@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carrel — визуальный стиль</title>
+<style>
+  :root{
+    --ink:#17211C;
+    --card:#E8DFCB;
+    --card-border:#C9BFA6;
+    --accent:#4A6B52;
+    --accent-dark:#7FA085;
+    --bg:#F5F1E8;
+    --paper:#FFFDF7;
+    --rule:#D8CFBB;
+    --hair:#E2DACA;
+    --dusty:#9A9280;
+    --muted:#6B6355;
+    --alert:#B04A3A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:15px;line-height:1.6;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:56px 32px 96px;}
+  header{border-bottom:0.5px solid var(--rule);padding-bottom:32px;margin-bottom:48px;}
+  h1{font-family:Georgia,"Source Serif 4",serif;font-size:38px;font-weight:400;margin:0 0 8px;}
+  .sub{font-size:11px;letter-spacing:0.18em;color:var(--dusty);text-transform:uppercase;}
+  h2{font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dusty);
+     font-weight:600;margin:64px 0 20px;padding-bottom:8px;border-bottom:0.5px solid var(--rule);}
+  h3{font-size:16px;font-weight:600;margin:32px 0 10px;}
+  p{margin:0 0 14px;max-width:68ch;}
+  .lede{font-size:17px;color:var(--muted);max-width:64ch;}
+  .note{font-size:13px;color:var(--muted);padding-left:14px;border-left:2px solid var(--card-border);margin:18px 0;max-width:64ch;}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:18px 0;}
+  th{text-align:left;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;
+     color:var(--dusty);font-weight:600;padding:0 12px 8px 0;border-bottom:0.5px solid var(--rule);}
+  td{padding:9px 12px 9px 0;border-bottom:0.5px solid var(--hair);vertical-align:top;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+       background:var(--paper);border:0.5px solid var(--hair);border-radius:3px;padding:1px 5px;}
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin:20px 0;}
+  .sw{display:flex;flex-direction:column;gap:7px;}
+  .chip{height:52px;border-radius:4px;border:0.5px solid var(--card-border);}
+  .sw .n{font-size:13px;font-weight:500;}
+  .sw .h{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--dusty);}
+  .marks{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:20px 0;}
+  .plate{background:var(--card);border:0.5px solid var(--card-border);border-radius:4px;
+         display:flex;align-items:center;justify-content:center;}
+  .p96{width:96px;height:96px;border-radius:6px;}
+  .p32{width:32px;height:32px;}
+  .p16{width:16px;height:16px;border-radius:2px;}
+  .p32 svg,.p16 svg{width:100%;height:100%;}
+  .dark{background:var(--ink);border-color:var(--ink);}
+  .cap{font-size:11px;color:var(--dusty);margin-top:6px;}
+  figure{margin:24px 0;}
+  figcaption{font-size:12.5px;color:var(--muted);margin-top:10px;}
+  .screen{border:0.5px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--bg);}
+  .screen svg{display:block;width:100%;height:auto;}
+  .type-demo{background:var(--paper);border:0.5px solid var(--hair);border-radius:5px;padding:22px 24px;margin:16px 0;}
+  .t-serif{font-family:Georgia,"Source Serif 4",serif;font-size:30px;margin-bottom:4px;}
+  .t-sans{font-size:15px;margin-bottom:4px;}
+  .t-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:var(--muted);}
+  .t-rubric{font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--dusty);margin-bottom:10px;}
+  .t-role{font-size:11px;color:var(--dusty);margin-top:8px;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:20px 0;}
+  .cols h3{margin-top:0;}
+  .yes li::marker{content:"— ";}
+  .no li::marker{content:"— ";}
+  ul{padding-left:18px;margin:0 0 14px;}
+  li{margin-bottom:7px;max-width:60ch;}
+  @media(max-width:680px){.cols{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="marks" style="margin-bottom:22px;">
+    <div class="plate p96">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <path d="M22 46 A26 26 0 0 1 74 46 L74 53 L22 53 Z" fill="#4A6B52"/>
+        <rect x="44" y="53" width="8" height="6" fill="#17211C"/>
+        <line x1="48" y1="59" x2="48" y2="76" stroke="#17211C" stroke-width="5"/>
+        <rect x="30" y="76" width="36" height="8" rx="2.5" fill="#17211C"/>
+      </svg>
+    </div>
+  </div>
+  <h1>Carrel</h1>
+  <div class="sub">Визуальный стиль · версия 1.0</div>
+</header>
+
+<p class="lede">Self-hosted веб-клиент для CalDAV, CardDAV и WebDAV. Название заимствовано у библиотечной кабинки — индивидуального рабочего места, где читатель работает с материалами, которые ему не принадлежат.</p>
+
+<h2>1. Идея</h2>
+<p>Стиль вырос из названия, а не из абстрактной эстетики «под библиотеку». Материал — плотная бумага и картон, приёмы — те, что использовались в каталожных системах до появления компьютеров: разлиновка, цветные язычки-разделители, впечатанный текст. Экран стилизован под печатный артефакт, оставаясь строго функциональным интерфейсом, а не имитацией бумаги ради красоты.</p>
+<p>В портфеле это третий голос рядом с SelfPost (почтовый штемпель, кирпичный) и GoSentry (часовой циферблат, янтарь и петроль). Общее — материальная, чуть старомодная метафора вместо SaaS-эстетики. Разное — материал и температура: Carrel сознательно сдержаннее обоих.</p>
+
+<h2>2. Почему палитра приглушённая</h2>
+<p>Ключевое ограничение, продиктовавшее весь стиль: интерфейс обязан показывать <em>чужой</em> цвет. Каждая коллекция несёт <code>calendar-color</code>, заданный на сервере, и пользователь видит его как метку источника. Яркий фирменный цвет начал бы спорить с этими метками — стало бы непонятно, где айдентика, а где данные.</p>
+<div class="note">Отсюда решение: у бренда почти ахроматичная база (чернила на картоне) и ровно один приглушённый акцент. Насыщенность в интерфейсе целиком отдана пользовательским коллекциям.</div>
+
+<h2>3. Цвет</h2>
+<div class="swatches">
+  <div class="sw"><div class="chip" style="background:#17211C"></div><div class="n">Чернила</div><div class="h">#17211C</div></div>
+  <div class="sw"><div class="chip" style="background:#E8DFCB"></div><div class="n">Картон</div><div class="h">#E8DFCB</div></div>
+  <div class="sw"><div class="chip" style="background:#4A6B52"></div><div class="n">Акцент</div><div class="h">#4A6B52</div></div>
+  <div class="sw"><div class="chip" style="background:#7FA085"></div><div class="n">Акцент, тёмная тема</div><div class="h">#7FA085</div></div>
+  <div class="sw"><div class="chip" style="background:#F5F1E8"></div><div class="n">Фон экрана</div><div class="h">#F5F1E8</div></div>
+  <div class="sw"><div class="chip" style="background:#FFFDF7"></div><div class="n">Поверхность</div><div class="h">#FFFDF7</div></div>
+  <div class="sw"><div class="chip" style="background:#D8CFBB"></div><div class="n">Разделитель</div><div class="h">#D8CFBB</div></div>
+  <div class="sw"><div class="chip" style="background:#E2DACA"></div><div class="n">Волосяная линия</div><div class="h">#E2DACA</div></div>
+  <div class="sw"><div class="chip" style="background:#9A9280"></div><div class="n">Пыльный текст</div><div class="h">#9A9280</div></div>
+  <div class="sw"><div class="chip" style="background:#6B6355"></div><div class="n">Вторичный текст</div><div class="h">#6B6355</div></div>
+  <div class="sw"><div class="chip" style="background:#B04A3A"></div><div class="n">Недоступность</div><div class="h">#B04A3A</div></div>
+</div>
+
+<h3>Правило одного акцента</h3>
+<p><code>#4A6B52</code> — единственный цвет, который бренд использует активно. Он живёт в хроме интерфейса: абажур лампы, активные состояния, выделения. Цветные метки коллекций приходят с сервера и в фирменную палитру не входят.</p>
+
+<h3>Метки коллекций</h3>
+<p>Намеренно вне брендовой палитры и намеренно приглушённые: даже при шести одновременно видимых источниках список не должен превращаться в цветной шум. Если сервер не прислал <code>calendar-color</code> — генерировать детерминированно из UID коллекции, но по той же приглушённой шкале, а не по чистым RGB.</p>
+<div class="marks">
+  <div class="sw" style="width:64px"><div class="chip" style="background:#4A6B52;height:34px"></div><div class="h">#4A6B52</div></div>
+  <div class="sw" style="width:64px"><div class="chip" style="background:#3F6E8C;height:34px"></div><div class="h">#3F6E8C</div></div>
+  <div class="sw" style="width:64px"><div class="chip" style="background:#A05A2C;height:34px"></div><div class="h">#A05A2C</div></div>
+  <div class="sw" style="width:64px"><div class="chip" style="background:#6B4E7A;height:34px"></div><div class="h">#6B4E7A</div></div>
+  <div class="sw" style="width:64px"><div class="chip" style="background:#8C6239;height:34px"></div><div class="h">#8C6239</div></div>
+</div>
+
+<h3>Тёмная тема</h3>
+<p>Чернила и картон меняются ролями. Акцент светлеет до <code>#7FA085</code> — исходный оттенок на тёмном фоне теряет контраст. Статус недоступности остаётся без изменений.</p>
+
+<h2>4. Типографика</h2>
+
+<div class="type-demo">
+  <div class="t-serif">Carrel</div>
+  <div class="t-role">Literata или Source Serif 4 — логотип и заголовки. Переходная антиква, читательский регистр. IBM Plex занят SelfPost, Space Grotesk — GoSentry.</div>
+</div>
+
+<div class="type-demo">
+  <div class="t-rubric">Понедельник · 10 августа</div>
+  <div class="t-sans">Синк-ап по релизу</div>
+  <div class="t-sans" style="color:var(--dusty);font-size:13px;">nextcloud · Личный</div>
+  <div class="t-role">Public Sans или Inter — интерфейс. Рабочая лошадка без собственного характера. Рубрикаторы — мелкий кегль с разрядкой, приём печатных картотек.</div>
+</div>
+
+<div class="type-demo">
+  <div class="t-mono">10:00 &nbsp; W/"a4f9c2e1" &nbsp; /dav.php/calendars/mix/personal/</div>
+  <div class="t-role">Моноширинный — время в агенде, ETag, пути, диагностика опроса. Выравнивает колонки и отделяет данные от текста для чтения.</div>
+</div>
+
+<div class="note">Все три шрифта — с открытой лицензией (OFL или аналог), бандлятся в бинарник через <code>go:embed</code>. CDN не используется — то же ограничение, что и для htmx.</div>
+
+<h2>5. Знак</h2>
+<p>Настольная лампа: силуэт абажура на дуге, короткая стойка, прямоугольное основание. Отсылка к лампам индивидуальных читальных мест — того самого carrel, у которого своя лампа на общем столе.</p>
+
+<div class="marks">
+  <div>
+    <div class="plate p96">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <path d="M22 46 A26 26 0 0 1 74 46 L74 53 L22 53 Z" fill="#4A6B52"/>
+        <rect x="44" y="53" width="8" height="6" fill="#17211C"/>
+        <line x1="48" y1="59" x2="48" y2="76" stroke="#17211C" stroke-width="5"/>
+        <rect x="30" y="76" width="36" height="8" rx="2.5" fill="#17211C"/>
+      </svg>
+    </div>
+    <div class="cap">96 px</div>
+  </div>
+  <div>
+    <div class="plate p32">
+      <svg viewBox="0 0 32 32">
+        <path d="M7 15 A9 9 0 0 1 25 15 L25 17.5 L7 17.5 Z" fill="#4A6B52"/>
+        <rect x="14.6" y="17.5" width="2.8" height="2" fill="#17211C"/>
+        <line x1="16" y1="19.5" x2="16" y2="25" stroke="#17211C" stroke-width="1.9"/>
+        <rect x="10" y="25" width="12" height="2.8" rx="0.9" fill="#17211C"/>
+      </svg>
+    </div>
+    <div class="cap">32 px</div>
+  </div>
+  <div>
+    <div class="plate p16">
+      <svg viewBox="0 0 32 32">
+        <path d="M7 15 A9 9 0 0 1 25 15 L25 17.5 L7 17.5 Z" fill="#4A6B52"/>
+        <rect x="14.6" y="17.5" width="2.8" height="2" fill="#17211C"/>
+        <line x1="16" y1="19.5" x2="16" y2="25" stroke="#17211C" stroke-width="2.4"/>
+        <rect x="10" y="25" width="12" height="2.8" rx="0.9" fill="#17211C"/>
+      </svg>
+    </div>
+    <div class="cap">16 px</div>
+  </div>
+  <div>
+    <div class="plate p32 dark">
+      <svg viewBox="0 0 32 32">
+        <path d="M7 15 A9 9 0 0 1 25 15 L25 17.5 L7 17.5 Z" fill="#7FA085"/>
+        <rect x="14.6" y="17.5" width="2.8" height="2" fill="#E8DFCB"/>
+        <line x1="16" y1="19.5" x2="16" y2="25" stroke="#E8DFCB" stroke-width="1.9"/>
+        <rect x="10" y="25" width="12" height="2.8" rx="0.9" fill="#E8DFCB"/>
+      </svg>
+    </div>
+    <div class="cap">тёмная тема</div>
+  </div>
+  <div>
+    <div class="plate" style="width:170px;height:44px;background:var(--paper);border-color:var(--rule);gap:11px;">
+      <svg width="20" height="20" viewBox="0 0 32 32">
+        <path d="M7 15 A9 9 0 0 1 25 15 L25 17.5 L7 17.5 Z" fill="#4A6B52"/>
+        <rect x="14.6" y="17.5" width="2.8" height="2" fill="#17211C"/>
+        <line x1="16" y1="19.5" x2="16" y2="25" stroke="#17211C" stroke-width="1.9"/>
+        <rect x="10" y="25" width="12" height="2.8" rx="0.9" fill="#17211C"/>
+      </svg>
+      <span style="font-family:Georgia,serif;font-size:20px;">Carrel</span>
+    </div>
+    <div class="cap">связка с надписью</div>
+  </div>
+</div>
+
+<h3>Геометрия</h3>
+<p>Три массы без внутренней детализации: закрашенная дуга абажура, вертикальный штрих стойки, прямоугольник основания. Никакого провода, никакой штриховки — на мелких размерах внутренняя деталь пропадает первой.</p>
+<p>Акцентом окрашен только абажур. Стойка и основание всегда чернильные — правило одного акцента действует и внутри логотипа.</p>
+
+<div class="note">На 16&nbsp;px стойка истончается почти до одного пикселя. В приведённой версии она утолщена точечно (<code>stroke-width</code> 2.4 вместо 1.9) — крупные размеры при этом не тронуты. Проверить на реальном рендере фавикона в браузере.</div>
+
+<h3>Почему лампа</h3>
+<p>За несколько раундов перебрано около пятнадцати предметных метафор: перфокарта, ящик картотеки, разделители-язычки, талон брони, книга с закладками, ключ, веер карточек, ниша, гардеробный номерок, уголки видоискателя, дверь, ширма, стол с перегородкой. Отбор шёл по двум критериям сразу — узнаваемость крупно и сохранность силуэта в 16&nbsp;px.</p>
+<p>Лампа выбрана за прямую связь со словом carrel при сохранении читаемости в мелком размере. Веер карточек остаётся резервным паттерном для внутренних иконок переключения между аккаунтами.</p>
+
+<h3>Ограничения использования</h3>
+<ul>
+  <li>Силуэт не меняется между темами — меняется только заливка.</li>
+  <li>Без поворотов, отражений, теней и градиентов.</li>
+  <li>В связке отступ до надписи — не менее половины высоты знака, выравнивание по низу основания.</li>
+  <li>Отдельно без надписи — только в квадратных форматах: фавикон, иконка приложения, аватар.</li>
+</ul>
+
+<h2>6. Интерфейс: агенда</h2>
+<figure>
+<div class="screen">
+<svg viewBox="0 0 680 372" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="680" height="352" fill="#F5F1E8"/>
+  <text x="20" y="30" font-family="Georgia,serif" font-size="18" fill="#17211C">Carrel</text>
+  <rect x="430" y="13" width="230" height="24" rx="3" fill="#FFFDF7" stroke="#D8CFBB" stroke-width="0.5"/>
+  <text x="440" y="29" font-size="11" fill="#9A9280">поиск по всем источникам</text>
+  <line x1="0" y1="44" x2="680" y2="44" stroke="#D8CFBB" stroke-width="0.5"/>
+  <line x1="170" y1="44" x2="170" y2="352" stroke="#D8CFBB" stroke-width="0.5"/>
+
+  <text x="20" y="68" font-size="9.5" letter-spacing="1.5" fill="#9A9280">NEXTCLOUD · HOME</text>
+  <rect x="20" y="82" width="9" height="9" rx="1.5" fill="#17211C"/>
+  <rect x="36" y="80" width="3" height="12" fill="#4A6B52"/>
+  <text x="46" y="90" font-size="12.5" fill="#17211C">Личный</text>
+  <rect x="20" y="104" width="9" height="9" rx="1.5" fill="#17211C"/>
+  <rect x="36" y="102" width="3" height="12" fill="#3F6E8C"/>
+  <text x="46" y="112" font-size="12.5" fill="#17211C">Работа</text>
+  <rect x="20" y="126" width="9" height="9" rx="1.5" fill="none" stroke="#B6AC94" stroke-width="0.5"/>
+  <rect x="36" y="124" width="3" height="12" fill="#A05A2C"/>
+  <text x="46" y="134" font-size="12.5" fill="#9A9280">Дни рождения</text>
+
+  <text x="20" y="170" font-size="9.5" letter-spacing="1.5" fill="#9A9280">RADICALE · VPS</text>
+  <rect x="20" y="184" width="9" height="9" rx="1.5" fill="#17211C"/>
+  <rect x="36" y="182" width="3" height="12" fill="#6B4E7A"/>
+  <text x="46" y="192" font-size="12.5" fill="#17211C">Проекты</text>
+  <rect x="20" y="206" width="9" height="9" rx="1.5" fill="#17211C"/>
+  <rect x="36" y="204" width="3" height="12" fill="#8C6239"/>
+  <text x="46" y="214" font-size="12.5" fill="#17211C">Дежурства</text>
+
+  <text x="20" y="258" font-size="9.5" letter-spacing="1.5" fill="#9A9280">BAIKAL · OFFICE</text>
+  <text x="46" y="282" font-size="12" fill="#B04A3A">недоступен</text>
+
+  <rect x="190" y="58" width="470" height="22" rx="3" fill="#EFE9DA"/>
+  <text x="200" y="73" font-size="11" fill="#6B6355">Опрошено 5 из 7 источников · 12 записей · 1 недоступен</text>
+
+  <text x="190" y="104" font-size="10" letter-spacing="2" fill="#9A9280">ПОНЕДЕЛЬНИК · 10 АВГУСТА</text>
+  <line x1="190" y1="112" x2="660" y2="112" stroke="#D8CFBB" stroke-width="0.5"/>
+
+  <rect x="190" y="112" width="3" height="44" fill="#4A6B52"/>
+  <text x="206" y="139" font-family="ui-monospace,monospace" font-size="11.5" fill="#6B6355">10:00</text>
+  <text x="256" y="132" font-size="13.5" fill="#17211C">Синк-ап по релизу</text>
+  <text x="256" y="148" font-size="11" fill="#9A9280">nextcloud · Личный</text>
+  <line x1="190" y1="156" x2="660" y2="156" stroke="#E2DACA" stroke-width="0.5"/>
+
+  <rect x="190" y="156" width="3" height="44" fill="#8C6239"/>
+  <text x="206" y="183" font-family="ui-monospace,monospace" font-size="11.5" fill="#6B6355">весь день</text>
+  <text x="256" y="176" font-size="13.5" fill="#17211C">Дежурство: первая линия</text>
+  <text x="256" y="192" font-size="11" fill="#9A9280">radicale · Дежурства</text>
+  <line x1="190" y1="200" x2="660" y2="200" stroke="#E2DACA" stroke-width="0.5"/>
+
+  <rect x="190" y="200" width="3" height="44" fill="#3F6E8C"/>
+  <text x="206" y="227" font-family="ui-monospace,monospace" font-size="11.5" fill="#6B6355">15:00</text>
+  <text x="256" y="220" font-size="13.5" fill="#17211C">Созвон с подрядчиком</text>
+  <text x="256" y="236" font-size="11" fill="#9A9280">nextcloud · Работа</text>
+  <line x1="190" y1="244" x2="660" y2="244" stroke="#E2DACA" stroke-width="0.5"/>
+
+  <text x="190" y="276" font-size="10" letter-spacing="2" fill="#9A9280">ВТОРНИК · 11 АВГУСТА</text>
+  <line x1="190" y1="284" x2="660" y2="284" stroke="#D8CFBB" stroke-width="0.5"/>
+
+  <rect x="190" y="284" width="3" height="44" fill="#6B4E7A"/>
+  <text x="206" y="311" font-family="ui-monospace,monospace" font-size="11.5" fill="#6B6355">09:30</text>
+  <text x="256" y="304" font-size="13.5" fill="#17211C">Ревью архитектуры</text>
+  <text x="256" y="320" font-size="11" fill="#9A9280">radicale · Проекты</text>
+  <line x1="190" y1="328" x2="660" y2="328" stroke="#E2DACA" stroke-width="0.5"/>
+</svg>
+</div>
+<figcaption>Пять цветных полосок принадлежат пользователю, и ничто в интерфейсе с ними не конкурирует. Время набрано моноширинным и выровнено в колонку — расписание читается вертикально. Недоступный аккаунт помечен в рейле и не выкидывает предупреждений поверх содержимого.</figcaption>
+</figure>
+
+<h2>7. Интерфейс: контакты</h2>
+<figure>
+<div class="screen">
+<svg viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="680" height="330" fill="#F5F1E8"/>
+  <text x="20" y="30" font-family="Georgia,serif" font-size="18" fill="#17211C">Carrel</text>
+  <rect x="430" y="13" width="230" height="24" rx="3" fill="#FFFDF7" stroke="#D8CFBB" stroke-width="0.5"/>
+  <text x="440" y="29" font-size="11" fill="#9A9280">поиск по всем источникам</text>
+  <line x1="0" y1="44" x2="680" y2="44" stroke="#D8CFBB" stroke-width="0.5"/>
+  <line x1="170" y1="44" x2="170" y2="330" stroke="#D8CFBB" stroke-width="0.5"/>
+
+  <text x="20" y="68" font-size="9.5" letter-spacing="1.5" fill="#9A9280">АДРЕСНЫЕ КНИГИ</text>
+  <rect x="20" y="82" width="9" height="9" rx="1.5" fill="#17211C"/>
+  <rect x="36" y="80" width="3" height="12" fill="#4A6B52"/>
+  <text x="46" y="90" font-size="12.5" fill="#17211C">Контакты</text>
+  <rect x="20" y="104" width="9" height="9" rx="1.5" fill="#17211C"/>
+  <rect x="36" y="102" width="3" height="12" fill="#6B4E7A"/>
+  <text x="46" y="112" font-size="12.5" fill="#17211C">Команда</text>
+  <rect x="20" y="126" width="9" height="9" rx="1.5" fill="none" stroke="#B6AC94" stroke-width="0.5"/>
+  <rect x="36" y="124" width="3" height="12" fill="#A05A2C"/>
+  <text x="46" y="134" font-size="12.5" fill="#9A9280">Архив</text>
+
+  <rect x="20" y="168" width="130" height="24" rx="3" fill="#EFE9DA"/>
+  <text x="30" y="184" font-size="11" fill="#6B6355">Дубликаты · 3</text>
+
+  <text x="190" y="70" font-size="10" letter-spacing="2" fill="#9A9280">А</text>
+  <line x1="190" y1="78" x2="660" y2="78" stroke="#D8CFBB" stroke-width="0.5"/>
+
+  <rect x="190" y="88" width="34" height="34" rx="3" fill="#D9D2BE"/>
+  <text x="200" y="110" font-size="13" fill="#6B6355">АК</text>
+  <rect x="234" y="88" width="3" height="34" fill="#4A6B52"/>
+  <text x="248" y="102" font-size="13.5" fill="#17211C">Анна Ковалёва</text>
+  <text x="248" y="118" font-size="11" fill="#9A9280">a.kovaleva@example.org · Контакты</text>
+  <line x1="190" y1="132" x2="660" y2="132" stroke="#E2DACA" stroke-width="0.5"/>
+
+  <rect x="190" y="140" width="34" height="34" rx="3" fill="#8C7B6A"/>
+  <path d="M207 150 a6 6 0 1 1 0 12 a6 6 0 1 1 0 -12 M195 174 a12 10 0 0 1 24 0" fill="#B3A491"/>
+  <rect x="234" y="140" width="3" height="34" fill="#6B4E7A"/>
+  <text x="248" y="154" font-size="13.5" fill="#17211C">Артём Белов</text>
+  <text x="248" y="170" font-size="11" fill="#9A9280">+7 912 445-10-88 · Команда</text>
+  <rect x="560" y="146" width="100" height="20" rx="3" fill="#EFE9DA"/>
+  <text x="570" y="160" font-size="10.5" fill="#6B6355">2 источника</text>
+  <line x1="190" y1="184" x2="660" y2="184" stroke="#E2DACA" stroke-width="0.5"/>
+
+  <rect x="206" y="192" width="3" height="16" fill="#4A6B52"/>
+  <text x="248" y="204" font-size="11.5" fill="#6B6355">nextcloud · Контакты</text>
+  <line x1="248" y1="212" x2="660" y2="212" stroke="#EAE3D3" stroke-width="0.5"/>
+  <rect x="206" y="220" width="3" height="16" fill="#6B4E7A"/>
+  <text x="248" y="232" font-size="11.5" fill="#6B6355">radicale · Команда</text>
+  <line x1="190" y1="244" x2="660" y2="244" stroke="#E2DACA" stroke-width="0.5"/>
+
+  <rect x="190" y="252" width="34" height="34" rx="3" fill="#D9D2BE"/>
+  <text x="200" y="274" font-size="13" fill="#6B6355">ВГ</text>
+  <rect x="234" y="252" width="3" height="34" fill="#4A6B52"/>
+  <text x="248" y="266" font-size="13.5" fill="#17211C">Виктор Гончаров</text>
+  <text x="248" y="282" font-size="11" fill="#9A9280">v.goncharov@example.org · Контакты</text>
+  <line x1="190" y1="296" x2="660" y2="296" stroke="#E2DACA" stroke-width="0.5"/>
+</svg>
+</div>
+<figcaption>Заглушка прямоугольная со скруглением, а не круглая: круг тянет за собой аватарочную эстетику соцсетей. Инициалы набраны на картоне того же семейства, поэтому контакты без фото не выпадают из полосы. Дубликат раскрыт третьей строкой — одна запись, под ней два источника со своими язычками.</figcaption>
+</figure>
+
+<h2>8. Материал и вёрстка</h2>
+<table>
+  <tr><th style="width:34%">Приём</th><th>Почему так</th></tr>
+  <tr><td>Строки списков разделяются волосяной линовкой, а не карточками с тенями</td><td>Тени и приподнятые плитки принадлежат стеклянному языку интерфейсов — противоположность плотной печатной картотеке. Список читается как ряд строк в каталожном ящике.</td></tr>
+  <tr><td>Метка коллекции — узкая вертикальная полоска слева, а не кружок или бейдж</td><td>Единственное цветное пятно в строке, отсылка к цветному язычку-разделителю в бумажной картотеке.</td></tr>
+  <tr><td>Заголовки групп — разрядка, мелкий кегль, приглушённый цвет</td><td>Роль рубрикатора, а не заголовка раздела.</td></tr>
+  <tr><td>Фон экрана тёплый, не белый</td><td>Чистый белый рядом с картонной палитрой выбивается: карточки начинают казаться вырезанными из другого материала.</td></tr>
+  <tr><td>Поля ввода чуть светлее фона, но в той же тёплой гамме</td><td>Не съезжают в холодный белый, сохраняют единство поверхности.</td></tr>
+  <tr><td>Заглушки и аватары квадратные со скруглением</td><td>Ближе к карточке, чем к профилю в соцсети.</td></tr>
+</table>
+
+<h2>9. Иконография</h2>
+<p>Иконки внутри приложения — Tabler outline, тонкая линия, без заливки, наследуют цвет текста. Отдельный фирменный набор не создаётся: геометрия знака зарезервирована за логотипом и не размножается на каждую кнопку — это удерживает лампу особенной, а не одной из полусотни похожих пиктограмм.</p>
+<p>Исключение — статусы источника (недоступен, из кэша, конфликт): простые геометрические формы в приглушённых, не акцентных цветах, чтобы не путать статус с брендовым зелёным.</p>
+
+<h2>10. Голос интерфейса</h2>
+<p>Коротко и по делу, без наигранной теплоты и без канцелярита — регистр читательского зала, а не стартаповского онбординга.</p>
+<div class="cols">
+  <div>
+    <h3>Так</h3>
+    <ul class="yes">
+      <li>«Подключить сервер»</li>
+      <li>«Источник недоступен»</li>
+      <li>«Сброс пароля удалит сохранённые подключения»</li>
+      <li>ETag, RRULE, X-поля названы своими именами</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Не так</h3>
+    <ul class="no">
+      <li>«Пожалуйста, подключите ваш сервер»</li>
+      <li>«Упс, что-то пошло не так!»</li>
+      <li>«Обновление учётных данных»&nbsp;— эвфемизм разрушительного действия</li>
+      <li>Технические детали, спрятанные за упрощениями</li>
+    </ul>
+  </div>
+</div>
+
+<h2>11. Чего стиль избегает</h2>
+<ul>
+  <li>Градиентов, теней, стеклянных поверхностей, скруглений-пилюль.</li>
+  <li>Яркой фирменной палитры — место для цвета отдано меткам коллекций.</li>
+  <li>Иллюстративных иконок и декора сверх необходимого: материал уже несёт характер.</li>
+  <li>Круглых аватаров и заглушек.</li>
+  <li>Emoji и декоративной типографики в интерфейсе.</li>
+</ul>
+
+</div>
+</body>
+</html>
