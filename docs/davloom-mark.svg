@@ -1,0 +1,13 @@
+<svg width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Знак модуля davloom</title>
+<desc>Нити, сходящиеся через вал станка в единое полотно</desc>
+<g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round">
+  <path d="M6 14 C24 14 30 36 44 39"/>
+  <path d="M6 30 C24 30 32 42 44 44"/>
+  <path d="M6 48 L44 48"/>
+  <path d="M6 66 C24 66 32 54 44 52"/>
+  <path d="M6 82 C24 82 30 60 44 57"/>
+</g>
+<rect x="44" y="22" width="6" height="52" rx="1.5" fill="#17211C"/>
+<rect x="52" y="38" width="44" height="20" fill="#4A6B52"/>
+</svg>
