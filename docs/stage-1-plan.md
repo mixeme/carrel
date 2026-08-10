@@ -73,20 +73,38 @@ THIRD_PARTY.md
 
 ## Чек-лист реализации
 
-### 0. Инициализация проекта
+| # | Блок | Модель |
+|---|------|--------|
+| 0 | Инициализация проекта | **Composer 2.5 Fast** |
+| 1 | Конфигурация | **Composer 2.5 Fast** |
+| 2 | Криптослой | **Opus / Sonnet (thinking-high)** |
+| 3 | Персистентность | **Sonnet (thinking-high)** |
+| 4 | Сессии и безопасность | **Sonnet (thinking-high)** |
+| 5 | Bootstrap и аутентификация | **Sonnet** |
+| 6 | Приглашения и регистрация | **Composer 2.5 Fast** |
+| 7 | SMTP | **Composer 2.5 Fast** |
+| 8 | Депонирование ключей | **Opus / Sonnet (thinking-high)** |
+| 9 | Админ-панель (htmx) | **Composer 2.5 Fast** |
+| 10 | Профиль пользователя | **Composer 2.5 Fast** |
+| 11 | Каркас UI и статика | **Composer 2.5 Fast** |
+| 12 | Страница «О сервисе» | **Composer 2.5 Fast** |
+| 13 | Поставка | **Composer 2.5 Fast** |
+| 14 | Тесты и приёмка | **Sonnet** (+ **Opus** для аудита crypto-тестов) |
+
+### 0. Инициализация проекта · Composer 2.5 Fast
 
 - [ ] `go mod init`, модуль `cmd/carrel/main.go`, `-ldflags -X` для version/commit
 - [ ] Структура каталогов по §3; `go:embed` для templates/static
 - [ ] Вендоринг htmx + htmx-sse в `internal/web/static/`; `THIRD_PARTY.md` с лицензиями
 - [ ] `LICENSE` (AGPL-3.0-or-later), заголовки в исходниках
 
-### 1. Конфигурация (`internal/config`)
+### 1. Конфигурация (`internal/config`) · Composer 2.5 Fast
 
 - [ ] Env-переменные с приоритетом над файлом: `CARREL_PORT`, `CARREL_DATA_DIR`, `CARREL_TRUSTED_PROXIES`, `CARREL_BASE_PATH`, log level
 - [ ] Defaults: порт `8080`, data dir `/var/lib/carrel`
 - [ ] Валидация при старте; понятные ошибки
 
-### 2. Криптослой (`internal/crypto`) + unit-тесты
+### 2. Криптослой (`internal/crypto`) + unit-тесты · Opus / Sonnet (thinking-high)
 
 - [ ] Argon2id: отдельные параметры для auth, KEK, escrow master (усиленные для master)
 - [ ] `DeriveKEK(password, salt_kek)` / `VerifyAuth(password, salt_auth, hash)` — constant-time compare
@@ -96,7 +114,7 @@ THIRD_PARTY.md
 - [ ] `Zero()` / explicit wipe для ключевого материала в памяти (§24.6)
 - [ ] Тесты: round-trip wrap/unwrap, смена пароля (re-wrap DEK only), wrong password fails
 
-### 3. Персистентность (`internal/store`)
+### 3. Персистентность (`internal/store`) · Sonnet (thinking-high)
 
 - [ ] Обнаружение «пустой том» → режим bootstrap
 - [ ] Атомарная запись: temp file + rename
@@ -106,7 +124,7 @@ THIRD_PARTY.md
 - [ ] Global settings: user creation mode, SMTP, escrow flags, session timeout (defaults for later stages)
 - [ ] Audit log append-only entries (no passwords/tokens)
 
-### 4. Сессии и безопасность (`internal/session` + middleware)
+### 4. Сессии и безопасность (`internal/session` + middleware) · Sonnet (thinking-high)
 
 - [ ] In-memory session store: session ID rotation on login
 - [ ] Cookie: `HttpOnly`, `SameSite=Lax`, `Secure` if trusted proxy sends `X-Forwarded-Proto: https`
@@ -116,7 +134,7 @@ THIRD_PARTY.md
 - [ ] Security headers: CSP (htmx-safe), `X-Frame-Options`, `nosniff`, `Referrer-Policy`
 - [ ] Public endpoints: `/healthz`, `/about`, `/invite/<token>` — без утечки версии на healthz
 
-### 5. Bootstrap и аутентификация
+### 5. Bootstrap и аутентификация · Sonnet
 
 - [ ] `GET/POST /setup` — первый администратор (login, password, email optional)
 - [ ] `GET/POST /login`, `POST /logout`
@@ -124,7 +142,7 @@ THIRD_PARTY.md
 - [ ] Post-login redirect: профиль или админка (admins)
 - [ ] Middleware: auth required для `/app/*`, admin required для `/admin/*`
 
-### 6. Приглашения и регистрация
+### 6. Приглашения и регистрация · Composer 2.5 Fast
 
 - [ ] Admin: создать приглашение (login + email) → показать ссылку + copy button + статус SMTP
 - [ ] Режим «пароль от админа»: temp password, `must_change_password` flag, предупреждение в UI
@@ -132,7 +150,7 @@ THIRD_PARTY.md
 - [ ] Resend / revoke / extend invite (admin actions)
 - [ ] Invite works with SMTP completely unset (manual link only) — §21
 
-### 7. SMTP (`internal/mail`)
+### 7. SMTP (`internal/mail`) · Composer 2.5 Fast
 
 - [ ] Admin settings: host, port, TLS mode (STARTTLS / implicit / none), login, password (encrypted server key), from name/address
 - [ ] «Send test email» — показать полный ответ сервера (success or diagnostic)
@@ -140,7 +158,7 @@ THIRD_PARTY.md
 - [ ] Templates: invite email, escrow recovery notification (plain + minimal HTML, no external resources)
 - [ ] Profile email change with confirmation email (§5.3)
 
-### 8. Депонирование ключей (`internal/crypto` + handlers)
+### 8. Депонирование ключей (`internal/crypto` + handlers) · Opus / Sonnet (thinking-high)
 
 - [ ] Global toggle (admin): off by default; applies only to users created after enable
 - [ ] Setup flow: generate key pair, set escrow master password (distinct from login password)
@@ -151,7 +169,7 @@ THIRD_PARTY.md
 - [ ] Every recovery → audit log + email to user (non-optional)
 - [ ] Admin password reset blocked when escrow active → offer recovery instead (§5.5)
 
-### 9. Админ-панель (htmx UI)
+### 9. Админ-панель (htmx UI) · Composer 2.5 Fast
 
 - [ ] User list: login, role, created, last login, DAV count (0), active sessions
 - [ ] Actions: create, disable (kill sessions), delete (type login confirm), reset password (destructive dialog), kill sessions, change role
@@ -159,14 +177,14 @@ THIRD_PARTY.md
 - [ ] Audit log viewer (filter by action type)
 - [ ] English UI only (§13); strings inline in templates
 
-### 10. Профиль пользователя
+### 10. Профиль пользователя · Composer 2.5 Fast
 
 - [ ] Change password (current + new) — re-wrap DEK only
 - [ ] Email display/edit with confirmation flow
 - [ ] Escrow status + opt-in/out
 - [ ] Change password after temp-password login (forced)
 
-### 11. Каркас UI и статика
+### 11. Каркас UI и статика · Composer 2.5 Fast
 
 - [ ] Base layout: header nav (Profile, Admin if admin, Logout), footer link to About
 - [ ] CSS from brand guide: `--ink`, `--card`, `--accent`, Georgia headings, system sans body
@@ -174,12 +192,12 @@ THIRD_PARTY.md
 - [ ] PWA-ready: manifest + icons in embed; no service worker cache of user data (§13)
 - [ ] Own nav controls (no reliance on browser back/refresh)
 
-### 12. Страница «О сервисе» (§22)
+### 12. Страница «О сервисе» (§22) · Composer 2.5 Fast
 
 - [ ] Public `/about`: name, version, commit (match ldflags), link to GitHub sources
 - [ ] Footer on all authenticated pages
 
-### 13. Поставка
+### 13. Поставка · Composer 2.5 Fast
 
 - [ ] Multi-stage Dockerfile: `golang:alpine` build → `distroless/static`, `CGO_ENABLED=0`
 - [ ] `compose.yaml`: `127.0.0.1:8080:8080`, volume for data, `read_only: true`, non-root user, cap drop
@@ -187,7 +205,7 @@ THIRD_PARTY.md
 - [ ] Graceful shutdown: stop accept → drain requests (15s) → wipe sessions/keys
 - [ ] Structured stdout logs; never log passwords/tokens (even debug)
 
-### 14. Тесты и ручная приёмка
+### 14. Тесты и ручная приёмка · Sonnet (+ Opus для аудита crypto-тестов)
 
 - [ ] Unit: crypto round-trips, invite token hash, constant-time helpers
 - [ ] Integration (optional httptest): bootstrap → admin login → create invite → accept → login
@@ -197,13 +215,13 @@ THIRD_PARTY.md
 
 ## Порядок работ (рекомендуемый)
 
-1. **Scaffold + config + crypto + store** — фундамент, без UI
-2. **Session + middleware + bootstrap/login** — можно проверить curl/httptest
-3. **Admin store ops + invites** — backend complete
-4. **Mail + invite emails** — async path
-5. **Escrow** — после базового user lifecycle стабилен
-6. **htmx UI** — все экраны на готовых handlers
-7. **Docker + manual QA**
+1. **Scaffold + config + crypto + store** (§0–3) — **Sonnet / Opus** — фундамент, без UI
+2. **Session + middleware + bootstrap/login** (§4–5) — **Sonnet** — можно проверить curl/httptest
+3. **Admin store ops + invites** (§6) — **Composer 2.5 Fast**
+4. **Mail + invite emails** (§7) — **Composer 2.5 Fast**
+5. **Escrow** (§8) — **Opus / Sonnet** — после базового user lifecycle стабилен
+6. **htmx UI** (§9–12) — **Composer 2.5 Fast** — все экраны на готовых handlers
+7. **Docker + manual QA** (§13–14) — **Composer 2.5 Fast** + **Sonnet** для интеграционных тестов
 
 Не начинать UI до стабильного crypto/store — иначе переделки при смене формата данных.
 
