@@ -106,13 +106,13 @@ THIRD_PARTY.md
 
 ### 2. Криптослой (`internal/crypto`) + unit-тесты · Opus / Sonnet (thinking-high)
 
-- [ ] Argon2id: отдельные параметры для auth, KEK, escrow master (усиленные для master)
-- [ ] `DeriveKEK(password, salt_kek)` / `VerifyAuth(password, salt_auth, hash)` — constant-time compare
-- [ ] Генерация DEK (32 байта), wrap/unwrap DEK через KEK (AES-256-GCM)
-- [ ] Server key: генерация, load/save на томе, шифрование служебных данных
-- [ ] Escrow: RSA/EC key pair; private key wrapped master password; DEK copy encrypted with public key
-- [ ] `Zero()` / explicit wipe для ключевого материала в памяти (§24.6)
-- [ ] Тесты: round-trip wrap/unwrap, смена пароля (re-wrap DEK only), wrong password fails
+- [x] Argon2id: отдельные параметры для auth, KEK, escrow master (усиленные для master)
+- [x] `DeriveKEK(password, salt_kek)` / `VerifyAuth(password, salt_auth, hash)` — constant-time compare
+- [x] Генерация DEK (32 байта), wrap/unwrap DEK через KEK (AES-256-GCM)
+- [x] Server key: генерация, load/save на томе, шифрование служебных данных
+- [x] Escrow: RSA/EC key pair; private key wrapped master password; DEK copy encrypted with public key
+- [x] `Zero()` / explicit wipe для ключевого материала в памяти (§24.6)
+- [x] Тесты: round-trip wrap/unwrap, смена пароля (re-wrap DEK only), wrong password fails
 
 ### 3. Персистентность (`internal/store`) · Sonnet (thinking-high)
 
