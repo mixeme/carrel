@@ -137,11 +137,11 @@ THIRD_PARTY.md
 
 ### 5. Bootstrap и аутентификация · Sonnet
 
-- [ ] `GET/POST /setup` — первый администратор (login, password, email optional)
-- [ ] `GET/POST /login`, `POST /logout`
-- [ ] «Forgot password» отсутствует или ведёт на страницу «восстановление невозможно» (§5.3)
-- [ ] Post-login redirect: профиль или админка (admins)
-- [ ] Middleware: auth required для `/app/*`, admin required для `/admin/*`
+- [x] `GET/POST /setup` — первый администратор (login, password, email optional)
+- [x] `GET/POST /login`, `POST /logout`
+- [x] «Forgot password» отсутствует или ведёт на страницу «восстановление невозможно» (§5.3)
+- [x] Post-login redirect: профиль или админка (admins)
+- [x] Middleware: auth required для `/app/*`, admin required для `/admin/*`
 
 ### 6. Приглашения и регистрация · Composer 2.5 Fast
 

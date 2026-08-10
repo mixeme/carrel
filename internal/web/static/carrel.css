@@ -3,6 +3,8 @@
     --ink: #1a1a1a;
     --card: #faf9f7;
     --accent: #2d5a27;
+    --muted: #6b6b6b;
+    --error: #8a1f11;
 }
 
 body {
@@ -10,4 +12,97 @@ body {
     color: var(--ink);
     background: var(--card);
     margin: 0;
+}
+
+h1, h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: normal;
+}
+
+main {
+    max-width: 32rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.topbar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e2ded7;
+}
+
+.topbar .brand {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.25rem;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.topbar nav {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.topbar nav form {
+    display: inline;
+}
+
+a {
+    color: var(--accent);
+}
+
+label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: 600;
+}
+
+input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    border: 1px solid #c9c3b8;
+    border-radius: 3px;
+    font: inherit;
+}
+
+button {
+    margin-top: 1.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 3px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+}
+
+.hint, .optional {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.hint {
+    margin: 0.25rem 0 0;
+}
+
+.warning {
+    border-left: 3px solid var(--accent);
+    padding-left: 0.75rem;
+}
+
+.message {
+    padding: 0.75rem;
+    border-radius: 3px;
+    background: #f0ece4;
+}
+
+.message.error {
+    color: var(--error);
+    border-left: 3px solid var(--error);
 }

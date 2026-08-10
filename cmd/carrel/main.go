@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/config"
+	"gitea.mixdep.ru/mix/carrel/internal/ratelimit"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 	"gitea.mixdep.ru/mix/carrel/internal/store"
 	"gitea.mixdep.ru/mix/carrel/internal/web"
@@ -64,33 +65,41 @@ func run() int {
 		Absolute: settings.SessionAbsolute(),
 	})
 
-	srv := &handler.Server{
-		BasePath: cfg.BasePath,
-		Trust:    trust,
-		Sessions: sessions,
-		Logger:   logger,
+	templates, err := loadTemplates()
+	if err != nil {
+		logger.Error("templates", "error", err)
+		return 1
 	}
 
-	mux, err := routes(srv)
+	loginLimit := ratelimit.New(ratelimit.Options{})
+
+	srv := &handler.Server{
+		BasePath:   cfg.BasePath,
+		Trust:      trust,
+		Sessions:   sessions,
+		Store:      st,
+		Templates:  templates,
+		LoginLimit: loginLimit,
+		Logger:     logger,
+	}
+
+	staticFS, err := fs.Sub(web.StaticFS, "static")
 	if err != nil {
-		logger.Error("routes", "error", err)
+		logger.Error("static assets", "error", err)
 		return 1
 	}
 
 	httpSrv := &http.Server{
-		Addr: cfg.Addr(),
-		Handler: handler.Chain(mux,
-			handler.Recover(logger),
-			handler.SecurityHeaders(trust),
-			handler.MaxBody(handler.DefaultMaxBody),
-			srv.LoadSession,
-		),
+		Addr:              cfg.Addr(),
+		Handler:           srv.Handler(staticFS),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	sessions.StartSweeper(ctx, time.Minute)
+	// Without this the limiter keeps one entry per address ever seen.
+	go sweepLimiter(ctx, loginLimit, limiterSweep)
 
 	logger.Info("carrel starting",
 		"version", version,
@@ -131,27 +140,29 @@ func run() int {
 	return 0
 }
 
-// routes wires the endpoints that exist so far. The screens themselves arrive
-// with the later stages; what is fixed here is the shape — the probe and the
-// static assets answer on their own, and everything that renders a page or
-// takes a form goes through the CSRF check.
-func routes(srv *handler.Server) (*http.ServeMux, error) {
-	staticFS, err := fs.Sub(web.StaticFS, "static")
+// loadTemplates parses the embedded page templates.
+func loadTemplates() (*handler.Templates, error) {
+	templateFS, err := fs.Sub(web.TemplateFS, "template")
 	if err != nil {
 		return nil, err
 	}
+	return handler.LoadTemplates(templateFS)
+}
 
-	// Pages: setup, login, profile, admin — added by the later stages.
-	pages := http.NewServeMux()
+// limiterSweep is how often expired rate-limiter entries are dropped.
+const limiterSweep = 10 * time.Minute
 
-	mux := http.NewServeMux()
-	// The probe and the assets need no session and no token; issuing a CSRF
-	// cookie on every health check would be pure noise.
-	mux.HandleFunc("GET "+srv.Path("/healthz"), handler.Health)
-	mux.Handle("GET "+srv.Path("/static/"),
-		http.StripPrefix(srv.Path("/static/"), http.FileServer(http.FS(staticFS))))
-	mux.Handle(srv.Path("/"), handler.Chain(pages, srv.CSRF))
-	return mux, nil
+func sweepLimiter(ctx context.Context, l *ratelimit.Limiter, every time.Duration) {
+	t := time.NewTicker(every)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			l.Sweep()
+		}
+	}
 }
 
 func logLevel(name string) slog.Level {

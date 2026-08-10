@@ -1,0 +1,34 @@
+{{define "body"}}
+<section class="card">
+    <h1>Set up Carrel</h1>
+    <p>This volume has no administrator yet. The account you create here is the
+        first one, and it can manage everyone else.</p>
+    <p class="warning">Your password is the only key to your own data. Nobody —
+        including this server — can recover it for you.</p>
+
+    <form method="post" action="{{.Base}}/setup" autocomplete="off">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+
+        <label for="login">Login</label>
+        <input id="login" name="login" type="text" required autofocus
+               maxlength="64" autocapitalize="none" spellcheck="false"
+               value="{{with .Data}}{{.Login}}{{end}}">
+        <p class="hint">Lowercase letters, digits, and <code>. _ -</code> inside.</p>
+
+        <label for="email">Email <span class="optional">(optional)</span></label>
+        <input id="email" name="email" type="email" autocomplete="off"
+               value="{{with .Data}}{{.Email}}{{end}}">
+        <p class="hint">Used for service notices only. Mail can be configured later.</p>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required
+               minlength="10" autocomplete="new-password">
+
+        <label for="confirm">Repeat password</label>
+        <input id="confirm" name="confirm" type="password" required
+               minlength="10" autocomplete="new-password">
+
+        <button type="submit">Create administrator</button>
+    </form>
+</section>
+{{end}}

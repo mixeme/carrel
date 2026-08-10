@@ -3,10 +3,29 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{block "title" .}}Carrel{{end}}</title>
+    <title>{{if .Title}}{{.Title}} · Carrel{{else}}Carrel{{end}}</title>
+    <link rel="stylesheet" href="{{.Base}}/static/carrel.css">
+    <script src="{{.Base}}/static/htmx.min.js" defer></script>
 </head>
 <body>
+{{if .Session}}
+<header class="topbar">
+    <a class="brand" href="{{.Base}}/">Carrel</a>
+    <nav>
+        <a href="{{.Base}}/app/">Profile</a>
+        {{if .Admin}}<a href="{{.Base}}/admin/">Administration</a>{{end}}
+        <form method="post" action="{{.Base}}/logout">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <button type="submit">Sign out</button>
+        </form>
+    </nav>
+</header>
+{{end}}
+<main>
+    {{if .Error}}<p class="message error" role="alert">{{.Error}}</p>{{end}}
+    {{if .Notice}}<p class="message notice">{{.Notice}}</p>{{end}}
     {{block "body" .}}{{end}}
+</main>
 </body>
 </html>
 {{end}}

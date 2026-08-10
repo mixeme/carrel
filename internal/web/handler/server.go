@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"strings"
 
+	"gitea.mixdep.ru/mix/carrel/internal/ratelimit"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
+	"gitea.mixdep.ru/mix/carrel/internal/store"
 )
 
 // Cookie names. The session cookie carries the identifier only; everything
@@ -20,14 +22,19 @@ const (
 )
 
 // Server is what every handler needs: where the app is mounted, whom to
-// believe about the client address, and where sessions live.
+// believe about the client address, where sessions live, and what is on the
+// volume.
 type Server struct {
 	// BasePath is the prefix the service is mounted under, "" for the root.
 	// It never ends in a slash.
-	BasePath string
-	Trust    *ProxyTrust
-	Sessions *session.Manager
-	Logger   *slog.Logger
+	BasePath  string
+	Trust     *ProxyTrust
+	Sessions  *session.Manager
+	Store     *store.Store
+	Templates *Templates
+	// LoginLimit throttles the login form by address and by account (§24.3).
+	LoginLimit *ratelimit.Limiter
+	Logger     *slog.Logger
 }
 
 // Path turns an app-relative path into an absolute one under BasePath.

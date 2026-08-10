@@ -1,0 +1,14 @@
+{{define "body"}}
+<section class="card">
+    <h1>Password recovery is not possible</h1>
+    <p>Your data is encrypted with a key derived from your password. The server
+        never stores that key, so there is nothing here that could decrypt your
+        account on your behalf — and no reset link that would help.</p>
+    <p>An administrator can give you a new password, but doing so replaces the
+        key: everything stored under the old one is lost. If key deposit is
+        enabled for your account, the administrator can instead recover it with
+        the recovery password, and your data is kept.</p>
+    <p>Ask your administrator which of the two applies to you.</p>
+    <p class="hint"><a href="{{.Base}}/login">Back to sign in</a></p>
+</section>
+{{end}}
