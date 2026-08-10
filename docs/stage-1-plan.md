@@ -55,6 +55,7 @@ internal/config/            # env > file; port, data dir, trusted proxies
 internal/crypto/            # Argon2id, AES-256-GCM, server key, escrow keys
 internal/store/             # один файл state на томе, атомарная запись
 internal/session/           # in-memory sessions, DEK keyring, CSRF store
+internal/ratelimit/         # progressive delay per key (login, invite, recovery)
 internal/admin/             # users, invites, audit log, global settings
 internal/mail/              # SMTP client, async queue, templates
 internal/web/
@@ -116,23 +117,23 @@ THIRD_PARTY.md
 
 ### 3. Персистентность (`internal/store`) · Sonnet (thinking-high)
 
-- [ ] Обнаружение «пустой том» → режим bootstrap
-- [ ] Атомарная запись: temp file + rename
-- [ ] CRUD пользователей: create (invite / temp password), disable, delete (confirm login), role change
-- [ ] Guard: нельзя удалить/понизить последнего админа
-- [ ] Invites: token hash only, expiry, revoke, extend; constant-time token verify
-- [ ] Global settings: user creation mode, SMTP, escrow flags, session timeout (defaults for later stages)
-- [ ] Audit log append-only entries (no passwords/tokens)
+- [x] Обнаружение «пустой том» → режим bootstrap
+- [x] Атомарная запись: temp file + rename
+- [x] CRUD пользователей: create (invite / temp password), disable, delete (confirm login), role change
+- [x] Guard: нельзя удалить/понизить последнего админа
+- [x] Invites: token hash only, expiry, revoke, extend; constant-time token verify
+- [x] Global settings: user creation mode, SMTP, escrow flags, session timeout (defaults for later stages)
+- [x] Audit log append-only entries (no passwords/tokens)
 
 ### 4. Сессии и безопасность (`internal/session` + middleware) · Sonnet (thinking-high)
 
-- [ ] In-memory session store: session ID rotation on login
-- [ ] Cookie: `HttpOnly`, `SameSite=Lax`, `Secure` if trusted proxy sends `X-Forwarded-Proto: https`
-- [ ] DEK только в session keyring; logout / disable user / SIGTERM → wipe
-- [ ] CSRF token per session; проверка на всех mutating requests (forms + htmx headers)
-- [ ] Rate limit login (by IP + username, progressive delay); rate limit `/invite/*`
-- [ ] Security headers: CSP (htmx-safe), `X-Frame-Options`, `nosniff`, `Referrer-Policy`
-- [ ] Public endpoints: `/healthz`, `/about`, `/invite/<token>` — без утечки версии на healthz
+- [x] In-memory session store: session ID rotation on login
+- [x] Cookie: `HttpOnly`, `SameSite=Lax`, `Secure` if trusted proxy sends `X-Forwarded-Proto: https`
+- [x] DEK только в session keyring; logout / disable user / SIGTERM → wipe
+- [x] CSRF token per session; проверка на всех mutating requests (forms + htmx headers)
+- [x] Rate limit login (by IP + username, progressive delay); rate limit `/invite/*` — `internal/ratelimit` + middleware; подключение к `/login` и `/invite/*` вместе с их обработчиками (шаги 5–6)
+- [x] Security headers: CSP (htmx-safe), `X-Frame-Options`, `nosniff`, `Referrer-Policy`
+- [x] Public endpoints: `/healthz` (без версии) готов; `/about` и `/invite/<token>` — вместе с шагами 12 и 6
 
 ### 5. Bootstrap и аутентификация · Sonnet
 
