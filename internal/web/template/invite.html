@@ -1,0 +1,31 @@
+{{define "body"}}
+<section class="card">
+    <h1>Accept invitation</h1>
+    <p>You have been invited to join this Carrel instance. Choose a password
+        to finish creating your account.</p>
+    <p class="warning">Your password is the only key to your own data. Nobody —
+        including this server — can recover it for you.</p>
+
+    <form method="post" action="{{.Base}}/invite/{{with .Data}}{{.Token}}{{end}}" autocomplete="off">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+
+        <label>Login</label>
+        <p class="field-value">{{with .Data}}{{.Login}}{{end}}</p>
+
+        {{with .Data}}{{if .Email}}
+        <label>Email</label>
+        <p class="field-value">{{.Email}}</p>
+        {{end}}{{end}}
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autofocus
+               minlength="10" autocomplete="new-password">
+
+        <label for="confirm">Repeat password</label>
+        <input id="confirm" name="confirm" type="password" required
+               minlength="10" autocomplete="new-password">
+
+        <button type="submit">Create account</button>
+    </form>
+</section>
+{{end}}

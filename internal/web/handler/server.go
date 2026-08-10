@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"gitea.mixdep.ru/mix/carrel/internal/mail"
 	"gitea.mixdep.ru/mix/carrel/internal/ratelimit"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 	"gitea.mixdep.ru/mix/carrel/internal/store"
@@ -34,7 +35,10 @@ type Server struct {
 	Templates *Templates
 	// LoginLimit throttles the login form by address and by account (§24.3).
 	LoginLimit *ratelimit.Limiter
-	Logger     *slog.Logger
+	// InviteLimit throttles public invite and email-confirmation links (§24.3).
+	InviteLimit *ratelimit.Limiter
+	Mail        *mail.Queue
+	Logger      *slog.Logger
 }
 
 // Path turns an app-relative path into an absolute one under BasePath.

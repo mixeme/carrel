@@ -20,7 +20,7 @@ h1, h2 {
 }
 
 main {
-    max-width: 32rem;
+    max-width: 40rem;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
@@ -105,4 +105,85 @@ button {
 .message.error {
     color: var(--error);
     border-left: 3px solid var(--error);
+}
+
+.subsection {
+    margin-top: 2rem;
+}
+
+.subsection h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.field-value {
+    margin: 0.25rem 0 0;
+    font-weight: 600;
+}
+
+table.data {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+table.data th,
+table.data td {
+    text-align: left;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid #e2ded7;
+    vertical-align: top;
+}
+
+td.actions {
+    white-space: nowrap;
+}
+
+td.actions form {
+    display: inline;
+}
+
+button.link,
+button.secondary {
+    background: transparent;
+    color: var(--accent);
+    margin-top: 0;
+    padding: 0.15rem 0.35rem;
+    border: 1px solid #c9c3b8;
+}
+
+button.secondary {
+    display: inline-block;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+.copy-row input {
+    display: inline-block;
+    width: calc(100% - 5rem);
+}
+
+select {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    border: 1px solid #c9c3b8;
+    border-radius: 3px;
+    font: inherit;
+}
+
+pre.diagnostic {
+    background: #f0ece4;
+    padding: 0.75rem;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+}
+
+.inline-form {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2ded7;
 }

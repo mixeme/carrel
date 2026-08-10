@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/config"
+	"gitea.mixdep.ru/mix/carrel/internal/mail"
 	"gitea.mixdep.ru/mix/carrel/internal/ratelimit"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 	"gitea.mixdep.ru/mix/carrel/internal/store"
@@ -72,15 +73,25 @@ func run() int {
 	}
 
 	loginLimit := ratelimit.New(ratelimit.Options{})
+	inviteLimit := ratelimit.New(ratelimit.Options{})
+
+	mailQueue := &mail.Queue{
+		Store:       st,
+		Logger:      logger,
+		ServiceName: "Carrel",
+	}
+	defer mailQueue.Close()
 
 	srv := &handler.Server{
-		BasePath:   cfg.BasePath,
-		Trust:      trust,
-		Sessions:   sessions,
-		Store:      st,
-		Templates:  templates,
-		LoginLimit: loginLimit,
-		Logger:     logger,
+		BasePath:    cfg.BasePath,
+		Trust:       trust,
+		Sessions:    sessions,
+		Store:       st,
+		Templates:   templates,
+		LoginLimit:  loginLimit,
+		InviteLimit: inviteLimit,
+		Mail:        mailQueue,
+		Logger:      logger,
 	}
 
 	staticFS, err := fs.Sub(web.StaticFS, "static")
@@ -97,9 +108,11 @@ func run() int {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	mailQueue.Start(ctx, 1)
 	sessions.StartSweeper(ctx, time.Minute)
 	// Without this the limiter keeps one entry per address ever seen.
 	go sweepLimiter(ctx, loginLimit, limiterSweep)
+	go sweepLimiter(ctx, inviteLimit, limiterSweep)
 
 	logger.Info("carrel starting",
 		"version", version,

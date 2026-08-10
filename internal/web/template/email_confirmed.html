@@ -1,0 +1,8 @@
+{{define "body"}}
+<section class="card">
+    <h1>Email address</h1>
+    {{if .Error}}<p>{{.Error}}</p>{{end}}
+    {{if .Notice}}<p>{{.Notice}}</p>{{end}}
+    <p class="hint"><a href="{{.Base}}/login">Sign in</a></p>
+</section>
+{{end}}

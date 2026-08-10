@@ -3,5 +3,18 @@
     <h1>Signed in as {{.Session.Login}}</h1>
     <p>No accounts connected yet. Connecting a CalDAV or CardDAV account
         arrives with the next stage.</p>
+
+    <section class="subsection">
+        <h2>Email address</h2>
+        <p class="hint">Used for invitations and service notices only.</p>
+        <form method="post" action="{{.Base}}/app/email">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+
+            <label for="email">New address</label>
+            <input id="email" name="email" type="email" required autocomplete="email">
+
+            <button type="submit">Send confirmation link</button>
+        </form>
+    </section>
 </section>
 {{end}}

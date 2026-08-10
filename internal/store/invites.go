@@ -240,6 +240,45 @@ func (s *Store) ExtendInvite(actor Actor, id string, ttl time.Duration) error {
 	})
 }
 
+// ResendInvite rotates the token and returns the new one. The old link stops
+// working, which is the only way to hand a fresh link over when the digest
+// is all that was kept (§5.3).
+func (s *Store) ResendInvite(actor Actor, id string) (string, error) {
+	token, err := crypto.NewToken()
+	if err != nil {
+		return "", err
+	}
+
+	err = s.update(func(state *State) error {
+		inv := findInvite(state, id)
+		if inv == nil {
+			return ErrNotFound
+		}
+		if !inv.Usable(s.now()) {
+			return ErrInviteInvalid
+		}
+		inv.TokenHash = crypto.HashToken(token)
+		status := SendPending
+		if !state.Settings.SMTP.Configured() || inv.Email == "" {
+			status = SendNotConfigured
+		}
+		inv.SendStatus = status
+		inv.SendError = ""
+		appendAudit(state, s.now(), AuditEntry{
+			Action:      ActionInviteResend,
+			ActorID:     actor.ID,
+			ActorLogin:  actor.Login,
+			TargetLogin: inv.Login,
+			IP:          actor.IP,
+		})
+		return nil
+	})
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
 // RecordInviteSend stores the outcome of a delivery attempt. A failure is
 // informational: the invite stays valid and the link stays usable (§5.3).
 func (s *Store) RecordInviteSend(id string, status SendStatus, sendErr string) error {

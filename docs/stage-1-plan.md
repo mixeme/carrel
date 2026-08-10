@@ -145,19 +145,19 @@ THIRD_PARTY.md
 
 ### 6. Приглашения и регистрация · Composer 2.5 Fast
 
-- [ ] Admin: создать приглашение (login + email) → показать ссылку + copy button + статус SMTP
-- [ ] Режим «пароль от админа»: temp password, `must_change_password` flag, предупреждение в UI
-- [ ] `GET/POST /invite/<token>`: set password, create salts + DEK; одноразовый token
-- [ ] Resend / revoke / extend invite (admin actions)
-- [ ] Invite works with SMTP completely unset (manual link only) — §21
+- [x] Admin: создать приглашение (login + email) → показать ссылку + copy button + статус SMTP
+- [x] Режим «пароль от админа»: temp password, `must_change_password` flag, предупреждение в UI
+- [x] `GET/POST /invite/<token>`: set password, create salts + DEK; одноразовый token
+- [x] Resend / revoke / extend invite (admin actions)
+- [x] Invite works with SMTP completely unset (manual link only) — §21
 
 ### 7. SMTP (`internal/mail`) · Composer 2.5 Fast
 
-- [ ] Admin settings: host, port, TLS mode (STARTTLS / implicit / none), login, password (encrypted server key), from name/address
-- [ ] «Send test email» — показать полный ответ сервера (success or diagnostic)
-- [ ] Async send with retries + backoff; failure logged, invite stays valid
-- [ ] Templates: invite email, escrow recovery notification (plain + minimal HTML, no external resources)
-- [ ] Profile email change with confirmation email (§5.3)
+- [x] Admin settings: host, port, TLS mode (STARTTLS / implicit / none), login, password (encrypted server key), from name/address
+- [x] «Send test email» — показать полный ответ сервера (success or diagnostic)
+- [x] Async send with retries + backoff; failure logged, invite stays valid
+- [x] Templates: invite email, escrow recovery notification (plain + minimal HTML, no external resources)
+- [x] Profile email change with confirmation email (§5.3)
 
 ### 8. Депонирование ключей (`internal/crypto` + handlers) · Opus / Sonnet (thinking-high)
 

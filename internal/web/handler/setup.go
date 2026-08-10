@@ -103,6 +103,18 @@ func validateAccountForm(login, email, password, confirm string) string {
 	return ""
 }
 
+// validateInvitePassword checks only the password fields on invite acceptance.
+// Login and email are fixed by the invitation itself.
+func validateInvitePassword(password, confirm string) string {
+	if err := store.ValidatePassword(password); err != nil {
+		return capitalize(err.Error()) + "."
+	}
+	if password != confirm {
+		return "The two passwords do not match."
+	}
+	return ""
+}
+
 // capitalize upper-cases the first letter so a validation message reads as a
 // sentence in the UI.
 func capitalize(s string) string {

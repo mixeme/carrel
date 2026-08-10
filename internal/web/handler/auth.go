@@ -89,6 +89,9 @@ func SafeRedirect(dst, fallback string) string {
 // from the login limiter.
 func (s *Server) RateLimit(l *ratelimit.Limiter, scope string) Middleware {
 	return func(next http.Handler) http.Handler {
+		if l == nil {
+			return next
+		}
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			key := scope + ":" + ClientIP(r)
 			if ok, wait := l.Allow(key); !ok {

@@ -98,6 +98,12 @@ type User struct {
 	// Secrets is the per-user blob sealed under the DEK: DAV credentials from
 	// stage 2 onward. Empty in stage 1, but the field fixes where they go.
 	Secrets []byte `json:"secrets,omitempty"`
+
+	// PendingEmail holds an address awaiting confirmation. The token digest
+	// and expiry live here too; only the plaintext token is ever mailed (§5.3).
+	PendingEmail         string    `json:"pending_email,omitempty"`
+	EmailChangeTokenHash []byte    `json:"email_change_token_hash,omitempty"`
+	EmailChangeExpires   time.Time `json:"email_change_expires,omitempty"`
 }
 
 // Activated reports whether the user has set a password. An invited user has
@@ -118,6 +124,7 @@ func (u *User) Clone() *User {
 	out.WrappedDEK = cloneBytes(u.WrappedDEK)
 	out.EscrowDEK = cloneBytes(u.EscrowDEK)
 	out.Secrets = cloneBytes(u.Secrets)
+	out.EmailChangeTokenHash = cloneBytes(u.EmailChangeTokenHash)
 	return &out
 }
 
@@ -326,8 +333,10 @@ const (
 	ActionInviteRevoke   = "invite_revoke"
 	ActionInviteExtend   = "invite_extend"
 	ActionInviteSend     = "invite_send"
+	ActionInviteResend   = "invite_resend"
 	ActionSettings       = "settings_update"
 	ActionSMTPTest       = "smtp_test"
+	ActionEmailConfirm   = "email_confirm"
 	ActionEscrowEnable   = "escrow_enable"
 	ActionEscrowDisable  = "escrow_disable"
 	ActionEscrowOptIn    = "escrow_opt_in"

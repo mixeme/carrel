@@ -33,14 +33,27 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	pages.HandleFunc("POST "+s.Path("/logout"), s.Logout)
 	pages.HandleFunc("GET "+s.Path("/forgot"), s.Forgot)
 
+	// Public token pages: no Referer on the URL (§24.3) and a separate rate
+	// limit from login.
+	invite := http.NewServeMux()
+	invite.HandleFunc("GET "+s.Path("/invite/{token}"), s.AcceptInvite)
+	invite.HandleFunc("POST "+s.Path("/invite/{token}"), s.AcceptInvite)
+	pages.Handle(s.Path("/invite/"), Chain(invite, NoReferrer, s.RateLimit(s.InviteLimit, "invite")))
+
+	confirm := http.NewServeMux()
+	confirm.HandleFunc("GET "+s.Path("/confirm-email/{token}"), s.ConfirmEmail)
+	pages.Handle(s.Path("/confirm-email/"), Chain(confirm, NoReferrer, s.RateLimit(s.InviteLimit, "confirm")))
+
 	// The user's own section. Anything added under /app is behind RequireAuth.
 	app := http.NewServeMux()
 	app.HandleFunc("GET "+s.Path("/app/{$}"), s.AppHome)
+	app.HandleFunc("POST "+s.Path("/app/email"), s.RequestEmailChange)
 	pages.Handle(s.Path("/app/"), Chain(app, s.RequireAuth))
 
-	// The administrator's section, filled in by step 9.
+	// The administrator's section.
 	admin := http.NewServeMux()
 	admin.HandleFunc("GET "+s.Path("/admin/{$}"), s.AdminHome)
+	admin.HandleFunc("POST "+s.Path("/admin/{$}"), s.AdminHome)
 	pages.Handle(s.Path("/admin/"), Chain(admin, s.RequireAdmin))
 
 	mux := http.NewServeMux()

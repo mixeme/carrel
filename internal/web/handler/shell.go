@@ -24,9 +24,3 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 func (s *Server) AppHome(w http.ResponseWriter, r *http.Request) {
 	s.Render(w, "app.html", s.View(r, "Carrel"))
 }
-
-// AdminHome is the administrator's landing page. The user list, settings and
-// audit viewer are added in step 9.
-func (s *Server) AdminHome(w http.ResponseWriter, r *http.Request) {
-	s.Render(w, "admin.html", s.View(r, "Administration"))
-}
