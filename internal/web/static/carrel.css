@@ -1,0 +1,13 @@
+/* Carrel base styles — expanded in stage 11 per brand guide */
+:root {
+    --ink: #1a1a1a;
+    --card: #faf9f7;
+    --accent: #2d5a27;
+}
+
+body {
+    font-family: system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--card);
+    margin: 0;
+}

@@ -93,16 +93,16 @@ THIRD_PARTY.md
 
 ### 0. Инициализация проекта · Composer 2.5 Fast
 
-- [ ] `go mod init`, модуль `cmd/carrel/main.go`, `-ldflags -X` для version/commit
-- [ ] Структура каталогов по §3; `go:embed` для templates/static
-- [ ] Вендоринг htmx + htmx-sse в `internal/web/static/`; `THIRD_PARTY.md` с лицензиями
-- [ ] `LICENSE` (AGPL-3.0-or-later), заголовки в исходниках
+- [x] `go mod init`, модуль `cmd/carrel/main.go`, `-ldflags -X` для version/commit
+- [x] Структура каталогов по §3; `go:embed` для templates/static
+- [x] Вендоринг htmx + htmx-sse в `internal/web/static/`; `THIRD_PARTY.md` с лицензиями
+- [x] `LICENSE` (AGPL-3.0-or-later), заголовки в исходниках
 
 ### 1. Конфигурация (`internal/config`) · Composer 2.5 Fast
 
-- [ ] Env-переменные с приоритетом над файлом: `CARREL_PORT`, `CARREL_DATA_DIR`, `CARREL_TRUSTED_PROXIES`, `CARREL_BASE_PATH`, log level
-- [ ] Defaults: порт `8080`, data dir `/var/lib/carrel`
-- [ ] Валидация при старте; понятные ошибки
+- [x] Env-переменные с приоритетом над файлом: `CARREL_PORT`, `CARREL_DATA_DIR`, `CARREL_TRUSTED_PROXIES`, `CARREL_BASE_PATH`, log level
+- [x] Defaults: порт `8080`, data dir `/var/lib/carrel`
+- [x] Валидация при старте; понятные ошибки
 
 ### 2. Криптослой (`internal/crypto`) + unit-тесты · Opus / Sonnet (thinking-high)
 
