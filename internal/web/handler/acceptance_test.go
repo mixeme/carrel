@@ -35,7 +35,7 @@ func TestStageOneAcceptanceFlow(t *testing.T) {
 	if a.Store.Settings().SMTP.Configured() {
 		t.Fatal("SMTP is configured on a fresh volume")
 	}
-	token := a.createInvite("ada", "ada@example.org", string(store.RoleUser))
+	token := a.createInvite(string(store.RoleUser))
 
 	// Until the invited user accepts, there is nothing to authenticate them
 	// with and nothing that could decrypt their data (§21).
@@ -54,6 +54,8 @@ func TestStageOneAcceptanceFlow(t *testing.T) {
 		t.Fatalf("GET the invite link = %d, want 200", rec.Code)
 	}
 	rec := a.post("/invite/"+token, url.Values{
+		fieldLogin:    {"ada"},
+		fieldEmail:    {"ada@example.org"},
 		fieldPassword: {testPassword},
 		fieldConfirm:  {testPassword},
 	})
@@ -117,14 +119,18 @@ func TestAdminCannotReadAnotherAccountsData(t *testing.T) {
 	a := newApp(t, nil)
 	bootstrap(t, a)
 	loginAdmin(t, a)
-	token := a.createInvite("ada", "ada@example.org", string(store.RoleUser))
+	token := a.createInvite(string(store.RoleUser))
 	// Kept past the administrator's logout, which wipes the session copy.
 	adminDEK := a.session().DEK().Clone()
 
 	a.post("/logout", url.Values{})
 	a.cookies = map[string]string{}
 	a.get("/invite/" + token)
-	a.post("/invite/"+token, url.Values{fieldPassword: {testPassword}, fieldConfirm: {testPassword}})
+	a.post("/invite/"+token, url.Values{
+		fieldLogin:    {"ada"},
+		fieldPassword: {testPassword},
+		fieldConfirm:  {testPassword},
+	})
 
 	// Stand in for the DAV credentials of stage 2: a blob sealed under the
 	// user's own key, which is the only thing that opens it.
@@ -171,13 +177,17 @@ func TestDisableEndsActiveSessionsAtOnce(t *testing.T) {
 	admin := newApp(t, nil)
 	bootstrap(t, admin)
 	loginAdmin(t, admin)
-	token := admin.createInvite("ada", "ada@example.org", string(store.RoleUser))
+	token := admin.createInvite(string(store.RoleUser))
 
 	// A second browser for the invited user, so both sessions are live at the
 	// same time.
 	user := &app{Server: admin.Server, t: t, handler: admin.handler, cookies: map[string]string{}}
 	user.get("/invite/" + token)
-	user.post("/invite/"+token, url.Values{fieldPassword: {testPassword}, fieldConfirm: {testPassword}})
+	user.post("/invite/"+token, url.Values{
+		fieldLogin:    {"ada"},
+		fieldPassword: {testPassword},
+		fieldConfirm:  {testPassword},
+	})
 	if rec := user.get("/app/"); rec.Code != http.StatusOK {
 		t.Fatalf("the invited user is not signed in: status %d", rec.Code)
 	}
@@ -278,12 +288,10 @@ func TestResetPasswordIsAnnouncedAsDestructive(t *testing.T) {
 
 // createInvite creates an invitation from the panel and returns its token,
 // taken from the link the administrator is shown.
-func (a *app) createInvite(login, email, role string) string {
+func (a *app) createInvite(role string) string {
 	a.t.Helper()
 	rec := a.post("/admin/", url.Values{
-		fieldAction: {"create_invite"},
-		fieldLogin:  {login},
-		fieldEmail:  {email},
+		fieldAction: {"create_invite_link"},
 		fieldRole:   {role},
 	})
 	if rec.Code != http.StatusOK {

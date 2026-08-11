@@ -4,6 +4,20 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- **Invitations:** two separate admin flows — copy a **link** (no mail) or **send by email** (SMTP required; the administrator never sees the link). The invitee chooses their own login on accept; email is fixed only for email invitations. Resend applies to email invitations only.
+- **`/about`:** source link points to [https://github.com/mixeme/carrel](https://github.com/mixeme/carrel).
+
+### Added
+
+- `.gitignore` entry for `dev/` (local developer notes and data, not tracked).
+
+### Verified (stage 1 acceptance, local `go run`)
+
+- `go test -race ./...` on the development machine (Windows, MSYS2 gcc).
+- Manual: first administrator setup, public `/about`, invite-by-link without SMTP (invitee picks login). Progress recorded in [docs/stage-1-outstanding.md](docs/stage-1-outstanding.md) §2a.
+
 ## [0.1.0] - 2026-08-11
 
 Stage 1 («Каркас») — первая рабочая версия. Открытые пункты приёмки: [docs/stage-1-outstanding.md](docs/stage-1-outstanding.md).

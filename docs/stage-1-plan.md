@@ -147,11 +147,11 @@ THIRD_PARTY.md
 
 ### 6. Приглашения и регистрация · Composer 2.5 Fast
 
-- [x] Admin: создать приглашение (login + email) → показать ссылку + copy button + статус SMTP
+- [x] Admin: два сценария — **по ссылке** (copy button, без почты) или **по email** (SMTP, ссылку админ не видит); не смешивать
+- [x] `GET/POST /invite/<token>`: приглашённый **сам выбирает логин**; email фиксирован только для email-приглашения
+- [x] Resend / revoke / extend invite (admin actions); resend — только для email-приглашений
+- [x] Invite by link works with SMTP completely unset — §21 — **проверено локально** (§2a в [stage-1-outstanding.md](stage-1-outstanding.md))
 - [x] Режим «пароль от админа»: temp password, `must_change_password` flag, предупреждение в UI
-- [x] `GET/POST /invite/<token>`: set password, create salts + DEK; одноразовый token
-- [x] Resend / revoke / extend invite (admin actions)
-- [x] Invite works with SMTP completely unset (manual link only) — §21
 
 ### 7. SMTP (`internal/mail`) · Composer 2.5 Fast
 
@@ -213,7 +213,7 @@ THIRD_PARTY.md
 
 - [x] Unit: crypto round-trips, invite token hash, constant-time helpers
 - [x] Integration (optional httptest): bootstrap → admin login → create invite → accept → login
-- [x] Manual checklist по §21 (users/security/deployment/deposit sections applicable to stage 1) — [stage-1-outstanding.md](stage-1-outstanding.md) (ручная часть A1–A9)
+- [x] Manual checklist по §21 — [stage-1-outstanding.md](stage-1-outstanding.md): race на dev-машине; локально проверены setup, `/about`, приглашение по ссылке (§2a); Docker A1–A9 и email-приглашение — открыты
 
 ---
 

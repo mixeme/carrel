@@ -39,7 +39,9 @@ type adminView struct {
 	Settings      store.Settings
 	Invites       []inviteRow
 	Users         []userRow
-	NewInviteLink string
+	NewInviteLink   string
+	InviteEmailSent string
+	SMTPConfigured  bool
 	SMTPDiag      string
 	CreationMode  store.CreationMode
 	// Escrow is the instance-wide deposit status (§5.4).
@@ -93,8 +95,10 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
 	var data adminView
 	var err error
 	switch r.PostFormValue(fieldAction) {
-	case "create_invite":
-		data, err = s.adminCreateInvite(w, r, actor)
+	case "create_invite_link":
+		data, err = s.adminCreateInviteLink(w, r, actor)
+	case "create_invite_email":
+		data, err = s.adminCreateInviteEmail(w, r, actor)
 	case "revoke_invite":
 		data, err = s.adminRevokeInvite(r, actor)
 	case "extend_invite":
@@ -154,7 +158,9 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case data.NewInviteLink != "":
-		v.Notice = "Invitation created. Copy the link below and share it with the new user."
+		v.Notice = "Invitation link created. Copy it below and share it with the new user."
+	case data.InviteEmailSent != "":
+		v.Notice = "Invitation email queued for " + data.InviteEmailSent + "."
 	case data.Recovered != "":
 		v.Notice = "Recovered " + data.Recovered +
 			". Hand over the temporary password; they must change it at their next sign-in, and their data is intact."
@@ -190,6 +196,7 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 	out.InviteTTLHours = out.Settings.InviteTTLSeconds / 3600
 	out.SessionIdleHours = out.Settings.SessionIdleSeconds / 3600
 	out.SessionAbsoluteDays = out.Settings.SessionAbsoluteSeconds / 86400
+	out.SMTPConfigured = out.Settings.SMTP.Configured()
 	return out
 }
 
@@ -200,33 +207,46 @@ func (s *Server) renderAdmin(w http.ResponseWriter, r *http.Request, partial adm
 	s.Render(w, "admin.html", v)
 }
 
-func (s *Server) adminCreateInvite(w http.ResponseWriter, r *http.Request, actor store.Actor) (adminView, error) {
-	login := store.NormalizeLogin(r.PostFormValue(fieldLogin))
+func (s *Server) adminCreateInviteLink(w http.ResponseWriter, r *http.Request, actor store.Actor) (adminView, error) {
+	role := store.Role(r.PostFormValue(fieldRole))
+	if !role.Valid() {
+		role = store.RoleUser
+	}
+
+	_, token, err := s.Store.CreateInvite(actor, role, store.InviteDeliveryLink, "", 0)
+	if err != nil {
+		return adminView{}, err
+	}
+
+	link := s.publicURL(r, "/invite/"+token)
+	return adminView{NewInviteLink: link}, nil
+}
+
+func (s *Server) adminCreateInviteEmail(w http.ResponseWriter, r *http.Request, actor store.Actor) (adminView, error) {
+	if !s.Store.Settings().SMTP.Configured() {
+		return adminView{}, fmt.Errorf("configure SMTP before sending invitations by email")
+	}
+	if s.Mail == nil {
+		return adminView{}, fmt.Errorf("mail is not available")
+	}
+
 	email := store.NormalizeEmail(r.PostFormValue(fieldEmail))
 	role := store.Role(r.PostFormValue(fieldRole))
 	if !role.Valid() {
 		role = store.RoleUser
 	}
-	if err := store.ValidateLogin(login); err != nil {
-		return adminView{}, fmt.Errorf("%s", capitalize(err.Error()))
-	}
 	if err := store.ValidateEmail(email); err != nil {
 		return adminView{}, fmt.Errorf("%s", capitalize(err.Error()))
 	}
 
-	inv, token, err := s.Store.CreateInvite(actor, login, email, role, 0)
+	inv, token, err := s.Store.CreateInvite(actor, role, store.InviteDeliveryEmail, email, 0)
 	if err != nil {
-		if errors.Is(err, store.ErrLoginTaken) {
-			return adminView{}, fmt.Errorf("that login is already in use")
-		}
 		return adminView{}, err
 	}
 
 	link := s.publicURL(r, "/invite/"+token)
-	if s.Mail != nil {
-		s.Mail.QueueInvite(inv.ID, email, actor.Login, link, inv.ExpiresAt)
-	}
-	return adminView{NewInviteLink: link}, nil
+	s.Mail.QueueInvite(inv.ID, email, actor.Login, link, inv.ExpiresAt)
+	return adminView{InviteEmailSent: email}, nil
 }
 
 func (s *Server) adminRevokeInvite(r *http.Request, actor store.Actor) (adminView, error) {
@@ -264,17 +284,21 @@ func (s *Server) adminResendInvite(w http.ResponseWriter, r *http.Request, actor
 		if errors.Is(err, store.ErrInviteInvalid) {
 			return adminView{}, fmt.Errorf("invitation is no longer pending")
 		}
+		if errors.Is(err, store.ErrInviteNotByEmail) {
+			return adminView{}, fmt.Errorf("only email invitations can be resent")
+		}
 		return adminView{}, err
 	}
 	inv, err := s.Store.Invite(id)
 	if err != nil {
 		return adminView{}, err
 	}
-	link := s.publicURL(r, "/invite/"+token)
-	if s.Mail != nil {
-		s.Mail.QueueInvite(inv.ID, inv.Email, actor.Login, link, inv.ExpiresAt)
+	if s.Mail == nil {
+		return adminView{}, fmt.Errorf("mail is not available")
 	}
-	return adminView{NewInviteLink: link}, nil
+	link := s.publicURL(r, "/invite/"+token)
+	s.Mail.QueueInvite(inv.ID, inv.Email, actor.Login, link, inv.ExpiresAt)
+	return adminView{InviteEmailSent: inv.Email}, nil
 }
 
 func (s *Server) adminCreateUser(r *http.Request, actor store.Actor) (adminView, error) {

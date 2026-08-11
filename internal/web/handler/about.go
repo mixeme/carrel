@@ -10,7 +10,7 @@ import (
 
 // SourceURL is where public links to the running service's source code point.
 // Per spec §22, this is the GitHub mirror, not the internal Gitea host.
-const SourceURL = "https://github.com/mixdep/carrel"
+const SourceURL = "https://github.com/mixeme/carrel"
 
 // About serves the public «About this service» page (§22).
 func (s *Server) About(w http.ResponseWriter, r *http.Request) {

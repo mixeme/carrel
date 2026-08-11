@@ -179,12 +179,12 @@ func TestDisabledUserCannotLogIn(t *testing.T) {
 	s, _ := openTest(t, t.TempDir())
 	admin := mustAdmin(t, s)
 
-	inv, token, err := s.CreateInvite(actorOf(admin), "ada", "ada@example.org", RoleUser, 0)
+	inv, token, err := s.CreateInvite(actorOf(admin), RoleUser, InviteDeliveryLink, "", 0)
 	if err != nil {
 		t.Fatalf("CreateInvite: %v", err)
 	}
 	_ = inv
-	user, err := s.AcceptInvite(token, testPassword, "10.0.0.2")
+	user, err := s.AcceptInvite(token, "ada", "ada@example.org", testPassword, "10.0.0.2")
 	if err != nil {
 		t.Fatalf("AcceptInvite: %v", err)
 	}
@@ -266,11 +266,11 @@ func TestResetRefusedWhenEscrowCovers(t *testing.T) {
 	if err := s.EnableEscrow(actorOf(admin), "master password for escrow"); err != nil {
 		t.Fatalf("EnableEscrow: %v", err)
 	}
-	_, token, err := s.CreateInvite(actorOf(admin), "ada", "", RoleUser, 0)
+	_, token, err := s.CreateInvite(actorOf(admin), RoleUser, InviteDeliveryLink, "", 0)
 	if err != nil {
 		t.Fatalf("CreateInvite: %v", err)
 	}
-	user, err := s.AcceptInvite(token, testPassword, "")
+	user, err := s.AcceptInvite(token, "ada", "", testPassword, "")
 	if err != nil {
 		t.Fatalf("AcceptInvite: %v", err)
 	}
@@ -388,11 +388,11 @@ func TestDuplicateLoginRejected(t *testing.T) {
 	if _, err := s.CreateUserWithPassword(a, "ROOT", "", RoleUser, testPassword); !errors.Is(err, ErrLoginTaken) {
 		t.Errorf("duplicate login differing in case: got %v, want ErrLoginTaken", err)
 	}
-	if _, _, err := s.CreateInvite(a, "ada", "", RoleUser, 0); err != nil {
+	if _, _, err := s.CreateInvite(a, RoleUser, InviteDeliveryLink, "", 0); err != nil {
 		t.Fatalf("CreateInvite: %v", err)
 	}
-	// A pending invite reserves the login too, or two people could claim it.
-	if _, err := s.CreateUserWithPassword(a, "ada", "", RoleUser, testPassword); !errors.Is(err, ErrLoginTaken) {
-		t.Errorf("login held by a pending invite: got %v, want ErrLoginTaken", err)
+	// A pending invite no longer reserves the login.
+	if _, err := s.CreateUserWithPassword(a, "ada", "", RoleUser, testPassword); err != nil {
+		t.Errorf("pending invite held login: %v", err)
 	}
 }

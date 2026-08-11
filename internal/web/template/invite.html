@@ -1,24 +1,32 @@
 {{define "body"}}
 <section class="card">
     <h1>Accept invitation</h1>
-    <p>You have been invited to join this Carrel instance. Choose a password
-        to finish creating your account.</p>
+    <p>You have been invited to join this Carrel instance. Choose a login and
+        password to finish creating your account.</p>
     <p class="warning">Your password is the only key to your own data. Nobody —
         including this server — can recover it for you.</p>
 
     <form method="post" action="{{.Base}}/invite/{{with .Data}}{{.Token}}{{end}}" autocomplete="off">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
 
-        <label>Login</label>
-        <p class="field-value">{{with .Data}}{{.Login}}{{end}}</p>
+        <label for="login">Login</label>
+        <input id="login" name="login" type="text" required autofocus
+               maxlength="64" autocapitalize="none" spellcheck="false"
+               value="{{with .Data}}{{.Login}}{{end}}">
+        <p class="hint">Lowercase letters, digits, and <code>. _ -</code> inside.</p>
 
-        {{with .Data}}{{if .Email}}
+        {{with .Data}}{{if .EmailLocked}}
         <label>Email</label>
         <p class="field-value">{{.Email}}</p>
+        {{else}}
+        <label for="email">Email <span class="optional">(optional)</span></label>
+        <input id="email" name="email" type="email" autocomplete="off"
+               value="{{.Email}}">
+        <p class="hint">Used for service notices only.</p>
         {{end}}{{end}}
 
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" required autofocus
+        <input id="password" name="password" type="password" required
                minlength="10" autocomplete="new-password">
 
         <label for="confirm">Repeat password</label>

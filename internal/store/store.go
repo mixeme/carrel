@@ -23,8 +23,7 @@ const StateFile = "state.enc"
 var (
 	// ErrNotFound is returned for any record that does not exist.
 	ErrNotFound = errors.New("store: not found")
-	// ErrLoginTaken is returned when a login is already used by a user or by
-	// a pending invite.
+	// ErrLoginTaken is returned when a login is already used by a user.
 	ErrLoginTaken = errors.New("store: login is already in use")
 	// ErrLastAdmin guards the invariant that at least one administrator can
 	// always log in (§5.5).
@@ -42,6 +41,9 @@ var (
 	// ErrInviteInvalid covers unknown, revoked, expired and already-accepted
 	// invites alike, so probing a token learns nothing (§24.3).
 	ErrInviteInvalid = errors.New("store: invite is not usable")
+	// ErrInviteNotByEmail is returned when an operation applies only to
+	// invitations that were emailed.
+	ErrInviteNotByEmail = errors.New("store: invite was not sent by email")
 	// ErrEscrowActive is returned when a destructive password reset is asked
 	// for on an account that can be recovered instead (§5.5).
 	ErrEscrowActive = errors.New("store: escrow is active for this user; recover instead of resetting")

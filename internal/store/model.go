@@ -152,15 +152,31 @@ const (
 	SendFailed        SendStatus = "failed"
 )
 
+// InviteDelivery distinguishes how an invitation reaches the new user.
+type InviteDelivery string
+
+const (
+	// InviteDeliveryLink: the administrator copies the link and shares it.
+	InviteDeliveryLink InviteDelivery = "link"
+	// InviteDeliveryEmail: the link is emailed to the address the administrator
+	// provides; the administrator never sees it.
+	InviteDeliveryEmail InviteDelivery = "email"
+)
+
+func (d InviteDelivery) Valid() bool {
+	return d == InviteDeliveryLink || d == InviteDeliveryEmail
+}
+
 // Invite is a pending account. Only the token digest is stored; the token
 // itself is returned once, at creation, and then exists solely in the link
 // (§5.3).
 type Invite struct {
-	ID        string `json:"id"`
-	Login     string `json:"login"`
-	Email     string `json:"email,omitempty"`
-	Role      Role   `json:"role"`
-	TokenHash []byte `json:"token_hash"`
+	ID        string         `json:"id"`
+	Login     string         `json:"login"`
+	Email     string         `json:"email,omitempty"`
+	Role      Role           `json:"role"`
+	Delivery  InviteDelivery `json:"delivery,omitempty"`
+	TokenHash []byte         `json:"token_hash"`
 
 	CreatedAt time.Time `json:"created_at"`
 	CreatedBy string    `json:"created_by,omitempty"`

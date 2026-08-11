@@ -17,9 +17,7 @@ func TestInviteLifecycle(t *testing.T) {
 	a.get("/admin/")
 
 	form := url.Values{
-		"action": {"create_invite"},
-		"login":  {"ada"},
-		"email":  {"ada@example.org"},
+		"action": {"create_invite_link"},
 		"role":   {"user"},
 	}
 	rec := a.post("/admin/", form)
@@ -42,6 +40,8 @@ func TestInviteLifecycle(t *testing.T) {
 	token := strings.TrimPrefix(link, "http://example.com/invite/")
 
 	accept := url.Values{
+		fieldLogin:    {"ada"},
+		fieldEmail:    {"ada@example.org"},
 		fieldPassword: {testPassword},
 		fieldConfirm:  {testPassword},
 	}

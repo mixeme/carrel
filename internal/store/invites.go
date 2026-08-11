@@ -39,22 +39,29 @@ func (s *Store) Invite(id string) (*Invite, error) {
 }
 
 // CreateInvite issues a one-time link for a new account. The token is returned
-// once and only its digest is kept, so a copy of the state file does not let
-// anyone accept the invite (§5.3).
+// once and only its digest is kept (§5.3).
 //
-// The caller shows the link to the administrator whether or not mail is
-// configured; delivery is a separate, non-blocking concern.
-func (s *Store) CreateInvite(actor Actor, login, email string, role Role, ttl time.Duration) (*Invite, string, error) {
-	login = NormalizeLogin(login)
-	email = NormalizeEmail(email)
-	if err := ValidateLogin(login); err != nil {
-		return nil, "", err
-	}
-	if err := ValidateEmail(email); err != nil {
-		return nil, "", err
-	}
+// For InviteDeliveryLink the administrator copies the link; login and optional
+// email are chosen when the bearer accepts. For InviteDeliveryEmail the
+// administrator supplies the recipient address and the link is delivered by
+// mail only — the caller must queue delivery separately.
+func (s *Store) CreateInvite(actor Actor, role Role, delivery InviteDelivery, email string, ttl time.Duration) (*Invite, string, error) {
 	if !role.Valid() {
 		return nil, "", fmt.Errorf("store: unknown role %q", role)
+	}
+	if !delivery.Valid() {
+		return nil, "", fmt.Errorf("store: unknown invite delivery %q", delivery)
+	}
+	email = NormalizeEmail(email)
+	switch delivery {
+	case InviteDeliveryLink:
+		if email != "" {
+			return nil, "", fmt.Errorf("store: link invitations must not carry an email address")
+		}
+	case InviteDeliveryEmail:
+		if err := ValidateEmail(email); err != nil {
+			return nil, "", err
+		}
 	}
 
 	token, err := crypto.NewToken()
@@ -68,22 +75,21 @@ func (s *Store) CreateInvite(actor Actor, login, email string, role Role, ttl ti
 
 	var out *Invite
 	err = s.update(func(state *State) error {
-		if err := s.checkLoginFree(state, login); err != nil {
-			return err
-		}
 		if ttl <= 0 {
 			ttl = state.Settings.InviteTTL()
 		}
 		now := s.now()
-		status := SendPending
-		if !state.Settings.SMTP.Configured() || email == "" {
-			status = SendNotConfigured
+		status := SendNotConfigured
+		if delivery == InviteDeliveryEmail {
+			if state.Settings.SMTP.Configured() {
+				status = SendPending
+			}
 		}
 		inv := &Invite{
 			ID:         id,
-			Login:      login,
-			Email:      email,
 			Role:       role,
+			Delivery:   delivery,
+			Email:      email,
 			TokenHash:  crypto.HashToken(token),
 			CreatedAt:  now,
 			CreatedBy:  actor.ID,
@@ -91,13 +97,16 @@ func (s *Store) CreateInvite(actor Actor, login, email string, role Role, ttl ti
 			SendStatus: status,
 		}
 		state.Invites = append(state.Invites, inv)
-		appendAudit(state, now, AuditEntry{
-			Action:      ActionInviteCreate,
-			ActorID:     actor.ID,
-			ActorLogin:  actor.Login,
-			TargetLogin: login,
-			IP:          actor.IP,
-		})
+		entry := AuditEntry{
+			Action:     ActionInviteCreate,
+			ActorID:    actor.ID,
+			ActorLogin: actor.Login,
+			IP:         actor.IP,
+		}
+		if delivery == InviteDeliveryEmail {
+			entry.Detail = email
+		}
+		appendAudit(state, now, entry)
 		out = inv.Clone()
 		return nil
 	})
@@ -137,10 +146,14 @@ func (s *Store) LookupInvite(token string) (*Invite, error) {
 	return found, nil
 }
 
-// AcceptInvite consumes a token and creates the account it stands for. The
-// password is chosen here for the first time: until this point the record has
-// no hash, no salts and no DEK, and the administrator never knew it (§5.2).
-func (s *Store) AcceptInvite(token, password string, ip string) (*User, error) {
+// AcceptInvite consumes a token and creates the account. Login and password
+// are always chosen here. Email comes from the invitation for email delivery,
+// or from the bearer for link delivery (§5.2).
+func (s *Store) AcceptInvite(token, login, email, password, ip string) (*User, error) {
+	login = NormalizeLogin(login)
+	if err := ValidateLogin(login); err != nil {
+		return nil, err
+	}
 	if err := ValidatePassword(password); err != nil {
 		return nil, err
 	}
@@ -161,14 +174,25 @@ func (s *Store) AcceptInvite(token, password string, ip string) (*User, error) {
 		if inv == nil || !inv.Usable(now) {
 			return ErrInviteInvalid
 		}
-		// Consume the invite before the check, or it would reserve the login
-		// against the very account it exists to create.
-		inv.AcceptedAt = now
-		if err := s.checkLoginFree(state, inv.Login); err != nil {
+		if err := s.checkLoginFree(state, login); err != nil {
 			return err
 		}
 
-		u, err := s.newUser(state, inv.Login, inv.Email, inv.Role, password, inv.CreatedBy)
+		accountEmail := NormalizeEmail(email)
+		switch inv.Delivery {
+		case InviteDeliveryEmail:
+			accountEmail = inv.Email
+		default:
+			if err := ValidateEmail(accountEmail); err != nil {
+				return err
+			}
+		}
+
+		inv.AcceptedAt = now
+		inv.Login = login
+		inv.Email = accountEmail
+
+		u, err := s.newUser(state, login, accountEmail, inv.Role, password, inv.CreatedBy)
 		if err != nil {
 			return err
 		}
@@ -240,9 +264,9 @@ func (s *Store) ExtendInvite(actor Actor, id string, ttl time.Duration) error {
 	})
 }
 
-// ResendInvite rotates the token and returns the new one. The old link stops
-// working, which is the only way to hand a fresh link over when the digest
-// is all that was kept (§5.3).
+// ResendInvite rotates the token and returns the new one for an email
+// invitation. The old link stops working. Link invitations cannot be resent
+// through this path — create a new link instead (§5.3).
 func (s *Store) ResendInvite(actor Actor, id string) (string, error) {
 	token, err := crypto.NewToken()
 	if err != nil {
@@ -257,10 +281,13 @@ func (s *Store) ResendInvite(actor Actor, id string) (string, error) {
 		if !inv.Usable(s.now()) {
 			return ErrInviteInvalid
 		}
+		if inv.Delivery != InviteDeliveryEmail {
+			return ErrInviteNotByEmail
+		}
 		inv.TokenHash = crypto.HashToken(token)
-		status := SendPending
-		if !state.Settings.SMTP.Configured() || inv.Email == "" {
-			status = SendNotConfigured
+		status := SendNotConfigured
+		if state.Settings.SMTP.Configured() {
+			status = SendPending
 		}
 		inv.SendStatus = status
 		inv.SendError = ""
@@ -269,6 +296,7 @@ func (s *Store) ResendInvite(actor Actor, id string) (string, error) {
 			ActorID:     actor.ID,
 			ActorLogin:  actor.Login,
 			TargetLogin: inv.Login,
+			Detail:      inv.Email,
 			IP:          actor.IP,
 		})
 		return nil

@@ -68,7 +68,7 @@ func TestAuditKeepsNoSecrets(t *testing.T) {
 	admin := mustAdmin(t, s)
 	a := actorOf(admin)
 
-	_, token, err := s.CreateInvite(a, "ada", "", RoleUser, 0)
+	_, token, err := s.CreateInvite(a, RoleUser, InviteDeliveryLink, "", 0)
 	if err != nil {
 		t.Fatalf("CreateInvite: %v", err)
 	}

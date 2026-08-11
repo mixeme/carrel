@@ -13,7 +13,7 @@ func TestResendInviteRotatesToken(t *testing.T) {
 	admin := mustAdmin(t, s)
 	a := actorOf(admin)
 
-	_, oldToken, err := s.CreateInvite(a, "ada", "ada@example.org", RoleUser, 0)
+	_, oldToken, err := s.CreateInvite(a, RoleUser, InviteDeliveryEmail, "ada@example.org", 0)
 	if err != nil {
 		t.Fatalf("CreateInvite: %v", err)
 	}

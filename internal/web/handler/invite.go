@@ -12,12 +12,14 @@ import (
 
 // inviteForm is rendered on the accept-invite screen.
 type inviteForm struct {
-	Token string
-	Login string
-	Email string
+	Token       string
+	Login       string
+	Email       string
+	EmailLocked bool
 }
 
-// AcceptInvite lets a bearer set their password and create their account (§5.2).
+// AcceptInvite lets a bearer choose login, email and password and create their
+// account (§5.2).
 func (s *Server) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 	token := r.PathValue("token")
 	if token == "" {
@@ -36,7 +38,11 @@ func (s *Server) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := s.View(r, "Accept invitation")
-	v.Data = inviteForm{Token: token, Login: inv.Login, Email: inv.Email}
+	v.Data = inviteForm{
+		Token:       token,
+		Email:       inv.Email,
+		EmailLocked: inv.Delivery == store.InviteDeliveryEmail,
+	}
 	s.Render(w, "invite.html", v)
 }
 
@@ -52,19 +58,36 @@ func (s *Server) acceptInviteSubmit(w http.ResponseWriter, r *http.Request, toke
 		return
 	}
 
+	form := inviteForm{
+		Token:       token,
+		Login:       store.NormalizeLogin(r.PostFormValue(fieldLogin)),
+		Email:       store.NormalizeEmail(r.PostFormValue(fieldEmail)),
+		EmailLocked: inv.Delivery == store.InviteDeliveryEmail,
+	}
+	if form.EmailLocked {
+		form.Email = inv.Email
+	}
+
 	password := r.PostFormValue(fieldPassword)
-	if msg := validateInvitePassword(password, r.PostFormValue(fieldConfirm)); msg != "" {
+	if msg := validateInviteAccept(form.Login, form.Email, password, r.PostFormValue(fieldConfirm), form.EmailLocked); msg != "" {
 		v := s.View(r, "Accept invitation")
 		v.Error = msg
-		v.Data = inviteForm{Token: token, Login: inv.Login, Email: inv.Email}
+		v.Data = form
 		s.RenderStatus(w, http.StatusBadRequest, "invite.html", v)
 		return
 	}
 
-	user, err := s.Store.AcceptInvite(token, password, ClientIP(r))
+	user, err := s.Store.AcceptInvite(token, form.Login, form.Email, password, ClientIP(r))
 	if err != nil {
 		if errors.Is(err, store.ErrInviteInvalid) {
 			s.inviteInvalid(w, r)
+			return
+		}
+		if errors.Is(err, store.ErrLoginTaken) {
+			v := s.View(r, "Accept invitation")
+			v.Error = "That login is already in use."
+			v.Data = form
+			s.RenderStatus(w, http.StatusBadRequest, "invite.html", v)
 			return
 		}
 		s.logError("accept invite", err)
@@ -79,6 +102,24 @@ func (s *Server) acceptInviteSubmit(w http.ResponseWriter, r *http.Request, toke
 		return
 	}
 	s.startSession(w, r, authed, dek, "")
+}
+
+func validateInviteAccept(login, email, password, confirm string, emailLocked bool) string {
+	if err := store.ValidateLogin(login); err != nil {
+		return capitalize(err.Error()) + "."
+	}
+	if !emailLocked {
+		if err := store.ValidateEmail(email); err != nil {
+			return capitalize(err.Error()) + "."
+		}
+	}
+	if err := store.ValidatePassword(password); err != nil {
+		return capitalize(err.Error()) + "."
+	}
+	if password != confirm {
+		return "The two passwords do not match."
+	}
+	return ""
 }
 
 func (s *Server) inviteInvalid(w http.ResponseWriter, r *http.Request) {

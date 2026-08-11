@@ -548,17 +548,10 @@ func validateNewUser(login, email, password string) error {
 	return ValidatePassword(password)
 }
 
-// checkLoginFree rejects a login already held by an account or by an invite
-// that could still be accepted.
+// checkLoginFree rejects a login already held by an account.
 func (s *Store) checkLoginFree(state *State, login string) error {
 	if findUserByLogin(state, login) != nil {
 		return ErrLoginTaken
-	}
-	now := s.now()
-	for _, i := range state.Invites {
-		if i.Login == login && i.Usable(now) {
-			return ErrLoginTaken
-		}
 	}
 	return nil
 }

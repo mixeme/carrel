@@ -19,11 +19,11 @@ func coveredUser(t *testing.T, s *Store, admin *User, login string) (*User, cryp
 	if err := s.EnableEscrow(actorOf(admin), masterPassword); err != nil {
 		t.Fatalf("EnableEscrow: %v", err)
 	}
-	_, token, err := s.CreateInvite(actorOf(admin), login, login+"@example.org", RoleUser, 0)
+	_, token, err := s.CreateInvite(actorOf(admin), RoleUser, InviteDeliveryLink, "", 0)
 	if err != nil {
 		t.Fatalf("CreateInvite: %v", err)
 	}
-	if _, err := s.AcceptInvite(token, testPassword, ""); err != nil {
+	if _, err := s.AcceptInvite(token, login, login+"@example.org", testPassword, ""); err != nil {
 		t.Fatalf("AcceptInvite: %v", err)
 	}
 	user, dek, err := s.Authenticate(login, testPassword)

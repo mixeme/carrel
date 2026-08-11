@@ -135,11 +135,11 @@ func TestDisableEscrowKeepsExistingCopies(t *testing.T) {
 	if err := s.EnableEscrow(a, "master password for escrow"); err != nil {
 		t.Fatalf("EnableEscrow: %v", err)
 	}
-	_, token, err := s.CreateInvite(a, "ada", "", RoleUser, 0)
+	_, token, err := s.CreateInvite(a, RoleUser, InviteDeliveryLink, "", 0)
 	if err != nil {
 		t.Fatalf("CreateInvite: %v", err)
 	}
-	user, err := s.AcceptInvite(token, testPassword, "")
+	user, err := s.AcceptInvite(token, "ada", "", testPassword, "")
 	if err != nil {
 		t.Fatalf("AcceptInvite: %v", err)
 	}
