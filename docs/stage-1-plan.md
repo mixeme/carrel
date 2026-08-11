@@ -209,9 +209,9 @@ THIRD_PARTY.md
 
 ### 14. Тесты и ручная приёмка · Sonnet (+ Opus для аудита crypto-тестов)
 
-- [ ] Unit: crypto round-trips, invite token hash, constant-time helpers
-- [ ] Integration (optional httptest): bootstrap → admin login → create invite → accept → login
-- [ ] Manual checklist по §21 (users/security/deployment/deposit sections applicable to stage 1)
+- [x] Unit: crypto round-trips, invite token hash, constant-time helpers
+- [x] Integration (optional httptest): bootstrap → admin login → create invite → accept → login
+- [x] Manual checklist по §21 (users/security/deployment/deposit sections applicable to stage 1) — [stage-1-acceptance.md](stage-1-acceptance.md)
 
 ---
 

@@ -384,10 +384,12 @@ func (s *Server) adminDeleteUser(r *http.Request, actor store.Actor) (adminView,
 	if confirm != user.Login {
 		return adminView{}, fmt.Errorf("type the login %q to confirm deletion", user.Login)
 	}
-	s.Sessions.DestroyUser(userID)
+	// The store decides first: a refused deletion — the last administrator,
+	// say — must not have signed anyone out on its way to being refused.
 	if err := s.Store.DeleteUser(actor, userID); err != nil {
 		return adminView{}, adminUserErr(err)
 	}
+	s.Sessions.DestroyUser(userID)
 	return adminView{}, nil
 }
 
