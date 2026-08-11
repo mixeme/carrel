@@ -1,0 +1,25 @@
+services:
+  carrel:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - carrel-data:/var/lib/carrel
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      CARREL_DATA_DIR: /var/lib/carrel
+    healthcheck:
+      test: ["CMD", "/carrel", "healthcheck"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  carrel-data:

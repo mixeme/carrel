@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -38,6 +40,10 @@ func main() {
 }
 
 func run() int {
+	if len(os.Args) > 1 && os.Args[1] == "healthcheck" {
+		return runHealthcheck()
+	}
+
 	cfg, err := config.Load()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "config: %v\n", err)
@@ -183,6 +189,29 @@ func sweepLimiter(ctx context.Context, l *ratelimit.Limiter, every time.Duration
 			l.Sweep()
 		}
 	}
+}
+
+// runHealthcheck probes /healthz for container liveness (§18). Distroless
+// images have no shell or curl, so Docker invokes the binary directly.
+func runHealthcheck() int {
+	port := strconv.Itoa(config.DefaultPort)
+	if v := strings.TrimSpace(os.Getenv("CARREL_PORT")); v != "" {
+		port = v
+	}
+	path := "/healthz"
+	if base := strings.TrimSpace(os.Getenv("CARREL_BASE_PATH")); base != "" {
+		path = strings.TrimSuffix(base, "/") + path
+	}
+	client := &http.Client{Timeout: 2 * time.Second}
+	resp, err := client.Get("http://127.0.0.1:" + port + path)
+	if err != nil {
+		return 1
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return 1
+	}
+	return 0
 }
 
 func logLevel(name string) slog.Level {

@@ -1,0 +1,6 @@
+.git
+.gitignore
+/carrel
+/carrel.exe
+*.md
+docs/

@@ -51,6 +51,8 @@ All notable changes to this project are documented in this file.
 - **Stage 11 — UI shell and static assets:** shared frame with top navigation (Profile, Administration for admins, Refresh, Sign out) and a footer link to About on every page. Stylesheet aligned with the brand guide palette — ink on cardboard, Georgia headings, system sans body, paper cards on a screen background. Signed-in landing shows the stage-2 placeholder «No accounts connected yet». PWA manifest and SVG icon embedded with the static assets; no service worker that would cache user data. Refresh is an in-app control so the interface does not rely on the browser chrome.
 - **Stage 12 — About this service (§22):** public `/about` with the service name, build version and commit from ldflags, AGPL notice and a link to the GitHub source mirror. Version and commit are wired from `main` into every rendered page.
 
+- **Stage 13 — delivery (§18):** multi-stage `Dockerfile` (`golang:alpine` build → `gcr.io/distroless/static:nonroot`, `CGO_ENABLED=0`, version and commit via `-ldflags -X`). `compose.yaml` binds `127.0.0.1:8080:8080`, mounts a data volume at `/var/lib/carrel`, runs with `read_only: true`, all capabilities dropped, and a `/healthz` liveness probe through a `healthcheck` subcommand (distroless has no shell or curl). Graceful shutdown on SIGTERM drains requests for 15 seconds and wipes the session keyring; structured JSON logs to stdout never carry passwords or tokens.
+
 ### Dependencies
 
 - `golang.org/x/crypto` v0.54.0 for `argon2` (and its indirect `golang.org/x/sys`), recorded in `THIRD_PARTY.md`.

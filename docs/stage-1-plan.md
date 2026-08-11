@@ -201,11 +201,11 @@ THIRD_PARTY.md
 
 ### 13. Поставка · Composer 2.5 Fast
 
-- [ ] Multi-stage Dockerfile: `golang:alpine` build → `distroless/static`, `CGO_ENABLED=0`
-- [ ] `compose.yaml`: `127.0.0.1:8080:8080`, volume for data, `read_only: true`, non-root user, cap drop
-- [ ] `/healthz` liveness
-- [ ] Graceful shutdown: stop accept → drain requests (15s) → wipe sessions/keys
-- [ ] Structured stdout logs; never log passwords/tokens (even debug)
+- [x] Multi-stage Dockerfile: `golang:alpine` build → `distroless/static`, `CGO_ENABLED=0`
+- [x] `compose.yaml`: `127.0.0.1:8080:8080`, volume for data, `read_only: true`, non-root user, cap drop
+- [x] `/healthz` liveness
+- [x] Graceful shutdown: stop accept → drain requests (15s) → wipe sessions/keys
+- [x] Structured stdout logs; never log passwords/tokens (even debug)
 
 ### 14. Тесты и ручная приёмка · Sonnet (+ Opus для аудита crypto-тестов)
 
