@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-11
+
+Stage 1 («Каркас») — первая рабочая версия. Открытые пункты приёмки: [docs/stage-1-outstanding.md](docs/stage-1-outstanding.md).
+
 ### Added
 
 - **Stage 0 — project scaffold:** Go module `gitea.mixdep.ru/mix/carrel`, `cmd/carrel/main.go` with version/commit ldflags, package layout per spec §3, `go:embed` for templates and static assets, vendored htmx 2.0.9 and htmx-sse extension, `LICENSE` (AGPL-3.0-or-later), `THIRD_PARTY.md`, SPDX headers in source files.
@@ -57,7 +61,7 @@ All notable changes to this project are documented in this file.
 - Invite tokens: `NewToken` produces a full `TokenLen` of entropy in a form that needs no escaping in a URL path, and `HashToken` is deterministic, collision-free across tokens, and compared only through the constant-time `Equal` — including against a digest that differs in one bit, a truncated one and none at all.
 - SMTP diagnostics (§5.3): the send path is exercised against a local relay that can be told to refuse. A missing configuration is reported without dialling, an unreachable relay names the address it tried, and a server's refusal is passed through in the server's own words — while the relay password stays out of the transcript that goes on screen.
 - Fixed: a refused deletion — the last administrator, typically — signed the account out before the store rejected it, so the administrator lost their session to a change that never happened. The store now decides first.
-- [docs/stage-1-acceptance.md](docs/stage-1-acceptance.md): §21 filtered to stage 1, each criterion marked with the test that covers it or with the manual procedure — empty volume to setup screen, read-only root and unprivileged user, SIGTERM draining requests, debug logs free of secrets, version and commit matching the build, and `THIRD_PARTY.md` against `go.mod`.
+- [docs/stage-1-outstanding.md](docs/stage-1-outstanding.md): открытые пункты этапа 1 — race-тесты, ручная приёмка A1–A9 в Docker, критерий полного закрытия. Архивные [stage-1-plan.md](docs/stage-1-plan.md) и [stage-1-acceptance.md](docs/stage-1-acceptance.md) помечены к удалению.
 
 ### Dependencies
 

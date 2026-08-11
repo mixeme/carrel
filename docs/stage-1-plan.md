@@ -1,5 +1,7 @@
 # Этап 1: Каркас Carrel
 
+> **Устарело — к удалению.** Реализация завершена в **v0.1.0**. Открытые пункты и ручная приёмка: [stage-1-outstanding.md](stage-1-outstanding.md). Этот файл — архив планирования.
+
 Источник требований: [carrel-spec.md](carrel-spec.md) — §3 (структура), §4 (крипто), §5 (пользователи/админ), §13 (интерфейс, базовые принципы), §18 (поставка), §19 этап 1, §21 (критерии приёмки), §22 (AGPL), §24.3–§24.6 (безопасность веб-уровня).
 
 **Текущее состояние:** в репозитории только документация (`docs/`). Кода, `go.mod`, Docker-файлов нет.
@@ -211,7 +213,7 @@ THIRD_PARTY.md
 
 - [x] Unit: crypto round-trips, invite token hash, constant-time helpers
 - [x] Integration (optional httptest): bootstrap → admin login → create invite → accept → login
-- [x] Manual checklist по §21 (users/security/deployment/deposit sections applicable to stage 1) — [stage-1-acceptance.md](stage-1-acceptance.md)
+- [x] Manual checklist по §21 (users/security/deployment/deposit sections applicable to stage 1) — [stage-1-outstanding.md](stage-1-outstanding.md) (ручная часть A1–A9)
 
 ---
 
