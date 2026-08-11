@@ -173,18 +173,18 @@ THIRD_PARTY.md
 
 ### 9. Админ-панель (htmx UI) · Composer 2.5 Fast
 
-- [ ] User list: login, role, created, last login, DAV count (0), active sessions
-- [ ] Actions: create, disable (kill sessions), delete (type login confirm), reset password (destructive dialog), kill sessions, change role
-- [ ] Global settings page (creation mode, SMTP, escrow, session timeout defaults)
-- [ ] Audit log viewer (filter by action type)
-- [ ] English UI only (§13); strings inline in templates
+- [x] User list: login, role, created, last login, DAV count (0), active sessions
+- [x] Actions: create, disable (kill sessions), delete (type login confirm), reset password (destructive dialog), kill sessions, change role
+- [x] Global settings page (creation mode, SMTP, escrow, session timeout defaults)
+- [x] Audit log viewer (filter by action type)
+- [x] English UI only (§13); strings inline in templates
 
 ### 10. Профиль пользователя · Composer 2.5 Fast
 
-- [ ] Change password (current + new) — re-wrap DEK only
-- [ ] Email display/edit with confirmation flow
-- [ ] Escrow status + opt-in/out
-- [ ] Change password after temp-password login (forced)
+- [x] Change password (current + new) — re-wrap DEK only
+- [x] Email display/edit with confirmation flow
+- [x] Escrow status + opt-in/out
+- [x] Change password after temp-password login (forced)
 
 ### 11. Каркас UI и статика · Composer 2.5 Fast
 

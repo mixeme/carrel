@@ -47,15 +47,17 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	// The user's own section. Anything added under /app is behind RequireAuth.
 	app := http.NewServeMux()
 	app.HandleFunc("GET "+s.Path("/app/{$}"), s.AppHome)
+	app.HandleFunc("GET "+s.Path("/app/password"), s.ChangePassword)
+	app.HandleFunc("POST "+s.Path("/app/password"), s.ChangePassword)
 	app.HandleFunc("POST "+s.Path("/app/email"), s.RequestEmailChange)
 	app.HandleFunc("POST "+s.Path("/app/escrow"), s.ProfileEscrow)
-	pages.Handle(s.Path("/app/"), Chain(app, s.RequireAuth))
+	pages.Handle(s.Path("/app/"), Chain(app, s.RequireAuth, s.RequirePasswordChange))
 
 	// The administrator's section.
 	admin := http.NewServeMux()
 	admin.HandleFunc("GET "+s.Path("/admin/{$}"), s.AdminHome)
 	admin.HandleFunc("POST "+s.Path("/admin/{$}"), s.AdminHome)
-	pages.Handle(s.Path("/admin/"), Chain(admin, s.RequireAdmin))
+	pages.Handle(s.Path("/admin/"), Chain(admin, s.RequireAdmin, s.RequirePasswordChange))
 
 	mux := http.NewServeMux()
 	// The probe and the assets need no session and no token; issuing a CSRF

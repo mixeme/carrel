@@ -176,6 +176,9 @@ func (s *Server) Forgot(w http.ResponseWriter, r *http.Request) {
 // everyone else on their own page. Both are section roots, so the trailing
 // slash is the canonical form and the browser is not sent through a redirect.
 func (s *Server) homeFor(sess *session.Session) string {
+	if sess != nil && sess.MustChangePassword() {
+		return s.Path("/app/password")
+	}
 	if sess != nil && sess.Admin {
 		return s.Path("/admin/")
 	}

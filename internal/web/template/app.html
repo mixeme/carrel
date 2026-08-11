@@ -6,6 +6,34 @@
         arrives with the next stage.</p>
 
     <section class="subsection">
+        <h2>Password</h2>
+        <p class="hint">Changing your password re-wraps your data key only;
+            saved connections stay readable.</p>
+        <p><a href="{{.Base}}/app/password">Change password</a></p>
+    </section>
+
+    <section class="subsection">
+        <h2>Email address</h2>
+        {{if .Data.Email}}
+        <p class="field-value">Current: {{.Data.Email}}</p>
+        {{else}}
+        <p class="hint">No address on file.</p>
+        {{end}}
+        {{if .Data.PendingEmail}}
+        <p class="hint">Pending confirmation: {{.Data.PendingEmail}}</p>
+        {{end}}
+        <p class="hint">Used for invitations and service notices only.</p>
+        <form method="post" action="{{.Base}}/app/email">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+
+            <label for="email">New address</label>
+            <input id="email" name="email" type="email" required autocomplete="email">
+
+            <button type="submit">Send confirmation link</button>
+        </form>
+    </section>
+
+    <section class="subsection">
         <h2>Key escrow</h2>
         {{if $e.Deposited}}
         <p class="warning">A copy of your data key is deposited on this server.
@@ -52,19 +80,6 @@
         </form>
         {{end}}
         {{end}}
-    </section>
-
-    <section class="subsection">
-        <h2>Email address</h2>
-        <p class="hint">Used for invitations and service notices only.</p>
-        <form method="post" action="{{.Base}}/app/email">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-
-            <label for="email">New address</label>
-            <input id="email" name="email" type="email" required autocomplete="email">
-
-            <button type="submit">Send confirmation link</button>
-        </form>
     </section>
 </section>
 {{end}}

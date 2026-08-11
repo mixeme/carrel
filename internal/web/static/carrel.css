@@ -25,6 +25,10 @@ main {
     padding: 2rem 1rem;
 }
 
+main:has(.admin-panel) {
+    max-width: 56rem;
+}
+
 .topbar {
     display: flex;
     align-items: baseline;

@@ -1,12 +1,125 @@
 {{define "body"}}
 {{$d := .Data}}
 {{$e := $d.Escrow}}
-<section class="card">
+<section class="card admin-panel">
     <h1>Administration</h1>
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>
     {{end}}
+
+    <section class="subsection">
+        <h2>Users</h2>
+        {{if $d.Users}}
+        <table class="data">
+            <thead>
+                <tr>
+                    <th>Login</th>
+                    <th>Role</th>
+                    <th>Created</th>
+                    <th>Last login</th>
+                    <th>DAV</th>
+                    <th>Sessions</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {{range $d.Users}}
+                <tr>
+                    <td>{{.Login}}{{if .Disabled}} <span class="hint">(disabled)</span>{{end}}</td>
+                    <td>{{.Role}}</td>
+                    <td>{{.CreatedAt.Format "2006-01-02"}}</td>
+                    <td>{{if .LastLoginAt.IsZero}}—{{else}}{{.LastLoginAt.Format "2006-01-02 15:04"}}{{end}}</td>
+                    <td>{{.DAVCount}}</td>
+                    <td>{{.Sessions}}</td>
+                    <td class="actions">
+                        {{if .Disabled}}
+                        <form method="post" action="{{$.Base}}/admin/">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="enable_user">
+                            <input type="hidden" name="user_id" value="{{.ID}}">
+                            <button type="submit" class="link">Enable</button>
+                        </form>
+                        {{else}}
+                        <form method="post" action="{{$.Base}}/admin/">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="disable_user">
+                            <input type="hidden" name="user_id" value="{{.ID}}">
+                            <button type="submit" class="link">Disable</button>
+                        </form>
+                        {{end}}
+                        <form method="post" action="{{$.Base}}/admin/">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="kill_sessions">
+                            <input type="hidden" name="user_id" value="{{.ID}}">
+                            <button type="submit" class="link">Kill sessions</button>
+                        </form>
+                        <form method="post" action="{{$.Base}}/admin/">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="change_role">
+                            <input type="hidden" name="user_id" value="{{.ID}}">
+                            <select name="role" aria-label="Role for {{.Login}}">
+                                <option value="user" {{if eq .Role "user"}}selected{{end}}>User</option>
+                                <option value="admin" {{if eq .Role "admin"}}selected{{end}}>Administrator</option>
+                            </select>
+                            <button type="submit" class="link">Set role</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="7">
+                        <form method="post" action="{{$.Base}}/admin/" class="inline-form">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="delete_user">
+                            <input type="hidden" name="user_id" value="{{.ID}}">
+                            <label for="confirm-{{.ID}}">Delete {{.Login}} — type the login to confirm</label>
+                            <input id="confirm-{{.ID}}" name="confirm_login" type="text" required
+                                   autocapitalize="none" spellcheck="false">
+                            <button type="submit">Delete account</button>
+                        </form>
+                    </td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p class="hint">No users yet.</p>
+        {{end}}
+    </section>
+
+    <section class="subsection">
+        <h2>Global settings</h2>
+        <form method="post" action="{{.Base}}/admin/">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="save_settings">
+
+            <label for="creation-mode">User creation mode</label>
+            <select id="creation-mode" name="creation_mode">
+                <option value="invite" {{if eq $d.Settings.CreationMode "invite"}}selected{{end}}>Invitation link</option>
+                <option value="admin_password" {{if eq $d.Settings.CreationMode "admin_password"}}selected{{end}}>Temporary password from administrator</option>
+            </select>
+
+            <label class="checkbox">
+                <input type="checkbox" name="self_registration" value="1"
+                       {{if $d.Settings.SelfRegistration}}checked{{end}}>
+                Allow self-registration (no public form in this stage)
+            </label>
+
+            <label for="invite-ttl">Invitation lifetime (hours)</label>
+            <input id="invite-ttl" name="invite_ttl_hours" type="number" min="1"
+                   value="{{$d.InviteTTLHours}}">
+
+            <label for="session-idle">Session idle timeout (hours)</label>
+            <input id="session-idle" name="session_idle_hours" type="number" min="1"
+                   value="{{$d.SessionIdleHours}}">
+
+            <label for="session-absolute">Session absolute lifetime (days)</label>
+            <input id="session-absolute" name="session_absolute_days" type="number" min="1"
+                   value="{{$d.SessionAbsoluteDays}}">
+
+            <button type="submit">Save global settings</button>
+        </form>
+    </section>
 
     {{if $d.NewInviteLink}}
     <section class="subsection">
@@ -335,6 +448,51 @@
 
             <button type="submit">Reset password</button>
         </form>
+    </section>
+
+    <section class="subsection">
+        <h2>Audit log</h2>
+        <form method="get" action="{{.Base}}/admin/">
+            <label for="audit-action">Filter by action</label>
+            <select id="audit-action" name="audit_action">
+                <option value="">All actions</option>
+                <option value="login" {{if eq $d.AuditAction "login"}}selected{{end}}>login</option>
+                <option value="login_failed" {{if eq $d.AuditAction "login_failed"}}selected{{end}}>login_failed</option>
+                <option value="logout" {{if eq $d.AuditAction "logout"}}selected{{end}}>logout</option>
+                <option value="user_create" {{if eq $d.AuditAction "user_create"}}selected{{end}}>user_create</option>
+                <option value="user_disable" {{if eq $d.AuditAction "user_disable"}}selected{{end}}>user_disable</option>
+                <option value="user_enable" {{if eq $d.AuditAction "user_enable"}}selected{{end}}>user_enable</option>
+                <option value="user_delete" {{if eq $d.AuditAction "user_delete"}}selected{{end}}>user_delete</option>
+                <option value="user_role_change" {{if eq $d.AuditAction "user_role_change"}}selected{{end}}>user_role_change</option>
+                <option value="password_change" {{if eq $d.AuditAction "password_change"}}selected{{end}}>password_change</option>
+                <option value="password_reset" {{if eq $d.AuditAction "password_reset"}}selected{{end}}>password_reset</option>
+                <option value="sessions_killed" {{if eq $d.AuditAction "sessions_killed"}}selected{{end}}>sessions_killed</option>
+                <option value="settings_update" {{if eq $d.AuditAction "settings_update"}}selected{{end}}>settings_update</option>
+                <option value="escrow_recover" {{if eq $d.AuditAction "escrow_recover"}}selected{{end}}>escrow_recover</option>
+            </select>
+            <button type="submit">Filter</button>
+        </form>
+
+        {{if $d.AuditLog}}
+        <table class="data">
+            <thead>
+                <tr><th>When</th><th>Action</th><th>Actor</th><th>Target</th><th>Detail</th></tr>
+            </thead>
+            <tbody>
+            {{range $d.AuditLog}}
+                <tr>
+                    <td>{{.At.Format "2006-01-02 15:04"}}</td>
+                    <td>{{.Action}}</td>
+                    <td>{{if .ActorLogin}}{{.ActorLogin}}{{else}}—{{end}}</td>
+                    <td>{{if .TargetLogin}}{{.TargetLogin}}{{else}}—{{end}}</td>
+                    <td>{{.Detail}}</td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p class="hint">No entries match this filter.</p>
+        {{end}}
     </section>
 </section>
 {{end}}

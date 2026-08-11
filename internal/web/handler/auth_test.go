@@ -254,6 +254,31 @@ func bootstrap(t *testing.T, a *app) {
 	a.cookies = map[string]string{}
 }
 
+// loginAdmin signs in as the bootstrap administrator.
+func loginAdmin(t *testing.T, a *app) {
+	t.Helper()
+	a.get("/login")
+	wantRedirect(t, a.post("/login", url.Values{fieldLogin: {"root"}, fieldPassword: {testPassword}}), "/admin/")
+}
+
+// signInReady signs in and clears a temporary password when one is set.
+func (a *app) signInReady(login, password string) {
+	a.t.Helper()
+	a.signIn(login, password)
+	if a.session() == nil || !a.session().MustChangePassword() {
+		return
+	}
+	perm := password + "-permanent"
+	rec := a.post("/app/password", url.Values{
+		fieldCurrentPassword: {password},
+		fieldNewPassword:     {perm},
+		fieldConfirm:         {perm},
+	})
+	if rec.Code != http.StatusSeeOther {
+		a.t.Fatalf("clear temp password for %s: status %d (body: %s)", login, rec.Code, rec.Body.String())
+	}
+}
+
 func TestLoginAndLogout(t *testing.T) {
 	a := newApp(t, nil)
 	bootstrap(t, a)
@@ -378,10 +403,14 @@ func TestUserLandsOnAppAndCannotReachAdmin(t *testing.T) {
 	}
 
 	a.get("/login")
-	wantRedirect(t, a.post("/login", url.Values{fieldLogin: {"ada"}, fieldPassword: {testPassword}}), "/app/")
+	wantRedirect(t, a.post("/login", url.Values{fieldLogin: {"ada"}, fieldPassword: {testPassword}}), "/app/password")
 
-	if rec := a.get("/app/"); rec.Code != http.StatusOK {
-		t.Errorf("GET /app/ = %d, want 200", rec.Code)
+	rec := a.get("/app/")
+	if rec.Code != http.StatusSeeOther {
+		t.Errorf("GET /app/ = %d, want 303 to password change", rec.Code)
+	}
+	if loc := rec.Header().Get("Location"); loc != "/app/password" {
+		t.Errorf("Location = %q, want /app/password", loc)
 	}
 	if rec := a.get("/admin/"); rec.Code != http.StatusForbidden {
 		t.Errorf("GET /admin/ = %d, want 403", rec.Code)

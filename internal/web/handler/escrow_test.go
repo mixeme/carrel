@@ -97,7 +97,7 @@ func TestEscrowCoversNewAccountsAndSaysSo(t *testing.T) {
 	a.enableEscrow()
 	a.coveredUser("ada", "ada@example.org")
 
-	a.signIn("ada", testPassword)
+	a.signInReady("ada", testPassword)
 	first := a.get("/app/").Body.String()
 	if !strings.Contains(first, escrowNotice) {
 		t.Errorf("no first-login notice for a covered account:\n%s", first)
@@ -114,7 +114,7 @@ func TestEscrowCoversNewAccountsAndSaysSo(t *testing.T) {
 		t.Error("the first-login notice was shown again")
 	}
 	// And it stays gone across sessions, because it was recorded as delivered.
-	a.signIn("ada", testPassword)
+	a.signIn("ada", testPassword+"-permanent")
 	if again := a.get("/app/").Body.String(); strings.Contains(again, escrowNotice) {
 		t.Error("the notice came back at the next sign-in")
 	}
@@ -173,7 +173,7 @@ func TestForbiddenOptOutIsVisible(t *testing.T) {
 		t.Fatalf("set policy: status %d", rec.Code)
 	}
 
-	a.signIn("ada", testPassword)
+	a.signInReady("ada", testPassword)
 	profile := a.get("/app/").Body.String()
 	if !strings.Contains(profile, "withdrawing a deposited key") {
 		t.Errorf("the profile hides the policy instead of showing it:\n%s", profile)
@@ -418,7 +418,7 @@ func TestEscrowPanelIsAdminOnly(t *testing.T) {
 	a.enableEscrow()
 	user := a.coveredUser("ada", "ada@example.org")
 
-	a.signIn("ada", testPassword)
+	a.signInReady("ada", testPassword)
 	rec := a.post("/admin/", url.Values{
 		fieldAction:         {"recover_user"},
 		fieldUserID:         {user.ID},

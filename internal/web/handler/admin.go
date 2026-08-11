@@ -25,13 +25,20 @@ const (
 	fieldSMTPFromName = "smtp_from_name"
 	fieldTestEmail    = "test_email"
 	fieldTempPassword = "temp_password"
+	fieldConfirmLogin = "confirm_login"
+	fieldCreationMode = "creation_mode"
+	fieldSelfReg      = "self_registration"
+	fieldInviteTTL    = "invite_ttl_hours"
+	fieldSessionIdle  = "session_idle_hours"
+	fieldSessionAbs   = "session_absolute_days"
+	fieldAuditAction  = "audit_action"
 )
 
 // adminView is what the administration page renders.
 type adminView struct {
 	Settings      store.Settings
 	Invites       []inviteRow
-	Users         []*store.User
+	Users         []userRow
 	NewInviteLink string
 	SMTPDiag      string
 	CreationMode  store.CreationMode
@@ -44,6 +51,20 @@ type adminView struct {
 	// MailWarning is set when a notice that may not be skipped could not be
 	// sent, so the administrator knows to deliver it themselves.
 	MailWarning string
+	// AuditAction is the filter applied to the log viewer.
+	AuditAction string
+	// AuditLog is the newest entries matching AuditAction.
+	AuditLog []store.AuditEntry
+	// Durations for the settings form, rounded for display.
+	InviteTTLHours      int64
+	SessionIdleHours    int64
+	SessionAbsoluteDays int64
+}
+
+type userRow struct {
+	*store.User
+	Sessions int
+	DAVCount int
 }
 
 type inviteRow struct {
@@ -51,14 +72,14 @@ type inviteRow struct {
 	Status string
 }
 
-// AdminHome is the administrator's workspace: invitations, user creation and
-// mail settings until the full panel arrives in step 9.
+// AdminHome is the administrator's workspace: users, invitations, settings,
+// mail, escrow, and the audit log (§5.5).
 func (s *Server) AdminHome(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		s.adminSubmit(w, r)
 		return
 	}
-	s.renderAdmin(w, r, adminView{})
+	s.renderAdmin(w, r, adminView{AuditAction: r.URL.Query().Get(fieldAuditAction)})
 }
 
 func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
@@ -100,6 +121,18 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
 		data, err = s.adminRecoverUser(r, actor)
 	case "reset_password":
 		data, err = s.adminResetPassword(r, actor)
+	case "disable_user":
+		data, err = s.adminDisableUser(r, actor)
+	case "enable_user":
+		data, err = s.adminEnableUser(r, actor)
+	case "delete_user":
+		data, err = s.adminDeleteUser(r, actor)
+	case "change_role":
+		data, err = s.adminChangeRole(r, actor)
+	case "kill_sessions":
+		data, err = s.adminKillSessions(r, actor)
+	case "save_settings":
+		data, err = s.adminSaveSettings(r, actor)
 	default:
 		http.Error(w, "unknown action", http.StatusBadRequest)
 		return
@@ -135,7 +168,13 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 	out := partial
 	out.Settings = s.Store.Settings()
 	out.CreationMode = out.Settings.CreationMode
-	out.Users = s.Store.Users()
+	for _, u := range s.Store.Users() {
+		out.Users = append(out.Users, userRow{
+			User:     u,
+			Sessions: s.Sessions.Count(u.ID),
+			DAVCount: 0,
+		})
+	}
 	out.Escrow = escrowStatusOf(out.Settings, nil)
 	out.EscrowCoverage = s.Store.EscrowCoverage()
 	for _, inv := range s.Store.Invites() {
@@ -144,6 +183,13 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 			Status: string(inv.Status(now)),
 		})
 	}
+	out.AuditLog = s.Store.Audit(store.AuditFilter{
+		Action: out.AuditAction,
+		Limit:  200,
+	})
+	out.InviteTTLHours = out.Settings.InviteTTLSeconds / 3600
+	out.SessionIdleHours = out.Settings.SessionIdleSeconds / 3600
+	out.SessionAbsoluteDays = out.Settings.SessionAbsoluteSeconds / 86400
 	return out
 }
 
@@ -309,6 +355,133 @@ func (s *Server) adminTestSMTP(r *http.Request, actor store.Actor) (adminView, e
 		Detail:     detail,
 	})
 	return adminView{SMTPDiag: res.Diagnostic}, nil
+}
+
+func (s *Server) adminDisableUser(r *http.Request, actor store.Actor) (adminView, error) {
+	userID := r.PostFormValue(fieldUserID)
+	if err := s.Store.SetDisabled(actor, userID, true); err != nil {
+		return adminView{}, adminUserErr(err)
+	}
+	s.Sessions.DestroyUser(userID)
+	return adminView{}, nil
+}
+
+func (s *Server) adminEnableUser(r *http.Request, actor store.Actor) (adminView, error) {
+	userID := r.PostFormValue(fieldUserID)
+	if err := s.Store.SetDisabled(actor, userID, false); err != nil {
+		return adminView{}, adminUserErr(err)
+	}
+	return adminView{}, nil
+}
+
+func (s *Server) adminDeleteUser(r *http.Request, actor store.Actor) (adminView, error) {
+	userID := r.PostFormValue(fieldUserID)
+	confirm := store.NormalizeLogin(r.PostFormValue(fieldConfirmLogin))
+	user, err := s.Store.User(userID)
+	if err != nil {
+		return adminView{}, adminUserErr(err)
+	}
+	if confirm != user.Login {
+		return adminView{}, fmt.Errorf("type the login %q to confirm deletion", user.Login)
+	}
+	s.Sessions.DestroyUser(userID)
+	if err := s.Store.DeleteUser(actor, userID); err != nil {
+		return adminView{}, adminUserErr(err)
+	}
+	return adminView{}, nil
+}
+
+func (s *Server) adminChangeRole(r *http.Request, actor store.Actor) (adminView, error) {
+	userID := r.PostFormValue(fieldUserID)
+	role := store.Role(r.PostFormValue(fieldRole))
+	if !role.Valid() {
+		return adminView{}, fmt.Errorf("choose a valid role")
+	}
+	if err := s.Store.SetRole(actor, userID, role); err != nil {
+		return adminView{}, adminUserErr(err)
+	}
+	return adminView{}, nil
+}
+
+func (s *Server) adminKillSessions(r *http.Request, actor store.Actor) (adminView, error) {
+	userID := r.PostFormValue(fieldUserID)
+	user, err := s.Store.User(userID)
+	if err != nil {
+		return adminView{}, adminUserErr(err)
+	}
+	n := s.Sessions.DestroyUser(userID)
+	if n == 0 {
+		return adminView{}, fmt.Errorf("this account has no active sessions")
+	}
+	if err := s.Store.Log(store.AuditEntry{
+		Action:      store.ActionSessionsKilled,
+		ActorID:     actor.ID,
+		ActorLogin:  actor.Login,
+		TargetID:    user.ID,
+		TargetLogin: user.Login,
+		IP:          actor.IP,
+		Detail:      fmt.Sprintf("%d session(s)", n),
+	}); err != nil {
+		s.logError("audit kill sessions", err)
+	}
+	return adminView{}, nil
+}
+
+func (s *Server) adminSaveSettings(r *http.Request, actor store.Actor) (adminView, error) {
+	mode := store.CreationMode(r.PostFormValue(fieldCreationMode))
+	if !mode.Valid() {
+		return adminView{}, fmt.Errorf("choose a valid user creation mode")
+	}
+	selfReg := r.PostFormValue(fieldSelfReg) == "1"
+
+	var inviteTTL, idle, absolute int64
+	for _, pair := range []struct {
+		name string
+		dst  *int64
+		unit time.Duration
+	}{
+		{fieldInviteTTL, &inviteTTL, time.Hour},
+		{fieldSessionIdle, &idle, time.Hour},
+		{fieldSessionAbs, &absolute, 24 * time.Hour},
+	} {
+		raw := r.PostFormValue(pair.name)
+		if raw == "" {
+			continue
+		}
+		var n int
+		if _, err := fmt.Sscanf(raw, "%d", &n); err != nil || n < 1 {
+			return adminView{}, fmt.Errorf("%s must be a positive number", pair.name)
+		}
+		*pair.dst = int64(time.Duration(n) * pair.unit / time.Second)
+	}
+
+	if err := s.Store.UpdateSettings(actor, func(st *store.Settings) {
+		st.CreationMode = mode
+		st.SelfRegistration = selfReg
+		if inviteTTL > 0 {
+			st.InviteTTLSeconds = inviteTTL
+		}
+		if idle > 0 {
+			st.SessionIdleSeconds = idle
+		}
+		if absolute > 0 {
+			st.SessionAbsoluteSeconds = absolute
+		}
+	}); err != nil {
+		return adminView{}, err
+	}
+	return adminView{}, nil
+}
+
+func adminUserErr(err error) error {
+	switch {
+	case errors.Is(err, store.ErrNotFound):
+		return fmt.Errorf("account not found")
+	case errors.Is(err, store.ErrLastAdmin):
+		return fmt.Errorf("cannot change the last administrator")
+	default:
+		return err
+	}
 }
 
 // RequestEmailChange starts the confirmation flow from the profile (§5.3).

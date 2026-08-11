@@ -19,11 +19,11 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// appView is what the signed-in landing page renders. The account list arrives
-// with stage 2 and the rest of the profile with step 10; what is here now is
-// the escrow transparency §5.4 requires before anyone saves a credential.
+// appView is what the signed-in profile page renders.
 type appView struct {
-	Escrow escrowStatus
+	Escrow       escrowStatus
+	Email        string
+	PendingEmail string
 }
 
 // buildAppView reads the caller's own record. A user who cannot be read is not
@@ -38,7 +38,11 @@ func (s *Server) buildAppView(r *http.Request) appView {
 		s.logError("load profile", err)
 		return appView{}
 	}
-	return appView{Escrow: escrowStatusOf(s.Store.Settings(), user)}
+	return appView{
+		Escrow:       escrowStatusOf(s.Store.Settings(), user),
+		Email:        user.Email,
+		PendingEmail: user.PendingEmail,
+	}
 }
 
 // AppHome is the signed-in landing page.
