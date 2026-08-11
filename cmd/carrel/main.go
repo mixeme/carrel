@@ -87,6 +87,8 @@ func run() int {
 
 	srv := &handler.Server{
 		BasePath:      cfg.BasePath,
+		Version:       version,
+		Commit:        commit,
 		Trust:         trust,
 		Sessions:      sessions,
 		Store:         st,

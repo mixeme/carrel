@@ -188,16 +188,16 @@ THIRD_PARTY.md
 
 ### 11. Каркас UI и статика · Composer 2.5 Fast
 
-- [ ] Base layout: header nav (Profile, Admin if admin, Logout), footer link to About
-- [ ] CSS from brand guide: `--ink`, `--card`, `--accent`, Georgia headings, system sans body
-- [ ] Post-login placeholder: «No accounts connected yet» (stub for stage 2)
-- [ ] PWA-ready: manifest + icons in embed; no service worker cache of user data (§13)
-- [ ] Own nav controls (no reliance on browser back/refresh)
+- [x] Base layout: header nav (Profile, Admin if admin, Logout), footer link to About
+- [x] CSS from brand guide: `--ink`, `--card`, `--accent`, Georgia headings, system sans body
+- [x] Post-login placeholder: «No accounts connected yet» (stub for stage 2)
+- [x] PWA-ready: manifest + icons in embed; no service worker cache of user data (§13)
+- [x] Own nav controls (no reliance on browser back/refresh)
 
 ### 12. Страница «О сервисе» (§22) · Composer 2.5 Fast
 
-- [ ] Public `/about`: name, version, commit (match ldflags), link to GitHub sources
-- [ ] Footer on all authenticated pages
+- [x] Public `/about`: name, version, commit (match ldflags), link to GitHub sources
+- [x] Footer on all authenticated pages
 
 ### 13. Поставка · Composer 2.5 Fast
 

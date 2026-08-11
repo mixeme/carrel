@@ -28,7 +28,10 @@ const (
 type Server struct {
 	// BasePath is the prefix the service is mounted under, "" for the root.
 	// It never ends in a slash.
-	BasePath  string
+	BasePath string
+	// Version and Commit are injected at link time and shown on /about (§22).
+	Version string
+	Commit  string
 	Trust     *ProxyTrust
 	Sessions  *session.Manager
 	Store     *store.Store

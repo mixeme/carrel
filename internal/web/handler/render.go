@@ -56,6 +56,11 @@ type View struct {
 	CSRF string
 	// Session is the caller's session, nil on the public pages.
 	Session *session.Session
+	// Version and Commit come from build ldflags and appear on /about (§22).
+	Version string
+	Commit  string
+	// SourceURL is the public mirror where users can fetch the source (§22).
+	SourceURL string
 	// Error and Notice are the two message slots the frame renders.
 	Error  string
 	Notice string
@@ -69,10 +74,13 @@ func (v View) Admin() bool { return v.Session != nil && v.Session.Admin }
 // View builds the common part of a page's data for the current request.
 func (s *Server) View(r *http.Request, title string) View {
 	return View{
-		Title:   title,
-		Base:    s.BasePath,
-		CSRF:    CSRFToken(r),
-		Session: SessionFrom(r),
+		Title:     title,
+		Base:      s.BasePath,
+		CSRF:      CSRFToken(r),
+		Session:   SessionFrom(r),
+		Version:   s.Version,
+		Commit:    s.Commit,
+		SourceURL: SourceURL,
 	}
 }
 

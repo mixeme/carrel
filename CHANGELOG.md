@@ -48,6 +48,9 @@ All notable changes to this project are documented in this file.
 - **Stage 10 — user profile:** change password with current and new values — re-wraps the DEK only, leaving saved data readable. Email address display with pending confirmation shown; change still goes through the confirmation link. Escrow status and opt-in/out unchanged from step 8. Accounts on a temporary password are held on a dedicated change screen until they replace it; the flag clears on a successful change without re-login.
 - Tests: user list and disable killing sign-in, delete requiring the login typed back, audit filter, profile password change clearing the forced-change gate, and existing escrow flows updated for the temporary-password redirect.
 
+- **Stage 11 — UI shell and static assets:** shared frame with top navigation (Profile, Administration for admins, Refresh, Sign out) and a footer link to About on every page. Stylesheet aligned with the brand guide palette — ink on cardboard, Georgia headings, system sans body, paper cards on a screen background. Signed-in landing shows the stage-2 placeholder «No accounts connected yet». PWA manifest and SVG icon embedded with the static assets; no service worker that would cache user data. Refresh is an in-app control so the interface does not rely on the browser chrome.
+- **Stage 12 — About this service (§22):** public `/about` with the service name, build version and commit from ldflags, AGPL notice and a link to the GitHub source mirror. Version and commit are wired from `main` into every rendered page.
+
 ### Dependencies
 
 - `golang.org/x/crypto` v0.54.0 for `argon2` (and its indirect `golang.org/x/sys`), recorded in `THIRD_PARTY.md`.

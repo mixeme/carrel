@@ -26,6 +26,7 @@ func (s *Server) Handler(staticFS fs.FS) http.Handler {
 func (s *Server) routes(staticFS fs.FS) http.Handler {
 	pages := http.NewServeMux()
 	pages.HandleFunc("GET "+s.Path("/{$}"), s.Index)
+	pages.HandleFunc("GET "+s.Path("/about"), s.About)
 	pages.HandleFunc("GET "+s.Path("/setup"), s.Setup)
 	pages.HandleFunc("POST "+s.Path("/setup"), s.Setup)
 	pages.HandleFunc("GET "+s.Path("/login"), s.Login)
@@ -63,6 +64,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	// The probe and the assets need no session and no token; issuing a CSRF
 	// cookie on every health check would be pure noise.
 	mux.HandleFunc("GET "+s.Path("/healthz"), Health)
+	mux.HandleFunc("GET "+s.Path("/manifest.webmanifest"), s.Manifest)
 	if staticFS != nil {
 		mux.Handle("GET "+s.Path("/static/"),
 			http.StripPrefix(s.Path("/static/"), http.FileServer(http.FS(staticFS))))

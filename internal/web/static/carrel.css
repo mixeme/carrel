@@ -1,17 +1,29 @@
-/* Carrel base styles — expanded in stage 11 per brand guide */
+/* Carrel — brand guide palette (docs/carrel-brand-guide.html) */
 :root {
-    --ink: #1a1a1a;
-    --card: #faf9f7;
-    --accent: #2d5a27;
-    --muted: #6b6b6b;
-    --error: #8a1f11;
+    --ink: #17211c;
+    --card: #e8dfcb;
+    --card-border: #c9bfa6;
+    --accent: #4a6b52;
+    --accent-dark: #7fa085;
+    --bg: #f5f1e8;
+    --paper: #fffdf7;
+    --rule: #d8cfbb;
+    --hair: #e2daca;
+    --dusty: #9a9280;
+    --muted: #6b6355;
+    --error: #b04a3a;
 }
 
 body {
-    font-family: system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
     color: var(--ink);
-    background: var(--card);
+    background: var(--bg);
     margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 h1, h2 {
@@ -20,9 +32,12 @@ h1, h2 {
 }
 
 main {
+    flex: 1;
     max-width: 40rem;
     margin: 0 auto;
     padding: 2rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 main:has(.admin-panel) {
@@ -35,7 +50,8 @@ main:has(.admin-panel) {
     justify-content: space-between;
     gap: 1rem;
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e2ded7;
+    border-bottom: 0.5px solid var(--rule);
+    background: var(--paper);
 }
 
 .topbar .brand {
@@ -49,10 +65,32 @@ main:has(.admin-panel) {
     display: flex;
     align-items: baseline;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .topbar nav form {
     display: inline;
+}
+
+.topbar nav a[aria-current="page"] {
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--ink);
+}
+
+.site-footer {
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted);
+    border-top: 0.5px solid var(--rule);
+}
+
+.card {
+    background: var(--paper);
+    border: 0.5px solid var(--hair);
+    border-radius: 4px;
+    padding: 1.5rem;
 }
 
 a {
@@ -70,9 +108,10 @@ input {
     width: 100%;
     box-sizing: border-box;
     padding: 0.5rem;
-    border: 1px solid #c9c3b8;
+    border: 0.5px solid var(--card-border);
     border-radius: 3px;
     font: inherit;
+    background: var(--paper);
 }
 
 button {
@@ -96,19 +135,19 @@ button {
 }
 
 .warning {
-    border-left: 3px solid var(--accent);
+    border-left: 2px solid var(--accent);
     padding-left: 0.75rem;
 }
 
 .message {
     padding: 0.75rem;
     border-radius: 3px;
-    background: #f0ece4;
+    background: var(--card);
 }
 
 .message.error {
     color: var(--error);
-    border-left: 3px solid var(--error);
+    border-left: 2px solid var(--error);
 }
 
 .subsection {
@@ -125,6 +164,36 @@ button {
     font-weight: 600;
 }
 
+.about-meta {
+    margin: 1.5rem 0;
+}
+
+.about-meta dt {
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.about-meta dt:first-child {
+    margin-top: 0;
+}
+
+.about-meta dd {
+    margin: 0.25rem 0 0;
+}
+
+.about-meta code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    background: var(--paper);
+    border: 0.5px solid var(--hair);
+    border-radius: 3px;
+    padding: 0.1rem 0.35rem;
+}
+
 table.data {
     width: 100%;
     border-collapse: collapse;
@@ -136,7 +205,7 @@ table.data th,
 table.data td {
     text-align: left;
     padding: 0.35rem 0.5rem;
-    border-bottom: 1px solid #e2ded7;
+    border-bottom: 0.5px solid var(--hair);
     vertical-align: top;
 }
 
@@ -154,7 +223,7 @@ button.secondary {
     color: var(--accent);
     margin-top: 0;
     padding: 0.15rem 0.35rem;
-    border: 1px solid #c9c3b8;
+    border: 0.5px solid var(--card-border);
 }
 
 button.secondary {
@@ -173,13 +242,14 @@ select {
     width: 100%;
     box-sizing: border-box;
     padding: 0.5rem;
-    border: 1px solid #c9c3b8;
+    border: 0.5px solid var(--card-border);
     border-radius: 3px;
     font: inherit;
+    background: var(--paper);
 }
 
 pre.diagnostic {
-    background: #f0ece4;
+    background: var(--card);
     padding: 0.75rem;
     overflow-x: auto;
     font-size: 0.8rem;
@@ -189,7 +259,7 @@ pre.diagnostic {
 .inline-form {
     margin-top: 1.5rem;
     padding-top: 1rem;
-    border-top: 1px solid #e2ded7;
+    border-top: 0.5px solid var(--rule);
 }
 
 label.checkbox {
@@ -202,4 +272,15 @@ label.checkbox {
 label.checkbox input {
     display: inline-block;
     width: auto;
+}
+
+@media (max-width: 640px) {
+    input {
+        font-size: 16px;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

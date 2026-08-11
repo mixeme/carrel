@@ -1,5 +1,11 @@
 // Carrel UI helpers — no inline scripts (CSP).
 document.addEventListener('click', function (e) {
+    var refresh = e.target.closest('[data-refresh]');
+    if (refresh) {
+        window.location.reload();
+        return;
+    }
+
     var btn = e.target.closest('[data-copy]');
     if (!btn) return;
     var id = btn.getAttribute('data-copy');
