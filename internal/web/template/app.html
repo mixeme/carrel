@@ -1,8 +1,58 @@
 {{define "body"}}
+{{$e := .Data.Escrow}}
 <section class="card">
     <h1>Signed in as {{.Session.Login}}</h1>
     <p>No accounts connected yet. Connecting a CalDAV or CardDAV account
         arrives with the next stage.</p>
+
+    <section class="subsection">
+        <h2>Key escrow</h2>
+        {{if $e.Deposited}}
+        <p class="warning">A copy of your data key is deposited on this server.
+            An administrator who holds the escrow master password can decrypt
+            the DAV credentials you save here, and through them your contacts
+            and calendars.</p>
+        {{if not $e.RecoveredAt.IsZero}}
+        <p>An administrator last recovered this account on
+            {{$e.RecoveredAt.Format "2006-01-02 15:04"}} UTC.</p>
+        {{end}}
+        {{if $e.CanOptOut}}
+        <form method="post" action="{{.Base}}/app/escrow">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="opt_out">
+            <p class="hint">Withdrawing deletes the copy. Nobody will be able
+                to recover this account afterwards, including you.</p>
+            <button type="submit">Withdraw my deposited key</button>
+        </form>
+        {{else}}
+        <p class="hint">The administrator of this instance does not allow
+            withdrawing a deposited key.</p>
+        {{end}}
+
+        {{else}}
+        <p>No copy of your data key is deposited. Nobody but you can decrypt
+            your data — and if you lose your password, it cannot be recovered
+            by anyone.</p>
+        {{if $e.CanOptIn}}
+        <form method="post" action="{{.Base}}/app/escrow">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="opt_in">
+            <p class="warning">Depositing your key means an administrator with
+                the escrow master password can read your saved credentials and
+                the contacts and calendars behind them. In exchange, your data
+                survives a forgotten password.</p>
+
+            <label for="escrow-password">Your current password</label>
+            <input id="escrow-password" name="password" type="password" required
+                   autocomplete="current-password">
+            <p class="hint">Your key can only be deposited by you: the server
+                cannot open it without your password.</p>
+
+            <button type="submit">Deposit my key</button>
+        </form>
+        {{end}}
+        {{end}}
+    </section>
 
     <section class="subsection">
         <h2>Email address</h2>

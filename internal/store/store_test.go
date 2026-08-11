@@ -28,7 +28,7 @@ func (c *clock) advance(d time.Duration) { c.t = c.t.Add(d) }
 func openTest(t *testing.T, dir string) (*Store, *clock) {
 	t.Helper()
 	c := &clock{t: time.Date(2026, 3, 1, 12, 0, 0, 0, time.UTC)}
-	s, err := OpenWith(dir, Options{Auth: fastParams(), KEK: fastParams(), Now: c.now})
+	s, err := OpenWith(dir, Options{Auth: fastParams(), KEK: fastParams(), Master: fastParams(), Now: c.now})
 	if err != nil {
 		t.Fatalf("OpenWith: %v", err)
 	}

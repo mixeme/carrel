@@ -187,3 +187,15 @@ pre.diagnostic {
     padding-top: 1rem;
     border-top: 1px solid #e2ded7;
 }
+
+label.checkbox {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-weight: normal;
+}
+
+label.checkbox input {
+    display: inline-block;
+    width: auto;
+}

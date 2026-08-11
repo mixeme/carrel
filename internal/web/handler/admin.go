@@ -13,16 +13,17 @@ import (
 )
 
 const (
-	fieldRole        = "role"
-	fieldInviteID    = "invite_id"
-	fieldSMTPHost    = "smtp_host"
-	fieldSMTPPort    = "smtp_port"
-	fieldSMTPTLS     = "smtp_tls"
-	fieldSMTPUser    = "smtp_username"
-	fieldSMTPPass    = "smtp_password"
-	fieldSMTPFrom    = "smtp_from"
+	fieldAction       = "action"
+	fieldRole         = "role"
+	fieldInviteID     = "invite_id"
+	fieldSMTPHost     = "smtp_host"
+	fieldSMTPPort     = "smtp_port"
+	fieldSMTPTLS      = "smtp_tls"
+	fieldSMTPUser     = "smtp_username"
+	fieldSMTPPass     = "smtp_password"
+	fieldSMTPFrom     = "smtp_from"
 	fieldSMTPFromName = "smtp_from_name"
-	fieldTestEmail   = "test_email"
+	fieldTestEmail    = "test_email"
 	fieldTempPassword = "temp_password"
 )
 
@@ -34,6 +35,15 @@ type adminView struct {
 	NewInviteLink string
 	SMTPDiag      string
 	CreationMode  store.CreationMode
+	// Escrow is the instance-wide deposit status (§5.4).
+	Escrow escrowStatus
+	// EscrowCoverage is how many accounts the master password reaches.
+	EscrowCoverage int
+	// Recovered names the account the last recovery restored.
+	Recovered string
+	// MailWarning is set when a notice that may not be skipped could not be
+	// sent, so the administrator knows to deliver it themselves.
+	MailWarning string
 }
 
 type inviteRow struct {
@@ -56,13 +66,12 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-	action := r.PostFormValue("action")
 	sess := SessionFrom(r)
 	actor := store.Actor{ID: sess.UserID, Login: sess.Login, IP: ClientIP(r)}
 
 	var data adminView
 	var err error
-	switch action {
+	switch r.PostFormValue(fieldAction) {
 	case "create_invite":
 		data, err = s.adminCreateInvite(w, r, actor)
 	case "revoke_invite":
@@ -77,26 +86,47 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
 		data, err = s.adminSaveSMTP(r, actor)
 	case "test_smtp":
 		data, err = s.adminTestSMTP(r, actor)
+	case "enable_escrow":
+		data, err = s.adminEnableEscrow(r, actor)
+	case "resume_escrow":
+		data, err = s.adminResumeEscrow(r, actor)
+	case "disable_escrow":
+		data, err = s.adminDisableEscrow(r, actor)
+	case "escrow_policy":
+		data, err = s.adminEscrowPolicy(r, actor)
+	case "change_master_password":
+		data, err = s.adminChangeMaster(r, actor)
+	case "recover_user":
+		data, err = s.adminRecoverUser(r, actor)
+	case "reset_password":
+		data, err = s.adminResetPassword(r, actor)
 	default:
 		http.Error(w, "unknown action", http.StatusBadRequest)
 		return
 	}
 
+	v := s.View(r, "Administration")
 	if err != nil {
-		v := s.View(r, "Administration")
+		status := http.StatusBadRequest
+		var throttled throttleError
+		if errors.As(err, &throttled) {
+			status = http.StatusTooManyRequests
+			retryAfter(w, throttled.wait)
+		}
 		v.Error = err.Error()
 		v.Data = s.buildAdminView(r, data)
-		s.RenderStatus(w, http.StatusBadRequest, "admin.html", v)
+		s.RenderStatus(w, status, "admin.html", v)
 		return
 	}
-	v := s.View(r, "Administration")
-	v.Data = s.buildAdminView(r, data)
-	if data.NewInviteLink != "" {
+
+	switch {
+	case data.NewInviteLink != "":
 		v.Notice = "Invitation created. Copy the link below and share it with the new user."
+	case data.Recovered != "":
+		v.Notice = "Recovered " + data.Recovered +
+			". Hand over the temporary password; they must change it at their next sign-in, and their data is intact."
 	}
-	if data.SMTPDiag != "" {
-		v.Data = s.buildAdminView(r, data)
-	}
+	v.Data = s.buildAdminView(r, data)
 	s.Render(w, "admin.html", v)
 }
 
@@ -106,6 +136,8 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 	out.Settings = s.Store.Settings()
 	out.CreationMode = out.Settings.CreationMode
 	out.Users = s.Store.Users()
+	out.Escrow = escrowStatusOf(out.Settings, nil)
+	out.EscrowCoverage = s.Store.EscrowCoverage()
 	for _, inv := range s.Store.Invites() {
 		out.Invites = append(out.Invites, inviteRow{
 			Invite: inv,
@@ -117,6 +149,7 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 
 func (s *Server) renderAdmin(w http.ResponseWriter, r *http.Request, partial adminView) {
 	v := s.View(r, "Administration")
+	s.firstLoginEscrowNotice(r, &v)
 	v.Data = s.buildAdminView(r, partial)
 	s.Render(w, "admin.html", v)
 }
@@ -300,6 +333,7 @@ func (s *Server) RequestEmailChange(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		v := s.View(r, "Carrel")
 		v.Error = capitalize(err.Error()) + "."
+		v.Data = s.buildAppView(r)
 		s.RenderStatus(w, http.StatusBadRequest, "app.html", v)
 		return
 	}
@@ -312,5 +346,6 @@ func (s *Server) RequestEmailChange(w http.ResponseWriter, r *http.Request) {
 
 	v := s.View(r, "Carrel")
 	v.Notice = "A confirmation link was sent to " + newEmail + "."
+	v.Data = s.buildAppView(r)
 	s.Render(w, "app.html", v)
 }

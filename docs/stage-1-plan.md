@@ -161,14 +161,15 @@ THIRD_PARTY.md
 
 ### 8. Депонирование ключей (`internal/crypto` + handlers) · Opus / Sonnet (thinking-high)
 
-- [ ] Global toggle (admin): off by default; applies only to users created after enable
-- [ ] Setup flow: generate key pair, set escrow master password (distinct from login password)
-- [ ] On user create (when escrow on): store DEK copy encrypted with escrow public key
-- [ ] Existing users: voluntary opt-in from profile; opt-out deletes copy (unless admin forbids)
-- [ ] Recovery flow: admin + master password → re-wrap DEK under temp password → user login + change password
-- [ ] Profile: escrow status, last recovery time; first-login notice if escrow active
-- [ ] Every recovery → audit log + email to user (non-optional)
-- [ ] Admin password reset blocked when escrow active → offer recovery instead (§5.5)
+- [x] Global toggle (admin): off by default; applies only to users created after enable
+- [x] Setup flow: generate key pair, set escrow master password (distinct from login password)
+- [x] On user create (when escrow on): store DEK copy encrypted with escrow public key
+- [x] Existing users: voluntary opt-in from profile; opt-out deletes copy (unless admin forbids)
+- [x] Recovery flow: admin + master password → re-wrap DEK under temp password → user login + change password
+- [x] Profile: escrow status, last recovery time; first-login notice if escrow active
+- [x] Every recovery → audit log + email to user (non-optional)
+- [x] Admin password reset blocked when escrow active → offer recovery instead (§5.5)
+- [x] Master password rotation (re-seals the private key only); recovery under rate limit (§5.4)
 
 ### 9. Админ-панель (htmx UI) · Composer 2.5 Fast
 

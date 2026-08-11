@@ -37,8 +37,11 @@ type Server struct {
 	LoginLimit *ratelimit.Limiter
 	// InviteLimit throttles public invite and email-confirmation links (§24.3).
 	InviteLimit *ratelimit.Limiter
-	Mail        *mail.Queue
-	Logger      *slog.Logger
+	// RecoveryLimit throttles guessing at the escrow master password, the one
+	// secret on the instance that opens somebody else's data (§5.4).
+	RecoveryLimit *ratelimit.Limiter
+	Mail          *mail.Queue
+	Logger        *slog.Logger
 }
 
 // Path turns an app-relative path into an absolute one under BasePath.

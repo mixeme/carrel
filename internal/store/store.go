@@ -56,6 +56,10 @@ type Options struct {
 	// records keep the parameters they were written with.
 	Auth crypto.Params
 	KEK  crypto.Params
+	// Master is the strengthened profile for the escrow master password. It
+	// is written into the escrow configuration when the scheme is set up
+	// and read back from there afterwards (§5.4).
+	Master crypto.Params
 	// Now overrides the clock.
 	Now func() time.Time
 }
@@ -66,6 +70,9 @@ func (o Options) withDefaults() Options {
 	}
 	if o.KEK == (crypto.Params{}) {
 		o.KEK = crypto.KEKParams()
+	}
+	if o.Master == (crypto.Params{}) {
+		o.Master = crypto.MasterParams()
 	}
 	if o.Now == nil {
 		o.Now = time.Now

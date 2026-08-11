@@ -206,6 +206,54 @@ func (s *Store) setCredentials(u *User, password string, esc EscrowSettings) err
 	return nil
 }
 
+// unwrapDEK opens a user's DEK with their own password. A password that does
+// not derive the wrapping key is reported as ErrAuth, the same as a wrong
+// password anywhere else.
+func unwrapDEK(u *User, password string) (crypto.Key, error) {
+	kek, err := crypto.DeriveKey(password, u.KEKSalt, u.KEKParams)
+	if err != nil {
+		return nil, err
+	}
+	defer kek.Zero()
+
+	dek, err := crypto.UnwrapDEK(kek, u.WrappedDEK)
+	if err != nil {
+		return nil, ErrAuth
+	}
+	return dek, nil
+}
+
+// rewrapDEK points a user's credentials at a new password without touching the
+// DEK. Everything sealed under that key — the secrets blob and the escrow copy
+// alike — stays valid, which is what separates a password change and an escrow
+// recovery from the destructive reset (§5.4, §5.5).
+func (s *Store) rewrapDEK(u *User, password string, dek crypto.Key) error {
+	auth, err := crypto.HashPassword(password, s.opts.Auth)
+	if err != nil {
+		return err
+	}
+	salt, err := crypto.NewSalt()
+	if err != nil {
+		return err
+	}
+	kek, err := crypto.DeriveKey(password, salt, s.opts.KEK)
+	if err != nil {
+		return err
+	}
+	defer kek.Zero()
+
+	wrapped, err := crypto.WrapDEK(kek, dek)
+	if err != nil {
+		return err
+	}
+
+	u.Auth = auth
+	u.KEKSalt = salt
+	u.KEKParams = s.opts.KEK
+	u.WrappedDEK = wrapped
+	return nil
+}
+
 // Authenticate verifies a login password and returns the account together with
 // its unwrapped DEK. The caller owns the key: put it in the session keyring
 // and wipe it on logout (§4).
@@ -301,41 +349,15 @@ func (s *Store) ChangePassword(userID, current, next string) error {
 			return ErrAuth
 		}
 
-		oldKEK, err := crypto.DeriveKey(current, u.KEKSalt, u.KEKParams)
+		dek, err := unwrapDEK(u, current)
 		if err != nil {
 			return err
-		}
-		defer oldKEK.Zero()
-
-		dek, err := crypto.UnwrapDEK(oldKEK, u.WrappedDEK)
-		if err != nil {
-			return ErrAuth
 		}
 		defer dek.Zero()
 
-		auth, err := crypto.HashPassword(next, s.opts.Auth)
-		if err != nil {
+		if err := s.rewrapDEK(u, next, dek); err != nil {
 			return err
 		}
-		salt, err := crypto.NewSalt()
-		if err != nil {
-			return err
-		}
-		newKEK, err := crypto.DeriveKey(next, salt, s.opts.KEK)
-		if err != nil {
-			return err
-		}
-		defer newKEK.Zero()
-
-		wrapped, err := crypto.WrapDEK(newKEK, dek)
-		if err != nil {
-			return err
-		}
-
-		u.Auth = auth
-		u.KEKSalt = salt
-		u.KEKParams = s.opts.KEK
-		u.WrappedDEK = wrapped
 		u.MustChangePassword = false
 
 		appendAudit(state, s.now(), AuditEntry{

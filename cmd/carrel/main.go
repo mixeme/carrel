@@ -74,6 +74,9 @@ func run() int {
 
 	loginLimit := ratelimit.New(ratelimit.Options{})
 	inviteLimit := ratelimit.New(ratelimit.Options{})
+	// The master password is typed rarely and by one person, so there is no
+	// reason to forgive a run of wrong ones (§5.4).
+	recoveryLimit := ratelimit.New(ratelimit.Options{Free: 1})
 
 	mailQueue := &mail.Queue{
 		Store:       st,
@@ -83,15 +86,16 @@ func run() int {
 	defer mailQueue.Close()
 
 	srv := &handler.Server{
-		BasePath:    cfg.BasePath,
-		Trust:       trust,
-		Sessions:    sessions,
-		Store:       st,
-		Templates:   templates,
-		LoginLimit:  loginLimit,
-		InviteLimit: inviteLimit,
-		Mail:        mailQueue,
-		Logger:      logger,
+		BasePath:      cfg.BasePath,
+		Trust:         trust,
+		Sessions:      sessions,
+		Store:         st,
+		Templates:     templates,
+		LoginLimit:    loginLimit,
+		InviteLimit:   inviteLimit,
+		RecoveryLimit: recoveryLimit,
+		Mail:          mailQueue,
+		Logger:        logger,
 	}
 
 	staticFS, err := fs.Sub(web.StaticFS, "static")
@@ -113,6 +117,7 @@ func run() int {
 	// Without this the limiter keeps one entry per address ever seen.
 	go sweepLimiter(ctx, loginLimit, limiterSweep)
 	go sweepLimiter(ctx, inviteLimit, limiterSweep)
+	go sweepLimiter(ctx, recoveryLimit, limiterSweep)
 
 	logger.Info("carrel starting",
 		"version", version,

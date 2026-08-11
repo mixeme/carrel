@@ -209,6 +209,30 @@ func (q *Queue) QueueEmailChange(to, login, confirmURL string, expires time.Time
 	q.enqueue(job{kind: "email_change", to: to, msg: msg, maxRetries: 4})
 }
 
+// QueueEscrowRecovery tells a user that their account was recovered. Notifying
+// them is not the administrator's decision to make, so this has no opt-out
+// (§5.4); it reports whether the message could be handed to the queue at all,
+// because an instance with no relay leaves the administrator to say it in
+// person.
+func (q *Queue) QueueEscrowRecovery(to, login string, recoveredAt time.Time) bool {
+	if to == "" {
+		return false
+	}
+	settings := q.Store.Settings()
+	if !settings.SMTP.Configured() {
+		return false
+	}
+	name := q.ServiceName
+	if name == "" {
+		name = "Carrel"
+	}
+	msg := EscrowRecoveryContent(name, login, recoveredAt.UTC().Format(time.RFC1123))
+	// More attempts than the other messages get: an unsent invitation is an
+	// inconvenience, an unsent recovery notice is a transparency failure.
+	q.enqueue(job{kind: "escrow_recovery", to: to, msg: msg, maxRetries: 6})
+	return true
+}
+
 func (q *Queue) logError(msg string, err error) {
 	if q.Logger != nil {
 		q.Logger.Error(msg, "error", err)

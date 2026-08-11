@@ -48,6 +48,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app := http.NewServeMux()
 	app.HandleFunc("GET "+s.Path("/app/{$}"), s.AppHome)
 	app.HandleFunc("POST "+s.Path("/app/email"), s.RequestEmailChange)
+	app.HandleFunc("POST "+s.Path("/app/escrow"), s.ProfileEscrow)
 	pages.Handle(s.Path("/app/"), Chain(app, s.RequireAuth))
 
 	// The administrator's section.
