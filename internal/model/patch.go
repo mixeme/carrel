@@ -215,21 +215,21 @@ func (o *Object) Apply(p *Patch) error {
 		}
 		return nil
 	case KindICal:
-		ev := o.primaryEvent()
-		if ev == nil {
-			return errors.New("model: calendar object has no VEVENT")
+		comp := o.primaryComponent()
+		if comp == nil {
+			return errors.New("model: calendar object has no VEVENT, VTODO or VJOURNAL")
 		}
 		for i, op := range p.ops {
 			name := names[i]
 			if op.remove {
-				ev.Props.Del(name)
+				comp.Props.Del(name)
 				continue
 			}
 			props := make([]ical.Prop, 0, len(op.values))
 			for _, v := range op.values {
 				props = append(props, v.prop(name))
 			}
-			ev.Props[name] = props
+			comp.Props[name] = props
 		}
 		return nil
 	default:

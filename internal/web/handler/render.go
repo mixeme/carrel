@@ -140,6 +140,21 @@ func (s *Server) RenderFragment(w http.ResponseWriter, name string, v View) {
 	_, _ = buf.WriteTo(w)
 }
 
+// Fragment renders a template's body block into memory. The progress stream of
+// §16 needs the bytes rather than a writer, because one connection carries a
+// succession of them and a failure to render must not truncate the stream.
+func (s *Server) Fragment(name string, v View) ([]byte, error) {
+	page, ok := s.Templates.pages[name]
+	if !ok {
+		return nil, fmt.Errorf("handler: no template %q", name)
+	}
+	var buf bytes.Buffer
+	if err := page.ExecuteTemplate(&buf, "body", v); err != nil {
+		return nil, fmt.Errorf("handler: render %s: %w", name, err)
+	}
+	return buf.Bytes(), nil
+}
+
 func (s *Server) logError(msg string, err error) {
 	if s.Logger != nil {
 		s.Logger.Error(msg, "error", err)

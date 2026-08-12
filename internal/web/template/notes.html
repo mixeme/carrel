@@ -1,0 +1,70 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout calendar-layout">
+    <aside class="sidebar card no-print">
+        <h2>Notebooks</h2>
+        {{if $d.Sources}}
+        <ul class="collection-list">
+        {{range $d.Sources}}
+            <li><a class="collection-link{{if and (eq $d.AccountID .AccountID) (eq $d.ColEnc .ColEnc)}} is-active{{end}}"
+                href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">
+                <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                {{.Label}}
+                <span class="hint">{{.AccountLabel}}</span>
+            </a></li>
+        {{end}}
+        </ul>
+        {{else}}<p class="hint">No notebooks yet. Connect a CalDAV account from your profile.</p>{{end}}
+        {{if $d.Tags}}
+        <h2>Tags</h2>
+        <ul class="tag-list">
+            <li><a class="tag{{if not $d.Tag}} is-active{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">All</a></li>
+        {{range $d.Tags}}
+            <li><a class="tag{{if eq $d.Tag .}} is-active{{end}}" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?tag={{.}}">{{.}}</a></li>
+        {{end}}
+        </ul>
+        {{end}}
+    </aside>
+    <div class="app-main">
+        {{if $d.NoLists}}
+        <section class="card"><h1>Notes</h1><p class="hint">Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.</p></section>
+        {{else}}
+        <section class="card agenda-print-root">
+            <div class="contacts-header">
+                <div>
+                    <h1>{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Notes{{end}}</h1>
+                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                </div>
+                <p class="contacts-actions no-print">
+                    {{if not $d.ReadOnly}}
+                    <a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new">New note</a>
+                    <a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">Import Markdown</a>
+                    {{end}}
+                    <a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/export">Export Markdown</a>
+                    <button type="button" class="link" data-print>Print</button>
+                </p>
+            </div>
+            {{if $d.ReadOnly}}<p class="hint no-print">This notebook is read-only.</p>{{end}}
+            {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
+            {{if $d.Empty}}<p class="hint">Nothing here yet.</p>{{end}}
+            <ul class="note-list">
+            {{range $d.Rows}}
+                <li class="note-row">
+                    <a class="note-link" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">
+                        <strong>{{.Title}}</strong>
+                        {{if .Excerpt}}<span class="note-excerpt">{{.Excerpt}}</span>{{end}}
+                    </a>
+                    <span class="note-meta">
+                        {{if .DateLabel}}<span class="note-date">{{.DateLabel}}</span>{{end}}
+                        {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+                        {{if .HasRelated}}<span class="hint">linked</span>{{end}}
+                    </span>
+                </li>
+            {{end}}
+            </ul>
+            <p class="print-footer print-only">Carrel · notes · captured {{$d.PrintDate}}</p>
+        </section>
+        {{end}}
+    </div>
+</div>
+{{end}}

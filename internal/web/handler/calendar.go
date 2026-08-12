@@ -132,7 +132,7 @@ func (s *Server) buildAgenda(ctx context.Context, sess *session.Session, account
 		}
 		uid := occ.UID
 		if uid == "" {
-			uid = uidFromEventPath(occ.Path)
+			uid = uidFromCalendarPath(occ.Path)
 		}
 		byDate[date] = append(byDate[date], agendaRow{
 			UID: uid, TimeLabel: label, Summary: summary, Location: occ.Location, AllDay: occ.AllDay,

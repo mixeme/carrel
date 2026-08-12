@@ -43,6 +43,9 @@ type fakeServer struct {
 	// refuseReport makes REPORT unavailable, as on a server that only
 	// answers PROPFIND and GET.
 	refuseReport bool
+	// queries records the addressbook-query reports, so a test can see what
+	// was asked of the server.
+	queries []*dav.AddressBookQuery
 }
 
 type fakeObject struct {
@@ -95,13 +98,32 @@ func (s *fakeServer) Report(_ context.Context, _ string, _ dav.Depth, body any) 
 	if s.refuseReport {
 		return nil, &dav.HTTPError{Code: http.StatusNotImplemented}
 	}
-	multiget, ok := body.(*dav.AddressBookMultiget)
-	if !ok {
+	var hrefs []string
+	switch req := body.(type) {
+	case *dav.AddressBookMultiget:
+		hrefs = req.Hrefs
+	case *dav.AddressBookQuery:
+		s.queries = append(s.queries, req)
+		// A Depth: 1 answer includes the collection itself, and the search
+		// has to skip it.
+		hrefs = append(hrefs, collection)
+		for _, path := range s.paths() {
+			if matchesCardQuery(s.objects[path].body, req) {
+				hrefs = append(hrefs, path)
+			}
+		}
+	default:
 		return nil, fmt.Errorf("unexpected report body %T", body)
 	}
 	var b strings.Builder
 	b.WriteString(`<multistatus xmlns="DAV:" xmlns:card="urn:ietf:params:xml:ns:carddav">`)
-	for _, href := range multiget.Hrefs {
+	for _, href := range hrefs {
+		if href == collection {
+			fmt.Fprintf(&b, `<response><href>%s</href><propstat><prop>`+
+				`<resourcetype><collection/></resourcetype></prop>`+
+				`<status>HTTP/1.1 200 OK</status></propstat></response>`, href)
+			continue
+		}
 		obj, ok := s.objects[href]
 		if !ok {
 			fmt.Fprintf(&b, `<response><href>%s</href><status>HTTP/1.1 404 Not Found</status></response>`, href)

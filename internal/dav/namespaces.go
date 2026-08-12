@@ -6,7 +6,7 @@ package dav
 import "encoding/xml"
 
 const (
-	NamespaceDAV   = "DAV:"
+	NamespaceDAV     = "DAV:"
 	NamespaceCalDAV  = "urn:ietf:params:xml:ns:caldav"
 	NamespaceCardDAV = "urn:ietf:params:xml:ns:carddav"
 	NamespaceApple   = "http://apple.com/ns/ical/"
@@ -14,21 +14,21 @@ const (
 )
 
 var (
-	ResourceTypeName            = xml.Name{NamespaceDAV, "resourcetype"}
-	DisplayNameName             = xml.Name{NamespaceDAV, "displayname"}
-	CurrentUserPrincipalName    = xml.Name{NamespaceDAV, "current-user-principal"}
-	CurrentUserPrivilegeSetName = xml.Name{NamespaceDAV, "current-user-privilege-set"}
-	CollectionName              = xml.Name{NamespaceDAV, "collection"}
-	PrincipalName               = xml.Name{NamespaceDAV, "principal"}
-	CalendarName                = xml.Name{NamespaceCalDAV, "calendar"}
-	AddressBookName             = xml.Name{NamespaceCardDAV, "addressbook"}
-	CalendarHomeSetName         = xml.Name{NamespaceCalDAV, "calendar-home-set"}
-	AddressBookHomeSetName      = xml.Name{NamespaceCardDAV, "addressbook-home-set"}
-	CalendarColorName           = xml.Name{NamespaceApple, "calendar-color"}
-	SupportedCalendarComponentSetName = xml.Name{NamespaceCalDAV, "supported-calendar-component-set"}
-	GetCTagName                 = xml.Name{NamespaceCS, "getctag"}
-	GetETagName                 = xml.Name{NamespaceDAV, "getetag"}
-	GetContentTypeName          = xml.Name{NamespaceDAV, "getcontenttype"}
-	AddressDataName             = xml.Name{NamespaceCardDAV, "address-data"}
-	CalendarDataName            = xml.Name{NamespaceCalDAV, "calendar-data"}
+	ResourceTypeName                  = xml.Name{Space: NamespaceDAV, Local: "resourcetype"}
+	DisplayNameName                   = xml.Name{Space: NamespaceDAV, Local: "displayname"}
+	CurrentUserPrincipalName          = xml.Name{Space: NamespaceDAV, Local: "current-user-principal"}
+	CurrentUserPrivilegeSetName       = xml.Name{Space: NamespaceDAV, Local: "current-user-privilege-set"}
+	CollectionName                    = xml.Name{Space: NamespaceDAV, Local: "collection"}
+	PrincipalName                     = xml.Name{Space: NamespaceDAV, Local: "principal"}
+	CalendarName                      = xml.Name{Space: NamespaceCalDAV, Local: "calendar"}
+	AddressBookName                   = xml.Name{Space: NamespaceCardDAV, Local: "addressbook"}
+	CalendarHomeSetName               = xml.Name{Space: NamespaceCalDAV, Local: "calendar-home-set"}
+	AddressBookHomeSetName            = xml.Name{Space: NamespaceCardDAV, Local: "addressbook-home-set"}
+	CalendarColorName                 = xml.Name{Space: NamespaceApple, Local: "calendar-color"}
+	SupportedCalendarComponentSetName = xml.Name{Space: NamespaceCalDAV, Local: "supported-calendar-component-set"}
+	GetCTagName                       = xml.Name{Space: NamespaceCS, Local: "getctag"}
+	GetETagName                       = xml.Name{Space: NamespaceDAV, Local: "getetag"}
+	GetContentTypeName                = xml.Name{Space: NamespaceDAV, Local: "getcontenttype"}
+	AddressDataName                   = xml.Name{Space: NamespaceCardDAV, Local: "address-data"}
+	CalendarDataName                  = xml.Name{Space: NamespaceCalDAV, Local: "calendar-data"}
 )

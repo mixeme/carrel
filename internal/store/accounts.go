@@ -194,6 +194,43 @@ func (s *Store) SetDAVAccountEnabled(actor Actor, userID, accountID string, dek 
 	})
 }
 
+// Views returns the user's saved source selections and default collections.
+func (s *Store) Views(userID string, dek crypto.Key) (account.Views, error) {
+	blob, err := s.openSecrets(userID, dek)
+	if err != nil {
+		return account.Views{}, err
+	}
+	return blob.Views.Clone(), nil
+}
+
+// UpdateViews applies fn to the saved view preferences and commits the result.
+// §14 puts the selection in the settings on purpose: a collection unticked has
+// to stay unticked after a restart.
+func (s *Store) UpdateViews(userID string, dek crypto.Key, fn func(*account.Views)) error {
+	if fn == nil {
+		return nil
+	}
+	return s.update(func(state *State) error {
+		u := findUser(state, userID)
+		if u == nil {
+			return ErrNotFound
+		}
+		blob, err := account.Open(dek, u.Secrets)
+		if err != nil {
+			return err
+		}
+		views := blob.Views.Clone()
+		fn(&views)
+		blob.Views = views
+		sealed, err := account.Seal(dek, blob)
+		if err != nil {
+			return err
+		}
+		u.Secrets = sealed
+		return nil
+	})
+}
+
 func (s *Store) openSecrets(userID string, dek crypto.Key) (*account.Blob, error) {
 	var sealed []byte
 	found := false

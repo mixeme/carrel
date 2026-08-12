@@ -1,0 +1,46 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout calendar-layout">
+    <aside class="sidebar card no-print">
+        <h2>Notebooks</h2>
+        <ul class="collection-list">{{range $d.Sources}}
+            <li><a class="collection-link" href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
+        {{end}}</ul>
+    </aside>
+    <div class="app-main"><section class="card">
+        <h1>Import notes</h1>
+        <p class="source-label">Into {{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+        {{if not $d.HasPreview}}
+        <form method="post" enctype="multipart/form-data" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <label for="file">Markdown file or zip</label>
+            <input id="file" type="file" name="file" accept=".md,.markdown,.txt,.zip,text/markdown" required>
+            <p class="hint">Front matter is read when present: title, date, tags, uid and any X- property exported earlier. A file without front matter becomes a note dated by its own timestamp.</p>
+            <button type="submit">Preview import</button>
+        </form>
+        {{else}}
+        <p>{{$d.OKCount}} note(s) ready; {{$d.ErrorCount}} error(s); {{$d.CollisionCount}} UID collision(s).</p>
+        {{if $d.TruncatedNote}}<p class="message error">{{$d.TruncatedNote}}</p>{{end}}
+        <table class="import-preview">
+            <thead><tr><th>File</th><th>Title</th><th>Date</th><th>Tags</th><th>Result</th></tr></thead>
+            <tbody>
+            {{range $d.Notes}}
+                <tr>
+                    <td>{{.Source}}</td>
+                    <td>{{.Title}}</td>
+                    <td>{{.Date}}</td>
+                    <td>{{range .Tags}}<span class="tag">{{.}}</span>{{end}}</td>
+                    <td>{{if .ParseError}}{{.ParseError}}{{else if .UIDCollision}}New UID will be assigned{{else}}Ready{{end}}</td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+        <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <button type="submit" name="action" value="confirm_import">Import</button>
+            <button type="submit" name="action" value="cancel_import" class="link">Cancel</button>
+        </form>
+        {{end}}
+    </section></div>
+</div>
+{{end}}

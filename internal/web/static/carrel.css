@@ -536,6 +536,230 @@ label.checkbox input {
     margin-top: 0;
 }
 
+/* Tasks (§23.9) */
+.task-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 1rem 0 0;
+}
+
+.task-overdue-count {
+    color: var(--danger, #a23b32);
+    font-size: 0.9rem;
+}
+
+.task-list,
+.note-list,
+.source-list,
+.tag-list,
+.related-list,
+.find-sources,
+.find-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.task-row {
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    gap: 0.6rem;
+    align-items: baseline;
+    padding: 0.5rem 0;
+    border-bottom: 0.5px solid var(--hair);
+}
+
+.task-tick {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.task-title {
+    color: inherit;
+    text-decoration: none;
+}
+
+.task-row.is-done .task-title {
+    color: var(--muted);
+    text-decoration: line-through;
+}
+
+.task-row.is-overdue .task-due {
+    color: var(--danger, #a23b32);
+}
+
+.task-meta,
+.note-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: baseline;
+    font-size: 0.9rem;
+}
+
+.tag {
+    border: 0.5px solid var(--hair);
+    border-radius: 0.6rem;
+    padding: 0.05rem 0.45rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.tag.is-active {
+    color: var(--fg, inherit);
+    border-color: var(--accent);
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+}
+
+/* Notes (§23.9) */
+.note-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.6rem;
+    padding: 0.6rem 0;
+    border-bottom: 0.5px solid var(--hair);
+}
+
+.note-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.note-excerpt,
+.find-row .hint {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.note-body {
+    white-space: pre-wrap;
+}
+
+.quick-note-page {
+    max-width: 40rem;
+    margin: 0 auto;
+}
+
+.related-list li {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding: 0.2rem 0;
+}
+
+/* Fan-out progress and merged results (§14, §16) */
+.find-summary {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.find-source {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding: 0.3rem 0;
+    border-bottom: 0.5px solid var(--hair);
+    font-size: 0.9rem;
+}
+
+.find-source-name {
+    display: flex;
+    flex-direction: column;
+    min-width: 12rem;
+}
+
+.find-source-state {
+    color: var(--muted);
+}
+
+.find-source.is-querying .find-source-state {
+    color: var(--accent);
+}
+
+.find-source.is-error .find-source-state,
+.find-source.is-timeout .find-source-state {
+    color: var(--danger, #a23b32);
+}
+
+.find-group {
+    margin-top: 1.5rem;
+}
+
+.find-group h2 {
+    font-size: 1.05rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--rule);
+}
+
+.find-row {
+    display: grid;
+    grid-template-columns: 7rem 1fr auto;
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+    border-bottom: 0.5px solid var(--hair);
+}
+
+.find-row-time {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.find-row-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.find-row-body a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.find-row-kind {
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.find-row.is-done .find-row-body strong {
+    text-decoration: line-through;
+    color: var(--muted);
+}
+
+.find-row.is-overdue .find-row-time {
+    color: var(--danger, #a23b32);
+}
+
+.source-list .checkbox {
+    display: flex;
+    gap: 0.4rem;
+    align-items: baseline;
+}
+
+.source-list .checkbox span {
+    display: flex;
+    flex-direction: column;
+}
+
 @media print {
     * {
         box-shadow: none !important;
@@ -583,9 +807,24 @@ label.checkbox input {
     }
 
     .agenda-day,
-    .agenda-event-row {
+    .agenda-event-row,
+    .task-row,
+    .note-row,
+    .find-group,
+    .find-row {
         break-inside: avoid;
         page-break-inside: avoid;
+    }
+
+    .task-title,
+    .note-link,
+    .find-row-body a {
+        color: #000 !important;
+        text-decoration: none;
+    }
+
+    .find-progress {
+        display: none !important;
     }
 
     .agenda-event-row > a {

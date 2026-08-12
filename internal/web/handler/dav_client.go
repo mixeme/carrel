@@ -211,11 +211,13 @@ func uidFromObjectPath(path string) string {
 	return base
 }
 
-func eventPathForUID(collection, uid string) string {
+// calendarObjectPath is where an object of a given UID lives. Events, tasks and
+// notes are all .ics resources; only the component inside differs (§10).
+func calendarObjectPath(collection, uid string) string {
 	return normalizeCollectionPath(collection) + url.PathEscape(uid) + ".ics"
 }
 
-func uidFromEventPath(path string) string {
+func uidFromCalendarPath(path string) string {
 	base := path
 	if i := strings.LastIndex(path, "/"); i >= 0 {
 		base = path[i+1:]

@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"strings"
 
+	"gitea.mixdep.ru/mix/carrel/internal/config"
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
+	"gitea.mixdep.ru/mix/carrel/internal/fanout"
 	"gitea.mixdep.ru/mix/carrel/internal/mail"
 	"gitea.mixdep.ru/mix/carrel/internal/ratelimit"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
@@ -48,8 +50,16 @@ type Server struct {
 	Guard         *dav.Guard
 	Photo         PhotoConfig
 	Import        ImportConfig
-	Logger        *slog.Logger
+	// Fanout owns the live cross-source polls of §14 and §16. It is optional:
+	// without it the unified view and the search say so instead of failing.
+	Fanout *fanout.Registry
+	// Progress selects how a running poll reaches the browser (§16).
+	Progress ProgressMode
+	Logger   *slog.Logger
 }
+
+// ProgressMode is how fan-out progress is delivered (§16).
+type ProgressMode = config.Progress
 
 // Path turns an app-relative path into an absolute one under BasePath.
 func (s *Server) Path(p string) string {

@@ -28,7 +28,10 @@ type Event struct {
 	AllDay    bool
 	RRule     string
 	Attendees []Attendee
-	Other     []Property
+	// Related are the RELATED-TO links other objects — notes, typically —
+	// hang off this event (§23.9).
+	Related []Relation
+	Other   []Property
 }
 
 // Attendee is a read-only PARTICIPANT view (§10 — no iTIP in v1).
@@ -63,6 +66,7 @@ var knownEventProps = map[string]bool{
 	ical.PropClass:         true,
 	ical.PropPriority:      true,
 	ical.PropURL:           true,
+	ical.PropRelatedTo:     true,
 }
 
 // Event returns the display view of a calendar object.
@@ -85,6 +89,7 @@ func (o *Object) Event(loc *time.Location) (Event, error) {
 		Location:    icalPropText(evComp.Props, ical.PropLocation),
 		Status:      icalPropText(evComp.Props, ical.PropStatus),
 		RRule:       icalPropText(evComp.Props, ical.PropRecurrenceRule),
+		Related:     relationsFrom(evComp.Props),
 	}
 	if cats := evComp.Props.Get(ical.PropCategories); cats != nil {
 		ev.Categories = splitComma(cats.Value)

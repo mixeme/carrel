@@ -1,0 +1,18 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout calendar-layout">
+    <aside class="sidebar card no-print">
+        <h2>Notebooks</h2>
+        <ul class="collection-list">{{range $d.Sources}}
+            <li><a class="collection-link" href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
+        {{end}}</ul>
+    </aside>
+    <div class="app-main"><section class="card">
+        <h1>Notes import report</h1>
+        <p>Created {{$d.Created}} note(s) in {{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}.</p>
+        {{if $d.Collisions}}<h2>Assigned new UIDs</h2><p class="hint">These notes already existed here, so the imported copies were given fresh identities instead of overwriting them.</p><ul>{{range $d.Collisions}}<li>{{.}}</li>{{end}}</ul>{{end}}
+        {{if $d.Failed}}<h2>Failed</h2><ul>{{range $d.Failed}}<li>{{.}}</li>{{end}}</ul>{{end}}
+        <p><a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">Return to notes</a></p>
+    </section></div>
+</div>
+{{end}}

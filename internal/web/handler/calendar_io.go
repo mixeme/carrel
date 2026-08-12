@@ -143,7 +143,7 @@ func (s *Server) previewCalendarImport(w http.ResponseWriter, r *http.Request, s
 	}
 	existing := map[string]bool{}
 	for _, objectPath := range listing.Paths() {
-		existing[uidFromEventPath(objectPath)] = true
+		existing[uidFromCalendarPath(objectPath)] = true
 	}
 	draft := session.ImportDraft{Key: key, AccountID: accountID, Collection: collection}
 	view := calendarImportView{
@@ -201,7 +201,7 @@ func (s *Server) confirmCalendarImport(w http.ResponseWriter, r *http.Request, s
 	}
 	existing := map[string]bool{}
 	for _, objectPath := range listing.Paths() {
-		existing[uidFromEventPath(objectPath)] = true
+		existing[uidFromCalendarPath(objectPath)] = true
 	}
 	report := calendarImportReportView{
 		Calendars: s.listCalendars(sess), AccountID: accountID, ColEnc: colEnc,
@@ -232,7 +232,7 @@ func (s *Server) confirmCalendarImport(w http.ResponseWriter, r *http.Request, s
 			}
 			uid = newUID
 		}
-		obj.Path = eventPathForUID(collection, uid)
+		obj.Path = calendarObjectPath(collection, uid)
 		if _, err := p.Create(ctx, collection, obj); err != nil {
 			report.Failed = append(report.Failed, item.DisplayName+": "+userFacingDAVError(err))
 			continue

@@ -19,6 +19,7 @@ import (
 
 	"gitea.mixdep.ru/mix/carrel/internal/config"
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
+	"gitea.mixdep.ru/mix/carrel/internal/fanout"
 	"gitea.mixdep.ru/mix/carrel/internal/mail"
 	"gitea.mixdep.ru/mix/carrel/internal/ratelimit"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
@@ -68,9 +69,16 @@ func run() int {
 	}
 
 	settings := st.Settings()
+	// The fan-out registry owns the cross-source polls of §14 and §16. It is
+	// created before the session manager so a session that ends can take its
+	// polls with it.
+	fanouts := fanout.NewRegistry(nil)
+	defer fanouts.Close()
+
 	sessions := session.New(session.Options{
 		Idle:     settings.SessionIdle(),
 		Absolute: settings.SessionAbsolute(),
+		OnEnd:    fanouts.CancelSession,
 		Cache: session.CacheConfig{
 			CollectionTTL:   cfg.Cache.CollectionTTL(),
 			MaxCollections:  cfg.Cache.MaxCollections,
@@ -122,6 +130,8 @@ func run() int {
 		Guard:         guard,
 		Photo:         handler.PhotoConfig(cfg.Photo),
 		Import:        handler.ImportConfig(cfg.Import),
+		Fanout:        fanouts,
+		Progress:      cfg.Progress,
 		Logger:        logger,
 	}
 
@@ -145,6 +155,8 @@ func run() int {
 	go sweepLimiter(ctx, loginLimit, limiterSweep)
 	go sweepLimiter(ctx, inviteLimit, limiterSweep)
 	go sweepLimiter(ctx, recoveryLimit, limiterSweep)
+	// A tab closed mid-poll leaves a task nobody will ask about again.
+	go sweepFanout(ctx, fanouts, fanoutSweep)
 
 	logger.Info("carrel starting",
 		"version", version,
@@ -206,6 +218,22 @@ func sweepLimiter(ctx context.Context, l *ratelimit.Limiter, every time.Duration
 			return
 		case <-t.C:
 			l.Sweep()
+		}
+	}
+}
+
+// fanoutSweep is how often abandoned fan-out tasks are dropped.
+const fanoutSweep = time.Minute
+
+func sweepFanout(ctx context.Context, r *fanout.Registry, every time.Duration) {
+	t := time.NewTicker(every)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			r.Sweep()
 		}
 	}
 }

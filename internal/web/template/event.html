@@ -13,7 +13,12 @@
             <div class="contacts-header">
                 <div><h1>{{if $d.IsNew}}New event{{else}}{{$d.Event.DisplayTitle}}{{end}}</h1>
                 <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p></div>
-                {{if not $d.IsNew}}<button type="button" class="link no-print" data-print>Print</button>{{end}}
+                {{if not $d.IsNew}}
+                <p class="contacts-actions no-print">
+                    {{if $d.NoteURL}}<a class="button" href="{{$d.NoteURL}}">Write a note</a>{{end}}
+                    <button type="button" class="link" data-print>Print</button>
+                </p>
+                {{end}}
             </div>
             {{if $d.ReadOnly}}
             <dl class="contact-readonly">
@@ -79,6 +84,14 @@
                 <button type="submit" class="link">Delete event</button>
             </form>
             {{end}}
+            {{end}}
+            {{if $d.Related}}
+            <section class="other-props">
+                <h2>Related</h2>
+                <ul class="related-list">{{range $d.Related}}
+                    <li>{{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}<code>{{.UID}}</code>{{end}}<span class="hint">{{.Kind}}{{if .RelType}} · {{.RelType}}{{end}}</span></li>
+                {{end}}</ul>
+            </section>
             {{end}}
             {{if $d.Event.Attendees}}<section class="other-props"><h2>Attendees</h2><ul>{{range $d.Event.Attendees}}<li>{{if .CN}}{{.CN}} — {{end}}{{.URI}}{{if .PartStat}} ({{.PartStat}}){{end}}</li>{{end}}</ul></section>{{end}}
             {{if $d.Event.Other}}<section class="other-props"><h2>Other properties</h2><p class="hint">Kept as the server sent them and not offered for editing.</p><ul>{{range $d.Event.Other}}<li><code>{{.Name}}</code>{{range .Values}} {{.Text}}{{end}}</li>{{end}}</ul></section>{{end}}

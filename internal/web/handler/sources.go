@@ -1,0 +1,177 @@
+// Copyright (C) 2026 Carrel contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+package handler
+
+import (
+	"strings"
+
+	"gitea.mixdep.ru/mix/carrel/internal/account"
+	"gitea.mixdep.ru/mix/carrel/internal/dav/discovery"
+	"gitea.mixdep.ru/mix/carrel/internal/fanout"
+	"gitea.mixdep.ru/mix/carrel/internal/session"
+)
+
+// sourceRow is one collection in a sidebar, with the tick §14 puts on it.
+type sourceRow struct {
+	AccountID    string
+	AccountLabel string
+	ColEnc       string
+	Path         string
+	Name         string
+	Color        string
+	Kind         discovery.Kind
+	ReadOnly     bool
+	Selected     bool
+}
+
+// Key matches account.SourceRef.Key, so a form field names a collection the
+// same way the stored selection does.
+func (r sourceRow) Key() string { return r.AccountID + "|" + normalizeCollectionPath(r.Path) }
+
+// Label is what the sources panel prints: the collection, then the account, so
+// two books of the same name in different accounts are told apart (§14).
+func (r sourceRow) Label() string {
+	if r.Name != "" {
+		return r.Name
+	}
+	return r.Path
+}
+
+// collectionsOfKind lists every collection of one kind across the user's
+// enabled accounts, marked against the saved selection of a view.
+//
+// A view with no saved selection means "all of them": on the first visit the
+// screen shows something rather than nothing. Once a choice is made, an empty
+// choice is honoured as an empty choice (§21).
+func (s *Server) collectionsOfKind(sess *session.Session, kind discovery.Kind, view, component string) ([]sourceRow, error) {
+	accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK())
+	if err != nil {
+		return nil, err
+	}
+	views, err := s.Store.Views(sess.UserID, sess.DEK())
+	if err != nil {
+		return nil, err
+	}
+	chosen, hasChoice := views.Selection(view)
+	picked := make(map[string]bool, len(chosen))
+	for _, ref := range chosen {
+		picked[ref.Key()] = true
+	}
+	var out []sourceRow
+	for _, acc := range accounts {
+		if !acc.Enabled {
+			continue
+		}
+		for _, col := range acc.Collections {
+			if col.Kind != kind || !supportsComponent(col, component) {
+				continue
+			}
+			row := sourceRow{
+				AccountID: acc.ID, AccountLabel: accountLabel(acc),
+				ColEnc: EncodeCollectionPath(col.Path), Path: col.Path,
+				Name: col.DisplayName, Color: col.Color, Kind: col.Kind,
+				ReadOnly: col.ReadOnly,
+			}
+			row.Selected = !hasChoice || picked[row.Key()]
+			out = append(out, row)
+		}
+	}
+	return out, nil
+}
+
+// supportsComponent reports whether a calendar accepts a component kind. A
+// server that does not advertise the set at all is taken at face value and
+// offered: refusing to show a collection because it kept quiet would hide
+// working task lists (§17).
+func supportsComponent(col discovery.Collection, component string) bool {
+	if component == "" || len(col.SupportedComponents) == 0 {
+		return true
+	}
+	for _, name := range col.SupportedComponents {
+		if strings.EqualFold(name, component) {
+			return true
+		}
+	}
+	return false
+}
+
+// selectedRows keeps only the ticked rows.
+func selectedRows(rows []sourceRow) []sourceRow {
+	out := make([]sourceRow, 0, len(rows))
+	for _, row := range rows {
+		if row.Selected {
+			out = append(out, row)
+		}
+	}
+	return out
+}
+
+// fanoutSources turns sidebar rows into the sources of a poll. The kind travels
+// with each one so a single task can mix calendars and address books, which is
+// what a cross-source search does (§16).
+func fanoutSources(rows []sourceRow) []fanout.Source {
+	out := make([]fanout.Source, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, fanout.Source{
+			ID:              row.Key(),
+			Kind:            string(row.Kind),
+			AccountID:       row.AccountID,
+			AccountLabel:    row.AccountLabel,
+			Collection:      normalizeCollectionPath(row.Path),
+			CollectionLabel: row.Label(),
+			Color:           row.Color,
+		})
+	}
+	return out
+}
+
+// saveSelection records the ticked collections of a view. The keys arrive from
+// the form as account|collection pairs and are checked against the collections
+// the user actually has, so a submitted field cannot add a source that was
+// never discovered.
+func (s *Server) saveSelection(sess *session.Session, view string, keys []string, known []sourceRow) error {
+	wanted := make(map[string]bool, len(keys))
+	for _, key := range keys {
+		wanted[key] = true
+	}
+	refs := make([]account.SourceRef, 0, len(known))
+	for _, row := range known {
+		if wanted[row.Key()] {
+			refs = append(refs, account.SourceRef{AccountID: row.AccountID, Collection: row.Path})
+		}
+	}
+	return s.Store.UpdateViews(sess.UserID, sess.DEK(), func(v *account.Views) { v.Select(view, refs) })
+}
+
+// defaultCollection returns the collection a view creates records in: the one
+// last used, or the first writable one. §23.9 is explicit that this is not asked
+// for every time — a note that costs a form is a note nobody writes.
+func (s *Server) defaultCollection(sess *session.Session, view string, rows []sourceRow) (sourceRow, bool) {
+	views, err := s.Store.Views(sess.UserID, sess.DEK())
+	if err == nil {
+		if ref, ok := views.Default(view); ok {
+			for _, row := range rows {
+				if row.Key() == ref.Key() && !row.ReadOnly {
+					return row, true
+				}
+			}
+		}
+	}
+	for _, row := range rows {
+		if !row.ReadOnly {
+			return row, true
+		}
+	}
+	return sourceRow{}, false
+}
+
+// rememberDefault records the collection a record was just filed in.
+func (s *Server) rememberDefault(sess *session.Session, view, accountID, collection string) {
+	err := s.Store.UpdateViews(sess.UserID, sess.DEK(), func(v *account.Views) {
+		v.SetDefault(view, account.SourceRef{AccountID: accountID, Collection: collection})
+	})
+	if err != nil {
+		s.logError("remember default collection", err)
+	}
+}

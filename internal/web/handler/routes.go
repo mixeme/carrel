@@ -75,6 +75,42 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("GET "+s.Path("/app/calendar/{account}/{col}/{uid}"), s.EventCard)
 	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}"), s.EventCard)
 	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}/conflict"), s.CalendarConflictResolve)
+	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}/timeline"), s.ContactTimeline)
+
+	app.HandleFunc("GET "+s.Path("/app/tasks"), s.TasksHome)
+	app.HandleFunc("GET "+s.Path("/app/tasks/{account}/{col}"), s.TasksList)
+	app.HandleFunc("GET "+s.Path("/app/tasks/{account}/{col}/new"), s.TaskNew)
+	app.HandleFunc("POST "+s.Path("/app/tasks/{account}/{col}/new"), s.TaskNew)
+	app.HandleFunc("GET "+s.Path("/app/tasks/{account}/{col}/{uid}"), s.TaskCard)
+	app.HandleFunc("POST "+s.Path("/app/tasks/{account}/{col}/{uid}"), s.TaskCard)
+	app.HandleFunc("POST "+s.Path("/app/tasks/{account}/{col}/{uid}/conflict"), s.TaskConflictResolve)
+
+	// Notes. The quick form comes before the collection routes so /new and
+	// /quick cannot be read as an account identifier.
+	app.HandleFunc("GET "+s.Path("/app/notes"), s.NotesHome)
+	app.HandleFunc("GET "+s.Path("/app/notes/quick"), s.NoteQuick)
+	app.HandleFunc("POST "+s.Path("/app/notes/quick"), s.NoteQuick)
+	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}"), s.NotesList)
+	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/new"), s.NoteNew)
+	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/new"), s.NoteNew)
+	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/import"), s.NotesImport)
+	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/import"), s.NotesImport)
+	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/export"), s.NotesExport)
+	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/{uid}"), s.NoteCard)
+	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/{uid}"), s.NoteCard)
+	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/{uid}/export"), s.NoteExport)
+	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/{uid}/conflict"), s.NoteConflictResolve)
+
+	// The unified view, the search and the progress endpoints they share (§14,
+	// §16).
+	app.HandleFunc("GET "+s.Path("/app/unified"), s.Unified)
+	app.HandleFunc("POST "+s.Path("/app/unified/sources"), s.FindSources)
+	app.HandleFunc("GET "+s.Path("/app/search"), s.Search)
+	app.HandleFunc("POST "+s.Path("/app/search/sources"), s.FindSources)
+	app.HandleFunc("GET "+s.Path("/app/find/{task}/results"), s.FindResults)
+	app.HandleFunc("GET "+s.Path("/app/find/{task}/stream"), s.FindStream)
+	app.HandleFunc("POST "+s.Path("/app/find/{task}/retry"), s.FindRetry)
+	app.HandleFunc("POST "+s.Path("/app/find/{task}/cancel"), s.FindCancel)
 	pages.Handle(s.Path("/app/"), Chain(app, s.RequireAuth, s.RequirePasswordChange))
 
 	// Contact photos: authenticated, separate prefix (§11).

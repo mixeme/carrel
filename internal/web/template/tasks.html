@@ -1,0 +1,70 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout calendar-layout">
+    <aside class="sidebar card no-print">
+        <h2>Task lists</h2>
+        {{if $d.Sources}}
+        <ul class="collection-list">
+        {{range $d.Sources}}
+            <li><a class="collection-link{{if and (eq $d.AccountID .AccountID) (eq $d.ColEnc .ColEnc)}} is-active{{end}}"
+                href="{{$.Base}}/app/tasks/{{.AccountID}}/{{.ColEnc}}">
+                <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                {{.Label}}
+                <span class="hint">{{.AccountLabel}}</span>
+            </a></li>
+        {{end}}
+        </ul>
+        {{else}}<p class="hint">No task lists yet. Connect a CalDAV account from your profile.</p>{{end}}
+    </aside>
+    <div class="app-main">
+        {{if $d.NoLists}}
+        <section class="card"><h1>Tasks</h1><p class="hint">Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> to keep tasks here.</p></section>
+        {{else}}
+        <section class="card agenda-print-root">
+            <div class="contacts-header">
+                <div>
+                    <h1>{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Tasks{{end}}</h1>
+                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                </div>
+                <p class="contacts-actions no-print">
+                    {{if not $d.ReadOnly}}<a class="button" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new">New task</a>{{end}}
+                    <button type="button" class="link" data-print>Print</button>
+                </p>
+            </div>
+            <p class="task-filters no-print">
+                <a class="button{{if eq $d.Filter "open"}} is-active{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=open">Open ({{$d.Counts.Open}})</a>
+                <a class="button{{if eq $d.Filter "done"}} is-active{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
+                <a class="button{{if eq $d.Filter "all"}} is-active{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All</a>
+                {{if $d.Counts.Overdue}}<span class="task-overdue-count">{{$d.Counts.Overdue}} overdue</span>{{end}}
+            </p>
+            {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
+            {{if $d.Empty}}<p class="hint">Nothing here.</p>{{end}}
+            <ul class="task-list">
+            {{range $d.Rows}}
+                <li class="task-row{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}">
+                    {{if not $d.ReadOnly}}
+                    <form method="post" action="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}" class="inline-form no-print">
+                        <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                        <input type="hidden" name="action" value="toggle">
+                        <input type="hidden" name="etag" value="{{.ETag}}">
+                        <input type="hidden" name="filter" value="{{$d.Filter}}">
+                        <button type="submit" class="task-tick" aria-label="{{if .Done}}Mark as not done{{else}}Mark as done{{end}}">{{if .Done}}✓{{else}}○{{end}}</button>
+                    </form>
+                    <span class="task-tick print-only" aria-hidden="true">{{if .Done}}✓{{else}}○{{end}}</span>
+                    {{else}}<span class="task-tick" aria-hidden="true">{{if .Done}}✓{{else}}○{{end}}</span>{{end}}
+                    <a class="task-title" href="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">{{.Title}}</a>
+                    <span class="task-meta">
+                        {{if .DueLabel}}<span class="task-due">{{.DueLabel}}</span>{{end}}
+                        {{if .Status}}<span class="hint">{{.Status}}</span>{{end}}
+                        {{if and .Percent (not .Done)}}<span class="hint">{{.Percent}}%</span>{{end}}
+                        {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+                    </span>
+                </li>
+            {{end}}
+            </ul>
+            <p class="print-footer print-only">Carrel · tasks · captured {{$d.PrintDate}}</p>
+        </section>
+        {{end}}
+    </div>
+</div>
+{{end}}

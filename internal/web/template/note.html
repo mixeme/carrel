@@ -1,0 +1,70 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout calendar-layout">
+    <aside class="sidebar card no-print">
+        <h2>Notebooks</h2>
+        <ul class="collection-list">{{range $d.Sources}}
+            <li><a class="collection-link" href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
+        {{end}}</ul>
+        <p><a href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to notes</a></p>
+    </aside>
+    <div class="app-main">
+        <section class="card note-card agenda-print-root">
+            <div class="contacts-header">
+                <div>
+                    <h1>{{if $d.IsNew}}New note{{else}}{{$d.Note.DisplayTitle}}{{end}}</h1>
+                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                </div>
+                <p class="contacts-actions no-print">
+                    {{if not $d.IsNew}}<a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/export">Export Markdown</a>
+                    <button type="button" class="link" data-print>Print</button>{{end}}
+                </p>
+            </div>
+            {{if $d.ReadOnly}}
+            <dl class="contact-readonly">
+                {{if $d.Form.Date}}<dt>Date</dt><dd>{{$d.Form.Date}} {{$d.Form.Time}}</dd>{{end}}
+                <dt>Text</dt><dd class="note-body">{{$d.Note.Description}}</dd>
+                {{if $d.Note.Categories}}<dt>Tags</dt><dd>{{range $d.Note.Categories}}<span class="tag">{{.}}</span>{{end}}</dd>{{end}}
+            </dl>
+            <p class="hint">This notebook is read-only.</p>
+            {{else}}
+            <form method="post" action="{{if $d.IsNew}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="save">
+                {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
+                <label for="summary">Title</label><input id="summary" name="summary" value="{{$d.Form.Summary}}" placeholder="optional">
+                <label for="description">Text</label><textarea id="description" name="description" rows="14" autofocus>{{$d.Form.Description}}</textarea>
+                <div class="event-time-grid">
+                    <label>Date <input type="date" name="date" value="{{$d.Form.Date}}"></label>
+                    <label>Time <input type="time" name="time" value="{{$d.Form.Time}}"></label>
+                </div>
+                <label for="categories">Tags</label><input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                <label for="related">Related to</label><input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
+                <p class="hint">A related UID ties this note to an event or a task in the same collection.</p>
+                <button type="submit">Save</button>
+            </form>
+            {{if not $d.IsNew}}
+            <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="etag" value="{{$d.ETag}}">
+                <button type="submit" class="link">Delete note</button>
+            </form>
+            {{end}}
+            {{end}}
+            {{if $d.Related}}
+            <section class="other-props">
+                <h2>Related</h2>
+                <ul class="related-list">{{range $d.Related}}
+                    <li>{{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}<code>{{.UID}}</code>{{end}}<span class="hint">{{.Kind}}{{if .RelType}} · {{.RelType}}{{end}}</span></li>
+                {{end}}</ul>
+            </section>
+            {{end}}
+            {{if $d.Note.Other}}
+            <section class="other-props"><h2>Other properties</h2><p class="hint">Kept as the server sent them and not offered for editing.</p>
+                <ul>{{range $d.Note.Other}}<li><code>{{.Name}}</code>{{range .Values}} {{.Text}}{{end}}</li>{{end}}</ul>
+            </section>
+            {{end}}
+            {{if $d.PrintDate}}<p class="print-footer print-only">Carrel · note · captured {{$d.PrintDate}}</p>{{end}}
+        </section>
+    </div>
+</div>
+{{end}}

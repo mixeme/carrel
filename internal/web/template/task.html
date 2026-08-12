@@ -1,0 +1,77 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout calendar-layout">
+    <aside class="sidebar card no-print">
+        <h2>Task lists</h2>
+        <ul class="collection-list">{{range $d.Sources}}
+            <li><a class="collection-link" href="{{$.Base}}/app/tasks/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
+        {{end}}</ul>
+        <p><a href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to tasks</a></p>
+    </aside>
+    <div class="app-main">
+        <section class="card">
+            <div class="contacts-header">
+                <div>
+                    <h1>{{if $d.IsNew}}New task{{else}}{{$d.Task.DisplayTitle}}{{end}}</h1>
+                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                </div>
+            </div>
+            {{if $d.ReadOnly}}
+            <dl class="contact-readonly">
+                {{if $d.Form.DueDate}}<dt>Due</dt><dd>{{$d.Form.DueDate}} {{$d.Form.DueTime}}</dd>{{end}}
+                {{if $d.Task.Status}}<dt>Status</dt><dd>{{$d.Task.Status}}</dd>{{end}}
+                {{if $d.Task.Location}}<dt>Location</dt><dd>{{$d.Task.Location}}</dd>{{end}}
+                {{if $d.Task.Description}}<dt>Description</dt><dd>{{$d.Task.Description}}</dd>{{end}}
+            </dl>
+            <p class="hint">This task list is read-only.</p>
+            {{else}}
+            <form method="post" action="{{if $d.IsNew}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="save">
+                {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
+                <label for="summary">Summary</label><input id="summary" name="summary" value="{{$d.Form.Summary}}" required>
+                <label for="description">Description</label><textarea id="description" name="description" rows="5">{{$d.Form.Description}}</textarea>
+                <label for="location">Location</label><input id="location" name="location" value="{{$d.Form.Location}}">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="NEEDS-ACTION"{{if eq $d.Form.Status "NEEDS-ACTION"}} selected{{end}}>Needs action</option>
+                    <option value="IN-PROCESS"{{if eq $d.Form.Status "IN-PROCESS"}} selected{{end}}>In progress</option>
+                    <option value="COMPLETED"{{if eq $d.Form.Status "COMPLETED"}} selected{{end}}>Completed</option>
+                    <option value="CANCELLED"{{if eq $d.Form.Status "CANCELLED"}} selected{{end}}>Cancelled</option>
+                </select>
+                <div class="event-time-grid">
+                    <label>Start date <input type="date" name="start_date" value="{{$d.Form.StartDate}}"></label>
+                    <label>Due date <input type="date" name="due_date" value="{{$d.Form.DueDate}}"></label>
+                    <label>Due time <input type="time" name="due_time" value="{{$d.Form.DueTime}}"></label>
+                    <label>Priority <input type="number" name="priority" min="0" max="9" value="{{$d.Form.Priority}}"></label>
+                    <label>Percent complete <input type="number" name="percent_complete" min="0" max="100" value="{{$d.Form.PercentComplete}}"></label>
+                </div>
+                <label for="categories">Categories</label><input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                <label for="related">Related to</label><input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
+                <p class="hint">A related UID ties this task to an event or a note in the same collection.</p>
+                <button type="submit">Save</button>
+            </form>
+            {{if not $d.IsNew}}
+            <form method="post" action="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="etag" value="{{$d.ETag}}">
+                <button type="submit" class="link">Delete task</button>
+            </form>
+            {{end}}
+            {{end}}
+            {{if $d.Related}}
+            <section class="other-props">
+                <h2>Related</h2>
+                <ul class="related-list">{{range $d.Related}}
+                    <li>{{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}<code>{{.UID}}</code>{{end}}<span class="hint">{{.Kind}}{{if .RelType}} · {{.RelType}}{{end}}</span></li>
+                {{end}}</ul>
+            </section>
+            {{end}}
+            {{if $d.Task.Other}}
+            <section class="other-props"><h2>Other properties</h2><p class="hint">Kept as the server sent them and not offered for editing.</p>
+                <ul>{{range $d.Task.Other}}<li><code>{{.Name}}</code>{{range .Values}} {{.Text}}{{end}}</li>{{end}}</ul>
+            </section>
+            {{end}}
+        </section>
+    </div>
+</div>
+{{end}}

@@ -20,7 +20,12 @@
         <a href="{{.Base}}/app/"{{if eq .Title "Carrel"}} aria-current="page"{{end}}>Profile</a>
         <a href="{{.Base}}/app/contacts"{{if or (eq .Title "Contacts") (eq .Title "New contact") (eq .Title "Conflict") (eq .Title "Import contacts") (eq .Title "Import report")}} aria-current="page"{{end}}>Contacts</a>
         <a href="{{.Base}}/app/calendar"{{if or (eq .Title "Agenda") (eq .Title "New event") (eq .Title "Event") (eq .Title "Calendar conflict") (eq .Title "Import calendar") (eq .Title "Calendar import report")}} aria-current="page"{{end}}>Calendar</a>
+        <a href="{{.Base}}/app/tasks"{{if or (eq .Title "Tasks") (eq .Title "New task") (eq .Title "Task") (eq .Title "Task conflict")}} aria-current="page"{{end}}>Tasks</a>
+        <a href="{{.Base}}/app/notes"{{if or (eq .Title "Notes") (eq .Title "New note") (eq .Title "Note") (eq .Title "Note conflict") (eq .Title "Import notes") (eq .Title "Notes import report")}} aria-current="page"{{end}}>Notes</a>
+        <a href="{{.Base}}/app/unified"{{if or (eq .Title "Everything") (eq .Title "All contacts")}} aria-current="page"{{end}}>Everything</a>
+        <a href="{{.Base}}/app/search"{{if eq .Title "Search"}} aria-current="page"{{end}}>Search</a>
         {{if .Admin}}<a href="{{.Base}}/admin/"{{if eq .Title "Administration"}} aria-current="page"{{end}}>Administration</a>{{end}}
+        <a class="quick-note" href="{{.Base}}/app/notes/quick" title="Write a note">New note</a>
         <form method="post" action="{{.Base}}/app/" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="refresh_cache">
@@ -43,4 +48,100 @@
 </footer>
 </body>
 </html>
+{{end}}
+
+{{/* The sources panel of §14: which collections a fan-out screen polls, ticked
+     and remembered between visits. It is defined here so every screen that
+     polls several sources shows the same list in the same place. */}}
+{{define "sourcepanel"}}
+{{$d := .Data}}
+<aside class="sidebar card no-print">
+    <h2>Sources</h2>
+    {{if $d.Sources}}
+    <form method="post" action="{{$d.SourcesURL}}">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <input type="hidden" name="mode" value="{{$d.Mode}}">
+        <ul class="source-list">
+        {{range $d.Sources}}
+            <li><label class="checkbox">
+                <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
+                <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                <span>{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
+            </label></li>
+        {{end}}
+        </ul>
+        <button type="submit">Apply</button>
+        <p class="hint">Unticked collections are not polled at all.</p>
+    </form>
+    {{else}}<p class="hint">No collections here yet. Connect a DAV account from your <a href="{{.Base}}/app/">profile</a>.</p>{{end}}
+</aside>
+{{end}}
+
+{{/* The progress panel and merged results of §16. It is defined against the
+     frame rather than in one page because the same markup is both the initial
+     render of a screen and every update pushed or polled afterwards. */}}
+{{define "findresults"}}
+{{$d := .Data}}
+<div class="find-progress">
+    <p class="find-summary" role="status">{{$d.Snapshot.Summary}}</p>
+    <ul class="find-sources">
+    {{range $d.Snapshot.Sources}}
+        <li class="find-source is-{{.State}}">
+            <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+            <span class="find-source-name">{{.CollectionLabel}}<span class="hint">{{.AccountLabel}}</span></span>
+            <span class="find-source-state">
+                {{if eq (printf "%s" .State) "waiting"}}Waiting
+                {{else if eq (printf "%s" .State) "querying"}}Querying…
+                {{else if eq (printf "%s" .State) "done"}}{{.Count}} found
+                {{else if eq (printf "%s" .State) "empty"}}Nothing here
+                {{else if eq (printf "%s" .State) "cancelled"}}Stopped
+                {{else if eq (printf "%s" .State) "timeout"}}Timed out
+                {{else}}Unavailable{{end}}
+                {{if .FromCache}}<span class="hint">from cache</span>{{end}}
+                {{if .Reason}}<span class="hint">{{.Reason}}</span>{{end}}
+            </span>
+            {{if .State.Failed}}
+            <button type="button" class="link"
+                    hx-post="{{$d.RetryURL}}" hx-vals='{"source": "{{.ID}}"}'
+                    hx-target="#find-panel" hx-swap="innerHTML"
+                    hx-headers='{"X-CSRF-Token": "{{$.CSRF}}"}'>Retry</button>
+            {{end}}
+        </li>
+    {{end}}
+    </ul>
+    {{if $d.Snapshot.Running}}
+    <button type="button" class="link"
+            hx-post="{{$d.CancelURL}}" hx-target="#find-panel" hx-swap="innerHTML"
+            hx-headers='{"X-CSRF-Token": "{{$.CSRF}}"}'>Stop polling</button>
+    {{end}}
+</div>
+{{if $d.Groups}}
+<div class="find-results">
+{{range $d.Groups}}
+    <section class="find-group">
+        <h2>{{.Label}}</h2>
+        <ul class="find-rows">
+        {{range .Rows}}
+            <li class="find-row is-{{.Kind}}{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}">
+                <span class="find-row-time">{{.TimeLabel}}</span>
+                <span class="find-row-body">
+                    {{if .URL}}<a href="{{.URL}}"><strong>{{.Title}}</strong></a>{{else}}<strong>{{.Title}}</strong>{{end}}
+                    <span class="hint">{{.Subtitle}}</span>
+                </span>
+                <span class="find-row-kind">{{.Kind}}</span>
+            </li>
+        {{end}}
+        </ul>
+    </section>
+{{end}}
+</div>
+{{else if not $d.Snapshot.Running}}
+<p class="hint">Nothing found.</p>
+{{end}}
+{{if and $d.Snapshot.Running (not $d.UseSSE)}}
+{{/* The poller is part of the fragment and is replaced by the next one, so a
+     finished poll stops asking without anything having to switch it off. */}}
+<div hx-get="{{$d.PollURL}}" hx-trigger="load delay:{{$d.PollMillis}}ms"
+     hx-target="#find-panel" hx-swap="innerHTML"></div>
+{{end}}
 {{end}}

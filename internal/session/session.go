@@ -118,6 +118,11 @@ type Options struct {
 	Now func() time.Time
 	// Cache holds per-session collection cache limits (§12).
 	Cache CacheConfig
+	// OnEnd is called with the identifier of a session that has just ended,
+	// however it ended. Work started on behalf of a session and outliving the
+	// request that started it — a fan-out poll above all — is stopped from
+	// here, so a logout or an expiry leaves nothing running (§16).
+	OnEnd func(sessionID string)
 }
 
 // Default session lifetimes. The administrator overrides them from global
@@ -265,6 +270,9 @@ func (m *Manager) remove(s *Session) {
 	s.dead = true
 	s.mu.Unlock()
 	m.detach(s)
+	if m.opts.OnEnd != nil {
+		m.opts.OnEnd(s.ID)
+	}
 }
 
 // Rotate replaces a session with an identical one under a new identifier,

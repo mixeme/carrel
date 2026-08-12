@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -31,9 +32,12 @@ type eventCardView struct {
 	ETag         string
 	Event        model.Event
 	Form         eventForm
-	ReadOnly     bool
-	IsNew        bool
-	PrintDate    string
+	Related      []relatedRow
+	// NoteURL opens a new note already linked to this event (§23.9).
+	NoteURL   string
+	ReadOnly  bool
+	IsNew     bool
+	PrintDate string
 }
 
 type eventForm struct {
@@ -150,7 +154,7 @@ func (s *Server) eventSave(w http.ResponseWriter, r *http.Request, isNew bool) {
 			obj, err = model.NewEvent(uid)
 		}
 	} else {
-		obj, err = p.Get(ctx, collection, eventPathForUID(collection, uid))
+		obj, err = p.Get(ctx, collection, calendarObjectPath(collection, uid))
 		if err == nil && strings.TrimSpace(r.PostFormValue("etag")) != "" {
 			obj.ETag = strings.TrimSpace(r.PostFormValue("etag"))
 		}
@@ -172,7 +176,7 @@ func (s *Server) eventSave(w http.ResponseWriter, r *http.Request, isNew bool) {
 	}
 	var result *calendar.WriteResult
 	if isNew {
-		obj.Path = eventPathForUID(collection, uid)
+		obj.Path = calendarObjectPath(collection, uid)
 		result, err = p.Create(ctx, collection, obj)
 	} else {
 		result, err = p.Update(ctx, collection, obj)
@@ -206,7 +210,7 @@ func (s *Server) eventDelete(w http.ResponseWriter, r *http.Request, accountID, 
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
-	err = p.Delete(ctx, normalizeCollectionPath(col.Path), eventPathForUID(col.Path, uid), strings.TrimSpace(r.PostFormValue("etag")))
+	err = p.Delete(ctx, normalizeCollectionPath(col.Path), calendarObjectPath(col.Path, uid), strings.TrimSpace(r.PostFormValue("etag")))
 	if err != nil {
 		if calendar.IsConflict(err) {
 			s.showCalendarConflict(w, r, sess, accountID, col.Path, colEnc, uid, err)
@@ -229,7 +233,7 @@ func (s *Server) loadEventCard(ctx context.Context, sess *session.Session, accou
 	}
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
-	obj, err := p.Get(ctx, normalizeCollectionPath(col.Path), eventPathForUID(col.Path, uid))
+	obj, err := p.Get(ctx, normalizeCollectionPath(col.Path), calendarObjectPath(col.Path, uid))
 	if err != nil {
 		return eventCardView{}, err
 	}
@@ -237,7 +241,24 @@ func (s *Server) loadEventCard(ctx context.Context, sess *session.Session, accou
 	if err != nil {
 		return eventCardView{}, err
 	}
-	return s.eventCardFromObject(sess, accountID, colEnc, col, *acc, obj, formFromEvent(ev), false), nil
+	card := s.eventCardFromObject(sess, accountID, colEnc, col, *acc, obj, formFromEvent(ev), false)
+	card.Related = s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), ev.Related)
+	// The minutes of a meeting are written from the meeting (§23.9): the link
+	// carries the event's identity and date so the note arrives already tied to
+	// it, with nothing to copy by hand.
+	card.NoteURL = s.noteAboutURL(accountID, colEnc, ev)
+	return card, nil
+}
+
+// noteAboutURL is the "write a note about this" link of an event card. It points
+// at the notes collection §23.9 files into by default, and falls back to the
+// event's own calendar when there is no separate one.
+func (s *Server) noteAboutURL(accountID, colEnc string, ev model.Event) string {
+	values := url.Values{"related": {ev.UID}, "summary": {"Notes: " + ev.DisplayTitle()}}
+	if !ev.Start.IsZero() {
+		values.Set("date", ev.Start.In(s.timezone()).Format("2006-01-02"))
+	}
+	return s.Path("/app/notes/"+accountID+"/"+colEnc+"/new") + "?" + values.Encode()
 }
 
 func (s *Server) eventCardFromObject(sess *session.Session, accountID, colEnc string, col discovery.Collection, acc account.Account, obj *model.Object, form eventForm, isNew bool) eventCardView {

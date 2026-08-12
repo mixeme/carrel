@@ -109,11 +109,11 @@ func (o *Object) AssignUID(uid string) error {
 		o.card.SetValue(vcard.FieldUID, uid)
 		return nil
 	case KindICal:
-		ev := o.primaryEvent()
-		if ev == nil {
-			return errors.New("model: calendar object has no VEVENT")
+		comp := o.primaryComponent()
+		if comp == nil {
+			return errors.New("model: calendar object has no VEVENT, VTODO or VJOURNAL")
 		}
-		ev.Props.SetText("UID", uid)
+		comp.Props.SetText("UID", uid)
 		return nil
 	default:
 		return fmt.Errorf("model: unknown object kind %q", o.kind)

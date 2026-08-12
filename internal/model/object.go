@@ -42,6 +42,14 @@ var ErrNotVCard = errors.New("model: object is not an address object")
 // applied to something else.
 var ErrNotICal = errors.New("model: object is not a calendar object")
 
+// ErrNotTodo is returned when a task view is asked of something that is not a
+// VTODO.
+var ErrNotTodo = errors.New("model: object is not a task")
+
+// ErrNotJournal is returned when a note view is asked of something that is not
+// a VJOURNAL.
+var ErrNotJournal = errors.New("model: object is not a note")
+
 // Object is a DAV resource together with its parsed payload.
 //
 // The payload is unexported (§8). Everything a caller needs for display comes
@@ -111,7 +119,15 @@ func NewVCard(version, uid string) (*Object, error) {
 
 // NewEvent builds a new calendar object with a single VEVENT that holds UID and
 // DTSTAMP. Every other property arrives through Apply.
-func NewEvent(uid string) (*Object, error) {
+func NewEvent(uid string) (*Object, error) { return newCalendarObject(ical.CompEvent, uid) }
+
+// NewTodo builds a new calendar object with a single VTODO (§10).
+func NewTodo(uid string) (*Object, error) { return newCalendarObject(ical.CompToDo, uid) }
+
+// NewJournal builds a new calendar object with a single VJOURNAL (§23.9).
+func NewJournal(uid string) (*Object, error) { return newCalendarObject(ical.CompJournal, uid) }
+
+func newCalendarObject(component, uid string) (*Object, error) {
 	uid = strings.TrimSpace(uid)
 	if uid == "" {
 		return nil, errors.New("model: UID is required")
@@ -119,10 +135,10 @@ func NewEvent(uid string) (*Object, error) {
 	cal := ical.NewCalendar()
 	cal.Props.SetText(ical.PropVersion, "2.0")
 	cal.Props.SetText(ical.PropProductID, DefaultICalProductID)
-	ev := ical.NewEvent()
-	ev.Props.SetText(ical.PropUID, uid)
-	ev.Props.SetDateTime(ical.PropDateTimeStamp, time.Now().UTC())
-	cal.Children = append(cal.Children, ev.Component)
+	comp := ical.NewComponent(component)
+	comp.Props.SetText(ical.PropUID, uid)
+	comp.Props.SetDateTime(ical.PropDateTimeStamp, time.Now().UTC())
+	cal.Children = append(cal.Children, comp)
 	return &Object{kind: KindICal, cal: cal}, nil
 }
 
@@ -167,8 +183,8 @@ func (o *Object) UID() string {
 		}
 		return o.card.Value(vcard.FieldUID)
 	case KindICal:
-		if ev := o.primaryEvent(); ev != nil {
-			return icalPropText(ev.Props, ical.PropUID)
+		if comp := o.primaryComponent(); comp != nil {
+			return icalPropText(comp.Props, ical.PropUID)
 		}
 		return ""
 	default:
@@ -245,12 +261,12 @@ func (o *Object) Names() []string {
 		sort.Strings(names)
 		return names
 	case KindICal:
-		ev := o.primaryEvent()
-		if ev == nil {
+		comp := o.primaryComponent()
+		if comp == nil {
 			return nil
 		}
-		names := make([]string, 0, len(ev.Props))
-		for name := range ev.Props {
+		names := make([]string, 0, len(comp.Props))
+		for name := range comp.Props {
 			names = append(names, name)
 		}
 		sort.Strings(names)
@@ -284,11 +300,11 @@ func (o *Object) Property(name string) []Value {
 		}
 		return out
 	case KindICal:
-		ev := o.primaryEvent()
-		if ev == nil {
+		comp := o.primaryComponent()
+		if comp == nil {
 			return nil
 		}
-		props := ev.Props[canonical]
+		props := comp.Props[canonical]
 		if len(props) == 0 {
 			return nil
 		}
@@ -333,6 +349,37 @@ func (o *Object) primaryEvent() *ical.Event {
 		return nil
 	}
 	return &events[0]
+}
+
+// primaryComponent returns the component a calendar object is about: its
+// VEVENT, VTODO or VJOURNAL. Everything that reads or patches properties goes
+// through this, so a task or a note keeps the unknown properties another client
+// left on it exactly as an event does (§8, §23.9). VTIMEZONE and alarms are
+// carried along untouched and are never the primary component.
+func (o *Object) primaryComponent() *ical.Component {
+	if o == nil || o.cal == nil {
+		return nil
+	}
+	for _, child := range o.cal.Children {
+		if child == nil {
+			continue
+		}
+		switch strings.ToUpper(child.Name) {
+		case ical.CompEvent, ical.CompToDo, ical.CompJournal:
+			return child
+		}
+	}
+	return nil
+}
+
+// Component reports which iCalendar component the object carries, upper-cased,
+// or "" for anything that is not a calendar object.
+func (o *Object) Component() string {
+	comp := o.primaryComponent()
+	if comp == nil {
+		return ""
+	}
+	return strings.ToUpper(comp.Name)
 }
 
 func cloneCard(card vcard.Card) vcard.Card {

@@ -29,3 +29,18 @@ document.addEventListener('change', function (e) {
     if (!cb) return;
     document.body.classList.toggle('print-with-photos', cb.checked);
 });
+
+// Progress delivery (§16): the panel is streamed when the browser and the
+// network allow it, and falls back to polling by itself when the stream will not
+// open. The fallback fetch returns a fragment that carries its own poller, so
+// nothing further has to be switched on here.
+document.addEventListener('htmx:sseError', function (e) {
+    var panel = e.target.closest('[data-sse-panel]');
+    if (!panel || panel.dataset.pollFallback === 'on') return;
+    panel.dataset.pollFallback = 'on';
+    panel.removeAttribute('sse-connect');
+    panel.removeAttribute('sse-swap');
+    var url = panel.getAttribute('data-poll-url');
+    if (!url || !window.htmx) return;
+    window.htmx.ajax('GET', url, { target: panel, swap: 'innerHTML' });
+});

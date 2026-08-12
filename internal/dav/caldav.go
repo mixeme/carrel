@@ -55,10 +55,29 @@ type CalendarFilter struct {
 
 // CompFilter selects a component by name and optional nested filters.
 type CompFilter struct {
-	XMLName    xml.Name    `xml:"urn:ietf:params:xml:ns:caldav comp-filter"`
-	Name       string      `xml:"name,attr"`
-	CompFilter *CompFilter `xml:"urn:ietf:params:xml:ns:caldav comp-filter,omitempty"`
-	TimeRange  *TimeRange  `xml:"urn:ietf:params:xml:ns:caldav time-range,omitempty"`
+	XMLName     xml.Name     `xml:"urn:ietf:params:xml:ns:caldav comp-filter"`
+	Name        string       `xml:"name,attr"`
+	CompFilter  *CompFilter  `xml:"urn:ietf:params:xml:ns:caldav comp-filter,omitempty"`
+	TimeRange   *TimeRange   `xml:"urn:ietf:params:xml:ns:caldav time-range,omitempty"`
+	PropFilters []PropFilter `xml:"urn:ietf:params:xml:ns:caldav prop-filter,omitempty"`
+}
+
+// PropFilter narrows a component by one of its properties (RFC 4791 §9.7.2).
+type PropFilter struct {
+	XMLName   xml.Name   `xml:"urn:ietf:params:xml:ns:caldav prop-filter"`
+	Name      string     `xml:"name,attr"`
+	TextMatch *TextMatch `xml:"urn:ietf:params:xml:ns:caldav text-match,omitempty"`
+}
+
+// CalDAVCollation is the case-insensitive collation every CalDAV and CardDAV
+// server has to support (RFC 4791 §7.5.1).
+const CalDAVCollation = "i;unicode-casemap"
+
+// TextMatch is a substring condition on a property value (RFC 4791 §9.7.5).
+type TextMatch struct {
+	XMLName   xml.Name `xml:"urn:ietf:params:xml:ns:caldav text-match"`
+	Collation string   `xml:"collation,attr,omitempty"`
+	Text      string   `xml:",chardata"`
 }
 
 // TimeRange limits a calendar-query to a UTC interval (RFC 4791 §9.9).
@@ -68,9 +87,63 @@ type TimeRange struct {
 	End     string   `xml:"end,attr,omitempty"`
 }
 
+// Component names a calendar-query can filter on (§10).
+const (
+	CompEvent   = "VEVENT"
+	CompTodo    = "VTODO"
+	CompJournal = "VJOURNAL"
+)
+
 // NewCalendarQuery builds a VEVENT query covering [start, end). Times are
 // formatted as UTC DATE-TIME values without separators beyond the RFC form.
 func NewCalendarQuery(start, end time.Time, props ...xml.Name) *CalendarQuery {
+	return NewCalendarComponentQuery(CompEvent, start, end, props...)
+}
+
+// NewCalendarComponentQuery builds a query for one component kind, optionally
+// limited to [start, end). A zero start and end asks for the whole collection,
+// which is what a journal or a task list wants: neither carries a time range
+// that a server would filter on usefully.
+func NewCalendarComponentQuery(component string, start, end time.Time, props ...xml.Name) *CalendarQuery {
+	inner := &CompFilter{Name: component}
+	if !start.IsZero() || !end.IsZero() {
+		tr := &TimeRange{}
+		if !start.IsZero() {
+			tr.Start = formatCalDAVTime(start)
+		}
+		if !end.IsZero() {
+			tr.End = formatCalDAVTime(end)
+		}
+		inner.TimeRange = tr
+	}
+	return &CalendarQuery{
+		Prop:   &Prop{Raw: rawProps(props)},
+		Filter: &CalendarFilter{CompFilter: &CompFilter{Name: "VCALENDAR", CompFilter: inner}},
+	}
+}
+
+// NewCalendarTextQuery builds a query matching one property of one component
+// against a substring (§16).
+//
+// CalDAV joins several prop-filters with AND, and there is no "any of" at this
+// level, so a search over more than one property is more than one query. The
+// alternative — pulling every object down and matching locally — is the cost the
+// report exists to avoid.
+func NewCalendarTextQuery(component, property, text string, props ...xml.Name) *CalendarQuery {
+	inner := &CompFilter{
+		Name: component,
+		PropFilters: []PropFilter{{
+			Name:      property,
+			TextMatch: &TextMatch{Collation: CalDAVCollation, Text: text},
+		}},
+	}
+	return &CalendarQuery{
+		Prop:   &Prop{Raw: rawProps(props)},
+		Filter: &CalendarFilter{CompFilter: &CompFilter{Name: "VCALENDAR", CompFilter: inner}},
+	}
+}
+
+func rawProps(props []xml.Name) []RawXMLValue {
 	if len(props) == 0 {
 		props = []xml.Name{GetETagName, CalendarDataName}
 	}
@@ -78,25 +151,7 @@ func NewCalendarQuery(start, end time.Time, props ...xml.Name) *CalendarQuery {
 	for i, name := range props {
 		raw[i] = *NewRawXMLElement(name, nil, nil)
 	}
-	tr := &TimeRange{}
-	if !start.IsZero() {
-		tr.Start = formatCalDAVTime(start)
-	}
-	if !end.IsZero() {
-		tr.End = formatCalDAVTime(end)
-	}
-	return &CalendarQuery{
-		Prop: &Prop{Raw: raw},
-		Filter: &CalendarFilter{
-			CompFilter: &CompFilter{
-				Name: "VCALENDAR",
-				CompFilter: &CompFilter{
-					Name:      "VEVENT",
-					TimeRange: tr,
-				},
-			},
-		},
-	}
+	return raw
 }
 
 func formatCalDAVTime(t time.Time) string {

@@ -10,6 +10,7 @@ import (
 	"io"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // ReadImportPayload extracts vCards from a lone .vcf body or a .zip of .vcf
@@ -113,6 +114,65 @@ func ReadICSImportPayload(filename string, body []byte, maxEvents int) ([]Parsed
 		}
 		return cals, nil
 	}
+}
+
+// ParsedMarkdown is one Markdown file taken from an import payload.
+type ParsedMarkdown struct {
+	Note   MarkdownNote
+	Source string
+	Error  string
+}
+
+// ReadMarkdownImportPayload extracts notes from a lone Markdown file or a .zip
+// of them (§23.9). A file that will not parse is reported and skipped: the
+// preview has to say what did not read rather than refuse the whole batch.
+func ReadMarkdownImportPayload(filename string, body []byte, maxNotes int) ([]ParsedMarkdown, error) {
+	if strings.HasSuffix(strings.ToLower(strings.TrimSpace(filename)), ".zip") {
+		return readZipMarkdown(body, maxNotes)
+	}
+	name := filename
+	if name == "" {
+		name = "upload.md"
+	}
+	note, err := ParseMarkdown(name, body, time.Time{})
+	if err != nil {
+		return []ParsedMarkdown{{Source: name, Error: err.Error()}}, nil
+	}
+	return []ParsedMarkdown{{Source: name, Note: note}}, nil
+}
+
+func readZipMarkdown(body []byte, maxNotes int) ([]ParsedMarkdown, error) {
+	zr, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
+	if err != nil {
+		return nil, fmt.Errorf("import: open zip: %w", err)
+	}
+	var out []ParsedMarkdown
+	for _, f := range zr.File {
+		if f.FileInfo().IsDir() || !IsMarkdownName(f.Name) {
+			continue
+		}
+		if maxNotes > 0 && len(out) >= maxNotes {
+			return out, fmt.Errorf("import exceeds %d notes; truncated", maxNotes)
+		}
+		rc, err := f.Open()
+		if err != nil {
+			out = append(out, ParsedMarkdown{Source: f.Name, Error: err.Error()})
+			continue
+		}
+		raw, err := io.ReadAll(io.LimitReader(rc, 8<<20))
+		rc.Close()
+		if err != nil {
+			out = append(out, ParsedMarkdown{Source: f.Name, Error: err.Error()})
+			continue
+		}
+		note, err := ParseMarkdown(f.Name, raw, f.Modified)
+		if err != nil {
+			out = append(out, ParsedMarkdown{Source: f.Name, Error: err.Error()})
+			continue
+		}
+		out = append(out, ParsedMarkdown{Source: f.Name, Note: note})
+	}
+	return out, nil
 }
 
 func readZipICals(body []byte, maxEvents int) ([]ParsedCalendar, error) {

@@ -25,6 +25,15 @@ type fakeCalendar struct {
 	objects          map[string]*fakeCalendarObject
 	lastPut          dav.PutOptions
 	failPrecondition bool
+
+	// queries records the calendar-query reports, so a test can tell what was
+	// asked of the server and how often.
+	queries []*dav.CalendarQuery
+	// ignoreFilter stands in for a server that answers a filter it does not
+	// implement with everything it has.
+	ignoreFilter bool
+	// refuseQuery makes calendar-query unavailable.
+	refuseQuery bool
 }
 
 type fakeCalendarObject struct {
@@ -65,8 +74,14 @@ func (s *fakeCalendar) Report(_ context.Context, _ string, _ dav.Depth, report a
 	case *dav.CalendarMultiget:
 		paths = body.Hrefs
 	case *dav.CalendarQuery:
-		for path := range s.objects {
-			paths = append(paths, path)
+		s.queries = append(s.queries, body)
+		if s.refuseQuery {
+			return nil, &dav.HTTPError{Code: http.StatusNotImplemented}
+		}
+		for path, obj := range s.objects {
+			if s.ignoreFilter || matchesCalendarQuery(obj.body, body) {
+				paths = append(paths, path)
+			}
 		}
 	default:
 		return nil, fmt.Errorf("unexpected report %T", report)
@@ -114,6 +129,41 @@ func (s *fakeCalendar) Delete(_ context.Context, path, etag string) error {
 	}
 	delete(s.objects, path)
 	return nil
+}
+
+// matchesCalendarQuery applies the component and property filters of a
+// calendar-query to one object. The time range is left to the provider, which
+// expands recurrences the fake knows nothing about.
+func matchesCalendarQuery(body string, query *dav.CalendarQuery) bool {
+	if query.Filter == nil || query.Filter.CompFilter == nil || query.Filter.CompFilter.CompFilter == nil {
+		return true
+	}
+	inner := query.Filter.CompFilter.CompFilter
+	if !strings.Contains(body, "BEGIN:"+inner.Name+"\r\n") {
+		return false
+	}
+	for _, filter := range inner.PropFilters {
+		if filter.TextMatch == nil {
+			continue
+		}
+		if !calendarPropContains(body, filter.Name, filter.TextMatch.Text) {
+			return false
+		}
+	}
+	return true
+}
+
+func calendarPropContains(body, property, text string) bool {
+	want := strings.ToLower(text)
+	for _, line := range strings.Split(body, "\r\n") {
+		if !strings.HasPrefix(line, property+":") && !strings.HasPrefix(line, property+";") {
+			continue
+		}
+		if strings.Contains(strings.ToLower(line), want) {
+			return true
+		}
+	}
+	return false
 }
 
 func calendarMS(body string) (*dav.MultiStatus, error) {

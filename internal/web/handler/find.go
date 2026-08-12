@@ -1,0 +1,983 @@
+// Copyright (C) 2026 Carrel contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+package handler
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"sort"
+	"strings"
+	"time"
+
+	"gitea.mixdep.ru/mix/carrel/internal/account"
+	"gitea.mixdep.ru/mix/carrel/internal/dav"
+	"gitea.mixdep.ru/mix/carrel/internal/dav/discovery"
+	"gitea.mixdep.ru/mix/carrel/internal/fanout"
+	"gitea.mixdep.ru/mix/carrel/internal/model"
+	"gitea.mixdep.ru/mix/carrel/internal/session"
+)
+
+// findMode is what a fan-out is for. It decides which sources are polled, what
+// each source is asked, and how the merged answer is grouped.
+type findMode string
+
+const (
+	// modeTime is the unified agenda: every ticked calendar, one date range.
+	modeTime findMode = "time"
+	// modePeople is the unified directory: every ticked address book.
+	modePeople findMode = "people"
+	// modeSearch is the cross-source search of §16, over both kinds at once.
+	modeSearch findMode = "search"
+	// modeTimeline is one contact's history across every calendar (§23.9).
+	modeTimeline findMode = "timeline"
+)
+
+func (m findMode) valid() bool {
+	switch m {
+	case modeTime, modePeople, modeSearch, modeTimeline:
+		return true
+	}
+	return false
+}
+
+// view is the account.Views key a mode saves its source selection under, so the
+// unified agenda and the search remember separate choices (§14).
+func (m findMode) view() string {
+	switch m {
+	case modePeople:
+		return account.ViewContacts
+	case modeSearch, modeTimeline:
+		return account.ViewSearch
+	default:
+		return account.ViewAgenda
+	}
+}
+
+// findRequest is everything a fan-out screen needs to be rebuilt from a URL.
+// Progress fragments carry it in the query string rather than in server state:
+// a task then holds only what it polled, and a reload cannot desynchronise the
+// page from the poll it is showing.
+type findRequest struct {
+	Mode findMode
+	// Query is the search text, empty outside modeSearch.
+	Query string
+	// From and To bound modeTime, as YYYY-MM-DD.
+	From string
+	To   string
+	// Kinds limits modeTime to events, tasks or notes.
+	Kinds []string
+	// Contact identifies the subject of modeTimeline.
+	Account    string
+	Collection string
+	UID        string
+	// Poll is set once the browser has fallen back from the stream, so every
+	// fragment after that carries the poller instead of waiting for events
+	// that are not coming (§16).
+	Poll bool
+}
+
+func parseFindRequest(r *http.Request) findRequest {
+	q := r.URL.Query()
+	req := findRequest{
+		Mode:       findMode(strings.TrimSpace(q.Get("mode"))),
+		Query:      strings.TrimSpace(q.Get("q")),
+		From:       strings.TrimSpace(q.Get("from")),
+		To:         strings.TrimSpace(q.Get("to")),
+		Account:    strings.TrimSpace(q.Get("account")),
+		Collection: strings.TrimSpace(q.Get("col")),
+		UID:        strings.TrimSpace(q.Get("uid")),
+		Poll:       q.Get("poll") == "1",
+	}
+	if !req.Mode.valid() {
+		req.Mode = modeTime
+	}
+	for _, kind := range q["kind"] {
+		switch strings.ToLower(strings.TrimSpace(kind)) {
+		case "events", "tasks", "notes":
+			req.Kinds = append(req.Kinds, strings.ToLower(strings.TrimSpace(kind)))
+		}
+	}
+	return req
+}
+
+func (f findRequest) values() url.Values {
+	v := url.Values{"mode": {string(f.Mode)}}
+	for _, key := range []struct{ name, value string }{
+		{"q", f.Query}, {"from", f.From}, {"to", f.To},
+		{"account", f.Account}, {"col", f.Collection}, {"uid", f.UID},
+	} {
+		if key.value != "" {
+			v.Set(key.name, key.value)
+		}
+	}
+	for _, kind := range f.Kinds {
+		v.Add("kind", kind)
+	}
+	if f.Poll {
+		v.Set("poll", "1")
+	}
+	return v
+}
+
+// Wants reports whether a kind is included in modeTime. It is called from the
+// template as well as the poll, so the ticked boxes and the poll cannot disagree.
+func (f findRequest) Wants(kind string) bool {
+	if len(f.Kinds) == 0 {
+		return true
+	}
+	for _, k := range f.Kinds {
+		if k == kind {
+			return true
+		}
+	}
+	return false
+}
+
+// resultRow is one merged record, ready to print. The fan-out carries these as
+// opaque data, so a source that is still running cannot change how an already
+// rendered row looks.
+type resultRow struct {
+	Kind       string
+	Title      string
+	Subtitle   string
+	TimeLabel  string
+	GroupKey   string
+	GroupLabel string
+	Sort       string
+	URL        string
+	Account    string
+	Collection string
+	Color      string
+	Tags       []string
+	Done       bool
+	Overdue    bool
+}
+
+type resultGroup struct {
+	Label string
+	Rows  []resultRow
+}
+
+type findView struct {
+	Request    findRequest
+	Mode       findMode
+	Title      string
+	Subject    string
+	TaskID     string
+	Sources    []sourceRow
+	Snapshot   fanout.Snapshot
+	Groups     []resultGroup
+	UseSSE     bool
+	PollMillis int
+	StreamURL  string
+	ResultsURL string
+	PollURL    string
+	RetryURL   string
+	CancelURL  string
+	SourcesURL string
+	// Back is where the screen came from, when it has one place to return to.
+	Back      string
+	NoSources bool
+	Unusable  string
+	FromLabel string
+	ToLabel   string
+}
+
+// Unified is the one place §14 asks for: every ticked collection at once, with
+// per-source progress instead of a single spinner.
+func (s *Server) Unified(w http.ResponseWriter, r *http.Request) {
+	req := parseFindRequest(r)
+	if req.Mode != modePeople {
+		req.Mode = modeTime
+	}
+	if req.Mode == modeTime && req.From == "" {
+		from, to := defaultUnifiedRange(s.timezone())
+		req.From, req.To = from, to
+	}
+	s.startFind(w, r, req, "unified.html")
+}
+
+// Search is the cross-source search of §16.
+func (s *Server) Search(w http.ResponseWriter, r *http.Request) {
+	req := parseFindRequest(r)
+	req.Mode = modeSearch
+	if req.Query == "" {
+		// Nothing to poll yet: show the form rather than start an empty task.
+		v := s.View(r, "Search")
+		v.Data = findView{
+			Request: req, Mode: modeSearch, Title: "Search",
+			Sources: s.findSourcesOrNil(r, req), SourcesURL: s.Path("/app/search/sources"),
+		}
+		s.Render(w, "search.html", v)
+		return
+	}
+	s.startFind(w, r, req, "search.html")
+}
+
+// ContactTimeline shows what a person appears in across every calendar (§23.9).
+func (s *Server) ContactTimeline(w http.ResponseWriter, r *http.Request) {
+	colEnc := r.PathValue("col")
+	collection, err := DecodeCollectionPath(colEnc)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	req := findRequest{
+		Mode: modeTimeline, Account: r.PathValue("account"),
+		Collection: collection, UID: r.PathValue("uid"),
+	}
+	s.startFind(w, r, req, "timeline.html")
+}
+
+// startFind begins a poll and renders the page that will follow it.
+func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findRequest, template string) {
+	sess := SessionFrom(r)
+	view := findView{
+		Request: req, Mode: req.Mode, Title: findTitle(req),
+		UseSSE: s.Progress.SSE(), PollMillis: s.pollMillis(),
+	}
+	view.SourcesURL = s.sourcesURL(req.Mode)
+	if req.Mode == modeTime {
+		view.FromLabel, view.ToLabel = req.From, req.To
+	}
+	if req.Mode == modeTimeline {
+		view.Back = s.Path("/app/contacts/" + req.Account + "/" + EncodeCollectionPath(req.Collection) + "/" + urlPathEscape(req.UID))
+	}
+	if s.Fanout == nil {
+		view.Unusable = "Cross-source polling is not configured on this instance."
+		s.renderFind(w, r, template, view)
+		return
+	}
+	rows, err := s.findSources(sess, req)
+	if err != nil {
+		view.Unusable = userFacingDAVError(err)
+		s.renderFind(w, r, template, view)
+		return
+	}
+	view.Sources = rows
+	if req.Mode == modeTimeline {
+		if subject, subjErr := s.timelineSubject(r.Context(), sess, req); subjErr == nil {
+			view.Subject = subject.name
+			req.Query = strings.Join(subject.terms, "\n")
+			view.Request = req
+			view.Title = "Timeline of " + subject.name
+		} else {
+			view.Unusable = userFacingDAVError(subjErr)
+			s.renderFind(w, r, template, view)
+			return
+		}
+	}
+	selected := selectedRows(rows)
+	if len(selected) == 0 {
+		view.NoSources = true
+		s.renderFind(w, r, template, view)
+		return
+	}
+	query, err := s.findQuery(sess, req)
+	if err != nil {
+		view.Unusable = userFacingDAVError(err)
+		s.renderFind(w, r, template, view)
+		return
+	}
+	task, err := s.Fanout.Start(sess.ID, fanoutSources(selected), query, s.fanoutOptions())
+	if err != nil {
+		if errors.Is(err, fanout.ErrNoSources) {
+			view.NoSources = true
+		} else {
+			view.Unusable = userFacingDAVError(err)
+		}
+		s.renderFind(w, r, template, view)
+		return
+	}
+	view.TaskID = task.ID
+	s.fillFindURLs(&view, req, task.ID)
+	view.Snapshot = task.Snapshot()
+	view.Groups = groupRows(req, view.Snapshot, s.timezone())
+	s.renderFind(w, r, template, view)
+}
+
+func (s *Server) renderFind(w http.ResponseWriter, r *http.Request, template string, view findView) {
+	v := s.View(r, view.Title)
+	v.Data = view
+	s.Render(w, template, v)
+}
+
+func (s *Server) fillFindURLs(view *findView, req findRequest, taskID string) {
+	base := s.Path("/app/find/" + urlPathEscape(taskID))
+	q := req.values().Encode()
+	view.ResultsURL = base + "/results?" + q
+	view.StreamURL = base + "/stream?" + q
+	view.RetryURL = base + "/retry?" + q
+	view.CancelURL = base + "/cancel?" + q
+	polling := req
+	polling.Poll = true
+	view.PollURL = base + "/results?" + polling.values().Encode()
+}
+
+// FindResults is the progress-and-results fragment, used by the poll fallback
+// and after a retry (§16).
+func (s *Server) FindResults(w http.ResponseWriter, r *http.Request) {
+	view, ok := s.findFragment(w, r)
+	if !ok {
+		return
+	}
+	s.RenderFragment(w, "find_results.html", s.fragmentView(r, view))
+}
+
+// fragmentView wraps a fan-out view in the frame data a template expects.
+func (s *Server) fragmentView(r *http.Request, view findView) View {
+	v := s.View(r, view.Title)
+	v.Data = view
+	return v
+}
+
+// FindRetry polls one source again without touching the others (§16).
+func (s *Server) FindRetry(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	sess := SessionFrom(r)
+	task, err := s.findTask(sess, r.PathValue("task"))
+	if err != nil {
+		http.Error(w, "that poll is no longer running.", http.StatusGone)
+		return
+	}
+	task.Retry(strings.TrimSpace(r.PostFormValue("source")))
+	view, ok := s.findFragment(w, r)
+	if !ok {
+		return
+	}
+	s.RenderFragment(w, "find_results.html", s.fragmentView(r, view))
+}
+
+// FindCancel stops a poll. §16 requires the partial results to stay on screen,
+// so the fragment is rendered from the snapshot after cancelling rather than
+// replaced by an empty state.
+func (s *Server) FindCancel(w http.ResponseWriter, r *http.Request) {
+	sess := SessionFrom(r)
+	taskID := r.PathValue("task")
+	task, err := s.findTask(sess, taskID)
+	if err != nil {
+		http.Error(w, "that poll is no longer running.", http.StatusGone)
+		return
+	}
+	task.Cancel()
+	view := s.viewFromTask(r, parseFindRequest(r), task)
+	s.RenderFragment(w, "find_results.html", s.fragmentView(r, view))
+}
+
+// findFragment resolves the task named in the path and builds the fragment view.
+func (s *Server) findFragment(w http.ResponseWriter, r *http.Request) (findView, bool) {
+	sess := SessionFrom(r)
+	task, err := s.findTask(sess, r.PathValue("task"))
+	if err != nil {
+		// A task that has been swept or belongs to another session is gone for
+		// good; say so once instead of letting the poll spin forever.
+		http.Error(w, "that poll is no longer running.", http.StatusGone)
+		return findView{}, false
+	}
+	return s.viewFromTask(r, parseFindRequest(r), task), true
+}
+
+func (s *Server) viewFromTask(r *http.Request, req findRequest, task *fanout.Task) findView {
+	view := findView{
+		Request: req, Mode: req.Mode, Title: findTitle(req), TaskID: task.ID,
+		UseSSE: s.Progress.SSE() && !req.Poll, PollMillis: s.pollMillis(),
+		SourcesURL: s.sourcesURL(req.Mode),
+	}
+	s.fillFindURLs(&view, req, task.ID)
+	view.Snapshot = task.Snapshot()
+	view.Groups = groupRows(req, view.Snapshot, s.timezone())
+	return view
+}
+
+func (s *Server) findTask(sess *session.Session, taskID string) (*fanout.Task, error) {
+	if s.Fanout == nil || sess == nil {
+		return nil, fanout.ErrNoTask
+	}
+	return s.Fanout.Get(sess.ID, strings.TrimSpace(taskID))
+}
+
+// FindStream pushes the same fragment over one event-source connection (§16).
+//
+// The stream ends itself as soon as the task is finished: an idle connection per
+// open tab is exactly what §13 asks not to keep. A heartbeat comment goes out
+// meanwhile so a proxy with an idle timeout does not drop a live poll.
+func (s *Server) FindStream(w http.ResponseWriter, r *http.Request) {
+	if !s.Progress.SSE() {
+		http.Error(w, "streaming is disabled", http.StatusNotFound)
+		return
+	}
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "streaming is unavailable", http.StatusNotImplemented)
+		return
+	}
+	sess := SessionFrom(r)
+	task, err := s.findTask(sess, r.PathValue("task"))
+	if err != nil {
+		http.Error(w, "that poll is no longer running.", http.StatusGone)
+		return
+	}
+	req := parseFindRequest(r)
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Connection", "keep-alive")
+	// Ask nginx not to buffer: a buffered event stream is a stream that
+	// arrives all at once at the end, which is worse than polling.
+	w.Header().Set("X-Accel-Buffering", "no")
+	w.WriteHeader(http.StatusOK)
+	flusher.Flush()
+
+	updates, release := task.Subscribe()
+	defer release()
+
+	heartbeat := time.NewTicker(20 * time.Second)
+	defer heartbeat.Stop()
+	// A last resort ceiling: whatever happens to the task, this connection is
+	// not held open for longer than a poll could possibly take.
+	deadline := time.NewTimer(s.streamLimit())
+	defer deadline.Stop()
+
+	for {
+		view := s.viewFromTask(r, req, task)
+		if err := s.writeSSE(w, "results", s.fragmentView(r, view)); err != nil {
+			return
+		}
+		if !view.Snapshot.Running {
+			_ = writeSSERaw(w, "done", "end")
+			flusher.Flush()
+			return
+		}
+		flusher.Flush()
+		select {
+		case <-updates:
+		case <-heartbeat.C:
+			if _, err := fmt.Fprint(w, ": keepalive\n\n"); err != nil {
+				return
+			}
+			flusher.Flush()
+		case <-deadline.C:
+			_ = writeSSERaw(w, "done", "end")
+			flusher.Flush()
+			return
+		case <-r.Context().Done():
+			// The tab is gone. The task stays alive on purpose: the person may
+			// be coming back with the same page, and the registry will sweep it
+			// if they do not (§16).
+			return
+		}
+	}
+}
+
+// writeSSE sends one rendered fragment as a single event. Every line of the
+// fragment becomes its own data line, which is what the protocol requires and
+// what keeps a multi-line HTML body from ending the event early.
+func (s *Server) writeSSE(w http.ResponseWriter, event string, v View) error {
+	html, err := s.Fragment("find_results.html", v)
+	if err != nil {
+		return err
+	}
+	return writeSSERaw(w, event, string(html))
+}
+
+func writeSSERaw(w http.ResponseWriter, event, payload string) error {
+	var b strings.Builder
+	b.WriteString("event: ")
+	b.WriteString(event)
+	b.WriteString("\n")
+	for _, line := range strings.Split(strings.ReplaceAll(payload, "\r\n", "\n"), "\n") {
+		b.WriteString("data: ")
+		b.WriteString(line)
+		b.WriteString("\n")
+	}
+	b.WriteString("\n")
+	_, err := w.Write([]byte(b.String()))
+	return err
+}
+
+// FindSources saves which collections a fan-out screen polls (§14).
+func (s *Server) FindSources(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	sess := SessionFrom(r)
+	req := parseFindRequest(r)
+	if mode := findMode(strings.TrimSpace(r.PostFormValue("mode"))); mode.valid() {
+		req.Mode = mode
+	}
+	rows, err := s.findSources(sess, req)
+	if err != nil {
+		http.Error(w, userFacingDAVError(err), http.StatusBadGateway)
+		return
+	}
+	if err := s.saveSelection(sess, req.Mode.view(), r.PostForm["source"], rows); err != nil {
+		http.Error(w, userFacingDAVError(err), http.StatusBadGateway)
+		return
+	}
+	// Restarting the poll is the point of changing the selection, so the
+	// browser goes back to the screen itself rather than to a fragment.
+	target := SafeRedirect(r.PostFormValue("back"), s.screenURL(req))
+	if IsHTMX(r) {
+		w.Header().Set("HX-Redirect", target)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	http.Redirect(w, r, target, http.StatusSeeOther)
+}
+
+func (s *Server) sourcesURL(mode findMode) string {
+	if mode == modePeople || mode == modeTime {
+		return s.Path("/app/unified/sources")
+	}
+	return s.Path("/app/search/sources")
+}
+
+func (s *Server) screenURL(req findRequest) string {
+	values := req.values()
+	switch req.Mode {
+	case modeSearch:
+		return s.Path("/app/search") + "?" + values.Encode()
+	case modeTimeline:
+		return s.Path("/app/contacts/" + req.Account + "/" + EncodeCollectionPath(req.Collection) + "/" + urlPathEscape(req.UID) + "/timeline")
+	default:
+		return s.Path("/app/unified") + "?" + values.Encode()
+	}
+}
+
+// findSources lists the collections a mode can poll. A search spans both kinds,
+// which is why the list is built from two calls and kept in one slice (§16).
+func (s *Server) findSources(sess *session.Session, req findRequest) ([]sourceRow, error) {
+	switch req.Mode {
+	case modePeople:
+		return s.collectionsOfKind(sess, discovery.KindAddressBook, req.Mode.view(), "")
+	case modeTimeline:
+		return s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
+	case modeSearch:
+		calendars, err := s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
+		if err != nil {
+			return nil, err
+		}
+		books, err := s.collectionsOfKind(sess, discovery.KindAddressBook, req.Mode.view(), "")
+		if err != nil {
+			return nil, err
+		}
+		return append(calendars, books...), nil
+	default:
+		return s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
+	}
+}
+
+func (s *Server) findSourcesOrNil(r *http.Request, req findRequest) []sourceRow {
+	rows, err := s.findSources(SessionFrom(r), req)
+	if err != nil {
+		return nil
+	}
+	return rows
+}
+
+func (s *Server) fanoutOptions() fanout.Options {
+	return fanout.Options{
+		SourceTimeout: s.Progress.SourceTimeout.Duration(),
+		TotalTimeout:  s.Progress.TotalTimeout.Duration(),
+	}
+}
+
+func (s *Server) pollMillis() int {
+	if s.Progress.PollMillis > 0 {
+		return s.Progress.PollMillis
+	}
+	return 700
+}
+
+// streamLimit keeps an event-source connection from outliving the poll it
+// reports on by more than a margin.
+func (s *Server) streamLimit() time.Duration {
+	total := s.Progress.TotalTimeout.Duration()
+	if total <= 0 {
+		total = fanout.DefaultTotalTimeout
+	}
+	return total + 2*time.Minute
+}
+
+func defaultUnifiedRange(loc *time.Location) (string, string) {
+	today := time.Now().In(loc)
+	return today.Format("2006-01-02"), today.AddDate(0, 0, 14).Format("2006-01-02")
+}
+
+func findTitle(req findRequest) string {
+	switch req.Mode {
+	case modePeople:
+		return "All contacts"
+	case modeSearch:
+		if req.Query != "" {
+			return "Search: " + req.Query
+		}
+		return "Search"
+	case modeTimeline:
+		return "Timeline"
+	default:
+		return "Everything"
+	}
+}
+
+// groupRows turns a snapshot into the printed groups. Ordering is by mode: an
+// agenda reads forwards in time, a timeline backwards, and a search by kind.
+func groupRows(req findRequest, snap fanout.Snapshot, loc *time.Location) []resultGroup {
+	rows := make([]resultRow, 0, len(snap.Items))
+	for _, item := range snap.Items {
+		if row, ok := item.Data.(resultRow); ok {
+			rows = append(rows, row)
+		}
+	}
+	descending := req.Mode == modeTimeline
+	sort.SliceStable(rows, func(i, j int) bool {
+		if rows[i].Sort == rows[j].Sort {
+			return strings.ToLower(rows[i].Title) < strings.ToLower(rows[j].Title)
+		}
+		if descending {
+			return rows[i].Sort > rows[j].Sort
+		}
+		return rows[i].Sort < rows[j].Sort
+	})
+	var groups []resultGroup
+	index := make(map[string]int)
+	for _, row := range rows {
+		at, ok := index[row.GroupKey]
+		if !ok {
+			groups = append(groups, resultGroup{Label: row.GroupLabel})
+			at = len(groups) - 1
+			index[row.GroupKey] = at
+		}
+		groups[at].Rows = append(groups[at].Rows, row)
+	}
+	return groups
+}
+
+// timelineSubject is the person a timeline is about, and the terms to look for.
+type timelineSubject struct {
+	name  string
+	terms []string
+}
+
+func (s *Server) timelineSubject(ctx context.Context, sess *session.Session, req findRequest) (timelineSubject, error) {
+	p, acc, err := s.contactsProvider(sess, req.Account)
+	if err != nil {
+		return timelineSubject{}, err
+	}
+	col, err := findAddressBook(acc, req.Collection)
+	if err != nil {
+		return timelineSubject{}, err
+	}
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	obj, err := p.Get(ctx, normalizeCollectionPath(col.Path), objectPathForUID(normalizeCollectionPath(col.Path), req.UID))
+	if err != nil {
+		return timelineSubject{}, err
+	}
+	contact, err := obj.Contact()
+	if err != nil {
+		return timelineSubject{}, err
+	}
+	subject := timelineSubject{name: contact.DisplayName()}
+	seen := make(map[string]bool)
+	add := func(term string) {
+		term = strings.TrimSpace(term)
+		if term == "" || seen[strings.ToLower(term)] {
+			return
+		}
+		seen[strings.ToLower(term)] = true
+		subject.terms = append(subject.terms, term)
+	}
+	// Addresses first: an ATTENDEE is a mailto and matches exactly, where a
+	// name match is a guess that happens to be worth making as well (§23.9).
+	for _, address := range contact.NormalizedEmails() {
+		add(address)
+	}
+	add(contact.DisplayName())
+	if len(subject.terms) == 0 {
+		return subject, errors.New("this contact has no name or address to look for")
+	}
+	return subject, nil
+}
+
+// findQuery builds the per-source poll for a mode. It is a closure over the
+// session and the request, and is called once per source on its own goroutine;
+// everything it touches must be safe to use from several at once, which is why
+// each call makes its own provider.
+func (s *Server) findQuery(sess *session.Session, req findRequest) (fanout.Query, error) {
+	loc := s.timezone()
+	switch req.Mode {
+	case modeTime:
+		from, to, err := unifiedRange(req, loc)
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
+			return s.pollCalendarRange(ctx, sess, src, req, from, to, loc)
+		}, nil
+	case modePeople:
+		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
+			return s.pollContacts(ctx, sess, src)
+		}, nil
+	case modeSearch:
+		if req.Query == "" {
+			return nil, errors.New("nothing to search for")
+		}
+		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
+			return s.pollSearch(ctx, sess, src, []string{req.Query}, loc)
+		}, nil
+	case modeTimeline:
+		terms := strings.Split(req.Query, "\n")
+		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
+			return s.pollSearch(ctx, sess, src, terms, loc)
+		}, nil
+	}
+	return nil, fmt.Errorf("unknown view")
+}
+
+func unifiedRange(req findRequest, loc *time.Location) (time.Time, time.Time, error) {
+	from, err := time.ParseInLocation("2006-01-02", req.From, loc)
+	if err != nil {
+		return time.Time{}, time.Time{}, errors.New("from must be a YYYY-MM-DD date")
+	}
+	to := from.AddDate(0, 0, 14)
+	if req.To != "" {
+		parsed, parseErr := time.ParseInLocation("2006-01-02", req.To, loc)
+		if parseErr != nil {
+			return time.Time{}, time.Time{}, errors.New("to must be a YYYY-MM-DD date")
+		}
+		to = parsed.AddDate(0, 0, 1)
+	}
+	if !to.After(from) {
+		return time.Time{}, time.Time{}, errors.New("the range ends before it starts")
+	}
+	// A range of years across ten calendars is a way to hang the instance, not
+	// a view anybody reads.
+	if to.Sub(from) > 400*24*time.Hour {
+		return time.Time{}, time.Time{}, errors.New("the range is longer than a year")
+	}
+	return from, to, nil
+}
+
+// pollCalendarRange asks one calendar for the events, tasks and notes of a
+// range. Each component is a separate report, so a server that supports only
+// events still answers for the part it has.
+func (s *Server) pollCalendarRange(ctx context.Context, sess *session.Session, src fanout.Source, req findRequest, from, to time.Time, loc *time.Location) ([]fanout.Item, bool, error) {
+	p, _, err := s.calendarProvider(sess, src.AccountID)
+	if err != nil {
+		return nil, false, err
+	}
+	var items []fanout.Item
+	cached := true
+	var firstErr error
+	if req.Wants("events") {
+		agenda, err := p.Query(ctx, src.Collection, from, to)
+		switch {
+		case err != nil:
+			firstErr = err
+		default:
+			cached = cached && agenda.FromCache
+			for _, occ := range agenda.Occurrences {
+				items = append(items, occurrenceItem(src, occ, loc))
+			}
+		}
+	}
+	if req.Wants("tasks") {
+		set, err := p.QueryComponent(ctx, src.Collection, dav.CompTodo, time.Time{}, time.Time{})
+		switch {
+		case err != nil:
+			if firstErr == nil {
+				firstErr = err
+			}
+		default:
+			cached = cached && set.FromCache
+			for _, obj := range set.Objects {
+				todo, todoErr := obj.Todo(loc)
+				if todoErr != nil || todo.Due.IsZero() || !withinRange(todo.Due, from, to) {
+					continue
+				}
+				items = append(items, todoItem(src, todo, loc))
+			}
+		}
+	}
+	if req.Wants("notes") {
+		set, err := p.QueryComponent(ctx, src.Collection, dav.CompJournal, time.Time{}, time.Time{})
+		switch {
+		case err != nil:
+			if firstErr == nil {
+				firstErr = err
+			}
+		default:
+			cached = cached && set.FromCache
+			for _, obj := range set.Objects {
+				note, noteErr := obj.Note(loc)
+				if noteErr != nil || !withinRange(note.Date, from, to) {
+					continue
+				}
+				items = append(items, noteItem(src, note, loc))
+			}
+		}
+	}
+	// A partial answer is still an answer, but a source that gave nothing and
+	// failed is reported as failed rather than as empty (§16).
+	if firstErr != nil && len(items) == 0 {
+		return nil, false, firstErr
+	}
+	return items, cached && len(items) > 0, nil
+}
+
+func (s *Server) pollContacts(ctx context.Context, sess *session.Session, src fanout.Source) ([]fanout.Item, bool, error) {
+	p, _, err := s.contactsProvider(sess, src.AccountID)
+	if err != nil {
+		return nil, false, err
+	}
+	listing, err := p.List(ctx, src.Collection)
+	if err != nil {
+		return nil, false, err
+	}
+	result, err := p.Multiget(ctx, src.Collection, listing.Paths(), listing.ETags)
+	if err != nil {
+		return nil, false, err
+	}
+	items := make([]fanout.Item, 0, len(result.Objects))
+	for _, obj := range result.Objects {
+		contact, contactErr := obj.Contact()
+		if contactErr != nil {
+			continue
+		}
+		items = append(items, contactItem(src, contact, s.Path("/app/contacts/"+src.AccountID+"/"+EncodeCollectionPath(src.Collection)+"/"+urlPathEscape(contact.UID))))
+	}
+	// A multiget answers from the cache card by card, so there is no honest
+	// "all of it came from cache" to report here; the panel says nothing rather
+	// than guessing (§16).
+	return items, false, nil
+}
+
+// pollSearch searches one source for any of the terms. A calendar source is
+// searched for events, tasks and notes; an address book for cards.
+func (s *Server) pollSearch(ctx context.Context, sess *session.Session, src fanout.Source, terms []string, loc *time.Location) ([]fanout.Item, bool, error) {
+	if src.Kind == string(discovery.KindAddressBook) {
+		return s.searchContacts(ctx, sess, src, terms)
+	}
+	p, _, err := s.calendarProvider(sess, src.AccountID)
+	if err != nil {
+		return nil, false, err
+	}
+	seen := make(map[string]bool)
+	var items []fanout.Item
+	var firstErr error
+	for _, term := range terms {
+		term = strings.TrimSpace(term)
+		if term == "" {
+			continue
+		}
+		set, err := p.Search(ctx, src.Collection, term)
+		if err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			continue
+		}
+		for _, obj := range set.Objects {
+			if seen[obj.Path] {
+				continue
+			}
+			seen[obj.Path] = true
+			if item, ok := s.icalItem(src, obj, loc); ok {
+				items = append(items, item)
+			}
+		}
+	}
+	if firstErr != nil && len(items) == 0 {
+		return nil, false, firstErr
+	}
+	return items, false, nil
+}
+
+func (s *Server) searchContacts(ctx context.Context, sess *session.Session, src fanout.Source, terms []string) ([]fanout.Item, bool, error) {
+	p, _, err := s.contactsProvider(sess, src.AccountID)
+	if err != nil {
+		return nil, false, err
+	}
+	seen := make(map[string]bool)
+	var items []fanout.Item
+	var firstErr error
+	for _, term := range terms {
+		term = strings.TrimSpace(term)
+		if term == "" {
+			continue
+		}
+		result, err := p.Search(ctx, src.Collection, term)
+		if err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+			continue
+		}
+		for _, obj := range result.Objects {
+			if seen[obj.Path] {
+				continue
+			}
+			seen[obj.Path] = true
+			contact, contactErr := obj.Contact()
+			if contactErr != nil {
+				continue
+			}
+			items = append(items, contactItem(src, contact, s.Path("/app/contacts/"+src.AccountID+"/"+EncodeCollectionPath(src.Collection)+"/"+urlPathEscape(contact.UID))))
+		}
+	}
+	if firstErr != nil && len(items) == 0 {
+		return nil, false, firstErr
+	}
+	return items, false, nil
+}
+
+// icalItem turns any calendar object into a row, whatever component it is.
+func (s *Server) icalItem(src fanout.Source, obj *model.Object, loc *time.Location) (fanout.Item, bool) {
+	switch obj.Component() {
+	case "VEVENT":
+		event, err := obj.Event(loc)
+		if err != nil {
+			return fanout.Item{}, false
+		}
+		return eventItem(src, event, s.icalURL("calendar", src, event.UID), loc), true
+	case "VTODO":
+		todo, err := obj.Todo(loc)
+		if err != nil {
+			return fanout.Item{}, false
+		}
+		item := todoItem(src, todo, loc)
+		item.Data = withURL(item.Data, s.icalURL("tasks", src, todo.UID))
+		return item, true
+	case "VJOURNAL":
+		note, err := obj.Note(loc)
+		if err != nil {
+			return fanout.Item{}, false
+		}
+		item := noteItem(src, note, loc)
+		item.Data = withURL(item.Data, s.icalURL("notes", src, note.UID))
+		return item, true
+	}
+	return fanout.Item{}, false
+}
+
+func (s *Server) icalURL(section string, src fanout.Source, uid string) string {
+	return s.Path("/app/" + section + "/" + src.AccountID + "/" + EncodeCollectionPath(src.Collection) + "/" + urlPathEscape(uid))
+}
+
+func withURL(data any, url string) any {
+	row, ok := data.(resultRow)
+	if !ok {
+		return data
+	}
+	row.URL = url
+	return row
+}

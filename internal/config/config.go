@@ -38,6 +38,11 @@ const (
 	DefaultPhotoThumbSide    = 96
 	DefaultImportMaxBytes    = 16 << 20 // 16 MiB upload ceiling for .vcf / .zip
 	DefaultImportMaxCards    = 5000
+
+	// Fan-out progress defaults from §16.
+	DefaultProgressPollMillis    = 700
+	DefaultProgressSourceTimeout = 10 * time.Second
+	DefaultProgressTotalTimeout  = 30 * time.Second
 )
 
 // LogLevel values accepted by CARREL_LOG_LEVEL and config file.
@@ -81,6 +86,36 @@ type Import struct {
 	MaxCards int   `json:"max_cards"`
 }
 
+// ProgressMode is how fan-out progress reaches the browser (§16).
+type ProgressMode string
+
+const (
+	// ProgressSSE streams fragments over one event-source connection and
+	// falls back to polling on its own when the stream will not open — which
+	// is the normal case on a mobile network and behind some proxies (§13).
+	ProgressSSE ProgressMode = "sse"
+	// ProgressPoll never opens a stream. It exists for a reverse proxy that
+	// buffers responses and cannot be reconfigured.
+	ProgressPoll ProgressMode = "poll"
+)
+
+// Valid reports whether m is a known mode.
+func (m ProgressMode) Valid() bool { return m == ProgressSSE || m == ProgressPoll }
+
+// Progress holds the fan-out progress settings of §16.
+type Progress struct {
+	Mode ProgressMode `json:"mode"`
+	// PollMillis is how often the fallback asks for the status fragment.
+	PollMillis int `json:"poll_millis"`
+	// SourceTimeout caps one source; TotalTimeout caps the whole task, after
+	// which whatever has not answered is marked timed out.
+	SourceTimeout Duration `json:"source_timeout"`
+	TotalTimeout  Duration `json:"total_timeout"`
+}
+
+// SSE reports whether a stream should be offered.
+func (p Progress) SSE() bool { return p.Mode != ProgressPoll }
+
 // Duration is a time.Duration marshaled as a JSON number of seconds.
 type Duration time.Duration
 
@@ -111,6 +146,7 @@ type Config struct {
 	Cache          Cache    `json:"cache"`
 	Photo          Photo    `json:"photo"`
 	Import         Import   `json:"import"`
+	Progress       Progress `json:"progress"`
 }
 
 // fileConfig mirrors Config for JSON unmarshaling with optional fields.
@@ -122,8 +158,9 @@ type fileConfig struct {
 	LogLevel       *string  `json:"log_level,omitempty"`
 	DAV            *DAV     `json:"dav,omitempty"`
 	Cache          *Cache   `json:"cache,omitempty"`
-	Photo          *Photo   `json:"photo,omitempty"`
-	Import         *Import  `json:"import,omitempty"`
+	Photo          *Photo    `json:"photo,omitempty"`
+	Import         *Import   `json:"import,omitempty"`
+	Progress       *Progress `json:"progress,omitempty"`
 }
 
 // Load reads configuration from an optional file in dataDir, then applies
@@ -186,6 +223,12 @@ func defaults() *Config {
 			MaxBytes: DefaultImportMaxBytes,
 			MaxCards: DefaultImportMaxCards,
 		},
+		Progress: Progress{
+			Mode:          ProgressSSE,
+			PollMillis:    DefaultProgressPollMillis,
+			SourceTimeout: Duration(DefaultProgressSourceTimeout),
+			TotalTimeout:  Duration(DefaultProgressTotalTimeout),
+		},
 	}
 }
 
@@ -220,6 +263,9 @@ func applyFile(cfg *Config, raw []byte) error {
 	}
 	if fc.Import != nil {
 		cfg.Import = *fc.Import
+	}
+	if fc.Progress != nil {
+		cfg.Progress = *fc.Progress
 	}
 	return nil
 }
@@ -359,6 +405,30 @@ func applyEnv(cfg *Config) error {
 		}
 		cfg.Import.MaxCards = n
 	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PROGRESS_MODE")); v != "" {
+		cfg.Progress.Mode = ProgressMode(strings.ToLower(v))
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PROGRESS_POLL_MILLIS")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_PROGRESS_POLL_MILLIS: invalid integer %q", v)
+		}
+		cfg.Progress.PollMillis = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PROGRESS_SOURCE_TIMEOUT")); v != "" {
+		d, err := parseDurationSeconds(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_PROGRESS_SOURCE_TIMEOUT: %w", err)
+		}
+		cfg.Progress.SourceTimeout = Duration(d)
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PROGRESS_TOTAL_TIMEOUT")); v != "" {
+		d, err := parseDurationSeconds(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_PROGRESS_TOTAL_TIMEOUT: %w", err)
+		}
+		cfg.Progress.TotalTimeout = Duration(d)
+	}
 	return nil
 }
 
@@ -418,6 +488,25 @@ func (c *Config) Validate() error {
 	}
 	if err := c.Import.validate(); err != nil {
 		return err
+	}
+	if err := c.Progress.validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p Progress) validate() error {
+	if !p.Mode.Valid() {
+		return fmt.Errorf("progress mode must be %q or %q, got %q", ProgressSSE, ProgressPoll, p.Mode)
+	}
+	if p.PollMillis < 100 {
+		return errors.New("progress poll interval must be at least 100 ms")
+	}
+	if p.SourceTimeout.Duration() <= 0 {
+		return errors.New("progress source timeout must be positive")
+	}
+	if p.TotalTimeout.Duration() < p.SourceTimeout.Duration() {
+		return errors.New("progress total timeout must not be shorter than the source timeout")
 	}
 	return nil
 }

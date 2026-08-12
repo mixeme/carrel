@@ -28,6 +28,7 @@
                 </div>
                 {{if not $d.IsNew}}
                 <p class="contacts-actions no-print">
+                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/timeline">Timeline</a>
                     <label class="checkbox"><input type="checkbox" data-print-photos> Print with photos</label>
                     <button type="button" class="link" data-print>Print</button>
                 </p>

@@ -20,6 +20,10 @@ var aadSecrets = []byte("carrel:secrets:v1")
 type Blob struct {
 	Version  int       `json:"version"`
 	Accounts []Account `json:"accounts"`
+	// Views are the source selections and default collections of §14 and
+	// §23.9. They name collections, so they are sealed with the credentials
+	// rather than kept in the clear settings.
+	Views Views `json:"views,omitempty"`
 }
 
 // Account is one connected DAV server (§6).
