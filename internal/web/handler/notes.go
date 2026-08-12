@@ -190,9 +190,17 @@ type noteCardView struct {
 	Note         model.Note
 	Form         noteForm
 	Related      []relatedRow
-	ReadOnly     bool
-	IsNew        bool
-	PrintDate    string
+	// Attachments are the pictures and files of §23.10 — the one thing a note
+	// could not carry before this stage.
+	Attachments []attachmentRow
+	// CanAttach says the folder of §23.10 has been chosen. Without it the card
+	// says where to choose one rather than offering a form that cannot work.
+	CanAttach bool
+	// Section is the URL segment the shared attachments block posts to.
+	Section   string
+	ReadOnly  bool
+	IsNew     bool
+	PrintDate string
 }
 
 // relatedRow is one RELATED-TO target resolved to something clickable, or left
@@ -400,15 +408,19 @@ func (s *Server) NoteCard(w http.ResponseWriter, r *http.Request) {
 		s.renderNotesError(w, r, err, accountID, colEnc)
 		return
 	}
-	v := s.View(r, note.DisplayTitle())
-	v.Notice = strings.TrimSpace(r.URL.Query().Get("notice"))
-	v.Data = noteCardView{
+	card := noteCardView{
 		Sources: s.noteSourcesOrNil(sess), AccountID: accountID, ColEnc: colEnc,
 		Collection: col, AccountLabel: accountLabel(*acc), UID: note.UID,
 		ETag: obj.ETag, Note: note, Form: formFromNote(note, s.timezone()),
-		Related:  s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), note.Related),
-		ReadOnly: col.ReadOnly, PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
+		Related:     s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), note.Related),
+		Attachments: s.attachmentRows(sess, sectionNotes, accountID, colEnc, note.UID, note.Attachments),
+		Section:     sectionNotes.Path,
+		ReadOnly:    col.ReadOnly, PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
+	_, card.CanAttach = s.attachmentTarget(sess)
+	v := s.View(r, note.DisplayTitle())
+	v.Notice = strings.TrimSpace(r.URL.Query().Get("notice"))
+	v.Data = card
 	s.Render(w, "note.html", v)
 }
 

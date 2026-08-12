@@ -11,7 +11,9 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // RawXMLValue holds one XML element with lazy decoding. Content is the inner
@@ -190,6 +192,45 @@ type GetETag struct {
 type GetContentType struct {
 	XMLName xml.Name `xml:"DAV: getcontenttype"`
 	Type    string   `xml:",chardata"`
+}
+
+// GetContentLength is the octet count of a resource. Servers report it as
+// chardata rather than an attribute, and a collection usually omits it
+// altogether, which is one of the ways a directory is told from a file.
+type GetContentLength struct {
+	XMLName xml.Name `xml:"DAV: getcontentlength"`
+	Length  string   `xml:",chardata"`
+}
+
+// Bytes parses the length, reporting whether the server gave a usable one.
+func (l GetContentLength) Bytes() (int64, bool) {
+	n, err := strconv.ParseInt(strings.TrimSpace(l.Length), 10, 64)
+	if err != nil || n < 0 {
+		return 0, false
+	}
+	return n, true
+}
+
+// GetLastModified is the modification time of a resource, in the HTTP date
+// format of RFC 7231.
+type GetLastModified struct {
+	XMLName xml.Name `xml:"DAV: getlastmodified"`
+	At      string   `xml:",chardata"`
+}
+
+// Time parses the modification time. Servers are inconsistent enough about the
+// format that a failure is reported rather than guessed at.
+func (m GetLastModified) Time() (time.Time, bool) {
+	raw := strings.TrimSpace(m.At)
+	if raw == "" {
+		return time.Time{}, false
+	}
+	for _, layout := range []string{http.TimeFormat, time.RFC1123, time.RFC1123Z, time.RFC3339} {
+		if t, err := time.Parse(layout, raw); err == nil {
+			return t, true
+		}
+	}
+	return time.Time{}, false
 }
 
 // AddressData carries a vCard body inside a CardDAV report (RFC 6352 §10.4).

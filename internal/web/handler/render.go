@@ -61,6 +61,11 @@ type View struct {
 	Commit  string
 	// SourceURL is the public mirror where users can fetch the source (§22).
 	SourceURL string
+	// ShowFiles decides whether the navigation carries a Files entry. §6 makes
+	// the section conditional on a plain collection having been discovered and
+	// forbids a setting for it, so this is asked of the accounts rather than of
+	// a preference.
+	ShowFiles bool
 	// Error and Notice are the two message slots the frame renders.
 	Error  string
 	Notice string
@@ -73,14 +78,16 @@ func (v View) Admin() bool { return v.Session != nil && v.Session.Admin }
 
 // View builds the common part of a page's data for the current request.
 func (s *Server) View(r *http.Request, title string) View {
+	sess := SessionFrom(r)
 	return View{
 		Title:     title,
 		Base:      s.BasePath,
 		CSRF:      CSRFToken(r),
-		Session:   SessionFrom(r),
+		Session:   sess,
 		Version:   s.Version,
 		Commit:    s.Commit,
 		SourceURL: SourceURL,
+		ShowFiles: s.hasFileCollections(sess),
 	}
 }
 

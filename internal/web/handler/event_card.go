@@ -33,6 +33,14 @@ type eventCardView struct {
 	Event        model.Event
 	Form         eventForm
 	Related      []relatedRow
+	// Attachments are the ATTACH links of §23.10, each with the proxy that
+	// opens it.
+	Attachments []attachmentRow
+	// CanAttach says a folder for attachments has been chosen, which is what
+	// §23.10 asks for once and never again.
+	CanAttach bool
+	// Section is the URL segment the shared attachments block posts to.
+	Section string
 	// NoteURL opens a new note already linked to this event (§23.9).
 	NoteURL   string
 	ReadOnly  bool
@@ -266,12 +274,18 @@ func (s *Server) eventCardFromObject(sess *session.Session, accountID, colEnc st
 	if obj != nil {
 		ev, _ = obj.Event(s.timezone())
 	}
-	return eventCardView{
+	card := eventCardView{
 		Calendars: s.listCalendars(sess), AccountID: accountID, ColEnc: colEnc,
 		Collection: col, AccountLabel: accountLabel(acc), UID: ev.UID,
 		ETag: obj.ETag, Event: ev, Form: form, ReadOnly: col.ReadOnly, IsNew: isNew,
+		Section:   sectionCalendar.Path,
 		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
+	if !isNew {
+		card.Attachments = s.attachmentRows(sess, sectionCalendar, accountID, colEnc, ev.UID, ev.Attachments)
+		_, card.CanAttach = s.attachmentTarget(sess)
+	}
+	return card
 }
 
 func parseEventForm(r *http.Request) eventForm {

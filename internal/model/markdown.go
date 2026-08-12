@@ -34,8 +34,10 @@ type MarkdownNote struct {
 	Tags     []string
 	UID      string
 	Related  []Relation
-	Source   MarkdownSource
-	Body     string
+	// Attachments are the `ATTACH` links of §23.10, read back as URIs.
+	Attachments []string
+	Source      MarkdownSource
+	Body        string
 	// Extra carries iCalendar properties with no front matter field of their
 	// own, under their own names. Export must not lose what §8 goes to such
 	// lengths to keep.
@@ -62,6 +64,14 @@ func RenderMarkdown(note Note, src MarkdownSource) []byte {
 	writeYAMLString(&buf, "uid", note.UID)
 	if len(note.Related) > 0 {
 		writeYAMLList(&buf, "related", RelationUIDs(note.Related))
+	}
+	// Attachments travel as their links (§23.10). An attachment another client
+	// embedded as base64 is not carried into Markdown: it is read-only anyway,
+	// and a note file with a megabyte of encoded image in its front matter is
+	// not a note file. What is skipped is said in the docs rather than left to
+	// be discovered.
+	if links := AttachmentLinks(note.Attachments); len(links) > 0 {
+		writeYAMLList(&buf, "attachments", links)
 	}
 	if src.Account != "" {
 		writeYAMLString(&buf, "account", src.Account)
@@ -121,6 +131,12 @@ func MarkdownFilename(note Note, taken map[string]bool) string {
 // maxSlugRunes keeps a generated name well inside the shortest path limit any
 // of the target file systems imposes.
 const maxSlugRunes = 60
+
+// Slug turns a title into a file-name stem: transliterated, lower case, and
+// stripped of anything a file system objects to. §23.10 asks for attachment
+// names built from the date and the entry's title, and they have to be the same
+// kind of name a Markdown export produces or the folder reads as two schemes.
+func Slug(s string) string { return slug(s) }
 
 func slug(s string) string {
 	var b strings.Builder
@@ -290,6 +306,8 @@ func (n *MarkdownNote) setField(key, value string) {
 		for _, uid := range splitList(value) {
 			n.Related = append(n.Related, Relation{UID: uid, RelType: RelTypeParent})
 		}
+	case "attachments", "attach":
+		n.Attachments = append(n.Attachments, splitList(value)...)
 	case "account":
 		n.Source.Account = value
 	case "collection":
@@ -310,6 +328,8 @@ func (n *MarkdownNote) appendListValue(key, item string) {
 		n.Tags = append(n.Tags, item)
 	case "related", "related-to":
 		n.Related = append(n.Related, Relation{UID: item, RelType: RelTypeParent})
+	case "attachments", "attach":
+		n.Attachments = append(n.Attachments, item)
 	case "carrel_properties":
 		n.appendExtra(item)
 	}
@@ -473,6 +493,9 @@ func (n MarkdownNote) Patch(loc *time.Location) *Patch {
 	}
 	if values := RelationValues(n.Related); len(values) > 0 {
 		p.Set(ical.PropRelatedTo, values...)
+	}
+	if values := AttachmentLinkValues(n.Attachments); len(values) > 0 {
+		p.Set(ical.PropAttach, values...)
 	}
 	for _, prop := range n.Extra {
 		if len(prop.Values) > 0 {

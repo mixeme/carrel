@@ -31,7 +31,10 @@ type Event struct {
 	// Related are the RELATED-TO links other objects — notes, typically —
 	// hang off this event (§23.9).
 	Related []Relation
-	Other   []Property
+	// Attachments are the ATTACH properties of §23.10, whether Carrel put them
+	// there or another client did.
+	Attachments []Attachment
+	Other       []Property
 }
 
 // Attendee is a read-only PARTICIPANT view (§10 — no iTIP in v1).
@@ -67,6 +70,7 @@ var knownEventProps = map[string]bool{
 	ical.PropPriority:        true,
 	ical.PropURL:             true,
 	ical.PropRelatedTo:       true,
+	ical.PropAttach:          true,
 }
 
 // Event returns the display view of a calendar object.
@@ -90,6 +94,7 @@ func (o *Object) Event(loc *time.Location) (Event, error) {
 		Status:      icalPropText(evComp.Props, ical.PropStatus),
 		RRule:       icalPropText(evComp.Props, ical.PropRecurrenceRule),
 		Related:     relationsFrom(evComp.Props),
+		Attachments: attachmentsFrom(evComp.Props),
 	}
 	if cats := evComp.Props.Get(ical.PropCategories); cats != nil {
 		ev.Categories = splitComma(cats.Value)

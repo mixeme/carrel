@@ -6,6 +6,7 @@ package handler
 import (
 	"io/fs"
 	"net/http"
+	"strings"
 )
 
 // Handler builds the whole service: the middleware chain of §24.5 wrapped
@@ -14,9 +15,37 @@ func (s *Server) Handler(staticFS fs.FS) http.Handler {
 	return Chain(s.routes(staticFS),
 		Recover(s.Logger),
 		SecurityHeaders(s.Trust),
-		MaxBody(DefaultMaxBody),
+		MaxBodyFunc(s.bodyLimit),
 		s.LoadSession,
 	)
+}
+
+// bodyLimit is the ceiling for one request: the default of §24.4 everywhere, and
+// the configured ceiling on the handful of paths that take a file.
+//
+// The list is by path rather than by handler because the decision comes before
+// routing. Each of these handlers then applies its own ceiling again, so the one
+// that matters is the smaller of the two and neither is load-bearing alone.
+func (s *Server) bodyLimit(r *http.Request) int64 {
+	if r.Method != http.MethodPost && r.Method != http.MethodPut {
+		return DefaultMaxBody
+	}
+	path := r.URL.Path
+	switch {
+	// The file browser and the two attach forms of §23.10.
+	case strings.HasPrefix(path, s.Path("/app/files/")), strings.HasSuffix(path, "/attach"):
+		return s.filesMaxUpload()
+	// Import of .vcf, .ics and .md (§23.7, §23.9).
+	case strings.HasSuffix(path, "/import"):
+		return s.importMaxBytes()
+	// A contact card carries a photo upload (§11).
+	case strings.HasPrefix(path, s.Path("/app/contacts/")):
+		if s.Photo.MaxUploadBytes > 0 {
+			return s.Photo.MaxUploadBytes
+		}
+		return photoUploadMaxBody
+	}
+	return DefaultMaxBody
 }
 
 // routes wires the endpoints that exist so far. The probe and the static
@@ -75,6 +104,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("GET "+s.Path("/app/calendar/{account}/{col}/{uid}"), s.EventCard)
 	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}"), s.EventCard)
 	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}/conflict"), s.CalendarConflictResolve)
+	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}/attach"), s.EventAttachment)
 	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}/timeline"), s.ContactTimeline)
 
 	app.HandleFunc("GET "+s.Path("/app/tasks"), s.TasksHome)
@@ -100,6 +130,14 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/{uid}"), s.NoteCard)
 	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/{uid}/export"), s.NoteExport)
 	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/{uid}/conflict"), s.NoteConflictResolve)
+	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/{uid}/attach"), s.NoteAttachment)
+
+	// The file section of §6 and §7. It appears only when a plain collection was
+	// discovered, which the navigation decides; the routes exist regardless and
+	// answer "not found" when there is no such collection.
+	app.HandleFunc("GET "+s.Path("/app/files"), s.FilesHome)
+	app.HandleFunc("GET "+s.Path("/app/files/{account}/{col}"), s.FilesBrowse)
+	app.HandleFunc("POST "+s.Path("/app/files/{account}/{col}"), s.FilesBrowse)
 
 	// The unified view, the search and the progress endpoints they share (§14,
 	// §16).
@@ -123,6 +161,23 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	photos := http.NewServeMux()
 	photos.HandleFunc("GET "+s.Path("/c/{account}/{col}/{uid}/photo"), s.ContactPhoto)
 	pages.Handle(s.Path("/c/"), Chain(photos, s.RequireAuth, s.RequirePasswordChange))
+
+	// File downloads, on their own prefix for the same reason photos are: these
+	// answer with somebody's file rather than a page, and a browser asked to save
+	// one should not be handed a URL that looks like a screen (§7).
+	downloads := http.NewServeMux()
+	downloads.HandleFunc("GET "+s.Path("/d/{account}/{col}"), s.FileDownload)
+	downloads.HandleFunc("HEAD "+s.Path("/d/{account}/{col}"), s.FileDownload)
+	pages.Handle(s.Path("/d/"), Chain(downloads, s.RequireAuth, s.RequirePasswordChange))
+
+	// Opening an attachment (§23.10). The URI is never taken from the request:
+	// the object is read and the attachment at that index is resolved against the
+	// collections this user has, so this is a proxy for their own files and not
+	// a fetcher of arbitrary addresses (§24.2).
+	attachments := http.NewServeMux()
+	attachments.HandleFunc("GET "+s.Path("/a/{section}/{account}/{col}/{uid}/{index}"), s.AttachmentOpen)
+	attachments.HandleFunc("HEAD "+s.Path("/a/{section}/{account}/{col}/{uid}/{index}"), s.AttachmentOpen)
+	pages.Handle(s.Path("/a/"), Chain(attachments, s.RequireAuth, s.RequirePasswordChange))
 
 	// The administrator's section.
 	admin := http.NewServeMux()

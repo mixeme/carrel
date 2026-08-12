@@ -29,6 +29,8 @@ var (
 	GetCTagName                       = xml.Name{Space: NamespaceCS, Local: "getctag"}
 	GetETagName                       = xml.Name{Space: NamespaceDAV, Local: "getetag"}
 	GetContentTypeName                = xml.Name{Space: NamespaceDAV, Local: "getcontenttype"}
+	GetContentLengthName              = xml.Name{Space: NamespaceDAV, Local: "getcontentlength"}
+	GetLastModifiedName               = xml.Name{Space: NamespaceDAV, Local: "getlastmodified"}
 	AddressDataName                   = xml.Name{Space: NamespaceCardDAV, Local: "address-data"}
 	CalendarDataName                  = xml.Name{Space: NamespaceCalDAV, Local: "calendar-data"}
 )

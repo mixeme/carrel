@@ -12,7 +12,9 @@
 | 4 | Календарь + import/export + печать | [stage-4-plan.md](stage-4-plan.md) | **готово** (фазы 0–11) | 0.4.0 |
 | 5 | Задачи, **заметки**, единый вид, поиск | [stage-5-plan.md](stage-5-plan.md) | **готово** (блоки A–G) | 0.5.0 |
 | 6 | Дубликаты | [stage-6-plan.md](stage-6-plan.md) | **готово** (блоки 0–10, включая объединение на сервере) | 0.6.0 |
-| 7 | **WebDAV-файлы** + вложения | [stage-7-plan.md](stage-7-plan.md) | — | 0.7.0 |
+| 7 | **WebDAV-файлы** + вложения | [stage-7-plan.md](stage-7-plan.md) | **готово** (блоки A, B, C) | 0.7.0 |
+
+**Основной объём v1 закрыт.** Остаётся ручная приёмка: [manual-acceptance.md](manual-acceptance.md).
 
 Открытые пункты приёмки этапа 1 (промежуточный трекер): [stage-1-outstanding.md](stage-1-outstanding.md).  
 **Финальная ручная приёмка v1** (после этапа 7): [manual-acceptance.md](manual-acceptance.md).

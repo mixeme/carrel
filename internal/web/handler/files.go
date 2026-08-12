@@ -1,0 +1,366 @@
+// Copyright (C) 2026 Carrel contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+package handler
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+
+	"gitea.mixdep.ru/mix/carrel/internal/account"
+	"gitea.mixdep.ru/mix/carrel/internal/config"
+	"gitea.mixdep.ru/mix/carrel/internal/dav"
+	"gitea.mixdep.ru/mix/carrel/internal/dav/discovery"
+	"gitea.mixdep.ru/mix/carrel/internal/model"
+	"gitea.mixdep.ru/mix/carrel/internal/provider/files"
+	"gitea.mixdep.ru/mix/carrel/internal/session"
+)
+
+// FilesConfig holds the file section limits (§7, §23.10).
+type FilesConfig = config.Files
+
+// fieldPath is the relative path inside a file collection, carried as a query
+// parameter rather than a path segment. The collection root is already one
+// encoded segment; making the rest of the path a second encoded segment would
+// mean a URL nobody can read and a breadcrumb built out of nested encodings.
+const fieldPath = "p"
+
+func (s *Server) filesProvider(sess *session.Session, accountID string) (*files.Provider, *account.Account, error) {
+	if s.Guard == nil {
+		return nil, nil, fmt.Errorf("DAV connections are not configured")
+	}
+	acc, err := s.Store.GetDAVAccount(sess.UserID, accountID, sess.DEK())
+	if err != nil {
+		return nil, nil, fmt.Errorf("account not found")
+	}
+	if !acc.Enabled {
+		return nil, nil, fmt.Errorf("account is disabled")
+	}
+	client, err := dav.NewClient(s.Guard, acc.BaseURL, acc.Username, acc.Password)
+	if err != nil {
+		return nil, nil, err
+	}
+	p, err := files.New(client, files.Options{
+		AccountID:  acc.ID,
+		Cache:      sess.Cache(),
+		MaxEntries: s.Files.MaxEntries,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return p, acc, nil
+}
+
+func findFileCollection(acc *account.Account, collection string) (discovery.Collection, error) {
+	collection = normalizeCollectionPath(collection)
+	for _, col := range acc.Collections {
+		if col.Kind == discovery.KindFiles && normalizeCollectionPath(col.Path) == collection {
+			return col, nil
+		}
+	}
+	return discovery.Collection{}, fmt.Errorf("file collection not found")
+}
+
+// fileCollections lists every file collection the user has. §6 makes the whole
+// section conditional on this being non-empty: there are some and it appears, or
+// there are none and it does not.
+func (s *Server) fileCollections(sess *session.Session) []sourceRow {
+	rows, err := s.collectionsOfKind(sess, discovery.KindFiles, account.ViewFiles, "")
+	if err != nil {
+		return nil
+	}
+	// The tick of §14 has no meaning here — a file browser shows one folder at a
+	// time and polls nothing — so every collection is offered.
+	for i := range rows {
+		rows[i].Selected = true
+	}
+	return rows
+}
+
+// hasFileCollections is what the navigation asks before drawing the Files
+// entry. §6 makes the section conditional and forbids a setting for it: a
+// person whose servers hold no plain collection never sees a file browser.
+func (s *Server) hasFileCollections(sess *session.Session) bool {
+	if sess == nil || s.Store == nil {
+		return false
+	}
+	accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK())
+	if err != nil {
+		return false
+	}
+	for _, acc := range accounts {
+		if !acc.Enabled {
+			continue
+		}
+		for _, col := range acc.Collections {
+			if col.Kind == discovery.KindFiles {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+type filesView struct {
+	Sources      []sourceRow
+	AccountID    string
+	ColEnc       string
+	Collection   discovery.Collection
+	AccountLabel string
+	// Rel is the folder inside the collection, "" at its root.
+	Rel       string
+	Crumbs    []fileCrumb
+	ParentURL string
+	Entries   []fileRow
+	ReadOnly  bool
+	Empty     bool
+	NoFiles   bool
+	Truncated bool
+	MaxUpload string
+	// IsAttachmentFolder marks the folder §23.10 puts attachments in, so a
+	// person who browses to it can see that is what it is.
+	IsAttachmentFolder bool
+}
+
+type fileCrumb struct {
+	Name string
+	URL  string
+	Last bool
+}
+
+type fileRow struct {
+	Name        string
+	Rel         string
+	Dir         bool
+	SizeLabel   string
+	TypeLabel   string
+	ModLabel    string
+	ETag        string
+	URL         string
+	DownloadURL string
+}
+
+// FilesHome opens the collection the browser was last in, or says there is no
+// file collection to open.
+func (s *Server) FilesHome(w http.ResponseWriter, r *http.Request) {
+	sess := SessionFrom(r)
+	rows := s.fileCollections(sess)
+	if len(rows) == 0 {
+		v := s.View(r, "Files")
+		v.Data = filesView{NoFiles: true}
+		s.Render(w, "files.html", v)
+		return
+	}
+	target := rows[0]
+	if preferred, ok := s.defaultCollection(sess, account.ViewFiles, rows); ok {
+		target = preferred
+	}
+	http.Redirect(w, r, s.Path("/app/files/"+target.AccountID+"/"+target.ColEnc), http.StatusSeeOther)
+}
+
+// FilesBrowse lists one folder of one collection.
+func (s *Server) FilesBrowse(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		s.filesAction(w, r)
+		return
+	}
+	accountID, colEnc := r.PathValue("account"), r.PathValue("col")
+	collection, err := DecodeCollectionPath(colEnc)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	sess := SessionFrom(r)
+	rel := r.URL.Query().Get(fieldPath)
+	view, err := s.buildFiles(r.Context(), sess, accountID, collection, colEnc, rel)
+	if err != nil {
+		s.renderFilesError(w, r, err, accountID, colEnc)
+		return
+	}
+	s.rememberDefault(sess, account.ViewFiles, accountID, collection)
+	v := s.View(r, "Files")
+	v.Notice = strings.TrimSpace(r.URL.Query().Get("notice"))
+	v.Data = view
+	s.Render(w, "files.html", v)
+}
+
+func (s *Server) buildFiles(ctx context.Context, sess *session.Session, accountID, collection, colEnc, rel string) (filesView, error) {
+	p, acc, err := s.filesProvider(sess, accountID)
+	if err != nil {
+		return filesView{}, err
+	}
+	col, err := findFileCollection(acc, collection)
+	if err != nil {
+		return filesView{}, err
+	}
+	clean, err := files.CleanRelative(rel)
+	if err != nil {
+		return filesView{}, err
+	}
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+	listing, err := p.List(ctx, col.Path, clean)
+	if err != nil {
+		return filesView{}, err
+	}
+	base := s.Path("/app/files/" + accountID + "/" + colEnc)
+	view := filesView{
+		Sources: s.fileCollections(sess), AccountID: accountID, ColEnc: colEnc,
+		Collection: col, AccountLabel: accountLabel(*acc), Rel: clean,
+		ReadOnly: col.ReadOnly, Truncated: listing.Truncated,
+		MaxUpload: model.ByteSize(s.filesMaxUpload()),
+		Crumbs:    fileCrumbs(base, collectionLabel(col), clean),
+	}
+	if parent, ok := files.Parent(clean); ok {
+		view.ParentURL = folderURL(base, parent)
+	}
+	if target, ok := s.attachmentTarget(sess); ok {
+		view.IsAttachmentFolder = target.AccountID == accountID &&
+			normalizeCollectionPath(target.Folder) == normalizeCollectionPath(listing.Dir)
+	}
+	for _, entry := range listing.Entries {
+		row := fileRow{
+			Name: entry.Name, Rel: entry.Rel, Dir: entry.Dir, ETag: entry.ETag,
+			TypeLabel: entry.ContentType,
+		}
+		if entry.HasSize && !entry.Dir {
+			row.SizeLabel = model.ByteSize(entry.Size)
+		}
+		if !entry.ModTime.IsZero() {
+			row.ModLabel = entry.ModTime.In(s.timezone()).Format("2006-01-02 15:04")
+		}
+		if entry.Dir {
+			row.URL = folderURL(base, entry.Rel)
+		} else {
+			row.DownloadURL = s.fileDownloadURL(accountID, colEnc, entry.Rel)
+		}
+		view.Entries = append(view.Entries, row)
+	}
+	view.Empty = len(view.Entries) == 0
+	return view, nil
+}
+
+func (s *Server) fileDownloadURL(accountID, colEnc, rel string) string {
+	return s.Path("/d/"+accountID+"/"+colEnc) + "?" + url.Values{fieldPath: {rel}}.Encode()
+}
+
+func folderURL(base, rel string) string {
+	if rel == "" {
+		return base
+	}
+	return base + "?" + url.Values{fieldPath: {rel}}.Encode()
+}
+
+func fileCrumbs(base, rootLabel, rel string) []fileCrumb {
+	crumbs := []fileCrumb{{Name: rootLabel, URL: base}}
+	if rel == "" {
+		crumbs[0].Last = true
+		return crumbs
+	}
+	walked := ""
+	for _, segment := range strings.Split(rel, "/") {
+		walked = files.Join(walked, segment)
+		crumbs = append(crumbs, fileCrumb{Name: segment, URL: folderURL(base, walked)})
+	}
+	crumbs[len(crumbs)-1].Last = true
+	return crumbs
+}
+
+// filesAction takes the three things this browser does to a collection: put a
+// file in it, make a folder, remove something.
+func (s *Server) filesAction(w http.ResponseWriter, r *http.Request) {
+	accountID, colEnc := r.PathValue("account"), r.PathValue("col")
+	collection, err := DecodeCollectionPath(colEnc)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	sess := SessionFrom(r)
+	p, acc, err := s.filesProvider(sess, accountID)
+	if err != nil {
+		s.renderFilesError(w, r, err, accountID, colEnc)
+		return
+	}
+	col, err := findFileCollection(acc, collection)
+	if err != nil {
+		s.renderFilesError(w, r, err, accountID, colEnc)
+		return
+	}
+	if col.ReadOnly {
+		http.Error(w, "this file collection is read-only", http.StatusForbidden)
+		return
+	}
+	base := s.Path("/app/files/" + accountID + "/" + colEnc)
+
+	// An upload arrives as multipart and is streamed on: the body is never
+	// parsed into memory, which is the whole reason §7 fixes Get and Put at a
+	// reader (§23.10).
+	if strings.HasPrefix(strings.ToLower(r.Header.Get("Content-Type")), "multipart/") {
+		s.fileUpload(w, r, p, col, base)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	rel, err := files.CleanRelative(r.PostFormValue(fieldPath))
+	if err != nil {
+		http.Error(w, "bad path", http.StatusBadRequest)
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
+	defer cancel()
+
+	switch r.PostFormValue(fieldAction) {
+	case "mkdir":
+		name, nameErr := files.CleanName(r.PostFormValue("name"))
+		if nameErr != nil {
+			s.redirectNotice(w, r, folderURL(base, rel), "That folder name cannot be used.")
+			return
+		}
+		if err := p.MakeDir(ctx, col.Path, files.Join(rel, name)); err != nil {
+			s.renderFilesError(w, r, err, accountID, colEnc)
+			return
+		}
+		s.redirectNotice(w, r, folderURL(base, rel), "Folder created.")
+	case "delete":
+		target, targetErr := files.CleanRelative(r.PostFormValue("target"))
+		if targetErr != nil || target == "" {
+			http.Error(w, "bad path", http.StatusBadRequest)
+			return
+		}
+		if err := p.Remove(ctx, col.Path, target, strings.TrimSpace(r.PostFormValue("etag"))); err != nil {
+			s.renderFilesError(w, r, err, accountID, colEnc)
+			return
+		}
+		s.redirectNotice(w, r, folderURL(base, rel), "Deleted from the server. Anything that linked to it now points at nothing.")
+	default:
+		http.Error(w, "bad request", http.StatusBadRequest)
+	}
+}
+
+func (s *Server) filesMaxUpload() int64 {
+	if s.Files.MaxUploadBytes > 0 {
+		return s.Files.MaxUploadBytes
+	}
+	return config.DefaultFilesMaxUploadBytes
+}
+
+func (s *Server) renderFilesError(w http.ResponseWriter, r *http.Request, err error, accountID, colEnc string) {
+	status := http.StatusBadRequest
+	if errors.Is(err, files.ErrOutsideCollection) || errors.Is(err, files.ErrBadName) {
+		status = http.StatusForbidden
+	}
+	v := s.View(r, "Files")
+	v.Error = userFacingDAVError(err)
+	v.Data = filesView{
+		Sources: s.fileCollections(SessionFrom(r)), AccountID: accountID, ColEnc: colEnc,
+		MaxUpload: model.ByteSize(s.filesMaxUpload()),
+	}
+	s.RenderStatus(w, status, "files.html", v)
+}

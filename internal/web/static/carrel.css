@@ -477,6 +477,79 @@ label.checkbox input {
     vertical-align: top;
 }
 
+/* The file browser of §7. A listing is a table because that is what a listing
+   is: name, size, type, date, in columns a person can compare down. */
+.files-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.files-table th,
+.files-table td {
+    border-bottom: 0.5px solid var(--hair);
+    text-align: left;
+    padding: 0.4rem 0.5rem;
+    vertical-align: baseline;
+}
+
+.files-table tr.is-folder a {
+    font-weight: 600;
+}
+
+.files-table td:nth-child(2) {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.crumbs {
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+}
+
+.crumbs a {
+    white-space: nowrap;
+}
+
+.files-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+}
+
+/* Attachments (§23.10). Each row is a link, what is known about it, and the one
+   action that applies — removing the link, which is not deleting the file. */
+.attachment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+}
+
+.attachment-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    border-bottom: 0.5px solid var(--hair);
+}
+
+.attach-form {
+    margin-top: 1rem;
+}
+
+/* A card being dragged onto says so, or a person cannot tell whether dropping
+   there will do anything. */
+.note-card.is-drop-target,
+.event-card.is-drop-target {
+    outline: 2px dashed var(--accent);
+    outline-offset: 0.5rem;
+}
+
 .agenda-range,
 .event-time-grid {
     display: grid;

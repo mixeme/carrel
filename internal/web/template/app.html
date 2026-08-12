@@ -9,7 +9,7 @@
         <section class="account-block">
             <h3>{{if $acc.Label}}{{$acc.Label}}{{else}}{{$acc.Username}}{{end}}</h3>
             <p class="hint">{{$acc.BaseURL}}</p>
-            {{if or $acc.AddressBooks $acc.Collections}}
+            {{if or $acc.AddressBooks $acc.Calendars $acc.FileCollections}}
             <ul class="collection-list">
             {{range $acc.AddressBooks}}
                 <li>
@@ -27,12 +27,14 @@
                     </a>
                 </li>
             {{end}}
-            {{range $acc.Collections}}
-                {{if and (ne .Kind "addressbook") (ne .Kind "calendar")}}
+            {{range $acc.FileCollections}}
                 <li>
-                    <span class="hint">{{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}} ({{.Kind}})</span>
+                    <a class="collection-link" href="{{$.Base}}/app/files/{{$acc.ID}}/{{.ColEnc}}">
+                        <span class="collection-dot" style="background:var(--accent)"></span>
+                        {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
+                        <span class="hint">files{{if .ReadOnly}} · read-only{{end}}</span>
+                    </a>
                 </li>
-                {{end}}
             {{end}}
             </ul>
             {{end}}
@@ -114,6 +116,40 @@
                 <button type="submit">Send confirmation link</button>
             </form>
         </section>
+
+        {{$att := $d.Attachments}}
+        {{if $att.Collections}}
+        <section class="card">
+            <h2>Attachments</h2>
+            <p class="hint">Where a file goes when you attach it to a note or an event. It is asked for once: after this,
+                attaching a screenshot is one action.</p>
+            {{if $att.Configured}}
+            <p class="field-value">Currently: {{$att.Label}}</p>
+            {{end}}
+            <form method="post" action="{{.Base}}/app/">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="save_attachments">
+
+                <label for="attach-collection">File collection</label>
+                <select id="attach-collection" name="attach_collection">
+                {{range $att.Collections}}
+                    <option value="{{.Key}}"{{if eq .Key $att.Selected}} selected{{end}}>{{.Label}} · {{.AccountLabel}}</option>
+                {{end}}
+                </select>
+
+                <label for="attach-folder">Folder inside it</label>
+                <input id="attach-folder" name="attach_folder" value="{{$att.Folder}}" placeholder="{{$att.Suggestion}}"
+                       autocapitalize="none" spellcheck="false">
+                <p class="hint">Created if it is not there yet. Leave it empty to put attachments at the top of the
+                    collection. Files are named from the date and the entry's title, so the folder stays readable
+                    outside Carrel.</p>
+
+                <button type="submit">Save</button>
+            </form>
+            <p class="hint">Carrel puts files in this folder and links to them. It never cleans it up, applies a quota or
+                deletes anything: it is your storage, and what is in it is yours to manage.</p>
+        </section>
+        {{end}}
 
         <section class="card">
             <h2>Key escrow</h2>

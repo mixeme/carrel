@@ -221,6 +221,9 @@ type notesImportView struct {
 	CollisionCount int
 	TruncatedNote  string
 	HasPreview     bool
+	// WebDAVSources are the file collections a folder of Markdown can be read
+	// from instead of uploading one (§23.9 block B8).
+	WebDAVSources []markdownImportSource
 }
 
 type notesImportRow struct {
@@ -272,6 +275,7 @@ func (s *Server) NotesImport(w http.ResponseWriter, r *http.Request) {
 	base := notesImportView{
 		Sources: s.noteSourcesOrNil(sess), AccountID: accountID, ColEnc: colEnc,
 		Collection: col, AccountLabel: accountLabel(*acc), DraftKey: key,
+		WebDAVSources: s.webdavMarkdownSources(sess),
 	}
 	if r.Method == http.MethodGet {
 		s.renderNotesImport(w, r, base)
@@ -291,6 +295,11 @@ func (s *Server) NotesImport(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, s.Path("/app/notes/"+accountID+"/"+colEnc), http.StatusSeeOther)
 	case "confirm_import":
 		s.confirmNotesImport(w, r, sess, p, col, base, collection)
+	case "webdav_import":
+		// The same preview, read from a folder on the person's own WebDAV rather
+		// than from an upload (§23.9 block B8). Downloading a directory of notes
+		// only to upload it again is work the server can spare them.
+		s.previewWebDAVImport(w, r, sess, p, col, base, collection)
 	default:
 		http.Error(w, "bad request", http.StatusBadRequest)
 	}

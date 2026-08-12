@@ -39,6 +39,19 @@ const (
 	DefaultImportMaxBytes   = 16 << 20 // 16 MiB upload ceiling for .vcf / .zip
 	DefaultImportMaxCards   = 5000
 
+	// File section defaults (§7, §23.10). The upload ceiling is generous
+	// because a file put on somebody's own WebDAV is not parsed here — it is
+	// streamed through — so the cost of a large one is bandwidth and not
+	// memory. The entry ceiling exists because a PROPFIND of a folder with
+	// tens of thousands of members is both an unbounded response and an
+	// unbounded page.
+	DefaultFilesMaxUploadBytes = 256 << 20 // 256 MiB
+	DefaultFilesMaxEntries     = 2000
+	// DefaultAttachmentFolder is where §23.10 puts a note's pictures when the
+	// person has not named a folder of their own. It is a suggestion offered on
+	// the settings form, not something created behind their back.
+	DefaultAttachmentFolder = "carrel-attachments"
+
 	// Fan-out progress defaults from §16.
 	DefaultProgressPollMillis    = 700
 	DefaultProgressSourceTimeout = 10 * time.Second
@@ -91,6 +104,16 @@ type Photo struct {
 type Import struct {
 	MaxBytes int64 `json:"max_bytes"`
 	MaxCards int   `json:"max_cards"`
+}
+
+// Files holds the limits of the WebDAV file section and of attachments (§7,
+// §23.10, §24.4).
+type Files struct {
+	// MaxUploadBytes caps one upload. Nothing is buffered on the way through,
+	// so this is a policy limit rather than a memory one.
+	MaxUploadBytes int64 `json:"max_upload_bytes"`
+	// MaxEntries caps how many members of one folder are listed.
+	MaxEntries int `json:"max_entries"`
 }
 
 // ProgressMode is how fan-out progress reaches the browser (§16).
@@ -161,6 +184,7 @@ type Config struct {
 	Cache          Cache      `json:"cache"`
 	Photo          Photo      `json:"photo"`
 	Import         Import     `json:"import"`
+	Files          Files      `json:"files"`
 	Progress       Progress   `json:"progress"`
 	Duplicates     Duplicates `json:"duplicates"`
 }
@@ -176,6 +200,7 @@ type fileConfig struct {
 	Cache          *Cache      `json:"cache,omitempty"`
 	Photo          *Photo      `json:"photo,omitempty"`
 	Import         *Import     `json:"import,omitempty"`
+	Files          *Files      `json:"files,omitempty"`
 	Progress       *Progress   `json:"progress,omitempty"`
 	Duplicates     *Duplicates `json:"duplicates,omitempty"`
 }
@@ -240,6 +265,10 @@ func defaults() *Config {
 			MaxBytes: DefaultImportMaxBytes,
 			MaxCards: DefaultImportMaxCards,
 		},
+		Files: Files{
+			MaxUploadBytes: DefaultFilesMaxUploadBytes,
+			MaxEntries:     DefaultFilesMaxEntries,
+		},
 		Progress: Progress{
 			Mode:          ProgressSSE,
 			PollMillis:    DefaultProgressPollMillis,
@@ -281,6 +310,9 @@ func applyFile(cfg *Config, raw []byte) error {
 	}
 	if fc.Import != nil {
 		cfg.Import = *fc.Import
+	}
+	if fc.Files != nil {
+		cfg.Files = *fc.Files
 	}
 	if fc.Progress != nil {
 		cfg.Progress = *fc.Progress
@@ -426,6 +458,20 @@ func applyEnv(cfg *Config) error {
 		}
 		cfg.Import.MaxCards = n
 	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_FILES_MAX_UPLOAD_BYTES")); v != "" {
+		n, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return fmt.Errorf("CARREL_FILES_MAX_UPLOAD_BYTES: invalid integer %q", v)
+		}
+		cfg.Files.MaxUploadBytes = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_FILES_MAX_ENTRIES")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_FILES_MAX_ENTRIES: invalid integer %q", v)
+		}
+		cfg.Files.MaxEntries = n
+	}
 	if v := strings.TrimSpace(os.Getenv("CARREL_PROGRESS_MODE")); v != "" {
 		cfg.Progress.Mode = ProgressMode(strings.ToLower(v))
 	}
@@ -517,6 +563,9 @@ func (c *Config) Validate() error {
 	if err := c.Import.validate(); err != nil {
 		return err
 	}
+	if err := c.Files.validate(); err != nil {
+		return err
+	}
 	if err := c.Progress.validate(); err != nil {
 		return err
 	}
@@ -604,6 +653,16 @@ func (p Photo) validate() error {
 	}
 	if p.MaxUploadBytes < 0 {
 		return errors.New("photo max upload bytes must not be negative")
+	}
+	return nil
+}
+
+func (f Files) validate() error {
+	if f.MaxUploadBytes <= 0 {
+		return errors.New("files max upload bytes must be positive")
+	}
+	if f.MaxEntries <= 0 {
+		return errors.New("files max entries must be positive")
 	}
 	return nil
 }

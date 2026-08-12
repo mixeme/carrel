@@ -76,7 +76,8 @@ func Discover(ctx context.Context, guard *dav.Guard, creds Credentials) (*Result
 	}
 
 	var collections []Collection
-	if calHome, err := findCalendarHome(ctx, client, principal, trace); err == nil && calHome != "" {
+	calHome, _ := findCalendarHome(ctx, client, principal, trace)
+	if calHome != "" {
 		cols, stepErr := listCollections(ctx, client, calHome, KindCalendar, trace, "calendar_collections")
 		if stepErr != nil {
 			trace.Add("calendar_collections", stepErr.Error(), 0, "")
@@ -84,7 +85,8 @@ func Discover(ctx context.Context, guard *dav.Guard, creds Credentials) (*Result
 			collections = append(collections, cols...)
 		}
 	}
-	if abHome, err := findAddressBookHome(ctx, client, principal, trace); err == nil && abHome != "" {
+	abHome, _ := findAddressBookHome(ctx, client, principal, trace)
+	if abHome != "" {
 		cols, stepErr := listCollections(ctx, client, abHome, KindAddressBook, trace, "addressbook_collections")
 		if stepErr != nil {
 			trace.Add("addressbook_collections", stepErr.Error(), 0, "")
@@ -92,8 +94,18 @@ func Discover(ctx context.Context, guard *dav.Guard, creds Credentials) (*Result
 			collections = append(collections, cols...)
 		}
 	}
+	// File collections are not advertised by a home-set: §6 defines them as the
+	// plain collections under the root, and asks for no setting of their own —
+	// there are some and the files section appears, or there are none and it
+	// does not.
+	cols, stepErr := listFileCollections(ctx, client, base, principal, calHome, abHome, trace)
+	if stepErr != nil {
+		trace.Add("file_collections", stepErr.Error(), 0, "")
+	} else {
+		collections = append(collections, cols...)
+	}
 	if len(collections) == 0 {
-		return nil, trace, fmt.Errorf("discovery: no calendar or address book collections found")
+		return nil, trace, fmt.Errorf("discovery: no calendar, address book or file collections found")
 	}
 
 	return &Result{
@@ -185,6 +197,64 @@ func findAddressBookHome(ctx context.Context, client *dav.Client, principal stri
 	return home.Href.Path, nil
 }
 
+// listFileCollections finds the plain collections directly under the root
+// (§6). A calendar or address book home lives under the same root on most
+// servers — Baikal answers `/dav.php/` with `calendars/`, `addressbooks/` and
+// `principals/`, none of them marked as anything at that depth — so a container
+// holding one of those homes is skipped rather than offered as a folder of
+// files.
+func listFileCollections(ctx context.Context, client *dav.Client, base, principal, calHome, abHome string, trace *Trace) ([]Collection, error) {
+	root := base
+	if u, err := url.Parse(base); err == nil && u.Path != "" {
+		root = u.Path
+	}
+	root = normalizePath(root)
+	ms, err := client.PropFind(ctx, root, dav.DepthOne, []xml.Name{
+		dav.ResourceTypeName,
+		dav.DisplayNameName,
+		dav.CurrentUserPrivilegeSetName,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var out []Collection
+	for _, resp := range ms.Responses {
+		path, err := resp.Path()
+		if err != nil {
+			continue
+		}
+		if normalizePath(path) == root {
+			continue
+		}
+		if holdsService(path, principal, calHome, abHome) {
+			continue
+		}
+		col, ok, err := decodeCollection(resp, KindFiles)
+		if err != nil || !ok {
+			continue
+		}
+		out = append(out, col)
+	}
+	trace.Add("file_collections", fmt.Sprintf("found %d collections", len(out)), http.StatusMultiStatus, root)
+	return out, nil
+}
+
+// holdsService reports whether path is, or contains, one of the DAV homes. Those
+// are the protocol's own trees and browsing them as files would offer a person
+// their address books as a folder of `.vcf`.
+func holdsService(path, principal, calHome, abHome string) bool {
+	candidate := normalizePath(path)
+	for _, service := range []string{principal, calHome, abHome} {
+		if service == "" {
+			continue
+		}
+		if strings.HasPrefix(normalizePath(service), candidate) {
+			return true
+		}
+	}
+	return false
+}
+
 func listCollections(ctx context.Context, client *dav.Client, home string, kind Kind, trace *Trace, step string) ([]Collection, error) {
 	props := []xml.Name{
 		dav.ResourceTypeName,
@@ -230,6 +300,15 @@ func decodeCollection(resp dav.Response, kind Kind) (Collection, bool, error) {
 		}
 	case KindAddressBook:
 		if !resType.Is(dav.AddressBookName) {
+			return Collection{}, false, nil
+		}
+	case KindFiles:
+		// A plain collection and nothing more: the calendar and address book
+		// markers, and a principal, all disqualify it (§6).
+		if !resType.Is(dav.CollectionName) {
+			return Collection{}, false, nil
+		}
+		if resType.Is(dav.CalendarName) || resType.Is(dav.AddressBookName) || resType.Is(dav.PrincipalName) {
 			return Collection{}, false, nil
 		}
 	}

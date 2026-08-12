@@ -130,6 +130,7 @@ func run() int {
 		Guard:         guard,
 		Photo:         handler.PhotoConfig(cfg.Photo),
 		Import:        handler.ImportConfig(cfg.Import),
+		Files:         handler.FilesConfig(cfg.Files),
 		Fanout:        fanouts,
 		Progress:      cfg.Progress,
 		Detection:     cfg.Duplicates,

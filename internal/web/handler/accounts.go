@@ -30,8 +30,9 @@ const (
 
 type accountRow struct {
 	account.Account
-	AddressBooks []sidebarBook
-	Calendars    []sidebarBook
+	AddressBooks    []sidebarBook
+	Calendars       []sidebarBook
+	FileCollections []sidebarBook
 }
 
 type sidebarBook struct {
@@ -54,6 +55,9 @@ type appView struct {
 	Connect      connectForm
 	Trace        *discovery.Trace
 	ShowConnect  bool
+	// Attachments is the one setting §23.10 needs: where a file goes when it is
+	// attached to a note or an event.
+	Attachments attachmentSettings
 }
 
 func (s *Server) buildAppView(r *http.Request) appView {
@@ -70,6 +74,7 @@ func (s *Server) buildAppView(r *http.Request) appView {
 		Escrow:       escrowStatusOf(s.Store.Settings(), user),
 		Email:        user.Email,
 		PendingEmail: user.PendingEmail,
+		Attachments:  s.attachmentSettingsView(sess),
 	}
 	accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK())
 	if err != nil {
@@ -87,6 +92,11 @@ func (s *Server) buildAppView(r *http.Request) appView {
 				})
 			case discovery.KindCalendar:
 				row.Calendars = append(row.Calendars, sidebarBook{
+					Collection: col,
+					ColEnc:     EncodeCollectionPath(col.Path),
+				})
+			case discovery.KindFiles:
+				row.FileCollections = append(row.FileCollections, sidebarBook{
 					Collection: col,
 					ColEnc:     EncodeCollectionPath(col.Path),
 				})
@@ -131,6 +141,11 @@ func (s *Server) appSubmit(w http.ResponseWriter, r *http.Request) {
 		data, err = s.appDeleteDAV(r, actor)
 		if err == nil {
 			notice = "Account removed."
+		}
+	case "save_attachments":
+		data, err = s.appSaveAttachments(r)
+		if err == nil {
+			notice = "Attachments will go in that folder."
 		}
 	case "refresh_cache":
 		s.appRefresh(w, r)

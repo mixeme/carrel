@@ -58,6 +58,7 @@
                 {{end}}</ul>
             </section>
             {{end}}
+            {{if not $d.IsNew}}{{template "attachments" .}}{{end}}
             {{if $d.Note.Other}}
             <section class="other-props"><h2>Other properties</h2><p class="hint">Kept as the server sent them and not offered for editing.</p>
                 <ul>{{range $d.Note.Other}}<li><code>{{.Name}}</code>{{range .Values}} {{.Text}}{{end}}</li>{{end}}</ul>

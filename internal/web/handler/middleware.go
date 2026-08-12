@@ -78,8 +78,23 @@ const DefaultMaxBody = 1 << 20 // 1 MiB
 // MaxBody caps the request body. A caller reading past the limit gets an
 // error rather than an unbounded allocation.
 func MaxBody(n int64) Middleware {
+	return MaxBodyFunc(func(*http.Request) int64 { return n })
+}
+
+// MaxBodyFunc caps the request body at a ceiling chosen per request.
+//
+// The choice has to be made here, before anything reads the body, and not in the
+// handler that wants a larger one. The CSRF check of §24.5 reads a multipart form
+// to find the token a plain HTML form carries as a field, so a limit imposed
+// after it would truncate the upload it was meant to authorise — and the person
+// would be told their token was invalid, which is both untrue and unactionable.
+func MaxBodyFunc(limit func(*http.Request) int64) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			n := limit(r)
+			if n <= 0 {
+				n = DefaultMaxBody
+			}
 			r.Body = http.MaxBytesReader(w, r.Body, n)
 			next.ServeHTTP(w, r)
 		})

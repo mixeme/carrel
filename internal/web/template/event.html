@@ -93,6 +93,7 @@
                 {{end}}</ul>
             </section>
             {{end}}
+            {{if not $d.IsNew}}{{template "attachments" .}}{{end}}
             {{if $d.Event.Attendees}}<section class="other-props"><h2>Attendees</h2><ul>{{range $d.Event.Attendees}}<li>{{if .CN}}{{.CN}} — {{end}}{{.URI}}{{if .PartStat}} ({{.PartStat}}){{end}}</li>{{end}}</ul></section>{{end}}
             {{if $d.Event.Other}}<section class="other-props"><h2>Other properties</h2><p class="hint">Kept as the server sent them and not offered for editing.</p><ul>{{range $d.Event.Other}}<li><code>{{.Name}}</code>{{range .Values}} {{.Text}}{{end}}</li>{{end}}</ul></section>{{end}}
             {{if $d.PrintDate}}<p class="print-footer print-only">Carrel · event · captured {{$d.PrintDate}}</p>{{end}}

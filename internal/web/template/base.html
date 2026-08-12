@@ -22,6 +22,7 @@
         <a href="{{.Base}}/app/calendar"{{if or (eq .Title "Agenda") (eq .Title "New event") (eq .Title "Event") (eq .Title "Calendar conflict") (eq .Title "Import calendar") (eq .Title "Calendar import report")}} aria-current="page"{{end}}>Calendar</a>
         <a href="{{.Base}}/app/tasks"{{if or (eq .Title "Tasks") (eq .Title "New task") (eq .Title "Task") (eq .Title "Task conflict")}} aria-current="page"{{end}}>Tasks</a>
         <a href="{{.Base}}/app/notes"{{if or (eq .Title "Notes") (eq .Title "New note") (eq .Title "Note") (eq .Title "Note conflict") (eq .Title "Import notes") (eq .Title "Notes import report")}} aria-current="page"{{end}}>Notes</a>
+        {{if .ShowFiles}}<a href="{{.Base}}/app/files"{{if eq .Title "Files"}} aria-current="page"{{end}}>Files</a>{{end}}
         <a href="{{.Base}}/app/unified"{{if or (eq .Title "Everything") (eq .Title "All contacts")}} aria-current="page"{{end}}>Everything</a>
         <a href="{{.Base}}/app/search"{{if eq .Title "Search"}} aria-current="page"{{end}}>Search</a>
         <a href="{{.Base}}/app/duplicates"{{if or (eq .Title "Duplicates") (eq .Title "Merge duplicates")}} aria-current="page"{{end}}>Duplicates</a>
@@ -76,6 +77,59 @@
     </form>
     {{else}}<p class="hint">No collections here yet. Connect a DAV account from your <a href="{{.Base}}/app/">profile</a>.</p>{{end}}
 </aside>
+{{end}}
+
+{{/* The attachments of §23.10. It is defined against the frame because a note
+     and an event show the same list in the same way, and the one thing that
+     differs — which section the form posts to — is passed in as .Section. */}}
+{{define "attachments"}}
+{{$d := .Data}}
+<section class="other-props attachments">
+    <h2>Attachments</h2>
+    {{if $d.Attachments}}
+    <ul class="attachment-list">
+    {{range $d.Attachments}}
+        <li>
+            {{if .OpenURL}}<a href="{{.OpenURL}}">{{.Name}}</a>{{else}}<span>{{.Name}}</span>{{end}}
+            <span class="hint">{{if .Type}}{{.Type}}{{end}}{{if .Size}} · {{.Size}}{{end}}
+                {{if .Inline}} · stored inside the entry, shown as it is{{end}}
+                {{if .External}} · on a server this account cannot reach{{end}}</span>
+            {{if not $d.ReadOnly}}
+            <form method="post" action="{{$.Base}}/app/{{$d.Section}}/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/attach" class="inline-form no-print">
+                <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                <input type="hidden" name="action" value="detach">
+                <input type="hidden" name="etag" value="{{$d.ETag}}">
+                <input type="hidden" name="attachment" value="{{.Index}}">
+                <button type="submit" class="link">Remove link</button>
+            </form>
+            {{end}}
+        </li>
+    {{end}}
+    </ul>
+    <p class="hint">Removing a link leaves the file on the server: another entry may point at the same one, so Carrel
+        does not delete it. Delete it yourself from <a href="{{.Base}}/app/files">Files</a> when you mean to.</p>
+    {{else}}
+    <p class="hint">Nothing attached.</p>
+    {{end}}
+    {{if and (not $d.ReadOnly) (not $d.IsNew)}}
+        {{if $d.CanAttach}}
+        <form method="post" action="{{.Base}}/app/{{$d.Section}}/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/attach"
+              enctype="multipart/form-data" class="attach-form no-print" data-attach-form>
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="etag" value="{{$d.ETag}}">
+            <label for="attach-file">Attach a file</label>
+            <input id="attach-file" type="file" name="file" required data-attach-input>
+            <button type="submit">Attach</button>
+            <p class="hint" data-attach-hint>The file goes on your WebDAV server and the entry gets a link to it. You can
+                also paste a picture from the clipboard or drop one onto this card. Other clients will show the link;
+                whether they can open it depends on the client and on whether your server asks them for a password.</p>
+        </form>
+        {{else}}
+        <p class="hint">To attach files, choose a folder for them on your <a href="{{.Base}}/app/">profile page</a>. It is
+            asked for once.</p>
+        {{end}}
+    {{end}}
+</section>
 {{end}}
 
 {{/* The progress panel of §16, on its own because every screen that polls

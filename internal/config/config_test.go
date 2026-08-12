@@ -141,6 +141,59 @@ func TestDuplicateThreshold(t *testing.T) {
 	}
 }
 
+// The file section of §7 has its own ceilings: one on an upload, one on how many
+// members of a folder are listed. A large upload is bandwidth rather than memory,
+// because nothing buffers it, so the default is generous; a listing is a page and
+// a PROPFIND response, so that one is not.
+func TestFilesLimits(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("CARREL_DATA_DIR", dir)
+	clearEnv(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Files.MaxUploadBytes != DefaultFilesMaxUploadBytes {
+		t.Errorf("max upload = %d, want %d", cfg.Files.MaxUploadBytes, DefaultFilesMaxUploadBytes)
+	}
+	if cfg.Files.MaxEntries != DefaultFilesMaxEntries {
+		t.Errorf("max entries = %d, want %d", cfg.Files.MaxEntries, DefaultFilesMaxEntries)
+	}
+
+	file := filepath.Join(dir, "config.json")
+	if err := os.WriteFile(file, []byte(`{"files": {"max_upload_bytes": 1048576, "max_entries": 50}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err = Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Files.MaxUploadBytes != 1<<20 || cfg.Files.MaxEntries != 50 {
+		t.Errorf("from file = %d / %d", cfg.Files.MaxUploadBytes, cfg.Files.MaxEntries)
+	}
+
+	t.Setenv("CARREL_FILES_MAX_UPLOAD_BYTES", "2097152")
+	t.Setenv("CARREL_FILES_MAX_ENTRIES", "10")
+	cfg, err = Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Files.MaxUploadBytes != 2<<20 || cfg.Files.MaxEntries != 10 {
+		t.Errorf("from env = %d / %d", cfg.Files.MaxUploadBytes, cfg.Files.MaxEntries)
+	}
+
+	t.Setenv("CARREL_FILES_MAX_ENTRIES", "0")
+	if _, err := Load(); err == nil {
+		t.Error("a listing ceiling of zero was accepted: no folder would ever show anything")
+	}
+	t.Setenv("CARREL_FILES_MAX_ENTRIES", "10")
+	t.Setenv("CARREL_FILES_MAX_UPLOAD_BYTES", "not-a-number")
+	if _, err := Load(); err == nil {
+		t.Error("an upload ceiling that is not a number was accepted")
+	}
+}
+
 func clearEnv(t *testing.T) {
 	t.Helper()
 	for _, k := range []string{"CARREL_PORT", "CARREL_TRUSTED_PROXIES", "CARREL_BASE_PATH", "CARREL_LOG_LEVEL"} {

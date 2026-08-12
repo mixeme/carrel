@@ -18,6 +18,15 @@ const (
 	// looking for duplicates spans both kinds of collection and is not the
 	// same question as the one a search screen was last asked.
 	ViewDuplicates = "duplicates"
+	// ViewFiles is the file section of §7. Its default is the collection the
+	// browser opens on.
+	ViewFiles = "files"
+	// ViewAttachments is not a screen: it is where §23.10 puts the files a note
+	// or an event is given. It is kept as a default rather than a selection
+	// because the whole requirement is that the folder is named once and never
+	// asked for again — the Collection of the reference is the folder itself,
+	// which is why it can be a path deeper than a collection root.
+	ViewAttachments = "attachments"
 )
 
 // SourceRef points at one collection of one account. It is a reference and not

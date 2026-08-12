@@ -26,7 +26,10 @@ type Note struct {
 	Date     time.Time
 	DateOnly bool
 	Related  []Relation
-	Other    []Property
+	// Attachments are the ATTACH properties of §23.10 — the pictures and
+	// screenshots that were the one thing notes could not carry.
+	Attachments []Attachment
+	Other       []Property
 }
 
 var knownNoteProps = map[string]bool{
@@ -42,6 +45,7 @@ var knownNoteProps = map[string]bool{
 	ical.PropStatus:        true,
 	ical.PropClass:         true,
 	ical.PropRelatedTo:     true,
+	ical.PropAttach:        true,
 }
 
 // Note returns the display view of a journal object.
@@ -61,6 +65,7 @@ func (o *Object) Note(loc *time.Location) (Note, error) {
 		Summary:     icalPropText(comp.Props, ical.PropSummary),
 		Description: icalPropText(comp.Props, ical.PropDescription),
 		Related:     relationsFrom(comp.Props),
+		Attachments: attachmentsFrom(comp.Props),
 	}
 	if cats := comp.Props.Get(ical.PropCategories); cats != nil {
 		note.Categories = splitComma(cats.Value)

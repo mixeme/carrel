@@ -18,6 +18,22 @@
             <p class="hint">Front matter is read when present: title, date, tags, uid and any X- property exported earlier. A file without front matter becomes a note dated by its own timestamp.</p>
             <button type="submit">Preview import</button>
         </form>
+        {{if $d.WebDAVSources}}
+        <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import" class="subsection">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="webdav_import">
+            <h2>Or read a folder from WebDAV</h2>
+            <label for="webdav-source">File collection</label>
+            <select id="webdav-source" name="webdav_source">
+            {{range $d.WebDAVSources}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}
+            </select>
+            <label for="webdav-folder">Folder</label>
+            <input id="webdav-folder" name="webdav_folder" placeholder="notes" autocapitalize="none" spellcheck="false">
+            <p class="hint">Every <code>.md</code> file directly in that folder is previewed. Subfolders are not walked, and
+                nothing is deleted or moved on the server.</p>
+            <button type="submit">Preview folder</button>
+        </form>
+        {{end}}
         {{else}}
         <p>{{$d.OKCount}} note(s) ready; {{$d.ErrorCount}} error(s); {{$d.CollisionCount}} UID collision(s).</p>
         {{if $d.TruncatedNote}}<p class="message error">{{$d.TruncatedNote}}</p>{{end}}

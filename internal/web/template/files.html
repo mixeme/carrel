@@ -1,0 +1,98 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout files-layout">
+    <aside class="sidebar card no-print">
+        <h2>File collections</h2>
+        {{if $d.Sources}}
+        <ul class="collection-list">{{range $d.Sources}}
+            <li><a class="collection-link{{if and (eq .AccountID $d.AccountID) (eq .ColEnc $d.ColEnc)}} is-active{{end}}"
+                   href="{{$.Base}}/app/files/{{.AccountID}}/{{.ColEnc}}">{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></a></li>
+        {{end}}</ul>
+        {{else}}<p class="hint">None found.</p>{{end}}
+    </aside>
+    <div class="app-main">
+        {{if $d.NoFiles}}
+        <section class="card">
+            <h1>Files</h1>
+            <p>None of your connected servers offers a plain folder to browse.</p>
+            <p class="hint">Carrel shows this section when discovery finds a WebDAV collection that is not a calendar
+                and not an address book. There is no setting to turn it on: connect an account whose server has one and
+                it appears. Baikal serves calendars and contacts only — a file collection usually means a second
+                account, on Nextcloud or on a plain WebDAV server.</p>
+            <p><a class="button" href="{{.Base}}/app/">Connect an account</a></p>
+        </section>
+        {{else}}
+        <section class="card files-card">
+            <div class="contacts-header">
+                <div>
+                    <h1>Files</h1>
+                    <nav class="crumbs" aria-label="Folder">
+                        {{range $d.Crumbs}}{{if .Last}}<span aria-current="page">{{.Name}}</span>{{else}}<a href="{{.URL}}">{{.Name}}</a> / {{end}}{{end}}
+                    </nav>
+                    <p class="source-label">{{$d.AccountLabel}}{{if $d.ReadOnly}} · read-only{{end}}</p>
+                    {{if $d.IsAttachmentFolder}}<p class="hint">This is the folder attachments are put in.</p>{{end}}
+                </div>
+                <p class="contacts-actions no-print">
+                    <button type="button" class="link" data-refresh>Refresh</button>
+                </p>
+            </div>
+
+            {{if $d.Truncated}}<p class="message notice no-print">This folder holds more files than Carrel lists. Only the first {{len $d.Entries}} are shown.</p>{{end}}
+
+            <table class="files-table">
+                <thead><tr><th>Name</th><th>Size</th><th>Type</th><th>Changed</th><th class="no-print"></th></tr></thead>
+                <tbody>
+                {{if $d.ParentURL}}<tr><td colspan="5"><a href="{{$d.ParentURL}}">← up one folder</a></td></tr>{{end}}
+                {{range $d.Entries}}
+                <tr class="{{if .Dir}}is-folder{{else}}is-file{{end}}">
+                    <td>{{if .Dir}}<a href="{{.URL}}">{{.Name}}/</a>{{else}}<a href="{{.DownloadURL}}">{{.Name}}</a>{{end}}</td>
+                    <td>{{.SizeLabel}}</td>
+                    <td class="hint">{{.TypeLabel}}</td>
+                    <td class="hint">{{.ModLabel}}</td>
+                    <td class="no-print">
+                        {{if not $d.ReadOnly}}
+                        <form method="post" action="{{$.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" class="inline-form">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="p" value="{{$d.Rel}}">
+                            <input type="hidden" name="target" value="{{.Rel}}">
+                            <input type="hidden" name="etag" value="{{.ETag}}">
+                            <button type="submit" class="link">Delete</button>
+                        </form>
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
+                {{if $d.Empty}}<tr><td colspan="5" class="hint">This folder is empty.</td></tr>{{end}}
+                </tbody>
+            </table>
+
+            {{if $d.ReadOnly}}
+            <p class="hint">This collection is read-only: it can be browsed and downloaded from, and nothing can be put in it.</p>
+            {{else}}
+            <div class="files-actions no-print">
+                <form method="post" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                    <input type="hidden" name="p" value="{{$d.Rel}}">
+                    <label for="file">Upload a file here</label>
+                    <input id="file" type="file" name="file" required>
+                    <button type="submit">Upload</button>
+                    <p class="hint">Up to {{$d.MaxUpload}}. A name that is already taken is refused rather than overwritten.</p>
+                </form>
+                <form method="post" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}">
+                    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                    <input type="hidden" name="action" value="mkdir">
+                    <input type="hidden" name="p" value="{{$d.Rel}}">
+                    <label for="name">New folder</label>
+                    <input id="name" name="name" required placeholder="folder name">
+                    <button type="submit">Create</button>
+                </form>
+            </div>
+            <p class="hint">Deleting removes the file from the server. Carrel does not check first whether an event or a
+                note links to it — it is your storage, and it keeps no index of what points where.</p>
+            {{end}}
+        </section>
+        {{end}}
+    </div>
+</div>
+{{end}}

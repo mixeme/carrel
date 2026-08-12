@@ -50,6 +50,9 @@ type Server struct {
 	Guard         *dav.Guard
 	Photo         PhotoConfig
 	Import        ImportConfig
+	// Files holds the upload and listing limits of the file section (§7,
+	// §23.10).
+	Files FilesConfig
 	// Fanout owns the live cross-source polls of §14 and §16. It is optional:
 	// without it the unified view and the search say so instead of failing.
 	Fanout *fanout.Registry
