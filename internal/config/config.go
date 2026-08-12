@@ -12,12 +12,22 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
 	DefaultPort    = 8080
 	DefaultDataDir = "/var/lib/carrel"
 	DefaultLogLevel = "info"
+
+	DefaultDAVConnectTimeout  = 10 * time.Second
+	DefaultDAVRequestTimeout  = 30 * time.Second
+	DefaultDAVMaxResponseSize = 10 << 20 // 10 MiB
+	DefaultDAVMaxRedirects    = 5
+
+	DefaultCacheCollectionTTL = 60 * time.Second
+	DefaultCacheMaxCollections = 256
+	DefaultCacheMaxETagEntries = 4096
 )
 
 // LogLevel values accepted by CARREL_LOG_LEVEL and config file.
@@ -28,6 +38,41 @@ const (
 	LogError = "error"
 )
 
+// DAV holds outbound CalDAV/CardDAV client limits (§24.2).
+type DAV struct {
+	SSRFAllowlist    []string `json:"ssrf_allowlist"`
+	ConnectTimeout   Duration `json:"connect_timeout"`
+	RequestTimeout   Duration `json:"request_timeout"`
+	MaxResponseBytes int64    `json:"max_response_bytes"`
+	MaxRedirects     int      `json:"max_redirects"`
+}
+
+// Cache holds per-session cache limits consumed in stage 2 §12.
+type Cache struct {
+	CollectionTTLSeconds int64 `json:"collection_ttl_seconds"`
+	MaxCollections       int   `json:"max_collections"`
+	MaxETagEntries       int   `json:"max_etag_entries"`
+}
+
+// Duration is a time.Duration marshaled as a JSON number of seconds.
+type Duration time.Duration
+
+func (d Duration) Duration() time.Duration { return time.Duration(d) }
+
+func (d Duration) MarshalJSON() ([]byte, error) {
+	sec := time.Duration(d).Seconds()
+	return json.Marshal(sec)
+}
+
+func (d *Duration) UnmarshalJSON(b []byte) error {
+	var sec float64
+	if err := json.Unmarshal(b, &sec); err != nil {
+		return err
+	}
+	*d = Duration(time.Duration(sec * float64(time.Second)))
+	return nil
+}
+
 // Config holds server runtime settings.
 type Config struct {
 	Port           int      `json:"port"`
@@ -35,6 +80,8 @@ type Config struct {
 	TrustedProxies []string `json:"trusted_proxies"`
 	BasePath       string   `json:"base_path"`
 	LogLevel       string   `json:"log_level"`
+	DAV            DAV      `json:"dav"`
+	Cache          Cache    `json:"cache"`
 }
 
 // fileConfig mirrors Config for JSON unmarshaling with optional fields.
@@ -44,6 +91,8 @@ type fileConfig struct {
 	TrustedProxies []string `json:"trusted_proxies,omitempty"`
 	BasePath       *string  `json:"base_path,omitempty"`
 	LogLevel       *string  `json:"log_level,omitempty"`
+	DAV            *DAV     `json:"dav,omitempty"`
+	Cache          *Cache   `json:"cache,omitempty"`
 }
 
 // Load reads configuration from an optional file in dataDir, then applies
@@ -83,6 +132,17 @@ func defaults() *Config {
 		TrustedProxies: nil,
 		BasePath:       "",
 		LogLevel:       DefaultLogLevel,
+		DAV: DAV{
+			ConnectTimeout:   Duration(DefaultDAVConnectTimeout),
+			RequestTimeout:   Duration(DefaultDAVRequestTimeout),
+			MaxResponseBytes: DefaultDAVMaxResponseSize,
+			MaxRedirects:     DefaultDAVMaxRedirects,
+		},
+		Cache: Cache{
+			CollectionTTLSeconds: int64(DefaultCacheCollectionTTL / time.Second),
+			MaxCollections:       DefaultCacheMaxCollections,
+			MaxETagEntries:       DefaultCacheMaxETagEntries,
+		},
 	}
 }
 
@@ -105,6 +165,12 @@ func applyFile(cfg *Config, raw []byte) error {
 	}
 	if fc.LogLevel != nil {
 		cfg.LogLevel = *fc.LogLevel
+	}
+	if fc.DAV != nil {
+		cfg.DAV = *fc.DAV
+	}
+	if fc.Cache != nil {
+		cfg.Cache = *fc.Cache
 	}
 	return nil
 }
@@ -129,7 +195,70 @@ func applyEnv(cfg *Config) error {
 	if v := strings.TrimSpace(os.Getenv("CARREL_LOG_LEVEL")); v != "" {
 		cfg.LogLevel = strings.ToLower(v)
 	}
+	if v, ok := os.LookupEnv("CARREL_DAV_SSRF_ALLOWLIST"); ok && strings.TrimSpace(v) != "" {
+		cfg.DAV.SSRFAllowlist = parseList(v)
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_DAV_CONNECT_TIMEOUT")); v != "" {
+		d, err := parseDurationSeconds(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_DAV_CONNECT_TIMEOUT: %w", err)
+		}
+		cfg.DAV.ConnectTimeout = Duration(d)
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_DAV_REQUEST_TIMEOUT")); v != "" {
+		d, err := parseDurationSeconds(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_DAV_REQUEST_TIMEOUT: %w", err)
+		}
+		cfg.DAV.RequestTimeout = Duration(d)
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_DAV_MAX_RESPONSE_BYTES")); v != "" {
+		n, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return fmt.Errorf("CARREL_DAV_MAX_RESPONSE_BYTES: invalid integer %q", v)
+		}
+		cfg.DAV.MaxResponseBytes = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_DAV_MAX_REDIRECTS")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_DAV_MAX_REDIRECTS: invalid integer %q", v)
+		}
+		cfg.DAV.MaxRedirects = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_CACHE_COLLECTION_TTL")); v != "" {
+		d, err := parseDurationSeconds(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_CACHE_COLLECTION_TTL: %w", err)
+		}
+		cfg.Cache.CollectionTTLSeconds = int64(d / time.Second)
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_CACHE_MAX_COLLECTIONS")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_CACHE_MAX_COLLECTIONS: invalid integer %q", v)
+		}
+		cfg.Cache.MaxCollections = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_CACHE_MAX_ETAG_ENTRIES")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_CACHE_MAX_ETAG_ENTRIES: invalid integer %q", v)
+		}
+		cfg.Cache.MaxETagEntries = n
+	}
 	return nil
+}
+
+func parseDurationSeconds(s string) (time.Duration, error) {
+	sec, err := strconv.ParseFloat(strings.TrimSpace(s), 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid duration %q", s)
+	}
+	if sec <= 0 {
+		return 0, fmt.Errorf("duration must be positive, got %q", s)
+	}
+	return time.Duration(sec * float64(time.Second)), nil
 }
 
 func parseList(s string) []string {
@@ -166,7 +295,47 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("trusted proxy %q: %w", proxy, err)
 		}
 	}
+	if err := c.DAV.validate(); err != nil {
+		return err
+	}
+	if err := c.Cache.validate(); err != nil {
+		return err
+	}
 	return nil
+}
+
+func (d DAV) validate() error {
+	if d.ConnectTimeout.Duration() <= 0 {
+		return errors.New("dav connect timeout must be positive")
+	}
+	if d.RequestTimeout.Duration() <= 0 {
+		return errors.New("dav request timeout must be positive")
+	}
+	if d.MaxResponseBytes <= 0 {
+		return errors.New("dav max response bytes must be positive")
+	}
+	if d.MaxRedirects < 0 {
+		return errors.New("dav max redirects must not be negative")
+	}
+	return nil
+}
+
+func (c Cache) validate() error {
+	if c.CollectionTTLSeconds <= 0 {
+		return errors.New("cache collection TTL must be positive")
+	}
+	if c.MaxCollections <= 0 {
+		return errors.New("cache max collections must be positive")
+	}
+	if c.MaxETagEntries <= 0 {
+		return errors.New("cache max etag entries must be positive")
+	}
+	return nil
+}
+
+// CollectionTTL returns the per-session collection metadata TTL.
+func (c Cache) CollectionTTL() time.Duration {
+	return time.Duration(c.CollectionTTLSeconds) * time.Second
 }
 
 func validateBasePath(p string) error {

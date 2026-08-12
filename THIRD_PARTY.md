@@ -36,4 +36,11 @@ Resolved by the Go toolchain from `go.mod`; not vendored in this repository.
 - **License:** BSD 3-Clause
 - **Copyright:** Copyright (c) 2009 The Go Authors. All rights reserved.
 
+### github.com/emersion/go-webdav v0.7.0
+
+- **Source:** https://github.com/emersion/go-webdav
+- **Used for:** CalDAV/CardDAV/WebDAV client reference; stage 2 transport builds on the same protocol surface
+- **License:** MIT
+- **Copyright:** Copyright (c) 2016-2024 emersion
+
 Full license texts are available in the respective upstream repositories.

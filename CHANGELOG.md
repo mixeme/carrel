@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 Stage 2 («Транспорт и discovery») — в работе; целевая версия **v0.2.0**. План: [docs/stage-2-plan.md](docs/stage-2-plan.md).
 
+### Added
+
+- **Stage 2 (phases 1–4) — transport and account storage:** `internal/config` DAV timeouts, SSRF allowlist, and session cache limits; `internal/dav` SSRF guard (§24.2), DAV transport with Multi-Status parsing, and discovery with step-by-step `DiscoveryTrace` (§6); `internal/account` secrets blob sealed under the user DEK; `store` API to add, list, update and delete DAV accounts in `User.Secrets`. Dependency `github.com/emersion/go-webdav` v0.7.0 recorded in `THIRD_PARTY.md`.
+
 ### Changed
 
 - **Invitations:** two separate admin flows — copy a **link** (no mail) or **send by email** (SMTP required; the administrator never sees the link). The invitee chooses their own login on accept; email is fixed only for email invitations. Resend applies to email invitations only.
