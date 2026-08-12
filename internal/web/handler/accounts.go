@@ -30,6 +30,12 @@ const (
 
 type accountRow struct {
 	account.Account
+	AddressBooks []sidebarBook
+}
+
+type sidebarBook struct {
+	discovery.Collection
+	ColEnc string
 }
 
 type connectForm struct {
@@ -70,7 +76,17 @@ func (s *Server) buildAppView(r *http.Request) appView {
 		return out
 	}
 	for _, acc := range accounts {
-		out.Accounts = append(out.Accounts, accountRow{Account: acc})
+		row := accountRow{Account: acc}
+		for _, col := range acc.Collections {
+			if col.Kind != discovery.KindAddressBook {
+				continue
+			}
+			row.AddressBooks = append(row.AddressBooks, sidebarBook{
+				Collection: col,
+				ColEnc:     EncodeCollectionPath(col.Path),
+			})
+		}
+		out.Accounts = append(out.Accounts, row)
 	}
 	return out
 }

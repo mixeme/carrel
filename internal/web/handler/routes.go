@@ -53,7 +53,21 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("POST "+s.Path("/app/password"), s.ChangePassword)
 	app.HandleFunc("POST "+s.Path("/app/email"), s.RequestEmailChange)
 	app.HandleFunc("POST "+s.Path("/app/escrow"), s.ProfileEscrow)
+	app.HandleFunc("GET "+s.Path("/app/contacts"), s.ContactsHome)
+	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}"), s.ContactsList)
+	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/page"), s.ContactsPage)
+	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/new"), s.ContactNew)
+	app.HandleFunc("POST "+s.Path("/app/contacts/{account}/{col}/new"), s.ContactNew)
+	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}"), s.ContactCard)
+	app.HandleFunc("POST "+s.Path("/app/contacts/{account}/{col}/{uid}"), s.ContactCard)
+	app.HandleFunc("POST "+s.Path("/app/contacts/{account}/{col}/{uid}/conflict"), s.ConflictResolve)
+	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}/photo-preview"), s.ContactPhotoPreview)
 	pages.Handle(s.Path("/app/"), Chain(app, s.RequireAuth, s.RequirePasswordChange))
+
+	// Contact photos: authenticated, separate prefix (§11).
+	photos := http.NewServeMux()
+	photos.HandleFunc("GET "+s.Path("/c/{account}/{col}/{uid}/photo"), s.ContactPhoto)
+	pages.Handle(s.Path("/c/"), Chain(photos, s.RequireAuth, s.RequirePasswordChange))
 
 	// The administrator's section.
 	admin := http.NewServeMux()

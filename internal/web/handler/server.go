@@ -46,6 +46,7 @@ type Server struct {
 	RecoveryLimit *ratelimit.Limiter
 	Mail          *mail.Queue
 	Guard         *dav.Guard
+	Photo         PhotoConfig
 	Logger        *slog.Logger
 }
 

@@ -5,27 +5,33 @@
     <aside class="sidebar card">
         <h2>Accounts</h2>
         {{if $d.Accounts}}
-        {{range $d.Accounts}}
+        {{range $acc := $d.Accounts}}
         <section class="account-block">
-            <h3>{{if .Label}}{{.Label}}{{else}}{{.Username}}{{end}}</h3>
-            <p class="hint">{{.BaseURL}}</p>
-            {{if .Collections}}
+            <h3>{{if $acc.Label}}{{$acc.Label}}{{else}}{{$acc.Username}}{{end}}</h3>
+            <p class="hint">{{$acc.BaseURL}}</p>
+            {{if or $acc.AddressBooks $acc.Collections}}
             <ul class="collection-list">
-            {{range .Collections}}
+            {{range $acc.AddressBooks}}
                 <li>
-                    <label class="checkbox">
-                        <input type="checkbox" name="collection" value="{{.Path}}" checked disabled>
+                    <a class="collection-link" href="{{$.Base}}/app/contacts/{{$acc.ID}}/{{.ColEnc}}">
+                        <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                         {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
-                        <span class="hint">({{.Kind}})</span>
-                    </label>
+                    </a>
                 </li>
+            {{end}}
+            {{range $acc.Collections}}
+                {{if ne .Kind "addressbook"}}
+                <li>
+                    <span class="hint">{{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}} ({{.Kind}})</span>
+                </li>
+                {{end}}
             {{end}}
             </ul>
             {{end}}
             <form method="post" action="{{$.Base}}/app/">
                 <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
                 <input type="hidden" name="action" value="delete_dav">
-                <input type="hidden" name="account_id" value="{{.ID}}">
+                <input type="hidden" name="account_id" value="{{$acc.ID}}">
                 <button type="submit" class="link">Remove</button>
             </form>
         </section>
@@ -67,10 +73,10 @@
     </aside>
 
     <div class="app-main">
-        <section class="card contacts-stub">
+        <section class="card">
             <h1>Signed in as {{.Session.Login}}</h1>
-            <p class="hint">Contacts and calendar events arrive in stage 3.
-                Connected collections appear in the sidebar.</p>
+            <p class="hint">Open <a href="{{.Base}}/app/contacts">Contacts</a> to browse
+                connected address books. Collection sources appear in the sidebar.</p>
         </section>
 
         <section class="card">

@@ -1,0 +1,39 @@
+{{define "body"}}
+{{$d := .Data}}
+{{if $d.Crop}}
+<div id="photo-crop">
+    <img class="contact-photo" src="{{$d.Crop.Preview}}?t={{$d.Crop.Rotate}}-{{$d.Crop.Zoom}}" alt="Crop preview" width="128" height="128">
+    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
+          hx-post="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
+          hx-target="#photo-crop" hx-swap="outerHTML"
+          hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <input type="hidden" name="action" value="crop_photo">
+        <input type="hidden" name="etag" value="{{$d.ETag}}">
+        <label>Pan X <input type="number" name="pan_x" step="0.1" min="-1" max="1" value="{{$d.Crop.PanX}}"></label>
+        <label>Pan Y <input type="number" name="pan_y" step="0.1" min="-1" max="1" value="{{$d.Crop.PanY}}"></label>
+        <label>Zoom <input type="number" name="zoom" step="0.1" min="1" max="8" value="{{if $d.Crop.Zoom}}{{$d.Crop.Zoom}}{{else}}1{{end}}"></label>
+        <label>Rotate
+            <select name="rotate">
+                <option value="0"{{if eq $d.Crop.Rotate 0}} selected{{end}}>0°</option>
+                <option value="90"{{if eq $d.Crop.Rotate 90}} selected{{end}}>90°</option>
+                <option value="180"{{if eq $d.Crop.Rotate 180}} selected{{end}}>180°</option>
+                <option value="270"{{if eq $d.Crop.Rotate 270}} selected{{end}}>270°</option>
+            </select>
+        </label>
+        <button type="submit">Update preview</button>
+    </form>
+    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <input type="hidden" name="action" value="confirm_photo">
+        <input type="hidden" name="etag" value="{{$d.ETag}}">
+        <button type="submit">Save photo</button>
+    </form>
+    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <input type="hidden" name="action" value="cancel_photo">
+        <button type="submit" class="link">Cancel crop</button>
+    </form>
+</div>
+{{end}}
+{{end}}

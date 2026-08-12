@@ -18,6 +18,7 @@
     <a class="brand" href="{{.Base}}/app/">Carrel</a>
     <nav>
         <a href="{{.Base}}/app/"{{if eq .Title "Carrel"}} aria-current="page"{{end}}>Profile</a>
+        <a href="{{.Base}}/app/contacts"{{if or (eq .Title "Contacts") (eq .Title "New contact") (eq .Title "Conflict")}} aria-current="page"{{end}}>Contacts</a>
         {{if .Admin}}<a href="{{.Base}}/admin/"{{if eq .Title "Administration"}} aria-current="page"{{end}}>Administration</a>{{end}}
         <form method="post" action="{{.Base}}/app/" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">

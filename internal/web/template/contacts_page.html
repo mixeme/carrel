@@ -1,0 +1,23 @@
+{{define "body"}}
+{{$d := .Data}}
+{{range $d.Contacts}}
+<li class="contact-row">
+    <a class="contact-row-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">
+        <img class="contact-avatar" src="{{.PhotoURL}}" alt="" width="40" height="40">
+        <span class="contact-meta">
+            <strong>{{.DisplayName}}</strong>
+            {{if .Phones}}<span class="hint">{{.Phones}}</span>{{end}}
+            {{if .Emails}}<span class="hint">{{.Emails}}</span>{{end}}
+        </span>
+    </a>
+</li>
+{{end}}
+{{if $d.HasMore}}
+<div hx-get="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/page?offset={{$d.NextOffset}}"
+     hx-trigger="revealed"
+     hx-swap="outerHTML"
+     hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
+    <p class="hint">Loading more…</p>
+</div>
+{{end}}
+{{end}}

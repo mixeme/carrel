@@ -50,4 +50,18 @@ Resolved by the Go toolchain from `go.mod`; not vendored in this repository.
 - **License:** MIT
 - **Copyright:** Copyright (c) 2016-2024 emersion
 
+### github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
+
+- **Source:** https://github.com/rwcarlsen/goexif
+- **Used for:** reading EXIF Orientation when processing contact photos (§11)
+- **License:** BSD 2-Clause
+- **Copyright:** Copyright (c) 2012 Callum Davies / rwcarlsen
+
+### golang.org/x/image v0.34.0
+
+- **Source:** https://cs.opensource.google/go/x/image
+- **Used for:** WebP decode support in the contact photo pipeline
+- **License:** BSD 3-Clause
+- **Copyright:** Copyright (c) 2009 The Go Authors. All rights reserved.
+
 Full license texts are available in the respective upstream repositories.

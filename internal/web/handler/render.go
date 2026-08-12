@@ -118,6 +118,28 @@ func (s *Server) RenderStatus(w http.ResponseWriter, status int, name string, v 
 	_, _ = buf.WriteTo(w)
 }
 
+// RenderFragment writes a template's body block without the page frame, for
+// htmx partial swaps.
+func (s *Server) RenderFragment(w http.ResponseWriter, name string, v View) {
+	page, ok := s.Templates.pages[name]
+	if !ok {
+		s.logError("unknown template", fmt.Errorf("no template %q", name))
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	var buf bytes.Buffer
+	if err := page.ExecuteTemplate(&buf, "body", v); err != nil {
+		s.logError("render fragment", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	h := w.Header()
+	h.Set("Content-Type", "text/html; charset=utf-8")
+	h.Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusOK)
+	_, _ = buf.WriteTo(w)
+}
+
 func (s *Server) logError(msg string, err error) {
 	if s.Logger != nil {
 		s.Logger.Error(msg, "error", err)

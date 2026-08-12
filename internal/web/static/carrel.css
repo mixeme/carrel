@@ -91,6 +91,114 @@ main:has(.app-layout) {
     margin-top: 0;
 }
 
+.collection-dot {
+    display: inline-block;
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+}
+
+.collection-link {
+    display: block;
+    text-decoration: none;
+    color: var(--ink);
+    padding: 0.25rem 0;
+}
+
+.collection-link.is-active {
+    font-weight: 600;
+}
+
+.contacts-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.contact-row {
+    border-bottom: 0.5px solid var(--hair);
+}
+
+.contact-row-link {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.65rem 0;
+    text-decoration: none;
+    color: inherit;
+}
+
+.contact-avatar,
+.contact-photo {
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--rule);
+    flex-shrink: 0;
+}
+
+.contact-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.contact-meta .hint {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.photo-block {
+    margin: 1rem 0;
+}
+
+.name-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.5rem;
+}
+
+.labeled-row {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.conflict-diff td {
+    vertical-align: top;
+    word-break: break-word;
+}
+
+.conflict-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.other-props ul {
+    padding-left: 1.25rem;
+}
+
+a.button {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--paper);
+    padding: 0.4rem 0.85rem;
+    text-decoration: none;
+}
+
 .topbar {
     display: flex;
     align-items: baseline;
@@ -329,5 +437,9 @@ label.checkbox input {
     .topbar {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .app-layout {
+        grid-template-columns: 1fr;
     }
 }

@@ -118,6 +118,7 @@ func run() int {
 		RecoveryLimit: recoveryLimit,
 		Mail:          mailQueue,
 		Guard:         guard,
+		Photo:         handler.PhotoConfig(cfg.Photo),
 		Logger:        logger,
 	}
 

@@ -28,6 +28,12 @@ const (
 	DefaultCacheCollectionTTL = 60 * time.Second
 	DefaultCacheMaxCollections = 256
 	DefaultCacheMaxETagEntries = 4096
+
+	// Photo defaults from §11 — starting values, not acceptance criteria.
+	DefaultPhotoMaxSide      = 512
+	DefaultPhotoJPEGQuality  = 85
+	DefaultPhotoMaxPixels    = 100_000_000
+	DefaultPhotoThumbSide    = 96
 )
 
 // LogLevel values accepted by CARREL_LOG_LEVEL and config file.
@@ -52,6 +58,15 @@ type Cache struct {
 	CollectionTTLSeconds int64 `json:"collection_ttl_seconds"`
 	MaxCollections       int   `json:"max_collections"`
 	MaxETagEntries       int   `json:"max_etag_entries"`
+}
+
+// Photo holds contact photo processing limits (§11).
+type Photo struct {
+	MaxSide        int   `json:"max_side"`
+	JPEGQuality    int   `json:"jpeg_quality"`
+	MaxPixels      int64 `json:"max_pixels"`
+	ThumbSide      int   `json:"thumb_side"`
+	MaxUploadBytes int64 `json:"max_upload_bytes"` // 0 = no byte ceiling
 }
 
 // Duration is a time.Duration marshaled as a JSON number of seconds.
@@ -82,6 +97,7 @@ type Config struct {
 	LogLevel       string   `json:"log_level"`
 	DAV            DAV      `json:"dav"`
 	Cache          Cache    `json:"cache"`
+	Photo          Photo    `json:"photo"`
 }
 
 // fileConfig mirrors Config for JSON unmarshaling with optional fields.
@@ -93,6 +109,7 @@ type fileConfig struct {
 	LogLevel       *string  `json:"log_level,omitempty"`
 	DAV            *DAV     `json:"dav,omitempty"`
 	Cache          *Cache   `json:"cache,omitempty"`
+	Photo          *Photo   `json:"photo,omitempty"`
 }
 
 // Load reads configuration from an optional file in dataDir, then applies
@@ -143,6 +160,12 @@ func defaults() *Config {
 			MaxCollections:       DefaultCacheMaxCollections,
 			MaxETagEntries:       DefaultCacheMaxETagEntries,
 		},
+		Photo: Photo{
+			MaxSide:     DefaultPhotoMaxSide,
+			JPEGQuality: DefaultPhotoJPEGQuality,
+			MaxPixels:   DefaultPhotoMaxPixels,
+			ThumbSide:   DefaultPhotoThumbSide,
+		},
 	}
 }
 
@@ -171,6 +194,9 @@ func applyFile(cfg *Config, raw []byte) error {
 	}
 	if fc.Cache != nil {
 		cfg.Cache = *fc.Cache
+	}
+	if fc.Photo != nil {
+		cfg.Photo = *fc.Photo
 	}
 	return nil
 }
@@ -247,6 +273,41 @@ func applyEnv(cfg *Config) error {
 		}
 		cfg.Cache.MaxETagEntries = n
 	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PHOTO_MAX_SIDE")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_PHOTO_MAX_SIDE: invalid integer %q", v)
+		}
+		cfg.Photo.MaxSide = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PHOTO_JPEG_QUALITY")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_PHOTO_JPEG_QUALITY: invalid integer %q", v)
+		}
+		cfg.Photo.JPEGQuality = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PHOTO_MAX_PIXELS")); v != "" {
+		n, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return fmt.Errorf("CARREL_PHOTO_MAX_PIXELS: invalid integer %q", v)
+		}
+		cfg.Photo.MaxPixels = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PHOTO_THUMB_SIDE")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_PHOTO_THUMB_SIDE: invalid integer %q", v)
+		}
+		cfg.Photo.ThumbSide = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PHOTO_MAX_UPLOAD_BYTES")); v != "" {
+		n, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return fmt.Errorf("CARREL_PHOTO_MAX_UPLOAD_BYTES: invalid integer %q", v)
+		}
+		cfg.Photo.MaxUploadBytes = n
+	}
 	return nil
 }
 
@@ -301,6 +362,9 @@ func (c *Config) Validate() error {
 	if err := c.Cache.validate(); err != nil {
 		return err
 	}
+	if err := c.Photo.validate(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -336,6 +400,25 @@ func (c Cache) validate() error {
 // CollectionTTL returns the per-session collection metadata TTL.
 func (c Cache) CollectionTTL() time.Duration {
 	return time.Duration(c.CollectionTTLSeconds) * time.Second
+}
+
+func (p Photo) validate() error {
+	if p.MaxSide <= 0 {
+		return errors.New("photo max side must be positive")
+	}
+	if p.JPEGQuality < 1 || p.JPEGQuality > 100 {
+		return errors.New("photo JPEG quality must be between 1 and 100")
+	}
+	if p.MaxPixels <= 0 {
+		return errors.New("photo max pixels must be positive")
+	}
+	if p.ThumbSide <= 0 {
+		return errors.New("photo thumb side must be positive")
+	}
+	if p.MaxUploadBytes < 0 {
+		return errors.New("photo max upload bytes must not be negative")
+	}
+	return nil
 }
 
 func validateBasePath(p string) error {

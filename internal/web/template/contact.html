@@ -1,0 +1,201 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout contacts-layout">
+    <aside class="sidebar card">
+        <h2>Address books</h2>
+        <ul class="collection-list">
+        {{range $d.Books}}
+            <li>
+                <a class="collection-link" href="{{$.Base}}/app/contacts/{{.AccountID}}/{{.ColEnc}}">
+                    {{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}
+                </a>
+            </li>
+        {{end}}
+        </ul>
+        {{if and $d.AccountID $d.ColEnc}}
+        <p><a href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to list</a></p>
+        {{end}}
+    </aside>
+
+    <div class="app-main">
+        <section class="card contact-card">
+            <h1>{{if $d.IsNew}}New contact{{else}}{{$d.Contact.DisplayName}}{{end}}</h1>
+            {{if $d.AccountLabel}}
+            <p class="hint">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+            {{end}}
+
+            {{if not $d.IsNew}}
+            <div class="photo-block">
+                {{if $d.PhotoURL}}
+                <img class="contact-photo" src="{{$d.PhotoURL}}" alt="" width="128" height="128">
+                {{end}}
+                {{if $d.PhotoURI}}
+                <p class="hint">This photo is a link. It can be shown but not edited here.</p>
+                {{end}}
+                {{if and (not $d.ReadOnly) (not $d.IsNew)}}
+                {{if $d.Crop}}
+                <div id="photo-crop">
+                    <img class="contact-photo" src="{{$d.Crop.Preview}}" alt="Crop preview" width="128" height="128">
+                    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
+                          hx-post="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
+                          hx-target="#photo-crop" hx-swap="outerHTML"
+                          hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
+                        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                        <input type="hidden" name="action" value="crop_photo">
+                        <input type="hidden" name="etag" value="{{$d.ETag}}">
+                        <label>Pan X <input type="number" name="pan_x" step="0.1" min="-1" max="1" value="{{$d.Crop.PanX}}"></label>
+                        <label>Pan Y <input type="number" name="pan_y" step="0.1" min="-1" max="1" value="{{$d.Crop.PanY}}"></label>
+                        <label>Zoom <input type="number" name="zoom" step="0.1" min="1" max="8" value="{{if $d.Crop.Zoom}}{{$d.Crop.Zoom}}{{else}}1{{end}}"></label>
+                        <label>Rotate
+                            <select name="rotate">
+                                <option value="0"{{if eq $d.Crop.Rotate 0}} selected{{end}}>0°</option>
+                                <option value="90"{{if eq $d.Crop.Rotate 90}} selected{{end}}>90°</option>
+                                <option value="180"{{if eq $d.Crop.Rotate 180}} selected{{end}}>180°</option>
+                                <option value="270"{{if eq $d.Crop.Rotate 270}} selected{{end}}>270°</option>
+                            </select>
+                        </label>
+                        <button type="submit">Update preview</button>
+                    </form>
+                    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
+                        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                        <input type="hidden" name="action" value="confirm_photo">
+                        <input type="hidden" name="etag" value="{{$d.ETag}}">
+                        <input type="hidden" name="pan_x" value="{{$d.Crop.PanX}}">
+                        <input type="hidden" name="pan_y" value="{{$d.Crop.PanY}}">
+                        <input type="hidden" name="zoom" value="{{$d.Crop.Zoom}}">
+                        <input type="hidden" name="rotate" value="{{$d.Crop.Rotate}}">
+                        <button type="submit">Save photo</button>
+                    </form>
+                    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
+                        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                        <input type="hidden" name="action" value="cancel_photo">
+                        <button type="submit" class="link">Cancel crop</button>
+                    </form>
+                </div>
+                {{else if $d.PhotoEditable}}
+                <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                    <input type="hidden" name="action" value="upload_photo">
+                    <input type="hidden" name="etag" value="{{$d.ETag}}">
+                    <label for="photo">Upload photo</label>
+                    <input id="photo" name="photo" type="file" accept="image/*" required>
+                    <button type="submit">Upload</button>
+                </form>
+                {{if $d.Contact.Photo.Present}}
+                <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
+                    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                    <input type="hidden" name="action" value="delete_photo">
+                    <input type="hidden" name="etag" value="{{$d.ETag}}">
+                    <button type="submit" class="link">Remove photo</button>
+                </form>
+                {{end}}
+                {{end}}
+                {{end}}
+            </div>
+            {{end}}
+
+            {{if $d.ReadOnly}}
+            <dl class="contact-readonly">
+                <dt>Name</dt><dd>{{$d.Contact.DisplayName}}</dd>
+                {{if $d.Contact.Organization}}<dt>Organisation</dt><dd>{{range $d.Contact.Organization}}{{.}} {{end}}</dd>{{end}}
+                {{if $d.Contact.Title}}<dt>Title</dt><dd>{{$d.Contact.Title}}</dd>{{end}}
+                {{range $d.Contact.Phones}}<dt>Phone{{if .Label}} ({{.Label}}){{end}}</dt><dd>{{.Value}}</dd>{{end}}
+                {{range $d.Contact.Emails}}<dt>Email{{if .Label}} ({{.Label}}){{end}}</dt><dd>{{.Value}}</dd>{{end}}
+                {{if $d.Contact.Note}}<dt>Note</dt><dd>{{$d.Contact.Note}}</dd>{{end}}
+            </dl>
+            {{else}}
+            <form method="post" action="{{if $d.IsNew}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="save">
+                {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
+
+                <label for="fn">Display name</label>
+                <input id="fn" name="fn" type="text" value="{{$d.Form.FormattedName}}" required>
+
+                <div class="name-grid">
+                    <label>Prefix <input name="prefix" type="text" value="{{$d.Form.Prefix}}"></label>
+                    <label>Given <input name="given" type="text" value="{{$d.Form.Given}}"></label>
+                    <label>Additional <input name="additional" type="text" value="{{$d.Form.Additional}}"></label>
+                    <label>Family <input name="family" type="text" value="{{$d.Form.Family}}"></label>
+                    <label>Suffix <input name="suffix" type="text" value="{{$d.Form.Suffix}}"></label>
+                </div>
+
+                <label for="nickname">Nickname</label>
+                <input id="nickname" name="nickname" type="text" value="{{$d.Form.Nickname}}">
+
+                <label for="org">Organisation</label>
+                <input id="org" name="org" type="text" value="{{$d.Form.Organization}}">
+
+                <label for="title">Title</label>
+                <input id="title" name="title" type="text" value="{{$d.Form.Title}}">
+
+                <label for="role">Role</label>
+                <input id="role" name="role" type="text" value="{{$d.Form.Role}}">
+
+                <label for="bday">Birthday</label>
+                <input id="bday" name="bday" type="text" value="{{$d.Form.Birthday}}" placeholder="YYYY-MM-DD">
+
+                <fieldset>
+                    <legend>Phone numbers</legend>
+                    {{range $d.Form.Phones}}
+                    <div class="labeled-row">
+                        <input name="phone_label" type="text" value="{{.Label}}" placeholder="label">
+                        <input name="phone" type="tel" value="{{.Value}}" placeholder="number">
+                    </div>
+                    {{end}}
+                    <div class="labeled-row">
+                        <input name="phone_label" type="text" placeholder="label">
+                        <input name="phone" type="tel" placeholder="number">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Email addresses</legend>
+                    {{range $d.Form.Emails}}
+                    <div class="labeled-row">
+                        <input name="email_label" type="text" value="{{.Label}}" placeholder="label">
+                        <input name="email" type="email" value="{{.Value}}" placeholder="address">
+                    </div>
+                    {{end}}
+                    <div class="labeled-row">
+                        <input name="email_label" type="text" placeholder="label">
+                        <input name="email" type="email" placeholder="address">
+                    </div>
+                </fieldset>
+
+                <label for="categories">Categories</label>
+                <input id="categories" name="categories" type="text" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+
+                <label for="note">Note</label>
+                <textarea id="note" name="note" rows="4">{{$d.Form.Note}}</textarea>
+
+                <button type="submit">Save</button>
+            </form>
+
+            {{if not $d.IsNew}}
+            <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="etag" value="{{$d.ETag}}">
+                <button type="submit" class="link">Delete contact</button>
+            </form>
+            {{end}}
+            {{end}}
+
+            {{if $d.Contact.Other}}
+            <section class="other-props">
+                <h2>Other properties</h2>
+                <p class="hint">Kept as the server sent them and not offered for editing.</p>
+                <ul>
+                {{range $d.Contact.Other}}
+                    <li><code>{{.Name}}</code>
+                    {{range .Values}} {{.Text}}{{end}}
+                    </li>
+                {{end}}
+                </ul>
+            </section>
+            {{end}}
+        </section>
+    </div>
+</div>
+{{end}}

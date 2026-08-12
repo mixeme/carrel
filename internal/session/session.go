@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/crypto"
+	"gitea.mixdep.ru/mix/carrel/internal/model"
 )
 
 // ErrNotFound is returned for an unknown, expired or already-destroyed
@@ -53,6 +54,9 @@ type Session struct {
 	escrowNotice bool
 	dead         bool
 	cache        *Cache
+	losses       *model.LossRegistry
+	conflicts    map[string]ConflictDraft
+	photos       map[string]PhotoDraft
 }
 
 // Cache returns the session's DAV collection cache (§12).
@@ -254,6 +258,7 @@ func (m *Manager) remove(s *Session) {
 		s.cache.Wipe()
 		s.cache = nil
 	}
+	s.wipeScratch()
 	s.dek.Zero()
 	s.dek = nil
 	s.dead = true
@@ -291,10 +296,16 @@ func (m *Manager) Rotate(id string) (*Session, error) {
 		mustChange:   old.mustChange,
 		escrowNotice: old.escrowNotice,
 		cache:        old.cache,
+		losses:       old.losses,
+		conflicts:    old.conflicts,
+		photos:       old.photos,
 	}
-	// The key and cache moved to the new session; the old shell must not wipe them.
+	// The key and scratch moved to the new session; the old shell must not wipe them.
 	old.dek = nil
 	old.cache = nil
+	old.losses = nil
+	old.conflicts = nil
+	old.photos = nil
 	old.dead = true
 	old.mu.Unlock()
 
