@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+Stage 2 («Транспорт и discovery») — в работе; целевая версия **v0.2.0**. План: [docs/stage-2-plan.md](docs/stage-2-plan.md).
+
 ### Changed
 
 - **Invitations:** two separate admin flows — copy a **link** (no mail) or **send by email** (SMTP required; the administrator never sees the link). The invitee chooses their own login on accept; email is fixed only for email invitations. Resend applies to email invitations only.
@@ -12,6 +14,7 @@ All notable changes to this project are documented in this file.
 ### Added
 
 - `.gitignore` entry for `dev/` (local developer notes and data, not tracked).
+- **Roadmap (docs):** [docs/stages.md](docs/stages.md) index; implementation plans [stage-2-plan.md](docs/stage-2-plan.md) through [stage-7-plan.md](docs/stage-7-plan.md); consolidated v1 manual acceptance [manual-acceptance.md](docs/manual-acceptance.md); local Baikal/WebDAV test credentials convention [dev-credentials.md](docs/dev-credentials.md).
 
 ### Verified (stage 1 acceptance, local `go run`)
 

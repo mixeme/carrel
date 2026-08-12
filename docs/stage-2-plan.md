@@ -1,6 +1,6 @@
 # Этап 2: Транспорт и discovery
 
-**Статус:** следующий после v0.1.0  
+**Статус:** **в работе** (после v0.1.0)  
 **Целевая версия:** v0.2.0  
 **Источник:** [carrel-spec.md](carrel-spec.md) — §6, §7, §12, §19 этап 2, §24.2  
 **Предшествует:** [stage-1-plan.md](stage-1-plan.md) (готово)  
@@ -81,6 +81,7 @@ flowchart TD
 
 ## Порядок работ
 
+0. Changelog — отметить начало этапа 2 в `[Unreleased]`; commit
 1. Config + `go-webdav` + SSRF (блокирует всё исходящее)
 2. Transport + multistatus parser
 3. Discovery + trace
