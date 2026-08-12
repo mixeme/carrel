@@ -25,15 +25,19 @@ const (
 	DefaultDAVMaxResponseSize = 10 << 20 // 10 MiB
 	DefaultDAVMaxRedirects    = 5
 
-	DefaultCacheCollectionTTL = 60 * time.Second
+	DefaultCacheCollectionTTL  = 60 * time.Second
 	DefaultCacheMaxCollections = 256
 	DefaultCacheMaxETagEntries = 4096
+	DefaultCacheMaxThumbBytes  = 16 << 20 // 16 MiB
+	DefaultCacheMaxThumbEntries = 512
 
 	// Photo defaults from §11 — starting values, not acceptance criteria.
 	DefaultPhotoMaxSide      = 512
 	DefaultPhotoJPEGQuality  = 85
 	DefaultPhotoMaxPixels    = 100_000_000
 	DefaultPhotoThumbSide    = 96
+	DefaultImportMaxBytes    = 16 << 20 // 16 MiB upload ceiling for .vcf / .zip
+	DefaultImportMaxCards    = 5000
 )
 
 // LogLevel values accepted by CARREL_LOG_LEVEL and config file.
@@ -58,6 +62,8 @@ type Cache struct {
 	CollectionTTLSeconds int64 `json:"collection_ttl_seconds"`
 	MaxCollections       int   `json:"max_collections"`
 	MaxETagEntries       int   `json:"max_etag_entries"`
+	MaxThumbBytes        int   `json:"max_thumb_bytes"`
+	MaxThumbEntries      int   `json:"max_thumb_entries"`
 }
 
 // Photo holds contact photo processing limits (§11).
@@ -67,6 +73,12 @@ type Photo struct {
 	MaxPixels      int64 `json:"max_pixels"`
 	ThumbSide      int   `json:"thumb_side"`
 	MaxUploadBytes int64 `json:"max_upload_bytes"` // 0 = no byte ceiling
+}
+
+// Import holds contact import limits (§23.7 standard .vcf).
+type Import struct {
+	MaxBytes int64 `json:"max_bytes"`
+	MaxCards int   `json:"max_cards"`
 }
 
 // Duration is a time.Duration marshaled as a JSON number of seconds.
@@ -98,6 +110,7 @@ type Config struct {
 	DAV            DAV      `json:"dav"`
 	Cache          Cache    `json:"cache"`
 	Photo          Photo    `json:"photo"`
+	Import         Import   `json:"import"`
 }
 
 // fileConfig mirrors Config for JSON unmarshaling with optional fields.
@@ -110,6 +123,7 @@ type fileConfig struct {
 	DAV            *DAV     `json:"dav,omitempty"`
 	Cache          *Cache   `json:"cache,omitempty"`
 	Photo          *Photo   `json:"photo,omitempty"`
+	Import         *Import  `json:"import,omitempty"`
 }
 
 // Load reads configuration from an optional file in dataDir, then applies
@@ -159,12 +173,18 @@ func defaults() *Config {
 			CollectionTTLSeconds: int64(DefaultCacheCollectionTTL / time.Second),
 			MaxCollections:       DefaultCacheMaxCollections,
 			MaxETagEntries:       DefaultCacheMaxETagEntries,
+			MaxThumbBytes:        DefaultCacheMaxThumbBytes,
+			MaxThumbEntries:      DefaultCacheMaxThumbEntries,
 		},
 		Photo: Photo{
 			MaxSide:     DefaultPhotoMaxSide,
 			JPEGQuality: DefaultPhotoJPEGQuality,
 			MaxPixels:   DefaultPhotoMaxPixels,
 			ThumbSide:   DefaultPhotoThumbSide,
+		},
+		Import: Import{
+			MaxBytes: DefaultImportMaxBytes,
+			MaxCards: DefaultImportMaxCards,
 		},
 	}
 }
@@ -197,6 +217,9 @@ func applyFile(cfg *Config, raw []byte) error {
 	}
 	if fc.Photo != nil {
 		cfg.Photo = *fc.Photo
+	}
+	if fc.Import != nil {
+		cfg.Import = *fc.Import
 	}
 	return nil
 }
@@ -273,6 +296,20 @@ func applyEnv(cfg *Config) error {
 		}
 		cfg.Cache.MaxETagEntries = n
 	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_CACHE_MAX_THUMB_BYTES")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_CACHE_MAX_THUMB_BYTES: invalid integer %q", v)
+		}
+		cfg.Cache.MaxThumbBytes = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_CACHE_MAX_THUMB_ENTRIES")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_CACHE_MAX_THUMB_ENTRIES: invalid integer %q", v)
+		}
+		cfg.Cache.MaxThumbEntries = n
+	}
 	if v := strings.TrimSpace(os.Getenv("CARREL_PHOTO_MAX_SIDE")); v != "" {
 		n, err := strconv.Atoi(v)
 		if err != nil {
@@ -307,6 +344,20 @@ func applyEnv(cfg *Config) error {
 			return fmt.Errorf("CARREL_PHOTO_MAX_UPLOAD_BYTES: invalid integer %q", v)
 		}
 		cfg.Photo.MaxUploadBytes = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_IMPORT_MAX_BYTES")); v != "" {
+		n, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return fmt.Errorf("CARREL_IMPORT_MAX_BYTES: invalid integer %q", v)
+		}
+		cfg.Import.MaxBytes = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_IMPORT_MAX_CARDS")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_IMPORT_MAX_CARDS: invalid integer %q", v)
+		}
+		cfg.Import.MaxCards = n
 	}
 	return nil
 }
@@ -365,6 +416,9 @@ func (c *Config) Validate() error {
 	if err := c.Photo.validate(); err != nil {
 		return err
 	}
+	if err := c.Import.validate(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -394,6 +448,12 @@ func (c Cache) validate() error {
 	if c.MaxETagEntries <= 0 {
 		return errors.New("cache max etag entries must be positive")
 	}
+	if c.MaxThumbBytes <= 0 {
+		return errors.New("cache max thumb bytes must be positive")
+	}
+	if c.MaxThumbEntries <= 0 {
+		return errors.New("cache max thumb entries must be positive")
+	}
 	return nil
 }
 
@@ -417,6 +477,16 @@ func (p Photo) validate() error {
 	}
 	if p.MaxUploadBytes < 0 {
 		return errors.New("photo max upload bytes must not be negative")
+	}
+	return nil
+}
+
+func (i Import) validate() error {
+	if i.MaxBytes <= 0 {
+		return errors.New("import max bytes must be positive")
+	}
+	if i.MaxCards <= 0 {
+		return errors.New("import max cards must be positive")
 	}
 	return nil
 }

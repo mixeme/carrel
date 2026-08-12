@@ -34,6 +34,24 @@ type PhotoDraft struct {
 	Rotate     int // degrees, multiples of 90
 }
 
+// ImportCard is one parsed card held for the import confirm step (§23.7).
+type ImportCard struct {
+	Body         []byte
+	Source       string
+	OriginalUID  string
+	DisplayName  string
+	UIDCollision bool
+	ParseError   string
+}
+
+// ImportDraft holds a previewed import until the person confirms or cancels.
+type ImportDraft struct {
+	Key        string
+	AccountID  string
+	Collection string
+	Cards      []ImportCard
+}
+
 // Losses returns the session's property-loss registry (§8).
 func (s *Session) Losses() *model.LossRegistry {
 	s.mu.Lock()
@@ -140,6 +158,42 @@ func (s *Session) ClearPhotoDraft(key string) {
 	}
 }
 
+// PutImport stores a previewed import under key.
+func (s *Session) PutImport(d ImportDraft) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.imports == nil {
+		s.imports = make(map[string]ImportDraft)
+	}
+	s.imports[d.Key] = d
+}
+
+// PeekImport returns an import draft without removing it.
+func (s *Session) PeekImport(key string) (ImportDraft, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	d, ok := s.imports[key]
+	return d, ok
+}
+
+// TakeImport returns and removes an import draft.
+func (s *Session) TakeImport(key string) (ImportDraft, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	d, ok := s.imports[key]
+	if ok {
+		delete(s.imports, key)
+	}
+	return d, ok
+}
+
+// ClearImport drops an import draft.
+func (s *Session) ClearImport(key string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.imports, key)
+}
+
 func (s *Session) wipeScratch() {
 	for _, d := range s.photos {
 		if d.Path != "" {
@@ -148,5 +202,6 @@ func (s *Session) wipeScratch() {
 	}
 	s.photos = nil
 	s.conflicts = nil
+	s.imports = nil
 	s.losses = nil
 }

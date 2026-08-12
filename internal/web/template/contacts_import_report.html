@@ -1,0 +1,43 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout contacts-layout">
+    <aside class="sidebar card no-print">
+        <h2>Address books</h2>
+        <ul class="collection-list">
+        {{range $d.Books}}
+            <li>
+                <a class="collection-link" href="{{$.Base}}/app/contacts/{{.AccountID}}/{{.ColEnc}}">
+                    {{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}
+                </a>
+            </li>
+        {{end}}
+        </ul>
+        <p><a href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to list</a></p>
+    </aside>
+
+    <div class="app-main">
+        <section class="card">
+            <h1>Import report</h1>
+            <p class="hint">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+            <p>Created: <strong>{{$d.Created}}</strong></p>
+            {{if $d.Collisions}}
+            <h2>UID collisions</h2>
+            <ul>
+            {{range $d.Collisions}}
+                <li>{{.}}</li>
+            {{end}}
+            </ul>
+            {{end}}
+            {{if $d.Failed}}
+            <h2>Failed</h2>
+            <ul>
+            {{range $d.Failed}}
+                <li>{{.}}</li>
+            {{end}}
+            </ul>
+            {{end}}
+            <p><a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">Back to list</a></p>
+        </section>
+    </div>
+</div>
+{{end}}

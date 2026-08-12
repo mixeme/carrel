@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout contacts-layout">
-    <aside class="sidebar card">
+    <aside class="sidebar card no-print">
         <h2>Address books</h2>
         {{if $d.Books}}
         <ul class="collection-list">
@@ -29,15 +29,26 @@
                 to see contacts here.</p>
         </section>
         {{else}}
-        <section class="card">
+        <section class="card contacts-print-root">
             <div class="contacts-header">
-                <h1>{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Contacts{{end}}</h1>
-                {{if and (not $d.ReadOnly) $d.AccountID $d.ColEnc}}
-                <p><a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new">New contact</a></p>
-                {{end}}
+                <div>
+                    <h1>{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Contacts{{end}}</h1>
+                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                </div>
+                <p class="contacts-actions no-print">
+                    {{if and (not $d.ReadOnly) $d.AccountID $d.ColEnc}}
+                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new">New contact</a>
+                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">Import</a>
+                    {{end}}
+                    {{if and $d.AccountID $d.ColEnc}}
+                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/export">Export</a>
+                    {{end}}
+                    <label class="checkbox"><input type="checkbox" data-print-photos> Print with photos</label>
+                    <button type="button" class="link" data-print>Print</button>
+                </p>
             </div>
             {{if $d.ReadOnly}}
-            <p class="hint">This address book is read-only.</p>
+            <p class="hint no-print">This address book is read-only.</p>
             {{end}}
             {{if $d.Empty}}
             <p class="hint">No contacts in this address book.</p>
@@ -46,7 +57,7 @@
             {{range $d.Contacts}}
                 <li class="contact-row">
                     <a class="contact-row-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">
-                        <img class="contact-avatar" src="{{.PhotoURL}}" alt="" width="40" height="40">
+                        <img class="contact-avatar print-photo" src="{{.PhotoURL}}" alt="" width="40" height="40">
                         <span class="contact-meta">
                             <strong>{{.DisplayName}}</strong>
                             {{if .Phones}}<span class="hint">{{.Phones}}</span>{{end}}
@@ -57,13 +68,16 @@
             {{end}}
             </ul>
             {{if $d.HasMore}}
-            <div hx-get="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/page?offset={{$d.NextOffset}}"
+            <div class="no-print" hx-get="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/page?offset={{$d.NextOffset}}"
                  hx-trigger="revealed"
                  hx-swap="outerHTML"
                  hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
                 <p class="hint">Loading more…</p>
             </div>
             {{end}}
+            {{end}}
+            {{if $d.PrintDate}}
+            <p class="print-footer print-only">Carrel · contacts · captured {{$d.PrintDate}}</p>
             {{end}}
         </section>
         {{end}}

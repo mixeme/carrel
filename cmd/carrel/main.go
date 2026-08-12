@@ -72,9 +72,11 @@ func run() int {
 		Idle:     settings.SessionIdle(),
 		Absolute: settings.SessionAbsolute(),
 		Cache: session.CacheConfig{
-			CollectionTTL:  cfg.Cache.CollectionTTL(),
-			MaxCollections: cfg.Cache.MaxCollections,
-			MaxETagEntries: cfg.Cache.MaxETagEntries,
+			CollectionTTL:   cfg.Cache.CollectionTTL(),
+			MaxCollections:  cfg.Cache.MaxCollections,
+			MaxETagEntries:  cfg.Cache.MaxETagEntries,
+			MaxThumbBytes:   cfg.Cache.MaxThumbBytes,
+			MaxThumbEntries: cfg.Cache.MaxThumbEntries,
 		},
 	})
 
@@ -119,6 +121,7 @@ func run() int {
 		Mail:          mailQueue,
 		Guard:         guard,
 		Photo:         handler.PhotoConfig(cfg.Photo),
+		Import:        handler.ImportConfig(cfg.Import),
 		Logger:        logger,
 	}
 

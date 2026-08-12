@@ -1,0 +1,73 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout contacts-layout">
+    <aside class="sidebar card no-print">
+        <h2>Address books</h2>
+        <ul class="collection-list">
+        {{range $d.Books}}
+            <li>
+                <a class="collection-link" href="{{$.Base}}/app/contacts/{{.AccountID}}/{{.ColEnc}}">
+                    {{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}
+                </a>
+            </li>
+        {{end}}
+        </ul>
+        <p><a href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to list</a></p>
+    </aside>
+
+    <div class="app-main">
+        <section class="card">
+            <h1>Import contacts</h1>
+            <p class="hint">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+            <p class="hint">Upload a standard <code>.vcf</code> (one or many cards) or a <code>.zip</code> of <code>.vcf</code> files.
+                Import always creates new contacts. A UID that already exists gets a new UID and is listed in the report.</p>
+
+            {{if not $d.HasPreview}}
+            <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="preview_import">
+                <label for="file">File</label>
+                <input id="file" type="file" name="file" accept=".vcf,.zip,text/vcard,application/zip" required>
+                <p><button type="submit">Preview</button></p>
+            </form>
+            {{else}}
+            <p><strong>{{$d.OKCount}}</strong> ready
+                {{if $d.ErrorCount}}· <strong>{{$d.ErrorCount}}</strong> with errors{{end}}
+                {{if $d.CollisionCount}}· <strong>{{$d.CollisionCount}}</strong> UID collision(s){{end}}
+            </p>
+            {{if $d.TruncatedNote}}<p class="message error" role="alert">{{$d.TruncatedNote}}</p>{{end}}
+            {{if $d.Cards}}
+            <table class="import-preview">
+                <thead><tr><th>Source</th><th>Name</th><th>UID</th><th>Notes</th></tr></thead>
+                <tbody>
+                {{range $d.Cards}}
+                    <tr>
+                        <td>{{.Source}}</td>
+                        <td>{{.DisplayName}}</td>
+                        <td><code>{{.OriginalUID}}</code></td>
+                        <td>
+                            {{if .ParseError}}<span class="message error">{{.ParseError}}</span>{{end}}
+                            {{if .UIDCollision}}new UID will be assigned{{end}}
+                        </td>
+                    </tr>
+                {{end}}
+                </tbody>
+            </table>
+            {{end}}
+            {{if gt $d.OKCount 0}}
+            <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="confirm_import">
+                <button type="submit">Import {{$d.OKCount}} contact(s)</button>
+            </form>
+            {{end}}
+            <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="cancel_import">
+                <button type="submit" class="link">Cancel</button>
+            </form>
+            {{end}}
+        </section>
+    </div>
+</div>
+{{end}}

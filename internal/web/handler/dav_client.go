@@ -21,6 +21,9 @@ import (
 // Photo holds contact photo processing limits (§11).
 type PhotoConfig = config.Photo
 
+// ImportConfig holds contact import upload limits.
+type ImportConfig = config.Import
+
 // EncodeCollectionPath encodes a DAV collection path for use in a URL segment.
 func EncodeCollectionPath(path string) string {
 	return base64.RawURLEncoding.EncodeToString([]byte(path))

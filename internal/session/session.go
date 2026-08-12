@@ -57,6 +57,7 @@ type Session struct {
 	losses       *model.LossRegistry
 	conflicts    map[string]ConflictDraft
 	photos       map[string]PhotoDraft
+	imports      map[string]ImportDraft
 }
 
 // Cache returns the session's DAV collection cache (§12).

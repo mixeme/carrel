@@ -21,18 +21,19 @@ import (
 const contactsBatch = contacts.DefaultBatchSize
 
 type contactsListView struct {
-	Books       []addressBookRef
-	AccountID   string
-	ColEnc      string
-	Collection  discovery.Collection
+	Books        []addressBookRef
+	AccountID    string
+	ColEnc       string
+	Collection   discovery.Collection
 	AccountLabel string
-	Contacts    []contactRow
-	Offset      int
-	NextOffset  int
-	HasMore     bool
-	ReadOnly    bool
-	Empty       bool
-	NoBooks     bool
+	Contacts     []contactRow
+	Offset       int
+	NextOffset   int
+	HasMore      bool
+	ReadOnly     bool
+	Empty        bool
+	NoBooks      bool
+	PrintDate    string
 }
 
 type contactRow struct {
@@ -150,6 +151,7 @@ func (s *Server) buildContactsList(ctx context.Context, sess *session.Session, a
 		Offset:       offset,
 		ReadOnly:     col.ReadOnly,
 		Empty:        len(paths) == 0,
+		PrintDate:    time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
 	if offset >= len(paths) {
 		return view, nil

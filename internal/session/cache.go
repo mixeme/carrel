@@ -13,6 +13,10 @@ type CacheConfig struct {
 	CollectionTTL  time.Duration
 	MaxCollections int
 	MaxETagEntries int
+	// MaxThumbBytes is the stricter ceiling for photo thumbnails (§12).
+	MaxThumbBytes int
+	// MaxThumbEntries caps how many thumbnails one session may keep.
+	MaxThumbEntries int
 }
 
 func (c CacheConfig) withDefaults() CacheConfig {
@@ -24,6 +28,12 @@ func (c CacheConfig) withDefaults() CacheConfig {
 	}
 	if c.MaxETagEntries <= 0 {
 		c.MaxETagEntries = 4096
+	}
+	if c.MaxThumbBytes <= 0 {
+		c.MaxThumbBytes = 16 << 20 // 16 MiB — stricter than the ~64 MiB session orient
+	}
+	if c.MaxThumbEntries <= 0 {
+		c.MaxThumbEntries = 512
 	}
 	return c
 }
@@ -41,9 +51,9 @@ type collectionEntry struct {
 	bodies    map[string][]byte
 }
 
-// Cache holds per-session collection metadata, path→ETag maps, and minimal
-// object bodies for refresh tests (§12). It lives only in memory and is wiped
-// when the session ends.
+// Cache holds per-session collection metadata, path→ETag maps, object bodies,
+// and photo thumbnails (§12). It lives only in memory and is wiped when the
+// session ends.
 type Cache struct {
 	cfg CacheConfig
 	now func() time.Time
@@ -52,6 +62,10 @@ type Cache struct {
 	collections map[collectionKey]*collectionEntry
 	order       []collectionKey
 	etagCount   int
+
+	thumbs     map[thumbKey]*thumbEntry
+	thumbOrder []thumbKey
+	thumbBytes int
 }
 
 // NewCache returns an empty session cache.
@@ -63,10 +77,11 @@ func NewCache(cfg CacheConfig, now func() time.Time) *Cache {
 		cfg:         cfg.withDefaults(),
 		now:         now,
 		collections: make(map[collectionKey]*collectionEntry),
+		thumbs:      make(map[thumbKey]*thumbEntry),
 	}
 }
 
-// Wipe drops every cached collection and object body.
+// Wipe drops every cached collection, object body and thumbnail.
 func (c *Cache) Wipe() {
 	if c == nil {
 		return
@@ -76,6 +91,7 @@ func (c *Cache) Wipe() {
 	c.collections = make(map[collectionKey]*collectionEntry)
 	c.order = nil
 	c.etagCount = 0
+	c.wipeThumbsLocked()
 }
 
 // InvalidateAll drops cached data for every collection.

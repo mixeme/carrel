@@ -443,3 +443,112 @@ label.checkbox input {
         grid-template-columns: 1fr;
     }
 }
+
+/* §23.6 print: current on-screen selection, no chrome, black on white */
+.print-only {
+    display: none;
+}
+
+.source-label {
+    margin: 0.15rem 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.contacts-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.import-preview {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.import-preview th,
+.import-preview td {
+    border-bottom: 0.5px solid var(--hair);
+    text-align: left;
+    padding: 0.35rem 0.5rem;
+    vertical-align: top;
+}
+
+@media print {
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    .no-print,
+    .topbar,
+    .sidebar,
+    .site-footer,
+    nav,
+    button,
+    .button,
+    form,
+    .message {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    .card,
+    .app-main,
+    .contacts-print-root,
+    .contact-card {
+        background: #fff !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .app-layout {
+        display: block;
+    }
+
+    .source-label {
+        color: #000 !important;
+    }
+
+    .contact-row {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border-bottom: 0.5px solid #999;
+    }
+
+    .contact-row-link {
+        color: #000 !important;
+        text-decoration: none;
+    }
+
+    .print-photo {
+        display: none !important;
+    }
+
+    body.print-with-photos .print-photo {
+        display: inline-block !important;
+    }
+
+    .print-footer {
+        margin-top: 1.5rem;
+        font-size: 0.8rem;
+        color: #333;
+    }
+
+    a[href]::after {
+        content: none !important;
+    }
+}

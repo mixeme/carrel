@@ -36,6 +36,7 @@ type contactCardView struct {
 	PhotoEditable bool
 	PhotoURI      bool
 	Crop          *photoCropView
+	PrintDate     string
 }
 
 type contactForm struct {
@@ -339,6 +340,7 @@ func (s *Server) cardFromObject(sess *session.Session, accountID, colEnc string,
 		PhotoURL:      photoURL,
 		PhotoEditable: !col.ReadOnly && (c.Photo.Editable || !c.Photo.Present),
 		PhotoURI:      c.Photo.URI != "",
+		PrintDate:     time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
 	if uid != "" {
 		if draft, ok := sess.PhotoDraft(photoDraftKey(accountID, col.Path, uid)); ok {

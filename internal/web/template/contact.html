@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout contacts-layout">
-    <aside class="sidebar card">
+    <aside class="sidebar card no-print">
         <h2>Address books</h2>
         <ul class="collection-list">
         {{range $d.Books}}
@@ -18,23 +18,33 @@
     </aside>
 
     <div class="app-main">
-        <section class="card contact-card">
-            <h1>{{if $d.IsNew}}New contact{{else}}{{$d.Contact.DisplayName}}{{end}}</h1>
-            {{if $d.AccountLabel}}
-            <p class="hint">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-            {{end}}
+        <section class="card contact-card contacts-print-root">
+            <div class="contacts-header">
+                <div>
+                    <h1>{{if $d.IsNew}}New contact{{else}}{{$d.Contact.DisplayName}}{{end}}</h1>
+                    {{if $d.AccountLabel}}
+                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                    {{end}}
+                </div>
+                {{if not $d.IsNew}}
+                <p class="contacts-actions no-print">
+                    <label class="checkbox"><input type="checkbox" data-print-photos> Print with photos</label>
+                    <button type="button" class="link" data-print>Print</button>
+                </p>
+                {{end}}
+            </div>
 
             {{if not $d.IsNew}}
             <div class="photo-block">
                 {{if $d.PhotoURL}}
-                <img class="contact-photo" src="{{$d.PhotoURL}}" alt="" width="128" height="128">
+                <img class="contact-photo print-photo" src="{{$d.PhotoURL}}" alt="" width="128" height="128">
                 {{end}}
                 {{if $d.PhotoURI}}
-                <p class="hint">This photo is a link. It can be shown but not edited here.</p>
+                <p class="hint no-print">This photo is a link. It can be shown but not edited here.</p>
                 {{end}}
                 {{if and (not $d.ReadOnly) (not $d.IsNew)}}
                 {{if $d.Crop}}
-                <div id="photo-crop">
+                <div id="photo-crop" class="no-print">
                     <img class="contact-photo" src="{{$d.Crop.Preview}}" alt="Crop preview" width="128" height="128">
                     <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
                           hx-post="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
@@ -194,6 +204,9 @@
                 {{end}}
                 </ul>
             </section>
+            {{end}}
+            {{if $d.PrintDate}}
+            <p class="print-footer print-only">Carrel · contact · captured {{$d.PrintDate}}</p>
             {{end}}
         </section>
     </div>

@@ -47,6 +47,7 @@ type Server struct {
 	Mail          *mail.Queue
 	Guard         *dav.Guard
 	Photo         PhotoConfig
+	Import        ImportConfig
 	Logger        *slog.Logger
 }
 

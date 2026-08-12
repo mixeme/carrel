@@ -101,10 +101,16 @@ func (s *Server) ContactPhoto(w http.ResponseWriter, r *http.Request) {
 	data := inline.Bytes
 	outType := mt
 	if size == "thumb" {
-		thumb, t, err := photo.Thumbnail(data, s.photoOpts().ThumbSide)
-		if err == nil {
-			data = thumb
-			outType = t
+		if cached, ok := sess.Cache().GetThumb(accountID, obj.Path, etag); ok {
+			data = cached.Bytes
+			outType = cached.MediaType
+		} else {
+			thumb, t, err := photo.Thumbnail(data, s.photoOpts().ThumbSide)
+			if err == nil {
+				data = thumb
+				outType = t
+				sess.Cache().PutThumb(accountID, obj.Path, etag, t, thumb)
+			}
 		}
 	}
 	w.Header().Set("Content-Type", outType)

@@ -14,11 +14,11 @@
 </head>
 <body>
 {{if .Session}}
-<header class="topbar">
+<header class="topbar no-print">
     <a class="brand" href="{{.Base}}/app/">Carrel</a>
     <nav>
         <a href="{{.Base}}/app/"{{if eq .Title "Carrel"}} aria-current="page"{{end}}>Profile</a>
-        <a href="{{.Base}}/app/contacts"{{if or (eq .Title "Contacts") (eq .Title "New contact") (eq .Title "Conflict")}} aria-current="page"{{end}}>Contacts</a>
+        <a href="{{.Base}}/app/contacts"{{if or (eq .Title "Contacts") (eq .Title "New contact") (eq .Title "Conflict") (eq .Title "Import contacts") (eq .Title "Import report")}} aria-current="page"{{end}}>Contacts</a>
         {{if .Admin}}<a href="{{.Base}}/admin/"{{if eq .Title "Administration"}} aria-current="page"{{end}}>Administration</a>{{end}}
         <form method="post" action="{{.Base}}/app/" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
@@ -33,11 +33,11 @@
 </header>
 {{end}}
 <main>
-    {{if .Error}}<p class="message error" role="alert">{{.Error}}</p>{{end}}
-    {{if .Notice}}<p class="message notice">{{.Notice}}</p>{{end}}
+    {{if .Error}}<p class="message error no-print" role="alert">{{.Error}}</p>{{end}}
+    {{if .Notice}}<p class="message notice no-print">{{.Notice}}</p>{{end}}
     {{block "body" .}}{{end}}
 </main>
-<footer class="site-footer">
+<footer class="site-footer no-print">
     <a href="{{.Base}}/about">About this service</a>
 </footer>
 </body>

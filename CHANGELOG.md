@@ -4,10 +4,15 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-Stage 2 («Транспорт и discovery») — готово, шлюз к этапу 3 пройден. Stage 3 («Контакты») — в работе, фазы 0–7; целевая версия **v0.3.0**. Планы: [docs/stage-2-plan.md](docs/stage-2-plan.md), [docs/stage-3-plan.md](docs/stage-3-plan.md).
+Stage 2 («Транспорт и discovery») — готово, шлюз к этапу 3 пройден. Stage 3 («Контакты») — **готово**, фазы 0–12; целевая версия **v0.3.0**. Планы: [docs/stage-2-plan.md](docs/stage-2-plan.md), [docs/stage-3-plan.md](docs/stage-3-plan.md). Следующий: [docs/stage-4-plan.md](docs/stage-4-plan.md).
 
 ### Added
 
+- **Stage 3 (phase 8) — thumbnail cache (§12):** photo thumbnails sit in the per-session cache keyed by account, object path and ETag, so a changed card is a miss rather than a stale hit. A stricter byte ceiling (default 16 MiB) and entry cap (512) evict LRU thumbnails; wipe on logout/expiry clears them with the rest of the session cache. `GET …/photo?size=thumb` serves from the cache after the first decode.
+- **Stage 3 (phase 9) — import `.vcf`:** upload a standard vCard file or a `.zip` of `.vcf` files, preview counts and parse errors against the target address book, then confirm. Import always creates; a UID that already exists gets a fresh UID and a line in the report. Cyrillic and multi-card files are accepted; Takeout-specific layouts stay out of scope (§23.7).
+- **Stage 3 (phase 10) — export `.vcf`:** download the current address book as a single `.vcf` attachment (`Content-Disposition`), bodies taken through the same multiget path as the list.
+- **Stage 3 (phase 11) — print (§23.6):** `@media print` hides nav, sidebar, forms and buttons; source labels are text as well as colour; black on white; `break-inside: avoid` on rows; a capture-date footer; optional photos via a checkbox that toggles `print-with-photos` before `window.print()`.
+- **Stage 3 (phase 12) — tests:** thumbnail hit/miss/LRU/wipe; multi-card and Cyrillic parse; zip import; AssignUID; handler coverage for import preview (UID collision), confirm, export headers/body, and print chrome on the list.
 - **Stage 3 (phase 4) — conflicts 412 (§9):** a refused precondition no longer ends as an error page. The refused edit is kept in the session, the server version is shown beside it as a property-level diff (PHOTO base64 truncated), and the person chooses keep server, apply mine, or cancel — never an automatic overwrite. Applying mine re-reads the current ETag and writes conditionally again; another 412 reopens the same screen.
 - **Stage 3 (phase 5) — contact list:** address books in the sidebar and under `/app/contacts`; bodies arrive through `addressbook-multiget` in batches of 50 while the list is scrolled (`hx-trigger="revealed"`). Reopening an unchanged collection still uses the session cache from phases 2–3. Read-only books list contacts without a New button.
 - **Stage 3 (phase 6) — card form via Apply:** create, edit and delete go through `Get` → `Patch` → `Apply` → conditional PUT. The form never rebuilds an object from its fields alone, so X- properties and other unknowns stay on the card (shown read-only). A first-time property loss after save is surfaced as a notice; empties remove properties rather than writing blank ones.
@@ -24,6 +29,7 @@ Stage 2 («Транспорт и discovery») — готово, шлюз к эт
 
 ### Fixed
 
+- **Multipart CSRF:** mutating multipart posts (photo upload, contact import) can carry the token in the form field; the middleware no longer requires the `X-CSRF-Token` header for those bodies alone.
 - **`PROPFIND` and `REPORT` asked for nothing recognisable:** the requested property names were serialised as the name of the Go field holding them (`<Raw><Name></Name>…`), so every request handed the server a body naming no property it knew, and servers answered with whatever they chose instead of what was asked for. Stage 2 discovery happened to work through that leniency; `addressbook-multiget` does not, since it has to name both `getetag` and `address-data` to get anything back. Requested properties are now emitted as themselves, under their own namespaces, and the request bodies are asserted in tests.
 
 ### Changed

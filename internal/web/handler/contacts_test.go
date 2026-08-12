@@ -4,6 +4,7 @@
 package handler
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -135,6 +136,7 @@ type cardDAVBook struct {
 	cards       map[string]string
 	etags       map[string]string
 	failNextPut bool
+	ctag        int
 }
 
 func startCardDAVBook(t *testing.T) *cardDAVBook {
@@ -146,6 +148,7 @@ func startCardDAVBook(t *testing.T) *cardDAVBook {
 		etags: map[string]string{
 			"/addressbooks/user/default/ada.vcf": `"v1"`,
 		},
+		ctag: 1,
 	}
 	book.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
@@ -158,29 +161,40 @@ func startCardDAVBook(t *testing.T) *cardDAVBook {
 		case r.Method == "PROPFIND" && (path == "/addressbooks/user/default/" || path == "/addressbooks/user/default"):
 			w.Header().Set("Content-Type", "application/xml")
 			w.WriteHeader(http.StatusMultiStatus)
-			io.WriteString(w, `<?xml version="1.0"?>
+			var b strings.Builder
+			b.WriteString(`<?xml version="1.0"?>
 <d:multistatus xmlns:d="DAV:" xmlns:cs="http://calendarserver.org/ns/">
   <d:response>
     <d:href>/addressbooks/user/default/</d:href>
-    <d:propstat><d:prop><cs:getctag>ctag-1</cs:getctag></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
-  </d:response>
+    <d:propstat><d:prop><cs:getctag>ctag-` + fmt.Sprintf("%d", book.ctag) + `</cs:getctag></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+  </d:response>`)
+			for p, etag := range book.etags {
+				b.WriteString(`
   <d:response>
-    <d:href>/addressbooks/user/default/ada.vcf</d:href>
-    <d:propstat><d:prop><d:getetag>"v1"</d:getetag></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
-  </d:response>
+    <d:href>` + p + `</d:href>
+    <d:propstat><d:prop><d:getetag>` + etag + `</d:getetag></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+  </d:response>`)
+			}
+			b.WriteString(`
 </d:multistatus>`)
+			io.WriteString(w, b.String())
 		case r.Method == "REPORT":
 			w.Header().Set("Content-Type", "application/xml")
 			w.WriteHeader(http.StatusMultiStatus)
-			body := book.cards["/addressbooks/user/default/ada.vcf"]
-			etag := book.etags["/addressbooks/user/default/ada.vcf"]
-			io.WriteString(w, `<?xml version="1.0"?>
-<d:multistatus xmlns:d="DAV:" xmlns:card="urn:ietf:params:xml:ns:carddav">
+			var b strings.Builder
+			b.WriteString(`<?xml version="1.0"?>
+<d:multistatus xmlns:d="DAV:" xmlns:card="urn:ietf:params:xml:ns:carddav">`)
+			for p, body := range book.cards {
+				etag := book.etags[p]
+				b.WriteString(`
   <d:response>
-    <d:href>/addressbooks/user/default/ada.vcf</d:href>
-    <d:propstat><d:prop><d:getetag>`+etag+`</d:getetag><card:address-data>`+xmlEscapeText(body)+`</card:address-data></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
-  </d:response>
+    <d:href>` + p + `</d:href>
+    <d:propstat><d:prop><d:getetag>` + etag + `</d:getetag><card:address-data>` + xmlEscapeText(body) + `</card:address-data></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+  </d:response>`)
+			}
+			b.WriteString(`
 </d:multistatus>`)
+			io.WriteString(w, b.String())
 		case r.Method == http.MethodGet && strings.HasSuffix(path, ".vcf"):
 			body, ok := book.cards[path]
 			if !ok {
@@ -196,14 +210,30 @@ func startCardDAVBook(t *testing.T) *cardDAVBook {
 				w.WriteHeader(http.StatusPreconditionFailed)
 				return
 			}
+			ifNone := r.Header.Get("If-None-Match")
+			ifMatch := r.Header.Get("If-Match")
+			if ifNone == "*" {
+				if _, exists := book.cards[path]; exists {
+					w.WriteHeader(http.StatusPreconditionFailed)
+					return
+				}
+			}
+			if ifMatch != "" {
+				if got := book.etags[path]; got != ifMatch {
+					w.WriteHeader(http.StatusPreconditionFailed)
+					return
+				}
+			}
 			raw, _ := io.ReadAll(r.Body)
 			book.cards[path] = string(raw)
 			book.etags[path] = `"v2"`
+			book.ctag++
 			w.Header().Set("ETag", `"v2"`)
-			w.WriteHeader(http.StatusNoContent)
+			w.WriteHeader(http.StatusCreated)
 		case r.Method == http.MethodDelete:
 			delete(book.cards, path)
 			delete(book.etags, path)
+			book.ctag++
 			w.WriteHeader(http.StatusNoContent)
 		default:
 			http.NotFound(w, r)

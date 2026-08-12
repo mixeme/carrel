@@ -93,9 +93,8 @@ func safeMethod(method string) bool {
 	return false
 }
 
-// submittedToken pulls the token out of the request. The form body is parsed
-// only for url-encoded posts; anything else must use the header, which keeps
-// this middleware from consuming a body it does not understand.
+// submittedToken pulls the token out of the request. Url-encoded and multipart
+// forms carry it as a field; htmx and other non-form posts use the header.
 func submittedToken(r *http.Request) string {
 	if v := r.Header.Get(CSRFHeader); v != "" {
 		return v
@@ -104,11 +103,18 @@ func submittedToken(r *http.Request) string {
 	if i := strings.IndexByte(ct, ';'); i >= 0 {
 		ct = ct[:i]
 	}
-	if !strings.EqualFold(strings.TrimSpace(ct), "application/x-www-form-urlencoded") {
-		return ""
+	ct = strings.TrimSpace(ct)
+	switch {
+	case strings.EqualFold(ct, "application/x-www-form-urlencoded"):
+		if err := r.ParseForm(); err != nil {
+			return ""
+		}
+		return r.PostFormValue(CSRFField)
+	case strings.HasPrefix(strings.ToLower(ct), "multipart/form-data"):
+		// A modest ceiling is enough to reach the token field; handlers that
+		// accept large uploads re-parse with their own MaxBytesReader.
+		_ = r.ParseMultipartForm(1 << 20)
+		return r.FormValue(CSRFField)
 	}
-	if err := r.ParseForm(); err != nil {
-		return ""
-	}
-	return r.PostFormValue(CSRFField)
+	return ""
 }
