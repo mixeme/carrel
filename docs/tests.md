@@ -87,6 +87,49 @@ SMTP against a local relay that can be told to refuse: a missing configuration r
 
 ---
 
+## Acceptance criteria and the tests that answer them
+
+§21 of the specification is a list of things that must be true. Most of them are asserted somewhere, and a criterion whose test is named here is a criterion that cannot regress quietly. This table is worth keeping current: it is the difference between "we have tests" and "this requirement is covered by that test".
+
+| §21 criterion | Test |
+|---|---|
+| An administrator sees no other user's connections or data | `TestAdminCannotReadAnotherAccountsData` |
+| An invited user chooses their own password; no hash or key exists before they accept | `TestStageOneAcceptanceFlow` |
+| An invite link works with SMTP entirely unconfigured | `TestInviteWorksWithoutSMTP` |
+| An invite token is single-use and only its digest is stored | `TestInviteStoresOnlyDigest`, `TestHashToken` |
+| A test email shows diagnostics when SMTP is wrong | `TestSendReportsAnUnreachableRelay`, `TestSendPassesTheServersRefusalThrough` |
+| An administrator's reset is announced as destructive before it happens | `TestResetPasswordIsAnnouncedAsDestructive`, `TestResetPasswordReplacesDEK` |
+| A user's own password change keeps every connection | `TestChangePasswordKeepsDEK`, `TestProfilePasswordChange` |
+| Disabling a user ends their active sessions immediately | `TestDisableEndsActiveSessionsAtOnce` |
+| The last administrator cannot be deleted, demoted or disabled | `TestLastAdminSurvivesThePanel`, `TestLastAdminGuard` |
+| The login page offers no misleading password recovery | `TestForgotOffersNoReset` |
+| With escrow off, no copy of any key is available to anyone else | `TestEscrowOffByDefault` |
+| Enabling escrow grants nothing over accounts that predate it | `TestEscrowAppliesOnlyToLaterUsers`, `TestRecoveryRefusedWithoutADeposit` |
+| Recovery is impossible without the master password | `TestRecoveryNeedsTheMasterPassword`, `TestRecoveryIsThrottled` |
+| Every recovery is in the audit log and in a mail to the user | `TestRecoveryThroughThePanel`, `TestEscrowActionsAreAudited` |
+| The profile says whether escrow covers this account | `TestEscrowCoversNewAccountsAndSaysSo`, `TestForbiddenOptOutIsVisible` |
+| `/about` is reachable without logging in | `TestAboutPublic`, `TestAboutNoSessionRequired` |
+| An X- property survives an edit to the name, compared byte for byte | `TestApplyKeepsForeignProperties`, `TestMarshalPreservesEveryProperty` |
+| A vCard 3.0 is still 3.0 after its photo is replaced | in `model/photo_test.go` |
+| An edit from a second client produces a choice, not an overwrite | `TestConflictScreenOn412` |
+| Reopening an unchanged collection makes no new multiget requests | in `provider/contacts/contacts_test.go` |
+| An outside edit becomes visible after a refresh rather than serving the cache | in `session/cache_test.go`, `provider/contacts/contacts_test.go` |
+| Signing out frees the cache | in `session/cache_test.go` |
+| Records from a slow source land in the right sort position | in `fanout/fanout_test.go` |
+| A failed source is marked with a retry of its own; the rest stay | in `fanout/fanout_test.go` |
+| Leaving a page mid-poll leaves no goroutines | in `fanout/registry_test.go` (needs `-race`) |
+| Unticking a collection persists across a restart | in `store/accounts_test.go`, `handler/stage5_test.go` |
+| One person in two books of two accounts is a candidate | in `merge/merge_test.go` |
+| "Not duplicates" survives a restart | in `store/duplicates_test.go` |
+| A server merge whose `PUT` fails deletes no source | in `handler/stage6_test.go` |
+| Deleting a linked record from another client causes no error | in `handler/stage6_test.go` |
+| A 10 MB download does not exhaust memory | `TestLiveLargeFileStreamsWithoutBuffering` (integration), `TestOpenStreamsWithoutBuffering` |
+| Removing an `ATTACH` leaves the file on the server | `TestDetachLeavesTheFileOnTheServer` |
+
+The criteria not in this table are the ones a person has to check, below.
+
+---
+
 ## How the fakes work
 
 Three helpers, worth reusing rather than rebuilding.

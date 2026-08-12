@@ -160,6 +160,57 @@ Web frameworks are out: `net/http` and `html/template` are enough, and the routi
 
 ---
 
+## Which tasks need which care
+
+Carrel has been built largely with an AI coding agent, and the stage plans carried a table of which model to use for what. The plans are gone; the judgement in them is worth keeping, because it is really a statement about where mistakes are expensive and where they are cheap.
+
+| Kind of work | Care needed | Why |
+|---|---|---|
+| Crypto, key handling, constant-time comparison | The most capable model available, in reasoning mode, plus a second pass over the diff alone | A mistake here loses somebody's data or leaks it, and neither shows up as a failing test |
+| Outbound connections, SSRF, path checks | The same | The edge cases are the whole feature: redirects, DNS rebinding, a name that looks like a traversal |
+| Preserving unknown properties (§8) | The same, and an audit of `model` before merging | A silent loss is discovered months later, when the original is gone |
+| DAV protocol: multistatus, discovery, fan-out | A reasoning model | Wire formats and concurrency; the `PROPFIND` bug that asked servers for nothing passed every test that only read responses |
+| Concurrency: goroutines, cancellation, caches | A reasoning model, and `-race` is not optional | Leaks and races do not reproduce on demand |
+| Destructive operations: server merge, delete | A reasoning model, in its own session, after the non-destructive path is settled | The order of writes and deletes *is* the safety |
+| Provider CRUD over a transport that already works | A capable model without extra ceremony | The patterns are established; follow the neighbouring provider |
+| htmx templates, CSS, print rules | A fast model, iterating | Cheap to check by looking, cheap to fix |
+| Compose files, config plumbing, `THIRD_PARTY.md` | A fast model | Mechanical |
+
+The practical shape that worked: security, transport and data-preservation code in dedicated reasoning sessions before any interface exists, then interface work in fast iterations once the tests underneath are green — and a second pass over the diff, by a reasoning model, before merging anything in the first three rows.
+
+---
+
+## Where things live
+
+A file-level map for the parts that are spread across several files.
+
+| | |
+|---|---|
+| Key schedule, DEK/KEK, escrow, server key | `internal/crypto/` |
+| The state file, users, invites, settings, audit | `internal/store/` |
+| DAV accounts and the sealed blob | `internal/account/blob.go`, `internal/store/accounts.go` |
+| Per-screen source selections and defaults | `internal/account/views.go` |
+| Duplicate decisions | `internal/account/duplicates.go`, `internal/store/duplicates.go` |
+| Transport, SSRF guard, multistatus, XML property types | `internal/dav/` |
+| Discovery chain and its trace | `internal/dav/discovery/` |
+| `Object`, `Patch`, loss comparison | `internal/model/object.go`, `patch.go`, `loss.go` |
+| Display views | `internal/model/contact.go`, `event.go`, `note.go`, `todo.go` |
+| `ATTACH` | `internal/model/attach.go` |
+| Markdown export and import of notes | `internal/model/markdown.go`, `import.go` |
+| Duplicate fingerprints, normalisation, scoring, clustering, field merge | `internal/merge/fingerprint.go`, `normalize.go`, `score.go`, `cluster.go`, `fields.go`, `vcard.go` |
+| Fan-out tasks, progress, timeouts | `internal/fanout/` |
+| Session cache, drafts, thumbnails | `internal/session/cache.go`, `scratch.go`, `thumb.go` |
+| Photo pipeline: EXIF, crop, thumbnails | `internal/photo/` |
+| Provider read paths | `internal/provider/*/provider.go` |
+| Provider write paths and conflicts | `internal/provider/*/write.go` |
+| File paths and the traversal guard | `internal/provider/files/path.go` |
+| Routes and the body-limit table | `internal/web/handler/routes.go` |
+| Middleware, CSRF, auth guards | `internal/web/handler/middleware.go`, `csrf.go`, `auth.go` |
+| Template loading and rendering | `internal/web/handler/render.go` |
+| Shared template fragments: sources, progress, duplicates, attachments | `internal/web/template/base.html` |
+
+---
+
 ## Adding things
 
 ### A setting

@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-Stage 2 («Транспорт и discovery») — готово, шлюз к этапу 3 пройден. Stage 3 («Контакты») — **готово**, фазы 0–12; целевая версия **v0.3.0**. Stage 4 («Календарь») — **готово**, фазы 0–11; целевая версия **v0.4.0**. Stage 5 («Задачи, заметки, единый вид, поиск») — **готово**, блоки A–G; целевая версия **v0.5.0**. Stage 6 («Дубликаты») — **готово**, блоки 0–10, включая объединение на сервере; целевая версия **v0.6.0**. Stage 7 («WebDAV-файлы и вложения») — **готово**, блоки A1–A6, B1–B8, C; целевая версия **v0.7.0**. Этим закрыт основной объём v1 (§19); остаётся ручная приёмка [docs/manual-acceptance.md](docs/manual-acceptance.md). Планы: [docs/stage-2-plan.md](docs/stage-2-plan.md) — [docs/stage-7-plan.md](docs/stage-7-plan.md).
+**Основной объём v1 закрыт (§19).** Этапы 2–7 — транспорт и discovery, контакты, календарь, задачи и заметки с единым видом и поиском, дубликаты, WebDAV-файлы и вложения — реализованы; целевая версия **v0.7.0**. Остаётся ручная приёмка: [docs/manual-acceptance.md](docs/manual-acceptance.md). Что не сделано и что делаться не будет: [docs/roadmap.md](docs/roadmap.md).
 
 ### Added
 
@@ -22,6 +22,11 @@ Stage 2 («Транспорт и discovery») — готово, шлюз к эт
 - **Stage 7 (block B) — import `.md` from WebDAV (§23.9):** a folder of notes already on the person's own storage previews and imports without being downloaded and uploaded again. Files are read one at a time and each is capped, so a folder somebody filled with a gigabyte of text costs the ceiling rather than the gigabyte; only `.md` directly in the named folder is read, subfolders are not walked, and nothing on the file server is moved or deleted.
 - **Stage 7 — configuration:** `files.max_upload_bytes` (`CARREL_FILES_MAX_UPLOAD_BYTES`, default 256 MiB) and `files.max_entries` (`CARREL_FILES_MAX_ENTRIES`, default 2000). The upload ceiling is generous because nothing buffers the file — the cost of a large one is bandwidth and not memory — and the listing ceiling is not, because a listing is a page and a response.
 - **Stage 7 — tests:** path resolution against traversal in both directions, a name that only looks like one, and the backslash and control bytes; listing separating folders from files and not reaching into a subfolder; a megabyte read out of a stream in two goes; a range returning the middle of a file; a refused conditional create leaving the original; a taken name yielding the next one without touching what was there; `EnsureDir` creating a chain once and being content the second time; a folder listing cached inside the TTL at no request and a write making it a miss; the listing ceiling truncating. `ATTACH` parsed with its parameters across a folded line, an inline attachment marked and left alone, the property modelled rather than listed as foreign while `X-JTX-COLOR` still is, a detach rewriting the set and preserving the inline one's parameters and an unrelated property, the last one removing the property rather than emptying it, a round trip reporting no loss under §8, and the Markdown links surviving export and import. Over HTTP against a server holding both a calendar and two file collections: the navigation entry appearing only when a plain collection exists, the listing and the breadcrumb, download headers and body, a traversal in a download URL answering 404, an upload refusing to overwrite, a read-only collection refusing writes and offering no forms, mkdir and delete, the whole of §23.10 in one pass (folder named once, file stored under a date-and-title name, `ATTACH` written as a URI with a file name and not as base64, the card showing it with its proxy), the proxy serving the bytes, a foreign link shown but refused, an inline attachment refused with a reason and no write, detaching leaving the file and saying so, an unreachable file server still rendering the card, a card with no folder configured pointing at the setting, and a folder of Markdown importing from WebDAV without disturbing it.
+
+### Removed
+
+- **The per-stage implementation plans, once every stage was done.** `stages.md`, `stage-1-plan.md` through `stage-7-plan.md`, `stage-1-acceptance.md` and `stage-1-outstanding.md` are gone. A plan describing work that is finished is not documentation, it is a claim that has to be checked against the code every time somebody reads it — and checking them turned up four requirements that had been carried from plan to plan as "a later strengthening" and never landed. Those are now in [docs/roadmap.md](docs/roadmap.md) as gaps with the reason each was left, not as intentions: no process-wide ceiling on the session cache (§12 asks for LRU eviction across users, and ten sessions currently get ten times the per-session allowance); no byte accounting for object bodies, so a collection is evicted whole and takes its ETag map with it, when §12 asks for bodies first and maps held longer; no public self-registration form behind the setting whose checkbox has read *"no public form in this stage"* since stage 1; and three of §13's narrow-screen requirements unmet — the source rail stacks rather than sliding out, tap targets are still mouse-sized, and photo cropping on a phone is the full pan-and-zoom rather than the centre crop. Everything else the plans held was either already true of the code or has been moved: the mapping from §21 acceptance criteria to the tests that answer them is in [docs/tests.md](docs/tests.md), the file-level map of where things live and the judgement about which tasks need which care are in [docs/development.md](docs/development.md), and the stage 1 manual progress that had been verified locally is recorded in [docs/manual-acceptance.md](docs/manual-acceptance.md) so it is not checked twice.
+- **`CARREL_TEST_WEBDAV_ATTACH_DIR`** from the credentials convention. It was documented and read by nothing: the integration tests make a scratch folder with a random name per run and remove it afterwards, which is safer than writing into a folder somebody named, and the attachment folder proper is a setting in the interface.
 
 ### Documentation
 
@@ -91,16 +96,16 @@ Stage 2 («Транспорт и discovery») — готово, шлюз к эт
 ### Added
 
 - `.gitignore` entry for `dev/` (local developer notes and data, not tracked).
-- **Roadmap (docs):** [docs/stages.md](docs/stages.md) index; implementation plans [stage-2-plan.md](docs/stage-2-plan.md) through [stage-7-plan.md](docs/stage-7-plan.md); consolidated v1 manual acceptance [manual-acceptance.md](docs/manual-acceptance.md); local Baikal/WebDAV test credentials convention [dev-credentials.md](docs/dev-credentials.md).
+- **Roadmap (docs):** a stage index, implementation plans for stages 2 through 7, a consolidated v1 manual acceptance checklist ([manual-acceptance.md](docs/manual-acceptance.md)) and the local test credentials convention ([dev-credentials.md](docs/dev-credentials.md)). The stage plans were removed once every stage was done; what they still carried that was not in the code is now in [docs/roadmap.md](docs/roadmap.md), [docs/architecture.md](docs/architecture.md) and [docs/development.md](docs/development.md).
 
 ### Verified (stage 1 acceptance, local `go run`)
 
 - `go test -race ./...` on the development machine (Windows, MSYS2 gcc).
-- Manual: first administrator setup, public `/about`, invite-by-link without SMTP (invitee picks login). Progress recorded in [docs/stage-1-outstanding.md](docs/stage-1-outstanding.md) §2a.
+- Manual: first administrator setup, public `/about`, invite-by-link without SMTP (invitee picks login). Recorded in the stage 1 tracker at the time, and now in [docs/manual-acceptance.md](docs/manual-acceptance.md).
 
 ## [0.1.0] - 2026-08-11
 
-Stage 1 («Каркас») — первая рабочая версия. Открытые пункты приёмки: [docs/stage-1-outstanding.md](docs/stage-1-outstanding.md).
+Stage 1 («Каркас») — первая рабочая версия. Открытые пункты приёмки велись отдельным трекером; они сведены в [docs/manual-acceptance.md](docs/manual-acceptance.md).
 
 ### Added
 
@@ -155,7 +160,7 @@ Stage 1 («Каркас») — первая рабочая версия. Отк�
 - Invite tokens: `NewToken` produces a full `TokenLen` of entropy in a form that needs no escaping in a URL path, and `HashToken` is deterministic, collision-free across tokens, and compared only through the constant-time `Equal` — including against a digest that differs in one bit, a truncated one and none at all.
 - SMTP diagnostics (§5.3): the send path is exercised against a local relay that can be told to refuse. A missing configuration is reported without dialling, an unreachable relay names the address it tried, and a server's refusal is passed through in the server's own words — while the relay password stays out of the transcript that goes on screen.
 - Fixed: a refused deletion — the last administrator, typically — signed the account out before the store rejected it, so the administrator lost their session to a change that never happened. The store now decides first.
-- [docs/stage-1-outstanding.md](docs/stage-1-outstanding.md): открытые пункты этапа 1 — race-тесты, ручная приёмка A1–A9 в Docker, критерий полного закрытия. Архивные [stage-1-plan.md](docs/stage-1-plan.md) и [stage-1-acceptance.md](docs/stage-1-acceptance.md) помечены к удалению.
+- Трекер открытых пунктов этапа 1 — race-тесты, ручная приёмка A1–A9 в Docker, критерий полного закрытия; план и чеклист этапа 1 помечены к удалению как архивные.
 
 ### Dependencies
 

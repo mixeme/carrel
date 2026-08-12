@@ -4,7 +4,7 @@ What is not built yet, in the order it matters, and — just as usefully — wha
 
 Everything in the main scope of v1 is implemented: the framework, transport and discovery, contacts, calendar, tasks, notes, the unified view, cross-source search, duplicates, and WebDAV files with attachments. What is left before a v1 tag is a person's judgement rather than code.
 
-Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for the order in which they are worth showing anyone.
+Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for the order in which they are worth showing anyone. The per-stage implementation plans were removed once every stage was done; what they still carried and the code did not is in the gaps section below, and what was worth keeping of their working practice is in [development.md](development.md).
 
 ---
 
@@ -25,10 +25,25 @@ Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for t
 
 ## Gaps in what is built
 
-Small, known, and worth being honest about rather than discovering later.
+Found by reading the stage plans back against the code they describe, and worth being honest about rather than discovering later. The first four are requirements from the main specification that were carried from plan to plan as "a later strengthening" and never landed; the rest are consequences of decisions that were correct at the time.
+
+### Requirements not met
+
+**A process-wide memory ceiling for the cache (§12).** The cache has per-session limits — collections, ETag entries, thumbnail bytes and count — and they work. What §12 also asks for is a ceiling across *all* sessions, with LRU eviction reaching across users, precisely so that ten people with large address books cannot together exhaust the container's memory. There is no such ceiling: ten sessions get ten times the per-session allowance. On a single-user instance this is invisible; on anything shared it is the difference between a slow instance and one the kernel kills. It is also the one item on this list that becomes load-bearing the moment multi-tenancy (§23.5) is taken seriously.
+
+**Byte accounting for object bodies, and eviction in the right order (§12).** Thumbnails are counted in bytes and evicted against a byte ceiling. Object bodies are not counted at all — a collection is evicted whole, taking its ETag map with it. §12 is explicit that the order should be the other way round: bodies go first and ETag maps are held longer, because the maps are small and save the most. Today evicting one collection under pressure throws away the cheap thing along with the expensive one, and the next visit pays a deep `PROPFIND` it did not need to.
+
+**The public self-registration form (§5.2).** The setting exists, is off by default, and is stored and audited correctly. The administration panel offers the checkbox with the label *"Allow self-registration (no public form in this stage)"* — which is honest, and has been that label since stage 1. There is no public form behind it: enabling the flag changes nothing a visitor can see. Either the form gets built or the checkbox should say so more plainly than in parentheses.
+
+**The narrow-screen requirements of §13.** There is a `@media (max-width: 640px)` block, and it does three of the things asked for: inputs at 16 px so iOS does not zoom on focus, one column instead of two, and a stacked top bar. The rest of §13's list is not done — the source rail does not become a slide-out panel, it simply stacks above the content, so on a phone every screen with sources starts with a list of checkboxes to scroll past; tap targets are not brought to 44 px, and the source checkboxes and 3 px colour strips are still the mouse-sized ones §13 names specifically; photo cropping on a narrow screen is the full pan-and-zoom rather than the centre crop §13 asks for. The lifeboat floats, but it is not the lifeboat that was specified.
+
+### Consequences of earlier decisions
 
 | | What is missing | Why it was left |
 |---|---|---|
+| **A service worker** | The PWA manifest and icon are embedded and the interface installs as an app. There is no service worker at all | §13 asks for a minimal one covering the shell and static assets, and forbids it caching collection contents. What was built is the safe half of that: nothing to cache wrongly. The cost is that an installed app with no network shows a browser error rather than a shell |
+| **Export from several collections at once** | Contacts and calendar export one collection each, the calendar optionally over a date range | Stage 4 planned "one event, an agenda range, or the selected collections". The third case is missing, which matters most for a backup taken by hand — and is subsumed by backup proper (§23.3) |
+| **Multi-platform images, CI, `ghcr.io`** | The Dockerfile and compose file are complete and build locally. Nothing publishes `linux/amd64` and `linux/arm64` images, and there is no CI at all | Explicitly out of scope from stage 1 onward. §18 describes the intended arrangement: GitHub Actions building for the mirror and publishing to `ghcr.io`, with secrets not duplicated into Gitea |
 | **Attachments on tasks** | `ATTACH` is modelled on events and notes. A VTODO keeps the property untouched and shows it among its foreign properties, but there is no attach or detach on a task card | §23.10 names events and notes. The model work is done; this is one card's worth of interface |
 | **Inline attachments** | An `ATTACH` carrying base64 is shown, named and never rewritten — as §23.10 requires — but cannot be opened or downloaded | Decoding it means holding the object's body in memory to serve a file, which is the one thing the file section avoids. A person can still read it in any client that supports it |
 | **Attachment size and type** | Taken from the `SIZE` and `FMTTYPE` parameters the writing client set, not measured | Measuring means one request per attachment on every page that lists them. A missing parameter shows as a missing detail rather than a wrong one |
@@ -37,6 +52,8 @@ Small, known, and worth being honest about rather than discovering later.
 | **Folder listings are not paginated** | A folder past the configured ceiling says so and shows the first N | The alternative is `PROPFIND` paging, which DAV does not really have. The ceiling is a setting |
 | **Original time zone of an event** | One global zone, as §10 fixes for v1 | §23.8 has the cheap remedy: show the source zone beside the time when it differs. The data is already in `DTSTART`. Not yet done |
 | **Per-collection sync state** | §23.8 asks for a line saying when a collection was last read and last changed on the server | The cache already knows all of it; only the display is missing |
+
+Both §23.8 items are worth doing before anything in the next section: they are display over data Carrel already computes, they are the two cheapest things left on this page, and §23.8's whole argument is that showing what is already known is what distinguishes this from clients that stay silent.
 
 ---
 
