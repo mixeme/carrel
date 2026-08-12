@@ -61,6 +61,8 @@ type adminView struct {
 	InviteTTLHours      int64
 	SessionIdleHours    int64
 	SessionAbsoluteDays int64
+	// DAVDiag holds discovery output from the admin validator.
+	DAVDiag string
 }
 
 type userRow struct {
@@ -111,6 +113,8 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
 		data, err = s.adminSaveSMTP(r, actor)
 	case "test_smtp":
 		data, err = s.adminTestSMTP(r, actor)
+	case "test_dav":
+		data, err = s.adminTestDAV(r, actor)
 	case "enable_escrow":
 		data, err = s.adminEnableEscrow(r, actor)
 	case "resume_escrow":
@@ -178,7 +182,7 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 		out.Users = append(out.Users, userRow{
 			User:     u,
 			Sessions: s.Sessions.Count(u.ID),
-			DAVCount: 0,
+			DAVCount: u.DAVAccountCount,
 		})
 	}
 	out.Escrow = escrowStatusOf(out.Settings, nil)

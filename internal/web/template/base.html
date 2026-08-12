@@ -19,7 +19,11 @@
     <nav>
         <a href="{{.Base}}/app/"{{if eq .Title "Carrel"}} aria-current="page"{{end}}>Profile</a>
         {{if .Admin}}<a href="{{.Base}}/admin/"{{if eq .Title "Administration"}} aria-current="page"{{end}}>Administration</a>{{end}}
-        <button type="button" class="link" data-refresh>Refresh</button>
+        <form method="post" action="{{.Base}}/app/" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="refresh_cache">
+            <button type="submit" class="link">Refresh</button>
+        </form>
         <form method="post" action="{{.Base}}/logout">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <button type="submit" class="link">Sign out</button>

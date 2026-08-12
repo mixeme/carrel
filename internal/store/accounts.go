@@ -90,6 +90,7 @@ func (s *Store) PutDAVAccount(actor Actor, userID string, dek crypto.Key, acc ac
 			return err
 		}
 		u.Secrets = sealed
+		u.DAVAccountCount = blob.CountEnabled()
 		action := ActionDAVAccountUpdate
 		if findErr != nil {
 			action = ActionDAVAccountAdd
@@ -152,6 +153,7 @@ func (s *Store) DeleteDAVAccount(actor Actor, userID, accountID string, dek cryp
 			return err
 		}
 		u.Secrets = sealed
+		u.DAVAccountCount = blob.CountEnabled()
 		appendAudit(state, s.now(), AuditEntry{
 			Action:      ActionDAVAccountDelete,
 			ActorID:     actor.ID,
@@ -187,6 +189,7 @@ func (s *Store) SetDAVAccountEnabled(actor Actor, userID, accountID string, dek 
 			return err
 		}
 		u.Secrets = sealed
+		u.DAVAccountCount = blob.CountEnabled()
 		return nil
 	})
 }

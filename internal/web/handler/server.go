@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"gitea.mixdep.ru/mix/carrel/internal/dav"
 	"gitea.mixdep.ru/mix/carrel/internal/mail"
 	"gitea.mixdep.ru/mix/carrel/internal/ratelimit"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
@@ -44,6 +45,7 @@ type Server struct {
 	// secret on the instance that opens somebody else's data (§5.4).
 	RecoveryLimit *ratelimit.Limiter
 	Mail          *mail.Queue
+	Guard         *dav.Guard
 	Logger        *slog.Logger
 }
 

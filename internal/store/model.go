@@ -98,6 +98,9 @@ type User struct {
 	// Secrets is the per-user blob sealed under the DEK: DAV credentials from
 	// stage 2 onward. Empty in stage 1, but the field fixes where they go.
 	Secrets []byte `json:"secrets,omitempty"`
+	// DAVAccountCount is the number of enabled DAV accounts, maintained without
+	// decrypting Secrets so the admin list can show it (§5.5).
+	DAVAccountCount int `json:"dav_account_count,omitempty"`
 
 	// PendingEmail holds an address awaiting confirmation. The token digest
 	// and expiry live here too; only the plaintext token is ever mailed (§5.3).
@@ -352,6 +355,7 @@ const (
 	ActionInviteResend   = "invite_resend"
 	ActionSettings       = "settings_update"
 	ActionSMTPTest       = "smtp_test"
+	ActionDAVTest        = "dav_test"
 	ActionEmailConfirm   = "email_confirm"
 	ActionEscrowEnable   = "escrow_enable"
 	ActionEscrowDisable  = "escrow_disable"

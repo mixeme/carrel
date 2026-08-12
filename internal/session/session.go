@@ -52,6 +52,14 @@ type Session struct {
 	mustChange   bool
 	escrowNotice bool
 	dead         bool
+	cache        *Cache
+}
+
+// Cache returns the session's DAV collection cache (§12).
+func (s *Session) Cache() *Cache {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.cache
 }
 
 // DEK returns the user's data key. It aliases the session's own copy: do not
@@ -103,6 +111,8 @@ type Options struct {
 	Absolute time.Duration
 	// Now overrides the clock.
 	Now func() time.Time
+	// Cache holds per-session collection cache limits (§12).
+	Cache CacheConfig
 }
 
 // Default session lifetimes. The administrator overrides them from global
@@ -173,6 +183,7 @@ func (m *Manager) Create(u User, dek crypto.Key) (*Session, error) {
 		deadline:     now.Add(m.opts.Absolute),
 		mustChange:   u.MustChangePassword,
 		escrowNotice: u.EscrowNotice,
+		cache:        NewCache(m.opts.Cache, m.opts.Now),
 	}
 
 	m.mu.Lock()
@@ -239,6 +250,10 @@ func (m *Manager) expired(s *Session, now time.Time) bool {
 // dropping the session, so the key does not wait for the collector (§24.6).
 func (m *Manager) remove(s *Session) {
 	s.mu.Lock()
+	if s.cache != nil {
+		s.cache.Wipe()
+		s.cache = nil
+	}
 	s.dek.Zero()
 	s.dek = nil
 	s.dead = true
@@ -275,9 +290,11 @@ func (m *Manager) Rotate(id string) (*Session, error) {
 		deadline:     old.deadline,
 		mustChange:   old.mustChange,
 		escrowNotice: old.escrowNotice,
+		cache:        old.cache,
 	}
-	// The key moved to the new session; the old shell must not wipe it.
+	// The key and cache moved to the new session; the old shell must not wipe them.
 	old.dek = nil
+	old.cache = nil
 	old.dead = true
 	old.mu.Unlock()
 

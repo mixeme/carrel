@@ -48,6 +48,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	// The user's own section. Anything added under /app is behind RequireAuth.
 	app := http.NewServeMux()
 	app.HandleFunc("GET "+s.Path("/app/{$}"), s.AppHome)
+	app.HandleFunc("POST "+s.Path("/app/{$}"), s.AppHome)
 	app.HandleFunc("GET "+s.Path("/app/password"), s.ChangePassword)
 	app.HandleFunc("POST "+s.Path("/app/password"), s.ChangePassword)
 	app.HandleFunc("POST "+s.Path("/app/email"), s.RequestEmailChange)

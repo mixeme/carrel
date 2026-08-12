@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/config"
+	"gitea.mixdep.ru/mix/carrel/internal/dav"
 	"gitea.mixdep.ru/mix/carrel/internal/mail"
 	"gitea.mixdep.ru/mix/carrel/internal/ratelimit"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
@@ -70,6 +71,19 @@ func run() int {
 	sessions := session.New(session.Options{
 		Idle:     settings.SessionIdle(),
 		Absolute: settings.SessionAbsolute(),
+		Cache: session.CacheConfig{
+			CollectionTTL:  cfg.Cache.CollectionTTL(),
+			MaxCollections: cfg.Cache.MaxCollections,
+			MaxETagEntries: cfg.Cache.MaxETagEntries,
+		},
+	})
+
+	guard := dav.NewGuard(dav.GuardConfig{
+		Allowlist:        cfg.DAV.SSRFAllowlist,
+		ConnectTimeout:   cfg.DAV.ConnectTimeout.Duration(),
+		RequestTimeout:   cfg.DAV.RequestTimeout.Duration(),
+		MaxResponseBytes: cfg.DAV.MaxResponseBytes,
+		MaxRedirects:     cfg.DAV.MaxRedirects,
 	})
 
 	templates, err := loadTemplates()
@@ -103,6 +117,7 @@ func run() int {
 		InviteLimit:   inviteLimit,
 		RecoveryLimit: recoveryLimit,
 		Mail:          mailQueue,
+		Guard:         guard,
 		Logger:        logger,
 	}
 

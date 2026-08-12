@@ -1,0 +1,19 @@
+# Baikal stack for integration tests and local DAV development.
+# After first start, complete the Baikal web setup and create a test user.
+# Point CARREL_TEST_DAV_* at the instance — see docs/dev-credentials.md.
+#
+#   docker compose -f compose.test.yaml up -d
+#   # then configure https://127.0.0.1:8443/ once
+
+services:
+  baikal:
+    image: ckulka/baikal:nginx
+    ports:
+      - "127.0.0.1:8443:443"
+    volumes:
+      - baikal-data:/var/www/baikal/Specific
+    environment:
+      BAIKAL_DAV_AUTH_TYPE: Basic
+
+volumes:
+  baikal-data:

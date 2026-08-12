@@ -8,6 +8,8 @@ Stage 2 («Транспорт и discovery») — в работе; целева�
 
 ### Added
 
+- **Stage 2 (phases 5–9) — cache, UI, and integration tests:** per-session collection cache with ETag maps, LRU eviction, TTL/`getctag` invalidation, and wipe on logout/SIGTERM; signed-in UI with sidebar (accounts, collections, connect/remove forms) and admin «Test DAV server» discovery validator; `compose.test.yaml` Baikal stack for local integration runs; unit tests for cache, discovery, and account handlers; `go test -tags=integration` Baikal discovery gate (`CARREL_TEST_DAV_*`, skips when unset). Admin user list shows real `DAVAccountCount` without decrypting secrets.
+
 - **Stage 2 (phases 1–4) — transport and account storage:** `internal/config` DAV timeouts, SSRF allowlist, and session cache limits; `internal/dav` SSRF guard (§24.2), DAV transport with Multi-Status parsing, and discovery with step-by-step `DiscoveryTrace` (§6); `internal/account` secrets blob sealed under the user DEK; `store` API to add, list, update and delete DAV accounts in `User.Secrets`. Dependency `github.com/emersion/go-webdav` v0.7.0 recorded in `THIRD_PARTY.md`.
 
 ### Changed

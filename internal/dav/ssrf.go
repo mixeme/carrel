@@ -18,11 +18,12 @@ import (
 
 // GuardConfig tunes outbound DAV connections (§24.2).
 type GuardConfig struct {
-	Allowlist        []string
-	ConnectTimeout   time.Duration
-	RequestTimeout   time.Duration
-	MaxResponseBytes int64
-	MaxRedirects     int
+	Allowlist          []string
+	ConnectTimeout     time.Duration
+	RequestTimeout     time.Duration
+	MaxResponseBytes   int64
+	MaxRedirects       int
+	InsecureSkipVerify bool // dev/integration only — self-signed TLS
 }
 
 // Guard validates outbound URLs and builds an SSRF-safe HTTP client.
@@ -32,6 +33,7 @@ type Guard struct {
 	requestTimeout   time.Duration
 	maxResponseBytes int64
 	maxRedirects     int
+	insecureTLS      bool
 	resolver         *net.Resolver
 }
 
@@ -62,6 +64,7 @@ func NewGuard(cfg GuardConfig) *Guard {
 		requestTimeout:   cfg.RequestTimeout,
 		maxResponseBytes: cfg.MaxResponseBytes,
 		maxRedirects:     cfg.MaxRedirects,
+		insecureTLS:      cfg.InsecureSkipVerify,
 		resolver:         net.DefaultResolver,
 	}
 }
@@ -70,7 +73,7 @@ func NewGuard(cfg GuardConfig) *Guard {
 func (g *Guard) HTTPClient() *http.Client {
 	transport := &http.Transport{
 		DialContext:           g.dialContext,
-		TLSClientConfig:     &tls.Config{MinVersion: tls.VersionTLS12},
+		TLSClientConfig:       &tls.Config{MinVersion: tls.VersionTLS12, InsecureSkipVerify: g.insecureTLS}, //nolint:gosec // dev integration flag only
 		ForceAttemptHTTP2:     true,
 		MaxIdleConns:          10,
 		IdleConnTimeout:       90 * time.Second,

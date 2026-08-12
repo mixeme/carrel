@@ -44,7 +44,7 @@ func TestAboutFooterOnSignedInPages(t *testing.T) {
 	if !strings.Contains(rec.Body.String(), `href="/about"`) {
 		t.Error("signed-in page has no footer link to /about")
 	}
-	if !strings.Contains(rec.Body.String(), `data-refresh`) {
+	if !strings.Contains(rec.Body.String(), `value="refresh_cache"`) {
 		t.Error("signed-in page has no refresh control")
 	}
 }

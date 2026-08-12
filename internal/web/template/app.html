@@ -1,85 +1,154 @@
 {{define "body"}}
-{{$e := .Data.Escrow}}
-<section class="card">
-    <h1>Signed in as {{.Session.Login}}</h1>
-    <p>No accounts connected yet. Connecting a CalDAV or CardDAV account
-        arrives with the next stage.</p>
-
-    <section class="subsection">
-        <h2>Password</h2>
-        <p class="hint">Changing your password re-wraps your data key only;
-            saved connections stay readable.</p>
-        <p><a href="{{.Base}}/app/password">Change password</a></p>
-    </section>
-
-    <section class="subsection">
-        <h2>Email address</h2>
-        {{if .Data.Email}}
-        <p class="field-value">Current: {{.Data.Email}}</p>
+{{$d := .Data}}
+{{$e := $d.Escrow}}
+<div class="app-layout">
+    <aside class="sidebar card">
+        <h2>Accounts</h2>
+        {{if $d.Accounts}}
+        {{range $d.Accounts}}
+        <section class="account-block">
+            <h3>{{if .Label}}{{.Label}}{{else}}{{.Username}}{{end}}</h3>
+            <p class="hint">{{.BaseURL}}</p>
+            {{if .Collections}}
+            <ul class="collection-list">
+            {{range .Collections}}
+                <li>
+                    <label class="checkbox">
+                        <input type="checkbox" name="collection" value="{{.Path}}" checked disabled>
+                        {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
+                        <span class="hint">({{.Kind}})</span>
+                    </label>
+                </li>
+            {{end}}
+            </ul>
+            {{end}}
+            <form method="post" action="{{$.Base}}/app/">
+                <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                <input type="hidden" name="action" value="delete_dav">
+                <input type="hidden" name="account_id" value="{{.ID}}">
+                <button type="submit" class="link">Remove</button>
+            </form>
+        </section>
+        {{end}}
         {{else}}
-        <p class="hint">No address on file.</p>
-        {{end}}
-        {{if .Data.PendingEmail}}
-        <p class="hint">Pending confirmation: {{.Data.PendingEmail}}</p>
-        {{end}}
-        <p class="hint">Used for invitations and service notices only.</p>
-        <form method="post" action="{{.Base}}/app/email">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-
-            <label for="email">New address</label>
-            <input id="email" name="email" type="email" required autocomplete="email">
-
-            <button type="submit">Send confirmation link</button>
-        </form>
-    </section>
-
-    <section class="subsection">
-        <h2>Key escrow</h2>
-        {{if $e.Deposited}}
-        <p class="warning">A copy of your data key is deposited on this server.
-            An administrator who holds the escrow master password can decrypt
-            the DAV credentials you save here, and through them your contacts
-            and calendars.</p>
-        {{if not $e.RecoveredAt.IsZero}}
-        <p>An administrator last recovered this account on
-            {{$e.RecoveredAt.Format "2006-01-02 15:04"}} UTC.</p>
-        {{end}}
-        {{if $e.CanOptOut}}
-        <form method="post" action="{{.Base}}/app/escrow">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <input type="hidden" name="action" value="opt_out">
-            <p class="hint">Withdrawing deletes the copy. Nobody will be able
-                to recover this account afterwards, including you.</p>
-            <button type="submit">Withdraw my deposited key</button>
-        </form>
-        {{else}}
-        <p class="hint">The administrator of this instance does not allow
-            withdrawing a deposited key.</p>
+        <p class="hint">No accounts connected yet.</p>
         {{end}}
 
-        {{else}}
-        <p>No copy of your data key is deposited. Nobody but you can decrypt
-            your data — and if you lose your password, it cannot be recovered
-            by anyone.</p>
-        {{if $e.CanOptIn}}
-        <form method="post" action="{{.Base}}/app/escrow">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <input type="hidden" name="action" value="opt_in">
-            <p class="warning">Depositing your key means an administrator with
-                the escrow master password can read your saved credentials and
-                the contacts and calendars behind them. In exchange, your data
-                survives a forgotten password.</p>
+        <section class="subsection">
+            <h3>Connect account</h3>
+            <form method="post" action="{{.Base}}/app/">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="connect_dav">
 
-            <label for="escrow-password">Your current password</label>
-            <input id="escrow-password" name="password" type="password" required
-                   autocomplete="current-password">
-            <p class="hint">Your key can only be deposited by you: the server
-                cannot open it without your password.</p>
+                <label for="dav-label">Label (optional)</label>
+                <input id="dav-label" name="dav_label" type="text"
+                       value="{{$d.Connect.Label}}" autocomplete="off">
 
-            <button type="submit">Deposit my key</button>
-        </form>
-        {{end}}
-        {{end}}
-    </section>
-</section>
+                <label for="dav-url">Server URL</label>
+                <input id="dav-url" name="dav_url" type="url" required
+                       value="{{$d.Connect.BaseURL}}" placeholder="https://host/dav.php/"
+                       autocapitalize="none" spellcheck="false">
+
+                <label for="dav-user">Username</label>
+                <input id="dav-user" name="dav_username" type="text" required
+                       value="{{$d.Connect.Username}}" autocapitalize="none" spellcheck="false">
+
+                <label for="dav-pass">Password</label>
+                <input id="dav-pass" name="dav_password" type="password" required
+                       autocomplete="current-password">
+
+                <button type="submit">Connect</button>
+            </form>
+            {{if $d.Trace}}
+            <pre class="diagnostic">{{range $d.Trace.Steps}}[{{.Name}}] {{.Detail}}{{if .StatusCode}} ({{.StatusCode}}){{end}}{{if .Target}} → {{.Target}}{{end}}
+{{end}}</pre>
+            {{end}}
+        </section>
+    </aside>
+
+    <div class="app-main">
+        <section class="card contacts-stub">
+            <h1>Signed in as {{.Session.Login}}</h1>
+            <p class="hint">Contacts and calendar events arrive in stage 3.
+                Connected collections appear in the sidebar.</p>
+        </section>
+
+        <section class="card">
+            <h2>Password</h2>
+            <p class="hint">Changing your password re-wraps your data key only;
+                saved connections stay readable.</p>
+            <p><a href="{{.Base}}/app/password">Change password</a></p>
+        </section>
+
+        <section class="card">
+            <h2>Email address</h2>
+            {{if $d.Email}}
+            <p class="field-value">Current: {{$d.Email}}</p>
+            {{else}}
+            <p class="hint">No address on file.</p>
+            {{end}}
+            {{if $d.PendingEmail}}
+            <p class="hint">Pending confirmation: {{$d.PendingEmail}}</p>
+            {{end}}
+            <p class="hint">Used for invitations and service notices only.</p>
+            <form method="post" action="{{.Base}}/app/email">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+
+                <label for="email">New address</label>
+                <input id="email" name="email" type="email" required autocomplete="email">
+
+                <button type="submit">Send confirmation link</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Key escrow</h2>
+            {{if $e.Deposited}}
+            <p class="warning">A copy of your data key is deposited on this server.
+                An administrator who holds the escrow master password can decrypt
+                the DAV credentials you save here, and through them your contacts
+                and calendars.</p>
+            {{if not $e.RecoveredAt.IsZero}}
+            <p>An administrator last recovered this account on
+                {{$e.RecoveredAt.Format "2006-01-02 15:04"}} UTC.</p>
+            {{end}}
+            {{if $e.CanOptOut}}
+            <form method="post" action="{{.Base}}/app/escrow">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="opt_out">
+                <p class="hint">Withdrawing deletes the copy. Nobody will be able
+                    to recover this account afterwards, including you.</p>
+                <button type="submit">Withdraw my deposited key</button>
+            </form>
+            {{else}}
+            <p class="hint">The administrator of this instance does not allow
+                withdrawing a deposited key.</p>
+            {{end}}
+
+            {{else}}
+            <p>No copy of your data key is deposited. Nobody but you can decrypt
+                your data — and if you lose your password, it cannot be recovered
+                by anyone.</p>
+            {{if $e.CanOptIn}}
+            <form method="post" action="{{.Base}}/app/escrow">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="opt_in">
+                <p class="warning">Depositing your key means an administrator with
+                    the escrow master password can read your saved credentials and
+                    the contacts and calendars behind them. In exchange, your data
+                    survives a forgotten password.</p>
+
+                <label for="escrow-password">Your current password</label>
+                <input id="escrow-password" name="password" type="password" required
+                       autocomplete="current-password">
+                <p class="hint">Your key can only be deposited by you: the server
+                    cannot open it without your password.</p>
+
+                <button type="submit">Deposit my key</button>
+            </form>
+            {{end}}
+            {{end}}
+        </section>
+    </div>
+</div>
 {{end}}

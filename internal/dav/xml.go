@@ -106,8 +106,10 @@ type ResourceType struct {
 
 func (t *ResourceType) Is(name xml.Name) bool {
 	for _, raw := range t.Raw {
-		if n, ok := raw.elementName(); ok && n == name {
-			return true
+		if n, ok := raw.elementName(); ok {
+			if n == name || n.Local == name.Local {
+				return true
+			}
 		}
 	}
 	return false
