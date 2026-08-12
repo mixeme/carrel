@@ -95,6 +95,52 @@ func TestTrustedProxiesEnv(t *testing.T) {
 	}
 }
 
+// The duplicate threshold of §15 is a setting: it has a conservative default, can
+// be lowered in the file, and can be overridden per process.
+func TestDuplicateThreshold(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("CARREL_DATA_DIR", dir)
+	clearEnv(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Duplicates.Threshold != DefaultDuplicateThreshold {
+		t.Errorf("threshold = %d, want %d", cfg.Duplicates.Threshold, DefaultDuplicateThreshold)
+	}
+
+	file := filepath.Join(dir, "config.json")
+	if err := os.WriteFile(file, []byte(`{"duplicates": {"threshold": 45}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err = Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Duplicates.Threshold != 45 {
+		t.Errorf("threshold from file = %d, want 45", cfg.Duplicates.Threshold)
+	}
+
+	t.Setenv("CARREL_DUPLICATES_THRESHOLD", "80")
+	cfg, err = Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Duplicates.Threshold != 80 {
+		t.Errorf("threshold from env = %d, want 80", cfg.Duplicates.Threshold)
+	}
+
+	t.Setenv("CARREL_DUPLICATES_THRESHOLD", "not-a-number")
+	if _, err := Load(); err == nil {
+		t.Error("a threshold that is not a number was accepted")
+	}
+	t.Setenv("CARREL_DUPLICATES_THRESHOLD", "0")
+	if _, err := Load(); err == nil {
+		t.Error("a threshold of zero was accepted: nothing would be a duplicate of nothing")
+	}
+}
+
 func clearEnv(t *testing.T) {
 	t.Helper()
 	for _, k := range []string{"CARREL_PORT", "CARREL_TRUSTED_PROXIES", "CARREL_BASE_PATH", "CARREL_LOG_LEVEL"} {

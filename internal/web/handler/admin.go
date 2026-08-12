@@ -36,14 +36,14 @@ const (
 
 // adminView is what the administration page renders.
 type adminView struct {
-	Settings      store.Settings
-	Invites       []inviteRow
-	Users         []userRow
+	Settings        store.Settings
+	Invites         []inviteRow
+	Users           []userRow
 	NewInviteLink   string
 	InviteEmailSent string
 	SMTPConfigured  bool
-	SMTPDiag      string
-	CreationMode  store.CreationMode
+	SMTPDiag        string
+	CreationMode    store.CreationMode
 	// Escrow is the instance-wide deposit status (§5.4).
 	Escrow escrowStatus
 	// EscrowCoverage is how many accounts the master password reaches.

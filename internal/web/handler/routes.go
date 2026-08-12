@@ -107,6 +107,12 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("POST "+s.Path("/app/unified/sources"), s.FindSources)
 	app.HandleFunc("GET "+s.Path("/app/search"), s.Search)
 	app.HandleFunc("POST "+s.Path("/app/search/sources"), s.FindSources)
+	// The duplicates screen of §15. It follows the same poll as the screens
+	// above, because detection works on records that have been loaded.
+	app.HandleFunc("GET "+s.Path("/app/duplicates"), s.Duplicates)
+	app.HandleFunc("POST "+s.Path("/app/duplicates/sources"), s.FindSources)
+	app.HandleFunc("POST "+s.Path("/app/duplicates/decide"), s.DuplicateDecide)
+	app.HandleFunc("POST "+s.Path("/app/duplicates/merge"), s.DuplicateMerge)
 	app.HandleFunc("GET "+s.Path("/app/find/{task}/results"), s.FindResults)
 	app.HandleFunc("GET "+s.Path("/app/find/{task}/stream"), s.FindStream)
 	app.HandleFunc("POST "+s.Path("/app/find/{task}/retry"), s.FindRetry)

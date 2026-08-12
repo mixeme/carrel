@@ -10,6 +10,7 @@
             {{if .Emails}}<span class="hint">{{.Emails}}</span>{{end}}
         </span>
     </a>
+    {{if .Linked}}<a class="dup-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}
 </li>
 {{end}}
 {{if $d.HasMore}}

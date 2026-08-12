@@ -24,6 +24,7 @@
         <a href="{{.Base}}/app/notes"{{if or (eq .Title "Notes") (eq .Title "New note") (eq .Title "Note") (eq .Title "Note conflict") (eq .Title "Import notes") (eq .Title "Notes import report")}} aria-current="page"{{end}}>Notes</a>
         <a href="{{.Base}}/app/unified"{{if or (eq .Title "Everything") (eq .Title "All contacts")}} aria-current="page"{{end}}>Everything</a>
         <a href="{{.Base}}/app/search"{{if eq .Title "Search"}} aria-current="page"{{end}}>Search</a>
+        <a href="{{.Base}}/app/duplicates"{{if or (eq .Title "Duplicates") (eq .Title "Merge duplicates")}} aria-current="page"{{end}}>Duplicates</a>
         {{if .Admin}}<a href="{{.Base}}/admin/"{{if eq .Title "Administration"}} aria-current="page"{{end}}>Administration</a>{{end}}
         <a class="quick-note" href="{{.Base}}/app/notes/quick" title="Write a note">New note</a>
         <form method="post" action="{{.Base}}/app/" class="inline-form">
@@ -77,10 +78,9 @@
 </aside>
 {{end}}
 
-{{/* The progress panel and merged results of §16. It is defined against the
-     frame rather than in one page because the same markup is both the initial
-     render of a screen and every update pushed or polled afterwards. */}}
-{{define "findresults"}}
+{{/* The progress panel of §16, on its own because every screen that polls
+     several sources shows it, including the duplicates screen of §15. */}}
+{{define "findprogress"}}
 {{$d := .Data}}
 <div class="find-progress">
     <p class="find-summary" role="status">{{$d.Snapshot.Summary}}</p>
@@ -115,6 +115,24 @@
             hx-headers='{"X-CSRF-Token": "{{$.CSRF}}"}'>Stop polling</button>
     {{end}}
 </div>
+{{end}}
+
+{{/* The poller of §16. It is part of every fragment and is replaced by the next
+     one, so a finished poll stops asking without anything switching it off. */}}
+{{define "findpoller"}}
+{{$d := .Data}}
+{{if and $d.Snapshot.Running (not $d.UseSSE)}}
+<div hx-get="{{$d.PollURL}}" hx-trigger="load delay:{{$d.PollMillis}}ms"
+     hx-target="#find-panel" hx-swap="innerHTML"></div>
+{{end}}
+{{end}}
+
+{{/* The merged results of §16. It is defined against the frame rather than in
+     one page because the same markup is both the initial render of a screen and
+     every update pushed or polled afterwards. */}}
+{{define "findresults"}}
+{{$d := .Data}}
+{{template "findprogress" .}}
 {{if $d.Groups}}
 <div class="find-results">
 {{range $d.Groups}}
@@ -122,11 +140,24 @@
         <h2>{{.Label}}</h2>
         <ul class="find-rows">
         {{range .Rows}}
-            <li class="find-row is-{{.Kind}}{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}">
+            <li class="find-row is-{{.Kind}}{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}{{if .Collapsed}} is-merged{{end}}">
                 <span class="find-row-time">{{.TimeLabel}}</span>
                 <span class="find-row-body">
                     {{if .URL}}<a href="{{.URL}}"><strong>{{.Title}}</strong></a>{{else}}<strong>{{.Title}}</strong>{{end}}
+                    {{if .Collapsed}}
+                    {{/* The badge of §15: one row standing for several records
+                         says so, and says where the decision is made. */}}
+                    <a class="dup-badge{{if .DupLinked}} is-linked{{end}}" href="{{.DupURL}}"
+                       title="{{if .DupLinked}}Linked records{{else}}Possible duplicates{{end}}">{{if .DupLinked}}linked{{else}}duplicate?{{end}} ×{{.DupCount}}</a>
+                    {{end}}
                     <span class="hint">{{.Subtitle}}</span>
+                    {{if .Collapsed}}
+                    <span class="dup-sources hint">
+                    {{range .Members}}
+                        <span class="dup-source"><span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>{{if .URL}}<a href="{{.URL}}">{{.Collection}}</a>{{else}}{{.Collection}}{{end}}</span>
+                    {{end}}
+                    </span>
+                    {{end}}
                 </span>
                 <span class="find-row-kind">{{.Kind}}</span>
             </li>
@@ -138,10 +169,104 @@
 {{else if not $d.Snapshot.Running}}
 <p class="hint">Nothing found.</p>
 {{end}}
-{{if and $d.Snapshot.Running (not $d.UseSSE)}}
-{{/* The poller is part of the fragment and is replaced by the next one, so a
-     finished poll stops asking without anything having to switch it off. */}}
-<div hx-get="{{$d.PollURL}}" hx-trigger="load delay:{{$d.PollMillis}}ms"
-     hx-target="#find-panel" hx-swap="innerHTML"></div>
+{{template "findpoller" .}}
 {{end}}
+
+{{/* The duplicate groups of §15. Detection runs on whatever the poll has loaded
+     so far, so this is redrawn by the same updates as any other fan-out. */}}
+{{define "dupgroups"}}
+{{$d := .Data}}{{$dup := $d.Duplicates}}
+{{template "findprogress" .}}
+{{if not $d.Snapshot.Running}}
+<p class="dup-summary hint">{{$dup.Records}} records compared · {{$dup.Candidates}} to look at · {{$dup.Linked}} linked · {{$dup.Ignored}} set aside · matching at {{$dup.Threshold}} points and above.</p>
+{{end}}
+{{if $dup.Empty}}
+    {{if not $d.Snapshot.Running}}<p class="hint">Nothing looks like a duplicate here.</p>{{end}}
+{{else}}
+{{range $section := $dup.Sections}}
+<section class="find-group">
+    <h2>{{$section.Label}}</h2>
+    <ul class="dup-groups">
+    {{range $section.Groups}}
+        <li class="dup-group is-{{.State}}">
+            <div class="dup-head">
+                <strong>{{.Title}}</strong>
+                <span class="dup-badge{{if .Linked}} is-linked{{end}}">{{if .Linked}}linked{{else if .Candidate}}candidate{{else}}set aside{{end}} ×{{len .Members}}</span>
+                {{if .Candidate}}<span class="hint">{{.Score}} points{{if .Signals}} · same {{range $i, $s := .Signals}}{{if $i}}, {{end}}{{$s}}{{end}}{{end}}</span>{{end}}
+                {{if .Missing}}<span class="hint">Some records here are not loaded: tick their collection to see them.</span>{{end}}
+            </div>
+            <ul class="dup-members">
+            {{range .Members}}
+                <li{{if not .Present}} class="is-absent"{{end}}>
+                    <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span>
+                        {{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}{{.Title}}{{end}}
+                        <span class="hint">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}{{if .ReadOnly}} · read-only{{end}}{{if .Subtitle}} · {{.Subtitle}}{{end}}</span>
+                    </span>
+                </li>
+            {{end}}
+            </ul>
+            {{if and .Fields (not (eq .State "ignored"))}}
+            <dl class="dup-fields">
+            {{range .Fields}}
+                <dt>{{.Label}}</dt>
+                <dd>{{range $i, $v := .Values}}{{if $i}}<br>{{end}}{{$v}}{{end}}</dd>
+            {{end}}
+            </dl>
+            {{end}}
+            <form method="post" action="{{$dup.DecideURL}}" class="dup-actions no-print">
+                <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                <input type="hidden" name="back" value="{{$dup.Back}}">
+                <input type="hidden" name="kind" value="{{.Kind}}">
+                {{if .ID}}<input type="hidden" name="group" value="{{.ID}}">{{end}}
+                {{range .Members}}<input type="hidden" name="member" value="{{.Token}}">{{end}}
+                {{if and .Conflicts (not (eq .State "ignored"))}}
+                {{range $field := .Conflicts}}
+                <fieldset class="dup-conflict">
+                    <legend>{{$field.Label}}{{if $field.Remembered}} <span class="hint">remembered</span>{{end}}</legend>
+                    {{range $field.Options}}
+                    <label class="checkbox"><input type="radio" name="field:{{$field.Name}}" value="{{.}}"{{if eq . $field.Chosen}} checked{{end}}> {{.}}</label>
+                    {{end}}
+                </fieldset>
+                {{end}}
+                {{end}}
+                <p class="dup-buttons">
+                {{if .Candidate}}
+                    <button type="submit" name="action" value="link">Link them</button>
+                    <button type="submit" name="action" value="ignore" class="link">Not duplicates</button>
+                {{else if .Linked}}
+                    <button type="submit" name="action" value="link">Save choices</button>
+                    <button type="submit" name="action" value="forget" class="link">Unlink</button>
+                {{else}}
+                    <button type="submit" name="action" value="forget" class="link">Offer again</button>
+                {{end}}
+                </p>
+            </form>
+            {{if and (eq .Kind "contact") (not (eq .State "ignored"))}}
+            <form method="post" action="{{$dup.MergeURL}}" class="dup-merge no-print">
+                <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                <input type="hidden" name="back" value="{{$dup.Back}}">
+                <input type="hidden" name="kind" value="{{.Kind}}">
+                {{if .ID}}<input type="hidden" name="group" value="{{.ID}}">{{end}}
+                {{range .Members}}<input type="hidden" name="member" value="{{.Token}}">{{end}}
+                {{if .Mergeable}}
+                <label>Merge into
+                    <select name="target">
+                    {{range .Members}}{{if and .Present (not .ReadOnly)}}<option value="{{.Token}}">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}</option>{{end}}{{end}}
+                    </select>
+                </label>
+                <button type="submit" name="action" value="plan" class="link">Merge on the server…</button>
+                <span class="hint">This one rewrites a card and deletes the others.</span>
+                {{else}}
+                <span class="hint">Merging on the server is not possible here: none of these collections can be written to.</span>
+                {{end}}
+            </form>
+            {{end}}
+        </li>
+    {{end}}
+    </ul>
+</section>
+{{end}}
+{{end}}
+{{template "findpoller" .}}
 {{end}}

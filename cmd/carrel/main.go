@@ -132,6 +132,7 @@ func run() int {
 		Import:        handler.ImportConfig(cfg.Import),
 		Fanout:        fanouts,
 		Progress:      cfg.Progress,
+		Detection:     cfg.Duplicates,
 		Logger:        logger,
 	}
 

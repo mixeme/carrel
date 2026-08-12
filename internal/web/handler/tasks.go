@@ -334,7 +334,7 @@ func (s *Server) TaskCard(w http.ResponseWriter, r *http.Request) {
 		Sources: s.taskSources(sess), AccountID: accountID, ColEnc: colEnc,
 		Collection: col, AccountLabel: accountLabel(*acc), UID: task.UID,
 		ETag: obj.ETag, Task: task, Form: formFromTask(task, s.timezone()),
-		Related: s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), task.Related),
+		Related:  s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), task.Related),
 		ReadOnly: col.ReadOnly,
 	}
 	s.Render(w, "task.html", v)

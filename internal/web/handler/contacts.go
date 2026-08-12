@@ -43,6 +43,12 @@ type contactRow struct {
 	Emails      string
 	HasPhoto    bool
 	PhotoURL    string
+	// Linked is how many records the card is linked with, zero when it is in no
+	// group. §15 asks the badge to be visible where the record is, not only on
+	// the duplicates screen.
+	Linked int
+	// DupURL is where the badge leads.
+	DupURL string
 }
 
 // ContactsHome redirects to the first address book or shows an empty state.
@@ -166,6 +172,9 @@ func (s *Server) buildContactsList(ctx context.Context, sess *session.Session, a
 		return view, err
 	}
 
+	// The stored decisions are read once for the page rather than per card: they
+	// all live in one sealed blob, so a badge per row costs nothing extra (§15).
+	marks := s.duplicateMarks(sess)
 	rows := make([]contactRow, 0, len(result.Objects))
 	for _, obj := range result.Objects {
 		c, err := obj.Contact()
@@ -183,6 +192,8 @@ func (s *Server) buildContactsList(ctx context.Context, sess *session.Session, a
 			Emails:      joinLabeled(c.Emails),
 			HasPhoto:    c.Photo.Present,
 			PhotoURL:    s.Path("/c/" + accountID + "/" + colEnc + "/" + urlPathEscape(uid) + "/photo?size=thumb"),
+			Linked:      marks.linkedSize(accountID, collection, uid),
+			DupURL:      s.Path("/app/duplicates"),
 		}
 		rows = append(rows, row)
 	}

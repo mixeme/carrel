@@ -33,8 +33,8 @@ type Server struct {
 	// It never ends in a slash.
 	BasePath string
 	// Version and Commit are injected at link time and shown on /about (§22).
-	Version string
-	Commit  string
+	Version   string
+	Commit    string
 	Trust     *ProxyTrust
 	Sessions  *session.Manager
 	Store     *store.Store
@@ -55,11 +55,16 @@ type Server struct {
 	Fanout *fanout.Registry
 	// Progress selects how a running poll reaches the browser (§16).
 	Progress ProgressMode
-	Logger   *slog.Logger
+	// Detection holds the duplicate threshold of §15.
+	Detection DuplicatesConfig
+	Logger    *slog.Logger
 }
 
 // ProgressMode is how fan-out progress is delivered (§16).
 type ProgressMode = config.Progress
+
+// DuplicatesConfig is the duplicate detection setting of §15.
+type DuplicatesConfig = config.Duplicates
 
 // Path turns an app-relative path into an absolute one under BasePath.
 func (s *Server) Path(p string) string {

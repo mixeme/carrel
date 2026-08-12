@@ -14,6 +14,10 @@ const (
 	ViewTasks    = "tasks"
 	ViewNotes    = "notes"
 	ViewSearch   = "search"
+	// ViewDuplicates is the screen of §15. It keeps its own selection because
+	// looking for duplicates spans both kinds of collection and is not the
+	// same question as the one a search screen was last asked.
+	ViewDuplicates = "duplicates"
 )
 
 // SourceRef points at one collection of one account. It is a reference and not

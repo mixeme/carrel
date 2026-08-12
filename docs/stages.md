@@ -10,8 +10,8 @@
 | 2 | Транспорт и discovery | [stage-2-plan.md](stage-2-plan.md) | **готово** (шлюз к этапу 3 пройден) | 0.2.0 |
 | 3 | Контакты + import/export + печать | [stage-3-plan.md](stage-3-plan.md) | **готово** (фазы 0–12) | 0.3.0 |
 | 4 | Календарь + import/export + печать | [stage-4-plan.md](stage-4-plan.md) | **готово** (фазы 0–11) | 0.4.0 |
-| 5 | Задачи, **заметки**, единый вид, поиск | [stage-5-plan.md](stage-5-plan.md) | — | 0.5.0 |
-| 6 | Дубликаты | [stage-6-plan.md](stage-6-plan.md) | — | 0.6.0 |
+| 5 | Задачи, **заметки**, единый вид, поиск | [stage-5-plan.md](stage-5-plan.md) | **готово** (блоки A–G) | 0.5.0 |
+| 6 | Дубликаты | [stage-6-plan.md](stage-6-plan.md) | **готово** (блоки 0–10, включая объединение на сервере) | 0.6.0 |
 | 7 | **WebDAV-файлы** + вложения | [stage-7-plan.md](stage-7-plan.md) | — | 0.7.0 |
 
 Открытые пункты приёмки этапа 1 (промежуточный трекер): [stage-1-outstanding.md](stage-1-outstanding.md).  

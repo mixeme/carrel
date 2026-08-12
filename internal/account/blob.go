@@ -24,19 +24,24 @@ type Blob struct {
 	// §23.9. They name collections, so they are sealed with the credentials
 	// rather than kept in the clear settings.
 	Views Views `json:"views,omitempty"`
+	// Duplicates are the decisions of §15 — the only record of what is in a
+	// person's collections that Carrel keeps on disk, and sealed here for the
+	// same reason as the views: an account paired with a collection and a UID
+	// is not something a stolen volume should give away.
+	Duplicates Duplicates `json:"duplicates,omitempty"`
 }
 
 // Account is one connected DAV server (§6).
 type Account struct {
-	ID          string                 `json:"id"`
-	Label       string                 `json:"label,omitempty"`
-	BaseURL     string                 `json:"base_url"`
-	Username    string                 `json:"username"`
-	Password    string                 `json:"password"`
-	Principal   string                 `json:"principal"`
-	Enabled     bool                   `json:"enabled"`
-	Collections []discovery.Collection `json:"collections"`
-	DiscoveredAt time.Time             `json:"discovered_at"`
+	ID           string                 `json:"id"`
+	Label        string                 `json:"label,omitempty"`
+	BaseURL      string                 `json:"base_url"`
+	Username     string                 `json:"username"`
+	Password     string                 `json:"password"`
+	Principal    string                 `json:"principal"`
+	Enabled      bool                   `json:"enabled"`
+	Collections  []discovery.Collection `json:"collections"`
+	DiscoveredAt time.Time              `json:"discovered_at"`
 }
 
 // Open decrypts and unmarshals a secrets blob.

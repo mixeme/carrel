@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	DefaultPort    = 8080
-	DefaultDataDir = "/var/lib/carrel"
+	DefaultPort     = 8080
+	DefaultDataDir  = "/var/lib/carrel"
 	DefaultLogLevel = "info"
 
 	DefaultDAVConnectTimeout  = 10 * time.Second
@@ -25,24 +25,31 @@ const (
 	DefaultDAVMaxResponseSize = 10 << 20 // 10 MiB
 	DefaultDAVMaxRedirects    = 5
 
-	DefaultCacheCollectionTTL  = 60 * time.Second
-	DefaultCacheMaxCollections = 256
-	DefaultCacheMaxETagEntries = 4096
-	DefaultCacheMaxThumbBytes  = 16 << 20 // 16 MiB
+	DefaultCacheCollectionTTL   = 60 * time.Second
+	DefaultCacheMaxCollections  = 256
+	DefaultCacheMaxETagEntries  = 4096
+	DefaultCacheMaxThumbBytes   = 16 << 20 // 16 MiB
 	DefaultCacheMaxThumbEntries = 512
 
 	// Photo defaults from §11 — starting values, not acceptance criteria.
-	DefaultPhotoMaxSide      = 512
-	DefaultPhotoJPEGQuality  = 85
-	DefaultPhotoMaxPixels    = 100_000_000
-	DefaultPhotoThumbSide    = 96
-	DefaultImportMaxBytes    = 16 << 20 // 16 MiB upload ceiling for .vcf / .zip
-	DefaultImportMaxCards    = 5000
+	DefaultPhotoMaxSide     = 512
+	DefaultPhotoJPEGQuality = 85
+	DefaultPhotoMaxPixels   = 100_000_000
+	DefaultPhotoThumbSide   = 96
+	DefaultImportMaxBytes   = 16 << 20 // 16 MiB upload ceiling for .vcf / .zip
+	DefaultImportMaxCards   = 5000
 
 	// Fan-out progress defaults from §16.
 	DefaultProgressPollMillis    = 700
 	DefaultProgressSourceTimeout = 10 * time.Second
 	DefaultProgressTotalTimeout  = 30 * time.Second
+
+	// DefaultDuplicateThreshold is the score a pair of records has to reach to
+	// be offered as a duplicate group. §15 asks for a conservative default:
+	// one strong signal — a shared address, telephone number or UID — is
+	// enough, and the weak ones together are not. Lowering it offers more and
+	// asks more of the person; raising it asks less and finds less.
+	DefaultDuplicateThreshold = 60
 )
 
 // LogLevel values accepted by CARREL_LOG_LEVEL and config file.
@@ -116,6 +123,14 @@ type Progress struct {
 // SSE reports whether a stream should be offered.
 func (p Progress) SSE() bool { return p.Mode != ProgressPoll }
 
+// Duplicates holds the detection settings of §15. The threshold is a setting
+// rather than a constant because what counts as the same person differs between
+// one person's address books and another's: a shared family telephone number is
+// a duplicate in one and two people in the other.
+type Duplicates struct {
+	Threshold int `json:"threshold"`
+}
+
 // Duration is a time.Duration marshaled as a JSON number of seconds.
 type Duration time.Duration
 
@@ -137,30 +152,32 @@ func (d *Duration) UnmarshalJSON(b []byte) error {
 
 // Config holds server runtime settings.
 type Config struct {
-	Port           int      `json:"port"`
-	DataDir        string   `json:"data_dir"`
-	TrustedProxies []string `json:"trusted_proxies"`
-	BasePath       string   `json:"base_path"`
-	LogLevel       string   `json:"log_level"`
-	DAV            DAV      `json:"dav"`
-	Cache          Cache    `json:"cache"`
-	Photo          Photo    `json:"photo"`
-	Import         Import   `json:"import"`
-	Progress       Progress `json:"progress"`
+	Port           int        `json:"port"`
+	DataDir        string     `json:"data_dir"`
+	TrustedProxies []string   `json:"trusted_proxies"`
+	BasePath       string     `json:"base_path"`
+	LogLevel       string     `json:"log_level"`
+	DAV            DAV        `json:"dav"`
+	Cache          Cache      `json:"cache"`
+	Photo          Photo      `json:"photo"`
+	Import         Import     `json:"import"`
+	Progress       Progress   `json:"progress"`
+	Duplicates     Duplicates `json:"duplicates"`
 }
 
 // fileConfig mirrors Config for JSON unmarshaling with optional fields.
 type fileConfig struct {
-	Port           *int     `json:"port,omitempty"`
-	DataDir        *string  `json:"data_dir,omitempty"`
-	TrustedProxies []string `json:"trusted_proxies,omitempty"`
-	BasePath       *string  `json:"base_path,omitempty"`
-	LogLevel       *string  `json:"log_level,omitempty"`
-	DAV            *DAV     `json:"dav,omitempty"`
-	Cache          *Cache   `json:"cache,omitempty"`
-	Photo          *Photo    `json:"photo,omitempty"`
-	Import         *Import   `json:"import,omitempty"`
-	Progress       *Progress `json:"progress,omitempty"`
+	Port           *int        `json:"port,omitempty"`
+	DataDir        *string     `json:"data_dir,omitempty"`
+	TrustedProxies []string    `json:"trusted_proxies,omitempty"`
+	BasePath       *string     `json:"base_path,omitempty"`
+	LogLevel       *string     `json:"log_level,omitempty"`
+	DAV            *DAV        `json:"dav,omitempty"`
+	Cache          *Cache      `json:"cache,omitempty"`
+	Photo          *Photo      `json:"photo,omitempty"`
+	Import         *Import     `json:"import,omitempty"`
+	Progress       *Progress   `json:"progress,omitempty"`
+	Duplicates     *Duplicates `json:"duplicates,omitempty"`
 }
 
 // Load reads configuration from an optional file in dataDir, then applies
@@ -229,6 +246,7 @@ func defaults() *Config {
 			SourceTimeout: Duration(DefaultProgressSourceTimeout),
 			TotalTimeout:  Duration(DefaultProgressTotalTimeout),
 		},
+		Duplicates: Duplicates{Threshold: DefaultDuplicateThreshold},
 	}
 }
 
@@ -266,6 +284,9 @@ func applyFile(cfg *Config, raw []byte) error {
 	}
 	if fc.Progress != nil {
 		cfg.Progress = *fc.Progress
+	}
+	if fc.Duplicates != nil {
+		cfg.Duplicates = *fc.Duplicates
 	}
 	return nil
 }
@@ -429,6 +450,13 @@ func applyEnv(cfg *Config) error {
 		}
 		cfg.Progress.TotalTimeout = Duration(d)
 	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_DUPLICATES_THRESHOLD")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_DUPLICATES_THRESHOLD: invalid integer %q", v)
+		}
+		cfg.Duplicates.Threshold = n
+	}
 	return nil
 }
 
@@ -491,6 +519,16 @@ func (c *Config) Validate() error {
 	}
 	if err := c.Progress.validate(); err != nil {
 		return err
+	}
+	if err := c.Duplicates.validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d Duplicates) validate() error {
+	if d.Threshold <= 0 {
+		return errors.New("duplicate threshold must be positive")
 	}
 	return nil
 }

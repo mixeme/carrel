@@ -121,6 +121,7 @@ func fanoutSources(rows []sourceRow) []fanout.Source {
 			Collection:      normalizeCollectionPath(row.Path),
 			CollectionLabel: row.Label(),
 			Color:           row.Color,
+			ReadOnly:        row.ReadOnly,
 		})
 	}
 	return out

@@ -62,11 +62,11 @@ type PutOptions struct {
 
 // Client is a DAV endpoint with Basic Auth and SSRF protection.
 type Client struct {
-	base   *url.URL
-	http   *http.Client
-	guard  *Guard
-	user   string
-	pass   string
+	base    *url.URL
+	http    *http.Client
+	guard   *Guard
+	user    string
+	pass    string
 	maxBody int64
 }
 

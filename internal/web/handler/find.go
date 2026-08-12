@@ -17,6 +17,7 @@ import (
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
 	"gitea.mixdep.ru/mix/carrel/internal/dav/discovery"
 	"gitea.mixdep.ru/mix/carrel/internal/fanout"
+	"gitea.mixdep.ru/mix/carrel/internal/merge"
 	"gitea.mixdep.ru/mix/carrel/internal/model"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 )
@@ -34,11 +35,14 @@ const (
 	modeSearch findMode = "search"
 	// modeTimeline is one contact's history across every calendar (§23.9).
 	modeTimeline findMode = "timeline"
+	// modeDuplicates loads whole records rather than rows, because the scoring
+	// of §15 needs the cards and the events themselves.
+	modeDuplicates findMode = "duplicates"
 )
 
 func (m findMode) valid() bool {
 	switch m {
-	case modeTime, modePeople, modeSearch, modeTimeline:
+	case modeTime, modePeople, modeSearch, modeTimeline, modeDuplicates:
 		return true
 	}
 	return false
@@ -52,6 +56,8 @@ func (m findMode) view() string {
 		return account.ViewContacts
 	case modeSearch, modeTimeline:
 		return account.ViewSearch
+	case modeDuplicates:
+		return account.ViewDuplicates
 	default:
 		return account.ViewAgenda
 	}
@@ -155,7 +161,34 @@ type resultRow struct {
 	Tags       []string
 	Done       bool
 	Overdue    bool
+
+	// The duplicate marks of §15. A row carries what it takes to score it, so
+	// the merged list can collapse a group without loading anything again.
+	Print merge.Fingerprint
+	// DupGroup is the linked group the record belongs to, empty when it is in
+	// none.
+	DupGroup string
+	// DupIgnored are the groups the record was decided against, so a pair the
+	// person has rejected is not offered again (§21).
+	DupIgnored []string
+	// DupCount is how many records the row stands for: one, or the size of the
+	// group it collapses.
+	DupCount int
+	// DupLinked reports that the group was linked by the person rather than
+	// merely detected.
+	DupLinked bool
+	// DupURL is where the badge leads.
+	DupURL string
+	// Members are the rows a collapsed row expands into, in source order.
+	Members []resultRow
+	// Emails and Phones are the merged repeatable fields of a collapsed row:
+	// §15 unions them rather than letting one record's win.
+	Emails []string
+	Phones []string
 }
+
+// Collapsed reports whether the row stands for more than one record.
+func (r resultRow) Collapsed() bool { return r.DupCount > 1 }
 
 type resultGroup struct {
 	Label string
@@ -163,14 +196,17 @@ type resultGroup struct {
 }
 
 type findView struct {
-	Request    findRequest
-	Mode       findMode
-	Title      string
-	Subject    string
-	TaskID     string
-	Sources    []sourceRow
-	Snapshot   fanout.Snapshot
-	Groups     []resultGroup
+	Request  findRequest
+	Mode     findMode
+	Title    string
+	Subject  string
+	TaskID   string
+	Sources  []sourceRow
+	Snapshot fanout.Snapshot
+	Groups   []resultGroup
+	// Duplicates is filled for modeDuplicates only: the groups of §15 built
+	// from the records this poll has loaded so far.
+	Duplicates duplicatesData
 	UseSSE     bool
 	PollMillis int
 	StreamURL  string
@@ -295,9 +331,19 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 	}
 	view.TaskID = task.ID
 	s.fillFindURLs(&view, req, task.ID)
-	view.Snapshot = task.Snapshot()
-	view.Groups = groupRows(req, view.Snapshot, s.timezone())
+	s.fillResults(r, &view, req, task)
 	s.renderFind(w, r, template, view)
+}
+
+// fillResults reads the poll and turns it into what the screen prints. It is the
+// one place that does so, so an update pushed over the stream and the first
+// render of the page cannot disagree about the same snapshot.
+func (s *Server) fillResults(r *http.Request, view *findView, req findRequest, task *fanout.Task) {
+	view.Snapshot = task.Snapshot()
+	view.Groups = groupRows(req, view.Snapshot, s.timezone(), s.dupDisplay())
+	if req.Mode == modeDuplicates {
+		view.Duplicates = s.duplicateData(SessionFrom(r), view.Snapshot)
+	}
 }
 
 func (s *Server) renderFind(w http.ResponseWriter, r *http.Request, template string, view findView) {
@@ -325,7 +371,17 @@ func (s *Server) FindResults(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	s.RenderFragment(w, "find_results.html", s.fragmentView(r, view))
+	s.RenderFragment(w, fragmentTemplate(view.Mode), s.fragmentView(r, view))
+}
+
+// fragmentTemplate is the partial a mode's updates arrive in. The duplicates
+// screen prints groups rather than a merged list, so it follows its own poll with
+// its own fragment (§15, §16).
+func fragmentTemplate(mode findMode) string {
+	if mode == modeDuplicates {
+		return "duplicate_results.html"
+	}
+	return "find_results.html"
 }
 
 // fragmentView wraps a fan-out view in the frame data a template expects.
@@ -352,7 +408,7 @@ func (s *Server) FindRetry(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	s.RenderFragment(w, "find_results.html", s.fragmentView(r, view))
+	s.RenderFragment(w, fragmentTemplate(view.Mode), s.fragmentView(r, view))
 }
 
 // FindCancel stops a poll. §16 requires the partial results to stay on screen,
@@ -368,7 +424,7 @@ func (s *Server) FindCancel(w http.ResponseWriter, r *http.Request) {
 	}
 	task.Cancel()
 	view := s.viewFromTask(r, parseFindRequest(r), task)
-	s.RenderFragment(w, "find_results.html", s.fragmentView(r, view))
+	s.RenderFragment(w, fragmentTemplate(view.Mode), s.fragmentView(r, view))
 }
 
 // findFragment resolves the task named in the path and builds the fragment view.
@@ -391,8 +447,7 @@ func (s *Server) viewFromTask(r *http.Request, req findRequest, task *fanout.Tas
 		SourcesURL: s.sourcesURL(req.Mode),
 	}
 	s.fillFindURLs(&view, req, task.ID)
-	view.Snapshot = task.Snapshot()
-	view.Groups = groupRows(req, view.Snapshot, s.timezone())
+	s.fillResults(r, &view, req, task)
 	return view
 }
 
@@ -447,7 +502,7 @@ func (s *Server) FindStream(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		view := s.viewFromTask(r, req, task)
-		if err := s.writeSSE(w, "results", s.fragmentView(r, view)); err != nil {
+		if err := s.writeSSE(w, fragmentTemplate(view.Mode), "results", s.fragmentView(r, view)); err != nil {
 			return
 		}
 		if !view.Snapshot.Running {
@@ -479,8 +534,8 @@ func (s *Server) FindStream(w http.ResponseWriter, r *http.Request) {
 // writeSSE sends one rendered fragment as a single event. Every line of the
 // fragment becomes its own data line, which is what the protocol requires and
 // what keeps a multi-line HTML body from ending the event early.
-func (s *Server) writeSSE(w http.ResponseWriter, event string, v View) error {
-	html, err := s.Fragment("find_results.html", v)
+func (s *Server) writeSSE(w http.ResponseWriter, template, event string, v View) error {
+	html, err := s.Fragment(template, v)
 	if err != nil {
 		return err
 	}
@@ -534,10 +589,14 @@ func (s *Server) FindSources(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) sourcesURL(mode findMode) string {
-	if mode == modePeople || mode == modeTime {
+	switch mode {
+	case modePeople, modeTime:
 		return s.Path("/app/unified/sources")
+	case modeDuplicates:
+		return s.Path("/app/duplicates/sources")
+	default:
+		return s.Path("/app/search/sources")
 	}
-	return s.Path("/app/search/sources")
 }
 
 func (s *Server) screenURL(req findRequest) string {
@@ -545,6 +604,8 @@ func (s *Server) screenURL(req findRequest) string {
 	switch req.Mode {
 	case modeSearch:
 		return s.Path("/app/search") + "?" + values.Encode()
+	case modeDuplicates:
+		return s.Path("/app/duplicates")
 	case modeTimeline:
 		return s.Path("/app/contacts/" + req.Account + "/" + EncodeCollectionPath(req.Collection) + "/" + urlPathEscape(req.UID) + "/timeline")
 	default:
@@ -560,7 +621,7 @@ func (s *Server) findSources(sess *session.Session, req findRequest) ([]sourceRo
 		return s.collectionsOfKind(sess, discovery.KindAddressBook, req.Mode.view(), "")
 	case modeTimeline:
 		return s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
-	case modeSearch:
+	case modeSearch, modeDuplicates:
 		calendars, err := s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
 		if err != nil {
 			return nil, err
@@ -623,6 +684,8 @@ func findTitle(req findRequest) string {
 		return "Search"
 	case modeTimeline:
 		return "Timeline"
+	case modeDuplicates:
+		return "Duplicates"
 	default:
 		return "Everything"
 	}
@@ -630,7 +693,7 @@ func findTitle(req findRequest) string {
 
 // groupRows turns a snapshot into the printed groups. Ordering is by mode: an
 // agenda reads forwards in time, a timeline backwards, and a search by kind.
-func groupRows(req findRequest, snap fanout.Snapshot, loc *time.Location) []resultGroup {
+func groupRows(req findRequest, snap fanout.Snapshot, loc *time.Location, dup dupDisplay) []resultGroup {
 	rows := make([]resultRow, 0, len(snap.Items))
 	for _, item := range snap.Items {
 		if row, ok := item.Data.(resultRow); ok {
@@ -647,6 +710,12 @@ func groupRows(req findRequest, snap fanout.Snapshot, loc *time.Location) []resu
 		}
 		return rows[i].Sort < rows[j].Sort
 	})
+	// The merged directory is where §15 asks for the group to be one row with a
+	// badge. It happens after sorting, so a collapsed row keeps the place its
+	// first record had rather than jumping to the end.
+	if req.Mode == modePeople {
+		rows = collapseDuplicates(rows, dup)
+	}
 	var groups []resultGroup
 	index := make(map[string]int)
 	for _, row := range rows {
@@ -724,8 +793,17 @@ func (s *Server) findQuery(sess *session.Session, req findRequest) (fanout.Query
 			return s.pollCalendarRange(ctx, sess, src, req, from, to, loc)
 		}, nil
 	case modePeople:
+		// The marks are read once, before the poll starts: a linked group is a
+		// stored decision, so every row can be stamped with it as it is built
+		// instead of the merged list going back to the store per source (§15).
+		marks := s.duplicateMarks(sess)
 		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
-			return s.pollContacts(ctx, sess, src)
+			return s.pollContacts(ctx, sess, src, marks)
+		}, nil
+	case modeDuplicates:
+		from, to := duplicateEventRange(loc)
+		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
+			return s.pollRecords(ctx, sess, src, from, to, loc)
 		}, nil
 	case modeSearch:
 		if req.Query == "" {
@@ -834,7 +912,7 @@ func (s *Server) pollCalendarRange(ctx context.Context, sess *session.Session, s
 	return items, cached && len(items) > 0, nil
 }
 
-func (s *Server) pollContacts(ctx context.Context, sess *session.Session, src fanout.Source) ([]fanout.Item, bool, error) {
+func (s *Server) pollContacts(ctx context.Context, sess *session.Session, src fanout.Source, marks duplicateMarks) ([]fanout.Item, bool, error) {
 	p, _, err := s.contactsProvider(sess, src.AccountID)
 	if err != nil {
 		return nil, false, err
@@ -853,7 +931,7 @@ func (s *Server) pollContacts(ctx context.Context, sess *session.Session, src fa
 		if contactErr != nil {
 			continue
 		}
-		items = append(items, contactItem(src, contact, s.Path("/app/contacts/"+src.AccountID+"/"+EncodeCollectionPath(src.Collection)+"/"+urlPathEscape(contact.UID))))
+		items = append(items, contactItem(src, contact, s.contactURL(src, contact.UID), marks.of(src, contact)))
 	}
 	// A multiget answers from the cache card by card, so there is no honest
 	// "all of it came from cache" to report here; the panel says nothing rather
@@ -931,7 +1009,7 @@ func (s *Server) searchContacts(ctx context.Context, sess *session.Session, src 
 			if contactErr != nil {
 				continue
 			}
-			items = append(items, contactItem(src, contact, s.Path("/app/contacts/"+src.AccountID+"/"+EncodeCollectionPath(src.Collection)+"/"+urlPathEscape(contact.UID))))
+			items = append(items, contactItem(src, contact, s.contactURL(src, contact.UID), contactMarks{}))
 		}
 	}
 	if firstErr != nil && len(items) == 0 {
@@ -967,6 +1045,10 @@ func (s *Server) icalItem(src fanout.Source, obj *model.Object, loc *time.Locati
 		return item, true
 	}
 	return fanout.Item{}, false
+}
+
+func (s *Server) contactURL(src fanout.Source, uid string) string {
+	return s.Path("/app/contacts/" + src.AccountID + "/" + EncodeCollectionPath(src.Collection) + "/" + urlPathEscape(uid))
 }
 
 func (s *Server) icalURL(section string, src fanout.Source, uid string) string {

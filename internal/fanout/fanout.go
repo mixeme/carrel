@@ -70,6 +70,9 @@ type Source struct {
 	Collection      string
 	CollectionLabel string
 	Color           string
+	// ReadOnly marks a collection that cannot be written to, which is what
+	// makes it unusable as the target of a merge (§15).
+	ReadOnly bool
 }
 
 // Item is one record a source produced. The package does not look inside Data;

@@ -18,8 +18,8 @@ import (
 // Config is the relay settings needed to send one message.
 type Config struct {
 	Host, Username, Password, FromAddress, FromName string
-	Port                                          int
-	TLS                                           store.TLSMode
+	Port                                            int
+	TLS                                             store.TLSMode
 }
 
 // Message is one outbound email.
