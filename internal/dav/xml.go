@@ -14,34 +14,22 @@ import (
 	"strings"
 )
 
-// RawXMLValue holds one XML element with lazy decoding.
+// RawXMLValue holds one XML element with lazy decoding. Content is the inner
+// XML of the element, without the element itself.
 type RawXMLValue struct {
 	Name    xml.Name
+	Attrs   []xml.Attr
 	Content []byte
 }
 
-// NewRawXMLElement builds a placeholder element for propfind requests.
+// NewRawXMLElement builds a placeholder element for propfind and report bodies.
 func NewRawXMLElement(name xml.Name, attrs []xml.Attr, content []byte) *RawXMLValue {
-	var buf bytes.Buffer
-	enc := xml.NewEncoder(&buf)
-	start := xml.StartElement{Name: name, Attr: attrs}
-	if err := enc.EncodeToken(start); err != nil {
-		panic(err)
-	}
-	if len(content) > 0 {
-		if err := enc.EncodeToken(xml.CharData(content)); err != nil {
-			panic(err)
-		}
-	}
-	if err := enc.EncodeToken(start.End()); err != nil {
-		panic(err)
-	}
-	_ = enc.Flush()
-	return &RawXMLValue{Name: name, Content: buf.Bytes()}
+	return &RawXMLValue{Name: name, Attrs: attrs, Content: content}
 }
 
 func (r *RawXMLValue) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	r.Name = start.Name
+	r.Attrs = append([]xml.Attr(nil), start.Attr...)
 	var inner struct {
 		Content []byte `xml:",innerxml"`
 	}
@@ -50,6 +38,20 @@ func (r *RawXMLValue) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 	}
 	r.Content = inner.Content
 	return nil
+}
+
+// MarshalXML writes the element under its own name, ignoring the name the
+// encoder derived from the surrounding struct field. Without this a requested
+// property is serialised as the Go field name and the server is asked for
+// nothing it recognises.
+func (r RawXMLValue) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
+	if r.Name.Local == "" {
+		return fmt.Errorf("dav: raw XML value has no element name")
+	}
+	inner := struct {
+		Content []byte `xml:",innerxml"`
+	}{Content: r.Content}
+	return e.EncodeElement(inner, xml.StartElement{Name: r.Name, Attr: r.Attrs})
 }
 
 func (r RawXMLValue) elementName() (xml.Name, bool) {
@@ -176,6 +178,24 @@ type CurrentUserPrivilegeSet struct {
 type GetCTag struct {
 	XMLName xml.Name `xml:"http://calendarserver.org/ns/ getctag"`
 	Tag     string   `xml:",chardata"`
+}
+
+// GetETag is the DAV entity tag of a resource.
+type GetETag struct {
+	XMLName xml.Name `xml:"DAV: getetag"`
+	ETag    string   `xml:",chardata"`
+}
+
+// GetContentType is the media type of a resource.
+type GetContentType struct {
+	XMLName xml.Name `xml:"DAV: getcontenttype"`
+	Type    string   `xml:",chardata"`
+}
+
+// AddressData carries a vCard body inside a CardDAV report (RFC 6352 §10.4).
+type AddressData struct {
+	XMLName xml.Name `xml:"urn:ietf:params:xml:ns:carddav address-data"`
+	Data    string   `xml:",chardata"`
 }
 
 // IsNotFound reports whether err is a missing-property response.

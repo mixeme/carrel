@@ -33,6 +33,33 @@ type Transport interface {
 	Move(ctx context.Context, src, dst string, overwrite bool) error
 }
 
+// Reporter issues REPORT requests. It is kept out of Transport because §7 fixes
+// that interface at the plain DAV methods; only the CardDAV and CalDAV
+// providers need REPORT.
+type Reporter interface {
+	Report(ctx context.Context, path string, depth Depth, body any) (*MultiStatus, error)
+}
+
+// ConditionalPutter uploads a resource with a media type and a precondition.
+// Transport carries neither, and CardDAV servers want both: a media type so the
+// object is stored as a vCard, and a precondition so a write cannot silently
+// overwrite someone else's change (§9).
+type ConditionalPutter interface {
+	PutOpts(ctx context.Context, path string, body io.Reader, opts PutOptions) (string, error)
+}
+
+// PutOptions are the media type and precondition of one write.
+type PutOptions struct {
+	ContentType string
+	// IfMatch names the version being replaced. An update without it is an
+	// unconditional overwrite and is refused (§9).
+	IfMatch string
+	// IfNoneMatch asks the server to store the object only if nothing is
+	// there yet, which is how a new object is created without clobbering an
+	// existing one that happens to share its UID.
+	IfNoneMatch bool
+}
+
 // Client is a DAV endpoint with Basic Auth and SSRF protection.
 type Client struct {
 	base   *url.URL
@@ -186,6 +213,11 @@ func (c *Client) Get(ctx context.Context, href string, rng *Range) (io.ReadClose
 
 // Put uploads a resource and returns the new ETag when present.
 func (c *Client) Put(ctx context.Context, href string, body io.Reader, ifMatch string) (string, error) {
+	return c.PutOpts(ctx, href, body, PutOptions{IfMatch: ifMatch})
+}
+
+// PutOpts uploads a resource with a media type and a precondition.
+func (c *Client) PutOpts(ctx context.Context, href string, body io.Reader, opts PutOptions) (string, error) {
 	target, err := c.resolve(href)
 	if err != nil {
 		return "", err
@@ -194,8 +226,14 @@ func (c *Client) Put(ctx context.Context, href string, body io.Reader, ifMatch s
 	if err != nil {
 		return "", err
 	}
-	if ifMatch != "" {
-		req.Header.Set("If-Match", ifMatch)
+	if opts.ContentType != "" {
+		req.Header.Set("Content-Type", opts.ContentType)
+	}
+	if opts.IfMatch != "" {
+		req.Header.Set("If-Match", opts.IfMatch)
+	}
+	if opts.IfNoneMatch {
+		req.Header.Set("If-None-Match", "*")
 	}
 	resp, err := c.do(req)
 	if err != nil {
@@ -204,6 +242,39 @@ func (c *Client) Put(ctx context.Context, href string, body io.Reader, ifMatch s
 	defer resp.Body.Close()
 	_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 1024))
 	return resp.Header.Get("ETag"), nil
+}
+
+// Report issues a REPORT and parses the Multi-Status body (RFC 3253 §3.6).
+func (c *Client) Report(ctx context.Context, href string, depth Depth, body any) (*MultiStatus, error) {
+	target, err := c.resolve(href)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	buf.WriteString(xml.Header)
+	if err := xml.NewEncoder(&buf).Encode(body); err != nil {
+		return nil, err
+	}
+	req, err := c.newRequest(ctx, "REPORT", target, &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", `text/xml; charset="utf-8"`)
+	req.Header.Set("Depth", depth.String())
+
+	resp, err := c.do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusMultiStatus {
+		return nil, &HTTPError{Code: resp.StatusCode, Err: fmt.Errorf("expected 207 Multi-Status, got %s", resp.Status)}
+	}
+	data, err := readLimited(resp.Body, c.maxBody)
+	if err != nil {
+		return nil, err
+	}
+	return ParseMultiStatus(bytes.NewReader(data))
 }
 
 // Delete removes a resource.

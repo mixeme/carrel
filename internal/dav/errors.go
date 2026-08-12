@@ -6,6 +6,7 @@ package dav
 import (
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 var (
@@ -31,3 +32,19 @@ func (e *HTTPError) Error() string {
 }
 
 func (e *HTTPError) Unwrap() error { return e.Err }
+
+// StatusCode returns the HTTP status carried by err, or zero when err is not a
+// DAV response error.
+func StatusCode(err error) int {
+	var httpErr *HTTPError
+	if errors.As(err, &httpErr) {
+		return httpErr.Code
+	}
+	return 0
+}
+
+// IsPreconditionFailed reports whether err is a 412: the version named in
+// If-Match is no longer the current one (§9).
+func IsPreconditionFailed(err error) bool {
+	return StatusCode(err) == http.StatusPreconditionFailed
+}

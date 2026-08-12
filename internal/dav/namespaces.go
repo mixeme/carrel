@@ -27,4 +27,7 @@ var (
 	CalendarColorName           = xml.Name{NamespaceApple, "calendar-color"}
 	SupportedCalendarComponentSetName = xml.Name{NamespaceCalDAV, "supported-calendar-component-set"}
 	GetCTagName                 = xml.Name{NamespaceCS, "getctag"}
+	GetETagName                 = xml.Name{NamespaceDAV, "getetag"}
+	GetContentTypeName          = xml.Name{NamespaceDAV, "getcontenttype"}
+	AddressDataName             = xml.Name{NamespaceCardDAV, "address-data"}
 )

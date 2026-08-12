@@ -116,6 +116,22 @@ func (c *Cache) NeedsRefresh(accountID, collectionPath, serverCTag string) bool 
 	return false
 }
 
+// CTag returns the collection tag the cached map was read at. A caller that
+// finds the server still reporting the same tag can keep the map instead of
+// reading every ETag again (§12).
+func (c *Cache) CTag(accountID, collectionPath string) (string, bool) {
+	if c == nil {
+		return "", false
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	ent, ok := c.collections[collectionKey{AccountID: accountID, Path: collectionPath}]
+	if !ok {
+		return "", false
+	}
+	return ent.ctag, true
+}
+
 // GetETags returns a copy of the cached path→ETag map for one collection.
 func (c *Cache) GetETags(accountID, collectionPath string) (map[string]string, bool) {
 	if c == nil {

@@ -43,4 +43,11 @@ Resolved by the Go toolchain from `go.mod`; not vendored in this repository.
 - **License:** MIT
 - **Copyright:** Copyright (c) 2016-2024 emersion
 
+### github.com/emersion/go-vcard v0.0.0-20260618161152-d854b7e0e2d3
+
+- **Source:** https://github.com/emersion/go-vcard
+- **Used for:** vCard parsing and serialisation in `internal/model` (the payload behind `Object`)
+- **License:** MIT
+- **Copyright:** Copyright (c) 2016-2024 emersion
+
 Full license texts are available in the respective upstream repositories.
