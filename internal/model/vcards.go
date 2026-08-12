@@ -91,18 +91,33 @@ func splitKeepNL(body []byte) [][]byte {
 }
 
 // AssignUID replaces the object's identity. Patch refuses UID because an edit
-// that quietly changes it creates a second contact; import is the one path that
+// that quietly changes it creates a second object; import is the one path that
 // needs a new identity when the original already exists in the collection.
 func (o *Object) AssignUID(uid string) error {
-	if o == nil || o.raw == nil {
+	if o == nil {
 		return errors.New("model: object has no payload")
 	}
 	uid = strings.TrimSpace(uid)
 	if uid == "" {
 		return errors.New("model: UID is required")
 	}
-	o.raw.SetValue(vcard.FieldUID, uid)
-	return nil
+	switch o.kind {
+	case KindVCard:
+		if o.card == nil {
+			return errors.New("model: object has no payload")
+		}
+		o.card.SetValue(vcard.FieldUID, uid)
+		return nil
+	case KindICal:
+		ev := o.primaryEvent()
+		if ev == nil {
+			return errors.New("model: calendar object has no VEVENT")
+		}
+		ev.Props.SetText("UID", uid)
+		return nil
+	default:
+		return fmt.Errorf("model: unknown object kind %q", o.kind)
+	}
 }
 
 // EnsureUID assigns a fresh identity when the card has none.

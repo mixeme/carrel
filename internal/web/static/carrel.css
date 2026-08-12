@@ -477,6 +477,65 @@ label.checkbox input {
     vertical-align: top;
 }
 
+.agenda-range,
+.event-time-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.agenda-range button {
+    margin-top: 1rem;
+}
+
+.agenda-day {
+    margin-top: 1.5rem;
+}
+
+.agenda-day h2 {
+    font-size: 1.05rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--rule);
+}
+
+.agenda-events {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.agenda-event-row {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 0.5px solid var(--hair);
+}
+
+.agenda-event-row > a {
+    display: flex;
+    flex-direction: column;
+    color: inherit;
+    text-decoration: none;
+}
+
+.agenda-time {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.weekday-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.weekday-grid label {
+    margin-top: 0;
+}
+
 @media print {
     * {
         box-shadow: none !important;
@@ -513,6 +572,24 @@ label.checkbox input {
         box-shadow: none !important;
         padding: 0 !important;
         margin: 0 !important;
+    }
+
+    .agenda-print-root,
+    .event-card {
+        background: #fff !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .agenda-day,
+    .agenda-event-row {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .agenda-event-row > a {
+        color: #000 !important;
     }
 
     .app-layout {

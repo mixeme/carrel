@@ -2,7 +2,7 @@
 {{$d := .Data}}
 <section class="card conflict-card">
     <h1>Conflict</h1>
-    <p>Another client changed this contact while you were editing it.
+    <p>Another client changed this {{$d.Entity}} while you were editing it.
         Choose which version to keep — nothing is overwritten automatically.</p>
 
     {{if $d.RemoteGone}}
@@ -28,7 +28,7 @@
     <p class="hint">No property-level differences were found; the versions still disagree on ETag.</p>
     {{end}}
 
-    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/conflict" class="conflict-actions">
+    <form method="post" action="{{.Base}}/app/{{$d.BasePath}}/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/conflict" class="conflict-actions">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="conflict_key" value="{{$d.Key}}">
         <input type="hidden" name="account_id" value="{{$d.AccountID}}">

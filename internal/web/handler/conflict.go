@@ -16,15 +16,17 @@ import (
 )
 
 type conflictView struct {
-	AccountID    string
-	ColEnc       string
-	UID          string
-	Key          string
-	Lines        []model.DiffLine
-	LocalName    string
-	RemoteName   string
-	RemoteGone   bool
+	AccountID      string
+	ColEnc         string
+	UID            string
+	Key            string
+	Lines          []model.DiffLine
+	LocalName      string
+	RemoteName     string
+	RemoteGone     bool
 	CollectionName string
+	BasePath       string
+	Entity         string
 }
 
 func (s *Server) showConflict(w http.ResponseWriter, r *http.Request, sess *session.Session, accountID, collection, colEnc, uid string, err error) {
@@ -79,6 +81,8 @@ func (s *Server) showConflict(w http.ResponseWriter, r *http.Request, sess *sess
 		RemoteName:     remoteName,
 		RemoteGone:     conflict.Remote == nil,
 		CollectionName: collection,
+		BasePath:       "contacts",
+		Entity:         "contact",
 	}
 	s.RenderStatus(w, http.StatusConflict, "conflict.html", v)
 }

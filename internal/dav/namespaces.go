@@ -30,4 +30,5 @@ var (
 	GetETagName                 = xml.Name{NamespaceDAV, "getetag"}
 	GetContentTypeName          = xml.Name{NamespaceDAV, "getcontenttype"}
 	AddressDataName             = xml.Name{NamespaceCardDAV, "address-data"}
+	CalendarDataName            = xml.Name{NamespaceCalDAV, "calendar-data"}
 )

@@ -20,7 +20,7 @@ type InlinePhoto struct {
 // ExtractPhoto returns the inline image bytes of PHOTO, if any. A URI photo
 // returns ok=false — it is shown through the proxy instead (§11).
 func (o *Object) ExtractPhoto() (InlinePhoto, bool, error) {
-	if o == nil || o.raw == nil {
+	if o == nil || o.card == nil {
 		return InlinePhoto{}, false, ErrNotVCard
 	}
 	values := o.Property(vcard.FieldPhoto)

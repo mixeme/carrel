@@ -31,6 +31,7 @@ const (
 type accountRow struct {
 	account.Account
 	AddressBooks []sidebarBook
+	Calendars    []sidebarBook
 }
 
 type sidebarBook struct {
@@ -78,13 +79,18 @@ func (s *Server) buildAppView(r *http.Request) appView {
 	for _, acc := range accounts {
 		row := accountRow{Account: acc}
 		for _, col := range acc.Collections {
-			if col.Kind != discovery.KindAddressBook {
-				continue
+			switch col.Kind {
+			case discovery.KindAddressBook:
+				row.AddressBooks = append(row.AddressBooks, sidebarBook{
+					Collection: col,
+					ColEnc:     EncodeCollectionPath(col.Path),
+				})
+			case discovery.KindCalendar:
+				row.Calendars = append(row.Calendars, sidebarBook{
+					Collection: col,
+					ColEnc:     EncodeCollectionPath(col.Path),
+				})
 			}
-			row.AddressBooks = append(row.AddressBooks, sidebarBook{
-				Collection: col,
-				ColEnc:     EncodeCollectionPath(col.Path),
-			})
 		}
 		out.Accounts = append(out.Accounts, row)
 	}
@@ -111,8 +117,8 @@ func (s *Server) appSubmit(w http.ResponseWriter, r *http.Request) {
 	actor := store.Actor{ID: sess.UserID, Login: sess.Login, IP: ClientIP(r)}
 
 	var (
-		data  appView
-		err   error
+		data   appView
+		err    error
 		notice string
 	)
 	switch r.PostFormValue(fieldAction) {

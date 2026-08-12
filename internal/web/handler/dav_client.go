@@ -9,11 +9,13 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/account"
 	"gitea.mixdep.ru/mix/carrel/internal/config"
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
 	"gitea.mixdep.ru/mix/carrel/internal/dav/discovery"
+	"gitea.mixdep.ru/mix/carrel/internal/provider/calendar"
 	"gitea.mixdep.ru/mix/carrel/internal/provider/contacts"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 )
@@ -27,6 +29,33 @@ type ImportConfig = config.Import
 // EncodeCollectionPath encodes a DAV collection path for use in a URL segment.
 func EncodeCollectionPath(path string) string {
 	return base64.RawURLEncoding.EncodeToString([]byte(path))
+}
+
+func (s *Server) calendarProvider(sess *session.Session, accountID string) (*calendar.Provider, *account.Account, error) {
+	if s.Guard == nil {
+		return nil, nil, fmt.Errorf("DAV connections are not configured")
+	}
+	acc, err := s.Store.GetDAVAccount(sess.UserID, accountID, sess.DEK())
+	if err != nil {
+		return nil, nil, fmt.Errorf("account not found")
+	}
+	if !acc.Enabled {
+		return nil, nil, fmt.Errorf("account is disabled")
+	}
+	client, err := dav.NewClient(s.Guard, acc.BaseURL, acc.Username, acc.Password)
+	if err != nil {
+		return nil, nil, err
+	}
+	p, err := calendar.New(client, calendar.Options{
+		AccountID: acc.ID,
+		Cache:     sess.Cache(),
+		Losses:    sess.Losses(),
+		Location:  s.timezone(),
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return p, acc, nil
 }
 
 // DecodeCollectionPath reverses EncodeCollectionPath.
@@ -92,10 +121,10 @@ func addressBooks(accounts []account.Account) []addressBookRef {
 				continue
 			}
 			out = append(out, addressBookRef{
-				AccountID:   acc.ID,
+				AccountID:    acc.ID,
 				AccountLabel: accountLabel(acc),
-				Collection:  col,
-				ColEnc:      EncodeCollectionPath(col.Path),
+				Collection:   col,
+				ColEnc:       EncodeCollectionPath(col.Path),
 			})
 		}
 	}
@@ -107,6 +136,41 @@ type addressBookRef struct {
 	AccountLabel string
 	Collection   discovery.Collection
 	ColEnc       string
+}
+
+type calendarRef struct {
+	AccountID    string
+	AccountLabel string
+	Collection   discovery.Collection
+	ColEnc       string
+}
+
+func findCalendar(acc *account.Account, collection string) (discovery.Collection, error) {
+	collection = normalizeCollectionPath(collection)
+	for _, col := range acc.Collections {
+		if col.Kind == discovery.KindCalendar && normalizeCollectionPath(col.Path) == collection {
+			return col, nil
+		}
+	}
+	return discovery.Collection{}, fmt.Errorf("calendar not found")
+}
+
+func calendars(accounts []account.Account) []calendarRef {
+	var out []calendarRef
+	for _, acc := range accounts {
+		if !acc.Enabled {
+			continue
+		}
+		for _, col := range acc.Collections {
+			if col.Kind == discovery.KindCalendar {
+				out = append(out, calendarRef{
+					AccountID: acc.ID, AccountLabel: accountLabel(acc),
+					Collection: col, ColEnc: EncodeCollectionPath(col.Path),
+				})
+			}
+		}
+	}
+	return out
 }
 
 func accountLabel(acc account.Account) string {
@@ -146,6 +210,24 @@ func uidFromObjectPath(path string) string {
 	}
 	return base
 }
+
+func eventPathForUID(collection, uid string) string {
+	return normalizeCollectionPath(collection) + url.PathEscape(uid) + ".ics"
+}
+
+func uidFromEventPath(path string) string {
+	base := path
+	if i := strings.LastIndex(path, "/"); i >= 0 {
+		base = path[i+1:]
+	}
+	base = strings.TrimSuffix(base, ".ics")
+	if dec, err := url.PathUnescape(base); err == nil {
+		return dec
+	}
+	return base
+}
+
+func (s *Server) timezone() *time.Location { return time.Local }
 
 func conflictKey(accountID, collection, uid string) string {
 	return accountID + "|" + normalizeCollectionPath(collection) + "|" + uid

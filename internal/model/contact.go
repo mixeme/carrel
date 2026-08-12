@@ -108,7 +108,7 @@ var contactProperties = map[string]bool{
 
 // Contact returns the display view of an address object.
 func (o *Object) Contact() (Contact, error) {
-	if o == nil || o.raw == nil {
+	if o == nil || o.card == nil {
 		return Contact{}, ErrNotVCard
 	}
 	if o.kind != KindVCard {

@@ -291,7 +291,7 @@ func TestCloneIsIndependent(t *testing.T) {
 		t.Error("editing the clone removed a property from the original")
 	}
 	// The parameter maps must be copies too, not shared.
-	clone.raw["TEL"][0].Params["TYPE"][0] = "MUTATED"
+	clone.card["TEL"][0].Params["TYPE"][0] = "MUTATED"
 	if obj.Property("TEL")[0].Param("TYPE") == "MUTATED" {
 		t.Error("clone shares parameter storage with the original")
 	}

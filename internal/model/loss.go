@@ -10,14 +10,18 @@ import (
 	"sync"
 	"time"
 
+	"github.com/emersion/go-ical"
 	"github.com/emersion/go-vcard"
 )
 
 // volatileProperties are the ones a server is expected to rewrite when it
 // stores an object, so a difference in them is not a loss.
 var volatileProperties = map[string]bool{
-	vcard.FieldRevision:  true,
-	vcard.FieldProductID: true,
+	vcard.FieldRevision:    true,
+	vcard.FieldProductID:   true,
+	ical.PropDateTimeStamp: true,
+	ical.PropLastModified:  true,
+	ical.PropSequence:      true,
 }
 
 // PropertyLoss is what a server did to an object that was not asked for: the

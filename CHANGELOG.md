@@ -4,9 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-Stage 2 («Транспорт и discovery») — готово, шлюз к этапу 3 пройден. Stage 3 («Контакты») — **готово**, фазы 0–12; целевая версия **v0.3.0**. Планы: [docs/stage-2-plan.md](docs/stage-2-plan.md), [docs/stage-3-plan.md](docs/stage-3-plan.md). Следующий: [docs/stage-4-plan.md](docs/stage-4-plan.md).
+Stage 2 («Транспорт и discovery») — готово, шлюз к этапу 3 пройден. Stage 3 («Контакты») — **готово**, фазы 0–12; целевая версия **v0.3.0**. Stage 4 («Календарь») — **готово**, фазы 0–11; целевая версия **v0.4.0**. Планы: [docs/stage-2-plan.md](docs/stage-2-plan.md), [docs/stage-3-plan.md](docs/stage-3-plan.md), [docs/stage-4-plan.md](docs/stage-4-plan.md). Следующий: [docs/stage-5-plan.md](docs/stage-5-plan.md).
 
 ### Added
+
+- **Stage 4 (phases 0–11) — calendar agenda, CRUD, import/export, print:** CalDAV VEVENT over `calendar-query` / `calendar-multiget`; RRULE expansion with `rrule-go` (whole series only); agenda UI grouped by day with a date range; event create/edit/delete with a structured RRULE editor; §9 conflict screen; session body and range caches; import/export of standard `.ics`; `@media print` for the agenda. Dependencies `github.com/emersion/go-ical` and `github.com/teambition/rrule-go` in `THIRD_PARTY.md`.
+- **Stage 4 — `internal/model` iCal:** `KindICal`, `ParseICal` / `NewEvent` / `Event` / `ExpandOccurrences`, Patch/Apply on the primary VEVENT so unknown properties survive, and `.ics` import splitting.
+- **Stage 4 — `internal/provider/calendar`:** listing, query-by-range, multiget, conditional PUT/DELETE, property-loss verification, and 412 conflicts carrying both versions.
+- **Stage 4 — tests:** CalDAV report bodies; RRULE weekly expansion in range; If-Match 412 → conflict; unknown iCal properties kept after Apply; agenda empty state, import UID collision, and print chrome on the agenda.
 
 - **Stage 3 (phase 8) — thumbnail cache (§12):** photo thumbnails sit in the per-session cache keyed by account, object path and ETag, so a changed card is a miss rather than a stale hit. A stricter byte ceiling (default 16 MiB) and entry cap (512) evict LRU thumbnails; wipe on logout/expiry clears them with the rest of the session cache. `GET …/photo?size=thumb` serves from the cache after the first decode.
 - **Stage 3 (phase 9) — import `.vcf`:** upload a standard vCard file or a `.zip` of `.vcf` files, preview counts and parse errors against the target address book, then confirm. Import always creates; a UID that already exists gets a fresh UID and a line in the report. Cyrillic and multi-card files are accepted; Takeout-specific layouts stay out of scope (§23.7).

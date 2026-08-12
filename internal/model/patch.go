@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/emersion/go-ical"
 	"github.com/emersion/go-vcard"
 )
 
@@ -76,6 +77,20 @@ func (v Value) field() *vcard.Field {
 	return f
 }
 
+func (v Value) prop(name string) ical.Prop {
+	p := ical.Prop{Name: name, Value: v.Text}
+	if len(v.Params) > 0 {
+		p.Params = make(ical.Params, len(v.Params))
+		for k, values := range v.Params {
+			key := strings.ToUpper(strings.TrimSpace(k))
+			p.Params[key] = append([]string(nil), values...)
+		}
+	} else {
+		p.Params = make(ical.Params)
+	}
+	return p
+}
+
 func valueFromField(f *vcard.Field) Value {
 	if f == nil {
 		return Value{}
@@ -92,7 +107,7 @@ func valueFromField(f *vcard.Field) Value {
 
 // protectedProperties cannot be changed through a patch. VERSION is the format
 // the object arrived in and is written back as it came (§11); UID is its
-// identity, and an edit that quietly changes it creates a second contact
+// identity, and an edit that quietly changes it creates a second object
 // instead of updating the first.
 var protectedProperties = map[string]bool{
 	vcard.FieldVersion: true,
@@ -159,11 +174,8 @@ func (p *Patch) Names() []string {
 // changes nothing at all: every operation is checked before the first one is
 // carried out.
 func (o *Object) Apply(p *Patch) error {
-	if o == nil || o.raw == nil {
+	if o == nil {
 		return errors.New("model: object has no payload")
-	}
-	if o.kind != KindVCard {
-		return ErrNotVCard
 	}
 	if p.IsEmpty() {
 		return nil
@@ -184,23 +196,49 @@ func (o *Object) Apply(p *Patch) error {
 		names[i] = name
 	}
 
-	for i, op := range p.ops {
-		name := names[i]
-		if op.remove {
-			delete(o.raw, name)
-			continue
+	switch o.kind {
+	case KindVCard:
+		if o.card == nil {
+			return errors.New("model: object has no payload")
 		}
-		fields := make([]*vcard.Field, 0, len(op.values))
-		for _, v := range op.values {
-			fields = append(fields, v.field())
+		for i, op := range p.ops {
+			name := names[i]
+			if op.remove {
+				delete(o.card, name)
+				continue
+			}
+			fields := make([]*vcard.Field, 0, len(op.values))
+			for _, v := range op.values {
+				fields = append(fields, v.field())
+			}
+			o.card[name] = fields
 		}
-		o.raw[name] = fields
+		return nil
+	case KindICal:
+		ev := o.primaryEvent()
+		if ev == nil {
+			return errors.New("model: calendar object has no VEVENT")
+		}
+		for i, op := range p.ops {
+			name := names[i]
+			if op.remove {
+				ev.Props.Del(name)
+				continue
+			}
+			props := make([]ical.Prop, 0, len(op.values))
+			for _, v := range op.values {
+				props = append(props, v.prop(name))
+			}
+			ev.Props[name] = props
+		}
+		return nil
+	default:
+		return fmt.Errorf("model: unknown object kind %q", o.kind)
 	}
-	return nil
 }
 
 // canonicalName upper-cases a property name and rejects anything that is not
-// one, so a patch cannot inject a whole line into the serialised card.
+// one, so a patch cannot inject a whole line into the serialised object.
 func canonicalName(name string) (string, error) {
 	trimmed := strings.ToUpper(strings.TrimSpace(name))
 	if trimmed == "" {

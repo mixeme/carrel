@@ -19,8 +19,16 @@
                     </a>
                 </li>
             {{end}}
+            {{range $acc.Calendars}}
+                <li>
+                    <a class="collection-link" href="{{$.Base}}/app/calendar/{{$acc.ID}}/{{.ColEnc}}">
+                        <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                        {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
+                    </a>
+                </li>
+            {{end}}
             {{range $acc.Collections}}
-                {{if ne .Kind "addressbook"}}
+                {{if and (ne .Kind "addressbook") (ne .Kind "calendar")}}
                 <li>
                     <span class="hint">{{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}} ({{.Kind}})</span>
                 </li>
@@ -75,8 +83,8 @@
     <div class="app-main">
         <section class="card">
             <h1>Signed in as {{.Session.Login}}</h1>
-            <p class="hint">Open <a href="{{.Base}}/app/contacts">Contacts</a> to browse
-                connected address books. Collection sources appear in the sidebar.</p>
+            <p class="hint">Open <a href="{{.Base}}/app/contacts">Contacts</a> or
+                <a href="{{.Base}}/app/calendar">Calendar</a>. Collection sources appear in the sidebar.</p>
         </section>
 
         <section class="card">

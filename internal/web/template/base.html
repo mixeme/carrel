@@ -19,6 +19,7 @@
     <nav>
         <a href="{{.Base}}/app/"{{if eq .Title "Carrel"}} aria-current="page"{{end}}>Profile</a>
         <a href="{{.Base}}/app/contacts"{{if or (eq .Title "Contacts") (eq .Title "New contact") (eq .Title "Conflict") (eq .Title "Import contacts") (eq .Title "Import report")}} aria-current="page"{{end}}>Contacts</a>
+        <a href="{{.Base}}/app/calendar"{{if or (eq .Title "Agenda") (eq .Title "New event") (eq .Title "Event") (eq .Title "Calendar conflict") (eq .Title "Import calendar") (eq .Title "Calendar import report")}} aria-current="page"{{end}}>Calendar</a>
         {{if .Admin}}<a href="{{.Base}}/admin/"{{if eq .Title "Administration"}} aria-current="page"{{end}}>Administration</a>{{end}}
         <form method="post" action="{{.Base}}/app/" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">

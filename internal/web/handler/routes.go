@@ -65,6 +65,16 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("POST "+s.Path("/app/contacts/{account}/{col}/{uid}"), s.ContactCard)
 	app.HandleFunc("POST "+s.Path("/app/contacts/{account}/{col}/{uid}/conflict"), s.ConflictResolve)
 	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}/photo-preview"), s.ContactPhotoPreview)
+	app.HandleFunc("GET "+s.Path("/app/calendar"), s.CalendarHome)
+	app.HandleFunc("GET "+s.Path("/app/calendar/{account}/{col}"), s.CalendarAgenda)
+	app.HandleFunc("GET "+s.Path("/app/calendar/{account}/{col}/new"), s.EventNew)
+	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/new"), s.EventNew)
+	app.HandleFunc("GET "+s.Path("/app/calendar/{account}/{col}/import"), s.CalendarImport)
+	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/import"), s.CalendarImport)
+	app.HandleFunc("GET "+s.Path("/app/calendar/{account}/{col}/export"), s.CalendarExport)
+	app.HandleFunc("GET "+s.Path("/app/calendar/{account}/{col}/{uid}"), s.EventCard)
+	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}"), s.EventCard)
+	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}/conflict"), s.CalendarConflictResolve)
 	pages.Handle(s.Path("/app/"), Chain(app, s.RequireAuth, s.RequirePasswordChange))
 
 	// Contact photos: authenticated, separate prefix (§11).

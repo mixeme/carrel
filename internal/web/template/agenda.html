@@ -1,0 +1,65 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout calendar-layout">
+    <aside class="sidebar card no-print">
+        <h2>Calendars</h2>
+        {{if $d.Calendars}}
+        <ul class="collection-list">
+        {{range $d.Calendars}}
+            <li><a class="collection-link{{if and (eq $.Data.AccountID .AccountID) (eq $.Data.ColEnc .ColEnc)}} is-active{{end}}"
+                href="{{$.Base}}/app/calendar/{{.AccountID}}/{{.ColEnc}}">
+                <span class="collection-dot" style="background:{{if .Collection.Color}}{{.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                {{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}
+                <span class="hint">{{.AccountLabel}}</span>
+            </a></li>
+        {{end}}
+        </ul>
+        {{else}}<p class="hint">No calendars yet. Connect a DAV account from your profile.</p>{{end}}
+    </aside>
+    <div class="app-main">
+        {{if $d.NoCalendars}}
+        <section class="card"><h1>Calendar</h1><p class="hint">Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> to see events here.</p></section>
+        {{else}}
+        <section class="card agenda-print-root">
+            <div class="contacts-header">
+                <div>
+                    <h1>{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Agenda{{end}}</h1>
+                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                </div>
+                <p class="contacts-actions no-print">
+                    {{if not $d.ReadOnly}}
+                    <a class="button" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new">New event</a>
+                    <a class="button" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">Import</a>
+                    {{end}}
+                    <a class="button" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/export?from={{$d.From}}&amp;to={{$d.To}}">Export</a>
+                    <button type="button" class="link" data-print>Print</button>
+                </p>
+            </div>
+            <form method="get" class="agenda-range no-print">
+                <label>From <input type="date" name="from" value="{{$d.From}}" required></label>
+                <label>To <input type="date" name="to" value="{{$d.To}}" required></label>
+                <button type="submit">Show</button>
+            </form>
+            {{if $d.ReadOnly}}<p class="hint no-print">This calendar is read-only.</p>{{end}}
+            {{if $d.Empty}}<p class="hint">No events in this date range.</p>{{end}}
+            {{range $d.Days}}
+            <section class="agenda-day" data-date="{{.Date}}">
+                <h2>{{.Label}}</h2>
+                <ul class="agenda-events">
+                {{range .Events}}
+                    <li class="agenda-event-row">
+                        <span class="agenda-time">{{.TimeLabel}}</span>
+                        <a href="{{$.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">
+                            <strong>{{.Summary}}</strong>{{if .Location}}<span class="hint">{{.Location}}</span>{{end}}
+                        </a>
+                    </li>
+                {{end}}
+                </ul>
+            </section>
+            {{end}}
+            <p class="print-footer print-only">Carrel · agenda · {{$d.From}}–{{$d.To}} · captured {{$d.PrintDate}}</p>
+        </section>
+        {{end}}
+    </div>
+</div>
+{{end}}

@@ -50,6 +50,20 @@ Resolved by the Go toolchain from `go.mod`; not vendored in this repository.
 - **License:** MIT
 - **Copyright:** Copyright (c) 2016-2024 emersion
 
+### github.com/emersion/go-ical v0.0.0-20250609112844-439c63cef608
+
+- **Source:** https://github.com/emersion/go-ical
+- **Used for:** iCalendar parsing, serialisation, and recurrence handling in `internal/model`
+- **License:** MIT
+- **Copyright:** Copyright (c) 2016-2024 emersion
+
+### github.com/teambition/rrule-go v1.8.2
+
+- **Source:** https://github.com/teambition/rrule-go
+- **Used for:** RFC 5545 recurrence expansion through go-ical
+- **License:** MIT
+- **Copyright:** Copyright (c) 2017 Teambition
+
 ### github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
 
 - **Source:** https://github.com/rwcarlsen/goexif
