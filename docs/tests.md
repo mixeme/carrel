@@ -12,10 +12,12 @@ Running them is in [development.md](development.md); the acceptance criteria the
 |---|---|---|---|
 | Unit and handler | `go test ./...` | nothing | **Yes.** Must be green before a commit |
 | Race | `CGO_ENABLED=1 go test -race ./...` | a C compiler | Yes where one is available |
-| Integration | `go test -tags=integration ./...` | live Baikal and WebDAV | Advisory; skips silently without credentials |
+| Integration | `go test -tags=integration ./...` | live Baikal and WebDAV | **Run it before a release.** Skips silently without credentials, which is why it went unrun long enough to hide three bugs |
 | Manual | a person, a phone, jtx Board | real clients | [manual-acceptance.md](manual-acceptance.md) |
 
 `go test ./...` needs no network and no server. Everything that speaks DAV runs against a fake server in `httptest`, which is what makes the suite fast enough to run on every change and honest enough to be worth running.
+
+**And a fake server agrees with whatever the code assumes.** The first live run of the integration tier found three defects the offline suite could not have caught: the fake put DAV at its root, so nobody noticed the principal was looked for at `/` rather than under the base path; the fake honoured `If-None-Match: *`, so nobody noticed a create trusted a precondition SFTPGo ignores; and the offline download test used a file smaller than the response ceiling, so nobody noticed the ceiling truncated it. All three now have offline regression tests that reproduce the real behaviour — a fake that serves DAV under a path with a web page at the root, a fake that ignores the precondition, and a ceiling set below the file. Which is the point: **the value of the live tier is finding out what to make the fake do.**
 
 ---
 
@@ -69,7 +71,7 @@ Against a fake address book and calendar over HTTP: reopening an unchanged colle
 
 Path resolution in both directions — traversal refused, a name that only looks like one accepted (`..hidden`, `a..b/c`), backslash and control bytes refused, and `Relative` refusing a path outside the collection, which is the check that keeps a foreign `ATTACH` from naming somebody else's tree.
 
-Listing separating folders from files without reaching into a subfolder, and reading size, type and modification time. A megabyte read out of a stream in two goes, which is what shows the body was not buffered. A range returning the middle of a file. A refused conditional create leaving the original intact. A taken name yielding the next one without touching what was there. `EnsureDir` creating a chain once and being content the second time. A folder listing cached inside the TTL at no request, and a write making it a miss. The listing ceiling truncating and saying so.
+Listing separating folders from files without reaching into a subfolder, and reading size, type and modification time. A megabyte read out of a stream in two goes, which is what shows the body was not buffered. A range returning the middle of a file. A refused create leaving the original intact — both when the server refuses it and when the server ignores the precondition entirely, which is a real server's behaviour and not a hypothetical; and the precondition still being sent, so the check before the write is an addition rather than a replacement. A download arriving whole when it is larger than the response ceiling. A taken name yielding the next one without touching what was there, on both kinds of server. `EnsureDir` creating a chain once and being content the second time. A folder listing cached inside the TTL at no request, and a write making it a miss. The listing ceiling truncating and saying so.
 
 ### `web/handler` — over the real middleware chain
 

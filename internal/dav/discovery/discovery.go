@@ -141,30 +141,54 @@ func resolveBaseURL(ctx context.Context, client *dav.Client, entered string, tra
 	return entered, nil
 }
 
+// findPrincipal asks for `current-user-principal`, at the base path first and
+// only then at the server root.
+//
+// The order matters and getting it wrong is invisible without a real server.
+// §6 makes the entered URL the main path precisely because Baikal lives at
+// something like `/dav.php/`; asking the server root instead reaches the web
+// server's home page, which answers 200 with HTML rather than 207 with a
+// multistatus, and discovery fails on a URL that is perfectly correct. The root
+// is still tried afterwards, because a server that does live there answers it.
 func findPrincipal(ctx context.Context, client *dav.Client, trace *Trace) (string, error) {
-	ms, err := client.PropFind(ctx, "/", dav.DepthZero, []xml.Name{dav.CurrentUserPrincipalName})
+	var targets []string
+	if base := normalizePath(client.BaseURL().Path); base != "/" {
+		targets = append(targets, base)
+	}
+	targets = append(targets, "/")
+
+	var lastErr error
+	for _, target := range targets {
+		path, err := principalAt(ctx, client, target)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		trace.Add("principal", "ok", http.StatusOK, path)
+		return path, nil
+	}
+	trace.Add("principal", lastErr.Error(), 0, "")
+	return "", lastErr
+}
+
+// principalAt reads the principal from one path. Every response is looked at
+// rather than only the first: a server answering Depth 0 with more than one is
+// unusual but not wrong, and the property may not be on the leading entry.
+func principalAt(ctx context.Context, client *dav.Client, target string) (string, error) {
+	ms, err := client.PropFind(ctx, target, dav.DepthZero, []xml.Name{dav.CurrentUserPrincipalName})
 	if err != nil {
-		trace.Add("principal", err.Error(), 0, "")
-		return "", err
+		return "", fmt.Errorf("discovery: principal at %s: %w", target, err)
 	}
-	if len(ms.Responses) == 0 {
-		err := fmt.Errorf("discovery: empty principal response")
-		trace.Add("principal", err.Error(), 0, "")
-		return "", err
+	for _, resp := range ms.Responses {
+		var principal dav.CurrentUserPrincipal
+		if err := resp.DecodeProp(&principal); err != nil {
+			continue
+		}
+		if path := principal.Href.Path; path != "" {
+			return path, nil
+		}
 	}
-	var principal dav.CurrentUserPrincipal
-	if err := ms.Responses[0].DecodeProp(&principal); err != nil {
-		trace.Add("principal", err.Error(), 0, "")
-		return "", err
-	}
-	path := principal.Href.Path
-	if path == "" {
-		err := fmt.Errorf("discovery: empty principal href")
-		trace.Add("principal", err.Error(), 0, "")
-		return "", err
-	}
-	trace.Add("principal", "ok", http.StatusOK, path)
-	return path, nil
+	return "", fmt.Errorf("discovery: no current-user-principal at %s", target)
 }
 
 func findCalendarHome(ctx context.Context, client *dav.Client, principal string, trace *Trace) (string, error) {

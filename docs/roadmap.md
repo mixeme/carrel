@@ -19,7 +19,9 @@ Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for t
 
 **`go test -race ./...` on a machine with a C compiler.** The suite passes without it; the goroutine-leak and race gate of §21 needs it, and the development machine has been without gcc in `PATH` for part of this work.
 
-**A live end-to-end pass of attachments** against a real Baikal plus a real WebDAV server. The handler tests cover the whole path against a fake server holding both a calendar and a file collection; the streaming and path behaviour is covered against a live server by the integration tests. What is not yet covered by either is the two combined — the browser attaching to a note on Baikal with the file landing on a separate WebDAV account.
+**A live end-to-end pass of attachments** against a real Baikal plus a real WebDAV server, through the browser. The pieces are now each verified live: discovery against Baikal, and listing, streaming, range requests, conditional creates and folder creation against SFTPGo. What the integration tests do not cover is the two combined through the interface — attaching to a note on Baikal with the file landing on the separate WebDAV account — which is check **P5** in [manual-acceptance.md](manual-acceptance.md).
+
+> Running these tests for the first time found three bugs, all in Carrel: discovery could not reach a principal under a base path, a download was truncated at the response ceiling, and a create trusted a precondition SFTPGo ignores. Each now has a regression test offline. The lesson is worth keeping in view: a fake DAV server agrees with whatever the code assumes, and a test tier that skips silently when unconfigured is a tier nobody notices is not running.
 
 ---
 

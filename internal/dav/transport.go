@@ -181,8 +181,28 @@ func (c *Client) PropFind(ctx context.Context, href string, depth Depth, props [
 	return ParseMultiStatus(bytes.NewReader(data))
 }
 
-// Get downloads a resource. The caller must close the returned body.
+// Get downloads a resource, capped at the response ceiling. The caller must
+// close the returned body.
+//
+// The cap suits an object a provider is about to parse into memory. It does not
+// suit a file: see GetStream.
 func (c *Client) Get(ctx context.Context, href string, rng *Range) (io.ReadCloser, string, error) {
+	return c.get(ctx, href, rng, c.maxBody)
+}
+
+// GetStream downloads a resource with no ceiling on its size.
+//
+// MaxResponseBytes exists for the XML the protocol paths read into memory. A
+// file is copied through to whoever asked for it and never accumulates, so
+// applying the same ceiling to one would put an arbitrary upper bound — 10 MiB
+// by default — on the size of file a person may keep on their own server. §7
+// makes Get return a reader precisely so that bound does not exist, and §21
+// expects a download well past it to work.
+func (c *Client) GetStream(ctx context.Context, href string, rng *Range) (io.ReadCloser, string, error) {
+	return c.get(ctx, href, rng, 0)
+}
+
+func (c *Client) get(ctx context.Context, href string, rng *Range, max int64) (io.ReadCloser, string, error) {
 	target, err := c.resolve(href)
 	if err != nil {
 		return nil, "", err
@@ -208,7 +228,10 @@ func (c *Client) Get(ctx context.Context, href string, rng *Range) (io.ReadClose
 			ctype = t
 		}
 	}
-	return limitedBody(resp.Body, c.maxBody), ctype, nil
+	if max <= 0 {
+		return resp.Body, ctype, nil
+	}
+	return limitedBody(resp.Body, max), ctype, nil
 }
 
 // Put uploads a resource and returns the new ETag when present.

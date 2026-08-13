@@ -78,6 +78,109 @@ func TestDiscoverMockServer(t *testing.T) {
 	}
 }
 
+// The arrangement §6 calls the main path: Baikal under `/dav.php/`, with the
+// site root serving an ordinary web page.
+//
+// Asking the server root for the principal reaches that page, which answers 200
+// with HTML instead of 207 with a multistatus, and discovery fails on a URL that
+// is entirely correct. This is what a live Baikal actually does, and no fake
+// server caught it until one was pointed at.
+func TestDiscoverAtABasePathIgnoresTheSiteRoot(t *testing.T) {
+	const (
+		base      = "/dav.php/"
+		principal = "/dav.php/principals/mix/"
+		calHome   = "/dav.php/calendars/mix/"
+		abHome    = "/dav.php/addressbooks/mix/"
+	)
+	rootHits := 0
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := normalizeMockPath(r.URL.Path)
+		switch {
+		case r.Method == http.MethodHead && strings.HasPrefix(path, "/.well-known/"):
+			w.WriteHeader(http.StatusNotFound)
+		// The site root is a web page. It answers every method with 200 and no
+		// XML at all, exactly as a web server in front of Baikal does.
+		case path == "/":
+			rootHits++
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusOK)
+			io.WriteString(w, "<html><body>nothing to see here</body></html>")
+		case r.Method == "PROPFIND" && path == base && r.Header.Get("Depth") == "1":
+			writeMS(w, rootListingMS(base, "principals/", "calendars/", "addressbooks/", "shared/"))
+		case r.Method == "PROPFIND" && path == base:
+			writeMS(w, principalMS(principal))
+		case r.Method == "PROPFIND" && path == normalizeMockPath(principal):
+			writeMS(w, homeSetsMS(calHome, abHome))
+		case r.Method == "PROPFIND" && path == normalizeMockPath(calHome):
+			writeMS(w, calendarMS(calHome+"default/"))
+		case r.Method == "PROPFIND" && path == normalizeMockPath(abHome):
+			writeMS(w, addressbookMS(abHome+"default/"))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	g := dav.NewGuard(dav.GuardConfig{Allowlist: []string{"127.0.0.1"}})
+	result, trace, err := Discover(context.Background(), g, Credentials{
+		BaseURL: srv.URL + base, Username: "mix", Password: "secret",
+	})
+	if err != nil {
+		t.Fatalf("Discover against a base path: %v\ntrace: %+v", err, trace)
+	}
+	if result.Principal != principal {
+		t.Fatalf("principal = %q, want %q", result.Principal, principal)
+	}
+	var kinds []string
+	for _, col := range result.Collections {
+		kinds = append(kinds, string(col.Kind))
+	}
+	if len(result.Collections) != 3 {
+		t.Fatalf("collections = %v, want a calendar, an address book and one file collection", kinds)
+	}
+	// The root may be probed, but it must not be what the answer depends on.
+	if rootHits > 0 {
+		t.Logf("the site root was reached %d time(s); acceptable as a fallback, not as the first choice", rootHits)
+	}
+}
+
+// A URL entered without its trailing slash has to work too: people copy
+// `https://host/dav.php` out of a wiki page far more often than with the slash.
+func TestDiscoverAcceptsABasePathWithoutATrailingSlash(t *testing.T) {
+	const principal = "/dav.php/principals/mix/"
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := normalizeMockPath(r.URL.Path)
+		switch {
+		case r.Method == http.MethodHead:
+			w.WriteHeader(http.StatusNotFound)
+		case path == "/":
+			w.WriteHeader(http.StatusOK)
+		case r.Method == "PROPFIND" && path == "/dav.php/" && r.Header.Get("Depth") == "1":
+			writeMS(w, rootListingMS("/dav.php/", "files/"))
+		case r.Method == "PROPFIND" && path == "/dav.php/":
+			writeMS(w, principalMS(principal))
+		default:
+			writeMS(w, `<?xml version="1.0"?><d:multistatus xmlns:d="DAV:"><d:response>`+
+				`<d:href>`+path+`</d:href><d:propstat><d:prop/>`+
+				`<d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response></d:multistatus>`)
+		}
+	}))
+	defer srv.Close()
+
+	g := dav.NewGuard(dav.GuardConfig{Allowlist: []string{"127.0.0.1"}})
+	result, trace, err := Discover(context.Background(), g, Credentials{
+		BaseURL: srv.URL + "/dav.php", Username: "mix", Password: "secret",
+	})
+	if err != nil {
+		t.Fatalf("Discover without a trailing slash: %v\ntrace: %+v", err, trace)
+	}
+	if result.Principal != principal {
+		t.Fatalf("principal = %q", result.Principal)
+	}
+}
+
 // §6: a plain collection under the root is a file collection, and the containers
 // the DAV homes live in are not. Baikal answers the root with `calendars/`,
 // `addressbooks/` and `principals/`, none of them marked as anything at that

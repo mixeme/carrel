@@ -31,13 +31,25 @@ type fakeDAV struct {
 	// bodyBytesRead is what the handler actually read off the wire, which is how
 	// a streaming upload is told from a buffered one.
 	uploaded map[string]int
+	// ignorePrecondition makes PUT accept `If-None-Match: *` and overwrite
+	// anyway, which is what SFTPGo 2.7.1 does.
+	ignorePrecondition bool
+	// ifNoneMatch records the header each PUT arrived with.
+	ifNoneMatch map[string]string
 }
 
 func newFakeDAV() *fakeDAV {
 	return &fakeDAV{
-		entries:  map[string][]byte{root: nil},
-		uploaded: map[string]int{},
+		entries:     map[string][]byte{root: nil},
+		uploaded:    map[string]int{},
+		ifNoneMatch: map[string]string{},
 	}
+}
+
+func (f *fakeDAV) lastPutIfNoneMatch(path string) string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.ifNoneMatch[path]
 }
 
 func (f *fakeDAV) put(path string, body []byte) {
@@ -171,7 +183,10 @@ func (f *fakeDAV) get(w http.ResponseWriter, r *http.Request, path string) {
 }
 
 func (f *fakeDAV) putHandler(w http.ResponseWriter, r *http.Request, path string) {
-	if r.Header.Get("If-None-Match") == "*" && f.has(path) {
+	f.mu.Lock()
+	f.ifNoneMatch[path] = r.Header.Get("If-None-Match")
+	f.mu.Unlock()
+	if !f.ignorePrecondition && r.Header.Get("If-None-Match") == "*" && f.has(path) {
 		w.WriteHeader(http.StatusPreconditionFailed)
 		return
 	}
@@ -317,11 +332,25 @@ func TestUploadCreateIsConditional(t *testing.T) {
 	p := newProvider(t, fake, nil)
 
 	_, err := p.Upload(context.Background(), root, "taken.txt", strings.NewReader("new"), "text/plain", "", true)
-	if !dav.IsPreconditionFailed(err) {
-		t.Fatalf("second create error = %v, want a refused precondition", err)
+	if !isTaken(err) {
+		t.Fatalf("second create error = %v, want it refused as already taken", err)
 	}
 	if got := string(fake.body(root + "taken.txt")); got != "original" {
 		t.Fatalf("body = %q, the refused create overwrote it", got)
+	}
+}
+
+// The precondition is still sent, for the servers that honour it: it is the
+// second of the two checks, not a leftover.
+func TestCreateStillSendsThePrecondition(t *testing.T) {
+	fake := newFakeDAV()
+	p := newProvider(t, fake, nil)
+	if _, err := p.Upload(context.Background(), root, "fresh.txt",
+		strings.NewReader("x"), "text/plain", "", true); err != nil {
+		t.Fatalf("Upload: %v", err)
+	}
+	if got := fake.lastPutIfNoneMatch(root + "fresh.txt"); got != "*" {
+		t.Fatalf("If-None-Match on a create = %q, want \"*\"", got)
 	}
 }
 
@@ -435,6 +464,85 @@ func TestMaxEntriesTruncates(t *testing.T) {
 	}
 	if len(listing.Entries) != 4 || !listing.Truncated {
 		t.Fatalf("entries = %d truncated = %v, want 4 and true", len(listing.Entries), listing.Truncated)
+	}
+}
+
+// The ceiling of MaxResponseBytes belongs to the XML the protocol paths parse,
+// not to a file. A download past it must arrive whole, or the file section
+// silently caps what a person may keep on their own server (§7, §21).
+func TestDownloadIsNotCappedByTheResponseCeiling(t *testing.T) {
+	fake := newFakeDAV()
+	const ceiling = 64 << 10
+	payload := bytes.Repeat([]byte("Z"), ceiling*3)
+	fake.put(root+"big.bin", payload)
+
+	srv := httptest.NewServer(fake)
+	defer srv.Close()
+	guard := dav.NewGuard(dav.GuardConfig{
+		Allowlist:        []string{"127.0.0.1"},
+		MaxResponseBytes: ceiling,
+	})
+	client, err := dav.NewClient(guard, srv.URL+root, "mix", "secret")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := New(client, Options{AccountID: "acc"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	download, err := p.Open(context.Background(), root, "big.bin", nil)
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	defer download.Body.Close()
+	got, err := io.ReadAll(download.Body)
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if len(got) != len(payload) {
+		t.Fatalf("streamed %d bytes of %d; the response ceiling truncated the file", len(got), len(payload))
+	}
+}
+
+// §9 asks that a create never overwrite. `If-None-Match: *` is how that is
+// asked for, and it is not enough on its own: SFTPGo accepts the header and
+// overwrites anyway. So the path is asked about first, and this test is a server
+// that ignores the precondition exactly as that one does.
+func TestCreateRefusesEvenWhenTheServerIgnoresThePrecondition(t *testing.T) {
+	fake := newFakeDAV()
+	fake.ignorePrecondition = true
+	fake.put(root+"taken.txt", []byte("original"))
+	p := newProvider(t, fake, nil)
+
+	_, err := p.Upload(context.Background(), root, "taken.txt", strings.NewReader("replacement"),
+		"text/plain", "", true)
+	if !errors.Is(err, ErrAlreadyExists) {
+		t.Fatalf("create over an existing file: %v, want ErrAlreadyExists", err)
+	}
+	if got := string(fake.body(root + "taken.txt")); got != "original" {
+		t.Fatalf("body = %q; the file was overwritten by a create", got)
+	}
+}
+
+// And the attachment path still finds a free name on such a server, rather than
+// silently replacing an earlier attachment that happens to share a generated
+// name — two screenshots on one note on one day (§23.10).
+func TestUploadNewFindsAFreeNameWhenThePreconditionIsIgnored(t *testing.T) {
+	fake := newFakeDAV()
+	fake.ignorePrecondition = true
+	fake.put(root+"2026-08-13-note.png", []byte("first"))
+	p := newProvider(t, fake, nil)
+
+	name, _, err := p.UploadNew(context.Background(), root, "", "2026-08-13-note.png",
+		strings.NewReader("second"), "image/png")
+	if err != nil {
+		t.Fatalf("UploadNew: %v", err)
+	}
+	if name != "2026-08-13-note-2.png" {
+		t.Fatalf("name = %q, want the next free one", name)
+	}
+	if got := string(fake.body(root + "2026-08-13-note.png")); got != "first" {
+		t.Fatalf("the earlier attachment became %q", got)
 	}
 }
 

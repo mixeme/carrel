@@ -299,5 +299,6 @@ func contentTypeOf(claimed, name string) string {
 }
 
 func isAlreadyThere(err error) bool {
-	return dav.IsPreconditionFailed(err) || dav.StatusCode(err) == http.StatusMethodNotAllowed
+	return errors.Is(err, files.ErrAlreadyExists) ||
+		dav.IsPreconditionFailed(err) || dav.StatusCode(err) == http.StatusMethodNotAllowed
 }

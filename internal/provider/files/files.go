@@ -25,11 +25,23 @@ import (
 // never REPORT: a plain collection answers no reports.
 type Client interface {
 	PropFind(ctx context.Context, path string, depth dav.Depth, props []xml.Name) (*dav.MultiStatus, error)
-	Get(ctx context.Context, path string, rng *dav.Range) (io.ReadCloser, string, error)
+	// GetStream and not Get: the response ceiling of the XML paths would cap a
+	// download at 10 MiB by default, which is not a limit anybody asked for on
+	// their own files.
+	GetStream(ctx context.Context, path string, rng *dav.Range) (io.ReadCloser, string, error)
 	PutOpts(ctx context.Context, path string, body io.Reader, opts dav.PutOptions) (string, error)
 	Delete(ctx context.Context, path, ifMatch string) error
 	MkCol(ctx context.Context, path string) error
 }
+
+// ErrAlreadyExists is returned by a create that found something at the path.
+//
+// It exists because a precondition is not enough. `If-None-Match: *` is the
+// right way to ask a server not to overwrite, and SFTPGo — to name the one this
+// was found on — accepts the header and overwrites anyway. A create therefore
+// asks whether the path is free before writing, and the header is still sent for
+// the servers that do honour it.
+var ErrAlreadyExists = errors.New("files: something is already there")
 
 // Cache is the listing half of the session cache (§12).
 //
@@ -253,7 +265,7 @@ func (p *Provider) OpenAbsolute(ctx context.Context, target string, rng *dav.Ran
 }
 
 func (p *Provider) openPath(ctx context.Context, target, name string, rng *dav.Range) (*Download, error) {
-	body, ctype, err := p.client.Get(ctx, target, rng)
+	body, ctype, err := p.client.GetStream(ctx, target, rng)
 	if err != nil {
 		return nil, fmt.Errorf("files: read %s: %w", target, err)
 	}
@@ -262,9 +274,12 @@ func (p *Provider) openPath(ctx context.Context, target, name string, rng *dav.R
 
 // Upload streams a body into the collection.
 //
-// A create carries `If-None-Match: *` so it cannot silently replace a file
-// somebody else put there; a replace carries the version it was read at, the
-// same precondition every other write in Carrel uses (§9).
+// A create is checked twice: the path is asked about first, and the write then
+// carries `If-None-Match: *`. Two checks for one rule because the header alone
+// turned out not to be enough — a server that accepts it and overwrites anyway
+// would make "an upload never replaces a file" false without saying so. A
+// replace carries the version it was read at, the precondition every other write
+// in Carrel uses (§9).
 func (p *Provider) Upload(ctx context.Context, root, rel string, body io.Reader, contentType, ifMatch string, create bool) (string, error) {
 	target, err := Resolve(root, rel)
 	if err != nil {
@@ -272,6 +287,13 @@ func (p *Provider) Upload(ctx context.Context, root, rel string, body io.Reader,
 	}
 	if strings.HasSuffix(target, "/") {
 		return "", errors.New("files: a file needs a name")
+	}
+	if create && ifMatch == "" {
+		// Only a clear answer counts. A server that will not say is no reason to
+		// refuse the write: the precondition below is still on it.
+		if _, statErr := p.Stat(ctx, root, rel); statErr == nil {
+			return "", fmt.Errorf("%w: %s", ErrAlreadyExists, rel)
+		}
 	}
 	if contentType == "" {
 		contentType = TypeForName(Base(rel))
@@ -513,10 +535,11 @@ func sortEntries(entries []Entry) {
 	})
 }
 
-// isTaken reports whether a conditional create was refused because something is
-// already at that path.
+// isTaken reports whether a create was refused because something is already at
+// that path — whether the server said so, or the check before the write did.
 func isTaken(err error) bool {
-	return dav.IsPreconditionFailed(err) || dav.StatusCode(err) == 405
+	return errors.Is(err, ErrAlreadyExists) ||
+		dav.IsPreconditionFailed(err) || dav.StatusCode(err) == 405
 }
 
 func splitExt(name string) (string, string) {
