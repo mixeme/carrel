@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>davloom — иконка, эталон построения</title>
+<style>
+  :root{
+    --ink:#17211C;--card:#E8DFCB;--card-border:#C9BFA6;--accent:#4A6B52;
+    --accent-dark:#7FA085;--bg:#F5F1E8;--paper:#FFFDF7;--rule:#D8CFBB;
+    --hair:#E2DACA;--dusty:#9A9280;--muted:#6B6355;--alert:#B04A3A;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       font-size:15px;line-height:1.6;}
+  .wrap{max-width:900px;margin:0 auto;padding:56px 32px 96px;}
+  header{border-bottom:0.5px solid var(--rule);padding-bottom:32px;margin-bottom:44px;}
+  h1{font-family:Georgia,"Source Serif 4",serif;font-size:38px;font-weight:400;margin:0 0 8px;}
+  .sub{font-size:11px;letter-spacing:0.18em;color:var(--dusty);text-transform:uppercase;}
+  h2{font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dusty);
+     font-weight:600;margin:64px 0 20px;padding-bottom:8px;border-bottom:0.5px solid var(--rule);}
+  h3{font-size:16px;font-weight:600;margin:32px 0 10px;}
+  p{margin:0 0 14px;max-width:68ch;}
+  .lede{font-size:17px;color:var(--muted);max-width:64ch;}
+  .note{font-size:13px;color:var(--muted);padding-left:14px;border-left:2px solid var(--card-border);margin:18px 0;max-width:64ch;}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:18px 0;}
+  th{text-align:left;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;
+     color:var(--dusty);font-weight:600;padding:0 12px 8px 0;border-bottom:0.5px solid var(--rule);}
+  td{padding:9px 12px 9px 0;border-bottom:0.5px solid var(--hair);vertical-align:top;}
+  td.num,th.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+       background:var(--paper);border:0.5px solid var(--hair);border-radius:3px;padding:1px 5px;}
+  pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.65;
+      background:var(--paper);border:0.5px solid var(--hair);border-radius:5px;
+      padding:16px 18px;overflow-x:auto;margin:14px 0 22px;}
+  pre code{background:none;border:0;padding:0;font-size:12px;}
+  figure{margin:26px 0;}
+  figcaption{font-size:12.5px;color:var(--muted);margin-top:12px;max-width:66ch;}
+  .board{background:var(--paper);border:0.5px solid var(--hair);border-radius:5px;padding:22px;display:inline-block;}
+  .board svg{display:block;}
+  .row{display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap;margin:20px 0;}
+  .cell{display:flex;flex-direction:column;gap:9px;}
+  .cap{font-size:11px;color:var(--dusty);}
+  .plate{background:var(--card);border:0.5px solid var(--card-border);
+         display:flex;align-items:center;justify-content:center;}
+  .plate.dark{background:var(--ink);border-color:var(--ink);}
+  .plate.paper{background:var(--paper);border-color:var(--hair);}
+  .plate svg{display:block;}
+  .strip{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;margin:18px 0;}
+  .strip .cell{align-items:center;}
+  .sizebox{display:flex;align-items:flex-end;justify-content:center;height:96px;}
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin:20px 0;}
+  .sw{display:flex;flex-direction:column;gap:7px;}
+  .chip{height:44px;border-radius:4px;border:0.5px solid var(--card-border);}
+  .sw .n{font-size:13px;font-weight:500;}
+  .sw .h{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--dusty);}
+  ul{padding-left:18px;margin:0 0 14px;}
+  li{margin-bottom:7px;max-width:64ch;}
+  .bad{color:var(--alert);}
+  .file{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--dusty);
+        font-weight:600;margin:26px 0 0;}
+  a{color:var(--accent);text-decoration:none;border-bottom:0.5px solid var(--card-border);}
+  a:hover{border-bottom-color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="row" style="margin-bottom:24px;gap:14px;">
+    <div class="plate" style="width:96px;height:96px;border-radius:6px;">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 12 C18 12 30 24 42 33"/>
+          <path d="M6 30 C24 30 36 42 42 42"/>
+          <path d="M6 48 L42 48"/>
+          <path d="M6 66 C24 66 36 54 42 54"/>
+          <path d="M6 84 C18 84 30 72 42 63"/>
+        </g>
+        <rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/>
+        <rect x="54" y="36" width="42" height="24" fill="#4A6B52"/>
+      </svg>
+    </div>
+    <div class="plate dark" style="width:96px;height:96px;border-radius:6px;">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <g fill="none" stroke="#E8DFCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 12 C18 12 30 24 42 33"/>
+          <path d="M6 30 C24 30 36 42 42 42"/>
+          <path d="M6 48 L42 48"/>
+          <path d="M6 66 C24 66 36 54 42 54"/>
+          <path d="M6 84 C18 84 30 72 42 63"/>
+        </g>
+        <rect x="42" y="18" width="6" height="60" rx="1.5" fill="#E8DFCB"/>
+        <rect x="54" y="36" width="42" height="24" fill="#7FA085"/>
+      </svg>
+    </div>
+  </div>
+  <h1>davloom</h1>
+  <div class="sub">Знак модуля · эталон построения · версия 1.1</div>
+</header>
+
+<p class="lede">Единственный источник правды по знаку модуля davloom: что изображено, почему именно это, как построено и по каким координатам. Спецификация (§23.2) описывает режим прокси; знак описан здесь. Палитра и типографика общие с Carrel — см. <a href="carrel-brand-guide.html">визуальный стиль</a>.</p>
+
+<h2>1. Что изображено и почему</h2>
+
+<p>davloom — режим DAV-прокси: одна учётная запись в DAVx5 или Thunderbird вместо всех настроенных аккаунтов. Имя пишется всегда строчными; это не отдельный продукт и не второй логотип Carrel, а поименованный модуль внутри одной сборки.</p>
+
+<p>Знак — пять нитей, сходящихся слева через вертикальный вал станка в единое полотно справа. Метафора прямолинейна: много источников сходятся в одну точку подключения. Станок здесь не декор — это тот же материальный язык, что и у Carrel (картон, чернила, один акцент), но предмет другой: не лампа читального места, а механизм сбора.</p>
+
+<p>Три массы плюс линии: пять штрихов-нитей, вертикальный вал, горизонтальное полотно. Нити — единственный элемент, который остаётся обводкой, а не заливкой: у нити нет «внутренности», и превращать её в контур ради чистоты мастер-файла значило бы потерять характер. Вал и полотно — заливки, как у знака Carrel.</p>
+
+<div class="note">Пиктограмма уровня иконки раздела: в шапке приложения, рядом с названием режима на корневой странице прокси, в документации. Не заменяет знак Carrel и не используется как фавиконка всего проекта.</div>
+
+<h2>2. Что чинится против версии 1.0</h2>
+
+<p>Черновик 1.0 был верен по смыслу и неверен по разметке — те же классы проблем, что у знака Carrel до перестройки.</p>
+
+<p><strong>Кромки не на сетке.</strong> Начала крайних нитей стояли на y&nbsp;=&nbsp;14 и 82 вместо 12 и 84; сходимость — на x&nbsp;=&nbsp;44 вместо 42; полотно начиналось с x&nbsp;=&nbsp;52 вместо 54. Ни одна из этих координат не кратна модулю 6, поэтому при делении на 32 и 16 каждая кромка уезжала между пикселями.</p>
+
+<p><strong>Полотно и вал не согласованы по модулю.</strong> Высота полотна была 20 (не кратна 6), верх на y&nbsp;=&nbsp;38 (тоже нет). Центр полотна не совпадал с центральной нитью y&nbsp;=&nbsp;48 — смещение на один модуль.</p>
+
+<p><strong>Зазор вал–полотно случайный.</strong> Между x&nbsp;=&nbsp;50 и x&nbsp;=&nbsp;52 лежали 2 px без правила. В 1.1 зазор ровно один модуль (6 px): вал заканчивается на 48, полотно начинается на 54.</p>
+
+<h2>3. Сетка и модуль</h2>
+
+<p>Мастер — квадрат 96, модуль 6. Та же логика, что у <a href="carrel-icon.html">знака Carrel</a>: 96 делится на 3 и на 6 без остатка, 32-я версия — точное деление, 16-я — деление с явными хинтами.</p>
+
+<p>Композиция намеренно прижата к левому краю: нити входят слева, полотно упирается в правый. Это не ошибка центрирования — знак читается слева направо, как поток данных. Поля: 6 слева, 0 справа, 12 сверху и снизу у крайних нитей.</p>
+
+<figure>
+<div class="row">
+  <div class="cell">
+    <div class="board">
+      <svg width="384" height="384" viewBox="0 0 96 96">
+        <defs>
+          <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+            <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+          </pattern>
+        </defs>
+        <rect width="96" height="96" fill="#FFFDF7"/>
+        <rect width="96" height="96" fill="url(#g6)"/>
+        <g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round" opacity="0.35">
+          <path d="M6 12 C18 12 30 24 42 33"/>
+          <path d="M6 30 C24 30 36 42 42 42"/>
+          <path d="M6 48 L42 48"/>
+          <path d="M6 66 C24 66 36 54 42 54"/>
+          <path d="M6 84 C18 84 30 72 42 63"/>
+        </g>
+        <rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C" fill-opacity="0.34" stroke="#17211C" stroke-width="0.5"/>
+        <rect x="54" y="36" width="42" height="24" fill="#4A6B52" fill-opacity="0.28" stroke="#4A6B52" stroke-width="0.5"/>
+        <line x1="0" y1="48" x2="96" y2="48" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="3 2"/>
+        <rect x="6" y="12" width="36" height="72" fill="none" stroke="#B04A3A" stroke-width="0.5"/>
+        <rect x="0" y="0" width="96" height="96" fill="none" stroke="#9A9280" stroke-width="0.5"/>
+      </svg>
+    </div>
+    <div class="cap">сетка 6, ось y&nbsp;=&nbsp;48, кайлайн нитей 36&nbsp;×&nbsp;72</div>
+  </div>
+</div>
+<figcaption>Центральная нить, вал и полотно лежат на одной горизонтали y&nbsp;=&nbsp;48. Крайние нити симметричны относительно неё: начала на ±36 (12 и 84), входы в вал на ±15 (33 и 63), внутренние — на ±6 (42 и 54).</figcaption>
+</figure>
+
+<h3>Координаты мастера</h3>
+<table>
+  <tr><th style="width:24%">Элемент</th><th class="num" style="width:22%">X</th><th class="num" style="width:22%">Y</th><th>Размер / примечание</th></tr>
+  <tr><td>Начала нитей</td><td class="num">6</td><td class="num">12, 30, 48, 66, 84</td><td>пять точек на левом поле</td></tr>
+  <tr><td>Входы в вал</td><td class="num">42</td><td class="num">33, 42, 48, 54, 63</td><td>левая кромка вала</td></tr>
+  <tr><td>Центральная нить</td><td class="num">6 … 42</td><td class="num">48</td><td>отрезок, без кривой</td></tr>
+  <tr><td>Вал</td><td class="num">42 … 48</td><td class="num">18 … 78</td><td>6&nbsp;×&nbsp;60, rx&nbsp;1.5</td></tr>
+  <tr><td>Зазор</td><td class="num">48 … 54</td><td class="num">—</td><td>один модуль, пусто</td></tr>
+  <tr><td>Полотно</td><td class="num">54 … 96</td><td class="num">36 … 60</td><td>42&nbsp;×&nbsp;24</td></tr>
+  <tr><td>Обводка нитей</td><td colspan="3">stroke-width&nbsp;2, round cap — на всех трёх размерах; на 16 px не утоньшается</td></tr>
+</table>
+
+<h3>Кривые нитей (мастер)</h3>
+<pre><code>M6 12 C18 12 30 24 42 33
+M6 30 C24 30 36 42 42 42
+M6 48 L42 48
+M6 66 C24 66 36 54 42 54
+M6 84 C18 84 30 72 42 63</code></pre>
+
+<h2>4. Хинтинг: 32 и 16</h2>
+
+<p>32-я версия — мастер ÷ 3. Вал и полотно делятся точно. Нити: stroke-width 2 вместо 0,67 — единственный хинт на этом размере.</p>
+
+<p>16-я версия — мастер ÷ 6 с четырьмя хинтами. Три из них — у вала и полотна; четвёртый — у точек входа нитей в вал, где деление даёт половинки.</p>
+
+<table>
+  <tr><th style="width:26%">Что</th><th class="num" style="width:22%">96 ÷ 6</th><th class="num" style="width:18%">Нарисовано</th><th>Почему</th></tr>
+  <tr><td>Точки входа нитей</td><td class="num">y = 5,5 · 7 · 8 · 9 · 10,5</td><td class="num">5 · 7 · 8 · 9 · 11</td><td>Округление до целых строк; симметрия ±3 вокруг 8 сохранена.</td></tr>
+  <tr><td>Вал, ширина</td><td class="num">1 px</td><td class="num">2 px</td><td>Столбец в один пиксель между границами — полупрозрачная каша.</td></tr>
+  <tr><td>Полотно, высота</td><td class="num">4 px</td><td class="num">4 px</td><td>Делится точно, хинт не нужен.</td></tr>
+  <tr><td>Обводка нитей</td><td class="num">0,33 px</td><td class="num">1 px</td><td>На 16 px нить тоньше 1 px не читается; утолщается до одного пикселя.</td></tr>
+</table>
+
+<figure>
+<div class="row">
+  <div class="cell">
+    <div class="board">
+      <svg width="320" height="320" viewBox="0 0 32 32">
+        <g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round">
+          <path d="M2 4 C6 4 10 8 14 11"/>
+          <path d="M2 10 C8 10 12 14 14 14"/>
+          <path d="M2 16 L14 16"/>
+          <path d="M2 22 C8 22 12 18 14 18"/>
+          <path d="M2 28 C6 28 10 24 14 21"/>
+        </g>
+        <rect x="14" y="6" width="2" height="20" rx="0.5" fill="#17211C"/>
+        <rect x="18" y="12" width="14" height="8" fill="#4A6B52"/>
+      </svg>
+    </div>
+    <div class="cap">32 px · вал и полотно ÷ 3, stroke 1</div>
+  </div>
+  <div class="cell">
+    <div class="board">
+      <svg width="320" height="320" viewBox="0 0 16 16">
+        <g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round">
+          <path d="M1 2 C3 2 5 4 7 5"/>
+          <path d="M1 5 C4 5 6 7 7 7"/>
+          <path d="M1 8 L7 8"/>
+          <path d="M1 11 C4 11 6 9 7 9"/>
+          <path d="M1 14 C3 14 5 12 7 11"/>
+        </g>
+        <rect x="7" y="3" width="2" height="10" fill="#17211C"/>
+        <rect x="9" y="6" width="7" height="4" fill="#4A6B52"/>
+      </svg>
+    </div>
+    <div class="cap">16 px · четыре хинта</div>
+  </div>
+</div>
+</figure>
+
+<h2>5. Проверки</h2>
+<table>
+  <tr><th style="width:34%">Что</th><th>Результат</th></tr>
+  <tr><td>Целые координаты вала и полотна</td><td>Все вершины на сетке 6.</td></tr>
+  <tr><td>Симметрия нитей</td><td>Относительно y&nbsp;=&nbsp;48: начала 12/84, входы 33/63 и 42/54.</td></tr>
+  <tr><td>Центр полотна</td><td>y&nbsp;=&nbsp;48 — совпадает с центральной нитью и серединой вала.</td></tr>
+  <tr><td>Зазор вал–полотно</td><td>Ровно 6 px (один модуль).</td></tr>
+  <tr><td>Деление на 3</td><td>Вал и полотно без правок; stroke нитей 2→1.</td></tr>
+  <tr><td>Правило одного акцента</td><td>Акцент только на полотне. Нити и вал — чернила.</td></tr>
+  <tr><td>Не второй логотип</td><td>Не используется как знак Carrel, не в фавиконке проекта, не в связке с надписью «Carrel».</td></tr>
+</table>
+
+<h2>6. Цвет</h2>
+<p>Те же роли, что в <a href="carrel-brand-guide.html">палитре Carrel</a>. Между темами меняются только заливки и цвет обводки нитей.</p>
+<div class="swatches">
+  <div class="sw"><div class="chip" style="background:#4A6B52"></div><div class="n">Полотно, светлая</div><div class="h">#4A6B52</div></div>
+  <div class="sw"><div class="chip" style="background:#17211C"></div><div class="n">Нити и вал, светлая</div><div class="h">#17211C</div></div>
+  <div class="sw"><div class="chip" style="background:#7FA085"></div><div class="n">Полотно, тёмная</div><div class="h">#7FA085</div></div>
+  <div class="sw"><div class="chip" style="background:#E8DFCB"></div><div class="n">Нити и вал, тёмная</div><div class="h">#E8DFCB</div></div>
+</div>
+
+<h2>7. Реальные размеры</h2>
+<figure>
+<div class="strip">
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:16px;height:16px;"><svg width="16" height="16" viewBox="0 0 16 16"><g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round"><path d="M1 2 C3 2 5 4 7 5"/><path d="M1 5 C4 5 6 7 7 7"/><path d="M1 8 L7 8"/><path d="M1 11 C4 11 6 9 7 9"/><path d="M1 14 C3 14 5 12 7 11"/></g><rect x="7" y="3" width="2" height="10" fill="#17211C"/><rect x="9" y="6" width="7" height="4" fill="#4A6B52"/></svg></div></div><div class="cap">16</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:24px;height:24px;"><svg width="24" height="24" viewBox="0 0 32 32"><g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round"><path d="M2 4 C6 4 10 8 14 11"/><path d="M2 10 C8 10 12 14 14 14"/><path d="M2 16 L14 16"/><path d="M2 22 C8 22 12 18 14 18"/><path d="M2 28 C6 28 10 24 14 21"/></g><rect x="14" y="6" width="2" height="20" rx="0.5" fill="#17211C"/><rect x="18" y="12" width="14" height="8" fill="#4A6B52"/></svg></div></div><div class="cap">24</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:32px;height:32px;"><svg width="32" height="32" viewBox="0 0 32 32"><g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round"><path d="M2 4 C6 4 10 8 14 11"/><path d="M2 10 C8 10 12 14 14 14"/><path d="M2 16 L14 16"/><path d="M2 22 C8 22 12 18 14 18"/><path d="M2 28 C6 28 10 24 14 21"/></g><rect x="14" y="6" width="2" height="20" rx="0.5" fill="#17211C"/><rect x="18" y="12" width="14" height="8" fill="#4A6B52"/></svg></div></div><div class="cap">32</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:48px;height:48px;"><svg width="48" height="48" viewBox="0 0 96 96"><g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round"><path d="M6 12 C18 12 30 24 42 33"/><path d="M6 30 C24 30 36 42 42 42"/><path d="M6 48 L42 48"/><path d="M6 66 C24 66 36 54 42 54"/><path d="M6 84 C18 84 30 72 42 63"/></g><rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/><rect x="54" y="36" width="42" height="24" fill="#4A6B52"/></svg></div></div><div class="cap">48</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:96px;height:96px;border-radius:6px;"><svg width="96" height="96" viewBox="0 0 96 96"><g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round"><path d="M6 12 C18 12 30 24 42 33"/><path d="M6 30 C24 30 36 42 42 42"/><path d="M6 48 L42 48"/><path d="M6 66 C24 66 36 54 42 54"/><path d="M6 84 C18 84 30 72 42 63"/></g><rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/><rect x="54" y="36" width="42" height="24" fill="#4A6B52"/></svg></div></div><div class="cap">96</div></div>
+</div>
+<figcaption>Знак без фоновой плашки: прозрачный фон, если SVG вставлен inline. Плашку картона добавляет только вариант icon.svg для квадратных форматов.</figcaption>
+</figure>
+
+<h2>8. Отличие от знака Carrel</h2>
+<table>
+  <tr><th style="width:28%"></th><th>Carrel</th><th>davloom</th></tr>
+  <tr><td>Роль</td><td>Логотип проекта</td><td>Пиктограмма модуля</td></tr>
+  <tr><td>Метафора</td><td>Лампа читального места</td><td>Нити → вал → полотно</td></tr>
+  <tr><td>Направление</td><td>Вертикаль, симметрично в квадрате</td><td>Горизонтальный поток слева направо</td></tr>
+  <tr><td>Нити/линии</td><td>Нет — только заливки</td><td>Нити — обводка stroke 2</td></tr>
+  <tr><td>Где живёт</td><td>Фавиконка, PWA, шапка</td><td>Раздел прокси, §23.2, корневая страница davloom</td></tr>
+</table>
+
+<h2>9. Исходники</h2>
+
+<div class="file">davloom-mark.svg — знак без плашки, мастер</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="davloom"&gt;
+  &lt;g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"&gt;
+    &lt;path d="M6 12 C18 12 30 24 42 33"/&gt;
+    &lt;path d="M6 30 C24 30 36 42 42 42"/&gt;
+    &lt;path d="M6 48 L42 48"/&gt;
+    &lt;path d="M6 66 C24 66 36 54 42 54"/&gt;
+    &lt;path d="M6 84 C18 84 30 72 42 63"/&gt;
+  &lt;/g&gt;
+  &lt;rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/&gt;
+  &lt;rect x="54" y="36" width="42" height="24" fill="#4A6B52"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">davloom-icon.svg — с плашкой картона</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="davloom"&gt;
+  &lt;rect width="96" height="96" fill="#E8DFCB"/&gt;
+  … те же нити, вал и полотно …
+&lt;/svg&gt;</code></pre>
+
+<div class="file">mark-32.svg · mark-16.svg — хинтованные версии (см. раздел 4)</div>
+
+<h2>10. Что эталон фиксирует</h2>
+<ul>
+  <li>Координаты из таблицы раздела 3 — единственный источник геометрии.</li>
+  <li>Нити — обводка stroke-width&nbsp;2 на мастере; это единственное допустимое отступление от правила «только заливки», и оно относится только к нитям.</li>
+  <li>Акцент — только полотно. Вал и нити всегда чернильные (или картонные в тёмной теме).</li>
+  <li>Имя модуля — строчными: davloom, не Davloom и не DAVLoom.</li>
+  <li>Знак не поворачивается, не отражается, без теней и градиентов.</li>
+  <li>Не подменяет знак Carrel и не плодится на каждую кнопку интерфейса.</li>
+</ul>
+
+<h2>11. Чего эталон не закрывает</h2>
+<ul>
+  <li><strong>Режим прокси ещё не реализован.</strong> Знак готов заранее; в коде embed-пути пока нет.</li>
+  <li><strong>Корневая страница прокси</strong> (AGPL §13) — отдельная вёрстка; знак там будет inline из mark.svg, но макет страницы этим файлом не задаётся.</li>
+  <li><strong>Связка с надписью «davloom»</strong> не регламентирована: модуль не имеет отдельного wordmark-файла, достаточно знака слева от строчного имени в интерфейсе.</li>
+</ul>
+
+</div>
+</body>
+</html>
