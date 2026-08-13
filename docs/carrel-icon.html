@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carrel — иконка, эталон построения</title>
+<style>
+  :root{
+    --ink:#17211C;
+    --card:#E8DFCB;
+    --card-border:#C9BFA6;
+    --accent:#4A6B52;
+    --accent-dark:#7FA085;
+    --bg:#F5F1E8;
+    --paper:#FFFDF7;
+    --rule:#D8CFBB;
+    --hair:#E2DACA;
+    --dusty:#9A9280;
+    --muted:#6B6355;
+    --alert:#B04A3A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:15px;line-height:1.6;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:56px 32px 96px;}
+  header{border-bottom:0.5px solid var(--rule);padding-bottom:32px;margin-bottom:44px;}
+  h1{font-family:Georgia,"Source Serif 4",serif;font-size:38px;font-weight:400;margin:0 0 8px;}
+  .sub{font-size:11px;letter-spacing:0.18em;color:var(--dusty);text-transform:uppercase;}
+  h2{font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dusty);
+     font-weight:600;margin:64px 0 20px;padding-bottom:8px;border-bottom:0.5px solid var(--rule);}
+  h3{font-size:16px;font-weight:600;margin:32px 0 10px;}
+  p{margin:0 0 14px;max-width:68ch;}
+  .lede{font-size:17px;color:var(--muted);max-width:64ch;}
+  .note{font-size:13px;color:var(--muted);padding-left:14px;border-left:2px solid var(--card-border);margin:18px 0;max-width:64ch;}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:18px 0;}
+  th{text-align:left;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;
+     color:var(--dusty);font-weight:600;padding:0 12px 8px 0;border-bottom:0.5px solid var(--rule);}
+  td{padding:9px 12px 9px 0;border-bottom:0.5px solid var(--hair);vertical-align:top;}
+  td.num,th.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+       background:var(--paper);border:0.5px solid var(--hair);border-radius:3px;padding:1px 5px;}
+  pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.65;
+      background:var(--paper);border:0.5px solid var(--hair);border-radius:5px;
+      padding:16px 18px;overflow-x:auto;margin:14px 0 22px;}
+  pre code{background:none;border:0;padding:0;font-size:12px;}
+  figure{margin:26px 0;}
+  figcaption{font-size:12.5px;color:var(--muted);margin-top:12px;max-width:66ch;}
+  .board{background:var(--paper);border:0.5px solid var(--hair);border-radius:5px;
+         padding:22px;display:inline-block;}
+  .board svg{display:block;}
+  .row{display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap;margin:20px 0;}
+  .cell{display:flex;flex-direction:column;gap:9px;}
+  .cap{font-size:11px;color:var(--dusty);}
+  .plate{background:var(--card);border:0.5px solid var(--card-border);
+         display:flex;align-items:center;justify-content:center;}
+  .plate.dark{background:var(--ink);border-color:var(--ink);}
+  .plate.paper{background:var(--paper);border-color:var(--hair);}
+  .plate svg{display:block;}
+  .strip{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;margin:18px 0;}
+  .strip .cell{align-items:center;}
+  .sizebox{display:flex;align-items:flex-end;justify-content:center;height:96px;}
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin:20px 0;}
+  .sw{display:flex;flex-direction:column;gap:7px;}
+  .chip{height:44px;border-radius:4px;border:0.5px solid var(--card-border);}
+  .sw .n{font-size:13px;font-weight:500;}
+  .sw .h{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--dusty);}
+  ul{padding-left:18px;margin:0 0 14px;}
+  li{margin-bottom:7px;max-width:64ch;}
+  .bad{color:var(--alert);}
+  .file{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--dusty);
+        font-weight:600;margin:26px 0 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="row" style="margin-bottom:24px;gap:14px;">
+    <div class="plate" style="width:96px;height:96px;border-radius:6px;">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/>
+        <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/>
+      </svg>
+    </div>
+    <div class="plate dark" style="width:96px;height:96px;border-radius:6px;">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#7FA085"/>
+        <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#E8DFCB"/>
+      </svg>
+    </div>
+  </div>
+  <h1>Иконка Carrel</h1>
+  <div class="sub">Эталон построения · версия 1.1</div>
+</header>
+
+<p class="lede">Единственный источник правды по знаку: что изображено, почему именно это, как оно построено и по каким координатам. Бренд-гайд описывает стиль в целом и на знак только ссылается. Всё, что расходится с этим файлом, считается ошибкой копии, а не вариантом.</p>
+
+<h2>1. Что изображено и почему</h2>
+
+<p>Настольная лампа: силуэт абажура на дуге, короткая стойка, прямоугольное основание. Отсылка к лампам индивидуальных читальных мест — того самого carrel, у которого своя лампа на общем столе.</p>
+
+<p>За несколько раундов перебрано около пятнадцати предметных метафор: перфокарта, ящик картотеки, разделители-язычки, талон брони, книга с закладками, ключ, веер карточек, ниша, гардеробный номерок, уголки видоискателя, дверь, ширма, стол с перегородкой. Отбор шёл по двум критериям сразу — узнаваемость крупно и сохранность силуэта в 16&nbsp;px.</p>
+
+<p>Лампа выбрана за прямую связь со словом carrel при сохранении читаемости в мелком размере. Веер карточек остаётся резервным паттерном для внутренних иконок переключения между аккаунтами.</p>
+
+<p>Три массы без внутренней детализации: закрашенная дуга абажура, вертикальный штрих стойки, прямоугольник основания. Никакого провода, никакой штриховки — на мелких размерах внутренняя деталь пропадает первой. Акцентом окрашен только абажур; стойка и основание всегда чернильные, потому что правило одного акцента действует и внутри знака.</p>
+
+<h2>2. Что чинится против версии 1.0</h2>
+
+<p>Знак 1.0 нарисован верно по смыслу и неверно по разметке. Три проблемы, все видны только в измерениях и на малых размерах.</p>
+
+<p><strong>Знак не по центру квадрата.</strong> Он занимает 52&nbsp;×&nbsp;64 в поле 96 при полях 22 по бокам, 20 сверху и 12 снизу. Верхнее и нижнее поля не совпадают, и это ничем не оправдано: композиция просто съехала вниз.</p>
+
+<p><strong>Мелкие размеры получены на глаз, а не делением.</strong> В 32-й версии кромки стоят на <code>17.5</code>, <code>14.6</code>, <code>19.5</code>, <code>27.8</code> — ни одна не попадает на границу пикселя. 16-я версия и вовсе не отдельный рисунок, а та же 32-я, ужатая вдвое: все кромки уезжают на четверть пикселя, и это уже не смягчение краёв, а грязь.</p>
+
+<p><strong>Стойка — обводка, остальное — заливки.</strong> <code>&lt;line stroke-width="5"&gt;</code> внутри знака мешает всему, что делается с иконкой дальше: объединению железа в один контур, сборке <code>.ico</code>, монохромной и маскируемой версиям. В мастер-файле обводок быть не должно.</p>
+
+<figure>
+<div class="row">
+  <div class="cell">
+    <div class="board">
+      <svg width="256" height="256" viewBox="0 0 16 16">
+        <defs>
+          <pattern id="pxA" width="1" height="1" patternUnits="userSpaceOnUse">
+            <path d="M1 0V1M0 1H1" fill="none" stroke="#B6AC94" stroke-width="0.07"/>
+          </pattern>
+        </defs>
+        <rect width="16" height="16" fill="#E8DFCB"/>
+        <g transform="scale(0.5)">
+          <path d="M7 15 A9 9 0 0 1 25 15 L25 17.5 L7 17.5 Z" fill="#4A6B52"/>
+          <rect x="14.6" y="17.5" width="2.8" height="2" fill="#17211C"/>
+          <line x1="16" y1="19.5" x2="16" y2="25" stroke="#17211C" stroke-width="2.4"/>
+          <rect x="10" y="25" width="12" height="2.8" rx="0.9" fill="#17211C"/>
+        </g>
+        <rect width="16" height="16" fill="url(#pxA)"/>
+        <g stroke="#B04A3A" stroke-width="0.09" stroke-dasharray="0.4 0.3">
+          <path d="M0 8.75H16"/>
+          <path d="M0 9.75H16"/>
+          <path d="M0 12.5H16"/>
+          <path d="M0 13.9H16"/>
+          <path d="M7.4 0V16"/>
+          <path d="M8.6 0V16"/>
+          <path d="M3.5 0V16"/>
+          <path d="M12.5 0V16"/>
+        </g>
+      </svg>
+    </div>
+    <div class="cap bad">1.0 на 16 px · красным — кромки, не попавшие на решётку</div>
+  </div>
+  <div class="cell">
+    <div class="board">
+      <svg width="256" height="256" viewBox="0 0 16 16">
+        <defs>
+          <pattern id="pxB" width="1" height="1" patternUnits="userSpaceOnUse">
+            <path d="M1 0V1M0 1H1" fill="none" stroke="#B6AC94" stroke-width="0.07"/>
+          </pattern>
+        </defs>
+        <rect width="16" height="16" fill="#E8DFCB"/>
+        <path d="M3 7A5 5 0 0 1 13 7V8H3Z" fill="#4A6B52"/>
+        <path d="M7 8H9V12H12V14H4V12H7Z" fill="#17211C"/>
+        <rect width="16" height="16" fill="url(#pxB)"/>
+      </svg>
+    </div>
+    <div class="cap">1.1 на 16 px · красным отмечать нечего</div>
+  </div>
+  <div class="cell">
+    <div class="board" style="display:flex;flex-direction:column;gap:18px;align-items:center;">
+      <div class="plate" style="width:16px;height:16px;">
+        <svg width="16" height="16" viewBox="0 0 32 32">
+          <path d="M7 15 A9 9 0 0 1 25 15 L25 17.5 L7 17.5 Z" fill="#4A6B52"/>
+          <rect x="14.6" y="17.5" width="2.8" height="2" fill="#17211C"/>
+          <line x1="16" y1="19.5" x2="16" y2="25" stroke="#17211C" stroke-width="2.4"/>
+          <rect x="10" y="25" width="12" height="2.8" rx="0.9" fill="#17211C"/>
+        </svg>
+      </div>
+      <div class="plate" style="width:16px;height:16px;">
+        <svg width="16" height="16" viewBox="0 0 16 16">
+          <path d="M3 7A5 5 0 0 1 13 7V8H3Z" fill="#4A6B52"/>
+          <path d="M7 8H9V12H12V14H4V12H7Z" fill="#17211C"/>
+        </svg>
+      </div>
+    </div>
+    <div class="cap">те же два, 1:1</div>
+  </div>
+</div>
+<figcaption>Силуэт у обоих один и тот же — разница в том, попадают ли кромки на решётку. У 1.0 не попадает почти ничего: бока абажура на 3,5 и 12,5, низ юбки на 8,75, стойка занимает 7,4&nbsp;…&nbsp;8,6 вместо честных двух столбцов, основание живёт между 12,5 и 13,9. Каждая такая кромка на реальном экране превращается в ряд полупрозрачных пикселей. У 1.1 все прямые кромки лежат на целых числах, сглаживается только дуга — там это и нужно.</figcaption>
+</figure>
+
+<p>Это можно не оценивать на глаз, а посчитать. Обе версии растеризованы в 16&nbsp;×&nbsp;16 и каждый из 256 пикселей проверен на совпадение с одним из трёх цветов палитры; всё остальное — промежуточные полутона, то есть размытая кромка.</p>
+
+<table>
+  <tr><th style="width:40%">16 × 16, 256 пикселей</th><th class="num" style="width:16%">1.0</th><th class="num" style="width:16%">1.1</th><th>Чем считается</th></tr>
+  <tr><td>Полутоновых пикселей всего</td><td class="num">43</td><td class="num">15</td><td>У 1.1 все 15 — сглаживание купола. У 1.0 сглаживанием объясняется примерно треть.</td></tr>
+  <tr><td>Из них в железе (строки 8&nbsp;…&nbsp;15)</td><td class="num bad">29</td><td class="num">0</td><td>Здесь только прямые углы. Любой полутон — чистая ошибка разметки, и её быть не должно.</td></tr>
+</table>
+
+<h2>3. Сетка и модуль</h2>
+
+<p>Мастер строится на квадрате 96 с модулем 6. Число выбрано не из эстетики: 96 нацело делится и на 3, и на 6, поэтому 32-я версия получается точным делением мастера без единой правки, а 16-я — точным делением с тремя оговоренными исключениями. Любое другое поле пришлось бы подгонять руками на каждом размере.</p>
+
+<p>Живая площадь — 60&nbsp;×&nbsp;72 при полях 18 по бокам и 12 сверху и снизу. Знак заполняет 62,5&nbsp;% ширины и 75&nbsp;% высоты квадрата; поля сверху и снизу равны.</p>
+
+<figure>
+<div class="row">
+  <div class="cell">
+    <div class="board">
+      <svg width="384" height="384" viewBox="0 0 96 96">
+        <defs>
+          <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+            <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+          </pattern>
+          <pattern id="g12" width="12" height="12" patternUnits="userSpaceOnUse">
+            <path d="M12 0V12M0 12H12" fill="none" stroke="#C9BFA6" stroke-width="0.4"/>
+          </pattern>
+        </defs>
+        <rect width="96" height="96" fill="#FFFDF7"/>
+        <rect width="96" height="96" fill="url(#g6)"/>
+        <rect width="96" height="96" fill="url(#g12)"/>
+
+        <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52" fill-opacity="0.28"/>
+        <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C" fill-opacity="0.34"/>
+        <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="none" stroke="#4A6B52" stroke-width="0.5"/>
+        <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="none" stroke="#17211C" stroke-width="0.5"/>
+
+        <circle cx="48" cy="42" r="30" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/>
+        <rect x="18" y="12" width="60" height="72" fill="none" stroke="#B04A3A" stroke-width="0.5"/>
+        <path d="M48 0V96" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="3 2"/>
+        <path d="M0 42H96" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="3 2"/>
+        <path d="M44 42h8M48 38v8" stroke="#B04A3A" stroke-width="0.5"/>
+        <path d="M48 42L69.21 20.79" stroke="#B04A3A" stroke-width="0.6"/>
+        <text x="61" y="27" font-family="ui-monospace,monospace" font-size="4.2" fill="#B04A3A">R30</text>
+        <rect x="0" y="0" width="96" height="96" fill="none" stroke="#9A9280" stroke-width="0.5"/>
+      </svg>
+    </div>
+    <div class="cap">Сетка 6 и 12, окружность абажура, кайлайн 60&nbsp;×&nbsp;72, оси</div>
+  </div>
+</div>
+<figcaption>Абажур — ровно полуокружность: точки 18,42 и 78,42 отстоят друг от друга на 60, то есть на два радиуса. Поэтому касательная в точке стыка с юбкой строго вертикальна, и переход дуги в прямую не даёт излома. Это не подгонка — это следствие того, что хорда равна диаметру.</figcaption>
+</figure>
+
+<figure>
+<div class="board">
+  <svg width="600" height="429" viewBox="-28 -14 204 146">
+    <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="4.2" fill="#6B6355">
+      <rect x="0" y="0" width="96" height="96" fill="#FFFDF7" stroke="#D8CFBB" stroke-width="0.4"/>
+
+      <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/>
+      <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/>
+
+      <g stroke="#9A9280" stroke-width="0.35" fill="none">
+        <path d="M-10 0h-4M-10 12h-4M-10 84h-4M-10 96h-4"/>
+        <path d="M-12 0V12M-12 12V84M-12 84V96"/>
+        <path d="M0 106v4M18 106v4M78 106v4M96 106v4"/>
+        <path d="M0 108H18M18 108H78M78 108H96"/>
+      </g>
+      <text x="-25" y="7.5" >12</text>
+      <text x="-25" y="49.5">72</text>
+      <text x="-25" y="91.5">12</text>
+      <text x="4" y="115">18</text>
+      <text x="44" y="115">60</text>
+      <text x="82" y="115">18</text>
+
+      <g stroke="#9A9280" stroke-width="0.35" fill="none" stroke-dasharray="1.5 1.5">
+        <path d="M78 27H100"/>
+        <path d="M78 45H100"/>
+        <path d="M54 51H100"/>
+        <path d="M51 64.5H100"/>
+        <path d="M69 79.5H100"/>
+      </g>
+      <text x="102" y="28.5">абажур · 60 × 36 · R30</text>
+      <text x="102" y="46.5">юбка · 6</text>
+      <text x="102" y="52.5">втулка · 12 × 6</text>
+      <text x="102" y="66">стойка · 6 × 21</text>
+      <text x="102" y="81">основание · 42 × 9 · r3</text>
+
+      <g fill="none">
+        <path d="M43 42.31h10M48 37.31v10" stroke="#FFFDF7" stroke-width="1.5"/>
+        <circle cx="48" cy="42.31" r="2" stroke="#FFFDF7" stroke-width="1.5"/>
+        <path d="M43 42.31h10M48 37.31v10" stroke="#B04A3A" stroke-width="0.5"/>
+        <circle cx="48" cy="42.31" r="2" stroke="#B04A3A" stroke-width="0.5"/>
+      </g>
+    </g>
+  </svg>
+</div>
+<figcaption>Красный крест — центр площади фигуры: y&nbsp;=&nbsp;42,3 при геометрическом центре квадрата 48. Формально знак верхотяжёлый, и по букве оптической компенсации его следовало бы опустить примерно на 6. Он не опущен намеренно: во-первых, любой сдвиг, кроме кратного 6, ломает деление сетки; во-вторых, расчёт считает абажур сплошной массой, тогда как читается он как полая светящаяся оболочка, а весом в композиции работает горизонтальная плита основания. Равные поля 12/12 здесь честнее вычисленной поправки.</figcaption>
+</figure>
+
+<h3>Координаты мастера</h3>
+<table>
+  <tr><th style="width:22%">Элемент</th><th class="num" style="width:20%">X</th><th class="num" style="width:20%">Y</th><th>Размер</th></tr>
+  <tr><td>Абажур, дуга</td><td class="num">18 … 78</td><td class="num">12 … 42</td><td>полуокружность R30, центр 48,42</td></tr>
+  <tr><td>Абажур, юбка</td><td class="num">18 … 78</td><td class="num">42 … 48</td><td>60 × 6</td></tr>
+  <tr><td>Втулка</td><td class="num">42 … 54</td><td class="num">48 … 54</td><td>12 × 6</td></tr>
+  <tr><td>Стойка</td><td class="num">45 … 51</td><td class="num">54 … 75</td><td>6 × 21</td></tr>
+  <tr><td>Основание</td><td class="num">27 … 69</td><td class="num">75 … 84</td><td>42 × 9, скругление 3</td></tr>
+</table>
+
+<h2>4. Хинтинг: 32 и 16</h2>
+
+<p>32-я версия — это мастер, делённый на 3. Ни одна координата не потребовала правки: 12→4, 42→14, 30→10, 45→15, 51→17, 27→9, 69→23, 75→25, 84→28. Хинтинга нет вообще, и это проверка того, что мастер построен правильно.</p>
+
+<p>16-я версия — мастер, делённый на 6, с тремя исключениями. Они перечислены явно, потому что расхождение эталона с делением должно быть решением, а не случайностью.</p>
+
+<table>
+  <tr><th style="width:26%">Что</th><th class="num" style="width:24%">96 ÷ 6 даёт</th><th class="num" style="width:20%">Нарисовано</th><th>Почему</th></tr>
+  <tr><td>Стойка, ширина</td><td class="num">1 px, на 7,5 … 8,5</td><td class="num">2 px, на 7 … 9</td><td>Пиксель в один столбец между границами превращается в два полупрозрачных. Стойка утолщается до двух и садится на решётку.</td></tr>
+  <tr><td>Втулка</td><td class="num">2 × 1 на 7 … 9</td><td class="num">поглощена стойкой</td><td>После утолщения стойки втулка совпадает с ней по ширине. Отдельной ступеньки нет — есть стойка, начинающаяся сразу под юбкой.</td></tr>
+  <tr><td>Основание</td><td class="num">7 × 1,5 на 4,5 … 11,5</td><td class="num">8 × 2 на 4 … 12</td><td>Раздвигается на полпикселя в каждую сторону и вниз до целой строки. Скругление снимается: радиус 0,5 на такой плите — не скругление, а размытый угол.</td></tr>
+</table>
+
+<figure>
+<div class="row">
+  <div class="cell">
+    <div class="board">
+      <svg width="320" height="320" viewBox="0 0 32 32">
+        <defs>
+          <pattern id="px32" width="1" height="1" patternUnits="userSpaceOnUse">
+            <path d="M1 0V1M0 1H1" fill="none" stroke="#B6AC94" stroke-width="0.08"/>
+          </pattern>
+          <pattern id="q32" width="8" height="8" patternUnits="userSpaceOnUse">
+            <path d="M8 0V8M0 8H8" fill="none" stroke="#9A9280" stroke-width="0.16"/>
+          </pattern>
+        </defs>
+        <rect width="32" height="32" fill="#E8DFCB"/>
+        <path d="M6 14A10 10 0 0 1 26 14V16H6Z" fill="#4A6B52"/>
+        <path d="M14 16H18V18H17V25H22A1 1 0 0 1 23 26V27A1 1 0 0 1 22 28H10A1 1 0 0 1 9 27V26A1 1 0 0 1 10 25H15V18H14Z" fill="#17211C"/>
+        <rect width="32" height="32" fill="url(#px32)"/>
+        <rect width="32" height="32" fill="url(#q32)"/>
+      </svg>
+    </div>
+    <div class="cap">32 px · мастер ÷ 3, без правок</div>
+  </div>
+  <div class="cell">
+    <div class="board">
+      <svg width="320" height="320" viewBox="0 0 16 16">
+        <defs>
+          <pattern id="px16" width="1" height="1" patternUnits="userSpaceOnUse">
+            <path d="M1 0V1M0 1H1" fill="none" stroke="#B6AC94" stroke-width="0.05"/>
+          </pattern>
+          <pattern id="q16" width="4" height="4" patternUnits="userSpaceOnUse">
+            <path d="M4 0V4M0 4H4" fill="none" stroke="#9A9280" stroke-width="0.09"/>
+          </pattern>
+        </defs>
+        <rect width="16" height="16" fill="#E8DFCB"/>
+        <path d="M3 7A5 5 0 0 1 13 7V8H3Z" fill="#4A6B52"/>
+        <path d="M7 8H9V12H12V14H4V12H7Z" fill="#17211C"/>
+        <rect width="16" height="16" fill="url(#px16)"/>
+        <rect width="16" height="16" fill="url(#q16)"/>
+      </svg>
+    </div>
+    <div class="cap">16 px · мастер ÷ 6 и три хинта</div>
+  </div>
+</div>
+<figcaption>На 16 остаются три массы и ни одной детали: купол шесть строк, стойка два столбца на четыре строки, плита восемь на два. Сглаживается только дуга — всё прямое лежит на целых пикселях.</figcaption>
+</figure>
+
+<h3>Какой рисунок на каком размере</h3>
+<table>
+  <tr><th style="width:26%">Размер вывода</th><th>Файл</th></tr>
+  <tr><td class="num">до 20 px</td><td>16-я версия</td></tr>
+  <tr><td class="num">21 … 47 px</td><td>32-я версия</td></tr>
+  <tr><td class="num">от 48 px</td><td>мастер 96</td></tr>
+</table>
+<div class="note">Один SVG не умеет переключать рисунок по размеру вывода, поэтому SVG-фавиконка — это всегда мастер, ужатый браузером. Хинтованные версии применяются там, где размер известен заранее: кадры <code>favicon.ico</code>, растровые иконки PWA, вставка знака в интерфейс. Мастер при этом ужимается корректно: он построен как точное шестикратное увеличение 16-й сетки, поэтому при уменьшении до 16 все кромки, кроме трёх захинтованных, ложатся на пиксели сами.</div>
+
+<h2>5. Проверки</h2>
+<table>
+  <tr><th style="width:34%">Что проверялось</th><th>Результат</th></tr>
+  <tr><td>Целые координаты на сетке 96</td><td>Все. Дробных значений в мастере нет.</td></tr>
+  <tr><td>Деление на 3</td><td>Точное для всех кромок. 32-я версия не потребовала хинтинга.</td></tr>
+  <tr><td>Деление на 6</td><td>Точное, кроме стойки и основания. Три отклонения зафиксированы выше.</td></tr>
+  <tr><td>Стык дуги и юбки</td><td>Касательная вертикальна с обеих сторон: хорда равна диаметру, значит дуга приходит в стык под 90°. Излома нет.</td></tr>
+  <tr><td>Обводки</td><td>Нет ни одной. Только заливки, только <code>&lt;path&gt;</code>.</td></tr>
+  <tr><td>Число фигур</td><td>Две: абажур акцентом, всё железо — одним замкнутым контуром. Монохромная и маскируемая версии получаются заменой заливок, без перерисовки.</td></tr>
+  <tr><td>Центр площади</td><td>y&nbsp;=&nbsp;42,3 при центре квадрата 48. Компенсация не вносится — обоснование под чертежом размеров.</td></tr>
+  <tr><td>Симметрия</td><td>Полная относительно x&nbsp;=&nbsp;48 на всех трёх размерах.</td></tr>
+  <tr><td>Растр 16 × 16</td><td>15 полутоновых пикселей из 256, все — сглаживание купола. В железе полутонов ноль. У версии 1.0 на том же тесте 43 и 29 соответственно.</td></tr>
+  <tr><td>Безопасная зона PWA maskable</td><td>Самая дальняя точка знака от центра — угол основания, 41,7. На поле 96 безопасный радиус 38,4, знак не проходит. Решение — не уменьшать знак, а расширить холст до 120: безопасный радиус становится 48. Геометрия знака при этом не меняется ни на единицу.</td></tr>
+</table>
+
+<h2>6. Цвет</h2>
+<p>Заливок ровно две, как в бренд-гайде: акцент на абажуре, чернила на железе. Правило одного акцента действует и внутри знака.</p>
+<div class="swatches">
+  <div class="sw"><div class="chip" style="background:#4A6B52"></div><div class="n">Абажур, светлая</div><div class="h">#4A6B52</div></div>
+  <div class="sw"><div class="chip" style="background:#17211C"></div><div class="n">Железо, светлая</div><div class="h">#17211C</div></div>
+  <div class="sw"><div class="chip" style="background:#E8DFCB"></div><div class="n">Плашка, светлая</div><div class="h">#E8DFCB</div></div>
+  <div class="sw"><div class="chip" style="background:#7FA085"></div><div class="n">Абажур, тёмная</div><div class="h">#7FA085</div></div>
+  <div class="sw"><div class="chip" style="background:#E8DFCB"></div><div class="n">Железо, тёмная</div><div class="h">#E8DFCB</div></div>
+  <div class="sw"><div class="chip" style="background:#17211C"></div><div class="n">Плашка, тёмная</div><div class="h">#17211C</div></div>
+</div>
+
+<figure>
+<div class="row">
+  <div class="cell">
+    <div class="plate" style="width:96px;height:96px;">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/>
+        <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/>
+      </svg>
+    </div>
+    <div class="cap">светлая плашка</div>
+  </div>
+  <div class="cell">
+    <div class="plate dark" style="width:96px;height:96px;">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#7FA085"/>
+        <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#E8DFCB"/>
+      </svg>
+    </div>
+    <div class="cap">тёмная плашка</div>
+  </div>
+  <div class="cell">
+    <div class="plate paper" style="width:96px;height:96px;">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#17211C"/>
+        <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/>
+      </svg>
+    </div>
+    <div class="cap">монохром, один цвет</div>
+  </div>
+  <div class="cell">
+    <div class="plate" style="width:120px;height:120px;">
+      <svg width="120" height="120" viewBox="-12 -12 120 120">
+        <rect x="-12" y="-12" width="120" height="120" fill="#E8DFCB"/>
+        <circle cx="48" cy="48" r="48" fill="none" stroke="#B04A3A" stroke-width="0.6" stroke-dasharray="3 3"/>
+        <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/>
+        <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/>
+      </svg>
+    </div>
+    <div class="cap">maskable · холст 120, знак не тронут</div>
+  </div>
+</div>
+<figcaption>Монохромная версия нужна для одноцветной печати, штампа на README и аватара организации там, где цвет не проходит. Силуэт при этом не меняется — меняется только заливка, как и требует бренд-гайд.</figcaption>
+</figure>
+
+<h2>7. Реальные размеры</h2>
+<figure>
+<div class="strip">
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:16px;height:16px;"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 7A5 5 0 0 1 13 7V8H3Z" fill="#4A6B52"/><path d="M7 8H9V12H12V14H4V12H7Z" fill="#17211C"/></svg></div></div><div class="cap">16</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:20px;height:20px;"><svg width="20" height="20" viewBox="0 0 16 16"><path d="M3 7A5 5 0 0 1 13 7V8H3Z" fill="#4A6B52"/><path d="M7 8H9V12H12V14H4V12H7Z" fill="#17211C"/></svg></div></div><div class="cap">20</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:24px;height:24px;"><svg width="24" height="24" viewBox="0 0 32 32"><path d="M6 14A10 10 0 0 1 26 14V16H6Z" fill="#4A6B52"/><path d="M14 16H18V18H17V25H22A1 1 0 0 1 23 26V27A1 1 0 0 1 22 28H10A1 1 0 0 1 9 27V26A1 1 0 0 1 10 25H15V18H14Z" fill="#17211C"/></svg></div></div><div class="cap">24</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:32px;height:32px;"><svg width="32" height="32" viewBox="0 0 32 32"><path d="M6 14A10 10 0 0 1 26 14V16H6Z" fill="#4A6B52"/><path d="M14 16H18V18H17V25H22A1 1 0 0 1 23 26V27A1 1 0 0 1 22 28H10A1 1 0 0 1 9 27V26A1 1 0 0 1 10 25H15V18H14Z" fill="#17211C"/></svg></div></div><div class="cap">32</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:48px;height:48px;border-radius:3px;"><svg width="48" height="48" viewBox="0 0 96 96"><path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/><path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/></svg></div></div><div class="cap">48</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:64px;height:64px;border-radius:4px;"><svg width="64" height="64" viewBox="0 0 96 96"><path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/><path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/></svg></div></div><div class="cap">64</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:96px;height:96px;border-radius:6px;"><svg width="96" height="96" viewBox="0 0 96 96"><path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/><path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/></svg></div></div><div class="cap">96</div></div>
+</div>
+<div class="strip">
+  <div class="cell"><div class="sizebox"><div class="plate dark" style="width:16px;height:16px;"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 7A5 5 0 0 1 13 7V8H3Z" fill="#7FA085"/><path d="M7 8H9V12H12V14H4V12H7Z" fill="#E8DFCB"/></svg></div></div><div class="cap">16</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate dark" style="width:20px;height:20px;"><svg width="20" height="20" viewBox="0 0 16 16"><path d="M3 7A5 5 0 0 1 13 7V8H3Z" fill="#7FA085"/><path d="M7 8H9V12H12V14H4V12H7Z" fill="#E8DFCB"/></svg></div></div><div class="cap">20</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate dark" style="width:24px;height:24px;"><svg width="24" height="24" viewBox="0 0 32 32"><path d="M6 14A10 10 0 0 1 26 14V16H6Z" fill="#7FA085"/><path d="M14 16H18V18H17V25H22A1 1 0 0 1 23 26V27A1 1 0 0 1 22 28H10A1 1 0 0 1 9 27V26A1 1 0 0 1 10 25H15V18H14Z" fill="#E8DFCB"/></svg></div></div><div class="cap">24</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate dark" style="width:32px;height:32px;"><svg width="32" height="32" viewBox="0 0 32 32"><path d="M6 14A10 10 0 0 1 26 14V16H6Z" fill="#7FA085"/><path d="M14 16H18V18H17V25H22A1 1 0 0 1 23 26V27A1 1 0 0 1 22 28H10A1 1 0 0 1 9 27V26A1 1 0 0 1 10 25H15V18H14Z" fill="#E8DFCB"/></svg></div></div><div class="cap">32</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate dark" style="width:48px;height:48px;border-radius:3px;"><svg width="48" height="48" viewBox="0 0 96 96"><path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#7FA085"/><path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#E8DFCB"/></svg></div></div><div class="cap">48</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate dark" style="width:64px;height:64px;border-radius:4px;"><svg width="64" height="64" viewBox="0 0 96 96"><path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#7FA085"/><path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#E8DFCB"/></svg></div></div><div class="cap">64</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate dark" style="width:96px;height:96px;border-radius:6px;"><svg width="96" height="96" viewBox="0 0 96 96"><path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#7FA085"/><path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#E8DFCB"/></svg></div></div><div class="cap">96</div></div>
+</div>
+<figcaption>Скругление плашки в этой таблице задано стилями страницы и в файлы не входит: иконка всегда полноформатный квадрат, а маску накладывает система.</figcaption>
+</figure>
+
+<h2>8. Связка с надписью</h2>
+<p>Отступ до надписи — не менее половины высоты знака, выравнивание по низу основания. На мастере высота знака 72, значит минимальный отступ 36; в любом другом масштабе — та же половина высоты.</p>
+<figure>
+<div class="row">
+  <div class="cell">
+    <div class="plate paper" style="padding:20px 24px;border-radius:5px;">
+      <svg width="290" height="90" viewBox="0 0 290 90">
+        <g transform="translate(-18,-12)">
+          <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/>
+          <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/>
+        </g>
+        <g stroke="#B04A3A" stroke-width="0.7" fill="none" stroke-dasharray="3 2">
+          <path d="M60 0V78M96 0V78"/>
+        </g>
+        <text x="72" y="81" font-family="ui-monospace,monospace" font-size="9" fill="#B04A3A">36</text>
+        <text x="96" y="72" font-family="Georgia,serif" font-size="68" fill="#17211C">Carrel</text>
+      </svg>
+    </div>
+    <div class="cap">знак 72 в высоту, отступ 36, база по низу основания</div>
+  </div>
+</div>
+<figcaption>Надпись здесь набрана Georgia как подстановкой — окончательный вариант переводится в кривые на Literata или Source Serif 4, как и оговорено в файле вариантов надписи.</figcaption>
+</figure>
+
+<h2>9. Исходники</h2>
+
+<p>Ниже — готовое содержимое файлов. Атрибут <code>width</code>/<code>height</code> оставлен только там, где файл может быть отрисован вне контекста с размером; в остальных случаях достаточно <code>viewBox</code>.</p>
+
+<div class="file">mark.svg — знак без плашки, мастер</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Carrel"&gt;
+  &lt;path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/&gt;
+  &lt;path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">icon.svg — иконка приложения и фавиконка, светлая плашка</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Carrel"&gt;
+  &lt;rect width="96" height="96" fill="#E8DFCB"/&gt;
+  &lt;path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/&gt;
+  &lt;path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">icon-dark.svg — тёмная плашка</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Carrel"&gt;
+  &lt;rect width="96" height="96" fill="#17211C"/&gt;
+  &lt;path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#7FA085"/&gt;
+  &lt;path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#E8DFCB"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">icon-maskable.svg — PWA maskable, холст 120, геометрия знака та же</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 120 120" role="img" aria-label="Carrel"&gt;
+  &lt;rect x="-12" y="-12" width="120" height="120" fill="#E8DFCB"/&gt;
+  &lt;path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/&gt;
+  &lt;path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">icon-32.svg — хинтовано, мастер ÷ 3</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Carrel"&gt;
+  &lt;rect width="32" height="32" fill="#E8DFCB"/&gt;
+  &lt;path d="M6 14A10 10 0 0 1 26 14V16H6Z" fill="#4A6B52"/&gt;
+  &lt;path d="M14 16H18V18H17V25H22A1 1 0 0 1 23 26V27A1 1 0 0 1 22 28H10A1 1 0 0 1 9 27V26A1 1 0 0 1 10 25H15V18H14Z" fill="#17211C"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">icon-16.svg — хинтовано, три отклонения от деления</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="Carrel"&gt;
+  &lt;rect width="16" height="16" fill="#E8DFCB"/&gt;
+  &lt;path d="M3 7A5 5 0 0 1 13 7V8H3Z" fill="#4A6B52"/&gt;
+  &lt;path d="M7 8H9V12H12V14H4V12H7Z" fill="#17211C"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">mono.svg — один цвет, для печати и штампов</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Carrel"&gt;
+  &lt;path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="currentColor"/&gt;
+  &lt;path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="currentColor"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<h2>10. Что эталон фиксирует</h2>
+<ul>
+  <li>Координаты из таблицы раздела 3 — единственный источник геометрии. Любой файл, где кромка стоит не там, — испорченная копия.</li>
+  <li>Две заливки, ноль обводок. Железо — один замкнутый контур, а не набор прямоугольников и линии.</li>
+  <li>Между темами меняются только заливки. Силуэт, поля и координаты одинаковы во всех вариантах, включая maskable.</li>
+  <li>Хинтинг допускается только в трёх местах 16-й версии, перечисленных в разделе 4. Больше нигде рисунок от деления не отступает.</li>
+  <li>Плашка — полноформатный квадрат без скругления. Скругление накладывает система или стили страницы.</li>
+  <li>Никаких градиентов, теней, свечения и провода — так же, как в бренд-гайде.</li>
+  <li>Без поворотов и отражений. Знак стоит вертикально и смотрит в одну сторону всегда.</li>
+  <li>Отдельно от надписи — только в квадратных форматах: фавиконка, иконка приложения, аватар. В строке текста и в шапке знак идёт в связке, по правилу отступа из раздела 8.</li>
+</ul>
+
+<h2>11. Чего эталон не закрывает</h2>
+<ul>
+  <li><strong>Нет <code>favicon.ico</code>.</strong> Сейчас в <code>base.html</code> объявлена только SVG-фавиконка, то есть на 16 px браузер всегда ужимает мастер, а хинтованный рисунок не используется. Пока это приемлемо — мастер построен так, чтобы ужиматься чисто, — но кадры 16 и 32 из готовых файлов дадут заметно более резкий результат в списке вкладок и в закладках.</li>
+  <li><strong>Растровых иконок PWA нет.</strong> Манифест отдаёт один SVG. Для установки на Android нужен ещё <code>icon-maskable</code> с <code>"purpose": "maskable"</code>, иначе система обрежет квадрат по своей маске вслепую.</li>
+  <li><strong>Файл вариантов надписи на старой геометрии.</strong> В <code>carrel-wordmarks.html</code> знак нарисован в трёх разных масштабах с собственными пропорциями — их надо привести к мастеру. Пока связка знака с надписью зафиксирована только правилом отступа в разделе 8, а не готовым файлом.</li>
+</ul>
+
+</div>
+</body>
+</html>
