@@ -20,7 +20,9 @@ It stores no copy of your data. The DAV server is the source of truth; Carrel is
 
 **Tasks** (VTODO) with open/done filters, due dates and an overdue marker.
 
-**Notes** (VJOURNAL) — the part with no web client anywhere else. Compatible with **jtx Board** on Android and **Evolution** on the desktop, so a note written here opens there and back again with nothing lost. Markdown export and import, a **New note** button on every screen that files into the collection you used last, `RELATED-TO` links between notes, tasks and events, and a timeline on each contact card showing everything that person appears in.
+**Notes** (VJOURNAL) — **edit your jtx Board notes on a big screen.** This is the part with no web client anywhere else: jtx Board exists on Android and Evolution on Linux, and between them there is no web link at all. A note written here opens in both and comes back with nothing lost, including the `X-` properties jtx writes. Markdown export and import, a **New note** button on every screen that files into the collection you used last, and `RELATED-TO` links between notes, tasks and events.
+
+**A contact card that is a client card.** Open a person and see everything they appear in: every event they attended, every note that mentions them, in one timeline across every server you ticked. Matched on their addresses first and their display name second, computed live, stored nowhere. This is the thing people usually buy a CRM for, and it exists here because the data was already loaded.
 
 **Duplicates.** The same person written into two address books on two servers is found, shown with the reason it was matched, and either linked — one row, merged fields, nothing written to any server — or merged on the server, which is confirmed first and writes before it deletes.
 
