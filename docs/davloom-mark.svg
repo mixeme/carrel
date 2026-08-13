@@ -7,5 +7,5 @@
     <path d="M6 84 C18 84 30 72 42 63"/>
   </g>
   <rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/>
-  <rect x="54" y="36" width="42" height="24" fill="#4A6B52"/>
+  <rect x="48" y="36" width="48" height="24" fill="#4A6B52"/>
 </svg>

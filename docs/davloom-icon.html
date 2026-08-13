@@ -79,7 +79,7 @@
           <path d="M6 84 C18 84 30 72 42 63"/>
         </g>
         <rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/>
-        <rect x="54" y="36" width="42" height="24" fill="#4A6B52"/>
+        <rect x="48" y="36" width="48" height="24" fill="#4A6B52"/>
       </svg>
     </div>
     <div class="plate dark" style="width:96px;height:96px;border-radius:6px;">
@@ -92,7 +92,7 @@
           <path d="M6 84 C18 84 30 72 42 63"/>
         </g>
         <rect x="42" y="18" width="6" height="60" rx="1.5" fill="#E8DFCB"/>
-        <rect x="54" y="36" width="42" height="24" fill="#7FA085"/>
+        <rect x="48" y="36" width="48" height="24" fill="#7FA085"/>
       </svg>
     </div>
   </div>
@@ -116,11 +116,11 @@
 
 <p>Черновик 1.0 был верен по смыслу и неверен по разметке — те же классы проблем, что у знака Carrel до перестройки.</p>
 
-<p><strong>Кромки не на сетке.</strong> Начала крайних нитей стояли на y&nbsp;=&nbsp;14 и 82 вместо 12 и 84; сходимость — на x&nbsp;=&nbsp;44 вместо 42; полотно начиналось с x&nbsp;=&nbsp;52 вместо 54. Ни одна из этих координат не кратна модулю 6, поэтому при делении на 32 и 16 каждая кромка уезжала между пикселями.</p>
+<p><strong>Кромки не на сетке.</strong> Начала крайних нитей стояли на y&nbsp;=&nbsp;14 и 82 вместо 12 и 84; сходимость — на x&nbsp;=&nbsp;44 вместо 42; полотно начиналось с x&nbsp;=&nbsp;52 вместо 48. Ни одна из этих координат не кратна модулю 6, поэтому при делении на 32 и 16 каждая кромка уезжала между пикселями.</p>
 
 <p><strong>Полотно и вал не согласованы по модулю.</strong> Высота полотна была 20 (не кратна 6), верх на y&nbsp;=&nbsp;38 (тоже нет). Центр полотна не совпадал с центральной нитью y&nbsp;=&nbsp;48 — смещение на один модуль.</p>
 
-<p><strong>Зазор вал–полотно случайный.</strong> Между x&nbsp;=&nbsp;50 и x&nbsp;=&nbsp;52 лежали 2 px без правила. В 1.1 зазор ровно один модуль (6 px): вал заканчивается на 48, полотно начинается на 54.</p>
+<p><strong>Зазор между валом и полотном.</strong> В 1.0 между правой кромкой вала (x&nbsp;=&nbsp;50) и левой кромкой полотна (x&nbsp;=&nbsp;52) были 2&nbsp;px пустоты. Это не деталь станка, а случайный люфт: ткань выходит из берда, а не висит рядом. В первой сетке 1.1 зазор даже увеличили до модуля (6&nbsp;px), чтобы пустота «легла на сетку». Неверно. Полотно начинается там, где кончается вал: x&nbsp;=&nbsp;48. Две заливки, общая кромка, разные цвета — массы остаются разными без дырки.</p>
 
 <h2>3. Сетка и модуль</h2>
 
@@ -148,7 +148,7 @@
           <path d="M6 84 C18 84 30 72 42 63"/>
         </g>
         <rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C" fill-opacity="0.34" stroke="#17211C" stroke-width="0.5"/>
-        <rect x="54" y="36" width="42" height="24" fill="#4A6B52" fill-opacity="0.28" stroke="#4A6B52" stroke-width="0.5"/>
+        <rect x="48" y="36" width="48" height="24" fill="#4A6B52" fill-opacity="0.28" stroke="#4A6B52" stroke-width="0.5"/>
         <line x1="0" y1="48" x2="96" y2="48" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="3 2"/>
         <rect x="6" y="12" width="36" height="72" fill="none" stroke="#B04A3A" stroke-width="0.5"/>
         <rect x="0" y="0" width="96" height="96" fill="none" stroke="#9A9280" stroke-width="0.5"/>
@@ -167,8 +167,7 @@
   <tr><td>Входы в вал</td><td class="num">42</td><td class="num">33, 42, 48, 54, 63</td><td>левая кромка вала</td></tr>
   <tr><td>Центральная нить</td><td class="num">6 … 42</td><td class="num">48</td><td>отрезок, без кривой</td></tr>
   <tr><td>Вал</td><td class="num">42 … 48</td><td class="num">18 … 78</td><td>6&nbsp;×&nbsp;60, rx&nbsp;1.5</td></tr>
-  <tr><td>Зазор</td><td class="num">48 … 54</td><td class="num">—</td><td>один модуль, пусто</td></tr>
-  <tr><td>Полотно</td><td class="num">54 … 96</td><td class="num">36 … 60</td><td>42&nbsp;×&nbsp;24</td></tr>
+  <tr><td>Полотно</td><td class="num">48 … 96</td><td class="num">36 … 60</td><td>48&nbsp;×&nbsp;24, стык с валом на x&nbsp;=&nbsp;48</td></tr>
   <tr><td>Обводка нитей</td><td colspan="3">stroke-width&nbsp;2, round cap — на всех трёх размерах; на 16 px не утоньшается</td></tr>
 </table>
 
@@ -183,7 +182,7 @@ M6 84 C18 84 30 72 42 63</code></pre>
 
 <p>32-я версия — мастер ÷ 3. Вал и полотно делятся точно. Нити: stroke-width 2 вместо 0,67 — единственный хинт на этом размере.</p>
 
-<p>16-я версия — мастер ÷ 6 с четырьмя хинтами. Три из них — у вала и полотна; четвёртый — у точек входа нитей в вал, где деление даёт половинки.</p>
+<p>16-я версия — мастер ÷ 6 с тремя хинтами: точки входа нитей, ширина вала, обводка. Полотно делится точно; после утолщения вала до двух пикселей его правая кромка и левая кромка полотна по-прежнему совпадают.</p>
 
 <table>
   <tr><th style="width:26%">Что</th><th class="num" style="width:22%">96 ÷ 6</th><th class="num" style="width:18%">Нарисовано</th><th>Почему</th></tr>
@@ -206,7 +205,7 @@ M6 84 C18 84 30 72 42 63</code></pre>
           <path d="M2 28 C6 28 10 24 14 21"/>
         </g>
         <rect x="14" y="6" width="2" height="20" rx="0.5" fill="#17211C"/>
-        <rect x="18" y="12" width="14" height="8" fill="#4A6B52"/>
+        <rect x="16" y="12" width="16" height="8" fill="#4A6B52"/>
       </svg>
     </div>
     <div class="cap">32 px · вал и полотно ÷ 3, stroke 1</div>
@@ -225,7 +224,7 @@ M6 84 C18 84 30 72 42 63</code></pre>
         <rect x="9" y="6" width="7" height="4" fill="#4A6B52"/>
       </svg>
     </div>
-    <div class="cap">16 px · четыре хинта</div>
+    <div class="cap">16 px · три хинта</div>
   </div>
 </div>
 </figure>
@@ -236,7 +235,7 @@ M6 84 C18 84 30 72 42 63</code></pre>
   <tr><td>Целые координаты вала и полотна</td><td>Все вершины на сетке 6.</td></tr>
   <tr><td>Симметрия нитей</td><td>Относительно y&nbsp;=&nbsp;48: начала 12/84, входы 33/63 и 42/54.</td></tr>
   <tr><td>Центр полотна</td><td>y&nbsp;=&nbsp;48 — совпадает с центральной нитью и серединой вала.</td></tr>
-  <tr><td>Зазор вал–полотно</td><td>Ровно 6 px (один модуль).</td></tr>
+  <tr><td>Стык вал–полотно</td><td>Общая кромка x&nbsp;=&nbsp;48. Пустоты нет. На 32 — x&nbsp;=&nbsp;16; на 16 после утолщения вала — x&nbsp;=&nbsp;9.</td></tr>
   <tr><td>Деление на 3</td><td>Вал и полотно без правок; stroke нитей 2→1.</td></tr>
   <tr><td>Правило одного акцента</td><td>Акцент только на полотне. Нити и вал — чернила.</td></tr>
   <tr><td>Не второй логотип</td><td>Не используется как знак Carrel, не в фавиконке проекта, не в связке с надписью «Carrel».</td></tr>
@@ -255,10 +254,10 @@ M6 84 C18 84 30 72 42 63</code></pre>
 <figure>
 <div class="strip">
   <div class="cell"><div class="sizebox"><div class="plate" style="width:16px;height:16px;"><svg width="16" height="16" viewBox="0 0 16 16"><g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round"><path d="M1 2 C3 2 5 4 7 5"/><path d="M1 5 C4 5 6 7 7 7"/><path d="M1 8 L7 8"/><path d="M1 11 C4 11 6 9 7 9"/><path d="M1 14 C3 14 5 12 7 11"/></g><rect x="7" y="3" width="2" height="10" fill="#17211C"/><rect x="9" y="6" width="7" height="4" fill="#4A6B52"/></svg></div></div><div class="cap">16</div></div>
-  <div class="cell"><div class="sizebox"><div class="plate" style="width:24px;height:24px;"><svg width="24" height="24" viewBox="0 0 32 32"><g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round"><path d="M2 4 C6 4 10 8 14 11"/><path d="M2 10 C8 10 12 14 14 14"/><path d="M2 16 L14 16"/><path d="M2 22 C8 22 12 18 14 18"/><path d="M2 28 C6 28 10 24 14 21"/></g><rect x="14" y="6" width="2" height="20" rx="0.5" fill="#17211C"/><rect x="18" y="12" width="14" height="8" fill="#4A6B52"/></svg></div></div><div class="cap">24</div></div>
-  <div class="cell"><div class="sizebox"><div class="plate" style="width:32px;height:32px;"><svg width="32" height="32" viewBox="0 0 32 32"><g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round"><path d="M2 4 C6 4 10 8 14 11"/><path d="M2 10 C8 10 12 14 14 14"/><path d="M2 16 L14 16"/><path d="M2 22 C8 22 12 18 14 18"/><path d="M2 28 C6 28 10 24 14 21"/></g><rect x="14" y="6" width="2" height="20" rx="0.5" fill="#17211C"/><rect x="18" y="12" width="14" height="8" fill="#4A6B52"/></svg></div></div><div class="cap">32</div></div>
-  <div class="cell"><div class="sizebox"><div class="plate" style="width:48px;height:48px;"><svg width="48" height="48" viewBox="0 0 96 96"><g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round"><path d="M6 12 C18 12 30 24 42 33"/><path d="M6 30 C24 30 36 42 42 42"/><path d="M6 48 L42 48"/><path d="M6 66 C24 66 36 54 42 54"/><path d="M6 84 C18 84 30 72 42 63"/></g><rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/><rect x="54" y="36" width="42" height="24" fill="#4A6B52"/></svg></div></div><div class="cap">48</div></div>
-  <div class="cell"><div class="sizebox"><div class="plate" style="width:96px;height:96px;border-radius:6px;"><svg width="96" height="96" viewBox="0 0 96 96"><g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round"><path d="M6 12 C18 12 30 24 42 33"/><path d="M6 30 C24 30 36 42 42 42"/><path d="M6 48 L42 48"/><path d="M6 66 C24 66 36 54 42 54"/><path d="M6 84 C18 84 30 72 42 63"/></g><rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/><rect x="54" y="36" width="42" height="24" fill="#4A6B52"/></svg></div></div><div class="cap">96</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:24px;height:24px;"><svg width="24" height="24" viewBox="0 0 32 32"><g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round"><path d="M2 4 C6 4 10 8 14 11"/><path d="M2 10 C8 10 12 14 14 14"/><path d="M2 16 L14 16"/><path d="M2 22 C8 22 12 18 14 18"/><path d="M2 28 C6 28 10 24 14 21"/></g><rect x="14" y="6" width="2" height="20" rx="0.5" fill="#17211C"/><rect x="16" y="12" width="16" height="8" fill="#4A6B52"/></svg></div></div><div class="cap">24</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:32px;height:32px;"><svg width="32" height="32" viewBox="0 0 32 32"><g fill="none" stroke="#17211C" stroke-width="1" stroke-linecap="round"><path d="M2 4 C6 4 10 8 14 11"/><path d="M2 10 C8 10 12 14 14 14"/><path d="M2 16 L14 16"/><path d="M2 22 C8 22 12 18 14 18"/><path d="M2 28 C6 28 10 24 14 21"/></g><rect x="14" y="6" width="2" height="20" rx="0.5" fill="#17211C"/><rect x="16" y="12" width="16" height="8" fill="#4A6B52"/></svg></div></div><div class="cap">32</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:48px;height:48px;"><svg width="48" height="48" viewBox="0 0 96 96"><g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round"><path d="M6 12 C18 12 30 24 42 33"/><path d="M6 30 C24 30 36 42 42 42"/><path d="M6 48 L42 48"/><path d="M6 66 C24 66 36 54 42 54"/><path d="M6 84 C18 84 30 72 42 63"/></g><rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/><rect x="48" y="36" width="48" height="24" fill="#4A6B52"/></svg></div></div><div class="cap">48</div></div>
+  <div class="cell"><div class="sizebox"><div class="plate" style="width:96px;height:96px;border-radius:6px;"><svg width="96" height="96" viewBox="0 0 96 96"><g fill="none" stroke="#17211C" stroke-width="2" stroke-linecap="round"><path d="M6 12 C18 12 30 24 42 33"/><path d="M6 30 C24 30 36 42 42 42"/><path d="M6 48 L42 48"/><path d="M6 66 C24 66 36 54 42 54"/><path d="M6 84 C18 84 30 72 42 63"/></g><rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/><rect x="48" y="36" width="48" height="24" fill="#4A6B52"/></svg></div></div><div class="cap">96</div></div>
 </div>
 <figcaption>Знак без фоновой плашки: прозрачный фон, если SVG вставлен inline. Плашку картона добавляет только вариант icon.svg для квадратных форматов.</figcaption>
 </figure>
@@ -285,7 +284,7 @@ M6 84 C18 84 30 72 42 63</code></pre>
     &lt;path d="M6 84 C18 84 30 72 42 63"/&gt;
   &lt;/g&gt;
   &lt;rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/&gt;
-  &lt;rect x="54" y="36" width="42" height="24" fill="#4A6B52"/&gt;
+  &lt;rect x="48" y="36" width="48" height="24" fill="#4A6B52"/&gt;
 &lt;/svg&gt;</code></pre>
 
 <div class="file">davloom-icon.svg — с плашкой картона</div>
@@ -299,6 +298,7 @@ M6 84 C18 84 30 72 42 63</code></pre>
 <h2>10. Что эталон фиксирует</h2>
 <ul>
   <li>Координаты из таблицы раздела 3 — единственный источник геометрии.</li>
+  <li>Полотно стыкуется с валом: общая кромка, без зазора.</li>
   <li>Нити — обводка stroke-width&nbsp;2 на мастере; это единственное допустимое отступление от правила «только заливки», и оно относится только к нитям.</li>
   <li>Акцент — только полотно. Вал и нити всегда чернильные (или картонные в тёмной теме).</li>
   <li>Имя модуля — строчными: davloom, не Davloom и не DAVLoom.</li>
