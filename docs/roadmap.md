@@ -17,11 +17,15 @@ Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for t
 - **Debug logs holding no password or token** after that scenario. A test asserts about lines it thought to look at; a person reads what is there.
 - **Pasting a screenshot into a note taking a couple of seconds.** §23.10 says outright that if this is slow the feature is dead, and no assertion measures whether something felt instant.
 
-**`go test -race ./...` on a machine with a C compiler.** The suite passes without it; the goroutine-leak and race gate of §21 needs it, and the development machine has been without gcc in `PATH` for part of this work.
+**A live end-to-end pass of attachments** against a real Baikal plus a real WebDAV server, through the browser. The pieces are each verified live now: discovery against Baikal, and listing, streaming, range requests, conditional creates and folder creation against SFTPGo. What the integration tests do not cover is the two combined through the interface — attaching to a note on Baikal with the file landing on the separate WebDAV account — which is check **P5** above.
 
-**A live end-to-end pass of attachments** against a real Baikal plus a real WebDAV server, through the browser. The pieces are now each verified live: discovery against Baikal, and listing, streaming, range requests, conditional creates and folder creation against SFTPGo. What the integration tests do not cover is the two combined through the interface — attaching to a note on Baikal with the file landing on the separate WebDAV account — which is check **P5** in [manual-acceptance.md](manual-acceptance.md).
+### Already cleared
 
-> Running these tests for the first time found three bugs, all in Carrel: discovery could not reach a principal under a base path, a download was truncated at the response ceiling, and a create trusted a precondition SFTPGo ignores. Each now has a regression test offline. The lesson is worth keeping in view: a fake DAV server agrees with whatever the code assumes, and a test tier that skips silently when unconfigured is a tier nobody notices is not running.
+- **`go test ./...`** — green, and the gate for every commit.
+- **`go test -race ./...`** — green across all seventeen packages, including the goroutine-leak and race gate of §21 in `internal/fanout`: concurrent snapshots against retries and subscribers, cancellation, and a cancelled task opening no further connections. Needs gcc in `PATH`; `-race` refuses to build without one rather than quietly skipping, so a run that cannot start says so.
+- **`go test -tags=integration ./...`** — green against a live Baikal and a live SFTPGo. Running it for the first time found three bugs, all in Carrel: discovery could not reach a principal under a base path, a download was truncated at the response ceiling, and a create trusted a precondition SFTPGo ignores. Each now has an offline regression test.
+
+> The lesson from that last one is worth keeping in view. A fake DAV server agrees with whatever the code assumes — ours put DAV at the root and honoured every header, which is exactly why two of the three were invisible. And a test tier that skips silently when unconfigured is a tier nobody notices is not running: `-tags=integration` reported `ok` in two seconds for as long as nobody had credentials loaded.
 
 ---
 
