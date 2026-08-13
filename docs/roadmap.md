@@ -35,7 +35,7 @@ Found by reading the stage plans back against the code they describe, and worth 
 
 ### Requirements not met
 
-**A process-wide memory ceiling for the cache (§12).** The cache has per-session limits — collections, ETag entries, thumbnail bytes and count — and they work. What §12 also asks for is a ceiling across *all* sessions, with LRU eviction reaching across users, precisely so that ten people with large address books cannot together exhaust the container's memory. There is no such ceiling: ten sessions get ten times the per-session allowance. On a single-user instance this is invisible; on anything shared it is the difference between a slow instance and one the kernel kills. It is also the one item on this list that becomes load-bearing the moment multi-tenancy (§23.5) is taken seriously.
+**A process-wide memory ceiling for the cache (§12).** The cache has per-session limits — collections, ETag entries, thumbnail bytes and count — and they work. What §12 also asks for is a ceiling across *all* sessions, with LRU eviction reaching across users, precisely so that ten people with large address books cannot together exhaust the container's memory. There is no such ceiling: ten sessions get ten times the per-session allowance. On a single-user instance this is invisible; on anything shared it is the difference between a slow instance and one the kernel kills.
 
 **Byte accounting for object bodies, and eviction in the right order (§12).** Thumbnails are counted in bytes and evicted against a byte ceiling. Object bodies are not counted at all — a collection is evicted whole, taking its ETag map with it. §12 is explicit that the order should be the other way round: bodies go first and ETag maps are held longer, because the maps are small and save the most. Today evicting one collection under pressure throws away the cheap thing along with the expensive one, and the next visit pays a deep `PROPFIND` it did not need to.
 
@@ -88,17 +88,28 @@ In order of increasing compromise, and the order they should be built in:
 1. **On demand.** The person is signed in, the key is unwrapped, the archive goes where they chose. No concession to the security model at all.
 2. **On sign-in.** If the last copy is older than N days, offer or take one in the session that is already open. Someone who signs in weekly gets weekly copies for free, and no secret is stored.
 3. **External trigger.** `POST /api/backup/run` with an app-password whose scope is exactly one thing: starting a backup. Not reading collections, not settings, nothing else. Asynchronous, rate limited, audited, and refusing a second run while one is going. The scheduler is `cron` or anything else, and the secret lives on the machine that holds the schedule. Plus `GET /api/backup/{id}/download` for people with nowhere to write, streamed and never landing on the server's disk.
-4. **A scheduler with a stored password.** Only if the three above prove insufficient, and knowing what it costs: the password would sit on the volume beside the wrapper it opens, so Argon2id protects nothing against whoever owns the host. Its real value is compartmentalisation and revocation, and the interface would have to say so without euphemism.
 
 Non-negotiable whatever the trigger: the archive is encrypted under its own password, distinct from the login password, because the target may be somebody else's hosting; the file is dated rather than overwritten and N are kept; what was written is read back and checked, because a backup that failed quietly is worse than none; a failure on one collection marks it in the manifest and continues; and **restore is part of the feature**, because a copy with no tested restore is a feeling and not a protection.
 
-### 3. Sharing: publish and subscribe (§23.4)
+### 3. Read-only publication (§23.4)
 
-Three things of very different cost, and the value is in not confusing them.
+One mechanism for two directions — **outbound** (your own) and **inbound** (someone else's feed) — with the same constraints: read-only, no local content storage, served on demand.
 
-- **Read-only publication** is nearly free and has no state: a secret link serves a collection as `.ics` or `.vcf` built from a live read. Token of at least 32 random bytes stored as a digest, one-click revocation, a configurable lifetime, the active links listed in the profile with when each was last used, `Cache-Control: private`, `X-Robots-Tag: noindex`, and its own rate limit because a public link will be guessed at. One collection per link, never a whole account. This closes a hole Baikal simply does not fill.
-- **A writable link** is the same mechanism, and carries a warning that cannot be hidden: every edit will look on the server as if the owner made it, because it goes through the owner's account. That is not shared access and must not be called it in the interface. Real sharing is a server-side ACL, granted by whoever owns the data, and Carrel does not create accounts on Baikal.
-- **Subscribing to an external calendar** is honest in the web interface only as a fetch on demand, because a subscription has nowhere to live between sessions and caching the feed on disk would be exactly the local content persistence §2 forbids. It becomes nearly free in proxy mode, where the feed is one more read-only collection the client decides when to refresh — so it belongs to davloom rather than here.
+**Outbound: your own via a secret link.** A secret link on one object or one collection, built from a live read of a connected upstream, openable without signing in:
+
+| Object | In the browser | Download |
+|---|---|---|
+| Address book (CardDAV) | contact list | `.vcf` |
+| Calendar (CalDAV) | agenda for a range | `.ics` |
+| Note (VJOURNAL) | rendered page | Markdown or raw `.ics` |
+| File (WebDAV) | image — inline preview; PDF — served as `application/pdf`, viewed in the browser; text (`text/plain`, `.txt`) and Markdown (`.md`) — body on the publication page; everything else — name and size | streamed with `Content-Type` |
+| Folder (WebDAV) | listing with a format icon per file | — |
+
+For files Carrel does not build a universal viewer: images inline, PDF to the browser, text and Markdown read from the stream into a simple HTML page — no new persistence model, only a size ceiling and a template like any other page in this feature. Text goes in a `<pre>` with escaping; Markdown gets a simple safe HTML render (headings, lists, emphasis, links, code), with raw HTML in the source escaped. A folder is a list of names with a type icon on each row — no content preview.
+
+**Inbound: subscribe to an external calendar or address book.** The person points at an external feed URL — `.ics` for a calendar, `.vcf` or equivalent for an address book — and gets the same read-only access: view in the browser and/or a secret link outward. The subscription has nowhere to live between sessions: Carrel fetches the feed on every access, and caching it on disk would be exactly the local content persistence §2 forbids. In the owner's session — view on demand; outward — through the same secret-link mechanism as for their own collections. In proxy mode (§23.2) the feed additionally appears to DAV clients as one more read-only collection they refresh themselves.
+
+**Shared requirements:** no state and no stored content — no concession to §2 or §4. Token of at least 32 random bytes stored as a digest, one-click revocation, configurable lifetime, active links listed in the profile with last access time, `Cache-Control: private`, `X-Robots-Tag: noindex`, its own rate limit. One object, one collection or one external feed per link — never a whole account. For external sources: timeout and response size limit; an unavailable source must not take down other collections (§17); source marked external and read-only; SSRF rules (§24.2) apply to the feed URL like any other outbound request.
 
 ### 4. davloom — DAV proxy mode (§23.2)
 
@@ -115,12 +126,6 @@ Authentication is per-device app-passwords, each with its own DEK wrapper, so re
 
 The real risk is not the code: an implementation that follows the RFC and one that DAVx5, Thunderbird and Apple Calendar all digest are noticeably different, and that tail often costs more than the feature. Start read-only against one DAVx5.
 
-### 5. Carrel as a service (§23.5)
-
-Almost no code: §5 already isolates users, invites them and keeps administrators out of their data. What is missing is quotas — accounts and collections per user, and a per-user memory ceiling as well as the process-wide one, or one person with an enormous address book evicts everyone else — self-registration with email confirmation, terms and operator contact on the about page, and escrow transparency shown *before* somebody connects an account rather than after.
-
-The honest limits have to be written into the terms, not just the README: the operator's instance holds users' DAV passwords encrypted and decrypts them in memory on every request, so an operator with process access can technically obtain them, and a restart signs everyone out.
-
 ---
 
 ## Undecided
@@ -129,7 +134,7 @@ Two ideas with a real price, recorded rather than planned. Neither is accepted.
 
 **Parsing service exports** (§23.7) — not standard `.vcf` and `.ics`, which already work, but what Google Takeout, iCloud and phone exports actually produce: non-standard group `X-` properties, photos in several representations, several cards glued into one file, encodings, escaping, nested archives. This determines whether people arrive: somebody migrates once, and if the import stumbles they do not come back. The price is that the work never finishes — export formats change without notice and each source is its own set of special cases — and it needs real exports to test against. The alternative is accepting standard files honestly and recommending a converter.
 
-**A wastebasket** (§23.7) — DAV servers have none, so a deleted contact is gone. Carrel could hold deleted objects for N days. This exists nowhere in the ecosystem and is exactly the feature that saves somebody's data once. The price is a direct breach of §2: restoring needs the **body**, not metadata, so it would be the first real local persistence of content. Mitigations are genuine (only deletions, only temporary, encrypted under the same DEK, bounded, auto-expiring) but so is the breach. And it would only cover deletions made through Carrel — a deletion from another client is seen as an object that has vanished, already without its body — which has to be said plainly or it creates a false sense of safety. The question is whether a partial wastebasket justifies giving up a founding principle, or whether backup (§23.3) closes the same scenario with no concession at all.
+**A writable link** (§23.7) — the same mechanism as read-only publication, but edits go through the owner's upstream account. Every change will look on the server as if the owner made it; upstream logs cannot tell who edited. That is not shared access and must not be called it in the interface. Real sharing is a server-side ACL. The question is whether this is needed at all, or read-only publication closes the real scenario.
 
 ---
 
@@ -148,4 +153,7 @@ Saying no is part of the design, and each of these is a decision with a reason r
 - **A file manager.** Previews, permissions, renaming trees at scale. The file section serves attachments; a file manager is a different product with different competitors.
 - **Cleaning up the attachments folder.** No quotas, no garbage collection, no deleting orphans. It is the person's storage, and §23.10 is explicit that taking responsibility for somebody else's contents is not Carrel's job.
 - **Being a mobile app.** The narrow layout is a lifeboat: read the schedule, find a number, write a note. Duplicate groups, merging, photo cropping, the administration panel and account setup are deliberately not optimised for it. For comfortable phone use the answer is DAVx5 and jtx Board, and saying so is more useful than pretending.
+- **A wastebasket for deleted objects.** DAV servers have none, and backup (§23.3) closes the same scenario without breaching §2.
+- **Carrel as a hosted service.** §5 already supports several users on one instance; positioning Carrel as a public multi-tenant offering is out of scope.
+- **An internal backup scheduler with a stored password.** Scheduling belongs on the machine that holds the secret — `cron`, GoSentry, a Gitea job — via the external trigger (§23.3). Storing the password on the volume beside its wrapper is the compromise §4 deliberately avoids.
 - **Protecting against the host operator.** DAV needs the password in cleartext for Basic authentication, so it is in memory during a request. This is inherent to the protocol.

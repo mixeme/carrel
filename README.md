@@ -129,7 +129,7 @@ The complete inventory, kept current. If something is here, it works; if it is m
 
 Named here so the list above can be read as complete. Detail, reasoning and order in the [roadmap](docs/roadmap.md).
 
-**Next:** a new-device screen (Apple `.mobileconfig`, DAVx5 QR); backup to a WebDAV of your choice, encrypted, with restore; publishing a collection read-only by secret link; [davloom](docs/roadmap.md), the proxy mode that makes Carrel one account for every device; quotas and self-registration for running this as a service.
+**Next:** a new-device screen (Apple `.mobileconfig`, DAVx5 QR); backup to a WebDAV of your choice, encrypted, with restore; read-only publication by secret link — your own address book, calendar, notes, files and folders, or an external calendar or address-book feed, all viewable in the browser; [davloom](docs/roadmap.md), the proxy mode that makes Carrel one account for every device.
 
 **Smaller gaps:** attachments on tasks; a per-collection line saying when it last changed on the server; showing an event's original time zone when it differs; a service worker so an installed app has a shell offline; a process-wide memory ceiling for the cache; the public self-registration form behind its setting; three of the narrow-screen refinements.
 
