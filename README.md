@@ -8,27 +8,130 @@ It stores no copy of your data. The DAV server is the source of truth; Carrel is
 
 > **The name.** A carrel is the individual study booth in a library — your own desk, for working with material that belongs to somebody else. That is exactly what this is. Nothing to do with Alexis Carrel.
 
+[Why Carrel](#why-carrel) · [Everything it does](#everything-it-does) · [Not built yet](#not-built-yet) · [What it is not](#what-it-is-not) · [Running it](#running-it) · [Configuration](#configuration) · [Threat model](#what-carrel-protects-you-from-and-what-it-does-not) · [Licence](#licence)
+
 ---
 
-## What it does
+## Why Carrel
 
-**Everything from every account, in one place.** Tick the collections you care about and the agenda, the contact list, the search and the duplicate finder poll all of them at once, merging the answers into one list sorted by time or by name. Every row is labelled with the account and collection it came from, because two servers holding the same meeting is normal and you should be able to see that without opening anything.
+Five things, in the order they matter. Three are here now; the last two are what the [roadmap](docs/roadmap.md) is for.
 
-**Contacts** with full vCard editing, photos (upload, crop, EXIF stripped, oriented), import and export of standard `.vcf`, and printing.
+1. **Several servers, one view.** Calendars, contacts, tasks and notes from every account you connect, merged into one list, with no database of its own. Nothing else living does all four across several servers: the one actively developed competitor covers calendars and tasks only and brings its own database.
+2. **Not a Nextcloud.** One binary, one container, Go and htmx — no Node, no npm, no bundler, no CDN, no local copy of your content. If you want only calendars, contacts and notes and not the whole machine, this is that.
+3. **Edit your jtx Board notes on a big screen.** VJOURNAL has clients on Android and Linux and no web link between them. Carrel is that link, and compatibility is a tested promise rather than a claim.
+4. **One account for every device** *(planned — [davloom](docs/roadmap.md))*. Point DAVx5 or Thunderbird at Carrel once and get every configured server behind it, instead of setting up five accounts on every device.
+5. **Setting up a new device in one tap** *(planned)*. An Apple configuration profile carrying every connected account at once; a QR code that opens DAVx5 with the fields already filled.
 
-**Calendar** as a list agenda grouped by day, with a date range you choose. Recurring events are expanded locally and edited as whole series. Import and export of standard `.ics`. Printing.
+---
 
-**Tasks** (VTODO) with open/done filters, due dates and an overdue marker.
+## Everything it does
 
-**Notes** (VJOURNAL) — **edit your jtx Board notes on a big screen.** This is the part with no web client anywhere else: jtx Board exists on Android and Evolution on Linux, and between them there is no web link at all. A note written here opens in both and comes back with nothing lost, including the `X-` properties jtx writes. Markdown export and import, a **New note** button on every screen that files into the collection you used last, and `RELATED-TO` links between notes, tasks and events.
+The complete inventory, kept current. If something is here, it works; if it is missing, look under [Not built yet](#not-built-yet).
 
-**A contact card that is a client card.** Open a person and see everything they appear in: every event they attended, every note that mentions them, in one timeline across every server you ticked. Matched on their addresses first and their display name second, computed live, stored nowhere. This is the thing people usually buy a CRM for, and it exists here because the data was already loaded.
+### Accounts and discovery
 
-**Duplicates.** The same person written into two address books on two servers is found, shown with the reason it was matched, and either linked — one row, merged fields, nothing written to any server — or merged on the server, which is confirmed first and writes before it deletes.
+- Connect a DAV account with a URL, a username and a password. `.well-known` is tried first, then the URL exactly as typed — which is the reliable path for Baikal.
+- One principal gives calendars **and** address books, so an account is one connection rather than one per protocol.
+- Several accounts on several servers per person, each enabled or disabled independently.
+- **Failure tells you which step broke and what the server actually replied** — the well-known probe, the principal lookup, each home-set — instead of "cannot connect".
+- Read-only collections are detected from the server's privileges and shown without edit controls.
+- Plain WebDAV folders are detected automatically and become the Files section. No setting to turn it on.
+- Administrators get the same discovery as a "test this server" tool, without saving anything.
 
-**Files and attachments.** If one of your servers offers a plain WebDAV folder, a Files section appears. Attach a picture to a note by pasting it (Ctrl+V) or dropping it on the card: the file goes onto your own storage and the note gets a standard `ATTACH` link to it. No base64 bloating your `.ics`.
+### Contacts
 
-**Multi-user with real isolation.** Each person's DAV credentials are encrypted under a key derived from their own password. One user cannot read another's, and neither can the administrator — unless key escrow is deliberately switched on, in which case the interface says so, to that user, on every page that matters.
+- Address books in the sidebar; list loads in batches as you scroll.
+- Create, edit and delete cards. **Properties this build does not know about survive the edit** — an X- property from another client is kept byte for byte, shown, and never dropped.
+- A card edited elsewhere first opens a conflict screen with a property-by-property diff and three choices; it is never silently overwritten.
+- Photos: upload, EXIF orientation applied, all metadata stripped, crop by pan, zoom and rotate, delete. A photo held as an external link is proxied and marked as not editable; a card with no photo at all gets a generated SVG of its initials, coloured from the UID.
+- Import `.vcf`, one file or a zip of them, with a preview of counts, parse errors and UID collisions before anything is written. Import always creates: a colliding UID gets a fresh one and a line in the report.
+- Export the whole address book as one `.vcf`.
+- Print the list or a single card, with or without photos.
+
+### Calendar
+
+- Agenda grouped by day over a date range you choose. A list, not a grid.
+- Create, edit and delete events, with the same conflict handling and property preservation as contacts.
+- Recurrence editor: frequency, interval, weekdays, until, count, or a raw `RRULE`. Repeats are expanded locally rather than trusting the server. Series are edited whole.
+- Attendees and participation status shown, read only.
+- Import and export `.ics`, optionally over a date range.
+- Print the agenda, with the range and capture date in the footer.
+- **Write a note from a meeting** — the note arrives already linked to the event and dated to match.
+
+### Tasks
+
+- Tasks of one collection with open, done and all filters, counts and an overdue marker, ordered by what still needs doing.
+- Ticking one off is a three-property edit, not a rebuilt object, so everything else on the task stays exactly as it was.
+- Create, edit, delete, with conflicts handled as everywhere else.
+
+### Notes
+
+- Collection newest first, with an excerpt and a tag filter.
+- Card with title, body, date, time, tags and links.
+- **New note** in the navigation bar on every screen: one field, saved into the collection you used last, never asking where it goes.
+- `RELATED-TO` links notes, tasks and events both ways, resolved to something clickable where the target is in the same collection.
+- **Timeline on every contact card** — every event that person attended and every note that mentions them, across every server you ticked, matched on their addresses first and their display name second. Computed live, stored nowhere. This is the thing people usually buy a CRM for.
+- Export one note as Markdown with YAML front matter, or a whole collection as a zip streamed straight to the browser. Anything with no front-matter field of its own is carried too, so an export loses nothing.
+- Import Markdown from a file, a zip, **or a folder on your own WebDAV**, with or without front matter, previewed before it is written.
+- Compatible with **jtx Board** and **Evolution**, including the `X-` properties they write.
+
+### Files and attachments
+
+- Browse a WebDAV collection with a breadcrumb, folders before files, size, type and modification time.
+- Download streams straight through — a large file costs bandwidth, not memory — with byte-range support.
+- Upload, create a folder, delete. **An upload never overwrites:** a name already taken is refused and said so.
+- Attach a file to a note or an event by **pasting it (Ctrl+V) or dropping it on the card**. The folder is chosen once on your profile and never asked for again.
+- Attachments are a standard `ATTACH` URI, not base64 — your `.ics` does not grow. Names are built from the date and the entry's title, so the folder stays readable outside Carrel.
+- Opening an attachment goes through Carrel, and only for files in a collection you hold credentials for. A link elsewhere is shown, and not fetched.
+- An attachment another client embedded is shown and left exactly as it is.
+- **Removing an attachment does not delete the file** — another entry may point at it — and the interface says so.
+
+### Across every source at once
+
+- **Everything view:** one list from every ticked calendar over a date range, optionally narrowed to events, tasks or notes, merged by time. A slow source lands in its right position, not at the end.
+- **Search** across calendars and address books simultaneously.
+- Live progress per source: waiting, querying, done with a count, empty, timed out or unavailable — and which answers came from cache. A failed source has a Retry of its own; cancelling keeps what already arrived.
+- Every row carries the account and collection it came from, because two servers holding the same meeting is normal.
+- Which collections a screen polls is remembered per screen, encrypted, and survives a restart.
+
+### Duplicates
+
+- The same person in two address books on two servers is found with no extra requests, scored on what was already loaded.
+- Each group is offered **with the reason it matched** — same address, same phone — beside the score, because a reason is something you can check.
+- **Link** them: shown as one row with merged fields, and **nothing is written to any server**. **Not duplicates**: never offered again, across restarts. Or **merge on the server**, confirmed first, writing before it deletes and never deleting when the write failed.
+- Repeatable fields merge as a union; a field the records disagree on is the one thing you are asked, and the answer is remembered.
+- The matching threshold is a setting, because a shared family phone number is one person in one address book and two in another.
+
+### Users, administration and security
+
+- First run on an empty volume creates the first administrator. No default password.
+- Invitations by copyable link or by email; the link always works even with SMTP completely unconfigured. The invitee chooses their own login and password.
+- SMTP settings with a **test button that shows the server's whole reply**, and never the relay password.
+- Email address change confirmed by a link.
+- **Real isolation:** each person's DAV credentials are sealed under a key derived from their own password. No other user can read them, and neither can the administrator.
+- **Optional key escrow**, off by default, never retroactive, and stated to the covered user at first sign-in and in their profile from then on — because it is a way in, not a key backup.
+- Admin panel: users with roles, last login, account counts and live sessions; disable, delete, change role, end sessions, reset password (announced as destructive), global settings, and an audit log carrying no secrets.
+- Changing your own password keeps every connection readable.
+- CSRF everywhere, a CSP with no inline scripts at all, progressive rate limiting by address and account, and an SSRF guard that resolves, checks and dials the address it checked — after every redirect.
+
+### How it runs
+
+- One binary, one container, one volume. No database, no Redis, no sidecar.
+- Read-only root filesystem, non-root user, all capabilities dropped, health check without a shell.
+- Installs as a PWA with its own window and icon.
+- Structured JSON logs that never carry a password, a token or the contents of a record.
+- Graceful shutdown that drains requests and then wipes every key.
+- English interface, one language.
+
+---
+
+## Not built yet
+
+Named here so the list above can be read as complete. Detail, reasoning and order in the [roadmap](docs/roadmap.md).
+
+**Next:** a new-device screen (Apple `.mobileconfig`, DAVx5 QR); backup to a WebDAV of your choice, encrypted, with restore; publishing a collection read-only by secret link; [davloom](docs/roadmap.md), the proxy mode that makes Carrel one account for every device; quotas and self-registration for running this as a service.
+
+**Smaller gaps:** attachments on tasks; a per-collection line saying when it last changed on the server; showing an event's original time zone when it differs; a service worker so an installed app has a shell offline; a process-wide memory ceiling for the cache; the public self-registration form behind its setting; three of the narrow-screen refinements.
 
 ---
 
