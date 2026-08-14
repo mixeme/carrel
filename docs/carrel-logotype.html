@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carrel — логотип, эталон построения</title>
+<style>
+  :root{
+    --ink:#17211C;--card:#E8DFCB;--card-border:#C9BFA6;--accent:#4A6B52;
+    --accent-dark:#7FA085;--bg:#F5F1E8;--paper:#FFFDF7;--rule:#D8CFBB;
+    --hair:#E2DACA;--dusty:#9A9280;--muted:#6B6355;--alert:#B04A3A;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:15px;line-height:1.6;}
+  .wrap{max-width:900px;margin:0 auto;padding:56px 32px 96px;}
+  header{border-bottom:0.5px solid var(--rule);padding-bottom:32px;margin-bottom:44px;}
+  h1{font-family:Georgia,"Source Serif 4",serif;font-size:38px;font-weight:400;margin:0 0 8px;}
+  .sub{font-size:11px;letter-spacing:0.18em;color:var(--dusty);text-transform:uppercase;}
+  h2{font-size:13px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dusty);
+     font-weight:600;margin:64px 0 20px;padding-bottom:8px;border-bottom:0.5px solid var(--rule);}
+  h3{font-size:16px;font-weight:600;margin:32px 0 10px;}
+  p{margin:0 0 14px;max-width:68ch;}
+  .lede{font-size:17px;color:var(--muted);max-width:64ch;}
+  .note{font-size:13px;color:var(--muted);padding-left:14px;
+        border-left:2px solid var(--card-border);margin:18px 0;max-width:64ch;}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;margin:18px 0;}
+  th{text-align:left;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;
+     color:var(--dusty);font-weight:600;padding:0 12px 8px 0;border-bottom:0.5px solid var(--rule);}
+  td{padding:9px 12px 9px 0;border-bottom:0.5px solid var(--hair);vertical-align:top;}
+  td.num,th.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+       background:var(--paper);border:0.5px solid var(--hair);border-radius:3px;padding:1px 5px;}
+  pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;line-height:1.7;
+      background:var(--paper);border:0.5px solid var(--hair);border-radius:5px;
+      padding:16px 18px;overflow-x:auto;margin:14px 0 22px;}
+  pre code{background:none;border:0;padding:0;}
+  figure{margin:26px 0;}
+  figcaption{font-size:12.5px;color:var(--muted);margin-top:12px;max-width:66ch;}
+  .board{background:var(--paper);border:0.5px solid var(--hair);border-radius:5px;
+         padding:22px;display:inline-block;max-width:100%;overflow-x:auto;}
+  .board svg{display:block;}
+  .row{display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap;margin:20px 0;}
+  .cell{display:flex;flex-direction:column;gap:9px;}
+  .cap{font-size:11px;color:var(--dusty);}
+  .plate{background:var(--card);border:0.5px solid var(--card-border);
+         display:flex;align-items:center;justify-content:center;border-radius:4px;}
+  .plate.dark{background:var(--ink);border-color:var(--ink);}
+  .plate.paper{background:var(--paper);border-color:var(--hair);}
+  .plate svg{display:block;}
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin:20px 0;}
+  .sw{display:flex;flex-direction:column;gap:7px;}
+  .chip{height:44px;border-radius:4px;border:0.5px solid var(--card-border);}
+  .sw .n{font-size:13px;font-weight:500;}
+  .sw .h{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--dusty);}
+  ul{padding-left:18px;margin:0 0 14px;}
+  li{margin-bottom:7px;max-width:64ch;}
+  .bad{color:var(--alert);}
+  .ok{color:var(--accent);}
+  .file{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--dusty);
+        font-weight:600;margin:26px 0 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="row" style="margin-bottom:24px;gap:14px;">
+    <div class="plate" style="padding:18px 22px;"><svg width="340" height="134" viewBox="0 0 243.0 96"><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/></svg></div>
+    <div class="plate dark" style="padding:18px 22px;"><svg width="340" height="134" viewBox="0 0 243.0 96"><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#E8DFCB"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#7FA085"/></svg></div>
+  </div>
+  <h1>Логотип Carrel</h1>
+  <div class="sub">Эталон построения · вариант 2, лампа в последней l · версия 1.0</div>
+</header>
+
+<p class="lede">Единственный источник правды по логотипу-надписи: что выбрано, как перестроена лампа под метрики шрифта, по каким координатам нарисована каждая литера и чем это проверено. Иконка описана отдельно, в <code>carrel-icon.html</code>; здесь она не повторяется, потому что в этом варианте знак живёт внутри слова.</p>
+
+<h2>1. Что выбрано и почему</h2>
+
+<p>Из пяти подходов файла вариантов взят второй: слово оканчивается на «l» — готовую вертикальную стойку, на которую садится абажур, а снизу подставляется основание. Знак не стоит рядом с надписью, а становится её литерой.</p>
+
+<p>Остальные четыре отпали по причинам, записанным там же. Базовая раскладка надёжна и ничем не запоминается. Каталожная надпись не влезает в шапку интерфейса. Световое пятно — полупрозрачная заливка, а стиль заявлен без градиентов и свечения. Карточка с язычком конфликтует с утверждённым знаком.</p>
+
+<p>У второго варианта есть цена, и её надо назвать прямо: <strong>лампа занимает место строчной «l», но выглядит симметрично</strong> — широкая шляпка сверху, слаб снизу. Симметричный верх — признак прописной «I», а не строчной «l». Держит прочтение только одно: выносная линия. Абажур поднят до 12, прописные начинаются с 18, то есть «l» выше «C» на целый модуль, и это единственное, что отличает её от «I». Отсюда жёсткое следствие для всех разделов ниже: <em>высота абажура не подлежит уменьшению</em>. Уменьшить её — значит опустить верх «l» до линии прописных и получить «CarreI».</p>
+
+<h3>Литеры нарисованы, а не набраны</h3>
+
+<p>Бренд-гайд отдаёт заголовкам и логотипу Literata или Source Serif 4. Для логотипа это оставлено как родство, а не как способ производства: литеры здесь построены вручную из дуг и прямоугольников на том же модуле, что и лампа.</p>
+
+<p>Причина не в шрифте, а в стыке. Лампа — конструкция: полуэллипс, три прямоугольника, скруглённый слаб. Поставить такую конструкцию на место литеры готовой антиквы значит получить ровно то, чем заканчивается вердикт варианта&nbsp;2 — «l» выпадает из ритма остальных букв. Когда всё слово построено тем же способом, что и лампа, выпадать нечему.</p>
+
+<div class="note">Практическое следствие: логотип ни от чего не зависит на сборке. В нём нет текста, нет шрифтовых файлов и нет лицензионного вопроса. Literata остаётся шрифтом заголовков и интерфейса; метрики логотипа подобраны так, чтобы он стоял рядом с ней не чужим — отношение выносной к прописным 72&nbsp;:&nbsp;66 взято тем же, что у переходных антикв.</div>
+
+<h2>2. Что чинится против наброска</h2>
+
+<p>В файле вариантов второй подход показан эскизом. Он верен по идее и не годится как файл: надпись набрана Georgia, лампа нарисована в собственных пропорциях, координаты стоят где пришлось — <code>193.6</code>, <code>4.6</code>, <code>28.5</code>, <code>1.6</code>.</p>
+
+<p>Главная поломка — не пропорции, а разрядка. Метрики Georgia считаются, а не оцениваются: на кегле 48 набор «Carre» от <code>x&nbsp;=&nbsp;18</code> заканчивается на <code>135.54</code>, левый полуапрош «l» равен <code>4.71</code>, значит штамб должен стоять на <code>140.25</code>. В эскизе он стоит на <code>193.6</code>: <strong>лампа отодвинута на 53,35 — почти четыре собственных ширины литеры</strong> (вся «l» занимает 13,73). Читается не слово, а «Carre» и предмет рядом.</p>
+
+<figure>
+<div class="row">
+  <div class="cell"><div class="board"><svg width="330" viewBox="0 0 260 78">
+      <rect width="260" height="78" fill="#FFFDF7"/>
+      <text x="18" y="60" font-family="Georgia,serif" font-size="48" fill="#17211C">Carre</text>
+      <path d="M182 24 A14 14 0 0 1 210 24 L210 28.5 L182 28.5 Z" fill="#4A6B52"/>
+      <rect x="193" y="28.5" width="5" height="3.5" fill="#17211C"/>
+      <rect x="193.6" y="32" width="4.6" height="24" fill="#17211C"/>
+      <rect x="185" y="56" width="22" height="5" rx="1.6" fill="#17211C"/>
+      <g stroke="#B04A3A" stroke-width="0.7" fill="none">
+        <path d="M140.25 14V70" stroke-dasharray="3 2"/>
+        <path d="M193.6 14V70" stroke-dasharray="3 2"/>
+        <path d="M140.25 18H193.6M140.25 15V21M193.6 15V21"/>
+        <path d="M0 60H260" stroke-width="0.5"/>
+      </g>
+      <text x="166.9" y="12" font-family="ui-monospace,monospace" font-size="7"
+            fill="#B04A3A" text-anchor="middle">53.35</text>
+    </svg></div>
+  <div class="cap bad">эскиз · красным — куда уехала стойка</div></div>
+</div>
+<figcaption>Толщина стойки в эскизе почти угадана: 4,6 против 4,36 у штамбов Georgia на этом кегле. А вот основание посажено низом на 61 при базовой линии 60 — плоская форма не свешивается за базовую, свес положен только круглым. Ни одно из этих чисел не выводится из сетки, поэтому проверить эскиз было нечем: он рисовался на глаз и на глаз же принимался.</figcaption>
+</figure>
+
+<h2>3. Сетка и метрики</h2>
+
+<p>Логотип живёт в той же вертикальной координате, что и иконка: поле высотой 96, модуль 6. Это не совпадение и не украшение — при таком совпадении знак и надпись стыкуются без пересчёта, а любая проверка, написанная для иконки, годится и здесь.</p>
+
+<p>Четыре линии заданы модулем, три роста получаются вычитанием. Ни одна не подбиралась: отношение роста строчных к прописным 48&nbsp;:&nbsp;66 = 0,73 и выносной к прописным 72&nbsp;:&nbsp;66 = 1,09 — обычные значения переходной антиквы, и оба выражаются целыми модулями.</p>
+
+<figure>
+<div class="board"><svg width="826" viewBox="-30 0 285.0 108"><defs>
+  <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+    <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+  </pattern>
+  <pattern id="g24" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M24 0V24M0 24H24" fill="none" stroke="#C9BFA6" stroke-width="0.45"/>
+  </pattern>
+</defs><rect x="0" y="0" width="243.0" height="96" fill="#FFFDF7"/><rect x="0" y="0" width="243.0" height="96" fill="url(#g6)"/><rect x="0" y="0" width="243.0" height="96" fill="url(#g24)"/><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C" fill-opacity="0.32"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52" fill-opacity="0.32"/><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="none" stroke="#17211C" stroke-width="0.4"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="none" stroke="#4A6B52" stroke-width="0.4"/><path d="M-24 12H249.0" stroke="#B04A3A" stroke-width="0.4"/><path d="M-24 18H249.0" stroke="#B04A3A" stroke-width="0.4"/><path d="M-24 36H249.0" stroke="#B04A3A" stroke-width="0.4"/><path d="M-24 84H249.0" stroke="#B04A3A" stroke-width="0.4"/><path d="M-24 85.5H249.0" stroke="#B04A3A" stroke-width="0.35" stroke-dasharray="2 2"/><g font-family="ui-monospace,monospace" font-size="4" fill="#B04A3A"><text x="-29" y="10.5">12</text><text x="-29" y="16.5">18</text><text x="-29" y="34.5">36</text><text x="-29" y="82.5">84</text><text x="251.0" y="13.5">выносная</text><text x="251.0" y="19.5">прописные</text><text x="251.0" y="37.5">строчные</text><text x="251.0" y="85.5">базовая</text></g></svg></div>
+<figcaption>Красным — четыре линии набора и пунктиром свес 85,5. Абажур упирается верхом в выносную, низ юбки лежит ровно на линии строчных: между ними 24, и это единственное место, где абажуру разрешено находиться.</figcaption>
+</figure>
+
+<table>
+  <tr><th style="width:34%">Величина</th><th class="num" style="width:16%">Значение</th><th>Чем задана</th></tr>
+  <tr><td>Выносная линия</td><td class="num">12</td><td>2 модуля от верха поля</td></tr>
+  <tr><td>Линия прописных</td><td class="num">18</td><td>3 модуля</td></tr>
+  <tr><td>Линия строчных</td><td class="num">36</td><td>6 модулей, ровно середина поля 96 минус 12</td></tr>
+  <tr><td>Базовая линия</td><td class="num">84</td><td>14 модулей</td></tr>
+  <tr><td>Рост прописных</td><td class="num">66</td><td>84 − 18</td></tr>
+  <tr><td>Рост строчных</td><td class="num">48</td><td>84 − 36, это 0,73 от прописных</td></tr>
+  <tr><td>Выносная высота</td><td class="num">72</td><td>84 − 12, это 1,09 от прописных</td></tr>
+  <tr><td>Основной штрих</td><td class="num">6</td><td>модуль; та же толщина, что у стойки лампы в иконке</td></tr>
+  <tr><td>Тонкий штрих</td><td class="num">3</td><td>полумодуль; контраст ровно 2 : 1</td></tr>
+  <tr><td>Засечка</td><td class="num">3 × 4.5</td><td>толщина равна тонкому штриху, вылет — три четверти модуля</td></tr>
+  <tr><td>Свес круглых</td><td class="num">1.5</td><td>четверть модуля, вверх и вниз</td></tr>
+</table>
+
+<div class="note">Толщина основного штриха не выбиралась под надпись. Она взята у стойки лампы в иконке и равна 6. Весь остальной набор построен вокруг неё — в этом и состоит вариант&nbsp;2: не лампа подгоняется под букву, а буква строится вокруг стойки лампы.</div>
+
+<h2>4. Как лампа перестроена под метрики</h2>
+
+<p>Лампа иконки не переносится в надпись как есть. В иконке она — единственный предмет в квадрате, и её пропорции заданы квадратом. В надписи она — литера, и её пропорции задают четыре линии набора. Каждое отличие ниже вынуждено метрикой, а не вкусом; ничего «для красоты» здесь нет.</p>
+
+<figure>
+<div class="row">
+  <div class="cell"><div class="board"><svg width="150" viewBox="0 0 96 96"><defs>
+  <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+    <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+  </pattern>
+  <pattern id="g24" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M24 0V24M0 24H24" fill="none" stroke="#C9BFA6" stroke-width="0.45"/>
+  </pattern>
+</defs><rect x="0" y="0" width="96" height="96" fill="#FFFDF7"/><rect x="0" y="0" width="96" height="96" fill="url(#g6)"/><rect x="0" y="0" width="96" height="96" fill="url(#g24)"/><path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/><path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/></svg></div><div class="cap">иконка · абажур 60 × 36</div></div>
+  <div class="cell"><div class="board"><svg width="150" viewBox="180.0 0 96 96"><defs>
+  <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+    <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+  </pattern>
+  <pattern id="g24" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M24 0V24M0 24H24" fill="none" stroke="#C9BFA6" stroke-width="0.45"/>
+  </pattern>
+</defs><rect x="180.0" y="0" width="96" height="96" fill="#FFFDF7"/><rect x="180.0" y="0" width="96" height="96" fill="url(#g6)"/><rect x="180.0" y="0" width="96" height="96" fill="url(#g24)"/><path d="M223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/><path d="M180.0 12H276.0" stroke="#B04A3A" stroke-width="0.4"/><path d="M180.0 18H276.0" stroke="#B04A3A" stroke-width="0.4"/><path d="M180.0 36H276.0" stroke="#B04A3A" stroke-width="0.4"/><path d="M180.0 84H276.0" stroke="#B04A3A" stroke-width="0.4"/><path d="M180.0 85.5H276.0" stroke="#B04A3A" stroke-width="0.35" stroke-dasharray="2 2"/></svg></div><div class="cap">логотип · абажур 30 × 24</div></div>
+</div>
+<figcaption>Одинаковы: полуформа абажура на горизонтальном диаметре, юбка толщиной в модуль, переход абажур&nbsp;→ втулка&nbsp;→ стойка в два уступа, скруглённый слаб основания, ширина стойки 6. Различаются только размеры, и каждый — по вынуждающей причине.</figcaption>
+</figure>
+
+<table>
+  <tr><th style="width:16%">Часть</th><th class="num" style="width:17%">Иконка</th><th class="num" style="width:17%">Логотип</th><th>Чем вынуждено</th></tr>
+  <tr><td>Абажур, дуга</td><td class="num">60 × 30</td><td class="num">30 × 18</td>
+      <td>Высота не выбрана: от выносной 12 до линии строчных 36 ровно 24, из них 6 занимает юбка. Ширина выбрана: 30 — вдвое уже иконочной, чтобы шляпка не перевешивала слово.</td></tr>
+  <tr><td>Абажур, юбка</td><td class="num">60 × 6</td><td class="num">30 × 6</td><td>Толщина не менялась: модуль.</td></tr>
+  <tr><td>Втулка</td><td class="num">12 × 6</td><td class="num">9 × 3</td>
+      <td>Воротничок перекрывает уступ от юбки к стойке. Юбка стала вдвое уже — уступ тоже, а толщина сведена к полумодулю, иначе втулка читается второй засечкой и превращает «l» в «I».</td></tr>
+  <tr><td>Стойка</td><td class="num">6 × 21</td><td class="num">6 × 39</td>
+      <td>Ширина неприкосновенна — это и есть штамб литеры. Длина получается вычитанием: от низа втулки 39 до верха основания 78.</td></tr>
+  <tr><td>Основание</td><td class="num">42 × 9, r3</td><td class="num">21 × 6, r1.5</td>
+      <td>Ровно половина иконочного. Отношение основания к абажуру сохранено точно: 42 : 60 = 21 : 30 = 0,7.</td></tr>
+</table>
+
+<h3>Полуэллипс вместо полуокружности</h3>
+
+<p>В иконке абажур — полуокружность, и эталон иконки обосновывает это тем, что хорда равна диаметру, поэтому касательная в стыке с юбкой вертикальна и излома нет.</p>
+
+<p>В надписи высота и ширина абажура заданы независимо: высоту диктуют линии набора, ширину — вес слова. Полуокружность связала бы их и заставила выбирать одно за счёт другого. Связывать не нужно: <strong>вертикальность касательной даёт не круглость, а опора на горизонтальный диаметр</strong>. У любого полуэллипса, поставленного на свою большую ось, касательные на концах вертикальны. Абажур логотипа — полуэллипс 30&nbsp;×&nbsp;18, стык с юбкой такой же гладкий, как в иконке, а проверка «излома нет» проходит дословно.</p>
+
+<h2>5. Как построены литеры</h2>
+
+<p>Способ один на все шесть знаков: круглое — сегмент кольца между двумя эллипсами, прямое — прямоугольник. Толщина кольца по бокам 6, сверху и снизу 3 — контраст задан не рисованием, а разностью полуосей.</p>
+
+<h3>Правило терминалов</h3>
+
+<p>Терминал срезается перпендикулярно ходу штриха: <strong>по горизонтали там, где штрих в этом месте идёт вертикально</strong> (C, a, e), <strong>по вертикали там, где горизонтально</strong> (r). Срез по радиусу, который напрашивается первым, на неокружном кольце даёт косой и острый клин — первая версия была нарисована так и вся выглядела растрёпанной.</p>
+
+<div class="note">Технически это значит, что внешний и внутренний контуры кольца обрываются на <em>разных</em> углах — тех, где каждый пересекает нужную прямую. В файле это видно по парам дуг с несовпадающими конечными точками.</div>
+
+<figure>
+<div class="board"><svg width="244" viewBox="-6 0 72 96"><defs>
+  <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+    <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+  </pattern>
+  <pattern id="g24" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M24 0V24M0 24H24" fill="none" stroke="#C9BFA6" stroke-width="0.45"/>
+  </pattern>
+</defs><rect x="-6" y="0" width="72" height="96" fill="#FFFDF7"/><rect x="-6" y="0" width="72" height="96" fill="url(#g6)"/><rect x="-6" y="0" width="72" height="96" fill="url(#g24)"/><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72Z" fill="#17211C" fill-opacity="0.3"/><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72Z" fill="none" stroke="#17211C" stroke-width="0.4"/><ellipse cx="30.0" cy="51.0" rx="30.0" ry="34.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><ellipse cx="30.0" cy="51.0" rx="24.0" ry="31.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><path d="M-6 12H66" stroke="#B04A3A" stroke-width="0.4"/><path d="M-6 18H66" stroke="#B04A3A" stroke-width="0.4"/><path d="M-6 36H66" stroke="#B04A3A" stroke-width="0.4"/><path d="M-6 84H66" stroke="#B04A3A" stroke-width="0.4"/><path d="M-6 85.5H66" stroke="#B04A3A" stroke-width="0.35" stroke-dasharray="2 2"/></svg></div>
+<figcaption>C · кольцо 30 × 34,5 и 24 × 31,5, проём справа, терминалы срезаны по горизонтали на 30 и 72</figcaption>
+</figure>
+
+<figure>
+<div class="board"><svg width="224" viewBox="54 0 66 96"><defs>
+  <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+    <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+  </pattern>
+  <pattern id="g24" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M24 0V24M0 24H24" fill="none" stroke="#C9BFA6" stroke-width="0.45"/>
+  </pattern>
+</defs><rect x="54" y="0" width="66" height="96" fill="#FFFDF7"/><rect x="54" y="0" width="66" height="96" fill="url(#g6)"/><rect x="54" y="0" width="66" height="96" fill="url(#g24)"/><path d="M60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72Z" fill="#17211C" fill-opacity="0.3"/><path d="M60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45Z" fill="#17211C" fill-opacity="0.3"/><path d="M96 48H102V84H96Z" fill="#17211C" fill-opacity="0.3"/><path d="M96 81H106.5V84H96Z" fill="#17211C" fill-opacity="0.3"/><path d="M60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72Z" fill="none" stroke="#17211C" stroke-width="0.4"/><path d="M60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45Z" fill="none" stroke="#17211C" stroke-width="0.4"/><path d="M96 48H102V84H96Z" fill="none" stroke="#17211C" stroke-width="0.4"/><path d="M96 81H106.5V84H96Z" fill="none" stroke="#17211C" stroke-width="0.4"/><ellipse cx="81.0" cy="72.0" rx="21.0" ry="13.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><ellipse cx="81.0" cy="72.0" rx="15.0" ry="10.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><ellipse cx="81.0" cy="48.0" rx="21.0" ry="13.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><ellipse cx="81.0" cy="48.0" rx="15.0" ry="10.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><path d="M54 12H120" stroke="#B04A3A" stroke-width="0.4"/><path d="M54 18H120" stroke="#B04A3A" stroke-width="0.4"/><path d="M54 36H120" stroke="#B04A3A" stroke-width="0.4"/><path d="M54 84H120" stroke="#B04A3A" stroke-width="0.4"/><path d="M54 85.5H120" stroke="#B04A3A" stroke-width="0.35" stroke-dasharray="2 2"/></svg></div>
+<figcaption>a · чаша и плечо — два кольца 21 × 13,5 с общим центром по x; правый бок чаши и есть штамб</figcaption>
+</figure>
+
+<figure>
+<div class="board"><svg width="142" viewBox="108 0 42 96"><defs>
+  <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+    <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+  </pattern>
+  <pattern id="g24" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M24 0V24M0 24H24" fill="none" stroke="#C9BFA6" stroke-width="0.45"/>
+  </pattern>
+</defs><rect x="108" y="0" width="42" height="96" fill="#FFFDF7"/><rect x="108" y="0" width="42" height="96" fill="url(#g6)"/><rect x="108" y="0" width="42" height="96" fill="url(#g24)"/><path d="M117 36H123V84H117Z" fill="#17211C" fill-opacity="0.3"/><path d="M112.5 36H123V39H112.5Z" fill="#17211C" fill-opacity="0.3"/><path d="M112.5 81H127.5V84H112.5Z" fill="#17211C" fill-opacity="0.3"/><path d="M123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48Z" fill="#17211C" fill-opacity="0.3"/><path d="M117 36H123V84H117Z" fill="none" stroke="#17211C" stroke-width="0.4"/><path d="M112.5 36H123V39H112.5Z" fill="none" stroke="#17211C" stroke-width="0.4"/><path d="M112.5 81H127.5V84H112.5Z" fill="none" stroke="#17211C" stroke-width="0.4"/><path d="M123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48Z" fill="none" stroke="#17211C" stroke-width="0.4"/><ellipse cx="132.0" cy="48.0" rx="15.0" ry="13.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><ellipse cx="132.0" cy="48.0" rx="9.0" ry="10.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><path d="M108 12H150" stroke="#B04A3A" stroke-width="0.4"/><path d="M108 18H150" stroke="#B04A3A" stroke-width="0.4"/><path d="M108 36H150" stroke="#B04A3A" stroke-width="0.4"/><path d="M108 84H150" stroke="#B04A3A" stroke-width="0.4"/><path d="M108 85.5H150" stroke="#B04A3A" stroke-width="0.35" stroke-dasharray="2 2"/></svg></div>
+<figcaption>r · плечо выходит из правой кромки штамба, терминал срезан по вертикали</figcaption>
+</figure>
+
+<figure>
+<div class="board"><svg width="210" viewBox="166 0 62 96"><defs>
+  <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+    <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+  </pattern>
+  <pattern id="g24" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M24 0V24M0 24H24" fill="none" stroke="#C9BFA6" stroke-width="0.45"/>
+  </pattern>
+</defs><rect x="166" y="0" width="62" height="96" fill="#FFFDF7"/><rect x="166" y="0" width="62" height="96" fill="url(#g6)"/><rect x="166" y="0" width="62" height="96" fill="url(#g24)"/><path d="M213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75Z" fill="#17211C" fill-opacity="0.3"/><path d="M178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5Z" fill="#17211C" fill-opacity="0.3"/><path d="M213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75Z" fill="none" stroke="#17211C" stroke-width="0.4"/><path d="M178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5Z" fill="none" stroke="#17211C" stroke-width="0.4"/><ellipse cx="195.0" cy="60.0" rx="22.5" ry="25.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><ellipse cx="195.0" cy="60.0" rx="16.5" ry="22.5" fill="none" stroke="#B04A3A" stroke-width="0.4" stroke-dasharray="2 2"/><path d="M166 12H228" stroke="#B04A3A" stroke-width="0.4"/><path d="M166 18H228" stroke="#B04A3A" stroke-width="0.4"/><path d="M166 36H228" stroke="#B04A3A" stroke-width="0.4"/><path d="M166 84H228" stroke="#B04A3A" stroke-width="0.4"/><path d="M166 85.5H228" stroke="#B04A3A" stroke-width="0.35" stroke-dasharray="2 2"/></svg></div>
+<figcaption>e · кольцо 22,5 × 25,5 и 16,5 × 22,5, перекладина 57…60, правый край перекладины идёт по внешнему контуру</figcaption>
+</figure>
+
+<h3>Координаты прямых кромок</h3>
+<p>Все прямые кромки лежат на сетке. Дробные значения в путях встречаются только там, где прямая упирается в дугу, — эта точка не задаётся, а вычисляется из эллипса.</p>
+
+<table>
+  <tr><th style="width:26%">Что</th><th class="num" style="width:26%">X</th><th class="num" style="width:22%">Y</th><th>Доля модуля</th></tr>
+  <tr><td>C, срез терминалов</td><td class="num">—</td><td class="num">30 и 72</td><td>модуль</td></tr>
+  <tr><td>a, штамб</td><td class="num">96 … 102</td><td class="num">48 … 84</td><td>модуль</td></tr>
+  <tr><td>a, срез терминала плеча</td><td class="num">—</td><td class="num">45</td><td>полумодуль</td></tr>
+  <tr><td>a, засечка</td><td class="num">96 … 106.5</td><td class="num">81 … 84</td><td>четверть</td></tr>
+  <tr><td>r, штамб</td><td class="num">117 … 123</td><td class="num">36 … 84</td><td>полумодуль</td></tr>
+  <tr><td>r, флаг и засечка</td><td class="num">112.5 … 127.5</td><td class="num">36 … 39, 81 … 84</td><td>четверть</td></tr>
+  <tr><td>r, срез терминала плеча</td><td class="num">139.5</td><td class="num">—</td><td>четверть</td></tr>
+  <tr><td>e, перекладина</td><td class="num">178.5 … по контуру</td><td class="num">57 … 60</td><td>полумодуль</td></tr>
+  <tr><td>e, срез терминала</td><td class="num">—</td><td class="num">75</td><td>полумодуль</td></tr>
+  <tr><td>l, юбка</td><td class="num">213 … 243</td><td class="num">30 … 36</td><td>модуль</td></tr>
+  <tr><td>l, втулка</td><td class="num">223.5 … 232.5</td><td class="num">36 … 39</td><td>четверть</td></tr>
+  <tr><td>l, стойка</td><td class="num">225 … 231</td><td class="num">39 … 78</td><td>полумодуль</td></tr>
+  <tr><td>l, основание</td><td class="num">217.5 … 238.5</td><td class="num">78 … 84</td><td>четверть</td></tr>
+</table>
+
+<h2>6. Раскладка</h2>
+
+<p>Разрядка задана одним правилом: <strong>соседние литеры нигде по всей высоте не сближаются теснее чем на модуль</strong>. Правило выбрано после того, как две более привычные метрики не сработали.</p>
+
+<p>Первой считалась площадь белого между литерами с потолком на строку. Она оказалась почти нечувствительна к сдвигу: у «C» правый бок открыт проёмом, и большинство строк упирается в потолок, поэтому подбор по ней уводил «a» внутрь «C» на треть её ширины.</p>
+
+<p>Второй считались полуапроши по утопленности контура — метод, которым разгоняют шрифты. Он споткнулся на том, что у половины пар крайние точки лежат на разной высоте: правая крайняя точка «C» — это кончик нижнего терминала на <code>53.8</code>, а не бок кольца, и расстояние между крайними точками ничего не говорит о том, где литеры реально сходятся. У пары «e — l» оно и вовсе отрицательное: абажур нависает над «e» на 4,5, не приближаясь к ней ни в одной точке.</p>
+
+<p>Минимальный зазор от обеих метрик отличается тем, что его нельзя обмануть формой. Он меряется по всей высоте знака, включая абажур, и равен 6 с точностью до четверти модуля во всех пяти парах.</p>
+
+<figure>
+<div class="board"><svg width="826" viewBox="0 0 243.0 100"><defs>
+  <pattern id="g6" width="6" height="6" patternUnits="userSpaceOnUse">
+    <path d="M6 0V6M0 6H6" fill="none" stroke="#D8CFBB" stroke-width="0.25"/>
+  </pattern>
+  <pattern id="g24" width="24" height="24" patternUnits="userSpaceOnUse">
+    <path d="M24 0V24M0 24H24" fill="none" stroke="#C9BFA6" stroke-width="0.45"/>
+  </pattern>
+</defs><rect x="0" y="0" width="243.0" height="96" fill="#FFFDF7"/><rect x="0" y="0" width="243.0" height="96" fill="url(#g6)"/><rect x="0" y="0" width="243.0" height="96" fill="url(#g24)"/><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/><path d="M53.75 72.0H60.0M53.75 70.0V74.0M60.0 70.0V74.0" stroke="#B04A3A" stroke-width="0.5"/><path d="M56.875 72.0V90" stroke="#B04A3A" stroke-width="0.3" stroke-dasharray="1.5 1.5"/><path d="M106.5 81.0H112.5M106.5 79.0V83.0M112.5 79.0V83.0" stroke="#B04A3A" stroke-width="0.5"/><path d="M109.5 81.0V90" stroke="#B04A3A" stroke-width="0.3" stroke-dasharray="1.5 1.5"/><path d="M139.5 36.25H145.5M139.5 34.25V38.25M145.5 34.25V38.25" stroke="#B04A3A" stroke-width="0.5"/><path d="M142.5 36.25V90" stroke="#B04A3A" stroke-width="0.3" stroke-dasharray="1.5 1.5"/><path d="M172.5 42.0H178.75M172.5 40.0V44.0M178.75 40.0V44.0" stroke="#B04A3A" stroke-width="0.5"/><path d="M175.625 42.0V90" stroke="#B04A3A" stroke-width="0.3" stroke-dasharray="1.5 1.5"/><path d="M210.75 78.0H217.5M210.75 76.0V80.0M217.5 76.0V80.0" stroke="#B04A3A" stroke-width="0.5"/><path d="M214.125 78.0V90" stroke="#B04A3A" stroke-width="0.3" stroke-dasharray="1.5 1.5"/><g font-family="ui-monospace,monospace" font-size="4.2" fill="#B04A3A" text-anchor="middle"><text x="56.875" y="95.5">6.25</text><text x="109.5" y="95.5">6.00</text><text x="142.5" y="95.5">6.00</text><text x="175.625" y="95.5">6.25</text><text x="214.125" y="95.5">6.75</text></g></svg></div>
+<figcaption>Красным отмечены места, где соседи сходятся ближе всего — они найдены перебором по всей высоте, а не назначены. Ни одно не оказалось там, где его ждёшь: у «Ca» это нижний терминал «C» против чаши «a» на 72, у «ar» — засечка против засечки на 81, у «rr» — кончик плеча против флага следующей литеры на 36, у «re» — кончик плеча против кольца на 42, у «el» — бок «e» против основания лампы на 78, а вовсе не против стойки.</figcaption>
+</figure>
+
+<table>
+  <tr><th style="width:22%">Литера</th><th class="num" style="width:22%">Левая кромка</th><th class="num" style="width:22%">Зазор до соседа</th><th>Доля модуля</th></tr>
+  <tr><td>C</td><td class="num">0</td><td class="num">—</td><td>модуль</td></tr>
+  <tr><td>a</td><td class="num">60</td><td class="num">6.25</td><td>модуль</td></tr>
+  <tr><td>r</td><td class="num">117</td><td class="num">6.00</td><td>полумодуль</td></tr>
+  <tr><td>r</td><td class="num">150</td><td class="num">6.00</td><td>модуль</td></tr>
+  <tr><td>e</td><td class="num">172.5</td><td class="num">6.25</td><td>четверть</td></tr>
+  <tr><td>l, ось стойки</td><td class="num">228</td><td class="num">6.75</td><td>модуль</td></tr>
+</table>
+
+<div class="note">Ширина набора вышла 243 при росте прописных 66. Для сверки: «Carrel» в Georgia, приведённой к тому же росту прописных, занимает 260,5. Логотип теснее на 6,7&nbsp;% — примерно столько и отличает логотип от того же слова, набранного текстовым шрифтом.</div>
+
+<h2>7. Проверки</h2>
+
+<p>Логотип — 24 подконтура в двух заливках, и на глаз в нём проверяется немногое. Ниже то, что считалось программой по той же геометрии, из которой собран файл.</p>
+
+<table>
+  <tr><th style="width:34%">Что проверялось</th><th>Результат</th></tr>
+  <tr><td>Прямые кромки на сетке</td><td class="ok">Все 34. Вне сетки — ни одной. Дробные числа в путях есть только в точках касания прямой и дуги.</td></tr>
+  <tr><td>Толщины штрихов</td><td class="ok">Основной 6 везде, включая стойку лампы. Тонкий 3. Контраст ровно 2 : 1.</td></tr>
+  <tr><td>Свес круглых</td><td class="ok">1,5 вверх и вниз у C, a, e и плеча r. Плоские формы — основание лампы, засечки — стоят на 84 без свеса.</td></tr>
+  <tr><td>Стык дуги и юбки</td><td class="ok">Абажур опирается на горизонтальный диаметр, касательная вертикальна с обеих сторон. Излома нет — как в иконке.</td></tr>
+  <tr><td>Минимальный зазор</td><td class="ok">6,00 … 6,75 во всех пяти парах.</td></tr>
+  <tr><td>Пути SVG против геометрии</td><td class="ok">Пути разобраны заново, как их прочтёт браузер — с эндпоинтной параметризацией дуг и флагами large-arc и sweep, — и сверены с исходными контурами. Расхождение площадей 0,018&nbsp;% и меньше, то есть остаток флаттенинга. Проверка не декоративная: на ней дважды поймана перевёрнутая дуга, которой на превью было не видно.</td></tr>
+  <tr><td>Правило nonzero</td><td class="ok">Все литеры уходят одним <code>&lt;path&gt;</code>. Число обхода посчитано в 17 точках заливки и 7 точках счётчиков: заливка везде +1, счётчики и просветы везде 0. Противоположно обойдённых перекрытий нет, дыр не будет.</td></tr>
+  <tr><td>Обводки</td><td class="ok">Нет ни одной. Только заливки.</td></tr>
+  <tr><td>Число заливок</td><td class="ok">Две: абажур акцентом, всё остальное чернилами. Правило одного акцента соблюдено.</td></tr>
+</table>
+
+<h2>8. Цвет</h2>
+<p>Заливок две, те же, что в иконке. Акцент — только абажур; литеры, втулка, стойка и основание всегда чернильные.</p>
+
+<div class="swatches">
+  <div class="sw"><div class="chip" style="background:#4A6B52"></div><div class="n">Абажур, светлая</div><div class="h">#4A6B52</div></div>
+  <div class="sw"><div class="chip" style="background:#17211C"></div><div class="n">Литеры, светлая</div><div class="h">#17211C</div></div>
+  <div class="sw"><div class="chip" style="background:#7FA085"></div><div class="n">Абажур, тёмная</div><div class="h">#7FA085</div></div>
+  <div class="sw"><div class="chip" style="background:#E8DFCB"></div><div class="n">Литеры, тёмная</div><div class="h">#E8DFCB</div></div>
+</div>
+
+<figure>
+<div class="row">
+  <div class="cell"><div class="plate" style="padding:14px 18px;"><svg width="260" height="102" viewBox="0 0 243.0 96"><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/></svg></div><div class="cap">светлая</div></div>
+  <div class="cell"><div class="plate dark" style="padding:14px 18px;"><svg width="260" height="102" viewBox="0 0 243.0 96"><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#E8DFCB"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#7FA085"/></svg></div><div class="cap">тёмная</div></div>
+  <div class="cell"><div class="plate paper" style="padding:14px 18px;"><svg width="260" height="102" viewBox="0 0 243.0 96"><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#17211C"/></svg></div><div class="cap">монохром</div></div>
+</div>
+<figcaption>В монохроме абажур становится чернильным и остаётся единственной сплошной массой в слове — силуэт лампы не разваливается. Это версия для печати в один цвет и для штампа на README.</figcaption>
+</figure>
+
+<h2>9. Размеры и охранное поле</h2>
+
+<p>Тонкий штрих — 3 из 243, то есть 1,23&nbsp;% ширины. На выводе шириной 108&nbsp;px он даёт 1,33&nbsp;px, основной — 2,67&nbsp;px. Ниже этого перекладина «e», флаги «r» и верх колец начинают выпадать в полупрозрачный серый, и слово редеет раньше, чем становится нечитаемым.</p>
+
+<figure>
+<div class="row"><div class="cell"><div class="plate" style="padding:10px 12px;"><svg width="243" height="96" viewBox="0 0 243.0 96"><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/></svg></div><div class="cap">243 px</div></div><div class="cell"><div class="plate" style="padding:10px 12px;"><svg width="162" height="64" viewBox="0 0 243.0 96"><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/></svg></div><div class="cap">162 px</div></div><div class="cell"><div class="plate" style="padding:10px 12px;"><svg width="121" height="47" viewBox="0 0 243.0 96"><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/></svg></div><div class="cap">121 px</div></div><div class="cell"><div class="plate" style="padding:10px 12px;"><svg width="108" height="42" viewBox="0 0 243.0 96"><path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/><path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/></svg></div><div class="cap">108 px</div></div></div>
+<figcaption>Разрядка на всех размерах одна: логотип не имеет хинтованных версий и не перерисовывается под размер. Вместо этого назначен предел.</figcaption>
+</figure>
+
+<table>
+  <tr><th style="width:30%">Ширина вывода</th><th>Что ставить</th></tr>
+  <tr><td class="num">от 108 px</td><td>логотип целиком</td></tr>
+  <tr><td class="num">меньше 108 px</td><td>иконка отдельно, без надписи — у неё для этого есть хинтованные версии 32 и 16</td></tr>
+</table>
+
+<p>Охранное поле — 24 со всех сторон от чернильного габарита, то есть высота абажура. Величина взята из самого знака, а не назначена: она масштабируется вместе с логотипом сама.</p>
+
+<div class="note">Габарит логотипа — <code>x</code> от 0 до 243, <code>y</code> от 12 до 85,5. Поле <code>viewBox</code> при этом объявлено как <code>0 0 243 96</code>: пустые 12 сверху и 10,5 снизу оставлены намеренно, чтобы вертикаль совпадала с иконкой и обе формы стыковались без пересчёта. Если логотип нужен впритык, второй файл отдаёт тот же рисунок в габаритном поле.</div>
+
+<h2>10. Исходники</h2>
+
+<p>Порядок заливок обязателен: сначала чернила, потом акцент. Абажур перекрывает верх втулки, и при обратном порядке на стыке появится чернильная кромка.</p>
+
+<div class="file">logotype.svg — мастер, вертикаль общая с иконкой</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 243.0 96" role="img" aria-label="Carrel"&gt;
+  &lt;path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/&gt;
+  &lt;path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">logotype-tight.svg — то же в габаритном поле, без пустых полей</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 12 243.0 73.5" role="img" aria-label="Carrel"&gt;
+  &lt;path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#17211C"/&gt;
+  &lt;path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#4A6B52"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">logotype-dark.svg — тёмная тема</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 243.0 96" role="img" aria-label="Carrel"&gt;
+  &lt;path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="#E8DFCB"/&gt;
+  &lt;path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="#7FA085"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="file">logotype-mono.svg — один цвет, печать и штампы</div>
+<pre><code>&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 243.0 96" role="img" aria-label="Carrel"&gt;
+  &lt;path d="M53.8021 72A30 34.5 0 1 1 53.8021 30L47.8885 30A24 31.5 0 1 0 47.8885 72ZM60 72A21 13.5 0 1 1 102 72A21 13.5 0 1 1 60 72ZM66 72A15 10.5 0 1 0 96 72A15 10.5 0 1 0 66 72ZM60.5251 45A21 13.5 0 0 1 102 48L96 48A15 10.5 0 0 0 66.6253 45ZM96 48H102V84H96ZM96 81H106.5V84H96ZM117 36H123V84H117ZM112.5 36H123V39H112.5ZM112.5 81H127.5V84H112.5ZM123 37.2A15 13.5 0 0 1 139.5 36.3087L139.5 42.1959A9 10.5 0 0 0 123 48ZM150 36H156V84H150ZM145.5 36H156V39H145.5ZM145.5 81H160.5V84H145.5ZM156 37.2A15 13.5 0 0 1 172.5 36.3087L172.5 42.1959A9 10.5 0 0 0 156 48ZM213.1955 75A22.5 25.5 0 1 1 217.5 60L211.5 60A16.5 22.5 0 1 0 207.2984 75ZM178.5 57H217.3437A22.5 25.5 0 0 1 217.5 60H178.5ZM223.5 36H232.5V39H223.5ZM225 39H231V78H225ZM217.5 78H238.5V82.5A1.5 1.5 0 0 1 237 84H219A1.5 1.5 0 0 1 217.5 82.5Z" fill="currentColor"/&gt;
+  &lt;path d="M213 30A15 18 0 0 1 243 30V36H213Z" fill="currentColor"/&gt;
+&lt;/svg&gt;</code></pre>
+
+<h2>11. Что эталон фиксирует</h2>
+<ul>
+  <li>Координаты из разделов 3, 5 и 6 — единственный источник геометрии. Файл, где кромка стоит не там, — испорченная копия, а не вариант.</li>
+  <li>Высота абажура не уменьшается ни при каких обстоятельствах. Верх на выносной 12 — единственное, что отличает «l» от «I».</li>
+  <li>Ширина стойки равна основному штриху литер и равна 6. Это условие существования варианта&nbsp;2, а не параметр.</li>
+  <li>Две заливки, ноль обводок, порядок «чернила, затем акцент». Между темами меняются только цвета заливок; геометрия во всех вариантах одна.</li>
+  <li>Разрядка не правится под место. Логотип масштабируется целиком, минимальный зазор в 6 сохраняется сам.</li>
+  <li>Иконка рядом с логотипом не ставится: в этом варианте знак уже внутри слова, и второй знак читается как повтор. Иконка идёт отдельно — в квадратных форматах и там, где ширины на надпись нет.</li>
+  <li>Никаких градиентов, теней, свечения, поворотов и отражений — как и в бренд-гайде.</li>
+</ul>
+
+<h2>12. Чего эталон не закрывает</h2>
+<ul>
+  <li><strong>Только латиница и только слово «Carrel».</strong> Литеры нарисованы под это слово и больше ни подо что. Кириллического начертания нет, склонений нет, дополнительных знаков нет. Любой другой текст рядом набирается Literata и логотипом не является.</li>
+  <li><strong>Прочтение «l» держится на одном признаке.</strong> Выносная выше прописных на 6 — на мелких размерах и в монохроме этого хватает, но запас невелик. Если знак пойдёт в среду, где ширина вывода регулярно уходит ниже 108&nbsp;px, ставить надо иконку, а не уменьшенный логотип.</li>
+  <li><strong>Файл вариантов не обновлён.</strong> В <code>carrel-wordmarks.html</code> вариант&nbsp;2 по-прежнему показан эскизом на старой геометрии. Его стоит либо заменить ссылкой сюда, либо оставить как историю выбора, пометив, что он не является файлом.</li>
+  <li><strong>Связка логотипа с иконкой в шапке не описана.</strong> Эталон иконки задаёт отступ для базовой раскладки — знак слева, надпись справа. Для варианта&nbsp;2 такая связка запрещена разделом&nbsp;11, поэтому правило отступа в разделе&nbsp;8 эталона иконки к этому логотипу неприменимо и висит без замены.</li>
+</ul>
+</div>
+</body>
+</html>
