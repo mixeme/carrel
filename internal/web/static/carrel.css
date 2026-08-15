@@ -182,6 +182,18 @@ main:has(.app-layout) {
     margin: 1rem 0;
 }
 
+.contact-form:not(.show-empty) .is-empty {
+    display: none;
+}
+
+.empty-fields-toggle {
+    margin-top: 1.25rem;
+}
+
+.empty-fields-toggle button {
+    margin-top: 0;
+}
+
 .name-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));

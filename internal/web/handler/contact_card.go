@@ -62,6 +62,28 @@ type labeledForm struct {
 	Value string
 }
 
+// HideEmpty is true when an unfilled field should start collapsed. A new
+// contact shows every field, because filling them is the point of that screen.
+func (v contactCardView) HideEmpty(value string) bool {
+	return !v.IsNew && strings.TrimSpace(value) == ""
+}
+
+func (item labeledForm) Empty() bool {
+	return strings.TrimSpace(item.Value) == "" && strings.TrimSpace(item.Label) == ""
+}
+
+func (f contactForm) HasPhone() bool { return hasFilledLabel(f.Phones) }
+func (f contactForm) HasEmail() bool { return hasFilledLabel(f.Emails) }
+
+func hasFilledLabel(items []labeledForm) bool {
+	for _, item := range items {
+		if !item.Empty() {
+			return true
+		}
+	}
+	return false
+}
+
 type photoCropView struct {
 	Key     string
 	PanX    float64

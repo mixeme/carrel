@@ -115,71 +115,92 @@
                 {{if $d.Contact.Note}}<dt>Note</dt><dd>{{$d.Contact.Note}}</dd>{{end}}
             </dl>
             {{else}}
-            <form method="post" action="{{if $d.IsNew}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+            <form method="post" class="contact-form" action="{{if $d.IsNew}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
 
-                <label for="fn">Display name</label>
-                <input id="fn" name="fn" type="text" value="{{$d.Form.FormattedName}}" required>
-
-                <div class="name-grid">
-                    <label>Prefix <input name="prefix" type="text" value="{{$d.Form.Prefix}}"></label>
-                    <label>Given <input name="given" type="text" value="{{$d.Form.Given}}"></label>
-                    <label>Additional <input name="additional" type="text" value="{{$d.Form.Additional}}"></label>
-                    <label>Family <input name="family" type="text" value="{{$d.Form.Family}}"></label>
-                    <label>Suffix <input name="suffix" type="text" value="{{$d.Form.Suffix}}"></label>
+                <div class="form-field">
+                    <label for="fn">Display name</label>
+                    <input id="fn" name="fn" type="text" value="{{$d.Form.FormattedName}}" required>
                 </div>
 
-                <label for="nickname">Nickname</label>
-                <input id="nickname" name="nickname" type="text" value="{{$d.Form.Nickname}}">
+                <div class="name-grid">
+                    <label{{if $d.HideEmpty $d.Form.Prefix}} class="is-empty"{{end}}>Prefix <input name="prefix" type="text" value="{{$d.Form.Prefix}}"></label>
+                    <label{{if $d.HideEmpty $d.Form.Given}} class="is-empty"{{end}}>Given <input name="given" type="text" value="{{$d.Form.Given}}"></label>
+                    <label{{if $d.HideEmpty $d.Form.Additional}} class="is-empty"{{end}}>Additional <input name="additional" type="text" value="{{$d.Form.Additional}}"></label>
+                    <label{{if $d.HideEmpty $d.Form.Family}} class="is-empty"{{end}}>Family <input name="family" type="text" value="{{$d.Form.Family}}"></label>
+                    <label{{if $d.HideEmpty $d.Form.Suffix}} class="is-empty"{{end}}>Suffix <input name="suffix" type="text" value="{{$d.Form.Suffix}}"></label>
+                </div>
 
-                <label for="org">Organisation</label>
-                <input id="org" name="org" type="text" value="{{$d.Form.Organization}}">
+                <div class="form-field{{if $d.HideEmpty $d.Form.Nickname}} is-empty{{end}}">
+                    <label for="nickname">Nickname</label>
+                    <input id="nickname" name="nickname" type="text" value="{{$d.Form.Nickname}}">
+                </div>
 
-                <label for="title">Title</label>
-                <input id="title" name="title" type="text" value="{{$d.Form.Title}}">
+                <div class="form-field{{if $d.HideEmpty $d.Form.Organization}} is-empty{{end}}">
+                    <label for="org">Organisation</label>
+                    <input id="org" name="org" type="text" value="{{$d.Form.Organization}}">
+                </div>
 
-                <label for="role">Role</label>
-                <input id="role" name="role" type="text" value="{{$d.Form.Role}}">
+                <div class="form-field{{if $d.HideEmpty $d.Form.Title}} is-empty{{end}}">
+                    <label for="title">Title</label>
+                    <input id="title" name="title" type="text" value="{{$d.Form.Title}}">
+                </div>
 
-                <label for="bday">Birthday</label>
-                <input id="bday" name="bday" type="text" value="{{$d.Form.Birthday}}" placeholder="YYYY-MM-DD">
+                <div class="form-field{{if $d.HideEmpty $d.Form.Role}} is-empty{{end}}">
+                    <label for="role">Role</label>
+                    <input id="role" name="role" type="text" value="{{$d.Form.Role}}">
+                </div>
 
-                <fieldset>
+                <div class="form-field{{if $d.HideEmpty $d.Form.Birthday}} is-empty{{end}}">
+                    <label for="bday">Birthday</label>
+                    <input id="bday" name="bday" type="text" value="{{$d.Form.Birthday}}" placeholder="YYYY-MM-DD">
+                </div>
+
+                <fieldset{{if and (not $d.IsNew) (not $d.Form.HasPhone)}} class="is-empty"{{end}}>
                     <legend>Phone numbers</legend>
                     {{range $d.Form.Phones}}
-                    <div class="labeled-row">
+                    <div class="labeled-row{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
                         <input name="phone_label" type="text" value="{{.Label}}" placeholder="label">
                         <input name="phone" type="tel" value="{{.Value}}" placeholder="number">
                     </div>
                     {{end}}
-                    <div class="labeled-row">
+                    <div class="labeled-row{{if not $d.IsNew}} is-empty{{end}}">
                         <input name="phone_label" type="text" placeholder="label">
                         <input name="phone" type="tel" placeholder="number">
                     </div>
                 </fieldset>
 
-                <fieldset>
+                <fieldset{{if and (not $d.IsNew) (not $d.Form.HasEmail)}} class="is-empty"{{end}}>
                     <legend>Email addresses</legend>
                     {{range $d.Form.Emails}}
-                    <div class="labeled-row">
+                    <div class="labeled-row{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
                         <input name="email_label" type="text" value="{{.Label}}" placeholder="label">
                         <input name="email" type="email" value="{{.Value}}" placeholder="address">
                     </div>
                     {{end}}
-                    <div class="labeled-row">
+                    <div class="labeled-row{{if not $d.IsNew}} is-empty{{end}}">
                         <input name="email_label" type="text" placeholder="label">
                         <input name="email" type="email" placeholder="address">
                     </div>
                 </fieldset>
 
-                <label for="categories">Categories</label>
-                <input id="categories" name="categories" type="text" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                <div class="form-field{{if $d.HideEmpty $d.Form.Categories}} is-empty{{end}}">
+                    <label for="categories">Categories</label>
+                    <input id="categories" name="categories" type="text" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                </div>
 
-                <label for="note">Note</label>
-                <textarea id="note" name="note" rows="4">{{$d.Form.Note}}</textarea>
+                <div class="form-field{{if $d.HideEmpty $d.Form.Note}} is-empty{{end}}">
+                    <label for="note">Note</label>
+                    <textarea id="note" name="note" rows="4">{{$d.Form.Note}}</textarea>
+                </div>
 
+                {{if not $d.IsNew}}
+                <p class="empty-fields-toggle no-print">
+                    <button type="button" class="link" data-empty-fields aria-expanded="false">Show empty fields</button>
+                </p>
+                {{end}}
                 <button type="submit">Save</button>
             </form>
 

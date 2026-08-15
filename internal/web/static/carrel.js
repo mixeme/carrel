@@ -12,6 +12,18 @@ document.addEventListener('click', function (e) {
         return;
     }
 
+    // Empty contact fields stay in the form so a save is still a patch; the
+    // button only changes whether they are shown.
+    var emptyBtn = e.target.closest('[data-empty-fields]');
+    if (emptyBtn) {
+        var form = emptyBtn.closest('form');
+        if (!form) return;
+        var on = form.classList.toggle('show-empty');
+        emptyBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
+        emptyBtn.textContent = on ? 'Hide empty fields' : 'Show empty fields';
+        return;
+    }
+
     var btn = e.target.closest('[data-copy]');
     if (!btn) return;
     var id = btn.getAttribute('data-copy');

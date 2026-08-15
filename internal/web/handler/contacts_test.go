@@ -78,6 +78,49 @@ func TestContactSaveKeepsUnknownProperties(t *testing.T) {
 	}
 }
 
+func TestContactCardHidesEmptyFields(t *testing.T) {
+	davSrv := startCardDAVBook(t)
+	defer davSrv.Close()
+
+	a := newApp(t, nil)
+	a.Guard = dav.NewGuard(dav.GuardConfig{Allowlist: []string{"127.0.0.1"}})
+	a.setupAdmin("root", "", testPassword)
+	accID, colEnc := a.connectAddressBook(t, davSrv.URL)
+
+	card := a.get("/app/contacts/" + accID + "/" + colEnc + "/ada")
+	if card.Code != http.StatusOK {
+		t.Fatalf("card status = %d, body = %s", card.Code, card.Body.String())
+	}
+	body := card.Body.String()
+	if !strings.Contains(body, `data-empty-fields`) {
+		t.Fatalf("expand control missing:\n%s", body)
+	}
+	if !strings.Contains(body, `class="form-field is-empty"`) {
+		t.Fatalf("empty fields were not marked to collapse:\n%s", body)
+	}
+	if !strings.Contains(body, `id="nickname"`) {
+		t.Fatal("empty nickname field missing from the form")
+	}
+	if !strings.Contains(body, `value="Ada"`) {
+		t.Fatal("filled given name missing")
+	}
+	if strings.Contains(body, `class="is-empty">Given`) {
+		t.Fatal("filled given name was marked empty")
+	}
+
+	blank := a.get("/app/contacts/" + accID + "/" + colEnc + "/new")
+	if blank.Code != http.StatusOK {
+		t.Fatalf("new contact status = %d, body = %s", blank.Code, blank.Body.String())
+	}
+	newBody := blank.Body.String()
+	if strings.Contains(newBody, `data-empty-fields`) {
+		t.Fatal("new contact hid empty fields")
+	}
+	if strings.Contains(newBody, `is-empty`) {
+		t.Fatalf("new contact marked fields as empty:\n%s", newBody)
+	}
+}
+
 func TestContactConflictShowsChoice(t *testing.T) {
 	davSrv := startCardDAVBook(t)
 	defer davSrv.Close()
