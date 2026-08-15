@@ -67,6 +67,8 @@ func TestValidateErrors(t *testing.T) {
 		{"trailing slash", Config{Port: 8080, DataDir: "/tmp", BasePath: "/carrel/", LogLevel: "info"}},
 		{"bad log level", Config{Port: 8080, DataDir: "/tmp", LogLevel: "trace"}},
 		{"bad proxy", Config{Port: 8080, DataDir: "/tmp", LogLevel: "info", TrustedProxies: []string{"not-an-ip"}}},
+		{"bad bind", Config{Port: 8080, DataDir: "/tmp", LogLevel: "info", Bind: "not-an-ip"}},
+		{"bind with port", Config{Port: 8080, DataDir: "/tmp", LogLevel: "info", Bind: "127.0.0.1:8080"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -194,9 +196,35 @@ func TestFilesLimits(t *testing.T) {
 	}
 }
 
+func TestBindEnvAndAddr(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("CARREL_DATA_DIR", dir)
+	t.Setenv("CARREL_BIND", "127.0.0.1")
+	t.Setenv("CARREL_PORT", "9090")
+	clearEnvExcept(t, "CARREL_DATA_DIR", "CARREL_BIND", "CARREL_PORT")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+	if cfg.Bind != "127.0.0.1" {
+		t.Errorf("Bind = %q, want 127.0.0.1", cfg.Bind)
+	}
+	if got := cfg.Addr(); got != "127.0.0.1:9090" {
+		t.Errorf("Addr() = %q, want 127.0.0.1:9090", got)
+	}
+}
+
+func TestAddrDefaultBind(t *testing.T) {
+	cfg := defaults()
+	if got := cfg.Addr(); got != ":8080" {
+		t.Errorf("Addr() = %q, want :8080", got)
+	}
+}
+
 func clearEnv(t *testing.T) {
 	t.Helper()
-	for _, k := range []string{"CARREL_PORT", "CARREL_TRUSTED_PROXIES", "CARREL_BASE_PATH", "CARREL_LOG_LEVEL"} {
+	for _, k := range []string{"CARREL_PORT", "CARREL_BIND", "CARREL_TRUSTED_PROXIES", "CARREL_BASE_PATH", "CARREL_LOG_LEVEL"} {
 		t.Setenv(k, "")
 	}
 }
@@ -207,7 +235,7 @@ func clearEnvExcept(t *testing.T, keep ...string) {
 	for _, k := range keep {
 		keepSet[k] = true
 	}
-	for _, k := range []string{"CARREL_PORT", "CARREL_TRUSTED_PROXIES", "CARREL_BASE_PATH", "CARREL_LOG_LEVEL"} {
+	for _, k := range []string{"CARREL_PORT", "CARREL_BIND", "CARREL_TRUSTED_PROXIES", "CARREL_BASE_PATH", "CARREL_LOG_LEVEL"} {
 		if !keepSet[k] {
 			t.Setenv(k, "")
 		}

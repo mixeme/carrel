@@ -186,6 +186,23 @@ docker compose logs carrel > /tmp/carrel.log
 
 ---
 
+## 8. Desktop application (после релиза desktop)
+
+План: [plans/desktop-wrapper.md](plans/desktop-wrapper.md). Проверки после сборки `carrel-desktop`.
+
+| # | Проверка |
+|---|----------|
+| **P-desktop-1** | Remote: первый запуск, URL, login, навигация |
+| **P-desktop-2** | Local: lazy download sidecar, setup/login, данные в профиле OS-user |
+| **P-desktop-3** | Tray on: close → фон; tray off: close → sidecar остановлен |
+| **P-desktop-4** | Sign out → onboarding → другой режим (Remote ↔ Local) |
+| **P-desktop-5** | Fan-out на Win и Linux: SSE или fallback polling |
+
+- [ ] P-desktop-1 … P-desktop-5
+- [ ] Admin install + server checkbox; user install; два OS-users на одной машине
+
+---
+
 ## Перед приёмкой
 
 ```bash

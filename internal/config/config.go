@@ -176,6 +176,7 @@ func (d *Duration) UnmarshalJSON(b []byte) error {
 // Config holds server runtime settings.
 type Config struct {
 	Port           int        `json:"port"`
+	Bind           string     `json:"bind"`
 	DataDir        string     `json:"data_dir"`
 	TrustedProxies []string   `json:"trusted_proxies"`
 	BasePath       string     `json:"base_path"`
@@ -192,6 +193,7 @@ type Config struct {
 // fileConfig mirrors Config for JSON unmarshaling with optional fields.
 type fileConfig struct {
 	Port           *int        `json:"port,omitempty"`
+	Bind           *string     `json:"bind,omitempty"`
 	DataDir        *string     `json:"data_dir,omitempty"`
 	TrustedProxies []string    `json:"trusted_proxies,omitempty"`
 	BasePath       *string     `json:"base_path,omitempty"`
@@ -287,6 +289,9 @@ func applyFile(cfg *Config, raw []byte) error {
 	if fc.Port != nil {
 		cfg.Port = *fc.Port
 	}
+	if fc.Bind != nil {
+		cfg.Bind = *fc.Bind
+	}
 	if fc.DataDir != nil {
 		cfg.DataDir = *fc.DataDir
 	}
@@ -330,6 +335,9 @@ func applyEnv(cfg *Config) error {
 			return fmt.Errorf("CARREL_PORT: invalid integer %q", v)
 		}
 		cfg.Port = port
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_BIND")); v != "" {
+		cfg.Bind = v
 	}
 	if v := strings.TrimSpace(os.Getenv("CARREL_DATA_DIR")); v != "" {
 		cfg.DataDir = v
@@ -537,6 +545,9 @@ func (c *Config) Validate() error {
 	if c.Port < 1 || c.Port > 65535 {
 		return fmt.Errorf("port must be between 1 and 65535, got %d", c.Port)
 	}
+	if err := validateBind(c.Bind); err != nil {
+		return err
+	}
 	if strings.TrimSpace(c.DataDir) == "" {
 		return errors.New("data directory must not be empty")
 	}
@@ -713,7 +724,25 @@ func validateTrustedProxy(s string) error {
 	return nil
 }
 
-// Addr returns the listen address for the configured port.
+// Addr returns the listen address for the configured port and bind address.
+// An empty bind listens on all interfaces (":port"); a set bind is "host:port".
 func (c *Config) Addr() string {
-	return fmt.Sprintf(":%d", c.Port)
+	if strings.TrimSpace(c.Bind) == "" {
+		return fmt.Sprintf(":%d", c.Port)
+	}
+	return fmt.Sprintf("%s:%d", c.Bind, c.Port)
+}
+
+func validateBind(bind string) error {
+	bind = strings.TrimSpace(bind)
+	if bind == "" {
+		return nil
+	}
+	if strings.Contains(bind, ":") {
+		return fmt.Errorf("bind address %q must not contain a port", bind)
+	}
+	if net.ParseIP(bind) == nil {
+		return fmt.Errorf("bind address %q must be an IP address", bind)
+	}
+	return nil
 }

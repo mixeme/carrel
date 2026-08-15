@@ -89,6 +89,10 @@ docker compose -f compose.test.yaml up -d
 
 Writing tests is covered in [tests.md](tests.md), including the fake-server helpers to reuse rather than rebuild.
 
+### Desktop application (planned)
+
+Wails wrapper for Windows and Linux — see [plans/desktop-wrapper.md](plans/desktop-wrapper.md). After `cmd/carrel-desktop` exists: build with Wails v2; on Linux install `libwebkit2gtk-4.1-dev` and `pkg-config` before `wails build`.
+
 ---
 
 ## Code conventions

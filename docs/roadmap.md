@@ -4,7 +4,7 @@ What is not built yet, in the order it matters, and — just as usefully — wha
 
 Everything in the main scope of v1 is implemented: the framework, transport and discovery, contacts, calendar, tasks, notes, the unified view, cross-source search, duplicates, and WebDAV files with attachments. What is left before a v1 tag is a person's judgement rather than code.
 
-Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for the order in which they are worth showing anyone. The per-stage implementation plans were removed once every stage was done; what they still carried and the code did not is in the gaps section below, and what was worth keeping of their working practice is in [development.md](development.md).
+Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for the order in which they are worth showing anyone. The per-stage implementation plans were removed once every stage was done; what they still carried and the code did not is in the gaps section below, and what was worth keeping of their working practice is in [development.md](development.md). Active implementation plans for features not yet built live in [plans/](plans/) and are deleted after closeout.
 
 ---
 
@@ -65,9 +65,31 @@ Both §23.8 items are worth doing before anything in the next section: they are 
 
 ---
 
+## Desktop application (Wails, §18)
+
+Native wrapper for Windows and Linux — own window and server lifecycle; PWA remains for the browser.
+
+**Stack:** Wails v2 (not Tauri). **v1 platforms:** Windows + Linux; macOS is not in v1.
+
+**Modes:** Remote (webview on a URL) or Local (sidecar `carrel`); chosen at first launch per OS-user. Switch modes via **Sign out** → onboarding again.
+
+**Data:** `CARREL_DATA_DIR` always in the OS-user profile. Sidecar binary next to the desktop app in the install directory; an admin install shares one sidecar copy on the machine.
+
+**Sidecar:** downloaded only for Local, or optionally during install («Download server component»). Dynamic port; `CARREL_BIND=127.0.0.1` for local desktop.
+
+**Tray:** user setting — close window hides to tray (server keeps running) or stops the sidecar.
+
+**Not in scope:** DAV on localhost, macOS v1, offline mode.
+
+**Implementation plan:** [plans/desktop-wrapper.md](plans/desktop-wrapper.md) (temporary; removed after closeout).
+
+**Acceptance:** Win+Linux; Remote/Local; single instance per user; fan-out SSE or polling in webview; installer server checkbox. See [manual-acceptance.md](manual-acceptance.md) P-desktop.
+
+---
+
 ## Next, in order
 
-The order below is value first, and follows §25.6 rather than the engineering order that got us here.
+The order below is value first, and follows §25.6 rather than the engineering order that got us here. The desktop application is a parallel track — its order relative to the items below is not fixed.
 
 ### 1. New device screen (§23.1)
 

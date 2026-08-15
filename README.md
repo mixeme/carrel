@@ -267,6 +267,7 @@ Settings come from `config.json` in the data directory, and from the environment
 | Variable | Default | What it does |
 |---|---|---|
 | `CARREL_PORT` | `8080` | Listen port |
+| `CARREL_BIND` | — | Listen address (IP only). Empty = all interfaces. Desktop local mode uses `127.0.0.1` |
 | `CARREL_DATA_DIR` | `/var/lib/carrel` | The volume: server key and state file |
 | `CARREL_BASE_PATH` | — | Mount under a prefix, e.g. `/carrel` |
 | `CARREL_TRUSTED_PROXIES` | — | Addresses or CIDRs whose `X-Forwarded-For` is believed. **Set this** if you are behind a proxy: without it the rate limiter counts the proxy's address as everyone's |

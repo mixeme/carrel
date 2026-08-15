@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **Desktop wrapper (§18) — plan and `CARREL_BIND`:** implementation plan in [docs/plans/desktop-wrapper.md](docs/plans/desktop-wrapper.md) (Wails, Windows + Linux, Remote/Local, tray, sidecar download). Roadmap section Desktop application. `CARREL_BIND` env for listen address (desktop local uses `127.0.0.1`); empty bind keeps listening on all interfaces as before.
+
 ## [0.7.0] - 2026-08-15
 
 **Основной объём v1 закрыт (§19).** Этапы 2–7 — транспорт и discovery, контакты, календарь, задачи и заметки с единым видом и поиском, дубликаты, WebDAV-файлы и вложения — реализованы; **v0.7.0**. Остаётся ручная приёмка: [docs/manual-acceptance.md](docs/manual-acceptance.md). Что не сделано и что делаться не будет: [docs/roadmap.md](docs/roadmap.md).
