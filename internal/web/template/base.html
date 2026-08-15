@@ -26,7 +26,7 @@
         <a href="{{.Base}}/app/unified"{{if or (eq .Title "Everything") (eq .Title "All contacts")}} aria-current="page"{{end}}>Everything</a>
         <a href="{{.Base}}/app/search"{{if eq .Title "Search"}} aria-current="page"{{end}}>Search</a>
         <a href="{{.Base}}/app/duplicates"{{if or (eq .Title "Duplicates") (eq .Title "Merge duplicates")}} aria-current="page"{{end}}>Duplicates</a>
-        {{if .Admin}}<a href="{{.Base}}/admin/"{{if eq .Title "Administration"}} aria-current="page"{{end}}>Administration</a>{{end}}
+        {{if .Admin}}<a href="{{.Base}}/admin/"{{if .InAdmin}} aria-current="page"{{end}}>Administration</a>{{end}}
         <a class="quick-note" href="{{.Base}}/app/notes/quick" title="Write a note">New note</a>
         <form method="post" action="{{.Base}}/app/" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
@@ -50,6 +50,19 @@
 </footer>
 </body>
 </html>
+{{end}}
+
+{{/* Administration subsection links. Defined here because every admin page
+     shows the same list, and the current item is the only thing that differs. */}}
+{{define "adminnav"}}
+{{$d := .Data}}
+<nav class="admin-nav" aria-label="Administration">
+    <a href="{{.Base}}/admin/"{{if eq $d.Section "users"}} aria-current="page"{{end}}>Users</a>
+    <a href="{{.Base}}/admin/invites"{{if eq $d.Section "invites"}} aria-current="page"{{end}}>Invitations</a>
+    <a href="{{.Base}}/admin/settings"{{if eq $d.Section "settings"}} aria-current="page"{{end}}>Settings</a>
+    <a href="{{.Base}}/admin/escrow"{{if eq $d.Section "escrow"}} aria-current="page"{{end}}>Key escrow</a>
+    <a href="{{.Base}}/admin/audit"{{if eq $d.Section "audit"}} aria-current="page"{{end}}>Audit log</a>
+</nav>
 {{end}}
 
 {{/* The sources panel of §14: which collections a fan-out screen polls, ticked

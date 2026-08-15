@@ -146,12 +146,75 @@ func TestAdminAuditLogFilter(t *testing.T) {
 	bootstrap(t, a)
 	loginAdmin(t, a)
 
-	rec := a.get("/admin/?audit_action=login")
+	rec := a.get("/admin/audit?audit_action=login")
 	if rec.Code != http.StatusOK {
-		t.Fatalf("GET /admin/ = %d", rec.Code)
+		t.Fatalf("GET /admin/audit = %d", rec.Code)
 	}
 	if !strings.Contains(rec.Body.String(), "login") {
 		t.Error("audit filter page missing login action")
+	}
+}
+
+func TestAdminSectionsAreSeparatePages(t *testing.T) {
+	a := newApp(t, nil)
+	bootstrap(t, a)
+	loginAdmin(t, a)
+
+	users := a.get("/admin/").Body.String()
+	if !strings.Contains(users, ">root<") {
+		t.Error("users page missing the administrator")
+	}
+	if strings.Contains(users, `value="enable_escrow"`) {
+		t.Error("users page still carries the escrow form")
+	}
+	if strings.Contains(users, `value="save_smtp"`) {
+		t.Error("users page still carries the mail form")
+	}
+	if strings.Contains(users, `id="audit-action"`) {
+		t.Error("users page still carries the audit filter")
+	}
+	if !strings.Contains(users, `href="/admin/invites"`) {
+		t.Error("users page missing the subsection navigation")
+	}
+
+	invites := a.get("/admin/invites")
+	if invites.Code != http.StatusOK {
+		t.Fatalf("GET /admin/invites = %d", invites.Code)
+	}
+	if !strings.Contains(invites.Body.String(), `value="create_invite_link"`) {
+		t.Error("invitations page missing the link form")
+	}
+
+	settings := a.get("/admin/settings")
+	if settings.Code != http.StatusOK {
+		t.Fatalf("GET /admin/settings = %d", settings.Code)
+	}
+	body := settings.Body.String()
+	if !strings.Contains(body, `value="save_settings"`) {
+		t.Error("settings page missing global settings")
+	}
+	if !strings.Contains(body, `value="save_smtp"`) {
+		t.Error("settings page missing mail settings")
+	}
+
+	escrow := a.get("/admin/escrow")
+	if escrow.Code != http.StatusOK {
+		t.Fatalf("GET /admin/escrow = %d", escrow.Code)
+	}
+	if !strings.Contains(escrow.Body.String(), `value="enable_escrow"`) {
+		t.Error("escrow page missing the enable form")
+	}
+
+	audit := a.get("/admin/audit")
+	if audit.Code != http.StatusOK {
+		t.Fatalf("GET /admin/audit = %d", audit.Code)
+	}
+	if !strings.Contains(audit.Body.String(), `id="audit-action"`) {
+		t.Error("audit page missing the filter")
+	}
+
+	if rec := a.get("/admin/unknown"); rec.Code != http.StatusNotFound {
+		t.Errorf("GET /admin/unknown = %d, want 404", rec.Code)
 	}
 }
 

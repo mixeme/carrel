@@ -1,0 +1,56 @@
+{{define "body"}}
+{{$d := .Data}}
+<section class="card admin-panel">
+    <h1>Administration</h1>
+    {{template "adminnav" .}}
+
+    {{if $d.MailWarning}}
+    <p class="warning" role="alert">{{$d.MailWarning}}</p>
+    {{end}}
+
+    <section class="subsection">
+        <h2>Audit log</h2>
+        <form method="get" action="{{.Base}}/admin/audit">
+            <label for="audit-action">Filter by action</label>
+            <select id="audit-action" name="audit_action">
+                <option value="">All actions</option>
+                <option value="login" {{if eq $d.AuditAction "login"}}selected{{end}}>login</option>
+                <option value="login_failed" {{if eq $d.AuditAction "login_failed"}}selected{{end}}>login_failed</option>
+                <option value="logout" {{if eq $d.AuditAction "logout"}}selected{{end}}>logout</option>
+                <option value="user_create" {{if eq $d.AuditAction "user_create"}}selected{{end}}>user_create</option>
+                <option value="user_disable" {{if eq $d.AuditAction "user_disable"}}selected{{end}}>user_disable</option>
+                <option value="user_enable" {{if eq $d.AuditAction "user_enable"}}selected{{end}}>user_enable</option>
+                <option value="user_delete" {{if eq $d.AuditAction "user_delete"}}selected{{end}}>user_delete</option>
+                <option value="user_role_change" {{if eq $d.AuditAction "user_role_change"}}selected{{end}}>user_role_change</option>
+                <option value="password_change" {{if eq $d.AuditAction "password_change"}}selected{{end}}>password_change</option>
+                <option value="password_reset" {{if eq $d.AuditAction "password_reset"}}selected{{end}}>password_reset</option>
+                <option value="sessions_killed" {{if eq $d.AuditAction "sessions_killed"}}selected{{end}}>sessions_killed</option>
+                <option value="settings_update" {{if eq $d.AuditAction "settings_update"}}selected{{end}}>settings_update</option>
+                <option value="escrow_recover" {{if eq $d.AuditAction "escrow_recover"}}selected{{end}}>escrow_recover</option>
+            </select>
+            <button type="submit">Filter</button>
+        </form>
+
+        {{if $d.AuditLog}}
+        <table class="data">
+            <thead>
+                <tr><th>When</th><th>Action</th><th>Actor</th><th>Target</th><th>Detail</th></tr>
+            </thead>
+            <tbody>
+            {{range $d.AuditLog}}
+                <tr>
+                    <td>{{.At.Format "2006-01-02 15:04"}}</td>
+                    <td>{{.Action}}</td>
+                    <td>{{if .ActorLogin}}{{.ActorLogin}}{{else}}—{{end}}</td>
+                    <td>{{if .TargetLogin}}{{.TargetLogin}}{{else}}—{{end}}</td>
+                    <td>{{.Detail}}</td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p class="hint">No entries match this filter.</p>
+        {{end}}
+    </section>
+</section>
+{{end}}

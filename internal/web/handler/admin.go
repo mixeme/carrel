@@ -34,8 +34,21 @@ const (
 	fieldAuditAction  = "audit_action"
 )
 
-// adminView is what the administration page renders.
+// Administration is split into one page per topic so the panel is not a
+// single sheet of unrelated forms. /admin/ is users; the rest live under
+// /admin/{section}.
+const (
+	adminSectionUsers    = "users"
+	adminSectionInvites  = "invites"
+	adminSectionSettings = "settings"
+	adminSectionEscrow   = "escrow"
+	adminSectionAudit    = "audit"
+)
+
+// adminView is what an administration page renders.
 type adminView struct {
+	// Section is which subsection this response belongs to.
+	Section         string
 	Settings        store.Settings
 	Invites         []inviteRow
 	Users           []userRow
@@ -76,17 +89,40 @@ type inviteRow struct {
 	Status string
 }
 
-// AdminHome is the administrator's workspace: users, invitations, settings,
-// mail, escrow, and the audit log (§5.5).
+// AdminHome is the users page, the landing screen after an administrator
+// signs in (§5.5). The other topics are AdminSection.
 func (s *Server) AdminHome(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		s.adminSubmit(w, r)
-		return
-	}
-	s.renderAdmin(w, r, adminView{AuditAction: r.URL.Query().Get(fieldAuditAction)})
+	s.serveAdmin(w, r, adminSectionUsers)
 }
 
-func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
+// AdminSection is one administration subsection: invitations, settings,
+// escrow or the audit log. An unknown name is a 404 rather than the users
+// page, so a mistyped URL is not silently rewritten.
+func (s *Server) AdminSection(w http.ResponseWriter, r *http.Request) {
+	section := r.PathValue("section")
+	switch section {
+	case "users":
+		section = adminSectionUsers
+	case adminSectionInvites, adminSectionSettings, adminSectionEscrow, adminSectionAudit:
+	default:
+		http.NotFound(w, r)
+		return
+	}
+	s.serveAdmin(w, r, section)
+}
+
+func (s *Server) serveAdmin(w http.ResponseWriter, r *http.Request, section string) {
+	if r.Method == http.MethodPost {
+		s.adminSubmit(w, r, section)
+		return
+	}
+	s.renderAdmin(w, r, adminView{
+		Section:     section,
+		AuditAction: r.URL.Query().Get(fieldAuditAction),
+	})
+}
+
+func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request, from string) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
@@ -146,7 +182,14 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v := s.View(r, "Administration")
+	if data.Section == "" {
+		data.Section = adminSectionForAction(r.PostFormValue(fieldAction))
+	}
+	if data.Section == "" {
+		data.Section = from
+	}
+
+	v := s.adminFrame(r)
 	if err != nil {
 		status := http.StatusBadRequest
 		var throttled throttleError
@@ -156,7 +199,7 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
 		}
 		v.Error = err.Error()
 		v.Data = s.buildAdminView(r, data)
-		s.RenderStatus(w, status, "admin.html", v)
+		s.RenderStatus(w, status, adminTemplate(data.Section), v)
 		return
 	}
 
@@ -170,12 +213,15 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request) {
 			". Hand over the temporary password; they must change it at their next sign-in, and their data is intact."
 	}
 	v.Data = s.buildAdminView(r, data)
-	s.Render(w, "admin.html", v)
+	s.Render(w, adminTemplate(data.Section), v)
 }
 
 func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 	now := time.Now()
 	out := partial
+	if out.Section == "" {
+		out.Section = adminSectionUsers
+	}
 	out.Settings = s.Store.Settings()
 	out.CreationMode = out.Settings.CreationMode
 	for _, u := range s.Store.Users() {
@@ -205,10 +251,48 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 }
 
 func (s *Server) renderAdmin(w http.ResponseWriter, r *http.Request, partial adminView) {
-	v := s.View(r, "Administration")
-	s.firstLoginEscrowNotice(r, &v)
+	v := s.adminFrame(r)
 	v.Data = s.buildAdminView(r, partial)
-	s.Render(w, "admin.html", v)
+	s.Render(w, adminTemplate(partial.Section), v)
+}
+
+func (s *Server) adminFrame(r *http.Request) View {
+	v := s.View(r, "Administration")
+	v.InAdmin = true
+	s.firstLoginEscrowNotice(r, &v)
+	return v
+}
+
+func adminTemplate(section string) string {
+	switch section {
+	case adminSectionInvites:
+		return "admin_invites.html"
+	case adminSectionSettings:
+		return "admin_settings.html"
+	case adminSectionEscrow:
+		return "admin_escrow.html"
+	case adminSectionAudit:
+		return "admin_audit.html"
+	default:
+		return "admin.html"
+	}
+}
+
+func adminSectionForAction(action string) string {
+	switch action {
+	case "create_invite_link", "create_invite_email", "revoke_invite", "extend_invite", "resend_invite":
+		return adminSectionInvites
+	case "save_smtp", "test_smtp", "save_settings", "test_dav":
+		return adminSectionSettings
+	case "enable_escrow", "resume_escrow", "disable_escrow", "escrow_policy",
+		"change_master_password", "recover_user":
+		return adminSectionEscrow
+	case "create_user", "disable_user", "enable_user", "delete_user",
+		"change_role", "kill_sessions", "reset_password":
+		return adminSectionUsers
+	default:
+		return ""
+	}
 }
 
 func (s *Server) adminCreateInviteLink(w http.ResponseWriter, r *http.Request, actor store.Actor) (adminView, error) {

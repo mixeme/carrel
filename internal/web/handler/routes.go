@@ -183,6 +183,8 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	admin := http.NewServeMux()
 	admin.HandleFunc("GET "+s.Path("/admin/{$}"), s.AdminHome)
 	admin.HandleFunc("POST "+s.Path("/admin/{$}"), s.AdminHome)
+	admin.HandleFunc("GET "+s.Path("/admin/{section}"), s.AdminSection)
+	admin.HandleFunc("POST "+s.Path("/admin/{section}"), s.AdminSection)
 	pages.Handle(s.Path("/admin/"), Chain(admin, s.RequireAdmin, s.RequirePasswordChange))
 
 	mux := http.NewServeMux()

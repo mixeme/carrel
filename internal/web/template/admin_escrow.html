@@ -1,0 +1,144 @@
+{{define "body"}}
+{{$d := .Data}}
+{{$e := $d.Escrow}}
+<section class="card admin-panel">
+    <h1>Administration</h1>
+    {{template "adminnav" .}}
+
+    {{if $d.MailWarning}}
+    <p class="warning" role="alert">{{$d.MailWarning}}</p>
+    {{end}}
+
+    <section class="subsection">
+        <h2>Key escrow</h2>
+        <p>Key escrow is not a key backup. It is a way in: an administrator
+            holding the master password can decrypt a covered user's saved DAV
+            credentials, and through them their contacts and calendars. Every
+            covered user is told so in their profile, and every recovery is
+            logged and mailed to them.</p>
+
+        {{if $e.Configured}}
+        <p class="field-value">
+            {{if $e.Enabled}}New accounts are covered.{{else}}New accounts are not covered; copies taken earlier stay recoverable.{{end}}
+            Accounts the master password can open: {{$d.EscrowCoverage}}.
+        </p>
+
+        {{if $e.Enabled}}
+        <form method="post" action="{{.Base}}/admin/escrow">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="disable_escrow">
+            <p class="hint">Turning deposit off stops covering new accounts.
+                Copies already taken are left alone — deleting one is its
+                owner's decision, from their profile.</p>
+            <button type="submit">Stop covering new accounts</button>
+        </form>
+        {{else}}
+        <form method="post" action="{{.Base}}/admin/escrow">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="resume_escrow">
+
+            <label for="resume-master">Master password</label>
+            <input id="resume-master" name="master_password" type="password" required
+                   autocomplete="off">
+            <p class="hint">Required so that deposit is not switched back on by
+                someone who can no longer recover anything.</p>
+
+            <button type="submit">Cover new accounts again</button>
+        </form>
+        {{end}}
+
+        <form method="post" action="{{.Base}}/admin/escrow" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="escrow_policy">
+
+            <label class="checkbox">
+                <input type="checkbox" name="forbid_opt_out" value="1"
+                       {{if $e.ForbidOptOut}}checked{{end}}>
+                Do not let users withdraw their deposited key
+            </label>
+            <p class="hint">Users see this policy in their profile whether or
+                not it currently affects them.</p>
+
+            <button type="submit">Save policy</button>
+        </form>
+
+        <form method="post" action="{{.Base}}/admin/escrow" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="change_master_password">
+
+            <label for="master-current">Current master password</label>
+            <input id="master-current" name="master_password" type="password" required
+                   autocomplete="off">
+
+            <label for="master-new">New master password</label>
+            <input id="master-new" name="new_master_password" type="password" required
+                   minlength="16" autocomplete="new-password">
+
+            <label for="master-confirm">Repeat new master password</label>
+            <input id="master-confirm" name="confirm_master_password" type="password" required
+                   minlength="16" autocomplete="new-password">
+            <p class="hint">Only the recovery private key is re-encrypted. The
+                deposited copies are untouched, so nobody has to opt in again.</p>
+
+            <button type="submit">Change master password</button>
+        </form>
+
+        {{else}}
+        <p class="warning">Choose a master password that is not your login
+            password and keep it somewhere outside this service. If it is lost
+            the scheme becomes useless: the deposited copies can never be
+            opened again, and generating a new key pair would orphan them.</p>
+        <form method="post" action="{{.Base}}/admin/escrow">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="enable_escrow">
+
+            <label for="escrow-master">Master password</label>
+            <input id="escrow-master" name="master_password" type="password" required
+                   minlength="16" autocomplete="new-password">
+
+            <label for="escrow-master-confirm">Repeat master password</label>
+            <input id="escrow-master-confirm" name="confirm_master_password" type="password"
+                   required minlength="16" autocomplete="new-password">
+            <p class="hint">At least 16 characters. Escrow will apply to
+                accounts created from now on; everyone else may join from their
+                own profile.</p>
+
+            <button type="submit">Enable key escrow</button>
+        </form>
+        {{end}}
+    </section>
+
+    {{if $e.Configured}}
+    <section class="subsection">
+        <h2>Recover an account</h2>
+        <p>The master password opens the deposited copy of the user's data key
+            and re-wraps it under a temporary password you choose. Their
+            connections survive. The user is mailed a notice of it, which is
+            not optional.</p>
+        <form method="post" action="{{.Base}}/admin/escrow">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="recover_user">
+
+            <label for="recover-user">Account</label>
+            <select id="recover-user" name="user_id" required>
+                {{range $d.Users}}{{if .EscrowDEK}}
+                <option value="{{.ID}}">{{.Login}}</option>
+                {{end}}{{end}}
+            </select>
+
+            <label for="recover-master">Master password</label>
+            <input id="recover-master" name="master_password" type="password" required
+                   autocomplete="off">
+
+            <label for="recover-temp">Temporary password for the user</label>
+            <input id="recover-temp" name="temp_password" type="text" required
+                   minlength="10" autocomplete="off">
+            <p class="hint">Hand it over in person. They must change it at
+                their next sign-in.</p>
+
+            <button type="submit">Recover account</button>
+        </form>
+    </section>
+    {{end}}
+</section>
+{{end}}

@@ -290,7 +290,7 @@ func TestResetPasswordIsAnnouncedAsDestructive(t *testing.T) {
 // taken from the link the administrator is shown.
 func (a *app) createInvite(role string) string {
 	a.t.Helper()
-	rec := a.post("/admin/", url.Values{
+	rec := a.post("/admin/invites", url.Values{
 		fieldAction: {"create_invite_link"},
 		fieldRole:   {role},
 	})

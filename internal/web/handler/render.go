@@ -66,6 +66,9 @@ type View struct {
 	// forbids a setting for it, so this is asked of the accounts rather than of
 	// a preference.
 	ShowFiles bool
+	// InAdmin is true on every administration screen, so the top navigation
+	// can mark Administration current without listing subsection titles.
+	InAdmin bool
 	// Error and Notice are the two message slots the frame renders.
 	Error  string
 	Notice string

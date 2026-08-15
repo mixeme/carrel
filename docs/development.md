@@ -142,7 +142,7 @@ Add routes inside the existing `app`, `admin` or `photos` mux so the guards appl
 
 ### Templates
 
-`{{define "body"}}`, rendered against `base.html`. A fragment reused on more than one screen is defined in `base.html` — the sources panel, the progress panel, the attachments block. Strings go directly in the template: English, one language, no message catalogue.
+`{{define "body"}}`, rendered against `base.html`. A fragment reused on more than one screen is defined in `base.html` — the sources panel, the progress panel, the attachments block, the administration subsection nav. Strings go directly in the template: English, one language, no message catalogue.
 
 `template.HTML` is never applied to anything a user typed.
 

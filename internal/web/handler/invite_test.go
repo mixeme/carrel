@@ -14,13 +14,13 @@ func TestInviteLifecycle(t *testing.T) {
 	a := newApp(t, nil)
 
 	a.setupAdmin("root", "root@example.org", testPassword)
-	a.get("/admin/")
+	a.get("/admin/invites")
 
 	form := url.Values{
 		"action": {"create_invite_link"},
 		"role":   {"user"},
 	}
-	rec := a.post("/admin/", form)
+	rec := a.post("/admin/invites", form)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("create invite status = %d, want 200", rec.Code)
 	}

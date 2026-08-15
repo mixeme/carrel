@@ -1,0 +1,131 @@
+{{define "body"}}
+{{$d := .Data}}
+<section class="card admin-panel">
+    <h1>Administration</h1>
+    {{template "adminnav" .}}
+
+    {{if $d.MailWarning}}
+    <p class="warning" role="alert">{{$d.MailWarning}}</p>
+    {{end}}
+
+    <section class="subsection">
+        <h2>Global settings</h2>
+        <form method="post" action="{{.Base}}/admin/settings">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="save_settings">
+
+            <label for="creation-mode">User creation mode</label>
+            <select id="creation-mode" name="creation_mode">
+                <option value="invite" {{if eq $d.Settings.CreationMode "invite"}}selected{{end}}>Invitation link</option>
+                <option value="admin_password" {{if eq $d.Settings.CreationMode "admin_password"}}selected{{end}}>Temporary password from administrator</option>
+            </select>
+
+            <label class="checkbox">
+                <input type="checkbox" name="self_registration" value="1"
+                       {{if $d.Settings.SelfRegistration}}checked{{end}}>
+                Allow self-registration (no public form in this stage)
+            </label>
+
+            <label for="invite-ttl">Invitation lifetime (hours)</label>
+            <input id="invite-ttl" name="invite_ttl_hours" type="number" min="1"
+                   value="{{$d.InviteTTLHours}}">
+
+            <label for="session-idle">Session idle timeout (hours)</label>
+            <input id="session-idle" name="session_idle_hours" type="number" min="1"
+                   value="{{$d.SessionIdleHours}}">
+
+            <label for="session-absolute">Session absolute lifetime (days)</label>
+            <input id="session-absolute" name="session_absolute_days" type="number" min="1"
+                   value="{{$d.SessionAbsoluteDays}}">
+
+            <button type="submit">Save global settings</button>
+        </form>
+    </section>
+
+    <section class="subsection">
+        <h2>Mail settings</h2>
+        <form method="post" action="{{.Base}}/admin/settings">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="save_smtp">
+
+            <label for="smtp-host">Host</label>
+            <input id="smtp-host" name="smtp_host" type="text"
+                   value="{{$d.Settings.SMTP.Host}}">
+
+            <label for="smtp-port">Port</label>
+            <input id="smtp-port" name="smtp_port" type="number" min="1" max="65535"
+                   value="{{if $d.Settings.SMTP.Port}}{{$d.Settings.SMTP.Port}}{{end}}">
+
+            <label for="smtp-tls">Encryption</label>
+            <select id="smtp-tls" name="smtp_tls">
+                <option value="starttls" {{if eq $d.Settings.SMTP.TLS "starttls"}}selected{{end}}>STARTTLS</option>
+                <option value="implicit" {{if eq $d.Settings.SMTP.TLS "implicit"}}selected{{end}}>Implicit TLS</option>
+                <option value="none" {{if eq $d.Settings.SMTP.TLS "none"}}selected{{end}}>None (local relay)</option>
+            </select>
+
+            <label for="smtp-user">Username</label>
+            <input id="smtp-user" name="smtp_username" type="text"
+                   value="{{$d.Settings.SMTP.Username}}" autocomplete="off">
+
+            <label for="smtp-pass">Password</label>
+            <input id="smtp-pass" name="smtp_password" type="password"
+                   autocomplete="new-password">
+            <p class="hint">Leave blank to keep the current password.</p>
+
+            <label for="smtp-from">From address</label>
+            <input id="smtp-from" name="smtp_from" type="email"
+                   value="{{$d.Settings.SMTP.FromAddress}}">
+
+            <label for="smtp-from-name">From name</label>
+            <input id="smtp-from-name" name="smtp_from_name" type="text"
+                   value="{{$d.Settings.SMTP.FromName}}">
+
+            <button type="submit">Save mail settings</button>
+        </form>
+
+        <form method="post" action="{{.Base}}/admin/settings" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="test_smtp">
+
+            <label for="test-email">Send test message to</label>
+            <input id="test-email" name="test_email" type="email" required>
+
+            <button type="submit">Send test email</button>
+        </form>
+
+        {{if $d.SMTPDiag}}
+        <h3>Server response</h3>
+        <pre class="diagnostic">{{$d.SMTPDiag}}</pre>
+        {{end}}
+    </section>
+
+    <section class="subsection">
+        <h2>Test DAV server</h2>
+        <p class="hint">Runs discovery without saving credentials. Useful before
+            handing connection details to a user.</p>
+        <form method="post" action="{{.Base}}/admin/settings">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="test_dav">
+
+            <label for="dav-test-url">Server URL</label>
+            <input id="dav-test-url" name="dav_test_url" type="url" required
+                   placeholder="https://host/dav.php/" autocapitalize="none" spellcheck="false">
+
+            <label for="dav-test-user">Username</label>
+            <input id="dav-test-user" name="dav_test_username" type="text" required
+                   autocapitalize="none" spellcheck="false">
+
+            <label for="dav-test-pass">Password</label>
+            <input id="dav-test-pass" name="dav_test_password" type="password" required
+                   autocomplete="off">
+
+            <button type="submit">Test discovery</button>
+        </form>
+
+        {{if $d.DAVDiag}}
+        <h3>Discovery trace</h3>
+        <pre class="diagnostic">{{$d.DAVDiag}}</pre>
+        {{end}}
+    </section>
+</section>
+{{end}}

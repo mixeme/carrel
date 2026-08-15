@@ -20,7 +20,7 @@ const masterPassword = "master password for escrow"
 // would.
 func (a *app) enableEscrow() {
 	a.t.Helper()
-	rec := a.post("/admin/", url.Values{
+	rec := a.post("/admin/escrow", url.Values{
 		fieldAction:         {"enable_escrow"},
 		fieldMasterPassword: {masterPassword},
 		fieldConfirmMaster:  {masterPassword},
@@ -71,7 +71,7 @@ func TestEscrowOffByDefault(t *testing.T) {
 	a := newApp(t, nil)
 	a.setupAdmin("root", "root@example.org", testPassword)
 
-	panel := a.get("/admin/").Body.String()
+	panel := a.get("/admin/escrow").Body.String()
 	if !strings.Contains(panel, `value="enable_escrow"`) {
 		t.Error("the panel does not offer to enable key escrow")
 	}

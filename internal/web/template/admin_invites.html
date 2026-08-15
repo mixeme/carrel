@@ -1,0 +1,111 @@
+{{define "body"}}
+{{$d := .Data}}
+<section class="card admin-panel">
+    <h1>Administration</h1>
+    {{template "adminnav" .}}
+
+    {{if $d.MailWarning}}
+    <p class="warning" role="alert">{{$d.MailWarning}}</p>
+    {{end}}
+
+    {{if $d.NewInviteLink}}
+    <section class="subsection">
+        <h2>Invitation link</h2>
+        <p>Copy this link and share it with the new user.</p>
+        <p class="copy-row">
+            <input id="invite-link" type="text" readonly value="{{$d.NewInviteLink}}">
+            <button type="button" class="secondary" data-copy="invite-link">Copy</button>
+        </p>
+    </section>
+    {{end}}
+
+    <section class="subsection">
+        <h2>Invitations</h2>
+
+        <h3>By link</h3>
+        <form method="post" action="{{.Base}}/admin/invites">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="create_invite_link">
+
+            <label for="invite-link-role">Role</label>
+            <select id="invite-link-role" name="role">
+                <option value="user">User</option>
+                <option value="admin">Administrator</option>
+            </select>
+            <p class="hint">Creates a one-time link for you to copy and share.
+                The new user chooses their own login when they open it.</p>
+
+            <button type="submit">Create link</button>
+        </form>
+
+        <h3>By email</h3>
+        {{if $d.SMTPConfigured}}
+        <form method="post" action="{{.Base}}/admin/invites">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="create_invite_email">
+
+            <label for="invite-email-to">Email</label>
+            <input id="invite-email-to" name="email" type="email" required>
+
+            <label for="invite-email-role">Role</label>
+            <select id="invite-email-role" name="role">
+                <option value="user">User</option>
+                <option value="admin">Administrator</option>
+            </select>
+            <p class="hint">Sends an invitation email with a one-time link.
+                You will not see the link — only the recipient gets it.</p>
+
+            <button type="submit">Send invitation</button>
+        </form>
+        {{else}}
+        <p class="hint">Configure SMTP in <a href="{{.Base}}/admin/settings">Settings</a>
+            before sending invitations by email.</p>
+        {{end}}
+
+        {{if $d.Invites}}
+        <table class="data">
+            <thead>
+                <tr><th>Login</th><th>Delivery</th><th>Status</th><th>Mail</th><th>Expires</th><th></th></tr>
+            </thead>
+            <tbody>
+            {{range $d.Invites}}
+                <tr>
+                    <td>{{if .Login}}{{.Login}}{{else}}—{{end}}</td>
+                    <td>{{if eq .Delivery "email"}}email{{else}}link{{end}}</td>
+                    <td>{{.Status}}</td>
+                    <td>{{if eq .Delivery "email"}}{{.SendStatus}}{{if .SendError}} — {{.SendError}}{{end}}{{else}}—{{end}}</td>
+                    <td>{{.ExpiresAt.Format "2006-01-02 15:04"}}</td>
+                    <td class="actions">
+                        {{if eq .Status "pending"}}
+                        <form method="post" action="{{$.Base}}/admin/invites">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="extend_invite">
+                            <input type="hidden" name="invite_id" value="{{.ID}}">
+                            <button type="submit" class="link">Extend</button>
+                        </form>
+                        {{if eq .Delivery "email"}}
+                        <form method="post" action="{{$.Base}}/admin/invites">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="resend_invite">
+                            <input type="hidden" name="invite_id" value="{{.ID}}">
+                            <button type="submit" class="link">Resend email</button>
+                        </form>
+                        {{end}}
+                        <form method="post" action="{{$.Base}}/admin/invites">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="revoke_invite">
+                            <input type="hidden" name="invite_id" value="{{.ID}}">
+                            <button type="submit" class="link">Revoke</button>
+                        </form>
+                        {{end}}
+                    </td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p class="hint">No invitations yet.</p>
+        {{end}}
+    </section>
+</section>
+{{end}}

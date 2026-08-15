@@ -110,7 +110,7 @@ The complete inventory, kept current. If something is here, it works; if it is m
 - Email address change confirmed by a link.
 - **Real isolation:** each person's DAV credentials are sealed under a key derived from their own password. No other user can read them, and neither can the administrator.
 - **Optional key escrow**, off by default, never retroactive, and stated to the covered user at first sign-in and in their profile from then on — because it is a way in, not a key backup.
-- Admin panel: users with roles, last login, account counts and live sessions; disable, delete, change role, end sessions, reset password (announced as destructive), global settings, and an audit log carrying no secrets.
+- Admin panel, as separate pages: users (roles, last login, account counts, live sessions; disable, delete, change role, end sessions, reset password announced as destructive), invitations, settings and mail, key escrow, and an audit log carrying no secrets.
 - Changing your own password keeps every connection readable.
 - CSRF everywhere, a CSP with no inline scripts at all, progressive rate limiting by address and account, and an SSRF guard that resolves, checks and dials the address it checked — after every redirect.
 
