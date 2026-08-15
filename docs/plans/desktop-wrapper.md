@@ -197,7 +197,7 @@ macOS, DAV localhost onboarding, auto-update, ручной путь к exe, mult
 - [x] §18 в `docs/carrel-spec.md` → «запланировано» + ссылка
 - [x] `CARREL_BIND` в `internal/config` + тесты + README
 - [x] `docs/development.md`: build desktop, Linux deps (кратко после scaffold)
-- [ ] Коммит + CHANGELOG [Unreleased]
+- [x] Коммит + CHANGELOG [Unreleased]
 
 ### Фаза 1 — `internal/desktop` — модель: **Composer**
 
