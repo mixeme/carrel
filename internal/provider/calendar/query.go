@@ -48,7 +48,7 @@ func (p *Provider) QueryComponent(ctx context.Context, collection, component str
 	if objects, ok := p.cachedSet(collection, key); ok {
 		return &ObjectSet{Collection: collection, Component: component, Objects: objects, FromCache: true}, nil
 	}
-	ms, err := p.client.Report(ctx, collection, dav.DepthZero, dav.NewCalendarComponentQuery(component, from, to))
+	ms, err := p.client.Report(ctx, collection, dav.DepthOne, dav.NewCalendarComponentQuery(component, from, to))
 	if err != nil {
 		return nil, fmt.Errorf("calendar: query %s in %s: %w", component, collection, err)
 	}
@@ -82,7 +82,7 @@ func (p *Provider) Search(ctx context.Context, collection, text string, componen
 				return p.searchResult(collection, found), err
 			}
 			query := dav.NewCalendarTextQuery(component, property, text)
-			ms, err := p.client.Report(ctx, collection, dav.DepthZero, query)
+			ms, err := p.client.Report(ctx, collection, dav.DepthOne, query)
 			if err != nil {
 				if firstErr == nil {
 					firstErr = fmt.Errorf("calendar: search %s in %s: %w", component, collection, err)

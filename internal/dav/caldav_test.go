@@ -4,7 +4,11 @@
 package dav
 
 import (
+	"context"
 	"encoding/xml"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -49,5 +53,29 @@ func TestCalendarQueryBody(t *testing.T) {
 		if !strings.Contains(got, want) {
 			t.Errorf("body has no %s\n%s", want, got)
 		}
+	}
+}
+
+func TestClientCalendarQueryReportDepth(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "REPORT" {
+			t.Errorf("method = %s, want REPORT", r.Method)
+		}
+		if r.Header.Get("Depth") != "1" {
+			t.Errorf("depth = %q, want 1 (RFC 4791 §7.8)", r.Header.Get("Depth"))
+		}
+		w.WriteHeader(http.StatusMultiStatus)
+		io.WriteString(w, `<multistatus xmlns="DAV:"/>`)
+	}))
+	defer srv.Close()
+
+	client, err := NewClient(testGuard(), srv.URL, "mix", "secret")
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
+	start := time.Date(2026, 8, 12, 0, 0, 0, 0, time.UTC)
+	_, err = client.Report(context.Background(), "/cal/", DepthOne, NewCalendarQuery(start, start.Add(24*time.Hour)))
+	if err != nil {
+		t.Fatalf("Report: %v", err)
 	}
 }

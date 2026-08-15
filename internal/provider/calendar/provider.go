@@ -364,7 +364,7 @@ func (p *Provider) Query(ctx context.Context, collection string, from, to time.T
 			}
 		}
 	}
-	ms, err := p.client.Report(ctx, collection, dav.DepthZero, dav.NewCalendarQuery(from, to))
+	ms, err := p.client.Report(ctx, collection, dav.DepthOne, dav.NewCalendarQuery(from, to))
 	if err != nil {
 		return nil, fmt.Errorf("calendar: query %s: %w", collection, err)
 	}
