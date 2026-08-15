@@ -43,7 +43,7 @@ Multistatus parsing. The SSRF guard refusing loopback, private and link-local ad
 
 ### `dav/discovery`
 
-The chain against a mock server: well-known, principal, home-sets, collections. A calendar collection decoded from a real-shaped answer. File collections found as the plain collections under the root, with the containers holding the DAV homes excluded — Baikal answers its root with `calendars/` and `addressbooks/`, and mistaking those for folders of files is the failure this prevents. A server with neither calendars nor address books connecting anyway, because a separate account for files is a supported arrangement.
+The chain against a mock server: well-known, principal, home-sets, collections. A calendar collection decoded from a real-shaped answer. File collections found as the plain collections under the root, with the containers holding the DAV homes excluded — Baikal answers its root with `calendars/` and `addressbooks/`, and mistaking those for folders of files is the failure this prevents. A server with neither calendars nor address books connecting anyway, because a separate account for files is a supported arrangement. A plain WebDAV server that does not advertise `current-user-principal` connecting with the entered URL as the file collection, including when that URL sits under a path and the site root is an ordinary web page; a 401 still refused rather than treated as files-only.
 
 ### `model` — the promise not to lose data
 

@@ -270,6 +270,104 @@ func TestDiscoverAcceptsAFilesOnlyServer(t *testing.T) {
 	}
 }
 
+// A plain WebDAV server — SFTPGo, Apache mod_dav, the Go net/webdav package —
+// answers PROPFIND and does not advertise current-user-principal. That property
+// is CalDAV/CardDAV. Treating its absence as a failed connection is what made
+// a dedicated files account unconnectable: well-known 404s, then the entered
+// URL, then "no current-user-principal at /".
+func TestDiscoverAcceptsAPlainWebDAVServer(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := normalizeMockPath(r.URL.Path)
+		switch {
+		case r.Method == http.MethodHead:
+			w.WriteHeader(http.StatusNotFound)
+		case r.Method == "PROPFIND" && path == "/":
+			writeMS(w, filesOnlyRootMS("/"))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	g := dav.NewGuard(dav.GuardConfig{Allowlist: []string{"127.0.0.1"}})
+	result, trace, err := Discover(context.Background(), g, Credentials{
+		BaseURL: srv.URL + "/", Username: "mix", Password: "secret",
+	})
+	if err != nil {
+		t.Fatalf("Discover: %v\ntrace: %+v", err, trace)
+	}
+	if result.Principal != "" {
+		t.Fatalf("principal = %q, want empty on a files-only server", result.Principal)
+	}
+	if len(result.Collections) != 1 || result.Collections[0].Kind != KindFiles {
+		t.Fatalf("collections = %+v, want the entered URL as one file collection", result.Collections)
+	}
+	if got := normalizePath(result.Collections[0].Path); got != "/" {
+		t.Fatalf("file collection path = %q, want /", result.Collections[0].Path)
+	}
+}
+
+// The Baikal arrangement in reverse: DAV under a path, an ordinary web page at
+// the site root. The root probe must not turn a missing principal on the DAV
+// path into a hard failure about HTML.
+func TestDiscoverAcceptsPlainWebDAVAtABasePath(t *testing.T) {
+	const base = "/webdav/"
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := normalizeMockPath(r.URL.Path)
+		switch {
+		case r.Method == http.MethodHead:
+			w.WriteHeader(http.StatusNotFound)
+		case path == "/":
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusOK)
+			io.WriteString(w, "<html><body>nothing to see here</body></html>")
+		case r.Method == "PROPFIND" && path == base:
+			writeMS(w, filesOnlyRootMS(base))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	g := dav.NewGuard(dav.GuardConfig{Allowlist: []string{"127.0.0.1"}})
+	result, trace, err := Discover(context.Background(), g, Credentials{
+		BaseURL: srv.URL + base, Username: "mix", Password: "secret",
+	})
+	if err != nil {
+		t.Fatalf("Discover: %v\ntrace: %+v", err, trace)
+	}
+	if len(result.Collections) != 1 || result.Collections[0].Kind != KindFiles {
+		t.Fatalf("collections = %+v, want the entered URL as one file collection", result.Collections)
+	}
+	if got := normalizePath(result.Collections[0].Path); got != base {
+		t.Fatalf("file collection path = %q, want %q", result.Collections[0].Path, base)
+	}
+}
+
+// A 401 is an authentication failure, not a files-only server.
+func TestDiscoverDoesNotTreatAuthFailureAsFiles(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodHead {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusUnauthorized)
+	}))
+	defer srv.Close()
+
+	g := dav.NewGuard(dav.GuardConfig{Allowlist: []string{"127.0.0.1"}})
+	_, _, err := Discover(context.Background(), g, Credentials{
+		BaseURL: srv.URL + "/", Username: "mix", Password: "wrong",
+	})
+	if err == nil {
+		t.Fatal("Discover succeeded on 401, want an authentication failure")
+	}
+	if strings.Contains(err.Error(), "no current-user-principal") {
+		t.Fatalf("treated 401 as a missing principal: %v", err)
+	}
+}
+
 // rootListingMS is a Depth:1 answer for the root: the root itself and the
 // members named, every one of them a bare collection.
 func rootListingMS(root string, members ...string) string {
@@ -295,6 +393,23 @@ func writeMS(w http.ResponseWriter, body string) {
 	w.Header().Set("Content-Type", "application/xml")
 	w.WriteHeader(http.StatusMultiStatus)
 	io.WriteString(w, body)
+}
+
+func filesOnlyRootMS(path string) string {
+	return `<?xml version="1.0" encoding="utf-8"?>
+<d:multistatus xmlns:d="DAV:">
+  <d:response>
+    <d:href>` + path + `</d:href>
+    <d:propstat>
+      <d:prop>
+        <d:resourcetype><d:collection/></d:resourcetype>
+        <d:displayname>Files</d:displayname>
+        <d:current-user-privilege-set><d:privilege><d:write/></d:privilege></d:current-user-privilege-set>
+      </d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+  </d:response>
+</d:multistatus>`
 }
 
 func principalMS(principal string) string {

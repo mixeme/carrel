@@ -6,6 +6,7 @@ package discovery
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,6 +14,12 @@ import (
 
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
 )
+
+// errNoPrincipal is a successful Multi-Status that did not name a
+// current-user-principal. Plain WebDAV servers do not advertise one: it is a
+// CalDAV/CardDAV property, and its absence is how a files-only account is
+// recognised rather than refused.
+var errNoPrincipal = errors.New("discovery: no current-user-principal")
 
 // Kind classifies a discovered collection.
 type Kind string
@@ -71,38 +78,45 @@ func Discover(ctx context.Context, guard *dav.Guard, creds Credentials) (*Result
 	}
 
 	principal, err := findPrincipal(ctx, client, trace)
-	if err != nil {
+	if err != nil && !errors.Is(err, errNoPrincipal) {
 		return nil, trace, err
 	}
 
 	var collections []Collection
-	calHome, _ := findCalendarHome(ctx, client, principal, trace)
-	if calHome != "" {
-		cols, stepErr := listCollections(ctx, client, calHome, KindCalendar, trace, "calendar_collections")
-		if stepErr != nil {
-			trace.Add("calendar_collections", stepErr.Error(), 0, "")
-		} else {
-			collections = append(collections, cols...)
-		}
-	}
-	abHome, _ := findAddressBookHome(ctx, client, principal, trace)
-	if abHome != "" {
-		cols, stepErr := listCollections(ctx, client, abHome, KindAddressBook, trace, "addressbook_collections")
-		if stepErr != nil {
-			trace.Add("addressbook_collections", stepErr.Error(), 0, "")
-		} else {
-			collections = append(collections, cols...)
-		}
-	}
-	// File collections are not advertised by a home-set: §6 defines them as the
-	// plain collections under the root, and asks for no setting of their own —
-	// there are some and the files section appears, or there are none and it
-	// does not.
-	cols, stepErr := listFileCollections(ctx, client, base, principal, calHome, abHome, trace)
-	if stepErr != nil {
-		trace.Add("file_collections", stepErr.Error(), 0, "")
+	if principal == "" {
+		// A plain WebDAV server has no CalDAV principal and no home-set. The
+		// URL the person entered is the file collection — the same path the
+		// files provider already uses when pointed at a live server directly.
+		collections = takeFileRoot(ctx, client, base, trace)
 	} else {
-		collections = append(collections, cols...)
+		calHome, _ := findCalendarHome(ctx, client, principal, trace)
+		if calHome != "" {
+			cols, stepErr := listCollections(ctx, client, calHome, KindCalendar, trace, "calendar_collections")
+			if stepErr != nil {
+				trace.Add("calendar_collections", stepErr.Error(), 0, "")
+			} else {
+				collections = append(collections, cols...)
+			}
+		}
+		abHome, _ := findAddressBookHome(ctx, client, principal, trace)
+		if abHome != "" {
+			cols, stepErr := listCollections(ctx, client, abHome, KindAddressBook, trace, "addressbook_collections")
+			if stepErr != nil {
+				trace.Add("addressbook_collections", stepErr.Error(), 0, "")
+			} else {
+				collections = append(collections, cols...)
+			}
+		}
+		// File collections are not advertised by a home-set: §6 defines them as the
+		// plain collections under the root, and asks for no setting of their own —
+		// there are some and the files section appears, or there are none and it
+		// does not.
+		cols, stepErr := listFileCollections(ctx, client, base, principal, calHome, abHome, trace)
+		if stepErr != nil {
+			trace.Add("file_collections", stepErr.Error(), 0, "")
+		} else {
+			collections = append(collections, cols...)
+		}
 	}
 	if len(collections) == 0 {
 		return nil, trace, fmt.Errorf("discovery: no calendar, address book or file collections found")
@@ -150,6 +164,11 @@ func resolveBaseURL(ctx context.Context, client *dav.Client, entered string, tra
 // server's home page, which answers 200 with HTML rather than 207 with a
 // multistatus, and discovery fails on a URL that is perfectly correct. The root
 // is still tried afterwards, because a server that does live there answers it.
+//
+// A Multi-Status that does not name the property is not a failure of this
+// step: it is how a plain WebDAV server answers, and Discover then treats the
+// entered URL as a file collection. A transport error — 401, HTML at the path,
+// a refused connection — is still a failure.
 func findPrincipal(ctx context.Context, client *dav.Client, trace *Trace) (string, error) {
 	var targets []string
 	if base := normalizePath(client.BaseURL().Path); base != "/" {
@@ -158,14 +177,25 @@ func findPrincipal(ctx context.Context, client *dav.Client, trace *Trace) (strin
 	targets = append(targets, "/")
 
 	var lastErr error
+	missing := false
 	for _, target := range targets {
 		path, err := principalAt(ctx, client, target)
 		if err != nil {
 			lastErr = err
+			if errors.Is(err, errNoPrincipal) {
+				missing = true
+			}
 			continue
 		}
 		trace.Add("principal", "ok", http.StatusOK, path)
 		return path, nil
+	}
+	if missing {
+		// A later probe of the site root may have failed for a different
+		// reason — HTML at `/` is the Baikal arrangement — and must not
+		// hide that the DAV path already answered without a principal.
+		trace.Add("principal", "not advertised; treating as files", 0, "")
+		return "", errNoPrincipal
 	}
 	trace.Add("principal", lastErr.Error(), 0, "")
 	return "", lastErr
@@ -188,7 +218,7 @@ func principalAt(ctx context.Context, client *dav.Client, target string) (string
 			return path, nil
 		}
 	}
-	return "", fmt.Errorf("discovery: no current-user-principal at %s", target)
+	return "", fmt.Errorf("%w at %s", errNoPrincipal, target)
 }
 
 func findCalendarHome(ctx context.Context, client *dav.Client, principal string, trace *Trace) (string, error) {
@@ -221,6 +251,46 @@ func findAddressBookHome(ctx context.Context, client *dav.Client, principal stri
 	return home.Href.Path, nil
 }
 
+// takeFileRoot treats the entered URL as one file collection. Plain WebDAV has
+// no home-set and no child collections that need classifying: the path is the
+// tree, and folders inside it are folders.
+func takeFileRoot(ctx context.Context, client *dav.Client, base string, trace *Trace) []Collection {
+	root := collectionRoot(base)
+	ms, err := client.PropFind(ctx, root, dav.DepthZero, []xml.Name{
+		dav.ResourceTypeName,
+		dav.DisplayNameName,
+		dav.CurrentUserPrivilegeSetName,
+	})
+	if err != nil {
+		trace.Add("file_collections", err.Error(), 0, root)
+		return []Collection{{Path: root, Kind: KindFiles}}
+	}
+	for _, resp := range ms.Responses {
+		path, err := resp.Path()
+		if err != nil {
+			continue
+		}
+		if normalizePath(path) != root {
+			continue
+		}
+		col, ok, err := decodeCollection(resp, KindFiles)
+		if err == nil && ok {
+			trace.Add("file_collections", "using the entered URL as a file collection", http.StatusMultiStatus, root)
+			return []Collection{col}
+		}
+	}
+	trace.Add("file_collections", "using the entered URL as a file collection", http.StatusMultiStatus, root)
+	return []Collection{{Path: root, Kind: KindFiles}}
+}
+
+func collectionRoot(base string) string {
+	root := base
+	if u, err := url.Parse(base); err == nil && u.Path != "" {
+		root = u.Path
+	}
+	return normalizePath(root)
+}
+
 // listFileCollections finds the plain collections directly under the root
 // (§6). A calendar or address book home lives under the same root on most
 // servers — Baikal answers `/dav.php/` with `calendars/`, `addressbooks/` and
@@ -228,11 +298,7 @@ func findAddressBookHome(ctx context.Context, client *dav.Client, principal stri
 // holding one of those homes is skipped rather than offered as a folder of
 // files.
 func listFileCollections(ctx context.Context, client *dav.Client, base, principal, calHome, abHome string, trace *Trace) ([]Collection, error) {
-	root := base
-	if u, err := url.Parse(base); err == nil && u.Path != "" {
-		root = u.Path
-	}
-	root = normalizePath(root)
+	root := collectionRoot(base)
 	ms, err := client.PropFind(ctx, root, dav.DepthOne, []xml.Name{
 		dav.ResourceTypeName,
 		dav.DisplayNameName,

@@ -144,6 +144,8 @@ Carrel — self-hosted веб-клиент для CalDAV, CardDAV и WebDAV. П�
 4. Из принципала — `calendar-home-set` и `addressbook-home-set`.
 5. `PROPFIND Depth: 1` по обоим home-set.
 
+Если `current-user-principal` нет — это обычный WebDAV без CalDAV/CardDAV: введённый URL и есть файловая коллекция, шаги 4–5 пропускаются. Так подключается отдельный файловый аккаунт (§23.10). 401 и прочие ошибки транспорта по-прежнему отказ.
+
 Забирать: `displayname`, `resourcetype`, `calendar-color`, `supported-calendar-component-set`, `current-user-privilege-set`, `getctag`. `current-user-privilege-set` определяет, показывать ли элементы редактирования; коллекции только для чтения помечаются визуально.
 
 **Один принципал отдаёт и календари, и адресные книги — аккаунт это одна такая связка**, а не отдельное подключение на протокол.

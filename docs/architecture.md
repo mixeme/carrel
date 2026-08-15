@@ -115,9 +115,11 @@ Timeouts on the connection and on the whole request, and a ceiling on the respon
 
 `.well-known/caldav`, then `.well-known/carddav`, then the URL as entered — the third being the reliable path for Baikal, where `.well-known` is a web server configuration people rarely have. Then `current-user-principal`, then the two home-sets, then `PROPFIND Depth: 1` on each.
 
+A Multi-Status that does not name `current-user-principal` is not a failure: that property is CalDAV/CardDAV, and a plain WebDAV server does not advertise it. The entered URL is then the file collection, which is how a dedicated files account connects. A 401, or HTML where a Multi-Status should be, is still a failure.
+
 Every step is recorded in a trace with what the server actually replied, and the trace is what the connection screen shows on failure. Discovery is the most common point of failure and "cannot connect" is not something a person can act on.
 
-File collections are not advertised by any home-set. They are the plain collections under the root — a `DAV:collection` with no calendar, address book or principal marker — and the containers that hold the discovered homes are excluded, because a server answers its root with `calendars/` and `addressbooks/` and neither is a folder of files. There is no setting: collections were found or they were not, and the Files section follows.
+File collections are not advertised by any home-set. On a CalDAV/CardDAV server they are the plain collections under the root — a `DAV:collection` with no calendar, address book or principal marker — and the containers that hold the discovered homes are excluded, because a server answers its root with `calendars/` and `addressbooks/` and neither is a folder of files. On a files-only server the entered URL itself is the collection. There is no setting: collections were found or they were not, and the Files section follows.
 
 ---
 
