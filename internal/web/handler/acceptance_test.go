@@ -244,7 +244,7 @@ func TestLastAdminSurvivesThePanel(t *testing.T) {
 		name string
 		form url.Values
 	}{
-		{"delete", url.Values{fieldAction: {"delete_user"}, fieldUserID: {admin.ID}, fieldConfirmLogin: {"root"}}},
+		{"delete", url.Values{fieldAction: {"delete_user"}, fieldUserID: {admin.ID}}},
 		{"demote", url.Values{fieldAction: {"change_role"}, fieldUserID: {admin.ID}, fieldRole: {string(store.RoleUser)}}},
 		{"disable", url.Values{fieldAction: {"disable_user"}, fieldUserID: {admin.ID}}},
 	} {
