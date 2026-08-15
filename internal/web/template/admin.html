@@ -26,7 +26,7 @@
             <tbody>
             {{range $d.Users}}
                 <tr>
-                    <td>{{.Login}}{{if .Disabled}} <span class="hint">(disabled)</span>{{end}}</td>
+                    <td>{{.Login}}{{if .Disabled}} <span class="hint">(disabled)</span>{{end}}{{if .Unconfirmed}} <span class="hint">(awaiting email)</span>{{end}}</td>
                     <td>{{.Role}}</td>
                     <td>{{.CreatedAt.Format "2006-01-02"}}</td>
                     <td>{{if .LastLoginAt.IsZero}}—{{else}}{{.LastLoginAt.Format "2006-01-02 15:04"}}{{end}}</td>
@@ -64,18 +64,12 @@
                             </select>
                             <button type="submit" class="link">Set role</button>
                         </form>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="7">
-                        <form method="post" action="{{$.Base}}/admin/" class="inline-form">
+                        <form method="post" action="{{$.Base}}/admin/"
+                              onsubmit="return confirm('Delete {{.Login}} permanently? This cannot be undone.');">
                             <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
                             <input type="hidden" name="action" value="delete_user">
                             <input type="hidden" name="user_id" value="{{.ID}}">
-                            <label for="confirm-{{.ID}}">Delete {{.Login}} — type the login to confirm</label>
-                            <input id="confirm-{{.ID}}" name="confirm_login" type="text" required
-                                   autocapitalize="none" spellcheck="false">
-                            <button type="submit">Delete account</button>
+                            <button type="submit" class="link">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -86,37 +80,6 @@
         <p class="hint">No users yet.</p>
         {{end}}
     </section>
-
-    {{if eq $d.CreationMode "admin_password"}}
-    <section class="subsection">
-        <h2>Create user with temporary password</h2>
-        <p class="warning">Until the user changes this password, you can sign
-            in as them. Only use this when handing credentials over in person.</p>
-        <form method="post" action="{{.Base}}/admin/">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <input type="hidden" name="action" value="create_user">
-
-            <label for="user-login">Login</label>
-            <input id="user-login" name="login" type="text" required maxlength="64"
-                   autocapitalize="none" spellcheck="false">
-
-            <label for="user-email">Email <span class="optional">(optional)</span></label>
-            <input id="user-email" name="email" type="email">
-
-            <label for="user-role">Role</label>
-            <select id="user-role" name="role">
-                <option value="user">User</option>
-                <option value="admin">Administrator</option>
-            </select>
-
-            <label for="temp-password">Temporary password</label>
-            <input id="temp-password" name="temp_password" type="text" required
-                   minlength="10" autocomplete="off">
-
-            <button type="submit">Create user</button>
-        </form>
-    </section>
-    {{end}}
 
     <section class="subsection">
         <h2>Reset a password</h2>

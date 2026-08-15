@@ -41,9 +41,6 @@ func (s *Store) UpdateSettings(actor Actor, fn func(*Settings)) error {
 }
 
 func validateSettings(s Settings) error {
-	if !s.CreationMode.Valid() {
-		return fmt.Errorf("store: unknown creation mode %q", s.CreationMode)
-	}
 	if s.SMTP.Host != "" {
 		if !s.SMTP.TLS.Valid() {
 			return fmt.Errorf("store: unknown SMTP TLS mode %q", s.SMTP.TLS)

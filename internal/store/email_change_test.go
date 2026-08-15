@@ -44,15 +44,18 @@ func TestEmailChangeLifecycle(t *testing.T) {
 		t.Fatalf("RequestEmailChange: %v", err)
 	}
 
-	u, err := s.ConfirmEmailChange(token)
+	u, registration, err := s.ConfirmEmailChange(token)
 	if err != nil {
 		t.Fatalf("ConfirmEmailChange: %v", err)
+	}
+	if registration {
+		t.Error("a profile email change was reported as registration")
 	}
 	if u.Email != "new@example.org" {
 		t.Errorf("email = %q, want new@example.org", u.Email)
 	}
 
-	if _, err := s.ConfirmEmailChange(token); !errors.Is(err, ErrInviteInvalid) {
+	if _, _, err := s.ConfirmEmailChange(token); !errors.Is(err, ErrInviteInvalid) {
 		t.Errorf("second confirm: got %v, want ErrInviteInvalid", err)
 	}
 
@@ -62,7 +65,7 @@ func TestEmailChangeLifecycle(t *testing.T) {
 		t.Fatalf("RequestEmailChange: %v", err)
 	}
 	c.advance(2 * DefaultEmailChangeTTL)
-	if _, err := s.ConfirmEmailChange(token2); !errors.Is(err, ErrInviteInvalid) {
+	if _, _, err := s.ConfirmEmailChange(token2); !errors.Is(err, ErrInviteInvalid) {
 		t.Errorf("expired token: got %v, want ErrInviteInvalid", err)
 	}
 }

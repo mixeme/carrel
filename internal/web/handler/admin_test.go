@@ -103,7 +103,7 @@ func TestProfilePasswordChange(t *testing.T) {
 	wantRedirect(t, a.post("/login", url.Values{fieldLogin: {"ada"}, fieldPassword: {newPass}}), "/app/")
 }
 
-func TestAdminDeleteRequiresLoginConfirm(t *testing.T) {
+func TestAdminDeleteUser(t *testing.T) {
 	a := newApp(t, nil)
 	bootstrap(t, a)
 	loginAdmin(t, a)
@@ -120,18 +120,8 @@ func TestAdminDeleteRequiresLoginConfirm(t *testing.T) {
 	bobID := mustUserID(t, a, "bob")
 
 	rec := a.post("/admin/", url.Values{
-		"action":        {"delete_user"},
-		"user_id":       {bobID},
-		"confirm_login": {"wrong"},
-	})
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("wrong confirm = %d, want 400", rec.Code)
-	}
-
-	rec = a.post("/admin/", url.Values{
-		"action":        {"delete_user"},
-		"user_id":       {bobID},
-		"confirm_login": {"bob"},
+		"action":  {"delete_user"},
+		"user_id": {bobID},
 	})
 	if rec.Code != http.StatusOK {
 		t.Fatalf("delete user = %d: %s", rec.Code, rec.Body.String())
@@ -177,12 +167,23 @@ func TestAdminSectionsAreSeparatePages(t *testing.T) {
 		t.Error("users page missing the subsection navigation")
 	}
 
+	if strings.Contains(users, `value="create_user"`) {
+		t.Error("users page still carries the create-user form")
+	}
+
 	invites := a.get("/admin/invites")
 	if invites.Code != http.StatusOK {
 		t.Fatalf("GET /admin/invites = %d", invites.Code)
 	}
-	if !strings.Contains(invites.Body.String(), `value="create_invite_link"`) {
-		t.Error("invitations page missing the link form")
+	invitesBody := invites.Body.String()
+	if !strings.Contains(invitesBody, `value="create_invite_link"`) {
+		t.Error("add-users page missing the invitation form")
+	}
+	if !strings.Contains(invitesBody, `value="create_user"`) {
+		t.Error("add-users page missing the temporary-password form")
+	}
+	if !strings.Contains(invitesBody, `value="save_self_registration"`) {
+		t.Error("add-users page missing the self-registration form")
 	}
 
 	settings := a.get("/admin/settings")
@@ -195,6 +196,12 @@ func TestAdminSectionsAreSeparatePages(t *testing.T) {
 	}
 	if !strings.Contains(body, `value="save_smtp"`) {
 		t.Error("settings page missing mail settings")
+	}
+	if strings.Contains(body, `name="creation_mode"`) {
+		t.Error("settings page still carries user creation mode")
+	}
+	if strings.Contains(body, `name="self_registration"`) {
+		t.Error("settings page still carries the self-registration checkbox")
 	}
 	if strings.Contains(body, `value="test_dav"`) {
 		t.Error("settings page still carries the DAV validator")
@@ -226,6 +233,48 @@ func TestAdminSectionsAreSeparatePages(t *testing.T) {
 
 	if rec := a.get("/admin/unknown"); rec.Code != http.StatusNotFound {
 		t.Errorf("GET /admin/unknown = %d, want 404", rec.Code)
+	}
+}
+
+func TestCreateUserWithTemporaryPassword(t *testing.T) {
+	a := newApp(t, nil)
+	bootstrap(t, a)
+	loginAdmin(t, a)
+
+	rec := a.post("/admin/invites", url.Values{
+		"action":        {"create_user"},
+		"login":         {"ada"},
+		"email":         {"ada@example.org"},
+		"role":          {"user"},
+		"temp_password": {testPassword},
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("create user = %d: %s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "Created ada") {
+		t.Errorf("missing created notice: %s", rec.Body.String())
+	}
+
+	u, err := a.Store.UserByLogin("ada")
+	if err != nil {
+		t.Fatalf("UserByLogin: %v", err)
+	}
+	if !u.MustChangePassword {
+		t.Error("temporary password must force a change")
+	}
+}
+
+func TestSelfRegistrationRequiresSMTP(t *testing.T) {
+	a := newApp(t, nil)
+	bootstrap(t, a)
+	loginAdmin(t, a)
+
+	rec := a.post("/admin/invites", url.Values{
+		"action":            {"save_self_registration"},
+		"self_registration": {"1"},
+	})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("enable without SMTP = %d, want 400: %s", rec.Code, rec.Body.String())
 	}
 }
 

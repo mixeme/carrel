@@ -25,24 +25,6 @@ const (
 // Valid reports whether r is a known role.
 func (r Role) Valid() bool { return r == RoleUser || r == RoleAdmin }
 
-// CreationMode selects how the administrator adds users (§5.2).
-type CreationMode string
-
-const (
-	// CreationInvite mails a one-time link; the administrator never sees a
-	// password. This is the default.
-	CreationInvite CreationMode = "invite"
-	// CreationAdminPassword lets the administrator set a temporary password,
-	// which the user must change on first login. Until they do, the
-	// administrator can log in as them — the UI has to say so.
-	CreationAdminPassword CreationMode = "admin_password"
-)
-
-// Valid reports whether m is a known creation mode.
-func (m CreationMode) Valid() bool {
-	return m == CreationInvite || m == CreationAdminPassword
-}
-
 // TLSMode is the transport security of the SMTP relay (§5.3).
 type TLSMode string
 
@@ -75,6 +57,9 @@ type User struct {
 	// MustChangePassword is set for accounts created with a temporary
 	// password and for accounts restored from escrow (§5.2, §5.4).
 	MustChangePassword bool `json:"must_change_password,omitempty"`
+	// Unconfirmed is set until a self-registered account follows the email
+	// link. They cannot sign in until then (§5.2).
+	Unconfirmed bool `json:"unconfirmed,omitempty"`
 
 	// Auth verifies the login password. Its salt is never the KEK salt (§4).
 	Auth *crypto.PasswordHash `json:"auth"`
@@ -282,9 +267,8 @@ const (
 // Settings are the global options from §5.5. Fields that later stages consume
 // are present with their defaults so the format does not change again.
 type Settings struct {
-	CreationMode CreationMode `json:"creation_mode"`
-	// SelfRegistration stays false unless an administrator turns it on; there
-	// is no public sign-up form in stage 1 (§5.2).
+	// SelfRegistration publishes the public sign-up form. Off by default so
+	// a private instance is not open to visitors (§5.2).
 	SelfRegistration bool `json:"self_registration,omitempty"`
 
 	InviteTTLSeconds       int64 `json:"invite_ttl_seconds"`
@@ -317,7 +301,6 @@ func (s Settings) Clone() Settings {
 
 func defaultSettings() Settings {
 	return Settings{
-		CreationMode:           CreationInvite,
 		InviteTTLSeconds:       int64(DefaultInviteTTL / time.Second),
 		SessionIdleSeconds:     int64(DefaultSessionIdle / time.Second),
 		SessionAbsoluteSeconds: int64(DefaultSessionAbsolute / time.Second),

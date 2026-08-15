@@ -20,9 +20,13 @@
     {{end}}
 
     <section class="subsection">
-        <h2>Invitations</h2>
+        <h2>Add a user</h2>
+        <p class="hint">Three ways, for three situations. Use whichever fits.</p>
 
-        <h3>By link</h3>
+        <h3>Invitation</h3>
+        <p class="hint">The new user chooses their own password. You never see it.</p>
+
+        <h4>By link</h4>
         <form method="post" action="{{.Base}}/admin/invites">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="create_invite_link">
@@ -38,7 +42,7 @@
             <button type="submit">Create link</button>
         </form>
 
-        <h3>By email</h3>
+        <h4>By email</h4>
         {{if $d.SMTPConfigured}}
         <form method="post" action="{{.Base}}/admin/invites">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
@@ -62,6 +66,65 @@
             before sending invitations by email.</p>
         {{end}}
 
+        <h3>Temporary password</h3>
+        <p class="warning">Until the user changes this password, you can sign
+            in as them. Only use this when handing credentials over in person.</p>
+        <form method="post" action="{{.Base}}/admin/invites">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="create_user">
+
+            <label for="user-login">Login</label>
+            <input id="user-login" name="login" type="text" required maxlength="64"
+                   autocapitalize="none" spellcheck="false">
+
+            <label for="user-email">Email <span class="optional">(optional)</span></label>
+            <input id="user-email" name="email" type="email">
+
+            <label for="user-role">Role</label>
+            <select id="user-role" name="role">
+                <option value="user">User</option>
+                <option value="admin">Administrator</option>
+            </select>
+
+            <label for="temp-password">Temporary password</label>
+            <input id="temp-password" name="temp_password" type="text" required
+                   minlength="10" autocomplete="off">
+
+            <button type="submit">Create user</button>
+        </form>
+
+        <h3>Self-registration</h3>
+        <p class="hint">Visitors create their own account at a public form
+            and confirm the email address before they can sign in. Off by
+            default. Mail must be configured first.</p>
+        <form method="post" action="{{.Base}}/admin/invites">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="save_self_registration">
+
+            <label class="checkbox">
+                <input type="checkbox" name="self_registration" value="1"
+                       {{if $d.Settings.SelfRegistration}}checked{{end}}>
+                Publish the registration form
+            </label>
+            {{if not $d.SMTPConfigured}}
+            <p class="hint">Configure SMTP in <a href="{{.Base}}/admin/settings">Settings</a>
+                first. A confirmation email cannot be sent without it, so this
+                cannot be turned on until mail works.</p>
+            {{end}}
+
+            <button type="submit">Save</button>
+        </form>
+        {{if $d.Settings.SelfRegistration}}
+        <p>The form is at this address:</p>
+        <p class="copy-row">
+            <input id="register-url" type="text" readonly value="{{$d.RegisterURL}}">
+            <button type="button" class="secondary" data-copy="register-url">Copy</button>
+        </p>
+        {{end}}
+    </section>
+
+    <section class="subsection">
+        <h2>Pending invitations</h2>
         {{if $d.Invites}}
         <table class="data">
             <thead>

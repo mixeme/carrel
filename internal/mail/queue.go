@@ -209,6 +209,23 @@ func (q *Queue) QueueEmailChange(to, login, confirmURL string, expires time.Time
 	q.enqueue(job{kind: "email_change", to: to, msg: msg, maxRetries: 4})
 }
 
+// QueueRegistration enqueues the confirmation message for a public sign-up.
+func (q *Queue) QueueRegistration(to, login, confirmURL string, expires time.Time) {
+	if to == "" {
+		return
+	}
+	settings := q.Store.Settings()
+	if !settings.SMTP.Configured() {
+		return
+	}
+	name := q.ServiceName
+	if name == "" {
+		name = "Carrel"
+	}
+	msg := RegisterContent(name, login, confirmURL, expires)
+	q.enqueue(job{kind: "email_change", to: to, msg: msg, maxRetries: 4})
+}
+
 // QueueEscrowRecovery tells a user that their account was recovered. Notifying
 // them is not the administrator's decision to make, so this has no opt-out
 // (§5.4); it reports whether the message could be handed to the queue at all,

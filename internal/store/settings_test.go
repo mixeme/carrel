@@ -14,9 +14,6 @@ func TestSettingsDefaults(t *testing.T) {
 	s, _ := openTest(t, t.TempDir())
 	got := s.Settings()
 
-	if got.CreationMode != CreationInvite {
-		t.Errorf("creation mode = %q, want %q", got.CreationMode, CreationInvite)
-	}
 	if got.SelfRegistration {
 		t.Error("self-registration must be off by default")
 	}
@@ -33,7 +30,6 @@ func TestUpdateSettings(t *testing.T) {
 	admin := mustAdmin(t, s)
 
 	err := s.UpdateSettings(actorOf(admin), func(cfg *Settings) {
-		cfg.CreationMode = CreationAdminPassword
 		cfg.InviteTTLSeconds = int64(24 * time.Hour / time.Second)
 		cfg.SMTP.Host = "localhost"
 		cfg.SMTP.Port = 25
@@ -45,9 +41,6 @@ func TestUpdateSettings(t *testing.T) {
 	}
 
 	got := s.Settings()
-	if got.CreationMode != CreationAdminPassword {
-		t.Errorf("creation mode = %q", got.CreationMode)
-	}
 	if got.InviteTTL() != 24*time.Hour {
 		t.Errorf("invite TTL = %v, want 24h", got.InviteTTL())
 	}

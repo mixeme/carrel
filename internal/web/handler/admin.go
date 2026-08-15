@@ -25,8 +25,6 @@ const (
 	fieldSMTPFromName = "smtp_from_name"
 	fieldTestEmail    = "test_email"
 	fieldTempPassword = "temp_password"
-	fieldConfirmLogin = "confirm_login"
-	fieldCreationMode = "creation_mode"
 	fieldSelfReg      = "self_registration"
 	fieldInviteTTL    = "invite_ttl_hours"
 	fieldSessionIdle  = "session_idle_hours"
@@ -57,7 +55,10 @@ type adminView struct {
 	InviteEmailSent string
 	SMTPConfigured  bool
 	SMTPDiag        string
-	CreationMode    store.CreationMode
+	// UserCreated is the login of an account just made with a temporary password.
+	UserCreated string
+	// RegisterURL is the public sign-up address, shown when self-registration is on.
+	RegisterURL string
 	// Escrow is the instance-wide deposit status (§5.4).
 	Escrow escrowStatus
 	// EscrowCoverage is how many accounts the master password reaches.
@@ -146,6 +147,8 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request, from string
 		data, err = s.adminResendInvite(w, r, actor)
 	case "create_user":
 		data, err = s.adminCreateUser(r, actor)
+	case "save_self_registration":
+		data, err = s.adminSaveSelfRegistration(r, actor)
 	case "save_smtp":
 		data, err = s.adminSaveSMTP(r, actor)
 	case "test_smtp":
@@ -212,6 +215,9 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request, from string
 	case data.Recovered != "":
 		v.Notice = "Recovered " + data.Recovered +
 			". Hand over the temporary password; they must change it at their next sign-in, and their data is intact."
+	case data.UserCreated != "":
+		v.Notice = "Created " + data.UserCreated +
+			". Hand over the temporary password; they must change it at their next sign-in."
 	}
 	v.Data = s.buildAdminView(r, data)
 	s.Render(w, adminTemplate(data.Section), v)
@@ -224,7 +230,7 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 		out.Section = adminSectionUsers
 	}
 	out.Settings = s.Store.Settings()
-	out.CreationMode = out.Settings.CreationMode
+	out.RegisterURL = s.publicURL(r, "/register")
 	for _, u := range s.Store.Users() {
 		out.Users = append(out.Users, userRow{
 			User:     u,
@@ -283,7 +289,8 @@ func adminTemplate(section string) string {
 
 func adminSectionForAction(action string) string {
 	switch action {
-	case "create_invite_link", "create_invite_email", "revoke_invite", "extend_invite", "resend_invite":
+	case "create_invite_link", "create_invite_email", "revoke_invite", "extend_invite", "resend_invite",
+		"create_user", "save_self_registration":
 		return adminSectionInvites
 	case "save_smtp", "test_smtp", "save_settings":
 		return adminSectionSettings
@@ -292,7 +299,7 @@ func adminSectionForAction(action string) string {
 	case "enable_escrow", "resume_escrow", "disable_escrow", "escrow_policy",
 		"change_master_password", "recover_user":
 		return adminSectionEscrow
-	case "create_user", "disable_user", "enable_user", "delete_user",
+	case "disable_user", "enable_user", "delete_user",
 		"change_role", "kill_sessions", "reset_password":
 		return adminSectionUsers
 	default:
@@ -395,9 +402,6 @@ func (s *Server) adminResendInvite(w http.ResponseWriter, r *http.Request, actor
 }
 
 func (s *Server) adminCreateUser(r *http.Request, actor store.Actor) (adminView, error) {
-	if s.Store.Settings().CreationMode != store.CreationAdminPassword {
-		return adminView{}, fmt.Errorf("user creation with a temporary password is not enabled")
-	}
 	login := store.NormalizeLogin(r.PostFormValue(fieldLogin))
 	email := store.NormalizeEmail(r.PostFormValue(fieldEmail))
 	role := store.Role(r.PostFormValue(fieldRole))
@@ -411,7 +415,7 @@ func (s *Server) adminCreateUser(r *http.Request, actor store.Actor) (adminView,
 		}
 		return adminView{}, err
 	}
-	return adminView{}, nil
+	return adminView{UserCreated: login}, nil
 }
 
 func (s *Server) adminSaveSMTP(r *http.Request, actor store.Actor) (adminView, error) {
@@ -493,14 +497,6 @@ func (s *Server) adminEnableUser(r *http.Request, actor store.Actor) (adminView,
 
 func (s *Server) adminDeleteUser(r *http.Request, actor store.Actor) (adminView, error) {
 	userID := r.PostFormValue(fieldUserID)
-	confirm := store.NormalizeLogin(r.PostFormValue(fieldConfirmLogin))
-	user, err := s.Store.User(userID)
-	if err != nil {
-		return adminView{}, adminUserErr(err)
-	}
-	if confirm != user.Login {
-		return adminView{}, fmt.Errorf("type the login %q to confirm deletion", user.Login)
-	}
 	// The store decides first: a refused deletion — the last administrator,
 	// say — must not have signed anyone out on its way to being refused.
 	if err := s.Store.DeleteUser(actor, userID); err != nil {
@@ -547,12 +543,6 @@ func (s *Server) adminKillSessions(r *http.Request, actor store.Actor) (adminVie
 }
 
 func (s *Server) adminSaveSettings(r *http.Request, actor store.Actor) (adminView, error) {
-	mode := store.CreationMode(r.PostFormValue(fieldCreationMode))
-	if !mode.Valid() {
-		return adminView{}, fmt.Errorf("choose a valid user creation mode")
-	}
-	selfReg := r.PostFormValue(fieldSelfReg) == "1"
-
 	var inviteTTL, idle, absolute int64
 	for _, pair := range []struct {
 		name string
@@ -575,8 +565,6 @@ func (s *Server) adminSaveSettings(r *http.Request, actor store.Actor) (adminVie
 	}
 
 	if err := s.Store.UpdateSettings(actor, func(st *store.Settings) {
-		st.CreationMode = mode
-		st.SelfRegistration = selfReg
 		if inviteTTL > 0 {
 			st.InviteTTLSeconds = inviteTTL
 		}
@@ -586,6 +574,19 @@ func (s *Server) adminSaveSettings(r *http.Request, actor store.Actor) (adminVie
 		if absolute > 0 {
 			st.SessionAbsoluteSeconds = absolute
 		}
+	}); err != nil {
+		return adminView{}, err
+	}
+	return adminView{}, nil
+}
+
+func (s *Server) adminSaveSelfRegistration(r *http.Request, actor store.Actor) (adminView, error) {
+	on := r.PostFormValue(fieldSelfReg) == "1"
+	if on && !s.Store.Settings().SMTP.Configured() {
+		return adminView{}, fmt.Errorf("configure SMTP before allowing self-registration")
+	}
+	if err := s.Store.UpdateSettings(actor, func(st *store.Settings) {
+		st.SelfRegistration = on
 	}); err != nil {
 		return adminView{}, err
 	}

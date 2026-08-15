@@ -19,6 +19,10 @@
         <button type="submit">Sign in</button>
     </form>
 
+    {{with .Data}}{{if .CanRegister}}
+    <p class="hint"><a href="{{$.Base}}/register">Create an account</a></p>
+    {{end}}{{end}}
+
     <p class="hint"><a href="{{.Base}}/forgot">Forgotten your password?</a></p>
 </section>
 {{end}}

@@ -63,6 +63,9 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	pages.HandleFunc("POST "+s.Path("/logout"), s.Logout)
 	pages.HandleFunc("GET "+s.Path("/forgot"), s.Forgot)
 
+	register := http.HandlerFunc(s.Register)
+	pages.Handle(s.Path("/register"), Chain(register, s.RateLimit(s.InviteLimit, "register")))
+
 	// Public token pages: no Referer on the URL (§24.3) and a separate rate
 	// limit from login.
 	invite := http.NewServeMux()
@@ -132,9 +135,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/{uid}/conflict"), s.NoteConflictResolve)
 	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/{uid}/attach"), s.NoteAttachment)
 
-	// The file section of §6 and §7. It appears only when a plain collection was
-	// discovered, which the navigation decides; the routes exist regardless and
-	// answer "not found" when there is no such collection.
+	// The file section of §6 and §7.
 	app.HandleFunc("GET "+s.Path("/app/files"), s.FilesHome)
 	app.HandleFunc("GET "+s.Path("/app/files/{account}/{col}"), s.FilesBrowse)
 	app.HandleFunc("POST "+s.Path("/app/files/{account}/{col}"), s.FilesBrowse)

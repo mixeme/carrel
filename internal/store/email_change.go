@@ -62,15 +62,15 @@ func (s *Store) RequestEmailChange(actor Actor, userID, newEmail string, ttl tim
 
 // ConfirmEmailChange applies a pending address after the bearer token checks
 // out. Unknown, expired and already-cleared tokens all yield ErrInviteInvalid
-// so the endpoint reveals nothing (§24.3).
-func (s *Store) ConfirmEmailChange(token string) (*User, error) {
+// so the endpoint reveals nothing (§24.3). registration is true when the
+// link finished a self-sign-up rather than a profile email change.
+func (s *Store) ConfirmEmailChange(token string) (user *User, registration bool, err error) {
 	if token == "" {
-		return nil, ErrInviteInvalid
+		return nil, false, ErrInviteInvalid
 	}
 	digest := crypto.HashToken(token)
 
-	var out *User
-	err := s.update(func(state *State) error {
+	err = s.update(func(state *State) error {
 		now := s.now()
 		var u *User
 		for _, candidate := range state.Users {
@@ -84,6 +84,8 @@ func (s *Store) ConfirmEmailChange(token string) (*User, error) {
 		if u == nil || u.PendingEmail == "" || !now.Before(u.EmailChangeExpires) {
 			return ErrInviteInvalid
 		}
+		registration = u.Unconfirmed
+		u.Unconfirmed = false
 		u.Email = u.PendingEmail
 		u.PendingEmail = ""
 		u.EmailChangeTokenHash = nil
@@ -97,11 +99,11 @@ func (s *Store) ConfirmEmailChange(token string) (*User, error) {
 			TargetLogin: u.Login,
 			Detail:      u.Email,
 		})
-		out = u.Clone()
+		user = u.Clone()
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return out, nil
+	return user, registration, nil
 }

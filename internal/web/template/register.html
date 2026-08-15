@@ -1,0 +1,36 @@
+{{define "body"}}
+<section class="card">
+    <h1>Create an account</h1>
+    <p>Choose a login and password. A confirmation link will be sent to the
+        email address you give; the account cannot be used until you open it.</p>
+    <p class="warning">Your password is the only key to your own data. Nobody —
+        including this server — can recover it for you.</p>
+
+    <form method="post" action="{{.Base}}/register" autocomplete="off">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+
+        <label for="login">Login</label>
+        <input id="login" name="login" type="text" required autofocus
+               maxlength="64" autocapitalize="none" spellcheck="false"
+               value="{{with .Data}}{{.Login}}{{end}}">
+        <p class="hint">Lowercase letters, digits, and <code>. _ -</code> inside.</p>
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required autocomplete="off"
+               value="{{with .Data}}{{.Email}}{{end}}">
+        <p class="hint">Used to confirm this account and for service notices.</p>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required
+               minlength="10" autocomplete="new-password">
+
+        <label for="confirm">Repeat password</label>
+        <input id="confirm" name="confirm" type="password" required
+               minlength="10" autocomplete="new-password">
+
+        <button type="submit">Create account</button>
+    </form>
+
+    <p class="hint"><a href="{{.Base}}/login">Already have an account? Sign in</a></p>
+</section>
+{{end}}

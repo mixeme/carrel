@@ -346,6 +346,16 @@ button {
     margin-bottom: 0.5rem;
 }
 
+.subsection h3 {
+    font-size: 1rem;
+    margin: 1.5rem 0 0.5rem;
+}
+
+.subsection h4 {
+    font-size: 0.95rem;
+    margin: 1rem 0 0.35rem;
+}
+
 .field-value {
     margin: 0.25rem 0 0;
     font-weight: 600;

@@ -38,6 +38,12 @@ var (
 	// ErrUserDisabled is returned after the password checks out but the
 	// account is switched off.
 	ErrUserDisabled = errors.New("store: account is disabled")
+	// ErrUserUnconfirmed is returned after the password checks out but the
+	// self-registration email has not been confirmed yet (§5.2).
+	ErrUserUnconfirmed = errors.New("store: account is awaiting email confirmation")
+	// ErrRegistrationClosed is returned when a visitor tries to sign up
+	// while the public form is off.
+	ErrRegistrationClosed = errors.New("store: self-registration is not enabled")
 	// ErrInviteInvalid covers unknown, revoked, expired and already-accepted
 	// invites alike, so probing a token learns nothing (§24.3).
 	ErrInviteInvalid = errors.New("store: invite is not usable")

@@ -60,6 +60,31 @@ If you did not request this change, you can ignore this message.`,
 	return Message{Subject: subject, Text: text, HTML: htmlBody}
 }
 
+// RegisterContent builds the self-registration confirmation email (§5.2).
+func RegisterContent(serviceName, login, confirmURL string, expires time.Time) Message {
+	subject := fmt.Sprintf("Confirm your %s account", serviceName)
+	text := fmt.Sprintf(`Finish creating the account %s on %s by opening this link:
+
+%s
+
+This link expires on %s.
+
+If you did not create this account, you can ignore this message.`,
+		login, serviceName, confirmURL, expires.UTC().Format(time.RFC1123))
+	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+<html><body>
+<p>Finish creating the account <strong>%s</strong> on %s.</p>
+<p><a href="%s">Confirm email address</a></p>
+<p>This link expires on %s.</p>
+<p>If you did not create this account, you can ignore this message.</p>
+</body></html>`,
+		html.EscapeString(login),
+		html.EscapeString(serviceName),
+		html.EscapeString(confirmURL),
+		html.EscapeString(expires.UTC().Format(time.RFC1123)))
+	return Message{Subject: subject, Text: text, HTML: htmlBody}
+}
+
 // EscrowRecoveryContent builds the non-optional recovery notice (§5.4).
 func EscrowRecoveryContent(serviceName, login, recoveredAt string) Message {
 	subject := fmt.Sprintf("Your %s account was recovered", serviceName)

@@ -28,3 +28,13 @@ func TestEmailChangeContent(t *testing.T) {
 		t.Error("confirmation email missing expected content")
 	}
 }
+
+func TestRegisterContent(t *testing.T) {
+	msg := RegisterContent("Carrel", "ada", "https://example.org/confirm/x", time.Now())
+	if !strings.Contains(msg.Text, "ada") || !strings.Contains(msg.Text, "https://example.org/confirm/x") {
+		t.Error("registration email missing expected content")
+	}
+	if strings.Contains(msg.HTML, "<img") {
+		t.Error("registration email must not carry images")
+	}
+}

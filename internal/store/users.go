@@ -290,6 +290,9 @@ func (s *Store) Authenticate(login, password string) (*User, crypto.Key, error) 
 	if stored.Disabled {
 		return nil, nil, ErrUserDisabled
 	}
+	if stored.Unconfirmed {
+		return nil, nil, ErrUserUnconfirmed
+	}
 
 	kek, err := crypto.DeriveKey(password, salt, params)
 	if err != nil {
@@ -578,11 +581,11 @@ func findUserByLogin(state *State, login string) *User {
 // log in. Deleting, demoting or disabling them would leave the instance with
 // no way back in.
 func isLastActiveAdmin(state *State, u *User) bool {
-	if u.Role != RoleAdmin || u.Disabled {
+	if u.Role != RoleAdmin || u.Disabled || u.Unconfirmed {
 		return false
 	}
 	for _, other := range state.Users {
-		if other.ID == u.ID || other.Role != RoleAdmin || other.Disabled {
+		if other.ID == u.ID || other.Role != RoleAdmin || other.Disabled || other.Unconfirmed {
 			continue
 		}
 		return false

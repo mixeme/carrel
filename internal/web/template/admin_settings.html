@@ -14,18 +14,6 @@
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="save_settings">
 
-            <label for="creation-mode">User creation mode</label>
-            <select id="creation-mode" name="creation_mode">
-                <option value="invite" {{if eq $d.Settings.CreationMode "invite"}}selected{{end}}>Invitation link</option>
-                <option value="admin_password" {{if eq $d.Settings.CreationMode "admin_password"}}selected{{end}}>Temporary password from administrator</option>
-            </select>
-
-            <label class="checkbox">
-                <input type="checkbox" name="self_registration" value="1"
-                       {{if $d.Settings.SelfRegistration}}checked{{end}}>
-                Allow self-registration (no public form in this stage)
-            </label>
-
             <label for="invite-ttl">Invitation lifetime (hours)</label>
             <input id="invite-ttl" name="invite_ttl_hours" type="number" min="1"
                    value="{{$d.InviteTTLHours}}">

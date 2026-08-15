@@ -1,0 +1,8 @@
+{{define "body"}}
+<section class="card">
+    <h1>Check your email</h1>
+    {{if .Notice}}<p>{{.Notice}}</p>{{end}}
+    <p class="hint"><a href="{{.Base}}/login">Sign in</a> after you have opened
+        the confirmation link.</p>
+</section>
+{{end}}

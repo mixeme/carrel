@@ -29,8 +29,9 @@ const badCredentials = "Incorrect login or password."
 // loginForm is what the login template renders. The password is never echoed
 // back.
 type loginForm struct {
-	Login string
-	Next  string
+	Login       string
+	Next        string
+	CanRegister bool
 }
 
 // Login serves the sign-in form and takes it.
@@ -50,7 +51,10 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	v := s.View(r, "Sign in")
-	v.Data = loginForm{Next: SafeRedirect(r.URL.Query().Get(fieldNext), "")}
+	v.Data = loginForm{
+		Next:        SafeRedirect(r.URL.Query().Get(fieldNext), ""),
+		CanRegister: s.registrationOpen(),
+	}
 	s.Render(w, "login.html", v)
 }
 
@@ -101,6 +105,8 @@ func (s *Server) auditFailedLogin(r *http.Request, login string, cause error) {
 	switch {
 	case errors.Is(cause, store.ErrUserDisabled):
 		detail = "account disabled"
+	case errors.Is(cause, store.ErrUserUnconfirmed):
+		detail = "email unconfirmed"
 	case !errors.Is(cause, store.ErrAuth):
 		// A derivation or decryption failure is a fault, not a wrong password.
 		detail = "authentication error"
@@ -114,8 +120,14 @@ func (s *Server) auditFailedLogin(r *http.Request, login string, cause error) {
 func (s *Server) loginError(w http.ResponseWriter, r *http.Request, status int, login, next, msg string) {
 	v := s.View(r, "Sign in")
 	v.Error = msg
-	v.Data = loginForm{Login: login, Next: next}
+	v.Data = loginForm{Login: login, Next: next, CanRegister: s.registrationOpen()}
 	s.RenderStatus(w, status, "login.html", v)
+}
+
+// registrationOpen is whether the public sign-up form should be offered.
+func (s *Server) registrationOpen() bool {
+	st := s.Store.Settings()
+	return st.SelfRegistration && st.SMTP.Configured()
 }
 
 // startSession puts a user who has just proved their password into a fresh

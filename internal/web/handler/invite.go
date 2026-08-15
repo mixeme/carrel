@@ -136,13 +136,17 @@ func (s *Server) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := s.Store.ConfirmEmailChange(token)
+	user, registration, err := s.Store.ConfirmEmailChange(token)
 	if err != nil {
 		s.emailConfirmInvalid(w, r)
 		return
 	}
 	v := s.View(r, "Email confirmed")
-	v.Notice = "The address for " + user.Login + " is now " + user.Email + "."
+	if registration {
+		v.Notice = "Your account is ready. Sign in with the login and password you chose."
+	} else {
+		v.Notice = "The address for " + user.Login + " is now " + user.Email + "."
+	}
 	s.Render(w, "email_confirmed.html", v)
 }
 
