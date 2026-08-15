@@ -196,6 +196,17 @@ func TestAdminSectionsAreSeparatePages(t *testing.T) {
 	if !strings.Contains(body, `value="save_smtp"`) {
 		t.Error("settings page missing mail settings")
 	}
+	if strings.Contains(body, `value="test_dav"`) {
+		t.Error("settings page still carries the DAV validator")
+	}
+
+	dav := a.get("/admin/dav")
+	if dav.Code != http.StatusOK {
+		t.Fatalf("GET /admin/dav = %d", dav.Code)
+	}
+	if !strings.Contains(dav.Body.String(), `value="test_dav"`) {
+		t.Error("DAV validator page missing the discovery form")
+	}
 
 	escrow := a.get("/admin/escrow")
 	if escrow.Code != http.StatusOK {

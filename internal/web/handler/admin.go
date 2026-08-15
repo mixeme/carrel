@@ -41,6 +41,7 @@ const (
 	adminSectionUsers    = "users"
 	adminSectionInvites  = "invites"
 	adminSectionSettings = "settings"
+	adminSectionDAV      = "dav"
 	adminSectionEscrow   = "escrow"
 	adminSectionAudit    = "audit"
 )
@@ -103,7 +104,7 @@ func (s *Server) AdminSection(w http.ResponseWriter, r *http.Request) {
 	switch section {
 	case "users":
 		section = adminSectionUsers
-	case adminSectionInvites, adminSectionSettings, adminSectionEscrow, adminSectionAudit:
+	case adminSectionInvites, adminSectionSettings, adminSectionDAV, adminSectionEscrow, adminSectionAudit:
 	default:
 		http.NotFound(w, r)
 		return
@@ -269,6 +270,8 @@ func adminTemplate(section string) string {
 		return "admin_invites.html"
 	case adminSectionSettings:
 		return "admin_settings.html"
+	case adminSectionDAV:
+		return "admin_dav.html"
 	case adminSectionEscrow:
 		return "admin_escrow.html"
 	case adminSectionAudit:
@@ -282,8 +285,10 @@ func adminSectionForAction(action string) string {
 	switch action {
 	case "create_invite_link", "create_invite_email", "revoke_invite", "extend_invite", "resend_invite":
 		return adminSectionInvites
-	case "save_smtp", "test_smtp", "save_settings", "test_dav":
+	case "save_smtp", "test_smtp", "save_settings":
 		return adminSectionSettings
+	case "test_dav":
+		return adminSectionDAV
 	case "enable_escrow", "resume_escrow", "disable_escrow", "escrow_policy",
 		"change_master_password", "recover_user":
 		return adminSectionEscrow

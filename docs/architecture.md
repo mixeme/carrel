@@ -207,7 +207,7 @@ Then, per subtree: **`CSRF`** on everything that renders or takes a form, **`Req
 |---|---|
 | `/` | Public: index, `/about`, setup, login, invite and confirmation links |
 | `/app/` | Everything a signed-in person uses |
-| `/admin/` | Administration: users at `/admin/`, then `/admin/invites`, `/admin/settings`, `/admin/escrow`, `/admin/audit` |
+| `/admin/` | Administration: users at `/admin/`, then `/admin/invites`, `/admin/settings`, `/admin/dav`, `/admin/escrow`, `/admin/audit` |
 | `/c/` | Contact photos |
 | `/d/` | File downloads |
 | `/a/` | Opening an attachment |
