@@ -66,9 +66,7 @@ func findFileCollection(acc *account.Account, collection string) (discovery.Coll
 	return discovery.Collection{}, fmt.Errorf("file collection not found")
 }
 
-// fileCollections lists every file collection the user has. §6 makes the whole
-// section conditional on this being non-empty: there are some and it appears, or
-// there are none and it does not.
+// fileCollections lists every file collection the user has.
 func (s *Server) fileCollections(sess *session.Session) []sourceRow {
 	rows, err := s.collectionsOfKind(sess, discovery.KindFiles, account.ViewFiles, "")
 	if err != nil {
@@ -80,30 +78,6 @@ func (s *Server) fileCollections(sess *session.Session) []sourceRow {
 		rows[i].Selected = true
 	}
 	return rows
-}
-
-// hasFileCollections is what the navigation asks before drawing the Files
-// entry. §6 makes the section conditional and forbids a setting for it: a
-// person whose servers hold no plain collection never sees a file browser.
-func (s *Server) hasFileCollections(sess *session.Session) bool {
-	if sess == nil || s.Store == nil {
-		return false
-	}
-	accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK())
-	if err != nil {
-		return false
-	}
-	for _, acc := range accounts {
-		if !acc.Enabled {
-			continue
-		}
-		for _, col := range acc.Collections {
-			if col.Kind == discovery.KindFiles {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 type filesView struct {

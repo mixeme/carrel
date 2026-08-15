@@ -8,18 +8,15 @@
             <li><a class="collection-link{{if and (eq .AccountID $d.AccountID) (eq .ColEnc $d.ColEnc)}} is-active{{end}}"
                    href="{{$.Base}}/app/files/{{.AccountID}}/{{.ColEnc}}">{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></a></li>
         {{end}}</ul>
-        {{else}}<p class="hint">None found.</p>{{end}}
+        {{else}}<p class="hint">No file collections yet. Connect a DAV account from your <a href="{{.Base}}/app/">profile</a>.</p>{{end}}
     </aside>
     <div class="app-main">
         {{if $d.NoFiles}}
         <section class="card">
             <h1>Files</h1>
-            <p>None of your connected servers offers a plain folder to browse.</p>
-            <p class="hint">Carrel shows this section when discovery finds a WebDAV collection that is not a calendar
-                and not an address book. There is no setting to turn it on: connect an account whose server has one and
-                it appears. Baikal serves calendars and contacts only — a file collection usually means a second
-                account, on Nextcloud or on a plain WebDAV server.</p>
-            <p><a class="button" href="{{.Base}}/app/">Connect an account</a></p>
+            <p class="hint">Connect a DAV account from your <a href="{{.Base}}/app/">profile</a> to browse files here.
+                Discovery finds plain WebDAV folders automatically — on a CalDAV/CardDAV server that usually means a
+                separate folder, or a second account on Nextcloud or a plain WebDAV server.</p>
         </section>
         {{else}}
         <section class="card files-card">

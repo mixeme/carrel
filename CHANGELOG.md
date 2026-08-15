@@ -26,6 +26,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Files is always in the navigation.** The section used to appear only after discovery found a plain WebDAV collection on a connected account. It is now a permanent entry alongside Contacts and Calendar; the empty Files screen points at the profile page the way the other sections do.
 - **Contact card collapses empty fields.** On an existing card, unfilled properties stay in the form (so filling one is still a patch, not a rebuild) but start hidden. **Show empty fields** reveals them in place. A new contact still shows every field.
 - **Administration is split into subsection pages.** The panel was one sheet of unrelated forms — users, invitations, mail, escrow, a DAV probe and the audit log. It is now five pages behind the same `/admin/` guard: users (the landing screen), invitations, settings, key escrow, and the audit log, with a local nav between them. A form still posts to its own page, so a saved setting does not dump the administrator back onto the user list.
 - **DAV validator is its own administration page.** The discovery probe lived at the bottom of Settings alongside mail configuration. It is now `/admin/dav` with its own tab, because it tests a remote server rather than changing instance settings.

@@ -61,11 +61,6 @@ type View struct {
 	Commit  string
 	// SourceURL is the public mirror where users can fetch the source (§22).
 	SourceURL string
-	// ShowFiles decides whether the navigation carries a Files entry. §6 makes
-	// the section conditional on a plain collection having been discovered and
-	// forbids a setting for it, so this is asked of the accounts rather than of
-	// a preference.
-	ShowFiles bool
 	// InAdmin is true on every administration screen, so the top navigation
 	// can mark Administration current without listing subsection titles.
 	InAdmin bool
@@ -90,7 +85,6 @@ func (s *Server) View(r *http.Request, title string) View {
 		Version:   s.Version,
 		Commit:    s.Commit,
 		SourceURL: SourceURL,
-		ShowFiles: s.hasFileCollections(sess),
 	}
 }
 

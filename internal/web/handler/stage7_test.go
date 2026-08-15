@@ -390,15 +390,13 @@ func TestUploadOverTheCeilingIsRefused(t *testing.T) {
 	}
 }
 
-// §6: the section appears because a plain collection was discovered, with no
-// setting to turn it on.
-func TestFilesNavigationAppearsOnlyWithAFileCollection(t *testing.T) {
+func TestFilesNavigationIsAlwaysVisible(t *testing.T) {
 	h := startDAVHost(t)
 
 	plain := newApp(t, nil)
 	plain.setupAdmin("root", "", testPassword)
-	if body := plain.get("/app/").Body.String(); strings.Contains(body, `/app/files"`) {
-		t.Fatalf("the Files entry is offered without any file collection:\n%s", body)
+	if body := plain.get("/app/").Body.String(); !strings.Contains(body, `/app/files"`) {
+		t.Fatalf("the Files entry is missing without any file collection:\n%s", body)
 	}
 
 	a := filesApp(t, h)

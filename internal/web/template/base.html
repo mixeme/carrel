@@ -22,7 +22,7 @@
         <a href="{{.Base}}/app/calendar"{{if or (eq .Title "Agenda") (eq .Title "New event") (eq .Title "Event") (eq .Title "Calendar conflict") (eq .Title "Import calendar") (eq .Title "Calendar import report")}} aria-current="page"{{end}}>Calendar</a>
         <a href="{{.Base}}/app/tasks"{{if or (eq .Title "Tasks") (eq .Title "New task") (eq .Title "Task") (eq .Title "Task conflict")}} aria-current="page"{{end}}>Tasks</a>
         <a href="{{.Base}}/app/notes"{{if or (eq .Title "Notes") (eq .Title "New note") (eq .Title "Note") (eq .Title "Note conflict") (eq .Title "Import notes") (eq .Title "Notes import report")}} aria-current="page"{{end}}>Notes</a>
-        {{if .ShowFiles}}<a href="{{.Base}}/app/files"{{if eq .Title "Files"}} aria-current="page"{{end}}>Files</a>{{end}}
+        <a href="{{.Base}}/app/files"{{if eq .Title "Files"}} aria-current="page"{{end}}>Files</a>
         <a href="{{.Base}}/app/unified"{{if or (eq .Title "Everything") (eq .Title "All contacts")}} aria-current="page"{{end}}>Everything</a>
         <a href="{{.Base}}/app/search"{{if eq .Title "Search"}} aria-current="page"{{end}}>Search</a>
         <a href="{{.Base}}/app/duplicates"{{if or (eq .Title "Duplicates") (eq .Title "Merge duplicates")}} aria-current="page"{{end}}>Duplicates</a>
@@ -58,7 +58,7 @@
 {{$d := .Data}}
 <nav class="admin-nav" aria-label="Administration">
     <a href="{{.Base}}/admin/"{{if eq $d.Section "users"}} aria-current="page"{{end}}>Users</a>
-    <a href="{{.Base}}/admin/invites"{{if eq $d.Section "invites"}} aria-current="page"{{end}}>Invitations</a>
+    <a href="{{.Base}}/admin/invites"{{if eq $d.Section "invites"}} aria-current="page"{{end}}>Add users</a>
     <a href="{{.Base}}/admin/settings"{{if eq $d.Section "settings"}} aria-current="page"{{end}}>Settings</a>
     <a href="{{.Base}}/admin/dav"{{if eq $d.Section "dav"}} aria-current="page"{{end}}>DAV validator</a>
     <a href="{{.Base}}/admin/escrow"{{if eq $d.Section "escrow"}} aria-current="page"{{end}}>Key escrow</a>
