@@ -125,9 +125,9 @@ docker compose logs carrel > /tmp/carrel.log
 
 Учётные данные: `dev/credentials/` ([dev-credentials.md](dev-credentials.md)).
 
-- [ ] Baikal по прямому URL `/dav.php/` — календари и адресные книги в sidebar
+- [X] Baikal по прямому URL `/dav.php/` — календари и адресные книги в sidebar
 - [ ] Radicale или Nextcloud — URL с `.well-known` и без
-- [ ] Ошибка подключения: пошаговая диагностика читаема и говорит, на каком шаге сломалось
+- [X] Ошибка подключения: пошаговая диагностика читаема и говорит, на каком шаге сломалось
 - [ ] Переподключение после `docker compose restart`
 - [ ] Смена пароля пользователем сохраняет аккаунты; сброс админом делает их недоступными
 
@@ -135,7 +135,7 @@ docker compose logs carrel > /tmp/carrel.log
 
 ## 3. Контакты
 
-- [ ] Import `.vcf`: кириллица, несколько vCard в файле, отчёт
+- [X] Import `.vcf`: кириллица, несколько vCard в файле, отчёт
 - [ ] Export `.vcf` пачкой
 - [ ] Фото: EXIF orientation 6 на реальном снимке; GPS не остаётся; DAVx5 / iOS после sync
 - [ ] Книга 500+ контактов — приемлемая скорость списка
