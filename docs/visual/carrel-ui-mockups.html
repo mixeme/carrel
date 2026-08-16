@@ -622,7 +622,15 @@ figcaption b{color:var(--ink);font-weight:600}
   <tr><td>Новое устройство</td><td>профиль Apple, QR</td><td>внутри календаря</td><td>внутри календаря</td><td>профиль Apple, QR</td><td><b>позже:</b> адрес для файлового клиента; в профиль Apple WebDAV не кладут</td><td>7.14</td></tr>
   <tr><td>Разрешение конфликтов по ETag</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>есть: загрузка не перезаписывает</td><td>7.8, 7.5</td></tr>
 </table>
-<div class="note">Строки «позже» — это не украшение таблицы, а обязательство: каждая из них попала в раздел 13 «Порядок работ» или в 7.18. Строка «неприменимо» обязана нести причину — иначе через полгода никто не вспомнит, был ли это выбор или недосмотр.</div>
+<h4>Что означает каждое слово в таблице</h4>
+<table class="doc">
+  <tr><th style="width:16%">Слово</th><th style="width:20%">Код</th><th style="width:20%">Макет</th><th>Что это значит на деле</th></tr>
+  <tr><td><b>есть</b></td><td>работает сегодня</td><td>есть, в разделах 7.1–7.13</td><td>Редизайн меняет вид, а не поведение</td></tr>
+  <tr><td><b>делаем</b></td><td>нет</td><td>есть, в разделах 7.14–7.18</td><td><b>Да: экран нарисован, кода нет.</b> Нарисован затем, чтобы функцию не начали проектировать заново и чтобы стало видно, что каркас её выдерживает</td></tr>
+  <tr><td><b>позже</b></td><td>нет или только модель</td><td>нет</td><td>Решено отложить. Строка обязана сказать, где это записано, — в 7.18 или в шаге раздела 13; иначе «позже» означает «забыли»</td></tr>
+  <tr><td><b>неприменимо</b></td><td>—</td><td>—</td><td>И не будет. Причина обязательна: через полгода никто не вспомнит, был это выбор или недосмотр</td></tr>
+</table>
+<div class="note">Порядок важен именно в таком виде: «делаем» — это обещание интерфейса, а не кода. Ни один макет из 7.14–7.18 не означает, что функция близка; он означает, что когда до неё дойдут руки, спорить о том, как она выглядит, уже не придётся.</div>
 
 <h2 id="width">3. Ширина: главное решение</h2>
 <p>Правило простое: <b>рабочая поверхность занимает всё, что есть</b> — списки, таблицы, редактор, поля в нём. Ограничение остаётся там, где оно не спорит с работой: у служебного текста, который читают один раз, и у полей, чьё значение короче поля, — дата, время, порт, процент. Всё остальное растёт вместе с окном; там, где ширина всё-таки может мешать чтению, стоит переключатель, а не запрет.</p>
@@ -2653,10 +2661,13 @@ Read  2 min ago</div>
         <div class="m-rail-sec">
           <div class="m-rubric">Settings</div>
           <div class="m-nav">
-            <a class="is-on"><svg><use href="#i-server"/></svg>Connections<span class="m-num">3</span></a>
             <a><svg><use href="#i-user"/></svg>Account</a>
+            <a class="is-on"><svg><use href="#i-server"/></svg>Connections<span class="m-num">3</span></a>
             <a><svg><use href="#i-file"/></svg>Attachments</a>
-            <a><svg><use href="#i-shield"/></svg>Key escrow</a>
+            <a><svg><use href="#i-device"/></svg>New device</a>
+            <a><svg><use href="#i-davloom"/></svg>davloom<span class="m-num">3</span></a>
+            <a><svg><use href="#i-archive"/></svg>Backup<span class="m-num">3</span></a>
+            <a><svg><use href="#i-link"/></svg>Published links<span class="m-num">2</span></a>
             <a><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
@@ -2727,12 +2738,13 @@ Read  2 min ago</div>
         <div class="m-rail-sec">
           <div class="m-rubric">Settings</div>
           <div class="m-nav">
+            <a><svg><use href="#i-user"/></svg>Account</a>
             <a class="is-on"><svg><use href="#i-server"/></svg>Connections<span class="m-num">3</span></a>
+            <a><svg><use href="#i-file"/></svg>Attachments</a>
             <a><svg><use href="#i-device"/></svg>New device</a>
+            <a><svg><use href="#i-davloom"/></svg>davloom<span class="m-num">3</span></a>
             <a><svg><use href="#i-archive"/></svg>Backup<span class="m-num">3</span></a>
             <a><svg><use href="#i-link"/></svg>Published links<span class="m-num">2</span></a>
-            <a><svg><use href="#i-davloom"/></svg>davloom<span class="m-num">3</span></a>
-            <a><svg><use href="#i-user"/></svg>Account</a>
             <a><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
@@ -2867,7 +2879,21 @@ Read  2 min ago</div>
 </div>
 
 
-<h3 id="usermenu">Меню в шапке: что за стрелкой</h3>
+<h3 id="usermenu">Меню в шапке и порядок настроек</h3>
+<p>Пункты настроек идут по одному вопросу: <b>кто вы → откуда данные → как их забрать на устройства → куда сложить копию → что отдать наружу → как это выглядит</b>. Account стоял предпоследним, между «отдать наружу» и «как выглядит», — то есть нигде: собственная учётная запись не относится ни к тому, ни к другому, и ищут её первой.</p>
+<table class="doc">
+  <tr><th style="width:26%">Пункт</th><th>О чём он</th></tr>
+  <tr><td><b>Account</b></td><td>Вы сами: почта, пароль, сеансы, депонирование ключа, удаление</td></tr>
+  <tr><td><b>Connections</b></td><td>Откуда приходят записи: серверы DAV и подписки на чужие ленты</td></tr>
+  <tr><td><b>Attachments</b></td><td>Куда класть файлы, приложенные к заметкам и событиям</td></tr>
+  <tr><td><b>New device</b></td><td>Как забрать всё это на телефон и в почтовый клиент</td></tr>
+  <tr><td><b>davloom</b></td><td>Тот же вопрос, другой ответ: один адрес вместо пяти</td></tr>
+  <tr><td><b>Backup</b></td><td>Что сохранить и куда</td></tr>
+  <tr><td><b>Published links</b></td><td>Что отдать наружу и кому</td></tr>
+  <tr><td><b>Appearance</b></td><td>Как это выглядит в этом браузере</td></tr>
+</table>
+
+<h4>Что за стрелкой в шапке</h4>
 <p>Квадратик с инициалами из шапки убран. Он выглядел как фотография, а фотографии у учётной записи нет и взяться ей неоткуда: <b>снимок принадлежит контакту, а не аккаунту</b> — контакт лежит на чужом сервере, и делать его лицом входа значит связать две вещи, которые в Carrel намеренно не связаны. Инициалы «MX» на их месте — украшение, а не сведения: имя рядом написано словом.</p>
 <p>Остаётся имя и стрелка. За стрелкой — то, что бывает нужно раз в месяц и потому не заслуживает места в рейле: настройки, смена пароля, администрирование, клавиши, выход. Тема вынесена прямо в меню переключателем: это единственный пункт, за которым идут часто и не хотят ради него открывать страницу.</p>
 
@@ -3608,12 +3634,13 @@ Read  2 min ago</div>
         <div class="m-rail-sec">
           <div class="m-rubric">Settings</div>
           <div class="m-nav">
-            <a><svg><use href="#i-server"/></svg>Connections<span class="m-num">3</span></a>
-            <a class="is-on"><svg><use href="#i-device"/></svg>New device</a>
-            <a><svg><use href="#i-archive"/></svg>Backup</a>
-            <a><svg><use href="#i-link"/></svg>Published links<span class="m-num">2</span></a>
-            <a><svg><use href="#i-davloom"/></svg>davloom<span class="m-num">3</span></a>
             <a><svg><use href="#i-user"/></svg>Account</a>
+            <a><svg><use href="#i-server"/></svg>Connections<span class="m-num">3</span></a>
+            <a><svg><use href="#i-file"/></svg>Attachments</a>
+            <a class="is-on"><svg><use href="#i-device"/></svg>New device</a>
+            <a><svg><use href="#i-davloom"/></svg>davloom<span class="m-num">3</span></a>
+            <a><svg><use href="#i-archive"/></svg>Backup<span class="m-num">3</span></a>
+            <a><svg><use href="#i-link"/></svg>Published links<span class="m-num">2</span></a>
             <a><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
@@ -3734,12 +3761,13 @@ Read  2 min ago</div>
         <div class="m-rail-sec">
           <div class="m-rubric">Settings</div>
           <div class="m-nav">
+            <a><svg><use href="#i-user"/></svg>Account</a>
             <a><svg><use href="#i-server"/></svg>Connections<span class="m-num">3</span></a>
+            <a><svg><use href="#i-file"/></svg>Attachments</a>
             <a><svg><use href="#i-device"/></svg>New device</a>
+            <a><svg><use href="#i-davloom"/></svg>davloom<span class="m-num">3</span></a>
             <a class="is-on"><svg><use href="#i-archive"/></svg>Backup<span class="m-num">3</span></a>
             <a><svg><use href="#i-link"/></svg>Published links<span class="m-num">2</span></a>
-            <a><svg><use href="#i-davloom"/></svg>davloom<span class="m-num">3</span></a>
-            <a><svg><use href="#i-user"/></svg>Account</a>
             <a><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
@@ -4000,11 +4028,13 @@ Read  2 min ago</div>
         <div class="m-rail-sec">
           <div class="m-rubric">Settings</div>
           <div class="m-nav">
-            <a><svg><use href="#i-server"/></svg>Connections<span class="m-num">3</span></a>
-            <a><svg><use href="#i-device"/></svg>New device</a>
-            <a><svg><use href="#i-archive"/></svg>Backup</a>
-            <a class="is-on"><svg><use href="#i-link"/></svg>Published links<span class="m-num">2</span></a>
             <a><svg><use href="#i-user"/></svg>Account</a>
+            <a><svg><use href="#i-server"/></svg>Connections<span class="m-num">3</span></a>
+            <a><svg><use href="#i-file"/></svg>Attachments</a>
+            <a><svg><use href="#i-device"/></svg>New device</a>
+            <a><svg><use href="#i-davloom"/></svg>davloom<span class="m-num">3</span></a>
+            <a><svg><use href="#i-archive"/></svg>Backup<span class="m-num">3</span></a>
+            <a class="is-on"><svg><use href="#i-link"/></svg>Published links<span class="m-num">2</span></a>
             <a><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
@@ -4355,11 +4385,14 @@ Read  2 min ago</div>
         <div class="m-rail-sec">
           <div class="m-rubric">Settings</div>
           <div class="m-nav">
+            <a><svg><use href="#i-user"/></svg>Account</a>
             <a><svg><use href="#i-server"/></svg>Connections<span class="m-num">3</span></a>
+            <a><svg><use href="#i-file"/></svg>Attachments</a>
             <a><svg><use href="#i-device"/></svg>New device</a>
-            <a><svg><use href="#i-archive"/></svg>Backup</a>
-            <a><svg><use href="#i-link"/></svg>Published links<span class="m-num">2</span></a>
             <a class="is-on"><svg><use href="#i-davloom"/></svg>davloom<span class="m-num">3</span></a>
+            <a><svg><use href="#i-archive"/></svg>Backup<span class="m-num">3</span></a>
+            <a><svg><use href="#i-link"/></svg>Published links<span class="m-num">2</span></a>
+            <a><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
         <div class="m-rail-foot">
