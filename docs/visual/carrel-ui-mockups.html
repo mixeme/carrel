@@ -3088,7 +3088,6 @@ Read  2 min ago</div>
         <dl class="m-fields" style="padding-left:0;padding-right:0">
           <dt>Deposited</dt><dd class="mono">2026-03-02</dd>
           <dt>Last recovery</dt><dd class="mono">never</dd>
-          <dt>Policy</dt><dd>Withdrawal allowed by the administrator</dd>
         </dl>
         <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-danger">Withdraw my deposited key</span>
           <span style="font-size:11.5px;color:var(--dusty)">After withdrawal nobody can recover this account, including you.</span></div>
@@ -3096,27 +3095,6 @@ Read  2 min ago</div>
     </div>
   </div>
   <figcaption>Текст оставлен дословно: он честный и его менять незачем. Меняется только вид — предупреждение отделено от фактов, факты сведены в пары «подпись — значение». Отказ здесь возможен, и кнопка стоит прямо под фактами: это решение владельца ключа.</figcaption>
-  </figure>
-
-  <figure style="flex:1 1 460px">
-  <div class="frame">
-    <div class="frame-label"><span>Настройки · депонирование, отказ запрещён</span><i>/app/settings/escrow</i></div>
-    <div class="mock">
-      <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:640px">
-        <div class="m-head"><div><div class="m-h1">Key escrow</div><div class="m-sub">A copy of your key on this server</div></div></div>
-        <div class="m-msg is-alert" style="margin-left:0;margin-right:0">A copy of your data key is deposited on this server, and this account cannot withdraw it: the administrator has made escrow a condition of the account. An administrator with the escrow master password can decrypt the DAV credentials you save here.</div>
-        <dl class="m-fields" style="padding-left:0;padding-right:0">
-          <dt>Deposited</dt><dd class="mono">2026-03-02</dd>
-          <dt>Last recovery</dt><dd class="mono">never</dd>
-          <dt>Policy</dt><dd>Withdrawal disabled by the administrator</dd>
-          <dt>What is still yours</dt><dd>Leaving: deleting this account removes the deposited copy with it. Nothing on your DAV servers is touched — your contacts and calendars stay where they are, and another Carrel opens them with the same credentials.</dd>
-        </dl>
-        <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-danger">Delete account…</span>
-          <span style="font-size:11.5px;color:var(--dusty)">Or keep the account and save nothing here you are unwilling to share.</span></div>
-      </div></div></div>
-    </div>
-  </div>
-  <figcaption><b>Тот самый неприятный случай, и он нарисован, чтобы его было видно.</b> Настройка «отказ запрещён» существует в §5.4 для рабочих экземпляров, где учётную запись выдают на условии депонирования, — и она отбирает у человека решение, которое иначе было бы его. Единственное, что интерфейс может сделать честно, — не прятать этого: сказать прямо, кто и что может расшифровать, и назвать то, что остаётся, — уйти вместе с ключом, ничего не потеряв на самих серверах DAV. Если проект решит, что такой власти у администратора быть не должно, экран исчезает вместе с флажком, а из §5.4 уходит одна строка; пока строка там есть, экран обязан существовать.</figcaption>
   </figure>
 </div>
 
@@ -3738,9 +3716,8 @@ An administrator can give you a new password, but doing so replaces the key: eve
             <div class="m-rubric">Policy</div>
             <div class="m-f" style="flex:1 1 100%;gap:7px">
               <span class="m-check"><span class="m-box"></span>New accounts are covered</span>
-              <span class="m-check"><span class="m-box is-off"></span>Deposited keys cannot be withdrawn</span>
             </div>
-            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Withdrawal is the user’s own decision by default, and this tick takes it away — the only setting here that does. It exists for accounts issued <b>on the condition</b> of escrow, where the data belongs to an organisation rather than to the person; anywhere else leave it off. It is never silent: a covered user reads this same line in their profile, and the way out that always remains is to delete the account — data on the DAV servers is not touched by that. Every user sees this policy whether or not it affects them now. Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.</span></div>
           </div>
           <div class="m-fset">
             <div class="m-rubric">Master password</div>
@@ -3761,11 +3738,11 @@ An administrator can give you a new password, but doing so replaces the key: eve
         </div>
         <div class="m-group"><span class="m-rubric">Whom the master password opens</span><span class="m-num">4</span></div>
         <table class="m-table">
-          <thead><tr><th>Account</th><th>Deposited</th><th>Last recovery</th><th>Can withdraw</th></tr></thead>
+          <thead><tr><th>Account</th><th>Deposited</th><th>Last recovery</th></tr></thead>
           <tbody>
-            <tr><td>anna</td><td class="mono">2026-03-02</td><td class="mono" style="color:var(--dusty)">never</td><td class="mono">yes</td></tr>
-            <tr><td>viktor</td><td class="mono">2026-04-19</td><td class="mono">2026-08-14 18:40</td><td class="mono">yes</td></tr>
-            <tr><td>mix</td><td class="mono" style="color:var(--dusty)">not deposited</td><td class="mono">—</td><td class="mono">—</td></tr>
+            <tr><td>anna</td><td class="mono">2026-03-02</td><td class="mono" style="color:var(--dusty)">never</td></tr>
+            <tr><td>viktor</td><td class="mono">2026-04-19</td><td class="mono">2026-08-14 18:40</td></tr>
+            <tr><td>mix</td><td class="mono" style="color:var(--dusty)">not deposited</td><td class="mono">—</td></tr>
           </tbody>
         </table>
       </div>

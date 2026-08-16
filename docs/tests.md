@@ -109,7 +109,7 @@ SMTP against a local relay that can be told to refuse: a missing configuration r
 | Enabling escrow grants nothing over accounts that predate it | `TestEscrowAppliesOnlyToLaterUsers`, `TestRecoveryRefusedWithoutADeposit` |
 | Recovery is impossible without the master password | `TestRecoveryNeedsTheMasterPassword`, `TestRecoveryIsThrottled` |
 | Every recovery is in the audit log and in a mail to the user | `TestRecoveryThroughThePanel`, `TestEscrowActionsAreAudited` |
-| The profile says whether escrow covers this account | `TestEscrowCoversNewAccountsAndSaysSo`, `TestForbiddenOptOutIsVisible` |
+| The profile says whether escrow covers this account | `TestEscrowCoversNewAccountsAndSaysSo` |
 | `/about` is reachable without logging in | `TestAboutPublic`, `TestAboutNoSessionRequired` |
 | An X- property survives an edit to the name, compared byte for byte | `TestApplyKeepsForeignProperties`, `TestMarshalPreservesEveryProperty` |
 | A vCard 3.0 is still 3.0 after its photo is replaced | in `model/photo_test.go` |

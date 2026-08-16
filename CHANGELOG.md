@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- **Escrow withdrawal is always the key owner's decision (§5.4).** The administrator can no longer forbid withdrawing a deposited copy. Updated [docs/carrel-spec.md](docs/carrel-spec.md), [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html) and [docs/tests.md](docs/tests.md). Removal from the code is recorded in [docs/roadmap.md](docs/roadmap.md).
+
 ### Added
 
 - **Desktop wrapper (§18) — plan and `CARREL_BIND`:** implementation plan in [docs/plans/desktop-wrapper.md](docs/plans/desktop-wrapper.md) (Wails, Windows + Linux, Remote/Local, tray, sidecar download). Roadmap section Desktop application; §18 marked planned in [docs/carrel-spec.md](docs/carrel-spec.md). P-desktop checks in [docs/manual-acceptance.md](docs/manual-acceptance.md). `CARREL_BIND` env for listen address (desktop local uses `127.0.0.1`); empty bind keeps listening on all interfaces as before.

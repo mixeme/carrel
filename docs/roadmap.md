@@ -45,6 +45,10 @@ Found by reading the stage plans back against the code they describe, and worth 
 
 What is wanted is a **second, optional stage** after discovery succeeds, clearly marked as **mutating**: it creates short-lived test objects in the collections discovery found (or in a dedicated test collection if the server supports one), exercises the operations Carrel actually performs — not abstract RFC compliance and not a replacement for the CalDAV Test Suite — reads them back, checks the answers, and deletes what it created. Failures name the operation, the request shape and what came back, in the same spirit as the discovery trace. It must not run silently on a production calendar; the administrator opts in, sees the warning, and the run is audited. Discovery stays read-only and remains the default; the full pass is for developers debugging an implementation and for an administrator who wants proof beyond «collections were listed» before handing credentials to users.
 
+### Built past the spec
+
+**Escrow withdrawal (§5.4).** The administrator could forbid users from withdrawing their deposited copy — `Settings.Escrow.ForbidOptOut`, the «Do not let users withdraw their deposited key» checkbox on `/admin/escrow`, the disabled-withdrawal branch in the profile, and tests (`TestOptOutCanBeForbidden`, `TestForbiddenOptOutIsVisible`). That power was removed from §5.4: withdrawal is always the key owner's decision. The specification, mockups and acceptance map are updated; the code and its tests are not yet.
+
 ### Consequences of earlier decisions
 
 | | What is missing | Why it was left |
