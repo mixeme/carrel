@@ -23,10 +23,10 @@ h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--dust
    margin:72px 0 18px;padding-bottom:8px;border-bottom:.5px solid var(--rule)}
 h3{font-size:17px;font-weight:600;margin:36px 0 8px;font-family:var(--f-serif)}
 h4{font-size:13px;font-weight:600;margin:22px 0 6px}
-p{margin:0 0 12px;max-width:74ch}
-.lede{font-size:17px;color:var(--muted);max-width:70ch}
-.note{font-size:13.5px;color:var(--muted);padding-left:14px;border-left:2px solid var(--card-border);margin:16px 0;max-width:70ch}
-ul.doc,ol.doc{padding-left:20px;margin:0 0 14px;max-width:74ch}
+p{margin:0 0 12px;max-width:96ch}
+.lede{font-size:17px;color:var(--muted);max-width:88ch}
+.note{font-size:13.5px;color:var(--muted);padding-left:14px;border-left:2px solid var(--card-border);margin:16px 0;max-width:96ch}
+ul.doc,ol.doc{padding-left:20px;margin:0 0 14px;max-width:96ch}
 ul.doc li,ol.doc li{margin-bottom:6px}
 code{font-family:var(--f-mono);font-size:12.5px;background:var(--paper);border:.5px solid var(--hair);border-radius:3px;padding:1px 5px}
 a{color:var(--accent)}
@@ -47,7 +47,7 @@ table.doc td{padding:9px 14px 9px 0;border-bottom:.5px solid var(--hair);vertica
 .toc a.is-sub{padding-left:14px}
 .toc a.is-sub b{font-size:10.5px}
 figure{margin:22px 0 34px}
-figcaption{font-size:13px;color:var(--muted);margin-top:10px;max-width:78ch}
+figcaption{font-size:13px;color:var(--muted);margin-top:10px;max-width:112ch}
 figcaption b{color:var(--ink);font-weight:600}
 .frame{border:.5px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--bg)}
 .frame-label{display:flex;justify-content:space-between;gap:12px;align-items:baseline;
@@ -476,7 +476,7 @@ figcaption b{color:var(--ink);font-weight:600}
     <a href="#s-files"><b>7.5</b><span>Файлы: менеджер</span></a>
     <a href="#s-find"><b>7.6</b><span>Поиск по всем источникам</span></a>
     <a href="#s-dup"><b>7.7</b><span>Дубликаты и слияние</span></a>
-    <a href="#s-conflict"><b>7.8</b><span>Конфликт</span></a>
+    <a href="#s-conflict"><b>7.8</b><span>Conflict</span></a>
     <a href="#s-io"><b>7.9</b><span>Импорт и экспорт</span></a>
     <a href="#s-profile"><b>7.10</b><span>Подключения и подписки</span></a>
     <a href="#subscribe" class="is-sub"><b>7.10.1</b><span>Подписка на чужую ленту</span></a>
@@ -613,7 +613,7 @@ figcaption b{color:var(--ink);font-weight:600}
   <tr><td>Выбор столбцов</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>раздел 6</td></tr>
   <tr><td>Печать</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td><b>делаем:</b> листинг папки</td><td>раздел 11</td></tr>
   <tr><td>Поиск по всем источникам</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td><b>делаем:</b> по имени файла — <code>PROPFIND</code> уже возвращает имена</td><td>7.6</td></tr>
-  <tr><td>Вложения</td><td>есть</td><td><b>делаем:</b> модель готова, дело за карточкой</td><td>есть</td><td>неприменимо: у карточки фотография, а не вложения</td><td>сами и есть вложения</td><td>7.2, 7.4, 7.5</td></tr>
+  <tr><td>Attachments</td><td>есть</td><td><b>делаем:</b> модель готова, дело за карточкой</td><td>есть</td><td>неприменимо: у карточки фотография, а не вложения</td><td>сами и есть вложения</td><td>7.2, 7.4, 7.5</td></tr>
   <tr><td>Дубликаты и связывание</td><td>есть</td><td><b>делаем:</b> только связывание</td><td><b>делаем:</b> только связывание</td><td>есть</td><td>неприменимо: одинаковые файлы — задача файлового менеджера, а не адресной книги</td><td>7.7</td></tr>
   <tr><td>Импорт и экспорт</td><td><code>.ics</code></td><td><code>.ics</code></td><td><code>.md</code></td><td><code>.vcf</code></td><td>загрузка и скачивание</td><td>7.9, 7.5</td></tr>
   <tr><td>Публикация по ссылке</td><td>делаем</td><td>внутри календаря</td><td>делаем</td><td>делаем</td><td>делаем: файл и папка</td><td>7.16</td></tr>
@@ -668,22 +668,22 @@ figcaption b{color:var(--ink);font-weight:600}
     </div>
     <div class="m-shell has-side" style="min-height:230px">
       <div class="m-rail" style="align-items:center;justify-content:center;color:var(--dusty)">
-        <div style="text-align:center"><div class="m-rubric">Рейл</div><div class="mono" style="font-size:11px;margin-top:4px">264 px · разделы + источники</div></div>
+        <div style="text-align:center"><div class="m-rubric">Rail</div><div class="mono" style="font-size:11px;margin-top:4px">264 px · sections + sources</div></div>
       </div>
       <div class="m-main" style="align-items:center;justify-content:center;color:var(--dusty)">
-        <div style="text-align:center"><div class="m-rubric">Содержимое</div><div class="mono" style="font-size:11px;margin-top:4px">резиновое · min 0</div></div>
+        <div style="text-align:center"><div class="m-rubric">Content</div><div class="mono" style="font-size:11px;margin-top:4px">fluid · min 0</div></div>
       </div>
       <div class="m-side" style="align-items:center;justify-content:center;color:var(--dusty)">
-        <div style="text-align:center"><div class="m-rubric">Подробности</div><div class="mono" style="font-size:11px;margin-top:4px">400 px</div></div>
+        <div style="text-align:center"><div class="m-rubric">Details</div><div class="mono" style="font-size:11px;margin-top:4px">400 px</div></div>
       </div>
     </div>
   </div>
 </div>
-<figcaption><b>Верхняя панель</b> — 52&nbsp;px: знак, поиск по всем источникам, <b>New note</b> (одно нажатие с любого экрана, стрелка — всё остальное, что можно создать), время последнего опроса, меню пользователя. <b>Рейл</b> — разделы и источники в одном столбце, потому что выбор «где искать» и «что смотреть» — одно движение. Первая строка списка источников — «All calendars» / «All address books»: единый вид принадлежит разделу, отдельной страницы «всё сразу» нет. <b>Содержимое</b> — единственная резиновая зона. <b>Подробности</b> — карточка выбранной записи; список при этом остаётся на месте.</figcaption>
+<figcaption><b>Верхняя панель</b> — 52&nbsp;px: знак, поиск по всем источникам, <b>New note</b> (одно нажатие с любого экрана, стрелка — всё остальное, что можно создать), время последнего опроса, меню пользователя. <b>Rail</b> — разделы и источники в одном столбце, потому что выбор «где искать» и «что смотреть» — одно движение. Первая строка списка источников — «All calendars» / «All address books»: единый вид принадлежит разделу, отдельной страницы «всё сразу» нет. <b>Content</b> — единственная резиновая зона. <b>Details</b> — карточка выбранной записи; список при этом остаётся на месте.</figcaption>
 </figure>
 
 <table class="doc">
-  <tr><th style="width:20%">Ширина окна</th><th style="width:16%">Рейл</th><th style="width:18%">Подробности</th><th>Что происходит со списком</th></tr>
+  <tr><th style="width:20%">Ширина окна</th><th style="width:16%">Rail</th><th style="width:18%">Details</th><th>Что происходит со списком</th></tr>
   <tr><td>≥ 1600</td><td>280 px</td><td>420 px, закреплена</td><td>Все колонки, включая организацию и вторую метку источника</td></tr>
   <tr><td>1280–1599</td><td>264 px</td><td>400 px, закреплена</td><td>Все колонки</td></tr>
   <tr><td>1024–1279</td><td>232 px</td><td>380 px, поверх списка</td><td>Уходит колонка организации</td></tr>
@@ -848,7 +848,7 @@ figcaption b{color:var(--ink);font-weight:600}
     <div class="m-src is-error"><span class="m-box"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="t">Проекты</span><span class="m-meta">401</span></div>
   </div>
   <div class="m-rail-sec" style="margin-top:12px">
-    <div class="m-rubric" style="padding:0 16px 4px">Подписки <span class="m-badge">external</span></div>
+    <div class="m-rubric" style="padding:0 16px 4px">Subscriptions <span class="m-badge">external</span></div>
     <div class="m-src is-ext"><span class="m-box"></span><span class="m-bar3" style="background:#8C6239"></span><span class="t">Праздники РФ</span><span class="m-meta">ro</span></div>
   </div>
 </div>
@@ -1138,7 +1138,7 @@ Read  2 min ago</div>
         </div>
         <div class="m-formfoot">
           <span class="m-btn is-primary">Save</span><span class="m-btn is-quiet">Cancel</span>
-          <span style="margin-left:auto;color:var(--dusty);font-size:11.5px">Свойства, которых Carrel не знает, сохраняются без изменений.</span>
+          <span style="margin-left:auto;color:var(--dusty);font-size:11.5px">Properties Carrel does not know are kept unchanged.</span>
         </div>
       </div>
     </div>
@@ -1208,38 +1208,38 @@ Read  2 min ago</div>
           <span class="m-seg"><span class="is-on">All 27</span><span>Events 14</span><span>Tasks 3</span><span>Notes 6</span><span>Files 4</span></span>
           <div class="m-f"><span class="m-in is-mono" style="height:26px">2026-01-01</span></div>
           <span style="color:var(--dusty)">→</span>
-          <div class="m-f"><span class="m-in is-mono" style="height:26px">сегодня</span></div>
+          <div class="m-f"><span class="m-in is-mono" style="height:26px">today</span></div>
           <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</span>
-          <span class="m-right"><span class="mono">новые сверху</span></span>
+          <span class="m-right"><span class="mono">newest first</span></span>
         </div>
-        <div class="m-poll"><span class="m-prog"><i style="width:80%"></i></span>Опрошено 4 из 5 календарей · найдено по <span class="mono">a.kovaleva@example.org</span>, <span class="mono">anna.kovaleva@slovo.example</span> и имени · <span style="color:var(--alert)">baikal · Общий недоступен</span></div>
+        <div class="m-poll"><span class="m-prog"><i style="width:80%"></i></span>Polled 4 of 5 calendars · matched by <span class="mono">a.kovaleva@example.org</span>, <span class="mono">anna.kovaleva@slovo.example</span> and the name · <span style="color:var(--alert)">baikal · Общий unavailable</span></div>
 
         <div class="m-group"><span class="m-rubric">Август 2026</span><span class="m-num">5</span></div>
         <div class="m-list">
           <div class="m-row m-row--find">
             <span class="m-bar3" style="background:#4A6B52"></span><span class="mono">10 авг</span>
-            <span class="t">Синк-ап по релизу</span><span class="s m-hide-3">участник · приняла</span>
-            <span class="d">встреча</span><span class="d">nextcloud · Личный</span>
+            <span class="t">Синк-ап по релизу</span><span class="s m-hide-3">attendee · accepted</span>
+            <span class="d">event</span><span class="d">nextcloud · Личный</span>
           </div>
           <div class="m-row m-row--find">
             <span class="m-bar3" style="background:#4A6B52"></span><span class="mono">10 авг</span>
-            <span class="t">Заметка со встречи 10.08</span><span class="s m-hide-3">упомянута в тексте</span>
-            <span class="d">заметка</span><span class="d">nextcloud · Записи</span>
+            <span class="t">Заметка со встречи 10.08</span><span class="s m-hide-3">mentioned in the text</span>
+            <span class="d">note</span><span class="d">nextcloud · Записи</span>
           </div>
           <div class="m-row m-row--find is-overdue">
             <span class="m-bar3" style="background:#3F6E8C"></span><span class="mono">8 авг</span>
-            <span class="t">Ответить Анне по смете</span><span class="s m-hide-3">упомянута в названии · просрочена</span>
-            <span class="d">задача</span><span class="d">nextcloud · Работа</span>
+            <span class="t">Ответить Анне по смете</span><span class="s m-hide-3">mentioned in the title · overdue</span>
+            <span class="d">task</span><span class="d">nextcloud · Работа</span>
           </div>
           <div class="m-row m-row--find">
             <span class="m-bar3" style="background:#4A6B52"></span><span class="mono">4 авг</span>
-            <span class="t">2026-08-04-обложка.pdf</span><span class="s m-hide-3">вложение к «Согласовать обложку»</span>
-            <span class="d">файл</span><span class="d">sftpgo · Documents</span>
+            <span class="t">2026-08-04-обложка.pdf</span><span class="s m-hide-3">attached to «Согласовать обложку»</span>
+            <span class="d">file</span><span class="d">sftpgo · Documents</span>
           </div>
           <div class="m-row m-row--find">
             <span class="m-bar3" style="background:#3F6E8C"></span><span class="mono">4 авг</span>
-            <span class="t">Согласовать обложку</span><span class="s m-hide-3">организатор · выполнено</span>
-            <span class="d">задача</span><span class="d">nextcloud · Работа</span>
+            <span class="t">Согласовать обложку</span><span class="s m-hide-3">organiser · done</span>
+            <span class="d">task</span><span class="d">nextcloud · Работа</span>
           </div>
         </div>
 
@@ -1247,13 +1247,13 @@ Read  2 min ago</div>
         <div class="m-list">
           <div class="m-row m-row--find">
             <span class="m-bar3" style="background:#6B4E7A"></span><span class="mono">29 июл</span>
-            <span class="t">Ревью вёрстки сборника</span><span class="s m-hide-3">участник · не ответила</span>
-            <span class="d">встреча</span><span class="d">radicale · Проекты</span>
+            <span class="t">Ревью вёрстки сборника</span><span class="s m-hide-3">attendee · no reply</span>
+            <span class="d">event</span><span class="d">radicale · Проекты</span>
           </div>
           <div class="m-row m-row--find">
             <span class="m-bar3" style="background:#4A6B52"></span><span class="mono">21 июл</span>
-            <span class="t">Про сроки по сборнику</span><span class="s m-hide-3">упомянута в тексте</span>
-            <span class="d">заметка</span><span class="d">nextcloud · Записи</span>
+            <span class="t">Про сроки по сборнику</span><span class="s m-hide-3">mentioned in the text</span>
+            <span class="d">note</span><span class="d">nextcloud · Записи</span>
           </div>
         </div>
         <div class="m-empty" style="padding:12px 20px;font-size:12px">Nothing was looked for before January 2026. Widen the range if you need it.</div>
@@ -1270,24 +1270,24 @@ Read  2 min ago</div>
           </div>
         </div>
         <dl class="m-fields">
-          <dt>Телефон · моб.</dt><dd class="mono">+7 912 445-10-88</dd>
-          <dt>Телефон · раб.</dt><dd class="mono">+7 495 120-45-00</dd>
-          <dt>Почта · раб.</dt><dd>a.kovaleva@example.org</dd>
-          <dt>Почта · вторая</dt><dd>anna.kovaleva@slovo.example</dd>
-          <dt>День рождения</dt><dd class="mono">1987-03-14 <span style="color:var(--dusty)">· через 7 месяцев</span></dd>
-          <dt>Категории</dt><dd><span class="m-tag">работа</span> <span class="m-tag">издательство</span></dd>
-          <dt>Заметка</dt><dd>Пишет по вторникам, отвечает в тот же день.</dd>
+          <dt>Phone · mobile</dt><dd class="mono">+7 912 445-10-88</dd>
+          <dt>Phone · work</dt><dd class="mono">+7 495 120-45-00</dd>
+          <dt>Email · work</dt><dd>a.kovaleva@example.org</dd>
+          <dt>Email · second</dt><dd>anna.kovaleva@slovo.example</dd>
+          <dt>Birthday</dt><dd class="mono">1987-03-14 <span style="color:var(--dusty)">· in 7 months</span></dd>
+          <dt>Categories</dt><dd><span class="m-tag">работа</span> <span class="m-tag">издательство</span></dd>
+          <dt>Note</dt><dd>Пишет по вторникам, отвечает в тот же день.</dd>
         </dl>
         <div class="m-sec">
-          <div class="m-rubric">Та же запись в других книгах <span class="m-badge is-linked">2</span></div>
+          <div class="m-rubric">The same person in other books <span class="m-badge is-linked">2</span></div>
           <ul style="display:flex;flex-direction:column;gap:6px;font-size:12.5px">
-            <li><span class="m-bar3" style="background:#4A6B52;display:inline-block;height:11px;vertical-align:-1px"></span> nextcloud · Контакты <span style="color:var(--dusty)">· открыта</span></li>
-            <li><span class="m-bar3" style="background:#6B4E7A;display:inline-block;height:11px;vertical-align:-1px"></span> radicale · Команда <span style="color:var(--dusty)">· телефон отличается</span></li>
+            <li><span class="m-bar3" style="background:#4A6B52;display:inline-block;height:11px;vertical-align:-1px"></span> nextcloud · Контакты <span style="color:var(--dusty)">· open</span></li>
+            <li><span class="m-bar3" style="background:#6B4E7A;display:inline-block;height:11px;vertical-align:-1px"></span> radicale · Команда <span style="color:var(--dusty)">· phone differs</span></li>
           </ul>
           <div class="m-hint" style="margin-top:6px">Linked on the duplicates screen. The records stay on their own servers; here they are shown as one person.</div>
         </div>
         <div class="m-sec">
-          <div class="m-rubric">Источник</div>
+          <div class="m-rubric">Source</div>
           <div class="m-diag">ETag  W/"7d21b0aa"
 UID   4f2b-9c31-a0e7
 Read  2 min ago</div>
@@ -1350,7 +1350,7 @@ Read  2 min ago</div>
           <div class="m-src is-error"><span class="m-box"></span><span class="m-bar3" style="background:#9A9280"></span><span class="t">Общий</span><span class="m-meta">401</span></div>
         </div>
         <div class="m-rail-sec">
-          <div class="m-rubric">Подписки <span class="m-badge">external</span></div>
+          <div class="m-rubric">Subscriptions <span class="m-badge">external</span></div>
           <div class="m-src is-ext"><span class="m-box"></span><span class="m-bar3" style="background:#8C6239"></span><span class="t">Праздники РФ</span><span class="m-meta">ro</span></div>
           <div class="m-src is-ext is-off"><span class="m-box is-off"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="t">Расписание лиги</span><span class="m-meta">ro</span></div>
         </div>
@@ -1582,7 +1582,7 @@ SEQUENCE  2</div>
           <div class="m-src"><span class="m-box"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">Работа</span><span class="m-meta">9</span></div>
         </div>
         <div class="m-rail-sec">
-          <div class="m-rubric">Подписки <span class="m-badge">external</span></div>
+          <div class="m-rubric">Subscriptions <span class="m-badge">external</span></div>
           <div class="m-src is-ext"><span class="m-box"></span><span class="m-bar3" style="background:#8C6239"></span><span class="t">Праздники РФ</span><span class="m-meta">6</span></div>
         </div>
         <div class="m-rail-sec">
@@ -1661,14 +1661,14 @@ SEQUENCE  2</div>
           <ul style="display:flex;flex-direction:column;gap:6px;font-size:12.5px">
             <li>посадочный-казань.pdf <span style="color:var(--dusty)">application/pdf · 128 KB</span></li>
           </ul>
-          <div class="m-hint" style="margin-top:6px">Тот же блок, что у события и заметки: файл ложится в папку вложений, задача получает ссылку. Вставка из буфера и перетаскивание работают так же.</div>
+          <div class="m-hint" style="margin-top:6px">The same block events and notes have: the file goes to the attachments folder and the task gets a link. Pasting and dropping work the same way.</div>
         </div>
         <div class="m-danger-zone"><span class="m-btn is-danger">Delete task</span></div>
       </div>
     </div>
   </div>
 </div>
-<figcaption><b>Вложения у задачи</b> — та самая строка «позже» из таблицы равенства: <code>ATTACH</code> в модели уже есть, карточки не было. Блок здесь тот же, что у события и заметки, и это весь объём работы. Активный фильтр наконец видно: сегментный переключатель с числами вместо трёх одинаковых кнопок-ссылок, у которых <code>.is-active</code> не описан в CSS. Просроченное вынесено в свою группу и окрашено единственным тревожным цветом. Флажок выполнения — квадрат 13&nbsp;px, а не символ «○/✓» в кнопке.</figcaption>
+<figcaption><b>Attachments у задачи</b> — та самая строка «позже» из таблицы равенства: <code>ATTACH</code> в модели уже есть, карточки не было. Блок здесь тот же, что у события и заметки, и это весь объём работы. Активный фильтр наконец видно: сегментный переключатель с числами вместо трёх одинаковых кнопок-ссылок, у которых <code>.is-active</code> не описан в CSS. Просроченное вынесено в свою группу и окрашено единственным тревожным цветом. Флажок выполнения — квадрат 13&nbsp;px, а не символ «○/✓» в кнопке.</figcaption>
 </figure>
 
 <h2 id="s-notes">7.4 Заметки</h2>
@@ -1890,7 +1890,7 @@ Read  2 min ago</div>
           <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></span>
           <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach</span>
           <span class="m-right" style="margin-left:auto;display:flex;align-items:center;gap:10px">
-            <span style="font-size:11.5px;color:var(--dusty)">Черновик в этом окне · <span class="mono">11:42</span></span>
+            <span style="font-size:11.5px;color:var(--dusty)">Draft in this window · <span class="mono">11:42</span></span>
             <span class="m-kbd">Ctrl+S</span>
             <span class="m-seg"><span class="is-on">Full width</span><span>Measure</span></span>
             <span class="m-btn" style="background:var(--card)"><svg viewBox="0 0 24 24"><use href="#i-expand"/></svg>Focus</span>
@@ -1932,7 +1932,7 @@ Read  2 min ago</div>
 ## Отложено до следующего спринта
 
 Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще.</div>
-            <div style="margin-top:14px;font-size:11.5px;color:var(--dusty)">Свойства, которых Carrel не знает — <span class="mono">X-JTX-COLOR</span> и ещё два, — сохраняются без изменений и здесь не показаны.</div>
+            <div style="margin-top:14px;font-size:11.5px;color:var(--dusty)">Properties Carrel does not know — <span class="mono">X-JTX-COLOR</span> and two more — are kept unchanged and not shown here.</div>
           </div>
         </div>
       </div>
@@ -2005,7 +2005,7 @@ Read  2 min ago</div>
           </div>
           <div class="b">
             <span class="m-in is-area is-focus" style="min-height:132px;font-size:14px;line-height:1.6">Позвонить в МФЦ во вторник до 12:00 — уточнить, нужен ли оригинал доверенности.</span>
-            <span style="font-size:11.5px;color:var(--dusty)">Заголовок берётся из первой строки. Дата — сейчас.</span>
+            <span style="font-size:11.5px;color:var(--dusty)">The title is taken from the first line. The date is now.</span>
           </div>
           <div class="f">
             <span class="m-btn is-primary">Save note</span>
@@ -2195,7 +2195,7 @@ Read  2 min ago</div>
         </dl>
         <div class="m-sec">
           <div class="m-rubric">Links</div>
-          <div style="font-size:12px;color:var(--muted)">Carrel не ведёт указателя, кто на этот файл ссылается. Он может быть вложением в заметке или в событии — проверьте прежде, чем удалять.</div>
+          <div style="font-size:12px;color:var(--muted)">Carrel keeps no index of what points at this file. It may be attached to a note or an event — check before deleting.</div>
         </div>
         <div class="m-danger-zone"><span class="m-btn is-danger"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg>Delete</span></div>
       </div>
@@ -2274,7 +2274,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Перемещение и копирование</span><i>диалог выбора папки</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
-        <div class="m-head"><div><div class="m-h1">Move 3 items</div><div class="m-sub">из Documents / carrel / attachments</div></div></div>
+        <div class="m-head"><div><div class="m-h1">Move 3 items</div><div class="m-sub">from Documents / carrel / attachments</div></div></div>
         <div class="m-card">
           <div class="m-tree">
             <div><svg><use href="#i-file"/></svg>Documents <span style="margin-left:auto;color:var(--dusty);font-size:11px">sftpgo</span></div>
@@ -2318,7 +2318,7 @@ Read  2 min ago</div>
           <div class="m-tile"><div class="m-thumb"><svg><use href="#i-img"/></svg></div><span class="n">схема-2.png</span><span class="s">712 KB · 1920×1080</span></div>
           <div class="m-tile"><div class="m-thumb" style="background:var(--card)"><svg><use href="#i-doc"/></svg></div><span class="n">смета.pdf</span><span class="s">1.2 MB</span></div>
           <div class="m-tile"><div class="m-thumb" style="background:var(--card)"><svg><use href="#i-file"/></svg></div><span class="n">архив</span><span class="s">12 items</span></div>
-          <div class="m-tile"><div class="m-thumb" style="background:var(--card)"><svg><use href="#i-img"/></svg></div><span class="n">панорама.tif</span><span class="s">84 MB · слишком большой</span></div>
+          <div class="m-tile"><div class="m-thumb" style="background:var(--card)"><svg><use href="#i-img"/></svg></div><span class="n">панорама.tif</span><span class="s">84 MB · too large</span></div>
         </div>
       </div></div>
     </div>
@@ -2334,7 +2334,7 @@ Read  2 min ago</div>
       <div class="m-shell no-rail"><div class="m-main">
         <div class="m-head" style="padding-bottom:8px">
           <div><div class="m-h1" style="font-size:18px"><span class="m-bar3 is-multi" style="height:18px"></span>All collections</div>
-            <div class="m-sub">3 хранилища на 2 серверах</div></div>
+            <div class="m-sub">3 storages on 2 servers</div></div>
         </div>
         <table class="m-table">
           <thead><tr><th>Name</th><th style="width:150px">Server</th><th style="width:80px">Access</th><th style="width:170px">Purpose</th></tr></thead>
@@ -2344,7 +2344,7 @@ Read  2 min ago</div>
             <tr class="is-folder"><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>Files</span></span></td><td class="mono">nextcloud · home</td><td class="mono">rw</td><td></td></tr>
           </tbody>
         </table>
-        <div class="m-msg">Это единый вид раздела «Файлы»: хранилища показаны как папки верхнего уровня. Дальше открывается дерево одного из них — содержимое разных серверов в одной папке не смешивается, потому что у файла один путь и он принадлежит своему хранилищу.</div>
+        <div class="m-msg">This is the section’s unified view: storages shown as top-level folders. Below it the tree of one of them opens — contents of different servers are never mixed in one folder, because a file has one path and belongs to its own storage.</div>
       </div></div>
     </div>
   </div>
@@ -2435,7 +2435,7 @@ Read  2 min ago</div>
             <span class="d">file</span><span class="d">sftpgo · Documents</span>
           </div>
         </div>
-        <div class="m-msg">Файлы ищутся по имени: <span class="mono">PROPFIND</span> и так возвращает имена, и обход папки стоит одного запроса на папку. Внутрь файлов Carrel не смотрит — и говорит об этом здесь, чтобы «ничего не найдено» не читалось как «в файлах этого нет».</div>
+        <div class="m-msg">Files are searched by name: <span class="mono">PROPFIND</span> returns names anyway, and walking a folder costs one request per folder. Carrel does not look inside files — and says so here, so that “nothing found” is not read as “not in the files”.</div>
       </div>
     </div>
   </div>
@@ -2531,7 +2531,7 @@ Read  2 min ago</div>
             <div style="display:flex;gap:8px;align-items:center;margin-top:11px;flex-wrap:wrap">
               <span class="m-btn is-primary">Link them</span>
               <span class="m-btn is-quiet">Not duplicates</span>
-              <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Слияние задач на сервере не предлагается: сливать нечего — у задачи нет полей, которые дополняли бы друг друга</span>
+              <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Merging tasks on the server is not offered: there is nothing to merge — a task has no fields that complete each other</span>
             </div>
           </div>
 
@@ -2549,7 +2549,7 @@ Read  2 min ago</div>
                 <span class="d"></span><span class="mono">8 Aug</span><span class="d">radicale · Дневник</span>
               </div>
             </div>
-            <div class="m-msg" style="margin:11px 0 0">Тексты расходятся — какой из них верный, знает только человек. Поэтому заметки <b>связываются</b>, а не сливаются: обе остаются на своих серверах, в списке показываются одной строкой, и открыть можно любую.</div>
+            <div class="m-msg" style="margin:11px 0 0">The texts differ, and only a person knows which is right. So notes are <b>linked</b> rather than merged: both stay on their servers, appear as one row in the list, and either can be opened.</div>
             <div style="display:flex;gap:8px;margin-top:11px">
               <span class="m-btn is-primary">Link them</span>
               <span class="m-btn is-quiet">Not duplicates</span>
@@ -2557,10 +2557,10 @@ Read  2 min ago</div>
           </div>
 
           <div class="m-card">
-            <div class="m-rubric">Дежурство: первая линия <span><span class="m-badge is-linked">linked ×2</span> <span class="mono" style="letter-spacing:0;color:var(--dusty)">решено 3 августа</span></span></div>
+            <div class="m-rubric">Дежурство: первая линия <span><span class="m-badge is-linked">linked ×2</span> <span class="mono" style="letter-spacing:0;color:var(--dusty)">decided 3 August</span></span></div>
             <div style="font-size:12.5px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap">
               <span><span class="m-bar3" style="background:#8C6239;display:inline-block;height:11px;vertical-align:-1px"></span> radicale · Дежурства</span>
-              <span><span class="m-bar3" style="background:#9A9280;display:inline-block;height:11px;vertical-align:-1px"></span> baikal · Общий <span class="m-badge is-alert">не загружено</span></span>
+              <span><span class="m-bar3" style="background:#9A9280;display:inline-block;height:11px;vertical-align:-1px"></span> baikal · Общий <span class="m-badge is-alert">not loaded</span></span>
             </div>
             <div style="display:flex;gap:8px;margin-top:11px"><span class="m-btn">Save choices</span><span class="m-btn is-quiet">Unlink</span></div>
           </div>
@@ -2570,7 +2570,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Задачи и заметки сравниваются наравне с контактами и событиями</b> — две строки «позже» из таблицы равенства закрыты. Разница между видами не в устройстве экрана, а в том, что предлагается сделать: контакты <b>сливаются</b> на сервере, потому что у карточки есть поля, дополняющие друг друга; задачи и заметки только <b>связываются</b> — у них нечего дополнять, а расходящиеся тексты человек должен выбирать сам, а не получать склеенными. Поэтому у карточки заметки нет ни «Merge on the server…», ни выбора значений полей.<br><br>Группа стала карточкой с линованным списком записей внутри — те же строки, что и в обычном списке, поэтому колонки читаются так же. Выбор значения при расхождении — набор переключателей в строку, а не столбик <code>fieldset</code>. Ссылка «Merge on the server…» отделена от безобидного «Link them» и цветом, и положением: разное по последствиям не должно стоять рядом и выглядеть одинаково.</figcaption>
+<figcaption><b>Задачи и заметки сравниваются наравне с контактами и событиями</b> — две строки «позже» из таблицы равенства закрыты. Разница между видами не в устройстве экрана, а в том, что предлагается сделать: контакты <b>сливаются</b> на сервере, потому что у карточки есть поля, дополняющие друг друга; задачи и заметки только <b>linked</b> — у них нечего дополнять, а расходящиеся тексты человек должен выбирать сам, а не получать склеенными. Поэтому у карточки заметки нет ни «Merge on the server…», ни выбора значений полей.<br><br>Группа стала карточкой с линованным списком записей внутри — те же строки, что и в обычном списке, поэтому колонки читаются так же. Выбор значения при расхождении — набор переключателей в строку, а не столбик <code>fieldset</code>. Ссылка «Merge on the server…» отделена от безобидного «Link them» и цветом, и положением: разное по последствиям не должно стоять рядом и выглядеть одинаково.</figcaption>
 </figure>
 
 <figure>
@@ -2594,7 +2594,7 @@ Read  2 min ago</div>
             <div class="m-rubric">The kept record gains</div>
             <ul style="font-size:13px;display:flex;flex-direction:column;gap:4px">
               <li>EMAIL;TYPE=work: belov@team.example</li>
-              <li>PHOTO (из radicale · Команда)</li>
+              <li>PHOTO (from radicale · Команда)</li>
             </ul>
           </div>
           <div class="m-formfoot" style="border-top:0">
@@ -2618,7 +2618,7 @@ Read  2 min ago</div>
     <div class="m-shell no-rail">
       <div class="m-main">
         <div class="m-dialog is-wide">
-          <div class="m-head"><div><div class="m-h1">Конфликт</div><div class="m-sub">Другой клиент изменил этот контакт, пока вы его правили. Ничего не перезаписано.</div></div></div>
+          <div class="m-head"><div><div class="m-h1">Conflict</div><div class="m-sub">Another client changed this contact while you were editing it. Nothing has been overwritten.</div></div></div>
           <table class="m-table" style="margin-top:8px">
             <thead><tr><th style="width:22%">Property</th><th style="width:39%">Your edit <span class="mono" style="text-transform:none;letter-spacing:0">local</span></th><th style="width:39%">Server <span class="mono" style="text-transform:none;letter-spacing:0">W/"7d21b0aa"</span></th></tr></thead>
             <tbody>
@@ -2633,7 +2633,7 @@ Read  2 min ago</div>
             <span class="m-btn is-primary">Apply my edit</span>
             <span class="m-btn">Keep server version</span>
             <span class="m-btn is-quiet">Cancel</span>
-            <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Строки, где стороны расходятся, отмечены цветом значения, а не фоном.</span>
+            <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Rows where the two disagree are marked by the colour of the value, not by a background.</span>
           </div>
         </div>
       </div>
@@ -2747,7 +2747,7 @@ Read  2 min ago</div>
             <div class="m-rubric">nextcloud · home
               <span style="display:flex;gap:6px"><span class="m-btn is-sm">Show password</span><span class="m-btn is-sm">Test</span><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm is-danger">Remove</span></span>
             </div>
-            <div class="mono" style="font-size:11.5px;color:var(--dusty);margin-bottom:9px">https://cloud.example.org/remote.php/dav/ · mix · последний ответ 2 min ago</div>
+            <div class="mono" style="font-size:11.5px;color:var(--dusty);margin-bottom:9px">https://cloud.example.org/remote.php/dav/ · mix · last answer 2 min ago</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:2px 16px">
               <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Личный</span><span class="m-meta">cal</span></div>
               <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">Работа</span><span class="m-meta">cal</span></div>
@@ -2778,7 +2778,7 @@ Read  2 min ago</div>
 [base]        PROPFIND /dav.php/ → 401 Unauthorized
               WWW-Authenticate: Basic realm="BaikalDAV"
 [principal]   не запрашивался: предыдущий шаг не прошёл</div>
-            <div style="font-size:12.5px;color:var(--muted);margin-top:9px">Сервер отклонил пароль. Он мог быть изменён на стороне сервера — сохранённый Carrel не подходит.</div>
+            <div style="font-size:12.5px;color:var(--muted);margin-top:9px">The server refused the password. It may have been changed on the server: the one Carrel saved no longer fits.</div>
           </div>
 
         </div>
@@ -2797,7 +2797,7 @@ Read  2 min ago</div>
       <div class="m-overlay">
         <div class="m-shell no-rail" style="min-height:280px"><div class="m-main">
           <div class="m-head" style="padding-bottom:8px">
-            <div><div class="m-h1" style="font-size:19px">Connections</div><div class="m-sub">3 сервера · 12 коллекций · 2 подписки</div></div>
+            <div><div class="m-h1" style="font-size:19px">Connections</div><div class="m-sub">3 servers · 12 collections · 2 subscriptions</div></div>
           </div>
           <div style="padding:0 20px">
             <div class="m-card">
@@ -2838,7 +2838,7 @@ Read  2 min ago</div>
     <div class="mock">
       <div class="m-shell no-rail" style="min-height:280px"><div class="m-main">
         <div class="m-head" style="padding-bottom:8px">
-          <div><div class="m-h1" style="font-size:19px">Connections</div><div class="m-sub">3 сервера · 12 коллекций · 2 подписки</div></div>
+          <div><div class="m-h1" style="font-size:19px">Connections</div><div class="m-sub">3 servers · 12 collections · 2 subscriptions</div></div>
           <div class="m-acts"><span class="m-badge" style="border-color:var(--accent);color:var(--accent)">credentials unlocked · 4:12</span><span class="m-btn is-sm is-quiet">Lock now</span></div>
         </div>
         <div style="padding:0 20px">
@@ -2893,40 +2893,40 @@ Read  2 min ago</div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Connections</div><div class="m-sub">3 сервера · 12 коллекций · 2 подписки</div></div>
+          <div><div class="m-h1">Connections</div><div class="m-sub">3 servers · 12 collections · 2 subscriptions</div></div>
           <div class="m-acts">
             <span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</span>
             <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg>Subscribe to a feed</span>
           </div>
         </div>
-        <div class="m-group"><span class="m-rubric">Серверы DAV</span><span class="m-num">3</span></div>
+        <div class="m-group"><span class="m-rubric">DAV servers</span><span class="m-num">3</span></div>
         <table class="m-table">
           <tbody>
             <tr><td><span class="m-fname"><svg><use href="#i-server"/></svg><span>nextcloud · home</span></span></td>
-              <td class="mono" style="font-size:11px">https://cloud.example.org/remote.php/dav/</td><td class="mono">6 коллекций</td><td class="mono">чтение и запись</td>
+              <td class="mono" style="font-size:11px">https://cloud.example.org/remote.php/dav/</td><td class="mono">6 collections</td><td class="mono">read and write</td>
               <td class="m-acts"><span class="m-btn is-sm">Test</span><span class="m-btn is-sm is-quiet">Edit</span></td></tr>
             <tr><td><span class="m-fname"><svg><use href="#i-server"/></svg><span>sftpgo · vps</span></span></td>
-              <td class="mono" style="font-size:11px">https://files.example.org/dav/</td><td class="mono">2 папки</td><td class="mono">чтение и запись</td>
+              <td class="mono" style="font-size:11px">https://files.example.org/dav/</td><td class="mono">2 folders</td><td class="mono">read and write</td>
               <td class="m-acts"><span class="m-btn is-sm">Test</span><span class="m-btn is-sm is-quiet">Edit</span></td></tr>
           </tbody>
         </table>
 
-        <div class="m-group"><span class="m-rubric">Подписки <span class="m-badge">external · read-only</span></span><span class="m-num">2</span></div>
+        <div class="m-group"><span class="m-rubric">Subscriptions <span class="m-badge">external · read-only</span></span><span class="m-num">2</span></div>
         <table class="m-table">
           <thead><tr><th>Feed</th><th>Address</th><th>What is in it</th><th>Last read</th><th style="width:170px"></th></tr></thead>
           <tbody>
             <tr>
               <td><span class="m-fname"><span class="m-src is-ext" style="display:inline-flex;padding:0;height:auto"><span class="m-bar3" style="background:#8C6239"></span></span><span>Праздники РФ</span></span></td>
               <td class="mono" style="font-size:11px">https://feeds.example/ru-holidays.ics</td>
-              <td class="mono">118 событий · 6 задач · 2 заметки</td>
-              <td class="mono">2 мин назад · 34 KB · 0.4 с</td>
+              <td class="mono">118 events · 6 tasks · 2 notes</td>
+              <td class="mono">2 min ago · 34 KB · 0.4 s</td>
               <td class="m-acts"><span class="m-btn is-sm">Check</span><span class="m-btn is-sm is-quiet">Edit</span><span class="m-btn is-sm is-danger">Unsubscribe</span></td>
             </tr>
             <tr>
               <td><span class="m-fname"><span class="m-src is-ext" style="display:inline-flex;padding:0;height:auto"><span class="m-bar3" style="background:#6B4E7A"></span></span><span>Расписание лиги</span></span></td>
-              <td class="mono" style="font-size:11px">webcal://league.example/season.ics <span class="m-badge">пароль</span></td>
-              <td class="mono">календарь · 46 событий</td>
-              <td class="mono" style="color:var(--alert)">вчера · 401 Unauthorized</td>
+              <td class="mono" style="font-size:11px">webcal://league.example/season.ics <span class="m-badge">password</span></td>
+              <td class="mono">calendar · 46 events</td>
+              <td class="mono" style="color:var(--alert)">yesterday · 401 Unauthorized</td>
               <td class="m-acts"><span class="m-btn is-sm">Check</span><span class="m-btn is-sm is-quiet">Edit</span><span class="m-btn is-sm is-danger">Unsubscribe</span></td>
             </tr>
           </tbody>
@@ -2936,7 +2936,7 @@ Read  2 min ago</div>
 
       <div class="m-side">
         <div class="m-head" style="padding-bottom:8px">
-          <div><div class="m-h1" style="font-size:17px">Subscribe to a feed</div><div class="m-sub">Чужой календарь или адресная книга, только чтение</div></div>
+          <div><div class="m-h1" style="font-size:17px">Subscribe to a feed</div><div class="m-sub">Somebody else’s calendar or address book, read-only</div></div>
           <div class="m-acts"><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
         </div>
         <div class="m-form" style="padding-top:2px">
@@ -2945,11 +2945,11 @@ Read  2 min ago</div>
             <span class="m-hint"><span class="mono">https://</span>, <span class="mono">webcal://</span> and a secret link from another Carrel are all understood.</span></div>
           <div class="m-f" style="width:100%"><span class="m-btn">Check the address</span></div>
           <div class="m-f" style="width:100%">
-            <div class="m-diag">[fetch]   GET /ru-holidays.ics → 200 · 0.4 с · 34 KB
+            <div class="m-diag">[fetch]   GET /ru-holidays.ics → 200 · 0.4 s · 34 KB
 [type]    text/calendar; charset=utf-8
 [parse]   VCALENDAR · 118 VEVENT · 6 VTODO · 2 VJOURNAL
 [name]    X-WR-CALNAME: Праздники России
-[access]  сервер не спрашивал пароль</div>
+[access]  the server asked for no password</div>
           </div>
           <div class="m-f" style="width:100%"><label>Name here</label><span class="m-in">Праздники РФ</span>
             <span class="m-hint">Taken from the feed; change it if you like — other people’s feed names are often longer than the rail.</span></div>
@@ -2960,13 +2960,13 @@ Read  2 min ago</div>
               <span class="m-bar3" style="background:#3F6E8C;height:18px"></span>
               <span class="m-bar3" style="background:#A05A2C;height:18px"></span>
               <span class="m-bar3" style="background:#6B4E7A;height:18px"></span>
-              <span style="font-size:11px;color:var(--dusty);margin-left:6px">выведен из адреса</span>
+              <span style="font-size:11px;color:var(--dusty);margin-left:6px">derived from the address</span>
             </span>
             <span class="m-hint">A feed sends no colour of its own: Carrel derives one, and hatches the strip so a feed is recognisable among your own collections.</span></div>
           <div class="m-f" style="width:100%">
             <span class="m-check"><span class="m-box is-off"></span>This feed asks for a password</span>
             <span class="m-hint">The login and password are kept the way DAV credentials are: encrypted under your key. A secret link needs no password — the secret is already in the address.</span></div>
-          <div class="m-f" style="width:100%"><label>Sections</label><span class="m-in" style="height:auto;min-height:28px;padding:4px 8px;gap:5px;flex-wrap:wrap"><span class="m-tag">Calendar · 118</span><span class="m-tag">Tasks · 6</span><span class="m-tag">Notes · 2</span></span><span class="m-hint">Не выбирается: одна лента — один файл, а в нём бывают все три вида записей. Куда попадёт, решает содержимое, и это видно ещё до подписки.</span></div>
+          <div class="m-f" style="width:100%"><label>Sections</label><span class="m-in" style="height:auto;min-height:28px;padding:4px 8px;gap:5px;flex-wrap:wrap"><span class="m-tag">Calendar · 118</span><span class="m-tag">Tasks · 6</span><span class="m-tag">Notes · 2</span></span><span class="m-hint">Not a choice: a feed is one file, and all three kinds of record live in it. What it carries decides where it lands, and that is visible before subscribing.</span></div>
         </div>
         <div class="m-msg is-alert" style="margin:0 20px">The feed is fetched by the Carrel server, not by your browser. An address on your local network works only if the server can reach it; a public Carrel cannot, and it says so instead of returning an empty list.</div>
         <div class="m-formfoot"><span class="m-btn is-primary">Subscribe</span><span class="m-btn is-quiet">Cancel</span></div>
@@ -2985,7 +2985,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Подключение аккаунта</span><i>диалог</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:540px">
-        <div class="m-head"><div><div class="m-h1">Connect account</div><div class="m-sub">Одно подключение даёт и календари, и адресные книги.</div></div></div>
+        <div class="m-head"><div><div class="m-h1">Connect account</div><div class="m-sub">One connection gives calendars and address books alike.</div></div></div>
         <div class="m-form" style="padding-left:0;padding-right:0">
           <div class="m-f w-md"><label>Label</label><span class="m-in is-ph">optional</span></div>
           <div class="m-f w-full"><label>Server URL</label><span class="m-in is-mono is-focus">https://dav.office.example/dav.php/</span><span class="m-hint"><code>.well-known</code> is tried first, then the URL exactly as typed — which is the reliable path for Baikal.</span></div>
@@ -3004,15 +3004,15 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Настройки · депонирование ключа</span><i>/app/settings/escrow</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:640px">
-        <div class="m-head"><div><div class="m-h1">Key escrow</div><div class="m-sub">Копия вашего ключа на этом сервере</div></div></div>
+        <div class="m-head"><div><div class="m-h1">Key escrow</div><div class="m-sub">A copy of your key on this server</div></div></div>
         <div class="m-msg is-alert" style="margin-left:0;margin-right:0">A copy of your data key is deposited on this server. An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars.</div>
         <dl class="m-fields" style="padding-left:0;padding-right:0">
           <dt>Deposited</dt><dd class="mono">2026-03-02</dd>
-          <dt>Last recovery</dt><dd class="mono">никогда</dd>
-          <dt>Policy</dt><dd>Отзыв разрешён администратором</dd>
+          <dt>Last recovery</dt><dd class="mono">never</dd>
+          <dt>Policy</dt><dd>Withdrawal allowed by the administrator</dd>
         </dl>
         <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-danger">Withdraw my deposited key</span>
-          <span style="font-size:11.5px;color:var(--dusty)">После отзыва восстановить учётную запись не сможет никто, включая вас.</span></div>
+          <span style="font-size:11.5px;color:var(--dusty)">After withdrawal nobody can recover this account, including you.</span></div>
       </div></div></div>
     </div>
   </div>
@@ -3070,7 +3070,7 @@ Read  2 min ago</div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Account</div><div class="m-sub">mix · создана 11 февраля 2026</div></div>
+          <div><div class="m-h1">Account</div><div class="m-sub">mix · created 11 February 2026</div></div>
         </div>
         <div class="m-form">
           <div class="m-fset" style="border-top:0;padding-top:0">
@@ -3102,7 +3102,7 @@ Read  2 min ago</div>
             <div class="m-f"><span class="m-btn">Deposit my key…</span></div>
           </div>
         </div>
-        <div class="m-danger-zone"><span class="m-btn is-danger">Delete account</span>Удаляет учётную запись и сохранённые подключения. Данные на серверах DAV остаются: их Carrel не трогает никогда.</div>
+        <div class="m-danger-zone"><span class="m-btn is-danger">Delete account</span>Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it.</div>
       </div></div>
     </div>
   </div>
@@ -3115,17 +3115,17 @@ Read  2 min ago</div>
   <div class="frame-label"><span>Настройки · вид</span><i>/app/settings/appearance</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
-      <div class="m-head"><div><div class="m-h1">Appearance</div><div class="m-sub">Хранится в этом браузере, не на сервере</div></div></div>
+      <div class="m-head"><div><div class="m-h1">Appearance</div><div class="m-sub">Kept in this browser, not on the server</div></div></div>
       <div class="m-form">
         <div class="m-fset" style="border-top:0;padding-top:0">
           <div class="m-rubric">Theme</div>
           <div class="m-f"><span class="m-seg" style="align-self:flex-start"><span class="is-on">Auto</span><span>Light</span><span>Dark</span></span>
-            <span class="m-hint">«Auto» следует за настройкой системы.</span></div>
+            <span class="m-hint">“Auto” follows the system setting.</span></div>
         </div>
         <div class="m-fset">
           <div class="m-rubric">Density</div>
           <div class="m-f"><span class="m-seg" style="align-self:flex-start"><span class="is-on">Comfortable</span><span>Compact</span></span>
-            <span class="m-hint">Высота строки списка: 38 или 32&nbsp;px. На телефоне всегда 52.</span></div>
+            <span class="m-hint">List row height: 38 or 32&nbsp;px. On a phone always 52.</span></div>
         </div>
         <div class="m-fset">
           <div class="m-rubric">Lists</div>
@@ -3134,7 +3134,7 @@ Read  2 min ago</div>
             <span class="m-check"><span class="m-box"></span>Show the source column</span>
             <span class="m-check"><span class="m-box is-off"></span>Open notes in full width</span>
           </div>
-          <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Наборы столбцов в каждом разделе запоминаются отдельно — их сбрасывает кнопка ниже.</span></div>
+          <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Column sets are remembered per section — the button below resets them.</span></div>
           <div class="m-f"><span class="m-btn">Reset remembered view settings</span></div>
         </div>
         <div class="m-fset">
@@ -3142,7 +3142,7 @@ Read  2 min ago</div>
           <div class="m-f w-md"><label>Week starts on</label><span class="m-in">Monday</span></div>
           <div class="m-f w-md"><label>Time</label><span class="m-in">24-hour</span></div>
           <div class="m-f w-lg"><label>Time zone</label><span class="m-in">Europe/Moscow <span style="color:var(--dusty);margin-left:6px">from the server</span></span></div>
-          <div class="m-f" style="flex:1 1 100%"><span class="m-hint">В v1 пояс один на экземпляр и задаётся администратором: событие, показанное в двух поясах разным людям, — источник ошибок, а не удобство.</span></div>
+          <div class="m-f" style="flex:1 1 100%"><span class="m-hint">In v1 there is one zone per instance, set by the administrator: an event shown in two zones to two people is a source of mistakes, not a convenience.</span></div>
         </div>
       </div>
     </div></div>
@@ -3173,7 +3173,7 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="m-rail-foot">
-          <div class="m-badge is-alert">SMTP не настроен</div>
+          <div class="m-badge is-alert">SMTP not configured</div>
           <span class="m-hint" style="font-size:11px;color:var(--dusty)">Invitations by email are unavailable.</span>
         </div>
       </div>
@@ -3228,12 +3228,12 @@ Read  2 min ago</div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Add users</div><div class="m-sub">Три способа, для трёх ситуаций. Общего режима нет — работает любой.</div></div>
+          <div><div class="m-h1">Add users</div><div class="m-sub">Three ways, for three situations. There is no global mode: any of them works.</div></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;padding:14px 20px">
 
           <div class="m-card">
-            <div class="m-rubric">Invitation <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--dusty)">пароль выбирает сам</span></div>
+            <div class="m-rubric">Invitation <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--dusty)">chooses their own password</span></div>
             <div style="display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end">
               <div class="m-f w-sm"><label>Role</label><span class="m-in">User</span></div>
               <span class="m-btn is-primary">Create link</span>
@@ -3249,7 +3249,7 @@ Read  2 min ago</div>
           </div>
 
           <div class="m-card">
-            <div class="m-rubric">Temporary password <span class="m-badge is-alert">из рук в руки</span></div>
+            <div class="m-rubric">Temporary password <span class="m-badge is-alert">hand to hand</span></div>
             <div class="m-msg is-alert" style="margin:0 0 10px">Until the user changes this password, you can sign in as them.</div>
             <div style="display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end">
               <div class="m-f w-xs"><label>Role</label><span class="m-in">User</span></div>
@@ -3261,8 +3261,8 @@ Read  2 min ago</div>
           </div>
 
           <div class="m-card">
-            <div class="m-rubric">Self-registration <span class="m-badge">открыта</span></div>
-            <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">Посетитель заводит себе учётную запись сам и подтверждает адрес письмом. Без настроенной почты включить нельзя.</div>
+            <div class="m-rubric">Self-registration <span class="m-badge">open</span></div>
+            <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px">A visitor creates an account and confirms the address by email. Cannot be turned on until mail works.</div>
             <span class="m-check"><span class="m-box"></span>Publish the registration form</span>
             <div style="margin-top:10px;display:flex;gap:6px;align-items:center">
               <span class="m-in is-mono" style="flex:1;font-size:11px">https://carrel.example/register</span>
@@ -3295,7 +3295,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Администрирование · настройки</span><i>/admin/settings</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
-        <div class="m-head"><div><div class="m-h1">Settings</div><div class="m-sub">Глобальные, почта, проверка сервера DAV</div></div><div class="m-acts"><span class="m-btn is-primary">Save</span></div></div>
+        <div class="m-head"><div><div class="m-h1">Settings</div><div class="m-sub">Global settings and mail</div></div><div class="m-acts"><span class="m-btn is-primary">Save</span></div></div>
         <div class="m-form">
           <div class="m-fset" style="border-top:0;padding-top:0">
             <div class="m-rubric">Global</div>
@@ -3305,12 +3305,12 @@ Read  2 min ago</div>
             <div class="m-f w-md"><label>Instance name</label><span class="m-in">Carrel</span></div>
           </div>
           <div class="m-fset">
-            <div class="m-rubric">Mail <span class="m-badge is-alert">не настроено</span></div>
+            <div class="m-rubric">Mail <span class="m-badge is-alert">not configured</span></div>
             <div class="m-f w-lg"><label>Host</label><span class="m-in is-mono is-ph">smtp.example.org</span></div>
             <div class="m-f w-xs"><label>Port</label><span class="m-in is-mono">587</span></div>
             <div class="m-f w-sm"><label>Encryption</label><span class="m-in">STARTTLS</span></div>
             <div class="m-f w-md"><label>Username</label><span class="m-in is-ph">—</span></div>
-            <div class="m-f w-md"><label>Password</label><span class="m-in is-ph">оставьте пустым, чтобы не менять</span></div>
+            <div class="m-f w-md"><label>Password</label><span class="m-in is-ph">leave blank to keep the current one</span></div>
             <div class="m-f w-md"><label>From address</label><span class="m-in is-ph">carrel@example.org</span></div>
             <div class="m-f w-md"><label>From name</label><span class="m-in is-ph">Carrel</span></div>
             <div class="m-f w-md"><label>Send test message to</label><span class="m-in is-ph">you@example.org</span></div>
@@ -3328,7 +3328,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Администрирование · проверка сервера DAV</span><i>/admin/dav</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
-        <div class="m-head"><div><div class="m-h1">DAV validator</div><div class="m-sub">Discovery без сохранения учётных данных</div></div></div>
+        <div class="m-head"><div><div class="m-h1">DAV validator</div><div class="m-sub">Discovery without saving credentials</div></div></div>
         <div class="m-form">
           <div class="m-f w-xl"><label>Server URL</label><span class="m-in is-mono">https://dav.office.example/dav.php/</span></div>
           <div class="m-f w-md"><label>Username</label><span class="m-in">m.yenuchenko</span></div>
@@ -3354,7 +3354,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Администрирование · журнал</span><i>/admin/audit</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
-        <div class="m-head"><div><div class="m-h1">Audit log</div><div class="m-sub">1 240 записей</div></div><div class="m-acts"><span class="m-btn">Export CSV</span></div></div>
+        <div class="m-head"><div><div class="m-h1">Audit log</div><div class="m-sub">1 240 records</div></div><div class="m-acts"><span class="m-btn">Export CSV</span></div></div>
         <div class="m-bar">
           <span class="m-in is-ph" style="width:170px;height:26px">All actions</span>
           <span class="m-in is-mono" style="width:120px;height:26px">2026-08-01</span>
@@ -3400,41 +3400,41 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="m-rail-foot">
-          <span style="font-size:11px;color:var(--dusty)">Последняя проверка<br><span class="mono" style="color:var(--ink)">16.08.2026 09:12</span></span>
+          <span style="font-size:11px;color:var(--dusty)">Last check<br><span class="mono" style="color:var(--ink)">16.08.2026 09:12</span></span>
         </div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Installation check</div><div class="m-sub">Carrel спрашивает сам себя снаружи — по тому адресу, который вы объявили базовым</div></div>
+          <div><div class="m-h1">Installation check</div><div class="m-sub">Carrel asks itself from outside, at the address you declared as the base one</div></div>
           <div class="m-acts">
             <div class="m-f" style="width:280px"><span class="m-in is-mono" style="font-size:11.5px">https://carrel.example</span></div>
             <span class="m-btn is-primary">Run the check</span>
           </div>
         </div>
-        <div class="m-poll"><span class="m-prog"><i style="width:100%"></i></span>11 проверок · <span style="color:var(--accent)">8 в порядке</span> · <span style="color:var(--alert)">2 сломано</span> · 1 предупреждение<span style="margin-left:auto" class="mono">4.2 с</span></div>
+        <div class="m-poll"><span class="m-prog"><i style="width:100%"></i></span>11 checks · <span style="color:var(--accent)">8 fine</span> · <span style="color:var(--alert)">2 broken</span> · 1 warning<span style="margin-left:auto" class="mono">4.2 s</span></div>
         <table class="m-table">
-          <thead><tr><th style="width:26px"></th><th style="width:26%">Проверка</th><th>Что получилось</th><th style="width:30%">Что делать</th></tr></thead>
+          <thead><tr><th style="width:26px"></th><th style="width:26%">Check</th><th>What happened</th><th style="width:30%">What to do</th></tr></thead>
           <tbody>
-            <tr><td><span class="m-tick is-done"></span></td><td>Доступность снаружи</td><td class="mono">GET https://carrel.example/healthz → 200 · 41 ms</td><td></td></tr>
-            <tr><td><span class="m-tick is-done"></span></td><td>Сертификат</td><td class="mono">Let’s Encrypt R11 · до 2026-11-02 · цепочка полная · имя совпадает</td><td></td></tr>
-            <tr><td><span class="m-tick is-done"></span></td><td>Базовый адрес</td><td class="mono">Host и X-Forwarded-Host совпадают с base_url</td><td></td></tr>
-            <tr><td><span class="m-tick is-done"></span></td><td>Схема за прокси</td><td class="mono">X-Forwarded-Proto: https · ссылки строятся как https</td><td></td></tr>
-            <tr><td><span class="m-tick is-done"></span></td><td>Адрес клиента</td><td class="mono">X-Forwarded-For: 203.0.113.7 · лимиты считаются по нему, а не по прокси</td><td></td></tr>
-            <tr class="is-sel"><td><span class="m-tick" style="border-color:var(--alert)"></span></td><td style="color:var(--alert)">Поток событий (SSE)</td>
-              <td class="mono">первое событие пришло через 30.0 с вместо 0.2 с — ответ буферизуется</td>
-              <td class="mono" style="font-size:11px">nginx: proxy_buffering off для /app/find/*/stream</td></tr>
-            <tr class="is-sel"><td><span class="m-tick" style="border-color:var(--alert)"></span></td><td style="color:var(--alert)">Размер загрузки</td>
-              <td class="mono">пробник 20 MB → 413 от прокси, Carrel разрешает 256 MB</td>
+            <tr><td><span class="m-tick is-done"></span></td><td>Reachable from outside</td><td class="mono">GET https://carrel.example/healthz → 200 · 41 ms</td><td></td></tr>
+            <tr><td><span class="m-tick is-done"></span></td><td>Certificate</td><td class="mono">Let’s Encrypt R11 · until 2026-11-02 · chain complete · name matches</td><td></td></tr>
+            <tr><td><span class="m-tick is-done"></span></td><td>Base address</td><td class="mono">Host and X-Forwarded-Host match base_url</td><td></td></tr>
+            <tr><td><span class="m-tick is-done"></span></td><td>Scheme behind the proxy</td><td class="mono">X-Forwarded-Proto: https · links are built as https</td><td></td></tr>
+            <tr><td><span class="m-tick is-done"></span></td><td>Client address</td><td class="mono">X-Forwarded-For: 203.0.113.7 · limits count this, not the proxy</td><td></td></tr>
+            <tr class="is-sel"><td><span class="m-tick" style="border-color:var(--alert)"></span></td><td style="color:var(--alert)">Event stream (SSE)</td>
+              <td class="mono">first event after 30.0 s instead of 0.2 s — the response is buffered</td>
+              <td class="mono" style="font-size:11px">nginx: proxy_buffering off for /app/find/*/stream</td></tr>
+            <tr class="is-sel"><td><span class="m-tick" style="border-color:var(--alert)"></span></td><td style="color:var(--alert)">Upload size</td>
+              <td class="mono">20 MB probe → 413 from the proxy; Carrel allows 256 MB</td>
               <td class="mono" style="font-size:11px">client_max_body_size 256m</td></tr>
-            <tr><td><span class="m-tick" style="border-color:var(--dusty)"></span></td><td style="color:var(--muted)">Таймаут длинного запроса</td>
-              <td class="mono">опрос семи источников уложился в 21 с; потолок прокси не проверить снаружи</td>
+            <tr><td><span class="m-tick" style="border-color:var(--dusty)"></span></td><td style="color:var(--muted)">Long request timeout</td>
+              <td class="mono">seven sources polled in 21 s; the proxy ceiling cannot be measured from outside</td>
               <td class="mono" style="font-size:11px">proxy_read_timeout ≥ 60s</td></tr>
-            <tr><td><span class="m-tick is-done"></span></td><td>Cookie</td><td class="mono">Secure, HttpOnly, SameSite=Lax · дошли обратно</td><td></td></tr>
-            <tr><td><span class="m-tick is-done"></span></td><td>Часы</td><td class="mono">расхождение с NTP 0.4 с · TZ Europe/Moscow</td><td></td></tr>
-            <tr><td><span class="m-tick is-done"></span></td><td>Папка данных</td><td class="mono">/var/lib/carrel · запись есть · свободно 41 GB</td><td></td></tr>
+            <tr><td><span class="m-tick is-done"></span></td><td>Cookie</td><td class="mono">Secure, HttpOnly, SameSite=Lax · came back</td><td></td></tr>
+            <tr><td><span class="m-tick is-done"></span></td><td>Clock</td><td class="mono">0.4 s from NTP · TZ Europe/Moscow</td><td></td></tr>
+            <tr><td><span class="m-tick is-done"></span></td><td>Data folder</td><td class="mono">/var/lib/carrel · writable · 41 GB free</td><td></td></tr>
           </tbody>
         </table>
-        <div class="m-msg">Проверка идёт снаружи и внутрь: Carrel обращается к самому себе по базовому адресу, поэтому видит ровно то же, что увидит браузер или DAVx5. Ничего не меняется и не сохраняется, кроме записи в журнале о том, что проверку запускали.</div>
+        <div class="m-msg">The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. Nothing is changed and nothing is stored, apart from the audit line saying the check was run.</div>
       </div>
     </div>
   </div>
@@ -3478,7 +3478,7 @@ Read  2 min ago</div>
       <div style="padding:26px 0;display:flex;justify-content:center">
         <div class="m-dialog" style="max-width:440px;padding-top:0;padding-bottom:0">
           <div class="m-h1" style="margin-bottom:4px">Create an account</div>
-          <div class="m-sub" style="margin-bottom:12px">Ссылка подтверждения придёт на указанный адрес; до перехода по ней войти нельзя.</div>
+          <div class="m-sub" style="margin-bottom:12px">A confirmation link will be sent to the address you give; the account cannot be used until you open it.</div>
           <div class="m-msg is-alert" style="margin:0 0 12px">Your password is the only key to your own data. Nobody — including this server — can recover it for you.</div>
           <div class="m-form" style="padding:0">
             <div class="m-f w-md"><label>Login</label><span class="m-in is-focus">viktor</span></div>
@@ -3488,8 +3488,8 @@ Read  2 min ago</div>
           </div>
           <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-primary">Create account</span><span style="font-size:12px;color:var(--accent)">Already have an account? Sign in</span></div>
           <div class="m-card" style="margin-top:16px">
-            <div class="m-rubric">После отправки</div>
-            <div style="font-size:13px"><b>Check your email.</b> Письмо ушло на <span class="mono">v@example.org</span>. Повторная отправка с тем же логином и адресом, пока запись не подтверждена, просто заменит письмо и пароль.</div>
+            <div class="m-rubric">After sending</div>
+            <div style="font-size:13px"><b>Check your email.</b> The letter went to <span class="mono">v@example.org</span>. Sending again with the same login and address, while the account is unconfirmed, simply replaces the letter and the password.</div>
           </div>
         </div>
       </div>
@@ -3505,7 +3505,7 @@ Read  2 min ago</div>
       <div style="padding:26px 0;display:flex;justify-content:center">
         <div class="m-dialog" style="max-width:460px;padding-top:0;padding-bottom:0">
           <div class="m-h1" style="margin-bottom:4px">Set up Carrel</div>
-          <div class="m-sub" style="margin-bottom:12px">Учётная запись, которую вы создадите, — первая, и она управляет всеми остальными.</div>
+          <div class="m-sub" style="margin-bottom:12px">The account you create here is the first one, and it can manage everyone else.</div>
           <div class="m-msg is-alert" style="margin:0 0 12px">Your password is the only key to your own data. Nobody — including this server — can recover it for you.</div>
           <div class="m-form" style="padding:0">
             <div class="m-f w-md"><label>Login</label><span class="m-in is-focus">mix</span><span class="m-hint">Lowercase letters, digits, and <code>. _ -</code> inside</span></div>
@@ -3528,9 +3528,9 @@ Read  2 min ago</div>
       <div style="padding:26px 0;display:flex;justify-content:center">
         <div class="m-dialog" style="max-width:520px;padding-top:0;padding-bottom:0">
           <div class="m-h1" style="margin-bottom:8px">Password recovery is not possible</div>
-          <div class="m-prose" style="color:var(--muted)">Ваши данные зашифрованы ключом, выведенным из пароля. Сервер этот ключ не хранит, поэтому здесь нет ничего, что могло бы расшифровать вашу учётную запись, — и нет ссылки сброса, которая бы помогла.
+          <div class="m-prose" style="color:var(--muted)">Your data is encrypted with a key derived from your password. The server never stores that key, so there is nothing here that could decrypt your account on your behalf — and no reset link that would help.
 
-Администратор может выдать новый пароль, но это заменит ключ: всё, что хранилось под старым, будет потеряно. Если для вашей учётной записи включено депонирование, администратор восстановит её мастер-паролем, и данные сохранятся.</div>
+An administrator can give you a new password, but doing so replaces the key: everything stored under the old one is lost. If key deposit is enabled for your account, the administrator can recover it with the master password, and your data is kept.</div>
           <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn">Back to sign in</span></div>
         </div>
       </div>
@@ -3570,7 +3570,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Фотография контакта · кадрирование</span><i>/app/contacts/…/{uid}</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
-        <div class="m-head"><div><div class="m-h1">Photo</div><div class="m-sub">Анна Ковалёва · метаданные будут вырезаны</div></div></div>
+        <div class="m-head"><div><div class="m-h1">Photo</div><div class="m-sub">Анна Ковалёва · metadata will be stripped</div></div></div>
         <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
           <div style="position:relative;width:190px;height:190px;border-radius:4px;background:#8C7B6A;overflow:hidden;flex:none">
             <div style="position:absolute;inset:22px;border:1.5px solid rgba(255,253,247,.9);border-radius:3px"></div>
@@ -3578,7 +3578,7 @@ Read  2 min ago</div>
             <div style="position:absolute;top:22px;bottom:22px;left:50%;width:.5px;background:rgba(255,253,247,.45)"></div>
           </div>
           <div style="flex:1 1 200px;display:flex;flex-direction:column;gap:11px">
-            <span style="font-size:12.5px;color:var(--muted)">Тяните снимок, чтобы выбрать кадр. Рамка — то, что увидят другие клиенты.</span>
+            <span style="font-size:12.5px;color:var(--muted)">Drag the photo to choose the frame. The box is what other clients will see.</span>
             <div class="m-f" style="width:100%"><label>Zoom</label>
               <span style="display:flex;align-items:center;gap:9px">
                 <span style="flex:1;height:3px;background:var(--card-border);border-radius:2px;position:relative">
@@ -3589,7 +3589,7 @@ Read  2 min ago</div>
               </span></div>
             <div class="m-f" style="width:100%"><label>Rotate</label>
               <span class="m-seg" style="align-self:flex-start"><span class="is-on">0°</span><span>90°</span><span>180°</span><span>270°</span></span></div>
-            <span style="font-size:11px;color:var(--dusty)">Ориентация из EXIF уже применена.</span>
+            <span style="font-size:11px;color:var(--dusty)">EXIF orientation is already applied.</span>
           </div>
         </div>
         <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-primary">Save photo</span><span class="m-btn is-quiet">Cancel</span><span style="margin-left:auto"><span class="m-btn is-danger">Remove photo</span></span></div>
@@ -3622,7 +3622,7 @@ Read  2 min ago</div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Key escrow</div><div class="m-sub">4 из 6 учётных записей открываются мастер-паролем</div></div>
+          <div><div class="m-h1">Key escrow</div><div class="m-sub">4 of 6 accounts open with the master password</div></div>
           <div class="m-acts"><span class="m-btn">Stop covering new accounts</span></div>
         </div>
         <div class="m-msg is-alert is-row">
@@ -3636,7 +3636,7 @@ Read  2 min ago</div>
               <span class="m-check"><span class="m-box"></span>New accounts are covered</span>
               <span class="m-check"><span class="m-box is-off"></span>Do not let users withdraw their deposited key</span>
             </div>
-            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Политику видно в профиле каждого пользователя независимо от того, затрагивает ли она его сейчас. Выключение покрытия не трогает уже снятые копии: удалить свою — решение владельца.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Every user sees this policy in their profile whether or not it affects them now. Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.</span></div>
           </div>
           <div class="m-fset">
             <div class="m-rubric">Master password</div>
@@ -3644,7 +3644,7 @@ Read  2 min ago</div>
             <div class="m-f w-lg"><label>New</label><span class="m-in">••••••••••••••••</span></div>
             <div class="m-f w-lg"><label>Repeat</label><span class="m-in">••••••••••••••••</span></div>
             <div class="m-f" style="align-self:flex-end"><span class="m-btn">Change</span></div>
-            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Перешифровывается только закрытый ключ восстановления. Депонированные копии не трогаются, поэтому заново соглашаться никому не нужно.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Only the recovery private key is re-encrypted. The deposited copies are untouched, so nobody has to opt in again.</span></div>
           </div>
           <div class="m-fset">
             <div class="m-rubric">Recover an account</div>
@@ -3652,16 +3652,16 @@ Read  2 min ago</div>
             <div class="m-f w-lg"><label>Master password</label><span class="m-in">••••••••••••••••</span></div>
             <div class="m-f w-md"><label>Temporary password for the user</label><span class="m-in is-mono">9f2-brick-lamp</span></div>
             <div class="m-f" style="align-self:flex-end"><span class="m-btn is-danger">Recover</span></div>
-            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Подключения переживут восстановление: копия ключа открывается мастер-паролем и перевязывается под временный. Пользователю уходит письмо об этом — не по желанию администратора, а всегда.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion.</span></div>
           </div>
         </div>
-        <div class="m-group"><span class="m-rubric">Кого открывает мастер-пароль</span><span class="m-num">4</span></div>
+        <div class="m-group"><span class="m-rubric">Whom the master password opens</span><span class="m-num">4</span></div>
         <table class="m-table">
           <thead><tr><th>Account</th><th>Deposited</th><th>Last recovery</th><th>Can withdraw</th></tr></thead>
           <tbody>
-            <tr><td>anna</td><td class="mono">2026-03-02</td><td class="mono" style="color:var(--dusty)">никогда</td><td class="mono">да</td></tr>
-            <tr><td>viktor</td><td class="mono">2026-04-19</td><td class="mono">2026-08-14 18:40</td><td class="mono">да</td></tr>
-            <tr><td>mix</td><td class="mono" style="color:var(--dusty)">не депонирован</td><td class="mono">—</td><td class="mono">—</td></tr>
+            <tr><td>anna</td><td class="mono">2026-03-02</td><td class="mono" style="color:var(--dusty)">never</td><td class="mono">yes</td></tr>
+            <tr><td>viktor</td><td class="mono">2026-04-19</td><td class="mono">2026-08-14 18:40</td><td class="mono">yes</td></tr>
+            <tr><td>mix</td><td class="mono" style="color:var(--dusty)">not deposited</td><td class="mono">—</td><td class="mono">—</td></tr>
           </tbody>
         </table>
       </div>
@@ -3678,7 +3678,7 @@ Read  2 min ago</div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:560px">
         <div class="m-steps"><span class="is-on">1 · Source</span><i></i><span>2 · Preview</span><i></i><span>3 · Report</span></div>
-        <div class="m-head"><div><div class="m-h1">Import notes</div><div class="m-sub">В «Записи» · nextcloud · home</div></div></div>
+        <div class="m-head"><div><div class="m-h1">Import notes</div><div class="m-sub">Into Записи · nextcloud · home</div></div></div>
         <div class="m-card">
           <div class="m-rubric">From a file</div>
           <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
@@ -3693,9 +3693,9 @@ Read  2 min ago</div>
             <div class="m-f" style="flex:1 1 140px"><label>Folder</label><span class="m-in is-mono">notes</span></div>
             <span class="m-btn is-primary">Preview folder</span>
           </div>
-          <div class="m-hint" style="margin-top:8px">Читается каждый <span class="mono">.md</span> прямо в этой папке. Подпапки не обходятся, на сервере ничего не двигается и не удаляется — файлы остаются там, где лежали.</div>
+          <div class="m-hint" style="margin-top:8px">Every <span class="mono">.md</span> directly in that folder. Subfolders are not walked, nothing on the server is moved or deleted — the files stay where they were.</div>
         </div>
-        <div class="m-msg">Front matter читается, когда он есть: заголовок, дата, теги, UID и <span class="mono">X-</span>свойства, выгруженные раньше. Файл без него становится заметкой с датой самого файла.</div>
+        <div class="m-msg">Front matter is read when present: title, date, tags, UID and <span class="mono">X-</span>properties exported earlier. A file without it becomes a note dated by its own timestamp.</div>
       </div></div></div>
     </div>
   </div>
@@ -3789,13 +3789,13 @@ Read  2 min ago</div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Set up a new device</div><div class="m-sub">Всё, что нашло discovery, — одним файлом или одним кодом <span class="m-badge" style="border-color:var(--accent);color:var(--accent)">credentials unlocked · 4:12</span><span class="m-btn is-sm is-quiet">Lock now</span></div></div>
+          <div><div class="m-h1">Set up a new device</div><div class="m-sub">Everything discovery found — as one file or one code <span class="m-badge" style="border-color:var(--accent);color:var(--accent)">credentials unlocked · 4:12</span><span class="m-btn is-sm is-quiet">Lock now</span></div></div>
           <div class="m-acts"><span class="m-seg"><span class="is-on">Apple</span><span>Android</span><span>Thunderbird</span><span>Anything else</span></span></div>
         </div>
         <div class="m-form" style="padding-bottom:0">
           <div style="flex:1 1 460px;display:flex;flex-direction:column;gap:12px">
             <div class="m-card">
-              <div class="m-rubric">Что войдёт в профиль</div>
+              <div class="m-rubric">What goes into the profile</div>
               <div class="m-list" style="margin:0 -14px">
                 <div class="m-row" style="grid-template-columns:14px 3px minmax(0,1fr) 110px;padding-left:14px;padding-right:14px;min-height:32px">
                   <span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Личный <span class="d">· CalDAV</span></span><span class="d">nextcloud</span>
@@ -3818,13 +3818,13 @@ Read  2 min ago</div>
           </div>
           <div style="flex:1 1 300px;display:flex;flex-direction:column;gap:12px">
             <div class="m-card">
-              <div class="m-rubric">Подтверждение</div>
+              <div class="m-rubric">Confirmation</div>
               <div class="m-f" style="width:100%"><label>Your Carrel password</label><span class="m-in is-focus">••••••••••</span>
                 <span class="m-hint">Asked again: the file hands out the credentials of every ticked server.</span></div>
               <div style="margin-top:12px"><span class="m-btn is-primary">Generate profile</span></div>
             </div>
             <div class="m-card">
-              <div class="m-rubric">Ссылка готова <span class="m-badge is-local" title="Локальный запуск: снаружи может быть недоступно">local</span> <span class="mono" style="letter-spacing:0;color:var(--alert)">09:41</span></div>
+              <div class="m-rubric">Link ready <span class="m-badge is-local" title="Локальный запуск: снаружи может быть недоступно">local</span> <span class="mono" style="letter-spacing:0;color:var(--alert)">09:41</span></div>
               <div style="display:flex;gap:6px;align-items:center">
                 <span class="m-in is-mono" style="flex:1;font-size:11px">https://carrel.example/d/2f9c…/carrel.mobileconfig</span>
                 <span class="m-btn is-sm">Copy</span>
@@ -3849,7 +3849,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Android · DAVx5</span><span class="plan">не построено</span></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
-        <div class="m-head"><div><div class="m-h1" style="font-size:19px">Android</div><div class="m-sub">DAVx5 откроется с заполненными полями</div></div></div>
+        <div class="m-head"><div><div class="m-h1" style="font-size:19px">Android</div><div class="m-sub">DAVx5 opens with the fields filled in</div></div></div>
         <div style="display:flex;gap:18px;padding:4px 20px 16px;flex-wrap:wrap;align-items:flex-start">
           <div style="background:#FFFDF7;border:.5px solid var(--card-border);border-radius:4px;padding:8px">
             <svg width="132" height="132" viewBox="-1 -1 27 27" role="img" aria-label="QR"><rect x="-1" y="-1" width="27" height="27" fill="#FFFDF7"/><use href="#qr-demo"/></svg>
@@ -3888,7 +3888,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Thunderbird и всё остальное</span><span class="plan">не построено</span></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
-        <div class="m-head"><div><div class="m-h1" style="font-size:19px">Anything else</div><div class="m-sub">Механизма импорта нет — и не нужно: нужны точные строки</div></div></div>
+        <div class="m-head"><div><div class="m-h1" style="font-size:19px">Anything else</div><div class="m-sub">There is no import mechanism, and none is needed: exact strings are</div></div></div>
         <table class="m-table">
           <thead><tr><th>Collection</th><th>Type</th><th>URL</th><th style="width:70px"></th></tr></thead>
           <tbody>
@@ -3937,12 +3937,12 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="m-rail-foot">
-          <span style="font-size:11px;color:var(--dusty)">Последняя удачная копия<br><span class="mono" style="color:var(--ink)">2026-08-16 03:10</span> · проверена</span>
+          <span style="font-size:11px;color:var(--dusty)">Last successful copy<br><span class="mono" style="color:var(--ink)">2026-08-16 03:10</span> · verified</span>
         </div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Backup</div><div class="m-sub">Три задания · разные источники, места и триггеры</div></div>
+          <div><div class="m-h1">Backup</div><div class="m-sub">Three jobs · their own sources, destinations and triggers</div></div>
           <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New job</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg>Restore…</span></div>
         </div>
         <table class="m-table">
@@ -3951,44 +3951,44 @@ Read  2 min ago</div>
             <tr>
               <td><span class="m-box"></span></td>
               <td><span class="m-fname"><svg><use href="#i-archive"/></svg><span>Рабочее, ежедневно</span></span></td>
-              <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap"><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="mono" style="font-size:11px;margin-left:4px">3 коллекции</span></span></td>
+              <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap"><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="mono" style="font-size:11px;margin-left:4px">3 collections</span></span></td>
               <td class="mono">sftpgo · Documents<br><span style="color:var(--dusty)">/backup/work</span></td>
-              <td class="mono">внешний запрос<br><span style="color:var(--dusty)">cron, 03:00</span></td>
+              <td class="mono">external request<br><span style="color:var(--dusty)">cron, 03:00</span></td>
               <td class="mono">14</td>
-              <td class="mono">2026-08-16 03:10<br><span style="color:var(--dusty)">18.4 MB · проверена</span></td>
+              <td class="mono">2026-08-16 03:10<br><span style="color:var(--dusty)">18.4 MB · verified</span></td>
               <td class="m-acts"><span class="m-btn is-sm">Run</span><span class="m-btn is-sm is-quiet">Edit</span><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></td>
             </tr>
             <tr>
               <td><span class="m-box"></span></td>
               <td><span class="m-fname"><svg><use href="#i-archive"/></svg><span>Личное на домашний диск</span></span></td>
-              <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-bar3" style="background:#A05A2C"></span><span class="mono" style="font-size:11px;margin-left:4px">2 коллекции + файлы</span></span></td>
+              <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-bar3" style="background:#A05A2C"></span><span class="mono" style="font-size:11px;margin-left:4px">2 collections + files</span></span></td>
               <td class="mono">nextcloud · Files<br><span style="color:var(--dusty)">/carrel-backup</span></td>
-              <td class="mono">при входе<br><span style="color:var(--dusty)">если старше 7 дней</span></td>
+              <td class="mono">on sign-in<br><span style="color:var(--dusty)">if older than 7 days</span></td>
               <td class="mono">8</td>
-              <td class="mono">2026-08-14 09:12<br><span style="color:var(--dusty)">2.1 GB · проверена</span></td>
+              <td class="mono">2026-08-14 09:12<br><span style="color:var(--dusty)">2.1 GB · verified</span></td>
               <td class="m-acts"><span class="m-btn is-sm">Run</span><span class="m-btn is-sm is-quiet">Edit</span><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></td>
             </tr>
             <tr style="opacity:.62">
               <td><span class="m-box is-off"></span></td>
-              <td><span class="m-fname"><svg><use href="#i-archive"/></svg><span>Архив контактов, вручную</span></span></td>
-              <td><span style="display:flex;gap:3px;align-items:center"><span class="m-bar3" style="background:#A05A2C"></span><span class="mono" style="font-size:11px;margin-left:4px">1 книга</span></span></td>
-              <td class="mono">скачать в браузер<br><span style="color:var(--dusty)">никуда не пишется</span></td>
-              <td class="mono">по требованию</td>
+              <td><span class="m-fname"><svg><use href="#i-archive"/></svg><span>Contacts archive, by hand</span></span></td>
+              <td><span style="display:flex;gap:3px;align-items:center"><span class="m-bar3" style="background:#A05A2C"></span><span class="mono" style="font-size:11px;margin-left:4px">1 book</span></span></td>
+              <td class="mono">download in browser<br><span style="color:var(--dusty)">nothing is written</span></td>
+              <td class="mono">on demand</td>
               <td class="mono">—</td>
-              <td class="mono" style="color:var(--dusty)">никогда</td>
+              <td class="mono" style="color:var(--dusty)">never</td>
               <td class="m-acts"><span class="m-btn is-sm">Run</span><span class="m-btn is-sm is-quiet">Edit</span><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></td>
             </tr>
           </tbody>
         </table>
-        <div class="m-group"><span class="m-rubric">История, все задания</span><span class="m-num">12</span></div>
+        <div class="m-group"><span class="m-rubric">History, all jobs</span><span class="m-num">12</span></div>
         <table class="m-table">
           <thead><tr><th>When</th><th>Job</th><th>Size</th><th>Collections</th><th>Verified</th><th>Trigger</th><th style="width:150px"></th></tr></thead>
           <tbody>
-            <tr><td class="mono">2026-08-16 03:10</td><td>Рабочее, ежедневно</td><td class="mono">18.4 MB</td><td class="mono">3 / 3</td><td>прочитана обратно</td><td class="mono">cron</td>
+            <tr><td class="mono">2026-08-16 03:10</td><td>Рабочее, ежедневно</td><td class="mono">18.4 MB</td><td class="mono">3 / 3</td><td>read back</td><td class="mono">cron</td>
               <td class="m-acts"><span class="m-btn is-sm">Restore…</span><span class="m-btn is-sm is-quiet">Download</span></td></tr>
             <tr><td class="mono">2026-08-15 03:10</td><td>Рабочее, ежедневно</td><td class="mono">18.2 MB</td><td class="mono" style="color:var(--alert)">2 / 3</td><td style="color:var(--alert)">baikal · Общий: 401</td><td class="mono">cron</td>
               <td class="m-acts"><span class="m-btn is-sm">Restore…</span><span class="m-btn is-sm is-quiet">Download</span></td></tr>
-            <tr><td class="mono">2026-08-14 09:12</td><td>Личное на домашний диск</td><td class="mono">2.1 GB</td><td class="mono">2 / 2 + 1 240 файлов</td><td>прочитана обратно</td><td class="mono">при входе</td>
+            <tr><td class="mono">2026-08-14 09:12</td><td>Личное на домашний диск</td><td class="mono">2.1 GB</td><td class="mono">2 / 2 + 1 240 files</td><td>read back</td><td class="mono">on sign-in</td>
               <td class="m-acts"><span class="m-btn is-sm">Restore…</span><span class="m-btn is-sm is-quiet">Download</span></td></tr>
           </tbody>
         </table>
@@ -4005,7 +4005,7 @@ Read  2 min ago</div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
       <div class="m-head">
-        <div><div class="m-h1">Личное на домашний диск</div><div class="m-sub">Задание · последняя копия 2 дня назад</div></div>
+        <div><div class="m-h1">Личное на домашний диск</div><div class="m-sub">Job · last copy 2 days ago</div></div>
         <div class="m-acts"><span class="m-btn is-quiet">Cancel</span><span class="m-btn">Run now</span><span class="m-btn is-primary">Save</span></div>
       </div>
       <div class="m-form">
@@ -4013,19 +4013,19 @@ Read  2 min ago</div>
         <div class="m-f" style="align-self:flex-end"><span class="m-check"><span class="m-box"></span>Job is on</span></div>
 
         <div class="m-fset">
-          <div class="m-rubric">Что копировать <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--dusty)">выбрано 2 коллекции и 1 папка · 2.1 GB в прошлый раз</span></div>
+          <div class="m-rubric">What to copy <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--dusty)">2 collections and 1 folder chosen · 2.1 GB last time</span></div>
           <div style="flex:1 1 100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2px 24px;max-width:1100px">
-            <div class="m-src" style="padding-left:0"><span class="m-box is-part"></span><span class="m-bar3 is-multi"></span><span class="t" style="font-weight:600">nextcloud · home</span><span class="m-meta">4 из 6</span></div>
-            <div class="m-src" style="padding-left:0"><span class="m-box is-off"></span><span class="m-bar3 is-multi"></span><span class="t" style="font-weight:600">radicale · vps</span><span class="m-meta">0 из 2</span></div>
-            <div class="m-src" style="padding-left:14px"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Личный</span><span class="m-meta">кал.</span></div>
-            <div class="m-src" style="padding-left:14px"><span class="m-box is-off"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="t">Проекты</span><span class="m-meta">кал.</span></div>
-            <div class="m-src" style="padding-left:14px"><span class="m-box is-off"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">Работа</span><span class="m-meta">кал.</span></div>
-            <div class="m-src" style="padding-left:14px"><span class="m-box is-off"></span><span class="m-bar3" style="background:#8C6239"></span><span class="t">Дежурства</span><span class="m-meta">кал.</span></div>
-            <div class="m-src" style="padding-left:14px"><span class="m-box"></span><span class="m-bar3" style="background:#A05A2C"></span><span class="t">Архив</span><span class="m-meta">книга</span></div>
-            <div class="m-src" style="padding-left:0"><span class="m-box is-part"></span><span class="m-bar3 is-multi"></span><span class="t" style="font-weight:600">sftpgo · vps</span><span class="m-meta">1 из 2</span></div>
-            <div class="m-src" style="padding-left:14px"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Записи</span><span class="m-meta">заметки</span></div>
-            <div class="m-src" style="padding-left:14px"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Documents</span><span class="m-meta">файлы · 2.0 GB</span></div>
-            <div class="m-src" style="padding-left:14px"><span class="m-box is-off"></span><span class="m-bar3" style="background:#9A9280"></span><span class="t">Public</span><span class="m-meta">файлы · ro</span></div>
+            <div class="m-src" style="padding-left:0"><span class="m-box is-part"></span><span class="m-bar3 is-multi"></span><span class="t" style="font-weight:600">nextcloud · home</span><span class="m-meta">4 of 6</span></div>
+            <div class="m-src" style="padding-left:0"><span class="m-box is-off"></span><span class="m-bar3 is-multi"></span><span class="t" style="font-weight:600">radicale · vps</span><span class="m-meta">0 of 2</span></div>
+            <div class="m-src" style="padding-left:14px"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Личный</span><span class="m-meta">cal.</span></div>
+            <div class="m-src" style="padding-left:14px"><span class="m-box is-off"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="t">Проекты</span><span class="m-meta">cal.</span></div>
+            <div class="m-src" style="padding-left:14px"><span class="m-box is-off"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">Работа</span><span class="m-meta">cal.</span></div>
+            <div class="m-src" style="padding-left:14px"><span class="m-box is-off"></span><span class="m-bar3" style="background:#8C6239"></span><span class="t">Дежурства</span><span class="m-meta">cal.</span></div>
+            <div class="m-src" style="padding-left:14px"><span class="m-box"></span><span class="m-bar3" style="background:#A05A2C"></span><span class="t">Архив</span><span class="m-meta">book</span></div>
+            <div class="m-src" style="padding-left:0"><span class="m-box is-part"></span><span class="m-bar3 is-multi"></span><span class="t" style="font-weight:600">sftpgo · vps</span><span class="m-meta">1 of 2</span></div>
+            <div class="m-src" style="padding-left:14px"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Записи</span><span class="m-meta">notes</span></div>
+            <div class="m-src" style="padding-left:14px"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Documents</span><span class="m-meta">files · 2.0 GB</span></div>
+            <div class="m-src" style="padding-left:14px"><span class="m-box is-off"></span><span class="m-bar3" style="background:#9A9280"></span><span class="t">Public</span><span class="m-meta">files · ro</span></div>
           </div>
           <div class="m-msg" style="flex:1 1 100%;margin:6px 0 0">A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them — they cannot be picked separately. The size beside each collection is what it took last time.</div>
         </div>
@@ -4045,9 +4045,9 @@ Read  2 min ago</div>
         </div>
 
         <div class="m-fset">
-          <div class="m-rubric">Чем закрыт архив</div>
+          <div class="m-rubric">How the archive is closed</div>
           <div class="m-f" style="flex:1 1 100%"><span class="m-check"><span class="m-box"></span>Encrypt the archive</span>
-            <span class="m-hint">Включено по умолчанию. Снимать имеет смысл ровно в одном случае: копия ложится туда, куда вы и так пускаете только себя, — и тогда её откроет любой архиватор.</span></div>
+            <span class="m-hint">On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.</span></div>
           <div class="m-f w-lg"><label>Archive password</label><span class="m-in">••••••••••••</span></div>
           <div class="m-f" style="align-self:flex-end"><span class="m-check"><span class="m-box"></span>Same as the job “Work, daily”</span></div>
           <div class="m-msg is-alert" style="flex:1 1 100%;margin:2px 0 0">Separate from the sign-in password: the destination may be somebody else’s hosting. Forget it and this job’s archives open for nobody, including you.</div>
@@ -4063,10 +4063,10 @@ Read  2 min ago</div>
           <div class="m-f w-full"><label>App password for this job <span style="color:var(--dusty)">(this job only, nothing else)</span></label>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               <span class="m-btn">Create password</span>
-              <span style="font-size:11.5px;color:var(--dusty)">создаётся по нажатию и показывается один раз — прямо здесь, до сохранения задания</span>
+              <span style="font-size:11.5px;color:var(--dusty)">created on a press and shown once — right here, before the job is saved</span>
             </div></div>
           <div class="m-card" style="flex:1 1 100%;border-color:var(--accent);margin:8px 0 0">
-            <div class="m-rubric">Password created <span class="mono" style="letter-spacing:0;color:var(--alert)">видно только сейчас</span></div>
+            <div class="m-rubric">Password created <span class="mono" style="letter-spacing:0;color:var(--alert)">visible only now</span></div>
             <div style="display:flex;gap:8px;align-items:center;margin-top:2px;flex-wrap:wrap">
               <span class="m-in is-mono" style="flex:1;min-width:220px;font-size:13px;letter-spacing:.03em">cbk_7f3a-91de-4402-lamp</span>
               <span class="m-btn is-sm">Copy</span>
@@ -4074,11 +4074,11 @@ Read  2 min ago</div>
             </div>
             <div class="m-diag" style="margin-top:9px">curl -X POST https://carrel.example/api/backup/run?job=personal \
      -H "Authorization: Bearer cbk_7f3a-91de-4402-lamp"</div>
-            <div style="font-size:11.5px;color:var(--muted);margin-top:8px">Готовая строка — чтобы не собирать её по документации. Пароль действует только на это задание и только на запуск: прочитать им ничего нельзя.</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:8px">A ready line, so nobody assembles it from documentation. The password works for this job and for starting it only: nothing can be read with it.</div>
           </div>
         </div>
       </div>
-      <div class="m-danger-zone"><span class="m-btn is-danger">Delete job</span>Уже созданные архивы останутся на месте: удаляется расписание, а не копии.</div>
+      <div class="m-danger-zone"><span class="m-btn is-danger">Delete job</span>Archives already made stay where they are: the schedule is deleted, not the copies.</div>
     </div></div>
   </div>
 </div>
@@ -4091,7 +4091,7 @@ Read  2 min ago</div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
       <div class="m-head">
-        <div><div class="m-h1">Backup</div><div class="m-sub">Заданий пока нет</div></div>
+        <div><div class="m-h1">Backup</div><div class="m-sub">No jobs yet</div></div>
         <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New job</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg>Restore…</span></div>
       </div>
       <div class="m-empty">
@@ -4113,7 +4113,7 @@ Read  2 min ago</div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog">
       <div class="m-steps"><span class="is-on">1 · Archive</span><i></i><span>2 · Match</span><i></i><span>3 · Report</span></div>
-      <div class="m-head"><div><div class="m-h1">Restore</div><div class="m-sub">Ничего не будет записано, пока вы не увидите, что и куда ляжет</div></div></div>
+      <div class="m-head"><div><div class="m-h1">Restore</div><div class="m-sub">Nothing is written until you have seen what goes where</div></div></div>
       <div class="m-card">
         <div class="m-rubric">From a job</div>
         <table class="m-table" style="margin:0 -14px">
@@ -4130,16 +4130,16 @@ Read  2 min ago</div>
           <span class="m-btn is-sm">Browse…</span>
           <div class="m-f" style="flex:1 1 200px"><label>Or upload</label><span class="m-in is-ph">carrel-2026-08-14.zip</span></div>
         </div>
-        <div class="m-hint" style="margin-top:8px">Архив можно принести откуда угодно: он самодостаточен — сырые <span class="mono">.ics</span>, <span class="mono">.vcf</span>, файлы и манифест. Экземпляр, в который восстанавливают, может быть совсем другим и даже пустым.</div>
+        <div class="m-hint" style="margin-top:8px">An archive can be brought from anywhere: it stands on its own — raw <span class="mono">.ics</span>, <span class="mono">.vcf</span>, files and a manifest. The instance being restored into may be a different one, or empty.</div>
       </div>
       <div class="m-card">
         <div class="m-rubric">Archive password</div>
         <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
           <div class="m-f w-lg"><span class="m-in is-focus">••••••••••••</span></div>
-          <span style="font-size:12px;color:var(--muted)">Тот, что задан в задании, а не пароль входа. Без него манифест не прочитать — Carrel не увидит даже списка коллекций.</span>
+          <span style="font-size:12px;color:var(--muted)">The one set in the job, not your sign-in password. Without it the manifest cannot be read — Carrel will not even see the list of collections.</span>
         </div>
       </div>
-      <div class="m-formfoot"><span class="m-btn is-primary">Открыть манифест</span><span class="m-btn is-quiet">Cancel</span></div>
+      <div class="m-formfoot"><span class="m-btn is-primary">Open the manifest</span><span class="m-btn is-quiet">Cancel</span></div>
     </div></div></div>
   </div>
 </div>
@@ -4152,7 +4152,7 @@ Read  2 min ago</div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog is-wide">
       <div class="m-steps"><span>1 · Archive</span><i></i><span class="is-on">2 · Match</span><i></i><span>3 · Report</span></div>
-      <div class="m-head"><div><div class="m-h1">Restore from 2026-08-14</div><div class="m-sub">Задание «Личное на домашний диск» · манифест прочитан · 4 коллекции · 1 214 записей · <span class="mono">carrel-backup/2026-08-14T09-12.zip</span></div></div>
+      <div class="m-head"><div><div class="m-h1">Restore from 2026-08-14</div><div class="m-sub">Job «Личное на домашний диск» · manifest read · 4 collections · 1 214 records · <span class="mono">carrel-backup/2026-08-14T09-12.zip</span></div></div>
         <div class="m-acts"><span class="m-btn is-quiet">Cancel</span><span class="m-btn is-primary">Restore 3 collections</span></div>
       </div>
       <table class="m-table">
@@ -4160,17 +4160,17 @@ Read  2 min ago</div>
         <tbody>
           <tr class="is-sel"><td><span class="m-box"></span></td>
             <td><span class="m-fname"><span class="m-bar3" style="background:#4A6B52"></span><span>nextcloud / personal</span></span></td><td class="mono">312</td>
-            <td class="mono">Личный · nextcloud</td><td>совпало по пути — 4 записи отсутствуют, будут созданы</td></tr>
+            <td class="mono">Личный · nextcloud</td><td>matched by path — 4 records missing, will be created</td></tr>
           <tr class="is-sel"><td><span class="m-box"></span></td>
             <td><span class="m-fname"><span class="m-bar3" style="background:#6B4E7A"></span><span>radicale / projects</span></span></td><td class="mono">86</td>
-            <td class="mono">Проекты · radicale</td><td>совпало по пути — расхождений нет</td></tr>
+            <td class="mono">Проекты · radicale</td><td>matched by path — no differences</td></tr>
           <tr class="is-sel"><td><span class="m-box"></span></td>
             <td><span class="m-fname"><span class="m-bar3" style="background:#9A9280"></span><span>baikal / shared</span></span></td><td class="mono">140</td>
             <td class="mono">Личный · nextcloud <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none" style="display:inline;vertical-align:-1px"><use href="#i-chev"/></svg></td>
-            <td style="color:var(--alert)">сервера больше нет — выбрана другая коллекция</td></tr>
+            <td style="color:var(--alert)">that server is gone — another collection chosen</td></tr>
           <tr><td><span class="m-box is-off"></span></td>
             <td><span class="m-fname"><span class="m-bar3" style="background:#A05A2C"></span><span>nextcloud / birthdays</span></span></td><td class="mono">51</td>
-            <td class="mono is-ph" style="color:var(--dusty)">—</td><td style="color:var(--dusty)">пропустить</td></tr>
+            <td class="mono is-ph" style="color:var(--dusty)">—</td><td style="color:var(--dusty)">skip</td></tr>
         </tbody>
       </table>
       <div class="m-msg is-alert">Restoring <b>creates</b> records, the way import does: a colliding UID gets a fresh one and a line in the report. Nothing on the server is deleted or overwritten — Carrel does not promise “exactly as it was”, because that would mean erasing somebody else’s changes.</div>
@@ -4206,24 +4206,24 @@ Read  2 min ago</div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Published links <span class="m-badge is-local" title="Локальный запуск: снаружи может быть недоступно">local</span></div><div class="m-sub">Только чтение, по одному объекту или одной коллекции на ссылку · <span style="color:var(--alert)">этот экземпляр локальный: ссылку откроют только из вашей сети</span></div></div>
+          <div><div class="m-h1">Published links <span class="m-badge is-local" title="Локальный запуск: снаружи может быть недоступно">local</span></div><div class="m-sub">Read-only, one object or one collection per link · <span style="color:var(--alert)">this instance is local: the link opens only from your network</span></div></div>
           <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Publish…</span></div>
         </div>
         <table class="m-table">
           <thead><tr><th>What is published</th><th>Kind</th><th>Created</th><th>Expires</th><th>Last opened</th><th>Opens</th><th style="width:120px"></th></tr></thead>
           <tbody>
-            <tr><td><span class="m-fname"><span class="m-bar3" style="background:#4A6B52"></span><span>Личный · 10–31 августа</span></span></td><td class="mono">calendar</td><td class="mono">2026-08-09</td><td class="mono">2026-09-09</td><td class="mono">2026-08-15 08:41</td><td class="mono">12</td>
+            <tr><td><span class="m-fname"><span class="m-bar3" style="background:#4A6B52"></span><span>Личный · 10–31 August</span></span></td><td class="mono">calendar</td><td class="mono">2026-08-09</td><td class="mono">2026-09-09</td><td class="mono">2026-08-15 08:41</td><td class="mono">12</td>
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Copy</span><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
-            <tr><td><span class="m-fname"><svg><use href="#i-doc"/></svg><span>смета-подрядчик.pdf</span></span></td><td class="mono">file</td><td class="mono">2026-08-12</td><td class="mono">2026-08-19</td><td class="mono" style="color:var(--dusty)">не открывали</td><td class="mono">0</td>
+            <tr><td><span class="m-fname"><svg><use href="#i-doc"/></svg><span>смета-подрядчик.pdf</span></span></td><td class="mono">file</td><td class="mono">2026-08-12</td><td class="mono">2026-08-19</td><td class="mono" style="color:var(--dusty)">never opened</td><td class="mono">0</td>
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Copy</span><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
           </tbody>
         </table>
-        <div class="m-group"><span class="m-rubric">Внешние ленты</span><span class="m-num">2</span></div>
+        <div class="m-group"><span class="m-rubric">External feeds</span><span class="m-num">2</span></div>
         <div class="m-msg is-accent" style="margin-bottom:12px">A subscribed feed can be handed on by a secret link of its own — the same mechanism, pointed outward.</div>
         <table class="m-table">
           <tbody>
             <tr><td><span class="m-fname"><span class="m-src is-ext" style="display:inline-flex;padding:0;height:auto"><span class="m-bar3" style="background:#8C6239"></span></span><span>Праздники РФ</span></span></td><td class="mono">ics · external</td>
-              <td class="mono" style="font-size:11px">https://feeds.example/ru-holidays.ics</td><td class="mono">отдана по ссылке до 01.09</td>
+              <td class="mono" style="font-size:11px">https://feeds.example/ru-holidays.ics</td><td class="mono">shared by link until 01.09</td>
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Copy</span><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
           </tbody>
         </table>
@@ -4233,21 +4233,21 @@ Read  2 min ago</div>
         <div class="m-head" style="padding-bottom:8px"><div><div class="m-h1" style="font-size:17px">Publish</div><div class="m-sub">Личный · nextcloud</div></div>
           <div class="m-acts"><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div></div>
         <div class="m-form" style="padding-top:4px">
-          <div class="m-f" style="width:100%"><label>What to publish</label><span class="m-in">Вся коллекция</span></div>
+          <div class="m-f" style="width:100%"><label>What to publish</label><span class="m-in">The whole collection</span></div>
           <div class="m-f w-sm"><label>From</label><span class="m-in is-mono">2026-08-10</span></div>
           <div class="m-f w-sm"><label>To</label><span class="m-in is-mono">2026-08-31</span></div>
-          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">30 дней</span></div>
+          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">30 days</span></div>
           <div class="m-f" style="width:100%;gap:7px">
             <span class="m-check"><span class="m-box"></span>Allow download of <span class="mono">.ics</span></span>
             <span class="m-check"><span class="m-box is-off"></span>Show event descriptions</span>
           </div>
         </div>
         <div class="m-sec">
-          <div class="m-rubric">Что получит открывший</div>
+          <div class="m-rubric">What the visitor gets</div>
           <ul style="font-size:12.5px;display:flex;flex-direction:column;gap:5px;color:var(--muted)">
-            <li>Список событий за диапазон, без входа</li>
-            <li>Ничего, кроме этой коллекции: ссылка не даёт доступа к аккаунту</li>
-            <li><span class="mono">X-Robots-Tag: noindex</span>, свой лимит запросов</li>
+            <li>A list of events for the range, without signing in</li>
+            <li>Nothing but this collection: the link gives no access to the account</li>
+            <li><span class="mono">X-Robots-Tag: noindex</span>, its own rate limit</li>
           </ul>
         </div>
         <div class="m-formfoot"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
@@ -4278,7 +4278,7 @@ Read  2 min ago</div>
         <span style="font-size:11px;color:var(--dusty)">read-only, updates on its own</span>
       </div>
       <div class="m-head" style="padding-bottom:8px">
-        <div><div class="m-h1">Личный</div><div class="m-sub">10 – 31 августа 2026 · страница читается с сервера при каждом заходе</div></div>
+        <div><div class="m-h1">Личный</div><div class="m-sub">10 – 31 August 2026 · the page is read from the server on every visit</div></div>
       </div>
       <div class="m-group"><span class="m-rubric">Понедельник · 10 августа</span><span class="m-num">2</span></div>
       <div class="m-list">
@@ -4289,7 +4289,7 @@ Read  2 min ago</div>
       <div class="m-list">
         <div class="m-row m-row--agenda"><span class="m-bar3" style="background:#4A6B52"></span><span class="mono">09:30</span><span class="t">Ревью архитектуры</span><span class="s m-hide-3">Переговорная 1</span><span class="d"></span><span class="d"></span></div>
       </div>
-      <div style="padding:16px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">Ссылка действует до 9 сентября 2026. Владелец может отозвать её в любой момент.</div>
+      <div style="padding:16px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">This link works until 9 September 2026. The owner can revoke it at any moment.</div>
     </div></div>
   </div>
 </div>
@@ -4319,8 +4319,8 @@ Read  2 min ago</div>
         <span style="font-size:11px;color:var(--dusty)">another Carrel can subscribe to it; other clients import it</span>
       </div>
       <div class="m-head" style="padding-bottom:8px">
-        <div><div class="m-h1">Команда</div><div class="m-sub">13 контактов · список читается с сервера при каждом заходе</div></div>
-        <div class="m-acts"><span class="m-in is-ph" style="width:190px;height:26px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" style="margin-right:6px"><use href="#i-search"/></svg>Найти в списке</span></div>
+        <div><div class="m-h1">Команда</div><div class="m-sub">13 contacts · the list is read from the server on every visit</div></div>
+        <div class="m-acts"><span class="m-in is-ph" style="width:190px;height:26px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" style="margin-right:6px"><use href="#i-search"/></svg>Search this list</span></div>
       </div>
       <div class="m-group"><span class="m-rubric">А</span><span class="m-num">2</span></div>
       <div class="m-list">
@@ -4352,7 +4352,7 @@ Read  2 min ago</div>
           <span class="d"></span>
         </div>
       </div>
-      <div style="padding:16px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">Ссылка действует до 9 сентября 2026. Владелец может отозвать её в любой момент.</div>
+      <div style="padding:16px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">This link works until 9 September 2026. The owner can revoke it at any moment.</div>
     </div></div>
   </div>
 </div>
@@ -4390,12 +4390,12 @@ Read  2 min ago</div>
               </ul>
             </div>
             <div style="margin-top:20px;padding-top:12px;border-top:.5px solid var(--hair)">
-              <div class="m-rubric" style="margin-bottom:7px">Вложения</div>
-              <div style="font-size:12.5px;color:var(--muted)">2026-08-10-sync-board.png <span style="color:var(--dusty)">· 412 KB · по этой ссылке не открывается</span></div>
+              <div class="m-rubric" style="margin-bottom:7px">Attachments</div>
+              <div style="font-size:12.5px;color:var(--muted)">2026-08-10-sync-board.png <span style="color:var(--dusty)">· 412 KB · not available through this link</span></div>
             </div>
           </div>
         </div>
-        <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">Ссылка действует до 19 августа 2026.</div>
+        <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">This link works until 19 August 2026.</div>
       </div></div>
     </div>
   </div>
@@ -4414,12 +4414,12 @@ Read  2 min ago</div>
         </div>
         <div class="m-head" style="padding-bottom:6px">
           <div><div class="m-h1" style="font-size:19px">2026-08-10-sync-board.png</div>
-            <div class="m-sub"><span class="mono">image/png · 412 KB · изменён 10.08.2026</span></div></div>
+            <div class="m-sub"><span class="mono">image/png · 412 KB · changed 2026-08-10</span></div></div>
         </div>
         <div style="padding:6px 20px 18px">
           <div class="m-thumb" style="aspect-ratio:16/9;border-radius:4px;border:.5px solid var(--hair)"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" style="width:34px;height:34px"><use href="#i-img"/></svg></div>
         </div>
-        <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">Ссылка действует до 19 августа 2026.</div>
+        <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">This link works until 19 August 2026.</div>
       </div></div>
     </div>
   </div>
@@ -4443,7 +4443,7 @@ Read  2 min ago</div>
         </div>
         <div class="m-head" style="padding-bottom:4px">
           <div><div class="m-h1" style="font-size:19px">release-checklist.md</div>
-            <div class="m-sub"><span class="mono">text/markdown · 3.1 KB · изменён 09.08.2026</span></div></div>
+            <div class="m-sub"><span class="mono">text/markdown · 3.1 KB · changed 2026-08-09</span></div></div>
         </div>
         <div class="m-docbody" style="padding-top:10px">
           <div class="m-prose" style="font-size:14px;line-height:1.7">## Перед заморозкой
@@ -4456,7 +4456,7 @@ Read  2 min ago</div>
 
 Тег ставит Виктор. Образ собирается вручную до появления CI.</div>
         </div>
-        <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">Ссылка действует до 19 августа 2026 · файл читается с сервера при каждом заходе</div>
+        <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">This link works until 19 August 2026 · the file is read from the server on every visit</div>
       </div></div>
     </div>
   </div>
@@ -4478,12 +4478,12 @@ Read  2 min ago</div>
           </span>
           <div>
             <div class="m-h1" style="font-size:18px">макет-обложки.psd</div>
-            <div class="m-sub" style="justify-content:center"><span class="mono">image/vnd.adobe.photoshop · 84.2 MB · изменён 04.08.2026</span></div>
+            <div class="m-sub" style="justify-content:center"><span class="mono">image/vnd.adobe.photoshop · 84.2 MB · changed 2026-08-04</span></div>
           </div>
           <span class="m-btn is-primary" style="height:30px"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Download 84.2 MB</span>
-          <div style="font-size:12px;color:var(--muted);max-width:44ch">Показать этот файл в браузере нельзя — Carrel не пытается. Он отдаётся потоком с исходным типом, ничего не перекодируя и не сохраняя у себя.</div>
+          <div style="font-size:12px;color:var(--muted);max-width:44ch">This file cannot be shown in a browser, and Carrel does not try. It is streamed with its own type, transcoded nowhere and stored nowhere.</div>
         </div>
-        <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">Ссылка действует до 19 августа 2026.</div>
+        <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">This link works until 19 August 2026.</div>
       </div></div>
     </div>
   </div>
@@ -4502,7 +4502,7 @@ Read  2 min ago</div>
       </div>
       <div class="m-head" style="padding-bottom:8px">
         <div><div class="m-h1" style="font-size:19px">Материалы к релизу</div>
-          <nav class="m-crumbs"><b>Материалы к релизу</b> <span style="color:var(--dusty)">· 4 файла · 6.6 MB</span></nav></div>
+          <nav class="m-crumbs"><b>Материалы к релизу</b> <span style="color:var(--dusty)">· 4 files · 6.6 MB</span></nav></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:9px 20px;border-bottom:.5px solid var(--hair)">
         <span style="font-size:12px;color:var(--muted)">Mount as a drive</span>
@@ -4514,13 +4514,13 @@ Read  2 min ago</div>
       <table class="m-table">
         <thead><tr><th>Name</th><th style="width:96px">Size</th><th style="width:140px">Type</th><th style="width:150px">Changed</th><th style="width:90px"></th></tr></thead>
         <tbody>
-          <tr class="is-folder"><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>скриншоты</span></span></td><td class="mono">—</td><td class="mono">папка · 6 файлов</td><td class="mono">2026-08-10 11:07</td><td class="m-acts"><span class="m-btn is-sm is-quiet">Open</span></td></tr>
+          <tr class="is-folder"><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>скриншоты</span></span></td><td class="mono">—</td><td class="mono">folder · 6 files</td><td class="mono">2026-08-10 11:07</td><td class="m-acts"><span class="m-btn is-sm is-quiet">Open</span></td></tr>
           <tr><td><span class="m-fname"><svg><use href="#i-doc"/></svg><span>release-checklist.md</span></span></td><td class="mono">3 KB</td><td class="mono">text/markdown</td><td class="mono">2026-08-09 18:44</td><td class="m-acts"><span class="m-btn is-sm">Download</span></td></tr>
           <tr><td><span class="m-fname"><svg><use href="#i-img"/></svg><span>2026-08-04-whiteboard.jpg</span></span></td><td class="mono">2.8 MB</td><td class="mono">image/jpeg</td><td class="mono">2026-08-04 17:03</td><td class="m-acts"><span class="m-btn is-sm">Download</span></td></tr>
           <tr><td><span class="m-fname"><svg><use href="#i-doc"/></svg><span>смета-подрядчик.pdf</span></span></td><td class="mono">1.2 MB</td><td class="mono">application/pdf</td><td class="mono">2026-08-05 14:20</td><td class="m-acts"><span class="m-btn is-sm">Download</span></td></tr>
         </tbody>
       </table>
-      <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">Ссылка действует до 1 сентября 2026 · содержимое читается с сервера при каждом заходе</div>
+      <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">This link works until 1 September 2026 · the contents are read from the server on every visit</div>
     </div></div>
   </div>
 </div>
@@ -4563,13 +4563,13 @@ Read  2 min ago</div>
         <div class="m-rail-foot">
           <span style="display:flex;align-items:center;gap:8px">
             <svg width="22" height="22" viewBox="0 0 96 96"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M6 12C18 12 30 24 42 33"/><path d="M6 30C24 30 36 42 42 42"/><path d="M6 48H42"/><path d="M6 66C24 66 36 54 42 54"/><path d="M6 84C18 84 30 72 42 63"/></g><rect x="42" y="18" width="6" height="60" rx="1.5" fill="currentColor"/><rect x="48" y="36" width="48" height="24" fill="#4A6B52"/></svg>
-            <span style="font-size:11px;color:var(--dusty)">Прокси включён<br>запись выключена</span>
+            <span style="font-size:11px;color:var(--dusty)">Proxy on<br>writing off</span>
           </span>
         </div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">davloom <span class="m-badge is-local" title="Локальный запуск: снаружи может быть недоступно">local</span></div><div class="m-sub">Один адрес для всех устройств вместо пяти учётных записей · <span style="color:var(--alert)">телефон в сотовой сети до локального адреса не дотянется</span></div></div>
+          <div><div class="m-h1">davloom <span class="m-badge is-local" title="Локальный запуск: снаружи может быть недоступно">local</span></div><div class="m-sub">One address for every device instead of five accounts · <span style="color:var(--alert)">a phone on mobile data will not reach a local address</span></div></div>
           <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add device</span></div>
         </div>
         <div class="m-form" style="padding-bottom:6px">
@@ -4588,14 +4588,14 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="m-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke its password here — that is the only thing that stops it.</div>
-        <div class="m-group"><span class="m-rubric">Устройства</span><span class="m-num">3</span></div>
+        <div class="m-group"><span class="m-rubric">Devices</span><span class="m-num">3</span></div>
         <table class="m-table">
           <thead><tr><th>Device</th><th style="width:34%">What it can see</th><th>Access</th><th>Created</th><th>Last request</th><th style="width:90px"></th></tr></thead>
           <tbody>
             <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Телефон · DAVx5</span></span></td>
               <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
                 <span class="m-bar3" style="background:#4A6B52"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-bar3" style="background:#A05A2C"></span>
-                <span class="mono" style="font-size:11px;margin:0 6px">4 календаря · 1 книга</span>
+                <span class="mono" style="font-size:11px;margin:0 6px">4 calendars · 1 book</span>
                 <span class="m-btn is-sm">Change…</span></span></td>
               <td><span class="m-seg" style="height:22px"><span class="is-on">read</span><span class="is-dim" title="Запись выключена для всего прокси">write</span></span></td>
               <td class="mono">2026-06-02</td><td class="mono">2026-08-15 09:31</td>
@@ -4603,29 +4603,29 @@ Read  2 min ago</div>
             <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Ноутбук · Thunderbird</span></span></td>
               <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
                 <span class="m-bar3 is-multi"></span>
-                <span class="mono" style="font-size:11px;margin:0 6px">всё · 12 коллекций</span>
+                <span class="mono" style="font-size:11px;margin:0 6px">all · 12 collections</span>
                 <span class="m-btn is-sm">Change…</span></span></td>
               <td><span class="m-seg" style="height:22px"><span class="is-on">read</span><span class="is-dim" title="Запись выключена для всего прокси">write</span></span></td>
               <td class="mono">2026-06-02</td><td class="mono">2026-08-15 08:02</td>
               <td class="m-acts"><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
-            <tr style="opacity:.6"><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Старый телефон</span></span></td>
-              <td class="mono">—</td><td class="mono">отозван</td><td class="mono">2026-03-14</td><td class="mono">2026-05-30 12:10</td>
+            <tr style="opacity:.6"><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Old phone</span></span></td>
+              <td class="mono">—</td><td class="mono">revoked</td><td class="mono">2026-03-14</td><td class="mono">2026-05-30 12:10</td>
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Delete</span></td></tr>
           </tbody>
         </table>
-        <div class="m-group"><span class="m-rubric">Что видит клиент</span></div>
+        <div class="m-group"><span class="m-rubric">What the client sees</span></div>
         <div style="padding:10px 20px 16px">
           <div class="m-tree" style="max-width:520px">
-            <div><svg><use href="#i-file"/></svg><span class="mono">/dav/</span> <span style="color:var(--dusty);font-size:11px;margin-left:auto">синтетический корень</span></div>
+            <div><svg><use href="#i-file"/></svg><span class="mono">/dav/</span> <span style="color:var(--dusty);font-size:11px;margin-left:auto">synthetic root</span></div>
             <div style="padding-left:22px"><svg><use href="#i-con"/></svg><span class="mono">principals/mix/</span></div>
-            <div style="padding-left:22px"><svg><use href="#i-cal"/></svg><span class="mono">calendars/</span> <span style="color:var(--dusty);font-size:11px;margin-left:auto">fan-out по серверам</span></div>
+            <div style="padding-left:22px"><svg><use href="#i-cal"/></svg><span class="mono">calendars/</span> <span style="color:var(--dusty);font-size:11px;margin-left:auto">fan-out across servers</span></div>
             <div style="padding-left:44px"><span class="m-bar3" style="background:#4A6B52"></span><span class="mono">nextcloud-personal/</span></div>
             <div style="padding-left:44px"><span class="m-bar3" style="background:#3F6E8C"></span><span class="mono">nextcloud-work/</span></div>
             <div style="padding-left:44px"><span class="m-bar3" style="background:#6B4E7A"></span><span class="mono">radicale-projects/</span></div>
             <div style="padding-left:22px"><svg><use href="#i-con"/></svg><span class="mono">addressbooks/</span></div>
             <div style="padding-left:44px"><span class="m-bar3" style="background:#4A6B52"></span><span class="mono">nextcloud-contacts/</span></div>
             <div style="padding-left:44px"><span class="m-bar3" style="background:#6B4E7A"></span><span class="mono">radicale-team/</span></div>
-            <div style="padding-left:22px"><svg><use href="#i-file"/></svg><span class="mono">files/</span> <span style="color:var(--dusty);font-size:11px;margin-left:auto">обычный WebDAV, без синтетики</span></div>
+            <div style="padding-left:22px"><svg><use href="#i-file"/></svg><span class="mono">files/</span> <span style="color:var(--dusty);font-size:11px;margin-left:auto">plain WebDAV, no synthetic levels</span></div>
             <div style="padding-left:44px"><span class="m-bar3" style="background:#4A6B52"></span><span class="mono">sftpgo-documents/</span></div>
             <div style="padding-left:44px"><span class="m-bar3" style="background:#3F6E8C"></span><span class="mono">nextcloud-files/</span></div>
           </div>
@@ -4644,7 +4644,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>davloom · добавление устройства, шаг 1</span><span class="plan">не построено</span><i>что это за устройство</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
-        <div class="m-head"><div><div class="m-h1">Add device</div><div class="m-sub">Пароль приложения — на одно устройство, со своей обёрткой ключа</div></div></div>
+        <div class="m-head"><div><div class="m-h1">Add device</div><div class="m-sub">An app password for one device, with its own key wrapper</div></div></div>
         <div class="m-form" style="padding-left:0;padding-right:0">
           <div class="m-f" style="width:100%"><label>Name</label><span class="m-in is-focus">Телефон · DAVx5</span>
             <span class="m-hint">For you: this is how you will know what you are revoking later.</span></div>
@@ -4654,7 +4654,7 @@ Read  2 min ago</div>
             <span class="m-hint">Writing is unavailable: it is off for the whole proxy. It is turned on once, on the davloom page, and for every device at once.</span>
           </div>
           <div class="m-f" style="width:100%">
-            <label>What the device will see <span style="color:var(--dusty)">— меняется и потом, без перевыдачи пароля</span></label>
+            <label>What the device will see <span style="color:var(--dusty)">— changed later too, without re-issuing the password</span></label>
             <div style="display:flex;flex-direction:column;gap:2px;margin-top:2px">
               <span class="m-check"><span class="m-box"></span>Calendars <span style="color:var(--dusty)">· 5 collections</span></span>
               <span class="m-check"><span class="m-box"></span>Address books <span style="color:var(--dusty)">· 3</span></span>
@@ -4676,7 +4676,7 @@ Read  2 min ago</div>
     <div class="frame-label"><span>davloom · добавление устройства, шаг 2</span><span class="plan">не построено</span><i>показывается один раз</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
-        <div class="m-head"><div><div class="m-h1">Телефон · DAVx5</div><div class="m-sub">Пароль создан · только чтение · 8 коллекций</div></div></div>
+        <div class="m-head"><div><div class="m-h1">Телефон · DAVx5</div><div class="m-sub">Password created · read only · 8 collections</div></div></div>
         <div class="m-card" style="border-color:var(--accent)">
           <div class="m-rubric">Device password</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:2px">
@@ -4744,7 +4744,7 @@ Read  2 min ago</div>
 <h2 id="s-plan-small">7.18 Мелкое запланированное — где оно живёт в этих макетах</h2>
 <table class="doc">
   <tr><th style="width:30%">Что</th><th style="width:26%">Где показано</th><th>Что нужно сделать</th></tr>
-  <tr><td>Вложения у задач (§23.10)</td><td>Нарисовано: 7.3, блок <b>Attachments</b> в карточке задачи</td><td>Модель готова: дело за карточкой</td></tr>
+  <tr><td>Attachments у задач (§23.10)</td><td>Нарисовано: 7.3, блок <b>Attachments</b> в карточке задачи</td><td>Модель готова: дело за карточкой</td></tr>
   <tr><td>Когда коллекция читалась и менялась (§23.8)</td><td>Блок <b>Source</b> в панели подробностей, 7.2</td><td>Кэш это уже знает — не хватает только вывода</td></tr>
   <tr><td>Исходный часовой пояс события (§23.8)</td><td>Поле <b>Time zone</b> в форме события, 7.2</td><td>Данные в <code>DTSTART</code>; показывать, когда отличается от общего</td></tr>
   <tr><td>Оболочка офлайн (service worker)</td><td>Нарисовано: раздел 8, состояние «нет сети»</td><td>Кэшировать оболочку и статику, содержимое коллекций — никогда</td></tr>
@@ -4760,7 +4760,7 @@ Read  2 min ago</div>
   <div class="frame">
     <div class="frame-label"><span>Ничего не подключено</span><i>первый вход</i></div>
     <div class="mock"><div class="m-shell no-rail"><div class="m-main">
-      <div class="m-head"><div><div class="m-h1">Calendar</div><div class="m-sub">Ни одного сервера пока не подключено</div></div></div>
+      <div class="m-head"><div><div class="m-h1">Calendar</div><div class="m-sub">No server connected yet</div></div></div>
       <div class="m-empty">
         Carrel stores nothing of its own: calendars, contacts and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password.
         <span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</span>
@@ -4774,7 +4774,7 @@ Read  2 min ago</div>
   <div class="frame">
     <div class="frame-label"><span>Файлы есть в навигации always</span><i>ни одной папки не найдено</i></div>
     <div class="mock"><div class="m-shell no-rail"><div class="m-main">
-      <div class="m-head"><div><div class="m-h1">Files</div><div class="m-sub">Ни на одном подключённом сервере нет простой папки</div></div></div>
+      <div class="m-head"><div><div class="m-h1">Files</div><div class="m-sub">None of the connected servers offers a plain folder</div></div></div>
       <div class="m-empty">
         Carrel shows this section when discovery finds a WebDAV collection that is neither a calendar nor an address book. There is no setting to turn it on: Baikal serves calendars and contacts only — a folder usually means a second account, on Nextcloud or on a plain WebDAV server.
         <span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</span>
@@ -4804,7 +4804,7 @@ Read  2 min ago</div>
   <div class="frame">
     <div class="frame-label"><span>Только для чтения</span><i>привилегии с сервера</i></div>
     <div class="mock"><div class="m-shell no-rail"><div class="m-main">
-      <div class="m-head"><div><div class="m-h1">Команда <span class="m-badge">read-only</span></div><div class="m-sub">radicale · vps · сервер не дал права на запись</div></div>
+      <div class="m-head"><div><div class="m-h1">Команда <span class="m-badge">read-only</span></div><div class="m-sub">radicale · vps · the server granted no write access</div></div>
         <div class="m-acts"><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Export</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</span></div></div>
       <div class="m-list">
         <div class="m-row m-row--contact"><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-av">ПК</span><span class="t">Пётр Ковалёв</span><span class="s mono">—</span><span class="s">p.kovalev@example.org</span><span class="s">—</span><span class="d">radicale · Команда</span></div>
@@ -4820,19 +4820,19 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Нет сети</span><i>оболочка есть, содержимого нет</i></div>
     <div class="mock"><div class="m-shell no-rail"><div class="m-main">
       <div class="m-poll" style="background:transparent;border-bottom:.5px solid var(--alert);color:var(--alert)">
-        <span class="m-prog"><i style="width:0"></i></span>Нет связи с carrel.example · последняя удачная попытка 4 минуты назад
-        <span style="margin-left:auto"><span class="m-btn is-sm">Повторить</span></span>
+        <span class="m-prog"><i style="width:0"></i></span>No connection to carrel.example · last successful attempt 4 minutes ago
+        <span style="margin-left:auto"><span class="m-btn is-sm">Retry</span></span>
       </div>
-      <div class="m-head"><div><div class="m-h1"><span class="m-bar3 is-multi" style="height:20px"></span>All calendars</div><div class="m-sub">показано из памяти этого сеанса</div></div></div>
+      <div class="m-head"><div><div class="m-h1"><span class="m-bar3 is-multi" style="height:20px"></span>All calendars</div><div class="m-sub">shown from this session’s memory</div></div></div>
       <div class="m-group"><span class="m-rubric">Понедельник · 10 августа</span><span class="m-num">3</span></div>
       <div class="m-list">
         <div class="m-row m-row--agenda" style="opacity:.7"><span class="m-bar3" style="background:#4A6B52"></span><span class="mono">10:00</span><span class="t">Синк-ап по релизу</span><span class="s m-hide-3">Переговорная 2</span><span class="d"></span><span class="d">nextcloud · Личный</span></div>
         <div class="m-row m-row--agenda" style="opacity:.7"><span class="m-bar3" style="background:#3F6E8C"></span><span class="mono">15:00</span><span class="t">Созвон с подрядчиком</span><span class="s m-hide-3">Jitsi</span><span class="d"></span><span class="d">nextcloud · Работа</span></div>
       </div>
-      <div class="m-empty" style="padding:14px 20px;font-size:12px">Создавать и править сейчас нельзя: запись уходит на сервер, а его не видно. Кнопки не спрятаны — они скажут то же самое, если нажать.</div>
+      <div class="m-empty" style="padding:14px 20px;font-size:12px">Creating and editing are not possible now: writing goes to the server, and the server is not there. The buttons are not hidden — they say the same if pressed.</div>
     </div></div></div>
   </div>
-  <figcaption>Установленное приложение (и настольное, и PWA) без сети показывает оболочку и то, что уже лежит в памяти сеанса, — но <b>не хранит содержимое на диске</b>: это была бы та самая локальная копия, которой в Carrel нет. Поэтому «показано из памяти этого сеанса» написано прямо в подзаголовке, строки приглушены, а полоса опроса красная и предлагает повторить. Открытое заново окно покажет пустой список и ту же строку — и это честнее, чем вчерашние данные, выданные за сегодняшние.</figcaption>
+  <figcaption>Установленное приложение (и настольное, и PWA) без сети показывает оболочку и то, что уже лежит в памяти сеанса, — но <b>не хранит содержимое на диске</b>: это была бы та самая локальная копия, которой в Carrel нет. Поэтому «shown from this session’s memory» написано прямо в подзаголовке, строки приглушены, а полоса опроса красная и предлагает повторить. Открытое заново окно покажет пустой список и ту же строку — и это честнее, чем вчерашние данные, выданные за сегодняшние.</figcaption>
   </figure>
 
   <figure style="flex:1 1 400px">
@@ -4950,7 +4950,7 @@ Read  2 min ago</div></div>
             </div>
             <div class="m-row m-row--phone">
               <span class="m-bar3" style="background:#8C6239;height:32px"></span>
-              <span class="m-two"><span class="t">Дежурство: первая линия</span><span class="d"><span class="mono">весь день</span> · повторяется</span></span>
+              <span class="m-two"><span class="t">Дежурство: первая линия</span><span class="d"><span class="mono">all day</span> · repeats</span></span>
               <span class="d">Дежурства</span>
             </div>
             <div class="m-row m-row--phone">
@@ -5125,19 +5125,19 @@ Read  2 min ago</div></div>
           <span class="m-photo is-ph" style="width:62px;height:62px;font-size:17px">АК</span>
           <div style="min-width:0">
             <div style="font-family:var(--f-serif);font-size:18px">Анна Ковалёва</div>
-            <div class="m-sub" style="margin-top:3px">Издательство «Слово» <span class="m-badge is-linked">в 2 книгах</span></div>
+            <div class="m-sub" style="margin-top:3px">Издательство «Слово» <span class="m-badge is-linked">in 2 books</span></div>
           </div>
         </div>
         <div style="display:flex;gap:6px;padding:0 14px 12px;flex-wrap:wrap">
-          <span class="m-btn">Позвонить</span><span class="m-btn">Написать</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg></span>
+          <span class="m-btn">Call</span><span class="m-btn">Email</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg></span>
         </div>
         <div class="m-bar" style="padding:0 14px 8px">
-          <span class="m-seg"><span class="is-on">Карточка</span><span>Связи 27</span></span>
+          <span class="m-seg"><span class="is-on">Card</span><span>Connections 27</span></span>
         </div>
         <dl class="m-fields" style="grid-template-columns:84px minmax(0,1fr);padding:4px 14px 12px">
-          <dt>Телефон</dt><dd class="mono" style="color:var(--accent)">+7 912 445-10-88</dd>
-          <dt>Почта</dt><dd style="color:var(--accent)">a.kovaleva@example.org</dd>
-          <dt>День рождения</dt><dd class="mono">1987-03-14</dd>
+          <dt>Phone</dt><dd class="mono" style="color:var(--accent)">+7 912 445-10-88</dd>
+          <dt>Email</dt><dd style="color:var(--accent)">a.kovaleva@example.org</dd>
+          <dt>Birthday</dt><dd class="mono">1987-03-14</dd>
         </dl>
         <div class="m-tabbar">
           <a class="is-on"><svg><use href="#i-con"/></svg>Contacts</a>
@@ -5232,8 +5232,8 @@ Read  2 min ago</div></div>
             </ul>
           </div>
           <div style="margin-top:16px;padding-top:12px;border-top:.5px solid var(--hair)">
-            <div class="m-rubric" style="margin-bottom:7px">Связано с</div>
-            <div style="font-size:13px;color:var(--accent)">Синк-ап по релизу <span style="color:var(--dusty)">· событие</span></div>
+            <div class="m-rubric" style="margin-bottom:7px">Related to</div>
+            <div style="font-size:13px;color:var(--accent)">Синк-ап по релизу <span style="color:var(--dusty)">· event</span></div>
           </div>
         </div>
         <div class="m-tabbar">
@@ -5261,7 +5261,7 @@ Read  2 min ago</div></div>
     <div style="font-size:11px;color:#555">nextcloud · Личный, Работа · radicale · Проекты, Дежурства</div>
     <div class="p-rub">Понедельник · 10 августа</div>
     <div class="p-row"><span class="mono" style="font-family:ui-monospace,monospace">10:00</span><span><b>Синк-ап по релизу</b><br><span style="color:#555;font-size:11px">Переговорная 2 · nextcloud · Личный</span></span></div>
-    <div class="p-row"><span class="mono" style="font-family:ui-monospace,monospace">весь день</span><span><b>Дежурство: первая линия</b><br><span style="color:#555;font-size:11px">radicale · Дежурства</span></span></div>
+    <div class="p-row"><span class="mono" style="font-family:ui-monospace,monospace">all day</span><span><b>Дежурство: первая линия</b><br><span style="color:#555;font-size:11px">radicale · Дежурства</span></span></div>
     <div class="p-row"><span class="mono" style="font-family:ui-monospace,monospace">15:00</span><span><b>Созвон с подрядчиком</b><br><span style="color:#555;font-size:11px">Jitsi · nextcloud · Работа</span></span></div>
     <div class="p-rub">Вторник · 11 августа</div>
     <div class="p-row"><span class="mono" style="font-family:ui-monospace,monospace">09:30</span><span><b>Ревью архитектуры</b><br><span style="color:#555;font-size:11px">Переговорная 1 · radicale · Проекты</span></span></div>
@@ -5345,14 +5345,14 @@ Read  2 min ago</div></div>
             <div style="display:flex;flex-direction:column;gap:7px;font-size:12.5px">
               <span>release-checklist.md <span style="color:var(--dusty)">· 3 KB</span></span>
               <span style="display:flex;gap:6px"><span class="m-btn is-sm">Open in editor</span><span class="m-btn is-sm is-quiet">Show in folder</span></span>
-              <span style="font-size:11px;color:var(--dusty)">Правки сохранятся на сервер, когда программа закроет файл. Временная копия живёт до этого момента и удаляется.</span>
+              <span style="font-size:11px;color:var(--dusty)">Edits go to the server when the program closes the file. The temporary copy lives until then and is deleted.</span>
             </div>
           </div>
         </div>
       </div>
       <div class="m-status">
-        <span><span class="dot"></span>carrel.example · опрошено 5 из 7 источников</span>
-        <span class="mono">последний ответ 2 мин назад</span>
+        <span><span class="dot"></span>carrel.example · polled 5 of 7 sources</span>
+        <span class="mono">last answer 2 min ago</span>
         <span style="margin-left:auto" class="mono">v0.7.0</span>
       </div>
     </div>
@@ -5376,9 +5376,9 @@ Read  2 min ago</div></div>
               <div style="display:flex;gap:9px;align-items:flex-start">
                 <span class="m-box" style="margin-top:3px"></span>
                 <div>
-                  <div style="font-weight:600;font-size:13.5px">Local — запустить здесь</div>
-                  <div style="font-size:12.5px;color:var(--muted);margin-top:3px">Carrel работает внутри приложения, на этом компьютере. Ничего разворачивать не нужно.</div>
-                  <div style="font-size:11.5px;color:var(--dusty);margin-top:6px">Подходит одному человеку и одному компьютеру. С телефона такой Carrel не открыть, пока не разрешить доступ по сети.</div>
+                  <div style="font-weight:600;font-size:13.5px">Local — run it here</div>
+                  <div style="font-size:12.5px;color:var(--muted);margin-top:3px">Carrel runs inside the app, on this computer. Nothing to deploy.</div>
+                  <div style="font-size:11.5px;color:var(--dusty);margin-top:6px">Suits one person and one computer. A phone cannot open this Carrel until access over the network is allowed.</div>
                 </div>
               </div>
             </div>
@@ -5386,14 +5386,14 @@ Read  2 min ago</div></div>
               <div style="display:flex;gap:9px;align-items:flex-start">
                 <span class="m-box is-off" style="margin-top:3px"></span>
                 <div>
-                  <div style="font-weight:600;font-size:13.5px">Remote — подключиться к серверу</div>
-                  <div style="font-size:12.5px;color:var(--muted);margin-top:3px">Carrel уже развёрнут — свой или общий. Приложение станет его окном.</div>
-                  <div style="font-size:11.5px;color:var(--dusty);margin-top:6px">Один экземпляр на все ваши устройства, и настройки везде одни и те же.</div>
+                  <div style="font-weight:600;font-size:13.5px">Remote — connect to a server</div>
+                  <div style="font-size:12.5px;color:var(--muted);margin-top:3px">Carrel is already running — yours or a shared one. The app becomes its window.</div>
+                  <div style="font-size:11.5px;color:var(--dusty);margin-top:6px">One instance for all your devices, with the same settings everywhere.</div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="m-msg" style="margin:0">Режим меняется через выход из учётной записи: приложение снова покажет этот экран. Данные (<span class="mono">state.enc</span>) в обоих случаях лежат в профиле пользователя ОС.</div>
+          <div class="m-msg" style="margin:0">The mode changes by signing out: the app shows this screen again. The data (<span class="mono">state.enc</span>) lives in the OS user profile either way.</div>
           <div style="display:flex;gap:8px"><span class="m-btn is-primary">Next</span></div>
         </div>
       </div>
@@ -5407,7 +5407,7 @@ Read  2 min ago</div></div>
     <div class="frame-label"><span>Локальный запуск</span><span class="plan">не построено</span><i>Carrel внутри приложения</i></div>
     <div class="mock">
       <div class="m-win">
-        <div class="m-titlebar"><span class="t">Carrel · локальный экземпляр</span><span class="m-winbtns"><span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
+        <div class="m-titlebar"><span class="t">Carrel · local instance</span><span class="m-winbtns"><span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
         <div style="padding:18px 20px;display:flex;flex-direction:column;gap:13px;background:var(--bg)">
           <div class="m-form" style="padding:0;gap:12px 16px">
             <div class="m-f" style="flex:1 1 100%"><label>Data folder</label>
@@ -5421,7 +5421,7 @@ Read  2 min ago</div></div>
             </div>
           </div>
           <div class="m-fset" style="border-top:.5px solid var(--hair);padding-top:12px">
-            <div class="m-rubric">Учётная запись</div>
+            <div class="m-rubric">Account</div>
             <div class="m-f w-md"><label>Login</label><span class="m-in">mix</span></div>
             <div class="m-f w-md"><label>Password</label><span class="m-in">••••••••••••</span></div>
             <div class="m-msg is-alert" style="flex:1 1 100%;margin:2px 0 0">The password is the only key to the saved connections. Running locally changes nothing about that: nobody can recover it, including the app on your own computer.</div>
@@ -5433,12 +5433,12 @@ Read  2 min ago</div></div>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="m-btn is-primary">Run</span>
             <span class="m-btn is-quiet">Back</span>
-            <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:5px"></span>сервер остановлен</span>
+            <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:5px"></span>server stopped</span>
           </div>
         </div>
         <div class="m-status">
-          <span><span class="dot"></span>локально · <span class="mono">127.0.0.1:8765</span></span>
-          <span class="mono">данные: AppData\Local\Carrel · 312 КБ</span>
+          <span><span class="dot"></span>local · <span class="mono">127.0.0.1:8765</span></span>
+          <span class="mono">data: AppData\Local\Carrel · 312 KB</span>
           <span style="margin-left:auto" class="mono">v0.7.0</span>
         </div>
       </div>
@@ -5458,7 +5458,7 @@ Read  2 min ago</div></div>
         <div class="m-titlebar"><span class="t">Carrel</span><span class="m-winbtns"><span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
         <div style="padding:22px 22px 20px;display:flex;flex-direction:column;gap:14px;background:var(--bg)">
           <svg class="m-logo" style="width:104px;height:42px" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>
-          <div style="font-size:13px;color:var(--muted)">Приложению нужен адрес вашего экземпляра Carrel. Данные останутся на нём: приложение — окно, а не вторая копия.</div>
+          <div style="font-size:13px;color:var(--muted)">The app needs the address of your Carrel instance. The data stays there: the app is a window, not a second copy.</div>
           <div class="m-form" style="padding:0;flex-direction:column;flex-wrap:nowrap;gap:11px">
             <div class="m-f" style="width:100%"><label>Address</label><span class="m-in is-mono is-focus">https://carrel.example</span></div>
             <div class="m-f" style="width:100%"><label>Login</label><span class="m-in">mix</span></div>
@@ -5466,11 +5466,11 @@ Read  2 min ago</div></div>
             <span class="m-check"><span class="m-box"></span>Start at sign-in</span>
           </div>
           <div class="m-diag">[connect]  GET /healthz → 200
-[tls]      сертификат Let's Encrypt, действителен до 2026-11-02
-[version]  0.7.0 · совместимо</div>
+[tls]      Let's Encrypt certificate, valid until 2026-11-02
+[version]  0.7.0 · compatible</div>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="m-btn is-primary">Connect</span><span class="m-btn">Check</span>
-            <span style="margin-left:auto;font-size:11.5px;color:var(--accent)">Добавить второй экземпляр</span>
+            <span style="margin-left:auto;font-size:11.5px;color:var(--accent)">Add a second instance</span>
           </div>
         </div>
       </div>
@@ -5489,7 +5489,7 @@ Read  2 min ago</div></div>
           <div style="display:flex;flex-direction:column;gap:5px;font-size:12.5px">
             <span style="display:flex;gap:8px"><span class="m-bar3" style="background:#4A6B52;height:14px"></span><span class="mono" style="color:var(--muted)">10:00</span> Синк-ап по релизу</span>
             <span style="display:flex;gap:8px"><span class="m-bar3" style="background:#3F6E8C;height:14px"></span><span class="mono" style="color:var(--muted)">15:00</span> Созвон с подрядчиком</span>
-            <span style="color:var(--alert);font-size:11.5px">3 задачи просрочены</span>
+            <span style="color:var(--alert);font-size:11.5px">3 tasks overdue</span>
           </div>
         </div>
         <span class="sep"></span>
@@ -5514,7 +5514,7 @@ Read  2 min ago</div></div>
       <div class="m-win" style="max-width:420px;margin:0 auto">
         <div class="m-titlebar" style="height:30px">
           <svg width="13" height="13" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.4" fill="none" stroke-linecap="round"><use href="#i-quill"/></svg>
-          <span class="t">Новая заметка</span>
+          <span class="t">New note</span>
           <span class="m-winbtns"><span style="height:30px"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span>
         </div>
         <div style="padding:12px;display:flex;flex-direction:column;gap:9px;background:var(--paper)">
@@ -5524,7 +5524,7 @@ Read  2 min ago</div></div>
             <span class="m-btn is-primary">Save</span>
             <span class="m-kbd">Ctrl+Enter</span>
           </div>
-          <span style="font-size:11px;color:var(--dusty)">Окно закроется само. Carrel открывать не нужно — заметка уйдёт на сервер сразу.</span>
+          <span style="font-size:11px;color:var(--dusty)">The window closes itself. Carrel need not be open — the note goes to the server at once.</span>
         </div>
       </div>
     </div>
@@ -5539,19 +5539,19 @@ Read  2 min ago</div></div>
       <div class="m-toast" style="margin:0 auto">
         <div class="h">
           <svg viewBox="0 0 24 24" stroke="var(--muted)" stroke-width="1.3" fill="none"><use href="#i-cal"/></svg>
-          Carrel · через 10 минут
+          Carrel · in 10 minutes
         </div>
         <div style="font-size:13.5px;font-weight:600">Синк-ап по релизу</div>
         <div style="font-size:12px;color:var(--muted)"><span class="mono">10:00 – 11:00</span> · Переговорная 2 · nextcloud · Личный</div>
         <div style="display:flex;gap:6px;margin-top:2px"><span class="m-btn is-sm">Open</span><span class="m-btn is-sm is-quiet">Snooze 5 min</span></div>
       </div>
       <div class="m-form" style="padding:0;flex-direction:column;flex-wrap:nowrap;gap:10px;max-width:340px;margin:0 auto;width:100%">
-        <div class="m-rubric">Настройка</div>
-        <div class="m-f" style="width:100%"><label>Remind me</label><span class="m-in">10 минут · и как задано в событии</span></div>
+        <div class="m-rubric">Reminders</div>
+        <div class="m-f" style="width:100%"><label>Remind me</label><span class="m-in">10 minutes · and as set in the event</span></div>
         <span class="m-check"><span class="m-box"></span>Task due dates — on the morning they are due</span>
         <span class="m-check"><span class="m-box is-off"></span>Show the title on the lock screen</span>
         <div class="m-f" style="width:100%"><label>Quiet hours</label><span class="m-in is-mono">22:00 – 08:00</span></div>
-        <div class="m-f" style="width:100%"><label>From which collections</label><span class="m-in">3 из 7 отмечено</span></div>
+        <div class="m-f" style="width:100%"><label>From which collections</label><span class="m-in">3 of 7 ticked</span></div>
       </div>
     </div>
   </div>
@@ -5564,22 +5564,22 @@ Read  2 min ago</div></div>
   <div class="frame-label"><span>Настройки приложения</span><span class="plan">не построено</span><i>то, чего нет в веб-версии</i></div>
   <div class="mock">
     <div class="m-win">
-      <div class="m-titlebar"><span class="t">Carrel · настройки приложения</span><span class="m-winbtns"><span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
+      <div class="m-titlebar"><span class="t">Carrel · application settings</span><span class="m-winbtns"><span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
       <div class="m-shell no-rail"><div class="m-main">
         <div class="m-head" style="padding-bottom:6px">
-          <div><div class="m-h1" style="font-size:19px">Приложение</div><div class="m-sub">Настройки учётной записи и коллекций — внутри, в разделе Settings</div></div>
+          <div><div class="m-h1" style="font-size:19px">Application</div><div class="m-sub">Account and collection settings are inside, in Settings</div></div>
         </div>
         <div class="m-form">
           <div class="m-fset" style="border-top:0;padding-top:0">
-            <div class="m-rubric">Экземпляры</div>
+            <div class="m-rubric">Instances</div>
             <div style="flex:1 1 100%;display:flex;flex-direction:column;gap:2px;max-width:620px">
-              <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">carrel.example · mix</span><span class="m-meta">открыт</span></div>
-              <div class="m-src" style="padding-left:0"><span class="m-box is-off"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">carrel.office.example · m.yenuchenko</span><span class="m-meta">выход</span></div>
+              <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">carrel.example · mix</span><span class="m-meta">open</span></div>
+              <div class="m-src" style="padding-left:0"><span class="m-box is-off"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">carrel.office.example · m.yenuchenko</span><span class="m-meta">signed out</span></div>
             </div>
             <span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add</span>
           </div>
           <div class="m-fset">
-            <div class="m-rubric">Поведение</div>
+            <div class="m-rubric">Behaviour</div>
             <div class="m-f" style="flex:1 1 100%;gap:8px">
               <span class="m-check"><span class="m-box"></span>Start at sign-in</span>
               <span class="m-check"><span class="m-box"></span>Closing the window hides to the tray</span>
@@ -5587,18 +5587,18 @@ Read  2 min ago</div></div>
             </div>
             <div class="m-f w-md"><label>Global note shortcut</label><span class="m-in is-mono">Ctrl+Shift+N</span></div>
             <div class="m-f w-md"><label>Downloads folder</label><span class="m-in is-mono">C:\Users\mix\Downloads</span></div>
-            <div class="m-f w-md"><label>Open files with</label><span class="m-in">программой по умолчанию</span></div>
+            <div class="m-f w-md"><label>Open files with</label><span class="m-in">default application</span></div>
           </div>
           <div class="m-fset">
-            <div class="m-rubric">Сеть</div>
-            <div class="m-f w-md"><label>Proxy</label><span class="m-in">системный</span></div>
+            <div class="m-rubric">Network</div>
+            <div class="m-f w-md"><label>Proxy</label><span class="m-in">system</span></div>
             <div class="m-f" style="align-self:flex-end"><span class="m-check"><span class="m-box is-off"></span>Trust this instance’s self-signed certificate</span></div>
             <div class="m-f" style="flex:1 1 100%"><span class="m-hint">This appears only after a certificate has been rejected, and it remembers that one fingerprint — it is not “turn checking off”.</span></div>
           </div>
           <div class="m-fset">
-            <div class="m-rubric">Версии</div>
-            <div class="m-f" style="flex:1 1 100%;font-size:12.5px;color:var(--muted)">Приложение <span class="mono">0.7.0</span> · сервер <span class="mono">0.7.0</span> · sidecar <span class="mono">0.7.0</span></div>
-            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Самообновления в v1 нет: приложение обновляется тем же способом, каким установлено. Версия приложения и версия сервера — разные вещи, поэтому показаны обе, а при локальном запуске ещё и версия sidecar-бинарника.</span></div>
+            <div class="m-rubric">Versions</div>
+            <div class="m-f" style="flex:1 1 100%;font-size:12.5px;color:var(--muted)">App <span class="mono">0.7.0</span> · server <span class="mono">0.7.0</span> · sidecar <span class="mono">0.7.0</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">There is no self-update in v1: the app is updated the way it was installed. The app version and the server version are different things, so both are shown — and with a local run, the sidecar version too.</span></div>
           </div>
         </div>
       </div></div>
@@ -5611,7 +5611,7 @@ Read  2 min ago</div></div>
 <h3>Что помечается меткой <span class="m-badge is-local" style="font-size:10px">local</span></h3>
 <p>Локальный экземпляр не виден из интернета, и это не поломка, а следствие выбора. Интерфейс не запрещает такие функции и не прячет их — он ставит метку там, где результат зависит от доступности снаружи, и говорит, чего именно не хватает. Обеспечить доступ (проброс порта, туннель, домен, сертификат) может только человек, и Carrel не притворяется, что сделает это за него.</p>
 <table class="doc">
-  <tr><th style="width:26%">Функция</th><th style="width:28%">Что не сработает</th><th>Что делать</th></tr>
+  <tr><th style="width:26%">Функция</th><th style="width:28%">Что не сработает</th><th>What to do</th></tr>
   <tr><td>Публичные ссылки (7.16)</td><td>Адрес откроется только из вашей сети</td><td>Туннель или проброс порта с доменом и сертификатом; либо отдавать файлом, а не ссылкой</td></tr>
   <tr><td>davloom (7.17)</td><td>Телефон в сотовой сети до <span class="mono">192.168.*</span> не дотянется</td><td>Дома по Wi-Fi работает как есть; снаружи — VPN или туннель</td></tr>
   <tr><td>Внешний запуск копии (7.15)</td><td><span class="mono">POST /api/backup/run</span> некому позвать снаружи</td><td>Планировщик на этом же компьютере, либо запуск при входе</td></tr>
@@ -5635,10 +5635,10 @@ Read  2 min ago</div></div>
   <div class="frame-label"><span>Папка на бумаге</span><i>@media print · раздел «Файлы»</i></div>
   <div class="mock is-print">
     <div class="p-h1">Documents / carrel / attachments</div>
-    <div style="font-size:11px;color:#555">sftpgo · vps · 14 объектов · 38.2 MB</div>
-    <div class="p-rub">Папки</div>
-    <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>2026-07</span><span style="font-family:ui-monospace,monospace">34 объекта</span><span style="font-family:ui-monospace,monospace">2026-07-01</span></div>
-    <div class="p-rub">Файлы</div>
+    <div style="font-size:11px;color:#555">sftpgo · vps · 14 items · 38.2 MB</div>
+    <div class="p-rub">Folders</div>
+    <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>2026-07</span><span style="font-family:ui-monospace,monospace">34 items</span><span style="font-family:ui-monospace,monospace">2026-07-01</span></div>
+    <div class="p-rub">Files</div>
     <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>2026-08-10-sync-board.png</span><span style="font-family:ui-monospace,monospace">412 KB</span><span style="font-family:ui-monospace,monospace">2026-08-10</span></div>
     <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>release-checklist.md</span><span style="font-family:ui-monospace,monospace">3 KB</span><span style="font-family:ui-monospace,monospace">2026-08-09</span></div>
     <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>смета-подрядчик.pdf</span><span style="font-family:ui-monospace,monospace">1.2 MB</span><span style="font-family:ui-monospace,monospace">2026-08-05</span></div>
@@ -5653,7 +5653,7 @@ Read  2 min ago</div></div>
 <p>Редизайн не меняет ни одной возможности и ни одной строки текста в интерфейсе — только вёрстку, разметку шаблонов и <code>carrel.css</code>. Ни сборщика, ни зависимостей: те же <code>html/template</code> и htmx.</p>
 
 <table class="doc">
-  <tr><th style="width:6%">Шаг</th><th style="width:26%">Что делается</th><th style="width:30%">Файлы</th><th>Проверка</th></tr>
+  <tr><th style="width:6%">Шаг</th><th style="width:26%">Что делается</th><th style="width:30%">Файлы</th><th>Check</th></tr>
   <tr><td><b>1</b></td><td>Токены и сброс: переменные, шкала, <code>--alert</code> вместо пары <code>--error</code>/<code>--danger</code>, тёмная тема, фокус</td><td><code>static/carrel.css</code></td><td>Существующие экраны не ломаются; <code>go test ./...</code> зелёный (шаблоны не тронуты)</td></tr>
   <tr><td><b>2</b></td><td>Каркас: верхняя панель, рейл, снятие <code>max-width</code> с <code>main</code></td><td><code>template/base.html</code>, CSS</td><td><code>shell_test.go</code> — навигация присутствует и помечает текущий раздел</td></tr>
   <tr><td><b>3</b></td><td>Компоненты списка: строка, полоска, рубрикатор, значки; замена круглых заглушек на квадратные</td><td>CSS + <code>contacts.html</code>, <code>agenda.html</code>, <code>tasks.html</code>, <code>notes.html</code></td><td>Печать сохраняет вид (класс <code>print-only</code> не трогается)</td></tr>
