@@ -546,7 +546,8 @@ figcaption b{color:var(--ink);font-weight:600}
     <a href="#m-phone"><b>10</b><span>Узкий экран</span></a>
     <a href="#m-print"><b>11</b><span>Печать</span></a>
     <a href="#m-desktop"><b>12</b><span>Настольное приложение</span></a>
-    <a href="#upd" class="is-sub"><b>12.1</b><span>Обновление</span></a>
+    <a href="#setup" class="is-sub"><b>12.1</b><span>Установка и portable</span></a>
+    <a href="#upd" class="is-sub"><b>12.2</b><span>Обновление</span></a>
   </section>
   <section>
     <div class="t-h">Внедрение<i>13</i></div>
@@ -5567,6 +5568,114 @@ Read  2 min ago</div></div>
 </div>
 <figcaption>Нативного здесь пять вещей: рамка с кнопками окна, строка меню, подсказка про глобальную клавишу, строка состояния снизу и две кнопки у вложения — «Открыть в редакторе» и «Показать в папке». Всё остальное — те же экраны, что в браузере, поэтому вторая вёрстка не нужна и разойтись двум интерфейсам не в чем. Строка состояния занимает место, которое в браузере отдано вкладке: соединение, ход опроса, версия. <b>Правка вложения во внешней программе</b> — единственное, что приложение делает с диском, и оно говорит об этом прямо: временная копия, слежение за сохранением, отправка обратно, удаление. Молчаливой синхронизации папки не будет: это была бы та самая локальная копия содержимого, которой в Carrel нет.</figcaption>
 </figure>
+
+
+<h3 id="setup">Установка: три варианта, и один из них без установки</h3>
+<p>Установщик спрашивает один раз и на всю жизнь копии, поэтому вопрос стоит задать по-человечески: не «per-machine или per-user», а <b>кому эта копия принадлежит</b>. Третий ответ — <b>portable</b>: распакованная папка, которую никуда не устанавливают. Она нужна там, где установить нельзя или не хочется: рабочий компьютер без прав администратора, чужая машина, флешка, каталог в «Загрузках» на один вечер.</p>
+
+<div class="frames">
+  <figure style="flex:1 1 430px">
+  <div class="frame">
+    <div class="frame-label"><span>Установка · кому эта копия</span><span class="plan">не построено</span><i>Windows, первый экран</i></div>
+    <div class="mock">
+      <div class="m-win">
+        <div class="m-titlebar"><span class="t">Carrel setup</span><span class="m-winbtns"><span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:13px;background:var(--bg)">
+          <svg class="m-logo" style="width:98px;height:40px" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div class="m-card" style="border-color:var(--accent);margin:0">
+              <div style="display:flex;gap:9px;align-items:flex-start">
+                <span class="m-box" style="margin-top:3px"></span>
+                <div>
+                  <div style="font-weight:600;font-size:13.5px">Just for me</div>
+                  <div style="font-size:12.5px;color:var(--muted);margin-top:3px">Installs into your own profile. No administrator needed.</div>
+                </div>
+              </div>
+            </div>
+            <div class="m-card" style="margin:0">
+              <div style="display:flex;gap:9px;align-items:flex-start">
+                <span class="m-box is-off" style="margin-top:3px"></span>
+                <div>
+                  <div style="font-weight:600;font-size:13.5px">For everyone on this computer</div>
+                  <div style="font-size:12.5px;color:var(--muted);margin-top:3px">Installs into <span class="mono">Program Files</span>. Asks for administrator once; each account still keeps its own data and password.</div>
+                </div>
+              </div>
+            </div>
+            <div class="m-card" style="margin:0">
+              <div style="display:flex;gap:9px;align-items:flex-start">
+                <span class="m-box is-off" style="margin-top:3px"></span>
+                <div>
+                  <div style="font-weight:600;font-size:13.5px">Portable — do not install</div>
+                  <div style="font-size:12.5px;color:var(--muted);margin-top:3px">Unpacks into a folder you choose and keeps everything inside it: the app, the server binary and your encrypted state.</div>
+                  <div class="m-f" style="width:100%;margin-top:9px">
+                    <span style="display:flex;gap:8px;align-items:center">
+                      <span class="m-in is-mono is-ph" style="flex:1;font-size:11px">E:\Carrel</span>
+                      <span class="m-btn">Choose…</span>
+                    </span>
+                    <span class="m-hint">Nothing is written outside this folder: no registry, no start-up entry, no traces in the profile. Moving the folder moves Carrel with it.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="m-msg is-alert is-row" style="margin:0">
+            <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none" style="flex:none;margin-top:1px"><use href="#i-shield"/></svg>
+            <span><b>On a stick, the folder is the secret.</b> Your saved DAV passwords are encrypted with your Carrel password and stay encrypted there — but whoever finds the stick holds that file and can try guessing. Choose a long password, or keep the portable copy where you would keep keys.</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="m-btn is-primary">Continue</span>
+            <span class="m-btn is-quiet">Cancel</span>
+            <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">64 MB · app, server, WebView2 check</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Три ответа на один вопрос, и формулировки — про последствия, а не про пути: «нужен ли администратор», «останется ли что-нибудь на этом компьютере». Portable — единственный вариант, где спрашивают папку, потому что в остальных двух она известна заранее и выбирать в них нечего. Предупреждение про флешку стоит на экране установки, а не в документации: человек, который несёт Carrel на флешке, принимает это решение здесь и один раз.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 380px">
+  <div class="frame">
+    <div class="frame-label"><span>Portable · чем эта копия отличается</span><span class="plan">не построено</span><i>настройки приложения</i></div>
+    <div class="mock">
+      <div class="m-win">
+        <div class="m-titlebar"><span class="t">Carrel · portable</span><span class="m-winbtns"><span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
+        <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;background:var(--bg)">
+          <div class="m-form" style="padding:0;gap:12px 16px">
+            <div class="m-f" style="flex:1 1 100%"><label>Everything lives here</label>
+              <span class="m-in is-mono" style="font-size:11.5px">E:\Carrel\ — app, carrel.exe, data\state.enc</span>
+              <span class="m-hint">The same folder on any computer: plug the stick in, run, sign in with your password. The data folder cannot be moved away from the app in this mode — that is what makes it portable.</span></div>
+            <div class="m-f" style="flex:1 1 100%;gap:7px">
+              <span class="m-check"><span class="m-box is-off"></span><span style="color:var(--dusty)">Start at sign-in — not available in a portable copy</span></span>
+              <span class="m-check"><span class="m-box"></span>Closing the window hides to the tray</span>
+            </div>
+            <div class="m-f" style="flex:1 1 100%"><label>Updates</label>
+              <span style="display:flex;gap:8px;align-items:center">
+                <span class="m-in is-ph" style="flex:1">Replaces the files in this folder</span>
+                <span class="m-btn">Check now</span>
+              </span>
+              <span class="m-hint">Works while the folder is writable. On a read-only medium the app says so and offers the download instead of installing it.</span></div>
+          </div>
+          <div class="m-msg" style="margin:0">A portable copy is a full Carrel, local or remote as usual — not a cut-down build.</div>
+        </div>
+        <div class="m-status">
+          <span><span class="dot"></span>portable · <span class="mono">E:\Carrel</span></span>
+          <span style="margin-left:auto" class="mono">v0.7.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Portable отличается тремя вещами, и все три названы на экране, а не в примечании: данные лежат рядом с программой и не отвязываются, автозапуск невозможен (его некуда прописать, не оставив следа), обновление заменяет файлы в этой же папке и требует прав на запись. Всё остальное — тот же Carrel: Remote и Local, трей, напоминания, глобальная клавиша.</figcaption>
+  </figure>
+</div>
+
+<table class="doc">
+  <tr><th style="width:22%">Вариант</th><th style="width:30%">Куда ложится</th><th style="width:26%">Где зашифрованное состояние</th><th>Чем расплачиваетесь</th></tr>
+  <tr><td><b>Just for me</b></td><td><span class="mono">%LOCALAPPDATA%\Programs\Carrel</span>, без администратора</td><td><span class="mono">%LOCALAPPDATA%\Carrel\data</span></td><td>Ничем: обычный вариант по умолчанию</td></tr>
+  <tr><td><b>For everyone</b></td><td><span class="mono">Program Files</span>, администратор один раз</td><td>У каждой учётной записи своё, в её профиле</td><td>Нужны права; на чужом компьютере так не поставить</td></tr>
+  <tr><td><b>Portable</b></td><td>Выбранная папка, ничего вне её</td><td>Там же, в <span class="mono">data\</span> рядом с программой</td><td>Нет автозапуска; обновление только при праве записи; потерянная флешка — потерянный файл состояния</td></tr>
+</table>
+<div class="note">Linux получает то же самое бесплатно: <span class="mono">tar.gz</span> распаковывается куда угодно и уже ведёт себя как portable, а пакет и AppImage — как две первые строки таблицы. Отдельного «портативного сборника» не собирают: это тот же бинарник, которому сказали держать данные рядом с собой.</div>
 
 
 <div class="frames">
