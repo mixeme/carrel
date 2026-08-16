@@ -4151,9 +4151,14 @@ Read  2 min ago</div>
           <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add device</span></div>
         </div>
         <div class="m-form" style="padding-bottom:6px">
-          <div class="m-f w-xl"><label>Address for the client</label><span class="m-in is-mono" style="font-size:11.5px">https://carrel.example/dav/</span><span class="m-hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
-          <div class="m-f" style="align-self:flex-end"><span class="m-btn is-sm">Copy</span></div>
-          <div class="m-f" style="align-self:flex-end"><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-qr"/></svg>QR</span></div>
+          <div class="m-f" style="flex:1 1 460px;max-width:640px">
+            <label>Address for the client</label>
+            <span style="display:flex;gap:8px;align-items:center">
+              <span class="m-in is-mono" style="flex:1;font-size:11.5px">https://carrel.example/dav/</span>
+              <span class="m-btn is-sm">Copy</span>
+              <span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-qr"/></svg>QR</span>
+            </span>
+            <span class="m-hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
           <div class="m-f" style="flex:1 1 100%">
             <label>What devices may do</label>
             <span class="m-seg" style="align-self:flex-start"><span class="is-on">Read only</span><span>Read and write</span></span>
