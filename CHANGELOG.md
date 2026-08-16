@@ -8,6 +8,26 @@ All notable changes to this project are documented in this file.
 
 - **Desktop wrapper (§18) — plan and `CARREL_BIND`:** implementation plan in [docs/plans/desktop-wrapper.md](docs/plans/desktop-wrapper.md) (Wails, Windows + Linux, Remote/Local, tray, sidecar download). Roadmap section Desktop application; §18 marked planned in [docs/carrel-spec.md](docs/carrel-spec.md). P-desktop checks in [docs/manual-acceptance.md](docs/manual-acceptance.md). `CARREL_BIND` env for listen address (desktop local uses `127.0.0.1`); empty bind keeps listening on all interfaces as before.
 
+### Changed
+
+- **Interface mockups grew from a redesign sketch into the reference for every screen** — [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html), 69 mockups drawn as live HTML on the classes meant for `carrel.css`. What changed since the first pass, in the order it matters:
+
+  **The unified view moved into the sections.** «Everything» and `/app/unified` are dropped: the first row of every source list is now **All calendars**, **All address books**, **All lists**, **All notebooks**, and the mixed chronology survives as *Tasks due* and *Notes* ticks in the calendar range bar — the one place where mixing kinds on a date axis is meaningful. Contacts, not Calendar, is the first section.
+
+  **Everything known about one person, in one place.** The timeline of §23.9 was there and hidden behind a button; it is now the contact screen itself — the card on the right, meetings, tasks, notes and their attachments from every server on the left, each row saying *why* it matched (attendee by `mailto:` versus a mention in the text). That is the product's own argument for keeping four sections side by side, and it was the hardest thing to find in the old mockups.
+
+  **Files became a file manager**, not a table with two forms under it: selection, group operations, rename and move (one `Move` over the `MOVE` the transport already has), an upload queue that asks about a taken name instead of refusing silently, a details panel with a stated rule for when it is open, grid view, and the collections root as the section's own unified view.
+
+  **Collection parity became a rule with a table** (§2.1): a feature meaningful for several kinds of collection is built for all of them at once, and each cell says *doing*, *not applicable* (with the reason) or *later* (with the place it is written down). It immediately paid: davloom now proxies WebDAV folders, and backup copies files as files.
+
+  **Backup is a list of jobs**, each with its own sources — including file collections — destination (WebDAV, download, or both), trigger and retention; restore now starts from a screen that asks *which archive* — from a job, from a file, or uploaded — and asks for the archive password before anything else.
+
+  **Planned features are drawn, not described:** new device (Apple profile, DAVx5 QR, copy rows), backup and restore, publication by secret link in all five kinds — calendar, address book, note, file, folder — with a `webcal://` subscription line for what can be subscribed to, external feed subscription with its own screen, and davloom with per-device app passwords and two levels of read-only. Section 12 covers the desktop wrapper against the plan above: Remote/Local onboarding, tray, global quick note, notifications, and the local-run screen that states plainly that running locally moves the *server*, not the data, and marks with a `local` badge what needs reachability from the internet.
+
+  **New screens for operating the thing:** an installation check that asks Carrel about itself from outside — external reachability, certificate, proxy headers, SSE buffering, body-size ceiling, clock, data directory — with what to do for each failure, because most «it does not work» reports are the reverse proxy.
+
+  **Interface strings were brought back to the product's language and voice.** A pass over the whole document replaced ~200 Russian chrome strings with the English the templates use, restored the wording that already exists in the templates instead of inventing new, moved design rationale out of the screens and into the captions, and removed the one emoji glyph that had crept onto a button. The rule is now stated where it can be checked: interface strings in English, data in Russian, reasoning only under the mockup.
+
 ## [0.7.0] - 2026-08-15
 
 **Основной объём v1 закрыт (§19).** Этапы 2–7 — транспорт и discovery, контакты, календарь, задачи и заметки с единым видом и поиском, дубликаты, WebDAV-файлы и вложения — реализованы; **v0.7.0**. Остаётся ручная приёмка: [docs/manual-acceptance.md](docs/manual-acceptance.md). Что не сделано и что делаться не будет: [docs/roadmap.md](docs/roadmap.md).
