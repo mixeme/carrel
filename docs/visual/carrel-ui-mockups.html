@@ -881,6 +881,15 @@ figcaption b{color:var(--ink);font-weight:600}
 </div>
 <p>Слева направо: полоска коллекции, заглушка, имя со значком связанных записей, затем колонки, которые уходят первыми при сужении — организация, телефон, почта, источник. Выделенная строка — фон «картон», без рамок и теней.</p>
 
+<h4>Кнопка рядом с полем</h4>
+<p>Кнопка, относящаяся к полю, стоит <b>справа от него и внутри его же блока</b>, обычной высоты. Мелкая кнопка (22&nbsp;px) — только для строк списка и таблиц, где полей нет. Пара «поле + кнопка» верстается одной строкой внутри <code>.m-f</code>, а не двумя соседними ячейками формы: во втором случае выравнивание держится на <code>align-items</code> родителя и разъезжается, как только у соседнего поля появляется подсказка или вторая строка. Ровно это и произошло на экране восстановления, и в трёх других местах — на карточке пароля устройства и в правке телефонов и почты.</p>
+<div class="demo mock" style="background:var(--paper)">
+  <div class="m-f" style="flex:1 1 300px"><label>On a connected server</label>
+    <span style="display:flex;gap:8px;align-items:center"><span class="m-in is-ph" style="flex:1;font-size:11px">Documents · sftpgo / carrel-backup/…</span><span class="m-btn">Browse…</span></span></div>
+  <div class="m-f" style="flex:1 1 260px"><label>Address for the client</label>
+    <span style="display:flex;gap:8px;align-items:center"><span class="m-in is-mono" style="flex:1;font-size:11.5px">https://carrel.example/dav/</span><span class="m-btn">Copy</span></span></div>
+</div>
+
 <h4>Выбор столбцов</h4>
 <p>Раз ширина отдана колонкам, человек должен решать, какие это колонки. Кнопка <b>Columns</b> стоит в панели управления каждого списка и каждой таблицы — контакты, задачи, заметки, файлы, пользователи, журнал.</p>
 <div class="demo mock" style="background:var(--paper);align-items:flex-start;gap:30px">
@@ -1111,11 +1120,11 @@ Read  2 min ago</div>
             <div class="m-rubric">Phone numbers</div>
             <div class="m-f w-xs"><label>Label</label><span class="m-in">mobile</span></div>
             <div class="m-f w-md"><label>Number</label><span class="m-in is-mono">+7 912 445-10-88</span></div>
-            <span class="m-btn is-sm is-quiet">Remove</span>
+            <span class="m-btn is-quiet">Remove</span>
             <div style="flex:1 1 100%"></div>
             <div class="m-f w-xs"><span class="m-in">work</span></div>
             <div class="m-f w-md"><span class="m-in is-mono">+7 495 120-45-00</span></div>
-            <span class="m-btn is-sm is-quiet">Remove</span>
+            <span class="m-btn is-quiet">Remove</span>
             <div style="flex:1 1 100%"></div>
             <span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add phone</span>
           </div>
@@ -1124,7 +1133,7 @@ Read  2 min ago</div>
             <div class="m-rubric">Email addresses</div>
             <div class="m-f w-xs"><label>Label</label><span class="m-in">work</span></div>
             <div class="m-f w-lg"><label>Address</label><span class="m-in">a.kovaleva@example.org</span></div>
-            <span class="m-btn is-sm is-quiet">Remove</span>
+            <span class="m-btn is-quiet">Remove</span>
             <div style="flex:1 1 100%"></div>
             <span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add email</span>
           </div>
@@ -3681,10 +3690,11 @@ An administrator can give you a new password, but doing so replaces the key: eve
         <div class="m-head"><div><div class="m-h1">Import notes</div><div class="m-sub">Into Записи · nextcloud · home</div></div></div>
         <div class="m-card">
           <div class="m-rubric">From a file</div>
-          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-            <div class="m-f" style="flex:1 1 220px"><label>Markdown or a zip of them</label><span class="m-in is-ph">заметки-2026.zip</span></div>
-            <span class="m-btn">Browse…</span>
-          </div>
+          <div class="m-f" style="width:100%"><label>Markdown or a zip of them</label>
+            <span style="display:flex;gap:8px;align-items:center">
+              <span class="m-in is-ph" style="flex:1">заметки-2026.zip</span>
+              <span class="m-btn">Browse…</span>
+            </span></div>
         </div>
         <div class="m-card" style="border-color:var(--accent)">
           <div class="m-rubric">From a WebDAV folder</div>
@@ -4069,8 +4079,8 @@ An administrator can give you a new password, but doing so replaces the key: eve
             <div class="m-rubric">Password created <span class="mono" style="letter-spacing:0;color:var(--alert)">visible only now</span></div>
             <div style="display:flex;gap:8px;align-items:center;margin-top:2px;flex-wrap:wrap">
               <span class="m-in is-mono" style="flex:1;min-width:220px;font-size:13px;letter-spacing:.03em">cbk_7f3a-91de-4402-lamp</span>
-              <span class="m-btn is-sm">Copy</span>
-              <span class="m-btn is-sm is-quiet">Regenerate</span>
+              <span class="m-btn">Copy</span>
+              <span class="m-btn is-quiet">Regenerate</span>
             </div>
             <div class="m-diag" style="margin-top:9px">curl -X POST https://carrel.example/api/backup/run?job=personal \
      -H "Authorization: Bearer cbk_7f3a-91de-4402-lamp"</div>
@@ -4125,10 +4135,17 @@ An administrator can give you a new password, but doing so replaces the key: eve
       </div>
       <div class="m-card">
         <div class="m-rubric">From a file</div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end">
-          <div class="m-f" style="flex:2 1 300px"><label>On a connected server</label><span class="m-in is-mono is-ph" style="font-size:11px">Documents · sftpgo / carrel-backup/…</span></div>
-          <span class="m-btn is-sm">Browse…</span>
-          <div class="m-f" style="flex:1 1 200px"><label>Or upload</label><span class="m-in is-ph">carrel-2026-08-14.zip</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px 16px">
+          <div class="m-f" style="flex:2 1 320px"><label>On a connected server</label>
+            <span style="display:flex;gap:8px;align-items:center">
+              <span class="m-in is-mono is-ph" style="flex:1;font-size:11px">Documents · sftpgo / carrel-backup/…</span>
+              <span class="m-btn">Browse…</span>
+            </span></div>
+          <div class="m-f" style="flex:1 1 260px"><label>Or upload from this computer</label>
+            <span style="display:flex;gap:8px;align-items:center">
+              <span class="m-in is-ph" style="flex:1">carrel-2026-08-14.zip</span>
+              <span class="m-btn">Choose…</span>
+            </span></div>
         </div>
         <div class="m-hint" style="margin-top:8px">An archive can be brought from anywhere: it stands on its own — raw <span class="mono">.ics</span>, <span class="mono">.vcf</span>, files and a manifest. The instance being restored into may be a different one, or empty.</div>
       </div>
@@ -4155,15 +4172,32 @@ An administrator can give you a new password, but doing so replaces the key: eve
       <div class="m-head"><div><div class="m-h1">Restore from 2026-08-14</div><div class="m-sub">Job «Личное на домашний диск» · manifest read · 4 collections · 1 214 records · <span class="mono">carrel-backup/2026-08-14T09-12.zip</span></div></div>
         <div class="m-acts"><span class="m-btn is-quiet">Cancel</span><span class="m-btn is-primary">Restore 3 collections</span></div>
       </div>
+      <div class="m-bar m-sel" style="margin:0 0 2px">
+        <span style="font-weight:600">3 selected</span>
+        <span style="width:1px;height:20px;background:var(--card-border)"></span>
+        <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg>Restore into…</span>
+        <span class="m-btn is-quiet">Skip</span>
+        <span class="m-right"><span class="m-btn is-sm is-quiet">Select all</span></span>
+      </div>
       <table class="m-table">
-        <thead><tr><th style="width:28px"><span class="m-box is-part"></span></th><th>In the archive</th><th>Records</th><th>Restore into</th><th>What will happen</th></tr></thead>
+        <thead><tr><th style="width:28px"><span class="m-box is-part"></span></th><th>In the archive</th><th>Records</th><th style="width:26%">Restore into</th><th>What will happen</th></tr></thead>
         <tbody>
           <tr class="is-sel"><td><span class="m-box"></span></td>
             <td><span class="m-fname"><span class="m-bar3" style="background:#4A6B52"></span><span>nextcloud / personal</span></span></td><td class="mono">312</td>
             <td class="mono">Личный · nextcloud</td><td>matched by path — 4 records missing, will be created</td></tr>
           <tr class="is-sel"><td><span class="m-box"></span></td>
             <td><span class="m-fname"><span class="m-bar3" style="background:#6B4E7A"></span><span>radicale / projects</span></span></td><td class="mono">86</td>
-            <td class="mono">Проекты · radicale</td><td>matched by path — no differences</td></tr>
+            <td style="position:relative">
+              <span class="m-in is-focus" style="height:24px;font-size:12px">Проекты · radicale<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" style="margin-left:auto"><use href="#i-chev"/></svg></span>
+              <div class="m-menu" style="width:230px;margin-top:3px">
+                <div class="is-on"><span class="m-bar3" style="background:#6B4E7A"></span>Проекты · radicale</div>
+                <div><span class="m-bar3" style="background:#4A6B52"></span>Личный · nextcloud</div>
+                <div><span class="m-bar3" style="background:#3F6E8C"></span>Работа · nextcloud</div>
+                <span class="sep"></span>
+                <div><svg><use href="#i-plus"/></svg>New collection…</div>
+                <div style="color:var(--dusty)">Skip this one</div>
+              </div>
+            </td><td>matched by path — no differences</td></tr>
           <tr class="is-sel"><td><span class="m-box"></span></td>
             <td><span class="m-fname"><span class="m-bar3" style="background:#9A9280"></span><span>baikal / shared</span></span></td><td class="mono">140</td>
             <td class="mono">Личный · nextcloud <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none" style="display:inline;vertical-align:-1px"><use href="#i-chev"/></svg></td>
@@ -4177,7 +4211,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
     </div></div></div>
   </div>
 </div>
-<figcaption>Главный экран всей функции: не «восстановить», а <b>что именно и куда</b>. Коллекция, чей сервер исчез, не блокирует восстановление — ей назначают другую цель прямо в строке. Обещание сформулировано так, чтобы его можно было выполнить: восстановление — это импорт, а не откат.</figcaption>
+<figcaption><b>Как выбирают.</b> Флажок в строке — что восстанавливать; колонка «Restore into» — куда, и это обычный выпадающий список коллекций с полосками, а не угадывание по имени. Carrel заранее подставляет совпавшую по пути коллекцию, поэтому в обычном случае трогать её не нужно вовсе. Несколько строк отмечаются флажками (с <span class="m-kbd" style="font-family:var(--f-mono)">Shift</span> — диапазон), и тогда «Restore into…» в панели сверху назначает цель всем сразу — иначе при двадцати коллекциях выбор пришлось бы повторять двадцать раз. Последний пункт списка — «Skip this one», потому что «не восстанавливать эту» — такой же выбор цели, как и остальные.<br><br>Главный экран всей функции: не «восстановить», а <b>что именно и куда</b>. Коллекция, чей сервер исчез, не блокирует восстановление — ей назначают другую цель прямо в строке. Обещание сформулировано так, чтобы его можно было выполнить: восстановление — это импорт, а не откат.</figcaption>
 </figure>
 
 <h2 id="s-publish">7.16 Публикация по ссылке и внешние подписки <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.4</span></h2>
@@ -4296,6 +4330,117 @@ An administrator can give you a new password, but doing so replaces the key: eve
 <figcaption><b>Ссылку можно не только открыть, но и подписаться на неё.</b> Строка под шапкой отдаёт тот же адрес в виде <code>webcal://</code>: календарный клиент возьмёт его и будет обновлять сам, а Carrel по-прежнему ничего не хранит — на каждый запрос он читает исходную коллекцию. Кнопка «Download .ics» осталась для тех, кому нужен снимок, а не подписка; это разные вещи, и в интерфейсе они стоят рядом, а не вместо друг друга. Первый из пяти видов публичной страницы — остальные четыре ниже. Логотип стоит крупно и рядом с ним написано «read-only»: человек попал сюда по ссылке и должен понять, чем ему это отдали. Колонка источника пуста намеренно — открывшему незачем знать, на каком сервере это лежит.</figcaption>
 </figure>
 
+
+
+<h3>Диалог публикации: по одному на каждый вид</h3>
+<p>Календарный диалог выше — не общий: у каждого вида свои решения, и общего у них ровно два — срок жизни ссылки и разрешено ли скачивание. Ниже — остальные четыре, и заодно то, чего не хватало календарю: возможность отдать его целиком, без диапазона.</p>
+
+<div class="frames">
+  <figure style="flex:1 1 330px">
+  <div class="frame">
+    <div class="frame-label"><span>Календарь</span><span class="plan">не построено</span><i>диапазон или весь</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-sheet" style="width:100%;max-width:none">
+        <div class="h"><b style="font-size:13.5px">Publish</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Личный · nextcloud</span></div>
+        <div class="b">
+          <div class="m-f" style="width:100%"><label>What to publish</label>
+            <span class="m-seg" style="align-self:flex-start"><span class="is-on">A date range</span><span>The whole calendar</span></span></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <div class="m-f" style="flex:1 1 120px"><label>From</label><span class="m-in is-mono">2026-08-10</span></div>
+            <div class="m-f" style="flex:1 1 120px"><label>To</label><span class="m-in is-mono">2026-08-31</span></div>
+          </div>
+          <span class="m-check"><span class="m-box is-off"></span>Show event descriptions</span>
+          <span class="m-check"><span class="m-box"></span>Allow <span class="mono">.ics</span> download and subscription</span>
+          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">30 days</span></div>
+        </div>
+        <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>«The whole calendar» не было, и это была дыра: для расписания секции или графика дежурств диапазон бессмысленен — его отдают целиком и надолго. Выбор стоит первым, потому что от него зависит, нужны ли поля дат.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 330px">
+  <div class="frame">
+    <div class="frame-label"><span>Контакт и адресная книга</span><span class="plan">не построено</span><i>чужие данные</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-sheet" style="width:100%;max-width:none">
+        <div class="h"><b style="font-size:13.5px">Publish</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Анна Ковалёва</span></div>
+        <div class="b">
+          <div class="m-f" style="width:100%"><label>What to publish</label>
+            <span class="m-seg" style="align-self:flex-start"><span class="is-on">This card</span><span>The whole book</span></span></div>
+          <div class="m-f" style="width:100%"><label>What the visitor sees</label>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:2px">
+              <span class="m-check"><span class="m-box"></span>Name and organisation</span>
+              <span class="m-check"><span class="m-box is-off"></span>Phone numbers</span>
+              <span class="m-check"><span class="m-box is-off"></span>Email addresses</span>
+              <span class="m-check"><span class="m-box is-off"></span>Photo</span>
+              <span class="m-check"><span class="m-box is-off"></span>Note</span>
+            </div></div>
+          <span class="m-check"><span class="m-box is-off"></span>Allow <span class="mono">.vcf</span> download</span>
+          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">7 days</span></div>
+        </div>
+        <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Единственный вид, где по умолчанию выключено почти всё: телефон и адрес принадлежат человеку, который о ссылке не знает. Диалог не спрашивает «показывать ли поля», он спрашивает каждое поле отдельно — и <code>.vcf</code> подчиняется тем же флажкам, иначе скачивание обходило бы их.</figcaption>
+  </figure>
+</div>
+
+<div class="frames">
+  <figure style="flex:1 1 330px">
+  <div class="frame">
+    <div class="frame-label"><span>Заметка</span><span class="plan">не построено</span><i>текст и вложения</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-sheet" style="width:100%;max-width:none">
+        <div class="h"><b style="font-size:13.5px">Publish</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Заметка со встречи 10.08</span></div>
+        <div class="b">
+          <span class="m-check"><span class="m-box"></span>Show tags</span>
+          <span class="m-check"><span class="m-box"></span>Show the date</span>
+          <span class="m-check"><span class="m-box is-off"></span>List attachments by name</span>
+          <span style="font-size:11.5px;color:var(--dusty)">Attachments themselves are not opened by this link: each file needs a link of its own.</span>
+          <span class="m-check"><span class="m-box"></span>Allow <span class="mono">.md</span> download</span>
+          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">30 days</span></div>
+        </div>
+        <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>У заметки нет ни диапазона, ни полей — есть текст, и решать почти нечего. Единственный неочевидный переключатель — вложения: их имена могут выдать больше, чем сам текст, поэтому по умолчанию их нет.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 330px">
+  <div class="frame">
+    <div class="frame-label"><span>Файл и папка</span><span class="plan">не построено</span><i>вложенность и диск</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-sheet" style="width:100%;max-width:none">
+        <div class="h"><b style="font-size:13.5px">Publish</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Материалы к релизу</span></div>
+        <div class="b">
+          <div class="m-f" style="width:100%"><label>What to publish</label>
+            <span class="m-seg" style="align-self:flex-start"><span>This file</span><span class="is-on">This folder</span></span></div>
+          <span class="m-check"><span class="m-box is-off"></span>Include subfolders</span>
+          <span class="m-check"><span class="m-box"></span>Allow mounting as a read-only drive</span>
+          <span style="font-size:11.5px;color:var(--dusty)">The same secret opens the folder over WebDAV — Windows, macOS and Linux mount it as a drive.</span>
+          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">14 days</span></div>
+        </div>
+        <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>У папки два решения, которых нет больше нигде: спускаться ли во вложенные (по умолчанию нет — человек видит четыре файла и не обязан помнить про сорок в подпапке) и отдавать ли адрес для монтирования. Файл проще: у него нет ни того, ни другого, и диалог сжимается до срока жизни ссылки.</figcaption>
+  </figure>
+</div>
+
+<table class="doc">
+  <tr><th style="width:18%">Вид</th><th style="width:44%">Что решается в диалоге</th><th>Что не спрашивается</th></tr>
+  <tr><td>Календарь</td><td>Диапазон <b>или</b> весь календарь; показывать ли описания; разрешить ли <code>.ics</code> и подписку</td><td>—</td></tr>
+  <tr><td>Адресная книга, контакт</td><td>Карточка или книга; каждое поле отдельно — имя, телефоны, почта, фотография, заметка; разрешить ли <code>.vcf</code></td><td>—</td></tr>
+  <tr><td>Заметка</td><td>Теги, дата, перечислять ли вложения; разрешить ли <code>.md</code></td><td>Диапазона нет: заметка одна</td></tr>
+  <tr><td>Файл</td><td>Только срок жизни ссылки</td><td>Ни полей, ни вложенности: файл отдаётся как есть</td></tr>
+  <tr><td>Папка</td><td>Вложенные папки; адрес для монтирования диском</td><td>Предпросмотра содержимого нет по определению</td></tr>
+</table>
+<div class="note">Общее у всех пяти — срок жизни и то, что ссылка отзывается одним нажатием. Всё остальное различается, и попытка свести это в один универсальный диалог с десятью флажками, половина которых неприменима, была бы хуже пяти коротких.</div>
 
 <h3>Публичная страница для каждого вида записи</h3>
 <p>Публиковать можно пять вещей, и у каждой свой вид страницы. Хрома у всех одна и та же — логотип, метка <b>read-only</b>, кнопка скачивания и строка про срок в подвале, — потому что открывший должен с первого взгляда понять три вещи: чем ему это отдали, что редактировать нечего и когда ссылка перестанет работать. Ни рейла, ни поиска, ни кнопок создания: страница не притворяется приложением.</p>
@@ -4593,23 +4738,25 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <thead><tr><th>Device</th><th style="width:34%">What it can see</th><th>Access</th><th>Created</th><th>Last request</th><th style="width:90px"></th></tr></thead>
           <tbody>
             <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Телефон · DAVx5</span></span></td>
-              <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
-                <span class="m-bar3" style="background:#4A6B52"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-bar3" style="background:#A05A2C"></span>
-                <span class="mono" style="font-size:11px;margin:0 6px">4 calendars · 1 book</span>
+              <td><span style="display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center">
+                <span style="display:flex;gap:3px">
+                  <span class="m-bar3" style="background:#4A6B52"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-bar3" style="background:#A05A2C"></span></span>
+                <span class="mono" style="font-size:11px">4 calendars · 1 book</span>
                 <span class="m-btn is-sm">Change…</span></span></td>
               <td><span class="m-seg" style="height:22px"><span class="is-on">read</span><span class="is-dim" title="Запись выключена для всего прокси">write</span></span></td>
               <td class="mono">2026-06-02</td><td class="mono">2026-08-15 09:31</td>
               <td class="m-acts"><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
             <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Ноутбук · Thunderbird</span></span></td>
-              <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
-                <span class="m-bar3 is-multi"></span>
-                <span class="mono" style="font-size:11px;margin:0 6px">all · 12 collections</span>
+              <td><span style="display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center">
+                <span style="display:flex;gap:3px"><span class="m-bar3 is-multi"></span></span>
+                <span class="mono" style="font-size:11px">all · 12 collections</span>
                 <span class="m-btn is-sm">Change…</span></span></td>
               <td><span class="m-seg" style="height:22px"><span class="is-on">read</span><span class="is-dim" title="Запись выключена для всего прокси">write</span></span></td>
               <td class="mono">2026-06-02</td><td class="mono">2026-08-15 08:02</td>
               <td class="m-acts"><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
             <tr style="opacity:.6"><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Old phone</span></span></td>
-              <td class="mono">—</td><td class="mono">revoked</td><td class="mono">2026-03-14</td><td class="mono">2026-05-30 12:10</td>
+              <td><span style="display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center"><span></span><span class="mono" style="font-size:11px;color:var(--dusty)">—</span><span></span></span></td>
+              <td class="mono">revoked</td><td class="mono">2026-03-14</td><td class="mono">2026-05-30 12:10</td>
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Delete</span></td></tr>
           </tbody>
         </table>
@@ -4634,7 +4781,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
     </div>
   </div>
 </div>
-<figcaption>Три синтетических уровня показаны так, как их увидит клиент, — потому что именно они и есть весь фокус: ниже начинается тупое проксирование, а имена коллекций собраны из аккаунта и пути, чтобы два «Личный» с разных серверов не слились. <b>Ветка <code>files/</code> — по правилу равенства коллекций.</b> Прокси затевается ради календарей и книг, но файловая коллекция для него — самый простой случай из всех: никакой синтетики, только подстановка префикса в путях, а на той стороне обычный WebDAV, который Windows, macOS и Linux монтируют как сетевой диск без всякого клиента. Не отдать её было бы не экономией, а произволом. <b>Главный столбец — «что устройству видно», и он второй слева.</b> Область выдачи важнее того, какие запросы клиент слал: по ней принимают решения, а по журналу запросов — разве что диагностируют. Показана она полосками коллекций и счётом, а не списком имён: четыре язычка читаются быстрее, чем «Личный, Работа, Проекты, Контакты», а полный список — в подсказке и в диалоге.<br><br><b>Список правится у выданного устройства.</b> «Change…» открывает те же флажки, что при добавлении, и <b>перевыдавать пароль не нужно</b>: область принадлежит записи пароля, а не самому паролю. Убранная коллекция исчезает у клиента при следующей синхронизации — DAVx5 увидит, что её больше нет в home-set, и уберёт локально; добавленная появится там же. Это стоит написать прямо в диалоге, потому что человек, привыкший к другим сервисам, ждёт «переподключите устройство».<br><br>Время последнего запроса осталось: оно отвечает на вопрос «живо ли устройство», а подробный журнал запросов ушёл под <span class="mono">⋯</span> — его читают редко и только когда что-то сломалось. Знак davloom стоит и в рейле пунктом навигации, и крупно в подвале — рядом со статусом режима: свой модуль, свой знак, лампа сюда не переезжает.
+<figcaption>Три синтетических уровня показаны так, как их увидит клиент, — потому что именно они и есть весь фокус: ниже начинается тупое проксирование, а имена коллекций собраны из аккаунта и пути, чтобы два «Личный» с разных серверов не слились. <b>Ветка <code>files/</code> есть потому, что WebDAV у нас уже есть.</b> Человек однажды дал Carrel доступ к своим данным — и задача Carrel в том, чтобы этот доступ окупился по-максимуму, а не в том, чтобы отдавать по одному протоколу за релиз. Файлы здесь ничего не стоят: провайдер уже написан, учётные данные уже есть, синтетики не требуется — только подстановка префикса в путях. На той стороне обычный WebDAV, который Windows, macOS и Linux монтируют как сетевой диск без всякого клиента. Это органичное продолжение того, что уже сделано, а не отдельная функция. <b>Главный столбец — «что устройству видно», и он второй слева.</b> Область выдачи важнее того, какие запросы клиент слал: по ней принимают решения, а по журналу запросов — разве что диагностируют. Показана она полосками коллекций и счётом, а не списком имён: четыре язычка читаются быстрее, чем «Личный, Работа, Проекты, Контакты», а полный список — в подсказке и в диалоге.<br><br><b>Список правится у выданного устройства.</b> «Change…» открывает те же флажки, что при добавлении, и <b>перевыдавать пароль не нужно</b>: область принадлежит записи пароля, а не самому паролю. Убранная коллекция исчезает у клиента при следующей синхронизации — DAVx5 увидит, что её больше нет в home-set, и уберёт локально; добавленная появится там же. Это стоит написать прямо в диалоге, потому что человек, привыкший к другим сервисам, ждёт «переподключите устройство».<br><br>Время последнего запроса осталось: оно отвечает на вопрос «живо ли устройство», а подробный журнал запросов ушёл под <span class="mono">⋯</span> — его читают редко и только когда что-то сломалось. Знак davloom стоит и в рейле пунктом навигации, и крупно в подвале — рядом со статусом режима: свой модуль, свой знак, лампа сюда не переезжает.
 <br><br><b>Только чтение ставится в двух местах, и это не дублирование.</b> Наверху — общий потолок: «что вообще можно устройствам». Он выключает запись сразу для всех, потому что запись через прокси моложе чтения, и если клиент начнёт портить данные, отзывать по одному — не то, что нужно в этот момент. В строке устройства — его собственные права, но не выше потолка: когда запись выключена целиком, половина переключателя погашена и подсказка говорит, где её включают. Устройству нельзя дать больше, чем разрешено прокси, и интерфейс показывает это состоянием кнопки, а не отказом после нажатия.</figcaption>
 </figure>
 
@@ -4681,7 +4828,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <div class="m-rubric">Device password</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:2px">
             <span class="m-in is-mono" style="flex:1;font-size:14px;letter-spacing:.04em">brick-lamp-9f2-carrel</span>
-            <span class="m-btn is-sm">Copy</span>
+            <span class="m-btn">Copy</span>
           </div>
           <div style="font-size:11.5px;color:var(--alert);margin-top:8px">Close this window and you will not see the password again.</div>
         </div>
