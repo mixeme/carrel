@@ -176,6 +176,17 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-in.is-area{height:auto;min-height:76px;align-items:flex-start;padding:7px 9px;line-height:1.5;white-space:pre-wrap}
 .m-in.is-mono{font-family:var(--f-mono);font-size:11.5px}
 .m-check{display:flex;align-items:center;gap:7px;font-size:12.5px}
+/* Строка формы: поле, кнопка, переключатель и флажок — одной высоты, 28px.
+   У поля высота была задана всегда, у флажка её не было: он брал высоту у
+   текста (18px) и не совпадал с полем рядом. Правило живёт в примитивах,
+   а не в разметке экрана, поэтому поставить флажок неправильно уже нельзя.
+   Плотные списки флажков (два и больше в одной ячейке) правило не трогает. */
+.m-f > .m-check:only-child,.m-f > label + .m-check:last-child,
+.m-form > .m-check,.m-fset > .m-check,.demo > .m-check{min-height:28px}
+.m-f:has(> .m-check:only-child){align-self:flex-end}
+.m-form .m-btn,.m-fset .m-btn,.m-f .m-btn{height:28px}
+.m-form .m-btn.is-sm,.m-fset .m-btn.is-sm,.m-f .m-btn.is-sm{height:22px}
+.m-f > .m-seg,.m-form > .m-seg,.m-fset > .m-seg{height:28px}
 .m-check .m-box{width:12px;height:12px;border-radius:2px;background:var(--ink);flex:none}
 .m-check .m-box.is-off{background:transparent;border:.5px solid var(--card-border)}
 
@@ -258,6 +269,11 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-table th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dusty);text-align:left;
   font-weight:600;padding:9px 12px;border-bottom:.5px solid var(--rule);white-space:nowrap}
 .m-table td{padding:7px 12px;border-bottom:.5px solid var(--hair);font-size:12.5px;vertical-align:middle}
+/* Машинная строка (адрес, путь, идентификатор) не имеет пробелов и потому
+   не даёт колонке ужаться — таблица уезжает за край панели. Разрешаем
+   перенос в любом месте: длинный адрес занимает две строки, но ничего
+   не обрезается и не вылезает. */
+.m-table td.mono,.m-table td .mono{overflow-wrap:anywhere}
 .m-table td.mono{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
 .m-table tr td:first-child,.m-table tr th:first-child{padding-left:var(--pad)}
 .m-table tr td:last-child,.m-table tr th:last-child{padding-right:var(--pad)}
@@ -400,11 +416,16 @@ figcaption b{color:var(--ink);font-weight:600}
   .m-row--task > :nth-child(6){display:none}
 }
 @container (max-width:700px){
+  /* Колонка второго ряда важности: помечается в разметке и исчезает,
+     когда панель узкая, — то же правило, что и для списков. */
+  .m-table th.is-2nd,.m-table td.is-2nd{display:none}
   .m-row--note{grid-template-columns:3px minmax(140px,1.4fr) minmax(70px,auto) 80px 116px}
   .m-row--note > :nth-child(3){display:none}
 }
 @container (max-width:620px){
   .m-row{padding-left:12px;padding-right:12px}
+  /* Тесная шапка: набор кнопок переносится, а не выдавливает панель. */
+  .m-head .m-acts{flex:0 1 auto;min-width:0}
   .m-row--contact{grid-template-columns:3px 28px minmax(100px,1.6fr) 118px 96px}
   .m-row--contact > :nth-child(5){display:none}
   .m-row--agenda{grid-template-columns:3px 54px minmax(110px,1fr) 96px}
@@ -647,6 +668,7 @@ figcaption b{color:var(--ink);font-weight:600}
   <tr><td><b>Рейл источников</b></td><td>264&nbsp;px, при &lt;1280 — 232, при &lt;900 сворачивается в 56&nbsp;px иконок, на телефоне — выдвижной</td><td>Длинные названия коллекций обрезаются многоточием, полное имя — в подсказке</td></tr>
   <tr><td><b>Поиск в шапке</b></td><td>Растёт до 560&nbsp;px и останавливается</td><td>Строка запроса длиннее не бывает; дальше поле только отбирает место у действий</td></tr>
   <tr><td><b>Диалоги и мастера</b> — импорт, слияние, конфликт</td><td>640–960&nbsp;px по центру рабочей области</td><td>Это разговор с одним ответом, а не рабочий стол</td></tr>
+  <tr><td><b>Плотные административные таблицы</b> — пользователи, задания копирования, устройства davloom</td><td>Колонки второго ряда важности (дата создания, срок хранения) уходят, когда панель ýже 700&nbsp;px; ниже 620 таблица прокручивается внутри своей панели</td><td>Восемь колонок в панель телефона не поместятся никаким сжатием. Прятать вместо этого действие или имя — хуже, чем прокрутка</td></tr>
 </table>
 
 <div class="note">Максимальной ширины у каркаса нет вообще. На сверхшироком мониторе приложение остаётся полноэкранным, а «лишняя» ширина уходит в колонки списка и в панель подробностей — и на 3440&nbsp;px становится видно то, ради чего Carrel написан: пять источников рядом, в одной строке, со своими язычками.</div>
@@ -826,13 +848,13 @@ figcaption b{color:var(--ink);font-weight:600}
 <p>Первичная кнопка на экране одна. Разрушительное — текстом тревожного цвета в рамке; сплошная заливка тревожным появляется единственный раз, на подтверждении слияния, где действие необратимо и затрагивает чужой сервер.</p>
 
 <h4>Поля</h4>
-<div class="demo mock" style="background:var(--paper)">
+<div class="demo mock" style="background:var(--paper);align-items:flex-end">
   <div class="m-f w-md"><label>Display name</label><span class="m-in">Анна Ковалёва</span></div>
   <div class="m-f w-sm"><label>Birthday</label><span class="m-in is-ph">YYYY-MM-DD</span></div>
   <div class="m-f w-xs"><label>Start time</label><span class="m-in is-mono">10:00</span></div>
   <div class="m-f w-lg"><label>Email</label><span class="m-in is-focus">a.kovaleva@example.org</span></div>
-  <div class="m-check"><span class="m-box"></span>All day</div>
-  <div class="m-check"><span class="m-box is-off"></span>Print with photos</div>
+  <div class="m-f"><span class="m-check"><span class="m-box"></span>All day</span></div>
+  <div class="m-f"><span class="m-check"><span class="m-box is-off"></span>Print with photos</span></div>
 </div>
 
 <h4>Источник в рейле</h4>
@@ -880,6 +902,17 @@ figcaption b{color:var(--ink);font-weight:600}
   </div>
 </div>
 <p>Слева направо: полоска коллекции, заглушка, имя со значком связанных записей, затем колонки, которые уходят первыми при сужении — организация, телефон, почта, источник. Выделенная строка — фон «картон», без рамок и теней.</p>
+
+<h4>Одна высота в строке формы</h4>
+<p>Поле, кнопка, переключатель и флажок в строке формы имеют <b>одну высоту — 28&nbsp;px</b>. У поля она была задана всегда, у флажка её не было: он брал высоту у своего текста, получалось 18&nbsp;px, и в строке с полем он садился ниже на девять пикселей. Так было у «Stop the server on exit» на экране локального запуска — и в семи других местах, где флажок стоял рядом с полем. Разметка это не лечит: каждый экран пришлось бы подпирать вручную, а следующий флажок всё равно поставили бы без подпорки.</p>
+<div class="demo mock" style="background:var(--paper);align-items:flex-end">
+  <div class="m-f w-sm"><label>Port</label><span class="m-in is-mono">8765</span></div>
+  <div class="m-f"><span class="m-check"><span class="m-box"></span>Stop the server on exit</span></div>
+  <div class="m-f"><span class="m-seg"><span class="is-on">Automatic</span><span>Fixed</span></span></div>
+  <div class="m-f"><span class="m-btn">Browse…</span></div>
+</div>
+<p>Правило записано в примитивах: высоту получают <code>.m-in</code>, <code>.m-btn</code>, <code>.m-seg</code> и одиночный <code>.m-check</code> внутри <code>.m-form</code>, <code>.m-fset</code> и <code>.m-f</code>. Ячейка, в которой стоит только флажок, вдобавок сама садится по нижнему краю строки — раньше это писали руками в четырёх местах, теперь этого писать не нужно. Плотные списки флажков правило не задевает: там, где в одной ячейке их два и больше, это уже не строка формы, а список, и 28&nbsp;px ему ни к чему.</p>
+<p>Чтобы разъезд не пришлось искать глазами по девяноста макетам, у файла есть встроенная проверка: откройте его с <code>#check</code> в адресе. Она обходит все строки форм, сравнивает вертикальные центры контролов и обводит красным те, что разошлись больше чем на полтора пикселя, а в углу показывает счёт. На чистом файле там написано «Строки форм выровнены».</p>
 
 <h4>Кнопка рядом с полем</h4>
 <p>Кнопка, относящаяся к полю, стоит <b>справа от него и внутри его же блока</b>, обычной высоты. Мелкая кнопка (22&nbsp;px) — только для строк списка и таблиц, где полей нет. Пара «поле + кнопка» верстается одной строкой внутри <code>.m-f</code>, а не двумя соседними ячейками формы: во втором случае выравнивание держится на <code>align-items</code> родителя и разъезжается, как только у соседнего поля появляется подсказка или вторая строка. Ровно это и произошло на экране восстановления, и в трёх других местах — на карточке пароля устройства и в правке телефонов и почты.</p>
@@ -1142,7 +1175,7 @@ Read  2 min ago</div>
             <div class="m-rubric">Other</div>
             <div class="m-f w-lg"><label>Categories</label><span class="m-in">работа, издательство</span></div>
             <div class="m-f w-full"><label>Note</label><span class="m-in is-area">Пишет по вторникам, отвечает в тот же день.</span></div>
-            <span class="m-btn is-sm is-quiet">Show 6 empty fields</span>
+            <div class="m-f"><span class="m-btn is-quiet">Show 6 empty fields</span></div>
           </div>
         </div>
         <div class="m-formfoot">
@@ -3084,9 +3117,10 @@ Read  2 min ago</div>
         <div class="m-form">
           <div class="m-fset" style="border-top:0;padding-top:0">
             <div class="m-rubric">Email</div>
-            <div class="m-f w-lg"><label>Address</label><span class="m-in">mix@example.org</span>
+            <div class="m-f w-lg"><label>Address</label>
+              <span style="display:flex;gap:8px;align-items:center">
+                <span class="m-in" style="flex:1">mix@example.org</span><span class="m-btn">Change…</span></span>
               <span class="m-hint">Used for invitations and service notices only.</span></div>
-            <div class="m-f" style="align-self:flex-end"><span class="m-btn">Change…</span></div>
             <div class="m-f" style="flex:1 1 100%"><span class="m-badge">pending: new@example.org</span></div>
           </div>
           <div class="m-fset">
@@ -3956,7 +3990,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New job</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg>Restore…</span></div>
         </div>
         <table class="m-table">
-          <thead><tr><th style="width:28px"></th><th>Job</th><th>What it copies</th><th>Where to</th><th>When</th><th>Keep</th><th>Last copy</th><th style="width:150px"></th></tr></thead>
+          <thead><tr><th style="width:28px"></th><th>Job</th><th>What it copies</th><th>Where to</th><th>When</th><th class="is-2nd">Keep</th><th>Last copy</th><th style="width:150px"></th></tr></thead>
           <tbody>
             <tr>
               <td><span class="m-box"></span></td>
@@ -3964,7 +3998,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
               <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap"><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="mono" style="font-size:11px;margin-left:4px">3 collections</span></span></td>
               <td class="mono">sftpgo · Documents<br><span style="color:var(--dusty)">/backup/work</span></td>
               <td class="mono">external request<br><span style="color:var(--dusty)">cron, 03:00</span></td>
-              <td class="mono">14</td>
+              <td class="mono is-2nd">14</td>
               <td class="mono">2026-08-16 03:10<br><span style="color:var(--dusty)">18.4 MB · verified</span></td>
               <td class="m-acts"><span class="m-btn is-sm">Run</span><span class="m-btn is-sm is-quiet">Edit</span><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></td>
             </tr>
@@ -3974,7 +4008,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
               <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-bar3" style="background:#A05A2C"></span><span class="mono" style="font-size:11px;margin-left:4px">2 collections + files</span></span></td>
               <td class="mono">nextcloud · Files<br><span style="color:var(--dusty)">/carrel-backup</span></td>
               <td class="mono">on sign-in<br><span style="color:var(--dusty)">if older than 7 days</span></td>
-              <td class="mono">8</td>
+              <td class="mono is-2nd">8</td>
               <td class="mono">2026-08-14 09:12<br><span style="color:var(--dusty)">2.1 GB · verified</span></td>
               <td class="m-acts"><span class="m-btn is-sm">Run</span><span class="m-btn is-sm is-quiet">Edit</span><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></td>
             </tr>
@@ -3984,7 +4018,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
               <td><span style="display:flex;gap:3px;align-items:center"><span class="m-bar3" style="background:#A05A2C"></span><span class="mono" style="font-size:11px;margin-left:4px">1 book</span></span></td>
               <td class="mono">download in browser<br><span style="color:var(--dusty)">nothing is written</span></td>
               <td class="mono">on demand</td>
-              <td class="mono">—</td>
+              <td class="mono is-2nd">—</td>
               <td class="mono" style="color:var(--dusty)">never</td>
               <td class="m-acts"><span class="m-btn is-sm">Run</span><span class="m-btn is-sm is-quiet">Edit</span><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></td>
             </tr>
@@ -4020,7 +4054,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
       </div>
       <div class="m-form">
         <div class="m-f w-lg"><label>Name</label><span class="m-in is-focus">Личное на домашний диск</span></div>
-        <div class="m-f" style="align-self:flex-end"><span class="m-check"><span class="m-box"></span>Job is on</span></div>
+        <div class="m-f"><span class="m-check"><span class="m-box"></span>Job is on</span></div>
 
         <div class="m-fset">
           <div class="m-rubric">What to copy <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--dusty)">2 collections and 1 folder chosen · 2.1 GB last time</span></div>
@@ -4059,7 +4093,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <div class="m-f" style="flex:1 1 100%"><span class="m-check"><span class="m-box"></span>Encrypt the archive</span>
             <span class="m-hint">On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.</span></div>
           <div class="m-f w-lg"><label>Archive password</label><span class="m-in">••••••••••••</span></div>
-          <div class="m-f" style="align-self:flex-end"><span class="m-check"><span class="m-box"></span>Same as the job “Work, daily”</span></div>
+          <div class="m-f"><span class="m-check"><span class="m-box"></span>Same as the job “Work, daily”</span></div>
           <div class="m-msg is-alert" style="flex:1 1 100%;margin:2px 0 0">Separate from the sign-in password: the destination may be somebody else’s hosting. Forget it and this job’s archives open for nobody, including you.</div>
         </div>
 
@@ -4244,11 +4278,11 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Publish…</span></div>
         </div>
         <table class="m-table">
-          <thead><tr><th>What is published</th><th>Kind</th><th>Created</th><th>Expires</th><th>Last opened</th><th>Opens</th><th style="width:120px"></th></tr></thead>
+          <thead><tr><th>What is published</th><th>Kind</th><th class="is-2nd">Created</th><th>Expires</th><th class="is-2nd">Last opened</th><th>Opens</th><th style="width:120px"></th></tr></thead>
           <tbody>
-            <tr><td><span class="m-fname"><span class="m-bar3" style="background:#4A6B52"></span><span>Личный · 10–31 August</span></span></td><td class="mono">calendar</td><td class="mono">2026-08-09</td><td class="mono">2026-09-09</td><td class="mono">2026-08-15 08:41</td><td class="mono">12</td>
+            <tr><td><span class="m-fname"><span class="m-bar3" style="background:#4A6B52"></span><span>Личный · 10–31 August</span></span></td><td class="mono">calendar</td><td class="mono is-2nd">2026-08-09</td><td class="mono">2026-09-09</td><td class="mono is-2nd">2026-08-15 08:41</td><td class="mono">12</td>
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Copy</span><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
-            <tr><td><span class="m-fname"><svg><use href="#i-doc"/></svg><span>смета-подрядчик.pdf</span></span></td><td class="mono">file</td><td class="mono">2026-08-12</td><td class="mono">2026-08-19</td><td class="mono" style="color:var(--dusty)">never opened</td><td class="mono">0</td>
+            <tr><td><span class="m-fname"><svg><use href="#i-doc"/></svg><span>смета-подрядчик.pdf</span></span></td><td class="mono">file</td><td class="mono is-2nd">2026-08-12</td><td class="mono">2026-08-19</td><td class="mono is-2nd" style="color:var(--dusty)">never opened</td><td class="mono">0</td>
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Copy</span><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
           </tbody>
         </table>
@@ -4735,7 +4769,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
         <div class="m-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke its password here — that is the only thing that stops it.</div>
         <div class="m-group"><span class="m-rubric">Devices</span><span class="m-num">3</span></div>
         <table class="m-table">
-          <thead><tr><th>Device</th><th style="width:34%">What it can see</th><th>Access</th><th>Created</th><th>Last request</th><th style="width:90px"></th></tr></thead>
+          <thead><tr><th>Device</th><th style="width:34%">What it can see</th><th>Access</th><th class="is-2nd">Created</th><th>Last request</th><th style="width:90px"></th></tr></thead>
           <tbody>
             <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Телефон · DAVx5</span></span></td>
               <td><span style="display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center">
@@ -4744,7 +4778,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
                 <span class="mono" style="font-size:11px">4 calendars · 1 book</span>
                 <span class="m-btn is-sm">Change…</span></span></td>
               <td><span class="m-seg" style="height:22px"><span class="is-on">read</span><span class="is-dim" title="Запись выключена для всего прокси">write</span></span></td>
-              <td class="mono">2026-06-02</td><td class="mono">2026-08-15 09:31</td>
+              <td class="mono is-2nd">2026-06-02</td><td class="mono">2026-08-15 09:31</td>
               <td class="m-acts"><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
             <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Ноутбук · Thunderbird</span></span></td>
               <td><span style="display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center">
@@ -4752,11 +4786,11 @@ An administrator can give you a new password, but doing so replaces the key: eve
                 <span class="mono" style="font-size:11px">all · 12 collections</span>
                 <span class="m-btn is-sm">Change…</span></span></td>
               <td><span class="m-seg" style="height:22px"><span class="is-on">read</span><span class="is-dim" title="Запись выключена для всего прокси">write</span></span></td>
-              <td class="mono">2026-06-02</td><td class="mono">2026-08-15 08:02</td>
+              <td class="mono is-2nd">2026-06-02</td><td class="mono">2026-08-15 08:02</td>
               <td class="m-acts"><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
             <tr style="opacity:.6"><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Old phone</span></span></td>
               <td><span style="display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center"><span></span><span class="mono" style="font-size:11px;color:var(--dusty)">—</span><span></span></span></td>
-              <td class="mono">revoked</td><td class="mono">2026-03-14</td><td class="mono">2026-05-30 12:10</td>
+              <td class="mono">revoked</td><td class="mono is-2nd">2026-03-14</td><td class="mono">2026-05-30 12:10</td>
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Delete</span></td></tr>
           </tbody>
         </table>
@@ -5561,7 +5595,7 @@ Read  2 min ago</div></div>
               <span class="m-in is-mono" style="font-size:11.5px">C:\Users\mix\AppData\Local\Carrel</span>
               <span class="m-hint">Encrypted state lives here: your DAV connections and settings. Not one contact, event or note — those stay on the servers.</span></div>
             <div class="m-f w-sm"><label>Port</label><span class="m-in is-mono">8765</span></div>
-            <div class="m-f" style="align-self:flex-end"><span class="m-check"><span class="m-box"></span>Stop the server on exit</span></div>
+            <div class="m-f"><span class="m-check"><span class="m-box"></span>Stop the server on exit</span></div>
             <div class="m-f" style="flex:1 1 100%;gap:7px">
               <span class="m-check"><span class="m-box is-off"></span>Allow other devices on this network</span>
               <span class="m-hint">While this is off, Carrel listens on <span class="mono">127.0.0.1</span> only — from outside it does not exist. Turning it on gives <span class="mono">http://192.168.1.14:8765</span> for a phone and for DAVx5, and asks for a password like any other instance.</span>
@@ -5739,7 +5773,7 @@ Read  2 min ago</div></div>
           <div class="m-fset">
             <div class="m-rubric">Network</div>
             <div class="m-f w-md"><label>Proxy</label><span class="m-in">system</span></div>
-            <div class="m-f" style="align-self:flex-end"><span class="m-check"><span class="m-box is-off"></span>Trust this instance’s self-signed certificate</span></div>
+            <div class="m-f"><span class="m-check"><span class="m-box is-off"></span>Trust this instance’s self-signed certificate</span></div>
             <div class="m-f" style="flex:1 1 100%"><span class="m-hint">This appears only after a certificate has been rejected, and it remembers that one fingerprint — it is not “turn checking off”.</span></div>
           </div>
           <div class="m-fset">
@@ -5834,5 +5868,51 @@ Read  2 min ago</div></div>
 <div class="note">Файл живой: макеты — это HTML, а не картинки, поэтому классы из раздела 6 переносятся в <code>carrel.css</code> копированием, а не перерисовкой.</div>
 
 </div>
+<script>
+/* Проверка выравнивания строк формы. Откройте файл с #check в адресе:
+   контролы, чей вертикальный центр разошёлся с соседями по строке больше
+   чем на 1.5 px, обводятся красным, в углу — их счёт. */
+addEventListener('load', function () {
+  if (!/check/.test(location.hash + location.search)) return;
+  var bad = 0;
+  document.querySelectorAll('.m-form, .m-fset, .demo').forEach(function (row) {
+    var items = [].slice.call(row.querySelectorAll('.m-in, .m-btn, .m-seg, .m-check'))
+      .filter(function (el) {
+        var r = el.getBoundingClientRect();
+        if (!r.height || el.closest('.m-menu') || el.closest('.m-msg')) return false;
+        /* Вертикальная стопка контролов (кнопки у фотографии, список флажков)
+           строкой формы не является — её центры сравнивать не с чем. */
+        var near = [].slice.call(el.parentElement.children).filter(function (sib) {
+          return sib !== el && sib.matches('.m-in, .m-btn, .m-seg, .m-check') && sib.getBoundingClientRect().height;
+        });
+        return !near.some(function (sib) {
+          var a = el.getBoundingClientRect(), b = sib.getBoundingClientRect();
+          return Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2) > 4;
+        });
+      });
+    var lines = [];
+    items.forEach(function (el) {
+      var r = el.getBoundingClientRect(), mid = (r.top + r.bottom) / 2;
+      var line = lines.filter(function (L) { return Math.abs(L.mid - mid) < 18; })[0];
+      if (line) { line.els.push(el); line.mids.push(mid); }
+      else { lines.push({ mid: mid, els: [el], mids: [mid] }); }
+    });
+    lines.forEach(function (L) {
+      if (L.els.length < 2) return;
+      var sorted = L.mids.slice().sort(function (a, b) { return a - b; });
+      var med = sorted[Math.floor(sorted.length / 2)];
+      L.els.forEach(function (el, i) {
+        if (Math.abs(L.mids[i] - med) > 1.5) { el.style.outline = '1.5px solid #B4442E'; bad++; }
+      });
+    });
+  });
+  var tag = document.createElement('div');
+  tag.textContent = bad ? 'Разъездов: ' + bad : 'Строки форм выровнены';
+  tag.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:99;padding:7px 11px;' +
+    'border-radius:4px;font:12px/1.2 ui-monospace,monospace;color:#fff;background:' +
+    (bad ? '#B4442E' : '#4A6B52');
+  document.body.appendChild(tag);
+});
+</script>
 </body>
 </html>
