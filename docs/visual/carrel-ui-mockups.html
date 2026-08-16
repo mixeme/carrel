@@ -4642,25 +4642,25 @@ Read  2 min ago</div>
         </svg>
         <div style="flex:1 1 320px;min-width:0">
           <div style="font-family:var(--f-serif);font-size:26px">davloom</div>
-          <div class="m-sub" style="margin-top:5px">Режим DAV-прокси для Carrel · один адрес вместо всех настроенных аккаунтов</div>
-          <div class="m-prose" style="margin-top:14px;font-size:13.5px">Этот адрес предназначен для календарного клиента, а не для чтения в браузере. Введите его в DAVx5, Thunderbird или «Календарь» вместе с именем пользователя и паролем устройства, выданным в Carrel.</div>
+          <div class="m-sub" style="margin-top:5px">DAV proxy for Carrel · one address instead of every configured account</div>
+          <div class="m-prose" style="margin-top:14px;font-size:13.5px">This is a connection point for clients, not a page to read. Enter the address in anything that speaks CalDAV, CardDAV or WebDAV — DAVx5, Thunderbird, Calendar and Contacts on Apple, a file manager mounting a network drive. The user name is your Carrel one; the password is the device password issued in Carrel.</div>
           <dl class="m-fields" style="padding:14px 0 0;grid-template-columns:120px minmax(0,1fr)">
-            <dt>Адрес</dt><dd class="mono">https://carrel.example/dav/</dd>
-            <dt>Версия</dt><dd class="mono">0.7.0</dd>
-            <dt>Сборка</dt><dd class="mono">19ced54</dd>
-            <dt>Лицензия</dt><dd>AGPL-3.0-or-later</dd>
+            <dt>Address</dt><dd class="mono">https://carrel.example/dav/</dd>
+            <dt>Serves</dt><dd class="mono">CalDAV · CardDAV · WebDAV</dd>
+            <dt>Version</dt><dd class="mono">0.7.0</dd>
+            <dt>Build</dt><dd class="mono">19ced54</dd>
+            <dt>Licence</dt><dd>AGPL-3.0-or-later</dd>
           </dl>
           <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-            <span class="m-btn is-primary">Исходный код</span>
-            <span class="m-btn">Открыть Carrel</span>
+            <span class="m-btn is-primary">Source code</span>
+            <span class="m-btn">Open Carrel</span>
           </div>
-          <div class="m-hint" style="margin-top:12px">Исходники предлагаются здесь потому, что этого требует §13 AGPL: davloom работает по сети, значит обязан дать их тем, кто им пользуется. Эта страница — единственная его пользовательская поверхность.</div>
         </div>
       </div>
     </div></div>
   </div>
 </div>
-<figcaption>Человек, открывший адрес прокси в браузере, не должен получить ни 401, ни пустой ответ — так требует §23.2 спецификации, и это же требование AGPL. Страница отвечает на три вопроса сразу: что это такое, куда этот адрес вводить и где взять исходники. Знак davloom здесь крупный и на картоне: это единственное место, где модуль показывается сам по себе, а не пунктом настроек внутри Carrel.
+<figcaption>Человек, открывший адрес прокси в браузере, не должен получить ни 401, ни пустой ответ — так требует §23.2. Страница отвечает на три вопроса: что это, куда вводить адрес и где взять исходники. Знак davloom здесь крупный и на картоне: это единственное место, где модуль показывается сам по себе, а не пунктом настроек внутри Carrel.<br><br><b>Ссылка на исходники стоит здесь не для красоты:</b> §13 AGPL обязывает предложить их тем, кто пользуется программой по сети, а davloom — ровно такой случай, и эта страница — его единственная пользовательская поверхность. В самом экране про это не написано ни слова: обязанность выполняется кнопкой, а не объяснением, зачем она нужна.<br><br><b>Строка про клиентов названа точно.</b> Прокси отдаёт CalDAV, CardDAV и WebDAV, то есть годится не только календарному клиенту: адресная книга в Thunderbird, «Контакты» на Apple и файловый менеджер, монтирующий сетевой диск, подключаются по тому же адресу. Строка <b>Serves</b> перечисляет протоколы прямо на странице — она отвечает на вопрос «а моё приложение сюда подойдёт» без чтения документации.
 <br><br>Ничего, кроме версии, сборки и ссылок, страница не сообщает: список коллекций, имя пользователя и само существование учётных записей — не для того, кто пришёл сюда без пароля. <code>PROPFIND</code> по тому же адресу по-прежнему требует аутентификации и отвечает клиенту, а не человеку.</figcaption>
 </figure>
 
