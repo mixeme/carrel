@@ -184,7 +184,7 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-form.is-tight{padding-top:4px}
 .m-f{display:flex;flex-direction:column;gap:4px;min-width:0}
 .m-f > label,.m-lbl{font-size:11px;letter-spacing:.04em;color:var(--muted);text-transform:none}
-.m-f .m-hint{font-size:11px;color:var(--dusty);max-width:52ch}
+.m-f .m-hint{font-size:11px;color:var(--dusty);max-width:74ch}
 .w-xs{width:96px}.w-sm{width:140px}.w-md{width:210px}.w-lg{width:300px}.w-xl{width:420px}.w-full{flex:1 1 100%;max-width:760px}
 .m-fset{flex:1 1 100%;border-top:.5px solid var(--hair);padding-top:12px;margin-top:2px;
   display:flex;flex-wrap:wrap;gap:13px 16px;align-items:flex-end}
@@ -239,7 +239,7 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-msg.is-row > svg{flex:none;margin-top:1px}
 .m-msg.is-alert{border-left-color:var(--alert);color:var(--alert);background:transparent;border:.5px solid var(--alert);border-left-width:2px}
 .m-msg.is-accent{border-left-color:var(--accent)}
-.m-empty{padding:26px var(--pad);color:var(--muted);font-size:13px;max-width:64ch;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.m-empty{padding:26px var(--pad);color:var(--muted);font-size:13px;max-width:74ch;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .m-prose{max-width:72ch;font-size:13.5px;line-height:1.65;white-space:pre-wrap}
 .m-diag{font-family:var(--f-mono);font-size:11px;line-height:1.65;background:var(--card);border-radius:3px;
   padding:9px 11px;color:var(--muted);white-space:pre-wrap;overflow-x:auto}
@@ -484,14 +484,15 @@ figcaption b{color:var(--ink);font-weight:600}
     <a href="#s-admin"><b>7.11</b><span>Администрирование</span></a>
     <a href="#install" class="is-sub"><b>7.11.1</b><span>Проверка установки</span></a>
     <a href="#s-auth"><b>7.12</b><span>Вход и первый запуск</span></a>
+    <a href="#rest"><b>7.13</b><span>Остальные экраны и полнота</span></a>
   </section>
   <section>
-    <div class="t-h">Экраны: запланированное<i>7.13–7.17</i></div>
-    <a href="#s-plan"><b>7.13</b><span>Новое устройство</span></a>
-    <a href="#s-backup"><b>7.14</b><span>Резервная копия и восстановление</span></a>
-    <a href="#s-publish"><b>7.15</b><span>Публикация по ссылке</span></a>
-    <a href="#s-davloom"><b>7.16</b><span>davloom — режим прокси</span></a>
-    <a href="#s-plan-small"><b>7.17</b><span>Мелкое запланированное</span></a>
+    <div class="t-h">Экраны: запланированное<i>7.14–7.18</i></div>
+    <a href="#s-plan"><b>7.14</b><span>Новое устройство</span></a>
+    <a href="#s-backup"><b>7.15</b><span>Резервная копия и восстановление</span></a>
+    <a href="#s-publish"><b>7.16</b><span>Публикация по ссылке</span></a>
+    <a href="#s-davloom"><b>7.17</b><span>davloom — режим прокси</span></a>
+    <a href="#s-plan-small"><b>7.18</b><span>Мелкое запланированное</span></a>
   </section>
   <section>
     <div class="t-h">Режимы и среды<i>8–12</i></div>
@@ -615,13 +616,13 @@ figcaption b{color:var(--ink);font-weight:600}
   <tr><td>Вложения</td><td>есть</td><td><b>позже:</b> модель готова, нет карточки</td><td>есть</td><td>неприменимо: у карточки фотография, а не вложения</td><td>сами и есть вложения</td><td>7.2, 7.4, 7.5</td></tr>
   <tr><td>Дубликаты и связывание</td><td>есть</td><td><b>позже</b></td><td><b>позже</b></td><td>есть</td><td>неприменимо: одинаковые файлы — задача файлового менеджера, а не адресной книги</td><td>7.7</td></tr>
   <tr><td>Импорт и экспорт</td><td><code>.ics</code></td><td><code>.ics</code></td><td><code>.md</code></td><td><code>.vcf</code></td><td>загрузка и скачивание</td><td>7.9, 7.5</td></tr>
-  <tr><td>Публикация по ссылке</td><td>делаем</td><td>внутри календаря</td><td>делаем</td><td>делаем</td><td>делаем: файл и папка</td><td>7.15</td></tr>
-  <tr><td>Резервная копия</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: файлы копируются как файлы</td><td>7.14</td></tr>
-  <tr><td>davloom — прокси</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: WebDAV проксируется проще всего — там нет синтетики, только префикс</td><td>7.16</td></tr>
-  <tr><td>Новое устройство</td><td>профиль Apple, QR</td><td>внутри календаря</td><td>внутри календаря</td><td>профиль Apple, QR</td><td><b>позже:</b> адрес для файлового клиента; в профиль Apple WebDAV не кладут</td><td>7.13</td></tr>
+  <tr><td>Публикация по ссылке</td><td>делаем</td><td>внутри календаря</td><td>делаем</td><td>делаем</td><td>делаем: файл и папка</td><td>7.16</td></tr>
+  <tr><td>Резервная копия</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: файлы копируются как файлы</td><td>7.15</td></tr>
+  <tr><td>davloom — прокси</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: WebDAV проксируется проще всего — там нет синтетики, только префикс</td><td>7.17</td></tr>
+  <tr><td>Новое устройство</td><td>профиль Apple, QR</td><td>внутри календаря</td><td>внутри календаря</td><td>профиль Apple, QR</td><td><b>позже:</b> адрес для файлового клиента; в профиль Apple WebDAV не кладут</td><td>7.14</td></tr>
   <tr><td>Разрешение конфликтов по ETag</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>есть: загрузка не перезаписывает</td><td>7.8, 7.5</td></tr>
 </table>
-<div class="note">Строки «позже» — это не украшение таблицы, а обязательство: каждая из них попала в раздел 13 «Порядок работ» или в 7.17. Строка «неприменимо» обязана нести причину — иначе через полгода никто не вспомнит, был ли это выбор или недосмотр.</div>
+<div class="note">Строки «позже» — это не украшение таблицы, а обязательство: каждая из них попала в раздел 13 «Порядок работ» или в 7.18. Строка «неприменимо» обязана нести причину — иначе через полгода никто не вспомнит, был ли это выбор или недосмотр.</div>
 
 <h2 id="width">3. Ширина: главное решение</h2>
 <p>Правило простое: <b>рабочая поверхность занимает всё, что есть</b> — списки, таблицы, редактор, поля в нём. Ограничение остаётся там, где оно не спорит с работой: у служебного текста, который читают один раз, и у полей, чьё значение короче поля, — дата, время, порт, процент. Всё остальное растёт вместе с окном; там, где ширина всё-таки может мешать чтению, стоит переключатель, а не запрет.</p>
@@ -3082,9 +3083,9 @@ Read  2 min ago</div>
             <div class="m-rubric">Temporary password <span class="m-badge is-alert">из рук в руки</span></div>
             <div class="m-msg is-alert" style="margin:0 0 10px">Until the user changes this password, you can sign in as them.</div>
             <div style="display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end">
+              <div class="m-f w-xs"><label>Role</label><span class="m-in">User</span></div>
               <div class="m-f w-sm"><label>Login</label><span class="m-in">viktor</span></div>
               <div class="m-f w-md"><label>Email <span style="color:var(--dusty)">(optional)</span></label><span class="m-in is-ph">—</span></div>
-              <div class="m-f w-xs"><label>Role</label><span class="m-in">User</span></div>
               <div class="m-f w-md"><label>Temporary password</label><span class="m-in is-mono">9f2-brick-lamp</span></div>
               <span class="m-btn is-primary">Create user</span>
             </div>
@@ -3116,7 +3117,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption>Три способа — три карточки в ряд, а не три формы в столбик под общим заголовком: они равноправны, и выбор между ними — это выбор ситуации, а не настройки. Ссылка-приглашение появляется в той же карточке, где её создали, с кнопкой копирования. Неудачная отправка письма названа кодом ответа сервера, а не словом «ошибка».</figcaption>
+<figcaption>Во всех трёх карточках роль стоит первой: она определяет, что человек сможет делать, и выбирается раньше, чем ему придумывают логин. Три способа — три карточки в ряд, а не три формы в столбик под общим заголовком: они равноправны, и выбор между ними — это выбор ситуации, а не настройки. Ссылка-приглашение появляется в той же карточке, где её создали, с кнопкой копирования. Неудачная отправка письма названа кодом ответа сервера, а не словом «ошибка».</figcaption>
 </figure>
 
 <div class="frames">
@@ -3370,7 +3371,229 @@ Read  2 min ago</div>
   </figure>
 </div>
 
-<h2 id="s-plan">7.13 Новое устройство <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.1</span></h2>
+
+<h2 id="rest">7.13 Остальные экраны и проверка полноты</h2>
+<p>Шесть страниц, которые не выглядят как «экраны» и потому вылетают из любого перечня: смена пароля, кадрирование фотографии, депонирование ключа со стороны администратора, импорт заметок с чужого WebDAV, две страницы по одноразовой ссылке и «о программе». Каждая из них — то, что человек однажды увидит, и незачем ему в этот момент видеть недоделку.</p>
+
+<div class="frames">
+  <figure style="flex:1 1 400px">
+  <div class="frame">
+    <div class="frame-label"><span>Смена пароля · обычная и вынужденная</span><i>/app/password</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
+        <div class="m-head"><div><div class="m-h1">Change password</div></div></div>
+        <div class="m-msg is-alert" style="margin-left:0;margin-right:0">You are signed in with a temporary password. Choose a new one before continuing.</div>
+        <div class="m-form" style="padding-left:0;padding-right:0">
+          <div class="m-f w-lg"><label>Current password</label><span class="m-in">••••••••••</span></div>
+          <div class="m-f w-lg"><label>New password</label><span class="m-in is-focus">••••••••••••</span></div>
+          <div class="m-f w-lg"><label>Repeat new password</label><span class="m-in">••••••••••••</span></div>
+          <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Your data stays encrypted under the same key; only the wrapping changes. Saved connections keep working.</span></div>
+        </div>
+        <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-primary">Change password</span><span class="m-btn is-quiet">Back to settings</span></div>
+      </div></div></div>
+    </div>
+  </div>
+  <figcaption>Один экран на два случая. Обычный — из «Account», с кнопкой «назад». Вынужденный — сразу после входа по временному паролю: тогда наверху стоит красная строка, а «назад» не показывается, потому что идти некуда: до смены пароля дальше не пускают. Подпись про перевязку ключа стоит под полями, а не в конце: она снимает главный страх — «не потеряю ли я подключения».</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 400px">
+  <div class="frame">
+    <div class="frame-label"><span>Фотография контакта · кадрирование</span><i>/app/contacts/…/{uid}</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
+        <div class="m-head"><div><div class="m-h1">Photo</div><div class="m-sub">Анна Ковалёва · метаданные будут вырезаны</div></div></div>
+        <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
+          <div style="position:relative;width:190px;height:190px;border-radius:4px;background:#8C7B6A;overflow:hidden;flex:none">
+            <div style="position:absolute;inset:22px;border:1.5px solid rgba(255,253,247,.9);border-radius:3px"></div>
+            <div style="position:absolute;left:22px;right:22px;top:50%;height:.5px;background:rgba(255,253,247,.45)"></div>
+            <div style="position:absolute;top:22px;bottom:22px;left:50%;width:.5px;background:rgba(255,253,247,.45)"></div>
+          </div>
+          <div style="flex:1 1 200px;display:flex;flex-direction:column;gap:11px">
+            <span style="font-size:12.5px;color:var(--muted)">Тяните снимок, чтобы выбрать кадр. Рамка — то, что увидят другие клиенты.</span>
+            <div class="m-f" style="width:100%"><label>Zoom</label>
+              <span style="display:flex;align-items:center;gap:9px">
+                <span style="flex:1;height:3px;background:var(--card-border);border-radius:2px;position:relative">
+                  <span style="position:absolute;left:0;top:0;bottom:0;width:38%;background:var(--accent);border-radius:2px"></span>
+                  <span style="position:absolute;left:38%;top:-5px;width:13px;height:13px;border-radius:50%;background:var(--paper);border:.5px solid var(--card-border)"></span>
+                </span>
+                <span class="mono" style="font-size:11px;color:var(--dusty)">1.6×</span>
+              </span></div>
+            <div class="m-f" style="width:100%"><label>Rotate</label>
+              <span class="m-seg" style="align-self:flex-start"><span class="is-on">0°</span><span>90°</span><span>180°</span><span>270°</span></span></div>
+            <span style="font-size:11px;color:var(--dusty)">Ориентация из EXIF уже применена.</span>
+          </div>
+        </div>
+        <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-primary">Save photo</span><span class="m-btn is-quiet">Cancel</span><span style="margin-left:auto"><span class="m-btn is-danger">Remove photo</span></span></div>
+      </div></div></div>
+    </div>
+  </div>
+  <figcaption>Сегодня это четыре числовых поля — «Pan X», «Pan Y», «Zoom», «Rotate», — и человек подбирает кадр, вводя числа и нажимая «Update preview». Здесь кадр выбирается перетаскиванием, масштаб — ползунком, поворот — четырьмя кнопками, а рамка показывает, что именно увидят другие клиенты. На узком экране (§13) ползунок остаётся, а перетаскивание заменяется центральным кадром: попасть пальцем в нужную точку снимка вслепую всё равно нельзя.</figcaption>
+  </figure>
+</div>
+
+<figure>
+<div class="frame">
+  <div class="frame-label"><span>Администрирование · депонирование ключей</span><i>/admin/escrow</i></div>
+  <div class="mock">
+    <div class="m-shell">
+      <div class="m-rail">
+        <div class="m-nav"><a><svg><use href="#i-back"/></svg>Back to app</a></div>
+        <div class="m-rail-sec">
+          <div class="m-rubric">Administration</div>
+          <div class="m-nav">
+            <a><svg><use href="#i-plus"/></svg>Add users<span class="m-num">2</span></a>
+            <a><svg><use href="#i-con"/></svg>Users<span class="m-num">6</span></a>
+            <a><svg><use href="#i-adm"/></svg>Settings</a>
+            <a><svg><use href="#i-shield"/></svg>Installation</a>
+            <a><svg><use href="#i-search"/></svg>DAV validator</a>
+            <a class="is-on"><svg><use href="#i-shield"/></svg>Key escrow</a>
+            <a><svg><use href="#i-clock"/></svg>Audit log</a>
+          </div>
+        </div>
+      </div>
+      <div class="m-main">
+        <div class="m-head">
+          <div><div class="m-h1">Key escrow</div><div class="m-sub">4 из 6 учётных записей открываются мастер-паролем</div></div>
+          <div class="m-acts"><span class="m-btn">Stop covering new accounts</span></div>
+        </div>
+        <div class="m-msg is-alert is-row">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
+          <span>Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and mailed to them.</span>
+        </div>
+        <div class="m-form">
+          <div class="m-fset" style="border-top:0;padding-top:0">
+            <div class="m-rubric">Policy</div>
+            <div class="m-f" style="flex:1 1 100%;gap:7px">
+              <span class="m-check"><span class="m-box"></span>New accounts are covered</span>
+              <span class="m-check"><span class="m-box is-off"></span>Do not let users withdraw their deposited key</span>
+            </div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Политику видно в профиле каждого пользователя независимо от того, затрагивает ли она его сейчас. Выключение покрытия не трогает уже снятые копии: удалить свою — решение владельца.</span></div>
+          </div>
+          <div class="m-fset">
+            <div class="m-rubric">Master password</div>
+            <div class="m-f w-lg"><label>Current</label><span class="m-in">••••••••••••••••</span></div>
+            <div class="m-f w-lg"><label>New</label><span class="m-in">••••••••••••••••</span></div>
+            <div class="m-f w-lg"><label>Repeat</label><span class="m-in">••••••••••••••••</span></div>
+            <div class="m-f" style="align-self:flex-end"><span class="m-btn">Change</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Перешифровывается только закрытый ключ восстановления. Депонированные копии не трогаются, поэтому заново соглашаться никому не нужно.</span></div>
+          </div>
+          <div class="m-fset">
+            <div class="m-rubric">Recover an account</div>
+            <div class="m-f w-md"><label>Account</label><span class="m-in">viktor</span></div>
+            <div class="m-f w-lg"><label>Master password</label><span class="m-in">••••••••••••••••</span></div>
+            <div class="m-f w-md"><label>Temporary password for the user</label><span class="m-in is-mono">9f2-brick-lamp</span></div>
+            <div class="m-f" style="align-self:flex-end"><span class="m-btn is-danger">Recover</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Подключения переживут восстановление: копия ключа открывается мастер-паролем и перевязывается под временный. Пользователю уходит письмо об этом — не по желанию администратора, а всегда.</span></div>
+          </div>
+        </div>
+        <div class="m-group"><span class="m-rubric">Кого открывает мастер-пароль</span><span class="m-num">4</span></div>
+        <table class="m-table">
+          <thead><tr><th>Account</th><th>Deposited</th><th>Last recovery</th><th>Can withdraw</th></tr></thead>
+          <tbody>
+            <tr><td>anna</td><td class="mono">2026-03-02</td><td class="mono" style="color:var(--dusty)">никогда</td><td class="mono">да</td></tr>
+            <tr><td>viktor</td><td class="mono">2026-04-19</td><td class="mono">2026-08-14 18:40</td><td class="mono">да</td></tr>
+            <tr><td>mix</td><td class="mono" style="color:var(--dusty)">не депонирован</td><td class="mono">—</td><td class="mono">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Самый опасный экран во всей администраторской части, и первое, что на нём стоит, — объяснение, чем депонирование <b>не</b> является. Текст взят из продукта дословно: он уже написан правильно и переписыванию не подлежит. Ниже — три действия, разделённые рубрикаторами, и таблица, отвечающая на вопрос, который администратор задаёт в первую очередь: <b>кого именно</b> этот мастер-пароль открывает. Строка «mix» с прочерками показывает, что администратор может не быть покрыт собственным механизмом, — это нормально и должно быть видно.</figcaption>
+</figure>
+
+<div class="frames">
+  <figure style="flex:1 1 400px">
+  <div class="frame">
+    <div class="frame-label"><span>Импорт заметок из папки WebDAV</span><i>/app/notes/…/import</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:560px">
+        <div class="m-steps"><span class="is-on">1 · Source</span><i></i><span>2 · Preview</span><i></i><span>3 · Report</span></div>
+        <div class="m-head"><div><div class="m-h1">Import notes</div><div class="m-sub">В «Записи» · nextcloud · home</div></div></div>
+        <div class="m-card">
+          <div class="m-rubric">From a file</div>
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <div class="m-f" style="flex:1 1 220px"><label>Markdown or a zip of them</label><span class="m-in is-ph">заметки-2026.zip</span></div>
+            <span class="m-btn">Browse…</span>
+          </div>
+        </div>
+        <div class="m-card" style="border-color:var(--accent)">
+          <div class="m-rubric">From a WebDAV folder</div>
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <div class="m-f" style="flex:1 1 200px"><label>Collection</label><span class="m-in">Documents · sftpgo</span></div>
+            <div class="m-f" style="flex:1 1 140px"><label>Folder</label><span class="m-in is-mono">notes</span></div>
+            <span class="m-btn is-primary">Preview folder</span>
+          </div>
+          <div class="m-hint" style="margin-top:8px">Читается каждый <span class="mono">.md</span> прямо в этой папке. Подпапки не обходятся, на сервере ничего не двигается и не удаляется — файлы остаются там, где лежали.</div>
+        </div>
+        <div class="m-msg">Front matter читается, когда он есть: заголовок, дата, теги, UID и <span class="mono">X-</span>свойства, выгруженные раньше. Файл без него становится заметкой с датой самого файла.</div>
+      </div></div></div>
+    </div>
+  </div>
+  <figcaption>Второй источник импорта, который легко не заметить: заметки можно взять прямо с того WebDAV, что уже подключён, — без скачивания и загрузки обратно. Оба источника ведут в один и тот же предпросмотр.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 400px">
+  <div class="frame">
+    <div class="frame-label"><span>Страницы по одноразовой ссылке и «о программе»</span><i>/invite/{token}, /confirm-email/{token}, /about</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main" style="gap:14px;padding:16px 0">
+        <div class="m-dialog" style="max-width:440px;padding:0 20px">
+          <div class="m-card" style="margin:0">
+            <div class="m-h1" style="font-size:17px">Invitation</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:6px">This invitation link is not valid. It may have expired, already been used, or been revoked.</div>
+            <div style="margin-top:10px"><span class="m-btn">Sign in</span></div>
+          </div>
+          <div class="m-card">
+            <div class="m-h1" style="font-size:17px">Email address</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:6px">Address confirmed. You can sign in now.</div>
+            <div style="margin-top:10px"><span class="m-btn">Sign in</span></div>
+          </div>
+          <div class="m-card" style="margin-bottom:0">
+            <div style="display:flex;align-items:center;gap:10px">
+              <svg class="m-logo" style="width:64px;height:26px" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>
+              <span class="mono" style="font-size:11.5px;color:var(--dusty)">0.7.0 · 19ced54</span>
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-top:8px">Self-hosted web client for CalDAV, CardDAV and WebDAV. AGPL-3.0-or-later: if you run a modified version for others, you must make the source available to them.</div>
+            <div style="margin-top:10px;display:flex;gap:6px"><span class="m-btn is-sm">Source code</span><span class="m-btn is-sm is-quiet">Third-party licences</span></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Три страницы в одном кадре, потому что каждая — это одна карточка и одна кнопка. Просроченная ссылка не говорит, что именно с ней случилось: истекла, уже использована или отозвана — снаружи это неразличимо, и различать не надо. «О программе» несёт версию с хешем сборки (их спрашивают в отчётах об ошибках) и обе обязательные ссылки лицензии.</figcaption>
+  </figure>
+</div>
+
+
+<h3>Полнота: где какой экран</h3>
+<p>Проверка не на глаз, а по списку шаблонов и маршрутов. Слева — то, что отдаёт сервер сегодня, справа — макет, который это показывает. Строк без макета не осталось; фрагменты htmx (<code>contacts_page</code>, <code>find_results</code>, <code>duplicate_results</code>, <code>contact_crop</code> как ответ на <code>hx-post</code>) отдельными экранами не считаются — они кусок того экрана, в который вставляются.</p>
+<table class="doc">
+  <tr><th style="width:26%">Шаблон и маршрут</th><th style="width:30%">Что это</th><th>Макет</th></tr>
+  <tr><td><code>login</code>, <code>setup</code>, <code>register</code>, <code>register_sent</code>, <code>forgot</code></td><td>Вход, первый администратор, регистрация, невозможность восстановления</td><td>7.12</td></tr>
+  <tr><td><code>invite</code>, <code>invite_invalid</code>, <code>email_confirmed</code></td><td>Приглашение и подтверждение адреса по одноразовой ссылке</td><td>7.12, 7.13</td></tr>
+  <tr><td><code>password</code></td><td>Смена пароля, обычная и вынужденная</td><td>7.13</td></tr>
+  <tr><td><code>app</code> → <code>settings_*</code></td><td>Подключения, подписки, учётная запись, вид, вложения, депонирование</td><td>7.10, 7.10.1, 7.10.2</td></tr>
+  <tr><td><code>contacts</code>, <code>contact</code>, <code>contact_crop</code>, <code>timeline</code></td><td>Список, карточка, правка, кадрирование фотографии, всё об одном человеке</td><td>7.1, 7.13</td></tr>
+  <tr><td><code>agenda</code>, <code>event</code></td><td>Агенда, карточка события, повторения</td><td>7.2</td></tr>
+  <tr><td><code>tasks</code>, <code>task</code></td><td>Список задач с фильтрами, карточка</td><td>7.3</td></tr>
+  <tr><td><code>notes</code>, <code>note</code>, <code>note_quick</code></td><td>Список, чтение и правка на весь экран, быстрая заметка</td><td>7.4</td></tr>
+  <tr><td><code>files</code></td><td>Файловый менеджер, плитки, корень коллекций</td><td>7.5</td></tr>
+  <tr><td><code>search</code></td><td>Поиск по всем источникам</td><td>7.6</td></tr>
+  <tr><td><code>duplicates</code>, <code>duplicate_merge</code></td><td>Группы дубликатов, слияние на сервере</td><td>7.7</td></tr>
+  <tr><td><code>conflict</code></td><td>Расхождение с сервером по ETag</td><td>7.8</td></tr>
+  <tr><td><code>contacts_import</code>, <code>calendar_import</code>, <code>notes_import</code> и три отчёта</td><td>Мастер импорта, импорт заметок из папки WebDAV, отчёты</td><td>7.9, 7.13</td></tr>
+  <tr><td><code>admin</code>, <code>admin_invites</code>, <code>admin_settings</code>, <code>admin_dav</code>, <code>admin_audit</code></td><td>Пользователи, три способа завести, настройки, валидатор, журнал</td><td>7.11</td></tr>
+  <tr><td><code>admin_escrow</code></td><td>Депонирование ключей: политика, мастер-пароль, восстановление</td><td>7.13</td></tr>
+  <tr><td>—</td><td>Проверка установки: доступность снаружи, сертификат, прокси</td><td>7.11.1 <span class="m-badge is-plan">план</span></td></tr>
+  <tr><td><code>about</code></td><td>Версия, сборка, лицензия</td><td>7.13</td></tr>
+  <tr><td><code>unified</code></td><td>«Everything»</td><td>удаляется: единый вид внутри разделов, 7.1–7.5</td></tr>
+  <tr><td>—</td><td>Новое устройство, резервная копия, публикация, davloom</td><td>7.14–7.18 <span class="m-badge is-plan">план</span></td></tr>
+  <tr><td>—</td><td>Состояния, тёмная тема, узкий экран, печать, приложение</td><td>8–12</td></tr>
+</table>
+<div class="note">Из шаблонов без своего макета остались только фрагменты, которые htmx вставляет внутрь уже нарисованных экранов. Если появится новый шаблон, строку сюда добавляют вместе с ним — иначе через полгода никто не вспомнит, рисовали его или нет.</div>
+
+<h2 id="s-plan">7.14 Новое устройство <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.1</span></h2>
 <p>Дальше — экраны того, чего в коде ещё нет. Они здесь по той же причине, по которой рисуют план дома целиком, а не по комнате за раз: каркас, рейл и панель подробностей должны выдержать и эти четыре вещи, иначе через полгода придётся ломать сделанное. Всё запланированное помечено в подписи макета.</p>
 <p>Самая дешёвая функция во всей дорожной карте: после discovery Carrel уже знает всё, на что уходит время при ручной настройке клиента — рабочий адрес, принципал, home-sets, точные пути и имена коллекций, учётные данные. Остаётся отдать это в том виде, который устройство понимает.</p>
 
@@ -3496,7 +3719,7 @@ Read  2 min ago</div>
   </figure>
 </div>
 
-<h2 id="s-backup">7.14 Резервная копия и восстановление <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.3</span></h2>
+<h2 id="s-backup">7.15 Резервная копия и восстановление <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.3</span></h2>
 <p>Carrel читает с одного сервера и пишет на другой, поэтому §2 остаётся в силе: у себя он по-прежнему ничего не хранит. Архив — сырые <code>.ics</code> и <code>.vcf</code> в папках <code>account/collection</code>, файлы — файлами, плюс манифест. Копия, которую умеет распаковать только её собственная программа, — плохая копия.</p>
 <div class="note"><b>Заданий несколько, а не одно.</b> «Резервная копия» — не переключатель в настройках, а список заданий: у каждого свои источники, своё место, свой триггер и свой срок хранения. Рабочие календари ежедневно на служебный сервер, личное — раз в неделю на домашний диск, архивная книга контактов — руками раз в квартал: это три разных задания, а не компромисс между ними. Одно задание при этом — самый частый случай, поэтому первое создаётся мастером за три поля.</div>
 
@@ -3763,7 +3986,7 @@ Read  2 min ago</div>
 <figcaption>Главный экран всей функции: не «восстановить», а <b>что именно и куда</b>. Коллекция, чей сервер исчез, не блокирует восстановление — ей назначают другую цель прямо в строке. Обещание сформулировано так, чтобы его можно было выполнить: восстановление — это импорт, а не откат.</figcaption>
 </figure>
 
-<h2 id="s-publish">7.15 Публикация по ссылке и внешние подписки <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.4</span></h2>
+<h2 id="s-publish">7.16 Публикация по ссылке и внешние подписки <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.4</span></h2>
 <p>Один механизм в две стороны: наружу — своё по секретной ссылке, внутрь — чужая лента <code>.ics</code> или <code>.vcf</code>. Общее у них то, что и там и там нет хранения: страница собирается из живого чтения источника на каждый запрос.</p>
 
 <figure>
@@ -4118,7 +4341,7 @@ Read  2 min ago</div>
   <tr><td>Папка</td><td>Листинг со значком типа; файл открывается своей страницей</td><td>Адрес <span class="mono">/dav/</span> — подключается как диск, только чтение</td><td>Включать ли вложенные папки (по умолчанию нет)</td></tr>
 </table>
 <p>Общее для всех пяти: токен не меньше 32 случайных байт и хранится дайджестом, отзыв в одно нажатие, свой лимит запросов, <code>Cache-Control: private</code> и <code>X-Robots-Tag: noindex</code>, ничего не сохраняется на диск и ничего не кэшируется. Одна ссылка — один объект, одна коллекция или одна внешняя лента; аккаунт целиком не публикуется никогда.</p>
-<h2 id="s-davloom">7.16 davloom — режим прокси <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.2</span></h2>
+<h2 id="s-davloom">7.17 davloom — режим прокси <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.2</span></h2>
 <p>Один аккаунт в DAVx5 или Thunderbird вместо пяти. Для интерфейса это две вещи: адрес, который дают клиенту, и пароли приложений по устройствам — со своей обёрткой ключа на каждое, чтобы отзыв устройства был удалением обёртки, а смена пароля Carrel устройств не роняла. Последнее интерфейс обязан сказать вслух, иначе люди будут считать наоборот.</p>
 
 <figure>
@@ -4281,7 +4504,7 @@ Read  2 min ago</div>
   </figure>
 </div>
 
-<h2 id="s-plan-small">7.17 Мелкое запланированное — где оно живёт в этих макетах</h2>
+<h2 id="s-plan-small">7.18 Мелкое запланированное — где оно живёт в этих макетах</h2>
 <table class="doc">
   <tr><th style="width:30%">Что</th><th style="width:26%">Где показано</th><th>Что нужно сделать</th></tr>
   <tr><td>Вложения у задач (§23.10)</td><td>Карточка задачи, 7.3 — блок <b>Attachments</b> такой же, как у события и заметки</td><td>Модель готова: одна карточка интерфейса</td></tr>
@@ -5132,9 +5355,9 @@ Read  2 min ago</div></div>
 <p>Локальный экземпляр не виден из интернета, и это не поломка, а следствие выбора. Интерфейс не запрещает такие функции и не прячет их — он ставит метку там, где результат зависит от доступности снаружи, и говорит, чего именно не хватает. Обеспечить доступ (проброс порта, туннель, домен, сертификат) может только человек, и Carrel не притворяется, что сделает это за него.</p>
 <table class="doc">
   <tr><th style="width:26%">Функция</th><th style="width:28%">Что не сработает</th><th>Что делать</th></tr>
-  <tr><td>Публичные ссылки (7.15)</td><td>Адрес откроется только из вашей сети</td><td>Туннель или проброс порта с доменом и сертификатом; либо отдавать файлом, а не ссылкой</td></tr>
-  <tr><td>davloom (7.16)</td><td>Телефон в сотовой сети до <span class="mono">192.168.*</span> не дотянется</td><td>Дома по Wi-Fi работает как есть; снаружи — VPN или туннель</td></tr>
-  <tr><td>Внешний запуск копии (7.14)</td><td><span class="mono">POST /api/backup/run</span> некому позвать снаружи</td><td>Планировщик на этом же компьютере, либо запуск при входе</td></tr>
+  <tr><td>Публичные ссылки (7.16)</td><td>Адрес откроется только из вашей сети</td><td>Туннель или проброс порта с доменом и сертификатом; либо отдавать файлом, а не ссылкой</td></tr>
+  <tr><td>davloom (7.17)</td><td>Телефон в сотовой сети до <span class="mono">192.168.*</span> не дотянется</td><td>Дома по Wi-Fi работает как есть; снаружи — VPN или туннель</td></tr>
+  <tr><td>Внешний запуск копии (7.15)</td><td><span class="mono">POST /api/backup/run</span> некому позвать снаружи</td><td>Планировщик на этом же компьютере, либо запуск при входе</td></tr>
   <tr><td>Приглашения и подтверждение почты</td><td>Письмо уйдёт, но ссылка в нём ведёт на локальный адрес</td><td>Для одного человека приглашения не нужны; для нескольких — обычный экземпляр на сервере</td></tr>
   <tr><td>Внешние ленты (7.10)</td><td>Работают: наружу Carrel ходит свободно</td><td>Ничего</td></tr>
 </table>
@@ -5172,7 +5395,7 @@ Read  2 min ago</div></div>
 </table>
 
 <h3>Проверка каркасом</h3>
-<p>Четыре запланированные функции (7.13–7.16) нарисованы на тех же примитивах, что и всё остальное: рейл, строка списка, таблица, панель подробностей, диалог, форма с полями по содержимому. Новым оказалось ровно одно — дерево папок, и оно всё равно нужно файлам для «Move…». Это и был смысл рисовать их сейчас: если бы «новое устройство» или davloom потребовали своего устройства страницы, менять каркас пришлось бы после того, как на нём собрано двенадцать экранов.</p>
+<p>Четыре запланированные функции (7.14–7.17) нарисованы на тех же примитивах, что и всё остальное: рейл, строка списка, таблица, панель подробностей, диалог, форма с полями по содержимому. Новым оказалось ровно одно — дерево папок, и оно всё равно нужно файлам для «Move…». Это и был смысл рисовать их сейчас: если бы «новое устройство» или davloom потребовали своего устройства страницы, менять каркас пришлось бы после того, как на нём собрано двенадцать экранов.</p>
 <p>Настольное приложение (раздел 12) — та же проверка с другой стороны: нативного в нём ровно рамка, меню, трей, уведомления и три диалога, а все двенадцать экранов работают внутри окна без единой правки. Если бы под окно пришлось рисовать вторую вёрстку, это значило бы, что каркас держится на браузере, а не на устройстве интерфейса.</p>
 <p>Обратное тоже верно и стоит сказать: <b>ни одна из этих функций не должна начинаться с интерфейса</b>.</p>
 <p style="max-width:none"><b>Порядок для запланированного свой</b> и живёт в <a href="../roadmap.md">roadmap.md</a>, а не здесь: этот документ отвечает на вопрос «как это выглядит», а не «когда это делается». Профиль Apple — это XML и одноразовая ссылка, резервная копия — это архив и проверка чтением, davloom — это подстановка префиксов в потоке. Макеты выше показывают, чем работа кончится, а не с чего начнётся.</p>
