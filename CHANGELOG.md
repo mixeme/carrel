@@ -4,15 +4,17 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-### Changed
+## [0.8.0] - 2026-08-17
 
-- **Escrow withdrawal is always the key owner's decision (§5.4).** The administrator can no longer forbid withdrawing a deposited copy. Updated [docs/carrel-spec.md](docs/carrel-spec.md), [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html) and [docs/tests.md](docs/tests.md). Removal from the code is recorded in [docs/roadmap.md](docs/roadmap.md).
+**Экранный эталон и подготовка десктопа.** Полный набор макетов в [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html); план обёртки §18; `CARREL_BIND` для local-режима. Функциональный объём v1 в коде без изменений; ручная приёмка — [docs/manual-acceptance.md](docs/manual-acceptance.md).
 
 ### Added
 
 - **Desktop wrapper (§18) — plan and `CARREL_BIND`:** implementation plan in [docs/plans/desktop-wrapper.md](docs/plans/desktop-wrapper.md) (Wails, Windows + Linux, Remote/Local, tray, sidecar download). Roadmap section Desktop application; §18 marked planned in [docs/carrel-spec.md](docs/carrel-spec.md). P-desktop checks in [docs/manual-acceptance.md](docs/manual-acceptance.md). `CARREL_BIND` env for listen address (desktop local uses `127.0.0.1`); empty bind keeps listening on all interfaces as before.
 
 ### Changed
+
+- **Escrow withdrawal is always the key owner's decision (§5.4).** The administrator can no longer forbid withdrawing a deposited copy. Updated [docs/carrel-spec.md](docs/carrel-spec.md), [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html) and [docs/tests.md](docs/tests.md). Removal from the code is recorded in [docs/roadmap.md](docs/roadmap.md).
 
 - **Interface mockups grew from a redesign sketch into the reference for every screen** — [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html), 100 mockups drawn as live HTML on the classes meant for `carrel.css`. What changed since the first pass, in the order it matters:
 
@@ -46,7 +48,7 @@ All notable changes to this project are documented in this file.
 
   **Publish dialogues stopped asking what is being published.** They publish what was selected, and their heading says which object it is: the «This file / This folder» and «This card / The whole book» switches are gone. Two more false choices went with them — subfolders are included in a published folder by definition, and «allow mounting as read-only» decided nothing, because a link is read-only either way, so the mountable address is simply stated. «List attachments by name» became a real option instead: publish the attachments too, each getting its own link that expires and is revoked with the note — naming files nobody can open was a taunt. Tags never appear on a public page (the author's own labels), the date always does, and the calendar dialogue is no longer drawn twice: it lives in the panel of the screen that owns it. `.vcf` now offers download **and subscription**, the way `.ics` always did.
 
-  **Answers to things that were wrong on the mockups themselves.** The photo crop states what it saves (512 px square, JPEG, ~90 KB) and why the size is the card's size. The `local` badge became a real chip — 16 px, tinted, centred against the heading — instead of an outlined word sitting a pixel low. «One address for every device instead of five accounts» lost the invented number. `Measure` became `Reading width`, because a typographic term on a button explains nothing. The public Markdown page renders its Markdown instead of showing hashes and dashes under a caption claiming it is parsed. Every details panel now has the ✕ its own rule promised — seven of ten did not. The escrow policy «do not let users withdraw their deposited key» is now named for what it does, carries the reason it exists and what remains possible, and the user's side of it is drawn: what a person sees when withdrawal is disabled, and that leaving takes nothing from the DAV servers.
+  **Answers to things that were wrong on the mockups themselves.** The photo crop states what it saves (512 px square, JPEG, ~90 KB) and why the size is the card's size. The `local` badge became a real chip — 16 px, tinted, centred against the heading — instead of an outlined word sitting a pixel low. «One address for every device instead of five accounts» lost the invented number. `Measure` became `Reading width`, because a typographic term on a button explains nothing. The public Markdown page renders its Markdown instead of showing hashes and dashes under a caption claiming it is parsed. Every details panel now has the ✕ its own rule promised — seven of ten did not.
 
   **A form row aligns from the top, on the label line.** Rows used to align on their bottom edge, which held only while cells were the same shape. The moment the port field gained the hint explaining the dynamic port, its cell grew by twenty pixels and the checkbox beside it — honestly pinned to the bottom of the row — slid down against the explanation. Cells now align from the top, and a cell without a label has an empty label line, so its control always sits level with the field next to it however much text hangs underneath. The checker gained a second pass for the same reason: the first compares controls already on one line and is therefore blind to a control that has drifted far enough to look like a line of its own; the second decides what a line is from the cells, not from the controls. Turned back on the old rule, it finds the drift on six rows.
 
