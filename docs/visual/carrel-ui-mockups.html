@@ -2971,8 +2971,8 @@ Read  2 min ago</div>
           <div class="m-rubric">Dates and times</div>
           <div class="m-f w-md"><label>Week starts on</label><span class="m-in">Monday</span></div>
           <div class="m-f w-md"><label>Time</label><span class="m-in">24-hour</span></div>
-          <div class="m-f w-lg"><label>Time zone</label><span class="m-in">Europe/Moscow <span style="color:var(--dusty);margin-left:6px">from the server</span></span>
-            <span class="m-hint">В v1 пояс один на экземпляр и задаётся администратором: событие, показанное в двух поясах разным людям, — источник ошибок, а не удобство.</span></div>
+          <div class="m-f w-lg"><label>Time zone</label><span class="m-in">Europe/Moscow <span style="color:var(--dusty);margin-left:6px">from the server</span></span></div>
+          <div class="m-f" style="flex:1 1 100%"><span class="m-hint">В v1 пояс один на экземпляр и задаётся администратором: событие, показанное в двух поясах разным людям, — источник ошибок, а не удобство.</span></div>
         </div>
       </div>
     </div></div>
@@ -4443,6 +4443,7 @@ Read  2 min ago</div></div>
 
 <h2 id="m-phone">10. Узкий экран</h2>
 <p>Здесь же закрывается пробел §13, который в дорожной карте отмечен как «спасательный круг, но не тот»: рейл источников становится выдвижной панелью, а не стопкой флажков над содержимым, цели нажатия — 44&nbsp;px.</p>
+<p>Показаны все четыре раздела, а не один календарь: то, что выдерживает узкий экран в агенде, ломается в файлах, где нужны выделение и операции, и в заметке, где нужен текст. Общее для всех — две строки в записи, нижняя панель разделов, отсутствие боковой панели свойств: её место занимает меню строки.</p>
 
 <div class="frames">
   <div>
@@ -4564,6 +4565,208 @@ Read  2 min ago</div></div>
     </div>
   </div>
   <div style="font-size:13px;color:var(--muted);margin-top:10px;max-width:392px">Панель подробностей на телефоне — отдельная страница с кнопкой «назад». Действия — внизу, под большим пальцем.</div>
+  </div>
+
+  <div>
+  <div class="frame" style="width:392px">
+    <div class="frame-label"><span>Контакты</span><i>390 px</i></div>
+    <div class="mock is-phone">
+      <div class="m-top">
+        <span class="m-btn is-quiet" style="padding:0 4px"><svg viewBox="0 0 24 24" style="width:19px;height:19px"><use href="#i-menu"/></svg></span>
+        <div class="m-brand" style="font-size:16px">All address books</div>
+        <div class="m-top-right" style="gap:2px">
+          <span class="m-btn is-quiet" style="padding:0 6px"><svg viewBox="0 0 24 24" style="width:17px;height:17px"><use href="#i-search"/></svg></span>
+          <span class="m-btn is-primary" style="padding:0 8px;height:32px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-quill"/></svg></span>
+        </div>
+      </div>
+      <div class="m-shell"><div class="m-main">
+        <div class="m-group"><span class="m-rubric">А</span><span class="m-num">3</span></div>
+        <div class="m-list">
+          <div class="m-row m-row--phone">
+            <span class="m-bar3" style="background:#4A6B52;height:34px"></span>
+            <span class="m-two" style="flex-direction:row;align-items:center;gap:10px">
+              <span class="m-av" style="width:34px;height:34px;font-size:12px">АК</span>
+              <span class="m-two"><span class="t">Анна Ковалёва</span><span class="d mono">+7 912 445-10-88</span></span>
+            </span>
+            <span class="d">Контакты</span>
+          </div>
+          <div class="m-row m-row--phone">
+            <span class="m-bar3" style="background:#6B4E7A;height:34px"></span>
+            <span class="m-two" style="flex-direction:row;align-items:center;gap:10px">
+              <span class="m-av is-photo" style="width:34px;height:34px"></span>
+              <span class="m-two"><span class="t">Артём Белов <span class="m-badge is-linked">×2</span></span><span class="d mono">+7 903 118-22-04</span></span>
+            </span>
+            <span class="d">Команда</span>
+          </div>
+          <div class="m-row m-row--phone">
+            <span class="m-bar3" style="background:#4A6B52;height:34px"></span>
+            <span class="m-two" style="flex-direction:row;align-items:center;gap:10px">
+              <span class="m-av" style="width:34px;height:34px;font-size:12px">АС</span>
+              <span class="m-two"><span class="t">Алексей Смирнов</span><span class="d mono">+7 916 200-71-15</span></span>
+            </span>
+            <span class="d">Контакты</span>
+          </div>
+        </div>
+        <div class="m-group"><span class="m-rubric">В</span><span class="m-num">2</span></div>
+        <div class="m-list">
+          <div class="m-row m-row--phone">
+            <span class="m-bar3" style="background:#4A6B52;height:34px"></span>
+            <span class="m-two" style="flex-direction:row;align-items:center;gap:10px">
+              <span class="m-av" style="width:34px;height:34px;font-size:12px">ВГ</span>
+              <span class="m-two"><span class="t">Виктор Гончаров</span><span class="d">v.goncharov@example.org</span></span>
+            </span>
+            <span class="d">Контакты</span>
+          </div>
+        </div>
+        <div class="m-tabbar">
+          <a class="is-on"><svg><use href="#i-con"/></svg>Contacts</a>
+          <a><svg><use href="#i-cal"/></svg>Calendar</a>
+          <a><svg><use href="#i-task"/></svg>Tasks</a>
+          <a><svg><use href="#i-note"/></svg>Notes</a>
+          <a><svg><use href="#i-file"/></svg>Files</a>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <div style="font-size:13px;color:var(--muted);margin-top:10px;max-width:392px">Из пяти колонок остаются две с половиной: имя, под ним первое, чем с человеком связываются, справа — книга. Заглушка 34&nbsp;px, потому что на телефоне по ней целятся пальцем.</div>
+  </div>
+
+  <div>
+  <div class="frame" style="width:392px">
+    <div class="frame-label"><span>Человек целиком</span><i>390 px</i></div>
+    <div class="mock is-phone">
+      <div class="m-top">
+        <span class="m-btn is-quiet" style="padding:0 4px"><svg viewBox="0 0 24 24" style="width:19px;height:19px"><use href="#i-back"/></svg></span>
+        <div class="m-brand" style="font-size:16px">Анна Ковалёва</div>
+        <div class="m-top-right"><span class="m-btn is-sm">Edit</span></div>
+      </div>
+      <div class="m-shell"><div class="m-main">
+        <div style="display:flex;gap:12px;align-items:center;padding:14px">
+          <span class="m-photo is-ph" style="width:62px;height:62px;font-size:17px">АК</span>
+          <div style="min-width:0">
+            <div style="font-family:var(--f-serif);font-size:18px">Анна Ковалёва</div>
+            <div class="m-sub" style="margin-top:3px">Издательство «Слово» <span class="m-badge is-linked">в 2 книгах</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;padding:0 14px 12px;flex-wrap:wrap">
+          <span class="m-btn">Позвонить</span><span class="m-btn">Написать</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg></span>
+        </div>
+        <div class="m-bar" style="padding:0 14px 8px">
+          <span class="m-seg"><span class="is-on">Карточка</span><span>Связи 27</span></span>
+        </div>
+        <dl class="m-fields" style="grid-template-columns:84px minmax(0,1fr);padding:4px 14px 12px">
+          <dt>Телефон</dt><dd class="mono" style="color:var(--accent)">+7 912 445-10-88</dd>
+          <dt>Почта</dt><dd style="color:var(--accent)">a.kovaleva@example.org</dd>
+          <dt>День рождения</dt><dd class="mono">1987-03-14</dd>
+        </dl>
+        <div class="m-tabbar">
+          <a class="is-on"><svg><use href="#i-con"/></svg>Contacts</a>
+          <a><svg><use href="#i-cal"/></svg>Calendar</a>
+          <a><svg><use href="#i-task"/></svg>Tasks</a>
+          <a><svg><use href="#i-note"/></svg>Notes</a>
+          <a><svg><use href="#i-file"/></svg>Files</a>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <div style="font-size:13px;color:var(--muted);margin-top:10px;max-width:392px">Две колонки широкого экрана становятся двумя вкладками: «Карточка» и «Связи». Телефон и почта — ссылки: на телефоне карточка контакта нужна прежде всего чтобы позвонить.</div>
+  </div>
+
+  <div>
+  <div class="frame" style="width:392px">
+    <div class="frame-label"><span>Файлы · выделение</span><i>390 px</i></div>
+    <div class="mock is-phone">
+      <div class="m-top">
+        <span class="m-btn is-quiet" style="padding:0 4px"><svg viewBox="0 0 24 24" style="width:19px;height:19px"><use href="#i-menu"/></svg></span>
+        <div class="m-brand" style="font-size:16px">attachments</div>
+        <div class="m-top-right"><span class="m-btn is-primary" style="padding:0 8px;height:32px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-up"/></svg></span></div>
+      </div>
+      <div class="m-shell"><div class="m-main">
+        <div class="m-bar m-sel" style="padding:8px 14px;gap:8px">
+          <span style="font-weight:600;font-size:12.5px">2 selected</span>
+          <span class="m-btn" style="padding:0 9px"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg></span>
+          <span class="m-btn" style="padding:0 9px"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg></span>
+          <span class="m-btn is-danger" style="padding:0 9px"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg></span>
+          <span class="m-btn is-quiet" style="margin-left:auto;padding:0 6px"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span>
+        </div>
+        <div class="m-list">
+          <div class="m-row m-row--phone is-on">
+            <span class="m-box" style="margin-left:2px"></span>
+            <span class="m-two" style="flex-direction:row;align-items:center;gap:10px">
+              <svg width="17" height="17" viewBox="0 0 24 24" stroke="var(--muted)" stroke-width="1.3" fill="none"><use href="#i-img"/></svg>
+              <span class="m-two"><span class="t">2026-08-10-sync-board.png</span><span class="d mono">412 KB · image/png</span></span>
+            </span>
+            <span class="m-btn is-quiet" style="padding:0 4px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-dots"/></svg></span>
+          </div>
+          <div class="m-row m-row--phone is-on">
+            <span class="m-box" style="margin-left:2px"></span>
+            <span class="m-two" style="flex-direction:row;align-items:center;gap:10px">
+              <svg width="17" height="17" viewBox="0 0 24 24" stroke="var(--muted)" stroke-width="1.3" fill="none"><use href="#i-doc"/></svg>
+              <span class="m-two"><span class="t">release-checklist.md</span><span class="d mono">3 KB · text/markdown</span></span>
+            </span>
+            <span class="m-btn is-quiet" style="padding:0 4px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-dots"/></svg></span>
+          </div>
+          <div class="m-row m-row--phone">
+            <span class="m-box is-off" style="margin-left:2px"></span>
+            <span class="m-two" style="flex-direction:row;align-items:center;gap:10px">
+              <svg width="17" height="17" viewBox="0 0 24 24" stroke="var(--muted)" stroke-width="1.3" fill="none"><use href="#i-file"/></svg>
+              <span class="m-two"><span class="t">2026-07</span><span class="d mono">34 items</span></span>
+            </span>
+            <span class="m-btn is-quiet" style="padding:0 4px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-dots"/></svg></span>
+          </div>
+        </div>
+        <div class="m-tabbar">
+          <a><svg><use href="#i-con"/></svg>Contacts</a>
+          <a><svg><use href="#i-cal"/></svg>Calendar</a>
+          <a><svg><use href="#i-task"/></svg>Tasks</a>
+          <a><svg><use href="#i-note"/></svg>Notes</a>
+          <a class="is-on"><svg><use href="#i-file"/></svg>Files</a>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <div style="font-size:13px;color:var(--muted);margin-top:10px;max-width:392px">Выделение включается долгим нажатием, операции — значками в той же панели, что на большом экране. Панели свойств на телефоне нет: её место занимает меню строки.</div>
+  </div>
+
+  <div>
+  <div class="frame" style="width:392px">
+    <div class="frame-label"><span>Заметка · чтение и правка</span><i>390 px</i></div>
+    <div class="mock is-phone">
+      <div class="m-top">
+        <span class="m-btn is-quiet" style="padding:0 4px"><svg viewBox="0 0 24 24" style="width:19px;height:19px"><use href="#i-back"/></svg></span>
+        <div class="m-brand" style="font-size:16px">Записи</div>
+        <div class="m-top-right"><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>Edit</span></div>
+      </div>
+      <div class="m-shell"><div class="m-main">
+        <div class="m-docbody" style="padding:14px">
+          <div class="m-title" style="font-size:21px">Заметка со встречи 10.08</div>
+          <div class="m-sub" style="margin-top:6px"><span class="mono">10 августа, 11:05</span> · <span class="m-tag">встречи</span></div>
+          <div class="m-prose" style="margin-top:12px;font-size:14px;line-height:1.65">Договорились заморозить ветку в среду.
+
+Письмо пользователям пишет Анна, черновик к вечеру вторника.</div>
+          <div style="margin-top:14px">
+            <div class="m-rubric" style="margin-bottom:7px">Что делаем</div>
+            <ul style="display:flex;flex-direction:column;gap:9px;font-size:14px">
+              <li style="display:flex;gap:9px;align-items:baseline"><span class="m-tick" style="position:relative;top:2px"></span>проверить changelog</li>
+              <li style="display:flex;gap:9px;align-items:baseline"><span class="m-tick is-done" style="position:relative;top:2px"></span><span style="color:var(--dusty);text-decoration:line-through">попросить скриншоты</span></li>
+            </ul>
+          </div>
+          <div style="margin-top:16px;padding-top:12px;border-top:.5px solid var(--hair)">
+            <div class="m-rubric" style="margin-bottom:7px">Связано с</div>
+            <div style="font-size:13px;color:var(--accent)">Синк-ап по релизу <span style="color:var(--dusty)">· событие</span></div>
+          </div>
+        </div>
+        <div class="m-tabbar">
+          <a><svg><use href="#i-con"/></svg>Contacts</a>
+          <a><svg><use href="#i-cal"/></svg>Calendar</a>
+          <a><svg><use href="#i-task"/></svg>Tasks</a>
+          <a class="is-on"><svg><use href="#i-note"/></svg>Notes</a>
+          <a><svg><use href="#i-file"/></svg>Files</a>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <div style="font-size:13px;color:var(--muted);margin-top:10px;max-width:392px">Разобранный Markdown, флажки задач нажимаются пальцем, «Measure» на телефоне не нужен — ширина и так одна. Правка открывает то же поле во весь экран, с той же панелью разметки.</div>
   </div>
 </div>
 
