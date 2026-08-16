@@ -611,15 +611,15 @@ figcaption b{color:var(--ink);font-weight:600}
   <tr><th style="width:22%">Функция</th><th>События</th><th>Задачи</th><th>Заметки</th><th>Контакты</th><th>Файлы</th><th style="width:22%">Где в макетах</th></tr>
   <tr><td>Единый вид «All …»</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>корень коллекций</td><td>7.1–7.5</td></tr>
   <tr><td>Выбор столбцов</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>раздел 6</td></tr>
-  <tr><td>Печать</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td><b>позже:</b> листинг папки</td><td>раздел 11</td></tr>
-  <tr><td>Поиск по всем источникам</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td><b>позже:</b> по имени файла — <code>PROPFIND</code> уже возвращает имена</td><td>7.6</td></tr>
-  <tr><td>Вложения</td><td>есть</td><td><b>позже:</b> модель готова, нет карточки</td><td>есть</td><td>неприменимо: у карточки фотография, а не вложения</td><td>сами и есть вложения</td><td>7.2, 7.4, 7.5</td></tr>
-  <tr><td>Дубликаты и связывание</td><td>есть</td><td><b>позже</b></td><td><b>позже</b></td><td>есть</td><td>неприменимо: одинаковые файлы — задача файлового менеджера, а не адресной книги</td><td>7.7</td></tr>
+  <tr><td>Печать</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td><b>делаем:</b> листинг папки</td><td>раздел 11</td></tr>
+  <tr><td>Поиск по всем источникам</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td><b>делаем:</b> по имени файла — <code>PROPFIND</code> уже возвращает имена</td><td>7.6</td></tr>
+  <tr><td>Вложения</td><td>есть</td><td><b>делаем:</b> модель готова, дело за карточкой</td><td>есть</td><td>неприменимо: у карточки фотография, а не вложения</td><td>сами и есть вложения</td><td>7.2, 7.4, 7.5</td></tr>
+  <tr><td>Дубликаты и связывание</td><td>есть</td><td><b>делаем:</b> только связывание</td><td><b>делаем:</b> только связывание</td><td>есть</td><td>неприменимо: одинаковые файлы — задача файлового менеджера, а не адресной книги</td><td>7.7</td></tr>
   <tr><td>Импорт и экспорт</td><td><code>.ics</code></td><td><code>.ics</code></td><td><code>.md</code></td><td><code>.vcf</code></td><td>загрузка и скачивание</td><td>7.9, 7.5</td></tr>
   <tr><td>Публикация по ссылке</td><td>делаем</td><td>внутри календаря</td><td>делаем</td><td>делаем</td><td>делаем: файл и папка</td><td>7.16</td></tr>
   <tr><td>Резервная копия</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: файлы копируются как файлы</td><td>7.15</td></tr>
   <tr><td>davloom — прокси</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: WebDAV проксируется проще всего — там нет синтетики, только префикс</td><td>7.17</td></tr>
-  <tr><td>Новое устройство</td><td>профиль Apple, QR</td><td>внутри календаря</td><td>внутри календаря</td><td>профиль Apple, QR</td><td><b>позже:</b> адрес для файлового клиента; в профиль Apple WebDAV не кладут</td><td>7.14</td></tr>
+  <tr><td>Новое устройство</td><td>профиль Apple, QR</td><td>внутри календаря</td><td>внутри календаря</td><td>профиль Apple, QR</td><td><b>делаем:</b> адрес для файлового клиента строкой в списке; в профиль Apple WebDAV не кладут</td><td>7.14</td></tr>
   <tr><td>Разрешение конфликтов по ETag</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>есть: загрузка не перезаписывает</td><td>7.8, 7.5</td></tr>
 </table>
 <h4>Что означает каждое слово в таблице</h4>
@@ -630,7 +630,7 @@ figcaption b{color:var(--ink);font-weight:600}
   <tr><td><b>позже</b></td><td>нет или только модель</td><td>нет</td><td>Решено отложить. Строка обязана сказать, где это записано, — в 7.18 или в шаге раздела 13; иначе «позже» означает «забыли»</td></tr>
   <tr><td><b>неприменимо</b></td><td>—</td><td>—</td><td>И не будет. Причина обязательна: через полгода никто не вспомнит, был это выбор или недосмотр</td></tr>
 </table>
-<div class="note">Порядок важен именно в таком виде: «делаем» — это обещание интерфейса, а не кода. Ни один макет из 7.14–7.18 не означает, что функция близка; он означает, что когда до неё дойдут руки, спорить о том, как она выглядит, уже не придётся.</div>
+<div class="note"><b>Строк «позже» в таблице не осталось.</b> Пять клеток, которые их держали — печать папки, поиск по именам файлов, вложения у задачи, дубликаты задач и заметок, адрес для файлового клиента, — это были не решения, а необработанные места: каждое требовало не столько кода, сколько ответа на вопрос «как это выглядит». Ответы нарисованы, и клетки стали «делаем».<br><br>Слово «делаем» — обещание интерфейса, а не кода. Ни один макет из 7.14–7.18 не означает, что функция близка; он означает, что когда до неё дойдут руки, спорить о том, как она выглядит, уже не придётся.</div>
 
 <h2 id="width">3. Ширина: главное решение</h2>
 <p>Правило простое: <b>рабочая поверхность занимает всё, что есть</b> — списки, таблицы, редактор, поля в нём. Ограничение остаётся там, где оно не спорит с работой: у служебного текста, который читают один раз, и у полей, чьё значение короче поля, — дата, время, порт, процент. Всё остальное растёт вместе с окном; там, где ширина всё-таки может мешать чтению, стоит переключатель, а не запрет.</p>
@@ -1656,12 +1656,19 @@ SEQUENCE  2</div>
         </dl>
         <div class="m-sec"><div class="m-rubric">Description</div><div class="m-prose" style="font-size:13px">Зарядки, переходник, распечатать посадочный.</div></div>
         <div class="m-sec"><div class="m-rubric">Related</div><ul style="font-size:12.5px"><li><span style="color:var(--accent)">Поездка в Казань</span> <span style="color:var(--dusty)">· event</span></li></ul></div>
+        <div class="m-sec">
+          <div class="m-rubric">Attachments <span class="m-btn is-sm is-quiet">Attach</span></div>
+          <ul style="display:flex;flex-direction:column;gap:6px;font-size:12.5px">
+            <li>посадочный-казань.pdf <span style="color:var(--dusty)">application/pdf · 128 KB</span></li>
+          </ul>
+          <div class="m-hint" style="margin-top:6px">Тот же блок, что у события и заметки: файл ложится в папку вложений, задача получает ссылку. Вставка из буфера и перетаскивание работают так же.</div>
+        </div>
         <div class="m-danger-zone"><span class="m-btn is-danger">Delete task</span></div>
       </div>
     </div>
   </div>
 </div>
-<figcaption>Активный фильтр наконец видно: сегментный переключатель с числами вместо трёх одинаковых кнопок-ссылок, у которых <code>.is-active</code> не описан в CSS. Просроченное вынесено в свою группу и окрашено единственным тревожным цветом. Флажок выполнения — квадрат 13&nbsp;px, а не символ «○/✓» в кнопке.</figcaption>
+<figcaption><b>Вложения у задачи</b> — та самая строка «позже» из таблицы равенства: <code>ATTACH</code> в модели уже есть, карточки не было. Блок здесь тот же, что у события и заметки, и это весь объём работы. Активный фильтр наконец видно: сегментный переключатель с числами вместо трёх одинаковых кнопок-ссылок, у которых <code>.is-active</code> не описан в CSS. Просроченное вынесено в свою группу и окрашено единственным тревожным цветом. Флажок выполнения — квадрат 13&nbsp;px, а не символ «○/✓» в кнопке.</figcaption>
 </figure>
 
 <h2 id="s-notes">7.4 Заметки</h2>
@@ -2385,6 +2392,7 @@ Read  2 min ago</div>
           <div class="m-src"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Личный</span><span class="m-meta">3</span></div>
           <div class="m-src"><span class="m-box"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">Работа</span><span class="m-meta">0</span></div>
           <div class="m-src is-error"><span class="m-box"></span><span class="m-bar3" style="background:#9A9280"></span><span class="t">Общий</span><span class="m-meta">timeout</span><span class="m-btn is-sm is-quiet">Retry</span></div>
+          <div class="m-src"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Documents</span><span class="m-meta">2</span></div>
         </div>
       </div>
       <div class="m-main">
@@ -2414,11 +2422,25 @@ Read  2 min ago</div>
             <span class="d">event</span><span class="d">nextcloud · Личный</span>
           </div>
         </div>
+        <div class="m-group"><span class="m-rubric">Files</span><span class="m-num">2</span></div>
+        <div class="m-list">
+          <div class="m-row m-row--find">
+            <span class="m-bar3" style="background:#4A6B52"></span><span class="mono">4 Aug</span>
+            <span class="t">договор-<b>ковал</b>ёва.pdf</span><span class="s m-hide-3">application/pdf · 240 KB · Documents / 2026-08</span>
+            <span class="d">file</span><span class="d">sftpgo · Documents</span>
+          </div>
+          <div class="m-row m-row--find">
+            <span class="m-bar3" style="background:#4A6B52"></span><span class="mono">21 Jul</span>
+            <span class="t"><b>Ковал</b>ёва — правки по обложке.md</span><span class="s m-hide-3">text/markdown · 6 KB · Documents / notes</span>
+            <span class="d">file</span><span class="d">sftpgo · Documents</span>
+          </div>
+        </div>
+        <div class="m-msg">Файлы ищутся по имени: <span class="mono">PROPFIND</span> и так возвращает имена, и обход папки стоит одного запроса на папку. Внутрь файлов Carrel не смотрит — и говорит об этом здесь, чтобы «ничего не найдено» не читалось как «в файлах этого нет».</div>
       </div>
     </div>
   </div>
 </div>
-<figcaption>Поиск перестаёт быть отдельной страницей с полем ввода: запрос вводится в шапке из любого места, а этот экран — только результаты. Совпадение подсвечено начертанием, а не цветом — цвет в строке зарезервирован за источником. Источник, не ответивший вовремя, помечен в рейле, и кнопка «Retry» стоит там же, у него, а не над списком.</figcaption>
+<figcaption><b>Файлы участвуют в поиске</b> — вторая строка «позже» из таблицы равенства. Ищется имя, и это честно написано в списке: содержимое документов не индексируется и индексироваться не будет, потому что Carrel ничего у себя не хранит. Поиск перестаёт быть отдельной страницей с полем ввода: запрос вводится в шапке из любого места, а этот экран — только результаты. Совпадение подсвечено начертанием, а не цветом — цвет в строке зарезервирован за источником. Источник, не ответивший вовремя, помечен в рейле, и кнопка «Retry» стоит там же, у него, а не над списком.</figcaption>
 </figure>
 
 
@@ -2451,8 +2473,8 @@ Read  2 min ago</div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Duplicates</div><div class="m-sub">312 records compared · 3 to look at · 1 linked · 2 set aside · matching at 70 points and above</div></div>
-          <div class="m-acts"><span class="m-seg"><span class="is-on">Candidates 3</span><span>Linked 1</span><span>Set aside 2</span></span></div>
+          <div><div class="m-h1">Duplicates</div><div class="m-sub">412 records compared · 6 to look at · 1 linked · 2 set aside · matching at 70 points and above</div></div>
+          <div class="m-acts"><span class="m-seg"><span class="is-on">All 6</span><span>Contacts 2</span><span>Events 1</span><span>Tasks 1</span><span>Notes 2</span></span></div>
         </div>
         <div class="m-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
         <div style="padding:14px 20px;display:flex;flex-direction:column;gap:10px">
@@ -2493,6 +2515,48 @@ Read  2 min ago</div>
           </div>
 
           <div class="m-card">
+            <div class="m-rubric">Собрать чемодан <span><span class="m-badge">candidate ×2</span> <span class="mono" style="letter-spacing:0;color:var(--dusty)">74 points · same summary, same due date</span></span></div>
+            <div class="m-list" style="margin:0 -14px">
+              <div class="m-row m-row--task" style="padding-left:14px;padding-right:14px">
+                <span class="m-tick"></span><span class="m-bar3" style="background:#4A6B52"></span>
+                <span class="t">Собрать чемодан</span><span class="d"><span class="m-tag">дом</span></span>
+                <span class="mono">12 Aug 18:00</span><span class="d mono">—</span><span class="d">nextcloud · Дела</span>
+              </div>
+              <div class="m-row m-row--task" style="padding-left:14px;padding-right:14px">
+                <span class="m-tick"></span><span class="m-bar3" style="background:#6B4E7A"></span>
+                <span class="t">Собрать чемодан</span><span class="d"></span>
+                <span class="mono">12 Aug</span><span class="d mono">—</span><span class="d">radicale · Личное</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:11px;flex-wrap:wrap">
+              <span class="m-btn is-primary">Link them</span>
+              <span class="m-btn is-quiet">Not duplicates</span>
+              <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Слияние задач на сервере не предлагается: сливать нечего — у задачи нет полей, которые дополняли бы друг друга</span>
+            </div>
+          </div>
+
+          <div class="m-card">
+            <div class="m-rubric">Что почитать про CRDT <span><span class="m-badge">candidate ×2</span> <span class="mono" style="letter-spacing:0;color:var(--dusty)">81 points · same title, texts differ</span></span></div>
+            <div class="m-list" style="margin:0 -14px">
+              <div class="m-row m-row--note" style="padding-left:14px;padding-right:14px">
+                <span class="m-bar3" style="background:#4A6B52"></span>
+                <span class="t">Что почитать про CRDT</span><span class="s">Кляйн, глава 5; статья Шапиро 2011…</span>
+                <span class="d"><span class="m-tag">книги</span></span><span class="mono">8 Aug</span><span class="d">nextcloud · Записи</span>
+              </div>
+              <div class="m-row m-row--note" style="padding-left:14px;padding-right:14px">
+                <span class="m-bar3" style="background:#6B4E7A"></span>
+                <span class="t">Что почитать про CRDT</span><span class="s">Кляйн гл. 5, Шапиро 2011, automerge…</span>
+                <span class="d"></span><span class="mono">8 Aug</span><span class="d">radicale · Дневник</span>
+              </div>
+            </div>
+            <div class="m-msg" style="margin:11px 0 0">Тексты расходятся — какой из них верный, знает только человек. Поэтому заметки <b>связываются</b>, а не сливаются: обе остаются на своих серверах, в списке показываются одной строкой, и открыть можно любую.</div>
+            <div style="display:flex;gap:8px;margin-top:11px">
+              <span class="m-btn is-primary">Link them</span>
+              <span class="m-btn is-quiet">Not duplicates</span>
+            </div>
+          </div>
+
+          <div class="m-card">
             <div class="m-rubric">Дежурство: первая линия <span><span class="m-badge is-linked">linked ×2</span> <span class="mono" style="letter-spacing:0;color:var(--dusty)">решено 3 августа</span></span></div>
             <div style="font-size:12.5px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap">
               <span><span class="m-bar3" style="background:#8C6239;display:inline-block;height:11px;vertical-align:-1px"></span> radicale · Дежурства</span>
@@ -2506,7 +2570,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption>Группа стала карточкой с линованным списком записей внутри — те же строки, что и в обычном списке, поэтому колонки читаются так же. Выбор значения при расхождении — набор переключателей в строку, а не столбик <code>fieldset</code>. Ссылка «Merge on the server…» отделена от безобидного «Link them» и цветом, и положением: разное по последствиям не должно стоять рядом и выглядеть одинаково.</figcaption>
+<figcaption><b>Задачи и заметки сравниваются наравне с контактами и событиями</b> — две строки «позже» из таблицы равенства закрыты. Разница между видами не в устройстве экрана, а в том, что предлагается сделать: контакты <b>сливаются</b> на сервере, потому что у карточки есть поля, дополняющие друг друга; задачи и заметки только <b>связываются</b> — у них нечего дополнять, а расходящиеся тексты человек должен выбирать сам, а не получать склеенными. Поэтому у карточки заметки нет ни «Merge on the server…», ни выбора значений полей.<br><br>Группа стала карточкой с линованным списком записей внутри — те же строки, что и в обычном списке, поэтому колонки читаются так же. Выбор значения при расхождении — набор переключателей в строку, а не столбик <code>fieldset</code>. Ссылка «Merge on the server…» отделена от безобидного «Link them» и цветом, и положением: разное по последствиям не должно стоять рядом и выглядеть одинаково.</figcaption>
 </figure>
 
 <figure>
@@ -3736,6 +3800,7 @@ Read  2 min ago</div>
             <tr><td><span class="m-fname"><span class="m-bar3" style="background:#4A6B52"></span><span>Личный</span></span></td><td class="mono">CalDAV</td><td class="mono" style="font-size:11px">…/remote.php/dav/calendars/mix/personal/</td><td class="m-acts"><span class="m-btn is-sm">Copy</span></td></tr>
             <tr><td><span class="m-fname"><span class="m-bar3" style="background:#3F6E8C"></span><span>Работа</span></span></td><td class="mono">CalDAV</td><td class="mono" style="font-size:11px">…/remote.php/dav/calendars/mix/work/</td><td class="m-acts"><span class="m-btn is-sm">Copy</span></td></tr>
             <tr><td><span class="m-fname"><span class="m-bar3" style="background:#4A6B52"></span><span>Контакты</span></span></td><td class="mono">CardDAV</td><td class="mono" style="font-size:11px">…/remote.php/dav/addressbooks/mix/contacts/</td><td class="m-acts"><span class="m-btn is-sm">Copy</span></td></tr>
+            <tr><td><span class="m-fname"><span class="m-bar3" style="background:#4A6B52"></span><span>Documents</span></span></td><td class="mono">WebDAV</td><td class="mono" style="font-size:11px">https://files.example.org/dav/Documents/</td><td class="m-acts"><span class="m-btn is-sm">Copy</span></td></tr>
             <tr><td colspan="2" class="mono">username</td><td class="mono">mix</td><td class="m-acts"><span class="m-btn is-sm">Copy</span></td></tr>
           </tbody>
         </table>
@@ -3743,7 +3808,7 @@ Read  2 min ago</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Кнопка «Copy» на каждой строке снимает единственную настоящую проблему ручной настройки — опечатку в длинном пути.</figcaption>
+  <figcaption>Кнопка «Copy» на каждой строке снимает единственную настоящую проблему ручной настройки — опечатку в длинном пути. <b>Файловые коллекции стоят в том же списке</b>: их адрес подключается как сетевой диск в Windows, «Подключиться к серверу» в macOS и davfs в Linux. В профиль Apple WebDAV не кладут — там нет такой полезной нагрузки, — и вместо того, чтобы промолчать, строка отдаёт адрес, который сработает без профиля.</figcaption>
   </figure>
 </div>
 
@@ -4541,10 +4606,10 @@ Read  2 min ago</div>
 <h2 id="s-plan-small">7.18 Мелкое запланированное — где оно живёт в этих макетах</h2>
 <table class="doc">
   <tr><th style="width:30%">Что</th><th style="width:26%">Где показано</th><th>Что нужно сделать</th></tr>
-  <tr><td>Вложения у задач (§23.10)</td><td>Карточка задачи, 7.3 — блок <b>Attachments</b> такой же, как у события и заметки</td><td>Модель готова: одна карточка интерфейса</td></tr>
+  <tr><td>Вложения у задач (§23.10)</td><td>Нарисовано: 7.3, блок <b>Attachments</b> в карточке задачи</td><td>Модель готова: дело за карточкой</td></tr>
   <tr><td>Когда коллекция читалась и менялась (§23.8)</td><td>Блок <b>Source</b> в панели подробностей, 7.2</td><td>Кэш это уже знает — не хватает только вывода</td></tr>
   <tr><td>Исходный часовой пояс события (§23.8)</td><td>Поле <b>Time zone</b> в форме события, 7.2</td><td>Данные в <code>DTSTART</code>; показывать, когда отличается от общего</td></tr>
-  <tr><td>Оболочка офлайн (service worker)</td><td>Состояния, раздел 8 — та же полоса опроса, но с надписью «нет сети»</td><td>Кэшировать оболочку и статику, содержимое коллекций — никогда</td></tr>
+  <tr><td>Оболочка офлайн (service worker)</td><td>Нарисовано: раздел 8, состояние «нет сети»</td><td>Кэшировать оболочку и статику, содержимое коллекций — никогда</td></tr>
   <tr><td>Полный тест DAV-сервера (§6, изменяющий этап)</td><td>Подпись к макету валидатора, 7.11</td><td>Отдельный экран не нужен: тот же след, второй кнопкой и с предупреждением</td></tr>
   <tr><td>Узкий экран (§13)</td><td>Раздел 10 целиком</td><td>Выдвижной рейл, цели 44 px, центральный кроп</td></tr>
 </table>
@@ -4610,6 +4675,26 @@ Read  2 min ago</div>
     </div></div></div>
   </div>
   <figcaption>Кнопок правки просто нет — вместо кнопок, которые есть, но отвечают отказом. Метка «read-only» стоит у заголовка и у источника в рейле.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 400px">
+  <div class="frame">
+    <div class="frame-label"><span>Нет сети</span><i>оболочка есть, содержимого нет</i></div>
+    <div class="mock"><div class="m-shell no-rail"><div class="m-main">
+      <div class="m-poll" style="background:transparent;border-bottom:.5px solid var(--alert);color:var(--alert)">
+        <span class="m-prog"><i style="width:0"></i></span>Нет связи с carrel.example · последняя удачная попытка 4 минуты назад
+        <span style="margin-left:auto"><span class="m-btn is-sm">Повторить</span></span>
+      </div>
+      <div class="m-head"><div><div class="m-h1"><span class="m-bar3 is-multi" style="height:20px"></span>All calendars</div><div class="m-sub">показано из памяти этого сеанса</div></div></div>
+      <div class="m-group"><span class="m-rubric">Понедельник · 10 августа</span><span class="m-num">3</span></div>
+      <div class="m-list">
+        <div class="m-row m-row--agenda" style="opacity:.7"><span class="m-bar3" style="background:#4A6B52"></span><span class="mono">10:00</span><span class="t">Синк-ап по релизу</span><span class="s m-hide-3">Переговорная 2</span><span class="d"></span><span class="d">nextcloud · Личный</span></div>
+        <div class="m-row m-row--agenda" style="opacity:.7"><span class="m-bar3" style="background:#3F6E8C"></span><span class="mono">15:00</span><span class="t">Созвон с подрядчиком</span><span class="s m-hide-3">Jitsi</span><span class="d"></span><span class="d">nextcloud · Работа</span></div>
+      </div>
+      <div class="m-empty" style="padding:14px 20px;font-size:12px">Создавать и править сейчас нельзя: запись уходит на сервер, а его не видно. Кнопки не спрятаны — они скажут то же самое, если нажать.</div>
+    </div></div></div>
+  </div>
+  <figcaption>Установленное приложение (и настольное, и PWA) без сети показывает оболочку и то, что уже лежит в памяти сеанса, — но <b>не хранит содержимое на диске</b>: это была бы та самая локальная копия, которой в Carrel нет. Поэтому «показано из памяти этого сеанса» написано прямо в подзаголовке, строки приглушены, а полоса опроса красная и предлагает повторить. Открытое заново окно покажет пустой список и ту же строку — и это честнее, чем вчерашние данные, выданные за сегодняшние.</figcaption>
   </figure>
 
   <figure style="flex:1 1 400px">
@@ -5406,6 +5491,25 @@ Read  2 min ago</div></div>
   <li><b>Мобильного приложения.</b> На телефоне работает установленный PWA (раздел 10) и DAVx5 — писать третий клиент незачем.</li>
   <li><b>Хранилища в локальном режиме.</b> «Запустить здесь» переносит на компьютер <em>сервер</em> Carrel, а не данные: контакты и календари остаются на серверах DAV, локально лежат только зашифрованные подключения. Приложение, которое однажды начнёт хранить содержимое, перестанет быть Carrel.</li>
 </ul>
+
+<figure>
+<div class="frame" style="max-width:760px">
+  <div class="frame-label"><span>Папка на бумаге</span><i>@media print · раздел «Файлы»</i></div>
+  <div class="mock is-print">
+    <div class="p-h1">Documents / carrel / attachments</div>
+    <div style="font-size:11px;color:#555">sftpgo · vps · 14 объектов · 38.2 MB</div>
+    <div class="p-rub">Папки</div>
+    <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>2026-07</span><span style="font-family:ui-monospace,monospace">34 объекта</span><span style="font-family:ui-monospace,monospace">2026-07-01</span></div>
+    <div class="p-rub">Файлы</div>
+    <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>2026-08-10-sync-board.png</span><span style="font-family:ui-monospace,monospace">412 KB</span><span style="font-family:ui-monospace,monospace">2026-08-10</span></div>
+    <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>release-checklist.md</span><span style="font-family:ui-monospace,monospace">3 KB</span><span style="font-family:ui-monospace,monospace">2026-08-09</span></div>
+    <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>смета-подрядчик.pdf</span><span style="font-family:ui-monospace,monospace">1.2 MB</span><span style="font-family:ui-monospace,monospace">2026-08-05</span></div>
+    <div class="p-row" style="grid-template-columns:1fr 90px 130px"><span>2026-08-04-whiteboard.jpg</span><span style="font-family:ui-monospace,monospace">2.8 MB</span><span style="font-family:ui-monospace,monospace">2026-08-04</span></div>
+    <div style="margin-top:20px;font-size:10.5px;color:#555;border-top:.5px solid #bbb;padding-top:6px">Carrel · folder · sftpgo / Documents / carrel / attachments · captured 2026-08-16 20:41 · 14 of 14 shown</div>
+  </div>
+</div>
+<figcaption>Третья строка «позже» из таблицы равенства: печатались все разделы, кроме файлов. Лист устроен как остальные — рубрикаторы, линовка, моноширинные числа, — и разделяет папки и файлы, потому что на бумаге нельзя нажать на папку и посмотреть, что внутри. В подвале, как и у агенды, сказано, сколько объектов попало в снимок: усечённый листинг, напечатанный молча, врёт убедительнее экранного.</figcaption>
+</figure>
 
 <h2 id="plan">13. Порядок работ</h2>
 <p>Редизайн не меняет ни одной возможности и ни одной строки текста в интерфейсе — только вёрстку, разметку шаблонов и <code>carrel.css</code>. Ни сборщика, ни зависимостей: те же <code>html/template</code> и htmx.</p>
