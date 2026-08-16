@@ -97,7 +97,9 @@ figcaption b{color:var(--ink);font-weight:600}
 .frame-label .plan{border:.5px solid var(--card-border);border-radius:2px;padding:0 5px;
   color:var(--dusty);letter-spacing:.04em;text-transform:none;font-family:var(--f-sans);font-size:10px}
 .m-badge.is-plan{border-style:dashed}
-.m-badge.is-local{border-color:var(--alert);color:var(--alert)}
+.m-badge.is-local{border-color:transparent;color:var(--alert);
+  background:color-mix(in srgb,var(--alert) 11%,transparent)}
+.m-badge.is-local::before{content:"";width:4px;height:4px;border-radius:50%;background:currentColor;flex:none}
 .m-search{flex:1;max-width:560px;display:flex;align-items:center;gap:7px;height:28px;padding:0 9px;
   background:var(--bg);border:.5px solid var(--card-border);border-radius:3px;color:var(--dusty);font-size:12.5px}
 .m-top-right{margin-left:auto;display:flex;align-items:center;gap:8px}
@@ -176,17 +178,36 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-in.is-area{height:auto;min-height:76px;align-items:flex-start;padding:7px 9px;line-height:1.5;white-space:pre-wrap}
 .m-in.is-mono{font-family:var(--f-mono);font-size:11.5px}
 .m-check{display:flex;align-items:center;gap:7px;font-size:12.5px}
-/* Строка формы: поле, кнопка, переключатель и флажок — одной высоты, 28px.
-   У поля высота была задана всегда, у флажка её не было: он брал высоту у
-   текста (18px) и не совпадал с полем рядом. Правило живёт в примитивах,
-   а не в разметке экрана, поэтому поставить флажок неправильно уже нельзя.
-   Плотные списки флажков (два и больше в одной ячейке) правило не трогает. */
+/* ── Высота строки ───────────────────────────────────────────────────
+   Высот ровно три, и выбирает их не разметка экрана, а вид строки:
+     28 px — строка с полями: форма, карточка, любой ряд, где есть поле;
+     26 px — панель инструментов: шапка раздела, панель выделения, подвал;
+     22 px — строка списка или таблицы, где полей нет вовсе.
+   Всё, что стоит в строке, берёт её высоту: поле, кнопка, переключатель,
+   флажок. Прежде высота была только у поля, а флажок брал её у своего
+   текста — отсюда и разъезды. Правила идут от частного к общему, и
+   последним стоит самое общее: ряд с полем: 28 px, чем бы он ни был. */
 .m-f > .m-check:only-child,.m-f > label + .m-check:last-child,
 .m-form > .m-check,.m-fset > .m-check,.demo > .m-check{min-height:28px}
 .m-f:has(> .m-check:only-child){align-self:flex-end}
 .m-form .m-btn,.m-fset .m-btn,.m-f .m-btn{height:28px}
-.m-form .m-btn.is-sm,.m-fset .m-btn.is-sm,.m-f .m-btn.is-sm{height:22px}
 .m-f > .m-seg,.m-form > .m-seg,.m-fset > .m-seg{height:28px}
+:where(div,span,label,p):has(> .m-in) > .m-btn,
+:where(div,span,label,p):has(> .m-in) > .m-seg,
+:where(div,span,label,p):has(> .m-f) > .m-btn,
+:where(div,span,label,p):has(> .m-f) > .m-seg{height:28px}
+:where(div,span,label,p):has(> .m-f) > .m-check,
+:where(div,span,label,p):has(> .m-in) > .m-check{min-height:28px}
+/* Панель инструментов — 26 px всему, включая поле фильтра в ней. */
+.m-bar .m-btn,.m-editbar .m-btn,.m-head .m-acts .m-btn,.m-formfoot .m-btn,
+.m-transfers .h .m-btn,.m-sheet > .h .m-btn{height:26px}
+.m-bar .m-in,.m-editbar .m-in,.m-head .m-acts .m-in,.m-sheet > .h .m-in{height:26px}
+.m-bar .m-seg,.m-editbar .m-seg,.m-head .m-acts .m-seg{height:26px}
+.m-bar .m-check,.m-editbar .m-check{min-height:26px}
+/* Строка таблицы — 22 px: полей в ней нет, и кнопка не должна её распирать. */
+.m-table td .m-btn{height:22px}
+/* Телефон: касание крупнее, верхняя панель одной высоты. */
+.mock.is-phone .m-top .m-btn{height:38px}
 .m-check .m-box{width:12px;height:12px;border-radius:2px;background:var(--ink);flex:none}
 .m-check .m-box.is-off{background:transparent;border:.5px solid var(--card-border)}
 
@@ -236,7 +257,8 @@ figcaption b{color:var(--ink);font-weight:600}
 /* метки, значки, статусы */
 .m-tag{border:.5px solid var(--hair);border-radius:2px;padding:0 5px;font-size:10.5px;color:var(--muted);background:var(--paper);white-space:nowrap}
 .m-tag.is-on{border-color:var(--accent);color:var(--accent)}
-.m-badge{border:.5px solid var(--rule);border-radius:2px;padding:0 5px;font-size:10px;color:var(--muted);white-space:nowrap;
+.m-badge{display:inline-flex;align-items:center;gap:4px;height:16px;line-height:1;vertical-align:1px;
+  border:.5px solid var(--rule);border-radius:2px;padding:0 6px;font-size:10px;color:var(--muted);white-space:nowrap;
   letter-spacing:.03em;background:transparent}
 .m-badge.is-linked{border-color:var(--accent);color:var(--accent)}
 .m-badge.is-alert{border-color:var(--alert);color:var(--alert)}
@@ -244,7 +266,9 @@ figcaption b{color:var(--ink);font-weight:600}
   border-bottom:.5px solid var(--rule);font-size:11.5px;color:var(--muted)}
 .m-poll .m-prog{width:120px;height:3px;border-radius:2px;background:var(--card-border);overflow:hidden}
 .m-poll .m-prog i{display:block;height:100%;background:var(--accent)}
-.m-msg{display:block;padding:9px 12px;margin:12px var(--pad) 0;font-size:12.5px;line-height:1.5;
+/* Отступ у баннера с обеих сторон: снизу его не было, и текст, идущий
+   следом, прилипал к рамке — заметнее всего на экране депонирования. */
+.m-msg{display:block;padding:9px 12px;margin:12px var(--pad);font-size:12.5px;line-height:1.5;
   background:var(--card);border-left:2px solid var(--card-border);border-radius:0 3px 3px 0}
 .m-msg.is-row{display:flex;gap:9px;align-items:flex-start}
 .m-msg.is-row > svg{flex:none;margin-top:1px}
@@ -331,7 +355,7 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-doc{display:grid;grid-template-columns:minmax(0,1fr) 296px;min-height:0}
 .m-doc.is-focus{grid-template-columns:minmax(0,1fr)}
 /* Полный экран значит полный экран: ни текст, ни поля здесь не зажаты.
-   «Measure» — отдельный, названный режим, а не поведение по умолчанию. */
+   «Reading width» — отдельный, названный режим, а не поведение по умолчанию. */
 .m-docbody{padding:20px var(--pad) 30px;min-width:0}
 .m-docbody .m-prose,.m-docbody .m-in{max-width:none}
 .m-doc.is-measure .m-docbody > *{max-width:78ch}
@@ -522,6 +546,7 @@ figcaption b{color:var(--ink);font-weight:600}
     <a href="#m-phone"><b>10</b><span>Узкий экран</span></a>
     <a href="#m-print"><b>11</b><span>Печать</span></a>
     <a href="#m-desktop"><b>12</b><span>Настольное приложение</span></a>
+    <a href="#upd" class="is-sub"><b>12.1</b><span>Обновление</span></a>
   </section>
   <section>
     <div class="t-h">Внедрение<i>13</i></div>
@@ -659,7 +684,7 @@ figcaption b{color:var(--ink);font-weight:600}
 <table class="doc">
   <tr><th style="width:26%">Тип содержимого</th><th style="width:26%">Поведение при росте ширины</th><th>Почему</th></tr>
   <tr><td><b>Списки и таблицы</b></td><td>Занимают всю доступную ширину и <b>добавляют колонки</b>: организация, вторая почта, метка источника, дата изменения</td><td>Ширина превращается в данные, а не в воздух. Обратно колонки уходят в обратном порядке приоритета</td></tr>
-  <tr><td><b>Сплошной текст</b> — тело заметки, описание события</td><td>Занимает всю колонку содержимого. Сужение до 78&nbsp;ch — отдельный переключатель <b>Measure</b> у заметки, выключенный по умолчанию</td><td>Полноэкранный режим делался ради ширины полей: зажимать их в нём — противоречие. Тем, кому длинная строка мешает, дана кнопка, а не решение за них</td></tr>
+  <tr><td><b>Сплошной текст</b> — тело заметки, описание события</td><td>Занимает всю колонку содержимого. Сужение до 78&nbsp;ch — отдельный переключатель <b>Full width / Reading width</b> у заметки, выключенный по умолчанию</td><td>Полноэкранный режим делался ради ширины полей: зажимать их в нём — противоречие. Тем, кому длинная строка мешает, дана кнопка, а не решение за них</td></tr>
   <tr><td><b>Подсказки, баннеры, пустые состояния</b></td><td>Занимают ширину своего блока: подсказка — ширину поля, баннер — колонку содержимого</td><td>Это части рабочей поверхности, а не чтение подряд. Строка в две строки, оборванная на середине экрана, читается не лучше — она просто выглядит недоделанной</td></tr>
   <tr><td><b>Отдельные страницы сплошного текста</b> — «восстановление невозможно», «о программе», лицензия</td><td>Ограничены 72&nbsp;ch</td><td>Здесь читают подряд и один раз; мера важнее заполнения экрана, и переключать её незачем</td></tr>
   <tr><td><b>Поля формы</b> — карточка записи</td><td>Ширина по содержимому: дата 140, время 96, телефон 210, почта 300, имя 210, URL 420&nbsp;px. Раскладка — многоколоночная</td><td>Поле подсказывает длину ожидаемого значения. Форма из двадцати полей помещается в экран без прокрутки</td></tr>
@@ -696,7 +721,7 @@ figcaption b{color:var(--ink);font-weight:600}
         <div style="text-align:center"><div class="m-rubric">Content</div><div class="mono" style="font-size:11px;margin-top:4px">fluid · min 0</div></div>
       </div>
       <div class="m-side" style="align-items:center;justify-content:center;color:var(--dusty)">
-        <div style="text-align:center"><div class="m-rubric">Details</div><div class="mono" style="font-size:11px;margin-top:4px">400 px</div></div>
+        <div style="text-align:center"><div class="m-rubric">Details</div><div class="mono" style="font-size:11px;margin-top:4px">400 px · closes by ✕</div></div>
       </div>
     </div>
   </div>
@@ -835,7 +860,7 @@ figcaption b{color:var(--ink);font-weight:600}
 <h2 id="components">6. Компоненты</h2>
 
 <h4>Кнопки и переключатели</h4>
-<div class="demo mock" style="background:var(--paper)">
+<div class="demo mock" data-check="off" style="background:var(--paper)">
   <span class="m-btn is-primary">Save</span>
   <span class="m-btn">Import</span>
   <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</span>
@@ -903,16 +928,17 @@ figcaption b{color:var(--ink);font-weight:600}
 </div>
 <p>Слева направо: полоска коллекции, заглушка, имя со значком связанных записей, затем колонки, которые уходят первыми при сужении — организация, телефон, почта, источник. Выделенная строка — фон «картон», без рамок и теней.</p>
 
-<h4>Одна высота в строке формы</h4>
-<p>Поле, кнопка, переключатель и флажок в строке формы имеют <b>одну высоту — 28&nbsp;px</b>. У поля она была задана всегда, у флажка её не было: он брал высоту у своего текста, получалось 18&nbsp;px, и в строке с полем он садился ниже на девять пикселей. Так было у «Stop the server on exit» на экране локального запуска — и в семи других местах, где флажок стоял рядом с полем. Разметка это не лечит: каждый экран пришлось бы подпирать вручную, а следующий флажок всё равно поставили бы без подпорки.</p>
+<h4>Высота строки: их три</h4>
+<p>Всё, что стоит в одной строке, имеет одну высоту, и выбирает её не разметка экрана, а вид строки: <b>28&nbsp;px</b> — там, где есть поля; <b>26&nbsp;px</b> — панель инструментов; <b>22&nbsp;px</b> — строка списка или таблицы, где полей нет. Поле, кнопка, переключатель, флажок — всё берёт высоту своей строки.</p>
 <div class="demo mock" style="background:var(--paper);align-items:flex-end">
   <div class="m-f w-sm"><label>Port</label><span class="m-in is-mono">8765</span></div>
   <div class="m-f"><span class="m-check"><span class="m-box"></span>Stop the server on exit</span></div>
-  <div class="m-f"><span class="m-seg"><span class="is-on">Automatic</span><span>Fixed</span></span></div>
+  <div class="m-f"><span class="m-seg"><span class="is-on">Remote</span><span>Local</span></span></div>
   <div class="m-f"><span class="m-btn">Browse…</span></div>
 </div>
-<p>Правило записано в примитивах: высоту получают <code>.m-in</code>, <code>.m-btn</code>, <code>.m-seg</code> и одиночный <code>.m-check</code> внутри <code>.m-form</code>, <code>.m-fset</code> и <code>.m-f</code>. Ячейка, в которой стоит только флажок, вдобавок сама садится по нижнему краю строки — раньше это писали руками в четырёх местах, теперь этого писать не нужно. Плотные списки флажков правило не задевает: там, где в одной ячейке их два и больше, это уже не строка формы, а список, и 28&nbsp;px ему ни к чему.</p>
-<p>Чтобы разъезд не пришлось искать глазами по девяноста макетам, у файла есть встроенная проверка: откройте его с <code>#check</code> в адресе. Она обходит все строки форм, сравнивает вертикальные центры контролов и обводит красным те, что разошлись больше чем на полтора пикселя, а в углу показывает счёт. На чистом файле там написано «Строки форм выровнены».</p>
+<p>Дважды это ломалось одинаково. Сначала у флажка не оказалось собственной высоты — он брал её у текста, получалось 18&nbsp;px, и рядом с полем он садился ниже на девять пикселей: так было у «Stop the server on exit» и ещё в семи местах. Потом то же самое нашлось в панелях: мелкая кнопка (22&nbsp;px) стояла среди обычных (26&nbsp;px) в панели выделения файлов, а флажки «Events · Tasks due · Notes» в панели календаря были ниже кнопок рядом. Причина одна и та же — <b>высоту знала разметка, а не система</b>.</p>
+<p>Теперь её знает система, и правила идут от частного к общему: строки формы, панели, таблицы, а последним — самое общее: <b>ряд, в котором стоит поле, задаёт 28&nbsp;px всему ряду</b>, чем бы этот ряд ни был свёрстан. Поэтому мелкая кнопка рядом с полем невозможна: она станет обычной, даже если её так назвали. Плотные списки флажков правило не трогает — два флажка в одной ячейке это уже список, а не строка.</p>
+<p>Чтобы разъезд не искали глазами по девяноста макетам, у файла есть встроенная проверка: откройте его с <code>#check</code> в адресе. Она обходит <b>каждый</b> ряд — форму, панель, шапку, подвал диалога, карточку, — сравнивает вертикальные центры и высоты и обводит красным то, что выбилось: центром больше чем на полтора пикселя или высотой хоть на пиксель. В углу — счёт. На чистом файле там написано «Строки выровнены»; когда проверку написали, она нашла двадцать восемь мест, о которых никто не знал.</p>
 
 <h4>Кнопка рядом с полем</h4>
 <p>Кнопка, относящаяся к полю, стоит <b>справа от него и внутри его же блока</b>, обычной высоты. Мелкая кнопка (22&nbsp;px) — только для строк списка и таблиц, где полей нет. Пара «поле + кнопка» верстается одной строкой внутри <code>.m-f</code>, а не двумя соседними ячейками формы: во втором случае выравнивание держится на <code>align-items</code> родителя и разъезжается, как только у соседнего поля появляется подсказка или вторая строка. Ровно это и произошло на экране восстановления, и в трёх других местах — на карточке пароля устройства и в правке телефонов и почты.</p>
@@ -1083,6 +1109,7 @@ figcaption b{color:var(--ink);font-weight:600}
               <div style="margin-top:7px;display:flex;gap:5px"><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm">Timeline</span><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></div>
             </div>
           </div>
+          <div class="m-acts"><span class="m-btn is-quiet" title="Close the panel"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
         </div>
         <dl class="m-fields">
           <dt>Organisation</dt><dd>Издательство «Слово»</dd>
@@ -1310,6 +1337,7 @@ Read  2 min ago</div>
               <div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap"><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></div>
             </div>
           </div>
+          <div class="m-acts"><span class="m-btn is-quiet" title="Close the panel"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
         </div>
         <dl class="m-fields">
           <dt>Phone · mobile</dt><dd class="mono">+7 912 445-10-88</dd>
@@ -1486,7 +1514,7 @@ Read  2 min ago</div>
             <div class="m-h1" style="font-size:19px"><span class="m-bar3" style="background:#4A6B52;height:19px"></span>Синк-ап по релизу</div>
             <div class="m-sub">nextcloud · Личный</div>
           </div>
-          <div class="m-acts"><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></div>
+          <div class="m-acts"><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span><span class="m-btn is-quiet" title="Close the panel"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
         </div>
         <dl class="m-fields">
           <dt>When</dt><dd><span class="mono">10:00 – 11:00</span>, понедельник 10 августа</dd>
@@ -1687,7 +1715,7 @@ SEQUENCE  2</div>
       <div class="m-side">
         <div class="m-head">
           <div><div class="m-h1" style="font-size:19px">Собрать чемодан</div><div class="m-sub">nextcloud · Дела</div></div>
-          <div class="m-acts"><span class="m-btn is-sm">Edit</span></div>
+          <div class="m-acts"><span class="m-btn is-sm">Edit</span><span class="m-btn is-quiet" title="Close the panel"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
         </div>
         <dl class="m-fields">
           <dt>Status</dt><dd>Needs action</dd>
@@ -1787,7 +1815,7 @@ SEQUENCE  2</div>
       <div class="m-side">
         <div class="m-head">
           <div><div class="m-h1" style="font-size:19px">Заметка со встречи 10.08</div><div class="m-sub">nextcloud · Записи · <span class="mono">10 Aug 2026 11:05</span></div></div>
-          <div class="m-acts"><span class="m-btn is-sm is-primary">Save</span><span class="m-btn is-sm" title="Open full screen"><svg viewBox="0 0 24 24"><use href="#i-expand"/></svg></span><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></div>
+          <div class="m-acts"><span class="m-btn is-sm is-primary">Save</span><span class="m-btn is-sm" title="Open full screen"><svg viewBox="0 0 24 24"><use href="#i-expand"/></svg></span><span class="m-btn is-quiet" title="Close the panel"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></div>
         </div>
         <div class="m-form is-tight">
           <div class="m-f w-full"><label>Title</label><span class="m-in">Заметка со встречи 10.08</span></div>
@@ -1861,7 +1889,7 @@ SEQUENCE  2</div>
             <span class="m-btn">Export Markdown</span>
             <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</span>
             <span class="m-btn">Source</span>
-            <span class="m-seg"><span class="is-on">Full width</span><span>Measure</span></span>
+            <span class="m-seg"><span class="is-on">Full width</span><span>Reading width</span></span>
             <span class="m-btn" title="Hide the side column"><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></span>
             <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span>
           </div>
@@ -1910,7 +1938,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Чтение.</b> Текст занимает всю колонку содержимого: кегль 14.5, интерлиньяж 1.7. Справа — колонка с тем, что не текст: теги, связи, вложения, техническая правда об источнике; кнопка <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none" style="display:inline;vertical-align:-1px"><use href="#i-panel"/></svg> убирает и её. В рейле вместо списка коллекций — соседние заметки, чтобы листать не возвращаясь. Переключатель <b>Full width / Measure</b> в панели — на случай, когда монитор шире, чем удобно читать: он сужает текст до 78&nbsp;ch и запоминается. Умолчание — полная ширина.
+<figcaption><b>Чтение.</b> Текст занимает всю колонку содержимого: кегль 14.5, интерлиньяж 1.7. Справа — колонка с тем, что не текст: теги, связи, вложения, техническая правда об источнике; кнопка <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none" style="display:inline;vertical-align:-1px"><use href="#i-panel"/></svg> убирает и её. В рейле вместо списка коллекций — соседние заметки, чтобы листать не возвращаясь. Переключатель <b>Full width / Reading width</b> в панели выбирает между двумя ширинами текста: во всю колонку содержимого — или в 78&nbsp;ch, примерно как в книге. Он нужен на мониторе, который шире, чем удобно читать; выбор запоминается. Слово «Measure» здесь стояло раньше и было снято: это типографский термин, а на кнопке должно быть написано, что она делает. Умолчание — полная ширина.
 <br><br><b>Да, Markdown разбирается — в просмотре и только в нём.</b> Заголовок «Что делаем» и список выше показаны так, как их увидит человек. Это решение, а не набросок: без разбора «режим просмотра» отличался бы от правки одним лишь отсутствием рамки у поля, и заводить его было бы незачем. Стоит оно одной зависимости — <code>goldmark</code> в бинарник, без CDN и без JS, с <b>выключенным сырым HTML</b>: чужая заметка приходит с чужого сервера, и превращать её в исполняемую разметку нельзя. Поддерживается то, что пишут в заметках руками и что кладёт jtx Board: заголовки, списки, задачи-флажки, выделение, ссылки, код, цитаты и таблицы. <b>Хранится по-прежнему текст.</b> Carrel ничего не переписывает: правка отдаёт ровно те символы, которые набрали, а синтаксис, которого разборщик не знает, остаётся видимым текстом, а не пропадает. Кнопка <b>«Source»</b> в меню карточки показывает исходник, когда нужно понять, что именно лежит на сервере.</figcaption>
 </figure>
 
@@ -1934,7 +1962,7 @@ Read  2 min ago</div>
           <span class="m-right" style="margin-left:auto;display:flex;align-items:center;gap:10px">
             <span style="font-size:11.5px;color:var(--dusty)">Draft in this window · <span class="mono">11:42</span></span>
             <span class="m-kbd">Ctrl+S</span>
-            <span class="m-seg"><span class="is-on">Full width</span><span>Measure</span></span>
+            <span class="m-seg"><span class="is-on">Full width</span><span>Reading width</span></span>
             <span class="m-btn" style="background:var(--card)"><svg viewBox="0 0 24 24"><use href="#i-expand"/></svg>Focus</span>
           </span>
         </div>
@@ -2042,7 +2070,7 @@ Read  2 min ago</div>
           <div class="h">
             <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#i-quill"/></svg>
             <b style="font-size:13.5px">New note</b>
-            <span class="m-in" style="width:200px;height:24px;font-size:12px;margin-left:auto">Записи · nextcloud</span>
+            <span class="m-in" style="width:200px;font-size:12px;margin-left:auto">Записи · nextcloud</span>
             <span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span>
           </div>
           <div class="b">
@@ -2863,7 +2891,7 @@ Read  2 min ago</div>
             </div>
             <div class="b">
               <div class="m-f" style="width:100%"><label>Your Carrel password</label><span class="m-in is-focus">••••••••••</span></div>
-              <span style="font-size:11.5px;color:var(--dusty)">Unlocks credentials everywhere for five minutes: passwords, device profiles, anything else handed out.</span>
+              <span style="font-size:11.5px;color:var(--dusty)">Unlocks credentials everywhere for five minutes: passwords, device profiles, key escrow — anything handed out or handed over.</span>
             </div>
             <div class="f"><span class="m-btn is-primary">Show</span><span class="m-kbd">Enter</span><span style="margin-left:auto;display:flex;gap:7px;align-items:center"><span class="m-btn is-quiet">Cancel</span><span class="m-kbd">Esc</span></span></div>
           </div>
@@ -2889,11 +2917,13 @@ Read  2 min ago</div>
               <span style="display:flex;gap:6px"><span class="m-btn is-sm">Test</span><span class="m-btn is-sm">Edit</span></span>
             </div>
             <div class="mono" style="font-size:11.5px;color:var(--dusty);margin-bottom:9px">https://cloud.example.org/remote.php/dav/</div>
-            <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
               <div class="m-f" style="flex:0 0 150px"><label>User name</label><span class="m-in is-mono">mix</span></div>
-              <div class="m-f" style="flex:1 1 220px"><label>Password</label><span class="m-in is-mono">z3-brick-lamp-9f2</span></div>
-              <span class="m-btn is-sm">Copy</span>
-              <span class="m-btn is-sm is-quiet">Hide</span>
+              <div class="m-f" style="flex:1 1 300px"><label>Password</label>
+                <span style="display:flex;gap:8px;align-items:center">
+                  <span class="m-in is-mono" style="flex:1">z3-brick-lamp-9f2</span>
+                  <span class="m-btn">Copy</span><span class="m-btn is-quiet">Hide</span>
+                </span></div>
             </div>
           </div>
           <div class="m-card">
@@ -3058,7 +3088,28 @@ Read  2 min ago</div>
       </div></div></div>
     </div>
   </div>
-  <figcaption>Текст оставлен дословно: он честный и его менять незачем. Меняется только вид — предупреждение отделено от фактов, факты сведены в пары «подпись — значение».</figcaption>
+  <figcaption>Текст оставлен дословно: он честный и его менять незачем. Меняется только вид — предупреждение отделено от фактов, факты сведены в пары «подпись — значение». Отказ здесь возможен, и кнопка стоит прямо под фактами: это решение владельца ключа.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 460px">
+  <div class="frame">
+    <div class="frame-label"><span>Настройки · депонирование, отказ запрещён</span><i>/app/settings/escrow</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:640px">
+        <div class="m-head"><div><div class="m-h1">Key escrow</div><div class="m-sub">A copy of your key on this server</div></div></div>
+        <div class="m-msg is-alert" style="margin-left:0;margin-right:0">A copy of your data key is deposited on this server, and this account cannot withdraw it: the administrator has made escrow a condition of the account. An administrator with the escrow master password can decrypt the DAV credentials you save here.</div>
+        <dl class="m-fields" style="padding-left:0;padding-right:0">
+          <dt>Deposited</dt><dd class="mono">2026-03-02</dd>
+          <dt>Last recovery</dt><dd class="mono">never</dd>
+          <dt>Policy</dt><dd>Withdrawal disabled by the administrator</dd>
+          <dt>What is still yours</dt><dd>Leaving: deleting this account removes the deposited copy with it. Nothing on your DAV servers is touched — your contacts and calendars stay where they are, and another Carrel opens them with the same credentials.</dd>
+        </dl>
+        <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-danger">Delete account…</span>
+          <span style="font-size:11.5px;color:var(--dusty)">Or keep the account and save nothing here you are unwilling to share.</span></div>
+      </div></div></div>
+    </div>
+  </div>
+  <figcaption><b>Тот самый неприятный случай, и он нарисован, чтобы его было видно.</b> Настройка «отказ запрещён» существует в §5.4 для рабочих экземпляров, где учётную запись выдают на условии депонирования, — и она отбирает у человека решение, которое иначе было бы его. Единственное, что интерфейс может сделать честно, — не прятать этого: сказать прямо, кто и что может расшифровать, и назвать то, что остаётся, — уйти вместе с ключом, ничего не потеряв на самих серверах DAV. Если проект решит, что такой власти у администратора быть не должно, экран исчезает вместе с флажком, а из §5.4 уходит одна строка; пока строка там есть, экран обязан существовать.</figcaption>
   </figure>
 </div>
 
@@ -3141,7 +3192,7 @@ Read  2 min ago</div>
           </div>
           <div class="m-fset">
             <div class="m-rubric">Key escrow</div>
-            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at.</span></div>
             <div class="m-f"><span class="m-btn">Deposit my key…</span></div>
           </div>
         </div>
@@ -3632,7 +3683,10 @@ An administrator can give you a new password, but doing so replaces the key: eve
               </span></div>
             <div class="m-f" style="width:100%"><label>Rotate</label>
               <span class="m-seg" style="align-self:flex-start"><span class="is-on">0°</span><span>90°</span><span>180°</span><span>270°</span></span></div>
-            <span style="font-size:11px;color:var(--dusty)">EXIF orientation is already applied.</span>
+            <div class="m-f" style="width:100%"><label>Saved as</label>
+              <span class="m-in is-mono">512 × 512 · JPEG · about 90 KB</span>
+              <span class="m-hint">The photo lives inside the card itself, so its size is the card’s size: a square of 512 px at quality 85 keeps a vCard near 200 KB, which servers and phones still accept. Lists are served a smaller copy of the same crop — the original file is not kept anywhere.</span></div>
+            <span style="font-size:11px;color:var(--dusty)">EXIF orientation is already applied, metadata is stripped.</span>
           </div>
         </div>
         <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-primary">Save photo</span><span class="m-btn is-quiet">Cancel</span><span style="margin-left:auto"><span class="m-btn is-danger">Remove photo</span></span></div>
@@ -3677,9 +3731,9 @@ An administrator can give you a new password, but doing so replaces the key: eve
             <div class="m-rubric">Policy</div>
             <div class="m-f" style="flex:1 1 100%;gap:7px">
               <span class="m-check"><span class="m-box"></span>New accounts are covered</span>
-              <span class="m-check"><span class="m-box is-off"></span>Do not let users withdraw their deposited key</span>
+              <span class="m-check"><span class="m-box is-off"></span>Deposited keys cannot be withdrawn</span>
             </div>
-            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Every user sees this policy in their profile whether or not it affects them now. Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Withdrawal is the user’s own decision by default, and this tick takes it away — the only setting here that does. It exists for accounts issued <b>on the condition</b> of escrow, where the data belongs to an organisation rather than to the person; anywhere else leave it off. It is never silent: a covered user reads this same line in their profile, and the way out that always remains is to delete the account — data on the DAV servers is not touched by that. Every user sees this policy whether or not it affects them now. Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.</span></div>
           </div>
           <div class="m-fset">
             <div class="m-rubric">Master password</div>
@@ -3901,7 +3955,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <div style="flex:1 1 200px;display:flex;flex-direction:column;gap:10px">
             <div class="m-f" style="width:100%"><label>Link in the code</label><span class="m-in is-mono" style="font-size:11px">davx5://mix@cloud.example.org/remote.php/dav/</span></div>
             <div class="m-msg" style="margin:0">The password does not travel in the code — DAVx5’s own documentation forbids it. The two fields people get wrong are covered; the password is typed by hand.</div>
-            <div style="display:flex;gap:6px"><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-qr"/></svg>Show larger</span><span class="m-btn is-sm">Copy link</span></div>
+            <div style="display:flex;gap:6px"><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-qr"/></svg>Show larger</span><span class="m-btn">Copy link</span></div>
           </div>
         </div>
       </div></div>
@@ -4301,12 +4355,13 @@ An administrator can give you a new password, but doing so replaces the key: eve
         <div class="m-head" style="padding-bottom:8px"><div><div class="m-h1" style="font-size:17px">Publish</div><div class="m-sub">Личный · nextcloud</div></div>
           <div class="m-acts"><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div></div>
         <div class="m-form" style="padding-top:4px">
-          <div class="m-f" style="width:100%"><label>What to publish</label><span class="m-in">The whole collection</span></div>
+          <div class="m-f" style="width:100%"><label>How much of it</label>
+            <span class="m-seg"><span class="is-on">A date range</span><span>The whole calendar</span></span></div>
           <div class="m-f w-sm"><label>From</label><span class="m-in is-mono">2026-08-10</span></div>
           <div class="m-f w-sm"><label>To</label><span class="m-in is-mono">2026-08-31</span></div>
           <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">30 days</span></div>
           <div class="m-f" style="width:100%;gap:7px">
-            <span class="m-check"><span class="m-box"></span>Allow download of <span class="mono">.ics</span></span>
+            <span class="m-check"><span class="m-box"></span>Allow <span class="mono">.ics</span> download and subscription</span>
             <span class="m-check"><span class="m-box is-off"></span>Show event descriptions</span>
           </div>
         </div>
@@ -4367,42 +4422,16 @@ An administrator can give you a new password, but doing so replaces the key: eve
 
 
 <h3>Диалог публикации: по одному на каждый вид</h3>
-<p>Календарный диалог выше — не общий: у каждого вида свои решения, и общего у них ровно два — срок жизни ссылки и разрешено ли скачивание. Ниже — остальные четыре, и заодно то, чего не хватало календарю: возможность отдать его целиком, без диапазона.</p>
+<p>Календарный диалог — в панели на экране выше, и второй раз он здесь не нарисован. Ниже три остальных, и в каждом видно правило, которое стоило сформулировать отдельно: <b>диалог не спрашивает, что публикуют</b> — публикуют то, что выбрано, и это написано в его шапке. Спрашивают только о том, что действительно решается. Единственное исключение — календарь: у него «сколько именно» — настоящий выбор, потому что диапазон и весь календарь дают разные ссылки на один и тот же объект.</p>
 
 <div class="frames">
-  <figure style="flex:1 1 330px">
-  <div class="frame">
-    <div class="frame-label"><span>Календарь</span><span class="plan">не построено</span><i>диапазон или весь</i></div>
-    <div class="mock" style="padding:14px;background:var(--bg)">
-      <div class="m-sheet" style="width:100%;max-width:none">
-        <div class="h"><b style="font-size:13.5px">Publish</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Личный · nextcloud</span></div>
-        <div class="b">
-          <div class="m-f" style="width:100%"><label>What to publish</label>
-            <span class="m-seg" style="align-self:flex-start"><span class="is-on">A date range</span><span>The whole calendar</span></span></div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <div class="m-f" style="flex:1 1 120px"><label>From</label><span class="m-in is-mono">2026-08-10</span></div>
-            <div class="m-f" style="flex:1 1 120px"><label>To</label><span class="m-in is-mono">2026-08-31</span></div>
-          </div>
-          <span class="m-check"><span class="m-box is-off"></span>Show event descriptions</span>
-          <span class="m-check"><span class="m-box"></span>Allow <span class="mono">.ics</span> download and subscription</span>
-          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">30 days</span></div>
-        </div>
-        <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
-      </div>
-    </div>
-  </div>
-  <figcaption>«The whole calendar» не было, и это была дыра: для расписания секции или графика дежурств диапазон бессмысленен — его отдают целиком и надолго. Выбор стоит первым, потому что от него зависит, нужны ли поля дат.</figcaption>
-  </figure>
-
   <figure style="flex:1 1 330px">
   <div class="frame">
     <div class="frame-label"><span>Контакт и адресная книга</span><span class="plan">не построено</span><i>чужие данные</i></div>
     <div class="mock" style="padding:14px;background:var(--bg)">
       <div class="m-sheet" style="width:100%;max-width:none">
-        <div class="h"><b style="font-size:13.5px">Publish</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Анна Ковалёва</span></div>
+        <div class="h"><b style="font-size:13.5px">Publish a contact</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Анна Ковалёва</span></div>
         <div class="b">
-          <div class="m-f" style="width:100%"><label>What to publish</label>
-            <span class="m-seg" style="align-self:flex-start"><span class="is-on">This card</span><span>The whole book</span></span></div>
           <div class="m-f" style="width:100%"><label>What the visitor sees</label>
             <div style="display:flex;flex-direction:column;gap:5px;margin-top:2px">
               <span class="m-check"><span class="m-box"></span>Name and organisation</span>
@@ -4411,29 +4440,28 @@ An administrator can give you a new password, but doing so replaces the key: eve
               <span class="m-check"><span class="m-box is-off"></span>Photo</span>
               <span class="m-check"><span class="m-box is-off"></span>Note</span>
             </div></div>
-          <span class="m-check"><span class="m-box is-off"></span>Allow <span class="mono">.vcf</span> download</span>
+          <span class="m-check"><span class="m-box is-off"></span>Allow <span class="mono">.vcf</span> download and subscription</span>
           <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">7 days</span></div>
         </div>
         <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
       </div>
     </div>
   </div>
-  <figcaption>Единственный вид, где по умолчанию выключено почти всё: телефон и адрес принадлежат человеку, который о ссылке не знает. Диалог не спрашивает «показывать ли поля», он спрашивает каждое поле отдельно — и <code>.vcf</code> подчиняется тем же флажкам, иначе скачивание обходило бы их.</figcaption>
+  <figcaption>Единственный вид, где по умолчанию выключено почти всё: телефон и адрес принадлежат человеку, который о ссылке не знает. Диалог не спрашивает «показывать ли поля», он спрашивает каждое поле отдельно — и <code>.vcf</code> подчиняется тем же флажкам, иначе скачивание обходило бы их. Подписка стоит рядом со скачиванием ровно как у календаря: тот же адрес другой Carrel берёт как ленту, а прочие клиенты — как разовый импорт. Книга публикуется тем же диалогом со своего экрана; отличие одно — флажки применяются ко всем карточкам сразу.</figcaption>
   </figure>
-</div>
 
-<div class="frames">
   <figure style="flex:1 1 330px">
   <div class="frame">
     <div class="frame-label"><span>Заметка</span><span class="plan">не построено</span><i>текст и вложения</i></div>
     <div class="mock" style="padding:14px;background:var(--bg)">
       <div class="m-sheet" style="width:100%;max-width:none">
-        <div class="h"><b style="font-size:13.5px">Publish</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Заметка со встречи 10.08</span></div>
+        <div class="h"><b style="font-size:13.5px">Publish a note</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Заметка со встречи 10.08</span></div>
         <div class="b">
-          <span class="m-check"><span class="m-box"></span>Show tags</span>
-          <span class="m-check"><span class="m-box"></span>Show the date</span>
-          <span class="m-check"><span class="m-box is-off"></span>List attachments by name</span>
-          <span style="font-size:11.5px;color:var(--dusty)">Attachments themselves are not opened by this link: each file needs a link of its own.</span>
+          <div class="m-f" style="width:100%"><label>Attachments <span style="text-transform:none;letter-spacing:0;color:var(--dusty);font-weight:400">2 files · 3.2 MB</span></label>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:2px">
+              <span class="m-check"><span class="m-box is-off"></span>Publish them too — each gets its own link</span>
+              <span class="m-hint">The links are created together with this one, expire with it and are revoked with it. Without this the page says how many files there are, but not their names: a file name gives away more than it looks.</span>
+            </div></div>
           <span class="m-check"><span class="m-box"></span>Allow <span class="mono">.md</span> download</span>
           <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">30 days</span></div>
         </div>
@@ -4441,40 +4469,36 @@ An administrator can give you a new password, but doing so replaces the key: eve
       </div>
     </div>
   </div>
-  <figcaption>У заметки нет ни диапазона, ни полей — есть текст, и решать почти нечего. Единственный неочевидный переключатель — вложения: их имена могут выдать больше, чем сам текст, поэтому по умолчанию их нет.</figcaption>
+  <figcaption>Решение здесь ровно одно, и оно про вложения. Раньше на этом месте стоял флажок «перечислить вложения по именам» — бессмысленный: имена показаны, а сами файлы всё равно не открываются, и человек, которому дали ссылку, упирается в список того, что ему не отдали. Теперь выбор честный: либо вложения публикуются вместе с заметкой и открываются с той же страницы, либо страница просто говорит «два файла», не называя их. <b>Тегов и даты в диалоге нет.</b> Дата нужна всегда — заметка без даты выглядит подделкой; теги — внутренняя разметка автора, и на публичной странице им делать нечего.</figcaption>
   </figure>
 
   <figure style="flex:1 1 330px">
   <div class="frame">
-    <div class="frame-label"><span>Файл и папка</span><span class="plan">не построено</span><i>вложенность и диск</i></div>
+    <div class="frame-label"><span>Файл и папка</span><span class="plan">не построено</span><i>адрес для монтирования</i></div>
     <div class="mock" style="padding:14px;background:var(--bg)">
       <div class="m-sheet" style="width:100%;max-width:none">
-        <div class="h"><b style="font-size:13.5px">Publish</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Материалы к релизу</span></div>
+        <div class="h"><b style="font-size:13.5px">Publish a folder</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Материалы к релизу · 12 files</span></div>
         <div class="b">
-          <div class="m-f" style="width:100%"><label>What to publish</label>
-            <span class="m-seg" style="align-self:flex-start"><span>This file</span><span class="is-on">This folder</span></span></div>
-          <span class="m-check"><span class="m-box is-off"></span>Include subfolders</span>
-          <span class="m-check"><span class="m-box"></span>Allow mounting as a read-only drive</span>
-          <span style="font-size:11.5px;color:var(--dusty)">The same secret opens the folder over WebDAV — Windows, macOS and Linux mount it as a drive.</span>
           <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">14 days</span></div>
+          <div class="m-msg" style="margin:0">The visitor gets the folder with everything inside it, read-only, and the same address mounts as a drive in Windows, macOS and Linux.</div>
         </div>
         <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
       </div>
     </div>
   </div>
-  <figcaption>У папки два решения, которых нет больше нигде: спускаться ли во вложенные (по умолчанию нет — человек видит четыре файла и не обязан помнить про сорок в подпапке) и отдавать ли адрес для монтирования. Файл проще: у него нет ни того, ни другого, и диалог сжимается до срока жизни ссылки.</figcaption>
+  <figcaption>Самый короткий диалог из пяти, и стал он таким, когда из него убрали два ненастоящих вопроса. «Включать ли вложенные папки» — папка отдаётся папкой, со всем, что в ней лежит; человек, публикующий «Материалы к релизу», имеет в виду материалы к релизу, а не их верхний слой. «Разрешить ли монтирование только для чтения» — ссылка read-only вся целиком, и выбирать между read-only и read-only нечего: адрес для монтирования просто есть, и об этом сказано строкой, а не флажком. У файла и того меньше: остаётся один срок.</figcaption>
   </figure>
 </div>
 
 <table class="doc">
   <tr><th style="width:18%">Вид</th><th style="width:44%">Что решается в диалоге</th><th>Что не спрашивается</th></tr>
   <tr><td>Календарь</td><td>Диапазон <b>или</b> весь календарь; показывать ли описания; разрешить ли <code>.ics</code> и подписку</td><td>—</td></tr>
-  <tr><td>Адресная книга, контакт</td><td>Карточка или книга; каждое поле отдельно — имя, телефоны, почта, фотография, заметка; разрешить ли <code>.vcf</code></td><td>—</td></tr>
-  <tr><td>Заметка</td><td>Теги, дата, перечислять ли вложения; разрешить ли <code>.md</code></td><td>Диапазона нет: заметка одна</td></tr>
+  <tr><td>Адресная книга, контакт</td><td>Каждое поле отдельно — имя, телефоны, почта, фотография, заметка; разрешить ли <code>.vcf</code> и подписку</td><td>—</td></tr>
+  <tr><td>Заметка</td><td>Публиковать ли вложения вместе с ней; разрешить ли <code>.md</code></td><td>Дата показывается всегда, теги не показываются никогда</td></tr>
   <tr><td>Файл</td><td>Только срок жизни ссылки</td><td>Ни полей, ни вложенности: файл отдаётся как есть</td></tr>
-  <tr><td>Папка</td><td>Вложенные папки; адрес для монтирования диском</td><td>Предпросмотра содержимого нет по определению</td></tr>
+  <tr><td>Папка</td><td>Только срок жизни ссылки</td><td>Вложенные папки входят всегда; адрес для монтирования есть всегда</td></tr>
 </table>
-<div class="note">Общее у всех пяти — срок жизни и то, что ссылка отзывается одним нажатием. Всё остальное различается, и попытка свести это в один универсальный диалог с десятью флажками, половина которых неприменима, была бы хуже пяти коротких.</div>
+<div class="note">Общее у всех пяти — срок жизни, то, что ссылка отзывается одним нажатием, и то, что <b>публикуют выбранное</b>: вид записи диалог не спрашивает, он его знает. Попытка свести это в один универсальный диалог с десятью флажками, половина которых неприменима, была бы хуже четырёх коротких.</div>
 
 <h3>Публичная страница для каждого вида записи</h3>
 <p>Публиковать можно пять вещей, и у каждой свой вид страницы. Хрома у всех одна и та же — логотип, метка <b>read-only</b>, кнопка скачивания и строка про срок в подвале, — потому что открывший должен с первого взгляда понять три вещи: чем ему это отдали, что редактировать нечего и когда ссылка перестанет работать. Ни рейла, ни поиска, ни кнопок создания: страница не притворяется приложением.</p>
@@ -4549,7 +4573,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <svg class="m-logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>
           <span class="m-badge">read-only</span>
           <span style="margin-left:auto;display:flex;gap:6px;align-items:center">
-            <span class="m-seg"><span class="is-on">Full width</span><span>Measure</span></span>
+            <span class="m-seg"><span class="is-on">Full width</span><span>Reading width</span></span>
             <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>.md</span>
             <span class="m-btn is-quiet">.ics</span>
           </span>
@@ -4557,7 +4581,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
         <div class="m-doc is-focus">
           <div class="m-docbody">
             <div class="m-title">Заметка со встречи 10.08</div>
-            <div class="m-sub" style="margin-top:6px"><span class="mono">10 августа 2026, 11:05</span> · <span class="m-tag">встречи</span> <span class="m-tag">релиз</span></div>
+            <div class="m-sub" style="margin-top:6px"><span class="mono">10 августа 2026, 11:05</span></div>
             <div class="m-prose" style="margin-top:16px;font-size:14.5px;line-height:1.7">Договорились заморозить ветку в среду.
 
 Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.</div>
@@ -4570,7 +4594,10 @@ An administrator can give you a new password, but doing so replaces the key: eve
             </div>
             <div style="margin-top:20px;padding-top:12px;border-top:.5px solid var(--hair)">
               <div class="m-rubric" style="margin-bottom:7px">Attachments</div>
-              <div style="font-size:12.5px;color:var(--muted)">2026-08-10-sync-board.png <span style="color:var(--dusty)">· 412 KB · not available through this link</span></div>
+              <div style="font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:5px">
+                <span><span style="color:var(--accent)">2026-08-10-sync-board.png</span> <span style="color:var(--dusty)">· 412 KB</span></span>
+                <span><span style="color:var(--accent)">release-checklist.md</span> <span style="color:var(--dusty)">· 3 KB</span></span>
+              </div>
             </div>
           </div>
         </div>
@@ -4578,7 +4605,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
       </div></div>
     </div>
   </div>
-  <figcaption>Вложение названо, но не открывается: ссылка отдаёт одну запись, а файл лежит в другой коллекции и требует своей. Сказать это в строке честнее, чем показать ссылку, которая ответит отказом. Переключатель ширины оставлен и гостю — он не может ничего сломать, а читать длинный текст на широком мониторе ему так же неудобно, как хозяину. Разбор Markdown здесь тот же, что в 7.4, и по тем же правилам: сырой HTML внутри чужой заметки не исполняется никогда — гостю отдают текст, а не чужой скрипт.</figcaption>
+  <figcaption><b>Вложения здесь открываются</b> — потому что при публикации отметили «опубликовать и их»: на каждый файл выпущена своя ссылка с тем же сроком, и отзываются они вместе с этой. Без этой отметки страница сказала бы «два файла» и не назвала бы их: имя файла выдаёт больше, чем кажется, а называть то, что всё равно не открыть, — издевательство над открывшим. <b>Тегов на публичной странице нет</b> ни в каком случае: это внутренняя разметка автора, гостю она ничего не объясняет, зато рассказывает о нём. Дата, наоборот, стоит всегда — заметка без даты выглядит подделкой. Переключатель ширины оставлен и гостю — он не может ничего сломать, а читать длинный текст на широком мониторе ему так же неудобно, как хозяину. Разбор Markdown здесь тот же, что в 7.4, и по тем же правилам: сырой HTML внутри чужой заметки не исполняется никогда — гостю отдают текст, а не чужой скрипт.</figcaption>
   </figure>
 
   <figure style="flex:1 1 400px">
@@ -4616,7 +4643,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <svg class="m-logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>
           <span class="m-badge">read-only</span>
           <span style="margin-left:auto;display:flex;gap:6px;align-items:center">
-            <span class="m-seg"><span class="is-on">Full width</span><span>Measure</span></span>
+            <span class="m-seg"><span class="is-on">Full width</span><span>Reading width</span></span>
             <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Download</span>
           </span>
         </div>
@@ -4624,22 +4651,21 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <div><div class="m-h1" style="font-size:19px">release-checklist.md</div>
             <div class="m-sub"><span class="mono">text/markdown · 3.1 KB · changed 2026-08-09</span></div></div>
         </div>
-        <div class="m-docbody" style="padding-top:10px">
-          <div class="m-prose" style="font-size:14px;line-height:1.7">## Перед заморозкой
-
-- прогнать `go test -race ./...`
-- проверить changelog
-- письмо пользователям — черновик у Анны
-
-## После
-
-Тег ставит Виктор. Образ собирается вручную до появления CI.</div>
+        <div class="m-docbody" style="padding-top:10px;display:flex;flex-direction:column;gap:14px">
+          <div style="font-family:var(--f-serif);font-size:19px">Перед заморозкой</div>
+          <ul style="display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.6;padding-left:18px;list-style:disc">
+            <li>прогнать <span class="mono" style="background:var(--card);padding:1px 4px;border-radius:2px">go test -race ./...</span></li>
+            <li>проверить changelog</li>
+            <li>письмо пользователям — черновик у Анны</li>
+          </ul>
+          <div style="font-family:var(--f-serif);font-size:19px">После</div>
+          <div style="font-size:14px;line-height:1.7">Тег ставит Виктор. Образ собирается вручную до появления CI.</div>
         </div>
         <div style="padding:14px 20px;border-top:.5px solid var(--hair);font-size:11.5px;color:var(--dusty)">This link works until 19 August 2026 · the file is read from the server on every visit</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Текст и Markdown показываются телом страницы, а не предлагаются к скачиванию: это единственные типы, которые можно прочесть без программы. Простой текст показывается <b>как есть</b>, в <code>&lt;pre&gt;</code> с экранированием; <code>.md</code> — разобранным, тем же разборщиком, что и заметка (7.4), и с той же выключенной поддержкой сырого HTML: файл чужой, страница публичная, и исполнять из неё нечего. Ограничение по размеру своё: файл на десять мегабайт текста не выводится, а предлагается скачать.</figcaption>
+  <figcaption>Текст и Markdown показываются телом страницы, а не предлагаются к скачиванию: это единственные типы, которые можно прочесть без программы. <b>Здесь Markdown разобран</b> — заголовки заголовками, список списком, <code>go test</code> моноширинным, — потому что иначе страница показывала бы решётки и дефисы, то есть исходник, и обещание «прочесть без программы» не выполнялось бы. Разборщик тот же, что у заметки (7.4), и с той же выключенной поддержкой сырого HTML: файл чужой, страница публичная, и исполнять из неё нечего. Простой текст — наоборот, <b>как есть</b>, в <code>&lt;pre&gt;</code> с экранированием: в нём разбирать нечего, а выравнивание пробелами сломать легко. Ограничение по размеру своё: файл на десять мегабайт текста не выводится, а предлагается скачать.</figcaption>
   </figure>
 
   <figure style="flex:1 1 360px">
@@ -4748,7 +4774,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">davloom <span class="m-badge is-local" title="Локальный запуск: снаружи может быть недоступно">local</span></div><div class="m-sub">One address for every device instead of five accounts · <span style="color:var(--alert)">a phone on mobile data will not reach a local address</span></div></div>
+          <div><div class="m-h1">davloom <span class="m-badge is-local" title="Локальный запуск: снаружи может быть недоступно">local</span></div><div class="m-sub">One address for every device instead of an account for every server · <span style="color:var(--alert)">a phone on mobile data will not reach a local address</span></div></div>
           <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add device</span></div>
         </div>
         <div class="m-form" style="padding-bottom:6px">
@@ -5086,7 +5112,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
         </div>
       </div>
       <div class="m-side">
-        <div class="m-head"><div><div class="m-h1" style="font-size:19px">Синк-ап по релизу</div><div class="m-sub">nextcloud · Личный</div></div><div class="m-acts"><span class="m-btn is-sm">Edit</span></div></div>
+        <div class="m-head"><div><div class="m-h1" style="font-size:19px">Синк-ап по релизу</div><div class="m-sub">nextcloud · Личный</div></div><div class="m-acts"><span class="m-btn is-sm">Edit</span><span class="m-btn is-quiet" title="Close the panel"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div></div>
         <dl class="m-fields">
           <dt>When</dt><dd><span class="mono">10:00 – 11:00</span></dd>
           <dt>Repeats</dt><dd>Weekly on Mon</dd>
@@ -5116,7 +5142,7 @@ Read  2 min ago</div></div>
         <div class="m-brand" style="font-size:16px">All calendars</div>
         <div class="m-top-right" style="gap:2px">
           <span class="m-btn is-quiet" style="padding:0 6px"><svg viewBox="0 0 24 24" style="width:17px;height:17px"><use href="#i-search"/></svg></span>
-          <span class="m-btn is-primary" style="padding:0 8px;height:32px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-quill"/></svg></span>
+          <span class="m-btn is-primary" style="padding:0 8px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-quill"/></svg></span>
         </div>
       </div>
       <div class="m-shell">
@@ -5237,7 +5263,7 @@ Read  2 min ago</div></div>
         <div class="m-brand" style="font-size:16px">All address books</div>
         <div class="m-top-right" style="gap:2px">
           <span class="m-btn is-quiet" style="padding:0 6px"><svg viewBox="0 0 24 24" style="width:17px;height:17px"><use href="#i-search"/></svg></span>
-          <span class="m-btn is-primary" style="padding:0 8px;height:32px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-quill"/></svg></span>
+          <span class="m-btn is-primary" style="padding:0 8px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-quill"/></svg></span>
         </div>
       </div>
       <div class="m-shell"><div class="m-main">
@@ -5340,7 +5366,7 @@ Read  2 min ago</div></div>
       <div class="m-top">
         <span class="m-btn is-quiet" style="padding:0 4px"><svg viewBox="0 0 24 24" style="width:19px;height:19px"><use href="#i-menu"/></svg></span>
         <div class="m-brand" style="font-size:16px">attachments</div>
-        <div class="m-top-right"><span class="m-btn is-primary" style="padding:0 8px;height:32px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-up"/></svg></span></div>
+        <div class="m-top-right"><span class="m-btn is-primary" style="padding:0 8px"><svg viewBox="0 0 24 24" style="width:16px;height:16px"><use href="#i-up"/></svg></span></div>
       </div>
       <div class="m-shell"><div class="m-main">
         <div class="m-bar m-sel" style="padding:8px 14px;gap:8px">
@@ -5427,7 +5453,7 @@ Read  2 min ago</div></div>
       </div></div>
     </div>
   </div>
-  <div style="font-size:13px;color:var(--muted);margin-top:10px;max-width:392px">Разобранный Markdown, флажки задач нажимаются пальцем, «Measure» на телефоне не нужен — ширина и так одна. Правка открывает то же поле во весь экран, с той же панелью разметки.</div>
+  <div style="font-size:13px;color:var(--muted);margin-top:10px;max-width:392px">Разобранный Markdown, флажки задач нажимаются пальцем, «Reading width» на телефоне не нужен — ширина и так одна. Правка открывает то же поле во весь экран, с той же панелью разметки.</div>
   </div>
 </div>
 
@@ -5516,7 +5542,7 @@ Read  2 min ago</div></div>
         </div>
         <div class="m-side">
           <div class="m-head" style="padding-bottom:8px"><div><div class="m-h1" style="font-size:17px">Синк-ап по релизу</div><div class="m-sub">nextcloud · Личный</div></div>
-            <div class="m-acts"><span class="m-btn is-sm">Edit</span></div></div>
+            <div class="m-acts"><span class="m-btn is-sm">Edit</span><span class="m-btn is-quiet" title="Close the panel"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div></div>
           <dl class="m-fields">
             <dt>When</dt><dd><span class="mono">10:00 – 11:00</span></dd>
             <dt>Where</dt><dd>Переговорная 2</dd>
@@ -5594,11 +5620,13 @@ Read  2 min ago</div></div>
             <div class="m-f" style="flex:1 1 100%"><label>Data folder</label>
               <span class="m-in is-mono" style="font-size:11.5px">C:\Users\mix\AppData\Local\Carrel</span>
               <span class="m-hint">Encrypted state lives here: your DAV connections and settings. Not one contact, event or note — those stay on the servers.</span></div>
-            <div class="m-f w-sm"><label>Port</label><span class="m-in is-mono">8765</span></div>
+            <div class="m-f" style="flex:1 1 300px"><label>Port</label>
+              <span class="m-in is-mono">chosen at every start · now 51734</span>
+              <span class="m-hint">Nothing to set here. The app asks the system for a free port on <span class="mono">127.0.0.1</span>, so a busy 8080, a second copy of Carrel or someone else’s server cannot collide with it. The current number is always in the status bar — it is needed only to open the address in a browser.</span></div>
             <div class="m-f"><span class="m-check"><span class="m-box"></span>Stop the server on exit</span></div>
             <div class="m-f" style="flex:1 1 100%;gap:7px">
               <span class="m-check"><span class="m-box is-off"></span>Allow other devices on this network</span>
-              <span class="m-hint">While this is off, Carrel listens on <span class="mono">127.0.0.1</span> only — from outside it does not exist. Turning it on gives <span class="mono">http://192.168.1.14:8765</span> for a phone and for DAVx5, and asks for a password like any other instance.</span>
+              <span class="m-hint">While this is off, Carrel listens on <span class="mono">127.0.0.1</span> only — from outside it does not exist. Turning it on <b>pins the port</b> and gives <span class="mono">http://192.168.1.14:8765</span> for a phone and for DAVx5, and asks for a password like any other instance: an address that other devices remember cannot change at every start.</span>
             </div>
           </div>
           <div class="m-fset" style="border-top:.5px solid var(--hair);padding-top:12px">
@@ -5618,7 +5646,7 @@ Read  2 min ago</div></div>
           </div>
         </div>
         <div class="m-status">
-          <span><span class="dot"></span>local · <span class="mono">127.0.0.1:8765</span></span>
+          <span><span class="dot"></span>local · <span class="mono">127.0.0.1:51734</span></span>
           <span class="mono">data: AppData\Local\Carrel · 312 KB</span>
           <span style="margin-left:auto" class="mono">v0.7.0</span>
         </div>
@@ -5626,6 +5654,7 @@ Read  2 min ago</div></div>
     </div>
   </div>
   <figcaption><b>Важное, что этот экран обязан сказать вслух:</b> локальный запуск не превращает Carrel в хранилище. Он по-прежнему клиент — календари и контакты живут на ваших DAV-серверах, а в папке данных лежат только зашифрованные подключения и настройки. Человек, выбравший «запустить здесь», должен понять это до того, как решит, что теперь у него всё на своём компьютере.
+  <br><br><b>Порт не спрашивают.</b> Он выбирается системой при каждом запуске: у локального экземпляра нет причин занимать один и тот же номер, зато есть все причины не спорить за него с тем, что уже слушает 8080. Поле показывает текущий номер и объясняет, откуда он, — настраивать в нём нечего. Номер закрепляется ровно в одном случае: когда доступ по сети включён, потому что телефон и DAVx5 запоминают адрес, и менять его под ними нельзя.
   <br><br>Доступ по сети выключен по умолчанию и включается осознанно: пока стоит <span class="mono">127.0.0.1</span>, никакого нового открытого порта в доме не появляется. Когда его включают, адрес показывается сразу — он же нужен для DAVx5, если поверх работает <a href="#s-davloom">davloom</a>. В строке состояния всегда видно, что сервер локальный и где его данные: их бывает нужно скопировать на другой компьютер, и путь не должен искаться в документации.</figcaption>
   </figure>
 </div>
@@ -5701,7 +5730,7 @@ Read  2 min ago</div></div>
         <div style="padding:12px;display:flex;flex-direction:column;gap:9px;background:var(--paper)">
           <span class="m-in is-area is-focus" style="min-height:104px;font-size:13.5px">Спросить у Виктора про миграцию — успеет ли до заморозки.</span>
           <div style="display:flex;gap:8px;align-items:center">
-            <span class="m-in" style="flex:1;height:26px;font-size:12px">Записи · nextcloud</span>
+            <span class="m-in" style="flex:1;font-size:12px">Записи · nextcloud</span>
             <span class="m-btn is-primary">Save</span>
             <span class="m-kbd">Ctrl+Enter</span>
           </div>
@@ -5752,12 +5781,14 @@ Read  2 min ago</div></div>
         </div>
         <div class="m-form">
           <div class="m-fset" style="border-top:0;padding-top:0">
-            <div class="m-rubric">Instances</div>
-            <div style="flex:1 1 100%;display:flex;flex-direction:column;gap:2px;max-width:620px">
-              <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">carrel.example · mix</span><span class="m-meta">open</span></div>
-              <div class="m-src" style="padding-left:0"><span class="m-box is-off"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">carrel.office.example · m.yenuchenko</span><span class="m-meta">signed out</span></div>
-            </div>
-            <span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add</span>
+            <div class="m-rubric">Connection</div>
+            <div class="m-f" style="flex:1 1 420px"><label>This app is a window onto</label>
+              <span style="display:flex;gap:8px;align-items:center">
+                <span class="m-in is-mono" style="flex:1">https://carrel.example</span>
+                <span class="m-btn">Sign out…</span>
+              </span>
+              <span class="m-hint">Signing out brings back the first screen, where the mode is chosen again — a server or a local run. Nothing is deleted by it.</span></div>
+            <div class="m-f w-md"><label>Signed in as</label><span class="m-in">mix</span></div>
           </div>
           <div class="m-fset">
             <div class="m-rubric">Behaviour</div>
@@ -5777,9 +5808,19 @@ Read  2 min ago</div></div>
             <div class="m-f" style="flex:1 1 100%"><span class="m-hint">This appears only after a certificate has been rejected, and it remembers that one fingerprint — it is not “turn checking off”.</span></div>
           </div>
           <div class="m-fset">
-            <div class="m-rubric">Versions</div>
-            <div class="m-f" style="flex:1 1 100%;font-size:12.5px;color:var(--muted)">App <span class="mono">0.7.0</span> · server <span class="mono">0.7.0</span> · sidecar <span class="mono">0.7.0</span></div>
-            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">There is no self-update in v1: the app is updated the way it was installed. The app version and the server version are different things, so both are shown — and with a local run, the sidecar version too.</span></div>
+            <div class="m-rubric">Updates</div>
+            <div class="m-f" style="flex:1 1 380px"><label>Installed</label>
+              <span style="display:flex;gap:8px;align-items:center">
+                <span class="m-in is-mono" style="flex:1;font-size:11.5px">app 0.7.0 · server 0.7.0</span>
+                <span class="m-btn">Check now</span>
+              </span>
+              <span class="m-hint">Checked 2 hours ago · <span class="mono">0.7.0</span> is the latest.</span></div>
+            <div class="m-f" style="flex:1 1 100%;gap:7px">
+              <span class="m-check"><span class="m-box"></span>Check for updates automatically</span>
+              <span class="m-check"><span class="m-box"></span>Install when I close the app</span>
+              <span class="m-check"><span class="m-box is-off"></span>Include pre-releases</span>
+              <span class="m-hint">The update is downloaded from the project’s releases and checked by signature before anything is replaced. With the second tick off, a ready update waits until the button is pressed: nothing restarts under your hands mid-work.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-hint">The app and the server are versioned separately. In local mode both are updated here at once, because the server runs inside the app. Connected to your own server, this updates the app only — the server is updated where it runs, and the app says so when the two versions stop matching.</span></div>
           </div>
         </div>
       </div></div>
@@ -5788,6 +5829,78 @@ Read  2 min ago</div></div>
 </div>
 <figcaption>Здесь только то, чего в вебе не бывает: экземпляры, автозапуск, глобальная клавиша, папка загрузок, сертификат, обновления. Всё, что относится к учётной записи и коллекциям, осталось внутри интерфейса и не продублировано — иначе через полгода два места настроек начнут расходиться. Флажок про самоподписанный сертификат намеренно не «отключить проверку»: он запоминает отпечаток одного сервера и появляется только тогда, когда проблема уже случилась.</figcaption>
 </figure>
+
+<h3 id="upd">Обновление</h3>
+<p>Веб-версию обновляет тот, кто её запустил, и она обновляется вся сразу. У приложения так не выйдет: оно живёт на чужом компьютере, у него своя версия, и рядом с ним — либо сервер внутри него самого, либо чужой сервер, который оно обновить не может. Отсюда два экрана, а не один.</p>
+
+<div class="frames">
+  <figure style="flex:1 1 420px">
+  <div class="frame">
+    <div class="frame-label"><span>Обновление · скачано и ждёт</span><span class="plan">не построено</span><i>решает человек</i></div>
+    <div class="mock">
+      <div class="m-win">
+        <div class="m-titlebar"><span class="t">Carrel</span><span class="m-winbtns"><span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
+        <div class="m-msg is-accent is-row" style="margin:0;border-radius:0">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none" style="flex:none;margin-top:1px"><use href="#i-down"/></svg>
+          <span><b>Carrel 0.8.0 is ready to install.</b> It will be applied the next time the app closes, or now — the window reopens where it was.</span>
+          <span style="margin-left:auto;display:flex;gap:6px;align-items:center">
+            <span class="m-btn is-primary">Install and restart</span>
+            <span class="m-btn">What’s new</span>
+            <span class="m-btn is-quiet">Later</span>
+          </span>
+        </div>
+        <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;background:var(--bg)">
+          <div class="m-form" style="padding:0;gap:12px 16px">
+            <div class="m-f" style="flex:1 1 100%"><label>Installed</label>
+              <span class="m-in is-mono" style="font-size:11.5px">app 0.7.0 · server 0.7.0 — both run inside this app</span>
+              <span class="m-hint">In local mode the server is part of the app, so one update covers both. Your data folder is untouched by an update: connections and settings stay where they are.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><label>Downloaded</label>
+              <span style="display:flex;gap:9px;align-items:center">
+                <span class="m-prog" style="flex:1;max-width:260px"><i style="width:100%"></i></span>
+                <span class="mono" style="font-size:11px;color:var(--dusty)">0.8.0 · 14.2 MB · signature checked</span>
+              </span></div>
+          </div>
+          <div class="m-msg" style="margin:0">Nothing installs itself while you work: an update waits for the app to close, or for this button. Turning that off is one tick in Application settings.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Обновление никогда не случается «вдруг»: оно скачивается фоном, проверяется по подписи и ждёт. Формулировка «применится при закрытии, или сейчас» важнее кнопки — человек в этот момент чаще всего занят, и от него требуется не решение, а разрешение не мешать. Что именно изменилось, лежит за «What’s new» и не пересказывается в баннере: список правок в баннере читать невозможно, а не читать — стыдно.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 380px">
+  <div class="frame">
+    <div class="frame-label"><span>Обновление · сервер отстал</span><span class="plan">не построено</span><i>подключение к своему серверу</i></div>
+    <div class="mock">
+      <div class="m-win">
+        <div class="m-titlebar"><span class="t">Carrel · carrel.example</span><span class="m-winbtns"><span><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span></span></div>
+        <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;background:var(--bg)">
+          <div class="m-msg is-alert is-row" style="margin:0">
+            <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none" style="flex:none;margin-top:1px"><use href="#i-shield"/></svg>
+            <span><b>The app is newer than the server.</b> This app is 0.8.0, <span class="mono">carrel.example</span> runs 0.6.4. Everything that both versions know still works; what is newer than the server simply is not there.</span>
+          </div>
+          <div class="m-form" style="padding:0;gap:12px 16px">
+            <div class="m-f" style="flex:1 1 100%"><label>What to do</label>
+              <span class="m-in is-ph">Update the server where it runs — this app cannot do it</span>
+              <span class="m-hint">The server is somebody’s machine: yours, a friend’s, a hosting account. An app that could update it from the outside would be a way in, and Carrel does not build such ways.</span></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="m-btn">How to update a server</span>
+            <span class="m-btn is-quiet">Do not warn about this server</span>
+          </div>
+        </div>
+        <div class="m-status">
+          <span><span class="dot"></span>carrel.example · <span class="mono">server 0.6.4</span></span>
+          <span style="margin-left:auto" class="mono">app 0.8.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Второй случай — тот, о котором обычно забывают: приложение обновилось, а сервер остался прежним. Carrel не притворяется, что может обновить чужую машину, и не пугает: он называет обе версии, говорит, что общее продолжает работать, и предлагает единственное осмысленное действие — обновить сервер там, где он запущен. Отключить предупреждение можно: к чужому серверу подключаются и намеренно старому.</figcaption>
+  </figure>
+</div>
+
+<div class="note">Самообновления в v1 нет — это записано в плане настольной обёртки, и рисунки выше не означают обратного. Они означают, что когда до него дойдут руки, спорить о том, как оно себя ведёт, уже не придётся: не устанавливать молча, не перезапускать под руками, не притворяться, что приложение управляет сервером.</div>
 
 <h3>Что помечается меткой <span class="m-badge is-local" style="font-size:10px">local</span></h3>
 <p>Локальный экземпляр не виден из интернета, и это не поломка, а следствие выбора. Интерфейс не запрещает такие функции и не прячет их — он ставит метку там, где результат зависит от доступности снаружи, и говорит, чего именно не хватает. Обеспечить доступ (проброс порта, туннель, домен, сертификат) может только человек, и Carrel не притворяется, что сделает это за него.</p>
@@ -5869,45 +5982,64 @@ Read  2 min ago</div></div>
 
 </div>
 <script>
-/* Проверка выравнивания строк формы. Откройте файл с #check в адресе:
-   контролы, чей вертикальный центр разошёлся с соседями по строке больше
-   чем на 1.5 px, обводятся красным, в углу — их счёт. */
+/* Проверка строк с контролами. Откройте файл с #check в адресе: то, что
+   выбилось из своей строки — центром больше чем на 1.5 px или высотой, —
+   обводится красным, в углу счёт. Строкой считается любой ряд, а не только
+   форма: панели инструментов, шапки, подвалы диалогов, карточки. */
 addEventListener('load', function () {
   if (!/check/.test(location.hash + location.search)) return;
-  var bad = 0;
-  document.querySelectorAll('.m-form, .m-fset, .demo').forEach(function (row) {
-    var items = [].slice.call(row.querySelectorAll('.m-in, .m-btn, .m-seg, .m-check'))
-      .filter(function (el) {
-        var r = el.getBoundingClientRect();
-        if (!r.height || el.closest('.m-menu') || el.closest('.m-msg')) return false;
-        /* Вертикальная стопка контролов (кнопки у фотографии, список флажков)
-           строкой формы не является — её центры сравнивать не с чем. */
-        var near = [].slice.call(el.parentElement.children).filter(function (sib) {
-          return sib !== el && sib.matches('.m-in, .m-btn, .m-seg, .m-check') && sib.getBoundingClientRect().height;
-        });
-        return !near.some(function (sib) {
-          var a = el.getBoundingClientRect(), b = sib.getBoundingClientRect();
-          return Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2) > 4;
-        });
-      });
+  var SEL = '.m-in, .m-btn, .m-seg, .m-check';
+  var mid = function (el) { var r = el.getBoundingClientRect(); return (r.top + r.bottom) / 2; };
+  var rowBox = function (el) {
+    /* Ближайший раскладочный предок — и только он: если он колонка,
+       у контрола строки нет, и сравнивать его не с чем. Иначе проверка
+       перелезала через колонку и сравнивала соседние столбцы. */
+    for (var n = el.parentElement; n && n !== document.body; n = n.parentElement) {
+      var cs = getComputedStyle(n);
+      if (cs.display === 'contents') continue;
+      if (!/flex|grid/.test(cs.display)) continue;
+      return /column/.test(cs.flexDirection) ? null : n;
+    }
+    return null;
+  };
+  var groups = new Map(), bad = 0;
+  [].slice.call(document.querySelectorAll(SEL)).forEach(function (el) {
+    var r = el.getBoundingClientRect();
+    if (!r.height || el.closest('.m-menu') || el.classList.contains('is-area')) return;
+    /* Витрина размеров — единственное место, где разная высота намеренна. */
+    if (el.closest('[data-check="off"]')) return;
+    /* вертикальная стопка внутри одной ячейки строкой не является */
+    var stacked = [].slice.call(el.parentElement.children).some(function (sib) {
+      return sib !== el && sib.matches(SEL) && sib.getBoundingClientRect().height &&
+             Math.abs(mid(sib) - mid(el)) > 4;
+    });
+    if (stacked) return;
+    var box = rowBox(el);
+    if (!box) return;
+    if (!groups.has(box)) groups.set(box, []);
+    groups.get(box).push(el);
+  });
+  groups.forEach(function (els) {
     var lines = [];
-    items.forEach(function (el) {
-      var r = el.getBoundingClientRect(), mid = (r.top + r.bottom) / 2;
-      var line = lines.filter(function (L) { return Math.abs(L.mid - mid) < 18; })[0];
-      if (line) { line.els.push(el); line.mids.push(mid); }
-      else { lines.push({ mid: mid, els: [el], mids: [mid] }); }
+    els.forEach(function (el) {
+      var line = lines.filter(function (L) { return Math.abs(L.mid - mid(el)) < 18; })[0];
+      if (line) line.els.push(el); else lines.push({ mid: mid(el), els: [el] });
     });
     lines.forEach(function (L) {
       if (L.els.length < 2) return;
-      var sorted = L.mids.slice().sort(function (a, b) { return a - b; });
-      var med = sorted[Math.floor(sorted.length / 2)];
+      var mids = L.els.map(mid).sort(function (a, b) { return a - b; });
+      var med = mids[Math.floor(mids.length / 2)];
+      var hs = L.els.map(function (el) { return Math.round(el.getBoundingClientRect().height); });
+      var tallest = Math.max.apply(null, hs), shortest = Math.min.apply(null, hs);
       L.els.forEach(function (el, i) {
-        if (Math.abs(L.mids[i] - med) > 1.5) { el.style.outline = '1.5px solid #B4442E'; bad++; }
+        var off = Math.abs(mid(el) - med) > 1.5;
+        var odd = tallest !== shortest && Math.round(el.getBoundingClientRect().height) !== tallest;
+        if (off || odd) { el.style.outline = '1.5px solid #B4442E'; bad++; }
       });
     });
   });
   var tag = document.createElement('div');
-  tag.textContent = bad ? 'Разъездов: ' + bad : 'Строки форм выровнены';
+  tag.textContent = bad ? 'Разъездов: ' + bad : 'Строки выровнены';
   tag.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:99;padding:7px 11px;' +
     'border-radius:4px;font:12px/1.2 ui-monospace,monospace;color:#fff;background:' +
     (bad ? '#B4442E' : '#4A6B52');
