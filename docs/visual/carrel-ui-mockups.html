@@ -515,7 +515,7 @@ figcaption b{color:var(--ink);font-weight:600}
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
   <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c0-3.4 2.9-5.6 6.5-5.6s6.5 2.2 6.5 5.6"/></symbol>
-  <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" fill-opacity=".3" stroke="none"/></symbol>
   <symbol id="i-drag" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/></symbol>
   <symbol id="i-device" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></symbol>
   <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="4" rx="1"/><path d="M5 9v10h14V9M10 13h4"/></symbol>
@@ -2883,7 +2883,7 @@ Read  2 min ago</div>
         <div><svg><use href="#i-adm"/></svg>Administration</div>
         <span class="sep"></span>
         <div style="height:auto;flex-direction:column;align-items:stretch;gap:6px;padding:7px 8px">
-          <span style="display:flex;align-items:center;gap:9px"><svg><use href="#i-theme"/></svg>Theme</span>
+          <span style="display:flex;align-items:center;gap:9px;padding-left:23px">Theme</span>
           <span class="m-seg" style="height:22px;font-size:11.5px"><span class="is-on">Auto</span><span>Light</span><span>Dark</span></span></div>
         <div><svg><use href="#i-search"/></svg>Keyboard shortcuts<span class="m-kbd">?</span></div>
         <span class="sep"></span>
@@ -2891,7 +2891,7 @@ Read  2 min ago</div>
       </div>
     </div>
   </div>
-  <figcaption>Пять пунктов, разделитель перед администрированием и перед выходом. «Sign out» стоит последним и без иконки — единственное действие в меню, которое что-то заканчивает.</figcaption>
+  <figcaption>Пять пунктов, разделитель перед администрированием и перед выходом. У строки «Theme» иконки нет: переключатель под ней и так говорит, о чём речь, а контрастный круг рядом с ним читался бы пятном. Сам круг остался у «Appearance» — половина залита вполсилы, чтобы на 14&nbsp;px он был кругом со светом и тенью, а не чёрной кляксой. «Sign out» стоит последним и без иконки — единственное действие в меню, которое что-то заканчивает.</figcaption>
   </figure>
 
   <figure style="flex:1 1 460px">
@@ -4163,15 +4163,26 @@ Read  2 min ago</div>
         <div class="m-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke its password here — that is the only thing that stops it.</div>
         <div class="m-group"><span class="m-rubric">Устройства</span><span class="m-num">3</span></div>
         <table class="m-table">
-          <thead><tr><th>Device</th><th>Created</th><th>Last request</th><th>What it asked for</th><th>Access</th><th style="width:90px"></th></tr></thead>
+          <thead><tr><th>Device</th><th style="width:34%">What it can see</th><th>Access</th><th>Created</th><th>Last request</th><th style="width:90px"></th></tr></thead>
           <tbody>
-            <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Телефон · DAVx5</span></span></td><td class="mono">2026-06-02</td><td class="mono">2026-08-15 09:31</td><td class="mono">sync-collection ×5</td>
+            <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Телефон · DAVx5</span></span></td>
+              <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
+                <span class="m-bar3" style="background:#4A6B52"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-bar3" style="background:#A05A2C"></span>
+                <span class="mono" style="font-size:11px;margin:0 6px">4 календаря · 1 книга</span>
+                <span class="m-btn is-sm">Change…</span></span></td>
               <td><span class="m-seg" style="height:22px"><span class="is-on">read</span><span class="is-dim" title="Запись выключена для всего прокси">write</span></span></td>
+              <td class="mono">2026-06-02</td><td class="mono">2026-08-15 09:31</td>
               <td class="m-acts"><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
-            <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Ноутбук · Thunderbird</span></span></td><td class="mono">2026-06-02</td><td class="mono">2026-08-15 08:02</td><td class="mono">PROPFIND ×2</td>
+            <tr><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Ноутбук · Thunderbird</span></span></td>
+              <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
+                <span class="m-bar3 is-multi"></span>
+                <span class="mono" style="font-size:11px;margin:0 6px">всё · 12 коллекций</span>
+                <span class="m-btn is-sm">Change…</span></span></td>
               <td><span class="m-seg" style="height:22px"><span class="is-on">read</span><span class="is-dim" title="Запись выключена для всего прокси">write</span></span></td>
+              <td class="mono">2026-06-02</td><td class="mono">2026-08-15 08:02</td>
               <td class="m-acts"><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
-            <tr style="opacity:.6"><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Старый телефон</span></span></td><td class="mono">2026-03-14</td><td class="mono">2026-05-30 12:10</td><td class="mono">—</td><td class="mono">отозван</td>
+            <tr style="opacity:.6"><td><span class="m-fname"><svg><use href="#i-device"/></svg><span>Старый телефон</span></span></td>
+              <td class="mono">—</td><td class="mono">отозван</td><td class="mono">2026-03-14</td><td class="mono">2026-05-30 12:10</td>
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Delete</span></td></tr>
           </tbody>
         </table>
@@ -4196,7 +4207,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption>Три синтетических уровня показаны так, как их увидит клиент, — потому что именно они и есть весь фокус: ниже начинается тупое проксирование, а имена коллекций собраны из аккаунта и пути, чтобы два «Личный» с разных серверов не слились. <b>Ветка <code>files/</code> — по правилу равенства коллекций.</b> Прокси затевается ради календарей и книг, но файловая коллекция для него — самый простой случай из всех: никакой синтетики, только подстановка префикса в путях, а на той стороне обычный WebDAV, который Windows, macOS и Linux монтируют как сетевой диск без всякого клиента. Не отдать её было бы не экономией, а произволом. Столбец «что запрашивал» — не отладка, а способ понять, живо ли устройство и что оно делает; он же первым покажет клиента, который синкается каждые пять минут. Знак davloom стоит и в рейле пунктом навигации, и крупно в подвале — рядом со статусом режима: свой модуль, свой знак, лампа сюда не переезжает.
+<figcaption>Три синтетических уровня показаны так, как их увидит клиент, — потому что именно они и есть весь фокус: ниже начинается тупое проксирование, а имена коллекций собраны из аккаунта и пути, чтобы два «Личный» с разных серверов не слились. <b>Ветка <code>files/</code> — по правилу равенства коллекций.</b> Прокси затевается ради календарей и книг, но файловая коллекция для него — самый простой случай из всех: никакой синтетики, только подстановка префикса в путях, а на той стороне обычный WebDAV, который Windows, macOS и Linux монтируют как сетевой диск без всякого клиента. Не отдать её было бы не экономией, а произволом. <b>Главный столбец — «что устройству видно», и он второй слева.</b> Область выдачи важнее того, какие запросы клиент слал: по ней принимают решения, а по журналу запросов — разве что диагностируют. Показана она полосками коллекций и счётом, а не списком имён: четыре язычка читаются быстрее, чем «Личный, Работа, Проекты, Контакты», а полный список — в подсказке и в диалоге.<br><br><b>Список правится у выданного устройства.</b> «Change…» открывает те же флажки, что при добавлении, и <b>перевыдавать пароль не нужно</b>: область принадлежит записи пароля, а не самому паролю. Убранная коллекция исчезает у клиента при следующей синхронизации — DAVx5 увидит, что её больше нет в home-set, и уберёт локально; добавленная появится там же. Это стоит написать прямо в диалоге, потому что человек, привыкший к другим сервисам, ждёт «переподключите устройство».<br><br>Время последнего запроса осталось: оно отвечает на вопрос «живо ли устройство», а подробный журнал запросов ушёл под <span class="mono">⋯</span> — его читают редко и только когда что-то сломалось. Знак davloom стоит и в рейле пунктом навигации, и крупно в подвале — рядом со статусом режима: свой модуль, свой знак, лампа сюда не переезжает.
 <br><br><b>Только чтение ставится в двух местах, и это не дублирование.</b> Наверху — общий потолок: «что вообще можно устройствам». Он выключает запись сразу для всех, потому что запись через прокси моложе чтения, и если клиент начнёт портить данные, отзывать по одному — не то, что нужно в этот момент. В строке устройства — его собственные права, но не выше потолка: когда запись выключена целиком, половина переключателя погашена и подсказка говорит, где её включают. Устройству нельзя дать больше, чем разрешено прокси, и интерфейс показывает это состоянием кнопки, а не отказом после нажатия.</figcaption>
 </figure>
 
@@ -4216,7 +4227,7 @@ Read  2 min ago</div>
             <span class="m-hint">Writing is unavailable: it is off for the whole proxy. It is turned on once, on the davloom page, and for every device at once.</span>
           </div>
           <div class="m-f" style="width:100%">
-            <label>What the device will see</label>
+            <label>What the device will see <span style="color:var(--dusty)">— меняется и потом, без перевыдачи пароля</span></label>
             <div style="display:flex;flex-direction:column;gap:2px;margin-top:2px">
               <span class="m-check"><span class="m-box"></span>Calendars <span style="color:var(--dusty)">· 5 collections</span></span>
               <span class="m-check"><span class="m-box"></span>Address books <span style="color:var(--dusty)">· 3</span></span>
