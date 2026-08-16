@@ -3359,7 +3359,7 @@ Read  2 min ago</div>
       <div class="m-main">
         <div class="m-head">
           <div><div class="m-h1">Backup</div><div class="m-sub">Три задания · разные источники, места и триггеры</div></div>
-          <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New job</span></div>
+          <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New job</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg>Restore…</span></div>
         </div>
         <table class="m-table">
           <thead><tr><th style="width:28px"></th><th>Job</th><th>What it copies</th><th>Where to</th><th>When</th><th>Keep</th><th>Last copy</th><th style="width:150px"></th></tr></thead>
@@ -3412,7 +3412,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption>Задания — таблица с теми же столбцами, что человек назвал бы сам: что, куда, когда, сколько хранить, чем кончилось прошлое. Источники в строке показаны полосками коллекций, а не списком имён: три цветные метки читаются быстрее, чем «Работа, Проекты, Контакты», а полное перечисление — в подсказке и в редакторе. Неполная копия помечена красным и здесь, и в истории: копия, которая тихо пропустила один календарь, хуже, чем её отсутствие. Задание без места назначения — тоже задание: «скачать в браузер» полезно тому, кому некуда писать, и честно говорит, что на сервере ничего не останется.</figcaption>
+<figcaption>Задания — таблица с теми же столбцами, что человек назвал бы сам: что, куда, когда, сколько хранить, чем кончилось прошлое. Источники в строке показаны полосками коллекций, а не списком имён: три цветные метки читаются быстрее, чем «Работа, Проекты, Контакты», а полное перечисление — в подсказке и в редакторе. Неполная копия помечена красным и здесь, и в истории: копия, которая тихо пропустила один календарь, хуже, чем её отсутствие. Задание без места назначения — тоже задание: «скачать в браузер» полезно тому, кому некуда писать, и честно говорит, что на сервере ничего не останется.<br><br><b>Восстановление стоит здесь же, в шапке.</b> Копию и возврат из копии ищут в одном месте, и место это — «Backup»; на пустом экране календаря или контактов рядом с «Connect account» такой кнопке делать нечего. У «Restore…» тот же вес, что у «New job», потому что в тот день, когда она понадобится, искать её будут первой. Она же работает и на пустом экземпляре, где заданий ещё нет: архив приносят файлом, и страница про это знает.</figcaption>
 </figure>
 
 <figure>
@@ -3485,8 +3485,27 @@ Read  2 min ago</div>
 <figcaption>Файловые коллекции в списке источников — по правилу равенства коллекций (<a href="#parity">2.1</a>), и рядом с каждой показан прошлый объём: два гигабайта и два мегабайта требуют разных решений о частоте и месте. Задачи и заметки отдельными строками не выбираются — они лежат в календарных коллекциях, и об этом сказано прямо, а не оставлено на догадку. Способ доставки — не настройка «куда положить файл», а выбор из трёх: на сервер, себе в браузер, и то и другое; у «себе» нет ни папки, ни срока хранения, ни расписания, потому что некому отдавать файл в три часа ночи. Источники выбираются тем же компонентом, что и везде: аккаунт с трёхпозиционным флажком, под ним коллекции с полосками. Ничего нового учить не нужно — это тот же рейл, только развёрнутый в сетку. У каждой строки написано, что это за коллекция и сколько весила в прошлый раз; у файловых это решает исход дела, потому что два гигабайта и два мегабайта требуют разных решений о частоте и месте. Токен внешнего запуска выдаётся <b>на задание</b>, а не на аккаунт: машина, которая запускает рабочую копию по расписанию, не должна уметь запускать личную.</figcaption>
 </figure>
 
+<figure style="max-width:760px">
+<div class="frame">
+  <div class="frame-label"><span>Backup на пустом экземпляре</span><span class="plan">не построено</span><i>заданий ещё нет</i></div>
+  <div class="mock">
+    <div class="m-shell no-rail"><div class="m-main">
+      <div class="m-head">
+        <div><div class="m-h1">Backup</div><div class="m-sub">Заданий пока нет</div></div>
+        <div class="m-acts"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New job</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg>Restore…</span></div>
+      </div>
+      <div class="m-empty">
+        Carrel copies raw <span class="mono">.ics</span>, <span class="mono">.vcf</span> and files to storage of your own, with a manifest and a read-back check. Nothing is kept here.
+        <span style="font-size:12.5px">Already have an archive from another instance? <b>Restore…</b> takes it from a file — a job is not needed for that.</span>
+      </div>
+    </div></div>
+  </div>
+</div>
+<figcaption>Тот же экран у того, кто пришёл восстанавливаться на чистый экземпляр: обе кнопки на месте, и вторая фраза говорит прямо, что задание для восстановления заводить не нужно. Это и есть проверка на «где люди будут искать»: страница называется «Backup», и на ней есть и то, и другое.</figcaption>
+</figure>
+
 <h3>Откуда попадают на восстановление</h3>
-<p>Три двери, и все три нужны. <b>Из истории задания</b> — обычный случай: копия своя, задание своё, архив на месте. <b>Из файла</b> — случай, ради которого всё и делалось: нового экземпляра ещё нет или он пуст, заданий в нём нет, а архив лежит на диске или на чужом WebDAV. <b>Из пустого экрана раздела</b> — «Restore from a backup» стоит рядом с «Connect account», потому что человек, у которого всё пропало, идёт именно туда.</p>
+<p>Одна дверь, и она там, где копия: кнопка <b>Restore…</b> в шапке страницы «Backup», рядом с «New job». Дальше — два случая, и оба на первом шаге. <b>Из истории задания</b>: копия своя, задание своё, архив на месте — выбирается строкой. <b>Из файла</b>: экземпляр новый или пустой, заданий в нём нет, а архив лежит на диске или на чужом WebDAV — тогда его показывают или загружают. Второй случай и есть тот, ради которого копию делали, поэтому он не спрятан за «сначала заведите задание».</p><p>Строка «Restore…» есть и в каждой записи истории — это короткий путь для первого случая, но не единственный вход: искать восстановление по строкам таблицы человек не станет, а в шапку раздела заглянет.</p>
 
 <figure>
 <div class="frame">
@@ -3883,6 +3902,13 @@ Read  2 min ago</div>
         <div><div class="m-h1" style="font-size:19px">Материалы к релизу</div>
           <nav class="m-crumbs"><b>Материалы к релизу</b> <span style="color:var(--dusty)">· 4 файла · 6.6 MB</span></nav></div>
       </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:9px 20px;border-bottom:.5px solid var(--hair)">
+        <span style="font-size:12px;color:var(--muted)">Mount as a drive</span>
+        <span class="m-in is-mono" style="flex:1;min-width:220px;max-width:540px;font-size:11px">https://carrel.example/p/5c40e2/dav/</span>
+        <span class="m-btn is-sm">Copy</span>
+        <span class="m-btn is-sm">How to mount</span>
+        <span style="font-size:11px;color:var(--dusty)">read-only WebDAV, no password</span>
+      </div>
       <table class="m-table">
         <thead><tr><th>Name</th><th style="width:96px">Size</th><th style="width:140px">Type</th><th style="width:150px">Changed</th><th style="width:90px"></th></tr></thead>
         <tbody>
@@ -3896,17 +3922,17 @@ Read  2 min ago</div>
     </div></div>
   </div>
 </div>
-<figcaption>Листинг со значком типа на каждой строке и без предпросмотра: нажатие на файл открывает его страницу — ту же, что выше, но внутри этой ссылки. <b>Вложенные папки — открытый вопрос, а не умолчание.</b> Ссылка на папку по смыслу отдаёт то, что в ней; спускаться ли в подпапки, решается при выдаче — флажком <b>включая вложенные папки</b> в диалоге публикации. Выключен по умолчанию: человек видит четыре файла и не обязан помнить, что в «скриншотах» лежит ещё сорок.</figcaption>
+<figcaption><b>Папку можно не только смотреть, но и подключить.</b> Тот же секрет открывает её как обычный WebDAV только для чтения: <span class="mono">https://carrel.example/p/&lt;токен&gt;/dav/</span> — Windows подключает это как сетевой диск, macOS через «Подключиться к серверу», Linux через davfs или файловый менеджер. Пароля нет, потому что секрет уже в адресе; кнопка «How to mount» показывает три строки для трёх систем, а не отправляет читать документацию. Отзыв ссылки закрывает и страницу, и диск разом — это один и тот же токен. Листинг со значком типа на каждой строке и без предпросмотра: нажатие на файл открывает его страницу — ту же, что выше, но внутри этой ссылки. <b>Вложенные папки — открытый вопрос, а не умолчание.</b> Ссылка на папку по смыслу отдаёт то, что в ней; спускаться ли в подпапки, решается при выдаче — флажком <b>включая вложенные папки</b> в диалоге публикации. Выключен по умолчанию: человек видит четыре файла и не обязан помнить, что в «скриншотах» лежит ещё сорок.</figcaption>
 </figure>
 
 <h4>Что отдаётся по ссылке, по видам</h4>
 <table class="doc">
-  <tr><th style="width:16%">Kind</th><th style="width:30%">Что на странице</th><th style="width:20%">Что скачивается</th><th>Что решается при выдаче</th></tr>
-  <tr><td>Адресная книга</td><td>Список с колонками, поиск по загруженному</td><td><code>.vcf</code></td><td>Показывать ли телефоны и почту (по умолчанию нет)</td></tr>
-  <tr><td>Календарь</td><td>Агенда за диапазон</td><td><code>.ics</code></td><td>Диапазон дат; показывать ли описания событий</td></tr>
+  <tr><th style="width:16%">Вид</th><th style="width:30%">Что на странице</th><th style="width:20%">Что скачивается</th><th>Что решается при выдаче</th></tr>
+  <tr><td>Адресная книга</td><td>Список с колонками, поиск по загруженному</td><td><code>.vcf</code> и адрес для внешней ленты другого Carrel</td><td>Показывать ли телефоны и почту (по умолчанию нет)</td></tr>
+  <tr><td>Календарь</td><td>Агенда за диапазон</td><td><code>.ics</code> и адрес <span class="mono">webcal://</span> для подписки</td><td>Диапазон дат; показывать ли описания событий</td></tr>
   <tr><td>Заметка</td><td>Страница с текстом, тегами и списком вложений</td><td><code>.md</code> или сырой <code>.ics</code></td><td>Разрешить ли скачивание</td></tr>
-  <tr><td>File</td><td>Картинка — в теге, PDF — браузеру, текст и Markdown — на странице, остальное — имя и размер</td><td>поток с исходным <code>Content-Type</code></td><td>Ничего: файл отдаётся как есть</td></tr>
-  <tr><td>Folder</td><td>Листинг со значком типа; файл открывается своей страницей</td><td>—</td><td>Включать ли вложенные папки (по умолчанию нет)</td></tr>
+  <tr><td>Файл</td><td>Картинка — в теге, PDF — браузеру, текст и Markdown — на странице, остальное — имя и размер</td><td>поток с исходным <code>Content-Type</code></td><td>Ничего: файл отдаётся как есть</td></tr>
+  <tr><td>Папка</td><td>Листинг со значком типа; файл открывается своей страницей</td><td>Адрес <span class="mono">/dav/</span> — подключается как диск, только чтение</td><td>Включать ли вложенные папки (по умолчанию нет)</td></tr>
 </table>
 <p>Общее для всех пяти: токен не меньше 32 случайных байт и хранится дайджестом, отзыв в одно нажатие, свой лимит запросов, <code>Cache-Control: private</code> и <code>X-Robots-Tag: noindex</code>, ничего не сохраняется на диск и ничего не кэшируется. Одна ссылка — один объект, одна коллекция или одна внешняя лента; аккаунт целиком не публикуется никогда.</p>
 <h2 id="s-davloom">7.16 davloom — режим прокси <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.2</span></h2>
@@ -4078,7 +4104,7 @@ Read  2 min ago</div>
       <div class="m-head"><div><div class="m-h1">Calendar</div><div class="m-sub">Ни одного сервера пока не подключено</div></div></div>
       <div class="m-empty">
         Carrel stores nothing of its own: calendars, contacts and notes come from your DAV servers. Connect the first one — you will need an address, a user name and a password.
-        <span style="display:flex;gap:8px;flex-wrap:wrap"><span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</span><span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-archive"/></svg>Restore from a backup</span></span>
+        <span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</span>
       </div>
     </div></div></div>
   </div>
@@ -4390,7 +4416,7 @@ Read  2 min ago</div></div>
         </span>
       </div>
       <div class="m-menubar">
-        <span class="is-on">File</span><span>Edit</span><span>Kind</span><span>Go</span><span>Help</span>
+        <span class="is-on">File</span><span>Edit</span><span>View</span><span>Go</span><span>Help</span>
         <span style="margin-left:auto;color:var(--dusty)">Ctrl+Shift+N — a note from any program</span>
       </div>
       <div class="m-shell has-side" style="--side:360px;min-height:390px">
@@ -4725,7 +4751,7 @@ Read  2 min ago</div></div>
 <p>Редизайн не меняет ни одной возможности и ни одной строки текста в интерфейсе — только вёрстку, разметку шаблонов и <code>carrel.css</code>. Ни сборщика, ни зависимостей: те же <code>html/template</code> и htmx.</p>
 
 <table class="doc">
-  <tr><th style="width:6%">Шаг</th><th style="width:26%">Что делается</th><th style="width:30%">Файлы</th><th>Verified</th></tr>
+  <tr><th style="width:6%">Шаг</th><th style="width:26%">Что делается</th><th style="width:30%">Файлы</th><th>Проверка</th></tr>
   <tr><td><b>1</b></td><td>Токены и сброс: переменные, шкала, <code>--alert</code> вместо пары <code>--error</code>/<code>--danger</code>, тёмная тема, фокус</td><td><code>static/carrel.css</code></td><td>Существующие экраны не ломаются; <code>go test ./...</code> зелёный (шаблоны не тронуты)</td></tr>
   <tr><td><b>2</b></td><td>Каркас: верхняя панель, рейл, снятие <code>max-width</code> с <code>main</code></td><td><code>template/base.html</code>, CSS</td><td><code>shell_test.go</code> — навигация присутствует и помечает текущий раздел</td></tr>
   <tr><td><b>3</b></td><td>Компоненты списка: строка, полоска, рубрикатор, значки; замена круглых заглушек на квадратные</td><td>CSS + <code>contacts.html</code>, <code>agenda.html</code>, <code>tasks.html</code>, <code>notes.html</code></td><td>Печать сохраняет вид (класс <code>print-only</code> не трогается)</td></tr>
