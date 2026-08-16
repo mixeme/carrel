@@ -189,7 +189,14 @@ figcaption b{color:var(--ink);font-weight:600}
    последним стоит самое общее: ряд с полем: 28 px, чем бы он ни был. */
 .m-f > .m-check:only-child,.m-f > label + .m-check:last-child,
 .m-form > .m-check,.m-fset > .m-check,.demo > .m-check{min-height:28px}
-.m-f:has(> .m-check:only-child){align-self:flex-end}
+/* Выравнивание в строке формы идёт сверху, по строке подписи: тогда
+   подсказка под полем не двигает соседей — а именно это и случилось,
+   когда у поля порта появилось объяснение и флажок уехал вниз вместе
+   с ним. У ячейки без подписи строка подписи пустая, но есть. */
+.m-f:has(> .m-check:only-child)::before,
+.m-f:has(> .m-btn:only-child)::before,
+.m-f:has(> .m-seg:only-child)::before{content:"";height:16px;flex:none}
+.m-f.is-own-line::before{display:none}
 .m-form .m-btn,.m-fset .m-btn,.m-f .m-btn{height:28px}
 .m-f > .m-seg,.m-form > .m-seg,.m-fset > .m-seg{height:28px}
 :where(div,span,label,p):has(> .m-in) > .m-btn,
@@ -212,14 +219,14 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-check .m-box.is-off{background:transparent;border:.5px solid var(--card-border)}
 
 /* поля формы: ширина по содержимому, не 100% */
-.m-form{display:flex;flex-wrap:wrap;gap:13px 16px;padding:14px var(--pad)}
+.m-form{display:flex;flex-wrap:wrap;gap:13px 16px;padding:14px var(--pad);align-items:flex-start}
 .m-form.is-tight{padding-top:4px}
 .m-f{display:flex;flex-direction:column;gap:4px;min-width:0}
 .m-f > label,.m-lbl{font-size:11px;letter-spacing:.04em;color:var(--muted);text-transform:none}
 .m-f .m-hint{font-size:11px;color:var(--dusty)}
 .w-xs{width:96px}.w-sm{width:140px}.w-md{width:210px}.w-lg{width:300px}.w-xl{width:420px}.w-full{flex:1 1 100%;max-width:760px}
 .m-fset{flex:1 1 100%;border-top:.5px solid var(--hair);padding-top:12px;margin-top:2px;
-  display:flex;flex-wrap:wrap;gap:13px 16px;align-items:flex-end}
+  display:flex;flex-wrap:wrap;gap:13px 16px;align-items:flex-start}
 .m-fset > .m-rubric{flex:1 1 100%;margin-bottom:-2px}
 .m-formfoot{display:flex;gap:10px;align-items:center;padding:12px var(--pad) 16px;border-top:.5px solid var(--hair);margin-top:4px}
 .m-danger-zone{display:flex;gap:12px;align-items:center;padding:11px var(--pad);border-top:.5px solid var(--hair);
@@ -874,7 +881,7 @@ figcaption b{color:var(--ink);font-weight:600}
 <p>Первичная кнопка на экране одна. Разрушительное — текстом тревожного цвета в рамке; сплошная заливка тревожным появляется единственный раз, на подтверждении слияния, где действие необратимо и затрагивает чужой сервер.</p>
 
 <h4>Поля</h4>
-<div class="demo mock" style="background:var(--paper);align-items:flex-end">
+<div class="demo mock" style="background:var(--paper);align-items:flex-start">
   <div class="m-f w-md"><label>Display name</label><span class="m-in">Анна Ковалёва</span></div>
   <div class="m-f w-sm"><label>Birthday</label><span class="m-in is-ph">YYYY-MM-DD</span></div>
   <div class="m-f w-xs"><label>Start time</label><span class="m-in is-mono">10:00</span></div>
@@ -931,7 +938,7 @@ figcaption b{color:var(--ink);font-weight:600}
 
 <h4>Высота строки: их три</h4>
 <p>Всё, что стоит в одной строке, имеет одну высоту, и выбирает её не разметка экрана, а вид строки: <b>28&nbsp;px</b> — там, где есть поля; <b>26&nbsp;px</b> — панель инструментов; <b>22&nbsp;px</b> — строка списка или таблицы, где полей нет. Поле, кнопка, переключатель, флажок — всё берёт высоту своей строки.</p>
-<div class="demo mock" style="background:var(--paper);align-items:flex-end">
+<div class="demo mock" style="background:var(--paper);align-items:flex-start">
   <div class="m-f w-sm"><label>Port</label><span class="m-in is-mono">8765</span></div>
   <div class="m-f"><span class="m-check"><span class="m-box"></span>Stop the server on exit</span></div>
   <div class="m-f"><span class="m-seg"><span class="is-on">Remote</span><span>Local</span></span></div>
@@ -939,7 +946,8 @@ figcaption b{color:var(--ink);font-weight:600}
 </div>
 <p>Дважды это ломалось одинаково. Сначала у флажка не оказалось собственной высоты — он брал её у текста, получалось 18&nbsp;px, и рядом с полем он садился ниже на девять пикселей: так было у «Stop the server on exit» и ещё в семи местах. Потом то же самое нашлось в панелях: мелкая кнопка (22&nbsp;px) стояла среди обычных (26&nbsp;px) в панели выделения файлов, а флажки «Events · Tasks due · Notes» в панели календаря были ниже кнопок рядом. Причина одна и та же — <b>высоту знала разметка, а не система</b>.</p>
 <p>Теперь её знает система, и правила идут от частного к общему: строки формы, панели, таблицы, а последним — самое общее: <b>ряд, в котором стоит поле, задаёт 28&nbsp;px всему ряду</b>, чем бы этот ряд ни был свёрстан. Поэтому мелкая кнопка рядом с полем невозможна: она станет обычной, даже если её так назвали. Плотные списки флажков правило не трогает — два флажка в одной ячейке это уже список, а не строка.</p>
-<p>Чтобы разъезд не искали глазами по девяноста макетам, у файла есть встроенная проверка: откройте его с <code>#check</code> в адресе. Она обходит <b>каждый</b> ряд — форму, панель, шапку, подвал диалога, карточку, — сравнивает вертикальные центры и высоты и обводит красным то, что выбилось: центром больше чем на полтора пикселя или высотой хоть на пиксель. В углу — счёт. На чистом файле там написано «Строки выровнены»; когда проверку написали, она нашла двадцать восемь мест, о которых никто не знал.</p>
+<p><b>Выравнивание идёт сверху, по строке подписи, — и это второе, что пришлось переучить.</b> Строка формы равнялась по нижнему краю, и пока у полей были только значения, это работало. Стоило у поля порта появиться подсказке под ним — «порт выбирает система при каждом запуске» — как ячейка стала на двадцать пикселей выше, а флажок «Stop the server on exit», честно прижатый к низу строки, уехал вниз вместе с подсказкой и оказался напротив объяснения. Теперь ячейки равняются по верху, и у ячейки без подписи строка подписи пустая, но есть: контрол всегда стоит на одной линии с соседним полем, сколько бы текста ни висело под ним. Ячейке, которая занимает строку одна, эта пустая строка не нужна — она помечается <code>is-own-line</code>, и таких в макетах две.</p>
+<p>Чтобы разъезд не искали глазами по девяноста макетам, у файла есть встроенная проверка: откройте его с <code>#check</code> в адресе. Она обходит <b>каждый</b> ряд — форму, панель, шапку, подвал диалога, карточку, — сравнивает вертикальные центры и высоты и обводит красным то, что выбилось: центром больше чем на полтора пикселя или высотой хоть на пиксель. Проходов у неё два, и второй появился как раз из-за уехавшего флажка: первый сравнивает контролы, уже стоящие на одной линии, и потому слепнет, когда контрол уехал далеко — такой выглядит как отдельная строка. Второй смотрит на ячейки формы: если их вертикальные диапазоны пересекаются, это одна строка, что бы ни думали контролы внутри. В углу — счёт. На чистом файле там написано «Строки выровнены»; когда проверку написали, она нашла двадцать восемь мест, о которых никто не знал.</p>
 
 <h4>Кнопка рядом с полем</h4>
 <p>Кнопка, относящаяся к полю, стоит <b>справа от него и внутри его же блока</b>, обычной высоты. Мелкая кнопка (22&nbsp;px) — только для строк списка и таблиц, где полей нет. Пара «поле + кнопка» верстается одной строкой внутри <code>.m-f</code>, а не двумя соседними ячейками формы: во втором случае выравнивание держится на <code>align-items</code> родителя и разъезжается, как только у соседнего поля появляется подсказка или вторая строка. Ровно это и произошло на экране восстановления, и в трёх других местах — на карточке пароля устройства и в правке телефонов и почты.</p>
@@ -3016,7 +3024,7 @@ Read  2 min ago</div>
           <div class="m-f" style="width:100%"><label>Feed address</label>
             <span class="m-in is-mono is-focus" style="font-size:11.5px">https://feeds.example/ru-holidays.ics</span>
             <span class="m-hint"><span class="mono">https://</span>, <span class="mono">webcal://</span> and a secret link from another Carrel are all understood.</span></div>
-          <div class="m-f" style="width:100%"><span class="m-btn">Check the address</span></div>
+          <div class="m-f is-own-line" style="width:100%"><span class="m-btn">Check the address</span></div>
           <div class="m-f" style="width:100%">
             <div class="m-diag">[fetch]   GET /ru-holidays.ics → 200 · 0.4 s · 34 KB
 [type]    text/calendar; charset=utf-8
@@ -3428,7 +3436,7 @@ Read  2 min ago</div>
           <div class="m-f w-xl"><label>Server URL</label><span class="m-in is-mono">https://dav.office.example/dav.php/</span></div>
           <div class="m-f w-md"><label>Username</label><span class="m-in">m.yenuchenko</span></div>
           <div class="m-f w-md"><label>Password</label><span class="m-in">••••••••</span></div>
-          <div class="m-f" style="align-self:flex-end"><span class="m-btn is-primary">Test discovery</span></div>
+          <div class="m-f"><span class="m-btn is-primary">Test discovery</span></div>
         </div>
         <div style="padding:0 20px 14px">
           <div class="m-diag">[well-known]  GET /.well-known/caldav → 301 → /dav.php/
@@ -3741,7 +3749,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
             <div class="m-f w-lg"><label>Current</label><span class="m-in">••••••••••••••••</span></div>
             <div class="m-f w-lg"><label>New</label><span class="m-in">••••••••••••••••</span></div>
             <div class="m-f w-lg"><label>Repeat</label><span class="m-in">••••••••••••••••</span></div>
-            <div class="m-f" style="align-self:flex-end"><span class="m-btn">Change</span></div>
+            <div class="m-f"><span class="m-btn">Change</span></div>
             <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Only the recovery private key is re-encrypted. The deposited copies are untouched, so nobody has to opt in again.</span></div>
           </div>
           <div class="m-fset">
@@ -3749,7 +3757,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
             <div class="m-f w-md"><label>Account</label><span class="m-in">viktor</span></div>
             <div class="m-f w-lg"><label>Master password</label><span class="m-in">••••••••••••••••</span></div>
             <div class="m-f w-md"><label>Temporary password for the user</label><span class="m-in is-mono">9f2-brick-lamp</span></div>
-            <div class="m-f" style="align-self:flex-end"><span class="m-btn is-danger">Recover</span></div>
+            <div class="m-f"><span class="m-btn is-danger">Recover</span></div>
             <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion.</span></div>
           </div>
         </div>
@@ -4131,7 +4139,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 
         <div class="m-fset">
           <div class="m-rubric">Where to</div>
-          <div class="m-f" style="flex:1 1 100%">
+          <div class="m-f is-own-line" style="flex:1 1 100%">
             <span class="m-seg" style="align-self:flex-start">
               <span class="is-on">To WebDAV</span><span>Download</span><span>Both</span>
             </span>
@@ -6147,6 +6155,42 @@ addEventListener('load', function () {
       });
     });
   });
+  /* Второй проход — по ячейкам формы. Первый сравнивает контролы, уже
+     стоящие на одной линии, и потому слепнет, когда контрол уехал далеко:
+     он выглядит как отдельная строка. Здесь строку задают сами ячейки —
+     если их вертикальные диапазоны пересекаются, это одна строка, — и
+     сравниваются первые контролы в них. Так виден случай, ради которого
+     проход и написан: у поля появилась подсказка, и флажок рядом уехал
+     вниз вместе с ней. */
+  document.querySelectorAll('.m-form, .m-fset, .demo').forEach(function (row) {
+    if (row.closest('[data-check="off"]')) return;
+    var cells = [].slice.call(row.children).filter(function (c) {
+      return c.classList.contains('m-f') && c.getBoundingClientRect().height;
+    }).map(function (c) {
+      var ctrl = c.querySelector(SEL);
+      if (!ctrl || ctrl.classList.contains('is-area')) return null;
+      var cr = c.getBoundingClientRect();
+      return { cell: c, ctrl: ctrl, top: cr.top, bottom: cr.bottom };
+    }).filter(Boolean);
+    var lines = [];
+    cells.forEach(function (c) {
+      var line = lines.filter(function (L) {
+        var overlap = Math.min(L.bottom, c.bottom) - Math.max(L.top, c.top);
+        return overlap > Math.min(L.bottom - L.top, c.bottom - c.top) * 0.5;
+      })[0];
+      if (line) { line.items.push(c); line.top = Math.min(line.top, c.top); line.bottom = Math.max(line.bottom, c.bottom); }
+      else { lines.push({ top: c.top, bottom: c.bottom, items: [c] }); }
+    });
+    lines.forEach(function (L) {
+      if (L.items.length < 2) return;
+      var mids = L.items.map(function (i) { return mid(i.ctrl); }).sort(function (a, b) { return a - b; });
+      var med = mids[Math.floor(mids.length / 2)];
+      L.items.forEach(function (i) {
+        if (Math.abs(mid(i.ctrl) - med) > 1.5) { i.ctrl.style.outline = '1.5px solid #B4442E'; bad++; }
+      });
+    });
+  });
+
   var tag = document.createElement('div');
   tag.textContent = bad ? 'Разъездов: ' + bad : 'Строки выровнены';
   tag.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:99;padding:7px 11px;' +
