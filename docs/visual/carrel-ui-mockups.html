@@ -2821,7 +2821,7 @@ Read  2 min ago</div>
             </div>
             <div class="b">
               <div class="m-f" style="width:100%"><label>Your Carrel password</label><span class="m-in is-focus">••••••••••</span></div>
-              <span style="font-size:11.5px;color:var(--dusty)">Asked once a session. For the next five minutes passwords open without a question.</span>
+              <span style="font-size:11.5px;color:var(--dusty)">Unlocks credentials everywhere for five minutes: passwords, device profiles, anything else handed out.</span>
             </div>
             <div class="f"><span class="m-btn is-primary">Show</span><span class="m-kbd">Enter</span><span style="margin-left:auto;display:flex;gap:7px;align-items:center"><span class="m-btn is-quiet">Cancel</span><span class="m-kbd">Esc</span></span></div>
           </div>
@@ -2839,6 +2839,7 @@ Read  2 min ago</div>
       <div class="m-shell no-rail" style="min-height:280px"><div class="m-main">
         <div class="m-head" style="padding-bottom:8px">
           <div><div class="m-h1" style="font-size:19px">Connections</div><div class="m-sub">3 сервера · 12 коллекций · 2 подписки</div></div>
+          <div class="m-acts"><span class="m-badge" style="border-color:var(--accent);color:var(--accent)">credentials unlocked · 4:12</span><span class="m-btn is-sm is-quiet">Lock now</span></div>
         </div>
         <div style="padding:0 20px">
           <div class="m-card" style="border-color:var(--accent)">
@@ -2851,7 +2852,6 @@ Read  2 min ago</div>
               <div class="m-f" style="flex:1 1 220px"><label>Password</label><span class="m-in is-mono">z3-brick-lamp-9f2</span></div>
               <span class="m-btn is-sm">Copy</span>
               <span class="m-btn is-sm is-quiet">Hide</span>
-              <span class="mono" style="font-size:10.5px;color:var(--alert);align-self:center">0:24</span>
             </div>
           </div>
           <div class="m-card">
@@ -2859,11 +2859,11 @@ Read  2 min ago</div>
             <div class="mono" style="font-size:11.5px;color:var(--dusty)">https://files.example.org/dav/ · mix</div>
           </div>
         </div>
-        <div class="m-msg">Second server opens without a question for the next five minutes.</div>
+        <div class="m-msg">While credentials are unlocked, every account opens without a question — here, on the New device screen and when a profile is built. <b>Lock now</b> ends it at once; so does signing out.</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Пароль появляется в самой карточке, рядом с логином, а не в отдельном окне: то, что человек пришёл узнать, стоит там же, где всё остальное про этот сервер. Счётчик показывает, сколько ещё видно; «Hide» убирает раньше. У второй карточки кнопка осталась — но нажатие на неё вопроса уже не вызовет, и об этом сказано строкой под списком, а не выясняется опытным путём.</figcaption>
+  <figcaption>Пароль появляется в самой карточке, рядом с логином, а не в отдельном окне: то, что человек пришёл узнать, стоит там же, где всё остальное про этот сервер. Сколько ещё открыто — показывает значок в шапке, один на весь раздел, а не счётчик у каждой строки; «Hide» убирает пароль с экрана, не закрывая окна. У второй карточки кнопка осталась — но нажатие на неё вопроса уже не вызовет, и об этом сказано строкой под списком, а не выясняется опытным путём.</figcaption>
   </figure>
 </div>
 
@@ -3789,7 +3789,7 @@ Read  2 min ago</div>
       </div>
       <div class="m-main">
         <div class="m-head">
-          <div><div class="m-h1">Set up a new device</div><div class="m-sub">Всё, что нашло discovery, — одним файлом или одним кодом</div></div>
+          <div><div class="m-h1">Set up a new device</div><div class="m-sub">Всё, что нашло discovery, — одним файлом или одним кодом <span class="m-badge" style="border-color:var(--accent);color:var(--accent)">credentials unlocked · 4:12</span><span class="m-btn is-sm is-quiet">Lock now</span></div></div>
           <div class="m-acts"><span class="m-seg"><span class="is-on">Apple</span><span>Android</span><span>Thunderbird</span><span>Anything else</span></span></div>
         </div>
         <div class="m-form" style="padding-bottom:0">
@@ -3874,13 +3874,13 @@ Read  2 min ago</div>
         <div class="h"><b style="font-size:13.5px">Show password</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">nextcloud · home</span></div>
         <div class="b">
           <div class="m-f" style="width:100%"><label>Your Carrel password</label><span class="m-in is-focus">••••••••••</span></div>
-          <span style="font-size:11.5px;color:var(--dusty)">Asked once a session. For the next five minutes passwords open without a question.</span>
+          <span style="font-size:11.5px;color:var(--dusty)">Unlocks credentials everywhere for five minutes: passwords, device profiles, anything else handed out.</span>
         </div>
         <div class="f"><span class="m-btn is-primary">Show</span><span class="m-btn is-quiet">Cancel</span><span class="m-kbd" style="margin-left:auto">Esc</span></div>
       </div>
     </div>
   </div>
-  <figcaption id="reveal"><b>Одна механика на все места, где учётные данные выходят наружу</b> — «Show password» в подключениях (7.10), пароль на этом экране, сборка профиля Apple: один и тот же лист, одни и те же правила. Спрашивается <b>ваш</b> пароль от Carrel, а не пароль сервера — подтверждается, что за экраном тот же человек, а не тот, кому досталась незаблокированная машина. Спрошенное действует <b>раз в сеанс</b> и открывает следующие пять минут; показанное скрывается само; каждый показ и каждая сборка профиля попадают в журнал. Разных «режимов доступа» к паролю в интерфейсе нет и не будет: одно правило легче объяснить и невозможно обойти, выбрав экран поудобнее.</figcaption>
+  <figcaption id="reveal"><b>Одна механика на все места, где учётные данные выходят наружу</b> — «Show password» в подключениях (7.10), пароль на этом экране, сборка профиля Apple: один и тот же лист, одни и те же правила. Спрашивается <b>ваш</b> пароль от Carrel, а не пароль сервера — подтверждается, что за экраном тот же человек, а не тот, кому досталась незаблокированная машина. <b>Часы одни на всё.</b> Подтверждение открывает учётные данные не на этом экране, а везде — в подключениях, на экране нового устройства, при сборке профиля — и держит их открытыми пять минут. Второго таймера нет: показанный пароль не прячется по своему собственному отсчёту, он закрывается вместе с окном или по кнопке <b>Lock now</b>; выход из учётной записи закрывает его тоже. Пока окно открыто, состояние видно значком в шапке раздела — иначе человек не знает, спросят его в следующий раз или нет. Каждый показ и каждая сборка профиля попадают в журнал.<br><br>Разных «режимов доступа» к паролю в интерфейсе нет и не будет: одно правило легче объяснить и невозможно обойти, выбрав экран поудобнее.</figcaption>
   </figure>
 
   <figure style="flex:1 1 380px">
@@ -3899,13 +3899,12 @@ Read  2 min ago</div>
             <tr><td colspan="2" class="mono">username</td><td class="mono">mix</td><td class="m-acts"><span class="m-btn is-sm">Copy</span></td></tr>
             <tr><td colspan="2" class="mono">password</td>
               <td><span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <span class="m-in is-mono" style="width:190px;font-size:12px">z3-brick-lamp-9f2</span>
-                <span class="mono" style="font-size:10.5px;color:var(--alert)">скроется через 0:24</span></span></td>
+                <span class="m-in is-mono" style="width:190px;font-size:12px">z3-brick-lamp-9f2</span></span></td>
               <td class="m-acts"><span class="m-btn is-sm">Copy</span><span class="m-btn is-sm is-quiet">Hide</span></td></tr>
           </tbody>
         </table>
         <div class="m-msg is-row"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-          <span>Asked once a session — for the next five minutes passwords open without a question. What is shown hides itself, and every reveal is written to the audit log.</span></div>
+          <span>Credentials are unlocked for five minutes — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press <b>Lock now</b>; every reveal is written to the audit log.</span></div>
       </div></div>
     </div>
   </div>
