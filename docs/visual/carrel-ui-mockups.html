@@ -233,8 +233,10 @@ figcaption b{color:var(--ink);font-weight:600}
   border-bottom:.5px solid var(--rule);font-size:11.5px;color:var(--muted)}
 .m-poll .m-prog{width:120px;height:3px;border-radius:2px;background:var(--card-border);overflow:hidden}
 .m-poll .m-prog i{display:block;height:100%;background:var(--accent)}
-.m-msg{display:flex;gap:9px;align-items:flex-start;padding:9px 12px;margin:12px var(--pad) 0;font-size:12.5px;
+.m-msg{display:block;padding:9px 12px;margin:12px var(--pad) 0;font-size:12.5px;line-height:1.5;
   background:var(--card);border-left:2px solid var(--card-border);border-radius:0 3px 3px 0;max-width:88ch}
+.m-msg.is-row{display:flex;gap:9px;align-items:flex-start}
+.m-msg.is-row > svg{flex:none;margin-top:1px}
 .m-msg.is-alert{border-left-color:var(--alert);color:var(--alert);background:transparent;border:.5px solid var(--alert);border-left-width:2px}
 .m-msg.is-accent{border-left-color:var(--accent)}
 .m-empty{padding:26px var(--pad);color:var(--muted);font-size:13px;max-width:64ch;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
@@ -928,12 +930,12 @@ figcaption b{color:var(--ink);font-weight:600}
     <div class="m-shell has-side">
       <div class="m-rail">
         <div class="m-nav">
+          <a><svg><use href="#i-search"/></svg>Search</a>
           <a class="is-on"><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
           <a><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
           <a><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
           <a><svg><use href="#i-note"/></svg>Notes<span class="m-num">86</span></a>
           <a><svg><use href="#i-file"/></svg>Files</a>
-          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-dup"/></svg>Duplicates<span class="m-num">3</span></a>
         </div>
         <div class="m-rail-sec">
@@ -1155,12 +1157,12 @@ Read  2 min ago</div>
     <div class="m-shell has-side">
       <div class="m-rail">
         <div class="m-nav">
+          <a><svg><use href="#i-search"/></svg>Search</a>
           <a class="is-on"><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
           <a><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
           <a><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
           <a><svg><use href="#i-note"/></svg>Notes<span class="m-num">86</span></a>
           <a><svg><use href="#i-file"/></svg>Files</a>
-          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-dup"/></svg>Duplicates<span class="m-num">3</span></a>
         </div>
         <div class="m-nav" style="margin-top:2px"><a><svg><use href="#i-back"/></svg>Back to list</a></div>
@@ -1311,12 +1313,12 @@ Read  2 min ago</div>
     <div class="m-shell has-side">
       <div class="m-rail">
         <div class="m-nav">
+          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
           <a class="is-on"><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
           <a><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
           <a><svg><use href="#i-note"/></svg>Notes<span class="m-num">86</span></a>
           <a><svg><use href="#i-file"/></svg>Files</a>
-          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-dup"/></svg>Duplicates<span class="m-num">3</span></a>
         </div>
         <div class="m-rail-sec">
@@ -1553,12 +1555,12 @@ SEQUENCE  2</div>
     <div class="m-shell has-side">
       <div class="m-rail">
         <div class="m-nav">
+          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
           <a><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
           <a class="is-on"><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
           <a><svg><use href="#i-note"/></svg>Notes<span class="m-num">86</span></a>
           <a><svg><use href="#i-file"/></svg>Files</a>
-          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-dup"/></svg>Duplicates<span class="m-num">3</span></a>
         </div>
         <div class="m-rail-sec">
@@ -1661,12 +1663,12 @@ SEQUENCE  2</div>
     <div class="m-shell has-side" style="--side:520px">
       <div class="m-rail">
         <div class="m-nav">
+          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
           <a><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
           <a><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
           <a class="is-on"><svg><use href="#i-note"/></svg>Notes<span class="m-num">86</span></a>
           <a><svg><use href="#i-file"/></svg>Files</a>
-          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-dup"/></svg>Duplicates<span class="m-num">3</span></a>
         </div>
         <div class="m-rail-sec">
@@ -1799,6 +1801,7 @@ SEQUENCE  2</div>
             <span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>Edit</span>
             <span class="m-btn">Export Markdown</span>
             <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</span>
+            <span class="m-btn">Source</span>
             <span class="m-seg"><span class="is-on">Full width</span><span>Measure</span></span>
             <span class="m-btn" title="Hide the side column"><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></span>
             <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span>
@@ -1849,7 +1852,7 @@ Read  2 min ago</div>
   </div>
 </div>
 <figcaption><b>Чтение.</b> Текст занимает всю колонку содержимого: кегль 14.5, интерлиньяж 1.7. Справа — колонка с тем, что не текст: теги, связи, вложения, техническая правда об источнике; кнопка <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none" style="display:inline;vertical-align:-1px"><use href="#i-panel"/></svg> убирает и её. В рейле вместо списка коллекций — соседние заметки, чтобы листать не возвращаясь. Переключатель <b>Full width / Measure</b> в панели — на случай, когда монитор шире, чем удобно читать: он сужает текст до 78&nbsp;ch и запоминается. Умолчание — полная ширина.
-<br><br><b>Про Markdown.</b> Заголовок «Что делаем» и список показаны разобранными. Сегодня Carrel хранит текст как есть и никуда его не разбирает: Markdown — формат импорта и экспорта, а не отображения. Чтобы просмотр выглядел так, нужен рендерер в бинарнике (goldmark, одна зависимость, ~1 МБ, без CDN и без JS) и запрет на сырой HTML внутри. Решение отдельное; пока его нет, честный просмотр — тот же текст с сохранёнными переносами, в той же мере и с тем же интерлиньяжем. Что не должно происходить ни при каком решении: просмотр не должен молча съедать разметку, которую другой клиент записал.</figcaption>
+<br><br><b>Да, Markdown разбирается — в просмотре и только в нём.</b> Заголовок «Что делаем» и список выше показаны так, как их увидит человек. Это решение, а не набросок: без разбора «режим просмотра» отличался бы от правки одним лишь отсутствием рамки у поля, и заводить его было бы незачем. Стоит оно одной зависимости — <code>goldmark</code> в бинарник, без CDN и без JS, с <b>выключенным сырым HTML</b>: чужая заметка приходит с чужого сервера, и превращать её в исполняемую разметку нельзя. Поддерживается то, что пишут в заметках руками и что кладёт jtx Board: заголовки, списки, задачи-флажки, выделение, ссылки, код, цитаты и таблицы. <b>Хранится по-прежнему текст.</b> Carrel ничего не переписывает: правка отдаёт ровно те символы, которые набрали, а синтаксис, которого разборщик не знает, остаётся видимым текстом, а не пропадает. Кнопка <b>«Source»</b> в меню карточки показывает исходник, когда нужно понять, что именно лежит на сервере.</figcaption>
 </figure>
 
 <figure>
@@ -1942,6 +1945,7 @@ Read  2 min ago</div>
       <div class="m-shell">
         <div class="m-rail">
           <div class="m-nav">
+            <a><svg><use href="#i-search"/></svg>Search</a>
             <a><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
             <a class="is-on"><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
             <a><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
@@ -2056,12 +2060,12 @@ Read  2 min ago</div>
     <div class="m-shell has-side" style="--side:340px">
       <div class="m-rail">
         <div class="m-nav">
+          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
           <a><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
           <a><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
           <a><svg><use href="#i-note"/></svg>Notes<span class="m-num">86</span></a>
           <a class="is-on"><svg><use href="#i-file"/></svg>Files</a>
-          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-dup"/></svg>Duplicates<span class="m-num">3</span></a>
         </div>
         <div class="m-rail-sec">
@@ -2079,8 +2083,8 @@ Read  2 min ago</div>
         <div class="m-rail-sec">
           <div class="m-rubric">Shortcuts</div>
           <div class="m-tree" style="padding:0 8px">
-            <div class="is-on"><svg><use href="#i-file"/></svg>Attachments</div>
-            <div><svg><use href="#i-clock"/></svg>Recently changed</div>
+            <div class="is-on"><svg><use href="#i-file"/></svg>Attachments<span class="m-meta" style="margin-left:auto;color:var(--dusty)">Documents / carrel</span></div>
+            <div><svg><use href="#i-link"/></svg>Published<span class="m-meta" style="margin-left:auto;color:var(--dusty)">2</span></div>
           </div>
         </div>
         <div class="m-rail-foot">
@@ -2102,6 +2106,16 @@ Read  2 min ago</div>
             <span class="m-btn" style="background:var(--card)" title="Details"><svg viewBox="0 0 24 24"><use href="#i-panel"/></svg></span>
             <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span>
           </div>
+        </div>
+        <div class="m-bar m-sel">
+          <span style="font-weight:600">1 selected</span><span class="mono" style="color:var(--muted)">412 KB</span>
+          <span style="width:1px;height:20px;background:var(--card-border)"></span>
+          <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Download</span>
+          <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>Rename</span>
+          <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg>Move…</span>
+          <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy…</span>
+          <span class="m-btn is-danger"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg>Delete</span>
+          <span class="m-right"><span class="m-btn is-sm is-quiet">Clear selection</span></span>
         </div>
         <div class="m-bar">
           <span class="m-in is-ph" style="width:190px;height:26px"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" style="margin-right:6px"><use href="#i-search"/></svg>Filter this folder</span>
@@ -2171,7 +2185,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Из таблицы получился менеджер.</b> Колонка флажков и выделение строки; у каждой строки — скачивание и меню; операции над одним файлом собраны справа, а не разбросаны по формам внизу страницы. Хлебные крошки стали навигацией, а не подписью. Тип файла несёт иконку тонкой линией — единственное место в редизайне, где иконки появляются в содержимом, а не в хроме: в файловом списке тип узнаётся быстрее по значку, чем по строке <code>image/png</code>, и колонка типа при этом остаётся. Панель свойств честно говорит то, чего Carrel не знает: указателя ссылок на файл у него нет, и удаление ничего не проверяет.</figcaption>
+<figcaption><b>Два ярлыка в рейле — не «умные папки», а два ответа на вопрос «где это лежало».</b> <b>Attachments</b> — та самая папка, которую выбрали один раз в настройках вложений: Carrel складывает туда файлы, приложенные к заметкам и событиям, и знает её адрес, поэтому ярлык просто открывает её, где бы она ни была. Если папка ещё не выбрана, ярлык ведёт на страницу, где её выбирают. <b>Published</b> — файлы и папки с действующей секретной ссылкой: список известен Carrel из его же токенов, ходить за ним на сервер не нужно. Ярлыка «недавние» здесь нет намеренно: WebDAV не умеет спрашивать «что изменилось», и такой список пришлось бы собирать обходом всего дерева на каждый заход.<br><br><b>Из таблицы получился менеджер.</b> Колонка флажков и выделение строки; у каждой строки — скачивание и меню; операции над одним файлом собраны справа, а не разбросаны по формам внизу страницы. Хлебные крошки стали навигацией, а не подписью. Тип файла несёт иконку тонкой линией — единственное место в редизайне, где иконки появляются в содержимом, а не в хроме: в файловом списке тип узнаётся быстрее по значку, чем по строке <code>image/png</code>, и колонка типа при этом остаётся. Панель свойств честно говорит то, чего Carrel не знает: указателя ссылок на файл у него нет, и удаление ничего не проверяет.</figcaption>
 </figure>
 
 <h3>Панель свойств: когда она есть</h3>
@@ -2179,12 +2193,12 @@ Read  2 min ago</div>
 <table class="doc">
   <tr><th style="width:26%">Что выделено</th><th style="width:30%">Что справа</th><th>Почему</th></tr>
   <tr><td>Ничего</td><td>Панели нет, список во всю ширину</td><td>Показывать пустую панель «выберите файл» — тратить треть экрана на подсказку</td></tr>
-  <tr><td>Один файл или папка</td><td>Свойства, предпросмотр, операции</td><td>Обычный случай: посмотреть, что это, не открывая</td></tr>
+  <tr><td>Один файл или папка</td><td>Свойства и предпросмотр</td><td>Панель отвечает на «что это такое». <b>Операции при этом уже в панели над списком</b> — она появляется от первого же выделенного объекта, а не от второго</td></tr>
   <tr><td>Несколько</td><td>Сводка: сколько объектов, суммарный размер, общие операции</td><td>Свойства десяти файлов сразу — это не свойства, а список</td></tr>
-  <tr><td>Панель закрыта вручную</td><td>Не открывается, пока её не вернут кнопкой</td><td>Решение человека, а не состояние выделения</td></tr>
+  <tr><td>Панель закрыта вручную</td><td>Не открывается, пока её не вернут кнопкой</td><td>Решение человека, а не состояние выделения. Ни одна операция при этом не пропадает: они в панели над списком и в меню <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none" style="display:inline;vertical-align:-1px"><use href="#i-dots"/></svg> у каждой строки</td></tr>
   <tr><td>Окно уже 1024&nbsp;px</td><td>Панель становится выдвижной поверх списка</td><td>То же правило, что у панели подробностей во всех разделах (раздел 4)</td></tr>
 </table>
-<p>Двойное нажатие или <span class="m-kbd" style="font-family:var(--f-mono)">Enter</span> — открыть: папку внутрь, файл на скачивание или в просмотр. Панель — про «что это такое», а не про «открыть».</p>
+<p>Двойное нажатие или <span class="m-kbd" style="font-family:var(--f-mono)">Enter</span> — открыть: папку внутрь, файл на скачивание или в просмотр. Панель — про «что это такое», а не про «открыть» и не про «сделать». <b>Кнопок, которые есть только в панели, не существует:</b> всё, что можно сделать с файлом, лежит в панели операций над списком и повторено в меню строки. Панель добавляет к этому предпросмотр, путь и ETag — то, что читают, а не нажимают.</p>
 
 <figure>
 <div class="frame">
@@ -2262,31 +2276,62 @@ Read  2 min ago</div>
   <figcaption>Дерево показывает все подключённые хранилища сразу — это и есть единый вид в файлах. Коллекция только для чтения видна, но целью быть не может.</figcaption>
   </figure>
 
-  <figure style="flex:1 1 440px">
+  <figure style="flex:1 1 430px">
   <div class="frame">
-    <div class="frame-label"><span>Плитки и корень «All collections»</span><i>вид и точка входа</i></div>
+    <div class="frame-label"><span>Файлы · плитки</span><i>папка с картинками</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
-        <div class="m-head" style="padding-bottom:6px"><div><div class="m-h1" style="font-size:18px">2026-07</div><nav class="m-crumbs"><a>Documents</a>/<a>carrel</a>/<b>2026-07</b></nav></div>
-          <div class="m-acts"><span class="m-seg"><span><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-menu"/></svg></span><span class="is-on"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-grid"/></svg></span></span></div></div>
-        <div class="m-grid">
-          <div class="m-tile is-sel"><div class="m-thumb"><svg><use href="#i-img"/></svg></div><span class="n">whiteboard.jpg</span><span class="s">2.8 MB</span></div>
-          <div class="m-tile"><div class="m-thumb"><svg><use href="#i-img"/></svg></div><span class="n">схема-1.png</span><span class="s">640 KB</span></div>
-          <div class="m-tile"><div class="m-thumb"><svg><use href="#i-doc"/></svg></div><span class="n">смета.pdf</span><span class="s">1.2 MB</span></div>
-          <div class="m-tile"><div class="m-thumb"><svg><use href="#i-file"/></svg></div><span class="n">архив</span><span class="s">12 items</span></div>
+        <div class="m-head" style="padding-bottom:6px">
+          <div><div class="m-h1" style="font-size:18px">2026-07</div><nav class="m-crumbs"><a>Documents</a>/<a>carrel</a>/<b>2026-07</b></nav></div>
+          <div class="m-acts">
+            <span class="m-seg"><span><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-menu"/></svg>List</span><span class="is-on"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-grid"/></svg>Tiles</span></span>
+          </div>
         </div>
-        <div class="m-group"><span class="m-rubric">All collections</span><span class="m-num">3</span></div>
-        <table class="m-table">
-          <tbody>
-            <tr class="is-folder"><td style="width:28px"></td><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>Documents</span></span></td><td class="mono">sftpgo · vps</td><td class="mono">rw</td><td class="mono">attachment folder</td></tr>
-            <tr class="is-folder"><td></td><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>Public</span></span></td><td class="mono">sftpgo · vps</td><td class="mono">ro</td><td></td></tr>
-            <tr class="is-folder"><td></td><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>Files</span></span></td><td class="mono">nextcloud · home</td><td class="mono">rw</td><td></td></tr>
-          </tbody>
-        </table>
+        <div class="m-bar m-sel">
+          <span style="font-weight:600">1 selected</span><span class="mono" style="color:var(--muted)">2.8 MB</span>
+          <span style="width:1px;height:20px;background:var(--card-border)"></span>
+          <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Download</span>
+          <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>Rename</span>
+          <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg>Move…</span>
+          <span class="m-btn is-danger"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg>Delete</span>
+        </div>
+        <div class="m-grid">
+          <div class="m-tile is-sel"><div class="m-thumb"><svg><use href="#i-img"/></svg></div><span class="n">whiteboard.jpg</span><span class="s">2.8 MB · 4032×3024</span></div>
+          <div class="m-tile"><div class="m-thumb"><svg><use href="#i-img"/></svg></div><span class="n">схема-1.png</span><span class="s">640 KB · 1920×1080</span></div>
+          <div class="m-tile"><div class="m-thumb"><svg><use href="#i-img"/></svg></div><span class="n">схема-2.png</span><span class="s">712 KB · 1920×1080</span></div>
+          <div class="m-tile"><div class="m-thumb" style="background:var(--card)"><svg><use href="#i-doc"/></svg></div><span class="n">смета.pdf</span><span class="s">1.2 MB</span></div>
+          <div class="m-tile"><div class="m-thumb" style="background:var(--card)"><svg><use href="#i-file"/></svg></div><span class="n">архив</span><span class="s">12 items</span></div>
+          <div class="m-tile"><div class="m-thumb" style="background:var(--card)"><svg><use href="#i-img"/></svg></div><span class="n">панорама.tif</span><span class="s">84 MB · слишком большой</span></div>
+        </div>
       </div></div>
     </div>
   </div>
-  <figcaption>Плитки — для папок с картинками: миниатюра берётся у самого файла и только если он меньше порога, иначе рисуется значок типа. Ниже — корень: подключённые хранилища как папки, с сервером и правами в колонках.</figcaption>
+  <figcaption><b>Плитки — один и тот же список, разложенный сеткой,</b> а не другой раздел: те же выделение, та же панель операций, тот же порядок сортировки. Нужны они там, где имя ничего не говорит, а картинка говорит всё — папка со снимками, сканами, скриншотами.
+  <br><br>Миниатюра берётся у самого файла и только у картинок меньше порога: <span class="mono">панорама.tif</span> на 84&nbsp;МБ рисуется значком, и подпись говорит почему. Всё остальное — PDF, папки, чужие форматы — получает плитку со значком типа на «картоне», а не пустой квадрат. Подгружаются миниатюры по мере появления на экране: сорок картинок по два мегабайта не должны уезжать с сервера разом ради одного взгляда.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 430px">
+  <div class="frame">
+    <div class="frame-label"><span>Файлы · корень «All collections»</span><i>точка входа раздела</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main">
+        <div class="m-head" style="padding-bottom:8px">
+          <div><div class="m-h1" style="font-size:18px"><span class="m-bar3 is-multi" style="height:18px"></span>All collections</div>
+            <div class="m-sub">3 хранилища на 2 серверах</div></div>
+        </div>
+        <table class="m-table">
+          <thead><tr><th>Name</th><th style="width:150px">Server</th><th style="width:80px">Access</th><th style="width:170px">Purpose</th></tr></thead>
+          <tbody>
+            <tr class="is-folder"><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>Documents</span></span></td><td class="mono">sftpgo · vps</td><td class="mono">rw</td><td><span class="m-badge">attachments</span></td></tr>
+            <tr class="is-folder"><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>Public</span></span></td><td class="mono">sftpgo · vps</td><td class="mono">ro</td><td></td></tr>
+            <tr class="is-folder"><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>Files</span></span></td><td class="mono">nextcloud · home</td><td class="mono">rw</td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="m-msg">Это единый вид раздела «Файлы»: хранилища показаны как папки верхнего уровня. Дальше открывается дерево одного из них — содержимое разных серверов в одной папке не смешивается, потому что у файла один путь и он принадлежит своему хранилищу.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Экран, с которого начинается раздел, когда в рейле выбрано <b>All collections</b>. Колонки отвечают на три вопроса сразу: чьё это хранилище, можно ли туда писать и не оно ли выбрано под вложения.</figcaption>
   </figure>
 </div>
 
@@ -2315,12 +2360,12 @@ Read  2 min ago</div>
     <div class="m-shell">
       <div class="m-rail">
         <div class="m-nav">
+          <a class="is-on"><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-con"/></svg>Contacts</a>
           <a><svg><use href="#i-cal"/></svg>Calendar</a>
           <a><svg><use href="#i-task"/></svg>Tasks</a>
           <a><svg><use href="#i-note"/></svg>Notes</a>
           <a><svg><use href="#i-file"/></svg>Files</a>
-          <a class="is-on"><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-dup"/></svg>Duplicates<span class="m-num">3</span></a>
         </div>
         <div class="m-rail-sec">
@@ -2376,12 +2421,12 @@ Read  2 min ago</div>
     <div class="m-shell">
       <div class="m-rail">
         <div class="m-nav">
+          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-con"/></svg>Contacts</a>
           <a><svg><use href="#i-cal"/></svg>Calendar</a>
           <a><svg><use href="#i-task"/></svg>Tasks</a>
           <a><svg><use href="#i-note"/></svg>Notes</a>
           <a><svg><use href="#i-file"/></svg>Files</a>
-          <a><svg><use href="#i-search"/></svg>Search</a>
           <a class="is-on"><svg><use href="#i-dup"/></svg>Duplicates<span class="m-num">3</span></a>
         </div>
         <div class="m-rail-sec">
@@ -3373,7 +3418,7 @@ Read  2 min ago</div>
                 </div>
               </div>
             </div>
-            <div class="m-msg is-alert" style="margin:0">
+            <div class="m-msg is-alert is-row" style="margin:0">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none" style="flex:none;margin-top:1px"><use href="#i-shield"/></svg>
               <span><b>The profile carries passwords in cleartext.</b> It is an ordinary file: it lands in Downloads, in a messenger, in the phone’s backup. Open it on the device and delete it. The link lives 10 minutes and opens once; nothing is written to the server’s disk, and the issue is recorded in the audit log.</span>
             </div>
@@ -3584,6 +3629,8 @@ Read  2 min ago</div>
 
         <div class="m-fset">
           <div class="m-rubric">Чем закрыт архив</div>
+          <div class="m-f" style="flex:1 1 100%"><span class="m-check"><span class="m-box"></span>Encrypt the archive</span>
+            <span class="m-hint">Включено по умолчанию. Снимать имеет смысл ровно в одном случае: копия ложится туда, куда вы и так пускаете только себя, — и тогда её откроет любой архиватор.</span></div>
           <div class="m-f w-lg"><label>Archive password</label><span class="m-in">••••••••••••</span></div>
           <div class="m-f" style="align-self:flex-end"><span class="m-check"><span class="m-box"></span>Same as the job “Work, daily”</span></div>
           <div class="m-msg is-alert" style="flex:1 1 100%;margin:2px 0 0">Separate from the sign-in password: the destination may be somebody else’s hosting. Forget it and this job’s archives open for nobody, including you.</div>
@@ -3597,14 +3644,28 @@ Read  2 min ago</div>
             <span class="m-check"><span class="m-box is-off"></span>On external request — <span class="mono">POST /api/backup/run?job=personal</span> <span class="m-badge is-local" title="Локальный запуск: снаружи может быть недоступно">local</span></span>
           </div>
           <div class="m-f w-full"><label>App password for this job <span style="color:var(--dusty)">(this job only, nothing else)</span></label>
-            <span class="m-in is-mono is-ph" style="font-size:11px">создаётся при включении и показывается один раз</span></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="m-btn">Create password</span>
+              <span style="font-size:11.5px;color:var(--dusty)">создаётся по нажатию и показывается один раз — прямо здесь, до сохранения задания</span>
+            </div></div>
+          <div class="m-card" style="flex:1 1 100%;border-color:var(--accent);margin:8px 0 0">
+            <div class="m-rubric">Password created <span class="mono" style="letter-spacing:0;color:var(--alert)">видно только сейчас</span></div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:2px;flex-wrap:wrap">
+              <span class="m-in is-mono" style="flex:1;min-width:220px;font-size:13px;letter-spacing:.03em">cbk_7f3a-91de-4402-lamp</span>
+              <span class="m-btn is-sm">Copy</span>
+              <span class="m-btn is-sm is-quiet">Regenerate</span>
+            </div>
+            <div class="m-diag" style="margin-top:9px">curl -X POST https://carrel.example/api/backup/run?job=personal \
+     -H "Authorization: Bearer cbk_7f3a-91de-4402-lamp"</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:8px">Готовая строка — чтобы не собирать её по документации. Пароль действует только на это задание и только на запуск: прочитать им ничего нельзя.</div>
+          </div>
         </div>
       </div>
       <div class="m-danger-zone"><span class="m-btn is-danger">Delete job</span>Уже созданные архивы останутся на месте: удаляется расписание, а не копии.</div>
     </div></div>
   </div>
 </div>
-<figcaption>Файловые коллекции в списке источников — по правилу равенства коллекций (<a href="#parity">2.1</a>), и рядом с каждой показан прошлый объём: два гигабайта и два мегабайта требуют разных решений о частоте и месте. Задачи и заметки отдельными строками не выбираются — они лежат в календарных коллекциях, и об этом сказано прямо, а не оставлено на догадку. Способ доставки — не настройка «куда положить файл», а выбор из трёх: на сервер, себе в браузер, и то и другое; у «себе» нет ни папки, ни срока хранения, ни расписания, потому что некому отдавать файл в три часа ночи. Источники выбираются тем же компонентом, что и везде: аккаунт с трёхпозиционным флажком, под ним коллекции с полосками. Ничего нового учить не нужно — это тот же рейл, только развёрнутый в сетку. У каждой строки написано, что это за коллекция и сколько весила в прошлый раз; у файловых это решает исход дела, потому что два гигабайта и два мегабайта требуют разных решений о частоте и месте. Токен внешнего запуска выдаётся <b>на задание</b>, а не на аккаунт: машина, которая запускает рабочую копию по расписанию, не должна уметь запускать личную.</figcaption>
+<figcaption>Файловые коллекции в списке источников — по правилу равенства коллекций (<a href="#parity">2.1</a>), и рядом с каждой показан прошлый объём: два гигабайта и два мегабайта требуют разных решений о частоте и месте. Задачи и заметки отдельными строками не выбираются — они лежат в календарных коллекциях, и об этом сказано прямо, а не оставлено на догадку. Способ доставки — не настройка «куда положить файл», а выбор из трёх: на сервер, себе в браузер, и то и другое; у «себе» нет ни папки, ни срока хранения, ни расписания, потому что некому отдавать файл в три часа ночи. Источники выбираются тем же компонентом, что и везде: аккаунт с трёхпозиционным флажком, под ним коллекции с полосками. Ничего нового учить не нужно — это тот же рейл, только развёрнутый в сетку. У каждой строки написано, что это за коллекция и сколько весила в прошлый раз; у файловых это решает исход дела, потому что два гигабайта и два мегабайта требуют разных решений о частоте и месте. <b>Шифрование архива — флажок, а не данность:</b> по умолчанию включено, но копия на диск, к которому и так никто, кроме вас, не подходит, вполне может лежать открытой — и тогда её распакует любой архиватор, без Carrel. Спецификация (§23.3) требует шифрования безусловно; это макет решения смягчить требование, и §23.3 придётся поправить вместе с ним.<br><br><b>Пароль запуска появляется по нажатию и виден один раз</b> — сразу, не дожидаясь сохранения задания, вместе с готовой строкой <span class="mono">curl</span>: иначе человек сохраняет задание и остаётся с флажком, за которым ничего не видно. Токен выдаётся <b>на задание</b>, а не на аккаунт: машина, которая запускает рабочую копию по расписанию, не должна уметь запускать личную.</figcaption>
 </figure>
 
 <figure style="max-width:760px">
@@ -3919,7 +3980,7 @@ Read  2 min ago</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Вложение названо, но не открывается: ссылка отдаёт одну запись, а файл лежит в другой коллекции и требует своей. Сказать это в строке честнее, чем показать ссылку, которая ответит отказом. Переключатель ширины оставлен и гостю — он не может ничего сломать, а читать длинный текст на широком мониторе ему так же неудобно, как хозяину. Разбор Markdown — то же открытое решение, что и в 7.4: пока рендерера нет, текст показывается как есть.</figcaption>
+  <figcaption>Вложение названо, но не открывается: ссылка отдаёт одну запись, а файл лежит в другой коллекции и требует своей. Сказать это в строке честнее, чем показать ссылку, которая ответит отказом. Переключатель ширины оставлен и гостю — он не может ничего сломать, а читать длинный текст на широком мониторе ему так же неудобно, как хозяину. Разбор Markdown здесь тот же, что в 7.4, и по тем же правилам: сырой HTML внутри чужой заметки не исполняется никогда — гостю отдают текст, а не чужой скрипт.</figcaption>
   </figure>
 
   <figure style="flex:1 1 400px">
@@ -3980,7 +4041,7 @@ Read  2 min ago</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Текст и Markdown показываются телом страницы, а не предлагаются к скачиванию: это единственные типы, которые можно прочесть без программы. Показаны они <b>как есть</b>, в <code>&lt;pre&gt;</code> с экранированием — тот же открытый вопрос про рендерер, что и у заметки (7.4); что бы ни решили, сырой HTML внутри чужого файла на этой странице не исполняется никогда. Ограничение по размеру своё: файл на десять мегабайт текста не выводится, а предлагается скачать.</figcaption>
+  <figcaption>Текст и Markdown показываются телом страницы, а не предлагаются к скачиванию: это единственные типы, которые можно прочесть без программы. Простой текст показывается <b>как есть</b>, в <code>&lt;pre&gt;</code> с экранированием; <code>.md</code> — разобранным, тем же разборщиком, что и заметка (7.4), и с той же выключенной поддержкой сырого HTML: файл чужой, страница публичная, и исполнять из неё нечего. Ограничение по размеру своё: файл на десять мегабайт текста не выводится, а предлагается скачать.</figcaption>
   </figure>
 
   <figure style="flex:1 1 360px">
@@ -4313,6 +4374,7 @@ Read  2 min ago</div>
     <div class="m-shell has-side">
       <div class="m-rail">
         <div class="m-nav">
+          <a><svg><use href="#i-search"/></svg>Search</a>
           <a><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
           <a class="is-on"><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
           <a><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
@@ -4544,12 +4606,12 @@ Read  2 min ago</div></div>
       <div class="m-shell has-side" style="--side:360px;min-height:390px">
         <div class="m-rail">
           <div class="m-nav">
+            <a><svg><use href="#i-search"/></svg>Search</a>
             <a><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
             <a class="is-on"><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
             <a><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
             <a><svg><use href="#i-note"/></svg>Notes<span class="m-num">86</span></a>
             <a><svg><use href="#i-file"/></svg>Files</a>
-            <a><svg><use href="#i-search"/></svg>Search</a>
           </div>
           <div class="m-rail-sec">
             <div class="m-src is-all is-on"><span class="m-box is-part"></span><span class="m-bar3 is-multi"></span><span class="t">All calendars</span><span class="m-meta">14</span></div>
@@ -4665,7 +4727,7 @@ Read  2 min ago</div></div>
             <div class="m-f w-md"><label>Password</label><span class="m-in">••••••••••••</span></div>
             <div class="m-msg is-alert" style="flex:1 1 100%;margin:2px 0 0">The password is the only key to the saved connections. Running locally changes nothing about that: nobody can recover it, including the app on your own computer.</div>
           </div>
-          <div class="m-msg is-alert" style="margin:0">
+          <div class="m-msg is-alert is-row" style="margin:0">
             <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none" style="flex:none;margin-top:1px"><use href="#i-shield"/></svg>
             <span><b>What only works from outside.</b> A local Carrel is not visible from the internet, so <b>published links</b>, <b>devices over davloom</b>, <b>backup started by an external request</b> and <b>invitation links</b> either do not work or need you to arrange the access yourself — an invitation letter will go out, but the address inside it opens on your machine only — port forwarding, a tunnel, your own domain and certificate. Carrel neither guesses nor configures any of that: it marks such places and shows what is not answering.</span>
           </div>
@@ -4882,7 +4944,7 @@ Read  2 min ago</div></div>
   <tr><td><b>6</b></td><td>Формы: многоколоночная раскладка, ширина поля по содержимому, нижняя панель действий</td><td>все шаблоны с формами</td><td>Формы отправляются теми же полями; тесты обработчиков не меняются</td></tr>
   <tr><td><b>7</b></td><td><b>Единый вид внутри разделов.</b> Строка «All …» в рейле, опрос по отмеченным коллекциям, колонка источника, флажки «Tasks due / Notes» в календаре. <code>/app/unified</code> и «Everything» удаляются</td><td><code>agenda.html</code>, <code>contacts.html</code>, <code>tasks.html</code>, <code>notes.html</code>, <code>base.html</code>; <code>unified.html</code> убирается, его <code>findresults</code> переиспользуется</td><td><code>stage5_test.go</code>, <code>stage6_test.go</code>: механика fan-out остаётся, меняются только точки входа. SSE и опрос не затронуты</td></tr>
   <tr><td><b>8</b></td><td>Сквозное: поиск и лента человека на том же рейле со статусами источников</td><td><code>search.html</code>, <code>timeline.html</code>, <code>duplicates.html</code>, <code>base.html</code> (<code>sourcepanel</code>, <code>findprogress</code>)</td><td>Поиск вызывается из шапки с любого экрана</td></tr>
-  <tr><td><b>9</b></td><td><b>Заметка на весь экран:</b> чтение с колонкой связей и вложений, правка с режимом сосредоточения, кнопки разметки, предупреждение о несохранённом</td><td><code>note.html</code>, CSS. Рендеринг Markdown — отдельное решение и отдельная зависимость</td><td>Сохранение остаётся явным: автосохранения на чужой сервер нет. Конфликт по ETag открывает тот же экран, что и раньше</td></tr>
+  <tr><td><b>9</b></td><td><b>Заметка на весь экран:</b> чтение с колонкой связей и вложений, правка с режимом сосредоточения, кнопки разметки, предупреждение о несохранённом</td><td><code>note.html</code>, CSS, <code>internal/model/markdown.go</code> (рендер) + <code>goldmark</code> в <code>go.mod</code> и <code>THIRD_PARTY.md</code></td><td>Сохранение остаётся явным: автосохранения на чужой сервер нет. Конфликт по ETag открывает тот же экран, что и раньше</td></tr>
   <tr><td><b>10</b></td><td><b>Файлы как менеджер.</b> Выделение и групповые операции — интерфейс поверх того, что провайдер уже умеет; затем <code>MOVE</code> (переименование и перемещение), затем перезапись по требованию и миниатюры</td><td><code>files.html</code>, <code>internal/provider/files</code> (метод <code>Move</code>), <code>files.go</code></td><td><code>stage7_test.go</code> и <code>files_integration_test.go</code>: <code>MOVE</code> проверяется против живого сервера — SFTPGo и Nextcloud ведут себя по-разному при перезаписи цели</td></tr>
   <tr><td><b>11</b></td><td>Диалоги: импорт как мастер, слияние, конфликт</td><td><code>*_import.html</code>, <code>duplicate_merge.html</code>, <code>conflict.html</code></td><td>Шаги соответствуют состояниям, которые обработчик уже различает</td></tr>
   <tr><td><b>12</b></td><td>Настройки и администрирование</td><td><code>app.html</code> → <code>settings_*.html</code>, <code>admin*.html</code></td><td><code>admin_test.go</code>, <code>accounts_test.go</code>, <code>register_test.go</code></td></tr>
