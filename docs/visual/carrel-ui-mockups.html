@@ -2789,6 +2789,84 @@ Read  2 min ago</div>
 <figcaption><b>«Show password» стоит и здесь</b> — пароль от чужого сервера человек доверил Carrel, и вернуть его по требованию — прямая обязанность читального зала. Механика <a href="#reveal">общая с экраном нового устройства</a> и описана там один раз: тот же лист, вопрос раз в сеанс, автоскрытие, журнал.<br><br><b>Диагностика перестаёт быть отладочным выводом и становится содержимым экрана.</b> Ровно этим Carrel отличается от клиентов, которые пишут «cannot connect»: видно, какой шаг сломался и что именно ответил сервер. Здесь она стоит у того аккаунта, к которому относится. Коллекции разложены сеткой по 210&nbsp;px — их бывает двенадцать, и в колонку 640&nbsp;px они не помещались.</figcaption>
 </figure>
 
+<div class="frames">
+  <figure style="flex:1 1 430px">
+  <div class="frame">
+    <div class="frame-label"><span>Show password · вопрос</span><span class="plan">не построено</span><i>лист поверх экрана</i></div>
+    <div class="mock">
+      <div class="m-overlay">
+        <div class="m-shell no-rail" style="min-height:280px"><div class="m-main">
+          <div class="m-head" style="padding-bottom:8px">
+            <div><div class="m-h1" style="font-size:19px">Connections</div><div class="m-sub">3 сервера · 12 коллекций · 2 подписки</div></div>
+          </div>
+          <div style="padding:0 20px">
+            <div class="m-card">
+              <div class="m-rubric">nextcloud · home
+                <span style="display:flex;gap:6px"><span class="m-btn is-sm" style="outline:1.5px solid var(--accent);outline-offset:1px">Show password</span><span class="m-btn is-sm">Test</span><span class="m-btn is-sm">Edit</span></span>
+              </div>
+              <div class="mono" style="font-size:11.5px;color:var(--dusty)">https://cloud.example.org/remote.php/dav/ · mix</div>
+            </div>
+            <div class="m-card">
+              <div class="m-rubric">sftpgo · vps <span style="display:flex;gap:6px"><span class="m-btn is-sm">Show password</span><span class="m-btn is-sm">Test</span></span></div>
+              <div class="mono" style="font-size:11.5px;color:var(--dusty)">https://files.example.org/dav/ · mix</div>
+            </div>
+          </div>
+        </div></div>
+        <div class="m-scrim" style="padding-top:26px">
+          <div class="m-sheet" style="width:400px">
+            <div class="h">
+              <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
+              <b style="font-size:13.5px">Show password</b>
+              <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">nextcloud · home</span>
+            </div>
+            <div class="b">
+              <div class="m-f" style="width:100%"><label>Your Carrel password</label><span class="m-in is-focus">••••••••••</span></div>
+              <span style="font-size:11.5px;color:var(--dusty)">Asked once a session. For the next five minutes passwords open without a question.</span>
+            </div>
+            <div class="f"><span class="m-btn is-primary">Show</span><span class="m-kbd">Enter</span><span style="margin-left:auto;display:flex;gap:7px;align-items:center"><span class="m-btn is-quiet">Cancel</span><span class="m-kbd">Esc</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Лист выходит поверх того экрана, с которого нажали, — как быстрая заметка (7.4) и по тем же причинам: список не перерисовывается, и видно, у какого именно аккаунта спрашивают. В шапке листа стоит его имя, чтобы «Show password» с двух карточек подряд нельзя было перепутать. Поле одно, <span class="m-kbd" style="font-family:var(--f-mono)">Enter</span> подтверждает, <span class="m-kbd" style="font-family:var(--f-mono)">Esc</span> закрывает.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 430px">
+  <div class="frame">
+    <div class="frame-label"><span>Show password · показано</span><span class="plan">не построено</span><i>после подтверждения</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail" style="min-height:280px"><div class="m-main">
+        <div class="m-head" style="padding-bottom:8px">
+          <div><div class="m-h1" style="font-size:19px">Connections</div><div class="m-sub">3 сервера · 12 коллекций · 2 подписки</div></div>
+        </div>
+        <div style="padding:0 20px">
+          <div class="m-card" style="border-color:var(--accent)">
+            <div class="m-rubric">nextcloud · home
+              <span style="display:flex;gap:6px"><span class="m-btn is-sm">Test</span><span class="m-btn is-sm">Edit</span></span>
+            </div>
+            <div class="mono" style="font-size:11.5px;color:var(--dusty);margin-bottom:9px">https://cloud.example.org/remote.php/dav/</div>
+            <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+              <div class="m-f" style="flex:0 0 150px"><label>User name</label><span class="m-in is-mono">mix</span></div>
+              <div class="m-f" style="flex:1 1 220px"><label>Password</label><span class="m-in is-mono">z3-brick-lamp-9f2</span></div>
+              <span class="m-btn is-sm">Copy</span>
+              <span class="m-btn is-sm is-quiet">Hide</span>
+              <span class="mono" style="font-size:10.5px;color:var(--alert);align-self:center">0:24</span>
+            </div>
+          </div>
+          <div class="m-card">
+            <div class="m-rubric">sftpgo · vps <span style="display:flex;gap:6px"><span class="m-btn is-sm">Show password</span><span class="m-btn is-sm">Test</span></span></div>
+            <div class="mono" style="font-size:11.5px;color:var(--dusty)">https://files.example.org/dav/ · mix</div>
+          </div>
+        </div>
+        <div class="m-msg">Second server opens without a question for the next five minutes.</div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Пароль появляется в самой карточке, рядом с логином, а не в отдельном окне: то, что человек пришёл узнать, стоит там же, где всё остальное про этот сервер. Счётчик показывает, сколько ещё видно; «Hide» убирает раньше. У второй карточки кнопка осталась — но нажатие на неё вопроса уже не вызовет, и об этом сказано строкой под списком, а не выясняется опытным путём.</figcaption>
+  </figure>
+</div>
+
 <h3 id="subscribe">Подписка на чужую коллекцию</h3>
 <p>Подписки живут здесь же, среди подключений, а не среди выданных ссылок: для человека это ещё один источник, откуда приходят записи. Отличий от аккаунта DAV три, и все три видны на экране — у ленты нет учётной записи (обычно), нет цвета и нет записи: она только читается.</p>
 
