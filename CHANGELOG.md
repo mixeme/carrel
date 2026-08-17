@@ -48,6 +48,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Manual acceptance lists only what is still open.** Closed container, log and mail checks are gone from [docs/manual-acceptance.md](docs/manual-acceptance.md); P1, P2 and P5 still block the tag.
+
 - **Manual acceptance recorded a live mail pass.** The remaining SMTP items — a successful test message with the full diagnostic, the mandatory escrow-recovery notice, and an invitation by email — were run in Docker against SelfPost as the relay and confirmed in a real mailbox. P1, P2 and P5 are still open. The checklist is [docs/manual-acceptance.md](docs/manual-acceptance.md).
 
 - **The external backup trigger hands over the finished command, not the password (§23.3).** Whoever turns it on came for a copy taken at three in the morning, which means a line in `crontab` on the machine that holds the schedule; the password is already inside that line, and assembling the call from documentation is work that can be done for them. The password moved to a disclosure below, where it matters to the minority writing the request by hand — and is worth showing properly there, with the other endpoints and the bounds of what it opens. The line is one line and stays one: `cron` understands no continuations, and the time lives inside it rather than in a second place on the screen.
