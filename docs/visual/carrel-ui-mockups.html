@@ -130,6 +130,11 @@ figcaption b{color:var(--ink);font-weight:600}
   height:26px;padding:0 14px 0 12px;font-size:13px}
 .m-src .m-box{width:11px;height:11px;border-radius:2px;background:var(--ink)}
 .m-src .m-box.is-off{background:transparent;border:.5px solid var(--card-border)}
+/* Полоска коллекции знает свой размер сама. Раньше его задавали только
+   .m-src и .m-row, и в шапках, именах и метках полоска молча схлопывалась
+   в ноль ширины — та же ошибка, что была с высотой строки: размер знала
+   разметка, а не система. */
+.m-bar3{display:inline-block;vertical-align:middle;width:3px;height:14px;border-radius:1px;flex:none}
 .m-src .m-bar3{width:3px;height:14px;border-radius:1px}
 .m-src span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .m-src .m-meta{font-size:11px;color:var(--dusty);font-family:var(--f-mono)}
@@ -5046,7 +5051,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
           </div>
           <div class="m-group"><span class="m-rubric">Г</span><span class="m-num">4</span></div>
           <div class="m-list">
-            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-av">ГМ</span><span class="t is-strong">Галина Мещерякова</span><span class="s mono">+7 962 114-90-23</span><span class="s">g.meshcheryakova@example.org</span><span class="s">—</span><span class="d">nextcloud · Личный</span></div>
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-av">ГМ</span><span class="t is-strong">Галина Мещерякова</span><span class="s mono">+7 962 114-90-23</span><span class="s">g.mescher@example.org</span><span class="s">—</span><span class="d">nextcloud · Личный</span></div>
             <div class="m-row m-row--contact"><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-av">ГС</span><span class="t is-strong">Геннадий Соловьёв</span><span class="s mono">+7 911 605-37-84</span><span class="s">g.solovyov@example.org</span><span class="s">Проектное бюро</span><span class="d">nextcloud · Работа</span></div>
             <div class="m-row m-row--contact"><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-av is-photo"></span><span class="t is-strong">Глеб Тарасов</span><span class="s mono">+7 985 229-46-12</span><span class="s">g.tarasov@example.org</span><span class="s">—</span><span class="d">radicale · Команда</span></div>
             <div class="m-row m-row--contact"><span class="m-bar3" style="background:#8C6239"></span><span class="m-av">ГФ</span><span class="t is-strong">Григорий Фомин</span><span class="s mono">+7 917 783-51-60</span><span class="s">g.fomin@example.org</span><span class="s">СМУ-14</span><span class="d">baikal · Офис</span></div>
@@ -5144,12 +5149,13 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
             <span style="color:var(--muted)">бел</span>
           </span></div>
         <div class="m-menu" style="width:100%;margin-top:3px">
-          <div class="is-on"><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-two"><span>Артём Белов</span><span style="font-size:11px;color:var(--dusty)" class="mono">a.belov@example.org</span></span><span class="m-tag" style="margin-left:auto">work</span></div>
-          <div><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-two"><span>Артём Белов</span><span style="font-size:11px;color:var(--dusty)" class="mono">belov@personal.example</span></span><span class="m-tag" style="margin-left:auto">home</span></div>
-          <div><span class="m-bar3" style="background:#4A6B52"></span><span class="m-two"><span>Белла Янковская</span><span style="font-size:11px;color:var(--dusty)" class="mono">b.yankovskaya@example.org</span></span></div>
+          <div class="is-on"><span class="m-bar3" style="background:#6B4E7A"></span>Артём Белов<span class="mono" style="font-size:11px;color:var(--dusty)">a.belov@example.org</span><span class="m-tag" style="margin-left:auto">work</span></div>
+          <div><span class="m-bar3" style="background:#6B4E7A"></span>Артём Белов<span class="mono" style="font-size:11px;color:var(--dusty)">belov@personal.example</span><span class="m-tag" style="margin-left:auto">home</span></div>
+          <div><span class="m-bar3" style="background:#4A6B52"></span>Белла Янковская<span class="mono" style="font-size:11px;color:var(--dusty)">b.yankovskaya@example.org</span></div>
           <span class="sep"></span>
           <div style="color:var(--muted)"><svg><use href="#i-mail"/></svg>Use «бел» as typed</div>
-          <div style="height:auto;padding:4px 8px 2px;font-size:11px;color:var(--dusty);line-height:1.45;display:block">Searched 4 of 5 address books · <span style="color:var(--alert)">baikal · Офис did not answer</span></div>
+          <span class="sep"></span>
+          <div style="height:24px;font-size:11px;color:var(--dusty);gap:5px">Searched 4 of 5 address books ·<span style="color:var(--alert)">baikal · Офис did not answer</span></div>
         </div>
       </div>
     </div>
@@ -5197,6 +5203,104 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   <figcaption><b>«Sent as» — не украшение формы, а единственное место, где это ещё можно узнать.</b> Отправитель здесь не выбирается: форму адреса решил администратор, почту для ответов человек задал в учётной записи. Но узнать, с какого адреса ушло письмо, <b>после</b> отправки нельзя ниоткуда — копии себе Carrel не кладёт, — а получатель увидит адрес, которого отправитель может и не помнить у себя. Поэтому строка стоит до кнопки, а не в подсказке под ней, и ведёт туда, где это меняется. Если подтверждённой почты в профиле нет, вторая строка говорит не «Reply-To пуст», а что ответить будет нельзя и письмо об этом скажет.<br><br><b>Письмо не заменяет кнопку «Copy».</b> Она стоит рядом в подвале, потому что мессенджер по-прежнему быстрее почты, а SMTP может быть не настроен вовсе — тогда исчезает эта форма, а не способ поделиться. Три строки в середине — не реклама функции, а три вещи, которые люди путают: письмо не несёт содержимого, отзыв ссылки действует и на уже отправленное, срок у письма не свой, а ссылкин.</figcaption>
   </figure>
 </div>
+
+<h3>Выбор того, что вкладывают</h3>
+<p>Системного диалога здесь быть не может: вкладывают не файл с диска, а запись из коллекции, о которой операционная система ничего не знает. Значит, это ещё один экран Carrel, и собран он из того же, из чего собраны разделы, — источники слева, список справа, поиск сверху. Ниже два из восьми: заметка, потому что на ней решается вопрос формата, и файл, потому что на нём видно, как вложение превращается в ссылку.</p>
+
+<figure>
+<div class="frame" style="max-width:900px">
+  <div class="frame-label"><span>Выбрать заметку</span><span class="plan">не построено</span><i>Attach → Note…</i></div>
+  <div class="mock" style="padding:16px;background:var(--bg)">
+    <div class="m-sheet" style="width:100%;max-width:100%">
+      <div class="h">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#i-note"/></svg>
+        <b style="font-size:13.5px">Attach a note</b>
+        <span class="m-in" style="width:210px;font-size:12px;margin-left:auto"><svg width="12" height="12" viewBox="0 0 24 24" stroke="var(--dusty)" stroke-width="1.5" fill="none"><use href="#i-search"/></svg>подряд</span>
+        <span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span>
+      </div>
+      <div class="b" style="padding:0">
+        <div style="display:flex;min-height:210px">
+          <div style="width:212px;border-right:.5px solid var(--hair);padding:9px 0">
+            <div class="m-rail-sec">
+              <div class="m-src is-all is-on"><span class="m-box is-part"></span><span class="m-bar3 is-multi"></span><span class="t">All notebooks</span><span class="m-meta">86</span></div>
+            </div>
+            <div class="m-rail-sec">
+              <div class="m-rubric">nextcloud · home</div>
+              <div class="m-src"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Записи</span><span class="m-meta">61</span></div>
+              <div class="m-src"><span class="m-box"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">Рабочее</span><span class="m-meta">25</span></div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:0;padding:9px 0">
+            <div class="m-group"><span class="m-rubric">Найдено</span><span class="m-num">3</span></div>
+            <div class="m-list">
+              <div class="m-row m-row--note is-on" style="grid-template-columns:3px minmax(0,1fr) 62px 148px"><span class="m-bar3" style="background:#3F6E8C"></span><span class="t is-strong">Встреча с подрядчиком, итоги</span><span class="mono">18 Aug</span><span class="d">nextcloud · Рабочее</span></div>
+              <div class="m-row m-row--note" style="grid-template-columns:3px minmax(0,1fr) 62px 148px"><span class="m-bar3" style="background:#3F6E8C"></span><span class="t is-strong">Подрядчики: кого смотрели</span><span class="mono">02 Aug</span><span class="d">nextcloud · Рабочее</span></div>
+              <div class="m-row m-row--note" style="grid-template-columns:3px minmax(0,1fr) 62px 148px"><span class="m-bar3" style="background:#4A6B52"></span><span class="t is-strong">Ремонт: что осталось</span><span class="mono">27 Jul</span><span class="d">nextcloud · Записи</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="m-sec" style="margin:0">
+          <div class="m-f" style="width:100%"><label>Send it as</label>
+            <span class="m-seg" style="align-self:flex-start"><span class="is-on">Markdown · .md</span><span>Source · .ics</span></span>
+            <span class="m-hint">Markdown is what a person opens and reads; it carries the text and links to attachments, not the foreign properties another client wrote. The source <span class="mono">.ics</span> is the faithful copy and needs a client that reads VJOURNAL — jtx Board, Evolution.</span></div>
+        </div>
+      </div>
+      <div class="f">
+        <span class="m-btn is-primary">Attach</span>
+        <span style="font-size:11.5px;color:var(--dusty)">1 note · <span class="mono">.md</span> · 4 KB · goes as a file</span>
+        <span style="margin-left:auto"><span class="m-btn is-quiet">Cancel</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Тот же рейл источников и тот же список, что в разделе заметок</b> — не потому, что лень рисовать другое, а потому, что искать здесь будут ровно так же, как ищут всегда: сначала «в какой тетради», потом глазами по списку. Новый способ выбора означал бы, что человек учит второй интерфейс ради одного действия.<br><br><b>Формат заметки — единственное место во всём разделе, где вопрос настоящий.</b> У контакта он один — <code>.vcf</code>, у события — <code>.ics</code>; заметка же существует в двух видах сразу, потому что Carrel даёт ей Markdown-представление, которого нет больше ни у кого. Отсюда выбор из двух, и подпись под ним говорит не «форматы разные», а что каждый теряет: Markdown читает человек, но чужие <code>X-</code>свойства в него не попадают; исходный <code>.ics</code> несёт всё, но открывается только клиентом, понимающим VJOURNAL. По умолчанию — Markdown: письмо идёт человеку, а не его календарю.<br><br><b>Строка у кнопки — та же, что потом окажется в списке вложений:</b> что выбрано, чем уйдёт, сколько весит и файлом это будет или ссылкой. Она стоит здесь, чтобы решение «ссылкой» не оказалось новостью на следующем экране.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" style="max-width:900px">
+  <div class="frame-label"><span>Выбрать файл</span><span class="plan">не построено</span><i>Attach → File…</i></div>
+  <div class="mock" style="padding:16px;background:var(--bg)">
+    <div class="m-sheet" style="width:100%;max-width:100%">
+      <div class="h">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#i-doc"/></svg>
+        <b style="font-size:13.5px">Attach a file</b>
+        <nav class="m-crumbs" style="margin-left:10px"><a>Documents</a>/<a>Стройка</a>/<b>Подряд</b></nav>
+        <span class="m-btn is-sm is-quiet" style="margin-left:auto"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span>
+      </div>
+      <div class="b" style="padding:0">
+        <div style="display:flex;min-height:196px">
+          <div style="width:212px;border-right:.5px solid var(--hair);padding:9px 0">
+            <div class="m-tree" style="padding:0 8px">
+              <div><svg><use href="#i-server"/></svg>sftpgo · vps</div>
+              <div style="padding-left:22px"><svg><use href="#i-file"/></svg>Documents</div>
+              <div style="padding-left:36px"><svg><use href="#i-file"/></svg>Стройка</div>
+              <div class="is-on" style="padding-left:50px"><svg><use href="#i-file"/></svg>Подряд</div>
+              <div style="padding-left:36px"><svg><use href="#i-file"/></svg>Личное</div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:0;padding:9px 0">
+            <table class="m-table">
+              <thead><tr><th>Name</th><th style="width:88px">Size</th><th style="width:110px">Changed</th><th style="width:132px"></th></tr></thead>
+              <tbody>
+                <tr class="is-on"><td><span class="m-fname"><svg><use href="#i-doc"/></svg><span>смета-подрядчик.pdf</span></span></td><td class="mono">4.2 MB</td><td class="mono">12 Aug</td><td><span class="m-tag is-on">over 2 MB · as a link</span></td></tr>
+                <tr><td><span class="m-fname"><svg><use href="#i-doc"/></svg><span>договор-подряда.pdf</span></span></td><td class="mono">840 KB</td><td class="mono">09 Aug</td><td><span class="m-tag">as a file</span></td></tr>
+                <tr><td><span class="m-fname"><svg><use href="#i-img"/></svg><span>объект-фасад.jpg</span></span></td><td class="mono">1.6 MB</td><td class="mono">09 Aug</td><td><span class="m-tag">as a file</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="m-msg is-accent" style="margin:0 14px 12px">Attaching this one publishes a secret link for it (§23.4) and puts the link in the letter. The link appears in <b>Published links</b>, lives 30 days and can be revoked — which also closes it for whoever got the letter.</div>
+      </div>
+      <div class="f">
+        <span class="m-btn is-primary">Attach</span>
+        <span style="font-size:11.5px;color:var(--dusty)">смета-подрядчик.pdf · 4.2 MB · goes as a link</span>
+        <span style="margin-left:auto"><span class="m-btn is-quiet">Cancel</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Колонка справа отвечает на вопрос до того, как его зададут.</b> «Файлом» или «ссылкой» видно у каждой строки, ещё до выбора, — так человек выбирает не вслепую и может взять договор вместо сметы, если ссылка ему не годится. Потолок назван прямо в метке («over 2 MB»), иначе одна строка «ссылкой», а соседняя «файлом» выглядят произволом.<br><br><b>Вложение ссылкой — это выдача публичной ссылки, и сказать об этом надо здесь.</b> Человек нажимает «Attach» на файле, а получает побочным действием запись в списке публикаций со своим сроком жизни и своим отзывом. Промолчать значит завести ссылки, о которых владелец не знает; поэтому сообщение стоит над кнопкой, а не в подсказке где-то ниже.<br><br>Дерево слева — то же, что у «Move…» в файлах и у выбора папки в резервной копии (<a href="#s-backup">7.15</a>). Третьего дерева не заводится.</figcaption>
+</figure>
 
 <h3>Что приходит получателю</h3>
 <p>Единственный экран раздела, который Carrel не рисует, — и именно поэтому его стоит нарисовать: две настройки, о которых спорить дешевле здесь, чем в почтовом клиенте получателя.</p>
