@@ -540,12 +540,13 @@ figcaption b{color:var(--ink);font-weight:600}
     <a href="#rest"><b>7.13</b><span>Остальные экраны и полнота</span></a>
   </section>
   <section>
-    <div class="t-h">Экраны: запланированное<i>7.14–7.18</i></div>
+    <div class="t-h">Экраны: запланированное<i>7.14–7.19</i></div>
     <a href="#s-plan"><b>7.14</b><span>Новое устройство</span></a>
     <a href="#s-backup"><b>7.15</b><span>Резервная копия и восстановление</span></a>
     <a href="#s-publish"><b>7.16</b><span>Публикация по ссылке</span></a>
-    <a href="#s-davloom"><b>7.17</b><span>davloom — режим прокси</span></a>
-    <a href="#s-plan-small"><b>7.18</b><span>Мелкое запланированное</span></a>
+    <a href="#s-mail"><b>7.17</b><span>Отправка почтой</span></a>
+    <a href="#s-davloom"><b>7.18</b><span>davloom — режим прокси</span></a>
+    <a href="#s-plan-small"><b>7.19</b><span>Мелкое запланированное</span></a>
   </section>
   <section>
     <div class="t-h">Режимы и среды<i>8–12</i></div>
@@ -599,6 +600,7 @@ figcaption b{color:var(--ink);font-weight:600}
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.3l3 1.7"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10.5 13.5a4 4 0 0 0 5.7 0l2.3-2.3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M13.5 10.5a4 4 0 0 0-5.7 0l-2.3 2.3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.6 7l8.4 6 8.4-6"/></symbol>
   <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M5 17l4.5-4.5 3 3L16 12l3 3"/></symbol>
   <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/></symbol>
   <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 4h4M6.5 7l1 13h9l1-13"/></symbol>
@@ -674,7 +676,8 @@ figcaption b{color:var(--ink);font-weight:600}
   <tr><td>Импорт и экспорт</td><td><code>.ics</code></td><td><code>.ics</code></td><td><code>.md</code></td><td><code>.vcf</code></td><td>загрузка и скачивание</td><td>7.9, 7.5</td></tr>
   <tr><td>Публикация по ссылке</td><td>делаем</td><td>внутри календаря</td><td>делаем</td><td>делаем</td><td>делаем: файл и папка</td><td>7.16</td></tr>
   <tr><td>Резервная копия</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: файлы копируются как файлы</td><td>7.15</td></tr>
-  <tr><td>davloom — прокси</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: WebDAV проксируется проще всего — там нет синтетики, только префикс</td><td>7.17</td></tr>
+  <tr><td>davloom — прокси</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: WebDAV проксируется проще всего — там нет синтетики, только префикс</td><td>7.18</td></tr>
+  <tr><td>Отправить почтой</td><td>делаем</td><td>делаем</td><td>делаем</td><td>делаем: карточка и книга целиком</td><td>делаем: файл вложением до потолка, папка ссылкой</td><td>7.17</td></tr>
   <tr><td>Новое устройство</td><td>профиль Apple, QR</td><td>внутри календаря</td><td>внутри календаря</td><td>профиль Apple, QR</td><td><b>делаем:</b> адрес для файлового клиента строкой в списке; в профиль Apple WebDAV не кладут</td><td>7.14</td></tr>
   <tr><td>Разрешение конфликтов по ETag</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>есть: загрузка не перезаписывает</td><td>7.8, 7.5</td></tr>
 </table>
@@ -682,11 +685,11 @@ figcaption b{color:var(--ink);font-weight:600}
 <table class="doc">
   <tr><th style="width:16%">Слово</th><th style="width:20%">Код</th><th style="width:20%">Макет</th><th>Что это значит на деле</th></tr>
   <tr><td><b>есть</b></td><td>работает сегодня</td><td>есть, в разделах 7.1–7.13</td><td>Редизайн меняет вид, а не поведение</td></tr>
-  <tr><td><b>делаем</b></td><td>нет</td><td>есть, в разделах 7.14–7.18</td><td><b>Да: экран нарисован, кода нет.</b> Нарисован затем, чтобы функцию не начали проектировать заново и чтобы стало видно, что каркас её выдерживает</td></tr>
-  <tr><td><b>позже</b></td><td>нет или только модель</td><td>нет</td><td>Решено отложить. Строка обязана сказать, где это записано, — в 7.18 или в шаге раздела 13; иначе «позже» означает «забыли»</td></tr>
+  <tr><td><b>делаем</b></td><td>нет</td><td>есть, в разделах 7.14–7.19</td><td><b>Да: экран нарисован, кода нет.</b> Нарисован затем, чтобы функцию не начали проектировать заново и чтобы стало видно, что каркас её выдерживает</td></tr>
+  <tr><td><b>позже</b></td><td>нет или только модель</td><td>нет</td><td>Решено отложить. Строка обязана сказать, где это записано, — в 7.19 или в шаге раздела 13; иначе «позже» означает «забыли»</td></tr>
   <tr><td><b>неприменимо</b></td><td>—</td><td>—</td><td>И не будет. Причина обязательна: через полгода никто не вспомнит, был это выбор или недосмотр</td></tr>
 </table>
-<div class="note"><b>Строк «позже» в таблице не осталось.</b> Пять клеток, которые их держали — печать папки, поиск по именам файлов, вложения у задачи, дубликаты задач и заметок, адрес для файлового клиента, — это были не решения, а необработанные места: каждое требовало не столько кода, сколько ответа на вопрос «как это выглядит». Ответы нарисованы, и клетки стали «делаем».<br><br>Слово «делаем» — обещание интерфейса, а не кода. Ни один макет из 7.14–7.18 не означает, что функция близка; он означает, что когда до неё дойдут руки, спорить о том, как она выглядит, уже не придётся.</div>
+<div class="note"><b>Строк «позже» в таблице не осталось.</b> Пять клеток, которые их держали — печать папки, поиск по именам файлов, вложения у задачи, дубликаты задач и заметок, адрес для файлового клиента, — это были не решения, а необработанные места: каждое требовало не столько кода, сколько ответа на вопрос «как это выглядит». Ответы нарисованы, и клетки стали «делаем».<br><br>Слово «делаем» — обещание интерфейса, а не кода. Ни один макет из 7.14–7.19 не означает, что функция близка; он означает, что когда до неё дойдут руки, спорить о том, как она выглядит, уже не придётся.</div>
 
 <h2 id="width">3. Ширина: главное решение</h2>
 <p>Правило простое: <b>рабочая поверхность занимает всё, что есть</b> — списки, таблицы, редактор, поля в нём. Ограничение остаётся там, где оно не спорит с работой: у служебного текста, который читают один раз, и у полей, чьё значение короче поля, — дата, время, порт, процент. Всё остальное растёт вместе с окном; там, где ширина всё-таки может мешать чтению, стоит переключатель, а не запрет.</p>
@@ -2116,10 +2119,12 @@ Read  2 min ago</div>
         <span class="sep"></span>
         <div><svg><use href="#i-up"/></svg>Upload file…</div>
         <div><svg><use href="#i-file"/></svg>New folder…</div>
+        <span class="sep"></span>
+        <div><svg><use href="#i-mail"/></svg>Letter…</div>
       </div>
     </div>
   </div>
-  <figcaption>Основное нажатие делает заметку — самое частое действие и то, ради чего к Carrel возвращаются. Остальное под стрелкой, в том же порядке, что разделы в рейле.</figcaption>
+  <figcaption>Основное нажатие делает заметку — самое частое действие и то, ради чего к Carrel возвращаются. Остальное под стрелкой, в том же порядке, что разделы в рейле.<br><br><b>Письмо (<a href="#s-mail">7.17</a>) встало сюда же, последней группой.</b> Своей кнопки в панели оно не получает: отправка — не шестой раздел и не то, ради чего сюда заходят, а место у стрелки описано ровно как «всё остальное, что можно создать». Письмо — единственный пункт этого меню, который ничего не создаёт в коллекции, поэтому оно отделено чертой, а не подставлено в общий список; порядок «разделы, файлы, письмо» читается от частого к редкому.</figcaption>
   </figure>
 
   <div style="flex:1 1 420px">
@@ -4004,7 +4009,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
   <tr><td>—</td><td>§23.8: состояние синхронизации у коллекции, исходный часовой пояс у события</td><td>7.10, 7.2 <span class="m-badge is-plan">план</span></td></tr>
   <tr><td><code>about</code></td><td>Версия, сборка, лицензия</td><td>7.13</td></tr>
   <tr><td><code>unified</code></td><td>«Everything»</td><td>удаляется: единый вид внутри разделов, 7.1–7.5</td></tr>
-  <tr><td>—</td><td>Новое устройство, резервная копия, публикация, davloom</td><td>7.14–7.18 <span class="m-badge is-plan">план</span></td></tr>
+  <tr><td>—</td><td>Новое устройство, резервная копия, публикация, письмо, davloom</td><td>7.14–7.19 <span class="m-badge is-plan">план</span></td></tr>
   <tr><td>—</td><td>Состояния, тёмная тема, узкий экран, печать, приложение</td><td>8–12</td></tr>
 </table>
 <div class="note">Из шаблонов без своего макета остались только фрагменты, которые htmx вставляет внутрь уже нарисованных экранов. Если появится новый шаблон, строку сюда добавляют вместе с ним — иначе через полгода никто не вспомнит, рисовали его или нет.</div>
@@ -4984,7 +4989,299 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   <tr><td>Папка</td><td>Листинг со значком типа; файл открывается своей страницей</td><td>Адрес <span class="mono">/dav/</span> — подключается как диск, только чтение</td><td>Включать ли вложенные папки (по умолчанию нет)</td></tr>
 </table>
 <p>Общее для всех пяти: токен не меньше 32 случайных байт и хранится дайджестом, отзыв в одно нажатие, свой лимит запросов, <code>Cache-Control: private</code> и <code>X-Robots-Tag: noindex</code>, ничего не сохраняется на диск и ничего не кэшируется. Одна ссылка — один объект, одна коллекция или одна внешняя лента; аккаунт целиком не публикуется никогда.</p>
-<h2 id="s-davloom">7.17 davloom — режим прокси <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.2</span></h2>
+<h2 id="s-mail">7.17 Отправка почтой <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.5</span></h2>
+<p>Публикация выдаёт ссылку и на этом останавливается: дальше человек несёт её в мессенджер руками. SMTP в Carrel работает с самого начала — не хватало разрешения отправить им что-нибудь, кроме токена. Две вещи, и вторая без первой не строится: ссылка письмом, затем письмо с вложениями, где ссылка остаётся штатным исходом для всего крупного.</p>
+
+<figure>
+<div class="frame">
+  <div class="frame-label"><span>Письмо поверх текущего экрана</span><span class="plan">не построено</span><i>стрелка у New note → Letter…</i></div>
+  <div class="mock">
+    <div class="m-top">
+      <div class="m-brand"><svg class="m-logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg></div>
+      <div class="m-search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg>Search everything…</div>
+      <div class="m-top-right">
+        <span class="m-btn is-primary" style="outline:1.5px solid var(--accent);outline-offset:1px"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></span>
+        <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</span>
+        <span class="m-user">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></span>
+      </div>
+    </div>
+    <div class="m-overlay">
+      <div class="m-shell">
+        <div class="m-rail">
+          <div class="m-nav">
+            <a><svg><use href="#i-search"/></svg>Search</a>
+            <a class="is-on"><svg><use href="#i-con"/></svg>Contacts<span class="m-num">312</span></a>
+            <a><svg><use href="#i-cal"/></svg>Calendar<span class="m-num">14</span></a>
+            <a><svg><use href="#i-task"/></svg>Tasks<span class="m-num is-alert">3</span></a>
+            <a><svg><use href="#i-note"/></svg>Notes<span class="m-num">86</span></a>
+            <a><svg><use href="#i-file"/></svg>Files</a>
+          </div>
+          <div class="m-rail-sec">
+            <div class="m-rubric">nextcloud · home</div>
+            <div class="m-src"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Личный</span><span class="m-meta">128</span></div>
+            <div class="m-src"><span class="m-box"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">Работа</span><span class="m-meta">41</span></div>
+          </div>
+        </div>
+        <div class="m-main">
+          <div class="m-head">
+            <div><div class="m-h1">Контакты</div><div class="m-sub">312 записей · 2 отмечено</div></div>
+          </div>
+          <div class="m-group"><span class="m-rubric">А</span><span class="m-num">4</span></div>
+          <div class="m-list">
+            <div class="m-row m-row--contact is-on"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-av">АК</span><span class="t is-strong">Анна Ковалёва</span><span class="s mono">+7 912 445-10-88</span><span class="s">a.kovaleva@example.org</span><span class="s">Издательство «Слово»</span><span class="d">nextcloud · Личный</span></div>
+            <div class="m-row m-row--contact is-on"><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-av is-photo"></span><span class="t is-strong">Артём Белов</span><span class="s mono">+7 903 118-22-04</span><span class="s">a.belov@example.org</span><span class="s">—</span><span class="d">radicale · Команда</span></div>
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-av">АГ</span><span class="t is-strong">Алексей Гринёв</span><span class="s mono">+7 921 330-07-19</span><span class="s">a.grinev@example.org</span><span class="s">—</span><span class="d">nextcloud · Личный</span></div>
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-av">АЛ</span><span class="t is-strong">Антонина Лебедева</span><span class="s mono">+7 916 204-55-31</span><span class="s">a.lebedeva@example.org</span><span class="s">Проектное бюро</span><span class="d">nextcloud · Работа</span></div>
+          </div>
+          <div class="m-group"><span class="m-rubric">Б</span><span class="m-num">3</span></div>
+          <div class="m-list">
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-av">БК</span><span class="t is-strong">Борис Кузьмин</span><span class="s mono">+7 905 771-42-08</span><span class="s">b.kuzmin@example.org</span><span class="s">—</span><span class="d">nextcloud · Личный</span></div>
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-av is-photo"></span><span class="t is-strong">Богдан Ремизов</span><span class="s mono">+7 999 018-63-77</span><span class="s">b.remizov@example.org</span><span class="s">СМУ-14</span><span class="d">nextcloud · Работа</span></div>
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-av">БЯ</span><span class="t is-strong">Белла Янковская</span><span class="s mono">+7 926 887-11-40</span><span class="s">b.yankovskaya@example.org</span><span class="s">—</span><span class="d">radicale · Команда</span></div>
+          </div>
+          <div class="m-group"><span class="m-rubric">В</span><span class="m-num">2</span></div>
+          <div class="m-list">
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-av">ВД</span><span class="t is-strong">Вера Дорошенко</span><span class="s mono">+7 903 552-19-06</span><span class="s">v.doroshenko@example.org</span><span class="s">—</span><span class="d">nextcloud · Личный</span></div>
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#8C6239"></span><span class="m-av">ВП</span><span class="t is-strong">Виктор Панов</span><span class="s mono">+7 910 443-28-15</span><span class="s">v.panov@example.org</span><span class="s">Смета-Сервис</span><span class="d">baikal · Офис</span></div>
+          </div>
+          <div class="m-group"><span class="m-rubric">Г</span><span class="m-num">4</span></div>
+          <div class="m-list">
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#4A6B52"></span><span class="m-av">ГМ</span><span class="t is-strong">Галина Мещерякова</span><span class="s mono">+7 962 114-90-23</span><span class="s">g.meshcheryakova@example.org</span><span class="s">—</span><span class="d">nextcloud · Личный</span></div>
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-av">ГС</span><span class="t is-strong">Геннадий Соловьёв</span><span class="s mono">+7 911 605-37-84</span><span class="s">g.solovyov@example.org</span><span class="s">Проектное бюро</span><span class="d">nextcloud · Работа</span></div>
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-av is-photo"></span><span class="t is-strong">Глеб Тарасов</span><span class="s mono">+7 985 229-46-12</span><span class="s">g.tarasov@example.org</span><span class="s">—</span><span class="d">radicale · Команда</span></div>
+            <div class="m-row m-row--contact"><span class="m-bar3" style="background:#8C6239"></span><span class="m-av">ГФ</span><span class="t is-strong">Григорий Фомин</span><span class="s mono">+7 917 783-51-60</span><span class="s">g.fomin@example.org</span><span class="s">СМУ-14</span><span class="d">baikal · Офис</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="m-scrim">
+        <div class="m-sheet" style="width:680px">
+          <div class="h">
+            <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#i-mail"/></svg>
+            <b style="font-size:13.5px">Letter</b>
+            <span class="m-tag is-on" style="margin-left:auto">from mix@carrel.example</span>
+            <span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span>
+          </div>
+          <div class="b">
+            <div class="m-f" style="width:100%"><label>To</label>
+              <span class="m-in is-focus">a.kovaleva@example.org, a.belov@example.org</span>
+              <span class="m-hint">2 of 10 recipients. Everyone sees the whole list.</span></div>
+            <div class="m-f" style="width:100%"><label>Subject</label><span class="m-in">Контакты подрядчика и смета</span></div>
+            <span class="m-in is-area" style="min-height:82px;font-size:13.5px;line-height:1.6">Анна, Артём — вот карточка подрядчика и смета, которую он прислал. Договор в папке, ссылка ниже.</span>
+            <div class="m-sec" style="padding:11px 0 0;margin:0">
+              <div class="m-rubric" style="display:flex;align-items:center;gap:8px">Attached<span class="m-num">4</span>
+                <span style="margin-left:auto;display:flex;gap:6px"><span class="m-btn is-sm">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></span></span></div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+                <div style="display:flex;align-items:center;gap:9px;font-size:12.5px">
+                  <span class="m-fname" style="flex:1"><svg><use href="#i-con"/></svg><span>Пётр Смирнов · подрядчик</span></span>
+                  <span class="mono" style="color:var(--dusty);font-size:11px">.vcf · 3 KB</span>
+                  <span class="m-tag">attached</span>
+                  <span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
+                <div style="display:flex;align-items:center;gap:9px;font-size:12.5px">
+                  <span class="m-fname" style="flex:1"><svg><use href="#i-cal"/></svg><span>Встреча на объекте · 18 August 10:00</span></span>
+                  <span class="mono" style="color:var(--dusty);font-size:11px">.ics · 2 KB</span>
+                  <span class="m-tag">attached</span>
+                  <span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
+                <div style="display:flex;align-items:center;gap:9px;font-size:12.5px">
+                  <span class="m-fname" style="flex:1"><svg><use href="#i-doc"/></svg><span>смета-подрядчик.pdf</span></span>
+                  <span class="mono" style="color:var(--dusty);font-size:11px">4.2 MB</span>
+                  <span class="m-tag is-on">as a link</span>
+                  <span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
+                <div style="display:flex;align-items:center;gap:9px;font-size:12.5px">
+                  <span class="m-fname" style="flex:1"><svg><use href="#i-file"/></svg><span>Договор подряда · 9 файлов</span></span>
+                  <span class="mono" style="color:var(--dusty);font-size:11px">folder</span>
+                  <span class="m-tag is-on">as a link</span>
+                  <span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
+              </div>
+              <div class="m-msg is-accent" style="margin:10px 0 0">Two of these go as links, not as files: the PDF is over the 2 MB ceiling, and a folder always goes as a link. Both links live 30 days and can be revoked in <b>Published links</b> — including for the people in this letter.</div>
+            </div>
+          </div>
+          <div class="f">
+            <span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg>Send</span>
+            <span class="m-btn is-quiet">Preview</span>
+            <span style="font-size:11.5px;color:var(--dusty)">Signed <b>Михаил Енученко</b> · replies go to mix@example.org</span>
+            <span style="margin-left:auto;display:flex;align-items:center;gap:7px"><span class="m-btn is-quiet">Cancel</span><span class="m-kbd">Esc</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Лист, а не страница, и по той же причине, что у быстрой заметки:</b> письмо пишут о том, что сейчас на экране, и терять этот экран нельзя — две отмеченные строки за листом и есть половина содержимого письма. Открывается оно из-под стрелки у <b>New note</b> (<a href="#s-notes">7.4</a>), последним пунктом и за чертой: это единственное действие того меню, которое ничего не создаёт в коллекции.<br><br><b>Главное в этом окне — колонка «attached / as a link».</b> Она отвечает на вопрос, который иначе задаёт получатель: почему вместо файла пришёл адрес. Правил ровно два, и оба видны здесь без объяснений — папка уходит ссылкой всегда, остальное превращается в ссылку, когда не влезает в потолок. Сказать это <b>до</b> отправки — единственный момент, когда это ещё что-то меняет: человек либо соглашается, либо убирает вложение.<br><br><b>Строка внизу говорит, чем письмо подписано и куда придёт ответ,</b> — оба ответа берутся из профиля и оба не редактируются здесь. Отправитель показан не в поле, а меткой в шапке: выбирать не из чего, форму адреса решил администратор, и поле с одним недоступным значением было бы приглашением его менять.</figcaption>
+</figure>
+
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame">
+    <div class="frame-label"><span>Что можно вложить</span><i>кнопка Attach</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-menu">
+        <div><svg><use href="#i-con"/></svg>Contact…</div>
+        <div><svg><use href="#i-con"/></svg>Address book…</div>
+        <div><svg><use href="#i-cal"/></svg>Event…</div>
+        <div><svg><use href="#i-cal"/></svg>Calendar for a range…</div>
+        <div><svg><use href="#i-note"/></svg>Note…</div>
+        <div><svg><use href="#i-task"/></svg>Task…</div>
+        <span class="sep"></span>
+        <div><svg><use href="#i-doc"/></svg>File…</div>
+        <div><svg><use href="#i-file"/></svg>Folder…<span class="m-tag" style="margin-left:auto">link</span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Порядок тот же, что в рейле, файлы — своей группой. Метка у папки стоит уже здесь: решение «ссылкой» принято до того, как её выбрали, и узнать об этом позже было бы неприятным сюрпризом. У остальных строк метки нет — размер выяснится, когда объект выберут.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 420px">
+  <div class="frame">
+    <div class="frame-label"><span>Отправить ссылку письмом</span><span class="plan">не построено</span><i>из Published links и из карточки объекта</i></div>
+    <div class="mock" style="padding:16px;background:var(--bg)">
+      <div class="m-sheet" style="width:100%;max-width:100%">
+        <div class="h">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#i-mail"/></svg>
+          <b style="font-size:13.5px">Send this link</b>
+          <span class="m-fname" style="margin-left:auto"><span class="m-bar3" style="background:#4A6B52"></span><span style="font-size:12px">Личный · 10–31 August</span></span>
+          <span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span>
+        </div>
+        <div class="b">
+          <div class="m-f" style="width:100%"><label>To</label><span class="m-in is-focus">n.orlova@example.org</span></div>
+          <div class="m-f" style="width:100%"><label>A line from you</label><span class="m-in is-ph">optional</span></div>
+          <div class="m-sec" style="padding:10px 0 0;margin:0">
+            <div class="m-rubric">The letter carries</div>
+            <ul style="font-size:12.5px;display:flex;flex-direction:column;gap:5px;color:var(--muted);margin-top:6px">
+              <li>The link and your line — nothing of the calendar itself</li>
+              <li>Revoking the link closes it for this recipient too</li>
+              <li>It expires on 9 September, as the link does</li>
+            </ul>
+          </div>
+        </div>
+        <div class="f">
+          <span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg>Send</span>
+          <span class="m-btn">Copy link instead</span>
+          <span style="margin-left:auto"><span class="m-btn is-quiet">Cancel</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption><b>Письмо не заменяет кнопку «Copy».</b> Она стоит рядом в подвале, потому что мессенджер по-прежнему быстрее почты, а SMTP может быть не настроен вовсе — тогда исчезает эта форма, а не способ поделиться. Три строки в середине — не реклама функции, а три вещи, которые люди путают: письмо не несёт содержимого, отзыв ссылки действует и на уже отправленное, срок у письма не свой, а ссылкин.</figcaption>
+  </figure>
+</div>
+
+<h3>Что приходит получателю</h3>
+<p>Единственный экран раздела, который Carrel не рисует, — и именно поэтому его стоит нарисовать: две настройки, о которых спорить дешевле здесь, чем в почтовом клиенте получателя.</p>
+
+<div class="frames">
+  <figure style="flex:1 1 380px">
+  <div class="frame">
+    <div class="frame-label"><span>Личные адреса, в профиле есть подтверждённая почта</span><i>как это видит получатель</i></div>
+    <div class="mock" style="padding:16px;background:var(--bg)">
+      <div class="m-card" style="margin:0">
+        <div style="display:flex;flex-direction:column;gap:3px;font-size:12px;padding-bottom:9px;border-bottom:.5px solid var(--hair)">
+          <div><span style="color:var(--dusty);display:inline-block;width:62px">From</span><b>Михаил Енученко</b> <span class="mono" style="font-size:11px;color:var(--muted)">&lt;mix@carrel.example&gt;</span></div>
+          <div><span style="color:var(--dusty);display:inline-block;width:62px">Reply-To</span><span class="mono" style="font-size:11px">mix@example.org</span></div>
+          <div><span style="color:var(--dusty);display:inline-block;width:62px">Subject</span>Контакты подрядчика и смета</div>
+        </div>
+        <div class="m-prose" style="padding:11px 0 0;font-size:13px">Анна, Артём — вот карточка подрядчика и смета, которую он прислал. Договор в папке, ссылка ниже.
+
+Михаил Енученко</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:11px;margin-top:11px;border-top:.5px solid var(--hair)">
+          <span class="m-tag"><svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none"><use href="#i-con"/></svg> smirnov.vcf</span>
+          <span class="m-tag"><svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none"><use href="#i-cal"/></svg> vstrecha.ics</span>
+        </div>
+        <div style="font-size:11.5px;color:var(--dusty);padding-top:9px;line-height:1.55">смета-подрядчик.pdf — <span style="color:var(--accent)">carrel.example/p/9c1f4e</span><br>Договор подряда, 9 файлов — <span style="color:var(--accent)">carrel.example/p/2ab77d</span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Подпись — то же имя из профиля, что и в <code>From</code>: поле одно, мест два. Ссылки стоят под вложениями отдельным блоком, а не в теле письма: получатель должен видеть их как часть приложенного, иначе они читаются как случайные адреса в тексте.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 380px">
+  <div class="frame">
+    <div class="frame-label"><span>Служебный адрес, почты в профиле нет</span><i>та же отправка, другие две настройки</i></div>
+    <div class="mock" style="padding:16px;background:var(--bg)">
+      <div class="m-card" style="margin:0">
+        <div style="display:flex;flex-direction:column;gap:3px;font-size:12px;padding-bottom:9px;border-bottom:.5px solid var(--hair)">
+          <div><span style="color:var(--dusty);display:inline-block;width:62px">From</span><b>Михаил Енученко (через Carrel)</b> <span class="mono" style="font-size:11px;color:var(--muted)">&lt;noreply@carrel.example&gt;</span></div>
+          <div><span style="color:var(--dusty);display:inline-block;width:62px">Subject</span>Контакты подрядчика и смета</div>
+        </div>
+        <div class="m-prose" style="padding:11px 0 0;font-size:13px">Анна, Артём — вот карточка подрядчика и смета, которую он прислал. Договор в папке, ссылка ниже.
+
+Михаил Енученко</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:11px;margin-top:11px;border-top:.5px solid var(--hair)">
+          <span class="m-tag"><svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none"><use href="#i-con"/></svg> smirnov.vcf</span>
+          <span class="m-tag"><svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none"><use href="#i-cal"/></svg> vstrecha.ics</span>
+        </div>
+        <div class="m-msg" style="margin:11px 0 0;font-size:11.5px">Отвечать на это письмо не нужно: адрес почту не принимает. Свяжитесь с отправителем другим способом.</div>
+      </div>
+    </div>
+  </div>
+  <figcaption><b>Строка про «не отвечайте» — не вежливая формула, а единственная правда об этом адресе:</b> Carrel входящего не разбирает вовсе, и ответ пропал бы молча. Она появляется ровно тогда, когда <code>Reply-To</code> поставить не из чего, и стоит после подписи: сначала кто написал, потом почему ему нельзя ответить. Подпись при служебной форме несёт всю нагрузку — в заголовке имени человека уже нет.</figcaption>
+  </figure>
+</div>
+
+<div class="frames">
+  <figure style="flex:1 1 460px">
+  <div class="frame">
+    <div class="frame-label"><span>Администрирование · почта</span><span class="plan">две новые строки</span><i>/admin/settings</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main">
+        <div class="m-head"><div><div class="m-h1">Settings</div><div class="m-sub">Global settings and mail</div></div><div class="m-acts"><span class="m-btn is-primary">Save</span></div></div>
+        <div class="m-form">
+          <div class="m-fset" style="border-top:0;padding-top:0">
+            <div class="m-rubric">Mail</div>
+            <div class="m-f w-lg"><label>Host</label><span class="m-in is-mono">smtp.example.org</span></div>
+            <div class="m-f w-xs"><label>Port</label><span class="m-in is-mono">587</span></div>
+            <div class="m-f w-md"><label>From address</label><span class="m-in is-mono">noreply@carrel.example</span></div>
+          </div>
+          <div class="m-fset">
+            <div class="m-rubric">Letters from users <span class="m-badge">off</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-check"><span class="m-box is-off"></span>Let users send letters and links from Carrel</span>
+              <span class="m-hint">Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><label>Sender address</label>
+              <span class="m-seg" style="align-self:flex-start"><span class="is-on">noreply@carrel.example</span><span>login@carrel.example</span></span>
+              <span class="m-hint">Your relay decides which of the two it will let out. The envelope sender stays <span class="mono">noreply@carrel.example</span> either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here.</span></div>
+            <div class="m-f w-xs"><label>Attachment, MB</label><span class="m-in is-mono">2</span></div>
+            <div class="m-f w-xs"><label>Letter, MB</label><span class="m-in is-mono">8</span></div>
+            <div class="m-f w-xs"><label>Recipients</label><span class="m-in is-mono">10</span></div>
+            <div class="m-f w-xs"><label>Letters a day</label><span class="m-in is-mono">50</span></div>
+            <div class="m-f w-md"><label>Send test message to</label>
+              <span style="display:flex;gap:8px;align-items:center"><span class="m-in is-ph" style="flex:1">you@example.org</span><span class="m-btn">Send test</span></span></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption><b>Выбор адреса — переключатель из двух готовых строк, а не поле для домена.</b> Домен у инстанса один и уже известен; спрашивать его второй раз значит позволить опечататься в том, что и так есть. Из настоящих вопросов остаётся ровно один — какую форму выпустит релей, — и на него отвечает тот, кто этот релей завёл. Кнопка тестового письма ниже проверяет именно выбранную форму: спор о SPF и DKIM разрешается одним письмом себе, а не чтением документации. Четыре потолка стоят одной строкой и без объяснений: каждый из них — число, которое либо устраивает, либо нет.<br><br><b>Пока флажок снят, всё это неактивно</b> — и это порядок чтения: сначала «пускать ли вообще», потом «как именно». Флажок снят по умолчанию, потому что отправка наружу — единственная функция Carrel, которой можно навредить постороннему человеку.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 380px">
+  <div class="frame">
+    <div class="frame-label"><span>Настройки · учётная запись</span><span class="plan">имя и подтверждение</span><i>/app/settings/account</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main">
+        <div class="m-head"><div><div class="m-h1">Account</div><div class="m-sub">mix · created 11 February 2026</div></div></div>
+        <div class="m-form">
+          <div class="m-fset" style="border-top:0;padding-top:0">
+            <div class="m-rubric">Name</div>
+            <div class="m-f w-lg"><label>Display name</label><span class="m-in">Михаил Енученко</span>
+              <span class="m-hint">Shown as the sender and used as the signature in letters you send. Blank means your login.</span></div>
+          </div>
+          <div class="m-fset">
+            <div class="m-rubric">Email</div>
+            <div class="m-f w-lg"><label>Address</label>
+              <span style="display:flex;gap:8px;align-items:center">
+                <span class="m-in" style="flex:1">mix@example.org</span><span class="m-btn">Change…</span></span>
+              <span class="m-hint">Used for service notices, and as <span class="mono">Reply-To</span> on letters you send.</span></div>
+            <div class="m-f" style="flex:1 1 100%"><span class="m-badge"><svg width="10" height="10" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none"><use href="#i-mail"/></svg> confirmed 14 February</span></div>
+          </div>
+        </div>
+        <div class="m-msg is-alert" style="margin:0 20px 16px">This address has not been confirmed. Letters you send will carry no reply address, and will say so at the foot. <span class="m-btn is-sm" style="margin-left:6px">Send confirmation</span></div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Отображаемого имени в записи пользователя нет вовсе — есть логин и адрес, и это поле придётся завести. Признака подтверждения тоже нет: три пути дают проверенный адрес по построению, а четвёртый — приглашение <b>ссылкой</b>, где адрес вписывают при активации, — не даёт. Пока адрес служил только служебным уведомлениям, ценой ошибки было недоставленное письмо; с <code>Reply-To</code> это ответ получателя, ушедший чужому человеку. Сообщение внизу показано в состоянии «не подтверждён» и говорит последствие, а не статус: не «адрес не подтверждён», а «ответить вам будет нельзя».</figcaption>
+  </figure>
+</div>
+
+<h2 id="s-davloom">7.18 davloom — режим прокси <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §23.2</span></h2>
 <p>Один аккаунт в DAVx5 или Thunderbird вместо пяти. Для интерфейса это две вещи: адрес, который дают клиенту, и пароли приложений по устройствам — со своей обёрткой ключа на каждое, чтобы отзыв устройства был удалением обёртки, а смена пароля Carrel устройств не роняла. Последнее интерфейс обязан сказать вслух, иначе люди будут считать наоборот.</p>
 
 <figure>
@@ -5190,7 +5487,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 <br><br>Ничего, кроме версии, сборки и ссылок, страница не сообщает: список коллекций, имя пользователя и само существование учётных записей — не для того, кто пришёл сюда без пароля. <code>PROPFIND</code> по тому же адресу по-прежнему требует аутентификации и отвечает клиенту, а не человеку.</figcaption>
 </figure>
 
-<h2 id="s-plan-small">7.18 Мелкое запланированное — где оно живёт в этих макетах</h2>
+<h2 id="s-plan-small">7.19 Мелкое запланированное — где оно живёт в этих макетах</h2>
 <table class="doc">
   <tr><th style="width:30%">Что</th><th style="width:26%">Где показано</th><th>Что нужно сделать</th></tr>
   <tr><td>Завести, переименовать, удалить коллекцию (§10.1)</td><td>Нарисовано: <a href="#collections">7.10.1</a>; кнопки — в рейле 7.1 и 7.2 и в карточке аккаунта 7.10</td><td>Транспорту нужны <code>PROPPATCH</code> и <code>MkCol</code> с телом; <code>DELETE</code> уже есть</td></tr>
@@ -5200,7 +5497,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   <tr><td>Оболочка офлайн (service worker)</td><td>Нарисовано: раздел 8, состояние «нет сети»</td><td>Кэшировать оболочку и статику, содержимое коллекций — никогда</td></tr>
   <tr><td>Полный тест DAV-сервера (§6, изменяющий этап)</td><td>Подпись к макету валидатора, 7.11</td><td>Отдельный экран не нужен: тот же след, второй кнопкой и с предупреждением</td></tr>
   <tr><td>Узкий экран (§13)</td><td>Раздел 10 целиком</td><td>Выдвижной рейл, цели 44 px, центральный кроп</td></tr>
-  <tr><td>Отправка почтой (§23.5)</td><td><b>Не нарисовано</b> — единственный запланированный пункт §23 без своего раздела</td><td>Нужен свой раздел: отправка ссылки из 7.16, окно письма с вложениями, выбор формы <code>From</code> рядом с SMTP в 7.11 и отображаемое имя в профиле. Показать до отправки, что уйдёт вложением, а что ссылкой</td></tr>
+  <tr><td>Отображаемое имя и подтверждение адреса (§23.5)</td><td>Нарисовано: <a href="#s-mail">7.17</a>, блоки <b>Name</b> и <b>Email</b> в учётной записи</td><td>Двух полей нет в записи пользователя: имя и признак подтверждения. Приглашение ссылкой даёт непроверенный адрес — считать его неподтверждённым</td></tr>
 </table>
 
 <h2 id="m-states">8. Состояния</h2>
@@ -6259,9 +6556,10 @@ Read  2 min ago</div></div>
 <table class="doc">
   <tr><th style="width:26%">Функция</th><th style="width:28%">Что не сработает</th><th>What to do</th></tr>
   <tr><td>Публичные ссылки (7.16)</td><td>Адрес откроется только из вашей сети</td><td>Туннель или проброс порта с доменом и сертификатом; либо отдавать файлом, а не ссылкой</td></tr>
-  <tr><td>davloom (7.17)</td><td>Телефон в сотовой сети до <span class="mono">192.168.*</span> не дотянется</td><td>Дома по Wi-Fi работает как есть; снаружи — VPN или туннель</td></tr>
+  <tr><td>davloom (7.18)</td><td>Телефон в сотовой сети до <span class="mono">192.168.*</span> не дотянется</td><td>Дома по Wi-Fi работает как есть; снаружи — VPN или туннель</td></tr>
   <tr><td>Внешний запуск копии (7.15)</td><td><span class="mono">POST /api/backup/run</span> некому позвать снаружи</td><td>Планировщик на этом же компьютере, либо запуск при входе</td></tr>
   <tr><td>Приглашения и подтверждение почты</td><td>Письмо уйдёт, но ссылка в нём ведёт на локальный адрес</td><td>Для одного человека приглашения не нужны; для нескольких — обычный экземпляр на сервере</td></tr>
+  <tr><td>Отправить почтой (7.17)</td><td>Письмо уйдёт и вложения дойдут; ссылка на файл или папку внутри него — нет</td><td>Держаться вложений: снять потолок так, чтобы ссылок не возникало, а папку отправлять не ссылкой, а нужными файлами</td></tr>
   <tr><td>Внешние ленты (7.10)</td><td>Работают: наружу Carrel ходит свободно</td><td>Ничего</td></tr>
 </table>
 
@@ -6317,7 +6615,7 @@ Read  2 min ago</div></div>
 </table>
 
 <h3>Проверка каркасом</h3>
-<p>Четыре запланированные функции (7.14–7.17) нарисованы на тех же примитивах, что и всё остальное: рейл, строка списка, таблица, панель подробностей, диалог, форма с полями по содержимому. Новым оказалось ровно одно — дерево папок, и оно всё равно нужно файлам для «Move…». Это и был смысл рисовать их сейчас: если бы «новое устройство» или davloom потребовали своего устройства страницы, менять каркас пришлось бы после того, как на нём собрано двенадцать экранов.</p>
+<p>Пять запланированных функций (7.14–7.18) нарисованы на тех же примитивах, что и всё остальное: рейл, строка списка, таблица, панель подробностей, диалог, форма с полями по содержимому. Новым оказалось ровно одно — дерево папок, и оно всё равно нужно файлам для «Move…». Письмо (7.17) не добавило и его: лист от быстрой заметки, поля формы, метки и меню — всё уже было, включая сам приём «показать в строке, чем именно это уйдёт». Это и был смысл рисовать их сейчас: если бы «новое устройство» или davloom потребовали своего устройства страницы, менять каркас пришлось бы после того, как на нём собрано двенадцать экранов.</p>
 <p>Настольное приложение (раздел 12) — та же проверка с другой стороны: нативного в нём ровно рамка, меню, трей, уведомления и три диалога, а все двенадцать экранов работают внутри окна без единой правки. Если бы под окно пришлось рисовать вторую вёрстку, это значило бы, что каркас держится на браузере, а не на устройстве интерфейса.</p>
 <p>Обратное тоже верно и стоит сказать: <b>ни одна из этих функций не должна начинаться с интерфейса</b>.</p>
 <p style="max-width:none"><b>Порядок для запланированного свой</b> и живёт в <a href="../roadmap.md">roadmap.md</a>, а не здесь: этот документ отвечает на вопрос «как это выглядит», а не «когда это делается». Профиль Apple — это XML и одноразовая ссылка, резервная копия — это архив и проверка чтением, davloom — это подстановка префиксов в потоке. Макеты выше показывают, чем работа кончится, а не с чего начнётся.</p>
