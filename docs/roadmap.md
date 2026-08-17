@@ -4,7 +4,7 @@ What is not built yet, in the order it matters, and — just as usefully — wha
 
 Everything in the main scope of v1 is implemented: the framework, transport and discovery, contacts, calendar, tasks, notes, the unified view, cross-source search, duplicates, and WebDAV files with attachments. What is left before a v1 tag is a person's judgement rather than code.
 
-Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for the order in which they are worth showing anyone. The per-stage implementation plans were removed once every stage was done; what they still carried and the code did not is in the gaps section below, and what was worth keeping of their working practice is in [development.md](development.md). Active implementation plans for features not yet built live in [plans/](plans/) and are deleted after closeout.
+Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for the order in which they are worth showing anyone. The per-stage implementation plans were removed once every stage was done; what they still carried and the code did not is in the gaps section below, and what was worth keeping of their working practice is in [development.md](development.md). Active implementation plans for features not yet built live in [plans/](plans/) and are deleted after closeout. The order in which everything below is actually built — together with the redesign the mockups ask for — is [plans/global-plan.md](plans/global-plan.md).
 
 ---
 
