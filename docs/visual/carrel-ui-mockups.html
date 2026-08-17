@@ -531,8 +531,9 @@ figcaption b{color:var(--ink);font-weight:600}
     <a href="#s-conflict"><b>7.8</b><span>Conflict</span></a>
     <a href="#s-io"><b>7.9</b><span>Импорт и экспорт</span></a>
     <a href="#s-profile"><b>7.10</b><span>Подключения и подписки</span></a>
-    <a href="#subscribe" class="is-sub"><b>7.10.1</b><span>Подписка на чужую ленту</span></a>
-    <a href="#usermenu" class="is-sub"><b>7.10.2</b><span>Меню, учётная запись, вид</span></a>
+    <a href="#collections" class="is-sub"><b>7.10.1</b><span>Завести, переименовать, удалить коллекцию</span></a>
+    <a href="#subscribe" class="is-sub"><b>7.10.2</b><span>Подписка на чужую ленту</span></a>
+    <a href="#usermenu" class="is-sub"><b>7.10.3</b><span>Меню, учётная запись, вид</span></a>
     <a href="#s-admin"><b>7.11</b><span>Администрирование</span></a>
     <a href="#install" class="is-sub"><b>7.11.1</b><span>Проверка установки</span></a>
     <a href="#s-auth"><b>7.12</b><span>Вход и первый запуск</span></a>
@@ -664,6 +665,7 @@ figcaption b{color:var(--ink);font-weight:600}
 <table class="doc">
   <tr><th style="width:22%">Функция</th><th>События</th><th>Задачи</th><th>Заметки</th><th>Контакты</th><th>Файлы</th><th style="width:22%">Где в макетах</th></tr>
   <tr><td>Единый вид «All …»</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>корень коллекций</td><td>7.1–7.5</td></tr>
+  <tr><td>Завести, переименовать, удалить коллекцию</td><td><b>делаем:</b> <code>MKCALENDAR</code></td><td><b>делаем:</b> та же календарная коллекция, другой набор компонентов</td><td><b>делаем:</b> то же</td><td><b>делаем:</b> <code>MKCOL</code> с типом ресурса</td><td>есть: «New folder», «Rename», «Delete»</td><td><a href="#collections">7.10</a>, 7.5</td></tr>
   <tr><td>Выбор столбцов</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>раздел 6</td></tr>
   <tr><td>Печать</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td><b>делаем:</b> листинг папки</td><td>раздел 11</td></tr>
   <tr><td>Поиск по всем источникам</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td><b>делаем:</b> по имени файла — <code>PROPFIND</code> уже возвращает имена</td><td>7.6</td></tr>
@@ -1035,7 +1037,8 @@ figcaption b{color:var(--ink);font-weight:600}
           <div class="m-src"><span class="m-box"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="t">Команда</span><span class="m-meta">13</span><span class="m-badge">ro</span></div>
         </div>
         <div class="m-rail-foot">
-          <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</span>
+          <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New address book</span>
+          <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-server"/></svg>Connect account</span>
         </div>
       </div>
 
@@ -1431,7 +1434,8 @@ Read  2 min ago</div>
           <div class="m-src is-ext is-off"><span class="m-box is-off"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="t">Расписание лиги</span><span class="m-meta">ro</span></div>
         </div>
         <div class="m-rail-foot">
-          <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Connect account</span>
+          <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New calendar</span>
+          <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-server"/></svg>Connect account</span>
           <span class="m-btn is-quiet"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg>Subscribe to a feed</span>
         </div>
       </div>
@@ -2822,13 +2826,22 @@ Read  2 min ago</div>
 
           <div class="m-card">
             <div class="m-rubric">nextcloud · home
-              <span style="display:flex;gap:6px"><span class="m-btn is-sm">Show password</span><span class="m-btn is-sm">Test</span><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm is-danger">Remove</span></span>
+              <span style="display:flex;gap:6px"><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New collection</span><span class="m-btn is-sm">Show password</span><span class="m-btn is-sm">Test</span><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm is-danger">Disconnect</span></span>
             </div>
             <div class="mono" style="font-size:11.5px;color:var(--dusty);margin-bottom:9px">https://cloud.example.org/remote.php/dav/ · mix · last answer 2 min ago</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2px 16px">
               <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Личный</span><span class="m-meta">cal · 128 · read 2 min ago · changed 3 h ago</span></div>
               <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">Работа</span><span class="m-meta">cal</span></div>
-              <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#A05A2C"></span><span class="t">Дни рождения</span><span class="m-meta">cal</span></div>
+              <div style="position:relative">
+                <div class="m-src is-on" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#A05A2C"></span><span class="t">Дни рождения</span><span style="display:flex;gap:7px;align-items:center"><span class="m-meta">cal</span><span class="m-btn is-sm is-quiet" style="height:18px;padding:0 3px"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></span></div>
+                <div class="m-menu" style="position:absolute;right:0;top:100%;margin-top:3px;z-index:2;width:222px">
+                  <div><svg><use href="#i-pencil"/></svg>Rename and colour…</div>
+                  <div><svg><use href="#i-down"/></svg>Export <span class="mono" style="font-size:11px">.ics</span></div>
+                  <div><svg><use href="#i-link"/></svg>Publish a link…</div>
+                  <span class="sep"></span>
+                  <div style="color:var(--alert)"><svg><use href="#i-trash"/></svg>Delete on the server…</div>
+                </div>
+              </div>
               <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Контакты</span><span class="m-meta">card</span></div>
               <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Записи</span><span class="m-meta">journal</span></div>
               <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="t">Дела</span><span class="m-meta">todo</span></div>
@@ -2837,7 +2850,7 @@ Read  2 min ago</div>
 
           <div class="m-card">
             <div class="m-rubric">sftpgo · vps
-              <span style="display:flex;gap:6px"><span class="m-btn is-sm">Test</span><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm is-danger">Remove</span></span>
+              <span style="display:flex;gap:6px"><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New folder</span><span class="m-btn is-sm">Test</span><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm is-danger">Disconnect</span></span>
             </div>
             <div class="mono" style="font-size:11.5px;color:var(--dusty);margin-bottom:9px">https://files.example.org/dav/ · mix · plain WebDAV, no principal</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:2px 16px">
@@ -2848,7 +2861,7 @@ Read  2 min ago</div>
 
           <div class="m-card" style="border-color:var(--alert)">
             <div class="m-rubric" style="color:var(--alert)">baikal · office
-              <span style="display:flex;gap:6px"><span class="m-btn is-sm">Test again</span><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm is-danger">Remove</span></span>
+              <span style="display:flex;gap:6px"><span class="m-btn is-sm">Test again</span><span class="m-btn is-sm">Edit</span><span class="m-btn is-sm is-danger">Disconnect</span></span>
             </div>
             <div class="mono" style="font-size:11.5px;color:var(--dusty);margin-bottom:9px">https://dav.office.example/dav.php/ · m.yenuchenko</div>
             <div class="m-diag">[well-known]  GET /.well-known/caldav → 404
@@ -2863,7 +2876,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>«Show password» стоит и здесь</b> — пароль от чужого сервера человек доверил Carrel, и вернуть его по требованию — прямая обязанность читального зала. Механика <a href="#reveal">общая с экраном нового устройства</a> и описана там один раз: тот же лист, вопрос раз в сеанс, автоскрытие, журнал.<br><br><b>Диагностика перестаёт быть отладочным выводом и становится содержимым экрана.</b> Ровно этим Carrel отличается от клиентов, которые пишут «cannot connect»: видно, какой шаг сломался и что именно ответил сервер. Здесь она стоит у того аккаунта, к которому относится. Коллекции разложены сеткой — их бывает двенадцать, и в одну колонку они не помещались. У каждой строкой стоит <b>состояние синхронизации</b>: сколько объектов, когда коллекция читалась и когда менялась на сервере. Это второй пункт §23.8 и тоже почти без кода: <code>getctag</code> и ETag Carrel уже видит. Нужно это в единственном, зато частом случае — когда рядом работают DAVx5 на телефоне и Thunderbird на работе, данные разошлись, и причину иначе не установить. Журналом изменений это не является: журнал требует хранить содержимое, чего Carrel не делает.</figcaption>
+<figcaption><b>«Show password» стоит и здесь</b> — пароль от чужого сервера человек доверил Carrel, и вернуть его по требованию — прямая обязанность читального зала. Механика <a href="#reveal">общая с экраном нового устройства</a> и описана там один раз: тот же лист, вопрос раз в сеанс, автоскрытие, журнал.<br><br><b>Диагностика перестаёт быть отладочным выводом и становится содержимым экрана.</b> Ровно этим Carrel отличается от клиентов, которые пишут «cannot connect»: видно, какой шаг сломался и что именно ответил сервер. Здесь она стоит у того аккаунта, к которому относится. Коллекции разложены сеткой — их бывает двенадцать, и в одну колонку они не помещались. У каждой строкой стоит <b>состояние синхронизации</b>: сколько объектов, когда коллекция читалась и когда менялась на сервере. Это второй пункт §23.8 и тоже почти без кода: <code>getctag</code> и ETag Carrel уже видит. Нужно это в единственном, зато частом случае — когда рядом работают DAVx5 на телефоне и Thunderbird на работе, данные разошлись, и причину иначе не установить. Журналом изменений это не является: журнал требует хранить содержимое, чего Carrel не делает.<br><br><b>Здесь же коллекциями и распоряжаются</b> — «New collection» в шапке аккаунта, <span class="mono">⋯</span> у строки коллекции. Разобрано отдельно ниже (<a href="#collections">создать, переименовать, удалить</a>), но живёт не в отдельном разделе настроек: место, где перечислены сервер и всё, что на нём лежит, и есть место, где заводят ещё одну коллекцию.<br><br><b>«Remove» у аккаунта стало «Disconnect», и это не косметика.</b> Рядом появилась кнопка, которая удаляет данные на чужом сервере, — и две соседние кнопки со словом «удалить» и противоположными последствиями рано или поздно нажали бы не ту. «Disconnect» убирает подключение из Carrel и на сервере не трогает ничего; «Delete on the server…» в меню коллекции — наоборот. Слово выбрано так, чтобы разницу было видно до нажатия, а не в подтверждении.</figcaption>
 </figure>
 
 <div class="frames">
@@ -2945,6 +2958,156 @@ Read  2 min ago</div>
   <figcaption>Пароль появляется в самой карточке, рядом с логином, а не в отдельном окне: то, что человек пришёл узнать, стоит там же, где всё остальное про этот сервер. Сколько ещё открыто — показывает значок в шапке, один на весь раздел, а не счётчик у каждой строки; «Hide» убирает пароль с экрана, не закрывая окна. У второй карточки кнопка осталась — но нажатие на неё вопроса уже не вызовет, и об этом сказано строкой под списком, а не выясняется опытным путём.</figcaption>
   </figure>
 </div>
+
+<h3 id="collections">Завести, переименовать и удалить коллекцию <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §10.1</span></h3>
+<p>Дыра, которую видно только если специально искать: Carrel умеет читать и записывать события и контакты, но не умеет завести календарь, в который их класть. Человек, поднявший чистый Baikal и подключивший его первым делом к Carrel, попадает в интерфейс, где работать не с чем, — и уходит заводить коллекцию в админку сервера, то есть ровно туда, откуда Carrel обещал его увести. То же самое при обычном «нужен ещё один календарь для поездок»: сегодня это делается где угодно, только не здесь.</p>
+<p>У файлов всё это давно есть — «New folder», «Rename», «Delete» в 7.5, — а у календарей и адресных книг нет. По <a href="#parity">правилу равенства коллекций</a> так быть не должно, и строка в таблице теперь стоит.</p>
+
+<table class="doc">
+  <tr><th style="width:20%">Действие</th><th style="width:26%">Календарь</th><th style="width:26%">Адресная книга</th><th>Чего не хватает в транспорте (§7)</th></tr>
+  <tr><td>Завести</td><td><code>MKCALENDAR</code> в <code>calendar-home-set</code></td><td><code>MKCOL</code> с <code>resourcetype: addressbook</code></td><td><code>MkCol</code> есть, но без тела: нужен вариант, который умеет отправить свойства</td></tr>
+  <tr><td>Переименовать, сменить цвет</td><td><code>PROPPATCH</code>: <code>displayname</code>, <code>calendar-color</code></td><td><code>PROPPATCH</code>: <code>displayname</code></td><td><code>PROPPATCH</code> в интерфейсе транспорта отсутствует вовсе</td></tr>
+  <tr><td>Удалить</td><td><code>DELETE</code> по адресу коллекции</td><td>то же</td><td>есть, менять нечего</td></tr>
+</table>
+<p>Две двери, один диалог. В рейле — кнопка внизу списка источников (<b>New calendar</b>, <b>New address book</b>, в задачах и заметках — <b>New list</b> и <b>New notebook</b>), потому что коллекцию заводят в тот момент, когда смотрят на список коллекций. В настройках — <b>New collection</b> в шапке аккаунта и <span class="mono">⋯</span> у каждой строки, потому что там перечислены сервер и всё, что на нём лежит. Переименование и удаление живут только во втором месте и в меню строки: в рейле им делать нечего, там выбирают, а не распоряжаются.</p>
+
+<div class="frames">
+  <figure style="flex:1 1 420px">
+  <div class="frame">
+    <div class="frame-label"><span>Новая коллекция</span><span class="plan">не построено</span><i>лист из рейла или из настроек</i></div>
+    <div class="mock" style="background:var(--bg);padding:16px">
+      <div class="m-sheet" style="width:100%;max-width:none">
+        <div class="h">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.6" fill="none"><use href="#i-plus"/></svg>
+          <b style="font-size:13.5px">New calendar</b>
+        </div>
+        <div class="b">
+          <div class="m-f" style="width:100%"><label>On which server</label>
+            <span class="m-in">nextcloud · home<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" style="margin-left:auto"><use href="#i-chev"/></svg></span>
+            <span class="m-hint" style="font-size:11px;color:var(--dusty)">Two of three are listed: <span class="mono">baikal · office</span> is not answering, and until it does there is nothing to create there.</span></div>
+          <div class="m-f" style="width:100%"><label>Name</label><span class="m-in is-focus">Поездки</span></div>
+          <div class="m-f" style="width:100%"><label>Colour</label>
+            <span style="display:flex;gap:9px;align-items:center;height:22px">
+              <span style="width:17px;height:17px;border-radius:50%;background:#4A6B52"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#3F6E8C"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#6B4E7A;outline:1.5px solid var(--accent);outline-offset:2px"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#A05A2C"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#8C6239"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#9A9280"></span>
+            </span>
+            <span class="m-hint" style="font-size:11px;color:var(--dusty)">Written to the server as <span class="mono">calendar-color</span> — DAVx5 and Thunderbird will show the same one.</span></div>
+          <div class="m-f" style="width:100%"><label>What goes in it</label>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:2px">
+              <span class="m-check"><span class="m-box"></span>Events</span>
+              <span class="m-check"><span class="m-box"></span>Tasks</span>
+              <span class="m-check"><span class="m-box is-off"></span>Notes</span>
+            </div>
+            <span class="m-hint" style="font-size:11px;color:var(--dusty)">Most servers settle this when the collection is made and will not change it afterwards. A collection holding only tasks appears in <b>Tasks</b>, not here — the rail follows what is inside, not where it was made.</span></div>
+          <div class="m-f" style="width:100%"><label>Address</label>
+            <span class="m-in is-mono">poezdki</span>
+            <span class="m-hint" style="font-size:11px;color:var(--dusty)"><span class="mono">…/remote.php/dav/calendars/mix/poezdki/</span> — taken from the name, yours to change. Other clients and restore-by-path go by the address; the name they only show.</span></div>
+        </div>
+        <div class="f"><span class="m-btn is-primary">Create</span><span class="m-kbd">Enter</span><span style="margin-left:auto;display:flex;gap:7px;align-items:center"><span class="m-btn is-quiet">Cancel</span><span class="m-kbd">Esc</span></span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Первое поле — сервер, а не имя: коллекция всегда чья-то, и у человека с тремя аккаунтами вопрос «где» стоит раньше вопроса «как назвать». Не отвечающий сервер в списке не показан, и сказано почему, — вместо строки, выбор которой кончится ошибкой через десять секунд.<br><br><b>Адрес показан и правится.</b> Он кажется техничной мелочью, но именно по нему коллекцию находит восстановление из архива (7.15, «matched by path») и по нему же её знают уже настроенные клиенты; имя — только подпись. Автоматически он выводится из названия, поэтому в обычном случае поле не трогают.<br><br><b>«Что внутрь» — не украшение.</b> Задачи и заметки лежат в календарных коллекциях, и <code>supported-calendar-component-set</code> решает, куда новая коллекция попадёт в интерфейсе. Большинство серверов фиксирует набор при создании и потом не меняет — значит, это единственный момент, когда вопрос вообще можно задать, и промолчать здесь означает решить за человека молча.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 340px">
+  <div class="frame">
+    <div class="frame-label"><span>Новая коллекция · сервер отказал</span><span class="plan">не построено</span><i>тот же лист</i></div>
+    <div class="mock" style="background:var(--bg);padding:16px">
+      <div class="m-sheet" style="width:100%;max-width:none">
+        <div class="h">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--alert)" stroke-width="1.6" fill="none"><use href="#i-plus"/></svg>
+          <b style="font-size:13.5px">New calendar</b>
+          <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">baikal · office</span>
+        </div>
+        <div class="b">
+          <div class="m-msg is-alert" style="margin:0">The server would not make it. Nothing was created, and the form is as you left it.</div>
+          <div class="m-diag">[create]  MKCALENDAR /dav.php/calendars/m.yenuchenko/poezdki/ → 403
+          &lt;D:error&gt;&lt;D:need-privileges/&gt;&lt;/D:error&gt;
+          no DAV:bind on the calendar home-set</div>
+          <span style="font-size:11.5px;color:var(--muted);line-height:1.55">This account may sign in and read, but not create. Either the user has no such right on the server, or the account was connected with a password issued read-only. Neither is something Carrel can fix from here — but it can say which of the two it is.</span>
+        </div>
+        <div class="f"><span class="m-btn is-primary">Back to the form</span><span class="m-btn is-quiet">Try again</span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Кнопку «New collection» не прячут заранее и не гасят «на всякий случай»: право на создание живёт на home-set, а его Carrel при discovery не спрашивает — <code>current-user-privilege-set</code> он забирает у самих коллекций (§6). Гадать вместо этого — значит либо прятать кнопку у тех, у кого всё работает, либо обещать то, чего сервер не даст. Поэтому ответ сервера показывается так же, как на карточке подключения выше: с методом, адресом, кодом и телом ошибки. Это тот же принцип «диагностика — содержимое экрана», и он же превращает 403 из тупика в понятную фразу «этой учётной записью можно читать, но не создавать».</figcaption>
+  </figure>
+</div>
+
+<div class="frames">
+  <figure style="flex:1 1 380px">
+  <div class="frame">
+    <div class="frame-label"><span>Переименовать и сменить цвет</span><span class="plan">не построено</span><i>из меню строки</i></div>
+    <div class="mock" style="background:var(--bg);padding:16px">
+      <div class="m-sheet" style="width:100%;max-width:none">
+        <div class="h">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.6" fill="none"><use href="#i-pencil"/></svg>
+          <b style="font-size:13.5px">Rename and colour</b>
+          <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">nextcloud · home</span>
+        </div>
+        <div class="b">
+          <div class="m-f" style="width:100%"><label>Name</label><span class="m-in is-focus">Дни рождения</span></div>
+          <div class="m-f" style="width:100%"><label>Colour</label>
+            <span style="display:flex;gap:9px;align-items:center;height:22px">
+              <span style="width:17px;height:17px;border-radius:50%;background:#4A6B52"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#3F6E8C"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#6B4E7A"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#A05A2C;outline:1.5px solid var(--accent);outline-offset:2px"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#8C6239"></span>
+              <span style="width:17px;height:17px;border-radius:50%;background:#9A9280"></span>
+            </span></div>
+          <div class="m-f" style="width:100%"><label>Address <span style="color:var(--dusty)">— stays as it is</span></label>
+            <span class="m-in is-mono" style="color:var(--dusty)">…/remote.php/dav/calendars/mix/birthdays/</span></div>
+          <div class="m-msg" style="margin:2px 0 0">Renaming is not moving: the address does not change, so devices, published links and backup jobs pointing here go on working. The new name and colour are written to the server — other clients will show them at their next sync.</div>
+        </div>
+        <div class="f"><span class="m-btn is-primary">Save</span><span class="m-kbd">Enter</span><span style="margin-left:auto;display:flex;gap:7px;align-items:center"><span class="m-btn is-quiet">Cancel</span><span class="m-kbd">Esc</span></span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Имя и цвет в одном листе, потому что это одно движение — «навести порядок в списке», — и потому что оба уходят одним <code>PROPPATCH</code>. Адрес показан, но не редактируется: сменить его — это <code>MOVE</code>, после которого у всех настроенных клиентов коллекция исчезает и появляется заново; такой операции в интерфейсе не будет, и строка «stays as it is» существует, чтобы этого не ждали.<br><br><b>Своё и чужое переименовываются по-разному, и это надо различать.</b> Здесь имя уходит на сервер и его увидят все клиенты. У внешней подписки (<a href="#subscribe">ниже</a>) имя местное: чужой фид переименовать нельзя, можно только назвать его у себя. Один и тот же жест с разными последствиями — значит, в подписи листа стоит имя сервера, а у подписки его нет.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 380px">
+  <div class="frame">
+    <div class="frame-label"><span>Удаление коллекции</span><span class="plan">не построено</span><i>что именно исчезнет</i></div>
+    <div class="mock" style="background:var(--bg);padding:16px">
+      <div class="m-sheet" style="width:100%;max-width:none">
+        <div class="h">
+          <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--alert)" stroke-width="1.6" fill="none"><use href="#i-trash"/></svg>
+          <b style="font-size:13.5px">Delete on the server</b>
+          <span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Дни рождения · nextcloud</span>
+        </div>
+        <div class="b">
+          <div class="m-msg is-alert" style="margin:0">The calendar and all <b>51</b> events in it are deleted on <span class="mono">cloud.example.org</span>. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
+          <div>
+            <div class="m-rubric" style="margin-bottom:6px">What is pointing at it now</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12.5px">
+              <span><b>1 published link</b> <span style="color:var(--dusty)">— answers “not found” from that moment</span></span>
+              <span><b>Backup job «Личное на домашний диск»</b> <span style="color:var(--dusty)">— copies this collection; it will run one short and say so</span></span>
+              <span><b>3 devices through davloom</b> <span style="color:var(--dusty)">— it disappears for them at the next sync</span></span>
+            </div>
+          </div>
+          <div class="m-msg" style="margin:0">Last time it was in an archive: <span class="mono">2026-08-14</span>. Restoring brings the records back into a <b>new</b> collection — not into this one, and not to this address.</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Download <span class="mono" style="font-size:11px">.ics</span> first</span>
+            <span style="font-size:11.5px;color:var(--dusty)">51 events, one file, straight to you</span>
+          </div>
+          <div class="m-f" style="width:100%"><label>Type the name to confirm</label><span class="m-in is-focus is-ph">Дни рождения</span></div>
+        </div>
+        <div class="f"><span class="m-btn is-danger">Delete on the server</span><span style="margin-left:auto;display:flex;gap:7px;align-items:center"><span class="m-btn is-quiet">Cancel</span><span class="m-kbd">Esc</span></span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption><b>Главное здесь — не предупреждение, а список.</b> «Вы уверены?» не сообщает ничего: человек уверен, иначе бы не нажал. Сообщает перечень того, что на эту коллекцию ссылается, — ссылка, задание копирования, устройства прокси, — потому что именно этого он не держит в голове, и именно это ломается молча через неделю. Строка про архив — последняя честная опора: она говорит и то, что копия есть, и то, чего восстановление не сделает.<br><br><b>Почему набор имени, а не громкая кнопка.</b> Слияние дубликатов (7.7) — единственное место со сплошной заливкой тревожным цветом, и таким оно и остаётся: там диалог перечисляет всё, что будет уничтожено, поимённо, и решение принимается глазами. Здесь перечислить нельзя — записей пятьдесят одна, а бывает три тысячи, — поэтому вместо кнопки погромче стоит единственный барьер, который нельзя пройти не читая. <b>«Download .ics first» — не вежливость, а работа продукта:</b> самый частый способ потерять данные не «удалил и промахнулся», а «удалил и только потом вспомнил».</figcaption>
+  </figure>
+</div>
+
+<div class="note"><b>Спецификация об этом молчала — теперь это §10.1.</b> До сих пор §7 фиксировал транспорт шестью методами, среди которых нет <code>PROPPATCH</code>, а <code>MkCol</code> не умеет отправлять тело; <code>MKCALENDAR</code> был упомянут ровно один раз — в §23.2, и только как то, что прокси пробрасывает вслепую. Пункт написан по этим макетам: два недостающих метода транспорта, правила вывода адреса из имени и его неизменяемость, набор компонентов как решение одного момента, поведение при отказе сервера — и отдельно удаление, потому что это единственная операция Carrel, уничтожающая чужие данные пачкой, и правила §8 про сохранение неизвестных свойств к ней неприменимы: сохранять уже нечего. Стоит он в §10 «Данные», а не в §23: это не дополнение поверх готового веб-клиента, а недостающая часть работы с данными.</div>
 
 <h3 id="subscribe">Подписка на чужую коллекцию</h3>
 <p>Подписки живут здесь же, среди подключений, а не среди выданных ссылок: для человека это ещё один источник, откуда приходят записи. Отличий от аккаунта DAV три, и все три видны на экране — у ленты нет учётной записи (обычно), нет цвета и нет записи: она только читается.</p>
@@ -3825,7 +3988,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
   <tr><td><code>login</code>, <code>setup</code>, <code>register</code>, <code>register_sent</code>, <code>forgot</code></td><td>Вход, первый администратор, регистрация, невозможность восстановления</td><td>7.12</td></tr>
   <tr><td><code>invite</code>, <code>invite_invalid</code>, <code>email_confirmed</code></td><td>Приглашение и подтверждение адреса по одноразовой ссылке</td><td>7.12, 7.13</td></tr>
   <tr><td><code>password</code></td><td>Смена пароля, обычная и вынужденная</td><td>7.13</td></tr>
-  <tr><td><code>app</code> → <code>settings_*</code></td><td>Подключения, подписки, учётная запись, вид, вложения, депонирование</td><td>7.10, 7.10.1, 7.10.2</td></tr>
+  <tr><td><code>app</code> → <code>settings_*</code></td><td>Подключения, подписки, учётная запись, вид, вложения, депонирование</td><td>7.10, 7.10.2, 7.10.3</td></tr>
   <tr><td><code>contacts</code>, <code>contact</code>, <code>contact_crop</code>, <code>timeline</code></td><td>Список, карточка, правка, кадрирование фотографии, всё об одном человеке</td><td>7.1, 7.13</td></tr>
   <tr><td><code>agenda</code>, <code>event</code></td><td>Агенда, карточка события, повторения</td><td>7.2</td></tr>
   <tr><td><code>tasks</code>, <code>task</code></td><td>Список задач с фильтрами, карточка</td><td>7.3</td></tr>
@@ -4037,7 +4200,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
               <td><span class="m-fname"><svg><use href="#i-archive"/></svg><span>Рабочее, ежедневно</span></span></td>
               <td><span style="display:flex;gap:3px;align-items:center;flex-wrap:wrap"><span class="m-bar3" style="background:#3F6E8C"></span><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-bar3" style="background:#4A6B52"></span><span class="mono" style="font-size:11px;margin-left:4px">3 collections</span></span></td>
               <td class="mono">sftpgo · Documents<br><span style="color:var(--dusty)">/backup/work</span></td>
-              <td class="mono">external request<br><span style="color:var(--dusty)">cron, 03:00</span></td>
+              <td class="mono">cron · 03:00<br><span style="color:var(--dusty)">external trigger</span></td>
               <td class="mono is-2nd">14</td>
               <td class="mono">2026-08-16 03:10<br><span style="color:var(--dusty)">18.4 MB · verified</span></td>
               <td class="m-acts"><span class="m-btn is-sm">Run</span><span class="m-btn is-sm is-quiet">Edit</span><span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></td>
@@ -4125,7 +4288,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <div class="m-f w-md"><label>Folder</label><span class="m-in is-mono">carrel-backup</span></div>
           <div class="m-f w-xs"><label>Keep copies</label><span class="m-in is-mono">8</span></div>
           <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Copies past the eighth are deleted <b>after</b> the new one has been read back and checked, not before. The file is dated and never overwritten.</span></div>
-          <div class="m-msg" style="flex:1 1 100%;margin:4px 0 0"><b>Download</b> streams the archive to your browser and writes nothing to the server. It has no folder and no retention — the copy is yours to keep — and no schedule, because there is nobody to hand a file to at three in the morning: such a job runs from the <b>Run</b> button. <b>Both</b> does the two at once.</div>
+          <div class="m-msg" style="flex:1 1 100%;margin:4px 0 0"><b>Download</b> streams the archive out and writes nothing to the server: no folder, no retention — the copy is yours to keep. It can still run at three in the morning, but only on an external trigger, because a stream needs somebody at the other end: a browser is not there at that hour, a machine with a disk is. <b>Both</b> does the two at once — and then the trigger has <b>two steps</b>, because the file still has to be taken.</div>
         </div>
 
         <div class="m-fset">
@@ -4142,23 +4305,25 @@ An administrator can give you a new password, but doing so replaces the key: eve
           <div class="m-f" style="flex:1 1 100%;gap:8px">
             <span class="m-check"><span class="m-box"></span>On demand — the button in the job list</span>
             <span class="m-check"><span class="m-box"></span>On sign-in, if the last copy is older than <span class="m-in is-mono" style="height:22px;width:52px;display:inline-flex">7</span> days</span>
-            <span class="m-check"><span class="m-box is-off"></span>On external request — <span class="mono">POST /api/backup/run?job=personal</span> <span class="m-badge is-local" title="Local instance: may be unreachable from outside">local</span></span>
+            <span class="m-check"><span class="m-box"></span>On a clock of your own — <span class="mono">cron</span>, GoSentry, a job in Gitea <span class="m-badge is-local" title="Local instance: the address in the line answers only from inside your own network">local</span></span>
           </div>
-          <div class="m-f w-full"><label>App password for this job <span style="color:var(--dusty)">(this job only, nothing else)</span></label>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <span class="m-btn">Create password</span>
-              <span style="font-size:11.5px;color:var(--dusty)">created on a press and shown once — right here, before the job is saved</span>
-            </div></div>
-          <div class="m-card" style="flex:1 1 100%;border-color:var(--accent);margin:8px 0 0">
-            <div class="m-rubric">Password created <span class="mono" style="letter-spacing:0;color:var(--alert)">visible only now</span></div>
-            <div style="display:flex;gap:8px;align-items:center;margin-top:2px;flex-wrap:wrap">
-              <span class="m-in is-mono" style="flex:1;min-width:220px;font-size:13px;letter-spacing:.03em">cbk_7f3a-91de-4402-lamp</span>
-              <span class="m-btn">Copy</span>
+          <div class="m-msg" style="flex:1 1 100%;margin:4px 0 0">No time picker here, and that is deliberate: Carrel keeps no clock of its own, so whoever holds the schedule holds the password. What it hands you instead is the line to paste where the clock already is.</div>
+          <div class="m-card" style="flex:1 1 100%;border-color:var(--accent);margin:10px 0 0">
+            <div class="m-rubric">The line to paste <span class="mono" style="letter-spacing:0;color:var(--alert)">visible only now</span></div>
+            <span class="m-seg" style="align-self:flex-start"><span class="is-on">crontab</span><span>GoSentry</span><span>Gitea</span><span>curl</span></span>
+            <div class="m-diag" style="margin-top:9px;color:var(--ink)">0 3 * * * curl -fsS -m 30 -X POST -H 'Authorization: Bearer cbk_7f3a-91de-4402-lamp' 'https://carrel.example/api/backup/run?job=personal'</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
+              <span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy the line</span>
               <span class="m-btn is-quiet">Regenerate</span>
+              <span style="font-size:11.5px;color:var(--dusty)">Runs at 03:00 · the time sits inside the line and is changed there</span>
             </div>
-            <div class="m-diag" style="margin-top:9px">curl -X POST https://carrel.example/api/backup/run?job=personal \
-     -H "Authorization: Bearer cbk_7f3a-91de-4402-lamp"</div>
-            <div style="font-size:11.5px;color:var(--muted);margin-top:8px">A ready line, so nobody assembles it from documentation. The password works for this job and for starting it only: nothing can be read with it.</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.55">Paste into <span class="mono">crontab -e</span> on the machine that is to hold the password. It is one line and stays one line — <span class="mono">cron</span> understands no continuations; the wrap you see is this screen’s doing. <span class="mono">-fsS</span> keeps it quiet while all is well and makes cron mail you when the request itself fails.</div>
+            <div class="m-msg" style="margin:9px 0 0">This line <b>starts</b> a copy; it does not wait for one. The answer comes back at once and says the job was accepted, nothing more. Whether the copy went through is on this page and in the history — and can be watched from outside, which is what the <b>GoSentry</b> tab is for.<br><br>Starting it is all there is to do <b>because this job writes to WebDAV</b>. Put <b>Download</b> in the destination and what is handed over here becomes a short script instead: the archive is a stream, and somebody has to be at the other end to take it.</div>
+            <div style="border-top:.5px solid var(--hair);margin-top:11px;padding-top:9px;display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+              <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" style="transform:rotate(-90deg);color:var(--dusty);flex:none"><use href="#i-chev"/></svg>
+              <span style="font-size:12.5px">The password on its own, and the other endpoints</span>
+              <span style="font-size:11.5px;color:var(--dusty)">— for a request written by hand; the line above already carries it</span>
+            </div>
           </div>
         </div>
       </div>
@@ -4166,8 +4331,99 @@ An administrator can give you a new password, but doing so replaces the key: eve
     </div></div>
   </div>
 </div>
-<figcaption>Файловые коллекции в списке источников — по правилу равенства коллекций (<a href="#parity">2.1</a>), и рядом с каждой показан прошлый объём: два гигабайта и два мегабайта требуют разных решений о частоте и месте. Задачи и заметки отдельными строками не выбираются — они лежат в календарных коллекциях, и об этом сказано прямо, а не оставлено на догадку. Способ доставки — не настройка «куда положить файл», а выбор из трёх: на сервер, себе в браузер, и то и другое; у «себе» нет ни папки, ни срока хранения, ни расписания, потому что некому отдавать файл в три часа ночи. Источники выбираются тем же компонентом, что и везде: аккаунт с трёхпозиционным флажком, под ним коллекции с полосками. Ничего нового учить не нужно — это тот же рейл, только развёрнутый в сетку. У каждой строки написано, что это за коллекция и сколько весила в прошлый раз; у файловых это решает исход дела, потому что два гигабайта и два мегабайта требуют разных решений о частоте и месте. <b>Шифрование архива — флажок, а не данность:</b> по умолчанию включено, но копия на диск, к которому и так никто, кроме вас, не подходит, вполне может лежать открытой — и тогда её распакует любой архиватор, без Carrel. Спецификация (§23.3) требует шифрования безусловно; это макет решения смягчить требование, и §23.3 придётся поправить вместе с ним.<br><br><b>Пароль запуска появляется по нажатию и виден один раз</b> — сразу, не дожидаясь сохранения задания, вместе с готовой строкой <span class="mono">curl</span>: иначе человек сохраняет задание и остаётся с флажком, за которым ничего не видно. Токен выдаётся <b>на задание</b>, а не на аккаунт: машина, которая запускает рабочую копию по расписанию, не должна уметь запускать личную.</figcaption>
+<figcaption>Файловые коллекции в списке источников — по правилу равенства коллекций (<a href="#parity">2.1</a>), и рядом с каждой показан прошлый объём: два гигабайта и два мегабайта требуют разных решений о частоте и месте. Задачи и заметки отдельными строками не выбираются — они лежат в календарных коллекциях, и об этом сказано прямо, а не оставлено на догадку. Способ доставки — не настройка «куда положить файл», а выбор из трёх: на сервер, себе в браузер, и то и другое; у «себе» нет ни папки, ни срока хранения, ни расписания, потому что некому отдавать файл в три часа ночи. Источники выбираются тем же компонентом, что и везде: аккаунт с трёхпозиционным флажком, под ним коллекции с полосками. Ничего нового учить не нужно — это тот же рейл, только развёрнутый в сетку. <b>Шифрование архива — флажок, а не данность:</b> по умолчанию включено, но копия на диск, к которому и так никто, кроме вас, не подходит, вполне может лежать открытой — и тогда её распакует любой архиватор, без Carrel. Спецификация требовала шифрования безусловно; §23.3 поправлена вместе с этим макетом — включено по умолчанию, выключается осознанно, и там же сказано, чем это оборачивается вместе с триггер-паролем.<br><br><b>Наружу отдаётся строка, а не пароль.</b> Тот, кто включил внешний триггер, пришёл не за секретом: ему нужно, чтобы копия снималась в три часа ночи, а для этого нужна строка в crontab на машине с часами. Пароль в ней уже стоит, поэтому отдельным полем он не нужен — собрать команду по документации человек может и сам, но это работа, которую мы умеем сделать за него, и делаем. Пароль сам по себе убран под раскрывашку внизу карточки: он нужен тому, кто дёргает API руками, и таких меньшинство — <a href="#trigger-secret">но им он нужен по-настоящему</a>, вместе с остальными эндпоинтами.<br><br><b>Строка одна и без переносов.</b> crontab не понимает продолжения по обратному слэшу, и красиво разложенная на четыре строки команда сломается ровно у того, кто ей поверил; перенос на экране делает браузер, а «Copy the line» кладёт в буфер одну строку. Время стоит внутри неё, а не полем на этой странице: расписание живёт на той машине, и два места, где оно якобы задаётся, разъехались бы в первый же месяц. Часов у Carrel нет не по недосмотру — планировщик внутри означал бы пароль, сохранённый на диске рядом с обёрткой ключа, то есть ровно ту уступку, которой §4 избегает.<br><br><b>Пароль появляется по нажатию и виден один раз</b> — сразу, не дожидаясь сохранения задания: иначе человек сохраняет задание и остаётся с флажком, за которым ничего не видно. Токен выдаётся <b>на задание</b>, а не на аккаунт: машина, которая запускает рабочую копию по расписанию, не должна уметь запускать личную.</figcaption>
 </figure>
+
+<figure style="max-width:840px">
+<div class="frame">
+  <div class="frame-label"><span>Внешний триггер · когда файл ещё надо забрать</span><span class="plan">не построено</span><i>то же задание, назначение «Both»</i></div>
+  <div class="mock">
+    <div class="m-shell no-rail"><div class="m-main"><div class="m-form">
+      <div class="m-card" style="flex:1 1 100%;border-color:var(--accent);margin:0">
+        <div class="m-rubric">The script to paste <span class="mono" style="letter-spacing:0;color:var(--alert)">visible only now</span></div>
+        <div style="font-size:11.5px;color:var(--dusty);margin:-3px 0 8px">Destination: <b style="color:var(--muted)">WebDAV and download</b> — two steps, so this is a file, not a line</div>
+        <span class="m-seg" style="align-self:flex-start"><span class="is-on">crontab</span><span>GoSentry</span><span>Gitea</span><span>curl</span></span>
+        <div class="m-diag" style="margin-top:9px;color:var(--ink)">#!/bin/sh
+set -eu
+h='Authorization: Bearer cbk_7f3a-91de-4402-lamp'
+b=https://carrel.example/api/backup
+out=/var/backups
+
+id=$(curl -fsS -X POST -H "$h" "$b/run?job=personal")
+until [ "$(curl -fsS -H "$h" "$b/status?id=$id")" != running ]; do sleep 20; done
+curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
+          <span class="m-btn is-primary"><svg viewBox="0 0 24 24"><use href="#i-dup"/></svg>Copy the script</span>
+          <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Save as <span class="mono" style="font-size:11px">carrel-personal.sh</span></span>
+          <span class="m-btn is-quiet">Regenerate</span>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.55">Put it where the password is to live, make it executable, and give <span class="mono">crontab -e</span> one line: <span class="mono">0 3 * * * /usr/local/bin/carrel-personal.sh</span> — the schedule stays a line, the work moves into the file. The date has to live in the script and not in the crontab line: <span class="mono">cron</span> reads <span class="mono">%</span> as a newline, so <span class="mono">date +%F</span> written up there would break the entry.</div>
+        <div class="m-msg" style="margin:9px 0 0">A copy that fails needs no separate check: the download answers with an error, <span class="mono">set -eu</span> stops the script on it, and cron sends the mail. The wait is open-ended on purpose — a copy takes what it takes, and <span class="mono">409</span> until then means «not yet», not «broken».</div>
+      </div>
+    </div></div></div>
+  </div>
+</div>
+<figcaption><b>Что отдаётся, зависит от того, куда сохраняется.</b> Задание, пишущее на WebDAV, требует одного действия — запустить, — и получает строку. Задание с «Download» файл никуда не кладёт: архив существует только как поток, и если на том конце никого нет, копии не будет вовсе. Поэтому у такого задания триггер из двух шагов, а честная «готовая команда» для него — не строка, а короткий скрипт: запустить, дождаться, забрать. Отдать вместо него ту же однострочную команду означало бы каждую ночь исправно запускать копирование, которое никто не забирает.<br><br><b>Три назначения — три формы.</b> На WebDAV — строка в crontab. «Both» — скрипт: файл уже лежит на сервере, и <span class="mono">download</span> просто приносит его же копию себе. Только «Download» — снова одна строка, но другая: там нечего ждать, потому что архив собирается в том же запросе, которым его забирают, — <span class="mono">GET /api/backup/download?job=…</span> с <span class="mono">-o</span>, и весь триггер на этом кончается. Долгий ответ здесь тайм-аута прокси не боится в отличие от долгого молчаливого <span class="mono">POST</span>: байты идут непрерывно, и таймер простоя не срабатывает.<br><br><b>Вкладки различаются местом расписания, а не тем, что кому можно.</b> Скрипт один и тот же: GoSentry запускает его так же, как cron, и так же, как задание в Gitea, — разница только в том, где живёт время. У cron оно строкой в crontab, у GoSentry и Gitea — своим полем, поэтому их вкладки отдают скрипт вместе с расписанием, а не внутри строки. Ни одна из вкладок для такого задания не гаснет; то, что GoSentry вдобавок умеет смотреть, не устарела ли последняя удачная копия, — не другая роль, а бесплатная добавка к тому же триггеру.<br><br><b>Форма ответа API — следствие этого экрана, а не наоборот.</b> Чтобы скрипт держался на одном <span class="mono">curl</span> без <span class="mono">jq</span>, запуск отвечает идентификатором строкой, а статус — одним словом. Спрашивают статус двумя способами, и оба нужны: по идентификатору запуска — так делает скрипт, ему важен именно этот запуск; по заданию — так делает сторож, ему важна последняя удачная копия. Всё это дописано в §23.3 таблицей запросов и ответов: раньше там было сказано «возвращает идентификатор», но не сказано чем, а отдельного адреса для «собери и отдай» не было вовсе.</figcaption>
+</figure>
+
+<div class="frames">
+  <figure style="flex:1 1 460px">
+  <div class="frame">
+    <div class="frame-label"><span>Внешний триггер · вкладка GoSentry</span><span class="plan">не построено</span><i>та же карточка</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main"><div class="m-form">
+        <div class="m-card" style="flex:1 1 100%;border-color:var(--accent);margin:0">
+          <div class="m-rubric">The fields to paste <span class="mono" style="letter-spacing:0;color:var(--alert)">visible only now</span></div>
+          <span class="m-seg" style="align-self:flex-start"><span>crontab</span><span class="is-on">GoSentry</span><span>Gitea</span><span>curl</span></span>
+          <div style="display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:8px 12px;align-items:center;margin-top:11px">
+            <span style="font-size:11px;color:var(--dusty)">URL</span>
+            <span class="m-in is-mono" style="font-size:11px">POST https://carrel.example/api/backup/run?job=personal</span>
+            <span class="m-btn is-sm">Copy</span>
+            <span style="font-size:11px;color:var(--dusty)">Header</span>
+            <span class="m-in is-mono" style="font-size:11px">Authorization: Bearer cbk_7f3a-91de-4402-lamp</span>
+            <span class="m-btn is-sm">Copy</span>
+            <span style="font-size:11px;color:var(--dusty)">Every</span>
+            <span class="m-in is-mono" style="font-size:11px">day · 03:00</span>
+            <span></span>
+            <span style="font-size:11px;color:var(--dusty)">Expect</span>
+            <span class="m-in is-mono" style="font-size:11px">202 · accepted</span>
+            <span></span>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.55">GoSentry asks for a form, not for a line, so this tab hands over the fields its form asks for — one press each. A shell command dropped into a form field would be of use to nobody.</div>
+          <div class="m-msg" style="margin:9px 0 0">Worth a second check while you are in there: <span class="mono">GET /api/backup/status?job=personal</span> with the same header, sounding off when the last <b>successful</b> copy is older than 26 hours. The first check says the copy was asked for; only the second says it happened.</div>
+        </div>
+      </div></div></div>
+    </div>
+  </div>
+  <figcaption>«Готовая команда» — это то, что примет цель, а не непременно строка для оболочки. Задание, которому хватает одного запроса, для GoSentry — обычная проверка, и вход у неё не строка, а форма: адрес, заголовок, расписание, ожидаемый ответ. Поэтому вкладка выдаёт ровно те поля, которые он спрашивает, и по кнопке на каждое — длинный заголовок с токеном руками не перенабирают. Заданию, которому нужен скрипт, эта же вкладка отдаёт скрипт: чем платить, решает не инструмент, а число шагов.<br><br><b>Вторая проверка предложена не для полноты.</b> Запуск отвечает сразу и говорит только, что задание приняли; молча провалившийся бэкап — то, против чего написан §23.3, и снаружи его ловит проверка статуса, а не то, что cron отработал без ошибки.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 380px" id="trigger-secret">
+  <div class="frame">
+    <div class="frame-label"><span>Внешний триггер · пароль сам по себе</span><span class="plan">не построено</span><i>раскрывашка развёрнута</i></div>
+    <div class="mock">
+      <div class="m-shell no-rail"><div class="m-main"><div class="m-form">
+        <div class="m-card" style="flex:1 1 100%;margin:0">
+          <div class="m-rubric">The password on its own <span class="mono" style="letter-spacing:0;color:var(--alert)">visible only now</span></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="m-in is-mono" style="flex:1;min-width:200px;font-size:13px;letter-spacing:.03em">cbk_7f3a-91de-4402-lamp</span>
+            <span class="m-btn">Copy</span>
+          </div>
+          <div class="m-rubric" style="margin:13px 0 6px">What it opens</div>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:7px 0;font-size:11.5px">
+            <span><span class="mono">POST /api/backup/run?job=personal</span><br><span style="color:var(--dusty)">starts a copy · answers <span class="mono">202</span> and an id, a second one while it runs is refused</span></span>
+            <span><span class="mono">GET /api/backup/status?job=personal</span><br><span style="color:var(--dusty)">how the running one is doing, and how the last one ended</span></span>
+            <span><span class="mono">GET /api/backup/{id}/download</span><br><span style="color:var(--dusty)">the archive itself, once it is done — <span class="mono">409</span> while it runs</span></span>
+          </div>
+          <div class="m-msg is-alert" style="margin:11px 0 0">No collections, no settings — but read the third line together with <b>Encrypt the archive</b> in this job: the password can pull the archive down as well, and an archive with encryption turned off is your data in the clear.</div>
+          <div style="font-size:11.5px;color:var(--dusty);margin-top:9px">Every use is logged, naming this password. <b>Regenerate</b> replaces it on the spot — and every line already handed out stops working with it.</div>
+        </div>
+      </div></div></div>
+    </div>
+  </div>
+  <figcaption>Меньшинство, ради которого пароль всё-таки показывают отдельно: тот, кто пишет запрос руками и читал документацию. Ему нужен не только секрет, но и то, что им открывается, — поэтому рядом все три эндпоинта и границы области действия. Раскрывашка закрыта по умолчанию не из скрытности: девять из десяти пришли за строкой, и первое, что они видят, — строка.<br><br><b>Оговорка про шифрование стоит именно здесь.</b> Флажок «Encrypt the archive» выше кажется вопросом о папке назначения, а на самом деле он решает и это: тем же паролем, который лежит на машине с часами, архив можно забрать. Выключать шифрование можно там, где и триггер-пароль никуда с этой машины не уходит.</figcaption>
+  </figure>
+</div>
 
 <figure style="max-width:760px">
 <div class="frame">
@@ -4937,6 +5193,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 <h2 id="s-plan-small">7.18 Мелкое запланированное — где оно живёт в этих макетах</h2>
 <table class="doc">
   <tr><th style="width:30%">Что</th><th style="width:26%">Где показано</th><th>Что нужно сделать</th></tr>
+  <tr><td>Завести, переименовать, удалить коллекцию (§10.1)</td><td>Нарисовано: <a href="#collections">7.10.1</a>; кнопки — в рейле 7.1 и 7.2 и в карточке аккаунта 7.10</td><td>Транспорту нужны <code>PROPPATCH</code> и <code>MkCol</code> с телом; <code>DELETE</code> уже есть</td></tr>
   <tr><td>Attachments у задач (§23.10)</td><td>Нарисовано: 7.3, блок <b>Attachments</b> в карточке задачи</td><td>Модель готова: дело за карточкой</td></tr>
   <tr><td>Когда коллекция читалась и менялась (§23.8)</td><td>Блок <b>Source</b> в панели подробностей, 7.2</td><td>Кэш это уже знает — не хватает только вывода</td></tr>
   <tr><td>Исходный часовой пояс события (§23.8)</td><td>Поле <b>Time zone</b> в форме события, 7.2</td><td>Данные в <code>DTSTART</code>; показывать, когда отличается от общего</td></tr>

@@ -31,7 +31,7 @@ Sources: §23 of [carrel-spec.md](carrel-spec.md) for the features, §25.6 for t
 
 ## Gaps in what is built
 
-Found by reading the stage plans back against the code they describe, and worth being honest about rather than discovering later. The first four are requirements from the main specification that were carried from plan to plan as "a later strengthening" and never landed; the rest are consequences of decisions that were correct at the time.
+Found by reading the stage plans back against the code they describe, and worth being honest about rather than discovering later. The first five are requirements from the main specification — four of them carried from plan to plan as "a later strengthening" and never landed, and one that was never written down at all until the mockups went looking for it; the rest are consequences of decisions that were correct at the time.
 
 ### Requirements not met
 
@@ -44,6 +44,8 @@ Found by reading the stage plans back against the code they describe, and worth 
 **A full DAV server test in the administration panel (§6).** The validator at `/admin/dav` runs discovery only — the same read-only chain as the connection screen, with a step-by-step trace when something fails. That answers whether Carrel will *see* the server, which is where most connection attempts die, but it does not answer whether the server will *work* once a user starts editing. A person developing or operating a DAV server needs the second question too: does `calendar-query` survive with the Depth Carrel sends, does `multiget` return what was asked for, does a conditional create refuse to overwrite, does an ETag conflict surface as 412 rather than silent corruption, do CardDAV and WebDAV file operations behave the way the providers expect. Those are the failures integration testing found in Carrel itself — principal under a base path, a download truncated at the response ceiling, a precondition a server accepts and ignores — and they do not show up in discovery.
 
 What is wanted is a **second, optional stage** after discovery succeeds, clearly marked as **mutating**: it creates short-lived test objects in the collections discovery found (or in a dedicated test collection if the server supports one), exercises the operations Carrel actually performs — not abstract RFC compliance and not a replacement for the CalDAV Test Suite — reads them back, checks the answers, and deletes what it created. Failures name the operation, the request shape and what came back, in the same spirit as the discovery trace. It must not run silently on a production calendar; the administrator opts in, sees the warning, and the run is audited. Discovery stays read-only and remains the default; the full pass is for developers debugging an implementation and for an administrator who wants proof beyond «collections were listed» before handing credentials to users.
+
+**Creating, renaming and deleting collections (§10.1).** Not a strengthening that slipped, but a hole nobody had written down: Carrel can write events and cards, and cannot make the calendar or address book to put them in. Someone who stands up a clean Baikal and connects it here first lands in an interface with nothing to work on, and goes to the server's own admin panel — precisely the place Carrel promised to take them away from. File collections have had folder creation from the start (`MKCOL`); calendars and address books have nothing, and the parity rule the mockups apply says that is not a decision but an oversight. §10.1 now states it: `MKCALENDAR` and extended `MKCOL` to create, `PROPPATCH` to rename and recolour, `DELETE` to remove, two methods added to the transport of §7, and a deletion flow that names what points at the collection before it goes. Where it falls in the order below is open.
 
 ### Built past the spec
 
@@ -111,13 +113,19 @@ Carrel reads from one server and writes to another, so §2 stays intact: nothing
 
 The archive is raw `.ics` and `.vcf` **as they are**, in `account/collection` directories, with a manifest recording the date, the version, the collections and the ETags at the time. A copy that only its own program can restore is a bad copy.
 
+Backup is a list of **jobs**, not a switch in the settings: each with its own sources, destination, trigger and retention. Work calendars daily to a company server and personal things weekly to a home disk are two jobs, not a compromise between them.
+
 In order of increasing compromise, and the order they should be built in:
 
 1. **On demand.** The person is signed in, the key is unwrapped, the archive goes where they chose. No concession to the security model at all.
 2. **On sign-in.** If the last copy is older than N days, offer or take one in the session that is already open. Someone who signs in weekly gets weekly copies for free, and no secret is stored.
-3. **External trigger.** `POST /api/backup/run` with an app-password whose scope is exactly one thing: starting a backup. Not reading collections, not settings, nothing else. Asynchronous, rate limited, audited, and refusing a second run while one is going. The scheduler is `cron` or anything else, and the secret lives on the machine that holds the schedule. Plus `GET /api/backup/{id}/download` for people with nowhere to write, streamed and never landing on the server's disk.
+3. **External trigger.** `POST /api/backup/run` with an app-password whose scope is exactly one job and starting it: not reading collections, not settings, not the neighbouring job. Asynchronous, rate limited, audited, and refusing a second run while one is going. The scheduler is `cron` or anything else, and the secret lives on the machine that holds the schedule. Plus `GET /api/backup/{id}/download` for people with nowhere to write, streamed and never landing on the server's disk.
 
-Non-negotiable whatever the trigger: the archive is encrypted under its own password, distinct from the login password, because the target may be somebody else's hosting; the file is dated rather than overwritten and N are kept; what was written is read back and checked, because a backup that failed quietly is worse than none; a failure on one collection marks it in the manifest and continues; and **restore is part of the feature**, because a copy with no tested restore is a feeling and not a protection.
+   What the interface hands over is the finished command, not the password — that is what most people came for, and §23.3 fixes the answer shapes accordingly: the id as a bare line, the status as one word, so a `sh` script on somebody else's machine needs no `jq`. A job that also hands the file back needs **two** steps, and gets a short script rather than a line; a download-only job needs one request that makes the archive and streams it in the same breath.
+
+Non-negotiable whatever the trigger: the file is dated rather than overwritten and N are kept; what was written is read back and checked, because a backup that failed quietly is worse than none; a failure on one collection marks it in the manifest and continues; and **restore is part of the feature**, because a copy with no tested restore is a feeling and not a protection — restorable into an empty instance, from a file, without a job.
+
+Encryption under a separate password, distinct from the login one, is **on by default** rather than unconditional: the target may be somebody else's hosting, but a copy landing where nobody but the owner ever goes may reasonably be left open, and then any archiver reads it without Carrel. §23.3 states the consequence in the same breath — with encryption off, whoever holds the trigger password can pull the archive down in the clear.
 
 ### 3. Read-only publication (§23.4)
 

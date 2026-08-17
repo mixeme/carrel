@@ -4,6 +4,26 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **Creating, renaming and deleting collections — §10.1 and its screens.** A hole nobody had written down: Carrel could write events and cards, and could not make the calendar or address book to put them in. Someone standing up a clean Baikal landed in an interface with nothing to work on and went to the server's own admin panel — precisely the place Carrel promises to take them away from. File collections have had `MKCOL` from the start, so the collection parity rule (§2.1) says this was an oversight rather than a decision, and the parity table now carries the row.
+
+  The new section sits in §10 «Данные» and not in §23, because this is missing data work and not an addition on top of a finished web client. It fixes the wire operations per kind (`MKCALENDAR`, extended `MKCOL`, `PROPPATCH`, `DELETE`), the two methods the transport of §7 still lacks — `PropPatch` and a `MkCol` that can send a body — address derivation from the name and its immutability afterwards (a change of address is `MOVE`, after which the collection vanishes and reappears for every configured client), the component set as a decision that can only be made once because most servers freeze it at creation, and the fact that the right to create lives on the home-set where discovery never looks: the button is therefore not hidden in advance and the server's refusal is shown as diagnostics, method, code and body, the way a failed connection already is.
+
+  Four screens in [7.10.1](docs/visual/carrel-ui-mockups.html): the new-collection sheet, that refusal, rename-and-colour, and deletion. **Deletion earns its own rules** — the only Carrel operation that destroys somebody else's data in bulk, and one to which §8 does not apply because there is nothing left to preserve. It lists what points at the collection (published links, backup jobs, davloom devices), offers the export before rather than after, and confirms by typing the name, because everything it would destroy cannot be listed. Entry points: buttons in the contacts and calendar rails, `New collection` on each account card in Connections, and a per-collection menu. The account's `Remove` became `Disconnect`: a button that deletes data on somebody else's server now stands next to it, and two adjacent buttons meaning «delete» with opposite consequences would eventually be confused.
+
+### Changed
+
+- **The external backup trigger hands over the finished command, not the password (§23.3).** Whoever turns it on came for a copy taken at three in the morning, which means a line in `crontab` on the machine that holds the schedule; the password is already inside that line, and assembling the call from documentation is work that can be done for them. The password moved to a disclosure below, where it matters to the minority writing the request by hand — and is worth showing properly there, with the other endpoints and the bounds of what it opens. The line is one line and stays one: `cron` understands no continuations, and the time lives inside it rather than in a second place on the screen.
+
+  **A destination other than WebDAV alone changes the shape of what is handed over.** A job that also gives the file back needs two steps — start it, wait, take the archive — so it gets a short script instead of a line, and the crontab entry only calls that script; a download-only job gets a single request that builds and streams the archive in one breath. Tabs for `cron`, GoSentry, Gitea and plain `curl` differ in where the schedule lives, not in what each tool is allowed to do.
+
+  §23.3 gained the contract this requires: the run answers with the id as a bare line and the status as one word, so a `sh` script on somebody else's machine needs no `jq`; status is asked by run id and by job; `GET /api/backup/download?job=` covers the download-only case. Asynchrony is explained rather than assumed — a silent `POST` running for minutes hits the proxy timeout, a stream continuously delivering bytes does not. The password's scope is now one job and starting it, not the account. Backup as a **list of jobs** is written down, with its three destinations and what each requires of the trigger.
+
+- **Archive encryption is on by default rather than unconditional (§23.3),** with the consequence named in the same breath: with it off, whoever holds the trigger password can pull the archive down in the clear. This is the edit the 0.8.0 mockups said §23.3 would need.
+
+- §10 is now **[частично]**; §24.8 gained two checks (a job's trigger password starts no other job and reads no collection; one user cannot create, rename or delete another's collection). [docs/roadmap.md](docs/roadmap.md) records §10.1 among the requirements not met and no longer claims backup encryption is non-negotiable.
+
 ## [0.8.0] - 2026-08-17
 
 **Экранный эталон и подготовка десктопа.** Полный набор макетов в [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html); план обёртки §18; `CARREL_BIND` для local-режима. Функциональный объём v1 в коде без изменений; ручная приёмка — [docs/manual-acceptance.md](docs/manual-acceptance.md).
