@@ -5063,7 +5063,10 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
           </div>
           <div class="b">
             <div class="m-f" style="width:100%"><label>To</label>
-              <span class="m-in is-focus">a.kovaleva@example.org, a.belov@example.org</span>
+              <span class="m-in is-focus" style="gap:5px;flex-wrap:wrap">
+                <span class="m-tag"><span class="m-bar3" style="background:#4A6B52;height:11px"></span> Анна Ковалёва · a.kovaleva@example.org</span>
+                <span class="m-tag"><span class="m-bar3" style="background:#6B4E7A;height:11px"></span> Артём Белов · a.belov@example.org</span>
+              </span>
               <span class="m-hint">2 of 10 recipients. Everyone sees the whole list.</span></div>
             <div class="m-f" style="width:100%"><label>Subject</label><span class="m-in">Контакты подрядчика и смета</span></div>
             <span class="m-in is-area" style="min-height:82px;font-size:13.5px;line-height:1.6">Анна, Артём — вот карточка подрядчика и смета, которую он прислал. Договор в папке, ссылка ниже.</span>
@@ -5130,8 +5133,34 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   <figcaption>Порядок тот же, что в рейле, файлы — своей группой. Метка у папки стоит уже здесь: решение «ссылкой» принято до того, как её выбрали, и узнать об этом позже было бы неприятным сюрпризом. У остальных строк метки нет — размер выяснится, когда объект выберут.</figcaption>
   </figure>
 
-  <figure style="flex:1 1 420px">
+  <figure style="flex:1 1 430px">
   <div class="frame">
+    <div class="frame-label"><span>Поле To подставляет из адресных книг</span><i>набрано «бел»</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div style="display:flex;flex-direction:column;gap:0;width:100%;max-width:400px">
+        <div class="m-f" style="width:100%"><label>To</label>
+          <span class="m-in is-focus" style="gap:5px;flex-wrap:wrap">
+            <span class="m-tag"><span class="m-bar3" style="background:#4A6B52;height:11px"></span> Анна Ковалёва · a.kovaleva@example.org</span>
+            <span style="color:var(--muted)">бел</span>
+          </span></div>
+        <div class="m-menu" style="width:100%;margin-top:3px">
+          <div class="is-on"><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-two"><span>Артём Белов</span><span style="font-size:11px;color:var(--dusty)" class="mono">a.belov@example.org</span></span><span class="m-tag" style="margin-left:auto">work</span></div>
+          <div><span class="m-bar3" style="background:#6B4E7A"></span><span class="m-two"><span>Артём Белов</span><span style="font-size:11px;color:var(--dusty)" class="mono">belov@personal.example</span></span><span class="m-tag" style="margin-left:auto">home</span></div>
+          <div><span class="m-bar3" style="background:#4A6B52"></span><span class="m-two"><span>Белла Янковская</span><span style="font-size:11px;color:var(--dusty)" class="mono">b.yankovskaya@example.org</span></span></div>
+          <span class="sep"></span>
+          <div style="color:var(--muted)"><svg><use href="#i-mail"/></svg>Use «бел» as typed</div>
+          <div style="height:auto;padding:4px 8px 2px;font-size:11px;color:var(--dusty);line-height:1.45;display:block">Searched 4 of 5 address books · <span style="color:var(--alert)">baikal · Офис did not answer</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption><b>Не подставлять было бы издевательством:</b> Carrel держит адресные книги и ищет по ним сквозь все аккаунты — заставлять человека уходить в «Контакты» за адресом, который лежит здесь же, не за чем. Механизм не новый: это тот же веерный поиск раздела <a href="#s-find">7.6</a>, только результат ограничен карточками с почтой.<br><br><b>Строка — это адрес, а не человек.</b> У Артёма их два, и они стоят двумя строками с метками из самой карточки: выбирают, куда написать, и решать это за человека нельзя. Карточки без адреса не показываются вовсе — предлагать того, кому нельзя написать, значит предлагать ошибку. Полоска коллекции слева стоит по той же причине, что и везде: одинаковых имён в разных книгах хватает.<br><br><b>Две последние строки — самое важное в этом списке.</b> «Use as typed» держит открытым главный случай — адрес, которого ни в одной книге нет, и поле обязано остаться обычным полем ввода. А строка внизу говорит, где искали: не ответившая книга означает, что человека в списке может не быть <b>не потому, что его нет</b>. Молчание здесь читалось бы как ответ «такого контакта у вас нет», и это ровно та тишина, против которой написан §23.8.<br><br>Истории отправок нет намеренно: «кому писали в прошлый раз» — это содержимое, а его Carrel у себя не держит (§2). Списки рассылки из <code>CATEGORIES</code> тоже не разворачиваются — одно нажатие, превращающееся в сорок получателей, стоит отдельного разговора, а не строки в подсказке.</figcaption>
+  </figure>
+</div>
+
+<div class="frames">
+  <figure style="flex:1 1 420px">
+  <div class="frame" style="max-width:820px">
     <div class="frame-label"><span>Отправить ссылку письмом</span><span class="plan">не построено</span><i>из Published links и из карточки объекта</i></div>
     <div class="mock" style="padding:16px;background:var(--bg)">
       <div class="m-sheet" style="width:100%;max-width:100%">
