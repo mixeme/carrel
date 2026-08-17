@@ -2113,8 +2113,8 @@ Read  2 min ago</div>
       <div class="m-menu">
         <div class="is-on"><svg><use href="#i-quill"/></svg>Note<span class="m-kbd">N</span></div>
         <span class="sep"></span>
-        <div><svg><use href="#i-cal"/></svg>Event<span class="m-kbd">E</span></div>
         <div><svg><use href="#i-con"/></svg>Contact<span class="m-kbd">C</span></div>
+        <div><svg><use href="#i-cal"/></svg>Event<span class="m-kbd">E</span></div>
         <div><svg><use href="#i-task"/></svg>Task<span class="m-kbd">T</span></div>
         <span class="sep"></span>
         <div><svg><use href="#i-up"/></svg>Upload file…</div>
@@ -2124,7 +2124,7 @@ Read  2 min ago</div>
       </div>
     </div>
   </div>
-  <figcaption>Основное нажатие делает заметку — самое частое действие и то, ради чего к Carrel возвращаются. Остальное под стрелкой, в том же порядке, что разделы в рейле.<br><br><b>Письмо (<a href="#s-mail">7.17</a>) встало сюда же, последней группой.</b> Своей кнопки в панели оно не получает: отправка — не шестой раздел и не то, ради чего сюда заходят, а место у стрелки описано ровно как «всё остальное, что можно создать». Письмо — единственный пункт этого меню, который ничего не создаёт в коллекции, поэтому оно отделено чертой, а не подставлено в общий список; порядок «разделы, файлы, письмо» читается от частого к редкому.</figcaption>
+  <figcaption>Основное нажатие делает заметку — самое частое действие и то, ради чего к Carrel возвращаются. Остальное под стрелкой, в том же порядке, что разделы в рейле: контакт, событие, задача — заметка уже наверху, отдельной кнопкой.<br><br><b>Письмо (<a href="#s-mail">7.17</a>) встало сюда же, последней группой.</b> Своей кнопки в панели оно не получает: отправка — не шестой раздел и не то, ради чего сюда заходят, а место у стрелки описано ровно как «всё остальное, что можно создать». Письмо — единственный пункт этого меню, который ничего не создаёт в коллекции, поэтому оно отделено чертой, а не подставлено в общий список; порядок «разделы, файлы, письмо» читается от частого к редкому.</figcaption>
   </figure>
 
   <div style="flex:1 1 420px">
@@ -5122,15 +5122,15 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
         <div><svg><use href="#i-con"/></svg>Address book…</div>
         <div><svg><use href="#i-cal"/></svg>Event…</div>
         <div><svg><use href="#i-cal"/></svg>Calendar for a range…</div>
-        <div><svg><use href="#i-note"/></svg>Note…</div>
         <div><svg><use href="#i-task"/></svg>Task…</div>
+        <div><svg><use href="#i-note"/></svg>Note…</div>
         <span class="sep"></span>
         <div><svg><use href="#i-doc"/></svg>File…</div>
         <div><svg><use href="#i-file"/></svg>Folder…<span class="m-tag" style="margin-left:auto">link</span></div>
       </div>
     </div>
   </div>
-  <figcaption>Порядок тот же, что в рейле, файлы — своей группой. Метка у папки стоит уже здесь: решение «ссылкой» принято до того, как её выбрали, и узнать об этом позже было бы неприятным сюрпризом. У остальных строк метки нет — размер выяснится, когда объект выберут.</figcaption>
+  <figcaption><b>Порядок — рейловый, и это не вкусовщина:</b> контакты, календарь, задачи, заметки, файлы. Тот же порядок в рейле и в разделах 7.1–7.5 этого документа; меню, которое переставило бы заметки перед задачами, заставило бы читать список глазами вместо того, чтобы взять строку с известного места. Файлы — своей группой, потому что они единственные приходят не из календарной или адресной коллекции. Метка у папки стоит уже здесь: решение «ссылкой» принято до того, как её выбрали, и узнать об этом позже было бы неприятным сюрпризом. У остальных строк метки нет — размер выяснится, когда объект выберут.</figcaption>
   </figure>
 
   <figure style="flex:1 1 430px">
@@ -5173,6 +5173,10 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
         <div class="b">
           <div class="m-f" style="width:100%"><label>To</label><span class="m-in is-focus">n.orlova@example.org</span></div>
           <div class="m-f" style="width:100%"><label>A line from you</label><span class="m-in is-ph">optional</span></div>
+          <div style="display:flex;gap:8px;font-size:12px;line-height:1.5;color:var(--muted);padding-top:2px">
+            <span style="color:var(--dusty);flex:none">Sent as</span>
+            <span><b>Михаил Енученко</b> <span class="mono" style="font-size:11px">&lt;mix@carrel.example&gt;</span><br>Replies go to <span class="mono" style="font-size:11px">mix@example.org</span> · <span style="color:var(--accent)">change in Account</span></span>
+          </div>
           <div class="m-sec" style="padding:10px 0 0;margin:0">
             <div class="m-rubric">The letter carries</div>
             <ul style="font-size:12.5px;display:flex;flex-direction:column;gap:5px;color:var(--muted);margin-top:6px">
@@ -5190,7 +5194,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
       </div>
     </div>
   </div>
-  <figcaption><b>Письмо не заменяет кнопку «Copy».</b> Она стоит рядом в подвале, потому что мессенджер по-прежнему быстрее почты, а SMTP может быть не настроен вовсе — тогда исчезает эта форма, а не способ поделиться. Три строки в середине — не реклама функции, а три вещи, которые люди путают: письмо не несёт содержимого, отзыв ссылки действует и на уже отправленное, срок у письма не свой, а ссылкин.</figcaption>
+  <figcaption><b>«Sent as» — не украшение формы, а единственное место, где это ещё можно узнать.</b> Отправитель здесь не выбирается: форму адреса решил администратор, почту для ответов человек задал в учётной записи. Но узнать, с какого адреса ушло письмо, <b>после</b> отправки нельзя ниоткуда — копии себе Carrel не кладёт, — а получатель увидит адрес, которого отправитель может и не помнить у себя. Поэтому строка стоит до кнопки, а не в подсказке под ней, и ведёт туда, где это меняется. Если подтверждённой почты в профиле нет, вторая строка говорит не «Reply-To пуст», а что ответить будет нельзя и письмо об этом скажет.<br><br><b>Письмо не заменяет кнопку «Copy».</b> Она стоит рядом в подвале, потому что мессенджер по-прежнему быстрее почты, а SMTP может быть не настроен вовсе — тогда исчезает эта форма, а не способ поделиться. Три строки в середине — не реклама функции, а три вещи, которые люди путают: письмо не несёт содержимого, отзыв ссылки действует и на уже отправленное, срок у письма не свой, а ссылкин.</figcaption>
   </figure>
 </div>
 
