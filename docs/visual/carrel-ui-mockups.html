@@ -509,7 +509,7 @@ figcaption b{color:var(--ink);font-weight:600}
 
 <p class="lede">Полный набор экранов Carrel, нарисованный вёрсткой, а не картинками: каждый макет — живой HTML на тех же классах, которые предлагается перенести в <code>carrel.css</code>. Палитра, шрифты и приёмы взяты из <a href="carrel-brand-guide.html">визуального стиля</a>; здесь они доведены до конкретных экранов, сеток и размеров.</p>
 
-<div class="note"><b>Три вида текста, и они не смешиваются.</b> <b>Строки интерфейса</b> внутри макетов — по-английски, как в самом продукте: кнопки, подписи полей, заголовки столбцов, подсказки и предупреждения. Они должны совпадать со строками в <code>internal/web/template/*.html</code>, иначе макет нельзя положить рядом с шаблоном. <b>Данные</b> — по-русски: имена коллекций, события, контакты, файлы; это содержимое человека, а не продукта. <b>Рассуждение о решении</b> — по-русски и только в подписи под макетом; внутри экрана ему места нет, иначе оно однажды уедет в интерфейс.</div>
+<div class="note"><b>Три вида текста, и они не смешиваются.</b> <b>Строки интерфейса</b> внутри макетов — по-английски, как в самом продукте: кнопки, подписи полей, заголовки столбцов, подсказки и предупреждения. Они должны совпадать со строками в <code>internal/web/template/*.html</code>, иначе макет нельзя положить рядом с шаблоном. <b>Данные</b> — по-русски: имена коллекций, события, контакты, файлы; это содержимое человека, а не продукта. <b>Рассуждение о решении</b> — по-русски и только в подписи под макетом; внутри экрана ему места нет, иначе оно однажды уедет в интерфейс. <b>Ссылка на раздел спецификации — тоже рассуждение,</b> и «§» внутри макета означает, что правило обошли: язык у такой строки английский, интерфейсный, и на глаз она от строки продукта не отличается. Экран говорит, что произойдёт; почему так решено — в подписи. Проверяется поиском по «§» внутри <code>.mock</code>, и находилось дважды.</div>
 
 <h2>Содержание</h2>
 <nav class="toc" aria-label="Содержание">
@@ -4601,7 +4601,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
               <td class="m-acts"><span class="m-btn is-sm is-quiet">Copy</span><span class="m-btn is-sm is-danger">Revoke</span></td></tr>
           </tbody>
         </table>
-        <div class="m-msg">The feed is fetched on every access — by the owner and by whoever opens the secret link. Keeping a copy would be exactly the local storage of content §2 forbids. In the rail such a collection is marked <span class="m-badge">external</span> and <span class="m-badge">read-only</span>.</div>
+        <div class="m-msg">The feed is fetched on every access — by the owner and by whoever opens the secret link. Carrel keeps no copy of it: nothing from a feed is stored here. In the rail such a collection is marked <span class="m-badge">external</span> and <span class="m-badge">read-only</span>.</div>
       </div>
       <div class="m-side">
         <div class="m-head" style="padding-bottom:8px"><div><div class="m-h1" style="font-size:17px">Publish</div><div class="m-sub">Личный · nextcloud</div></div>
@@ -4630,7 +4630,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
     </div>
   </div>
 </div>
-<figcaption>Подписки заводятся и живут среди подключений (<a href="#subscribe">7.10</a>): для человека это источник, а не выданная ссылка; здесь они появляются с другой стороны. Столбцы «последний заход» и «заходов» — это не статистика ради статистики: по секретной ссылке отдают чужим людям, и единственный способ понять, что ссылка ушла дальше, чем предполагалось, — увидеть, что по ней ходят. «Не открывали» написано словами, потому что ноль в этом столбце читается хуже.</figcaption>
+<figcaption>Подписки заводятся и живут среди подключений (<a href="#subscribe">7.10</a>): для человека это источник, а не выданная ссылка; здесь они появляются с другой стороны. Столбцы «последний заход» и «заходов» — это не статистика ради статистики: по секретной ссылке отдают чужим людям, и единственный способ понять, что ссылка ушла дальше, чем предполагалось, — увидеть, что по ней ходят. «Не открывали» написано словами, потому что ноль в этом столбце читается хуже.<br><br>Сообщение про чужую ленту говорит на экране только факт — копии не остаётся, — а причина этому §2: кэш ленты на диске был бы ровно той локальной персистентностью содержимого, которой Carrel не допускает. Причина живёт здесь, в подписи, и на экран не выносится.</figcaption>
 </figure>
 
 <figure>
@@ -5289,7 +5289,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
             </table>
           </div>
         </div>
-        <div class="m-msg is-accent" style="margin:0 14px 12px">Attaching this one publishes a secret link for it (§23.4) and puts the link in the letter. The link appears in <b>Published links</b>, lives 30 days and can be revoked — which also closes it for whoever got the letter.</div>
+        <div class="m-msg is-accent" style="margin:0 14px 12px">This file is over the limit for an attachment, so the letter will carry a secret link to it instead. The link is listed in <b>Published links</b>, works for 30 days, and revoking it there closes it for whoever got the letter.</div>
       </div>
       <div class="f">
         <span class="m-btn is-primary">Attach</span>

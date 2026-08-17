@@ -36,6 +36,8 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- **Two mockups had specification references in their interface copy** — `§23.4` in the file picker of 7.17 and `§2` in the external-feed message of 7.16. The rule against this was already written down («рассуждение о решении — только в подписи под макетом»), and both lines slipped past it the same way: interface strings are English, so a sentence in English voice carrying a `§` does not look like document text at a glance. The rule now says outright that a section reference is reasoning whatever language surrounds it, and names the check — search for `§` inside `.mock`. Both screens now state the consequence («the letter will carry a secret link instead», «Carrel keeps no copy of it»); the reason each is so moved into the caption, where the rest of the reasoning lives.
+
 - **The collection stripe knew no size of its own.** `.m-bar3` was given width and height only inside `.m-src` and `.m-row`; everywhere else — screen headings, file names, subtitles, tags — it silently collapsed to zero width, and **60 of the 239 stripes in the mockups were not being drawn at all**, under captions explaining what the stripe means. It is the same mistake the row-height section of the mockups already describes: the size was known to the markup rather than to the system. A base rule now gives it 3×14 and `display:inline-block` so width applies in inline contexts too; the per-context rules stay and only override the height.
 
 ### Changed
