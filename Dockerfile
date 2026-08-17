@@ -17,11 +17,16 @@ ARG COMMIT=unknown
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -ldflags="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" \
     -o /out/carrel \
-    ./cmd/carrel
+    ./cmd/carrel \
+ && mkdir -p /out/data
 
 FROM gcr.io/distroless/static:nonroot
 
 COPY --from=build /out/carrel /carrel
+# Empty named volumes are seeded from this path, including owner and mode.
+# Owned by the image user (nonroot), mode 0700 — not world-writable, not a
+# numeric uid of our choosing.
+COPY --from=build --chown=nonroot:nonroot --chmod=0700 /out/data /var/lib/carrel
 
 EXPOSE 8080
 
