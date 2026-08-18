@@ -47,25 +47,37 @@
                 {{if $d.Crop}}
                 <div id="photo-crop" class="no-print">
                     <img class="contact-photo" src="{{$d.Crop.Preview}}" alt="Crop preview" width="128" height="128">
-                    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
+                    <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
                           hx-post="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
                           hx-target="#photo-crop" hx-swap="outerHTML"
                           hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
                         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                         <input type="hidden" name="action" value="crop_photo">
                         <input type="hidden" name="etag" value="{{$d.ETag}}">
-                        <label>Pan X <input type="number" name="pan_x" step="0.1" min="-1" max="1" value="{{$d.Crop.PanX}}"></label>
-                        <label>Pan Y <input type="number" name="pan_y" step="0.1" min="-1" max="1" value="{{$d.Crop.PanY}}"></label>
-                        <label>Zoom <input type="number" name="zoom" step="0.1" min="1" max="8" value="{{if $d.Crop.Zoom}}{{$d.Crop.Zoom}}{{else}}1{{end}}"></label>
-                        <label>Rotate
-                            <select name="rotate">
+                        <div class="form-field w-xs">
+                            <label for="pan_x">Pan X</label>
+                            <input id="pan_x" type="number" name="pan_x" step="0.1" min="-1" max="1" value="{{$d.Crop.PanX}}">
+                        </div>
+                        <div class="form-field w-xs">
+                            <label for="pan_y">Pan Y</label>
+                            <input id="pan_y" type="number" name="pan_y" step="0.1" min="-1" max="1" value="{{$d.Crop.PanY}}">
+                        </div>
+                        <div class="form-field w-xs">
+                            <label for="zoom">Zoom</label>
+                            <input id="zoom" type="number" name="zoom" step="0.1" min="1" max="8" value="{{if $d.Crop.Zoom}}{{$d.Crop.Zoom}}{{else}}1{{end}}">
+                        </div>
+                        <div class="form-field w-xs">
+                            <label for="rotate">Rotate</label>
+                            <select id="rotate" name="rotate">
                                 <option value="0"{{if eq $d.Crop.Rotate 0}} selected{{end}}>0°</option>
                                 <option value="90"{{if eq $d.Crop.Rotate 90}} selected{{end}}>90°</option>
                                 <option value="180"{{if eq $d.Crop.Rotate 180}} selected{{end}}>180°</option>
                                 <option value="270"{{if eq $d.Crop.Rotate 270}} selected{{end}}>270°</option>
                             </select>
-                        </label>
-                        <button type="submit">Update preview</button>
+                        </div>
+                        <div class="form-foot">
+                            <button type="submit">Update preview</button>
+                        </div>
                     </form>
                     <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
                         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
@@ -84,13 +96,17 @@
                     </form>
                 </div>
                 {{else if $d.PhotoEditable}}
-                <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" enctype="multipart/form-data">
+                <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                     <input type="hidden" name="action" value="upload_photo">
                     <input type="hidden" name="etag" value="{{$d.ETag}}">
-                    <label for="photo">Upload photo</label>
-                    <input id="photo" name="photo" type="file" accept="image/*" required>
-                    <button type="submit">Upload</button>
+                    <div class="form-field w-lg">
+                        <label for="photo">Upload photo</label>
+                        <div class="form-inline">
+                            <input id="photo" name="photo" type="file" accept="image/*" required>
+                            <button type="submit">Upload</button>
+                        </div>
+                    </div>
                 </form>
                 {{if $d.Contact.Photo.Present}}
                 <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
@@ -115,83 +131,112 @@
                 {{if $d.Contact.Note}}<dt>Note</dt><dd>{{$d.Contact.Note}}</dd>{{end}}
             </dl>
             {{else}}
-            <form method="post" class="contact-form" action="{{if $d.IsNew}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+            <form method="post" class="form contact-form" action="{{if $d.IsNew}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
 
-                <div class="form-field">
+                <div class="form-field w-xl">
                     <label for="fn">Display name</label>
                     <input id="fn" name="fn" type="text" value="{{$d.Form.FormattedName}}" required>
                 </div>
 
-                <div class="name-grid">
-                    <label{{if $d.HideEmpty $d.Form.Prefix}} class="is-empty"{{end}}>Prefix <input name="prefix" type="text" value="{{$d.Form.Prefix}}"></label>
-                    <label{{if $d.HideEmpty $d.Form.Given}} class="is-empty"{{end}}>Given <input name="given" type="text" value="{{$d.Form.Given}}"></label>
-                    <label{{if $d.HideEmpty $d.Form.Additional}} class="is-empty"{{end}}>Additional <input name="additional" type="text" value="{{$d.Form.Additional}}"></label>
-                    <label{{if $d.HideEmpty $d.Form.Family}} class="is-empty"{{end}}>Family <input name="family" type="text" value="{{$d.Form.Family}}"></label>
-                    <label{{if $d.HideEmpty $d.Form.Suffix}} class="is-empty"{{end}}>Suffix <input name="suffix" type="text" value="{{$d.Form.Suffix}}"></label>
+                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Prefix}} is-empty{{end}}">
+                    <label for="prefix">Prefix</label>
+                    <input id="prefix" name="prefix" type="text" value="{{$d.Form.Prefix}}">
+                </div>
+                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Given}} is-empty{{end}}">
+                    <label for="given">Given</label>
+                    <input id="given" name="given" type="text" value="{{$d.Form.Given}}">
+                </div>
+                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Additional}} is-empty{{end}}">
+                    <label for="additional">Additional</label>
+                    <input id="additional" name="additional" type="text" value="{{$d.Form.Additional}}">
+                </div>
+                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Family}} is-empty{{end}}">
+                    <label for="family">Family</label>
+                    <input id="family" name="family" type="text" value="{{$d.Form.Family}}">
+                </div>
+                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Suffix}} is-empty{{end}}">
+                    <label for="suffix">Suffix</label>
+                    <input id="suffix" name="suffix" type="text" value="{{$d.Form.Suffix}}">
                 </div>
 
-                <div class="form-field{{if $d.HideEmpty $d.Form.Nickname}} is-empty{{end}}">
+                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Nickname}} is-empty{{end}}">
                     <label for="nickname">Nickname</label>
                     <input id="nickname" name="nickname" type="text" value="{{$d.Form.Nickname}}">
                 </div>
 
-                <div class="form-field{{if $d.HideEmpty $d.Form.Organization}} is-empty{{end}}">
+                <div class="form-field w-md{{if $d.HideEmpty $d.Form.Organization}} is-empty{{end}}">
                     <label for="org">Organisation</label>
                     <input id="org" name="org" type="text" value="{{$d.Form.Organization}}">
                 </div>
 
-                <div class="form-field{{if $d.HideEmpty $d.Form.Title}} is-empty{{end}}">
+                <div class="form-field w-md{{if $d.HideEmpty $d.Form.Title}} is-empty{{end}}">
                     <label for="title">Title</label>
                     <input id="title" name="title" type="text" value="{{$d.Form.Title}}">
                 </div>
 
-                <div class="form-field{{if $d.HideEmpty $d.Form.Role}} is-empty{{end}}">
+                <div class="form-field w-md{{if $d.HideEmpty $d.Form.Role}} is-empty{{end}}">
                     <label for="role">Role</label>
                     <input id="role" name="role" type="text" value="{{$d.Form.Role}}">
                 </div>
 
-                <div class="form-field{{if $d.HideEmpty $d.Form.Birthday}} is-empty{{end}}">
+                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Birthday}} is-empty{{end}}">
                     <label for="bday">Birthday</label>
                     <input id="bday" name="bday" type="text" value="{{$d.Form.Birthday}}" placeholder="YYYY-MM-DD">
                 </div>
 
-                <fieldset{{if and (not $d.IsNew) (not $d.Form.HasPhone)}} class="is-empty"{{end}}>
+                <fieldset class="form-fieldset{{if and (not $d.IsNew) (not $d.Form.HasPhone)}} is-empty{{end}}">
                     <legend>Phone numbers</legend>
                     {{range $d.Form.Phones}}
-                    <div class="labeled-row{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                    <div class="form-field w-xs{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                        <label>Label</label>
                         <input name="phone_label" type="text" value="{{.Label}}" placeholder="label">
+                    </div>
+                    <div class="form-field w-md{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                        <label>Number</label>
                         <input name="phone" type="tel" value="{{.Value}}" placeholder="number">
                     </div>
                     {{end}}
-                    <div class="labeled-row{{if not $d.IsNew}} is-empty{{end}}">
+                    <div class="form-field w-xs{{if not $d.IsNew}} is-empty{{end}}">
+                        <label>Label</label>
                         <input name="phone_label" type="text" placeholder="label">
+                    </div>
+                    <div class="form-field w-md{{if not $d.IsNew}} is-empty{{end}}">
+                        <label>Number</label>
                         <input name="phone" type="tel" placeholder="number">
                     </div>
                 </fieldset>
 
-                <fieldset{{if and (not $d.IsNew) (not $d.Form.HasEmail)}} class="is-empty"{{end}}>
+                <fieldset class="form-fieldset{{if and (not $d.IsNew) (not $d.Form.HasEmail)}} is-empty{{end}}">
                     <legend>Email addresses</legend>
                     {{range $d.Form.Emails}}
-                    <div class="labeled-row{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                    <div class="form-field w-xs{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                        <label>Label</label>
                         <input name="email_label" type="text" value="{{.Label}}" placeholder="label">
+                    </div>
+                    <div class="form-field w-lg{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                        <label>Address</label>
                         <input name="email" type="email" value="{{.Value}}" placeholder="address">
                     </div>
                     {{end}}
-                    <div class="labeled-row{{if not $d.IsNew}} is-empty{{end}}">
+                    <div class="form-field w-xs{{if not $d.IsNew}} is-empty{{end}}">
+                        <label>Label</label>
                         <input name="email_label" type="text" placeholder="label">
+                    </div>
+                    <div class="form-field w-lg{{if not $d.IsNew}} is-empty{{end}}">
+                        <label>Address</label>
                         <input name="email" type="email" placeholder="address">
                     </div>
                 </fieldset>
 
-                <div class="form-field{{if $d.HideEmpty $d.Form.Categories}} is-empty{{end}}">
+                <div class="form-field w-lg{{if $d.HideEmpty $d.Form.Categories}} is-empty{{end}}">
                     <label for="categories">Categories</label>
                     <input id="categories" name="categories" type="text" value="{{$d.Form.Categories}}" placeholder="comma-separated">
                 </div>
 
-                <div class="form-field{{if $d.HideEmpty $d.Form.Note}} is-empty{{end}}">
+                <div class="form-field w-full{{if $d.HideEmpty $d.Form.Note}} is-empty{{end}}">
                     <label for="note">Note</label>
                     <textarea id="note" name="note" rows="4">{{$d.Form.Note}}</textarea>
                 </div>
@@ -201,7 +246,9 @@
                     <button type="button" class="link" data-empty-fields aria-expanded="false">Show empty fields</button>
                 </p>
                 {{end}}
-                <button type="submit">Save</button>
+                <div class="form-foot">
+                    <button type="submit">Save</button>
+                </div>
             </form>
 
             {{if not $d.IsNew}}

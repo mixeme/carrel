@@ -25,31 +25,63 @@
             </dl>
             <p class="hint">This task list is read-only.</p>
             {{else}}
-            <form method="post" action="{{if $d.IsNew}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+            <form method="post" class="form" action="{{if $d.IsNew}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
-                <label for="summary">Summary</label><input id="summary" name="summary" value="{{$d.Form.Summary}}" required>
-                <label for="description">Description</label><textarea id="description" name="description" rows="5">{{$d.Form.Description}}</textarea>
-                <label for="location">Location</label><input id="location" name="location" value="{{$d.Form.Location}}">
-                <label for="status">Status</label>
-                <select id="status" name="status">
-                    <option value="NEEDS-ACTION"{{if eq $d.Form.Status "NEEDS-ACTION"}} selected{{end}}>Needs action</option>
-                    <option value="IN-PROCESS"{{if eq $d.Form.Status "IN-PROCESS"}} selected{{end}}>In progress</option>
-                    <option value="COMPLETED"{{if eq $d.Form.Status "COMPLETED"}} selected{{end}}>Completed</option>
-                    <option value="CANCELLED"{{if eq $d.Form.Status "CANCELLED"}} selected{{end}}>Cancelled</option>
-                </select>
-                <div class="event-time-grid">
-                    <label>Start date <input type="date" name="start_date" value="{{$d.Form.StartDate}}"></label>
-                    <label>Due date <input type="date" name="due_date" value="{{$d.Form.DueDate}}"></label>
-                    <label>Due time <input type="time" name="due_time" value="{{$d.Form.DueTime}}"></label>
-                    <label>Priority <input type="number" name="priority" min="0" max="9" value="{{$d.Form.Priority}}"></label>
-                    <label>Percent complete <input type="number" name="percent_complete" min="0" max="100" value="{{$d.Form.PercentComplete}}"></label>
+                <div class="form-field w-xl">
+                    <label for="summary">Summary</label>
+                    <input id="summary" name="summary" value="{{$d.Form.Summary}}" required>
                 </div>
-                <label for="categories">Categories</label><input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
-                <label for="related">Related to</label><input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
-                <p class="hint">A related UID ties this task to an event or a note in the same collection.</p>
-                <button type="submit">Save</button>
+                <div class="form-field w-full">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="5">{{$d.Form.Description}}</textarea>
+                </div>
+                <div class="form-field w-lg">
+                    <label for="location">Location</label>
+                    <input id="location" name="location" value="{{$d.Form.Location}}">
+                </div>
+                <div class="form-field w-sm">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="NEEDS-ACTION"{{if eq $d.Form.Status "NEEDS-ACTION"}} selected{{end}}>Needs action</option>
+                        <option value="IN-PROCESS"{{if eq $d.Form.Status "IN-PROCESS"}} selected{{end}}>In progress</option>
+                        <option value="COMPLETED"{{if eq $d.Form.Status "COMPLETED"}} selected{{end}}>Completed</option>
+                        <option value="CANCELLED"{{if eq $d.Form.Status "CANCELLED"}} selected{{end}}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-field w-sm">
+                    <label for="start_date">Start date</label>
+                    <input id="start_date" type="date" name="start_date" value="{{$d.Form.StartDate}}">
+                </div>
+                <div class="form-field w-sm">
+                    <label for="due_date">Due date</label>
+                    <input id="due_date" type="date" name="due_date" value="{{$d.Form.DueDate}}">
+                </div>
+                <div class="form-field w-xs">
+                    <label for="due_time">Due time</label>
+                    <input id="due_time" type="time" name="due_time" value="{{$d.Form.DueTime}}">
+                </div>
+                <div class="form-field w-xs">
+                    <label for="priority">Priority</label>
+                    <input id="priority" type="number" name="priority" min="0" max="9" value="{{$d.Form.Priority}}">
+                </div>
+                <div class="form-field w-xs">
+                    <label for="percent_complete">Percent complete</label>
+                    <input id="percent_complete" type="number" name="percent_complete" min="0" max="100" value="{{$d.Form.PercentComplete}}">
+                </div>
+                <div class="form-field w-md">
+                    <label for="categories">Categories</label>
+                    <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                </div>
+                <div class="form-field w-xl">
+                    <label for="related">Related to</label>
+                    <input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
+                    <p class="form-hint">A related UID ties this task to an event or a note in the same collection.</p>
+                </div>
+                <div class="form-foot">
+                    <button type="submit">Save</button>
+                </div>
             </form>
             {{if not $d.IsNew}}
             <form method="post" action="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">

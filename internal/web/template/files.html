@@ -68,21 +68,29 @@
             <p class="hint">This collection is read-only: it can be browsed and downloaded from, and nothing can be put in it.</p>
             {{else}}
             <div class="files-actions no-print">
-                <form method="post" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" enctype="multipart/form-data">
+                <form method="post" class="form" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                     <input type="hidden" name="p" value="{{$d.Rel}}">
-                    <label for="file">Upload a file here</label>
-                    <input id="file" type="file" name="file" required>
-                    <button type="submit">Upload</button>
-                    <p class="hint">Up to {{$d.MaxUpload}}. A name that is already taken is refused rather than overwritten.</p>
+                    <div class="form-field w-lg">
+                        <label for="file">Upload a file here</label>
+                        <div class="form-inline">
+                            <input id="file" type="file" name="file" required>
+                            <button type="submit">Upload</button>
+                        </div>
+                        <p class="form-hint">Up to {{$d.MaxUpload}}. A name that is already taken is refused rather than overwritten.</p>
+                    </div>
                 </form>
-                <form method="post" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}">
+                <form method="post" class="form" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}">
                     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                     <input type="hidden" name="action" value="mkdir">
                     <input type="hidden" name="p" value="{{$d.Rel}}">
-                    <label for="name">New folder</label>
-                    <input id="name" name="name" required placeholder="folder name">
-                    <button type="submit">Create</button>
+                    <div class="form-field w-md">
+                        <label for="name">New folder</label>
+                        <div class="form-inline">
+                            <input id="name" name="name" required placeholder="folder name">
+                            <button type="submit">Create</button>
+                        </div>
+                    </div>
                 </form>
             </div>
             <p class="hint">Deleting removes the file from the server. Carrel does not check first whether an event or a

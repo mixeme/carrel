@@ -28,20 +28,38 @@
             </dl>
             <p class="hint">This notebook is read-only.</p>
             {{else}}
-            <form method="post" action="{{if $d.IsNew}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+            <form method="post" class="form" action="{{if $d.IsNew}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
-                <label for="summary">Title</label><input id="summary" name="summary" value="{{$d.Form.Summary}}" placeholder="optional">
-                <label for="description">Text</label><textarea id="description" name="description" rows="14" autofocus>{{$d.Form.Description}}</textarea>
-                <div class="event-time-grid">
-                    <label>Date <input type="date" name="date" value="{{$d.Form.Date}}"></label>
-                    <label>Time <input type="time" name="time" value="{{$d.Form.Time}}"></label>
+                <div class="form-field w-xl">
+                    <label for="summary">Title</label>
+                    <input id="summary" name="summary" value="{{$d.Form.Summary}}" placeholder="optional">
                 </div>
-                <label for="categories">Tags</label><input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
-                <label for="related">Related to</label><input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
-                <p class="hint">A related UID ties this note to an event or a task in the same collection.</p>
-                <button type="submit">Save</button>
+                <div class="form-field w-full">
+                    <label for="description">Text</label>
+                    <textarea id="description" name="description" rows="14" autofocus>{{$d.Form.Description}}</textarea>
+                </div>
+                <div class="form-field w-sm">
+                    <label for="date">Date</label>
+                    <input id="date" type="date" name="date" value="{{$d.Form.Date}}">
+                </div>
+                <div class="form-field w-xs">
+                    <label for="time">Time</label>
+                    <input id="time" type="time" name="time" value="{{$d.Form.Time}}">
+                </div>
+                <div class="form-field w-md">
+                    <label for="categories">Tags</label>
+                    <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                </div>
+                <div class="form-field w-xl">
+                    <label for="related">Related to</label>
+                    <input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
+                    <p class="form-hint">A related UID ties this note to an event or a task in the same collection.</p>
+                </div>
+                <div class="form-foot">
+                    <button type="submit">Save</button>
+                </div>
             </form>
             {{if not $d.IsNew}}
             <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">

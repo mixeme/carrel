@@ -53,21 +53,27 @@
         {{if .Error}}<p class="message error" role="alert">{{.Error}}</p>{{end}}
         {{if $d.HasTarget}}
         <p class="source-label">Filed in {{$d.Target.Label}} · {{$d.Target.AccountLabel}}</p>
-        <form method="post" action="{{.Base}}/app/notes/quick" data-quick-note-form>
+        <form method="post" class="form" action="{{.Base}}/app/notes/quick" data-quick-note-form>
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="back" value="{{$d.Back}}">
-            <label for="body">Note</label>
-            <textarea id="body" name="body" rows="10" autofocus placeholder="Write it down; the title is taken from the first line."></textarea>
+            <div class="form-field w-full">
+                <label for="body">Note</label>
+                <textarea id="body" name="body" rows="10" autofocus placeholder="Write it down; the title is taken from the first line."></textarea>
+            </div>
             {{if gt (len $d.Sources) 1}}
-            <label for="source">Notebook</label>
-            <select id="source" name="source">
-            {{range $d.Sources}}
-                <option value="{{.Key}}"{{if eq .Key $d.Target.Key}} selected{{end}}>{{.Label}} · {{.AccountLabel}}</option>
+            <div class="form-field w-lg">
+                <label for="source">Notebook</label>
+                <select id="source" name="source">
+                {{range $d.Sources}}
+                    <option value="{{.Key}}"{{if eq .Key $d.Target.Key}} selected{{end}}>{{.Label}} · {{.AccountLabel}}</option>
+                {{end}}
+                </select>
+            </div>
             {{end}}
-            </select>
-            {{end}}
-            <button type="submit">Save note</button>
-            <a class="link" href="{{$d.Back}}">Cancel</a>
+            <div class="form-foot">
+                <button type="submit">Save note</button>
+                <a class="link" href="{{$d.Back}}">Cancel</a>
+            </div>
         </form>
         {{else}}
         <p class="hint">No writable notebook is connected. Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> first.</p>

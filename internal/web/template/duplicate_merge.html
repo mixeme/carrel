@@ -39,17 +39,17 @@
     {{else}}
     <p class="hint">The kept record already carries everything the others do, so only the deletions are left to do.</p>
     {{end}}
-    <form method="post" action="{{$d.MergeURL}}">
+    <form method="post" class="form" action="{{$d.MergeURL}}">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="back" value="{{$d.Back}}">
         <input type="hidden" name="kind" value="{{$d.Kind}}">
         {{if $d.GroupID}}<input type="hidden" name="group" value="{{$d.GroupID}}">{{end}}
         {{range $d.Tokens}}<input type="hidden" name="member" value="{{.}}">{{end}}
         <input type="hidden" name="target" value="{{$d.Target.Token}}">
-        <p class="form-actions">
+        <div class="form-foot">
             <button type="submit" name="action" value="apply" class="danger">Write the merge and delete the rest</button>
             <a class="button" href="{{$d.Back}}">Cancel</a>
-        </p>
+        </div>
     </form>
     {{end}}
 </section>

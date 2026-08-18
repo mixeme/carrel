@@ -6,10 +6,14 @@
         <section class="card">
             <h1>Search</h1>
             <p class="source-label">Across every ticked calendar and address book.</p>
-            <form method="get" action="{{.Base}}/app/search" class="search-form no-print">
-                <label for="q">Look for</label>
-                <input id="q" name="q" value="{{$d.Request.Query}}" placeholder="name, address, word in a summary" autofocus required>
-                <button type="submit">Search</button>
+            <form method="get" action="{{.Base}}/app/search" class="form no-print">
+                <div class="form-field w-xl">
+                    <label for="q">Look for</label>
+                    <input id="q" name="q" value="{{$d.Request.Query}}" placeholder="name, address, word in a summary" autofocus required>
+                </div>
+                <div class="form-field is-own-line">
+                    <button type="submit">Search</button>
+                </div>
             </form>
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was searched.</p>{{end}}

@@ -2,21 +2,27 @@
 <section class="card">
     <h1>Sign in</h1>
 
-    <form method="post" action="{{.Base}}/login">
+    <form method="post" class="form" action="{{.Base}}/login">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         {{with .Data}}{{if .Next}}<input type="hidden" name="next" value="{{.Next}}">{{end}}{{end}}
 
-        <label for="login">Login</label>
-        <input id="login" name="login" type="text" required autofocus
-               maxlength="64" autocapitalize="none" spellcheck="false"
-               autocomplete="username"
-               value="{{with .Data}}{{.Login}}{{end}}">
+        <div class="form-field w-full">
+            <label for="login">Login</label>
+            <input id="login" name="login" type="text" required autofocus
+                   maxlength="64" autocapitalize="none" spellcheck="false"
+                   autocomplete="username"
+                   value="{{with .Data}}{{.Login}}{{end}}">
+        </div>
 
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" required
-               autocomplete="current-password">
+        <div class="form-field w-full">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required
+                   autocomplete="current-password">
+        </div>
 
-        <button type="submit">Sign in</button>
+        <div class="form-foot">
+            <button type="submit">Sign in</button>
+        </div>
     </form>
 
     {{with .Data}}{{if .CanRegister}}

@@ -28,31 +28,58 @@
                 {{if $d.Event.Status}}<dt>Status</dt><dd>{{$d.Event.Status}}</dd>{{end}}
             </dl>
             {{else}}
-            <form method="post" action="{{if $d.IsNew}}{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+            <form method="post" class="form" action="{{if $d.IsNew}}{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
-                <label for="summary">Summary</label><input id="summary" name="summary" value="{{$d.Form.Summary}}" required>
-                <label for="location">Location</label><input id="location" name="location" value="{{$d.Form.Location}}">
-                <label for="description">Description</label><textarea id="description" name="description" rows="5">{{$d.Form.Description}}</textarea>
-                <label for="status">Status</label>
-                <select id="status" name="status">
-                    <option value=""{{if eq $d.Form.Status ""}} selected{{end}}>Unspecified</option>
-                    <option value="TENTATIVE"{{if eq $d.Form.Status "TENTATIVE"}} selected{{end}}>Tentative</option>
-                    <option value="CONFIRMED"{{if eq $d.Form.Status "CONFIRMED"}} selected{{end}}>Confirmed</option>
-                    <option value="CANCELLED"{{if eq $d.Form.Status "CANCELLED"}} selected{{end}}>Cancelled</option>
-                </select>
-                <label class="checkbox"><input type="checkbox" name="all_day" value="1"{{if $d.Form.AllDay}} checked{{end}}> All day</label>
-                <div class="event-time-grid">
-                    <label>Start date <input type="date" name="start_date" value="{{$d.Form.StartDate}}" required></label>
-                    <label>Start time <input type="time" name="start_time" value="{{$d.Form.StartTime}}"></label>
-                    <label>End date <input type="date" name="end_date" value="{{$d.Form.EndDate}}" required></label>
-                    <label>End time <input type="time" name="end_time" value="{{$d.Form.EndTime}}"></label>
+                <div class="form-field w-xl">
+                    <label for="summary">Summary</label>
+                    <input id="summary" name="summary" value="{{$d.Form.Summary}}" required>
                 </div>
-                <label for="categories">Categories</label><input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
-                <fieldset>
+                <div class="form-field w-lg">
+                    <label for="location">Location</label>
+                    <input id="location" name="location" value="{{$d.Form.Location}}">
+                </div>
+                <div class="form-field w-full">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="5">{{$d.Form.Description}}</textarea>
+                </div>
+                <div class="form-field w-sm">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value=""{{if eq $d.Form.Status ""}} selected{{end}}>Unspecified</option>
+                        <option value="TENTATIVE"{{if eq $d.Form.Status "TENTATIVE"}} selected{{end}}>Tentative</option>
+                        <option value="CONFIRMED"{{if eq $d.Form.Status "CONFIRMED"}} selected{{end}}>Confirmed</option>
+                        <option value="CANCELLED"{{if eq $d.Form.Status "CANCELLED"}} selected{{end}}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label class="checkbox"><input type="checkbox" name="all_day" value="1"{{if $d.Form.AllDay}} checked{{end}}> All day</label>
+                </div>
+                <div class="form-field w-sm">
+                    <label>Start date</label>
+                    <input type="date" name="start_date" value="{{$d.Form.StartDate}}" required>
+                </div>
+                <div class="form-field w-xs">
+                    <label>Start time</label>
+                    <input type="time" name="start_time" value="{{$d.Form.StartTime}}">
+                </div>
+                <div class="form-field w-sm">
+                    <label>End date</label>
+                    <input type="date" name="end_date" value="{{$d.Form.EndDate}}" required>
+                </div>
+                <div class="form-field w-xs">
+                    <label>End time</label>
+                    <input type="time" name="end_time" value="{{$d.Form.EndTime}}">
+                </div>
+                <div class="form-field w-md">
+                    <label for="categories">Categories</label>
+                    <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                </div>
+                <fieldset class="form-fieldset">
                     <legend>Recurrence</legend>
-                    <label>Frequency
+                    <div class="form-field w-sm">
+                        <label>Frequency</label>
                         <select name="rrule_freq">
                             <option value="NONE"{{if eq $d.Form.RRuleFreq "NONE"}} selected{{end}}>None</option>
                             <option value="DAILY"{{if eq $d.Form.RRuleFreq "DAILY"}} selected{{end}}>Daily</option>
@@ -60,23 +87,37 @@
                             <option value="MONTHLY"{{if eq $d.Form.RRuleFreq "MONTHLY"}} selected{{end}}>Monthly</option>
                             <option value="YEARLY"{{if eq $d.Form.RRuleFreq "YEARLY"}} selected{{end}}>Yearly</option>
                         </select>
-                    </label>
-                    <label>Interval <input type="number" name="rrule_interval" min="1" value="{{if $d.Form.RRuleInterval}}{{$d.Form.RRuleInterval}}{{else}}1{{end}}"></label>
-                    <div class="weekday-grid">
-                        <label class="checkbox"><input type="checkbox" name="rrule_byday" value="MO"{{if index $d.Form.RRuleByDay "MO"}} checked{{end}}>MO</label>
-                        <label class="checkbox"><input type="checkbox" name="rrule_byday" value="TU"{{if index $d.Form.RRuleByDay "TU"}} checked{{end}}>TU</label>
-                        <label class="checkbox"><input type="checkbox" name="rrule_byday" value="WE"{{if index $d.Form.RRuleByDay "WE"}} checked{{end}}>WE</label>
-                        <label class="checkbox"><input type="checkbox" name="rrule_byday" value="TH"{{if index $d.Form.RRuleByDay "TH"}} checked{{end}}>TH</label>
-                        <label class="checkbox"><input type="checkbox" name="rrule_byday" value="FR"{{if index $d.Form.RRuleByDay "FR"}} checked{{end}}>FR</label>
-                        <label class="checkbox"><input type="checkbox" name="rrule_byday" value="SA"{{if index $d.Form.RRuleByDay "SA"}} checked{{end}}>SA</label>
-                        <label class="checkbox"><input type="checkbox" name="rrule_byday" value="SU"{{if index $d.Form.RRuleByDay "SU"}} checked{{end}}>SU</label>
                     </div>
-                    <label>Until <input type="date" name="rrule_until" value="{{$d.Form.RRuleUntil}}"></label>
-                    <label>Count <input type="number" name="rrule_count" min="1" value="{{$d.Form.RRuleCount}}"></label>
-                    <label>Advanced RRULE <input name="rrule" value="{{$d.Form.RRule}}" placeholder="FREQ=WEEKLY;BYDAY=MO"></label>
-                    <p class="hint">The advanced value takes precedence when set.</p>
+                    <div class="form-field w-xs">
+                        <label>Interval</label>
+                        <input type="number" name="rrule_interval" min="1" value="{{if $d.Form.RRuleInterval}}{{$d.Form.RRuleInterval}}{{else}}1{{end}}">
+                    </div>
+                    <div class="weekday-grid">
+                        <div class="form-field is-own-line"><label class="checkbox"><input type="checkbox" name="rrule_byday" value="MO"{{if index $d.Form.RRuleByDay "MO"}} checked{{end}}>MO</label></div>
+                        <div class="form-field is-own-line"><label class="checkbox"><input type="checkbox" name="rrule_byday" value="TU"{{if index $d.Form.RRuleByDay "TU"}} checked{{end}}>TU</label></div>
+                        <div class="form-field is-own-line"><label class="checkbox"><input type="checkbox" name="rrule_byday" value="WE"{{if index $d.Form.RRuleByDay "WE"}} checked{{end}}>WE</label></div>
+                        <div class="form-field is-own-line"><label class="checkbox"><input type="checkbox" name="rrule_byday" value="TH"{{if index $d.Form.RRuleByDay "TH"}} checked{{end}}>TH</label></div>
+                        <div class="form-field is-own-line"><label class="checkbox"><input type="checkbox" name="rrule_byday" value="FR"{{if index $d.Form.RRuleByDay "FR"}} checked{{end}}>FR</label></div>
+                        <div class="form-field is-own-line"><label class="checkbox"><input type="checkbox" name="rrule_byday" value="SA"{{if index $d.Form.RRuleByDay "SA"}} checked{{end}}>SA</label></div>
+                        <div class="form-field is-own-line"><label class="checkbox"><input type="checkbox" name="rrule_byday" value="SU"{{if index $d.Form.RRuleByDay "SU"}} checked{{end}}>SU</label></div>
+                    </div>
+                    <div class="form-field w-sm">
+                        <label>Until</label>
+                        <input type="date" name="rrule_until" value="{{$d.Form.RRuleUntil}}">
+                    </div>
+                    <div class="form-field w-xs">
+                        <label>Count</label>
+                        <input type="number" name="rrule_count" min="1" value="{{$d.Form.RRuleCount}}">
+                    </div>
+                    <div class="form-field w-xl">
+                        <label>Advanced RRULE</label>
+                        <input name="rrule" value="{{$d.Form.RRule}}" placeholder="FREQ=WEEKLY;BYDAY=MO">
+                        <p class="form-hint">The advanced value takes precedence when set.</p>
+                    </div>
                 </fieldset>
-                <button type="submit">Save</button>
+                <div class="form-foot">
+                    <button type="submit">Save</button>
+                </div>
             </form>
             {{if not $d.IsNew}}
             <form method="post" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">

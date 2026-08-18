@@ -11,27 +11,37 @@
         <h1>Import notes</h1>
         <p class="source-label">Into {{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
         {{if not $d.HasPreview}}
-        <form method="post" enctype="multipart/form-data" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+        <form method="post" class="form" enctype="multipart/form-data" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <label for="file">Markdown file or zip</label>
-            <input id="file" type="file" name="file" accept=".md,.markdown,.txt,.zip,text/markdown" required>
-            <p class="hint">Front matter is read when present: title, date, tags, uid and any X- property exported earlier. A file without front matter becomes a note dated by its own timestamp.</p>
-            <button type="submit">Preview import</button>
+            <div class="form-field w-lg">
+                <label for="file">Markdown file or zip</label>
+                <input id="file" type="file" name="file" accept=".md,.markdown,.txt,.zip,text/markdown" required>
+                <p class="form-hint">Front matter is read when present: title, date, tags, uid and any X- property exported earlier. A file without front matter becomes a note dated by its own timestamp.</p>
+            </div>
+            <div class="form-foot">
+                <button type="submit">Preview import</button>
+            </div>
         </form>
         {{if $d.WebDAVSources}}
-        <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import" class="subsection">
+        <form method="post" class="form subsection" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="webdav_import">
             <h2>Or read a folder from WebDAV</h2>
-            <label for="webdav-source">File collection</label>
-            <select id="webdav-source" name="webdav_source">
-            {{range $d.WebDAVSources}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}
-            </select>
-            <label for="webdav-folder">Folder</label>
-            <input id="webdav-folder" name="webdav_folder" placeholder="notes" autocapitalize="none" spellcheck="false">
-            <p class="hint">Every <code>.md</code> file directly in that folder is previewed. Subfolders are not walked, and
-                nothing is deleted or moved on the server.</p>
-            <button type="submit">Preview folder</button>
+            <div class="form-field w-lg">
+                <label for="webdav-source">File collection</label>
+                <select id="webdav-source" name="webdav_source">
+                {{range $d.WebDAVSources}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}
+                </select>
+            </div>
+            <div class="form-field w-md">
+                <label for="webdav-folder">Folder</label>
+                <input id="webdav-folder" name="webdav_folder" placeholder="notes" autocapitalize="none" spellcheck="false">
+                <p class="form-hint">Every <code>.md</code> file directly in that folder is previewed. Subfolders are not walked, and
+                    nothing is deleted or moved on the server.</p>
+            </div>
+            <div class="form-foot">
+                <button type="submit">Preview folder</button>
+            </div>
         </form>
         {{end}}
         {{else}}
@@ -51,10 +61,12 @@
             {{end}}
             </tbody>
         </table>
-        <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+        <form method="post" class="form" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <button type="submit" name="action" value="confirm_import">Import</button>
-            <button type="submit" name="action" value="cancel_import" class="link">Cancel</button>
+            <div class="form-foot">
+                <button type="submit" name="action" value="confirm_import">Import</button>
+                <button type="submit" name="action" value="cancel_import" class="link">Cancel</button>
+            </div>
         </form>
         {{end}}
     </section></div>

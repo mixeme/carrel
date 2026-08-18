@@ -35,10 +35,18 @@
                     <button type="button" class="link" data-print>Print</button>
                 </p>
             </div>
-            <form method="get" class="agenda-range no-print">
-                <label>From <input type="date" name="from" value="{{$d.From}}" required></label>
-                <label>To <input type="date" name="to" value="{{$d.To}}" required></label>
-                <button type="submit">Show</button>
+            <form method="get" class="form no-print">
+                <div class="form-field w-sm">
+                    <label for="agenda-from">From</label>
+                    <input id="agenda-from" type="date" name="from" value="{{$d.From}}" required>
+                </div>
+                <div class="form-field w-sm">
+                    <label for="agenda-to">To</label>
+                    <input id="agenda-to" type="date" name="to" value="{{$d.To}}" required>
+                </div>
+                <div class="form-field is-own-line">
+                    <button type="submit">Show</button>
+                </div>
             </form>
             {{if $d.ReadOnly}}<p class="hint no-print">This calendar is read-only.</p>{{end}}
             {{if $d.Empty}}<p class="hint">No events in this date range.</p>{{end}}

@@ -87,27 +87,35 @@
             so every connection they saved becomes unreadable and is deleted.
             Nothing about it can be undone. For an account covered by key
             escrow, <a href="{{.Base}}/admin/escrow">recover it instead</a> — that keeps the data.</p>
-        <form method="post" action="{{.Base}}/admin/">
+        <form method="post" class="form" action="{{.Base}}/admin/">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="reset_password">
 
-            <label for="reset-user">Account</label>
-            <select id="reset-user" name="user_id" required>
-                {{range $d.Users}}
-                <option value="{{.ID}}">{{.Login}}</option>
-                {{end}}
-            </select>
+            <div class="form-field w-md">
+                <label for="reset-user">Account</label>
+                <select id="reset-user" name="user_id" required>
+                    {{range $d.Users}}
+                    <option value="{{.ID}}">{{.Login}}</option>
+                    {{end}}
+                </select>
+            </div>
 
-            <label for="reset-temp">Temporary password</label>
-            <input id="reset-temp" name="temp_password" type="text" required
-                   minlength="10" autocomplete="off">
+            <div class="form-field w-md">
+                <label for="reset-temp">Temporary password</label>
+                <input id="reset-temp" name="temp_password" type="text" required
+                       minlength="10" autocomplete="off">
+            </div>
 
-            <label class="checkbox">
-                <input type="checkbox" name="confirm_reset" value="1" required>
-                I understand this destroys the account's saved connections
-            </label>
+            <div class="form-field w-full">
+                <label class="checkbox">
+                    <input type="checkbox" name="confirm_reset" value="1" required>
+                    I understand this destroys the account's saved connections
+                </label>
+            </div>
 
-            <button type="submit">Reset password</button>
+            <div class="form-foot">
+                <button type="submit">Reset password</button>
+            </div>
         </form>
     </section>
 </section>

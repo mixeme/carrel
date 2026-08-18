@@ -52,28 +52,38 @@
 
         <section class="subsection">
             <h3>Connect account</h3>
-            <form method="post" action="{{.Base}}/app/">
+            <form method="post" class="form" action="{{.Base}}/app/">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="connect_dav">
 
-                <label for="dav-label">Label (optional)</label>
-                <input id="dav-label" name="dav_label" type="text"
-                       value="{{$d.Connect.Label}}" autocomplete="off">
+                <div class="form-field w-md">
+                    <label for="dav-label">Label (optional)</label>
+                    <input id="dav-label" name="dav_label" type="text"
+                           value="{{$d.Connect.Label}}" autocomplete="off">
+                </div>
 
-                <label for="dav-url">Server URL</label>
-                <input id="dav-url" name="dav_url" type="url" required
-                       value="{{$d.Connect.BaseURL}}" placeholder="https://host/dav.php/"
-                       autocapitalize="none" spellcheck="false">
+                <div class="form-field w-xl">
+                    <label for="dav-url">Server URL</label>
+                    <input id="dav-url" name="dav_url" type="url" required
+                           value="{{$d.Connect.BaseURL}}" placeholder="https://host/dav.php/"
+                           autocapitalize="none" spellcheck="false">
+                </div>
 
-                <label for="dav-user">Username</label>
-                <input id="dav-user" name="dav_username" type="text" required
-                       value="{{$d.Connect.Username}}" autocapitalize="none" spellcheck="false">
+                <div class="form-field w-md">
+                    <label for="dav-user">Username</label>
+                    <input id="dav-user" name="dav_username" type="text" required
+                           value="{{$d.Connect.Username}}" autocapitalize="none" spellcheck="false">
+                </div>
 
-                <label for="dav-pass">Password</label>
-                <input id="dav-pass" name="dav_password" type="password" required
-                       autocomplete="current-password">
+                <div class="form-field w-md">
+                    <label for="dav-pass">Password</label>
+                    <input id="dav-pass" name="dav_password" type="password" required
+                           autocomplete="current-password">
+                </div>
 
-                <button type="submit">Connect</button>
+                <div class="form-foot">
+                    <button type="submit">Connect</button>
+                </div>
             </form>
             {{if $d.Trace}}
             <pre class="diagnostic">{{range $d.Trace.Steps}}[{{.Name}}] {{.Detail}}{{if .StatusCode}} ({{.StatusCode}}){{end}}{{if .Target}} → {{.Target}}{{end}}
@@ -107,13 +117,17 @@
             <p class="hint">Pending confirmation: {{$d.PendingEmail}}</p>
             {{end}}
             <p class="hint">Used for invitations and service notices only.</p>
-            <form method="post" action="{{.Base}}/app/email">
+            <form method="post" class="form" action="{{.Base}}/app/email">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
 
-                <label for="email">New address</label>
-                <input id="email" name="email" type="email" required autocomplete="email">
+                <div class="form-field w-lg">
+                    <label for="email">New address</label>
+                    <input id="email" name="email" type="email" required autocomplete="email">
+                </div>
 
-                <button type="submit">Send confirmation link</button>
+                <div class="form-foot">
+                    <button type="submit">Send confirmation link</button>
+                </div>
             </form>
         </section>
 
@@ -126,25 +140,31 @@
             {{if $att.Configured}}
             <p class="field-value">Currently: {{$att.Label}}</p>
             {{end}}
-            <form method="post" action="{{.Base}}/app/">
+            <form method="post" class="form" action="{{.Base}}/app/">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save_attachments">
 
-                <label for="attach-collection">File collection</label>
-                <select id="attach-collection" name="attach_collection">
-                {{range $att.Collections}}
-                    <option value="{{.Key}}"{{if eq .Key $att.Selected}} selected{{end}}>{{.Label}} · {{.AccountLabel}}</option>
-                {{end}}
-                </select>
+                <div class="form-field w-lg">
+                    <label for="attach-collection">File collection</label>
+                    <select id="attach-collection" name="attach_collection">
+                    {{range $att.Collections}}
+                        <option value="{{.Key}}"{{if eq .Key $att.Selected}} selected{{end}}>{{.Label}} · {{.AccountLabel}}</option>
+                    {{end}}
+                    </select>
+                </div>
 
-                <label for="attach-folder">Folder inside it</label>
-                <input id="attach-folder" name="attach_folder" value="{{$att.Folder}}" placeholder="{{$att.Suggestion}}"
-                       autocapitalize="none" spellcheck="false">
-                <p class="hint">Created if it is not there yet. Leave it empty to put attachments at the top of the
-                    collection. Files are named from the date and the entry's title, so the folder stays readable
-                    outside Carrel.</p>
+                <div class="form-field w-md">
+                    <label for="attach-folder">Folder inside it</label>
+                    <input id="attach-folder" name="attach_folder" value="{{$att.Folder}}" placeholder="{{$att.Suggestion}}"
+                           autocapitalize="none" spellcheck="false">
+                    <p class="form-hint">Created if it is not there yet. Leave it empty to put attachments at the top of the
+                        collection. Files are named from the date and the entry's title, so the folder stays readable
+                        outside Carrel.</p>
+                </div>
 
-                <button type="submit">Save</button>
+                <div class="form-foot">
+                    <button type="submit">Save</button>
+                </div>
             </form>
             <p class="hint">Carrel puts files in this folder and links to them. It never cleans it up, applies a quota or
                 deletes anything: it is your storage, and what is in it is yours to manage.</p>
@@ -163,12 +183,14 @@
                 {{$e.RecoveredAt.Format "2006-01-02 15:04"}} UTC.</p>
             {{end}}
             {{if $e.CanOptOut}}
-            <form method="post" action="{{.Base}}/app/escrow">
+            <form method="post" class="form" action="{{.Base}}/app/escrow">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="opt_out">
-                <p class="hint">Withdrawing deletes the copy. Nobody will be able
+                <p class="form-hint">Withdrawing deletes the copy. Nobody will be able
                     to recover this account afterwards, including you.</p>
-                <button type="submit">Withdraw my deposited key</button>
+                <div class="form-foot">
+                    <button type="submit">Withdraw my deposited key</button>
+                </div>
             </form>
             {{end}}
 
@@ -177,7 +199,7 @@
                 your data — and if you lose your password, it cannot be recovered
                 by anyone.</p>
             {{if $e.CanOptIn}}
-            <form method="post" action="{{.Base}}/app/escrow">
+            <form method="post" class="form" action="{{.Base}}/app/escrow">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="opt_in">
                 <p class="warning">Depositing your key means an administrator with
@@ -185,13 +207,17 @@
                     the contacts and calendars behind them. In exchange, your data
                     survives a forgotten password.</p>
 
-                <label for="escrow-password">Your current password</label>
-                <input id="escrow-password" name="password" type="password" required
-                       autocomplete="current-password">
-                <p class="hint">Your key can only be deposited by you: the server
-                    cannot open it without your password.</p>
+                <div class="form-field w-md">
+                    <label for="escrow-password">Your current password</label>
+                    <input id="escrow-password" name="password" type="password" required
+                           autocomplete="current-password">
+                    <p class="form-hint">Your key can only be deposited by you: the server
+                        cannot open it without your password.</p>
+                </div>
 
-                <button type="submit">Deposit my key</button>
+                <div class="form-foot">
+                    <button type="submit">Deposit my key</button>
+                </div>
             </form>
             {{end}}
             {{end}}

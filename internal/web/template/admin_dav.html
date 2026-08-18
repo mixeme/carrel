@@ -8,23 +8,31 @@
         <h2>DAV server validator</h2>
         <p class="hint">Runs discovery without saving credentials. Useful before
             handing connection details to a user.</p>
-        <form method="post" action="{{.Base}}/admin/dav">
+        <form method="post" class="form" action="{{.Base}}/admin/dav">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="test_dav">
 
-            <label for="dav-test-url">Server URL</label>
-            <input id="dav-test-url" name="dav_test_url" type="url" required
-                   placeholder="https://host/dav.php/" autocapitalize="none" spellcheck="false">
+            <div class="form-field w-xl">
+                <label for="dav-test-url">Server URL</label>
+                <input id="dav-test-url" name="dav_test_url" type="url" required
+                       placeholder="https://host/dav.php/" autocapitalize="none" spellcheck="false">
+            </div>
 
-            <label for="dav-test-user">Username</label>
-            <input id="dav-test-user" name="dav_test_username" type="text" required
-                   autocapitalize="none" spellcheck="false">
+            <div class="form-field w-md">
+                <label for="dav-test-user">Username</label>
+                <input id="dav-test-user" name="dav_test_username" type="text" required
+                       autocapitalize="none" spellcheck="false">
+            </div>
 
-            <label for="dav-test-pass">Password</label>
-            <input id="dav-test-pass" name="dav_test_password" type="password" required
-                   autocomplete="off">
+            <div class="form-field w-md">
+                <label for="dav-test-pass">Password</label>
+                <input id="dav-test-pass" name="dav_test_password" type="password" required
+                       autocomplete="off">
+            </div>
 
-            <button type="submit">Test discovery</button>
+            <div class="form-foot">
+                <button type="submit">Test discovery</button>
+            </div>
         </form>
 
         {{if $d.DAVDiag}}

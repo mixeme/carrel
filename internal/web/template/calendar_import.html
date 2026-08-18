@@ -6,10 +6,15 @@
         <h1>Import calendar</h1>
         <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
         {{if not $d.HasPreview}}
-        <form method="post" enctype="multipart/form-data" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+        <form method="post" class="form" enctype="multipart/form-data" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <label for="file">iCalendar file</label><input id="file" type="file" name="file" accept=".ics,.ical,.zip,text/calendar" required>
-            <button type="submit">Preview import</button>
+            <div class="form-field w-lg">
+                <label for="file">iCalendar file</label>
+                <input id="file" type="file" name="file" accept=".ics,.ical,.zip,text/calendar" required>
+            </div>
+            <div class="form-foot">
+                <button type="submit">Preview import</button>
+            </div>
         </form>
         {{else}}
         <p>{{$d.OKCount}} event(s) ready; {{$d.ErrorCount}} error(s); {{$d.CollisionCount}} UID collision(s).</p>
@@ -17,8 +22,12 @@
         <table class="import-preview"><thead><tr><th>Source</th><th>Event</th><th>UID</th><th>Result</th></tr></thead><tbody>
         {{range $d.Events}}<tr><td>{{.Source}}</td><td>{{.DisplayName}}</td><td>{{.OriginalUID}}</td><td>{{if .ParseError}}{{.ParseError}}{{else if .UIDCollision}}New UID will be assigned{{else}}Ready{{end}}</td></tr>{{end}}
         </tbody></table>
-        <form method="post" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}"><button type="submit" name="action" value="confirm_import">Import</button><button type="submit" name="action" value="cancel_import" class="link">Cancel</button>
+        <form method="post" class="form" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <div class="form-foot">
+                <button type="submit" name="action" value="confirm_import">Import</button>
+                <button type="submit" name="action" value="cancel_import" class="link">Cancel</button>
+            </div>
         </form>
         {{end}}
     </section></div>

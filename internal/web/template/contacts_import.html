@@ -23,12 +23,16 @@
                 Import always creates new contacts. A UID that already exists gets a new UID and is listed in the report.</p>
 
             {{if not $d.HasPreview}}
-            <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import" enctype="multipart/form-data">
+            <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="preview_import">
-                <label for="file">File</label>
-                <input id="file" type="file" name="file" accept=".vcf,.zip,text/vcard,application/zip" required>
-                <p><button type="submit">Preview</button></p>
+                <div class="form-field w-lg">
+                    <label for="file">File</label>
+                    <input id="file" type="file" name="file" accept=".vcf,.zip,text/vcard,application/zip" required>
+                </div>
+                <div class="form-foot">
+                    <button type="submit">Preview</button>
+                </div>
             </form>
             {{else}}
             <p><strong>{{$d.OKCount}}</strong> ready
@@ -55,10 +59,12 @@
             </table>
             {{end}}
             {{if gt $d.OKCount 0}}
-            <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+            <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="confirm_import">
-                <button type="submit">Import {{$d.OKCount}} contact(s)</button>
+                <div class="form-foot">
+                    <button type="submit">Import {{$d.OKCount}} contact(s)</button>
+                </div>
             </form>
             {{end}}
             <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">
