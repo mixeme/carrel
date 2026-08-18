@@ -39,7 +39,7 @@
     </form>
     {{else}}
     <div class="app-sheet-body">
-        <p class="hint">No writable notebook is connected. Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> first.</p>
+        <p class="hint">No writable notebook is connected. Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> first.</p>
         <div class="app-sheet-foot">
             <button type="button" class="app-btn is-quiet" data-sheet-close>Close</button>
         </div>
@@ -76,7 +76,7 @@
             </div>
         </form>
         {{else}}
-        <p class="hint">No writable notebook is connected. Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> first.</p>
+        <p class="hint">No writable notebook is connected. Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> first.</p>
         {{end}}
     </section>
 </div>

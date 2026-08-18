@@ -8,13 +8,13 @@
             <li><a class="collection-link{{if and (eq .AccountID $d.AccountID) (eq .ColEnc $d.ColEnc)}} is-active{{end}}"
                    href="{{$.Base}}/app/files/{{.AccountID}}/{{.ColEnc}}">{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></a></li>
         {{end}}</ul>
-        {{else}}<p class="hint">No file collections yet. Connect a DAV account from your <a href="{{.Base}}/app/">profile</a>.</p>{{end}}
+        {{else}}<p class="hint">No file collections yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
     </aside>
     <div class="app-main">
         {{if $d.NoFiles}}
         <section class="card">
             <h1>Files</h1>
-            <p class="hint">Connect a DAV account from your <a href="{{.Base}}/app/">profile</a> to browse files here.
+            <p class="hint">Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to browse files here.
                 Discovery finds plain WebDAV folders automatically — on a CalDAV/CardDAV server that usually means a
                 separate folder, or a second account on Nextcloud or a plain WebDAV server.</p>
         </section>
@@ -36,17 +36,20 @@
 
             {{if $d.Truncated}}<p class="message notice no-print">This folder holds more files than Carrel lists. Only the first {{len $d.Entries}} are shown.</p>{{end}}
 
-            <table class="files-table">
-                <thead><tr><th>Name</th><th>Size</th><th>Type</th><th>Changed</th><th class="no-print"></th></tr></thead>
+            <div class="list-toolbar no-print">
+                {{template "columnpicker" "files"}}
+            </div>
+            <table class="files-table" data-columns-root="files">
+                <thead><tr><th data-col="name">Name</th><th data-col="size">Size</th><th data-col="type">Type</th><th data-col="changed">Changed</th><th data-col="actions" class="no-print"></th></tr></thead>
                 <tbody>
                 {{if $d.ParentURL}}<tr><td colspan="5"><a href="{{$d.ParentURL}}">← up one folder</a></td></tr>{{end}}
                 {{range $d.Entries}}
                 <tr class="{{if .Dir}}is-folder{{else}}is-file{{end}}">
-                    <td>{{if .Dir}}<a href="{{.URL}}">{{.Name}}/</a>{{else}}<a href="{{.DownloadURL}}">{{.Name}}</a>{{end}}</td>
-                    <td>{{.SizeLabel}}</td>
-                    <td class="hint">{{.TypeLabel}}</td>
-                    <td class="hint">{{.ModLabel}}</td>
-                    <td class="no-print">
+                    <td data-col="name">{{if .Dir}}<a href="{{.URL}}">{{.Name}}/</a>{{else}}<a href="{{.DownloadURL}}">{{.Name}}</a>{{end}}</td>
+                    <td data-col="size">{{.SizeLabel}}</td>
+                    <td data-col="type" class="hint">{{.TypeLabel}}</td>
+                    <td data-col="changed" class="hint">{{.ModLabel}}</td>
+                    <td data-col="actions" class="no-print">
                         {{if not $d.ReadOnly}}
                         <form method="post" action="{{$.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" class="inline-form">
                             <input type="hidden" name="csrf_token" value="{{$.CSRF}}">

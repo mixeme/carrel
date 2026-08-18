@@ -1,0 +1,88 @@
+{{define "body"}}
+{{$d := .Data}}
+{{$e := $d.Escrow}}
+<section class="card settings-panel">
+    <div class="page-head">
+        <div>
+            <h1>Account</h1>
+            <p class="source-label">{{.Session.Login}}</p>
+        </div>
+    </div>
+
+    <fieldset class="form-fieldset">
+        <legend>Email</legend>
+        {{if $d.Email}}
+        <p class="field-value">Current: {{$d.Email}}</p>
+        {{else}}
+        <p class="hint">No address on file.</p>
+        {{end}}
+        {{if $d.PendingEmail}}
+        <p class="hint">Pending confirmation: {{$d.PendingEmail}}</p>
+        {{end}}
+        <p class="form-hint">Used for invitations and service notices only.</p>
+        <form method="post" class="form" action="{{.Base}}/app/email">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <div class="form-field w-lg">
+                <label for="email">New address</label>
+                <input id="email" name="email" type="email" required autocomplete="email">
+            </div>
+            <div class="form-foot">
+                <button type="submit">Send confirmation link</button>
+            </div>
+        </form>
+    </fieldset>
+
+    <fieldset class="form-fieldset">
+        <legend>Password</legend>
+        <p class="form-hint">Changing your password re-wraps your data key only; saved connections stay readable.</p>
+        <p><a class="app-btn" href="{{.Base}}/app/password">Change password</a></p>
+    </fieldset>
+
+    <fieldset class="form-fieldset">
+        <legend>Key escrow</legend>
+        {{if $e.Deposited}}
+        <p class="warning">A copy of your data key is deposited on this server.
+            An administrator who holds the escrow master password can decrypt
+            the DAV credentials you save here, and through them your contacts
+            and calendars.</p>
+        {{if not $e.RecoveredAt.IsZero}}
+        <p>An administrator last recovered this account on
+            {{$e.RecoveredAt.Format "2006-01-02 15:04"}} UTC.</p>
+        {{end}}
+        {{if $e.CanOptOut}}
+        <form method="post" class="form" action="{{.Base}}/app/escrow">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="opt_out">
+            <p class="form-hint">Withdrawing deletes the copy. Nobody will be able
+                to recover this account afterwards, including you.</p>
+            <div class="form-foot">
+                <button type="submit" class="app-btn is-danger-solid">Withdraw my deposited key</button>
+            </div>
+        </form>
+        {{end}}
+        {{else}}
+        <p class="form-hint">No copy of your data key is deposited. Nobody but you can decrypt
+            your data — and if you lose your password, it cannot be recovered
+            by anyone.</p>
+        {{if $e.CanOptIn}}
+        <form method="post" class="form" action="{{.Base}}/app/escrow">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="opt_in">
+            <p class="warning">Depositing your key means an administrator with
+                the escrow master password can read your saved credentials and
+                the contacts and calendars behind them. In exchange, your data
+                survives a forgotten password.</p>
+            <div class="form-field w-md">
+                <label for="escrow-password">Your current password</label>
+                <input id="escrow-password" name="password" type="password" required
+                       autocomplete="current-password">
+            </div>
+            <div class="form-foot">
+                <button type="submit">Deposit my key</button>
+            </div>
+        </form>
+        {{end}}
+        {{end}}
+    </fieldset>
+</section>
+{{end}}

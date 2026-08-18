@@ -1,0 +1,39 @@
+{{define "body"}}
+<section class="card settings-panel">
+    <div class="page-head">
+        <div>
+            <h1>Appearance</h1>
+            <p class="source-label">Kept in this browser, not on the server</p>
+        </div>
+    </div>
+
+    <fieldset class="form-fieldset">
+        <legend>Theme</legend>
+        <div class="form-field">
+            <div class="theme-segment" data-theme-segment role="group" aria-label="Theme">
+                <button type="button" class="theme-segment-btn is-on" data-theme-value="auto">Auto</button>
+                <button type="button" class="theme-segment-btn" data-theme-value="light">Light</button>
+                <button type="button" class="theme-segment-btn" data-theme-value="dark">Dark</button>
+            </div>
+            <p class="form-hint">Auto follows the system setting.</p>
+        </div>
+    </fieldset>
+
+    <fieldset class="form-fieldset">
+        <legend>Density</legend>
+        <div class="form-field">
+            <div class="theme-segment" data-density-segment role="group" aria-label="Row density">
+                <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
+                <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+            </div>
+            <p class="form-hint">List row height in lists and tables.</p>
+        </div>
+    </fieldset>
+
+    <fieldset class="form-fieldset">
+        <legend>Lists</legend>
+        <p class="form-hint">Column sets are remembered per section. Reset restores the defaults from the mockups.</p>
+        <p><button type="button" class="app-btn" data-reset-columns>Reset remembered column choices</button></p>
+    </fieldset>
+</section>
+{{end}}

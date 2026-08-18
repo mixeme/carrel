@@ -1,0 +1,48 @@
+{{define "body"}}
+{{$d := .Data}}
+{{$att := $d.Attachments}}
+<section class="card settings-panel">
+    <div class="page-head">
+        <div>
+            <h1>Attachments</h1>
+            <p class="source-label">Where files go when you attach them to a note or an event.</p>
+        </div>
+    </div>
+
+    {{if $att.Collections}}
+    {{if $att.Configured}}
+    <p class="field-value">Currently: {{$att.Label}}</p>
+    {{end}}
+    <form method="post" class="form" action="{{.Base}}/app/settings/attachments">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <input type="hidden" name="action" value="save_attachments">
+
+        <div class="form-field w-lg">
+            <label for="attach-collection">File collection</label>
+            <select id="attach-collection" name="attach_collection">
+            {{range $att.Collections}}
+                <option value="{{.Key}}"{{if eq .Key $att.Selected}} selected{{end}}>{{.Label}} · {{.AccountLabel}}</option>
+            {{end}}
+            </select>
+        </div>
+
+        <div class="form-field w-md">
+            <label for="attach-folder">Folder inside it</label>
+            <input id="attach-folder" name="attach_folder" value="{{$att.Folder}}" placeholder="{{$att.Suggestion}}"
+                   autocapitalize="none" spellcheck="false">
+            <p class="form-hint">Created if it is not there yet. Leave it empty to put attachments at the top of the
+                collection. Files are named from the date and the entry's title, so the folder stays readable
+                outside Carrel.</p>
+        </div>
+
+        <div class="form-foot">
+            <button type="submit">Save</button>
+        </div>
+    </form>
+    <p class="hint">Carrel puts files in this folder and links to them. It never cleans it up, applies a quota or
+        deletes anything: it is your storage, and what is in it is yours to manage.</p>
+    {{else}}
+    <p class="hint">Connect a file collection first from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>
+    {{end}}
+</section>
+{{end}}

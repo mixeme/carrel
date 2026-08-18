@@ -1,38 +1,43 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="card admin-panel">
-    <h1>Administration</h1>
-    {{template "adminnav" .}}
+    <div class="page-head">
+        <div>
+            <h1>Users</h1>
+        </div>
+    </div>
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>
     {{end}}
 
     <section class="subsection">
-        <h2>Users</h2>
+        <div class="list-toolbar no-print">
+            {{template "columnpicker" "admin-users"}}
+        </div>
         {{if $d.Users}}
-        <table class="data">
+        <table class="data" data-columns-root="admin-users">
             <thead>
                 <tr>
-                    <th>Login</th>
-                    <th>Role</th>
-                    <th>Created</th>
-                    <th>Last login</th>
-                    <th>DAV</th>
-                    <th>Sessions</th>
-                    <th></th>
+                    <th data-col="login">Login</th>
+                    <th data-col="role">Role</th>
+                    <th data-col="created">Created</th>
+                    <th data-col="last_login">Last login</th>
+                    <th data-col="dav">DAV</th>
+                    <th data-col="sessions">Sessions</th>
+                    <th data-col="actions"></th>
                 </tr>
             </thead>
             <tbody>
             {{range $d.Users}}
                 <tr>
-                    <td>{{.Login}}{{if .Disabled}} <span class="hint">(disabled)</span>{{end}}{{if .Unconfirmed}} <span class="hint">(awaiting email)</span>{{end}}</td>
-                    <td>{{.Role}}</td>
-                    <td>{{.CreatedAt.Format "2006-01-02"}}</td>
-                    <td>{{if .LastLoginAt.IsZero}}—{{else}}{{.LastLoginAt.Format "2006-01-02 15:04"}}{{end}}</td>
-                    <td>{{.DAVCount}}</td>
-                    <td>{{.Sessions}}</td>
-                    <td class="actions">
+                    <td data-col="login">{{.Login}}{{if .Disabled}} <span class="hint">(disabled)</span>{{end}}{{if .Unconfirmed}} <span class="hint">(awaiting email)</span>{{end}}</td>
+                    <td data-col="role">{{.Role}}</td>
+                    <td data-col="created">{{.CreatedAt.Format "2006-01-02"}}</td>
+                    <td data-col="last_login">{{if .LastLoginAt.IsZero}}—{{else}}{{.LastLoginAt.Format "2006-01-02 15:04"}}{{end}}</td>
+                    <td data-col="dav">{{.DAVCount}}</td>
+                    <td data-col="sessions">{{.Sessions}}</td>
+                    <td data-col="actions" class="actions">
                         {{if .Disabled}}
                         <form method="post" action="{{$.Base}}/admin/">
                             <input type="hidden" name="csrf_token" value="{{$.CSRF}}">

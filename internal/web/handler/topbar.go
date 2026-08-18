@@ -26,10 +26,11 @@ type createMenuItem struct {
 
 // topbarView is shared shell chrome: back URL for sheets and create links.
 type topbarView struct {
-	Back         string
-	QuickNoteURL string
-	SearchQuery  string
-	Create       []createMenuItem
+	Back            string
+	QuickNoteURL    string
+	SearchQuery     string
+	Create          []createMenuItem
+	ConnectionCount int
 }
 
 func (s *Server) buildTopbar(r *http.Request, sess *session.Session) topbarView {
@@ -55,11 +56,16 @@ func (s *Server) buildTopbar(r *http.Request, sess *session.Session) topbarView 
 			createMenuItem{Label: "New folder…", URL: url},
 		)
 	}
+	connCount := 0
+	if accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK()); err == nil {
+		connCount = len(accounts)
+	}
 	return topbarView{
-		Back:         back,
-		QuickNoteURL: s.Path("/app/notes/quick") + "?back=" + url.QueryEscape(back),
-		SearchQuery:  strings.TrimSpace(r.URL.Query().Get("q")),
-		Create:       menu,
+		Back:            back,
+		QuickNoteURL:    s.Path("/app/notes/quick") + "?back=" + url.QueryEscape(back),
+		SearchQuery:     strings.TrimSpace(r.URL.Query().Get("q")),
+		Create:          menu,
+		ConnectionCount: connCount,
 	}
 }
 

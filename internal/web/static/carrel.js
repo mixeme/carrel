@@ -449,3 +449,448 @@ document.addEventListener('htmx:sseError', function (e) {
         }
     });
 })();
+
+// Appearance: theme and density in localStorage (wave 1.10).
+(function () {
+    var THEME_KEY = 'carrel:theme';
+    var DENSITY_KEY = 'carrel:density';
+
+    function readTheme() {
+        try {
+            return localStorage.getItem(THEME_KEY) || 'auto';
+        } catch (e) {
+            return 'auto';
+        }
+    }
+
+    function readDensity() {
+        try {
+            return localStorage.getItem(DENSITY_KEY) || 'comfortable';
+        } catch (e) {
+            return 'comfortable';
+        }
+    }
+
+    function applyTheme(value) {
+        if (value === 'light' || value === 'dark') {
+            document.documentElement.dataset.theme = value;
+        } else {
+            delete document.documentElement.dataset.theme;
+        }
+        try {
+            localStorage.setItem(THEME_KEY, value || 'auto');
+        } catch (e) {}
+        document.querySelectorAll('[data-theme-segment]').forEach(function (group) {
+            group.querySelectorAll('[data-theme-value]').forEach(function (btn) {
+                btn.classList.toggle('is-on', btn.getAttribute('data-theme-value') === (value || 'auto'));
+            });
+        });
+    }
+
+    function applyDensity(value) {
+        if (value === 'compact') {
+            document.documentElement.dataset.density = 'compact';
+        } else {
+            delete document.documentElement.dataset.density;
+        }
+        try {
+            localStorage.setItem(DENSITY_KEY, value || 'comfortable');
+        } catch (e) {}
+        document.querySelectorAll('[data-density-segment]').forEach(function (group) {
+            group.querySelectorAll('[data-density-value]').forEach(function (btn) {
+                btn.classList.toggle('is-on', btn.getAttribute('data-density-value') === (value || 'comfortable'));
+            });
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        var themeBtn = e.target.closest('[data-theme-value]');
+        if (themeBtn && themeBtn.closest('[data-theme-segment]')) {
+            e.preventDefault();
+            applyTheme(themeBtn.getAttribute('data-theme-value'));
+            return;
+        }
+        var densityBtn = e.target.closest('[data-density-value]');
+        if (densityBtn && densityBtn.closest('[data-density-segment]')) {
+            e.preventDefault();
+            applyDensity(densityBtn.getAttribute('data-density-value'));
+        }
+    });
+
+    applyTheme(readTheme());
+    applyDensity(readDensity());
+})();
+
+// User menu in the header (wave 1.10).
+(function () {
+    function menu() {
+        return document.querySelector('.app-user-dropdown');
+    }
+
+    function closeMenu() {
+        var el = menu();
+        var toggle = document.querySelector('[data-user-menu-toggle]');
+        if (el) el.hidden = true;
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    document.addEventListener('click', function (e) {
+        var toggle = e.target.closest('[data-user-menu-toggle]');
+        if (toggle) {
+            e.preventDefault();
+            var el = menu();
+            if (!el) return;
+            var open = el.hidden;
+            el.hidden = !open;
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            return;
+        }
+        if (!e.target.closest('.app-user-menu')) {
+            closeMenu();
+        }
+    });
+})();
+
+// Column picker per list/table (wave 1.11).
+(function () {
+    var STORAGE_PREFIX = 'carrel:columns:';
+
+    var PRESETS = {
+        contacts: {
+            locked: 'name',
+            pinned: ['bar'],
+            always: ['badges'],
+            columns: [
+                { id: 'photo', label: 'Photo', width: 'var(--row-lg)' },
+                { id: 'name', label: 'Name', width: 'minmax(150px, 1.4fr)', locked: true },
+                { id: 'phone', label: 'Phone', width: 'minmax(110px, 1fr)' },
+                { id: 'email', label: 'Email', width: 'minmax(110px, 1fr)' },
+                { id: 'badges', label: 'Badges', width: 'auto', always: true }
+            ],
+            lead: [{ id: 'bar', width: '3px' }]
+        },
+        tasks: {
+            locked: 'name',
+            pinned: ['done', 'bar'],
+            always: [],
+            columns: [
+                { id: 'name', label: 'Title', width: 'minmax(190px, 2fr)', locked: true },
+                { id: 'due', label: 'Due', width: 'minmax(90px, auto)' },
+                { id: 'status', label: 'Status', width: 'minmax(70px, auto)' },
+                { id: 'progress', label: 'Progress', width: 'minmax(50px, auto)' },
+                { id: 'tags', label: 'Tags', width: 'auto' }
+            ],
+            lead: [
+                { id: 'done', width: '14px' },
+                { id: 'bar', width: '3px' }
+            ]
+        },
+        notes: {
+            locked: 'name',
+            pinned: ['bar'],
+            always: [],
+            columns: [
+                { id: 'name', label: 'Title', width: 'minmax(140px, 1.2fr)', locked: true },
+                { id: 'excerpt', label: 'Excerpt', width: 'minmax(170px, 2fr)' },
+                { id: 'date', label: 'Date', width: 'minmax(70px, auto)' },
+                { id: 'tags', label: 'Tags', width: 'auto' }
+            ],
+            lead: [{ id: 'bar', width: '3px' }]
+        },
+        files: {
+            locked: 'name',
+            always: ['actions'],
+            columns: [
+                { id: 'name', label: 'Name', width: 'minmax(220px, 2.4fr)', locked: true },
+                { id: 'size', label: 'Size', width: '90px' },
+                { id: 'type', label: 'Type', width: '130px' },
+                { id: 'changed', label: 'Changed', width: '130px' },
+                { id: 'actions', label: 'Actions', width: '60px', always: true }
+            ],
+            table: true
+        },
+        'admin-users': {
+            locked: 'login',
+            always: ['actions'],
+            columns: [
+                { id: 'login', label: 'Login', locked: true },
+                { id: 'role', label: 'Role' },
+                { id: 'created', label: 'Created' },
+                { id: 'last_login', label: 'Last login' },
+                { id: 'dav', label: 'DAV' },
+                { id: 'sessions', label: 'Sessions' },
+                { id: 'actions', label: 'Actions', always: true }
+            ],
+            table: true
+        },
+        'admin-audit': {
+            locked: 'when',
+            columns: [
+                { id: 'when', label: 'When', locked: true },
+                { id: 'action', label: 'Action' },
+                { id: 'actor', label: 'Actor' },
+                { id: 'target', label: 'Target' },
+                { id: 'detail', label: 'Detail' }
+            ],
+            table: true
+        }
+    };
+
+    function loadState(id, preset) {
+        try {
+            var raw = localStorage.getItem(STORAGE_PREFIX + id);
+            if (raw) {
+                return JSON.parse(raw);
+            }
+        } catch (e) {}
+        return {
+            order: preset.columns.map(function (c) { return c.id; }),
+            visible: preset.columns.reduce(function (acc, col) {
+                acc[col.id] = true;
+                return acc;
+            }, {})
+        };
+    }
+
+    function saveState(id, state) {
+        try {
+            localStorage.setItem(STORAGE_PREFIX + id, JSON.stringify(state));
+        } catch (e) {}
+    }
+
+    function columnMap(preset) {
+        var map = {};
+        preset.columns.forEach(function (col) {
+            map[col.id] = col;
+        });
+        return map;
+    }
+
+    function visibleOrder(state, preset) {
+        var cols = columnMap(preset);
+        return state.order.filter(function (id) {
+            var col = cols[id];
+            return col && (col.locked || col.always || state.visible[id] !== false);
+        });
+    }
+
+    function applyList(root, preset, state) {
+        var order = visibleOrder(state, preset);
+        var widths = [];
+        (preset.lead || []).forEach(function (lead) {
+            widths.push(lead.width);
+        });
+        order.forEach(function (id) {
+            var col = columnMap(preset)[id];
+            if (col && col.width) {
+                widths.push(col.width);
+            }
+        });
+        root.style.setProperty('--list-cols', widths.join(' '));
+
+        var visible = {};
+        order.forEach(function (id) { visible[id] = true; });
+        preset.columns.forEach(function (col) {
+            if (!visible[col.id]) {
+                root.querySelectorAll('[data-col="' + col.id + '"]').forEach(function (node) {
+                    node.classList.add('is-col-hidden');
+                });
+            }
+        });
+        (preset.lead || []).forEach(function (lead) {
+            root.querySelectorAll('[data-col="' + lead.id + '"]').forEach(function (node) {
+                node.classList.remove('is-col-hidden');
+            });
+        });
+        order.forEach(function (id) {
+            root.querySelectorAll('[data-col="' + id + '"]').forEach(function (node) {
+                node.classList.remove('is-col-hidden');
+            });
+        });
+    }
+
+    function applyTable(root, preset, state) {
+        var order = visibleOrder(state, preset);
+        var visible = {};
+        order.forEach(function (id) { visible[id] = true; });
+        preset.columns.forEach(function (col) {
+            var hide = !visible[col.id];
+            root.querySelectorAll('[data-col="' + col.id + '"]').forEach(function (node) {
+                node.classList.toggle('is-col-hidden', hide);
+            });
+        });
+    }
+
+    function applyColumns(id) {
+        var preset = PRESETS[id];
+        if (!preset) return;
+        var state = loadState(id, preset);
+        document.querySelectorAll('[data-columns-root="' + id + '"]').forEach(function (root) {
+            preset.columns.forEach(function (col) {
+                root.querySelectorAll('[data-col="' + col.id + '"]').forEach(function (node) {
+                    node.classList.remove('is-col-hidden');
+                });
+            });
+            if (preset.table) {
+                applyTable(root, preset, state);
+            } else {
+                applyList(root, preset, state);
+            }
+        });
+        document.querySelectorAll('[data-columns-id="' + id + '"] [data-columns-count]').forEach(function (el) {
+            el.textContent = String(visibleOrder(state, preset).length);
+        });
+    }
+
+    function renderMenu(picker, id) {
+        var preset = PRESETS[id];
+        if (!preset) return;
+        var menu = picker.querySelector('[data-columns-menu]');
+        if (!menu) return;
+        var state = loadState(id, preset);
+        var cols = columnMap(preset);
+        menu.innerHTML = '';
+        var rubric = document.createElement('div');
+        rubric.className = 'column-picker-rubric';
+        rubric.textContent = 'Columns';
+        menu.appendChild(rubric);
+
+        state.order.forEach(function (colId) {
+            var col = cols[colId];
+            if (!col) return;
+            var row = document.createElement('div');
+            row.className = 'column-picker-row';
+            row.draggable = !col.locked;
+            row.dataset.colId = colId;
+
+            var drag = document.createElement('span');
+            drag.className = 'column-picker-drag';
+            drag.textContent = '≡';
+            drag.setAttribute('aria-hidden', 'true');
+            row.appendChild(drag);
+
+            var box = document.createElement('span');
+            var on = col.locked || col.always || state.visible[colId] !== false;
+            box.className = 'column-picker-check' + (on ? '' : ' is-off') + (col.locked ? ' is-locked' : '');
+            row.appendChild(box);
+
+            var label = document.createElement('span');
+            label.textContent = col.label;
+            row.appendChild(label);
+
+            if (col.locked) {
+                var always = document.createElement('span');
+                always.className = 'column-picker-always';
+                always.textContent = 'always';
+                row.appendChild(always);
+            }
+
+            if (!col.locked && !col.always) {
+                row.addEventListener('click', function (e) {
+                    if (e.target.closest('.column-picker-drag')) return;
+                    state.visible[colId] = state.visible[colId] !== false ? false : true;
+                    saveState(id, state);
+                    applyColumns(id);
+                    renderMenu(picker, id);
+                });
+            }
+
+            row.addEventListener('dragstart', function (e) {
+                if (col.locked) {
+                    e.preventDefault();
+                    return;
+                }
+                row.classList.add('is-dragging');
+                e.dataTransfer.setData('text/plain', colId);
+            });
+            row.addEventListener('dragend', function () {
+                row.classList.remove('is-dragging');
+            });
+            row.addEventListener('dragover', function (e) {
+                e.preventDefault();
+            });
+            row.addEventListener('drop', function (e) {
+                e.preventDefault();
+                var fromId = e.dataTransfer.getData('text/plain');
+                if (!fromId || fromId === colId) return;
+                var fromIdx = state.order.indexOf(fromId);
+                var toIdx = state.order.indexOf(colId);
+                if (fromIdx < 0 || toIdx < 0) return;
+                state.order.splice(fromIdx, 1);
+                state.order.splice(toIdx, 0, fromId);
+                saveState(id, state);
+                applyColumns(id);
+                renderMenu(picker, id);
+            });
+
+            menu.appendChild(row);
+        });
+
+        var reset = document.createElement('button');
+        reset.type = 'button';
+        reset.className = 'column-picker-reset';
+        reset.textContent = 'Reset to defaults';
+        reset.addEventListener('click', function () {
+            try {
+                localStorage.removeItem(STORAGE_PREFIX + id);
+            } catch (e) {}
+            applyColumns(id);
+            renderMenu(picker, id);
+        });
+        menu.appendChild(reset);
+    }
+
+    function initPickers() {
+        document.querySelectorAll('[data-columns-id]').forEach(function (picker) {
+            var id = picker.getAttribute('data-columns-id');
+            renderMenu(picker, id);
+            applyColumns(id);
+            var toggle = picker.querySelector('[data-columns-toggle]');
+            if (toggle) {
+                toggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var menu = picker.querySelector('[data-columns-menu]');
+                    if (!menu) return;
+                    var open = menu.hidden;
+                    document.querySelectorAll('[data-columns-menu]').forEach(function (other) {
+                        other.hidden = true;
+                    });
+                    menu.hidden = !open;
+                    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+            }
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.column-picker')) {
+            document.querySelectorAll('[data-columns-menu]').forEach(function (menu) {
+                menu.hidden = true;
+            });
+            document.querySelectorAll('[data-columns-toggle]').forEach(function (btn) {
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-reset-columns]')) {
+            Object.keys(PRESETS).forEach(function (id) {
+                try {
+                    localStorage.removeItem(STORAGE_PREFIX + id);
+                } catch (err) {}
+                applyColumns(id);
+            });
+            document.querySelectorAll('[data-columns-id]').forEach(function (picker) {
+                renderMenu(picker, picker.getAttribute('data-columns-id'));
+            });
+        }
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPickers);
+    } else {
+        initPickers();
+    }
+})();

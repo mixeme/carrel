@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Wave 1.11 — column picker.** Lists and tables in contacts, tasks, notes, files, admin users, and the audit log gain a **Columns** control in the toolbar. A checkbox shows or hides a column, the drag handle reorders, and the first data column cannot be turned off. Choices are stored per section in `localStorage`.
+
+- **Wave 1.10 — settings and administration shell.** Profile moves into **Settings** with its own rail: Account, Connections, Attachments, and Appearance. `/app/` redirects to Connections; the header login link becomes a menu (connections, account, appearance, theme switcher, administration, sign out). **Appearance** keeps theme and row density in `localStorage` only. Administration pages use the same top bar and a vertical rail instead of horizontal tabs.
+
 - **Wave 1.9 — import, merge, and conflict dialogs.** Import screens are a three-step wizard (file or source → preview → report) in a centred dialog without the section rail. Merge confirmation and ETag conflict resolution use the same dialog frame: merge shows kept/deleted/gains with a solid danger confirm button; conflict shows a wide property table with value colours by diff kind. Handlers and form fields are unchanged.
 
 - **Wave 1.8 — cross-source search and person view.** The header search field submits to `/app/search` from any screen (`/` focuses it); the search page shows results and kind tabs only. `/app/contacts/{account}/{col}/{uid}` is the full-width person screen: calendar source rail, fan-out of meetings, tasks, notes and file attachments from the same poll, a «why it matched» column (exact `mailto:` attendee vs text hit), kind tabs including Files, and Write a note / New event with a pre-filled link or attendee. The edit form moves to `/edit`; `/timeline` redirects here. Duplicates gains the same kind filter tabs; `timeline.html` is removed.

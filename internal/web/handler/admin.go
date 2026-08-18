@@ -264,6 +264,7 @@ func (s *Server) renderAdmin(w http.ResponseWriter, r *http.Request, partial adm
 func (s *Server) adminFrame(r *http.Request) View {
 	v := s.View(r, "Administration")
 	v.InAdmin = true
+	v.ShellLayout = "admin"
 	s.firstLoginEscrowNotice(r, &v)
 	return v
 }
@@ -622,10 +623,10 @@ func (s *Server) RequestEmailChange(w http.ResponseWriter, r *http.Request) {
 
 	token, err := s.Store.RequestEmailChange(actor, sess.UserID, newEmail, 0)
 	if err != nil {
-		v := s.View(r, "Carrel")
+		v := s.settingsFrame(r, "Account", settingsSectionAccount)
 		v.Error = capitalize(err.Error()) + "."
-		v.Data = s.buildAppView(r)
-		s.RenderStatus(w, http.StatusBadRequest, "app.html", v)
+		v.Data = settingsView{Section: settingsSectionAccount, appView: s.buildAppView(r)}
+		s.RenderStatus(w, http.StatusBadRequest, "settings_account.html", v)
 		return
 	}
 
@@ -635,8 +636,8 @@ func (s *Server) RequestEmailChange(w http.ResponseWriter, r *http.Request) {
 		s.Mail.QueueEmailChange(newEmail, sess.Login, link, expires)
 	}
 
-	v := s.View(r, "Carrel")
+	v := s.settingsFrame(r, "Account", settingsSectionAccount)
 	v.Notice = "A confirmation link was sent to " + newEmail + "."
-	v.Data = s.buildAppView(r)
-	s.Render(w, "app.html", v)
+	v.Data = settingsView{Section: settingsSectionAccount, appView: s.buildAppView(r)}
+	s.Render(w, "settings_account.html", v)
 }

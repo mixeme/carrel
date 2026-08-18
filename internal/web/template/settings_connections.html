@@ -1,0 +1,102 @@
+{{define "body"}}
+{{$d := .Data}}
+<section class="card settings-panel">
+    <div class="page-head">
+        <div>
+            <h1>Connections</h1>
+            <p class="source-label">Signed in as <strong>{{.Session.Login}}</strong>{{if $d.Accounts}} · {{len $d.Accounts}} {{if eq (len $d.Accounts) 1}}server{{else}}servers{{end}}{{end}}</p>
+        </div>
+    </div>
+
+    {{if $d.Accounts}}
+    {{range $acc := $d.Accounts}}
+    <section class="account-block settings-account-card">
+        <div class="settings-account-head">
+            <h2>{{if $acc.Label}}{{$acc.Label}}{{else}}{{$acc.Username}}{{end}}</h2>
+            <form method="post" action="{{$.Base}}/app/settings/connections" class="inline-form no-print">
+                <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                <input type="hidden" name="action" value="delete_dav">
+                <input type="hidden" name="account_id" value="{{$acc.ID}}">
+                <button type="submit" class="app-btn is-sm is-danger-solid">Disconnect</button>
+            </form>
+        </div>
+        <p class="hint mono">{{$acc.BaseURL}} · {{$acc.Username}}</p>
+        {{if or $acc.AddressBooks $acc.Calendars $acc.FileCollections}}
+        <ul class="collection-list settings-collections">
+        {{range $acc.AddressBooks}}
+            <li>
+                <a class="collection-link" href="{{$.Base}}/app/contacts/{{$acc.ID}}/{{.ColEnc}}">
+                    <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                    {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
+                    <span class="hint">card</span>
+                </a>
+            </li>
+        {{end}}
+        {{range $acc.Calendars}}
+            <li>
+                <a class="collection-link" href="{{$.Base}}/app/calendar/{{$acc.ID}}/{{.ColEnc}}">
+                    <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                    {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
+                    <span class="hint">cal</span>
+                </a>
+            </li>
+        {{end}}
+        {{range $acc.FileCollections}}
+            <li>
+                <a class="collection-link" href="{{$.Base}}/app/files/{{$acc.ID}}/{{.ColEnc}}">
+                    <span class="collection-dot" style="background:var(--accent)"></span>
+                    {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
+                    <span class="hint">files{{if .ReadOnly}} · ro{{end}}</span>
+                </a>
+            </li>
+        {{end}}
+        </ul>
+        {{end}}
+    </section>
+    {{end}}
+    {{else}}
+    <p class="hint">No accounts connected yet.</p>
+    {{end}}
+
+    <section class="subsection">
+        <h2>Connect account</h2>
+        <form method="post" class="form" action="{{.Base}}/app/settings/connections">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="connect_dav">
+
+            <div class="form-field w-md">
+                <label for="dav-label">Label (optional)</label>
+                <input id="dav-label" name="dav_label" type="text"
+                       value="{{$d.Connect.Label}}" autocomplete="off">
+            </div>
+
+            <div class="form-field w-xl">
+                <label for="dav-url">Server URL</label>
+                <input id="dav-url" name="dav_url" type="url" required
+                       value="{{$d.Connect.BaseURL}}" placeholder="https://host/dav.php/"
+                       autocapitalize="none" spellcheck="false">
+            </div>
+
+            <div class="form-field w-md">
+                <label for="dav-user">Username</label>
+                <input id="dav-user" name="dav_username" type="text" required
+                       value="{{$d.Connect.Username}}" autocapitalize="none" spellcheck="false">
+            </div>
+
+            <div class="form-field w-md">
+                <label for="dav-pass">Password</label>
+                <input id="dav-pass" name="dav_password" type="password" required
+                       autocomplete="current-password">
+            </div>
+
+            <div class="form-foot">
+                <button type="submit">Connect</button>
+            </div>
+        </form>
+        {{if $d.Trace}}
+        <pre class="diagnostic">{{range $d.Trace.Steps}}[{{.Name}}] {{.Detail}}{{if .StatusCode}} ({{.StatusCode}}){{end}}{{if .Target}} → {{.Target}}{{end}}
+{{end}}</pre>
+        {{end}}
+    </section>
+</section>
+{{end}}

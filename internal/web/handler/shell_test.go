@@ -74,9 +74,9 @@ func TestAboutFooterOnSignedInPages(t *testing.T) {
 	a := newApp(t, nil)
 	a.setupAdmin("root", "root@example.org", testPassword)
 
-	rec := a.get("/app/")
+	rec := a.get("/app/calendar")
 	if rec.Code != http.StatusOK {
-		t.Fatalf("GET /app/ = %d, want 200", rec.Code)
+		t.Fatalf("GET /app/calendar = %d, want 200", rec.Code)
 	}
 	if !strings.Contains(rec.Body.String(), `href="/about"`) {
 		t.Error("signed-in page has no footer link to /about")

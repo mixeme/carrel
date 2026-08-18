@@ -9,6 +9,19 @@
     <link rel="icon" href="{{.Base}}/static/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{.Base}}/static/icon.svg">
     <link rel="manifest" href="{{.Base}}/manifest.webmanifest">
+    <script>
+    (function () {
+        try {
+            var theme = localStorage.getItem('carrel:theme');
+            if (theme === 'light' || theme === 'dark') {
+                document.documentElement.dataset.theme = theme;
+            }
+            if (localStorage.getItem('carrel:density') === 'compact') {
+                document.documentElement.dataset.density = 'compact';
+            }
+        } catch (e) {}
+    })();
+    </script>
     <script src="{{.Base}}/static/htmx.min.js" defer></script>
     <script src="{{.Base}}/static/carrel.js" defer></script>
 </head>
@@ -47,15 +60,44 @@
             <input type="hidden" name="action" value="refresh_cache">
             <button type="submit" class="app-btn is-quiet">Refresh</button>
         </form>
-        <a class="app-btn is-quiet" href="{{.Base}}/app/">{{.Session.Login}}</a>
-        {{if .Admin}}<a class="app-btn is-quiet" href="{{.Base}}/admin/"{{if .InAdmin}} aria-current="page"{{end}}>Administration</a>{{end}}
-        <form method="post" action="{{.Base}}/logout" class="app-top-form">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <button type="submit" class="app-btn is-quiet">Sign out</button>
-        </form>
+        <div class="app-user-menu">
+            <button type="button" class="app-btn is-quiet app-user-toggle" data-user-menu-toggle
+                    aria-expanded="false" aria-haspopup="menu">
+                {{.Session.Login}} <span aria-hidden="true">▾</span>
+            </button>
+            <div class="app-user-dropdown" role="menu" hidden>
+                <div class="app-user-head">
+                    <strong>{{.Session.Login}}</strong>
+                </div>
+                <a class="app-user-item" role="menuitem" href="{{.Base}}/app/settings/connections">Connections{{if .Topbar.ConnectionCount}} <span class="app-user-count">{{.Topbar.ConnectionCount}}</span>{{end}}</a>
+                <a class="app-user-item" role="menuitem" href="{{.Base}}/app/settings/account">Account</a>
+                <a class="app-user-item" role="menuitem" href="{{.Base}}/app/settings/appearance">Appearance</a>
+                {{if .Admin}}<hr class="app-user-sep">
+                <a class="app-user-item" role="menuitem" href="{{.Base}}/admin/"{{if .InAdmin}} aria-current="page"{{end}}>Administration</a>{{end}}
+                <hr class="app-user-sep">
+                <div class="app-user-theme" role="group" aria-label="Theme">
+                    <span class="app-user-theme-label">Theme</span>
+                    <div class="theme-segment theme-segment--menu" data-theme-segment>
+                        <button type="button" class="theme-segment-btn is-on" data-theme-value="auto">Auto</button>
+                        <button type="button" class="theme-segment-btn" data-theme-value="light">Light</button>
+                        <button type="button" class="theme-segment-btn" data-theme-value="dark">Dark</button>
+                    </div>
+                </div>
+                <hr class="app-user-sep">
+                <form method="post" action="{{.Base}}/logout" class="app-user-signout">
+                    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                    <button type="submit" class="app-user-item app-user-signout-btn" role="menuitem">Sign out</button>
+                </form>
+            </div>
+        </div>
     </div>
 </header>
-<div class="app-shell">
+<div class="app-shell{{if eq .ShellLayout "admin"}} is-admin{{else if eq .ShellLayout "settings"}} is-settings{{end}}">
+    {{if eq .ShellLayout "admin"}}
+    {{template "adminrail" .}}
+    {{else if eq .ShellLayout "settings"}}
+    {{template "settingsrail" .}}
+    {{else}}
     <nav class="app-rail no-print" aria-label="Sections">
         <a href="{{.Base}}/app/search"{{if eq .NavSection "search"}} aria-current="page"{{end}}>Search</a>
         <a href="{{.Base}}/app/contacts"{{if eq .NavSection "contacts"}} aria-current="page"{{end}}>Contacts</a>
@@ -65,14 +107,15 @@
         <a href="{{.Base}}/app/files"{{if eq .NavSection "files"}} aria-current="page"{{end}}>Files</a>
         <a href="{{.Base}}/app/duplicates"{{if eq .NavSection "duplicates"}} aria-current="page"{{end}}>Duplicates</a>
     </nav>
+    {{end}}
     <div class="app-work">
         <div class="app-content">
 {{else}}
 {{if .Session}}
 <header class="topbar no-print">
-    <a class="brand" href="{{.Base}}/app/">Carrel</a>
+    <a class="brand" href="{{.Base}}/app/calendar">Carrel</a>
     <nav>
-        <a href="{{.Base}}/app/">Back to app</a>
+        <a href="{{.Base}}/app/calendar">Back to app</a>
         {{if .Admin}}<a href="{{.Base}}/admin/"{{if .InAdmin}} aria-current="page"{{end}}>Administration</a>{{end}}
         <form method="post" action="{{.Base}}/logout">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
@@ -105,8 +148,45 @@
 </html>
 {{end}}
 
-{{/* Administration subsection links. Defined here because every admin page
-     shows the same list, and the current item is the only thing that differs. */}}
+{{/* Settings rail — order: who you are → where data comes from → attachments → appearance */}}
+{{define "settingsrail"}}
+{{$d := .Data}}
+<nav class="settings-rail no-print" aria-label="Settings">
+    <a class="settings-back" href="{{.Base}}/app/calendar">← Back to app</a>
+    <p class="settings-rubric">Settings</p>
+    <a href="{{.Base}}/app/settings/account"{{if eq $d.Section "account"}} aria-current="page"{{end}}>Account</a>
+    <a href="{{.Base}}/app/settings/connections"{{if eq $d.Section "connections"}} aria-current="page"{{end}}>Connections</a>
+    <a href="{{.Base}}/app/settings/attachments"{{if eq $d.Section "attachments"}} aria-current="page"{{end}}>Attachments</a>
+    <a href="{{.Base}}/app/settings/appearance"{{if eq $d.Section "appearance"}} aria-current="page"{{end}}>Appearance</a>
+</nav>
+{{end}}
+
+{{/* Administration rail (§7.11). Installation check arrives in wave 3. */}}
+{{define "adminrail"}}
+{{$d := .Data}}
+<nav class="settings-rail admin-rail no-print" aria-label="Administration">
+    <a class="settings-back" href="{{.Base}}/app/calendar">← Back to app</a>
+    <p class="settings-rubric">Administration</p>
+    <a href="{{.Base}}/admin/invites"{{if eq $d.Section "invites"}} aria-current="page"{{end}}>Add users</a>
+    <a href="{{.Base}}/admin/"{{if eq $d.Section "users"}} aria-current="page"{{end}}>Users</a>
+    <a href="{{.Base}}/admin/settings"{{if eq $d.Section "settings"}} aria-current="page"{{end}}>Settings</a>
+    <a href="{{.Base}}/admin/dav"{{if eq $d.Section "dav"}} aria-current="page"{{end}}>DAV validator</a>
+    <a href="{{.Base}}/admin/escrow"{{if eq $d.Section "escrow"}} aria-current="page"{{end}}>Key escrow</a>
+    <a href="{{.Base}}/admin/audit"{{if eq $d.Section "audit"}} aria-current="page"{{end}}>Audit log</a>
+</nav>
+{{end}}
+
+{{/* Column picker button — menu is built in carrel.js from presets (§1.11). */}}
+{{define "columnpicker"}}
+<div class="column-picker no-print" data-columns-id="{{.}}">
+    <button type="button" class="app-btn column-picker-toggle" data-columns-toggle aria-haspopup="menu" aria-expanded="false">
+        Columns <span class="column-picker-count" data-columns-count></span>
+    </button>
+    <div class="column-picker-menu" role="menu" hidden data-columns-menu></div>
+</div>
+{{end}}
+
+{{/* Legacy horizontal admin nav — kept for non-shell admin fragments if any. */}}
 {{define "adminnav"}}
 {{$d := .Data}}
 <nav class="admin-nav" aria-label="Administration">
@@ -142,7 +222,7 @@
         <button type="submit">Apply</button>
         <p class="hint">Unticked collections are not polled at all.</p>
     </form>
-    {{else}}<p class="hint">No collections here yet. Connect a DAV account from your <a href="{{.Base}}/app/">profile</a>.</p>{{end}}
+    {{else}}<p class="hint">No collections here yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
 </aside>
 {{end}}
 
@@ -176,7 +256,7 @@
         <button type="submit">Apply</button>
         <p class="hint">Unticked collections are not polled on the merged view.</p>
     </form>
-    {{else}}<p class="hint">No collections here yet. Connect a DAV account from your <a href="{{.Base}}/app/">profile</a>.</p>{{end}}
+    {{else}}<p class="hint">No collections here yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
 </aside>
 {{end}}
 
@@ -239,7 +319,7 @@
                 whether they can open it depends on the client and on whether your server asks them for a password.</p>
         </form>
         {{else}}
-        <p class="hint">To attach files, choose a folder for them on your <a href="{{.Base}}/app/">profile page</a>. It is
+        <p class="hint">To attach files, choose a folder for them in <a href="{{.Base}}/app/settings/attachments">Attachments</a>. It is
             asked for once.</p>
         {{end}}
     {{end}}

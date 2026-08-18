@@ -24,7 +24,7 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
-        <section class="card"><h1>Tasks</h1><p class="hint">Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> to keep tasks here.</p></section>
+        <section class="card"><h1>Tasks</h1><p class="hint">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to keep tasks here.</p></section>
         {{else}}
         <section class="card agenda-print-root">
             <div class="contacts-header">
@@ -45,11 +45,14 @@
             </p>
             {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
             {{if $d.Empty}}<p class="hint">Nothing here.</p>{{end}}
-            <ul class="list task-list">
+            <div class="list-toolbar no-print">
+                {{template "columnpicker" "tasks"}}
+            </div>
+            <ul class="list task-list" data-columns-root="tasks">
             {{range $d.Rows}}
                 <li class="list-row list-row--task task-row{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}">
                     {{if not $d.ReadOnly}}
-                    <form method="post" action="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}" class="inline-form no-print">
+                    <form method="post" action="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}" class="inline-form no-print" data-col="done">
                         <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
                         <input type="hidden" name="action" value="toggle">
                         <input type="hidden" name="etag" value="{{.ETag}}">
@@ -57,16 +60,16 @@
                         <button type="submit" class="task-tick" aria-label="{{if .Done}}Mark as not done{{else}}Mark as done{{end}}">{{if .Done}}✓{{end}}</button>
                     </form>
                     <span class="task-tick print-only" aria-hidden="true">{{if .Done}}✓{{end}}</span>
-                    {{else}}<span class="task-tick" aria-hidden="true">{{if .Done}}✓{{end}}</span>{{end}}
-                    <span class="list-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
-                    <a class="task-title list-title detail-link" href="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
+                    {{else}}<span class="task-tick" data-col="done" aria-hidden="true">{{if .Done}}✓{{end}}</span>{{end}}
+                    <span class="list-bar" data-col="bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                    <a class="task-title list-title detail-link" data-col="name" href="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                        hx-get="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
                        hx-target="#app-details" hx-swap="innerHTML">{{.Title}}</a>
                     <span class="list-end task-meta">
-                        {{if .DueLabel}}<span class="task-due list-detail">{{.DueLabel}}</span>{{end}}
-                        {{if .Status}}<span class="list-detail">{{.Status}}</span>{{end}}
-                        {{if and .Percent (not .Done)}}<span class="list-detail">{{.Percent}}%</span>{{end}}
-                        {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+                        {{if .DueLabel}}<span class="task-due list-detail" data-col="due">{{.DueLabel}}</span>{{end}}
+                        {{if .Status}}<span class="list-detail" data-col="status">{{.Status}}</span>{{end}}
+                        {{if and .Percent (not .Done)}}<span class="list-detail" data-col="progress">{{.Percent}}%</span>{{end}}
+                        <span data-col="tags">{{range .Tags}}<span class="tag">{{.}}</span>{{end}}</span>
                     </span>
                 </li>
             {{end}}

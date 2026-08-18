@@ -395,12 +395,12 @@ func TestFilesNavigationIsAlwaysVisible(t *testing.T) {
 
 	plain := newApp(t, nil)
 	plain.setupAdmin("root", "", testPassword)
-	if body := plain.get("/app/").Body.String(); !strings.Contains(body, `/app/files"`) {
+	if body := plain.get("/app/calendar").Body.String(); !strings.Contains(body, `/app/files"`) {
 		t.Fatalf("the Files entry is missing without any file collection:\n%s", body)
 	}
 
 	a := filesApp(t, h)
-	if body := a.get("/app/").Body.String(); !strings.Contains(body, `/app/files"`) {
+	if body := a.get("/app/calendar").Body.String(); !strings.Contains(body, `/app/files"`) {
 		t.Fatalf("the Files entry is missing with a file collection connected:\n%s", body)
 	}
 }

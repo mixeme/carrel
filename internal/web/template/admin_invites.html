@@ -1,8 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="card admin-panel">
-    <h1>Administration</h1>
-    {{template "adminnav" .}}
+    <div class="page-head"><h1>Add users</h1></div>
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>

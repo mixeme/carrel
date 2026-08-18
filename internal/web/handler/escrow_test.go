@@ -79,7 +79,7 @@ func TestEscrowOffByDefault(t *testing.T) {
 		t.Error("the panel offers a recovery with no key pair to recover with")
 	}
 
-	profile := a.get("/app/").Body.String()
+	profile := a.get("/app/settings/account").Body.String()
 	if !strings.Contains(profile, "No copy of your data key is deposited") {
 		t.Errorf("the profile does not say the account is unrecoverable:\n%s", profile)
 	}
@@ -98,24 +98,25 @@ func TestEscrowCoversNewAccountsAndSaysSo(t *testing.T) {
 	a.coveredUser("ada", "ada@example.org")
 
 	a.signInReady("ada", testPassword)
-	first := a.get("/app/").Body.String()
+	first := a.get("/app/settings/connections").Body.String()
 	if !strings.Contains(first, escrowNotice) {
 		t.Errorf("no first-login notice for a covered account:\n%s", first)
 	}
-	if !strings.Contains(first, "A copy of your data key is deposited") {
+	account := a.get("/app/settings/account").Body.String()
+	if !strings.Contains(account, "A copy of your data key is deposited") {
 		t.Error("the profile does not show the deposit status")
 	}
-	if !strings.Contains(first, `value="opt_out"`) {
+	if !strings.Contains(account, `value="opt_out"`) {
 		t.Error("the profile does not offer to withdraw the deposited copy")
 	}
 
 	// The notice is a notice, not a nag.
-	if second := a.get("/app/").Body.String(); strings.Contains(second, escrowNotice) {
+	if second := a.get("/app/settings/connections").Body.String(); strings.Contains(second, escrowNotice) {
 		t.Error("the first-login notice was shown again")
 	}
 	// And it stays gone across sessions, because it was recorded as delivered.
 	a.signIn("ada", testPassword+"-permanent")
-	if again := a.get("/app/").Body.String(); strings.Contains(again, escrowNotice) {
+	if again := a.get("/app/settings/connections").Body.String(); strings.Contains(again, escrowNotice) {
 		t.Error("the notice came back at the next sign-in")
 	}
 }
@@ -127,7 +128,7 @@ func TestProfileOptInAndOptOut(t *testing.T) {
 	a.setupAdmin("root", "root@example.org", testPassword)
 	a.enableEscrow()
 
-	if !strings.Contains(a.get("/app/").Body.String(), `value="opt_in"`) {
+	if !strings.Contains(a.get("/app/settings/account").Body.String(), `value="opt_in"`) {
 		t.Fatal("the profile does not offer to join the scheme")
 	}
 

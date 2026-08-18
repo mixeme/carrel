@@ -26,7 +26,7 @@
         {{if $d.NoBooks}}
         <section class="card">
             <h1>Contacts</h1>
-            <p class="hint">Connect a CardDAV account from your <a href="{{.Base}}/app/">profile</a>
+            <p class="hint">Connect a CardDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>
                 to see contacts here.</p>
         </section>
         {{else}}
@@ -54,19 +54,22 @@
             {{if $d.Empty}}
             <p class="hint">No contacts in this address book.</p>
             {{else}}
-            <ul class="list contact-list" id="contact-list">
+            <div class="list-toolbar no-print">
+                {{template "columnpicker" "contacts"}}
+            </div>
+            <ul class="list contact-list" id="contact-list" data-columns-root="contacts">
             {{range $d.Contacts}}
                 <li class="list-row list-row--contact contact-row">
-                    <span class="list-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span class="list-bar" data-col="bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
                     <a class="contact-row-link detail-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                        hx-get="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
                        hx-target="#app-details" hx-swap="innerHTML">
-                        <img class="list-avatar contact-avatar print-photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
-                        <span class="list-title"><strong>{{.DisplayName}}</strong></span>
-                        <span class="list-sub">{{.Phones}}</span>
-                        <span class="list-sub">{{.Emails}}</span>
+                        <img class="list-avatar contact-avatar print-photo" data-col="photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
+                        <span class="list-title" data-col="name"><strong>{{.DisplayName}}</strong></span>
+                        <span class="list-sub" data-col="phone">{{.Phones}}</span>
+                        <span class="list-sub" data-col="email">{{.Emails}}</span>
                     </a>
-                    <span class="list-end">{{if .Linked}}<a class="dup-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}</span>
+                    <span class="list-end" data-col="badges">{{if .Linked}}<a class="dup-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}</span>
                 </li>
             {{end}}
             </ul>

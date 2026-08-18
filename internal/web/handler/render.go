@@ -65,6 +65,9 @@ type View struct {
 	// InAdmin is true on every administration screen, so the top navigation
 	// can mark Administration current without listing subsection titles.
 	InAdmin bool
+	// ShellLayout selects which rail sits under the top bar: app sections,
+	// settings, or administration. Empty means the legacy rule (!InAdmin).
+	ShellLayout string
 	// Error and Notice are the two message slots the frame renders.
 	Error  string
 	Notice string
@@ -77,8 +80,17 @@ type View struct {
 // what decides the navigation entries.
 func (v View) Admin() bool { return v.Session != nil && v.Session.Admin }
 
-// Shell reports whether the four-zone application frame wraps this page.
-func (v View) Shell() bool { return v.Session != nil && !v.InAdmin }
+// Shell reports whether the signed-in chrome wraps this page.
+func (v View) Shell() bool {
+	if v.Session == nil {
+		return false
+	}
+	switch v.ShellLayout {
+	case "app", "settings", "admin":
+		return true
+	}
+	return !v.InAdmin
+}
 
 // NavSection is the shell rail item to mark current, empty when none applies.
 func (v View) NavSection() string {
@@ -100,6 +112,8 @@ func (v View) NavSection() string {
 		return "files"
 	case "Duplicates", "Merge duplicates":
 		return "duplicates"
+	case "Connections", "Account", "Attachments", "Appearance":
+		return ""
 	default:
 		if strings.HasPrefix(v.Title, "Timeline of ") {
 			return "contacts"
@@ -124,7 +138,7 @@ func (s *Server) View(r *http.Request, title string) View {
 		Commit:    s.Commit,
 		SourceURL: SourceURL,
 	}
-	if sess != nil && !v.InAdmin {
+	if sess != nil && v.Shell() {
 		v.Topbar = s.buildTopbar(r, sess)
 	}
 	return v

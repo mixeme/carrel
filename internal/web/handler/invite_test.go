@@ -60,7 +60,7 @@ func TestInviteLifecycle(t *testing.T) {
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("login as invited user status = %d", rec.Code)
 	}
-	rec = a.get("/app/")
+	rec = a.get("/app/settings/connections")
 	if rec.Code != http.StatusOK {
 		t.Fatalf("app home status = %d", rec.Code)
 	}

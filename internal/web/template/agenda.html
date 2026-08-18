@@ -43,7 +43,7 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoCalendars}}
-        <section class="card"><h1>Calendar</h1><p class="hint">Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> to see events here.</p></section>
+        <section class="card"><h1>Calendar</h1><p class="hint">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to see events here.</p></section>
         {{else}}
         <section class="card agenda-print-root">
             <div class="contacts-header">

@@ -111,19 +111,19 @@ func (s *Server) ProfileEscrow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v := s.View(r, "Carrel")
+	v := s.settingsFrame(r, "Account", settingsSectionAccount)
 	if err != nil {
 		v.Error = escrowMessage(err)
-		v.Data = s.buildAppView(r)
-		s.RenderStatus(w, http.StatusBadRequest, "app.html", v)
+		v.Data = settingsView{Section: settingsSectionAccount, appView: s.buildAppView(r)}
+		s.RenderStatus(w, http.StatusBadRequest, "settings_account.html", v)
 		return
 	}
 	// The user has just decided the question the notice would ask about.
 	sess.ClearEscrowNotice()
 
 	v.Notice = notice
-	v.Data = s.buildAppView(r)
-	s.Render(w, "app.html", v)
+	v.Data = settingsView{Section: settingsSectionAccount, appView: s.buildAppView(r)}
+	s.Render(w, "settings_account.html", v)
 }
 
 // escrowMessage turns a store failure into something worth reading. Anything

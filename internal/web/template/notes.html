@@ -24,7 +24,7 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
-        <section class="card"><h1>Notes</h1><p class="hint">Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.</p></section>
+        <section class="card"><h1>Notes</h1><p class="hint">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.</p></section>
         {{else}}
         <section class="card agenda-print-root">
             <div class="contacts-header">
@@ -44,20 +44,23 @@
             {{if $d.ReadOnly}}<p class="hint no-print">This notebook is read-only.</p>{{end}}
             {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
             {{if $d.Empty}}<p class="hint">Nothing here yet.</p>{{end}}
-            <ul class="list note-list">
+            <div class="list-toolbar no-print">
+                {{template "columnpicker" "notes"}}
+            </div>
+            <ul class="list note-list" data-columns-root="notes">
             {{range $d.Rows}}
                 <li class="list-row list-row--note note-row">
-                    <span class="list-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span class="list-bar" data-col="bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
                     <a class="note-link detail-link" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                        hx-get="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
                        hx-target="#app-details" hx-swap="innerHTML">
-                        <strong>{{.Title}}</strong>
-                        <span class="note-excerpt">{{.Excerpt}}</span>
+                        <strong data-col="name">{{.Title}}</strong>
+                        <span class="note-excerpt" data-col="excerpt">{{.Excerpt}}</span>
                     </a>
                     <span class="list-end note-meta">
-                        {{if .DateLabel}}<span class="note-date list-detail">{{.DateLabel}}</span>{{end}}
-                        {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
-                        {{if .HasRelated}}<span class="dup-badge is-linked">linked</span>{{end}}
+                        {{if .DateLabel}}<span class="note-date list-detail" data-col="date">{{.DateLabel}}</span>{{end}}
+                        <span data-col="tags">{{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+                        {{if .HasRelated}}<span class="dup-badge is-linked">linked</span>{{end}}</span>
                     </span>
                 </li>
             {{end}}

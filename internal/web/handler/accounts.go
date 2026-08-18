@@ -107,68 +107,8 @@ func (s *Server) buildAppView(r *http.Request) appView {
 	return out
 }
 
-func (s *Server) AppHome(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		s.appSubmit(w, r)
-		return
-	}
-	v := s.View(r, "Carrel")
-	s.firstLoginEscrowNotice(r, &v)
-	v.Data = s.buildAppView(r)
-	s.Render(w, "app.html", v)
-}
-
 func (s *Server) appSubmit(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-	sess := SessionFrom(r)
-	actor := store.Actor{ID: sess.UserID, Login: sess.Login, IP: ClientIP(r)}
-
-	var (
-		data   appView
-		err    error
-		notice string
-	)
-	switch r.PostFormValue(fieldAction) {
-	case "connect_dav":
-		data, err = s.appConnectDAV(r, actor)
-		if err == nil {
-			notice = "Account connected."
-		}
-	case "delete_dav":
-		data, err = s.appDeleteDAV(r, actor)
-		if err == nil {
-			notice = "Account removed."
-		}
-	case "save_attachments":
-		data, err = s.appSaveAttachments(r)
-		if err == nil {
-			notice = "Attachments will go in that folder."
-		}
-	case "refresh_cache":
-		s.appRefresh(w, r)
-		return
-	default:
-		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-
-	v := s.View(r, "Carrel")
-	s.firstLoginEscrowNotice(r, &v)
-	if err != nil {
-		v.Error = userFacingDAVError(err)
-	}
-	if notice != "" {
-		v.Notice = notice
-	}
-	v.Data = data
-	status := http.StatusOK
-	if err != nil {
-		status = http.StatusBadRequest
-	}
-	s.RenderStatus(w, status, "app.html", v)
+	s.appSubmitTo(w, r, "settings_connections.html", settingsSectionConnections)
 }
 
 func (s *Server) appConnectDAV(r *http.Request, actor store.Actor) (appView, error) {
@@ -242,7 +182,7 @@ func (s *Server) appRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 	target := r.Header.Get("Referer")
 	if target == "" {
-		target = s.Path("/app/")
+		target = s.Path("/app/settings/connections")
 	}
 	http.Redirect(w, r, target, http.StatusSeeOther)
 }

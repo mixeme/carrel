@@ -1,15 +1,15 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="card admin-panel">
-    <h1>Administration</h1>
-    {{template "adminnav" .}}
+    <div class="page-head">
+        <h1>Audit log</h1>
+    </div>
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>
     {{end}}
 
     <section class="subsection">
-        <h2>Audit log</h2>
         <form method="get" action="{{.Base}}/admin/audit">
             <label for="audit-action">Filter by action</label>
             <select id="audit-action" name="audit_action">
@@ -31,19 +31,22 @@
             <button type="submit">Filter</button>
         </form>
 
+        <div class="list-toolbar no-print">
+            {{template "columnpicker" "admin-audit"}}
+        </div>
         {{if $d.AuditLog}}
-        <table class="data">
+        <table class="data" data-columns-root="admin-audit">
             <thead>
-                <tr><th>When</th><th>Action</th><th>Actor</th><th>Target</th><th>Detail</th></tr>
+                <tr><th data-col="when">When</th><th data-col="action">Action</th><th data-col="actor">Actor</th><th data-col="target">Target</th><th data-col="detail">Detail</th></tr>
             </thead>
             <tbody>
             {{range $d.AuditLog}}
                 <tr>
-                    <td>{{.At.Format "2006-01-02 15:04"}}</td>
-                    <td>{{.Action}}</td>
-                    <td>{{if .ActorLogin}}{{.ActorLogin}}{{else}}—{{end}}</td>
-                    <td>{{if .TargetLogin}}{{.TargetLogin}}{{else}}—{{end}}</td>
-                    <td>{{.Detail}}</td>
+                    <td data-col="when">{{.At.Format "2006-01-02 15:04"}}</td>
+                    <td data-col="action">{{.Action}}</td>
+                    <td data-col="actor">{{if .ActorLogin}}{{.ActorLogin}}{{else}}—{{end}}</td>
+                    <td data-col="target">{{if .TargetLogin}}{{.TargetLogin}}{{else}}—{{end}}</td>
+                    <td data-col="detail">{{.Detail}}</td>
                 </tr>
             {{end}}
             </tbody>

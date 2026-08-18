@@ -105,8 +105,8 @@ func TestStageOneAcceptanceFlow(t *testing.T) {
 	if sess := a.session(); sess.MustChangePassword() {
 		t.Error("a self-chosen password was marked as needing a change")
 	}
-	if rec := a.get("/app/"); rec.Code != http.StatusOK {
-		t.Errorf("GET /app/ = %d, want 200", rec.Code)
+	if rec := a.get("/app/settings/connections"); rec.Code != http.StatusOK {
+		t.Errorf("GET /app/settings/connections = %d, want 200", rec.Code)
 	}
 	if rec := a.get("/admin/"); rec.Code != http.StatusForbidden {
 		t.Errorf("the invited user reached the panel: status %d", rec.Code)
@@ -188,7 +188,7 @@ func TestDisableEndsActiveSessionsAtOnce(t *testing.T) {
 		fieldPassword: {testPassword},
 		fieldConfirm:  {testPassword},
 	})
-	if rec := user.get("/app/"); rec.Code != http.StatusOK {
+	if rec := user.get("/app/settings/connections"); rec.Code != http.StatusOK {
 		t.Fatalf("the invited user is not signed in: status %d", rec.Code)
 	}
 	userSession := user.session()
