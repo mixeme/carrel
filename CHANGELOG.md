@@ -342,3 +342,16 @@ Stage 1 («Каркас») — первая рабочая версия. Отк�
 ### Dependencies
 
 - `golang.org/x/crypto` v0.54.0 for `argon2` (and its indirect `golang.org/x/sys`), recorded in `THIRD_PARTY.md`.
+
+---
+
+## Version index
+
+Checked against `git log` on `main` (2026-08-18). Intermediate dev versions `0.2.0`–`0.6.0` were never released; stage work landed in `0.7.0`.
+
+| Version | Date | Commit | Note |
+|---------|------|--------|------|
+| 0.9.0 | 2026-08-18 | `c3795ec` | Last change in the release; no `Release v0.9.0` commit yet |
+| 0.8.0 | 2026-08-17 | `21fedc4` | `Release v0.8.0 with a corrected changelog.` |
+| 0.7.0 | 2026-08-15 | `db38bee` | `Release v0.7.0 with a corrected changelog.` |
+| 0.1.0 | 2026-08-11 | `19c4100` | `Release v0.1.0 and document open stage 1 acceptance items.` |
