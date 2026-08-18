@@ -1,18 +1,36 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="app-layout calendar-layout">
-    <aside class="sidebar card no-print">
-        <h2>Notebooks</h2>
-        <ul class="collection-list">{{range $d.Sources}}
-            <li><a class="collection-link" href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
-        {{end}}</ul>
-    </aside>
-    <div class="app-main"><section class="card">
+<div class="dialog-host">
+<div class="app-dialog is-narrow">
+{{template "importsteps-file-3" .}}
+<div class="dialog-head">
+    <div>
         <h1>Notes import report</h1>
-        <p>Created {{$d.Created}} note(s) in {{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}.</p>
-        {{if $d.Collisions}}<h2>Assigned new UIDs</h2><p class="hint">These notes already existed here, so the imported copies were given fresh identities instead of overwriting them.</p><ul>{{range $d.Collisions}}<li>{{.}}</li>{{end}}</ul>{{end}}
-        {{if $d.Failed}}<h2>Failed</h2><ul>{{range $d.Failed}}<li>{{.}}</li>{{end}}</ul>{{end}}
-        <p><a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">Return to notes</a></p>
-    </section></div>
+        <p class="dialog-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+    </div>
+</div>
+<div class="dialog-card">
+    <div class="dialog-rubric">Created</div>
+    <p class="import-report-stat">{{$d.Created}}</p>
+</div>
+{{if $d.Collisions}}
+<div class="dialog-card">
+    <div class="dialog-rubric">Assigned new UIDs <span class="mono">{{len $d.Collisions}}</span></div>
+    <p class="hint">These notes already existed here, so the imported copies were given fresh identities instead of overwriting them.</p>
+    <div class="dialog-diag">{{range $d.Collisions}}{{.}}
+{{end}}</div>
+</div>
+{{end}}
+{{if $d.Failed}}
+<div class="dialog-card">
+    <div class="dialog-rubric">Failed <span class="mono">{{len $d.Failed}}</span></div>
+    <div class="dialog-diag is-error">{{range $d.Failed}}{{.}}
+{{end}}</div>
+</div>
+{{end}}
+<div class="dialog-foot">
+    <a class="app-btn is-primary" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">Return to notes</a>
+</div>
+</div>
 </div>
 {{end}}

@@ -679,6 +679,19 @@ a.src-label:hover {
     word-break: break-word;
 }
 
+.conflict-diff .diff-only_local td:nth-child(2) {
+    color: var(--accent);
+}
+
+.conflict-diff .diff-only_remote td:nth-child(3) {
+    color: var(--dusty);
+}
+
+.conflict-diff .diff-changed td:nth-child(2),
+.conflict-diff .diff-changed td:nth-child(3) {
+    color: var(--alert);
+}
+
 .conflict-actions {
     display: flex;
     flex-wrap: wrap;
@@ -868,6 +881,12 @@ body.has-shell {
     background: transparent;
     border-color: transparent;
     color: var(--muted);
+}
+
+.app-btn.is-danger-solid {
+    background: var(--alert);
+    border-color: var(--alert);
+    color: #fff;
 }
 
 .app-shell {
@@ -1562,6 +1581,171 @@ label.checkbox input {
     text-align: left;
     padding: 0.35rem 0.5rem;
     vertical-align: top;
+}
+
+/* Centered dialogs: import, merge, conflict (§7.7–7.9) */
+.dialog-host {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.app-dialog {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 22px var(--pad) 26px;
+}
+
+.app-dialog.is-wide {
+    max-width: 1080px;
+}
+
+.app-dialog.is-narrow {
+    max-width: 520px;
+}
+
+.import-steps {
+    display: flex;
+    gap: 0;
+    align-items: center;
+    font-size: 11px;
+    color: var(--dusty);
+    margin-bottom: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.import-steps span {
+    padding: 0 12px 0 0;
+}
+
+.import-steps span.is-on {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.import-steps i {
+    width: 22px;
+    height: 0.5px;
+    background: var(--rule);
+    margin-right: 12px;
+    display: block;
+    flex: none;
+}
+
+.dialog-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.dialog-head h1 {
+    font-family: var(--f-serif);
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.15;
+    margin: 0;
+}
+
+.dialog-sub {
+    font-size: 11.5px;
+    color: var(--dusty);
+    margin: 4px 0 0;
+}
+
+.dialog-acts {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex: none;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.dialog-acts form {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin: 0;
+}
+
+.dialog-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding-top: 12px;
+    margin-top: 14px;
+    border-top: 0.5px solid var(--hair);
+}
+
+.dialog-foot button,
+.dialog-foot .app-btn {
+    margin-top: 0;
+}
+
+.import-stats {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin: 6px 0 12px;
+    font-size: 13px;
+}
+
+.import-stats .is-error {
+    color: var(--alert);
+}
+
+.dialog-card {
+    border: 0.5px solid var(--hair);
+    border-radius: 5px;
+    background: var(--paper);
+    padding: 14px;
+    margin-bottom: 10px;
+}
+
+.dialog-card.is-accent {
+    border-color: var(--accent);
+}
+
+.dialog-rubric {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    font-weight: 600;
+    margin: 0 0 8px;
+}
+
+.dialog-rubric .mono {
+    letter-spacing: 0;
+    text-transform: none;
+    font-family: var(--f-mono);
+    font-size: 11px;
+}
+
+.import-report-stat {
+    font-size: 20px;
+    font-family: var(--f-serif);
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.dialog-diag {
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.dialog-diag.is-error {
+    color: var(--alert);
 }
 
 /* The file browser of §7. A listing is a table because that is what a listing

@@ -1,35 +1,56 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="app-layout calendar-layout">
-    <aside class="sidebar card no-print"><h2>Calendars</h2><ul class="collection-list">{{range $d.Calendars}}<li><a class="collection-link" href="{{$.Base}}/app/calendar/{{.AccountID}}/{{.ColEnc}}">{{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}</a></li>{{end}}</ul></aside>
-    <div class="app-main"><section class="card">
+<div class="dialog-host">
+<div class="app-dialog{{if $d.HasPreview}} is-wide{{end}}">
+{{if $d.HasPreview}}{{template "importsteps-file-2" .}}{{else}}{{template "importsteps-file-1" .}}{{end}}
+<div class="dialog-head">
+    <div>
         <h1>Import calendar</h1>
-        <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-        {{if not $d.HasPreview}}
-        <form method="post" class="form" enctype="multipart/form-data" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+        <p class="dialog-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}{{if $d.HasPreview}}{{if $d.Events}} ← <code>{{(index $d.Events 0).Source}}</code>{{end}}{{end}}</p>
+    </div>
+    {{if $d.HasPreview}}
+    <div class="dialog-acts">
+        <form method="post" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <div class="form-field w-lg">
-                <label for="file">iCalendar file</label>
-                <input id="file" type="file" name="file" accept=".ics,.ical,.zip,text/calendar" required>
-            </div>
-            <div class="form-foot">
-                <button type="submit">Preview import</button>
-            </div>
+            <button type="submit" name="action" value="cancel_import" class="app-btn is-quiet">Cancel</button>
+            <button type="submit" name="action" value="confirm_import" class="app-btn is-primary">Import {{$d.OKCount}} event(s)</button>
         </form>
-        {{else}}
-        <p>{{$d.OKCount}} event(s) ready; {{$d.ErrorCount}} error(s); {{$d.CollisionCount}} UID collision(s).</p>
-        {{if $d.TruncatedNote}}<p class="warning">{{$d.TruncatedNote}}</p>{{end}}
-        <table class="import-preview"><thead><tr><th>Source</th><th>Event</th><th>UID</th><th>Result</th></tr></thead><tbody>
-        {{range $d.Events}}<tr><td>{{.Source}}</td><td>{{.DisplayName}}</td><td>{{.OriginalUID}}</td><td>{{if .ParseError}}{{.ParseError}}{{else if .UIDCollision}}New UID will be assigned{{else}}Ready{{end}}</td></tr>{{end}}
-        </tbody></table>
-        <form method="post" class="form" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <div class="form-foot">
-                <button type="submit" name="action" value="confirm_import">Import</button>
-                <button type="submit" name="action" value="cancel_import" class="link">Cancel</button>
-            </div>
-        </form>
-        {{end}}
-    </section></div>
+    </div>
+    {{end}}
+</div>
+
+{{if not $d.HasPreview}}
+<form method="post" class="form" enctype="multipart/form-data" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+    <div class="form-field w-lg">
+        <label for="file">iCalendar file</label>
+        <input id="file" type="file" name="file" accept=".ics,.ical,.zip,text/calendar" required>
+    </div>
+    <div class="form-foot">
+        <button type="submit">Preview import</button>
+    </div>
+</form>
+{{else}}
+<div class="import-stats">
+    <span><strong>{{$d.OKCount}}</strong> ready</span>
+    {{if $d.ErrorCount}}<span class="is-error"><strong>{{$d.ErrorCount}}</strong> with errors</span>{{end}}
+    {{if $d.CollisionCount}}<span><strong>{{$d.CollisionCount}}</strong> UID collision(s)</span>{{end}}
+</div>
+{{if $d.TruncatedNote}}<p class="message error" role="alert">{{$d.TruncatedNote}}</p>{{end}}
+<table class="import-preview data">
+    <thead><tr><th>Source</th><th>Event</th><th>UID</th><th>Result</th></tr></thead>
+    <tbody>
+    {{range $d.Events}}
+        <tr>
+            <td><code>{{.Source}}</code></td>
+            <td>{{.DisplayName}}</td>
+            <td><code>{{.OriginalUID}}</code></td>
+            <td>{{if .ParseError}}<span class="is-error">{{.ParseError}}</span>{{else if .UIDCollision}}New UID will be assigned{{else}}Ready{{end}}</td>
+        </tr>
+    {{end}}
+    </tbody>
+</table>
+{{end}}
+</div>
 </div>
 {{end}}

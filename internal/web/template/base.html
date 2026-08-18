@@ -440,3 +440,37 @@
 {{end}}
 {{template "findpoller" .}}
 {{end}}
+
+{{/* Import wizard step indicators (§7.9). File-based imports use File on step 1;
+     notes use Source because WebDAV is a second source on the same step. */}}
+{{define "importsteps-file-1"}}
+<div class="import-steps" aria-label="Import steps">
+    <span class="is-on">1 · File</span><i aria-hidden="true"></i>
+    <span>2 · Preview</span><i aria-hidden="true"></i>
+    <span>3 · Report</span>
+</div>
+{{end}}
+
+{{define "importsteps-file-2"}}
+<div class="import-steps" aria-label="Import steps">
+    <span>1 · File</span><i aria-hidden="true"></i>
+    <span class="is-on">2 · Preview</span><i aria-hidden="true"></i>
+    <span>3 · Report</span>
+</div>
+{{end}}
+
+{{define "importsteps-file-3"}}
+<div class="import-steps" aria-label="Import steps">
+    <span>1 · File</span><i aria-hidden="true"></i>
+    <span>2 · Preview</span><i aria-hidden="true"></i>
+    <span class="is-on">3 · Report</span>
+</div>
+{{end}}
+
+{{define "importsteps-source-1"}}
+<div class="import-steps" aria-label="Import steps">
+    <span class="is-on">1 · Source</span><i aria-hidden="true"></i>
+    <span>2 · Preview</span><i aria-hidden="true"></i>
+    <span>3 · Report</span>
+</div>
+{{end}}

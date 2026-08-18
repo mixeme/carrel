@@ -1,74 +1,85 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="app-layout calendar-layout">
-    <aside class="sidebar card no-print">
-        <h2>Notebooks</h2>
-        <ul class="collection-list">{{range $d.Sources}}
-            <li><a class="collection-link" href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
-        {{end}}</ul>
-    </aside>
-    <div class="app-main"><section class="card">
+<div class="dialog-host">
+<div class="app-dialog{{if $d.HasPreview}} is-wide{{end}}">
+{{if $d.HasPreview}}{{template "importsteps-file-2" .}}{{else}}{{template "importsteps-source-1" .}}{{end}}
+<div class="dialog-head">
+    <div>
         <h1>Import notes</h1>
-        <p class="source-label">Into {{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-        {{if not $d.HasPreview}}
-        <form method="post" class="form" enctype="multipart/form-data" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+        <p class="dialog-sub">Into {{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}{{if $d.HasPreview}}{{if $d.Notes}} ← <code>{{(index $d.Notes 0).Source}}</code>{{end}}{{end}}</p>
+    </div>
+    {{if $d.HasPreview}}
+    <div class="dialog-acts">
+        <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <div class="form-field w-lg">
-                <label for="file">Markdown file or zip</label>
-                <input id="file" type="file" name="file" accept=".md,.markdown,.txt,.zip,text/markdown" required>
-                <p class="form-hint">Front matter is read when present: title, date, tags, uid and any X- property exported earlier. A file without front matter becomes a note dated by its own timestamp.</p>
-            </div>
-            <div class="form-foot">
-                <button type="submit">Preview import</button>
-            </div>
+            <button type="submit" name="action" value="cancel_import" class="app-btn is-quiet">Cancel</button>
+            <button type="submit" name="action" value="confirm_import" class="app-btn is-primary">Import {{$d.OKCount}} note(s)</button>
         </form>
-        {{if $d.WebDAVSources}}
-        <form method="post" class="form subsection" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <input type="hidden" name="action" value="webdav_import">
-            <h2>Or read a folder from WebDAV</h2>
-            <div class="form-field w-lg">
-                <label for="webdav-source">File collection</label>
-                <select id="webdav-source" name="webdav_source">
-                {{range $d.WebDAVSources}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}
-                </select>
-            </div>
-            <div class="form-field w-md">
-                <label for="webdav-folder">Folder</label>
-                <input id="webdav-folder" name="webdav_folder" placeholder="notes" autocapitalize="none" spellcheck="false">
-                <p class="form-hint">Every <code>.md</code> file directly in that folder is previewed. Subfolders are not walked, and
-                    nothing is deleted or moved on the server.</p>
-            </div>
-            <div class="form-foot">
-                <button type="submit">Preview folder</button>
-            </div>
-        </form>
-        {{end}}
-        {{else}}
-        <p>{{$d.OKCount}} note(s) ready; {{$d.ErrorCount}} error(s); {{$d.CollisionCount}} UID collision(s).</p>
-        {{if $d.TruncatedNote}}<p class="message error">{{$d.TruncatedNote}}</p>{{end}}
-        <table class="import-preview">
-            <thead><tr><th>File</th><th>Title</th><th>Date</th><th>Tags</th><th>Result</th></tr></thead>
-            <tbody>
-            {{range $d.Notes}}
-                <tr>
-                    <td>{{.Source}}</td>
-                    <td>{{.Title}}</td>
-                    <td>{{.Date}}</td>
-                    <td>{{range .Tags}}<span class="tag">{{.}}</span>{{end}}</td>
-                    <td>{{if .ParseError}}{{.ParseError}}{{else if .UIDCollision}}New UID will be assigned{{else}}Ready{{end}}</td>
-                </tr>
-            {{end}}
-            </tbody>
-        </table>
-        <form method="post" class="form" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <div class="form-foot">
-                <button type="submit" name="action" value="confirm_import">Import</button>
-                <button type="submit" name="action" value="cancel_import" class="link">Cancel</button>
-            </div>
-        </form>
-        {{end}}
-    </section></div>
+    </div>
+    {{end}}
+</div>
+
+{{if not $d.HasPreview}}
+<div class="dialog-card">
+    <div class="dialog-rubric">From a file</div>
+    <form method="post" class="form" enctype="multipart/form-data" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <div class="form-field w-lg">
+            <label for="file">Markdown file or zip</label>
+            <input id="file" type="file" name="file" accept=".md,.markdown,.txt,.zip,text/markdown" required>
+        </div>
+        <div class="form-foot">
+            <button type="submit">Preview import</button>
+        </div>
+    </form>
+</div>
+{{if $d.WebDAVSources}}
+<div class="dialog-card is-accent">
+    <div class="dialog-rubric">From a WebDAV folder</div>
+    <form method="post" class="form" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <input type="hidden" name="action" value="webdav_import">
+        <div class="form-field w-lg">
+            <label for="webdav-source">File collection</label>
+            <select id="webdav-source" name="webdav_source">
+            {{range $d.WebDAVSources}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}
+            </select>
+        </div>
+        <div class="form-field w-md">
+            <label for="webdav-folder">Folder</label>
+            <input id="webdav-folder" name="webdav_folder" placeholder="notes" autocapitalize="none" spellcheck="false">
+        </div>
+        <div class="form-foot">
+            <button type="submit" class="app-btn is-primary">Preview folder</button>
+        </div>
+        <p class="hint">Every <code>.md</code> file directly in that folder is previewed. Subfolders are not walked, and
+            nothing is deleted or moved on the server.</p>
+    </form>
+</div>
+{{end}}
+<p class="message">Front matter is read when present: title, date, tags, uid and any X- property exported earlier. A file without front matter becomes a note dated by its own timestamp.</p>
+{{else}}
+<div class="import-stats">
+    <span><strong>{{$d.OKCount}}</strong> ready</span>
+    {{if $d.ErrorCount}}<span class="is-error"><strong>{{$d.ErrorCount}}</strong> with errors</span>{{end}}
+    {{if $d.CollisionCount}}<span><strong>{{$d.CollisionCount}}</strong> UID collision(s)</span>{{end}}
+</div>
+{{if $d.TruncatedNote}}<p class="message error" role="alert">{{$d.TruncatedNote}}</p>{{end}}
+<table class="import-preview data">
+    <thead><tr><th>File</th><th>Title</th><th>Date</th><th>Tags</th><th>Result</th></tr></thead>
+    <tbody>
+    {{range $d.Notes}}
+        <tr>
+            <td><code>{{.Source}}</code></td>
+            <td>{{.Title}}</td>
+            <td>{{.Date}}</td>
+            <td>{{range .Tags}}<span class="tag">{{.}}</span>{{end}}</td>
+            <td>{{if .ParseError}}<span class="is-error">{{.ParseError}}</span>{{else if .UIDCollision}}New UID will be assigned{{else}}Ready{{end}}</td>
+        </tr>
+    {{end}}
+    </tbody>
+</table>
+{{end}}
+</div>
 </div>
 {{end}}

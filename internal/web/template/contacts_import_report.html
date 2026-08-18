@@ -1,43 +1,35 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="app-layout contacts-layout">
-    <aside class="sidebar card no-print">
-        <h2>Address books</h2>
-        <ul class="collection-list">
-        {{range $d.Books}}
-            <li>
-                <a class="collection-link" href="{{$.Base}}/app/contacts/{{.AccountID}}/{{.ColEnc}}">
-                    {{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}
-                </a>
-            </li>
-        {{end}}
-        </ul>
-        <p><a href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to list</a></p>
-    </aside>
-
-    <div class="app-main">
-        <section class="card">
-            <h1>Import report</h1>
-            <p class="hint">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-            <p>Created: <strong>{{$d.Created}}</strong></p>
-            {{if $d.Collisions}}
-            <h2>UID collisions</h2>
-            <ul>
-            {{range $d.Collisions}}
-                <li>{{.}}</li>
-            {{end}}
-            </ul>
-            {{end}}
-            {{if $d.Failed}}
-            <h2>Failed</h2>
-            <ul>
-            {{range $d.Failed}}
-                <li>{{.}}</li>
-            {{end}}
-            </ul>
-            {{end}}
-            <p><a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">Back to list</a></p>
-        </section>
+<div class="dialog-host">
+<div class="app-dialog is-narrow">
+{{template "importsteps-file-3" .}}
+<div class="dialog-head">
+    <div>
+        <h1>Import report</h1>
+        <p class="dialog-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
     </div>
+</div>
+<div class="dialog-card">
+    <div class="dialog-rubric">Created</div>
+    <p class="import-report-stat">{{$d.Created}}</p>
+</div>
+{{if $d.Collisions}}
+<div class="dialog-card">
+    <div class="dialog-rubric">UID collisions <span class="mono">{{len $d.Collisions}}</span></div>
+    <div class="dialog-diag">{{range $d.Collisions}}{{.}}
+{{end}}</div>
+</div>
+{{end}}
+{{if $d.Failed}}
+<div class="dialog-card">
+    <div class="dialog-rubric">Failed <span class="mono">{{len $d.Failed}}</span></div>
+    <div class="dialog-diag is-error">{{range $d.Failed}}{{.}}
+{{end}}</div>
+</div>
+{{end}}
+<div class="dialog-foot">
+    <a class="app-btn is-primary" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">Back to list</a>
+</div>
+</div>
 </div>
 {{end}}

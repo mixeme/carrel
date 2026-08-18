@@ -1,44 +1,49 @@
 {{define "body"}}
 {{$d := .Data}}
-<section class="card conflict-card">
-    <h1>Conflict</h1>
-    <p>Another client changed this {{$d.Entity}} while you were editing it.
-        Choose which version to keep — nothing is overwritten automatically.</p>
+<div class="dialog-host">
+<div class="app-dialog is-wide">
+<div class="dialog-head">
+    <div>
+        <h1>Conflict</h1>
+        <p class="dialog-sub">Another client changed this {{$d.Entity}} while you were editing it. Nothing has been overwritten.</p>
+    </div>
+</div>
 
-    {{if $d.RemoteGone}}
-    <p class="hint">The server version could not be re-read. Applying yours will try to create it again.</p>
+{{if $d.RemoteGone}}
+<p class="hint">The server version could not be re-read. Applying yours will try to create it again.</p>
+{{end}}
+
+{{if $d.Lines}}
+<table class="data conflict-diff">
+    <thead>
+        <tr><th>Property</th><th>Your edit ({{$d.LocalName}})</th><th>Server ({{$d.RemoteName}})</th></tr>
+    </thead>
+    <tbody>
+    {{range $d.Lines}}
+        <tr class="diff-{{.Kind}}">
+            <td><code>{{.Name}}</code></td>
+            <td>{{if .Local}}{{.Local}}{{else}}—{{end}}</td>
+            <td>{{if .Remote}}{{.Remote}}{{else}}—{{end}}</td>
+        </tr>
     {{end}}
+    </tbody>
+</table>
+{{else}}
+<p class="hint">No property-level differences were found; the versions still disagree on ETag.</p>
+{{end}}
 
-    {{if $d.Lines}}
-    <table class="data conflict-diff">
-        <thead>
-            <tr><th>Property</th><th>Your edit ({{$d.LocalName}})</th><th>Server ({{$d.RemoteName}})</th></tr>
-        </thead>
-        <tbody>
-        {{range $d.Lines}}
-            <tr class="diff-{{.Kind}}">
-                <td><code>{{.Name}}</code></td>
-                <td>{{if .Local}}{{.Local}}{{else}}—{{end}}</td>
-                <td>{{if .Remote}}{{.Remote}}{{else}}—{{end}}</td>
-            </tr>
-        {{end}}
-        </tbody>
-    </table>
-    {{else}}
-    <p class="hint">No property-level differences were found; the versions still disagree on ETag.</p>
-    {{end}}
-
-    <form method="post" action="{{.Base}}/app/{{$d.BasePath}}/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/conflict" class="form conflict-actions">
-        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-        <input type="hidden" name="conflict_key" value="{{$d.Key}}">
-        <input type="hidden" name="account_id" value="{{$d.AccountID}}">
-        <input type="hidden" name="col" value="{{$d.ColEnc}}">
-        <input type="hidden" name="uid" value="{{$d.UID}}">
-        <div class="form-foot">
-            <button type="submit" name="choice" value="keep_server">Keep server version</button>
-            <button type="submit" name="choice" value="apply_mine">Apply my edit</button>
-            <button type="submit" name="choice" value="cancel" class="link">Cancel</button>
-        </div>
-    </form>
-</section>
+<form method="post" action="{{.Base}}/app/{{$d.BasePath}}/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/conflict" class="form">
+    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+    <input type="hidden" name="conflict_key" value="{{$d.Key}}">
+    <input type="hidden" name="account_id" value="{{$d.AccountID}}">
+    <input type="hidden" name="col" value="{{$d.ColEnc}}">
+    <input type="hidden" name="uid" value="{{$d.UID}}">
+    <div class="dialog-foot">
+        <button type="submit" name="choice" value="apply_mine" class="app-btn is-primary">Apply my edit</button>
+        <button type="submit" name="choice" value="keep_server" class="app-btn">Keep server version</button>
+        <button type="submit" name="choice" value="cancel" class="app-btn is-quiet">Cancel</button>
+    </div>
+</form>
+</div>
+</div>
 {{end}}

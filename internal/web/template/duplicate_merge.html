@@ -1,56 +1,77 @@
 {{define "body"}}
 {{$d := .Data}}
-<section class="card narrow">
-    <h1>Merge on the server</h1>
-    {{if $d.Done}}
-    <p class="source-label">{{$d.Title}}</p>
-    {{if $d.Written}}<p>The merged record was written to <strong>{{$d.Target.CollectionLabel}}</strong>.</p>
-    {{else}}<p>Nothing was written, so nothing was deleted.</p>{{end}}
-    {{if $d.Deleted}}
-    <h2>Deleted</h2>
+<div class="dialog-host">
+<div class="app-dialog">
+{{if $d.Done}}
+<div class="dialog-head">
+    <div>
+        <h1>Merge on the server</h1>
+        <p class="dialog-sub">{{$d.Title}}</p>
+    </div>
+</div>
+{{if $d.Written}}<p>The merged record was written to <strong>{{$d.Target.CollectionLabel}}</strong>.</p>
+{{else}}<p>Nothing was written, so nothing was deleted.</p>{{end}}
+{{if $d.Deleted}}
+<div class="dialog-card">
+    <div class="dialog-rubric">Deleted</div>
     <ul class="dup-members">
     {{range $d.Deleted}}<li><span>{{.Title}}<span class="hint">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}</span></span></li>{{end}}
     </ul>
-    {{end}}
-    {{if $d.Kept}}
-    <h2>Still there</h2>
+</div>
+{{end}}
+{{if $d.Kept}}
+<div class="dialog-card">
+    <div class="dialog-rubric">Still there</div>
     <ul class="dup-members">
     {{range $d.Kept}}<li><span>{{.Title}}<span class="hint">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}</span></span></li>{{end}}
     </ul>
     <p class="hint">These were left as they are. Nothing was undone: delete them yourself once you have checked the merged record.</p>
-    {{end}}
-    <p><a class="button" href="{{$d.Back}}">Back to duplicates</a></p>
-    {{else}}
-    <p class="source-label">{{$d.Title}}</p>
-    <p class="message error">This changes other people's servers: the merged record is written to one collection and the others are deleted. It cannot be undone from here.</p>
-    <h2>Kept and rewritten</h2>
-    <ul class="dup-members">
-        <li><span>{{$d.Target.Title}}<span class="hint">{{$d.Target.CollectionLabel}}{{if $d.Target.AccountLabel}} · {{$d.Target.AccountLabel}}{{end}}</span></span></li>
-    </ul>
-    <h2>Deleted afterwards</h2>
+</div>
+{{end}}
+<div class="dialog-foot">
+    <a class="app-btn" href="{{$d.Back}}">Back to duplicates</a>
+</div>
+{{else}}
+<div class="dialog-head">
+    <div>
+        <h1>Merge on the server</h1>
+        <p class="dialog-sub">{{$d.Title}}</p>
+    </div>
+</div>
+<p class="message error" role="alert">This changes other people's servers: the merged record is written to one collection and the others are deleted. It cannot be undone from here.</p>
+<div class="dialog-card">
+    <div class="dialog-rubric">Kept and rewritten</div>
+    <p>{{$d.Target.Title}} <span class="hint">{{$d.Target.CollectionLabel}}{{if $d.Target.AccountLabel}} · {{$d.Target.AccountLabel}}{{end}}</span></p>
+</div>
+<div class="dialog-card">
+    <div class="dialog-rubric">Deleted afterwards</div>
     <ul class="dup-members">
     {{range $d.Sources}}<li><span>{{.Title}}<span class="hint">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}</span></span></li>{{end}}
     </ul>
-    {{if $d.Adds}}
-    <h2>The kept record gains</h2>
+</div>
+{{if $d.Adds}}
+<div class="dialog-card">
+    <div class="dialog-rubric">The kept record gains</div>
     <ul class="dup-members">
     {{range $d.Adds}}<li><span>{{.}}</span></li>{{end}}
     </ul>
-    {{else}}
-    <p class="hint">The kept record already carries everything the others do, so only the deletions are left to do.</p>
-    {{end}}
-    <form method="post" class="form" action="{{$d.MergeURL}}">
-        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-        <input type="hidden" name="back" value="{{$d.Back}}">
-        <input type="hidden" name="kind" value="{{$d.Kind}}">
-        {{if $d.GroupID}}<input type="hidden" name="group" value="{{$d.GroupID}}">{{end}}
-        {{range $d.Tokens}}<input type="hidden" name="member" value="{{.}}">{{end}}
-        <input type="hidden" name="target" value="{{$d.Target.Token}}">
-        <div class="form-foot">
-            <button type="submit" name="action" value="apply" class="danger">Write the merge and delete the rest</button>
-            <a class="button" href="{{$d.Back}}">Cancel</a>
-        </div>
-    </form>
-    {{end}}
-</section>
+</div>
+{{else}}
+<p class="hint">The kept record already carries everything the others do, so only the deletions are left to do.</p>
+{{end}}
+<form method="post" class="form" action="{{$d.MergeURL}}">
+    <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+    <input type="hidden" name="back" value="{{$d.Back}}">
+    <input type="hidden" name="kind" value="{{$d.Kind}}">
+    {{if $d.GroupID}}<input type="hidden" name="group" value="{{$d.GroupID}}">{{end}}
+    {{range $d.Tokens}}<input type="hidden" name="member" value="{{.}}">{{end}}
+    <input type="hidden" name="target" value="{{$d.Target.Token}}">
+    <div class="dialog-foot">
+        <button type="submit" name="action" value="apply" class="app-btn is-danger-solid">Write the merge and delete the rest</button>
+        <a class="app-btn is-quiet" href="{{$d.Back}}">Cancel</a>
+    </div>
+</form>
+{{end}}
+</div>
+</div>
 {{end}}
