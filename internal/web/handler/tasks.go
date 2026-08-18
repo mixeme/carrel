@@ -306,37 +306,14 @@ func (s *Server) TaskCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sess := SessionFrom(r)
-	p, acc, err := s.calendarProvider(sess, accountID)
-	if err != nil {
-		s.renderTasksError(w, r, err, accountID, colEnc)
-		return
-	}
-	col, err := findCalendar(acc, collection)
-	if err != nil {
-		s.renderTasksError(w, r, err, accountID, colEnc)
-		return
-	}
-	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
-	defer cancel()
-	obj, err := p.Get(ctx, normalizeCollectionPath(col.Path), calendarObjectPath(col.Path, uid))
-	if err != nil {
-		s.renderTasksError(w, r, err, accountID, colEnc)
-		return
-	}
-	task, err := obj.Todo(s.timezone())
+	card, err := s.loadTaskCard(r.Context(), sess, accountID, collection, colEnc, uid)
 	if err != nil {
 		s.renderTasksError(w, r, err, accountID, colEnc)
 		return
 	}
 	v := s.View(r, "Task")
 	v.Notice = strings.TrimSpace(r.URL.Query().Get("notice"))
-	v.Data = taskCardView{
-		Sources: s.taskSources(sess), AccountID: accountID, ColEnc: colEnc,
-		Collection: col, AccountLabel: accountLabel(*acc), UID: task.UID,
-		ETag: obj.ETag, Task: task, Form: formFromTask(task, s.timezone()),
-		Related:  s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), task.Related),
-		ReadOnly: col.ReadOnly,
-	}
+	v.Data = card
 	s.Render(w, "task.html", v)
 }
 

@@ -1,6 +1,6 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="app-layout calendar-layout">
+<div class="app-layout calendar-layout" data-detail-section="tasks">
     <aside class="sidebar card no-print">
         <h2>Task lists</h2>
         {{if $d.Sources}}
@@ -53,7 +53,9 @@
                     <span class="task-tick print-only" aria-hidden="true">{{if .Done}}✓{{end}}</span>
                     {{else}}<span class="task-tick" aria-hidden="true">{{if .Done}}✓{{end}}</span>{{end}}
                     <span class="list-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
-                    <a class="task-title list-title" href="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">{{.Title}}</a>
+                    <a class="task-title list-title detail-link" href="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
+                       hx-get="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
+                       hx-target="#app-details" hx-swap="innerHTML">{{.Title}}</a>
                     <span class="list-end task-meta">
                         {{if .DueLabel}}<span class="task-due list-detail">{{.DueLabel}}</span>{{end}}
                         {{if .Status}}<span class="list-detail">{{.Status}}</span>{{end}}

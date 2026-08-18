@@ -1,0 +1,33 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="detail-panel" data-detail-url="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/panel">
+    <div class="detail-panel-head">
+        <div>
+            <h2 class="detail-panel-title">{{$d.Task.DisplayTitle}}</h2>
+            <p class="detail-panel-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+        </div>
+        <div class="detail-panel-actions">
+            <a class="app-btn" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">Edit</a>
+            <button type="button" class="app-btn is-quiet" data-detail-close title="Close the panel" aria-label="Close">✕</button>
+        </div>
+    </div>
+    <div class="detail-panel-body">
+        <dl class="detail-fields">
+            {{if $d.Form.DueDate}}<dt>Due</dt><dd>{{$d.Form.DueDate}}{{if $d.Form.DueTime}} {{$d.Form.DueTime}}{{end}}</dd>{{end}}
+            {{if $d.Task.Status}}<dt>Status</dt><dd>{{$d.Task.Status}}</dd>{{end}}
+            {{if and $d.Task.PercentComplete (not $d.Task.Done)}}<dt>Progress</dt><dd>{{$d.Task.PercentComplete}}%</dd>{{end}}
+            {{if $d.Task.Location}}<dt>Location</dt><dd>{{$d.Task.Location}}</dd>{{end}}
+            {{if $d.Task.Description}}<dt>Description</dt><dd>{{$d.Task.Description}}</dd>{{end}}
+            {{if $d.Task.Categories}}<dt>Categories</dt><dd>{{range $d.Task.Categories}}<span class="tag">{{.}}</span> {{end}}</dd>{{end}}
+        </dl>
+        {{if $d.Related}}
+        <section class="detail-section">
+            <h3>Related</h3>
+            <ul class="related-list">{{range $d.Related}}
+                <li>{{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}<code>{{.UID}}</code>{{end}}<span class="hint">{{.Kind}}{{if .RelType}} · {{.RelType}}{{end}}</span></li>
+            {{end}}</ul>
+        </section>
+        {{end}}
+    </div>
+</div>
+{{end}}

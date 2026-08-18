@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Wave 1.4 — details panel.** Contacts, calendar, tasks, and notes load a read-only card into the right-hand `#app-details` column via htmx when a list row is clicked. Direct links to a record still open the full edit page. The panel closes with ✕ and does not reopen by itself; which row was open is remembered per section in `localStorage` until the user closes it.
+
 - **Wave 1.3 — list row components.** Shared list grid (`.list` / `.list-row`), 3 px collection bar, rubricator headers, square 28 px avatars, and badge styling from the mockups. Row-height tokens (`--row-lg` / `--row-md` / `--row-sm`) drive control sizes; inputs and adjacent buttons share the 28 px height. Contacts, agenda, tasks, and notes use per-section column layouts; collection dots in the sidebar are vertical bars.
 
 - **Wave 1.2 — application shell in `base.html`.** Signed-in app pages use a 52 px top bar, section rail, full-width content area, and a hidden details zone for later htmx use. `View.Shell()` and `View.NavSection()` drive the frame; admin and public pages keep the old top bar. Responsive layout collapses rail and side widths at ≤1279 px and hides the details column at ≤1023 px.

@@ -157,3 +157,128 @@ document.addEventListener('htmx:sseError', function (e) {
     if (!url || !window.htmx) return;
     window.htmx.ajax('GET', url, { target: panel, swap: 'innerHTML' });
 });
+
+// Details panel (wave 1.4): list rows load a read-only card into #app-details.
+// No selection — no panel; closed manually — stays closed; state is per section.
+(function () {
+    var STORAGE_KEY = 'carrel:details';
+
+    function shell() {
+        return document.querySelector('.app-shell');
+    }
+
+    function panel() {
+        return document.getElementById('app-details');
+    }
+
+    function sectionKey() {
+        var layout = document.querySelector('[data-detail-section]');
+        return layout ? layout.getAttribute('data-detail-section') : '';
+    }
+
+    function readAll() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function writeSection(section, data) {
+        if (!section) return;
+        var all = readAll();
+        if (!data || (!data.url && !data.closed)) {
+            delete all[section];
+        } else {
+            all[section] = data;
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    }
+
+    function showPanel() {
+        var el = panel();
+        var frame = shell();
+        if (el) el.hidden = false;
+        if (frame) frame.classList.add('has-details');
+    }
+
+    function hidePanel(manual) {
+        var el = panel();
+        var frame = shell();
+        if (el) {
+            el.hidden = true;
+            el.innerHTML = '';
+        }
+        if (frame) frame.classList.remove('has-details');
+        document.querySelectorAll('.list-row.is-selected').forEach(function (row) {
+            row.classList.remove('is-selected');
+        });
+        var section = sectionKey();
+        if (!section) return;
+        if (manual) {
+            writeSection(section, { closed: true });
+        } else {
+            writeSection(section, null);
+        }
+    }
+
+    function markSelected(link) {
+        document.querySelectorAll('.list-row.is-selected').forEach(function (row) {
+            row.classList.remove('is-selected');
+        });
+        var row = link.closest('.list-row');
+        if (row) row.classList.add('is-selected');
+    }
+
+    function rememberOpen(url) {
+        var section = sectionKey();
+        if (section && url) {
+            writeSection(section, { url: url, closed: false });
+        }
+    }
+
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-detail-close]')) {
+            e.preventDefault();
+            hidePanel(true);
+            return;
+        }
+        var link = e.target.closest('a.detail-link[hx-get]');
+        if (!link) return;
+        markSelected(link);
+        rememberOpen(link.getAttribute('hx-get'));
+        showPanel();
+    });
+
+    document.body.addEventListener('htmx:afterSwap', function (e) {
+        if (!e.detail.target || e.detail.target.id !== 'app-details') return;
+        showPanel();
+        var root = e.detail.target.querySelector('[data-detail-url]');
+        if (root) rememberOpen(root.getAttribute('data-detail-url'));
+    });
+
+    document.body.addEventListener('htmx:responseError', function (e) {
+        if (!e.detail.target || e.detail.target.id !== 'app-details') return;
+        hidePanel(false);
+    });
+
+    function restore() {
+        var section = sectionKey();
+        if (!section || !window.htmx) return;
+        var state = readAll()[section];
+        if (!state || state.closed || !state.url) return;
+        var el = panel();
+        if (!el) return;
+        window.htmx.ajax('GET', state.url, { target: '#app-details', swap: 'innerHTML' }).then(function () {
+            var link = document.querySelector('a.detail-link[hx-get="' + CSS.escape(state.url) + '"]');
+            if (link) markSelected(link);
+            showPanel();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', restore);
+    } else {
+        restore();
+    }
+})();

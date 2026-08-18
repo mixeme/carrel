@@ -1,6 +1,6 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="app-layout contacts-layout">
+<div class="app-layout contacts-layout" data-detail-section="contacts">
     <aside class="sidebar card no-print">
         <h2>Address books</h2>
         {{if $d.Books}}
@@ -57,7 +57,9 @@
             {{range $d.Contacts}}
                 <li class="list-row list-row--contact contact-row">
                     <span class="list-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
-                    <a class="contact-row-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">
+                    <a class="contact-row-link detail-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
+                       hx-get="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
+                       hx-target="#app-details" hx-swap="innerHTML">
                         <img class="list-avatar contact-avatar print-photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
                         <span class="list-title"><strong>{{.DisplayName}}</strong></span>
                         <span class="list-sub">{{.Phones}}</span>

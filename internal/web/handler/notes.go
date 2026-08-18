@@ -386,39 +386,13 @@ func (s *Server) NoteCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sess := SessionFrom(r)
-	p, acc, err := s.calendarProvider(sess, accountID)
+	card, err := s.loadNoteCard(r.Context(), sess, accountID, collection, colEnc, uid)
 	if err != nil {
 		s.renderNotesError(w, r, err, accountID, colEnc)
 		return
 	}
-	col, err := findCalendar(acc, collection)
-	if err != nil {
-		s.renderNotesError(w, r, err, accountID, colEnc)
-		return
-	}
-	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
-	defer cancel()
-	obj, err := p.Get(ctx, normalizeCollectionPath(col.Path), calendarObjectPath(col.Path, uid))
-	if err != nil {
-		s.renderNotesError(w, r, err, accountID, colEnc)
-		return
-	}
-	note, err := obj.Note(s.timezone())
-	if err != nil {
-		s.renderNotesError(w, r, err, accountID, colEnc)
-		return
-	}
-	card := noteCardView{
-		Sources: s.noteSourcesOrNil(sess), AccountID: accountID, ColEnc: colEnc,
-		Collection: col, AccountLabel: accountLabel(*acc), UID: note.UID,
-		ETag: obj.ETag, Note: note, Form: formFromNote(note, s.timezone()),
-		Related:     s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), note.Related),
-		Attachments: s.attachmentRows(sess, sectionNotes, accountID, colEnc, note.UID, note.Attachments),
-		Section:     sectionNotes.Path,
-		ReadOnly:    col.ReadOnly, PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
-	}
-	_, card.CanAttach = s.attachmentTarget(sess)
-	v := s.View(r, note.DisplayTitle())
+	card.PrintDate = time.Now().UTC().Format("2006-01-02 15:04 UTC")
+	v := s.View(r, card.Note.DisplayTitle())
 	v.Notice = strings.TrimSpace(r.URL.Query().Get("notice"))
 	v.Data = card
 	s.Render(w, "note.html", v)

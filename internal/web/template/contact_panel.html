@@ -1,0 +1,41 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="detail-panel" data-detail-url="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/panel">
+    <div class="detail-panel-head">
+        <div class="detail-panel-intro">
+            {{if $d.PhotoURL}}<img class="detail-panel-photo" src="{{$d.PhotoURL}}" alt="" width="76" height="76">{{end}}
+            <div>
+                <h2 class="detail-panel-title">{{$d.Contact.DisplayName}}</h2>
+                <p class="detail-panel-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+            </div>
+        </div>
+        <div class="detail-panel-actions">
+            <a class="app-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">Edit</a>
+            <a class="app-btn is-quiet" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/timeline">Timeline</a>
+            <button type="button" class="app-btn is-quiet" data-detail-close title="Close the panel" aria-label="Close">✕</button>
+        </div>
+    </div>
+    <div class="detail-panel-body">
+        <dl class="detail-fields">
+            {{if $d.Contact.Organization}}<dt>Organisation</dt><dd>{{range $d.Contact.Organization}}{{.}} {{end}}</dd>{{end}}
+            {{if $d.Contact.Title}}<dt>Title</dt><dd>{{$d.Contact.Title}}</dd>{{end}}
+            {{if $d.Contact.Role}}<dt>Role</dt><dd>{{$d.Contact.Role}}</dd>{{end}}
+            {{range $d.Contact.Phones}}<dt>Phone{{if .Label}} · {{.Label}}{{end}}</dt><dd>{{.Value}}</dd>{{end}}
+            {{range $d.Contact.Emails}}<dt>Email{{if .Label}} · {{.Label}}{{end}}</dt><dd>{{.Value}}</dd>{{end}}
+            {{if $d.Contact.Birthday}}<dt>Birthday</dt><dd>{{$d.Contact.Birthday}}</dd>{{end}}
+            {{if $d.Contact.Categories}}<dt>Categories</dt><dd>{{range $d.Contact.Categories}}<span class="tag">{{.}}</span> {{end}}</dd>{{end}}
+            {{if $d.Contact.Note}}<dt>Note</dt><dd>{{$d.Contact.Note}}</dd>{{end}}
+        </dl>
+        {{if $d.Contact.Other}}
+        <section class="detail-section">
+            <h3>Kept as the server sent them</h3>
+            <ul class="detail-other">
+            {{range $d.Contact.Other}}
+                <li><code>{{.Name}}</code>{{range .Values}} {{.Text}}{{end}}</li>
+            {{end}}
+            </ul>
+        </section>
+        {{end}}
+    </div>
+</div>
+{{end}}
