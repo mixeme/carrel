@@ -161,8 +161,6 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request, from string
 		data, err = s.adminResumeEscrow(r, actor)
 	case "disable_escrow":
 		data, err = s.adminDisableEscrow(r, actor)
-	case "escrow_policy":
-		data, err = s.adminEscrowPolicy(r, actor)
 	case "change_master_password":
 		data, err = s.adminChangeMaster(r, actor)
 	case "recover_user":
@@ -296,7 +294,7 @@ func adminSectionForAction(action string) string {
 		return adminSectionSettings
 	case "test_dav":
 		return adminSectionDAV
-	case "enable_escrow", "resume_escrow", "disable_escrow", "escrow_policy",
+	case "enable_escrow", "resume_escrow", "disable_escrow",
 		"change_master_password", "recover_user":
 		return adminSectionEscrow
 	case "disable_user", "enable_user", "delete_user",

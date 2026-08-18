@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- **Escrow withdrawal is always the key owner's decision in code (§5.4).** Removed `Settings.Escrow.ForbidOptOut`, the «Do not let users withdraw their deposited key» checkbox on `/admin/escrow`, the disabled-withdrawal branch in the profile, `SetEscrowOptOutPolicy`, `ErrEscrowOptOutForbidden`, and tests `TestOptOutCanBeForbidden` and `TestForbiddenOptOutIsVisible`. A `forbid_opt_out` flag left in an older state file is read and ignored; withdrawal still works. `TestStoredForbidOptOutIsIgnored` covers that case.
+
 ### Added
 
 - **A global implementation plan — [docs/plans/global-plan.md](docs/plans/global-plan.md).** The roadmap says what is not built and in what order it matters; the mockups say how it looks and carry their own fourteen-step order for the redesign. Neither answers the question the two together raise: which of those orders runs first. The plan answers it in five waves and two parallel tracks, and derives the order from three rules rather than taste — no feature starts with its interface, the frame comes before what stands on it, and the collection parity rule is an acceptance criterion rather than a wish.

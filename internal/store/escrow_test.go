@@ -199,33 +199,25 @@ func TestOptInThenOptOut(t *testing.T) {
 	}
 }
 
-// The administrator may take the withdrawal away, but the user has to be able
-// to see that they did (§5.4) — here, that the refusal is its own error and
-// not silence.
-func TestOptOutCanBeForbidden(t *testing.T) {
+// A forbid_opt_out flag left in an older state file is ignored: withdrawal is
+// always the key owner's decision (§5.4).
+func TestStoredForbidOptOutIsIgnored(t *testing.T) {
 	s, _ := openTest(t, t.TempDir())
 	admin := mustAdmin(t, s)
 	user, dek := coveredUser(t, s, admin, "ada")
 	defer dek.Zero()
 
-	if err := s.SetEscrowOptOutPolicy(actorOf(admin), true); err != nil {
-		t.Fatalf("SetEscrowOptOutPolicy: %v", err)
+	if err := s.update(func(state *State) error {
+		state.Settings.Escrow.ForbidOptOut = true
+		return nil
+	}); err != nil {
+		t.Fatalf("set forbid_opt_out in state: %v", err)
 	}
-	if !s.Settings().Escrow.ForbidOptOut {
-		t.Fatal("the policy was not stored")
+	if err := s.EscrowOptOut(actorOf(user), user.ID); err != nil {
+		t.Fatalf("EscrowOptOut with stored forbid flag: %v", err)
 	}
-	if err := s.EscrowOptOut(actorOf(admin), user.ID); !errors.Is(err, ErrEscrowOptOutForbidden) {
-		t.Fatalf("forbidden opt-out: got %v, want ErrEscrowOptOutForbidden", err)
-	}
-	if stored, _ := s.User(user.ID); len(stored.EscrowDEK) == 0 {
-		t.Error("the copy went away despite the refusal")
-	}
-
-	if err := s.SetEscrowOptOutPolicy(actorOf(admin), false); err != nil {
-		t.Fatalf("SetEscrowOptOutPolicy: %v", err)
-	}
-	if err := s.EscrowOptOut(actorOf(admin), user.ID); err != nil {
-		t.Errorf("opt-out after the policy was lifted: %v", err)
+	if stored, _ := s.User(user.ID); len(stored.EscrowDEK) != 0 {
+		t.Error("the deposited copy was not removed")
 	}
 }
 

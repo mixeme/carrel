@@ -232,8 +232,8 @@ func (s SMTP) Clone() SMTP {
 // an existing DEK cannot be deposited without its owner's password (§5.4).
 type EscrowSettings struct {
 	Enabled bool `json:"enabled,omitempty"`
-	// ForbidOptOut keeps users from withdrawing their deposited copy. The
-	// profile has to show this too, not just enforce it.
+	// ForbidOptOut is read from older state files and ignored. Withdrawal is
+	// always the key owner's decision (§5.4).
 	ForbidOptOut bool `json:"forbid_opt_out,omitempty"`
 	// Config holds the recovery key pair. It survives Enabled going false so
 	// that already-deposited copies stay recoverable.

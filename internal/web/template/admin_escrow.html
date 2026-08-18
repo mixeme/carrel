@@ -49,21 +49,6 @@
 
         <form method="post" action="{{.Base}}/admin/escrow" class="inline-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <input type="hidden" name="action" value="escrow_policy">
-
-            <label class="checkbox">
-                <input type="checkbox" name="forbid_opt_out" value="1"
-                       {{if $e.ForbidOptOut}}checked{{end}}>
-                Do not let users withdraw their deposited key
-            </label>
-            <p class="hint">Users see this policy in their profile whether or
-                not it currently affects them.</p>
-
-            <button type="submit">Save policy</button>
-        </form>
-
-        <form method="post" action="{{.Base}}/admin/escrow" class="inline-form">
-            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="change_master_password">
 
             <label for="master-current">Current master password</label>

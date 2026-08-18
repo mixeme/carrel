@@ -19,7 +19,6 @@ const (
 	fieldMasterPassword = "master_password"
 	fieldNewMaster      = "new_master_password"
 	fieldConfirmMaster  = "confirm_master_password"
-	fieldForbidOptOut   = "forbid_opt_out"
 	fieldConfirmReset   = "confirm_reset"
 )
 
@@ -43,9 +42,6 @@ type escrowStatus struct {
 	Enabled bool
 	// Deposited reports whether this account's own key can be recovered.
 	Deposited bool
-	// ForbidOptOut reports the administrator's policy, which the user sees
-	// whether or not it currently affects them.
-	ForbidOptOut bool
 	// RecoveredAt is the last time an administrator used the scheme on this
 	// account. It is never cleared.
 	RecoveredAt time.Time
@@ -55,14 +51,13 @@ type escrowStatus struct {
 func (e escrowStatus) CanOptIn() bool { return e.Enabled && !e.Deposited }
 
 // CanOptOut reports whether the user may delete their deposited copy.
-func (e escrowStatus) CanOptOut() bool { return e.Deposited && !e.ForbidOptOut }
+func (e escrowStatus) CanOptOut() bool { return e.Deposited }
 
 // escrowStatusOf reads the status of one account.
 func escrowStatusOf(settings store.Settings, u *store.User) escrowStatus {
 	st := escrowStatus{
-		Configured:   settings.Escrow.Config != nil,
-		Enabled:      settings.Escrow.Active(),
-		ForbidOptOut: settings.Escrow.ForbidOptOut,
+		Configured: settings.Escrow.Config != nil,
+		Enabled:    settings.Escrow.Active(),
 	}
 	if u != nil {
 		st.Deposited = len(u.EscrowDEK) > 0
@@ -150,8 +145,6 @@ func escrowMessage(err error) string {
 		return "This account is already covered by key escrow."
 	case errors.Is(err, store.ErrEscrowNotDeposited):
 		return "This account has no deposited key, so there is nothing to recover."
-	case errors.Is(err, store.ErrEscrowOptOutForbidden):
-		return "The administrator of this instance does not allow withdrawing a deposited key."
 	case errors.Is(err, store.ErrNotFound):
 		return "That account does not exist."
 	default:
@@ -193,14 +186,6 @@ func (s *Server) adminResumeEscrow(r *http.Request, actor store.Actor) (adminVie
 
 func (s *Server) adminDisableEscrow(_ *http.Request, actor store.Actor) (adminView, error) {
 	if err := s.Store.DisableEscrow(actor); err != nil {
-		return adminView{}, err
-	}
-	return adminView{}, nil
-}
-
-func (s *Server) adminEscrowPolicy(r *http.Request, actor store.Actor) (adminView, error) {
-	forbid := r.PostFormValue(fieldForbidOptOut) != ""
-	if err := s.Store.SetEscrowOptOutPolicy(actor, forbid); err != nil {
 		return adminView{}, err
 	}
 	return adminView{}, nil

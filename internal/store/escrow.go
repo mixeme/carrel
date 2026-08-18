@@ -19,10 +19,6 @@ var (
 	// ErrEscrowNotDeposited is returned when there is no copy of the
 	// account's DEK to recover from.
 	ErrEscrowNotDeposited = errors.New("store: this account has no deposited key copy")
-	// ErrEscrowOptOutForbidden is returned when the administrator has taken
-	// the withdrawal away. The profile has to show that too, not just be
-	// refused by it (§5.4).
-	ErrEscrowOptOutForbidden = errors.New("store: the administrator does not allow withdrawing the deposited copy")
 	// ErrEscrowDeposited is returned when an account already has a copy, so
 	// opting in again would only replace one valid copy with another.
 	ErrEscrowDeposited = errors.New("store: this account is already covered by escrow")
@@ -125,30 +121,6 @@ func (s *Store) ChangeEscrowMasterPassword(actor Actor, current, next string) er
 	})
 }
 
-// SetEscrowOptOutPolicy decides whether users may withdraw their deposited
-// copy. Forbidding it is a legitimate operator choice, but the profile must
-// say so plainly rather than just hiding the button (§5.4).
-func (s *Store) SetEscrowOptOutPolicy(actor Actor, forbid bool) error {
-	return s.update(func(state *State) error {
-		if state.Settings.Escrow.ForbidOptOut == forbid {
-			return nil
-		}
-		state.Settings.Escrow.ForbidOptOut = forbid
-		detail := "escrow opt-out allowed"
-		if forbid {
-			detail = "escrow opt-out forbidden"
-		}
-		appendAudit(state, s.now(), AuditEntry{
-			Action:     ActionSettings,
-			ActorID:    actor.ID,
-			ActorLogin: actor.Login,
-			IP:         actor.IP,
-			Detail:     detail,
-		})
-		return nil
-	})
-}
-
 // EscrowOptIn deposits a copy of an existing user's DEK. It takes the user's
 // own password because that is the only thing that can open their DEK — the
 // server cannot deposit an account into escrow behind its owner's back, which
@@ -207,9 +179,6 @@ func (s *Store) EscrowOptOut(actor Actor, userID string) error {
 		}
 		if len(u.EscrowDEK) == 0 {
 			return ErrEscrowNotDeposited
-		}
-		if state.Settings.Escrow.ForbidOptOut {
-			return ErrEscrowOptOutForbidden
 		}
 		u.EscrowDEK = nil
 

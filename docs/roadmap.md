@@ -49,7 +49,7 @@ What is wanted is a **second, optional stage** after discovery succeeds, clearly
 
 ### Built past the spec
 
-**Escrow withdrawal (§5.4).** The administrator could forbid users from withdrawing their deposited copy — `Settings.Escrow.ForbidOptOut`, the «Do not let users withdraw their deposited key» checkbox on `/admin/escrow`, the disabled-withdrawal branch in the profile, and tests (`TestOptOutCanBeForbidden`, `TestForbiddenOptOutIsVisible`). That power was removed from §5.4: withdrawal is always the key owner's decision. The specification, mockups and acceptance map are updated; the code and its tests are not yet.
+**Escrow withdrawal (§5.4).** Done in wave 0.1: the administrator can no longer forbid withdrawing a deposited copy; a `forbid_opt_out` flag in older state is ignored.
 
 ### Consequences of earlier decisions
 

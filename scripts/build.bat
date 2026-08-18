@@ -24,7 +24,7 @@ if "%~1"=="" (
 for %%I in ("%OUTPUT%") do set "OUTPUT_DIR=%%~dpI"
 if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%" 2>nul
 
-set "VERSION=0.8.0"
+set "VERSION=0.9.0"
 set "COMMIT=unknown"
 
 where git >nul 2>&1

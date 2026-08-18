@@ -160,37 +160,6 @@ func TestProfileOptInAndOptOut(t *testing.T) {
 	}
 }
 
-// The administrator may forbid withdrawal, but the user has to see that they
-// did rather than just find the button missing (§5.4).
-func TestForbiddenOptOutIsVisible(t *testing.T) {
-	a := newApp(t, nil)
-	a.setupAdmin("root", "root@example.org", testPassword)
-	a.enableEscrow()
-	a.coveredUser("ada", "ada@example.org")
-
-	rec := a.post("/admin/", url.Values{fieldAction: {"escrow_policy"}, fieldForbidOptOut: {"1"}})
-	if rec.Code != http.StatusOK {
-		t.Fatalf("set policy: status %d", rec.Code)
-	}
-
-	a.signInReady("ada", testPassword)
-	profile := a.get("/app/").Body.String()
-	if !strings.Contains(profile, "withdrawing a deposited key") {
-		t.Errorf("the profile hides the policy instead of showing it:\n%s", profile)
-	}
-	if strings.Contains(profile, `value="opt_out"`) {
-		t.Error("the withdrawal form is offered although the policy forbids it")
-	}
-
-	rec = a.post("/app/escrow", url.Values{fieldAction: {"opt_out"}})
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("forbidden opt-out: status %d, want 400", rec.Code)
-	}
-	if user, _ := a.Store.UserByLogin("ada"); len(user.EscrowDEK) == 0 {
-		t.Error("a posted opt-out went through despite the policy")
-	}
-}
-
 // The recovery of §5.4 from end to end: the administrator gets the account
 // back with the master password, the user's sessions are cut, their data key
 // survives, and they are told it happened.
