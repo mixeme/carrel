@@ -120,6 +120,7 @@ func (s *Server) loadTaskCard(ctx context.Context, sess *session.Session, accoun
 		ETag: obj.ETag, Task: task, Form: formFromTask(task, s.timezone()),
 		Related:  s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), task.Related),
 		ReadOnly: col.ReadOnly,
+		Source:   s.objectSource(sess, accountID, normalizeCollectionPath(col.Path), obj.Path, obj.ETag),
 	}, nil
 }
 
@@ -150,6 +151,7 @@ func (s *Server) loadNoteCard(ctx context.Context, sess *session.Session, accoun
 		Attachments: s.attachmentRows(sess, sectionNotes, accountID, colEnc, note.UID, note.Attachments),
 		Section:     sectionNotes.Path,
 		ReadOnly:    col.ReadOnly,
+		Source:      s.objectSource(sess, accountID, col.Path, obj.Path, obj.ETag),
 	}
 	_, card.CanAttach = s.attachmentTarget(sess)
 	return card, nil

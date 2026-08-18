@@ -5,6 +5,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/emersion/go-ical"
@@ -19,6 +20,7 @@ type Occurrence struct {
 	Location  string
 	Start     time.Time
 	End       time.Time
+	StartTZID string
 	AllDay    bool
 	Recurring bool
 }
@@ -47,8 +49,12 @@ func (o *Object) ExpandOccurrences(from, to time.Time, loc *time.Location) ([]Oc
 		return nil, fmt.Errorf("model: DTEND: %w", err)
 	}
 	allDay := false
-	if p := ev.Props.Get(ical.PropDateTimeStart); p != nil && p.ValueType() == ical.ValueDate {
-		allDay = true
+	startTZID := ""
+	if p := ev.Props.Get(ical.PropDateTimeStart); p != nil {
+		if p.ValueType() == ical.ValueDate {
+			allDay = true
+		}
+		startTZID = strings.TrimSpace(p.Params.Get("TZID"))
 	}
 	dur := end.Sub(start)
 	if dur < 0 {
@@ -67,7 +73,7 @@ func (o *Object) ExpandOccurrences(from, to time.Time, loc *time.Location) ([]Oc
 			return []Occurrence{{
 				UID: uid, Path: o.Path, ETag: o.ETag,
 				Summary: summary, Location: location,
-				Start: start, End: end, AllDay: allDay,
+				Start: start, End: end, StartTZID: startTZID, AllDay: allDay,
 			}}, nil
 		}
 		return nil, nil
@@ -89,7 +95,7 @@ func (o *Object) ExpandOccurrences(from, to time.Time, loc *time.Location) ([]Oc
 		out = append(out, Occurrence{
 			UID: uid, Path: o.Path, ETag: o.ETag,
 			Summary: summary, Location: location,
-			Start: s, End: e, AllDay: allDay, Recurring: true,
+			Start: s, End: e, StartTZID: startTZID, AllDay: allDay, Recurring: true,
 		})
 	}
 	return out, nil

@@ -326,6 +326,18 @@
 </section>
 {{end}}
 
+{{/* §23.8: when a collection was read and when the server last changed it. */}}
+{{define "sourceblock"}}
+{{if .Known}}
+<section class="detail-section source-block">
+    <h3>Source</h3>
+    <pre class="diagnostic">{{if .ObjectETag}}ETag  {{.ObjectETag}}
+{{end}}{{if .ObjectPath}}Path  {{.ObjectPath}}
+{{end}}{{if .ReadLabel}}Read  {{.ReadLabel}}{{if .ChangedLabel}} · {{.ChangedLabel}}{{end}}{{else if .ChangedLabel}}{{.ChangedLabel}}{{end}}</pre>
+</section>
+{{end}}
+{{end}}
+
 {{/* The progress panel of §16, on its own because every screen that polls
      several sources shows it, including the duplicates screen of §15. */}}
 {{define "findprogress"}}
@@ -389,7 +401,7 @@
         <ul class="find-rows">
         {{range .Rows}}
             <li class="find-row is-{{.Kind}}{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}{{if .Collapsed}} is-merged{{end}}">
-                <span class="find-row-time">{{.TimeLabel}}</span>
+                <span class="find-row-time">{{.TimeLabel}}{{if .TimeZoneLabel}} <span class="tz-label">{{.TimeZoneLabel}}</span>{{end}}</span>
                 <span class="find-row-body">
                     {{if .URL}}<a href="{{.URL}}"><strong>{{.Title}}</strong></a>{{else}}<strong>{{.Title}}</strong>{{end}}
                     {{if .Collapsed}}

@@ -22,7 +22,7 @@
             </div>
             {{if $d.ReadOnly}}
             <dl class="contact-readonly">
-                <dt>When</dt><dd>{{if $d.Event.AllDay}}{{$d.Form.StartDate}} – {{$d.Form.EndDate}}{{else}}{{$d.Form.StartDate}} {{$d.Form.StartTime}} – {{$d.Form.EndDate}} {{$d.Form.EndTime}}{{end}}</dd>
+                <dt>When</dt><dd>{{if $d.Event.AllDay}}{{$d.Form.StartDate}} – {{$d.Form.EndDate}}{{else}}{{$d.Form.StartDate}} {{$d.Form.StartTime}} – {{$d.Form.EndDate}} {{$d.Form.EndTime}}{{end}}{{if $d.TimeZoneLabel}} <span class="tz-label">{{$d.TimeZoneLabel}}</span>{{end}}</dd>
                 {{if $d.Event.Location}}<dt>Location</dt><dd>{{$d.Event.Location}}</dd>{{end}}
                 {{if $d.Event.Description}}<dt>Description</dt><dd>{{$d.Event.Description}}</dd>{{end}}
                 {{if $d.Event.Status}}<dt>Status</dt><dd>{{$d.Event.Status}}</dd>{{end}}
@@ -73,6 +73,13 @@
                     <label>End time</label>
                     <input type="time" name="end_time" value="{{$d.Form.EndTime}}">
                 </div>
+                {{if $d.TimeZoneLabel}}
+                <div class="form-field w-md">
+                    <label>Time zone</label>
+                    <input type="text" value="{{$d.TimeZoneLabel}}" readonly class="mono">
+                    <p class="form-hint">Stored on the server; times are shown in your settings timezone.</p>
+                </div>
+                {{end}}
                 <div class="form-field w-md">
                     <label for="categories">Categories</label>
                     <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">

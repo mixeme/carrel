@@ -395,6 +395,13 @@ a.src-label:hover {
     white-space: nowrap;
 }
 
+.tz-label {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
 .list-end {
     display: flex;
     flex-wrap: wrap;

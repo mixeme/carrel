@@ -64,8 +64,8 @@ What is wanted is a **second, optional stage** after discovery succeeds, clearly
 | **Markdown export of inline attachments** | An export carries attachment links; base64 data is not carried | A note file with a megabyte of encoded image in its front matter is not a note file. It is stated in the export rather than left to be found |
 | **Renaming and moving files** | The transport has `MOVE` and the provider does not use it | Nothing in §23.10 needs it, and §23.10 is explicit that this is not a file manager |
 | **Folder listings are not paginated** | A folder past the configured ceiling says so and shows the first N | The alternative is `PROPFIND` paging, which DAV does not really have. The ceiling is a setting |
-| **Original time zone of an event** | One global zone, as §10 fixes for v1 | §23.8 has the cheap remedy: show the source zone beside the time when it differs. The data is already in `DTSTART`. Not yet done |
-| **Per-collection sync state** | §23.8 asks for a line saying when a collection was last read and last changed on the server | The cache already knows all of it; only the display is missing |
+| **Original time zone of an event** | One global zone, as §10 fixes for v1 | §23.8: source zone beside the time when it differs; data is in `DTSTART` | Done |
+| **Per-collection sync state** | §23.8 asks for a line saying when a collection was last read and last changed on the server | Source block in detail panels and Connections | Done |
 
 Both §23.8 items are worth doing before anything in the next section: they are display over data Carrel already computes, they are the two cheapest things left on this page, and §23.8's whole argument is that showing what is already known is what distinguishes this from clients that stay silent.
 

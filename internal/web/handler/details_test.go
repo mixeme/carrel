@@ -48,6 +48,15 @@ func TestContactPanelIsAFragment(t *testing.T) {
 	a.setupAdmin("root", "", testPassword)
 	accID, colEnc := a.connectAddressBook(t, davSrv.URL)
 
+	list := a.get("/app/contacts/" + accID + "/" + colEnc)
+	if list.Code != http.StatusOK {
+		t.Fatalf("list status = %d", list.Code)
+	}
+	sess := a.session()
+	if meta, ok := sess.Cache().CollectionMeta(accID, "/addressbooks/user/default/"); !ok {
+		t.Fatalf("expected cached collection after list, meta=%+v", meta)
+	}
+
 	rec := a.get("/app/contacts/" + accID + "/" + colEnc + "/ada/panel")
 	if rec.Code != http.StatusOK {
 		t.Fatalf("panel status = %d, body = %s", rec.Code, rec.Body.String())
@@ -66,6 +75,9 @@ func TestContactPanelIsAFragment(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("panel body missing %q", want)
 		}
+	}
+	if !strings.Contains(body, "source-block") {
+		t.Fatalf("panel should include the Source block when the collection is cached, body:\n%s", body)
 	}
 }
 

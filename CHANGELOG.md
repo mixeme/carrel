@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Wave 1.12–1.13 — §23.8 transparency.** Detail panels and **Settings → Connections** show a **Source** block with when the collection was last read, when the server last changed it (from `getctag` when it encodes a time), and object count. Event times carry the stored `TZID` as a muted label when it differs from your settings timezone; the event form shows a read-only **Time zone** field in that case.
+
 - **Wave 1.11 — column picker.** Lists and tables in contacts, tasks, notes, files, admin users, and the audit log gain a **Columns** control in the toolbar. A checkbox shows or hides a column, the drag handle reorders, and the first data column cannot be turned off. Choices are stored per section in `localStorage`.
 
 - **Wave 1.10 — settings and administration shell.** Profile moves into **Settings** with its own rail: Account, Connections, Attachments, and Appearance. `/app/` redirects to Connections; the header login link becomes a menu (connections, account, appearance, theme switcher, administration, sign out). **Appearance** keeps theme and row density in `localStorage` only. Administration pages use the same top bar and a vertical rail instead of horizontal tabs.

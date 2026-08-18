@@ -12,6 +12,10 @@ import (
 	"gitea.mixdep.ru/mix/carrel/internal/model"
 )
 
+func sourceTZLabel(tzid string, display *time.Location) string {
+	return model.Event{StartTZID: tzid}.SourceTimeZone(display)
+}
+
 // The row builders below are the only place that decides what a merged record
 // looks like. They run on a source's own goroutine, inside the fan-out, so a row
 // is finished before it is ever handed to a template (§16).
@@ -63,7 +67,7 @@ func occurrenceItem(src fanout.Source, occ model.Occurrence, loc *time.Location)
 		Subtitle: sourceSubtitle(src), GroupKey: key, GroupLabel: label,
 		Sort: sortKey(occ.Start, occ.Summary), Account: src.AccountLabel,
 		Collection: src.CollectionLabel, Color: src.Color,
-		TimeLabel: occurrenceTime(occ, loc),
+		TimeLabel: occurrenceTime(occ, loc), TimeZoneLabel: sourceTZLabel(occ.StartTZID, loc),
 	}
 	if occ.Location != "" {
 		row.Subtitle = occ.Location + " · " + row.Subtitle

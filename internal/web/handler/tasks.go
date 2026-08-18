@@ -247,6 +247,7 @@ type taskCardView struct {
 	Related      []relatedRow
 	ReadOnly     bool
 	IsNew        bool
+	Source       sourceBlockView
 }
 
 type taskForm struct {

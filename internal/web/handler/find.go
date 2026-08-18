@@ -203,20 +203,21 @@ func (f findRequest) Wants(kind string) bool {
 // opaque data, so a source that is still running cannot change how an already
 // rendered row looks.
 type resultRow struct {
-	Kind       string
-	Title      string
-	Subtitle   string
-	TimeLabel  string
-	GroupKey   string
-	GroupLabel string
-	Sort       string
-	URL        string
-	Account    string
-	Collection string
-	Color      string
-	Tags       []string
-	Done       bool
-	Overdue    bool
+	Kind          string
+	Title         string
+	Subtitle      string
+	TimeLabel     string
+	TimeZoneLabel string
+	GroupKey      string
+	GroupLabel    string
+	Sort          string
+	URL           string
+	Account       string
+	Collection    string
+	Color         string
+	Tags          []string
+	Done          bool
+	Overdue       bool
 	// MatchLabel says why a row matched on search or timeline screens (§1.8).
 	MatchLabel string
 	// Files lists attachment names carried on the parent row for the files tab.

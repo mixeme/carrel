@@ -39,8 +39,8 @@ type agendaDay struct {
 }
 
 type agendaRow struct {
-	UID, TimeLabel, Summary, Location string
-	AllDay                            bool
+	UID, TimeLabel, TimeZoneLabel, Summary, Location string
+	AllDay                                           bool
 }
 
 // CalendarHome shows every ticked calendar at once, or an empty state.
@@ -142,7 +142,8 @@ func (s *Server) buildAgenda(ctx context.Context, sess *session.Session, account
 			uid = uidFromCalendarPath(occ.Path)
 		}
 		byDate[date] = append(byDate[date], agendaRow{
-			UID: uid, TimeLabel: label, Summary: summary, Location: occ.Location, AllDay: occ.AllDay,
+			UID: uid, TimeLabel: label, TimeZoneLabel: sourceTZLabel(occ.StartTZID, loc),
+			Summary: summary, Location: occ.Location, AllDay: occ.AllDay,
 		})
 	}
 	keys := make([]string, 0, len(byDate))

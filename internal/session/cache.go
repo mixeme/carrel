@@ -132,6 +132,32 @@ func (c *Cache) NeedsRefresh(accountID, collectionPath, serverCTag string) bool 
 	return false
 }
 
+// CollectionMeta holds sync metadata Carrel already keeps for a collection (§23.8).
+type CollectionMeta struct {
+	FetchedAt   time.Time
+	CTag        string
+	ObjectCount int
+}
+
+// CollectionMeta returns cached read time, server tag and object count when the
+// collection is in the session cache.
+func (c *Cache) CollectionMeta(accountID, collectionPath string) (CollectionMeta, bool) {
+	if c == nil {
+		return CollectionMeta{}, false
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	ent, ok := c.collections[collectionKey{AccountID: accountID, Path: collectionPath}]
+	if !ok {
+		return CollectionMeta{}, false
+	}
+	return CollectionMeta{
+		FetchedAt:   ent.fetchedAt,
+		CTag:        ent.ctag,
+		ObjectCount: len(ent.etags),
+	}, true
+}
+
 // CTag returns the collection tag the cached map was read at. A caller that
 // finds the server still reporting the same tag can keep the map instead of
 // reading every ETag again (§12).

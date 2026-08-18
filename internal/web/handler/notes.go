@@ -201,6 +201,7 @@ type noteCardView struct {
 	ReadOnly  bool
 	IsNew     bool
 	PrintDate string
+	Source    sourceBlockView
 }
 
 // relatedRow is one RELATED-TO target resolved to something clickable, or left

@@ -77,3 +77,19 @@ func TestCacheBodyRoundTrip(t *testing.T) {
 		t.Fatalf("GetBody = %q, %v", got, ok)
 	}
 }
+
+func TestCollectionMeta(t *testing.T) {
+	now := time.Date(2026, 8, 19, 12, 0, 0, 0, time.UTC)
+	c := NewCache(CacheConfig{CollectionTTL: time.Minute, MaxCollections: 4, MaxETagEntries: 8}, func() time.Time { return now })
+	c.SetETags("acc", "/cal/", "ctag-1", map[string]string{"/cal/a.ics": "e1", "/cal/b.ics": "e2"})
+	meta, ok := c.CollectionMeta("acc", "/cal/")
+	if !ok {
+		t.Fatal("expected collection metadata")
+	}
+	if meta.CTag != "ctag-1" || meta.ObjectCount != 2 || !meta.FetchedAt.Equal(now) {
+		t.Fatalf("meta = %+v", meta)
+	}
+	if _, ok := c.CollectionMeta("acc", "/missing/"); ok {
+		t.Fatal("missing collection should not report metadata")
+	}
+}

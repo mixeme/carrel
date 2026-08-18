@@ -15,7 +15,7 @@
     <div class="detail-panel-body">
         <dl class="detail-fields">
             <dt>When</dt>
-            <dd>{{if $d.Event.AllDay}}{{$d.Form.StartDate}} – {{$d.Form.EndDate}}{{else}}{{$d.Form.StartDate}} {{$d.Form.StartTime}} – {{$d.Form.EndDate}} {{$d.Form.EndTime}}{{end}}</dd>
+            <dd>{{if $d.Event.AllDay}}{{$d.Form.StartDate}} – {{$d.Form.EndDate}}{{else}}{{$d.Form.StartDate}} {{$d.Form.StartTime}} – {{$d.Form.EndDate}} {{$d.Form.EndTime}}{{end}}{{if $d.TimeZoneLabel}} <span class="tz-label">{{$d.TimeZoneLabel}}</span>{{end}}</dd>
             {{if $d.Event.Location}}<dt>Location</dt><dd>{{$d.Event.Location}}</dd>{{end}}
             {{if $d.Event.Status}}<dt>Status</dt><dd>{{$d.Event.Status}}</dd>{{end}}
             {{if $d.Event.Description}}<dt>Description</dt><dd>{{$d.Event.Description}}</dd>{{end}}
@@ -43,6 +43,7 @@
             <ul>{{range $d.Event.Attendees}}<li>{{if .CN}}{{.CN}} — {{end}}{{.URI}}{{if .PartStat}} ({{.PartStat}}){{end}}</li>{{end}}</ul>
         </section>
         {{end}}
+        {{template "sourceblock" $d.Source}}
     </div>
 </div>
 {{end}}

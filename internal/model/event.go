@@ -23,8 +23,10 @@ type Event struct {
 	Status      string
 	Categories  []string
 	// Start/End are wall times in the location passed to Event().
-	Start     time.Time
-	End       time.Time
+	Start time.Time
+	End   time.Time
+	// StartTZID is the TZID parameter on DTSTART when the server stored one.
+	StartTZID string
 	AllDay    bool
 	RRule     string
 	Attendees []Attendee
@@ -105,8 +107,13 @@ func (o *Object) Event(loc *time.Location) (Event, error) {
 	if end, err := evComp.DateTimeEnd(loc); err == nil {
 		ev.End = end
 	}
-	if p := evComp.Props.Get(ical.PropDateTimeStart); p != nil && p.ValueType() == ical.ValueDate {
-		ev.AllDay = true
+	if p := evComp.Props.Get(ical.PropDateTimeStart); p != nil {
+		if p.ValueType() == ical.ValueDate {
+			ev.AllDay = true
+		}
+		if tz := strings.TrimSpace(p.Params.Get("TZID")); tz != "" {
+			ev.StartTZID = tz
+		}
 	}
 	for _, p := range evComp.Props[ical.PropAttendee] {
 		ev.Attendees = append(ev.Attendees, Attendee{
@@ -126,6 +133,12 @@ func (o *Object) Event(loc *time.Location) (Event, error) {
 	return ev, nil
 }
 
+// SourceTimeZone returns the stored TZID when it differs from the display
+// location (§23.8).
+func (e Event) SourceTimeZone(display *time.Location) string {
+	return sourceTZLabel(e.StartTZID, display)
+}
+
 // DisplayTitle is SUMMARY, or a fallback when the event has none.
 func (e Event) DisplayTitle() string {
 	if s := strings.TrimSpace(e.Summary); s != "" {
@@ -135,6 +148,30 @@ func (e Event) DisplayTitle() string {
 		return e.UID
 	}
 	return "(untitled event)"
+}
+
+func sourceTZLabel(tzid string, display *time.Location) string {
+	tzid = strings.TrimSpace(tzid)
+	if tzid == "" || display == nil {
+		return ""
+	}
+	srcLoc, err := time.LoadLocation(tzid)
+	if err != nil {
+		if strings.EqualFold(tzid, display.String()) {
+			return ""
+		}
+		return tzid
+	}
+	if srcLoc.String() == display.String() {
+		return ""
+	}
+	now := time.Now()
+	_, srcOff := now.In(srcLoc).Zone()
+	_, dispOff := now.In(display).Zone()
+	if srcOff == dispOff {
+		return ""
+	}
+	return tzid
 }
 
 func splitComma(s string) []string {

@@ -38,6 +38,7 @@ type accountRow struct {
 type sidebarBook struct {
 	discovery.Collection
 	ColEnc string
+	Sync   collectionSyncView
 }
 
 type connectForm struct {
@@ -84,22 +85,22 @@ func (s *Server) buildAppView(r *http.Request) appView {
 	for _, acc := range accounts {
 		row := accountRow{Account: acc}
 		for _, col := range acc.Collections {
+			sync := s.collectionSource(sess, acc.ID, normalizeCollectionPath(col.Path))
+			book := sidebarBook{
+				Collection: col,
+				ColEnc:     EncodeCollectionPath(col.Path),
+				Sync: collectionSyncView{
+					Known:     sync.Known,
+					MetaLabel: sync.MetaLabel,
+				},
+			}
 			switch col.Kind {
 			case discovery.KindAddressBook:
-				row.AddressBooks = append(row.AddressBooks, sidebarBook{
-					Collection: col,
-					ColEnc:     EncodeCollectionPath(col.Path),
-				})
+				row.AddressBooks = append(row.AddressBooks, book)
 			case discovery.KindCalendar:
-				row.Calendars = append(row.Calendars, sidebarBook{
-					Collection: col,
-					ColEnc:     EncodeCollectionPath(col.Path),
-				})
+				row.Calendars = append(row.Calendars, book)
 			case discovery.KindFiles:
-				row.FileCollections = append(row.FileCollections, sidebarBook{
-					Collection: col,
-					ColEnc:     EncodeCollectionPath(col.Path),
-				})
+				row.FileCollections = append(row.FileCollections, book)
 			}
 		}
 		out.Accounts = append(out.Accounts, row)

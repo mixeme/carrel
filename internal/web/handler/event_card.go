@@ -42,10 +42,13 @@ type eventCardView struct {
 	// Section is the URL segment the shared attachments block posts to.
 	Section string
 	// NoteURL opens a new note already linked to this event (§23.9).
-	NoteURL   string
-	ReadOnly  bool
-	IsNew     bool
-	PrintDate string
+	NoteURL       string
+	ReadOnly      bool
+	IsNew         bool
+	PrintDate     string
+	Path          string
+	TimeZoneLabel string
+	Source        sourceBlockView
 }
 
 type eventForm struct {
@@ -255,6 +258,9 @@ func (s *Server) loadEventCard(ctx context.Context, sess *session.Session, accou
 		return eventCardView{}, err
 	}
 	card := s.eventCardFromObject(sess, accountID, colEnc, col, *acc, obj, formFromEvent(ev), false)
+	card.Path = obj.Path
+	card.TimeZoneLabel = ev.SourceTimeZone(s.timezone())
+	card.Source = s.objectSource(sess, accountID, normalizeCollectionPath(col.Path), obj.Path, obj.ETag)
 	card.Related = s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), ev.Related)
 	// The minutes of a meeting are written from the meeting (§23.9): the link
 	// carries the event's identity and date so the note arrives already tied to
@@ -283,8 +289,13 @@ func (s *Server) eventCardFromObject(sess *session.Session, accountID, colEnc st
 		Calendars: s.listCalendars(sess), AccountID: accountID, ColEnc: colEnc,
 		Collection: col, AccountLabel: accountLabel(acc), UID: ev.UID,
 		ETag: obj.ETag, Event: ev, Form: form, ReadOnly: col.ReadOnly, IsNew: isNew,
-		Section:   sectionCalendar.Path,
-		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
+		Section:       sectionCalendar.Path,
+		PrintDate:     time.Now().UTC().Format("2006-01-02 15:04 UTC"),
+		TimeZoneLabel: ev.SourceTimeZone(s.timezone()),
+	}
+	if obj != nil {
+		card.Path = obj.Path
+		card.Source = s.objectSource(sess, accountID, normalizeCollectionPath(col.Path), obj.Path, obj.ETag)
 	}
 	if !isNew {
 		card.Attachments = s.attachmentRows(sess, sectionCalendar, accountID, colEnc, ev.UID, ev.Attachments)
