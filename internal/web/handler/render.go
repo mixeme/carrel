@@ -68,6 +68,8 @@ type View struct {
 	// Error and Notice are the two message slots the frame renders.
 	Error  string
 	Notice string
+	// Topbar carries shell chrome shared across signed-in app pages.
+	Topbar topbarView
 	Data   any
 }
 
@@ -111,7 +113,7 @@ func (v View) NavSection() string {
 // View builds the common part of a page's data for the current request.
 func (s *Server) View(r *http.Request, title string) View {
 	sess := SessionFrom(r)
-	return View{
+	v := View{
 		Title:     title,
 		Base:      s.BasePath,
 		CSRF:      CSRFToken(r),
@@ -120,6 +122,10 @@ func (s *Server) View(r *http.Request, title string) View {
 		Commit:    s.Commit,
 		SourceURL: SourceURL,
 	}
+	if sess != nil && !v.InAdmin {
+		v.Topbar = s.buildTopbar(r, sess)
+	}
+	return v
 }
 
 // Render writes a page with status 200.

@@ -16,9 +16,30 @@
 {{if .Shell}}
 <header class="app-top no-print">
     <a class="app-brand" href="{{.Base}}/app/calendar">Carrel</a>
-    <a class="app-search" href="{{.Base}}/app/search">Search everything…</a>
+    <a class="app-search" id="app-search" href="{{.Base}}/app/search">Search everything…</a>
     <div class="app-top-actions">
-        <a class="app-btn is-primary" href="{{.Base}}/app/notes/quick">New note</a>
+        <div class="app-create">
+            <div class="app-create-group">
+                <a class="app-btn is-primary" href="{{.Topbar.QuickNoteURL}}" data-quick-note-open
+                   hx-get="{{.Topbar.QuickNoteURL}}" hx-target="#app-sheet" hx-swap="innerHTML">New note</a>
+                <button type="button" class="app-btn is-primary app-create-toggle" data-create-menu-toggle
+                        aria-expanded="false" aria-haspopup="menu" aria-label="Create…">▾</button>
+            </div>
+            <div class="app-create-menu" role="menu" hidden>
+            {{range .Topbar.Create}}
+                {{if .Separator}}<hr class="app-create-sep">{{else if .QuickNote}}
+                <a class="app-create-item is-active" role="menuitem" href="{{$.Topbar.QuickNoteURL}}" data-quick-note-open
+                   hx-get="{{$.Topbar.QuickNoteURL}}" hx-target="#app-sheet" hx-swap="innerHTML">
+                    {{.Label}}{{if .Shortcut}} <kbd>{{.Shortcut}}</kbd>{{end}}
+                </a>
+                {{else if .Disabled}}
+                <span class="app-create-item is-disabled" role="menuitem" aria-disabled="true">{{.Label}}{{if .Shortcut}} <kbd>{{.Shortcut}}</kbd>{{end}}</span>
+                {{else}}
+                <a class="app-create-item" role="menuitem" href="{{.URL}}" data-create-shortcut="{{.Shortcut}}">{{.Label}}{{if .Shortcut}} <kbd>{{.Shortcut}}</kbd>{{end}}</a>
+                {{end}}
+            {{end}}
+            </div>
+        </div>
         <form method="post" action="{{.Base}}/app/" class="app-top-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="refresh_cache">
@@ -67,6 +88,10 @@
         </div>
         <aside class="app-details no-print" id="app-details" hidden aria-label="Details"></aside>
     </div>
+</div>
+<div class="app-overlay no-print" id="app-overlay" hidden>
+    <button type="button" class="app-scrim" data-sheet-close tabindex="-1" aria-label="Close"></button>
+    <div id="app-sheet" class="app-sheet-host"></div>
 </div>
 {{else}}
 </main>

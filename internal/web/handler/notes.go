@@ -238,10 +238,21 @@ func (s *Server) NoteQuick(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	target, hasTarget := s.defaultCollection(sess, account.ViewNotes, rows)
-	back := SafeRedirect(r.FormValue("back"), s.Path("/app/notes"))
+	back := s.quickNoteBack(r)
+	fullNoteURL := ""
+	if hasTarget {
+		fullNoteURL = s.Path("/app/notes/" + target.AccountID + "/" + target.ColEnc + "/new")
+	}
 	if r.Method == http.MethodGet {
 		v := s.View(r, "New note")
-		v.Data = quickNoteView{Sources: writable, Target: target, HasTarget: hasTarget, Back: back}
+		v.Data = quickNoteView{
+			Sources: writable, Target: target, HasTarget: hasTarget, Back: back,
+			Overlay: IsHTMX(r), FullNoteURL: fullNoteURL,
+		}
+		if IsHTMX(r) {
+			s.RenderFragment(w, "note_quick.html", v)
+			return
+		}
 		s.Render(w, "note_quick.html", v)
 		return
 	}
@@ -266,16 +277,22 @@ func (s *Server) NoteQuick(w http.ResponseWriter, r *http.Request) {
 	if body == "" {
 		v := s.View(r, "New note")
 		v.Error = "A note needs some text."
-		v.Data = quickNoteView{Sources: writable, Target: target, HasTarget: hasTarget, Back: back}
-		s.RenderStatus(w, http.StatusBadRequest, "note_quick.html", v)
+		v.Data = quickNoteView{
+			Sources: writable, Target: target, HasTarget: hasTarget, Back: back,
+			Overlay: IsHTMX(r), FullNoteURL: fullNoteURL,
+		}
+		s.renderQuickNote(w, r, http.StatusBadRequest, v)
 		return
 	}
 	uid, err := s.createNote(r.Context(), sess, target, noteForm{Description: body})
 	if err != nil {
 		v := s.View(r, "New note")
 		v.Error = userFacingDAVError(err)
-		v.Data = quickNoteView{Sources: writable, Target: target, HasTarget: hasTarget, Back: back}
-		s.RenderStatus(w, http.StatusBadGateway, "note_quick.html", v)
+		v.Data = quickNoteView{
+			Sources: writable, Target: target, HasTarget: hasTarget, Back: back,
+			Overlay: IsHTMX(r), FullNoteURL: fullNoteURL,
+		}
+		s.renderQuickNote(w, r, http.StatusBadGateway, v)
 		return
 	}
 	s.rememberDefault(sess, account.ViewNotes, target.AccountID, target.Path)
@@ -283,10 +300,30 @@ func (s *Server) NoteQuick(w http.ResponseWriter, r *http.Request) {
 }
 
 type quickNoteView struct {
-	Sources   []sourceRow
-	Target    sourceRow
-	HasTarget bool
-	Back      string
+	Sources     []sourceRow
+	Target      sourceRow
+	HasTarget   bool
+	Back        string
+	Overlay     bool
+	FullNoteURL string
+}
+
+func (s *Server) quickNoteBack(r *http.Request) string {
+	if r.Method == http.MethodPost {
+		return SafeRedirect(r.FormValue("back"), s.Path("/app/notes"))
+	}
+	return SafeRedirect(r.URL.Query().Get("back"), s.Path("/app/notes"))
+}
+
+func (s *Server) renderQuickNote(w http.ResponseWriter, r *http.Request, status int, v View) {
+	if IsHTMX(r) {
+		if status != http.StatusOK {
+			w.WriteHeader(status)
+		}
+		s.RenderFragment(w, "note_quick.html", v)
+		return
+	}
+	s.RenderStatus(w, status, "note_quick.html", v)
 }
 
 // createNote writes one note and returns its UID.

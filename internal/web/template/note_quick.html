@@ -1,11 +1,59 @@
 {{define "body"}}
 {{$d := .Data}}
+{{if $d.Overlay}}
+<div class="app-sheet" data-sheet="quick-note">
+    <div class="app-sheet-head">
+        <h2 class="app-sheet-title">New note</h2>
+        {{if $d.HasTarget}}<p class="app-sheet-target">{{$d.Target.Label}} · {{$d.Target.AccountLabel}}</p>{{end}}
+        <button type="button" class="app-btn is-quiet app-sheet-close" data-sheet-close title="Close" aria-label="Close">✕</button>
+    </div>
+    {{if .Error}}<p class="message error" role="alert">{{.Error}}</p>{{end}}
+    {{if $d.HasTarget}}
+    <form class="app-sheet-body" method="post" action="{{.Base}}/app/notes/quick" data-quick-note-form
+          hx-post="{{.Base}}/app/notes/quick"
+          hx-target="#app-sheet"
+          hx-swap="innerHTML"
+          hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <input type="hidden" name="back" value="{{$d.Back}}">
+        <label class="sr-only" for="quick-body">Note</label>
+        <textarea id="quick-body" name="body" rows="8" autofocus placeholder="Write it down; the title is taken from the first line."></textarea>
+        <p class="hint">The title is taken from the first line. The date is now.</p>
+        {{if gt (len $d.Sources) 1}}
+        <label for="quick-source">Notebook</label>
+        <select id="quick-source" name="source">
+        {{range $d.Sources}}
+            <option value="{{.Key}}"{{if eq .Key $d.Target.Key}} selected{{end}}>{{.Label}} · {{.AccountLabel}}</option>
+        {{end}}
+        </select>
+        {{end}}
+        <div class="app-sheet-foot">
+            <button type="submit" class="app-btn is-primary">Save note</button>
+            <kbd class="app-kbd">Ctrl+Enter</kbd>
+            {{if $d.FullNoteURL}}<a class="app-btn is-quiet" href="{{$d.FullNoteURL}}">Open full screen</a>{{end}}
+            <span class="app-sheet-foot-end">
+                <button type="button" class="app-btn is-quiet" data-sheet-close>Cancel</button>
+                <kbd class="app-kbd">Esc</kbd>
+            </span>
+        </div>
+    </form>
+    {{else}}
+    <div class="app-sheet-body">
+        <p class="hint">No writable notebook is connected. Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> first.</p>
+        <div class="app-sheet-foot">
+            <button type="button" class="app-btn is-quiet" data-sheet-close>Close</button>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{else}}
 <div class="app-main quick-note-page">
     <section class="card">
         <h1>New note</h1>
+        {{if .Error}}<p class="message error" role="alert">{{.Error}}</p>{{end}}
         {{if $d.HasTarget}}
         <p class="source-label">Filed in {{$d.Target.Label}} · {{$d.Target.AccountLabel}}</p>
-        <form method="post" action="{{.Base}}/app/notes/quick">
+        <form method="post" action="{{.Base}}/app/notes/quick" data-quick-note-form>
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="back" value="{{$d.Back}}">
             <label for="body">Note</label>
@@ -26,4 +74,5 @@
         {{end}}
     </section>
 </div>
+{{end}}
 {{end}}

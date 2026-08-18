@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Wave 1.5 — quick note sheet.** «New note» opens a sheet over the current screen via htmx; `/app/notes/quick` still works as a full page without JavaScript. The caret lists other create actions in rail order (contact, event, task, file upload). Keys: `N` opens the sheet, `/` focuses search, `Enter` opens the selected row, `Esc` closes the sheet or details panel, `Ctrl+Enter` saves the quick note.
+
 - **Wave 1.4 — details panel.** Contacts, calendar, tasks, and notes load a read-only card into the right-hand `#app-details` column via htmx when a list row is clicked. Direct links to a record still open the full edit page. The panel closes with ✕ and does not reopen by itself; which row was open is remembered per section in `localStorage` until the user closes it.
 
 - **Wave 1.3 — list row components.** Shared list grid (`.list` / `.list-row`), 3 px collection bar, rubricator headers, square 28 px avatars, and badge styling from the mockups. Row-height tokens (`--row-lg` / `--row-md` / `--row-sm`) drive control sizes; inputs and adjacent buttons share the 28 px height. Contacts, agenda, tasks, and notes use per-section column layouts; collection dots in the sidebar are vertical bars.
