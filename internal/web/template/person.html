@@ -1,0 +1,51 @@
+{{define "body"}}
+{{$d := .Data}}
+{{$p := $d.Person}}
+<div class="app-layout person-layout">
+    {{template "sectionrail" .}}
+    <div class="app-main">
+        <section class="card person-main">
+            <div class="contacts-header">
+                <div class="person-head">
+                    {{if $p.PhotoURL}}<img class="contact-photo person-photo" src="{{$p.PhotoURL}}" alt="" width="44" height="44">{{end}}
+                    <div>
+                        <h1>{{$d.Subject}}</h1>
+                        <p class="source-label">{{$p.AccountLabel}}{{if $p.Collection.DisplayName}} · {{$p.Collection.DisplayName}}{{end}}</p>
+                    </div>
+                </div>
+                <p class="contacts-actions no-print">
+                    {{if $p.NoteURL}}<a class="button" href="{{$p.NoteURL}}">Write a note</a>{{end}}
+                    {{if $p.EventURL}}<a class="button" href="{{$p.EventURL}}">New event</a>{{end}}
+                </p>
+            </div>
+            {{template "kindtabs" .}}
+            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+            {{if $d.NoSources}}<p class="hint">No calendars are ticked, so nothing was polled.</p>{{end}}
+            <div id="find-panel"
+                 data-sse-panel data-poll-url="{{$d.PollURL}}"
+                 {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
+                {{if $d.TaskID}}{{template "findresults" .}}{{end}}
+            </div>
+        </section>
+    </div>
+    <aside class="person-sidebar card no-print">
+        <div class="person-card-head">
+            {{if $p.PhotoURL}}<img class="contact-photo" src="{{$p.PhotoURL}}" alt="" width="76" height="76">{{end}}
+            <div>
+                <h2>Card</h2>
+                <p><a class="button" href="{{$p.EditURL}}">Edit</a></p>
+            </div>
+        </div>
+        <dl class="contact-readonly">
+            <dt>Name</dt><dd>{{$p.Contact.DisplayName}}</dd>
+            {{if $p.Contact.Organization}}<dt>Organisation</dt><dd>{{range $p.Contact.Organization}}{{.}} {{end}}</dd>{{end}}
+            {{if $p.Contact.Title}}<dt>Title</dt><dd>{{$p.Contact.Title}}</dd>{{end}}
+            {{range $p.Contact.Phones}}<dt>Phone{{if .Label}} · {{.Label}}{{end}}</dt><dd>{{.Value}}</dd>{{end}}
+            {{range $p.Contact.Emails}}<dt>Email{{if .Label}} · {{.Label}}{{end}}</dt><dd>{{.Value}}</dd>{{end}}
+            {{if $p.Contact.Birthday}}<dt>Birthday</dt><dd>{{$p.Contact.Birthday}}</dd>{{end}}
+            {{if $p.Contact.Categories}}<dt>Categories</dt><dd>{{range $p.Contact.Categories}}<span class="tag">{{.}}</span> {{end}}</dd>{{end}}
+            {{if $p.Contact.Note}}<dt>Note</dt><dd>{{$p.Contact.Note}}</dd>{{end}}
+        </dl>
+    </aside>
+</div>
+{{end}}

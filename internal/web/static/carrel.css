@@ -731,13 +731,99 @@ body.has-shell {
     display: flex;
     align-items: center;
     height: 28px;
-    padding: 0 9px;
+    padding: 0;
     background: var(--bg);
     border: 0.5px solid var(--card-border);
     border-radius: 3px;
-    color: var(--dusty);
+}
+
+.app-search input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    padding: 0 9px;
+    color: var(--ink);
+    font: inherit;
     font-size: 12.5px;
+}
+
+.app-search input::placeholder {
+    color: var(--dusty);
+}
+
+.app-search input:focus {
+    outline: none;
+}
+
+.kind-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0.75rem 0;
+}
+
+.kind-tab {
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    padding: 0 10px;
+    border: 0.5px solid var(--card-border);
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--muted);
     text-decoration: none;
+    background: var(--paper);
+}
+
+.kind-tab.is-on {
+    color: var(--ink);
+    border-color: var(--accent);
+}
+
+.person-layout {
+    display: grid;
+    grid-template-columns: var(--rail) 1fr minmax(220px, 280px);
+    gap: 1rem;
+    align-items: start;
+}
+
+.person-head {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+}
+
+.person-photo {
+    border-radius: 4px;
+}
+
+.person-sidebar {
+    position: sticky;
+    top: 1rem;
+}
+
+.person-card-head {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.person-card-head h2 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+@media (max-width: 960px) {
+    .person-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .person-sidebar {
+        position: static;
+    }
 }
 
 .app-top-actions {
@@ -1813,7 +1899,7 @@ label.checkbox input {
 
 .find-row {
     display: grid;
-    grid-template-columns: 7rem 1fr minmax(5rem, 8rem) auto;
+    grid-template-columns: 7rem 1fr minmax(6rem, 10rem) auto auto;
     gap: 0.6rem;
     padding: 0.5rem 0;
     border-bottom: 0.5px solid var(--hair);
@@ -1832,6 +1918,14 @@ label.checkbox input {
 .find-row-body a {
     color: inherit;
     text-decoration: none;
+}
+
+.find-row-match {
+    color: var(--muted);
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .find-row-kind {

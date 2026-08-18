@@ -31,6 +31,7 @@
             <form method="post" class="form" action="{{if $d.IsNew}}{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
+                {{if and $d.IsNew $d.Form.Attendee}}<input type="hidden" name="attendee" value="{{$d.Form.Attendee}}">{{end}}
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
                 <div class="form-field w-xl">
                     <label for="summary">Summary</label>

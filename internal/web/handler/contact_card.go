@@ -137,8 +137,8 @@ func (s *Server) ContactNew(w http.ResponseWriter, r *http.Request) {
 	s.Render(w, "contact.html", v)
 }
 
-// ContactCard shows or updates one contact.
-func (s *Server) ContactCard(w http.ResponseWriter, r *http.Request) {
+// ContactEdit shows or updates one contact.
+func (s *Server) ContactEdit(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		s.contactSave(w, r, false)
 		return

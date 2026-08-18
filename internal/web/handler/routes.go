@@ -94,8 +94,9 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("POST "+s.Path("/app/contacts/{account}/{col}/import"), s.ContactsImport)
 	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/export"), s.ContactsExport)
 	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}/panel"), s.ContactPanel)
-	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}"), s.ContactCard)
-	app.HandleFunc("POST "+s.Path("/app/contacts/{account}/{col}/{uid}"), s.ContactCard)
+	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}/edit"), s.ContactEdit)
+	app.HandleFunc("POST "+s.Path("/app/contacts/{account}/{col}/{uid}/edit"), s.ContactEdit)
+	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}"), s.ContactPerson)
 	app.HandleFunc("POST "+s.Path("/app/contacts/{account}/{col}/{uid}/conflict"), s.ConflictResolve)
 	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}/photo-preview"), s.ContactPhotoPreview)
 	app.HandleFunc("GET "+s.Path("/app/calendar"), s.CalendarHome)
@@ -110,6 +111,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}"), s.EventCard)
 	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}/conflict"), s.CalendarConflictResolve)
 	app.HandleFunc("POST "+s.Path("/app/calendar/{account}/{col}/{uid}/attach"), s.EventAttachment)
+	// Legacy timeline URL redirects to the contact screen (§1.8).
 	app.HandleFunc("GET "+s.Path("/app/contacts/{account}/{col}/{uid}/timeline"), s.ContactTimeline)
 
 	app.HandleFunc("GET "+s.Path("/app/tasks"), s.TasksHome)

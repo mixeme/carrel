@@ -104,6 +104,10 @@ func (v View) NavSection() string {
 		if strings.HasPrefix(v.Title, "Timeline of ") {
 			return "contacts"
 		}
+		// Person screen title is the contact name (§1.8).
+		if data, ok := v.Data.(findView); ok && data.Mode == modeTimeline && data.Person.UID != "" {
+			return "contacts"
+		}
 		return ""
 	}
 }

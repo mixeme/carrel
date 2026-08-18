@@ -15,16 +15,17 @@ import (
 // sectionRail is the source list of §1.7: an «All …» row and ticked collections
 // shared by the merged and single-collection views of one section.
 type sectionRail struct {
-	Section       string
-	AllLabel      string
-	AllURL        string
-	AllActive     bool
-	AccountID     string
-	ColEnc        string
-	Sources       []sourceRow
-	SourcesURL    string
-	Mode          findMode
-	Selection     string
+	Section    string
+	AllLabel   string
+	AllURL     string
+	AllActive  bool
+	AccountID  string
+	ColEnc     string
+	Sources    []sourceRow
+	SourcesURL string
+	Mode       findMode
+	Selection  string
+	RailTitle  string
 }
 
 func selectionState(rows []sourceRow) string {

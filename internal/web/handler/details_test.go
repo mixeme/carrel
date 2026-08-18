@@ -56,7 +56,7 @@ func TestContactPanelIsAFragment(t *testing.T) {
 	if strings.Contains(body, "app-rail") {
 		t.Fatalf("panel includes the page shell:\n%s", body)
 	}
-	wantHref := `href="/app/contacts/` + accID + `/` + colEnc + `/ada"`
+	wantHref := `href="/app/contacts/` + accID + `/` + colEnc + `/ada/edit"`
 	for _, want := range []string{
 		`class="detail-panel"`,
 		"Ada Lovelace",
@@ -80,13 +80,24 @@ func TestContactCardStillRendersFullPage(t *testing.T) {
 
 	rec := a.get("/app/contacts/" + accID + "/" + colEnc + "/ada")
 	if rec.Code != http.StatusOK {
-		t.Fatalf("card status = %d", rec.Code)
+		t.Fatalf("person view status = %d", rec.Code)
 	}
 	body := rec.Body.String()
 	if !strings.Contains(body, "app-rail") {
-		t.Fatal("direct card link should still render the full shell")
+		t.Fatal("direct contact link should still render the full shell")
 	}
-	if !strings.Contains(body, `contact-form`) {
-		t.Fatal("direct card link should still offer the edit form")
+	if strings.Contains(body, `contact-form`) {
+		t.Fatal("person view should not include the edit form")
+	}
+	if !strings.Contains(body, "Ada Lovelace") {
+		t.Fatal("person view should show the contact name")
+	}
+
+	edit := a.get("/app/contacts/" + accID + "/" + colEnc + "/ada/edit")
+	if edit.Code != http.StatusOK {
+		t.Fatalf("edit status = %d", edit.Code)
+	}
+	if !strings.Contains(edit.Body.String(), `contact-form`) {
+		t.Fatal("/edit URL should offer the contact edit form")
 	}
 }

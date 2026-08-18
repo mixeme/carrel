@@ -28,7 +28,7 @@
                 </div>
                 {{if not $d.IsNew}}
                 <p class="contacts-actions no-print">
-                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/timeline">Timeline</a>
+                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">Back to list</a>
                     <label class="checkbox"><input type="checkbox" data-print-photos> Print with photos</label>
                     <button type="button" class="link" data-print>Print</button>
                 </p>
@@ -47,8 +47,8 @@
                 {{if $d.Crop}}
                 <div id="photo-crop" class="no-print">
                     <img class="contact-photo" src="{{$d.Crop.Preview}}" alt="Crop preview" width="128" height="128">
-                    <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
-                          hx-post="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}"
+                    <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit"
+                          hx-post="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit"
                           hx-target="#photo-crop" hx-swap="outerHTML"
                           hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
                         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
@@ -79,7 +79,7 @@
                             <button type="submit">Update preview</button>
                         </div>
                     </form>
-                    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
+                    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit">
                         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                         <input type="hidden" name="action" value="confirm_photo">
                         <input type="hidden" name="etag" value="{{$d.ETag}}">
@@ -89,14 +89,14 @@
                         <input type="hidden" name="rotate" value="{{$d.Crop.Rotate}}">
                         <button type="submit">Save photo</button>
                     </form>
-                    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
+                    <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit">
                         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                         <input type="hidden" name="action" value="cancel_photo">
                         <button type="submit" class="link">Cancel crop</button>
                     </form>
                 </div>
                 {{else if $d.PhotoEditable}}
-                <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" enctype="multipart/form-data">
+                <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                     <input type="hidden" name="action" value="upload_photo">
                     <input type="hidden" name="etag" value="{{$d.ETag}}">
@@ -109,7 +109,7 @@
                     </div>
                 </form>
                 {{if $d.Contact.Photo.Present}}
-                <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
+                <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit">
                     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                     <input type="hidden" name="action" value="delete_photo">
                     <input type="hidden" name="etag" value="{{$d.ETag}}">
@@ -131,7 +131,7 @@
                 {{if $d.Contact.Note}}<dt>Note</dt><dd>{{$d.Contact.Note}}</dd>{{end}}
             </dl>
             {{else}}
-            <form method="post" class="form contact-form" action="{{if $d.IsNew}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+            <form method="post" class="form contact-form" action="{{if $d.IsNew}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
@@ -252,7 +252,7 @@
             </form>
 
             {{if not $d.IsNew}}
-            <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">
+            <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit" class="danger-form">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="etag" value="{{$d.ETag}}">

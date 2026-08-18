@@ -4,20 +4,20 @@
     {{template "sourcepanel" .}}
     <div class="app-main">
         <section class="card">
+            {{if $d.Request.Query}}
+            <div class="contacts-header">
+                <div>
+                    <h1>{{$d.Request.Query}}</h1>
+                    <p class="source-label">Across every ticked calendar and address book.</p>
+                </div>
+                {{template "kindtabs" .}}
+            </div>
+            {{else}}
             <h1>Search</h1>
-            <p class="source-label">Across every ticked calendar and address book.</p>
-            <form method="get" action="{{.Base}}/app/search" class="form no-print">
-                <div class="form-field w-xl">
-                    <label for="q">Look for</label>
-                    <input id="q" name="q" value="{{$d.Request.Query}}" placeholder="name, address, word in a summary" autofocus required>
-                </div>
-                <div class="form-field is-own-line">
-                    <button type="submit">Search</button>
-                </div>
-            </form>
+            <p class="hint">Type in the search field in the top bar and press Enter. Each source is asked separately, and answers appear as they arrive.</p>
+            {{end}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was searched.</p>{{end}}
-            {{if not $d.Request.Query}}<p class="hint">Type something to search for. Each source is asked separately, and answers appear as they arrive.</p>{{end}}
             <div id="find-panel"
                  data-sse-panel data-poll-url="{{$d.PollURL}}"
                  {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>

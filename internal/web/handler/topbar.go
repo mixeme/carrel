@@ -6,6 +6,7 @@ package handler
 import (
 	"net/http"
 	"net/url"
+	"strings"
 
 	"gitea.mixdep.ru/mix/carrel/internal/account"
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
@@ -27,6 +28,7 @@ type createMenuItem struct {
 type topbarView struct {
 	Back         string
 	QuickNoteURL string
+	SearchQuery  string
 	Create       []createMenuItem
 }
 
@@ -56,6 +58,7 @@ func (s *Server) buildTopbar(r *http.Request, sess *session.Session) topbarView 
 	return topbarView{
 		Back:         back,
 		QuickNoteURL: s.Path("/app/notes/quick") + "?back=" + url.QueryEscape(back),
+		SearchQuery:  strings.TrimSpace(r.URL.Query().Get("q")),
 		Create:       menu,
 	}
 }

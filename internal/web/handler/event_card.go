@@ -53,6 +53,7 @@ type eventForm struct {
 	StartDate, StartTime, EndDate, EndTime string
 	AllDay                                 bool
 	Categories                             string
+	Attendee                               string
 	RRuleFreq, RRuleInterval, RRuleUntil   string
 	RRuleCount, RRule                      string
 	RRuleByDay                             map[string]bool
@@ -89,6 +90,10 @@ func (s *Server) EventNew(w http.ResponseWriter, r *http.Request) {
 		StartDate: now.Format("2006-01-02"), StartTime: now.Format("15:04"),
 		EndDate: now.Add(time.Hour).Format("2006-01-02"), EndTime: now.Add(time.Hour).Format("15:04"),
 		RRuleFreq: "NONE", RRuleInterval: "1", RRuleByDay: map[string]bool{},
+		Attendee: strings.TrimSpace(r.URL.Query().Get("attendee")),
+	}
+	if summary := strings.TrimSpace(r.URL.Query().Get("summary")); summary != "" {
+		form.Summary = summary
 	}
 	v := s.View(r, "New event")
 	v.Data = eventCardView{
@@ -299,6 +304,7 @@ func parseEventForm(r *http.Request) eventForm {
 		RRuleInterval: strings.TrimSpace(r.PostFormValue("rrule_interval")),
 		RRuleUntil:    strings.TrimSpace(r.PostFormValue("rrule_until")), RRuleCount: strings.TrimSpace(r.PostFormValue("rrule_count")),
 		RRule: strings.TrimSpace(r.PostFormValue("rrule")), RRuleByDay: map[string]bool{},
+		Attendee: strings.TrimSpace(r.PostFormValue("attendee")),
 	}
 	for _, day := range r.PostForm["rrule_byday"] {
 		f.RRuleByDay[strings.ToUpper(day)] = true
@@ -349,6 +355,17 @@ func (f eventForm) toPatch(loc *time.Location) (*model.Patch, error) {
 		p.SetText(ical.PropRecurrenceRule, rrule)
 	}
 	p.SetText(ical.PropDateTimeStamp, time.Now().UTC().Format("20060102T150405Z"))
+	if attendee := strings.TrimSpace(f.Attendee); attendee != "" {
+		p.Set(ical.PropAttendee, model.Value{
+			Text: attendee,
+			Params: map[string][]string{
+				"CUTYPE":   {"INDIVIDUAL"},
+				"ROLE":     {"REQ-PARTICIPANT"},
+				"PARTSTAT": {"NEEDS-ACTION"},
+				"RSVP":     {"TRUE"},
+			},
+		})
+	}
 	return p, nil
 }
 

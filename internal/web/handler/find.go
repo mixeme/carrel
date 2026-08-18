@@ -124,6 +124,8 @@ type findRequest struct {
 	To   string
 	// Kinds limits modeTime to events, tasks or notes.
 	Kinds []string
+	// Tab is the kind filter on search, timeline and duplicates screens.
+	Tab string
 	// Contact identifies the subject of modeTimeline.
 	Account    string
 	Collection string
@@ -155,6 +157,9 @@ func parseFindRequest(r *http.Request) findRequest {
 			req.Kinds = append(req.Kinds, strings.ToLower(strings.TrimSpace(kind)))
 		}
 	}
+	if tab := strings.ToLower(strings.TrimSpace(q.Get("tab"))); tab != "" {
+		req.Tab = tab
+	}
 	return req
 }
 
@@ -170,6 +175,9 @@ func (f findRequest) values() url.Values {
 	}
 	for _, kind := range f.Kinds {
 		v.Add("kind", kind)
+	}
+	if f.Tab != "" {
+		v.Set("tab", f.Tab)
 	}
 	if f.Poll {
 		v.Set("poll", "1")
@@ -209,6 +217,10 @@ type resultRow struct {
 	Tags       []string
 	Done       bool
 	Overdue    bool
+	// MatchLabel says why a row matched on search or timeline screens (§1.8).
+	MatchLabel string
+	// Files lists attachment names carried on the parent row for the files tab.
+	Files []string
 
 	// The duplicate marks of §15. A row carries what it takes to score it, so
 	// the merged list can collapse a group without loading anything again.
@@ -263,13 +275,40 @@ type findView struct {
 	RetryURL   string
 	CancelURL  string
 	SourcesURL string
+	Base       string
 	// Back is where the screen came from, when it has one place to return to.
-	Back      string
-	NoSources bool
-	Unusable  string
-	FromLabel string
-	ToLabel   string
+	Back        string
+	NoSources   bool
+	Unusable    string
+	FromLabel   string
+	ToLabel     string
 	SectionRail sectionRail
+	// Person is filled on the contact screen of §1.8.
+	Person personPanel
+}
+
+// personPanel is the read-only contact summary beside a person's timeline.
+type personPanel struct {
+	AccountID    string
+	ColEnc       string
+	UID          string
+	Contact      model.Contact
+	PhotoURL     string
+	AccountLabel string
+	Collection   discovery.Collection
+	ReadOnly     bool
+	EditURL      string
+	NoteURL      string
+	EventURL     string
+}
+
+// kindTab is one segment in a kind filter bar.
+type kindTab struct {
+	Label  string
+	Value  string
+	Count  int
+	Active bool
+	URL    string
 }
 
 // SectionHome redirects legacy /app/unified URLs to the section that now owns
@@ -304,10 +343,9 @@ func (s *Server) Search(w http.ResponseWriter, r *http.Request) {
 	req := parseFindRequest(r)
 	req.Mode = modeSearch
 	if req.Query == "" {
-		// Nothing to poll yet: show the form rather than start an empty task.
 		v := s.View(r, "Search")
 		v.Data = findView{
-			Request: req, Mode: modeSearch, Title: "Search",
+			Request: req, Mode: modeSearch, Title: "Search", Base: s.Path(""),
 			Sources: s.findSourcesOrNil(r, req), SourcesURL: s.Path("/app/search/sources"),
 		}
 		s.Render(w, "search.html", v)
@@ -316,19 +354,18 @@ func (s *Server) Search(w http.ResponseWriter, r *http.Request) {
 	s.startFind(w, r, req, "search.html")
 }
 
-// ContactTimeline shows what a person appears in across every calendar (§23.9).
+// ContactTimeline redirects the legacy timeline URL to the contact screen (§1.8).
 func (s *Server) ContactTimeline(w http.ResponseWriter, r *http.Request) {
 	colEnc := r.PathValue("col")
-	collection, err := DecodeCollectionPath(colEnc)
-	if err != nil {
+	if _, err := DecodeCollectionPath(colEnc); err != nil {
 		http.NotFound(w, r)
 		return
 	}
-	req := findRequest{
-		Mode: modeTimeline, Account: r.PathValue("account"),
-		Collection: collection, UID: r.PathValue("uid"),
+	target := s.Path("/app/contacts/" + r.PathValue("account") + "/" + colEnc + "/" + urlPathEscape(r.PathValue("uid")))
+	if q := r.URL.RawQuery; q != "" {
+		target += "?" + q
 	}
-	s.startFind(w, r, req, "timeline.html")
+	http.Redirect(w, r, target, http.StatusSeeOther)
 }
 
 // startFind begins a poll and renders the page that will follow it.
@@ -336,19 +373,19 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 	sess := SessionFrom(r)
 	view := findView{
 		Request: req, Mode: req.Mode, Title: findTitle(req),
-		UseSSE: s.Progress.SSE(), PollMillis: s.pollMillis(),
+		UseSSE: s.Progress.SSE(), PollMillis: s.pollMillis(), Base: s.Path(""),
 	}
 	view.SourcesURL = s.sourcesURL(req.Mode)
 	if req.Mode == modeTime {
 		view.FromLabel, view.ToLabel = req.From, req.To
 	}
-	if req.Mode.isSection() {
-		if rail, railErr := s.buildSectionRail(sess, req, "", ""); railErr == nil {
+	if req.Mode.isSection() || req.Mode == modeTimeline {
+		if rail, railErr := s.buildSectionRail(sess, findRequest{Mode: modeTimeline}, "", ""); railErr == nil {
+			rail.RailTitle = "Where to look"
+			rail.Mode = modeTimeline
+			rail.SourcesURL = s.sourcesURL(modeTimeline)
 			view.SectionRail = rail
 		}
-	}
-	if req.Mode == modeTimeline {
-		view.Back = s.Path("/app/contacts/" + req.Account + "/" + EncodeCollectionPath(req.Collection) + "/" + urlPathEscape(req.UID))
 	}
 	if s.Fanout == nil {
 		view.Unusable = "Cross-source polling is not configured on this instance."
@@ -367,7 +404,7 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 			view.Subject = subject.name
 			req.Query = strings.Join(subject.terms, "\n")
 			view.Request = req
-			view.Title = "Timeline of " + subject.name
+			view.Title = subject.name
 		} else {
 			view.Unusable = userFacingDAVError(subjErr)
 			s.renderFind(w, r, template, view)
@@ -511,7 +548,7 @@ func (s *Server) viewFromTask(r *http.Request, req findRequest, task *fanout.Tas
 	view := findView{
 		Request: req, Mode: req.Mode, Title: findTitle(req), TaskID: task.ID,
 		UseSSE: s.Progress.SSE() && !req.Poll, PollMillis: s.pollMillis(),
-		SourcesURL: s.sourcesURL(req.Mode),
+		SourcesURL: s.sourcesURL(req.Mode), Base: s.Path(""),
 	}
 	s.fillFindURLs(&view, req, task.ID)
 	s.fillResults(r, &view, req, task)
@@ -680,7 +717,7 @@ func (s *Server) screenURL(req findRequest) string {
 	case modeDuplicates:
 		return s.Path("/app/duplicates")
 	case modeTimeline:
-		return s.Path("/app/contacts/" + req.Account + "/" + EncodeCollectionPath(req.Collection) + "/" + urlPathEscape(req.UID) + "/timeline")
+		return s.Path("/app/contacts/" + req.Account + "/" + EncodeCollectionPath(req.Collection) + "/" + urlPathEscape(req.UID))
 	case modePeople:
 		return s.Path("/app/contacts")
 	case modeTasks:
@@ -802,6 +839,10 @@ func groupRows(req findRequest, snap fanout.Snapshot, loc *time.Location, dup du
 			rows = append(rows, row)
 		}
 	}
+	if req.Mode == modeTimeline {
+		rows = appendAttachmentRows(rows)
+	}
+	rows = filterRowsByTab(req, rows)
 	descending := req.Mode == modeTimeline || req.Mode == modeNotes
 	sort.SliceStable(rows, func(i, j int) bool {
 		if rows[i].Sort == rows[j].Sort {
@@ -911,13 +952,15 @@ func (s *Server) findQuery(sess *session.Session, req findRequest) (fanout.Query
 		if req.Query == "" {
 			return nil, errors.New("nothing to search for")
 		}
+		match := searchContext{mode: modeSearch, query: req.Query}
 		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
-			return s.pollSearch(ctx, sess, src, []string{req.Query}, loc)
+			return s.pollSearch(ctx, sess, src, []string{req.Query}, loc, match)
 		}, nil
 	case modeTimeline:
 		terms := strings.Split(req.Query, "\n")
+		match := searchContext{mode: modeTimeline, terms: matchTerms{}.fromStrings(terms)}
 		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
-			return s.pollSearch(ctx, sess, src, terms, loc)
+			return s.pollSearch(ctx, sess, src, terms, loc, match)
 		}, nil
 	case modeTasks:
 		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
@@ -1085,7 +1128,7 @@ func (s *Server) pollContacts(ctx context.Context, sess *session.Session, src fa
 		if contactErr != nil {
 			continue
 		}
-		items = append(items, contactItem(src, contact, s.contactURL(src, contact.UID), marks.of(src, contact)))
+		items = append(items, contactItem(src, contact, s.contactURL(src, contact.UID), marks.of(src, contact), ""))
 	}
 	// A multiget answers from the cache card by card, so there is no honest
 	// "all of it came from cache" to report here; the panel says nothing rather
@@ -1093,11 +1136,18 @@ func (s *Server) pollContacts(ctx context.Context, sess *session.Session, src fa
 	return items, false, nil
 }
 
+// searchContext carries match labelling through a poll (§1.8).
+type searchContext struct {
+	mode  findMode
+	terms matchTerms
+	query string
+}
+
 // pollSearch searches one source for any of the terms. A calendar source is
 // searched for events, tasks and notes; an address book for cards.
-func (s *Server) pollSearch(ctx context.Context, sess *session.Session, src fanout.Source, terms []string, loc *time.Location) ([]fanout.Item, bool, error) {
+func (s *Server) pollSearch(ctx context.Context, sess *session.Session, src fanout.Source, terms []string, loc *time.Location, match searchContext) ([]fanout.Item, bool, error) {
 	if src.Kind == string(discovery.KindAddressBook) {
-		return s.searchContacts(ctx, sess, src, terms)
+		return s.searchContacts(ctx, sess, src, terms, match)
 	}
 	p, _, err := s.calendarProvider(sess, src.AccountID)
 	if err != nil {
@@ -1123,7 +1173,7 @@ func (s *Server) pollSearch(ctx context.Context, sess *session.Session, src fano
 				continue
 			}
 			seen[obj.Path] = true
-			if item, ok := s.icalItem(src, obj, loc); ok {
+			if item, ok := s.icalItem(src, obj, loc, match); ok {
 				items = append(items, item)
 			}
 		}
@@ -1134,7 +1184,7 @@ func (s *Server) pollSearch(ctx context.Context, sess *session.Session, src fano
 	return items, false, nil
 }
 
-func (s *Server) searchContacts(ctx context.Context, sess *session.Session, src fanout.Source, terms []string) ([]fanout.Item, bool, error) {
+func (s *Server) searchContacts(ctx context.Context, sess *session.Session, src fanout.Source, terms []string, match searchContext) ([]fanout.Item, bool, error) {
 	p, _, err := s.contactsProvider(sess, src.AccountID)
 	if err != nil {
 		return nil, false, err
@@ -1163,7 +1213,7 @@ func (s *Server) searchContacts(ctx context.Context, sess *session.Session, src 
 			if contactErr != nil {
 				continue
 			}
-			items = append(items, contactItem(src, contact, s.contactURL(src, contact.UID), contactMarks{}))
+			items = append(items, contactItem(src, contact, s.contactURL(src, contact.UID), contactMarks{}, contactSearchLabel(contact, searchQuery(match, terms))))
 		}
 	}
 	if firstErr != nil && len(items) == 0 {
@@ -1173,21 +1223,36 @@ func (s *Server) searchContacts(ctx context.Context, sess *session.Session, src 
 }
 
 // icalItem turns any calendar object into a row, whatever component it is.
-func (s *Server) icalItem(src fanout.Source, obj *model.Object, loc *time.Location) (fanout.Item, bool) {
+func (s *Server) icalItem(src fanout.Source, obj *model.Object, loc *time.Location, match searchContext) (fanout.Item, bool) {
 	switch obj.Component() {
 	case "VEVENT":
 		event, err := obj.Event(loc)
 		if err != nil {
 			return fanout.Item{}, false
 		}
-		return eventItem(src, event, s.icalURL("calendar", src, event.UID), loc), true
+		item := eventItem(src, event, s.icalURL("calendar", src, event.UID), loc)
+		if row, ok := item.Data.(resultRow); ok {
+			row.MatchLabel = eventMatchLabel(event, match.terms)
+			if match.mode == modeSearch && row.MatchLabel == "" && row.TimeLabel != "" {
+				row.MatchLabel = row.TimeLabel
+			}
+			row.Files = attachmentNames(event.Attachments)
+			item.Data = row
+		}
+		return item, true
 	case "VTODO":
 		todo, err := obj.Todo(loc)
 		if err != nil {
 			return fanout.Item{}, false
 		}
 		item := todoItem(src, todo, loc)
-		item.Data = withURL(item.Data, s.icalURL("tasks", src, todo.UID))
+		if row, ok := item.Data.(resultRow); ok {
+			row.MatchLabel = todoMatchLabel(todo, match.terms)
+			if match.mode == modeSearch && row.MatchLabel == "" && row.TimeLabel != "" {
+				row.MatchLabel = row.TimeLabel
+			}
+			item.Data = withURL(row, s.icalURL("tasks", src, todo.UID))
+		}
 		return item, true
 	case "VJOURNAL":
 		note, err := obj.Note(loc)
@@ -1195,10 +1260,27 @@ func (s *Server) icalItem(src fanout.Source, obj *model.Object, loc *time.Locati
 			return fanout.Item{}, false
 		}
 		item := noteItem(src, note, loc)
-		item.Data = withURL(item.Data, s.icalURL("notes", src, note.UID))
+		if row, ok := item.Data.(resultRow); ok {
+			row.MatchLabel = noteMatchLabel(note, match.terms)
+			if match.mode == modeSearch && row.MatchLabel == "" && row.TimeLabel != "" {
+				row.MatchLabel = row.TimeLabel
+			}
+			row.Files = attachmentNames(note.Attachments)
+			item.Data = withURL(row, s.icalURL("notes", src, note.UID))
+		}
 		return item, true
 	}
 	return fanout.Item{}, false
+}
+
+func attachmentNames(list []model.Attachment) []string {
+	out := make([]string, 0, len(list))
+	for _, att := range list {
+		if name := strings.TrimSpace(att.Filename); name != "" {
+			out = append(out, name)
+		}
+	}
+	return out
 }
 
 func (s *Server) contactURL(src fanout.Source, uid string) string {
@@ -1207,6 +1289,18 @@ func (s *Server) contactURL(src fanout.Source, uid string) string {
 
 func (s *Server) icalURL(section string, src fanout.Source, uid string) string {
 	return s.Path("/app/" + section + "/" + src.AccountID + "/" + EncodeCollectionPath(src.Collection) + "/" + urlPathEscape(uid))
+}
+
+func searchQuery(match searchContext, terms []string) string {
+	if q := strings.TrimSpace(match.query); q != "" {
+		return q
+	}
+	for _, term := range terms {
+		if term = strings.TrimSpace(term); term != "" {
+			return term
+		}
+	}
+	return ""
 }
 
 func withURL(data any, url string) any {

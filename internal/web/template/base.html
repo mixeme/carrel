@@ -16,7 +16,9 @@
 {{if .Shell}}
 <header class="app-top no-print">
     <a class="app-brand" href="{{.Base}}/app/calendar">Carrel</a>
-    <a class="app-search" id="app-search" href="{{.Base}}/app/search">Search everything…</a>
+    <form class="app-search" method="get" action="{{.Base}}/app/search">
+        <input id="app-search" type="search" name="q" value="{{.Topbar.SearchQuery}}" placeholder="Search everything…" autocomplete="off" spellcheck="false" aria-label="Search everything">
+    </form>
     <div class="app-top-actions">
         <div class="app-create">
             <div class="app-create-group">
@@ -149,6 +151,7 @@
 {{$rail := .Data.SectionRail}}
 <aside class="sidebar card no-print section-rail">
     {{if $rail.Sources}}
+    {{if $rail.RailTitle}}<h2>{{$rail.RailTitle}}</h2>{{end}}
     <form method="post" action="{{$rail.SourcesURL}}">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="mode" value="{{$rail.Mode}}">
@@ -175,6 +178,19 @@
     </form>
     {{else}}<p class="hint">No collections here yet. Connect a DAV account from your <a href="{{.Base}}/app/">profile</a>.</p>{{end}}
 </aside>
+{{end}}
+
+{{/* Kind filter tabs for search, person and duplicates screens (§1.8). */}}
+{{define "kindtabs"}}
+{{$d := .Data}}
+{{$tabs := $d.KindTabs}}
+{{if $tabs}}
+<nav class="kind-tabs no-print" aria-label="Filter by kind">
+{{range $tabs}}
+    <a class="kind-tab{{if .Active}} is-on{{end}}" href="{{.URL}}">{{.Label}}{{if .Count}} {{.Count}}{{end}}</a>
+{{end}}
+</nav>
+{{end}}
 {{end}}
 
 {{/* The attachments of §23.10. It is defined against the frame because a note
@@ -311,6 +327,7 @@
                     </span>
                     {{end}}
                 </span>
+                <span class="find-row-match">{{if .MatchLabel}}{{.MatchLabel}}{{end}}</span>
                 <span class="find-row-source">{{.Collection}}</span>
                 <span class="find-row-kind">{{.Kind}}</span>
             </li>

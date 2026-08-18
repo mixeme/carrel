@@ -141,7 +141,7 @@ func noteItem(src fanout.Source, note model.Note, loc *time.Location) fanout.Ite
 
 // contactItem groups people by initial, which is the natural key §14 asks for
 // when the merged list is a directory rather than an agenda.
-func contactItem(src fanout.Source, contact model.Contact, url string, marks contactMarks) fanout.Item {
+func contactItem(src fanout.Source, contact model.Contact, url string, marks contactMarks, matchLabel string) fanout.Item {
 	name := contact.DisplayName()
 	row := resultRow{
 		Kind: "contact", Title: displayOr(name, "(no name)"),
@@ -149,7 +149,7 @@ func contactItem(src fanout.Source, contact model.Contact, url string, marks con
 		GroupKey: initialOf(name), GroupLabel: initialOf(name),
 		Sort: strings.ToLower(name), Account: src.AccountLabel,
 		Collection: src.CollectionLabel, Color: src.Color,
-		Tags: contact.Categories, DupCount: 1,
+		Tags: contact.Categories, DupCount: 1, MatchLabel: matchLabel,
 		Print: merge.FingerprintContact(contact), DupGroup: marks.Group,
 		DupIgnored: marks.Ignored, Emails: valuesOf(contact.Emails),
 		Phones: valuesOf(contact.Phones),

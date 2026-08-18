@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Wave 1.8 — cross-source search and person view.** The header search field submits to `/app/search` from any screen (`/` focuses it); the search page shows results and kind tabs only. `/app/contacts/{account}/{col}/{uid}` is the full-width person screen: calendar source rail, fan-out of meetings, tasks, notes and file attachments from the same poll, a «why it matched» column (exact `mailto:` attendee vs text hit), kind tabs including Files, and Write a note / New event with a pre-filled link or attendee. The edit form moves to `/edit`; `/timeline` redirects here. Duplicates gains the same kind filter tabs; `timeline.html` is removed.
+
 - **Wave 1.7 — unified view inside sections.** `/app/calendar`, `/app/contacts`, `/app/tasks`, and `/app/notes` open on an «All …» merged view with fan-out polling; each section rail lists collections with tri-state selection, and merged rows show a source column. Calendar range forms add Events / Tasks due / Notes kind checkboxes. `/app/unified` redirects to the matching section; `unified.html` is removed.
 
 - **Wave 1.6 — forms.** Record cards, settings, auth, and admin screens use a shared multi-column form layout: `.form` / `.form-field` with content-width tokens (`w-xs`–`w-xl`), grouped fieldsets, and a `.form-foot` action bar. Field names and handler tests are unchanged.

@@ -56,7 +56,7 @@ func TestContactSaveKeepsUnknownProperties(t *testing.T) {
 	a.setupAdmin("root", "", testPassword)
 	accID, colEnc := a.connectAddressBook(t, davSrv.URL)
 
-	rec := a.post("/app/contacts/"+accID+"/"+colEnc+"/ada", url.Values{
+	rec := a.post("/app/contacts/"+accID+"/"+colEnc+"/ada/edit", url.Values{
 		fieldAction: {"save"},
 		"etag":      {`"v1"`},
 		"fn":        {"Ada Lovelace"},
@@ -69,7 +69,7 @@ func TestContactSaveKeepsUnknownProperties(t *testing.T) {
 		t.Fatalf("save status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 
-	card := a.get("/app/contacts/" + accID + "/" + colEnc + "/ada")
+	card := a.get("/app/contacts/" + accID + "/" + colEnc + "/ada/edit")
 	if card.Code != http.StatusOK {
 		t.Fatalf("card status = %d", card.Code)
 	}
@@ -87,7 +87,7 @@ func TestContactCardHidesEmptyFields(t *testing.T) {
 	a.setupAdmin("root", "", testPassword)
 	accID, colEnc := a.connectAddressBook(t, davSrv.URL)
 
-	card := a.get("/app/contacts/" + accID + "/" + colEnc + "/ada")
+	card := a.get("/app/contacts/" + accID + "/" + colEnc + "/ada/edit")
 	if card.Code != http.StatusOK {
 		t.Fatalf("card status = %d, body = %s", card.Code, card.Body.String())
 	}
@@ -135,7 +135,7 @@ func TestContactConflictShowsChoice(t *testing.T) {
 	a.setupAdmin("root", "", testPassword)
 	accID, colEnc := a.connectAddressBook(t, davSrv.URL)
 
-	rec := a.post("/app/contacts/"+accID+"/"+colEnc+"/ada", url.Values{
+	rec := a.post("/app/contacts/"+accID+"/"+colEnc+"/ada/edit", url.Values{
 		fieldAction: {"save"},
 		"etag":      {`"stale"`},
 		"fn":        {"Ada Changed"},
