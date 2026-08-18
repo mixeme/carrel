@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"strings"
 
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 )
@@ -73,6 +74,39 @@ type View struct {
 // Admin reports whether the page is being shown to an administrator, which is
 // what decides the navigation entries.
 func (v View) Admin() bool { return v.Session != nil && v.Session.Admin }
+
+// Shell reports whether the four-zone application frame wraps this page.
+func (v View) Shell() bool { return v.Session != nil && !v.InAdmin }
+
+// NavSection is the shell rail item to mark current, empty when none applies.
+func (v View) NavSection() string {
+	if !v.Shell() {
+		return ""
+	}
+	switch v.Title {
+	case "Search":
+		return "search"
+	case "Contacts", "New contact", "Conflict", "Import contacts", "Import report", "Contact":
+		return "contacts"
+	case "Agenda", "New event", "Event", "Calendar conflict", "Import calendar", "Calendar import report":
+		return "calendar"
+	case "Tasks", "New task", "Task", "Task conflict":
+		return "tasks"
+	case "Notes", "New note", "Note", "Note conflict", "Import notes", "Notes import report", "Quick note":
+		return "notes"
+	case "Files":
+		return "files"
+	case "Duplicates", "Merge duplicates":
+		return "duplicates"
+	case "Everything", "All contacts":
+		return "search"
+	default:
+		if strings.HasPrefix(v.Title, "Timeline of ") {
+			return "contacts"
+		}
+		return ""
+	}
+}
 
 // View builds the common part of a page's data for the current request.
 func (s *Server) View(r *http.Request, title string) View {

@@ -4,11 +4,62 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
+	"io/fs"
 	"net/http"
 	"strings"
 	"testing"
+
+	"gitea.mixdep.ru/mix/carrel/internal/session"
+	"gitea.mixdep.ru/mix/carrel/internal/web"
 )
+
+func TestAppTemplateHasShell(t *testing.T) {
+	templateFS, err := fs.Sub(web.TemplateFS, "template")
+	if err != nil {
+		t.Fatalf("template FS: %v", err)
+	}
+	templates, err := LoadTemplates(templateFS)
+	if err != nil {
+		t.Fatalf("LoadTemplates: %v", err)
+	}
+	page := templates.pages["app.html"]
+	v := View{
+		Title:   "Carrel",
+		CSRF:    "tok",
+		Session: &session.Session{Login: "root"},
+	}
+	var buf bytes.Buffer
+	if err := page.ExecuteTemplate(&buf, "base", v); err != nil {
+		t.Fatalf("execute: %v", err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, `class="app-rail`) {
+		t.Fatalf("LoadTemplates app.html missing rail:\n%s", out[:min(1200, len(out))])
+	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func TestEmbeddedBaseHasShell(t *testing.T) {
+	templateFS, err := fs.Sub(web.TemplateFS, "template")
+	if err != nil {
+		t.Fatalf("template FS: %v", err)
+	}
+	b, err := fs.ReadFile(templateFS, "base.html")
+	if err != nil {
+		t.Fatalf("read base.html: %v", err)
+	}
+	if !strings.Contains(string(b), "app-rail") {
+		t.Fatal("embedded base.html is missing the application shell")
+	}
+}
 
 func TestAboutPublic(t *testing.T) {
 	a := newApp(t, nil)
@@ -47,6 +98,14 @@ func TestAboutFooterOnSignedInPages(t *testing.T) {
 	if !strings.Contains(rec.Body.String(), `value="refresh_cache"`) {
 		t.Error("signed-in page has no refresh control")
 	}
+	if !strings.Contains(rec.Body.String(), `class="app-rail`) {
+		body := rec.Body.String()
+		snippet := body
+		if len(snippet) > 600 {
+			snippet = snippet[:600]
+		}
+		t.Fatalf("signed-in app page has no section rail; snippet:\n%s", snippet)
+	}
 }
 
 func TestManifest(t *testing.T) {
@@ -82,5 +141,38 @@ func TestAboutNoSessionRequired(t *testing.T) {
 	rec := a.get("/about")
 	if rec.Code != http.StatusOK {
 		t.Fatalf("GET /about = %d, want 200", rec.Code)
+	}
+}
+
+func TestShellNavigationMarksCurrentSection(t *testing.T) {
+	a := newApp(t, nil)
+	a.setupAdmin("root", "root@example.org", testPassword)
+
+	cases := []struct {
+		path string
+		want string
+	}{
+		{"/app/contacts", "Contacts"},
+		{"/app/calendar", "Calendar"},
+		{"/app/tasks", "Tasks"},
+		{"/app/notes", "Notes"},
+		{"/app/files", "Files"},
+		{"/app/search", "Search"},
+		{"/app/duplicates", "Duplicates"},
+	}
+
+	for _, tc := range cases {
+		rec := a.get(tc.path)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("GET %s = %d, want 200", tc.path, rec.Code)
+		}
+		body := rec.Body.String()
+		if !strings.Contains(body, `class="app-rail`) {
+			t.Fatalf("GET %s body missing section rail", tc.path)
+		}
+		marker := `aria-current="page"` + ">" + tc.want + "<"
+		if !strings.Contains(body, marker) {
+			t.Errorf("GET %s: want %q marked current in the rail", tc.path, tc.want)
+		}
 	}
 }
