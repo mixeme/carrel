@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- **Wave 1.1 — design tokens in `carrel.css`.** Palette and layout variables from the UI mockups (§5): font stacks, `--rail` / `--side` / `--top` / `--pad`, `--accent-lt`. One alert colour (`--alert`) replaces `--error` and `--danger`. Dark theme follows `prefers-color-scheme` and `data-theme`; `:focus-visible` uses the accent outline from the mockups.
+
 ## [0.9.0] - 2026-08-18
 
 **Планы и спека после 0.8.0; волна 0.1 в коде.** Глобальный план, §10.1 коллекции, §23.3–§23.5 в спеке и макетах; отзыв депонированной копии — только решение владельца ключа (код). Версия в бинарнике — `0.9.0`. Не v1: тег ждёт P1, P2, P5 ([docs/manual-acceptance.md](docs/manual-acceptance.md)).

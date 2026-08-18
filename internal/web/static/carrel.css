@@ -1,21 +1,79 @@
-/* Carrel — brand guide palette (docs/visual/carrel-brand-guide.html) */
+/* Carrel — tokens from docs/visual/carrel-ui-mockups.html §5 */
 :root {
     --ink: #17211c;
     --card: #e8dfcb;
     --card-border: #c9bfa6;
     --accent: #4a6b52;
-    --accent-dark: #7fa085;
+    --accent-lt: #7fa085;
     --bg: #f5f1e8;
     --paper: #fffdf7;
     --rule: #d8cfbb;
     --hair: #e2daca;
     --dusty: #9a9280;
     --muted: #6b6355;
-    --error: #b04a3a;
+    --alert: #b04a3a;
+    --f-serif: Literata, "Source Serif 4", Georgia, "Times New Roman", serif;
+    --f-sans: "Public Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --f-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --rail: 264px;
+    --side: 400px;
+    --top: 52px;
+    --pad: 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --ink: #e8dfcb;
+        --bg: #141a16;
+        --paper: #1b231d;
+        --card: #242e27;
+        --card-border: #3a463d;
+        --rule: #2f3b33;
+        --hair: #28332b;
+        --dusty: #8b8571;
+        --muted: #a79e88;
+        --accent: #7fa085;
+        --alert: #c4675a;
+    }
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --ink: #e8dfcb;
+    --bg: #141a16;
+    --paper: #1b231d;
+    --card: #242e27;
+    --card-border: #3a463d;
+    --rule: #2f3b33;
+    --hair: #28332b;
+    --dusty: #8b8571;
+    --muted: #a79e88;
+    --accent: #7fa085;
+    --alert: #c4675a;
+}
+
+:root[data-theme="light"] {
+    color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 1px;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--f-sans);
     font-size: 15px;
     line-height: 1.6;
     color: var(--ink);
@@ -27,7 +85,7 @@ body {
 }
 
 h1, h2 {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--f-serif);
     font-weight: normal;
 }
 
@@ -242,7 +300,7 @@ a.button {
 }
 
 .topbar .brand {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--f-serif);
     font-size: 1.25rem;
     color: var(--accent);
     text-decoration: none;
@@ -333,8 +391,8 @@ button {
 }
 
 .message.error {
-    color: var(--error);
-    border-left: 2px solid var(--error);
+    color: var(--alert);
+    border-left: 2px solid var(--alert);
 }
 
 .subsection {
@@ -383,7 +441,7 @@ button {
 }
 
 .about-meta code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: var(--f-mono);
     font-size: 0.8125rem;
     background: var(--paper);
     border: 0.5px solid var(--hair);
@@ -661,7 +719,7 @@ label.checkbox input {
 }
 
 .task-overdue-count {
-    color: var(--danger, #a23b32);
+    color: var(--alert);
     font-size: 0.9rem;
 }
 
@@ -707,7 +765,7 @@ label.checkbox input {
 }
 
 .task-row.is-overdue .task-due {
-    color: var(--danger, #a23b32);
+    color: var(--alert);
 }
 
 .task-meta,
@@ -812,7 +870,7 @@ label.checkbox input {
 
 .find-source.is-error .find-source-state,
 .find-source.is-timeout .find-source-state {
-    color: var(--danger, #a23b32);
+    color: var(--alert);
 }
 
 .find-group {
@@ -861,7 +919,7 @@ label.checkbox input {
 }
 
 .find-row.is-overdue .find-row-time {
-    color: var(--danger, #a23b32);
+    color: var(--alert);
 }
 
 /* The duplicates of §15: a badge where a record stands for several, and the
@@ -983,8 +1041,8 @@ label.checkbox input {
 }
 
 button.danger {
-    background: var(--danger, #a23b32);
-    border-color: var(--danger, #a23b32);
+    background: var(--alert);
+    border-color: var(--alert);
     color: #fff;
 }
 
