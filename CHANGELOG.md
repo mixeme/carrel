@@ -4,9 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-### Changed
+## [0.9.0] - 2026-08-18
 
-- **Escrow withdrawal is always the key owner's decision in code (§5.4).** Removed `Settings.Escrow.ForbidOptOut`, the «Do not let users withdraw their deposited key» checkbox on `/admin/escrow`, the disabled-withdrawal branch in the profile, `SetEscrowOptOutPolicy`, `ErrEscrowOptOutForbidden`, and tests `TestOptOutCanBeForbidden` and `TestForbiddenOptOutIsVisible`. A `forbid_opt_out` flag left in an older state file is read and ignored; withdrawal still works. `TestStoredForbidOptOutIsIgnored` covers that case.
+**Планы и спека после 0.8.0; волна 0.1 в коде.** Глобальный план, §10.1 коллекции, §23.3–§23.5 в спеке и макетах; отзыв депонированной копии — только решение владельца ключа (код). Версия в бинарнике — `0.9.0`. Не v1: тег ждёт P1, P2, P5 ([docs/manual-acceptance.md](docs/manual-acceptance.md)).
 
 ### Added
 
@@ -50,6 +50,8 @@ All notable changes to this project are documented in this file.
 
 - **The collection stripe knew no size of its own.** `.m-bar3` was given width and height only inside `.m-src` and `.m-row`; everywhere else — screen headings, file names, subtitles, tags — it silently collapsed to zero width, and **60 of the 239 stripes in the mockups were not being drawn at all**, under captions explaining what the stripe means. It is the same mistake the row-height section of the mockups already describes: the size was known to the markup rather than to the system. A base rule now gives it 3×14 and `display:inline-block` so width applies in inline contexts too; the per-context rules stay and only override the height.
 
+- **Docker image seeds the data volume for `nonroot`.** A fresh named volume was owned `root:root`, so the distroless user could not create `server.key` on first start. The build now ships an empty `/var/lib/carrel` owned by `nonroot` with mode `0700`, which new volumes inherit.
+
 ### Changed
 
 - **Manual acceptance lists only what is still open.** Closed container, log and mail checks are gone from [docs/manual-acceptance.md](docs/manual-acceptance.md); P1, P2 and P5 still block the tag.
@@ -66,6 +68,8 @@ All notable changes to this project are documented in this file.
 
 - §10 is now **[частично]**; §24.8 gained two checks (a job's trigger password starts no other job and reads no collection; one user cannot create, rename or delete another's collection). [docs/roadmap.md](docs/roadmap.md) records §10.1 among the requirements not met and no longer claims backup encryption is non-negotiable.
 
+- **Escrow withdrawal is always the key owner's decision in code (§5.4).** Removed `Settings.Escrow.ForbidOptOut`, the «Do not let users withdraw their deposited key» checkbox on `/admin/escrow`, the disabled-withdrawal branch in the profile, `SetEscrowOptOutPolicy`, `ErrEscrowOptOutForbidden`, and tests `TestOptOutCanBeForbidden` and `TestForbiddenOptOutIsVisible`. A `forbid_opt_out` flag left in an older state file is read and ignored; withdrawal still works. `TestStoredForbidOptOutIsIgnored` covers that case. The specification and mockups were updated in 0.8.0; this release catches the code up.
+
 ## [0.8.0] - 2026-08-17
 
 **Экранный эталон и подготовка десктопа.** Полный набор макетов в [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html); план обёртки §18; `CARREL_BIND` для local-режима. Функциональный объём v1 в коде без изменений; ручная приёмка — [docs/manual-acceptance.md](docs/manual-acceptance.md).
@@ -76,7 +80,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
-- **Escrow withdrawal is always the key owner's decision (§5.4).** The administrator can no longer forbid withdrawing a deposited copy. Updated [docs/carrel-spec.md](docs/carrel-spec.md), [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html) and [docs/tests.md](docs/tests.md). Removal from the code is recorded in [docs/roadmap.md](docs/roadmap.md).
+- **Escrow withdrawal is always the key owner's decision (§5.4), documentation only.** The administrator can no longer forbid withdrawing a deposited copy. Updated [docs/carrel-spec.md](docs/carrel-spec.md), [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html) and [docs/tests.md](docs/tests.md). Code removal ships in 0.9.0.
 
 - **Interface mockups grew from a redesign sketch into the reference for every screen** — [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html), 100 mockups drawn as live HTML on the classes meant for `carrel.css`. What changed since the first pass, in the order it matters:
 
