@@ -19,6 +19,9 @@
     --side: 400px;
     --top: 52px;
     --pad: 20px;
+    --row-lg: 28px;
+    --row-md: 26px;
+    --row-sm: 22px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -171,11 +174,12 @@ main:has(.app-layout) {
 
 .collection-dot {
     display: inline-block;
-    width: 0.65rem;
-    height: 0.65rem;
-    border-radius: 50%;
-    margin-right: 0.35rem;
+    width: 3px;
+    height: 14px;
+    border-radius: 1px;
+    margin-right: 0.5rem;
     vertical-align: middle;
+    flex: none;
 }
 
 .collection-link {
@@ -203,31 +207,160 @@ main:has(.app-layout) {
     margin: 0;
 }
 
+/* List rows — mockups §5 (.m-list / .m-row) */
+.list {
+    display: flex;
+    flex-direction: column;
+}
+
+.card > .list,
+.card > .agenda-day > .list,
+.card > .task-list,
+.card > .note-list {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+}
+
+.list-row {
+    display: grid;
+    align-items: center;
+    gap: 12px;
+    min-height: 38px;
+    padding-left: var(--pad);
+    padding-right: var(--pad);
+    border-bottom: 0.5px solid var(--hair);
+}
+
+.list-row.is-on {
+    background: var(--card);
+}
+
+.list-bar {
+    width: 3px;
+    height: var(--row-sm);
+    border-radius: 1px;
+    flex: none;
+    align-self: center;
+}
+
+.list-avatar {
+    width: var(--row-lg);
+    height: var(--row-lg);
+    border-radius: 3px;
+    object-fit: cover;
+    background: #d9d2be;
+    flex: none;
+}
+
+:root[data-theme="dark"] .list-avatar {
+    background: #3a463d;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .list-avatar {
+        background: #3a463d;
+    }
+}
+
+.list-title {
+    font-size: 13.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: inherit;
+    text-decoration: none;
+}
+
+.list-title strong {
+    font-weight: 600;
+}
+
+.list-sub,
+.list-detail {
+    font-size: 12px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.list-detail {
+    font-size: 11.5px;
+    color: var(--dusty);
+}
+
+.list-time {
+    color: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.list-end {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.list-rubric {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    font-weight: 600;
+    margin: 0;
+}
+
+.list-group {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 15px var(--pad) 5px;
+    border-bottom: 0.5px solid var(--rule);
+    background: var(--bg);
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+}
+
+.list-row--contact {
+    grid-template-columns: 3px var(--row-lg) minmax(150px, 1.4fr) minmax(110px, 1fr) minmax(110px, 1fr) auto;
+}
+
+.list-row--agenda {
+    grid-template-columns: 3px 62px minmax(180px, 2fr) minmax(110px, 1fr);
+}
+
+.list-row--task {
+    grid-template-columns: 14px 3px minmax(190px, 2fr) minmax(90px, auto) auto;
+}
+
+.list-row--note {
+    grid-template-columns: 3px minmax(140px, 1.2fr) minmax(170px, 2fr) minmax(70px, auto) auto;
+}
+
 .contact-row {
     border-bottom: 0.5px solid var(--hair);
 }
 
 .contact-row-link {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    padding: 0.65rem 0;
+    display: contents;
     text-decoration: none;
     color: inherit;
 }
 
 .contact-avatar,
 .contact-photo {
-    border-radius: 50%;
+    border-radius: 3px;
     object-fit: cover;
-    background: var(--rule);
+    background: #d9d2be;
     flex-shrink: 0;
 }
 
 .contact-meta {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
+    display: contents;
 }
 
 .contact-meta .hint {
@@ -519,11 +652,21 @@ input {
     display: block;
     width: 100%;
     box-sizing: border-box;
-    padding: 0.5rem;
+    height: var(--row-lg);
+    padding: 0 9px;
     border: 0.5px solid var(--card-border);
     border-radius: 3px;
     font: inherit;
     background: var(--paper);
+}
+
+:where(label, div):has(> input:not([type="checkbox"]):not([type="radio"])) > button,
+:where(label, div):has(> input:not([type="checkbox"]):not([type="radio"])) > .button,
+:where(label, div):has(> select) > button,
+:where(label, div):has(> select) > .button {
+    height: var(--row-lg);
+    margin-top: 0;
+    padding: 0 10px;
 }
 
 button {
@@ -817,7 +960,40 @@ label.checkbox input {
     outline-offset: 0.5rem;
 }
 
-.agenda-range,
+.agenda-range {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px 16px;
+    align-items: flex-end;
+    margin: 1rem 0 0;
+}
+
+.agenda-range label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 0;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    font-weight: 400;
+}
+
+.agenda-range input {
+    display: block;
+    width: auto;
+    min-width: 9rem;
+    height: var(--row-lg);
+    padding: 0 9px;
+    margin-top: 0;
+}
+
+.agenda-range button {
+    height: var(--row-lg);
+    margin-top: 0;
+    padding: 0 10px;
+}
+
 .event-time-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
@@ -825,18 +1001,12 @@ label.checkbox input {
     align-items: end;
 }
 
-.agenda-range button {
-    margin-top: 1rem;
-}
-
 .agenda-day {
-    margin-top: 1.5rem;
+    margin-top: 0;
 }
 
-.agenda-day h2 {
-    font-size: 1.05rem;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid var(--rule);
+.agenda-day .list-group {
+    margin-top: 1.25rem;
 }
 
 .agenda-events {
@@ -847,21 +1017,39 @@ label.checkbox input {
 
 .agenda-event-row {
     display: grid;
-    grid-template-columns: 7rem 1fr;
-    gap: 0.75rem;
-    padding: 0.55rem 0;
+    grid-template-columns: 3px 62px minmax(180px, 2fr) minmax(110px, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 38px;
+    padding-left: var(--pad);
+    padding-right: var(--pad);
     border-bottom: 0.5px solid var(--hair);
 }
 
 .agenda-event-row > a {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     color: inherit;
     text-decoration: none;
+    font-size: 13.5px;
+}
+
+.agenda-event-row > a strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agenda-event-row > a .hint {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .agenda-time {
     color: var(--muted);
+    font-size: 12px;
     font-variant-numeric: tabular-nums;
 }
 
@@ -904,26 +1092,43 @@ label.checkbox input {
 
 .task-row {
     display: grid;
-    grid-template-columns: 2rem 1fr auto;
-    gap: 0.6rem;
-    align-items: baseline;
-    padding: 0.5rem 0;
+    grid-template-columns: 14px 3px minmax(190px, 2fr) minmax(90px, auto) auto;
+    gap: 12px;
+    align-items: center;
+    min-height: 38px;
+    padding-left: var(--pad);
+    padding-right: var(--pad);
     border-bottom: 0.5px solid var(--hair);
 }
 
 .task-tick {
-    background: none;
-    border: none;
+    width: 13px;
+    height: 13px;
+    border: 1px solid var(--card-border);
+    border-radius: 2px;
+    background: transparent;
     padding: 0;
-    font-size: 1.1rem;
-    line-height: 1;
+    margin: 0;
+    font-size: 9px;
+    line-height: 11px;
+    text-align: center;
     cursor: pointer;
     color: var(--muted);
 }
 
+.task-row.is-done .task-tick {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
 .task-title {
+    font-size: 13.5px;
     color: inherit;
     text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .task-row.is-done .task-title {
@@ -946,11 +1151,13 @@ label.checkbox input {
 
 .tag {
     border: 0.5px solid var(--hair);
-    border-radius: 0.6rem;
-    padding: 0.05rem 0.45rem;
-    font-size: 0.8rem;
+    border-radius: 2px;
+    padding: 0 5px;
+    font-size: 10.5px;
     color: var(--muted);
     text-decoration: none;
+    white-space: nowrap;
+    background: var(--paper);
 }
 
 .tag.is-active {
@@ -968,24 +1175,34 @@ label.checkbox input {
 /* Notes (§23.9) */
 .note-row {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0.6rem;
-    padding: 0.6rem 0;
+    grid-template-columns: 3px minmax(140px, 1.2fr) minmax(170px, 2fr) minmax(70px, auto) auto;
+    gap: 12px;
+    align-items: center;
+    min-height: 38px;
+    padding-left: var(--pad);
+    padding-right: var(--pad);
     border-bottom: 0.5px solid var(--hair);
 }
 
 .note-link {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
+    display: contents;
     color: inherit;
     text-decoration: none;
 }
 
-.note-excerpt,
-.find-row .hint {
+.note-link strong {
+    font-size: 13.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.note-excerpt {
+    font-size: 12px;
     color: var(--muted);
-    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .note-body {
@@ -1092,30 +1309,25 @@ label.checkbox input {
 /* The duplicates of §15: a badge where a record stands for several, and the
    groups on the screen where they are decided. */
 .dup-badge {
-    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 16px;
+    line-height: 1;
     border: 0.5px solid var(--rule);
-    border-radius: 999px;
-    padding: 0 0.45rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.02em;
+    border-radius: 2px;
+    padding: 0 6px;
+    font-size: 10px;
+    letter-spacing: 0.03em;
     color: var(--muted);
     text-decoration: none;
     white-space: nowrap;
+    background: transparent;
 }
 
 .dup-badge.is-linked {
     border-color: var(--accent);
     color: var(--accent);
-}
-
-.contact-row {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-}
-
-.contact-row .contact-row-link {
-    flex: 1;
 }
 
 .dup-sources {

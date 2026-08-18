@@ -53,18 +53,17 @@
             {{if $d.Empty}}
             <p class="hint">No contacts in this address book.</p>
             {{else}}
-            <ul class="contact-list" id="contact-list">
+            <ul class="list contact-list" id="contact-list">
             {{range $d.Contacts}}
-                <li class="contact-row">
+                <li class="list-row list-row--contact contact-row">
+                    <span class="list-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
                     <a class="contact-row-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">
-                        <img class="contact-avatar print-photo" src="{{.PhotoURL}}" alt="" width="40" height="40">
-                        <span class="contact-meta">
-                            <strong>{{.DisplayName}}</strong>
-                            {{if .Phones}}<span class="hint">{{.Phones}}</span>{{end}}
-                            {{if .Emails}}<span class="hint">{{.Emails}}</span>{{end}}
-                        </span>
+                        <img class="list-avatar contact-avatar print-photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
+                        <span class="list-title"><strong>{{.DisplayName}}</strong></span>
+                        <span class="list-sub">{{.Phones}}</span>
+                        <span class="list-sub">{{.Emails}}</span>
                     </a>
-                    {{if .Linked}}<a class="dup-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}
+                    <span class="list-end">{{if .Linked}}<a class="dup-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}</span>
                 </li>
             {{end}}
             </ul>

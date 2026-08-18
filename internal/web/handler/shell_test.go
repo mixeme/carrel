@@ -4,47 +4,33 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/fs"
 	"net/http"
 	"strings"
 	"testing"
 
-	"gitea.mixdep.ru/mix/carrel/internal/session"
 	"gitea.mixdep.ru/mix/carrel/internal/web"
 )
 
-func TestAppTemplateHasShell(t *testing.T) {
+func TestListTemplatesUseListRows(t *testing.T) {
 	templateFS, err := fs.Sub(web.TemplateFS, "template")
 	if err != nil {
 		t.Fatalf("template FS: %v", err)
 	}
-	templates, err := LoadTemplates(templateFS)
-	if err != nil {
-		t.Fatalf("LoadTemplates: %v", err)
+	for _, name := range []string{"contacts.html", "contacts_page.html", "agenda.html", "tasks.html", "notes.html"} {
+		b, err := fs.ReadFile(templateFS, name)
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		body := string(b)
+		if !strings.Contains(body, `class="list-bar"`) {
+			t.Errorf("%s is missing the collection colour bar", name)
+		}
+		if !strings.Contains(body, `class="list-row`) {
+			t.Errorf("%s is missing list-row markup", name)
+		}
 	}
-	page := templates.pages["app.html"]
-	v := View{
-		Title:   "Carrel",
-		CSRF:    "tok",
-		Session: &session.Session{Login: "root"},
-	}
-	var buf bytes.Buffer
-	if err := page.ExecuteTemplate(&buf, "base", v); err != nil {
-		t.Fatalf("execute: %v", err)
-	}
-	out := buf.String()
-	if !strings.Contains(out, `class="app-rail`) {
-		t.Fatalf("LoadTemplates app.html missing rail:\n%s", out[:min(1200, len(out))])
-	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 func TestEmbeddedBaseHasShell(t *testing.T) {

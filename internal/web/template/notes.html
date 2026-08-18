@@ -47,17 +47,18 @@
             {{if $d.ReadOnly}}<p class="hint no-print">This notebook is read-only.</p>{{end}}
             {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
             {{if $d.Empty}}<p class="hint">Nothing here yet.</p>{{end}}
-            <ul class="note-list">
+            <ul class="list note-list">
             {{range $d.Rows}}
-                <li class="note-row">
+                <li class="list-row list-row--note note-row">
+                    <span class="list-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
                     <a class="note-link" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">
                         <strong>{{.Title}}</strong>
-                        {{if .Excerpt}}<span class="note-excerpt">{{.Excerpt}}</span>{{end}}
+                        <span class="note-excerpt">{{.Excerpt}}</span>
                     </a>
-                    <span class="note-meta">
-                        {{if .DateLabel}}<span class="note-date">{{.DateLabel}}</span>{{end}}
+                    <span class="list-end note-meta">
+                        {{if .DateLabel}}<span class="note-date list-detail">{{.DateLabel}}</span>{{end}}
                         {{range .Tags}}<span class="tag">{{.}}</span>{{end}}
-                        {{if .HasRelated}}<span class="hint">linked</span>{{end}}
+                        {{if .HasRelated}}<span class="dup-badge is-linked">linked</span>{{end}}
                     </span>
                 </li>
             {{end}}

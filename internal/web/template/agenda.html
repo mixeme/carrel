@@ -44,14 +44,18 @@
             {{if $d.Empty}}<p class="hint">No events in this date range.</p>{{end}}
             {{range $d.Days}}
             <section class="agenda-day" data-date="{{.Date}}">
-                <h2>{{.Label}}</h2>
-                <ul class="agenda-events">
+                <div class="list-group">
+                    <h2 class="list-rubric">{{.Label}}</h2>
+                </div>
+                <ul class="list agenda-events">
                 {{range .Events}}
-                    <li class="agenda-event-row">
-                        <span class="agenda-time">{{.TimeLabel}}</span>
+                    <li class="list-row list-row--agenda agenda-event-row">
+                        <span class="list-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                        <span class="agenda-time list-time">{{.TimeLabel}}</span>
                         <a href="{{$.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">
-                            <strong>{{.Summary}}</strong>{{if .Location}}<span class="hint">{{.Location}}</span>{{end}}
+                            <strong>{{.Summary}}</strong>
                         </a>
+                        <span class="list-detail">{{.Location}}</span>
                     </li>
                 {{end}}
                 </ul>
