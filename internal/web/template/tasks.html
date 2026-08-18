@@ -1,21 +1,27 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout calendar-layout" data-detail-section="tasks">
-    <aside class="sidebar card no-print">
-        <h2>Task lists</h2>
-        {{if $d.Sources}}
-        <ul class="collection-list">
-        {{range $d.Sources}}
-            <li><a class="collection-link{{if and (eq $d.AccountID .AccountID) (eq $d.ColEnc .ColEnc)}} is-active{{end}}"
-                href="{{$.Base}}/app/tasks/{{.AccountID}}/{{.ColEnc}}">
-                <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
-                {{.Label}}
-                <span class="hint">{{.AccountLabel}}</span>
-            </a></li>
-        {{end}}
-        </ul>
-        {{else}}<p class="hint">No task lists yet. Connect a CalDAV account from your profile.</p>{{end}}
-    </aside>
+    {{if $d.Mode}}
+    {{template "sectionrail" .}}
+    <div class="app-main">
+        <section class="card">
+            <div class="contacts-header">
+                <div>
+                    <h1>{{$d.SectionRail.AllLabel}}</h1>
+                    <p class="source-label">Open tasks from every ticked list.</p>
+                </div>
+            </div>
+            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+            {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
+            <div id="find-panel"
+                 data-sse-panel data-poll-url="{{$d.PollURL}}"
+                 {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
+                {{if $d.TaskID}}{{template "findresults" .}}{{end}}
+            </div>
+        </section>
+    </div>
+    {{else}}
+    {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
         <section class="card"><h1>Tasks</h1><p class="hint">Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> to keep tasks here.</p></section>
@@ -69,5 +75,6 @@
         </section>
         {{end}}
     </div>
+    {{end}}
 </div>
 {{end}}

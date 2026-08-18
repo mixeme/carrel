@@ -34,6 +34,8 @@ type contactsListView struct {
 	Empty        bool
 	NoBooks      bool
 	PrintDate    string
+	SectionRail  sectionRail
+	Mode         findMode
 }
 
 type contactRow struct {
@@ -51,7 +53,7 @@ type contactRow struct {
 	DupURL string
 }
 
-// ContactsHome redirects to the first address book or shows an empty state.
+// ContactsHome shows every ticked address book at once, or an empty state.
 func (s *Server) ContactsHome(w http.ResponseWriter, r *http.Request) {
 	sess := SessionFrom(r)
 	accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK())
@@ -67,8 +69,7 @@ func (s *Server) ContactsHome(w http.ResponseWriter, r *http.Request) {
 		s.Render(w, "contacts.html", v)
 		return
 	}
-	b := books[0]
-	http.Redirect(w, r, s.Path("/app/contacts/"+b.AccountID+"/"+b.ColEnc), http.StatusSeeOther)
+	s.sectionFind(w, r, findRequest{Mode: modePeople}, "contacts.html")
 }
 
 // ContactsList shows one address book with the first batch of contacts.
@@ -86,9 +87,16 @@ func (s *Server) ContactsList(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		v := s.View(r, "Contacts")
 		v.Error = userFacingDAVError(err)
-		v.Data = contactsListView{Books: s.listBooks(sess), AccountID: accountID, ColEnc: colEnc}
+		data := contactsListView{Books: s.listBooks(sess), AccountID: accountID, ColEnc: colEnc}
+		if rail, railErr := s.buildSectionRail(sess, findRequest{Mode: modePeople}, accountID, colEnc); railErr == nil {
+			data.SectionRail = rail
+		}
+		v.Data = data
 		s.RenderStatus(w, http.StatusBadRequest, "contacts.html", v)
 		return
+	}
+	if rail, railErr := s.buildSectionRail(sess, findRequest{Mode: modePeople}, accountID, colEnc); railErr == nil {
+		view.SectionRail = rail
 	}
 	v := s.View(r, "Contacts")
 	v.Data = view

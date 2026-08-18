@@ -12,6 +12,60 @@ import (
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 )
 
+// sectionRail is the source list of §1.7: an «All …» row and ticked collections
+// shared by the merged and single-collection views of one section.
+type sectionRail struct {
+	Section       string
+	AllLabel      string
+	AllURL        string
+	AllActive     bool
+	AccountID     string
+	ColEnc        string
+	Sources       []sourceRow
+	SourcesURL    string
+	Mode          findMode
+	Selection     string
+}
+
+func selectionState(rows []sourceRow) string {
+	if len(rows) == 0 {
+		return "none"
+	}
+	selected := 0
+	for _, row := range rows {
+		if row.Selected {
+			selected++
+		}
+	}
+	switch {
+	case selected == 0:
+		return "none"
+	case selected == len(rows):
+		return "all"
+	default:
+		return "part"
+	}
+}
+
+func (s *Server) buildSectionRail(sess *session.Session, req findRequest, activeAccount, activeColEnc string) (sectionRail, error) {
+	rows, err := s.findSources(sess, req)
+	if err != nil {
+		return sectionRail{}, err
+	}
+	return sectionRail{
+		Section:    req.Mode.section(),
+		AllLabel:   req.Mode.allLabel(),
+		AllURL:     s.Path(req.Mode.sectionHome()),
+		AllActive:  activeAccount == "",
+		AccountID:  activeAccount,
+		ColEnc:     activeColEnc,
+		Sources:    rows,
+		SourcesURL: s.sourcesURL(req.Mode),
+		Mode:       req.Mode,
+		Selection:  selectionState(rows),
+	}, nil
+}
+
 // sourceRow is one collection in a sidebar, with the tick §14 puts on it.
 type sourceRow struct {
 	AccountID    string

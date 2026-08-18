@@ -1,30 +1,27 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout calendar-layout" data-detail-section="notes">
-    <aside class="sidebar card no-print">
-        <h2>Notebooks</h2>
-        {{if $d.Sources}}
-        <ul class="collection-list">
-        {{range $d.Sources}}
-            <li><a class="collection-link{{if and (eq $d.AccountID .AccountID) (eq $d.ColEnc .ColEnc)}} is-active{{end}}"
-                href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">
-                <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
-                {{.Label}}
-                <span class="hint">{{.AccountLabel}}</span>
-            </a></li>
-        {{end}}
-        </ul>
-        {{else}}<p class="hint">No notebooks yet. Connect a CalDAV account from your profile.</p>{{end}}
-        {{if $d.Tags}}
-        <h2>Tags</h2>
-        <ul class="tag-list">
-            <li><a class="tag{{if not $d.Tag}} is-active{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">All</a></li>
-        {{range $d.Tags}}
-            <li><a class="tag{{if eq $d.Tag .}} is-active{{end}}" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?tag={{.}}">{{.}}</a></li>
-        {{end}}
-        </ul>
-        {{end}}
-    </aside>
+    {{if $d.Mode}}
+    {{template "sectionrail" .}}
+    <div class="app-main">
+        <section class="card">
+            <div class="contacts-header">
+                <div>
+                    <h1>{{$d.SectionRail.AllLabel}}</h1>
+                    <p class="source-label">Every ticked notebook at once.</p>
+                </div>
+            </div>
+            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+            {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
+            <div id="find-panel"
+                 data-sse-panel data-poll-url="{{$d.PollURL}}"
+                 {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
+                {{if $d.TaskID}}{{template "findresults" .}}{{end}}
+            </div>
+        </section>
+    </div>
+    {{else}}
+    {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
         <section class="card"><h1>Notes</h1><p class="hint">Connect a CalDAV account from your <a href="{{.Base}}/app/">profile</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.</p></section>
@@ -65,9 +62,21 @@
                 </li>
             {{end}}
             </ul>
+            {{if $d.Tags}}
+            <div class="no-print">
+                <h2>Tags</h2>
+                <ul class="tag-list">
+                    <li><a class="tag{{if not $d.Tag}} is-active{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">All</a></li>
+                {{range $d.Tags}}
+                    <li><a class="tag{{if eq $d.Tag .}} is-active{{end}}" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?tag={{.}}">{{.}}</a></li>
+                {{end}}
+                </ul>
+            </div>
+            {{end}}
             <p class="print-footer print-only">Carrel · notes · captured {{$d.PrintDate}}</p>
         </section>
         {{end}}
     </div>
+    {{end}}
 </div>
 {{end}}

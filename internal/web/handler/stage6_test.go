@@ -319,9 +319,9 @@ func TestLinkedGroupCollapsesInTheMergedList(t *testing.T) {
 		t.Fatalf("link = %d, body = %s", rec.Code, rec.Body.String())
 	}
 
-	page := a.get("/app/unified?mode=people")
+	page := a.get("/app/contacts")
 	if page.Code != http.StatusOK {
-		t.Fatalf("people = %d", page.Code)
+		t.Fatalf("contacts = %d", page.Code)
 	}
 	body := a.findResults(t, page.Body.String(), "mode=people")
 	if !strings.Contains(body, "linked ×2") {
@@ -373,7 +373,7 @@ func TestDuplicateIgnoreIsNotOfferedAgain(t *testing.T) {
 	}
 
 	// The merged list does not collapse a pair that was rejected.
-	page := a.get("/app/unified?mode=people")
+	page := a.get("/app/contacts")
 	people := a.findResults(t, page.Body.String(), "mode=people")
 	if strings.Contains(people, "duplicate?") || strings.Contains(people, "linked ×") {
 		t.Errorf("a rejected pair was collapsed anyway:\n%s", people)

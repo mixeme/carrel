@@ -100,8 +100,6 @@ func (v View) NavSection() string {
 		return "files"
 	case "Duplicates", "Merge duplicates":
 		return "duplicates"
-	case "Everything", "All contacts":
-		return "search"
 	default:
 		if strings.HasPrefix(v.Title, "Timeline of ") {
 			return "contacts"

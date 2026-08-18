@@ -28,6 +28,8 @@ type agendaView struct {
 	Empty        bool
 	NoCalendars  bool
 	PrintDate    string
+	SectionRail  sectionRail
+	Mode         findMode
 }
 
 type agendaDay struct {
@@ -41,23 +43,19 @@ type agendaRow struct {
 	AllDay                            bool
 }
 
-// CalendarHome redirects to the first calendar or shows an empty state.
+// CalendarHome shows every ticked calendar at once, or an empty state.
 func (s *Server) CalendarHome(w http.ResponseWriter, r *http.Request) {
 	sess := SessionFrom(r)
-	accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK())
-	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	refs := calendars(accounts)
+	refs := s.listCalendars(sess)
 	if len(refs) == 0 {
 		v := s.View(r, "Agenda")
 		v.Data = agendaView{Calendars: refs, NoCalendars: true}
 		s.Render(w, "agenda.html", v)
 		return
 	}
-	ref := refs[0]
-	http.Redirect(w, r, s.Path("/app/calendar/"+ref.AccountID+"/"+ref.ColEnc), http.StatusSeeOther)
+	req := parseFindRequest(r)
+	req.Mode = modeTime
+	s.sectionFind(w, r, req, "agenda.html")
 }
 
 // CalendarAgenda renders occurrences in an inclusive local-date range.
@@ -73,13 +71,22 @@ func (s *Server) CalendarAgenda(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		v := s.View(r, "Agenda")
 		v.Error = userFacingDAVError(err)
-		v.Data = agendaView{Calendars: s.listCalendars(sess), AccountID: accountID, ColEnc: colEnc}
+		data := agendaView{Calendars: s.listCalendars(sess), AccountID: accountID, ColEnc: colEnc}
+		s.fillAgendaRail(sess, &data, accountID, colEnc)
+		v.Data = data
 		s.RenderStatus(w, http.StatusBadRequest, "agenda.html", v)
 		return
 	}
+	s.fillAgendaRail(sess, &view, accountID, colEnc)
 	v := s.View(r, "Agenda")
 	v.Data = view
 	s.Render(w, "agenda.html", v)
+}
+
+func (s *Server) fillAgendaRail(sess *session.Session, view *agendaView, accountID, colEnc string) {
+	if rail, err := s.buildSectionRail(sess, findRequest{Mode: modeTime}, accountID, colEnc); err == nil {
+		view.SectionRail = rail
+	}
 }
 
 func (s *Server) listCalendars(sess *session.Session) []calendarRef {

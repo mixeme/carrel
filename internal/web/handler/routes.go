@@ -144,10 +144,13 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("GET "+s.Path("/app/files/{account}/{col}"), s.FilesBrowse)
 	app.HandleFunc("POST "+s.Path("/app/files/{account}/{col}"), s.FilesBrowse)
 
-	// The unified view, the search and the progress endpoints they share (§14,
-	// §16).
-	app.HandleFunc("GET "+s.Path("/app/unified"), s.Unified)
+	// Legacy unified URL; merged views live in each section now (§1.7).
+	app.HandleFunc("GET "+s.Path("/app/unified"), s.SectionHome)
 	app.HandleFunc("POST "+s.Path("/app/unified/sources"), s.FindSources)
+	app.HandleFunc("POST "+s.Path("/app/calendar/sources"), s.FindSources)
+	app.HandleFunc("POST "+s.Path("/app/contacts/sources"), s.FindSources)
+	app.HandleFunc("POST "+s.Path("/app/tasks/sources"), s.FindSources)
+	app.HandleFunc("POST "+s.Path("/app/notes/sources"), s.FindSources)
 	app.HandleFunc("GET "+s.Path("/app/search"), s.Search)
 	app.HandleFunc("POST "+s.Path("/app/search/sources"), s.FindSources)
 	// The duplicates screen of §15. It follows the same poll as the screens

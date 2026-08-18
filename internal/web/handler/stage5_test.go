@@ -588,9 +588,9 @@ func TestUnifiedPollsEveryKindAndReportsProgress(t *testing.T) {
 	box := startCalBox(t)
 	a, _, _ := calendarApp(t, box)
 
-	page := a.get("/app/unified?mode=time&from=2026-08-01&to=2026-08-31")
+	page := a.get("/app/calendar?from=2026-08-01&to=2026-08-31")
 	if page.Code != http.StatusOK {
-		t.Fatalf("unified = %d, body = %s", page.Code, page.Body.String())
+		t.Fatalf("calendar = %d, body = %s", page.Code, page.Body.String())
 	}
 	// The screen goes out before the poll finishes: that is the point of §16.
 	// The source panel is on it from the start, the records arrive after.
@@ -600,7 +600,7 @@ func TestUnifiedPollsEveryKindAndReportsProgress(t *testing.T) {
 	body := a.findResults(t, page.Body.String(), "mode=time&from=2026-08-01&to=2026-08-31")
 	for _, want := range []string{"Budget meeting", "Chase the invoice", "A thought"} {
 		if !strings.Contains(body, want) {
-			t.Errorf("the unified view is missing %q:\n%s", want, body)
+			t.Errorf("the calendar view is missing %q:\n%s", want, body)
 		}
 	}
 	// §16 wants a line per source, not one spinner for everything.
@@ -614,7 +614,7 @@ func TestUnifiedHonoursTheKindBoxes(t *testing.T) {
 	a, _, _ := calendarApp(t, box)
 
 	query := "mode=time&from=2026-08-01&to=2026-08-31&kind=notes"
-	page := a.get("/app/unified?" + query)
+	page := a.get("/app/calendar?" + strings.TrimPrefix(query, "mode=time&"))
 	body := a.findResults(t, page.Body.String(), query)
 	if !strings.Contains(body, "A thought") {
 		t.Errorf("the note is missing:\n%s", body)
@@ -697,7 +697,7 @@ func TestSourceSelectionIsRememberedAndHonoured(t *testing.T) {
 	box := startCalBox(t)
 	a, _, _ := calendarApp(t, box)
 
-	rec := a.post("/app/unified/sources", url.Values{"mode": {"time"}})
+	rec := a.post("/app/calendar/sources", url.Values{"mode": {"time"}})
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("saving the selection = %d, body = %s", rec.Code, rec.Body.String())
 	}
@@ -711,9 +711,9 @@ func TestSourceSelectionIsRememberedAndHonoured(t *testing.T) {
 		t.Fatalf("selection = %+v, hasChoice = %v, want an empty choice honoured as one", chosen, hasChoice)
 	}
 
-	page := a.get("/app/unified?mode=time&from=2026-08-01&to=2026-08-31")
+	page := a.get("/app/calendar?from=2026-08-01&to=2026-08-31")
 	if page.Code != http.StatusOK {
-		t.Fatalf("unified = %d", page.Code)
+		t.Fatalf("calendar = %d", page.Code)
 	}
 	body := page.Body.String()
 	if !strings.Contains(body, "No sources are ticked") {

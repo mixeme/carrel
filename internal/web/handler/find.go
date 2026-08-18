@@ -27,10 +27,16 @@ import (
 type findMode string
 
 const (
-	// modeTime is the unified agenda: every ticked calendar, one date range.
+	// modeTime is the calendar section's merged agenda: every ticked calendar,
+	// one date range.
 	modeTime findMode = "time"
-	// modePeople is the unified directory: every ticked address book.
+	// modePeople is the contacts section's merged directory: every ticked
+	// address book.
 	modePeople findMode = "people"
+	// modeTasks is the tasks section's merged list: every ticked task list.
+	modeTasks findMode = "tasks"
+	// modeNotes is the notes section's merged list: every ticked notebook.
+	modeNotes findMode = "notes"
 	// modeSearch is the cross-source search of §16, over both kinds at once.
 	modeSearch findMode = "search"
 	// modeTimeline is one contact's history across every calendar (§23.9).
@@ -42,10 +48,48 @@ const (
 
 func (m findMode) valid() bool {
 	switch m {
-	case modeTime, modePeople, modeSearch, modeTimeline, modeDuplicates:
+	case modeTime, modePeople, modeTasks, modeNotes, modeSearch, modeTimeline, modeDuplicates:
 		return true
 	}
 	return false
+}
+
+func (m findMode) isSection() bool {
+	switch m {
+	case modeTime, modePeople, modeTasks, modeNotes:
+		return true
+	}
+	return false
+}
+
+func (m findMode) section() string {
+	switch m {
+	case modePeople:
+		return "contacts"
+	case modeTasks:
+		return "tasks"
+	case modeNotes:
+		return "notes"
+	default:
+		return "calendar"
+	}
+}
+
+func (m findMode) allLabel() string {
+	switch m {
+	case modePeople:
+		return "All address books"
+	case modeTasks:
+		return "All lists"
+	case modeNotes:
+		return "All notebooks"
+	default:
+		return "All calendars"
+	}
+}
+
+func (m findMode) sectionHome() string {
+	return "/app/" + m.section()
 }
 
 // view is the account.Views key a mode saves its source selection under, so the
@@ -54,6 +98,10 @@ func (m findMode) view() string {
 	switch m {
 	case modePeople:
 		return account.ViewContacts
+	case modeTasks:
+		return account.ViewTasks
+	case modeNotes:
+		return account.ViewNotes
 	case modeSearch, modeTimeline:
 		return account.ViewSearch
 	case modeDuplicates:
@@ -221,20 +269,34 @@ type findView struct {
 	Unusable  string
 	FromLabel string
 	ToLabel   string
+	SectionRail sectionRail
 }
 
-// Unified is the one place §14 asks for: every ticked collection at once, with
-// per-source progress instead of a single spinner.
-func (s *Server) Unified(w http.ResponseWriter, r *http.Request) {
+// SectionHome redirects legacy /app/unified URLs to the section that now owns
+// the merged view (§1.7).
+func (s *Server) SectionHome(w http.ResponseWriter, r *http.Request) {
 	req := parseFindRequest(r)
-	if req.Mode != modePeople {
-		req.Mode = modeTime
+	switch req.Mode {
+	case modePeople:
+		http.Redirect(w, r, s.Path("/app/contacts"), http.StatusSeeOther)
+	default:
+		q := url.Values{}
+		for _, key := range []struct{ name, value string }{
+			{"from", req.From}, {"to", req.To},
+		} {
+			if key.value != "" {
+				q.Set(key.name, key.value)
+			}
+		}
+		for _, kind := range req.Kinds {
+			q.Add("kind", kind)
+		}
+		target := s.Path("/app/calendar")
+		if encoded := q.Encode(); encoded != "" {
+			target += "?" + encoded
+		}
+		http.Redirect(w, r, target, http.StatusSeeOther)
 	}
-	if req.Mode == modeTime && req.From == "" {
-		from, to := defaultUnifiedRange(s.timezone())
-		req.From, req.To = from, to
-	}
-	s.startFind(w, r, req, "unified.html")
 }
 
 // Search is the cross-source search of §16.
@@ -279,6 +341,11 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 	view.SourcesURL = s.sourcesURL(req.Mode)
 	if req.Mode == modeTime {
 		view.FromLabel, view.ToLabel = req.From, req.To
+	}
+	if req.Mode.isSection() {
+		if rail, railErr := s.buildSectionRail(sess, req, "", ""); railErr == nil {
+			view.SectionRail = rail
+		}
 	}
 	if req.Mode == modeTimeline {
 		view.Back = s.Path("/app/contacts/" + req.Account + "/" + EncodeCollectionPath(req.Collection) + "/" + urlPathEscape(req.UID))
@@ -590,8 +657,14 @@ func (s *Server) FindSources(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) sourcesURL(mode findMode) string {
 	switch mode {
-	case modePeople, modeTime:
-		return s.Path("/app/unified/sources")
+	case modeTime:
+		return s.Path("/app/calendar/sources")
+	case modePeople:
+		return s.Path("/app/contacts/sources")
+	case modeTasks:
+		return s.Path("/app/tasks/sources")
+	case modeNotes:
+		return s.Path("/app/notes/sources")
 	case modeDuplicates:
 		return s.Path("/app/duplicates/sources")
 	default:
@@ -608,8 +681,29 @@ func (s *Server) screenURL(req findRequest) string {
 		return s.Path("/app/duplicates")
 	case modeTimeline:
 		return s.Path("/app/contacts/" + req.Account + "/" + EncodeCollectionPath(req.Collection) + "/" + urlPathEscape(req.UID) + "/timeline")
+	case modePeople:
+		return s.Path("/app/contacts")
+	case modeTasks:
+		return s.Path("/app/tasks")
+	case modeNotes:
+		return s.Path("/app/notes")
 	default:
-		return s.Path("/app/unified") + "?" + values.Encode()
+		target := s.Path("/app/calendar")
+		q := url.Values{}
+		for _, key := range []struct{ name, value string }{
+			{"from", req.From}, {"to", req.To},
+		} {
+			if key.value != "" {
+				q.Set(key.name, key.value)
+			}
+		}
+		for _, kind := range req.Kinds {
+			q.Add("kind", kind)
+		}
+		if encoded := q.Encode(); encoded != "" {
+			target += "?" + encoded
+		}
+		return target
 	}
 }
 
@@ -619,6 +713,10 @@ func (s *Server) findSources(sess *session.Session, req findRequest) ([]sourceRo
 	switch req.Mode {
 	case modePeople:
 		return s.collectionsOfKind(sess, discovery.KindAddressBook, req.Mode.view(), "")
+	case modeTasks:
+		return s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), dav.CompTodo)
+	case modeNotes:
+		return s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), dav.CompJournal)
 	case modeTimeline:
 		return s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
 	case modeSearch, modeDuplicates:
@@ -676,7 +774,11 @@ func defaultUnifiedRange(loc *time.Location) (string, string) {
 func findTitle(req findRequest) string {
 	switch req.Mode {
 	case modePeople:
-		return "All contacts"
+		return "Contacts"
+	case modeTasks:
+		return "Tasks"
+	case modeNotes:
+		return "Notes"
 	case modeSearch:
 		if req.Query != "" {
 			return "Search: " + req.Query
@@ -687,7 +789,7 @@ func findTitle(req findRequest) string {
 	case modeDuplicates:
 		return "Duplicates"
 	default:
-		return "Everything"
+		return "Agenda"
 	}
 }
 
@@ -700,7 +802,7 @@ func groupRows(req findRequest, snap fanout.Snapshot, loc *time.Location, dup du
 			rows = append(rows, row)
 		}
 	}
-	descending := req.Mode == modeTimeline
+	descending := req.Mode == modeTimeline || req.Mode == modeNotes
 	sort.SliceStable(rows, func(i, j int) bool {
 		if rows[i].Sort == rows[j].Sort {
 			return strings.ToLower(rows[i].Title) < strings.ToLower(rows[j].Title)
@@ -817,6 +919,14 @@ func (s *Server) findQuery(sess *session.Session, req findRequest) (fanout.Query
 		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
 			return s.pollSearch(ctx, sess, src, terms, loc)
 		}, nil
+	case modeTasks:
+		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
+			return s.pollTasksList(ctx, sess, src, loc)
+		}, nil
+	case modeNotes:
+		return func(ctx context.Context, src fanout.Source) ([]fanout.Item, bool, error) {
+			return s.pollNotesList(ctx, sess, src, loc)
+		}, nil
 	}
 	return nil, fmt.Errorf("unknown view")
 }
@@ -910,6 +1020,50 @@ func (s *Server) pollCalendarRange(ctx context.Context, sess *session.Session, s
 		return nil, false, firstErr
 	}
 	return items, cached && len(items) > 0, nil
+}
+
+func (s *Server) pollTasksList(ctx context.Context, sess *session.Session, src fanout.Source, loc *time.Location) ([]fanout.Item, bool, error) {
+	p, _, err := s.calendarProvider(sess, src.AccountID)
+	if err != nil {
+		return nil, false, err
+	}
+	set, err := p.QueryComponent(ctx, src.Collection, dav.CompTodo, time.Time{}, time.Time{})
+	if err != nil {
+		return nil, false, err
+	}
+	items := make([]fanout.Item, 0, len(set.Objects))
+	for _, obj := range set.Objects {
+		todo, todoErr := obj.Todo(loc)
+		if todoErr != nil || todo.Done() {
+			continue
+		}
+		item := todoItem(src, todo, loc)
+		item.Data = withURL(item.Data, s.icalURL("tasks", src, todo.UID))
+		items = append(items, item)
+	}
+	return items, set.FromCache && len(items) > 0, nil
+}
+
+func (s *Server) pollNotesList(ctx context.Context, sess *session.Session, src fanout.Source, loc *time.Location) ([]fanout.Item, bool, error) {
+	p, _, err := s.calendarProvider(sess, src.AccountID)
+	if err != nil {
+		return nil, false, err
+	}
+	set, err := p.QueryComponent(ctx, src.Collection, dav.CompJournal, time.Time{}, time.Time{})
+	if err != nil {
+		return nil, false, err
+	}
+	items := make([]fanout.Item, 0, len(set.Objects))
+	for _, obj := range set.Objects {
+		note, noteErr := obj.Note(loc)
+		if noteErr != nil {
+			continue
+		}
+		item := noteItem(src, note, loc)
+		item.Data = withURL(item.Data, s.icalURL("notes", src, note.UID))
+		items = append(items, item)
+	}
+	return items, set.FromCache && len(items) > 0, nil
 }
 
 func (s *Server) pollContacts(ctx context.Context, sess *session.Session, src fanout.Source, marks duplicateMarks) ([]fanout.Item, bool, error) {

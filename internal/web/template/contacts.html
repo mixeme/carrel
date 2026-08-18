@@ -1,26 +1,27 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout contacts-layout" data-detail-section="contacts">
-    <aside class="sidebar card no-print">
-        <h2>Address books</h2>
-        {{if $d.Books}}
-        <ul class="collection-list">
-        {{range $d.Books}}
-            <li>
-                <a class="collection-link{{if and (eq $.Data.AccountID .AccountID) (eq $.Data.ColEnc .ColEnc)}} is-active{{end}}"
-                   href="{{$.Base}}/app/contacts/{{.AccountID}}/{{.ColEnc}}">
-                    <span class="collection-dot" style="background:{{if .Collection.Color}}{{.Collection.Color}}{{else}}var(--accent){{end}}"></span>
-                    {{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}
-                    <span class="hint">{{.AccountLabel}}</span>
-                </a>
-            </li>
-        {{end}}
-        </ul>
-        {{else}}
-        <p class="hint">No address books yet. Connect a DAV account from your profile.</p>
-        {{end}}
-    </aside>
-
+    {{if $d.Mode}}
+    {{template "sectionrail" .}}
+    <div class="app-main">
+        <section class="card">
+            <div class="contacts-header">
+                <div>
+                    <h1>{{$d.SectionRail.AllLabel}}</h1>
+                    <p class="source-label">Every ticked address book at once.</p>
+                </div>
+            </div>
+            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+            {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
+            <div id="find-panel"
+                 data-sse-panel data-poll-url="{{$d.PollURL}}"
+                 {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
+                {{if $d.TaskID}}{{template "findresults" .}}{{end}}
+            </div>
+        </section>
+    </div>
+    {{else}}
+    {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoBooks}}
         <section class="card">
@@ -84,5 +85,6 @@
         </section>
         {{end}}
     </div>
+    {{end}}
 </div>
 {{end}}

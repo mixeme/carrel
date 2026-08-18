@@ -144,6 +144,39 @@
 </aside>
 {{end}}
 
+{{/* The section source rail of §1.7: «All …» first, then ticked collections. */}}
+{{define "sectionrail"}}
+{{$rail := .Data.SectionRail}}
+<aside class="sidebar card no-print section-rail">
+    {{if $rail.Sources}}
+    <form method="post" action="{{$rail.SourcesURL}}">
+        <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+        <input type="hidden" name="mode" value="{{$rail.Mode}}">
+        <a class="src-row is-all{{if $rail.AllActive}} is-on{{end}}" href="{{$rail.AllURL}}">
+            <span class="src-box{{if eq $rail.Selection "part"}} is-part{{else if eq $rail.Selection "none"}} is-off{{end}}" aria-hidden="true"></span>
+            <span class="src-bar is-multi" aria-hidden="true"></span>
+            <span class="src-label">{{$rail.AllLabel}}</span>
+        </a>
+        <ul class="src-list">
+        {{range $rail.Sources}}
+            <li class="src-row{{if and (eq $rail.AccountID .AccountID) (eq $rail.ColEnc .ColEnc)}} is-on{{else if not .Selected}} is-off{{end}}">
+                <label class="src-check">
+                    <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
+                    <span class="src-box" aria-hidden="true"></span>
+                </label>
+                <span class="src-bar" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                <a class="src-label" href="{{$.Base}}/app/{{$rail.Section}}/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a>
+                <span class="src-meta hint">{{.AccountLabel}}{{if .ReadOnly}} · ro{{end}}</span>
+            </li>
+        {{end}}
+        </ul>
+        <button type="submit">Apply</button>
+        <p class="hint">Unticked collections are not polled on the merged view.</p>
+    </form>
+    {{else}}<p class="hint">No collections here yet. Connect a DAV account from your <a href="{{.Base}}/app/">profile</a>.</p>{{end}}
+</aside>
+{{end}}
+
 {{/* The attachments of §23.10. It is defined against the frame because a note
      and an event show the same list in the same way, and the one thing that
      differs — which section the form posts to — is passed in as .Section. */}}
@@ -278,6 +311,7 @@
                     </span>
                     {{end}}
                 </span>
+                <span class="find-row-source">{{.Collection}}</span>
                 <span class="find-row-kind">{{.Kind}}</span>
             </li>
         {{end}}

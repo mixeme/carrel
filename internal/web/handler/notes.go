@@ -34,6 +34,8 @@ type notesView struct {
 	Empty        bool
 	NoLists      bool
 	PrintDate    string
+	SectionRail  sectionRail
+	Mode         findMode
 }
 
 type noteRow struct {
@@ -46,8 +48,7 @@ type noteRow struct {
 	HasRelated bool
 }
 
-// NotesHome redirects to the collection notes were last written to, or shows
-// the empty state.
+// NotesHome shows every ticked notebook at once, or the empty state.
 func (s *Server) NotesHome(w http.ResponseWriter, r *http.Request) {
 	sess := SessionFrom(r)
 	rows, err := s.noteSources(sess)
@@ -61,11 +62,7 @@ func (s *Server) NotesHome(w http.ResponseWriter, r *http.Request) {
 		s.Render(w, "notes.html", v)
 		return
 	}
-	target := rows[0]
-	if preferred, ok := s.defaultCollection(sess, account.ViewNotes, rows); ok {
-		target = preferred
-	}
-	http.Redirect(w, r, s.Path("/app/notes/"+target.AccountID+"/"+target.ColEnc), http.StatusSeeOther)
+	s.sectionFind(w, r, findRequest{Mode: modeNotes}, "notes.html")
 }
 
 // NotesList renders the VJOURNALs of one collection, newest first.
@@ -81,6 +78,9 @@ func (s *Server) NotesList(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.renderNotesError(w, r, err, accountID, colEnc)
 		return
+	}
+	if rail, railErr := s.buildSectionRail(sess, findRequest{Mode: modeNotes}, accountID, colEnc); railErr == nil {
+		view.SectionRail = rail
 	}
 	v := s.View(r, "Notes")
 	v.Notice = strings.TrimSpace(r.URL.Query().Get("notice"))

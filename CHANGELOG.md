@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Wave 1.7 — unified view inside sections.** `/app/calendar`, `/app/contacts`, `/app/tasks`, and `/app/notes` open on an «All …» merged view with fan-out polling; each section rail lists collections with tri-state selection, and merged rows show a source column. Calendar range forms add Events / Tasks due / Notes kind checkboxes. `/app/unified` redirects to the matching section; `unified.html` is removed.
+
 - **Wave 1.6 — forms.** Record cards, settings, auth, and admin screens use a shared multi-column form layout: `.form` / `.form-field` with content-width tokens (`w-xs`–`w-xl`), grouped fieldsets, and a `.form-foot` action bar. Field names and handler tests are unchanged.
 
 - **Wave 1.5 — quick note sheet.** «New note» opens a sheet over the current screen via htmx; `/app/notes/quick` still works as a full page without JavaScript. The caret lists other create actions in rail order (contact, event, task, file upload). Keys: `N` opens the sheet, `/` focuses search, `Enter` opens the selected row, `Esc` closes the sheet or details panel, `Ctrl+Enter` saves the quick note.

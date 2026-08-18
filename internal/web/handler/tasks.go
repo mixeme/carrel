@@ -42,6 +42,8 @@ type tasksView struct {
 	Empty        bool
 	NoLists      bool
 	PrintDate    string
+	SectionRail  sectionRail
+	Mode         findMode
 }
 
 type taskCounts struct{ Open, Done, Overdue int }
@@ -58,7 +60,7 @@ type taskRow struct {
 	ETag     string
 }
 
-// TasksHome redirects to the first task list or shows the empty state.
+// TasksHome shows every ticked task list at once, or the empty state.
 func (s *Server) TasksHome(w http.ResponseWriter, r *http.Request) {
 	sess := SessionFrom(r)
 	rows, err := s.collectionsOfKind(sess, discovery.KindCalendar, account.ViewTasks, dav.CompTodo)
@@ -72,11 +74,7 @@ func (s *Server) TasksHome(w http.ResponseWriter, r *http.Request) {
 		s.Render(w, "tasks.html", v)
 		return
 	}
-	target := rows[0]
-	if preferred, ok := s.defaultCollection(sess, account.ViewTasks, rows); ok {
-		target = preferred
-	}
-	http.Redirect(w, r, s.Path("/app/tasks/"+target.AccountID+"/"+target.ColEnc), http.StatusSeeOther)
+	s.sectionFind(w, r, findRequest{Mode: modeTasks}, "tasks.html")
 }
 
 // TasksList renders the VTODOs of one collection.
@@ -93,6 +91,9 @@ func (s *Server) TasksList(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.renderTasksError(w, r, err, accountID, colEnc)
 		return
+	}
+	if rail, railErr := s.buildSectionRail(sess, findRequest{Mode: modeTasks}, accountID, colEnc); railErr == nil {
+		view.SectionRail = rail
 	}
 	v := s.View(r, "Tasks")
 	v.Notice = strings.TrimSpace(r.URL.Query().Get("notice"))
