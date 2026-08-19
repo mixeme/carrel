@@ -198,7 +198,7 @@ type noteCardView struct {
 	Form         noteForm
 	// BodyHTML is the rendered description in read mode (wave 2.2).
 	BodyHTML template.HTML
-	Related      []relatedRow
+	Related  []relatedRow
 	// RelatedPicker is the chip list in edit mode (wave 2.3).
 	RelatedPicker []relatedRow
 	// Neighbors are the other notes in this notebook, in list order, so the

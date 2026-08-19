@@ -528,7 +528,7 @@ func TestFilesRenameAndMove(t *testing.T) {
 
 	rec = a.post(filesURL(""), url.Values{
 		"action": {"move"}, fieldPath: {""},
-		"target": {"new.txt"},
+		"target":       {"new.txt"},
 		"dest_account": {filesAccount},
 		"dest_col":     {EncodeCollectionPath(filesRoot)},
 		"dest_folder":  {"invoices"},
@@ -536,13 +536,13 @@ func TestFilesRenameAndMove(t *testing.T) {
 	if rec.Code >= 400 {
 		t.Fatalf("move = %d %s", rec.Code, rec.Body.String())
 	}
-	if !h.hasFile(filesRoot+"invoices/new.txt") {
+	if !h.hasFile(filesRoot + "invoices/new.txt") {
 		t.Fatalf("move did not land: %v", h.fileNames(filesRoot))
 	}
 
 	rec = a.post(filesURL(""), url.Values{
 		"action": {"copy"}, fieldPath: {""},
-		"target": {"invoices/new.txt"},
+		"target":       {"invoices/new.txt"},
 		"dest_account": {filesAccount},
 		"dest_col":     {EncodeCollectionPath(filesRoot)},
 		"dest_folder":  {""},

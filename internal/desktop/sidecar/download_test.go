@@ -86,7 +86,7 @@ func TestEnsureSkipsWhenPresent(t *testing.T) {
 	}
 	called := false
 	err := Ensure(context.Background(), EnsureOptions{
-		Paths: InstallPathsFrom(dir, bin, filepath.Join(dir, "version.json")),
+		Paths:   InstallPathsFrom(dir, bin, filepath.Join(dir, "version.json")),
 		Version: "0.10.0",
 		Downloader: &Downloader{
 			HTTPClient: &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {

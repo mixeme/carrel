@@ -26,15 +26,15 @@ type folderPickerSel struct {
 }
 
 type folderPickerNode struct {
-	AccountID    string
-	ColEnc       string
-	Folder       string
-	Name         string
-	ServerLabel  string
-	ReadOnly     bool
-	Children     []folderPickerNode
-	HasChildren  bool
-	Collection   bool
+	AccountID   string
+	ColEnc      string
+	Folder      string
+	Name        string
+	ServerLabel string
+	ReadOnly    bool
+	Children    []folderPickerNode
+	HasChildren bool
+	Collection  bool
 }
 
 // FilesFolderPicker returns the shared folder tree for move, copy, backup and mail.

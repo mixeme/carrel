@@ -101,14 +101,14 @@ type filesView struct {
 	IsAttachmentFolder bool
 	PrintDate          string
 	// AllCollections is the section root: every file collection as a row.
-	AllCollections bool
-	Collections    []fileCollectionRow
-	ServerCount    int
-	FolderTitle    string
-	ItemCount      int
-	TotalSizeLabel string
-	PickerRoots    []folderPickerNode
-	AttachmentsURL string
+	AllCollections  bool
+	Collections     []fileCollectionRow
+	ServerCount     int
+	FolderTitle     string
+	ItemCount       int
+	TotalSizeLabel  string
+	PickerRoots     []folderPickerNode
+	AttachmentsURL  string
 	AttachmentsHint string
 	PublishedActive bool
 }
