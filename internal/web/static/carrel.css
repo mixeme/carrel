@@ -2195,6 +2195,74 @@ label.checkbox input {
     font-size: 0.8rem;
 }
 
+.files-transfers {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    width: min(22rem, calc(100% - 2rem));
+    border: 0.5px solid var(--hair);
+    border-radius: 4px;
+    background: var(--paper);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    z-index: 40;
+}
+
+.files-transfers[hidden] {
+    display: none !important;
+}
+
+.files-transfers-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 0.5px solid var(--hair);
+    font-size: 0.85rem;
+}
+
+.files-transfers ul {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0.75rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 14rem;
+    overflow: auto;
+}
+
+.files-transfers li {
+    font-size: 0.82rem;
+}
+
+.files-transfers .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.files-transfers .bar {
+    height: 4px;
+    background: var(--hair);
+    border-radius: 2px;
+    margin-top: 0.25rem;
+    overflow: hidden;
+}
+
+.files-transfers .bar i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    width: 0;
+}
+
+.files-transfers .actions {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+
 .crumbs {
     font-size: 0.9rem;
     margin: 0.25rem 0 0;

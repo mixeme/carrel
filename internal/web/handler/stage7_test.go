@@ -595,6 +595,50 @@ func TestFileUploadRefusesToOverwrite(t *testing.T) {
 	}
 }
 
+func (a *app) postMultipartJSON(path string, fields url.Values, fileField, filename string, body []byte) *httptest.ResponseRecorder {
+	a.t.Helper()
+	var buf bytes.Buffer
+	mw := multipart.NewWriter(&buf)
+	_ = mw.WriteField(CSRFField, a.token())
+	for k, vs := range fields {
+		for _, v := range vs {
+			_ = mw.WriteField(k, v)
+		}
+	}
+	fw, _ := mw.CreateFormFile(fileField, filename)
+	_, _ = fw.Write(body)
+	_ = mw.Close()
+	req := httptest.NewRequest(http.MethodPost, path, &buf)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	req.Header.Set("Accept", "application/json")
+	return a.do(req)
+}
+
+func TestFileUploadJSONConflictAndReplace(t *testing.T) {
+	h := startDAVHost(t)
+	h.putFile(filesRoot+"taken.png", []byte("original"))
+	a := filesApp(t, h)
+
+	conflict := a.postMultipartJSON(filesURL(""), url.Values{fieldPath: {""}}, "file", "taken.png", []byte("new"))
+	if conflict.Code != http.StatusConflict {
+		t.Fatalf("xhr conflict = %d %s", conflict.Code, conflict.Body.String())
+	}
+	if !strings.Contains(conflict.Body.String(), `"conflict":true`) {
+		t.Fatalf("expected conflict json: %s", conflict.Body.String())
+	}
+
+	replaced := a.postMultipartJSON(filesURL(""), url.Values{
+		fieldPath: {""}, "upload_mode": {"replace"},
+	}, "file", "taken.png", []byte("replacement"))
+	if replaced.Code != http.StatusOK {
+		t.Fatalf("replace = %d %s", replaced.Code, replaced.Body.String())
+	}
+	if got := string(h.files[filesRoot+"taken.png"]); got != "replacement" {
+		t.Fatalf("replace stored %q", got)
+	}
+}
+
 func TestReadOnlyFileCollectionRefusesWrites(t *testing.T) {
 	h := startDAVHost(t)
 	a := filesApp(t, h)

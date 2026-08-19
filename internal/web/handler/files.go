@@ -330,6 +330,15 @@ func (s *Server) filesAction(w http.ResponseWriter, r *http.Request) {
 	// parsed into memory, which is the whole reason §7 fixes Get and Put at a
 	// reader (§23.10).
 	if strings.HasPrefix(strings.ToLower(r.Header.Get("Content-Type")), "multipart/") {
+		if wantsJSONUpload(r) {
+			rel, relErr := files.CleanRelative(r.FormValue(fieldPath))
+			if relErr != nil {
+				writeUploadJSON(w, http.StatusForbidden, uploadReply{Error: "bad path"})
+				return
+			}
+			s.fileUploadXHR(w, r, p, col, rel)
+			return
+		}
 		s.fileUpload(w, r, p, col, base)
 		return
 	}

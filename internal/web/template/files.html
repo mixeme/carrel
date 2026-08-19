@@ -168,10 +168,10 @@
                     <div class="form-field w-lg">
                         <label for="file">Upload a file here</label>
                         <div class="form-inline">
-                            <input id="file" type="file" name="file" required>
+                            <input id="file" type="file" name="file" required multiple data-files-upload-input>
                             <button type="submit">Upload</button>
                         </div>
-                        <p class="form-hint">Up to {{$d.MaxUpload}}. A name that is already taken is refused rather than overwritten.</p>
+                        <p class="form-hint">Up to {{$d.MaxUpload}}. Drop files onto the window or a folder row. A taken name asks what to do rather than failing silently.</p>
                     </div>
                 </form>
                 <form method="post" class="form" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}">
@@ -189,6 +189,13 @@
             </div>
             <p class="hint">Deleting removes the file from the server. Carrel does not check first whether an event or a
                 note links to it — it is your storage, and it keeps no index of what points where.</p>
+            <div class="files-transfers no-print" data-files-transfers hidden>
+                <div class="files-transfers-head">
+                    <strong data-files-transfers-label>Uploading</strong>
+                    <button type="button" class="link" data-files-transfers-hide>Hide</button>
+                </div>
+                <ul data-files-transfers-list></ul>
+            </div>
             {{end}}
             {{if $d.PrintDate}}<p class="print-footer print-only">Carrel · files · {{$d.AccountLabel}} · captured {{$d.PrintDate}}</p>{{end}}
         </section>

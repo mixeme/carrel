@@ -1813,3 +1813,156 @@ document.addEventListener('htmx:sseError', function (e) {
         }
     });
 })();
+
+// Wave 2.6 — upload queue with XHR progress and name-collision choices.
+(function () {
+    var browse = document.querySelector('[data-files-browse]');
+    if (!browse || browse.getAttribute('data-readonly') === '1') return;
+
+    var uploadInput = browse.querySelector('[data-files-upload-input]');
+    var uploadForm = uploadInput && uploadInput.closest('form');
+    var transfers = browse.querySelector('[data-files-transfers]');
+    var transfersList = browse.querySelector('[data-files-transfers-list]');
+    var transfersLabel = browse.querySelector('[data-files-transfers-label]');
+    var csrf = uploadForm && uploadForm.querySelector('[name="csrf_token"]');
+    var folder = browse.getAttribute('data-folder') || '';
+    var postURL = uploadForm && uploadForm.action;
+    var queue = [];
+    var active = 0;
+
+    function showTransfers() {
+        if (transfers) transfers.hidden = false;
+    }
+
+    function updateLabel() {
+        if (!transfersLabel) return;
+        var waiting = queue.filter(function (q) { return q.state === 'queued' || q.state === 'uploading'; }).length;
+        transfersLabel.textContent = waiting > 0 ? 'Uploading ' + (active + 1) + ' of ' + queue.length : 'Uploads';
+    }
+
+    function renderItem(item) {
+        var li = item.el;
+        if (!li) {
+            li = document.createElement('li');
+            item.el = li;
+            transfersList.appendChild(li);
+        }
+        var status = item.state === 'done' ? 'done' : item.state === 'conflict' ? 'name taken' :
+            item.state === 'skipped' ? 'skipped' : item.state === 'error' ? item.error :
+                Math.round(item.progress * 100) + '%';
+        var html = '<div class="row"><span' + (item.state === 'conflict' || item.state === 'error' ? ' style="color:var(--alert)"' : '') + '>' + item.file.name + '</span><span class="hint">' + status + '</span></div>';
+        if (item.state === 'uploading' || item.state === 'done') {
+            html += '<div class="bar"><i style="width:' + Math.round(item.progress * 100) + '%"></i></div>';
+        }
+        if (item.state === 'conflict') {
+            html += '<div class="actions"><button type="button" class="link" data-upload-choice="keep-both">Keep both</button>' +
+                '<button type="button" class="link" data-upload-choice="replace">Replace</button>' +
+                '<button type="button" class="link" data-upload-choice="skip">Skip</button></div>';
+        }
+        li.innerHTML = html;
+        li.querySelectorAll('[data-upload-choice]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var choice = btn.getAttribute('data-upload-choice');
+                if (choice === 'skip') {
+                    item.state = 'skipped';
+                    renderItem(item);
+                    pump();
+                    return;
+                }
+                item.mode = choice;
+                item.state = 'queued';
+                pump();
+            });
+        });
+    }
+
+    function enqueue(file) {
+        var item = { file: file, state: 'queued', progress: 0, mode: '' };
+        queue.push(item);
+        showTransfers();
+        renderItem(item);
+        updateLabel();
+        pump();
+    }
+
+    function pump() {
+        if (active >= 1) return;
+        var next = queue.find(function (q) { return q.state === 'queued'; });
+        if (!next) {
+            updateLabel();
+            return;
+        }
+        active++;
+        next.state = 'uploading';
+        renderItem(next);
+        updateLabel();
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', postURL);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.upload.onprogress = function (ev) {
+            if (ev.lengthComputable) {
+                next.progress = ev.loaded / ev.total;
+                renderItem(next);
+            }
+        };
+        xhr.onload = function () {
+            active--;
+            var reply = {};
+            try { reply = JSON.parse(xhr.responseText || '{}'); } catch (e) { /* ignore */ }
+            if (xhr.status === 409 && reply.conflict) {
+                next.state = 'conflict';
+                renderItem(next);
+            } else if (xhr.status >= 200 && xhr.status < 300 && reply.ok) {
+                next.state = 'done';
+                next.progress = 1;
+                renderItem(next);
+            } else {
+                next.state = 'error';
+                next.error = reply.error || 'upload failed';
+                renderItem(next);
+            }
+            updateLabel();
+            pump();
+        };
+        xhr.onerror = function () {
+            active--;
+            next.state = 'error';
+            next.error = 'network error';
+            renderItem(next);
+            updateLabel();
+            pump();
+        };
+        var body = new FormData();
+        body.append('csrf_token', csrf && csrf.value || '');
+        body.append('p', folder);
+        body.append('file', next.file);
+        if (next.mode) body.append('upload_mode', next.mode);
+        xhr.send(body);
+    }
+
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', function (e) {
+            if (!uploadInput || !uploadInput.files || !uploadInput.files.length) return;
+            e.preventDefault();
+            Array.prototype.forEach.call(uploadInput.files, enqueue);
+            uploadInput.value = '';
+        });
+    }
+
+    browse.addEventListener('dragover', function (e) {
+        e.preventDefault();
+    });
+    browse.addEventListener('drop', function (e) {
+        e.preventDefault();
+        if (!e.dataTransfer || !e.dataTransfer.files) return;
+        Array.prototype.forEach.call(e.dataTransfer.files, enqueue);
+    });
+
+    var hideBtn = browse.querySelector('[data-files-transfers-hide]');
+    if (hideBtn) {
+        hideBtn.addEventListener('click', function () {
+            if (transfers) transfers.hidden = true;
+        });
+    }
+})();
