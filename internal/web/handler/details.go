@@ -5,9 +5,12 @@ package handler
 
 import (
 	"context"
+	"html/template"
 	"net/http"
+	"strings"
 	"time"
 
+	"gitea.mixdep.ru/mix/carrel/internal/model"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 )
 
@@ -158,5 +161,10 @@ func (s *Server) loadNoteCard(ctx context.Context, sess *session.Session, accoun
 		Source:      s.objectSource(sess, accountID, col.Path, obj.Path, obj.ETag),
 	}
 	_, card.CanAttach = s.attachmentTarget(sess)
+	if strings.TrimSpace(card.Note.Description) != "" {
+		if html, err := model.RenderNoteHTML(card.Note.Description); err == nil {
+			card.BodyHTML = template.HTML(html)
+		}
+	}
 	return card, nil
 }

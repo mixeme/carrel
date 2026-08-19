@@ -433,6 +433,76 @@ func TestNoteFullScreenReadAndEdit(t *testing.T) {
 	}
 }
 
+func TestNoteMarkdownReadMode(t *testing.T) {
+	box := startCalBox(t)
+	box.seed("md-note.ics", `"m1"`, "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Test//EN\r\nBEGIN:VJOURNAL\r\n"+
+		"UID:md-note\r\nDTSTAMP:20260801T000000Z\r\nSUMMARY:Markdown note\r\n"+
+		"DESCRIPTION:**Ideas** and <script>alert(1)</script>.\r\nDTSTART;VALUE=DATE:20260812\r\n"+
+		"END:VJOURNAL\r\nEND:VCALENDAR\r\n")
+	a, accID, colEnc := calendarApp(t, box)
+
+	read := a.get("/app/notes/" + accID + "/" + colEnc + "/md-note")
+	if read.Code != http.StatusOK {
+		t.Fatalf("note read = %d, body = %s", read.Code, read.Body.String())
+	}
+	body := read.Body.String()
+	if !strings.Contains(body, "<strong>Ideas</strong>") {
+		t.Errorf("markdown was not rendered:\n%s", body)
+	}
+	if strings.Contains(body, "<script>alert(1)</script>") {
+		t.Error("raw HTML was not escaped in read mode")
+	}
+
+	edit := a.get("/app/notes/" + accID + "/" + colEnc + "/md-note?edit=1")
+	if edit.Code != http.StatusOK {
+		t.Fatalf("note edit = %d", edit.Code)
+	}
+	if !strings.Contains(edit.Body.String(), "**Ideas** and &lt;script&gt;alert(1)&lt;/script&gt;.") &&
+		!strings.Contains(edit.Body.String(), "**Ideas** and <script>alert(1)</script>.") {
+		t.Errorf("edit mode should show the stored text, not HTML:\n%s", edit.Body.String())
+	}
+}
+
+func TestNoteSaveWithoutChangingDescription(t *testing.T) {
+	box := startCalBox(t)
+	a, accID, colEnc := calendarApp(t, box)
+
+	before := box.body(t, "thought.ics")
+	descLine := icalDescriptionLine(before)
+	if descLine == "" {
+		t.Fatal("seed note has no DESCRIPTION line")
+	}
+
+	edit := a.get("/app/notes/" + accID + "/" + colEnc + "/thought?edit=1")
+	if edit.Code != http.StatusOK {
+		t.Fatalf("note edit = %d", edit.Code)
+	}
+
+	rec := a.post("/app/notes/"+accID+"/"+colEnc+"/thought", url.Values{
+		"etag":        {`"j1"`},
+		"summary":     {"A thought"},
+		"description": {"Ideas about the budget."},
+		"date":        {"2026-08-12"},
+		"categories":  {"ideas"},
+	})
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("save = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	written := box.lastPut(t)
+	if !strings.Contains(written.Body, descLine) {
+		t.Errorf("DESCRIPTION changed after a save with no edits:\nwant %q\nin %q", descLine, written.Body)
+	}
+}
+
+func icalDescriptionLine(body string) string {
+	for _, line := range strings.Split(body, "\r\n") {
+		if strings.HasPrefix(line, "DESCRIPTION:") {
+			return line
+		}
+	}
+	return ""
+}
+
 func TestNotesListShowsJournalsAndFiltersByTag(t *testing.T) {
 	box := startCalBox(t)
 	a, accID, colEnc := calendarApp(t, box)

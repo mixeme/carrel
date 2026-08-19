@@ -117,7 +117,11 @@
             <div class="note-doc-inner">
                 <div class="note-docbody">
                     <h1 class="note-read-title">{{$d.Note.DisplayTitle}}</h1>
+                    {{if $d.BodyHTML}}
+                    <div class="note-prose note-body">{{$d.BodyHTML}}</div>
+                    {{else}}
                     <div class="note-prose note-body">{{$d.Note.Description}}</div>
+                    {{end}}
                     <pre class="note-source-pane" hidden>{{$d.Note.Description}}</pre>
                 </div>
                 <aside class="note-metacol no-print" data-note-metacol>

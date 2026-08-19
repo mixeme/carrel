@@ -6,6 +6,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"net/http"
 	"sort"
 	"strings"
@@ -195,6 +196,8 @@ type noteCardView struct {
 	ETag         string
 	Note         model.Note
 	Form         noteForm
+	// BodyHTML is the rendered description in read mode (wave 2.2).
+	BodyHTML template.HTML
 	Related      []relatedRow
 	// Neighbors are the other notes in this notebook, in list order, so the
 	// rail can page through them without going back to the list.
@@ -691,6 +694,11 @@ func (s *Server) finalizeNoteCard(ctx context.Context, r *http.Request, sess *se
 		return
 	}
 	card.Edit = !card.ReadOnly && noteWantsEdit(r)
+	if !card.Edit && strings.TrimSpace(card.Note.Description) != "" {
+		if html, err := model.RenderNoteHTML(card.Note.Description); err == nil {
+			card.BodyHTML = template.HTML(html)
+		}
+	}
 	if card.UID == "" {
 		return
 	}

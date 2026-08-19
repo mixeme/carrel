@@ -14,7 +14,7 @@
     <div class="detail-panel-body">
         <dl class="detail-fields">
             {{if $d.Form.Date}}<dt>Date</dt><dd>{{$d.Form.Date}}{{if $d.Form.Time}} {{$d.Form.Time}}{{end}}</dd>{{end}}
-            <dt>Text</dt><dd class="note-body">{{$d.Note.Description}}</dd>
+            <dt>Text</dt><dd class="note-body note-prose">{{if $d.BodyHTML}}{{$d.BodyHTML}}{{else}}{{$d.Note.Description}}{{end}}</dd>
             {{if $d.Note.Categories}}<dt>Tags</dt><dd>{{range $d.Note.Categories}}<span class="tag">{{.}}</span> {{end}}</dd>{{end}}
         </dl>
         {{if $d.Related}}

@@ -57,6 +57,13 @@ Resolved by the Go toolchain from `go.mod`; not vendored in this repository.
 - **License:** MIT
 - **Copyright:** Copyright (c) 2016-2024 emersion
 
+### github.com/yuin/goldmark v1.7.8
+
+- **Source:** https://github.com/yuin/goldmark
+- **Used for:** rendering note Markdown in read mode (`internal/model/markdown_render.go`); GitHub Flavored Markdown with raw HTML disabled
+- **License:** MIT
+- **Copyright:** Copyright (c) 2019 Yusuke Inuzuka
+
 ### github.com/teambition/rrule-go v1.8.2
 
 - **Source:** https://github.com/teambition/rrule-go

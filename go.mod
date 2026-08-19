@@ -8,8 +8,11 @@ require (
 	github.com/emersion/go-webdav v0.7.0
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
 	github.com/teambition/rrule-go v1.8.2
+	github.com/wailsapp/wails/v2 v2.10.2
+	github.com/yuin/goldmark v1.7.8
 	golang.org/x/crypto v0.54.0
 	golang.org/x/image v0.34.0
+	golang.org/x/sys v0.47.0
 )
 
 require (
@@ -36,8 +39,6 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wailsapp/go-webview2 v1.0.19 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
-	github.com/wailsapp/wails/v2 v2.10.2 // indirect
 	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 )
