@@ -18,9 +18,10 @@ func profileDirs() (userProfileDirs, error) {
 	}
 	carrelRoot := filepath.Join(root, "Carrel")
 	return userProfileDirs{
-		configDir: carrelRoot,
-		lockDir:   carrelRoot,
-		dataDir:   filepath.Join(carrelRoot, "data"),
+		configDir:  carrelRoot,
+		lockDir:    carrelRoot,
+		dataDir:    filepath.Join(carrelRoot, "data"),
+		webviewDir: filepath.Join(carrelRoot, "webview"),
 	}, nil
 }
 

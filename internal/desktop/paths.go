@@ -12,12 +12,13 @@ import (
 // Paths holds install, profile, and sidecar locations for the desktop app.
 // See docs/plans/desktop-wrapper.md §4.
 type Paths struct {
-	InstallDir  string
-	ConfigPath  string
-	LockPath    string
-	DataDir     string
-	SidecarPath string
-	VersionPath string
+	InstallDir     string
+	ConfigPath     string
+	LockPath       string
+	DataDir        string
+	WebviewDataDir string
+	SidecarPath    string
+	VersionPath    string
 }
 
 // DefaultPaths resolves paths from the running executable and the current
@@ -50,17 +51,19 @@ func pathsForInstall(installDir string) (Paths, error) {
 		return Paths{}, err
 	}
 	return Paths{
-		InstallDir:  installDir,
-		ConfigPath:  filepath.Join(profile.configDir, "desktop.json"),
-		LockPath:    filepath.Join(profile.lockDir, "instance.lock"),
-		DataDir:     profile.dataDir,
-		SidecarPath: filepath.Join(installDir, sidecarBinaryName()),
-		VersionPath: filepath.Join(installDir, "version.json"),
+		InstallDir:     installDir,
+		ConfigPath:     filepath.Join(profile.configDir, "desktop.json"),
+		LockPath:       filepath.Join(profile.lockDir, "instance.lock"),
+		DataDir:        profile.dataDir,
+		WebviewDataDir: profile.webviewDir,
+		SidecarPath:    filepath.Join(installDir, sidecarBinaryName()),
+		VersionPath:    filepath.Join(installDir, "version.json"),
 	}, nil
 }
 
 type userProfileDirs struct {
-	configDir string
-	lockDir   string
-	dataDir   string
+	configDir  string
+	lockDir    string
+	dataDir    string
+	webviewDir string
 }

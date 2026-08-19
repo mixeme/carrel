@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
-- **Desktop wrapper phase 1 — `internal/desktop`:** platform paths (Windows `%LOCALAPPDATA%\Carrel`, Linux `~/.config/carrel` + `~/.local/share/carrel/data`), `desktop.json` load/save (mode, remote URL, tray, start-at-login), and single-instance `instance.lock` with PID liveness checks. Unit tests cover paths, config round-trip, and lock acquire/release.
+- **Desktop wrapper phase 2 — Wails Remote webview:** `cmd/carrel-desktop` (Wails v2) opens a window and navigates to a configured or `-remote-url` Carrel instance; persistent webview profile under the OS-user Carrel directory; instance lock on startup. Minimal `frontend/` shell embed; full UI and fan-out SSE/poll run in the remote webview like a browser. Local mode returns a clear not-implemented error until phase 3.
 
 ### Changed
 

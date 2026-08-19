@@ -89,9 +89,17 @@ docker compose -f compose.test.yaml up -d
 
 Writing tests is covered in [tests.md](tests.md), including the fake-server helpers to reuse rather than rebuild.
 
-### Desktop application (planned)
+### Desktop application
 
-Wails wrapper for Windows and Linux — see [plans/desktop-wrapper.md](plans/desktop-wrapper.md). After `cmd/carrel-desktop` exists: build with Wails v2; on Linux install `libwebkit2gtk-4.1-dev` and `pkg-config` before `wails build`.
+Wails v2 wrapper — see [plans/desktop-wrapper.md](plans/desktop-wrapper.md).
+
+```bash
+# Remote mode spike: pass a URL or set desktop.json (mode remote).
+go build -o carrel-desktop ./cmd/carrel-desktop
+./carrel-desktop -remote-url https://carrel.example
+```
+
+`wails build` uses [wails.json](../wails.json) at the repo root. On Linux install `libwebkit2gtk-4.1-dev` and `pkg-config` first. Windows needs the WebView2 Evergreen runtime. The webview loads the full Carrel UI from the remote instance; fan-out progress uses the same SSE stream (or poll fallback) as in a browser.
 
 ---
 

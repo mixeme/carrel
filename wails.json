@@ -1,0 +1,24 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "carrel-desktop",
+  "outputfilename": "carrel-desktop",
+  "frontend:install": "",
+  "frontend:build": "",
+  "frontend:dev:watcher": "",
+  "frontend:dev:serverUrl": "",
+  "wailsjsdir": "./frontend",
+  "version": "2",
+  "assetdir": "./frontend",
+  "reloaddirs": "./frontend",
+  "debounceMS": 100,
+  "author": {
+    "name": "Carrel contributors"
+  },
+  "info": {
+    "companyName": "Carrel",
+    "productName": "Carrel",
+    "productVersion": "0.9.0",
+    "copyright": "Copyright (C) 2026 Carrel contributors",
+    "comments": "Desktop wrapper for Carrel"
+  }
+}

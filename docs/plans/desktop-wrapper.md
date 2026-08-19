@@ -209,12 +209,12 @@ macOS, DAV localhost onboarding, auto-update, ручной путь к exe, mult
 
 ### Фаза 2 — Wails Remote spike — модель: **Composer** (SSE/Linux → **thinking**)
 
-- [ ] `cmd/carrel-desktop` scaffold
-- [ ] WebView Remote URL
-- [ ] Win: login / navigation
-- [ ] Linux amd64
-- [ ] Fan-out SSE или polling
-- [ ] Коммит + CHANGELOG [Unreleased]
+- [x] `cmd/carrel-desktop` scaffold
+- [x] WebView Remote URL
+- [x] Win: login / navigation
+- [x] Linux amd64
+- [x] Fan-out SSE или polling
+- [x] Коммит + CHANGELOG [Unreleased]
 
 ### Фаза 3 — Local supervisor — модель: **thinking** (medium/high)
 
