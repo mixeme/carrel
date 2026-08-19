@@ -1533,11 +1533,17 @@ document.addEventListener('htmx:sseError', function (e) {
     var toolbar = browse.querySelector('[data-files-toolbar]');
     var deleteForm = browse.querySelector('[data-files-delete-form]');
     var moveForm = browse.querySelector('[data-files-move-form]');
+    var copyForm = browse.querySelector('[data-files-copy-form]');
     var renameForm = browse.querySelector('[data-files-rename-form]');
     var moveDialog = browse.querySelector('[data-files-move-dialog]');
     var picker = moveDialog && moveDialog.querySelector('[data-folder-picker]');
     var pickerConfirm = picker && picker.querySelector('[data-picker-confirm]');
+    var pickerTitle = picker && picker.querySelector('.folder-picker-title');
+    var pickerWarn = picker && picker.querySelector('[data-picker-warn]');
     var pickerSelection = null;
+    var pickerMode = 'move';
+    var srcAccount = browse.getAttribute('data-account');
+    var srcCol = browse.getAttribute('data-col');
     var propsPanel = document.getElementById('files-props');
     var propsBody = propsPanel && propsPanel.querySelector('[data-files-props-body]');
     var propsTitle = propsPanel && propsPanel.querySelector('[data-files-props-title]');
@@ -1798,15 +1804,25 @@ document.addEventListener('htmx:sseError', function (e) {
             renameForm.submit();
             return;
         }
-        if (action === 'move') {
+        if (action === 'move' || action === 'copy') {
             e.preventDefault();
             if (readonly || !moveDialog) return;
+            pickerMode = action;
+            if (pickerTitle) pickerTitle.textContent = action === 'copy' ? 'Copy here' : 'Move here';
+            if (pickerConfirm) pickerConfirm.textContent = action === 'copy' ? 'Copy here' : 'Move here';
             pickerSelection = null;
             if (pickerConfirm) pickerConfirm.disabled = true;
+            if (pickerWarn) pickerWarn.hidden = true;
             picker.querySelectorAll('.folder-tree-node.is-on').forEach(function (n) { n.classList.remove('is-on'); });
             moveDialog.showModal();
         }
     });
+
+    function updatePickerWarn() {
+        if (!pickerSelection || !pickerWarn) return;
+        var cross = pickerSelection.account !== srcAccount || pickerSelection.col !== srcCol;
+        pickerWarn.hidden = !cross;
+    }
 
     if (picker) {
         picker.addEventListener('click', function (e) {
@@ -1820,26 +1836,35 @@ document.addEventListener('htmx:sseError', function (e) {
                 folder: node.getAttribute('data-folder') || ''
             };
             if (pickerConfirm) pickerConfirm.disabled = false;
+            updatePickerWarn();
         });
         picker.addEventListener('click', function (e) {
             if (e.target.closest('[data-picker-cancel]')) {
                 moveDialog.close();
             }
-            if (e.target.closest('[data-picker-confirm]') && pickerSelection && moveForm) {
-                moveForm.querySelector('[name="dest_account"]').value = pickerSelection.account;
-                moveForm.querySelector('[name="dest_col"]').value = pickerSelection.col;
-                moveForm.querySelector('[name="dest_folder"]').value = pickerSelection.folder;
-                moveForm.querySelectorAll('[data-batch-field]').forEach(function (el) { el.remove(); });
+            if (e.target.closest('[data-picker-confirm]') && pickerSelection) {
+                var form = pickerMode === 'copy' ? copyForm : moveForm;
+                if (!form) return;
+                if (pickerMode === 'move' && pickerWarn && !pickerWarn.hidden) {
+                    if (!window.confirm('Files will be downloaded and uploaded through Carrel. Continue?')) return;
+                }
+                if (pickerMode === 'copy' && pickerWarn && !pickerWarn.hidden) {
+                    if (!window.confirm('Files will be copied through Carrel (download then upload). Continue?')) return;
+                }
+                form.querySelector('[name="dest_account"]').value = pickerSelection.account;
+                form.querySelector('[name="dest_col"]').value = pickerSelection.col;
+                form.querySelector('[name="dest_folder"]').value = pickerSelection.folder;
+                form.querySelectorAll('[data-batch-field]').forEach(function (el) { el.remove(); });
                 selectedRows().forEach(function (row) {
                     var input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = 'target';
                     input.value = row.getAttribute('data-rel') || '';
                     input.setAttribute('data-batch-field', '');
-                    moveForm.appendChild(input);
+                    form.appendChild(input);
                 });
                 moveDialog.close();
-                moveForm.submit();
+                form.submit();
             }
         });
     }

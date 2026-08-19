@@ -527,6 +527,20 @@ func TestFilesRenameAndMove(t *testing.T) {
 	if !h.hasFile(filesRoot+"invoices/new.txt") {
 		t.Fatalf("move did not land: %v", h.fileNames(filesRoot))
 	}
+
+	rec = a.post(filesURL(""), url.Values{
+		"action": {"copy"}, fieldPath: {""},
+		"target": {"invoices/new.txt"},
+		"dest_account": {filesAccount},
+		"dest_col":     {EncodeCollectionPath(filesRoot)},
+		"dest_folder":  {""},
+	})
+	if rec.Code >= 400 {
+		t.Fatalf("copy = %d %s", rec.Code, rec.Body.String())
+	}
+	if !h.hasFile(filesRoot+"new.txt") || !h.hasFile(filesRoot+"invoices/new.txt") {
+		t.Fatalf("copy did not keep both: %v", h.fileNames(filesRoot))
+	}
 }
 
 // §24.4: a user's own file is served with an explicit name and nosniff, and never

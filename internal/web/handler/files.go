@@ -403,6 +403,14 @@ func (s *Server) filesAction(w http.ResponseWriter, r *http.Request) {
 		}
 		notice := s.filesMoveBatch(ctx, sess, accountID, colEnc, rel, r.PostForm["target"], dest)
 		s.redirectNotice(w, r, folderURL(base, rel), notice)
+	case "copy":
+		dest, destErr := readMoveDest(r)
+		if destErr != nil {
+			s.redirectNotice(w, r, folderURL(base, rel), destErr.Error())
+			return
+		}
+		notice := s.filesCopyBatch(ctx, sess, accountID, colEnc, rel, r.PostForm["target"], dest)
+		s.redirectNotice(w, r, folderURL(base, rel), notice)
 	default:
 		http.Error(w, "bad request", http.StatusBadRequest)
 	}

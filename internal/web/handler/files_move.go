@@ -112,6 +112,62 @@ func (s *Server) filesMoveBatch(ctx context.Context, sess *session.Session, srcA
 	return fmt.Sprintf("Moved %d of %d. %s", ok, len(targets), strings.Join(lines, " "))
 }
 
+func (s *Server) filesCopyBatch(ctx context.Context, sess *session.Session, srcAccount, srcColEnc, srcFolder string, targets []string, dest moveDest) string {
+	srcCollection, err := DecodeCollectionPath(srcColEnc)
+	if err != nil {
+		return "That copy could not be read."
+	}
+	srcP, srcAcc, err := s.filesProvider(sess, srcAccount)
+	if err != nil {
+		return userFacingDAVError(err)
+	}
+	srcCol, err := findFileCollection(srcAcc, srcCollection)
+	if err != nil {
+		return userFacingDAVError(err)
+	}
+	destP, destAcc, err := s.filesProvider(sess, dest.AccountID)
+	if err != nil {
+		return userFacingDAVError(err)
+	}
+	destCol, err := findFileCollection(destAcc, dest.Collection)
+	if err != nil {
+		return userFacingDAVError(err)
+	}
+	if destCol.ReadOnly {
+		return "The destination collection is read-only."
+	}
+	var lines []string
+	ok := 0
+	for _, raw := range targets {
+		rel, err := files.CleanRelative(raw)
+		if err != nil || rel == "" {
+			lines = append(lines, raw+": refused — bad path.")
+			continue
+		}
+		name := files.Base(rel)
+		toRel := files.Join(dest.Folder, name)
+		if err := s.filesCopyStream(ctx, srcP, srcCol, destP, destCol, rel, toRel); err != nil {
+			lines = append(lines, name+": "+userFacingDAVError(err))
+			continue
+		}
+		ok++
+	}
+	if ok == len(targets) {
+		if ok == 1 {
+			return "Copied 1 item."
+		}
+		return fmt.Sprintf("Copied %d items.", ok)
+	}
+	if ok == 0 {
+		return strings.Join(lines, " ")
+	}
+	return fmt.Sprintf("Copied %d of %d. %s", ok, len(targets), strings.Join(lines, " "))
+}
+
+func crossStorageMove(srcAccount, srcColEnc, destAccount, destColEnc string) bool {
+	return srcAccount != destAccount || srcColEnc != destColEnc
+}
+
 func (s *Server) filesTransfer(ctx context.Context, srcP *files.Provider, srcCol discovery.Collection, destP *files.Provider, destCol discovery.Collection, fromRel, toRel string) error {
 	entry, err := srcP.Stat(ctx, srcCol.Path, fromRel)
 	if err != nil {

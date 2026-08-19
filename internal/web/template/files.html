@@ -73,6 +73,7 @@
                 <button type="button" class="link" data-files-op="download">Download</button>
                 <button type="button" class="link" data-files-op="rename"{{if $d.ReadOnly}} disabled{{end}}>Rename</button>
                 <button type="button" class="link" data-files-op="move"{{if $d.ReadOnly}} disabled{{end}}>Move…</button>
+                <button type="button" class="link" data-files-op="copy"{{if $d.ReadOnly}} disabled{{end}}>Copy…</button>
                 <button type="button" class="link" data-files-op="delete"{{if $d.ReadOnly}} disabled{{end}}>Delete</button>
                 <span class="files-ops-right"><button type="button" class="link" data-files-clear>Clear selection</button></span>
             </div>
@@ -103,6 +104,14 @@
                 <input type="hidden" name="dest_col" value="">
                 <input type="hidden" name="dest_folder" value="">
             </form>
+            <form method="post" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" data-files-copy-form class="visually-hidden">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="copy">
+                <input type="hidden" name="p" value="{{$d.Rel}}">
+                <input type="hidden" name="dest_account" value="">
+                <input type="hidden" name="dest_col" value="">
+                <input type="hidden" name="dest_folder" value="">
+            </form>
             <form method="post" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" data-files-rename-form class="visually-hidden">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="rename">
@@ -112,7 +121,7 @@
             </form>
 
             <dialog class="files-dialog no-print" data-files-move-dialog>
-                <div class="folder-picker" data-folder-picker>
+                <div class="folder-picker" data-folder-picker data-picker-mode="move">
                     <h3 class="folder-picker-title">Move here</h3>
                     <div class="folder-tree" role="tree">
                         {{range $d.PickerRoots}}
@@ -128,7 +137,8 @@
                         {{end}}
                         {{end}}
                     </div>
-                    <p class="hint folder-picker-hint">Inside one server this is <code>MOVE</code> — instant, no traffic. To another storage the file is downloaded and uploaded again.</p>
+                    <p class="hint folder-picker-hint" data-picker-hint>Inside one server this is <code>MOVE</code> — instant, no traffic. To another storage the file is downloaded and uploaded again.</p>
+                    <p class="message notice folder-picker-warn" data-picker-warn hidden>To another storage each file is downloaded and uploaded through Carrel — this can take time and uses bandwidth on both sides.</p>
                     <div class="form-foot">
                         <button type="button" class="primary" data-picker-confirm disabled>Move here</button>
                         <button type="button" class="link" data-picker-cancel>Cancel</button>
