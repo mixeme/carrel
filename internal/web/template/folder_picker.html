@@ -6,13 +6,13 @@
         {{range $d.Roots}}
         <div class="folder-tree-node{{if .ReadOnly}} is-disabled{{end}}{{if and (eq $.Data.Selected.AccountID .AccountID) (eq $.Data.Selected.ColEnc .ColEnc) (eq $.Data.Selected.Folder .Folder)}} is-on{{end}}"
              role="treeitem" data-picker-node data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="{{.Folder}}"
-             {{if not .ReadOnly}}tabindex="0"{{end}} style="padding-left:0">
+             {{if not .ReadOnly}}tabindex="0"{{end}} data-depth="0">
             <span class="folder-tree-label">{{.Name}} <span class="hint">{{.ServerLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
         </div>
         {{range .Children}}
         <div class="folder-tree-node{{if .ReadOnly}} is-disabled{{end}}"
              role="treeitem" data-picker-node data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="{{.Folder}}"
-             {{if not .ReadOnly}}tabindex="0"{{end}} style="padding-left:1.25rem">
+             {{if not .ReadOnly}}tabindex="0"{{end}} data-depth="1">
             <span class="folder-tree-label">{{.Name}}</span>
         </div>
         {{end}}

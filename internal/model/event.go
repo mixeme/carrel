@@ -93,8 +93,8 @@ func (o *Object) Event(loc *time.Location) (Event, error) {
 		Summary:     icalPropText(evComp.Props, ical.PropSummary),
 		Description: icalPropText(evComp.Props, ical.PropDescription),
 		Location:    icalPropText(evComp.Props, ical.PropLocation),
-		Status:      icalPropText(evComp.Props, ical.PropStatus),
-		RRule:       icalPropText(evComp.Props, ical.PropRecurrenceRule),
+		Status:      icalPropRaw(evComp.Props, ical.PropStatus),
+		RRule:       icalPropRaw(evComp.Props, ical.PropRecurrenceRule),
 		Related:     relationsFrom(evComp.Props),
 		Attachments: attachmentsFrom(evComp.Props),
 	}

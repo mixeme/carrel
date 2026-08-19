@@ -35,7 +35,7 @@
             <header class="page-head">
                 <div>
                     <h1 class="page-title">All collections</h1>
-                    <p class="page-sub">{{len $d.Collections}} storages on {{$d.ServerCount}} {{if eq $d.ServerCount 1}}server{{else}}servers{{end}}</p>
+                    <p class="page-sub">{{len $d.Collections}} {{if eq (len $d.Collections) 1}}storage{{else}}storages{{end}} on {{$d.ServerCount}} {{if eq $d.ServerCount 1}}server{{else}}servers{{end}}</p>
                 </div>
             </header>
             <table class="files-table files-table--root">
@@ -140,7 +140,7 @@
                         </div>
                         {{range .Children}}
                         <div class="folder-tree-node" role="treeitem" data-picker-node
-                             data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="{{.Folder}}" style="padding-left:1.25rem">
+                             data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="{{.Folder}}" data-depth="1">
                             <span class="folder-tree-label">{{.Name}}</span>
                         </div>
                         {{end}}

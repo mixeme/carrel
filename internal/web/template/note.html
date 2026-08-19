@@ -116,7 +116,7 @@
             {{else}}
             <div class="note-read-head no-print">
                 <div class="note-read-meta">
-                    <span class="list-bar note-read-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span class="list-bar note-read-bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
                     <span class="note-read-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}{{if $d.DateLabel}} · <span class="mono">{{$d.DateLabel}}</span>{{end}}</span>
                 </div>
                 <div class="note-read-actions">

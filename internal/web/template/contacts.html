@@ -64,7 +64,7 @@
             <ul class="list contact-list" id="contact-list" data-columns-root="contacts">
             {{range $d.Contacts}}
                 <li class="list-row list-row--contact contact-row">
-                    <span class="list-bar" data-col="bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span class="list-bar" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
                     <a class="contact-row-link detail-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                        hx-get="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
                        hx-target="#app-details" hx-swap="innerHTML">

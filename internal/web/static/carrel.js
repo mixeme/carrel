@@ -5,6 +5,31 @@
 // stays in the page where it can still be reached.
 document.documentElement.classList.add('js');
 
+// Collection colours and the progress fill (§16). The CSP of §24.5 has no
+// 'unsafe-inline' for styles, so a style attribute written by a template is
+// dropped before it reaches the box; the value travels as a data attribute and
+// is applied here instead. Without JavaScript the CSS default — the accent —
+// still shows, which is why the rules carry one.
+(function () {
+    function paint(root) {
+        if (!root || !root.querySelectorAll) return;
+        var scope = root.nodeType === 1 ? [root] : [];
+        scope.concat(Array.prototype.slice.call(root.querySelectorAll('[data-swatch],[data-fill]')))
+            .forEach(function (el) {
+                if (!el.getAttribute) return;
+                var colour = el.getAttribute('data-swatch');
+                if (colour) el.style.background = colour;
+                var fill = el.getAttribute('data-fill');
+                if (fill !== null) el.style.width = fill + '%';
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () { paint(document); });
+    document.addEventListener('htmx:afterSwap', function (e) { paint(e.target); });
+    document.addEventListener('htmx:afterSettle', function (e) { paint(e.target); });
+    paint(document);
+})();
+
 document.addEventListener('click', function (e) {
     var refresh = e.target.closest('[data-refresh]');
     if (refresh) {
@@ -161,16 +186,53 @@ document.addEventListener('change', function (e) {
 // network allow it, and falls back to polling by itself when the stream will not
 // open. The fallback fetch returns a fragment that carries its own poller, so
 // nothing further has to be switched on here.
-document.addEventListener('htmx:sseError', function (e) {
-    var panel = e.target.closest('[data-sse-panel]');
-    if (!panel || panel.dataset.pollFallback === 'on') return;
-    panel.dataset.pollFallback = 'on';
-    panel.removeAttribute('sse-connect');
-    panel.removeAttribute('sse-swap');
-    var url = panel.getAttribute('data-poll-url');
-    if (!url || !window.htmx) return;
-    window.htmx.ajax('GET', url, { target: panel, swap: 'innerHTML' });
-});
+(function () {
+    // How long a panel may show nothing before the stream is written off. A
+    // failed connection raises htmx:sseError and is handled at once; a stream
+    // that never speaks — no extension, a proxy that buffers, a connection that
+    // hangs open — raises nothing at all, and only this timer catches it.
+    var GRACE = 3000;
+
+    function running(panel) {
+        return !!panel.querySelector('.find-source.is-waiting, .find-source.is-querying');
+    }
+
+    function fallback(panel) {
+        if (!panel || panel.dataset.pollFallback === 'on') return;
+        panel.dataset.pollFallback = 'on';
+        panel.removeAttribute('sse-connect');
+        panel.removeAttribute('sse-swap');
+        var url = panel.getAttribute('data-poll-url');
+        if (!url || !window.htmx) return;
+        window.htmx.ajax('GET', url, { target: panel, swap: 'innerHTML' });
+    }
+
+    document.addEventListener('htmx:sseError', function (e) {
+        var panel = e.target.closest('[data-sse-panel]');
+        if (panel) fallback(panel);
+    });
+
+    function watch() {
+        document.querySelectorAll('[data-sse-panel][data-poll-url]').forEach(function (panel) {
+            if (!panel.getAttribute('sse-connect') || !running(panel)) return;
+            var spoke = false;
+            function mark() { spoke = true; }
+            panel.addEventListener('htmx:sseMessage', mark);
+            panel.addEventListener('htmx:afterSwap', mark);
+            window.setTimeout(function () {
+                panel.removeEventListener('htmx:sseMessage', mark);
+                panel.removeEventListener('htmx:afterSwap', mark);
+                if (!spoke && running(panel)) fallback(panel);
+            }, GRACE);
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', watch);
+    } else {
+        watch();
+    }
+})();
 
 // Details panel (wave 1.4): list rows load a read-only card into #app-details.
 // No selection — no panel; closed manually — stays closed; state is per section.

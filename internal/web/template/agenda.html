@@ -89,7 +89,7 @@
                 <ul class="list agenda-events">
                 {{range .Events}}
                     <li class="list-row list-row--agenda agenda-event-row">
-                        <span class="list-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                        <span class="list-bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
                         <span class="agenda-time list-time">{{.TimeLabel}}{{if .TimeZoneLabel}} <span class="tz-label">{{.TimeZoneLabel}}</span>{{end}}</span>
                         <a class="detail-link" href="{{$.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                            hx-get="{{$.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"

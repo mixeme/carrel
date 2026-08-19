@@ -165,7 +165,7 @@ func (o *Object) Version() string {
 		if o.cal == nil {
 			return ""
 		}
-		return icalPropText(o.cal.Props, ical.PropVersion)
+		return icalPropRaw(o.cal.Props, ical.PropVersion)
 	default:
 		return ""
 	}
@@ -184,7 +184,7 @@ func (o *Object) UID() string {
 		return o.card.Value(vcard.FieldUID)
 	case KindICal:
 		if comp := o.primaryComponent(); comp != nil {
-			return icalPropText(comp.Props, ical.PropUID)
+			return icalPropRaw(comp.Props, ical.PropUID)
 		}
 		return ""
 	default:
@@ -192,11 +192,57 @@ func (o *Object) UID() string {
 	}
 }
 
-func icalPropText(props ical.Props, name string) string {
+// icalPropRaw returns a property exactly as it arrived. It is for the values
+// that are not TEXT — UID, VERSION, RRULE, STATUS, numbers — where a backslash
+// is not an escape and resolving one would change the meaning.
+func icalPropRaw(props ical.Props, name string) string {
 	if p := props.Get(name); p != nil {
 		return p.Value
 	}
 	return ""
+}
+
+// icalPropText returns a TEXT property with the escapes of RFC 5545 §3.3.11
+// resolved: \n and \N are a line break, \\ \, and \; are the characters
+// themselves. go-ical keeps Value as it came off the wire, so reading it
+// directly shows a note written in jtx Board with a literal \n in the middle of
+// it and, worse, escapes it a second time on the next save. Prop.Text is not
+// used because it splits on an unescaped comma and keeps only the first piece,
+// which throws away the tail of every description a client wrote with a plain
+// comma in it.
+func icalPropText(props ical.Props, name string) string {
+	p := props.Get(name)
+	if p == nil {
+		return ""
+	}
+	return unescapeICalText(p.Value)
+}
+
+func unescapeICalText(value string) string {
+	if !strings.Contains(value, `\`) {
+		return value
+	}
+	var b strings.Builder
+	b.Grow(len(value))
+	for i := 0; i < len(value); i++ {
+		if value[i] != '\\' || i+1 >= len(value) {
+			b.WriteByte(value[i])
+			continue
+		}
+		i++
+		switch value[i] {
+		case 'n', 'N':
+			b.WriteByte('\n')
+		case '\\', ',', ';':
+			b.WriteByte(value[i])
+		default:
+			// An escape this build does not know is kept as it arrived rather
+			// than dropped: it came from another client and may mean something.
+			b.WriteByte('\\')
+			b.WriteByte(value[i])
+		}
+	}
+	return b.String()
 }
 
 // Clone returns a deep copy, so a candidate write can be compared against the

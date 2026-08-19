@@ -26,7 +26,7 @@
         {{range $acc.AddressBooks}}
             <li>
                 <a class="collection-link" href="{{$.Base}}/app/contacts/{{$acc.ID}}/{{.ColEnc}}">
-                    <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span class="collection-dot" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                     {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
                     <span class="hint">card{{if .Sync.Known}} · {{.Sync.MetaLabel}}{{end}}</span>
                 </a>
@@ -35,7 +35,7 @@
         {{range $acc.Calendars}}
             <li>
                 <a class="collection-link" href="{{$.Base}}/app/calendar/{{$acc.ID}}/{{.ColEnc}}">
-                    <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span class="collection-dot" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                     {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
                     <span class="hint">cal{{if .Sync.Known}} · {{.Sync.MetaLabel}}{{end}}</span>
                 </a>
@@ -44,7 +44,7 @@
         {{range $acc.FileCollections}}
             <li>
                 <a class="collection-link" href="{{$.Base}}/app/files/{{$acc.ID}}/{{.ColEnc}}">
-                    <span class="collection-dot" style="background:var(--accent)"></span>
+                    <span class="collection-dot"></span>
                     {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
                     <span class="hint">files{{if .ReadOnly}} · ro{{end}}{{if .Sync.Known}} · {{.Sync.MetaLabel}}{{end}}</span>
                 </a>

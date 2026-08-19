@@ -61,7 +61,7 @@
                     </form>
                     <span class="task-tick print-only" aria-hidden="true">{{if .Done}}✓{{end}}</span>
                     {{else}}<span class="task-tick" data-col="done" aria-hidden="true">{{if .Done}}✓{{end}}</span>{{end}}
-                    <span class="list-bar" data-col="bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span class="list-bar" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
                     <a class="task-title list-title detail-link" data-col="name" href="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                        hx-get="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
                        hx-target="#app-details" hx-swap="innerHTML">{{.Title}}</a>

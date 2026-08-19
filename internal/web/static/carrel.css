@@ -248,6 +248,7 @@ main:has(.app-layout) {
 
 .collection-dot {
     display: inline-block;
+    background: var(--accent);
     width: 3px;
     height: 14px;
     border-radius: 1px;
@@ -342,6 +343,7 @@ main:has(.app-layout) {
 }
 
 .src-bar {
+    background: var(--accent);
     width: 3px;
     height: 14px;
     border-radius: 1px;
@@ -428,6 +430,7 @@ a.src-label:hover {
 }
 
 .list-bar {
+    background: var(--accent);
     width: 3px;
     height: var(--row-sm);
     border-radius: 1px;
@@ -2261,6 +2264,16 @@ label.checkbox input {
     font-size: 0.9rem;
 }
 
+/* Nesting is a class rather than an inline style: the CSP of §24.5 has no
+   'unsafe-inline' for styles, so a style attribute never reaches the box. */
+.folder-tree-node[data-depth="0"] {
+    padding-left: 0;
+}
+
+.folder-tree-node[data-depth="1"] {
+    padding-left: 1.25rem;
+}
+
 .folder-tree-node.is-on {
     background: var(--card);
     color: var(--accent);
@@ -3242,6 +3255,7 @@ label.checkbox input {
 .find-prog i {
     display: block;
     height: 100%;
+    width: 0;
     background: var(--accent);
 }
 

@@ -12,6 +12,16 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- **The merged view of every section waited for a stream nobody opened.** `hx-ext="sse"` needs the htmx SSE extension, and `base.html` never loaded it: the vendored `static/htmx-sse.js` was embedded and referenced nowhere. Nothing connected, nothing failed either, and so the fallback poller — which hangs off `htmx:sseError` — never fired. Contacts, calendar, tasks, notes, search, duplicates and the person screen sat on «Queried 0 of N sources» for as long as they were left open. The extension is loaded after htmx, and `carrel.js` now also gives up on a stream that connects and then says nothing for three seconds, which covers a proxy that buffers as well as an extension that failed to register.
+
+- **The CSP dropped every inline style and the theme bootstrap.** `style-src 'self'` has no `'unsafe-inline'`, so the twenty `style="…"` attributes in the templates never reached the browser: collection colours were absent from every dot and row bar, the fan-out progress bar stayed at nought whatever the poll said, and the folder tree lost its indent. Colours travel as `data-swatch` / `data-fill` and are applied by `carrel.js`, with the accent as the CSS default when there is no JavaScript; the tree indents by class. The theme and density bootstrap moves from an inline `<script>`, which was likewise dropped, to `static/boot.js`. Two tests now hold the line: no template and no rendered page may carry a style attribute or an inline script.
+
+- **Duplicates polled file storages and showed them as unavailable.** §15 scores loaded records; a plain WebDAV folder has none, but it shared the source list with search and so was sent the same `calendar-query`, which the server answered with 400. The duplicates screen now lists calendars and address books only; search keeps file collections, which it searches by name.
+
+- **iCalendar TEXT arrived escaped.** `SUMMARY`, `DESCRIPTION` and `LOCATION` were read straight off `Prop.Value`, so a note written in jtx Board showed a literal \n in the middle of a line instead of a line break, and saving it escaped the backslash a second time. The escapes of RFC 5545 §3.3.11 are resolved on the way in — without `Prop.Text`, which splits on an unescaped comma and would drop the tail of every description written with a plain comma in it. UID, VERSION, RRULE, STATUS and the numeric properties are still read raw, where a backslash is not an escape.
+
+- **The files root said «1 storages».** The count of storages was not pluralised, only the count of servers.
+
 - **Contacts, tasks and notes drew the calendar rail.** `startFind` built every section rail as the person-screen timeline, so `/app/contacts` showed «All calendars», «Where to look», and CalDAV collections while the poll queried address books. Each section now builds its own rail.
 
 - **Public Sans rendered as Thin, and the shell type did not match the mockups.** The embedded variable files named themselves `Public Sans Thin` with `wght` default 100, so the interface used the hairline master instead of Regular. They now default to 400. The signed-in shell takes the mockup measure (13 px / 1.45), `.app-btn` keeps 12.5 px after `font: inherit`, and text inputs, selects, textareas and buttons drop native appearance so they inherit the face.

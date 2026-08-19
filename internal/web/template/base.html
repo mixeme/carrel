@@ -9,20 +9,9 @@
     <link rel="icon" href="{{.Base}}/static/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{.Base}}/static/icon.svg">
     <link rel="manifest" href="{{.Base}}/manifest.webmanifest">
-    <script>
-    (function () {
-        try {
-            var theme = localStorage.getItem('carrel:theme');
-            if (theme === 'light' || theme === 'dark') {
-                document.documentElement.dataset.theme = theme;
-            }
-            if (localStorage.getItem('carrel:density') === 'compact') {
-                document.documentElement.dataset.density = 'compact';
-            }
-        } catch (e) {}
-    })();
-    </script>
+    <script src="{{.Base}}/static/boot.js"></script>
     <script src="{{.Base}}/static/htmx.min.js" defer></script>
+    <script src="{{.Base}}/static/htmx-sse.js" defer></script>
     <script src="{{.Base}}/static/carrel.js" defer></script>
 </head>
 <body{{if .Shell}} class="has-shell"{{end}}>
@@ -258,7 +247,7 @@
         {{range $d.Sources}}
             <li><label class="checkbox">
                 <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
-                <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                <span class="collection-dot" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                 <span>{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
             </label></li>
         {{end}}
@@ -294,7 +283,7 @@
                         <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
                         <span class="src-box" aria-hidden="true"></span>
                     </label>
-                    <span class="src-bar" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <span class="src-bar" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
                     <a class="src-label" href="{{$.Base}}/app/{{$rail.Section}}/{{.AccountID}}/{{.ColEnc}}" title="{{.Label}}">{{.Label}}</a>
                     {{if .ReadOnly}}<span class="src-meta hint">ro</span>{{end}}
                 </li>
@@ -395,7 +384,7 @@
 {{$d := .Data}}
 <div class="find-progress">
     <div class="find-poll">
-        <span class="find-prog" aria-hidden="true"><i style="width:{{$d.Snapshot.Percent}}%"></i></span>
+        <span class="find-prog" aria-hidden="true"><i data-fill="{{$d.Snapshot.Percent}}"></i></span>
         <p class="find-summary" role="status">{{$d.Snapshot.Summary}}</p>
         {{if $d.Snapshot.Running}}
         <button type="button" class="app-btn is-quiet is-sm"
@@ -408,7 +397,7 @@
         <ul class="find-sources">
         {{range $d.Snapshot.Sources}}
             <li class="find-source is-{{.State}}">
-                <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                <span class="collection-dot" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                 <span class="find-source-name">{{.CollectionLabel}}<span class="hint">{{.AccountLabel}}</span></span>
                 <span class="find-source-state">
                     {{if eq (printf "%s" .State) "waiting"}}Waiting
@@ -462,7 +451,7 @@
         {{range .Rows}}
             {{if eq .Kind "contact"}}
             <li class="list-row list-row--contact-find find-row is-contact{{if .Collapsed}} is-merged{{end}}">
-                <span class="list-bar" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                <span class="list-bar" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                 {{if .URL}}
                 <a class="contact-row-link detail-link" href="{{.URL}}"
                    hx-get="{{.PanelURL}}" hx-target="#app-details" hx-swap="innerHTML">
@@ -486,7 +475,7 @@
             </li>
             {{else}}
             <li class="list-row list-row--find find-row is-{{.Kind}}{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}{{if .Collapsed}} is-merged{{end}}">
-                <span class="list-bar" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                <span class="list-bar" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                 <span class="list-time">{{.TimeLabel}}{{if .TimeZoneLabel}} <span class="tz-label">{{.TimeZoneLabel}}</span>{{end}}</span>
                 <span class="list-title">
                     {{if .URL}}<a class="detail-link" href="{{.URL}}"
@@ -540,7 +529,7 @@
             <ul class="dup-members">
             {{range .Members}}
                 <li{{if not .Present}} class="is-absent"{{end}}>
-                    <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span class="collection-dot" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                     <span>
                         {{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}{{.Title}}{{end}}
                         <span class="hint">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}{{if .ReadOnly}} · read-only{{end}}{{if .Subtitle}} · {{.Subtitle}}{{end}}</span>

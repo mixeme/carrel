@@ -76,7 +76,7 @@ func (o *Object) Todo(loc *time.Location) (Todo, error) {
 		Summary:     icalPropText(comp.Props, ical.PropSummary),
 		Description: icalPropText(comp.Props, ical.PropDescription),
 		Location:    icalPropText(comp.Props, ical.PropLocation),
-		Status:      strings.ToUpper(icalPropText(comp.Props, ical.PropStatus)),
+		Status:      strings.ToUpper(icalPropRaw(comp.Props, ical.PropStatus)),
 		Related:     relationsFrom(comp.Props),
 		Attachments: attachmentsFrom(comp.Props),
 	}
@@ -95,8 +95,8 @@ func (o *Object) Todo(loc *time.Location) (Todo, error) {
 	if done, err := comp.Props.DateTime(ical.PropCompleted, loc); err == nil {
 		task.Completed = done
 	}
-	task.Priority = atoiOr(icalPropText(comp.Props, ical.PropPriority), 0)
-	task.PercentComplete = atoiOr(icalPropText(comp.Props, ical.PropPercentComplete), 0)
+	task.Priority = atoiOr(icalPropRaw(comp.Props, ical.PropPriority), 0)
+	task.PercentComplete = atoiOr(icalPropRaw(comp.Props, ical.PropPercentComplete), 0)
 	for _, name := range o.Names() {
 		if knownTodoProps[name] {
 			continue

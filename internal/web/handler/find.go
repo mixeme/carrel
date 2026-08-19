@@ -843,7 +843,20 @@ func (s *Server) findSources(sess *session.Session, req findRequest) ([]sourceRo
 		return s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), dav.CompJournal)
 	case modeTimeline:
 		return s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
-	case modeSearch, modeDuplicates:
+	case modeDuplicates:
+		// Files are deliberately absent: §15 scores loaded records, and a plain
+		// WebDAV folder has none. Offering one as a source only got it a
+		// calendar-query it answers with 400.
+		calendars, err := s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
+		if err != nil {
+			return nil, err
+		}
+		books, err := s.collectionsOfKind(sess, discovery.KindAddressBook, req.Mode.view(), "")
+		if err != nil {
+			return nil, err
+		}
+		return append(calendars, books...), nil
+	case modeSearch:
 		calendars, err := s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
 		if err != nil {
 			return nil, err
