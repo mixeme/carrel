@@ -2182,6 +2182,300 @@ label.checkbox input {
     white-space: pre-wrap;
 }
 
+/* Wave 2.1 — full-screen note: read column + meta, edit bar, neighbours rail */
+.note-screen .note-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.note-sidebar-back {
+    margin: 0;
+    font-size: 12.5px;
+}
+
+.note-sidebar-rubric {
+    margin: 0 0 0.35rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dusty);
+}
+
+.note-neighbor-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 12.5px;
+}
+
+.note-neighbor-link {
+    display: block;
+    padding: 4px 8px;
+    border-radius: 3px;
+    color: var(--ink);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.note-neighbor-link.is-active,
+.note-neighbor-link:hover {
+    background: var(--card);
+    color: var(--accent);
+}
+
+.note-doc {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-height: 0;
+}
+
+.note-read-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    padding-bottom: 0.65rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 0.5px solid var(--rule);
+}
+
+.note-read-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.note-read-bar {
+    width: 3px;
+    height: 12px;
+    flex-shrink: 0;
+    border-radius: 1px;
+}
+
+.note-read-sub {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.note-read-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.note-doc-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    min-width: 0;
+}
+
+.note-docbody {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.note-read-title {
+    margin: 0 0 0.65rem;
+    font-family: var(--f-serif);
+    font-size: 1.65rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.note-prose {
+    font-family: var(--f-serif);
+    font-size: 14.5px;
+    line-height: 1.7;
+}
+
+.note-doc.is-reading-width .note-docbody {
+    max-width: 78ch;
+}
+
+.note-source-pane {
+    margin: 0.75rem 0 0;
+    padding: 0.75rem;
+    font-family: var(--f-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    background: var(--paper);
+    border: 0.5px solid var(--hair);
+    border-radius: 3px;
+}
+
+.note-doc.is-source-on .note-prose {
+    display: none;
+}
+
+.note-doc.is-source-on .note-source-pane {
+    display: block !important;
+}
+
+.note-metacol {
+    flex: 0 0 240px;
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    font-size: 12.5px;
+}
+
+.note-doc.is-meta-hidden .note-metacol {
+    display: none;
+}
+
+.note-meta-rubric {
+    margin: 0 0 0.4rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dusty);
+}
+
+.note-meta-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.note-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.note-meta-attachments .other-props {
+    margin: 0;
+}
+
+.note-meta-attachments .other-props > h2 {
+    margin: 0 0 0.4rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--dusty);
+}
+
+.note-editbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 0.65rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 0.5px solid var(--rule);
+}
+
+.note-editbar-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--rule);
+}
+
+.note-editbar-right {
+    margin-left: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.note-draft-label {
+    font-size: 11.5px;
+}
+
+.note-width-seg {
+    display: inline-flex;
+    border: 0.5px solid var(--hair);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.note-width-seg button {
+    border: 0;
+    background: var(--paper);
+    color: var(--muted);
+    font: inherit;
+    font-size: 11.5px;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+.note-width-seg button.is-on {
+    background: var(--card);
+    color: var(--ink);
+}
+
+.note-title-input {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    font-family: var(--f-serif);
+    font-size: 1.65rem;
+    font-weight: 600;
+    line-height: 1.25;
+    padding: 0;
+    margin: 0 0 0.5rem;
+    color: var(--ink);
+}
+
+.note-title-input:focus {
+    outline: none;
+}
+
+.note-text-input {
+    width: 100%;
+    min-height: 18rem;
+    font-family: var(--f-serif);
+    font-size: 14.5px;
+    line-height: 1.7;
+    resize: vertical;
+}
+
+.note-edit-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    margin-top: 1rem;
+    align-items: flex-end;
+}
+
+.note-screen.is-focus .note-sidebar,
+.note-screen.is-focus .note-metacol {
+    display: none;
+}
+
+.note-screen.is-focus .note-editbar-right .note-width-seg,
+.note-screen.is-focus .note-editbar-right .note-draft-label {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .note-doc-inner {
+        flex-direction: column;
+    }
+
+    .note-metacol {
+        width: 100%;
+        flex: none;
+    }
+}
+
 .quick-note-page {
     max-width: 40rem;
     margin: 0 auto;

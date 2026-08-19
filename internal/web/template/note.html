@@ -1,82 +1,161 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="app-layout calendar-layout">
-    <aside class="sidebar card no-print">
-        <h2>Notebooks</h2>
-        <ul class="collection-list">{{range $d.Sources}}
-            <li><a class="collection-link" href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
-        {{end}}</ul>
-        <p><a href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to notes</a></p>
+{{$readURL := ""}}
+{{if not $d.IsNew}}{{$readURL = printf "%s/app/notes/%s/%s/%s" .Base $d.AccountID $d.ColEnc $d.UID}}{{end}}
+<div class="app-layout calendar-layout note-screen" data-detail-section="notes">
+    <aside class="sidebar card no-print note-sidebar" data-note-sidebar>
+        <p class="note-sidebar-back"><a href="{{$d.BackURL}}">← Back to list</a></p>
+        {{if $d.Sources}}
+        <div class="note-sidebar-sec">
+            <h2 class="note-sidebar-rubric">Notebooks</h2>
+            <ul class="collection-list">{{range $d.Sources}}
+                <li><a class="collection-link{{if and (eq .AccountID $d.AccountID) (eq .ColEnc $d.ColEnc)}} is-active{{end}}"
+                       href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
+            {{end}}</ul>
+        </div>
+        {{end}}
+        {{if $d.Neighbors}}
+        <div class="note-sidebar-sec">
+            <h2 class="note-sidebar-rubric">Neighbours</h2>
+            <ul class="note-neighbor-list">{{range $d.Neighbors}}
+                <li><a class="note-neighbor-link{{if .Active}} is-active{{end}}"
+                       href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}">{{.Title}}</a></li>
+            {{end}}</ul>
+        </div>
+        {{end}}
     </aside>
     <div class="app-main">
-        <section class="card note-card agenda-print-root">
-            <div class="contacts-header">
-                <div>
-                    <h1>{{if $d.IsNew}}New note{{else}}{{$d.Note.DisplayTitle}}{{end}}</h1>
-                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-                </div>
-                <p class="contacts-actions no-print">
-                    {{if not $d.IsNew}}<a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/export">Export Markdown</a>
-                    <button type="button" class="link" data-print>Print</button>{{end}}
-                </p>
-            </div>
-            {{if $d.ReadOnly}}
-            <dl class="contact-readonly">
-                {{if $d.Form.Date}}<dt>Date</dt><dd>{{$d.Form.Date}} {{$d.Form.Time}}</dd>{{end}}
-                <dt>Text</dt><dd class="note-body">{{$d.Note.Description}}</dd>
-                {{if $d.Note.Categories}}<dt>Tags</dt><dd>{{range $d.Note.Categories}}<span class="tag">{{.}}</span>{{end}}</dd>{{end}}
-            </dl>
-            <p class="hint">This notebook is read-only.</p>
-            {{else}}
-            <form method="post" class="form" action="{{if $d.IsNew}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+        <section class="card note-card note-doc agenda-print-root" data-note-doc
+                 {{if $d.Edit}}data-note-editing{{end}}
+                 {{if not $d.IsNew}}data-note-page-url="{{$readURL}}"{{end}}>
+            {{if $d.Edit}}
+            <form method="post" class="form note-edit-form" data-note-form
+                  action="{{if $d.IsNew}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}?edit=1{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
-                <div class="form-field w-xl">
-                    <label for="summary">Title</label>
-                    <input id="summary" name="summary" value="{{$d.Form.Summary}}" placeholder="optional">
+                <div class="note-editbar no-print">
+                    <button type="submit" class="app-btn is-primary">Save</button>
+                    {{if $d.IsNew}}
+                    <a class="app-btn is-quiet" href="{{$d.BackURL}}">Cancel</a>
+                    {{else}}
+                    <a class="app-btn is-quiet" href="{{$readURL}}">Cancel</a>
+                    {{end}}
+                    <span class="note-editbar-sep" aria-hidden="true"></span>
+                    <button type="button" class="app-btn is-quiet" data-note-markup="bold" title="Bold"><b>B</b></button>
+                    <button type="button" class="app-btn is-quiet" data-note-markup="italic" title="Italic"><i>I</i></button>
+                    <button type="button" class="app-btn is-quiet" data-note-markup="h2" title="Heading">H2</button>
+                    <button type="button" class="app-btn is-quiet" data-note-markup="list" title="List">• list</button>
+                    <button type="button" class="app-btn is-quiet" data-note-markup="task" title="Task">☐ task</button>
+                    <button type="button" class="app-btn is-quiet" data-note-markup="link" title="Link">Link</button>
+                    <span class="note-editbar-right">
+                        <span class="hint note-draft-label">Draft in this window</span>
+                        <span class="note-width-seg" data-note-width-seg role="group" aria-label="Text width">
+                            <button type="button" class="is-on" data-note-width="full">Full width</button>
+                            <button type="button" data-note-width="reading">Reading width</button>
+                        </span>
+                        <button type="button" class="app-btn is-quiet" data-note-focus title="Focus">Focus</button>
+                    </span>
                 </div>
-                <div class="form-field w-full">
-                    <label for="description">Text</label>
-                    <textarea id="description" name="description" rows="14" autofocus>{{$d.Form.Description}}</textarea>
-                </div>
-                <div class="form-field w-sm">
-                    <label for="date">Date</label>
-                    <input id="date" type="date" name="date" value="{{$d.Form.Date}}">
-                </div>
-                <div class="form-field w-xs">
-                    <label for="time">Time</label>
-                    <input id="time" type="time" name="time" value="{{$d.Form.Time}}">
-                </div>
-                <div class="form-field w-md">
-                    <label for="categories">Tags</label>
-                    <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
-                </div>
-                <div class="form-field w-xl">
-                    <label for="related">Related to</label>
-                    <input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
-                    <p class="form-hint">A related UID ties this note to an event or a task in the same collection.</p>
-                </div>
-                <div class="form-foot">
-                    <button type="submit">Save</button>
+                <div class="note-doc-inner">
+                    <div class="note-docbody">
+                        <div class="form-field w-full note-title-field">
+                            <label class="sr-only" for="summary">Title</label>
+                            <input id="summary" class="note-title-input" name="summary" value="{{$d.Form.Summary}}" placeholder="optional">
+                        </div>
+                        <div class="form-field w-full note-text-field">
+                            <label class="sr-only" for="description">Text</label>
+                            <textarea id="description" class="note-text-input" name="description" rows="16" autofocus data-note-body>{{$d.Form.Description}}</textarea>
+                        </div>
+                        <div class="note-edit-fields">
+                            <div class="form-field w-md">
+                                <label for="date">Date</label>
+                                <input id="date" type="date" name="date" value="{{$d.Form.Date}}">
+                            </div>
+                            <div class="form-field w-xs">
+                                <label for="time">Time</label>
+                                <input id="time" type="time" name="time" value="{{$d.Form.Time}}">
+                            </div>
+                            <div class="form-field w-lg">
+                                <label for="categories">Tags</label>
+                                <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                            </div>
+                            <div class="form-field w-xl">
+                                <label for="related">Related to</label>
+                                <input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
+                                <p class="form-hint">A related UID ties this note to an event or a task in the same collection.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
             {{if not $d.IsNew}}
-            <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">
+            <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form no-print">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="etag" value="{{$d.ETag}}">
                 <button type="submit" class="link">Delete note</button>
             </form>
             {{end}}
+            {{else}}
+            <div class="note-read-head no-print">
+                <div class="note-read-meta">
+                    <span class="list-bar note-read-bar" style="background:{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
+                    <span class="note-read-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}{{if $d.DateLabel}} · <span class="mono">{{$d.DateLabel}}</span>{{end}}</span>
+                </div>
+                <div class="note-read-actions">
+                    {{if not $d.ReadOnly}}<a class="app-btn is-primary" href="{{$readURL}}?edit=1">Edit</a>{{end}}
+                    {{if not $d.IsNew}}<a class="app-btn" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/export">Export Markdown</a>{{end}}
+                    <button type="button" class="app-btn is-quiet" data-print>Print</button>
+                    <button type="button" class="app-btn is-quiet" data-note-source-toggle>Source</button>
+                    <span class="note-width-seg" data-note-width-seg role="group" aria-label="Text width">
+                        <button type="button" class="is-on" data-note-width="full">Full width</button>
+                        <button type="button" data-note-width="reading">Reading width</button>
+                    </span>
+                    <button type="button" class="app-btn is-quiet" data-note-meta-toggle title="Hide the side column">Panel</button>
+                    {{if $readURL}}<button type="button" class="app-btn is-quiet" data-copy-url="{{$readURL}}">Copy link</button>{{end}}
+                </div>
+            </div>
+            <div class="note-doc-inner">
+                <div class="note-docbody">
+                    <h1 class="note-read-title">{{$d.Note.DisplayTitle}}</h1>
+                    <div class="note-prose note-body">{{$d.Note.Description}}</div>
+                    <pre class="note-source-pane" hidden>{{$d.Note.Description}}</pre>
+                </div>
+                <aside class="note-metacol no-print" data-note-metacol>
+                    {{if $d.Note.Categories}}
+                    <div class="note-meta-block">
+                        <h3 class="note-meta-rubric">Tags</h3>
+                        <div class="note-tag-row">{{range $d.Note.Categories}}<span class="tag">{{.}}</span>{{end}}</div>
+                    </div>
+                    {{end}}
+                    {{if $d.Related}}
+                    <div class="note-meta-block">
+                        <h3 class="note-meta-rubric">Related</h3>
+                        <ul class="note-meta-list related-list">{{range $d.Related}}
+                            <li>{{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}<code>{{.UID}}</code>{{end}}
+                                <span class="hint">{{.Kind}}{{if .RelType}} · {{.RelType}}{{end}}</span></li>
+                        {{end}}</ul>
+                    </div>
+                    {{end}}
+                    {{if not $d.IsNew}}
+                    <div class="note-meta-block note-meta-attachments">
+                        {{template "attachments" .}}
+                    </div>
+                    {{end}}
+                    <div class="note-meta-block">
+                        {{template "sourceblock" $d.Source}}
+                    </div>
+                    {{if and (not $d.ReadOnly) (not $d.IsNew)}}
+                    <div class="note-meta-block note-meta-danger">
+                        <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">
+                            <input type="hidden" name="csrf_token" value="{{.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="etag" value="{{$d.ETag}}">
+                            <button type="submit" class="app-btn is-danger">Delete note</button>
+                        </form>
+                    </div>
+                    {{end}}
+                </aside>
+            </div>
+            {{if $d.ReadOnly}}<p class="hint no-print">This notebook is read-only.</p>{{end}}
             {{end}}
-            {{if $d.Related}}
-            <section class="other-props">
-                <h2>Related</h2>
-                <ul class="related-list">{{range $d.Related}}
-                    <li>{{if .URL}}<a href="{{.URL}}">{{.Title}}</a>{{else}}<code>{{.UID}}</code>{{end}}<span class="hint">{{.Kind}}{{if .RelType}} · {{.RelType}}{{end}}</span></li>
-                {{end}}</ul>
-            </section>
-            {{end}}
-            {{if not $d.IsNew}}{{template "attachments" .}}{{end}}
             {{if $d.Note.Other}}
             <section class="other-props"><h2>Other properties</h2><p class="hint">Kept as the server sent them and not offered for editing.</p>
                 <ul>{{range $d.Note.Other}}<li><code>{{.Name}}</code>{{range .Values}} {{.Text}}{{end}}</li>{{end}}</ul>

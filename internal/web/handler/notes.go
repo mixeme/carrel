@@ -179,6 +179,12 @@ func (s *Server) noteSourcesOrNil(sess *session.Session) []sourceRow {
 	return rows
 }
 
+type noteNeighborRow struct {
+	UID    string
+	Title  string
+	Active bool
+}
+
 type noteCardView struct {
 	Sources      []sourceRow
 	AccountID    string
@@ -190,6 +196,15 @@ type noteCardView struct {
 	Note         model.Note
 	Form         noteForm
 	Related      []relatedRow
+	// Neighbors are the other notes in this notebook, in list order, so the
+	// rail can page through them without going back to the list.
+	Neighbors []noteNeighborRow
+	// Edit is true on /new and on ?edit; otherwise the card is read mode.
+	Edit bool
+	// BackURL is the notebook list this note belongs to.
+	BackURL string
+	// DateLabel is the note date in the header line.
+	DateLabel string
 	// Attachments are the pictures and files of §23.10 — the one thing a note
 	// could not carry before this stage.
 	Attachments []attachmentRow
@@ -403,11 +418,14 @@ func (s *Server) NoteNew(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	form.Summary = strings.TrimSpace(r.URL.Query().Get("summary"))
-	v := s.View(r, "New note")
-	v.Data = noteCardView{
+	card := noteCardView{
 		Sources: s.noteSourcesOrNil(sess), AccountID: accountID, ColEnc: colEnc,
 		Collection: col, AccountLabel: accountLabel(*acc), IsNew: true, Form: form,
+		Section: sectionNotes.Path,
 	}
+	s.finalizeNoteCard(r.Context(), r, sess, &card)
+	v := s.View(r, "New note")
+	v.Data = card
 	s.Render(w, "note.html", v)
 }
 
@@ -430,6 +448,7 @@ func (s *Server) NoteCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	card.PrintDate = time.Now().UTC().Format("2006-01-02 15:04 UTC")
+	s.finalizeNoteCard(r.Context(), r, sess, &card)
 	v := s.View(r, card.Note.DisplayTitle())
 	v.Notice = strings.TrimSpace(r.URL.Query().Get("notice"))
 	v.Data = card
@@ -527,11 +546,15 @@ func (s *Server) noteSave(w http.ResponseWriter, r *http.Request, isNew bool) {
 		note, _ := obj.Note(s.timezone())
 		v := s.View(r, map[bool]string{true: "New note", false: "Note"}[isNew])
 		v.Error = capitalize(err.Error())
-		v.Data = noteCardView{
+		card := noteCardView{
 			Sources: s.noteSourcesOrNil(sess), AccountID: accountID, ColEnc: colEnc,
 			Collection: col, AccountLabel: accountLabel(*acc), UID: note.UID,
 			ETag: obj.ETag, Note: note, Form: form, IsNew: isNew,
+			Section: sectionNotes.Path, ReadOnly: col.ReadOnly,
 		}
+		s.finalizeNoteCard(r.Context(), r, sess, &card)
+		card.Edit = true
+		v.Data = card
 		s.RenderStatus(w, http.StatusBadRequest, "note.html", v)
 		return
 	}
@@ -636,4 +659,75 @@ func (s *Server) renderNotesError(w http.ResponseWriter, r *http.Request, err er
 	v.Error = userFacingDAVError(err)
 	v.Data = notesView{Sources: s.noteSourcesOrNil(SessionFrom(r)), AccountID: accountID, ColEnc: colEnc}
 	s.RenderStatus(w, http.StatusBadRequest, "notes.html", v)
+}
+
+func noteWantsEdit(r *http.Request) bool {
+	q := r.URL.Query()
+	if q.Get("edit") == "0" || strings.EqualFold(q.Get("edit"), "false") {
+		return false
+	}
+	return q.Has("edit")
+}
+
+func formatNoteDateLabel(note model.Note, loc *time.Location) string {
+	if note.Date.IsZero() {
+		return ""
+	}
+	local := note.Date.In(loc)
+	if note.DateOnly {
+		return local.Format("2 Jan 2006")
+	}
+	return local.Format("2 Jan 2006 15:04")
+}
+
+func (s *Server) finalizeNoteCard(ctx context.Context, r *http.Request, sess *session.Session, card *noteCardView) {
+	card.BackURL = s.Path("/app/notes/" + card.AccountID + "/" + card.ColEnc)
+	loc := s.timezone()
+	if !card.IsNew {
+		card.DateLabel = formatNoteDateLabel(card.Note, loc)
+	}
+	if card.IsNew {
+		card.Edit = !card.ReadOnly
+		return
+	}
+	card.Edit = !card.ReadOnly && noteWantsEdit(r)
+	if card.UID == "" {
+		return
+	}
+	p, _, err := s.calendarProvider(sess, card.AccountID)
+	if err != nil {
+		return
+	}
+	collection := normalizeCollectionPath(card.Collection.Path)
+	card.Neighbors = s.noteNeighbors(ctx, p, card.AccountID, card.ColEnc, collection, card.UID, loc)
+}
+
+func (s *Server) noteNeighbors(ctx context.Context, p *calendar.Provider, accountID, colEnc, collection, currentUID string, loc *time.Location) []noteNeighborRow {
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+	set, err := p.QueryComponent(ctx, collection, dav.CompJournal, time.Time{}, time.Time{})
+	if err != nil {
+		return nil
+	}
+	notes := make([]model.Note, 0, len(set.Objects))
+	for _, obj := range set.Objects {
+		note, noteErr := obj.Note(loc)
+		if noteErr != nil {
+			continue
+		}
+		notes = append(notes, note)
+	}
+	sort.SliceStable(notes, func(i, j int) bool {
+		if notes[i].Date.Equal(notes[j].Date) {
+			return strings.ToLower(notes[i].DisplayTitle()) < strings.ToLower(notes[j].DisplayTitle())
+		}
+		return notes[i].Date.After(notes[j].Date)
+	})
+	out := make([]noteNeighborRow, 0, len(notes))
+	for _, note := range notes {
+		out = append(out, noteNeighborRow{
+			UID: note.UID, Title: note.DisplayTitle(), Active: note.UID == currentUID,
+		})
+	}
+	return out
 }

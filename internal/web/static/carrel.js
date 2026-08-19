@@ -31,14 +31,22 @@ document.addEventListener('click', function (e) {
     }
 
     var btn = e.target.closest('[data-copy]');
-    if (!btn) return;
-    var id = btn.getAttribute('data-copy');
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.select();
-    el.setSelectionRange(0, 99999);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(el.value);
+    if (btn) {
+        var id = btn.getAttribute('data-copy');
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.select();
+        el.setSelectionRange(0, 99999);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(el.value);
+        }
+        return;
+    }
+
+    var copyURL = e.target.closest('[data-copy-url]');
+    if (copyURL && navigator.clipboard && navigator.clipboard.writeText) {
+        var link = copyURL.getAttribute('data-copy-url');
+        if (link) navigator.clipboard.writeText(link);
     }
 });
 
@@ -1164,4 +1172,140 @@ document.addEventListener('htmx:sseError', function (e) {
         var href = el.getAttribute('href');
         if (href) window.location.assign(href);
     });
+})();
+
+// Wave 2.1 — full-screen note: width, focus, markup, unsaved warning.
+(function () {
+    var WIDTH_KEY = 'carrel:note-width';
+    var doc = document.querySelector('[data-note-doc]');
+    var screen = document.querySelector('.note-screen');
+    if (!doc) return;
+
+    function readWidth() {
+        try {
+            return localStorage.getItem(WIDTH_KEY) || 'full';
+        } catch (e) {
+            return 'full';
+        }
+    }
+
+    function applyWidth(value) {
+        var reading = value === 'reading';
+        doc.classList.toggle('is-reading-width', reading);
+        document.querySelectorAll('[data-note-width-seg]').forEach(function (seg) {
+            seg.querySelectorAll('[data-note-width]').forEach(function (btn) {
+                var on = btn.getAttribute('data-note-width') === (reading ? 'reading' : 'full');
+                btn.classList.toggle('is-on', on);
+            });
+        });
+        try {
+            localStorage.setItem(WIDTH_KEY, reading ? 'reading' : 'full');
+        } catch (e) {}
+    }
+
+    applyWidth(readWidth());
+
+    document.addEventListener('click', function (e) {
+        var widthBtn = e.target.closest('[data-note-width]');
+        if (widthBtn) {
+            applyWidth(widthBtn.getAttribute('data-note-width'));
+            return;
+        }
+        var focusBtn = e.target.closest('[data-note-focus]');
+        if (focusBtn && screen) {
+            screen.classList.toggle('is-focus');
+            return;
+        }
+        var metaBtn = e.target.closest('[data-note-meta-toggle]');
+        if (metaBtn) {
+            doc.classList.toggle('is-meta-hidden');
+            return;
+        }
+        var sourceBtn = e.target.closest('[data-note-source-toggle]');
+        if (sourceBtn) {
+            doc.classList.toggle('is-source-on');
+            return;
+        }
+        var markup = e.target.closest('[data-note-markup]');
+        if (markup) {
+            insertMarkup(markup.getAttribute('data-note-markup'));
+        }
+    });
+
+    function insertMarkup(kind) {
+        var area = document.getElementById('description');
+        if (!area) return;
+        var start = area.selectionStart;
+        var end = area.selectionEnd;
+        var text = area.value;
+        var sel = text.slice(start, end);
+        var insert = sel;
+        var cursor = start;
+        switch (kind) {
+        case 'bold':
+            insert = '**' + (sel || 'text') + '**';
+            cursor = start + 2 + (sel || 'text').length + 2;
+            break;
+        case 'italic':
+            insert = '_' + (sel || 'text') + '_';
+            cursor = start + 1 + (sel || 'text').length + 1;
+            break;
+        case 'h2':
+            insert = '## ' + (sel || 'Heading');
+            cursor = start + insert.length;
+            break;
+        case 'list':
+            insert = '- ' + (sel || 'item');
+            cursor = start + insert.length;
+            break;
+        case 'task':
+            insert = '- [ ] ' + (sel || 'task');
+            cursor = start + insert.length;
+            break;
+        case 'link':
+            insert = '[' + (sel || 'text') + '](url)';
+            cursor = start + insert.length - 5;
+            break;
+        }
+        area.value = text.slice(0, start) + insert + text.slice(end);
+        area.focus();
+        area.setSelectionRange(cursor, cursor);
+        area.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    var form = document.querySelector('[data-note-form]');
+    if (form) {
+        var snapshot = formSnapshot(form);
+        form.addEventListener('input', function () {
+            form.dataset.dirty = formSnapshot(form) !== snapshot ? '1' : '';
+        });
+        form.addEventListener('submit', function () {
+            form.dataset.dirty = '';
+        });
+        window.addEventListener('beforeunload', function (e) {
+            if (form.dataset.dirty === '1') {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                if (!form.contains(document.activeElement) && document.activeElement !== form) return;
+                e.preventDefault();
+                form.requestSubmit();
+            }
+            if (e.key === 'Escape' && screen && screen.classList.contains('is-focus')) {
+                e.preventDefault();
+                screen.classList.remove('is-focus');
+            }
+        });
+    }
+
+    function formSnapshot(f) {
+        var parts = [];
+        f.querySelectorAll('input, textarea, select').forEach(function (el) {
+            if (el.name && el.type !== 'hidden') parts.push(el.name + '=' + el.value);
+        });
+        return parts.join('&');
+    }
 })();

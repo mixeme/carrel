@@ -395,6 +395,44 @@ func TestTaskFormRejectsATaskWithNoSummary(t *testing.T) {
 	}
 }
 
+func TestNoteFullScreenReadAndEdit(t *testing.T) {
+	box := startCalBox(t)
+	a, accID, colEnc := calendarApp(t, box)
+
+	read := a.get("/app/notes/" + accID + "/" + colEnc + "/thought")
+	if read.Code != http.StatusOK {
+		t.Fatalf("note read = %d, body = %s", read.Code, read.Body.String())
+	}
+	body := read.Body.String()
+	for _, want := range []string{
+		`data-note-doc`,
+		`note-read-title`,
+		`Neighbours`,
+		`Ideas about the budget`,
+		`?edit=1`,
+		`data-copy-url`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("read view missing %q", want)
+		}
+	}
+	if strings.Contains(body, `data-note-form`) {
+		t.Error("read view should not include the edit form")
+	}
+
+	edit := a.get("/app/notes/" + accID + "/" + colEnc + "/thought?edit=1")
+	if edit.Code != http.StatusOK {
+		t.Fatalf("note edit = %d", edit.Code)
+	}
+	editBody := edit.Body.String()
+	if !strings.Contains(editBody, `data-note-form`) {
+		t.Error("edit view should include the edit form")
+	}
+	if !strings.Contains(editBody, `data-note-markup`) {
+		t.Error("edit view should include markup buttons")
+	}
+}
+
 func TestNotesListShowsJournalsAndFiltersByTag(t *testing.T) {
 	box := startCalBox(t)
 	a, accID, colEnc := calendarApp(t, box)
