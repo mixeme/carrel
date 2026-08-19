@@ -81,9 +81,27 @@
                                 <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
                             </div>
                             <div class="form-field w-xl">
-                                <label for="related">Related to</label>
-                                <input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
-                                <p class="form-hint">A related UID ties this note to an event or a task in the same collection.</p>
+                                <label for="related-query">Related to</label>
+                                <div class="related-picker" data-related-picker
+                                     data-search-url="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/related-search"
+                                     {{if $d.UID}}data-exclude-uid="{{$d.UID}}"{{end}}>
+                                    <input type="hidden" name="related" value="{{$d.Form.Related}}" data-related-input>
+                                    <div class="related-picker-field">
+                                        <div class="related-picker-chips" data-related-chips>
+                                            {{range $d.RelatedPicker}}
+                                            <span class="related-chip" data-related-chip data-uid="{{.UID}}" data-title="{{.Title}}">
+                                                <span class="related-chip-label">{{.Title}}</span>
+                                                <button type="button" class="related-chip-remove" data-related-remove aria-label="Remove">×</button>
+                                            </span>
+                                            {{end}}
+                                        </div>
+                                        <input id="related-query" type="text" class="related-picker-query" data-related-query
+                                               placeholder="Search events, tasks, notes, contacts…" autocomplete="off"
+                                               role="combobox" aria-expanded="false" aria-controls="related-picker-menu">
+                                    </div>
+                                    <div class="related-picker-menu" id="related-picker-menu" data-related-menu hidden role="listbox"></div>
+                                </div>
+                                <p class="form-hint">Link this note to an event, task, note or contact. You can enter a UID by hand from the list.</p>
                             </div>
                         </div>
                     </div>

@@ -1304,8 +1304,215 @@ document.addEventListener('htmx:sseError', function (e) {
     function formSnapshot(f) {
         var parts = [];
         f.querySelectorAll('input, textarea, select').forEach(function (el) {
-            if (el.name && el.type !== 'hidden') parts.push(el.name + '=' + el.value);
+            if (!el.name) return;
+            if (el.type === 'hidden' && el.name !== 'related') return;
+            parts.push(el.name + '=' + el.value);
         });
         return parts.join('&');
     }
+})();
+
+// Wave 2.3 — related-to typeahead on the note editor.
+(function () {
+    var picker = document.querySelector('[data-related-picker]');
+    if (!picker) return;
+
+    var input = picker.querySelector('[data-related-input]');
+    var chips = picker.querySelector('[data-related-chips]');
+    var query = picker.querySelector('[data-related-query]');
+    var menu = picker.querySelector('[data-related-menu]');
+    var searchURL = picker.getAttribute('data-search-url');
+    var excludeUID = picker.getAttribute('data-exclude-uid') || '';
+    var timer = 0;
+    var active = -1;
+
+    function selectedUIDs() {
+        var out = [];
+        chips.querySelectorAll('[data-related-chip]').forEach(function (chip) {
+            var uid = chip.getAttribute('data-uid');
+            if (uid) out.push(uid);
+        });
+        return out;
+    }
+
+    function syncInput() {
+        input.value = selectedUIDs().join(', ');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function addChip(uid, title) {
+        uid = (uid || '').trim();
+        if (!uid) return;
+        if (selectedUIDs().indexOf(uid) >= 0) return;
+        var chip = document.createElement('span');
+        chip.className = 'related-chip';
+        chip.setAttribute('data-related-chip', '');
+        chip.setAttribute('data-uid', uid);
+        chip.setAttribute('data-title', title || uid);
+        var label = document.createElement('span');
+        label.className = 'related-chip-label';
+        label.textContent = title || uid;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'related-chip-remove';
+        btn.setAttribute('data-related-remove', '');
+        btn.setAttribute('aria-label', 'Remove');
+        btn.textContent = '×';
+        chip.appendChild(label);
+        chip.appendChild(btn);
+        chips.appendChild(chip);
+        syncInput();
+    }
+
+    function closeMenu() {
+        menu.hidden = true;
+        query.setAttribute('aria-expanded', 'false');
+        active = -1;
+        menu.innerHTML = '';
+    }
+
+    function kindLabel(kind) {
+        switch (kind) {
+        case 'event': return 'Event';
+        case 'task': return 'Task';
+        case 'note': return 'Note';
+        case 'contact': return 'Contact';
+        default: return kind;
+        }
+    }
+
+    function renderMenu(items, q) {
+        menu.innerHTML = '';
+        items.forEach(function (item, index) {
+            var row = document.createElement('button');
+            row.type = 'button';
+            row.className = 'related-picker-option';
+            row.setAttribute('role', 'option');
+            row.setAttribute('data-related-option', '');
+            row.setAttribute('data-uid', item.uid);
+            row.setAttribute('data-title', item.title);
+            row.innerHTML = '<span class="related-picker-kind">' + kindLabel(item.kind) + '</span>' +
+                '<span class="related-picker-title">' + escapeHTML(item.title) + '</span>' +
+                (item.meta ? '<span class="related-picker-meta">' + escapeHTML(item.meta) + '</span>' : '');
+            row.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+            });
+            row.addEventListener('click', function () {
+                addChip(item.uid, item.title);
+                query.value = '';
+                closeMenu();
+                query.focus();
+            });
+            menu.appendChild(row);
+        });
+        if (q) {
+            var sep = document.createElement('div');
+            sep.className = 'related-picker-sep';
+            sep.setAttribute('role', 'separator');
+            menu.appendChild(sep);
+            var manual = document.createElement('button');
+            manual.type = 'button';
+            manual.className = 'related-picker-option is-manual';
+            manual.setAttribute('role', 'option');
+            manual.setAttribute('data-related-manual', '');
+            manual.textContent = 'Enter UID by hand…';
+            manual.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+            });
+            manual.addEventListener('click', function () {
+                addChip(q, q);
+                query.value = '';
+                closeMenu();
+                query.focus();
+            });
+            menu.appendChild(manual);
+        }
+        menu.hidden = items.length === 0 && !q;
+        query.setAttribute('aria-expanded', menu.hidden ? 'false' : 'true');
+        active = -1;
+    }
+
+    function escapeHTML(text) {
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function fetchMatches(q) {
+        if (!searchURL || !q) {
+            closeMenu();
+            return;
+        }
+        var url = searchURL + '?q=' + encodeURIComponent(q);
+        if (excludeUID) url += '&exclude=' + encodeURIComponent(excludeUID);
+        fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+            .then(function (res) { return res.ok ? res.json() : []; })
+            .then(function (items) {
+                if (query.value.trim() !== q) return;
+                var selected = selectedUIDs();
+                var filtered = (items || []).filter(function (item) {
+                    return selected.indexOf(item.uid) < 0;
+                });
+                renderMenu(filtered, q);
+            })
+            .catch(function () {
+                renderMenu([], q);
+            });
+    }
+
+    query.addEventListener('input', function () {
+        var q = query.value.trim();
+        clearTimeout(timer);
+        if (!q) {
+            closeMenu();
+            return;
+        }
+        timer = setTimeout(function () {
+            fetchMatches(q);
+        }, 200);
+    });
+
+    query.addEventListener('keydown', function (e) {
+        var options = menu.querySelectorAll('[data-related-option], [data-related-manual]');
+        if (e.key === 'ArrowDown') {
+            if (menu.hidden) {
+                fetchMatches(query.value.trim());
+                return;
+            }
+            e.preventDefault();
+            active = Math.min(active + 1, options.length - 1);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            active = Math.max(active - 1, 0);
+        } else if (e.key === 'Enter') {
+            if (active >= 0 && options[active]) {
+                e.preventDefault();
+                options[active].click();
+            }
+            return;
+        } else if (e.key === 'Escape') {
+            closeMenu();
+            return;
+        } else {
+            return;
+        }
+        options.forEach(function (opt, i) {
+            opt.classList.toggle('is-active', i === active);
+        });
+    });
+
+    picker.addEventListener('click', function (e) {
+        var remove = e.target.closest('[data-related-remove]');
+        if (remove) {
+            var chip = remove.closest('[data-related-chip]');
+            if (chip) chip.remove();
+            syncInput();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!picker.contains(e.target)) closeMenu();
+    });
 })();

@@ -199,6 +199,8 @@ type noteCardView struct {
 	// BodyHTML is the rendered description in read mode (wave 2.2).
 	BodyHTML template.HTML
 	Related      []relatedRow
+	// RelatedPicker is the chip list in edit mode (wave 2.3).
+	RelatedPicker []relatedRow
 	// Neighbors are the other notes in this notebook, in list order, so the
 	// rail can page through them without going back to the list.
 	Neighbors []noteNeighborRow
@@ -694,6 +696,9 @@ func (s *Server) finalizeNoteCard(ctx context.Context, r *http.Request, sess *se
 		return
 	}
 	card.Edit = !card.ReadOnly && noteWantsEdit(r)
+	if card.Edit {
+		card.RelatedPicker = relatedPickerRows(card.Form.Related, card.Related)
+	}
 	if !card.Edit && strings.TrimSpace(card.Note.Description) != "" {
 		if html, err := model.RenderNoteHTML(card.Note.Description); err == nil {
 			card.BodyHTML = template.HTML(html)

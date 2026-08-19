@@ -141,6 +141,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/import"), s.NotesImport)
 	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/import"), s.NotesImport)
 	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/export"), s.NotesExport)
+	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/related-search"), s.NoteRelatedSearch)
 	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/{uid}/panel"), s.NotePanel)
 	app.HandleFunc("GET "+s.Path("/app/notes/{account}/{col}/{uid}"), s.NoteCard)
 	app.HandleFunc("POST "+s.Path("/app/notes/{account}/{col}/{uid}"), s.NoteCard)

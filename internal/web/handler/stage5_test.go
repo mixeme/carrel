@@ -6,6 +6,7 @@ package handler
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -430,6 +431,66 @@ func TestNoteFullScreenReadAndEdit(t *testing.T) {
 	}
 	if !strings.Contains(editBody, `data-note-markup`) {
 		t.Error("edit view should include markup buttons")
+	}
+	if !strings.Contains(editBody, `data-related-picker`) {
+		t.Error("edit view should include the related-to picker")
+	}
+	if strings.Contains(editBody, `UIDs, comma-separated`) {
+		t.Error("edit view still shows the old related placeholder")
+	}
+}
+
+func TestNoteRelatedSearchFindsObjects(t *testing.T) {
+	box := startCalBox(t)
+	a, accID, colEnc := calendarApp(t, box)
+
+	rec := a.get("/app/notes/" + accID + "/" + colEnc + "/related-search?q=budget")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("related search = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	if ct := rec.Header().Get("Content-Type"); !strings.Contains(ct, "application/json") {
+		t.Fatalf("Content-Type = %q, want JSON", ct)
+	}
+	var hits []struct {
+		UID, Title, Kind string
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &hits); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(hits) < 2 {
+		t.Fatalf("expected several matches, got %d: %+v", len(hits), hits)
+	}
+	seen := map[string]bool{}
+	for _, hit := range hits {
+		seen[hit.UID] = true
+	}
+	for _, uid := range []string{"meeting", "chase", "thought"} {
+		if !seen[uid] {
+			t.Errorf("related search missed %q in %+v", uid, hits)
+		}
+	}
+}
+
+func TestNoteSaveKeepsRelatedUIDs(t *testing.T) {
+	box := startCalBox(t)
+	a, accID, colEnc := calendarApp(t, box)
+
+	rec := a.post("/app/notes/"+accID+"/"+colEnc+"/thought", url.Values{
+		"etag":        {`"j1"`},
+		"summary":     {"A thought"},
+		"description": {"Ideas about the budget."},
+		"date":        {"2026-08-12"},
+		"categories":  {"ideas"},
+		"related":     {"meeting, chase"},
+	})
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("save = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	written := box.lastPut(t)
+	for _, want := range []string{"RELATED-TO:meeting", "RELATED-TO:chase"} {
+		if !strings.Contains(written.Body, want) {
+			t.Errorf("saved note is missing %q:\n%s", want, written.Body)
+		}
 	}
 }
 
