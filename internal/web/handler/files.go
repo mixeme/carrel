@@ -107,6 +107,7 @@ type filesView struct {
 	FolderTitle    string
 	ItemCount      int
 	TotalSizeLabel string
+	PickerRoots    []folderPickerNode
 }
 
 // fileCollectionRow is one storage at the All collections root.
@@ -269,6 +270,7 @@ func (s *Server) buildFiles(ctx context.Context, sess *session.Session, accountI
 		view.FolderTitle = collectionLabel(col)
 	}
 	view.PrintDate = time.Now().UTC().Format("2006-01-02 15:04 UTC")
+	view.PickerRoots = s.folderPickerRoots(ctx, sess)
 	return view, nil
 }
 
@@ -368,6 +370,25 @@ func (s *Server) filesAction(w http.ResponseWriter, r *http.Request) {
 		s.redirectNotice(w, r, folderURL(base, rel), "Deleted from the server. Anything that linked to it now points at nothing.")
 	case "delete-batch":
 		notice := s.filesDeleteBatch(ctx, p, col, rel, r.PostForm["target"], r.PostForm["etag"])
+		s.redirectNotice(w, r, folderURL(base, rel), notice)
+	case "rename":
+		target, targetErr := files.CleanRelative(r.PostFormValue("target"))
+		if targetErr != nil || target == "" {
+			http.Error(w, "bad path", http.StatusBadRequest)
+			return
+		}
+		if err := s.filesRename(ctx, p, col, target, r.PostFormValue("new_name")); err != nil {
+			s.renderFilesError(w, r, err, accountID, colEnc)
+			return
+		}
+		s.redirectNotice(w, r, folderURL(base, rel), "Renamed.")
+	case "move":
+		dest, destErr := readMoveDest(r)
+		if destErr != nil {
+			s.redirectNotice(w, r, folderURL(base, rel), destErr.Error())
+			return
+		}
+		notice := s.filesMoveBatch(ctx, sess, accountID, colEnc, rel, r.PostForm["target"], dest)
 		s.redirectNotice(w, r, folderURL(base, rel), notice)
 	default:
 		http.Error(w, "bad request", http.StatusBadRequest)

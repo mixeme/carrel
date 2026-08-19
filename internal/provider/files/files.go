@@ -32,6 +32,7 @@ type Client interface {
 	PutOpts(ctx context.Context, path string, body io.Reader, opts dav.PutOptions) (string, error)
 	Delete(ctx context.Context, path, ifMatch string) error
 	MkCol(ctx context.Context, path string) error
+	Move(ctx context.Context, src, dst string, overwrite bool) error
 }
 
 // ErrAlreadyExists is returned by a create that found something at the path.
@@ -392,6 +393,41 @@ func (p *Provider) EnsureDir(ctx context.Context, root, rel string) error {
 		return err
 	}
 	return nil
+}
+
+// Move relocates one member inside a collection with WebDAV MOVE.
+func (p *Provider) Move(ctx context.Context, root, fromRel, toRel string, overwrite bool) error {
+	src, err := Resolve(root, fromRel)
+	if err != nil {
+		return err
+	}
+	dst, err := Resolve(root, toRel)
+	if err != nil {
+		return err
+	}
+	if NormalizeDir(src) == NormalizeDir(root) || NormalizeDir(dst) == NormalizeDir(root) {
+		return errors.New("files: the collection itself cannot be moved")
+	}
+	if err := p.client.Move(ctx, src, dst, overwrite); err != nil {
+		return fmt.Errorf("files: move %s → %s: %w", fromRel, toRel, err)
+	}
+	p.invalidate(parentOf(src))
+	p.invalidate(parentOf(dst))
+	if entry, statErr := p.Stat(ctx, root, fromRel); statErr == nil && entry.Dir {
+		p.invalidate(NormalizeDir(dst))
+	}
+	return nil
+}
+
+// Rename changes the last segment of a path inside one collection.
+func (p *Provider) Rename(ctx context.Context, root, rel, newName string) error {
+	name, err := CleanName(newName)
+	if err != nil {
+		return err
+	}
+	parent, _ := Parent(rel)
+	toRel := Join(parent, name)
+	return p.Move(ctx, root, rel, toRel, false)
 }
 
 // Remove deletes one member. A folder is removed with everything in it, which

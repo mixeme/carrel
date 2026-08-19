@@ -197,6 +197,27 @@ func (h *davHost) serveFiles(w http.ResponseWriter, r *http.Request, path string
 		delete(h.files, path)
 		h.deletes = append(h.deletes, path)
 		w.WriteHeader(http.StatusNoContent)
+	case "MOVE":
+		dest := r.Header.Get("Destination")
+		if dest == "" {
+			http.Error(w, "destination required", http.StatusBadRequest)
+			return
+		}
+		if i := strings.Index(dest, "/dav/"); i >= 0 {
+			dest = dest[i:]
+		}
+		body, ok := h.files[path]
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+		if _, taken := h.files[dest]; taken && r.Header.Get("Overwrite") != "T" {
+			w.WriteHeader(http.StatusPreconditionFailed)
+			return
+		}
+		delete(h.files, path)
+		h.files[dest] = body
+		w.WriteHeader(http.StatusCreated)
 	default:
 		http.Error(w, "no", http.StatusMethodNotAllowed)
 	}
@@ -473,6 +494,38 @@ func TestFilesDeleteBatch(t *testing.T) {
 	}
 	if h.hasFile(filesRoot+"a.png") || h.hasFile(filesRoot+"b.png") {
 		t.Fatalf("batch delete left files behind: %v", h.fileNames(filesRoot))
+	}
+}
+
+func TestFilesRenameAndMove(t *testing.T) {
+	h := startDAVHost(t)
+	h.putFile(filesRoot+"old.txt", []byte("data"))
+	h.putFile(filesRoot+"invoices/", nil)
+	a := filesApp(t, h)
+
+	rec := a.post(filesURL(""), url.Values{
+		"action": {"rename"}, fieldPath: {""},
+		"target": {"old.txt"}, "new_name": {"new.txt"},
+	})
+	if rec.Code >= 400 {
+		t.Fatalf("rename = %d %s", rec.Code, rec.Body.String())
+	}
+	if !h.hasFile(filesRoot+"new.txt") || h.hasFile(filesRoot+"old.txt") {
+		t.Fatalf("rename did not land: %v", h.fileNames(filesRoot))
+	}
+
+	rec = a.post(filesURL(""), url.Values{
+		"action": {"move"}, fieldPath: {""},
+		"target": {"new.txt"},
+		"dest_account": {filesAccount},
+		"dest_col":     {EncodeCollectionPath(filesRoot)},
+		"dest_folder":  {"invoices"},
+	})
+	if rec.Code >= 400 {
+		t.Fatalf("move = %d %s", rec.Code, rec.Body.String())
+	}
+	if !h.hasFile(filesRoot+"invoices/new.txt") {
+		t.Fatalf("move did not land: %v", h.fileNames(filesRoot))
 	}
 }
 

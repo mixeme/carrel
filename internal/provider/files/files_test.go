@@ -105,6 +105,29 @@ func (f *fakeDAV) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		f.entries[dir] = nil
 		w.WriteHeader(http.StatusCreated)
+	case "MOVE":
+		dest := r.Header.Get("Destination")
+		if dest == "" {
+			http.Error(w, "destination required", http.StatusBadRequest)
+			return
+		}
+		if i := strings.Index(dest, "/dav/"); i >= 0 {
+			dest = dest[i:]
+		}
+		f.mu.Lock()
+		defer f.mu.Unlock()
+		body, ok := f.entries[path]
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+		if _, taken := f.entries[dest]; taken && r.Header.Get("Overwrite") != "T" {
+			w.WriteHeader(http.StatusPreconditionFailed)
+			return
+		}
+		delete(f.entries, path)
+		f.entries[dest] = body
+		w.WriteHeader(http.StatusCreated)
 	default:
 		http.Error(w, "no", http.StatusMethodNotAllowed)
 	}

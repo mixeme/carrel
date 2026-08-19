@@ -1531,6 +1531,12 @@ document.addEventListener('htmx:sseError', function (e) {
     var filterInput = browse.querySelector('[data-files-filter]');
     var toolbar = browse.querySelector('[data-files-toolbar]');
     var deleteForm = browse.querySelector('[data-files-delete-form]');
+    var moveForm = browse.querySelector('[data-files-move-form]');
+    var renameForm = browse.querySelector('[data-files-rename-form]');
+    var moveDialog = browse.querySelector('[data-files-move-dialog]');
+    var picker = moveDialog && moveDialog.querySelector('[data-folder-picker]');
+    var pickerConfirm = picker && picker.querySelector('[data-picker-confirm]');
+    var pickerSelection = null;
     var propsPanel = document.getElementById('files-props');
     var propsBody = propsPanel && propsPanel.querySelector('[data-files-props-body]');
     var propsTitle = propsPanel && propsPanel.querySelector('[data-files-props-title]');
@@ -1629,6 +1635,8 @@ document.addEventListener('htmx:sseError', function (e) {
         });
         if (opsCount) opsCount.textContent = sel.length + (sel.length === 1 ? ' selected' : ' selected');
         if (opsSize) opsSize.textContent = total > 0 ? formatSize(total) : '';
+        var renameBtn = browse.querySelector('[data-files-op="rename"]');
+        if (renameBtn) renameBtn.disabled = readonly || sel.length !== 1;
         if (sel.length === 1 && !propsClosed() && !narrow.matches) {
             renderProps(sel[0]);
             showProps();
@@ -1736,8 +1744,64 @@ document.addEventListener('htmx:sseError', function (e) {
                 });
             });
             deleteForm.submit();
+            return;
+        }
+        if (action === 'rename') {
+            e.preventDefault();
+            if (readonly || !renameForm || sel.length !== 1) return;
+            var current = sel[0].getAttribute('data-name') || '';
+            var next = window.prompt('New name', current);
+            if (!next || next === current) return;
+            renameForm.querySelector('[name="target"]').value = sel[0].getAttribute('data-rel') || '';
+            renameForm.querySelector('[name="new_name"]').value = next;
+            renameForm.submit();
+            return;
+        }
+        if (action === 'move') {
+            e.preventDefault();
+            if (readonly || !moveDialog) return;
+            pickerSelection = null;
+            if (pickerConfirm) pickerConfirm.disabled = true;
+            picker.querySelectorAll('.folder-tree-node.is-on').forEach(function (n) { n.classList.remove('is-on'); });
+            moveDialog.showModal();
         }
     });
+
+    if (picker) {
+        picker.addEventListener('click', function (e) {
+            var node = e.target.closest('[data-picker-node]');
+            if (!node || node.classList.contains('is-disabled')) return;
+            picker.querySelectorAll('.folder-tree-node.is-on').forEach(function (n) { n.classList.remove('is-on'); });
+            node.classList.add('is-on');
+            pickerSelection = {
+                account: node.getAttribute('data-account'),
+                col: node.getAttribute('data-col'),
+                folder: node.getAttribute('data-folder') || ''
+            };
+            if (pickerConfirm) pickerConfirm.disabled = false;
+        });
+        picker.addEventListener('click', function (e) {
+            if (e.target.closest('[data-picker-cancel]')) {
+                moveDialog.close();
+            }
+            if (e.target.closest('[data-picker-confirm]') && pickerSelection && moveForm) {
+                moveForm.querySelector('[name="dest_account"]').value = pickerSelection.account;
+                moveForm.querySelector('[name="dest_col"]').value = pickerSelection.col;
+                moveForm.querySelector('[name="dest_folder"]').value = pickerSelection.folder;
+                moveForm.querySelectorAll('[data-batch-field]').forEach(function (el) { el.remove(); });
+                selectedRows().forEach(function (row) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'target';
+                    input.value = row.getAttribute('data-rel') || '';
+                    input.setAttribute('data-batch-field', '');
+                    moveForm.appendChild(input);
+                });
+                moveDialog.close();
+                moveForm.submit();
+            }
+        });
+    }
 
     if (filterInput) {
         filterInput.addEventListener('input', applyFilter);

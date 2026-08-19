@@ -2143,6 +2143,58 @@ label.checkbox input {
     }
 }
 
+.files-dialog {
+    border: 0.5px solid var(--hair);
+    border-radius: 6px;
+    padding: 0;
+    max-width: 34rem;
+    width: calc(100% - 2rem);
+    background: var(--bg);
+    color: var(--ink);
+}
+
+.files-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.folder-picker {
+    padding: 1rem 1.25rem 1.25rem;
+}
+
+.folder-picker-title {
+    margin: 0 0 0.75rem;
+    font-size: 1.05rem;
+}
+
+.folder-tree {
+    max-height: 16rem;
+    overflow: auto;
+    border: 0.5px solid var(--hair);
+    border-radius: 4px;
+    padding: 0.35rem 0;
+    margin-bottom: 0.75rem;
+}
+
+.folder-tree-node {
+    padding: 0.35rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.folder-tree-node.is-on {
+    background: var(--card);
+    color: var(--accent);
+}
+
+.folder-tree-node.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.folder-tree-label .hint {
+    font-size: 0.8rem;
+}
+
 .crumbs {
     font-size: 0.9rem;
     margin: 0.25rem 0 0;

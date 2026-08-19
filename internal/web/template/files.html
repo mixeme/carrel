@@ -71,6 +71,8 @@
                 <span class="files-ops-size hint" data-files-ops-size></span>
                 <span class="files-ops-sep" aria-hidden="true"></span>
                 <button type="button" class="link" data-files-op="download">Download</button>
+                <button type="button" class="link" data-files-op="rename"{{if $d.ReadOnly}} disabled{{end}}>Rename</button>
+                <button type="button" class="link" data-files-op="move"{{if $d.ReadOnly}} disabled{{end}}>Move…</button>
                 <button type="button" class="link" data-files-op="delete"{{if $d.ReadOnly}} disabled{{end}}>Delete</button>
                 <span class="files-ops-right"><button type="button" class="link" data-files-clear>Clear selection</button></span>
             </div>
@@ -89,6 +91,46 @@
                 <input type="hidden" name="action" value="delete-batch">
                 <input type="hidden" name="p" value="{{$d.Rel}}">
             </form>
+            <form method="post" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" data-files-move-form class="visually-hidden">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="move">
+                <input type="hidden" name="p" value="{{$d.Rel}}">
+                <input type="hidden" name="dest_account" value="">
+                <input type="hidden" name="dest_col" value="">
+                <input type="hidden" name="dest_folder" value="">
+            </form>
+            <form method="post" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" data-files-rename-form class="visually-hidden">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="rename">
+                <input type="hidden" name="p" value="{{$d.Rel}}">
+                <input type="hidden" name="target" value="">
+                <input type="hidden" name="new_name" value="">
+            </form>
+
+            <dialog class="files-dialog no-print" data-files-move-dialog>
+                <div class="folder-picker" data-folder-picker>
+                    <h3 class="folder-picker-title">Move here</h3>
+                    <div class="folder-tree" role="tree">
+                        {{range $d.PickerRoots}}
+                        <div class="folder-tree-node{{if .ReadOnly}} is-disabled{{end}}" role="treeitem"
+                             data-picker-node data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="">
+                            <span class="folder-tree-label">{{.Name}} <span class="hint">{{.ServerLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
+                        </div>
+                        {{range .Children}}
+                        <div class="folder-tree-node" role="treeitem" data-picker-node
+                             data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="{{.Folder}}" style="padding-left:1.25rem">
+                            <span class="folder-tree-label">{{.Name}}</span>
+                        </div>
+                        {{end}}
+                        {{end}}
+                    </div>
+                    <p class="hint folder-picker-hint">Inside one server this is <code>MOVE</code> — instant, no traffic. To another storage the file is downloaded and uploaded again.</p>
+                    <div class="form-foot">
+                        <button type="button" class="primary" data-picker-confirm disabled>Move here</button>
+                        <button type="button" class="link" data-picker-cancel>Cancel</button>
+                    </div>
+                </div>
+            </dialog>
 
             <table class="files-table" data-columns-root="files" data-files-list>
                 <thead><tr>
