@@ -245,6 +245,9 @@ type taskCardView struct {
 	Task         model.Todo
 	Form         taskForm
 	Related      []relatedRow
+	Attachments  []attachmentRow
+	CanAttach    bool
+	Section      string
 	ReadOnly     bool
 	IsNew        bool
 	Source       sourceBlockView

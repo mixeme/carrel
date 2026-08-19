@@ -34,6 +34,7 @@ type Todo struct {
 	Priority        int
 	PercentComplete int
 	Related         []Relation
+	Attachments     []Attachment
 	Other           []Property
 }
 
@@ -55,6 +56,7 @@ var knownTodoProps = map[string]bool{
 	ical.PropSequence:        true,
 	ical.PropClass:           true,
 	ical.PropRelatedTo:       true,
+	ical.PropAttach:          true,
 }
 
 // Todo returns the display view of a task object.
@@ -76,6 +78,7 @@ func (o *Object) Todo(loc *time.Location) (Todo, error) {
 		Location:    icalPropText(comp.Props, ical.PropLocation),
 		Status:      strings.ToUpper(icalPropText(comp.Props, ical.PropStatus)),
 		Related:     relationsFrom(comp.Props),
+		Attachments: attachmentsFrom(comp.Props),
 	}
 	if cats := comp.Props.Get(ical.PropCategories); cats != nil {
 		task.Categories = splitComma(cats.Value)

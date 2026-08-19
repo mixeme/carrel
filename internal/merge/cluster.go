@@ -174,6 +174,46 @@ func DetectEvents(records []Record, loc *time.Location, opts Options) []Candidat
 	return candidates(KindEvent, kept, prints, opts)
 }
 
+// DetectTodos groups the tasks among records.
+func DetectTodos(records []Record, loc *time.Location, opts Options) []Candidate {
+	if loc == nil {
+		loc = time.UTC
+	}
+	kept, prints := make([]Record, 0, len(records)), make([]Fingerprint, 0, len(records))
+	for _, rec := range records {
+		if rec.Object == nil || rec.Object.Component() != "VTODO" {
+			continue
+		}
+		todo, err := rec.Object.Todo(loc)
+		if err != nil {
+			continue
+		}
+		kept = append(kept, rec)
+		prints = append(prints, FingerprintTodo(todo))
+	}
+	return candidates(KindTodo, kept, prints, opts)
+}
+
+// DetectNotes groups the notes among records.
+func DetectNotes(records []Record, loc *time.Location, opts Options) []Candidate {
+	if loc == nil {
+		loc = time.UTC
+	}
+	kept, prints := make([]Record, 0, len(records)), make([]Fingerprint, 0, len(records))
+	for _, rec := range records {
+		if rec.Object == nil || rec.Object.Component() != "VJOURNAL" {
+			continue
+		}
+		note, err := rec.Object.Note(loc)
+		if err != nil {
+			continue
+		}
+		kept = append(kept, rec)
+		prints = append(prints, FingerprintNote(note))
+	}
+	return candidates(KindNote, kept, prints, opts)
+}
+
 func candidates(kind Kind, records []Record, prints []Fingerprint, opts Options) []Candidate {
 	// Skip is given in the caller's indexes, which are the indexes of the
 	// records that survived the kind filter.

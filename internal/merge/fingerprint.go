@@ -19,6 +19,10 @@ const (
 	KindContact Kind = "contact"
 	// KindEvent is a calendar event.
 	KindEvent Kind = "event"
+	// KindTodo is a task (VTODO).
+	KindTodo Kind = "todo"
+	// KindNote is a journal entry (VJOURNAL).
+	KindNote Kind = "note"
 )
 
 // Fingerprint is the comparable shape of one record: the handful of values §15
@@ -79,6 +83,30 @@ func FingerprintEvent(e model.Event) Fingerprint {
 	}
 	if !e.Start.IsZero() {
 		print.Start = e.Start.UTC()
+	}
+	return print
+}
+
+// FingerprintTodo folds a task into its comparable form. Tasks are scored on
+// UID and on summary, the same way events are minus the start time.
+func FingerprintTodo(t model.Todo) Fingerprint {
+	return Fingerprint{
+		Kind: KindTodo,
+		UID:  strings.TrimSpace(t.UID),
+		Name: NormalizeName(t.Summary),
+	}
+}
+
+// FingerprintNote folds a note into its comparable form. Notes are scored on
+// UID, on summary, and on date when present.
+func FingerprintNote(n model.Note) Fingerprint {
+	print := Fingerprint{
+		Kind: KindNote,
+		UID:  strings.TrimSpace(n.UID),
+		Name: NormalizeName(n.Summary),
+	}
+	if !n.Date.IsZero() {
+		print.Start = n.Date.UTC()
 	}
 	return print
 }

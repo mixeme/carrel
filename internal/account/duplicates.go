@@ -31,6 +31,8 @@ func (v Verdict) Valid() bool { return v == VerdictLinked || v == VerdictIgnored
 const (
 	KindContact = "contact"
 	KindEvent   = "event"
+	KindTodo    = "todo"
+	KindNote    = "note"
 )
 
 // Member identifies one object of a group. §15 fixes the key — account,
@@ -210,7 +212,7 @@ func (d *Duplicates) Decide(id, kind string, verdict Verdict, members []Member, 
 		return Group{}, errors.New("account: a duplicate group needs at least two records")
 	}
 	kind = strings.TrimSpace(kind)
-	if kind != KindContact && kind != KindEvent {
+	if kind != KindContact && kind != KindEvent && kind != KindTodo && kind != KindNote {
 		return Group{}, errors.New("account: unknown duplicate kind")
 	}
 

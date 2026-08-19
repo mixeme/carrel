@@ -114,14 +114,18 @@ func (s *Server) loadTaskCard(ctx context.Context, sess *session.Session, accoun
 	if err != nil {
 		return taskCardView{}, err
 	}
-	return taskCardView{
+	card := taskCardView{
 		Sources: s.taskSources(sess), AccountID: accountID, ColEnc: colEnc,
 		Collection: col, AccountLabel: accountLabel(*acc), UID: task.UID,
 		ETag: obj.ETag, Task: task, Form: formFromTask(task, s.timezone()),
 		Related:  s.resolveRelated(ctx, p, accountID, colEnc, normalizeCollectionPath(col.Path), task.Related),
 		ReadOnly: col.ReadOnly,
+		Section:  sectionTasks.Path,
 		Source:   s.objectSource(sess, accountID, normalizeCollectionPath(col.Path), obj.Path, obj.ETag),
-	}, nil
+	}
+	card.Attachments = s.attachmentRows(sess, sectionTasks, accountID, colEnc, task.UID, task.Attachments)
+	_, card.CanAttach = s.attachmentTarget(sess)
+	return card, nil
 }
 
 func (s *Server) loadNoteCard(ctx context.Context, sess *session.Session, accountID, collection, colEnc, uid string) (noteCardView, error) {

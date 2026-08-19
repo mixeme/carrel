@@ -90,6 +90,7 @@
             </form>
             {{end}}
             {{end}}
+            {{if not $d.IsNew}}{{template "attachments" .}}{{end}}
             {{if $d.Related}}
             <section class="other-props">
                 <h2>Related</h2>

@@ -125,6 +125,7 @@ func (s *Server) pollCalendarRecords(ctx context.Context, sess *session.Session,
 		return nil, false, err
 	}
 	items := make([]fanout.Item, 0, len(set.Objects))
+	anyCache := false
 	for _, obj := range set.Objects {
 		event, eventErr := obj.Event(loc)
 		if eventErr != nil {
@@ -138,7 +139,47 @@ func (s *Server) pollCalendarRecords(ctx context.Context, sess *session.Session,
 			URL:      s.icalURL("calendar", src, event.UID),
 		}})
 	}
-	return items, set.FromCache && len(items) > 0, nil
+	anyCache = set.FromCache && len(items) > 0
+
+	if todoSet, todoErr := p.QueryComponent(ctx, src.Collection, dav.CompTodo, time.Time{}, time.Time{}); todoErr == nil {
+		for _, obj := range todoSet.Objects {
+			todo, todoErr := obj.Todo(loc)
+			if todoErr != nil {
+				continue
+			}
+			record := recordOf(src, obj)
+			items = append(items, fanout.Item{SourceID: src.ID, Key: record.Key(), Data: dupRecordItem{
+				Record: record, Kind: account.KindTodo,
+				Title:    todo.DisplayTitle(),
+				Subtitle: taskStatusLabel(todo),
+				URL:      s.icalURL("tasks", src, todo.UID),
+			}})
+		}
+		if todoSet.FromCache && len(todoSet.Objects) > 0 {
+			anyCache = true
+		}
+	}
+
+	if noteSet, noteErr := p.QueryComponent(ctx, src.Collection, dav.CompJournal, time.Time{}, time.Time{}); noteErr == nil {
+		for _, obj := range noteSet.Objects {
+			note, noteErr := obj.Note(loc)
+			if noteErr != nil {
+				continue
+			}
+			record := recordOf(src, obj)
+			items = append(items, fanout.Item{SourceID: src.ID, Key: record.Key(), Data: dupRecordItem{
+				Record: record, Kind: account.KindNote,
+				Title:    note.DisplayTitle(),
+				Subtitle: noteDate(note, loc),
+				URL:      s.icalURL("notes", src, note.UID),
+			}})
+		}
+		if noteSet.FromCache && len(noteSet.Objects) > 0 {
+			anyCache = true
+		}
+	}
+
+	return items, anyCache, nil
 }
 
 func recordOf(src fanout.Source, obj *model.Object) merge.Record {
@@ -147,6 +188,16 @@ func recordOf(src fanout.Source, obj *model.Object) merge.Record {
 		AccountLabel: src.AccountLabel, CollectionLabel: src.CollectionLabel,
 		Color: src.Color, ReadOnly: src.ReadOnly, Object: obj,
 	}
+}
+
+func noteDate(note model.Note, loc *time.Location) string {
+	if note.Date.IsZero() {
+		return "No date"
+	}
+	if note.DateOnly {
+		return note.Date.In(loc).Format("2 January 2006")
+	}
+	return note.Date.In(loc).Format("2 January 2006, 15:04")
 }
 
 func eventWhen(event model.Event, loc *time.Location) string {
@@ -163,6 +214,8 @@ func eventWhen(event model.Event, loc *time.Location) string {
 type duplicatesData struct {
 	Contacts   []dupGroupView
 	Events     []dupGroupView
+	Tasks      []dupGroupView
+	Notes      []dupGroupView
 	Threshold  int
 	Records    int
 	Candidates int
@@ -175,7 +228,9 @@ type duplicatesData struct {
 
 // Empty reports whether there is nothing to show, which is the normal outcome and
 // not a failure.
-func (d duplicatesData) Empty() bool { return len(d.Contacts) == 0 && len(d.Events) == 0 }
+func (d duplicatesData) Empty() bool {
+	return len(d.Contacts) == 0 && len(d.Events) == 0 && len(d.Tasks) == 0 && len(d.Notes) == 0
+}
 
 // dupSection is one heading on the screen. The two kinds are never compared with
 // each other, so they are never mixed in one list either.
@@ -192,6 +247,12 @@ func (d duplicatesData) Sections() []dupSection {
 	}
 	if len(d.Events) > 0 {
 		out = append(out, dupSection{Label: "Events", Groups: d.Events})
+	}
+	if len(d.Tasks) > 0 {
+		out = append(out, dupSection{Label: "Tasks", Groups: d.Tasks})
+	}
+	if len(d.Notes) > 0 {
+		out = append(out, dupSection{Label: "Notes", Groups: d.Notes})
 	}
 	return out
 }
@@ -254,7 +315,7 @@ func (s *Server) duplicateData(sess *session.Session, snap fanout.Snapshot) dupl
 	}
 
 	loaded := make(map[string]dupRecordItem, len(snap.Items))
-	var contacts, events []merge.Record
+	var contacts, events, todos, notes []merge.Record
 	for _, item := range snap.Items {
 		record, ok := item.Data.(dupRecordItem)
 		if !ok {
@@ -266,6 +327,10 @@ func (s *Server) duplicateData(sess *session.Session, snap fanout.Snapshot) dupl
 			contacts = append(contacts, record.Record)
 		case account.KindEvent:
 			events = append(events, record.Record)
+		case account.KindTodo:
+			todos = append(todos, record.Record)
+		case account.KindNote:
+			notes = append(notes, record.Record)
 		}
 	}
 	data.Records = len(loaded)
@@ -311,17 +376,36 @@ func (s *Server) duplicateData(sess *session.Session, snap fanout.Snapshot) dupl
 			data.append(view)
 		}
 	}
+	for _, candidate := range merge.DetectTodos(todos, s.timezone(), s.duplicateOptions(decisions, todos)) {
+		if view, ok := s.candidateGroup(candidate, loaded, decided); ok {
+			data.Candidates++
+			data.append(view)
+		}
+	}
+	for _, candidate := range merge.DetectNotes(notes, s.timezone(), s.duplicateOptions(decisions, notes)) {
+		if view, ok := s.candidateGroup(candidate, loaded, decided); ok {
+			data.Candidates++
+			data.append(view)
+		}
+	}
 	sortDupGroups(data.Contacts)
 	sortDupGroups(data.Events)
+	sortDupGroups(data.Tasks)
+	sortDupGroups(data.Notes)
 	return data
 }
 
 func (d *duplicatesData) append(view dupGroupView) {
-	if view.Kind == account.KindEvent {
+	switch view.Kind {
+	case account.KindEvent:
 		d.Events = append(d.Events, view)
-		return
+	case account.KindTodo:
+		d.Tasks = append(d.Tasks, view)
+	case account.KindNote:
+		d.Notes = append(d.Notes, view)
+	default:
+		d.Contacts = append(d.Contacts, view)
 	}
-	d.Contacts = append(d.Contacts, view)
 }
 
 // duplicateOptions carries the stored verdicts into detection: a pair the person
@@ -360,7 +444,7 @@ func (s *Server) decidedGroup(group account.Group, loaded map[string]dupRecordIt
 		}
 		present = append(present, item.Record)
 		view.Members = append(view.Members, memberView(item))
-		if !item.Record.ReadOnly {
+		if !item.Record.ReadOnly && group.Kind != account.KindTodo && group.Kind != account.KindNote {
 			view.Mergeable = true
 		}
 	}
@@ -386,7 +470,7 @@ func (s *Server) candidateGroup(candidate merge.Candidate, loaded map[string]dup
 			continue
 		}
 		view.Members = append(view.Members, memberView(item))
-		if !record.ReadOnly {
+		if !record.ReadOnly && candidate.Kind != merge.KindTodo && candidate.Kind != merge.KindNote {
 			view.Mergeable = true
 		}
 	}

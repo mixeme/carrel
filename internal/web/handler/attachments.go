@@ -366,15 +366,15 @@ func (s *Server) AttachmentOpen(w http.ResponseWriter, r *http.Request) {
 	s.serveStream(w, r, download, name, rng != nil)
 }
 
-// attachSection maps a URL segment onto the section it names. Only the two
-// §23.10 covers are accepted: a task list is not offered attachments in this
-// build.
+// attachSection maps a URL segment onto the section it names.
 func attachSection(name string) (icalSection, bool) {
 	switch name {
 	case sectionNotes.Path:
 		return sectionNotes, true
 	case sectionCalendar.Path:
 		return sectionCalendar, true
+	case sectionTasks.Path:
+		return sectionTasks, true
 	}
 	return icalSection{}, false
 }
@@ -634,13 +634,17 @@ func (s *Server) AttachmentAction(w http.ResponseWriter, r *http.Request, sectio
 	s.attachDetach(w, r, section, accountID, colEnc, uid)
 }
 
-// NoteAttachment and EventAttachment are the two routes of §23.10.
+// NoteAttachment, EventAttachment and TaskAttachment are the routes of §23.10.
 func (s *Server) NoteAttachment(w http.ResponseWriter, r *http.Request) {
 	s.AttachmentAction(w, r, sectionNotes)
 }
 
 func (s *Server) EventAttachment(w http.ResponseWriter, r *http.Request) {
 	s.AttachmentAction(w, r, sectionCalendar)
+}
+
+func (s *Server) TaskAttachment(w http.ResponseWriter, r *http.Request) {
+	s.AttachmentAction(w, r, sectionTasks)
 }
 
 // rewindable returns the upload as something that can be read more than once,

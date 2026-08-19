@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Wave 1.14–1.15 — task attachments and task/note duplicates.** Tasks gain the same attachment block events and notes already have: upload, detach, open through the proxy, all reusing the shared `{{template "attachments"}}` and the existing `/attach` endpoint. The `ATTACH` property is parsed into the `Todo` model instead of falling into `Other`. Duplicate detection now covers tasks (`VTODO`) and notes (`VJOURNAL`) in addition to contacts and events: the poll loads all component types from each calendar, fingerprints them on UID and summary, and groups them on the duplicates screen under their own sections. Linking and ignoring work the same way; server-side merge is not offered for tasks or notes because their fields have nothing to supplement.
+
 - **Wave 1.12–1.13 — §23.8 transparency.** Detail panels and **Settings → Connections** show a **Source** block with when the collection was last read, when the server last changed it (from `getctag` when it encodes a time), and object count. Event times carry the stored `TZID` as a muted label when it differs from your settings timezone; the event form shows a read-only **Time zone** field in that case.
 
 - **Wave 1.11 — column picker.** Lists and tables in contacts, tasks, notes, files, admin users, and the audit log gain a **Columns** control in the toolbar. A checkbox shows or hides a column, the drag handle reorders, and the first data column cannot be turned off. Choices are stored per section in `localStorage`.

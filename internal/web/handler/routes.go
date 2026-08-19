@@ -128,6 +128,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("GET "+s.Path("/app/tasks/{account}/{col}/{uid}"), s.TaskCard)
 	app.HandleFunc("POST "+s.Path("/app/tasks/{account}/{col}/{uid}"), s.TaskCard)
 	app.HandleFunc("POST "+s.Path("/app/tasks/{account}/{col}/{uid}/conflict"), s.TaskConflictResolve)
+	app.HandleFunc("POST "+s.Path("/app/tasks/{account}/{col}/{uid}/attach"), s.TaskAttachment)
 
 	// Notes. The quick form comes before the collection routes so /new and
 	// /quick cannot be read as an account identifier.
