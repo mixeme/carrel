@@ -772,7 +772,11 @@ func (s *Server) findSources(sess *session.Session, req findRequest) ([]sourceRo
 		if err != nil {
 			return nil, err
 		}
-		return append(calendars, books...), nil
+		storages, err := s.collectionsOfKind(sess, discovery.KindFiles, req.Mode.view(), "")
+		if err != nil {
+			return nil, err
+		}
+		return append(append(calendars, books...), storages...), nil
 	default:
 		return s.collectionsOfKind(sess, discovery.KindCalendar, req.Mode.view(), "")
 	}
@@ -1170,6 +1174,10 @@ type searchContext struct {
 // pollSearch searches one source for any of the terms. A calendar source is
 // searched for events, tasks and notes; an address book for cards.
 func (s *Server) pollSearch(ctx context.Context, sess *session.Session, src fanout.Source, terms []string, loc *time.Location, match searchContext) ([]fanout.Item, bool, error) {
+	if src.Kind == string(discovery.KindFiles) {
+		query := searchQuery(match, terms)
+		return s.searchFiles(ctx, sess, src, query)
+	}
 	if src.Kind == string(discovery.KindAddressBook) {
 		return s.searchContacts(ctx, sess, src, terms, match)
 	}

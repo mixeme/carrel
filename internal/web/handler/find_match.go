@@ -249,7 +249,7 @@ func (v findView) KindTabs() []kindTab {
 	case modeSearch:
 		specs = []struct{ label, value string }{
 			{"All", "all"}, {"Contacts", "contacts"}, {"Events", "events"},
-			{"Tasks", "tasks"}, {"Notes", "notes"},
+			{"Tasks", "tasks"}, {"Notes", "notes"}, {"Files", "files"},
 		}
 	case modeTimeline:
 		specs = []struct{ label, value string }{
@@ -273,6 +273,9 @@ func (v findView) KindTabs() []kindTab {
 		count := counts[spec.value]
 		if spec.value == "contacts" {
 			count = counts["contact"]
+		}
+		if spec.value == "files" {
+			count = counts["file"]
 		}
 		tab := kindTab{
 			Label:  spec.label,

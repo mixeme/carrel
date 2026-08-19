@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- **Desktop wrapper phase 5 — onboarding and sign-out:** first launch without `desktop.json` shows a Remote/Local choice (and a tray checkbox, stored for phase 6). The choice is written to the OS-user config. **Sign out** in Carrel returns to that screen; a Local sidecar is stopped before a Remote session can start.
+
 - **Desktop wrapper phase 4 — sidecar download:** `internal/desktop/sidecar` downloads `carrel_{version}_{goos}_{goarch}` from GitHub releases, verifies SHA256 via `checksums.txt`, extracts to the install dir, and writes `version.json`. Local mode calls `Ensure` lazily when the sidecar is missing or version mismatches; `-sidecar` skips download for development.
 
 - **Desktop wrapper phase 3 — local supervisor:** `PickFreePort` on loopback, `Supervisor` starts `carrel` with `CARREL_DATA_DIR`, `CARREL_PORT`, `CARREL_BIND=127.0.0.1`, polls `/healthz`, writes `instance.lock` with dynamic port, stops sidecar with 15s grace (SIGTERM / interrupt). `LocalApp` and `-local`/`-sidecar` flags; Wails `SingleInstanceLock` focuses an existing window on second launch.
@@ -27,6 +29,8 @@ All notable changes to this project are documented in this file.
 - **Wave 2.7 — tiles and server thumbnails.** The file list toggles to a tile grid with the same selection and operations bar. Image previews come from `GET /t/{account}/{col}?p=…` — Carrel decodes on the server (up to 16 MiB, ~256 px long side) and caches in the session; the browser never fetches the original for a tile.
 
 - **Wave 2.8 — copy and cross-storage warning.** **Copy…** uses `GET` + `PUT` and leaves the source in place. Move and copy through the folder picker warn before starting when the destination is another storage — files then pass through Carrel rather than a single `MOVE`.
+
+- **Wave 2.9 — filename search.** Global search includes ticked file collections, matches filenames by walking each collection tree, adds a **Files** tab, and states plainly that content is not indexed and will not be.
 
 ### Changed
 
