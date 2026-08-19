@@ -875,6 +875,8 @@ body.has-shell {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    font-size: 13px;
+    line-height: 1.45;
 }
 
 .app-top {
@@ -1026,11 +1028,11 @@ body.has-shell {
     border: 0.5px solid var(--card-border);
     border-radius: 3px;
     background: var(--paper);
+    font: inherit;
     font-size: 12.5px;
     color: var(--ink);
     text-decoration: none;
     cursor: pointer;
-    font: inherit;
     white-space: nowrap;
 }
 
@@ -1534,6 +1536,14 @@ input {
     background: var(--paper);
 }
 
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea,
+button {
+    appearance: none;
+    -webkit-appearance: none;
+}
+
 :where(label, div):has(> input:not([type="checkbox"]):not([type="radio"])) > button,
 :where(label, div):has(> input:not([type="checkbox"]):not([type="radio"])) > .button,
 :where(label, div):has(> select) > button,
@@ -1551,6 +1561,7 @@ button {
     background: var(--accent);
     color: #fff;
     font: inherit;
+    font-size: 12.5px;
     cursor: pointer;
 }
 

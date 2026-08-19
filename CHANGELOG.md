@@ -8,6 +8,10 @@ All notable changes to this project are documented in this file.
 
 - **Wave 2.5 — visual layout transfer.** App screens take the mockup shell: SVG logotype in the header, icons on search / New note / refresh / the section rail / the narrow bottom bar, and a relative cache-age label instead of the bare word Refresh. Section sources sit in the same left column as the nav (CSS grid; without JavaScript they stay in the page, and on a phone they still move into the drawer). List, settings and admin pages drop the inner `.card` frame; `.button` is gone from app templates in favour of `.app-btn`. Auth screens (login, setup, register, invite, password, about) use the centred card of §7.12 with the logotype on sign-in. Handlers and form fields are unchanged. [docs/plans/global-plan.md](docs/plans/global-plan.md) wave 2.5 is closed in code; v1.1 still waits on side-by-side visual acceptance of table 7.13 and a repeat of P5.
 
+### Fixed
+
+- **Public Sans rendered as Thin, and the shell type did not match the mockups.** The embedded variable files named themselves `Public Sans Thin` with `wght` default 100, so the interface used the hairline master instead of Regular. They now default to 400. The signed-in shell takes the mockup measure (13 px / 1.45), `.app-btn` keeps 12.5 px after `font: inherit`, and text inputs, selects, textareas and buttons drop native appearance so they inherit the face.
+
 ## [0.10.0] - 2026-08-19
 
 **Волны 1–2 в коде; десктоп-обёртка фазы 1–5.** Redesign shell, file manager, notes; `cmd/carrel-desktop` through onboarding and sign-out. Версия в бинарнике — `0.10.0`. Не v1: тег ждёт P1, P2, P5 ([docs/manual-acceptance.md](docs/manual-acceptance.md)).
