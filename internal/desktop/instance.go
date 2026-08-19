@@ -36,7 +36,7 @@ func ReadLock(path string) (*InstanceLock, error) {
 	if lock.PID <= 0 {
 		return nil, fmt.Errorf("desktop: lock pid %d", lock.PID)
 	}
-	if lock.Mode != ModeRemote && lock.Mode != ModeLocal {
+	if !validLockMode(lock.Mode) {
 		return nil, fmt.Errorf("desktop: lock mode %q", lock.Mode)
 	}
 	return &lock, nil
@@ -47,7 +47,7 @@ func WriteLock(path string, lock InstanceLock) error {
 	if lock.PID <= 0 {
 		return fmt.Errorf("desktop: lock pid %d", lock.PID)
 	}
-	if lock.Mode != ModeRemote && lock.Mode != ModeLocal {
+	if !validLockMode(lock.Mode) {
 		return fmt.Errorf("desktop: lock mode %q", lock.Mode)
 	}
 	data, err := json.MarshalIndent(lock, "", "  ")
@@ -108,4 +108,8 @@ func AcquireLock(path string, lock InstanceLock) error {
 		return fmt.Errorf("%w (pid %d)", ErrAlreadyRunning, existing.PID)
 	}
 	return WriteLock(path, lock)
+}
+
+func validLockMode(m Mode) bool {
+	return m == ModeRemote || m == ModeLocal || m == ModeSetup
 }

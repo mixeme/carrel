@@ -1,0 +1,202 @@
+:root {
+  --ink: #17211c;
+  --card: #e8dfcb;
+  --card-border: #c9bfa6;
+  --accent: #4a6b52;
+  --bg: #f5f1e8;
+  --paper: #fffdf7;
+  --hair: #e2daca;
+  --dusty: #9a9280;
+  --muted: #6b6355;
+  --alert: #b04a3a;
+  --f-sans: "Public Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --f-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ink: #e8dfcb;
+    --bg: #141a16;
+    --paper: #1b231d;
+    --card: #242e27;
+    --card-border: #3a463d;
+    --hair: #28332b;
+    --dusty: #8b8571;
+    --muted: #a79e88;
+    --accent: #7fa085;
+    --alert: #c4675a;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.5 var(--f-sans);
+}
+
+.onboard {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 2rem 1.4rem 2.4rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1.1rem;
+  font-size: 1.35rem;
+  font-weight: 650;
+}
+
+.brand svg {
+  border-radius: 6px;
+}
+
+.choice {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.85rem 0.9rem;
+  margin: 0 0 0.65rem;
+  border: 1px solid var(--card-border);
+  background: var(--paper);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.choice:has(input:checked) {
+  border-color: var(--accent);
+}
+
+.choice input {
+  margin-top: 0.3rem;
+  accent-color: var(--accent);
+}
+
+.choice strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.lead {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.quiet {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--dusty);
+  font-size: 0.8rem;
+}
+
+.check {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  margin: 0.85rem 0 0.4rem;
+  cursor: pointer;
+}
+
+.check input {
+  accent-color: var(--accent);
+}
+
+.note {
+  margin: 0.7rem 0 1rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--card);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.note code {
+  font-family: var(--f-mono);
+  font-size: 0.8em;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.9rem 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.field input {
+  font: 13px/1.4 var(--f-mono);
+  font-weight: 400;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.field input:read-only {
+  color: var(--muted);
+}
+
+.hint {
+  font-weight: 400;
+  color: var(--dusty);
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+button {
+  font: inherit;
+  padding: 0.4rem 0.85rem;
+  border-radius: 4px;
+  border: 1px solid var(--card-border);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fffdf7;
+}
+
+button.quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.error {
+  margin: 1rem 0 0;
+  color: var(--alert);
+  font-size: 0.9rem;
+}
+
+.status {
+  margin: 0.8rem 0 0;
+  color: var(--muted);
+}

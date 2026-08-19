@@ -47,6 +47,7 @@ func TestConfigValidate(t *testing.T) {
 	}{
 		{name: "remote needs url", cfg: Config{Mode: ModeRemote}, want: ErrRemoteURL},
 		{name: "local ok", cfg: Config{Mode: ModeLocal}, want: nil},
+		{name: "setup not persistable", cfg: Config{Mode: ModeSetup}, want: ErrInvalidMode},
 		{name: "bad mode", cfg: Config{Mode: "hybrid"}, want: ErrInvalidMode},
 	}
 	for _, tc := range tests {

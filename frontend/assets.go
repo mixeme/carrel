@@ -1,8 +1,9 @@
 // Copyright (C) 2026 Carrel contributors
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-// Package frontend holds the minimal Wails shell assets. Onboarding UI lands
-// here in a later phase; Remote mode redirects the webview to the Carrel URL.
+// Package frontend holds the Wails onboarding UI. After a mode is chosen the
+// webview navigates to the Carrel instance; templates of the web app are not
+// duplicated here.
 package frontend
 
 import (
@@ -10,7 +11,7 @@ import (
 	"io/fs"
 )
 
-//go:embed index.html
+//go:embed *.html *.css *.js
 var files embed.FS
 
 // Assets returns the embedded shell files for the Wails asset server.

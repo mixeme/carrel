@@ -93,9 +93,14 @@ Writing tests is covered in [tests.md](tests.md), including the fake-server help
 
 Wails v2 wrapper — see [plans/desktop-wrapper.md](plans/desktop-wrapper.md).
 
+With no `desktop.json` and no flags, the window opens on onboarding (Local or Remote, tray checkbox). The choice is saved per OS-user. Signing out of Carrel returns to that screen and stops a Local sidecar.
+
 ```bash
-# Remote mode: pass a URL or set desktop.json (mode remote).
+# First run: onboarding UI (or pass a flag to skip it).
 go build -o carrel-desktop ./cmd/carrel-desktop
+./carrel-desktop
+
+# Remote mode: pass a URL or set desktop.json (mode remote).
 ./carrel-desktop -remote-url https://carrel.example
 
 # Local mode: sidecar on 127.0.0.1 (desktop.json mode local, or -local).

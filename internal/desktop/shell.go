@@ -5,7 +5,7 @@ package desktop
 
 import (
 	"context"
-	"fmt"
+	"os"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -19,15 +19,9 @@ import (
 
 const singleInstanceID = "gitea.mixdep.ru.mix.carrel.desktop"
 
-type windowShell struct {
-	paths      Paths
-	targetURL  string
-	ctx        context.Context
-	onStartup  func(ctx context.Context) error
-	onShutdown func()
-}
-
-func (s *windowShell) run() error {
+// Run starts the Wails window. First run shows onboarding; a saved desktop.json
+// or -remote-url / -local skips it. Blocks until the window closes.
+func Run(a *App) error {
 	return wails.Run(&options.App{
 		Title:     "Carrel",
 		Width:     1280,
@@ -35,22 +29,27 @@ func (s *windowShell) run() error {
 		MinWidth:  800,
 		MinHeight: 600,
 		AssetServer: &assetserver.Options{
-			Assets: carrelfrontend.Assets(),
+			Assets:     carrelfrontend.Assets(),
+			Middleware: a.assetMiddleware,
 		},
+		Bind: []interface{}{a},
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId: singleInstanceID,
 			OnSecondInstanceLaunch: func(options.SecondInstanceData) {
-				if s.ctx != nil {
-					runtime.WindowShow(s.ctx)
-					runtime.WindowUnminimise(s.ctx)
+				a.mu.Lock()
+				ctx := a.ctx
+				a.mu.Unlock()
+				if ctx != nil {
+					runtime.WindowShow(ctx)
+					runtime.WindowUnminimise(ctx)
 				}
 			},
 		},
-		OnStartup:  s.startup,
-		OnDomReady: s.domReady,
-		OnShutdown: s.shutdown,
+		OnStartup:  a.startup,
+		OnDomReady: a.domReady,
+		OnShutdown: a.shutdown,
 		Windows: &windows.Options{
-			WebviewUserDataPath: s.paths.WebviewDataDir,
+			WebviewUserDataPath: a.Paths.WebviewDataDir,
 		},
 		Linux: &linux.Options{
 			WebviewGpuPolicy: linux.WebviewGpuPolicyOnDemand,
@@ -59,28 +58,40 @@ func (s *windowShell) run() error {
 	})
 }
 
-func (s *windowShell) startup(ctx context.Context) {
-	s.ctx = ctx
-	if s.onStartup == nil {
-		return
-	}
-	if err := s.onStartup(ctx); err != nil {
+func (a *App) startup(ctx context.Context) {
+	a.mu.Lock()
+	a.ctx = ctx
+	a.pid = os.Getpid()
+	a.mu.Unlock()
+
+	if err := a.acquireOrFocus(); err != nil {
 		runtime.LogError(ctx, err.Error())
 		runtime.Quit(ctx)
-	}
-}
-
-func (s *windowShell) domReady(ctx context.Context) {
-	s.ctx = ctx
-	if s.targetURL == "" {
 		return
 	}
-	script := fmt.Sprintf(`window.location.replace(%s);`, jsString(s.targetURL))
-	runtime.WindowExecJS(ctx, script)
+	if err := a.autoConnect(ctx); err != nil {
+		a.setErr(err)
+		runtime.LogError(ctx, err.Error())
+	}
 }
 
-func (s *windowShell) shutdown(ctx context.Context) {
-	if s.onShutdown != nil {
-		s.onShutdown()
+func (a *App) domReady(ctx context.Context) {
+	a.mu.Lock()
+	a.ctx = ctx
+	target := a.target
+	a.mu.Unlock()
+	if target == "" {
+		return
 	}
+	a.navigate(target)
+}
+
+func (a *App) shutdown(ctx context.Context) {
+	a.stopWatch()
+	a.stopSidecar()
+	a.mu.Lock()
+	pid := a.pid
+	lockPath := a.Paths.LockPath
+	a.mu.Unlock()
+	_ = RemoveLock(lockPath, pid)
 }

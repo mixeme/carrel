@@ -237,11 +237,11 @@ macOS, DAV localhost onboarding, auto-update, ручной путь к exe, mult
 
 ### Фаза 5 — Onboarding и sign out — модель: **thinking** (medium)
 
-- [ ] First-run UI
-- [ ] Persist `desktop.json`
-- [ ] Sign out → onboarding
-- [ ] Local → Remote: stop sidecar
-- [ ] Коммит + CHANGELOG [Unreleased]
+- [x] First-run UI
+- [x] Persist `desktop.json`
+- [x] Sign out → onboarding
+- [x] Local → Remote: stop sidecar
+- [x] Коммит + CHANGELOG [Unreleased]
 
 ### Фаза 6 — Tray — модель: **Composer**
 

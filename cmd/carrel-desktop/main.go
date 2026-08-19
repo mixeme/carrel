@@ -34,29 +34,16 @@ func main() {
 		exitErr(err)
 	}
 
-	if desktop.ResolveLocalMode(cfg, *forceLocal, *remoteURL) {
-		app := &desktop.LocalApp{
-			Paths:               paths,
-			SidecarPath:         *sidecarPath,
-			Version:             version,
-			SkipSidecarDownload: *skipDownload,
-		}
-		if err := app.Run(); err != nil {
-			handleRunErr(err)
-		}
-		return
+	app := &desktop.App{
+		Paths:               paths,
+		Config:              cfg,
+		Version:             version,
+		SidecarPath:         *sidecarPath,
+		SkipSidecarDownload: *skipDownload,
+		RemoteOverride:      *remoteURL,
+		ForceLocal:          *forceLocal,
 	}
-
-	url, err := desktop.ResolveRemoteURL(cfg, *remoteURL)
-	if err != nil {
-		if errors.Is(err, desktop.ErrNotConfigured) {
-			exitErr(fmt.Errorf("%w: set desktop.json, pass -remote-url, or -local", err))
-		}
-		exitErr(err)
-	}
-
-	app := &desktop.RemoteApp{Paths: paths, URL: url}
-	if err := app.Run(); err != nil {
+	if err := desktop.Run(app); err != nil {
 		handleRunErr(err)
 	}
 }

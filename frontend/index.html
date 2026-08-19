@@ -4,20 +4,77 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Carrel</title>
-  <style>
-    body {
-      margin: 0;
-      font: 14px/1.4 system-ui, sans-serif;
-      background: #faf9f7;
-      color: #1a1a1a;
-      display: grid;
-      place-items: center;
-      min-height: 100vh;
-    }
-    p { margin: 0; color: #5c5c5c; }
-  </style>
+  <link rel="stylesheet" href="/onboarding.css">
 </head>
 <body>
-  <p id="status">Loading…</p>
+  <main class="onboard">
+    <p id="boot" class="status">Loading…</p>
+
+    <div id="panel" hidden>
+      <div class="brand" aria-hidden="true">
+        <svg viewBox="0 0 96 96" width="40" height="40" role="img" aria-label="Carrel">
+          <rect width="96" height="96" fill="#E8DFCB"/>
+          <path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/>
+          <path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/>
+        </svg>
+        <span>Carrel</span>
+      </div>
+
+      <section id="step-mode">
+        <label class="choice">
+          <input type="radio" name="mode" value="local" checked>
+          <span>
+            <strong>Local — run it here</strong>
+            <span class="lead">Carrel runs inside the app, on this computer. Nothing to deploy.</span>
+            <span class="quiet">Suits one person and one computer. A phone cannot open this Carrel until access over the network is allowed.</span>
+          </span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="mode" value="remote">
+          <span>
+            <strong>Remote — connect to a server</strong>
+            <span class="lead">Carrel is already running — yours or a shared one. The app becomes its window.</span>
+            <span class="quiet">One instance for all your devices, with the same settings everywhere.</span>
+          </span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="tray" checked>
+          <span>Closing the window hides to the tray</span>
+        </label>
+        <p class="note">The mode changes by signing out: the app shows this screen again. The data (<code>state.enc</code>) lives in the OS user profile either way.</p>
+        <div class="actions">
+          <button type="button" class="primary" id="next">Next</button>
+        </div>
+      </section>
+
+      <section id="step-remote" hidden>
+        <p class="lead">The app needs the address of your Carrel instance. The data stays there: the app is a window, not a second copy.</p>
+        <label class="field">
+          Address
+          <input id="remote-url" type="url" spellcheck="false" autocomplete="url" placeholder="https://carrel.example">
+        </label>
+        <div class="actions">
+          <button type="button" class="primary" id="connect-remote">Connect</button>
+          <button type="button" class="quiet" id="back-remote">Back</button>
+        </div>
+      </section>
+
+      <section id="step-local" hidden>
+        <label class="field">
+          Data folder
+          <input id="data-dir" type="text" readonly>
+          <span class="hint">Encrypted state lives here: your DAV connections and settings. Not one contact, event or note — those stay on the servers.</span>
+        </label>
+        <div class="actions">
+          <button type="button" class="primary" id="connect-local">Run</button>
+          <button type="button" class="quiet" id="back-local">Back</button>
+        </div>
+      </section>
+
+      <p id="error" class="error" role="alert" hidden></p>
+      <p id="status" class="status" hidden></p>
+    </div>
+  </main>
+  <script src="/onboarding.js"></script>
 </body>
 </html>

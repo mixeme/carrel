@@ -17,6 +17,9 @@ type Mode string
 const (
 	ModeRemote Mode = "remote"
 	ModeLocal  Mode = "local"
+	// ModeSetup is the instance-lock mode while onboarding is on screen.
+	// It is not a valid desktop.json value.
+	ModeSetup Mode = "setup"
 )
 
 // Config is persisted per OS-user in desktop.json.
@@ -67,6 +70,14 @@ func SaveConfig(path string, cfg *Config) error {
 	data = append(data, '\n')
 	if err := writeAtomic(path, data); err != nil {
 		return err
+	}
+	return nil
+}
+
+// ClearConfig removes desktop.json. A missing file is not an error.
+func ClearConfig(path string) error {
+	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("desktop: remove config: %w", err)
 	}
 	return nil
 }
