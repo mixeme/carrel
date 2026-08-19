@@ -47,6 +47,52 @@ func TestEmbeddedBaseHasShell(t *testing.T) {
 	}
 }
 
+// The narrow screen of §13 asks for the *source* rail to move into the
+// slide-out panel — the stack of checkboxes above the list is what it is meant
+// to replace. The panel is assembled in the browser, so what the server can be
+// held to is the mount point, and that the stylesheet does not simply hide the
+// rail on a phone.
+func TestNarrowShellCarriesTheSourcesDrawer(t *testing.T) {
+	templateFS, err := fs.Sub(web.TemplateFS, "template")
+	if err != nil {
+		t.Fatalf("template FS: %v", err)
+	}
+	b, err := fs.ReadFile(templateFS, "base.html")
+	if err != nil {
+		t.Fatalf("read base.html: %v", err)
+	}
+	body := string(b)
+	for _, want := range []string{"data-rail-mount", "data-rail-toggle", "data-rail-close", "data-rail-title"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("base.html is missing %s", want)
+		}
+	}
+
+	staticFS, err := fs.Sub(web.StaticFS, "static")
+	if err != nil {
+		t.Fatalf("static FS: %v", err)
+	}
+	css, err := fs.ReadFile(staticFS, "carrel.css")
+	if err != nil {
+		t.Fatalf("read carrel.css: %v", err)
+	}
+	sheet := string(css)
+	if strings.Contains(sheet, "\n    .section-rail {\n        display: none;\n    }") {
+		t.Error("the source rail is hidden outright on a narrow screen instead of moving into the panel")
+	}
+	if !strings.Contains(sheet, ".js .app-layout > .section-rail") {
+		t.Error("without JavaScript the source rail has to stay in the page")
+	}
+
+	js, err := fs.ReadFile(staticFS, "carrel.js")
+	if err != nil {
+		t.Fatalf("read carrel.js: %v", err)
+	}
+	if !strings.Contains(string(js), "data-rail-mount") {
+		t.Error("carrel.js does not move the source rail into the panel")
+	}
+}
+
 func TestAboutPublic(t *testing.T) {
 	a := newApp(t, nil)
 	a.Version = "1.2.3"

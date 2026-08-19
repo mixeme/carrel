@@ -388,6 +388,78 @@ func eventRecord(t *testing.T, accountID, collection, uid, summary, start string
 	}
 }
 
+func TestDetectTodosGroupsOnUID(t *testing.T) {
+	// The same task copied into a second list keeps its UID, which is the one
+	// signal worth 60 on its own. A shared summary is a hint and stays below
+	// the default threshold — two people can both have "Call the bank".
+	records := []Record{
+		todoRecord(t, "a", "/cals/one/", "task-1", "Renew the domain"),
+		todoRecord(t, "b", "/cals/two/", "task-1", "Renew the domain"),
+		todoRecord(t, "b", "/cals/two/", "task-2", "Renew the domain"),
+		eventRecord(t, "b", "/cals/two/", "evt-1", "Renew the domain", "20260304T090000Z"),
+	}
+	groups := DetectTodos(records, time.UTC, Options{})
+	if len(groups) != 1 {
+		t.Fatalf("groups = %d, want 1", len(groups))
+	}
+	if len(groups[0].Members) != 2 {
+		t.Fatalf("members = %d, want 2 — the event and the third task are not tasks of this pair", len(groups[0].Members))
+	}
+	if groups[0].Kind != KindTodo {
+		t.Fatalf("kind = %q", groups[0].Kind)
+	}
+	if !contains(groups[0].Signals, SignalUID) {
+		t.Fatalf("signals = %v", groups[0].Signals)
+	}
+}
+
+func TestDetectTodosNeedsMoreThanASummary(t *testing.T) {
+	records := []Record{
+		todoRecord(t, "a", "/cals/one/", "task-1", "Call the bank"),
+		todoRecord(t, "b", "/cals/two/", "task-2", "Call the bank"),
+	}
+	if groups := DetectTodos(records, time.UTC, Options{}); len(groups) != 0 {
+		t.Fatalf("a shared summary alone should stay below the threshold, got %d", len(groups))
+	}
+	if groups := DetectTodos(records, time.UTC, Options{Threshold: WeightName}); len(groups) != 1 {
+		t.Fatalf("lowering the threshold should offer the pair, got %d", len(groups))
+	}
+}
+
+func TestDetectNotesGroupsOnUIDAndRespectsSkip(t *testing.T) {
+	records := []Record{
+		noteRecord(t, "a", "/cals/one/", "note-1", "Minutes", "20260304"),
+		noteRecord(t, "b", "/cals/two/", "note-1", "Minutes", "20260304"),
+		noteRecord(t, "b", "/cals/two/", "note-2", "Shopping", ""),
+	}
+	groups := DetectNotes(records, time.UTC, Options{})
+	if len(groups) != 1 || len(groups[0].Members) != 2 {
+		t.Fatalf("groups = %+v", groups)
+	}
+	if groups[0].Kind != KindNote {
+		t.Fatalf("kind = %q", groups[0].Kind)
+	}
+	skipped := DetectNotes(records, time.UTC, Options{Skip: func(a, b int) bool { return true }})
+	if len(skipped) != 0 {
+		t.Fatalf("skipped pairs still grouped: %d", len(skipped))
+	}
+}
+
+func TestDetectNotesIgnoresOtherComponents(t *testing.T) {
+	// The duplicates poll loads every component from a calendar (§1.15), so the
+	// kind filter is what keeps a task out of the notes section.
+	records := []Record{
+		todoRecord(t, "a", "/cals/one/", "same-uid", "Minutes"),
+		todoRecord(t, "b", "/cals/two/", "same-uid", "Minutes"),
+	}
+	if groups := DetectNotes(records, time.UTC, Options{}); len(groups) != 0 {
+		t.Fatalf("tasks grouped as notes: %+v", groups)
+	}
+	if groups := DetectTodos(records, time.UTC, Options{}); len(groups) != 1 {
+		t.Fatalf("the same pair should group as tasks, got %d", len(groups))
+	}
+}
+
 func vcard(t *testing.T, path, body string) *model.Object {
 	t.Helper()
 	obj, err := model.ParseVCard(path, `"etag"`, []byte(body))
@@ -404,4 +476,29 @@ func ical(t *testing.T, path, body string) *model.Object {
 		t.Fatal(err)
 	}
 	return obj
+}
+
+func todoRecord(t *testing.T, accountID, collection, uid, summary string) Record {
+	t.Helper()
+	body := strings.Join([]string{
+		"BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VTODO", "UID:" + uid,
+		"SUMMARY:" + summary, "END:VTODO", "END:VCALENDAR",
+	}, "\r\n")
+	return Record{
+		AccountID: accountID, Collection: collection,
+		Object: ical(t, collection+uid+".ics", body),
+	}
+}
+
+func noteRecord(t *testing.T, accountID, collection, uid, summary, date string) Record {
+	t.Helper()
+	lines := []string{"BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VJOURNAL", "UID:" + uid, "SUMMARY:" + summary}
+	if date != "" {
+		lines = append(lines, "DTSTART;VALUE=DATE:"+date)
+	}
+	lines = append(lines, "END:VJOURNAL", "END:VCALENDAR")
+	return Record{
+		AccountID: accountID, Collection: collection,
+		Object: ical(t, collection+uid+".ics", strings.Join(lines, "\r\n")),
+	}
 }

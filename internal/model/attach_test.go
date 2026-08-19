@@ -285,3 +285,54 @@ func hasProperty(props []Property, name string) bool {
 	}
 	return false
 }
+
+const todoWithAttachment = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//EN
+BEGIN:VTODO
+UID:task-1
+SUMMARY:Renew the domain
+DUE;VALUE=DATE:20270105
+ATTACH;FMTTYPE=application/pdf;FILENAME=invoice.pdf;SIZE=4096:https://dav.example/files/invoice.pdf
+X-JTX-COLOR:#4A6B52
+END:VTODO
+END:VCALENDAR
+`
+
+// Wave 1.14 gave tasks the attachment block events and notes already had, which
+// means ATTACH has to reach Todo rather than fall into the foreign properties
+// the card keeps untouched (§8).
+func TestTodoCarriesItsAttachments(t *testing.T) {
+	obj, err := ParseICal("/c/task-1.ics", `"1"`, []byte(todoWithAttachment))
+	if err != nil {
+		t.Fatal(err)
+	}
+	task, err := obj.Todo(time.UTC)
+	if err != nil {
+		t.Fatalf("Todo: %v", err)
+	}
+	if len(task.Attachments) != 1 {
+		t.Fatalf("task attachments = %d, want 1", len(task.Attachments))
+	}
+	att := task.Attachments[0]
+	if att.URI != "https://dav.example/files/invoice.pdf" {
+		t.Fatalf("uri = %q", att.URI)
+	}
+	if att.FmtType != "application/pdf" {
+		t.Fatalf("fmttype = %q", att.FmtType)
+	}
+	if att.Size != 4096 {
+		t.Fatalf("size = %d", att.Size)
+	}
+	if got := att.DisplayName(); got != "invoice.pdf" {
+		t.Fatalf("display name = %q", got)
+	}
+	for _, prop := range task.Other {
+		if prop.Name == ical.PropAttach {
+			t.Fatal("ATTACH appeared in Other as well as in Attachments")
+		}
+	}
+	if !hasProperty(task.Other, "X-JTX-COLOR") {
+		t.Fatal("X-JTX-COLOR was lost from Other")
+	}
+}

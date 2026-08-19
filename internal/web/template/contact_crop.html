@@ -32,7 +32,10 @@
                 </select>
             </label>
         </details>
-        <button type="submit">Update preview</button>
+        <button type="submit" class="crop-apply">Update preview</button>
+        {{/* §13: on a narrow screen the crop is the centred square and nothing
+             else — the canvas and the numbers are both hidden by CSS. */}}
+        <p class="crop-narrow-note hint">Cropped to the centre of the photo. Adjust it on a wider screen.</p>
     </form>
     <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">

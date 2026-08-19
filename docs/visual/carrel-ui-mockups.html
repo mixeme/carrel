@@ -3991,15 +3991,16 @@ An administrator can give you a new password, but doing so replaces the key: eve
 
 
 <h3>Полнота: где какой экран</h3>
-<p><b>Сверено 17 августа 2026:</b> 44 шаблона и 77 маршрутов против 100 макетов. Без макета остаются четыре шаблона, и все четыре — не экраны: <code>base</code> — обвязка страницы, <code>contacts_page</code>, <code>duplicate_results</code> и <code>find_results</code> — htmx-фрагменты, которые подставляются внутрь уже нарисованного экрана. Из маршрутов без макета — только те, что не показывают страницу: выдача файла и вложения, фотография контакта, <code>healthz</code>, манифест и статика.</p>
-<p>Проверка не на глаз, а по списку шаблонов и маршрутов. Слева — то, что отдаёт сервер сегодня, справа — макет, который это показывает. Строк без макета не осталось; фрагменты htmx (<code>contacts_page</code>, <code>find_results</code>, <code>duplicate_results</code>, <code>contact_crop</code> как ответ на <code>hx-post</code>) отдельными экранами не считаются — они кусок того экрана, в который вставляются.</p>
+<p><b>Сверено 19 августа 2026, после волны 1:</b> 50 шаблонов и 92 маршрута против 100 макетов. Своего макета нет у восьми шаблонов, и ни один из них не экран: <code>base</code> — обвязка страницы; <code>contacts_page</code>, <code>duplicate_results</code> и <code>find_results</code> — htmx-фрагменты, которые подставляются внутрь уже нарисованного экрана; четыре <code>*_panel</code> — панель подробностей, нарисованная правой колонкой в 7.1–7.4, а не отдельным кадром. Из маршрутов без макета — только те, что не показывают страницу: выдача файла и вложения, фотография контакта, <code>healthz</code>, манифест и статика.</p>
+<p>Проверка не на глаз, а по списку шаблонов и маршрутов. Слева — то, что отдаёт сервер сегодня, справа — макет, который это показывает. Строк без макета не осталось; фрагменты htmx (<code>contacts_page</code>, <code>find_results</code>, <code>duplicate_results</code>, четыре <code>*_panel</code>, <code>contact_crop</code> как ответ на <code>hx-post</code>) отдельными экранами не считаются — они кусок того экрана, в который вставляются.</p>
 <table class="doc">
   <tr><th style="width:26%">Шаблон и маршрут</th><th style="width:30%">Что это</th><th>Макет</th></tr>
   <tr><td><code>login</code>, <code>setup</code>, <code>register</code>, <code>register_sent</code>, <code>forgot</code></td><td>Вход, первый администратор, регистрация, невозможность восстановления</td><td>7.12</td></tr>
   <tr><td><code>invite</code>, <code>invite_invalid</code>, <code>email_confirmed</code></td><td>Приглашение и подтверждение адреса по одноразовой ссылке</td><td>7.12, 7.13</td></tr>
   <tr><td><code>password</code></td><td>Смена пароля, обычная и вынужденная</td><td>7.13</td></tr>
-  <tr><td><code>app</code> → <code>settings_*</code></td><td>Подключения, подписки, учётная запись, вид, вложения, депонирование</td><td>7.10, 7.10.2, 7.10.3</td></tr>
-  <tr><td><code>contacts</code>, <code>contact</code>, <code>contact_crop</code>, <code>timeline</code></td><td>Список, карточка, правка, кадрирование фотографии, всё об одном человеке</td><td>7.1, 7.13</td></tr>
+  <tr><td><code>settings_connections</code>, <code>settings_account</code>, <code>settings_attachments</code>, <code>settings_appearance</code></td><td>Подключения, подписки, учётная запись, вложения, тема и плотность строк</td><td>7.10, 7.10.2, 7.10.3</td></tr>
+  <tr><td><code>contacts</code>, <code>contact</code>, <code>contact_crop</code>, <code>person</code></td><td>Список, карточка, правка, кадрирование фотографии, всё об одном человеке</td><td>7.1, 7.13</td></tr>
+  <tr><td><code>contact_panel</code>, <code>event_panel</code>, <code>task_panel</code>, <code>note_panel</code></td><td>Панель подробностей справа: htmx-фрагмент, а не экран</td><td>7.1–7.4</td></tr>
   <tr><td><code>agenda</code>, <code>event</code></td><td>Агенда, карточка события, повторения</td><td>7.2</td></tr>
   <tr><td><code>tasks</code>, <code>task</code></td><td>Список задач с фильтрами, карточка</td><td>7.3</td></tr>
   <tr><td><code>notes</code>, <code>note</code>, <code>note_quick</code></td><td>Список, чтение и правка на весь экран, быстрая заметка</td><td>7.4</td></tr>
@@ -4011,9 +4012,8 @@ An administrator can give you a new password, but doing so replaces the key: eve
   <tr><td><code>admin</code>, <code>admin_invites</code>, <code>admin_settings</code>, <code>admin_dav</code>, <code>admin_audit</code></td><td>Пользователи, три способа завести, настройки, валидатор, журнал</td><td>7.11</td></tr>
   <tr><td><code>admin_escrow</code></td><td>Депонирование ключей: политика, мастер-пароль, восстановление</td><td>7.13</td></tr>
   <tr><td>—</td><td>Проверка установки: доступность снаружи, сертификат, прокси</td><td>7.11.1 <span class="m-badge is-plan">план</span></td></tr>
-  <tr><td>—</td><td>§23.8: состояние синхронизации у коллекции, исходный часовой пояс у события</td><td>7.10, 7.2 <span class="m-badge is-plan">план</span></td></tr>
+  <tr><td>блок <code>Source</code> в панелях и в <code>settings_connections</code>, метка пояса в <code>event</code></td><td>§23.8: состояние синхронизации у коллекции, исходный часовой пояс у события</td><td>7.10, 7.2</td></tr>
   <tr><td><code>about</code></td><td>Версия, сборка, лицензия</td><td>7.13</td></tr>
-  <tr><td><code>unified</code></td><td>«Everything»</td><td>удаляется: единый вид внутри разделов, 7.1–7.5</td></tr>
   <tr><td>—</td><td>Новое устройство, резервная копия, публикация, письмо, davloom</td><td>7.14–7.19 <span class="m-badge is-plan">план</span></td></tr>
   <tr><td>—</td><td>Состояния, тёмная тема, узкий экран, печать, приложение</td><td>8–12</td></tr>
 </table>
@@ -6732,6 +6732,7 @@ Read  2 min ago</div></div>
 
 <h2 id="plan">13. Порядок работ</h2>
 <p>Редизайн не меняет ни одной возможности и ни одной строки текста в интерфейсе — только вёрстку, разметку шаблонов и <code>carrel.css</code>. Ни сборщика, ни зависимостей: те же <code>html/template</code> и htmx.</p>
+<div class="note"><b>Шаги 1–8 и 11–14 сделаны волной 1</b> (19 августа 2026); шаги 9 и 10 — заметка и файлы — это волна 2. Таблица оставлена как была написана, поэтому в ней ещё стоят имена файлов, которых больше нет: <code>timeline.html</code> стал <code>person.html</code>, <code>app.html</code> — четырьмя <code>settings_*.html</code>. Порядок работ теперь ведётся в <a href="../plans/global-plan.md">plans/global-plan.md</a>, а не здесь.</div>
 
 <table class="doc">
   <tr><th style="width:6%">Шаг</th><th style="width:26%">Что делается</th><th style="width:30%">Файлы</th><th>Check</th></tr>

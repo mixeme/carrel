@@ -28,7 +28,7 @@
 <body{{if .Shell}} class="has-shell"{{end}}>
 {{if .Shell}}
 <header class="app-top no-print">
-    <button type="button" class="app-rail-toggle no-print" data-rail-toggle aria-label="Open navigation">☰</button>
+    <button type="button" class="app-rail-toggle no-print" data-rail-toggle aria-label="Open sources and navigation" aria-expanded="false">☰</button>
     <a class="app-brand" href="{{.Base}}/app/calendar">Carrel</a>
     <form class="app-search" method="get" action="{{.Base}}/app/search">
         <input id="app-search" type="search" name="q" value="{{.Topbar.SearchQuery}}" placeholder="Search everything…" autocomplete="off" spellcheck="false" aria-label="Search everything">
@@ -100,6 +100,13 @@
     {{template "settingsrail" .}}
     {{else}}
     <nav class="app-rail no-print" aria-label="Sections" data-app-rail>
+        {{/* §13: on a narrow screen this nav is the slide-out panel, and the
+             source rail of the section moves into the mount above the links. */}}
+        <div class="app-rail-head">
+            <span class="app-rail-title" data-rail-title>Menu</span>
+            <button type="button" class="app-rail-close" data-rail-close aria-label="Close">✕</button>
+        </div>
+        <div class="app-rail-mount" data-rail-mount></div>
         <a href="{{.Base}}/app/search"{{if eq .NavSection "search"}} aria-current="page"{{end}}>Search</a>
         <a href="{{.Base}}/app/contacts"{{if eq .NavSection "contacts"}} aria-current="page"{{end}}>Contacts</a>
         <a href="{{.Base}}/app/calendar"{{if eq .NavSection "calendar"}} aria-current="page"{{end}}>Calendar</a>

@@ -611,17 +611,23 @@ a.src-label:hover {
     color: var(--muted);
 }
 
+.crop-narrow-note {
+    display: none;
+}
+
+/* §13: centre crop, no manual adjustment — canvas, numbers and the preview
+   button all go, leaving the square the server already centres. */
 @media (max-width: 640px) {
-    .crop-canvas-wrap {
+    .crop-canvas-wrap,
+    .crop-numbers,
+    .crop-apply {
         display: none;
     }
 
-    .crop-numbers {
+    .crop-narrow-note {
         display: block;
-    }
-
-    .crop-numbers[open] summary ~ * {
-        display: block;
+        flex: 1 1 100%;
+        margin: 0;
     }
 }
 
@@ -2905,6 +2911,14 @@ button.danger {
     display: none;
 }
 
+.app-rail-head {
+    display: none;
+}
+
+.app-rail-mount:empty {
+    display: none;
+}
+
 @media (max-width: 640px) {
     :root {
         --pad: 12px;
@@ -2914,14 +2928,102 @@ button.danger {
         grid-template-columns: minmax(0, 1fr);
     }
 
+    /* §13: the panel takes the whole screen and closes with Apply — choosing
+       sources is its own action, not something to scroll past. */
     .app-rail {
         position: fixed;
-        inset: var(--top) auto 0 0;
-        width: 264px;
+        inset: var(--top) 0 0 0;
+        width: auto;
         z-index: 30;
+        overflow-y: auto;
+        overscroll-behavior: contain;
         transform: translateX(-100%);
         transition: transform 0.2s ease;
         box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .app-rail-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 4px 0 8px;
+        border-bottom: 0.5px solid var(--hair);
+        margin-bottom: 8px;
+    }
+
+    .app-rail-title {
+        font-weight: 600;
+    }
+
+    .app-rail-close {
+        min-width: 44px;
+        min-height: 44px;
+        border: 0;
+        background: transparent;
+        color: var(--ink);
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .app-rail > a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* The rail is borrowed by the panel; in the page it would be the stack of
+       checkboxes §13 asks to get rid of. Without JavaScript it stays put. */
+    .js .app-layout > .section-rail {
+        display: none;
+    }
+
+    .app-rail-head {
+        display: flex;
+    }
+
+    .app-rail .section-rail {
+        padding: 0;
+        border: 0;
+        background: none;
+        box-shadow: none;
+        margin: 0 0 10px;
+    }
+
+    .app-rail .src-row {
+        grid-template-columns: 44px 3px minmax(0, 1fr) auto;
+        gap: 6px;
+        min-height: 44px;
+        padding: 0;
+    }
+
+    .app-rail .src-check {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        /* The form label margin would push the row past its own height. */
+        margin: 0;
+    }
+
+    .app-rail .src-box {
+        width: 16px;
+        height: 16px;
+    }
+
+    .app-rail .src-bar {
+        height: 24px;
+    }
+
+    .app-rail .src-label {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    .app-rail .section-rail button[type="submit"] {
+        min-height: 44px;
     }
 
     .app-rail.is-open {
@@ -2943,8 +3045,8 @@ button.danger {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 28px;
-        height: 28px;
+        width: 44px;
+        height: 44px;
         border: 0;
         background: transparent;
         color: var(--ink);
@@ -3011,6 +3113,15 @@ button.danger {
 
     .app-top-actions {
         gap: 4px;
+    }
+
+    /* §13: 44 px is the tap target, so the row-height tokens of 1.3 stop
+       governing controls once the pointer is a finger. */
+    button,
+    .app-btn,
+    input[type="submit"],
+    input[type="button"] {
+        min-height: 44px;
     }
 
     .app-create-group .app-btn.is-primary {
@@ -3123,16 +3234,12 @@ button.danger {
         display: none;
     }
 
-    .sidebar {
+    .sidebar:not(.section-rail) {
         display: none;
     }
 
     .app-layout {
         grid-template-columns: 1fr;
-    }
-
-    .section-rail {
-        display: none;
     }
 
     .app-overlay {

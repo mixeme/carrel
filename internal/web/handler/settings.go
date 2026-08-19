@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	settingsSectionAccount      = "account"
-	settingsSectionConnections  = "connections"
-	settingsSectionAttachments  = "attachments"
-	settingsSectionAppearance   = "appearance"
+	settingsSectionAccount     = "account"
+	settingsSectionConnections = "connections"
+	settingsSectionAttachments = "attachments"
+	settingsSectionAppearance  = "appearance"
 )
 
 // settingsView is shared chrome for the settings rail.

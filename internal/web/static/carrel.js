@@ -1,4 +1,10 @@
 // Carrel UI helpers — no inline scripts (CSP).
+
+// Marks the document so CSS can tell the two narrow-screen layouts apart: with
+// JavaScript the source rail lives in the slide-out panel, without it the rail
+// stays in the page where it can still be reached.
+document.documentElement.classList.add('js');
+
 document.addEventListener('click', function (e) {
     var refresh = e.target.closest('[data-refresh]');
     if (refresh) {
@@ -162,6 +168,7 @@ document.addEventListener('htmx:sseError', function (e) {
 // No selection — no panel; closed manually — stays closed; state is per section.
 (function () {
     var STORAGE_KEY = 'carrel:details';
+    var narrow = window.matchMedia('(max-width: 640px)');
 
     function shell() {
         return document.querySelector('.app-shell');
@@ -245,6 +252,9 @@ document.addEventListener('htmx:sseError', function (e) {
         }
         var link = e.target.closest('a.detail-link[hx-get]');
         if (!link) return;
+        // §13: no properties panel on a narrow screen. The row opens the
+        // record; the htmx request itself is cancelled below.
+        if (narrow.matches) return;
         markSelected(link);
         rememberOpen(link.getAttribute('hx-get'));
         showPanel();
@@ -264,7 +274,7 @@ document.addEventListener('htmx:sseError', function (e) {
 
     function restore() {
         var section = sectionKey();
-        if (!section || !window.htmx) return;
+        if (!section || !window.htmx || narrow.matches) return;
         var state = readAll()[section];
         if (!state || state.closed || !state.url) return;
         var el = panel();
@@ -1043,27 +1053,115 @@ document.addEventListener('htmx:sseError', function (e) {
         crops.forEach(initCrop);
     });
 })();
-
-// Wave 1.17 — slide-out rail on narrow screens.
+// Wave 1.17 — the slide-out panel on a narrow screen holds the source rail
+// (§13 asks for that rail, not the section links, to move out of the way) and
+// the section links below it. Without JavaScript the source rail stays in the
+// flow of the page, which is why the `js` class gates hiding it.
 (function () {
+    var narrow = window.matchMedia('(max-width: 640px)');
+    var home = null;
+
+    function rail() {
+        return document.querySelector('[data-app-rail]');
+    }
+
+    function scrim() {
+        return document.querySelector('[data-rail-scrim]');
+    }
+
+    // The source rail is rendered inside the page, next to the list. On a
+    // narrow screen it is borrowed by the panel and put back afterwards, so
+    // the wide layout never sees it move.
+    function mountSources() {
+        var node = document.querySelector('.section-rail');
+        var mount = document.querySelector('[data-rail-mount]');
+        var title = document.querySelector('[data-rail-title]');
+        if (!node || !mount || node.parentNode === mount) return;
+        home = { parent: node.parentNode, next: node.nextSibling };
+        mount.appendChild(node);
+        if (title) title.textContent = 'Sources';
+    }
+
+    function unmountSources() {
+        var mount = document.querySelector('[data-rail-mount]');
+        var title = document.querySelector('[data-rail-title]');
+        var node = mount ? mount.querySelector('.section-rail') : null;
+        if (node && home) home.parent.insertBefore(node, home.next);
+        home = null;
+        if (title) title.textContent = 'Menu';
+    }
+
+    function openRail() {
+        var el = rail();
+        if (!el) return;
+        mountSources();
+        el.classList.add('is-open');
+        var back = scrim();
+        if (back) back.hidden = false;
+        var toggle = document.querySelector('[data-rail-toggle]');
+        if (toggle) toggle.setAttribute('aria-expanded', 'true');
+        var first = el.querySelector('[data-rail-close]');
+        if (first) first.focus();
+    }
+
+    function closeRail() {
+        var el = rail();
+        if (el) el.classList.remove('is-open');
+        var back = scrim();
+        if (back) back.hidden = true;
+        var toggle = document.querySelector('[data-rail-toggle]');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        unmountSources();
+    }
+
+    function railOpen() {
+        var el = rail();
+        return !!el && el.classList.contains('is-open');
+    }
+
     document.addEventListener('click', function (e) {
         if (e.target.closest('[data-rail-toggle]')) {
-            var rail = document.querySelector('[data-app-rail]');
-            var scrim = document.querySelector('[data-rail-scrim]');
-            if (rail) rail.classList.add('is-open');
-            if (scrim) scrim.hidden = false;
+            if (railOpen()) closeRail(); else openRail();
             return;
         }
-        if (e.target.closest('[data-rail-scrim]')) {
+        if (e.target.closest('[data-rail-scrim]') || e.target.closest('[data-rail-close]')) {
             closeRail();
             return;
         }
+        // A section link inside the panel navigates; nothing to put back.
+        if (railOpen() && e.target.closest('[data-app-rail] a')) {
+            var el = rail();
+            if (el) el.classList.remove('is-open');
+        }
     });
 
-    function closeRail() {
-        var rail = document.querySelector('[data-app-rail]');
-        var scrim = document.querySelector('[data-rail-scrim]');
-        if (rail) rail.classList.remove('is-open');
-        if (scrim) scrim.hidden = true;
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && railOpen()) {
+            e.preventDefault();
+            closeRail();
+        }
+    });
+
+    // Growing past the breakpoint while the panel is open would leave the
+    // source rail parked in a nav that is a column again.
+    function onWidthChange() {
+        if (!narrow.matches && railOpen()) closeRail();
     }
+
+    if (narrow.addEventListener) narrow.addEventListener('change', onWidthChange);
+    else if (narrow.addListener) narrow.addListener(onWidthChange);
+})();
+
+// Wave 1.17 — no properties panel on a narrow screen: the row opens the record
+// itself, which is what its href points at anyway.
+(function () {
+    var narrow = window.matchMedia('(max-width: 640px)');
+    document.body.addEventListener('htmx:beforeRequest', function (e) {
+        var el = e.detail && e.detail.elt;
+        if (!narrow.matches || !el || !el.classList.contains('detail-link')) return;
+        if (el.getAttribute('hx-target') !== '#app-details') return;
+        e.preventDefault();
+        var href = el.getAttribute('href');
+        if (href) window.location.assign(href);
+    });
 })();
