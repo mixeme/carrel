@@ -108,6 +108,9 @@ type filesView struct {
 	ItemCount      int
 	TotalSizeLabel string
 	PickerRoots    []folderPickerNode
+	AttachmentsURL string
+	AttachmentsHint string
+	PublishedActive bool
 }
 
 // fileCollectionRow is one storage at the All collections root.
@@ -173,6 +176,7 @@ func (s *Server) FilesHome(w http.ResponseWriter, r *http.Request) {
 		view.Collections = append(view.Collections, cr)
 	}
 	view.ServerCount = len(servers)
+	view.AttachmentsURL, view.AttachmentsHint = s.filesAttachmentsShortcut(sess)
 	v := s.View(r, "Files")
 	v.Data = view
 	s.Render(w, "files.html", v)
@@ -275,6 +279,7 @@ func (s *Server) buildFiles(ctx context.Context, sess *session.Session, accountI
 	}
 	view.PrintDate = time.Now().UTC().Format("2006-01-02 15:04 UTC")
 	view.PickerRoots = s.folderPickerRoots(ctx, sess)
+	view.AttachmentsURL, view.AttachmentsHint = s.filesAttachmentsShortcut(sess)
 	return view, nil
 }
 

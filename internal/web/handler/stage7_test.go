@@ -479,6 +479,18 @@ func TestFilesHomeShowsAllCollections(t *testing.T) {
 	}
 }
 
+func TestFilesPublishedPlaceholder(t *testing.T) {
+	h := startDAVHost(t)
+	a := filesApp(t, h)
+	page := a.get("/app/files/published")
+	if page.Code != http.StatusOK {
+		t.Fatalf("published = %d", page.Code)
+	}
+	if !strings.Contains(page.Body.String(), "wave 4.3") {
+		t.Fatalf("published page missing stub text:\n%s", page.Body.String())
+	}
+}
+
 func TestFilesDeleteBatch(t *testing.T) {
 	h := startDAVHost(t)
 	h.putFile(filesRoot+"a.png", []byte("a"))

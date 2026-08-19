@@ -12,6 +12,13 @@
                    href="{{$.Base}}/app/files/{{.AccountID}}/{{.ColEnc}}">{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></a></li>
         {{end}}</ul>
         {{else}}<p class="hint">No file collections yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
+        <div class="files-shortcuts no-print">
+            <h3>Shortcuts</h3>
+            <ul class="collection-list">
+                <li><a class="collection-link" href="{{if $d.AttachmentsURL}}{{$d.AttachmentsURL}}{{else}}{{$.Base}}/app/settings/attachments{{end}}">Attachments{{if $d.AttachmentsHint}}<span class="hint">{{$d.AttachmentsHint}}</span>{{else}}<span class="hint">not chosen yet</span>{{end}}</a></li>
+                <li><a class="collection-link{{if $d.PublishedActive}} is-active{{end}}" href="{{$.Base}}/app/files/published">Published<span class="hint">coming in 4.3</span></a></li>
+            </ul>
+        </div>
     </aside>
     <div class="app-main files-main">
         {{if $d.NoFiles}}

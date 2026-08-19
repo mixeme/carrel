@@ -1938,6 +1938,21 @@ label.checkbox input {
 }
 
 /* Wave 2.4 — file manager: selection, ops bar, properties, filter, icons */
+.files-shortcuts {
+    margin-top: 1.25rem;
+    padding-top: 0.75rem;
+    border-top: 0.5px solid var(--hair);
+}
+
+.files-shortcuts h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 .files-layout .files-main {
     display: flex;
     gap: 0;

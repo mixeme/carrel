@@ -1,0 +1,29 @@
+{{define "body"}}
+{{$d := .Data}}
+<div class="app-layout files-layout">
+    <aside class="sidebar card no-print">
+        <h2>File collections</h2>
+        {{if $d.Sources}}
+        <ul class="collection-list">
+            <li><a class="collection-link" href="{{$.Base}}/app/files">All collections</a></li>
+        {{range $d.Sources}}
+            <li><a class="collection-link" href="{{$.Base}}/app/files/{{.AccountID}}/{{.ColEnc}}">{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></a></li>
+        {{end}}</ul>
+        {{else}}<p class="hint">No file collections yet.</p>{{end}}
+        <div class="files-shortcuts">
+            <h3>Shortcuts</h3>
+            <ul class="collection-list">
+                <li><a class="collection-link" href="{{if $d.AttachmentsURL}}{{$d.AttachmentsURL}}{{else}}{{$.Base}}/app/settings/attachments{{end}}">Attachments{{if $d.AttachmentsHint}}<span class="hint">{{$d.AttachmentsHint}}</span>{{end}}</a></li>
+                <li><a class="collection-link is-active" href="{{$.Base}}/app/files/published">Published</a></li>
+            </ul>
+        </div>
+    </aside>
+    <div class="app-main">
+        <section class="card">
+            <h1>Published</h1>
+            <p class="hint">Secret links to files and folders will be listed here once publication is built (wave 4.3). Carrel already knows about tokens it issued; this page will show them without walking the server tree.</p>
+            <p class="hint">Until then, manage links from each record when publication ships, or check the server directly.</p>
+        </section>
+    </div>
+</div>
+{{end}}
