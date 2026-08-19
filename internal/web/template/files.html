@@ -83,6 +83,10 @@
                     <input type="search" placeholder="Filter this folder" data-files-filter autocomplete="off">
                 </label>
                 {{template "columnpicker" "files"}}
+                <span class="files-view-toggle no-print">
+                    <button type="button" class="link" data-files-view="list" aria-pressed="true">List</button>
+                    <button type="button" class="link" data-files-view="tiles" aria-pressed="false">Tiles</button>
+                </span>
                 {{if $d.ItemCount}}<span class="files-meta hint">{{$d.ItemCount}} items{{if $d.TotalSizeLabel}} · {{$d.TotalSizeLabel}}{{end}}</span>{{end}}
             </div>
 
@@ -157,6 +161,23 @@
                 {{if $d.Empty}}<tr data-files-empty><td colspan="5" class="hint">This folder is empty.</td></tr>{{end}}
                 </tbody>
             </table>
+
+            <div class="files-grid no-print" data-files-grid hidden>
+                {{if $d.ParentURL}}<a class="files-tile files-tile--up" href="{{$d.ParentURL}}">↑ up one folder</a>{{end}}
+                {{range $d.Entries}}
+                <div class="files-tile{{if .Dir}} is-folder{{end}}" data-file-row tabindex="0"
+                     data-rel="{{.Rel}}" data-name="{{.Name}}" data-dir="{{.Dir}}"
+                     data-size="{{.SizeBytes}}" data-type="{{.TypeLabel}}" data-changed="{{.ModLabel}}"
+                     data-etag="{{.ETag}}" data-url="{{.URL}}" data-download="{{.DownloadURL}}"
+                     data-thumb="{{.ThumbURL}}">
+                    <div class="files-tile-thumb">
+                        {{if .ThumbURL}}<img data-lazy-thumb data-src="{{.ThumbURL}}" alt="" loading="lazy">{{else}}<span class="file-icon file-icon--{{.IconKind}}"></span>{{end}}
+                    </div>
+                    <span class="files-tile-name">{{.Name}}{{if .Dir}}/{{end}}</span>
+                    <span class="files-tile-meta hint">{{if .SizeLabel}}{{.SizeLabel}}{{else}}folder{{end}}{{if .ModLabel}} · {{.ModLabel}}{{end}}</span>
+                </div>
+                {{end}}
+            </div>
 
             {{if $d.ReadOnly}}
             <p class="hint">This collection is read-only: it can be browsed and downloaded from, and nothing can be put in it.</p>

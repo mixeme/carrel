@@ -151,6 +151,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 
 	// The file section of §6 and §7.
 	app.HandleFunc("GET "+s.Path("/app/files"), s.FilesHome)
+	app.HandleFunc("GET "+s.Path("/t/{account}/{col}"), s.FileThumb)
 	app.HandleFunc("GET "+s.Path("/app/files/picker"), s.FilesFolderPicker)
 	app.HandleFunc("GET "+s.Path("/app/files/picker/children"), s.FilesFolderChildren)
 	app.HandleFunc("GET "+s.Path("/app/files/{account}/{col}"), s.FilesBrowse)

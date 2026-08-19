@@ -138,6 +138,7 @@ type fileRow struct {
 	ETag        string
 	URL         string
 	DownloadURL string
+	ThumbURL    string
 	IconKind    string
 }
 
@@ -256,6 +257,9 @@ func (s *Server) buildFiles(ctx context.Context, sess *session.Session, accountI
 			row.URL = folderURL(base, entry.Rel)
 		} else {
 			row.DownloadURL = s.fileDownloadURL(accountID, colEnc, entry.Rel)
+			if row.IconKind == "image" {
+				row.ThumbURL = s.fileThumbURL(accountID, colEnc, entry.Rel)
+			}
 		}
 		view.Entries = append(view.Entries, row)
 	}

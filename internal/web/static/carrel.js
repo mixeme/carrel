@@ -1525,6 +1525,7 @@ document.addEventListener('htmx:sseError', function (e) {
     var STORAGE_KEY = 'carrel:files-props';
     var layout = document.querySelector('[data-files-layout]');
     var list = browse.querySelector('[data-files-list]');
+    var grid = browse.querySelector('[data-files-grid]');
     var opsBar = browse.querySelector('[data-files-ops]');
     var opsCount = browse.querySelector('[data-files-ops-count]');
     var opsSize = browse.querySelector('[data-files-ops-size]');
@@ -1544,14 +1545,34 @@ document.addEventListener('htmx:sseError', function (e) {
     var narrow = window.matchMedia('(max-width: 640px)');
 
     function rows() {
-        return Array.prototype.slice.call(list.querySelectorAll('[data-file-row]'));
+        return Array.prototype.slice.call(browse.querySelectorAll('[data-file-row]'));
+    }
+
+    function rowChecks() {
+        return Array.prototype.slice.call(browse.querySelectorAll('[data-files-check]'));
+    }
+
+    function syncRowSelection(rel, on) {
+        browse.querySelectorAll('[data-file-row][data-rel="' + rel + '"]').forEach(function (row) {
+            row.classList.toggle('is-selected', on);
+            var cb = row.querySelector('[data-files-check]');
+            if (cb) cb.checked = on;
+        });
     }
 
     function selectedRows() {
-        return rows().filter(function (row) {
+        var seen = {};
+        var out = [];
+        rows().forEach(function (row) {
+            var rel = row.getAttribute('data-rel');
+            if (!rel || seen[rel]) return;
             var cb = row.querySelector('[data-files-check]');
-            return cb && cb.checked;
+            if (cb && cb.checked) {
+                seen[rel] = true;
+                out.push(row);
+            }
         });
+        return out;
     }
 
     function formatSize(bytes) {
@@ -1618,8 +1639,10 @@ document.addEventListener('htmx:sseError', function (e) {
     function updateSelection() {
         var sel = selectedRows();
         rows().forEach(function (row) {
+            var rel = row.getAttribute('data-rel');
             var cb = row.querySelector('[data-files-check]');
-            row.classList.toggle('is-selected', cb && cb.checked);
+            var on = cb && cb.checked;
+            syncRowSelection(rel, on);
         });
         if (sel.length === 0) {
             if (opsBar) opsBar.hidden = true;
@@ -1643,18 +1666,19 @@ document.addEventListener('htmx:sseError', function (e) {
         } else {
             hideProps(false);
         }
-        var all = rows();
+        var all = rowChecks();
         var selectAll = list.querySelector('[data-files-select-all]');
         if (selectAll) {
-            selectAll.checked = all.length > 0 && sel.length === all.length;
-            selectAll.indeterminate = sel.length > 0 && sel.length < all.length;
+            var checked = all.filter(function (cb) { return cb.checked; }).length;
+            selectAll.checked = all.length > 0 && checked === all.length;
+            selectAll.indeterminate = checked > 0 && checked < all.length;
         }
     }
 
     function clearSelection() {
+        rowChecks().forEach(function (cb) { cb.checked = false; });
         rows().forEach(function (row) {
-            var cb = row.querySelector('[data-files-check]');
-            if (cb) cb.checked = false;
+            syncRowSelection(row.getAttribute('data-rel'), false);
         });
         updateSelection();
     }
@@ -1671,12 +1695,29 @@ document.addEventListener('htmx:sseError', function (e) {
         if (e.target.matches('[data-files-check], [data-files-select-all]')) {
             if (e.target.matches('[data-files-select-all]')) {
                 var on = e.target.checked;
-                rows().forEach(function (row) {
-                    var cb = row.querySelector('[data-files-check]');
-                    if (cb && !row.hidden) cb.checked = on;
+                rowChecks().forEach(function (cb) {
+                    if (!cb.closest('[data-file-row]').hidden) cb.checked = on;
                 });
             }
             updateSelection();
+        }
+    });
+
+    browse.addEventListener('click', function (e) {
+        var tile = e.target.closest('.files-tile[data-file-row]');
+        if (tile && !e.target.closest('a')) {
+            if (e.detail === 2) {
+                var url = tile.getAttribute('data-dir') === 'true' ? tile.getAttribute('data-url') : tile.getAttribute('data-download');
+                if (url) window.location.href = url;
+                return;
+            }
+            var rel = tile.getAttribute('data-rel');
+            var listRow = list.querySelector('[data-file-row][data-rel="' + rel + '"]');
+            var cb = listRow && listRow.querySelector('[data-files-check]');
+            if (cb) {
+                cb.checked = !cb.checked;
+                updateSelection();
+            }
         }
     });
 
@@ -1965,4 +2006,36 @@ document.addEventListener('htmx:sseError', function (e) {
             if (transfers) transfers.hidden = true;
         });
     }
+})();
+
+// Wave 2.7 — list / tiles toggle.
+(function () {
+    var browse = document.querySelector('[data-files-browse]');
+    if (!browse) return;
+    var layout = document.querySelector('[data-files-layout]');
+    var grid = browse.querySelector('[data-files-grid]');
+    var list = browse.querySelector('[data-files-list]');
+    var KEY = 'carrel:files-view';
+
+    function setView(mode) {
+        var tiles = mode === 'tiles';
+        if (layout) layout.classList.toggle('is-tiles', tiles);
+        if (grid) grid.hidden = !tiles;
+        if (list) list.hidden = tiles;
+        browse.querySelectorAll('[data-files-view]').forEach(function (btn) {
+            var on = btn.getAttribute('data-files-view') === mode;
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        try { localStorage.setItem(KEY, mode); } catch (e) { /* ignore */ }
+    }
+
+    var saved = 'list';
+    try { saved = localStorage.getItem(KEY) || 'list'; } catch (e) { /* ignore */ }
+    setView(saved === 'tiles' ? 'tiles' : 'list');
+
+    browse.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-files-view]');
+        if (!btn) return;
+        setView(btn.getAttribute('data-files-view'));
+    });
 })();

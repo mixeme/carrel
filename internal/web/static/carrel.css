@@ -2263,6 +2263,91 @@ label.checkbox input {
     margin-top: 0.35rem;
 }
 
+.files-view-toggle {
+    display: inline-flex;
+    gap: 0.25rem;
+    border: 0.5px solid var(--hair);
+    border-radius: 4px;
+    padding: 0.1rem;
+}
+
+.files-view-toggle [aria-pressed="true"] {
+    background: var(--card);
+    font-weight: 600;
+}
+
+.files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.25rem, 1fr));
+    gap: 0.65rem;
+    margin: 1rem 0;
+}
+
+.files-grid[hidden] {
+    display: none !important;
+}
+
+.files-layout.is-tiles [data-files-list] {
+    display: none;
+}
+
+.files-tile {
+    border: 0.5px solid var(--hair);
+    border-radius: 4px;
+    background: var(--paper);
+    padding: 0.45rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.files-tile.is-selected {
+    border-color: var(--accent);
+    background: var(--card);
+}
+
+.files-tile--up {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.files-tile-thumb {
+    aspect-ratio: 4 / 3;
+    border-radius: 3px;
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.files-tile-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.files-tile-thumb .file-icon {
+    width: 2rem;
+    height: 2rem;
+    opacity: 0.45;
+}
+
+.files-tile-name {
+    font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.files-tile-meta {
+    font-size: 0.72rem;
+    font-family: var(--f-mono);
+}
+
 .crumbs {
     font-size: 0.9rem;
     margin: 0.25rem 0 0;
