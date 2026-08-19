@@ -218,13 +218,13 @@ macOS, DAV localhost onboarding, auto-update, ручной путь к exe, mult
 
 ### Фаза 3 — Local supervisor — модель: **thinking** (medium/high)
 
-- [ ] `pickFreePort()` loopback
-- [ ] `supervisor.go`
-- [ ] SIGTERM + 15s grace
-- [ ] Lock + dynamic port
-- [ ] Second launch focus
-- [ ] Тесты supervisor
-- [ ] Коммит + CHANGELOG [Unreleased]
+- [x] `pickFreePort()` loopback
+- [x] `supervisor.go`
+- [x] SIGTERM + 15s grace
+- [x] Lock + dynamic port
+- [x] Second launch focus
+- [x] Тесты supervisor
+- [x] Коммит + CHANGELOG [Unreleased]
 
 ### Фаза 4 — Sidecar download — модель: **Composer** + security review
 

@@ -94,9 +94,14 @@ Writing tests is covered in [tests.md](tests.md), including the fake-server help
 Wails v2 wrapper — see [plans/desktop-wrapper.md](plans/desktop-wrapper.md).
 
 ```bash
-# Remote mode spike: pass a URL or set desktop.json (mode remote).
+# Remote mode: pass a URL or set desktop.json (mode remote).
 go build -o carrel-desktop ./cmd/carrel-desktop
 ./carrel-desktop -remote-url https://carrel.example
+
+# Local mode: sidecar on 127.0.0.1 (desktop.json mode local, or -local).
+go build -o carrel ./cmd/carrel
+go build -o carrel-desktop ./cmd/carrel-desktop
+./carrel-desktop -local -sidecar ./carrel
 ```
 
 `wails build` uses [wails.json](../wails.json) at the repo root. On Linux install `libwebkit2gtk-4.1-dev` and `pkg-config` first. Windows needs the WebView2 Evergreen runtime. The webview loads the full Carrel UI from the remote instance; fan-out progress uses the same SSE stream (or poll fallback) as in a browser.

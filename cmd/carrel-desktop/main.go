@@ -13,7 +13,9 @@ import (
 )
 
 func main() {
-	remoteURL := flag.String("remote-url", "", "Carrel instance URL (overrides desktop.json)")
+	remoteURL := flag.String("remote-url", "", "Carrel instance URL (overrides desktop.json; forces Remote mode)")
+	forceLocal := flag.Bool("local", false, "force Local mode (sidecar on loopback)")
+	sidecarPath := flag.String("sidecar", "", "path to carrel sidecar binary (default: next to carrel-desktop)")
 	flag.Parse()
 
 	paths, err := desktop.DefaultPaths()
@@ -26,25 +28,34 @@ func main() {
 		exitErr(err)
 	}
 
+	if desktop.ResolveLocalMode(cfg, *forceLocal, *remoteURL) {
+		app := &desktop.LocalApp{Paths: paths, SidecarPath: *sidecarPath}
+		if err := app.Run(); err != nil {
+			handleRunErr(err)
+		}
+		return
+	}
+
 	url, err := desktop.ResolveRemoteURL(cfg, *remoteURL)
 	if err != nil {
 		if errors.Is(err, desktop.ErrNotConfigured) {
-			exitErr(fmt.Errorf("%w: set desktop.json or pass -remote-url", err))
-		}
-		if cfg != nil && cfg.Mode == desktop.ModeLocal && *remoteURL == "" {
-			exitErr(desktop.ErrLocalNotImplemented)
+			exitErr(fmt.Errorf("%w: set desktop.json, pass -remote-url, or -local", err))
 		}
 		exitErr(err)
 	}
 
 	app := &desktop.RemoteApp{Paths: paths, URL: url}
 	if err := app.Run(); err != nil {
-		if errors.Is(err, desktop.ErrAlreadyRunning) {
-			fmt.Fprintln(os.Stderr, "Carrel is already running.")
-			os.Exit(2)
-		}
-		exitErr(err)
+		handleRunErr(err)
 	}
+}
+
+func handleRunErr(err error) {
+	if errors.Is(err, desktop.ErrAlreadyRunning) {
+		fmt.Fprintln(os.Stderr, "Carrel is already running.")
+		os.Exit(2)
+	}
+	exitErr(err)
 }
 
 func exitErr(err error) {

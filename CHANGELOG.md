@@ -6,9 +6,13 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- **Desktop wrapper phase 3 — local supervisor:** `PickFreePort` on loopback, `Supervisor` starts `carrel` with `CARREL_DATA_DIR`, `CARREL_PORT`, `CARREL_BIND=127.0.0.1`, polls `/healthz`, writes `instance.lock` with dynamic port, stops sidecar with 15s grace (SIGTERM / interrupt). `LocalApp` and `-local`/`-sidecar` flags; Wails `SingleInstanceLock` focuses an existing window on second launch.
+
 - **Desktop wrapper phase 2 — Wails Remote webview:** `cmd/carrel-desktop` (Wails v2) opens a window and navigates to a configured or `-remote-url` Carrel instance; persistent webview profile under the OS-user Carrel directory; instance lock on startup. Minimal `frontend/` shell embed; full UI and fan-out SSE/poll run in the remote webview like a browser. Local mode returns a clear not-implemented error until phase 3.
 
 - **Wave 2.1 — full-screen note.** A note opens in read mode on its own URL: prose column, meta column (tags, related, attachments, source), neighbour notes in the rail, **Full width / Reading width** (remembered in `localStorage`), **Focus** and **Esc**, markup toolbar and unsaved-draft warning in edit mode (`?edit=1`), **Copy link**, and **Source** toggling the raw text. The details panel links **Open** instead of **Edit**. Save stays explicit; ETag conflicts unchanged.
+
+- **Wave 2.2 — Markdown in read mode.** Note bodies render as GitHub Flavored Markdown through `goldmark` (headers, lists, tasks, emphasis, links, code, quotes, tables); raw HTML stays escaped. Storage and edit mode still use the exact typed text; **Source** shows the same string. Dependency recorded in `THIRD_PARTY.md`.
 
 ### Changed
 
