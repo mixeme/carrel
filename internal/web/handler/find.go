@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"gitea.mixdep.ru/mix/carrel/internal/account"
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
@@ -85,6 +86,19 @@ func (m findMode) allLabel() string {
 		return "All notebooks"
 	default:
 		return "All calendars"
+	}
+}
+
+func (m findMode) collectionNoun() (one, many string) {
+	switch m {
+	case modePeople:
+		return "book", "books"
+	case modeTasks:
+		return "list", "lists"
+	case modeNotes:
+		return "notebook", "notebooks"
+	default:
+		return "calendar", "calendars"
 	}
 }
 
@@ -246,10 +260,48 @@ type resultRow struct {
 	// §15 unions them rather than letting one record's win.
 	Emails []string
 	Phones []string
+	Org    string
 }
 
 // Collapsed reports whether the row stands for more than one record.
 func (r resultRow) Collapsed() bool { return r.DupCount > 1 }
+
+func (r resultRow) Initials() string {
+	var out []rune
+	for _, word := range strings.Fields(r.Title) {
+		for _, rr := range word {
+			if unicode.IsLetter(rr) {
+				out = append(out, unicode.ToUpper(rr))
+				break
+			}
+		}
+		if len(out) == 2 {
+			break
+		}
+	}
+	return string(out)
+}
+
+func (r resultRow) PhonesLabel() string { return strings.Join(r.Phones, ", ") }
+
+func (r resultRow) EmailsLabel() string { return strings.Join(r.Emails, ", ") }
+
+func (r resultRow) SourceLabel() string {
+	if r.Account == "" {
+		return r.Collection
+	}
+	if r.Collection == "" {
+		return r.Account
+	}
+	return r.Account + " · " + r.Collection
+}
+
+func (r resultRow) PanelURL() string {
+	if r.URL == "" {
+		return ""
+	}
+	return r.URL + "/panel"
+}
 
 type resultGroup struct {
 	Label string
@@ -286,6 +338,8 @@ type findView struct {
 	SectionRail  sectionRail
 	PrintDate    string
 	PrintSection string
+	CreateURL    string
+	CreateLabel  string
 	// Person is filled on the contact screen of §1.8.
 	Person personPanel
 }
@@ -384,7 +438,12 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 	if req.Mode == modeTime {
 		view.FromLabel, view.ToLabel = req.From, req.To
 	}
-	if req.Mode.isSection() || req.Mode == modeTimeline {
+	if req.Mode.isSection() {
+		if rail, railErr := s.buildSectionRail(sess, req, "", ""); railErr == nil {
+			view.SectionRail = rail
+			s.fillSectionCreate(&view, sess, req, rail)
+		}
+	} else if req.Mode == modeTimeline {
 		if rail, railErr := s.buildSectionRail(sess, findRequest{Mode: modeTimeline}, "", ""); railErr == nil {
 			rail.RailTitle = "Where to look"
 			rail.Mode = modeTimeline
@@ -697,6 +756,27 @@ func (s *Server) FindSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, target, http.StatusSeeOther)
+}
+
+func (s *Server) fillSectionCreate(view *findView, sess *session.Session, req findRequest, rail sectionRail) {
+	dest, ok := s.defaultCollection(sess, req.Mode.view(), rail.Sources)
+	if !ok {
+		return
+	}
+	switch req.Mode {
+	case modePeople:
+		view.CreateURL = s.Path("/app/contacts/" + dest.AccountID + "/" + dest.ColEnc + "/new")
+		view.CreateLabel = "New contact"
+	case modeTasks:
+		view.CreateURL = s.Path("/app/tasks/" + dest.AccountID + "/" + dest.ColEnc + "/new")
+		view.CreateLabel = "New task"
+	case modeNotes:
+		view.CreateURL = s.Path("/app/notes/" + dest.AccountID + "/" + dest.ColEnc + "/new")
+		view.CreateLabel = "New note"
+	default:
+		view.CreateURL = s.Path("/app/calendar/" + dest.AccountID + "/" + dest.ColEnc + "/new")
+		view.CreateLabel = "New event"
+	}
 }
 
 func (s *Server) sourcesURL(mode findMode) string {

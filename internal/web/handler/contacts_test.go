@@ -37,6 +37,21 @@ func TestContactsListAndPhotoPlaceholder(t *testing.T) {
 		t.Fatalf("list missing contact: %s", body)
 	}
 
+	home := a.get("/app/contacts")
+	if home.Code != http.StatusOK {
+		t.Fatalf("contacts home = %d, body = %s", home.Code, home.Body.String())
+	}
+	homeBody := home.Body.String()
+	if strings.Contains(homeBody, "Where to look") {
+		t.Error("contacts used the person-screen rail title")
+	}
+	if strings.Contains(homeBody, "All calendars") {
+		t.Errorf("contacts rail was built from calendars")
+	}
+	if !strings.Contains(homeBody, "All address books") {
+		t.Errorf("contacts home missing All address books:\n%s", homeBody)
+	}
+
 	photo := a.get("/c/" + accID + "/" + colEnc + "/ada/photo?size=thumb")
 	if photo.Code != http.StatusOK {
 		t.Fatalf("photo status = %d", photo.Code)

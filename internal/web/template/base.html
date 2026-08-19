@@ -275,7 +275,7 @@
 {{$rail := .Data.SectionRail}}
 <aside class="sidebar no-print section-rail">
     {{if $rail.Sources}}
-    {{if $rail.RailTitle}}<h2>{{$rail.RailTitle}}</h2>{{end}}
+    {{if $rail.RailTitle}}<p class="src-rubric">{{$rail.RailTitle}}</p>{{end}}
     <form method="post" action="{{$rail.SourcesURL}}">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="mode" value="{{$rail.Mode}}">
@@ -284,23 +284,30 @@
             <span class="src-bar is-multi" aria-hidden="true"></span>
             <span class="src-label">{{$rail.AllLabel}}</span>
         </a>
-        <ul class="src-list">
-        {{range $rail.Sources}}
-            <li class="src-row{{if and (eq $rail.AccountID .AccountID) (eq $rail.ColEnc .ColEnc)}} is-on{{else if not .Selected}} is-off{{end}}">
-                <label class="src-check">
-                    <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
-                    <span class="src-box" aria-hidden="true"></span>
-                </label>
-                <span class="src-bar" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
-                <a class="src-label" href="{{$.Base}}/app/{{$rail.Section}}/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a>
-                <span class="src-meta hint">{{.AccountLabel}}{{if .ReadOnly}} · ro{{end}}</span>
-            </li>
+        {{range $rail.AccountGroups}}
+        <div class="src-sec">
+            <p class="src-rubric">{{.Label}}</p>
+            <ul class="src-list">
+            {{range .Sources}}
+                <li class="src-row{{if and (eq $rail.AccountID .AccountID) (eq $rail.ColEnc .ColEnc)}} is-on{{else if not .Selected}} is-off{{end}}">
+                    <label class="src-check">
+                        <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
+                        <span class="src-box" aria-hidden="true"></span>
+                    </label>
+                    <span class="src-bar" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <a class="src-label" href="{{$.Base}}/app/{{$rail.Section}}/{{.AccountID}}/{{.ColEnc}}" title="{{.Label}}">{{.Label}}</a>
+                    {{if .ReadOnly}}<span class="src-meta hint">ro</span>{{end}}
+                </li>
+            {{end}}
+            </ul>
+        </div>
         {{end}}
-        </ul>
-        <button type="submit">Apply</button>
-        <p class="hint">Unticked collections are not polled on the merged view.</p>
+        <div class="rail-foot">
+            <button type="submit" class="app-btn">Apply</button>
+            <p class="hint">Unticked collections are not polled on the merged view.</p>
+        </div>
     </form>
-    {{else}}<p class="hint">No collections here yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
+    {{else}}<p class="hint rail-empty">No collections here yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
 </aside>
 {{end}}
 
@@ -387,37 +394,43 @@
 {{define "findprogress"}}
 {{$d := .Data}}
 <div class="find-progress">
-    <p class="find-summary" role="status">{{$d.Snapshot.Summary}}</p>
-    <ul class="find-sources">
-    {{range $d.Snapshot.Sources}}
-        <li class="find-source is-{{.State}}">
-            <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
-            <span class="find-source-name">{{.CollectionLabel}}<span class="hint">{{.AccountLabel}}</span></span>
-            <span class="find-source-state">
-                {{if eq (printf "%s" .State) "waiting"}}Waiting
-                {{else if eq (printf "%s" .State) "querying"}}Querying…
-                {{else if eq (printf "%s" .State) "done"}}{{.Count}} found
-                {{else if eq (printf "%s" .State) "empty"}}Nothing here
-                {{else if eq (printf "%s" .State) "cancelled"}}Stopped
-                {{else if eq (printf "%s" .State) "timeout"}}Timed out
-                {{else}}Unavailable{{end}}
-                {{if .FromCache}}<span class="hint">from cache</span>{{end}}
-                {{if .Reason}}<span class="hint">{{.Reason}}</span>{{end}}
-            </span>
-            {{if .State.Failed}}
-            <button type="button" class="link"
-                    hx-post="{{$d.RetryURL}}" hx-vals='{"source": "{{.ID}}"}'
-                    hx-target="#find-panel" hx-swap="innerHTML"
-                    hx-headers='{"X-CSRF-Token": "{{$.CSRF}}"}'>Retry</button>
-            {{end}}
-        </li>
-    {{end}}
-    </ul>
-    {{if $d.Snapshot.Running}}
-    <button type="button" class="link"
-            hx-post="{{$d.CancelURL}}" hx-target="#find-panel" hx-swap="innerHTML"
-            hx-headers='{"X-CSRF-Token": "{{$.CSRF}}"}'>Stop polling</button>
-    {{end}}
+    <div class="find-poll">
+        <span class="find-prog" aria-hidden="true"><i style="width:{{$d.Snapshot.Percent}}%"></i></span>
+        <p class="find-summary" role="status">{{$d.Snapshot.Summary}}</p>
+        {{if $d.Snapshot.Running}}
+        <button type="button" class="app-btn is-quiet is-sm"
+                hx-post="{{$d.CancelURL}}" hx-target="#find-panel" hx-swap="innerHTML"
+                hx-headers='{"X-CSRF-Token": "{{$.CSRF}}"}'>Stop polling</button>
+        {{end}}
+    </div>
+    <details class="find-sources-wrap">
+        <summary>{{len $d.Snapshot.Sources}} sources</summary>
+        <ul class="find-sources">
+        {{range $d.Snapshot.Sources}}
+            <li class="find-source is-{{.State}}">
+                <span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                <span class="find-source-name">{{.CollectionLabel}}<span class="hint">{{.AccountLabel}}</span></span>
+                <span class="find-source-state">
+                    {{if eq (printf "%s" .State) "waiting"}}Waiting
+                    {{else if eq (printf "%s" .State) "querying"}}Querying…
+                    {{else if eq (printf "%s" .State) "done"}}{{.Count}} found
+                    {{else if eq (printf "%s" .State) "empty"}}Nothing here
+                    {{else if eq (printf "%s" .State) "cancelled"}}Stopped
+                    {{else if eq (printf "%s" .State) "timeout"}}Timed out
+                    {{else}}Unavailable{{end}}
+                    {{if .FromCache}}<span class="hint">from cache</span>{{end}}
+                    {{if .Reason}}<span class="hint">{{.Reason}}</span>{{end}}
+                </span>
+                {{if .State.Failed}}
+                <button type="button" class="app-btn is-quiet is-sm"
+                        hx-post="{{$d.RetryURL}}" hx-vals='{"source": "{{.ID}}"}'
+                        hx-target="#find-panel" hx-swap="innerHTML"
+                        hx-headers='{"X-CSRF-Token": "{{$.CSRF}}"}'>Retry</button>
+                {{end}}
+            </li>
+        {{end}}
+        </ul>
+    </details>
 </div>
 {{end}}
 
@@ -441,39 +454,61 @@
 <div class="find-results">
 {{range $d.Groups}}
     <section class="find-group">
-        <h2>{{.Label}}</h2>
-        <ul class="find-rows">
+        <div class="list-group">
+            <h2 class="list-rubric">{{.Label}}</h2>
+            <span class="list-num">{{len .Rows}}</span>
+        </div>
+        <ul class="list find-rows">
         {{range .Rows}}
-            <li class="find-row is-{{.Kind}}{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}{{if .Collapsed}} is-merged{{end}}">
-                <span class="find-row-time">{{.TimeLabel}}{{if .TimeZoneLabel}} <span class="tz-label">{{.TimeZoneLabel}}</span>{{end}}</span>
-                <span class="find-row-body">
-                    {{if .URL}}<a href="{{.URL}}"><strong>{{.Title}}</strong></a>{{else}}<strong>{{.Title}}</strong>{{end}}
+            {{if eq .Kind "contact"}}
+            <li class="list-row list-row--contact-find find-row is-contact{{if .Collapsed}} is-merged{{end}}">
+                <span class="list-bar" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                {{if .URL}}
+                <a class="contact-row-link detail-link" href="{{.URL}}"
+                   hx-get="{{.PanelURL}}" hx-target="#app-details" hx-swap="innerHTML">
+                    <span class="list-avatar contact-avatar">{{.Initials}}</span>
+                    <span class="list-title"><strong>{{.Title}}</strong></span>
+                    <span class="list-sub list-phone">{{.PhonesLabel}}</span>
+                    <span class="list-sub">{{.EmailsLabel}}</span>
+                    <span class="list-sub">{{.Org}}</span>
+                    <span class="list-detail">{{.SourceLabel}}</span>
+                </a>
+                {{else}}
+                <span class="list-avatar contact-avatar">{{.Initials}}</span>
+                <span class="list-title"><strong>{{.Title}}</strong></span>
+                <span class="list-sub list-phone">{{.PhonesLabel}}</span>
+                <span class="list-sub">{{.EmailsLabel}}</span>
+                <span class="list-sub">{{.Org}}</span>
+                <span class="list-detail">{{.SourceLabel}}</span>
+                {{end}}
+                <span class="list-end">{{if .Collapsed}}<a class="dup-badge{{if .DupLinked}} is-linked{{end}}" href="{{.DupURL}}"
+                    title="{{if .DupLinked}}Linked records{{else}}Possible duplicates{{end}}">{{if .DupLinked}}linked{{else}}duplicate?{{end}} ×{{.DupCount}}</a>{{end}}</span>
+            </li>
+            {{else}}
+            <li class="list-row list-row--find find-row is-{{.Kind}}{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}{{if .Collapsed}} is-merged{{end}}">
+                <span class="list-bar" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
+                <span class="list-time">{{.TimeLabel}}{{if .TimeZoneLabel}} <span class="tz-label">{{.TimeZoneLabel}}</span>{{end}}</span>
+                <span class="list-title">
+                    {{if .URL}}<a class="detail-link" href="{{.URL}}"
+                       hx-get="{{.PanelURL}}" hx-target="#app-details" hx-swap="innerHTML"><strong>{{.Title}}</strong></a>{{else}}<strong>{{.Title}}</strong>{{end}}
                     {{if .Collapsed}}
-                    {{/* The badge of §15: one row standing for several records
-                         says so, and says where the decision is made. */}}
                     <a class="dup-badge{{if .DupLinked}} is-linked{{end}}" href="{{.DupURL}}"
                        title="{{if .DupLinked}}Linked records{{else}}Possible duplicates{{end}}">{{if .DupLinked}}linked{{else}}duplicate?{{end}} ×{{.DupCount}}</a>
                     {{end}}
-                    <span class="hint">{{.Subtitle}}</span>
-                    {{if .Collapsed}}
-                    <span class="dup-sources hint">
-                    {{range .Members}}
-                        <span class="dup-source"><span class="collection-dot" style="background:{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>{{if .URL}}<a href="{{.URL}}">{{.Collection}}</a>{{else}}{{.Collection}}{{end}}</span>
-                    {{end}}
-                    </span>
-                    {{end}}
                 </span>
-                <span class="find-row-match">{{if .MatchLabel}}{{.MatchLabel}}{{end}}</span>
-                <span class="find-row-source">{{.Collection}}</span>
-                <span class="find-row-kind">{{.Kind}}</span>
+                <span class="list-sub">{{.Subtitle}}</span>
+                <span class="list-detail find-row-match">{{if .MatchLabel}}{{.MatchLabel}}{{end}}</span>
+                <span class="list-detail">{{.SourceLabel}}</span>
+                <span class="list-detail find-row-kind">{{.Kind}}</span>
             </li>
+            {{end}}
         {{end}}
         </ul>
     </section>
 {{end}}
 </div>
 {{else if not $d.Snapshot.Running}}
-<p class="hint">Nothing found.</p>
+<p class="hint page-hint">Nothing found.</p>
 {{end}}
 <p class="print-footer print-only">Carrel · {{$d.PrintSection}} · {{$d.Snapshot.Queried}} sources polled · captured {{$d.PrintDate}}</p>
 {{template "findpoller" .}}

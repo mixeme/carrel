@@ -4,6 +4,7 @@
 package handler
 
 import (
+	"fmt"
 	"strings"
 
 	"gitea.mixdep.ru/mix/carrel/internal/account"
@@ -65,6 +66,60 @@ func (s *Server) buildSectionRail(sess *session.Session, req findRequest, active
 		Mode:       req.Mode,
 		Selection:  selectionState(rows),
 	}, nil
+}
+
+type sourceGroup struct {
+	Label   string
+	Sources []sourceRow
+}
+
+// AccountGroups keeps collections under the account they belong to, in the
+// order the accounts first appear. The mockup's rail is a list of accounts,
+// not a flat pile of collections.
+func (r sectionRail) AccountGroups() []sourceGroup {
+	var groups []sourceGroup
+	index := make(map[string]int)
+	for _, src := range r.Sources {
+		key := src.AccountID
+		if at, ok := index[key]; ok {
+			groups[at].Sources = append(groups[at].Sources, src)
+			continue
+		}
+		label := src.AccountLabel
+		if label == "" {
+			label = src.AccountID
+		}
+		index[key] = len(groups)
+		groups = append(groups, sourceGroup{Label: label, Sources: []sourceRow{src}})
+	}
+	return groups
+}
+
+func (r sectionRail) SourceSummary() string {
+	if len(r.Sources) == 0 {
+		return ""
+	}
+	selected := 0
+	accounts := make(map[string]struct{})
+	for _, src := range r.Sources {
+		accounts[src.AccountID] = struct{}{}
+		if src.Selected {
+			selected++
+		}
+	}
+	one, many := r.Mode.collectionNoun()
+	noun := many
+	if len(r.Sources) == 1 {
+		noun = one
+	}
+	acc := "account"
+	if len(accounts) != 1 {
+		acc = "accounts"
+	}
+	if selected == len(r.Sources) {
+		return fmt.Sprintf("%d %s · %d %s", len(r.Sources), noun, len(accounts), acc)
+	}
+	return fmt.Sprintf("%d of %d %s · %d %s", selected, len(r.Sources), many, len(accounts), acc)
 }
 
 // sourceRow is one collection in a sidebar, with the tick §14 puts on it.

@@ -156,7 +156,7 @@ func contactItem(src fanout.Source, contact model.Contact, url string, marks con
 		Tags: contact.Categories, DupCount: 1, MatchLabel: matchLabel,
 		Print: merge.FingerprintContact(contact), DupGroup: marks.Group,
 		DupIgnored: marks.Ignored, Emails: valuesOf(contact.Emails),
-		Phones: valuesOf(contact.Phones),
+		Phones: valuesOf(contact.Phones), Org: firstOrg(contact),
 	}
 	return fanout.Item{SourceID: src.ID, Key: row.Sort + "|" + src.ID, Data: row}
 }
@@ -322,17 +322,23 @@ func (s *stringSet) add(values ...string) {
 
 func contactSubtitle(contact model.Contact, src fanout.Source) string {
 	parts := make([]string, 0, 3)
-	for _, org := range contact.Organization {
-		if org = strings.TrimSpace(org); org != "" {
-			parts = append(parts, org)
-			break
-		}
+	if org := firstOrg(contact); org != "" {
+		parts = append(parts, org)
 	}
 	if emails := contact.NormalizedEmails(); len(emails) > 0 {
 		parts = append(parts, emails[0])
 	}
 	parts = append(parts, sourceSubtitle(src))
 	return strings.Join(parts, " · ")
+}
+
+func firstOrg(contact model.Contact) string {
+	for _, org := range contact.Organization {
+		if org = strings.TrimSpace(org); org != "" {
+			return org
+		}
+	}
+	return ""
 }
 
 func initialOf(name string) string {

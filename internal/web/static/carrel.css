@@ -271,10 +271,11 @@ main:has(.app-layout) {
 
 .src-row {
     display: grid;
-    grid-template-columns: 14px 3px minmax(0, 1fr) auto;
+    grid-template-columns: 12px 3px minmax(0, 1fr) auto;
     gap: 9px;
     align-items: center;
-    padding: 5px 0;
+    height: 26px;
+    padding: 0 14px 0 12px;
     text-decoration: none;
     color: inherit;
 }
@@ -285,7 +286,25 @@ main:has(.app-layout) {
 }
 
 .src-row.is-on {
+    background: var(--card);
     font-weight: 600;
+}
+
+.src-sec {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 8px;
+}
+
+.src-rubric {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    font-weight: 600;
+    padding: 0 16px;
+    margin: 0 0 3px;
 }
 
 .src-row.is-off .src-label {
@@ -422,6 +441,12 @@ a.src-label:hover {
     border-radius: 3px;
     object-fit: cover;
     background: #d9d2be;
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex: none;
 }
 
@@ -501,8 +526,12 @@ a.src-label:hover {
     padding: 15px var(--pad) 5px;
     border-bottom: 0.5px solid var(--rule);
     background: var(--bg);
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
+}
+
+.list-num {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--dusty);
 }
 
 .list-row--contact {
@@ -1505,6 +1534,12 @@ body.has-sheet {
     font-size: 0.875rem;
     color: var(--muted);
     border-top: 0.5px solid var(--rule);
+}
+
+body.has-shell .site-footer {
+    padding: 8px var(--pad);
+    font-size: 11px;
+    color: var(--dusty);
 }
 
 .card {
@@ -3182,10 +3217,55 @@ label.checkbox input {
 }
 
 /* Fan-out progress and merged results (§14, §16) */
+.find-progress {
+    border-bottom: 0.5px solid var(--rule);
+}
+
+.find-poll {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px var(--pad);
+    background: var(--card);
+    flex-wrap: wrap;
+}
+
+.find-prog {
+    width: 120px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--card-border);
+    overflow: hidden;
+    flex: none;
+}
+
+.find-prog i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+}
+
 .find-summary {
-    margin: 0.5rem 0;
-    font-size: 0.9rem;
-    color: var(--muted);
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--ink);
+    flex: 1;
+    min-width: 12rem;
+}
+
+.find-poll .app-btn {
+    margin-left: auto;
+}
+
+.find-sources-wrap {
+    padding: 0 var(--pad) 8px;
+    background: var(--card);
+}
+
+.find-sources-wrap summary {
+    font-size: 11.5px;
+    color: var(--dusty);
+    cursor: pointer;
 }
 
 .find-source {
@@ -3218,7 +3298,7 @@ label.checkbox input {
 }
 
 .find-group {
-    margin-top: 1.5rem;
+    margin-top: 0;
 }
 
 .find-group h2 {
@@ -3229,10 +3309,26 @@ label.checkbox input {
 
 .find-row {
     display: grid;
-    grid-template-columns: 7rem 1fr minmax(6rem, 10rem) auto auto;
-    gap: 0.6rem;
-    padding: 0.5rem 0;
+    align-items: center;
+    gap: 12px;
+    min-height: 38px;
+    padding-left: var(--pad);
+    padding-right: var(--pad);
     border-bottom: 0.5px solid var(--hair);
+}
+
+.list-row--find {
+    grid-template-columns: 3px 76px minmax(220px, 2.4fr) minmax(120px, 1fr) minmax(80px, 1fr) 128px auto;
+}
+
+.list-row--contact-find {
+    grid-template-columns: 3px var(--row-lg) minmax(150px, 1.4fr) 142px minmax(150px, 1.1fr) minmax(110px, 0.9fr) 120px auto;
+}
+
+.list-phone {
+    font-family: var(--f-mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
 }
 
 .find-row-time {
@@ -4125,12 +4221,15 @@ button.danger {
         gap: 8px;
     }
 
-    .list-row--contact {
+    .list-row--contact,
+    .list-row--contact-find {
         grid-template-columns: var(--list-cols, 3px var(--row-lg) minmax(0, 1fr));
     }
 
     .list-row--contact .list-sub,
-    .list-row--contact .list-detail {
+    .list-row--contact .list-detail,
+    .list-row--contact-find .list-sub,
+    .list-row--contact-find .list-detail {
         grid-column: 3;
         margin-top: -4px;
     }
@@ -4177,9 +4276,17 @@ button.danger {
         margin-top: -4px;
     }
 
-    .find-row {
-        grid-template-columns: 1fr;
-        gap: 0.2rem;
+    .find-row,
+    .list-row--find {
+        grid-template-columns: 3px minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .list-row--find .list-time,
+    .list-row--find .list-title,
+    .list-row--find .list-sub,
+    .list-row--find .list-detail {
+        grid-column: 2;
     }
 
     .find-row-time {
@@ -4378,8 +4485,12 @@ body.has-shell .note-sidebar {
     border: none;
     box-shadow: none;
     padding: 0 0 16px;
-    align-self: start;
+    align-self: stretch;
     min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
 }
 
 body.has-shell .app-main,
@@ -4442,6 +4553,18 @@ body.has-shell .app-shell.is-admin .admin-rail {
     gap: 9px;
 }
 
+.page-title .src-bar {
+    width: 3px;
+    height: 20px;
+    border-radius: 1px;
+}
+
+.page-title .src-bar {
+    width: 3px;
+    height: 20px;
+    border-radius: 1px;
+}
+
 .page-sub,
 .page-head .source-label {
     font-size: 11.5px;
@@ -4491,7 +4614,8 @@ body.has-shell .app-shell.is-admin .admin-rail {
 }
 
 .section-rail h2,
-.section-rail .settings-rubric {
+.section-rail .settings-rubric,
+.section-rail .src-rubric {
     font-size: 10px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -4504,6 +4628,27 @@ body.has-shell .app-shell.is-admin .admin-rail {
 .section-rail form,
 .section-rail .collection-list {
     padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.section-rail .rail-foot {
+    margin-top: auto;
+    padding: 10px 16px 0;
+    border-top: 0.5px solid var(--hair);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.section-rail .rail-foot .app-btn {
+    align-self: flex-start;
+}
+
+.section-rail .rail-empty {
+    padding: 0 16px;
 }
 
 .settings-panel,

@@ -6,8 +6,12 @@
     <div class="app-main">
         <header class="page-head">
             <div>
-                <h1 class="page-title">{{$d.SectionRail.AllLabel}}</h1>
-                <p class="page-sub">Every ticked calendar at once.</p>
+                <h1 class="page-title"><span class="src-bar is-multi" aria-hidden="true"></span>{{$d.SectionRail.AllLabel}}</h1>
+                <p class="page-sub">{{if $d.SectionRail.SourceSummary}}{{$d.SectionRail.SourceSummary}}{{if $d.Request.From}} · {{$d.Request.From}}{{if $d.Request.To}} – {{$d.Request.To}}{{end}}{{end}}{{else}}Every ticked calendar at once.{{end}}</p>
+            </div>
+            <div class="page-acts no-print">
+                {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
+                <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
             </div>
         </header>
         <form method="get" action="{{.Base}}/app/calendar" class="form page-bar no-print">

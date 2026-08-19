@@ -6,8 +6,12 @@
     <div class="app-main">
         <header class="page-head">
             <div>
-                <h1 class="page-title">{{$d.SectionRail.AllLabel}}</h1>
-                <p class="page-sub">Open tasks from every ticked list.</p>
+                <h1 class="page-title"><span class="src-bar is-multi" aria-hidden="true"></span>{{$d.SectionRail.AllLabel}}</h1>
+                <p class="page-sub">{{if $d.SectionRail.SourceSummary}}{{$d.SectionRail.SourceSummary}}{{else}}Open tasks from every ticked list.{{end}}</p>
+            </div>
+            <div class="page-acts no-print">
+                {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
+                <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
             </div>
         </header>
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}

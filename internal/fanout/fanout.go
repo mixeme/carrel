@@ -537,6 +537,22 @@ func (s Snapshot) Summary() string {
 	return strings.Join(parts, " · ")
 }
 
+// Percent is how far the poll bar has filled: queried sources over the total,
+// 100 when nothing is left to wait for.
+func (s Snapshot) Percent() int {
+	if s.Total <= 0 {
+		if s.Running {
+			return 0
+		}
+		return 100
+	}
+	n := s.Queried
+	if n > s.Total {
+		n = s.Total
+	}
+	return 100 * n / s.Total
+}
+
 func noun(n int, singular, plural string) string {
 	if n == 1 {
 		return singular
