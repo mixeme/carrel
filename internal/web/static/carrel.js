@@ -894,3 +894,27 @@ document.addEventListener('htmx:sseError', function (e) {
         initPickers();
     }
 })();
+
+// Wave 1.17 — slide-out rail on narrow screens.
+(function () {
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-rail-toggle]')) {
+            var rail = document.querySelector('[data-app-rail]');
+            var scrim = document.querySelector('[data-rail-scrim]');
+            if (rail) rail.classList.add('is-open');
+            if (scrim) scrim.hidden = false;
+            return;
+        }
+        if (e.target.closest('[data-rail-scrim]')) {
+            closeRail();
+            return;
+        }
+    });
+
+    function closeRail() {
+        var rail = document.querySelector('[data-app-rail]');
+        var scrim = document.querySelector('[data-rail-scrim]');
+        if (rail) rail.classList.remove('is-open');
+        if (scrim) scrim.hidden = true;
+    }
+})();

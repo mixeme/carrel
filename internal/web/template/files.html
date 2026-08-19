@@ -99,6 +99,7 @@
             <p class="hint">Deleting removes the file from the server. Carrel does not check first whether an event or a
                 note links to it — it is your storage, and it keeps no index of what points where.</p>
             {{end}}
+            {{if $d.PrintDate}}<p class="print-footer print-only">Carrel · files · {{$d.AccountLabel}} · captured {{$d.PrintDate}}</p>{{end}}
         </section>
         {{end}}
     </div>

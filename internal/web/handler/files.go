@@ -99,6 +99,7 @@ type filesView struct {
 	// IsAttachmentFolder marks the folder §23.10 puts attachments in, so a
 	// person who browses to it can see that is what it is.
 	IsAttachmentFolder bool
+	PrintDate          string
 }
 
 type fileCrumb struct {
@@ -216,6 +217,7 @@ func (s *Server) buildFiles(ctx context.Context, sess *session.Session, accountI
 		view.Entries = append(view.Entries, row)
 	}
 	view.Empty = len(view.Entries) == 0
+	view.PrintDate = time.Now().UTC().Format("2006-01-02 15:04 UTC")
 	return view, nil
 }
 

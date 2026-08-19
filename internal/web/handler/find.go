@@ -278,12 +278,14 @@ type findView struct {
 	SourcesURL string
 	Base       string
 	// Back is where the screen came from, when it has one place to return to.
-	Back        string
-	NoSources   bool
-	Unusable    string
-	FromLabel   string
-	ToLabel     string
-	SectionRail sectionRail
+	Back         string
+	NoSources    bool
+	Unusable     string
+	FromLabel    string
+	ToLabel      string
+	SectionRail  sectionRail
+	PrintDate    string
+	PrintSection string
 	// Person is filled on the contact screen of §1.8.
 	Person personPanel
 }
@@ -375,7 +377,9 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 	view := findView{
 		Request: req, Mode: req.Mode, Title: findTitle(req),
 		UseSSE: s.Progress.SSE(), PollMillis: s.pollMillis(), Base: s.Path(""),
+		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
+	view.PrintSection = findPrintSection(req.Mode)
 	view.SourcesURL = s.sourcesURL(req.Mode)
 	if req.Mode == modeTime {
 		view.FromLabel, view.ToLabel = req.From, req.To
@@ -550,7 +554,9 @@ func (s *Server) viewFromTask(r *http.Request, req findRequest, task *fanout.Tas
 		Request: req, Mode: req.Mode, Title: findTitle(req), TaskID: task.ID,
 		UseSSE: s.Progress.SSE() && !req.Poll, PollMillis: s.pollMillis(),
 		SourcesURL: s.sourcesURL(req.Mode), Base: s.Path(""),
+		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
+	view.PrintSection = findPrintSection(req.Mode)
 	s.fillFindURLs(&view, req, task.ID)
 	s.fillResults(r, &view, req, task)
 	return view
@@ -828,6 +834,23 @@ func findTitle(req findRequest) string {
 		return "Duplicates"
 	default:
 		return "Agenda"
+	}
+}
+
+func findPrintSection(mode findMode) string {
+	switch mode {
+	case modePeople:
+		return "contacts"
+	case modeTasks:
+		return "tasks"
+	case modeNotes:
+		return "notes"
+	case modeSearch:
+		return "search"
+	case modeDuplicates:
+		return "duplicates"
+	default:
+		return "agenda"
 	}
 }
 

@@ -28,6 +28,7 @@
 <body{{if .Shell}} class="has-shell"{{end}}>
 {{if .Shell}}
 <header class="app-top no-print">
+    <button type="button" class="app-rail-toggle no-print" data-rail-toggle aria-label="Open navigation">☰</button>
     <a class="app-brand" href="{{.Base}}/app/calendar">Carrel</a>
     <form class="app-search" method="get" action="{{.Base}}/app/search">
         <input id="app-search" type="search" name="q" value="{{.Topbar.SearchQuery}}" placeholder="Search everything…" autocomplete="off" spellcheck="false" aria-label="Search everything">
@@ -98,7 +99,7 @@
     {{else if eq .ShellLayout "settings"}}
     {{template "settingsrail" .}}
     {{else}}
-    <nav class="app-rail no-print" aria-label="Sections">
+    <nav class="app-rail no-print" aria-label="Sections" data-app-rail>
         <a href="{{.Base}}/app/search"{{if eq .NavSection "search"}} aria-current="page"{{end}}>Search</a>
         <a href="{{.Base}}/app/contacts"{{if eq .NavSection "contacts"}} aria-current="page"{{end}}>Contacts</a>
         <a href="{{.Base}}/app/calendar"{{if eq .NavSection "calendar"}} aria-current="page"{{end}}>Calendar</a>
@@ -107,6 +108,7 @@
         <a href="{{.Base}}/app/files"{{if eq .NavSection "files"}} aria-current="page"{{end}}>Files</a>
         <a href="{{.Base}}/app/duplicates"{{if eq .NavSection "duplicates"}} aria-current="page"{{end}}>Duplicates</a>
     </nav>
+    <div class="app-rail-scrim no-print" data-rail-scrim hidden></div>
     {{end}}
     <div class="app-work">
         <div class="app-content">
@@ -134,6 +136,13 @@
         <aside class="app-details no-print" id="app-details" hidden aria-label="Details"></aside>
     </div>
 </div>
+<nav class="app-bottom-nav no-print" aria-label="Sections">
+    <a href="{{.Base}}/app/contacts"{{if eq .NavSection "contacts"}} aria-current="page"{{end}}><span class="bottom-nav-icon" aria-hidden="true">👤</span>Contacts</a>
+    <a href="{{.Base}}/app/calendar"{{if eq .NavSection "calendar"}} aria-current="page"{{end}}><span class="bottom-nav-icon" aria-hidden="true">📅</span>Calendar</a>
+    <a href="{{.Base}}/app/tasks"{{if eq .NavSection "tasks"}} aria-current="page"{{end}}><span class="bottom-nav-icon" aria-hidden="true">☑</span>Tasks</a>
+    <a href="{{.Base}}/app/notes"{{if eq .NavSection "notes"}} aria-current="page"{{end}}><span class="bottom-nav-icon" aria-hidden="true">📝</span>Notes</a>
+    <a href="{{.Base}}/app/files"{{if eq .NavSection "files"}} aria-current="page"{{end}}><span class="bottom-nav-icon" aria-hidden="true">📁</span>Files</a>
+</nav>
 <div class="app-overlay no-print" id="app-overlay" hidden>
     <button type="button" class="app-scrim" data-sheet-close tabindex="-1" aria-label="Close"></button>
     <div id="app-sheet" class="app-sheet-host"></div>
@@ -431,6 +440,7 @@
 {{else if not $d.Snapshot.Running}}
 <p class="hint">Nothing found.</p>
 {{end}}
+<p class="print-footer print-only">Carrel · {{$d.PrintSection}} · {{$d.Snapshot.Queried}} sources polled · captured {{$d.PrintDate}}</p>
 {{template "findpoller" .}}
 {{end}}
 

@@ -2380,6 +2380,27 @@ button.danger {
         color: #333;
     }
 
+    .files-table tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .files-table {
+        border-collapse: collapse;
+    }
+
+    .files-table th,
+    .files-table td {
+        border-bottom: 0.5px solid #999;
+    }
+
+    .files-card {
+        background: #fff !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
     a[href]::after {
         content: none !important;
     }
@@ -2726,5 +2747,253 @@ button.danger {
 
     .settings-rail {
         display: none;
+    }
+}
+
+/* Wave 1.17 — narrow screen (§13) */
+.app-bottom-nav {
+    display: none;
+}
+
+.app-rail-toggle {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    :root {
+        --pad: 12px;
+    }
+
+    .app-shell {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .app-rail {
+        position: fixed;
+        inset: var(--top) auto 0 0;
+        width: 264px;
+        z-index: 30;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .app-rail.is-open {
+        transform: translateX(0);
+    }
+
+    .app-rail-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: 29;
+        background: rgba(23, 33, 28, 0.22);
+    }
+
+    .app-rail-scrim[hidden] {
+        display: none;
+    }
+
+    .app-rail-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: 0;
+        background: transparent;
+        color: var(--ink);
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        flex: none;
+    }
+
+    .app-brand {
+        width: auto;
+    }
+
+    .app-search {
+        max-width: none;
+    }
+
+    .app-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 20;
+        height: 52px;
+        background: var(--paper);
+        border-top: 0.5px solid var(--rule);
+        align-items: stretch;
+        justify-content: space-around;
+    }
+
+    .app-bottom-nav a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 4px 8px;
+        font-size: 10px;
+        color: var(--muted);
+        text-decoration: none;
+        gap: 2px;
+    }
+
+    .app-bottom-nav a[aria-current="page"] {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .app-bottom-nav .bottom-nav-icon {
+        font-size: 18px;
+        line-height: 1;
+    }
+
+    body.has-shell {
+        padding-bottom: 52px;
+    }
+
+    .app-content {
+        padding-bottom: calc(var(--pad) + 52px);
+    }
+
+    .app-top-actions {
+        gap: 4px;
+    }
+
+    .app-create-group .app-btn.is-primary {
+        padding: 0 8px;
+        font-size: 11.5px;
+    }
+
+    .app-user-toggle {
+        font-size: 11.5px;
+    }
+
+    .list-row {
+        min-height: 44px;
+        gap: 8px;
+    }
+
+    .list-row--contact {
+        grid-template-columns: var(--list-cols, 3px var(--row-lg) minmax(0, 1fr));
+    }
+
+    .list-row--contact .list-sub,
+    .list-row--contact .list-detail {
+        grid-column: 3;
+        margin-top: -4px;
+    }
+
+    .list-row--agenda {
+        grid-template-columns: 3px minmax(0, 1fr);
+    }
+
+    .agenda-event-row {
+        grid-template-columns: 3px minmax(0, 1fr);
+        min-height: 44px;
+    }
+
+    .agenda-event-row .agenda-time {
+        grid-column: 2;
+        font-size: 11px;
+    }
+
+    .list-row--task {
+        grid-template-columns: var(--list-cols, 14px 3px minmax(0, 1fr));
+    }
+
+    .task-row {
+        grid-template-columns: 14px 3px minmax(0, 1fr);
+        min-height: 44px;
+    }
+
+    .task-row .list-end {
+        grid-column: 3;
+        margin-top: -4px;
+    }
+
+    .list-row--note {
+        grid-template-columns: var(--list-cols, 3px minmax(0, 1fr));
+    }
+
+    .note-row {
+        grid-template-columns: 3px minmax(0, 1fr);
+        min-height: 44px;
+    }
+
+    .note-row .note-excerpt {
+        grid-column: 2;
+        margin-top: -4px;
+    }
+
+    .find-row {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+    }
+
+    .find-row-time {
+        font-size: 11px;
+    }
+
+    .app-shell.has-details .app-work {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .app-details {
+        position: fixed;
+        inset: var(--top) 0 52px;
+        z-index: 25;
+        width: 100%;
+        border-left: 0;
+    }
+
+    .app-details[hidden] {
+        display: none !important;
+    }
+
+    .person-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .person-sidebar {
+        position: static;
+    }
+
+    .app-dialog {
+        padding: 12px var(--pad) 16px;
+    }
+
+    .files-table th:nth-child(3),
+    .files-table td:nth-child(3),
+    .files-table th:nth-child(4),
+    .files-table td:nth-child(4) {
+        display: none;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .app-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .section-rail {
+        display: none;
+    }
+
+    .app-overlay {
+        padding: 12px 8px;
+    }
+
+    .app-sheet-host {
+        width: 100%;
     }
 }
