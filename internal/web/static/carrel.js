@@ -1516,3 +1516,236 @@ document.addEventListener('htmx:sseError', function (e) {
         if (!picker.contains(e.target)) closeMenu();
     });
 })();
+
+// Wave 2.4 — file manager: selection, ops bar, filter, properties panel.
+(function () {
+    var browse = document.querySelector('[data-files-browse]');
+    if (!browse) return;
+
+    var STORAGE_KEY = 'carrel:files-props';
+    var layout = document.querySelector('[data-files-layout]');
+    var list = browse.querySelector('[data-files-list]');
+    var opsBar = browse.querySelector('[data-files-ops]');
+    var opsCount = browse.querySelector('[data-files-ops-count]');
+    var opsSize = browse.querySelector('[data-files-ops-size]');
+    var filterInput = browse.querySelector('[data-files-filter]');
+    var toolbar = browse.querySelector('[data-files-toolbar]');
+    var deleteForm = browse.querySelector('[data-files-delete-form]');
+    var propsPanel = document.getElementById('files-props');
+    var propsBody = propsPanel && propsPanel.querySelector('[data-files-props-body]');
+    var propsTitle = propsPanel && propsPanel.querySelector('[data-files-props-title]');
+    var readonly = browse.getAttribute('data-readonly') === '1';
+    var narrow = window.matchMedia('(max-width: 640px)');
+
+    function rows() {
+        return Array.prototype.slice.call(list.querySelectorAll('[data-file-row]'));
+    }
+
+    function selectedRows() {
+        return rows().filter(function (row) {
+            var cb = row.querySelector('[data-files-check]');
+            return cb && cb.checked;
+        });
+    }
+
+    function formatSize(bytes) {
+        bytes = Number(bytes) || 0;
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' kB';
+        if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+    }
+
+    function propsClosed() {
+        try {
+            return localStorage.getItem(STORAGE_KEY) === 'closed';
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function setPropsClosed(closed) {
+        try {
+            if (closed) localStorage.setItem(STORAGE_KEY, 'closed');
+            else localStorage.removeItem(STORAGE_KEY);
+        } catch (e) { /* ignore */ }
+    }
+
+    function showProps() {
+        if (!propsPanel || narrow.matches) return;
+        propsPanel.hidden = false;
+        if (layout) layout.classList.add('has-files-props');
+    }
+
+    function hideProps(manual) {
+        if (!propsPanel) return;
+        propsPanel.hidden = true;
+        if (layout) layout.classList.remove('has-files-props');
+        if (propsBody) propsBody.innerHTML = '';
+        if (manual) setPropsClosed(true);
+    }
+
+    function renderProps(row) {
+        if (!propsBody || !propsTitle || !row) return;
+        var name = row.getAttribute('data-name') || '';
+        var isDir = row.getAttribute('data-dir') === 'true';
+        propsTitle.textContent = name;
+        var html = '';
+        if (!isDir && row.getAttribute('data-download')) {
+            html += '<div class="files-props-actions"><a class="link" href="' + row.getAttribute('data-download') + '">Download</a></div>';
+        }
+        html += '<dl>';
+        if (!isDir) {
+            html += '<dt>Size</dt><dd>' + (row.getAttribute('data-size') ? formatSize(row.getAttribute('data-size')) : '—') + '</dd>';
+            html += '<dt>Type</dt><dd>' + (row.getAttribute('data-type') || '—') + '</dd>';
+        }
+        html += '<dt>Changed</dt><dd>' + (row.getAttribute('data-changed') || '—') + '</dd>';
+        html += '<dt>Path</dt><dd>' + (row.getAttribute('data-rel') || '') + '</dd>';
+        if (!isDir && row.getAttribute('data-etag')) {
+            html += '<dt>ETag</dt><dd>' + row.getAttribute('data-etag') + '</dd>';
+        }
+        html += '</dl>';
+        html += '<p class="hint">Carrel keeps no index of what points at this file. It may be attached to a note or an event — check before deleting.</p>';
+        propsBody.innerHTML = html;
+    }
+
+    function updateSelection() {
+        var sel = selectedRows();
+        rows().forEach(function (row) {
+            var cb = row.querySelector('[data-files-check]');
+            row.classList.toggle('is-selected', cb && cb.checked);
+        });
+        if (sel.length === 0) {
+            if (opsBar) opsBar.hidden = true;
+            if (toolbar) toolbar.hidden = false;
+            hideProps(false);
+            return;
+        }
+        if (opsBar) opsBar.hidden = false;
+        if (toolbar) toolbar.hidden = true;
+        var total = 0;
+        sel.forEach(function (row) {
+            total += Number(row.getAttribute('data-size')) || 0;
+        });
+        if (opsCount) opsCount.textContent = sel.length + (sel.length === 1 ? ' selected' : ' selected');
+        if (opsSize) opsSize.textContent = total > 0 ? formatSize(total) : '';
+        if (sel.length === 1 && !propsClosed() && !narrow.matches) {
+            renderProps(sel[0]);
+            showProps();
+        } else {
+            hideProps(false);
+        }
+        var all = rows();
+        var selectAll = list.querySelector('[data-files-select-all]');
+        if (selectAll) {
+            selectAll.checked = all.length > 0 && sel.length === all.length;
+            selectAll.indeterminate = sel.length > 0 && sel.length < all.length;
+        }
+    }
+
+    function clearSelection() {
+        rows().forEach(function (row) {
+            var cb = row.querySelector('[data-files-check]');
+            if (cb) cb.checked = false;
+        });
+        updateSelection();
+    }
+
+    function applyFilter() {
+        var q = (filterInput && filterInput.value || '').trim().toLowerCase();
+        rows().forEach(function (row) {
+            var name = (row.getAttribute('data-name') || '').toLowerCase();
+            row.hidden = q !== '' && name.indexOf(q) < 0;
+        });
+    }
+
+    list.addEventListener('change', function (e) {
+        if (e.target.matches('[data-files-check], [data-files-select-all]')) {
+            if (e.target.matches('[data-files-select-all]')) {
+                var on = e.target.checked;
+                rows().forEach(function (row) {
+                    var cb = row.querySelector('[data-files-check]');
+                    if (cb && !row.hidden) cb.checked = on;
+                });
+            }
+            updateSelection();
+        }
+    });
+
+    list.addEventListener('click', function (e) {
+        if (e.target.closest('a')) return;
+        var row = e.target.closest('[data-file-row]');
+        if (!row) return;
+        var cb = row.querySelector('[data-files-check]');
+        if (!cb) return;
+        if (!e.target.matches('[data-files-check]')) {
+            cb.checked = !cb.checked;
+            updateSelection();
+        }
+    });
+
+    browse.addEventListener('click', function (e) {
+        if (e.target.closest('[data-files-clear]')) {
+            e.preventDefault();
+            clearSelection();
+            return;
+        }
+        if (e.target.closest('[data-files-props-toggle]')) {
+            e.preventDefault();
+            setPropsClosed(false);
+            var sel = selectedRows();
+            if (sel.length === 1) {
+                renderProps(sel[0]);
+                showProps();
+            } else if (propsPanel && !propsPanel.hidden) {
+                hideProps(true);
+            }
+            return;
+        }
+        if (e.target.closest('[data-files-props-close]')) {
+            e.preventDefault();
+            hideProps(true);
+            return;
+        }
+        var op = e.target.closest('[data-files-op]');
+        if (!op || op.disabled) return;
+        var action = op.getAttribute('data-files-op');
+        var sel = selectedRows();
+        if (sel.length === 0) return;
+        if (action === 'download') {
+            e.preventDefault();
+            sel.forEach(function (row) {
+                var url = row.getAttribute('data-download');
+                if (url) window.open(url, '_blank');
+            });
+            return;
+        }
+        if (action === 'delete') {
+            e.preventDefault();
+            if (readonly || !deleteForm) return;
+            if (!window.confirm('Delete ' + sel.length + ' item(s) from the server?')) return;
+            deleteForm.querySelectorAll('[data-batch-field]').forEach(function (el) { el.remove(); });
+            sel.forEach(function (row) {
+                ['target', 'etag'].forEach(function (name) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = row.getAttribute(name === 'target' ? 'data-rel' : 'data-etag') || '';
+                    input.setAttribute('data-batch-field', '');
+                    deleteForm.appendChild(input);
+                });
+            });
+            deleteForm.submit();
+        }
+    });
+
+    if (filterInput) {
+        filterInput.addEventListener('input', applyFilter);
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && propsPanel && !propsPanel.hidden) {
+            hideProps(true);
+        }
+    });
+})();

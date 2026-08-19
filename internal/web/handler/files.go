@@ -100,6 +100,24 @@ type filesView struct {
 	// person who browses to it can see that is what it is.
 	IsAttachmentFolder bool
 	PrintDate          string
+	// AllCollections is the section root: every file collection as a row.
+	AllCollections bool
+	Collections    []fileCollectionRow
+	ServerCount    int
+	FolderTitle    string
+	ItemCount      int
+	TotalSizeLabel string
+}
+
+// fileCollectionRow is one storage at the All collections root.
+type fileCollectionRow struct {
+	AccountID    string
+	ColEnc       string
+	Name         string
+	ServerLabel  string
+	ReadOnly     bool
+	IsAttachment bool
+	URL          string
 }
 
 type fileCrumb struct {
@@ -113,15 +131,17 @@ type fileRow struct {
 	Rel         string
 	Dir         bool
 	SizeLabel   string
+	SizeBytes   int64
 	TypeLabel   string
 	ModLabel    string
 	ETag        string
 	URL         string
 	DownloadURL string
+	IconKind    string
 }
 
-// FilesHome opens the collection the browser was last in, or says there is no
-// file collection to open.
+// FilesHome is the section root: every connected file collection as a top-level
+// folder. A specific collection opens from there or from the rail.
 func (s *Server) FilesHome(w http.ResponseWriter, r *http.Request) {
 	sess := SessionFrom(r)
 	rows := s.fileCollections(sess)
@@ -131,11 +151,29 @@ func (s *Server) FilesHome(w http.ResponseWriter, r *http.Request) {
 		s.Render(w, "files.html", v)
 		return
 	}
-	target := rows[0]
-	if preferred, ok := s.defaultCollection(sess, account.ViewFiles, rows); ok {
-		target = preferred
+	attach, hasAttach := s.attachmentTarget(sess)
+	servers := make(map[string]struct{})
+	view := filesView{
+		Sources: rows, AllCollections: true,
+		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
-	http.Redirect(w, r, s.Path("/app/files/"+target.AccountID+"/"+target.ColEnc), http.StatusSeeOther)
+	for _, row := range rows {
+		servers[row.AccountID] = struct{}{}
+		cr := fileCollectionRow{
+			AccountID: row.AccountID, ColEnc: row.ColEnc, Name: row.Label(),
+			ServerLabel: row.AccountLabel, ReadOnly: row.ReadOnly,
+			URL: s.Path("/app/files/" + row.AccountID + "/" + row.ColEnc),
+		}
+		if hasAttach && attach.AccountID == row.AccountID &&
+			normalizeCollectionPath(attach.Root) == normalizeCollectionPath(row.Path) {
+			cr.IsAttachment = true
+		}
+		view.Collections = append(view.Collections, cr)
+	}
+	view.ServerCount = len(servers)
+	v := s.View(r, "Files")
+	v.Data = view
+	s.Render(w, "files.html", v)
 }
 
 // FilesBrowse lists one folder of one collection.
@@ -198,13 +236,17 @@ func (s *Server) buildFiles(ctx context.Context, sess *session.Session, accountI
 		view.IsAttachmentFolder = target.AccountID == accountID &&
 			normalizeCollectionPath(target.Folder) == normalizeCollectionPath(listing.Dir)
 	}
+	var totalBytes int64
 	for _, entry := range listing.Entries {
 		row := fileRow{
 			Name: entry.Name, Rel: entry.Rel, Dir: entry.Dir, ETag: entry.ETag,
 			TypeLabel: entry.ContentType,
+			IconKind:  fileIconKind(entry.Name, entry.ContentType, entry.Dir),
 		}
 		if entry.HasSize && !entry.Dir {
+			row.SizeBytes = entry.Size
 			row.SizeLabel = model.ByteSize(entry.Size)
+			totalBytes += entry.Size
 		}
 		if !entry.ModTime.IsZero() {
 			row.ModLabel = entry.ModTime.In(s.timezone()).Format("2006-01-02 15:04")
@@ -217,6 +259,15 @@ func (s *Server) buildFiles(ctx context.Context, sess *session.Session, accountI
 		view.Entries = append(view.Entries, row)
 	}
 	view.Empty = len(view.Entries) == 0
+	view.ItemCount = len(view.Entries)
+	if totalBytes > 0 {
+		view.TotalSizeLabel = model.ByteSize(totalBytes)
+	}
+	if clean != "" {
+		view.FolderTitle = files.Base(clean)
+	} else {
+		view.FolderTitle = collectionLabel(col)
+	}
 	view.PrintDate = time.Now().UTC().Format("2006-01-02 15:04 UTC")
 	return view, nil
 }
@@ -315,6 +366,9 @@ func (s *Server) filesAction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.redirectNotice(w, r, folderURL(base, rel), "Deleted from the server. Anything that linked to it now points at nothing.")
+	case "delete-batch":
+		notice := s.filesDeleteBatch(ctx, p, col, rel, r.PostForm["target"], r.PostForm["etag"])
+		s.redirectNotice(w, r, folderURL(base, rel), notice)
 	default:
 		http.Error(w, "bad request", http.StatusBadRequest)
 	}

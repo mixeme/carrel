@@ -439,6 +439,43 @@ func TestFilesBrowseListsFoldersAndFiles(t *testing.T) {
 	}
 }
 
+func TestFilesHomeShowsAllCollections(t *testing.T) {
+	h := startDAVHost(t)
+	a := filesApp(t, h)
+
+	page := a.get("/app/files")
+	if page.Code != http.StatusOK {
+		t.Fatalf("files home = %d %s", page.Code, page.Body.String())
+	}
+	body := page.Body.String()
+	for _, want := range []string{"All collections", "Storage", "Shared", "data-files-layout"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("files home is missing %q:\n%s", want, body)
+		}
+	}
+	if strings.Contains(body, "data-files-browse") {
+		t.Error("files home should not open a folder listing directly")
+	}
+}
+
+func TestFilesDeleteBatch(t *testing.T) {
+	h := startDAVHost(t)
+	h.putFile(filesRoot+"a.png", []byte("a"))
+	h.putFile(filesRoot+"b.png", []byte("b"))
+	a := filesApp(t, h)
+
+	rec := a.post(filesURL(""), url.Values{
+		"action": {"delete-batch"}, fieldPath: {""},
+		"target": {"a.png", "b.png"}, "etag": {`"e1"`, `"e2"`},
+	})
+	if rec.Code >= 400 {
+		t.Fatalf("batch delete = %d %s", rec.Code, rec.Body.String())
+	}
+	if h.hasFile(filesRoot+"a.png") || h.hasFile(filesRoot+"b.png") {
+		t.Fatalf("batch delete left files behind: %v", h.fileNames(filesRoot))
+	}
+}
+
 // §24.4: a user's own file is served with an explicit name and nosniff, and never
 // as something the browser may decide to render for itself.
 func TestFileDownloadHeadersAndBody(t *testing.T) {

@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- **Desktop wrapper phase 4 — sidecar download:** `internal/desktop/sidecar` downloads `carrel_{version}_{goos}_{goarch}` from GitHub releases, verifies SHA256 via `checksums.txt`, extracts to the install dir, and writes `version.json`. Local mode calls `Ensure` lazily when the sidecar is missing or version mismatches; `-sidecar` skips download for development.
+
 - **Desktop wrapper phase 3 — local supervisor:** `PickFreePort` on loopback, `Supervisor` starts `carrel` with `CARREL_DATA_DIR`, `CARREL_PORT`, `CARREL_BIND=127.0.0.1`, polls `/healthz`, writes `instance.lock` with dynamic port, stops sidecar with 15s grace (SIGTERM / interrupt). `LocalApp` and `-local`/`-sidecar` flags; Wails `SingleInstanceLock` focuses an existing window on second launch.
 
 - **Desktop wrapper phase 2 — Wails Remote webview:** `cmd/carrel-desktop` (Wails v2) opens a window and navigates to a configured or `-remote-url` Carrel instance; persistent webview profile under the OS-user Carrel directory; instance lock on startup. Minimal `frontend/` shell embed; full UI and fan-out SSE/poll run in the remote webview like a browser. Local mode returns a clear not-implemented error until phase 3.
@@ -15,6 +17,8 @@ All notable changes to this project are documented in this file.
 - **Wave 2.2 — Markdown in read mode.** Note bodies render as GitHub Flavored Markdown through `goldmark` (headers, lists, tasks, emphasis, links, code, quotes, tables); raw HTML stays escaped. Storage and edit mode still use the exact typed text; **Source** shows the same string. Dependency recorded in `THIRD_PARTY.md`.
 
 - **Wave 2.3 — Related to typeahead.** The note editor replaces the comma-separated UID field with a search-as-you-type picker over the same selected calendar and contact sources as global search. Matches appear as removable chips; **Enter UID by hand…** is always the last menu item.
+
+- **Wave 2.4 — file manager foundation.** `/app/files` is **All collections** — every storage as a top-level folder with server, access and attachments badge. Inside a collection: row checkboxes, an operations bar (download and batch delete with a per-item report), **Filter this folder** on the loaded listing, type icons in the name column, and a properties panel for a single selection (closes manually and remembers). Breadcrumbs navigate as before.
 
 ### Changed
 
