@@ -201,11 +201,11 @@ macOS, DAV localhost onboarding, auto-update, ручной путь к exe, mult
 
 ### Фаза 1 — `internal/desktop` — модель: **Composer**
 
-- [ ] `paths.go` (Win + Linux)
-- [ ] `config.go` (`desktop.json`)
-- [ ] `instance.go` (lock: pid, port, mode)
-- [ ] Unit-тесты
-- [ ] Коммит + CHANGELOG [Unreleased]
+- [x] `paths.go` (Win + Linux)
+- [x] `config.go` (`desktop.json`)
+- [x] `instance.go` (lock: pid, port, mode)
+- [x] Unit-тесты
+- [x] Коммит + CHANGELOG [Unreleased]
 
 ### Фаза 2 — Wails Remote spike — модель: **Composer** (SSE/Linux → **thinking**)
 

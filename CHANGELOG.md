@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **Desktop wrapper phase 1 — `internal/desktop`:** platform paths (Windows `%LOCALAPPDATA%\Carrel`, Linux `~/.config/carrel` + `~/.local/share/carrel/data`), `desktop.json` load/save (mode, remote URL, tray, start-at-login), and single-instance `instance.lock` with PID liveness checks. Unit tests cover paths, config round-trip, and lock acquire/release.
+
 ### Changed
 
 - **Wave 1 close-out — the narrow screen keeps the promise §13 made.** The slide-out panel of 1.17 moved the wrong rail. What slid out was the list of *sections*, which the bottom bar already carries; what got `display: none` was the *source* rail — the stack of checkboxes that §13 and section 10 of the mockups both name as the thing to move out of the way. A phone therefore could not choose which collections to poll at all. The panel now takes the whole screen, holds the source rail with its own **Apply** button and the section links below it, and closes on Escape, on the scrim and on its own ✕. It is assembled in the browser, so without JavaScript the rail simply stays in the flow of the page: uglier, and still usable. Tap targets follow: the toggle went from 28 px to 44, and source rows, list rows, the bottom bar and every button below 640 px are 44 px — the row-height tokens of 1.3 stop governing controls once the pointer is a finger. There is no properties panel on a phone any more: a row opens the record itself, which is where its `href` pointed all along, and the remembered-open state of 1.4 no longer restores a full-screen overlay on load. Photo cropping on a narrow screen is the centre square §13 asks for rather than pan-and-zoom by numbers — canvas, number fields and the preview button are all hidden, and the screen says so. The one item of §13's list still missing is the `⋯` row menu that was to take the panel's place for operations; it is written down in the specification and the roadmap instead of being quietly dropped.
