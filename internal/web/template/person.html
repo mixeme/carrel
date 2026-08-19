@@ -4,20 +4,20 @@
 <div class="app-layout person-layout">
     {{template "sectionrail" .}}
     <div class="app-main">
-        <section class="card person-main">
-            <div class="contacts-header">
+        <section class="person-main">
+            <header class="page-head">
                 <div class="person-head">
                     {{if $p.PhotoURL}}<img class="contact-photo person-photo" src="{{$p.PhotoURL}}" alt="" width="44" height="44">{{end}}
                     <div>
-                        <h1>{{$d.Subject}}</h1>
-                        <p class="source-label">{{$p.AccountLabel}}{{if $p.Collection.DisplayName}} · {{$p.Collection.DisplayName}}{{end}}</p>
+                        <h1 class="page-title">{{$d.Subject}}</h1>
+                        <p class="page-sub">{{$p.AccountLabel}}{{if $p.Collection.DisplayName}} · {{$p.Collection.DisplayName}}{{end}}</p>
                     </div>
                 </div>
-                <p class="contacts-actions no-print">
-                    {{if $p.NoteURL}}<a class="button" href="{{$p.NoteURL}}">Write a note</a>{{end}}
-                    {{if $p.EventURL}}<a class="button" href="{{$p.EventURL}}">New event</a>{{end}}
-                </p>
-            </div>
+                <div class="page-acts no-print">
+                    {{if $p.NoteURL}}<a class="app-btn" href="{{$p.NoteURL}}">Write a note</a>{{end}}
+                    {{if $p.EventURL}}<a class="app-btn" href="{{$p.EventURL}}">New event</a>{{end}}
+                </div>
+            </header>
             {{template "kindtabs" .}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No calendars are ticked, so nothing was polled.</p>{{end}}
@@ -28,12 +28,12 @@
             </div>
         </section>
     </div>
-    <aside class="person-sidebar card no-print">
+    <aside class="person-sidebar no-print">
         <div class="person-card-head">
             {{if $p.PhotoURL}}<img class="contact-photo" src="{{$p.PhotoURL}}" alt="" width="76" height="76">{{end}}
             <div>
                 <h2>Card</h2>
-                <p><a class="button" href="{{$p.EditURL}}">Edit</a></p>
+                <p><a class="app-btn" href="{{$p.EditURL}}">Edit</a></p>
             </div>
         </div>
         <dl class="contact-readonly">

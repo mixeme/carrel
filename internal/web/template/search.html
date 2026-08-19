@@ -3,28 +3,30 @@
 <div class="app-layout calendar-layout">
     {{template "sourcepanel" .}}
     <div class="app-main">
-        <section class="card">
-            {{if $d.Request.Query}}
-            <div class="contacts-header">
-                <div>
-                    <h1>{{$d.Request.Query}}</h1>
-                    <p class="source-label">Across every ticked calendar, address book and file collection.</p>
-                    <p class="hint">File matches are by name only — Carrel does not index file contents and will not.</p>
-                </div>
-                {{template "kindtabs" .}}
+        {{if $d.Request.Query}}
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">{{$d.Request.Query}}</h1>
+                <p class="page-sub">Across every ticked calendar, address book and file collection.</p>
+                <p class="hint">File matches are by name only — Carrel does not index file contents and will not.</p>
             </div>
-            {{else}}
-            <h1>Search</h1>
-            <p class="hint">Type in the search field in the top bar and press Enter. Each source is asked separately, and answers appear as they arrive.</p>
-            {{end}}
-            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
-            {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was searched.</p>{{end}}
-            <div id="find-panel"
-                 data-sse-panel data-poll-url="{{$d.PollURL}}"
-                 {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
-                {{if $d.TaskID}}{{template "findresults" .}}{{end}}
+            {{template "kindtabs" .}}
+        </header>
+        {{else}}
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">Search</h1>
+                <p class="page-sub">Type in the search field in the top bar and press Enter. Each source is asked separately, and answers appear as they arrive.</p>
             </div>
-        </section>
+        </header>
+        {{end}}
+        {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+        {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was searched.</p>{{end}}
+        <div id="find-panel"
+             data-sse-panel data-poll-url="{{$d.PollURL}}"
+             {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
+            {{if $d.TaskID}}{{template "findresults" .}}{{end}}
+        </div>
     </div>
 </div>
 {{end}}

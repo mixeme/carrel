@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout files-layout">
-    <aside class="sidebar card no-print">
+    <aside class="sidebar no-print section-rail">
         <h2>File collections</h2>
         {{if $d.Sources}}
         <ul class="collection-list">
@@ -19,11 +19,13 @@
         </div>
     </aside>
     <div class="app-main">
-        <section class="card">
-            <h1>Published</h1>
-            <p class="hint">Secret links to files and folders will be listed here once publication is built (wave 4.3). Carrel already knows about tokens it issued; this page will show them without walking the server tree.</p>
-            <p class="hint">Until then, manage links from each record when publication ships, or check the server directly.</p>
-        </section>
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">Published</h1>
+            </div>
+        </header>
+        <p class="hint page-hint">Secret links to files and folders will be listed here once publication is built (wave 4.3). Carrel already knows about tokens it issued; this page will show them without walking the server tree.</p>
+        <p class="hint page-hint">Until then, manage links from each record when publication ships, or check the server directly.</p>
     </div>
 </div>
 {{end}}

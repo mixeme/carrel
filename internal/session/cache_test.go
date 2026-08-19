@@ -78,6 +78,26 @@ func TestCacheBodyRoundTrip(t *testing.T) {
 	}
 }
 
+func TestCacheLastFetched(t *testing.T) {
+	now := time.Date(2026, 8, 19, 12, 0, 0, 0, time.UTC)
+	clock := func() time.Time { return now }
+	c := NewCache(CacheConfig{CollectionTTL: time.Minute, MaxCollections: 4, MaxETagEntries: 8}, clock)
+	if _, ok := c.LastFetched(); ok {
+		t.Fatal("empty cache should have no last fetch")
+	}
+	c.SetETags("acc", "/cal/", "c1", map[string]string{"/cal/a": "e"})
+	got, ok := c.LastFetched()
+	if !ok || !got.Equal(now) {
+		t.Fatalf("LastFetched = %v, %v", got, ok)
+	}
+	now = now.Add(3 * time.Minute)
+	c.SetETags("acc", "/ab/", "c2", map[string]string{"/ab/a": "e"})
+	got, ok = c.LastFetched()
+	if !ok || !got.Equal(now) {
+		t.Fatalf("LastFetched after later write = %v, %v", got, ok)
+	}
+}
+
 func TestCollectionMeta(t *testing.T) {
 	now := time.Date(2026, 8, 19, 12, 0, 0, 0, time.UTC)
 	c := NewCache(CacheConfig{CollectionTTL: time.Minute, MaxCollections: 4, MaxETagEntries: 8}, func() time.Time { return now })

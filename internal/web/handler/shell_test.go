@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/web"
 )
@@ -44,6 +45,11 @@ func TestEmbeddedBaseHasShell(t *testing.T) {
 	}
 	if !strings.Contains(string(b), "app-rail") {
 		t.Fatal("embedded base.html is missing the application shell")
+	}
+	for _, want := range []string{`class="app-logo"`, `id="i-search"`, `id="logo-word"`, `class="app-nav"`} {
+		if !strings.Contains(string(b), want) {
+			t.Errorf("base.html is missing %s", want)
+		}
 	}
 }
 
@@ -130,13 +136,69 @@ func TestAboutFooterOnSignedInPages(t *testing.T) {
 	if !strings.Contains(rec.Body.String(), `value="refresh_cache"`) {
 		t.Error("signed-in page has no refresh control")
 	}
-	if !strings.Contains(rec.Body.String(), `class="app-rail`) {
-		body := rec.Body.String()
+	body := rec.Body.String()
+	if !strings.Contains(body, `class="app-logo"`) {
+		t.Error("signed-in page has no SVG logotype in the header")
+	}
+	if !strings.Contains(body, `href="#i-search"`) {
+		t.Error("search field has no search icon")
+	}
+	if !strings.Contains(body, `href="#i-refresh"`) {
+		t.Error("refresh control has no icon")
+	}
+	if !strings.Contains(body, "Refresh") && !strings.Contains(body, "ago") && !strings.Contains(body, "just now") {
+		t.Error("refresh control has neither a time label nor Refresh")
+	}
+	if !strings.Contains(body, `class="app-rail`) {
 		snippet := body
 		if len(snippet) > 600 {
 			snippet = snippet[:600]
 		}
 		t.Fatalf("signed-in app page has no section rail; snippet:\n%s", snippet)
+	}
+}
+
+func TestAppTemplatesHaveNoButtonClass(t *testing.T) {
+	templateFS, err := fs.Sub(web.TemplateFS, "template")
+	if err != nil {
+		t.Fatalf("template FS: %v", err)
+	}
+	names, err := fs.Glob(templateFS, "*.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range names {
+		b, err := fs.ReadFile(templateFS, name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(b), `class="button"`) || strings.Contains(string(b), `class="button `) {
+			t.Errorf("%s still uses class=\"button\"", name)
+		}
+	}
+}
+
+func TestRelativeAge(t *testing.T) {
+	now := time.Date(2026, 8, 19, 12, 0, 0, 0, time.UTC)
+	cases := []struct {
+		ago  time.Duration
+		want string
+	}{
+		{10 * time.Second, "just now"},
+		{2 * time.Minute, "2 min ago"},
+		{90 * time.Minute, "1 hour ago"},
+		{5 * time.Hour, "5 hours ago"},
+		{30 * time.Hour, "1 day ago"},
+		{80 * time.Hour, "3 days ago"},
+	}
+	for _, tc := range cases {
+		got := relativeAge(now.Add(-tc.ago), now)
+		if got != tc.want {
+			t.Errorf("age %v = %q, want %q", tc.ago, got, tc.want)
+		}
+	}
+	if got := relativeAge(time.Time{}, now); got != "Refresh" {
+		t.Errorf("zero time = %q, want Refresh", got)
 	}
 }
 
@@ -202,8 +264,8 @@ func TestShellNavigationMarksCurrentSection(t *testing.T) {
 		if !strings.Contains(body, `class="app-rail`) {
 			t.Fatalf("GET %s body missing section rail", tc.path)
 		}
-		marker := `aria-current="page"` + ">" + tc.want + "<"
-		if !strings.Contains(body, marker) {
+		marker := `aria-current="page"`
+		if !strings.Contains(body, marker) || !strings.Contains(body, "</svg>"+tc.want+"</a>") {
 			t.Errorf("GET %s: want %q marked current in the rail", tc.path, tc.want)
 		}
 	}

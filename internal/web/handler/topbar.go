@@ -4,9 +4,11 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/account"
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
@@ -31,6 +33,9 @@ type topbarView struct {
 	SearchQuery     string
 	Create          []createMenuItem
 	ConnectionCount int
+	// RefreshLabel is the last cache read as a relative time ("2 min ago"),
+	// or "Refresh" when the session has not polled anything yet.
+	RefreshLabel string
 }
 
 func (s *Server) buildTopbar(r *http.Request, sess *session.Session) topbarView {
@@ -60,12 +65,48 @@ func (s *Server) buildTopbar(r *http.Request, sess *session.Session) topbarView 
 	if accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK()); err == nil {
 		connCount = len(accounts)
 	}
+	refresh := "Refresh"
+	if sess != nil {
+		if t, ok := sess.Cache().LastFetched(); ok {
+			refresh = relativeAge(t, time.Now())
+		}
+	}
 	return topbarView{
 		Back:            back,
 		QuickNoteURL:    s.Path("/app/notes/quick") + "?back=" + url.QueryEscape(back),
 		SearchQuery:     strings.TrimSpace(r.URL.Query().Get("q")),
 		Create:          menu,
 		ConnectionCount: connCount,
+		RefreshLabel:    refresh,
+	}
+}
+
+func relativeAge(then, now time.Time) string {
+	if then.IsZero() || now.Before(then) {
+		return "Refresh"
+	}
+	d := now.Sub(then)
+	switch {
+	case d < 45*time.Second:
+		return "just now"
+	case d < time.Hour:
+		m := int(d.Minutes())
+		if m < 1 {
+			m = 1
+		}
+		return fmt.Sprintf("%d min ago", m)
+	case d < 24*time.Hour:
+		h := int(d.Hours())
+		if h <= 1 {
+			return "1 hour ago"
+		}
+		return fmt.Sprintf("%d hours ago", h)
+	default:
+		days := int(d.Hours() / 24)
+		if days <= 1 {
+			return "1 day ago"
+		}
+		return fmt.Sprintf("%d days ago", days)
 	}
 }
 

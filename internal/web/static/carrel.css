@@ -902,11 +902,13 @@ body.has-shell {
     max-width: 560px;
     display: flex;
     align-items: center;
+    gap: 7px;
     height: 28px;
-    padding: 0;
+    padding: 0 9px;
     background: var(--bg);
     border: 0.5px solid var(--card-border);
     border-radius: 3px;
+    color: var(--dusty);
 }
 
 .app-search input {
@@ -915,7 +917,7 @@ body.has-shell {
     height: 100%;
     border: 0;
     background: transparent;
-    padding: 0 9px;
+    padding: 0;
     color: var(--ink);
     font: inherit;
     font-size: 12.5px;
@@ -1018,7 +1020,8 @@ body.has-shell {
 .app-btn {
     display: inline-flex;
     align-items: center;
-    height: 28px;
+    gap: 6px;
+    height: 26px;
     padding: 0 10px;
     border: 0.5px solid var(--card-border);
     border-radius: 3px;
@@ -1028,6 +1031,7 @@ body.has-shell {
     text-decoration: none;
     cursor: pointer;
     font: inherit;
+    white-space: nowrap;
 }
 
 .app-btn.is-primary {
@@ -1040,6 +1044,12 @@ body.has-shell {
     background: transparent;
     border-color: transparent;
     color: var(--muted);
+    padding: 0 6px;
+}
+
+.app-btn.is-on {
+    background: var(--card);
+    font-weight: 600;
 }
 
 .app-btn.is-danger-solid {
@@ -1068,17 +1078,25 @@ body.has-shell {
 
 .app-rail {
     border-right: 0.5px solid var(--rule);
-    padding: 12px 8px 16px;
+    padding: 12px 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    background: var(--paper);
+}
+
+.app-nav {
     display: flex;
     flex-direction: column;
     gap: 1px;
-    min-width: 0;
-    background: var(--paper);
+    padding: 0 8px;
 }
 
 .app-rail a {
     display: flex;
     align-items: center;
+    gap: 9px;
     height: 29px;
     padding: 0 8px;
     border-radius: 3px;
@@ -1087,7 +1105,8 @@ body.has-shell {
     text-decoration: none;
 }
 
-.app-rail a[aria-current="page"] {
+.app-nav a[aria-current="page"],
+.app-rail .app-nav a[aria-current="page"] {
     background: var(--card);
     font-weight: 600;
 }
@@ -1096,9 +1115,9 @@ body.has-shell {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0;
     background: var(--bg);
-    padding: var(--pad);
+    padding: 0;
     overflow-x: auto;
 }
 
@@ -3923,7 +3942,7 @@ button.danger {
         cursor: pointer;
     }
 
-    .app-rail > a {
+    .app-rail .app-nav a {
         min-height: 44px;
         display: flex;
         align-items: center;
@@ -4207,3 +4226,340 @@ button.danger {
         width: 100%;
     }
 }
+
+/* Wave 2.5 — mockup primitives in production (docs/visual/carrel-ui-mockups.html §4–§6) */
+.app-sprite {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.app-logo {
+    width: 56px;
+    height: 22px;
+    display: block;
+}
+
+.app-logo .wd {
+    fill: var(--ink);
+}
+
+.app-logo .sh {
+    fill: var(--accent);
+}
+
+.auth-card .app-logo,
+.topbar .app-logo {
+    width: 118px;
+    height: 47px;
+}
+
+.topbar .app-logo {
+    width: 56px;
+    height: 22px;
+}
+
+.app-ico {
+    width: 15px;
+    height: 15px;
+    flex: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.75;
+}
+
+.app-btn .app-ico,
+.app-search .app-ico {
+    width: 13px;
+    height: 13px;
+    stroke-width: 1.4;
+    opacity: 1;
+}
+
+.app-search .app-ico {
+    color: var(--dusty);
+}
+
+.app-btn {
+    margin: 0;
+}
+
+.app-btn.is-danger {
+    color: var(--alert);
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    color: inherit;
+}
+
+.app-create-toggle .app-ico {
+    width: 12px;
+    height: 12px;
+}
+
+.app-user-toggle .app-ico {
+    width: 12px;
+    height: 12px;
+}
+
+.app-rail-toggle .app-ico,
+.app-rail-close .app-ico {
+    width: 18px;
+    height: 18px;
+    opacity: 1;
+}
+
+.app-bottom-nav .app-ico {
+    width: 18px;
+    height: 18px;
+    opacity: 0.85;
+}
+
+.settings-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Sources sit in the same column as section links (mockup §4). Wrappers
+   collapse so .section-rail is a grid item of .app-shell, beside the nav. */
+body.has-shell .app-work,
+body.has-shell .app-content,
+body.has-shell .app-layout {
+    display: contents;
+}
+
+body.has-shell .app-shell {
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+}
+
+body.has-shell .app-shell::before {
+    content: "";
+    grid-column: 1;
+    grid-row: 1 / -1;
+    background: var(--paper);
+    border-right: 0.5px solid var(--rule);
+    pointer-events: none;
+}
+
+body.has-shell .app-rail {
+    grid-column: 1;
+    grid-row: 1;
+    background: transparent;
+    border-right: none;
+    z-index: 1;
+    min-height: 0;
+}
+
+body.has-shell .section-rail,
+body.has-shell .note-sidebar {
+    grid-column: 1;
+    grid-row: 2;
+    z-index: 1;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0 0 16px;
+    align-self: start;
+    min-width: 0;
+}
+
+body.has-shell .app-main,
+body.has-shell .settings-panel,
+body.has-shell .admin-panel {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    min-width: 0;
+    background: var(--bg);
+}
+
+body.has-shell .app-content > .message {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 12px var(--pad) 0;
+    align-self: start;
+}
+
+body.has-shell .app-details,
+body.has-shell .person-sidebar,
+body.has-shell .files-props {
+    grid-column: 3;
+    grid-row: 1 / -1;
+    min-width: 0;
+}
+
+body.has-shell .app-shell.has-details,
+body.has-shell .app-shell:has(.person-sidebar),
+body.has-shell .app-shell:has(.files-props:not([hidden])) {
+    grid-template-columns: var(--rail) minmax(0, 1fr) var(--side);
+}
+
+body.has-shell .app-shell.is-settings .settings-rail,
+body.has-shell .app-shell.is-admin .admin-rail {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    z-index: 1;
+    background: transparent;
+    border-right: none;
+}
+
+.page-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 15px var(--pad) 11px;
+    flex-wrap: wrap;
+}
+
+.page-title,
+.page-head h1 {
+    font-family: var(--f-serif);
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.15;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.page-sub,
+.page-head .source-label {
+    font-size: 11.5px;
+    color: var(--dusty);
+    margin: 4px 0 0;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.page-acts,
+.page-head .contacts-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex: none;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin: 0;
+}
+
+.page-bar,
+.list-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 var(--pad) 9px;
+    border-bottom: 0.5px solid var(--rule);
+    flex-wrap: wrap;
+}
+
+.page-bar .form,
+.page-bar.form {
+    border-bottom: 0.5px solid var(--rule);
+    padding-bottom: 9px;
+    margin: 0;
+}
+
+.page-hint {
+    padding: 8px var(--pad) 0;
+}
+
+.app-main .list,
+.app-main .agenda-day > .list {
+    margin: 0;
+}
+
+.section-rail h2,
+.section-rail .settings-rubric {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    font-weight: 600;
+    padding: 0 16px;
+    margin: 0 0 6px;
+}
+
+.section-rail form,
+.section-rail .collection-list {
+    padding: 0;
+}
+
+.settings-panel,
+.admin-panel {
+    background: transparent;
+    border: none;
+    padding: 0 0 24px;
+    border-radius: 0;
+}
+
+body:not(.has-shell) main {
+    max-width: none;
+    display: flex;
+    justify-content: center;
+    padding: 36px 16px 48px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.auth-card.is-wide {
+    max-width: 460px;
+}
+
+.auth-brand {
+    margin-bottom: 18px;
+}
+
+.auth-submit {
+    width: 100%;
+    justify-content: center;
+    height: 30px;
+}
+
+.auth-card .form-foot {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+@media (max-width: 640px) {
+    body.has-shell .app-shell,
+    body.has-shell .app-shell.has-details,
+    body.has-shell .app-shell:has(.person-sidebar) {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto;
+    }
+
+    body.has-shell .app-shell::before {
+        display: none;
+    }
+
+    body.has-shell .app-main,
+    body.has-shell .settings-panel,
+    body.has-shell .admin-panel,
+    body.has-shell .app-content > .message {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .app-bottom-nav .app-ico {
+        display: block;
+        margin: 0 auto;
+    }
+}
+

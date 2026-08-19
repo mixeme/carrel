@@ -4,13 +4,12 @@
     {{if $d.Mode}}
     {{template "sectionrail" .}}
     <div class="app-main">
-        <section class="card">
-            <div class="contacts-header">
-                <div>
-                    <h1>{{$d.SectionRail.AllLabel}}</h1>
-                    <p class="source-label">Every ticked notebook at once.</p>
-                </div>
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">{{$d.SectionRail.AllLabel}}</h1>
+                <p class="page-sub">Every ticked notebook at once.</p>
             </div>
+        </header>
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
             <div id="find-panel"
@@ -18,33 +17,32 @@
                  {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
                 {{if $d.TaskID}}{{template "findresults" .}}{{end}}
             </div>
-        </section>
     </div>
     {{else}}
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
-        <section class="card"><h1>Notes</h1><p class="hint">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.</p></section>
+        <header class="page-head"><div><h1 class="page-title">Notes</h1><p class="page-sub">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.</p></div></header>
         {{else}}
-        <section class="card agenda-print-root">
-            <div class="contacts-header">
+        <div class="agenda-print-root">
+            <header class="page-head">
                 <div>
-                    <h1>{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Notes{{end}}</h1>
-                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                    <h1 class="page-title">{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Notes{{end}}</h1>
+                    <p class="page-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
                 </div>
-                <p class="contacts-actions no-print">
+                <div class="page-acts no-print">
                     {{if not $d.ReadOnly}}
-                    <a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new">New note</a>
-                    <a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">Import Markdown</a>
+                    <a class="app-btn is-primary" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New note</a>
+                    <a class="app-btn" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">{{template "ico" "up"}}Import Markdown</a>
                     {{end}}
-                    <a class="button" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/export">Export Markdown</a>
-                    <button type="button" class="link" data-print>Print</button>
-                </p>
-            </div>
+                    <a class="app-btn" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/export">{{template "ico" "down"}}Export Markdown</a>
+                    <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                </div>
+            </header>
             {{if $d.ReadOnly}}<p class="hint no-print">This notebook is read-only.</p>{{end}}
             {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
-            {{if $d.Empty}}<p class="hint">Nothing here yet.</p>{{end}}
-            <div class="list-toolbar no-print">
+            {{if $d.Empty}}<p class="hint page-hint">Nothing here yet.</p>{{end}}
+            <div class="page-bar no-print">
                 {{template "columnpicker" "notes"}}
             </div>
             <ul class="list note-list" data-columns-root="notes">
@@ -77,7 +75,7 @@
             </div>
             {{end}}
             <p class="print-footer print-only">Carrel · notes · captured {{$d.PrintDate}}</p>
-        </section>
+        </div>
         {{end}}
     </div>
     {{end}}

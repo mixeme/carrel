@@ -4,57 +4,57 @@
     {{if $d.Mode}}
     {{template "sectionrail" .}}
     <div class="app-main">
-        <section class="card">
-            <div class="contacts-header">
-                <div>
-                    <h1>{{$d.SectionRail.AllLabel}}</h1>
-                    <p class="source-label">Every ticked address book at once.</p>
-                </div>
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">{{$d.SectionRail.AllLabel}}</h1>
+                <p class="page-sub">Every ticked address book at once.</p>
             </div>
-            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
-            {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
-            <div id="find-panel"
-                 data-sse-panel data-poll-url="{{$d.PollURL}}"
-                 {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
-                {{if $d.TaskID}}{{template "findresults" .}}{{end}}
-            </div>
-        </section>
+        </header>
+        {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+        {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was polled.</p>{{end}}
+        <div id="find-panel"
+             data-sse-panel data-poll-url="{{$d.PollURL}}"
+             {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
+            {{if $d.TaskID}}{{template "findresults" .}}{{end}}
+        </div>
     </div>
     {{else}}
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoBooks}}
-        <section class="card">
-            <h1>Contacts</h1>
-            <p class="hint">Connect a CardDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>
-                to see contacts here.</p>
-        </section>
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">Contacts</h1>
+                <p class="page-sub">Connect a CardDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>
+                    to see contacts here.</p>
+            </div>
+        </header>
         {{else}}
-        <section class="card contacts-print-root">
-            <div class="contacts-header">
+        <div class="contacts-print-root">
+            <header class="page-head">
                 <div>
-                    <h1>{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Contacts{{end}}</h1>
-                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                    <h1 class="page-title">{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Contacts{{end}}</h1>
+                    <p class="page-sub source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
                 </div>
-                <p class="contacts-actions no-print">
+                <div class="page-acts no-print">
                     {{if and (not $d.ReadOnly) $d.AccountID $d.ColEnc}}
-                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new">New contact</a>
-                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">Import</a>
+                    <a class="app-btn is-primary" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New contact</a>
+                    <a class="app-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">{{template "ico" "up"}}Import</a>
                     {{end}}
                     {{if and $d.AccountID $d.ColEnc}}
-                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/export">Export</a>
+                    <a class="app-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/export">{{template "ico" "down"}}Export</a>
                     {{end}}
                     <label class="checkbox"><input type="checkbox" data-print-photos> Print with photos</label>
-                    <button type="button" class="link" data-print>Print</button>
-                </p>
-            </div>
+                    <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                </div>
+            </header>
             {{if $d.ReadOnly}}
-            <p class="hint no-print">This address book is read-only.</p>
+            <p class="hint page-hint no-print">This address book is read-only.</p>
             {{end}}
             {{if $d.Empty}}
-            <p class="hint">No contacts in this address book.</p>
+            <p class="hint page-hint">No contacts in this address book.</p>
             {{else}}
-            <div class="list-toolbar no-print">
+            <div class="page-bar no-print">
                 {{template "columnpicker" "contacts"}}
             </div>
             <ul class="list contact-list" id="contact-list" data-columns-root="contacts">
@@ -78,14 +78,14 @@
                  hx-trigger="revealed"
                  hx-swap="outerHTML"
                  hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
-                <p class="hint">Loading more…</p>
+                <p class="hint page-hint">Loading more…</p>
             </div>
             {{end}}
             {{end}}
             {{if $d.PrintDate}}
             <p class="print-footer print-only">Carrel · contacts · captured {{$d.PrintDate}}</p>
             {{end}}
-        </section>
+        </div>
         {{end}}
     </div>
     {{end}}

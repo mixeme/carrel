@@ -4,13 +4,12 @@
     {{if $d.Mode}}
     {{template "sectionrail" .}}
     <div class="app-main">
-        <section class="card">
-            <div class="contacts-header">
-                <div>
-                    <h1>{{$d.SectionRail.AllLabel}}</h1>
-                    <p class="source-label">Open tasks from every ticked list.</p>
-                </div>
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">{{$d.SectionRail.AllLabel}}</h1>
+                <p class="page-sub">Open tasks from every ticked list.</p>
             </div>
+        </header>
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
             <div id="find-panel"
@@ -18,36 +17,33 @@
                  {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
                 {{if $d.TaskID}}{{template "findresults" .}}{{end}}
             </div>
-        </section>
     </div>
     {{else}}
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
-        <section class="card"><h1>Tasks</h1><p class="hint">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to keep tasks here.</p></section>
+        <header class="page-head"><div><h1 class="page-title">Tasks</h1><p class="page-sub">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to keep tasks here.</p></div></header>
         {{else}}
-        <section class="card agenda-print-root">
-            <div class="contacts-header">
+        <div class="agenda-print-root">
+            <header class="page-head">
                 <div>
-                    <h1>{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Tasks{{end}}</h1>
-                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                    <h1 class="page-title">{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Tasks{{end}}</h1>
+                    <p class="page-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
                 </div>
-                <p class="contacts-actions no-print">
-                    {{if not $d.ReadOnly}}<a class="button" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new">New task</a>{{end}}
-                    <button type="button" class="link" data-print>Print</button>
-                </p>
-            </div>
-            <p class="task-filters no-print">
-                <a class="button{{if eq $d.Filter "open"}} is-active{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=open">Open ({{$d.Counts.Open}})</a>
-                <a class="button{{if eq $d.Filter "done"}} is-active{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
-                <a class="button{{if eq $d.Filter "all"}} is-active{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All</a>
+                <div class="page-acts no-print">
+                    {{if not $d.ReadOnly}}<a class="app-btn is-primary" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New task</a>{{end}}
+                    <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                </div>
+            </header>
+            <div class="page-bar no-print">
+                <a class="app-btn{{if eq $d.Filter "open"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=open">Open ({{$d.Counts.Open}})</a>
+                <a class="app-btn{{if eq $d.Filter "done"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
+                <a class="app-btn{{if eq $d.Filter "all"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All</a>
                 {{if $d.Counts.Overdue}}<span class="task-overdue-count">{{$d.Counts.Overdue}} overdue</span>{{end}}
-            </p>
-            {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
-            {{if $d.Empty}}<p class="hint">Nothing here.</p>{{end}}
-            <div class="list-toolbar no-print">
                 {{template "columnpicker" "tasks"}}
             </div>
+            {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
+            {{if $d.Empty}}<p class="hint page-hint">Nothing here.</p>{{end}}
             <ul class="list task-list" data-columns-root="tasks">
             {{range $d.Rows}}
                 <li class="list-row list-row--task task-row{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}">
@@ -75,7 +71,7 @@
             {{end}}
             </ul>
             <p class="print-footer print-only">Carrel · tasks · captured {{$d.PrintDate}}</p>
-        </section>
+        </div>
         {{end}}
     </div>
     {{end}}

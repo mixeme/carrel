@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout files-layout" data-files-layout{{if not $d.AllCollections}} data-detail-section="files"{{end}}>
-    <aside class="sidebar card no-print">
+    <aside class="sidebar no-print section-rail">
         <h2>File collections</h2>
         {{if $d.Sources}}
         <ul class="collection-list">
@@ -22,20 +22,22 @@
     </aside>
     <div class="app-main files-main">
         {{if $d.NoFiles}}
-        <section class="card">
-            <h1>Files</h1>
-            <p class="hint">Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to browse files here.
-                Discovery finds plain WebDAV folders automatically — on a CalDAV/CardDAV server that usually means a
-                separate folder, or a second account on Nextcloud or a plain WebDAV server.</p>
-        </section>
-        {{else if $d.AllCollections}}
-        <section class="card files-card">
-            <div class="contacts-header">
-                <div>
-                    <h1>All collections</h1>
-                    <p class="source-label">{{len $d.Collections}} storages on {{$d.ServerCount}} {{if eq $d.ServerCount 1}}server{{else}}servers{{end}}</p>
-                </div>
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">Files</h1>
+                <p class="page-sub">Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to browse files here.
+                    Discovery finds plain WebDAV folders automatically — on a CalDAV/CardDAV server that usually means a
+                    separate folder, or a second account on Nextcloud or a plain WebDAV server.</p>
             </div>
+        </header>
+        {{else if $d.AllCollections}}
+        <div class="files-card">
+            <header class="page-head">
+                <div>
+                    <h1 class="page-title">All collections</h1>
+                    <p class="page-sub">{{len $d.Collections}} storages on {{$d.ServerCount}} {{if eq $d.ServerCount 1}}server{{else}}servers{{end}}</p>
+                </div>
+            </header>
             <table class="files-table files-table--root">
                 <thead><tr><th>Name</th><th>Server</th><th>Access</th><th>Purpose</th></tr></thead>
                 <tbody>
@@ -51,25 +53,25 @@
             </table>
             <p class="hint">This is the section's unified view: storages shown as top-level folders. Below it the tree of one of them opens — contents of different servers are never mixed in one folder.</p>
             {{if $d.PrintDate}}<p class="print-footer print-only">Carrel · files · All collections · captured {{$d.PrintDate}}</p>{{end}}
-        </section>
+        </div>
         {{else}}
-        <section class="card files-card" data-files-browse
+        <div class="files-card" data-files-browse
                  data-account="{{$d.AccountID}}" data-col="{{$d.ColEnc}}" data-folder="{{$d.Rel}}"
                  data-readonly="{{if $d.ReadOnly}}1{{end}}">
-            <div class="contacts-header">
+            <header class="page-head">
                 <div>
-                    <h1>{{$d.FolderTitle}}</h1>
+                    <h1 class="page-title">{{$d.FolderTitle}}</h1>
                     <nav class="crumbs" aria-label="Folder">
                         {{range $d.Crumbs}}{{if .Last}}<span aria-current="page">{{.Name}}</span>{{else}}<a href="{{.URL}}">{{.Name}}</a> / {{end}}{{end}}
                     </nav>
-                    <p class="source-label">{{$d.AccountLabel}}{{if $d.ReadOnly}} · read-only{{end}}</p>
+                    <p class="page-sub">{{$d.AccountLabel}}{{if $d.ReadOnly}} · read-only{{end}}</p>
                     {{if $d.IsAttachmentFolder}}<p class="hint">This is the folder attachments are put in.</p>{{end}}
                 </div>
-                <p class="contacts-actions no-print">
-                    <button type="button" class="link" data-files-props-toggle title="Properties panel">Properties</button>
-                    <button type="button" class="link" data-refresh>Refresh</button>
-                </p>
-            </div>
+                <div class="page-acts no-print">
+                    <button type="button" class="app-btn is-quiet" data-files-props-toggle title="Properties panel">Properties</button>
+                    <button type="button" class="app-btn is-quiet" data-refresh>{{template "ico" "refresh"}}Refresh</button>
+                </div>
+            </header>
 
             {{if $d.Truncated}}<p class="message notice no-print">This folder holds more files than Carrel lists. Only the first {{len $d.Entries}} are shown.</p>{{end}}
 
@@ -85,7 +87,7 @@
                 <span class="files-ops-right"><button type="button" class="link" data-files-clear>Clear selection</button></span>
             </div>
 
-            <div class="list-toolbar no-print" data-files-toolbar>
+            <div class="page-bar no-print" data-files-toolbar>
                 <label class="files-filter">
                     <span class="visually-hidden">Filter this folder</span>
                     <input type="search" placeholder="Filter this folder" data-files-filter autocomplete="off">
@@ -236,7 +238,7 @@
             </div>
             {{end}}
             {{if $d.PrintDate}}<p class="print-footer print-only">Carrel · files · {{$d.AccountLabel}} · captured {{$d.PrintDate}}</p>{{end}}
-        </section>
+        </div>
         <aside class="files-props no-print" id="files-props" hidden aria-label="File properties">
             <div class="files-props-head">
                 <h2 data-files-props-title>Properties</h2>

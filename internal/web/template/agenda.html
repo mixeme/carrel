@@ -2,65 +2,67 @@
 {{$d := .Data}}
 <div class="app-layout calendar-layout" data-detail-section="calendar">
     {{if $d.Mode}}
-    {{/* Merged view: every ticked calendar at once. */}}
     {{template "sectionrail" .}}
     <div class="app-main">
-        <section class="card">
-            <div class="contacts-header">
-                <div>
-                    <h1>{{$d.SectionRail.AllLabel}}</h1>
-                    <p class="source-label">Every ticked calendar at once.</p>
-                </div>
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">{{$d.SectionRail.AllLabel}}</h1>
+                <p class="page-sub">Every ticked calendar at once.</p>
             </div>
-            <form method="get" action="{{.Base}}/app/calendar" class="form no-print">
-                <div class="form-field w-sm">
-                    <label for="cal-from">From</label>
-                    <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required>
-                </div>
-                <div class="form-field w-sm">
-                    <label for="cal-to">To</label>
-                    <input id="cal-to" type="date" name="to" value="{{$d.Request.To}}">
-                </div>
-                <div class="form-field is-own-line form-inline">
-                    <label class="checkbox"><input type="checkbox" name="kind" value="events"{{if $d.Request.Wants "events"}} checked{{end}}> Events</label>
-                    <label class="checkbox"><input type="checkbox" name="kind" value="tasks"{{if $d.Request.Wants "tasks"}} checked{{end}}> Tasks due</label>
-                    <label class="checkbox"><input type="checkbox" name="kind" value="notes"{{if $d.Request.Wants "notes"}} checked{{end}}> Notes</label>
-                </div>
-                <div class="form-field is-own-line">
-                    <button type="submit">Show</button>
-                </div>
-            </form>
-            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
-            {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
-            <div id="find-panel"
-                 data-sse-panel data-poll-url="{{$d.PollURL}}"
-                 {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
-                {{if $d.TaskID}}{{template "findresults" .}}{{end}}
+        </header>
+        <form method="get" action="{{.Base}}/app/calendar" class="form page-bar no-print">
+            <div class="form-field w-sm">
+                <label for="cal-from">From</label>
+                <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required>
             </div>
-        </section>
+            <div class="form-field w-sm">
+                <label for="cal-to">To</label>
+                <input id="cal-to" type="date" name="to" value="{{$d.Request.To}}">
+            </div>
+            <div class="form-field is-own-line form-inline">
+                <label class="checkbox"><input type="checkbox" name="kind" value="events"{{if $d.Request.Wants "events"}} checked{{end}}> Events</label>
+                <label class="checkbox"><input type="checkbox" name="kind" value="tasks"{{if $d.Request.Wants "tasks"}} checked{{end}}> Tasks due</label>
+                <label class="checkbox"><input type="checkbox" name="kind" value="notes"{{if $d.Request.Wants "notes"}} checked{{end}}> Notes</label>
+            </div>
+            <div class="form-field is-own-line">
+                <button type="submit" class="app-btn">Show</button>
+            </div>
+        </form>
+        {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+        {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was polled.</p>{{end}}
+        <div id="find-panel"
+             data-sse-panel data-poll-url="{{$d.PollURL}}"
+             {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
+            {{if $d.TaskID}}{{template "findresults" .}}{{end}}
+        </div>
     </div>
     {{else}}
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoCalendars}}
-        <section class="card"><h1>Calendar</h1><p class="hint">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to see events here.</p></section>
-        {{else}}
-        <section class="card agenda-print-root">
-            <div class="contacts-header">
-                <div>
-                    <h1>{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Agenda{{end}}</h1>
-                    <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-                </div>
-                <p class="contacts-actions no-print">
-                    {{if not $d.ReadOnly}}
-                    <a class="button" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new">New event</a>
-                    <a class="button" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">Import</a>
-                    {{end}}
-                    <a class="button" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/export?from={{$d.From}}&amp;to={{$d.To}}">Export</a>
-                    <button type="button" class="link" data-print>Print</button>
-                </p>
+        <header class="page-head">
+            <div>
+                <h1 class="page-title">Calendar</h1>
+                <p class="page-sub">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to see events here.</p>
             </div>
-            <form method="get" class="form no-print">
+        </header>
+        {{else}}
+        <div class="agenda-print-root">
+            <header class="page-head">
+                <div>
+                    <h1 class="page-title">{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Agenda{{end}}</h1>
+                    <p class="page-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
+                </div>
+                <div class="page-acts no-print">
+                    {{if not $d.ReadOnly}}
+                    <a class="app-btn is-primary" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New event</a>
+                    <a class="app-btn" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">{{template "ico" "up"}}Import</a>
+                    {{end}}
+                    <a class="app-btn" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/export?from={{$d.From}}&amp;to={{$d.To}}">{{template "ico" "down"}}Export</a>
+                    <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                </div>
+            </header>
+            <form method="get" class="form page-bar no-print">
                 <div class="form-field w-sm">
                     <label for="agenda-from">From</label>
                     <input id="agenda-from" type="date" name="from" value="{{$d.From}}" required>
@@ -70,11 +72,11 @@
                     <input id="agenda-to" type="date" name="to" value="{{$d.To}}" required>
                 </div>
                 <div class="form-field is-own-line">
-                    <button type="submit">Show</button>
+                    <button type="submit" class="app-btn">Show</button>
                 </div>
             </form>
-            {{if $d.ReadOnly}}<p class="hint no-print">This calendar is read-only.</p>{{end}}
-            {{if $d.Empty}}<p class="hint">No events in this date range.</p>{{end}}
+            {{if $d.ReadOnly}}<p class="hint page-hint no-print">This calendar is read-only.</p>{{end}}
+            {{if $d.Empty}}<p class="hint page-hint">No events in this date range.</p>{{end}}
             {{range $d.Days}}
             <section class="agenda-day" data-date="{{.Date}}">
                 <div class="list-group">
@@ -97,7 +99,7 @@
             </section>
             {{end}}
             <p class="print-footer print-only">Carrel · agenda · {{$d.From}}–{{$d.To}} · captured {{$d.PrintDate}}</p>
-        </section>
+        </div>
         {{end}}
     </div>
     {{end}}

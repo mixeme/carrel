@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout contacts-layout">
-    <aside class="sidebar card no-print">
+    <aside class="sidebar no-print section-rail">
         <h2>Address books</h2>
         <ul class="collection-list">
         {{range $d.Books}}
@@ -18,7 +18,7 @@
     </aside>
 
     <div class="app-main">
-        <section class="card contact-card contacts-print-root">
+        <section class="contact-card contacts-print-root">
             <div class="contacts-header">
                 <div>
                     <h1>{{if $d.IsNew}}New contact{{else}}{{$d.Contact.DisplayName}}{{end}}</h1>
@@ -28,7 +28,7 @@
                 </div>
                 {{if not $d.IsNew}}
                 <p class="contacts-actions no-print">
-                    <a class="button" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">Back to list</a>
+                    <a class="app-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">Back to list</a>
                     <label class="checkbox"><input type="checkbox" data-print-photos> Print with photos</label>
                     <button type="button" class="link" data-print>Print</button>
                 </p>

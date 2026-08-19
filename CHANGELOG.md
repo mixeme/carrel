@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
-- **Global plan: wave 2.5 — visual layout pass.** Waves 1–2 closed structure and behaviour (shell, fan-out, note screen, file manager) but not mockup fidelity. v1.1 now means wave **2.5** (transfer `.m-*` layout into templates and `carrel.css` for screens 7.1–7.13); waves 1–2 are recorded as **v1.1‑struct**. Acceptance is side-by-side with mockup frames and `#check` in `carrel-ui-mockups.html`, not green tests alone. P5, public demo, and desktop show wait for 2.5. Updated [docs/plans/global-plan.md](docs/plans/global-plan.md), §13 of [docs/carrel-spec.md](docs/carrel-spec.md), and notes in [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html).
+- **Wave 2.5 — visual layout transfer.** App screens take the mockup shell: SVG logotype in the header, icons on search / New note / refresh / the section rail / the narrow bottom bar, and a relative cache-age label instead of the bare word Refresh. Section sources sit in the same left column as the nav (CSS grid; without JavaScript they stay in the page, and on a phone they still move into the drawer). List, settings and admin pages drop the inner `.card` frame; `.button` is gone from app templates in favour of `.app-btn`. Auth screens (login, setup, register, invite, password, about) use the centred card of §7.12 with the logotype on sign-in. Handlers and form fields are unchanged. [docs/plans/global-plan.md](docs/plans/global-plan.md) wave 2.5 is closed in code; v1.1 still waits on side-by-side visual acceptance of table 7.13 and a repeat of P5.
 
 ## [0.10.0] - 2026-08-19
 

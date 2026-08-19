@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout calendar-layout">
-    <aside class="sidebar card no-print">
+    <aside class="sidebar no-print section-rail">
         <h2>Task lists</h2>
         <ul class="collection-list">{{range $d.Sources}}
             <li><a class="collection-link" href="{{$.Base}}/app/tasks/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
@@ -9,7 +9,7 @@
         <p><a href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to tasks</a></p>
     </aside>
     <div class="app-main">
-        <section class="card">
+        <section>
             <div class="contacts-header">
                 <div>
                     <h1>{{if $d.IsNew}}New task{{else}}{{$d.Task.DisplayTitle}}{{end}}</h1>

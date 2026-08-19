@@ -1,9 +1,10 @@
 {{define "body"}}
-<section class="card">
-    <h1>Set up Carrel</h1>
-    <p>This volume has no administrator yet. The account you create here is the
+<section class="auth-card is-wide">
+    <div class="auth-brand">{{template "logo"}}</div>
+    <h1 class="page-title">Set up Carrel</h1>
+    <p class="page-sub">This volume has no administrator yet. The account you create here is the
         first one, and it can manage everyone else.</p>
-    <p class="warning">Your password is the only key to your own data. Nobody —
+    <p class="message error">Your password is the only key to your own data. Nobody —
         including this server — can recover it for you.</p>
 
     <form method="post" class="form" action="{{.Base}}/setup" autocomplete="off">
@@ -37,7 +38,7 @@
         </div>
 
         <div class="form-foot">
-            <button type="submit">Create administrator</button>
+            <button type="submit" class="app-btn is-primary">Create administrator</button>
         </div>
     </form>
 </section>

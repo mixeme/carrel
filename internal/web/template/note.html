@@ -3,7 +3,7 @@
 {{$readURL := ""}}
 {{if not $d.IsNew}}{{$readURL = printf "%s/app/notes/%s/%s/%s" .Base $d.AccountID $d.ColEnc $d.UID}}{{end}}
 <div class="app-layout calendar-layout note-screen" data-detail-section="notes">
-    <aside class="sidebar card no-print note-sidebar" data-note-sidebar>
+    <aside class="sidebar no-print note-sidebar section-rail" data-note-sidebar>
         <p class="note-sidebar-back"><a href="{{$d.BackURL}}">← Back to list</a></p>
         {{if $d.Sources}}
         <div class="note-sidebar-sec">
@@ -25,7 +25,7 @@
         {{end}}
     </aside>
     <div class="app-main">
-        <section class="card note-card note-doc agenda-print-root" data-note-doc
+        <section class="note-card note-doc agenda-print-root" data-note-doc
                  {{if $d.Edit}}data-note-editing{{end}}
                  {{if not $d.IsNew}}data-note-page-url="{{$readURL}}"{{end}}>
             {{if $d.Edit}}

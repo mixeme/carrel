@@ -139,6 +139,25 @@ type CollectionMeta struct {
 	ObjectCount int
 }
 
+// LastFetched is the most recent collection read in this session, if any.
+func (c *Cache) LastFetched() (time.Time, bool) {
+	if c == nil {
+		return time.Time{}, false
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	var latest time.Time
+	for _, ent := range c.collections {
+		if ent != nil && ent.fetchedAt.After(latest) {
+			latest = ent.fetchedAt
+		}
+	}
+	if latest.IsZero() {
+		return time.Time{}, false
+	}
+	return latest, true
+}
+
 // CollectionMeta returns cached read time, server tag and object count when the
 // collection is in the session cache.
 func (c *Cache) CollectionMeta(accountID, collectionPath string) (CollectionMeta, bool) {
