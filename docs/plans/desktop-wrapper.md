@@ -228,12 +228,12 @@ macOS, DAV localhost onboarding, auto-update, ручной путь к exe, mult
 
 ### Фаза 4 — Sidecar download — модель: **Composer** + security review
 
-- [ ] Release URL + naming
-- [ ] SHA256 verify
-- [ ] `version.json`
-- [ ] Lazy download Local
-- [ ] Ошибки сети/checksum
-- [ ] Коммит + CHANGELOG [Unreleased]
+- [x] Release URL + naming
+- [x] SHA256 verify
+- [x] `version.json`
+- [x] Lazy download Local
+- [x] Ошибки сети/checksum
+- [x] Коммит + CHANGELOG [Unreleased]
 
 ### Фаза 5 — Onboarding и sign out — модель: **thinking** (medium)
 

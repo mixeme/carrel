@@ -8,16 +8,20 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	"gitea.mixdep.ru/mix/carrel/internal/desktop/sidecar"
 )
 
 // LocalApp runs Carrel in Local mode: start a loopback sidecar and open it in
 // the desktop webview.
 type LocalApp struct {
-	Paths       Paths
-	SidecarPath string
-	pid         int
-	sup         *Supervisor
-	running     *RunningSidecar
+	Paths               Paths
+	SidecarPath         string
+	Version             string
+	SkipSidecarDownload bool
+	pid                 int
+	sup                 *Supervisor
+	running             *RunningSidecar
 }
 
 // Run starts the local sidecar supervisor and opens the Wails window.
@@ -42,12 +46,25 @@ func (a *LocalApp) startSidecar(ctx context.Context, shell *windowShell) error {
 		return fmt.Errorf("%w (pid %d)", ErrAlreadyRunning, existing.PID)
 	}
 
-	sidecar := a.SidecarPath
-	if sidecar == "" {
-		sidecar = a.Paths.SidecarPath
+	if err := sidecar.Ensure(ctx, sidecar.EnsureOptions{
+		Paths: sidecar.InstallPathsFrom(
+			a.Paths.InstallDir,
+			a.Paths.SidecarPath,
+			a.Paths.VersionPath,
+		),
+		Version:      a.Version,
+		OverridePath: a.SidecarPath,
+		SkipDownload: a.SkipSidecarDownload,
+	}); err != nil {
+		return err
+	}
+
+	sidecarPath := a.SidecarPath
+	if sidecarPath == "" {
+		sidecarPath = a.Paths.SidecarPath
 	}
 	a.sup = &Supervisor{
-		SidecarPath: sidecar,
+		SidecarPath: sidecarPath,
 		DataDir:     a.Paths.DataDir,
 		Bind:        loopbackBind,
 	}

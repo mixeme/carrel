@@ -99,9 +99,11 @@ go build -o carrel-desktop ./cmd/carrel-desktop
 ./carrel-desktop -remote-url https://carrel.example
 
 # Local mode: sidecar on 127.0.0.1 (desktop.json mode local, or -local).
+# If carrel/carrel.exe is missing next to carrel-desktop, it is downloaded from
+# GitHub releases (checksums.txt + SHA256) for the desktop app version.
 go build -o carrel ./cmd/carrel
 go build -o carrel-desktop ./cmd/carrel-desktop
-./carrel-desktop -local -sidecar ./carrel
+./carrel-desktop -local -sidecar ./carrel   # dev: skip download
 ```
 
 `wails build` uses [wails.json](../wails.json) at the repo root. On Linux install `libwebkit2gtk-4.1-dev` and `pkg-config` first. Windows needs the WebView2 Evergreen runtime. The webview loads the full Carrel UI from the remote instance; fan-out progress uses the same SSE stream (or poll fallback) as in a browser.

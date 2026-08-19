@@ -12,10 +12,16 @@ import (
 	"gitea.mixdep.ru/mix/carrel/internal/desktop"
 )
 
+var (
+	version = "0.9.0"
+	commit  = "unknown"
+)
+
 func main() {
 	remoteURL := flag.String("remote-url", "", "Carrel instance URL (overrides desktop.json; forces Remote mode)")
 	forceLocal := flag.Bool("local", false, "force Local mode (sidecar on loopback)")
-	sidecarPath := flag.String("sidecar", "", "path to carrel sidecar binary (default: next to carrel-desktop)")
+	sidecarPath := flag.String("sidecar", "", "path to carrel sidecar binary (skips download)")
+	skipDownload := flag.Bool("skip-sidecar-download", false, "do not download sidecar; fail if missing")
 	flag.Parse()
 
 	paths, err := desktop.DefaultPaths()
@@ -29,7 +35,12 @@ func main() {
 	}
 
 	if desktop.ResolveLocalMode(cfg, *forceLocal, *remoteURL) {
-		app := &desktop.LocalApp{Paths: paths, SidecarPath: *sidecarPath}
+		app := &desktop.LocalApp{
+			Paths:               paths,
+			SidecarPath:         *sidecarPath,
+			Version:             version,
+			SkipSidecarDownload: *skipDownload,
+		}
 		if err := app.Run(); err != nil {
 			handleRunErr(err)
 		}
