@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- **Global plan: wave 2.5 — visual layout pass.** Waves 1–2 closed structure and behaviour (shell, fan-out, note screen, file manager) but not mockup fidelity. v1.1 now means wave **2.5** (transfer `.m-*` layout into templates and `carrel.css` for screens 7.1–7.13); waves 1–2 are recorded as **v1.1‑struct**. Acceptance is side-by-side with mockup frames and `#check` in `carrel-ui-mockups.html`, not green tests alone. P5, public demo, and desktop show wait for 2.5. Updated [docs/plans/global-plan.md](docs/plans/global-plan.md), §13 of [docs/carrel-spec.md](docs/carrel-spec.md), and notes in [docs/visual/carrel-ui-mockups.html](docs/visual/carrel-ui-mockups.html).
+
 ## [0.10.0] - 2026-08-19
 
 **Волны 1–2 в коде; десктоп-обёртка фазы 1–5.** Redesign shell, file manager, notes; `cmd/carrel-desktop` through onboarding and sign-out. Версия в бинарнике — `0.10.0`. Не v1: тег ждёт P1, P2, P5 ([docs/manual-acceptance.md](docs/manual-acceptance.md)).
