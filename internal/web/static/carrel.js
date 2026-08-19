@@ -895,6 +895,155 @@ document.addEventListener('htmx:sseError', function (e) {
     }
 })();
 
+// Wave 1.18 — drag-to-crop photo (§1.18). The canvas overlay lets a person
+// drag to pan and scroll to zoom instead of typing numbers. The hidden form
+// fields are kept in sync so Update preview sends the right values. On narrow
+// screens the canvas is hidden by CSS and the number fields remain.
+(function () {
+    function initCrop(root) {
+        var wrap = root.querySelector('[data-crop-canvas]');
+        var img = root.querySelector('[data-crop-img]');
+        var frame = root.querySelector('[data-crop-frame]');
+        var result = root.querySelector('[data-crop-result]');
+        if (!wrap || !img || !frame) return;
+
+        var panXIn = root.querySelector('[data-crop-pan-x]');
+        var panYIn = root.querySelector('[data-crop-pan-y]');
+        var zoomIn = root.querySelector('[data-crop-zoom]');
+        var rotateIn = root.querySelector('[data-crop-rotate]');
+
+        var state = {
+            panX: parseFloat(panXIn.value) || 0,
+            panY: parseFloat(panYIn.value) || 0,
+            zoom: parseFloat(zoomIn.value) || 1,
+            rotate: parseInt(rotateIn.value, 10) || 0
+        };
+
+        var imgW = 0, imgH = 0;
+
+        function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+        function sync() {
+            state.panX = clamp(state.panX, -1, 1);
+            state.panY = clamp(state.panY, -1, 1);
+            state.zoom = clamp(state.zoom, 1, 8);
+            panXIn.value = state.panX.toFixed(2);
+            panYIn.value = state.panY.toFixed(2);
+            zoomIn.value = state.zoom.toFixed(1);
+            rotateIn.value = String(state.rotate);
+            var nums = root.querySelectorAll('[data-crop-num]');
+            for (var i = 0; i < nums.length; i++) {
+                var key = nums[i].getAttribute('data-crop-num');
+                if (key === 'pan_x') nums[i].value = state.panX.toFixed(2);
+                else if (key === 'pan_y') nums[i].value = state.panY.toFixed(2);
+                else if (key === 'zoom') nums[i].value = state.zoom.toFixed(1);
+                else if (key === 'rotate') nums[i].value = String(state.rotate);
+            }
+            render();
+        }
+
+        function render() {
+            if (!imgW || !imgH) return;
+            var wrapW = wrap.clientWidth, wrapH = wrap.clientHeight;
+            var fitScale = Math.min(wrapW / imgW, wrapH / imgH);
+            var dispW = imgW * fitScale, dispH = imgH * fitScale;
+            img.style.width = dispW + 'px';
+            img.style.height = dispH + 'px';
+            var ox = (wrapW - dispW) / 2, oy = (wrapH - dispH) / 2;
+            img.style.left = ox + 'px';
+            img.style.top = oy + 'px';
+            img.style.transform = '';
+
+            var side = Math.min(dispW, dispH) / state.zoom;
+            var cx = dispW / 2 + state.panX * ((dispW - side) / 2);
+            var cy = dispH / 2 + state.panY * ((dispH - side) / 2);
+            frame.style.left = (ox + cx - side / 2) + 'px';
+            frame.style.top = (oy + cy - side / 2) + 'px';
+            frame.style.width = side + 'px';
+            frame.style.height = side + 'px';
+        }
+
+        img.addEventListener('load', function () {
+            imgW = img.naturalWidth;
+            imgH = img.naturalHeight;
+            render();
+        });
+        if (img.naturalWidth) {
+            imgW = img.naturalWidth;
+            imgH = img.naturalHeight;
+            render();
+        }
+
+        var dragging = false, startX = 0, startY = 0, startPanX = 0, startPanY = 0;
+
+        wrap.addEventListener('pointerdown', function (e) {
+            if (e.button && e.button !== 0) return;
+            dragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startPanX = state.panX;
+            startPanY = state.panY;
+            wrap.setPointerCapture(e.pointerId);
+            e.preventDefault();
+        });
+
+        wrap.addEventListener('pointermove', function (e) {
+            if (!dragging || !imgW) return;
+            var wrapW = wrap.clientWidth, wrapH = wrap.clientHeight;
+            var fitScale = Math.min(wrapW / imgW, wrapH / imgH);
+            var dispW = imgW * fitScale, dispH = imgH * fitScale;
+            var side = Math.min(dispW, dispH) / state.zoom;
+            var rangeX = (dispW - side) / 2;
+            var rangeY = (dispH - side) / 2;
+            var dx = e.clientX - startX, dy = e.clientY - startY;
+            state.panX = rangeX > 0 ? clamp(startPanX + dx / rangeX, -1, 1) : 0;
+            state.panY = rangeY > 0 ? clamp(startPanY + dy / rangeY, -1, 1) : 0;
+            sync();
+        });
+
+        wrap.addEventListener('pointerup', function () { dragging = false; });
+        wrap.addEventListener('pointercancel', function () { dragging = false; });
+
+        wrap.addEventListener('wheel', function (e) {
+            e.preventDefault();
+            state.zoom = clamp(state.zoom - e.deltaY * 0.005, 1, 8);
+            sync();
+        }, { passive: false });
+
+        root.addEventListener('change', function (e) {
+            var num = e.target.closest('[data-crop-num]');
+            if (!num) return;
+            var key = num.getAttribute('data-crop-num');
+            var val = key === 'rotate' ? parseInt(num.value, 10) : parseFloat(num.value);
+            if (key === 'pan_x') state.panX = val;
+            else if (key === 'pan_y') state.panY = val;
+            else if (key === 'zoom') state.zoom = val;
+            else if (key === 'rotate') state.rotate = val;
+            sync();
+        });
+
+        sync();
+    }
+
+    function run() {
+        document.querySelectorAll('#photo-crop').forEach(initCrop);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run);
+    } else {
+        run();
+    }
+
+    document.body.addEventListener('htmx:afterSwap', function (e) {
+        if (e.detail.target && e.detail.target.id === 'photo-crop') {
+            initCrop(e.detail.target);
+        }
+        var crops = e.detail.target ? e.detail.target.querySelectorAll('#photo-crop') : [];
+        crops.forEach(initCrop);
+    });
+})();
+
 // Wave 1.17 — slide-out rail on narrow screens.
 (function () {
     document.addEventListener('click', function (e) {
