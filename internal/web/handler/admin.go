@@ -14,24 +14,52 @@ import (
 )
 
 const (
-	fieldAction       = "action"
-	fieldRole         = "role"
-	fieldInviteID     = "invite_id"
-	fieldSMTPHost     = "smtp_host"
-	fieldSMTPPort     = "smtp_port"
-	fieldSMTPTLS      = "smtp_tls"
-	fieldSMTPUser     = "smtp_username"
-	fieldSMTPPass     = "smtp_password"
-	fieldSMTPFrom     = "smtp_from"
-	fieldSMTPFromName = "smtp_from_name"
-	fieldTestEmail    = "test_email"
-	fieldTempPassword = "temp_password"
-	fieldSelfReg      = "self_registration"
-	fieldInviteTTL    = "invite_ttl_hours"
-	fieldSessionIdle  = "session_idle_hours"
-	fieldSessionAbs   = "session_absolute_days"
-	fieldAuditAction  = "audit_action"
+	fieldAction        = "action"
+	fieldRole          = "role"
+	fieldInviteID      = "invite_id"
+	fieldSMTPHost      = "smtp_host"
+	fieldSMTPPort      = "smtp_port"
+	fieldSMTPTLS       = "smtp_tls"
+	fieldSMTPUser      = "smtp_username"
+	fieldSMTPPass      = "smtp_password"
+	fieldSMTPFrom      = "smtp_from"
+	fieldSMTPFromName  = "smtp_from_name"
+	fieldTestEmail     = "test_email"
+	fieldTempPassword  = "temp_password"
+	fieldSelfReg       = "self_registration"
+	fieldInviteTTL     = "invite_ttl_hours"
+	fieldSessionIdle   = "session_idle_hours"
+	fieldSessionAbs    = "session_absolute_days"
+	fieldAuditAction   = "audit_action"
+	fieldAuditCategory = "audit_category"
+	fieldUserFilter    = "user_filter"
 )
+
+// auditSecurityActions and auditFailureActions back the All / Security /
+// Failures segment of 2.6.C6. Security is everything that changes who can
+// sign in or what a session can do; Failures is the subset that is, on its
+// own, a sign something went wrong rather than a person doing their job.
+var auditSecurityActions = []string{
+	store.ActionLogin, store.ActionLoginFailed, store.ActionLogout,
+	store.ActionPasswordChange, store.ActionPasswordReset,
+	store.ActionSessionsKilled, store.ActionSessionEnd, store.ActionSessionsEndOthers,
+	store.ActionUserDisable, store.ActionUserEnable, store.ActionUserDelete,
+	store.ActionEscrowEnable, store.ActionEscrowDisable, store.ActionEscrowOptIn,
+	store.ActionEscrowOptOut, store.ActionEscrowRecover,
+}
+
+var auditFailureActions = []string{store.ActionLoginFailed}
+
+func auditCategoryActions(category string) []string {
+	switch category {
+	case "security":
+		return auditSecurityActions
+	case "failures":
+		return auditFailureActions
+	default:
+		return nil
+	}
+}
 
 // Administration is split into one page per topic so the panel is not a
 // single sheet of unrelated forms. /admin/ is users; the rest live under
@@ -69,10 +97,20 @@ type adminView struct {
 	// MailWarning is set when a notice that may not be skipped could not be
 	// sent, so the administrator knows to deliver it themselves.
 	MailWarning string
-	// AuditAction is the filter applied to the log viewer.
+	// AuditAction is the exact-action filter applied to the log viewer.
 	AuditAction string
-	// AuditLog is the newest entries matching AuditAction.
+	// AuditCategory is the All / Security / Failures segment of 2.6.C6,
+	// narrowing alongside AuditAction rather than replacing it.
+	AuditCategory string
+	// AuditLog is the newest entries matching AuditAction and AuditCategory.
 	AuditLog []store.AuditEntry
+	// UserFilter is the All / Administrators / Disabled segment on the users
+	// list (2.6.C6).
+	UserFilter string
+	// AllUsers is every account regardless of UserFilter, for pickers — the
+	// password-reset form must offer someone even while the table is
+	// narrowed to a different filter.
+	AllUsers []userRow
 	// Durations for the settings form, rounded for display.
 	InviteTTLHours      int64
 	SessionIdleHours    int64
@@ -120,8 +158,10 @@ func (s *Server) serveAdmin(w http.ResponseWriter, r *http.Request, section stri
 		return
 	}
 	s.renderAdmin(w, r, adminView{
-		Section:     section,
-		AuditAction: r.URL.Query().Get(fieldAuditAction),
+		Section:       section,
+		AuditAction:   r.URL.Query().Get(fieldAuditAction),
+		AuditCategory: r.URL.Query().Get(fieldAuditCategory),
+		UserFilter:    r.URL.Query().Get(fieldUserFilter),
 	})
 }
 
@@ -230,7 +270,8 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request, from string
 func (s *Server) AdminAuditExport(w http.ResponseWriter, r *http.Request) {
 	sess := SessionFrom(r)
 	action := r.URL.Query().Get(fieldAuditAction)
-	entries := s.Store.Audit(store.AuditFilter{Action: action})
+	category := r.URL.Query().Get(fieldAuditCategory)
+	entries := s.Store.Audit(store.AuditFilter{Action: action, Categories: auditCategoryActions(category)})
 
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	w.Header().Set("Content-Disposition", `attachment; filename="audit-log.csv"`)
@@ -268,11 +309,15 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 	out.Settings = s.Store.Settings()
 	out.RegisterURL = s.publicURL(r, "/register")
 	for _, u := range s.Store.Users() {
-		out.Users = append(out.Users, userRow{
+		row := userRow{
 			User:     u,
 			Sessions: s.Sessions.Count(u.ID),
 			DAVCount: u.DAVAccountCount,
-		})
+		}
+		out.AllUsers = append(out.AllUsers, row)
+		if matchesUserFilter(u, out.UserFilter) {
+			out.Users = append(out.Users, row)
+		}
 	}
 	out.Escrow = escrowStatusOf(out.Settings, nil)
 	out.EscrowCoverage = s.Store.EscrowCoverage()
@@ -283,8 +328,9 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 		})
 	}
 	out.AuditLog = s.Store.Audit(store.AuditFilter{
-		Action: out.AuditAction,
-		Limit:  200,
+		Action:     out.AuditAction,
+		Categories: auditCategoryActions(out.AuditCategory),
+		Limit:      200,
 	})
 	out.InviteTTLHours = out.Settings.InviteTTLSeconds / 3600
 	out.SessionIdleHours = out.Settings.SessionIdleSeconds / 3600
@@ -628,6 +674,19 @@ func (s *Server) adminSaveSelfRegistration(r *http.Request, actor store.Actor) (
 		return adminView{}, err
 	}
 	return adminView{}, nil
+}
+
+// matchesUserFilter backs the All / Administrators / Disabled segment on the
+// users list (2.6.C6).
+func matchesUserFilter(u *store.User, filter string) bool {
+	switch filter {
+	case "admin":
+		return u.Role == store.RoleAdmin
+	case "disabled":
+		return u.Disabled
+	default:
+		return true
+	}
 }
 
 func adminUserErr(err error) error {

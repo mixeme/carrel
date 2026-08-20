@@ -382,6 +382,11 @@ type AuditFilter struct {
 	ActorID  string
 	TargetID string
 	Since    time.Time
+	// Categories, when non-empty, keeps an entry only if its Action is one of
+	// these. It narrows alongside Action rather than replacing it, so the
+	// admin audit log's exact-action dropdown and its All/Security/Failures
+	// segment (2.6.C6) can be applied together.
+	Categories []string
 	// Limit caps the result, counting from the newest entry.
 	Limit int
 }

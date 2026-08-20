@@ -8,7 +8,13 @@
     {{end}}
 
     <section class="subsection">
+        <span class="bar-sort no-print">
+            <a class="app-btn is-sm{{if not $d.AuditCategory}} is-on{{end}}" href="{{.Base}}/admin/audit{{if $d.AuditAction}}?audit_action={{$d.AuditAction}}{{end}}">All</a>
+            <a class="app-btn is-sm{{if eq $d.AuditCategory "security"}} is-on{{end}}" href="{{.Base}}/admin/audit?audit_category=security{{if $d.AuditAction}}&amp;audit_action={{$d.AuditAction}}{{end}}">Security</a>
+            <a class="app-btn is-sm{{if eq $d.AuditCategory "failures"}} is-on{{end}}" href="{{.Base}}/admin/audit?audit_category=failures{{if $d.AuditAction}}&amp;audit_action={{$d.AuditAction}}{{end}}">Failures</a>
+        </span>
         <form method="get" action="{{.Base}}/admin/audit">
+            <input type="hidden" name="audit_category" value="{{$d.AuditCategory}}">
             <label for="audit-action">Filter by action</label>
             <select id="audit-action" name="audit_action">
                 <option value="">All actions</option>
@@ -30,7 +36,7 @@
         </form>
 
         <div class="list-toolbar no-print">
-            <a class="app-btn is-sm" href="{{.Base}}/admin/audit/export{{if $d.AuditAction}}?audit_action={{$d.AuditAction}}{{end}}">Export CSV</a>
+            <a class="app-btn is-sm" href="{{.Base}}/admin/audit/export?{{if $d.AuditAction}}audit_action={{$d.AuditAction}}&amp;{{end}}{{if $d.AuditCategory}}audit_category={{$d.AuditCategory}}{{end}}">Export CSV</a>
             {{template "columnpicker" "admin-audit"}}
         </div>
         {{if $d.AuditLog}}

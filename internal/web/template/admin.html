@@ -9,6 +9,11 @@
 
     <section class="subsection">
         <div class="list-toolbar no-print">
+            <span class="bar-sort">
+                <a class="app-btn is-sm{{if not $d.UserFilter}} is-on{{end}}" href="{{.Base}}/admin/">All</a>
+                <a class="app-btn is-sm{{if eq $d.UserFilter "admin"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=admin">Administrators</a>
+                <a class="app-btn is-sm{{if eq $d.UserFilter "disabled"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=disabled">Disabled</a>
+            </span>
             {{template "columnpicker" "admin-users"}}
         </div>
         {{if $d.Users}}
@@ -78,7 +83,7 @@
             </tbody>
         {{template "datatableend"}}
         {{else}}
-        <p class="hint">No users yet.</p>
+        <p class="hint">{{if $d.UserFilter}}No users match this filter.{{else}}No users yet.{{end}}</p>
         {{end}}
     </section>
 
@@ -95,7 +100,7 @@
             <div class="form-field w-md">
                 <label for="reset-user">Account</label>
                 <select id="reset-user" name="user_id" required>
-                    {{range $d.Users}}
+                    {{range $d.AllUsers}}
                     <option value="{{.ID}}">{{.Login}}</option>
                     {{end}}
                 </select>

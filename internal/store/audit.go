@@ -54,8 +54,19 @@ func matches(e AuditEntry, f AuditFilter) bool {
 		return false
 	case !f.Since.IsZero() && e.At.Before(f.Since):
 		return false
+	case len(f.Categories) > 0 && !containsAction(f.Categories, e.Action):
+		return false
 	}
 	return true
+}
+
+func containsAction(actions []string, action string) bool {
+	for _, a := range actions {
+		if a == action {
+			return true
+		}
+	}
+	return false
 }
 
 // appendAudit stamps and appends an entry inside an update, so the record and
