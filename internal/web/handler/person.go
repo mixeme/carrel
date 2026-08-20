@@ -43,7 +43,7 @@ func (s *Server) startPersonFind(w http.ResponseWriter, r *http.Request, req fin
 	view := findView{
 		Request: req, Mode: modeTimeline, Title: card.Contact.DisplayName(),
 		Subject: card.Contact.DisplayName(),
-		UseSSE:  s.Progress.SSE(), PollMillis: s.pollMillis(), Base: s.Path(""),
+		UseSSE:  s.Progress.SSE(), PollMillis: s.pollMillis(), Base: s.BasePath,
 		Person: personPanel{
 			AccountID: card.AccountID, ColEnc: card.ColEnc, UID: card.UID,
 			Contact: card.Contact, PhotoURL: card.PhotoURL,

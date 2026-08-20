@@ -328,7 +328,12 @@ type findView struct {
 	RetryURL   string
 	CancelURL  string
 	SourcesURL string
-	Base       string
+	// Base is the mount prefix without a trailing slash, exactly as the page
+	// view carries it. It used to be filled from Path(""), which returns "/"
+	// on a default install, and every tab URL built from it came out as
+	// "//app/duplicates" — a scheme-relative address pointing at a host called
+	// "app", so the filter tabs walked out of the application.
+	Base string
 	// Back is where the screen came from, when it has one place to return to.
 	Back         string
 	NoSources    bool
@@ -402,7 +407,7 @@ func (s *Server) Search(w http.ResponseWriter, r *http.Request) {
 	if req.Query == "" {
 		v := s.View(r, "Search")
 		v.Data = findView{
-			Request: req, Mode: modeSearch, Title: "Search", Base: s.Path(""),
+			Request: req, Mode: modeSearch, Title: "Search", Base: s.BasePath,
 			Sources: s.findSourcesOrNil(r, req), SourcesURL: s.Path("/app/search/sources"),
 		}
 		s.Render(w, "search.html", v)
@@ -430,7 +435,7 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 	sess := SessionFrom(r)
 	view := findView{
 		Request: req, Mode: req.Mode, Title: findTitle(req),
-		UseSSE: s.Progress.SSE(), PollMillis: s.pollMillis(), Base: s.Path(""),
+		UseSSE: s.Progress.SSE(), PollMillis: s.pollMillis(), Base: s.BasePath,
 		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
 	view.PrintSection = findPrintSection(req.Mode)
@@ -612,7 +617,7 @@ func (s *Server) viewFromTask(r *http.Request, req findRequest, task *fanout.Tas
 	view := findView{
 		Request: req, Mode: req.Mode, Title: findTitle(req), TaskID: task.ID,
 		UseSSE: s.Progress.SSE() && !req.Poll, PollMillis: s.pollMillis(),
-		SourcesURL: s.sourcesURL(req.Mode), Base: s.Path(""),
+		SourcesURL: s.sourcesURL(req.Mode), Base: s.BasePath,
 		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
 	view.PrintSection = findPrintSection(req.Mode)
