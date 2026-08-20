@@ -2236,6 +2236,18 @@ label.checkbox input {
     gap: 4px;
 }
 
+/* 2.6.B6: the agenda's own From/To fields stay visible without JavaScript,
+   since there is then no Range button to reveal them with; the wrapper
+   participates in the page-bar's flex row rather than boxing its fields, so
+   this changes nothing about their layout when shown. */
+.js [data-range-fields] {
+    display: none;
+}
+
+.js [data-range-open] [data-range-fields] {
+    display: contents;
+}
+
 .files-filter input {
     width: 12rem;
     max-width: 100%;

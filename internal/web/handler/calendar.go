@@ -27,7 +27,15 @@ type agendaView struct {
 	// EventCount is the total occurrences across every day, for the page-bar
 	// counter of 2.6.B5 — the number already loaded, not the count in the
 	// collection, which nothing here asks the server for.
-	EventCount  int
+	EventCount int
+	// Segment, WeekURL and MonthURL back the Week/Month/Range presets of
+	// 2.6.B6, layered on the same From/To the form always used. Segment is
+	// "week" or "month" when From/To exactly match that preset's computed
+	// range, "range" otherwise — which is also what a custom From/To lands
+	// on, so Range reads as "on, and here is the form" rather than "off".
+	Segment     string
+	WeekURL     string
+	MonthURL    string
 	ReadOnly    bool
 	Empty       bool
 	NoCalendars bool
@@ -160,13 +168,47 @@ func (s *Server) buildAgenda(ctx context.Context, sess *session.Session, account
 		day, _ := time.ParseInLocation("2006-01-02", date, loc)
 		days = append(days, agendaDay{Date: date, Label: day.Format("Monday, 2 January 2006"), Events: byDate[date]})
 	}
+	weekStart, weekEnd := weekRange(today)
+	monthStart, monthEnd := monthRange(today)
+	base := s.Path("/app/calendar/" + accountID + "/" + colEnc)
+	segment := "range"
+	if sameDate(from, weekStart) && sameDate(to, weekEnd) {
+		segment = "week"
+	} else if sameDate(from, monthStart) && sameDate(to, monthEnd) {
+		segment = "month"
+	}
+
 	return agendaView{
 		Calendars: s.listCalendars(sess), AccountID: accountID, ColEnc: colEnc,
 		Collection: col, AccountLabel: accountLabel(*acc),
 		From: from.Format("2006-01-02"), To: to.Format("2006-01-02"),
 		Days: days, EventCount: len(result.Occurrences), ReadOnly: col.ReadOnly, Empty: len(days) == 0,
+		Segment:   segment,
+		WeekURL:   base + "?from=" + weekStart.Format("2006-01-02") + "&to=" + weekEnd.Format("2006-01-02"),
+		MonthURL:  base + "?from=" + monthStart.Format("2006-01-02") + "&to=" + monthEnd.Format("2006-01-02"),
 		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}, nil
+}
+
+// weekRange is the Monday-to-Sunday week containing t, for the Week preset
+// of 2.6.B6.
+func weekRange(t time.Time) (time.Time, time.Time) {
+	day := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	offset := (int(day.Weekday()) + 6) % 7 // days since Monday; Sunday is 6
+	start := day.AddDate(0, 0, -offset)
+	return start, start.AddDate(0, 0, 6)
+}
+
+// monthRange is the first and last day of t's month, for the Month preset of
+// 2.6.B6.
+func monthRange(t time.Time) (time.Time, time.Time) {
+	start := time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, t.Location())
+	end := start.AddDate(0, 1, -1)
+	return start, end
+}
+
+func sameDate(a, b time.Time) bool {
+	return a.Year() == b.Year() && a.Month() == b.Month() && a.Day() == b.Day()
 }
 
 func parseAgendaDate(text string, fallback time.Time) (time.Time, error) {

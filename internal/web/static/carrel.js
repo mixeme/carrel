@@ -2172,6 +2172,26 @@ document.addEventListener('change', function (e) {
     });
 })();
 
+// 2.6.B6 — Week/Month/Range on the agenda. Week and Month are plain links;
+// Range only reveals the existing From/To form already on the page, so
+// there is nothing to fetch here either.
+(function () {
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-range-toggle]');
+        if (!btn) return;
+        var scope = btn.closest('[data-filter-scope]');
+        if (!scope) return;
+        var open = scope.hasAttribute('data-range-open');
+        if (open) {
+            scope.removeAttribute('data-range-open');
+        } else {
+            scope.setAttribute('data-range-open', '');
+        }
+        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+        btn.classList.toggle('is-on', !open);
+    });
+})();
+
 // 2.6.B1 — filter the page-bar acts on: narrows the rows already on the
 // page, entirely in the browser. No request is made, so there is nothing to
 // filter without JavaScript and the field stays hidden (see ".list-filter"
