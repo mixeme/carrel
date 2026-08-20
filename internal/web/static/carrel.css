@@ -1664,10 +1664,13 @@ code {
 
 /* Inside a panel the mockups head every block with the same small capitals
    they use in the rail and on the fieldsets — never a second serif heading.
-   A panel has one title, at the top, and the blocks under it are labelled. */
-.subsection h2,
-.subsection h3,
-.subsection h4 {
+   A panel has one title, at the top, and the blocks under it are labelled.
+   2.6.A4: these are explicit classes rather than a ".subsection h2/h3/h4"
+   tag rule, so a subsection heading that forgets the class renders as a
+   plain, unstyled heading instead of silently picking up the right look. */
+.subsection-h2,
+.subsection-h3,
+.subsection-h4 {
     font-family: var(--f-sans);
     font-size: 10px;
     font-weight: 600;
@@ -1676,15 +1679,15 @@ code {
     color: var(--dusty);
 }
 
-.subsection h2 {
+.subsection-h2 {
     margin-bottom: 0.5rem;
 }
 
-.subsection h3 {
+.subsection-h3 {
     margin: 1.5rem 0 0.5rem;
 }
 
-.subsection h4 {
+.subsection-h4 {
     margin: 1rem 0 0.35rem;
 }
 
@@ -3827,10 +3830,6 @@ button.danger {
     margin-bottom: 1rem;
 }
 
-.page-head h1 {
-    margin: 0;
-}
-
 .settings-account-card {
     border: 0.5px solid var(--rule);
     border-radius: 4px;
@@ -4682,8 +4681,7 @@ body.has-shell .app-shell.is-admin .admin-rail {
     flex-wrap: wrap;
 }
 
-.page-title,
-.page-head h1 {
+.page-title {
     font-family: var(--f-serif);
     font-size: 22px;
     font-weight: 400;
@@ -4706,8 +4704,7 @@ body.has-shell .app-shell.is-admin .admin-rail {
     border-radius: 1px;
 }
 
-.page-sub,
-.page-head .source-label {
+.page-sub {
     font-size: 11.5px;
     color: var(--dusty);
     margin: 4px 0 0;

@@ -4,7 +4,7 @@
     {{template "pagehead" (dict "Title" "DAV validator")}}{{template "pageheadend"}}
 
     <section class="subsection">
-        <h2>DAV server validator</h2>
+        <h2 class="subsection-h2">DAV server validator</h2>
         <p class="hint">Runs discovery without saving credentials. Useful before
             handing connection details to a user.</p>
         <form method="post" class="form" action="{{.Base}}/admin/dav">
@@ -35,7 +35,7 @@
         </form>
 
         {{if $d.DAVDiag}}
-        <h3>Discovery trace</h3>
+        <h3 class="subsection-h3">Discovery trace</h3>
         <pre class="diagnostic">{{$d.DAVDiag}}</pre>
         {{end}}
     </section>

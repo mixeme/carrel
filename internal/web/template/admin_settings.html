@@ -8,7 +8,7 @@
     {{end}}
 
     <section class="subsection">
-        <h2>Global settings</h2>
+        <h2 class="subsection-h2">Global settings</h2>
         <form method="post" class="form" action="{{.Base}}/admin/settings">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="save_settings">
@@ -38,7 +38,7 @@
     </section>
 
     <section class="subsection">
-        <h2>Mail settings</h2>
+        <h2 class="subsection-h2">Mail settings</h2>
         <form method="post" class="form" action="{{.Base}}/admin/settings">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="save_smtp">
@@ -109,7 +109,7 @@
         </form>
 
         {{if $d.SMTPDiag}}
-        <h3>Server response</h3>
+        <h3 class="subsection-h3">Server response</h3>
         <pre class="diagnostic">{{$d.SMTPDiag}}</pre>
         {{end}}
     </section>
