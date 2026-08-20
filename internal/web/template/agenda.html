@@ -18,7 +18,7 @@
                 <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
             </div>
         {{template "pageheadend"}}
-        <form method="get" action="{{.Base}}/app/calendar" class="form page-bar no-print">
+        {{template "pagebarform" (dict "Action" (print .Base "/app/calendar"))}}
             <div class="form-field w-sm">
                 <label for="cal-from">From</label>
                 <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required>
@@ -35,7 +35,7 @@
             <div class="form-field is-own-line">
                 <button type="submit" class="app-btn">Show</button>
             </div>
-        </form>
+        {{template "pagebarformend"}}
         {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
         {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was polled.</p>{{end}}
         <div id="find-panel"
@@ -65,7 +65,7 @@
                     <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
             {{template "pageheadend"}}
-            <form method="get" class="form page-bar no-print">
+            {{template "pagebarform"}}
                 <div class="form-field w-sm">
                     <label for="agenda-from">From</label>
                     <input id="agenda-from" type="date" name="from" value="{{$d.From}}" required>
@@ -77,7 +77,7 @@
                 <div class="form-field is-own-line">
                     <button type="submit" class="app-btn">Show</button>
                 </div>
-            </form>
+            {{template "pagebarformend"}}
             {{if $d.ReadOnly}}<p class="hint page-hint no-print">This calendar is read-only.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">No events in this date range.</p>{{end}}
             {{range $d.Days}}

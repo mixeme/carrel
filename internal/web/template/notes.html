@@ -44,9 +44,9 @@
             {{if $d.ReadOnly}}<p class="hint no-print">This notebook is read-only.</p>{{end}}
             {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">Nothing here yet.</p>{{end}}
-            <div class="page-bar no-print">
+            {{template "pagebar"}}
                 {{template "columnpicker" "notes"}}
-            </div>
+            {{template "pagebarend"}}
             <ul class="list note-list" data-columns-root="notes">
             {{range $d.Rows}}
                 <li class="list-row list-row--note note-row">

@@ -660,6 +660,22 @@
 
 {{define "pageheadend"}}</header>{{end}}
 
+{{/* The filter/segment/Columns/counter bar of 2.6.A2. Most screens hold it
+     in a plain div; the agenda's From/To filter is a real GET form, and the
+     CSS already treats ".page-bar.form" as the same primitive ("form
+     page-bar"), so a second pair of components opens and closes the form
+     instead of forcing it into a div it would have to be pulled back out
+     of. Column headers, filter fields and segments stay page-local, same
+     reasoning as pagehead's actions. */}}
+{{define "pagebar"}}<div class="page-bar no-print"{{if .}}{{if .Attrs}} {{.Attrs}}{{end}}{{end}}>{{end}}
+{{define "pagebarend"}}</div>{{end}}
+
+{{define "pagebarform"}}
+{{$b := .}}
+<form method="{{if and $b $b.Method}}{{$b.Method}}{{else}}get{{end}}"{{if and $b $b.Action}} action="{{$b.Action}}"{{end}} class="form page-bar no-print">
+{{end}}
+{{define "pagebarformend"}}</form>{{end}}
+
 {{define "logo"}}<svg class="app-logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>{{end}}
 
 {{define "ico"}}<svg class="app-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-{{.}}"/></svg>{{end}}

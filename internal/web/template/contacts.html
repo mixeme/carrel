@@ -50,9 +50,9 @@
             {{if $d.Empty}}
             <p class="hint page-hint">No contacts in this address book.</p>
             {{else}}
-            <div class="page-bar no-print">
+            {{template "pagebar"}}
                 {{template "columnpicker" "contacts"}}
-            </div>
+            {{template "pagebarend"}}
             <ul class="list contact-list" id="contact-list" data-columns-root="contacts">
             {{range $d.Contacts}}
                 <li class="list-row list-row--contact contact-row">

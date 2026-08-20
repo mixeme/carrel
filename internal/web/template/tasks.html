@@ -37,13 +37,13 @@
                     <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
             {{template "pageheadend"}}
-            <div class="page-bar no-print">
+            {{template "pagebar"}}
                 <a class="app-btn{{if eq $d.Filter "open"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=open">Open ({{$d.Counts.Open}})</a>
                 <a class="app-btn{{if eq $d.Filter "done"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
                 <a class="app-btn{{if eq $d.Filter "all"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All</a>
                 {{if $d.Counts.Overdue}}<span class="task-overdue-count">{{$d.Counts.Overdue}} overdue</span>{{end}}
                 {{template "columnpicker" "tasks"}}
-            </div>
+            {{template "pagebarend"}}
             {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">Nothing here.</p>{{end}}
             <ul class="list task-list" data-columns-root="tasks">
