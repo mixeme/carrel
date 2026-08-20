@@ -45,9 +45,10 @@ func Run(a *App) error {
 				}
 			},
 		},
-		OnStartup:  a.startup,
-		OnDomReady: a.domReady,
-		OnShutdown: a.shutdown,
+		OnStartup:     a.startup,
+		OnDomReady:    a.domReady,
+		OnShutdown:    a.shutdown,
+		OnBeforeClose: a.onBeforeClose,
 		Windows: &windows.Options{
 			WebviewUserDataPath: a.Paths.WebviewDataDir,
 		},
@@ -73,6 +74,7 @@ func (a *App) startup(ctx context.Context) {
 		a.setErr(err)
 		runtime.LogError(ctx, err.Error())
 	}
+	a.maybeStartTray()
 }
 
 func (a *App) domReady(ctx context.Context) {

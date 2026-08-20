@@ -175,7 +175,7 @@ Linux dev: `libwebkit2gtk-4.1-dev`, `pkg-config` — см. [development.md](../d
 | 3 | Supervisor | `desktop: local supervisor` | ☑ |
 | 4 | Sidecar download | `desktop: sidecar download` | ☑ |
 | 5 | Onboarding + sign out | `desktop: onboarding and sign-out` | ☑ |
-| 6 | Tray | `desktop: tray and window lifecycle` | ☐ |
+| 6 | Tray | `desktop: tray and window lifecycle` | ☑ |
 | 7 | Installers | `desktop: installers` | ☐ |
 | 8 | CI + acceptance docs | `desktop: CI and acceptance` | ☐ |
 | closeout | roadmap, docs, delete plan | `docs: desktop closeout` | ☐ |
@@ -190,15 +190,7 @@ macOS, DAV localhost onboarding, auto-update, ручной путь к exe, mult
 
 ## 14. Прогресс
 
-Фазы **0–5** закрыты в коде и CHANGELOG (`0.10.0`); чеклисты сняты, статус — в §12. Ниже только оставшееся.
-
-### Фаза 6 — Tray — модель: **Composer**
-
-- [ ] Tray Open / Quit
-- [ ] Tray on: hide window
-- [ ] Tray off: SIGTERM on close
-- [ ] Quit → full exit
-- [ ] Коммит + CHANGELOG [Unreleased]
+Фазы **0–6** закрыты в коде и CHANGELOG; чеклисты сняты, статус — в §12. Ниже только оставшееся.
 
 ### Фаза 7 — Установщики — модель: **Composer** + ручная проверка
 

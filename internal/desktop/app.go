@@ -27,14 +27,17 @@ type App struct {
 	RemoteOverride      string
 	ForceLocal          bool
 
-	ctx      context.Context
-	pid      int
-	mu       sync.Mutex
-	sidecarM sync.Mutex
-	shellURL string
-	target   string
-	watchOff context.CancelFunc
-	lastErr  string
+	ctx         context.Context
+	pid         int
+	mu          sync.Mutex
+	trayMu      sync.Mutex
+	sidecarM    sync.Mutex
+	trayRunning bool
+	quitting    bool
+	shellURL    string
+	target      string
+	watchOff    context.CancelFunc
+	lastErr     string
 
 	sup     *Supervisor
 	running *RunningSidecar
@@ -82,6 +85,7 @@ func (a *App) ConnectLocal(tray bool) error {
 	url := a.target
 	a.mu.Unlock()
 	a.navigate(url)
+	a.maybeStartTray()
 	return nil
 }
 
@@ -106,6 +110,7 @@ func (a *App) ConnectRemote(raw string, tray bool) error {
 		_ = WriteLock(lockPath, InstanceLock{PID: pid, Mode: ModeRemote})
 	}
 	a.navigate(url)
+	a.maybeStartTray()
 	return nil
 }
 
@@ -199,6 +204,7 @@ func (a *App) watchLoop(ctx context.Context, signOutURL string) {
 }
 
 func (a *App) beginSignOut() (*Supervisor, *RunningSidecar) {
+	a.stopTray()
 	a.stopWatch()
 	a.mu.Lock()
 	a.target = ""
