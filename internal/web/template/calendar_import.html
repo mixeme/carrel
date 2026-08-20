@@ -13,7 +13,7 @@
         <form method="post" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <button type="submit" name="action" value="cancel_import" class="app-btn is-quiet">Cancel</button>
-            <button type="submit" name="action" value="confirm_import" class="app-btn is-primary">Import {{$d.OKCount}} event(s)</button>
+            <button type="submit" name="action" value="confirm_import" class="app-btn is-primary">Import {{$d.OKCount}} {{if eq $d.OKCount 1}}entry{{else}}entries{{end}}</button>
         </form>
     </div>
     {{end}}
@@ -38,7 +38,7 @@
 </div>
 {{if $d.TruncatedNote}}<p class="message error" role="alert">{{$d.TruncatedNote}}</p>{{end}}
 <table class="import-preview data">
-    <thead><tr><th>Source</th><th>Event</th><th>UID</th><th>Result</th></tr></thead>
+    <thead><tr><th>Source</th><th>Entry</th><th>UID</th><th>Result</th></tr></thead>
     <tbody>
     {{range $d.Events}}
         <tr>

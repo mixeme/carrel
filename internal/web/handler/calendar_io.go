@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/emersion/go-ical"
+
 	"gitea.mixdep.ru/mix/carrel/internal/account"
 	"gitea.mixdep.ru/mix/carrel/internal/dav/discovery"
 	"gitea.mixdep.ru/mix/carrel/internal/model"
@@ -157,12 +159,12 @@ func (s *Server) previewCalendarImport(w http.ResponseWriter, r *http.Request, s
 		row := calendarImportRow{Source: cal.Source, ParseError: cal.Error}
 		card := session.ImportCard{Source: cal.Source, ParseError: cal.Error}
 		if cal.Error == "" && cal.Object != nil {
-			ev, eventErr := cal.Object.Event(s.timezone())
-			if eventErr != nil {
-				row.ParseError, card.ParseError = eventErr.Error(), eventErr.Error()
+			title, titleErr := s.importEntryTitle(cal.Object, col)
+			if titleErr != nil {
+				row.ParseError, card.ParseError = titleErr.Error(), titleErr.Error()
 			} else {
 				uid := strings.TrimSpace(cal.Object.UID())
-				row.DisplayName, row.OriginalUID = ev.DisplayTitle(), uid
+				row.DisplayName, row.OriginalUID = title, uid
 				row.UIDCollision = uid != "" && existing[uid]
 				if row.UIDCollision {
 					view.CollisionCount++
@@ -318,4 +320,39 @@ func (s *Server) CalendarExport(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", `attachment; filename="calendar.ics"`)
 	w.Header().Set("Cache-Control", "no-store")
 	_, _ = io.WriteString(w, body.String())
+}
+
+// importEntryTitle names an entry from whichever component it carries. A
+// calendar export is not a file of events: the same VCALENDAR holds the tasks
+// and the journal entries kept beside them, and a CalDAV calendar stores all
+// three. Reading every entry as an event reported twenty tasks as "not a
+// calendar object" and dropped them.
+func (s *Server) importEntryTitle(obj *model.Object, col discovery.Collection) (string, error) {
+	component := obj.Component()
+	if component == "" {
+		return "", model.ErrNotICal
+	}
+	if !supportsComponent(col, component) {
+		return "", fmt.Errorf("this calendar does not accept %s entries", component)
+	}
+	switch component {
+	case ical.CompToDo:
+		todo, err := obj.Todo(s.timezone())
+		if err != nil {
+			return "", err
+		}
+		return todo.DisplayTitle(), nil
+	case ical.CompJournal:
+		note, err := obj.Note(s.timezone())
+		if err != nil {
+			return "", err
+		}
+		return note.DisplayTitle(), nil
+	default:
+		event, err := obj.Event(s.timezone())
+		if err != nil {
+			return "", err
+		}
+		return event.DisplayTitle(), nil
+	}
 }
