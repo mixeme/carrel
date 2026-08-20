@@ -237,6 +237,9 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	mux.HandleFunc("POST "+s.Path("/installcheck/{token}/upload"), s.InstallCheckUpload)
 	mux.HandleFunc("GET "+s.Path("/manifest.webmanifest"), s.Manifest)
 	if staticFS != nil {
+		mux.HandleFunc("GET "+s.Path("/sw.js"), func(w http.ResponseWriter, r *http.Request) {
+			s.ServiceWorker(w, r, staticFS)
+		})
 		mux.Handle("GET "+s.Path("/static/"),
 			http.StripPrefix(s.Path("/static/"), http.FileServer(http.FS(staticFS))))
 	}

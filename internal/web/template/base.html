@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#4A6B52">
+    <meta name="carrel-base" content="{{.Base}}">
     <title>{{if .Title}}{{.Title}} · Carrel{{else}}Carrel{{end}}</title>
     <link rel="stylesheet" href="{{.Base}}/static/carrel.css">
     <link rel="icon" href="{{.Base}}/static/icon.svg" type="image/svg+xml">
@@ -146,6 +147,13 @@
     {{end}}
     <div class="app-work">
         <div class="app-content">
+            <div class="app-offline no-print" id="app-offline" hidden role="status">
+                <div class="find-poll is-offline">
+                    <span class="find-prog" aria-hidden="true"><i></i></span>
+                    <p class="find-summary">No connection · check your network</p>
+                    <button type="button" class="app-btn is-sm" data-refresh>Retry</button>
+                </div>
+            </div>
 {{else}}
 {{if .Session}}
 <header class="topbar no-print">

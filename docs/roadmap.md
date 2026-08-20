@@ -51,7 +51,6 @@ Found by reading the stage plans back against the code they describe, and worth 
 
 | | What is missing | Why it was left |
 |---|---|---|
-| **A service worker** | The PWA manifest and icon are embedded and the interface installs as an app. There is no service worker at all | §13 asks for a minimal one covering the shell and static assets, and forbids it caching collection contents. What was built is the safe half of that: nothing to cache wrongly. The cost is that an installed app with no network shows a browser error rather than a shell |
 | **Export from several collections at once** | Contacts and calendar export one collection each, the calendar optionally over a date range | Stage 4 planned "one event, an agenda range, or the selected collections". The third case is missing, which matters most for a backup taken by hand — and is subsumed by backup proper (§23.3) |
 | **Multi-platform images, CI, `ghcr.io`** | The Dockerfile and compose file are complete and build locally. Nothing publishes `linux/amd64` and `linux/arm64` images, and there is no CI at all | Explicitly out of scope from stage 1 onward. §18 describes the intended arrangement: GitHub Actions building for the mirror and publishing to `ghcr.io`, with secrets not duplicated into Gitea |
 | **Attachments on tasks** | `ATTACH` is modelled on events and notes. A VTODO keeps the property untouched and shows it among its foreign properties, but there is no attach or detach on a task card | §23.10 names events and notes. The model work is done; this is one card's worth of interface |

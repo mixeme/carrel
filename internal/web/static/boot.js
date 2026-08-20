@@ -17,3 +17,14 @@
         }
     } catch (e) {}
 })();
+
+// PWA shell worker (§13, wave 3.6). Registers after load so a slow install
+// does not block the first paint.
+(function () {
+    if (!('serviceWorker' in navigator)) return;
+    var meta = document.querySelector('meta[name="carrel-base"]');
+    var base = meta ? meta.getAttribute('content') || '' : '';
+    window.addEventListener('load', function () {
+        navigator.serviceWorker.register(base + '/sw.js').catch(function () {});
+    });
+})();

@@ -3474,6 +3474,42 @@ label.checkbox input {
     margin-left: auto;
 }
 
+.find-poll.is-offline {
+    background: transparent;
+    border-bottom: 0.5px solid var(--alert);
+    color: var(--alert);
+}
+
+.find-poll.is-offline .find-summary {
+    color: var(--alert);
+}
+
+.find-poll.is-offline .find-prog i {
+    width: 0;
+    background: var(--alert);
+}
+
+.app-offline:not([hidden]) {
+    border-bottom: 0.5px solid var(--rule);
+}
+
+.offline-shell .app-brand {
+    font-family: var(--f-serif);
+    font-size: 17px;
+    font-weight: 400;
+    padding: 0 16px;
+    line-height: 52px;
+}
+
+.offline-shell-body {
+    padding: 20px var(--pad) 32px;
+    max-width: 42rem;
+}
+
+.offline-shell-body .page-title {
+    margin: 0 0 12px;
+}
+
 .find-sources-wrap {
     padding: 0 var(--pad) 8px;
     background: var(--card);

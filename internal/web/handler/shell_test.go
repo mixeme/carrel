@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io/fs"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -227,6 +228,50 @@ func TestManifest(t *testing.T) {
 	icon, ok := icons[0].(map[string]any)
 	if !ok || icon["src"] != "/static/icon.svg" {
 		t.Errorf("icon src = %v, want /static/icon.svg", icon["src"])
+	}
+}
+
+func TestServiceWorker(t *testing.T) {
+	s := newServer(t)
+	staticFS, err := fs.Sub(web.StaticFS, "static")
+	if err != nil {
+		t.Fatalf("static FS: %v", err)
+	}
+	rec := httptest.NewRecorder()
+	s.Handler(staticFS).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/sw.js", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("GET sw.js = %d, want 200", rec.Code)
+	}
+	if ct := rec.Header().Get("Content-Type"); !strings.Contains(ct, "javascript") {
+		t.Errorf("Content-Type = %q, want javascript", ct)
+	}
+	if cc := rec.Header().Get("Cache-Control"); !strings.Contains(cc, "no-cache") {
+		t.Errorf("Cache-Control = %q, want no-cache", cc)
+	}
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "mode === 'navigate'") {
+		t.Error("sw.js does not handle navigation separately")
+	}
+	if !strings.Contains(body, "isShellAsset") {
+		t.Error("sw.js does not restrict caching to shell assets")
+	}
+	if !strings.Contains(body, "static/offline-shell.html") {
+		t.Error("sw.js does not precache the offline shell page")
+	}
+}
+
+func TestServiceWorkerRespectsBasePath(t *testing.T) {
+	s := newServer(t)
+	s.BasePath = "/carrel"
+	staticFS, err := fs.Sub(web.StaticFS, "static")
+	if err != nil {
+		t.Fatalf("static FS: %v", err)
+	}
+	rec := httptest.NewRecorder()
+	s.Handler(staticFS).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/carrel/sw.js", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("GET /carrel/sw.js = %d, want 200", rec.Code)
 	}
 }
 

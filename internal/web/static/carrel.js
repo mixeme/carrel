@@ -2323,3 +2323,16 @@ document.addEventListener('change', function (e) {
     // so the DOM is already parsed by the time this runs.
     Array.prototype.slice.call(document.querySelectorAll('[data-filter-scope]')).forEach(refreshScope);
 })();
+
+// Installed PWA and signed-in shell: show the §13 offline bar when the browser
+// loses the network. Session memory stays on screen; nothing is written to disk.
+(function () {
+    var bar = document.getElementById('app-offline');
+    if (!bar) return;
+    function sync() {
+        bar.hidden = navigator.onLine !== false;
+    }
+    window.addEventListener('online', sync);
+    window.addEventListener('offline', sync);
+    sync();
+})();

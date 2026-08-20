@@ -27,6 +27,7 @@ func Chain(h http.Handler, mw ...Middleware) http.Handler {
 // which is what inline icons need.
 const contentSecurityPolicy = "default-src 'self'; " +
 	"script-src 'self'; " +
+	"worker-src 'self'; " +
 	"style-src 'self'; " +
 	"img-src 'self' data:; " +
 	"font-src 'self'; " +

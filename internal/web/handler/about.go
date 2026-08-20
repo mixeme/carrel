@@ -5,6 +5,7 @@ package handler
 
 import (
 	"encoding/json"
+	"io/fs"
 	"net/http"
 )
 
@@ -41,4 +42,22 @@ func (s *Server) Manifest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/manifest+json")
 	w.Header().Set("Cache-Control", "no-store")
 	_ = json.NewEncoder(w).Encode(manifest)
+}
+
+// ServiceWorker serves the PWA shell worker (§13, wave 3.6). It is not under
+// /static/ so its scope covers the mount prefix; updates must not be cached
+// for a year by the browser.
+func (s *Server) ServiceWorker(w http.ResponseWriter, r *http.Request, staticFS fs.FS) {
+	if staticFS == nil {
+		http.NotFound(w, r)
+		return
+	}
+	b, err := fs.ReadFile(staticFS, "sw.js")
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache")
+	_, _ = w.Write(b)
 }

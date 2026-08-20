@@ -73,6 +73,9 @@ func TestBaseLoadsTheStreamExtension(t *testing.T) {
 			t.Errorf("base.html does not load %s", want)
 		}
 	}
+	if !strings.Contains(body, `meta name="carrel-base"`) {
+		t.Error("base.html does not carry the mount prefix for the service worker")
+	}
 	if strings.Index(body, "htmx.min.js") > strings.Index(body, "htmx-sse.js") {
 		t.Error("the sse extension is loaded before htmx itself; it registers against the global and would be lost")
 	}
@@ -81,7 +84,7 @@ func TestBaseLoadsTheStreamExtension(t *testing.T) {
 	if err != nil {
 		t.Fatalf("static FS: %v", err)
 	}
-	for _, name := range []string{"htmx-sse.js", "boot.js"} {
+	for _, name := range []string{"htmx-sse.js", "boot.js", "sw.js", "offline-shell.html"} {
 		if _, err := fs.Stat(staticFS, name); err != nil {
 			t.Errorf("static/%s is referenced but not embedded: %v", name, err)
 		}
@@ -96,5 +99,16 @@ func TestBaseLoadsTheStreamExtension(t *testing.T) {
 	}
 	if !strings.Contains(string(js), "pollFallback") {
 		t.Error("carrel.js has no fallback for a stream that never speaks")
+	}
+	if !strings.Contains(string(js), "app-offline") {
+		t.Error("carrel.js does not toggle the offline shell bar")
+	}
+
+	boot, err := fs.ReadFile(staticFS, "boot.js")
+	if err != nil {
+		t.Fatalf("read boot.js: %v", err)
+	}
+	if !strings.Contains(string(boot), "serviceWorker.register") {
+		t.Error("boot.js does not register the PWA shell worker")
 	}
 }
