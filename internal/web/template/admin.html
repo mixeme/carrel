@@ -12,7 +12,7 @@
             {{template "columnpicker" "admin-users"}}
         </div>
         {{if $d.Users}}
-        <table class="data" data-columns-root="admin-users">
+        {{template "datatable" (dict "Class" "data" "Root" "admin-users")}}
             <thead>
                 <tr>
                     <th data-col="login">Login</th>
@@ -76,7 +76,7 @@
                 </tr>
             {{end}}
             </tbody>
-        </table>
+        {{template "datatableend"}}
         {{else}}
         <p class="hint">No users yet.</p>
         {{end}}

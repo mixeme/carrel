@@ -30,7 +30,7 @@
             {{$serverWord := "servers"}}
             {{if eq $d.ServerCount 1}}{{$serverWord = "server"}}{{end}}
             {{template "pagehead" (dict "Title" "All collections" "Subtitle" (print (len $d.Collections) " " $storageWord " on " $d.ServerCount " " $serverWord))}}{{template "pageheadend"}}
-            <table class="files-table files-table--root">
+            {{template "datatable" (dict "Class" "files-table files-table--root")}}
                 <thead><tr><th>Name</th><th>Server</th><th>Access</th><th>Purpose</th></tr></thead>
                 <tbody>
                 {{range $d.Collections}}
@@ -42,7 +42,7 @@
                 </tr>
                 {{end}}
                 </tbody>
-            </table>
+            {{template "datatableend"}}
             <p class="hint">This is the section's unified view: storages shown as top-level folders. Below it the tree of one of them opens — contents of different servers are never mixed in one folder.</p>
             {{if $d.PrintDate}}<p class="print-footer print-only">Carrel · files · All collections · captured {{$d.PrintDate}}</p>{{end}}
         </div>
@@ -143,7 +143,7 @@
                 </div>
             </dialog>
 
-            <table class="files-table" data-columns-root="files" data-files-list>
+            {{template "datatable" (dict "Class" "files-table" "Root" "files" "Attrs" (safeHTML "data-files-list"))}}
                 <thead><tr>
                     <th class="files-check-col no-print" data-col="check"><input type="checkbox" data-files-select-all aria-label="Select all"></th>
                     <th data-col="name">Name</th><th data-col="size">Size</th><th data-col="type">Type</th><th data-col="changed">Changed</th>
@@ -167,7 +167,7 @@
                 {{end}}
                 {{if $d.Empty}}<tr data-files-empty><td colspan="5" class="hint">This folder is empty.</td></tr>{{end}}
                 </tbody>
-            </table>
+            {{template "datatableend"}}
 
             <div class="files-grid no-print" data-files-grid hidden>
                 {{if $d.ParentURL}}<a class="files-tile files-tile--up" href="{{$d.ParentURL}}">↑ up one folder</a>{{end}}

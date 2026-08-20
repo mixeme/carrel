@@ -676,6 +676,19 @@
 {{end}}
 {{define "pagebarformend"}}</form>{{end}}
 
+{{/* The admin/files table scaffold of 2.6.A3: which class, which
+     data-columns-root, which extra attributes, in one definition instead
+     of five hand-written opening tags. Column headers and rows stay
+     page-local — they differ by table — same reasoning as the two
+     components above. Import previews and the conflict screen use <table>
+     for a different purpose (a side-by-side diff, not a list) and are not
+     part of this component. */}}
+{{define "datatable"}}
+{{$t := .}}
+<table class="{{$t.Class}}"{{if $t.Root}} data-columns-root="{{$t.Root}}"{{end}}{{if $t.Attrs}} {{$t.Attrs}}{{end}}>
+{{end}}
+{{define "datatableend"}}</table>{{end}}
+
 {{define "logo"}}<svg class="app-logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>{{end}}
 
 {{define "ico"}}<svg class="app-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-{{.}}"/></svg>{{end}}

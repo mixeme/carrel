@@ -33,7 +33,7 @@
             {{template "columnpicker" "admin-audit"}}
         </div>
         {{if $d.AuditLog}}
-        <table class="data" data-columns-root="admin-audit">
+        {{template "datatable" (dict "Class" "data" "Root" "admin-audit")}}
             <thead>
                 <tr><th data-col="when">When</th><th data-col="action">Action</th><th data-col="actor">Actor</th><th data-col="target">Target</th><th data-col="detail">Detail</th></tr>
             </thead>
@@ -48,7 +48,7 @@
                 </tr>
             {{end}}
             </tbody>
-        </table>
+        {{template "datatableend"}}
         {{else}}
         <p class="hint">No entries match this filter.</p>
         {{end}}
