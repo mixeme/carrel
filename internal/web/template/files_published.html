@@ -19,11 +19,7 @@
         </div>
     </aside>
     <div class="app-main">
-        <header class="page-head">
-            <div>
-                <h1 class="page-title">Published</h1>
-            </div>
-        </header>
+        {{template "pagehead" (dict "Title" "Published")}}{{template "pageheadend"}}
         <p class="hint page-hint">Secret links to files and folders will be listed here once publication is built (wave 4.3). Carrel already knows about tokens it issued; this page will show them without walking the server tree.</p>
         <p class="hint page-hint">Until then, manage links from each record when publication ships, or check the server directly.</p>
     </div>

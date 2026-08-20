@@ -2,12 +2,7 @@
 {{$d := .Data}}
 {{$att := $d.Attachments}}
 <section class="settings-panel">
-    <div class="page-head">
-        <div>
-            <h1>Attachments</h1>
-            <p class="source-label">Where files go when you attach them to a note or an event.</p>
-        </div>
-    </div>
+    {{template "pagehead" (dict "Title" "Attachments" "Subtitle" "Where files go when you attach them to a note or an event.")}}{{template "pageheadend"}}
 
     {{if $att.Collections}}
     {{if $att.Configured}}

@@ -4,16 +4,20 @@
     {{if $d.Mode}}
     {{template "sectionrail" .}}
     <div class="app-main">
-        <header class="page-head">
-            <div>
-                <h1 class="page-title"><span class="src-bar is-multi" aria-hidden="true"></span>{{$d.SectionRail.AllLabel}}</h1>
-                <p class="page-sub">{{if $d.SectionRail.SourceSummary}}{{$d.SectionRail.SourceSummary}}{{if $d.Request.From}} · {{$d.Request.From}}{{if $d.Request.To}} – {{$d.Request.To}}{{end}}{{end}}{{else}}Every ticked calendar at once.{{end}}</p>
-            </div>
+        {{$sub := "Every ticked calendar at once."}}
+        {{if $d.SectionRail.SourceSummary}}
+            {{$sub = $d.SectionRail.SourceSummary}}
+            {{if $d.Request.From}}
+                {{$sub = print $sub " · " $d.Request.From}}
+                {{if $d.Request.To}}{{$sub = print $sub " – " $d.Request.To}}{{end}}
+            {{end}}
+        {{end}}
+        {{template "pagehead" (dict "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" (safeHTML $sub))}}
             <div class="page-acts no-print">
                 {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
                 <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
             </div>
-        </header>
+        {{template "pageheadend"}}
         <form method="get" action="{{.Base}}/app/calendar" class="form page-bar no-print">
             <div class="form-field w-sm">
                 <label for="cal-from">From</label>
@@ -44,19 +48,14 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoCalendars}}
-        <header class="page-head">
-            <div>
-                <h1 class="page-title">Calendar</h1>
-                <p class="page-sub">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to see events here.</p>
-            </div>
-        </header>
+        {{template "pagehead" (dict "Title" "Calendar" "Subtitle" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to see events here.")))}}{{template "pageheadend"}}
         {{else}}
         <div class="agenda-print-root">
-            <header class="page-head">
-                <div>
-                    <h1 class="page-title">{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Agenda{{end}}</h1>
-                    <p class="page-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-                </div>
+            {{$title := "Agenda"}}
+            {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
+            {{$sub := $d.AccountLabel}}
+            {{if $d.Collection.DisplayName}}{{$sub = print $d.AccountLabel " · " $d.Collection.DisplayName}}{{end}}
+            {{template "pagehead" (dict "Title" $title "Subtitle" $sub)}}
                 <div class="page-acts no-print">
                     {{if not $d.ReadOnly}}
                     <a class="app-btn is-primary" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New event</a>
@@ -65,7 +64,7 @@
                     <a class="app-btn" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/export?from={{$d.From}}&amp;to={{$d.To}}">{{template "ico" "down"}}Export</a>
                     <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
-            </header>
+            {{template "pageheadend"}}
             <form method="get" class="form page-bar no-print">
                 <div class="form-field w-sm">
                     <label for="agenda-from">From</label>

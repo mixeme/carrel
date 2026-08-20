@@ -5,19 +5,14 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         <section class="person-main">
-            <header class="page-head">
-                <div class="person-head">
-                    {{if $p.PhotoURL}}<img class="contact-photo person-photo" src="{{$p.PhotoURL}}" alt="" width="44" height="44">{{end}}
-                    <div>
-                        <h1 class="page-title">{{$d.Subject}}</h1>
-                        <p class="page-sub">{{$p.AccountLabel}}{{if $p.Collection.DisplayName}} · {{$p.Collection.DisplayName}}{{end}}</p>
-                    </div>
-                </div>
+            {{$sub := $p.AccountLabel}}
+            {{if $p.Collection.DisplayName}}{{$sub = print $p.AccountLabel " · " $p.Collection.DisplayName}}{{end}}
+            {{template "pagehead" (dict "Title" $d.Subject "Subtitle" $sub "Photo" $p.PhotoURL "WrapClass" "person-head")}}
                 <div class="page-acts no-print">
                     {{if $p.NoteURL}}<a class="app-btn" href="{{$p.NoteURL}}">Write a note</a>{{end}}
                     {{if $p.EventURL}}<a class="app-btn" href="{{$p.EventURL}}">New event</a>{{end}}
                 </div>
-            </header>
+            {{template "pageheadend"}}
             {{template "kindtabs" .}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No calendars are ticked, so nothing was polled.</p>{{end}}

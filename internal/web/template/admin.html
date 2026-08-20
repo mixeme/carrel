@@ -1,11 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="admin-panel">
-    <div class="page-head">
-        <div>
-            <h1>Users</h1>
-        </div>
-    </div>
+    {{template "pagehead" (dict "Title" "Users")}}{{template "pageheadend"}}
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>

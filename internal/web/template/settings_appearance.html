@@ -1,11 +1,6 @@
 {{define "body"}}
 <section class="settings-panel">
-    <div class="page-head">
-        <div>
-            <h1>Appearance</h1>
-            <p class="source-label">Kept in this browser, not on the server</p>
-        </div>
-    </div>
+    {{template "pagehead" (dict "Title" "Appearance" "Subtitle" "Kept in this browser, not on the server")}}{{template "pageheadend"}}
 
     <fieldset class="form-fieldset">
         <legend>Theme</legend>

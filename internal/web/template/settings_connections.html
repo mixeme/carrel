@@ -1,12 +1,13 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="settings-panel">
-    <div class="page-head">
-        <div>
-            <h1>Connections</h1>
-            <p class="source-label">Signed in as <strong>{{.Session.Login}}</strong>{{if $d.Accounts}} · {{len $d.Accounts}} {{if eq (len $d.Accounts) 1}}server{{else}}servers{{end}}{{end}}</p>
-        </div>
-    </div>
+    {{$sub := print "Signed in as <strong>" .Session.Login "</strong>"}}
+    {{if $d.Accounts}}
+        {{$word := "servers"}}
+        {{if eq (len $d.Accounts) 1}}{{$word = "server"}}{{end}}
+        {{$sub = print $sub " &#183; " (len $d.Accounts) " " $word}}
+    {{end}}
+    {{template "pagehead" (dict "Title" "Connections" "Subtitle" (safeHTML $sub))}}{{template "pageheadend"}}
 
     {{if $d.Accounts}}
     {{range $acc := $d.Accounts}}

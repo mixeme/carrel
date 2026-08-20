@@ -22,22 +22,14 @@
     </aside>
     <div class="app-main files-main">
         {{if $d.NoFiles}}
-        <header class="page-head">
-            <div>
-                <h1 class="page-title">Files</h1>
-                <p class="page-sub">Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to browse files here.
-                    Discovery finds plain WebDAV folders automatically — on a CalDAV/CardDAV server that usually means a
-                    separate folder, or a second account on Nextcloud or a plain WebDAV server.</p>
-            </div>
-        </header>
+        {{template "pagehead" (dict "Title" "Files" "Subtitle" (safeHTML (print "Connect a DAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to browse files here. Discovery finds plain WebDAV folders automatically — on a CalDAV/CardDAV server that usually means a separate folder, or a second account on Nextcloud or a plain WebDAV server.")))}}{{template "pageheadend"}}
         {{else if $d.AllCollections}}
         <div class="files-card">
-            <header class="page-head">
-                <div>
-                    <h1 class="page-title">All collections</h1>
-                    <p class="page-sub">{{len $d.Collections}} {{if eq (len $d.Collections) 1}}storage{{else}}storages{{end}} on {{$d.ServerCount}} {{if eq $d.ServerCount 1}}server{{else}}servers{{end}}</p>
-                </div>
-            </header>
+            {{$storageWord := "storages"}}
+            {{if eq (len $d.Collections) 1}}{{$storageWord = "storage"}}{{end}}
+            {{$serverWord := "servers"}}
+            {{if eq $d.ServerCount 1}}{{$serverWord = "server"}}{{end}}
+            {{template "pagehead" (dict "Title" "All collections" "Subtitle" (print (len $d.Collections) " " $storageWord " on " $d.ServerCount " " $serverWord))}}{{template "pageheadend"}}
             <table class="files-table files-table--root">
                 <thead><tr><th>Name</th><th>Server</th><th>Access</th><th>Purpose</th></tr></thead>
                 <tbody>
@@ -58,20 +50,16 @@
         <div class="files-card" data-files-browse
                  data-account="{{$d.AccountID}}" data-col="{{$d.ColEnc}}" data-folder="{{$d.Rel}}"
                  data-readonly="{{if $d.ReadOnly}}1{{end}}">
-            <header class="page-head">
-                <div>
-                    <h1 class="page-title">{{$d.FolderTitle}}</h1>
-                    <nav class="crumbs" aria-label="Folder">
-                        {{range $d.Crumbs}}{{if .Last}}<span aria-current="page">{{.Name}}</span>{{else}}<a href="{{.URL}}">{{.Name}}</a> / {{end}}{{end}}
-                    </nav>
-                    <p class="page-sub">{{$d.AccountLabel}}{{if $d.ReadOnly}} · read-only{{end}}</p>
-                    {{if $d.IsAttachmentFolder}}<p class="hint">This is the folder attachments are put in.</p>{{end}}
-                </div>
+            {{$sub := $d.AccountLabel}}
+            {{if $d.ReadOnly}}{{$sub = print $d.AccountLabel " · read-only"}}{{end}}
+            {{$hint := ""}}
+            {{if $d.IsAttachmentFolder}}{{$hint = "This is the folder attachments are put in."}}{{end}}
+            {{template "pagehead" (dict "Title" $d.FolderTitle "Crumbs" $d.Crumbs "Subtitle" $sub "Hint" $hint)}}
                 <div class="page-acts no-print">
                     <button type="button" class="app-btn is-quiet" data-files-props-toggle title="Properties panel">Properties</button>
                     <button type="button" class="app-btn is-quiet" data-refresh>{{template "ico" "refresh"}}Refresh</button>
                 </div>
-            </header>
+            {{template "pageheadend"}}
 
             {{if $d.Truncated}}<p class="message notice no-print">This folder holds more files than Carrel lists. Only the first {{len $d.Entries}} are shown.</p>{{end}}
 

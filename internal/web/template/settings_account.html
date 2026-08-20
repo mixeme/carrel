@@ -2,12 +2,7 @@
 {{$d := .Data}}
 {{$e := $d.Escrow}}
 <section class="settings-panel">
-    <div class="page-head">
-        <div>
-            <h1>Account</h1>
-            <p class="source-label">{{.Session.Login}}</p>
-        </div>
-    </div>
+    {{template "pagehead" (dict "Title" "Account" "Subtitle" .Session.Login)}}{{template "pageheadend"}}
 
     <fieldset class="form-fieldset">
         <legend>Email</legend>

@@ -35,7 +35,7 @@ func LoadTemplates(fsys fs.FS) (*Templates, error) {
 		if name == baseTemplate {
 			continue
 		}
-		page, err := template.New(name).ParseFS(fsys, baseTemplate, name)
+		page, err := template.New(name).Funcs(templateFuncs).ParseFS(fsys, baseTemplate, name)
 		if err != nil {
 			return nil, fmt.Errorf("handler: parse %s: %w", name, err)
 		}
@@ -45,6 +45,36 @@ func LoadTemplates(fsys fs.FS) (*Templates, error) {
 		return nil, fmt.Errorf("handler: no page templates found")
 	}
 	return t, nil
+}
+
+// templateFuncs backs the component library of wave 2.6.A: the built-in
+// html/template action set has no way to build a value from several named
+// pieces or to mark a template-built string safe, and the header, bar and
+// table components both need one call site to hand over several named
+// fields at once. Neither function touches anything a caller passes in
+// beyond reshaping it, so this is not new data, just a way to carry the
+// data the template already had into one component call.
+var templateFuncs = template.FuncMap{
+	"dict":     templateDict,
+	"safeHTML": func(s string) template.HTML { return template.HTML(s) },
+}
+
+// templateDict builds a string-keyed map from alternating key/value
+// arguments, so a template can call a component with several named fields
+// in one pipeline: {{template "pagehead" (dict "Title" "…" "Bar" true)}}.
+func templateDict(pairs ...any) (map[string]any, error) {
+	if len(pairs)%2 != 0 {
+		return nil, fmt.Errorf("dict: odd number of arguments")
+	}
+	m := make(map[string]any, len(pairs)/2)
+	for i := 0; i < len(pairs); i += 2 {
+		key, ok := pairs[i].(string)
+		if !ok {
+			return nil, fmt.Errorf("dict: key %v is not a string", pairs[i])
+		}
+		m[key] = pairs[i+1]
+	}
+	return m, nil
 }
 
 // View is what every template receives. Handlers add whatever else the page

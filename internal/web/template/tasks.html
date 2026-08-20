@@ -4,16 +4,14 @@
     {{if $d.Mode}}
     {{template "sectionrail" .}}
     <div class="app-main">
-        <header class="page-head">
-            <div>
-                <h1 class="page-title"><span class="src-bar is-multi" aria-hidden="true"></span>{{$d.SectionRail.AllLabel}}</h1>
-                <p class="page-sub">{{if $d.SectionRail.SourceSummary}}{{$d.SectionRail.SourceSummary}}{{else}}Open tasks from every ticked list.{{end}}</p>
-            </div>
+        {{$sub := "Open tasks from every ticked list."}}
+        {{if $d.SectionRail.SourceSummary}}{{$sub = $d.SectionRail.SourceSummary}}{{end}}
+        {{template "pagehead" (dict "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
             <div class="page-acts no-print">
                 {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
                 <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
             </div>
-        </header>
+        {{template "pageheadend"}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
             <div id="find-panel"
@@ -26,19 +24,19 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
-        <header class="page-head"><div><h1 class="page-title">Tasks</h1><p class="page-sub">Connect a CalDAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> to keep tasks here.</p></div></header>
+        {{template "pagehead" (dict "Title" "Tasks" "Subtitle" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep tasks here.")))}}{{template "pageheadend"}}
         {{else}}
         <div class="agenda-print-root">
-            <header class="page-head">
-                <div>
-                    <h1 class="page-title">{{if $d.Collection.DisplayName}}{{$d.Collection.DisplayName}}{{else}}Tasks{{end}}</h1>
-                    <p class="page-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-                </div>
+            {{$title := "Tasks"}}
+            {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
+            {{$sub := $d.AccountLabel}}
+            {{if $d.Collection.DisplayName}}{{$sub = print $d.AccountLabel " · " $d.Collection.DisplayName}}{{end}}
+            {{template "pagehead" (dict "Title" $title "Subtitle" $sub)}}
                 <div class="page-acts no-print">
                     {{if not $d.ReadOnly}}<a class="app-btn is-primary" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New task</a>{{end}}
                     <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
-            </header>
+            {{template "pageheadend"}}
             <div class="page-bar no-print">
                 <a class="app-btn{{if eq $d.Filter "open"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=open">Open ({{$d.Counts.Open}})</a>
                 <a class="app-btn{{if eq $d.Filter "done"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
