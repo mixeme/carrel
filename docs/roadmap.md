@@ -181,7 +181,9 @@ The real risk is not the code: an implementation that follows the RFC and one th
 
 ## Undecided
 
-Two ideas with a real price, recorded rather than planned. Neither is accepted.
+Three ideas with a real price, recorded rather than planned. None is accepted.
+
+**Counts beside every collection and section** — the mockups write a number next to Contacts, Calendar, Tasks and Notes in the rail, and next to each collection under them. To show one, the number has to come from somewhere, and every source is a compromise: asking each collection means a fan-out over collections the person did not tick, which §16 calls the most expensive place in the architecture and tells us not to spend twice; using only what the cache already holds means the numbers appear and disappear as the cache evicts, which is worse than no number; a cheap `PROPFIND` per collection is still one request per collection on every page load. The number is genuinely useful — it is how you notice that an address book you thought was empty has 300 cards in it — so this is not a refusal. It waits for §12, where cache ceilings and eviction order are reopened anyway, because the honest answer probably lives there: a count is worth showing exactly when it is already known, and the question is how long "already known" lasts. Found by the visual acceptance of wave 2.5.
 
 **Parsing service exports** (§23.7) — not standard `.vcf` and `.ics`, which already work, but what Google Takeout, iCloud and phone exports actually produce: non-standard group `X-` properties, photos in several representations, several cards glued into one file, encodings, escaping, nested archives. This determines whether people arrive: somebody migrates once, and if the import stumbles they do not come back. The price is that the work never finishes — export formats change without notice and each source is its own set of special cases — and it needs real exports to test against. The alternative is accepting standard files honestly and recommending a converter.
 
