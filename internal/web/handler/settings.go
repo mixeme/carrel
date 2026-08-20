@@ -83,6 +83,10 @@ func (s *Server) settingsConnectionsSubmit(w http.ResponseWriter, r *http.Reques
 }
 
 func (s *Server) SettingsAccount(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		s.settingsAccountSubmit(w, r)
+		return
+	}
 	v := s.settingsFrame(r, "Account", settingsSectionAccount)
 	v.Data = settingsView{Section: settingsSectionAccount, appView: s.buildAppView(r)}
 	s.Render(w, "settings_account.html", v)

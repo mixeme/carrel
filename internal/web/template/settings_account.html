@@ -79,5 +79,54 @@
         {{end}}
         {{end}}
     </fieldset>
+
+    <fieldset class="form-fieldset">
+        <legend>Sessions</legend>
+        {{if $d.Sessions}}
+        <ul class="session-list">
+        {{range $d.Sessions}}
+            <li class="session-row{{if eq .ID $d.CurrentSessionID}} is-current{{end}}">
+                <span>{{if eq .ID $d.CurrentSessionID}}This session{{else}}Session{{end}}</span>
+                <span class="hint">started {{.CreatedAt.Format "2006-01-02 15:04"}} · last used {{.LastSeen.Format "2006-01-02 15:04"}}</span>
+                {{if ne .ID $d.CurrentSessionID}}
+                <form method="post" action="{{$.Base}}/app/settings/account" class="inline-form no-print">
+                    <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                    <input type="hidden" name="action" value="end_session">
+                    <input type="hidden" name="session_id" value="{{.ID}}">
+                    <button type="submit" class="app-btn is-sm">End</button>
+                </form>
+                {{end}}
+            </li>
+        {{end}}
+        </ul>
+        {{if gt (len $d.Sessions) 1}}
+        <form method="post" class="no-print" action="{{.Base}}/app/settings/account">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="end_other_sessions">
+            <button type="submit" class="app-btn is-danger-solid">End all other sessions</button>
+        </form>
+        {{end}}
+        {{else}}
+        <p class="hint">No active sessions.</p>
+        {{end}}
+    </fieldset>
+
+    <fieldset class="form-fieldset">
+        <legend>Delete account</legend>
+        <p class="warning">This removes your account, your saved connections and everything sealed under your
+            data key, for good. It cannot be undone.</p>
+        <form method="post" class="form" action="{{.Base}}/app/settings/account">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="delete_account">
+            <div class="form-field w-md">
+                <label for="confirm-login">Type <strong>{{.Session.Login}}</strong> to confirm</label>
+                <input id="confirm-login" name="confirm_login" type="text" required
+                       autocomplete="off" autocapitalize="none" spellcheck="false">
+            </div>
+            <div class="form-foot">
+                <button type="submit" class="app-btn is-danger-solid">Delete my account</button>
+            </div>
+        </form>
+    </fieldset>
 </section>
 {{end}}

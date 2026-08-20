@@ -8,12 +8,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/account"
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
 	"gitea.mixdep.ru/mix/carrel/internal/dav/discovery"
+	"gitea.mixdep.ru/mix/carrel/internal/session"
 	"gitea.mixdep.ru/mix/carrel/internal/store"
 )
 
@@ -68,6 +70,11 @@ type appView struct {
 	// which account's inline form is open, and what it is pre-filled with.
 	EditAccountID string
 	EditForm      connectForm
+	// Sessions and CurrentSessionID back the self-service SESSIONS block of
+	// 2.6.C3 — the admin panel could already list and kill a user's sessions;
+	// a person could see nothing about their own.
+	Sessions         []session.Info
+	CurrentSessionID string
 }
 
 func (s *Server) buildAppView(r *http.Request) appView {
@@ -81,11 +88,14 @@ func (s *Server) buildAppView(r *http.Request) appView {
 		return appView{}
 	}
 	out := appView{
-		Escrow:       escrowStatusOf(s.Store.Settings(), user),
-		Email:        user.Email,
-		PendingEmail: user.PendingEmail,
-		Attachments:  s.attachmentSettingsView(sess),
+		Escrow:           escrowStatusOf(s.Store.Settings(), user),
+		Email:            user.Email,
+		PendingEmail:     user.PendingEmail,
+		Attachments:      s.attachmentSettingsView(sess),
+		Sessions:         s.Sessions.Sessions(sess.UserID),
+		CurrentSessionID: sess.ID,
 	}
+	sort.Slice(out.Sessions, func(i, j int) bool { return out.Sessions[i].LastSeen.After(out.Sessions[j].LastSeen) })
 	accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK())
 	if err != nil {
 		s.logError("list DAV accounts", err)
