@@ -117,6 +117,47 @@ func TestStylesheetKeepsTheTwoFamilies(t *testing.T) {
 	}
 }
 
+// trackingScale is the mockup's closed set of letter-spacing values (2.6.G4).
+// 2.6.E4 named tracking as the third leg of the type-scale audit alongside
+// size and family; only the first two ever got a test.
+var trackingScale = map[string]bool{
+	"0": true, "0.03": true, "0.04": true, "0.06": true,
+	"0.1": true, "0.12": true, "0.14": true, "0.16": true, "0.18": true,
+}
+
+// TestStylesheetKeepsTheTracking is TestStylesheetKeepsTheTypeScale's shape
+// applied to letter-spacing instead of font-size — the gate 2.6.E4 promised
+// and never wrote. No known declaration fails it today; the point is the
+// next one that would.
+func TestStylesheetKeepsTheTracking(t *testing.T) {
+	sheet := readStylesheet(t)
+	decl := regexp.MustCompile(`letter-spacing:\s*([0-9.]+)(px|em|rem)?`)
+
+	var selector string
+	for n, line := range strings.Split(sheet, "\n") {
+		if m := selectorLine.FindStringSubmatch(strings.TrimSpace(line)); m != nil {
+			selector = strings.TrimSpace(m[1])
+		}
+		m := decl.FindStringSubmatch(line)
+		if m == nil {
+			continue
+		}
+		value, unit := m[1], m[2]
+
+		if value != "0" && unit != "em" {
+			t.Errorf("carrel.css:%d  %s sets letter-spacing in %q; the design system's tracking is in em "+
+				"(0 is unitless everywhere, mockups included)", n+1, selector, unit)
+			continue
+		}
+		if trackingScale[trimZero(value)] {
+			continue
+		}
+		t.Errorf("carrel.css:%d  %s uses %s%s tracking, which is not in the mockup's set.\n"+
+			"    Either take the nearest value the design already has, or add this one to trackingScale "+
+			"in the same commit — with a frame that uses it.", n+1, selector, value, unit)
+	}
+}
+
 func readStylesheet(t *testing.T) string {
 	t.Helper()
 	staticFS, err := fs.Sub(web.StaticFS, "static")
