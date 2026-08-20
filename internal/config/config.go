@@ -28,7 +28,9 @@ const (
 	DefaultCacheCollectionTTL   = 60 * time.Second
 	DefaultCacheMaxCollections  = 256
 	DefaultCacheMaxETagEntries  = 4096
-	DefaultCacheMaxThumbBytes   = 16 << 20 // 16 MiB
+	DefaultCacheMaxBodyBytes    = 64 << 20  // 64 MiB of object bodies per session
+	DefaultCacheMaxProcessBytes = 256 << 20 // 256 MiB of bodies+thumbs across all sessions
+	DefaultCacheMaxThumbBytes   = 16 << 20  // 16 MiB
 	DefaultCacheMaxThumbEntries = 512
 
 	// Photo defaults from §11 — starting values, not acceptance criteria.
@@ -82,11 +84,15 @@ type DAV struct {
 	MaxRedirects     int      `json:"max_redirects"`
 }
 
-// Cache holds per-session cache limits consumed in stage 2 §12.
+// Cache holds session cache limits consumed in §12. Collection, ETag, body
+// and thumbnail ceilings apply per session; MaxProcessBytes is the process-wide
+// ceiling across every live session.
 type Cache struct {
 	CollectionTTLSeconds int64 `json:"collection_ttl_seconds"`
 	MaxCollections       int   `json:"max_collections"`
 	MaxETagEntries       int   `json:"max_etag_entries"`
+	MaxBodyBytes         int   `json:"max_body_bytes"`
+	MaxProcessBytes      int   `json:"max_process_bytes"`
 	MaxThumbBytes        int   `json:"max_thumb_bytes"`
 	MaxThumbEntries      int   `json:"max_thumb_entries"`
 }
@@ -254,6 +260,8 @@ func defaults() *Config {
 			CollectionTTLSeconds: int64(DefaultCacheCollectionTTL / time.Second),
 			MaxCollections:       DefaultCacheMaxCollections,
 			MaxETagEntries:       DefaultCacheMaxETagEntries,
+			MaxBodyBytes:         DefaultCacheMaxBodyBytes,
+			MaxProcessBytes:      DefaultCacheMaxProcessBytes,
 			MaxThumbBytes:        DefaultCacheMaxThumbBytes,
 			MaxThumbEntries:      DefaultCacheMaxThumbEntries,
 		},
@@ -309,6 +317,7 @@ func applyFile(cfg *Config, raw []byte) error {
 	}
 	if fc.Cache != nil {
 		cfg.Cache = *fc.Cache
+		cfg.Cache.fillUnsetCeilings()
 	}
 	if fc.Photo != nil {
 		cfg.Photo = *fc.Photo
@@ -402,6 +411,20 @@ func applyEnv(cfg *Config) error {
 			return fmt.Errorf("CARREL_CACHE_MAX_ETAG_ENTRIES: invalid integer %q", v)
 		}
 		cfg.Cache.MaxETagEntries = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_CACHE_MAX_BODY_BYTES")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_CACHE_MAX_BODY_BYTES: invalid integer %q", v)
+		}
+		cfg.Cache.MaxBodyBytes = n
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_CACHE_MAX_PROCESS_BYTES")); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			return fmt.Errorf("CARREL_CACHE_MAX_PROCESS_BYTES: invalid integer %q", v)
+		}
+		cfg.Cache.MaxProcessBytes = n
 	}
 	if v := strings.TrimSpace(os.Getenv("CARREL_CACHE_MAX_THUMB_BYTES")); v != "" {
 		n, err := strconv.Atoi(v)
@@ -635,6 +658,12 @@ func (c Cache) validate() error {
 	if c.MaxETagEntries <= 0 {
 		return errors.New("cache max etag entries must be positive")
 	}
+	if c.MaxBodyBytes <= 0 {
+		return errors.New("cache max body bytes must be positive")
+	}
+	if c.MaxProcessBytes <= 0 {
+		return errors.New("cache max process bytes must be positive")
+	}
 	if c.MaxThumbBytes <= 0 {
 		return errors.New("cache max thumb bytes must be positive")
 	}
@@ -647,6 +676,18 @@ func (c Cache) validate() error {
 // CollectionTTL returns the per-session collection metadata TTL.
 func (c Cache) CollectionTTL() time.Duration {
 	return time.Duration(c.CollectionTTLSeconds) * time.Second
+}
+
+// fillUnsetCeilings keeps a config.json that named the cache before the body
+// and process ceilings existed from failing validation: missing fields stay
+// at the documented defaults rather than zero.
+func (c *Cache) fillUnsetCeilings() {
+	if c.MaxBodyBytes <= 0 {
+		c.MaxBodyBytes = DefaultCacheMaxBodyBytes
+	}
+	if c.MaxProcessBytes <= 0 {
+		c.MaxProcessBytes = DefaultCacheMaxProcessBytes
+	}
 }
 
 func (p Photo) validate() error {

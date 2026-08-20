@@ -83,6 +83,8 @@ func run() int {
 			CollectionTTL:   cfg.Cache.CollectionTTL(),
 			MaxCollections:  cfg.Cache.MaxCollections,
 			MaxETagEntries:  cfg.Cache.MaxETagEntries,
+			MaxBodyBytes:    cfg.Cache.MaxBodyBytes,
+			MaxProcessBytes: cfg.Cache.MaxProcessBytes,
 			MaxThumbBytes:   cfg.Cache.MaxThumbBytes,
 			MaxThumbEntries: cfg.Cache.MaxThumbEntries,
 		},

@@ -223,7 +223,7 @@ A file-level map for the parts that are spread across several files.
 | Markdown export and import of notes | `internal/model/markdown.go`, `import.go` |
 | Duplicate fingerprints, normalisation, scoring, clustering, field merge | `internal/merge/fingerprint.go`, `normalize.go`, `score.go`, `cluster.go`, `fields.go`, `vcard.go` |
 | Fan-out tasks, progress, timeouts | `internal/fanout/` |
-| Session cache, drafts, thumbnails | `internal/session/cache.go`, `scratch.go`, `thumb.go` |
+| Session cache, drafts, thumbnails | `internal/session/cache.go`, `budget.go`, `scratch.go`, `thumb.go` |
 | Photo pipeline: EXIF, crop, thumbnails | `internal/photo/` |
 | Provider read paths | `internal/provider/*/provider.go` |
 | Provider write paths and conflicts | `internal/provider/*/write.go` |

@@ -117,6 +117,8 @@ SMTP against a local relay that can be told to refuse: a missing configuration r
 | Reopening an unchanged collection makes no new multiget requests | in `provider/contacts/contacts_test.go` |
 | An outside edit becomes visible after a refresh rather than serving the cache | in `session/cache_test.go`, `provider/contacts/contacts_test.go` |
 | Signing out frees the cache | in `session/cache_test.go` |
+| Bodies are evicted before the ETag map that names them | `TestCacheBodiesEvictedBeforeETagMap` |
+| Ten sessions cannot together exceed the process cache ceiling | `TestCacheProcessWideEvictsAcrossUsers` |
 | Records from a slow source land in the right sort position | in `fanout/fanout_test.go` |
 | A failed source is marked with a retry of its own; the rest stay | in `fanout/fanout_test.go` |
 | Leaving a page mid-poll leaves no goroutines | in `fanout/registry_test.go` (needs `-race`) |

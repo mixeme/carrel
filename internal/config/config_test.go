@@ -196,6 +196,56 @@ func TestFilesLimits(t *testing.T) {
 	}
 }
 
+func TestCacheCeilings(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("CARREL_DATA_DIR", dir)
+	clearEnv(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Cache.MaxBodyBytes != DefaultCacheMaxBodyBytes {
+		t.Errorf("body = %d, want %d", cfg.Cache.MaxBodyBytes, DefaultCacheMaxBodyBytes)
+	}
+	if cfg.Cache.MaxProcessBytes != DefaultCacheMaxProcessBytes {
+		t.Errorf("process = %d, want %d", cfg.Cache.MaxProcessBytes, DefaultCacheMaxProcessBytes)
+	}
+
+	file := filepath.Join(dir, "config.json")
+	// An older cache block that never named the new ceilings still loads.
+	if err := os.WriteFile(file, []byte(`{"cache": {"collection_ttl_seconds": 60, "max_collections": 10, "max_etag_entries": 20, "max_thumb_bytes": 100, "max_thumb_entries": 4}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err = Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Cache.MaxCollections != 10 || cfg.Cache.MaxBodyBytes != DefaultCacheMaxBodyBytes || cfg.Cache.MaxProcessBytes != DefaultCacheMaxProcessBytes {
+		t.Errorf("partial file = %+v", cfg.Cache)
+	}
+
+	t.Setenv("CARREL_CACHE_MAX_BODY_BYTES", "1048576")
+	t.Setenv("CARREL_CACHE_MAX_PROCESS_BYTES", "2097152")
+	cfg, err = Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Cache.MaxBodyBytes != 1<<20 || cfg.Cache.MaxProcessBytes != 2<<20 {
+		t.Errorf("from env = %d / %d", cfg.Cache.MaxBodyBytes, cfg.Cache.MaxProcessBytes)
+	}
+
+	t.Setenv("CARREL_CACHE_MAX_PROCESS_BYTES", "0")
+	if _, err := Load(); err == nil {
+		t.Error("a process ceiling of zero was accepted")
+	}
+	t.Setenv("CARREL_CACHE_MAX_PROCESS_BYTES", "2097152")
+	t.Setenv("CARREL_CACHE_MAX_BODY_BYTES", "not-a-number")
+	if _, err := Load(); err == nil {
+		t.Error("a body ceiling that is not a number was accepted")
+	}
+}
+
 func TestBindEnvAndAddr(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("CARREL_DATA_DIR", dir)

@@ -142,12 +142,14 @@ func (o Options) withDefaults() Options {
 	if o.Now == nil {
 		o.Now = time.Now
 	}
+	o.Cache = o.Cache.withDefaults()
 	return o
 }
 
 // Manager is the in-memory session store and DEK keyring.
 type Manager struct {
-	opts Options
+	opts   Options
+	budget *budget
 
 	mu       sync.Mutex
 	sessions map[string]*Session
@@ -156,8 +158,10 @@ type Manager struct {
 
 // New returns a Manager with the given options.
 func New(opts Options) *Manager {
+	opts = opts.withDefaults()
 	return &Manager{
-		opts:     opts.withDefaults(),
+		opts:     opts,
+		budget:   newBudget(opts.Cache.MaxProcessBytes),
 		sessions: make(map[string]*Session),
 		byUser:   make(map[string]map[string]struct{}),
 	}
@@ -195,6 +199,7 @@ func (m *Manager) Create(u User, dek crypto.Key) (*Session, error) {
 		escrowNotice: u.EscrowNotice,
 		cache:        NewCache(m.opts.Cache, m.opts.Now),
 	}
+	s.cache.bind(m.budget)
 
 	m.mu.Lock()
 	defer m.mu.Unlock()

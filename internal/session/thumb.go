@@ -19,6 +19,7 @@ type thumbEntry struct {
 	key   thumbKey
 	media string
 	data  []byte
+	seq   uint64
 }
 
 // PutThumb stores a photo thumbnail keyed by the object's path and ETag (§12).
@@ -29,7 +30,6 @@ func (c *Cache) PutThumb(accountID, objectPath, etag, mediaType string, data []b
 	}
 	key := thumbKey{AccountID: accountID, Path: objectPath, ETag: etag}
 	c.mu.Lock()
-	defer c.mu.Unlock()
 
 	if ent, ok := c.thumbs[key]; ok {
 		c.thumbBytes -= len(ent.data)
@@ -38,10 +38,13 @@ func (c *Cache) PutThumb(accountID, objectPath, etag, mediaType string, data []b
 	}
 	dup := make([]byte, len(data))
 	copy(dup, data)
-	c.thumbs[key] = &thumbEntry{key: key, media: mediaType, data: dup}
+	c.thumbs[key] = &thumbEntry{key: key, media: mediaType, data: dup, seq: c.nextSeqLocked()}
 	c.thumbOrder = append([]thumbKey{key}, c.thumbOrder...)
 	c.thumbBytes += len(dup)
-	c.evictThumbs()
+	c.evictLocked()
+	n := c.bodyBytes + c.thumbBytes
+	c.mu.Unlock()
+	c.publish(n)
 }
 
 // GetThumb returns a cached thumbnail when the object's ETag still matches.
@@ -113,6 +116,9 @@ func (c *Cache) touchThumb(idx int) {
 	key := c.thumbOrder[idx]
 	copy(c.thumbOrder[1:idx+1], c.thumbOrder[0:idx])
 	c.thumbOrder[0] = key
+	if ent, ok := c.thumbs[key]; ok {
+		ent.seq = c.nextSeqLocked()
+	}
 }
 
 func (c *Cache) removeThumbKey(key thumbKey) {

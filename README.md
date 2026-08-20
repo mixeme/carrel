@@ -131,7 +131,7 @@ Named here so the list above can be read as complete. Detail, reasoning and orde
 
 **Next:** a new-device screen (Apple `.mobileconfig`, DAVx5 QR); backup to a WebDAV of your choice, encrypted, with restore; read-only publication by secret link — your own address book, calendar, notes, files and folders, or an external calendar or address-book feed, all viewable in the browser, and mailable — a link, or a letter with a contact, an event, a note or a file attached; [davloom](docs/roadmap.md), the proxy mode that makes Carrel one account for every device.
 
-**Smaller gaps:** attachments on tasks; a per-collection line saying when it last changed on the server; showing an event's original time zone when it differs; a service worker so an installed app has a shell offline; a process-wide memory ceiling for the cache; three of the narrow-screen refinements.
+**Smaller gaps:** attachments on tasks; a per-collection line saying when it last changed on the server; showing an event's original time zone when it differs; a service worker so an installed app has a shell offline; three of the narrow-screen refinements.
 
 ---
 
@@ -280,6 +280,8 @@ Settings come from `config.json` in the data directory, and from the environment
 | `CARREL_CACHE_COLLECTION_TTL` | `60` | Seconds before a collection is re-read even when the server reports no change |
 | `CARREL_CACHE_MAX_COLLECTIONS` | `256` | Cached collections per session |
 | `CARREL_CACHE_MAX_ETAG_ENTRIES` | `4096` | Cached object versions per session |
+| `CARREL_CACHE_MAX_BODY_BYTES` | `67108864` | Cached object bodies per session. Bodies are evicted before ETag maps |
+| `CARREL_CACHE_MAX_PROCESS_BYTES` | `268435456` | Bodies and thumbnails across every live session. LRU reaches across users |
 | `CARREL_CACHE_MAX_THUMB_BYTES` | `16777216` | Stricter ceiling for photo thumbnails |
 | `CARREL_CACHE_MAX_THUMB_ENTRIES` | `512` | Thumbnails per session |
 | `CARREL_PHOTO_MAX_SIDE` | `512` | Contact photos are scaled to this |
