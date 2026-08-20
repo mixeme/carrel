@@ -81,24 +81,30 @@
     </fieldset>
 
     <fieldset class="form-fieldset">
-        <legend>Sessions</legend>
+        <legend>Sessions{{if $d.Sessions}} <span class="hint">{{len $d.Sessions}} active</span>{{end}}</legend>
         {{if $d.Sessions}}
-        <ul class="session-list">
-        {{range $d.Sessions}}
-            <li class="session-row{{if eq .ID $d.CurrentSessionID}} is-current{{end}}">
-                <span>{{if eq .ID $d.CurrentSessionID}}This session{{else}}Session{{end}}</span>
-                <span class="hint">started {{.CreatedAt.Format "2006-01-02 15:04"}} · last used {{.LastSeen.Format "2006-01-02 15:04"}}</span>
-                {{if ne .ID $d.CurrentSessionID}}
-                <form method="post" action="{{$.Base}}/app/settings/account" class="inline-form no-print">
-                    <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
-                    <input type="hidden" name="action" value="end_session">
-                    <input type="hidden" name="session_id" value="{{.ID}}">
-                    <button type="submit" class="app-btn is-sm">End</button>
-                </form>
-                {{end}}
-            </li>
-        {{end}}
-        </ul>
+        {{template "datatable" (dataTable "Class" "data")}}
+            <thead><tr><th data-col="where">Where</th><th data-col="started">Started</th><th data-col="last_seen">Last seen</th><th data-col="actions"></th></tr></thead>
+            <tbody>
+            {{range $d.Sessions}}
+                <tr>
+                    <td data-col="where">{{if eq .ID $d.CurrentSessionID}}This session{{else}}Session{{end}}</td>
+                    <td data-col="started">{{.CreatedAt.Format "2006-01-02 15:04"}}</td>
+                    <td data-col="last_seen">{{.LastSeen.Format "2006-01-02 15:04"}}</td>
+                    <td data-col="actions" class="actions">
+                        {{if ne .ID $d.CurrentSessionID}}
+                        <form method="post" action="{{$.Base}}/app/settings/account" class="inline-form no-print">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                            <input type="hidden" name="action" value="end_session">
+                            <input type="hidden" name="session_id" value="{{.ID}}">
+                            <button type="submit" class="link">End</button>
+                        </form>
+                        {{end}}
+                    </td>
+                </tr>
+            {{end}}
+            </tbody>
+        {{template "datatableend"}}
         {{if gt (len $d.Sessions) 1}}
         <form method="post" class="no-print" action="{{.Base}}/app/settings/account">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">

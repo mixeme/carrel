@@ -3577,6 +3577,22 @@ label.checkbox input {
     color: var(--alert);
 }
 
+/* A small inline label — "attachments" on the all-collections files table
+   today (2.6.G12) — sharing .dup-badge's look without its link colouring. */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    height: 16px;
+    line-height: 1;
+    border: 0.5px solid var(--rule);
+    border-radius: 2px;
+    padding: 0 6px;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
 /* The duplicates of §15: a badge where a record stands for several, and the
    groups on the screen where they are decided. */
 .dup-badge {
