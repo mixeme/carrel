@@ -167,18 +167,18 @@ Linux dev: `libwebkit2gtk-4.1-dev`, `pkg-config` — см. [development.md](../d
 
 Порядок в проходе агента: закрыть чекбоксы фазы → `go test` → CHANGELOG → **коммит** (без отложения).
 
-| Фаза | Deliverable | Коммит (subject) |
-|------|-------------|------------------|
-| 0 | docs + `CARREL_BIND` | `docs: desktop plan; feat: CARREL_BIND` |
-| 1 | `internal/desktop` | `desktop: paths, config, instance lock` |
-| 2 | Wails Remote | `desktop: Wails Remote webview` |
-| 3 | Supervisor | `desktop: local supervisor` |
-| 4 | Sidecar download | `desktop: sidecar download` |
-| 5 | Onboarding + sign out | `desktop: onboarding and sign-out` |
-| 6 | Tray | `desktop: tray and window lifecycle` |
-| 7 | Installers | `desktop: installers` |
-| 8 | CI + acceptance docs | `desktop: CI and acceptance` |
-| closeout | roadmap, docs, delete plan | `docs: desktop closeout` |
+| Фаза | Deliverable | Коммит (subject) | Состояние |
+|------|-------------|------------------|-----------|
+| 0 | docs + `CARREL_BIND` | `docs: desktop plan; feat: CARREL_BIND` | ☑ |
+| 1 | `internal/desktop` | `desktop: paths, config, instance lock` | ☑ |
+| 2 | Wails Remote | `desktop: Wails Remote webview` | ☑ |
+| 3 | Supervisor | `desktop: local supervisor` | ☑ |
+| 4 | Sidecar download | `desktop: sidecar download` | ☑ |
+| 5 | Onboarding + sign out | `desktop: onboarding and sign-out` | ☑ |
+| 6 | Tray | `desktop: tray and window lifecycle` | ☐ |
+| 7 | Installers | `desktop: installers` | ☐ |
+| 8 | CI + acceptance docs | `desktop: CI and acceptance` | ☐ |
+| closeout | roadmap, docs, delete plan | `docs: desktop closeout` | ☐ |
 
 ---
 
@@ -190,58 +190,7 @@ macOS, DAV localhost onboarding, auto-update, ручной путь к exe, mult
 
 ## 14. Прогресс
 
-### Документация и core — модель: **Composer**
-
-- [x] `docs/plans/desktop-wrapper.md` опубликован
-- [x] Секция в `docs/roadmap.md`
-- [x] §18 в `docs/carrel-spec.md` → «запланировано» + ссылка
-- [x] `CARREL_BIND` в `internal/config` + тесты + README
-- [x] `docs/development.md`: build desktop, Linux deps (кратко после scaffold)
-- [x] Коммит + CHANGELOG [Unreleased]
-
-### Фаза 1 — `internal/desktop` — модель: **Composer**
-
-- [x] `paths.go` (Win + Linux)
-- [x] `config.go` (`desktop.json`)
-- [x] `instance.go` (lock: pid, port, mode)
-- [x] Unit-тесты
-- [x] Коммит + CHANGELOG [Unreleased]
-
-### Фаза 2 — Wails Remote spike — модель: **Composer** (SSE/Linux → **thinking**)
-
-- [x] `cmd/carrel-desktop` scaffold
-- [x] WebView Remote URL
-- [x] Win: login / navigation
-- [x] Linux amd64
-- [x] Fan-out SSE или polling
-- [x] Коммит + CHANGELOG [Unreleased]
-
-### Фаза 3 — Local supervisor — модель: **thinking** (medium/high)
-
-- [x] `pickFreePort()` loopback
-- [x] `supervisor.go`
-- [x] SIGTERM + 15s grace
-- [x] Lock + dynamic port
-- [x] Second launch focus
-- [x] Тесты supervisor
-- [x] Коммит + CHANGELOG [Unreleased]
-
-### Фаза 4 — Sidecar download — модель: **Composer** + security review
-
-- [x] Release URL + naming
-- [x] SHA256 verify
-- [x] `version.json`
-- [x] Lazy download Local
-- [x] Ошибки сети/checksum
-- [x] Коммит + CHANGELOG [Unreleased]
-
-### Фаза 5 — Onboarding и sign out — модель: **thinking** (medium)
-
-- [x] First-run UI
-- [x] Persist `desktop.json`
-- [x] Sign out → onboarding
-- [x] Local → Remote: stop sidecar
-- [x] Коммит + CHANGELOG [Unreleased]
+Фазы **0–5** закрыты в коде и CHANGELOG (`0.10.0`); чеклисты сняты, статус — в §12. Ниже только оставшееся.
 
 ### Фаза 6 — Tray — модель: **Composer**
 
