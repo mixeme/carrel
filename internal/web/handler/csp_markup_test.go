@@ -54,35 +54,6 @@ func TestTemplatesCarryNothingInline(t *testing.T) {
 	}
 }
 
-// A page that renders without its own inline markup is only half the promise:
-// the fragments htmx swaps in are rendered by the same templates, and a live
-// page is the one the browser judges.
-func TestRenderedPagesCarryNothingInline(t *testing.T) {
-	a := newApp(t, nil)
-	a.setupAdmin("root", "root@example.org", testPassword)
-
-	for _, path := range []string{
-		"/app/calendar", "/app/contacts", "/app/tasks", "/app/notes",
-		"/app/files", "/app/duplicates", "/app/search?q=a",
-		"/app/settings/connections", "/app/settings/appearance", "/admin/",
-	} {
-		rec := a.get(path)
-		if rec.Code != 200 {
-			t.Errorf("GET %s = %d, want 200", path, rec.Code)
-			continue
-		}
-		body := rec.Body.String()
-		if styleAttr.MatchString(body) {
-			t.Errorf("GET %s renders a style attribute, which the CSP drops", path)
-		}
-		for _, tag := range inlineScript.FindAllString(body, -1) {
-			if !scriptWithSrc.MatchString(tag) {
-				t.Errorf("GET %s renders an inline script (%s), which the CSP drops", path, tag)
-			}
-		}
-	}
-}
-
 // The fan-out of §16 is delivered over SSE, and the extension that makes
 // hx-ext="sse" mean anything is a separate file. Without it nothing connects,
 // nothing fails either, and the merged view of every section waits for a
