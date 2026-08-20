@@ -1619,9 +1619,20 @@ button {
     cursor: pointer;
 }
 
+/* Explanatory text sits below the line it explains, so it is smaller than the
+   body — 14 px was larger, which read as the point rather than the aside. */
 .hint, .optional {
     color: var(--muted);
-    font-size: 0.875rem;
+    font-size: 11.5px;
+}
+
+/* Machine text: an address, a path, an ETag, an identifier. The templates have
+   asked for `.mono` in nine places since the redesign and nothing answered, so
+   every one of them was set in the sans face at whatever size it inherited. */
+.mono,
+code {
+    font-family: var(--f-mono);
+    font-size: 11.5px;
 }
 
 .hint {
@@ -1648,18 +1659,29 @@ button {
     margin-top: 2rem;
 }
 
+/* Inside a panel the mockups head every block with the same small capitals
+   they use in the rail and on the fieldsets — never a second serif heading.
+   A panel has one title, at the top, and the blocks under it are labelled. */
+.subsection h2,
+.subsection h3,
+.subsection h4 {
+    font-family: var(--f-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dusty);
+}
+
 .subsection h2 {
-    font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
 
 .subsection h3 {
-    font-size: 1rem;
     margin: 1.5rem 0 0.5rem;
 }
 
 .subsection h4 {
-    font-size: 0.95rem;
     margin: 1rem 0 0.35rem;
 }
 
@@ -1698,19 +1720,56 @@ button {
     padding: 0.1rem 0.35rem;
 }
 
-table.data {
+/* The data table of the mockups (§6): a header of small capitals rather than
+   the browser's bold, and cells indented to the page gutter so a table lines up
+   with the head above it. `table.data` is the administration, `.files-table`
+   the file browser; they are one component and are written as one. */
+table.data,
+.files-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
-    font-size: 0.875rem;
+    font-size: 13px;
 }
 
 table.data th,
-table.data td {
+.files-table th {
     text-align: left;
-    padding: 0.35rem 0.5rem;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    white-space: nowrap;
+    padding: 9px 12px;
+    border-bottom: 0.5px solid var(--rule);
+    vertical-align: bottom;
+}
+
+table.data td,
+.files-table td {
+    text-align: left;
+    font-size: 12.5px;
+    padding: 7px 12px;
     border-bottom: 0.5px solid var(--hair);
-    vertical-align: top;
+    vertical-align: middle;
+}
+
+table.data tr th:first-child,
+table.data tr td:first-child,
+.files-table tr th:first-child,
+.files-table tr td:first-child {
+    padding-left: var(--pad);
+}
+
+/* A machine string — an address, a path, an identifier — has no spaces, so the
+   column cannot shrink and the table runs off the panel. Breaking anywhere
+   costs a wrapped address and saves the layout. */
+table.data td.mono,
+table.data td .mono,
+.files-table td.mono,
+.files-table td .mono {
+    overflow-wrap: anywhere;
 }
 
 td.actions {
@@ -1992,20 +2051,10 @@ label.checkbox input {
 }
 
 /* The file browser of §7. A listing is a table because that is what a listing
-   is: name, size, type, date, in columns a person can compare down. */
+   is: name, size, type, date, in columns a person can compare down. It takes
+   the shared table above; only the margin is its own. */
 .files-table {
-    width: 100%;
-    border-collapse: collapse;
     margin: 1rem 0;
-    font-size: 0.9rem;
-}
-
-.files-table th,
-.files-table td {
-    border-bottom: 0.5px solid var(--hair);
-    text-align: left;
-    padding: 0.4rem 0.5rem;
-    vertical-align: baseline;
 }
 
 .files-table tr.is-folder a {
@@ -2030,11 +2079,12 @@ label.checkbox input {
 
 .files-shortcuts h3 {
     margin: 0 0 0.5rem;
-    font-size: 0.85rem;
-    color: var(--muted);
+    font-family: var(--f-sans);
+    font-size: 10px;
     font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    color: var(--dusty);
 }
 
 .files-layout .files-main {
@@ -2100,15 +2150,23 @@ label.checkbox input {
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6'%3E%3Cpath d='M7 4h7l4 4v12H7z'/%3E%3Cpath d='M14 4v4h4'/%3E%3C/svg%3E");
 }
 
+/* The selection bar of the mockups: a band across the panel in the card
+   colour, not a floating box — it belongs to the listing under it, and its
+   buttons stand on paper so they read against the band. */
 .files-ops-bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem 0.75rem;
-    margin: 0.75rem 0;
-    padding: 0.5rem 0.75rem;
-    border: 0.5px solid var(--hair);
-    border-radius: 4px;
+    gap: 10px;
+    margin: 0;
+    padding: 0 var(--pad) 9px;
+    border: 0;
+    border-bottom: 0.5px solid var(--rule);
+    border-radius: 0;
+    background: var(--card);
+}
+
+.files-ops-bar .app-btn {
     background: var(--paper);
 }
 
@@ -2186,23 +2244,26 @@ label.checkbox input {
     white-space: nowrap;
 }
 
+/* The same field list as the record panels of §7.1–7.4, in the same sizes:
+   this is one component appearing in a second place, not a second component. */
 .files-props-body dl {
     margin: 0.5rem 0 1rem;
     display: grid;
     grid-template-columns: 5.5rem 1fr;
     gap: 0.35rem 0.75rem;
-    font-size: 0.85rem;
 }
 
 .files-props-body dt {
     margin: 0;
-    color: var(--muted);
+    font-size: 11.5px;
+    color: var(--dusty);
+    padding-top: 1px;
 }
 
 .files-props-body dd {
     margin: 0;
     font-family: var(--f-mono);
-    font-size: 0.8rem;
+    font-size: 11.5px;
     word-break: break-all;
 }
 
@@ -2262,7 +2323,9 @@ label.checkbox input {
 
 .folder-picker-title {
     margin: 0 0 0.75rem;
-    font-size: 1.05rem;
+    font-family: var(--f-serif);
+    font-weight: 400;
+    font-size: 22px;
 }
 
 .folder-tree {
@@ -2275,9 +2338,14 @@ label.checkbox input {
 }
 
 .folder-tree-node {
-    padding: 0.35rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 26px;
+    padding: 0 8px;
+    border-radius: 3px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 12.5px;
 }
 
 /* Nesting is a class rather than an inline style: the CSP of §24.5 has no
@@ -2327,7 +2395,7 @@ label.checkbox input {
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
     border-bottom: 0.5px solid var(--hair);
-    font-size: 0.85rem;
+    font-size: 12.5px;
 }
 
 .files-transfers ul {
@@ -2342,7 +2410,7 @@ label.checkbox input {
 }
 
 .files-transfers li {
-    font-size: 0.82rem;
+    font-size: 11.5px;
 }
 
 .files-transfers .row {
@@ -2458,8 +2526,22 @@ label.checkbox input {
 }
 
 .crumbs {
-    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--dusty);
     margin: 0.25rem 0 0;
+}
+
+/* Where you are is the one part of the trail set in the ink: the rest is a
+   path back, and a path back is not the subject of the screen. */
+.crumbs b,
+.crumbs strong,
+.crumbs [aria-current] {
+    font-weight: 600;
+    color: var(--ink);
 }
 
 .crumbs a {
@@ -3305,7 +3387,7 @@ label.checkbox input {
     align-items: baseline;
     padding: 0.3rem 0;
     border-bottom: 0.5px solid var(--hair);
-    font-size: 0.9rem;
+    font-size: 11.5px;
 }
 
 .find-source-name {
@@ -3377,7 +3459,7 @@ label.checkbox input {
 
 .find-row-match {
     color: var(--muted);
-    font-size: 0.8rem;
+    font-size: 11.5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3385,14 +3467,14 @@ label.checkbox input {
 
 .find-row-kind {
     color: var(--muted);
-    font-size: 0.8rem;
+    font-size: 11.5px;
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
 
 .find-row-source {
     color: var(--muted);
-    font-size: 0.8rem;
+    font-size: 11.5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3755,9 +3837,16 @@ button.danger {
     gap: 8px;
 }
 
+/* The account is the card's rubric, not a heading: the mockup writes it as
+   «NEXTCLOUD · HOME» in the same small capitals the rest of the panel uses. */
 .settings-account-head h2 {
     margin: 0;
-    font-size: 1rem;
+    font-family: var(--f-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dusty);
 }
 
 .settings-collections {
@@ -3873,6 +3962,20 @@ button.danger {
     background: var(--card);
     color: var(--ink);
     font-weight: 600;
+}
+
+/* The segment in the user menu is a compact control in a dropdown; the one on
+   the Appearance screen is a form control and takes the size the mockups give
+   a segment inside a field, with a hairline between the choices. */
+.form-field .theme-segment:not(.theme-segment--menu) .theme-segment-btn {
+    height: 28px;
+    font-size: 12.5px;
+    padding: 0 11px;
+    border-right: 0.5px solid var(--hair);
+}
+
+.form-field .theme-segment:not(.theme-segment--menu) .theme-segment-btn:last-child {
+    border-right: 0;
 }
 
 .app-user-signout {
