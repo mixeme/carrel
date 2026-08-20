@@ -4,6 +4,7 @@
 package handler
 
 import (
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"net/http"
@@ -219,6 +220,43 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request, from string
 	}
 	v.Data = s.buildAdminView(r, data)
 	s.Render(w, adminTemplate(data.Section), v)
+}
+
+// AdminAuditExport streams the whole audit log as CSV (2.6.C5), honouring the
+// same action filter as the viewer. It writes straight to the response as it
+// reads, so the export never buffers the log a second time, and it is not
+// capped at the 200-row viewer limit — an export is for the record, not for
+// a screen.
+func (s *Server) AdminAuditExport(w http.ResponseWriter, r *http.Request) {
+	sess := SessionFrom(r)
+	action := r.URL.Query().Get(fieldAuditAction)
+	entries := s.Store.Audit(store.AuditFilter{Action: action})
+
+	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+	w.Header().Set("Content-Disposition", `attachment; filename="audit-log.csv"`)
+	cw := csv.NewWriter(w)
+	_ = cw.Write([]string{"when", "action", "actor", "target", "ip", "detail"})
+	for _, e := range entries {
+		_ = cw.Write([]string{
+			e.At.UTC().Format(time.RFC3339),
+			e.Action,
+			e.ActorLogin,
+			e.TargetLogin,
+			e.IP,
+			e.Detail,
+		})
+	}
+	cw.Flush()
+
+	if sess != nil {
+		_ = s.Store.Log(store.AuditEntry{
+			Action:     store.ActionAuditExport,
+			ActorID:    sess.UserID,
+			ActorLogin: sess.Login,
+			IP:         ClientIP(r),
+			Detail:     fmt.Sprintf("%d entries", len(entries)),
+		})
+	}
 }
 
 func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {

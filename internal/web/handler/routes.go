@@ -204,6 +204,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 
 	// The administrator's section.
 	admin := http.NewServeMux()
+	admin.HandleFunc("GET "+s.Path("/admin/audit/export"), s.AdminAuditExport)
 	admin.HandleFunc("GET "+s.Path("/admin/{$}"), s.AdminHome)
 	admin.HandleFunc("POST "+s.Path("/admin/{$}"), s.AdminHome)
 	admin.HandleFunc("GET "+s.Path("/admin/{section}"), s.AdminSection)

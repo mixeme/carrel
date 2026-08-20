@@ -30,6 +30,7 @@
         </form>
 
         <div class="list-toolbar no-print">
+            <a class="app-btn is-sm" href="{{.Base}}/admin/audit/export{{if $d.AuditAction}}?audit_action={{$d.AuditAction}}{{end}}">Export CSV</a>
             {{template "columnpicker" "admin-audit"}}
         </div>
         {{if $d.AuditLog}}
