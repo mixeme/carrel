@@ -81,6 +81,10 @@
                     <input type="search" placeholder="Filter this folder" data-files-filter autocomplete="off">
                 </label>
                 {{template "columnpicker" "files"}}
+                <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
+                    <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
+                    <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                </div>
                 <span class="files-view-toggle no-print">
                     <button type="button" class="link" data-files-view="list" aria-pressed="true">List</button>
                     <button type="button" class="link" data-files-view="tiles" aria-pressed="false">Tiles</button>

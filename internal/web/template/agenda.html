@@ -81,6 +81,10 @@
                     <span class="visually-hidden">Filter these events</span>
                     <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
                 </label>
+                <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
+                    <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
+                    <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                </div>
                 <span class="bar-count" data-bar-count>{{$d.EventCount}} {{if eq $d.EventCount 1}}item{{else}}items{{end}}</span>
             {{template "pagebarformend"}}
             {{if $d.ReadOnly}}<p class="hint page-hint no-print">This calendar is read-only.</p>{{end}}

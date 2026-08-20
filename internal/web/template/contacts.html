@@ -60,6 +60,10 @@
                     <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
                 </label>
                 {{template "columnpicker" "contacts"}}
+                <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
+                    <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
+                    <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                </div>
                 <span class="bar-count" data-bar-count>{{len $d.Contacts}} {{if eq (len $d.Contacts) 1}}item{{else}}items{{end}}</span>
             {{template "pagebarend"}}
             <ul class="list contact-list" id="contact-list" data-columns-root="contacts">

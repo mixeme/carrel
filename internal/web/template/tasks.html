@@ -52,6 +52,10 @@
                     <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
                 </label>
                 {{template "columnpicker" "tasks"}}
+                <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
+                    <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
+                    <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                </div>
                 <span class="bar-count" data-bar-count>{{len $d.Rows}} {{if eq (len $d.Rows) 1}}item{{else}}items{{end}}</span>
             {{template "pagebarend"}}
             {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
