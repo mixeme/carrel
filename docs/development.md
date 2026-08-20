@@ -217,6 +217,7 @@ A file-level map for the parts that are spread across several files.
 | Duplicate decisions | `internal/account/duplicates.go`, `internal/store/duplicates.go` |
 | Transport, SSRF guard, multistatus, XML property types | `internal/dav/` |
 | Discovery chain and its trace | `internal/dav/discovery/` |
+| Mutating DAV validation pass (§6) | `internal/dav/exercise/` |
 | `Object`, `Patch`, loss comparison | `internal/model/object.go`, `patch.go`, `loss.go` |
 | Display views | `internal/model/contact.go`, `event.go`, `note.go`, `todo.go` |
 | `ATTACH` | `internal/model/attach.go` |

@@ -214,6 +214,9 @@ func TestAdminSectionsAreSeparatePages(t *testing.T) {
 	if !strings.Contains(dav.Body.String(), `value="test_dav"`) {
 		t.Error("DAV validator page missing the discovery form")
 	}
+	if !strings.Contains(dav.Body.String(), `value="exercise_dav"`) {
+		t.Error("DAV validator page missing the full test form")
+	}
 
 	escrow := a.get("/admin/escrow")
 	if escrow.Code != http.StatusOK {

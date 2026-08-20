@@ -39,5 +39,47 @@
         <pre class="diagnostic">{{$d.DAVDiag}}</pre>
         {{end}}
     </section>
+
+    <section class="subsection">
+        <h2 class="subsection-h2">Full server test</h2>
+        <p class="hint">After discovery succeeds, creates short-lived test objects in
+            writable collections, exercises the operations Carrel actually uses —
+            calendar-query at Depth 1, multiget, conditional create, an ETag conflict,
+            CardDAV and WebDAV reads — verifies the answers, and deletes what it created.
+            Do not run this against a production calendar without understanding that it writes.</p>
+        <form method="post" class="form" action="{{.Base}}/admin/dav">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="exercise_dav">
+
+            <div class="form-field w-xl">
+                <label for="dav-exercise-url">Server URL</label>
+                <input id="dav-exercise-url" name="dav_test_url" type="url" required
+                       placeholder="https://host/dav.php/" autocapitalize="none" spellcheck="false">
+            </div>
+
+            <div class="form-field w-md">
+                <label for="dav-exercise-user">Username</label>
+                <input id="dav-exercise-user" name="dav_test_username" type="text" required
+                       autocapitalize="none" spellcheck="false">
+            </div>
+
+            <div class="form-field w-md">
+                <label for="dav-exercise-pass">Password</label>
+                <input id="dav-exercise-pass" name="dav_test_password" type="password" required
+                       autocomplete="off">
+            </div>
+
+            <div class="form-field">
+                <label class="checkbox">
+                    <input type="checkbox" name="dav_exercise_confirm" value="1" required>
+                    I understand this test creates and deletes objects on the server
+                </label>
+            </div>
+
+            <div class="form-foot">
+                <button type="submit" class="app-btn">Run full test</button>
+            </div>
+        </form>
+    </section>
 </section>
 {{end}}

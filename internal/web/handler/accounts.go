@@ -15,19 +15,21 @@ import (
 	"gitea.mixdep.ru/mix/carrel/internal/account"
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
 	"gitea.mixdep.ru/mix/carrel/internal/dav/discovery"
+	"gitea.mixdep.ru/mix/carrel/internal/dav/exercise"
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 	"gitea.mixdep.ru/mix/carrel/internal/store"
 )
 
 const (
-	fieldDAVLabel    = "dav_label"
-	fieldDAVURL      = "dav_url"
-	fieldDAVUser     = "dav_username"
-	fieldDAVPass     = "dav_password"
-	fieldAccountID   = "account_id"
-	fieldTestDAVURL  = "dav_test_url"
-	fieldTestDAVUser = "dav_test_username"
-	fieldTestDAVPass = "dav_test_password"
+	fieldDAVLabel      = "dav_label"
+	fieldDAVURL        = "dav_url"
+	fieldDAVUser       = "dav_username"
+	fieldDAVPass       = "dav_password"
+	fieldAccountID     = "account_id"
+	fieldTestDAVURL    = "dav_test_url"
+	fieldTestDAVUser   = "dav_test_username"
+	fieldTestDAVPass   = "dav_test_password"
+	fieldDAVExerciseOK = "dav_exercise_confirm"
 )
 
 type accountRow struct {
@@ -385,6 +387,74 @@ func (s *Server) adminTestDAV(r *http.Request, actor store.Actor) (adminView, er
 		Detail:     diagSummary(result, err),
 	})
 	return adminView{DAVDiag: diag}, nil
+}
+
+func (s *Server) adminExerciseDAV(r *http.Request, actor store.Actor) (adminView, error) {
+	if r.PostFormValue(fieldDAVExerciseOK) != "1" {
+		return adminView{}, fmt.Errorf("confirm that this test may create and delete short-lived objects on the server")
+	}
+	url := strings.TrimSpace(r.PostFormValue(fieldTestDAVURL))
+	user := strings.TrimSpace(r.PostFormValue(fieldTestDAVUser))
+	pass := r.PostFormValue(fieldTestDAVPass)
+	if url == "" || user == "" || pass == "" {
+		return adminView{}, fmt.Errorf("enter the server URL, username and password")
+	}
+	if s.Guard == nil {
+		return adminView{}, fmt.Errorf("DAV connections are not configured")
+	}
+
+	creds := discovery.Credentials{BaseURL: url, Username: user, Password: pass}
+	ctx, cancel := context.WithTimeout(r.Context(), 120*time.Second)
+	defer cancel()
+
+	result, trace, err := discovery.Discover(ctx, s.Guard, creds)
+	var b strings.Builder
+	b.WriteString(formatDAVDiag(result, trace, err))
+	if err != nil {
+		_ = s.Store.Log(store.AuditEntry{
+			Action:     store.ActionDAVExercise,
+			ActorID:    actor.ID,
+			ActorLogin: actor.Login,
+			IP:         actor.IP,
+			Detail:     "discovery failed",
+		})
+		return adminView{DAVDiag: strings.TrimSpace(b.String())}, nil
+	}
+
+	client, clientErr := dav.NewClient(s.Guard, result.BaseURL, creds.Username, creds.Password)
+	if clientErr != nil {
+		return adminView{}, clientErr
+	}
+	exTrace := &discovery.Trace{}
+	exErr := exercise.Run(ctx, client, result, exTrace)
+	if len(exTrace.Steps) > 0 {
+		b.WriteString("\n\nFull test trace\n")
+		for _, step := range exTrace.Steps {
+			fmt.Fprintf(&b, "[%s] %s", step.Name, step.Detail)
+			if step.StatusCode != 0 {
+				fmt.Fprintf(&b, " (%d)", step.StatusCode)
+			}
+			if step.Target != "" {
+				fmt.Fprintf(&b, " → %s", step.Target)
+			}
+			b.WriteByte('\n')
+		}
+	}
+	detail := "ok"
+	if exErr != nil {
+		detail = "failed"
+	}
+	_ = s.Store.Log(store.AuditEntry{
+		Action:     store.ActionDAVExercise,
+		ActorID:    actor.ID,
+		ActorLogin: actor.Login,
+		IP:         actor.IP,
+		Detail:     detail,
+	})
+	if exErr != nil {
+		return adminView{DAVDiag: strings.TrimSpace(b.String())}, fmt.Errorf("full DAV test failed: %v", exErr)
+	}
+	return adminView{DAVDiag: strings.TrimSpace(b.String())}, nil
 }
 
 func userFacingDAVError(err error) string {

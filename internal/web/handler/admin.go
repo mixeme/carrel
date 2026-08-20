@@ -201,6 +201,8 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request, from string
 		data, err = s.adminTestSMTP(r, actor)
 	case "test_dav":
 		data, err = s.adminTestDAV(r, actor)
+	case "exercise_dav":
+		data, err = s.adminExerciseDAV(r, actor)
 	case "enable_escrow":
 		data, err = s.adminEnableEscrow(r, actor)
 	case "resume_escrow":
@@ -389,7 +391,7 @@ func adminSectionForAction(action string) string {
 		return adminSectionInvites
 	case "save_smtp", "test_smtp", "save_settings":
 		return adminSectionSettings
-	case "test_dav":
+	case "test_dav", "exercise_dav":
 		return adminSectionDAV
 	case "enable_escrow", "resume_escrow", "disable_escrow",
 		"change_master_password", "recover_user":
