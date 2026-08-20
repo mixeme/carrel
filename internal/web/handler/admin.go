@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"gitea.mixdep.ru/mix/carrel/internal/installcheck"
 	"gitea.mixdep.ru/mix/carrel/internal/store"
 )
 
@@ -71,6 +72,7 @@ const (
 	adminSectionDAV      = "dav"
 	adminSectionEscrow   = "escrow"
 	adminSectionAudit    = "audit"
+	adminSectionInstall  = "install"
 )
 
 // adminView is what an administration page renders.
@@ -122,6 +124,12 @@ type adminView struct {
 	SessionAbsoluteDays int64
 	// DAVDiag holds discovery output from the admin validator.
 	DAVDiag string
+	// PublicURL is the declared external base address (§18.1).
+	PublicURL string
+	// InstallResult is set after Run the check is submitted.
+	InstallResult *installcheck.Result
+	// LastInstallAt is when the check last ran, from the audit log or this request.
+	LastInstallAt time.Time
 }
 
 type userRow struct {
@@ -149,7 +157,7 @@ func (s *Server) AdminSection(w http.ResponseWriter, r *http.Request) {
 	switch section {
 	case "users":
 		section = adminSectionUsers
-	case adminSectionInvites, adminSectionSettings, adminSectionDAV, adminSectionEscrow, adminSectionAudit:
+	case adminSectionInvites, adminSectionSettings, adminSectionInstall, adminSectionDAV, adminSectionEscrow, adminSectionAudit:
 	default:
 		http.NotFound(w, r)
 		return
@@ -203,6 +211,8 @@ func (s *Server) adminSubmit(w http.ResponseWriter, r *http.Request, from string
 		data, err = s.adminTestDAV(r, actor)
 	case "exercise_dav":
 		data, err = s.adminExerciseDAV(r, actor)
+	case "run_install_check":
+		data, err = s.adminRunInstallCheck(r, actor)
 	case "enable_escrow":
 		data, err = s.adminEnableEscrow(r, actor)
 	case "resume_escrow":
@@ -350,6 +360,25 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 	out.SessionIdleHours = out.Settings.SessionIdleSeconds / 3600
 	out.SessionAbsoluteDays = out.Settings.SessionAbsoluteSeconds / 86400
 	out.SMTPConfigured = out.Settings.SMTP.Configured()
+	if partial.PublicURL != "" {
+		out.PublicURL = partial.PublicURL
+	} else {
+		out.PublicURL = s.defaultPublicURL(r)
+	}
+	if partial.InstallResult != nil {
+		out.InstallResult = partial.InstallResult
+	}
+	if !partial.LastInstallAt.IsZero() {
+		out.LastInstallAt = partial.LastInstallAt
+	} else {
+		recent := s.Store.Audit(store.AuditFilter{Limit: 500})
+		for i := len(recent) - 1; i >= 0; i-- {
+			if recent[i].Action == store.ActionInstallCheck {
+				out.LastInstallAt = recent[i].At
+				break
+			}
+		}
+	}
 	return out
 }
 
@@ -373,6 +402,8 @@ func adminTemplate(section string) string {
 		return "admin_invites.html"
 	case adminSectionSettings:
 		return "admin_settings.html"
+	case adminSectionInstall:
+		return "admin_install.html"
 	case adminSectionDAV:
 		return "admin_dav.html"
 	case adminSectionEscrow:
@@ -391,6 +422,8 @@ func adminSectionForAction(action string) string {
 		return adminSectionInvites
 	case "save_smtp", "test_smtp", "save_settings":
 		return adminSectionSettings
+	case "run_install_check":
+		return adminSectionInstall
 	case "test_dav", "exercise_dav":
 		return adminSectionDAV
 	case "enable_escrow", "resume_escrow", "disable_escrow",

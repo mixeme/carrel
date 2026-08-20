@@ -1,0 +1,52 @@
+{{define "body"}}
+{{$d := .Data}}
+<section class="admin-panel">
+    {{template "pagehead" (pageHead "Title" "Installation check" "Subtitle" "Carrel asks itself from outside, at the address you declared as the base one")}}
+        <div class="page-acts no-print">
+            <form method="post" action="{{.Base}}/admin/install" class="inline-form install-check-form">
+                <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+                <input type="hidden" name="action" value="run_install_check">
+                <div class="form-field w-xl">
+                    <label class="sr-only" for="public-url">Public address</label>
+                    <input id="public-url" name="public_url" type="url" required class="mono"
+                           value="{{$d.PublicURL}}" placeholder="https://carrel.example" autocapitalize="none" spellcheck="false">
+                </div>
+                <button type="submit" class="app-btn is-primary">Run the check</button>
+            </form>
+        </div>
+    {{template "pageheadend"}}
+
+    {{if $d.InstallResult}}
+    <p class="install-check-summary">
+        <span class="install-progress"><i class="is-full"></i></span>
+        {{len $d.InstallResult.Rows}} checks ·
+        <span class="install-ok">{{$d.InstallResult.OK}} fine</span> ·
+        {{if $d.InstallResult.Fail}}<span class="install-fail">{{$d.InstallResult.Fail}} broken</span> · {{end}}
+        {{if $d.InstallResult.Warn}}<span class="install-warn">{{$d.InstallResult.Warn}} warning{{if ne $d.InstallResult.Warn 1}}s{{end}}</span> · {{end}}
+        <span class="mono">{{printf "%.1f s" $d.InstallResult.Duration.Seconds}}</span>
+    </p>
+    {{template "datatable" (dataTable "Class" "data install-check-table")}}
+        <thead>
+            <tr>
+                <th class="install-col-status"></th>
+                <th class="install-col-name">Check</th>
+                <th>What happened</th>
+                <th class="install-col-advice">What to do</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{range $d.InstallResult.Rows}}
+            <tr class="install-row is-{{.Status}}">
+                <td><span class="install-tick is-{{.Status}}" aria-hidden="true"></span></td>
+                <td>{{.Name}}{{if eq .Status "local"}} <span class="badge is-local">local</span>{{end}}</td>
+                <td class="mono">{{.Detail}}</td>
+                <td class="mono install-advice">{{.Advice}}</td>
+            </tr>
+        {{end}}
+        </tbody>
+    {{template "datatableend"}}
+    {{end}}
+
+    <p class="hint install-check-note">The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. Nothing is changed and nothing is stored, apart from the audit line saying the check was run.</p>
+</section>
+{{end}}

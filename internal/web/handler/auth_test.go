@@ -39,7 +39,8 @@ func newApp(t *testing.T, limiter *ratelimit.Limiter) *app {
 	t.Helper()
 
 	fast := crypto.Params{Time: 1, Memory: 8 * 1024, Threads: 1, KeyLen: crypto.KeyLen}
-	st, err := store.OpenWith(t.TempDir(), store.Options{Auth: fast, KEK: fast, Master: fast})
+	dataDir := t.TempDir()
+	st, err := store.OpenWith(dataDir, store.Options{Auth: fast, KEK: fast, Master: fast})
 	if err != nil {
 		t.Fatalf("OpenWith: %v", err)
 	}
@@ -69,6 +70,7 @@ func newApp(t *testing.T, limiter *ratelimit.Limiter) *app {
 		Templates:     templates,
 		LoginLimit:    limiter,
 		RecoveryLimit: ratelimit.New(ratelimit.Options{}),
+		DataDir:       dataDir,
 	}
 	t.Cleanup(srv.Sessions.Close)
 

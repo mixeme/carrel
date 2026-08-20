@@ -71,7 +71,7 @@ func pageRoutes(t *testing.T) []string {
 	// should be left out of an automatic sweep.
 	for _, section := range []string{
 		adminSectionUsers, adminSectionInvites, adminSectionSettings,
-		adminSectionDAV, adminSectionEscrow, adminSectionAudit,
+		adminSectionInstall, adminSectionDAV, adminSectionEscrow, adminSectionAudit,
 	} {
 		p := "/admin/" + section
 		if !seen[p] {

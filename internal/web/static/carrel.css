@@ -5005,3 +5005,112 @@ body:not(.has-shell) main {
     }
 }
 
+/* Installation check (§18.1, mockup 7.11.1) */
+.install-check-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.install-check-form .form-field {
+    margin: 0;
+}
+
+.install-check-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0 0 10px;
+    font-size: 12.5px;
+}
+
+.install-progress {
+    display: inline-block;
+    width: 120px;
+    height: 4px;
+    background: var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.install-progress > i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+}
+
+.install-progress > i.is-full {
+    width: 100%;
+}
+
+.install-ok { color: var(--accent); }
+.install-fail { color: var(--alert); }
+.install-warn { color: var(--muted); }
+
+.install-check-table .install-col-status {
+    width: 26px;
+}
+
+.install-check-table .install-col-name {
+    width: 26%;
+}
+
+.install-check-table .install-col-advice {
+    width: 30%;
+}
+
+.install-check-table .install-tick {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid var(--dusty);
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.install-check-table .install-tick.is-ok {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+
+.install-check-table .install-tick.is-fail {
+    border-color: var(--alert);
+}
+
+.install-check-table .install-tick.is-warn,
+.install-check-table .install-tick.is-local {
+    border-color: var(--dusty);
+}
+
+.install-row.is-fail td:first-child + td {
+    color: var(--alert);
+}
+
+.install-advice {
+    font-size: 11px;
+}
+
+.install-check-note {
+    margin-top: 12px;
+}
+
+.settings-rail-foot {
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 11px;
+    color: var(--dusty);
+}
+
+.badge.is-local {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border: 0.5px solid var(--rule);
+    border-radius: 3px;
+    padding: 0 4px;
+    vertical-align: middle;
+}
+

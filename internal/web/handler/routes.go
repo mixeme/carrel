@@ -32,6 +32,8 @@ func (s *Server) bodyLimit(r *http.Request) int64 {
 	}
 	path := r.URL.Path
 	switch {
+	case strings.HasPrefix(path, s.Path("/installcheck/")) && strings.HasSuffix(path, "/upload"):
+		return installUploadLimit
 	// The file browser and the two attach forms of §23.10.
 	case strings.HasPrefix(path, s.Path("/app/files/")), strings.HasSuffix(path, "/attach"):
 		return s.filesMaxUpload()
@@ -229,6 +231,9 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	// The probe and the assets need no session and no token; issuing a CSRF
 	// cookie on every health check would be pure noise.
 	mux.HandleFunc("GET "+s.Path("/healthz"), Health)
+	mux.HandleFunc("GET "+s.Path("/installcheck/{token}/echo"), s.InstallCheckEcho)
+	mux.HandleFunc("GET "+s.Path("/installcheck/{token}/sse"), s.InstallCheckSSE)
+	mux.HandleFunc("POST "+s.Path("/installcheck/{token}/upload"), s.InstallCheckUpload)
 	mux.HandleFunc("GET "+s.Path("/manifest.webmanifest"), s.Manifest)
 	if staticFS != nil {
 		mux.Handle("GET "+s.Path("/static/"),

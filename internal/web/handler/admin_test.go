@@ -218,6 +218,17 @@ func TestAdminSectionsAreSeparatePages(t *testing.T) {
 		t.Error("DAV validator page missing the full test form")
 	}
 
+	install := a.get("/admin/install")
+	if install.Code != http.StatusOK {
+		t.Fatalf("GET /admin/install = %d", install.Code)
+	}
+	if !strings.Contains(install.Body.String(), "Installation check") {
+		t.Error("install page missing title")
+	}
+	if !strings.Contains(install.Body.String(), `value="run_install_check"`) {
+		t.Error("install page missing run form")
+	}
+
 	escrow := a.get("/admin/escrow")
 	if escrow.Code != http.StatusOK {
 		t.Fatalf("GET /admin/escrow = %d", escrow.Code)

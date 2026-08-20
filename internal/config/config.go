@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -186,6 +187,7 @@ type Config struct {
 	DataDir        string     `json:"data_dir"`
 	TrustedProxies []string   `json:"trusted_proxies"`
 	BasePath       string     `json:"base_path"`
+	PublicURL      string     `json:"public_url"`
 	LogLevel       string     `json:"log_level"`
 	DAV            DAV        `json:"dav"`
 	Cache          Cache      `json:"cache"`
@@ -203,6 +205,7 @@ type fileConfig struct {
 	DataDir        *string     `json:"data_dir,omitempty"`
 	TrustedProxies []string    `json:"trusted_proxies,omitempty"`
 	BasePath       *string     `json:"base_path,omitempty"`
+	PublicURL      *string     `json:"public_url,omitempty"`
 	LogLevel       *string     `json:"log_level,omitempty"`
 	DAV            *DAV        `json:"dav,omitempty"`
 	Cache          *Cache      `json:"cache,omitempty"`
@@ -309,6 +312,9 @@ func applyFile(cfg *Config, raw []byte) error {
 	if fc.BasePath != nil {
 		cfg.BasePath = *fc.BasePath
 	}
+	if fc.PublicURL != nil {
+		cfg.PublicURL = strings.TrimSpace(*fc.PublicURL)
+	}
 	if fc.LogLevel != nil {
 		cfg.LogLevel = *fc.LogLevel
 	}
@@ -356,6 +362,9 @@ func applyEnv(cfg *Config) error {
 	}
 	if v := strings.TrimSpace(os.Getenv("CARREL_BASE_PATH")); v != "" {
 		cfg.BasePath = v
+	}
+	if v := strings.TrimSpace(os.Getenv("CARREL_PUBLIC_URL")); v != "" {
+		cfg.PublicURL = v
 	}
 	if v := strings.TrimSpace(os.Getenv("CARREL_LOG_LEVEL")); v != "" {
 		cfg.LogLevel = strings.ToLower(v)
@@ -577,6 +586,9 @@ func (c *Config) Validate() error {
 	if err := validateBasePath(c.BasePath); err != nil {
 		return err
 	}
+	if err := validatePublicURL(c.PublicURL); err != nil {
+		return err
+	}
 	if err := validateLogLevel(c.LogLevel); err != nil {
 		return err
 	}
@@ -786,4 +798,68 @@ func validateBind(bind string) error {
 		return fmt.Errorf("bind address %q must be an IP address", bind)
 	}
 	return nil
+}
+
+func validatePublicURL(raw string) error {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	u, err := url.Parse(raw)
+	if err != nil {
+		return fmt.Errorf("public_url: %w", err)
+	}
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return errors.New("public_url must use http or https")
+	}
+	if u.Host == "" {
+		return errors.New("public_url must include a host name")
+	}
+	return nil
+}
+
+// SetPublicURL writes the declared external base address into config.json.
+func SetPublicURL(dataDir, publicURL string) error {
+	publicURL = strings.TrimSpace(publicURL)
+	if err := validatePublicURL(publicURL); err != nil {
+		return err
+	}
+	cfg, err := LoadFromDir(dataDir)
+	if err != nil {
+		return err
+	}
+	cfg.PublicURL = publicURL
+	return writeConfig(filepath.Join(dataDir, "config.json"), cfg)
+}
+
+// LoadFromDir reads configuration the way Load does, but for an explicit directory.
+func LoadFromDir(dataDir string) (*Config, error) {
+	prev := os.Getenv("CARREL_DATA_DIR")
+	if err := os.Setenv("CARREL_DATA_DIR", dataDir); err != nil {
+		return nil, err
+	}
+	defer func() {
+		if prev == "" {
+			_ = os.Unsetenv("CARREL_DATA_DIR")
+		} else {
+			_ = os.Setenv("CARREL_DATA_DIR", prev)
+		}
+	}()
+	return Load()
+}
+
+func writeConfig(path string, cfg *Config) error {
+	if err := cfg.Validate(); err != nil {
+		return err
+	}
+	raw, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return err
+	}
+	raw = append(raw, '\n')
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, raw, 0o600); err != nil {
+		return err
+	}
+	return os.Rename(tmp, path)
 }

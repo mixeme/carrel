@@ -213,9 +213,13 @@
     <a href="{{.Base}}/admin/invites"{{if eq $d.Section "invites"}} aria-current="page"{{end}}>Add users</a>
     <a href="{{.Base}}/admin/"{{if eq $d.Section "users"}} aria-current="page"{{end}}>Users</a>
     <a href="{{.Base}}/admin/settings"{{if eq $d.Section "settings"}} aria-current="page"{{end}}>Settings</a>
+    <a href="{{.Base}}/admin/install"{{if eq $d.Section "install"}} aria-current="page"{{end}}>Installation</a>
     <a href="{{.Base}}/admin/dav"{{if eq $d.Section "dav"}} aria-current="page"{{end}}>DAV validator</a>
     <a href="{{.Base}}/admin/escrow"{{if eq $d.Section "escrow"}} aria-current="page"{{end}}>Key escrow</a>
     <a href="{{.Base}}/admin/audit"{{if eq $d.Section "audit"}} aria-current="page"{{end}}>Audit log</a>
+    {{if and (eq $d.Section "install") (not $d.LastInstallAt.IsZero)}}
+    <p class="settings-rail-foot">Last check<br><span class="mono">{{$d.LastInstallAt.Format "02.01.2006 15:04"}}</span></p>
+    {{end}}
 </nav>
 {{end}}
 
@@ -272,6 +276,7 @@
     <a href="{{.Base}}/admin/"{{if eq $d.Section "users"}} aria-current="page"{{end}}>Users</a>
     <a href="{{.Base}}/admin/invites"{{if eq $d.Section "invites"}} aria-current="page"{{end}}>Add users</a>
     <a href="{{.Base}}/admin/settings"{{if eq $d.Section "settings"}} aria-current="page"{{end}}>Settings</a>
+    <a href="{{.Base}}/admin/install"{{if eq $d.Section "install"}} aria-current="page"{{end}}>Installation</a>
     <a href="{{.Base}}/admin/dav"{{if eq $d.Section "dav"}} aria-current="page"{{end}}>DAV validator</a>
     <a href="{{.Base}}/admin/escrow"{{if eq $d.Section "escrow"}} aria-current="page"{{end}}>Key escrow</a>
     <a href="{{.Base}}/admin/audit"{{if eq $d.Section "audit"}} aria-current="page"{{end}}>Audit log</a>

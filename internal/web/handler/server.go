@@ -8,6 +8,8 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/config"
 	"gitea.mixdep.ru/mix/carrel/internal/dav"
@@ -61,6 +63,27 @@ type Server struct {
 	// Detection holds the duplicate threshold of §15.
 	Detection DuplicatesConfig
 	Logger    *slog.Logger
+	// DataDir is the instance state directory (§18).
+	DataDir string
+	// PublicURL is the address people use in a browser, from config (§18.1).
+	PublicURL string
+	// Bind is the listen address from config, used to detect local-only mode.
+	Bind string
+	// TrustedProxies is the configured proxy list, for install-check messaging.
+	TrustedProxies []string
+	// InstallCheck holds short-lived tokens for probe endpoints.
+	InstallCheck InstallCheckGate
+}
+
+// InstallCheckGate holds short-lived probe credentials during an install check.
+type InstallCheckGate struct {
+	mu    sync.Mutex
+	probe *installProbeState
+}
+
+type installProbeState struct {
+	token   string
+	expires time.Time
 }
 
 // ProgressMode is how fan-out progress is delivered (§16).

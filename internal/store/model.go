@@ -357,6 +357,7 @@ const (
 	ActionSMTPTest          = "smtp_test"
 	ActionDAVTest           = "dav_test"
 	ActionDAVExercise       = "dav_exercise"
+	ActionInstallCheck      = "install_check"
 	ActionEmailConfirm      = "email_confirm"
 	ActionEscrowEnable      = "escrow_enable"
 	ActionEscrowDisable     = "escrow_disable"
