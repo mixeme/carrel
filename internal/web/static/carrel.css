@@ -4066,17 +4066,9 @@ button.danger {
     --row-sm: 20px;
 }
 
-/* Wave 1.11 — list toolbar and column picker */
-.list-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 10px;
-    padding-bottom: 8px;
-    border-bottom: 0.5px solid var(--hair);
-}
-
+/* Wave 1.11 — column picker. The toolbar row it once sat in is gone: admin
+   moved onto the pagebar component (2.6.G3), and nothing else ever used
+   .list-toolbar as its own primitive. */
 .column-picker {
     position: relative;
 }
@@ -4795,8 +4787,7 @@ body.has-shell .app-shell.is-admin .admin-rail {
     margin: 0;
 }
 
-.page-bar,
-.list-toolbar {
+.page-bar {
     display: flex;
     align-items: center;
     gap: 10px;

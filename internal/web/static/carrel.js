@@ -496,6 +496,14 @@ document.addEventListener('change', function (e) {
         var select = e.target.closest('[data-dest-select]');
         if (select && select.value && select.form) {
             select.form.submit();
+            return;
+        }
+        // A plain filter select that submits its own form on every change,
+        // placeholder option included — unlike [data-dest-select] above,
+        // which never submits on the placeholder (2.6.G6).
+        var auto = e.target.closest('[data-auto-submit]');
+        if (auto && auto.form) {
+            auto.form.submit();
         }
     });
 

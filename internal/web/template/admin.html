@@ -8,14 +8,14 @@
     {{end}}
 
     <section class="subsection">
-        <div class="list-toolbar no-print">
-            <span class="bar-sort">
+        {{template "pagebar" (pageBar)}}
+            <span class="bar-sort no-print">
                 <a class="app-btn is-sm{{if not $d.UserFilter}} is-on{{end}}" href="{{.Base}}/admin/">All</a>
                 <a class="app-btn is-sm{{if eq $d.UserFilter "admin"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=admin">Administrators</a>
                 <a class="app-btn is-sm{{if eq $d.UserFilter "disabled"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=disabled">Disabled</a>
             </span>
             {{template "columnpicker" "admin-users"}}
-        </div>
+        {{template "pagebarend"}}
         {{if $d.Users}}
         {{template "datatable" (dataTable "Class" "data" "Root" "admin-users")}}
             <thead>

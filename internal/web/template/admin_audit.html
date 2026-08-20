@@ -8,37 +8,36 @@
     {{end}}
 
     <section class="subsection">
-        <span class="bar-sort no-print">
-            <a class="app-btn is-sm{{if not $d.AuditCategory}} is-on{{end}}" href="{{.Base}}/admin/audit{{if $d.AuditAction}}?audit_action={{$d.AuditAction}}{{end}}">All</a>
-            <a class="app-btn is-sm{{if eq $d.AuditCategory "security"}} is-on{{end}}" href="{{.Base}}/admin/audit?audit_category=security{{if $d.AuditAction}}&amp;audit_action={{$d.AuditAction}}{{end}}">Security</a>
-            <a class="app-btn is-sm{{if eq $d.AuditCategory "failures"}} is-on{{end}}" href="{{.Base}}/admin/audit?audit_category=failures{{if $d.AuditAction}}&amp;audit_action={{$d.AuditAction}}{{end}}">Failures</a>
-        </span>
-        <form method="get" action="{{.Base}}/admin/audit">
-            <input type="hidden" name="audit_category" value="{{$d.AuditCategory}}">
-            <label for="audit-action">Filter by action</label>
-            <select id="audit-action" name="audit_action">
-                <option value="">All actions</option>
-                <option value="login" {{if eq $d.AuditAction "login"}}selected{{end}}>login</option>
-                <option value="login_failed" {{if eq $d.AuditAction "login_failed"}}selected{{end}}>login_failed</option>
-                <option value="logout" {{if eq $d.AuditAction "logout"}}selected{{end}}>logout</option>
-                <option value="user_create" {{if eq $d.AuditAction "user_create"}}selected{{end}}>user_create</option>
-                <option value="user_disable" {{if eq $d.AuditAction "user_disable"}}selected{{end}}>user_disable</option>
-                <option value="user_enable" {{if eq $d.AuditAction "user_enable"}}selected{{end}}>user_enable</option>
-                <option value="user_delete" {{if eq $d.AuditAction "user_delete"}}selected{{end}}>user_delete</option>
-                <option value="user_role_change" {{if eq $d.AuditAction "user_role_change"}}selected{{end}}>user_role_change</option>
-                <option value="password_change" {{if eq $d.AuditAction "password_change"}}selected{{end}}>password_change</option>
-                <option value="password_reset" {{if eq $d.AuditAction "password_reset"}}selected{{end}}>password_reset</option>
-                <option value="sessions_killed" {{if eq $d.AuditAction "sessions_killed"}}selected{{end}}>sessions_killed</option>
-                <option value="settings_update" {{if eq $d.AuditAction "settings_update"}}selected{{end}}>settings_update</option>
-                <option value="escrow_recover" {{if eq $d.AuditAction "escrow_recover"}}selected{{end}}>escrow_recover</option>
-            </select>
-            <button type="submit">Filter</button>
-        </form>
-
-        <div class="list-toolbar no-print">
-            <a class="app-btn is-sm" href="{{.Base}}/admin/audit/export?{{if $d.AuditAction}}audit_action={{$d.AuditAction}}&amp;{{end}}{{if $d.AuditCategory}}audit_category={{$d.AuditCategory}}{{end}}">Export CSV</a>
+        {{template "pagebar" (pageBar)}}
+            <span class="bar-sort no-print">
+                <a class="app-btn is-sm{{if not $d.AuditCategory}} is-on{{end}}" href="{{.Base}}/admin/audit{{if $d.AuditAction}}?audit_action={{$d.AuditAction}}{{end}}">All</a>
+                <a class="app-btn is-sm{{if eq $d.AuditCategory "security"}} is-on{{end}}" href="{{.Base}}/admin/audit?audit_category=security{{if $d.AuditAction}}&amp;audit_action={{$d.AuditAction}}{{end}}">Security</a>
+                <a class="app-btn is-sm{{if eq $d.AuditCategory "failures"}} is-on{{end}}" href="{{.Base}}/admin/audit?audit_category=failures{{if $d.AuditAction}}&amp;audit_action={{$d.AuditAction}}{{end}}">Failures</a>
+            </span>
+            <form method="get" action="{{.Base}}/admin/audit" class="no-print">
+                <input type="hidden" name="audit_category" value="{{$d.AuditCategory}}">
+                <label class="sr-only" for="audit-action">Filter by action</label>
+                <select id="audit-action" name="audit_action" data-auto-submit>
+                    <option value="">All actions</option>
+                    <option value="login" {{if eq $d.AuditAction "login"}}selected{{end}}>login</option>
+                    <option value="login_failed" {{if eq $d.AuditAction "login_failed"}}selected{{end}}>login_failed</option>
+                    <option value="logout" {{if eq $d.AuditAction "logout"}}selected{{end}}>logout</option>
+                    <option value="user_create" {{if eq $d.AuditAction "user_create"}}selected{{end}}>user_create</option>
+                    <option value="user_disable" {{if eq $d.AuditAction "user_disable"}}selected{{end}}>user_disable</option>
+                    <option value="user_enable" {{if eq $d.AuditAction "user_enable"}}selected{{end}}>user_enable</option>
+                    <option value="user_delete" {{if eq $d.AuditAction "user_delete"}}selected{{end}}>user_delete</option>
+                    <option value="user_role_change" {{if eq $d.AuditAction "user_role_change"}}selected{{end}}>user_role_change</option>
+                    <option value="password_change" {{if eq $d.AuditAction "password_change"}}selected{{end}}>password_change</option>
+                    <option value="password_reset" {{if eq $d.AuditAction "password_reset"}}selected{{end}}>password_reset</option>
+                    <option value="sessions_killed" {{if eq $d.AuditAction "sessions_killed"}}selected{{end}}>sessions_killed</option>
+                    <option value="settings_update" {{if eq $d.AuditAction "settings_update"}}selected{{end}}>settings_update</option>
+                    <option value="escrow_recover" {{if eq $d.AuditAction "escrow_recover"}}selected{{end}}>escrow_recover</option>
+                </select>
+                <noscript><button type="submit" class="app-btn is-sm">Filter</button></noscript>
+            </form>
+            <a class="app-btn is-sm no-print" href="{{.Base}}/admin/audit/export?{{if $d.AuditAction}}audit_action={{$d.AuditAction}}&amp;{{end}}{{if $d.AuditCategory}}audit_category={{$d.AuditCategory}}{{end}}">Export CSV</a>
             {{template "columnpicker" "admin-audit"}}
-        </div>
+        {{template "pagebarend"}}
         {{if $d.AuditLog}}
         {{template "datatable" (dataTable "Class" "data" "Root" "admin-audit")}}
             <thead>
