@@ -14,14 +14,64 @@
     <section class="account-block settings-account-card">
         <div class="settings-account-head">
             <h2>{{if $acc.Label}}{{$acc.Label}}{{else}}{{$acc.Username}}{{end}}</h2>
-            <form method="post" action="{{$.Base}}/app/settings/connections" class="inline-form no-print">
-                <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
-                <input type="hidden" name="action" value="delete_dav">
-                <input type="hidden" name="account_id" value="{{$acc.ID}}">
-                <button type="submit" class="app-btn is-sm is-danger-solid">Disconnect</button>
-            </form>
+            <span class="bar-sort no-print">
+                <form method="post" action="{{$.Base}}/app/settings/connections" class="inline-form">
+                    <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                    <input type="hidden" name="action" value="test_dav">
+                    <input type="hidden" name="account_id" value="{{$acc.ID}}">
+                    <button type="submit" class="app-btn is-sm">Test</button>
+                </form>
+                <form method="get" action="{{$.Base}}/app/settings/connections" class="inline-form">
+                    <input type="hidden" name="edit" value="{{$acc.ID}}">
+                    <button type="submit" class="app-btn is-sm">Edit</button>
+                </form>
+                <form method="post" action="{{$.Base}}/app/settings/connections" class="inline-form">
+                    <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+                    <input type="hidden" name="action" value="delete_dav">
+                    <input type="hidden" name="account_id" value="{{$acc.ID}}">
+                    <button type="submit" class="app-btn is-sm is-danger-solid">Disconnect</button>
+                </form>
+            </span>
         </div>
         <p class="hint mono">{{$acc.BaseURL}} · {{$acc.Username}}</p>
+        {{if eq $d.TestAccountID $acc.ID}}
+        <pre class="diagnostic">{{$d.TestDiag}}</pre>
+        {{end}}
+        {{if eq $d.EditAccountID $acc.ID}}
+        <form method="post" class="form" action="{{$.Base}}/app/settings/connections">
+            <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+            <input type="hidden" name="action" value="update_dav">
+            <input type="hidden" name="account_id" value="{{$acc.ID}}">
+            <div class="form-field w-md">
+                <label for="edit-label-{{$acc.ID}}">Label (optional)</label>
+                <input id="edit-label-{{$acc.ID}}" name="dav_label" type="text"
+                       value="{{$d.EditForm.Label}}" autocomplete="off">
+            </div>
+            <div class="form-field w-xl">
+                <label for="edit-url-{{$acc.ID}}">Server URL</label>
+                <input id="edit-url-{{$acc.ID}}" name="dav_url" type="url" required
+                       value="{{$d.EditForm.BaseURL}}" autocapitalize="none" spellcheck="false">
+            </div>
+            <div class="form-field w-md">
+                <label for="edit-user-{{$acc.ID}}">Username</label>
+                <input id="edit-user-{{$acc.ID}}" name="dav_username" type="text" required
+                       value="{{$d.EditForm.Username}}" autocapitalize="none" spellcheck="false">
+            </div>
+            <div class="form-field w-md">
+                <label for="edit-pass-{{$acc.ID}}">New password</label>
+                <input id="edit-pass-{{$acc.ID}}" name="dav_password" type="password" autocomplete="new-password">
+                <p class="form-hint">Leave blank to keep the saved password.</p>
+            </div>
+            <div class="form-foot">
+                <button type="submit">Save and re-check</button>
+                <a class="app-btn is-quiet" href="{{$.Base}}/app/settings/connections">Cancel</a>
+            </div>
+        </form>
+        {{if $d.Trace}}
+        <pre class="diagnostic">{{range $d.Trace.Steps}}[{{.Name}}] {{.Detail}}{{if .StatusCode}} ({{.StatusCode}}){{end}}{{if .Target}} → {{.Target}}{{end}}
+{{end}}</pre>
+        {{end}}
+        {{end}}
         {{if or $acc.AddressBooks $acc.Calendars $acc.FileCollections}}
         <ul class="collection-list settings-collections">
         {{range $acc.AddressBooks}}
@@ -94,7 +144,7 @@
                 <button type="submit">Connect</button>
             </div>
         </form>
-        {{if $d.Trace}}
+        {{if and $d.Trace (not $d.EditAccountID)}}
         <pre class="diagnostic">{{range $d.Trace.Steps}}[{{.Name}}] {{.Detail}}{{if .StatusCode}} ({{.StatusCode}}){{end}}{{if .Target}} → {{.Target}}{{end}}
 {{end}}</pre>
         {{end}}

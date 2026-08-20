@@ -5,6 +5,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 	"gitea.mixdep.ru/mix/carrel/internal/store"
@@ -69,7 +70,11 @@ func (s *Server) SettingsConnections(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := s.settingsFrame(r, "Connections", settingsSectionConnections)
-	v.Data = settingsView{Section: settingsSectionConnections, appView: s.buildAppView(r)}
+	data := s.buildAppView(r)
+	if editID := strings.TrimSpace(r.URL.Query().Get("edit")); editID != "" {
+		s.fillEditForm(r, &data, editID)
+	}
+	v.Data = settingsView{Section: settingsSectionConnections, appView: data}
 	s.Render(w, "settings_connections.html", v)
 }
 
@@ -126,6 +131,16 @@ func (s *Server) appSubmitTo(w http.ResponseWriter, r *http.Request, template, s
 		data, err = s.appDeleteDAV(r, actor)
 		if err == nil {
 			notice = "Account removed."
+		}
+	case "test_dav":
+		data, err = s.appTestDAV(r, actor)
+		if err == nil {
+			notice = "Connection test succeeded."
+		}
+	case "update_dav":
+		data, err = s.appUpdateDAV(r, actor)
+		if err == nil {
+			notice = "Connection updated."
 		}
 	case "save_attachments":
 		data, err = s.appSaveAttachments(r)

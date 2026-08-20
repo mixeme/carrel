@@ -59,6 +59,15 @@ type appView struct {
 	// Attachments is the one setting §23.10 needs: where a file goes when it is
 	// attached to a note or an event.
 	Attachments attachmentSettings
+	// TestAccountID and TestDiag carry the result of "Test" on one saved
+	// connection (2.6.C1), shown inline in that account's own block rather
+	// than mixed into Trace, which belongs to the "Connect account" form.
+	TestAccountID string
+	TestDiag      string
+	// EditAccountID and EditForm back "Edit" on a saved connection (2.6.C2):
+	// which account's inline form is open, and what it is pre-filled with.
+	EditAccountID string
+	EditForm      connectForm
 }
 
 func (s *Server) buildAppView(r *http.Request) appView {
@@ -156,6 +165,137 @@ func (s *Server) appConnectDAV(r *http.Request, actor store.Actor) (appView, err
 	data = s.buildAppView(r)
 	data.ShowConnect = false
 	return data, nil
+}
+
+// fillEditForm opens the inline edit form for one saved account when the
+// Connections screen is loaded with ?edit=<id> (2.6.C2). The password field
+// is left blank on purpose: submitting without typing a new one keeps the
+// saved one, the same way the admin reset-password form never shows one back.
+func (s *Server) fillEditForm(r *http.Request, data *appView, accountID string) {
+	sess := SessionFrom(r)
+	if sess == nil || accountID == "" {
+		return
+	}
+	acc, err := s.Store.GetDAVAccount(sess.UserID, accountID, sess.DEK())
+	if err != nil {
+		return
+	}
+	data.EditAccountID = acc.ID
+	data.EditForm = connectForm{Label: acc.Label, BaseURL: acc.BaseURL, Username: acc.Username}
+}
+
+// appTestDAV re-runs discovery against a saved account's own stored
+// credentials and shows the trace, without saving anything (2.6.C1 — §6
+// promises a diagnostic that names the step that failed, and today that is
+// only available while adding an account, not after).
+func (s *Server) appTestDAV(r *http.Request, actor store.Actor) (appView, error) {
+	sess := SessionFrom(r)
+	accountID := strings.TrimSpace(r.PostFormValue(fieldAccountID))
+	data := s.buildAppView(r)
+	if accountID == "" {
+		return data, fmt.Errorf("choose an account to test")
+	}
+	acc, err := s.Store.GetDAVAccount(sess.UserID, accountID, sess.DEK())
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			return data, fmt.Errorf("account not found")
+		}
+		return data, err
+	}
+	if s.Guard == nil {
+		return data, fmt.Errorf("DAV connections are not configured")
+	}
+
+	creds := discovery.Credentials{BaseURL: acc.BaseURL, Username: acc.Username, Password: acc.Password}
+	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
+	defer cancel()
+	result, trace, testErr := discovery.Discover(ctx, s.Guard, creds)
+
+	data.TestAccountID = accountID
+	data.TestDiag = formatDAVDiag(result, trace, testErr)
+	_ = s.Store.Log(store.AuditEntry{
+		Action:      store.ActionDAVTest,
+		ActorID:     actor.ID,
+		ActorLogin:  actor.Login,
+		TargetID:    sess.UserID,
+		TargetLogin: sess.Login,
+		IP:          actor.IP,
+		Detail:      diagSummary(result, testErr),
+	})
+	if testErr != nil {
+		return data, testErr
+	}
+	return data, nil
+}
+
+// appUpdateDAV changes a saved connection's address, username or password in
+// place, keeping its account ID — and with it every source selection and
+// duplicate decision keyed on that ID (2.6.C2). A new discovery run is
+// required to save, the same as adding an account, so a broken edit is never
+// saved silently; its collections replace the stored ones, since that is what
+// "the address changed" means. A collection whose path also changed on the
+// server orphans any view selection or duplicate decision that named the old
+// path — that risk belongs to pointing the account somewhere else, not to
+// this feature, and nothing here can detect it in advance.
+func (s *Server) appUpdateDAV(r *http.Request, actor store.Actor) (appView, error) {
+	sess := SessionFrom(r)
+	accountID := strings.TrimSpace(r.PostFormValue(fieldAccountID))
+	form := connectForm{
+		Label:    strings.TrimSpace(r.PostFormValue(fieldDAVLabel)),
+		BaseURL:  strings.TrimSpace(r.PostFormValue(fieldDAVURL)),
+		Username: strings.TrimSpace(r.PostFormValue(fieldDAVUser)),
+		Password: r.PostFormValue(fieldDAVPass),
+	}
+	data := s.buildAppView(r)
+	data.EditAccountID = accountID
+	data.EditForm = form
+
+	if accountID == "" {
+		return data, fmt.Errorf("choose an account to edit")
+	}
+	existing, err := s.Store.GetDAVAccount(sess.UserID, accountID, sess.DEK())
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			return data, fmt.Errorf("account not found")
+		}
+		return data, err
+	}
+	if form.BaseURL == "" || form.Username == "" {
+		return data, fmt.Errorf("enter the server URL and username")
+	}
+	if s.Guard == nil {
+		return data, fmt.Errorf("DAV connections are not configured")
+	}
+	password := form.Password
+	if password == "" {
+		password = existing.Password
+	}
+
+	creds := discovery.Credentials{BaseURL: form.BaseURL, Username: form.Username, Password: password}
+	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
+	defer cancel()
+	result, trace, err := discovery.Discover(ctx, s.Guard, creds)
+	data.Trace = trace
+	if err != nil {
+		return data, err
+	}
+
+	label := form.Label
+	if label == "" {
+		label = form.Username
+	}
+	updated := *existing
+	updated.Label = label
+	updated.BaseURL = result.BaseURL
+	updated.Username = form.Username
+	updated.Password = password
+	updated.Principal = result.Principal
+	updated.Collections = result.Collections
+	if err := s.Store.PutDAVAccount(actor, sess.UserID, sess.DEK(), updated); err != nil {
+		return data, err
+	}
+
+	return s.buildAppView(r), nil
 }
 
 func (s *Server) appDeleteDAV(r *http.Request, actor store.Actor) (appView, error) {
