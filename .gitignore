@@ -2,3 +2,8 @@
 
 # Internal developer notes (not tracked)
 /dev/
+
+# Agent and editor scratch. The command to run this project lives in
+# dev/local-testing.md, not in a per-tool launch configuration.
+/.claude/
+/.cursor/
