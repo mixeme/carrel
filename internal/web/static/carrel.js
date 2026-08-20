@@ -431,6 +431,26 @@ document.addEventListener('change', function (e) {
         btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
 
+    // The ⋯ overflow menu of 2.6.D1: one per page, holding the Import/Export
+    // destination pickers a merged view needs (2.6.D2 — there is no single
+    // collection to act on until one is chosen). Scoped by the nearest
+    // [data-dots-menu] wrapper rather than a single global element, so more
+    // than one could exist on a page without colliding.
+    function dotsMenuOf(el) {
+        var wrap = el.closest('[data-dots-menu]');
+        return wrap ? wrap.querySelector('.dots-menu') : null;
+    }
+
+    function closeDotsMenus(except) {
+        document.querySelectorAll('.dots-menu').forEach(function (menu) {
+            if (menu === except) return;
+            menu.hidden = true;
+            var wrap = menu.closest('[data-dots-menu]');
+            var toggle = wrap && wrap.querySelector('[data-dots-toggle]');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        });
+    }
+
     document.addEventListener('click', function (e) {
         if (e.target.closest('[data-sheet-close]')) {
             e.preventDefault();
@@ -452,6 +472,30 @@ document.addEventListener('change', function (e) {
         }
         if (!e.target.closest('.app-create')) {
             closeCreateMenu();
+        }
+        var dotsToggle = e.target.closest('[data-dots-toggle]');
+        if (dotsToggle) {
+            e.preventDefault();
+            var menu = dotsMenuOf(dotsToggle);
+            if (menu) {
+                var open = menu.hidden;
+                closeDotsMenus(open ? menu : null);
+                menu.hidden = !open;
+                dotsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+            return;
+        }
+        if (!e.target.closest('[data-dots-menu]')) {
+            closeDotsMenus();
+        }
+    });
+
+    // A destination picked in the ⋯ menu navigates straight there — the
+    // <select> stands in for a submit button (2.6.D2).
+    document.addEventListener('change', function (e) {
+        var select = e.target.closest('[data-dest-select]');
+        if (select && select.value && select.form) {
+            select.form.submit();
         }
     });
 

@@ -36,7 +36,7 @@
                 {{range $d.Collections}}
                 <tr class="is-folder">
                     <td data-col="name"><a href="{{.URL}}" class="file-name"><span class="file-icon file-icon--folder" aria-hidden="true"></span>{{.Name}}</a></td>
-                    <td class="hint">{{.ServerLabel}}</td>
+                    <td class="hint">{{template "ico" "server"}}{{.ServerLabel}}</td>
                     <td class="hint">{{if .ReadOnly}}ro{{else}}rw{{end}}</td>
                     <td>{{if .IsAttachment}}<span class="badge">attachments</span>{{end}}</td>
                 </tr>
@@ -56,7 +56,10 @@
             {{if $d.IsAttachmentFolder}}{{$hint = "This is the folder attachments are put in."}}{{end}}
             {{template "pagehead" (dict "Title" $d.FolderTitle "Crumbs" $d.Crumbs "Subtitle" $sub "Hint" $hint)}}
                 <div class="page-acts no-print">
-                    <button type="button" class="app-btn is-quiet" data-files-props-toggle title="Properties panel">Properties</button>
+                    {{if not $d.ReadOnly}}
+                    <a class="app-btn is-primary" href="#new-folder-form">{{template "ico" "plus"}}New folder</a>
+                    {{end}}
+                    <button type="button" class="app-btn is-quiet" data-files-props-toggle title="Properties panel">{{template "ico" "panel"}}Properties</button>
                     <button type="button" class="app-btn is-quiet" data-refresh>{{template "ico" "refresh"}}Refresh</button>
                 </div>
             {{template "pageheadend"}}
@@ -68,10 +71,10 @@
                 <span class="files-ops-size hint" data-files-ops-size></span>
                 <span class="files-ops-sep" aria-hidden="true"></span>
                 <button type="button" class="link" data-files-op="download">Download</button>
-                <button type="button" class="link" data-files-op="rename"{{if $d.ReadOnly}} disabled{{end}}>Rename</button>
-                <button type="button" class="link" data-files-op="move"{{if $d.ReadOnly}} disabled{{end}}>Move…</button>
+                <button type="button" class="link" data-files-op="rename"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "pencil"}}Rename</button>
+                <button type="button" class="link" data-files-op="move"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "move"}}Move…</button>
                 <button type="button" class="link" data-files-op="copy"{{if $d.ReadOnly}} disabled{{end}}>Copy…</button>
-                <button type="button" class="link" data-files-op="delete"{{if $d.ReadOnly}} disabled{{end}}>Delete</button>
+                <button type="button" class="link" data-files-op="delete"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "trash"}}Delete</button>
                 <span class="files-ops-right"><button type="button" class="link" data-files-clear>Clear selection</button></span>
             </div>
 
@@ -87,7 +90,7 @@
                 </div>
                 <span class="files-view-toggle no-print">
                     <button type="button" class="link" data-files-view="list" aria-pressed="true">List</button>
-                    <button type="button" class="link" data-files-view="tiles" aria-pressed="false">Tiles</button>
+                    <button type="button" class="link" data-files-view="tiles" aria-pressed="false">{{template "ico" "grid"}}Tiles</button>
                 </span>
                 {{if $d.ItemCount}}<span class="files-meta hint">{{$d.ItemCount}} items{{if $d.TotalSizeLabel}} · {{$d.TotalSizeLabel}}{{end}}</span>{{end}}
             {{template "pagebarend"}}
@@ -209,7 +212,7 @@
                         <p class="form-hint">Up to {{$d.MaxUpload}}. Drop files onto the window or a folder row. A taken name asks what to do rather than failing silently.</p>
                     </div>
                 </form>
-                <form method="post" class="form" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}">
+                <form id="new-folder-form" method="post" class="form" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}">
                     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                     <input type="hidden" name="action" value="mkdir">
                     <input type="hidden" name="p" value="{{$d.Rel}}">

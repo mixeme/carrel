@@ -10,6 +10,7 @@
             <div class="page-acts no-print">
                 {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
                 <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                {{template "importexportmenu" (dict "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/notes/import") "ExportURL" (print .Base "/app/notes/export"))}}
             </div>
         {{template "pageheadend"}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
