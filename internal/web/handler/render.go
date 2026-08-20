@@ -64,6 +64,14 @@ var templateFuncs = template.FuncMap{
 	"dataTable":        buildDataTable,
 	"importExportMenu": buildImportExportMenu,
 	"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
+	"hasComp": func(comps []string, want string) bool {
+		for _, c := range comps {
+			if strings.EqualFold(c, want) {
+				return true
+			}
+		}
+		return false
+	},
 }
 
 // PageHead is the typed input to the pagehead component. Subtitle is plain

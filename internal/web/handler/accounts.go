@@ -79,6 +79,8 @@ type appView struct {
 	// 2.6.C7. Populated even off the Appearance screen because appView is
 	// shared, the same as Attachments already is.
 	WeekStart string
+	// CollectionForm backs the create/rename/delete sheets of §10.1.
+	CollectionForm collectionFormView
 }
 
 func (s *Server) buildAppView(r *http.Request) appView {

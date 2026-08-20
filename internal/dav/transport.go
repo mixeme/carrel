@@ -30,6 +30,8 @@ type Transport interface {
 	Put(ctx context.Context, path string, body io.Reader, ifMatch string) (string, error)
 	Delete(ctx context.Context, path, ifMatch string) error
 	MkCol(ctx context.Context, path string) error
+	MkColProps(ctx context.Context, method, path string, props []ColProp) error
+	PropPatch(ctx context.Context, path string, set []ColProp, remove []xml.Name) error
 	Move(ctx context.Context, src, dst string, overwrite bool) error
 }
 

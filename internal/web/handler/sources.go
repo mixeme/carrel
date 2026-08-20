@@ -27,6 +27,9 @@ type sectionRail struct {
 	Mode       findMode
 	Selection  string
 	RailTitle  string
+	// NewCollectionURL and NewCollectionLabel are the rail-foot entry (§10.1).
+	NewCollectionURL   string
+	NewCollectionLabel string
 }
 
 func selectionState(rows []sourceRow) string {
@@ -55,16 +58,18 @@ func (s *Server) buildSectionRail(sess *session.Session, req findRequest, active
 		return sectionRail{}, err
 	}
 	return sectionRail{
-		Section:    req.Mode.section(),
-		AllLabel:   req.Mode.allLabel(),
-		AllURL:     s.Path(req.Mode.sectionHome()),
-		AllActive:  activeAccount == "",
-		AccountID:  activeAccount,
-		ColEnc:     activeColEnc,
-		Sources:    rows,
-		SourcesURL: s.sourcesURL(req.Mode),
-		Mode:       req.Mode,
-		Selection:  selectionState(rows),
+		Section:            req.Mode.section(),
+		AllLabel:           req.Mode.allLabel(),
+		AllURL:             s.Path(req.Mode.sectionHome()),
+		AllActive:          activeAccount == "",
+		AccountID:          activeAccount,
+		ColEnc:             activeColEnc,
+		Sources:            rows,
+		SourcesURL:         s.sourcesURL(req.Mode),
+		Mode:               req.Mode,
+		Selection:          selectionState(rows),
+		NewCollectionURL:   s.sectionNewCollectionURL(req.Mode),
+		NewCollectionLabel:   sectionNewCollectionLabel(req.Mode),
 	}, nil
 }
 

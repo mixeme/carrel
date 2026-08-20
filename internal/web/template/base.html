@@ -339,6 +339,7 @@
         {{end}}
         <div class="rail-foot">
             <button type="submit" class="app-btn">Apply</button>
+            {{if $rail.NewCollectionURL}}<a class="app-btn is-quiet" href="{{$rail.NewCollectionURL}}">{{template "ico" "plus"}}{{$rail.NewCollectionLabel}}</a>{{end}}
             <p class="hint">Unticked collections are not polled on the merged view.</p>
         </div>
     </form>

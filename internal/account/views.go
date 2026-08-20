@@ -124,6 +124,31 @@ func (v Views) Clone() Views {
 	return out
 }
 
+// PurgeCollection removes every reference to one collection from saved views.
+func (v *Views) PurgeCollection(ref SourceRef) {
+	if v == nil {
+		return
+	}
+	ref.Collection = normalizePath(ref.Collection)
+	for view, refs := range v.Selected {
+		out := refs[:0]
+		for _, r := range refs {
+			if r.AccountID == ref.AccountID && normalizePath(r.Collection) == ref.Collection {
+				continue
+			}
+			out = append(out, r)
+		}
+		if len(out) != len(refs) {
+			v.Selected[view] = out
+		}
+	}
+	for view, def := range v.Defaults {
+		if def.AccountID == ref.AccountID && normalizePath(def.Collection) == ref.Collection {
+			delete(v.Defaults, view)
+		}
+	}
+}
+
 func normalizePath(path string) string {
 	path = strings.TrimSpace(path)
 	if path == "" {

@@ -1,0 +1,102 @@
+{{define "body"}}
+{{$d := .Data}}
+{{$f := $d.CollectionForm}}
+<section class="settings-panel collection-sheet">
+    <form method="post" class="form collection-form" action="{{if eq $f.Mode "new"}}{{.Base}}/app/collections/new{{else if eq $f.Mode "rename"}}{{.Base}}/app/collections/rename{{else}}{{.Base}}/app/collections/delete{{end}}">
+        <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
+        <input type="hidden" name="mode" value="{{$f.Mode}}">
+        <input type="hidden" name="collection_kind" value="{{$f.Kind}}">
+        <input type="hidden" name="return" value="{{$f.ReturnURL}}">
+        {{if $f.AccountID}}<input type="hidden" name="account_id" value="{{$f.AccountID}}">{{end}}
+        {{if $f.ColPath}}<input type="hidden" name="collection_path" value="{{$f.ColPath}}">{{end}}
+
+        {{template "pagehead" (pageHead "Title" $f.Title "Subtitle" $f.AccountLabel)}}{{template "pageheadend"}}
+
+        {{if .Error}}<p class="message error">{{.Error}}</p>{{end}}
+        {{if $f.Diag}}<pre class="diagnostic">{{$f.Diag}}</pre>{{end}}
+
+        {{if eq $f.Mode "delete"}}
+        <p class="message error">The {{if eq $f.Kind "addressbook"}}address book{{else}}calendar{{end}} and everything in it is deleted on <span class="mono">{{$f.Host}}</span>. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</p>
+        <p class="hint">Restoring from a backup brings records into a <strong>new</strong> collection at a new address, not back into this one.</p>
+        {{if $f.ExportURL}}
+        <p><a class="app-btn" href="{{$f.ExportURL}}">{{template "ico" "down"}}Download a copy first</a></p>
+        {{end}}
+        <div class="form-field w-md">
+            <label for="confirm-collection">Type the name to confirm</label>
+            <input id="confirm-collection" name="confirm_collection" type="text" required autocomplete="off"
+                   placeholder="{{$f.DisplayName}}">
+        </div>
+        <div class="form-foot">
+            <button type="submit" class="app-btn is-danger-solid">Delete on the server</button>
+            <a class="app-btn is-quiet" href="{{$f.ReturnURL}}">Cancel</a>
+        </div>
+
+        {{else if eq $f.Mode "rename"}}
+        <div class="form-field w-md">
+            <label for="collection-name">Name</label>
+            <input id="collection-name" name="collection_name" type="text" required value="{{$f.DisplayName}}" autocomplete="off">
+        </div>
+        {{if ne $f.Kind "addressbook"}}
+        <fieldset class="form-field">
+            <legend>Colour</legend>
+            <div class="color-palette">
+            {{range $f.Palette}}
+                <label class="color-swatch"><input type="radio" name="collection_color" value="{{.}}"{{if eq . $f.Color}} checked{{end}}><span data-swatch="{{.}}"></span></label>
+            {{end}}
+            </div>
+        </fieldset>
+        {{end}}
+        <div class="form-field w-xl">
+            <label>Address <span class="hint">— stays as it is</span></label>
+            <p class="mono hint">{{$f.AddressHint}}</p>
+        </div>
+        <p class="hint">Renaming is not moving: the address does not change, so configured clients keep working.</p>
+        <div class="form-foot">
+            <button type="submit">Save</button>
+            <a class="app-btn is-quiet" href="{{$f.ReturnURL}}">Cancel</a>
+        </div>
+
+        {{else}}
+        <div class="form-field w-md">
+            <label for="collection-account">On which server</label>
+            <select id="collection-account" name="account_id" required>
+                <option value="">Choose…</option>
+                {{range $f.Accounts}}
+                <option value="{{.ID}}"{{if .Disabled}} disabled{{end}}{{if and (not .Disabled) (eq .ID $f.AccountID)}} selected{{end}}>{{.Label}}{{if .Reason}} — {{.Reason}}{{end}}</option>
+                {{end}}
+            </select>
+        </div>
+        <div class="form-field w-md">
+            <label for="collection-name">Name</label>
+            <input id="collection-name" name="collection_name" type="text" required value="{{$f.DisplayName}}" autocomplete="off">
+        </div>
+        {{if ne $f.Kind "addressbook"}}
+        <fieldset class="form-field">
+            <legend>Colour</legend>
+            <div class="color-palette">
+            {{range $f.Palette}}
+                <label class="color-swatch"><input type="radio" name="collection_color" value="{{.}}"{{if or (eq . $f.Color) (and (not $f.Color) (eq . (index $f.Palette 0)))}} checked{{end}}><span data-swatch="{{.}}"></span></label>
+            {{end}}
+            </div>
+        </fieldset>
+        <fieldset class="form-field">
+            <legend>What goes in it</legend>
+            <label class="checkbox"><input type="checkbox" name="components" value="VEVENT"{{if hasComp $f.Components "VEVENT"}} checked{{end}}> Events</label>
+            <label class="checkbox"><input type="checkbox" name="components" value="VTODO"{{if hasComp $f.Components "VTODO"}} checked{{end}}> Tasks</label>
+            <label class="checkbox"><input type="checkbox" name="components" value="VJOURNAL"{{if hasComp $f.Components "VJOURNAL"}} checked{{end}}> Notes</label>
+            <p class="form-hint">Most servers fix this when the collection is made and will not change it afterwards.</p>
+        </fieldset>
+        {{end}}
+        <div class="form-field w-md">
+            <label for="collection-address">Address</label>
+            <input id="collection-address" name="collection_address" type="text" class="mono" value="{{$f.Address}}" autocomplete="off" spellcheck="false">
+            <p class="form-hint">Taken from the name if left blank. Other clients and restore-by-path go by the address; the name they only show.</p>
+        </div>
+        <div class="form-foot">
+            <button type="submit" class="app-btn is-primary">Create</button>
+            <a class="app-btn is-quiet" href="{{$f.ReturnURL}}">Cancel</a>
+        </div>
+        {{end}}
+    </form>
+</section>
+{{end}}

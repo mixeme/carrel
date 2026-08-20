@@ -19,6 +19,9 @@
         <div class="settings-account-head">
             <h2>{{if $acc.Label}}{{$acc.Label}}{{else}}{{$acc.Username}}{{end}}</h2>
             <span class="bar-sort no-print">
+                {{if $acc.Principal}}
+                <a class="app-btn is-sm" href="{{$.Base}}/app/collections/new?account={{$acc.ID}}&amp;return={{$.Base}}/app/settings/connections">{{template "ico" "plus"}}New collection</a>
+                {{end}}
                 <form method="post" action="{{$.Base}}/app/settings/connections" class="inline-form">
                     <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
                     <input type="hidden" name="action" value="test_dav">
@@ -79,21 +82,33 @@
         {{if or $acc.AddressBooks $acc.Calendars $acc.FileCollections}}
         <ul class="collection-list settings-collections">
         {{range $acc.AddressBooks}}
-            <li>
+            <li class="collection-row-with-menu">
                 <a class="collection-link" href="{{$.Base}}/app/contacts/{{$acc.ID}}/{{.ColEnc}}">
                     <span class="collection-dot" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                     {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
                     <span class="hint">card{{if .Sync.Known}} · {{.Sync.MetaLabel}}{{end}}</span>
                 </a>
+                {{if not .ReadOnly}}
+                <span class="collection-row-menu no-print">
+                    <a class="app-btn is-sm is-quiet" href="{{$.Base}}/app/collections/rename?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Rename</a>
+                    <a class="app-btn is-sm is-danger" href="{{$.Base}}/app/collections/delete?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Delete</a>
+                </span>
+                {{end}}
             </li>
         {{end}}
         {{range $acc.Calendars}}
-            <li>
+            <li class="collection-row-with-menu">
                 <a class="collection-link" href="{{$.Base}}/app/calendar/{{$acc.ID}}/{{.ColEnc}}">
                     <span class="collection-dot" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                     {{if .DisplayName}}{{.DisplayName}}{{else}}{{.Path}}{{end}}
                     <span class="hint">cal{{if .Sync.Known}} · {{.Sync.MetaLabel}}{{end}}</span>
                 </a>
+                {{if not .ReadOnly}}
+                <span class="collection-row-menu no-print">
+                    <a class="app-btn is-sm is-quiet" href="{{$.Base}}/app/collections/rename?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Rename</a>
+                    <a class="app-btn is-sm is-danger" href="{{$.Base}}/app/collections/delete?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Delete</a>
+                </span>
+                {{end}}
             </li>
         {{end}}
         {{range $acc.FileCollections}}

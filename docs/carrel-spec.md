@@ -169,6 +169,8 @@ type Transport interface {
     Put(ctx context.Context, path string, body io.Reader, ifMatch string) (string, error)
     Delete(ctx context.Context, path, ifMatch string) error
     MkCol(ctx context.Context, path string) error
+    MkColProps(ctx context.Context, method, path string, props []ColProp) error
+    PropPatch(ctx context.Context, path string, set []ColProp, remove []xml.Name) error
     Move(ctx context.Context, src, dst string, overwrite bool) error
 }
 ```
@@ -177,7 +179,7 @@ type Transport interface {
 
 Транспорт ничего не знает про vCard и iCal. `REPORT` и условный `PUT` — отдельные интерфейсы, потому что это не плоский DAV.
 
-**Два метода добавятся вместе с §10.1** — `PropPatch` и вариант `MkCol`, умеющий отправить тело со свойствами; их подписи приведены там же. До тех пор интерфейс полон: ни один из существующих провайдеров их не требует, и `MkCol` без тела закрывает единственный случай, который сегодня есть, — создание папки в файловой коллекции.
+`MkColProps` и `PropPatch` добавлены вместе с §10.1; подписи и правила — там же.
 
 ---
 
@@ -231,7 +233,7 @@ type Object struct {
 
 **VJOURNAL** — заметки не односторонние: клиенты существуют (jtx Board, Evolution), совместимость обязательна, сохранение неизвестных свойств действует полностью. Подробнее §23.9.
 
-### 10.1 Коллекции: завести, переименовать, удалить **[не сделано]**
+### 10.1 Коллекции: завести, переименовать, удалить **[готово]**
 
 Carrel умеет записывать события и контакты, но не умеет завести коллекцию, куда их класть. Человек, поднявший чистый Baikal и подключивший его первым делом сюда, попадает в интерфейс, где работать не с чем, и уходит в админку сервера — то есть ровно туда, откуда Carrel обещал его увести. У файловых коллекций создание папки есть с самого начала (`MKCOL`), у календарей и адресных книг нет ничего, и это не решение, а необработанное место.
 

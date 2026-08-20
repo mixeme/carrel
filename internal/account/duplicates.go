@@ -345,6 +345,17 @@ func (d *Duplicates) Prune(gone func(Member) bool) bool {
 	return changed
 }
 
+// PurgeCollection drops duplicate groups touching one collection (§10.1).
+func (d *Duplicates) PurgeCollection(ref SourceRef) {
+	if d == nil {
+		return
+	}
+	ref.Collection = normalizePath(ref.Collection)
+	d.Prune(func(m Member) bool {
+		return m.AccountID == ref.AccountID && normalizePath(m.Collection) == ref.Collection
+	})
+}
+
 func normalizeMembers(members []Member) []Member {
 	out := make([]Member, 0, len(members))
 	seen := make(map[string]bool, len(members))
