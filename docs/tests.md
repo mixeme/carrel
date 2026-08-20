@@ -49,6 +49,10 @@ The chain against a mock server: well-known, principal, home-sets, collections. 
 
 The optional mutating validation pass (§6): against a mock server that already answers discovery, creates a calendar object, runs `calendar-query` at Depth 1 and multiget, refuses a duplicate conditional create and a stale `If-Match` with 412, reads the object back, deletes it, and repeats the same shape for CardDAV and plain WebDAV files. Nothing is left behind when the pass succeeds.
 
+### `installcheck`
+
+The installation-check rows of §18.1 against a fake local server: reachability, header echo, SSE, upload, cookies, clock, grey rows for what cannot be measured from outside, and `local` when the bind is loopback.
+
 ### `model` — the promise not to lose data
 
 The largest set, because §8 is the promise that is hardest to keep and easiest to break by accident.
@@ -83,7 +87,7 @@ These are the tests that catch what unit tests cannot, because they run through 
 
 **`acceptance_test.go`** walks §21 end to end: an empty volume, the first administrator, an invitation handed over by link alone with SMTP unset, the account it creates, and that account signing in with the password it chose. Along the way: no credentials and no data key existing for an invited login until it is accepted, a spent link answering gone with only its digest ever stored, and the new account refused at the panel. Plus an administrator's key not opening another account's data, disabling an account ending its live sessions and wiping their keys then and there, the last administrator surviving everything, and the destructive reset naming escrow as the alternative above the button that does it.
 
-**Per stage:** `stage5_test.go`, `stage6_test.go` and `stage7_test.go` each hold that stage's behaviour against a fake server. The rest cover authentication, CSRF, the admin panel, escrow, invitations, contacts, the calendar and the shell.
+**Per stage:** `stage5_test.go`, `stage6_test.go` and `stage7_test.go` each hold that stage's behaviour against a fake server. The rest cover authentication, CSRF, the admin panel, escrow, invitations, contacts, the calendar, collections (§10.1: a mismatched typed name does not `DELETE`, a second user cannot reach another account's collection, every empty section rail still offers to create) and the shell.
 
 Stage 7 in particular: the navigation entry appearing only when a plain collection exists; the listing and breadcrumb; download headers and body; a traversal in a download URL answering 404; an upload refusing to overwrite; a read-only collection refusing writes and offering no forms; mkdir and delete; the whole of §23.10 in one pass — folder named once, file stored under a date-and-title name, `ATTACH` written as a URI with a filename and not as base64, the card showing it with its proxy; the proxy serving the bytes; a foreign link shown but refused; an inline attachment refused with a reason and no write; detaching leaving the file and saying so; an unreachable file server still rendering the card; a card with no folder configured pointing at the setting; and a folder of Markdown importing from WebDAV without disturbing it.
 
@@ -133,6 +137,7 @@ SMTP against a local relay that can be told to refuse: a missing configuration r
 | Deleting a linked record from another client causes no error | in `handler/stage6_test.go` |
 | A 10 MB download does not exhaust memory | `TestLiveLargeFileStreamsWithoutBuffering` (integration), `TestOpenStreamsWithoutBuffering` |
 | Removing an `ATTACH` leaves the file on the server | `TestDetachLeavesTheFileOnTheServer` |
+| User A cannot create, rename or delete user B's collection | `TestUserCannotDeleteAnotherUsersCollection` |
 
 The criteria not in this table are the ones a person has to check, below.
 

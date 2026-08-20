@@ -69,8 +69,20 @@ func (s *Server) buildSectionRail(sess *session.Session, req findRequest, active
 		Mode:               req.Mode,
 		Selection:          selectionState(rows),
 		NewCollectionURL:   s.sectionNewCollectionURL(req.Mode),
-		NewCollectionLabel:   sectionNewCollectionLabel(req.Mode),
+		NewCollectionLabel: sectionNewCollectionLabel(req.Mode),
 	}, nil
+}
+
+// emptyHomeRail is the rail for a section that has no collections of that
+// kind yet. The empty-home path used to skip buildSectionRail, which hid the
+// New calendar / address book / list / notebook button §10.1 puts on an
+// empty rail — the clean-Baikal case the wave was written for.
+func (s *Server) emptyHomeRail(sess *session.Session, mode findMode) sectionRail {
+	rail, err := s.buildSectionRail(sess, findRequest{Mode: mode}, "", "")
+	if err != nil {
+		return sectionRail{}
+	}
+	return rail
 }
 
 type sourceGroup struct {

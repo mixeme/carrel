@@ -86,7 +86,7 @@ func (s *Server) TasksHome(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(rows) == 0 {
 		v := s.View(r, "Tasks")
-		v.Data = tasksView{NoLists: true}
+		v.Data = tasksView{NoLists: true, SectionRail: s.emptyHomeRail(sess, modeTasks)}
 		s.Render(w, "tasks.html", v)
 		return
 	}

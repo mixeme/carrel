@@ -370,7 +370,13 @@
             <p class="hint">Unticked collections are not polled on the merged view.</p>
         </div>
     </form>
-    {{else}}<p class="hint rail-empty">No collections here yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
+    {{else}}
+    <p class="hint rail-empty">No collections here yet.</p>
+    <div class="rail-foot">
+        {{if $rail.NewCollectionURL}}<a class="app-btn is-quiet" href="{{$rail.NewCollectionURL}}">{{template "ico" "plus"}}{{$rail.NewCollectionLabel}}</a>{{end}}
+        <p class="hint">Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> if you haven't.</p>
+    </div>
+    {{end}}
 </aside>
 {{end}}
 

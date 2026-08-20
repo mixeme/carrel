@@ -99,7 +99,7 @@ func (s *Server) NotesHome(w http.ResponseWriter, r *http.Request) {
 	}
 	if len(rows) == 0 {
 		v := s.View(r, "Notes")
-		v.Data = notesView{NoLists: true}
+		v.Data = notesView{NoLists: true, SectionRail: s.emptyHomeRail(sess, modeNotes)}
 		s.Render(w, "notes.html", v)
 		return
 	}

@@ -161,21 +161,6 @@ func TestRegistrationConfirmsOnLink(t *testing.T) {
 	}
 }
 
-func TestMigrateMarksExistingAddressesConfirmed(t *testing.T) {
-	state := &State{
-		Version: 0,
-		Users: []*User{{
-			ID:    "u1",
-			Login: "legacy",
-			Email: "legacy@example.org",
-		}},
-	}
-	migrate(state)
-	if !state.Users[0].EmailConfirmed {
-		t.Fatal("migration should confirm existing addresses")
-	}
-}
-
 func TestSetEmailClearsConfirmationWhenEmpty(t *testing.T) {
 	s, _ := openTest(t, t.TempDir())
 	admin := mustAdmin(t, s)

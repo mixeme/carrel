@@ -3059,7 +3059,7 @@ Read  2 min ago</div>
   </figure>
 </div>
 
-<h3 id="collections">Завести, переименовать и удалить коллекцию <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· запланировано, §10.1</span></h3>
+<h3 id="collections">Завести, переименовать и удалить коллекцию <span style="font-size:11px;letter-spacing:.06em;color:var(--dusty);text-transform:none">· готово, §10.1</span></h3>
 <p>Дыра, которую видно только если специально искать: Carrel умеет читать и записывать события и контакты, но не умеет завести календарь, в который их класть. Человек, поднявший чистый Baikal и подключивший его первым делом к Carrel, попадает в интерфейс, где работать не с чем, — и уходит заводить коллекцию в админку сервера, то есть ровно туда, откуда Carrel обещал его увести. То же самое при обычном «нужен ещё один календарь для поездок»: сегодня это делается где угодно, только не здесь.</p>
 <p>У файлов всё это давно есть — «New folder», «Rename», «Delete» в 7.5, — а у календарей и адресных книг нет. По <a href="#parity">правилу равенства коллекций</a> так быть не должно, и строка в таблице теперь стоит.</p>
 
@@ -3074,7 +3074,7 @@ Read  2 min ago</div>
 <div class="frames">
   <figure style="flex:1 1 420px">
   <div class="frame">
-    <div class="frame-label"><span>Новая коллекция</span><span class="plan">не построено</span><i>лист из рейла или из настроек</i></div>
+    <div class="frame-label"><span>Новая коллекция</span><span class="plan">готово</span><i>лист из рейла или из настроек</i></div>
     <div class="mock" style="background:var(--bg);padding:16px">
       <div class="m-sheet" style="width:100%;max-width:none">
         <div class="h">
@@ -3116,7 +3116,7 @@ Read  2 min ago</div>
 
   <figure style="flex:1 1 340px">
   <div class="frame">
-    <div class="frame-label"><span>Новая коллекция · сервер отказал</span><span class="plan">не построено</span><i>тот же лист</i></div>
+    <div class="frame-label"><span>Новая коллекция · сервер отказал</span><span class="plan">готово</span><i>тот же лист</i></div>
     <div class="mock" style="background:var(--bg);padding:16px">
       <div class="m-sheet" style="width:100%;max-width:none">
         <div class="h">
@@ -3142,7 +3142,7 @@ Read  2 min ago</div>
 <div class="frames">
   <figure style="flex:1 1 380px">
   <div class="frame">
-    <div class="frame-label"><span>Переименовать и сменить цвет</span><span class="plan">не построено</span><i>из меню строки</i></div>
+    <div class="frame-label"><span>Переименовать и сменить цвет</span><span class="plan">готово</span><i>из меню строки</i></div>
     <div class="mock" style="background:var(--bg);padding:16px">
       <div class="m-sheet" style="width:100%;max-width:none">
         <div class="h">
@@ -3174,7 +3174,7 @@ Read  2 min ago</div>
 
   <figure style="flex:1 1 380px">
   <div class="frame">
-    <div class="frame-label"><span>Удаление коллекции</span><span class="plan">не построено</span><i>что именно исчезнет</i></div>
+    <div class="frame-label"><span>Удаление коллекции</span><span class="plan">готово</span><i>что именно исчезнет</i></div>
     <div class="mock" style="background:var(--bg);padding:16px">
       <div class="m-sheet" style="width:100%;max-width:none">
         <div class="h">
@@ -4088,7 +4088,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
   <tr><td><code>login</code>, <code>setup</code>, <code>register</code>, <code>register_sent</code>, <code>forgot</code></td><td>Вход, первый администратор, регистрация, невозможность восстановления</td><td>7.12</td></tr>
   <tr><td><code>invite</code>, <code>invite_invalid</code>, <code>email_confirmed</code></td><td>Приглашение и подтверждение адреса по одноразовой ссылке</td><td>7.12, 7.13</td></tr>
   <tr><td><code>password</code></td><td>Смена пароля, обычная и вынужденная</td><td>7.13</td></tr>
-  <tr><td><code>settings_connections</code>, <code>settings_account</code>, <code>settings_attachments</code>, <code>settings_appearance</code></td><td>Подключения, подписки, учётная запись, вложения, тема и плотность строк</td><td>7.10, 7.10.2, 7.10.3</td></tr>
+  <tr><td><code>settings_connections</code>, <code>settings_account</code>, <code>settings_attachments</code>, <code>settings_appearance</code>, <code>collection_form</code></td><td>Подключения, подписки, учётная запись, вложения, тема и плотность строк; завести / переименовать / удалить коллекцию</td><td>7.10, 7.10.1, 7.10.2, 7.10.3</td></tr>
   <tr><td><code>contacts</code>, <code>contact</code>, <code>contact_crop</code>, <code>person</code></td><td>Список, карточка, правка, кадрирование фотографии, всё об одном человеке</td><td>7.1, 7.13</td></tr>
   <tr><td><code>contact_panel</code>, <code>event_panel</code>, <code>task_panel</code>, <code>note_panel</code></td><td>Панель подробностей справа: htmx-фрагмент, а не экран</td><td>7.1–7.4</td></tr>
   <tr><td><code>agenda</code>, <code>event</code></td><td>Агенда, карточка события, повторения</td><td>7.2</td></tr>
@@ -5717,14 +5717,14 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 <h2 id="s-plan-small">7.19 Мелкое запланированное — где оно живёт в этих макетах</h2>
 <table class="doc">
   <tr><th style="width:30%">Что</th><th style="width:26%">Где показано</th><th>Что нужно сделать</th></tr>
-  <tr><td>Завести, переименовать, удалить коллекцию (§10.1)</td><td>Нарисовано: <a href="#collections">7.10.1</a>; кнопки — в рейле 7.1 и 7.2 и в карточке аккаунта 7.10</td><td>Транспорту нужны <code>PROPPATCH</code> и <code>MkCol</code> с телом; <code>DELETE</code> уже есть</td></tr>
+  <tr><td>Завести, переименовать, удалить коллекцию (§10.1)</td><td>Нарисовано: <a href="#collections">7.10.1</a>; кнопки — в рейле 7.1 и 7.2 и в карточке аккаунта 7.10</td><td><span class="m-badge is-done">готово</span></td></tr>
   <tr><td>Attachments у задач (§23.10)</td><td>Нарисовано: 7.3, блок <b>Attachments</b> в карточке задачи</td><td>Модель готова: дело за карточкой</td></tr>
   <tr><td>Когда коллекция читалась и менялась (§23.8)</td><td>Блок <b>Source</b> в панели подробностей, 7.2</td><td>Кэш это уже знает — не хватает только вывода</td></tr>
   <tr><td>Исходный часовой пояс события (§23.8)</td><td>Поле <b>Time zone</b> в форме события, 7.2</td><td>Данные в <code>DTSTART</code>; показывать, когда отличается от общего</td></tr>
-  <tr><td>Оболочка офлайн (service worker)</td><td>§13, макет §8 «Нет сети»</td><td>Кэшировать оболочку и статику, содержимое коллекций — никогда</td></tr>
-  <tr><td>Полный тест DAV-сервера (§6, изменяющий этап)</td><td>Подпись к макету валидатора, 7.11</td><td>Отдельный экран не нужен: тот же след, второй кнопкой и с предупреждением</td></tr>
+  <tr><td>Оболочка офлайн (service worker)</td><td>§13, макет §8 «Нет сети»</td><td><span class="m-badge is-done">готово</span></td></tr>
+  <tr><td>Полный тест DAV-сервера (§6, изменяющий этап)</td><td>Подпись к макету валидатора, 7.11</td><td><span class="m-badge is-done">готово</span></td></tr>
   <tr><td>Узкий экран (§13)</td><td>Раздел 10 целиком</td><td>Выдвижной рейл, цели 44 px, центральный кроп</td></tr>
-  <tr><td>Отображаемое имя и подтверждение адреса (§23.5)</td><td>Нарисовано: <a href="#s-mail">7.17</a>, блоки <b>Name</b> и <b>Email</b> в учётной записи</td><td>Двух полей нет в записи пользователя: имя и признак подтверждения. Приглашение ссылкой даёт непроверенный адрес — считать его неподтверждённым</td></tr>
+  <tr><td>Отображаемое имя и подтверждение адреса (§23.5)</td><td>Нарисовано: <a href="#s-mail">7.17</a>, блоки <b>Name</b> и <b>Email</b> в учётной записи</td><td><span class="m-badge is-done">готово</span></td></tr>
 </table>
 
 <h2 id="m-states">8. Состояния</h2>

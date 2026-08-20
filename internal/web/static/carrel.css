@@ -4007,6 +4007,7 @@ button.danger {
 }
 
 .collection-row-menu {
+    position: relative;
     display: inline-flex;
     gap: 4px;
     margin-left: auto;
@@ -4167,6 +4168,13 @@ button.danger {
     background: var(--card);
     color: var(--ink);
     font-weight: 600;
+}
+
+a.theme-segment-btn {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* The segment in the user menu is a compact control in a dropdown; the one on

@@ -61,7 +61,7 @@ func (s *Server) CalendarHome(w http.ResponseWriter, r *http.Request) {
 	refs := s.listCalendars(sess)
 	if len(refs) == 0 {
 		v := s.View(r, "Agenda")
-		v.Data = agendaView{Calendars: refs, NoCalendars: true}
+		v.Data = agendaView{Calendars: refs, NoCalendars: true, SectionRail: s.emptyHomeRail(sess, modeTime)}
 		s.Render(w, "agenda.html", v)
 		return
 	}

@@ -32,26 +32,28 @@ const (
 )
 
 type collectionFormView struct {
-	Mode         string
-	Kind         discovery.Kind
-	Title        string
-	AccountID    string
-	AccountLabel string
-	Collection   discovery.Collection
-	ColPath      string
-	DisplayName  string
-	Address      string
-	Color        string
-	Components   []string
-	AddressHint  string
-	ReadOnlyAddr bool
-	Palette      []string
-	Accounts     []collectionAccountChoice
-	ReturnURL    string
-	Diag         string
-	ExportURL    string
-	Refs         collectionDeleteRefs
-	Host         string
+	Mode               string
+	Kind               discovery.Kind
+	Title              string
+	AccountID          string
+	AccountLabel       string
+	Collection         discovery.Collection
+	ColPath            string
+	DisplayName        string
+	Address            string
+	Color              string
+	Components         []string
+	AddressHint        string
+	ReadOnlyAddr       bool
+	Palette            []string
+	Accounts           []collectionAccountChoice
+	ReturnURL          string
+	Diag               string
+	ExportURL          string
+	Refs               collectionDeleteRefs
+	Host               string
+	CalendarKindURL    string
+	AddressBookKindURL string
 }
 
 type collectionAccountChoice struct {
@@ -138,6 +140,7 @@ func (s *Server) renderCollectionForm(w http.ResponseWriter, r *http.Request, mo
 	if len(data.Accounts) == 0 && mode == "new" {
 		data.Accounts = s.collectionAccountChoices(r, data.Kind)
 	}
+	s.setCollectionKindURLs(&data)
 	v := s.View(r, data.Title)
 	v.ShellLayout = "settings"
 	s.firstLoginEscrowNotice(r, &v)
@@ -345,6 +348,7 @@ func (s *Server) fillDeleteForm(acc account.Account, col discovery.Collection, r
 		ReturnURL:    returnURL,
 		ExportURL:    exportURL,
 		Host:         host,
+		Refs:         collectionDeleteRefs{},
 	}
 }
 
@@ -373,6 +377,7 @@ func (s *Server) buildCollectionFormFromPost(r *http.Request) collectionFormView
 }
 
 func (s *Server) renderCollectionFormError(w http.ResponseWriter, r *http.Request, data collectionFormView, err error) {
+	s.setCollectionKindURLs(&data)
 	v := s.View(r, data.Title)
 	v.ShellLayout = "settings"
 	if data.Diag != "" {
@@ -517,25 +522,37 @@ func collectionReturnURL(s *Server, returnURL, accountID, colPath string) string
 	return returnURL
 }
 
-func collectionNewURL(s *Server, kind discovery.Kind, components []string, returnURL string) string {
+func collectionNewURL(s *Server, kind discovery.Kind, components []string, returnURL, accountID string) string {
 	q := url.Values{"kind": {string(kind)}, "return": {returnURL}}
 	if len(components) > 0 {
 		q.Set("components", strings.Join(components, ","))
 	}
+	if accountID != "" {
+		q.Set("account", accountID)
+	}
 	return s.Path("/app/collections/new?" + q.Encode())
+}
+
+func (s *Server) setCollectionKindURLs(data *collectionFormView) {
+	calComps := data.Components
+	if data.Kind == discovery.KindAddressBook {
+		calComps = nil
+	}
+	data.CalendarKindURL = collectionNewURL(s, discovery.KindCalendar, calComps, data.ReturnURL, data.AccountID)
+	data.AddressBookKindURL = collectionNewURL(s, discovery.KindAddressBook, nil, data.ReturnURL, data.AccountID)
 }
 
 func (s *Server) sectionNewCollectionURL(mode findMode) string {
 	home := s.Path(mode.sectionHome())
 	switch mode {
 	case modePeople:
-		return collectionNewURL(s, discovery.KindAddressBook, nil, home)
+		return collectionNewURL(s, discovery.KindAddressBook, nil, home, "")
 	case modeTasks:
-		return collectionNewURL(s, discovery.KindCalendar, []string{"VTODO"}, home)
+		return collectionNewURL(s, discovery.KindCalendar, []string{"VTODO"}, home, "")
 	case modeNotes:
-		return collectionNewURL(s, discovery.KindCalendar, []string{"VJOURNAL"}, home)
+		return collectionNewURL(s, discovery.KindCalendar, []string{"VJOURNAL"}, home, "")
 	case modeTime:
-		return collectionNewURL(s, discovery.KindCalendar, []string{"VEVENT"}, home)
+		return collectionNewURL(s, discovery.KindCalendar, []string{"VEVENT"}, home, "")
 	default:
 		return ""
 	}

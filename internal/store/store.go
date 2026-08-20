@@ -170,14 +170,6 @@ func (s *Store) load() (*State, error) {
 // migrate brings an older state up to StateVersion. There is nothing to do
 // yet; the hook exists so the first format change has an obvious home.
 func migrate(state *State) {
-	for _, u := range state.Users {
-		// Accounts that already had an address before EmailConfirmed existed
-		// were treated as reachable; only link invitations after wave 3.5
-		// start unconfirmed.
-		if u.Email != "" && !u.Unconfirmed && !u.EmailConfirmed {
-			u.EmailConfirmed = true
-		}
-	}
 	state.Version = StateVersion
 }
 

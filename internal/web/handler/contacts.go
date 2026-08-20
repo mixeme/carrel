@@ -102,7 +102,7 @@ func (s *Server) ContactsHome(w http.ResponseWriter, r *http.Request) {
 	books := addressBooks(accounts)
 	if len(books) == 0 {
 		v := s.View(r, "Contacts")
-		v.Data = contactsListView{NoBooks: true, Books: books}
+		v.Data = contactsListView{NoBooks: true, Books: books, SectionRail: s.emptyHomeRail(sess, modePeople)}
 		s.Render(w, "contacts.html", v)
 		return
 	}

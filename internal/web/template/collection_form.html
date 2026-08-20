@@ -17,6 +17,12 @@
 
         {{if eq $f.Mode "delete"}}
         <p class="message error">The {{if eq $f.Kind "addressbook"}}address book{{else}}calendar{{end}} and everything in it is deleted on <span class="mono">{{$f.Host}}</span>. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</p>
+        <p class="src-rubric">What is pointing at it now</p>
+        <ul class="source-list">
+            <li>{{if $f.Refs.PublishedLinks}}{{range $f.Refs.PublishedLinks}}<span>{{.}}</span>{{end}}{{else}}<span class="hint">No published links</span>{{end}}</li>
+            <li>{{if $f.Refs.BackupJobs}}{{range $f.Refs.BackupJobs}}<span>{{.}}</span>{{end}}{{else}}<span class="hint">No backup jobs</span>{{end}}</li>
+            <li>{{if $f.Refs.DavloomDevices}}{{range $f.Refs.DavloomDevices}}<span>{{.}}</span>{{end}}{{else}}<span class="hint">No davloom devices</span>{{end}}</li>
+        </ul>
         <p class="hint">Restoring from a backup brings records into a <strong>new</strong> collection at a new address, not back into this one.</p>
         {{if $f.ExportURL}}
         <p><a class="app-btn" href="{{$f.ExportURL}}">{{template "ico" "down"}}Download a copy first</a></p>
@@ -57,6 +63,13 @@
         </div>
 
         {{else}}
+        <div class="form-field">
+            <label>Kind</label>
+            <div class="theme-segment">
+                <a class="theme-segment-btn{{if ne $f.Kind "addressbook"}} is-on{{end}}" href="{{$f.CalendarKindURL}}">Calendar</a>
+                <a class="theme-segment-btn{{if eq $f.Kind "addressbook"}} is-on{{end}}" href="{{$f.AddressBookKindURL}}">Address book</a>
+            </div>
+        </div>
         <div class="form-field w-md">
             <label for="collection-account">On which server</label>
             <select id="collection-account" name="account_id" required>

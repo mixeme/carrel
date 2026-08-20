@@ -89,9 +89,13 @@
                     <span class="hint">card{{if .Sync.Known}} · {{.Sync.MetaLabel}}{{end}}</span>
                 </a>
                 {{if not .ReadOnly}}
-                <span class="collection-row-menu no-print">
-                    <a class="app-btn is-sm is-quiet" href="{{$.Base}}/app/collections/rename?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Rename</a>
-                    <a class="app-btn is-sm is-danger" href="{{$.Base}}/app/collections/delete?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Delete</a>
+                <span class="collection-row-menu no-print" data-dots-menu>
+                    <button type="button" class="app-btn is-sm is-quiet" data-dots-toggle
+                            aria-expanded="false" aria-haspopup="menu" aria-label="Collection actions">{{template "ico" "dots"}}</button>
+                    <div class="app-create-menu dots-menu" role="menu" hidden>
+                        <a class="app-create-item" href="{{$.Base}}/app/collections/rename?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Rename</a>
+                        <a class="app-create-item" href="{{$.Base}}/app/collections/delete?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Delete</a>
+                    </div>
                 </span>
                 {{end}}
             </li>
@@ -104,9 +108,13 @@
                     <span class="hint">cal{{if .Sync.Known}} · {{.Sync.MetaLabel}}{{end}}</span>
                 </a>
                 {{if not .ReadOnly}}
-                <span class="collection-row-menu no-print">
-                    <a class="app-btn is-sm is-quiet" href="{{$.Base}}/app/collections/rename?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Rename</a>
-                    <a class="app-btn is-sm is-danger" href="{{$.Base}}/app/collections/delete?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Delete</a>
+                <span class="collection-row-menu no-print" data-dots-menu>
+                    <button type="button" class="app-btn is-sm is-quiet" data-dots-toggle
+                            aria-expanded="false" aria-haspopup="menu" aria-label="Collection actions">{{template "ico" "dots"}}</button>
+                    <div class="app-create-menu dots-menu" role="menu" hidden>
+                        <a class="app-create-item" href="{{$.Base}}/app/collections/rename?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Rename</a>
+                        <a class="app-create-item" href="{{$.Base}}/app/collections/delete?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Delete</a>
+                    </div>
                 </span>
                 {{end}}
             </li>
