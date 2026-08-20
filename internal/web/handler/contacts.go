@@ -34,6 +34,26 @@ func contactSortFrom(value string) string {
 	return contactSortName
 }
 
+// resolveContactSort applies an explicit ?sort= and remembers it as the
+// user's default, or falls back to that remembered default when the request
+// carries none (2.6.G11 — the parameter worked and the memory never did).
+func (s *Server) resolveContactSort(sess *session.Session, r *http.Request) string {
+	raw := r.URL.Query().Get("sort")
+	if raw == "" {
+		if sess != nil {
+			if user, err := s.Store.User(sess.UserID); err == nil {
+				return contactSortFrom(user.ContactSort)
+			}
+		}
+		return contactSortName
+	}
+	sortBy := contactSortFrom(raw)
+	if sess != nil {
+		_ = s.Store.SetContactSort(sess.UserID, sortBy)
+	}
+	return sortBy
+}
+
 type contactsListView struct {
 	Books        []addressBookRef
 	AccountID    string
@@ -100,7 +120,7 @@ func (s *Server) ContactsList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess := SessionFrom(r)
-	sortBy := contactSortFrom(r.URL.Query().Get("sort"))
+	sortBy := s.resolveContactSort(sess, r)
 	view, err := s.buildContactsList(r.Context(), sess, accountID, collection, colEnc, 0, sortBy)
 	if err != nil {
 		v := s.View(r, "Contacts")
@@ -136,7 +156,7 @@ func (s *Server) ContactsPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess := SessionFrom(r)
-	sortBy := contactSortFrom(r.URL.Query().Get("sort"))
+	sortBy := s.resolveContactSort(sess, r)
 	view, err := s.buildContactsList(r.Context(), sess, accountID, collection, colEnc, offset, sortBy)
 	if err != nil {
 		http.Error(w, userFacingDAVError(err), http.StatusBadRequest)

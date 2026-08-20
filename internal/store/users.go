@@ -545,6 +545,31 @@ func (s *Store) SetWeekStart(userID, start string) error {
 	})
 }
 
+// SetContactSort and SetNoteSort save the sort order chosen on a
+// per-collection list as the default for next time (2.6.G11). Not audited,
+// the same as the other display preferences.
+func (s *Store) SetContactSort(userID, value string) error {
+	return s.update(func(state *State) error {
+		u := findUser(state, userID)
+		if u == nil {
+			return ErrNotFound
+		}
+		u.ContactSort = value
+		return nil
+	})
+}
+
+func (s *Store) SetNoteSort(userID, value string) error {
+	return s.update(func(state *State) error {
+		u := findUser(state, userID)
+		if u == nil {
+			return ErrNotFound
+		}
+		u.NoteSort = value
+		return nil
+	})
+}
+
 // MarkEscrowNoticeSeen records that the user has been shown the escrow notice,
 // so it is not repeated at every login (§5.4).
 func (s *Store) MarkEscrowNoticeSeen(userID string) error {

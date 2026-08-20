@@ -99,6 +99,13 @@ type User struct {
 	// week's boundary is computed on the server before the page is sent, so
 	// there is nothing client-side to apply a local-only preference to.
 	WeekStart string `json:"week_start,omitempty"`
+
+	// ContactSort and NoteSort remember the order chosen on a per-collection
+	// list (2.6.B2, closed properly by 2.6.G11): the parameter was applied
+	// on the request it arrived on and forgotten the moment it did not, which
+	// is not what "remembered in the profile" promised.
+	ContactSort string `json:"contact_sort,omitempty"`
+	NoteSort    string `json:"note_sort,omitempty"`
 }
 
 // Activated reports whether the user has set a password. An invited user has

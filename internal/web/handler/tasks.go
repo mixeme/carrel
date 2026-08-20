@@ -59,6 +59,11 @@ type tasksView struct {
 
 type taskCounts struct{ Open, Done, Overdue int }
 
+// All is the total already-loaded count behind the "All n" segment of §16 —
+// the mockup names it, and it was the one number in Open/Done/All that was
+// never computed (2.6.G10).
+func (c taskCounts) All() int { return c.Open + c.Done }
+
 type taskRow struct {
 	UID      string
 	Title    string

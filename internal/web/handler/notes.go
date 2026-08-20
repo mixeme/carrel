@@ -41,6 +41,26 @@ func noteSortFrom(value string) string {
 	}
 }
 
+// resolveNoteSort mirrors resolveContactSort (2.6.G11): an explicit ?sort=
+// is applied and remembered, an absent one falls back to what was
+// remembered last.
+func (s *Server) resolveNoteSort(sess *session.Session, r *http.Request) string {
+	raw := r.URL.Query().Get("sort")
+	if raw == "" {
+		if sess != nil {
+			if user, err := s.Store.User(sess.UserID); err == nil {
+				return noteSortFrom(user.NoteSort)
+			}
+		}
+		return noteSortNewest
+	}
+	sortBy := noteSortFrom(raw)
+	if sess != nil {
+		_ = s.Store.SetNoteSort(sess.UserID, sortBy)
+	}
+	return sortBy
+}
+
 type notesView struct {
 	Sources      []sourceRow
 	AccountID    string
@@ -95,7 +115,7 @@ func (s *Server) NotesList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sess := SessionFrom(r)
-	view, err := s.buildNotes(r.Context(), sess, accountID, collection, colEnc, r.URL.Query().Get("tag"), noteSortFrom(r.URL.Query().Get("sort")))
+	view, err := s.buildNotes(r.Context(), sess, accountID, collection, colEnc, r.URL.Query().Get("tag"), s.resolveNoteSort(sess, r))
 	if err != nil {
 		s.renderNotesError(w, r, err, accountID, colEnc)
 		return
