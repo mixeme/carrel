@@ -93,7 +93,12 @@
     --side: 400px;
     --top: 52px;
     --pad: 20px;
-    --row-lg: 28px;
+    /* List row height (mockup frame 43: "38 or 32 px"). --row-lg also sizes
+       the avatar/icon column (2.6.G7) — the two were meant to scale
+       together, and five `min-height: 38px` literals bypassing this
+       variable entirely is why Compact rows toggled the mechanism without
+       changing anything on screen. */
+    --row-lg: 38px;
     --row-md: 26px;
     --row-sm: 22px;
 }
@@ -422,7 +427,7 @@ a.src-label:hover {
     display: grid;
     align-items: center;
     gap: 12px;
-    min-height: 38px;
+    min-height: var(--row-lg);
     padding-left: var(--pad);
     padding-right: var(--pad);
     border-bottom: 0.5px solid var(--hair);
@@ -2685,7 +2690,7 @@ label.checkbox input {
     grid-template-columns: 3px 62px minmax(180px, 2fr) minmax(110px, 1fr);
     gap: 12px;
     align-items: center;
-    min-height: 38px;
+    min-height: var(--row-lg);
     padding-left: var(--pad);
     padding-right: var(--pad);
     border-bottom: 0.5px solid var(--hair);
@@ -2750,7 +2755,7 @@ label.checkbox input {
     grid-template-columns: 14px 3px minmax(190px, 2fr) minmax(90px, auto) auto;
     gap: 12px;
     align-items: center;
-    min-height: 38px;
+    min-height: var(--row-lg);
     padding-left: var(--pad);
     padding-right: var(--pad);
     border-bottom: 0.5px solid var(--hair);
@@ -2833,7 +2838,7 @@ label.checkbox input {
     grid-template-columns: 3px minmax(140px, 1.2fr) minmax(170px, 2fr) minmax(70px, auto) auto;
     gap: 12px;
     align-items: center;
-    min-height: 38px;
+    min-height: var(--row-lg);
     padding-left: var(--pad);
     padding-right: var(--pad);
     border-bottom: 0.5px solid var(--hair);
@@ -3505,7 +3510,7 @@ label.checkbox input {
     display: grid;
     align-items: center;
     gap: 12px;
-    min-height: 38px;
+    min-height: var(--row-lg);
     padding-left: var(--pad);
     padding-right: var(--pad);
     border-bottom: 0.5px solid var(--hair);
@@ -3892,14 +3897,6 @@ button.danger {
     max-width: none;
 }
 
-.page-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
 .settings-account-card {
     border: 0.5px solid var(--rule);
     border-radius: 4px;
@@ -4061,7 +4058,7 @@ button.danger {
 }
 
 :root[data-density="compact"] {
-    --row-lg: 24px;
+    --row-lg: 32px;
     --row-md: 22px;
     --row-sm: 20px;
 }
@@ -4752,12 +4749,6 @@ body.has-shell .app-shell.is-admin .admin-rail {
     display: flex;
     align-items: center;
     gap: 9px;
-}
-
-.page-title .src-bar {
-    width: 3px;
-    height: 20px;
-    border-radius: 1px;
 }
 
 .page-title .src-bar {
