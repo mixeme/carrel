@@ -1,7 +1,12 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="admin-panel">
-    {{template "pagehead" (pageHead "Title" "Audit log")}}{{template "pageheadend"}}
+    {{$sub := printf "%d record" $d.TotalAuditCount}}{{if ne $d.TotalAuditCount 1}}{{$sub = printf "%d records" $d.TotalAuditCount}}{{end}}
+    {{template "pagehead" (pageHead "Title" "Audit log" "Subtitle" $sub)}}
+        <div class="page-acts no-print">
+            <a class="app-btn" href="{{.Base}}/admin/audit/export?{{if $d.AuditAction}}audit_action={{$d.AuditAction}}&amp;{{end}}{{if $d.AuditCategory}}audit_category={{$d.AuditCategory}}{{end}}">{{template "ico" "down"}}Export CSV</a>
+        </div>
+    {{template "pageheadend"}}
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>
@@ -35,7 +40,6 @@
                 </select>
                 <noscript><button type="submit" class="app-btn is-sm">Filter</button></noscript>
             </form>
-            <a class="app-btn is-sm no-print" href="{{.Base}}/admin/audit/export?{{if $d.AuditAction}}audit_action={{$d.AuditAction}}&amp;{{end}}{{if $d.AuditCategory}}audit_category={{$d.AuditCategory}}{{end}}">Export CSV</a>
             {{template "columnpicker" "admin-audit"}}
         {{template "pagebarend"}}
         {{if $d.AuditLog}}

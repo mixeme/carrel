@@ -92,6 +92,9 @@ type adminView struct {
 	Escrow escrowStatus
 	// EscrowCoverage is how many accounts the master password reaches.
 	EscrowCoverage int
+	// AdminCount is how many of Users hold the administrator role, for the
+	// users list's header subtitle (2.6.G14).
+	AdminCount int
 	// Recovered names the account the last recovery restored.
 	Recovered string
 	// MailWarning is set when a notice that may not be skipped could not be
@@ -104,6 +107,8 @@ type adminView struct {
 	AuditCategory string
 	// AuditLog is the newest entries matching AuditAction and AuditCategory.
 	AuditLog []store.AuditEntry
+	// TotalAuditCount is the log's full size, unfiltered (2.6.G14).
+	TotalAuditCount int
 	// UserFilter is the All / Administrators / Disabled segment on the users
 	// list (2.6.C6).
 	UserFilter string
@@ -315,6 +320,9 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 			DAVCount: u.DAVAccountCount,
 		}
 		out.AllUsers = append(out.AllUsers, row)
+		if u.Role == store.RoleAdmin {
+			out.AdminCount++
+		}
 		if matchesUserFilter(u, out.UserFilter) {
 			out.Users = append(out.Users, row)
 		}
@@ -332,6 +340,10 @@ func (s *Server) buildAdminView(r *http.Request, partial adminView) adminView {
 		Categories: auditCategoryActions(out.AuditCategory),
 		Limit:      200,
 	})
+	// TotalAuditCount is the whole log regardless of the viewer's filter, for
+	// the header subtitle (2.6.G14) — "N records" means the log, not the 200
+	// rows the table happens to show.
+	out.TotalAuditCount = len(s.Store.Audit(store.AuditFilter{}))
 	out.InviteTTLHours = out.Settings.InviteTTLSeconds / 3600
 	out.SessionIdleHours = out.Settings.SessionIdleSeconds / 3600
 	out.SessionAbsoluteDays = out.Settings.SessionAbsoluteSeconds / 86400

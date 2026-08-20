@@ -1773,6 +1773,19 @@ table.data th,
     vertical-align: bottom;
 }
 
+/* A sortable column header is a button in markup (data-files-sort) and
+   small caps in appearance, not a bordered pill — button.link's own border
+   and padding are for a toolbar link, not a th (2.6.G15). */
+table.data th button.link,
+.files-table th button.link {
+    border: 0;
+    padding: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+}
+
 table.data td,
 .files-table td {
     text-align: left;
@@ -1852,10 +1865,14 @@ pre.diagnostic {
     white-space: pre-wrap;
 }
 
+/* 2.6.G13: every current use is one interactive element (a button, a task
+   checkbox) meant to sit inside its parent's own layout — a row, a bar-sort
+   group — not a form of its own with a top rule under it. The name already
+   said "inline"; the rule just never matched it. display: contents drops the
+   <form> out of the box model entirely so its one child lays out exactly as
+   if it were a direct child of whatever it sits in. */
 .inline-form {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 0.5px solid var(--rule);
+    display: contents;
 }
 
 label.checkbox {
@@ -4027,6 +4044,15 @@ button.danger {
 
 .theme-segment {
     display: inline-flex;
+    align-items: center;
+    height: 23px;
+    /* .form-field is a column flexbox and .page-bar wraps onto more than one
+       line; align-items: stretch is the default cross-axis behaviour for
+       both, which would otherwise pull an inline-flex child out to its
+       container's full cross size — a segment control should size to its
+       buttons, not the space around it (2.6.G15). An explicit height pins
+       this regardless of which of the two contexts it is measured in. */
+    align-self: flex-start;
     border: 0.5px solid var(--card-border);
     border-radius: 3px;
     overflow: hidden;

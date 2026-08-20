@@ -1,7 +1,16 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="admin-panel">
-    {{template "pagehead" (pageHead "Title" "Users")}}{{template "pageheadend"}}
+    {{$sub := printf "%d account" (len $d.AllUsers)}}
+    {{if ne (len $d.AllUsers) 1}}{{$sub = printf "%d accounts" (len $d.AllUsers)}}{{end}}
+    {{$sub = printf "%s · %d administrator" $sub $d.AdminCount}}{{if ne $d.AdminCount 1}}{{$sub = print $sub "s"}}{{end}}
+    {{if $d.EscrowCoverage}}{{$sub = printf "%s · %d covered by escrow" $sub $d.EscrowCoverage}}{{end}}
+    {{template "pagehead" (pageHead "Title" "Users" "Subtitle" $sub)}}
+        <div class="page-acts no-print">
+            <a class="app-btn is-primary" href="{{.Base}}/admin/invites">{{template "ico" "plus"}}Add user</a>
+            <a class="app-btn" href="#reset-password-form">Reset a password…</a>
+        </div>
+    {{template "pageheadend"}}
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>
@@ -93,7 +102,7 @@
             so every connection they saved becomes unreadable and is deleted.
             Nothing about it can be undone. For an account covered by key
             escrow, <a href="{{.Base}}/admin/escrow">recover it instead</a> — that keeps the data.</p>
-        <form method="post" class="form" action="{{.Base}}/admin/">
+        <form id="reset-password-form" method="post" class="form" action="{{.Base}}/admin/">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="reset_password">
 

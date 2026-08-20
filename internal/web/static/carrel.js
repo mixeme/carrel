@@ -2300,25 +2300,26 @@ document.addEventListener('change', function (e) {
     });
 
     // 2.6.G9: #find-panel is replaced whole by every poll tick and every SSE
-    // message (sse-swap="results"), both of which go through htmx's normal
-    // swap and so both fire htmx:afterSwap. Without this, a filled-in filter
-    // would go stale the moment a new batch of rows arrived — worse than an
-    // emptied field, because the list would silently stop being filtered
-    // while still looking like it was. Re-run unconditionally, not only when
-    // a query is typed: an empty query still recomputes the counter against
-    // whatever the swap just added (2.6.G8), which is the only way the
-    // merged-view counter and task counts stay right as a poll brings more
-    // rows in.
-    document.body.addEventListener('htmx:afterSwap', function (e) {
-        var target = e.detail && e.detail.target;
-        if (!target || !target.querySelectorAll) return;
-        var scope = target.closest('[data-filter-scope]') || target;
-        refreshScope(scope);
+    // message. htmx:afterSwap was tried first and does not fire reliably for
+    // the SSE path in practice — live-checked against a real instance:
+    // rows arrived, the counter and task counts stayed at zero. A
+    // MutationObserver on the panel itself does not depend on which
+    // mechanism changed it, only that it did, so it catches both the same
+    // way. Without this, a filled-in filter would go stale the moment a new
+    // batch of rows arrived — worse than an emptied field, because the list
+    // would silently stop being filtered while still looking like it was.
+    // Re-run unconditionally, not only when a query is typed: an empty
+    // query still recomputes the counter against whatever just changed
+    // (2.6.G8), which is the only way the merged-view counter and task
+    // counts stay right as a poll brings more rows in.
+    Array.prototype.slice.call(document.querySelectorAll('[data-sse-panel]')).forEach(function (panel) {
+        var scope = panel.closest('[data-filter-scope]') || panel;
+        new MutationObserver(function () { refreshScope(scope); }).observe(panel, { childList: true, subtree: true });
     });
 
     // A page can load with #find-panel already populated — a running task ID
-    // carried over rather than started fresh — in which case no swap ever
-    // fires to trigger the pass above. carrel.js is loaded with `defer`, so
-    // the DOM is already parsed by the time this runs.
+    // carried over rather than started fresh — in which case the observer
+    // above sees no mutation to react to. carrel.js is loaded with `defer`,
+    // so the DOM is already parsed by the time this runs.
     Array.prototype.slice.call(document.querySelectorAll('[data-filter-scope]')).forEach(refreshScope);
 })();
