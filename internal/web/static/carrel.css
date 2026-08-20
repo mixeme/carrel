@@ -513,6 +513,9 @@ a.src-label:hover {
 }
 
 .list-rubric {
+    /* An h2 for the outline, a label to the eye — so the serif that h1 and h2
+       carry has to be said away, or the rubricator reads as a heading. */
+    font-family: var(--f-sans);
     font-size: 10px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -1237,7 +1240,9 @@ body.has-shell {
 }
 
 .detail-fields dt {
-    color: var(--muted);
+    font-size: 11.5px;
+    color: var(--dusty);
+    padding-top: 1px;
     margin: 0;
 }
 
@@ -1252,10 +1257,10 @@ body.has-shell {
 }
 
 .detail-section h3 {
-    font-size: 11px;
-    letter-spacing: 0.12em;
+    font-size: 10px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--dusty);
     margin: 0 0 8px;
     font-weight: 600;
 }
@@ -1570,8 +1575,19 @@ input {
     padding: 0 9px;
     border: 0.5px solid var(--card-border);
     border-radius: 3px;
+    /* font: inherit takes the face but also the 13 px of the shell; the field
+       text of the mockups is 12.5, and the colour has to be said or the field
+       gets the browser's black instead of the ink everything else is set in. */
     font: inherit;
+    font-size: 12.5px;
+    color: var(--ink);
     background: var(--paper);
+}
+
+select,
+textarea {
+    font-size: 12.5px;
+    color: var(--ink);
 }
 
 input:not([type="checkbox"]):not([type="radio"]),
@@ -3315,11 +3331,10 @@ label.checkbox input {
     margin-top: 0;
 }
 
-.find-group h2 {
-    font-size: 1.05rem;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid var(--rule);
-}
+/* The group heading is .list-rubric — the small capitals of the mockups, not a
+   section title. It is an h2 for the outline, which is why the rule that used
+   to size it here had to go: it beat the class on every merged screen and put a
+   22 px serif heading with a rule under it where a 10 px label belongs. */
 
 .find-row {
     display: grid;
@@ -4696,7 +4711,9 @@ body:not(.has-shell) main {
     margin-bottom: 18px;
 }
 
-.auth-submit {
+/* Scoped to the card so it outranks `.form-foot button`, which is one class
+   plus an element and was quietly winning the height with --row-lg. */
+.auth-card .auth-submit {
     width: 100%;
     justify-content: center;
     height: 30px;
