@@ -234,3 +234,47 @@ func TestDuplicatesSurviveSealing(t *testing.T) {
 		t.Fatalf("kind = %q", opened.Duplicates.Groups[0].Kind)
 	}
 }
+
+func TestDuplicateThresholdPreference(t *testing.T) {
+	var d Duplicates
+	if d.EffectiveThreshold(60) != 60 {
+		t.Fatalf("zero stored = %d, want 60", d.EffectiveThreshold(60))
+	}
+	if err := d.SetThreshold(45); err != nil {
+		t.Fatal(err)
+	}
+	if d.EffectiveThreshold(60) != 45 {
+		t.Fatalf("stored = %d, want 45", d.EffectiveThreshold(60))
+	}
+	if err := d.SetThreshold(0); err == nil {
+		t.Fatal("zero threshold should be refused")
+	}
+	cloned := Duplicates{}.Clone()
+	if cloned.Threshold != 0 {
+		t.Fatalf("empty clone threshold = %d", cloned.Threshold)
+	}
+	d.SetThreshold(70)
+	cloned = d.Clone()
+	if cloned.Threshold != 70 || len(cloned.Groups) != 0 {
+		t.Fatalf("clone without groups = %+v", cloned)
+	}
+}
+
+func TestDuplicateThresholdSurvivesSealing(t *testing.T) {
+	dek := mustDEK(t)
+	blob := &Blob{}
+	if err := blob.Duplicates.SetThreshold(55); err != nil {
+		t.Fatal(err)
+	}
+	sealed, err := Seal(dek, blob)
+	if err != nil {
+		t.Fatal(err)
+	}
+	opened, err := Open(dek, sealed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if opened.Duplicates.Threshold != 55 {
+		t.Fatalf("threshold after sealing = %d, want 55", opened.Duplicates.Threshold)
+	}
+}

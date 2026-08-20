@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -47,15 +48,30 @@ func duplicateEventRange(loc *time.Location) (time.Time, time.Time) {
 
 // dupDisplay is the detection setting a merged list collapses with, together with
 // where its badges lead.
-func (s *Server) dupDisplay() dupDisplay {
-	return dupDisplay{Threshold: s.duplicateThreshold(), URL: s.Path("/app/duplicates")}
+func (s *Server) dupDisplay(sess *session.Session) dupDisplay {
+	return dupDisplay{Threshold: s.duplicateThreshold(sess), URL: s.Path("/app/duplicates")}
 }
 
-func (s *Server) duplicateThreshold() int {
+func (s *Server) instanceDuplicateThreshold() int {
 	if s.Detection.Threshold > 0 {
 		return s.Detection.Threshold
 	}
 	return merge.DefaultThreshold
+}
+
+// duplicateThreshold is the score a pair must reach for this person. Their
+// choice lives in the sealed duplicate store; the instance default from config
+// applies until they change it (§15, wave 3.7).
+func (s *Server) duplicateThreshold(sess *session.Session) int {
+	if sess == nil {
+		return s.instanceDuplicateThreshold()
+	}
+	decisions, err := s.Store.Duplicates(sess.UserID, sess.DEK())
+	if err != nil {
+		s.logError("read duplicate threshold", err)
+		return s.instanceDuplicateThreshold()
+	}
+	return decisions.EffectiveThreshold(s.instanceDuplicateThreshold())
 }
 
 // Duplicates is the screen of §15: every ticked address book and calendar is
@@ -212,18 +228,19 @@ func eventWhen(event model.Event, loc *time.Location) string {
 
 // duplicatesData is what the duplicates screen prints.
 type duplicatesData struct {
-	Contacts   []dupGroupView
-	Events     []dupGroupView
-	Tasks      []dupGroupView
-	Notes      []dupGroupView
-	Threshold  int
-	Records    int
-	Candidates int
-	Linked     int
-	Ignored    int
-	DecideURL  string
-	MergeURL   string
-	Back       string
+	Contacts     []dupGroupView
+	Events       []dupGroupView
+	Tasks        []dupGroupView
+	Notes        []dupGroupView
+	Threshold    int
+	ThresholdURL string
+	Records      int
+	Candidates   int
+	Linked       int
+	Ignored      int
+	DecideURL    string
+	MergeURL     string
+	Back         string
 }
 
 // Empty reports whether there is nothing to show, which is the normal outcome and
@@ -305,12 +322,13 @@ type dupMemberView struct {
 // and what the person has already decided.
 func (s *Server) duplicateData(sess *session.Session, snap fanout.Snapshot) duplicatesData {
 	data := duplicatesData{
-		Threshold: s.duplicateThreshold(),
-		DecideURL: s.Path("/app/duplicates/decide"),
-		MergeURL:  s.Path("/app/duplicates/merge"),
-		Back:      s.Path("/app/duplicates"),
+		ThresholdURL: s.Path("/app/duplicates/threshold"),
+		DecideURL:    s.Path("/app/duplicates/decide"),
+		MergeURL:     s.Path("/app/duplicates/merge"),
+		Back:         s.Path("/app/duplicates"),
 	}
 	if sess == nil {
+		data.Threshold = s.instanceDuplicateThreshold()
 		return data
 	}
 
@@ -338,8 +356,10 @@ func (s *Server) duplicateData(sess *session.Session, snap fanout.Snapshot) dupl
 	decisions, err := s.Store.Duplicates(sess.UserID, sess.DEK())
 	if err != nil {
 		s.logError("read duplicate decisions", err)
+		data.Threshold = s.instanceDuplicateThreshold()
 		return data
 	}
+	data.Threshold = decisions.EffectiveThreshold(s.instanceDuplicateThreshold())
 	// A member whose collection answered the poll and which is not in the
 	// answer has gone: another client deleted or moved it. §15 asks for that to
 	// be silent, and for a group left with one member to dissolve.
@@ -364,25 +384,25 @@ func (s *Server) duplicateData(sess *session.Session, snap fanout.Snapshot) dupl
 		data.append(view)
 	}
 
-	for _, candidate := range merge.DetectContacts(contacts, s.duplicateOptions(decisions, contacts)) {
+	for _, candidate := range merge.DetectContacts(contacts, s.duplicateOptions(decisions, contacts, data.Threshold)) {
 		if view, ok := s.candidateGroup(candidate, loaded, decided); ok {
 			data.Candidates++
 			data.append(view)
 		}
 	}
-	for _, candidate := range merge.DetectEvents(events, s.timezone(), s.duplicateOptions(decisions, events)) {
+	for _, candidate := range merge.DetectEvents(events, s.timezone(), s.duplicateOptions(decisions, events, data.Threshold)) {
 		if view, ok := s.candidateGroup(candidate, loaded, decided); ok {
 			data.Candidates++
 			data.append(view)
 		}
 	}
-	for _, candidate := range merge.DetectTodos(todos, s.timezone(), s.duplicateOptions(decisions, todos)) {
+	for _, candidate := range merge.DetectTodos(todos, s.timezone(), s.duplicateOptions(decisions, todos, data.Threshold)) {
 		if view, ok := s.candidateGroup(candidate, loaded, decided); ok {
 			data.Candidates++
 			data.append(view)
 		}
 	}
-	for _, candidate := range merge.DetectNotes(notes, s.timezone(), s.duplicateOptions(decisions, notes)) {
+	for _, candidate := range merge.DetectNotes(notes, s.timezone(), s.duplicateOptions(decisions, notes, data.Threshold)) {
 		if view, ok := s.candidateGroup(candidate, loaded, decided); ok {
 			data.Candidates++
 			data.append(view)
@@ -411,9 +431,9 @@ func (d *duplicatesData) append(view dupGroupView) {
 // duplicateOptions carries the stored verdicts into detection: a pair the person
 // has decided against is never scored again, and a pair already linked is shown as
 // the group it is rather than proposed a second time.
-func (s *Server) duplicateOptions(decisions account.Duplicates, records []merge.Record) merge.Options {
+func (s *Server) duplicateOptions(decisions account.Duplicates, records []merge.Record, threshold int) merge.Options {
 	return merge.Options{
-		Threshold: s.duplicateThreshold(),
+		Threshold: threshold,
 		Skip: func(a, b int) bool {
 			if a >= len(records) || b >= len(records) {
 				return false
@@ -631,6 +651,31 @@ func (s *Server) DuplicateDecide(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.redirectNotice(w, r, back, notice)
+}
+
+// DuplicateThreshold saves the score a pair must reach for this person (§15,
+// wave 3.7). It lives in the same sealed store as their duplicate decisions.
+func (s *Server) DuplicateThreshold(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	sess := SessionFrom(r)
+	back := SafeRedirect(r.PostFormValue("back"), s.Path("/app/duplicates"))
+	raw := strings.TrimSpace(r.PostFormValue("threshold"))
+	n, err := strconv.Atoi(raw)
+	if err != nil {
+		s.duplicateFailed(w, r, back, errors.New("threshold must be a number"))
+		return
+	}
+	err = s.Store.UpdateDuplicates(sess.UserID, sess.DEK(), func(stored *account.Duplicates) error {
+		return stored.SetThreshold(n)
+	})
+	if err != nil {
+		s.duplicateFailed(w, r, back, err)
+		return
+	}
+	s.redirectNotice(w, r, back, fmt.Sprintf("Match threshold set to %d points.", n))
 }
 
 // duplicateFailed says what went wrong on the screen the action came from. A

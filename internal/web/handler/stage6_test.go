@@ -606,7 +606,7 @@ func TestDuplicateThresholdIsConfigurable(t *testing.T) {
 	books := startDupBooks(t)
 	books.mu.Lock()
 	// Two cards that share nothing but a name: below the default, above a
-	// threshold an administrator lowered.
+	// threshold the person lowered.
 	books.seed(dupBookOne+"grace-two.vcf", `"g2"`, card("grace-two", "Grace Hopper"))
 	books.mu.Unlock()
 
@@ -615,7 +615,12 @@ func TestDuplicateThresholdIsConfigurable(t *testing.T) {
 		t.Errorf("a shared name alone was offered at the default threshold:\n%s", body)
 	}
 
-	a.Detection.Threshold = 30
+	sess := a.session()
+	if err := a.Store.UpdateDuplicates(sess.UserID, sess.DEK(), func(d *account.Duplicates) error {
+		return d.SetThreshold(30)
+	}); err != nil {
+		t.Fatal(err)
+	}
 	if body := a.duplicateGroups(t); !strings.Contains(body, "Grace Hopper") {
 		t.Errorf("the lowered threshold offered nothing:\n%s", body)
 	}

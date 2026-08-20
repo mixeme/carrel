@@ -307,6 +307,20 @@
         <p class="hint">Unticked collections are not polled at all.</p>
     </form>
     {{else}}<p class="hint">No collections here yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
+    {{if eq $d.Mode "duplicates"}}
+    <div class="rail-foot">
+        <form method="post" action="{{$d.Duplicates.ThresholdURL}}" class="rail-threshold-form">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="back" value="{{$d.Duplicates.Back}}">
+            <div class="form-field rail-threshold">
+                <label for="dup-threshold">Match threshold</label>
+                <input type="number" id="dup-threshold" name="threshold" class="mono" min="1" step="1"
+                       value="{{$d.Duplicates.Threshold}}" required>
+            </div>
+            <button type="submit" class="app-btn">Apply</button>
+        </form>
+    </div>
+    {{end}}
 </aside>
 {{end}}
 

@@ -486,6 +486,12 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 		s.renderFind(w, r, template, view)
 		return
 	}
+	if req.Mode == modeDuplicates {
+		sess := SessionFrom(r)
+		view.Duplicates.Threshold = s.duplicateThreshold(sess)
+		view.Duplicates.ThresholdURL = s.Path("/app/duplicates/threshold")
+		view.Duplicates.Back = s.Path("/app/duplicates")
+	}
 	rows, err := s.findSources(sess, req)
 	if err != nil {
 		view.Unusable = userFacingDAVError(err)
@@ -538,7 +544,7 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 // render of the page cannot disagree about the same snapshot.
 func (s *Server) fillResults(r *http.Request, view *findView, req findRequest, task *fanout.Task) {
 	view.Snapshot = task.Snapshot()
-	view.Groups = groupRows(req, view.Snapshot, s.timezone(), s.dupDisplay())
+	view.Groups = groupRows(req, view.Snapshot, s.timezone(), s.dupDisplay(SessionFrom(r)))
 	if req.Mode == modeDuplicates {
 		view.Duplicates = s.duplicateData(SessionFrom(r), view.Snapshot)
 	}

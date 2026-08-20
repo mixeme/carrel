@@ -189,6 +189,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("GET "+s.Path("/app/duplicates"), s.Duplicates)
 	app.HandleFunc("POST "+s.Path("/app/duplicates/sources"), s.FindSources)
 	app.HandleFunc("POST "+s.Path("/app/duplicates/decide"), s.DuplicateDecide)
+	app.HandleFunc("POST "+s.Path("/app/duplicates/threshold"), s.DuplicateThreshold)
 	app.HandleFunc("POST "+s.Path("/app/duplicates/merge"), s.DuplicateMerge)
 	app.HandleFunc("GET "+s.Path("/app/find/{task}/results"), s.FindResults)
 	app.HandleFunc("GET "+s.Path("/app/find/{task}/stream"), s.FindStream)

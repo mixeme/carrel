@@ -126,14 +126,42 @@ func (g Group) clone() Group {
 // paired with accounts is not something a stolen volume should give away.
 type Duplicates struct {
 	Groups []Group `json:"groups,omitempty"`
+	// Threshold is the score a pair must reach to be offered as a duplicate
+	// group. Zero means the instance default from config (wave 3.7).
+	Threshold int `json:"threshold,omitempty"`
+}
+
+// EffectiveThreshold returns the stored preference, or instanceDefault when
+// none has been chosen yet.
+func (d Duplicates) EffectiveThreshold(instanceDefault int) int {
+	if d.Threshold > 0 {
+		return d.Threshold
+	}
+	if instanceDefault > 0 {
+		return instanceDefault
+	}
+	return 0
+}
+
+// SetThreshold remembers the score a pair must reach. It must be positive.
+func (d *Duplicates) SetThreshold(n int) error {
+	if d == nil {
+		return errors.New("account: no decision store")
+	}
+	if n <= 0 {
+		return errors.New("account: duplicate threshold must be positive")
+	}
+	d.Threshold = n
+	return nil
 }
 
 // Clone returns a deep copy, so a caller cannot reach into stored state.
 func (d Duplicates) Clone() Duplicates {
+	out := Duplicates{Threshold: d.Threshold}
 	if len(d.Groups) == 0 {
-		return Duplicates{}
+		return out
 	}
-	out := Duplicates{Groups: make([]Group, 0, len(d.Groups))}
+	out.Groups = make([]Group, 0, len(d.Groups))
 	for _, g := range d.Groups {
 		out.Groups = append(out.Groups, g.clone())
 	}

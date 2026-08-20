@@ -4931,6 +4931,20 @@ body.has-shell .app-shell.is-admin .admin-rail {
     align-self: flex-start;
 }
 
+.rail-threshold-form {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.rail-threshold {
+    gap: 4px;
+}
+
+.rail-threshold input[type="number"] {
+    width: 4.5rem;
+}
+
 .section-rail .rail-empty {
     padding: 0 16px;
 }
