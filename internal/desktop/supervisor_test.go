@@ -4,9 +4,12 @@
 package desktop
 
 import (
+	"context"
 	"errors"
+	"io"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -92,6 +95,43 @@ func TestResolveLocalMode(t *testing.T) {
 	}
 	if !ResolveLocalMode(nil, true, "") {
 		t.Fatal("-local forces local")
+	}
+}
+
+func TestDefaultSidecarStartIgnoresCanceledContext(t *testing.T) {
+	if testing.Short() {
+		t.Skip("builds fake sidecar")
+	}
+	fake := buildFakeSidecar(t)
+	port, err := PickFreePort(loopbackBind)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	env := append(os.Environ(),
+		"CARREL_PORT="+strconv.Itoa(port),
+		"CARREL_BIND="+loopbackBind,
+	)
+	cmd, err := defaultSidecarStart(ctx, fake, env, io.Discard, io.Discard)
+	if err != nil {
+		t.Fatalf("start: %v", err)
+	}
+	t.Cleanup(func() { _ = stopProcess(cmd, 2*time.Second) })
+
+	deadline := time.Now().Add(3 * time.Second)
+	for {
+		resp, err := http.Get(LocalBaseURL(port) + "/healthz")
+		if err == nil {
+			_ = resp.Body.Close()
+			if resp.StatusCode == http.StatusOK {
+				return
+			}
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("sidecar exited after a canceled start context")
+		}
+		time.Sleep(50 * time.Millisecond)
 	}
 }
 

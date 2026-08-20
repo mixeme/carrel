@@ -18,12 +18,20 @@ func (a *App) trayActive() bool {
 	return a.Config != nil && a.Config.Tray && a.target != ""
 }
 
+func (a *App) applyTray() {
+	if a.trayActive() {
+		a.maybeStartTray()
+		return
+	}
+	a.stopTray()
+}
+
 func (a *App) maybeStartTray() {
 	if !a.trayActive() {
 		return
 	}
 	a.trayMu.Lock()
-	if a.trayRunning {
+	if a.trayRunning || a.trayDone {
 		a.trayMu.Unlock()
 		return
 	}
@@ -42,9 +50,15 @@ func (a *App) onTrayReady() {
 
 	for {
 		select {
-		case <-open.ClickedCh:
+		case _, ok := <-open.ClickedCh:
+			if !ok {
+				return
+			}
 			a.showWindow()
-		case <-quit.ClickedCh:
+		case _, ok := <-quit.ClickedCh:
+			if !ok {
+				return
+			}
 			a.requestQuit()
 			return
 		}
@@ -54,12 +68,16 @@ func (a *App) onTrayReady() {
 func (a *App) onTrayExit() {
 	a.trayMu.Lock()
 	a.trayRunning = false
+	a.trayDone = true
 	a.trayMu.Unlock()
 }
 
 func (a *App) stopTray() {
 	a.trayMu.Lock()
 	running := a.trayRunning
+	if running {
+		a.trayDone = true
+	}
 	a.trayMu.Unlock()
 	if running {
 		systray.Quit()
@@ -91,13 +109,27 @@ func (a *App) requestQuit() {
 func (a *App) onBeforeClose(ctx context.Context) (prevent bool) {
 	a.mu.Lock()
 	quitting := a.quitting
-	tray := a.Config != nil && a.Config.Tray && a.target != ""
 	a.mu.Unlock()
-	if quitting || !tray {
-		return false
+	hide, prevent := windowCloseAction(a.trayHidesWindow(), quitting)
+	if hide {
+		runtime.WindowHide(ctx)
 	}
-	runtime.WindowHide(ctx)
-	return true
+	return prevent
+}
+
+func (a *App) trayHidesWindow() bool {
+	a.mu.Lock()
+	cfg := a.Config
+	target := a.target
+	a.mu.Unlock()
+	a.trayMu.Lock()
+	running := a.trayRunning
+	a.trayMu.Unlock()
+	if cfg != nil && cfg.Tray && target != "" {
+		return true
+	}
+	// Sign-out clears config but leaves the icon up (Quit is one-shot).
+	return running && cfg == nil
 }
 
 // windowCloseAction reports whether closing the window should hide it (tray on)

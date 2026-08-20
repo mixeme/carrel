@@ -42,7 +42,7 @@ func TestAcquireLockCurrentProcess(t *testing.T) {
 
 func TestAcquireLockStale(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "instance.lock")
-	stale := InstanceLock{PID: 2, Mode: ModeLocal, Port: 8080}
+	stale := InstanceLock{PID: deadPID(t), Mode: ModeLocal, Port: 8080}
 	if err := WriteLock(path, stale); err != nil {
 		t.Fatal(err)
 	}
@@ -115,11 +115,26 @@ func TestProcessAliveCurrent(t *testing.T) {
 }
 
 func TestProcessAliveMissing(t *testing.T) {
-	alive, err := processAlive(2)
+	alive, err := processAlive(deadPID(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if alive {
-		t.Fatal("pid 2 should not be alive")
+		t.Fatal("dead pid reported alive")
 	}
+}
+
+// deadPID is a process ID that is not running. PID 2 is kthreadd on Linux
+// and must not be used as a stand-in for a stale lock.
+func deadPID(t *testing.T) int {
+	t.Helper()
+	const pid = 1_000_000_000
+	alive, err := processAlive(pid)
+	if err != nil {
+		t.Fatalf("processAlive(%d): %v", pid, err)
+	}
+	if alive {
+		t.Fatalf("pid %d is unexpectedly alive", pid)
+	}
+	return pid
 }

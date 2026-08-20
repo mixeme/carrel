@@ -16,7 +16,7 @@ import (
 // here from the Carrel origin after a real sign-out so bindings work again.
 const signOutPath = "/__carrel_signout"
 
-const inAppStorageKey = "carrel.desktop.inApp"
+const signOutIntentKey = "carrel.desktop.signOut"
 
 func defaultShellOrigin() string {
 	if runtime.GOOS == "windows" {
@@ -72,27 +72,61 @@ func isInAppPath(urlPath string) bool {
 	return false
 }
 
+func isLoginPath(urlPath string) bool {
+	urlPath = strings.TrimRight(urlPath, "/")
+	return path.Base(urlPath) == "login"
+}
+
+func isLogoutPath(urlPath string) bool {
+	urlPath = strings.TrimRight(urlPath, "/")
+	return path.Base(urlPath) == "logout"
+}
+
+func loginHasNext(rawQuery string) bool {
+	q, err := url.ParseQuery(strings.TrimPrefix(rawQuery, "?"))
+	if err != nil {
+		return false
+	}
+	return strings.TrimSpace(q.Get("next")) != ""
+}
+
+// shouldResetDesktop is true only after Carrel's own Sign out: the logout
+// form ran, then the browser landed on /login without a resume `next`
+// parameter. Session expiry uses /login?next=… and must not wipe desktop.json.
+func shouldResetDesktop(urlPath, rawQuery string, logoutIntent bool) bool {
+	return logoutIntent && isLoginPath(urlPath) && !loginHasNext(rawQuery)
+}
+
 func signOutWatchScript(signOutURL string) string {
 	return fmt.Sprintf(`(function(){
   try {
-    var href = String(location.href || '');
     if (location.protocol === 'wails:' || /wails\.localhost$/i.test(location.host) || /(?:^|\.)wails$/i.test(location.host)) {
       return;
     }
-    var path = location.pathname || '';
-    var auth = /\/(login|setup|register|forgot)\/?$/.test(path);
-    var inApp = /\/(app|admin)(\/|$)/.test(path);
-    var key = %s;
-    if (inApp) {
-      sessionStorage.setItem(key, '1');
-      return;
+    var logoutKey = %s;
+    if (!window.__carrelLogoutHook) {
+      window.__carrelLogoutHook = true;
+      document.addEventListener('submit', function (e) {
+        var form = e.target;
+        if (!form) return;
+        var action = form.getAttribute('action') || form.action || '';
+        try {
+          var u = new URL(action, location.href);
+          if (/\/logout\/?$/.test(u.pathname || '')) {
+            sessionStorage.setItem(logoutKey, '1');
+          }
+        } catch (err) {}
+      }, true);
     }
-    if (auth && sessionStorage.getItem(key) === '1') {
-      sessionStorage.removeItem(key);
+    var path = location.pathname || '';
+    var params = new URLSearchParams(location.search || '');
+    var hasNext = params.has('next') && String(params.get('next') || '') !== '';
+    if (/\/login\/?$/.test(path) && sessionStorage.getItem(logoutKey) === '1' && !hasNext) {
+      sessionStorage.removeItem(logoutKey);
       location.replace(%s);
     }
   } catch (e) {}
-})();`, jsString(inAppStorageKey), jsString(signOutURL))
+})();`, jsString(signOutIntentKey), jsString(signOutURL))
 }
 
 func (a *App) assetMiddleware(next http.Handler) http.Handler {

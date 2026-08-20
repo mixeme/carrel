@@ -3,7 +3,10 @@
 
 package desktop
 
-import "testing"
+import (
+	"path/filepath"
+	"testing"
+)
 
 func TestWindowCloseAction(t *testing.T) {
 	tests := []struct {
@@ -42,5 +45,43 @@ func TestTrayActiveRequiresTarget(t *testing.T) {
 	app.Config.Tray = false
 	if app.trayActive() {
 		t.Fatal("tray disabled in config")
+	}
+}
+
+func TestTrayHidesWindowAfterSignOut(t *testing.T) {
+	dir := t.TempDir()
+	app := &App{
+		Paths: Paths{
+			ConfigPath: filepath.Join(dir, "desktop.json"),
+			LockPath:   filepath.Join(dir, "instance.lock"),
+		},
+		Config:      &Config{Mode: ModeLocal, Tray: true},
+		target:      "http://127.0.0.1:9",
+		trayRunning: true,
+	}
+	if !app.trayHidesWindow() {
+		t.Fatal("connected tray session should hide")
+	}
+	app.beginSignOut()
+	if !app.trayRunning {
+		t.Fatal("sign-out must not Quit the tray")
+	}
+	if app.trayDone {
+		t.Fatal("sign-out must not mark tray done")
+	}
+	if !app.trayHidesWindow() {
+		t.Fatal("onboarding after tray session should still hide")
+	}
+}
+
+func TestApplyTrayStopsWhenDisabled(t *testing.T) {
+	app := &App{
+		Config:      &Config{Mode: ModeRemote, RemoteURL: "https://carrel.example"},
+		target:      "https://carrel.example",
+		trayRunning: false,
+	}
+	app.applyTray()
+	if app.trayDone {
+		t.Fatal("stopTray with no running icon should not mark done")
 	}
 }

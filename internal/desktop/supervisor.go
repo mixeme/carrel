@@ -40,8 +40,10 @@ type RunningSidecar struct {
 
 type sidecarStartFunc func(ctx context.Context, path string, env []string, stdout, stderr io.Writer) (*exec.Cmd, error)
 
-func defaultSidecarStart(ctx context.Context, path string, env []string, stdout, stderr io.Writer) (*exec.Cmd, error) {
-	cmd := exec.CommandContext(ctx, path)
+func defaultSidecarStart(_ context.Context, path string, env []string, stdout, stderr io.Writer) (*exec.Cmd, error) {
+	// Command, not CommandContext: the Wails startup context is cancelled on
+	// shutdown and would SIGKILL the sidecar, racing the 15s SIGTERM grace.
+	cmd := exec.Command(path)
 	cmd.Env = env
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr

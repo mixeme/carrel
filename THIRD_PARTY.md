@@ -85,11 +85,18 @@ Resolved by the Go toolchain from `go.mod`; not vendored in this repository.
 - **License:** BSD 3-Clause
 - **Copyright:** Copyright (c) 2009 The Go Authors. All rights reserved.
 
-### github.com/wailsapp/wails/v2 v2.10.2 (indirect; `cmd/carrel-desktop`)
+### github.com/wailsapp/wails/v2 v2.10.2 (`cmd/carrel-desktop`)
 
 - **Source:** https://github.com/wailsapp/wails
 - **Used for:** desktop wrapper window and webview (§18)
 - **License:** MIT
 - **Copyright:** Copyright (c) Wails
+
+### github.com/getlantern/systray v1.2.2 (`cmd/carrel-desktop`)
+
+- **Source:** https://github.com/getlantern/systray
+- **Used for:** system tray icon beside the Wails webview (Open / Quit)
+- **License:** Apache License 2.0
+- **Copyright:** Copyright 2014 Brave New Software Project, Inc.
 
 Full license texts are available in the respective upstream repositories.

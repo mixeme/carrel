@@ -22,6 +22,9 @@ const singleInstanceID = "gitea.mixdep.ru.mix.carrel.desktop"
 // Run starts the Wails window. First run shows onboarding; a saved desktop.json
 // or -remote-url / -local skips it. Blocks until the window closes.
 func Run(a *App) error {
+	if err := prepareWebviewProfile(a.Paths); err != nil {
+		return err
+	}
 	return wails.Run(&options.App{
 		Title:     "Carrel",
 		Width:     1280,
@@ -54,6 +57,7 @@ func Run(a *App) error {
 		},
 		Linux: &linux.Options{
 			WebviewGpuPolicy: linux.WebviewGpuPolicyOnDemand,
+			ProgramName:      "carrel-desktop",
 		},
 		BackgroundColour: &options.RGBA{R: 250, G: 249, B: 247, A: 255},
 	})
@@ -74,7 +78,7 @@ func (a *App) startup(ctx context.Context) {
 		a.setErr(err)
 		runtime.LogError(ctx, err.Error())
 	}
-	a.maybeStartTray()
+	a.applyTray()
 }
 
 func (a *App) domReady(ctx context.Context) {
@@ -90,6 +94,7 @@ func (a *App) domReady(ctx context.Context) {
 
 func (a *App) shutdown(ctx context.Context) {
 	a.stopWatch()
+	a.stopTray()
 	a.stopSidecar()
 	a.mu.Lock()
 	pid := a.pid
