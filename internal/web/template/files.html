@@ -22,15 +22,15 @@
     </aside>
     <div class="app-main files-main">
         {{if $d.NoFiles}}
-        {{template "pagehead" (dict "Title" "Files" "Subtitle" (safeHTML (print "Connect a DAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to browse files here. Discovery finds plain WebDAV folders automatically — on a CalDAV/CardDAV server that usually means a separate folder, or a second account on Nextcloud or a plain WebDAV server.")))}}{{template "pageheadend"}}
+        {{template "pagehead" (pageHead "Title" "Files" "SubtitleHTML" (safeHTML (print "Connect a DAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to browse files here. Discovery finds plain WebDAV folders automatically — on a CalDAV/CardDAV server that usually means a separate folder, or a second account on Nextcloud or a plain WebDAV server.")))}}{{template "pageheadend"}}
         {{else if $d.AllCollections}}
         <div class="files-card">
             {{$storageWord := "storages"}}
             {{if eq (len $d.Collections) 1}}{{$storageWord = "storage"}}{{end}}
             {{$serverWord := "servers"}}
             {{if eq $d.ServerCount 1}}{{$serverWord = "server"}}{{end}}
-            {{template "pagehead" (dict "Title" "All collections" "Subtitle" (print (len $d.Collections) " " $storageWord " on " $d.ServerCount " " $serverWord))}}{{template "pageheadend"}}
-            {{template "datatable" (dict "Class" "files-table files-table--root")}}
+            {{template "pagehead" (pageHead "Title" "All collections" "Subtitle" (print (len $d.Collections) " " $storageWord " on " $d.ServerCount " " $serverWord))}}{{template "pageheadend"}}
+            {{template "datatable" (dataTable "Class" "files-table files-table--root")}}
                 <thead><tr><th>Name</th><th>Server</th><th>Access</th><th>Purpose</th></tr></thead>
                 <tbody>
                 {{range $d.Collections}}
@@ -54,7 +54,7 @@
             {{if $d.ReadOnly}}{{$sub = print $d.AccountLabel " · read-only"}}{{end}}
             {{$hint := ""}}
             {{if $d.IsAttachmentFolder}}{{$hint = "This is the folder attachments are put in."}}{{end}}
-            {{template "pagehead" (dict "Title" $d.FolderTitle "Crumbs" $d.Crumbs "Subtitle" $sub "Hint" $hint)}}
+            {{template "pagehead" (pageHead "Title" $d.FolderTitle "Crumbs" $d.Crumbs "Subtitle" $sub "Hint" $hint)}}
                 <div class="page-acts no-print">
                     {{if not $d.ReadOnly}}
                     <a class="app-btn is-primary" href="#new-folder-form">{{template "ico" "plus"}}New folder</a>
@@ -78,7 +78,7 @@
                 <span class="files-ops-right"><button type="button" class="link" data-files-clear>Clear selection</button></span>
             </div>
 
-            {{template "pagebar" (dict "Attrs" (safeHTML "data-files-toolbar"))}}
+            {{template "pagebar" (pageBar "Attrs" (safeHTML "data-files-toolbar"))}}
                 <label class="files-filter">
                     <span class="visually-hidden">Filter this folder</span>
                     <input type="search" placeholder="Filter this folder" data-files-filter autocomplete="off">
@@ -150,7 +150,7 @@
                 </div>
             </dialog>
 
-            {{template "datatable" (dict "Class" "files-table" "Root" "files" "Attrs" (safeHTML "data-files-list"))}}
+            {{template "datatable" (dataTable "Class" "files-table" "Root" "files" "Attrs" (safeHTML "data-files-list"))}}
                 <thead><tr>
                     <th class="files-check-col no-print" data-col="check"><input type="checkbox" data-files-select-all aria-label="Select all"></th>
                     <th data-col="name"><button type="button" class="link" data-files-sort="name">Name</button></th>

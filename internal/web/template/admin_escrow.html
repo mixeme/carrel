@@ -2,7 +2,7 @@
 {{$d := .Data}}
 {{$e := $d.Escrow}}
 <section class="admin-panel">
-    {{template "pagehead" (dict "Title" "Key escrow")}}{{template "pageheadend"}}
+    {{template "pagehead" (pageHead "Title" "Key escrow")}}{{template "pageheadend"}}
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>

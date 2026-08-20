@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"reflect"
 	"strings"
 
 	"gitea.mixdep.ru/mix/carrel/internal/session"
@@ -47,34 +48,104 @@ func LoadTemplates(fsys fs.FS) (*Templates, error) {
 	return t, nil
 }
 
-// templateFuncs backs the component library of wave 2.6.A: the built-in
-// html/template action set has no way to build a value from several named
-// pieces or to mark a template-built string safe, and the header, bar and
-// table components both need one call site to hand over several named
-// fields at once. Neither function touches anything a caller passes in
-// beyond reshaping it, so this is not new data, just a way to carry the
-// data the template already had into one component call.
+// templateFuncs backs the component library of wave 2.6.A, typed per 2.6.E2.
+// Wave 2.6.A's own `dict` built a map[string]any: a call site could misspell
+// a field name or pass the wrong type of value and the component would
+// render anyway, with an empty title or nothing where a bool was expected —
+// exactly the kind of silent gap that let ten screens drift in wave 2.5.
+// Each component here instead takes a concrete struct that typedDict builds
+// from the same alternating name/value pairs `dict` took; a name that is not
+// a real field, or a value that does not fit it, fails the render, and
+// 2.6.E3 renders every screen so that failure shows up at once.
 var templateFuncs = template.FuncMap{
-	"dict":     templateDict,
-	"safeHTML": func(s string) template.HTML { return template.HTML(s) },
+	"pageHead":         buildPageHead,
+	"pageBar":          buildPageBar,
+	"pageBarForm":      buildPageBarForm,
+	"dataTable":        buildDataTable,
+	"importExportMenu": buildImportExportMenu,
+	"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
 }
 
-// templateDict builds a string-keyed map from alternating key/value
-// arguments, so a template can call a component with several named fields
-// in one pipeline: {{template "pagehead" (dict "Title" "…" "Bar" true)}}.
-func templateDict(pairs ...any) (map[string]any, error) {
+// PageHead is the typed input to the pagehead component. Subtitle is plain
+// text and is escaped like any other field; SubtitleHTML is the handful of
+// call sites that build a real link into the subtitle ("Connect a DAV
+// account from Connections…") from constants, never from anything typed by a
+// visitor — development.md's rule that template.HTML never wraps user input
+// holds exactly the same as it did when these were `(safeHTML …)` under a
+// `dict`, only the field name says which case a call site is choosing.
+type PageHead struct {
+	Title        string
+	Subtitle     string
+	SubtitleHTML template.HTML
+	Hint         string
+	Photo        string
+	WrapClass    string
+	Bar          bool
+	Muted        bool
+	Crumbs       []fileCrumb
+}
+
+// PageBar is the typed input to the pagebar component.
+type PageBar struct {
+	Attrs template.HTML
+}
+
+// PageBarForm is the typed input to the pagebarform component.
+type PageBarForm struct {
+	Action string
+	Method string
+}
+
+// DataTable is the typed input to the datatable component.
+type DataTable struct {
+	Class string
+	Root  string
+	Attrs template.HTML
+}
+
+// ImportExportMenu is the typed input to the ⋯ menu of 2.6.D1/D2.
+type ImportExportMenu struct {
+	Sources   []sourceRow
+	ImportURL string
+	ExportURL string
+}
+
+func buildPageHead(pairs ...any) (PageHead, error) { return typedDict[PageHead](pairs...) }
+func buildPageBar(pairs ...any) (PageBar, error)   { return typedDict[PageBar](pairs...) }
+func buildPageBarForm(pairs ...any) (PageBarForm, error) {
+	return typedDict[PageBarForm](pairs...)
+}
+func buildDataTable(pairs ...any) (DataTable, error) { return typedDict[DataTable](pairs...) }
+func buildImportExportMenu(pairs ...any) (ImportExportMenu, error) {
+	return typedDict[ImportExportMenu](pairs...)
+}
+
+// typedDict builds a T from alternating name/value arguments the same way
+// wave 2.6.A's `dict` built a map (2.6.E2). It is generic so every component
+// gets the same rule from one implementation rather than four copies of a
+// hand-rolled switch, one per struct.
+func typedDict[T any](pairs ...any) (T, error) {
+	var out T
 	if len(pairs)%2 != 0 {
-		return nil, fmt.Errorf("dict: odd number of arguments")
+		return out, fmt.Errorf("%T: odd number of arguments", out)
 	}
-	m := make(map[string]any, len(pairs)/2)
+	v := reflect.ValueOf(&out).Elem()
 	for i := 0; i < len(pairs); i += 2 {
-		key, ok := pairs[i].(string)
+		name, ok := pairs[i].(string)
 		if !ok {
-			return nil, fmt.Errorf("dict: key %v is not a string", pairs[i])
+			return out, fmt.Errorf("%T: key %v is not a string", out, pairs[i])
 		}
-		m[key] = pairs[i+1]
+		field := v.FieldByName(name)
+		if !field.IsValid() || !field.CanSet() {
+			return out, fmt.Errorf("%T has no field %q", out, name)
+		}
+		val := reflect.ValueOf(pairs[i+1])
+		if !val.IsValid() || !val.Type().AssignableTo(field.Type()) {
+			return out, fmt.Errorf("%T.%s: %#v is not assignable to %s", out, name, pairs[i+1], field.Type())
+		}
+		field.Set(val)
 	}
-	return m, nil
+	return out, nil
 }
 
 // View is what every template receives. Handlers add whatever else the page

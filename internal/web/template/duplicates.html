@@ -3,7 +3,7 @@
 <div class="app-layout calendar-layout">
     {{template "sourcepanel" .}}
     <div class="app-main">
-        {{template "pagehead" (dict "Title" "Duplicates" "Subtitle" "Records that look like the same thing in more than one place.")}}
+        {{template "pagehead" (pageHead "Title" "Duplicates" "Subtitle" "Records that look like the same thing in more than one place.")}}
             {{template "kindtabs" .}}
         {{template "pageheadend"}}
         <p class="hint page-hint">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</p>

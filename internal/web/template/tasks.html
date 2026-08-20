@@ -6,7 +6,7 @@
     <div class="app-main">
         {{$sub := "Open tasks from every ticked list."}}
         {{if $d.SectionRail.SourceSummary}}{{$sub = $d.SectionRail.SourceSummary}}{{end}}
-        {{template "pagehead" (dict "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
+        {{template "pagehead" (pageHead "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
             <div class="page-acts no-print">
                 {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
                 <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
@@ -24,20 +24,20 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
-        {{template "pagehead" (dict "Title" "Tasks" "Subtitle" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep tasks here.")))}}{{template "pageheadend"}}
+        {{template "pagehead" (pageHead "Title" "Tasks" "SubtitleHTML" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep tasks here.")))}}{{template "pageheadend"}}
         {{else}}
         <div class="agenda-print-root" data-filter-scope>
             {{$title := "Tasks"}}
             {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
             {{$sub := $d.AccountLabel}}
             {{if $d.Collection.DisplayName}}{{$sub = print $d.AccountLabel " · " $d.Collection.DisplayName}}{{end}}
-            {{template "pagehead" (dict "Title" $title "Subtitle" $sub)}}
+            {{template "pagehead" (pageHead "Title" $title "Subtitle" $sub)}}
                 <div class="page-acts no-print">
                     {{if not $d.ReadOnly}}<a class="app-btn is-primary" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New task</a>{{end}}
                     <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
             {{template "pageheadend"}}
-            {{template "pagebar"}}
+            {{template "pagebar" (pageBar)}}
                 <a class="app-btn{{if eq $d.Filter "open"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=open">Open ({{$d.Counts.Open}})</a>
                 <a class="app-btn{{if eq $d.Filter "done"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
                 <a class="app-btn{{if eq $d.Filter "all"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All</a>

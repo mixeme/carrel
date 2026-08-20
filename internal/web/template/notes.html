@@ -6,11 +6,11 @@
     <div class="app-main">
         {{$sub := "Every ticked notebook at once."}}
         {{if $d.SectionRail.SourceSummary}}{{$sub = $d.SectionRail.SourceSummary}}{{end}}
-        {{template "pagehead" (dict "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
+        {{template "pagehead" (pageHead "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
             <div class="page-acts no-print">
                 {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
                 <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
-                {{template "importexportmenu" (dict "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/notes/import") "ExportURL" (print .Base "/app/notes/export"))}}
+                {{template "importexportmenu" (importExportMenu "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/notes/import") "ExportURL" (print .Base "/app/notes/export"))}}
             </div>
         {{template "pageheadend"}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
@@ -25,14 +25,14 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
-        {{template "pagehead" (dict "Title" "Notes" "Subtitle" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.")))}}{{template "pageheadend"}}
+        {{template "pagehead" (pageHead "Title" "Notes" "SubtitleHTML" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.")))}}{{template "pageheadend"}}
         {{else}}
         <div class="agenda-print-root" data-filter-scope>
             {{$title := "Notes"}}
             {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
             {{$sub := $d.AccountLabel}}
             {{if $d.Collection.DisplayName}}{{$sub = print $d.AccountLabel " · " $d.Collection.DisplayName}}{{end}}
-            {{template "pagehead" (dict "Title" $title "Subtitle" $sub)}}
+            {{template "pagehead" (pageHead "Title" $title "Subtitle" $sub)}}
                 <div class="page-acts no-print">
                     {{if not $d.ReadOnly}}
                     <a class="app-btn is-primary" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New note</a>
@@ -45,7 +45,7 @@
             {{if $d.ReadOnly}}<p class="hint no-print">This notebook is read-only.</p>{{end}}
             {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">Nothing here yet.</p>{{end}}
-            {{template "pagebar"}}
+            {{template "pagebar" (pageBar)}}
                 <span class="bar-sort no-print">
                     <a class="app-btn is-sm{{if or (eq $d.Sort "newest") (not $d.Sort)}} is-on{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?sort=newest{{if $d.Tag}}&amp;tag={{$d.Tag}}{{end}}">Newest</a>
                     <a class="app-btn is-sm{{if eq $d.Sort "oldest"}} is-on{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?sort=oldest{{if $d.Tag}}&amp;tag={{$d.Tag}}{{end}}">Oldest</a>

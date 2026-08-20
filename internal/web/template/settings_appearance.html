@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="settings-panel">
-    {{template "pagehead" (dict "Title" "Appearance" "Subtitle" "Kept in this browser, not on the server")}}{{template "pageheadend"}}
+    {{template "pagehead" (pageHead "Title" "Appearance" "Subtitle" "Kept in this browser, not on the server")}}{{template "pageheadend"}}
 
     <fieldset class="form-fieldset">
         <legend>Theme</legend>

@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="admin-panel">
-    {{template "pagehead" (dict "Title" "Settings")}}{{template "pageheadend"}}
+    {{template "pagehead" (pageHead "Title" "Settings")}}{{template "pageheadend"}}
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>

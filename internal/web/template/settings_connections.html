@@ -7,7 +7,7 @@
         {{if eq (len $d.Accounts) 1}}{{$word = "server"}}{{end}}
         {{$sub = print $sub " &#183; " (len $d.Accounts) " " $word}}
     {{end}}
-    {{template "pagehead" (dict "Title" "Connections" "Subtitle" (safeHTML $sub))}}{{template "pageheadend"}}
+    {{template "pagehead" (pageHead "Title" "Connections" "SubtitleHTML" (safeHTML $sub))}}{{template "pageheadend"}}
 
     {{if $d.Accounts}}
     {{range $acc := $d.Accounts}}

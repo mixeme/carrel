@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="admin-panel">
-    {{template "pagehead" (dict "Title" "Add users")}}{{template "pageheadend"}}
+    {{template "pagehead" (pageHead "Title" "Add users")}}{{template "pageheadend"}}
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>
@@ -149,7 +149,7 @@
     <section class="subsection">
         <h2 class="subsection-h2">Pending invitations</h2>
         {{if $d.Invites}}
-        {{template "datatable" (dict "Class" "data")}}
+        {{template "datatable" (dataTable "Class" "data")}}
             <thead>
                 <tr><th>Login</th><th>Delivery</th><th>Status</th><th>Mail</th><th>Expires</th><th></th></tr>
             </thead>

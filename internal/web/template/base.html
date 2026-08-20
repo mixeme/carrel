@@ -684,13 +684,13 @@
 
 {{/* The page header of 2.6.A1: title, optional collection-stripe bar before
      it, optional subtitle, and — on the files folder view — a breadcrumb
-     trail. Every call site supplies a dict (see templateDict in render.go)
-     and writes whatever page-specific actions belong on the right between
-     this call and "pageheadend"; actions differ by page in a way titles and
-     subtitles do not, so they stay page-local rather than being forced
-     through a one-size-fits-all field. .Subtitle may be plain text (escaped
-     normally) or, for the handful of empty states that embed a link, a
-     safeHTML value built at the call site. */}}
+     trail. Every call site builds a handler.PageHead (see typedDict in
+     render.go, 2.6.E2) and writes whatever page-specific actions belong on
+     the right between this call and "pageheadend"; actions differ by page in
+     a way titles and subtitles do not, so they stay page-local rather than
+     being forced through a one-size-fits-all field. .Subtitle is plain text,
+     escaped normally; .SubtitleHTML is the handful of empty states that
+     embed a link, built safe at the call site. */}}
 {{define "pagehead"}}
 {{$h := .}}
 <header class="page-head">
@@ -698,7 +698,7 @@
     <div>
         <h1 class="page-title">{{if $h.Bar}}<span class="src-bar is-multi" aria-hidden="true"></span>{{end}}{{$h.Title}}</h1>
         {{if $h.Crumbs}}<nav class="crumbs" aria-label="Folder">{{range $h.Crumbs}}{{if .Last}}<span aria-current="page">{{.Name}}</span>{{else}}<a href="{{.URL}}">{{.Name}}</a> / {{end}}{{end}}</nav>{{end}}
-        {{if $h.Subtitle}}<p class="page-sub{{if $h.Muted}} source-label{{end}}">{{$h.Subtitle}}</p>{{end}}
+        {{if $h.SubtitleHTML}}<p class="page-sub{{if $h.Muted}} source-label{{end}}">{{$h.SubtitleHTML}}</p>{{else if $h.Subtitle}}<p class="page-sub{{if $h.Muted}} source-label{{end}}">{{$h.Subtitle}}</p>{{end}}
         {{if $h.Hint}}<p class="hint">{{$h.Hint}}</p>{{end}}
     </div>
     {{if or $h.Photo $h.WrapClass}}</div>{{end}}
@@ -712,13 +712,16 @@
      page-bar"), so a second pair of components opens and closes the form
      instead of forcing it into a div it would have to be pulled back out
      of. Column headers, filter fields and segments stay page-local, same
-     reasoning as pagehead's actions. */}}
-{{define "pagebar"}}<div class="page-bar no-print"{{if .}}{{if .Attrs}} {{.Attrs}}{{end}}{{end}}>{{end}}
+     reasoning as pagehead's actions. Every call site passes a
+     handler.PageBar/PageBarForm, including the bare ones — {{template
+     "pagebar" (pageBar)}} rather than {{template "pagebar"}} — so "." is
+     always the typed zero value here, never nil (2.6.E2). */}}
+{{define "pagebar"}}<div class="page-bar no-print"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
 {{define "pagebarend"}}</div>{{end}}
 
 {{define "pagebarform"}}
 {{$b := .}}
-<form method="{{if and $b $b.Method}}{{$b.Method}}{{else}}get{{end}}"{{if and $b $b.Action}} action="{{$b.Action}}"{{end}} class="form page-bar no-print">
+<form method="{{if $b.Method}}{{$b.Method}}{{else}}get{{end}}"{{if $b.Action}} action="{{$b.Action}}"{{end}} class="form page-bar no-print">
 {{end}}
 {{define "pagebarformend"}}</form>{{end}}
 

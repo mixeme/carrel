@@ -12,14 +12,14 @@
                 {{if $d.Request.To}}{{$sub = print $sub " – " $d.Request.To}}{{end}}
             {{end}}
         {{end}}
-        {{template "pagehead" (dict "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" (safeHTML $sub))}}
+        {{template "pagehead" (pageHead "Bar" true "Title" $d.SectionRail.AllLabel "SubtitleHTML" (safeHTML $sub))}}
             <div class="page-acts no-print">
                 {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
                 <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
-                {{template "importexportmenu" (dict "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/calendar/import") "ExportURL" (print .Base "/app/calendar/export"))}}
+                {{template "importexportmenu" (importExportMenu "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/calendar/import") "ExportURL" (print .Base "/app/calendar/export"))}}
             </div>
         {{template "pageheadend"}}
-        {{template "pagebarform" (dict "Action" (print .Base "/app/calendar"))}}
+        {{template "pagebarform" (pageBarForm "Action" (print .Base "/app/calendar"))}}
             <div class="form-field w-sm">
                 <label for="cal-from">From</label>
                 <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required>
@@ -49,14 +49,14 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoCalendars}}
-        {{template "pagehead" (dict "Title" "Calendar" "Subtitle" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to see events here.")))}}{{template "pageheadend"}}
+        {{template "pagehead" (pageHead "Title" "Calendar" "SubtitleHTML" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to see events here.")))}}{{template "pageheadend"}}
         {{else}}
         <div class="agenda-print-root" data-filter-scope{{if eq $d.Segment "range"}} data-range-open{{end}}>
             {{$title := "Agenda"}}
             {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
             {{$sub := $d.AccountLabel}}
             {{if $d.Collection.DisplayName}}{{$sub = print $d.AccountLabel " · " $d.Collection.DisplayName}}{{end}}
-            {{template "pagehead" (dict "Title" $title "Subtitle" $sub)}}
+            {{template "pagehead" (pageHead "Title" $title "Subtitle" $sub)}}
                 <div class="page-acts no-print">
                     {{if not $d.ReadOnly}}
                     <a class="app-btn is-primary" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New event</a>
@@ -66,7 +66,7 @@
                     <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
             {{template "pageheadend"}}
-            {{template "pagebarform"}}
+            {{template "pagebarform" (pageBarForm)}}
                 <span class="bar-sort no-print">
                     <a class="app-btn is-sm{{if eq $d.Segment "week"}} is-on{{end}}" href="{{$d.WeekURL}}">Week</a>
                     <a class="app-btn is-sm{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>

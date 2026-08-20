@@ -1,7 +1,7 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="admin-panel">
-    {{template "pagehead" (dict "Title" "Users")}}{{template "pageheadend"}}
+    {{template "pagehead" (pageHead "Title" "Users")}}{{template "pageheadend"}}
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>
@@ -17,7 +17,7 @@
             {{template "columnpicker" "admin-users"}}
         </div>
         {{if $d.Users}}
-        {{template "datatable" (dict "Class" "data" "Root" "admin-users")}}
+        {{template "datatable" (dataTable "Class" "data" "Root" "admin-users")}}
             <thead>
                 <tr>
                     <th data-col="login">Login</th>
