@@ -79,6 +79,7 @@ func (s *Store) CreateFirstAdmin(login, email, password string, ip string) (*Use
 		// The first administrator picks their own password, so there is
 		// nothing to force a change of.
 		u.MustChangePassword = false
+		u.EmailConfirmed = email != ""
 		state.Users = append(state.Users, u)
 		appendAudit(state, s.now(), AuditEntry{
 			Action:      ActionBootstrap,
@@ -120,6 +121,7 @@ func (s *Store) CreateUserWithPassword(actor Actor, login, email string, role Ro
 			return err
 		}
 		u.MustChangePassword = true
+		u.EmailConfirmed = email != ""
 		state.Users = append(state.Users, u)
 		appendAudit(state, s.now(), AuditEntry{
 			Action:      ActionUserCreate,
@@ -472,6 +474,22 @@ func (s *Store) SetRole(actor Actor, userID string, role Role) error {
 	})
 }
 
+// SetDisplayName stores the optional sender name shown in letters (§23.5).
+func (s *Store) SetDisplayName(userID, name string) error {
+	name = NormalizeDisplayName(name)
+	if err := ValidateDisplayName(name); err != nil {
+		return err
+	}
+	return s.update(func(state *State) error {
+		u := findUser(state, userID)
+		if u == nil {
+			return ErrNotFound
+		}
+		u.DisplayName = name
+		return nil
+	})
+}
+
 // SetEmail replaces the address used for invites and service notices. The
 // confirmation flow that precedes it lives in the mail package (§5.3).
 func (s *Store) SetEmail(actor Actor, userID, email string) error {
@@ -485,6 +503,7 @@ func (s *Store) SetEmail(actor Actor, userID, email string) error {
 			return ErrNotFound
 		}
 		u.Email = email
+		u.EmailConfirmed = email != ""
 		appendAudit(state, s.now(), AuditEntry{
 			Action:      ActionUserEmail,
 			ActorID:     actor.ID,

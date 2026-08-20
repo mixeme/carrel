@@ -196,6 +196,7 @@ func (s *Store) AcceptInvite(token, login, email, password, ip string) (*User, e
 		if err != nil {
 			return err
 		}
+		u.EmailConfirmed = inv.Delivery == InviteDeliveryEmail
 		state.Users = append(state.Users, u)
 
 		appendAudit(state, now, AuditEntry{

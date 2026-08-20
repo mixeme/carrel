@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 	"gitea.mixdep.ru/mix/carrel/internal/store"
@@ -16,6 +17,7 @@ import (
 const (
 	fieldSessionID    = "session_id"
 	fieldConfirmLogin = "confirm_login"
+	fieldDisplayName  = "display_name"
 )
 
 // settingsAccountSubmit is the self-service counterpart of adminKillSessions
@@ -37,6 +39,10 @@ func (s *Server) settingsAccountSubmit(w http.ResponseWriter, r *http.Request) {
 	switch r.PostFormValue(fieldAction) {
 	case "delete_account":
 		s.deleteOwnAccount(w, r, sess, actor)
+	case "save_display_name":
+		s.saveDisplayName(w, r, sess)
+	case "confirm_email":
+		s.resendEmailConfirmation(w, r, sess, actor)
 	case "end_session":
 		err := s.endOwnSession(r, sess, actor)
 		notice := ""
@@ -158,4 +164,40 @@ func (s *Server) deleteOwnAccount(w http.ResponseWriter, r *http.Request, sess *
 	s.Sessions.DestroyUser(sess.UserID)
 	s.ClearSessionCookie(w, r)
 	s.redirect(w, r, s.Path("/login"))
+}
+
+func (s *Server) saveDisplayName(w http.ResponseWriter, r *http.Request, sess *session.Session) {
+	name := r.PostFormValue(fieldDisplayName)
+	if err := s.Store.SetDisplayName(sess.UserID, name); err != nil {
+		s.renderAccountAction(w, r, err, "")
+		return
+	}
+	s.renderAccountAction(w, r, nil, "Display name saved.")
+}
+
+func (s *Server) resendEmailConfirmation(w http.ResponseWriter, r *http.Request, sess *session.Session, actor store.Actor) {
+	user, err := s.Store.User(sess.UserID)
+	if err != nil {
+		s.renderAccountAction(w, r, err, "")
+		return
+	}
+	if user.Email == "" {
+		s.renderAccountAction(w, r, fmt.Errorf("no address on file"), "")
+		return
+	}
+	if user.EmailConfirmed {
+		s.renderAccountAction(w, r, fmt.Errorf("address already confirmed"), "")
+		return
+	}
+	token, err := s.Store.RequestEmailChange(actor, sess.UserID, user.Email, 0)
+	if err != nil {
+		s.renderAccountAction(w, r, err, "")
+		return
+	}
+	link := s.publicURL(r, "/confirm-email/"+token)
+	expires := time.Now().Add(store.DefaultEmailChangeTTL)
+	if s.Mail != nil {
+		s.Mail.QueueEmailChange(user.Email, sess.Login, link, expires)
+	}
+	s.renderAccountAction(w, r, nil, "A confirmation link was sent to "+user.Email+".")
 }

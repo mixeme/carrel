@@ -4,6 +4,7 @@
 package store
 
 import (
+	"strings"
 	"time"
 
 	"gitea.mixdep.ru/mix/carrel/internal/crypto"
@@ -44,13 +45,21 @@ func (m TLSMode) Valid() bool {
 // off their password: KEKSalt derives the KEK, the KEK unwraps WrappedDEK, and
 // the DEK opens Secrets. The server can do none of that on its own (§4, §5.1).
 type User struct {
-	ID        string    `json:"id"`
-	Login     string    `json:"login"`
-	Email     string    `json:"email,omitempty"`
-	Role      Role      `json:"role"`
-	Disabled  bool      `json:"disabled,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
-	CreatedBy string    `json:"created_by,omitempty"`
+	ID    string `json:"id"`
+	Login string `json:"login"`
+	Email string `json:"email,omitempty"`
+	// DisplayName is optional; empty means the login is shown as the sender
+	// name and letter signature (§23.5, wave 3.5).
+	DisplayName string `json:"display_name,omitempty"`
+	// EmailConfirmed is set when the address was proved or arrived by a path
+	// that proves it: invite by email, self-registration, email change, or an
+	// administrator setting the address. Link invitations leave it false until
+	// the same confirmation mail as a change (§23.5, wave 3.5).
+	EmailConfirmed bool      `json:"email_confirmed,omitempty"`
+	Role           Role      `json:"role"`
+	Disabled       bool      `json:"disabled,omitempty"`
+	CreatedAt      time.Time `json:"created_at"`
+	CreatedBy      string    `json:"created_by,omitempty"`
 
 	// LastLoginAt is zero until the first successful login.
 	LastLoginAt time.Time `json:"last_login_at,omitempty"`
@@ -114,6 +123,27 @@ func (u *User) Activated() bool { return u != nil && u.Auth != nil }
 
 // IsAdmin reports whether the user may manage accounts.
 func (u *User) IsAdmin() bool { return u != nil && u.Role == RoleAdmin }
+
+// SenderName is what letters show as the writer: the display name when set,
+// otherwise the login (§23.5).
+func (u *User) SenderName() string {
+	if u == nil {
+		return ""
+	}
+	if name := strings.TrimSpace(u.DisplayName); name != "" {
+		return name
+	}
+	return u.Login
+}
+
+// ReplyAddress is the profile address for Reply-To only when confirmed.
+// An unconfirmed address is treated as absent (§23.5).
+func (u *User) ReplyAddress() string {
+	if u == nil || !u.EmailConfirmed {
+		return ""
+	}
+	return u.Email
+}
 
 // Clone returns a deep copy, so callers cannot reach into stored state.
 func (u *User) Clone() *User {

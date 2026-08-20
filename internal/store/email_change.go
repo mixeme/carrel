@@ -37,7 +37,7 @@ func (s *Store) RequestEmailChange(actor Actor, userID, newEmail string, ttl tim
 		if u == nil {
 			return ErrNotFound
 		}
-		if u.Email == newEmail {
+		if u.Email == newEmail && u.EmailConfirmed {
 			return fmt.Errorf("store: email is unchanged")
 		}
 		u.PendingEmail = newEmail
@@ -87,6 +87,7 @@ func (s *Store) ConfirmEmailChange(token string) (user *User, registration bool,
 		registration = u.Unconfirmed
 		u.Unconfirmed = false
 		u.Email = u.PendingEmail
+		u.EmailConfirmed = true
 		u.PendingEmail = ""
 		u.EmailChangeTokenHash = nil
 		u.EmailChangeExpires = time.Time{}

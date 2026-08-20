@@ -53,13 +53,15 @@ type connectForm struct {
 }
 
 type appView struct {
-	Escrow       escrowStatus
-	Email        string
-	PendingEmail string
-	Accounts     []accountRow
-	Connect      connectForm
-	Trace        *discovery.Trace
-	ShowConnect  bool
+	Escrow         escrowStatus
+	Email          string
+	PendingEmail   string
+	DisplayName    string
+	EmailConfirmed bool
+	Accounts       []accountRow
+	Connect        connectForm
+	Trace          *discovery.Trace
+	ShowConnect    bool
 	// Attachments is the one setting §23.10 needs: where a file goes when it is
 	// attached to a note or an event.
 	Attachments attachmentSettings
@@ -99,6 +101,8 @@ func (s *Server) buildAppView(r *http.Request) appView {
 		Escrow:           escrowStatusOf(s.Store.Settings(), user),
 		Email:            user.Email,
 		PendingEmail:     user.PendingEmail,
+		DisplayName:      user.DisplayName,
+		EmailConfirmed:   user.EmailConfirmed,
 		Attachments:      s.attachmentSettingsView(sess),
 		Sessions:         s.Sessions.Sessions(sess.UserID),
 		CurrentSessionID: sess.ID,

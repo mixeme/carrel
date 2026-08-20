@@ -5,16 +5,44 @@
     {{template "pagehead" (pageHead "Title" "Account" "Subtitle" .Session.Login)}}{{template "pageheadend"}}
 
     <fieldset class="form-fieldset">
+        <legend>Name</legend>
+        <form method="post" class="form" action="{{.Base}}/app/settings/account">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="save_display_name">
+            <div class="form-field w-lg">
+                <label for="display-name">Display name</label>
+                <input id="display-name" name="display_name" type="text"
+                       value="{{$d.DisplayName}}" autocomplete="name">
+            </div>
+            <p class="form-hint">Shown as the sender and used as the signature in letters you send. Blank means your login.</p>
+            <div class="form-foot">
+                <button type="submit">Save</button>
+            </div>
+        </form>
+    </fieldset>
+
+    <fieldset class="form-fieldset">
         <legend>Email</legend>
         {{if $d.Email}}
         <p class="field-value">Current: {{$d.Email}}</p>
         {{else}}
         <p class="hint">No address on file.</p>
         {{end}}
+        {{if and $d.Email $d.EmailConfirmed}}
+        <p><span class="badge">Confirmed</span></p>
+        {{end}}
         {{if $d.PendingEmail}}
         <p class="hint">Pending confirmation: {{$d.PendingEmail}}</p>
         {{end}}
-        <p class="form-hint">Used for invitations and service notices only.</p>
+        <p class="form-hint">Used for service notices, and as <span class="mono">Reply-To</span> on letters you send once confirmed.</p>
+        {{if and $d.Email (not $d.EmailConfirmed) (not $d.PendingEmail)}}
+        <p class="warning">This address has not been confirmed. Letters you send will carry no reply address, and will say so at the foot.</p>
+        <form method="post" class="no-print" action="{{.Base}}/app/settings/account">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="confirm_email">
+            <button type="submit" class="app-btn">Send confirmation</button>
+        </form>
+        {{end}}
         <form method="post" class="form" action="{{.Base}}/app/email">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <div class="form-field w-lg">
