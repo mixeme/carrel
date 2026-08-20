@@ -50,7 +50,7 @@
         {{if $d.NoCalendars}}
         {{template "pagehead" (dict "Title" "Calendar" "Subtitle" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to see events here.")))}}{{template "pageheadend"}}
         {{else}}
-        <div class="agenda-print-root">
+        <div class="agenda-print-root" data-filter-scope>
             {{$title := "Agenda"}}
             {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
             {{$sub := $d.AccountLabel}}
@@ -77,11 +77,16 @@
                 <div class="form-field is-own-line">
                     <button type="submit" class="app-btn">Show</button>
                 </div>
+                <label class="list-filter">
+                    <span class="visually-hidden">Filter these events</span>
+                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+                </label>
+                <span class="bar-count" data-bar-count>{{$d.EventCount}} {{if eq $d.EventCount 1}}item{{else}}items{{end}}</span>
             {{template "pagebarformend"}}
             {{if $d.ReadOnly}}<p class="hint page-hint no-print">This calendar is read-only.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">No events in this date range.</p>{{end}}
             {{range $d.Days}}
-            <section class="agenda-day" data-date="{{.Date}}">
+            <section class="agenda-day" data-date="{{.Date}}" data-filter-group>
                 <div class="list-group">
                     <h2 class="list-rubric">{{.Label}}</h2>
                 </div>

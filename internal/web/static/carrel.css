@@ -2200,6 +2200,33 @@ label.checkbox input {
     margin-right: auto;
 }
 
+/* 2.6.B1: hidden until carrel.js proves there is a filter to run against,
+   same convention as the other JS-only controls in this file. */
+.list-filter {
+    display: none;
+    align-items: center;
+    margin-right: auto;
+}
+
+.js .list-filter {
+    display: inline-flex;
+}
+
+.list-filter input {
+    width: 12rem;
+    max-width: 100%;
+}
+
+.is-filtered-out {
+    display: none;
+}
+
+.bar-count {
+    margin-left: auto;
+    color: var(--dusty);
+    font-size: 11.5px;
+}
+
 .files-filter input {
     width: 12rem;
     max-width: 100%;

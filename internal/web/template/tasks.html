@@ -26,7 +26,7 @@
         {{if $d.NoLists}}
         {{template "pagehead" (dict "Title" "Tasks" "Subtitle" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep tasks here.")))}}{{template "pageheadend"}}
         {{else}}
-        <div class="agenda-print-root">
+        <div class="agenda-print-root" data-filter-scope>
             {{$title := "Tasks"}}
             {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
             {{$sub := $d.AccountLabel}}
@@ -42,7 +42,12 @@
                 <a class="app-btn{{if eq $d.Filter "done"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
                 <a class="app-btn{{if eq $d.Filter "all"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All</a>
                 {{if $d.Counts.Overdue}}<span class="task-overdue-count">{{$d.Counts.Overdue}} overdue</span>{{end}}
+                <label class="list-filter">
+                    <span class="visually-hidden">Filter these tasks</span>
+                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+                </label>
                 {{template "columnpicker" "tasks"}}
+                <span class="bar-count" data-bar-count>{{len $d.Rows}} {{if eq (len $d.Rows) 1}}item{{else}}items{{end}}</span>
             {{template "pagebarend"}}
             {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">Nothing here.</p>{{end}}

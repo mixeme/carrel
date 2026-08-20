@@ -26,7 +26,7 @@
         {{if $d.NoLists}}
         {{template "pagehead" (dict "Title" "Notes" "Subtitle" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.")))}}{{template "pageheadend"}}
         {{else}}
-        <div class="agenda-print-root">
+        <div class="agenda-print-root" data-filter-scope>
             {{$title := "Notes"}}
             {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
             {{$sub := $d.AccountLabel}}
@@ -45,7 +45,12 @@
             {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">Nothing here yet.</p>{{end}}
             {{template "pagebar"}}
+                <label class="list-filter">
+                    <span class="visually-hidden">Filter these notes</span>
+                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+                </label>
                 {{template "columnpicker" "notes"}}
+                <span class="bar-count" data-bar-count>{{len $d.Rows}} {{if eq (len $d.Rows) 1}}item{{else}}items{{end}}</span>
             {{template "pagebarend"}}
             <ul class="list note-list" data-columns-root="notes">
             {{range $d.Rows}}

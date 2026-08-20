@@ -24,12 +24,16 @@ type agendaView struct {
 	From         string
 	To           string
 	Days         []agendaDay
-	ReadOnly     bool
-	Empty        bool
-	NoCalendars  bool
-	PrintDate    string
-	SectionRail  sectionRail
-	Mode         findMode
+	// EventCount is the total occurrences across every day, for the page-bar
+	// counter of 2.6.B5 — the number already loaded, not the count in the
+	// collection, which nothing here asks the server for.
+	EventCount  int
+	ReadOnly    bool
+	Empty       bool
+	NoCalendars bool
+	PrintDate   string
+	SectionRail sectionRail
+	Mode        findMode
 }
 
 type agendaDay struct {
@@ -160,7 +164,7 @@ func (s *Server) buildAgenda(ctx context.Context, sess *session.Session, account
 		Calendars: s.listCalendars(sess), AccountID: accountID, ColEnc: colEnc,
 		Collection: col, AccountLabel: accountLabel(*acc),
 		From: from.Format("2006-01-02"), To: to.Format("2006-01-02"),
-		Days: days, ReadOnly: col.ReadOnly, Empty: len(days) == 0,
+		Days: days, EventCount: len(result.Occurrences), ReadOnly: col.ReadOnly, Empty: len(days) == 0,
 		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}, nil
 }

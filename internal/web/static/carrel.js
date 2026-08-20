@@ -2126,3 +2126,36 @@ document.addEventListener('change', function (e) {
         setView(btn.getAttribute('data-files-view'));
     });
 })();
+
+// 2.6.B1 — filter the page-bar acts on: narrows the rows already on the
+// page, entirely in the browser. No request is made, so there is nothing to
+// filter without JavaScript and the field stays hidden (see ".list-filter"
+// in carrel.css). Each filter input names the ancestor it filters through
+// data-filter-scope, and an optional data-filter-group marks a row's day or
+// section so an emptied group disappears along with its rows — the agenda
+// is the one screen where rows come in named groups.
+(function () {
+    function applyFilter(input) {
+        var scope = input.closest('[data-filter-scope]');
+        if (!scope) return;
+        var q = input.value.trim().toLowerCase();
+        var rows = Array.prototype.slice.call(scope.querySelectorAll('.list-row'));
+        var visible = 0;
+        rows.forEach(function (row) {
+            var match = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
+            row.classList.toggle('is-filtered-out', !match);
+            if (match) visible++;
+        });
+        Array.prototype.slice.call(scope.querySelectorAll('[data-filter-group]')).forEach(function (group) {
+            var anyVisible = !!group.querySelector('.list-row:not(.is-filtered-out)');
+            group.classList.toggle('is-filtered-out', !anyVisible);
+        });
+        var counter = scope.querySelector('[data-bar-count]');
+        if (counter) counter.textContent = visible + (visible === 1 ? ' item' : ' items');
+    }
+
+    document.addEventListener('input', function (e) {
+        var input = e.target.closest('[data-list-filter]');
+        if (input) applyFilter(input);
+    });
+})();
