@@ -488,7 +488,7 @@
 {{if $d.Groups}}
 <div class="find-results">
 {{range $d.Groups}}
-    <section class="find-group">
+    <section class="find-group" data-filter-group>
         <div class="list-group">
             <h2 class="list-rubric">{{.Label}}</h2>
             <span class="list-num">{{len .Rows}}</span>

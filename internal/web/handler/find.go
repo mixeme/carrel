@@ -335,11 +335,18 @@ type findView struct {
 	// "app", so the filter tabs walked out of the application.
 	Base string
 	// Back is where the screen came from, when it has one place to return to.
-	Back         string
-	NoSources    bool
-	Unusable     string
-	FromLabel    string
-	ToLabel      string
+	Back      string
+	NoSources bool
+	Unusable  string
+	FromLabel string
+	ToLabel   string
+	// Segment, WeekURL and MonthURL back the merged agenda's Week/Month/Range
+	// presets (2.6.G8), the same computation buildAgenda already does for one
+	// collection at a time — the merged view had a bare From/To form and none
+	// of the three.
+	Segment      string
+	WeekURL      string
+	MonthURL     string
 	SectionRail  sectionRail
 	PrintDate    string
 	PrintSection string
@@ -442,6 +449,24 @@ func (s *Server) startFind(w http.ResponseWriter, r *http.Request, req findReque
 	view.SourcesURL = s.sourcesURL(req.Mode)
 	if req.Mode == modeTime {
 		view.FromLabel, view.ToLabel = req.From, req.To
+		loc := s.timezone()
+		today := time.Now().In(loc)
+		weekStart, weekEnd := weekRange(today, s.weekStartDay(sess))
+		monthStart, monthEnd := monthRange(today)
+		base := s.Path("/app/calendar")
+		view.WeekURL = base + "?from=" + weekStart.Format("2006-01-02") + "&to=" + weekEnd.Format("2006-01-02")
+		view.MonthURL = base + "?from=" + monthStart.Format("2006-01-02") + "&to=" + monthEnd.Format("2006-01-02")
+		view.Segment = "range"
+		if from, fromErr := parseAgendaDate(req.From, today); fromErr == nil {
+			if to, toErr := parseAgendaDate(req.To, from.AddDate(0, 0, 14)); toErr == nil {
+				switch {
+				case sameDate(from, weekStart) && sameDate(to, weekEnd):
+					view.Segment = "week"
+				case sameDate(from, monthStart) && sameDate(to, monthEnd):
+					view.Segment = "month"
+				}
+			}
+		}
 	}
 	if req.Mode.isSection() {
 		if rail, railErr := s.buildSectionRail(sess, req, "", ""); railErr == nil {

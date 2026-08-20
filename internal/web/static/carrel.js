@@ -2271,8 +2271,54 @@ document.addEventListener('change', function (e) {
         if (counter) counter.textContent = visible + (visible === 1 ? ' item' : ' items');
     }
 
+    // 2.6.G8/G10: Open/Done/All on the merged tasks view, from the same rows
+    // the filter already counts — no second request, and no distinction from
+    // the per-collection view's own server-computed numbers except that
+    // these come from whatever the fan-out has loaded so far.
+    function updateTaskCounts(scope) {
+        var box = scope.querySelector('[data-task-counts]');
+        if (!box) return;
+        var rows = Array.prototype.slice.call(scope.querySelectorAll('.find-row.is-task'));
+        var done = rows.filter(function (r) { return r.classList.contains('is-done'); }).length;
+        var all = rows.length;
+        var openEl = box.querySelector('[data-task-count="open"]');
+        var doneEl = box.querySelector('[data-task-count="done"]');
+        var allEl = box.querySelector('[data-task-count="all"]');
+        if (openEl) openEl.textContent = 'Open ' + (all - done);
+        if (doneEl) doneEl.textContent = 'Done ' + done;
+        if (allEl) allEl.textContent = 'All ' + all;
+    }
+
+    function refreshScope(scope) {
+        Array.prototype.slice.call(scope.querySelectorAll('[data-list-filter]')).forEach(applyFilter);
+        updateTaskCounts(scope);
+    }
+
     document.addEventListener('input', function (e) {
         var input = e.target.closest('[data-list-filter]');
         if (input) applyFilter(input);
     });
+
+    // 2.6.G9: #find-panel is replaced whole by every poll tick and every SSE
+    // message (sse-swap="results"), both of which go through htmx's normal
+    // swap and so both fire htmx:afterSwap. Without this, a filled-in filter
+    // would go stale the moment a new batch of rows arrived — worse than an
+    // emptied field, because the list would silently stop being filtered
+    // while still looking like it was. Re-run unconditionally, not only when
+    // a query is typed: an empty query still recomputes the counter against
+    // whatever the swap just added (2.6.G8), which is the only way the
+    // merged-view counter and task counts stay right as a poll brings more
+    // rows in.
+    document.body.addEventListener('htmx:afterSwap', function (e) {
+        var target = e.detail && e.detail.target;
+        if (!target || !target.querySelectorAll) return;
+        var scope = target.closest('[data-filter-scope]') || target;
+        refreshScope(scope);
+    });
+
+    // A page can load with #find-panel already populated — a running task ID
+    // carried over rather than started fresh — in which case no swap ever
+    // fires to trigger the pass above. carrel.js is loaded with `defer`, so
+    // the DOM is already parsed by the time this runs.
+    Array.prototype.slice.call(document.querySelectorAll('[data-filter-scope]')).forEach(refreshScope);
 })();

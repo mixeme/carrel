@@ -3,7 +3,7 @@
 <div class="app-layout calendar-layout" data-detail-section="calendar">
     {{if $d.Mode}}
     {{template "sectionrail" .}}
-    <div class="app-main">
+    <div class="app-main" data-filter-scope{{if eq $d.Segment "range"}} data-range-open{{end}}>
         {{$sub := "Every ticked calendar at once."}}
         {{if $d.SectionRail.SourceSummary}}
             {{$sub = $d.SectionRail.SourceSummary}}
@@ -20,22 +20,38 @@
             </div>
         {{template "pageheadend"}}
         {{template "pagebarform" (pageBarForm "Action" (print .Base "/app/calendar"))}}
-            <div class="form-field w-sm">
-                <label for="cal-from">From</label>
-                <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required>
-            </div>
-            <div class="form-field w-sm">
-                <label for="cal-to">To</label>
-                <input id="cal-to" type="date" name="to" value="{{$d.Request.To}}">
+            <span class="bar-sort no-print">
+                <a class="app-btn is-sm{{if eq $d.Segment "week"}} is-on{{end}}" href="{{$d.WeekURL}}">Week</a>
+                <a class="app-btn is-sm{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>
+                <button type="button" class="app-btn is-sm{{if eq $d.Segment "range"}} is-on{{end}}" data-range-toggle aria-expanded="{{if eq $d.Segment "range"}}true{{else}}false{{end}}">Range</button>
+            </span>
+            <div data-range-fields>
+                <div class="form-field w-sm">
+                    <label for="cal-from">From</label>
+                    <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required>
+                </div>
+                <div class="form-field w-sm">
+                    <label for="cal-to">To</label>
+                    <input id="cal-to" type="date" name="to" value="{{$d.Request.To}}">
+                </div>
+                <div class="form-field is-own-line">
+                    <button type="submit" class="app-btn">Show</button>
+                </div>
             </div>
             <div class="form-field is-own-line form-inline">
                 <label class="checkbox"><input type="checkbox" name="kind" value="events"{{if $d.Request.Wants "events"}} checked{{end}}> Events</label>
                 <label class="checkbox"><input type="checkbox" name="kind" value="tasks"{{if $d.Request.Wants "tasks"}} checked{{end}}> Tasks due</label>
                 <label class="checkbox"><input type="checkbox" name="kind" value="notes"{{if $d.Request.Wants "notes"}} checked{{end}}> Notes</label>
             </div>
-            <div class="form-field is-own-line">
-                <button type="submit" class="app-btn">Show</button>
+            <label class="list-filter">
+                <span class="visually-hidden">Filter these events</span>
+                <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+            </label>
+            <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
+                <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
+                <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
             </div>
+            <span class="bar-count" data-bar-count>0 items</span>
         {{template "pagebarformend"}}
         {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
         {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was polled.</p>{{end}}
