@@ -103,9 +103,25 @@ func stringLit(e ast.Expr) (string, bool) {
 // visual acceptance arrived at the hard way: enumerate the screens, which are
 // a closed set, rather than the mistakes, which are not.
 func TestEveryPageObeysTheMarkupRules(t *testing.T) {
-	a := newApp(t, nil)
-	a.setupAdmin("root", "root@example.org", testPassword)
+	t.Run("empty instance", func(t *testing.T) {
+		a := newApp(t, nil)
+		a.setupAdmin("root", "root@example.org", testPassword)
+		checkMarkupRules(t, a)
+	})
+	t.Run("populated instance", func(t *testing.T) {
+		a := newApp(t, nil)
+		a.setupAdmin("root", "root@example.org", testPassword)
+		seedMergedViewAccount(t, a)
+		checkMarkupRules(t, a)
+	})
+}
 
+// checkMarkupRules is 2.6.G2's fix applied here too: the original single pass
+// only ever rendered the empty-instance branch of every screen, so the
+// merged ($d.Mode) branch of contacts/calendar/tasks/notes was never checked
+// for a stray style attribute or inline script either.
+func checkMarkupRules(t *testing.T, a *app) {
+	t.Helper()
 	for _, path := range pageRoutes(t) {
 		rec := a.get(path)
 		// A redirect is an answer: /app/ sends you to a section, and a page
