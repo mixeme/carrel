@@ -20,6 +20,20 @@ import (
 
 const contactsBatch = contacts.DefaultBatchSize
 
+// contactSort is the order of 2.6.B2. "name" is the order the list already
+// had.
+const (
+	contactSortName    = "name"
+	contactSortChanged = "changed"
+)
+
+func contactSortFrom(value string) string {
+	if strings.ToLower(strings.TrimSpace(value)) == contactSortChanged {
+		return contactSortChanged
+	}
+	return contactSortName
+}
+
 type contactsListView struct {
 	Books        []addressBookRef
 	AccountID    string
@@ -27,6 +41,7 @@ type contactsListView struct {
 	Collection   discovery.Collection
 	AccountLabel string
 	Contacts     []contactRow
+	Sort         string
 	Offset       int
 	NextOffset   int
 	HasMore      bool
@@ -51,6 +66,8 @@ type contactRow struct {
 	Linked int
 	// DupURL is where the badge leads.
 	DupURL string
+	// Modified backs the "по изменению" sort of 2.6.B2 only; nothing renders it.
+	Modified time.Time
 }
 
 // ContactsHome shows every ticked address book at once, or an empty state.
@@ -83,7 +100,8 @@ func (s *Server) ContactsList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess := SessionFrom(r)
-	view, err := s.buildContactsList(r.Context(), sess, accountID, collection, colEnc, 0)
+	sortBy := contactSortFrom(r.URL.Query().Get("sort"))
+	view, err := s.buildContactsList(r.Context(), sess, accountID, collection, colEnc, 0, sortBy)
 	if err != nil {
 		v := s.View(r, "Contacts")
 		v.Error = userFacingDAVError(err)
@@ -118,7 +136,8 @@ func (s *Server) ContactsPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sess := SessionFrom(r)
-	view, err := s.buildContactsList(r.Context(), sess, accountID, collection, colEnc, offset)
+	sortBy := contactSortFrom(r.URL.Query().Get("sort"))
+	view, err := s.buildContactsList(r.Context(), sess, accountID, collection, colEnc, offset, sortBy)
 	if err != nil {
 		http.Error(w, userFacingDAVError(err), http.StatusBadRequest)
 		return
@@ -136,7 +155,7 @@ func (s *Server) listBooks(sess *session.Session) []addressBookRef {
 	return addressBooks(accounts)
 }
 
-func (s *Server) buildContactsList(ctx context.Context, sess *session.Session, accountID, collection, colEnc string, offset int) (contactsListView, error) {
+func (s *Server) buildContactsList(ctx context.Context, sess *session.Session, accountID, collection, colEnc string, offset int, sortBy string) (contactsListView, error) {
 	books := s.listBooks(sess)
 	p, acc, err := s.contactsProvider(sess, accountID)
 	if err != nil {
@@ -162,6 +181,7 @@ func (s *Server) buildContactsList(ctx context.Context, sess *session.Session, a
 		ColEnc:       colEnc,
 		Collection:   col,
 		AccountLabel: accountLabel(*acc),
+		Sort:         sortBy,
 		Offset:       offset,
 		ReadOnly:     col.ReadOnly,
 		Empty:        len(paths) == 0,
@@ -202,12 +222,29 @@ func (s *Server) buildContactsList(ctx context.Context, sess *session.Session, a
 			PhotoURL:    s.Path("/c/" + accountID + "/" + colEnc + "/" + urlPathEscape(uid) + "/photo?size=thumb"),
 			Linked:      marks.linkedSize(accountID, collection, uid),
 			DupURL:      s.Path("/app/duplicates"),
+			Modified:    c.Modified,
 		}
 		rows = append(rows, row)
 	}
-	sort.SliceStable(rows, func(i, j int) bool {
-		return strings.ToLower(rows[i].DisplayName) < strings.ToLower(rows[j].DisplayName)
-	})
+	if sortBy == contactSortChanged {
+		sort.SliceStable(rows, func(i, j int) bool {
+			mi, mj := rows[i].Modified, rows[j].Modified
+			if !mi.Equal(mj) {
+				if mi.IsZero() {
+					return false
+				}
+				if mj.IsZero() {
+					return true
+				}
+				return mi.After(mj)
+			}
+			return strings.ToLower(rows[i].DisplayName) < strings.ToLower(rows[j].DisplayName)
+		})
+	} else {
+		sort.SliceStable(rows, func(i, j int) bool {
+			return strings.ToLower(rows[i].DisplayName) < strings.ToLower(rows[j].DisplayName)
+		})
+	}
 	view.Contacts = rows
 	view.NextOffset = end
 	view.HasMore = end < len(paths)

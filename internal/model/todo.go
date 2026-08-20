@@ -33,9 +33,14 @@ type Todo struct {
 	DueDateOnly     bool
 	Priority        int
 	PercentComplete int
-	Related         []Relation
-	Attachments     []Attachment
-	Other           []Property
+	// Modified is LAST-MODIFIED, read for the "Recently changed" sort of
+	// 2.6.B2. It is already in knownTodoProps — excluded from Other because
+	// it was always meant to be read on its own rather than shown raw — so
+	// giving it a field costs nothing the parser was not already doing.
+	Modified    time.Time
+	Related     []Relation
+	Attachments []Attachment
+	Other       []Property
 }
 
 var knownTodoProps = map[string]bool{
@@ -97,6 +102,9 @@ func (o *Object) Todo(loc *time.Location) (Todo, error) {
 	}
 	task.Priority = atoiOr(icalPropRaw(comp.Props, ical.PropPriority), 0)
 	task.PercentComplete = atoiOr(icalPropRaw(comp.Props, ical.PropPercentComplete), 0)
+	if modified, err := comp.Props.DateTime(ical.PropLastModified, loc); err == nil {
+		task.Modified = modified
+	}
 	for _, name := range o.Names() {
 		if knownTodoProps[name] {
 			continue

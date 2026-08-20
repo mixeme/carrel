@@ -5,6 +5,7 @@ package model
 
 import (
 	"strings"
+	"time"
 
 	"github.com/emersion/go-vcard"
 )
@@ -32,6 +33,11 @@ type Contact struct {
 	IMs           []LabeledValue
 	Addresses     []Address
 	Photo         Photo
+	// Modified is REV, read for the "по изменению" sort of 2.6.B2. A card
+	// that carries no REV parses as the zero time, the same convention the
+	// due-date and last-modified sorts elsewhere in this package already use
+	// for "unknown".
+	Modified time.Time
 
 	// Other holds the properties the card carries that this view does not
 	// name, X- properties among them. They are shown read-only rather than
@@ -129,6 +135,9 @@ func (o *Object) Contact() (Contact, error) {
 		URLs:          labeled(o.Property(vcard.FieldURL)),
 		IMs:           labeled(o.Property(vcard.FieldIMPP)),
 		Photo:         describePhoto(o.Property(vcard.FieldPhoto)),
+	}
+	if modified, err := o.card.Revision(); err == nil {
+		c.Modified = modified
 	}
 
 	if values := o.Property(vcard.FieldName); len(values) > 0 {

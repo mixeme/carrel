@@ -51,6 +51,10 @@
             <p class="hint page-hint">No contacts in this address book.</p>
             {{else}}
             {{template "pagebar"}}
+                <span class="bar-sort no-print">
+                    <a class="app-btn is-sm{{if or (eq $d.Sort "name") (not $d.Sort)}} is-on{{end}}" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}?sort=name">A&#8211;Z</a>
+                    <a class="app-btn is-sm{{if eq $d.Sort "changed"}} is-on{{end}}" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}?sort=changed">Recently changed</a>
+                </span>
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these contacts</span>
                     <input type="search" placeholder="Filter" data-list-filter autocomplete="off">

@@ -146,7 +146,10 @@
             {{template "datatable" (dict "Class" "files-table" "Root" "files" "Attrs" (safeHTML "data-files-list"))}}
                 <thead><tr>
                     <th class="files-check-col no-print" data-col="check"><input type="checkbox" data-files-select-all aria-label="Select all"></th>
-                    <th data-col="name">Name</th><th data-col="size">Size</th><th data-col="type">Type</th><th data-col="changed">Changed</th>
+                    <th data-col="name"><button type="button" class="link" data-files-sort="name">Name</button></th>
+                    <th data-col="size"><button type="button" class="link" data-files-sort="size">Size</button></th>
+                    <th data-col="type"><button type="button" class="link" data-files-sort="type">Type</button></th>
+                    <th data-col="changed"><button type="button" class="link" data-files-sort="changed">Changed</button></th>
                 </tr></thead>
                 <tbody>
                 {{if $d.ParentURL}}<tr class="files-up-row" data-files-skip><td class="no-print"></td><td colspan="4"><a href="{{$d.ParentURL}}">← up one folder</a></td></tr>{{end}}

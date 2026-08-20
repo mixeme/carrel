@@ -42,6 +42,11 @@
                 <a class="app-btn{{if eq $d.Filter "done"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
                 <a class="app-btn{{if eq $d.Filter "all"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All</a>
                 {{if $d.Counts.Overdue}}<span class="task-overdue-count">{{$d.Counts.Overdue}} overdue</span>{{end}}
+                <span class="bar-sort no-print">
+                    <a class="app-btn is-sm{{if or (eq $d.Sort "due") (not $d.Sort)}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter={{$d.Filter}}&amp;sort=due">By due</a>
+                    <a class="app-btn is-sm{{if eq $d.Sort "priority"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter={{$d.Filter}}&amp;sort=priority">By priority</a>
+                    <a class="app-btn is-sm{{if eq $d.Sort "changed"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter={{$d.Filter}}&amp;sort=changed">Recently changed</a>
+                </span>
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these tasks</span>
                     <input type="search" placeholder="Filter" data-list-filter autocomplete="off">

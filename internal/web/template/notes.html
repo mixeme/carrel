@@ -45,6 +45,11 @@
             {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">Nothing here yet.</p>{{end}}
             {{template "pagebar"}}
+                <span class="bar-sort no-print">
+                    <a class="app-btn is-sm{{if or (eq $d.Sort "newest") (not $d.Sort)}} is-on{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?sort=newest{{if $d.Tag}}&amp;tag={{$d.Tag}}{{end}}">Newest</a>
+                    <a class="app-btn is-sm{{if eq $d.Sort "oldest"}} is-on{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?sort=oldest{{if $d.Tag}}&amp;tag={{$d.Tag}}{{end}}">Oldest</a>
+                    <a class="app-btn is-sm{{if eq $d.Sort "title"}} is-on{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?sort=title{{if $d.Tag}}&amp;tag={{$d.Tag}}{{end}}">Title</a>
+                </span>
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these notes</span>
                     <input type="search" placeholder="Filter" data-list-filter autocomplete="off">

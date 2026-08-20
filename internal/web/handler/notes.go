@@ -22,6 +22,25 @@ import (
 	"gitea.mixdep.ru/mix/carrel/internal/session"
 )
 
+// noteSort is the order of 2.6.B2. "newest" is the order the list already
+// had.
+const (
+	noteSortNewest = "newest"
+	noteSortOldest = "oldest"
+	noteSortTitle  = "title"
+)
+
+func noteSortFrom(value string) string {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case noteSortOldest:
+		return noteSortOldest
+	case noteSortTitle:
+		return noteSortTitle
+	default:
+		return noteSortNewest
+	}
+}
+
 type notesView struct {
 	Sources      []sourceRow
 	AccountID    string
@@ -30,6 +49,7 @@ type notesView struct {
 	AccountLabel string
 	Tag          string
 	Tags         []string
+	Sort         string
 	Rows         []noteRow
 	ReadOnly     bool
 	Empty        bool
@@ -75,7 +95,7 @@ func (s *Server) NotesList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sess := SessionFrom(r)
-	view, err := s.buildNotes(r.Context(), sess, accountID, collection, colEnc, r.URL.Query().Get("tag"))
+	view, err := s.buildNotes(r.Context(), sess, accountID, collection, colEnc, r.URL.Query().Get("tag"), noteSortFrom(r.URL.Query().Get("sort")))
 	if err != nil {
 		s.renderNotesError(w, r, err, accountID, colEnc)
 		return
@@ -89,7 +109,7 @@ func (s *Server) NotesList(w http.ResponseWriter, r *http.Request) {
 	s.Render(w, "notes.html", v)
 }
 
-func (s *Server) buildNotes(ctx context.Context, sess *session.Session, accountID, collection, colEnc, tag string) (notesView, error) {
+func (s *Server) buildNotes(ctx context.Context, sess *session.Session, accountID, collection, colEnc, tag, sortBy string) (notesView, error) {
 	p, acc, err := s.calendarProvider(sess, accountID)
 	if err != nil {
 		return notesView{}, err
@@ -113,17 +133,32 @@ func (s *Server) buildNotes(ctx context.Context, sess *session.Session, accountI
 		}
 		notes = append(notes, note)
 	}
-	// §23.9 sorts notes by date; newest first is the order a journal is read in.
-	sort.SliceStable(notes, func(i, j int) bool {
-		if notes[i].Date.Equal(notes[j].Date) {
+	// §23.9 sorts notes by date; newest first is the order a journal is read
+	// in, and stays the default of 2.6.B2.
+	switch sortBy {
+	case noteSortOldest:
+		sort.SliceStable(notes, func(i, j int) bool {
+			if notes[i].Date.Equal(notes[j].Date) {
+				return strings.ToLower(notes[i].DisplayTitle()) < strings.ToLower(notes[j].DisplayTitle())
+			}
+			return notes[i].Date.Before(notes[j].Date)
+		})
+	case noteSortTitle:
+		sort.SliceStable(notes, func(i, j int) bool {
 			return strings.ToLower(notes[i].DisplayTitle()) < strings.ToLower(notes[j].DisplayTitle())
-		}
-		return notes[i].Date.After(notes[j].Date)
-	})
+		})
+	default:
+		sort.SliceStable(notes, func(i, j int) bool {
+			if notes[i].Date.Equal(notes[j].Date) {
+				return strings.ToLower(notes[i].DisplayTitle()) < strings.ToLower(notes[j].DisplayTitle())
+			}
+			return notes[i].Date.After(notes[j].Date)
+		})
+	}
 
 	view := notesView{
 		AccountID: accountID, ColEnc: colEnc, Collection: col,
-		AccountLabel: accountLabel(*acc), ReadOnly: col.ReadOnly,
+		AccountLabel: accountLabel(*acc), ReadOnly: col.ReadOnly, Sort: sortBy,
 		Tag: strings.TrimSpace(tag), PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
 	if rows, listErr := s.noteSources(sess); listErr == nil {

@@ -2127,6 +2127,51 @@ document.addEventListener('change', function (e) {
     });
 })();
 
+// 2.6.B2 — sort the files table by its own columns. Reorders the rows
+// already in the DOM; nothing is re-fetched. The "up one folder" row stays
+// pinned at the top, same as it does unsorted.
+(function () {
+    var browse = document.querySelector('[data-files-browse]');
+    if (!browse) return;
+    var list = browse.querySelector('[data-files-list]');
+    if (!list) return;
+    var tbody = list.querySelector('tbody');
+    var state = { col: null, dir: 1 };
+
+    function sortValue(row, col) {
+        if (col === 'size') return Number(row.getAttribute('data-size')) || 0;
+        if (col === 'changed') return row.getAttribute('data-changed') || '';
+        if (col === 'type') return (row.getAttribute('data-type') || '').toLowerCase();
+        return (row.getAttribute('data-name') || '').toLowerCase();
+    }
+
+    function applySort(col) {
+        if (state.col === col) {
+            state.dir = -state.dir;
+        } else {
+            state.col = col;
+            state.dir = 1;
+        }
+        var rows = Array.prototype.slice.call(tbody.querySelectorAll('[data-file-row]'));
+        rows.sort(function (a, b) {
+            var va = sortValue(a, col), vb = sortValue(b, col);
+            if (va < vb) return -state.dir;
+            if (va > vb) return state.dir;
+            return 0;
+        });
+        rows.forEach(function (row) { tbody.appendChild(row); });
+        browse.querySelectorAll('[data-files-sort]').forEach(function (btn) {
+            btn.classList.toggle('is-on', btn.getAttribute('data-files-sort') === col);
+        });
+    }
+
+    browse.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-files-sort]');
+        if (!btn) return;
+        applySort(btn.getAttribute('data-files-sort'));
+    });
+})();
+
 // 2.6.B1 — filter the page-bar acts on: narrows the rows already on the
 // page, entirely in the browser. No request is made, so there is nothing to
 // filter without JavaScript and the field stays hidden (see ".list-filter"

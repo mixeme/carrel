@@ -29,6 +29,16 @@ const (
 	taskFilterDone = "done"
 )
 
+// taskSort is the order of 2.6.B2. The default, "due", is the sort the list
+// already had; the others are additional orders over the same loaded set —
+// nothing here asks the server for anything a different sort didn't already
+// have.
+const (
+	taskSortDue      = "due"
+	taskSortPriority = "priority"
+	taskSortChanged  = "changed"
+)
+
 type tasksView struct {
 	Sources      []sourceRow
 	AccountID    string
@@ -36,6 +46,7 @@ type tasksView struct {
 	Collection   discovery.Collection
 	AccountLabel string
 	Filter       string
+	Sort         string
 	Rows         []taskRow
 	Counts       taskCounts
 	ReadOnly     bool
@@ -87,7 +98,8 @@ func (s *Server) TasksList(w http.ResponseWriter, r *http.Request) {
 	}
 	sess := SessionFrom(r)
 	filter := taskFilterFrom(r.URL.Query().Get("filter"))
-	view, err := s.buildTasks(r.Context(), sess, accountID, collection, colEnc, filter)
+	sortBy := taskSortFrom(r.URL.Query().Get("sort"))
+	view, err := s.buildTasks(r.Context(), sess, accountID, collection, colEnc, filter, sortBy)
 	if err != nil {
 		s.renderTasksError(w, r, err, accountID, colEnc)
 		return
@@ -112,7 +124,18 @@ func taskFilterFrom(value string) string {
 	}
 }
 
-func (s *Server) buildTasks(ctx context.Context, sess *session.Session, accountID, collection, colEnc, filter string) (tasksView, error) {
+func taskSortFrom(value string) string {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case taskSortPriority:
+		return taskSortPriority
+	case taskSortChanged:
+		return taskSortChanged
+	default:
+		return taskSortDue
+	}
+}
+
+func (s *Server) buildTasks(ctx context.Context, sess *session.Session, accountID, collection, colEnc, filter, sortBy string) (tasksView, error) {
 	p, acc, err := s.calendarProvider(sess, accountID)
 	if err != nil {
 		return tasksView{}, err
@@ -138,11 +161,18 @@ func (s *Server) buildTasks(ctx context.Context, sess *session.Session, accountI
 		tasks = append(tasks, task)
 		etags[task.UID] = obj.ETag
 	}
-	sort.SliceStable(tasks, func(i, j int) bool { return lessTask(tasks[i], tasks[j]) })
+	switch sortBy {
+	case taskSortPriority:
+		sort.SliceStable(tasks, func(i, j int) bool { return lessTaskByPriority(tasks[i], tasks[j]) })
+	case taskSortChanged:
+		sort.SliceStable(tasks, func(i, j int) bool { return lessTaskByChanged(tasks[i], tasks[j]) })
+	default:
+		sort.SliceStable(tasks, func(i, j int) bool { return lessTask(tasks[i], tasks[j]) })
+	}
 
 	view := tasksView{
 		AccountID: accountID, ColEnc: colEnc, Collection: col,
-		AccountLabel: accountLabel(*acc), Filter: filter, ReadOnly: col.ReadOnly,
+		AccountLabel: accountLabel(*acc), Filter: filter, Sort: sortBy, ReadOnly: col.ReadOnly,
 		PrintDate: time.Now().UTC().Format("2006-01-02 15:04 UTC"),
 	}
 	if rows, listErr := s.collectionsOfKind(sess, discovery.KindCalendar, account.ViewTasks, dav.CompTodo); listErr == nil {
@@ -198,6 +228,40 @@ func lessTask(a, b model.Todo) bool {
 			return true
 		}
 		return dueA.Before(dueB)
+	}
+	return strings.ToLower(a.DisplayTitle()) < strings.ToLower(b.DisplayTitle())
+}
+
+// lessTaskByPriority is the "By priority" order of 2.6.B2: RFC 5545 §3.8.1.9
+// numbers 1 (highest) through 9 (lowest), with 0 — no priority set — sorted
+// after every task that has one, same as a due date of zero already is.
+func lessTaskByPriority(a, b model.Todo) bool {
+	pa, pb := a.Priority, b.Priority
+	if pa != pb {
+		if pa == 0 {
+			return false
+		}
+		if pb == 0 {
+			return true
+		}
+		return pa < pb
+	}
+	return strings.ToLower(a.DisplayTitle()) < strings.ToLower(b.DisplayTitle())
+}
+
+// lessTaskByChanged is the "Recently changed" order of 2.6.B2: LAST-MODIFIED
+// descending, with a task that never carried one sorted after every task
+// that did.
+func lessTaskByChanged(a, b model.Todo) bool {
+	ma, mb := a.Modified, b.Modified
+	if !ma.Equal(mb) {
+		if ma.IsZero() {
+			return false
+		}
+		if mb.IsZero() {
+			return true
+		}
+		return ma.After(mb)
 	}
 	return strings.ToLower(a.DisplayTitle()) < strings.ToLower(b.DisplayTitle())
 }
