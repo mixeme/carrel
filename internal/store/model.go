@@ -92,6 +92,13 @@ type User struct {
 	PendingEmail         string    `json:"pending_email,omitempty"`
 	EmailChangeTokenHash []byte    `json:"email_change_token_hash,omitempty"`
 	EmailChangeExpires   time.Time `json:"email_change_expires,omitempty"`
+
+	// WeekStart is "monday" or "sunday"; empty defaults to Monday, the week
+	// the agenda's Week preset used before this preference existed (2.6.C7).
+	// Unlike theme and row density it cannot live in the browser alone: the
+	// week's boundary is computed on the server before the page is sent, so
+	// there is nothing client-side to apply a local-only preference to.
+	WeekStart string `json:"week_start,omitempty"`
 }
 
 // Activated reports whether the user has set a password. An invited user has

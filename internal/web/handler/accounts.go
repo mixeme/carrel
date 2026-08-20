@@ -75,6 +75,10 @@ type appView struct {
 	// a person could see nothing about their own.
 	Sessions         []session.Info
 	CurrentSessionID string
+	// WeekStart is "monday" or "sunday", for the Dates and times block of
+	// 2.6.C7. Populated even off the Appearance screen because appView is
+	// shared, the same as Attachments already is.
+	WeekStart string
 }
 
 func (s *Server) buildAppView(r *http.Request) appView {
@@ -94,6 +98,7 @@ func (s *Server) buildAppView(r *http.Request) appView {
 		Attachments:      s.attachmentSettingsView(sess),
 		Sessions:         s.Sessions.Sessions(sess.UserID),
 		CurrentSessionID: sess.ID,
+		WeekStart:        user.WeekStart,
 	}
 	sort.Slice(out.Sessions, func(i, j int) bool { return out.Sessions[i].LastSeen.After(out.Sessions[j].LastSeen) })
 	accounts, err := s.Store.ListDAVAccounts(sess.UserID, sess.DEK())
@@ -305,6 +310,21 @@ func (s *Server) appUpdateDAV(r *http.Request, actor store.Actor) (appView, erro
 		return data, err
 	}
 
+	return s.buildAppView(r), nil
+}
+
+// appSaveAppearance stores the first-day-of-week preference (2.6.C7). It is
+// the one control on the Appearance screen that is not local storage: the
+// week's boundary is worked out on the server before the page is sent.
+func (s *Server) appSaveAppearance(r *http.Request) (appView, error) {
+	sess := SessionFrom(r)
+	start := r.PostFormValue("week_start")
+	if start != "monday" && start != "sunday" {
+		return s.buildAppView(r), fmt.Errorf("choose Monday or Sunday")
+	}
+	if err := s.Store.SetWeekStart(sess.UserID, start); err != nil {
+		return s.buildAppView(r), err
+	}
 	return s.buildAppView(r), nil
 }
 

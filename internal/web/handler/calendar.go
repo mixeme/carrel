@@ -168,7 +168,7 @@ func (s *Server) buildAgenda(ctx context.Context, sess *session.Session, account
 		day, _ := time.ParseInLocation("2006-01-02", date, loc)
 		days = append(days, agendaDay{Date: date, Label: day.Format("Monday, 2 January 2006"), Events: byDate[date]})
 	}
-	weekStart, weekEnd := weekRange(today)
+	weekStart, weekEnd := weekRange(today, s.weekStartDay(sess))
 	monthStart, monthEnd := monthRange(today)
 	base := s.Path("/app/calendar/" + accountID + "/" + colEnc)
 	segment := "range"
@@ -190,13 +190,27 @@ func (s *Server) buildAgenda(ctx context.Context, sess *session.Session, account
 	}, nil
 }
 
-// weekRange is the Monday-to-Sunday week containing t, for the Week preset
-// of 2.6.B6.
-func weekRange(t time.Time) (time.Time, time.Time) {
+// weekRange is the seven-day week containing t that starts on start, for the
+// Week preset of 2.6.B6. Which day that is is a per-user preference (2.6.C7).
+func weekRange(t time.Time, start time.Weekday) (time.Time, time.Time) {
 	day := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
-	offset := (int(day.Weekday()) + 6) % 7 // days since Monday; Sunday is 6
-	start := day.AddDate(0, 0, -offset)
-	return start, start.AddDate(0, 0, 6)
+	offset := (int(day.Weekday()) - int(start) + 7) % 7
+	rangeStart := day.AddDate(0, 0, -offset)
+	return rangeStart, rangeStart.AddDate(0, 0, 6)
+}
+
+// weekStartDay reads the signed-in user's week-start preference (2.6.C7).
+// Unset, or no session at all, means Monday — the week the Week preset used
+// before this preference existed.
+func (s *Server) weekStartDay(sess *session.Session) time.Weekday {
+	if sess == nil {
+		return time.Monday
+	}
+	user, err := s.Store.User(sess.UserID)
+	if err != nil || user.WeekStart != "sunday" {
+		return time.Monday
+	}
+	return time.Sunday
 }
 
 // monthRange is the first and last day of t's month, for the Month preset of

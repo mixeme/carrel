@@ -88,6 +88,7 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	app.HandleFunc("GET "+s.Path("/app/settings/attachments"), s.SettingsAttachments)
 	app.HandleFunc("POST "+s.Path("/app/settings/attachments"), s.SettingsAttachments)
 	app.HandleFunc("GET "+s.Path("/app/settings/appearance"), s.SettingsAppearance)
+	app.HandleFunc("POST "+s.Path("/app/settings/appearance"), s.SettingsAppearance)
 	app.HandleFunc("GET "+s.Path("/app/password"), s.ChangePassword)
 	app.HandleFunc("POST "+s.Path("/app/password"), s.ChangePassword)
 	app.HandleFunc("POST "+s.Path("/app/email"), s.RequestEmailChange)

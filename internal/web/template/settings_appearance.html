@@ -1,4 +1,5 @@
 {{define "body"}}
+{{$d := .Data}}
 <section class="settings-panel">
     {{template "pagehead" (dict "Title" "Appearance" "Subtitle" "Kept in this browser, not on the server")}}{{template "pageheadend"}}
 
@@ -23,6 +24,25 @@
             </div>
             <p class="form-hint">List row height in lists and tables.</p>
         </div>
+    </fieldset>
+
+    <fieldset class="form-fieldset">
+        <legend>Dates and times</legend>
+        <form method="post" class="form" action="{{.Base}}/app/settings/appearance">
+            <input type="hidden" name="csrf_token" value="{{.CSRF}}">
+            <input type="hidden" name="action" value="save_appearance">
+            <div class="form-field">
+                <div class="theme-segment" role="group" aria-label="First day of the week">
+                    <button type="submit" name="week_start" value="monday"
+                            class="theme-segment-btn{{if ne $d.WeekStart "sunday"}} is-on{{end}}">Monday</button>
+                    <button type="submit" name="week_start" value="sunday"
+                            class="theme-segment-btn{{if eq $d.WeekStart "sunday"}} is-on{{end}}">Sunday</button>
+                </div>
+                <p class="form-hint">Which day the agenda's Week preset starts from. Saved to your account,
+                    unlike the settings above: the week's boundary is worked out on the server before the page
+                    is sent, so there is nothing here for the browser to remember on its own.</p>
+            </div>
+        </form>
     </fieldset>
 
     <fieldset class="form-fieldset">

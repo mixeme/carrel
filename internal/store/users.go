@@ -528,6 +528,23 @@ func (s *Store) DeleteUser(actor Actor, userID string) error {
 	})
 }
 
+// SetWeekStart saves which day the agenda's Week preset starts from (2.6.C7).
+// Not audited: like theme and row density, it changes nothing security-
+// relevant, and every other appearance preference goes unaudited too.
+func (s *Store) SetWeekStart(userID, start string) error {
+	if start != "monday" && start != "sunday" {
+		return fmt.Errorf("store: unknown week start %q", start)
+	}
+	return s.update(func(state *State) error {
+		u := findUser(state, userID)
+		if u == nil {
+			return ErrNotFound
+		}
+		u.WeekStart = start
+		return nil
+	})
+}
+
 // MarkEscrowNoticeSeen records that the user has been shown the escrow notice,
 // so it is not repeated at every login (§5.4).
 func (s *Store) MarkEscrowNoticeSeen(userID string) error {

@@ -107,9 +107,17 @@ func (s *Server) settingsAttachmentsSubmit(w http.ResponseWriter, r *http.Reques
 }
 
 func (s *Server) SettingsAppearance(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		s.settingsAppearanceSubmit(w, r)
+		return
+	}
 	v := s.settingsFrame(r, "Appearance", settingsSectionAppearance)
-	v.Data = settingsView{Section: settingsSectionAppearance}
+	v.Data = settingsView{Section: settingsSectionAppearance, appView: s.buildAppView(r)}
 	s.Render(w, "settings_appearance.html", v)
+}
+
+func (s *Server) settingsAppearanceSubmit(w http.ResponseWriter, r *http.Request) {
+	s.appSubmitTo(w, r, "settings_appearance.html", settingsSectionAppearance)
 }
 
 func (s *Server) appSubmitTo(w http.ResponseWriter, r *http.Request, template, section string) {
@@ -150,6 +158,11 @@ func (s *Server) appSubmitTo(w http.ResponseWriter, r *http.Request, template, s
 		data, err = s.appSaveAttachments(r)
 		if err == nil {
 			notice = "Attachments will go in that folder."
+		}
+	case "save_appearance":
+		data, err = s.appSaveAppearance(r)
+		if err == nil {
+			notice = "Saved."
 		}
 	case "refresh_cache":
 		s.appRefresh(w, r)
