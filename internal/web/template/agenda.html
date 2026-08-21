@@ -25,7 +25,7 @@
                 <a class="{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>
                 <button type="button" class="{{if eq $d.Segment "range"}} is-on{{end}}" data-range-toggle aria-expanded="{{if eq $d.Segment "range"}}true{{else}}false{{end}}">Range</button>
             </span>
-            {{template "m-range" (barRange "Second" true "Attrs" (safeHTML "data-range-fields"))}}
+            {{template "m-range" (barRange "Second" true "Attrs" (safeAttr "data-range-fields"))}}
                 <label class="visually-hidden" for="cal-from">From</label>
                 <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required class="m-in">
                 <i aria-hidden="true">→</i>
@@ -87,7 +87,7 @@
                     <a class="{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>
                     <button type="button" class="{{if eq $d.Segment "range"}} is-on{{end}}" data-range-toggle aria-expanded="{{if eq $d.Segment "range"}}true{{else}}false{{end}}">Range</button>
                 </span>
-                {{template "m-range" (barRange "Second" true "Attrs" (safeHTML "data-range-fields"))}}
+                {{template "m-range" (barRange "Second" true "Attrs" (safeAttr "data-range-fields"))}}
                     <label class="visually-hidden" for="agenda-from">From</label>
                     <input id="agenda-from" type="date" name="from" value="{{$d.From}}" required class="m-in">
                     <i aria-hidden="true">→</i>

@@ -84,7 +84,7 @@
                     <span data-bar-count>{{len $d.Contacts}} {{if eq (len $d.Contacts) 1}}item{{else}}items{{end}}</span>
                 {{template "m-rightend"}}
             {{template "m-barend"}}
-            {{template "m-list" (list "Attrs" (safeHTML "id=\"contact-list\" data-columns-root=\"contacts\""))}}
+            {{template "m-list" (list "Attrs" (safeAttr "id=\"contact-list\" data-columns-root=\"contacts\""))}}
             {{range $d.Contacts}}
                 {{template "m-row" (row "Kind" "contact")}}
                     <span class="m-bar3" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>

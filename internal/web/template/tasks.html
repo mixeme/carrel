@@ -84,7 +84,7 @@
             {{template "m-barend"}}
             {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
             {{if $d.Empty}}<p class="m-empty">Nothing here.</p>{{end}}
-            {{template "m-list" (list "Attrs" (safeHTML "data-columns-root=\"tasks\""))}}
+            {{template "m-list" (list "Attrs" (safeAttr "data-columns-root=\"tasks\""))}}
             {{range $d.Rows}}
                 {{template "m-row" (row "Kind" "task" "Done" .Done "Overdue" .Overdue)}}
                     <span data-col="done">

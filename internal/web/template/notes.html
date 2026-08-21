@@ -79,7 +79,7 @@
                     <span data-bar-count>{{len $d.Rows}} {{if eq (len $d.Rows) 1}}item{{else}}items{{end}}</span>
                 {{template "m-rightend"}}
             {{template "m-barend"}}
-            {{template "m-list" (list "Attrs" (safeHTML "data-columns-root=\"notes\""))}}
+            {{template "m-list" (list "Attrs" (safeAttr "data-columns-root=\"notes\""))}}
             {{range $d.Rows}}
                 {{template "m-row" (row "Kind" "note")}}
                     <span class="m-bar3" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>

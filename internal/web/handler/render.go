@@ -99,6 +99,10 @@ var templateFuncs = template.FuncMap{
 	"card":             buildCard,
 	"menu":             buildMenu,
 	"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
+	// safeAttr is safeHTML for the one position safeHTML cannot serve: an
+	// attribute name. html/template drops a template.HTML there and writes
+	// ZgotmplZ instead, so a component's Attrs takes this instead.
+	"safeAttr": func(s string) template.HTMLAttr { return template.HTMLAttr(s) },
 	"hasComp": func(comps []string, want string) bool {
 		for _, c := range comps {
 			if strings.EqualFold(c, want) {

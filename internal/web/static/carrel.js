@@ -453,7 +453,8 @@ document.addEventListener('change', function (e) {
         if (!bar || !menu) return;
         Array.prototype.slice.call(bar.children).forEach(function (kid) {
             if (kid === wrap) return;
-            if (!kid.classList || !kid.classList.contains('is-2nd')) return;
+            if (!kid.classList) return;
+            if (!kid.classList.contains('is-2nd') && !kid.classList.contains('is-shed')) return;
             if (barMoreHome) barMoreHome.set(kid, { parent: bar, next: kid.nextSibling });
             menu.appendChild(kid);
         });
@@ -496,6 +497,61 @@ document.addEventListener('change', function (e) {
         });
     }
     window.addEventListener('resize', restoreWideBarMore);
+
+    // Stage 1's law — the bar is one line and the extra retreats by rank —
+    // was decided by one number: a content column narrower than 800px. A
+    // column can be wider than that and still be too narrow for what the bar
+    // carries. The agenda's is: week/month, the From/To range, two kind
+    // checkboxes, the filter and the density toggle came to about 1070px on
+    // a 1000px column, so the group hung past the edge and the whole page
+    // grew a horizontal scrollbar. The width is measured here and .is-tight
+    // says what the container query says at 800px. The query stays: without
+    // JavaScript it is the only retreat there is.
+    function barOverflows(bar) {
+        var limit = bar.getBoundingClientRect().right -
+            (parseFloat(getComputedStyle(bar).paddingRight) || 0) + 0.5;
+        return Array.prototype.slice.call(bar.children).some(function (kid) {
+            var box = kid.getBoundingClientRect();
+            return box.width > 0 && box.right > limit;
+        });
+    }
+
+    function barItems(bar, more) {
+        return Array.prototype.slice.call(bar.children).filter(function (kid) {
+            return kid !== more && !kid.classList.contains('is-2nd');
+        });
+    }
+
+    function fitBars() {
+        document.querySelectorAll('.m-bar').forEach(function (bar) {
+            if (bar.hidden) return;
+            var more = bar.querySelector('[data-bar-more]');
+            var menu = more && more.querySelector('.m-menu');
+            // The items are in the ⋯ menu right now; measuring the bar
+            // without them would say it fits and put them straight back.
+            if (menu && !menu.hidden) return;
+            bar.classList.remove('is-tight');
+            var items = barItems(bar, more);
+            items.forEach(function (kid) { kid.classList.remove('is-shed'); });
+            if (!barOverflows(bar)) return;
+            bar.classList.add('is-tight');
+            // The ranks the markup gave are spent and it still does not fit —
+            // a phone reaches this on the agenda, where week/month, the kind
+            // checkboxes and the filter are all first rank. The tail goes on
+            // retreating one item at a time, last first, which is the same
+            // law continued rather than a second one. The head of the bar
+            // stays: a bar with nothing in it says less than a narrow one.
+            if (!more) return;
+            while (items.length > 1 && barOverflows(bar)) {
+                items.pop().classList.add('is-shed');
+            }
+        });
+    }
+    window.addEventListener('resize', fitBars);
+    window.addEventListener('load', fitBars);
+    document.addEventListener('DOMContentLoaded', fitBars);
+    document.addEventListener('htmx:afterSettle', fitBars);
+    fitBars();
 
     document.addEventListener('click', function (e) {
         if (e.target.closest('[data-sheet-close]')) {

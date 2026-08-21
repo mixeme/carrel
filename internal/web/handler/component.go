@@ -68,10 +68,21 @@ type Head struct {
 	Crumbs       []fileCrumb
 }
 
+// Every Attrs below is template.HTMLAttr rather than template.HTML, and the
+// type is load-bearing. These fields land where an attribute *name* is
+// expected — `<div class="m-bar" {{.Attrs}}>` — and html/template filters
+// that position by content type: anything that is not HTMLAttr comes out as
+// the literal `ZgotmplZ` and the attribute is gone. It fails silently and in
+// the browser only: the page still renders, the class is still right, and the
+// screen's own `data-files-ops hidden` or `data-columns-root` simply is not
+// there any more. Which is how the file browser lost its selection bar, its
+// toolbar and its sortable table at once. Values come from `(safeAttr …)`
+// with a constant argument; nothing a visitor typed reaches here.
+//
 // Bar is the input to the m-bar component. Sel is the filled selection
 // band (.m-sel): the same bar, in the card colour, with buttons on paper.
 type Bar struct {
-	Attrs template.HTML
+	Attrs template.HTMLAttr
 	Sel   bool
 }
 
@@ -92,7 +103,7 @@ type Sep struct {
 // hanging separator.
 type BarRange struct {
 	Second bool
-	Attrs  template.HTML
+	Attrs  template.HTMLAttr
 }
 
 // BarForm is the input to the m-barform component: the same bar built as a
@@ -108,7 +119,7 @@ type BarForm struct {
 type DataTable struct {
 	Class string
 	Root  string
-	Attrs template.HTML
+	Attrs template.HTMLAttr
 }
 
 // ImportExportMenu is the input to the ⋯ menu of 2.6.D1/D2.
@@ -122,7 +133,7 @@ type ImportExportMenu struct {
 // identity attributes the screen owns (id, data-columns-root) — the list
 // itself does not.
 type List struct {
-	Attrs template.HTML
+	Attrs template.HTMLAttr
 }
 
 // Row is the input to m-row. Kind is the mockup modifier (contact, agenda,
@@ -175,7 +186,7 @@ type Form struct {
 	Method string
 	Action string
 	Class  string
-	Attrs  template.HTML
+	Attrs  template.HTMLAttr
 	Tight  bool
 }
 
@@ -221,7 +232,7 @@ type Seg struct {
 	Menu   bool
 	Second bool
 	Class  string
-	Attrs  template.HTML
+	Attrs  template.HTMLAttr
 }
 
 // FieldSet is the input to m-fset, a labelled group of fields.
@@ -307,7 +318,7 @@ type RailFoot struct {
 // / aria-label the screen owns; Extra is a screen marker.
 type Side struct {
 	Label string
-	Attrs template.HTML
+	Attrs template.HTMLAttr
 	Extra string
 }
 
@@ -331,7 +342,7 @@ type Card struct {
 type Menu struct {
 	Pop   bool
 	Right bool
-	Attrs template.HTML
+	Attrs template.HTMLAttr
 }
 
 func buildHead(pairs ...any) (Head, error)   { return typedDict[Head](pairs...) }
