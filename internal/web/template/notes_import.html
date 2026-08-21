@@ -3,11 +3,11 @@
 <div class="dialog-host">
 <div class="app-dialog{{if $d.HasPreview}} is-wide{{end}}">
 {{if $d.HasPreview}}{{template "importsteps-file-2" .}}{{else}}{{template "importsteps-source-1" .}}{{end}}
-<div class="dialog-head">
-    <div>
-        <h1>Import notes</h1>
-        <p class="dialog-sub">Into {{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}{{if $d.HasPreview}}{{if $d.Notes}} ← <code>{{(index $d.Notes 0).Source}}</code>{{end}}{{end}}</p>
-    </div>
+{{$sub := printf "Into %s" $d.AccountLabel}}
+{{if $d.Collection.DisplayName}}{{$sub = printf "Into %s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
+{{$src := ""}}
+{{if and $d.HasPreview $d.Notes}}{{$src = (index $d.Notes 0).Source}}{{end}}
+{{template "m-head" (head "Plain" true "Title" "Import notes" "Subtitle" $sub "Code" $src)}}
     {{if $d.HasPreview}}
     <div class="m-acts">
         <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
@@ -17,7 +17,7 @@
         </form>
     </div>
     {{end}}
-</div>
+{{template "m-headend"}}
 
 {{if not $d.HasPreview}}
 <div class="dialog-card">

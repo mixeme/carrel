@@ -3,12 +3,9 @@
 <div class="dialog-host">
 <div class="app-dialog is-narrow">
 {{template "importsteps-file-3" .}}
-<div class="dialog-head">
-    <div>
-        <h1>Notes import report</h1>
-        <p class="dialog-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-    </div>
-</div>
+{{$sub := $d.AccountLabel}}
+{{if $d.Collection.DisplayName}}{{$sub = printf "%s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
+{{template "m-head" (head "Plain" true "Title" "Notes import report" "Subtitle" $sub)}}{{template "m-headend"}}
 <div class="dialog-card">
     <div class="dialog-rubric">Created</div>
     <p class="import-report-stat">{{$d.Created}}</p>

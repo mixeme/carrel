@@ -114,12 +114,11 @@
             </form>
             {{end}}
             {{else}}
-            <div class="note-read-head no-print">
-                <div class="note-read-meta">
-                    <span class="list-bar note-read-bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
-                    <span class="note-read-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}{{if $d.DateLabel}} · <span class="mono">{{$d.DateLabel}}</span>{{end}}</span>
-                </div>
-                <div class="note-read-actions">
+            {{$sub := $d.AccountLabel}}
+            {{if $d.Collection.DisplayName}}{{$sub = printf "%s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
+            {{$sw := $d.Collection.Color}}{{if not $sw}}{{$sw = "var(--accent)"}}{{end}}
+            {{template "m-head" (head "Doc" true "Subtitle" $sub "Mono" $d.DateLabel "Swatch" $sw)}}
+                <div class="m-acts">
                     {{if not $d.ReadOnly}}<a class="app-btn is-primary" href="{{$readURL}}?edit=1">Edit</a>{{end}}
                     {{if not $d.IsNew}}<a class="app-btn" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/export">Export Markdown</a>{{end}}
                     <button type="button" class="app-btn is-quiet" data-print>Print</button>
@@ -131,7 +130,7 @@
                     <button type="button" class="app-btn is-quiet" data-note-meta-toggle title="Hide the side column">Panel</button>
                     {{if $readURL}}<button type="button" class="app-btn is-quiet" data-copy-url="{{$readURL}}">Copy link</button>{{end}}
                 </div>
-            </div>
+            {{template "m-headend"}}
             <div class="note-doc-inner">
                 <div class="note-docbody">
                     <h1 class="note-read-title">{{$d.Note.DisplayTitle}}</h1>

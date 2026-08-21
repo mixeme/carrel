@@ -64,7 +64,7 @@ component/
 
 | Компонент | Вход | Шаблон · стили | Что это |
 |---|---|---|---|
-| `m-head` / `m-headend` | `head` | `tmpl/m-head.html` · `css/10-head.css` | Шапка раздела |
+| `m-head` / `m-headend` | `head` | `tmpl/m-head.html` · `css/10-head.css` | Шапка раздела. `Side` — панель справа (h2, 19px); `Plain` — диалог без своего отступа; `Doc` — хром чтения заметки без h1 |
 | `m-bar` / `m-barend` | `bar` | `tmpl/m-bar.html` · `css/20-bar.css` | Полоса инструментов; `Sel` — заливка выделения (`.m-sel`) |
 | `m-barform` / `m-barformend` | `barForm` | `tmpl/m-bar.html` · `css/20-bar.css` | Та же полоса настоящей формой GET — диапазон дат в агенде |
 | `m-right` / `m-rightend` | `right` | `tmpl/m-bar.html` · `css/20-bar.css` | Правая группа полосы; `Second` — уходит под «⋯» |
@@ -76,7 +76,7 @@ component/
 
 | Класс | Чей | Что это |
 |---|---|---|
-| `.m-head` | `m-head` | Сама шапка |
+| `.m-head` | `m-head` | Сама шапка. `is-side` — панель справа; `is-plain` — диалог; `is-doc` — хром чтения заметки |
 | `.m-h1` | `m-head` | Заголовок раздела |
 | `.m-sub` | `m-head` | Подзаголовок под заголовком |
 | `.m-crumbs` | `m-head` | Хлебные крошки |

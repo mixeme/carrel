@@ -3,12 +3,7 @@
 <div class="dialog-host">
 <div class="app-dialog">
 {{if $d.Done}}
-<div class="dialog-head">
-    <div>
-        <h1>Merge on the server</h1>
-        <p class="dialog-sub">{{$d.Title}}</p>
-    </div>
-</div>
+{{template "m-head" (head "Plain" true "Title" "Merge on the server" "Subtitle" $d.Title)}}{{template "m-headend"}}
 {{if $d.Written}}<p>The merged record was written to <strong>{{$d.Target.CollectionLabel}}</strong>.</p>
 {{else}}<p>Nothing was written, so nothing was deleted.</p>{{end}}
 {{if $d.Deleted}}
@@ -32,12 +27,7 @@
     <a class="app-btn" href="{{$d.Back}}">Back to duplicates</a>
 </div>
 {{else}}
-<div class="dialog-head">
-    <div>
-        <h1>Merge on the server</h1>
-        <p class="dialog-sub">{{$d.Title}}</p>
-    </div>
-</div>
+{{template "m-head" (head "Plain" true "Title" "Merge on the server" "Subtitle" $d.Title)}}{{template "m-headend"}}
 <p class="message error" role="alert">This changes other people's servers: the merged record is written to one collection and the others are deleted. It cannot be undone from here.</p>
 <div class="dialog-card">
     <div class="dialog-rubric">Kept and rewritten</div>

@@ -61,7 +61,7 @@ internal/web/handler/component.go   типы входа, сборка стиле
 
 - [x] **Э0 · Каркас.** Каталоги, `embed`, загрузчик, склейка CSS, `README.md`, ворота. Шапка и полоса переезжают под именами макетов: `pagehead` → `m-head` (33 места), `pagebar` → `m-bar` (11), `.contacts-actions` — второе имя того же ряда действий — убран. `carrel.css`: 5174 → 5081. Сделано в `03bd039`.
 - [x] **Э1 · Полоса действий** — `.m-bar`, `.m-sel`, `.m-sep`, `.m-right`, `.m-more`, `.m-acts`. Схлопывает 16 имён. Здесь же переносится исправление из макетов: симметричный отступ, одна строка, отступление по рангу под «⋯». `.app-main` / `.settings-panel` / `.admin-panel` стали контейнерами. `carrel.css`: 5081 → 5015.
-- [ ] **Э2 · Шапка раздела** — `.m-head`, `.m-h1`, `.m-sub`, `.m-crumbs`. 28 классов → 4. Частично сделано в Э0; остаётся свести сюда `.detail-panel-head/-title/-sub`, `.note-read-head/-title/-sub`, `.dup-head`, `.person-head`, `.dialog-head/-sub`.
+- [x] **Э2 · Шапка раздела** — `.m-head`, `.m-h1`, `.m-sub`, `.m-crumbs`. Диалоги (`.dialog-head/-sub`), панели (`.detail-panel-head/-title/-sub/-actions/-intro/-photo`), `.person-head` и хром чтения заметки (`.note-read-head/-sub/-actions`) сходятся на ту же шапку: `is-plain` / `is-side` / `is-doc` сохраняют числа, которые уже были. `.dup-head` — рубрика карточки (`.m-rubric`, Э6), не шапка; `.note-read-title` — `.m-title` 27px в теле документа, не `.m-h1`. `carrel.css`: 5015 → 4903.
 - [ ] **Э3 · Строка списка** — `.m-list`, `.m-row` с модификаторами `--contact/--agenda/--task/--note/--find/--file`, `.m-group`, `.m-rubric`. 25 классов → 9. Сюда же лестница исчезающих колонок.
 - [ ] **Э4 · Поля, кнопки, формы** — `.m-form`, `.m-f`, `.m-in` (включая `is-pick`), `.m-check`, `.m-seg`, `.m-btn`, `.m-formfoot`. Сюда переезжает закон трёх высот строки (28/26/22), который сейчас живёт только в макетах.
 - [ ] **Э5 · Рейл и источники** — `.m-rail`, `.m-nav`, `.m-src`, `.m-rail-sec`, `.m-rail-foot`, `.m-bar3` (сейчас `.src-bar`).
@@ -71,7 +71,8 @@ internal/web/handler/component.go   типы входа, сборка стиле
 ### Что Э0 намеренно не сделал — закрыто в Э1, кроме
 
 - **`datatable` и `importexportmenu` остались на месте.** У `datatable` класс приходит из места вызова (`Class "data"`, `"files-table"`), то есть примитив пока без единого имени; тащить это в библиотеку значит закрепить смысл, который надо развалить.
-- **`.src-bar` / `.note-read-bar` / `.form-foot` / `.dup-buttons` не тронуты.** Полоска коллекции — Э5 (`.m-bar3`); подвал формы и кнопки дубликатов — Э4 (`.m-formfoot`). `.bar-sort` остаётся до Э4 (`.m-seg`).
+- **`.src-bar` / `.form-foot` / `.dup-buttons` не тронуты.** Полоска коллекции в рейле — Э5 (`.m-bar3`); подвал формы и кнопки дубликатов — Э4 (`.m-formfoot`). `.bar-sort` остаётся до Э4 (`.m-seg`).
+- **`.dup-head` и `.note-read-title` не тронуты.** Рубрика группы дубликатов — Э6 (`.m-card` > `.m-rubric`); 27px заголовок заметки — `.m-title`, не шапка раздела.
 
 ## 5. Ворота
 

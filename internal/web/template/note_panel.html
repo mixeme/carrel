@@ -1,16 +1,14 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="detail-panel" data-detail-url="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/panel">
-    <div class="detail-panel-head">
-        <div>
-            <h2 class="detail-panel-title">{{$d.Note.DisplayTitle}}</h2>
-            <p class="detail-panel-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p>
-        </div>
-        <div class="detail-panel-actions">
+    {{$sub := $d.AccountLabel}}
+    {{if $d.Collection.DisplayName}}{{$sub = printf "%s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
+    {{template "m-head" (head "Side" true "Title" $d.Note.DisplayTitle "Subtitle" $sub)}}
+        <div class="m-acts">
             <a class="app-btn" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">Open</a>
             <button type="button" class="app-btn is-quiet" data-detail-close title="Close the panel" aria-label="Close">✕</button>
         </div>
-    </div>
+    {{template "m-headend"}}
     <div class="detail-panel-body">
         <dl class="detail-fields">
             {{if $d.Form.Date}}<dt>Date</dt><dd>{{$d.Form.Date}}{{if $d.Form.Time}} {{$d.Form.Time}}{{end}}</dd>{{end}}

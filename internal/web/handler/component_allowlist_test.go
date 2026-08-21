@@ -196,3 +196,39 @@ func TestRetiredBarNamesStayGone(t *testing.T) {
 		}
 	}
 }
+
+// A screen that writes one of these is inventing an eleventh header family
+// again. The leftovers — dup-head, note-read-title — are a card rubric and
+// a 27px document title, not this header.
+var retiredHeadNames = []string{
+	"dialog-head", "dialog-sub",
+	"detail-panel-head", "detail-panel-title", "detail-panel-sub",
+	"detail-panel-actions", "detail-panel-intro", "detail-panel-photo",
+	"person-head",
+	"note-read-head", "note-read-sub", "note-read-actions",
+	"note-read-meta", "note-read-bar",
+}
+
+func TestRetiredHeadNamesStayGone(t *testing.T) {
+	templateFS, err := fs.Sub(web.TemplateFS, "template")
+	if err != nil {
+		t.Fatalf("template FS: %v", err)
+	}
+	names, err := fs.Glob(templateFS, "*.html")
+	if err != nil {
+		t.Fatalf("glob templates: %v", err)
+	}
+	for _, name := range names {
+		b, err := fs.ReadFile(templateFS, name)
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		body := string(b)
+		for _, class := range retiredHeadNames {
+			if writesClass(body, class) {
+				t.Errorf("%s still writes retired header class %q; use m-head / m-h1 / m-sub / m-acts",
+					name, class)
+			}
+		}
+	}
+}

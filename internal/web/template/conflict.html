@@ -2,12 +2,7 @@
 {{$d := .Data}}
 <div class="dialog-host">
 <div class="app-dialog is-wide">
-<div class="dialog-head">
-    <div>
-        <h1>Conflict</h1>
-        <p class="dialog-sub">Another client changed this {{$d.Entity}} while you were editing it. Nothing has been overwritten.</p>
-    </div>
-</div>
+{{template "m-head" (head "Plain" true "Title" "Conflict" "Subtitle" (printf "Another client changed this %s while you were editing it. Nothing has been overwritten." $d.Entity))}}{{template "m-headend"}}
 
 {{if $d.RemoteGone}}
 <p class="hint">The server version could not be re-read. Applying yours will try to create it again.</p>

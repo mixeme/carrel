@@ -101,3 +101,71 @@
 .m-crumbs a {
     white-space: nowrap;
 }
+
+/* Фотография и заголовок — одна группа слева, действия остаются справа.
+   Макеты рисуют это безымянным flex с gap 14px; экран больше не передаёт
+   своё имя обёртки. */
+.m-head > div:has(> img) {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+/* Диалог: отступ уже у .app-dialog, шапка его не повторяет. Макеты:
+   `.m-dialog .m-head { padding-left: 0; padding-right: 0 }`. Вертикальный
+   тоже ноль и margin-bottom 8px — как было у .dialog-head, не перерисовка. */
+.m-head.is-plain {
+    padding: 0;
+    margin-bottom: 8px;
+}
+
+/* Панель справа. Макеты задают 19px инлайном на .m-h1 — ровно тот дефект,
+   из-за которого библиотека существует. Пока это отдельный вид шапки, а не
+   выравнивание на 22px: переезд и исправление не один коммит. */
+.m-head.is-side {
+    gap: 12px;
+    padding: 12px var(--pad);
+    border-bottom: 0.5px solid var(--rule);
+    flex-shrink: 0;
+}
+
+.m-head.is-side > div:has(> img) {
+    align-items: center;
+}
+
+.m-head.is-side .m-h1 {
+    font-size: 19px;
+    line-height: 1.2;
+}
+
+.m-head.is-side .m-sub {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.m-head.is-side img {
+    width: 76px;
+    height: 76px;
+    object-fit: cover;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* Хром чтения заметки: шапка без h1 (заголовок — .note-read-title / .m-title
+   в теле), нижняя граница вместо отступа страницы. Числа — как у
+   .note-read-head, не макетные 15px var(--pad). */
+.m-head.is-doc {
+    padding: 0 0 0.65rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 0.5px solid var(--rule);
+    gap: 0.75rem 1rem;
+}
+
+.m-head.is-doc .m-sub {
+    margin-top: 0;
+}
+
+.m-head.is-doc .m-bar3 {
+    height: 12px;
+}

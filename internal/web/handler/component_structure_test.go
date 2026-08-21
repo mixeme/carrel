@@ -99,7 +99,7 @@ func checkShellScreensAssembleInOrder(t *testing.T, a *app) {
 			continue // not a full page — same skip routes_conformance_test.go uses
 		}
 
-		if n := strings.Count(body, `<header class="m-head">`); n != 1 {
+		if n := strings.Count(body, `<header class="m-head`); n != 1 {
 			t.Errorf("GET %s renders %d m-head headers; exactly one expected "+
 				"(list it in headerlessScreens if none is genuinely correct here)", path, n)
 		}
@@ -111,7 +111,7 @@ func checkShellScreensAssembleInOrder(t *testing.T, a *app) {
 			}
 		}
 
-		headIdx := strings.Index(body, `<header class="m-head">`)
+		headIdx := strings.Index(body, `<header class="m-head`)
 		if headIdx < 0 {
 			continue // a screen with no list/detail content of its own — nothing to be first before
 		}

@@ -42,15 +42,29 @@ const (
 // ("Connect a DAV account from Connections…") from constants, never from
 // anything a visitor typed — development.md's rule that template.HTML never
 // wraps user input holds exactly as it did when these were `(safeHTML …)`.
+//
+// Side, Plain and Doc are the same header in the three places the mockups
+// already draw it: a details panel (h2, 19px), a dialog (no padding of its
+// own — the dialog already has one), and the note-reading chrome (no title
+// in the header; the 27px document title lives in the body). Code and Mono
+// are tails the component wraps itself, so a screen never has to hand the
+// template raw HTML for a filename or a date. Swatch is the collection
+// stripe in the subtitle — the same .m-bar3 the combined views already put
+// in the h1.
 type Head struct {
 	Title        string
 	Subtitle     string
 	SubtitleHTML template.HTML
 	Hint         string
 	Photo        string
-	WrapClass    string
 	Bar          bool
 	Muted        bool
+	Side         bool
+	Plain        bool
+	Doc          bool
+	Code         string
+	Mono         string
+	Swatch       string
 	Crumbs       []fileCrumb
 }
 

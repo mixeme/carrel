@@ -7,7 +7,7 @@
         <section class="person-main">
             {{$sub := $p.AccountLabel}}
             {{if $p.Collection.DisplayName}}{{$sub = print $p.AccountLabel " · " $p.Collection.DisplayName}}{{end}}
-            {{template "m-head" (head "Title" $d.Subject "Subtitle" $sub "Photo" $p.PhotoURL "WrapClass" "person-head")}}
+            {{template "m-head" (head "Title" $d.Subject "Subtitle" $sub "Photo" $p.PhotoURL)}}
                 <div class="m-acts no-print">
                     {{if $p.NoteURL}}<a class="app-btn" href="{{$p.NoteURL}}">Write a note</a>{{end}}
                     {{if $p.EventURL}}<a class="app-btn" href="{{$p.EventURL}}">New event</a>{{end}}
