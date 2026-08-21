@@ -25,7 +25,7 @@
         {{if $d.InstallResult.Warn}}<span class="install-warn">{{$d.InstallResult.Warn}} warning{{if ne $d.InstallResult.Warn 1}}s{{end}}</span> · {{end}}
         <span class="mono">{{printf "%.1f s" $d.InstallResult.Duration.Seconds}}</span>
     </p>
-    {{template "datatable" (dataTable "Class" "data install-check-table")}}
+    {{template "m-table" (dataTable "Class" "install-check-table")}}
         <thead>
             <tr>
                 <th class="install-col-status"></th>
@@ -44,7 +44,7 @@
             </tr>
         {{end}}
         </tbody>
-    {{template "datatableend"}}
+    {{template "m-tableend"}}
     {{end}}
 
     <p class="hint install-check-note">The check runs from outside inwards: Carrel calls itself at the base address, so it sees exactly what a browser or DAVx5 will. Nothing is changed and nothing is stored, apart from the audit line saying the check was run.</p>

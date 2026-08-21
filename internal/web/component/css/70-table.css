@@ -1,0 +1,300 @@
+/* Таблица, плитки, дерево, очередь загрузок — макеты §6
+   (.m-table, .m-fname, .m-grid, .m-tile, .m-thumb, .m-transfers, .m-tree).
+
+   `table.data` и `.files-table` были одной таблицей под двумя именами.
+   Числа — те, что уже были в продакшене: 13 px на таблице, 12.5 px в ячейке,
+   первая колонка в желобе `--pad`. Узкий экран прячет колонки только у
+   файлового списка (`data-files-list`): админская таблица — другой набор. */
+
+.m-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 13px;
+}
+
+.files-card .m-table {
+    margin: 1rem 0;
+}
+
+.m-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    white-space: nowrap;
+    padding: 9px 12px;
+    border-bottom: 0.5px solid var(--rule);
+    vertical-align: bottom;
+}
+
+/* A sortable column header is a button in markup (data-files-sort) and
+   small caps in appearance, not a bordered pill — button.link's own border
+   and padding are for a toolbar link, not a th (2.6.G15). */
+.m-table th button.link {
+    border: 0;
+    padding: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+}
+
+.m-table td {
+    text-align: left;
+    font-size: 12.5px;
+    padding: 7px 12px;
+    border-bottom: 0.5px solid var(--hair);
+    vertical-align: middle;
+}
+
+.m-table tr th:first-child,
+.m-table tr td:first-child {
+    padding-left: var(--pad);
+}
+
+/* A machine string — an address, a path, an identifier — has no spaces, so the
+   column cannot shrink and the table runs off the panel. Breaking anywhere
+   costs a wrapped address and saves the layout. */
+.m-table td.mono,
+.m-table td .mono {
+    overflow-wrap: anywhere;
+}
+
+.m-table tr.is-folder a {
+    font-weight: 600;
+}
+
+.m-table tr.is-selected {
+    background: var(--card);
+}
+
+.m-table .m-acts {
+    justify-content: flex-start;
+}
+
+/* Name cell: icon + label. Size is the cell's, not the row's. */
+.m-fname {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+/* ── плитки ───────────────────────────────────────────────────── */
+
+.m-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.25rem, 1fr));
+    gap: 0.65rem;
+    margin: 1rem 0;
+}
+
+.m-grid[hidden] {
+    display: none !important;
+}
+
+.m-tile {
+    border: 0.5px solid var(--hair);
+    border-radius: 4px;
+    background: var(--paper);
+    padding: 0.45rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.m-tile.is-selected {
+    border-color: var(--accent);
+    background: var(--card);
+}
+
+.m-tile.is-up {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.m-thumb {
+    aspect-ratio: 4 / 3;
+    border-radius: 3px;
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.m-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.m-thumb .file-icon {
+    width: 2rem;
+    height: 2rem;
+    opacity: 0.45;
+}
+
+.m-tile .n {
+    font-size: 12.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.m-tile .s {
+    font-size: 11.5px;
+    font-family: var(--f-mono);
+}
+
+/* ── очередь загрузок ─────────────────────────────────────────── */
+
+.m-transfers {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    width: min(22rem, calc(100% - 2rem));
+    border: 0.5px solid var(--hair);
+    border-radius: 4px;
+    background: var(--paper);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    z-index: 40;
+}
+
+.m-transfers[hidden] {
+    display: none !important;
+}
+
+.m-transfers .h {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 0.5px solid var(--hair);
+    font-size: 12.5px;
+}
+
+.m-transfers ul {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0.75rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 14rem;
+    overflow: auto;
+}
+
+.m-transfers li {
+    font-size: 11.5px;
+}
+
+.m-transfers .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.m-transfers .bar {
+    height: 4px;
+    background: var(--hair);
+    border-radius: 2px;
+    margin-top: 0.25rem;
+    overflow: hidden;
+}
+
+.m-transfers .bar i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    width: 0;
+}
+
+.m-transfers .actions {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+
+/* ── дерево папок ─────────────────────────────────────────────── */
+
+.m-tree {
+    max-height: 16rem;
+    overflow: auto;
+    border: 0.5px solid var(--hair);
+    border-radius: 4px;
+    padding: 0.35rem 0;
+    margin-bottom: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 12.5px;
+}
+
+.m-tree [role="treeitem"] {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 26px;
+    padding: 0 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12.5px;
+}
+
+/* Nesting is a class rather than an inline style: the CSP of §24.5 has no
+   'unsafe-inline' for styles, so a style attribute never reaches the box. */
+.m-tree [role="treeitem"][data-depth="0"] {
+    padding-left: 0;
+}
+
+.m-tree [role="treeitem"][data-depth="1"] {
+    padding-left: 1.25rem;
+}
+
+.m-tree [role="treeitem"].is-on {
+    background: var(--card);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.m-tree [role="treeitem"].is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.m-tree .hint {
+    font-size: 11px;
+}
+
+@media print {
+    .m-table tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .m-table {
+        border-collapse: collapse;
+    }
+
+    .m-table th,
+    .m-table td {
+        border-bottom: 0.5px solid #999;
+    }
+}
+
+@media (max-width: 640px) {
+    [data-files-list] th:nth-child(3),
+    [data-files-list] td:nth-child(3),
+    [data-files-list] th:nth-child(4),
+    [data-files-list] td:nth-child(4) {
+        display: none;
+    }
+}

@@ -17,3 +17,39 @@
 
 {{define "m-menu"}}<div class="m-menu{{if .Pop}} is-pop{{end}}{{if .Right}} is-right{{end}}" role="menu"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
 {{define "m-menuend"}}</div>{{end}}
+
+{{/* The ⋯ overflow menu of 2.6.D1, holding Import/Export on a merged view
+     (2.6.D2): there is no single collection to import into or export from
+     until one is chosen, so the menu asks first and then hands off to that
+     collection's own screen. Sources is a []sourceRow (sectionRail.Sources);
+     ImportURL is omitted where the section makes no import promise. */}}
+{{define "importexportmenu"}}
+{{$m := .}}
+{{if $m.Sources}}
+<div class="app-create no-print" data-dots-menu>
+    <button type="button" class="m-btn is-quiet" data-dots-toggle
+            aria-expanded="false" aria-haspopup="menu" aria-label="Import or export">{{template "ico" "dots"}}</button>
+    <div class="m-menu" role="menu" hidden>
+        {{if $m.ImportURL}}
+        <form method="get" action="{{$m.ImportURL}}" role="menuitem">
+            <label>Import into
+                <select name="dest" data-dest-select class="m-in">
+                    <option value="">Choose a collection…</option>
+                    {{range $m.Sources}}{{if not .ReadOnly}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}{{end}}
+                </select>
+            </label>
+        </form>
+        <hr class="app-create-sep">
+        {{end}}
+        <form method="get" action="{{$m.ExportURL}}" role="menuitem">
+            <label>Export
+                <select name="dest" data-dest-select class="m-in">
+                    <option value="">Choose a collection…</option>
+                    {{range $m.Sources}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}
+                </select>
+            </label>
+        </form>
+    </div>
+</div>
+{{end}}
+{{end}}

@@ -305,8 +305,7 @@ textarea.m-in {
     white-space: nowrap;
 }
 
-.data td .m-btn,
-.files-table td .m-btn {
+.m-table td .m-btn {
     height: 22px;
 }
 

@@ -44,7 +44,7 @@
             {{template "m-more"}}
         {{template "m-barend"}}
         {{if $d.AuditLog}}
-        {{template "datatable" (dataTable "Class" "data" "Root" "admin-audit")}}
+        {{template "m-table" (dataTable "Root" "admin-audit")}}
             <thead>
                 <tr><th data-col="when">When</th><th data-col="action">Action</th><th data-col="actor">Actor</th><th data-col="target">Target</th><th data-col="detail">Detail</th></tr>
             </thead>
@@ -59,7 +59,7 @@
                 </tr>
             {{end}}
             </tbody>
-        {{template "datatableend"}}
+        {{template "m-tableend"}}
         {{else}}
         <p class="hint">No entries match this filter.</p>
         {{end}}

@@ -149,7 +149,7 @@
     <section class="subsection">
         <h2 class="subsection-h2">Pending invitations</h2>
         {{if $d.Invites}}
-        {{template "datatable" (dataTable "Class" "data")}}
+        {{template "m-table" (dataTable)}}
             <thead>
                 <tr><th>Login</th><th>Delivery</th><th>Status</th><th>Mail</th><th>Expires</th><th></th></tr>
             </thead>
@@ -188,7 +188,7 @@
                 </tr>
             {{end}}
             </tbody>
-        {{template "datatableend"}}
+        {{template "m-tableend"}}
         {{else}}
         <p class="hint">No invitations yet.</p>
         {{end}}

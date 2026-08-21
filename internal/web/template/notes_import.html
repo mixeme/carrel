@@ -64,7 +64,7 @@
     {{if $d.CollisionCount}}<span><strong>{{$d.CollisionCount}}</strong> UID collision(s)</span>{{end}}
 </div>
 {{if $d.TruncatedNote}}<p class="m-msg is-alert" role="alert">{{$d.TruncatedNote}}</p>{{end}}
-<table class="import-preview data">
+<table class="m-table import-preview">
     <thead><tr><th>File</th><th>Title</th><th>Date</th><th>Tags</th><th>Result</th></tr></thead>
     <tbody>
     {{range $d.Notes}}

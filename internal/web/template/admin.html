@@ -26,7 +26,7 @@
             {{template "columnpicker" "admin-users"}}
         {{template "m-barend"}}
         {{if $d.Users}}
-        {{template "datatable" (dataTable "Class" "data" "Root" "admin-users")}}
+        {{template "m-table" (dataTable "Root" "admin-users")}}
             <thead>
                 <tr>
                     <th data-col="login">Login</th>
@@ -90,7 +90,7 @@
                 </tr>
             {{end}}
             </tbody>
-        {{template "datatableend"}}
+        {{template "m-tableend"}}
         {{else}}
         <p class="hint">{{if $d.UserFilter}}No users match this filter.{{else}}No users yet.{{end}}</p>
         {{end}}

@@ -1,10 +1,10 @@
 {{define "body"}}
 {{$d := .Data}}
 {{range $d.Children}}
-<div class="folder-tree-node{{if .ReadOnly}} is-disabled{{end}}"
+<div{{if .ReadOnly}} class="is-disabled"{{end}}
      role="treeitem" data-picker-node data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="{{.Folder}}"
      {{if not .ReadOnly}}tabindex="0"{{end}} data-depth="1">
-    <span class="folder-tree-label">{{.Name}}</span>
+    <span>{{.Name}}</span>
 </div>
 {{end}}
 {{end}}

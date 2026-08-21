@@ -102,9 +102,9 @@ type BarForm struct {
 	Method string
 }
 
-// DataTable is the input to the datatable component. Not yet a library
-// component: every call site passes its own Class ("data", "files-table"),
-// so the primitive still has no single name. It moves with the table stage.
+// DataTable is the input to m-table. The table is always .m-table;
+// Class is extra screen markers (install-check-table), Root is
+// data-columns-root, Attrs is everything else the tag needs.
 type DataTable struct {
 	Class string
 	Root  string

@@ -1267,6 +1267,65 @@ figcaption b{color:var(--ink);font-weight:600}
   <div class="m-empty">No contacts in this address book.<span class="m-btn is-primary">New contact</span></div>
 </div>
 
+<h4>Таблица</h4>
+<div class="demo mock col" style="background:var(--bg);padding:0;overflow:hidden">
+  <table class="m-table">
+    <thead><tr><th>Login</th><th>Role</th><th class="is-2nd">Created</th><th>Last login</th></tr></thead>
+    <tbody>
+      <tr><td>mix</td><td>administrator</td><td class="is-2nd mono">2026-03-12</td><td class="mono">2026-08-10 09:14</td></tr>
+      <tr class="is-sel"><td>anna</td><td>user</td><td class="is-2nd mono">2026-04-02</td><td class="mono">2026-08-09 18:02</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>Заголовок — капитель, не жирный шрифт браузера. Первая и последняя колонки стоят в желобе страницы (<code>var(--pad)</code>), чтобы таблица совпадала с шапкой над ней. Машинная строка (адрес, путь, идентификатор) ломается в любом месте: иначе колонка не сжимается и таблица уезжает за край. В файлах имя — <code>.m-fname</code>: значок и подпись, размер знает ячейка.</p>
+
+<h4>Плитки и очередь загрузок</h4>
+<div class="demo mock" style="background:var(--bg);align-items:flex-start">
+  <div class="m-grid" style="flex:1;margin:0;padding:8px">
+    <div class="m-tile"><div class="m-thumb"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#i-doc"/></svg></div><span class="n">смета.pdf</span><span class="s">412 KB</span></div>
+    <div class="m-tile is-sel"><div class="m-thumb"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#i-img"/></svg></div><span class="n">фасад.jpg</span><span class="s">1.8 MB</span></div>
+  </div>
+</div>
+<p>Сетка <code>.m-grid</code>, плитка <code>.m-tile</code>, превью <code>.m-thumb</code>. Выделенная плитка — рамка акцента, как выделенная строка таблицы — фон картона. Очередь загрузок <code>.m-transfers</code> — карточка поверх: ход, конфликт имени, Keep both / Replace / Skip. Она не список и не таблица, поэтому у неё своё имя.</p>
+
+<h4>Дерево папок</h4>
+<div class="demo mock col" style="background:var(--paper);max-width:340px;padding:8px">
+  <div class="m-tree">
+    <div class="is-on"><svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-file"/></svg>attachments</div>
+    <div style="padding-left:1.25rem"><svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-file"/></svg>2026</div>
+    <div style="padding-left:1.25rem"><svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-file"/></svg>смета</div>
+  </div>
+</div>
+<p>Единственное новое устройство, которое понадобилось «Move…» в файлах — и оно же нужно запланированному экрану нового устройства. Вложенность — атрибут <code>data-depth</code>, не инлайновый стиль: CSP не пускает <code>style=</code>.</p>
+
+<h4>Документ: заголовок, текст, правка</h4>
+<div class="demo mock col" style="background:var(--paper);padding:16px 20px">
+  <div class="m-editbar" style="padding:0 0 8px;margin:0 0 12px;border-bottom:.5px solid var(--hair)">
+    <span class="m-btn is-primary">Save</span>
+    <span class="m-btn is-quiet">Cancel</span>
+    <span class="m-sep"></span>
+    <span class="m-btn is-quiet"><b>B</b></span>
+    <span class="m-right"><span class="m-kbd">Ctrl+S</span></span>
+  </div>
+  <div class="m-title">Заметка со встречи 10.08</div>
+  <div class="m-prose">Календарь на осень: три события в «Личный», одно в «Работа». Связанные — Анна и смета.</div>
+</div>
+<p><code>.m-title</code> — 27 px в теле документа, не <code>.m-h1</code> шапки раздела. <code>.m-doc</code> / <code>.m-docbody</code> / <code>.m-metacol</code> — полный экран заметки: текст и боковая колонка. <code>.m-editbar</code> — та же высота 26 px, что у полосы инструментов, только для правки. <code>.m-kbd</code> — аккорд, который обещает кнопку.</p>
+
+<h4>Шаги мастера и диагностика</h4>
+<div class="demo mock col" style="background:var(--paper);padding:14px 20px;gap:12px">
+  <div class="m-steps"><span class="is-on">1 · File</span><i aria-hidden="true"></i><span>2 · Preview</span><i aria-hidden="true"></i><span>3 · Report</span></div>
+  <div class="m-diag">[discover] GET /.well-known/caldav → 200
+[principal] /principals/mix/</div>
+</div>
+<p>Три шага импорта — <code>.m-steps</code>: текущий жирный, остальные пыльные, между ними линейка. Трасса обнаружения и отчёт об ошибках — <code>.m-diag</code>, моноширинным, как данные.</p>
+
+<h4>Оверлей, оболочка, настольное, телефон</h4>
+<p>Быстрая заметка поверх любого экрана — <code>.m-overlay</code> / <code>.m-scrim</code> / <code>.m-sheet</code>: это хром оболочки, не примитив экрана, и живёт вместе с верхней панелью (<code>.m-top</code>, <code>.m-brand</code>, <code>.m-logo</code>, <code>.m-search</code>, <code>.m-shell</code>, <code>.m-main</code>) — раздел 4. Нативное окно (<code>.m-win</code>, <code>.m-titlebar</code>, <code>.m-menubar</code>, <code>.m-status</code>, <code>.m-toast</code>, <code>.m-tray</code>) — раздел 12. Нижняя панель телефона (<code>.m-tabbar</code>) — раздел 10. Заглушка загрузки <code>.m-skel</code> и двухстрочная ячейка <code>.m-two</code> нарисованы здесь, в продакшене пока не вызываются. Фото человека — <code>&lt;img&gt;</code> в <code>.m-head</code>, не отдельный <code>.m-photo</code>. Разрушительный подвал формы — <code>.m-formfoot</code> с <code>is-danger</code>, не <code>.m-danger-zone</code>.</p>
+
+<h4>Восемьдесят семь имён</h4>
+<p>Именованных примитивов с префиксом <code>.m-</code> — <b>87</b> (модификаторы строки <code>.m-row--contact</code> и т.п. — не отдельные примитивы, а вид той же строки). Каждый либо показан в подразделе выше, либо назван в абзаце «Оверлей, оболочка…» с отсылкой к разделу, где он живёт. Это и есть закрытый список: новое имя — только если появилась новая вещь, а не новое место для старой.</p>
+
 <h2 id="s-contacts">7.1 Контакты и человек целиком</h2>
 
 <figure>

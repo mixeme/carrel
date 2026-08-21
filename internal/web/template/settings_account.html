@@ -111,7 +111,7 @@
     <fieldset class="m-fset">
         <legend>Sessions{{if $d.Sessions}} <span class="hint">{{len $d.Sessions}} active</span>{{end}}</legend>
         {{if $d.Sessions}}
-        {{template "datatable" (dataTable "Class" "data")}}
+        {{template "m-table" (dataTable)}}
             <thead><tr><th data-col="where">Where</th><th data-col="started">Started</th><th data-col="last_seen">Last seen</th><th data-col="actions"></th></tr></thead>
             <tbody>
             {{range $d.Sessions}}
@@ -132,7 +132,7 @@
                 </tr>
             {{end}}
             </tbody>
-        {{template "datatableend"}}
+        {{template "m-tableend"}}
         {{if gt (len $d.Sessions) 1}}
         <form method="post" class="no-print" action="{{.Base}}/app/settings/account">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">

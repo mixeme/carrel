@@ -134,12 +134,14 @@ func TestComponentStylesheetAssembles(t *testing.T) {
 	// The order is the order of the names, which is why they carry a numeric
 	// prefix; a cascade that depends on glob order is a cascade nobody can
 	// reason about.
-	if head, bar, row, form, rail, panel := strings.Index(string(sheet.Body), "10-head.css"),
+	if head, bar, row, form, rail, panel, table, doc := strings.Index(string(sheet.Body), "10-head.css"),
 		strings.Index(string(sheet.Body), "20-bar.css"),
 		strings.Index(string(sheet.Body), "30-row.css"),
 		strings.Index(string(sheet.Body), "40-form.css"),
 		strings.Index(string(sheet.Body), "50-rail.css"),
-		strings.Index(string(sheet.Body), "60-panel.css"); head < 0 || bar < 0 || row < 0 || form < 0 || rail < 0 || panel < 0 || head > bar || bar > row || row > form || form > rail || rail > panel {
-		t.Errorf("stylesheets are not concatenated in name order (head at %d, bar at %d, row at %d, form at %d, rail at %d, panel at %d)", head, bar, row, form, rail, panel)
+		strings.Index(string(sheet.Body), "60-panel.css"),
+		strings.Index(string(sheet.Body), "70-table.css"),
+		strings.Index(string(sheet.Body), "80-doc.css"); head < 0 || bar < 0 || row < 0 || form < 0 || rail < 0 || panel < 0 || table < 0 || doc < 0 || head > bar || bar > row || row > form || form > rail || rail > panel || panel > table || table > doc {
+		t.Errorf("stylesheets are not concatenated in name order (head at %d, bar at %d, row at %d, form at %d, rail at %d, panel at %d, table at %d, doc at %d)", head, bar, row, form, rail, panel, table, doc)
 	}
 }

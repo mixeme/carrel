@@ -1875,7 +1875,7 @@ document.addEventListener('change', function (e) {
     });
 
     browse.addEventListener('click', function (e) {
-        var tile = e.target.closest('.files-tile[data-file-row]');
+        var tile = e.target.closest('.m-tile[data-file-row]');
         if (tile && !e.target.closest('a')) {
             if (e.detail === 2) {
                 var url = tile.getAttribute('data-dir') === 'true' ? tile.getAttribute('data-url') : tile.getAttribute('data-download');
@@ -1978,7 +1978,7 @@ document.addEventListener('change', function (e) {
             pickerSelection = null;
             if (pickerConfirm) pickerConfirm.disabled = true;
             if (pickerWarn) pickerWarn.hidden = true;
-            picker.querySelectorAll('.folder-tree-node.is-on').forEach(function (n) { n.classList.remove('is-on'); });
+            picker.querySelectorAll('.m-tree [role="treeitem"].is-on').forEach(function (n) { n.classList.remove('is-on'); });
             moveDialog.showModal();
         }
     });
@@ -1993,7 +1993,7 @@ document.addEventListener('change', function (e) {
         picker.addEventListener('click', function (e) {
             var node = e.target.closest('[data-picker-node]');
             if (!node || node.classList.contains('is-disabled')) return;
-            picker.querySelectorAll('.folder-tree-node.is-on').forEach(function (n) { n.classList.remove('is-on'); });
+            picker.querySelectorAll('.m-tree [role="treeitem"].is-on').forEach(function (n) { n.classList.remove('is-on'); });
             node.classList.add('is-on');
             pickerSelection = {
                 account: node.getAttribute('data-account'),

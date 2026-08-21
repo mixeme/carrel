@@ -407,7 +407,7 @@ func TestNoteFullScreenReadAndEdit(t *testing.T) {
 	body := read.Body.String()
 	for _, want := range []string{
 		`data-note-doc`,
-		`note-read-title`,
+		`m-title`,
 		`Neighbours`,
 		`Ideas about the budget`,
 		`?edit=1`,

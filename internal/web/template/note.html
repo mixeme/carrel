@@ -32,7 +32,7 @@
         {{end}}
     {{template "m-railend" (rail)}}
     <div class="app-main">
-        <section class="note-card note-doc agenda-print-root" data-note-doc
+        <section class="note-card m-doc agenda-print-root" data-note-doc
                  {{if $d.Edit}}data-note-editing{{end}}
                  {{if not $d.IsNew}}data-note-page-url="{{$readURL}}"{{end}}>
             {{if $d.Edit}}
@@ -41,31 +41,31 @@
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
-                <div class="note-editbar no-print">
+                <div class="m-editbar no-print">
                     <button type="submit" class="m-btn is-primary">Save</button>
                     {{if $d.IsNew}}
                     <a class="m-btn is-quiet" href="{{$d.BackURL}}">Cancel</a>
                     {{else}}
                     <a class="m-btn is-quiet" href="{{$readURL}}">Cancel</a>
                     {{end}}
-                    <span class="note-editbar-sep" aria-hidden="true"></span>
+                    {{template "m-sep" (sep)}}
                     <button type="button" class="m-btn is-quiet" data-note-markup="bold" title="Bold"><b>B</b></button>
                     <button type="button" class="m-btn is-quiet" data-note-markup="italic" title="Italic"><i>I</i></button>
                     <button type="button" class="m-btn is-quiet" data-note-markup="h2" title="Heading">H2</button>
                     <button type="button" class="m-btn is-quiet" data-note-markup="list" title="List">• list</button>
                     <button type="button" class="m-btn is-quiet" data-note-markup="task" title="Task">☐ task</button>
                     <button type="button" class="m-btn is-quiet" data-note-markup="link" title="Link">Link</button>
-                    <span class="note-editbar-right">
+                    {{template "m-right" (right)}}
                         <span class="hint note-draft-label">Draft in this window</span>
                         <span class="note-width-seg" data-note-width-seg role="group" aria-label="Text width">
                             <button type="button" class="is-on" data-note-width="full">Full width</button>
                             <button type="button" data-note-width="reading">Reading width</button>
                         </span>
                         <button type="button" class="m-btn is-quiet" data-note-focus title="Focus">Focus</button>
-                    </span>
+                    {{template "m-rightend"}}
                 </div>
                 <div class="note-doc-inner">
-                    <div class="note-docbody">
+                    <div class="m-docbody">
                         <div class="m-f w-full note-title-field">
                             <label class="sr-only" for="summary">Title</label>
                             <input id="summary" class="note-title-input m-in" name="summary" value="{{$d.Form.Summary}}" placeholder="optional">
@@ -139,16 +139,16 @@
                 </div>
             {{template "m-headend"}}
             <div class="note-doc-inner">
-                <div class="note-docbody">
-                    <h1 class="note-read-title">{{$d.Note.DisplayTitle}}</h1>
+                <div class="m-docbody">
+                    <h1 class="m-title">{{$d.Note.DisplayTitle}}</h1>
                     {{if $d.BodyHTML}}
-                    <div class="note-prose note-body">{{$d.BodyHTML}}</div>
+                    <div class="m-prose note-body">{{$d.BodyHTML}}</div>
                     {{else}}
-                    <div class="note-prose note-body">{{$d.Note.Description}}</div>
+                    <div class="m-prose note-body">{{$d.Note.Description}}</div>
                     {{end}}
                     <pre class="note-source-pane" hidden>{{$d.Note.Description}}</pre>
                 </div>
-                <aside class="note-metacol no-print" data-note-metacol>
+                <aside class="m-metacol no-print" data-note-metacol>
                     {{if $d.Note.Categories}}
                     <div class="note-meta-block">
                         <h3 class="note-meta-rubric">Tags</h3>

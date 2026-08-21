@@ -69,6 +69,22 @@ var slotClasses = map[string]string{
 	"m-tag":       "a category chip; the words and is-on are the screen's",
 	"m-tick":      "the 13px task tick; checked/label are the screen's",
 	"m-av":        "the list-row avatar; initials or photo are the screen's",
+	"m-table":     "the screen's <table> (import preview, conflict diff) or extra markers on the component; columns and rows are always the screen's",
+	"m-fname":     "the file-name cell; the icon and the label are the screen's",
+	"m-grid":      "the tile grid; which tiles sit there is the screen's",
+	"m-tile":      "one file tile; name, thumb and href are the screen's",
+	"m-thumb":     "the tile thumbnail; image or icon is the screen's",
+	"m-transfers": "the upload queue; rows are built by carrel.js",
+	"m-tree":      "the folder tree; nodes are the screen's",
+	"m-title":     "the 27px document title in a note body, not the section heading",
+	"m-prose":     "note body text; the HTML is the screen's",
+	"m-doc":       "the note document frame; editing vs reading is the screen's",
+	"m-docbody":   "the text column of a note; title and prose are the screen's",
+	"m-metacol":   "the note side column; sections are the screen's",
+	"m-editbar":   "the note-editing toolbar; buttons are the screen's",
+	"m-steps":     "the import wizard steps; labels are the screen's",
+	"m-diag":      "a diagnostic dump; the words are the screen's",
+	"m-kbd":       "a keyboard hint; the chord is the screen's",
 }
 
 // standaloneUse names, per class, the screens allowed to use a primitive on
@@ -98,10 +114,11 @@ func mayWrite(name, class string) bool {
 }
 
 // tablesOutsideDatatable are the templates whose tables were never in scope
-// for the datatable component of 2.6.A3 — import previews and the conflict
+// for the m-table component — import previews and the conflict
 // diff are a different shape of table (a row per field, not a row per
-// record), not "admin and files stop being two tables". Anything not listed
-// here is expected to reach a `<table>` only through the component.
+// record), not "admin and files stop being two tables". They still write
+// .m-table as a slot. Anything not listed here is expected to reach a
+// `<table>` only through the component.
 var tablesOutsideDatatable = map[string]bool{
 	"calendar_import.html": true,
 	"contacts_import.html": true,
@@ -180,7 +197,7 @@ func TestComponentClassesStayInComponentFiles(t *testing.T) {
 			continue
 		}
 		if tableTag.MatchString(body) && !tablesOutsideDatatable[name] {
-			t.Errorf("%s opens a <table> by hand; call the datatable component instead "+
+			t.Errorf("%s opens a <table> by hand; call the m-table component instead "+
 				"(or add it to tablesOutsideDatatable if it genuinely is not a data table)", name)
 		}
 	}
@@ -233,7 +250,7 @@ func TestRetiredBarNamesStayGone(t *testing.T) {
 }
 
 // A screen that writes one of these is inventing an eleventh header family
-// again. The leftover — note-read-title — is a 27px document title, not this header.
+// again. The 27px document title is .m-title, not this header.
 var retiredHeadNames = []string{
 	"dialog-head", "dialog-sub",
 	"detail-panel-head", "detail-panel-title", "detail-panel-sub",
@@ -248,8 +265,7 @@ func TestRetiredHeadNamesStayGone(t *testing.T) {
 }
 
 // A screen that writes one of these is inventing a fourteenth row family
-// again. The files table is still a table (stage 0 leftover), not
-// .m-row--file.
+// again. The files listing is .m-table / .m-tile, not .m-row--file.
 var retiredRowNames = []string{
 	"list-row", "list-row--contact", "list-row--agenda", "list-row--task",
 	"list-row--note", "list-row--find", "list-row--contact-find",
@@ -305,6 +321,20 @@ var retiredPanelNames = []string{
 
 func TestRetiredPanelNamesStayGone(t *testing.T) {
 	assertRetiredClassesGone(t, retiredPanelNames, "m-side / m-fields / m-sec / m-dialog / m-card / m-msg / m-empty / m-poll / m-menu / m-badge / m-tag / m-tick / m-av")
+}
+
+var retiredStage7Names = []string{
+	"files-table", "file-name",
+	"files-grid", "files-tile", "files-tile-thumb", "files-tile-name", "files-tile-meta",
+	"files-transfers", "files-transfers-head",
+	"folder-tree", "folder-tree-node", "folder-tree-label",
+	"note-read-title", "note-prose", "note-doc", "note-docbody", "note-metacol",
+	"note-editbar", "note-editbar-sep", "note-editbar-right",
+	"import-steps", "dialog-diag", "app-kbd",
+}
+
+func TestRetiredStage7NamesStayGone(t *testing.T) {
+	assertRetiredClassesGone(t, retiredStage7Names, "m-table / m-fname / m-grid / m-tile / m-tree / m-title / m-prose / m-doc / m-steps / m-diag / m-kbd")
 }
 
 func assertRetiredClassesGone(t *testing.T, classes []string, instead string) {

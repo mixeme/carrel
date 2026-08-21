@@ -12,14 +12,14 @@
 {{if $d.Collisions}}
 <div class="m-card">
     <div class="m-rubric">Assigned new UIDs <span class="mono">{{len $d.Collisions}}</span></div>
-    <div class="dialog-diag">{{range $d.Collisions}}{{.}}
+    <div class="m-diag">{{range $d.Collisions}}{{.}}
 {{end}}</div>
 </div>
 {{end}}
 {{if $d.Failed}}
 <div class="m-card">
     <div class="m-rubric">Failed <span class="mono">{{len $d.Failed}}</span></div>
-    <div class="dialog-diag is-error">{{range $d.Failed}}{{.}}
+    <div class="m-diag is-error">{{range $d.Failed}}{{.}}
 {{end}}</div>
 </div>
 {{end}}

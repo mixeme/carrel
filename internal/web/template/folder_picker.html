@@ -2,18 +2,18 @@
 {{$d := .Data}}
 <div class="folder-picker" data-folder-picker data-action="{{$d.Action}}">
     <h3 class="folder-picker-title">{{$d.Title}}</h3>
-    <div class="folder-tree" role="tree">
+    <div class="m-tree" role="tree">
         {{range $d.Roots}}
-        <div class="folder-tree-node{{if .ReadOnly}} is-disabled{{end}}{{if and (eq $.Data.Selected.AccountID .AccountID) (eq $.Data.Selected.ColEnc .ColEnc) (eq $.Data.Selected.Folder .Folder)}} is-on{{end}}"
+        <div class="{{if .ReadOnly}}is-disabled{{end}}{{if and (eq $.Data.Selected.AccountID .AccountID) (eq $.Data.Selected.ColEnc .ColEnc) (eq $.Data.Selected.Folder .Folder)}}{{if .ReadOnly}} {{end}}is-on{{end}}"
              role="treeitem" data-picker-node data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="{{.Folder}}"
              {{if not .ReadOnly}}tabindex="0"{{end}} data-depth="0">
-            <span class="folder-tree-label">{{.Name}} <span class="hint">{{.ServerLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
+            <span>{{.Name}} <span class="hint">{{.ServerLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
         </div>
         {{range .Children}}
-        <div class="folder-tree-node{{if .ReadOnly}} is-disabled{{end}}"
+        <div{{if .ReadOnly}} class="is-disabled"{{end}}
              role="treeitem" data-picker-node data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="{{.Folder}}"
              {{if not .ReadOnly}}tabindex="0"{{end}} data-depth="1">
-            <span class="folder-tree-label">{{.Name}}</span>
+            <span>{{.Name}}</span>
         </div>
         {{end}}
         {{end}}

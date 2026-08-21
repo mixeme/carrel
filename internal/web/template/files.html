@@ -49,19 +49,19 @@
             {{$serverWord := "servers"}}
             {{if eq $d.ServerCount 1}}{{$serverWord = "server"}}{{end}}
             {{template "m-head" (head "Title" "All collections" "Subtitle" (print (len $d.Collections) " " $storageWord " on " $d.ServerCount " " $serverWord))}}{{template "m-headend"}}
-            {{template "datatable" (dataTable "Class" "files-table files-table--root")}}
+            {{template "m-table" (dataTable)}}
                 <thead><tr><th>Name</th><th>Server</th><th>Access</th><th>Purpose</th></tr></thead>
                 <tbody>
                 {{range $d.Collections}}
                 <tr class="is-folder">
-                    <td data-col="name"><a href="{{.URL}}" class="file-name"><span class="file-icon file-icon--folder" aria-hidden="true"></span>{{.Name}}</a></td>
+                    <td data-col="name"><a href="{{.URL}}" class="m-fname"><span class="file-icon file-icon--folder" aria-hidden="true"></span>{{.Name}}</a></td>
                     <td class="hint">{{template "ico" "server"}}{{.ServerLabel}}</td>
                     <td class="hint">{{if .ReadOnly}}ro{{else}}rw{{end}}</td>
                     <td>{{if .IsAttachment}}<span class="m-badge">attachments</span>{{end}}</td>
                 </tr>
                 {{end}}
                 </tbody>
-            {{template "datatableend"}}
+            {{template "m-tableend"}}
             <p class="hint">This is the section's unified view: storages shown as top-level folders. Below it the tree of one of them opens — contents of different servers are never mixed in one folder.</p>
             {{if $d.PrintDate}}<p class="print-footer print-only">Carrel · files · All collections · captured {{$d.PrintDate}}</p>{{end}}
         </div>
@@ -151,16 +151,16 @@
             <dialog class="files-dialog no-print" data-files-move-dialog>
                 <div class="folder-picker" data-folder-picker data-picker-mode="move">
                     <h3 class="folder-picker-title">Move here</h3>
-                    <div class="folder-tree" role="tree">
+                    <div class="m-tree" role="tree">
                         {{range $d.PickerRoots}}
-                        <div class="folder-tree-node{{if .ReadOnly}} is-disabled{{end}}" role="treeitem"
+                        <div{{if .ReadOnly}} class="is-disabled"{{end}} role="treeitem"
                              data-picker-node data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="">
-                            <span class="folder-tree-label">{{.Name}} <span class="hint">{{.ServerLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
+                            <span>{{.Name}} <span class="hint">{{.ServerLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
                         </div>
                         {{range .Children}}
-                        <div class="folder-tree-node" role="treeitem" data-picker-node
+                        <div role="treeitem" data-picker-node
                              data-account="{{.AccountID}}" data-col="{{.ColEnc}}" data-folder="{{.Folder}}" data-depth="1">
-                            <span class="folder-tree-label">{{.Name}}</span>
+                            <span>{{.Name}}</span>
                         </div>
                         {{end}}
                         {{end}}
@@ -174,7 +174,7 @@
                 </div>
             </dialog>
 
-            {{template "datatable" (dataTable "Class" "files-table" "Root" "files" "Attrs" (safeHTML "data-files-list"))}}
+            {{template "m-table" (dataTable "Root" "files" "Attrs" (safeHTML "data-files-list"))}}
                 <thead><tr>
                     <th class="files-check-col no-print" data-col="check"><input type="checkbox" data-files-select-all aria-label="Select all"></th>
                     <th data-col="name"><button type="button" class="link" data-files-sort="name">Name</button></th>
@@ -191,8 +191,8 @@
                     data-etag="{{.ETag}}" data-url="{{.URL}}" data-download="{{.DownloadURL}}">
                     <td class="files-check-col no-print" data-col="check"><input type="checkbox" data-files-check aria-label="Select {{.Name}}"></td>
                     <td data-col="name">
-                        {{if .Dir}}<a href="{{.URL}}" class="file-name"><span class="file-icon file-icon--{{.IconKind}}" aria-hidden="true"></span>{{.Name}}/</a>
-                        {{else}}<a href="{{.DownloadURL}}" class="file-name"><span class="file-icon file-icon--{{.IconKind}}" aria-hidden="true"></span>{{.Name}}</a>{{end}}
+                        {{if .Dir}}<a href="{{.URL}}" class="m-fname"><span class="file-icon file-icon--{{.IconKind}}" aria-hidden="true"></span>{{.Name}}/</a>
+                        {{else}}<a href="{{.DownloadURL}}" class="m-fname"><span class="file-icon file-icon--{{.IconKind}}" aria-hidden="true"></span>{{.Name}}</a>{{end}}
                     </td>
                     <td data-col="size">{{.SizeLabel}}</td>
                     <td data-col="type" class="hint">{{.TypeLabel}}</td>
@@ -201,21 +201,21 @@
                 {{end}}
                 {{if $d.Empty}}<tr data-files-empty><td colspan="5" class="hint">This folder is empty.</td></tr>{{end}}
                 </tbody>
-            {{template "datatableend"}}
+            {{template "m-tableend"}}
 
-            <div class="files-grid no-print" data-files-grid hidden>
-                {{if $d.ParentURL}}<a class="files-tile files-tile--up" href="{{$d.ParentURL}}">↑ up one folder</a>{{end}}
+            <div class="m-grid no-print" data-files-grid hidden>
+                {{if $d.ParentURL}}<a class="m-tile is-up" href="{{$d.ParentURL}}">↑ up one folder</a>{{end}}
                 {{range $d.Entries}}
-                <div class="files-tile{{if .Dir}} is-folder{{end}}" data-file-row tabindex="0"
+                <div class="m-tile{{if .Dir}} is-folder{{end}}" data-file-row tabindex="0"
                      data-rel="{{.Rel}}" data-name="{{.Name}}" data-dir="{{.Dir}}"
                      data-size="{{.SizeBytes}}" data-type="{{.TypeLabel}}" data-changed="{{.ModLabel}}"
                      data-etag="{{.ETag}}" data-url="{{.URL}}" data-download="{{.DownloadURL}}"
                      data-thumb="{{.ThumbURL}}">
-                    <div class="files-tile-thumb">
+                    <div class="m-thumb">
                         {{if .ThumbURL}}<img data-lazy-thumb data-src="{{.ThumbURL}}" alt="" loading="lazy">{{else}}<span class="file-icon file-icon--{{.IconKind}}"></span>{{end}}
                     </div>
-                    <span class="files-tile-name">{{.Name}}{{if .Dir}}/{{end}}</span>
-                    <span class="files-tile-meta hint">{{if .SizeLabel}}{{.SizeLabel}}{{else}}folder{{end}}{{if .ModLabel}} · {{.ModLabel}}{{end}}</span>
+                    <span class="n">{{.Name}}{{if .Dir}}/{{end}}</span>
+                    <span class="s hint">{{if .SizeLabel}}{{.SizeLabel}}{{else}}folder{{end}}{{if .ModLabel}} · {{.ModLabel}}{{end}}</span>
                 </div>
                 {{end}}
             </div>
@@ -251,8 +251,8 @@
             </div>
             <p class="hint">Deleting removes the file from the server. Carrel does not check first whether an event or a
                 note links to it — it is your storage, and it keeps no index of what points where.</p>
-            <div class="files-transfers no-print" data-files-transfers hidden>
-                <div class="files-transfers-head">
+            <div class="m-transfers no-print" data-files-transfers hidden>
+                <div class="h">
                     <strong data-files-transfers-label>Uploading</strong>
                     <button type="button" class="link" data-files-transfers-hide>Hide</button>
                 </div>

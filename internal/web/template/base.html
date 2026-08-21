@@ -240,42 +240,6 @@
 {{template "m-railend" (rail "Nav" true)}}
 {{end}}
 
-{{/* The ⋯ overflow menu of 2.6.D1, holding Import/Export on a merged view
-     (2.6.D2): there is no single collection to import into or export from
-     until one is chosen, so the menu asks first and then hands off to that
-     collection's own screen. Sources is a []sourceRow (sectionRail.Sources);
-     ImportURL is omitted where the section makes no import promise. */}}
-{{define "importexportmenu"}}
-{{$m := .}}
-{{if $m.Sources}}
-<div class="app-create no-print" data-dots-menu>
-    <button type="button" class="m-btn is-quiet" data-dots-toggle
-            aria-expanded="false" aria-haspopup="menu" aria-label="Import or export">{{template "ico" "dots"}}</button>
-    <div class="m-menu" role="menu" hidden>
-        {{if $m.ImportURL}}
-        <form method="get" action="{{$m.ImportURL}}" role="menuitem">
-            <label>Import into
-                <select name="dest" data-dest-select class="m-in">
-                    <option value="">Choose a collection…</option>
-                    {{range $m.Sources}}{{if not .ReadOnly}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}{{end}}
-                </select>
-            </label>
-        </form>
-        <hr class="app-create-sep">
-        {{end}}
-        <form method="get" action="{{$m.ExportURL}}" role="menuitem">
-            <label>Export
-                <select name="dest" data-dest-select class="m-in">
-                    <option value="">Choose a collection…</option>
-                    {{range $m.Sources}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}
-                </select>
-            </label>
-        </form>
-    </div>
-</div>
-{{end}}
-{{end}}
-
 {{/* Column picker button — menu is built in carrel.js from presets (§1.11). */}}
 {{define "columnpicker"}}
 <div class="column-picker no-print" data-columns-id="{{.}}">
@@ -692,7 +656,7 @@
 {{/* Import wizard step indicators (§7.9). File-based imports use File on step 1;
      notes use Source because WebDAV is a second source on the same step. */}}
 {{define "importsteps-file-1"}}
-<div class="import-steps" aria-label="Import steps">
+<div class="m-steps" aria-label="Import steps">
     <span class="is-on">1 · File</span><i aria-hidden="true"></i>
     <span>2 · Preview</span><i aria-hidden="true"></i>
     <span>3 · Report</span>
@@ -700,7 +664,7 @@
 {{end}}
 
 {{define "importsteps-file-2"}}
-<div class="import-steps" aria-label="Import steps">
+<div class="m-steps" aria-label="Import steps">
     <span>1 · File</span><i aria-hidden="true"></i>
     <span class="is-on">2 · Preview</span><i aria-hidden="true"></i>
     <span>3 · Report</span>
@@ -708,7 +672,7 @@
 {{end}}
 
 {{define "importsteps-file-3"}}
-<div class="import-steps" aria-label="Import steps">
+<div class="m-steps" aria-label="Import steps">
     <span>1 · File</span><i aria-hidden="true"></i>
     <span>2 · Preview</span><i aria-hidden="true"></i>
     <span class="is-on">3 · Report</span>
@@ -716,25 +680,12 @@
 {{end}}
 
 {{define "importsteps-source-1"}}
-<div class="import-steps" aria-label="Import steps">
+<div class="m-steps" aria-label="Import steps">
     <span class="is-on">1 · Source</span><i aria-hidden="true"></i>
     <span>2 · Preview</span><i aria-hidden="true"></i>
     <span>3 · Report</span>
 </div>
 {{end}}
-
-{{/* The admin/files table scaffold of 2.6.A3: which class, which
-     data-columns-root, which extra attributes, in one definition instead
-     of five hand-written opening tags. Column headers and rows stay
-     page-local — they differ by table — same reasoning as the two
-     components above. Import previews and the conflict screen use <table>
-     for a different purpose (a side-by-side diff, not a list) and are not
-     part of this component. */}}
-{{define "datatable"}}
-{{$t := .}}
-<table class="{{$t.Class}}"{{if $t.Root}} data-columns-root="{{$t.Root}}"{{end}}{{if $t.Attrs}} {{$t.Attrs}}{{end}}>
-{{end}}
-{{define "datatableend"}}</table>{{end}}
 
 {{define "logo"}}<svg class="app-logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>{{end}}
 
