@@ -6,45 +6,45 @@
     <p class="warning">Your password is the only key to your own data. Nobody —
         including this server — can recover it for you.</p>
 
-    <form method="post" class="form" action="{{.Base}}/invite/{{with .Data}}{{.Token}}{{end}}" autocomplete="off">
+    <form method="post" class="m-form" action="{{.Base}}/invite/{{with .Data}}{{.Token}}{{end}}" autocomplete="off">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
 
-        <div class="form-field w-full">
+        <div class="m-f w-full">
             <label for="login">Login</label>
             <input id="login" name="login" type="text" required autofocus
                    maxlength="64" autocapitalize="none" spellcheck="false"
-                   value="{{with .Data}}{{.Login}}{{end}}">
-            <p class="form-hint">Lowercase letters, digits, and <code>. _ -</code> inside.</p>
+                   value="{{with .Data}}{{.Login}}{{end}}" class="m-in">
+            <p class="m-hint">Lowercase letters, digits, and <code>. _ -</code> inside.</p>
         </div>
 
         {{with .Data}}{{if .EmailLocked}}
-        <div class="form-field w-lg">
-            <span class="form-label">Email</span>
+        <div class="m-f w-lg">
+            <span class="m-lbl">Email</span>
             <p class="field-value">{{.Email}}</p>
         </div>
         {{else}}
-        <div class="form-field w-lg">
+        <div class="m-f w-lg">
             <label for="email">Email <span class="optional">(optional)</span></label>
             <input id="email" name="email" type="email" autocomplete="off"
-                   value="{{.Email}}">
-            <p class="form-hint">Used for service notices only.</p>
+                   value="{{.Email}}" class="m-in">
+            <p class="m-hint">Used for service notices only.</p>
         </div>
         {{end}}{{end}}
 
-        <div class="form-field w-full">
+        <div class="m-f w-full">
             <label for="password">Password</label>
             <input id="password" name="password" type="password" required
-                   minlength="10" autocomplete="new-password">
+                   minlength="10" autocomplete="new-password" class="m-in">
         </div>
 
-        <div class="form-field w-full">
+        <div class="m-f w-full">
             <label for="confirm">Repeat password</label>
             <input id="confirm" name="confirm" type="password" required
-                   minlength="10" autocomplete="new-password">
+                   minlength="10" autocomplete="new-password" class="m-in">
         </div>
 
-        <div class="form-foot">
-            <button type="submit">Create account</button>
+        <div class="m-formfoot">
+            <button type="submit" class="m-btn">Create account</button>
         </div>
     </form>
 </section>

@@ -110,7 +110,7 @@ func TestContactCardHidesEmptyFields(t *testing.T) {
 	if !strings.Contains(body, `data-empty-fields`) {
 		t.Fatalf("expand control missing:\n%s", body)
 	}
-	if !strings.Contains(body, `form-field w-sm is-empty`) {
+	if !strings.Contains(body, `m-f w-sm is-empty`) {
 		t.Fatalf("empty fields were not marked to collapse:\n%s", body)
 	}
 	if !strings.Contains(body, `id="nickname"`) {
@@ -121,7 +121,7 @@ func TestContactCardHidesEmptyFields(t *testing.T) {
 	}
 	givenIdx := strings.Index(body, `for="given"`)
 	if givenIdx >= 0 {
-		start := strings.LastIndex(body[:givenIdx], `<div class="form-field`)
+		start := strings.LastIndex(body[:givenIdx], `<div class="m-f`)
 		if start >= 0 && strings.Contains(body[start:givenIdx], `is-empty`) {
 			t.Fatal("filled given name was marked empty")
 		}

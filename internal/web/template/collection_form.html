@@ -2,7 +2,7 @@
 {{$d := .Data}}
 {{$f := $d.CollectionForm}}
 <section class="settings-panel collection-sheet">
-    <form method="post" class="form collection-form" action="{{if eq $f.Mode "new"}}{{.Base}}/app/collections/new{{else if eq $f.Mode "rename"}}{{.Base}}/app/collections/rename{{else}}{{.Base}}/app/collections/delete{{end}}">
+    <form method="post" class="m-form collection-form" action="{{if eq $f.Mode "new"}}{{.Base}}/app/collections/new{{else if eq $f.Mode "rename"}}{{.Base}}/app/collections/rename{{else}}{{.Base}}/app/collections/delete{{end}}">
         <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
         <input type="hidden" name="mode" value="{{$f.Mode}}">
         <input type="hidden" name="collection_kind" value="{{$f.Kind}}">
@@ -25,25 +25,25 @@
         </ul>
         <p class="hint">Restoring from a backup brings records into a <strong>new</strong> collection at a new address, not back into this one.</p>
         {{if $f.ExportURL}}
-        <p><a class="app-btn" href="{{$f.ExportURL}}">{{template "ico" "down"}}Download a copy first</a></p>
+        <p><a class="m-btn" href="{{$f.ExportURL}}">{{template "ico" "down"}}Download a copy first</a></p>
         {{end}}
-        <div class="form-field w-md">
+        <div class="m-f w-md">
             <label for="confirm-collection">Type the name to confirm</label>
             <input id="confirm-collection" name="confirm_collection" type="text" required autocomplete="off"
-                   placeholder="{{$f.DisplayName}}">
+                   placeholder="{{$f.DisplayName}}" class="m-in">
         </div>
-        <div class="form-foot">
-            <button type="submit" class="app-btn is-danger-solid">Delete on the server</button>
-            <a class="app-btn is-quiet" href="{{$f.ReturnURL}}">Cancel</a>
+        <div class="m-formfoot">
+            <button type="submit" class="m-btn is-danger-solid">Delete on the server</button>
+            <a class="m-btn is-quiet" href="{{$f.ReturnURL}}">Cancel</a>
         </div>
 
         {{else if eq $f.Mode "rename"}}
-        <div class="form-field w-md">
+        <div class="m-f w-md">
             <label for="collection-name">Name</label>
-            <input id="collection-name" name="collection_name" type="text" required value="{{$f.DisplayName}}" autocomplete="off">
+            <input id="collection-name" name="collection_name" type="text" required value="{{$f.DisplayName}}" autocomplete="off" class="m-in">
         </div>
         {{if ne $f.Kind "addressbook"}}
-        <fieldset class="form-field">
+        <fieldset class="m-f">
             <legend>Colour</legend>
             <div class="color-palette">
             {{range $f.Palette}}
@@ -52,39 +52,39 @@
             </div>
         </fieldset>
         {{end}}
-        <div class="form-field w-xl">
+        <div class="m-f w-xl">
             <label>Address <span class="hint">— stays as it is</span></label>
             <p class="mono hint">{{$f.AddressHint}}</p>
         </div>
         <p class="hint">Renaming is not moving: the address does not change, so configured clients keep working.</p>
-        <div class="form-foot">
-            <button type="submit">Save</button>
-            <a class="app-btn is-quiet" href="{{$f.ReturnURL}}">Cancel</a>
+        <div class="m-formfoot">
+            <button type="submit" class="m-btn">Save</button>
+            <a class="m-btn is-quiet" href="{{$f.ReturnURL}}">Cancel</a>
         </div>
 
         {{else}}
-        <div class="form-field">
+        <div class="m-f">
             <label>Kind</label>
-            <div class="theme-segment">
-                <a class="theme-segment-btn{{if ne $f.Kind "addressbook"}} is-on{{end}}" href="{{$f.CalendarKindURL}}">Calendar</a>
-                <a class="theme-segment-btn{{if eq $f.Kind "addressbook"}} is-on{{end}}" href="{{$f.AddressBookKindURL}}">Address book</a>
+            <div class="m-seg">
+                <a class="{{if ne $f.Kind "addressbook"}} is-on{{end}}" href="{{$f.CalendarKindURL}}">Calendar</a>
+                <a class="{{if eq $f.Kind "addressbook"}} is-on{{end}}" href="{{$f.AddressBookKindURL}}">Address book</a>
             </div>
         </div>
-        <div class="form-field w-md">
+        <div class="m-f w-md">
             <label for="collection-account">On which server</label>
-            <select id="collection-account" name="account_id" required>
+            <select id="collection-account" name="account_id" required class="m-in">
                 <option value="">Choose…</option>
                 {{range $f.Accounts}}
                 <option value="{{.ID}}"{{if .Disabled}} disabled{{end}}{{if and (not .Disabled) (eq .ID $f.AccountID)}} selected{{end}}>{{.Label}}{{if .Reason}} — {{.Reason}}{{end}}</option>
                 {{end}}
             </select>
         </div>
-        <div class="form-field w-md">
+        <div class="m-f w-md">
             <label for="collection-name">Name</label>
-            <input id="collection-name" name="collection_name" type="text" required value="{{$f.DisplayName}}" autocomplete="off">
+            <input id="collection-name" name="collection_name" type="text" required value="{{$f.DisplayName}}" autocomplete="off" class="m-in">
         </div>
         {{if ne $f.Kind "addressbook"}}
-        <fieldset class="form-field">
+        <fieldset class="m-f">
             <legend>Colour</legend>
             <div class="color-palette">
             {{range $f.Palette}}
@@ -92,22 +92,22 @@
             {{end}}
             </div>
         </fieldset>
-        <fieldset class="form-field">
+        <fieldset class="m-f">
             <legend>What goes in it</legend>
-            <label class="checkbox"><input type="checkbox" name="components" value="VEVENT"{{if hasComp $f.Components "VEVENT"}} checked{{end}}> Events</label>
-            <label class="checkbox"><input type="checkbox" name="components" value="VTODO"{{if hasComp $f.Components "VTODO"}} checked{{end}}> Tasks</label>
-            <label class="checkbox"><input type="checkbox" name="components" value="VJOURNAL"{{if hasComp $f.Components "VJOURNAL"}} checked{{end}}> Notes</label>
-            <p class="form-hint">Most servers fix this when the collection is made and will not change it afterwards.</p>
+            <label class="m-check"><input type="checkbox" name="components" value="VEVENT"{{if hasComp $f.Components "VEVENT"}} checked{{end}}> Events</label>
+            <label class="m-check"><input type="checkbox" name="components" value="VTODO"{{if hasComp $f.Components "VTODO"}} checked{{end}}> Tasks</label>
+            <label class="m-check"><input type="checkbox" name="components" value="VJOURNAL"{{if hasComp $f.Components "VJOURNAL"}} checked{{end}}> Notes</label>
+            <p class="m-hint">Most servers fix this when the collection is made and will not change it afterwards.</p>
         </fieldset>
         {{end}}
-        <div class="form-field w-md">
+        <div class="m-f w-md">
             <label for="collection-address">Address</label>
-            <input id="collection-address" name="collection_address" type="text" class="mono" value="{{$f.Address}}" autocomplete="off" spellcheck="false">
-            <p class="form-hint">Taken from the name if left blank. Other clients and restore-by-path go by the address; the name they only show.</p>
+            <input id="collection-address" name="collection_address" type="text" class="mono m-in" value="{{$f.Address}}" autocomplete="off" spellcheck="false">
+            <p class="m-hint">Taken from the name if left blank. Other clients and restore-by-path go by the address; the name they only show.</p>
         </div>
-        <div class="form-foot">
-            <button type="submit" class="app-btn is-primary">Create</button>
-            <a class="app-btn is-quiet" href="{{$f.ReturnURL}}">Cancel</a>
+        <div class="m-formfoot">
+            <button type="submit" class="m-btn is-primary">Create</button>
+            <a class="m-btn is-quiet" href="{{$f.ReturnURL}}">Cancel</a>
         </div>
         {{end}}
     </form>

@@ -12,8 +12,8 @@
     <div class="m-acts">
         <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <button type="submit" name="action" value="cancel_import" class="app-btn is-quiet">Cancel</button>
-            <button type="submit" name="action" value="confirm_import" class="app-btn is-primary">Import {{$d.OKCount}} note(s)</button>
+            <button type="submit" name="action" value="cancel_import" class="m-btn is-quiet">Cancel</button>
+            <button type="submit" name="action" value="confirm_import" class="m-btn is-primary">Import {{$d.OKCount}} note(s)</button>
         </form>
     </div>
     {{end}}
@@ -22,35 +22,35 @@
 {{if not $d.HasPreview}}
 <div class="dialog-card">
     <div class="dialog-rubric">From a file</div>
-    <form method="post" class="form" enctype="multipart/form-data" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+    <form method="post" class="m-form" enctype="multipart/form-data" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-        <div class="form-field w-lg">
+        <div class="m-f w-lg">
             <label for="file">Markdown file or zip</label>
             <input id="file" type="file" name="file" accept=".md,.markdown,.txt,.zip,text/markdown" required>
         </div>
-        <div class="form-foot">
-            <button type="submit">Preview import</button>
+        <div class="m-formfoot">
+            <button type="submit" class="m-btn">Preview import</button>
         </div>
     </form>
 </div>
 {{if $d.WebDAVSources}}
 <div class="dialog-card is-accent">
     <div class="dialog-rubric">From a WebDAV folder</div>
-    <form method="post" class="form" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+    <form method="post" class="m-form" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="action" value="webdav_import">
-        <div class="form-field w-lg">
+        <div class="m-f w-lg">
             <label for="webdav-source">File collection</label>
-            <select id="webdav-source" name="webdav_source">
+            <select id="webdav-source" name="webdav_source" class="m-in">
             {{range $d.WebDAVSources}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}
             </select>
         </div>
-        <div class="form-field w-md">
+        <div class="m-f w-md">
             <label for="webdav-folder">Folder</label>
-            <input id="webdav-folder" name="webdav_folder" placeholder="notes" autocapitalize="none" spellcheck="false">
+            <input id="webdav-folder" name="webdav_folder" placeholder="notes" autocapitalize="none" spellcheck="false" class="m-in">
         </div>
-        <div class="form-foot">
-            <button type="submit" class="app-btn is-primary">Preview folder</button>
+        <div class="m-formfoot">
+            <button type="submit" class="m-btn is-primary">Preview folder</button>
         </div>
         <p class="hint">Every <code>.md</code> file directly in that folder is previewed. Subfolders are not walked, and
             nothing is deleted or moved on the server.</p>

@@ -5,9 +5,9 @@
     {{if $d.Collection.DisplayName}}{{$sub = printf "%s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
     {{template "m-head" (head "Side" true "Title" $d.Event.DisplayTitle "Subtitle" $sub)}}
         <div class="m-acts">
-            {{if $d.NoteURL}}<a class="app-btn is-quiet" href="{{$d.NoteURL}}">Write a note</a>{{end}}
-            <a class="app-btn" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">Edit</a>
-            <button type="button" class="app-btn is-quiet" data-detail-close title="Close the panel" aria-label="Close">✕</button>
+            {{if $d.NoteURL}}<a class="m-btn is-quiet" href="{{$d.NoteURL}}">Write a note</a>{{end}}
+            <a class="m-btn" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}">Edit</a>
+            <button type="button" class="m-btn is-quiet" data-detail-close title="Close the panel" aria-label="Close">✕</button>
         </div>
     {{template "m-headend"}}
     <div class="detail-panel-body">

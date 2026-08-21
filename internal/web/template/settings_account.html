@@ -4,24 +4,24 @@
 <section class="settings-panel">
     {{template "m-head" (head "Title" "Account" "Subtitle" .Session.Login)}}{{template "m-headend"}}
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Name</legend>
-        <form method="post" class="form" action="{{.Base}}/app/settings/account">
+        <form method="post" class="m-form" action="{{.Base}}/app/settings/account">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="save_display_name">
-            <div class="form-field w-lg">
+            <div class="m-f w-lg">
                 <label for="display-name">Display name</label>
                 <input id="display-name" name="display_name" type="text"
-                       value="{{$d.DisplayName}}" autocomplete="name">
+                       value="{{$d.DisplayName}}" autocomplete="name" class="m-in">
             </div>
-            <p class="form-hint">Shown as the sender and used as the signature in letters you send. Blank means your login.</p>
-            <div class="form-foot">
-                <button type="submit">Save</button>
+            <p class="m-hint">Shown as the sender and used as the signature in letters you send. Blank means your login.</p>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Save</button>
             </div>
         </form>
     </fieldset>
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Email</legend>
         {{if $d.Email}}
         <p class="field-value">Current: {{$d.Email}}</p>
@@ -34,34 +34,34 @@
         {{if $d.PendingEmail}}
         <p class="hint">Pending confirmation: {{$d.PendingEmail}}</p>
         {{end}}
-        <p class="form-hint">Used for service notices, and as <span class="mono">Reply-To</span> on letters you send once confirmed.</p>
+        <p class="m-hint">Used for service notices, and as <span class="mono">Reply-To</span> on letters you send once confirmed.</p>
         {{if and $d.Email (not $d.EmailConfirmed) (not $d.PendingEmail)}}
         <p class="warning">This address has not been confirmed. Letters you send will carry no reply address, and will say so at the foot.</p>
         <form method="post" class="no-print" action="{{.Base}}/app/settings/account">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="confirm_email">
-            <button type="submit" class="app-btn">Send confirmation</button>
+            <button type="submit" class="m-btn">Send confirmation</button>
         </form>
         {{end}}
-        <form method="post" class="form" action="{{.Base}}/app/email">
+        <form method="post" class="m-form" action="{{.Base}}/app/email">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <div class="form-field w-lg">
+            <div class="m-f w-lg">
                 <label for="email">New address</label>
-                <input id="email" name="email" type="email" required autocomplete="email">
+                <input id="email" name="email" type="email" required autocomplete="email" class="m-in">
             </div>
-            <div class="form-foot">
-                <button type="submit">Send confirmation link</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Send confirmation link</button>
             </div>
         </form>
     </fieldset>
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Password</legend>
-        <p class="form-hint">Changing your password re-wraps your data key only; saved connections stay readable.</p>
-        <p><a class="app-btn" href="{{.Base}}/app/password">Change password</a></p>
+        <p class="m-hint">Changing your password re-wraps your data key only; saved connections stay readable.</p>
+        <p><a class="m-btn" href="{{.Base}}/app/password">Change password</a></p>
     </fieldset>
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Key escrow</legend>
         {{if $e.Deposited}}
         <p class="warning">A copy of your data key is deposited on this server.
@@ -73,42 +73,42 @@
             {{$e.RecoveredAt.Format "2006-01-02 15:04"}} UTC.</p>
         {{end}}
         {{if $e.CanOptOut}}
-        <form method="post" class="form" action="{{.Base}}/app/escrow">
+        <form method="post" class="m-form" action="{{.Base}}/app/escrow">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="opt_out">
-            <p class="form-hint">Withdrawing deletes the copy. Nobody will be able
+            <p class="m-hint">Withdrawing deletes the copy. Nobody will be able
                 to recover this account afterwards, including you.</p>
-            <div class="form-foot">
-                <button type="submit" class="app-btn is-danger-solid">Withdraw my deposited key</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn is-danger-solid">Withdraw my deposited key</button>
             </div>
         </form>
         {{end}}
         {{else}}
-        <p class="form-hint">No copy of your data key is deposited. Nobody but you can decrypt
+        <p class="m-hint">No copy of your data key is deposited. Nobody but you can decrypt
             your data — and if you lose your password, it cannot be recovered
             by anyone.</p>
         {{if $e.CanOptIn}}
-        <form method="post" class="form" action="{{.Base}}/app/escrow">
+        <form method="post" class="m-form" action="{{.Base}}/app/escrow">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="opt_in">
             <p class="warning">Depositing your key means an administrator with
                 the escrow master password can read your saved credentials and
                 the contacts and calendars behind them. In exchange, your data
                 survives a forgotten password.</p>
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="escrow-password">Your current password</label>
                 <input id="escrow-password" name="password" type="password" required
-                       autocomplete="current-password">
+                       autocomplete="current-password" class="m-in">
             </div>
-            <div class="form-foot">
-                <button type="submit">Deposit my key</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Deposit my key</button>
             </div>
         </form>
         {{end}}
         {{end}}
     </fieldset>
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Sessions{{if $d.Sessions}} <span class="hint">{{len $d.Sessions}} active</span>{{end}}</legend>
         {{if $d.Sessions}}
         {{template "datatable" (dataTable "Class" "data")}}
@@ -137,7 +137,7 @@
         <form method="post" class="no-print" action="{{.Base}}/app/settings/account">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="end_other_sessions">
-            <button type="submit" class="app-btn is-danger-solid">End all other sessions</button>
+            <button type="submit" class="m-btn is-danger-solid">End all other sessions</button>
         </form>
         {{end}}
         {{else}}
@@ -145,20 +145,20 @@
         {{end}}
     </fieldset>
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Delete account</legend>
         <p class="warning">This removes your account, your saved connections and everything sealed under your
             data key, for good. It cannot be undone.</p>
-        <form method="post" class="form" action="{{.Base}}/app/settings/account">
+        <form method="post" class="m-form" action="{{.Base}}/app/settings/account">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="delete_account">
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="confirm-login">Type <strong>{{.Session.Login}}</strong> to confirm</label>
                 <input id="confirm-login" name="confirm_login" type="text" required
-                       autocomplete="off" autocapitalize="none" spellcheck="false">
+                       autocomplete="off" autocapitalize="none" spellcheck="false" class="m-in">
             </div>
-            <div class="form-foot">
-                <button type="submit" class="app-btn is-danger-solid">Delete my account</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn is-danger-solid">Delete my account</button>
             </div>
         </form>
     </fieldset>

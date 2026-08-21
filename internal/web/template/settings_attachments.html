@@ -8,30 +8,30 @@
     {{if $att.Configured}}
     <p class="field-value">Currently: {{$att.Label}}</p>
     {{end}}
-    <form method="post" class="form" action="{{.Base}}/app/settings/attachments">
+    <form method="post" class="m-form" action="{{.Base}}/app/settings/attachments">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="action" value="save_attachments">
 
-        <div class="form-field w-lg">
+        <div class="m-f w-lg">
             <label for="attach-collection">File collection</label>
-            <select id="attach-collection" name="attach_collection">
+            <select id="attach-collection" name="attach_collection" class="m-in">
             {{range $att.Collections}}
                 <option value="{{.Key}}"{{if eq .Key $att.Selected}} selected{{end}}>{{.Label}} · {{.AccountLabel}}</option>
             {{end}}
             </select>
         </div>
 
-        <div class="form-field w-md">
+        <div class="m-f w-md">
             <label for="attach-folder">Folder inside it</label>
             <input id="attach-folder" name="attach_folder" value="{{$att.Folder}}" placeholder="{{$att.Suggestion}}"
-                   autocapitalize="none" spellcheck="false">
-            <p class="form-hint">Created if it is not there yet. Leave it empty to put attachments at the top of the
+                   autocapitalize="none" spellcheck="false" class="m-in">
+            <p class="m-hint">Created if it is not there yet. Leave it empty to put attachments at the top of the
                 collection. Files are named from the date and the entry's title, so the folder stays readable
                 outside Carrel.</p>
         </div>
 
-        <div class="form-foot">
-            <button type="submit">Save</button>
+        <div class="m-formfoot">
+            <button type="submit" class="m-btn">Save</button>
         </div>
     </form>
     <p class="hint">Carrel puts files in this folder and links to them. It never cleans it up, applies a quota or

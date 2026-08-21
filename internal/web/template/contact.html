@@ -28,8 +28,8 @@
                 </div>
                 {{if not $d.IsNew}}
                 <p class="m-acts no-print">
-                    <a class="app-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">Back to list</a>
-                    <label class="checkbox"><input type="checkbox" data-print-photos> Print with photos</label>
+                    <a class="m-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">Back to list</a>
+                    <label class="m-check"><input type="checkbox" data-print-photos> Print with photos</label>
                     <button type="button" class="link" data-print>Print</button>
                 </p>
                 {{end}}
@@ -47,36 +47,36 @@
                 {{if $d.Crop}}
                 <div id="photo-crop" class="no-print">
                     <img class="contact-photo" src="{{$d.Crop.Preview}}" alt="Crop preview" width="128" height="128">
-                    <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit"
+                    <form method="post" class="m-form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit"
                           hx-post="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit"
                           hx-target="#photo-crop" hx-swap="outerHTML"
                           hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
                         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                         <input type="hidden" name="action" value="crop_photo">
                         <input type="hidden" name="etag" value="{{$d.ETag}}">
-                        <div class="form-field w-xs">
+                        <div class="m-f w-xs">
                             <label for="pan_x">Pan X</label>
-                            <input id="pan_x" type="number" name="pan_x" step="0.1" min="-1" max="1" value="{{$d.Crop.PanX}}">
+                            <input id="pan_x" type="number" name="pan_x" step="0.1" min="-1" max="1" value="{{$d.Crop.PanX}}" class="m-in">
                         </div>
-                        <div class="form-field w-xs">
+                        <div class="m-f w-xs">
                             <label for="pan_y">Pan Y</label>
-                            <input id="pan_y" type="number" name="pan_y" step="0.1" min="-1" max="1" value="{{$d.Crop.PanY}}">
+                            <input id="pan_y" type="number" name="pan_y" step="0.1" min="-1" max="1" value="{{$d.Crop.PanY}}" class="m-in">
                         </div>
-                        <div class="form-field w-xs">
+                        <div class="m-f w-xs">
                             <label for="zoom">Zoom</label>
-                            <input id="zoom" type="number" name="zoom" step="0.1" min="1" max="8" value="{{if $d.Crop.Zoom}}{{$d.Crop.Zoom}}{{else}}1{{end}}">
+                            <input id="zoom" type="number" name="zoom" step="0.1" min="1" max="8" value="{{if $d.Crop.Zoom}}{{$d.Crop.Zoom}}{{else}}1{{end}}" class="m-in">
                         </div>
-                        <div class="form-field w-xs">
+                        <div class="m-f w-xs">
                             <label for="rotate">Rotate</label>
-                            <select id="rotate" name="rotate">
+                            <select id="rotate" name="rotate" class="m-in">
                                 <option value="0"{{if eq $d.Crop.Rotate 0}} selected{{end}}>0°</option>
                                 <option value="90"{{if eq $d.Crop.Rotate 90}} selected{{end}}>90°</option>
                                 <option value="180"{{if eq $d.Crop.Rotate 180}} selected{{end}}>180°</option>
                                 <option value="270"{{if eq $d.Crop.Rotate 270}} selected{{end}}>270°</option>
                             </select>
                         </div>
-                        <div class="form-foot">
-                            <button type="submit">Update preview</button>
+                        <div class="m-formfoot">
+                            <button type="submit" class="m-btn">Update preview</button>
                         </div>
                     </form>
                     <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit">
@@ -87,7 +87,7 @@
                         <input type="hidden" name="pan_y" value="{{$d.Crop.PanY}}">
                         <input type="hidden" name="zoom" value="{{$d.Crop.Zoom}}">
                         <input type="hidden" name="rotate" value="{{$d.Crop.Rotate}}">
-                        <button type="submit">Save photo</button>
+                        <button type="submit" class="m-btn">Save photo</button>
                     </form>
                     <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit">
                         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
@@ -96,15 +96,15 @@
                     </form>
                 </div>
                 {{else if $d.PhotoEditable}}
-                <form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit" enctype="multipart/form-data">
+                <form method="post" class="m-form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                     <input type="hidden" name="action" value="upload_photo">
                     <input type="hidden" name="etag" value="{{$d.ETag}}">
-                    <div class="form-field w-lg">
+                    <div class="m-f w-lg">
                         <label for="photo">Upload photo</label>
                         <div class="form-inline">
                             <input id="photo" name="photo" type="file" accept="image/*" required>
-                            <button type="submit">Upload</button>
+                            <button type="submit" class="m-btn">Upload</button>
                         </div>
                     </div>
                 </form>
@@ -131,114 +131,114 @@
                 {{if $d.Contact.Note}}<dt>Note</dt><dd>{{$d.Contact.Note}}</dd>{{end}}
             </dl>
             {{else}}
-            <form method="post" class="form contact-form" action="{{if $d.IsNew}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit{{end}}">
+            <form method="post" class="m-form contact-form" action="{{if $d.IsNew}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
 
-                <div class="form-field w-xl">
+                <div class="m-f w-xl">
                     <label for="fn">Display name</label>
-                    <input id="fn" name="fn" type="text" value="{{$d.Form.FormattedName}}" required>
+                    <input id="fn" name="fn" type="text" value="{{$d.Form.FormattedName}}" required class="m-in">
                 </div>
 
-                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Prefix}} is-empty{{end}}">
+                <div class="m-f w-sm{{if $d.HideEmpty $d.Form.Prefix}} is-empty{{end}}">
                     <label for="prefix">Prefix</label>
-                    <input id="prefix" name="prefix" type="text" value="{{$d.Form.Prefix}}">
+                    <input id="prefix" name="prefix" type="text" value="{{$d.Form.Prefix}}" class="m-in">
                 </div>
-                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Given}} is-empty{{end}}">
+                <div class="m-f w-sm{{if $d.HideEmpty $d.Form.Given}} is-empty{{end}}">
                     <label for="given">Given</label>
-                    <input id="given" name="given" type="text" value="{{$d.Form.Given}}">
+                    <input id="given" name="given" type="text" value="{{$d.Form.Given}}" class="m-in">
                 </div>
-                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Additional}} is-empty{{end}}">
+                <div class="m-f w-sm{{if $d.HideEmpty $d.Form.Additional}} is-empty{{end}}">
                     <label for="additional">Additional</label>
-                    <input id="additional" name="additional" type="text" value="{{$d.Form.Additional}}">
+                    <input id="additional" name="additional" type="text" value="{{$d.Form.Additional}}" class="m-in">
                 </div>
-                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Family}} is-empty{{end}}">
+                <div class="m-f w-sm{{if $d.HideEmpty $d.Form.Family}} is-empty{{end}}">
                     <label for="family">Family</label>
-                    <input id="family" name="family" type="text" value="{{$d.Form.Family}}">
+                    <input id="family" name="family" type="text" value="{{$d.Form.Family}}" class="m-in">
                 </div>
-                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Suffix}} is-empty{{end}}">
+                <div class="m-f w-sm{{if $d.HideEmpty $d.Form.Suffix}} is-empty{{end}}">
                     <label for="suffix">Suffix</label>
-                    <input id="suffix" name="suffix" type="text" value="{{$d.Form.Suffix}}">
+                    <input id="suffix" name="suffix" type="text" value="{{$d.Form.Suffix}}" class="m-in">
                 </div>
 
-                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Nickname}} is-empty{{end}}">
+                <div class="m-f w-sm{{if $d.HideEmpty $d.Form.Nickname}} is-empty{{end}}">
                     <label for="nickname">Nickname</label>
-                    <input id="nickname" name="nickname" type="text" value="{{$d.Form.Nickname}}">
+                    <input id="nickname" name="nickname" type="text" value="{{$d.Form.Nickname}}" class="m-in">
                 </div>
 
-                <div class="form-field w-md{{if $d.HideEmpty $d.Form.Organization}} is-empty{{end}}">
+                <div class="m-f w-md{{if $d.HideEmpty $d.Form.Organization}} is-empty{{end}}">
                     <label for="org">Organisation</label>
-                    <input id="org" name="org" type="text" value="{{$d.Form.Organization}}">
+                    <input id="org" name="org" type="text" value="{{$d.Form.Organization}}" class="m-in">
                 </div>
 
-                <div class="form-field w-md{{if $d.HideEmpty $d.Form.Title}} is-empty{{end}}">
+                <div class="m-f w-md{{if $d.HideEmpty $d.Form.Title}} is-empty{{end}}">
                     <label for="title">Title</label>
-                    <input id="title" name="title" type="text" value="{{$d.Form.Title}}">
+                    <input id="title" name="title" type="text" value="{{$d.Form.Title}}" class="m-in">
                 </div>
 
-                <div class="form-field w-md{{if $d.HideEmpty $d.Form.Role}} is-empty{{end}}">
+                <div class="m-f w-md{{if $d.HideEmpty $d.Form.Role}} is-empty{{end}}">
                     <label for="role">Role</label>
-                    <input id="role" name="role" type="text" value="{{$d.Form.Role}}">
+                    <input id="role" name="role" type="text" value="{{$d.Form.Role}}" class="m-in">
                 </div>
 
-                <div class="form-field w-sm{{if $d.HideEmpty $d.Form.Birthday}} is-empty{{end}}">
+                <div class="m-f w-sm{{if $d.HideEmpty $d.Form.Birthday}} is-empty{{end}}">
                     <label for="bday">Birthday</label>
-                    <input id="bday" name="bday" type="text" value="{{$d.Form.Birthday}}" placeholder="YYYY-MM-DD">
+                    <input id="bday" name="bday" type="text" value="{{$d.Form.Birthday}}" placeholder="YYYY-MM-DD" class="m-in">
                 </div>
 
-                <fieldset class="form-fieldset{{if and (not $d.IsNew) (not $d.Form.HasPhone)}} is-empty{{end}}">
+                <fieldset class="m-fset{{if and (not $d.IsNew) (not $d.Form.HasPhone)}} is-empty{{end}}">
                     <legend>Phone numbers</legend>
                     {{range $d.Form.Phones}}
-                    <div class="form-field w-xs{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                    <div class="m-f w-xs{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
                         <label>Label</label>
-                        <input name="phone_label" type="text" value="{{.Label}}" placeholder="label">
+                        <input name="phone_label" type="text" value="{{.Label}}" placeholder="label" class="m-in">
                     </div>
-                    <div class="form-field w-md{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                    <div class="m-f w-md{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
                         <label>Number</label>
-                        <input name="phone" type="tel" value="{{.Value}}" placeholder="number">
+                        <input name="phone" type="tel" value="{{.Value}}" placeholder="number" class="m-in">
                     </div>
                     {{end}}
-                    <div class="form-field w-xs{{if not $d.IsNew}} is-empty{{end}}">
+                    <div class="m-f w-xs{{if not $d.IsNew}} is-empty{{end}}">
                         <label>Label</label>
-                        <input name="phone_label" type="text" placeholder="label">
+                        <input name="phone_label" type="text" placeholder="label" class="m-in">
                     </div>
-                    <div class="form-field w-md{{if not $d.IsNew}} is-empty{{end}}">
+                    <div class="m-f w-md{{if not $d.IsNew}} is-empty{{end}}">
                         <label>Number</label>
-                        <input name="phone" type="tel" placeholder="number">
+                        <input name="phone" type="tel" placeholder="number" class="m-in">
                     </div>
                 </fieldset>
 
-                <fieldset class="form-fieldset{{if and (not $d.IsNew) (not $d.Form.HasEmail)}} is-empty{{end}}">
+                <fieldset class="m-fset{{if and (not $d.IsNew) (not $d.Form.HasEmail)}} is-empty{{end}}">
                     <legend>Email addresses</legend>
                     {{range $d.Form.Emails}}
-                    <div class="form-field w-xs{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                    <div class="m-f w-xs{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
                         <label>Label</label>
-                        <input name="email_label" type="text" value="{{.Label}}" placeholder="label">
+                        <input name="email_label" type="text" value="{{.Label}}" placeholder="label" class="m-in">
                     </div>
-                    <div class="form-field w-lg{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
+                    <div class="m-f w-lg{{if and (not $d.IsNew) .Empty}} is-empty{{end}}">
                         <label>Address</label>
-                        <input name="email" type="email" value="{{.Value}}" placeholder="address">
+                        <input name="email" type="email" value="{{.Value}}" placeholder="address" class="m-in">
                     </div>
                     {{end}}
-                    <div class="form-field w-xs{{if not $d.IsNew}} is-empty{{end}}">
+                    <div class="m-f w-xs{{if not $d.IsNew}} is-empty{{end}}">
                         <label>Label</label>
-                        <input name="email_label" type="text" placeholder="label">
+                        <input name="email_label" type="text" placeholder="label" class="m-in">
                     </div>
-                    <div class="form-field w-lg{{if not $d.IsNew}} is-empty{{end}}">
+                    <div class="m-f w-lg{{if not $d.IsNew}} is-empty{{end}}">
                         <label>Address</label>
-                        <input name="email" type="email" placeholder="address">
+                        <input name="email" type="email" placeholder="address" class="m-in">
                     </div>
                 </fieldset>
 
-                <div class="form-field w-lg{{if $d.HideEmpty $d.Form.Categories}} is-empty{{end}}">
+                <div class="m-f w-lg{{if $d.HideEmpty $d.Form.Categories}} is-empty{{end}}">
                     <label for="categories">Categories</label>
-                    <input id="categories" name="categories" type="text" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                    <input id="categories" name="categories" type="text" value="{{$d.Form.Categories}}" placeholder="comma-separated" class="m-in">
                 </div>
 
-                <div class="form-field w-full{{if $d.HideEmpty $d.Form.Note}} is-empty{{end}}">
+                <div class="m-f w-full{{if $d.HideEmpty $d.Form.Note}} is-empty{{end}}">
                     <label for="note">Note</label>
-                    <textarea id="note" name="note" rows="4">{{$d.Form.Note}}</textarea>
+                    <textarea id="note" name="note" rows="4" class="m-in is-area">{{$d.Form.Note}}</textarea>
                 </div>
 
                 {{if not $d.IsNew}}
@@ -246,8 +246,8 @@
                     <button type="button" class="link" data-empty-fields aria-expanded="false">Show empty fields</button>
                 </p>
                 {{end}}
-                <div class="form-foot">
-                    <button type="submit">Save</button>
+                <div class="m-formfoot">
+                    <button type="submit" class="m-btn">Save</button>
                 </div>
             </form>
 

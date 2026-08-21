@@ -1,0 +1,22 @@
+{{/* Поля, кнопки, формы — макеты §6.
+
+     Высоту строки знает система, не экран: 28 px там, где есть поле,
+     26 px на полосе инструментов, 22 px в таблице. Экран пишет сами
+     контролы (.m-btn, .m-in, .m-check) — содержимое всегда его, — а
+     обёртки формы, поля, подвала и сегмента можно вызвать отсюда.
+
+     Вход передаётся всегда, даже пустой. */}}
+{{define "m-form"}}<form{{if .Method}} method="{{.Method}}"{{end}}{{if .Action}} action="{{.Action}}"{{end}} class="m-form{{if .Tight}} is-tight{{end}}{{if .Class}} {{.Class}}{{end}}"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
+{{define "m-formend"}}</form>{{end}}
+
+{{define "m-f"}}<div class="m-f{{if .WidthClass}} {{.WidthClass}}{{end}}{{if .OwnLine}} is-own-line{{end}}{{if .Class}} {{.Class}}{{end}}">{{end}}
+{{define "m-fend"}}</div>{{end}}
+
+{{define "m-formfoot"}}<div class="m-formfoot{{if .Class}} {{.Class}}{{end}}">{{end}}
+{{define "m-formfootend"}}</div>{{end}}
+
+{{define "m-seg"}}<span class="m-seg{{if .Menu}} is-menu{{end}}{{if .Second}} is-2nd{{end}}{{if .Class}} {{.Class}}{{end}}"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
+{{define "m-segend"}}</span>{{end}}
+
+{{define "m-fset"}}<fieldset class="m-fset{{if .Class}} {{.Class}}{{end}}">{{end}}
+{{define "m-fsetend"}}</fieldset>{{end}}

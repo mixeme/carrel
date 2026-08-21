@@ -65,9 +65,9 @@
     <div class="app-top-actions">
         <div class="app-create">
             <div class="app-create-group">
-                <a class="app-btn is-primary" href="{{.Topbar.QuickNoteURL}}" data-quick-note-open
+                <a class="m-btn is-primary" href="{{.Topbar.QuickNoteURL}}" data-quick-note-open
                    hx-get="{{.Topbar.QuickNoteURL}}" hx-target="#app-sheet" hx-swap="innerHTML">{{template "ico" "quill"}}New note</a>
-                <button type="button" class="app-btn is-primary app-create-toggle" data-create-menu-toggle
+                <button type="button" class="m-btn is-primary app-create-toggle" data-create-menu-toggle
                         aria-expanded="false" aria-haspopup="menu" aria-label="Create…">{{template "ico" "chev"}}</button>
             </div>
             <div class="app-create-menu" role="menu" hidden>
@@ -88,10 +88,10 @@
         <form method="post" action="{{.Base}}/app/" class="app-top-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="refresh_cache">
-            <button type="submit" class="app-btn is-quiet" title="Refresh cache">{{template "ico" "refresh"}}{{.Topbar.RefreshLabel}}</button>
+            <button type="submit" class="m-btn is-quiet" title="Refresh cache">{{template "ico" "refresh"}}{{.Topbar.RefreshLabel}}</button>
         </form>
         <div class="app-user-menu">
-            <button type="button" class="app-btn is-quiet app-user-toggle" data-user-menu-toggle
+            <button type="button" class="m-btn is-quiet app-user-toggle" data-user-menu-toggle
                     aria-expanded="false" aria-haspopup="menu">
                 {{.Session.Login}} {{template "ico" "chev"}}
             </button>
@@ -107,10 +107,10 @@
                 <hr class="app-user-sep">
                 <div class="app-user-theme" role="group" aria-label="Theme">
                     <span class="app-user-theme-label">Theme</span>
-                    <div class="theme-segment theme-segment--menu" data-theme-segment>
-                        <button type="button" class="theme-segment-btn is-on" data-theme-value="auto">Auto</button>
-                        <button type="button" class="theme-segment-btn" data-theme-value="light">Light</button>
-                        <button type="button" class="theme-segment-btn" data-theme-value="dark">Dark</button>
+                    <div class="m-seg is-menu" data-theme-segment>
+                        <button type="button" class="is-on" data-theme-value="auto">Auto</button>
+                        <button type="button" data-theme-value="light">Light</button>
+                        <button type="button" data-theme-value="dark">Dark</button>
                     </div>
                 </div>
                 <hr class="app-user-sep">
@@ -154,7 +154,7 @@
                 <div class="find-poll is-offline">
                     <span class="find-prog" aria-hidden="true"><i></i></span>
                     <p class="find-summary">No connection · check your network</p>
-                    <button type="button" class="app-btn is-sm" data-refresh>Retry</button>
+                    <button type="button" class="m-btn is-sm" data-refresh>Retry</button>
                 </div>
             </div>
 {{else}}
@@ -243,13 +243,13 @@
 {{$m := .}}
 {{if $m.Sources}}
 <div class="app-create no-print" data-dots-menu>
-    <button type="button" class="app-btn is-quiet" data-dots-toggle
+    <button type="button" class="m-btn is-quiet" data-dots-toggle
             aria-expanded="false" aria-haspopup="menu" aria-label="Import or export">{{template "ico" "dots"}}</button>
     <div class="app-create-menu dots-menu" role="menu" hidden>
         {{if $m.ImportURL}}
         <form method="get" action="{{$m.ImportURL}}" role="menuitem">
             <label>Import into
-                <select name="dest" data-dest-select>
+                <select name="dest" data-dest-select class="m-in">
                     <option value="">Choose a collection…</option>
                     {{range $m.Sources}}{{if not .ReadOnly}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}{{end}}
                 </select>
@@ -259,7 +259,7 @@
         {{end}}
         <form method="get" action="{{$m.ExportURL}}" role="menuitem">
             <label>Export
-                <select name="dest" data-dest-select>
+                <select name="dest" data-dest-select class="m-in">
                     <option value="">Choose a collection…</option>
                     {{range $m.Sources}}<option value="{{.AccountID}}|{{.ColEnc}}">{{.Label}}</option>{{end}}
                 </select>
@@ -273,7 +273,7 @@
 {{/* Column picker button — menu is built in carrel.js from presets (§1.11). */}}
 {{define "columnpicker"}}
 <div class="column-picker no-print" data-columns-id="{{.}}">
-    <button type="button" class="app-btn column-picker-toggle" data-columns-toggle aria-haspopup="menu" aria-expanded="false">
+    <button type="button" class="m-btn column-picker-toggle" data-columns-toggle aria-haspopup="menu" aria-expanded="false">
         {{template "ico" "cols"}}Columns <span class="column-picker-count" data-columns-count></span>
     </button>
     <div class="column-picker-menu" role="menu" hidden data-columns-menu></div>
@@ -307,14 +307,14 @@
         <input type="hidden" name="mode" value="{{$d.Mode}}">
         <ul class="source-list">
         {{range $d.Sources}}
-            <li><label class="checkbox">
+            <li><label class="m-check">
                 <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
                 <span class="collection-dot" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
                 <span>{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
             </label></li>
         {{end}}
         </ul>
-        <button type="submit">Apply</button>
+        <button type="submit" class="m-btn">Apply</button>
         <p class="hint">Unticked collections are not polled at all.</p>
     </form>
     {{else}}<p class="hint">No collections here yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
@@ -323,12 +323,12 @@
         <form method="post" action="{{$d.Duplicates.ThresholdURL}}" class="rail-threshold-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="back" value="{{$d.Duplicates.Back}}">
-            <div class="form-field rail-threshold">
+            <div class="m-f rail-threshold">
                 <label for="dup-threshold">Match threshold</label>
-                <input type="number" id="dup-threshold" name="threshold" class="mono" min="1" step="1"
+                <input type="number" id="dup-threshold" name="threshold" class="mono m-in" min="1" step="1"
                        value="{{$d.Duplicates.Threshold}}" required>
             </div>
-            <button type="submit" class="app-btn">Apply</button>
+            <button type="submit" class="m-btn">Apply</button>
         </form>
     </div>
     {{end}}
@@ -368,15 +368,15 @@
         </div>
         {{end}}
         <div class="rail-foot">
-            <button type="submit" class="app-btn">Apply</button>
-            {{if $rail.NewCollectionURL}}<a class="app-btn is-quiet" href="{{$rail.NewCollectionURL}}">{{template "ico" "plus"}}{{$rail.NewCollectionLabel}}</a>{{end}}
+            <button type="submit" class="m-btn">Apply</button>
+            {{if $rail.NewCollectionURL}}<a class="m-btn is-quiet" href="{{$rail.NewCollectionURL}}">{{template "ico" "plus"}}{{$rail.NewCollectionLabel}}</a>{{end}}
             <p class="hint">Unticked collections are not polled on the merged view.</p>
         </div>
     </form>
     {{else}}
     <p class="hint rail-empty">No collections here yet.</p>
     <div class="rail-foot">
-        {{if $rail.NewCollectionURL}}<a class="app-btn is-quiet" href="{{$rail.NewCollectionURL}}">{{template "ico" "plus"}}{{$rail.NewCollectionLabel}}</a>{{end}}
+        {{if $rail.NewCollectionURL}}<a class="m-btn is-quiet" href="{{$rail.NewCollectionURL}}">{{template "ico" "plus"}}{{$rail.NewCollectionLabel}}</a>{{end}}
         <p class="hint">Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> if you haven't.</p>
     </div>
     {{end}}
@@ -436,7 +436,7 @@
             <input type="hidden" name="etag" value="{{$d.ETag}}">
             <label for="attach-file">Attach a file</label>
             <input id="attach-file" type="file" name="file" required data-attach-input>
-            <button type="submit">Attach</button>
+            <button type="submit" class="m-btn">Attach</button>
             <p class="hint" data-attach-hint>The file goes on your WebDAV server and the entry gets a link to it. You can
                 also paste a picture from the clipboard or drop one onto this card. Other clients will show the link;
                 whether they can open it depends on the client and on whether your server asks them for a password.</p>
@@ -470,7 +470,7 @@
         <span class="find-prog" aria-hidden="true"><i data-fill="{{$d.Snapshot.Percent}}"></i></span>
         <p class="find-summary" role="status">{{$d.Snapshot.Summary}}</p>
         {{if $d.Snapshot.Running}}
-        <button type="button" class="app-btn is-quiet is-sm"
+        <button type="button" class="m-btn is-quiet is-sm"
                 hx-post="{{$d.CancelURL}}" hx-target="#find-panel" hx-swap="innerHTML"
                 hx-headers='{"X-CSRF-Token": "{{$.CSRF}}"}'>Stop polling</button>
         {{end}}
@@ -494,7 +494,7 @@
                     {{if .Reason}}<span class="hint">{{.Reason}}</span>{{end}}
                 </span>
                 {{if .State.Failed}}
-                <button type="button" class="app-btn is-quiet is-sm"
+                <button type="button" class="m-btn is-quiet is-sm"
                         hx-post="{{$d.RetryURL}}" hx-vals='{"source": "{{.ID}}"}'
                         hx-target="#find-panel" hx-swap="innerHTML"
                         hx-headers='{"X-CSRF-Token": "{{$.CSRF}}"}'>Retry</button>
@@ -628,17 +628,17 @@
                 <fieldset class="dup-conflict">
                     <legend>{{$field.Label}}{{if $field.Remembered}} <span class="hint">remembered</span>{{end}}</legend>
                     {{range $field.Options}}
-                    <label class="checkbox"><input type="radio" name="field:{{$field.Name}}" value="{{.}}"{{if eq . $field.Chosen}} checked{{end}}> {{.}}</label>
+                    <label class="m-check"><input type="radio" name="field:{{$field.Name}}" value="{{.}}"{{if eq . $field.Chosen}} checked{{end}}> {{.}}</label>
                     {{end}}
                 </fieldset>
                 {{end}}
                 {{end}}
-                <p class="dup-buttons">
+                <p class="m-formfoot">
                 {{if .Candidate}}
-                    <button type="submit" name="action" value="link">Link them</button>
+                    <button type="submit" name="action" value="link" class="m-btn">Link them</button>
                     <button type="submit" name="action" value="ignore" class="link">Not duplicates</button>
                 {{else if .Linked}}
-                    <button type="submit" name="action" value="link">Save choices</button>
+                    <button type="submit" name="action" value="link" class="m-btn">Save choices</button>
                     <button type="submit" name="action" value="forget" class="link">Unlink</button>
                 {{else}}
                     <button type="submit" name="action" value="forget" class="link">Offer again</button>
@@ -654,7 +654,7 @@
                 {{range .Members}}<input type="hidden" name="member" value="{{.Token}}">{{end}}
                 {{if .Mergeable}}
                 <label>Merge into
-                    <select name="target">
+                    <select name="target" class="m-in">
                     {{range .Members}}{{if and .Present (not .ReadOnly)}}<option value="{{.Token}}">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}</option>{{end}}{{end}}
                     </select>
                 </label>

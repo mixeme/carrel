@@ -7,8 +7,8 @@
     {{if $d.EscrowCoverage}}{{$sub = printf "%s · %d covered by escrow" $sub $d.EscrowCoverage}}{{end}}
     {{template "m-head" (head "Title" "Users" "Subtitle" $sub)}}
         <div class="m-acts no-print">
-            <a class="app-btn is-primary" href="{{.Base}}/admin/invites">{{template "ico" "plus"}}Add user</a>
-            <a class="app-btn" href="#reset-password-form">Reset a password…</a>
+            <a class="m-btn is-primary" href="{{.Base}}/admin/invites">{{template "ico" "plus"}}Add user</a>
+            <a class="m-btn" href="#reset-password-form">Reset a password…</a>
         </div>
     {{template "m-headend"}}
 
@@ -18,10 +18,10 @@
 
     <section class="subsection">
         {{template "m-bar" (bar)}}
-            <span class="bar-sort no-print">
-                <a class="app-btn is-sm{{if not $d.UserFilter}} is-on{{end}}" href="{{.Base}}/admin/">All</a>
-                <a class="app-btn is-sm{{if eq $d.UserFilter "admin"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=admin">Administrators</a>
-                <a class="app-btn is-sm{{if eq $d.UserFilter "disabled"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=disabled">Disabled</a>
+            <span class="m-seg no-print">
+                <a class="{{if not $d.UserFilter}} is-on{{end}}" href="{{.Base}}/admin/">All</a>
+                <a class="{{if eq $d.UserFilter "admin"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=admin">Administrators</a>
+                <a class="{{if eq $d.UserFilter "disabled"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=disabled">Disabled</a>
             </span>
             {{template "columnpicker" "admin-users"}}
         {{template "m-barend"}}
@@ -73,7 +73,7 @@
                             <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
                             <input type="hidden" name="action" value="change_role">
                             <input type="hidden" name="user_id" value="{{.ID}}">
-                            <select name="role" aria-label="Role for {{.Login}}">
+                            <select name="role" aria-label="Role for {{.Login}}" class="m-in">
                                 <option value="user" {{if eq .Role "user"}}selected{{end}}>User</option>
                                 <option value="admin" {{if eq .Role "admin"}}selected{{end}}>Administrator</option>
                             </select>
@@ -102,34 +102,34 @@
             so every connection they saved becomes unreadable and is deleted.
             Nothing about it can be undone. For an account covered by key
             escrow, <a href="{{.Base}}/admin/escrow">recover it instead</a> — that keeps the data.</p>
-        <form id="reset-password-form" method="post" class="form" action="{{.Base}}/admin/">
+        <form id="reset-password-form" method="post" class="m-form" action="{{.Base}}/admin/">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="reset_password">
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="reset-user">Account</label>
-                <select id="reset-user" name="user_id" required>
+                <select id="reset-user" name="user_id" required class="m-in">
                     {{range $d.AllUsers}}
                     <option value="{{.ID}}">{{.Login}}</option>
                     {{end}}
                 </select>
             </div>
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="reset-temp">Temporary password</label>
                 <input id="reset-temp" name="temp_password" type="text" required
-                       minlength="10" autocomplete="off">
+                       minlength="10" autocomplete="off" class="m-in">
             </div>
 
-            <div class="form-field w-full">
-                <label class="checkbox">
+            <div class="m-f w-full">
+                <label class="m-check">
                     <input type="checkbox" name="confirm_reset" value="1" required>
                     I understand this destroys the account's saved connections
                 </label>
             </div>
 
-            <div class="form-foot">
-                <button type="submit">Reset password</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Reset password</button>
             </div>
         </form>
     </section>

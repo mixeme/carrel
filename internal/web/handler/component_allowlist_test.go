@@ -35,6 +35,19 @@ var (
 var slotClasses = map[string]string{
 	"m-acts": "the screen's own actions, laid out by m-head",
 	"m-bar3": "the collection stripe; the row names the colour, the component names the size",
+	// Form controls are stamped onto native elements the screen owns — a
+	// button's href, an input's name, a field's label. The class names the
+	// primitive so height and the pick arrow are the system's.
+	"m-form":     "the screen's <form> (method, action, enctype, hx-*); the class is the layout",
+	"m-f":        "one labelled cell; contents (label, input, hint, extra button) are always the screen's",
+	"m-fset":     "a labelled group of fields; the legend and the fields are the screen's",
+	"m-formfoot": "the action row under a form; which buttons sit there is the screen's",
+	"m-seg":      "the joined segment; the options (links, buttons, their is-on) are the screen's",
+	"m-btn":      "a button or button-link; label, href, type and icons are the screen's",
+	"m-in":       "a field; name, type and value are the screen's. select.m-in draws the pick arrow",
+	"m-check":    "a labelled checkbox or radio; the input and the words are the screen's",
+	"m-hint":     "the hint under a field; the words are the screen's",
+	"m-lbl":      "a field label sitting outside m-f > label",
 }
 
 // standaloneUse names, per class, the screens allowed to use a primitive on
@@ -232,6 +245,16 @@ var retiredRowNames = []string{
 
 func TestRetiredRowNamesStayGone(t *testing.T) {
 	assertRetiredClassesGone(t, retiredRowNames, "m-list / m-row / m-group / m-rubric")
+}
+
+var retiredFormNames = []string{
+	"app-btn", "form-field", "form-foot", "form-hint", "form-label",
+	"form-fieldset", "bar-sort", "theme-segment", "theme-segment-btn",
+	"dialog-foot", "dup-buttons",
+}
+
+func TestRetiredFormNamesStayGone(t *testing.T) {
+	assertRetiredClassesGone(t, retiredFormNames, "m-form / m-f / m-in / m-btn / m-seg / m-formfoot")
 }
 
 func assertRetiredClassesGone(t *testing.T, classes []string, instead string) {

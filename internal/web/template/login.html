@@ -3,26 +3,26 @@
     <h1 class="visually-hidden">Sign in</h1>
     <div class="auth-brand">{{template "logo"}}</div>
 
-    <form method="post" class="form" action="{{.Base}}/login">
+    <form method="post" class="m-form" action="{{.Base}}/login">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         {{with .Data}}{{if .Next}}<input type="hidden" name="next" value="{{.Next}}">{{end}}{{end}}
 
-        <div class="form-field w-full">
+        <div class="m-f w-full">
             <label for="login">Login</label>
             <input id="login" name="login" type="text" required autofocus
                    maxlength="64" autocapitalize="none" spellcheck="false"
                    autocomplete="username"
-                   value="{{with .Data}}{{.Login}}{{end}}">
+                   value="{{with .Data}}{{.Login}}{{end}}" class="m-in">
         </div>
 
-        <div class="form-field w-full">
+        <div class="m-f w-full">
             <label for="password">Password</label>
             <input id="password" name="password" type="password" required
-                   autocomplete="current-password">
+                   autocomplete="current-password" class="m-in">
         </div>
 
-        <div class="form-foot">
-            <button type="submit" class="app-btn is-primary auth-submit">Sign in</button>
+        <div class="m-formfoot">
+            <button type="submit" class="m-btn is-primary auth-submit">Sign in</button>
         </div>
     </form>
 

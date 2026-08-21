@@ -9,7 +9,7 @@
     {{end}}
     {{template "m-head" (head "Title" "Connections" "SubtitleHTML" (safeHTML $sub))}}
         <div class="m-acts no-print">
-            <a class="app-btn is-primary" href="#connect-account-form">{{template "ico" "plus"}}Connect account</a>
+            <a class="m-btn is-primary" href="#connect-account-form">{{template "ico" "plus"}}Connect account</a>
         </div>
     {{template "m-headend"}}
 
@@ -18,25 +18,25 @@
     <section class="account-block settings-account-card">
         <div class="settings-account-head">
             <h2>{{if $acc.Label}}{{$acc.Label}}{{else}}{{$acc.Username}}{{end}}</h2>
-            <span class="bar-sort no-print">
+            <span class="form-inline no-print">
                 {{if $acc.Principal}}
-                <a class="app-btn is-sm" href="{{$.Base}}/app/collections/new?account={{$acc.ID}}&amp;return={{$.Base}}/app/settings/connections">{{template "ico" "plus"}}New collection</a>
+                <a class="m-btn is-sm" href="{{$.Base}}/app/collections/new?account={{$acc.ID}}&amp;return={{$.Base}}/app/settings/connections">{{template "ico" "plus"}}New collection</a>
                 {{end}}
                 <form method="post" action="{{$.Base}}/app/settings/connections" class="inline-form">
                     <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
                     <input type="hidden" name="action" value="test_dav">
                     <input type="hidden" name="account_id" value="{{$acc.ID}}">
-                    <button type="submit" class="app-btn is-sm">Test</button>
+                    <button type="submit" class="m-btn is-sm">Test</button>
                 </form>
                 <form method="get" action="{{$.Base}}/app/settings/connections" class="inline-form">
                     <input type="hidden" name="edit" value="{{$acc.ID}}">
-                    <button type="submit" class="app-btn is-sm">Edit</button>
+                    <button type="submit" class="m-btn is-sm">Edit</button>
                 </form>
                 <form method="post" action="{{$.Base}}/app/settings/connections" class="inline-form">
                     <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
                     <input type="hidden" name="action" value="delete_dav">
                     <input type="hidden" name="account_id" value="{{$acc.ID}}">
-                    <button type="submit" class="app-btn is-sm is-danger-solid">Disconnect</button>
+                    <button type="submit" class="m-btn is-sm is-danger-solid">Disconnect</button>
                 </form>
             </span>
         </div>
@@ -45,33 +45,33 @@
         <pre class="diagnostic">{{$d.TestDiag}}</pre>
         {{end}}
         {{if eq $d.EditAccountID $acc.ID}}
-        <form method="post" class="form" action="{{$.Base}}/app/settings/connections">
+        <form method="post" class="m-form" action="{{$.Base}}/app/settings/connections">
             <input type="hidden" name="csrf_token" value="{{$.CSRF}}">
             <input type="hidden" name="action" value="update_dav">
             <input type="hidden" name="account_id" value="{{$acc.ID}}">
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="edit-label-{{$acc.ID}}">Label (optional)</label>
                 <input id="edit-label-{{$acc.ID}}" name="dav_label" type="text"
-                       value="{{$d.EditForm.Label}}" autocomplete="off">
+                       value="{{$d.EditForm.Label}}" autocomplete="off" class="m-in">
             </div>
-            <div class="form-field w-xl">
+            <div class="m-f w-xl">
                 <label for="edit-url-{{$acc.ID}}">Server URL</label>
                 <input id="edit-url-{{$acc.ID}}" name="dav_url" type="url" required
-                       value="{{$d.EditForm.BaseURL}}" autocapitalize="none" spellcheck="false">
+                       value="{{$d.EditForm.BaseURL}}" autocapitalize="none" spellcheck="false" class="m-in">
             </div>
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="edit-user-{{$acc.ID}}">Username</label>
                 <input id="edit-user-{{$acc.ID}}" name="dav_username" type="text" required
-                       value="{{$d.EditForm.Username}}" autocapitalize="none" spellcheck="false">
+                       value="{{$d.EditForm.Username}}" autocapitalize="none" spellcheck="false" class="m-in">
             </div>
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="edit-pass-{{$acc.ID}}">New password</label>
-                <input id="edit-pass-{{$acc.ID}}" name="dav_password" type="password" autocomplete="new-password">
-                <p class="form-hint">Leave blank to keep the saved password.</p>
+                <input id="edit-pass-{{$acc.ID}}" name="dav_password" type="password" autocomplete="new-password" class="m-in">
+                <p class="m-hint">Leave blank to keep the saved password.</p>
             </div>
-            <div class="form-foot">
-                <button type="submit">Save and re-check</button>
-                <a class="app-btn is-quiet" href="{{$.Base}}/app/settings/connections">Cancel</a>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Save and re-check</button>
+                <a class="m-btn is-quiet" href="{{$.Base}}/app/settings/connections">Cancel</a>
             </div>
         </form>
         {{if $d.Trace}}
@@ -90,7 +90,7 @@
                 </a>
                 {{if not .ReadOnly}}
                 <span class="collection-row-menu no-print" data-dots-menu>
-                    <button type="button" class="app-btn is-sm is-quiet" data-dots-toggle
+                    <button type="button" class="m-btn is-sm is-quiet" data-dots-toggle
                             aria-expanded="false" aria-haspopup="menu" aria-label="Collection actions">{{template "ico" "dots"}}</button>
                     <div class="app-create-menu dots-menu" role="menu" hidden>
                         <a class="app-create-item" href="{{$.Base}}/app/collections/rename?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Rename</a>
@@ -109,7 +109,7 @@
                 </a>
                 {{if not .ReadOnly}}
                 <span class="collection-row-menu no-print" data-dots-menu>
-                    <button type="button" class="app-btn is-sm is-quiet" data-dots-toggle
+                    <button type="button" class="m-btn is-sm is-quiet" data-dots-toggle
                             aria-expanded="false" aria-haspopup="menu" aria-label="Collection actions">{{template "ico" "dots"}}</button>
                     <div class="app-create-menu dots-menu" role="menu" hidden>
                         <a class="app-create-item" href="{{$.Base}}/app/collections/rename?account={{$acc.ID}}&amp;col={{.ColEnc}}&amp;return={{$.Base}}/app/settings/connections">Rename</a>
@@ -138,37 +138,37 @@
 
     <section class="subsection" id="connect-account-form">
         <h2 class="subsection-h2">Connect account</h2>
-        <form method="post" class="form" action="{{.Base}}/app/settings/connections">
+        <form method="post" class="m-form" action="{{.Base}}/app/settings/connections">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="connect_dav">
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="dav-label">Label (optional)</label>
                 <input id="dav-label" name="dav_label" type="text"
-                       value="{{$d.Connect.Label}}" autocomplete="off">
+                       value="{{$d.Connect.Label}}" autocomplete="off" class="m-in">
             </div>
 
-            <div class="form-field w-xl">
+            <div class="m-f w-xl">
                 <label for="dav-url">Server URL</label>
                 <input id="dav-url" name="dav_url" type="url" required
                        value="{{$d.Connect.BaseURL}}" placeholder="https://host/dav.php/"
-                       autocapitalize="none" spellcheck="false">
+                       autocapitalize="none" spellcheck="false" class="m-in">
             </div>
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="dav-user">Username</label>
                 <input id="dav-user" name="dav_username" type="text" required
-                       value="{{$d.Connect.Username}}" autocapitalize="none" spellcheck="false">
+                       value="{{$d.Connect.Username}}" autocapitalize="none" spellcheck="false" class="m-in">
             </div>
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="dav-pass">Password</label>
                 <input id="dav-pass" name="dav_password" type="password" required
-                       autocomplete="current-password">
+                       autocomplete="current-password" class="m-in">
             </div>
 
-            <div class="form-foot">
-                <button type="submit">Connect</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Connect</button>
             </div>
         </form>
         {{if and $d.Trace (not $d.EditAccountID)}}

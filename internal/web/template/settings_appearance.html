@@ -3,52 +3,52 @@
 <section class="settings-panel">
     {{template "m-head" (head "Title" "Appearance" "Subtitle" "Kept in this browser, not on the server")}}{{template "m-headend"}}
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Theme</legend>
-        <div class="form-field">
-            <div class="theme-segment" data-theme-segment role="group" aria-label="Theme">
-                <button type="button" class="theme-segment-btn is-on" data-theme-value="auto">Auto</button>
-                <button type="button" class="theme-segment-btn" data-theme-value="light">Light</button>
-                <button type="button" class="theme-segment-btn" data-theme-value="dark">Dark</button>
+        <div class="m-f">
+            <div class="m-seg" data-theme-segment role="group" aria-label="Theme">
+                <button type="button" class="is-on" data-theme-value="auto">Auto</button>
+                <button type="button" data-theme-value="light">Light</button>
+                <button type="button" data-theme-value="dark">Dark</button>
             </div>
-            <p class="form-hint">Auto follows the system setting.</p>
+            <p class="m-hint">Auto follows the system setting.</p>
         </div>
     </fieldset>
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Density</legend>
-        <div class="form-field">
-            <div class="theme-segment" data-density-segment role="group" aria-label="Row density">
-                <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+        <div class="m-f">
+            <div class="m-seg" data-density-segment role="group" aria-label="Row density">
+                <button type="button" class="is-on" data-density-value="comfortable">Comfortable</button>
+                <button type="button" data-density-value="compact">Compact</button>
             </div>
-            <p class="form-hint">List row height in lists and tables.</p>
+            <p class="m-hint">List row height in lists and tables.</p>
         </div>
     </fieldset>
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Dates and times</legend>
-        <form method="post" class="form" action="{{.Base}}/app/settings/appearance">
+        <form method="post" class="m-form" action="{{.Base}}/app/settings/appearance">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="save_appearance">
-            <div class="form-field">
-                <div class="theme-segment" role="group" aria-label="First day of the week">
+            <div class="m-f">
+                <div class="m-seg" role="group" aria-label="First day of the week">
                     <button type="submit" name="week_start" value="monday"
-                            class="theme-segment-btn{{if ne $d.WeekStart "sunday"}} is-on{{end}}">Monday</button>
+                           class="{{if ne $d.WeekStart "sunday"}} is-on{{end}}">Monday</button>
                     <button type="submit" name="week_start" value="sunday"
-                            class="theme-segment-btn{{if eq $d.WeekStart "sunday"}} is-on{{end}}">Sunday</button>
+                           class="{{if eq $d.WeekStart "sunday"}} is-on{{end}}">Sunday</button>
                 </div>
-                <p class="form-hint">Which day the agenda's Week preset starts from. Saved to your account,
+                <p class="m-hint">Which day the agenda's Week preset starts from. Saved to your account,
                     unlike the settings above: the week's boundary is worked out on the server before the page
                     is sent, so there is nothing here for the browser to remember on its own.</p>
             </div>
         </form>
     </fieldset>
 
-    <fieldset class="form-fieldset">
+    <fieldset class="m-fset">
         <legend>Lists</legend>
-        <p class="form-hint">Column sets are remembered per section. Reset restores the defaults from the mockups.</p>
-        <p><button type="button" class="app-btn" data-reset-columns>Reset remembered column choices</button></p>
+        <p class="m-hint">Column sets are remembered per section. Reset restores the defaults from the mockups.</p>
+        <p><button type="button" class="m-btn" data-reset-columns>Reset remembered column choices</button></p>
     </fieldset>
 </section>
 {{end}}

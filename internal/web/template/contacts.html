@@ -8,8 +8,8 @@
         {{if $d.SectionRail.SourceSummary}}{{$sub = $d.SectionRail.SourceSummary}}{{end}}
         {{template "m-head" (head "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
             <div class="m-acts no-print">
-                {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
-                <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                {{if $d.CreateURL}}<a class="m-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
+                <button type="button" class="m-btn" data-print>{{template "ico" "print"}}Print</button>
                 {{template "importexportmenu" (importExportMenu "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/contacts/import") "ExportURL" (print .Base "/app/contacts/export"))}}
             </div>
         {{template "m-headend"}}
@@ -18,13 +18,13 @@
         {{template "m-bar" (bar)}}
             <label class="list-filter">
                 <span class="visually-hidden">Filter these contacts</span>
-                <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+                <input type="search" placeholder="Filter" data-list-filter autocomplete="off" class="m-in">
             </label>
             {{template "m-more"}}
             {{template "m-right" (right "Second" true)}}
-                <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
-                    <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                    <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                <div class="m-seg no-print" data-density-segment role="group" aria-label="Row density">
+                    <button type="button" class="is-on" data-density-value="comfortable">Comfortable</button>
+                    <button type="button" data-density-value="compact">Compact</button>
                 </div>
                 <span data-bar-count>0 items</span>
             {{template "m-rightend"}}
@@ -49,14 +49,14 @@
             {{template "m-head" (head "Title" $title "Subtitle" $sub "Muted" true)}}
                 <div class="m-acts no-print">
                     {{if and (not $d.ReadOnly) $d.AccountID $d.ColEnc}}
-                    <a class="app-btn is-primary" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New contact</a>
-                    <a class="app-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">{{template "ico" "up"}}Import</a>
+                    <a class="m-btn is-primary" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New contact</a>
+                    <a class="m-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">{{template "ico" "up"}}Import</a>
                     {{end}}
                     {{if and $d.AccountID $d.ColEnc}}
-                    <a class="app-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/export">{{template "ico" "down"}}Export</a>
+                    <a class="m-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/export">{{template "ico" "down"}}Export</a>
                     {{end}}
-                    <label class="checkbox"><input type="checkbox" data-print-photos> Print with photos</label>
-                    <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                    <label class="m-check"><input type="checkbox" data-print-photos> Print with photos</label>
+                    <button type="button" class="m-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
             {{template "m-headend"}}
             {{if $d.ReadOnly}}
@@ -68,18 +68,18 @@
             {{template "m-bar" (bar)}}
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these contacts</span>
-                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off" class="m-in">
                 </label>
-                <span class="bar-sort no-print is-2nd">
-                    <a class="app-btn is-sm{{if or (eq $d.Sort "name") (not $d.Sort)}} is-on{{end}}" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}?sort=name">A&#8211;Z</a>
-                    <a class="app-btn is-sm{{if eq $d.Sort "changed"}} is-on{{end}}" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}?sort=changed">Recently changed</a>
+                <span class="m-seg no-print is-2nd">
+                    <a class="{{if or (eq $d.Sort "name") (not $d.Sort)}} is-on{{end}}" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}?sort=name">A&#8211;Z</a>
+                    <a class="{{if eq $d.Sort "changed"}} is-on{{end}}" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}?sort=changed">Recently changed</a>
                 </span>
                 {{template "columnpicker" "contacts"}}
                 {{template "m-more"}}
                 {{template "m-right" (right "Second" true)}}
-                    <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
-                        <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                        <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                    <div class="m-seg no-print" data-density-segment role="group" aria-label="Row density">
+                        <button type="button" class="is-on" data-density-value="comfortable">Comfortable</button>
+                        <button type="button" data-density-value="compact">Compact</button>
                     </div>
                     <span data-bar-count>{{len $d.Contacts}} {{if eq (len $d.Contacts) 1}}item{{else}}items{{end}}</span>
                 {{template "m-rightend"}}

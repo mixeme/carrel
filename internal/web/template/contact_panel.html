@@ -5,8 +5,8 @@
     {{if $d.Collection.DisplayName}}{{$sub = printf "%s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
     {{template "m-head" (head "Side" true "Title" $d.Contact.DisplayName "Subtitle" $sub "Photo" $d.PhotoURL)}}
         <div class="m-acts">
-            <a class="app-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit">Edit</a>
-            <button type="button" class="app-btn is-quiet" data-detail-close title="Close the panel" aria-label="Close">✕</button>
+            <a class="m-btn" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/edit">Edit</a>
+            <button type="button" class="m-btn is-quiet" data-detail-close title="Close the panel" aria-label="Close">✕</button>
         </div>
     {{template "m-headend"}}
     <div class="detail-panel-body">

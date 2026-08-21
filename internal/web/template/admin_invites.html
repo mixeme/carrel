@@ -12,7 +12,7 @@
         <h2 class="subsection-h2">Invitation link</h2>
         <p>Copy this link and share it with the new user.</p>
         <p class="copy-row">
-            <input id="invite-link" type="text" readonly value="{{$d.NewInviteLink}}">
+            <input id="invite-link" type="text" readonly value="{{$d.NewInviteLink}}" class="m-in">
             <button type="button" class="secondary" data-copy="invite-link">Copy</button>
         </p>
     </section>
@@ -26,48 +26,48 @@
         <p class="hint">The new user chooses their own password. You never see it.</p>
 
         <h4 class="subsection-h4">By link</h4>
-        <form method="post" class="form" action="{{.Base}}/admin/invites">
+        <form method="post" class="m-form" action="{{.Base}}/admin/invites">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="create_invite_link">
 
-            <div class="form-field w-sm">
+            <div class="m-f w-sm">
                 <label for="invite-link-role">Role</label>
-                <select id="invite-link-role" name="role">
+                <select id="invite-link-role" name="role" class="m-in">
                     <option value="user">User</option>
                     <option value="admin">Administrator</option>
                 </select>
-                <p class="form-hint">Creates a one-time link for you to copy and share.
+                <p class="m-hint">Creates a one-time link for you to copy and share.
                     The new user chooses their own login when they open it.</p>
             </div>
 
-            <div class="form-foot">
-                <button type="submit">Create link</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Create link</button>
             </div>
         </form>
 
         <h4 class="subsection-h4">By email</h4>
         {{if $d.SMTPConfigured}}
-        <form method="post" class="form" action="{{.Base}}/admin/invites">
+        <form method="post" class="m-form" action="{{.Base}}/admin/invites">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="create_invite_email">
 
-            <div class="form-field w-lg">
+            <div class="m-f w-lg">
                 <label for="invite-email-to">Email</label>
-                <input id="invite-email-to" name="email" type="email" required>
+                <input id="invite-email-to" name="email" type="email" required class="m-in">
             </div>
 
-            <div class="form-field w-sm">
+            <div class="m-f w-sm">
                 <label for="invite-email-role">Role</label>
-                <select id="invite-email-role" name="role">
+                <select id="invite-email-role" name="role" class="m-in">
                     <option value="user">User</option>
                     <option value="admin">Administrator</option>
                 </select>
-                <p class="form-hint">Sends an invitation email with a one-time link.
+                <p class="m-hint">Sends an invitation email with a one-time link.
                     You will not see the link — only the recipient gets it.</p>
             </div>
 
-            <div class="form-foot">
-                <button type="submit">Send invitation</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Send invitation</button>
             </div>
         </form>
         {{else}}
@@ -78,37 +78,37 @@
         <h3 class="subsection-h3">Temporary password</h3>
         <p class="warning">Until the user changes this password, you can sign
             in as them. Only use this when handing credentials over in person.</p>
-        <form method="post" class="form" action="{{.Base}}/admin/invites">
+        <form method="post" class="m-form" action="{{.Base}}/admin/invites">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="create_user">
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="user-login">Login</label>
                 <input id="user-login" name="login" type="text" required maxlength="64"
-                       autocapitalize="none" spellcheck="false">
+                       autocapitalize="none" spellcheck="false" class="m-in">
             </div>
 
-            <div class="form-field w-lg">
+            <div class="m-f w-lg">
                 <label for="user-email">Email <span class="optional">(optional)</span></label>
-                <input id="user-email" name="email" type="email">
+                <input id="user-email" name="email" type="email" class="m-in">
             </div>
 
-            <div class="form-field w-sm">
+            <div class="m-f w-sm">
                 <label for="user-role">Role</label>
-                <select id="user-role" name="role">
+                <select id="user-role" name="role" class="m-in">
                     <option value="user">User</option>
                     <option value="admin">Administrator</option>
                 </select>
             </div>
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="temp-password">Temporary password</label>
                 <input id="temp-password" name="temp_password" type="text" required
-                       minlength="10" autocomplete="off">
+                       minlength="10" autocomplete="off" class="m-in">
             </div>
 
-            <div class="form-foot">
-                <button type="submit">Create user</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Create user</button>
             </div>
         </form>
 
@@ -116,31 +116,31 @@
         <p class="hint">Visitors create their own account at a public form
             and confirm the email address before they can sign in. Off by
             default. Mail must be configured first.</p>
-        <form method="post" class="form" action="{{.Base}}/admin/invites">
+        <form method="post" class="m-form" action="{{.Base}}/admin/invites">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="save_self_registration">
 
-            <div class="form-field">
-                <label class="checkbox">
+            <div class="m-f">
+                <label class="m-check">
                     <input type="checkbox" name="self_registration" value="1"
                            {{if $d.Settings.SelfRegistration}}checked{{end}}>
                     Publish the registration form
                 </label>
             </div>
             {{if not $d.SMTPConfigured}}
-            <p class="form-hint">Configure SMTP in <a href="{{.Base}}/admin/settings">Settings</a>
+            <p class="m-hint">Configure SMTP in <a href="{{.Base}}/admin/settings">Settings</a>
                 first. A confirmation email cannot be sent without it, so this
                 cannot be turned on until mail works.</p>
             {{end}}
 
-            <div class="form-foot">
-                <button type="submit">Save</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Save</button>
             </div>
         </form>
         {{if $d.Settings.SelfRegistration}}
         <p>The form is at this address:</p>
         <p class="copy-row">
-            <input id="register-url" type="text" readonly value="{{$d.RegisterURL}}">
+            <input id="register-url" type="text" readonly value="{{$d.RegisterURL}}" class="m-in">
             <button type="button" class="secondary" data-copy="register-url">Copy</button>
         </p>
         {{end}}

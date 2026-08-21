@@ -50,6 +50,18 @@ component/
     <span class="s">…</span>
 {{template "m-rowend"}}
 {{template "m-listend"}}
+
+<form method="post" class="m-form" action="…">
+    <div class="m-f w-md">
+        <label for="port">Port</label>
+        <input class="m-in is-mono" id="port" name="port">
+        <p class="m-hint">Chosen by the system at each start.</p>
+    </div>
+    <label class="m-check"><input type="checkbox" name="stop">Stop the server on exit</label>
+    <div class="m-formfoot">
+        <button type="submit" class="m-btn is-primary">Save</button>
+    </div>
+</form>
 ```
 
 Парные компоненты (`m-head` / `m-headend`) открывают и закрывают тег: между ними
@@ -84,6 +96,11 @@ component/
 | `m-list` / `m-listend` | `list` | `tmpl/m-row.html` · `css/30-row.css` | Колонка строк; `Attrs` — id и `data-columns-root` экрана |
 | `m-row` / `m-rowend` | `row` | `tmpl/m-row.html` · `css/30-row.css` | Строка списка. `Kind` — модификатор макетов (`contact` / `agenda` / `task` / `note` / `find` / `file`); `Done` / `Overdue` / `On` — состояния; `Class` — маркеры JS (`is-contact`, `is-merged`) |
 | `m-group` | `group` | `tmpl/m-row.html` · `css/30-row.css` | Рубрикатор над пачкой строк и счётчик справа |
+| `m-form` / `m-formend` | `form` | `tmpl/m-form.html` · `css/40-form.css` | Форма как ряд полей. Экран чаще пишет класс на своём `<form>` (слот): method, action и enctype всегда его |
+| `m-f` / `m-fend` | `field` | `tmpl/m-form.html` · `css/40-form.css` | Ячейка поля. `Width` — `xs`/`sm`/`md`/`lg`/`xl`/`full`; `OwnLine` — без пустой строки подписи |
+| `m-formfoot` / `m-formfootend` | `formFoot` | `tmpl/m-form.html` · `css/40-form.css` | Подвал формы: кнопки экрана, высота 26 px |
+| `m-seg` / `m-segend` | `seg` | `tmpl/m-form.html` · `css/40-form.css` | Сегмент (сортировка, плотность, Week/Month). `Menu` — компактный в меню пользователя |
+| `m-fset` / `m-fsetend` | `fieldSet` | `tmpl/m-form.html` · `css/40-form.css` | Группа полей с легендой |
 
 Классы, которые эти компоненты приносят с собой:
 
@@ -105,6 +122,18 @@ component/
 | `.m-group` | `m-group` | Рубрикатор группы и счётчик |
 | `.m-rubric` | `m-group` | Капитель рубрикатора (h2 для оглавления) |
 | `.m-num` | `m-group` | Счётчик справа |
+| `.m-form` | `m-form` | Ряд полей. `is-tight` — меньше отступ сверху |
+| `.m-f` | `m-form` | Ячейка: подпись, поле, подсказка. `is-own-line` — без пустой строки подписи |
+| `.m-fset` | `m-form` | Группа полей на всю ширину, с легендой-рубрикатором |
+| `.m-in` | `m-form` | Поле. `is-pick` / `select.m-in` — стрелка списка; `is-area` — многострочное; `is-mono` — моноширинное |
+| `.m-btn` | `m-form` | Кнопка. `is-primary` / `is-quiet` / `is-danger` / `is-danger-solid` / `is-sm` / `is-on` |
+| `.m-seg` | `m-form` | Сегмент; выбранное — `.is-on` у ребёнка. `is-menu` — на всю ширину в выпадающем |
+| `.m-check` | `m-form` | Подписанный флажок или радио |
+| `.m-hint` | `m-form` | Подсказка под полем, 11 px |
+| `.m-lbl` | `m-form` | Подпись поля вне `m-f > label` |
+| `.m-formfoot` | `m-form` | Подвал: кнопки 26 px, как на полосе |
+
+Высоту строки знает система, не экран: **28 px** там, где есть поле, **26 px** на полосе инструментов, **22 px** в таблице. Стрелку у `<select>` рисует `.m-in`, разметка только ставит класс.
 
 Что экрану **можно** писать руками, перечислено поимённо в
 `component_allowlist_test.go`: `slotClasses` — слоты вроде `.m-acts`,

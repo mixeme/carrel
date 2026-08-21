@@ -27,16 +27,16 @@
 <p class="hint">No property-level differences were found; the versions still disagree on ETag.</p>
 {{end}}
 
-<form method="post" action="{{.Base}}/app/{{$d.BasePath}}/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/conflict" class="form">
+<form method="post" action="{{.Base}}/app/{{$d.BasePath}}/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/conflict" class="m-form">
     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
     <input type="hidden" name="conflict_key" value="{{$d.Key}}">
     <input type="hidden" name="account_id" value="{{$d.AccountID}}">
     <input type="hidden" name="col" value="{{$d.ColEnc}}">
     <input type="hidden" name="uid" value="{{$d.UID}}">
-    <div class="dialog-foot">
-        <button type="submit" name="choice" value="apply_mine" class="app-btn is-primary">Apply my edit</button>
-        <button type="submit" name="choice" value="keep_server" class="app-btn">Keep server version</button>
-        <button type="submit" name="choice" value="cancel" class="app-btn is-quiet">Cancel</button>
+    <div class="m-formfoot">
+        <button type="submit" name="choice" value="apply_mine" class="m-btn is-primary">Apply my edit</button>
+        <button type="submit" name="choice" value="keep_server" class="m-btn">Keep server version</button>
+        <button type="submit" name="choice" value="cancel" class="m-btn is-quiet">Cancel</button>
     </div>
 </form>
 </div>

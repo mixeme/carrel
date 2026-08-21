@@ -14,40 +14,40 @@
         {{end}}
         {{template "m-head" (head "Bar" true "Title" $d.SectionRail.AllLabel "SubtitleHTML" (safeHTML $sub))}}
             <div class="m-acts no-print">
-                {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
-                <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                {{if $d.CreateURL}}<a class="m-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
+                <button type="button" class="m-btn" data-print>{{template "ico" "print"}}Print</button>
                 {{template "importexportmenu" (importExportMenu "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/calendar/import") "ExportURL" (print .Base "/app/calendar/export"))}}
             </div>
         {{template "m-headend"}}
         {{template "m-barform" (barForm "Action" (print .Base "/app/calendar"))}}
-            <span class="bar-sort no-print">
-                <a class="app-btn is-sm{{if eq $d.Segment "week"}} is-on{{end}}" href="{{$d.WeekURL}}">Week</a>
-                <a class="app-btn is-sm{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>
-                <button type="button" class="app-btn is-sm{{if eq $d.Segment "range"}} is-on{{end}}" data-range-toggle aria-expanded="{{if eq $d.Segment "range"}}true{{else}}false{{end}}">Range</button>
+            <span class="m-seg no-print">
+                <a class="{{if eq $d.Segment "week"}} is-on{{end}}" href="{{$d.WeekURL}}">Week</a>
+                <a class="{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>
+                <button type="button" class="{{if eq $d.Segment "range"}} is-on{{end}}" data-range-toggle aria-expanded="{{if eq $d.Segment "range"}}true{{else}}false{{end}}">Range</button>
             </span>
             {{template "m-range" (barRange "Second" true "Attrs" (safeHTML "data-range-fields"))}}
                 <label class="visually-hidden" for="cal-from">From</label>
-                <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required>
+                <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required class="m-in">
                 <i aria-hidden="true">→</i>
                 <label class="visually-hidden" for="cal-to">To</label>
-                <input id="cal-to" type="date" name="to" value="{{$d.Request.To}}">
-                <button type="submit" class="app-btn">Show</button>
+                <input id="cal-to" type="date" name="to" value="{{$d.Request.To}}" class="m-in">
+                <button type="submit" class="m-btn">Show</button>
             {{template "m-rangeend"}}
             {{template "m-sep" (sep "Second" true)}}
             <div class="form-inline">
-                <label class="checkbox"><input type="checkbox" name="kind" value="events"{{if $d.Request.Wants "events"}} checked{{end}}> Events</label>
-                <label class="checkbox"><input type="checkbox" name="kind" value="tasks"{{if $d.Request.Wants "tasks"}} checked{{end}}> Tasks due</label>
-                <label class="checkbox"><input type="checkbox" name="kind" value="notes"{{if $d.Request.Wants "notes"}} checked{{end}}> Notes</label>
+                <label class="m-check"><input type="checkbox" name="kind" value="events"{{if $d.Request.Wants "events"}} checked{{end}}> Events</label>
+                <label class="m-check"><input type="checkbox" name="kind" value="tasks"{{if $d.Request.Wants "tasks"}} checked{{end}}> Tasks due</label>
+                <label class="m-check"><input type="checkbox" name="kind" value="notes"{{if $d.Request.Wants "notes"}} checked{{end}}> Notes</label>
             </div>
             <label class="list-filter">
                 <span class="visually-hidden">Filter these events</span>
-                <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+                <input type="search" placeholder="Filter" data-list-filter autocomplete="off" class="m-in">
             </label>
             {{template "m-more"}}
             {{template "m-right" (right "Second" true)}}
-                <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
-                    <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                    <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                <div class="m-seg no-print" data-density-segment role="group" aria-label="Row density">
+                    <button type="button" class="is-on" data-density-value="comfortable">Comfortable</button>
+                    <button type="button" data-density-value="compact">Compact</button>
                 </div>
                 <span data-bar-count>0 items</span>
             {{template "m-rightend"}}
@@ -74,37 +74,37 @@
             {{template "m-head" (head "Title" $title "Subtitle" $sub)}}
                 <div class="m-acts no-print">
                     {{if not $d.ReadOnly}}
-                    <a class="app-btn is-primary" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New event</a>
-                    <a class="app-btn" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">{{template "ico" "up"}}Import</a>
+                    <a class="m-btn is-primary" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New event</a>
+                    <a class="m-btn" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">{{template "ico" "up"}}Import</a>
                     {{end}}
-                    <a class="app-btn" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/export?from={{$d.From}}&amp;to={{$d.To}}">{{template "ico" "down"}}Export</a>
-                    <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                    <a class="m-btn" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/export?from={{$d.From}}&amp;to={{$d.To}}">{{template "ico" "down"}}Export</a>
+                    <button type="button" class="m-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
             {{template "m-headend"}}
             {{template "m-barform" (barForm)}}
-                <span class="bar-sort no-print">
-                    <a class="app-btn is-sm{{if eq $d.Segment "week"}} is-on{{end}}" href="{{$d.WeekURL}}">Week</a>
-                    <a class="app-btn is-sm{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>
-                    <button type="button" class="app-btn is-sm{{if eq $d.Segment "range"}} is-on{{end}}" data-range-toggle aria-expanded="{{if eq $d.Segment "range"}}true{{else}}false{{end}}">Range</button>
+                <span class="m-seg no-print">
+                    <a class="{{if eq $d.Segment "week"}} is-on{{end}}" href="{{$d.WeekURL}}">Week</a>
+                    <a class="{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>
+                    <button type="button" class="{{if eq $d.Segment "range"}} is-on{{end}}" data-range-toggle aria-expanded="{{if eq $d.Segment "range"}}true{{else}}false{{end}}">Range</button>
                 </span>
                 {{template "m-range" (barRange "Second" true "Attrs" (safeHTML "data-range-fields"))}}
                     <label class="visually-hidden" for="agenda-from">From</label>
-                    <input id="agenda-from" type="date" name="from" value="{{$d.From}}" required>
+                    <input id="agenda-from" type="date" name="from" value="{{$d.From}}" required class="m-in">
                     <i aria-hidden="true">→</i>
                     <label class="visually-hidden" for="agenda-to">To</label>
-                    <input id="agenda-to" type="date" name="to" value="{{$d.To}}" required>
-                    <button type="submit" class="app-btn">Show</button>
+                    <input id="agenda-to" type="date" name="to" value="{{$d.To}}" required class="m-in">
+                    <button type="submit" class="m-btn">Show</button>
                 {{template "m-rangeend"}}
                 {{template "m-sep" (sep "Second" true)}}
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these events</span>
-                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off" class="m-in">
                 </label>
                 {{template "m-more"}}
                 {{template "m-right" (right "Second" true)}}
-                    <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
-                        <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                        <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                    <div class="m-seg no-print" data-density-segment role="group" aria-label="Row density">
+                        <button type="button" class="is-on" data-density-value="comfortable">Comfortable</button>
+                        <button type="button" data-density-value="compact">Compact</button>
                     </div>
                     <span data-bar-count>{{$d.EventCount}} {{if eq $d.EventCount 1}}item{{else}}items{{end}}</span>
                 {{template "m-rightend"}}

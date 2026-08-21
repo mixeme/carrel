@@ -8,8 +8,8 @@
         {{if $d.SectionRail.SourceSummary}}{{$sub = $d.SectionRail.SourceSummary}}{{end}}
         {{template "m-head" (head "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
             <div class="m-acts no-print">
-                {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
-                <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                {{if $d.CreateURL}}<a class="m-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
+                <button type="button" class="m-btn" data-print>{{template "ico" "print"}}Print</button>
             </div>
         {{template "m-headend"}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
@@ -17,18 +17,18 @@
             {{template "m-bar" (bar)}}
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these tasks</span>
-                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off" class="m-in">
                 </label>
-                <span class="bar-sort no-print" data-task-counts>
+                <span class="m-seg no-print" data-task-counts>
                     <span data-task-count="open">Open 0</span>
                     <span data-task-count="done">Done 0</span>
                     <span data-task-count="all">All 0</span>
                 </span>
                 {{template "m-more"}}
                 {{template "m-right" (right "Second" true)}}
-                    <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
-                        <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                        <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                    <div class="m-seg no-print" data-density-segment role="group" aria-label="Row density">
+                        <button type="button" class="is-on" data-density-value="comfortable">Comfortable</button>
+                        <button type="button" data-density-value="compact">Compact</button>
                     </div>
                     <span data-bar-count>0 items</span>
                 {{template "m-rightend"}}
@@ -52,30 +52,32 @@
             {{if $d.Collection.DisplayName}}{{$sub = print $d.AccountLabel " · " $d.Collection.DisplayName}}{{end}}
             {{template "m-head" (head "Title" $title "Subtitle" $sub)}}
                 <div class="m-acts no-print">
-                    {{if not $d.ReadOnly}}<a class="app-btn is-primary" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New task</a>{{end}}
-                    <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
+                    {{if not $d.ReadOnly}}<a class="m-btn is-primary" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New task</a>{{end}}
+                    <button type="button" class="m-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
             {{template "m-headend"}}
             {{template "m-bar" (bar)}}
-                <a class="app-btn{{if eq $d.Filter "open"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=open">Open ({{$d.Counts.Open}})</a>
-                <a class="app-btn{{if eq $d.Filter "done"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
-                <a class="app-btn{{if eq $d.Filter "all"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All ({{$d.Counts.All}})</a>
+                <span class="m-seg no-print">
+                    <a class="{{if eq $d.Filter "open"}}is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=open">Open ({{$d.Counts.Open}})</a>
+                    <a class="{{if eq $d.Filter "done"}}is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
+                    <a class="{{if eq $d.Filter "all"}}is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All ({{$d.Counts.All}})</a>
+                </span>
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these tasks</span>
-                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
+                    <input type="search" placeholder="Filter" data-list-filter autocomplete="off" class="m-in">
                 </label>
-                <span class="bar-sort no-print is-2nd">
-                    <a class="app-btn is-sm{{if or (eq $d.Sort "due") (not $d.Sort)}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter={{$d.Filter}}&amp;sort=due">By due</a>
-                    <a class="app-btn is-sm{{if eq $d.Sort "priority"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter={{$d.Filter}}&amp;sort=priority">By priority</a>
-                    <a class="app-btn is-sm{{if eq $d.Sort "changed"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter={{$d.Filter}}&amp;sort=changed">Recently changed</a>
+                <span class="m-seg no-print is-2nd">
+                    <a class="{{if or (eq $d.Sort "due") (not $d.Sort)}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter={{$d.Filter}}&amp;sort=due">By due</a>
+                    <a class="{{if eq $d.Sort "priority"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter={{$d.Filter}}&amp;sort=priority">By priority</a>
+                    <a class="{{if eq $d.Sort "changed"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter={{$d.Filter}}&amp;sort=changed">Recently changed</a>
                 </span>
                 {{template "columnpicker" "tasks"}}
                 {{template "m-more"}}
                 {{template "m-right" (right "Second" true)}}
                     {{if $d.Counts.Overdue}}<span class="task-overdue-count">{{$d.Counts.Overdue}} overdue</span>{{end}}
-                    <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
-                        <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                        <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                    <div class="m-seg no-print" data-density-segment role="group" aria-label="Row density">
+                        <button type="button" class="is-on" data-density-value="comfortable">Comfortable</button>
+                        <button type="button" data-density-value="compact">Compact</button>
                     </div>
                     <span data-bar-count>{{len $d.Rows}} {{if eq (len $d.Rows) 1}}item{{else}}items{{end}}</span>
                 {{template "m-rightend"}}

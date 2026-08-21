@@ -25,62 +25,62 @@
             </dl>
             <p class="hint">This task list is read-only.</p>
             {{else}}
-            <form method="post" class="form" action="{{if $d.IsNew}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
+            <form method="post" class="m-form" action="{{if $d.IsNew}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
-                <div class="form-field w-xl">
+                <div class="m-f w-xl">
                     <label for="summary">Summary</label>
-                    <input id="summary" name="summary" value="{{$d.Form.Summary}}" required>
+                    <input id="summary" name="summary" value="{{$d.Form.Summary}}" required class="m-in">
                 </div>
-                <div class="form-field w-full">
+                <div class="m-f w-full">
                     <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="5">{{$d.Form.Description}}</textarea>
+                    <textarea id="description" name="description" rows="5" class="m-in is-area">{{$d.Form.Description}}</textarea>
                 </div>
-                <div class="form-field w-lg">
+                <div class="m-f w-lg">
                     <label for="location">Location</label>
-                    <input id="location" name="location" value="{{$d.Form.Location}}">
+                    <input id="location" name="location" value="{{$d.Form.Location}}" class="m-in">
                 </div>
-                <div class="form-field w-sm">
+                <div class="m-f w-sm">
                     <label for="status">Status</label>
-                    <select id="status" name="status">
+                    <select id="status" name="status" class="m-in">
                         <option value="NEEDS-ACTION"{{if eq $d.Form.Status "NEEDS-ACTION"}} selected{{end}}>Needs action</option>
                         <option value="IN-PROCESS"{{if eq $d.Form.Status "IN-PROCESS"}} selected{{end}}>In progress</option>
                         <option value="COMPLETED"{{if eq $d.Form.Status "COMPLETED"}} selected{{end}}>Completed</option>
                         <option value="CANCELLED"{{if eq $d.Form.Status "CANCELLED"}} selected{{end}}>Cancelled</option>
                     </select>
                 </div>
-                <div class="form-field w-sm">
+                <div class="m-f w-sm">
                     <label for="start_date">Start date</label>
-                    <input id="start_date" type="date" name="start_date" value="{{$d.Form.StartDate}}">
+                    <input id="start_date" type="date" name="start_date" value="{{$d.Form.StartDate}}" class="m-in">
                 </div>
-                <div class="form-field w-sm">
+                <div class="m-f w-sm">
                     <label for="due_date">Due date</label>
-                    <input id="due_date" type="date" name="due_date" value="{{$d.Form.DueDate}}">
+                    <input id="due_date" type="date" name="due_date" value="{{$d.Form.DueDate}}" class="m-in">
                 </div>
-                <div class="form-field w-xs">
+                <div class="m-f w-xs">
                     <label for="due_time">Due time</label>
-                    <input id="due_time" type="time" name="due_time" value="{{$d.Form.DueTime}}">
+                    <input id="due_time" type="time" name="due_time" value="{{$d.Form.DueTime}}" class="m-in">
                 </div>
-                <div class="form-field w-xs">
+                <div class="m-f w-xs">
                     <label for="priority">Priority</label>
-                    <input id="priority" type="number" name="priority" min="0" max="9" value="{{$d.Form.Priority}}">
+                    <input id="priority" type="number" name="priority" min="0" max="9" value="{{$d.Form.Priority}}" class="m-in">
                 </div>
-                <div class="form-field w-xs">
+                <div class="m-f w-xs">
                     <label for="percent_complete">Percent complete</label>
-                    <input id="percent_complete" type="number" name="percent_complete" min="0" max="100" value="{{$d.Form.PercentComplete}}">
+                    <input id="percent_complete" type="number" name="percent_complete" min="0" max="100" value="{{$d.Form.PercentComplete}}" class="m-in">
                 </div>
-                <div class="form-field w-md">
+                <div class="m-f w-md">
                     <label for="categories">Categories</label>
-                    <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                    <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated" class="m-in">
                 </div>
-                <div class="form-field w-xl">
+                <div class="m-f w-xl">
                     <label for="related">Related to</label>
-                    <input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated">
-                    <p class="form-hint">A related UID ties this task to an event or a note in the same collection.</p>
+                    <input id="related" name="related" value="{{$d.Form.Related}}" placeholder="UIDs, comma-separated" class="m-in">
+                    <p class="m-hint">A related UID ties this task to an event or a note in the same collection.</p>
                 </div>
-                <div class="form-foot">
-                    <button type="submit">Save</button>
+                <div class="m-formfoot">
+                    <button type="submit" class="m-btn">Save</button>
                 </div>
             </form>
             {{if not $d.IsNew}}

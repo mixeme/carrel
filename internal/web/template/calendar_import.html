@@ -12,22 +12,22 @@
     <div class="m-acts">
         <form method="post" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-            <button type="submit" name="action" value="cancel_import" class="app-btn is-quiet">Cancel</button>
-            <button type="submit" name="action" value="confirm_import" class="app-btn is-primary">Import {{$d.OKCount}} {{if eq $d.OKCount 1}}entry{{else}}entries{{end}}</button>
+            <button type="submit" name="action" value="cancel_import" class="m-btn is-quiet">Cancel</button>
+            <button type="submit" name="action" value="confirm_import" class="m-btn is-primary">Import {{$d.OKCount}} {{if eq $d.OKCount 1}}entry{{else}}entries{{end}}</button>
         </form>
     </div>
     {{end}}
 {{template "m-headend"}}
 
 {{if not $d.HasPreview}}
-<form method="post" class="form" enctype="multipart/form-data" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
+<form method="post" class="m-form" enctype="multipart/form-data" action="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/import">
     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
-    <div class="form-field w-lg">
+    <div class="m-f w-lg">
         <label for="file">iCalendar file</label>
         <input id="file" type="file" name="file" accept=".ics,.ical,.zip,text/calendar" required>
     </div>
-    <div class="form-foot">
-        <button type="submit">Preview import</button>
+    <div class="m-formfoot">
+        <button type="submit" class="m-btn">Preview import</button>
     </div>
 </form>
 {{else}}

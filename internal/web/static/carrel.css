@@ -94,10 +94,8 @@
     --top: 52px;
     --pad: 20px;
     /* List row height (mockup frame 43: "38 or 32 px"). --row-lg also sizes
-       the avatar/icon column (2.6.G7) — the two were meant to scale
-       together, and five `min-height: 38px` literals bypassing this
-       variable entirely is why Compact rows toggled the mechanism without
-       changing anything on screen. */
+       the avatar/icon column (2.6.G7). Field and button height is the
+       three-row law in the form component (28/26/22), not this token. */
     --row-lg: 38px;
     --row-md: 26px;
     --row-sm: 22px;
@@ -556,171 +554,6 @@ a.src-label:hover {
     margin-top: 0;
 }
 
-/* Forms (wave 1.6 — mockups §6) */
-.form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 13px 16px;
-    align-items: flex-start;
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-}
-
-.form-field > label,
-.form-field > .form-label {
-    display: block;
-    margin-top: 0;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    color: var(--muted);
-    font-weight: 400;
-}
-
-.form-field input:not([type="checkbox"]):not([type="radio"]),
-.form-field select,
-.form-field textarea {
-    display: block;
-    width: 100%;
-    margin-top: 0;
-}
-
-.form-field textarea {
-    min-height: 5rem;
-    height: auto;
-    padding: 6px 9px;
-    resize: vertical;
-}
-
-.form-field > label.checkbox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: var(--row-lg);
-    font-size: 13px;
-    color: var(--ink);
-}
-
-.form-field > label.checkbox input {
-    display: inline-block;
-    width: auto;
-    height: auto;
-    margin: 0;
-}
-
-.form-field:has(> label.checkbox:only-child)::before,
-.form-field:has(> input[type="checkbox"]:only-child)::before {
-    content: "";
-    height: 16px;
-    flex: none;
-}
-
-.form-field.is-own-line::before {
-    display: none;
-}
-
-.form-hint {
-    margin: 0;
-    font-size: 11px;
-    color: var(--dusty);
-}
-
-.form-inline {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    min-width: 0;
-}
-
-.form-inline input:not([type="checkbox"]):not([type="radio"]),
-.form-inline select {
-    flex: 1;
-    min-width: 0;
-    margin-top: 0;
-}
-
-.form-inline .button,
-.form-inline button {
-    flex: none;
-    margin-top: 0;
-    height: var(--row-lg);
-    white-space: nowrap;
-}
-
-.w-xs {
-    width: 96px;
-    flex: 0 0 auto;
-}
-
-.w-sm {
-    width: 140px;
-    flex: 0 0 auto;
-}
-
-.w-md {
-    width: 210px;
-    flex: 0 0 auto;
-}
-
-.w-lg {
-    width: 300px;
-    flex: 0 0 auto;
-}
-
-.w-xl {
-    width: 420px;
-    flex: 0 0 auto;
-}
-
-.w-full {
-    flex: 1 1 100%;
-    max-width: 760px;
-}
-
-.form-fieldset {
-    flex: 1 1 100%;
-    border: 0;
-    border-top: 0.5px solid var(--hair);
-    padding: 12px 0 0;
-    margin: 2px 0 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 13px 16px;
-    align-items: flex-start;
-}
-
-.form-fieldset > legend {
-    flex: 1 1 100%;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dusty);
-    font-weight: 600;
-    margin: 0 0 -2px;
-    padding: 0;
-}
-
-.form-foot {
-    flex: 1 1 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    padding-top: 12px;
-    border-top: 0.5px solid var(--hair);
-    margin-top: 4px;
-}
-
-.form-foot button,
-.form-foot .button {
-    margin-top: 0;
-    height: var(--row-lg);
-}
-
 .form-danger {
     margin-top: 1rem;
     padding-top: 0.75rem;
@@ -738,7 +571,7 @@ a.src-label:hover {
     gap: 0.75rem;
 }
 
-.weekday-grid .form-field {
+.weekday-grid .m-f {
     width: auto;
 }
 
@@ -911,47 +744,6 @@ body.has-shell {
 
 .app-top-form button {
     margin-top: 0;
-}
-
-.app-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 26px;
-    padding: 0 10px;
-    border: 0.5px solid var(--card-border);
-    border-radius: 3px;
-    background: var(--paper);
-    font: inherit;
-    font-size: 12.5px;
-    color: var(--ink);
-    text-decoration: none;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.app-btn.is-primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--paper);
-}
-
-.app-btn.is-quiet {
-    background: transparent;
-    border-color: transparent;
-    color: var(--muted);
-    padding: 0 6px;
-}
-
-.app-btn.is-on {
-    background: var(--card);
-    font-weight: 600;
-}
-
-.app-btn.is-danger-solid {
-    background: var(--alert);
-    border-color: var(--alert);
-    color: #fff;
 }
 
 .app-shell {
@@ -1214,7 +1006,7 @@ body.has-shell {
     display: inline-flex;
 }
 
-.app-create-group .app-btn.is-primary {
+.app-create-group .m-btn.is-primary {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
@@ -1392,13 +1184,12 @@ input {
     display: block;
     width: 100%;
     box-sizing: border-box;
-    height: var(--row-lg);
     padding: 0 9px;
     border: 0.5px solid var(--card-border);
     border-radius: 3px;
-    /* font: inherit takes the face but also the 13 px of the shell; the field
-       text of the mockups is 12.5, and the colour has to be said or the field
-       gets the browser's black instead of the ink everything else is set in. */
+    /* Height is .m-in's: 28 in a form, 26 on a bar. An unclassed field
+       still takes the form row so a missed class is 28, not --row-lg. */
+    height: 28px;
     font: inherit;
     font-size: 12.5px;
     color: var(--ink);
@@ -1417,15 +1208,6 @@ textarea,
 button {
     appearance: none;
     -webkit-appearance: none;
-}
-
-:where(label, div):has(> input:not([type="checkbox"]):not([type="radio"])) > button,
-:where(label, div):has(> input:not([type="checkbox"]):not([type="radio"])) > .button,
-:where(label, div):has(> select) > button,
-:where(label, div):has(> select) > .button {
-    height: var(--row-lg);
-    margin-top: 0;
-    padding: 0 10px;
 }
 
 button {
@@ -1663,25 +1445,13 @@ pre.diagnostic {
 }
 
 /* 2.6.G13: every current use is one interactive element (a button, a task
-   checkbox) meant to sit inside its parent's own layout — a row, a bar-sort
+   checkbox) meant to sit inside its parent's own layout — a row, a segment
    group — not a form of its own with a top rule under it. The name already
    said "inline"; the rule just never matched it. display: contents drops the
    <form> out of the box model entirely so its one child lays out exactly as
    if it were a direct child of whatever it sits in. */
 .inline-form {
     display: contents;
-}
-
-label.checkbox {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    font-weight: normal;
-}
-
-label.checkbox input {
-    display: inline-block;
-    width: auto;
 }
 
 @media (max-width: 640px) {
@@ -1775,21 +1545,6 @@ label.checkbox input {
     margin-right: 12px;
     display: block;
     flex: none;
-}
-
-.dialog-foot {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    padding-top: 12px;
-    margin-top: 14px;
-    border-top: 0.5px solid var(--hair);
-}
-
-.dialog-foot button,
-.dialog-foot .app-btn {
-    margin-top: 0;
 }
 
 .import-stats {
@@ -1974,15 +1729,6 @@ label.checkbox input {
 
 .is-filtered-out {
     display: none;
-}
-
-/* 2.6.B2: the sort order lives as links, same control the task filter
-   segment already used, so the choice is a plain navigation rather than a
-   second mechanism the m-bar has to learn. */
-.bar-sort {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
 }
 
 /* 2.6.B6: the agenda's own From/To fields stay visible without JavaScript,
@@ -2998,7 +2744,7 @@ label.checkbox input {
     min-width: 12rem;
 }
 
-.find-poll .app-btn {
+.find-poll .m-btn {
     margin-left: auto;
 }
 
@@ -3202,7 +2948,6 @@ label.checkbox input {
     padding: 0.4rem 0.7rem;
 }
 
-.dup-buttons,
 .dup-merge {
     display: flex;
     flex-wrap: wrap;
@@ -3217,13 +2962,13 @@ button.danger {
     color: #fff;
 }
 
-.source-list .checkbox {
+.source-list .m-check {
     display: flex;
     gap: 0.4rem;
     align-items: baseline;
 }
 
-.source-list .checkbox span {
+.source-list .m-check span {
     display: flex;
     flex-direction: column;
 }
@@ -3470,18 +3215,8 @@ button.danger {
     outline-offset: 2px;
 }
 
-.collection-sheet .form-foot {
-    margin-top: 12px;
-}
-
 .collection-form {
     max-width: 36rem;
-}
-
-.app-btn.is-sm {
-    height: 22px;
-    padding: 0 8px;
-    font-size: 11.5px;
 }
 
 .app-user-menu {
@@ -3555,66 +3290,6 @@ button.danger {
     font-size: 12.5px;
     margin-bottom: 6px;
     padding-left: 0;
-}
-
-.theme-segment {
-    display: inline-flex;
-    align-items: center;
-    height: 23px;
-    /* .form-field is a column flexbox and .m-bar wraps onto more than one
-       line; align-items: stretch is the default cross-axis behaviour for
-       both, which would otherwise pull an inline-flex child out to its
-       container's full cross size — a segment control should size to its
-       buttons, not the space around it (2.6.G15). An explicit height pins
-       this regardless of which of the two contexts it is measured in. */
-    align-self: flex-start;
-    border: 0.5px solid var(--card-border);
-    border-radius: 3px;
-    overflow: hidden;
-    background: var(--bg);
-}
-
-.theme-segment--menu {
-    width: 100%;
-}
-
-.theme-segment-btn {
-    flex: 1;
-    border: 0;
-    background: transparent;
-    color: var(--muted);
-    font: inherit;
-    font-size: 11.5px;
-    height: 22px;
-    padding: 0 8px;
-    cursor: pointer;
-}
-
-.theme-segment-btn.is-on {
-    background: var(--card);
-    color: var(--ink);
-    font-weight: 600;
-}
-
-a.theme-segment-btn {
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* The segment in the user menu is a compact control in a dropdown; the one on
-   the Appearance screen is a form control and takes the size the mockups give
-   a segment inside a field, with a hairline between the choices. */
-.form-field .theme-segment:not(.theme-segment--menu) .theme-segment-btn {
-    height: 28px;
-    font-size: 12.5px;
-    padding: 0 11px;
-    border-right: 0.5px solid var(--hair);
-}
-
-.form-field .theme-segment:not(.theme-segment--menu) .theme-segment-btn:last-child {
-    border-right: 0;
 }
 
 .app-user-signout {
@@ -3952,13 +3627,13 @@ a.theme-segment-btn {
     /* §13: 44 px is the tap target, so the row-height tokens of 1.3 stop
        governing controls once the pointer is a finger. */
     button,
-    .app-btn,
+    .m-btn,
     input[type="submit"],
     input[type="button"] {
         min-height: 44px;
     }
 
-    .app-create-group .app-btn.is-primary {
+    .app-create-group .m-btn.is-primary {
         padding: 0 8px;
         font-size: 11.5px;
     }
@@ -4064,7 +3739,7 @@ a.theme-segment-btn {
     opacity: 0.75;
 }
 
-.app-btn .app-ico,
+.m-btn .app-ico,
 .app-search .app-ico {
     width: 13px;
     height: 13px;
@@ -4074,14 +3749,6 @@ a.theme-segment-btn {
 
 .app-search .app-ico {
     color: var(--dusty);
-}
-
-.app-btn {
-    margin: 0;
-}
-
-.app-btn.is-danger {
-    color: var(--alert);
 }
 
 .app-brand {
@@ -4249,7 +3916,7 @@ body.has-shell .app-shell.is-admin .admin-rail {
     gap: 7px;
 }
 
-.section-rail .rail-foot .app-btn {
+.section-rail .rail-foot .m-btn {
     align-self: flex-start;
 }
 
@@ -4302,17 +3969,10 @@ body:not(.has-shell) main {
     margin-bottom: 18px;
 }
 
-/* Scoped to the card so it outranks `.form-foot button`, which is one class
-   plus an element and was quietly winning the height with --row-lg. */
 .auth-card .auth-submit {
     width: 100%;
     justify-content: center;
     height: 30px;
-}
-
-.auth-card .form-foot {
-    padding-left: 0;
-    padding-right: 0;
 }
 
 @media (max-width: 640px) {
@@ -4349,7 +4009,7 @@ body:not(.has-shell) main {
     flex-wrap: wrap;
 }
 
-.install-check-form .form-field {
+.install-check-form .m-f {
     margin: 0;
 }
 

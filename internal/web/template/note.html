@@ -29,58 +29,58 @@
                  {{if $d.Edit}}data-note-editing{{end}}
                  {{if not $d.IsNew}}data-note-page-url="{{$readURL}}"{{end}}>
             {{if $d.Edit}}
-            <form method="post" class="form note-edit-form" data-note-form
+            <form method="post" class="m-form note-edit-form" data-note-form
                   action="{{if $d.IsNew}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new{{else}}{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}?edit=1{{end}}">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="save">
                 {{if not $d.IsNew}}<input type="hidden" name="etag" value="{{$d.ETag}}">{{end}}
                 <div class="note-editbar no-print">
-                    <button type="submit" class="app-btn is-primary">Save</button>
+                    <button type="submit" class="m-btn is-primary">Save</button>
                     {{if $d.IsNew}}
-                    <a class="app-btn is-quiet" href="{{$d.BackURL}}">Cancel</a>
+                    <a class="m-btn is-quiet" href="{{$d.BackURL}}">Cancel</a>
                     {{else}}
-                    <a class="app-btn is-quiet" href="{{$readURL}}">Cancel</a>
+                    <a class="m-btn is-quiet" href="{{$readURL}}">Cancel</a>
                     {{end}}
                     <span class="note-editbar-sep" aria-hidden="true"></span>
-                    <button type="button" class="app-btn is-quiet" data-note-markup="bold" title="Bold"><b>B</b></button>
-                    <button type="button" class="app-btn is-quiet" data-note-markup="italic" title="Italic"><i>I</i></button>
-                    <button type="button" class="app-btn is-quiet" data-note-markup="h2" title="Heading">H2</button>
-                    <button type="button" class="app-btn is-quiet" data-note-markup="list" title="List">• list</button>
-                    <button type="button" class="app-btn is-quiet" data-note-markup="task" title="Task">☐ task</button>
-                    <button type="button" class="app-btn is-quiet" data-note-markup="link" title="Link">Link</button>
+                    <button type="button" class="m-btn is-quiet" data-note-markup="bold" title="Bold"><b>B</b></button>
+                    <button type="button" class="m-btn is-quiet" data-note-markup="italic" title="Italic"><i>I</i></button>
+                    <button type="button" class="m-btn is-quiet" data-note-markup="h2" title="Heading">H2</button>
+                    <button type="button" class="m-btn is-quiet" data-note-markup="list" title="List">• list</button>
+                    <button type="button" class="m-btn is-quiet" data-note-markup="task" title="Task">☐ task</button>
+                    <button type="button" class="m-btn is-quiet" data-note-markup="link" title="Link">Link</button>
                     <span class="note-editbar-right">
                         <span class="hint note-draft-label">Draft in this window</span>
                         <span class="note-width-seg" data-note-width-seg role="group" aria-label="Text width">
                             <button type="button" class="is-on" data-note-width="full">Full width</button>
                             <button type="button" data-note-width="reading">Reading width</button>
                         </span>
-                        <button type="button" class="app-btn is-quiet" data-note-focus title="Focus">Focus</button>
+                        <button type="button" class="m-btn is-quiet" data-note-focus title="Focus">Focus</button>
                     </span>
                 </div>
                 <div class="note-doc-inner">
                     <div class="note-docbody">
-                        <div class="form-field w-full note-title-field">
+                        <div class="m-f w-full note-title-field">
                             <label class="sr-only" for="summary">Title</label>
-                            <input id="summary" class="note-title-input" name="summary" value="{{$d.Form.Summary}}" placeholder="optional">
+                            <input id="summary" class="note-title-input m-in" name="summary" value="{{$d.Form.Summary}}" placeholder="optional">
                         </div>
-                        <div class="form-field w-full note-text-field">
+                        <div class="m-f w-full note-text-field">
                             <label class="sr-only" for="description">Text</label>
-                            <textarea id="description" class="note-text-input" name="description" rows="16" autofocus data-note-body>{{$d.Form.Description}}</textarea>
+                            <textarea id="description" class="note-text-input m-in is-area" name="description" rows="16" autofocus data-note-body>{{$d.Form.Description}}</textarea>
                         </div>
                         <div class="note-edit-fields">
-                            <div class="form-field w-md">
+                            <div class="m-f w-md">
                                 <label for="date">Date</label>
-                                <input id="date" type="date" name="date" value="{{$d.Form.Date}}">
+                                <input id="date" type="date" name="date" value="{{$d.Form.Date}}" class="m-in">
                             </div>
-                            <div class="form-field w-xs">
+                            <div class="m-f w-xs">
                                 <label for="time">Time</label>
-                                <input id="time" type="time" name="time" value="{{$d.Form.Time}}">
+                                <input id="time" type="time" name="time" value="{{$d.Form.Time}}" class="m-in">
                             </div>
-                            <div class="form-field w-lg">
+                            <div class="m-f w-lg">
                                 <label for="categories">Tags</label>
-                                <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated">
+                                <input id="categories" name="categories" value="{{$d.Form.Categories}}" placeholder="comma-separated" class="m-in">
                             </div>
-                            <div class="form-field w-xl">
+                            <div class="m-f w-xl">
                                 <label for="related-query">Related to</label>
                                 <div class="related-picker" data-related-picker
                                      data-search-url="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/related-search"
@@ -95,13 +95,13 @@
                                             </span>
                                             {{end}}
                                         </div>
-                                        <input id="related-query" type="text" class="related-picker-query" data-related-query
+                                        <input id="related-query" type="text" class="related-picker-query m-in" data-related-query
                                                placeholder="Search events, tasks, notes, contacts…" autocomplete="off"
                                                role="combobox" aria-expanded="false" aria-controls="related-picker-menu">
                                     </div>
                                     <div class="related-picker-menu" id="related-picker-menu" data-related-menu hidden role="listbox"></div>
                                 </div>
-                                <p class="form-hint">Link this note to an event, task, note or contact. You can enter a UID by hand from the list.</p>
+                                <p class="m-hint">Link this note to an event, task, note or contact. You can enter a UID by hand from the list.</p>
                             </div>
                         </div>
                     </div>
@@ -119,16 +119,16 @@
             {{$sw := $d.Collection.Color}}{{if not $sw}}{{$sw = "var(--accent)"}}{{end}}
             {{template "m-head" (head "Doc" true "Subtitle" $sub "Mono" $d.DateLabel "Swatch" $sw)}}
                 <div class="m-acts">
-                    {{if not $d.ReadOnly}}<a class="app-btn is-primary" href="{{$readURL}}?edit=1">Edit</a>{{end}}
-                    {{if not $d.IsNew}}<a class="app-btn" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/export">Export Markdown</a>{{end}}
-                    <button type="button" class="app-btn is-quiet" data-print>Print</button>
-                    <button type="button" class="app-btn is-quiet" data-note-source-toggle>Source</button>
+                    {{if not $d.ReadOnly}}<a class="m-btn is-primary" href="{{$readURL}}?edit=1">Edit</a>{{end}}
+                    {{if not $d.IsNew}}<a class="m-btn" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/export">Export Markdown</a>{{end}}
+                    <button type="button" class="m-btn is-quiet" data-print>Print</button>
+                    <button type="button" class="m-btn is-quiet" data-note-source-toggle>Source</button>
                     <span class="note-width-seg" data-note-width-seg role="group" aria-label="Text width">
                         <button type="button" class="is-on" data-note-width="full">Full width</button>
                         <button type="button" data-note-width="reading">Reading width</button>
                     </span>
-                    <button type="button" class="app-btn is-quiet" data-note-meta-toggle title="Hide the side column">Panel</button>
-                    {{if $readURL}}<button type="button" class="app-btn is-quiet" data-copy-url="{{$readURL}}">Copy link</button>{{end}}
+                    <button type="button" class="m-btn is-quiet" data-note-meta-toggle title="Hide the side column">Panel</button>
+                    {{if $readURL}}<button type="button" class="m-btn is-quiet" data-copy-url="{{$readURL}}">Copy link</button>{{end}}
                 </div>
             {{template "m-headend"}}
             <div class="note-doc-inner">
@@ -169,7 +169,7 @@
                     <div class="note-meta-block note-meta-danger">
                         <form method="post" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}" class="danger-form">
                             <input type="hidden" name="csrf_token" value="{{.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="etag" value="{{$d.ETag}}">
-                            <button type="submit" class="app-btn is-danger">Delete note</button>
+                            <button type="submit" class="m-btn is-danger">Delete note</button>
                         </form>
                     </div>
                     {{end}}

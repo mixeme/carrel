@@ -9,102 +9,102 @@
 
     <section class="subsection">
         <h2 class="subsection-h2">Global settings</h2>
-        <form method="post" class="form" action="{{.Base}}/admin/settings">
+        <form method="post" class="m-form" action="{{.Base}}/admin/settings">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="save_settings">
 
-            <div class="form-field w-sm">
+            <div class="m-f w-sm">
                 <label for="invite-ttl">Invitation lifetime (hours)</label>
                 <input id="invite-ttl" name="invite_ttl_hours" type="number" min="1"
-                       value="{{$d.InviteTTLHours}}">
+                       value="{{$d.InviteTTLHours}}" class="m-in">
             </div>
 
-            <div class="form-field w-sm">
+            <div class="m-f w-sm">
                 <label for="session-idle">Session idle timeout (hours)</label>
                 <input id="session-idle" name="session_idle_hours" type="number" min="1"
-                       value="{{$d.SessionIdleHours}}">
+                       value="{{$d.SessionIdleHours}}" class="m-in">
             </div>
 
-            <div class="form-field w-sm">
+            <div class="m-f w-sm">
                 <label for="session-absolute">Session absolute lifetime (days)</label>
                 <input id="session-absolute" name="session_absolute_days" type="number" min="1"
-                       value="{{$d.SessionAbsoluteDays}}">
+                       value="{{$d.SessionAbsoluteDays}}" class="m-in">
             </div>
 
-            <div class="form-foot">
-                <button type="submit">Save global settings</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Save global settings</button>
             </div>
         </form>
     </section>
 
     <section class="subsection">
         <h2 class="subsection-h2">Mail settings</h2>
-        <form method="post" class="form" action="{{.Base}}/admin/settings">
+        <form method="post" class="m-form" action="{{.Base}}/admin/settings">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="save_smtp">
 
-            <div class="form-field w-lg">
+            <div class="m-f w-lg">
                 <label for="smtp-host">Host</label>
                 <input id="smtp-host" name="smtp_host" type="text"
-                       value="{{$d.Settings.SMTP.Host}}">
+                       value="{{$d.Settings.SMTP.Host}}" class="m-in">
             </div>
 
-            <div class="form-field w-xs">
+            <div class="m-f w-xs">
                 <label for="smtp-port">Port</label>
                 <input id="smtp-port" name="smtp_port" type="number" min="1" max="65535"
-                       value="{{if $d.Settings.SMTP.Port}}{{$d.Settings.SMTP.Port}}{{end}}">
+                       value="{{if $d.Settings.SMTP.Port}}{{$d.Settings.SMTP.Port}}{{end}}" class="m-in">
             </div>
 
-            <div class="form-field w-sm">
+            <div class="m-f w-sm">
                 <label for="smtp-tls">Encryption</label>
-                <select id="smtp-tls" name="smtp_tls">
+                <select id="smtp-tls" name="smtp_tls" class="m-in">
                     <option value="starttls" {{if eq $d.Settings.SMTP.TLS "starttls"}}selected{{end}}>STARTTLS</option>
                     <option value="implicit" {{if eq $d.Settings.SMTP.TLS "implicit"}}selected{{end}}>Implicit TLS</option>
                     <option value="none" {{if eq $d.Settings.SMTP.TLS "none"}}selected{{end}}>None (local relay)</option>
                 </select>
             </div>
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="smtp-user">Username</label>
                 <input id="smtp-user" name="smtp_username" type="text"
-                       value="{{$d.Settings.SMTP.Username}}" autocomplete="off">
+                       value="{{$d.Settings.SMTP.Username}}" autocomplete="off" class="m-in">
             </div>
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="smtp-pass">Password</label>
                 <input id="smtp-pass" name="smtp_password" type="password"
-                       autocomplete="new-password">
-                <p class="form-hint">Leave blank to keep the current password.</p>
+                       autocomplete="new-password" class="m-in">
+                <p class="m-hint">Leave blank to keep the current password.</p>
             </div>
 
-            <div class="form-field w-lg">
+            <div class="m-f w-lg">
                 <label for="smtp-from">From address</label>
                 <input id="smtp-from" name="smtp_from" type="email"
-                       value="{{$d.Settings.SMTP.FromAddress}}">
+                       value="{{$d.Settings.SMTP.FromAddress}}" class="m-in">
             </div>
 
-            <div class="form-field w-md">
+            <div class="m-f w-md">
                 <label for="smtp-from-name">From name</label>
                 <input id="smtp-from-name" name="smtp_from_name" type="text"
-                       value="{{$d.Settings.SMTP.FromName}}">
+                       value="{{$d.Settings.SMTP.FromName}}" class="m-in">
             </div>
 
-            <div class="form-foot">
-                <button type="submit">Save mail settings</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Save mail settings</button>
             </div>
         </form>
 
-        <form method="post" class="form inline-form" action="{{.Base}}/admin/settings">
+        <form method="post" class="m-form inline-form" action="{{.Base}}/admin/settings">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="test_smtp">
 
-            <div class="form-field w-lg">
+            <div class="m-f w-lg">
                 <label for="test-email">Send test message to</label>
-                <input id="test-email" name="test_email" type="email" required>
+                <input id="test-email" name="test_email" type="email" required class="m-in">
             </div>
 
-            <div class="form-foot">
-                <button type="submit">Send test email</button>
+            <div class="m-formfoot">
+                <button type="submit" class="m-btn">Send test email</button>
             </div>
         </form>
 

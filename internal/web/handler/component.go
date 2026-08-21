@@ -167,7 +167,78 @@ type Group struct {
 	Num   string
 }
 
-func buildHead(pairs ...any) (Head, error)       { return typedDict[Head](pairs...) }
+// Form is the input to m-form: a real <form> laid out as the mockups'
+// field row. Class is a screen-owned marker (contact-form, note-edit-form);
+// Attrs is everything the tag needs besides method/action/class (enctype,
+// hx-*, autocomplete). Tight drops the top padding (.is-tight).
+type Form struct {
+	Method string
+	Action string
+	Class  string
+	Attrs  template.HTML
+	Tight  bool
+}
+
+// Field is the input to m-f, one labelled cell of a form. Width is a
+// content-width token (xs/sm/md/lg/xl/full) emitted as a complete class
+// so the allow-list never sees interpolation inside quotes. OwnLine
+// skips the empty label spacer — the cell occupies the row alone.
+type Field struct {
+	Width   string
+	OwnLine bool
+	Class   string
+}
+
+// WidthClass is the mockup width token (w-xs … w-full).
+func (f Field) WidthClass() string {
+	switch f.Width {
+	case "xs":
+		return "w-xs"
+	case "sm":
+		return "w-sm"
+	case "md":
+		return "w-md"
+	case "lg":
+		return "w-lg"
+	case "xl":
+		return "w-xl"
+	case "full":
+		return "w-full"
+	default:
+		return ""
+	}
+}
+
+// FormFoot is the input to m-formfoot, the action row under a form.
+type FormFoot struct {
+	Class string
+}
+
+// Seg is the input to m-seg, the joined segment control. Menu is the
+// compact full-width variant in the user dropdown; Second retreats
+// under ⋯ with the rest of the bar.
+type Seg struct {
+	Menu   bool
+	Second bool
+	Class  string
+	Attrs  template.HTML
+}
+
+// FieldSet is the input to m-fset, a labelled group of fields.
+type FieldSet struct {
+	Class string
+}
+
+func buildHead(pairs ...any) (Head, error)   { return typedDict[Head](pairs...) }
+func buildForm(pairs ...any) (Form, error)   { return typedDict[Form](pairs...) }
+func buildField(pairs ...any) (Field, error) { return typedDict[Field](pairs...) }
+func buildFormFoot(pairs ...any) (FormFoot, error) {
+	return typedDict[FormFoot](pairs...)
+}
+func buildSeg(pairs ...any) (Seg, error) { return typedDict[Seg](pairs...) }
+func buildFieldSet(pairs ...any) (FieldSet, error) {
+	return typedDict[FieldSet](pairs...)
+}
 func buildList(pairs ...any) (List, error)       { return typedDict[List](pairs...) }
 func buildRow(pairs ...any) (Row, error)         { return typedDict[Row](pairs...) }
 func buildGroup(pairs ...any) (Group, error)     { return typedDict[Group](pairs...) }

@@ -45,7 +45,7 @@ var unstyledClassAllowList = map[string]string{
 	"attachments":      "modifier on .other-props, which carries the rule",
 	"source-block":     "modifier on .detail-section, which carries the rule",
 	"contact-readonly": "state modifier read by carrel.js; layout is unaffected by it",
-	"danger-form":      "modifier on .form; only the destructive action inside needs marking",
+	"danger-form":      "modifier on .m-form; only the destructive action inside needs marking",
 	"notice":           "modifier on .message; only .message.error diverges from the base look",
 
 	// Structural containers with no visual rule of their own — real content
@@ -66,9 +66,9 @@ var unstyledClassAllowList = map[string]string{
 	"note-text-field":    "field-identity marker for carrel.js, not a drawn box",
 	"note-title-field":   "field-identity marker for carrel.js, not a drawn box",
 
-	// The column-picker toggle is an .app-btn first; this second class is
+	// The column-picker toggle is an .m-btn first; this second class is
 	// only how carrel.js finds the one that opens the columns menu.
-	"column-picker-toggle": "JS hook only; .app-btn carries the look",
+	"column-picker-toggle": "JS hook only; .m-btn carries the look",
 }
 
 // extractClassAttrs finds every class="..." value in a template, treating

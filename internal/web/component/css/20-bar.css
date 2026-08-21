@@ -78,15 +78,14 @@
     overflow: hidden;
 }
 
-.m-bar > .bar-sort,
-.m-bar > .theme-segment,
+.m-bar > .m-seg,
 .m-bar > .column-picker,
 .m-bar > .files-view-toggle,
 .m-bar > .m-right,
 .m-bar > .m-sep,
 .m-bar > .m-range,
 .m-bar > .form-inline,
-.m-bar > .form-field,
+.m-bar > .m-f,
 .m-bar > form {
     flex: none;
 }
@@ -96,7 +95,7 @@
     border-bottom: 0.5px solid var(--rule);
 }
 
-.m-sel .app-btn {
+.m-sel .m-btn {
     background: var(--paper);
 }
 
@@ -131,10 +130,10 @@
         display: none;
     }
     /* Панель выделения теряет подпись, не действие. */
-    .m-sel .app-btn > .lbl {
+    .m-sel .m-btn > .lbl {
         display: none;
     }
-    .m-sel .app-btn:has(> .lbl) {
+    .m-sel .m-btn:has(> .lbl) {
         padding: 0 9px;
     }
     .m-bar:has(.is-2nd) > .m-more {

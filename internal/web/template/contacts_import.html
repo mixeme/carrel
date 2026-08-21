@@ -13,13 +13,13 @@
         <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="cancel_import">
-            <button type="submit" class="app-btn is-quiet">Cancel</button>
+            <button type="submit" class="m-btn is-quiet">Cancel</button>
         </form>
         {{if gt $d.OKCount 0}}
         <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="confirm_import">
-            <button type="submit" class="app-btn is-primary">Import {{$d.OKCount}} contact(s)</button>
+            <button type="submit" class="m-btn is-primary">Import {{$d.OKCount}} contact(s)</button>
         </form>
         {{end}}
     </div>
@@ -27,15 +27,15 @@
 {{template "m-headend"}}
 
 {{if not $d.HasPreview}}
-<form method="post" class="form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import" enctype="multipart/form-data">
+<form method="post" class="m-form" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{{.CSRF}}">
     <input type="hidden" name="action" value="preview_import">
-    <div class="form-field w-lg">
+    <div class="m-f w-lg">
         <label for="file">File</label>
         <input id="file" type="file" name="file" accept=".vcf,.zip,text/vcard,application/zip" required>
     </div>
-    <div class="form-foot">
-        <button type="submit">Preview</button>
+    <div class="m-formfoot">
+        <button type="submit" class="m-btn">Preview</button>
     </div>
 </form>
 <p class="message">Upload a standard <code>.vcf</code> (one or many cards) or a <code>.zip</code> of <code>.vcf</code> files.

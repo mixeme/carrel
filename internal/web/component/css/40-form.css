@@ -1,0 +1,485 @@
+/* Поля, кнопки, формы — макеты §6 (.m-form, .m-f, .m-in, .m-check, .m-seg,
+   .m-btn, .m-formfoot).
+
+   Высоты ровно три, и выбирает их не разметка экрана, а вид строки:
+     28 px — строка с полями: форма, карточка, любой ряд, где есть поле;
+     26 px — панель инструментов: шапка раздела, панель выделения, подвал;
+     22 px — строка списка или таблицы, где полей нет вовсе.
+   Всё, что стоит в строке, берёт её высоту: поле, кнопка, переключатель,
+   флажок. Прежде высота была только у поля, а флажок брал её у текста.
+
+   Правила идут от частного к общему, и последним стоит самое общее: ряд
+   с полем — 28 px, чем бы он ни был. Стрелка у списка (.m-in.is-pick /
+   select.m-in) рисуется системой: разметка только называет поле списком. */
+
+.m-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 10px;
+    border: 0.5px solid var(--card-border);
+    border-radius: 3px;
+    background: var(--paper);
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--ink);
+    text-decoration: none;
+    cursor: pointer;
+    margin: 0;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.m-btn .app-ico,
+.m-btn svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex: none;
+    opacity: 1;
+}
+
+.m-btn.is-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--paper);
+}
+
+.m-btn.is-quiet {
+    background: transparent;
+    border-color: transparent;
+    color: var(--muted);
+    padding: 0 6px;
+}
+
+.m-btn.is-on {
+    background: var(--card);
+    font-weight: 600;
+}
+
+.m-btn.is-danger {
+    color: var(--alert);
+    border-color: var(--card-border);
+}
+
+.m-btn.is-danger-solid {
+    background: var(--alert);
+    border-color: var(--alert);
+    color: #fff;
+}
+
+.m-btn.is-sm {
+    height: 22px;
+    font-size: 11.5px;
+    padding: 0 7px;
+}
+
+.m-seg {
+    display: inline-flex;
+    align-items: stretch;
+    align-self: flex-start;
+    border: 0.5px solid var(--card-border);
+    border-radius: 3px;
+    overflow: hidden;
+    height: 26px;
+    background: var(--bg);
+    flex: none;
+}
+
+.m-seg > a,
+.m-seg > button,
+.m-seg > span {
+    padding: 0 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--muted);
+    border: 0;
+    border-right: 0.5px solid var(--hair);
+    border-radius: 0;
+    background: transparent;
+    text-decoration: none;
+    cursor: pointer;
+    margin: 0;
+    height: 100%;
+    white-space: nowrap;
+}
+
+.m-seg > :last-child {
+    border-right: 0;
+}
+
+.m-seg > .is-on {
+    background: var(--card);
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.m-seg > .is-dim {
+    color: var(--dusty);
+    opacity: 0.5;
+}
+
+.m-seg.is-menu {
+    width: 100%;
+    height: auto;
+}
+
+.m-seg.is-menu > a,
+.m-seg.is-menu > button {
+    flex: 1;
+    height: 22px;
+    font-size: 11.5px;
+    padding: 0 8px;
+}
+
+.m-in {
+    height: 28px;
+    border: 0.5px solid var(--card-border);
+    border-radius: 3px;
+    background: var(--paper);
+    padding: 0 9px;
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+input.m-in,
+select.m-in,
+textarea.m-in {
+    display: block;
+}
+
+.m-in::placeholder {
+    color: var(--dusty);
+}
+
+.m-in.is-ph {
+    color: var(--dusty);
+}
+
+/* Поле-список. Стрелка — часть поля, не значок в разметке: без неё
+   выпадающий список ничем не отличается от строки ввода. На <select>
+   псевдоэлемент не рисуется, поэтому стрелка — фон; на span/div — ::after. */
+.m-in.is-pick {
+    padding-right: 26px;
+    position: relative;
+}
+
+.m-in.is-pick::after {
+    content: "";
+    position: absolute;
+    right: 9px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    margin-top: -4px;
+    border-right: 1.3px solid currentColor;
+    border-bottom: 1.3px solid currentColor;
+    transform: rotate(45deg);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+select.m-in {
+    padding-right: 26px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M1.5 2.5L4 5l2.5-2.5' fill='none' stroke='%238b8571' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 9px center;
+}
+
+.m-in:focus,
+.m-in.is-focus {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+}
+
+.m-in.is-area,
+textarea.m-in {
+    height: auto;
+    min-height: 76px;
+    align-items: flex-start;
+    padding: 7px 9px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.m-in.is-mono {
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+}
+
+.m-check {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--ink);
+    margin: 0;
+}
+
+.m-check input {
+    display: inline-block;
+    width: auto;
+    height: auto;
+    margin: 0;
+}
+
+.m-f > .m-check:only-child,
+.m-f > label + .m-check:last-child,
+.m-form > .m-check,
+.m-fset > .m-check {
+    min-height: 28px;
+}
+
+.m-f:has(> .m-check:only-child)::before,
+.m-f:has(> .m-btn:only-child)::before,
+.m-f:has(> .m-seg:only-child)::before {
+    content: "";
+    height: 16px;
+    flex: none;
+}
+
+.m-f.is-own-line::before {
+    display: none;
+}
+
+.m-form .m-btn,
+.m-fset .m-btn,
+.m-f .m-btn {
+    height: 28px;
+}
+
+.m-f > .m-seg,
+.m-form > .m-seg,
+.m-fset > .m-seg {
+    height: 28px;
+}
+
+:where(div, span, label, p):has(> .m-in) > .m-btn,
+:where(div, span, label, p):has(> .m-in) > .m-seg,
+:where(div, span, label, p):has(> .m-f) > .m-btn,
+:where(div, span, label, p):has(> .m-f) > .m-seg {
+    height: 28px;
+}
+
+:where(div, span, label, p):has(> .m-f) > .m-check,
+:where(div, span, label, p):has(> .m-in) > .m-check {
+    min-height: 28px;
+}
+
+.m-bar .m-btn,
+.m-head .m-acts .m-btn,
+.m-formfoot .m-btn,
+.app-top .m-btn {
+    height: 26px;
+}
+
+.m-bar .m-in,
+.m-head .m-acts .m-in {
+    height: 26px;
+}
+
+.m-bar .m-seg,
+.m-head .m-acts .m-seg {
+    height: 26px;
+}
+
+.m-bar .m-check {
+    min-height: 26px;
+    white-space: nowrap;
+}
+
+.data td .m-btn,
+.files-table td .m-btn {
+    height: 22px;
+}
+
+.m-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px 16px;
+    padding: 14px var(--pad);
+    align-items: flex-start;
+    margin: 0;
+}
+
+.m-form.is-tight {
+    padding-top: 4px;
+}
+
+.app-dialog .m-form,
+.auth-card .m-form,
+.settings-panel .m-form,
+.admin-panel .m-form,
+.collection-sheet .m-form {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.m-f {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.m-f > label,
+.m-lbl {
+    display: block;
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    font-weight: 400;
+    text-transform: none;
+}
+
+.m-f .m-hint,
+.m-hint {
+    margin: 0;
+    font-size: 11px;
+    color: var(--dusty);
+}
+
+.m-f .m-in,
+.m-f select,
+.m-f textarea {
+    width: 100%;
+}
+
+.w-xs { width: 96px; flex: 0 0 auto; }
+.w-sm { width: 140px; flex: 0 0 auto; }
+.w-md { width: 210px; flex: 0 0 auto; }
+.w-lg { width: 300px; flex: 0 0 auto; }
+.w-xl { width: 420px; flex: 0 0 auto; }
+.w-full { flex: 1 1 100%; max-width: 760px; }
+
+.form-inline {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
+}
+
+.form-inline .m-in,
+.form-inline input:not([type="checkbox"]):not([type="radio"]),
+.form-inline select {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+}
+
+.form-inline .m-btn {
+    flex: none;
+}
+
+.m-fset {
+    flex: 1 1 100%;
+    border: 0;
+    border-top: 0.5px solid var(--hair);
+    padding: 12px 0 0;
+    margin: 2px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px 16px;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.m-fset > legend,
+.m-fset > .m-rubric {
+    flex: 1 1 100%;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    font-weight: 600;
+    margin: 0 0 -2px;
+    padding: 0;
+}
+
+.m-formfoot {
+    flex: 1 1 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding: 12px var(--pad) 16px;
+    border-top: 0.5px solid var(--hair);
+    margin: 4px 0 0;
+}
+
+.app-dialog .m-formfoot,
+.auth-card .m-formfoot,
+.settings-panel .m-formfoot,
+.admin-panel .m-formfoot,
+.collection-sheet .m-formfoot {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.m-sel .m-btn {
+    background: var(--paper);
+}
+
+.m-sel .m-btn.is-off {
+    color: var(--dusty);
+    border-color: var(--hair);
+}
+
+.m-bar > .m-in,
+.m-bar > .list-filter .m-in,
+.m-bar > .files-filter .m-in {
+    min-width: 88px;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 12rem;
+    max-width: 100%;
+    flex: 0 1 auto;
+}
+
+.m-bar > .m-seg,
+.m-bar > .m-btn,
+.m-bar > .m-check,
+.m-bar > .form-inline,
+.m-bar > .m-f,
+.m-bar > form {
+    flex: none;
+}
+
+@container (max-width: 800px) {
+    .m-sel .m-btn > .lbl {
+        display: none;
+    }
+
+    .m-sel .m-btn:has(> .lbl) {
+        padding: 0 9px;
+    }
+}
+
+@media (max-width: 640px) {
+    .m-btn,
+    .m-in {
+        min-height: 44px;
+    }
+
+    .m-btn.is-sm {
+        min-height: 44px;
+    }
+}

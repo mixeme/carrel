@@ -6,12 +6,12 @@
             <form method="post" action="{{.Base}}/admin/install" class="inline-form install-check-form">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="run_install_check">
-                <div class="form-field w-xl">
+                <div class="m-f w-xl">
                     <label class="sr-only" for="public-url">Public address</label>
-                    <input id="public-url" name="public_url" type="url" required class="mono"
+                    <input id="public-url" name="public_url" type="url" required class="mono m-in"
                            value="{{$d.PublicURL}}" placeholder="https://carrel.example" autocapitalize="none" spellcheck="false">
                 </div>
-                <button type="submit" class="app-btn is-primary">Run the check</button>
+                <button type="submit" class="m-btn is-primary">Run the check</button>
             </form>
         </div>
     {{template "m-headend"}}
