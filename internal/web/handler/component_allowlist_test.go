@@ -34,6 +34,7 @@ var (
 // actions this screen has, but how they line up is the header's business.
 var slotClasses = map[string]string{
 	"m-acts": "the screen's own actions, laid out by m-head",
+	"m-bar3": "the collection stripe; the row names the colour, the component names the size",
 }
 
 // standaloneUse names, per class, the screens allowed to use a primitive on
@@ -210,6 +211,31 @@ var retiredHeadNames = []string{
 }
 
 func TestRetiredHeadNamesStayGone(t *testing.T) {
+	assertRetiredClassesGone(t, retiredHeadNames, "m-head / m-h1 / m-sub / m-acts")
+}
+
+// A screen that writes one of these is inventing a fourteenth row family
+// again. .src-row is the rail (stage 5); the files table is still a table
+// (stage 0 leftover), not .m-row--file.
+var retiredRowNames = []string{
+	"list-row", "list-row--contact", "list-row--agenda", "list-row--task",
+	"list-row--note", "list-row--find", "list-row--contact-find",
+	"contact-row", "contact-row-link",
+	"task-row", "task-title", "task-meta",
+	"note-row", "note-link", "note-excerpt",
+	"find-row", "find-row-time", "find-row-body", "find-row-match",
+	"find-row-kind", "find-row-source", "find-rows",
+	"agenda-event-row", "agenda-events", "agenda-time",
+	"list-group", "list-rubric", "list-num",
+	"list-title", "list-sub", "list-detail", "list-time", "list-end", "list-bar",
+}
+
+func TestRetiredRowNamesStayGone(t *testing.T) {
+	assertRetiredClassesGone(t, retiredRowNames, "m-list / m-row / m-group / m-rubric")
+}
+
+func assertRetiredClassesGone(t *testing.T, classes []string, instead string) {
+	t.Helper()
 	templateFS, err := fs.Sub(web.TemplateFS, "template")
 	if err != nil {
 		t.Fatalf("template FS: %v", err)
@@ -224,10 +250,9 @@ func TestRetiredHeadNamesStayGone(t *testing.T) {
 			t.Fatalf("read %s: %v", name, err)
 		}
 		body := string(b)
-		for _, class := range retiredHeadNames {
+		for _, class := range classes {
 			if writesClass(body, class) {
-				t.Errorf("%s still writes retired header class %q; use m-head / m-h1 / m-sub / m-acts",
-					name, class)
+				t.Errorf("%s still writes retired class %q; use %s", name, class, instead)
 			}
 		}
 	}

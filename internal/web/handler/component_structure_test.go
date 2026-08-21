@@ -115,7 +115,7 @@ func checkShellScreensAssembleInOrder(t *testing.T, a *app) {
 		if headIdx < 0 {
 			continue // a screen with no list/detail content of its own — nothing to be first before
 		}
-		for _, marker := range []string{`<table`, `<ul class="list`, `id="find-panel"`} {
+		for _, marker := range []string{`<table`, `<ul class="m-list`, `id="find-panel"`} {
 			if ci := strings.Index(body, marker); ci >= 0 && ci < headIdx {
 				t.Errorf("GET %s renders %s before its m-head; the header is meant to be "+
 					"the first thing in the work area", path, marker)

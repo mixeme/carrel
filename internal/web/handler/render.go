@@ -74,6 +74,9 @@ func LoadTemplates(pages, components fs.FS) (*Templates, error) {
 // 2.6.E3 renders every screen so that failure shows up at once.
 var templateFuncs = template.FuncMap{
 	"head":             buildHead,
+	"list":             buildList,
+	"row":              buildRow,
+	"group":            buildGroup,
 	"bar":              buildBar,
 	"barForm":          buildBarForm,
 	"right":            buildRight,

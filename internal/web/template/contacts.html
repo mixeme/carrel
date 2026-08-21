@@ -84,22 +84,22 @@
                     <span data-bar-count>{{len $d.Contacts}} {{if eq (len $d.Contacts) 1}}item{{else}}items{{end}}</span>
                 {{template "m-rightend"}}
             {{template "m-barend"}}
-            <ul class="list contact-list" id="contact-list" data-columns-root="contacts">
+            {{template "m-list" (list "Attrs" (safeHTML "id=\"contact-list\" data-columns-root=\"contacts\""))}}
             {{range $d.Contacts}}
-                <li class="list-row list-row--contact contact-row">
-                    <span class="list-bar" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
-                    <a class="contact-row-link detail-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
-                       hx-get="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
-                       hx-target="#app-details" hx-swap="innerHTML">
-                        <img class="list-avatar contact-avatar print-photo" data-col="photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
-                        <span class="list-title" data-col="name"><strong>{{.DisplayName}}</strong></span>
-                        <span class="list-sub" data-col="phone">{{.Phones}}</span>
-                        <span class="list-sub" data-col="email">{{.Emails}}</span>
-                    </a>
-                    <span class="list-end" data-col="badges">{{if .Linked}}<a class="dup-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}</span>
-                </li>
+                {{template "m-row" (row "Kind" "contact")}}
+                    <span class="m-bar3" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <img class="list-avatar contact-avatar print-photo" data-col="photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
+                    <span class="t" data-col="name">
+                        <a class="detail-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
+                           hx-get="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
+                           hx-target="#app-details" hx-swap="innerHTML"><strong>{{.DisplayName}}</strong></a>
+                        {{if .Linked}}<a class="dup-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}
+                    </span>
+                    <span class="s mono" data-col="phone">{{.Phones}}</span>
+                    <span class="s" data-col="email">{{.Emails}}</span>
+                {{template "m-rowend"}}
             {{end}}
-            </ul>
+            {{template "m-listend"}}
             {{if $d.HasMore}}
             <div class="no-print" hx-get="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/page?offset={{$d.NextOffset}}"
                  hx-trigger="revealed"

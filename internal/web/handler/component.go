@@ -118,7 +118,59 @@ type ImportExportMenu struct {
 	ExportURL string
 }
 
+// List is the input to m-list, the column of rows. Attrs is the handful of
+// identity attributes the screen owns (id, data-columns-root) — the list
+// itself does not.
+type List struct {
+	Attrs template.HTML
+}
+
+// Row is the input to m-row. Kind is the mockup modifier (contact, agenda,
+// task, note, find, file) and becomes m-row--Kind; a typo here is an
+// unknown class, not a silent fallback. Class is JS/state markers the
+// screen owns (is-contact, is-merged, is-task) — not a second name for
+// the row.
+type Row struct {
+	Kind    string
+	On      bool
+	Done    bool
+	Overdue bool
+	Class   string
+}
+
+// Mod is the mockup modifier class (m-row--contact, …). Emitted as a
+// complete token so the class attribute never interpolates Kind inside
+// quotes, which would break the allow-list's class="…" scan.
+func (r Row) Mod() string {
+	switch r.Kind {
+	case "contact":
+		return "m-row--contact"
+	case "agenda":
+		return "m-row--agenda"
+	case "task":
+		return "m-row--task"
+	case "note":
+		return "m-row--note"
+	case "find":
+		return "m-row--find"
+	case "file":
+		return "m-row--file"
+	default:
+		return ""
+	}
+}
+
+// Group is the input to m-group: the rubric above a run of rows, and
+// the count on the right when the screen has one.
+type Group struct {
+	Label string
+	Num   string
+}
+
 func buildHead(pairs ...any) (Head, error)       { return typedDict[Head](pairs...) }
+func buildList(pairs ...any) (List, error)       { return typedDict[List](pairs...) }
+func buildRow(pairs ...any) (Row, error)         { return typedDict[Row](pairs...) }
+func buildGroup(pairs ...any) (Group, error)     { return typedDict[Group](pairs...) }
 func buildBar(pairs ...any) (Bar, error)         { return typedDict[Bar](pairs...) }
 func buildBarForm(pairs ...any) (BarForm, error) { return typedDict[BarForm](pairs...) }
 func buildRight(pairs ...any) (Right, error)     { return typedDict[Right](pairs...) }

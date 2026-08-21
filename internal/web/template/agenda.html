@@ -113,23 +113,19 @@
             {{if $d.Empty}}<p class="hint page-hint">No events in this date range.</p>{{end}}
             {{range $d.Days}}
             <section class="agenda-day" data-date="{{.Date}}" data-filter-group>
-                <div class="list-group">
-                    <h2 class="list-rubric">{{.Label}}</h2>
-                </div>
-                <ul class="list agenda-events">
+                {{template "m-group" (group "Label" .Label "Num" (print (len .Events)))}}
+                {{template "m-list" (list)}}
                 {{range .Events}}
-                    <li class="list-row list-row--agenda agenda-event-row">
-                        <span class="list-bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
-                        <span class="agenda-time list-time">{{.TimeLabel}}{{if .TimeZoneLabel}} <span class="tz-label">{{.TimeZoneLabel}}</span>{{end}}</span>
-                        <a class="detail-link" href="{{$.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
+                    {{template "m-row" (row "Kind" "agenda")}}
+                        <span class="m-bar3" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                        <span class="mono">{{.TimeLabel}}{{if .TimeZoneLabel}} <span class="tz-label">{{.TimeZoneLabel}}</span>{{end}}</span>
+                        <a class="t detail-link" href="{{$.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                            hx-get="{{$.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
-                           hx-target="#app-details" hx-swap="innerHTML">
-                            <strong>{{.Summary}}</strong>
-                        </a>
-                        <span class="list-detail">{{.Location}}</span>
-                    </li>
+                           hx-target="#app-details" hx-swap="innerHTML"><strong>{{.Summary}}</strong></a>
+                        <span class="s">{{.Location}}</span>
+                    {{template "m-rowend"}}
                 {{end}}
-                </ul>
+                {{template "m-listend"}}
             </section>
             {{end}}
             <p class="print-footer print-only">Carrel · agenda · {{$d.From}}–{{$d.To}} · captured {{$d.PrintDate}}</p>

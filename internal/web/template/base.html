@@ -526,41 +526,31 @@
 <div class="find-results">
 {{range $d.Groups}}
     <section class="find-group" data-filter-group>
-        <div class="list-group">
-            <h2 class="list-rubric">{{.Label}}</h2>
-            <span class="list-num">{{len .Rows}}</span>
-        </div>
-        <ul class="list find-rows">
+        {{template "m-group" (group "Label" .Label "Num" (print (len .Rows)))}}
+        {{template "m-list" (list)}}
         {{range .Rows}}
             {{if eq .Kind "contact"}}
-            <li class="list-row list-row--contact-find find-row is-contact{{if .Collapsed}} is-merged{{end}}">
-                <span class="list-bar" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
-                {{if .URL}}
-                <a class="contact-row-link detail-link" href="{{.URL}}"
-                   hx-get="{{.PanelURL}}" hx-target="#app-details" hx-swap="innerHTML">
-                    <span class="list-avatar contact-avatar">{{.Initials}}</span>
-                    <span class="list-title"><strong>{{.Title}}</strong></span>
-                    <span class="list-sub list-phone">{{.PhonesLabel}}</span>
-                    <span class="list-sub">{{.EmailsLabel}}</span>
-                    <span class="list-sub">{{.Org}}</span>
-                    <span class="list-detail">{{.SourceLabel}}</span>
-                </a>
-                {{else}}
+            {{$cls := "is-contact"}}{{if .Collapsed}}{{$cls = "is-contact is-merged"}}{{end}}
+            {{template "m-row" (row "Kind" "contact" "Class" $cls)}}
+                <span class="m-bar3" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
                 <span class="list-avatar contact-avatar">{{.Initials}}</span>
-                <span class="list-title"><strong>{{.Title}}</strong></span>
-                <span class="list-sub list-phone">{{.PhonesLabel}}</span>
-                <span class="list-sub">{{.EmailsLabel}}</span>
-                <span class="list-sub">{{.Org}}</span>
-                <span class="list-detail">{{.SourceLabel}}</span>
-                {{end}}
-                <span class="list-end">{{if .Collapsed}}<a class="dup-badge{{if .DupLinked}} is-linked{{end}}" href="{{.DupURL}}"
-                    title="{{if .DupLinked}}Linked records{{else}}Possible duplicates{{end}}">{{if .DupLinked}}linked{{else}}duplicate?{{end}} ×{{.DupCount}}</a>{{end}}</span>
-            </li>
+                <span class="t">
+                    {{if .URL}}<a class="detail-link" href="{{.URL}}"
+                       hx-get="{{.PanelURL}}" hx-target="#app-details" hx-swap="innerHTML"><strong>{{.Title}}</strong></a>{{else}}<strong>{{.Title}}</strong>{{end}}
+                    {{if .Collapsed}}<a class="dup-badge{{if .DupLinked}} is-linked{{end}}" href="{{.DupURL}}"
+                       title="{{if .DupLinked}}Linked records{{else}}Possible duplicates{{end}}">{{if .DupLinked}}linked{{else}}duplicate?{{end}} ×{{.DupCount}}</a>{{end}}
+                </span>
+                <span class="s mono">{{.PhonesLabel}}</span>
+                <span class="s">{{.EmailsLabel}}</span>
+                <span class="s">{{.Org}}</span>
+                <span class="d">{{.SourceLabel}}</span>
+            {{template "m-rowend"}}
             {{else}}
-            <li class="list-row list-row--find find-row is-{{.Kind}}{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}{{if .Collapsed}} is-merged{{end}}">
-                <span class="list-bar" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
-                <span class="list-time">{{.TimeLabel}}{{if .TimeZoneLabel}} <span class="tz-label">{{.TimeZoneLabel}}</span>{{end}}</span>
-                <span class="list-title">
+            {{$cls := printf "is-%s" .Kind}}{{if .Collapsed}}{{$cls = printf "is-%s is-merged" .Kind}}{{end}}
+            {{template "m-row" (row "Kind" "find" "Done" .Done "Overdue" .Overdue "Class" $cls)}}
+                <span class="m-bar3" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                <span class="mono">{{.TimeLabel}}{{if .TimeZoneLabel}} <span class="tz-label">{{.TimeZoneLabel}}</span>{{end}}</span>
+                <span class="t">
                     {{if .URL}}<a class="detail-link" href="{{.URL}}"
                        hx-get="{{.PanelURL}}" hx-target="#app-details" hx-swap="innerHTML"><strong>{{.Title}}</strong></a>{{else}}<strong>{{.Title}}</strong>{{end}}
                     {{if .Collapsed}}
@@ -568,14 +558,13 @@
                        title="{{if .DupLinked}}Linked records{{else}}Possible duplicates{{end}}">{{if .DupLinked}}linked{{else}}duplicate?{{end}} ×{{.DupCount}}</a>
                     {{end}}
                 </span>
-                <span class="list-sub">{{.Subtitle}}</span>
-                <span class="list-detail find-row-match">{{if .MatchLabel}}{{.MatchLabel}}{{end}}</span>
-                <span class="list-detail">{{.SourceLabel}}</span>
-                <span class="list-detail find-row-kind">{{.Kind}}</span>
-            </li>
+                <span class="s">{{.Subtitle}}</span>
+                <span class="d">{{if .MatchLabel}}{{.MatchLabel}}{{end}}</span>
+                <span class="d">{{.SourceLabel}}</span>
+            {{template "m-rowend"}}
             {{end}}
         {{end}}
-        </ul>
+        {{template "m-listend"}}
     </section>
 {{end}}
 </div>

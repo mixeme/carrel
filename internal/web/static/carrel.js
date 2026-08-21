@@ -287,8 +287,8 @@ document.addEventListener('change', function (e) {
             el.innerHTML = '';
         }
         if (frame) frame.classList.remove('has-details');
-        document.querySelectorAll('.list-row.is-selected').forEach(function (row) {
-            row.classList.remove('is-selected');
+        document.querySelectorAll('.m-row.is-on').forEach(function (row) {
+            row.classList.remove('is-on');
         });
         var section = sectionKey();
         if (!section) return;
@@ -300,11 +300,11 @@ document.addEventListener('change', function (e) {
     }
 
     function markSelected(link) {
-        document.querySelectorAll('.list-row.is-selected').forEach(function (row) {
-            row.classList.remove('is-selected');
+        document.querySelectorAll('.m-row.is-on').forEach(function (row) {
+            row.classList.remove('is-on');
         });
-        var row = link.closest('.list-row');
-        if (row) row.classList.add('is-selected');
+        var row = link.closest('.m-row');
+        if (row) row.classList.add('is-on');
     }
 
     function rememberOpen(url) {
@@ -618,7 +618,7 @@ document.addEventListener('change', function (e) {
         }
         if (e.key === 'Enter') {
             if (sheetOpen()) return;
-            var selected = document.querySelector('.list-row.is-selected a.detail-link');
+            var selected = document.querySelector('.m-row.is-on a.detail-link');
             if (selected) {
                 e.preventDefault();
                 window.location.href = selected.getAttribute('href');
@@ -744,13 +744,12 @@ document.addEventListener('change', function (e) {
         contacts: {
             locked: 'name',
             pinned: ['bar'],
-            always: ['badges'],
+            always: [],
             columns: [
-                { id: 'photo', label: 'Photo', width: 'var(--row-lg)' },
+                { id: 'photo', label: 'Photo', width: '28px' },
                 { id: 'name', label: 'Name', width: 'minmax(150px, 1.4fr)', locked: true },
-                { id: 'phone', label: 'Phone', width: 'minmax(110px, 1fr)' },
-                { id: 'email', label: 'Email', width: 'minmax(110px, 1fr)' },
-                { id: 'badges', label: 'Badges', width: 'auto', always: true }
+                { id: 'phone', label: 'Phone', width: '142px' },
+                { id: 'email', label: 'Email', width: 'minmax(150px, 1.1fr)' }
             ],
             lead: [{ id: 'bar', width: '3px' }]
         },
@@ -760,10 +759,9 @@ document.addEventListener('change', function (e) {
             always: [],
             columns: [
                 { id: 'name', label: 'Title', width: 'minmax(190px, 2fr)', locked: true },
-                { id: 'due', label: 'Due', width: 'minmax(90px, auto)' },
-                { id: 'status', label: 'Status', width: 'minmax(70px, auto)' },
-                { id: 'progress', label: 'Progress', width: 'minmax(50px, auto)' },
-                { id: 'tags', label: 'Tags', width: 'auto' }
+                { id: 'tags', label: 'Tags', width: 'minmax(90px, auto)' },
+                { id: 'due', label: 'Due', width: '84px' },
+                { id: 'progress', label: 'Progress', width: '44px' }
             ],
             lead: [
                 { id: 'done', width: '14px' },
@@ -777,8 +775,8 @@ document.addEventListener('change', function (e) {
             columns: [
                 { id: 'name', label: 'Title', width: 'minmax(140px, 1.2fr)', locked: true },
                 { id: 'excerpt', label: 'Excerpt', width: 'minmax(170px, 2fr)' },
-                { id: 'date', label: 'Date', width: 'minmax(70px, auto)' },
-                { id: 'tags', label: 'Tags', width: 'auto' }
+                { id: 'tags', label: 'Tags', width: 'minmax(70px, auto)' },
+                { id: 'date', label: 'Date', width: '80px' }
             ],
             lead: [{ id: 'bar', width: '3px' }]
         },
@@ -2309,7 +2307,7 @@ document.addEventListener('change', function (e) {
         var scope = input.closest('[data-filter-scope]');
         if (!scope) return;
         var q = input.value.trim().toLowerCase();
-        var rows = Array.prototype.slice.call(scope.querySelectorAll('.list-row'));
+        var rows = Array.prototype.slice.call(scope.querySelectorAll('.m-row'));
         var visible = 0;
         rows.forEach(function (row) {
             var match = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
@@ -2317,7 +2315,7 @@ document.addEventListener('change', function (e) {
             if (match) visible++;
         });
         Array.prototype.slice.call(scope.querySelectorAll('[data-filter-group]')).forEach(function (group) {
-            var anyVisible = !!group.querySelector('.list-row:not(.is-filtered-out)');
+            var anyVisible = !!group.querySelector('.m-row:not(.is-filtered-out)');
             group.classList.toggle('is-filtered-out', !anyVisible);
         });
         var counter = scope.querySelector('[data-bar-count]');
@@ -2331,7 +2329,7 @@ document.addEventListener('change', function (e) {
     function updateTaskCounts(scope) {
         var box = scope.querySelector('[data-task-counts]');
         if (!box) return;
-        var rows = Array.prototype.slice.call(scope.querySelectorAll('.find-row.is-task'));
+        var rows = Array.prototype.slice.call(scope.querySelectorAll('.m-row.is-task'));
         var done = rows.filter(function (r) { return r.classList.contains('is-done'); }).length;
         var all = rows.length;
         var openEl = box.querySelector('[data-task-count="open"]');

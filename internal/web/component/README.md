@@ -40,6 +40,16 @@ component/
     {{template "m-more"}}
     {{template "m-right" (right "Second" true)}}…счётчик…{{template "m-rightend"}}
 {{template "m-barend"}}
+
+{{template "m-list" (list)}}
+{{template "m-group" (group "Label" "Monday · 10 August" "Num" "3")}}
+{{template "m-row" (row "Kind" "agenda")}}
+    <span class="m-bar3" data-swatch="…"></span>
+    <span class="mono">10:00</span>
+    <a class="t detail-link" href="…">…</a>
+    <span class="s">…</span>
+{{template "m-rowend"}}
+{{template "m-listend"}}
 ```
 
 Парные компоненты (`m-head` / `m-headend`) открывают и закрывают тег: между ними
@@ -71,6 +81,9 @@ component/
 | `m-sep` | `sep` | `tmpl/m-bar.html` · `css/20-bar.css` | Вертикальный разделитель на полосе |
 | `m-range` / `m-rangeend` | `barRange` | `tmpl/m-bar.html` · `css/20-bar.css` | Диапазон дат как один элемент полосы |
 | `m-more` | — | `tmpl/m-bar.html` · `css/20-bar.css` | Кнопка «⋯»: скрыта, пока колонка широкая |
+| `m-list` / `m-listend` | `list` | `tmpl/m-row.html` · `css/30-row.css` | Колонка строк; `Attrs` — id и `data-columns-root` экрана |
+| `m-row` / `m-rowend` | `row` | `tmpl/m-row.html` · `css/30-row.css` | Строка списка. `Kind` — модификатор макетов (`contact` / `agenda` / `task` / `note` / `find` / `file`); `Done` / `Overdue` / `On` — состояния; `Class` — маркеры JS (`is-contact`, `is-merged`) |
+| `m-group` | `group` | `tmpl/m-row.html` · `css/30-row.css` | Рубрикатор над пачкой строк и счётчик справа |
 
 Классы, которые эти компоненты приносят с собой:
 
@@ -80,13 +93,18 @@ component/
 | `.m-h1` | `m-head` | Заголовок раздела |
 | `.m-sub` | `m-head` | Подзаголовок под заголовком |
 | `.m-crumbs` | `m-head` | Хлебные крошки |
-| `.m-bar3` | `m-head` | Полоска коллекции. Знает свой размер сама — в макетах это стоило отдельного разбора: размер задавала разметка, и полоска молча схлопывалась в ноль ширины |
+| `.m-bar3` | `m-head`; слот строки | Полоска коллекции. Знает свой размер сама. В шапке её пишет компонент; в строке экран пишет цвет, `.m-row` — размер |
 | `.m-acts` | `m-head` | **Слот**: действия экрана. Содержимое — дело экрана, раскладка — дело шапки, поэтому этот класс экран пишет сам |
 | `.m-bar` | `m-bar` | Сама полоса; `is-form` — вариант формой; `.m-sel` — панель выделения |
 | `.m-right` | `m-bar` | Правая группа: счётчик, плотность, «Clear selection» |
 | `.m-sep` | `m-bar` | Разделитель 1×20 |
 | `.m-range` | `m-bar` | From/To и Show — один узел, чтобы диапазон уходил целиком |
 | `.m-more` | `m-bar` | «⋯»; содержимое меню — ушедшие `is-2nd`, их подставляет `carrel.js` |
+| `.m-list` | `m-list` | Колонка строк |
+| `.m-row` | `m-row` | Сама строка; `--contact` / `--agenda` / `--task` / `--note` / `--find` / `--file` — сетка колонок. `is-on` — открытая, `is-done` / `is-overdue` — состояния |
+| `.m-group` | `m-group` | Рубрикатор группы и счётчик |
+| `.m-rubric` | `m-group` | Капитель рубрикатора (h2 для оглавления) |
+| `.m-num` | `m-group` | Счётчик справа |
 
 Что экрану **можно** писать руками, перечислено поимённо в
 `component_allowlist_test.go`: `slotClasses` — слоты вроде `.m-acts`,

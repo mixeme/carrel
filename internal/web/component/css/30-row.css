@@ -1,0 +1,293 @@
+/* Строка списка — макеты §6 (.m-list, .m-row, .m-group, .m-rubric).
+   Сетка и лестница колонок скопированы из carrel-ui-mockups.html.
+   min-height — var(--row-lg), чтобы плотность comfortable/compact
+   продолжала работать; в макетах здесь 38px, это как раз comfortable. */
+
+.m-list {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.m-row {
+    display: grid;
+    align-items: center;
+    gap: 12px;
+    padding-left: var(--pad);
+    padding-right: var(--pad);
+    min-height: var(--row-lg);
+    border-bottom: 0.5px solid var(--hair);
+}
+
+.m-row.is-on {
+    background: var(--card);
+}
+
+.m-row.is-on .t {
+    font-weight: 600;
+}
+
+.m-row .m-bar3 {
+    width: 3px;
+    height: 22px;
+    border-radius: 1px;
+}
+
+.m-row .t {
+    font-size: 13.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.m-row a.t,
+.m-row .t a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.m-row .t.is-strong,
+.m-row .t strong {
+    font-weight: 600;
+}
+
+.m-row .s {
+    font-size: 12px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.m-row .d {
+    font-size: 11.5px;
+    color: var(--dusty);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.m-row .mono {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.m-row--task > :first-child {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.m-row.is-done .t {
+    color: var(--dusty);
+    text-decoration: line-through;
+}
+
+.m-row.is-overdue .mono {
+    color: var(--alert);
+}
+
+.m-row--contact {
+    grid-template-columns: var(--list-cols, 3px 28px minmax(150px, 1.4fr) 142px minmax(150px, 1.1fr) minmax(110px, 0.9fr) 120px);
+}
+
+.m-row--agenda {
+    grid-template-columns: 3px 62px minmax(180px, 2fr) minmax(110px, 1fr) 96px 128px;
+}
+
+.m-row--task {
+    grid-template-columns: var(--list-cols, 14px 3px minmax(190px, 2fr) minmax(90px, auto) 84px 44px 128px);
+}
+
+.m-row--note {
+    grid-template-columns: var(--list-cols, 3px minmax(140px, 1.2fr) minmax(170px, 2fr) minmax(70px, auto) 80px 118px);
+}
+
+.m-row--find {
+    grid-template-columns: 3px 76px minmax(220px, 2.4fr) minmax(120px, 1fr) 74px 128px;
+}
+
+.m-row--file {
+    grid-template-columns: 16px minmax(220px, 2.4fr) 90px 130px 130px 60px;
+}
+
+.m-group {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 15px var(--pad) 5px;
+    border-bottom: 0.5px solid var(--rule);
+    background: var(--bg);
+}
+
+.m-rubric {
+    font-family: var(--f-sans);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    font-weight: 600;
+    margin: 0;
+}
+
+.m-num {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    color: var(--dusty);
+}
+
+.m-group .m-num {
+    margin-left: 0;
+}
+
+/* Лестница колонок — та же колонка содержимого, что и у полосы (800 px).
+   Прячет n-го ребёнка и сужает сетку; ячейки поэтому прямые дети .m-row. */
+@container (max-width: 800px) {
+    .m-row--contact {
+        grid-template-columns: var(--list-cols, 3px 28px minmax(130px, 1.4fr) 130px minmax(120px, 1fr) 110px);
+    }
+
+    .m-row--contact > :nth-child(6) {
+        display: none;
+    }
+
+    .m-row--agenda {
+        grid-template-columns: 3px 60px minmax(140px, 2fr) 88px 116px;
+    }
+
+    .m-row--agenda > :nth-child(4) {
+        display: none;
+    }
+
+    .m-row--find {
+        grid-template-columns: 3px 70px minmax(160px, 2.4fr) 66px 116px;
+    }
+
+    .m-row--find > :nth-child(4) {
+        display: none;
+    }
+
+    .m-row--task {
+        grid-template-columns: var(--list-cols, 14px 3px minmax(140px, 2fr) minmax(60px, auto) 74px 112px);
+    }
+
+    .m-row--task > :nth-child(6) {
+        display: none;
+    }
+}
+
+@container (max-width: 700px) {
+    .m-row--note {
+        grid-template-columns: var(--list-cols, 3px minmax(140px, 1.4fr) minmax(70px, auto) 80px 116px);
+    }
+
+    .m-row--note > :nth-child(3) {
+        display: none;
+    }
+}
+
+@container (max-width: 620px) {
+    .m-row {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .m-row--contact {
+        grid-template-columns: var(--list-cols, 3px 28px minmax(100px, 1.6fr) 118px 96px);
+    }
+
+    .m-row--contact > :nth-child(5) {
+        display: none;
+    }
+
+    .m-row--agenda {
+        grid-template-columns: 3px 54px minmax(110px, 1fr) 96px;
+    }
+
+    .m-row--agenda > :nth-child(5) {
+        display: none;
+    }
+
+    .m-row--find {
+        grid-template-columns: 3px 62px minmax(110px, 2fr) 96px;
+    }
+
+    .m-row--find > :nth-child(5) {
+        display: none;
+    }
+
+    .m-row--task {
+        grid-template-columns: var(--list-cols, 14px 3px minmax(100px, 2fr) 70px 92px);
+    }
+
+    .m-row--task > :nth-child(4) {
+        display: none;
+    }
+
+    .m-row--note {
+        grid-template-columns: var(--list-cols, 3px minmax(100px, 1.4fr) 74px 96px);
+    }
+
+    .m-row--note > :nth-child(4) {
+        display: none;
+    }
+}
+
+@container (max-width: 460px) {
+    .m-row--contact {
+        grid-template-columns: var(--list-cols, 3px 28px minmax(0, 1fr) 74px);
+    }
+
+    .m-row--contact > :nth-child(4) {
+        display: none;
+    }
+
+    .m-row--agenda {
+        grid-template-columns: 3px 50px minmax(0, 1fr);
+    }
+
+    .m-row--agenda > :nth-child(6) {
+        display: none;
+    }
+
+    .m-row--find {
+        grid-template-columns: 3px 58px minmax(0, 1fr);
+    }
+
+    .m-row--find > :nth-child(6) {
+        display: none;
+    }
+
+    .m-row--note {
+        grid-template-columns: var(--list-cols, 3px minmax(0, 1fr) 70px);
+    }
+
+    .m-row--note > :nth-child(6) {
+        display: none;
+    }
+
+    .m-row--task {
+        grid-template-columns: var(--list-cols, 14px 3px minmax(0, 1fr) 66px);
+    }
+
+    .m-row--task > :nth-child(7) {
+        display: none;
+    }
+}
+
+@media print {
+    .m-row,
+    .m-group {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .m-row a.t {
+        color: #000 !important;
+        text-decoration: none;
+    }
+}

@@ -1,0 +1,22 @@
+{{/* Строка списка — макеты §6, классы .m-list / .m-row / .m-group.
+
+     Список — колонка строк; строка — сетка, колонки которой уходят по
+     рангу, когда колонка содержимого узкая. Какие ячейки прятать — знает
+     CSS (nth-child), поэтому они прямые дети строки: обёртка с
+     display:contents вынула бы их из дерева, и лестница прятала бы не то.
+
+     Kind — модификатор макетов (contact, agenda, task, note, find, file).
+     Ячейки (.t / .s / .d, полоска .m-bar3) пишет экран: содержимое у
+     каждой строки своё, раскладка — дело строки. */}}
+{{define "m-list"}}<ul class="m-list"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
+{{define "m-listend"}}</ul>{{end}}
+
+{{define "m-row"}}<li class="m-row{{if .Mod}} {{.Mod}}{{end}}{{if .On}} is-on{{end}}{{if .Done}} is-done{{end}}{{if .Overdue}} is-overdue{{end}}{{if .Class}} {{.Class}}{{end}}">{{end}}
+{{define "m-rowend"}}</li>{{end}}
+
+{{define "m-group"}}
+<div class="m-group">
+    <h2 class="m-rubric">{{.Label}}</h2>
+    {{if .Num}}<span class="m-num">{{.Num}}</span>{{end}}
+</div>
+{{end}}

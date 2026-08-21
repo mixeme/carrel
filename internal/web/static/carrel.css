@@ -403,47 +403,10 @@ a.src-label:hover {
     gap: 0.75rem;
 }
 
-.contact-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-/* List rows — mockups §5 (.m-list / .m-row) */
-.list {
-    display: flex;
-    flex-direction: column;
-}
-
-.card > .list,
-.card > .agenda-day > .list,
-.card > .task-list,
-.card > .note-list {
+.card > .m-list,
+.card > .agenda-day > .m-list {
     margin-left: -1.5rem;
     margin-right: -1.5rem;
-}
-
-.list-row {
-    display: grid;
-    align-items: center;
-    gap: 12px;
-    min-height: var(--row-lg);
-    padding-left: var(--pad);
-    padding-right: var(--pad);
-    border-bottom: 0.5px solid var(--hair);
-}
-
-.list-row.is-on {
-    background: var(--card);
-}
-
-.list-bar {
-    background: var(--accent);
-    width: 3px;
-    height: var(--row-sm);
-    border-radius: 1px;
-    flex: none;
-    align-self: center;
 }
 
 .list-avatar {
@@ -471,40 +434,6 @@ a.src-label:hover {
     }
 }
 
-.list-title {
-    font-size: 13.5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: inherit;
-    text-decoration: none;
-}
-
-.list-title strong {
-    font-weight: 600;
-}
-
-.list-sub,
-.list-detail {
-    font-size: 12px;
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.list-detail {
-    font-size: 11.5px;
-    color: var(--dusty);
-}
-
-.list-time {
-    color: var(--muted);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-}
-
 .tz-label {
     /* var(--mono) does not exist and never did: the token is --f-mono, so the
        source time zone of §23.8 had been rendering in the sans face. */
@@ -512,68 +441,6 @@ a.src-label:hover {
     font-size: 11.5px;
     color: var(--muted);
     white-space: nowrap;
-}
-
-.list-end {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.list-rubric {
-    /* An h2 for the outline, a label to the eye — so the serif that h1 and h2
-       carry has to be said away, or the rubricator reads as a heading. */
-    font-family: var(--f-sans);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dusty);
-    font-weight: 600;
-    margin: 0;
-}
-
-.list-group {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 15px var(--pad) 5px;
-    border-bottom: 0.5px solid var(--rule);
-    background: var(--bg);
-}
-
-.list-num {
-    font-family: var(--f-mono);
-    font-size: 11px;
-    color: var(--dusty);
-}
-
-.list-row--contact {
-    grid-template-columns: 3px var(--row-lg) minmax(150px, 1.4fr) minmax(110px, 1fr) minmax(110px, 1fr) auto;
-}
-
-.list-row--agenda {
-    grid-template-columns: 3px 62px minmax(180px, 2fr) minmax(110px, 1fr);
-}
-
-.list-row--task {
-    grid-template-columns: 14px 3px minmax(190px, 2fr) minmax(90px, auto) auto;
-}
-
-.list-row--note {
-    grid-template-columns: 3px minmax(140px, 1.2fr) minmax(170px, 2fr) minmax(70px, auto) auto;
-}
-
-.contact-row {
-    border-bottom: 0.5px solid var(--hair);
-}
-
-.contact-row-link {
-    display: contents;
-    text-decoration: none;
-    color: inherit;
 }
 
 .contact-avatar,
@@ -1214,14 +1081,6 @@ body.has-shell {
 .detail-other {
     margin: 0;
     padding-left: 1.2rem;
-}
-
-.list-row.is-selected {
-    background: var(--card);
-}
-
-.list-row.is-selected .detail-link {
-    font-weight: 600;
 }
 
 .sr-only {
@@ -2516,54 +2375,9 @@ label.checkbox input {
     margin-top: 0;
 }
 
-.agenda-day .list-group {
+.agenda-day .m-group {
     margin-top: 1.25rem;
 }
-
-.agenda-events {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.agenda-event-row {
-    display: grid;
-    grid-template-columns: 3px 62px minmax(180px, 2fr) minmax(110px, 1fr);
-    gap: 12px;
-    align-items: center;
-    min-height: var(--row-lg);
-    padding-left: var(--pad);
-    padding-right: var(--pad);
-    border-bottom: 0.5px solid var(--hair);
-}
-
-.agenda-event-row > a {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    color: inherit;
-    text-decoration: none;
-    font-size: 13.5px;
-}
-
-.agenda-event-row > a strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.agenda-event-row > a .hint {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.agenda-time {
-    color: var(--muted);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
-}
-
 
 /* Tasks (§23.9) */
 .task-filters {
@@ -2579,27 +2393,13 @@ label.checkbox input {
     font-size: 11.5px;
 }
 
-.task-list,
-.note-list,
 .source-list,
 .tag-list,
 .related-list,
-.find-sources,
-.find-rows {
+.find-sources {
     list-style: none;
     margin: 0;
     padding: 0;
-}
-
-.task-row {
-    display: grid;
-    grid-template-columns: 14px 3px minmax(190px, 2fr) minmax(90px, auto) auto;
-    gap: 12px;
-    align-items: center;
-    min-height: var(--row-lg);
-    padding-left: var(--pad);
-    padding-right: var(--pad);
-    border-bottom: 0.5px solid var(--hair);
 }
 
 .task-tick {
@@ -2617,37 +2417,10 @@ label.checkbox input {
     color: var(--muted);
 }
 
-.task-row.is-done .task-tick {
+.m-row.is-done .task-tick {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
-}
-
-.task-title {
-    font-size: 13.5px;
-    color: inherit;
-    text-decoration: none;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.task-row.is-done .task-title {
-    color: var(--muted);
-    text-decoration: line-through;
-}
-
-.task-row.is-overdue .task-due {
-    color: var(--alert);
-}
-
-.task-meta,
-.note-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-items: baseline;
-    font-size: 11.5px;
 }
 
 .tag {
@@ -2674,38 +2447,6 @@ label.checkbox input {
 }
 
 /* Notes (§23.9) */
-.note-row {
-    display: grid;
-    grid-template-columns: 3px minmax(140px, 1.2fr) minmax(170px, 2fr) minmax(70px, auto) auto;
-    gap: 12px;
-    align-items: center;
-    min-height: var(--row-lg);
-    padding-left: var(--pad);
-    padding-right: var(--pad);
-    border-bottom: 0.5px solid var(--hair);
-}
-
-.note-link {
-    display: contents;
-    color: inherit;
-    text-decoration: none;
-}
-
-.note-link strong {
-    font-size: 13.5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.note-excerpt {
-    font-size: 12px;
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .note-body {
     white-space: pre-wrap;
 }
@@ -3341,82 +3082,6 @@ label.checkbox input {
     margin-top: 0;
 }
 
-/* The group heading is .list-rubric — the small capitals of the mockups, not a
-   section title. It is an h2 for the outline, which is why the rule that used
-   to size it here had to go: it beat the class on every merged screen and put a
-   22 px serif heading with a rule under it where a 10 px label belongs. */
-
-.find-row {
-    display: grid;
-    align-items: center;
-    gap: 12px;
-    min-height: var(--row-lg);
-    padding-left: var(--pad);
-    padding-right: var(--pad);
-    border-bottom: 0.5px solid var(--hair);
-}
-
-.list-row--find {
-    grid-template-columns: 3px 76px minmax(220px, 2.4fr) minmax(120px, 1fr) minmax(80px, 1fr) 128px auto;
-}
-
-.list-row--contact-find {
-    grid-template-columns: 3px var(--row-lg) minmax(150px, 1.4fr) 142px minmax(150px, 1.1fr) minmax(110px, 0.9fr) 120px auto;
-}
-
-.list-phone {
-    font-family: var(--f-mono);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
-}
-
-.find-row-time {
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-}
-
-.find-row-body {
-    display: flex;
-    flex-direction: column;
-}
-
-.find-row-body a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.find-row-match {
-    color: var(--muted);
-    font-size: 11.5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.find-row-kind {
-    color: var(--muted);
-    font-size: 11.5px;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-
-.find-row-source {
-    color: var(--muted);
-    font-size: 11.5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.find-row.is-done .find-row-body strong {
-    text-decoration: line-through;
-    color: var(--muted);
-}
-
-.find-row.is-overdue .find-row-time {
-    color: var(--alert);
-}
-
 /* A small inline label — "attachments" on the all-collections files table
    today (2.6.G12) — sharing .dup-badge's look without its link colouring. */
 .badge {
@@ -3613,28 +3278,13 @@ button.danger {
     }
 
     .agenda-day,
-    .agenda-event-row,
-    .task-row,
-    .note-row,
-    .find-group,
-    .find-row {
+    .find-group {
         break-inside: avoid;
         page-break-inside: avoid;
     }
 
-    .task-title,
-    .note-link,
-    .find-row-body a {
-        color: #000 !important;
-        text-decoration: none;
-    }
-
     .find-progress {
         display: none !important;
-    }
-
-    .agenda-event-row > a {
-        color: #000 !important;
     }
 
     .app-layout {
@@ -3643,17 +3293,6 @@ button.danger {
 
     .source-label {
         color: #000 !important;
-    }
-
-    .contact-row {
-        break-inside: avoid;
-        page-break-inside: avoid;
-        border-bottom: 0.5px solid #999;
-    }
-
-    .contact-row-link {
-        color: #000 !important;
-        text-decoration: none;
     }
 
     .print-photo {
@@ -4086,18 +3725,6 @@ a.theme-segment-btn {
     display: none !important;
 }
 
-.list-row--contact {
-    grid-template-columns: var(--list-cols, 3px var(--row-lg) minmax(150px, 1.4fr) minmax(110px, 1fr) minmax(110px, 1fr) auto);
-}
-
-.list-row--task {
-    grid-template-columns: var(--list-cols, 14px 3px minmax(190px, 2fr) minmax(90px, auto) auto);
-}
-
-.list-row--note {
-    grid-template-columns: var(--list-cols, 3px minmax(140px, 1.2fr) minmax(170px, 2fr) minmax(70px, auto) auto);
-}
-
 @media (max-width: 1023px) {
     .app-shell.is-settings,
     .app-shell.is-admin {
@@ -4338,83 +3965,6 @@ a.theme-segment-btn {
 
     .app-user-toggle {
         font-size: 11.5px;
-    }
-
-    .list-row {
-        min-height: 44px;
-        gap: 8px;
-    }
-
-    .list-row--contact,
-    .list-row--contact-find {
-        grid-template-columns: var(--list-cols, 3px var(--row-lg) minmax(0, 1fr));
-    }
-
-    .list-row--contact .list-sub,
-    .list-row--contact .list-detail,
-    .list-row--contact-find .list-sub,
-    .list-row--contact-find .list-detail {
-        grid-column: 3;
-        margin-top: -4px;
-    }
-
-    .list-row--agenda {
-        grid-template-columns: 3px minmax(0, 1fr);
-    }
-
-    .agenda-event-row {
-        grid-template-columns: 3px minmax(0, 1fr);
-        min-height: 44px;
-    }
-
-    .agenda-event-row .agenda-time {
-        grid-column: 2;
-        font-size: 11px;
-    }
-
-    .list-row--task {
-        grid-template-columns: var(--list-cols, 14px 3px minmax(0, 1fr));
-    }
-
-    .task-row {
-        grid-template-columns: 14px 3px minmax(0, 1fr);
-        min-height: 44px;
-    }
-
-    .task-row .list-end {
-        grid-column: 3;
-        margin-top: -4px;
-    }
-
-    .list-row--note {
-        grid-template-columns: var(--list-cols, 3px minmax(0, 1fr));
-    }
-
-    .note-row {
-        grid-template-columns: 3px minmax(0, 1fr);
-        min-height: 44px;
-    }
-
-    .note-row .note-excerpt {
-        grid-column: 2;
-        margin-top: -4px;
-    }
-
-    .find-row,
-    .list-row--find {
-        grid-template-columns: 3px minmax(0, 1fr);
-        gap: 8px;
-    }
-
-    .list-row--find .list-time,
-    .list-row--find .list-title,
-    .list-row--find .list-sub,
-    .list-row--find .list-detail {
-        grid-column: 2;
-    }
-
-    .find-row-time {
-        font-size: 11px;
     }
 
     .app-shell.has-details .app-work {
@@ -4664,8 +4214,8 @@ body.has-shell .app-shell.is-admin .admin-rail {
     padding: 8px var(--pad) 0;
 }
 
-.app-main .list,
-.app-main .agenda-day > .list {
+.app-main .m-list,
+.app-main .agenda-day > .m-list {
     margin: 0;
 }
 

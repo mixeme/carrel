@@ -26,11 +26,11 @@ func TestListTemplatesUseListRows(t *testing.T) {
 			t.Fatalf("read %s: %v", name, err)
 		}
 		body := string(b)
-		if !strings.Contains(body, `class="list-bar"`) {
+		if !strings.Contains(body, `class="m-bar3"`) {
 			t.Errorf("%s is missing the collection colour bar", name)
 		}
-		if !strings.Contains(body, `class="list-row`) {
-			t.Errorf("%s is missing list-row markup", name)
+		if !strings.Contains(body, `m-row`) {
+			t.Errorf("%s is missing m-row markup", name)
 		}
 	}
 }

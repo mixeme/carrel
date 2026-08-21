@@ -32,9 +32,10 @@ import (
 var unstyledClassAllowList = map[string]string{
 	// Kind/state markers read by carrel.js (querySelector), not matched by
 	// their own CSS rule — visual state comes from the base row class.
-	"is-contact": "JS marker only (base.html row-kind branch), not its own rule",
-	"is-file":    "JS marker only (files.html), not its own rule",
-	"is-merged":  "JS marker only (base.html, collapsed duplicate rows), not its own rule",
+	"is-contact":  "JS marker only (base.html row-kind branch), not its own rule",
+	"is-file":     "JS marker only (files.html), not its own rule",
+	"is-merged":   "JS marker only (base.html, collapsed duplicate rows), not its own rule",
+	"detail-link": "JS hook for the details panel; the cell (.t) carries the look",
 
 	// Layout wrapper classes carried for meaning/specificity; the visual
 	// rule lives on a sibling class already present on the same element.
@@ -55,10 +56,9 @@ var unstyledClassAllowList = map[string]string{
 
 	// Small, single-purpose helper spans with genuinely no visual treatment
 	// distinct from their surrounding context.
-	"files-up-row":       "row-kind marker; .list-row/.find-row carry the box",
+	"files-up-row":       "row-kind marker; .m-row carries the box",
 	"folder-picker-hint": "plain hint text; .hint's rule already applies via cascade",
 	"folder-picker-warn": "plain warning text; .message.notice's rule already applies",
-	"note-date":          "plain text, no distinct look from surrounding .list-sub",
 	"note-edit-form":     "form-identity marker for carrel.js, not a drawn box",
 	"note-meta-block":    "structural grouping only; children carry their own rules",
 	"note-meta-danger":   "modifier read by carrel.js to gate an action, not to draw",

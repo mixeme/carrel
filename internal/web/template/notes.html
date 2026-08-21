@@ -79,24 +79,20 @@
                     <span data-bar-count>{{len $d.Rows}} {{if eq (len $d.Rows) 1}}item{{else}}items{{end}}</span>
                 {{template "m-rightend"}}
             {{template "m-barend"}}
-            <ul class="list note-list" data-columns-root="notes">
+            {{template "m-list" (list "Attrs" (safeHTML "data-columns-root=\"notes\""))}}
             {{range $d.Rows}}
-                <li class="list-row list-row--note note-row">
-                    <span class="list-bar" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}"></span>
-                    <a class="note-link detail-link" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
+                {{template "m-row" (row "Kind" "note")}}
+                    <span class="m-bar3" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <a class="t detail-link" data-col="name" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                        hx-get="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
-                       hx-target="#app-details" hx-swap="innerHTML">
-                        <strong data-col="name">{{.Title}}</strong>
-                        <span class="note-excerpt" data-col="excerpt">{{.Excerpt}}</span>
-                    </a>
-                    <span class="list-end note-meta">
-                        {{if .DateLabel}}<span class="note-date list-detail" data-col="date">{{.DateLabel}}</span>{{end}}
-                        <span data-col="tags">{{range .Tags}}<span class="tag">{{.}}</span>{{end}}
+                       hx-target="#app-details" hx-swap="innerHTML"><strong>{{.Title}}</strong></a>
+                    <span class="s" data-col="excerpt">{{.Excerpt}}</span>
+                    <span class="d" data-col="tags">{{range .Tags}}<span class="tag">{{.}}</span>{{end}}
                         {{if .HasRelated}}<span class="dup-badge is-linked">linked</span>{{end}}</span>
-                    </span>
-                </li>
+                    <span class="mono" data-col="date">{{if .DateLabel}}{{.DateLabel}}{{end}}</span>
+                {{template "m-rowend"}}
             {{end}}
-            </ul>
+            {{template "m-listend"}}
             {{if $d.Tags}}
             <div class="no-print">
                 <h2>Tags</h2>
