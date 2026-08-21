@@ -428,6 +428,13 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-menu.is-pop{position:absolute;top:100%;left:0;margin-top:4px;z-index:3}
 .m-menu.is-pop.is-right{left:auto;right:0}
 .m-f:has(> .m-menu.is-pop){position:relative}
+/* Кнопка, у которой меню нарисовано раскрытым: сама кнопка становится
+   точкой отсчёта для него. Без этого меню считалось бы от полосы и
+   уезжало в её левый край. */
+.m-btn:has(> .m-menu.is-pop){position:relative}
+.m-btn > .m-menu.is-pop{margin-top:6px;font-weight:400;text-align:left}
+/* Рубрика внутри меню: говорит, откуда взялся набор строк. */
+.m-menu > .m-rubric{padding:4px 8px 6px}
 .m-menu > div{display:flex;align-items:center;gap:9px;height:28px;padding:0 8px;border-radius:3px;font-size:12.5px}
 .m-menu > div.is-on{background:var(--card)}
 .m-menu > div > svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;opacity:.75}
@@ -1108,6 +1115,107 @@ figcaption b{color:var(--ink);font-weight:600}
 <p><b>Полоса — одна строка, и она ею остаётся.</b> У неё стоял <code>flex-wrap:wrap</code>, и стоило открыть панель подробностей, как колонка содержимого сужалась до полутысячи пикселей и набор молча разваливался на два ряда: «Compact&nbsp;rows» уезжал вниз один, а полоска опроса вставала под ним. Теперь действует тот же закон, что и у колонок списка: <b>лишнее уходит по очереди, а не переносится</b>. Что уходит — помечает разметка (<code>is-2nd</code>), когда — решает ширина колонки содержимого (800&nbsp;px), а ушедшее лежит под кнопкой «⋯» в конце строки. Порядок отступления у каждой панели свой, как своя очередь колонок у каждого вида строки: в календаре первым уходит диапазон дат, в задачах — сортировка, в контактах — сортировка и хвост со счётчиком.</p>
 <p><b>Панель выделения сжимается иначе</b> — не потерей действия, а потерей подписи: значок остаётся, слово уходит. Действие из панели выделения прятать нельзя, поэтому «⋯» ей не нужен. Так уже было нарисовано на телефоне, только руками; теперь это правило.</p>
 
+<h4>Меню: что обещано кнопкой и что внутри</h4>
+<p>Кнопка со стрелкой или с «⋯» — это обещание списка. Обещаний в документе <b>шестьдесят восемь</b>: восемь «⋯» в панелях, двадцать у строк и шапок, тридцать одно поле-список, «Upload» и «New …» со стрелкой. Нарисованных списков было восемь, и промахи распределились неровно: витрину получили меню, которые и так очевидны, а <b>не получили ровно те, где содержимое угадать нельзя</b>.</p>
+<p><b>Дороже всего обошлась «⋯» в панели инструментов.</b> Она появляется, когда набор не поместился, и уносит с собой контрол — на календаре это «Compact&nbsp;rows». При открытой панели подробностей колонка содержимого уходит ниже 800&nbsp;px, и на окне 1440 в документе <b>не оставалось ни одного места, где этот флажок видно</b>: он исчезал везде, а меню, в которое он ушёл, не было нарисовано нигде. Теперь оно раскрыто прямо в агенде (7.2), и в нём лежит ровно то, что отступило на этом экране.</p>
+<div class="frames">
+  <figure style="flex:0 1 250px">
+  <div class="frame">
+    <div class="frame-label"><span>Строка списка · ⋯</span><i>контакт</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-menu" style="width:212px">
+        <div><svg><use href="#i-con"/></svg>Open</div>
+        <div><svg><use href="#i-pencil"/></svg>Edit</div>
+        <div><svg><use href="#i-down"/></svg>Export <span class="mono" style="font-size:11px">.vcf</span></div>
+        <div><svg><use href="#i-link"/></svg>Publish a link…</div>
+        <span class="sep"></span>
+        <div style="color:var(--alert)"><svg><use href="#i-trash"/></svg>Delete contact</div>
+      </div>
+    </div>
+  </div>
+  </figure>
+
+  <figure style="flex:0 1 250px">
+  <div class="frame">
+    <div class="frame-label"><span>Строка списка · ⋯</span><i>событие</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-menu" style="width:212px">
+        <div><svg><use href="#i-cal"/></svg>Open</div>
+        <div><svg><use href="#i-pencil"/></svg>Edit</div>
+        <div><svg><use href="#i-down"/></svg>Export <span class="mono" style="font-size:11px">.ics</span></div>
+        <div><svg><use href="#i-link"/></svg>Publish a link…</div>
+        <span class="sep"></span>
+        <div style="color:var(--alert)"><svg><use href="#i-trash"/></svg>Delete event</div>
+      </div>
+    </div>
+  </div>
+  </figure>
+
+  <figure style="flex:0 1 250px">
+  <div class="frame">
+    <div class="frame-label"><span>Строка списка · ⋯</span><i>файл</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-menu" style="width:212px">
+        <div><svg><use href="#i-doc"/></svg>Open</div>
+        <div><svg><use href="#i-down"/></svg>Download</div>
+        <div><svg><use href="#i-pencil"/></svg>Rename…</div>
+        <div><svg><use href="#i-move"/></svg>Move…</div>
+        <div><svg><use href="#i-dup"/></svg>Copy…</div>
+        <div><svg><use href="#i-link"/></svg>Publish a link…</div>
+        <span class="sep"></span>
+        <div style="color:var(--alert)"><svg><use href="#i-trash"/></svg>Delete</div>
+      </div>
+    </div>
+  </div>
+  </figure>
+</div>
+<figcaption style="margin-bottom:18px"><b>Три меню, а не одно с прочерками.</b> Порядок общий и читается сверху вниз как «посмотреть — изменить — унести — отдать», и разрушительное всегда последним, за разделителем, тревожным цветом. Различается середина, и различается она не по вкусу: у файла есть путь, поэтому у него есть «Move…» и «Copy…», которых у карточки быть не может; у карточки и события есть свой формат выгрузки, и он назван прямо в строке, а не спрятан за общим словом «Export». <b>«Open» стоит первым и в меню файла тоже</b> — открыть и скачать это разные намерения, и когда их сводят в одну строку, человек скачивает то, на что хотел посмотреть.</figcaption>
+
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame">
+    <div class="frame-label"><span>«New …» в едином виде</span><i>стрелка спрашивает, куда писать</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-menu" style="width:250px">
+        <div class="m-rubric">Write into</div>
+        <div class="is-on"><span class="m-bar3" style="background:#4A6B52"></span>Контакты<span class="mono" style="margin-left:auto;font-size:10px;color:var(--dusty)">last used</span></div>
+        <div><span class="m-bar3" style="background:#A05A2C"></span>Архив</div>
+        <div><span class="m-bar3" style="background:#6B4E7A"></span>Команда<span class="m-badge" style="margin-left:auto">ro</span></div>
+      </div>
+    </div>
+  </div>
+  <figcaption>В едином виде «New contact» не знает, куда писать, и спрашивает — это уже сказано в 7.1, но нарисовано не было. Последний выбор помечен, и он же сработает, если нажать саму кнопку, а не стрелку. Коллекция только для чтения показана и <b>недоступна</b>, а не спрятана: спрятанная строка читается как «такой книги у вас нет».</figcaption>
+  </figure>
+
+  <figure style="flex:0 1 260px">
+  <div class="frame">
+    <div class="frame-label"><span>«Upload» в файлах</span><i>стрелка у кнопки загрузки</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-menu" style="width:216px">
+        <div><svg><use href="#i-doc"/></svg>Files…</div>
+        <div><svg><use href="#i-file"/></svg>Folder…</div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Две строки, и обе нужны: выбор папки — это отдельный диалог операционной системы, а не тот же самый с другим фильтром. «Перезаписать» здесь нет и не будет: загрузка не перезаписывает никогда, а занятое имя становится вопросом в очереди — решением на месте, а не настройкой, выставленной заранее и забытой.</figcaption>
+  </figure>
+
+  <figure style="flex:1 1 330px">
+  <div class="frame">
+    <div class="frame-label"><span>Шапка экрана · ⋯</span><i>файлы</i></div>
+    <div class="mock" style="padding:14px;background:var(--bg)">
+      <div class="m-menu" style="width:238px">
+        <div><svg><use href="#i-up"/></svg>Import…</div>
+        <div><svg><use href="#i-down"/></svg>Export…</div>
+        <div><svg><use href="#i-link"/></svg>Published links</div>
+        <div><svg><use href="#i-print"/></svg>Print</div>
+      </div>
+    </div>
+  </div>
+  <figcaption><b>Один значок, два разных механизма, и путать их нельзя.</b> В панели инструментов «⋯» — это <b>переполнение</b>: в нём лежат те же самые контролы, что стояли в строке, целиком и в том же виде — поэтому в агенде внутри него настоящий диапазон дат, а не строка «Date range…», которая открывала бы что-то ещё. Рубрика «Didn’t&nbsp;fit» стоит только там и говорит правду: это не продолжение списка, а тот же список, которому не хватило ширины.<br><br>В шапке экрана тот же значок — уже <b>не переполнение</b>, а обычное меню действий: «Import» и «Export» никогда в шапке не стояли и не вытеснялись туда шириной, им там место по замыслу. Рубрики у него поэтому нет. Различать их важно исполнителю: переполнение собирается из ушедших узлов само, а меню действий пишется руками и у каждого экрана своё.</figcaption>
+  </figure>
+</div>
+
 <h4>Раскрытое меню в макете</h4>
 <p>Меню, нарисованное открытым внутри экрана, <b>всплывает и места в раскладке не занимает</b>. Правило звучит как придирка к вёрстке документа, но оно про то, что получится на выходе: <b>исполнитель строит то, что видит</b>. Список подсказок у поля «Related to» стоял в потоке и раздвигал форму на четыре строки, которых в интерфейсе нет; выбор коллекции при восстановлении растягивал строку таблицы на полтораста пикселей. Обе высоты выглядели как часть разметки, и повторить их в шаблоне было бы ровно тем, о чём просит макет.</p>
 <p>Отличить одно от другого можно не на глаз: меню внутри <code>.m-shell</code> — это меню на экране, и оно обязано всплывать; меню вне <code>.m-shell</code> — витрина, где меню и есть предмет кадра. Так это и проверяется: <code>#check</code> обводит красным любое меню внутри экрана, оставшееся в потоке. Из трёх таких в документе правильно был сделан один — на странице подключений, и то <b>руками</b>, координатами в атрибуте <code>style</code>; теперь все три пользуются одним <code>is-pop</code>.</p>
@@ -1621,7 +1729,14 @@ Read  2 min ago</div>
           <span class="m-check"><span class="m-box"></span>Events</span>
           <span class="m-check"><span class="m-box is-off"></span>Tasks due</span>
           <span class="m-check"><span class="m-box is-off"></span>Notes</span>
-          <span class="m-btn is-quiet m-more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span>
+          <span class="m-btn is-quiet m-more" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg>
+            <span class="m-menu is-pop is-right" style="width:252px">
+              <span class="m-rubric">Didn’t fit</span>
+              <span class="m-range" style="padding:2px 8px 7px;flex-wrap:wrap"><span class="m-in is-mono">2026-08-10</span><i>→</i><span class="m-in is-mono">2026-08-16</span><span class="m-btn">Show</span></span>
+              <span class="sep"></span>
+              <div><span class="m-box is-off"></span>Compact rows</div>
+            </span>
+          </span>
           <span class="m-right is-2nd"><span class="m-check"><span class="m-box is-off"></span>Compact rows</span></span>
         </div>
         <div class="m-poll"><span class="m-prog"><i style="width:83%"></i></span>Polled 5 of 6 sources · 14 events · <span style="color:var(--alert)">baikal · office unavailable</span><span style="margin-left:auto" class="mono">from cache · 2 min ago</span></div>
