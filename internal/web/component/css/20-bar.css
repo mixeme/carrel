@@ -1,36 +1,151 @@
-/* Полоса инструментов — макеты §6 (.m-bar).
+/* Полоса инструментов — макеты §6 (.m-bar, .m-sel, .m-sep, .m-right, .m-more).
 
-   ВНИМАНИЕ: это перенос сегодняшних значений, а не значений из макетов.
-   Здесь стоит `padding: 0 var(--pad) 9px` и `flex-wrap: wrap`, то есть ровно
-   те два дефекта, которые в макетах уже исправлены:
+   Отступ у полосы свой, и он одинаков сверху и снизу. На этапе 0 здесь стояли
+   `padding: 0 var(--pad) 9px` и `flex-wrap: wrap`: сверху ноль, потому что
+   девять пикселей выдавала шапка, а wrap разваливал набор на два ряда, как
+   только колонка сужалась. Оба значения — дефекты, уже закрытые в макетах.
+   Этап 1 переносит исправление целиком: 7 px с обеих сторон, одна строка,
+   лишнее уходит по рангу (is-2nd) под «⋯». Когда — решает ширина колонки
+   содержимого (800 px), для чего .app-main / .settings-panel / .admin-panel
+   стали контейнерами. Полоса выделения (.m-sel) сжимается иначе: действие
+   остаётся, уходит только подпись. */
 
-     — отступа сверху нет, девять пикселей полосе выдаёт шапка над ней. Пока
-       полоса прозрачна, разницы не видно; на залитой панели выделения
-       содержимое сядет вплотную к верхнему краю заливки;
-     — wrap разваливает набор на два ряда, как только колонка сужается.
-
-   В макетах это `padding: 7px var(--pad)` и одна строка с отступлением по
-   рангу под кнопку «⋯». Отступление построено на container queries по колонке
-   содержимого, а в продакшене нет ни одного container query и .app-main не
-   контейнер: перенести половину — значит получить переполнение вместо
-   переноса. Поэтому этап 0 переносит полосу как есть, этап 1 переносит
-   исправление целиком, вместе с лестницей отступления и рангами в разметке.
-   Так видно, что сломал переезд, а что — исправление. */
+.m-head:has(+ .m-bar) {
+    padding-bottom: 4px;
+}
 
 .m-bar {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 0 var(--pad) 9px;
+    padding: 7px var(--pad);
     border-bottom: 0.5px solid var(--rule);
+    flex-wrap: nowrap;
+}
+
+.m-bar[hidden] {
+    display: none !important;
+}
+
+/* Та же полоса настоящей формой GET: фильтр «From/To» в агенде. Форма не
+   должна приносить браузерный margin. */
+.m-bar.is-form {
+    margin: 0;
+}
+
+.m-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11.5px;
+    color: var(--dusty);
+}
+
+.m-more {
+    display: none;
+    position: relative;
+    margin-left: auto;
+    flex: none;
+}
+
+.m-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--card-border);
+    flex: none;
+}
+
+.m-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+}
+
+.m-range > i {
+    font-style: normal;
+    color: var(--dusty);
+}
+
+/* Сжимается в панели только поле, и не ниже 88 px: переключателю сжиматься
+   нечем — он обрезает слово. */
+.m-bar > .list-filter,
+.m-bar > .files-filter {
+    flex: 0 1 auto;
+    min-width: 88px;
+    margin-right: 0;
+    overflow: hidden;
+}
+
+.m-bar > .bar-sort,
+.m-bar > .theme-segment,
+.m-bar > .column-picker,
+.m-bar > .files-view-toggle,
+.m-bar > .m-right,
+.m-bar > .m-sep,
+.m-bar > .m-range,
+.m-bar > .form-inline,
+.m-bar > .form-field,
+.m-bar > form {
+    flex: none;
+}
+
+.m-sel {
+    background: var(--card);
+    border-bottom: 0.5px solid var(--rule);
+}
+
+.m-sel .app-btn {
+    background: var(--paper);
+}
+
+.m-sel [data-files-ops-count] {
+    font-weight: 600;
+}
+
+.m-more .dots-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    min-width: 200px;
+    right: 0;
+    left: auto;
+}
+
+.m-more .dots-menu[hidden] {
+    display: none;
+}
+
+.m-more .dots-menu .m-right {
+    margin-left: 0;
     flex-wrap: wrap;
 }
 
-/* Та же полоса, собранная настоящей формой GET: фильтр «From/To» в агенде.
-   Раньше это писалось как `class="form page-bar"` и держалось на правиле
-   `.page-bar .form, .page-bar.form`, то есть на совпадении двух классов. */
-.m-bar.is-form {
-    border-bottom: 0.5px solid var(--rule);
-    padding-bottom: 9px;
-    margin: 0;
+@container (max-width: 800px) {
+    /* Лишнее уходит по рангу, а не переносится. У таблицы второй ранг
+       держится дольше — это этап 3; здесь только полоса. */
+    .m-bar > .is-2nd,
+    .js [data-range-open] .m-bar > .is-2nd {
+        display: none;
+    }
+    /* Панель выделения теряет подпись, не действие. */
+    .m-sel .app-btn > .lbl {
+        display: none;
+    }
+    .m-sel .app-btn:has(> .lbl) {
+        padding: 0 9px;
+    }
+    .m-bar:has(.is-2nd) > .m-more {
+        display: inline-flex;
+    }
+}
+
+@container (max-width: 620px) {
+    /* Тесная шапка: набор кнопок переносится, а не выдавливает панель. */
+    .m-head .m-acts {
+        flex: 0 1 auto;
+        min-width: 0;
+    }
 }

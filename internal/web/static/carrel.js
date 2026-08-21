@@ -441,15 +441,61 @@ document.addEventListener('change', function (e) {
         return wrap ? wrap.querySelector('.dots-menu') : null;
     }
 
+    // Stage 1: the bar's ⋯ holds the is-2nd items that the container query
+    // hid. They move into the menu on open and back to the bar on close, so
+    // a sort link or the density toggle is still the same node — not a copy
+    // that would desync from the form it belongs to.
+    var barMoreHome = typeof WeakMap === 'function' ? new WeakMap() : null;
+
+    function parkBarMore(wrap) {
+        var bar = wrap.closest('.m-bar');
+        var menu = wrap.querySelector('.dots-menu');
+        if (!bar || !menu) return;
+        Array.prototype.slice.call(bar.children).forEach(function (kid) {
+            if (kid === wrap) return;
+            if (!kid.classList || !kid.classList.contains('is-2nd')) return;
+            if (barMoreHome) barMoreHome.set(kid, { parent: bar, next: kid.nextSibling });
+            menu.appendChild(kid);
+        });
+    }
+
+    function unparkBarMore(menu) {
+        var wrap = menu.closest('[data-bar-more]');
+        if (!wrap) return;
+        Array.prototype.slice.call(menu.children).forEach(function (kid) {
+            var home = barMoreHome && barMoreHome.get(kid);
+            if (home && home.parent) {
+                var next = home.next;
+                home.parent.insertBefore(kid, next && next.parentNode === home.parent ? next : wrap);
+            } else if (wrap.parentNode) {
+                wrap.parentNode.insertBefore(kid, wrap);
+            }
+        });
+    }
+
     function closeDotsMenus(except) {
         document.querySelectorAll('.dots-menu').forEach(function (menu) {
             if (menu === except) return;
+            if (!menu.hidden) unparkBarMore(menu);
             menu.hidden = true;
             var wrap = menu.closest('[data-dots-menu]');
             var toggle = wrap && wrap.querySelector('[data-dots-toggle]');
             if (toggle) toggle.setAttribute('aria-expanded', 'false');
         });
     }
+
+    function restoreWideBarMore() {
+        document.querySelectorAll('[data-bar-more]').forEach(function (wrap) {
+            if (getComputedStyle(wrap).display !== 'none') return;
+            var menu = wrap.querySelector('.dots-menu');
+            if (!menu || menu.hidden) return;
+            unparkBarMore(menu);
+            menu.hidden = true;
+            var toggle = wrap.querySelector('[data-dots-toggle]');
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        });
+    }
+    window.addEventListener('resize', restoreWideBarMore);
 
     document.addEventListener('click', function (e) {
         if (e.target.closest('[data-sheet-close]')) {
@@ -480,7 +526,14 @@ document.addEventListener('change', function (e) {
             if (menu) {
                 var open = menu.hidden;
                 closeDotsMenus(open ? menu : null);
-                menu.hidden = !open;
+                if (open) {
+                    var barWrap = dotsToggle.closest('[data-bar-more]');
+                    if (barWrap) parkBarMore(barWrap);
+                    menu.hidden = false;
+                } else {
+                    menu.hidden = true;
+                    unparkBarMore(menu);
+                }
                 dotsToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
             }
             return;

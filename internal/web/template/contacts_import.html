@@ -9,7 +9,7 @@
         <p class="dialog-sub">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}{{if $d.HasPreview}}{{if $d.Cards}} ← <code>{{(index $d.Cards 0).Source}}</code>{{end}}{{end}}</p>
     </div>
     {{if $d.HasPreview}}
-    <div class="dialog-acts">
+    <div class="m-acts">
         <form method="post" action="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/import">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="cancel_import">

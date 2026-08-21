@@ -1,21 +1,17 @@
 {{/* Полоса инструментов — макеты §6, класс .m-bar.
 
-     Полоса держит свой отступ сама, и он одинаков сверху и снизу. Раньше
-     сверху стоял ноль: девять пикселей полосе выдавала шапка над ней. Пока
-     полоса прозрачна, разницы не видно; стоило её залить — панель выделения в
-     файлах, — и содержимое село вплотную к верхнему краю заливки.
-
-     Полоса — одна строка, и она ею остаётся. Стоял flex-wrap:wrap, и с
-     открытой панелью подробностей набор молча разваливался на два ряда.
-     Лишнее теперь уходит по рангу (is-2nd) под кнопку «⋯», а не переносится.
+     Полоса держит свой отступ сама, и он одинаков сверху и снизу. Полоса —
+     одна строка, и она ею остаётся: лишнее уходит по рангу (is-2nd) под
+     кнопку «⋯», а не переносится.
 
      Большинство экранов держит полосу в обычном div; фильтр «From/To» в агенде
      — настоящая форма GET, поэтому у неё своя пара: форма не должна становиться
      div, из которого её потом вынимать.
 
+     Sel — заливка панели выделения (.m-sel): фон карточки, кнопки на бумаге.
      Вход передаётся всегда, даже пустой — {{template "m-bar" (bar)}}, а не
      {{template "m-bar"}}: тогда «.» здесь типизированный ноль, а не nil. */}}
-{{define "m-bar"}}<div class="m-bar no-print"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
+{{define "m-bar"}}<div class="m-bar{{if .Sel}} m-sel{{end}} no-print"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
 {{define "m-barend"}}</div>{{end}}
 
 {{define "m-barform"}}
@@ -23,3 +19,22 @@
 <form method="{{if $b.Method}}{{$b.Method}}{{else}}get{{end}}"{{if $b.Action}} action="{{$b.Action}}"{{end}} class="m-bar is-form no-print">
 {{end}}
 {{define "m-barformend"}}</form>{{end}}
+
+{{/* Правая группа полосы — счётчик, плотность, «Clear selection». Second
+     помечает её вторым рангом: на узкой колонке уходит под «⋯». */}}
+{{define "m-right"}}<span class="m-right{{if .Second}} is-2nd{{end}}">{{end}}
+{{define "m-rightend"}}</span>{{end}}
+
+{{define "m-sep"}}<span class="m-sep{{if .Second}} is-2nd{{end}}" aria-hidden="true"></span>{{end}}
+
+{{define "m-range"}}<span class="m-range{{if .Second}} is-2nd{{end}}"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
+{{define "m-rangeend"}}</span>{{end}}
+
+{{/* Кнопка «⋯»: скрыта, пока колонка широкая; появляется, когда в полосе
+     есть is-2nd. Содержимое меню подставляет carrel.js из ушедших узлов. */}}
+{{define "m-more"}}
+<span class="m-more" data-dots-menu data-bar-more>
+    <button type="button" class="app-btn is-quiet" data-dots-toggle title="More" aria-expanded="false" aria-haspopup="menu" aria-label="More">{{template "ico" "dots"}}</button>
+    <div class="app-create-menu dots-menu" role="menu" hidden></div>
+</span>
+{{end}}

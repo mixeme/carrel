@@ -66,17 +66,19 @@
 
             {{if $d.Truncated}}<p class="message notice no-print">This folder holds more files than Carrel lists. Only the first {{len $d.Entries}} are shown.</p>{{end}}
 
-            <div class="files-ops-bar no-print" data-files-ops hidden>
-                <span class="files-ops-count" data-files-ops-count>0 selected</span>
-                <span class="files-ops-size hint" data-files-ops-size></span>
-                <span class="files-ops-sep" aria-hidden="true"></span>
-                <button type="button" class="link" data-files-op="download">Download</button>
-                <button type="button" class="link" data-files-op="rename"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "pencil"}}Rename</button>
-                <button type="button" class="link" data-files-op="move"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "move"}}Move…</button>
-                <button type="button" class="link" data-files-op="copy"{{if $d.ReadOnly}} disabled{{end}}>Copy…</button>
-                <button type="button" class="link" data-files-op="delete"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "trash"}}Delete</button>
-                <span class="files-ops-right"><button type="button" class="link" data-files-clear>Clear selection</button></span>
-            </div>
+            {{template "m-bar" (bar "Sel" true "Attrs" (safeHTML "data-files-ops hidden"))}}
+                <span data-files-ops-count>0 selected</span>
+                <span class="hint" data-files-ops-size></span>
+                {{template "m-sep" (sep)}}
+                <button type="button" class="app-btn" data-files-op="download" title="Download">{{template "ico" "down"}}<span class="lbl">Download</span></button>
+                <button type="button" class="app-btn" data-files-op="rename" title="Rename"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "pencil"}}<span class="lbl">Rename</span></button>
+                <button type="button" class="app-btn" data-files-op="move" title="Move…"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "move"}}<span class="lbl">Move…</span></button>
+                <button type="button" class="app-btn" data-files-op="copy" title="Copy…"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "dup"}}<span class="lbl">Copy…</span></button>
+                <button type="button" class="app-btn is-danger" data-files-op="delete" title="Delete"{{if $d.ReadOnly}} disabled{{end}}>{{template "ico" "trash"}}<span class="lbl">Delete</span></button>
+                {{template "m-right" (right)}}
+                    <button type="button" class="app-btn is-sm is-quiet" data-files-clear>Clear selection</button>
+                {{template "m-rightend"}}
+            {{template "m-barend"}}
 
             {{template "m-bar" (bar "Attrs" (safeHTML "data-files-toolbar"))}}
                 <label class="files-filter">
@@ -84,15 +86,18 @@
                     <input type="search" placeholder="Filter this folder" data-files-filter autocomplete="off">
                 </label>
                 {{template "columnpicker" "files"}}
-                <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
-                    <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                    <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
-                </div>
                 <span class="files-view-toggle no-print">
                     <button type="button" class="link" data-files-view="list" aria-pressed="true">List</button>
                     <button type="button" class="link" data-files-view="tiles" aria-pressed="false">{{template "ico" "grid"}}Tiles</button>
                 </span>
-                {{if $d.ItemCount}}<span class="files-meta hint">{{$d.ItemCount}} items{{if $d.TotalSizeLabel}} · {{$d.TotalSizeLabel}}{{end}}</span>{{end}}
+                {{template "m-more"}}
+                {{template "m-right" (right "Second" true)}}
+                    <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
+                        <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
+                        <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                    </div>
+                    {{if $d.ItemCount}}<span class="files-meta hint">{{$d.ItemCount}} items{{if $d.TotalSizeLabel}} · {{$d.TotalSizeLabel}}{{end}}</span>{{end}}
+                {{template "m-rightend"}}
             {{template "m-barend"}}
 
             <form method="post" action="{{.Base}}/app/files/{{$d.AccountID}}/{{$d.ColEnc}}" data-files-delete-form class="visually-hidden">

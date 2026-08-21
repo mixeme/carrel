@@ -19,7 +19,7 @@
                 <a class="app-btn is-sm{{if eq $d.AuditCategory "security"}} is-on{{end}}" href="{{.Base}}/admin/audit?audit_category=security{{if $d.AuditAction}}&amp;audit_action={{$d.AuditAction}}{{end}}">Security</a>
                 <a class="app-btn is-sm{{if eq $d.AuditCategory "failures"}} is-on{{end}}" href="{{.Base}}/admin/audit?audit_category=failures{{if $d.AuditAction}}&amp;audit_action={{$d.AuditAction}}{{end}}">Failures</a>
             </span>
-            <form method="get" action="{{.Base}}/admin/audit" class="no-print">
+            <form method="get" action="{{.Base}}/admin/audit" class="no-print is-2nd">
                 <input type="hidden" name="audit_category" value="{{$d.AuditCategory}}">
                 <label class="sr-only" for="audit-action">Filter by action</label>
                 <select id="audit-action" name="audit_action" data-auto-submit>
@@ -41,6 +41,7 @@
                 <noscript><button type="submit" class="app-btn is-sm">Filter</button></noscript>
             </form>
             {{template "columnpicker" "admin-audit"}}
+            {{template "m-more"}}
         {{template "m-barend"}}
         {{if $d.AuditLog}}
         {{template "datatable" (dataTable "Class" "data" "Root" "admin-audit")}}

@@ -34,7 +34,8 @@
 }
 
 /* Набор действий экрана: он лежит между m-head и m-headend, но размер его —
-   дело шапки, а не экрана. */
+   дело шапки, а не экрана. Импорт кладёт сюда формы — они не должны
+   разбивать ряд своими полями. */
 .m-acts {
     display: flex;
     gap: 6px;
@@ -42,6 +43,13 @@
     flex: none;
     flex-wrap: wrap;
     justify-content: flex-end;
+    margin: 0;
+}
+
+.m-acts form {
+    display: flex;
+    gap: 6px;
+    align-items: center;
     margin: 0;
 }
 

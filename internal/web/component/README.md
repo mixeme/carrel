@@ -37,6 +37,8 @@ component/
 
 {{template "m-bar" (bar)}}
     …поля и переключатели экрана…
+    {{template "m-more"}}
+    {{template "m-right" (right "Second" true)}}…счётчик…{{template "m-rightend"}}
 {{template "m-barend"}}
 ```
 
@@ -63,8 +65,12 @@ component/
 | Компонент | Вход | Шаблон · стили | Что это |
 |---|---|---|---|
 | `m-head` / `m-headend` | `head` | `tmpl/m-head.html` · `css/10-head.css` | Шапка раздела |
-| `m-bar` / `m-barend` | `bar` | `tmpl/m-bar.html` · `css/20-bar.css` | Полоса инструментов |
+| `m-bar` / `m-barend` | `bar` | `tmpl/m-bar.html` · `css/20-bar.css` | Полоса инструментов; `Sel` — заливка выделения (`.m-sel`) |
 | `m-barform` / `m-barformend` | `barForm` | `tmpl/m-bar.html` · `css/20-bar.css` | Та же полоса настоящей формой GET — диапазон дат в агенде |
+| `m-right` / `m-rightend` | `right` | `tmpl/m-bar.html` · `css/20-bar.css` | Правая группа полосы; `Second` — уходит под «⋯» |
+| `m-sep` | `sep` | `tmpl/m-bar.html` · `css/20-bar.css` | Вертикальный разделитель на полосе |
+| `m-range` / `m-rangeend` | `barRange` | `tmpl/m-bar.html` · `css/20-bar.css` | Диапазон дат как один элемент полосы |
+| `m-more` | — | `tmpl/m-bar.html` · `css/20-bar.css` | Кнопка «⋯»: скрыта, пока колонка широкая |
 
 Классы, которые эти компоненты приносят с собой:
 
@@ -76,7 +82,11 @@ component/
 | `.m-crumbs` | `m-head` | Хлебные крошки |
 | `.m-bar3` | `m-head` | Полоска коллекции. Знает свой размер сама — в макетах это стоило отдельного разбора: размер задавала разметка, и полоска молча схлопывалась в ноль ширины |
 | `.m-acts` | `m-head` | **Слот**: действия экрана. Содержимое — дело экрана, раскладка — дело шапки, поэтому этот класс экран пишет сам |
-| `.m-bar` | `m-bar` | Сама полоса; `is-form` — вариант формой |
+| `.m-bar` | `m-bar` | Сама полоса; `is-form` — вариант формой; `.m-sel` — панель выделения |
+| `.m-right` | `m-bar` | Правая группа: счётчик, плотность, «Clear selection» |
+| `.m-sep` | `m-bar` | Разделитель 1×20 |
+| `.m-range` | `m-bar` | From/To и Show — один узел, чтобы диапазон уходил целиком |
+| `.m-more` | `m-bar` | «⋯»; содержимое меню — ушедшие `is-2nd`, их подставляет `carrel.js` |
 
 Что экрану **можно** писать руками, перечислено поимённо в
 `component_allowlist_test.go`: `slotClasses` — слоты вроде `.m-acts`,

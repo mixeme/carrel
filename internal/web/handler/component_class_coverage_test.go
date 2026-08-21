@@ -55,7 +55,6 @@ var unstyledClassAllowList = map[string]string{
 
 	// Small, single-purpose helper spans with genuinely no visual treatment
 	// distinct from their surrounding context.
-	"files-ops-size":     "plain text sizing readout; no distinct look from .hint",
 	"files-up-row":       "row-kind marker; .list-row/.find-row carry the box",
 	"folder-picker-hint": "plain hint text; .hint's rule already applies via cascade",
 	"folder-picker-warn": "plain warning text; .message.notice's rule already applies",

@@ -164,3 +164,35 @@ func writesClass(body, class string) bool {
 }
 
 var classAttr = regexp.MustCompile(`class="([^"]*)"`)
+
+// retiredBarNames are the extra names the action bar had before stage 1
+// collapsed them onto .m-bar / .m-sel / .m-sep / .m-right / .m-acts.
+// A screen that writes one of these is inventing a sixteenth name again.
+var retiredBarNames = []string{
+	"files-ops-bar", "files-ops-sep", "files-ops-right", "files-ops-count",
+	"dialog-acts", "bar-count", "form-actions", "conflict-actions",
+}
+
+func TestRetiredBarNamesStayGone(t *testing.T) {
+	templateFS, err := fs.Sub(web.TemplateFS, "template")
+	if err != nil {
+		t.Fatalf("template FS: %v", err)
+	}
+	names, err := fs.Glob(templateFS, "*.html")
+	if err != nil {
+		t.Fatalf("glob templates: %v", err)
+	}
+	for _, name := range names {
+		b, err := fs.ReadFile(templateFS, name)
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		body := string(b)
+		for _, class := range retiredBarNames {
+			if writesClass(body, class) {
+				t.Errorf("%s still writes retired bar class %q; use m-bar / m-sel / m-sep / m-right / m-acts",
+					name, class)
+			}
+		}
+	}
+}

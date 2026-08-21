@@ -837,8 +837,7 @@ a.src-label:hover {
     padding: 0;
 }
 
-.form-foot,
-.form-actions {
+.form-foot {
     flex: 1 1 100%;
     display: flex;
     flex-wrap: wrap;
@@ -850,9 +849,7 @@ a.src-label:hover {
 }
 
 .form-foot button,
-.form-actions button,
-.form-foot .button,
-.form-actions .button {
+.form-foot .button {
     margin-top: 0;
     height: var(--row-lg);
 }
@@ -894,13 +891,6 @@ a.src-label:hover {
 .conflict-diff .diff-changed td:nth-child(2),
 .conflict-diff .diff-changed td:nth-child(3) {
     color: var(--alert);
-}
-
-.conflict-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1rem;
 }
 
 .other-props ul {
@@ -2003,22 +1993,6 @@ label.checkbox input {
     margin: 4px 0 0;
 }
 
-.dialog-acts {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex: none;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.dialog-acts form {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    margin: 0;
-}
-
 .dialog-foot {
     display: flex;
     flex-wrap: wrap;
@@ -2193,48 +2167,9 @@ label.checkbox input {
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6'%3E%3Cpath d='M7 4h7l4 4v12H7z'/%3E%3Cpath d='M14 4v4h4'/%3E%3C/svg%3E");
 }
 
-/* The selection bar of the mockups: a band across the panel in the card
-   colour, not a floating box — it belongs to the listing under it, and its
-   buttons stand on paper so they read against the band. */
-.files-ops-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    padding: 0 var(--pad) 9px;
-    border: 0;
-    border-bottom: 0.5px solid var(--rule);
-    border-radius: 0;
-    background: var(--card);
-}
-
-.files-ops-bar .app-btn {
-    background: var(--paper);
-}
-
-.files-ops-bar[hidden] {
-    display: none !important;
-}
-
-.files-ops-count {
-    font-weight: 600;
-}
-
-.files-ops-sep {
-    width: 1px;
-    height: 1.25rem;
-    background: var(--hair);
-}
-
-.files-ops-right {
-    margin-left: auto;
-}
-
 .files-filter {
     display: inline-flex;
     align-items: center;
-    margin-right: auto;
 }
 
 /* 2.6.B1: hidden until carrel.js proves there is a filter to run against,
@@ -2242,7 +2177,6 @@ label.checkbox input {
 .list-filter {
     display: none;
     align-items: center;
-    margin-right: auto;
 }
 
 .js .list-filter {
@@ -2256,12 +2190,6 @@ label.checkbox input {
 
 .is-filtered-out {
     display: none;
-}
-
-.bar-count {
-    margin-left: auto;
-    color: var(--dusty);
-    font-size: 11.5px;
 }
 
 /* 2.6.B2: the sort order lives as links, same control the task filter
@@ -2282,7 +2210,7 @@ label.checkbox input {
 }
 
 .js [data-range-open] [data-range-fields] {
-    display: contents;
+    display: flex;
 }
 
 .files-filter input {
@@ -2291,7 +2219,8 @@ label.checkbox input {
 }
 
 .files-meta {
-    margin-left: auto;
+    color: var(--dusty);
+    font-size: 11.5px;
 }
 
 .files-table tr.is-selected {
@@ -4807,6 +4736,10 @@ body.has-shell .admin-panel {
     grid-row: 1 / -1;
     min-width: 0;
     background: var(--bg);
+    /* The bar's retreat ladder (and the list-column ladder after it) is a
+       container query on this column, not a viewport query: opening the
+       details panel must shrink the content, not the window. */
+    container-type: inline-size;
 }
 
 body.has-shell .app-content > .message {

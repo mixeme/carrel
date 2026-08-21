@@ -25,20 +25,16 @@
                 <a class="app-btn is-sm{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>
                 <button type="button" class="app-btn is-sm{{if eq $d.Segment "range"}} is-on{{end}}" data-range-toggle aria-expanded="{{if eq $d.Segment "range"}}true{{else}}false{{end}}">Range</button>
             </span>
-            <div data-range-fields>
-                <div class="form-field w-sm">
-                    <label for="cal-from">From</label>
-                    <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required>
-                </div>
-                <div class="form-field w-sm">
-                    <label for="cal-to">To</label>
-                    <input id="cal-to" type="date" name="to" value="{{$d.Request.To}}">
-                </div>
-                <div class="form-field is-own-line">
-                    <button type="submit" class="app-btn">Show</button>
-                </div>
-            </div>
-            <div class="form-field is-own-line form-inline">
+            {{template "m-range" (barRange "Second" true "Attrs" (safeHTML "data-range-fields"))}}
+                <label class="visually-hidden" for="cal-from">From</label>
+                <input id="cal-from" type="date" name="from" value="{{$d.Request.From}}" required>
+                <i aria-hidden="true">→</i>
+                <label class="visually-hidden" for="cal-to">To</label>
+                <input id="cal-to" type="date" name="to" value="{{$d.Request.To}}">
+                <button type="submit" class="app-btn">Show</button>
+            {{template "m-rangeend"}}
+            {{template "m-sep" (sep "Second" true)}}
+            <div class="form-inline">
                 <label class="checkbox"><input type="checkbox" name="kind" value="events"{{if $d.Request.Wants "events"}} checked{{end}}> Events</label>
                 <label class="checkbox"><input type="checkbox" name="kind" value="tasks"{{if $d.Request.Wants "tasks"}} checked{{end}}> Tasks due</label>
                 <label class="checkbox"><input type="checkbox" name="kind" value="notes"{{if $d.Request.Wants "notes"}} checked{{end}}> Notes</label>
@@ -47,11 +43,14 @@
                 <span class="visually-hidden">Filter these events</span>
                 <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
             </label>
-            <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
-                <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
-            </div>
-            <span class="bar-count" data-bar-count>0 items</span>
+            {{template "m-more"}}
+            {{template "m-right" (right "Second" true)}}
+                <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
+                    <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
+                    <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                </div>
+                <span data-bar-count>0 items</span>
+            {{template "m-rightend"}}
         {{template "m-barformend"}}
         {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
         {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was polled.</p>{{end}}
@@ -88,28 +87,27 @@
                     <a class="app-btn is-sm{{if eq $d.Segment "month"}} is-on{{end}}" href="{{$d.MonthURL}}">Month</a>
                     <button type="button" class="app-btn is-sm{{if eq $d.Segment "range"}} is-on{{end}}" data-range-toggle aria-expanded="{{if eq $d.Segment "range"}}true{{else}}false{{end}}">Range</button>
                 </span>
-                <div data-range-fields>
-                    <div class="form-field w-sm">
-                        <label for="agenda-from">From</label>
-                        <input id="agenda-from" type="date" name="from" value="{{$d.From}}" required>
-                    </div>
-                    <div class="form-field w-sm">
-                        <label for="agenda-to">To</label>
-                        <input id="agenda-to" type="date" name="to" value="{{$d.To}}" required>
-                    </div>
-                    <div class="form-field is-own-line">
-                        <button type="submit" class="app-btn">Show</button>
-                    </div>
-                </div>
+                {{template "m-range" (barRange "Second" true "Attrs" (safeHTML "data-range-fields"))}}
+                    <label class="visually-hidden" for="agenda-from">From</label>
+                    <input id="agenda-from" type="date" name="from" value="{{$d.From}}" required>
+                    <i aria-hidden="true">→</i>
+                    <label class="visually-hidden" for="agenda-to">To</label>
+                    <input id="agenda-to" type="date" name="to" value="{{$d.To}}" required>
+                    <button type="submit" class="app-btn">Show</button>
+                {{template "m-rangeend"}}
+                {{template "m-sep" (sep "Second" true)}}
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these events</span>
                     <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
                 </label>
-                <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
-                    <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
-                    <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
-                </div>
-                <span class="bar-count" data-bar-count>{{$d.EventCount}} {{if eq $d.EventCount 1}}item{{else}}items{{end}}</span>
+                {{template "m-more"}}
+                {{template "m-right" (right "Second" true)}}
+                    <div class="theme-segment no-print" data-density-segment role="group" aria-label="Row density">
+                        <button type="button" class="theme-segment-btn is-on" data-density-value="comfortable">Comfortable</button>
+                        <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
+                    </div>
+                    <span data-bar-count>{{$d.EventCount}} {{if eq $d.EventCount 1}}item{{else}}items{{end}}</span>
+                {{template "m-rightend"}}
             {{template "m-barformend"}}
             {{if $d.ReadOnly}}<p class="hint page-hint no-print">This calendar is read-only.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">No events in this date range.</p>{{end}}

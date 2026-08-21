@@ -54,9 +54,31 @@ type Head struct {
 	Crumbs       []fileCrumb
 }
 
-// Bar is the input to the m-bar component.
+// Bar is the input to the m-bar component. Sel is the filled selection
+// band (.m-sel): the same bar, in the card colour, with buttons on paper.
 type Bar struct {
 	Attrs template.HTML
+	Sel   bool
+}
+
+// Right is the input to m-right: the trailing group of a bar (counter,
+// density, "Clear selection"). Second marks it is-2nd — it retreats under
+// ⋯ when the content column is narrow.
+type Right struct {
+	Second bool
+}
+
+// Sep is the input to m-sep, the 1px rule between groups on a bar.
+type Sep struct {
+	Second bool
+}
+
+// BarRange is the input to m-range: From/To (and its Show) as one bar
+// item, so the whole range retreats together rather than leaving a
+// hanging separator.
+type BarRange struct {
+	Second bool
+	Attrs  template.HTML
 }
 
 // BarForm is the input to the m-barform component: the same bar built as a
@@ -85,6 +107,11 @@ type ImportExportMenu struct {
 func buildHead(pairs ...any) (Head, error)       { return typedDict[Head](pairs...) }
 func buildBar(pairs ...any) (Bar, error)         { return typedDict[Bar](pairs...) }
 func buildBarForm(pairs ...any) (BarForm, error) { return typedDict[BarForm](pairs...) }
+func buildRight(pairs ...any) (Right, error)     { return typedDict[Right](pairs...) }
+func buildSep(pairs ...any) (Sep, error)         { return typedDict[Sep](pairs...) }
+func buildBarRange(pairs ...any) (BarRange, error) {
+	return typedDict[BarRange](pairs...)
+}
 
 func buildDataTable(pairs ...any) (DataTable, error) { return typedDict[DataTable](pairs...) }
 func buildImportExportMenu(pairs ...any) (ImportExportMenu, error) {
