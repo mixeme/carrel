@@ -126,8 +126,21 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-rubric{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dusty);font-weight:600}
 .m-rail-sec{display:flex;flex-direction:column;gap:3px}
 .m-rail-sec > .m-rubric{padding:0 16px;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
-.m-src{display:grid;grid-template-columns:12px 3px minmax(0,1fr) auto;gap:9px;align-items:center;
+/* Сколько ячеек в строке источника, знает разметка, а не сетка: к имени
+   и счётчику добавляется то значок «ro», то кнопка «Retry» у не
+   ответившего источника. Колонок было ровно четыре, пятая ячейка
+   заворачивалась на второй ряд и вставала поверх имени, а само имя
+   сжималось до нуля: «Retry» в поиске лёг на «Общий», «ro» в контактах —
+   на «Команда». Теперь заданы только три первые колонки, а хвост
+   раскладывается сам, сколько бы ячеек в нём ни было. */
+.m-src{display:grid;grid-template-columns:12px 3px minmax(3.5em,1fr);
+  grid-auto-flow:column;grid-auto-columns:minmax(0,auto);gap:9px;align-items:center;
   height:26px;padding:0 14px 0 12px;font-size:13px}
+/* Уступает хвост, а не имя: имя — единственное, за что строку узнают.
+   На странице подключений хвост «cal · 128 · read 2 min ago · changed
+   3 h ago» съедал колонку имени до нуля, и от «Личный» не оставалось
+   ни буквы. */
+.m-src .m-meta{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .m-src .m-box{width:11px;height:11px;border-radius:2px;background:var(--ink)}
 .m-src .m-box.is-off{background:transparent;border:.5px solid var(--card-border)}
 /* Полоска коллекции знает свой размер сама. Раньше его задавали только
@@ -144,6 +157,13 @@ figcaption b{color:var(--ink);font-weight:600}
 /* «Все календари», «Все адресные книги» — единый вид раздела. Полоска
    собрана из цветов всех коллекций: одна запись стоит за несколькими. */
 .m-src.is-all{margin-bottom:2px}
+/* Корень файлов — не единый вид, а навигация: содержимое хранилищ
+   не смешивается, складывать нечего. Поэтому у этой строки нет ни
+   флажка «опрашивается», ни сборной полоски из цветов коллекций —
+   только значок раздела, как у строки навигации. */
+.m-src.is-root{grid-template-columns:13px minmax(3.5em,1fr);margin-bottom:2px}
+.m-src.is-root > svg{width:13px;height:13px;stroke:currentColor;stroke-width:1.3;
+  fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.75}
 /* Чужая лента: цвет не с сервера, а выведен из адреса, поэтому полоска
    штрихованная — видно, что коллекция не ваша и только для чтения. */
 .m-src.is-ext .m-bar3{position:relative}
@@ -184,7 +204,7 @@ figcaption b{color:var(--ink);font-weight:600}
 /* Сжимается в панели только поле, и не ниже 96 px: переключателю
    сжиматься нечем — он просто обрезает слово, и «Failures» в журнале
    превращался в «Failur». */
-.m-bar > .m-in{min-width:96px;overflow:hidden;white-space:nowrap}
+.m-bar > .m-in{min-width:88px;overflow:hidden;white-space:nowrap}
 .m-bar > .m-seg,.m-bar > .m-btn,.m-bar > .m-check,.m-bar > .m-range,
 .m-bar > .m-right,.m-bar > .m-sep{flex:none}
 .m-sep{width:1px;height:20px;background:var(--card-border);flex:none}
@@ -208,6 +228,17 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-in{height:28px;border:.5px solid var(--card-border);border-radius:3px;background:var(--paper);padding:0 9px;
   font-size:12.5px;display:flex;align-items:center;color:var(--ink);min-width:0}
 .m-in.is-ph{color:var(--dusty)}
+/* Поле, за которым стоит список. Стрелка — часть поля, а не значок,
+   дописанный в разметке: без неё выпадающий список ничем не отличается
+   от строки ввода, и человек не догадывается, что вариант не один.
+   Нарисована она была четыре раза руками — у «Status», «Frequency»,
+   «On which server» и выбора коллекции при восстановлении, — а у
+   двадцати четырёх таких же полей её просто забыли. Теперь забыть
+   нельзя: рисует система, разметка только называет поле списком. */
+.m-in.is-pick{padding-right:26px;position:relative}
+.m-in.is-pick::after{content:"";position:absolute;right:9px;top:50%;width:6px;height:6px;
+  margin-top:-4px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;
+  transform:rotate(45deg);opacity:.5}
 .m-in.is-focus{outline:1.5px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
 .m-in.is-area{height:auto;min-height:76px;align-items:flex-start;padding:7px 9px;line-height:1.5;white-space:pre-wrap}
 .m-in.is-mono{font-family:var(--f-mono);font-size:11.5px}
@@ -386,6 +417,17 @@ figcaption b{color:var(--ink);font-weight:600}
 .m-kbd{font-family:var(--f-mono);font-size:10.5px;border:.5px solid var(--card-border);border-radius:3px;
   padding:1px 5px;color:var(--muted);background:var(--bg);white-space:nowrap}
 .m-menu{width:236px;background:var(--paper);border:.5px solid var(--card-border);border-radius:4px;padding:4px}
+/* Меню, раскрытое поверх экрана, всплывает и места в раскладке не
+   занимает. Иначе макет врёт вдвойне: список подсказок у «Related to»
+   раздвигал форму на четыре строки, которых в интерфейсе нет, а выбор
+   коллекции при восстановлении растягивал строку таблицы на полтораста
+   пикселей. Исполнитель, верстающий «как в макете», построит эти пустые
+   строки — он их видит. Витрины меню (раздел 6 и четыре отдельных
+   кадра) — другое дело: там меню и есть предмет, оно стоит само по
+   себе и ничего собой не раздвигает. */
+.m-menu.is-pop{position:absolute;top:100%;left:0;margin-top:4px;z-index:3}
+.m-menu.is-pop.is-right{left:auto;right:0}
+.m-f:has(> .m-menu.is-pop){position:relative}
 .m-menu > div{display:flex;align-items:center;gap:9px;height:28px;padding:0 8px;border-radius:3px;font-size:12.5px}
 .m-menu > div.is-on{background:var(--card)}
 .m-menu > div > svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;opacity:.75}
@@ -464,9 +506,24 @@ figcaption b{color:var(--ink);font-weight:600}
 /* Колонки уходят по очереди, когда сужается колонка содержимого. Запросы
    заданы к контейнеру .m-main, а не к окну: список ведёт себя одинаково и
    на узком экране, и на широком с раскрытой панелью подробностей. */
-/* Панель подробностей: ниже 1024 она перестаёт быть закреплённой и
-   становится отдельной страницей — здесь это показано как её исчезновение. */
-@container (max-width:1000px){
+/* Панель подробностей перестаёт быть закреплённой и становится отдельной
+   страницей — здесь это показано как её исчезновение. Порог не выбран, а
+   посчитан: рейл 264 + самая широкая панель 520 (правка заметки) + пол
+   колонки содержимого 416 = 1200. Стояла тысяча, и она была взята от
+   «ниже 1024 панель отцепляется» — от ширины окна, а не от того, что
+   после панели остаётся. Панели же разной ширины: 340 у файлов, 360, 400,
+   440 у заметок. При 1019 px кадра заметкам оставалось 235 px, задачам и
+   календарю — 355, и панель инструментов в них не помещалась ни в одну
+   строку. Порог считается по самой широкой панели: где хватило ей,
+   хватит всем.
+
+   Пол колонки — 480 px: столько нужно самой тяжёлой панели инструментов
+   после отступления («всё о человеке»: переключатель на пять делений,
+   «Columns» и «⋯»). 264 + 440 + 480 = 1184, порог округлён до 1190.
+   Панель правки заметки при этом ужалась с 520 до 440: 520 требовали
+   порога в 1264, а это значит, что на окне 1280 у всех кадров пропала бы
+   панель подробностей — ровно то, ради чего эти кадры и нарисованы. */
+@container (max-width:1190px){
   .m-shell.has-side{grid-template-columns:var(--rail) minmax(0,1fr)}
   .m-shell.has-side > .m-side{display:none}
 }
@@ -711,7 +768,7 @@ figcaption b{color:var(--ink);font-weight:600}
 <p><b>Правило:</b> прежде чем делать функцию, для каждого рода коллекций отвечают на вопрос «осмысленна ли она здесь». Ответов ровно три — <b>делаем</b>, <b>неприменимо</b> (и почему), <b>сознательно позже</b> (и когда). Ответа «про это не подумали» быть не должно, и таблица ниже существует ровно затем, чтобы его не было. Она же — список того, что редизайн обязан показать: экран, у которого в строке стоит «делаем», должен быть в этом документе.</p>
 <table class="doc">
   <tr><th style="width:22%">Функция</th><th>События</th><th>Задачи</th><th>Заметки</th><th>Контакты</th><th>Файлы</th><th style="width:22%">Где в макетах</th></tr>
-  <tr><td>Единый вид «Combined …»</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>корень коллекций</td><td>7.1–7.5</td></tr>
+  <tr><td>Единый вид «Combined …»</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>корень, а не единый вид</td><td>7.1–7.5</td></tr>
   <tr><td>Завести, переименовать, удалить коллекцию</td><td><b>делаем:</b> <code>MKCALENDAR</code></td><td><b>делаем:</b> та же календарная коллекция, другой набор компонентов</td><td><b>делаем:</b> то же</td><td><b>делаем:</b> <code>MKCOL</code> с типом ресурса</td><td>есть: «New folder», «Rename», «Delete»</td><td><a href="#collections">7.10</a>, 7.5</td></tr>
   <tr><td>Выбор столбцов</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td>раздел 6</td></tr>
   <tr><td>Печать</td><td>есть</td><td>есть</td><td>есть</td><td>есть</td><td><b>делаем:</b> листинг папки</td><td>раздел 11</td></tr>
@@ -936,9 +993,12 @@ figcaption b{color:var(--ink);font-weight:600}
   <div class="m-f w-sm"><label>Birthday</label><span class="m-in is-ph">YYYY-MM-DD</span></div>
   <div class="m-f w-xs"><label>Start time</label><span class="m-in is-mono">10:00</span></div>
   <div class="m-f w-lg"><label>Email</label><span class="m-in is-focus">a.kovaleva@example.org</span></div>
+  <div class="m-f w-sm"><label>Status</label><span class="m-in is-pick">Confirmed</span></div>
   <div class="m-f"><span class="m-check"><span class="m-box"></span>All day</span></div>
   <div class="m-f"><span class="m-check"><span class="m-box is-off"></span>Print with photos</span></div>
 </div>
+
+<p><b>Поле со списком отличается от поля ввода стрелкой</b>, и рисует её система, а не разметка. До этого стрелку ставили руками — и поставили четыре раза из двадцати восьми: у «Status», «Frequency», «On which server» и у выбора коллекции при восстановлении. Остальные двадцать четыре списка — часовой пояс, роль пользователя, шифрование почты, срок жизни ссылки, записная книжка у быстрой заметки — выглядели как обычные строки ввода, и узнать, что вариант не один, можно было только ткнув. Теперь список называет себя сам: <code>is-pick</code> — и стрелка появляется, потому что поле — список, а не потому, что о ней вспомнили.</p>
 
 <h4>Источник в рейле</h4>
 <div class="demo mock col" style="background:var(--paper);max-width:340px">
@@ -997,7 +1057,7 @@ figcaption b{color:var(--ink);font-weight:600}
 <p>Дважды это ломалось одинаково. Сначала у флажка не оказалось собственной высоты — он брал её у текста, получалось 18&nbsp;px, и рядом с полем он садился ниже на девять пикселей: так было у «Stop the server on exit» и ещё в семи местах. Потом то же самое нашлось в панелях: мелкая кнопка (22&nbsp;px) стояла среди обычных (26&nbsp;px) в панели выделения файлов, а флажки «Events · Tasks due · Notes» в панели календаря были ниже кнопок рядом. Причина одна и та же — <b>высоту знала разметка, а не система</b>.</p>
 <p>Теперь её знает система, и правила идут от частного к общему: строки формы, панели, таблицы, а последним — самое общее: <b>ряд, в котором стоит поле, задаёт 28&nbsp;px всему ряду</b>, чем бы этот ряд ни был свёрстан. Поэтому мелкая кнопка рядом с полем невозможна: она станет обычной, даже если её так назвали. Плотные списки флажков правило не трогает — два флажка в одной ячейке это уже список, а не строка.</p>
 <p><b>Выравнивание идёт сверху, по строке подписи, — и это второе, что пришлось переучить.</b> Строка формы равнялась по нижнему краю, и пока у полей были только значения, это работало. Стоило у поля порта появиться подсказке под ним — «порт выбирает система при каждом запуске» — как ячейка стала на двадцать пикселей выше, а флажок «Stop the server on exit», честно прижатый к низу строки, уехал вниз вместе с подсказкой и оказался напротив объяснения. Теперь ячейки равняются по верху, и у ячейки без подписи строка подписи пустая, но есть: контрол всегда стоит на одной линии с соседним полем, сколько бы текста ни висело под ним. Ячейке, которая занимает строку одна, эта пустая строка не нужна — она помечается <code>is-own-line</code>, и таких в макетах две.</p>
-<p>Чтобы разъезд не искали глазами по девяноста макетам, у файла есть встроенная проверка: откройте его с <code>#check</code> в адресе. Она обходит <b>каждый</b> ряд — форму, панель, шапку, подвал диалога, карточку, — сравнивает вертикальные центры и высоты и обводит красным то, что выбилось: центром больше чем на полтора пикселя или высотой хоть на пиксель. Проходов у неё три, и каждый появился из-за того, чего не видел предыдущий. Первый сравнивает контролы, уже стоящие на одной линии, и потому слепнет, когда контрол уехал далеко — такой выглядит как отдельная строка. Второй смотрит на ячейки формы: если их вертикальные диапазоны пересекаются, это одна строка, что бы ни думали контролы внутри. Третий смотрит уже не внутрь строки, а на саму полосу — и видит то, чего в строке не видно: разный отступ сверху и снизу (содержимое сидит не по центру своей полосы) и полосу, не поместившуюся в колонку — развалившуюся на два ряда или вылезшую за край. В углу — счёт. На чистом файле там написано «Строки выровнены»; когда проверку написали, она нашла двадцать восемь мест, о которых никто не знал.</p>
+<p>Чтобы разъезд не искали глазами по девяноста макетам, у файла есть встроенная проверка: откройте его с <code>#check</code> в адресе. Она обходит <b>каждый</b> ряд — форму, панель, шапку, подвал диалога, карточку, — сравнивает вертикальные центры и высоты и обводит красным то, что выбилось: центром больше чем на полтора пикселя или высотой хоть на пиксель. Проходов у неё три, и каждый появился из-за того, чего не видел предыдущий. Первый сравнивает контролы, уже стоящие на одной линии, и потому слепнет, когда контрол уехал далеко — такой выглядит как отдельная строка. Второй смотрит на ячейки формы: если их вертикальные диапазоны пересекаются, это одна строка, что бы ни думали контролы внутри. Третий смотрит уже не внутрь строки, а на саму полосу — и видит то, чего в строке не видно: разный отступ сверху и снизу (содержимое сидит не по центру своей полосы) и полосу, не поместившуюся в колонку — развалившуюся на два ряда или вылезшую за край. Он же обходит строки источников в рейле, и там ловит ещё одно: ячейку, которой не хватило колонки, и имя, сжатое хвостом до нуля. Так нашлись «Retry» поверх «Общий» в поиске, «ro» поверх «Команда» в контактах и исчезнувший «Личный» на странице подключений. В углу — счёт. На чистом файле там написано «Строки выровнены»; когда проверку написали, она нашла двадцать восемь мест, о которых никто не знал.</p>
 
 <h4>Панель инструментов: одна строка</h4>
 <p>Панель управления списка — <b>полоса высотой в одну строку</b>, и таких полос три: инструменты списка, панель выделения, ход опроса. У всех трёх один отступ (7&nbsp;px сверху и снизу) и одна высота содержимого (26&nbsp;px), потому что это одна вещь, а не три похожих.</p>
@@ -1047,6 +1107,10 @@ figcaption b{color:var(--ink);font-weight:600}
 <p><b>Отступ у полосы свой, а не соседский.</b> Раньше сверху у неё стоял ноль, а нужные девять пикселей выдавала шапка над ней. Пока полоса прозрачна, разницы не видно; стоило её залить — панель выделения в файлах, — и кнопки сели вплотную к верхнему краю заливки. Ошибка ровно та же, что была с высотой строки: <b>размер знала соседняя разметка, а не сам компонент</b>. Оттуда же росли и заплаты в разметке: у телефонной панели выделения отступ был прописан руками, у панели правки заметки её правая группа была собрана инлайновым стилем вместо <code>.m-right</code>, а вертикальный разделитель пять раз подряд рисовали спаном с размерами в атрибуте. Теперь это <code>.m-sep</code>, <code>.m-range</code> и <code>.m-right</code> — такие же части набора, как кнопка.</p>
 <p><b>Полоса — одна строка, и она ею остаётся.</b> У неё стоял <code>flex-wrap:wrap</code>, и стоило открыть панель подробностей, как колонка содержимого сужалась до полутысячи пикселей и набор молча разваливался на два ряда: «Compact&nbsp;rows» уезжал вниз один, а полоска опроса вставала под ним. Теперь действует тот же закон, что и у колонок списка: <b>лишнее уходит по очереди, а не переносится</b>. Что уходит — помечает разметка (<code>is-2nd</code>), когда — решает ширина колонки содержимого (800&nbsp;px), а ушедшее лежит под кнопкой «⋯» в конце строки. Порядок отступления у каждой панели свой, как своя очередь колонок у каждого вида строки: в календаре первым уходит диапазон дат, в задачах — сортировка, в контактах — сортировка и хвост со счётчиком.</p>
 <p><b>Панель выделения сжимается иначе</b> — не потерей действия, а потерей подписи: значок остаётся, слово уходит. Действие из панели выделения прятать нельзя, поэтому «⋯» ей не нужен. Так уже было нарисовано на телефоне, только руками; теперь это правило.</p>
+
+<h4>Раскрытое меню в макете</h4>
+<p>Меню, нарисованное открытым внутри экрана, <b>всплывает и места в раскладке не занимает</b>. Правило звучит как придирка к вёрстке документа, но оно про то, что получится на выходе: <b>исполнитель строит то, что видит</b>. Список подсказок у поля «Related to» стоял в потоке и раздвигал форму на четыре строки, которых в интерфейсе нет; выбор коллекции при восстановлении растягивал строку таблицы на полтораста пикселей. Обе высоты выглядели как часть разметки, и повторить их в шаблоне было бы ровно тем, о чём просит макет.</p>
+<p>Отличить одно от другого можно не на глаз: меню внутри <code>.m-shell</code> — это меню на экране, и оно обязано всплывать; меню вне <code>.m-shell</code> — витрина, где меню и есть предмет кадра. Так это и проверяется: <code>#check</code> обводит красным любое меню внутри экрана, оставшееся в потоке. Из трёх таких в документе правильно был сделан один — на странице подключений, и то <b>руками</b>, координатами в атрибуте <code>style</code>; теперь все три пользуются одним <code>is-pop</code>.</p>
 
 <h4>Кнопка рядом с полем</h4>
 <p>Кнопка, относящаяся к полю, стоит <b>справа от него и внутри его же блока</b>, обычной высоты. Мелкая кнопка (22&nbsp;px) — только для строк списка и таблиц, где полей нет. Пара «поле + кнопка» верстается одной строкой внутри <code>.m-f</code>, а не двумя соседними ячейками формы: во втором случае выравнивание держится на <code>align-items</code> родителя и разъезжается, как только у соседнего поля появляется подсказка или вторая строка. Ровно это и произошло на экране восстановления, и в трёх других местах — на карточке пароля устройства и в правке телефонов и почты.</p>
@@ -1285,7 +1349,7 @@ Read  2 min ago</div>
 
           <div class="m-fset">
             <div class="m-rubric">Phone numbers</div>
-            <div class="m-f w-xs"><label>Label</label><span class="m-in">mobile</span></div>
+            <div class="m-f w-xs"><label>Label</label><span class="m-in is-pick">mobile</span></div>
             <div class="m-f w-md"><label>Number</label><span class="m-in is-mono">+7 912 445-10-88</span></div>
             <span class="m-btn is-quiet">Remove</span>
             <div style="flex:1 1 100%"></div>
@@ -1298,7 +1362,7 @@ Read  2 min ago</div>
 
           <div class="m-fset">
             <div class="m-rubric">Email addresses</div>
-            <div class="m-f w-xs"><label>Label</label><span class="m-in">work</span></div>
+            <div class="m-f w-xs"><label>Label</label><span class="m-in is-pick">work</span></div>
             <div class="m-f w-lg"><label>Address</label><span class="m-in">a.kovaleva@example.org</span></div>
             <span class="m-btn is-quiet">Remove</span>
             <div style="flex:1 1 100%"></div>
@@ -1689,7 +1753,7 @@ Read  2 min ago · changed on server 3 days ago</div>
         <div class="m-form">
           <div class="m-f w-xl"><label>Summary</label><span class="m-in is-focus">Синк-ап по релизу</span></div>
           <div class="m-f w-lg"><label>Location</label><span class="m-in">Переговорная 2</span></div>
-          <div class="m-f w-sm"><label>Status</label><span class="m-in">Confirmed <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" style="margin-left:auto"><use href="#i-chev"/></svg></span></div>
+          <div class="m-f w-sm"><label>Status</label><span class="m-in is-pick">Confirmed</span></div>
           <div class="m-f w-md"><label>Categories</label><span class="m-in">release, team</span></div>
           <div class="m-f w-full"><label>Description</label><span class="m-in is-area">Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям.</span></div>
 
@@ -1700,12 +1764,12 @@ Read  2 min ago · changed on server 3 days ago</div>
             <div class="m-f w-xs"><label>Start time</label><span class="m-in is-mono">10:00</span></div>
             <div class="m-f w-sm"><label>End date</label><span class="m-in is-mono">2026-08-10</span></div>
             <div class="m-f w-xs"><label>End time</label><span class="m-in is-mono">11:00</span></div>
-            <div class="m-f w-md"><label>Time zone</label><span class="m-in">Europe/Moscow <span style="color:var(--dusty);margin-left:6px">as sent</span></span></div>
+            <div class="m-f w-md"><label>Time zone</label><span class="m-in is-pick">Europe/Moscow <span style="color:var(--dusty);margin-left:6px">as sent</span></span></div>
           </div>
 
           <div class="m-fset">
             <div class="m-rubric">Repeats</div>
-            <div class="m-f w-sm"><label>Frequency</label><span class="m-in">Weekly <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" style="margin-left:auto"><use href="#i-chev"/></svg></span></div>
+            <div class="m-f w-sm"><label>Frequency</label><span class="m-in is-pick">Weekly</span></div>
             <div class="m-f w-xs"><label>Every</label><span class="m-in is-mono">1</span></div>
             <div class="m-f"><label>On</label><span class="m-seg"><span class="is-on">MO</span><span>TU</span><span>WE</span><span>TH</span><span>FR</span><span>SA</span><span>SU</span></span></div>
             <div class="m-f w-sm"><label>Until</label><span class="m-in is-mono">2026-12-28</span></div>
@@ -1854,7 +1918,7 @@ SEQUENCE  2</div>
 <div class="frame">
   <div class="frame-label"><span>Заметки · список и редактор</span><i>/app/notes/{account}/{col}</i></div>
   <div class="mock">
-    <div class="m-shell has-side" style="--side:520px">
+    <div class="m-shell has-side" style="--side:440px">
       <div class="m-rail">
         <div class="m-nav">
           <a><svg><use href="#i-search"/></svg>Search</a>
@@ -2078,7 +2142,7 @@ Read  2 min ago</div>
           <div class="m-docbody" style="padding-top:20px">
             <div class="m-in is-focus" style="height:auto;padding:7px 12px;font-family:var(--f-serif);font-size:24px">Заметка со встречи 10.08</div>
             <div style="display:flex;flex-wrap:wrap;gap:12px 16px;margin:12px 0;align-items:flex-end">
-              <div class="m-f" style="flex:2 1 280px"><label>Notebook</label><span class="m-in">Записи · nextcloud</span></div>
+              <div class="m-f" style="flex:2 1 280px"><label>Notebook</label><span class="m-in is-pick">Записи · nextcloud</span></div>
               <div class="m-f" style="flex:0 0 150px"><label>Date</label><span class="m-in is-mono">2026-08-10</span></div>
               <div class="m-f" style="flex:0 0 110px"><label>Time</label><span class="m-in is-mono">11:05</span></div>
               <div class="m-f" style="flex:3 1 320px"><label>Tags</label><span class="m-in">встречи, релиз</span></div>
@@ -2089,7 +2153,7 @@ Read  2 min ago</div>
                     <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" fill="none"><use href="#i-close"/></svg></span>
                   <span style="color:var(--dusty)">ковал</span>
                 </span>
-                <div class="m-menu" style="width:100%;margin-top:4px">
+                <div class="m-menu is-pop" style="width:100%">
                   <div class="is-on"><svg><use href="#i-cal"/></svg>Звонок с Ковалёвой<span class="mono" style="margin-left:auto;font-size:10px;color:var(--dusty)">10 Aug · Личный</span></div>
                   <div><svg><use href="#i-task"/></svg>Ответить Анне по смете<span class="mono" style="margin-left:auto;font-size:10px;color:var(--dusty)">task · Работа</span></div>
                   <div><svg><use href="#i-con"/></svg>Анна Ковалёва<span class="mono" style="margin-left:auto;font-size:10px;color:var(--dusty)">contact</span></div>
@@ -2178,7 +2242,7 @@ Read  2 min ago</div>
           <div class="h">
             <svg width="15" height="15" viewBox="0 0 24 24" stroke="var(--accent)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#i-quill"/></svg>
             <b style="font-size:13.5px">New note</b>
-            <span class="m-in" style="width:200px;font-size:12px;margin-left:auto">Записи · nextcloud</span>
+            <span class="m-in is-pick" style="width:200px;font-size:12px;margin-left:auto">Записи · nextcloud</span>
             <span class="m-btn is-sm is-quiet"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span>
           </div>
           <div class="b">
@@ -2239,7 +2303,7 @@ Read  2 min ago</div>
 <h2 id="s-files">7.5 Файлы</h2>
 <p>Сейчас это таблица с двумя формами под ней. Должен быть нормальный файловый менеджер: выделение, набор операций в панели, перетаскивание, очередь загрузок и панель свойств. Ниже — весь раздел целиком, включая операции, которых в провайдере ещё нет; они помечены отдельно, и в конце раздела расписано, чего каждая стоит.</p>
 
-<div class="note"><b>Единый вид в файлах — это корень.</b> Строка <b>All collections</b> открывает список подключённых хранилищ как папок верхнего уровня: у каждой — сервер, права и назначение. Дальше открывается обычное дерево одной коллекции. Смешивать содержимое разных серверов в одной папке нельзя и не нужно: путь у файла один, и он принадлежит своему хранилищу.</div>
+<div class="note"><b>Единого вида в файлах нет, и он тут не нужен.</b> В остальных разделах единый вид складывает записи разных коллекций в один список — у события или карточки нет места, кроме самой записи, и порядок им задаёт дата или имя. У файла место есть: путь, и путь принадлежит своему хранилищу. Сложить два дерева в одно можно только придумав, чей каталог главнее, — а придумывать такое интерфейс не вправе.<br><br>Поэтому строка <b>All collections</b> в рейле — не единый вид, а <b>корень раздела</b>: она открывает список подключённых хранилищ как папок верхнего уровня, у каждой — сервер, права и назначение. Дальше открывается обычное дерево одной коллекции. Ни флажка «опрашивается», ни сборной полоски из цветов у этой строки нет: нечего отмечать и нечего собирать. В таблице равенства коллекций у файлов в этой строке так и стоит — «корень, а не единый вид».</div>
 
 <figure>
 <div class="frame">
@@ -2266,7 +2330,7 @@ Read  2 min ago</div>
           <a><svg><use href="#i-dup"/></svg>Duplicates<span class="m-num">3</span></a>
         </div>
         <div class="m-rail-sec">
-          <div class="m-src is-all"><span class="m-box"></span><span class="m-bar3 is-multi"></span><span class="t">All collections</span><span class="m-meta">3</span></div>
+          <div class="m-src is-root"><svg viewBox="0 0 24 24"><use href="#i-file"/></svg><span class="t">All collections</span><span class="m-meta">3</span></div>
         </div>
         <div class="m-rail-sec">
           <div class="m-rubric">sftpgo · vps</div>
@@ -2514,7 +2578,7 @@ Read  2 min ago</div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
         <div class="m-head" style="padding-bottom:8px">
-          <div><div class="m-h1" style="font-size:18px"><span class="m-bar3 is-multi" style="height:18px"></span>All collections</div>
+          <div><div class="m-h1" style="font-size:18px">All collections</div>
             <div class="m-sub">3 storages on 2 servers</div></div>
         </div>
         <table class="m-table">
@@ -2525,11 +2589,11 @@ Read  2 min ago</div>
             <tr class="is-folder"><td><span class="m-fname"><svg><use href="#i-file"/></svg><span>Files</span></span></td><td class="mono">nextcloud · home</td><td class="mono">rw</td><td></td></tr>
           </tbody>
         </table>
-        <div class="m-msg">This is the section’s unified view: storages shown as top-level folders. Below it the tree of one of them opens — contents of different servers are never mixed in one folder, because a file has one path and belongs to its own storage.</div>
+        <div class="m-msg">This is where the section starts: your storages as top-level folders. Open one and its own tree opens — contents of different servers are never mixed in one folder, because a file has one path and belongs to its own storage.</div>
       </div></div>
     </div>
   </div>
-  <figcaption>Экран, с которого начинается раздел, когда в рейле выбрано <b>All collections</b>. Колонки отвечают на три вопроса сразу: чьё это хранилище, можно ли туда писать и не оно ли выбрано под вложения.</figcaption>
+  <figcaption>Экран, с которого начинается раздел, когда в рейле выбран корень <b>All collections</b>. Колонки отвечают на три вопроса сразу: чьё это хранилище, можно ли туда писать и не оно ли выбрано под вложения.</figcaption>
   </figure>
 </div>
 
@@ -2689,7 +2753,7 @@ Read  2 min ago</div>
               <span class="m-btn is-primary">Link them</span>
               <span class="m-btn is-quiet">Not duplicates</span>
               <span style="margin-left:auto;display:flex;gap:8px;align-items:center">
-                <span class="m-f"><span class="m-in" style="width:210px">Merge into: nextcloud · Контакты</span></span>
+                <span class="m-f"><span class="m-in is-pick" style="width:210px">Merge into: nextcloud · Контакты</span></span>
                 <span class="m-btn is-danger">Merge on the server…</span>
               </span>
             </div>
@@ -2934,7 +2998,7 @@ Read  2 min ago</div>
               <div class="m-src" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#3F6E8C"></span><span class="t">Работа</span><span class="m-meta">cal</span></div>
               <div style="position:relative">
                 <div class="m-src is-on" style="padding-left:0"><span class="m-box"></span><span class="m-bar3" style="background:#A05A2C"></span><span class="t">Дни рождения</span><span style="display:flex;gap:7px;align-items:center"><span class="m-meta">cal</span><span class="m-btn is-sm is-quiet" style="height:18px;padding:0 3px"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></span></div>
-                <div class="m-menu" style="position:absolute;right:0;top:100%;margin-top:3px;z-index:2;width:222px">
+                <div class="m-menu is-pop is-right" style="width:222px">
                   <div><svg><use href="#i-pencil"/></svg>Rename and colour…</div>
                   <div><svg><use href="#i-down"/></svg>Export <span class="mono" style="font-size:11px">.ics</span></div>
                   <div><svg><use href="#i-link"/></svg>Publish a link…</div>
@@ -3083,7 +3147,7 @@ Read  2 min ago</div>
         </div>
         <div class="b">
           <div class="m-f" style="width:100%"><label>On which server</label>
-            <span class="m-in">nextcloud · home<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" style="margin-left:auto"><use href="#i-chev"/></svg></span>
+            <span class="m-in is-pick">nextcloud · home</span>
             <span class="m-hint" style="font-size:11px;color:var(--dusty)">Two of three are listed: <span class="mono">baikal · office</span> is not answering, and until it does there is nothing to create there.</span></div>
           <div class="m-f" style="width:100%"><label>Name</label><span class="m-in is-focus">Поездки</span></div>
           <div class="m-f" style="width:100%"><label>Colour</label>
@@ -3481,9 +3545,9 @@ Read  2 min ago</div>
         </div>
         <div class="m-fset">
           <div class="m-rubric">Dates and times</div>
-          <div class="m-f w-md"><label>Week starts on</label><span class="m-in">Monday</span></div>
-          <div class="m-f w-md"><label>Time</label><span class="m-in">24-hour</span></div>
-          <div class="m-f w-lg"><label>Time zone</label><span class="m-in">Europe/Moscow <span style="color:var(--dusty);margin-left:6px">from the server</span></span></div>
+          <div class="m-f w-md"><label>Week starts on</label><span class="m-in is-pick">Monday</span></div>
+          <div class="m-f w-md"><label>Time</label><span class="m-in is-pick">24-hour</span></div>
+          <div class="m-f w-lg"><label>Time zone</label><span class="m-in is-pick">Europe/Moscow <span style="color:var(--dusty);margin-left:6px">from the server</span></span></div>
           <div class="m-f" style="flex:1 1 100%"><span class="m-hint">In v1 there is one zone per instance, set by the administrator: an event shown in two zones to two people is a source of mistakes, not a convenience.</span></div>
         </div>
       </div>
@@ -3577,7 +3641,7 @@ Read  2 min ago</div>
           <div class="m-card">
             <div class="m-rubric">Invitation <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--dusty)">chooses their own password</span></div>
             <div style="display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end">
-              <div class="m-f w-sm"><label>Role</label><span class="m-in">User</span></div>
+              <div class="m-f w-sm"><label>Role</label><span class="m-in is-pick">User</span></div>
               <span class="m-btn is-primary">Create link</span>
             </div>
             <div style="margin-top:10px;display:flex;gap:6px;align-items:center">
@@ -3594,7 +3658,7 @@ Read  2 min ago</div>
             <div class="m-rubric">Temporary password <span class="m-badge is-alert">hand to hand</span></div>
             <div class="m-msg is-alert" style="margin:0 0 10px">Until the user changes this password, you can sign in as them.</div>
             <div style="display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end">
-              <div class="m-f w-xs"><label>Role</label><span class="m-in">User</span></div>
+              <div class="m-f w-xs"><label>Role</label><span class="m-in is-pick">User</span></div>
               <div class="m-f w-sm"><label>Login</label><span class="m-in">viktor</span></div>
               <div class="m-f w-md"><label>Email <span style="color:var(--dusty)">(optional)</span></label><span class="m-in is-ph">—</span></div>
               <div class="m-f w-md"><label>Temporary password</label><span class="m-in is-mono">9f2-brick-lamp</span></div>
@@ -3650,7 +3714,7 @@ Read  2 min ago</div>
             <div class="m-rubric">Mail <span class="m-badge is-alert">not configured</span></div>
             <div class="m-f w-lg"><label>Host</label><span class="m-in is-mono is-ph">smtp.example.org</span></div>
             <div class="m-f w-xs"><label>Port</label><span class="m-in is-mono">587</span></div>
-            <div class="m-f w-sm"><label>Encryption</label><span class="m-in">STARTTLS</span></div>
+            <div class="m-f w-sm"><label>Encryption</label><span class="m-in is-pick">STARTTLS</span></div>
             <div class="m-f w-md"><label>Username</label><span class="m-in is-ph">—</span></div>
             <div class="m-f w-md"><label>Password</label><span class="m-in is-ph">leave blank to keep the current one</span></div>
             <div class="m-f w-md"><label>From address</label><span class="m-in is-ph">carrel@example.org</span></div>
@@ -3698,7 +3762,7 @@ Read  2 min ago</div>
       <div class="m-shell no-rail"><div class="m-main">
         <div class="m-head"><div><div class="m-h1">Audit log</div><div class="m-sub">1 240 records</div></div><div class="m-acts"><span class="m-btn">Export CSV</span></div></div>
         <div class="m-bar">
-          <span class="m-in is-ph" style="width:170px;height:26px">All actions</span>
+          <span class="m-in is-ph is-pick" style="width:170px;height:26px">All actions</span>
           <span class="m-in is-mono" style="width:120px;height:26px">2026-08-01</span>
           <span class="m-seg"><span class="is-on">All</span><span>Security</span><span>Failures</span></span>
         </div>
@@ -3796,8 +3860,8 @@ Read  2 min ago</div>
     <div class="mock">
       <div style="padding:36px 0;display:flex;justify-content:center">
         <div class="m-dialog is-narrow" style="padding-top:0;padding-bottom:0">
-          <div style="display:flex;align-items:center;gap:9px;font-family:var(--f-serif);font-size:20px;margin-bottom:18px">
-            <svg class="m-logo" style="width:118px;height:47px" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>
+          <div style="display:flex;justify-content:center;margin:6px 0 24px">
+            <svg class="m-logo" style="width:150px;height:60px" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>
           </div>
           <div class="m-form" style="padding:0;flex-direction:column;flex-wrap:nowrap">
             <div class="m-f" style="width:100%"><label>Login</label><span class="m-in is-focus">mix</span></div>
@@ -4034,7 +4098,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
         <div class="m-card" style="border-color:var(--accent)">
           <div class="m-rubric">From a WebDAV folder</div>
           <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-            <div class="m-f" style="flex:1 1 200px"><label>Collection</label><span class="m-in">Documents · sftpgo</span></div>
+            <div class="m-f" style="flex:1 1 200px"><label>Collection</label><span class="m-in is-pick">Documents · sftpgo</span></div>
             <div class="m-f" style="flex:1 1 140px"><label>Folder</label><span class="m-in is-mono">notes</span></div>
             <span class="m-btn is-primary">Preview folder</span>
           </div>
@@ -4384,7 +4448,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
               <span class="is-on">To WebDAV</span><span>Download</span><span>Both</span>
             </span>
           </div>
-          <div class="m-f w-lg"><label>Collection</label><span class="m-in">nextcloud · Files</span></div>
+          <div class="m-f w-lg"><label>Collection</label><span class="m-in is-pick">nextcloud · Files</span></div>
           <div class="m-f w-md"><label>Folder</label><span class="m-in is-mono">carrel-backup</span></div>
           <div class="m-f w-xs"><label>Keep copies</label><span class="m-in is-mono">8</span></div>
           <div class="m-f" style="flex:1 1 100%"><span class="m-hint">Copies past the eighth are deleted <b>after</b> the new one has been read back and checked, not before. The file is dated and never overwritten.</span></div>
@@ -4483,7 +4547,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
             <span class="m-in is-mono" style="font-size:11px">Authorization: Bearer cbk_7f3a-91de-4402-lamp</span>
             <span class="m-btn is-sm">Copy</span>
             <span style="font-size:11px;color:var(--dusty)">Every</span>
-            <span class="m-in is-mono" style="font-size:11px">day · 03:00</span>
+            <span class="m-in is-mono is-pick" style="font-size:11px">day · 03:00</span>
             <span></span>
             <span style="font-size:11px;color:var(--dusty)">Expect</span>
             <span class="m-in is-mono" style="font-size:11px">202 · accepted</span>
@@ -4618,8 +4682,8 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
           <tr class="is-sel"><td><span class="m-box"></span></td>
             <td><span class="m-fname"><span class="m-bar3" style="background:#6B4E7A"></span><span>radicale / projects</span></span></td><td class="mono">86</td>
             <td style="position:relative">
-              <span class="m-in is-focus" style="height:24px;font-size:12px">Проекты · radicale<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" style="margin-left:auto"><use href="#i-chev"/></svg></span>
-              <div class="m-menu" style="width:230px;margin-top:3px">
+              <span class="m-in is-focus is-pick" style="height:24px;font-size:12px">Проекты · radicale</span>
+              <div class="m-menu is-pop" style="width:230px">
                 <div class="is-on"><span class="m-bar3" style="background:#6B4E7A"></span>Проекты · radicale</div>
                 <div><span class="m-bar3" style="background:#4A6B52"></span>Личный · nextcloud</div>
                 <div><span class="m-bar3" style="background:#3F6E8C"></span>Работа · nextcloud</div>
@@ -4701,7 +4765,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
             <span class="m-seg"><span class="is-on">A date range</span><span>The whole calendar</span></span></div>
           <div class="m-f w-sm"><label>From</label><span class="m-in is-mono">2026-08-10</span></div>
           <div class="m-f w-sm"><label>To</label><span class="m-in is-mono">2026-08-31</span></div>
-          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">30 days</span></div>
+          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in is-pick">30 days</span></div>
           <div class="m-f" style="width:100%;gap:7px">
             <span class="m-check"><span class="m-box"></span>Allow <span class="mono">.ics</span> download and subscription</span>
             <span class="m-check"><span class="m-box is-off"></span>Show event descriptions</span>
@@ -4783,7 +4847,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
               <span class="m-check"><span class="m-box is-off"></span>Note</span>
             </div></div>
           <span class="m-check"><span class="m-box is-off"></span>Allow <span class="mono">.vcf</span> download and subscription</span>
-          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">7 days</span></div>
+          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in is-pick">7 days</span></div>
         </div>
         <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
       </div>
@@ -4805,7 +4869,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
               <span class="m-hint">The links are created together with this one, expire with it and are revoked with it. Without this the page says how many files there are, but not their names: a file name gives away more than it looks.</span>
             </div></div>
           <span class="m-check"><span class="m-box"></span>Allow <span class="mono">.md</span> download</span>
-          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">30 days</span></div>
+          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in is-pick">30 days</span></div>
         </div>
         <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
       </div>
@@ -4821,7 +4885,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
       <div class="m-sheet" style="width:100%;max-width:none">
         <div class="h"><b style="font-size:13.5px">Publish a folder</b><span style="margin-left:auto;font-size:11.5px;color:var(--dusty)">Материалы к релизу · 12 files</span></div>
         <div class="b">
-          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in">14 days</span></div>
+          <div class="m-f" style="width:100%"><label>Link lives for</label><span class="m-in is-pick">14 days</span></div>
           <div class="m-msg" style="margin:0">The visitor gets the folder with everything inside it, read-only, and the same address mounts as a drive in Windows, macOS and Linux.</div>
         </div>
         <div class="f"><span class="m-btn is-primary">Create link</span><span class="m-btn is-quiet">Cancel</span></div>
@@ -6251,7 +6315,7 @@ Read  2 min ago</div></div>
 <p>Тогда зачем оно. Ровно за шестью вещами, каждая из которых недоступна вкладке браузера:</p>
 <ul class="doc">
   <li><b>Глобальная горячая клавиша для заметки.</b> Записать мысль, не открывая ничего и не бросая то, чем занят. Ради этого одного приложение уже окупается.</li>
-  <li><b>Значок в трее</b> с ближайшими событиями и состоянием опроса — Carrel виден, когда окно закрыто.</li>
+  <li><b>Значок в трее</b> с ближайшими событиями, быстрой заметкой, новой встречей и состоянием опроса — Carrel виден, когда окно закрыто.</li>
   <li><b>Системные напоминания</b> о событиях и сроках задач, работающие без открытого окна.</li>
   <li><b>Правка файла во внешней программе</b>: открыть вложение в нужном редакторе и вернуть изменённое на сервер, не проходя цикл «скачать — найти — загрузить заново».</li>
   <li><b>Перетаскивание из проводника и в проводник</b> — и файлов, и вложений.</li>
@@ -6580,6 +6644,7 @@ Read  2 min ago</div></div>
         </div>
         <span class="sep"></span>
         <div class="r"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3" fill="none"><use href="#i-quill"/></svg>Quick note<span class="m-kbd" style="margin-left:auto">Ctrl+Shift+N</span></div>
+        <div class="r"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3" fill="none"><use href="#i-cal"/></svg>New event…</div>
         <div class="r"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.3" fill="none"><use href="#i-refresh"/></svg>Poll now</div>
         <div class="r">Open Carrel</div>
         <span class="sep"></span>
@@ -6588,7 +6653,7 @@ Read  2 min ago</div></div>
       </div>
     </div>
   </div>
-  <figcaption>Меню трея — не копия приложения, а четыре ответа: что сегодня, записать, обновить, открыть. Недоступный источник виден и здесь: он должен попадаться на глаза, а не ждать, пока откроют окно.</figcaption>
+  <figcaption>Меню трея — не копия приложения, а пять ответов: что сегодня, записать, завести встречу, обновить, открыть. <b>«New event…» с многоточием</b>, и это не украшение: заметка пишется прямо здесь, в окне поверх всего, а у события есть время, место, участники и календарь — форма, а не строка. Поэтому пункт открывает окно Carrel на форме события, а не пытается уместить её в меню. Глобальная клавиша остаётся одна и остаётся у заметки: она затем и нужна, чтобы записать мысль, не выбирая, куда. Недоступный источник виден и здесь: он должен попадаться на глаза, а не ждать, пока откроют окно.</figcaption>
   </figure>
 </div>
 
@@ -6606,7 +6671,7 @@ Read  2 min ago</div></div>
         <div style="padding:12px;display:flex;flex-direction:column;gap:9px;background:var(--paper)">
           <span class="m-in is-area is-focus" style="min-height:104px;font-size:13.5px">Спросить у Виктора про миграцию — успеет ли до заморозки.</span>
           <div style="display:flex;gap:8px;align-items:center">
-            <span class="m-in" style="flex:1;font-size:12px">Записи · nextcloud</span>
+            <span class="m-in is-pick" style="flex:1;font-size:12px">Записи · nextcloud</span>
             <span class="m-btn is-primary">Save</span>
             <span class="m-kbd">Ctrl+Enter</span>
           </div>
@@ -6633,7 +6698,7 @@ Read  2 min ago</div></div>
       </div>
       <div class="m-form" style="padding:0;flex-direction:column;flex-wrap:nowrap;gap:10px;max-width:340px;margin:0 auto;width:100%">
         <div class="m-rubric">Reminders</div>
-        <div class="m-f" style="width:100%"><label>Remind me</label><span class="m-in">10 minutes · and as set in the event</span></div>
+        <div class="m-f" style="width:100%"><label>Remind me</label><span class="m-in is-pick">10 minutes · and as set in the event</span></div>
         <span class="m-check"><span class="m-box"></span>Task due dates — on the morning they are due</span>
         <span class="m-check"><span class="m-box is-off"></span>Show the title on the lock screen</span>
         <div class="m-f" style="width:100%"><label>Quiet hours</label><span class="m-in is-mono">22:00 – 08:00</span></div>
@@ -6675,11 +6740,11 @@ Read  2 min ago</div></div>
             <div class="m-f w-md"><label>Global note shortcut</label><span class="m-in is-mono">Ctrl+Shift+N</span>
               <span class="m-hint">The note opens on the screen the pointer is on; the main window comes back where it was left.</span></div>
             <div class="m-f w-md"><label>Downloads folder</label><span class="m-in is-mono">C:\Users\mix\Downloads</span></div>
-            <div class="m-f w-md"><label>Open files with</label><span class="m-in">default application</span></div>
+            <div class="m-f w-md"><label>Open files with</label><span class="m-in is-pick">default application</span></div>
           </div>
           <div class="m-fset">
             <div class="m-rubric">Network</div>
-            <div class="m-f w-md"><label>Proxy</label><span class="m-in">system</span></div>
+            <div class="m-f w-md"><label>Proxy</label><span class="m-in is-pick">system</span></div>
             <div class="m-f"><span class="m-check"><span class="m-box is-off"></span>Trust this instance’s self-signed certificate</span></div>
             <div class="m-f" style="flex:1 1 100%"><span class="m-hint">This appears only after a certificate has been rejected, and it remembers that one fingerprint — it is not “turn checking off”.</span></div>
           </div>
@@ -6856,6 +6921,10 @@ Read  2 min ago</div></div>
   <li>Не заводит вторую палитру. Всё, что здесь есть, — из брендбука; добавлены только состояния строки.</li>
 </ul>
 
+<h3>Сверка готового экрана с макетом</h3>
+<p>Встроенная проверка следит за самим документом. За тем, что получилось в приложении, она не следит никак, а разница в одну колонку или в один разъехавшийся флажок глазами не ловится — тем более между двумя окнами, где данные разные. Поэтому рядом с макетами лежат наборы: <a href="fixtures/README.md">docs/visual/fixtures</a> — двенадцать файлов <code>.vcf</code> и <code>.ics</code> с <b>теми самыми</b> записями, что нарисованы выше. Их загружают через «Import» в пустой экземпляр и открывают те же экраны: состав строк, группы, колонки и состояния должны совпасть.</p>
+<p>Четыре вещи набор проверяет нарочно, потому что на выдуманных данных они не воспроизводятся: встреча заведена в <code>Asia/Yekaterinburg</code> и обязана показать исходный пояс меткой; дежурство лежит в двух коллекциях разными UID и обязано стать одной строкой с «duplicate?&nbsp;×2»; Артём Белов лежит в двух книгах и до связывания обязан попасть в «Дубликаты»; у карточки Анны Ковалёвой три чужих свойства, и карточка обязана сказать «Kept as the server sent them · Show&nbsp;3». Чего набор не воспроизводит — счётчиков в рейле: 248 карточек файлом не задать, да и сам макет рисует книгу на 248 карточек пятью строками. <b>Сверяется устройство экрана, а не итог пересчёта</b>, и в README это сказано прямо, чтобы никто не гнался за числами.</p>
+
 <div class="note">Файл живой: макеты — это HTML, а не картинки, поэтому классы из раздела 6 переносятся в <code>carrel.css</code> копированием, а не перерисовкой.</div>
 
 </div>
@@ -6960,8 +7029,10 @@ addEventListener('load', function () {
      краю заливки. Вторая: полоса не поместилась в колонку — развалилась
      на два ряда (так «Compact rows» уезжал вниз один) или вылезла за
      свой край. Обе видны только по самой полосе, а не по её строкам. */
-  document.querySelectorAll('.m-bar, .m-editbar').forEach(function (bar) {
+  document.querySelectorAll('.m-bar, .m-editbar, .m-src').forEach(function (bar) {
     if (bar.closest('[data-check="off"]')) return;
+    /* Свёрнутый рейл — другой режим, там строка нарочно без имени. */
+    if (bar.classList.contains('m-src') && bar.getBoundingClientRect().width < 80) return;
     var kids = [].slice.call(bar.children).filter(function (c) {
       return getComputedStyle(c).display !== 'none' && c.getBoundingClientRect().height;
     });
@@ -6979,7 +7050,23 @@ addEventListener('load', function () {
     var broke = lines.length > 1;
     var offCentre = Math.abs((top - br.top) - (br.bottom - bottom)) > 1;
     var spills = right > br.right - pad + 1;
-    if (broke || offCentre || spills) { bar.style.outline = '1.5px solid #B4442E'; bad++; }
+    /* Имя источника, сжатое хвостом до нуля: строка есть, узнать её
+       нельзя. Так пропадал «Личный» на странице подключений. */
+    var name = bar.querySelector(':scope > .t');
+    var noName = !!name && name.getBoundingClientRect().width < 24;
+    if (broke || offCentre || spills || noName) { bar.style.outline = '1.5px solid #B4442E'; bad++; }
+  });
+
+  /* Четвёртый проход — по раскрытым меню. Меню, нарисованное открытым
+     внутри экрана, должно всплывать: если оно стоит в потоке, оно
+     раздвигает то, что под ним, и макет показывает строки, которых в
+     интерфейсе не будет. Исполнитель верстает то, что видит, — и
+     строит их. Витрины меню стоят вне .m-shell, и их это не касается. */
+  document.querySelectorAll('.m-shell .m-menu').forEach(function (menu) {
+    if (menu.closest('[data-check="off"]')) return;
+    if (getComputedStyle(menu).position === 'static') {
+      menu.style.outline = '1.5px solid #B4442E'; bad++;
+    }
   });
 
   var tag = document.createElement('div');
