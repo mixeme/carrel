@@ -216,16 +216,6 @@ main:has(.app-layout) {
     align-items: start;
 }
 
-.sidebar {
-    padding: 1rem;
-}
-
-.sidebar h2,
-.sidebar h3 {
-    font-size: 16px;
-    margin: 0 0 0.5rem;
-}
-
 .account-block {
     margin-bottom: 1rem;
     padding-bottom: 0.75rem;
@@ -261,125 +251,6 @@ main:has(.app-layout) {
     margin-right: 0.5rem;
     vertical-align: middle;
     flex: none;
-}
-
-/* Section source rail (§1.7) */
-.section-rail form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.src-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.src-row {
-    display: grid;
-    grid-template-columns: 12px 3px minmax(0, 1fr) auto;
-    gap: 9px;
-    align-items: center;
-    height: 26px;
-    padding: 0 14px 0 12px;
-    text-decoration: none;
-    color: inherit;
-}
-
-.src-row.is-all {
-    margin-bottom: 2px;
-    font-weight: 600;
-}
-
-.src-row.is-on {
-    background: var(--card);
-    font-weight: 600;
-}
-
-.src-sec {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    margin-top: 8px;
-}
-
-.src-rubric {
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dusty);
-    font-weight: 600;
-    padding: 0 16px;
-    margin: 0 0 3px;
-}
-
-.src-row.is-off .src-label {
-    color: var(--muted);
-}
-
-.src-check {
-    display: contents;
-    cursor: pointer;
-}
-
-.src-check input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.src-box {
-    width: 11px;
-    height: 11px;
-    border-radius: 2px;
-    background: var(--ink);
-    justify-self: center;
-}
-
-.src-box.is-off {
-    background: transparent;
-    border: 0.5px solid var(--card-border);
-}
-
-.src-box.is-part {
-    background: linear-gradient(var(--ink) 0 0) center/7px 2px no-repeat;
-    border: 0.5px solid var(--card-border);
-}
-
-.src-bar {
-    background: var(--accent);
-    width: 3px;
-    height: 14px;
-    border-radius: 1px;
-}
-
-.src-bar.is-multi {
-    background: linear-gradient(
-        to bottom,
-        var(--accent) 0 33%,
-        #3f6e8c 33% 66%,
-        #a05a2c 66% 100%
-    );
-}
-
-.src-label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-decoration: none;
-    color: inherit;
-    font-size: 13px;
-}
-
-a.src-label:hover {
-    text-decoration: underline;
-}
-
-.src-meta {
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
 }
 
 .collection-link {
@@ -762,41 +633,6 @@ body.has-shell {
 
 .app-shell.has-details .app-work {
     grid-template-columns: minmax(0, 1fr) var(--side);
-}
-
-.app-rail {
-    border-right: 0.5px solid var(--rule);
-    padding: 12px 0 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    min-width: 0;
-    background: var(--paper);
-}
-
-.app-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    padding: 0 8px;
-}
-
-.app-rail a {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    height: 29px;
-    padding: 0 8px;
-    border-radius: 3px;
-    font-size: 13.5px;
-    color: var(--ink);
-    text-decoration: none;
-}
-
-.app-nav a[aria-current="page"],
-.app-rail .app-nav a[aria-current="page"] {
-    background: var(--card);
-    font-weight: 600;
 }
 
 .app-content {
@@ -1627,22 +1463,6 @@ pre.diagnostic {
 }
 
 /* Wave 2.4 — file manager: selection, ops bar, properties, filter, icons */
-.files-shortcuts {
-    margin-top: 1.25rem;
-    padding-top: 0.75rem;
-    border-top: 0.5px solid var(--hair);
-}
-
-.files-shortcuts h3 {
-    margin: 0 0 0.5rem;
-    font-family: var(--f-sans);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dusty);
-}
-
 .files-layout .files-main {
     display: flex;
     gap: 0;
@@ -2202,11 +2022,6 @@ pre.diagnostic {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-}
-
-.note-sidebar-back {
-    margin: 0;
-    font-size: 12.5px;
 }
 
 .note-sidebar-rubric {
@@ -2987,9 +2802,8 @@ button.danger {
     .no-print,
     .topbar,
     .app-top,
-    .app-rail,
+    .m-rail,
     .app-details,
-    .sidebar,
     .site-footer,
     nav,
     button,
@@ -3081,47 +2895,6 @@ button.danger {
 }
 
 /* Wave 1.10 — settings and admin rails, user menu, appearance */
-.settings-rail {
-    border-right: 0.5px solid var(--rule);
-    padding: 12px 8px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-    background: var(--paper);
-}
-
-.settings-rail a {
-    display: flex;
-    align-items: center;
-    min-height: 29px;
-    padding: 0 8px;
-    border-radius: 3px;
-    font-size: 13.5px;
-    color: var(--ink);
-    text-decoration: none;
-}
-
-.settings-rail a[aria-current="page"] {
-    background: var(--card);
-    font-weight: 600;
-}
-
-.settings-back {
-    font-size: 12.5px !important;
-    color: var(--muted) !important;
-    margin-bottom: 8px;
-}
-
-.settings-rubric {
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dusty);
-    font-weight: 600;
-    margin: 10px 8px 4px;
-}
-
 .app-shell.is-settings,
 .app-shell.is-admin {
     grid-template-columns: var(--rail) minmax(0, 1fr);
@@ -3406,7 +3179,8 @@ button.danger {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .settings-rail {
+    .app-shell.is-settings .m-rail,
+    .app-shell.is-admin .m-rail {
         display: none;
     }
 }
@@ -3439,7 +3213,7 @@ button.danger {
 
     /* §13: the panel takes the whole screen and closes with Apply — choosing
        sources is its own action, not something to scroll past. */
-    .app-rail {
+    [data-app-rail] {
         position: fixed;
         inset: var(--top) 0 0 0;
         width: auto;
@@ -3475,15 +3249,9 @@ button.danger {
         cursor: pointer;
     }
 
-    .app-rail .app-nav a {
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-    }
-
     /* The rail is borrowed by the panel; in the page it would be the stack of
        checkboxes §13 asks to get rid of. Without JavaScript it stays put. */
-    .js .app-layout > .section-rail {
+    .js .app-layout > [data-section-rail] {
         display: none;
     }
 
@@ -3491,7 +3259,7 @@ button.danger {
         display: flex;
     }
 
-    .app-rail .section-rail {
+    [data-app-rail] [data-section-rail] {
         padding: 0;
         border: 0;
         background: none;
@@ -3499,43 +3267,7 @@ button.danger {
         margin: 0 0 10px;
     }
 
-    .app-rail .src-row {
-        grid-template-columns: 44px 3px minmax(0, 1fr) auto;
-        gap: 6px;
-        min-height: 44px;
-        padding: 0;
-    }
-
-    .app-rail .src-check {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 44px;
-        min-height: 44px;
-        /* The form label margin would push the row past its own height. */
-        margin: 0;
-    }
-
-    .app-rail .src-box {
-        width: 16px;
-        height: 16px;
-    }
-
-    .app-rail .src-bar {
-        height: 24px;
-    }
-
-    .app-rail .src-label {
-        display: flex;
-        align-items: center;
-        min-height: 44px;
-    }
-
-    .app-rail .section-rail button[type="submit"] {
-        min-height: 44px;
-    }
-
-    .app-rail.is-open {
+    [data-app-rail].is-open {
         transform: translateX(0);
     }
 
@@ -3677,10 +3409,6 @@ button.danger {
         display: none;
     }
 
-    .sidebar:not(.section-rail) {
-        display: none;
-    }
-
     .app-layout {
         grid-template-columns: 1fr;
     }
@@ -3780,14 +3508,8 @@ button.danger {
     opacity: 0.85;
 }
 
-.settings-back {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 /* Sources sit in the same column as section links (mockup §4). Wrappers
-   collapse so .section-rail is a grid item of .app-shell, beside the nav. */
+   collapse so the source rail is a grid item of .app-shell, beside the nav. */
 body.has-shell .app-work,
 body.has-shell .app-content,
 body.has-shell .app-layout {
@@ -3808,7 +3530,7 @@ body.has-shell .app-shell::before {
     pointer-events: none;
 }
 
-body.has-shell .app-rail {
+body.has-shell [data-app-rail] {
     grid-column: 1;
     grid-row: 1;
     background: transparent;
@@ -3817,8 +3539,7 @@ body.has-shell .app-rail {
     min-height: 0;
 }
 
-body.has-shell .section-rail,
-body.has-shell .note-sidebar {
+body.has-shell [data-section-rail] {
     grid-column: 1;
     grid-row: 2;
     z-index: 1;
@@ -3868,8 +3589,8 @@ body.has-shell .app-shell:has(.files-props:not([hidden])) {
     grid-template-columns: var(--rail) minmax(0, 1fr) var(--side);
 }
 
-body.has-shell .app-shell.is-settings .settings-rail,
-body.has-shell .app-shell.is-admin .admin-rail {
+body.has-shell .app-shell.is-settings .m-rail,
+body.has-shell .app-shell.is-admin .m-rail {
     grid-column: 1;
     grid-row: 1 / -1;
     z-index: 1;
@@ -3886,40 +3607,6 @@ body.has-shell .app-shell.is-admin .admin-rail {
     margin: 0;
 }
 
-.section-rail h2,
-.section-rail .settings-rubric,
-.section-rail .src-rubric {
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dusty);
-    font-weight: 600;
-    padding: 0 16px;
-    margin: 0 0 6px;
-}
-
-.section-rail form,
-.section-rail .collection-list {
-    padding: 0;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.section-rail .rail-foot {
-    margin-top: auto;
-    padding: 10px 16px 0;
-    border-top: 0.5px solid var(--hair);
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.section-rail .rail-foot .m-btn {
-    align-self: flex-start;
-}
-
 .rail-threshold-form {
     display: flex;
     flex-direction: column;
@@ -3932,10 +3619,6 @@ body.has-shell .app-shell.is-admin .admin-rail {
 
 .rail-threshold input[type="number"] {
     width: 4.5rem;
-}
-
-.section-rail .rail-empty {
-    padding: 0 16px;
 }
 
 .settings-panel,
@@ -4090,13 +3773,6 @@ body:not(.has-shell) main {
 
 .install-check-note {
     margin-top: 12px;
-}
-
-.settings-rail-foot {
-    margin-top: auto;
-    padding-top: 12px;
-    font-size: 11px;
-    color: var(--dusty);
 }
 
 .badge.is-local {

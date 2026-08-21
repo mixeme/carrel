@@ -1,21 +1,25 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout contacts-layout">
-    <aside class="sidebar no-print section-rail">
-        <h2>Address books</h2>
-        <ul class="collection-list">
-        {{range $d.Books}}
-            <li>
-                <a class="collection-link" href="{{$.Base}}/app/contacts/{{.AccountID}}/{{.ColEnc}}">
-                    {{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}
-                </a>
-            </li>
-        {{end}}
-        </ul>
+    {{template "m-rail" (rail "Sec" true)}}
         {{if and $d.AccountID $d.ColEnc}}
-        <p><a href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to list</a></p>
+        {{template "m-nav" (nav)}}
+            <a class="is-back" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">{{template "ico" "back"}}Back to list</a>
+        {{template "m-navend"}}
         {{end}}
-    </aside>
+        {{template "m-rail-sec" (railSec "Label" "Address books")}}
+            <ul>
+            {{range $d.Books}}
+                {{$row := src "Href" (print $.Base "/app/contacts/" .AccountID "/" .ColEnc) "Title" (or .Collection.DisplayName .Collection.Path)}}
+                {{template "m-src" $row}}
+                    <span class="m-box" aria-hidden="true"></span>
+                    <span class="m-bar3" data-swatch="{{if .Collection.Color}}{{.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <span class="t">{{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}</span>
+                {{template "m-srcend" $row}}
+            {{end}}
+            </ul>
+        {{template "m-rail-secend"}}
+    {{template "m-railend" (rail)}}
 
     <div class="app-main">
         <section class="contact-card contacts-print-root">

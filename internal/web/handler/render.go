@@ -89,6 +89,11 @@ var templateFuncs = template.FuncMap{
 	"barRange":         buildBarRange,
 	"dataTable":        buildDataTable,
 	"importExportMenu": buildImportExportMenu,
+	"rail":             buildRail,
+	"nav":              buildNav,
+	"src":              buildSrc,
+	"railSec":          buildRailSec,
+	"railFoot":         buildRailFoot,
 	"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
 	"hasComp": func(comps []string, want string) bool {
 		for _, c := range comps {

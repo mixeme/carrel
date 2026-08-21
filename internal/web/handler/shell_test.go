@@ -44,10 +44,10 @@ func TestEmbeddedBaseHasShell(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read base.html: %v", err)
 	}
-	if !strings.Contains(string(b), "app-rail") {
+	if !strings.Contains(string(b), `"App" true`) {
 		t.Fatal("embedded base.html is missing the application shell")
 	}
-	for _, want := range []string{`class="app-logo"`, `id="i-search"`, `id="logo-word"`, `class="app-nav"`} {
+	for _, want := range []string{`class="app-logo"`, `id="i-search"`, `id="logo-word"`, `{{template "m-nav"`} {
 		if !strings.Contains(string(b), want) {
 			t.Errorf("base.html is missing %s", want)
 		}
@@ -84,10 +84,10 @@ func TestNarrowShellCarriesTheSourcesDrawer(t *testing.T) {
 		t.Fatalf("read carrel.css: %v", err)
 	}
 	sheet := string(css)
-	if strings.Contains(sheet, "\n    .section-rail {\n        display: none;\n    }") {
+	if strings.Contains(sheet, "\n    [data-section-rail] {\n        display: none;\n    }") {
 		t.Error("the source rail is hidden outright on a narrow screen instead of moving into the panel")
 	}
-	if !strings.Contains(sheet, ".js .app-layout > .section-rail") {
+	if !strings.Contains(sheet, ".js .app-layout > [data-section-rail]") {
 		t.Error("without JavaScript the source rail has to stay in the page")
 	}
 
@@ -150,7 +150,7 @@ func TestAboutFooterOnSignedInPages(t *testing.T) {
 	if !strings.Contains(body, "Refresh") && !strings.Contains(body, "ago") && !strings.Contains(body, "just now") {
 		t.Error("refresh control has neither a time label nor Refresh")
 	}
-	if !strings.Contains(body, `class="app-rail`) {
+	if !strings.Contains(body, `data-app-rail`) {
 		snippet := body
 		if len(snippet) > 600 {
 			snippet = snippet[:600]
@@ -306,7 +306,7 @@ func TestShellNavigationMarksCurrentSection(t *testing.T) {
 			t.Fatalf("GET %s = %d, want 200", tc.path, rec.Code)
 		}
 		body := rec.Body.String()
-		if !strings.Contains(body, `class="app-rail`) {
+		if !strings.Contains(body, `data-app-rail`) {
 			t.Fatalf("GET %s body missing section rail", tc.path)
 		}
 		marker := `aria-current="page"`

@@ -3,16 +3,23 @@
 {{$readURL := ""}}
 {{if not $d.IsNew}}{{$readURL = printf "%s/app/notes/%s/%s/%s" .Base $d.AccountID $d.ColEnc $d.UID}}{{end}}
 <div class="app-layout calendar-layout note-screen" data-detail-section="notes">
-    <aside class="sidebar no-print note-sidebar section-rail" data-note-sidebar>
-        <p class="note-sidebar-back"><a href="{{$d.BackURL}}">← Back to list</a></p>
+    {{template "m-rail" (rail "Sec" true "Note" true "Extra" "note-sidebar")}}
+        {{template "m-nav" (nav)}}
+            <a class="is-back" href="{{$d.BackURL}}">{{template "ico" "back"}}Back to list</a>
+        {{template "m-navend"}}
         {{if $d.Sources}}
-        <div class="note-sidebar-sec">
-            <h2 class="note-sidebar-rubric">Notebooks</h2>
-            <ul class="collection-list">{{range $d.Sources}}
-                <li><a class="collection-link{{if and (eq .AccountID $d.AccountID) (eq .ColEnc $d.ColEnc)}} is-active{{end}}"
-                       href="{{$.Base}}/app/notes/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
-            {{end}}</ul>
-        </div>
+        {{template "m-rail-sec" (railSec "Label" "Notebooks")}}
+            <ul>
+            {{range $d.Sources}}
+                {{$row := src "Href" (print $.Base "/app/notes/" .AccountID "/" .ColEnc) "On" (and (eq .AccountID $d.AccountID) (eq .ColEnc $d.ColEnc)) "Title" .Label}}
+                {{template "m-src" $row}}
+                    <span class="m-box" aria-hidden="true"></span>
+                    <span class="m-bar3" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <span class="t">{{.Label}}</span>
+                {{template "m-srcend" $row}}
+            {{end}}
+            </ul>
+        {{template "m-rail-secend"}}
         {{end}}
         {{if $d.Neighbors}}
         <div class="note-sidebar-sec">
@@ -23,7 +30,7 @@
             {{end}}</ul>
         </div>
         {{end}}
-    </aside>
+    {{template "m-railend" (rail)}}
     <div class="app-main">
         <section class="note-card note-doc agenda-print-root" data-note-doc
                  {{if $d.Edit}}data-note-editing{{end}}

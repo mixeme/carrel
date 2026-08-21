@@ -21,7 +21,7 @@ func TestQuickNoteSheetIsAFragment(t *testing.T) {
 		t.Fatalf("quick sheet = %d, body = %s", rec.Code, rec.Body.String())
 	}
 	body := rec.Body.String()
-	if strings.Contains(body, "app-rail") {
+	if strings.Contains(body, "data-app-rail") {
 		t.Fatalf("quick note sheet includes the page shell:\n%s", body)
 	}
 	for _, want := range []string{
@@ -47,7 +47,7 @@ func TestQuickNotePageStillRendersFullShell(t *testing.T) {
 		t.Fatalf("quick page = %d", rec.Code)
 	}
 	body := rec.Body.String()
-	if !strings.Contains(body, "app-rail") {
+	if !strings.Contains(body, "data-app-rail") {
 		t.Fatal("direct /app/notes/quick should still render the full shell")
 	}
 	if !strings.Contains(body, `data-quick-note-form`) {

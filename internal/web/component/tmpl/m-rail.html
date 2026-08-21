@@ -1,0 +1,50 @@
+{{/* Рейл и источники — макеты §6, классы .m-rail / .m-nav / .m-src /
+     .m-rail-sec / .m-rail-foot.
+
+     Левая колонка держит навигацию разделов и список источников. В
+     продакшене это два узла одной сетки (навигация сверху, источники
+     снизу): JS на узком экране забирает источники в панель. Поэтому
+     экран пишет на рейле data-app-rail или data-section-rail — это не
+     второе имя примитива, а то, какой из двух узлов перед ним.
+
+     Nav — <nav> вместо <aside>: разделы, настройки, админка. Закрывающий
+     тег должен получить тот же Nav, иначе пара не сойдётся.
+
+     Ячейки строки источника (.m-box, .m-bar3, .t, .m-meta) пишет экран:
+     содержимое у каждой своё, раскладка — дело строки. Вход передаётся
+     всегда, даже пустой.
+
+     Открывающий тег в каждой ветке полный: html/template выбрасывает
+     разрезку вида «<nav{{else}}<aside». */}}
+{{define "m-rail"}}
+{{- if .Nav -}}
+<nav class="m-rail{{if .Extra}} {{.Extra}}{{end}} no-print"{{if .Label}} aria-label="{{.Label}}"{{end}}{{if .App}} data-app-rail{{end}}{{if .Sec}} data-section-rail{{end}}{{if .Note}} data-note-sidebar{{end}}>
+{{- else -}}
+<aside class="m-rail{{if .Extra}} {{.Extra}}{{end}} no-print"{{if .Label}} aria-label="{{.Label}}"{{end}}{{if .App}} data-app-rail{{end}}{{if .Sec}} data-section-rail{{end}}{{if .Note}} data-note-sidebar{{end}}>
+{{- end -}}
+{{end}}
+{{define "m-railend"}}
+{{- if .Nav -}}</nav>{{- else -}}</aside>{{- end -}}
+{{end}}
+
+{{define "m-nav"}}<div class="m-nav">{{end}}
+{{define "m-navend"}}</div>{{end}}
+
+{{define "m-rail-sec"}}<div class="m-rail-sec">{{if .Label}}<p class="m-rubric">{{.Label}}</p>{{end}}{{end}}
+{{define "m-rail-secend"}}</div>{{end}}
+
+{{define "m-rail-foot"}}<div class="m-rail-foot{{if .Extra}} {{.Extra}}{{end}}">{{end}}
+{{define "m-rail-footend"}}</div>{{end}}
+
+{{define "m-src"}}
+{{- if .Href -}}
+<a href="{{.Href}}" class="m-src{{.Mods}}"{{if .Title}} title="{{.Title}}"{{end}}>
+{{- else if .Item -}}
+<li class="m-src{{.Mods}}">
+{{- else -}}
+<div class="m-src{{.Mods}}">
+{{- end -}}
+{{end}}
+{{define "m-srcend"}}
+{{- if .Href -}}</a>{{- else if .Item -}}</li>{{- else -}}</div>{{- end -}}
+{{end}}

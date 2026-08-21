@@ -1,13 +1,23 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout calendar-layout">
-    <aside class="sidebar no-print section-rail">
-        <h2>Calendars</h2>
-        <ul class="collection-list">{{range $d.Calendars}}
-            <li><a class="collection-link" href="{{$.Base}}/app/calendar/{{.AccountID}}/{{.ColEnc}}">{{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}</a></li>
-        {{end}}</ul>
-        <p><a href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to agenda</a></p>
-    </aside>
+    {{template "m-rail" (rail "Sec" true)}}
+        {{template "m-nav" (nav)}}
+            <a class="is-back" href="{{.Base}}/app/calendar/{{$d.AccountID}}/{{$d.ColEnc}}">{{template "ico" "back"}}Back to agenda</a>
+        {{template "m-navend"}}
+        {{template "m-rail-sec" (railSec "Label" "Calendars")}}
+            <ul>
+            {{range $d.Calendars}}
+                {{$row := src "Href" (print $.Base "/app/calendar/" .AccountID "/" .ColEnc) "Title" (or .Collection.DisplayName .Collection.Path)}}
+                {{template "m-src" $row}}
+                    <span class="m-box" aria-hidden="true"></span>
+                    <span class="m-bar3" data-swatch="{{if .Collection.Color}}{{.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <span class="t">{{if .Collection.DisplayName}}{{.Collection.DisplayName}}{{else}}{{.Collection.Path}}{{end}}</span>
+                {{template "m-srcend" $row}}
+            {{end}}
+            </ul>
+        {{template "m-rail-secend"}}
+    {{template "m-railend" (rail)}}
     <div class="app-main">
         <section class="event-card agenda-print-root">
             <div class="contacts-header">

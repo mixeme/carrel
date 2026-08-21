@@ -128,7 +128,7 @@
     {{else if eq .ShellLayout "settings"}}
     {{template "settingsrail" .}}
     {{else}}
-    <nav class="app-rail no-print" aria-label="Sections" data-app-rail>
+    {{template "m-rail" (rail "Nav" true "Label" "Sections" "App" true)}}
         {{/* §13: on a narrow screen this nav is the slide-out panel, and the
              source rail of the section moves into the mount above the links. */}}
         <div class="app-rail-head">
@@ -136,7 +136,7 @@
             <button type="button" class="app-rail-close" data-rail-close aria-label="Close">{{template "ico" "close"}}</button>
         </div>
         <div class="app-rail-mount" data-rail-mount></div>
-        <div class="app-nav">
+        {{template "m-nav" (nav)}}
             <a href="{{.Base}}/app/search"{{if eq .NavSection "search"}} aria-current="page"{{end}}>{{template "ico" "search"}}Search</a>
             <a href="{{.Base}}/app/contacts"{{if eq .NavSection "contacts"}} aria-current="page"{{end}}>{{template "ico" "con"}}Contacts</a>
             <a href="{{.Base}}/app/calendar"{{if eq .NavSection "calendar"}} aria-current="page"{{end}}>{{template "ico" "cal"}}Calendar</a>
@@ -144,8 +144,8 @@
             <a href="{{.Base}}/app/notes"{{if eq .NavSection "notes"}} aria-current="page"{{end}}>{{template "ico" "note"}}Notes</a>
             <a href="{{.Base}}/app/files"{{if eq .NavSection "files"}} aria-current="page"{{end}}>{{template "ico" "file"}}Files</a>
             <a href="{{.Base}}/app/duplicates"{{if eq .NavSection "duplicates"}} aria-current="page"{{end}}>{{template "ico" "dup"}}Duplicates</a>
-        </div>
-    </nav>
+        {{template "m-navend"}}
+    {{template "m-railend" (rail "Nav" true)}}
     <div class="app-rail-scrim no-print" data-rail-scrim hidden></div>
     {{end}}
     <div class="app-work">
@@ -205,33 +205,39 @@
 {{/* Settings rail — order: who you are → where data comes from → attachments → appearance */}}
 {{define "settingsrail"}}
 {{$d := .Data}}
-<nav class="settings-rail no-print" aria-label="Settings">
-    <a class="settings-back" href="{{.Base}}/app/calendar">{{template "ico" "back"}}Back to app</a>
-    <p class="settings-rubric">Settings</p>
-    <a href="{{.Base}}/app/settings/account"{{if eq $d.Section "account"}} aria-current="page"{{end}}>Account</a>
-    <a href="{{.Base}}/app/settings/connections"{{if eq $d.Section "connections"}} aria-current="page"{{end}}>Connections</a>
-    <a href="{{.Base}}/app/settings/attachments"{{if eq $d.Section "attachments"}} aria-current="page"{{end}}>Attachments</a>
-    <a href="{{.Base}}/app/settings/appearance"{{if eq $d.Section "appearance"}} aria-current="page"{{end}}>Appearance</a>
-</nav>
+{{template "m-rail" (rail "Nav" true "Label" "Settings")}}
+    {{template "m-nav" (nav)}}
+        <a class="is-back" href="{{.Base}}/app/calendar">{{template "ico" "back"}}Back to app</a>
+        <p class="m-rubric">Settings</p>
+        <a href="{{.Base}}/app/settings/account"{{if eq $d.Section "account"}} aria-current="page"{{end}}>Account</a>
+        <a href="{{.Base}}/app/settings/connections"{{if eq $d.Section "connections"}} aria-current="page"{{end}}>Connections</a>
+        <a href="{{.Base}}/app/settings/attachments"{{if eq $d.Section "attachments"}} aria-current="page"{{end}}>Attachments</a>
+        <a href="{{.Base}}/app/settings/appearance"{{if eq $d.Section "appearance"}} aria-current="page"{{end}}>Appearance</a>
+    {{template "m-navend"}}
+{{template "m-railend" (rail "Nav" true)}}
 {{end}}
 
 {{/* Administration rail (§7.11). Installation check arrives in wave 3. */}}
 {{define "adminrail"}}
 {{$d := .Data}}
-<nav class="settings-rail admin-rail no-print" aria-label="Administration">
-    <a class="settings-back" href="{{.Base}}/app/calendar">{{template "ico" "back"}}Back to app</a>
-    <p class="settings-rubric">Administration</p>
-    <a href="{{.Base}}/admin/invites"{{if eq $d.Section "invites"}} aria-current="page"{{end}}>Add users</a>
-    <a href="{{.Base}}/admin/"{{if eq $d.Section "users"}} aria-current="page"{{end}}>Users</a>
-    <a href="{{.Base}}/admin/settings"{{if eq $d.Section "settings"}} aria-current="page"{{end}}>Settings</a>
-    <a href="{{.Base}}/admin/install"{{if eq $d.Section "install"}} aria-current="page"{{end}}>Installation</a>
-    <a href="{{.Base}}/admin/dav"{{if eq $d.Section "dav"}} aria-current="page"{{end}}>DAV validator</a>
-    <a href="{{.Base}}/admin/escrow"{{if eq $d.Section "escrow"}} aria-current="page"{{end}}>Key escrow</a>
-    <a href="{{.Base}}/admin/audit"{{if eq $d.Section "audit"}} aria-current="page"{{end}}>Audit log</a>
+{{template "m-rail" (rail "Nav" true "Label" "Administration")}}
+    {{template "m-nav" (nav)}}
+        <a class="is-back" href="{{.Base}}/app/calendar">{{template "ico" "back"}}Back to app</a>
+        <p class="m-rubric">Administration</p>
+        <a href="{{.Base}}/admin/invites"{{if eq $d.Section "invites"}} aria-current="page"{{end}}>Add users</a>
+        <a href="{{.Base}}/admin/"{{if eq $d.Section "users"}} aria-current="page"{{end}}>Users</a>
+        <a href="{{.Base}}/admin/settings"{{if eq $d.Section "settings"}} aria-current="page"{{end}}>Settings</a>
+        <a href="{{.Base}}/admin/install"{{if eq $d.Section "install"}} aria-current="page"{{end}}>Installation</a>
+        <a href="{{.Base}}/admin/dav"{{if eq $d.Section "dav"}} aria-current="page"{{end}}>DAV validator</a>
+        <a href="{{.Base}}/admin/escrow"{{if eq $d.Section "escrow"}} aria-current="page"{{end}}>Key escrow</a>
+        <a href="{{.Base}}/admin/audit"{{if eq $d.Section "audit"}} aria-current="page"{{end}}>Audit log</a>
+    {{template "m-navend"}}
     {{if and (eq $d.Section "install") (not $d.LastInstallAt.IsZero)}}
-    <p class="settings-rail-foot">Last check<br><span class="mono">{{$d.LastInstallAt.Format "02.01.2006 15:04"}}</span></p>
+    {{template "m-rail-foot" (railFoot)}}
+        <p class="hint">Last check<br><span class="mono">{{$d.LastInstallAt.Format "02.01.2006 15:04"}}</span></p>
+    {{template "m-rail-footend"}}
     {{end}}
-</nav>
+{{template "m-railend" (rail "Nav" true)}}
 {{end}}
 
 {{/* The ⋯ overflow menu of 2.6.D1, holding Import/Export on a merged view
@@ -299,27 +305,35 @@
      polls several sources shows the same list in the same place. */}}
 {{define "sourcepanel"}}
 {{$d := .Data}}
-<aside class="sidebar no-print section-rail">
-    <h2>Sources</h2>
+{{template "m-rail" (rail "Sec" true)}}
+    <p class="m-rubric">Sources</p>
     {{if $d.Sources}}
     <form method="post" action="{{$d.SourcesURL}}">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="mode" value="{{$d.Mode}}">
-        <ul class="source-list">
+        {{template "m-rail-sec" (railSec)}}
+        <ul>
         {{range $d.Sources}}
-            <li><label class="m-check">
-                <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
-                <span class="collection-dot" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}"></span>
-                <span>{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></span>
-            </label></li>
+            {{template "m-src" (src "Item" true)}}
+                <label>
+                    <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
+                    <span class="m-box{{if not .Selected}} is-off{{end}}" aria-hidden="true"></span>
+                </label>
+                <span class="m-bar3" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                <span class="t" title="{{.Label}}">{{.Label}}</span>
+                <span class="m-meta">{{.AccountLabel}}{{if .ReadOnly}} · ro{{end}}</span>
+            {{template "m-srcend" (src "Item" true)}}
         {{end}}
         </ul>
-        <button type="submit" class="m-btn">Apply</button>
-        <p class="hint">Unticked collections are not polled at all.</p>
+        {{template "m-rail-secend"}}
+        {{template "m-rail-foot" (railFoot)}}
+            <button type="submit" class="m-btn">Apply</button>
+            <p class="hint">Unticked collections are not polled at all.</p>
+        {{template "m-rail-footend"}}
     </form>
     {{else}}<p class="hint">No collections here yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
     {{if eq $d.Mode "duplicates"}}
-    <div class="rail-foot">
+    {{template "m-rail-foot" (railFoot)}}
         <form method="post" action="{{$d.Duplicates.ThresholdURL}}" class="rail-threshold-form">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="back" value="{{$d.Duplicates.Back}}">
@@ -330,57 +344,58 @@
             </div>
             <button type="submit" class="m-btn">Apply</button>
         </form>
-    </div>
+    {{template "m-rail-footend"}}
     {{end}}
-</aside>
+{{template "m-railend" (rail)}}
 {{end}}
 
 {{/* The section source rail of §1.7: «All …» first, then ticked collections. */}}
 {{define "sectionrail"}}
 {{$rail := .Data.SectionRail}}
-<aside class="sidebar no-print section-rail">
+{{template "m-rail" (rail "Sec" true)}}
     {{if $rail.Sources}}
-    {{if $rail.RailTitle}}<p class="src-rubric">{{$rail.RailTitle}}</p>{{end}}
+    {{if $rail.RailTitle}}<p class="m-rubric">{{$rail.RailTitle}}</p>{{end}}
     <form method="post" action="{{$rail.SourcesURL}}">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="mode" value="{{$rail.Mode}}">
-        <a class="src-row is-all{{if $rail.AllActive}} is-on{{end}}" href="{{$rail.AllURL}}">
-            <span class="src-box{{if eq $rail.Selection "part"}} is-part{{else if eq $rail.Selection "none"}} is-off{{end}}" aria-hidden="true"></span>
-            <span class="src-bar is-multi" aria-hidden="true"></span>
-            <span class="src-label">{{$rail.AllLabel}}</span>
-        </a>
+        {{$all := src "Href" $rail.AllURL "All" true "On" $rail.AllActive}}
+        {{template "m-src" $all}}
+            <span class="m-box{{if eq $rail.Selection "part"}} is-part{{else if eq $rail.Selection "none"}} is-off{{end}}" aria-hidden="true"></span>
+            <span class="m-bar3 is-multi" aria-hidden="true"></span>
+            <span class="t">{{$rail.AllLabel}}</span>
+        {{template "m-srcend" $all}}
         {{range $rail.AccountGroups}}
-        <div class="src-sec">
-            <p class="src-rubric">{{.Label}}</p>
-            <ul class="src-list">
+        {{template "m-rail-sec" (railSec "Label" .Label)}}
+            <ul>
             {{range .Sources}}
-                <li class="src-row{{if and (eq $rail.AccountID .AccountID) (eq $rail.ColEnc .ColEnc)}} is-on{{else if not .Selected}} is-off{{end}}">
-                    <label class="src-check">
+                {{$row := src "Item" true "On" (and (eq $rail.AccountID .AccountID) (eq $rail.ColEnc .ColEnc)) "Off" (not .Selected)}}
+                {{template "m-src" $row}}
+                    <label>
                         <input type="checkbox" name="source" value="{{.Key}}"{{if .Selected}} checked{{end}}>
-                        <span class="src-box" aria-hidden="true"></span>
+                        <span class="m-box" aria-hidden="true"></span>
                     </label>
-                    <span class="src-bar" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
-                    <a class="src-label" href="{{$.Base}}/app/{{$rail.Section}}/{{.AccountID}}/{{.ColEnc}}" title="{{.Label}}">{{.Label}}</a>
-                    {{if .ReadOnly}}<span class="src-meta hint">ro</span>{{end}}
-                </li>
+                    <span class="m-bar3" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <a class="t" href="{{$.Base}}/app/{{$rail.Section}}/{{.AccountID}}/{{.ColEnc}}" title="{{.Label}}">{{.Label}}</a>
+                    {{if .ReadOnly}}<span class="m-meta">ro</span>{{end}}
+                {{template "m-srcend" $row}}
             {{end}}
             </ul>
-        </div>
+        {{template "m-rail-secend"}}
         {{end}}
-        <div class="rail-foot">
+        {{template "m-rail-foot" (railFoot)}}
             <button type="submit" class="m-btn">Apply</button>
             {{if $rail.NewCollectionURL}}<a class="m-btn is-quiet" href="{{$rail.NewCollectionURL}}">{{template "ico" "plus"}}{{$rail.NewCollectionLabel}}</a>{{end}}
             <p class="hint">Unticked collections are not polled on the merged view.</p>
-        </div>
+        {{template "m-rail-footend"}}
     </form>
     {{else}}
-    <p class="hint rail-empty">No collections here yet.</p>
-    <div class="rail-foot">
+    <p class="hint">No collections here yet.</p>
+    {{template "m-rail-foot" (railFoot)}}
         {{if $rail.NewCollectionURL}}<a class="m-btn is-quiet" href="{{$rail.NewCollectionURL}}">{{template "ico" "plus"}}{{$rail.NewCollectionLabel}}</a>{{end}}
         <p class="hint">Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a> if you haven't.</p>
-    </div>
+    {{template "m-rail-footend"}}
     {{end}}
-</aside>
+{{template "m-railend" (rail)}}
 {{end}}
 
 {{/* Kind filter tabs for search, person and duplicates screens (§1.8). */}}

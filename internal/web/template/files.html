@@ -1,25 +1,44 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout files-layout" data-files-layout{{if not $d.AllCollections}} data-detail-section="files"{{end}}>
-    <aside class="sidebar no-print section-rail">
-        <h2>File collections</h2>
+    {{template "m-rail" (rail "Sec" true)}}
         {{if $d.Sources}}
-        <ul class="collection-list">
-            <li><a class="collection-link{{if $d.AllCollections}} is-active{{end}}"
-                   href="{{$.Base}}/app/files">All collections</a></li>
-        {{range $d.Sources}}
-            <li><a class="collection-link{{if and (not $d.AllCollections) (eq .AccountID $d.AccountID) (eq .ColEnc $d.ColEnc)}} is-active{{end}}"
-                   href="{{$.Base}}/app/files/{{.AccountID}}/{{.ColEnc}}">{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></a></li>
-        {{end}}</ul>
-        {{else}}<p class="hint">No file collections yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
-        <div class="files-shortcuts no-print">
-            <h3>Shortcuts</h3>
-            <ul class="collection-list">
-                <li><a class="collection-link" href="{{if $d.AttachmentsURL}}{{$d.AttachmentsURL}}{{else}}{{$.Base}}/app/settings/attachments{{end}}">Attachments{{if $d.AttachmentsHint}}<span class="hint">{{$d.AttachmentsHint}}</span>{{else}}<span class="hint">not chosen yet</span>{{end}}</a></li>
-                <li><a class="collection-link{{if $d.PublishedActive}} is-active{{end}}" href="{{$.Base}}/app/files/published">Published<span class="hint">coming in 4.3</span></a></li>
+        {{$root := src "Href" (print $.Base "/app/files") "Root" true "On" $d.AllCollections}}
+        {{template "m-src" $root}}
+            {{template "ico" "file"}}
+            <span class="t">All collections</span>
+        {{template "m-srcend" $root}}
+        {{template "m-rail-sec" (railSec "Label" "File collections")}}
+            <ul>
+            {{range $d.Sources}}
+                {{$row := src "Href" (print $.Base "/app/files/" .AccountID "/" .ColEnc) "On" (and (not $d.AllCollections) (eq .AccountID $d.AccountID) (eq .ColEnc $d.ColEnc)) "Title" (.Label)}}
+                {{template "m-src" $row}}
+                    <span class="m-box" aria-hidden="true"></span>
+                    <span class="m-bar3" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <span class="t">{{.Label}}</span>
+                    <span class="m-meta">{{.AccountLabel}}{{if .ReadOnly}} · ro{{end}}</span>
+                {{template "m-srcend" $row}}
+            {{end}}
             </ul>
-        </div>
-    </aside>
+        {{template "m-rail-secend"}}
+        {{else}}<p class="hint">No file collections yet. Connect a DAV account from <a href="{{.Base}}/app/settings/connections">Connections</a>.</p>{{end}}
+        {{template "m-rail-sec" (railSec "Label" "Shortcuts")}}
+            {{$attURL := print $.Base "/app/settings/attachments"}}
+            {{if $d.AttachmentsURL}}{{$attURL = $d.AttachmentsURL}}{{end}}
+            {{$att := src "Href" $attURL "Root" true}}
+            {{template "m-src" $att}}
+                {{template "ico" "file"}}
+                <span class="t">Attachments</span>
+                <span class="m-meta">{{if $d.AttachmentsHint}}{{$d.AttachmentsHint}}{{else}}not chosen yet{{end}}</span>
+            {{template "m-srcend" $att}}
+            {{$pub := src "Href" (print $.Base "/app/files/published") "Root" true "On" $d.PublishedActive}}
+            {{template "m-src" $pub}}
+                {{template "ico" "link"}}
+                <span class="t">Published</span>
+                <span class="m-meta">coming in 4.3</span>
+            {{template "m-srcend" $pub}}
+        {{template "m-rail-secend"}}
+    {{template "m-railend" (rail)}}
     <div class="app-main files-main">
         {{if $d.NoFiles}}
         {{template "m-head" (head "Title" "Files" "SubtitleHTML" (safeHTML (print "Connect a DAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to browse files here. Discovery finds plain WebDAV folders automatically — on a CalDAV/CardDAV server that usually means a separate folder, or a second account on Nextcloud or a plain WebDAV server.")))}}{{template "m-headend"}}

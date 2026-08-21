@@ -1,13 +1,23 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout calendar-layout">
-    <aside class="sidebar no-print section-rail">
-        <h2>Task lists</h2>
-        <ul class="collection-list">{{range $d.Sources}}
-            <li><a class="collection-link" href="{{$.Base}}/app/tasks/{{.AccountID}}/{{.ColEnc}}">{{.Label}}</a></li>
-        {{end}}</ul>
-        <p><a href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}">← Back to tasks</a></p>
-    </aside>
+    {{template "m-rail" (rail "Sec" true)}}
+        {{template "m-nav" (nav)}}
+            <a class="is-back" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}">{{template "ico" "back"}}Back to tasks</a>
+        {{template "m-navend"}}
+        {{template "m-rail-sec" (railSec "Label" "Task lists")}}
+            <ul>
+            {{range $d.Sources}}
+                {{$row := src "Href" (print $.Base "/app/tasks/" .AccountID "/" .ColEnc) "Title" .Label}}
+                {{template "m-src" $row}}
+                    <span class="m-box" aria-hidden="true"></span>
+                    <span class="m-bar3" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <span class="t">{{.Label}}</span>
+                {{template "m-srcend" $row}}
+            {{end}}
+            </ul>
+        {{template "m-rail-secend"}}
+    {{template "m-railend" (rail)}}
     <div class="app-main">
         <section>
             <div class="contacts-header">

@@ -1246,7 +1246,7 @@ document.addEventListener('change', function (e) {
     // narrow screen it is borrowed by the panel and put back afterwards, so
     // the wide layout never sees it move.
     function mountSources() {
-        var node = document.querySelector('.section-rail');
+        var node = document.querySelector('[data-section-rail]');
         var mount = document.querySelector('[data-rail-mount]');
         var title = document.querySelector('[data-rail-title]');
         if (!node || !mount || node.parentNode === mount) return;
@@ -1258,7 +1258,7 @@ document.addEventListener('change', function (e) {
     function unmountSources() {
         var mount = document.querySelector('[data-rail-mount]');
         var title = document.querySelector('[data-rail-title]');
-        var node = mount ? mount.querySelector('.section-rail') : null;
+        var node = mount ? mount.querySelector('[data-section-rail]') : null;
         if (node && home) home.parent.insertBefore(node, home.next);
         home = null;
         if (title) title.textContent = 'Menu';

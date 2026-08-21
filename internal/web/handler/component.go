@@ -229,6 +229,80 @@ type FieldSet struct {
 	Class string
 }
 
+// Rail is the input to m-rail, the left column. Nav emits a <nav> (section
+// links, settings, administration); the default is an <aside> (sources).
+// App and Sec are the two nodes of one grid column: the section nav the
+// drawer opens, and the source list it borrows. Extra is a screen-owned
+// marker (note-sidebar). Note marks the note-reading sidebar for JS.
+type Rail struct {
+	Nav   bool
+	Label string
+	App   bool
+	Sec   bool
+	Note  bool
+	Extra string
+}
+
+// Nav is the input to m-nav, the stack of section links inside the rail.
+type Nav struct{}
+
+// Src is the input to m-src, one collection (or combined-view) row.
+// Href makes it an <a>; Item makes it an <li>; otherwise it is a <div>.
+// The same Href/Item must be passed to m-srcend, or the tags will not match.
+type Src struct {
+	Href  string
+	Item  bool
+	Title string
+	All   bool
+	On    bool
+	Off   bool
+	Error bool
+	Ext   bool
+	Root  bool
+	Extra string
+}
+
+// Mods is the state classes (is-all, is-on, …) as a leading-space suffix
+// so the class attribute never interpolates a bool inside quotes.
+func (s Src) Mods() string {
+	var b strings.Builder
+	if s.All {
+		b.WriteString(" is-all")
+	}
+	if s.On {
+		b.WriteString(" is-on")
+	}
+	if s.Off {
+		b.WriteString(" is-off")
+	}
+	if s.Error {
+		b.WriteString(" is-error")
+	}
+	if s.Ext {
+		b.WriteString(" is-ext")
+	}
+	if s.Root {
+		b.WriteString(" is-root")
+	}
+	if s.Extra != "" {
+		b.WriteByte(' ')
+		b.WriteString(s.Extra)
+	}
+	return b.String()
+}
+
+// RailSec is the input to m-rail-sec, one account group in the source
+// list. Label is the rubric above the rows.
+type RailSec struct {
+	Label string
+}
+
+// RailFoot is the input to m-rail-foot, the Apply / New collection
+// stripe at the bottom of the rail.
+type RailFoot struct {
+	Extra string
+}
+
 func buildHead(pairs ...any) (Head, error)   { return typedDict[Head](pairs...) }
 func buildForm(pairs ...any) (Form, error)   { return typedDict[Form](pairs...) }
 func buildField(pairs ...any) (Field, error) { return typedDict[Field](pairs...) }
@@ -238,6 +312,13 @@ func buildFormFoot(pairs ...any) (FormFoot, error) {
 func buildSeg(pairs ...any) (Seg, error) { return typedDict[Seg](pairs...) }
 func buildFieldSet(pairs ...any) (FieldSet, error) {
 	return typedDict[FieldSet](pairs...)
+}
+func buildRail(pairs ...any) (Rail, error)       { return typedDict[Rail](pairs...) }
+func buildNav(pairs ...any) (Nav, error)         { return typedDict[Nav](pairs...) }
+func buildSrc(pairs ...any) (Src, error)         { return typedDict[Src](pairs...) }
+func buildRailSec(pairs ...any) (RailSec, error) { return typedDict[RailSec](pairs...) }
+func buildRailFoot(pairs ...any) (RailFoot, error) {
+	return typedDict[RailFoot](pairs...)
 }
 func buildList(pairs ...any) (List, error)       { return typedDict[List](pairs...) }
 func buildRow(pairs ...any) (Row, error)         { return typedDict[Row](pairs...) }

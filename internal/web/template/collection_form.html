@@ -17,7 +17,7 @@
 
         {{if eq $f.Mode "delete"}}
         <p class="message error">The {{if eq $f.Kind "addressbook"}}address book{{else}}calendar{{end}} and everything in it is deleted on <span class="mono">{{$f.Host}}</span>. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</p>
-        <p class="src-rubric">What is pointing at it now</p>
+        <p class="m-rubric">What is pointing at it now</p>
         <ul class="source-list">
             <li>{{if $f.Refs.PublishedLinks}}{{range $f.Refs.PublishedLinks}}<span>{{.}}</span>{{end}}{{else}}<span class="hint">No published links</span>{{end}}</li>
             <li>{{if $f.Refs.BackupJobs}}{{range $f.Refs.BackupJobs}}<span>{{.}}</span>{{end}}{{else}}<span class="hint">No backup jobs</span>{{end}}</li>

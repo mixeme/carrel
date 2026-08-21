@@ -38,16 +38,23 @@ var slotClasses = map[string]string{
 	// Form controls are stamped onto native elements the screen owns — a
 	// button's href, an input's name, a field's label. The class names the
 	// primitive so height and the pick arrow are the system's.
-	"m-form":     "the screen's <form> (method, action, enctype, hx-*); the class is the layout",
-	"m-f":        "one labelled cell; contents (label, input, hint, extra button) are always the screen's",
-	"m-fset":     "a labelled group of fields; the legend and the fields are the screen's",
-	"m-formfoot": "the action row under a form; which buttons sit there is the screen's",
-	"m-seg":      "the joined segment; the options (links, buttons, their is-on) are the screen's",
-	"m-btn":      "a button or button-link; label, href, type and icons are the screen's",
-	"m-in":       "a field; name, type and value are the screen's. select.m-in draws the pick arrow",
-	"m-check":    "a labelled checkbox or radio; the input and the words are the screen's",
-	"m-hint":     "the hint under a field; the words are the screen's",
-	"m-lbl":      "a field label sitting outside m-f > label",
+	"m-form":      "the screen's <form> (method, action, enctype, hx-*); the class is the layout",
+	"m-f":         "one labelled cell; contents (label, input, hint, extra button) are always the screen's",
+	"m-fset":      "a labelled group of fields; the legend and the fields are the screen's",
+	"m-formfoot":  "the action row under a form; which buttons sit there is the screen's",
+	"m-seg":       "the joined segment; the options (links, buttons, their is-on) are the screen's",
+	"m-btn":       "a button or button-link; label, href, type and icons are the screen's",
+	"m-in":        "a field; name, type and value are the screen's. select.m-in draws the pick arrow",
+	"m-check":     "a labelled checkbox or radio; the input and the words are the screen's",
+	"m-hint":      "the hint under a field; the words are the screen's",
+	"m-lbl":       "a field label sitting outside m-f > label",
+	"m-rail":      "the screen's <nav> or <aside> (aria-label, data-app-rail / data-section-rail); the class is the column",
+	"m-nav":       "the stack of section links; which hrefs sit there is the screen's",
+	"m-rail-sec":  "one account group; the rows inside are the screen's",
+	"m-rail-foot": "the Apply / New collection stripe; which buttons sit there is the screen's",
+	"m-box":       "the tick square on a source row; checked / part / off are the screen's",
+	"m-meta":      "the source-row tail (count, ro); the words are the screen's",
+	"m-rubric":    "small-caps label; the words are the screen's (list group, rail section, form sheet)",
 }
 
 // standaloneUse names, per class, the screens allowed to use a primitive on
@@ -228,8 +235,8 @@ func TestRetiredHeadNamesStayGone(t *testing.T) {
 }
 
 // A screen that writes one of these is inventing a fourteenth row family
-// again. .src-row is the rail (stage 5); the files table is still a table
-// (stage 0 leftover), not .m-row--file.
+// again. The files table is still a table (stage 0 leftover), not
+// .m-row--file.
 var retiredRowNames = []string{
 	"list-row", "list-row--contact", "list-row--agenda", "list-row--task",
 	"list-row--note", "list-row--find", "list-row--contact-find",
@@ -255,6 +262,21 @@ var retiredFormNames = []string{
 
 func TestRetiredFormNamesStayGone(t *testing.T) {
 	assertRetiredClassesGone(t, retiredFormNames, "m-form / m-f / m-in / m-btn / m-seg / m-formfoot")
+}
+
+// A screen that writes one of these is inventing a second name for the
+// rail again. The drawer chrome (app-rail-head / -toggle / -scrim / -mount)
+// stays: it is the phone panel, not the column.
+var retiredRailNames = []string{
+	"src-row", "src-bar", "src-label", "src-box", "src-check",
+	"src-sec", "src-rubric", "src-list", "src-meta",
+	"section-rail", "app-nav", "app-rail",
+	"rail-foot", "settings-rail", "settings-rubric", "settings-rail-foot",
+	"admin-rail",
+}
+
+func TestRetiredRailNamesStayGone(t *testing.T) {
+	assertRetiredClassesGone(t, retiredRailNames, "m-rail / m-nav / m-src / m-rail-sec / m-rail-foot")
 }
 
 func assertRetiredClassesGone(t *testing.T, classes []string, instead string) {

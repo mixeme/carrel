@@ -1,23 +1,43 @@
 {{define "body"}}
 {{$d := .Data}}
 <div class="app-layout files-layout">
-    <aside class="sidebar no-print section-rail">
-        <h2>File collections</h2>
+    {{template "m-rail" (rail "Sec" true)}}
         {{if $d.Sources}}
-        <ul class="collection-list">
-            <li><a class="collection-link" href="{{$.Base}}/app/files">All collections</a></li>
-        {{range $d.Sources}}
-            <li><a class="collection-link" href="{{$.Base}}/app/files/{{.AccountID}}/{{.ColEnc}}">{{.Label}}<span class="hint">{{.AccountLabel}}{{if .ReadOnly}} · read-only{{end}}</span></a></li>
-        {{end}}</ul>
-        {{else}}<p class="hint">No file collections yet.</p>{{end}}
-        <div class="files-shortcuts">
-            <h3>Shortcuts</h3>
-            <ul class="collection-list">
-                <li><a class="collection-link" href="{{if $d.AttachmentsURL}}{{$d.AttachmentsURL}}{{else}}{{$.Base}}/app/settings/attachments{{end}}">Attachments{{if $d.AttachmentsHint}}<span class="hint">{{$d.AttachmentsHint}}</span>{{end}}</a></li>
-                <li><a class="collection-link is-active" href="{{$.Base}}/app/files/published">Published</a></li>
+        {{$root := src "Href" (print $.Base "/app/files") "Root" true}}
+        {{template "m-src" $root}}
+            {{template "ico" "file"}}
+            <span class="t">All collections</span>
+        {{template "m-srcend" $root}}
+        {{template "m-rail-sec" (railSec "Label" "File collections")}}
+            <ul>
+            {{range $d.Sources}}
+                {{$row := src "Href" (print $.Base "/app/files/" .AccountID "/" .ColEnc) "Title" .Label}}
+                {{template "m-src" $row}}
+                    <span class="m-box" aria-hidden="true"></span>
+                    <span class="m-bar3" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
+                    <span class="t">{{.Label}}</span>
+                    <span class="m-meta">{{.AccountLabel}}{{if .ReadOnly}} · ro{{end}}</span>
+                {{template "m-srcend" $row}}
+            {{end}}
             </ul>
-        </div>
-    </aside>
+        {{template "m-rail-secend"}}
+        {{else}}<p class="hint">No file collections yet.</p>{{end}}
+        {{template "m-rail-sec" (railSec "Label" "Shortcuts")}}
+            {{$attURL := print $.Base "/app/settings/attachments"}}
+            {{if $d.AttachmentsURL}}{{$attURL = $d.AttachmentsURL}}{{end}}
+            {{$att := src "Href" $attURL "Root" true}}
+            {{template "m-src" $att}}
+                {{template "ico" "file"}}
+                <span class="t">Attachments</span>
+                {{if $d.AttachmentsHint}}<span class="m-meta">{{$d.AttachmentsHint}}</span>{{end}}
+            {{template "m-srcend" $att}}
+            {{$pub := src "Href" (print $.Base "/app/files/published") "Root" true "On" true}}
+            {{template "m-src" $pub}}
+                {{template "ico" "link"}}
+                <span class="t">Published</span>
+            {{template "m-srcend" $pub}}
+        {{template "m-rail-secend"}}
+    {{template "m-railend" (rail)}}
     <div class="app-main">
         {{template "m-head" (head "Title" "Published")}}{{template "m-headend"}}
         <p class="hint page-hint">Secret links to files and folders will be listed here once publication is built (wave 4.3). Carrel already knows about tokens it issued; this page will show them without walking the server tree.</p>

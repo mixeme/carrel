@@ -62,6 +62,34 @@ component/
         <button type="submit" class="m-btn is-primary">Save</button>
     </div>
 </form>
+
+{{template "m-rail" (rail "Nav" true "Label" "Sections" "App" true)}}
+    {{template "m-nav" (nav)}}
+        <a href="…">{{template "ico" "cal"}}Calendar</a>
+    {{template "m-navend"}}
+{{template "m-railend" (rail "Nav" true)}}
+
+{{template "m-rail" (rail "Sec" true)}}
+    {{template "m-src" (src "Href" $allURL "All" true "On" true)}}
+        <span class="m-box is-part"></span>
+        <span class="m-bar3 is-multi" aria-hidden="true"></span>
+        <span class="t">Combined calendar</span>
+    {{template "m-srcend" (src "Href" $allURL)}}
+    {{template "m-rail-sec" (railSec "Label" "Nextcloud")}}
+    {{template "m-src" (src "Item" true)}}
+        <label>
+            <input type="checkbox" name="source" value="…" checked>
+            <span class="m-box"></span>
+        </label>
+        <span class="m-bar3" data-swatch="…" aria-hidden="true"></span>
+        <a class="t" href="…">Личный</a>
+        <span class="m-meta">ro</span>
+    {{template "m-srcend" (src "Item" true)}}
+    {{template "m-rail-secend"}}
+    {{template "m-rail-foot" (railFoot)}}
+        <button type="submit" class="m-btn">Apply</button>
+    {{template "m-rail-footend"}}
+{{template "m-railend" (rail)}}
 ```
 
 Парные компоненты (`m-head` / `m-headend`) открывают и закрывают тег: между ними
@@ -101,6 +129,11 @@ component/
 | `m-formfoot` / `m-formfootend` | `formFoot` | `tmpl/m-form.html` · `css/40-form.css` | Подвал формы: кнопки экрана, высота 26 px |
 | `m-seg` / `m-segend` | `seg` | `tmpl/m-form.html` · `css/40-form.css` | Сегмент (сортировка, плотность, Week/Month). `Menu` — компактный в меню пользователя |
 | `m-fset` / `m-fsetend` | `fieldSet` | `tmpl/m-form.html` · `css/40-form.css` | Группа полей с легендой |
+| `m-rail` / `m-railend` | `rail` | `tmpl/m-rail.html` · `css/50-rail.css` | Левая колонка. `Nav` — `<nav>` (разделы, настройки); иначе `<aside>` (источники). `App` — `data-app-rail`; `Sec` — `data-section-rail` |
+| `m-nav` / `m-navend` | `nav` | `tmpl/m-rail.html` · `css/50-rail.css` | Стек ссылок раздела |
+| `m-src` / `m-srcend` | `src` | `tmpl/m-rail.html` · `css/50-rail.css` | Строка источника. `Href` — ссылка, `Item` — пункт списка; `All` / `On` / `Off` / `Root` / `Ext` / `Error` — состояния макетов |
+| `m-rail-sec` / `m-rail-secend` | `railSec` | `tmpl/m-rail.html` · `css/50-rail.css` | Группа источников под рубрикатором (`Label`) |
+| `m-rail-foot` / `m-rail-footend` | `railFoot` | `tmpl/m-rail.html` · `css/50-rail.css` | Подвал рейла: Apply, «New calendar» |
 
 Классы, которые эти компоненты приносят с собой:
 
@@ -110,7 +143,7 @@ component/
 | `.m-h1` | `m-head` | Заголовок раздела |
 | `.m-sub` | `m-head` | Подзаголовок под заголовком |
 | `.m-crumbs` | `m-head` | Хлебные крошки |
-| `.m-bar3` | `m-head`; слот строки | Полоска коллекции. Знает свой размер сама. В шапке её пишет компонент; в строке экран пишет цвет, `.m-row` — размер |
+| `.m-bar3` | `m-head`; слот строки и рейла | Полоска коллекции. Знает свой размер сама. В шапке её пишет компонент; в строке и в источнике экран пишет цвет |
 | `.m-acts` | `m-head` | **Слот**: действия экрана. Содержимое — дело экрана, раскладка — дело шапки, поэтому этот класс экран пишет сам |
 | `.m-bar` | `m-bar` | Сама полоса; `is-form` — вариант формой; `.m-sel` — панель выделения |
 | `.m-right` | `m-bar` | Правая группа: счётчик, плотность, «Clear selection» |
@@ -132,6 +165,13 @@ component/
 | `.m-hint` | `m-form` | Подсказка под полем, 11 px |
 | `.m-lbl` | `m-form` | Подпись поля вне `m-f > label` |
 | `.m-formfoot` | `m-form` | Подвал: кнопки 26 px, как на полосе |
+| `.m-rail` | `m-rail` | Левая колонка. `App` ставит `data-app-rail` (навигация), `Sec` — `data-section-rail` (источники): два узла одной сетки |
+| `.m-nav` | `m-nav` | Стек ссылок; текущая — `aria-current="page"` или `.is-on`. `is-back` — «Back to app» |
+| `.m-src` | `m-src` | Строка источника. `is-all` — единый вид; `is-root` — корень файлов (не единый вид); `is-on` / `is-off` / `is-error` / `is-ext` — состояния. Ячейки — прямые дети, хвост раскладывается сам |
+| `.m-box` | `m-src` | **Слот**: флажок-квадрат. `is-off` / `is-part` — не опрошен / частично |
+| `.m-meta` | `m-src` | **Слот**: хвост строки (счётчик, `ro`) |
+| `.m-rail-sec` | `m-rail-sec` | Группа под рубрикатором — один аккаунт |
+| `.m-rail-foot` | `m-rail-foot` | **Слот**: подвал; какие кнопки — дело экрана |
 
 Высоту строки знает система, не экран: **28 px** там, где есть поле, **26 px** на полосе инструментов, **22 px** в таблице. Стрелку у `<select>` рисует `.m-in`, разметка только ставит класс.
 

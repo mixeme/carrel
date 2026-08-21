@@ -62,7 +62,7 @@ func TestContactPanelIsAFragment(t *testing.T) {
 		t.Fatalf("panel status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 	body := rec.Body.String()
-	if strings.Contains(body, "app-rail") {
+	if strings.Contains(body, "data-app-rail") {
 		t.Fatalf("panel includes the page shell:\n%s", body)
 	}
 	wantHref := `href="/app/contacts/` + accID + `/` + colEnc + `/ada/edit"`
@@ -95,7 +95,7 @@ func TestContactCardStillRendersFullPage(t *testing.T) {
 		t.Fatalf("person view status = %d", rec.Code)
 	}
 	body := rec.Body.String()
-	if !strings.Contains(body, "app-rail") {
+	if !strings.Contains(body, "data-app-rail") {
 		t.Fatal("direct contact link should still render the full shell")
 	}
 	if strings.Contains(body, `contact-form`) {
