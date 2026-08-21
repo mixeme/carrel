@@ -1,0 +1,46 @@
+BEGIN:VCARD
+VERSION:3.0
+UID:4f2b-9c31-a0e7
+N:Ковалёва;Анна;;;
+FN:Анна Ковалёва
+ORG:Издательство «Слово»
+TITLE:Выпускающий редактор
+TEL;TYPE=CELL:+7 912 445-10-88
+TEL;TYPE=WORK:+7 495 120-45-00
+EMAIL;TYPE=WORK:a.kovaleva@example.org
+BDAY:1987-03-14
+CATEGORIES:работа,издательство
+NOTE:Пишет по вторникам\, отвечает в тот же 
+ день.
+X-EVOLUTION-FILE-AS:Ковалёва\, Анна
+X-ABLABEL:издательство
+X-CARREL-UNKNOWN-FLAG:1
+REV:20260814T090412Z
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+UID:6b18-2d40-77c5
+N:Смирнов;Алексей;;;
+FN:Алексей Смирнов
+TEL;TYPE=CELL:+7 916 200-71-15
+REV:20260731T174501Z
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+UID:a90d-5512-4e83
+N:Гончаров;Виктор;;;
+FN:Виктор Гончаров
+ORG:Городская библиотека №4
+EMAIL;TYPE=WORK:v.goncharov@example.org
+REV:20260805T120000Z
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+UID:c3f7-8a21-1b09
+N:Белов;Артём;;;
+FN:Артём Белов
+ORG:Тензор
+TEL;TYPE=CELL:+7 903 118-22-04
+EMAIL;TYPE=WORK:a.belov@example.org
+REV:20260612T101500Z
+END:VCARD

@@ -1,0 +1,45 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Carrel//mockup fixtures//RU
+CALSCALE:GREGORIAN
+NAME:Записи
+X-WR-CALNAME:Записи
+BEGIN:VTIMEZONE
+TZID:Europe/Moscow
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0300
+TZNAME:MSK
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VJOURNAL
+UID:5c81-77aa-0d64
+DTSTAMP:20260810T080500Z
+DTSTART;TZID=Europe/Moscow:20260810T110500
+SUMMARY:Заметка со встречи 10.08
+CATEGORIES:встречи,релиз
+DESCRIPTION:Договорились заморозить ветку в с
+ реду.\n\nПисьмо пользователям пишет Анна\
+ , черновик к вечеру вторника. Виктор про
+ веряет миграцию на копии базы — если не 
+ успевает\, переносим на следующий сприн
+ т.\n\n## Что делаем\n\n- [ ] проверить changelog\n- [x
+ ] попросить у Артёма скриншоты\n\n## Отлож
+ ено до следующего спринта\n\nПеренос ста
+ рых вложений в новую папку — Виктор пос
+ мотрит\, сколько их вообще.
+RELATED-TO;RELTYPE=SIBLING:8f1c-4a02-b7d3
+X-JTX-COLOR:#4A6B52
+END:VJOURNAL
+BEGIN:VJOURNAL
+UID:6d92-13ef-b408
+DTSTAMP:20260808T190000Z
+DTSTART;TZID=Europe/Moscow:20260808T211000
+SUMMARY:Что почитать про CRDT
+CATEGORIES:книги
+DESCRIPTION:Кляйн\, глава 5\; статья Шапиро 2011\; д
+ емка automerge — посмотреть\, как они решают 
+ конфликт двух правок одного поля.
+END:VJOURNAL
+END:VCALENDAR
