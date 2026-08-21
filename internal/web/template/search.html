@@ -4,11 +4,11 @@
     {{template "sourcepanel" .}}
     <div class="app-main">
         {{if $d.Request.Query}}
-        {{template "pagehead" (pageHead "Title" $d.Request.Query "Subtitle" "Across every ticked calendar, address book and file collection." "Hint" "File matches are by name only — Carrel does not index file contents and will not.")}}
+        {{template "m-head" (head "Title" $d.Request.Query "Subtitle" "Across every ticked calendar, address book and file collection." "Hint" "File matches are by name only — Carrel does not index file contents and will not.")}}
             {{template "kindtabs" .}}
-        {{template "pageheadend"}}
+        {{template "m-headend"}}
         {{else}}
-        {{template "pagehead" (pageHead "Title" "Search" "Subtitle" "Type in the search field in the top bar and press Enter. Each source is asked separately, and answers appear as they arrive.")}}{{template "pageheadend"}}
+        {{template "m-head" (head "Title" "Search" "Subtitle" "Type in the search field in the top bar and press Enter. Each source is asked separately, and answers appear as they arrive.")}}{{template "m-headend"}}
         {{end}}
         {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
         {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was searched.</p>{{end}}

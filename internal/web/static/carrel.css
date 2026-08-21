@@ -1913,13 +1913,6 @@ label.checkbox input {
     font-size: 11.5px;
 }
 
-.contacts-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-}
-
 .import-preview {
     width: 100%;
     border-collapse: collapse;
@@ -2273,7 +2266,7 @@ label.checkbox input {
 
 /* 2.6.B2: the sort order lives as links, same control the task filter
    segment already used, so the choice is a plain navigation rather than a
-   second mechanism the page-bar has to learn. */
+   second mechanism the m-bar has to learn. */
 .bar-sort {
     display: inline-flex;
     align-items: center;
@@ -2282,7 +2275,7 @@ label.checkbox input {
 
 /* 2.6.B6: the agenda's own From/To fields stay visible without JavaScript,
    since there is then no Range button to reveal them with; the wrapper
-   participates in the page-bar's flex row rather than boxing its fields, so
+   participates in the m-bar's flex row rather than boxing its fields, so
    this changes nothing about their layout when shown. */
 .js [data-range-fields] {
     display: none;
@@ -2621,29 +2614,6 @@ label.checkbox input {
 .files-tile-meta {
     font-size: 11.5px;
     font-family: var(--f-mono);
-}
-
-.crumbs {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 5px;
-    font-size: 12px;
-    color: var(--dusty);
-    margin: 0.25rem 0 0;
-}
-
-/* Where you are is the one part of the trail set in the ink: the rest is a
-   path back, and a path back is not the subject of the screen. */
-.crumbs b,
-.crumbs strong,
-.crumbs [aria-current] {
-    font-weight: 600;
-    color: var(--ink);
-}
-
-.crumbs a {
-    white-space: nowrap;
 }
 
 .files-actions {
@@ -3506,7 +3476,7 @@ label.checkbox input {
     max-width: 42rem;
 }
 
-.offline-shell-body .page-title {
+.offline-shell-body .m-h1 {
     margin: 0 0 12px;
 }
 
@@ -4135,7 +4105,7 @@ button.danger {
     display: inline-flex;
     align-items: center;
     height: 23px;
-    /* .form-field is a column flexbox and .page-bar wraps onto more than one
+    /* .form-field is a column flexbox and .m-bar wraps onto more than one
        line; align-items: stretch is the default cross-axis behaviour for
        both, which would otherwise pull an inline-flex child out to its
        container's full cross size — a segment control should size to its
@@ -4867,69 +4837,6 @@ body.has-shell .app-shell.is-admin .admin-rail {
     z-index: 1;
     background: transparent;
     border-right: none;
-}
-
-.page-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 15px var(--pad) 11px;
-    flex-wrap: wrap;
-}
-
-.page-title {
-    font-family: var(--f-serif);
-    font-size: 22px;
-    font-weight: 400;
-    line-height: 1.15;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-.page-title .src-bar {
-    width: 3px;
-    height: 20px;
-    border-radius: 1px;
-}
-
-.page-sub {
-    font-size: 11.5px;
-    color: var(--dusty);
-    margin: 4px 0 0;
-    display: flex;
-    gap: 7px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.page-acts,
-.page-head .contacts-actions {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex: none;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    margin: 0;
-}
-
-.page-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 var(--pad) 9px;
-    border-bottom: 0.5px solid var(--rule);
-    flex-wrap: wrap;
-}
-
-.page-bar .form,
-.page-bar.form {
-    border-bottom: 0.5px solid var(--rule);
-    padding-bottom: 9px;
-    margin: 0;
 }
 
 .page-hint {

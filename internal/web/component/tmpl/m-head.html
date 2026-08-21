@@ -1,0 +1,28 @@
+{{/* Шапка раздела — макеты §6, класс .m-head.
+
+     Открывающая половина; закрывает "m-headend". Между ними экран кладёт свои
+     действия (.m-acts): они у каждого экрана свои, и общего у них ровно
+     столько, сколько уже описано классом.
+
+     Заголовок, подзаголовок и крошки остаются здесь, потому что порознь они
+     разъезжались: до этого компонента десять экранов писали собственную пару
+     <h1> + .source-label, и выглядели правильно только благодаря запасному
+     правилу в CSS, которое накрывало оба варианта.
+
+     Subtitle — обычный текст и экранируется как всё остальное; SubtitleHTML —
+     та горстка пустых состояний, что вставляют в подзаголовок настоящую
+     ссылку, собранную из констант на месте вызова. */}}
+{{define "m-head"}}
+{{$h := .}}
+<header class="m-head">
+    {{if or $h.Photo $h.WrapClass}}<div{{if $h.WrapClass}} class="{{$h.WrapClass}}"{{end}}>{{if $h.Photo}}<img class="contact-photo person-photo" src="{{$h.Photo}}" alt="" width="44" height="44">{{end}}{{end}}
+    <div>
+        <h1 class="m-h1">{{if $h.Bar}}<span class="m-bar3 is-multi" aria-hidden="true"></span>{{end}}{{$h.Title}}</h1>
+        {{if $h.Crumbs}}<nav class="m-crumbs" aria-label="Folder">{{range $h.Crumbs}}{{if .Last}}<span aria-current="page">{{.Name}}</span>{{else}}<a href="{{.URL}}">{{.Name}}</a> / {{end}}{{end}}</nav>{{end}}
+        {{if $h.SubtitleHTML}}<p class="m-sub{{if $h.Muted}} source-label{{end}}">{{$h.SubtitleHTML}}</p>{{else if $h.Subtitle}}<p class="m-sub{{if $h.Muted}} source-label{{end}}">{{$h.Subtitle}}</p>{{end}}
+        {{if $h.Hint}}<p class="hint">{{$h.Hint}}</p>{{end}}
+    </div>
+    {{if or $h.Photo $h.WrapClass}}</div>{{end}}
+{{end}}
+
+{{define "m-headend"}}</header>{{end}}

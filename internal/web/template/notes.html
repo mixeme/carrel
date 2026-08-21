@@ -6,16 +6,16 @@
     <div class="app-main" data-filter-scope>
         {{$sub := "Every ticked notebook at once."}}
         {{if $d.SectionRail.SourceSummary}}{{$sub = $d.SectionRail.SourceSummary}}{{end}}
-        {{template "pagehead" (pageHead "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
-            <div class="page-acts no-print">
+        {{template "m-head" (head "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
+            <div class="m-acts no-print">
                 {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
                 <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
                 {{template "importexportmenu" (importExportMenu "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/notes/import") "ExportURL" (print .Base "/app/notes/export"))}}
             </div>
-        {{template "pageheadend"}}
+        {{template "m-headend"}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
-            {{template "pagebar" (pageBar)}}
+            {{template "m-bar" (bar)}}
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these notes</span>
                     <input type="search" placeholder="Filter" data-list-filter autocomplete="off">
@@ -25,7 +25,7 @@
                     <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
                 </div>
                 <span class="bar-count" data-bar-count>0 items</span>
-            {{template "pagebarend"}}
+            {{template "m-barend"}}
             <div id="find-panel"
                  data-sse-panel data-poll-url="{{$d.PollURL}}"
                  {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
@@ -36,15 +36,15 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
-        {{template "pagehead" (pageHead "Title" "Notes" "SubtitleHTML" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.")))}}{{template "pageheadend"}}
+        {{template "m-head" (head "Title" "Notes" "SubtitleHTML" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep notes here. Notes are stored as journal entries, so any other CalDAV client sees them too.")))}}{{template "m-headend"}}
         {{else}}
         <div class="agenda-print-root" data-filter-scope>
             {{$title := "Notes"}}
             {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
             {{$sub := $d.AccountLabel}}
             {{if $d.Collection.DisplayName}}{{$sub = print $d.AccountLabel " · " $d.Collection.DisplayName}}{{end}}
-            {{template "pagehead" (pageHead "Title" $title "Subtitle" $sub)}}
-                <div class="page-acts no-print">
+            {{template "m-head" (head "Title" $title "Subtitle" $sub)}}
+                <div class="m-acts no-print">
                     {{if not $d.ReadOnly}}
                     <a class="app-btn is-primary" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New note</a>
                     <a class="app-btn" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">{{template "ico" "up"}}Import Markdown</a>
@@ -52,11 +52,11 @@
                     <a class="app-btn" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/export">{{template "ico" "down"}}Export Markdown</a>
                     <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
-            {{template "pageheadend"}}
+            {{template "m-headend"}}
             {{if $d.ReadOnly}}<p class="hint no-print">This notebook is read-only.</p>{{end}}
             {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">Nothing here yet.</p>{{end}}
-            {{template "pagebar" (pageBar)}}
+            {{template "m-bar" (bar)}}
                 <span class="bar-sort no-print">
                     <a class="app-btn is-sm{{if or (eq $d.Sort "newest") (not $d.Sort)}} is-on{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?sort=newest{{if $d.Tag}}&amp;tag={{$d.Tag}}{{end}}">Newest</a>
                     <a class="app-btn is-sm{{if eq $d.Sort "oldest"}} is-on{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?sort=oldest{{if $d.Tag}}&amp;tag={{$d.Tag}}{{end}}">Oldest</a>
@@ -72,7 +72,7 @@
                     <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
                 </div>
                 <span class="bar-count" data-bar-count>{{len $d.Rows}} {{if eq (len $d.Rows) 1}}item{{else}}items{{end}}</span>
-            {{template "pagebarend"}}
+            {{template "m-barend"}}
             <ul class="list note-list" data-columns-root="notes">
             {{range $d.Rows}}
                 <li class="list-row list-row--note note-row">

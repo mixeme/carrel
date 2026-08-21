@@ -6,15 +6,15 @@
     <div class="app-main" data-filter-scope>
         {{$sub := "Open tasks from every ticked list."}}
         {{if $d.SectionRail.SourceSummary}}{{$sub = $d.SectionRail.SourceSummary}}{{end}}
-        {{template "pagehead" (pageHead "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
-            <div class="page-acts no-print">
+        {{template "m-head" (head "Bar" true "Title" $d.SectionRail.AllLabel "Subtitle" $sub)}}
+            <div class="m-acts no-print">
                 {{if $d.CreateURL}}<a class="app-btn is-primary" href="{{$d.CreateURL}}">{{template "ico" "plus"}}{{$d.CreateLabel}}</a>{{end}}
                 <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
             </div>
-        {{template "pageheadend"}}
+        {{template "m-headend"}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
-            {{template "pagebar" (pageBar)}}
+            {{template "m-bar" (bar)}}
                 <span class="bar-sort no-print" data-task-counts>
                     <span data-task-count="open">Open 0</span>
                     <span data-task-count="done">Done 0</span>
@@ -29,7 +29,7 @@
                     <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
                 </div>
                 <span class="bar-count" data-bar-count>0 items</span>
-            {{template "pagebarend"}}
+            {{template "m-barend"}}
             <div id="find-panel"
                  data-sse-panel data-poll-url="{{$d.PollURL}}"
                  {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
@@ -40,20 +40,20 @@
     {{template "sectionrail" .}}
     <div class="app-main">
         {{if $d.NoLists}}
-        {{template "pagehead" (pageHead "Title" "Tasks" "SubtitleHTML" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep tasks here.")))}}{{template "pageheadend"}}
+        {{template "m-head" (head "Title" "Tasks" "SubtitleHTML" (safeHTML (print "Connect a CalDAV account from <a href=\"" .Base "/app/settings/connections\">Connections</a> to keep tasks here.")))}}{{template "m-headend"}}
         {{else}}
         <div class="agenda-print-root" data-filter-scope>
             {{$title := "Tasks"}}
             {{if $d.Collection.DisplayName}}{{$title = $d.Collection.DisplayName}}{{end}}
             {{$sub := $d.AccountLabel}}
             {{if $d.Collection.DisplayName}}{{$sub = print $d.AccountLabel " · " $d.Collection.DisplayName}}{{end}}
-            {{template "pagehead" (pageHead "Title" $title "Subtitle" $sub)}}
-                <div class="page-acts no-print">
+            {{template "m-head" (head "Title" $title "Subtitle" $sub)}}
+                <div class="m-acts no-print">
                     {{if not $d.ReadOnly}}<a class="app-btn is-primary" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/new">{{template "ico" "plus"}}New task</a>{{end}}
                     <button type="button" class="app-btn" data-print>{{template "ico" "print"}}Print</button>
                 </div>
-            {{template "pageheadend"}}
-            {{template "pagebar" (pageBar)}}
+            {{template "m-headend"}}
+            {{template "m-bar" (bar)}}
                 <a class="app-btn{{if eq $d.Filter "open"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=open">Open ({{$d.Counts.Open}})</a>
                 <a class="app-btn{{if eq $d.Filter "done"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=done">Done ({{$d.Counts.Done}})</a>
                 <a class="app-btn{{if eq $d.Filter "all"}} is-on{{end}}" href="{{.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}?filter=all">All ({{$d.Counts.All}})</a>
@@ -73,7 +73,7 @@
                     <button type="button" class="theme-segment-btn" data-density-value="compact">Compact</button>
                 </div>
                 <span class="bar-count" data-bar-count>{{len $d.Rows}} {{if eq (len $d.Rows) 1}}item{{else}}items{{end}}</span>
-            {{template "pagebarend"}}
+            {{template "m-barend"}}
             {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
             {{if $d.Empty}}<p class="hint page-hint">Nothing here.</p>{{end}}
             <ul class="list task-list" data-columns-root="tasks">

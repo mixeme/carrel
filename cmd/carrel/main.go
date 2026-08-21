@@ -104,6 +104,12 @@ func run() int {
 		return 1
 	}
 
+	components, err := loadStylesheet()
+	if err != nil {
+		logger.Error("component stylesheet", "error", err)
+		return 1
+	}
+
 	loginLimit := ratelimit.New(ratelimit.Options{})
 	inviteLimit := ratelimit.New(ratelimit.Options{})
 	// The master password is typed rarely and by one person, so there is no
@@ -125,6 +131,7 @@ func run() int {
 		Sessions:       sessions,
 		Store:          st,
 		Templates:      templates,
+		Components:     components,
 		LoginLimit:     loginLimit,
 		InviteLimit:    inviteLimit,
 		RecoveryLimit:  recoveryLimit,
@@ -205,13 +212,31 @@ func run() int {
 	return 0
 }
 
-// loadTemplates parses the embedded page templates.
+// loadTemplates parses the embedded page templates against the component
+// library, so a page calling a component it did not get fails at startup.
 func loadTemplates() (*handler.Templates, error) {
 	templateFS, err := fs.Sub(web.TemplateFS, "template")
 	if err != nil {
 		return nil, err
 	}
-	return handler.LoadTemplates(templateFS)
+	componentFS, err := componentFS()
+	if err != nil {
+		return nil, err
+	}
+	return handler.LoadTemplates(templateFS, componentFS)
+}
+
+// componentFS roots the embedded component library at its own directory.
+func componentFS() (fs.FS, error) { return fs.Sub(web.ComponentFS, "component") }
+
+// loadStylesheet assembles the library's stylesheets into the one response
+// served at /static/component.css.
+func loadStylesheet() (*handler.Stylesheet, error) {
+	fsys, err := componentFS()
+	if err != nil {
+		return nil, err
+	}
+	return handler.LoadStylesheet(fsys)
 }
 
 // limiterSweep is how often expired rate-limiter entries are dropped.

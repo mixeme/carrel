@@ -50,7 +50,11 @@ func newApp(t *testing.T, limiter *ratelimit.Limiter) *app {
 	if err != nil {
 		t.Fatalf("template FS: %v", err)
 	}
-	templates, err := LoadTemplates(templateFS)
+	componentFS, err := fs.Sub(web.ComponentFS, "component")
+	if err != nil {
+		t.Fatalf("component FS: %v", err)
+	}
+	templates, err := LoadTemplates(templateFS, componentFS)
 	if err != nil {
 		t.Fatalf("LoadTemplates: %v", err)
 	}

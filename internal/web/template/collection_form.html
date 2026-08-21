@@ -10,7 +10,7 @@
         {{if $f.AccountID}}<input type="hidden" name="account_id" value="{{$f.AccountID}}">{{end}}
         {{if $f.ColPath}}<input type="hidden" name="collection_path" value="{{$f.ColPath}}">{{end}}
 
-        {{template "pagehead" (pageHead "Title" $f.Title "Subtitle" $f.AccountLabel)}}{{template "pageheadend"}}
+        {{template "m-head" (head "Title" $f.Title "Subtitle" $f.AccountLabel)}}{{template "m-headend"}}
 
         {{if .Error}}<p class="message error">{{.Error}}</p>{{end}}
         {{if $f.Diag}}<pre class="diagnostic">{{$f.Diag}}</pre>{{end}}

@@ -41,6 +41,10 @@ type Server struct {
 	Sessions  *session.Manager
 	Store     *store.Store
 	Templates *Templates
+	// Components is the assembled stylesheet of the component library
+	// (internal/web/component/css), served at /static/component.css. Nil in
+	// tests that render markup without asking for assets.
+	Components *Stylesheet
 	// LoginLimit throttles the login form by address and by account (§24.3).
 	LoginLimit *ratelimit.Limiter
 	// InviteLimit throttles public invite and email-confirmation links (§24.3).

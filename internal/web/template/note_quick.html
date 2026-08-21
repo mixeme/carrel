@@ -49,7 +49,7 @@
 {{else}}
 <div class="app-main quick-note-page">
     <section>
-        {{template "pagehead" (pageHead "Title" "New note")}}{{template "pageheadend"}}
+        {{template "m-head" (head "Title" "New note")}}{{template "m-headend"}}
         {{if .Error}}<p class="message error" role="alert">{{.Error}}</p>{{end}}
         {{if $d.HasTarget}}
         <p class="source-label">Filed in {{$d.Target.Label}} · {{$d.Target.AccountLabel}}</p>

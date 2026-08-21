@@ -236,6 +236,12 @@ func (s *Server) routes(staticFS fs.FS) http.Handler {
 	mux.HandleFunc("GET "+s.Path("/installcheck/{token}/sse"), s.InstallCheckSSE)
 	mux.HandleFunc("POST "+s.Path("/installcheck/{token}/upload"), s.InstallCheckUpload)
 	mux.HandleFunc("GET "+s.Path("/manifest.webmanifest"), s.Manifest)
+	// The component library is assembled at startup, not served from a file,
+	// so it needs its own route rather than the static file server. It is
+	// more specific than /static/, which is what ServeMux matches on.
+	if s.Components != nil {
+		mux.HandleFunc("GET "+s.Path("/static/component.css"), s.ComponentCSS)
+	}
 	if staticFS != nil {
 		mux.HandleFunc("GET "+s.Path("/sw.js"), func(w http.ResponseWriter, r *http.Request) {
 			s.ServiceWorker(w, r, staticFS)

@@ -6,23 +6,61 @@ package handler
 import (
 	"io/fs"
 	"regexp"
+	"sort"
+	"strings"
 	"testing"
 
 	"gitea.mixdep.ru/mix/carrel/internal/web"
 )
 
-// 2.6.E1: an allow-list of where the component primitives may appear, rather
-// than a list of bad patterns to catch. Wave 2.5 passed over ten screens that
-// wrote the old header markup by hand because nothing said "this string may
-// only appear here" — a fallback CSS rule made them look right anyway. This
-// test is the same check the manual verification of 2.6.F ran by hand
-// (`grep -c 'class="page-head"' …`), made to fail the build instead of
-// depending on someone remembering to run it.
+// 2.6.E1, extended when the component library moved to internal/web/component:
+// an allow-list of where the primitives may appear, rather than a list of bad
+// patterns to catch. Wave 2.5 passed over ten screens that wrote the old header
+// markup by hand because nothing said "this string may only appear here" — a
+// fallback CSS rule made them look right anyway.
+//
+// The list of classes to police is no longer written here. It is read out of
+// the library's own stylesheets, so a component added tomorrow is guarded the
+// day it is added, without anyone remembering to extend a test. That is the
+// same reason the library keeps markup and styles side by side: a rule that
+// has to be repeated somewhere else is a rule that will be forgotten.
 var (
-	pageHeadClass = regexp.MustCompile(`class="page-head"`)
-	pageBarClass  = regexp.MustCompile(`class="page-bar`)
-	tableTag      = regexp.MustCompile(`<table`)
+	libraryClassRule = regexp.MustCompile(`(?m)^\.(m-[a-z0-9-]+)`)
+	tableTag         = regexp.MustCompile(`<table`)
 )
+
+// slotClasses are the library classes any screen may write: content the
+// screen owns, sitting in a box the component sizes. .m-acts holds whatever
+// actions this screen has, but how they line up is the header's business.
+var slotClasses = map[string]string{
+	"m-acts": "the screen's own actions, laid out by m-head",
+}
+
+// standaloneUse names, per class, the screens allowed to use a primitive on
+// its own, away from the component it usually lives in — and only those. The
+// permission is per screen rather than global on purpose: "some screens may
+// write a heading by hand" is how ten of them drifted in wave 2.5.
+//
+// The sign-in-adjacent screens carry the mockup's own §7.12 frame — a centred
+// card, not the rail-and-header shell — and take the title and subtitle
+// typography without the header layout around them, exactly as §7.12 draws
+// them inside .m-dialog.
+var standaloneUse = map[string][]string{
+	"m-h1":  {"setup.html"},
+	"m-sub": {"setup.html"},
+}
+
+func mayWrite(name, class string) bool {
+	if _, ok := slotClasses[class]; ok {
+		return true
+	}
+	for _, allowed := range standaloneUse[class] {
+		if allowed == name {
+			return true
+		}
+	}
+	return false
+}
 
 // tablesOutsideDatatable are the templates whose tables were never in scope
 // for the datatable component of 2.6.A3 — import previews and the conflict
@@ -36,7 +74,44 @@ var tablesOutsideDatatable = map[string]bool{
 	"conflict.html":        true,
 }
 
+// libraryClasses reads every class the component library defines.
+func libraryClasses(t *testing.T) []string {
+	t.Helper()
+	componentFS, err := fs.Sub(web.ComponentFS, "component")
+	if err != nil {
+		t.Fatalf("component FS: %v", err)
+	}
+	names, err := fs.Glob(componentFS, "css/*.css")
+	if err != nil {
+		t.Fatalf("glob component css: %v", err)
+	}
+	if len(names) == 0 {
+		t.Fatal("component library has no stylesheets")
+	}
+	seen := map[string]bool{}
+	for _, name := range names {
+		b, err := fs.ReadFile(componentFS, name)
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		for _, m := range libraryClassRule.FindAllStringSubmatch(string(b), -1) {
+			seen[m[1]] = true
+		}
+	}
+	out := make([]string, 0, len(seen))
+	for c := range seen {
+		out = append(out, c)
+	}
+	sort.Strings(out)
+	return out
+}
+
 func TestComponentClassesStayInComponentFiles(t *testing.T) {
+	classes := libraryClasses(t)
+	if len(classes) == 0 {
+		t.Fatal("no library classes found; the gate would pass vacuously")
+	}
+
 	templateFS, err := fs.Sub(web.TemplateFS, "template")
 	if err != nil {
 		t.Fatalf("template FS: %v", err)
@@ -49,19 +124,25 @@ func TestComponentClassesStayInComponentFiles(t *testing.T) {
 		t.Fatal("no templates found")
 	}
 	for _, name := range names {
-		if name == "base.html" {
-			continue
-		}
 		b, err := fs.ReadFile(templateFS, name)
 		if err != nil {
 			t.Fatalf("read %s: %v", name, err)
 		}
 		body := string(b)
-		if pageHeadClass.MatchString(body) {
-			t.Errorf("%s writes class=\"page-head\" by hand; call the pagehead component instead", name)
+		for _, class := range classes {
+			if mayWrite(name, class) {
+				continue
+			}
+			// class="m-bar …" and class="… m-bar" both count: what matters is
+			// that the screen wrote the library's class itself.
+			if writesClass(body, class) {
+				t.Errorf("%s writes class %q by hand; call the component instead "+
+					"(or name it in slotClasses / standaloneUse with the reason it is "+
+					"this screen's to write)", name, class)
+			}
 		}
-		if pageBarClass.MatchString(body) {
-			t.Errorf("%s writes class=\"page-bar\" by hand; call the pagebar component instead", name)
+		if name == "base.html" {
+			continue
 		}
 		if tableTag.MatchString(body) && !tablesOutsideDatatable[name] {
 			t.Errorf("%s opens a <table> by hand; call the datatable component instead "+
@@ -69,3 +150,17 @@ func TestComponentClassesStayInComponentFiles(t *testing.T) {
 		}
 	}
 }
+
+// writesClass reports whether body has the class inside a class="…" value.
+func writesClass(body, class string) bool {
+	for _, attr := range classAttr.FindAllStringSubmatch(body, -1) {
+		for _, f := range strings.Fields(attr[1]) {
+			if f == class {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+var classAttr = regexp.MustCompile(`class="([^"]*)"`)

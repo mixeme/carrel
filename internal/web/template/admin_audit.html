@@ -2,18 +2,18 @@
 {{$d := .Data}}
 <section class="admin-panel">
     {{$sub := printf "%d record" $d.TotalAuditCount}}{{if ne $d.TotalAuditCount 1}}{{$sub = printf "%d records" $d.TotalAuditCount}}{{end}}
-    {{template "pagehead" (pageHead "Title" "Audit log" "Subtitle" $sub)}}
-        <div class="page-acts no-print">
+    {{template "m-head" (head "Title" "Audit log" "Subtitle" $sub)}}
+        <div class="m-acts no-print">
             <a class="app-btn" href="{{.Base}}/admin/audit/export?{{if $d.AuditAction}}audit_action={{$d.AuditAction}}&amp;{{end}}{{if $d.AuditCategory}}audit_category={{$d.AuditCategory}}{{end}}">{{template "ico" "down"}}Export CSV</a>
         </div>
-    {{template "pageheadend"}}
+    {{template "m-headend"}}
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>
     {{end}}
 
     <section class="subsection">
-        {{template "pagebar" (pageBar)}}
+        {{template "m-bar" (bar)}}
             <span class="bar-sort no-print">
                 <a class="app-btn is-sm{{if not $d.AuditCategory}} is-on{{end}}" href="{{.Base}}/admin/audit{{if $d.AuditAction}}?audit_action={{$d.AuditAction}}{{end}}">All</a>
                 <a class="app-btn is-sm{{if eq $d.AuditCategory "security"}} is-on{{end}}" href="{{.Base}}/admin/audit?audit_category=security{{if $d.AuditAction}}&amp;audit_action={{$d.AuditAction}}{{end}}">Security</a>
@@ -41,7 +41,7 @@
                 <noscript><button type="submit" class="app-btn is-sm">Filter</button></noscript>
             </form>
             {{template "columnpicker" "admin-audit"}}
-        {{template "pagebarend"}}
+        {{template "m-barend"}}
         {{if $d.AuditLog}}
         {{template "datatable" (dataTable "Class" "data" "Root" "admin-audit")}}
             <thead>

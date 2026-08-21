@@ -9,7 +9,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
-	"reflect"
+	"path"
 	"strings"
 
 	"gitea.mixdep.ru/mix/carrel/internal/session"
@@ -25,19 +25,34 @@ type Templates struct {
 	pages map[string]*template.Template
 }
 
-// LoadTemplates parses every page in fsys against the base frame.
-func LoadTemplates(fsys fs.FS) (*Templates, error) {
-	names, err := fs.Glob(fsys, "*.html")
+// LoadTemplates parses every page in pages against the base frame and the
+// component library in components (internal/web/component/tmpl).
+//
+// The library is parsed into every page rather than into a shared parent, so
+// a page that calls a component it did not get fails at startup instead of at
+// the request that first reaches that branch.
+func LoadTemplates(pages, components fs.FS) (*Templates, error) {
+	names, err := fs.Glob(pages, "*.html")
 	if err != nil {
 		return nil, fmt.Errorf("handler: list templates: %w", err)
+	}
+	comps, err := fs.Glob(components, path.Join(componentTmplDir, "*.html"))
+	if err != nil {
+		return nil, fmt.Errorf("handler: list components: %w", err)
+	}
+	if len(comps) == 0 {
+		return nil, fmt.Errorf("handler: component library has no templates")
 	}
 	t := &Templates{pages: make(map[string]*template.Template, len(names))}
 	for _, name := range names {
 		if name == baseTemplate {
 			continue
 		}
-		page, err := template.New(name).Funcs(templateFuncs).ParseFS(fsys, baseTemplate, name)
+		page, err := template.New(name).Funcs(templateFuncs).ParseFS(components, comps...)
 		if err != nil {
+			return nil, fmt.Errorf("handler: parse component library: %w", err)
+		}
+		if page, err = page.ParseFS(pages, baseTemplate, name); err != nil {
 			return nil, fmt.Errorf("handler: parse %s: %w", name, err)
 		}
 		t.pages[name] = page
@@ -58,9 +73,9 @@ func LoadTemplates(fsys fs.FS) (*Templates, error) {
 // a real field, or a value that does not fit it, fails the render, and
 // 2.6.E3 renders every screen so that failure shows up at once.
 var templateFuncs = template.FuncMap{
-	"pageHead":         buildPageHead,
-	"pageBar":          buildPageBar,
-	"pageBarForm":      buildPageBarForm,
+	"head":             buildHead,
+	"bar":              buildBar,
+	"barForm":          buildBarForm,
 	"dataTable":        buildDataTable,
 	"importExportMenu": buildImportExportMenu,
 	"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
@@ -72,88 +87,6 @@ var templateFuncs = template.FuncMap{
 		}
 		return false
 	},
-}
-
-// PageHead is the typed input to the pagehead component. Subtitle is plain
-// text and is escaped like any other field; SubtitleHTML is the handful of
-// call sites that build a real link into the subtitle ("Connect a DAV
-// account from Connections…") from constants, never from anything typed by a
-// visitor — development.md's rule that template.HTML never wraps user input
-// holds exactly the same as it did when these were `(safeHTML …)` under a
-// `dict`, only the field name says which case a call site is choosing.
-type PageHead struct {
-	Title        string
-	Subtitle     string
-	SubtitleHTML template.HTML
-	Hint         string
-	Photo        string
-	WrapClass    string
-	Bar          bool
-	Muted        bool
-	Crumbs       []fileCrumb
-}
-
-// PageBar is the typed input to the pagebar component.
-type PageBar struct {
-	Attrs template.HTML
-}
-
-// PageBarForm is the typed input to the pagebarform component.
-type PageBarForm struct {
-	Action string
-	Method string
-}
-
-// DataTable is the typed input to the datatable component.
-type DataTable struct {
-	Class string
-	Root  string
-	Attrs template.HTML
-}
-
-// ImportExportMenu is the typed input to the ⋯ menu of 2.6.D1/D2.
-type ImportExportMenu struct {
-	Sources   []sourceRow
-	ImportURL string
-	ExportURL string
-}
-
-func buildPageHead(pairs ...any) (PageHead, error) { return typedDict[PageHead](pairs...) }
-func buildPageBar(pairs ...any) (PageBar, error)   { return typedDict[PageBar](pairs...) }
-func buildPageBarForm(pairs ...any) (PageBarForm, error) {
-	return typedDict[PageBarForm](pairs...)
-}
-func buildDataTable(pairs ...any) (DataTable, error) { return typedDict[DataTable](pairs...) }
-func buildImportExportMenu(pairs ...any) (ImportExportMenu, error) {
-	return typedDict[ImportExportMenu](pairs...)
-}
-
-// typedDict builds a T from alternating name/value arguments the same way
-// wave 2.6.A's `dict` built a map (2.6.E2). It is generic so every component
-// gets the same rule from one implementation rather than four copies of a
-// hand-rolled switch, one per struct.
-func typedDict[T any](pairs ...any) (T, error) {
-	var out T
-	if len(pairs)%2 != 0 {
-		return out, fmt.Errorf("%T: odd number of arguments", out)
-	}
-	v := reflect.ValueOf(&out).Elem()
-	for i := 0; i < len(pairs); i += 2 {
-		name, ok := pairs[i].(string)
-		if !ok {
-			return out, fmt.Errorf("%T: key %v is not a string", out, pairs[i])
-		}
-		field := v.FieldByName(name)
-		if !field.IsValid() || !field.CanSet() {
-			return out, fmt.Errorf("%T has no field %q", out, name)
-		}
-		val := reflect.ValueOf(pairs[i+1])
-		if !val.IsValid() || !val.Type().AssignableTo(field.Type()) {
-			return out, fmt.Errorf("%T.%s: %#v is not assignable to %s", out, name, pairs[i+1], field.Type())
-		}
-		field.Set(val)
-	}
-	return out, nil
 }
 
 // View is what every template receives. Handlers add whatever else the page

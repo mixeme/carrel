@@ -7,12 +7,12 @@
         <section class="person-main">
             {{$sub := $p.AccountLabel}}
             {{if $p.Collection.DisplayName}}{{$sub = print $p.AccountLabel " · " $p.Collection.DisplayName}}{{end}}
-            {{template "pagehead" (pageHead "Title" $d.Subject "Subtitle" $sub "Photo" $p.PhotoURL "WrapClass" "person-head")}}
-                <div class="page-acts no-print">
+            {{template "m-head" (head "Title" $d.Subject "Subtitle" $sub "Photo" $p.PhotoURL "WrapClass" "person-head")}}
+                <div class="m-acts no-print">
                     {{if $p.NoteURL}}<a class="app-btn" href="{{$p.NoteURL}}">Write a note</a>{{end}}
                     {{if $p.EventURL}}<a class="app-btn" href="{{$p.EventURL}}">New event</a>{{end}}
                 </div>
-            {{template "pageheadend"}}
+            {{template "m-headend"}}
             {{template "kindtabs" .}}
             {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No calendars are ticked, so nothing was polled.</p>{{end}}

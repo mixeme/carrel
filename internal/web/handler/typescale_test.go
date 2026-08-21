@@ -158,8 +158,21 @@ func TestStylesheetKeepsTheTracking(t *testing.T) {
 	}
 }
 
+// readStylesheet returns everything the browser is given: the component
+// library first, then carrel.css, in the order base.html links them. The
+// library has to be in here — a size or a letter-spacing that slipped into a
+// component would otherwise sit outside every gate that reads this, which is
+// the opposite of what moving the primitives into a library was for.
 func readStylesheet(t *testing.T) string {
 	t.Helper()
+	componentFS, err := fs.Sub(web.ComponentFS, "component")
+	if err != nil {
+		t.Fatalf("component FS: %v", err)
+	}
+	sheet, err := LoadStylesheet(componentFS)
+	if err != nil {
+		t.Fatalf("assemble component stylesheet: %v", err)
+	}
 	staticFS, err := fs.Sub(web.StaticFS, "static")
 	if err != nil {
 		t.Fatalf("static FS: %v", err)
@@ -168,7 +181,7 @@ func readStylesheet(t *testing.T) string {
 	if err != nil {
 		t.Fatalf("read carrel.css: %v", err)
 	}
-	return string(b)
+	return string(sheet.Body) + "\n" + string(b)
 }
 
 func trimZero(v string) string {

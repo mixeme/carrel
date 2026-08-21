@@ -1,8 +1,8 @@
 {{define "body"}}
 {{$d := .Data}}
 <section class="admin-panel">
-    {{template "pagehead" (pageHead "Title" "Installation check" "Subtitle" "Carrel asks itself from outside, at the address you declared as the base one")}}
-        <div class="page-acts no-print">
+    {{template "m-head" (head "Title" "Installation check" "Subtitle" "Carrel asks itself from outside, at the address you declared as the base one")}}
+        <div class="m-acts no-print">
             <form method="post" action="{{.Base}}/admin/install" class="inline-form install-check-form">
                 <input type="hidden" name="csrf_token" value="{{.CSRF}}">
                 <input type="hidden" name="action" value="run_install_check">
@@ -14,7 +14,7 @@
                 <button type="submit" class="app-btn is-primary">Run the check</button>
             </form>
         </div>
-    {{template "pageheadend"}}
+    {{template "m-headend"}}
 
     {{if $d.InstallResult}}
     <p class="install-check-summary">

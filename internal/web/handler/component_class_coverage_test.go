@@ -161,7 +161,8 @@ func TestEveryTemplateClassIsStyled(t *testing.T) {
 	}
 	sort.Strings(missing)
 	for _, cls := range missing {
-		t.Errorf("class %q (in %v) has no rule in carrel.css and is not in unstyledClassAllowList — "+
+		t.Errorf("class %q (in %v) has no rule in the component library or carrel.css and is "+
+			"not in unstyledClassAllowList — "+
 			"either style it or add it to the allow-list with why it needs none", cls, usedIn[cls])
 	}
 }

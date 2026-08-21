@@ -8,6 +8,7 @@
 var CACHE = 'carrel-shell-1';
 
 var SHELL_ASSETS = [
+    'static/component.css',
     'static/carrel.css',
     'static/boot.js',
     'static/htmx.min.js',

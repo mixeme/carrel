@@ -5,26 +5,26 @@
     {{if ne (len $d.AllUsers) 1}}{{$sub = printf "%d accounts" (len $d.AllUsers)}}{{end}}
     {{$sub = printf "%s · %d administrator" $sub $d.AdminCount}}{{if ne $d.AdminCount 1}}{{$sub = print $sub "s"}}{{end}}
     {{if $d.EscrowCoverage}}{{$sub = printf "%s · %d covered by escrow" $sub $d.EscrowCoverage}}{{end}}
-    {{template "pagehead" (pageHead "Title" "Users" "Subtitle" $sub)}}
-        <div class="page-acts no-print">
+    {{template "m-head" (head "Title" "Users" "Subtitle" $sub)}}
+        <div class="m-acts no-print">
             <a class="app-btn is-primary" href="{{.Base}}/admin/invites">{{template "ico" "plus"}}Add user</a>
             <a class="app-btn" href="#reset-password-form">Reset a password…</a>
         </div>
-    {{template "pageheadend"}}
+    {{template "m-headend"}}
 
     {{if $d.MailWarning}}
     <p class="warning" role="alert">{{$d.MailWarning}}</p>
     {{end}}
 
     <section class="subsection">
-        {{template "pagebar" (pageBar)}}
+        {{template "m-bar" (bar)}}
             <span class="bar-sort no-print">
                 <a class="app-btn is-sm{{if not $d.UserFilter}} is-on{{end}}" href="{{.Base}}/admin/">All</a>
                 <a class="app-btn is-sm{{if eq $d.UserFilter "admin"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=admin">Administrators</a>
                 <a class="app-btn is-sm{{if eq $d.UserFilter "disabled"}} is-on{{end}}" href="{{.Base}}/admin/?user_filter=disabled">Disabled</a>
             </span>
             {{template "columnpicker" "admin-users"}}
-        {{template "pagebarend"}}
+        {{template "m-barend"}}
         {{if $d.Users}}
         {{template "datatable" (dataTable "Class" "data" "Root" "admin-users")}}
             <thead>

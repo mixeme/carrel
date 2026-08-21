@@ -14,7 +14,7 @@
                 <div><h1>{{if $d.IsNew}}New event{{else}}{{$d.Event.DisplayTitle}}{{end}}</h1>
                 <p class="source-label">{{$d.AccountLabel}}{{if $d.Collection.DisplayName}} · {{$d.Collection.DisplayName}}{{end}}</p></div>
                 {{if not $d.IsNew}}
-                <p class="contacts-actions no-print">
+                <p class="m-acts no-print">
                     {{if $d.NoteURL}}<a class="app-btn" href="{{$d.NoteURL}}">Write a note</a>{{end}}
                     <button type="button" class="link" data-print>Print</button>
                 </p>

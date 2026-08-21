@@ -1,0 +1,95 @@
+/* Шапка раздела — макеты §6 (.m-head). Перенесено копированием, а не
+   перерисовкой: числа те же, что в carrel-ui-mockups.html.
+
+   Отступ снизу платит не шапка, а полоса под ней — см. 20-bar.css. */
+
+.m-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 15px var(--pad) 11px;
+    flex-wrap: wrap;
+}
+
+.m-h1 {
+    font-family: var(--f-serif);
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.15;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.m-sub {
+    font-size: 11.5px;
+    color: var(--dusty);
+    margin: 4px 0 0;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Набор действий экрана: он лежит между m-head и m-headend, но размер его —
+   дело шапки, а не экрана. */
+.m-acts {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex: none;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin: 0;
+}
+
+/* Полоска коллекции знает свой размер сама. В макетах это ошибка, стоившая
+   отдельного комментария: размер задавали .m-src и .m-row, и в шапках,
+   именах и метках полоска молча схлопывалась в ноль ширины. */
+.m-bar3 {
+    display: inline-block;
+    vertical-align: middle;
+    width: 3px;
+    height: 14px;
+    border-radius: 1px;
+    flex: none;
+    background: var(--accent);
+}
+
+.m-h1 .m-bar3 {
+    height: 20px;
+}
+
+.m-bar3.is-multi {
+    background: linear-gradient(
+        to bottom,
+        var(--accent) 0 33%,
+        #3f6e8c 33% 66%,
+        #a05a2c 66% 100%
+    );
+}
+
+/* Хлебные крошки шапки. Где вы сейчас — единственная часть тропы, набранная
+   чернилами: остальное это путь назад, а путь назад не предмет экрана. */
+.m-crumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--dusty);
+    margin: 0.25rem 0 0;
+}
+
+.m-crumbs b,
+.m-crumbs strong,
+.m-crumbs [aria-current] {
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.m-crumbs a {
+    white-space: nowrap;
+}
