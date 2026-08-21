@@ -5,7 +5,7 @@
     {{template "m-head" (head "Title" "Key escrow")}}{{template "m-headend"}}
 
     {{if $d.MailWarning}}
-    <p class="warning" role="alert">{{$d.MailWarning}}</p>
+    <p class="m-msg is-accent" role="alert">{{$d.MailWarning}}</p>
     {{end}}
 
     <section class="subsection">
@@ -82,7 +82,7 @@
         </form>
 
         {{else}}
-        <p class="warning">Choose a master password that is not your login
+        <p class="m-msg is-accent">Choose a master password that is not your login
             password and keep it somewhere outside this service. If it is lost
             the scheme becomes useless: the deposited copies can never be
             opened again, and generating a new key pair would orphan them.</p>

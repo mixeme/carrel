@@ -1,6 +1,6 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="detail-panel" data-detail-url="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/panel">
+<div data-detail-url="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{$d.UID}}/panel">
     {{$sub := $d.AccountLabel}}
     {{if $d.Collection.DisplayName}}{{$sub = printf "%s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
     {{template "m-head" (head "Side" true "Title" $d.Contact.DisplayName "Subtitle" $sub "Photo" $d.PhotoURL)}}
@@ -10,19 +10,19 @@
         </div>
     {{template "m-headend"}}
     <div class="detail-panel-body">
-        <dl class="detail-fields">
+        <dl class="m-fields">
             {{if $d.Contact.Organization}}<dt>Organisation</dt><dd>{{range $d.Contact.Organization}}{{.}} {{end}}</dd>{{end}}
             {{if $d.Contact.Title}}<dt>Title</dt><dd>{{$d.Contact.Title}}</dd>{{end}}
             {{if $d.Contact.Role}}<dt>Role</dt><dd>{{$d.Contact.Role}}</dd>{{end}}
             {{range $d.Contact.Phones}}<dt>Phone{{if .Label}} · {{.Label}}{{end}}</dt><dd>{{.Value}}</dd>{{end}}
             {{range $d.Contact.Emails}}<dt>Email{{if .Label}} · {{.Label}}{{end}}</dt><dd>{{.Value}}</dd>{{end}}
             {{if $d.Contact.Birthday}}<dt>Birthday</dt><dd>{{$d.Contact.Birthday}}</dd>{{end}}
-            {{if $d.Contact.Categories}}<dt>Categories</dt><dd>{{range $d.Contact.Categories}}<span class="tag">{{.}}</span> {{end}}</dd>{{end}}
+            {{if $d.Contact.Categories}}<dt>Categories</dt><dd>{{range $d.Contact.Categories}}<span class="m-tag">{{.}}</span> {{end}}</dd>{{end}}
             {{if $d.Contact.Note}}<dt>Note</dt><dd>{{$d.Contact.Note}}</dd>{{end}}
         </dl>
         {{if $d.Contact.Other}}
-        <section class="detail-section">
-            <h3>Kept as the server sent them</h3>
+        <section class="m-sec">
+            <h3 class="m-rubric">Kept as the server sent them</h3>
             <ul class="detail-other">
             {{range $d.Contact.Other}}
                 <li><code>{{.Name}}</code>{{range .Values}} {{.Text}}{{end}}</li>

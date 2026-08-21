@@ -303,6 +303,37 @@ type RailFoot struct {
 	Extra string
 }
 
+// Side is the input to m-side, the details column. Attrs is id / hidden
+// / aria-label the screen owns; Extra is a screen marker.
+type Side struct {
+	Label string
+	Attrs template.HTML
+	Extra string
+}
+
+// Dialog is the input to m-dialog, the centred page frame. Wide and
+// Narrow are the mockup width tokens; Narrow keeps the 520px production
+// already had, not the mockup's 420.
+type Dialog struct {
+	Wide   bool
+	Narrow bool
+}
+
+// Card is the input to m-card. Accent is the highlighted import card;
+// Class is a state marker (is-ignored) the screen owns.
+type Card struct {
+	Accent bool
+	Class  string
+}
+
+// Menu is the input to m-menu, the popover. Pop is the mockup is-pop
+// (floats, does not inflate the layout); Right aligns it to the trigger.
+type Menu struct {
+	Pop   bool
+	Right bool
+	Attrs template.HTML
+}
+
 func buildHead(pairs ...any) (Head, error)   { return typedDict[Head](pairs...) }
 func buildForm(pairs ...any) (Form, error)   { return typedDict[Form](pairs...) }
 func buildField(pairs ...any) (Field, error) { return typedDict[Field](pairs...) }
@@ -320,6 +351,10 @@ func buildRailSec(pairs ...any) (RailSec, error) { return typedDict[RailSec](pai
 func buildRailFoot(pairs ...any) (RailFoot, error) {
 	return typedDict[RailFoot](pairs...)
 }
+func buildSide(pairs ...any) (Side, error)       { return typedDict[Side](pairs...) }
+func buildDialog(pairs ...any) (Dialog, error)   { return typedDict[Dialog](pairs...) }
+func buildCard(pairs ...any) (Card, error)       { return typedDict[Card](pairs...) }
+func buildMenu(pairs ...any) (Menu, error)       { return typedDict[Menu](pairs...) }
 func buildList(pairs ...any) (List, error)       { return typedDict[List](pairs...) }
 func buildRow(pairs ...any) (Row, error)         { return typedDict[Row](pairs...) }
 func buildGroup(pairs ...any) (Group, error)     { return typedDict[Group](pairs...) }

@@ -29,14 +29,14 @@
         <p class="hint">No address on file.</p>
         {{end}}
         {{if and $d.Email $d.EmailConfirmed}}
-        <p><span class="badge">Confirmed</span></p>
+        <p><span class="m-badge">Confirmed</span></p>
         {{end}}
         {{if $d.PendingEmail}}
         <p class="hint">Pending confirmation: {{$d.PendingEmail}}</p>
         {{end}}
         <p class="m-hint">Used for service notices, and as <span class="mono">Reply-To</span> on letters you send once confirmed.</p>
         {{if and $d.Email (not $d.EmailConfirmed) (not $d.PendingEmail)}}
-        <p class="warning">This address has not been confirmed. Letters you send will carry no reply address, and will say so at the foot.</p>
+        <p class="m-msg is-accent">This address has not been confirmed. Letters you send will carry no reply address, and will say so at the foot.</p>
         <form method="post" class="no-print" action="{{.Base}}/app/settings/account">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="confirm_email">
@@ -64,7 +64,7 @@
     <fieldset class="m-fset">
         <legend>Key escrow</legend>
         {{if $e.Deposited}}
-        <p class="warning">A copy of your data key is deposited on this server.
+        <p class="m-msg is-accent">A copy of your data key is deposited on this server.
             An administrator who holds the escrow master password can decrypt
             the DAV credentials you save here, and through them your contacts
             and calendars.</p>
@@ -91,7 +91,7 @@
         <form method="post" class="m-form" action="{{.Base}}/app/escrow">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">
             <input type="hidden" name="action" value="opt_in">
-            <p class="warning">Depositing your key means an administrator with
+            <p class="m-msg is-accent">Depositing your key means an administrator with
                 the escrow master password can read your saved credentials and
                 the contacts and calendars behind them. In exchange, your data
                 survives a forgotten password.</p>
@@ -147,7 +147,7 @@
 
     <fieldset class="m-fset">
         <legend>Delete account</legend>
-        <p class="warning">This removes your account, your saved connections and everything sealed under your
+        <p class="m-msg is-accent">This removes your account, your saved connections and everything sealed under your
             data key, for good. It cannot be undone.</p>
         <form method="post" class="m-form" action="{{.Base}}/app/settings/account">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">

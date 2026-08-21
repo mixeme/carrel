@@ -4,7 +4,7 @@
     {{template "m-head" (head "Title" "Add users")}}{{template "m-headend"}}
 
     {{if $d.MailWarning}}
-    <p class="warning" role="alert">{{$d.MailWarning}}</p>
+    <p class="m-msg is-accent" role="alert">{{$d.MailWarning}}</p>
     {{end}}
 
     {{if $d.NewInviteLink}}
@@ -76,7 +76,7 @@
         {{end}}
 
         <h3 class="subsection-h3">Temporary password</h3>
-        <p class="warning">Until the user changes this password, you can sign
+        <p class="m-msg is-accent">Until the user changes this password, you can sign
             in as them. Only use this when handing credentials over in person.</p>
         <form method="post" class="m-form" action="{{.Base}}/admin/invites">
             <input type="hidden" name="csrf_token" value="{{.CSRF}}">

@@ -1,7 +1,6 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="dialog-host">
-<div class="app-dialog is-wide">
+<div class="m-dialog is-wide">
 {{template "m-head" (head "Plain" true "Title" "Conflict" "Subtitle" (printf "Another client changed this %s while you were editing it. Nothing has been overwritten." $d.Entity))}}{{template "m-headend"}}
 
 {{if $d.RemoteGone}}
@@ -39,6 +38,5 @@
         <button type="submit" name="choice" value="cancel" class="m-btn is-quiet">Cancel</button>
     </div>
 </form>
-</div>
 </div>
 {{end}}

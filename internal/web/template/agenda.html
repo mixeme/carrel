@@ -52,8 +52,8 @@
                 <span data-bar-count>0 items</span>
             {{template "m-rightend"}}
         {{template "m-barformend"}}
-        {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
-        {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was polled.</p>{{end}}
+        {{if $d.Unusable}}<p class="m-msg is-alert">{{$d.Unusable}}</p>{{end}}
+        {{if $d.NoSources}}<p class="m-empty">No sources are ticked, so nothing was polled.</p>{{end}}
         <div id="find-panel"
              data-sse-panel data-poll-url="{{$d.PollURL}}"
              {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>
@@ -109,8 +109,8 @@
                     <span data-bar-count>{{$d.EventCount}} {{if eq $d.EventCount 1}}item{{else}}items{{end}}</span>
                 {{template "m-rightend"}}
             {{template "m-barformend"}}
-            {{if $d.ReadOnly}}<p class="hint page-hint no-print">This calendar is read-only.</p>{{end}}
-            {{if $d.Empty}}<p class="hint page-hint">No events in this date range.</p>{{end}}
+            {{if $d.ReadOnly}}<p class="hint no-print">This calendar is read-only.</p>{{end}}
+            {{if $d.Empty}}<p class="m-empty">No events in this date range.</p>{{end}}
             {{range $d.Days}}
             <section class="agenda-day" data-date="{{.Date}}" data-filter-group>
                 {{template "m-group" (group "Label" .Label "Num" (print (len .Events)))}}

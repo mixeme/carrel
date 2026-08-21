@@ -70,7 +70,7 @@
                 <button type="button" class="m-btn is-primary app-create-toggle" data-create-menu-toggle
                         aria-expanded="false" aria-haspopup="menu" aria-label="Create…">{{template "ico" "chev"}}</button>
             </div>
-            <div class="app-create-menu" role="menu" hidden>
+            <div class="m-menu" data-create-menu role="menu" hidden>
             {{range .Topbar.Create}}
                 {{if .Separator}}<hr class="app-create-sep">{{else if .QuickNote}}
                 <a class="app-create-item is-active" role="menuitem" href="{{$.Topbar.QuickNoteURL}}" data-quick-note-open
@@ -151,8 +151,8 @@
     <div class="app-work">
         <div class="app-content">
             <div class="app-offline no-print" id="app-offline" hidden role="status">
-                <div class="find-poll is-offline">
-                    <span class="find-prog" aria-hidden="true"><i></i></span>
+                <div class="m-poll is-offline">
+                    <span class="m-prog" aria-hidden="true"><i></i></span>
                     <p class="find-summary">No connection · check your network</p>
                     <button type="button" class="m-btn is-sm" data-refresh>Retry</button>
                 </div>
@@ -173,12 +173,12 @@
 {{end}}
 <main>
 {{end}}
-    {{if .Error}}<p class="message error no-print" role="alert">{{.Error}}</p>{{end}}
-    {{if .Notice}}<p class="message notice no-print">{{.Notice}}</p>{{end}}
+    {{if .Error}}<p class="m-msg is-alert no-print" role="alert">{{.Error}}</p>{{end}}
+    {{if .Notice}}<p class="m-msg no-print">{{.Notice}}</p>{{end}}
     {{block "body" .}}{{end}}
 {{if .Shell}}
         </div>
-        <aside class="app-details no-print" id="app-details" hidden aria-label="Details"></aside>
+        <aside class="m-side no-print" id="app-details" hidden aria-label="Details"></aside>
     </div>
 </div>
 <nav class="app-bottom-nav no-print" aria-label="Sections">
@@ -251,7 +251,7 @@
 <div class="app-create no-print" data-dots-menu>
     <button type="button" class="m-btn is-quiet" data-dots-toggle
             aria-expanded="false" aria-haspopup="menu" aria-label="Import or export">{{template "ico" "dots"}}</button>
-    <div class="app-create-menu dots-menu" role="menu" hidden>
+    <div class="m-menu" role="menu" hidden>
         {{if $m.ImportURL}}
         <form method="get" action="{{$m.ImportURL}}" role="menuitem">
             <label>Import into
@@ -467,8 +467,8 @@
 {{/* §23.8: when a collection was read and when the server last changed it. */}}
 {{define "sourceblock"}}
 {{if .Known}}
-<section class="detail-section source-block">
-    <h3>Source</h3>
+<section class="m-sec source-block">
+    <h3 class="m-rubric">Source</h3>
     <pre class="diagnostic">{{if .ObjectETag}}ETag  {{.ObjectETag}}
 {{end}}{{if .ObjectPath}}Path  {{.ObjectPath}}
 {{end}}{{if .ReadLabel}}Read  {{.ReadLabel}}{{if .ChangedLabel}} · {{.ChangedLabel}}{{end}}{{else if .ChangedLabel}}{{.ChangedLabel}}{{end}}</pre>
@@ -481,8 +481,8 @@
 {{define "findprogress"}}
 {{$d := .Data}}
 <div class="find-progress">
-    <div class="find-poll">
-        <span class="find-prog" aria-hidden="true"><i data-fill="{{$d.Snapshot.Percent}}"></i></span>
+    <div class="m-poll">
+        <span class="m-prog" aria-hidden="true"><i data-fill="{{$d.Snapshot.Percent}}"></i></span>
         <p class="find-summary" role="status">{{$d.Snapshot.Summary}}</p>
         {{if $d.Snapshot.Running}}
         <button type="button" class="m-btn is-quiet is-sm"
@@ -548,11 +548,11 @@
             {{$cls := "is-contact"}}{{if .Collapsed}}{{$cls = "is-contact is-merged"}}{{end}}
             {{template "m-row" (row "Kind" "contact" "Class" $cls)}}
                 <span class="m-bar3" data-swatch="{{if .Color}}{{.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
-                <span class="list-avatar contact-avatar">{{.Initials}}</span>
+                <span class="m-av">{{.Initials}}</span>
                 <span class="t">
                     {{if .URL}}<a class="detail-link" href="{{.URL}}"
                        hx-get="{{.PanelURL}}" hx-target="#app-details" hx-swap="innerHTML"><strong>{{.Title}}</strong></a>{{else}}<strong>{{.Title}}</strong>{{end}}
-                    {{if .Collapsed}}<a class="dup-badge{{if .DupLinked}} is-linked{{end}}" href="{{.DupURL}}"
+                    {{if .Collapsed}}<a class="m-badge{{if .DupLinked}} is-linked{{end}}" href="{{.DupURL}}"
                        title="{{if .DupLinked}}Linked records{{else}}Possible duplicates{{end}}">{{if .DupLinked}}linked{{else}}duplicate?{{end}} ×{{.DupCount}}</a>{{end}}
                 </span>
                 <span class="s mono">{{.PhonesLabel}}</span>
@@ -569,7 +569,7 @@
                     {{if .URL}}<a class="detail-link" href="{{.URL}}"
                        hx-get="{{.PanelURL}}" hx-target="#app-details" hx-swap="innerHTML"><strong>{{.Title}}</strong></a>{{else}}<strong>{{.Title}}</strong>{{end}}
                     {{if .Collapsed}}
-                    <a class="dup-badge{{if .DupLinked}} is-linked{{end}}" href="{{.DupURL}}"
+                    <a class="m-badge{{if .DupLinked}} is-linked{{end}}" href="{{.DupURL}}"
                        title="{{if .DupLinked}}Linked records{{else}}Possible duplicates{{end}}">{{if .DupLinked}}linked{{else}}duplicate?{{end}} ×{{.DupCount}}</a>
                     {{end}}
                 </span>
@@ -584,7 +584,7 @@
 {{end}}
 </div>
 {{else if not $d.Snapshot.Running}}
-<p class="hint page-hint">Nothing found.</p>
+<p class="m-empty">Nothing found.</p>
 {{end}}
 <p class="print-footer print-only">Carrel · {{$d.PrintSection}} · {{$d.Snapshot.Queried}} sources polled · captured {{$d.PrintDate}}</p>
 {{template "findpoller" .}}
@@ -606,10 +606,10 @@
     <h2>{{$section.Label}}</h2>
     <ul class="dup-groups">
     {{range $section.Groups}}
-        <li class="dup-group is-{{.State}}">
-            <div class="dup-head">
+        <li class="m-card is-{{.State}}">
+            <div>
                 <strong>{{.Title}}</strong>
-                <span class="dup-badge{{if .Linked}} is-linked{{end}}">{{if .Linked}}linked{{else if .Candidate}}candidate{{else}}set aside{{end}} ×{{len .Members}}</span>
+                <span class="m-badge{{if .Linked}} is-linked{{end}}">{{if .Linked}}linked{{else if .Candidate}}candidate{{else}}set aside{{end}} ×{{len .Members}}</span>
                 {{if .Candidate}}<span class="hint">{{.Score}} points{{if .Signals}} · same {{range $i, $s := .Signals}}{{if $i}}, {{end}}{{$s}}{{end}}{{end}}</span>{{end}}
                 {{if .Missing}}<span class="hint">Some records here are not loaded: tick their collection to see them.</span>{{end}}
             </div>
@@ -625,7 +625,7 @@
             {{end}}
             </ul>
             {{if and .Fields (not (eq .State "ignored"))}}
-            <dl class="dup-fields">
+            <dl class="m-fields">
             {{range .Fields}}
                 <dt>{{.Label}}</dt>
                 <dd>{{range $i, $v := .Values}}{{if $i}}<br>{{end}}{{$v}}{{end}}</dd>

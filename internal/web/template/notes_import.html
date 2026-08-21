@@ -1,7 +1,6 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="dialog-host">
-<div class="app-dialog{{if $d.HasPreview}} is-wide{{end}}">
+<div class="m-dialog{{if $d.HasPreview}} is-wide{{end}}">
 {{if $d.HasPreview}}{{template "importsteps-file-2" .}}{{else}}{{template "importsteps-source-1" .}}{{end}}
 {{$sub := printf "Into %s" $d.AccountLabel}}
 {{if $d.Collection.DisplayName}}{{$sub = printf "Into %s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
@@ -20,8 +19,8 @@
 {{template "m-headend"}}
 
 {{if not $d.HasPreview}}
-<div class="dialog-card">
-    <div class="dialog-rubric">From a file</div>
+<div class="m-card">
+    <div class="m-rubric">From a file</div>
     <form method="post" class="m-form" enctype="multipart/form-data" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <div class="m-f w-lg">
@@ -34,8 +33,8 @@
     </form>
 </div>
 {{if $d.WebDAVSources}}
-<div class="dialog-card is-accent">
-    <div class="dialog-rubric">From a WebDAV folder</div>
+<div class="m-card is-accent">
+    <div class="m-rubric">From a WebDAV folder</div>
     <form method="post" class="m-form" action="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/import">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">
         <input type="hidden" name="action" value="webdav_import">
@@ -57,14 +56,14 @@
     </form>
 </div>
 {{end}}
-<p class="message">Front matter is read when present: title, date, tags, uid and any X- property exported earlier. A file without front matter becomes a note dated by its own timestamp.</p>
+<p class="m-msg">Front matter is read when present: title, date, tags, uid and any X- property exported earlier. A file without front matter becomes a note dated by its own timestamp.</p>
 {{else}}
 <div class="import-stats">
     <span><strong>{{$d.OKCount}}</strong> ready</span>
     {{if $d.ErrorCount}}<span class="is-error"><strong>{{$d.ErrorCount}}</strong> with errors</span>{{end}}
     {{if $d.CollisionCount}}<span><strong>{{$d.CollisionCount}}</strong> UID collision(s)</span>{{end}}
 </div>
-{{if $d.TruncatedNote}}<p class="message error" role="alert">{{$d.TruncatedNote}}</p>{{end}}
+{{if $d.TruncatedNote}}<p class="m-msg is-alert" role="alert">{{$d.TruncatedNote}}</p>{{end}}
 <table class="import-preview data">
     <thead><tr><th>File</th><th>Title</th><th>Date</th><th>Tags</th><th>Result</th></tr></thead>
     <tbody>
@@ -73,13 +72,12 @@
             <td><code>{{.Source}}</code></td>
             <td>{{.Title}}</td>
             <td>{{.Date}}</td>
-            <td>{{range .Tags}}<span class="tag">{{.}}</span>{{end}}</td>
+            <td>{{range .Tags}}<span class="m-tag">{{.}}</span>{{end}}</td>
             <td>{{if .ParseError}}<span class="is-error">{{.ParseError}}</span>{{else if .UIDCollision}}New UID will be assigned{{else}}Ready{{end}}</td>
         </tr>
     {{end}}
     </tbody>
 </table>
 {{end}}
-</div>
 </div>
 {{end}}

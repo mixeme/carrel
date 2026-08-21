@@ -12,11 +12,11 @@
 
         {{template "m-head" (head "Title" $f.Title "Subtitle" $f.AccountLabel)}}{{template "m-headend"}}
 
-        {{if .Error}}<p class="message error">{{.Error}}</p>{{end}}
+        {{if .Error}}<p class="m-msg is-alert">{{.Error}}</p>{{end}}
         {{if $f.Diag}}<pre class="diagnostic">{{$f.Diag}}</pre>{{end}}
 
         {{if eq $f.Mode "delete"}}
-        <p class="message error">The {{if eq $f.Kind "addressbook"}}address book{{else}}calendar{{end}} and everything in it is deleted on <span class="mono">{{$f.Host}}</span>. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</p>
+        <p class="m-msg is-alert">The {{if eq $f.Kind "addressbook"}}address book{{else}}calendar{{end}} and everything in it is deleted on <span class="mono">{{$f.Host}}</span>. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</p>
         <p class="m-rubric">What is pointing at it now</p>
         <ul class="source-list">
             <li>{{if $f.Refs.PublishedLinks}}{{range $f.Refs.PublishedLinks}}<span>{{.}}</span>{{end}}{{else}}<span class="hint">No published links</span>{{end}}</li>

@@ -94,6 +94,10 @@ var templateFuncs = template.FuncMap{
 	"src":              buildSrc,
 	"railSec":          buildRailSec,
 	"railFoot":         buildRailFoot,
+	"side":             buildSide,
+	"dialog":           buildDialog,
+	"card":             buildCard,
+	"menu":             buildMenu,
 	"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
 	"hasComp": func(comps []string, want string) bool {
 		for _, c := range comps {

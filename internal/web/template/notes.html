@@ -13,7 +13,7 @@
                 {{template "importexportmenu" (importExportMenu "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/notes/import") "ExportURL" (print .Base "/app/notes/export"))}}
             </div>
         {{template "m-headend"}}
-            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+            {{if $d.Unusable}}<p class="m-msg is-alert">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
             {{template "m-bar" (bar)}}
                 <label class="list-filter">
@@ -58,7 +58,7 @@
             {{template "m-headend"}}
             {{if $d.ReadOnly}}<p class="hint no-print">This notebook is read-only.</p>{{end}}
             {{if $d.Tag}}<p class="hint no-print">Showing notes tagged <strong>{{$d.Tag}}</strong>.</p>{{end}}
-            {{if $d.Empty}}<p class="hint page-hint">Nothing here yet.</p>{{end}}
+            {{if $d.Empty}}<p class="m-empty">Nothing here yet.</p>{{end}}
             {{template "m-bar" (bar)}}
                 <label class="list-filter">
                     <span class="visually-hidden">Filter these notes</span>
@@ -87,8 +87,8 @@
                        hx-get="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
                        hx-target="#app-details" hx-swap="innerHTML"><strong>{{.Title}}</strong></a>
                     <span class="s" data-col="excerpt">{{.Excerpt}}</span>
-                    <span class="d" data-col="tags">{{range .Tags}}<span class="tag">{{.}}</span>{{end}}
-                        {{if .HasRelated}}<span class="dup-badge is-linked">linked</span>{{end}}</span>
+                    <span class="d" data-col="tags">{{range .Tags}}<span class="m-tag">{{.}}</span>{{end}}
+                        {{if .HasRelated}}<span class="m-badge is-linked">linked</span>{{end}}</span>
                     <span class="mono" data-col="date">{{if .DateLabel}}{{.DateLabel}}{{end}}</span>
                 {{template "m-rowend"}}
             {{end}}
@@ -97,9 +97,9 @@
             <div class="no-print">
                 <h2>Tags</h2>
                 <ul class="tag-list">
-                    <li><a class="tag{{if not $d.Tag}} is-active{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">All</a></li>
+                    <li><a class="m-tag{{if not $d.Tag}} is-on{{end}}" href="{{.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}">All</a></li>
                 {{range $d.Tags}}
-                    <li><a class="tag{{if eq $d.Tag .}} is-active{{end}}" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?tag={{.}}">{{.}}</a></li>
+                    <li><a class="m-tag{{if eq $d.Tag .}} is-on{{end}}" href="{{$.Base}}/app/notes/{{$d.AccountID}}/{{$d.ColEnc}}?tag={{.}}">{{.}}</a></li>
                 {{end}}
                 </ul>
             </div>

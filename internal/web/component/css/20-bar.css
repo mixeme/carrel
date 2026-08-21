@@ -103,7 +103,7 @@
     font-weight: 600;
 }
 
-.m-more .dots-menu {
+.m-more .m-menu {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -113,11 +113,11 @@
     left: auto;
 }
 
-.m-more .dots-menu[hidden] {
+.m-more .m-menu[hidden] {
     display: none;
 }
 
-.m-more .dots-menu .m-right {
+.m-more .m-menu .m-right {
     margin-left: 0;
     flex-wrap: wrap;
 }

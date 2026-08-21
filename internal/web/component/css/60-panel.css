@@ -1,0 +1,399 @@
+/* Панели, карточки, диалоги, сообщения — макеты §6 (.m-side, .m-fields,
+   .m-sec, .m-dialog, .m-card, .m-msg, .m-empty, .m-poll, .m-menu,
+   .m-badge, .m-tag, .m-tick, .m-av).
+
+   Числа — те, что уже были в продакшене. Где одно имя макетов закрывает
+   несколько семейств, разные величины остаются модификатором или потомком,
+   потому что переезд и исправление — не один коммит: узкий диалог по-
+   прежнему 520 px, не 420 из макетов; карточка в диалоге — 5 px радиуса,
+   карточка аккаунта — 4. */
+
+/* ── колонка подробностей ─────────────────────────────────────── */
+
+.m-side {
+    border-left: 0.5px solid var(--rule);
+    background: var(--paper);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.m-side[hidden] {
+    display: none !important;
+}
+
+/* Фрагмент, который HTMX кладёт внутрь колонки: шапка не скроллится. */
+.m-side > [data-detail-url] {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.m-fields {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 7px 14px;
+    padding: 12px var(--pad);
+    font-size: 13px;
+    margin: 0;
+}
+
+.m-fields dt {
+    font-size: 11.5px;
+    color: var(--dusty);
+    padding-top: 1px;
+    margin: 0;
+}
+
+.m-fields dd {
+    margin: 0;
+    min-width: 0;
+}
+
+.m-sec {
+    padding: 0 var(--pad) 12px;
+    font-size: 13px;
+}
+
+.m-sec > .m-rubric {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dusty);
+    margin: 0 0 8px;
+    font-weight: 600;
+}
+
+/* ── диалог ───────────────────────────────────────────────────── */
+
+.m-dialog {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 22px var(--pad) 26px;
+}
+
+.m-dialog.is-wide {
+    max-width: 1080px;
+}
+
+.m-dialog.is-narrow {
+    max-width: 520px;
+}
+
+.m-dialog .m-head {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.m-dialog .m-form,
+.m-dialog .m-formfoot {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* ── карточка ─────────────────────────────────────────────────── */
+
+.m-card {
+    border: 0.5px solid var(--hair);
+    border-radius: 4px;
+    background: var(--paper);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+
+.m-dialog .m-card {
+    border-radius: 5px;
+    padding: 14px;
+}
+
+.m-card.is-accent {
+    border-color: var(--accent);
+}
+
+.m-card.is-ignored {
+    opacity: 0.65;
+}
+
+.dup-groups > .m-card {
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 0.8rem;
+}
+
+/* Рубрика карточки — капитель («Created», «NEXTCLOUD · HOME»). Строка
+   заголовка группы дубликатов — имя человека, не рубрика: это первый
+   div без класса, чтобы капитель не легла на фамилию. */
+.m-card > .m-rubric {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin: 0 0 8px;
+}
+
+.m-card > div:first-child:not(.m-rubric) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.m-card > .m-rubric .mono {
+    letter-spacing: 0;
+    text-transform: none;
+    font-family: var(--f-mono);
+    font-size: 11px;
+}
+
+/* Поля внутри карточки дубликатов: шире подпись, без экранного отступа. */
+.m-card > .m-fields {
+    grid-template-columns: minmax(6rem, 10rem) 1fr;
+    gap: 0.2rem 0.8rem;
+    padding: 0;
+    margin: 0.6rem 0 0;
+}
+
+.m-card > .m-fields dt {
+    color: var(--muted);
+}
+
+/* ── сообщение, пустое, ход опроса ────────────────────────────── */
+
+.m-msg {
+    padding: 0.75rem;
+    border-radius: 3px;
+    background: var(--card);
+}
+
+.m-msg.is-alert {
+    color: var(--alert);
+    border-left: 2px solid var(--alert);
+}
+
+.m-msg.is-accent {
+    background: transparent;
+    padding: 0 0 0 0.75rem;
+    border-radius: 0;
+    border-left: 2px solid var(--accent);
+}
+
+.m-empty {
+    padding: 8px var(--pad) 0;
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-size: 11.5px;
+}
+
+.m-poll {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px var(--pad);
+    background: var(--card);
+    flex-wrap: wrap;
+}
+
+.m-poll.is-offline {
+    background: transparent;
+    border-bottom: 0.5px solid var(--alert);
+    color: var(--alert);
+}
+
+.m-prog {
+    width: 120px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--card-border);
+    overflow: hidden;
+    flex: none;
+}
+
+.m-prog i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+}
+
+.m-poll.is-offline .m-prog i {
+    width: 0;
+    background: var(--alert);
+}
+
+.m-poll .m-btn {
+    margin-left: auto;
+}
+
+/* ── меню ─────────────────────────────────────────────────────── */
+
+.m-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 50;
+    min-width: 200px;
+    background: var(--paper);
+    border: 0.5px solid var(--card-border);
+    border-radius: 5px;
+    padding: 4px;
+    box-shadow: 0 8px 24px rgba(23, 33, 28, 0.1);
+}
+
+.m-menu[hidden] {
+    display: none;
+}
+
+.m-menu form {
+    padding: 6px 9px;
+}
+
+.m-menu label {
+    display: block;
+    font-size: 12.5px;
+    color: var(--ink);
+}
+
+.m-menu select {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.m-menu.is-pop {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    z-index: 3;
+}
+
+.m-menu.is-pop.is-right {
+    left: auto;
+    right: 0;
+}
+
+.m-f:has(> .m-menu.is-pop) {
+    position: relative;
+}
+
+.m-btn:has(> .m-menu.is-pop) {
+    position: relative;
+}
+
+.m-btn > .m-menu.is-pop {
+    margin-top: 6px;
+    font-weight: 400;
+    text-align: left;
+}
+
+/* ── значок, тег, флажок задачи, аватар ───────────────────────── */
+
+.m-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 16px;
+    line-height: 1;
+    vertical-align: 1px;
+    border: 0.5px solid var(--rule);
+    border-radius: 2px;
+    padding: 0 6px;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+    background: transparent;
+}
+
+.m-badge.is-linked {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.m-badge.is-alert {
+    border-color: var(--alert);
+    color: var(--alert);
+}
+
+.m-badge.is-local {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border: 0.5px solid var(--rule);
+    border-radius: 3px;
+    padding: 0 4px;
+    vertical-align: middle;
+}
+
+.m-tag {
+    border: 0.5px solid var(--hair);
+    border-radius: 2px;
+    padding: 0 5px;
+    font-size: 10.5px;
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+    background: var(--paper);
+}
+
+.m-tag.is-on {
+    color: var(--fg, inherit);
+    border-color: var(--accent);
+}
+
+.m-tick {
+    width: 13px;
+    height: 13px;
+    border: 1px solid var(--card-border);
+    border-radius: 2px;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: 9.5px;
+    line-height: 11px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.m-tick.is-done,
+.m-row.is-done .m-tick {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.m-av {
+    width: var(--row-lg);
+    height: var(--row-lg);
+    border-radius: 3px;
+    object-fit: cover;
+    background: #d9d2be;
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+}
+
+:root[data-theme="dark"] .m-av {
+    background: #3a463d;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .m-av {
+        background: #3a463d;
+    }
+}

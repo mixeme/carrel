@@ -1,32 +1,30 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="dialog-host">
-<div class="app-dialog is-narrow">
+<div class="m-dialog is-narrow">
 {{template "importsteps-file-3" .}}
 {{$sub := $d.AccountLabel}}
 {{if $d.Collection.DisplayName}}{{$sub = printf "%s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
 {{template "m-head" (head "Plain" true "Title" "Import report" "Subtitle" $sub)}}{{template "m-headend"}}
-<div class="dialog-card">
-    <div class="dialog-rubric">Created</div>
+<div class="m-card">
+    <div class="m-rubric">Created</div>
     <p class="import-report-stat">{{$d.Created}}</p>
 </div>
 {{if $d.Collisions}}
-<div class="dialog-card">
-    <div class="dialog-rubric">UID collisions <span class="mono">{{len $d.Collisions}}</span></div>
+<div class="m-card">
+    <div class="m-rubric">UID collisions <span class="mono">{{len $d.Collisions}}</span></div>
     <div class="dialog-diag">{{range $d.Collisions}}{{.}}
 {{end}}</div>
 </div>
 {{end}}
 {{if $d.Failed}}
-<div class="dialog-card">
-    <div class="dialog-rubric">Failed <span class="mono">{{len $d.Failed}}</span></div>
+<div class="m-card">
+    <div class="m-rubric">Failed <span class="mono">{{len $d.Failed}}</span></div>
     <div class="dialog-diag is-error">{{range $d.Failed}}{{.}}
 {{end}}</div>
 </div>
 {{end}}
 <div class="m-formfoot">
     <a class="m-btn is-primary" href="{{.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}">Back to list</a>
-</div>
 </div>
 </div>
 {{end}}

@@ -413,7 +413,7 @@ document.addEventListener('change', function (e) {
     }
 
     function createMenu() {
-        return document.querySelector('.app-create-menu');
+        return document.querySelector('[data-create-menu]');
     }
 
     function closeCreateMenu() {
@@ -438,7 +438,7 @@ document.addEventListener('change', function (e) {
     // than one could exist on a page without colliding.
     function dotsMenuOf(el) {
         var wrap = el.closest('[data-dots-menu]');
-        return wrap ? wrap.querySelector('.dots-menu') : null;
+        return wrap ? wrap.querySelector('.m-menu') : null;
     }
 
     // Stage 1: the bar's ⋯ holds the is-2nd items that the container query
@@ -449,7 +449,7 @@ document.addEventListener('change', function (e) {
 
     function parkBarMore(wrap) {
         var bar = wrap.closest('.m-bar');
-        var menu = wrap.querySelector('.dots-menu');
+        var menu = wrap.querySelector('.m-menu');
         if (!bar || !menu) return;
         Array.prototype.slice.call(bar.children).forEach(function (kid) {
             if (kid === wrap) return;
@@ -474,7 +474,7 @@ document.addEventListener('change', function (e) {
     }
 
     function closeDotsMenus(except) {
-        document.querySelectorAll('.dots-menu').forEach(function (menu) {
+        document.querySelectorAll('[data-dots-menu] .m-menu').forEach(function (menu) {
             if (menu === except) return;
             if (!menu.hidden) unparkBarMore(menu);
             menu.hidden = true;
@@ -487,7 +487,7 @@ document.addEventListener('change', function (e) {
     function restoreWideBarMore() {
         document.querySelectorAll('[data-bar-more]').forEach(function (wrap) {
             if (getComputedStyle(wrap).display !== 'none') return;
-            var menu = wrap.querySelector('.dots-menu');
+            var menu = wrap.querySelector('.m-menu');
             if (!menu || menu.hidden) return;
             unparkBarMore(menu);
             menu.hidden = true;
@@ -1792,7 +1792,7 @@ document.addEventListener('change', function (e) {
         if (!isDir && row.getAttribute('data-download')) {
             html += '<div class="files-props-actions"><a class="link" href="' + row.getAttribute('data-download') + '">Download</a></div>';
         }
-        html += '<dl>';
+        html += '<dl class="m-fields">';
         if (!isDir) {
             html += '<dt>Size</dt><dd>' + (row.getAttribute('data-size') ? formatSize(row.getAttribute('data-size')) : '—') + '</dd>';
             html += '<dt>Type</dt><dd>' + (row.getAttribute('data-type') || '—') + '</dd>';

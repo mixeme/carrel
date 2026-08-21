@@ -54,7 +54,21 @@ var slotClasses = map[string]string{
 	"m-rail-foot": "the Apply / New collection stripe; which buttons sit there is the screen's",
 	"m-box":       "the tick square on a source row; checked / part / off are the screen's",
 	"m-meta":      "the source-row tail (count, ro); the words are the screen's",
-	"m-rubric":    "small-caps label; the words are the screen's (list group, rail section, form sheet)",
+	"m-rubric":    "small-caps label; the words are the screen's (list group, rail section, form sheet, card, panel section)",
+	"m-side":      "the details column (<aside> id, hidden, aria-label); the class is the column",
+	"m-fields":    "the label/value grid; which dt/dd sit there is the screen's",
+	"m-sec":       "a subsection under a panel header; the rubric and the body are the screen's",
+	"m-dialog":    "the centred dialog frame; wide/narrow and the contents are the screen's",
+	"m-card":      "a bordered card; the rubric and the body are the screen's",
+	"m-msg":       "a banner; the words and the role (alert/accent) are the screen's",
+	"m-empty":     "an empty-state block; the copy and the CTA are the screen's",
+	"m-poll":      "the poll bar; the summary and Stop are the screen's",
+	"m-prog":      "the poll bar's meter; fill is data-fill, owned by the screen",
+	"m-menu":      "a popover; which rows sit there is the screen's",
+	"m-badge":     "an inline badge; the words and is-linked/is-alert/is-local are the screen's",
+	"m-tag":       "a category chip; the words and is-on are the screen's",
+	"m-tick":      "the 13px task tick; checked/label are the screen's",
+	"m-av":        "the list-row avatar; initials or photo are the screen's",
 }
 
 // standaloneUse names, per class, the screens allowed to use a primitive on
@@ -219,8 +233,7 @@ func TestRetiredBarNamesStayGone(t *testing.T) {
 }
 
 // A screen that writes one of these is inventing an eleventh header family
-// again. The leftovers — dup-head, note-read-title — are a card rubric and
-// a 27px document title, not this header.
+// again. The leftover — note-read-title — is a 27px document title, not this header.
 var retiredHeadNames = []string{
 	"dialog-head", "dialog-sub",
 	"detail-panel-head", "detail-panel-title", "detail-panel-sub",
@@ -277,6 +290,21 @@ var retiredRailNames = []string{
 
 func TestRetiredRailNamesStayGone(t *testing.T) {
 	assertRetiredClassesGone(t, retiredRailNames, "m-rail / m-nav / m-src / m-rail-sec / m-rail-foot")
+}
+
+var retiredPanelNames = []string{
+	"app-details", "detail-panel", "detail-fields", "detail-section",
+	"dialog-host", "app-dialog", "dialog-card", "dialog-rubric",
+	"dup-head", "dup-group", "dup-badge", "dup-fields",
+	"find-poll", "find-prog",
+	"app-create-menu", "dots-menu",
+	"badge", "tag", "task-tick", "list-avatar",
+	"message", "warning", "page-hint",
+	"settings-account-card", "files-props",
+}
+
+func TestRetiredPanelNamesStayGone(t *testing.T) {
+	assertRetiredClassesGone(t, retiredPanelNames, "m-side / m-fields / m-sec / m-dialog / m-card / m-msg / m-empty / m-poll / m-menu / m-badge / m-tag / m-tick / m-av")
 }
 
 func assertRetiredClassesGone(t *testing.T, classes []string, instead string) {

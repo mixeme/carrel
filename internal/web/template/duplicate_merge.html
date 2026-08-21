@@ -1,22 +1,21 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="dialog-host">
-<div class="app-dialog">
+<div class="m-dialog">
 {{if $d.Done}}
 {{template "m-head" (head "Plain" true "Title" "Merge on the server" "Subtitle" $d.Title)}}{{template "m-headend"}}
 {{if $d.Written}}<p>The merged record was written to <strong>{{$d.Target.CollectionLabel}}</strong>.</p>
 {{else}}<p>Nothing was written, so nothing was deleted.</p>{{end}}
 {{if $d.Deleted}}
-<div class="dialog-card">
-    <div class="dialog-rubric">Deleted</div>
+<div class="m-card">
+    <div class="m-rubric">Deleted</div>
     <ul class="dup-members">
     {{range $d.Deleted}}<li><span>{{.Title}}<span class="hint">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}</span></span></li>{{end}}
     </ul>
 </div>
 {{end}}
 {{if $d.Kept}}
-<div class="dialog-card">
-    <div class="dialog-rubric">Still there</div>
+<div class="m-card">
+    <div class="m-rubric">Still there</div>
     <ul class="dup-members">
     {{range $d.Kept}}<li><span>{{.Title}}<span class="hint">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}</span></span></li>{{end}}
     </ul>
@@ -28,20 +27,20 @@
 </div>
 {{else}}
 {{template "m-head" (head "Plain" true "Title" "Merge on the server" "Subtitle" $d.Title)}}{{template "m-headend"}}
-<p class="message error" role="alert">This changes other people's servers: the merged record is written to one collection and the others are deleted. It cannot be undone from here.</p>
-<div class="dialog-card">
-    <div class="dialog-rubric">Kept and rewritten</div>
+<p class="m-msg is-alert" role="alert">This changes other people's servers: the merged record is written to one collection and the others are deleted. It cannot be undone from here.</p>
+<div class="m-card">
+    <div class="m-rubric">Kept and rewritten</div>
     <p>{{$d.Target.Title}} <span class="hint">{{$d.Target.CollectionLabel}}{{if $d.Target.AccountLabel}} · {{$d.Target.AccountLabel}}{{end}}</span></p>
 </div>
-<div class="dialog-card">
-    <div class="dialog-rubric">Deleted afterwards</div>
+<div class="m-card">
+    <div class="m-rubric">Deleted afterwards</div>
     <ul class="dup-members">
     {{range $d.Sources}}<li><span>{{.Title}}<span class="hint">{{.CollectionLabel}}{{if .AccountLabel}} · {{.AccountLabel}}{{end}}</span></span></li>{{end}}
     </ul>
 </div>
 {{if $d.Adds}}
-<div class="dialog-card">
-    <div class="dialog-rubric">The kept record gains</div>
+<div class="m-card">
+    <div class="m-rubric">The kept record gains</div>
     <ul class="dup-members">
     {{range $d.Adds}}<li><span>{{.}}</span></li>{{end}}
     </ul>
@@ -62,6 +61,5 @@
     </div>
 </form>
 {{end}}
-</div>
 </div>
 {{end}}

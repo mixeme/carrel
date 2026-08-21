@@ -6,9 +6,9 @@
         {{template "m-head" (head "Title" "Duplicates" "Subtitle" "Records that look like the same thing in more than one place.")}}
             {{template "kindtabs" .}}
         {{template "m-headend"}}
-        <p class="hint page-hint">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</p>
-        {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
-        {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was compared.</p>{{end}}
+        <p class="m-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</p>
+        {{if $d.Unusable}}<p class="m-msg is-alert">{{$d.Unusable}}</p>{{end}}
+        {{if $d.NoSources}}<p class="m-empty">No sources are ticked, so nothing was compared.</p>{{end}}
         <div id="find-panel"
              data-sse-panel data-poll-url="{{$d.PollURL}}"
              {{if and $d.TaskID $d.UseSSE}}hx-ext="sse" sse-connect="{{$d.StreamURL}}" sse-swap="results" sse-close="done"{{end}}>

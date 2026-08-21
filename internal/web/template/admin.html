@@ -13,7 +13,7 @@
     {{template "m-headend"}}
 
     {{if $d.MailWarning}}
-    <p class="warning" role="alert">{{$d.MailWarning}}</p>
+    <p class="m-msg is-accent" role="alert">{{$d.MailWarning}}</p>
     {{end}}
 
     <section class="subsection">
@@ -98,7 +98,7 @@
 
     <section class="subsection">
         <h2 class="subsection-h2">Reset a password</h2>
-        <p class="warning">This is destructive. The user's data key is replaced,
+        <p class="m-msg is-accent">This is destructive. The user's data key is replaced,
             so every connection they saved becomes unreadable and is deleted.
             Nothing about it can be undone. For an account covered by key
             escrow, <a href="{{.Base}}/admin/escrow">recover it instead</a> — that keeps the data.</p>

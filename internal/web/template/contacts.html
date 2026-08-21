@@ -13,8 +13,8 @@
                 {{template "importexportmenu" (importExportMenu "Sources" $d.SectionRail.Sources "ImportURL" (print .Base "/app/contacts/import") "ExportURL" (print .Base "/app/contacts/export"))}}
             </div>
         {{template "m-headend"}}
-        {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
-        {{if $d.NoSources}}<p class="hint page-hint">No sources are ticked, so nothing was polled.</p>{{end}}
+        {{if $d.Unusable}}<p class="m-msg is-alert">{{$d.Unusable}}</p>{{end}}
+        {{if $d.NoSources}}<p class="m-empty">No sources are ticked, so nothing was polled.</p>{{end}}
         {{template "m-bar" (bar)}}
             <label class="list-filter">
                 <span class="visually-hidden">Filter these contacts</span>
@@ -60,10 +60,10 @@
                 </div>
             {{template "m-headend"}}
             {{if $d.ReadOnly}}
-            <p class="hint page-hint no-print">This address book is read-only.</p>
+            <p class="hint no-print">This address book is read-only.</p>
             {{end}}
             {{if $d.Empty}}
-            <p class="hint page-hint">No contacts in this address book.</p>
+            <p class="m-empty">No contacts in this address book.</p>
             {{else}}
             {{template "m-bar" (bar)}}
                 <label class="list-filter">
@@ -88,12 +88,12 @@
             {{range $d.Contacts}}
                 {{template "m-row" (row "Kind" "contact")}}
                     <span class="m-bar3" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
-                    <img class="list-avatar contact-avatar print-photo" data-col="photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
+                    <img class="m-av print-photo" data-col="photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
                     <span class="t" data-col="name">
                         <a class="detail-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                            hx-get="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
                            hx-target="#app-details" hx-swap="innerHTML"><strong>{{.DisplayName}}</strong></a>
-                        {{if .Linked}}<a class="dup-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}
+                        {{if .Linked}}<a class="m-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}
                     </span>
                     <span class="s mono" data-col="phone">{{.Phones}}</span>
                     <span class="s" data-col="email">{{.Emails}}</span>
@@ -105,7 +105,7 @@
                  hx-trigger="revealed"
                  hx-swap="outerHTML"
                  hx-headers='{"X-CSRF-Token": "{{.CSRF}}"}'>
-                <p class="hint page-hint">Loading more…</p>
+                <p class="m-empty">Loading more…</p>
             </div>
             {{end}}
             {{end}}

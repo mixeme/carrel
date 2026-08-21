@@ -43,10 +43,9 @@ var unstyledClassAllowList = map[string]string{
 	"contacts-layout":  "wrapper alongside .app-layout, which carries the rule",
 	"person-main":      "wrapper alongside .app-main, which carries the rule",
 	"attachments":      "modifier on .other-props, which carries the rule",
-	"source-block":     "modifier on .detail-section, which carries the rule",
+	"source-block":     "modifier on .m-sec, which carries the rule",
 	"contact-readonly": "state modifier read by carrel.js; layout is unaffected by it",
 	"danger-form":      "modifier on .m-form; only the destructive action inside needs marking",
-	"notice":           "modifier on .message; only .message.error diverges from the base look",
 
 	// Structural containers with no visual rule of their own — real content
 	// (rows, panels) supplies all the visible styling; these exist to be
@@ -58,7 +57,7 @@ var unstyledClassAllowList = map[string]string{
 	// distinct from their surrounding context.
 	"files-up-row":       "row-kind marker; .m-row carries the box",
 	"folder-picker-hint": "plain hint text; .hint's rule already applies via cascade",
-	"folder-picker-warn": "plain warning text; .message.notice's rule already applies",
+	"folder-picker-warn": "plain warning text; .m-msg already applies",
 	"note-edit-form":     "form-identity marker for carrel.js, not a drawn box",
 	"note-meta-block":    "structural grouping only; children carry their own rules",
 	"note-meta-danger":   "modifier read by carrel.js to gate an action, not to draw",

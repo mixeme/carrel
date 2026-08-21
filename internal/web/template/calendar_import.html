@@ -1,7 +1,6 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="dialog-host">
-<div class="app-dialog{{if $d.HasPreview}} is-wide{{end}}">
+<div class="m-dialog{{if $d.HasPreview}} is-wide{{end}}">
 {{if $d.HasPreview}}{{template "importsteps-file-2" .}}{{else}}{{template "importsteps-file-1" .}}{{end}}
 {{$sub := $d.AccountLabel}}
 {{if $d.Collection.DisplayName}}{{$sub = printf "%s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
@@ -36,7 +35,7 @@
     {{if $d.ErrorCount}}<span class="is-error"><strong>{{$d.ErrorCount}}</strong> with errors</span>{{end}}
     {{if $d.CollisionCount}}<span><strong>{{$d.CollisionCount}}</strong> UID collision(s)</span>{{end}}
 </div>
-{{if $d.TruncatedNote}}<p class="message error" role="alert">{{$d.TruncatedNote}}</p>{{end}}
+{{if $d.TruncatedNote}}<p class="m-msg is-alert" role="alert">{{$d.TruncatedNote}}</p>{{end}}
 <table class="import-preview data">
     <thead><tr><th>Source</th><th>Entry</th><th>UID</th><th>Result</th></tr></thead>
     <tbody>
@@ -51,6 +50,5 @@
     </tbody>
 </table>
 {{end}}
-</div>
 </div>
 {{end}}

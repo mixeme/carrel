@@ -323,7 +323,7 @@ textarea.m-in {
     padding-top: 4px;
 }
 
-.app-dialog .m-form,
+.m-dialog .m-form,
 .auth-card .m-form,
 .settings-panel .m-form,
 .admin-panel .m-form,
@@ -425,7 +425,7 @@ textarea.m-in {
     margin: 4px 0 0;
 }
 
-.app-dialog .m-formfoot,
+.m-dialog .m-formfoot,
 .auth-card .m-formfoot,
 .settings-panel .m-formfoot,
 .admin-panel .m-formfoot,

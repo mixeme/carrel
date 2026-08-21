@@ -12,7 +12,7 @@
                 <button type="button" class="m-btn" data-print>{{template "ico" "print"}}Print</button>
             </div>
         {{template "m-headend"}}
-            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+            {{if $d.Unusable}}<p class="m-msg is-alert">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No sources are ticked, so nothing was polled.</p>{{end}}
             {{template "m-bar" (bar)}}
                 <label class="list-filter">
@@ -83,7 +83,7 @@
                 {{template "m-rightend"}}
             {{template "m-barend"}}
             {{if $d.ReadOnly}}<p class="hint no-print">This task list is read-only.</p>{{end}}
-            {{if $d.Empty}}<p class="hint page-hint">Nothing here.</p>{{end}}
+            {{if $d.Empty}}<p class="m-empty">Nothing here.</p>{{end}}
             {{template "m-list" (list "Attrs" (safeHTML "data-columns-root=\"tasks\""))}}
             {{range $d.Rows}}
                 {{template "m-row" (row "Kind" "task" "Done" .Done "Overdue" .Overdue)}}
@@ -94,16 +94,16 @@
                         <input type="hidden" name="action" value="toggle">
                         <input type="hidden" name="etag" value="{{.ETag}}">
                         <input type="hidden" name="filter" value="{{$d.Filter}}">
-                        <button type="submit" class="task-tick" aria-label="{{if .Done}}Mark as not done{{else}}Mark as done{{end}}">{{if .Done}}✓{{end}}</button>
+                        <button type="submit" class="m-tick" aria-label="{{if .Done}}Mark as not done{{else}}Mark as done{{end}}">{{if .Done}}✓{{end}}</button>
                     </form>
-                    <span class="task-tick print-only" aria-hidden="true">{{if .Done}}✓{{end}}</span>
-                    {{else}}<span class="task-tick" aria-hidden="true">{{if .Done}}✓{{end}}</span>{{end}}
+                    <span class="m-tick print-only" aria-hidden="true">{{if .Done}}✓{{end}}</span>
+                    {{else}}<span class="m-tick" aria-hidden="true">{{if .Done}}✓{{end}}</span>{{end}}
                     </span>
                     <span class="m-bar3" data-col="bar" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
                     <a class="t detail-link" data-col="name" href="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
                        hx-get="{{$.Base}}/app/tasks/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
                        hx-target="#app-details" hx-swap="innerHTML">{{.Title}}</a>
-                    <span class="d" data-col="tags">{{range .Tags}}<span class="tag">{{.}}</span>{{end}}</span>
+                    <span class="d" data-col="tags">{{range .Tags}}<span class="m-tag">{{.}}</span>{{end}}</span>
                     <span class="mono" data-col="due">{{if .DueLabel}}{{.DueLabel}}{{end}}</span>
                     <span class="d mono" data-col="progress">{{if .Status}}{{.Status}}{{end}}{{if and .Percent (not .Done)}} {{.Percent}}%{{end}}</span>
                 {{template "m-rowend"}}

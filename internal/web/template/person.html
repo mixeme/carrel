@@ -14,7 +14,7 @@
                 </div>
             {{template "m-headend"}}
             {{template "kindtabs" .}}
-            {{if $d.Unusable}}<p class="message error">{{$d.Unusable}}</p>{{end}}
+            {{if $d.Unusable}}<p class="m-msg is-alert">{{$d.Unusable}}</p>{{end}}
             {{if $d.NoSources}}<p class="hint">No calendars are ticked, so nothing was polled.</p>{{end}}
             <div id="find-panel"
                  data-sse-panel data-poll-url="{{$d.PollURL}}"
@@ -38,7 +38,7 @@
             {{range $p.Contact.Phones}}<dt>Phone{{if .Label}} · {{.Label}}{{end}}</dt><dd>{{.Value}}</dd>{{end}}
             {{range $p.Contact.Emails}}<dt>Email{{if .Label}} · {{.Label}}{{end}}</dt><dd>{{.Value}}</dd>{{end}}
             {{if $p.Contact.Birthday}}<dt>Birthday</dt><dd>{{$p.Contact.Birthday}}</dd>{{end}}
-            {{if $p.Contact.Categories}}<dt>Categories</dt><dd>{{range $p.Contact.Categories}}<span class="tag">{{.}}</span> {{end}}</dd>{{end}}
+            {{if $p.Contact.Categories}}<dt>Categories</dt><dd>{{range $p.Contact.Categories}}<span class="m-tag">{{.}}</span> {{end}}</dd>{{end}}
             {{if $p.Contact.Note}}<dt>Note</dt><dd>{{$p.Contact.Note}}</dd>{{end}}
         </dl>
     </aside>

@@ -1,0 +1,19 @@
+{{/* Панели, карточки, диалоги, меню — макеты §6.
+
+     Колонка подробностей, рамка диалога, карточка и выпадающее меню —
+     обёртки: экран кладёт содержимое между открывающей и закрывающей
+     половиной. Поля, секции, баннер, пустое, ход опроса, значок, тег,
+     флажок и аватар экран пишет сам (слоты): содержимое всегда его.
+
+     Вход передаётся всегда, даже пустой. */}}
+{{define "m-side"}}<aside class="m-side{{if .Extra}} {{.Extra}}{{end}} no-print"{{if .Label}} aria-label="{{.Label}}"{{end}}{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
+{{define "m-sideend"}}</aside>{{end}}
+
+{{define "m-dialog"}}<div class="m-dialog{{if .Wide}} is-wide{{end}}{{if .Narrow}} is-narrow{{end}}">{{end}}
+{{define "m-dialogend"}}</div>{{end}}
+
+{{define "m-card"}}<div class="m-card{{if .Accent}} is-accent{{end}}{{if .Class}} {{.Class}}{{end}}">{{end}}
+{{define "m-cardend"}}</div>{{end}}
+
+{{define "m-menu"}}<div class="m-menu{{if .Pop}} is-pop{{end}}{{if .Right}} is-right{{end}}" role="menu"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
+{{define "m-menuend"}}</div>{{end}}

@@ -3,12 +3,12 @@
 {{range $d.Contacts}}
 {{template "m-row" (row "Kind" "contact")}}
     <span class="m-bar3" data-swatch="{{if $d.Collection.Color}}{{$d.Collection.Color}}{{else}}var(--accent){{end}}" aria-hidden="true"></span>
-    <img class="list-avatar contact-avatar print-photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
+    <img class="m-av print-photo" src="{{.PhotoURL}}" alt="" width="28" height="28">
     <span class="t">
         <a class="detail-link" href="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}"
            hx-get="{{$.Base}}/app/contacts/{{$d.AccountID}}/{{$d.ColEnc}}/{{.UID}}/panel"
            hx-target="#app-details" hx-swap="innerHTML"><strong>{{.DisplayName}}</strong></a>
-        {{if .Linked}}<a class="dup-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}
+        {{if .Linked}}<a class="m-badge is-linked no-print" href="{{.DupURL}}" title="Linked with {{.Linked}} records in all">linked ×{{.Linked}}</a>{{end}}
     </span>
     <span class="s mono">{{.Phones}}</span>
     <span class="s">{{.Emails}}</span>

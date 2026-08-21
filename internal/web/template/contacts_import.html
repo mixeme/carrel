@@ -1,7 +1,6 @@
 {{define "body"}}
 {{$d := .Data}}
-<div class="dialog-host">
-<div class="app-dialog{{if $d.HasPreview}} is-wide{{end}}">
+<div class="m-dialog{{if $d.HasPreview}} is-wide{{end}}">
 {{if $d.HasPreview}}{{template "importsteps-file-2" .}}{{else}}{{template "importsteps-file-1" .}}{{end}}
 {{$sub := $d.AccountLabel}}
 {{if $d.Collection.DisplayName}}{{$sub = printf "%s · %s" $d.AccountLabel $d.Collection.DisplayName}}{{end}}
@@ -38,7 +37,7 @@
         <button type="submit" class="m-btn">Preview</button>
     </div>
 </form>
-<p class="message">Upload a standard <code>.vcf</code> (one or many cards) or a <code>.zip</code> of <code>.vcf</code> files.
+<p class="m-msg">Upload a standard <code>.vcf</code> (one or many cards) or a <code>.zip</code> of <code>.vcf</code> files.
     Import always creates new contacts. A UID that already exists gets a new UID and is listed in the report.</p>
 {{else}}
 <div class="import-stats">
@@ -46,7 +45,7 @@
     {{if $d.ErrorCount}}<span class="is-error"><strong>{{$d.ErrorCount}}</strong> with errors</span>{{end}}
     {{if $d.CollisionCount}}<span><strong>{{$d.CollisionCount}}</strong> UID collision(s)</span>{{end}}
 </div>
-{{if $d.TruncatedNote}}<p class="message error" role="alert">{{$d.TruncatedNote}}</p>{{end}}
+{{if $d.TruncatedNote}}<p class="m-msg is-alert" role="alert">{{$d.TruncatedNote}}</p>{{end}}
 {{if $d.Cards}}
 <table class="import-preview data">
     <thead><tr><th>Source</th><th>Name</th><th>UID</th><th>Result</th></tr></thead>
@@ -64,8 +63,7 @@
     </tbody>
 </table>
 {{end}}
-<p class="message">Import always creates. A UID that already exists gets a new one and is listed in the report.</p>
+<p class="m-msg">Import always creates. A UID that already exists gets a new one and is listed in the report.</p>
 {{end}}
-</div>
 </div>
 {{end}}

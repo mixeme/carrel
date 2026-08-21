@@ -3,7 +3,7 @@
     <h1>Accept invitation</h1>
     <p>You have been invited to join this Carrel instance. Choose a login and
         password to finish creating your account.</p>
-    <p class="warning">Your password is the only key to your own data. Nobody —
+    <p class="m-msg is-accent">Your password is the only key to your own data. Nobody —
         including this server — can recover it for you.</p>
 
     <form method="post" class="m-form" action="{{.Base}}/invite/{{with .Data}}{{.Token}}{{end}}" autocomplete="off">

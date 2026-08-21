@@ -67,7 +67,7 @@ func TestContactPanelIsAFragment(t *testing.T) {
 	}
 	wantHref := `href="/app/contacts/` + accID + `/` + colEnc + `/ada/edit"`
 	for _, want := range []string{
-		`class="detail-panel"`,
+		`data-detail-url`,
 		"Ada Lovelace",
 		`data-detail-close`,
 		wantHref,

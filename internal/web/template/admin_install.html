@@ -38,7 +38,7 @@
         {{range $d.InstallResult.Rows}}
             <tr class="install-row is-{{.Status}}">
                 <td><span class="install-tick is-{{.Status}}" aria-hidden="true"></span></td>
-                <td>{{.Name}}{{if eq .Status "local"}} <span class="badge is-local">local</span>{{end}}</td>
+                <td>{{.Name}}{{if eq .Status "local"}} <span class="m-badge is-local">local</span>{{end}}</td>
                 <td class="mono">{{.Detail}}</td>
                 <td class="mono install-advice">{{.Advice}}</td>
             </tr>

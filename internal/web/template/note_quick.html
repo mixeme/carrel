@@ -7,7 +7,7 @@
         {{if $d.HasTarget}}<p class="app-sheet-target">{{$d.Target.Label}} · {{$d.Target.AccountLabel}}</p>{{end}}
         <button type="button" class="m-btn is-quiet app-sheet-close" data-sheet-close title="Close" aria-label="Close">✕</button>
     </div>
-    {{if .Error}}<p class="message error" role="alert">{{.Error}}</p>{{end}}
+    {{if .Error}}<p class="m-msg is-alert" role="alert">{{.Error}}</p>{{end}}
     {{if $d.HasTarget}}
     <form class="app-sheet-body" method="post" action="{{.Base}}/app/notes/quick" data-quick-note-form
           hx-post="{{.Base}}/app/notes/quick"
@@ -50,7 +50,7 @@
 <div class="app-main quick-note-page">
     <section>
         {{template "m-head" (head "Title" "New note")}}{{template "m-headend"}}
-        {{if .Error}}<p class="message error" role="alert">{{.Error}}</p>{{end}}
+        {{if .Error}}<p class="m-msg is-alert" role="alert">{{.Error}}</p>{{end}}
         {{if $d.HasTarget}}
         <p class="source-label">Filed in {{$d.Target.Label}} · {{$d.Target.AccountLabel}}</p>
         <form method="post" class="m-form" action="{{.Base}}/app/notes/quick" data-quick-note-form>

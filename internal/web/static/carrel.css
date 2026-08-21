@@ -201,7 +201,7 @@ main:has(.admin-panel) {
 }
 
 .admin-nav + .subsection,
-.admin-nav + .warning + .subsection {
+.admin-nav + .m-msg + .subsection {
     margin-top: 1.25rem;
 }
 
@@ -278,31 +278,6 @@ main:has(.app-layout) {
     margin-right: -1.5rem;
 }
 
-.list-avatar {
-    width: var(--row-lg);
-    height: var(--row-lg);
-    border-radius: 3px;
-    object-fit: cover;
-    background: #d9d2be;
-    color: var(--muted);
-    font-size: 10.5px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: none;
-}
-
-:root[data-theme="dark"] .list-avatar {
-    background: #3a463d;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .list-avatar {
-        background: #3a463d;
-    }
-}
-
 .tz-label {
     /* var(--mono) does not exist and never did: the token is --f-mono, so the
        source time zone of §23.8 had been rendering in the sans face. */
@@ -312,7 +287,6 @@ main:has(.app-layout) {
     white-space: nowrap;
 }
 
-.contact-avatar,
 .contact-photo {
     border-radius: 3px;
     object-fit: cover;
@@ -649,61 +623,10 @@ body.has-shell {
     max-width: none;
 }
 
-.app-details {
-    border-left: 0.5px solid var(--rule);
-    background: var(--paper);
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.detail-panel {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-}
-
 .detail-panel-body {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-}
-
-.detail-fields {
-    display: grid;
-    grid-template-columns: 104px minmax(0, 1fr);
-    gap: 7px 14px;
-    padding: 12px var(--pad);
-    font-size: 13px;
-    margin: 0;
-}
-
-.detail-fields dt {
-    font-size: 11.5px;
-    color: var(--dusty);
-    padding-top: 1px;
-    margin: 0;
-}
-
-.detail-fields dd {
-    margin: 0;
-    min-width: 0;
-}
-
-.detail-section {
-    padding: 0 var(--pad) 12px;
-    font-size: 13px;
-}
-
-.detail-section h3 {
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dusty);
-    margin: 0 0 8px;
-    font-weight: 600;
 }
 
 .detail-other {
@@ -855,23 +778,6 @@ body.has-shell {
     min-width: 28px;
 }
 
-.app-create-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
-    z-index: 50;
-    min-width: 200px;
-    background: var(--paper);
-    border: 0.5px solid var(--card-border);
-    border-radius: 5px;
-    padding: 4px;
-    box-shadow: 0 8px 24px rgba(23, 33, 28, 0.1);
-}
-
-.app-create-menu[hidden] {
-    display: none;
-}
-
 .app-create-sep {
     border: 0;
     border-top: 0.5px solid var(--hair);
@@ -904,22 +810,6 @@ body.has-shell {
     cursor: default;
 }
 
-.dots-menu form {
-    padding: 6px 9px;
-}
-
-.dots-menu label {
-    display: block;
-    font-size: 12.5px;
-    color: var(--ink);
-}
-
-.dots-menu select {
-    display: block;
-    width: 100%;
-    margin-top: 4px;
-}
-
 .app-create-item kbd {
     margin-left: auto;
     font-family: var(--f-mono);
@@ -946,7 +836,7 @@ body.has-sheet {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .app-details:not([hidden]) {
+    .m-side:not([hidden]) {
         display: none;
     }
 }
@@ -1076,22 +966,6 @@ code {
 
 .hint {
     margin: 0.25rem 0 0;
-}
-
-.warning {
-    border-left: 2px solid var(--accent);
-    padding-left: 0.75rem;
-}
-
-.message {
-    padding: 0.75rem;
-    border-radius: 3px;
-    background: var(--card);
-}
-
-.message.error {
-    color: var(--alert);
-    border-left: 2px solid var(--alert);
 }
 
 .subsection {
@@ -1331,29 +1205,6 @@ pre.diagnostic {
     vertical-align: top;
 }
 
-/* Centered dialogs: import, merge, conflict (§7.7–7.9) */
-.dialog-host {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.app-dialog {
-    width: 100%;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 22px var(--pad) 26px;
-}
-
-.app-dialog.is-wide {
-    max-width: 1080px;
-}
-
-.app-dialog.is-narrow {
-    max-width: 520px;
-}
-
 .import-steps {
     display: flex;
     gap: 0;
@@ -1393,34 +1244,6 @@ pre.diagnostic {
 
 .import-stats .is-error {
     color: var(--alert);
-}
-
-.dialog-card {
-    border: 0.5px solid var(--hair);
-    border-radius: 5px;
-    background: var(--paper);
-    padding: 14px;
-    margin-bottom: 10px;
-}
-
-.dialog-card.is-accent {
-    border-color: var(--accent);
-}
-
-.dialog-rubric {
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dusty);
-    font-weight: 600;
-    margin: 0 0 8px;
-}
-
-.dialog-rubric .mono {
-    letter-spacing: 0;
-    text-transform: none;
-    font-family: var(--f-mono);
-    font-size: 11px;
 }
 
 .import-report-stat {
@@ -1577,21 +1400,20 @@ pre.diagnostic {
     background: var(--card);
 }
 
-.files-props {
+.files-layout.has-files-props .files-card {
+    border-right: 0;
+}
+
+/* Files' properties column is .m-side; these are the numbers it already
+   had, which differ from the record panel (bg, hair, padding). */
+
+#files-props {
     flex: 0 0 var(--side);
     width: var(--side);
-    border-left: 0.5px solid var(--hair);
+    border-left-color: var(--hair);
     background: var(--bg);
     padding: 0 1rem 1rem;
     overflow: auto;
-}
-
-.files-props[hidden] {
-    display: none !important;
-}
-
-.files-layout.has-files-props .files-card {
-    border-right: 0;
 }
 
 .files-props-head {
@@ -1614,24 +1436,14 @@ pre.diagnostic {
     white-space: nowrap;
 }
 
-/* The same field list as the record panels of §7.1–7.4, in the same sizes:
-   this is one component appearing in a second place, not a second component. */
-.files-props-body dl {
+#files-props .m-fields {
     margin: 0.5rem 0 1rem;
-    display: grid;
     grid-template-columns: 5.5rem 1fr;
     gap: 0.35rem 0.75rem;
+    padding: 0;
 }
 
-.files-props-body dt {
-    margin: 0;
-    font-size: 11.5px;
-    color: var(--dusty);
-    padding-top: 1px;
-}
-
-.files-props-body dd {
-    margin: 0;
+#files-props .m-fields dd {
     font-family: var(--f-mono);
     font-size: 11.5px;
     word-break: break-all;
@@ -1657,7 +1469,7 @@ pre.diagnostic {
 }
 
 @media (max-width: 1023px) {
-    .files-layout.has-files-props .files-props {
+    .files-layout.has-files-props #files-props {
         position: fixed;
         inset: var(--top) 0 0 auto;
         width: min(100%, 22rem);
@@ -1667,7 +1479,7 @@ pre.diagnostic {
 }
 
 @media (max-width: 640px) {
-    .files-props,
+    #files-props,
     [data-files-props-toggle] {
         display: none !important;
     }
@@ -1966,43 +1778,6 @@ pre.diagnostic {
     list-style: none;
     margin: 0;
     padding: 0;
-}
-
-.task-tick {
-    width: 13px;
-    height: 13px;
-    border: 1px solid var(--card-border);
-    border-radius: 2px;
-    background: transparent;
-    padding: 0;
-    margin: 0;
-    font-size: 9.5px;
-    line-height: 11px;
-    text-align: center;
-    cursor: pointer;
-    color: var(--muted);
-}
-
-.m-row.is-done .task-tick {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-}
-
-.tag {
-    border: 0.5px solid var(--hair);
-    border-radius: 2px;
-    padding: 0 5px;
-    font-size: 10.5px;
-    color: var(--muted);
-    text-decoration: none;
-    white-space: nowrap;
-    background: var(--paper);
-}
-
-.tag.is-active {
-    color: var(--fg, inherit);
-    border-color: var(--accent);
 }
 
 .tag-list {
@@ -2526,31 +2301,6 @@ pre.diagnostic {
     border-bottom: 0.5px solid var(--rule);
 }
 
-.find-poll {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 7px var(--pad);
-    background: var(--card);
-    flex-wrap: wrap;
-}
-
-.find-prog {
-    width: 120px;
-    height: 3px;
-    border-radius: 2px;
-    background: var(--card-border);
-    overflow: hidden;
-    flex: none;
-}
-
-.find-prog i {
-    display: block;
-    height: 100%;
-    width: 0;
-    background: var(--accent);
-}
-
 .find-summary {
     margin: 0;
     font-size: 12.5px;
@@ -2559,23 +2309,8 @@ pre.diagnostic {
     min-width: 12rem;
 }
 
-.find-poll .m-btn {
-    margin-left: auto;
-}
-
-.find-poll.is-offline {
-    background: transparent;
-    border-bottom: 0.5px solid var(--alert);
+.m-poll.is-offline .find-summary {
     color: var(--alert);
-}
-
-.find-poll.is-offline .find-summary {
-    color: var(--alert);
-}
-
-.find-poll.is-offline .find-prog i {
-    width: 0;
-    background: var(--alert);
 }
 
 .app-offline:not([hidden]) {
@@ -2643,46 +2378,6 @@ pre.diagnostic {
     margin-top: 0;
 }
 
-/* A small inline label — "attachments" on the all-collections files table
-   today (2.6.G12) — sharing .dup-badge's look without its link colouring. */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    height: 16px;
-    line-height: 1;
-    border: 0.5px solid var(--rule);
-    border-radius: 2px;
-    padding: 0 6px;
-    font-size: 10px;
-    letter-spacing: 0.03em;
-    color: var(--muted);
-    white-space: nowrap;
-}
-
-/* The duplicates of §15: a badge where a record stands for several, and the
-   groups on the screen where they are decided. */
-.dup-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    height: 16px;
-    line-height: 1;
-    border: 0.5px solid var(--rule);
-    border-radius: 2px;
-    padding: 0 6px;
-    font-size: 10px;
-    letter-spacing: 0.03em;
-    color: var(--muted);
-    text-decoration: none;
-    white-space: nowrap;
-    background: transparent;
-}
-
-.dup-badge.is-linked {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
 .dup-sources {
     display: flex;
     flex-wrap: wrap;
@@ -2706,24 +2401,6 @@ pre.diagnostic {
     padding: 0;
 }
 
-.dup-group {
-    border: 0.5px solid var(--hair);
-    border-radius: 6px;
-    padding: 0.7rem 0.9rem;
-    margin-bottom: 0.8rem;
-}
-
-.dup-group.is-ignored {
-    opacity: 0.65;
-}
-
-.dup-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.5rem;
-}
-
 .dup-members li {
     display: flex;
     align-items: baseline;
@@ -2738,22 +2415,6 @@ pre.diagnostic {
 
 .dup-members li.is-absent {
     color: var(--muted);
-}
-
-.dup-fields {
-    display: grid;
-    grid-template-columns: minmax(6rem, 10rem) 1fr;
-    gap: 0.2rem 0.8rem;
-    margin: 0.6rem 0 0;
-}
-
-.dup-fields dt {
-    color: var(--muted);
-    font-size: 11.5px;
-}
-
-.dup-fields dd {
-    margin: 0;
 }
 
 .dup-conflict {
@@ -2803,13 +2464,13 @@ button.danger {
     .topbar,
     .app-top,
     .m-rail,
-    .app-details,
+    .m-side,
     .site-footer,
     nav,
     button,
     .button,
     form,
-    .message {
+    .m-msg {
         display: none !important;
     }
 
@@ -2910,31 +2571,11 @@ button.danger {
     max-width: none;
 }
 
-.settings-account-card {
-    border: 0.5px solid var(--rule);
-    border-radius: 4px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    background: var(--paper);
-}
-
 .settings-account-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-}
-
-/* The account is the card's rubric, not a heading: the mockup writes it as
-   «NEXTCLOUD · HOME» in the same small capitals the rest of the panel uses. */
-.settings-account-head h2 {
-    margin: 0;
-    font-family: var(--f-sans);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dusty);
 }
 
 .settings-collections {
@@ -3378,7 +3019,7 @@ button.danger {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .app-details {
+    .m-side {
         position: fixed;
         inset: var(--top) 0 52px;
         z-index: 25;
@@ -3386,7 +3027,7 @@ button.danger {
         border-left: 0;
     }
 
-    .app-details[hidden] {
+    .m-side[hidden] {
         display: none !important;
     }
 
@@ -3398,7 +3039,7 @@ button.danger {
         position: static;
     }
 
-    .app-dialog {
+    .m-dialog {
         padding: 12px var(--pad) 16px;
     }
 
@@ -3568,16 +3209,16 @@ body.has-shell .admin-panel {
     container-type: inline-size;
 }
 
-body.has-shell .app-content > .message {
+body.has-shell .app-content > .m-msg {
     grid-column: 2;
     grid-row: 1;
     margin: 12px var(--pad) 0;
     align-self: start;
 }
 
-body.has-shell .app-details,
+body.has-shell .m-side,
 body.has-shell .person-sidebar,
-body.has-shell .files-props {
+body.has-shell #files-props {
     grid-column: 3;
     grid-row: 1 / -1;
     min-width: 0;
@@ -3585,7 +3226,7 @@ body.has-shell .files-props {
 
 body.has-shell .app-shell.has-details,
 body.has-shell .app-shell:has(.person-sidebar),
-body.has-shell .app-shell:has(.files-props:not([hidden])) {
+body.has-shell .app-shell:has(#files-props:not([hidden])) {
     grid-template-columns: var(--rail) minmax(0, 1fr) var(--side);
 }
 
@@ -3596,10 +3237,6 @@ body.has-shell .app-shell.is-admin .m-rail {
     z-index: 1;
     background: transparent;
     border-right: none;
-}
-
-.page-hint {
-    padding: 8px var(--pad) 0;
 }
 
 .app-main .m-list,
@@ -3673,7 +3310,7 @@ body:not(.has-shell) main {
     body.has-shell .app-main,
     body.has-shell .settings-panel,
     body.has-shell .admin-panel,
-    body.has-shell .app-content > .message {
+    body.has-shell .app-content > .m-msg {
         grid-column: 1;
         grid-row: auto;
     }
@@ -3773,16 +3410,5 @@ body:not(.has-shell) main {
 
 .install-check-note {
     margin-top: 12px;
-}
-
-.badge.is-local {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-    border: 0.5px solid var(--rule);
-    border-radius: 3px;
-    padding: 0 4px;
-    vertical-align: middle;
 }
 

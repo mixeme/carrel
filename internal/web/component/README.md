@@ -134,6 +134,10 @@ component/
 | `m-src` / `m-srcend` | `src` | `tmpl/m-rail.html` · `css/50-rail.css` | Строка источника. `Href` — ссылка, `Item` — пункт списка; `All` / `On` / `Off` / `Root` / `Ext` / `Error` — состояния макетов |
 | `m-rail-sec` / `m-rail-secend` | `railSec` | `tmpl/m-rail.html` · `css/50-rail.css` | Группа источников под рубрикатором (`Label`) |
 | `m-rail-foot` / `m-rail-footend` | `railFoot` | `tmpl/m-rail.html` · `css/50-rail.css` | Подвал рейла: Apply, «New calendar» |
+| `m-side` / `m-sideend` | `side` | `tmpl/m-panel.html` · `css/60-panel.css` | Колонка подробностей справа. Экран чаще пишет класс на своём `<aside>` (`#app-details`, `#files-props`): id и hidden всегда его |
+| `m-dialog` / `m-dialogend` | `dialog` | `tmpl/m-panel.html` · `css/60-panel.css` | Рамка диалога. `Wide` / `Narrow` — 1080 / 520 px |
+| `m-card` / `m-cardend` | `card` | `tmpl/m-panel.html` · `css/60-panel.css` | Карточка. `Accent` — выделенная; экран чаще пишет класс на своём узле |
+| `m-menu` / `m-menuend` | `menu` | `tmpl/m-panel.html` · `css/60-panel.css` | Выпадающее меню. `Pop` — всплывает и места в раскладке не занимает |
 
 Классы, которые эти компоненты приносят с собой:
 
@@ -172,6 +176,20 @@ component/
 | `.m-meta` | `m-src` | **Слот**: хвост строки (счётчик, `ro`) |
 | `.m-rail-sec` | `m-rail-sec` | Группа под рубрикатором — один аккаунт |
 | `.m-rail-foot` | `m-rail-foot` | **Слот**: подвал; какие кнопки — дело экрана |
+| `.m-side` | `m-side` | **Слот**: колонка подробностей; id, hidden и aria-label — дело экрана |
+| `.m-fields` | `m-side` | **Слот**: сетка подпись/значение; какие dt/dd — дело экрана |
+| `.m-sec` | `m-side` | **Слот**: секция под шапкой панели; рубрика и тело — дело экрана |
+| `.m-dialog` | `m-dialog` | **Слот**: рамка диалога. `is-wide` / `is-narrow` |
+| `.m-card` | `m-card` | **Слот**: карточка. `is-accent` / `is-ignored` — состояния экрана |
+| `.m-msg` | `m-card` | **Слот**: баннер. `is-alert` / `is-accent`. Текст — дело экрана |
+| `.m-empty` | `m-card` | **Слот**: пустое состояние; слова и кнопка — дело экрана |
+| `.m-poll` | `m-card` | **Слот**: ход опроса; сводка и Stop — дело экрана |
+| `.m-prog` | `m-card` | Полоска прогресса внутри `.m-poll`; ширину пишет `data-fill` |
+| `.m-menu` | `m-menu` | **Слот**: выпадающее меню; какие строки — дело экрана. `is-pop` / `is-right` |
+| `.m-badge` | `m-card` | **Слот**: значок (`is-linked` / `is-alert` / `is-local`) |
+| `.m-tag` | `m-card` | **Слот**: категория. `is-on` — выбранная |
+| `.m-tick` | `m-card` | **Слот**: флажок задачи 13 px |
+| `.m-av` | `m-card` | **Слот**: аватар строки списка |
 
 Высоту строки знает система, не экран: **28 px** там, где есть поле, **26 px** на полосе инструментов, **22 px** в таблице. Стрелку у `<select>` рисует `.m-in`, разметка только ставит класс.
 

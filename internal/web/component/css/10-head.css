@@ -112,7 +112,7 @@
     min-width: 0;
 }
 
-/* Диалог: отступ уже у .app-dialog, шапка его не повторяет. Макеты:
+/* Диалог: отступ уже у .m-dialog, шапка его не повторяет. Макеты:
    `.m-dialog .m-head { padding-left: 0; padding-right: 0 }`. Вертикальный
    тоже ноль и margin-bottom 8px — как было у .dialog-head, не перерисовка. */
 .m-head.is-plain {
