@@ -2027,6 +2027,67 @@ SEQUENCE  2</div>
 <figcaption><b>Attachments у задачи</b> — та самая строка «позже» из таблицы равенства: <code>ATTACH</code> в модели уже есть, карточки не было. Блок здесь тот же, что у события и заметки, и это весь объём работы. Активный фильтр наконец видно: сегментный переключатель с числами вместо трёх одинаковых кнопок-ссылок, у которых <code>.is-active</code> не описан в CSS. Просроченное вынесено в свою группу и окрашено единственным тревожным цветом. Флажок выполнения — квадрат 13&nbsp;px, а не символ «○/✓» в кнопке.</figcaption>
 </figure>
 
+
+<figure>
+<div class="frame">
+  <div class="frame-label"><span>Задача · правка, срок, выполнение</span><i>/app/tasks/{account}/{col}/{uid}</i></div>
+  <div class="mock">
+    <div class="m-shell no-rail">
+      <div class="m-main">
+        <div class="m-head">
+          <div>
+            <div class="m-nav" style="margin-bottom:6px;padding:0"><a><svg><use href="#i-back"/></svg>Дела</a></div>
+            <div class="m-h1"><span class="m-bar3" style="background:#4A6B52;height:20px"></span>Отправить документы в МФЦ</div>
+            <div class="m-sub">nextcloud · home · Дела · <span class="m-badge is-alert">overdue by 3 days</span></div>
+          </div>
+          <div class="m-acts">
+            <span class="m-btn is-primary">Save</span>
+            <span class="m-btn is-quiet">Cancel</span>
+            <span class="m-btn is-quiet" title="More"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span>
+          </div>
+        </div>
+        <div class="m-form">
+          <div class="m-f w-full"><label>Summary</label><span class="m-in is-focus">Отправить документы в МФЦ</span></div>
+          <div class="m-f w-full"><label>Description</label><span class="m-in is-area">Опись, копия паспорта и заявление. Приём до 18:00, окно 4.</span></div>
+          <div class="m-f w-sm"><label>Start date</label><span class="m-in is-mono is-ph">YYYY-MM-DD</span></div>
+          <div class="m-f w-sm"><label>Due date</label><span class="m-in is-mono">2026-08-07</span></div>
+          <div class="m-f w-xs"><label>Due time</label><span class="m-in is-mono is-ph">--:--</span></div>
+          <div class="m-f w-sm"><label>Status</label><span class="m-in is-pick">Needs action</span></div>
+          <div class="m-f w-xs"><label>Priority</label><span class="m-in is-pick">1</span></div>
+          <div class="m-f w-xs"><label>Percent complete</label><span class="m-in is-mono">0</span></div>
+          <div class="m-f w-md"><label>Location</label><span class="m-in is-ph">optional</span></div>
+          <div class="m-f w-md"><label>Categories</label><span class="m-in">дом</span></div>
+          <div class="m-f w-lg"><label>Related to</label>
+            <span class="m-in" style="height:auto;min-height:28px;padding:4px 8px;gap:5px;flex-wrap:wrap">
+              <span class="m-tag" style="display:inline-flex;align-items:center;gap:5px;padding:1px 4px 1px 6px">Забрать документы
+                <svg width="9" height="9" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" fill="none"><use href="#i-close"/></svg></span>
+            </span></div>
+          <div class="m-fset">
+            <div class="m-rubric">Attachments</div>
+            <div style="flex:1 1 100%;display:flex;gap:8px;align-items:center">
+              <span class="m-btn"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></span>
+              <span style="font-size:11.5px;color:var(--dusty)">Ничего не вложено</span>
+            </div>
+          </div>
+          <div class="m-fset">
+            <div class="m-rubric">Source</div>
+            <dl class="m-fields" style="flex:1 1 100%;padding:0">
+              <dt>ETag</dt><dd class="mono">W/&quot;3c07f1a9&quot;</dd>
+              <dt>Path</dt><dd class="mono">/remote.php/dav/calendars/mix/dela/aa10.ics</dd>
+              <dt>Read</dt><dd>2 min ago · не менялась на сервере</dd>
+            </dl>
+          </div>
+        </div>
+        <div class="m-danger-zone"><span class="m-btn is-danger"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg>Delete task</span>Удаление уходит на сервер сразу и отменить его нечем.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Этого кадра не было, и это была не мелочь.</b> Карточку получили контакт, событие и заметка — у каждого свой экран правки; у задачи его не нарисовали, хотя <code>task.html</code> в приложении работает и отдаёт полноценную форму. Ровно про это §2.1: «ответа „про это не подумали“ быть не должно», а таблица полноты при этом утверждала, что карточка задачи нарисована в 7.3. Не была.
+<br><br>Стоило это дороже одного пропущенного рисунка. Экран, которого нет в макетах, не переносят на общие компоненты: <code>task.html</code> — вместе с <code>contact.html</code> и <code>event.html</code> — до сих пор пишет шапку руками четвёртым именем (<code>.contacts-header</code>), и ворота этого не видят, потому что <code>TestEveryShellScreenAssemblesInOrder</code> пропускает любой маршрут с параметром в пути. Все экраны записей — вне охвата.
+<br><br><b>Что на самом кадре.</b> Поля — те, что отдаёт форма: срок разделён на дату и время, потому что у задачи «до вторника» и «до вторника 18:00» это разные обещания. <b>Просрочка названа в подзаголовке</b>, а не только цветом строки в списке: цвет говорит «что-то не так», а «overdue by 3 days» говорит, насколько. <b>Percent complete — поле, а не ползунок</b>: значение уходит на чужой сервер как число, и вводить его надо тем же способом, каким оно хранится. «Related to» — тот же поиск по мере набора, что у заметки, и здесь он связывает задачу с событием «Забрать документы».</figcaption>
+</figure>
+
 <h2 id="s-notes">7.4 Заметки</h2>
 
 <figure>
@@ -4260,7 +4321,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 
 
 <h3>Полнота: где какой экран</h3>
-<p><b>Сверено 19 августа 2026, после волны 2.5 (перенос вёрстки):</b> 50 шаблонов и 92 маршрута против 100 макетов. Классы и каркас экранов 7.1–7.13 перенесены в шаблоны и <code>carrel.css</code> (логотип, единый рейл, шапка с иконками, контент без <code>.card</code>, <code>.app-btn</code>). <b>Покадровая визуальная приёмка</b> таблицы ниже — условие тега v1.1, не зелёных тестов. Своего макета нет у восьми шаблонов, и ни один из них не экран: <code>base</code> — обвязка страницы; <code>contacts_page</code>, <code>duplicate_results</code> и <code>find_results</code> — htmx-фрагменты, которые подставляются внутрь уже нарисованного экрана; четыре <code>*_panel</code> — панель подробностей, нарисованная правой колонкой в 7.1–7.4, а не отдельным кадром. Из маршрутов без макета — только те, что не показывают страницу: выдача файла и вложения, фотография контакта, <code>healthz</code>, манифест и статика.</p>
+<p><b>Сверено повторно 21 августа 2026: 55 шаблонов и 78 GET-маршрутов против 123 кадров. Нашлась одна дыра, и именно там, где эта таблица утверждала обратное: <b>карточки задачи не было</b> — строка про <code>task</code> говорила «карточка, 7.3», а в 7.3 был только список. Кадр дорисован. Урок не в пропущенном рисунке, а в том, что <b>таблица утверждала полноту, которой не было</b>, и проверить её мог только тот, кто считает заново. Заодно выяснилось, почему дыра держалась: <code>TestEveryShellScreenAssemblesInOrder</code> пропускает маршруты с параметром в пути, то есть все экраны записей. <br><br>Сверено 19 августа 2026, после волны 2.5 (перенос вёрстки):</b> 50 шаблонов и 92 маршрута против 100 макетов. Классы и каркас экранов 7.1–7.13 перенесены в шаблоны и <code>carrel.css</code> (логотип, единый рейл, шапка с иконками, контент без <code>.card</code>, <code>.app-btn</code>). <b>Покадровая визуальная приёмка</b> таблицы ниже — условие тега v1.1, не зелёных тестов. Своего макета нет у восьми шаблонов, и ни один из них не экран: <code>base</code> — обвязка страницы; <code>contacts_page</code>, <code>duplicate_results</code> и <code>find_results</code> — htmx-фрагменты, которые подставляются внутрь уже нарисованного экрана; четыре <code>*_panel</code> — панель подробностей, нарисованная правой колонкой в 7.1–7.4, а не отдельным кадром. Из маршрутов без макета — только те, что не показывают страницу: выдача файла и вложения, фотография контакта, <code>healthz</code>, манифест и статика.</p>
 <p>Проверка не на глаз, а по списку шаблонов и маршрутов. Слева — то, что отдаёт сервер сегодня, справа — макет, который это показывает. Строк без макета не осталось; фрагменты htmx (<code>contacts_page</code>, <code>find_results</code>, <code>duplicate_results</code>, четыре <code>*_panel</code>, <code>contact_crop</code> как ответ на <code>hx-post</code>) отдельными экранами не считаются — они кусок того экрана, в который вставляются.</p>
 <table class="doc">
   <tr><th style="width:26%">Шаблон и маршрут</th><th style="width:30%">Что это</th><th>Макет</th></tr>
@@ -4828,7 +4889,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <figure>
 <div class="frame">
-  <div class="frame-label"><span>Публикация · выданные ссылки и диалог</span><span class="plan">не построено</span><i>/app/settings/links</i></div>
+  <div class="frame-label"><span>Публикация · выданные ссылки и диалог</span><span class="plan">не построено</span><i>/app/files/published</i></div>
   <div class="mock">
     <div class="m-shell has-side" style="--side:360px">
       <div class="m-rail">
@@ -4899,7 +4960,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
     </div>
   </div>
 </div>
-<figcaption>Подписки заводятся и живут среди подключений (<a href="#subscribe">7.10</a>): для человека это источник, а не выданная ссылка; здесь они появляются с другой стороны. Столбцы «последний заход» и «заходов» — это не статистика ради статистики: по секретной ссылке отдают чужим людям, и единственный способ понять, что ссылка ушла дальше, чем предполагалось, — увидеть, что по ней ходят. «Не открывали» написано словами, потому что ноль в этом столбце читается хуже.<br><br>Сообщение про чужую ленту говорит на экране только факт — копии не остаётся, — а причина этому §2: кэш ленты на диске был бы ровно той локальной персистентностью содержимого, которой Carrel не допускает. Причина живёт здесь, в подписи, и на экран не выносится.</figcaption>
+<figcaption><b>Адрес уже занят, и занят правильно.</b> В рейле файлов есть ярлык <b>Published</b>, и он ведёт на <code>/app/files/published</code> — сегодня там заглушка, честно говорящая, что публикация ещё не построена. Макет раньше указывал <code>/app/settings/links</code> — второй адрес для того же экрана, то есть та же ошибка, что с шестнадцатью именами одной полосы, только в маршрутах. Заглушка отдельного кадра не просит: этот кадр и есть то, во что она превратится.<br><br>Подписки заводятся и живут среди подключений (<a href="#subscribe">7.10</a>): для человека это источник, а не выданная ссылка; здесь они появляются с другой стороны. Столбцы «последний заход» и «заходов» — это не статистика ради статистики: по секретной ссылке отдают чужим людям, и единственный способ понять, что ссылка ушла дальше, чем предполагалось, — увидеть, что по ней ходят. «Не открывали» написано словами, потому что ноль в этом столбце читается хуже.<br><br>Сообщение про чужую ленту говорит на экране только факт — копии не остаётся, — а причина этому §2: кэш ленты на диске был бы ровно той локальной персистентностью содержимого, которой Carrel не допускает. Причина живёт здесь, в подписи, и на экран не выносится.</figcaption>
 </figure>
 
 <figure>
