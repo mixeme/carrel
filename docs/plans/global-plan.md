@@ -10,6 +10,7 @@
 | Требования и `§`-ссылки | [carrel-spec.md](../carrel-spec.md) |
 | Как это выглядит и порядок работ по редизайну | [carrel-ui-mockups.html](../visual/carrel-ui-mockups.html), раздел 13 |
 | Настольная обёртка, свои фазы | [desktop-wrapper.md](desktop-wrapper.md) |
+| Библиотека компонентов, свои этапы | [component-library.md](component-library.md) |
 | Что проверяет человек | [manual-acceptance.md](../manual-acceptance.md) |
 | Как проверяется волна 2.6 | [wave-2.6-review.md](wave-2.6-review.md) |
 | Соглашения кода, кому какая работа | [development.md](../development.md) |
