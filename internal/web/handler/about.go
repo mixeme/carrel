@@ -13,6 +13,15 @@ import (
 // Per spec §22, this is the GitHub mirror, not the internal Gitea host.
 const SourceURL = "https://github.com/mixeme/carrel"
 
+// Public tagline — keep in sync with README and docs/visual/carrel-brand-guide.html.
+const (
+	Tagline1 = "One desk. Every server."
+	Tagline2 = "Calendars, contacts, tasks, notes and files — one place."
+)
+
+// TaglineDescription is the single-line form for meta tags and the PWA manifest.
+func TaglineDescription() string { return Tagline1 + " " + Tagline2 }
+
 // About serves the public «About this service» page (§22).
 func (s *Server) About(w http.ResponseWriter, r *http.Request) {
 	s.Render(w, "about.html", s.View(r, "About"))
@@ -24,7 +33,7 @@ func (s *Server) Manifest(w http.ResponseWriter, r *http.Request) {
 	manifest := map[string]any{
 		"name":             "Carrel",
 		"short_name":       "Carrel",
-		"description":      "Self-hosted web client for CalDAV, CardDAV and WebDAV",
+		"description":      TaglineDescription(),
 		"start_url":        s.Path("/app/"),
 		"scope":            s.Path("/"),
 		"display":          "standalone",

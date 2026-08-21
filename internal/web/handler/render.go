@@ -128,6 +128,9 @@ type View struct {
 	Commit  string
 	// SourceURL is the public mirror where users can fetch the source (§22).
 	SourceURL string
+	// Tagline1 and Tagline2 are the public tagline (README, login, /about, manifest).
+	Tagline1 string
+	Tagline2 string
 	// InAdmin is true on every administration screen, so the top navigation
 	// can mark Administration current without listing subsection titles.
 	InAdmin bool
@@ -203,6 +206,8 @@ func (s *Server) View(r *http.Request, title string) View {
 		Version:   s.Version,
 		Commit:    s.Commit,
 		SourceURL: SourceURL,
+		Tagline1:  Tagline1,
+		Tagline2:  Tagline2,
 	}
 	if sess != nil && v.Shell() {
 		v.Topbar = s.buildTopbar(r, sess)

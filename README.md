@@ -1,10 +1,11 @@
 # Carrel
 
-**One web client for several CalDAV/CardDAV servers at once — calendars, contacts, tasks and notes in a single view, with no database of its own.**
+**One desk. Every server.**  
+**Calendars, contacts, tasks, notes and files — one place.**
 
 Carrel is a self-hosted web front end for DAV servers you already run. It connects to Baikal, Radicale, Davis, Nextcloud or anything else that speaks CalDAV, CardDAV or plain WebDAV, and gives you full read and write access to contacts, events, tasks, notes and files — from several accounts on several servers, merged into one list.
 
-It stores no copy of your data. The DAV server is the source of truth; Carrel is the reading room.
+It stores no copy of your data. The DAV server is the source of truth.
 
 > **The name.** A carrel is the individual study booth in a library — your own desk, for working with material that belongs to somebody else. That is exactly what this is. Nothing to do with Alexis Carrel.
 

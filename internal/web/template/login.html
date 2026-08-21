@@ -2,6 +2,7 @@
 <section class="auth-card">
     <h1 class="visually-hidden">Sign in</h1>
     <div class="auth-brand">{{template "logo"}}</div>
+    <p class="auth-tagline"><strong>{{.Tagline1}}</strong><br>{{.Tagline2}}</p>
 
     <form method="post" class="m-form" action="{{.Base}}/login">
         <input type="hidden" name="csrf_token" value="{{.CSRF}}">

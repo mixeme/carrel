@@ -112,6 +112,8 @@ func TestAboutPublic(t *testing.T) {
 	body := rec.Body.String()
 	for _, want := range []string{
 		"About Carrel",
+		Tagline1,
+		Tagline2,
 		"1.2.3",
 		"deadbeef",
 		SourceURL,
@@ -220,6 +222,9 @@ func TestManifest(t *testing.T) {
 	}
 	if got := manifest["start_url"]; got != "/app/" {
 		t.Errorf("start_url = %v, want /app/", got)
+	}
+	if got := manifest["description"]; got != TaglineDescription() {
+		t.Errorf("description = %v, want %q", got, TaglineDescription())
 	}
 	icons, ok := manifest["icons"].([]any)
 	if !ok || len(icons) == 0 {

@@ -2769,7 +2769,22 @@ body:not(.has-shell) main {
 }
 
 .auth-brand {
-    margin-bottom: 18px;
+    margin-bottom: 12px;
+}
+
+.auth-tagline {
+    margin: 0 0 18px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--muted);
+}
+
+.auth-tagline strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
 }
 
 .auth-card .auth-submit {
