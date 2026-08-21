@@ -6,7 +6,7 @@ package sidecar
 import "testing"
 
 func TestArchiveNameFor(t *testing.T) {
-	if got := ArchiveNameFor("0.10.0", "linux", "amd64"); got != "carrel_0.10.0_linux_amd64.tar.gz" {
+	if got := ArchiveNameFor("0.11.0", "linux", "amd64"); got != "carrel_0.11.0_linux_amd64.tar.gz" {
 		t.Fatalf("got %q", got)
 	}
 	if got := ArchiveNameFor("v1.0.0", "windows", "amd64"); got != "carrel_1.0.0_windows_amd64.zip" {
@@ -15,8 +15,8 @@ func TestArchiveNameFor(t *testing.T) {
 }
 
 func TestReleaseBaseURL(t *testing.T) {
-	got := ReleaseBaseURL(DefaultReleaseRepo, "0.10.0")
-	want := "https://github.com/mixeme/carrel/releases/download/v0.10.0"
+	got := ReleaseBaseURL(DefaultReleaseRepo, "0.11.0")
+	want := "https://github.com/mixeme/carrel/releases/download/v0.11.0"
 	if got != want {
 		t.Fatalf("got %q want %q", got, want)
 	}

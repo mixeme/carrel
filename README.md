@@ -243,7 +243,7 @@ To serve Carrel from a subdirectory, set `CARREL_BASE_PATH=/carrel` as well, or 
 
 ```bash
 docker compose build \
-  --build-arg VERSION=0.10.0 \
+  --build-arg VERSION=0.11.0 \
   --build-arg COMMIT=$(git rev-parse --short HEAD)
 ```
 

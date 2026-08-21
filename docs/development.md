@@ -52,7 +52,7 @@ The allowlist is the one you will forget. Without it a DAV server on `localhost`
 
 ```bash
 docker compose build \
-  --build-arg VERSION=0.10.0 \
+  --build-arg VERSION=0.11.0 \
   --build-arg COMMIT=$(git rev-parse --short HEAD)
 docker compose up -d
 ```

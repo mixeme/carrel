@@ -23,8 +23,8 @@ import (
 
 func TestParseChecksum(t *testing.T) {
 	hash := "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
-	body := hash + "  carrel_0.10.0_linux_amd64.tar.gz\n"
-	got, err := parseChecksum(bytes.NewBufferString(body), "carrel_0.10.0_linux_amd64.tar.gz")
+	body := hash + "  carrel_0.11.0_linux_amd64.tar.gz\n"
+	got, err := parseChecksum(bytes.NewBufferString(body), "carrel_0.11.0_linux_amd64.tar.gz")
 	if err != nil || got != hash {
 		t.Fatalf("parseChecksum() = %q, %v", got, err)
 	}
@@ -32,7 +32,7 @@ func TestParseChecksum(t *testing.T) {
 
 func TestDownloadInstall(t *testing.T) {
 	installDir := t.TempDir()
-	version := "0.10.0"
+	version := "0.11.0"
 	archive := ArchiveNameFor(version, runtime.GOOS, runtime.GOARCH)
 	payload := []byte("#!/bin/sh\necho carrel\n")
 	archiveBytes, err := buildTestArchive(t, archive, BinaryName(runtime.GOOS), payload)
@@ -43,16 +43,16 @@ func TestDownloadInstall(t *testing.T) {
 	checksums := hex.EncodeToString(sum[:]) + "  " + archive + "\n"
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/releases/download/v0.10.0/checksums.txt", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("/releases/download/v0.11.0/checksums.txt", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(checksums))
 	})
-	mux.HandleFunc("/releases/download/v0.10.0/"+archive, func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("/releases/download/v0.11.0/"+archive, func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write(archiveBytes)
 	})
 	srv := httptest.NewServer(mux)
 	defer srv.Close()
 
-	base := srv.URL + "/releases/download/v0.10.0"
+	base := srv.URL + "/releases/download/v0.11.0"
 	dl := &Downloader{
 		HTTPClient: srv.Client(),
 	}
@@ -70,7 +70,7 @@ func TestDownloadInstall(t *testing.T) {
 		t.Fatalf("binary content mismatch")
 	}
 	info, err := ReadVersion(filepath.Join(installDir, "version.json"))
-	if err != nil || info.Version != "0.10.0" {
+	if err != nil || info.Version != "0.11.0" {
 		t.Fatalf("version %+v, %v", info, err)
 	}
 }
@@ -81,13 +81,13 @@ func TestEnsureSkipsWhenPresent(t *testing.T) {
 	if err := os.WriteFile(bin, []byte("ok"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := WriteVersion(filepath.Join(dir, "version.json"), "0.10.0"); err != nil {
+	if err := WriteVersion(filepath.Join(dir, "version.json"), "0.11.0"); err != nil {
 		t.Fatal(err)
 	}
 	called := false
 	err := Ensure(context.Background(), EnsureOptions{
 		Paths:   InstallPathsFrom(dir, bin, filepath.Join(dir, "version.json")),
-		Version: "0.10.0",
+		Version: "0.11.0",
 		Downloader: &Downloader{
 			HTTPClient: &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
 				called = true
