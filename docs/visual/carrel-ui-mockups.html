@@ -4347,22 +4347,22 @@ An administrator can give you a new password, but doing so replaces the key: eve
   </figure>
 
   <figure style="flex:1 1 400px">
-  <div class="frame" data-screen="/invite/{token} /confirm-email/{token} /about">
+  <div class="frame">
     <div class="frame-label"><span>Страницы по одноразовой ссылке и «о программе»</span><i>/invite/{token}, /confirm-email/{token}, /about</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main" style="gap:14px;padding:16px 0">
         <div class="m-dialog" style="max-width:440px;padding:0 20px">
-          <div class="m-card" style="margin:0" data-part="invalid">
+          <div class="m-card" style="margin:0" data-screen="/invite/{token}" data-part="invalid">
             <div class="m-h1" style="font-size:17px">Invitation</div>
             <div style="font-size:13px;color:var(--muted);margin-top:6px">This invitation link is not valid. It may have expired, already been used, or been revoked.</div>
             <div style="margin-top:10px"><span class="m-btn">Sign in</span></div>
           </div>
-          <div class="m-card" data-part="confirmed">
+          <div class="m-card" data-screen="/confirm-email/{token}" data-part="confirmed">
             <div class="m-h1" style="font-size:17px">Email address</div>
             <div style="font-size:13px;color:var(--muted);margin-top:6px">Address confirmed. You can sign in now.</div>
             <div style="margin-top:10px"><span class="m-btn">Sign in</span></div>
           </div>
-          <div class="m-card" style="margin-bottom:0" data-part="about">
+          <div class="m-card" style="margin-bottom:0" data-screen="/about" data-part="about">
             <div style="display:flex;align-items:center;gap:10px">
               <svg class="m-logo" style="width:64px;height:26px" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>
               <span class="mono" style="font-size:11.5px;color:var(--dusty)">0.8.0 · 19ced54</span>
