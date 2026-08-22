@@ -1,0 +1,51 @@
+# Contract of notes_import.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+field:action
+field:csrf_token
+field:file
+field:type=file
+field:type=hidden
+field:webdav_folder
+field:webdav_source
+form:accept=.md,.markdown,.txt,.zip,text/markdown
+form:action=*/app/notes/*/*/import
+form:enctype=multipart/form-data
+form:method=post
+id:file
+id:webdav-folder
+id:webdav-source
+read:AccountID
+read:AccountLabel
+read:Base
+read:CSRF
+read:ColEnc
+read:Collection.DisplayName
+read:CollisionCount
+read:Data
+read:Date
+read:ErrorCount
+read:HasPreview
+read:Label
+read:Notes
+read:OKCount
+read:ParseError
+read:Source
+read:Tags
+read:Title
+read:TruncatedNote
+read:UIDCollision
+read:WebDAVSources

@@ -1,0 +1,50 @@
+# Contract of event_panel.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+data:data-detail-close
+data:data-detail-url=*/app/calendar/*/*/*/panel
+read:AccountID
+read:AccountLabel
+read:Attachments
+read:Base
+read:CN
+read:ColEnc
+read:Collection.DisplayName
+read:Data
+read:Event.AllDay
+read:Event.Attendees
+read:Event.Categories
+read:Event.Description
+read:Event.DisplayTitle
+read:Event.Location
+read:Event.Status
+read:Form.EndDate
+read:Form.EndTime
+read:Form.StartDate
+read:Form.StartTime
+read:Kind
+read:Name
+read:NoteURL
+read:OpenURL
+read:PartStat
+read:RelType
+read:Related
+read:Source
+read:TimeZoneLabel
+read:Title
+read:UID
+read:URI
+read:URL

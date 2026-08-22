@@ -1,0 +1,57 @@
+# Contract of admin_invites.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+data:data-copy=invite-link
+data:data-copy=register-url
+field:action
+field:csrf_token
+field:email
+field:invite_id
+field:login
+field:role
+field:self_registration
+field:temp_password
+field:type=checkbox
+field:type=email
+field:type=hidden
+field:type=text
+form:action=*/admin/invites
+form:method=post
+id:invite-email-role
+id:invite-email-to
+id:invite-link
+id:invite-link-role
+id:register-url
+id:temp-password
+id:user-email
+id:user-login
+id:user-role
+read:Base
+read:CSRF
+read:Data
+read:Delivery
+read:ExpiresAt.Format
+read:ID
+read:Invites
+read:Login
+read:MailWarning
+read:NewInviteLink
+read:RegisterURL
+read:SMTPConfigured
+read:SendError
+read:SendStatus
+read:Settings.SelfRegistration
+read:Status

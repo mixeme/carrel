@@ -1,0 +1,104 @@
+# Contract of event.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+data:data-print
+data:data-swatch=*var(--accent)*
+field:action
+field:all_day
+field:attendee
+field:categories
+field:csrf_token
+field:description
+field:end_date
+field:end_time
+field:etag
+field:location
+field:rrule
+field:rrule_byday
+field:rrule_count
+field:rrule_freq
+field:rrule_interval
+field:rrule_until
+field:start_date
+field:start_time
+field:status
+field:summary
+field:type=checkbox
+field:type=date
+field:type=hidden
+field:type=number
+field:type=text
+field:type=time
+form:action=*/app/calendar/*/*/*
+form:action=*/app/calendar/*/*/new*/app/calendar/*/*/*
+form:method=post
+id:categories
+id:description
+id:location
+id:status
+id:summary
+read:AccountID
+read:AccountLabel
+read:Base
+read:CN
+read:CSRF
+read:Calendars
+read:ColEnc
+read:Collection.Color
+read:Collection.DisplayName
+read:Collection.Path
+read:Data
+read:ETag
+read:Event.AllDay
+read:Event.Attendees
+read:Event.Description
+read:Event.DisplayTitle
+read:Event.Location
+read:Event.Other
+read:Event.Status
+read:Form.AllDay
+read:Form.Attendee
+read:Form.Categories
+read:Form.Description
+read:Form.EndDate
+read:Form.EndTime
+read:Form.Location
+read:Form.RRule
+read:Form.RRuleByDay
+read:Form.RRuleCount
+read:Form.RRuleFreq
+read:Form.RRuleInterval
+read:Form.RRuleUntil
+read:Form.StartDate
+read:Form.StartTime
+read:Form.Status
+read:Form.Summary
+read:IsNew
+read:Kind
+read:Name
+read:NoteURL
+read:PartStat
+read:PrintDate
+read:ReadOnly
+read:RelType
+read:Related
+read:Text
+read:TimeZoneLabel
+read:Title
+read:UID
+read:URI
+read:URL
+read:Values

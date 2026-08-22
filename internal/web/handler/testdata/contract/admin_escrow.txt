@@ -1,0 +1,49 @@
+# Contract of admin_escrow.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+field:action
+field:confirm_master_password
+field:csrf_token
+field:master_password
+field:new_master_password
+field:temp_password
+field:type=hidden
+field:type=password
+field:type=text
+field:user_id
+form:action=*/admin/escrow
+form:method=post
+id:escrow-master
+id:escrow-master-confirm
+id:master-confirm
+id:master-current
+id:master-new
+id:recover-master
+id:recover-temp
+id:recover-user
+id:resume-master
+read:Base
+read:CSRF
+read:Configured
+read:Data
+read:Enabled
+read:Escrow
+read:EscrowCoverage
+read:EscrowDEK
+read:ID
+read:Login
+read:MailWarning
+read:Users

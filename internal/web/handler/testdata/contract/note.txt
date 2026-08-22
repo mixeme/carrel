@@ -1,0 +1,113 @@
+# Contract of note.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+data:data-copy-url=*
+data:data-detail-section=notes
+data:data-exclude-uid=*
+data:data-note-body
+data:data-note-doc
+data:data-note-focus
+data:data-note-form
+data:data-note-markup=bold
+data:data-note-markup=h2
+data:data-note-markup=italic
+data:data-note-markup=link
+data:data-note-markup=list
+data:data-note-markup=task
+data:data-note-meta-toggle
+data:data-note-metacol
+data:data-note-page-url=*
+data:data-note-source-toggle
+data:data-note-width-seg
+data:data-note-width=full
+data:data-note-width=reading
+data:data-print
+data:data-related-chip
+data:data-related-chips
+data:data-related-input
+data:data-related-menu
+data:data-related-picker
+data:data-related-query
+data:data-related-remove
+data:data-search-url=*/app/notes/*/*/related-search
+data:data-swatch=*var(--accent)*
+data:data-title=*
+data:data-uid=*
+field:action
+field:categories
+field:csrf_token
+field:date
+field:description
+field:etag
+field:related
+field:summary
+field:time
+field:type=date
+field:type=hidden
+field:type=text
+field:type=time
+form:action=*/app/notes/*/*/*
+form:action=*/app/notes/*/*/new*/app/notes/*/*/*?edit=1*
+form:method=post
+id:categories
+id:date
+id:description
+id:related-picker-menu
+id:related-query
+id:summary
+id:time
+read:AccountID
+read:AccountLabel
+read:Active
+read:BackURL
+read:Base
+read:BodyHTML
+read:CSRF
+read:ColEnc
+read:Collection.Color
+read:Collection.DisplayName
+read:Color
+read:Data
+read:DateLabel
+read:ETag
+read:Edit
+read:Form.Categories
+read:Form.Date
+read:Form.Description
+read:Form.Related
+read:Form.Summary
+read:Form.Time
+read:IsNew
+read:Kind
+read:Label
+read:Name
+read:Neighbors
+read:Note.Categories
+read:Note.Description
+read:Note.DisplayTitle
+read:Note.Other
+read:PrintDate
+read:ReadOnly
+read:RelType
+read:Related
+read:RelatedPicker
+read:Source
+read:Sources
+read:Text
+read:Title
+read:UID
+read:URL
+read:Values

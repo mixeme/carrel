@@ -1,0 +1,74 @@
+# Contract of settings_connections.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+data:data-dots-menu
+data:data-dots-toggle
+data:data-swatch=*var(--accent)*
+field:account_id
+field:action
+field:csrf_token
+field:dav_label
+field:dav_password
+field:dav_url
+field:dav_username
+field:edit
+field:type=hidden
+field:type=password
+field:type=text
+field:type=url
+form:action=*/app/settings/connections
+form:method=get
+form:method=post
+id:connect-account-form
+id:dav-label
+id:dav-pass
+id:dav-url
+id:dav-user
+read:Accounts
+read:AddressBooks
+read:Base
+read:BaseURL
+read:CSRF
+read:Calendars
+read:ColEnc
+read:Color
+read:Connect.BaseURL
+read:Connect.Label
+read:Connect.Username
+read:Data
+read:Detail
+read:DisplayName
+read:EditAccountID
+read:EditForm.BaseURL
+read:EditForm.Label
+read:EditForm.Username
+read:FileCollections
+read:ID
+read:Label
+read:Name
+read:Path
+read:Principal
+read:ReadOnly
+read:Session.Login
+read:StatusCode
+read:Sync.Known
+read:Sync.MetaLabel
+read:Target
+read:TestAccountID
+read:TestDiag
+read:Trace
+read:Trace.Steps
+read:Username

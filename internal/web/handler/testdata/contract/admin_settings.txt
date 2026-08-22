@@ -1,0 +1,61 @@
+# Contract of admin_settings.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+field:action
+field:csrf_token
+field:invite_ttl_hours
+field:session_absolute_days
+field:session_idle_hours
+field:smtp_from
+field:smtp_from_name
+field:smtp_host
+field:smtp_password
+field:smtp_port
+field:smtp_tls
+field:smtp_username
+field:test_email
+field:type=email
+field:type=hidden
+field:type=number
+field:type=password
+field:type=text
+form:action=*/admin/settings
+form:method=post
+id:invite-ttl
+id:session-absolute
+id:session-idle
+id:smtp-from
+id:smtp-from-name
+id:smtp-host
+id:smtp-pass
+id:smtp-port
+id:smtp-tls
+id:smtp-user
+id:test-email
+read:Base
+read:CSRF
+read:Data
+read:InviteTTLHours
+read:MailWarning
+read:SMTPDiag
+read:SessionAbsoluteDays
+read:SessionIdleHours
+read:Settings.SMTP.FromAddress
+read:Settings.SMTP.FromName
+read:Settings.SMTP.Host
+read:Settings.SMTP.Port
+read:Settings.SMTP.TLS
+read:Settings.SMTP.Username

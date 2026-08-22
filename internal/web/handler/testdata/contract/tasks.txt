@@ -1,0 +1,93 @@
+# Contract of tasks.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+bind:hx-ext=sse
+bind:hx-get=*/app/tasks/*/*/*/panel
+bind:hx-swap=innerHTML
+bind:hx-target=#app-details
+bind:sse-close=done
+bind:sse-connect=*
+bind:sse-swap=results
+data:data-bar-count
+data:data-col=bar
+data:data-col=done
+data:data-col=due
+data:data-col=name
+data:data-col=progress
+data:data-col=tags
+data:data-columns-root=tasks
+data:data-density-segment
+data:data-density-value=comfortable
+data:data-density-value=compact
+data:data-detail-section=tasks
+data:data-filter-scope
+data:data-list-filter
+data:data-poll-url=*
+data:data-print
+data:data-sse-panel
+data:data-swatch=*var(--accent)*
+data:data-task-count=all
+data:data-task-count=done
+data:data-task-count=open
+data:data-task-counts
+field:action
+field:csrf_token
+field:etag
+field:filter
+field:type=hidden
+field:type=search
+form:action=*/app/tasks/*/*/*
+form:method=post
+id:find-panel
+read:AccountID
+read:AccountLabel
+read:Base
+read:CSRF
+read:ColEnc
+read:Collection.Color
+read:Collection.DisplayName
+read:Counts.All
+read:Counts.Done
+read:Counts.Open
+read:Counts.Overdue
+read:CreateLabel
+read:CreateURL
+read:Data
+read:Done
+read:DueLabel
+read:ETag
+read:Empty
+read:Filter
+read:Mode
+read:NoLists
+read:NoSources
+read:Overdue
+read:Percent
+read:PollURL
+read:PrintDate
+read:ReadOnly
+read:Rows
+read:SectionRail.AllLabel
+read:SectionRail.SourceSummary
+read:Sort
+read:Status
+read:StreamURL
+read:Tags
+read:TaskID
+read:Title
+read:UID
+read:Unusable
+read:UseSSE

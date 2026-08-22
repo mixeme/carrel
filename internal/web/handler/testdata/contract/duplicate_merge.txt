@@ -1,0 +1,46 @@
+# Contract of duplicate_merge.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+field:action
+field:back
+field:csrf_token
+field:group
+field:kind
+field:member
+field:target
+field:type=hidden
+form:action=*
+form:method=post
+read:AccountLabel
+read:Adds
+read:Back
+read:CSRF
+read:CollectionLabel
+read:Data
+read:Deleted
+read:Done
+read:GroupID
+read:Kept
+read:Kind
+read:MergeURL
+read:Sources
+read:Target.AccountLabel
+read:Target.CollectionLabel
+read:Target.Title
+read:Target.Token
+read:Title
+read:Tokens
+read:Written

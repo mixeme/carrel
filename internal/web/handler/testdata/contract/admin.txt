@@ -1,0 +1,49 @@
+# Contract of admin.html — frozen before the rebuild (docs/plans/interface-rebuild.md §4).
+#
+# Every line is a name something outside the markup depends on: a form field,
+# an htmx or SSE binding, a data-* a script hooks, an id another node aims at,
+# or a field of the view this template reads. The template rewritten from its
+# frame has to bring each one back.
+#
+# A name may be dropped — but only out loud. Put "- " in front of the line and
+# the reason after "#":
+#
+#     - field:sort_order  # the bar sorts by link now, not by a posted field
+#
+# Then the lost behaviour is a decision visible in the diff instead of a side
+# effect of retyping the screen.
+#
+# Regenerate with: go test ./internal/web/handler -run TestScreenKeepsItsContract -update
+field:action
+field:confirm_reset
+field:csrf_token
+field:role
+field:temp_password
+field:type=checkbox
+field:type=hidden
+field:type=text
+field:user_id
+form:action=*/admin/
+form:method=post
+id:reset-password-form
+id:reset-temp
+id:reset-user
+read:AdminCount
+read:AllUsers
+read:Base
+read:CSRF
+read:CreatedAt.Format
+read:DAVCount
+read:Data
+read:Disabled
+read:EscrowCoverage
+read:ID
+read:LastLoginAt.Format
+read:LastLoginAt.IsZero
+read:Login
+read:MailWarning
+read:Role
+read:Sessions
+read:Unconfirmed
+read:UserFilter
+read:Users
