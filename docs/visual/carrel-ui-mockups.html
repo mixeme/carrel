@@ -1329,7 +1329,7 @@ figcaption b{color:var(--ink);font-weight:600}
 <h2 id="s-contacts">7.1 Контакты и человек целиком</h2>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/contacts/{account}/{col}">
   <div class="frame-label"><span>Контакты · список и карточка</span><i>/app/contacts/{account}/{col}</i></div>
   <div class="mock">
     <div class="m-top">
@@ -1389,7 +1389,7 @@ figcaption b{color:var(--ink);font-weight:600}
         </div>
 
         <div class="m-group"><span class="m-rubric">А</span><span class="m-num">3</span></div>
-        <div class="m-list">
+        <div class="m-list" data-part="page">
           <div class="m-row m-row--contact is-on">
             <span class="m-bar3" style="background:#4A6B52"></span><span class="m-av">АК</span>
             <span class="t is-strong">Анна Ковалёва</span>
@@ -1416,7 +1416,7 @@ figcaption b{color:var(--ink);font-weight:600}
           </div>
         </div>
         <div class="m-group"><span class="m-rubric">В</span><span class="m-num">2</span></div>
-        <div class="m-list">
+        <div class="m-list" data-part="page">
           <div class="m-row m-row--contact">
             <span class="m-bar3" style="background:#4A6B52"></span><span class="m-av">ВГ</span>
             <span class="t">Виктор Гончаров</span>
@@ -1437,7 +1437,7 @@ figcaption b{color:var(--ink);font-weight:600}
         <div class="m-empty" style="padding:12px 20px;color:var(--dusty);font-size:12px">Loading more…</div>
       </div>
 
-      <div class="m-side">
+      <div class="m-side" data-part="panel">
         <div class="m-head" style="align-items:center">
           <div style="display:flex;gap:14px;align-items:center">
             <span class="m-photo is-ph">АК</span>
@@ -1478,7 +1478,7 @@ Read  2 min ago</div>
 </figure>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/contacts/{account}/{col}/{uid}/edit">
   <div class="frame-label"><span>Контакт · правка, фотография</span><i>/app/contacts/{account}/{col}/{uid} · режим правки</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -1559,7 +1559,7 @@ Read  2 min ago</div>
 <div class="note"><b>Что здесь было не так.</b> В прошлых версиях этих макетов человек был нарисован — но маленькой картинкой в конце сквозного раздела, рядом с поиском, и назывался «лента». Экран, который держит главную мысль продукта, стоял там, куда не смотрят. Теперь он живёт в контактах, открывается с карточки и занимает всю ширину: слева — что о человеке известно из его записей, справа — что о нём известно из его карточки.</div>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/contacts/{account}/{col}/{uid}">
   <div class="frame-label"><span>Человек · карточка и всё, что с ним связано</span><i>/app/contacts/{account}/{col}/{uid}</i></div>
   <div class="mock">
     <div class="m-top">
@@ -1715,7 +1715,7 @@ Read  2 min ago</div>
 <div class="note"><b>Единый вид живёт здесь, а не в отдельном разделе.</b> Первая строка в списке источников — <b>Combined calendar</b>: она и есть то, чем был «Everything», но внутри своего раздела и без переключения контекста. Флажки решают, что опрашивается; полоска у этой строки собрана из цветов всех коллекций. Выбор одной коллекции ниже сужает тот же экран до одного источника — устройство страницы не меняется, меняется только набор опрашиваемых. То же самое в контактах (<b>Combined address book</b>), задачах (<b>Combined list</b>) и заметках (<b>Combined notebook</b>).<br><br><b>Почему не «All».</b> Раньше строка называлась «Combined calendar», и это было неправдой ровно в тот момент, когда ею начинали пользоваться: флажки решают, что опрашивается, и «все» — только один случай из многих, обычно не тот, который человек видит. Имя в единственном числе говорит то, что верно при любом наборе галочек: <b>это один календарь, собранный из нескольких</b>, — и трёхпозиционный флажок рядом сам показывает, из скольких именно. В файлах приставки нет и строка остаётся <b>All collections</b>: там корень показывает все подключённые хранилища, а не отмеченные, и содержимое коллекций не смешивается — смешивать нечего.</div>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/calendar/{account}/{col}">
   <div class="frame-label"><span>Календарь · агенда со списком и карточкой</span><i>/app/calendar/{account}/{col}</i></div>
   <div class="mock">
     <div class="m-top">
@@ -1851,7 +1851,7 @@ Read  2 min ago</div>
         <div class="m-empty" style="padding:14px 20px">Nothing this day.</div>
       </div>
 
-      <div class="m-side">
+      <div class="m-side" data-part="panel">
         <div class="m-head">
           <div>
             <div class="m-h1" style="font-size:19px"><span class="m-bar3" style="background:#4A6B52;height:19px"></span>Синк-ап по релизу</div>
@@ -1889,7 +1889,7 @@ Read  2 min ago</div>
           <div class="m-rubric">Related</div>
           <ul style="font-size:12.5px"><li><span style="color:var(--accent)">Заметка со встречи 10.08</span> <span style="color:var(--dusty)">· note</span></li></ul>
         </div>
-        <div class="m-sec">
+        <div class="m-sec" data-planned="§23.8">
           <div class="m-rubric">Source</div>
           <div class="m-diag">ETag  W/"a4f9c2e1"
 Path  /dav.php/calendars/mix/personal/8f1c.ics
@@ -1905,7 +1905,7 @@ Read  2 min ago · changed on server 3 days ago</div>
 </figure>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/calendar/{account}/{col}/{uid}">
   <div class="frame-label"><span>Событие · правка, повторение</span><i>/app/calendar/{account}/{col}/{uid}</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -1938,7 +1938,7 @@ Read  2 min ago · changed on server 3 days ago</div>
             <div class="m-f w-xs"><label>Start time</label><span class="m-in is-mono">10:00</span></div>
             <div class="m-f w-sm"><label>End date</label><span class="m-in is-mono">2026-08-10</span></div>
             <div class="m-f w-xs"><label>End time</label><span class="m-in is-mono">11:00</span></div>
-            <div class="m-f w-md"><label>Time zone</label><span class="m-in is-pick">Europe/Moscow <span style="color:var(--dusty);margin-left:6px">as sent</span></span></div>
+            <div class="m-f w-md" data-planned="§23.8"><label>Time zone</label><span class="m-in is-pick">Europe/Moscow <span style="color:var(--dusty);margin-left:6px">as sent</span></span></div>
           </div>
 
           <div class="m-fset">
@@ -1973,7 +1973,7 @@ SEQUENCE  2</div>
 <h2 id="s-tasks">7.3 Задачи</h2>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/tasks/{account}/{col}">
   <div class="frame-label"><span>Задачи · фильтры, просрочка</span><i>/app/tasks/{account}/{col}</i></div>
   <div class="mock">
     <div class="m-shell has-side">
@@ -2057,7 +2057,7 @@ SEQUENCE  2</div>
           </div>
         </div>
       </div>
-      <div class="m-side">
+      <div class="m-side" data-part="panel">
         <div class="m-head">
           <div><div class="m-h1" style="font-size:19px">Собрать чемодан</div><div class="m-sub">nextcloud · Дела</div></div>
           <div class="m-acts"><span class="m-btn is-sm">Edit</span><span class="m-btn is-quiet" title="Close the panel"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span></div>
@@ -2088,7 +2088,7 @@ SEQUENCE  2</div>
 
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/tasks/{account}/{col}/{uid}">
   <div class="frame-label"><span>Задача · правка, срок, выполнение</span><i>/app/tasks/{account}/{col}/{uid}</i></div>
   <div class="mock">
     <div class="m-shell no-rail">
@@ -2150,7 +2150,7 @@ SEQUENCE  2</div>
 <h2 id="s-notes">7.4 Заметки</h2>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/notes/{account}/{col}">
   <div class="frame-label"><span>Заметки · список и редактор</span><i>/app/notes/{account}/{col}</i></div>
   <div class="mock">
     <div class="m-shell has-side" style="--side:440px">
@@ -2218,7 +2218,7 @@ SEQUENCE  2</div>
           </div>
         </div>
       </div>
-      <div class="m-side">
+      <div class="m-side" data-part="panel">
         <div class="m-head">
           <div><div class="m-h1" style="font-size:19px">Заметка со встречи 10.08</div><div class="m-sub">nextcloud · Записи · <span class="mono">10 Aug 2026 11:05</span></div></div>
           <div class="m-acts"><span class="m-btn is-sm is-primary">Save</span><span class="m-btn is-sm" title="Open full screen"><svg viewBox="0 0 24 24"><use href="#i-expand"/></svg></span><span class="m-btn is-quiet" title="Close the panel"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></span><span class="m-btn is-sm"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></span></div>
@@ -2258,7 +2258,7 @@ SEQUENCE  2</div>
 <p>Панель справа хороша, чтобы пробежать заметку глазами, не теряя список. Но заметка — единственная запись в Carrel, которую <b>пишут</b>, а не заполняют полями, и для письма нужен весь экран. Поэтому у заметки два размера, и переход между ними — одно нажатие: <span class="m-kbd" style="font-family:var(--f-mono)">Enter</span> или двойное нажатие в списке, значок <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" fill="none" style="display:inline;vertical-align:-1px"><use href="#i-expand"/></svg> в панели, кнопка «Back to list» обратно. Адрес у полноэкранного вида свой, поэтому на заметку можно дать ссылку.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/notes/{account}/{col}/{uid}">
   <div class="frame-label"><span>Заметка · чтение на весь экран</span><i>/app/notes/{account}/{col}/{uid}</i></div>
   <div class="mock">
     <div class="m-top">
@@ -2349,7 +2349,7 @@ Read  2 min ago</div>
 </figure>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/notes/{account}/{col}/{uid}" data-part="edit">
   <div class="frame-label"><span>Заметка · правка на весь экран, режим сосредоточения</span><i>/app/notes/{account}/{col}/{uid}?edit</i></div>
   <div class="mock">
     <div class="m-shell no-rail">
@@ -2423,7 +2423,7 @@ Read  2 min ago</div>
 <p>«Записать, пока не забыл» — действие, у которого не должно быть маршрута. Поэтому оно стоит в верхней панели, одинаково на всех экранах, и открывается не переходом на страницу, а листом поверх того, чем человек занят: список, календарь или карточка остаются на месте, и после сохранения он возвращается ровно туда, где был.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/notes/quick">
   <div class="frame-label"><span>Быстрая заметка поверх текущего экрана</span><i>вызывается из шапки и клавишей N</i></div>
   <div class="mock">
     <div class="m-top">
@@ -2541,7 +2541,7 @@ Read  2 min ago</div>
 <div class="note"><b>Единого вида в файлах нет, и он тут не нужен.</b> В остальных разделах единый вид складывает записи разных коллекций в один список — у события или карточки нет места, кроме самой записи, и порядок им задаёт дата или имя. У файла место есть: путь, и путь принадлежит своему хранилищу. Сложить два дерева в одно можно только придумав, чей каталог главнее, — а придумывать такое интерфейс не вправе.<br><br>Поэтому строка <b>All collections</b> в рейле — не единый вид, а <b>корень раздела</b>: она открывает список подключённых хранилищ как папок верхнего уровня, у каждой — сервер, права и назначение. Дальше открывается обычное дерево одной коллекции. Ни флажка «опрашивается», ни сборной полоски из цветов у этой строки нет: нечего отмечать и нечего собирать. В таблице равенства коллекций у файлов в этой строке так и стоит — «корень, а не единый вид».</div>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/files/{account}/{col}">
   <div class="frame-label"><span>Файлы · обзор папки, свойства выбранного</span><i>/app/files/{account}/{col}</i></div>
   <div class="mock">
     <div class="m-top">
@@ -2750,7 +2750,7 @@ Read  2 min ago</div>
 
 <div class="frames">
   <figure style="flex:1 1 440px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/files/picker">
     <div class="frame-label"><span>Перемещение и копирование</span><i>диалог выбора папки</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
@@ -2758,9 +2758,9 @@ Read  2 min ago</div>
         <div class="m-card">
           <div class="m-tree">
             <div><svg><use href="#i-file"/></svg>Documents <span style="margin-left:auto;color:var(--dusty);font-size:11px">sftpgo</span></div>
-            <div style="padding-left:22px"><svg><use href="#i-file"/></svg>carrel</div>
-            <div class="is-on" style="padding-left:40px"><svg><use href="#i-file"/></svg>2026-07</div>
-            <div style="padding-left:40px"><svg><use href="#i-file"/></svg>attachments</div>
+            <div style="padding-left:22px" data-part="children"><svg><use href="#i-file"/></svg>carrel</div>
+            <div class="is-on" style="padding-left:40px" data-part="children"><svg><use href="#i-file"/></svg>2026-07</div>
+            <div style="padding-left:40px" data-part="children"><svg><use href="#i-file"/></svg>attachments</div>
             <div><svg><use href="#i-file"/></svg>Files <span style="margin-left:auto;color:var(--dusty);font-size:11px">nextcloud</span></div>
             <div style="opacity:.55"><svg><use href="#i-file"/></svg>Public <span class="m-badge" style="margin-left:auto">read-only</span></div>
           </div>
@@ -2808,7 +2808,7 @@ Read  2 min ago</div>
   </figure>
 
   <figure style="flex:1 1 430px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/files">
     <div class="frame-label"><span>Файлы · корень «All collections»</span><i>точка входа раздела</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -2851,7 +2851,7 @@ Read  2 min ago</div>
 
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/search">
   <div class="frame-label"><span>Поиск по всем источникам</span><i>/app/search?q=…</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -2880,9 +2880,9 @@ Read  2 min ago</div>
           <div><div class="m-h1">«ковал»</div><div class="m-sub">6 collections · 6 records · 1 source timed out</div></div>
           <div class="m-acts"><span class="m-seg"><span class="is-on">All</span><span>Contacts</span><span>Events</span><span>Tasks</span><span>Notes</span></span></div>
         </div>
-        <div class="m-poll"><span class="m-prog"><i style="width:100%"></i></span>Done · 6 of 7 sources answered<span style="margin-left:auto" class="mono">1.8 s</span></div>
-        <div class="m-group"><span class="m-rubric">Contacts</span><span class="m-num">3</span></div>
-        <div class="m-list">
+        <div class="m-poll" data-part="results"><span class="m-prog"><i style="width:100%"></i></span>Done · 6 of 7 sources answered<span style="margin-left:auto" class="mono">1.8 s</span></div>
+        <div class="m-group" data-part="results"><span class="m-rubric">Contacts</span><span class="m-num">3</span></div>
+        <div class="m-list" data-part="results">
           <div class="m-row m-row--find">
             <span class="m-bar3" style="background:#4A6B52"></span><span class="mono">—</span>
             <span class="t"><b>Ковал</b>ёва Анна</span><span class="s m-hide-3">a.kovaleva@example.org · +7 912 445-10-88</span>
@@ -2894,16 +2894,16 @@ Read  2 min ago</div>
             <span class="d">contact</span><span class="d">radicale · Команда</span>
           </div>
         </div>
-        <div class="m-group"><span class="m-rubric">Events</span><span class="m-num">3</span></div>
-        <div class="m-list">
+        <div class="m-group" data-part="results"><span class="m-rubric">Events</span><span class="m-num">3</span></div>
+        <div class="m-list" data-part="results">
           <div class="m-row m-row--find">
             <span class="m-bar3" style="background:#4A6B52"></span><span class="mono">10 Aug</span>
             <span class="t">Звонок с <b>Ковал</b>ёвой</span><span class="s m-hide-3">15:00 – 15:30</span>
             <span class="d">event</span><span class="d">nextcloud · Личный</span>
           </div>
         </div>
-        <div class="m-group"><span class="m-rubric">Files</span><span class="m-num">2</span></div>
-        <div class="m-list">
+        <div class="m-group" data-part="results"><span class="m-rubric">Files</span><span class="m-num">2</span></div>
+        <div class="m-list" data-part="results">
           <div class="m-row m-row--find">
             <span class="m-bar3" style="background:#4A6B52"></span><span class="mono">4 Aug</span>
             <span class="t">договор-<b>ковал</b>ёва.pdf</span><span class="s m-hide-3">application/pdf · 240 KB · Documents / 2026-08</span>
@@ -2915,7 +2915,7 @@ Read  2 min ago</div>
             <span class="d">file</span><span class="d">sftpgo · Documents</span>
           </div>
         </div>
-        <div class="m-msg">Files are searched by name: <span class="mono">PROPFIND</span> returns names anyway, and walking a folder costs one request per folder. Carrel does not look inside files — and says so here, so that “nothing found” is not read as “not in the files”.</div>
+        <div class="m-msg" data-part="results">Files are searched by name: <span class="mono">PROPFIND</span> returns names anyway, and walking a folder costs one request per folder. Carrel does not look inside files — and says so here, so that “nothing found” is not read as “not in the files”.</div>
       </div>
     </div>
   </div>
@@ -2927,7 +2927,7 @@ Read  2 min ago</div>
 <h2 id="s-dup">7.7 Дубликаты и слияние</h2>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/duplicates">
   <div class="frame-label"><span>Дубликаты · группы и решения</span><i>/app/duplicates</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -2957,7 +2957,7 @@ Read  2 min ago</div>
           <div class="m-acts"><span class="m-seg"><span class="is-on">All 6</span><span>Contacts 2</span><span>Events 1</span><span>Tasks 1</span><span>Notes 2</span></span></div>
         </div>
         <div class="m-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
-        <div style="padding:14px 20px;display:flex;flex-direction:column;gap:10px">
+        <div style="padding:14px 20px;display:flex;flex-direction:column;gap:10px" data-part="results">
 
           <div class="m-card">
             <div class="m-rubric">Артём Белов <span><span class="m-badge">candidate ×2</span> <span class="mono" style="letter-spacing:0;color:var(--dusty)">86 points · same name, same phone</span></span></div>
@@ -3054,7 +3054,7 @@ Read  2 min ago</div>
 </figure>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/duplicates/merge">
   <div class="frame-label"><span>Слияние на сервере · подтверждение</span><i>/app/duplicates/merge</i></div>
   <div class="mock">
     <div class="m-shell no-rail">
@@ -3092,7 +3092,7 @@ Read  2 min ago</div>
 <h2 id="s-conflict">7.8 Конфликт</h2>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/contacts/{account}/{col}/{uid}/conflict /app/calendar/{account}/{col}/{uid}/conflict /app/tasks/{account}/{col}/{uid}/conflict /app/notes/{account}/{col}/{uid}/conflict">
   <div class="frame-label"><span>Конфликт версий · пословное сравнение</span><i>/app/{section}/{account}/{col}/{uid}/conflict</i></div>
   <div class="mock">
     <div class="m-shell no-rail">
@@ -3126,7 +3126,7 @@ Read  2 min ago</div>
 <h2 id="s-io">7.9 Импорт и экспорт</h2>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/contacts/{account}/{col}/import /app/calendar/{account}/{col}/import">
   <div class="frame-label"><span>Импорт контактов · шаг 2 из 3, предпросмотр</span><i>/app/contacts/{account}/{col}/import</i></div>
   <div class="mock">
     <div class="m-shell no-rail">
@@ -3166,7 +3166,7 @@ Read  2 min ago</div>
 
 
   <figure style="flex:1 1 420px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/contacts/{account}/{col}/import /app/calendar/{account}/{col}/import /app/notes/{account}/{col}/import" data-part="report">
     <div class="frame-label"><span>Отчёт об импорте · шаг 3</span><i>после подтверждения</i></div>
     <div class="mock">
       <div class="m-shell no-rail">
@@ -3194,7 +3194,7 @@ Read  2 min ago</div>
 <p>Сегодня это одна страница, где в левой колонке — список аккаунтов вперемешку с формой подключения, а в правой — стопка из пяти карточек: пароль, почта, вложения, депонирование ключа. Разделяется на настройки с собственным рейлом, а подключения становятся тем, чем они и являются, — главным экраном этого раздела.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/settings/connections">
   <div class="frame-label"><span>Настройки · подключения DAV</span><i>/app/ → /app/settings/connections</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -3372,7 +3372,7 @@ Read  2 min ago</div>
 
 <div class="frames">
   <figure style="flex:1 1 420px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/collections/new">
     <div class="frame-label"><span>Новая коллекция</span><span class="plan">готово</span><i>лист из рейла или из настроек</i></div>
     <div class="mock" style="background:var(--bg);padding:16px">
       <div class="m-sheet" style="width:100%;max-width:none">
@@ -3440,7 +3440,7 @@ Read  2 min ago</div>
 
 <div class="frames">
   <figure style="flex:1 1 380px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/collections/rename">
     <div class="frame-label"><span>Переименовать и сменить цвет</span><span class="plan">готово</span><i>из меню строки</i></div>
     <div class="mock" style="background:var(--bg);padding:16px">
       <div class="m-sheet" style="width:100%;max-width:none">
@@ -3472,7 +3472,7 @@ Read  2 min ago</div>
   </figure>
 
   <figure style="flex:1 1 380px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/collections/delete">
     <div class="frame-label"><span>Удаление коллекции</span><span class="plan">готово</span><i>что именно исчезнет</i></div>
     <div class="mock" style="background:var(--bg);padding:16px">
       <div class="m-sheet" style="width:100%;max-width:none">
@@ -3705,7 +3705,7 @@ Read  2 min ago</div>
   </figure>
 
   <figure style="flex:1 1 460px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/settings/account">
     <div class="frame-label"><span>Настройки · учётная запись</span><i>/app/settings/account</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -3752,7 +3752,7 @@ Read  2 min ago</div>
 </div>
 
 <figure>
-<div class="frame" style="max-width:860px">
+<div class="frame" style="max-width:860px" data-screen="/app/settings/appearance">
   <div class="frame-label"><span>Настройки · вид</span><i>/app/settings/appearance</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
@@ -3795,7 +3795,7 @@ Read  2 min ago</div>
 <h2 id="s-admin">7.11 Администрирование</h2>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/admin/">
   <div class="frame-label"><span>Администрирование · пользователи</span><i>/admin/</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -3848,7 +3848,7 @@ Read  2 min ago</div>
 </figure>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/admin/invites">
   <div class="frame-label"><span>Администрирование · как заводят пользователей</span><i>/admin/invites</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -3932,7 +3932,7 @@ Read  2 min ago</div>
 
 <div class="frames">
   <figure style="flex:1 1 520px">
-  <div class="frame">
+  <div class="frame" data-screen="/admin/settings">
     <div class="frame-label"><span>Администрирование · настройки</span><i>/admin/settings</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -3965,7 +3965,7 @@ Read  2 min ago</div>
   </figure>
 
   <figure style="flex:1 1 440px">
-  <div class="frame">
+  <div class="frame" data-screen="/admin/dav">
     <div class="frame-label"><span>Администрирование · проверка сервера DAV</span><i>/admin/dav</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -3991,7 +3991,7 @@ Read  2 min ago</div>
   </figure>
 
   <figure style="flex:1 1 420px">
-  <div class="frame">
+  <div class="frame" data-screen="/admin/audit">
     <div class="frame-label"><span>Администрирование · журнал</span><i>/admin/audit</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -4022,7 +4022,7 @@ Read  2 min ago</div>
 <p>Carrel почти всегда стоит за чужим обратным прокси, и почти все жалобы «у меня не работает» — это прокси: срезанные заголовки, буферизация потока, короткий таймаут, потолок размера тела. Разбираться в этом по логам должен уметь администратор, а не пользователь, — но сначала кто-то должен сказать, что именно сломано.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/admin/install">
   <div class="frame-label"><span>Администрирование · проверка установки</span><span class="plan">готово</span><i>/admin/install</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -4090,7 +4090,7 @@ Read  2 min ago</div>
 
 <div class="frames">
   <figure style="flex:1 1 330px">
-  <div class="frame">
+  <div class="frame" data-screen="/login">
     <div class="frame-label"><span>Вход</span><i>/login</i></div>
     <div class="mock">
       <div style="padding:36px 0;display:flex;justify-content:center">
@@ -4113,7 +4113,7 @@ Read  2 min ago</div>
   </figure>
 
   <figure style="flex:1 1 330px">
-  <div class="frame">
+  <div class="frame" data-screen="/register /invite/{token}">
     <div class="frame-label"><span>Регистрация и подтверждение</span><i>/register</i></div>
     <div class="mock">
       <div style="padding:26px 0;display:flex;justify-content:center">
@@ -4128,7 +4128,7 @@ Read  2 min ago</div>
             <div class="m-f w-md"><label>Repeat password</label><span class="m-in">••••••••••••</span></div>
           </div>
           <div class="m-formfoot" style="padding-left:0;padding-right:0"><span class="m-btn is-primary">Create account</span><span style="font-size:12px;color:var(--accent)">Already have an account? Sign in</span></div>
-          <div class="m-card" style="margin-top:16px">
+          <div class="m-card" style="margin-top:16px" data-part="sent">
             <div class="m-rubric">After sending</div>
             <div style="font-size:13px"><b>Check your email.</b> The letter went to <span class="mono">v@example.org</span>. Sending again with the same login and address, while the account is unconfirmed, simply replaces the letter and the password.</div>
           </div>
@@ -4140,7 +4140,7 @@ Read  2 min ago</div>
   </figure>
 
   <figure style="flex:1 1 330px">
-  <div class="frame">
+  <div class="frame" data-screen="/setup">
     <div class="frame-label"><span>Первый запуск</span><i>/setup</i></div>
     <div class="mock">
       <div style="padding:26px 0;display:flex;justify-content:center">
@@ -4163,7 +4163,7 @@ Read  2 min ago</div>
   </figure>
 
   <figure style="flex:1 1 330px">
-  <div class="frame">
+  <div class="frame" data-screen="/forgot">
     <div class="frame-label"><span>Восстановление невозможно</span><i>/forgot</i></div>
     <div class="mock">
       <div style="padding:26px 0;display:flex;justify-content:center">
@@ -4187,7 +4187,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 
 <div class="frames">
   <figure style="flex:1 1 400px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/password">
     <div class="frame-label"><span>Смена пароля · обычная и вынужденная</span><i>/app/password</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
@@ -4207,7 +4207,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
   </figure>
 
   <figure style="flex:1 1 400px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/contacts/{account}/{col}/{uid}/photo-preview">
     <div class="frame-label"><span>Фотография контакта · кадрирование</span><i>/app/contacts/…/{uid}</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
@@ -4245,7 +4245,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 </div>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/admin/escrow">
   <div class="frame-label"><span>Администрирование · депонирование ключей</span><i>/admin/escrow</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -4316,7 +4316,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 
 <div class="frames">
   <figure style="flex:1 1 400px">
-  <div class="frame">
+  <div class="frame" data-screen="/app/notes/{account}/{col}/import">
     <div class="frame-label"><span>Импорт заметок из папки WebDAV</span><i>/app/notes/…/import</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:560px">
@@ -4347,22 +4347,22 @@ An administrator can give you a new password, but doing so replaces the key: eve
   </figure>
 
   <figure style="flex:1 1 400px">
-  <div class="frame">
+  <div class="frame" data-screen="/invite/{token} /confirm-email/{token} /about">
     <div class="frame-label"><span>Страницы по одноразовой ссылке и «о программе»</span><i>/invite/{token}, /confirm-email/{token}, /about</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main" style="gap:14px;padding:16px 0">
         <div class="m-dialog" style="max-width:440px;padding:0 20px">
-          <div class="m-card" style="margin:0">
+          <div class="m-card" style="margin:0" data-part="invalid">
             <div class="m-h1" style="font-size:17px">Invitation</div>
             <div style="font-size:13px;color:var(--muted);margin-top:6px">This invitation link is not valid. It may have expired, already been used, or been revoked.</div>
             <div style="margin-top:10px"><span class="m-btn">Sign in</span></div>
           </div>
-          <div class="m-card">
+          <div class="m-card" data-part="confirmed">
             <div class="m-h1" style="font-size:17px">Email address</div>
             <div style="font-size:13px;color:var(--muted);margin-top:6px">Address confirmed. You can sign in now.</div>
             <div style="margin-top:10px"><span class="m-btn">Sign in</span></div>
           </div>
-          <div class="m-card" style="margin-bottom:0">
+          <div class="m-card" style="margin-bottom:0" data-part="about">
             <div style="display:flex;align-items:center;gap:10px">
               <svg class="m-logo" style="width:64px;height:26px" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="wd"/><use href="#logo-shade" class="sh"/></svg>
               <span class="mono" style="font-size:11.5px;color:var(--dusty)">0.8.0 · 19ced54</span>
@@ -4413,7 +4413,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 <p>Самая дешёвая функция во всей дорожной карте: после discovery Carrel уже знает всё, на что уходит время при ручной настройке клиента — рабочий адрес, принципал, home-sets, точные пути и имена коллекций, учётные данные. Остаётся отдать это в том виде, который устройство понимает.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-planned="§23.1">
   <div class="frame-label"><span>Новое устройство · профиль Apple</span><span class="plan">не построено</span><i>/app/settings/devices</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -4491,7 +4491,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 
 <div class="frames">
   <figure style="flex:1 1 380px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.1">
     <div class="frame-label"><span>Android · DAVx5</span><span class="plan">не построено</span></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -4513,7 +4513,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
   </figure>
 
   <figure style="flex:1 1 300px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.1">
     <div class="frame-label"><span>Показать пароль</span><span class="plan">не построено</span><i>раз в сеанс</i></div>
     <div class="mock" style="background:var(--bg);padding:16px">
       <div class="m-sheet" style="width:100%;max-width:none">
@@ -4530,7 +4530,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
   </figure>
 
   <figure style="flex:1 1 380px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.1">
     <div class="frame-label"><span>Thunderbird и всё остальное</span><span class="plan">не построено</span></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -4563,7 +4563,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 <div class="note"><b>Заданий несколько, а не одно.</b> «Резервная копия» — не переключатель в настройках, а список заданий: у каждого свои источники, своё место, свой триггер и свой срок хранения. Рабочие календари ежедневно на служебный сервер, личное — раз в неделю на домашний диск, архивная книга контактов — руками раз в квартал: это три разных задания, а не компромисс между ними. Одно задание при этом — самый частый случай, поэтому первое создаётся мастером за три поля.</div>
 
 <figure>
-<div class="frame">
+<div class="frame" data-planned="§23.3">
   <div class="frame-label"><span>Резервная копия · задания</span><span class="plan">не построено</span><i>/app/settings/backup</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -4646,7 +4646,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 </figure>
 
 <figure>
-<div class="frame">
+<div class="frame" data-planned="§23.3">
   <div class="frame-label"><span>Резервная копия · задание, что и куда</span><span class="plan">не построено</span><i>редактор задания</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
@@ -4734,7 +4734,7 @@ An administrator can give you a new password, but doing so replaces the key: eve
 </figure>
 
 <figure style="max-width:840px">
-<div class="frame">
+<div class="frame" data-planned="§23.3">
   <div class="frame-label"><span>Внешний триггер · когда файл ещё надо забрать</span><span class="plan">не построено</span><i>то же задание, назначение «Both»</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main"><div class="m-form">
@@ -4767,7 +4767,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <div class="frames">
   <figure style="flex:1 1 460px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.3">
     <div class="frame-label"><span>Внешний триггер · вкладка GoSentry</span><span class="plan">не построено</span><i>та же карточка</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-form">
@@ -4798,7 +4798,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   </figure>
 
   <figure style="flex:1 1 380px" id="trigger-secret">
-  <div class="frame">
+  <div class="frame" data-planned="§23.3">
     <div class="frame-label"><span>Внешний триггер · пароль сам по себе</span><span class="plan">не построено</span><i>раскрывашка развёрнута</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-form">
@@ -4825,7 +4825,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 </div>
 
 <figure style="max-width:760px">
-<div class="frame">
+<div class="frame" data-planned="§23.3">
   <div class="frame-label"><span>Backup на пустом экземпляре</span><span class="plan">не построено</span><i>заданий ещё нет</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
@@ -4847,7 +4847,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 <p>Одна дверь, и она там, где копия: кнопка <b>Restore…</b> в шапке страницы «Backup», рядом с «New job». Дальше — два случая, и оба на первом шаге. <b>Из истории задания</b>: копия своя, задание своё, архив на месте — выбирается строкой. <b>Из файла</b>: экземпляр новый или пустой, заданий в нём нет, а архив лежит на диске или на чужом WebDAV — тогда его показывают или загружают. Второй случай и есть тот, ради которого копию делали, поэтому он не спрятан за «сначала заведите задание».</p><p>Строка «Restore…» есть и в каждой записи истории — это короткий путь для первого случая, но не единственный вход: искать восстановление по строкам таблицы человек не станет, а в шапку раздела заглянет.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-planned="§23.3">
   <div class="frame-label"><span>Восстановление · шаг 1, какой архив</span><span class="plan">не построено</span><i>шаг 1 из 3</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog">
@@ -4893,7 +4893,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 </figure>
 
 <figure>
-<div class="frame">
+<div class="frame" data-planned="§23.3">
   <div class="frame-label"><span>Восстановление · что и куда ляжет</span><span class="plan">не построено</span><i>шаг 2 из 3</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog is-wide">
@@ -4947,7 +4947,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 <p>Один механизм в две стороны: наружу — своё по секретной ссылке, внутрь — чужая лента <code>.ics</code> или <code>.vcf</code>. Общее у них то, что и там и там нет хранения: страница собирается из живого чтения источника на каждый запрос.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-screen="/app/files/published" data-planned="§23.4">
   <div class="frame-label"><span>Публикация · выданные ссылки и диалог</span><span class="plan">не построено</span><i>/app/files/published</i></div>
   <div class="mock">
     <div class="m-shell has-side" style="--side:360px">
@@ -5023,7 +5023,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 </figure>
 
 <figure>
-<div class="frame" style="max-width:900px">
+<div class="frame" style="max-width:900px" data-planned="§23.4">
   <div class="frame-label"><span>Что видит открывший ссылку</span><span class="plan">не построено</span><i>публичная страница, без входа</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
@@ -5067,7 +5067,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <div class="frames">
   <figure style="flex:1 1 330px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.4">
     <div class="frame-label"><span>Контакт и адресная книга</span><span class="plan">не построено</span><i>чужие данные</i></div>
     <div class="mock" style="padding:14px;background:var(--bg)">
       <div class="m-sheet" style="width:100%;max-width:none">
@@ -5092,7 +5092,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   </figure>
 
   <figure style="flex:1 1 330px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.4">
     <div class="frame-label"><span>Заметка</span><span class="plan">не построено</span><i>текст и вложения</i></div>
     <div class="mock" style="padding:14px;background:var(--bg)">
       <div class="m-sheet" style="width:100%;max-width:none">
@@ -5114,7 +5114,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   </figure>
 
   <figure style="flex:1 1 330px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.4">
     <div class="frame-label"><span>Файл и папка</span><span class="plan">не построено</span><i>адрес для монтирования</i></div>
     <div class="mock" style="padding:14px;background:var(--bg)">
       <div class="m-sheet" style="width:100%;max-width:none">
@@ -5145,7 +5145,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 <p>Публиковать можно пять вещей, и у каждой свой вид страницы. Хрома у всех одна и та же — логотип, метка <b>read-only</b>, кнопка скачивания и строка про срок в подвале, — потому что открывший должен с первого взгляда понять три вещи: чем ему это отдали, что редактировать нечего и когда ссылка перестанет работать. Ни рейла, ни поиска, ни кнопок создания: страница не притворяется приложением.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-planned="§23.4">
   <div class="frame-label"><span>Публичная страница · адресная книга</span><span class="plan">не построено</span><i>CardDAV → список + .vcf</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
@@ -5206,7 +5206,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <div class="frames">
   <figure style="flex:1 1 520px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.4">
     <div class="frame-label"><span>Публичная страница · заметка</span><span class="plan">не построено</span><i>VJOURNAL → страница + .md</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -5250,7 +5250,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   </figure>
 
   <figure style="flex:1 1 400px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.4">
     <div class="frame-label"><span>Публичная страница · файл</span><span class="plan">не построено</span><i>WebDAV → просмотр + поток</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -5276,7 +5276,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <div class="frames">
   <figure style="flex:1 1 430px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.4">
     <div class="frame-label"><span>Публичная страница · текст и Markdown</span><span class="plan">не построено</span><i>тело читается из потока</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -5310,7 +5310,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   </figure>
 
   <figure style="flex:1 1 360px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.4">
     <div class="frame-label"><span>Публичная страница · файл без предпросмотра</span><span class="plan">не построено</span><i>имя, размер, скачать</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -5338,7 +5338,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 </div>
 
 <figure>
-<div class="frame" style="max-width:900px">
+<div class="frame" style="max-width:900px" data-planned="§23.4">
   <div class="frame-label"><span>Публичная страница · папка</span><span class="plan">не построено</span><i>WebDAV → листинг</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
@@ -5387,7 +5387,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 <p>Публикация выдаёт ссылку и на этом останавливается: дальше человек несёт её в мессенджер руками. SMTP в Carrel работает с самого начала — не хватало разрешения отправить им что-нибудь, кроме токена. Две вещи, и вторая без первой не строится: ссылка письмом, затем письмо с вложениями, где ссылка остаётся штатным исходом для всего крупного.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-planned="§23.5">
   <div class="frame-label"><span>Письмо поверх текущего экрана</span><span class="plan">не построено</span><i>стрелка у New note → Letter…</i></div>
   <div class="mock">
     <div class="m-top">
@@ -5508,7 +5508,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <div class="frames">
   <figure style="flex:0 1 300px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.5">
     <div class="frame-label"><span>Что можно вложить</span><i>кнопка Attach</i></div>
     <div class="mock" style="padding:14px;background:var(--bg)">
       <div class="m-menu">
@@ -5528,7 +5528,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   </figure>
 
   <figure style="flex:1 1 430px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.5">
     <div class="frame-label"><span>Поле To подставляет из адресных книг</span><i>набрано «бел»</i></div>
     <div class="mock" style="padding:14px;background:var(--bg)">
       <div style="display:flex;flex-direction:column;gap:0;width:100%;max-width:400px">
@@ -5555,7 +5555,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <div class="frames">
   <figure style="flex:1 1 420px">
-  <div class="frame" style="max-width:820px">
+  <div class="frame" style="max-width:820px" data-planned="§23.5">
     <div class="frame-label"><span>Отправить ссылку письмом</span><span class="plan">не построено</span><i>из Published links и из карточки объекта</i></div>
     <div class="mock" style="padding:16px;background:var(--bg)">
       <div class="m-sheet" style="width:100%;max-width:100%">
@@ -5597,7 +5597,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 <p>Системного диалога здесь быть не может: вкладывают не файл с диска, а запись из коллекции, о которой операционная система ничего не знает. Значит, это ещё один экран Carrel, и собран он из того же, из чего собраны разделы, — источники слева, список справа, поиск сверху. Ниже два из восьми: заметка, потому что на ней решается вопрос формата, и файл, потому что на нём видно, как вложение превращается в ссылку.</p>
 
 <figure>
-<div class="frame" style="max-width:900px">
+<div class="frame" style="max-width:900px" data-planned="§23.5">
   <div class="frame-label"><span>Выбрать заметку</span><span class="plan">не построено</span><i>Attach → Note…</i></div>
   <div class="mock" style="padding:16px;background:var(--bg)">
     <div class="m-sheet" style="width:100%;max-width:100%">
@@ -5646,7 +5646,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 </figure>
 
 <figure>
-<div class="frame" style="max-width:900px">
+<div class="frame" style="max-width:900px" data-planned="§23.5">
   <div class="frame-label"><span>Выбрать файл</span><span class="plan">не построено</span><i>Attach → File…</i></div>
   <div class="mock" style="padding:16px;background:var(--bg)">
     <div class="m-sheet" style="width:100%;max-width:100%">
@@ -5696,7 +5696,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <div class="frames">
   <figure style="flex:1 1 380px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.5">
     <div class="frame-label"><span>Личные адреса, в профиле есть подтверждённая почта</span><i>как это видит получатель</i></div>
     <div class="mock" style="padding:16px;background:var(--bg)">
       <div class="m-card" style="margin:0">
@@ -5720,7 +5720,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   </figure>
 
   <figure style="flex:1 1 380px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.5">
     <div class="frame-label"><span>Служебный адрес, почты в профиле нет</span><i>та же отправка, другие две настройки</i></div>
     <div class="mock" style="padding:16px;background:var(--bg)">
       <div class="m-card" style="margin:0">
@@ -5745,7 +5745,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <div class="frames">
   <figure style="flex:1 1 460px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.5">
     <div class="frame-label"><span>Администрирование · почта</span><span class="plan">две новые строки</span><i>/admin/settings</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -5779,7 +5779,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   </figure>
 
   <figure style="flex:1 1 380px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.5">
     <div class="frame-label"><span>Настройки · учётная запись</span><span class="plan">имя и подтверждение</span><i>/app/settings/account</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main">
@@ -5811,7 +5811,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 <p>Один аккаунт в DAVx5 или Thunderbird вместо пяти. Для интерфейса это две вещи: адрес, который дают клиенту, и пароли приложений по устройствам — со своей обёрткой ключа на каждое, чтобы отзыв устройства был удалением обёртки, а смена пароля Carrel устройств не роняла. Последнее интерфейс обязан сказать вслух, иначе люди будут считать наоборот.</p>
 
 <figure>
-<div class="frame">
+<div class="frame" data-planned="§23.2">
   <div class="frame-label"><span>davloom · точка подключения и устройства</span><span class="plan">не построено</span><i>/app/settings/davloom</i></div>
   <div class="mock">
     <div class="m-shell">
@@ -5912,7 +5912,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 
 <div class="frames">
   <figure style="flex:1 1 420px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.2">
     <div class="frame-label"><span>davloom · добавление устройства, шаг 1</span><span class="plan">не построено</span><i>что это за устройство</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
@@ -5944,7 +5944,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
   </figure>
 
   <figure style="flex:1 1 420px">
-  <div class="frame">
+  <div class="frame" data-planned="§23.2">
     <div class="frame-label"><span>davloom · добавление устройства, шаг 2</span><span class="plan">не построено</span><i>показывается один раз</i></div>
     <div class="mock">
       <div class="m-shell no-rail"><div class="m-main"><div class="m-dialog" style="max-width:520px">
@@ -5976,7 +5976,7 @@ curl -fsS -H "$h" "$b/$id/download" -o "$out/carrel-personal-$(date +%F).zip"</d
 </div>
 
 <figure>
-<div class="frame" style="max-width:820px">
+<div class="frame" style="max-width:820px" data-planned="§23.2">
   <div class="frame-label"><span>Что видно по адресу прокси в браузере</span><span class="plan">не построено</span><i>GET / — единственная страница davloom</i></div>
   <div class="mock">
     <div class="m-shell no-rail"><div class="m-main">
@@ -7159,6 +7159,8 @@ Read  2 min ago</div></div>
 <h3>Сверка готового экрана с макетом</h3>
 <p>Встроенная проверка следит за самим документом. За тем, что получилось в приложении, она не следит никак, а разница в одну колонку или в один разъехавшийся флажок глазами не ловится — тем более между двумя окнами, где данные разные. Поэтому рядом с макетами лежат наборы: <a href="fixtures/README.md">docs/visual/fixtures</a> — двенадцать файлов <code>.vcf</code> и <code>.ics</code> с <b>теми самыми</b> записями, что нарисованы выше. Их загружают через «Import» в пустой экземпляр и открывают те же экраны: состав строк, группы, колонки и состояния должны совпасть.</p>
 <p>Четыре вещи набор проверяет нарочно, потому что на выдуманных данных они не воспроизводятся: встреча заведена в <code>Asia/Yekaterinburg</code> и обязана показать исходный пояс меткой; дежурство лежит в двух коллекциях разными UID и обязано стать одной строкой с «duplicate?&nbsp;×2»; Артём Белов лежит в двух книгах и до связывания обязан попасть в «Дубликаты»; у карточки Анны Ковалёвой три чужих свойства, и карточка обязана сказать «Kept as the server sent them · Show&nbsp;3». Чего набор не воспроизводит — счётчиков в рейле: 248 карточек файлом не задать, да и сам макет рисует книгу на 248 карточек пятью строками. <b>Сверяется устройство экрана, а не итог пересчёта</b>, и в README это сказано прямо, чтобы никто не гнался за числами.</p>
+
+<p><b>Кадры адресуются машиной.</b> Индекс в <code>querySelectorAll('.mock')</code> идентичностью не является: кадров 123, и каждый дорисованный сдвигает нумерацию. Поэтому кадр, по которому собирают экран, несёт <code>data-screen</code> с маршрутом — тем же, что стоит в подписи кадра; кадр, показывающий несколько страниц сразу, перечисляет их через пробел. Кусок кадра, которым отвечает фрагмент htmx (панель подробностей, порция списка, результаты поиска), несёт <code>data-part</code> с именем этого куска; имя может стоять на нескольких соседях, и тогда куском считаются они все по порядку. То, что нарисовано, но относится к своей волне, несёт <code>data-planned</code> с разделом спецификации — на кадре целиком (7.14–7.19) или на одном узле внутри уже действующего кадра, как поле <b>Time&nbsp;zone</b> и блок <b>Source</b> из §23.8. <b>Отсутствие контрола на экране законно только тогда, когда оно объявлено здесь</b>, на виду у того, кто смотрит на дизайн, — а не в списке исключений внутри теста, куда никто не заглядывает.</p>
 
 <div class="note">Файл живой: макеты — это HTML, а не картинки, поэтому классы из раздела 6 переносятся в <code>carrel.css</code> копированием, а не перерисовкой.</div>
 
