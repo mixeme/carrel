@@ -448,7 +448,7 @@ document.addEventListener('change', function (e) {
     var barMoreHome = typeof WeakMap === 'function' ? new WeakMap() : null;
 
     function parkBarMore(wrap) {
-        var bar = wrap.closest('.m-bar');
+        var bar = wrap.closest('[data-bar]');
         var menu = wrap.querySelector('.m-menu');
         if (!bar || !menu) return;
         Array.prototype.slice.call(bar.children).forEach(function (kid) {
@@ -507,6 +507,9 @@ document.addEventListener('change', function (e) {
     // grew a horizontal scrollbar. The width is measured here and .is-tight
     // says what the container query says at 800px. The query stays: without
     // JavaScript it is the only retreat there is.
+    //
+    // The bar is found by [data-bar], not by .m-bar: a class is the name of a
+    // look and changes when the look does, while a binding point must not.
     function barOverflows(bar) {
         var limit = bar.getBoundingClientRect().right -
             (parseFloat(getComputedStyle(bar).paddingRight) || 0) + 0.5;
@@ -523,7 +526,7 @@ document.addEventListener('change', function (e) {
     }
 
     function fitBars() {
-        document.querySelectorAll('.m-bar').forEach(function (bar) {
+        document.querySelectorAll('[data-bar]').forEach(function (bar) {
             if (bar.hidden) return;
             var more = bar.querySelector('[data-bar-more]');
             var menu = more && more.querySelector('.m-menu');

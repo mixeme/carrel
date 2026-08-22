@@ -8,15 +8,19 @@
      — настоящая форма GET, поэтому у неё своя пара: форма не должна становиться
      div, из которого её потом вынимать.
 
+     data-bar — точка привязки для carrel.js, который меряет ширину полосы
+     и решает, что уходит под «⋯». Класс — дело вида, и скрипт за него не
+     держится: имя вида меняется вместе с видом, а точка привязки не должна.
+
      Sel — заливка панели выделения (.m-sel): фон карточки, кнопки на бумаге.
      Вход передаётся всегда, даже пустой — {{template "m-bar" (bar)}}, а не
      {{template "m-bar"}}: тогда «.» здесь типизированный ноль, а не nil. */}}
-{{define "m-bar"}}<div class="m-bar{{if .Sel}} m-sel{{end}} no-print"{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
+{{define "m-bar"}}<div class="m-bar{{if .Sel}} m-sel{{end}} no-print" data-bar{{if .Attrs}} {{.Attrs}}{{end}}>{{end}}
 {{define "m-barend"}}</div>{{end}}
 
 {{define "m-barform"}}
 {{$b := .}}
-<form method="{{if $b.Method}}{{$b.Method}}{{else}}get{{end}}"{{if $b.Action}} action="{{$b.Action}}"{{end}} class="m-bar is-form no-print">
+<form method="{{if $b.Method}}{{$b.Method}}{{else}}get{{end}}"{{if $b.Action}} action="{{$b.Action}}"{{end}} class="m-bar is-form no-print" data-bar>
 {{end}}
 {{define "m-barformend"}}</form>{{end}}
 
