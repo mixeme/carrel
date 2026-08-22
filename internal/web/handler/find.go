@@ -76,16 +76,24 @@ func (m findMode) section() string {
 	}
 }
 
+// allLabel names the first row of a section's source list — the one that
+// stands for every ticked collection at once.
+//
+// It said "All calendars" and the mockups say "Combined calendar", because
+// "all" is true only by accident: the ticks decide what is polled, and the
+// row means "one calendar assembled from several" at any setting. Files keep
+// "All collections" and are not renamed: a file has one path and belongs to
+// its own storage, so there is nothing there to combine.
 func (m findMode) allLabel() string {
 	switch m {
 	case modePeople:
-		return "All address books"
+		return "Combined address book"
 	case modeTasks:
-		return "All lists"
+		return "Combined list"
 	case modeNotes:
-		return "All notebooks"
+		return "Combined notebook"
 	default:
-		return "All calendars"
+		return "Combined calendar"
 	}
 }
 

@@ -45,11 +45,11 @@ func TestContactsListAndPhotoPlaceholder(t *testing.T) {
 	if strings.Contains(homeBody, "Where to look") {
 		t.Error("contacts used the person-screen rail title")
 	}
-	if strings.Contains(homeBody, "All calendars") {
+	if strings.Contains(homeBody, "Combined calendar") {
 		t.Errorf("contacts rail was built from calendars")
 	}
-	if !strings.Contains(homeBody, "All address books") {
-		t.Errorf("contacts home missing All address books:\n%s", homeBody)
+	if !strings.Contains(homeBody, "Combined address book") {
+		t.Errorf("contacts home missing Combined address book:\n%s", homeBody)
 	}
 
 	photo := a.get("/c/" + accID + "/" + colEnc + "/ada/photo?size=thumb")
