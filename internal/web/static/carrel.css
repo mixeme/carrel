@@ -2779,9 +2779,12 @@ body:not(.has-shell) main {
     color: var(--muted);
 }
 
+/* One step up from the line below it (13.5), and the step the scale has:
+   15 is not a size the mockups define, and a tagline is not a reason to add
+   one. */
 .auth-tagline strong {
     display: block;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--ink);
     margin-bottom: 4px;
