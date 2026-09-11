@@ -5,6 +5,17 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.37 — 2026-09-11
+
+Typecase now lives in its own repository; this tree is Carrel server and
+product docs only.
+
+### For consumers
+
+Nothing in the running server. Check out or depend on `carrel.dev/typecase`
+from its standalone repository — the `typecase/` directory is no longer in
+this checkout.
+
 ## v0.0.36 — 2026-09-09
 
 Adds [limits.md](../../docs/spec/limits.md): one reference for every timeout,
@@ -49,18 +60,6 @@ stay stubs until that checklist is ticked.
 - Install check is eleven named rows; the probe client is not the DAV guard.
   Image publish and CI stay out of this plan.
 
-## v0.0.34 — 2026-09-09
-
-Fixes live S-30.2 integration tests against Baikal and SFTPGo.
-
-### Included
-
-- Baikal contacts use `/dav.php/addressbooks/...` paths (endpoint is `/dav.php`).
-- SFTPGo folder CRUD renames via MOVE; `x/net/webdav` ignores `If-None-Match` on
-  PUT, so occupied-name check moves to `TestRadicaleCardUploadOccupiedName`.
-- `integration/live_creds.go` reads `dev/credentials.txt` when `CARREL_*` unset.
-- `scripts/run-live-integration.sh` / `.ps1` for manual full runs.
-
 ## v0.0.33 — 2026-09-08
 
 Closes the provider tail in
@@ -80,6 +79,11 @@ the provider layer depends on.
 - `integration/providers_collection_test.go`: collection CRUD on Radicale
   (address book + calendar) and SFTPGo folders.
 - `scripts/linux-gates.sh`: optional Baikal block when credentials are set.
+- Baikal contacts use `/dav.php/addressbooks/...` paths (endpoint is `/dav.php`).
+- SFTPGo folder CRUD renames via MOVE; `x/net/webdav` ignores `If-None-Match` on
+  PUT, so occupied-name check moves to `TestRadicaleCardUploadOccupiedName`.
+- `integration/live_creds.go` reads `dev/credentials.txt` when `CARREL_*` unset.
+- `scripts/run-live-integration.sh` / `.ps1` for manual full runs.
 
 ## v0.0.32 — 2026-09-08
 
@@ -696,6 +700,7 @@ ownership checks, JSON `Renderer`, and page/fragment distinction by
 
 Providers, fanout, and feature handlers that need live DAV data.
 
+## v0.0.11 — 2026-09-05
 
 Fixes a cache-eviction defect found while verifying that the Fable debt was
 actually closed. The gates were green; the test that guards the rule passed by

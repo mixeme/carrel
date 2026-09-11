@@ -5,9 +5,8 @@
 
 Проверяет то, что можно проверить машиной:
 адреса кадров против карты маршрутов и разбора экранов, вью-модели против схем,
-виджеты против состава библиотеки, независимость библиотеки, отсутствие
-настольного приложения в четырёх браузерных файлах, чистый лист, ссылки на
-существующие разделы, разбор фикстур.
+отсутствие настольного приложения в четырёх браузерных файлах, чистый лист,
+ссылки на существующие разделы, разбор фикстур.
 """
 import io, os, re, json, glob, sys
 
@@ -20,7 +19,6 @@ def read(p):
 
 common = read(os.path.join(SPEC, "carrel-common.md"))
 client = read(os.path.join(SPEC, "carrel-client.md"))
-uilib  = read(os.path.join(SPEC, "typecase.md"))
 server = read(os.path.join(SPEC, "carrel-server.md"))
 desk   = read(os.path.join(SPEC, "carrel-desktop.md"))
 mock   = read(MOCK)
@@ -67,47 +65,13 @@ defined = set(re.findall(r'type\s+([A-Z][A-Za-z]*)\s+struct', common))
 missing_vm = sorted(v for v in vms if v not in defined)
 check("2. вью-модели из C-5 определены в C-6", missing_vm)
 
-# 3. Полнота библиотеки: каждый m-* из клиента объявлен в L-4
-used = set(re.findall(r'`(tc-[a-z]+(?:--[a-z]+)?)`', client))
-headings = re.sub(r'(?m)^(?!####).*$', '', uilib)      # только строки заголовков
-declared = set(re.findall(r'`(tc-[a-z]+(?:--[a-z]+)?)`', headings))
-declared |= set(re.findall(r'\|\s*`(tc-[a-z]+--[a-z]+)`\s*\|', uilib))  # таблица вариантов
-missing_widgets = sorted(w for w in used if w not in declared)
-check("3. виджеты из U-6 объявлены в L-4", missing_widgets)
-
-# 3b. Карта кадров: каждый .m-* из кадров разобран в U-5.4
-frame_cls = set()
-for m in re.finditer(r'class="([^"]*)"', mock):
-    for c in m.group(1).split():
-        if re.match(r'^m-[a-z0-9]+(--[a-z0-9]+)?$', c):
-            frame_cls.add(c)
-unmapped = []
-for c in sorted(frame_cls):
-    if c in client:                      # назван в карте исключений
-        continue
-    if ("`tc-" + c[2:] + "`") in uilib:  # правило по умолчанию: m-x -> tc-x
-        continue
-    unmapped.append(c)
-check("3b. классы кадров разобраны картой U-5.4", unmapped)
-
-# 4. Независимость библиотеки: ни ссылок на другие файлы, ни доменных слов
-cross = re.findall(r'\((?:carrel-(?:common|client|server|desktop))\.md\)', uilib)
-domain = []
-for w in ["DAV", "vCard", "iCal", "контакт", "календар", "заметк", "коллекци", "аккаунт", "Carrel"]:
-    for m in re.finditer(w, uilib, re.I):
-        line = uilib[:m.start()].count("\n") + 1
-        if line > 90:  # §L-2.2 приводит их как отрицательные примеры
-            domain.append("%s:%d" % (w, line))
-check("4. typecase.md не ссылается на другие файлы", cross)
-check("4b. typecase.md без доменных слов", sorted(set(domain)))
-
 # 5. Браузерные файлы не знают о настольном приложении
 # «оболочка» здесь значит каркас страницы, «настольная библиотека» — GUI-тулкит:
 # ищутся только те слова, что могут значить одно.
 deskwords = [r"carrel-desktop\.md", r"sidecar", r"Wails", r"webview",
              r"настольн\w*\s+приложени", r"настольного приложения"]
 leak = []
-for name, text in [("common", common), ("server", server), ("client", client), ("ui", uilib)]:
+for name, text in [("common", common), ("server", server), ("client", client)]:
     for w in deskwords:
         for m in re.finditer(w, text, re.I):
             line = text[:m.start()].count(chr(10)) + 1
@@ -126,7 +90,7 @@ check("5. в четырёх файлах нет настольного прил�
 # 5b. Чистый лист: ни статусов, ни следов другого репозитория
 dirty = []
 for name, text in [("common", common), ("server", server), ("client", client),
-                   ("ui", uilib), ("desktop", desk)]:
+                   ("desktop", desk)]:
     for w in [r"\[готово\]", r"\[не сделано\]", r"\[частично\]", r"CHANGELOG",
               r"internal/", r"roadmap", r"§2[0-9]"]:
         for m in re.finditer(w, text, re.I):
@@ -136,11 +100,11 @@ check("5b. чистый лист: без статусов и следов дру
 
 # 6. Ссылки на разделы указывают на существующие
 nums = {}
-for pref, text in [("C", common), ("S", server), ("U", client), ("L", uilib), ("D", desk)]:
+for pref, text in [("C", common), ("S", server), ("U", client), ("D", desk)]:
     nums[pref] = set(re.findall(r'^##\s+' + pref + r'-(\d+)\.', text, re.M))
 badrefs = []
-for pref, text in [("C", common), ("S", server), ("U", client), ("L", uilib), ("D", desk)]:
-    for m in re.finditer(r'\b([CSULD])-(\d+)(?:\.\d+)?\b', text):
+for pref, text in [("C", common), ("S", server), ("U", client), ("D", desk)]:
+    for m in re.finditer(r'\b([CSUD])-(\d+)(?:\.\d+)?\b', text):
         p, n = m.group(1), m.group(2)
         if p in nums and n not in nums[p]:
             line = text[:m.start()].count("\n") + 1
@@ -150,7 +114,7 @@ check("6. ссылки на существующие разделы", sorted(set
 # 6b. Названное правило, на которое ссылаются из разных файлов, обязано где-то
 # вводиться заголовком. Ловит правило, которое все цитируют и никто не сформулировал.
 FILES = [("common", common), ("server", server), ("client", client),
-         ("ui", uilib), ("desktop", desk)]
+         ("desktop", desk)]
 seen = {}
 for name, text in FILES:
     for m in re.finditer(r'[Пп]равил\w*\s+([а-яё]+(?:\s+[а-яё]+)?)', text):
