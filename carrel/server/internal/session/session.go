@@ -22,6 +22,7 @@ type Session struct {
 	login     string
 
 	mu         sync.Mutex
+	ended      bool
 	dataKey    [crypt.KeyLen]byte
 	csrf       []byte
 	created    time.Time
@@ -45,14 +46,17 @@ func (s *Session) AccountID() string { return s.accountID }
 // Login returns the account login.
 func (s *Session) Login() string { return s.login }
 
-// DataKey returns a copy of the data key. Callers must not retain it longer
-// than the session lives.
-func (s *Session) DataKey() [crypt.KeyLen]byte {
+// DataKey returns a copy of the data key when the session is live. Callers
+// must not retain it longer than the session lives.
+func (s *Session) DataKey() ([crypt.KeyLen]byte, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.ended {
+		return [crypt.KeyLen]byte{}, false
+	}
 	var k [crypt.KeyLen]byte
 	copy(k[:], s.dataKey[:])
-	return k
+	return k, true
 }
 
 // CSRFToken is the token for mutating requests.
@@ -78,9 +82,32 @@ func (s *Session) CheckCSRF(token string) bool {
 
 // Touch records activity and extends the idle deadline.
 func (s *Session) Touch(now time.Time) {
+	if s.mgr != nil {
+		s.mgr.Touch(s.id, now)
+		return
+	}
+	s.touchAt(now)
+}
+
+func (s *Session) touchAt(now time.Time) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.ended {
+		return
+	}
 	s.lastSeen = now
+}
+
+func (s *Session) expiredAt(now time.Time) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.ended {
+		return true
+	}
+	if !now.Before(s.absoluteAt) {
+		return true
+	}
+	return !now.Before(s.lastSeen.Add(conf.SessionIdleTimeout))
 }
 
 // Expired reports whether idle or absolute lifetime has ended (S-4).
@@ -107,6 +134,9 @@ func (s *Session) Draft(slot DraftSlot) []byte {
 func (s *Session) SetDraft(slot DraftSlot, data []byte) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.ended {
+		return
+	}
 	s.drafts.set(slot, data)
 }
 
@@ -149,7 +179,7 @@ func (s *Session) Losses() LossNotes { return LossNotes{s} }
 func (s *Session) AcquireFanout() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.fanout >= conf.MaxLiveFanouts {
+	if s.ended || s.fanout >= conf.MaxLiveFanouts {
 		return false
 	}
 	s.fanout++
@@ -219,6 +249,7 @@ func newSession(mgr *Manager, accountID, login string, dataKey [crypt.KeyLen]byt
 // end wipes sensitive material and unregisters the session (S-2, S-4).
 func (s *Session) end() {
 	s.mu.Lock()
+	s.ended = true
 	crypt.Wipe(s.dataKey[:])
 	crypt.Wipe(s.csrf)
 	s.drafts.clear()
@@ -227,5 +258,5 @@ func (s *Session) end() {
 	s.fanout = 0
 	s.mu.Unlock()
 
-	s.cache.clear()
+	s.cache.markEnded()
 }

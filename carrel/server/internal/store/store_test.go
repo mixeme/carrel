@@ -265,3 +265,26 @@ func TestAuditWhatMustBeAnEventCode(t *testing.T) {
 		t.Fatalf("expected ErrAuditWhat, got %v", err)
 	}
 }
+
+func TestMutateRejectsInvalidKDF(t *testing.T) {
+	dir := t.TempDir()
+	st, err := Open(dir, testKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	when := time.Now().UTC()
+	err = st.Mutate(func(s *State) ([]AuditEntry, error) {
+		s.Users = []User{{
+			ID:        "a-1",
+			Login:     "alice",
+			Role:      RoleAdmin,
+			CreatedAt: when,
+			LoginHash: []byte{1, 2, 3},
+			LoginKDF:  kdfRecord{},
+		}}
+		return nil, nil
+	})
+	if err == nil {
+		t.Fatal("expected KDF validation error")
+	}
+}

@@ -41,6 +41,8 @@ func TestRender_smoke(t *testing.T) {
 		{"shell", widget.Shell{Main: widget.Main{Label: "M", Body: widget.Paragraph("b")}}.Render()},
 		{"doc", widget.Doc{Body: widget.Paragraph("x")}.Render()},
 		{"search", widget.Search{Action: "/s"}.Render()},
+		{"stat", widget.Stat{Label: "Users", Value: "1,234"}.Render()},
+		{"stats", widget.Stats{Items: []widget.Stat{{Label: "Users", Value: "1,234"}}}.Render()},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

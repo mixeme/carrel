@@ -45,9 +45,13 @@ from the module root before deploying.
 - `gate.CheckDocInput`: L-3.2 «Вход» field lists must match exported struct fields.
 - `gate.CheckDomainNaming`: const names, enum string values, and L-3.2 «Состояния»
   slugs are checked without the catalog whitelist.
-- `gate.CheckInvariantCoverage`: `widget:smoke` is rejected; `todo:` bindings are
-  counted against ceiling 65; markup gates for seg, crumbs, range, and table.
-- `gate.CheckTableColumns`: actions column header when any row has actions.
+- `gate.CheckInvariantCoverage`: every invariant clause has a `gate:inv-*` markup
+  check; `todo:` bindings are rejected; 72 bite fixtures under
+  `gate/testdata/inv/`.
+- `gate.CheckSpecL4`: implemented widgets must match the L-4 registry in
+  `docs/spec/typecase.md`.
+- `gate.CheckGofmt` and `gate.CheckVet` run from `gate.Run` via `go test ./...`.
+- `gate.CheckOwnership`: scans git repository root, skips the typecase module by path.
 - `tc.js`: focus trap lifecycle (`attachTrap` / `releaseOverlayTrap`); no
   autofocus on pre-open overlays at load.
 - `gate.CheckUniqueIDs`: catalog HTML must not repeat `id` attributes.
@@ -63,6 +67,10 @@ from the module root before deploying.
   side-panel close, crop controls, list arrows, range validation, tickrow toggle.
 - `tc-tree` disabled nodes: `disabled` button and `pointer-events: none`.
 - `tc-row` avatar/tick variants read `RowCells.Avatar` and `RowCells.Done`.
+- `tc-stat` and `tc-stats`: pre-formatted `Stat.Value` string; equal-width row
+  with `flex-wrap: nowrap`.
+- Catalog page styles served as `/catalog.css` (strict `style-src` on the demo).
+- `Column.Kind` defaults to `ColText` when empty in table headers.
 
 ### Breaking changes from v0.0.5
 
@@ -73,8 +81,8 @@ from the module root before deploying.
 
 ### Not yet released
 
-- Corrected `typecase/v0.1.0` tag on a commit that passes L-11.2 acceptance
-  (`gofmt`, `go vet`, ownership gate, `go test ./...`).
+- Move tag: `git tag -f -a typecase/v0.1.0 -m "typecase/v0.1.0"` on the commit
+  that passes L-11.2 acceptance, then rename this section to `typecase/v0.1.0`.
 
 ## typecase/v0.0.5 — 2026-09-04
 

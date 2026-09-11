@@ -2,55 +2,63 @@ package gate
 
 import (
 	"fmt"
-	"regexp"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"os"
 	"strings"
 )
 
-const maxInvariantTodos = 65
+const maxInvariantTodos = 0
 
-var (
-	segChosenRe    = regexp.MustCompile(`aria-pressed="true"`)
-	crumbsCurrentRe = regexp.MustCompile(`class="tc-crumbs__current"`)
-)
-
-func checkInvariantGate(ref, widget string, catalog []CatalogEntry) error {
+func checkInvariantGate(ref, widget string, catalog []CatalogEntry, widgetDir string) error {
 	name := strings.TrimPrefix(ref, "gate:")
-	var html []string
-	for _, e := range catalog {
-		if e.Widget == widget {
-			html = append(html, e.HTML)
-		}
-	}
-	if len(html) == 0 {
-		return fmt.Errorf("%s: no catalog HTML for gate %s", widget, name)
-	}
-	switch name {
-	case "seg-one-chosen":
-		for _, h := range html {
-			if strings.Count(h, `aria-pressed="true"`) != 1 {
-				return fmt.Errorf("%s: seg must have exactly one chosen option", widget)
-			}
-		}
-	case "crumbs-last-not-link":
-		for _, h := range html {
-			if !crumbsCurrentRe.MatchString(h) {
-				return fmt.Errorf("%s: crumbs last item must not be a link", widget)
-			}
-		}
-	case "range-order":
-		for _, h := range html {
-			if strings.Contains(h, "is-invalid") {
-				return fmt.Errorf("%s: range must not be invalid in catalog", widget)
-			}
-		}
-	case "table-number-columns":
-		for _, h := range html {
-			if strings.Contains(h, "tc-table__th--number") && !strings.Contains(h, "tc-table__td--number") {
-				return fmt.Errorf("%s: number columns must align in header and body", widget)
-			}
-		}
-	default:
+	spec, ok := invGateChecks[name]
+	if !ok {
 		return nil
+	}
+	html := widgetHTML(catalog, widget)
+	return spec.fn(widget, html, widgetDir)
+}
+
+func checkStatValueIsString(widgetDir string) error {
+	fset := token.NewFileSet()
+	pkgs, err := parser.ParseDir(fset, widgetDir, func(fi os.FileInfo) bool {
+		return strings.HasSuffix(fi.Name(), ".go") && !strings.HasSuffix(fi.Name(), "_test.go") && fi.Name() != "doc.go"
+	}, 0)
+	if err != nil {
+		return err
+	}
+	for _, pkg := range pkgs {
+		for _, f := range pkg.Files {
+			var bad bool
+			ast.Inspect(f, func(n ast.Node) bool {
+				ts, ok := n.(*ast.TypeSpec)
+				if !ok || ts.Name.Name != "Stat" {
+					return true
+				}
+				st, ok := ts.Type.(*ast.StructType)
+				if !ok {
+					return true
+				}
+				for _, field := range st.Fields.List {
+					for _, name := range field.Names {
+						if name.Name != "Value" {
+							continue
+						}
+						ident, ok := field.Type.(*ast.Ident)
+						if !ok || ident.Name != "string" {
+							bad = true
+							return false
+						}
+					}
+				}
+				return true
+			})
+			if bad {
+				return fmt.Errorf("tc-stat: Value must be a pre-formatted string")
+			}
+		}
 	}
 	return nil
 }

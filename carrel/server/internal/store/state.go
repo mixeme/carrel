@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"carrel.dev/carrel/server/internal/crypt"
@@ -54,6 +55,27 @@ func kdfFromCrypt(p crypt.KDFParams) kdfRecord {
 
 func (k kdfRecord) toCrypt() crypt.KDFParams {
 	return crypt.KDFParams{Time: k.Time, Memory: k.Memory, Threads: k.Threads, KeyLen: k.KeyLen}
+}
+
+func validateUserKDF(u *User) error {
+	hasLogin := len(u.LoginHash) > 0
+	if err := crypt.ValidateKDFParams(u.LoginKDF.toCrypt(), hasLogin); err != nil {
+		return fmt.Errorf("login KDF: %w", err)
+	}
+	hasWrap := len(u.WrappedKey) > 0
+	if err := crypt.ValidateKDFParams(u.WrapKDF.toCrypt(), hasWrap); err != nil {
+		return fmt.Errorf("wrap KDF: %w", err)
+	}
+	return nil
+}
+
+func validateStateKDF(st *State) error {
+	for i := range st.Users {
+		if err := validateUserKDF(&st.Users[i]); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // AuditEntry is one audit-log line. Passwords, tokens, and record bodies never

@@ -36,12 +36,42 @@ func (m *Manager) Create(accountID, login string, dataKey [crypt.KeyLen]byte) (*
 	return s, nil
 }
 
-// Get returns a live session by SID.
+// Get returns a live session by SID. Expired sessions are ended and reported
+// as missing (S-4.1).
 func (m *Manager) Get(sid string) (*Session, bool) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 	s, ok := m.byID[sid]
-	return s, ok
+	if !ok {
+		m.mu.Unlock()
+		return nil, false
+	}
+	if s.ended || s.expiredAt(time.Now()) {
+		delete(m.byID, sid)
+		m.mu.Unlock()
+		s.end()
+		return nil, false
+	}
+	m.mu.Unlock()
+	return s, true
+}
+
+// Touch records activity under the same lock order as Get.
+func (m *Manager) Touch(sid string, now time.Time) bool {
+	m.mu.Lock()
+	s, ok := m.byID[sid]
+	if !ok || s.ended {
+		m.mu.Unlock()
+		return false
+	}
+	if s.expiredAt(now) {
+		delete(m.byID, sid)
+		m.mu.Unlock()
+		s.end()
+		return false
+	}
+	s.touchAt(now)
+	m.mu.Unlock()
+	return true
 }
 
 // End terminates one session and wipes its keys and cache.
@@ -54,6 +84,21 @@ func (m *Manager) End(sid string) {
 	m.mu.Unlock()
 	if ok {
 		s.end()
+	}
+}
+
+// EndAccount terminates every live session for one account (S-10).
+func (m *Manager) EndAccount(accountID string) {
+	m.mu.Lock()
+	var ids []string
+	for id, s := range m.byID {
+		if s.accountID == accountID {
+			ids = append(ids, id)
+		}
+	}
+	m.mu.Unlock()
+	for _, id := range ids {
+		m.End(id)
 	}
 }
 
@@ -76,7 +121,7 @@ func (m *Manager) PurgeExpired(now time.Time) int {
 	m.mu.Lock()
 	var expired []string
 	for id, s := range m.byID {
-		if s.Expired(now) {
+		if s.expiredAt(now) {
 			expired = append(expired, id)
 		}
 	}

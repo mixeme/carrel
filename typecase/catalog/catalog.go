@@ -120,6 +120,8 @@ func Entries() []Entry {
 	add("utility", "tc-card", "default", widget.Card{Rubric: widget.Rubric{Text: "Card"}, Body: widget.Paragraph("Card body")}.Render())
 	add("utility", "tc-sec", "default", widget.Sec{Rubric: widget.Rubric{Text: "Section"}, Body: widget.Paragraph("Section body")}.Render())
 	add("utility", "tc-fields", "default", widget.Fields{Rows: []widget.FieldRow{{Label: "Name", Value: "Example"}, {Label: "Path", Value: "/very/long/path/to/item", Path: true}}}.Render())
+	add("utility", "tc-stat", "default", widget.Stat{Label: "Users", Value: "1,234", Hint: "Last 30 days"}.Render())
+	add("utility", "tc-stats", "default", widget.Stats{Items: []widget.Stat{{Label: "Users", Value: "1,234"}, {Label: "Sessions", Value: "89"}, {Label: "Errors", Value: "3"}}}.Render())
 
 	// Additional states (L-9.1)
 	add("primitives", "tc-check", "on", widget.Check{Name: "on", Label: "On", Checked: true}.Render())
@@ -226,16 +228,7 @@ func PageHTML(title string, entries []Entry, withJS bool) string {
 <title>%s</title>
 <script src="/theme.js"></script>
 <link rel="stylesheet" href="/typecase.css">
-<style>
-.catalog-family { margin: 2em 0; }
-.catalog-entry { margin: 1.5em 0; padding: 1em; border: 1px solid var(--tc-rule); border-radius: var(--tc-radius); background: var(--tc-surface); }
-.catalog-demo { margin-top: 0.75em; padding: 0.75em; background: var(--tc-bg); border-radius: var(--tc-radius); }
-.catalog-nav { display: flex; gap: 1em; margin-bottom: 1em; }
-/* Scrims, overlays and the rail drawer are fixed to the viewport by design.
-   In the catalog every state is on one page, so each such cell becomes its own
-   containing block; otherwise one open scrim covers every other entry. */
-.catalog-demo:has(.tc-scrim, .tc-overlay, .tc-rail--drawer) { position: relative; min-height: 220px; overflow: hidden; transform: translate(0); }
-</style>
+<link rel="stylesheet" href="/catalog.css">
 </head>
 <body data-tc-root>
 <header class="catalog-nav"><a href="/">With behavior</a><a href="/static">Without behavior</a></header>

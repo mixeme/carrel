@@ -277,6 +277,52 @@ func FieldRowHTML(r FieldRow) string {
 	return `<div class="tc-fields__row"><dt class="tc-fields__label">` + esc(r.Label) + `</dt><dd` + classAttr(valCls) + `>` + esc(r.Value) + `</dd></div>`
 }
 
+// Stat — tc-stat
+//
+// Роль. Число с подписью.
+// Вход. Stat{ Label, Value, Hint }.
+// Состояния. нет.
+// Инварианты. Значение приходит готовой строкой: виджет не считает и не округляет.
+// Поведение. нет.
+// Геометрия. Равная доля по ширине в ряду.
+// Содержимое. нет.
+// Чего нет. Нет диаграмм.
+type Stat struct {
+	Label string
+	Value string
+	Hint  string
+}
+
+func (s Stat) Render() string {
+	hint := ""
+	if s.Hint != "" {
+		hint = `<span class="tc-stat__hint">` + esc(s.Hint) + `</span>`
+	}
+	return `<div` + classAttr("tc-stat") + `><span class="tc-stat__value">` + esc(s.Value) + `</span><span class="tc-stat__label">` + esc(s.Label) + `</span>` + hint + `</div>`
+}
+
+// Stats — tc-stats
+//
+// Роль. Ряд показателей.
+// Вход. Stats{ Items []Stat }.
+// Состояния. нет.
+// Инварианты. Ряд не переносится по одному показателю: либо все в строку, либо в столбец.
+// Поведение. нет.
+// Геометрия. Равные доли по ширине.
+// Содержимое. tc-stat.
+// Чего нет. Нет диаграмм.
+type Stats struct {
+	Items []Stat
+}
+
+func (s Stats) Render() string {
+	var items string
+	for _, st := range s.Items {
+		items += st.Render()
+	}
+	return `<div` + classAttr("tc-stats") + `>` + items + `</div>`
+}
+
 func itoa(n int) string {
 	return strconv.Itoa(n)
 }

@@ -38,6 +38,12 @@ var (
 var (
 	ErrCiphertextTooShort = errors.New("crypt: ciphertext too short")
 	ErrDecrypt            = errors.New("crypt: decrypt failed")
+	ErrKDFParams          = errors.New("crypt: invalid KDF parameters")
+)
+
+const (
+	minKDFMemoryKiB = 8 * 1024    // 8 MiB
+	maxKDFMemoryKiB = 1024 * 1024 // 1 GiB
 )
 
 func NewSalt() ([]byte, error) {
@@ -72,8 +78,27 @@ func VerifyLogin(password string, salt, hash []byte, p KDFParams) bool {
 }
 
 // DeriveWrapKey derives the wrap key from a different salt than login (S-2).
+// The returned slice holds key material; wipe it after UnwrapDataKey or copy
+// into a fixed-size buffer.
 func DeriveWrapKey(password string, salt []byte) ([]byte, KDFParams) {
 	return DeriveKey(password, salt, WrapKDF), WrapKDF
+}
+
+// ValidateKDFParams checks stored cost parameters. All-zero params are allowed
+// only when there is nothing to unwrap yet (no login hash / wrapped key).
+func ValidateKDFParams(p KDFParams, unwrap bool) error {
+	if !unwrap {
+		if p.Time == 0 && p.Memory == 0 && p.Threads == 0 && p.KeyLen == 0 {
+			return nil
+		}
+	}
+	if p.Time < 1 || p.Threads < 1 || p.KeyLen != KeyLen {
+		return ErrKDFParams
+	}
+	if p.Memory < minKDFMemoryKiB || p.Memory > maxKDFMemoryKiB {
+		return ErrKDFParams
+	}
+	return nil
 }
 
 func aadWrap(login string) []byte { return []byte("carrel.wrap.v1|" + login) }
@@ -129,9 +154,11 @@ func UnwrapDataKey(wrapKey [KeyLen]byte, wrapped []byte, login string) ([KeyLen]
 		return out, err
 	}
 	if len(plain) != KeyLen {
+		Wipe(plain)
 		return out, fmt.Errorf("crypt: wrapped key length %d", len(plain))
 	}
 	copy(out[:], plain)
+	Wipe(plain)
 	return out, nil
 }
 

@@ -1,0 +1,24 @@
+.catalog-family { margin: 2em 0; }
+.catalog-entry {
+	margin: 1.5em 0;
+	padding: 1em;
+	border: 1px solid var(--tc-rule);
+	border-radius: var(--tc-radius);
+	background: var(--tc-surface);
+}
+.catalog-demo {
+	margin-top: 0.75em;
+	padding: 0.75em;
+	background: var(--tc-bg);
+	border-radius: var(--tc-radius);
+}
+.catalog-nav { display: flex; gap: 1em; margin-bottom: 1em; }
+/* Scrims, overlays and the rail drawer are fixed to the viewport by design.
+   In the catalog every state is on one page, so each such cell becomes its own
+   containing block; otherwise one open scrim covers every other entry. */
+.catalog-demo:has(.tc-scrim, .tc-overlay, .tc-rail--drawer) {
+	position: relative;
+	min-height: 220px;
+	overflow: hidden;
+	transform: translate(0);
+}

@@ -30,7 +30,11 @@ func (t Table) Render() string {
 	}
 	var head string
 	for _, c := range t.Columns {
-		head += `<th class="tc-table__th tc-table__th--` + string(c.Kind) + `">` + esc(c.Label) + `</th>`
+		kind := c.Kind
+		if kind == "" {
+			kind = ColText
+		}
+		head += `<th class="tc-table__th tc-table__th--` + string(kind) + `">` + esc(c.Label) + `</th>`
 	}
 	if hasActions {
 		head += `<th class="tc-table__th tc-table__th--action">` + esc(labels.Actions) + `</th>`

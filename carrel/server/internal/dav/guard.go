@@ -8,9 +8,11 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/netip"
 	"net/url"
 	"strings"
 	"time"
+	"unicode"
 
 	"carrel.dev/carrel/server/internal/conf"
 )
@@ -22,6 +24,10 @@ var ErrSSRF = errors.New("dav: outbound address blocked")
 // CARREL_DAV_MAX_RESPONSE_BYTES. It is a state on the screen, not a 500.
 var ErrResponseTooLarge = errors.New("dav: response exceeds limit")
 
+type ipLookup interface {
+	LookupIPAddr(ctx context.Context, host string) ([]net.IPAddr, error)
+}
+
 // Guard validates outbound DAV targets and builds guarded HTTP clients (S-5.1).
 type Guard struct {
 	allow       map[string]struct{}
@@ -29,7 +35,7 @@ type Guard struct {
 	request     time.Duration
 	maxBody     int64
 	maxRedirect int
-	resolver    *net.Resolver
+	resolver    ipLookup
 }
 
 // NewGuard builds a guard from C-12 DAV settings.
@@ -128,12 +134,24 @@ func (g *Guard) dialTLSContext(ctx context.Context, network, address string) (ne
 
 func (g *Guard) allowlisted(host string) bool {
 	host = strings.ToLower(strings.TrimSuffix(host, "."))
-	if i := strings.Index(host, ":"); i >= 0 {
-		host = host[:i]
-	}
 	_, ok := g.allow[host]
 	return ok
 }
+
+var (
+	blockV6Whole = []netip.Prefix{
+		netip.MustParsePrefix("::/96"),
+		netip.MustParsePrefix("::ffff:0:0:0/96"),
+		netip.MustParsePrefix("2001::/32"),
+		netip.MustParsePrefix("fec0::/10"),
+	}
+	embedV4Prefixes = []netip.Prefix{
+		netip.MustParsePrefix("64:ff9b::/96"),
+		netip.MustParsePrefix("64:ff9b:1::/48"),
+		netip.MustParsePrefix("2002::/16"),
+	}
+	prefix2002 = netip.MustParsePrefix("2002::/16")
+)
 
 func blockedIP(ip net.IP) bool {
 	if ip == nil {
@@ -143,40 +161,92 @@ func blockedIP(ip net.IP) bool {
 		ip.IsMulticast() || ip.IsUnspecified() {
 		return true
 	}
-	if ip4 := ip.To4(); ip4 != nil {
-		return privateIPv4(ip4)
+
+	addr, ok := netip.AddrFromSlice(ip)
+	if !ok {
+		return true
 	}
-	if len(ip) == net.IPv6len && ip.To4() == nil {
-		return privateIPv6(ip)
+	if addr.Is4In6() {
+		addr = addr.Unmap()
+	}
+
+	for _, pfx := range blockV6Whole {
+		if pfx.Contains(addr) {
+			return true
+		}
+	}
+
+	if v4, ok := embeddedIPv4(addr); ok {
+		return blockedIPv4(v4)
+	}
+	if addr.Is4() {
+		return blockedIPv4(addr)
+	}
+	if addr.Is6() {
+		return privateIPv6(addr)
 	}
 	return false
 }
 
-func privateIPv4(ip net.IP) bool {
+func embeddedIPv4(addr netip.Addr) (netip.Addr, bool) {
+	if !addr.Is6() {
+		return netip.Addr{}, false
+	}
+	for _, pfx := range embedV4Prefixes {
+		if !pfx.Contains(addr) {
+			continue
+		}
+		b := addr.As16()
+		if pfx == prefix2002 {
+			return netip.AddrFrom4([4]byte{b[2], b[3], b[4], b[5]}), true
+		}
+		return netip.AddrFrom4([4]byte{b[12], b[13], b[14], b[15]}), true
+	}
+	if addr.Is4In6() {
+		return addr.Unmap(), true
+	}
+	return netip.Addr{}, false
+}
+
+func blockedIPv4(addr netip.Addr) bool {
+	if !addr.Is4() {
+		return false
+	}
+	b := addr.As4()
 	switch {
-	case ip[0] == 10:
+	case b[0] == 0: // 0.0.0.0/8
 		return true
-	case ip[0] == 172 && ip[1] >= 16 && ip[1] <= 31:
+	case b[0] >= 240: // 240.0.0.0/4 and broadcast
 		return true
-	case ip[0] == 192 && ip[1] == 168:
+	case b[0] == 10:
 		return true
-	case ip[0] == 127:
+	case b[0] == 172 && b[1] >= 16 && b[1] <= 31:
 		return true
-	case ip[0] == 169 && ip[1] == 254:
+	case b[0] == 192 && b[1] == 168:
 		return true
-	case ip[0] == 100 && ip[1] >= 64 && ip[1] <= 127: // CGNAT
+	case b[0] == 127:
+		return true
+	case b[0] == 169 && b[1] == 254:
+		return true
+	case b[0] == 100 && b[1] >= 64 && b[1] <= 127: // CGNAT
+		return true
+	case b[0] == 192 && b[1] == 0 && b[2] == 0: // 192.0.0.0/24
 		return true
 	default:
 		return false
 	}
 }
 
-func privateIPv6(ip net.IP) bool {
-	if ip.IsLoopback() || ip.IsLinkLocalUnicast() {
+func privateIPv6(addr netip.Addr) bool {
+	if !addr.Is6() {
+		return false
+	}
+	if addr.IsLoopback() || addr.IsLinkLocalUnicast() {
 		return true
 	}
+	b := addr.As16()
 	// Unique local fc00::/7
-	return ip[0]&0xfe == 0xfc
+	return b[0]&0xfe == 0xfc
 }
 
 type limitTransport struct {
@@ -219,6 +289,21 @@ func (b *limitedBody) Read(p []byte) (int, error) {
 		return 0, ErrResponseTooLarge
 	}
 	return n, err
+}
+
+// sanitizeRemoteText trims a remote error body for operator-facing messages.
+func sanitizeRemoteText(b []byte) string {
+	const max = 256
+	if len(b) > max {
+		b = b[:max]
+	}
+	var out strings.Builder
+	for _, r := range string(b) {
+		if r == '\n' || r == '\r' || r == '\t' || (r >= 32 && r < unicode.MaxASCII) {
+			out.WriteRune(r)
+		}
+	}
+	return strings.TrimSpace(out.String())
 }
 
 // ResolveWellKnown follows a well-known path from base and returns the final URL.

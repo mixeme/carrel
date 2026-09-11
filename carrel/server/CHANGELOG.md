@@ -4,6 +4,50 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.9 — 2026-09-05
+
+Closes the first Fable audit debt from [docs/plan/server.md](../../docs/plan/server.md)
+("Долг после аудита Fable №1", findings Ф-1…Ф-12).
+
+### For consumers
+
+- **Breaking (`internal/session`).** Cache methods for bodies, etag maps, and
+  thumbnails now take a connection identifier first:
+  `PutBody(connID, path, version, data)`, `GetBody`, `PutETagMap`, `GetETagMap`,
+  `PutThumb`, `GetThumb`, `InvalidatePath(connID, path)`. Collection lists are
+  unchanged (still keyed by account). `Session.DataKey()` returns `([32]byte, bool)`.
+- `Manager.Get` ends expired sessions and reports them as missing; `Manager.Touch`
+  uses the same lock order. `Manager.EndAccount(accountID)` ends every live session
+  for one account.
+- `CARREL_DAV_CONNECT_TIMEOUT`, `CARREL_DAV_REQUEST_TIMEOUT`,
+  `CARREL_DAV_MAX_RESPONSE_BYTES`, `CARREL_PROGRESS_SOURCE_TIMEOUT`, and
+  `CARREL_PROGRESS_TOTAL_TIMEOUT` must be positive; `CARREL_DAV_MAX_REDIRECTS`
+  must not be negative. Zero previously disabled timeouts and response caps.
+- Outbound DAV methods that bypassed go-webdav (`Get`, `Put`, `Delete`, `PropFind`,
+  `PropPatch`, `MkColProps`) now send Basic auth like the rest of the client.
+- `LoadServerKey` rejects `server.key` with group/other permissions on Unix
+  (`ErrServerKeyPermissive`).
+- Stored KDF parameters are validated on load and on every `Mutate`; zero params
+  are allowed only before login/wrap material exists.
+
+### Included
+
+- `internal/dav`: extended SSRF blocks (NAT64/6to4 embedded IPv4, deprecated v6
+  ranges, extra v4 ranges); IPv6 allowlist literals; redirect and NAT64 resolver
+  tests; Basic auth on custom transport methods; 256-byte sanitized remote errors.
+- `internal/session`: expiry in `Get`/`Touch`; inert ended sessions; connection-
+  scoped cache keys; `EndAccount`.
+- `internal/crypt`: `ValidateKDFParams`; `UnwrapDataKey` wipes plaintext buffer;
+  `DeriveWrapKey` documents caller wipe duty.
+- `internal/store`: KDF bounds on decode and mutate.
+- `internal/conf`: positive DAV/progress timeout validation.
+
+### Not yet included
+
+The request layer — Ф-7 (KDF process semaphore), Ф-8 (`store.User` projection),
+Ф-13 (Basic over plain HTTP), Ф-14 (login rename re-wrap) are constraints on
+later layers; audit №2 checks them.
+
 ## carrel/server/v0.0.8 — 2026-09-04
 
 Closes the layer-review debt from [docs/plan/server.md](../../docs/plan/server.md)
@@ -37,9 +81,7 @@ Closes the layer-review debt from [docs/plan/server.md](../../docs/plan/server.m
 
 ### Not yet included
 
-The request layer — blocked until the first Fable audit in
-[reviews.md](../../docs/plan/reviews.md) closes the three remaining perimeter
-items (extended SSRF cases, `containsSecret` heuristic, audit itself).
+The request layer — unblocked after v0.0.9 closes Fable audit №1 debt.
 
 ## carrel/server/v0.0.7 — 2026-09-04
 

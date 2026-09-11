@@ -400,6 +400,24 @@ func (c *Config) validate() error {
 	if _, err := c.ParseLogLevel(); err != nil {
 		return err
 	}
+	if c.DAVConnectTimeout <= 0 {
+		return fmt.Errorf("CARREL_DAV_CONNECT_TIMEOUT: must be positive")
+	}
+	if c.DAVRequestTimeout <= 0 {
+		return fmt.Errorf("CARREL_DAV_REQUEST_TIMEOUT: must be positive")
+	}
+	if c.DAVMaxResponseBytes <= 0 {
+		return fmt.Errorf("CARREL_DAV_MAX_RESPONSE_BYTES: must be positive")
+	}
+	if c.DAVMaxRedirects < 0 {
+		return fmt.Errorf("CARREL_DAV_MAX_REDIRECTS: negative")
+	}
+	if c.ProgressSourceTimeout <= 0 {
+		return fmt.Errorf("CARREL_PROGRESS_SOURCE_TIMEOUT: must be positive")
+	}
+	if c.ProgressTotalTimeout <= 0 {
+		return fmt.Errorf("CARREL_PROGRESS_TOTAL_TIMEOUT: must be positive")
+	}
 	return nil
 }
 

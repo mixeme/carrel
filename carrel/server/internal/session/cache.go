@@ -40,6 +40,7 @@ type Cache struct {
 	mgr *Manager
 
 	mu         sync.Mutex
+	ended      bool
 	entries    map[string]*cacheEntry
 	bodyBytes  int64
 	etagBytes  int64
@@ -55,29 +56,33 @@ func newCache(cfg *conf.Config, mgr *Manager) *Cache {
 	}
 }
 
-func bodyKey(path, version string) string  { return "body\x00" + path + "\x00" + version }
-func etagKey(path string) string           { return "etag\x00" + path }
-func thumbKey(path, version string) string { return "thumb\x00" + path + "\x00" + version }
-func collKey(path string) string           { return "coll\x00" + path }
+func bodyKey(connID, path, version string) string {
+	return "body\x00" + connID + "\x00" + path + "\x00" + version
+}
+func etagKey(connID, path string) string { return "etag\x00" + connID + "\x00" + path }
+func thumbKey(connID, path, version string) string {
+	return "thumb\x00" + connID + "\x00" + path + "\x00" + version
+}
+func collKey(path string) string { return "coll\x00" + path }
 
-// PutBody stores an object body keyed by path and version together.
-func (c *Cache) PutBody(path, version string, data []byte) {
-	c.put(kindBody, bodyKey(path, version), data)
+// PutBody stores an object body keyed by connection, path, and version.
+func (c *Cache) PutBody(connID, path, version string, data []byte) {
+	c.put(kindBody, bodyKey(connID, path, version), data)
 }
 
-// GetBody returns a body for the exact path and version.
-func (c *Cache) GetBody(path, version string) ([]byte, bool) {
-	return c.get(bodyKey(path, version))
+// GetBody returns a body for the exact connection, path, and version.
+func (c *Cache) GetBody(connID, path, version string) ([]byte, bool) {
+	return c.get(bodyKey(connID, path, version))
 }
 
-// PutETagMap stores a collection path→version map.
-func (c *Cache) PutETagMap(collection string, data []byte) {
-	c.put(kindETagMap, etagKey(collection), data)
+// PutETagMap stores a collection path→version map for one connection.
+func (c *Cache) PutETagMap(connID, collection string, data []byte) {
+	c.put(kindETagMap, etagKey(connID, collection), data)
 }
 
 // GetETagMap returns a cached version map.
-func (c *Cache) GetETagMap(collection string) ([]byte, bool) {
-	return c.get(etagKey(collection))
+func (c *Cache) GetETagMap(connID, collection string) ([]byte, bool) {
+	return c.get(etagKey(connID, collection))
 }
 
 // PutCollectionList stores a discovered collection list.
@@ -90,24 +95,30 @@ func (c *Cache) GetCollectionList(account string) ([]byte, bool) {
 	return c.get(collKey(account))
 }
 
-// PutThumb stores a photo thumbnail by object version.
-func (c *Cache) PutThumb(path, version string, data []byte) {
-	c.put(kindThumb, thumbKey(path, version), data)
+// PutThumb stores a photo thumbnail by connection and object version.
+func (c *Cache) PutThumb(connID, path, version string, data []byte) {
+	c.put(kindThumb, thumbKey(connID, path, version), data)
 }
 
 // GetThumb returns a cached thumbnail.
-func (c *Cache) GetThumb(path, version string) ([]byte, bool) {
-	return c.get(thumbKey(path, version))
+func (c *Cache) GetThumb(connID, path, version string) ([]byte, bool) {
+	return c.get(thumbKey(connID, path, version))
 }
 
-// InvalidatePath drops cached data for one object path (after write/delete).
-func (c *Cache) InvalidatePath(path string) {
+// InvalidatePath drops cached data for one object path on a connection.
+func (c *Cache) InvalidatePath(connID, path string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if c.ended {
+		return
+	}
 	var drop []string
+	prefix := "\x00" + path + "\x00"
+	connPrefix := connID + "\x00"
 	for k, e := range c.entries {
-		if strings.Contains(e.key, "\x00"+path+"\x00") ||
-			e.key == etagKey(path) || e.key == collKey(path) {
+		if strings.HasPrefix(e.key, "body\x00"+connPrefix) && strings.Contains(e.key, prefix) ||
+			strings.HasPrefix(e.key, "thumb\x00"+connPrefix) && strings.Contains(e.key, prefix) ||
+			e.key == etagKey(connID, path) {
 			drop = append(drop, k)
 		}
 	}
@@ -118,6 +129,10 @@ func (c *Cache) InvalidatePath(path string) {
 
 func (c *Cache) put(kind cacheKind, key string, data []byte) {
 	c.mu.Lock()
+	if c.ended {
+		c.mu.Unlock()
+		return
+	}
 	if _, ok := c.entries[key]; ok {
 		c.removeLocked(key)
 	}
@@ -258,6 +273,17 @@ func (c *Cache) totalBytes() int64 {
 func (c *Cache) clear() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	c.entries = make(map[string]*cacheEntry)
+	c.bodyBytes = 0
+	c.etagBytes = 0
+	c.thumbBytes = 0
+	c.otherBytes = 0
+}
+
+func (c *Cache) markEnded() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.ended = true
 	c.entries = make(map[string]*cacheEntry)
 	c.bodyBytes = 0
 	c.etagBytes = 0

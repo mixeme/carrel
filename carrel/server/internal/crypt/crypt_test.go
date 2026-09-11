@@ -203,3 +203,34 @@ func TestLoadOrCreateServerKey(t *testing.T) {
 		t.Fatal("second load should return same key")
 	}
 }
+
+func TestLoadServerKeyRejectsPermissiveMode(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("file mode check is skipped on Windows")
+	}
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, ServerKey), bytes.Repeat([]byte{0xab}, KeyLen), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := LoadServerKey(dir)
+	if !errors.Is(err, ErrServerKeyPermissive) {
+		t.Fatalf("got %v, want ErrServerKeyPermissive", err)
+	}
+}
+
+func TestValidateKDFParams(t *testing.T) {
+	if err := ValidateKDFParams(KDFParams{}, false); err != nil {
+		t.Fatalf("zero params without secrets: %v", err)
+	}
+	if err := ValidateKDFParams(KDFParams{}, true); err == nil {
+		t.Fatal("zero params with secrets should fail")
+	}
+	if err := ValidateKDFParams(LoginKDF, true); err != nil {
+		t.Fatalf("login defaults: %v", err)
+	}
+	bad := LoginKDF
+	bad.Time = 0
+	if err := ValidateKDFParams(bad, true); err == nil {
+		t.Fatal("Time=0 should fail")
+	}
+}

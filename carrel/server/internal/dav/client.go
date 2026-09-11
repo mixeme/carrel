@@ -3,6 +3,7 @@ package dav
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -29,7 +30,20 @@ type Client struct {
 
 // NewClient dials endpoint through guard. Username and password may be empty.
 func NewClient(g *Guard, endpoint, username, password string) (*Client, error) {
-	httpClient := g.HTTPClient()
+	baseClient := g.HTTPClient()
+	transport := baseClient.Transport
+	if username != "" {
+		transport = &basicAuthTransport{
+			base:     baseClient.Transport,
+			username: username,
+			password: password,
+		}
+	}
+	httpClient := &http.Client{
+		Transport:     &limitTransport{base: transport, max: g.maxBody},
+		Timeout:       baseClient.Timeout,
+		CheckRedirect: baseClient.CheckRedirect,
+	}
 	var hc webdav.HTTPClient = httpClient
 	if username != "" {
 		hc = webdav.HTTPClientWithBasicAuth(httpClient, username, password)
@@ -61,6 +75,24 @@ func NewClient(g *Guard, endpoint, username, password string) (*Client, error) {
 		carddav: adc,
 		maxBody: g.maxBody,
 	}, nil
+}
+
+type basicAuthTransport struct {
+	base     http.RoundTripper
+	username string
+	password string
+}
+
+func (t *basicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if t.username != "" {
+		req = req.Clone(req.Context())
+		req.SetBasicAuth(t.username, t.password)
+	}
+	base := t.base
+	if base == nil {
+		base = http.DefaultTransport
+	}
+	return base.RoundTrip(req)
 }
 
 // WebDAV returns the underlying webdav client for discovery helpers.
@@ -276,13 +308,17 @@ func (c *Client) doMultiStatus(req *http.Request) (*MultiStatus, error) {
 }
 
 func httpStatusError(resp *http.Response) error {
-	const max = 1024
-	b, _ := io.ReadAll(io.LimitReader(resp.Body, max))
-	msg := strings.TrimSpace(string(b))
+	b, _ := io.ReadAll(resp.Body)
+	msg := sanitizeRemoteText(b)
 	if msg == "" {
 		msg = resp.Status
 	}
 	return fmt.Errorf("dav: HTTP %d: %s", resp.StatusCode, msg)
+}
+
+func expectedBasicAuth(user, pass string) string {
+	creds := user + ":" + pass
+	return "Basic " + base64.StdEncoding.EncodeToString([]byte(creds))
 }
 
 func propFindXML(props []xml.Name) *propFind {

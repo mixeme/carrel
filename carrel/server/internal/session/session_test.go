@@ -123,12 +123,12 @@ func TestCacheVersionKeyMakesOldBodyUnreachable(t *testing.T) {
 		t.Fatal(err)
 	}
 	c := s.Cache()
-	c.PutBody("/cal/personal/event.ics", "v1", []byte("old"))
-	c.PutBody("/cal/personal/event.ics", "v2", []byte("new"))
-	if _, ok := c.GetBody("/cal/personal/event.ics", "v1"); !ok {
+	c.PutBody("conn-a", "/cal/personal/event.ics", "v1", []byte("old"))
+	c.PutBody("conn-a", "/cal/personal/event.ics", "v2", []byte("new"))
+	if _, ok := c.GetBody("conn-a", "/cal/personal/event.ics", "v1"); !ok {
 		t.Fatal("v1 should still be cached until evicted")
 	}
-	got, ok := c.GetBody("/cal/personal/event.ics", "v2")
+	got, ok := c.GetBody("conn-a", "/cal/personal/event.ics", "v2")
 	if !ok || string(got) != "new" {
 		t.Fatal("v2 body missing")
 	}
@@ -144,10 +144,10 @@ func TestCacheEvictsBodiesBeforeMaps(t *testing.T) {
 		t.Fatal(err)
 	}
 	c := s.Cache()
-	c.PutETagMap("/cal/personal", []byte("etag-map-data"))
-	c.PutBody("/cal/personal/a.ics", "e1", make([]byte, 50))
-	c.PutBody("/cal/personal/b.ics", "e1", make([]byte, 50))
-	if _, ok := c.GetETagMap("/cal/personal"); !ok {
+	c.PutETagMap("conn-a", "/cal/personal", []byte("etag-map-data"))
+	c.PutBody("conn-a", "/cal/personal/a.ics", "e1", make([]byte, 50))
+	c.PutBody("conn-a", "/cal/personal/b.ics", "e1", make([]byte, 50))
+	if _, ok := c.GetETagMap("conn-a", "/cal/personal"); !ok {
 		t.Fatal("etag map should survive body pressure first")
 	}
 }
@@ -165,8 +165,8 @@ func TestProcessWideEviction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s1.Cache().PutBody("/a", "v1", make([]byte, 100))
-	s2.Cache().PutBody("/b", "v1", make([]byte, 100))
+	s1.Cache().PutBody("conn-a", "/a", "v1", make([]byte, 100))
+	s2.Cache().PutBody("conn-a", "/b", "v1", make([]byte, 100))
 	if mgr.ProcessBytes() > cfg.CacheMaxProcessBytes {
 		// enforceLimits on put should have evicted
 	}
@@ -181,7 +181,7 @@ func TestEndAllWipesSessions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s.Cache().PutBody("/x", "v1", []byte("data"))
+	s.Cache().PutBody("conn-a", "/x", "v1", []byte("data"))
 	s.AddHistory("find me")
 	mgr.EndAll()
 	if _, ok := mgr.Get(s.ID()); ok {
@@ -220,23 +220,23 @@ func TestCacheCollectionTTLExpires(t *testing.T) {
 	}
 	c := s.Cache()
 	c.PutCollectionList("alice", []byte("collections"))
-	c.PutETagMap("/cal/personal", []byte("etag-map"))
+	c.PutETagMap("conn-a", "/cal/personal", []byte("etag-map"))
 	if _, ok := c.GetCollectionList("alice"); !ok {
 		t.Fatal("fresh collection list should hit")
 	}
-	if _, ok := c.GetETagMap("/cal/personal"); !ok {
+	if _, ok := c.GetETagMap("conn-a", "/cal/personal"); !ok {
 		t.Fatal("fresh etag map should hit")
 	}
 	time.Sleep(60 * time.Millisecond)
 	if _, ok := c.GetCollectionList("alice"); ok {
 		t.Fatal("stale collection list should miss")
 	}
-	if _, ok := c.GetETagMap("/cal/personal"); ok {
+	if _, ok := c.GetETagMap("conn-a", "/cal/personal"); ok {
 		t.Fatal("stale etag map should miss")
 	}
-	c.PutBody("/cal/personal/a.ics", "v1", []byte("body"))
+	c.PutBody("conn-a", "/cal/personal/a.ics", "v1", []byte("body"))
 	time.Sleep(60 * time.Millisecond)
-	if _, ok := c.GetBody("/cal/personal/a.ics", "v1"); !ok {
+	if _, ok := c.GetBody("conn-a", "/cal/personal/a.ics", "v1"); !ok {
 		t.Fatal("body should not expire by collection TTL")
 	}
 }
@@ -250,17 +250,16 @@ func TestSessionEvictionByAccessTime(t *testing.T) {
 		t.Fatal(err)
 	}
 	c := s.Cache()
-	c.PutBody("/a", "v1", make([]byte, 40))
-	time.Sleep(5 * time.Millisecond)
-	c.PutBody("/b", "v1", make([]byte, 40))
-	if _, ok := c.GetBody("/a", "v1"); !ok {
-		t.Fatal("a should be present")
+	c.PutBody("conn-a", "/a", "v1", make([]byte, 40))
+	c.PutBody("conn-a", "/b", "v1", make([]byte, 40))
+	if _, ok := c.GetBody("conn-a", "/b", "v1"); !ok {
+		t.Fatal("b should be present")
 	}
-	c.PutBody("/c", "v1", make([]byte, 40))
-	if _, ok := c.GetBody("/b", "v1"); ok {
-		t.Fatal("b should be evicted before a (least recently used)")
+	c.PutBody("conn-a", "/c", "v1", make([]byte, 40))
+	if _, ok := c.GetBody("conn-a", "/a", "v1"); ok {
+		t.Fatal("a should be evicted before b (least recently used)")
 	}
-	if _, ok := c.GetBody("/a", "v1"); !ok {
-		t.Fatal("a should survive after recent access")
+	if _, ok := c.GetBody("conn-a", "/b", "v1"); !ok {
+		t.Fatal("b should survive after recent access")
 	}
 }

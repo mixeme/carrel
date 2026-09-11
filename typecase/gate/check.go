@@ -23,15 +23,19 @@ const (
 	DomainNaming Name = "domain-naming"
 	DocFormat    Name = "doc-format"
 	Catalog      Name = "catalog"
+	SpecL4       Name = "spec-l4"
 	Verifiable   Name = "verifiable"
 	NoInline     Name = "no-inline"
 	A11y         Name = "a11y"
+	Gofmt        Name = "gofmt"
+	Vet          Name = "vet"
 )
 
 // AllGates lists every L-8 gate in stable order.
 var AllGates = []Name{
 	Completeness, Ownership, NodeNames, TypedInput, Enumerations,
-	DomainNaming, DocFormat, Catalog, Verifiable, NoInline, A11y,
+	DomainNaming, DocFormat, Catalog, SpecL4, Verifiable, NoInline, A11y,
+	Gofmt, Vet,
 }
 
 // browserChecks lists L-9.2 invariant names that must have broken HTML fixtures.
@@ -61,21 +65,26 @@ type CatalogEntry struct {
 
 // ModulePaths locates typecase module directories from module root.
 type ModulePaths struct {
-	Root           string
-	WidgetDir      string
-	CSSDir         string
-	RepoRoot       string // ownership scan root; empty disables CheckOwnership
+	Root      string
+	WidgetDir string
+	CSSDir    string
+	RepoRoot  string // ownership scan root; empty disables CheckOwnership
 }
 
 // Paths resolves standard directories under module root.
-// Ownership scans only the module root unless widened via PathsWithOwnership.
+// Ownership scans the git repository root when the module lives in a monorepo.
 func Paths(root string) ModulePaths {
-	return ModulePaths{
+	p := ModulePaths{
 		Root:      root,
 		WidgetDir: filepath.Join(root, "widget"),
 		CSSDir:    filepath.Join(root, "css"),
-		RepoRoot:  root,
 	}
+	if gitRoot, ok := findGitRoot(root); ok {
+		p.RepoRoot = gitRoot
+	} else {
+		p.RepoRoot = root
+	}
+	return p
 }
 
 // PathsWithOwnership sets an explicit ownership scan root (e.g. monorepo root).
@@ -84,6 +93,7 @@ func PathsWithOwnership(moduleRoot, ownershipRoot string) ModulePaths {
 	p.RepoRoot = ownershipRoot
 	return p
 }
+
 // FindModuleRoot returns the directory containing go.mod.
 func FindModuleRoot() (string, error) {
 	dir, err := os.Getwd()
@@ -121,12 +131,18 @@ func Run(name Name, p ModulePaths, catalog []CatalogEntry) error {
 		return CheckDocFormat(p.WidgetDir)
 	case Catalog:
 		return CheckCatalog(p.WidgetDir, catalog)
+	case SpecL4:
+		return CheckSpecL4(p, "")
 	case Verifiable:
 		return CheckVerifiable(p, catalog)
 	case NoInline:
 		return CheckNoInline(catalog)
 	case A11y:
 		return CheckA11y(catalog)
+	case Gofmt:
+		return CheckGofmt(p.Root)
+	case Vet:
+		return CheckVet(p.Root)
 	default:
 		return fmt.Errorf("gate: unknown check %q", name)
 	}
@@ -180,7 +196,7 @@ func CheckUniqueIDs(catalog []CatalogEntry) error {
 func gateImplemented(name Name) bool {
 	switch name {
 	case Completeness, Ownership, NodeNames, TypedInput, Enumerations,
-		DomainNaming, DocFormat, Catalog, Verifiable, NoInline, A11y:
+		DomainNaming, DocFormat, Catalog, SpecL4, Verifiable, NoInline, A11y, Gofmt, Vet:
 		return true
 	default:
 		return false
@@ -249,14 +265,18 @@ func cssRootWidgets(dir string) (map[string]bool, error) {
 	return found, nil
 }
 
-// CheckOwnership flags tc-* classes outside the configured ownership root.
+// CheckOwnership flags tc-* classes outside the typecase module within RepoRoot.
 func CheckOwnership(p ModulePaths) error {
-	if p.RepoRoot == "" {
-		return fmt.Errorf("ownership: search root not configured")
+	if err := validateOwnershipScope(p); err != nil {
+		return err
+	}
+	modAbs, err := filepath.Abs(p.Root)
+	if err != nil {
+		return err
 	}
 	var hits []string
-	err := walkFiles(p.RepoRoot, func(path string, data []byte) error {
-		if strings.Contains(path, string(filepath.Separator)+"typecase"+string(filepath.Separator)) {
+	err = walkFiles(p.RepoRoot, func(path string, data []byte) error {
+		if isUnderDir(path, modAbs) {
 			return nil
 		}
 		if strings.Contains(path, string(filepath.Separator)+"docs"+string(filepath.Separator)) {

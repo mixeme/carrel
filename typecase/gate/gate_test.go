@@ -28,6 +28,8 @@ func TestL8_gates(t *testing.T) {
 	cat := catalogEntries()
 
 	checks := []gate.Name{
+		gate.Gofmt,
+		gate.Vet,
 		gate.Completeness,
 		gate.Ownership,
 		gate.NodeNames,
@@ -36,6 +38,7 @@ func TestL8_gates(t *testing.T) {
 		gate.DomainNaming,
 		gate.DocFormat,
 		gate.Catalog,
+		gate.SpecL4,
 		gate.Verifiable,
 		gate.NoInline,
 		gate.A11y,
@@ -58,7 +61,7 @@ func TestL8_verifiable(t *testing.T) {
 	if err := gate.Run(gate.Verifiable, p, catalogEntries()); err != nil {
 		t.Fatal(err)
 	}
-	if len(gate.AllGates) != 11 {
-		t.Fatalf("expected 11 gates, got %d", len(gate.AllGates))
+	if len(gate.AllGates) != 14 {
+		t.Fatalf("expected 14 gates, got %d", len(gate.AllGates))
 	}
 }

@@ -6,18 +6,30 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 var (
-	ErrServerKeyExists  = errors.New("crypt: server key already exists")
-	ErrServerKeyShort   = errors.New("crypt: server key too short")
-	ErrServerKeyCorrupt = errors.New("crypt: server key corrupt")
+	ErrServerKeyExists     = errors.New("crypt: server key already exists")
+	ErrServerKeyShort      = errors.New("crypt: server key too short")
+	ErrServerKeyCorrupt    = errors.New("crypt: server key corrupt")
+	ErrServerKeyPermissive = errors.New("crypt: server key file permissions too open")
 )
 
 // LoadServerKey reads the 32-byte server key. It must already exist.
 func LoadServerKey(dataDir string) ([KeyLen]byte, error) {
 	var key [KeyLen]byte
-	b, err := os.ReadFile(filepath.Join(dataDir, ServerKey))
+	path := filepath.Join(dataDir, ServerKey)
+	if runtime.GOOS != "windows" {
+		info, err := os.Stat(path)
+		if err != nil {
+			return key, err
+		}
+		if info.Mode().Perm()&0o077 != 0 {
+			return key, ErrServerKeyPermissive
+		}
+	}
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return key, err
 	}

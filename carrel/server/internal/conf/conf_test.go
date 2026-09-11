@@ -186,6 +186,27 @@ func TestInvalidLogLevelRejected(t *testing.T) {
 	}
 }
 
+func TestZeroDAVTimeoutsRejected(t *testing.T) {
+	for _, tc := range []struct{ key, val string }{
+		{"CARREL_DAV_CONNECT_TIMEOUT", "0"},
+		{"CARREL_DAV_REQUEST_TIMEOUT", "0"},
+		{"CARREL_DAV_MAX_RESPONSE_BYTES", "0"},
+		{"CARREL_DAV_MAX_REDIRECTS", "-1"},
+		{"CARREL_PROGRESS_SOURCE_TIMEOUT", "0"},
+		{"CARREL_PROGRESS_TOTAL_TIMEOUT", "0"},
+	} {
+		t.Run(tc.key, func(t *testing.T) {
+			t.Setenv("CARREL_DATA_DIR", t.TempDir())
+			t.Setenv(tc.key, tc.val)
+			if _, err := Load(); err == nil {
+				t.Fatalf("%s=%q: expected an error", tc.key, tc.val)
+			} else if !strings.Contains(err.Error(), tc.key) {
+				t.Fatalf("error should name the variable: %v", err)
+			}
+		})
+	}
+}
+
 func TestNegativeCacheLimitsRejected(t *testing.T) {
 	for _, tc := range []struct{ key, val string }{
 		{"CARREL_CACHE_COLLECTION_TTL", "-1"},

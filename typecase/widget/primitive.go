@@ -267,7 +267,7 @@ func (b Brand) Render() string {
 // Содержимое. нет.
 // Чего нет. Нет формы кружка и заливки строки.
 type Mark struct {
-	Colour   MarkColour
+	Colour MarkColour
 	Label  string
 }
 

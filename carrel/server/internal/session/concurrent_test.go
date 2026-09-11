@@ -25,10 +25,10 @@ func TestSessionConcurrentUse(t *testing.T) {
 			defer wg.Done()
 			for n := 0; n < 50; n++ {
 				key := fmt.Sprintf("/c/%d-%d", i, n)
-				s.Cache().PutBody(key, "v1", []byte("body"))
-				s.Cache().GetBody(key, "v1")
-				s.Cache().PutETagMap(key, []byte("map"))
-				s.Cache().InvalidatePath(key)
+				s.Cache().PutBody("conn-a", key, "v1", []byte("body"))
+				s.Cache().GetBody("conn-a", key, "v1")
+				s.Cache().PutETagMap("conn-a", key, []byte("map"))
+				s.Cache().InvalidatePath("conn-a", key)
 				s.AddHistory(key)
 				s.NoteLoss("srv1", key)
 				s.HasLoss("srv1", key)
@@ -98,17 +98,17 @@ func TestBodiesEvictedBeforeMaps(t *testing.T) {
 		t.Fatal(err)
 	}
 	c := s.Cache()
-	c.PutETagMap("/c/one", make([]byte, 60))
-	c.PutBody("/c/one/a", "v1", make([]byte, 60))
-	c.PutBody("/c/one/b", "v1", make([]byte, 60)) // pushes bodies past the cap
+	c.PutETagMap("conn-a", "/c/one", make([]byte, 60))
+	c.PutBody("conn-a", "/c/one/a", "v1", make([]byte, 60))
+	c.PutBody("conn-a", "/c/one/b", "v1", make([]byte, 60)) // pushes bodies past the cap
 
-	if _, ok := c.GetETagMap("/c/one"); !ok {
+	if _, ok := c.GetETagMap("conn-a", "/c/one"); !ok {
 		t.Fatal("version map evicted while a body was still cached")
 	}
-	if _, ok := c.GetBody("/c/one/a", "v1"); ok {
+	if _, ok := c.GetBody("conn-a", "/c/one/a", "v1"); ok {
 		t.Fatal("oldest body should have been evicted first")
 	}
-	if _, ok := c.GetBody("/c/one/b", "v1"); !ok {
+	if _, ok := c.GetBody("conn-a", "/c/one/b", "v1"); !ok {
 		t.Fatal("newest body should have survived")
 	}
 }
@@ -125,8 +125,8 @@ func TestProcessBudgetEvictsAcrossSessions(t *testing.T) {
 			t.Fatal(err)
 		}
 		sessions = append(sessions, s)
-		s.Cache().PutETagMap("/c/map", make([]byte, 50))
-		s.Cache().PutBody("/c/body", "v1", make([]byte, 100))
+		s.Cache().PutETagMap("conn-a", "/c/map", make([]byte, 50))
+		s.Cache().PutBody("conn-a", "/c/body", "v1", make([]byte, 100))
 	}
 
 	if total := mgr.ProcessBytes(); total > cfg.CacheMaxProcessBytes {
@@ -134,7 +134,7 @@ func TestProcessBudgetEvictsAcrossSessions(t *testing.T) {
 	}
 	// Whatever had to go, the version maps are the last thing given up.
 	for i, s := range sessions {
-		if _, ok := s.Cache().GetETagMap("/c/map"); !ok {
+		if _, ok := s.Cache().GetETagMap("conn-a", "/c/map"); !ok {
 			t.Fatalf("session %d lost its version map before every body went", i)
 		}
 	}

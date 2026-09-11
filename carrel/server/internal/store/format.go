@@ -66,6 +66,9 @@ func decodeFile(data []byte, serverKey [crypt.KeyLen]byte) (uint32, State, error
 	if err := jsonUnmarshal(plain, &st); err != nil {
 		return version, emptyState(), fmt.Errorf("%w: %v", ErrCorruptFile, err)
 	}
+	if err := validateStateKDF(&st); err != nil {
+		return version, emptyState(), fmt.Errorf("%w: %v", ErrCorruptFile, err)
+	}
 	return version, st, nil
 }
 

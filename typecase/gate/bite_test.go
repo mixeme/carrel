@@ -139,20 +139,62 @@ func TestBite_ownership(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := gate.Paths(root)
-	tmp := filepath.Join(t.TempDir(), "outside.html")
-	if err := os.WriteFile(tmp, []byte(`<div class="tc-stolen"></div>`), 0644); err != nil {
+	modAbs, err := filepath.Abs(p.Root)
+	if err != nil {
 		t.Fatal(err)
 	}
-	parent := gate.ModulePaths{Root: p.Root, WidgetDir: p.WidgetDir, CSSDir: p.CSSDir, RepoRoot: filepath.Dir(tmp)}
-	if err := gate.CheckOwnership(parent); err == nil {
-		t.Fatal("expected ownership gate to fail when scan root is outside module")
+	repoAbs, err := filepath.Abs(p.RepoRoot)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if err := gate.CheckOwnership(p); err != nil {
-		t.Fatalf("standalone module must not scan parent dirs: %v", err)
+
+	inside := gate.PathsWithOwnership(p.Root, filepath.Join(p.Root, "widget"))
+	if err := gate.CheckOwnership(inside); err == nil {
+		t.Fatal("expected ownership gate to reject search root inside module")
 	}
-	wide := gate.PathsWithOwnership(p.Root, filepath.Dir(tmp))
-	if err := gate.CheckOwnership(wide); err == nil {
-		t.Fatal("expected ownership gate to fail on stolen class in widened scope")
+
+	if repoAbs == modAbs {
+		if err := gate.CheckOwnership(p); err != nil {
+			t.Fatalf("standalone module must pass when no outside violations: %v", err)
+		}
+		return
+	}
+
+	outsideDir := filepath.Join(repoAbs, ".gate_bite_ownership")
+	if err := os.MkdirAll(outsideDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(outsideDir) })
+	stolen := filepath.Join(outsideDir, "stolen.go")
+	if err := os.WriteFile(stolen, []byte("package stolen\n\nconst markup = `<div class=\"tc-stolen\"></div>`\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := gate.Run(gate.Ownership, p, nil); err == nil {
+		t.Fatal("expected standard Paths ownership gate to fail on tc-* outside module")
+	}
+}
+
+func TestBite_gofmt(t *testing.T) {
+	tmp := t.TempDir()
+	src := readBroken(t, "unformatted.go")
+	if err := os.WriteFile(filepath.Join(tmp, "bad.go"), []byte(src), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := gate.CheckGofmt(tmp); err == nil {
+		t.Fatal("expected gofmt gate to fail on unformatted file")
+	}
+}
+
+func TestBite_vet(t *testing.T) {
+	tmp := t.TempDir()
+	if err := os.WriteFile(filepath.Join(tmp, "go.mod"), []byte("module vetbite\n\ngo 1.27\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(tmp, "bad.go"), []byte("package vetbite\n\nfunc f() { fmt.Println(undefined) }\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := gate.CheckVet(tmp); err == nil {
+		t.Fatal("expected vet gate to fail on undefined identifier")
 	}
 }
 
@@ -251,5 +293,77 @@ func TestBite_uniqueIDs(t *testing.T) {
 	}
 	if err := gate.CheckUniqueIDs(cat); err == nil {
 		t.Fatal("expected unique-ids check to fail on duplicates")
+	}
+}
+
+func TestBite_specL4(t *testing.T) {
+	p := brokenModule(t)
+	specDir := filepath.Join(p.RepoRoot, "docs", "spec")
+	if err := os.MkdirAll(specDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(specDir, "typecase.md"), []byte(readBroken(t, "spec-l4.md")), 0644); err != nil {
+		t.Fatal(err)
+	}
+	widgetSrc := `package widget
+
+// Foo — tc-foo
+//
+// Роль. Test widget.
+// Вход. Foo{}.
+// Состояния. default.
+// Инварианты. none.
+// Поведение. none.
+// Геометрия. none.
+// Содержимое. none.
+// Чего нет. none.
+type Foo struct{}
+`
+	if err := os.WriteFile(filepath.Join(p.WidgetDir, "foo.go"), []byte(widgetSrc), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := gate.Run(gate.SpecL4, p, nil); err == nil {
+		t.Fatal("expected spec-l4 gate to fail on extra declared widget")
+	}
+}
+
+func TestBite_specL4_missingSpec(t *testing.T) {
+	p := brokenModule(t)
+	if err := gate.Run(gate.SpecL4, p, nil); err == nil {
+		t.Fatal("expected spec-l4 gate to fail when spec unavailable")
+	}
+}
+
+func readInvBroken(t *testing.T, name string) string {
+	root, err := gate.FindModuleRoot()
+	if err != nil {
+		t.Fatalf("module root: %v", err)
+	}
+	path := filepath.Join(root, "gate", "testdata", "inv", name)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read %s: %v", name, err)
+	}
+	return string(data)
+}
+
+func TestBite_invChecks(t *testing.T) {
+	root, err := gate.FindModuleRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	widgetDir := filepath.Join(root, "widget")
+	for _, name := range gate.RunnableInvGateNames() {
+		t.Run(name, func(t *testing.T) {
+			html := readInvBroken(t, name+".html")
+			widget := gate.InvGateWidget(name)
+			if widget == "" {
+				t.Fatalf("no widget for check %s", name)
+			}
+			cat := []gate.CatalogEntry{{Widget: widget, State: "broken", HTML: html}}
+			if err := gate.CheckInvGate(name, widget, cat, widgetDir); err == nil {
+				t.Fatalf("%s: expected check to fail on broken fixture", name)
+			}
+		})
 	}
 }

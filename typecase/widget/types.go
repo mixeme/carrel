@@ -135,14 +135,14 @@ const (
 type RunItemState string
 
 const (
-	RunItemWaiting      RunItemState = "waiting"
-	RunItemRunning      RunItemState = "running"
-	RunItemDone         RunItemState = "done"
-	RunItemEmpty        RunItemState = "empty"
-	RunItemError        RunItemState = "error"
-	RunItemTimeout      RunItemState = "timeout"
-	RunItemCancelled    RunItemState = "cancelled"
-	RunItemUnavailable  RunItemState = "unavailable"
+	RunItemWaiting     RunItemState = "waiting"
+	RunItemRunning     RunItemState = "running"
+	RunItemDone        RunItemState = "done"
+	RunItemEmpty       RunItemState = "empty"
+	RunItemError       RunItemState = "error"
+	RunItemTimeout     RunItemState = "timeout"
+	RunItemCancelled   RunItemState = "cancelled"
+	RunItemUnavailable RunItemState = "unavailable"
 )
 
 // RailSectionState is the availability tone of a rail section.

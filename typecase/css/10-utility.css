@@ -1,4 +1,4 @@
-/* tc-search, tc-runbar, tc-diag, tc-diff, tc-crop, tc-steps, tc-card, tc-sec, tc-fields */
+/* tc-search, tc-runbar, tc-diag, tc-diff, tc-crop, tc-steps, tc-card, tc-sec, tc-fields, tc-stat, tc-stats */
 
 .tc-search { position: relative; flex: 1; min-width: 8em; }
 .tc-search__field { display: flex; align-items: center; gap: 0.35em; }
@@ -145,4 +145,36 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.tc-stats {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 0.75em 1em;
+}
+.tc-stats .tc-stat {
+	flex: 1 1 0;
+	min-width: 0;
+}
+.tc-stat {
+	display: flex;
+	flex-direction: column;
+	white-space: nowrap;
+}
+.tc-stat__value {
+	font-weight: 600;
+	font-size: 1.25em;
+	line-height: 1.2;
+}
+.tc-stat__label {
+	color: var(--tc-muted);
+	font-size: 0.85em;
+}
+.tc-stat__hint {
+	color: var(--tc-muted);
+	font-size: 0.8em;
+}
+
+@media (max-width: 720px) {
+	.tc-stats { flex-direction: column; }
 }

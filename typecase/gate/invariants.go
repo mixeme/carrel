@@ -8,70 +8,72 @@ import (
 // invariantBindings maps each widget to executable checks for its invariant clauses
 // (semicolon-separated in L-3.2 «Инварианты»). Order matches clause order.
 var invariantBindings = map[string][]string{
-	"tc-avatar":   {"todo:pending", "todo:pending"},
-	"tc-badge":    {"todo:pending", "todo:pending"},
+	"tc-avatar":   {"gate:inv-avatar-not-empty", "gate:inv-avatar-square"},
+	"tc-badge":    {"gate:inv-badge-has-text", "gate:inv-badge-not-link"},
 	"tc-bar":      {"browser:bar-one-row", "browser:bar-one-row"},
-	"tc-brand":    {"todo:pending", "todo:pending"},
+	"tc-brand":    {"gate:inv-brand-single-mark", "gate:inv-brand-no-dup-word"},
 	"tc-btn":      {"gate:enumerations", "gate:a11y", "gate:a11y"},
-	"tc-card":     {"todo:pending"},
+	"tc-card":     {"gate:inv-card-has-body"},
 	"tc-check":    {"gate:a11y", "gate:enumerations"},
-	"tc-chip":     {"todo:pending"},
+	"tc-chip":     {"gate:inv-chip-state-class"},
 	"tc-close":    {"gate:a11y", "gate:a11y"},
-	"tc-crop":     {"todo:pending", "todo:pending"},
-	"tc-crumbs":   {"gate:crumbs-last-not-link", "todo:collapse"},
+	"tc-crop":     {"gate:inv-crop-has-frame", "gate:inv-crop-has-zoom"},
+	"tc-crumbs":   {"gate:crumbs-last-not-link", "gate:inv-crumbs-has-root"},
 	"tc-danger":   {"gate:a11y", "gate:a11y"},
-	"tc-diag":     {"todo:pending", "todo:pending"},
+	"tc-diag":     {"gate:inv-diag-collapsed-default", "gate:inv-diag-mono"},
 	"tc-dialog":   {"browser:esc-layers", "gate:a11y"},
-	"tc-diff":     {"todo:pending", "todo:pending"},
-	"tc-doc":      {"todo:pending", "todo:pending"},
-	"tc-docbar":   {"todo:pending", "todo:pending"},
-	"tc-docmeta":  {"todo:pending"},
+	"tc-diff":     {"gate:inv-diff-options-column", "gate:inv-diff-one-chosen"},
+	"tc-doc":      {"gate:inv-doc-mode-switch", "gate:inv-doc-no-silent-save"},
+	"tc-docbar":   {"gate:inv-docbar-actions", "gate:inv-docbar-dirty-flag"},
+	"tc-docmeta":  {"gate:inv-docmeta-sections"},
 	"tc-empty":    {"gate:a11y"},
 	"tc-field":    {"gate:a11y", "gate:a11y"},
-	"tc-fields":   {"browser:ellipsis", "todo:pending"},
+	"tc-fields":   {"browser:ellipsis", "gate:inv-fields-dl-structure"},
 	"tc-form":     {"gate:a11y", "gate:a11y", "gate:a11y"},
 	"tc-formfoot": {"gate:a11y", "gate:a11y"},
-	"tc-fset":     {"todo:pending"},
-	"tc-grid":     {"todo:pending", "todo:pending"},
-	"tc-head":     {"todo:pending"},
+	"tc-fset":     {"gate:inv-fset-rubric"},
+	"tc-grid":     {"gate:inv-grid-tiles", "gate:inv-grid-uniform"},
+	"tc-head":     {"gate:inv-head-title"},
 	"tc-in":       {"gate:a11y", "gate:a11y"},
-	"tc-kbd":      {"todo:pending"},
-	"tc-list":     {"gate:a11y", "todo:pending"},
-	"tc-main":     {"todo:pending"},
+	"tc-kbd":      {"gate:inv-kbd-not-button"},
+	"tc-list":     {"gate:a11y", "gate:inv-list-empty-action"},
+	"tc-main":     {"gate:inv-main-body"},
 	"tc-mark":     {"gate:a11y", "gate:a11y"},
 	"tc-menu":     {"browser:menu-label-arrow", "browser:popover-anchor", "browser:focus-return"},
-	"tc-meter":    {"todo:pending"},
+	"tc-meter":    {"gate:inv-meter-has-value"},
 	"tc-msg":      {"gate:a11y", "gate:a11y"},
-	"tc-nav":      {"todo:pending"},
-	"tc-num":      {"gate:typed-input", "todo:pending"},
-	"tc-overlay":  {"todo:pending", "browser:popover-anchor"},
+	"tc-nav":      {"gate:inv-nav-one-current"},
+	"tc-num":      {"gate:typed-input", "gate:inv-num-unknown-hidden"},
+	"tc-overlay":  {"gate:inv-overlay-kind-class", "browser:popover-anchor"},
 	"tc-prose":    {"gate:typed-input"},
-	"tc-queue":    {"todo:pending", "todo:pending"},
-	"tc-rail":     {"todo:pending", "todo:pending"},
-	"tc-railfoot": {"todo:pending", "todo:pending"},
-	"tc-railsec":  {"todo:pending"},
-	"tc-range":    {"gate:range-order", "todo:field-width"},
-	"tc-row":      {"todo:pending", "todo:pending", "todo:pending"},
-	"tc-rubric":   {"todo:pending"},
-	"tc-runbar":   {"todo:pending", "todo:pending"},
-	"tc-scrim":    {"todo:pending", "browser:esc-layers"},
-	"tc-search":   {"todo:pending", "todo:pending"},
-	"tc-sec":      {"todo:pending"},
-	"tc-seg":      {"gate:seg-one-chosen", "todo:narrow-menu"},
+	"tc-queue":    {"gate:inv-queue-question", "gate:inv-queue-meter"},
+	"tc-rail":     {"gate:inv-rail-foot", "gate:inv-rail-drawer-class"},
+	"tc-railfoot": {"gate:inv-railfoot-build", "gate:inv-railfoot-actions"},
+	"tc-railsec":  {"gate:inv-railsec-state"},
+	"tc-range":    {"gate:range-order", "gate:inv-range-field-width"},
+	"tc-row":      {"gate:inv-row-mark", "gate:inv-row-tail", "gate:inv-row-menu-in-tail"},
+	"tc-rubric":   {"gate:inv-rubric-not-heading"},
+	"tc-runbar":   {"gate:inv-runbar-meter-hidden-idle", "gate:inv-runbar-states"},
+	"tc-scrim":    {"gate:inv-scrim-for-attr", "browser:esc-layers"},
+	"tc-search":   {"gate:inv-search-popover-below", "gate:inv-search-no-empty-submit"},
+	"tc-sec":      {"gate:inv-sec-like-card"},
+	"tc-seg":      {"gate:seg-one-chosen", "gate:inv-seg-narrow-menu"},
 	"tc-sheet":    {"browser:esc-layers", "gate:a11y", "gate:a11y"},
-	"tc-shell":    {"todo:pending", "browser:theme-geometry"},
+	"tc-shell":    {"gate:inv-shell-four-zones", "browser:theme-geometry"},
 	"tc-side":     {"browser:esc-layers"},
-	"tc-skel":     {"todo:pending"},
-	"tc-steps":    {"todo:pending", "todo:pending"},
-	"tc-table":    {"todo:column-width", "gate:table-number-columns", "todo:scroll"},
-	"tc-tag":      {"todo:pending"},
-	"tc-thumb":    {"todo:pending", "todo:pending"},
+	"tc-skel":     {"gate:inv-skel-shape"},
+	"tc-stat":     {"gate:inv-stat-string-value"},
+	"tc-stats":    {"gate:inv-stats-no-wrap"},
+	"tc-steps":    {"gate:inv-steps-one-current", "gate:inv-steps-count"},
+	"tc-table":    {"gate:inv-table-column-kind", "gate:table-number-columns", "gate:inv-table-scrollable"},
+	"tc-tag":      {"gate:inv-tag-not-editable"},
+	"tc-thumb":    {"gate:inv-thumb-placeholder", "gate:inv-thumb-icon-fallback"},
 	"tc-tick":     {"gate:a11y", "gate:enumerations"},
-	"tc-tickrow":  {"gate:enumerations", "todo:pending"},
-	"tc-tile":     {"todo:pending"},
-	"tc-top":      {"todo:pending", "todo:pending"},
-	"tc-tree":     {"todo:pending", "gate:a11y"},
-	"tc-usermenu": {"browser:focus-return", "todo:pending"},
+	"tc-tickrow":  {"gate:enumerations", "gate:inv-tickrow-count-optional"},
+	"tc-tile":     {"gate:inv-tile-has-name"},
+	"tc-top":      {"gate:inv-top-brand-once", "gate:inv-top-search"},
+	"tc-tree":     {"gate:inv-tree-one-chosen", "gate:a11y"},
+	"tc-usermenu": {"browser:focus-return", "gate:inv-usermenu-open-state"},
 }
 
 func splitInvariantClauses(text string) []string {
@@ -95,12 +97,10 @@ func checkRefValid(ref string) bool {
 	switch {
 	case strings.HasPrefix(ref, "gate:"):
 		name := strings.TrimPrefix(ref, "gate:")
-		switch name {
-		case "seg-one-chosen", "crumbs-last-not-link", "range-order", "table-number-columns":
+		if isRunnableInvGate(name) {
 			return true
-		default:
-			return gateImplemented(Name(name))
 		}
+		return gateImplemented(Name(name))
 	case strings.HasPrefix(ref, "browser:"):
 		name := strings.TrimPrefix(ref, "browser:")
 		for _, c := range browserChecks {
@@ -110,7 +110,7 @@ func checkRefValid(ref string) bool {
 		}
 		return false
 	case strings.HasPrefix(ref, "todo:"):
-		return true
+		return false
 	case ref == "widget:smoke":
 		return false
 	default:
@@ -150,9 +150,9 @@ func CheckInvariantCoverage(widgetDir string, catalog []CatalogEntry) error {
 				continue
 			}
 			if strings.HasPrefix(ref, "gate:") {
-				switch strings.TrimPrefix(ref, "gate:") {
-				case "seg-one-chosen", "crumbs-last-not-link", "range-order", "table-number-columns":
-					if err := checkInvariantGate(ref, name, catalog); err != nil {
+				gateName := strings.TrimPrefix(ref, "gate:")
+				if isRunnableInvGate(gateName) {
+					if err := checkInvariantGate(ref, name, catalog, widgetDir); err != nil {
 						problems = append(problems, err.Error())
 					}
 				}

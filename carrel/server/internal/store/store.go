@@ -85,6 +85,9 @@ func (s *Store) Mutate(fn func(*State) ([]AuditEntry, error)) error {
 	if err != nil {
 		return err
 	}
+	if err := validateStateKDF(&next); err != nil {
+		return err
+	}
 	for _, e := range entries {
 		if err := validateAudit(e); err != nil {
 			return err
