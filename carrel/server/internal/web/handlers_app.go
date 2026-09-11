@@ -1,12 +1,14 @@
 package web
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"time"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -162,15 +164,67 @@ func (s *Server) getPassword(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	page := view.PasswordPage{
-		Shell: s.buildShell(sess, "Change password"),
-		Form:  plainForm("/app/password", "POST", csrfField(sess), view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword}),
-	}
-	s.writePage(w, r, http.StatusOK, page)
+	s.writePage(w, r, http.StatusOK, s.passwordPage(sess, s.mustChangePassword(sess.AccountID()), nil))
 }
 
 func (s *Server) postPassword(w http.ResponseWriter, r *http.Request) {
-	s.getPassword(w, r)
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	mustChange := s.mustChangePassword(sess.AccountID())
+	start := time.Now()
+	if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	err := s.users.ChangePassword(r.Context(), sess.AccountID(), sess.ID(),
+		r.FormValue("current"), r.FormValue("password"), r.FormValue("password2"))
+	if err != nil {
+		if errors.Is(err, user.ErrWrongPassword) {
+			constantTimeDelay(start, 300*time.Millisecond)
+		}
+		s.writePage(w, r, http.StatusOK, s.passwordPage(sess, mustChange, err))
+		return
+	}
+	if mustChange {
+		s.redirect(w, r, "/app/contacts")
+		return
+	}
+	s.redirect(w, r, "/app/settings/account")
+}
+
+func (s *Server) mustChangePassword(accountID string) bool {
+	snap := s.store.Snapshot()
+	u := snap.UserByID(accountID)
+	return u != nil && u.MustChangePassword
+}
+
+func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error) view.PasswordPage {
+	var currentErr, passErr, pass2Err view.Text
+	switch {
+	case errors.Is(err, user.ErrWrongPassword):
+		currentErr = text("Password is wrong.")
+	case errors.Is(err, user.ErrPasswordShort):
+		passErr = formError(err)
+	case errors.Is(err, user.ErrPasswordMismatch):
+		pass2Err = formError(err)
+	}
+	page := view.PasswordPage{
+		Shell: s.buildShell(sess, "Change password"),
+		Form: plainForm("/app/password", "POST", csrfField(sess),
+			view.FormRow{Name: "current", Label: "Current password", Kind: view.InputPassword, Required: true, Error: currentErr},
+			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true, Error: passErr, Hint: text("At least 8 characters.")},
+			view.FormRow{Name: "password2", Label: "Repeat new password", Kind: view.InputPassword, Required: true, Error: pass2Err},
+		),
+	}
+	if mustChange {
+		page.Warning = view.Notice{
+			Role: view.NoticeAlert,
+			Body: text("You are signed in with a temporary password. Choose a new one before continuing."),
+		}
+	}
+	return page
 }
 
 func (s *Server) getKindRoot(w http.ResponseWriter, r *http.Request, kind string) {

@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"carrel.dev/carrel/server/internal/crypt"
@@ -126,6 +127,62 @@ func RewrapLogin(u *User, newLogin string, wrapKey, dataKey [crypt.KeyLen]byte) 
 	u.Login = newLogin
 	return nil
 }
+
+// ChangePassword re-wraps the data key under a new password without touching
+// the sealed blob (S-2). ApplyPassword must not be used here: it issues a new
+// data key and makes existing ciphertext unreadable.
+func ChangePassword(ctx context.Context, u *User, login, currentPassword, newPassword string) error {
+	if _, ok := DataKeyForLogin(ctx, u, currentPassword); !ok {
+		return errInvalidPassword
+	}
+	oldWrapBytes, _, err := crypt.DeriveWrapKey(ctx, currentPassword, u.WrapSalt)
+	if err != nil {
+		return err
+	}
+	var oldWrap [crypt.KeyLen]byte
+	copy(oldWrap[:], oldWrapBytes)
+
+	loginSalt, err := crypt.NewSalt()
+	if err != nil {
+		crypt.Wipe(oldWrapBytes)
+		return err
+	}
+	wrapSalt, err := crypt.NewSalt()
+	if err != nil {
+		crypt.Wipe(oldWrapBytes)
+		return err
+	}
+	loginHash, loginKDF, err := crypt.HashLogin(ctx, newPassword, loginSalt)
+	if err != nil {
+		crypt.Wipe(oldWrapBytes)
+		return err
+	}
+	newWrapBytes, wrapKDF, err := crypt.DeriveWrapKey(ctx, newPassword, wrapSalt)
+	if err != nil {
+		crypt.Wipe(oldWrapBytes)
+		return err
+	}
+	var newWrap [crypt.KeyLen]byte
+	copy(newWrap[:], newWrapBytes)
+
+	rewrapped, err := crypt.RewrapDataKey(oldWrap, newWrap, u.WrappedKey, login)
+	crypt.Wipe(oldWrapBytes)
+	crypt.Wipe(newWrapBytes)
+	if err != nil {
+		return err
+	}
+
+	u.LoginSalt = loginSalt
+	u.LoginHash = loginHash
+	u.LoginKDF = kdfFromCrypt(loginKDF)
+	u.WrapSalt = wrapSalt
+	u.WrappedKey = rewrapped
+	u.WrapKDF = kdfFromCrypt(wrapKDF)
+	u.MustChangePassword = false
+	return nil
+}
+
+var errInvalidPassword = errors.New("invalid password")
 
 // RewrapPasswordWithKey sets new login credentials while keeping the data key
 // and sealed blob intact (escrow recovery, S-10.5).

@@ -56,6 +56,10 @@ type Users interface {
 	// S-10.7 sheet and journals it.
 	Unlock(ctx context.Context, accountID, password string) bool
 
+	// ChangePassword re-wraps the data key under a new password and ends
+	// every other session of the account.
+	ChangePassword(ctx context.Context, accountID, exceptSID, current, newPW, newPW2 string) error
+
 	EnableEscrow(ctx context.Context, actorID, master, master2 string) error
 	SetEscrowCoverNew(actorID string, cover bool) error
 	ChangeEscrowMaster(ctx context.Context, actorID, current, newPW, newPW2 string) error

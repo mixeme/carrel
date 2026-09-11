@@ -27,6 +27,33 @@ func TestGetEndsExpiredSession(t *testing.T) {
 	}
 }
 
+func TestEndAccountExceptKeepsNamedSession(t *testing.T) {
+	mgr := NewManager(testCfg())
+	s1, err := mgr.Create("a-1", "alice", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s2, err := mgr.Create("a-1", "alice", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	other, err := mgr.Create("a-2", "bob", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	mgr.EndAccountExcept("a-1", s1.ID())
+	if _, ok := mgr.Get(s1.ID()); !ok {
+		t.Fatal("kept session should remain")
+	}
+	if _, ok := mgr.Get(s2.ID()); ok {
+		t.Fatal("other session of same account should be gone")
+	}
+	if _, ok := mgr.Get(other.ID()); !ok {
+		t.Fatal("other account session should remain")
+	}
+}
+
 func TestEndAccountEndsAllSessions(t *testing.T) {
 	mgr := NewManager(testCfg())
 	s1, err := mgr.Create("a-1", "alice", testDataKey(t))

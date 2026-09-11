@@ -615,6 +615,58 @@ func TestForgotWipeRouteAndDeadTokensAlike(t *testing.T) {
 	}
 }
 
+// POST /app/password re-wraps the data key, burns wipe tokens, and ends
+// other sessions of the same account (before-providers.md §2).
+func TestChangePasswordHTTP(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	sess := h.login("alice", "password123")
+	key, ok := sess.DataKey()
+	if !ok {
+		t.Fatal("data key")
+	}
+	h.putConnections("alice", key, "a-alice00001")
+
+	link, err := h.users.IssueConsoleWipeLink("alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+	token := strings.TrimPrefix(link, "/forgot/")
+
+	other := h.login("alice", "password123")
+	current := h.login("alice", "password123")
+
+	rec := h.do(postForm("/app/password", current, url.Values{
+		"current":   {"password123"},
+		"password":  {"newpass1234"},
+		"password2": {"newpass1234"},
+	}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("change password: %d %s", rec.Code, rec.Body.String())
+	}
+	if _, _, _, ok := h.users.Authenticate(context.Background(), "alice", "password123"); ok {
+		t.Fatal("old password still works")
+	}
+	_, newKey, _, ok := h.users.Authenticate(context.Background(), "alice", "newpass1234")
+	if !ok {
+		t.Fatal("new password does not work")
+	}
+	snap := h.st.Snapshot()
+	got, err := sealed.Open(newKey, snap.UserByLogin("alice").SealedBlob, "alice")
+	if err != nil || len(got.Connections) != 1 {
+		t.Fatal("blob unreadable after password change")
+	}
+	if _, ok := h.mgr.Get(other.ID()); ok {
+		t.Fatal("other session still alive")
+	}
+	if _, ok := h.mgr.Get(current.ID()); !ok {
+		t.Fatal("current session ended")
+	}
+	if _, _, valid := h.users.ForgotWipeState(context.Background(), token); valid {
+		t.Fatal("wipe token still valid")
+	}
+}
+
 // /forgot must not claim the wipe email was sent until S-26 dispatches it.
 func TestForgotDoesNotClaimMailSent(t *testing.T) {
 	h := newHarness(t)

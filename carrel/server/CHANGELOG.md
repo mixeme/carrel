@@ -5,6 +5,36 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.21 — 2026-09-07
+
+Closes `/app/password` from [before-providers.md](../../docs/plan/before-providers.md).
+
+### For consumers
+
+- **`POST /app/password` changes the login password without re-encrypting
+  data.** The data key is re-wrapped under the new password; saved DAV
+  connections and the sealed blob stay readable. Wrong current password shares
+  the login rate bucket. After a successful change, `MustChangePassword` is
+  cleared, outstanding wipe links for the account are burned, and every other
+  live session of that person ends (the browser that submitted the form keeps
+  its session).
+
+### Included
+
+- `internal/store`: `ChangePassword` via `RewrapDataKey`.
+- `internal/user`: `ChangePassword` — audit `password.change`, wipe burn,
+  session cleanup.
+- `internal/session`: `EndAccountExcept`.
+- `internal/web`: `POST /app/password` handler and form (current, new, repeat).
+- Tests: `TestChangePasswordPreservesDataKey`,
+  `TestChangePasswordBurnsWipeTokensAndEndsOtherSessions`,
+  `TestEndAccountExceptKeepsNamedSession`, `TestChangePasswordHTTP`.
+
+### Not yet included
+
+Admin panel actions (other than escrow), escrow recovery UI gaps,
+`CARREL_BASE_PATH` on cookies and routes.
+
 ## v0.0.20 — 2026-09-07
 
 Closes key escrow (S-10.5) from [users-tail.md](../../docs/plan/users-tail.md).
@@ -36,7 +66,7 @@ Closes key escrow (S-10.5) from [users-tail.md](../../docs/plan/users-tail.md).
 
 ### Not yet included
 
-Admin panel actions (other than escrow), `/app/password`,
+Admin panel actions (other than escrow), escrow recovery UI gaps,
 `CARREL_BASE_PATH` on cookies and routes.
 
 ## v0.0.19 — 2026-09-07

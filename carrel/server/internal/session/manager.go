@@ -102,6 +102,23 @@ func (m *Manager) EndAccount(accountID string) {
 	}
 }
 
+// EndAccountExcept terminates every live session for one account except the
+// named SID. Used after a password change so the browser that submitted the
+// form keeps its session (S-10).
+func (m *Manager) EndAccountExcept(accountID, exceptSID string) {
+	m.mu.Lock()
+	var ids []string
+	for id, s := range m.byID {
+		if s.accountID == accountID && id != exceptSID {
+			ids = append(ids, id)
+		}
+	}
+	m.mu.Unlock()
+	for _, id := range ids {
+		m.End(id)
+	}
+}
+
 // EndAll wipes every session (process restart / shutdown).
 func (m *Manager) EndAll() {
 	m.mu.Lock()
