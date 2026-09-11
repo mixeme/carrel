@@ -5,10 +5,46 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.29 — 2026-09-08
+
+Closes the pre-provider gate. Remaining S-30.2 coverage (foreign properties,
+collection CRUD, large-file RSS, occupied names, merge) stays in
+[server.md](../../docs/plan/server.md) and waits on provider packages.
+
+### For consumers
+
+- **Admin and escrow POST actions name their target on the href.** Menu
+  items on `/admin/` and `/admin/invites`, and deposit/withdraw on
+  `/app/settings/escrow`, carry `action` and the account or invite identity
+  in the query string (`Action` has no form body in C-6). Posting the href
+  from the JSON view is enough; CSRF still travels in the form.
+- **The escrow admin “covered” list is only deposited accounts.** Accounts
+  that never opted in no longer appear there.
+- **Outbound DAV refuses HTTPS→HTTP redirects.** The Guard does not follow
+  a scheme downgrade, so Basic credentials are not copied to `http://` on
+  the same host. An address entered as `http://` is unchanged (F-13 warning
+  on the connections screen).
+- **`AdminEscrowPage.Result` encodes absence as `null`**, not a missing
+  key (pointer fields in `view` are never `omitempty`).
+- **Radicale integration reset uses a typed `MKCOL`** for the parent
+  calendar folder. Untyped `MKCOL` is 403 on Radicale.
+
+### Included
+
+- `internal/web`: `postQuery`; admin and escrow action hrefs; covered-list
+  filter.
+- `internal/dav`: `httpsToHTTP` in `CheckRedirect`.
+- `integration/radicale_test.go`: typed parent `MKCOL`.
+- Tests: `TestAdminUserMenuHrefDisables`,
+  `TestAdminInviteActionsNameTheInvite`,
+  `TestGetAdminEscrowCoveredOmitsUncovered`,
+  `TestEscrowWithdrawActionCarriesAction`,
+  `TestRedirectRefusesHTTPSDowngrade`.
+
 ## v0.0.28 — 2026-09-08
 
-Closes Linux-machine hygiene from
-[before-providers.md](../../docs/plan/before-providers.md) §5.
+Closes Linux-machine hygiene from the pre-provider gate §5
+([server.md](../../docs/plan/server.md), «Linux-машина»).
 
 ### For consumers
 
@@ -27,8 +63,8 @@ Closes Linux-machine hygiene from
 
 ## v0.0.27 — 2026-09-08
 
-Closes discovery well-known defects from
-[before-providers.md](../../docs/plan/before-providers.md) §4.
+Closes discovery well-known defects from the pre-provider gate
+([server.md](../../docs/plan/server.md), S-30.2 first run).
 
 ### For consumers
 
@@ -54,8 +90,8 @@ Closes discovery well-known defects from
 
 ## v0.0.26 — 2026-09-08
 
-Closes escrow admin UI gaps from
-[before-providers.md](../../docs/plan/before-providers.md) §1.
+Closes escrow admin UI gaps from the pre-provider gate
+([server.md](../../docs/plan/server.md), users / escrow).
 
 ### For consumers
 
@@ -77,7 +113,7 @@ Closes escrow admin UI gaps from
 ## v0.0.25 — 2026-09-08
 
 Closes the audit №2 tail. Remaining work (discovery,
-Linux) stays in [before-providers.md](../../docs/plan/before-providers.md).
+Linux) closed in `v0.0.27`…`v0.0.29`.
 
 ### For consumers
 
@@ -93,8 +129,7 @@ Linux) stays in [before-providers.md](../../docs/plan/before-providers.md).
 
 ### Not yet included
 
-Discovery defects and Linux compose remain in
-[before-providers.md](../../docs/plan/before-providers.md).
+Discovery defects and Linux compose closed in `v0.0.27`…`v0.0.28`.
 
 ## v0.0.24 — 2026-09-08
 
@@ -119,7 +154,7 @@ Closes audit perimeter №3 (secret-in-URL headers and public stubs).
 ## v0.0.23 — 2026-09-08
 
 Closes admin panel handlers from the audit №2 tail
-and [before-providers.md](../../docs/plan/before-providers.md) §3 (people,
+and the pre-provider gate §3 (people,
 invites, roles, wipe/recover, audit).
 
 ### For consumers
@@ -175,7 +210,7 @@ Admin panel actions (other than escrow), escrow recovery UI gaps.
 
 ## v0.0.21 — 2026-09-07
 
-Closes `/app/password` from [before-providers.md](../../docs/plan/before-providers.md).
+Closes `/app/password` from the pre-provider gate.
 
 ### For consumers
 
@@ -300,9 +335,7 @@ Key escrow (S-10.5), admin panel actions, `/app/password`,
 
 Closes Fable audit №2 (accounts and secrets, Ф2-1…Ф2-15 in
 [reviews.md](../../docs/plan/reviews.md)). Every fix ships with a test that
-was red on v0.0.16. Layers after the audit closed in `v0.0.18`…`v0.0.25`;
-remaining gaps are in
-[before-providers.md](../../docs/plan/before-providers.md).
+was red on v0.0.16. Layers after the audit closed in `v0.0.18`…`v0.0.29`.
 
 ### For consumers
 

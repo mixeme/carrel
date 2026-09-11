@@ -90,9 +90,19 @@ func (g *Guard) httpClient(pinnedFingerprint string) *http.Client {
 			if len(via) >= g.maxRedirect {
 				return fmt.Errorf("dav: too many redirects")
 			}
+			if httpsToHTTP(via[0].URL, req.URL) {
+				return fmt.Errorf("dav: redirect downgrades HTTPS to HTTP")
+			}
 			return nil
 		},
 	}
+}
+
+func httpsToHTTP(from, to *url.URL) bool {
+	if from == nil || to == nil {
+		return false
+	}
+	return strings.EqualFold(from.Scheme, "https") && strings.EqualFold(to.Scheme, "http")
 }
 
 func (g *Guard) dialContext(ctx context.Context, network, address string) (net.Conn, error) {

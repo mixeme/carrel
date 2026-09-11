@@ -44,6 +44,8 @@ do, not what the authors did.
 
 ### Fixed
 
+- `scripts/typecase-screens.bat` opens the browser when the server is listening,
+  prints the route list, and pauses on startup failure (e.g. port already in use).
 - Narrow `Apply` was packed into the `tc-top` overflow stash, then painted
   under `tc-search`, so it could not be pressed. It stays in the bar above the
   open drawer.

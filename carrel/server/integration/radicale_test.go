@@ -78,7 +78,17 @@ func resetRadicale(t *testing.T, endpoint string) {
 	_ = client.Delete(ctx, "/cal/", "")
 	_ = client.Delete(ctx, "/contacts/", "")
 
-	resp, err := davRequest(ctx, g, "MKCOL", base+"/cal/", "")
+	// Radicale rejects untyped MKCOL (403, type:UNKNOWN). Parent folders
+	// must declare DAV:collection; calendars use MKCALENDAR.
+	parentBody := `<?xml version="1.0" encoding="utf-8"?>
+<D:mkcol xmlns:D="DAV:">
+  <D:set>
+    <D:prop>
+      <D:resourcetype><D:collection/></D:resourcetype>
+    </D:prop>
+  </D:set>
+</D:mkcol>`
+	resp, err := davRequest(ctx, g, "MKCOL", base+"/cal/", parentBody)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"carrel.dev/carrel/server/internal/session"
@@ -148,37 +149,44 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 
 func (s *Server) adminUserMenu(sess *session.Session, snap store.State, u *store.User) []view.MenuItem {
 	lastAdmin := u.Role == store.RoleAdmin && store.AdminCount(&snap) <= 1 && !u.Disabled
-	adminPath := s.route("/admin/")
 	menu := []view.MenuItem{
 		{Action: view.Action{
-			ID: "admin.user.sessions", Label: "End sessions", Href: adminPath, Method: "POST",
-			Enabled: s.sessions.LiveCount(u.ID) > 0,
+			ID: "admin.user.sessions", Label: "End sessions",
+			Href:   s.postQuery("/admin/", url.Values{"action": {"sessions"}, "target": {u.ID}}),
+			Method: "POST", Enabled: s.sessions.LiveCount(u.ID) > 0,
 		}},
 	}
 	if !u.Disabled {
 		menu = append(menu, view.MenuItem{Action: view.Action{
-			ID: "admin.user.disable", Label: "Disable", Href: adminPath, Method: "POST",
-			Enabled: !lastAdmin, Reason: text("Cannot disable the last administrator."),
+			ID: "admin.user.disable", Label: "Disable",
+			Href:   s.postQuery("/admin/", url.Values{"action": {"disable"}, "target": {u.ID}}),
+			Method: "POST", Enabled: !lastAdmin, Reason: text("Cannot disable the last administrator."),
 		}})
 	}
 	if u.Role == store.RoleUser {
 		menu = append(menu, view.MenuItem{Action: view.Action{
-			ID: "admin.user.role", Label: "Make administrator", Href: adminPath, Method: "POST", Enabled: true,
+			ID: "admin.user.role", Label: "Make administrator",
+			Href:   s.postQuery("/admin/", url.Values{"action": {"role"}, "target": {u.ID}, "role": {"admin"}}),
+			Method: "POST", Enabled: true,
 		}})
 	} else if !lastAdmin {
 		menu = append(menu, view.MenuItem{Action: view.Action{
-			ID: "admin.user.role", Label: "Make user", Href: adminPath, Method: "POST", Enabled: true,
+			ID: "admin.user.role", Label: "Make user",
+			Href:   s.postQuery("/admin/", url.Values{"action": {"role"}, "target": {u.ID}, "role": {"user"}}),
+			Method: "POST", Enabled: true,
 		}})
 	}
 	menu = append(menu,
 		view.MenuItem{Separator: true, Action: view.Action{
-			ID: "admin.user.reset", Label: "Reset password", Href: adminPath, Method: "POST",
-			Enabled: !u.Disabled, Danger: true,
+			ID: "admin.user.reset", Label: "Reset password",
+			Href:   s.postQuery("/admin/", url.Values{"action": {"reset"}, "target": {u.ID}}),
+			Method: "POST", Enabled: !u.Disabled, Danger: true,
 			Reason: text("Destroys encrypted connections. Issues the same wipe link as /forgot."),
 		}},
 		view.MenuItem{Action: view.Action{
-			ID: "admin.user.delete", Label: "Delete", Href: adminPath, Method: "POST",
-			Enabled: !lastAdmin, Danger: true,
+			ID: "admin.user.delete", Label: "Delete",
+			Href:   s.postQuery("/admin/", url.Values{"action": {"delete"}, "target": {u.ID}}),
+			Method: "POST", Enabled: !lastAdmin, Danger: true,
 			Reason: text("Type the login to confirm. Cannot delete the last administrator."),
 		}},
 	)
@@ -270,9 +278,15 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvites
 			Sent:    inviteSentStatus(s.cfg.MailEnabled),
 			Expires: formatWhen(inv.ExpiresAt, s.tz(), false, now),
 			Actions: []view.Action{
-				{ID: "admin.invite.extend", Label: "Extend", Href: s.route("/admin/invites"), Method: "POST", Enabled: true},
-				{ID: "admin.invite.revoke", Label: "Revoke", Href: s.route("/admin/invites"), Method: "POST", Enabled: true, Danger: true},
-				{ID: "admin.invite.resend", Label: "Send again", Href: s.route("/admin/invites"), Method: "POST", Enabled: true},
+				{ID: "admin.invite.extend", Label: "Extend",
+					Href:   s.postQuery("/admin/invites", url.Values{"action": {"extend"}, "invite": {inv.ID}}),
+					Method: "POST", Enabled: true},
+				{ID: "admin.invite.revoke", Label: "Revoke",
+					Href:   s.postQuery("/admin/invites", url.Values{"action": {"revoke"}, "invite": {inv.ID}}),
+					Method: "POST", Enabled: true, Danger: true},
+				{ID: "admin.invite.resend", Label: "Send again",
+					Href:   s.postQuery("/admin/invites", url.Values{"action": {"resend"}, "login": {inv.Login}, "email": {inv.Email}}),
+					Method: "POST", Enabled: true},
 			},
 		}
 		if inv.Secret != "" {

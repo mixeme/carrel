@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"carrel.dev/carrel/server/internal/session"
@@ -76,12 +77,14 @@ func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.Esc
 			status.LastUsed = formatWhen(*u.EscrowDepositedAt, s.tz(), false, time.Now())
 		}
 		status.Actions = []view.Action{{
-			ID: "escrow.withdraw", Label: "Withdraw my deposited key", Href: s.route("/app/settings/escrow"),
+			ID: "escrow.withdraw", Label: "Withdraw my deposited key",
+			Href:   s.postQuery("/app/settings/escrow", url.Values{"action": {"withdraw"}}),
 			Method: "POST", Enabled: true,
 		}}
 	} else if active {
 		status.Actions = []view.Action{{
-			ID: "escrow.deposit", Label: "Deposit my key", Href: s.route("/app/settings/escrow"),
+			ID: "escrow.deposit", Label: "Deposit my key",
+			Href:   s.postQuery("/app/settings/escrow", url.Values{"action": {"deposit"}}),
 			Method: "POST", Enabled: sess.UnlockUntil(time.Now()) != nil,
 		}}
 	}
@@ -230,14 +233,14 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 		}
 	}
 	for _, u := range snap.Users {
-		if u.Disabled {
+		if u.Disabled || !store.UserDeposited(&u) {
 			continue
 		}
 		row := view.AdminUserRow{
-			Login: text(u.Login),
+			Login:    text(u.Login),
+			Escrowed: true,
 		}
-		if store.UserDeposited(&u) && u.EscrowDepositedAt != nil {
-			row.Escrowed = true
+		if u.EscrowDepositedAt != nil {
 			row.Created = formatWhen(*u.EscrowDepositedAt, s.tz(), false, time.Now())
 		}
 		if u.EscrowLastRecovery != nil {

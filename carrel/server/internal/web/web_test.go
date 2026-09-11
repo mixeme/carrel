@@ -741,7 +741,7 @@ func TestSecretPathReferrerPolicy(t *testing.T) {
 }
 
 // POST /app/password re-wraps the data key, burns wipe tokens, and ends
-// other sessions of the same account (before-providers.md §2).
+// other sessions of the same account.
 func TestChangePasswordHTTP(t *testing.T) {
 	h := newHarness(t)
 	h.admin("alice", "password123")

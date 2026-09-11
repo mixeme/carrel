@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"testing"
 
+	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -52,6 +53,43 @@ func TestPostAdminEscrowRecoverShowsTempPassword(t *testing.T) {
 	temp := string(page.Result.Password)
 	if _, _, ok, _ := h.users.Authenticate(context.Background(), "bob", temp); !ok {
 		t.Fatal("cannot sign in with temporary password from recovery page")
+	}
+}
+
+func TestEscrowWithdrawActionCarriesAction(t *testing.T) {
+	h := newHarness(t)
+	const master = "sixteen-char-pass!"
+	h.enableEscrow("alice", "password123", master)
+	snap := h.st.Snapshot()
+	adminID := snap.UserByLogin("alice").ID
+	h.invite(adminID, "bob", "bobpass123")
+	bob := h.login("bob", "bobpass123")
+
+	rec := h.do(get("/app/settings/escrow", bob))
+	var page view.EscrowPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+		t.Fatal(err)
+	}
+	href := ""
+	for _, a := range page.Status.Actions {
+		if a.ID == "escrow.withdraw" {
+			href = a.Href
+		}
+	}
+	if href == "" {
+		t.Fatal("withdraw action missing")
+	}
+	u, err := url.Parse(href)
+	if err != nil || u.Query().Get("action") != "withdraw" {
+		t.Fatalf("withdraw href = %q, want action=withdraw", href)
+	}
+	rec = h.do(postForm(href, bob, url.Values{}))
+	if rec.Code != 303 {
+		t.Fatalf("POST withdraw href: %d, want redirect", rec.Code)
+	}
+	snap = h.st.Snapshot()
+	if store.UserDeposited(snap.UserByLogin("bob")) {
+		t.Fatal("bob still deposited after withdraw via href")
 	}
 }
 
@@ -224,5 +262,126 @@ func TestGetAdminUsersListsPeople(t *testing.T) {
 	}
 	if len(page.Rows) < 2 {
 		t.Fatalf("rows = %d, want alice and bob", len(page.Rows))
+	}
+}
+
+func TestAdminUserMenuHrefDisables(t *testing.T) {
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	bobID := h.invite(adminID, "bob", "bobpass123")
+	alice := h.login("alice", "password123")
+
+	rec := h.do(get("/admin/", alice))
+	var page view.AdminUsersPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+		t.Fatal(err)
+	}
+	href := ""
+	for _, row := range page.Rows {
+		if row.Login != "bob" {
+			continue
+		}
+		for _, item := range row.Menu {
+			if item.ID == "admin.user.disable" {
+				href = item.Href
+			}
+		}
+	}
+	if href == "" {
+		t.Fatal("disable action missing for bob")
+	}
+	rec = h.do(postForm(href, alice, url.Values{}))
+	if rec.Code != 303 {
+		t.Fatalf("POST disable href %q: %d, want redirect", href, rec.Code)
+	}
+	snap := h.st.Snapshot()
+	if u := snap.UserByID(bobID); u == nil || !u.Disabled {
+		t.Fatal("bob not disabled via menu href")
+	}
+}
+
+func TestAdminInviteActionsNameTheInvite(t *testing.T) {
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	alice := h.login("alice", "password123")
+	form := url.Values{"action": {"create"}, "login": {"carol"}, "email": {"carol@example.com"}}
+	if rec := h.do(postForm("/admin/invites", alice, form)); rec.Code != 303 {
+		t.Fatalf("create invite: %d", rec.Code)
+	}
+	snap := h.st.Snapshot()
+	var invID, secret string
+	for _, inv := range snap.Invites {
+		if inv.Login == "carol" {
+			invID, secret = inv.ID, inv.Secret
+			break
+		}
+	}
+	if invID == "" {
+		t.Fatal("invite not stored")
+	}
+
+	rec := h.do(get("/admin/invites", alice))
+	var page view.AdminInvitesPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+		t.Fatal(err)
+	}
+	var extend, revoke, resend string
+	for _, row := range page.Rows {
+		if row.Login != "carol" {
+			continue
+		}
+		for _, a := range row.Actions {
+			switch a.ID {
+			case "admin.invite.extend":
+				extend = a.Href
+			case "admin.invite.revoke":
+				revoke = a.Href
+			case "admin.invite.resend":
+				resend = a.Href
+			}
+		}
+	}
+	mustQuery := func(raw, key, want string) {
+		t.Helper()
+		u, err := url.Parse(raw)
+		if err != nil {
+			t.Fatalf("parse %q: %v", raw, err)
+		}
+		if u.Query().Get(key) != want {
+			t.Fatalf("%s %s = %q, want %q (href %q)", key, raw, u.Query().Get(key), want, raw)
+		}
+	}
+	mustQuery(extend, "action", "extend")
+	mustQuery(extend, "invite", invID)
+	mustQuery(revoke, "action", "revoke")
+	mustQuery(revoke, "invite", invID)
+	mustQuery(resend, "action", "resend")
+	mustQuery(resend, "login", "carol")
+	mustQuery(resend, "email", "carol@example.com")
+
+	if rec := h.do(postForm(extend, alice, url.Values{})); rec.Code != 303 {
+		t.Fatalf("POST extend href: %d", rec.Code)
+	}
+	if !h.users.InviteValid(context.Background(), secret) {
+		t.Fatal("extend via href broke the secret")
+	}
+	_ = adminID
+}
+
+func TestGetAdminEscrowCoveredOmitsUncovered(t *testing.T) {
+	h := newHarness(t)
+	const master = "sixteen-char-pass!"
+	h.enableEscrow("alice", "password123", master)
+	alice := h.login("alice", "password123")
+	snap := h.st.Snapshot()
+	h.invite(snap.UserByLogin("alice").ID, "bob", "bobpass123")
+
+	rec := h.do(get("/admin/escrow", alice))
+	var page view.AdminEscrowPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+		t.Fatal(err)
+	}
+	if len(page.Covered) != 1 || page.Covered[0].Login != "bob" || !page.Covered[0].Escrowed {
+		t.Fatalf("covered = %+v, want only deposited bob", page.Covered)
 	}
 }

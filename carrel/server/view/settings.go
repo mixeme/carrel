@@ -277,7 +277,7 @@ type AdminEscrowPage struct {
 	Master  Form                  `json:"master"`
 	Covered []AdminUserRow        `json:"covered"`
 	Recover Form                  `json:"recover"`
-	Result  *EscrowRecoveryResult `json:"result,omitempty"`
+	Result  *EscrowRecoveryResult `json:"result"`
 	History []AuditRow            `json:"history"`
 }
 

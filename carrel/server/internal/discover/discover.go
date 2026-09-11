@@ -235,8 +235,9 @@ func formatErr(err error) string {
 	return err.Error()
 }
 
-// acceptWellKnownTarget gates a well-known redirect before credentials are sent
-// to the candidate (S-6, before-providers §4).
+// acceptWellKnownTarget gates a well-known redirect before discovery switches
+// to the candidate. HTTPS→HTTP is refused here and again in Guard.CheckRedirect
+// so credentials are not sent to a downgraded scheme (S-6).
 func acceptWellKnownTarget(ctx context.Context, g *dav.Guard, entered, candidate, username, password string) (bool, string) {
 	enteredURL, err := url.Parse(entered)
 	if err != nil {
