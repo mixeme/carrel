@@ -177,6 +177,95 @@ for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
         badfix.append("не разбирается: %s (%s)" % (p, e))
 check("7. фикстуры разбираются", badfix)
 
+# 8. Фикстура рисуется в свой кадр.
+# Проверка 1 говорит, что кадр назван в карте маршрутов, проверка 2 — что у
+# маршрута есть вью-модель. Ни одна не смотрит, что данные фикстуры и данные
+# кадра — про один и тот же экземпляр. Без этого фикстура и кадр расходятся
+# молча, а клиент, который по U-15.2 сверяется с кадром машинным diff, не
+# может отрисовать в него свою фикстуру ни при каком старании.
+#
+# Сравнивается оболочка — рейл и навигация: их рисует каждый кадр внутри
+# входа, поэтому проверка общая, а не про списки контактов.
+#   состав коллекций — во всех состояниях: состояние меняет числа и флажки,
+#     но не то, какие книги подключены;
+#   числа, флажки и счётчики разделов — только в normal: partial нарочно
+#     показывает прочерки во время опроса, unavailable — упавший аккаунт.
+FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут из C-5
+    "app-contacts": "/app/contacts",
+    "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
+}
+
+def as_kind(x):
+    """Кадр рода пишет свой маршрут, карта — шаблон: сводим к шаблону."""
+    return re.sub(r'/app/(contacts|calendar|tasks|notes)/', '/app/{kind}/', x)
+
+def canon_frame(route):
+    """Кадр маршрута: тот, что рисует экран целиком, а не его кусок."""
+    for m in re.finditer(r'<div class="frame"([^>]*)>', mock):
+        attrs = m.group(1)
+        if 'data-part=' in attrs:
+            continue
+        ds = re.search(r'data-screen="([^"]+)"', attrs)
+        if ds and as_kind(route) in [as_kind(s) for s in ds.group(1).split()]:
+            nxt = mock.find('<div class="frame"', m.end())
+            return mock[m.end():nxt if nxt > 0 else len(mock)]
+    return None
+
+def frame_rail(frame):
+    cols = []
+    for m in re.finditer(r'<div class="m-src([^"]*)">(.*?)</div>', frame, re.S):
+        lab = re.search(r'<span class="t">([^<]*)</span>', m.group(2))
+        meta = re.search(r'<span class="m-meta">([^<]*)</span>', m.group(2))
+        if lab and meta:
+            cols.append((lab.group(1), meta.group(1),
+                         "off" if "is-off" in m.group(1) else "on"))
+    nav = []
+    nm = re.search(r'<div class="m-nav">(.*?)</div>', frame, re.S)
+    if nm:
+        for a in re.finditer(r'<a[^>]*>(.*?)</a>', nm.group(1), re.S):
+            num = re.search(r'<span class="m-num">([^<]*)</span>', a.group(1))
+            lab = re.sub(r'<[^>]+>', '', re.sub(r'<span class="m-num">.*?</span>', '', a.group(1))).strip()
+            nav.append((lab, num.group(1) if num else None))
+    return cols, nav
+
+def fixture_rail(data):
+    rail = data.get("rail") or {}
+    cols = [(r.get("label"),
+             "—" if r.get("count") is None else str(r.get("count")),
+             "off" if r.get("tick") == "off" else "on")
+            for s in rail.get("sections") or [] for r in s.get("rows") or []]
+    nav = [(n.get("label"), None if n.get("count") is None else str(n.get("count")))
+           for n in rail.get("nav") or []]
+    return cols, nav
+
+drift = []
+for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
+    d = os.path.basename(os.path.dirname(p))
+    state = os.path.splitext(os.path.basename(p))[0]
+    if d not in FIXTURE_SCREEN:
+        drift.append("%s: каталог не назван в FIXTURE_SCREEN — неизвестно, какой кадр сверять" % d)
+        continue
+    frame = canon_frame(FIXTURE_SCREEN[d])
+    if frame is None:
+        drift.append("%s: нет кадра для %s" % (d, FIXTURE_SCREEN[d]))
+        continue
+    try:
+        data = json.load(io.open(p, encoding="utf-8"))
+    except Exception:
+        continue                      # об этом уже сказала проверка 7
+    fc, fn = frame_rail(frame)
+    xc, xn = fixture_rail(data)
+    where = "%s/%s" % (d, state)
+    if [c[0] for c in fc] != [c[0] for c in xc]:
+        drift.append("%s: коллекции рейла: кадр %s, фикстура %s"
+                     % (where, [c[0] for c in fc], [c[0] for c in xc]))
+    elif state == "normal":
+        if fc != xc:
+            drift.append("%s: числа или флажки коллекций: кадр %s, фикстура %s" % (where, fc, xc))
+        if fn != xn:
+            drift.append("%s: навигация: кадр %s, фикстура %s" % (where, fn, xn))
+check("8. фикстура рисуется в свой кадр", drift)
+
 print()
 print("ИТОГ: %d красных проверок" % len(fails))
 sys.exit(1 if fails else 0)

@@ -1,0 +1,67 @@
+/* tc-list, tc-row, tc-tickrow, tc-rubric */
+
+.tc-list { border: var(--tc-stroke) solid var(--tc-rule); border-radius: var(--tc-radius); }
+.tc-list--touch .tc-row { min-height: var(--tc-row-height-touch); }
+
+.tc-rubric {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.35em 0.75em;
+	font-size: 0.75em;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--tc-muted);
+	background: var(--tc-bg);
+}
+
+.tc-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	min-height: var(--tc-row-height);
+	padding: 0 0.75em;
+	border-bottom: var(--tc-stroke) solid var(--tc-rule);
+	text-decoration: none;
+	color: var(--tc-ink);
+}
+.tc-row:last-child { border-bottom: 0; }
+.tc-row.is-selected { background: color-mix(in srgb, var(--tc-accent) 12%, var(--tc-surface)); }
+.tc-row.is-muted { opacity: 0.65; }
+.tc-row.is-alert { border-left: 3px solid var(--tc-danger); }
+.tc-row__cells { flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.5em; overflow: hidden; }
+.tc-row__title, .tc-row__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tc-row__subtitle, .tc-row__detail, .tc-row__caption { color: var(--tc-muted); font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tc-row__lead { font-family: var(--tc-font-mono); flex: none; }
+.tc-row__tail { flex: none; margin-left: auto; }
+.tc-row__excerpt {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+.tc-row--find .tc-row__find { display: flex; flex-direction: column; min-width: 0; }
+
+.tc-tickrow {
+	display: flex;
+	align-items: center;
+	gap: 0.35em;
+	min-height: var(--tc-row-height);
+	padding: 0 0.5em;
+}
+.tc-tickrow__tick {
+	width: 13px;
+	height: 13px;
+	min-width: 44px;
+	min-height: 44px;
+	border: var(--tc-stroke) solid var(--tc-rule);
+	border-radius: var(--tc-radius);
+	background: var(--tc-surface);
+	cursor: pointer;
+	flex: none;
+}
+.tc-tickrow__tick.is-on { background: var(--tc-accent); }
+.tc-tickrow__tick.is-partial { background: color-mix(in srgb, var(--tc-accent) 50%, var(--tc-surface)); }
+.tc-tickrow__label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tc-tickrow__state { color: var(--tc-danger); font-size: 0.85em; margin-left: 0.35em; }
+.tc-tickrow.is-unavailable { opacity: 0.65; }

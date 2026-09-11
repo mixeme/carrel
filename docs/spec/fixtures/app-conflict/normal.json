@@ -18,12 +18,7 @@
   },
   "rail": {
     "nav": [
-      { "id": "nav.contacts", "label": "Contacts", "icon": "i-con", "href": "/app/contacts", "method": "GET", "enabled": true, "count": 312, "on": true },
-      { "id": "nav.calendar", "label": "Calendar", "icon": "i-cal", "href": "/app/calendar", "method": "GET", "enabled": true, "count": 14, "on": false },
-      { "id": "nav.tasks", "label": "Tasks", "icon": "i-task", "href": "/app/tasks", "method": "GET", "enabled": true, "count": 3, "on": false },
-      { "id": "nav.notes", "label": "Notes", "icon": "i-note", "href": "/app/notes", "method": "GET", "enabled": true, "count": 86, "on": false },
-      { "id": "nav.files", "label": "Files", "icon": "i-file", "href": "/app/files", "method": "GET", "enabled": true, "count": null, "on": false },
-      { "id": "nav.duplicates", "label": "Duplicates", "icon": "i-dup", "href": "/app/duplicates", "method": "GET", "enabled": true, "count": 3, "on": false }
+      { "id": "nav.back", "label": "Back to list", "icon": "i-back", "href": "/app/contacts/a-nc-home/kontakty", "method": "GET", "enabled": true, "count": null, "on": false }
     ],
     "sections": [
       {
@@ -31,7 +26,6 @@
         "accountID": "a-nc-home",
         "state": "ok",
         "rows": [
-          { "href": "/app/contacts", "label": "Combined address book", "colour": "", "count": 312, "tick": "part", "readOnly": false, "state": "ok", "menu": [] },
           { "href": "/app/contacts/a-nc-home/kontakty", "label": "Контакты", "colour": "#4A6B52", "count": 248, "tick": "on", "readOnly": false, "state": "ok", "menu": [] },
           { "href": "/app/contacts/a-nc-home/arhiv", "label": "Архив", "colour": "#A05A2C", "count": 51, "tick": "on", "readOnly": false, "state": "ok", "menu": [] }
         ]

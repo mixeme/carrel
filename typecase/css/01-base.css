@@ -1,0 +1,46 @@
+@font-face {
+	font-family: "Literata";
+	font-style: normal;
+	font-weight: 200 900;
+	font-display: swap;
+	src: url("../fonts/Literata.ttf") format("truetype");
+}
+
+@font-face {
+	font-family: "Public Sans";
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url("../fonts/PublicSans.ttf") format("truetype");
+}
+
+@font-face {
+	font-family: "Source Code Pro";
+	font-style: normal;
+	font-weight: 200 900;
+	font-display: swap;
+	src: url("../fonts/SourceCodePro.ttf") format("truetype");
+}
+
+.tc-root {
+	box-sizing: border-box;
+	color: var(--tc-ink);
+	background: var(--tc-bg);
+	font-family: var(--tc-font-sans);
+	font-size: var(--tc-font-size);
+	line-height: 1.45;
+}
+
+.tc-root *,
+.tc-root *::before,
+.tc-root *::after {
+	box-sizing: border-box;
+}
+
+.tc-icon {
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+	flex: none;
+}
