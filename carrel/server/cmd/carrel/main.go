@@ -60,7 +60,9 @@ func run(cfg *conf.Config) error {
 	if st.FirstRun() {
 		slog.Info("carrel: first-run mode", "dataDir", cfg.DataDir)
 	}
-	_ = session.NewManager(cfg)
+	mgr := session.NewManager(cfg)
+	stopPurge := runSessionPurge(mgr, time.Minute)
+	defer stopPurge()
 
 	addr := net.JoinHostPort(cfg.Bind, strconv.Itoa(cfg.Port))
 
@@ -81,4 +83,23 @@ func run(cfg *conf.Config) error {
 func healthz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_, _ = w.Write([]byte("ok"))
+}
+
+func runSessionPurge(mgr *session.Manager, interval time.Duration) func() {
+	stop := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case now := <-ticker.C:
+				if n := mgr.PurgeExpired(now); n > 0 {
+					slog.Debug("carrel: purged expired sessions", "count", n)
+				}
+			case <-stop:
+				return
+			}
+		}
+	}()
+	return func() { close(stop) }
 }

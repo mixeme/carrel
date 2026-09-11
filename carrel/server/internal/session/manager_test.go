@@ -76,6 +76,14 @@ func TestEndedSessionIsInert(t *testing.T) {
 	if got := s.Draft(DraftPendingPhoto); got != nil {
 		t.Fatal("ended session should not store drafts")
 	}
+	s.AddHistory("ghost")
+	if len(s.History()) != 0 {
+		t.Fatal("ended session should not store history")
+	}
+	s.NoteLoss("srv1", "X-FOO")
+	if s.HasLoss("srv1", "X-FOO") {
+		t.Fatal("ended session should not record losses")
+	}
 }
 
 func TestCacheIsolatesConnections(t *testing.T) {
@@ -107,6 +115,20 @@ func TestCacheIsolatesConnections(t *testing.T) {
 	}
 }
 
+func TestInvalidateCollectionList(t *testing.T) {
+	mgr := NewManager(testCfg())
+	s, err := mgr.Create("a-1", "alice", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := s.Cache()
+	c.PutCollectionList("alice", []byte("collections"))
+	c.InvalidateCollectionList("alice")
+	if _, ok := c.GetCollectionList("alice"); ok {
+		t.Fatal("collection list should be invalidated")
+	}
+}
+
 func TestTouchExpiresUnderManagerLock(t *testing.T) {
 	mgr := NewManager(testCfg())
 	s, err := mgr.Create("a-1", "alice", testDataKey(t))
@@ -123,5 +145,30 @@ func TestTouchExpiresUnderManagerLock(t *testing.T) {
 	}
 	if _, ok := mgr.Get(s.ID()); ok {
 		t.Fatal("expired session should be removed")
+	}
+}
+
+func TestPurgeExpiredRemovesOrphanSession(t *testing.T) {
+	mgr := NewManager(testCfg())
+	s, err := mgr.Create("a-1", "alice", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Cache().PutBody("conn-a", "/x", "v1", []byte("cached"))
+
+	past := time.Now().Add(-conf.SessionAbsoluteTimeout - time.Hour)
+	s.mu.Lock()
+	s.absoluteAt = past
+	s.lastSeen = past
+	s.mu.Unlock()
+
+	if n := mgr.PurgeExpired(time.Now()); n != 1 {
+		t.Fatalf("purged = %d, want 1", n)
+	}
+	if _, ok := mgr.Get(s.ID()); ok {
+		t.Fatal("orphan session should be gone without Get by SID")
+	}
+	if mgr.ProcessBytes() != 0 {
+		t.Fatalf("cache bytes = %d after purge", mgr.ProcessBytes())
 	}
 }

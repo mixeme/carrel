@@ -105,6 +105,18 @@ func (c *Cache) GetThumb(connID, path, version string) ([]byte, bool) {
 	return c.get(thumbKey(connID, path, version))
 }
 
+// InvalidateCollectionList drops a cached collection list for one account.
+func (c *Cache) InvalidateCollectionList(account string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.ended {
+		return
+	}
+	if e := c.entries[collKey(account)]; e != nil {
+		c.removeLocked(collKey(account))
+	}
+}
+
 // InvalidatePath drops cached data for one object path on a connection.
 func (c *Cache) InvalidatePath(connID, path string) {
 	c.mu.Lock()

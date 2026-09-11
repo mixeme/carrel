@@ -251,6 +251,7 @@ func TestSessionEvictionByAccessTime(t *testing.T) {
 	}
 	c := s.Cache()
 	c.PutBody("conn-a", "/a", "v1", make([]byte, 40))
+	time.Sleep(2 * time.Millisecond)
 	c.PutBody("conn-a", "/b", "v1", make([]byte, 40))
 	if _, ok := c.GetBody("conn-a", "/b", "v1"); !ok {
 		t.Fatal("b should be present")

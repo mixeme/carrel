@@ -144,6 +144,9 @@ func (s *Session) SetDraft(slot DraftSlot, data []byte) {
 func (s *Session) NoteLoss(serverID, prop string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.ended {
+		return
+	}
 	s.losses.Note(serverID, prop)
 }
 
@@ -206,6 +209,9 @@ func (s *Session) LiveFanouts() int {
 func (s *Session) AddHistory(query string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.ended {
+		return
+	}
 	s.history = append([]HistoryEntry{{Query: query, At: time.Now()}}, s.history...)
 	if len(s.history) > 10 {
 		s.history = s.history[:10]

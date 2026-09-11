@@ -4,6 +4,35 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.10 — 2026-09-05
+
+Closes the Fable verification debt on commit `1dd02cb` (findings Ф-15…Ф-17 and
+follow-ups from [reviews.md](../../docs/plan/reviews.md)).
+
+### For consumers
+
+- DAV transport credentials no longer leak on cross-host redirects: custom methods
+  use the same `HTTPClientWithBasicAuth` path as go-webdav, not a transport-level
+  Basic wrapper.
+- `httpStatusError` reads at most 256 bytes of a remote error body.
+- `cmd/carrel` runs `PurgeExpired` every minute so abandoned sessions release
+  keys and cache without another request.
+- `Cache.InvalidateCollectionList(account)` clears a cached collection list after
+  collection CRUD (S-12).
+- Ended sessions ignore `AddHistory` and `NoteLoss`.
+
+### Included
+
+- `internal/dav/client.go`: single guarded client, `hc.Do` for all methods;
+  redirect auth tests; limited error-body read test.
+- `cmd/carrel/main.go`: session purge ticker with shutdown hook.
+- `internal/session`: `InvalidateCollectionList`; `ended` on history/loss;
+  `TestPurgeExpiredRemovesOrphanSession`.
+
+### Not yet included
+
+The request layer — ready to start per [server.md](../../docs/plan/server.md).
+
 ## carrel/server/v0.0.9 — 2026-09-05
 
 Closes the first Fable audit debt from [docs/plan/server.md](../../docs/plan/server.md)

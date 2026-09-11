@@ -3,7 +3,6 @@ package dav
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -21,7 +20,7 @@ import (
 // Client is a guarded DAV transport plus optional CalDAV/CardDAV reporters.
 type Client struct {
 	base    *url.URL
-	http    *http.Client
+	hc      webdav.HTTPClient
 	webdav  *webdav.Client
 	caldav  *caldav.Client
 	carddav *carddav.Client
@@ -30,20 +29,7 @@ type Client struct {
 
 // NewClient dials endpoint through guard. Username and password may be empty.
 func NewClient(g *Guard, endpoint, username, password string) (*Client, error) {
-	baseClient := g.HTTPClient()
-	transport := baseClient.Transport
-	if username != "" {
-		transport = &basicAuthTransport{
-			base:     baseClient.Transport,
-			username: username,
-			password: password,
-		}
-	}
-	httpClient := &http.Client{
-		Transport:     &limitTransport{base: transport, max: g.maxBody},
-		Timeout:       baseClient.Timeout,
-		CheckRedirect: baseClient.CheckRedirect,
-	}
+	httpClient := g.HTTPClient()
 	var hc webdav.HTTPClient = httpClient
 	if username != "" {
 		hc = webdav.HTTPClientWithBasicAuth(httpClient, username, password)
@@ -69,30 +55,12 @@ func NewClient(g *Guard, endpoint, username, password string) (*Client, error) {
 	}
 	return &Client{
 		base:    u,
-		http:    httpClient,
+		hc:      hc,
 		webdav:  wc,
 		caldav:  cc,
 		carddav: adc,
 		maxBody: g.maxBody,
 	}, nil
-}
-
-type basicAuthTransport struct {
-	base     http.RoundTripper
-	username string
-	password string
-}
-
-func (t *basicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	if t.username != "" {
-		req = req.Clone(req.Context())
-		req.SetBasicAuth(t.username, t.password)
-	}
-	base := t.base
-	if base == nil {
-		base = http.DefaultTransport
-	}
-	return base.RoundTrip(req)
 }
 
 // WebDAV returns the underlying webdav client for discovery helpers.
@@ -139,7 +107,7 @@ func (c *Client) Get(ctx context.Context, p string, rng *Range) (io.ReadCloser, 
 			req.Header.Set("Range", fmt.Sprintf("bytes=%d-", rng.Start))
 		}
 	}
-	resp, err := c.http.Do(req)
+	resp, err := c.hc.Do(req)
 	if err != nil {
 		return nil, "", err
 	}
@@ -163,7 +131,7 @@ func (c *Client) Put(ctx context.Context, p string, body io.Reader, ifMatch stri
 	if ifMatch != "" {
 		req.Header.Set("If-Match", ifMatch)
 	}
-	resp, err := c.http.Do(req)
+	resp, err := c.hc.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -182,7 +150,7 @@ func (c *Client) Delete(ctx context.Context, p, ifMatch string) error {
 	if ifMatch != "" {
 		req.Header.Set("If-Match", ifMatch)
 	}
-	resp, err := c.http.Do(req)
+	resp, err := c.hc.Do(req)
 	if err != nil {
 		return err
 	}
@@ -210,7 +178,7 @@ func (c *Client) MkColProps(ctx context.Context, method, p string, props []Prop)
 		return err
 	}
 	req.Header.Set("Content-Type", `application/xml; charset="utf-8"`)
-	resp, err := c.http.Do(req)
+	resp, err := c.hc.Do(req)
 	if err != nil {
 		return err
 	}
@@ -231,7 +199,7 @@ func (c *Client) PropPatch(ctx context.Context, p string, set []Prop, remove []x
 		return err
 	}
 	req.Header.Set("Content-Type", `application/xml; charset="utf-8"`)
-	resp, err := c.http.Do(req)
+	resp, err := c.hc.Do(req)
 	if err != nil {
 		return err
 	}
@@ -296,7 +264,7 @@ func (c *Client) xmlRequest(method, p string, v any) (*http.Request, error) {
 }
 
 func (c *Client) doMultiStatus(req *http.Request) (*MultiStatus, error) {
-	resp, err := c.http.Do(req)
+	resp, err := c.hc.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -308,17 +276,12 @@ func (c *Client) doMultiStatus(req *http.Request) (*MultiStatus, error) {
 }
 
 func httpStatusError(resp *http.Response) error {
-	b, _ := io.ReadAll(resp.Body)
+	b, _ := io.ReadAll(io.LimitReader(resp.Body, 256))
 	msg := sanitizeRemoteText(b)
 	if msg == "" {
 		msg = resp.Status
 	}
 	return fmt.Errorf("dav: HTTP %d: %s", resp.StatusCode, msg)
-}
-
-func expectedBasicAuth(user, pass string) string {
-	creds := user + ":" + pass
-	return "Basic " + base64.StdEncoding.EncodeToString([]byte(creds))
 }
 
 func propFindXML(props []xml.Name) *propFind {
