@@ -7,6 +7,9 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
+
+	"carrel.dev/carrel/server/internal/conf"
 )
 
 // version and commit are set by -ldflags at build time (C-13: the About
@@ -17,17 +20,19 @@ var (
 )
 
 func main() {
-	if err := run(os.Getenv("CARREL_BIND"), os.Getenv("CARREL_PORT")); err != nil {
+	cfg, err := conf.Load()
+	if err != nil {
+		slog.Error("carrel: config", "error", err)
+		os.Exit(1)
+	}
+	if err := run(cfg); err != nil {
 		slog.Error("carrel: exiting", "error", err)
 		os.Exit(1)
 	}
 }
 
-func run(bind, port string) error {
-	if port == "" {
-		port = "8080"
-	}
-	addr := net.JoinHostPort(bind, port)
+func run(cfg *conf.Config) error {
+	addr := net.JoinHostPort(cfg.Bind, strconv.Itoa(cfg.Port))
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", healthz)

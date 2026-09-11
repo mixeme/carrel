@@ -4,6 +4,43 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.4 — 2026-09-04
+
+Configuration, crypto, and the record model foundations.
+
+### For consumers
+
+- `cmd/carrel` now loads all C-12 settings through `internal/conf` instead of
+  reading `CARREL_BIND` and `CARREL_PORT` alone. Defaults match C-12; a
+  `settings.env` file in `CARREL_DATA_DIR` is overridden by the process
+  environment. `CARREL_DAVLOOM_PORT` is supported here (empty = disabled) even
+  though it is not in C-12.
+- Session durations, secret TTLs, the 1 MiB form-body cap, rate-bucket limits,
+  and password-length floors live as named constants in `internal/conf`, not as
+  new `CARREL_*` variables.
+- `internal/crypt` implements S-2: two independent Argon2id applications
+  (login vs wrap), XChaCha20-Poly1305 with per-purpose AAD, and `server.key`
+  creation with `O_EXCL`. Nothing else imports it yet.
+- `internal/model` defines `Object` and `Patch` with the closed operation set
+  from architecture.md (`SetText`, `AddValue`, `SetValues`, `RemoveProp`,
+  `SetParam`, `RemoveParam`). `raw` stays unexported; rejected patches change
+  nothing.
+
+### Included
+
+- `internal/conf`: full C-12 surface, `CARREL_DAVLOOM_PORT`, `settings.env`
+  merge order, and architecture.md limit constants.
+- `internal/crypt`: KDF, wrap/blob/state AEAD, re-wrap on password change,
+  wipe, server-key load/create; S-30.1 crypto tests (independent KDFs, password
+  change preserves the data key, wipe, AAD binding).
+- `internal/model`: atomic patch apply with upfront validation; UID and VERSION
+  are not patchable.
+
+### Not yet included
+
+Storage, sessions, transport, the request layer, and everything above them.
+`cmd/carrel` still serves only `/healthz`.
+
 ## carrel/server/v0.0.3 — 2026-09-04
 
 Three spec corrections, and `view` follows them.

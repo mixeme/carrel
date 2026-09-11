@@ -4,8 +4,11 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"strconv"
 	"testing"
 	"time"
+
+	"carrel.dev/carrel/server/internal/conf"
 )
 
 // TestEmptyVolumeStarts confirms the server comes up and answers /healthz
@@ -26,8 +29,14 @@ func TestEmptyVolumeStarts(t *testing.T) {
 		t.Fatalf("release port: %v", err)
 	}
 
+	portN, err := strconv.Atoi(port)
+	if err != nil {
+		t.Fatalf("parse port: %v", err)
+	}
+	cfg := &conf.Config{Bind: host, Port: portN}
+
 	errc := make(chan error, 1)
-	go func() { errc <- run(host, port) }()
+	go func() { errc <- run(cfg) }()
 
 	client := &http.Client{Timeout: time.Second}
 	var resp *http.Response

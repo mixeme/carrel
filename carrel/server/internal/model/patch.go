@@ -1,0 +1,239 @@
+package model
+
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
+
+// Object is a DAV record. raw is not exportable: callers see only a view for
+// display and send changes only through Patch (S-7).
+type Object struct {
+	Path string
+	ETag string
+	raw  payload
+}
+
+// Patch is a validated, atomic set of property operations (S-7). An rejected
+// patch changes nothing.
+type Patch struct {
+	ops []PatchOp
+}
+
+// PatchOp is the closed set of patch operations from architecture.md.
+type PatchOp interface {
+	patchOp()
+	prop() string
+}
+
+// SetText replaces a single-value property's text.
+type SetText struct {
+	Prop  string
+	Value string
+}
+
+func (SetText) patchOp()       {}
+func (o SetText) prop() string { return o.Prop }
+
+// AddValue appends a value to a multi-value property.
+type AddValue struct {
+	Prop  string
+	Value string
+}
+
+func (AddValue) patchOp()       {}
+func (o AddValue) prop() string { return o.Prop }
+
+// SetValues replaces all values of a multi-value property.
+type SetValues struct {
+	Prop   string
+	Values []string
+}
+
+func (SetValues) patchOp()       {}
+func (o SetValues) prop() string { return o.Prop }
+
+// RemoveProp deletes a property entirely. Empty value is not removal (S-7).
+type RemoveProp struct {
+	Prop string
+}
+
+func (RemoveProp) patchOp()       {}
+func (o RemoveProp) prop() string { return o.Prop }
+
+// SetParam sets a parameter on a property value.
+type SetParam struct {
+	Prop  string
+	Index int
+	Param string
+	Value string
+}
+
+func (SetParam) patchOp()       {}
+func (o SetParam) prop() string { return o.Prop }
+
+// RemoveParam removes a parameter from a property value.
+type RemoveParam struct {
+	Prop  string
+	Index int
+	Param string
+}
+
+func (RemoveParam) patchOp()       {}
+func (o RemoveParam) prop() string { return o.Prop }
+
+var (
+	ErrPatchImmutable = errors.New("model: property cannot be patched")
+	ErrPatchEmpty     = errors.New("model: patch has no operations")
+)
+
+// nonPatchable lists properties that identify the record or its wire format.
+var nonPatchable = map[string]bool{
+	"UID":     true,
+	"VERSION": true,
+}
+
+// NewPatch builds a patch from operations. Returns an error if any operation
+// targets a non-patchable property.
+func NewPatch(ops ...PatchOp) (*Patch, error) {
+	if len(ops) == 0 {
+		return nil, ErrPatchEmpty
+	}
+	for _, op := range ops {
+		name := strings.ToUpper(op.prop())
+		if nonPatchable[name] {
+			return nil, fmt.Errorf("%w: %s", ErrPatchImmutable, name)
+		}
+	}
+	return &Patch{ops: append([]PatchOp(nil), ops...)}, nil
+}
+
+// Ops returns a copy of the patch operations (for tests and validation).
+func (p *Patch) Ops() []PatchOp {
+	return append([]PatchOp(nil), p.ops...)
+}
+
+// payload is the in-memory parsed record. Providers populate it; only this
+// package and providers may read or mutate raw bytes.
+type payload struct {
+	props map[string]propState
+}
+
+type propState struct {
+	values []propValue
+}
+
+type propValue struct {
+	text   string
+	params map[string]string
+}
+
+// NewObjectFromRaw constructs an Object from a parsed property map. Used by
+// providers after fetching from DAV.
+func NewObjectFromRaw(path, etag string, props map[string]propState) *Object {
+	cp := make(map[string]propState, len(props))
+	for k, v := range props {
+		cp[k] = v.clone()
+	}
+	return &Object{
+		Path: path,
+		ETag: etag,
+		raw:  payload{props: cp},
+	}
+}
+
+func (p propState) clone() propState {
+	out := propState{values: make([]propValue, len(p.values))}
+	for i, v := range p.values {
+		out.values[i].text = v.text
+		if len(v.params) > 0 {
+			out.values[i].params = make(map[string]string, len(v.params))
+			for k, val := range v.params {
+				out.values[i].params[k] = val
+			}
+		}
+	}
+	return out
+}
+
+// Apply validates and applies the patch atomically, or returns an error without
+// changing the object (S-7).
+func (p *Patch) Apply(obj *Object) error {
+	if obj == nil {
+		return errors.New("model: nil object")
+	}
+	next := obj.raw.clone()
+	for _, op := range p.ops {
+		if err := applyOp(next, op); err != nil {
+			return err
+		}
+	}
+	obj.raw = next
+	return nil
+}
+
+func (p payload) clone() payload {
+	out := payload{props: make(map[string]propState, len(p.props))}
+	for k, v := range p.props {
+		out.props[k] = v.clone()
+	}
+	return out
+}
+
+func applyOp(p payload, op PatchOp) error {
+	switch o := op.(type) {
+	case SetText:
+		p.props[strings.ToUpper(o.Prop)] = propState{
+			values: []propValue{{text: o.Value}},
+		}
+	case AddValue:
+		key := strings.ToUpper(o.Prop)
+		st := p.props[key]
+		st.values = append(st.values, propValue{text: o.Value})
+		p.props[key] = st
+	case SetValues:
+		key := strings.ToUpper(o.Prop)
+		vals := make([]propValue, len(o.Values))
+		for i, v := range o.Values {
+			vals[i] = propValue{text: v}
+		}
+		p.props[key] = propState{values: vals}
+	case RemoveProp:
+		delete(p.props, strings.ToUpper(o.Prop))
+	case SetParam:
+		key := strings.ToUpper(o.Prop)
+		st, ok := p.props[key]
+		if !ok || o.Index < 0 || o.Index >= len(st.values) {
+			return fmt.Errorf("model: %s[%d]: no such value", key, o.Index)
+		}
+		if st.values[o.Index].params == nil {
+			st.values[o.Index].params = make(map[string]string)
+		}
+		st.values[o.Index].params[strings.ToUpper(o.Param)] = o.Value
+		p.props[key] = st
+	case RemoveParam:
+		key := strings.ToUpper(o.Prop)
+		st, ok := p.props[key]
+		if !ok || o.Index < 0 || o.Index >= len(st.values) {
+			return fmt.Errorf("model: %s[%d]: no such value", key, o.Index)
+		}
+		delete(st.values[o.Index].params, strings.ToUpper(o.Param))
+		p.props[key] = st
+	default:
+		return fmt.Errorf("model: unknown patch operation %T", op)
+	}
+	return nil
+}
+
+// PropText returns property values for tests and loss comparison.
+func (o *Object) PropText(prop string) []string {
+	st, ok := o.raw.props[strings.ToUpper(prop)]
+	if !ok {
+		return nil
+	}
+	out := make([]string, len(st.values))
+	for i, v := range st.values {
+		out[i] = v.text
+	}
+	return out
+}

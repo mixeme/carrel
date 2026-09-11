@@ -1,0 +1,205 @@
+package crypt
+
+import (
+	"bytes"
+	"errors"
+	"os"
+	"path/filepath"
+	"runtime"
+	"testing"
+)
+
+func TestKDFIndependent(t *testing.T) {
+	password := "hunter2"
+	loginSalt, err := NewSalt()
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrapSalt, err := NewSalt()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Equal(loginSalt, wrapSalt) {
+		t.Fatal("salts should differ in this test")
+	}
+
+	loginHash, _ := HashLogin(password, loginSalt)
+	wrapKey, _ := DeriveWrapKey(password, wrapSalt)
+
+	if bytes.Equal(loginHash, wrapKey) {
+		t.Fatal("login hash and wrap key must not be equal")
+	}
+	if bytes.Equal(DeriveKey(password, loginSalt, WrapKDF), wrapKey) {
+		t.Fatal("wrap salt must be required for wrap key")
+	}
+}
+
+func TestPasswordChangePreservesDataKey(t *testing.T) {
+	login := "alice"
+	oldPass := "old-secret"
+	newPass := "new-secret"
+
+	wrapSalt, err := NewSalt()
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldWrapBytes, _ := DeriveWrapKey(oldPass, wrapSalt)
+	var oldWrap, newWrap [KeyLen]byte
+	copy(oldWrap[:], oldWrapBytes)
+	newWrapBytes, _ := DeriveWrapKey(newPass, wrapSalt)
+	copy(newWrap[:], newWrapBytes)
+
+	dataKey, err := NewDataKey()
+	if err != nil {
+		t.Fatal(err)
+	}
+	plaintext := []byte("connections and duplicate decisions")
+
+	wrapped, err := WrapDataKey(oldWrap, dataKey, login)
+	if err != nil {
+		t.Fatal(err)
+	}
+	blob, err := EncryptBlob(dataKey, plaintext, login)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rewrapped, err := RewrapDataKey(oldWrap, newWrap, wrapped, login)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotKey, err := UnwrapDataKey(newWrap, rewrapped, login)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotKey != dataKey {
+		t.Fatal("data key changed after password change")
+	}
+	gotPlain, err := DecryptBlob(gotKey, blob, login)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(gotPlain, plaintext) {
+		t.Fatal("blob unreadable after password change")
+	}
+}
+
+func TestWipeMakesBlobUnreadable(t *testing.T) {
+	login := "bob"
+	wrapSalt, _ := NewSalt()
+	wrapBytes, _ := DeriveWrapKey("pass", wrapSalt)
+	var wrap [KeyLen]byte
+	copy(wrap[:], wrapBytes)
+
+	dataKey, err := NewDataKey()
+	if err != nil {
+		t.Fatal(err)
+	}
+	blob, err := EncryptBlob(dataKey, []byte("secret state"), login)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrapped, err := WrapDataKey(wrap, dataKey, login)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	Wipe(wrapped)
+	if _, err := UnwrapDataKey(wrap, wrapped, login); err == nil {
+		t.Fatal("wiped wrap should not unwrap")
+	}
+	if _, err := DecryptBlob(dataKey, blob, login); err != nil {
+		t.Fatal("blob still readable with data key after wipe of wrap only")
+	}
+
+	Wipe(blob)
+	if _, err := DecryptBlob(dataKey, blob, login); err == nil {
+		t.Fatal("wiped blob should not decrypt")
+	}
+}
+
+func TestAADPreventsSubstitution(t *testing.T) {
+	key, _ := NewDataKey()
+	plain := []byte("payload")
+
+	wrapCT, err := WrapDataKey(key, key, "alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+	blobCT, err := EncryptBlob(key, plain, "alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := UnwrapDataKey(key, blobCT, "alice"); err == nil {
+		t.Fatal("blob ciphertext must not unwrap as wrap key")
+	}
+	if _, err := DecryptBlob(key, wrapCT, "alice"); err == nil {
+		t.Fatal("wrap ciphertext must not decrypt as blob")
+	}
+	if _, err := DecryptBlob(key, blobCT, "bob"); err == nil {
+		t.Fatal("blob ciphertext must not decrypt under another login AAD")
+	}
+
+	stateCT, err := EncryptState(key, plain, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := DecryptState(key, stateCT, 2); err == nil {
+		t.Fatal("state ciphertext must not decrypt under another version AAD")
+	}
+}
+
+func TestServerKeyOEXCL(t *testing.T) {
+	dir := t.TempDir()
+	k1, err := CreateServerKey(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = CreateServerKey(dir)
+	if !errors.Is(err, ErrServerKeyExists) {
+		t.Fatalf("second create: got %v, want ErrServerKeyExists", err)
+	}
+	k2, err := LoadServerKey(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if k1 != k2 {
+		t.Fatal("loaded key differs from created key")
+	}
+	info, err := os.Stat(filepath.Join(dir, ServerKey))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if runtime.GOOS != "windows" {
+		if info.Mode().Perm() != 0o600 {
+			t.Fatalf("mode = %o, want 0600", info.Mode().Perm())
+		}
+	}
+}
+
+func TestServerKeyShortRejected(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, ServerKey), []byte("short"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, err := LoadServerKey(dir)
+	if !errors.Is(err, ErrServerKeyShort) {
+		t.Fatalf("got %v, want ErrServerKeyShort", err)
+	}
+}
+
+func TestLoadOrCreateServerKey(t *testing.T) {
+	dir := t.TempDir()
+	k1, err := LoadOrCreateServerKey(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	k2, err := LoadOrCreateServerKey(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if k1 != k2 {
+		t.Fatal("second load should return same key")
+	}
+}

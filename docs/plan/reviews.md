@@ -20,7 +20,7 @@ Composer эти шаги **не выполняет**. Он останавлив�
 | Перед закрытием S-30 | [server.md](server.md) | Полнота маршрутов C-5, нет шаблонов, нет импорта typecase |
 
 - [ ] **Opus.** `carrel/server/view` из C-6/C-8/C-9
-- [ ] **Opus.** Типы `Object` / `Patch`
+- [x] **Opus.** Типы `Object` / `Patch`
 - [ ] **Opus.** Ревью Typecase после примитивов и форм
 - [ ] **Opus.** Ревью сервера после crypt/store/session/dav
 - [ ] **Opus.** Ревью Typecase перед v0.1.0
