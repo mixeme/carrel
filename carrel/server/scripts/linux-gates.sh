@@ -55,4 +55,9 @@ if [[ -n "${CARREL_SFTPGO_URL:-}" && -n "${CARREL_SFTPGO_USER:-}" && -n "${CARRE
   go test -tags=integration -count=1 -run 'SFTPGo' ./integration/...
 fi
 
+if [[ -n "${CARREL_BAIKAL_URL:-}" && -n "${CARREL_BAIKAL_USER:-}" && -n "${CARREL_BAIKAL_PASS:-}" ]]; then
+  echo "== S-30.2: Baikal integration =="
+  go test -tags=integration -count=1 -run 'Baikal' ./integration/...
+fi
+
 echo "linux gates passed"

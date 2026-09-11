@@ -5,6 +5,26 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.33 — 2026-09-08
+
+Closes the provider tail in
+[providers-tail.md](../../docs/plan/providers-tail.md) (S-30.2 integration
+coverage). Run on Linux: `scripts/linux-gates.sh`; SFTPGo and Baikal need
+`CARREL_SFTPGO_*` / `CARREL_BAIKAL_*` from `dev/credentials.txt`.
+
+### For consumers
+
+Nothing in the running server. Integration tests assert live DAV behaviour
+the provider layer depends on.
+
+### Included
+
+- `integration/providers_test.go`: large-file heap check, merge write failure
+  keeps sources, optional Baikal foreign-property round-trip.
+- `integration/providers_collection_test.go`: collection CRUD on Radicale
+  (address book + calendar) and SFTPGo folders.
+- `scripts/linux-gates.sh`: optional Baikal block when credentials are set.
+
 ## v0.0.32 — 2026-09-08
 
 Closes forks for **S-11…S-26** in [server.md](../../docs/plan/server.md).

@@ -28,14 +28,16 @@ S-11…S-26 — закрытые развилки в [server.md](server.md), д�
 
 ## S-30.2
 
-Тесты в `integration/providers_test.go`: чужие свойства card/cal на Radicale,
-занятое имя и поток на SFTPGo. Гонять на Linux: `scripts/linux-gates.sh`.
-Учётные данные — `dev/credentials.txt`, не в git.
+Тесты в `integration/providers_test.go` и
+`integration/providers_collection_test.go`: чужие свойства card/cal на Radicale
+(и Baikal при `CARREL_BAIKAL_*`), занятое имя, поток и RSS на SFTPGo, CRUD
+коллекций, merge при неудачной записи. Гонять на Linux:
+`scripts/linux-gates.sh`. Учётные данные — `dev/credentials.txt`, не в git.
 
-- [ ] Прогон `providers_test.go` на Linux против Radicale и SFTPGo
-- [ ] CRUD коллекций (S-12 на живых серверах)
-- [ ] Большой файл не растит RSS: не 4 КиБ из 2 МиБ, а память процесса
-- [ ] Merge не удаляет исходники, если запись не прошла
+- [ ] Прогон на Linux против Radicale и SFTPGo (и Baikal при наличии кредов)
+- [x] CRUD коллекций (S-12 на живых серверах)
+- [x] Большой файл не растит RSS: не 4 КиБ из 2 МиБ, а память процесса
+- [x] Merge не удаляет исходники, если запись не прошла
 
 Календари и адресные книги — Radicale и Baikal; файлы и потоки — SFTPGo.
 Один сервер не отличает «работает» от «совпало с Radicale».
