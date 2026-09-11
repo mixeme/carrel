@@ -10,9 +10,10 @@ import (
 var notesComposeBypass = []string{
 	`<main class="tc-main"`,
 	`<div class="tc-bar"`,
+	`<aside class="tc-side"`,
 }
 
-// CheckScreensCompose rejects hand-built tc-main and tc-bar markup in notes.go.
+// CheckScreensCompose rejects hand-built tc-main, tc-bar, and tc-side markup in notes.go.
 func CheckScreensCompose(p ModulePaths) error {
 	path := filepath.Join(p.Root, "screens", "notes.go")
 	src, err := os.ReadFile(path)

@@ -134,3 +134,43 @@ func TestBadge_emptyLabelRendersNothing(t *testing.T) {
 		t.Fatalf("empty badge must render nothing, got %q", got)
 	}
 }
+
+func TestRailSection_emptyTitleOmitsHeading(t *testing.T) {
+	html := widget.RailSection{Rows: []widget.TickRow{{Label: "Combined notebook"}}}.Render()
+	if strings.Contains(html, "tc-railsec__title") {
+		t.Fatalf("empty title must omit heading: %s", html)
+	}
+	if !strings.Contains(html, "tc-railsec__rows") {
+		t.Fatalf("rows must still render: %s", html)
+	}
+}
+
+func TestRailSection_titledKeepsHeading(t *testing.T) {
+	html := widget.RailSection{Title: "Views", Rows: []widget.TickRow{{Label: "All"}}}.Render()
+	if !strings.Contains(html, `<h3 class="tc-railsec__title">Views</h3>`) {
+		t.Fatalf("titled section must keep heading: %s", html)
+	}
+}
+
+func TestSideBlock_exactlyOne(t *testing.T) {
+	sec := widget.Sec{Rubric: widget.Rubric{Text: "Info"}, Body: []widget.Node{widget.Paragraph("Details")}}
+	field := widget.Field{Name: "title", Label: "Title", Kind: widget.InputText, Value: "Note"}
+	fields := widget.Fields{Rows: []widget.FieldRow{{Label: "UID", Value: "42"}}}
+
+	if got := (widget.SideBlock{Sec: &sec}).Render(); !strings.Contains(got, "tc-sec") {
+		t.Fatalf("sec block: %q", got)
+	}
+	if got := (widget.SideBlock{Field: &field}).Render(); !strings.Contains(got, "tc-field") {
+		t.Fatalf("field block: %q", got)
+	}
+	if got := (widget.SideBlock{Fields: &fields}).Render(); !strings.Contains(got, "tc-fields") {
+		t.Fatalf("fields block: %q", got)
+	}
+	if got := (widget.SideBlock{}).Render(); got != "" {
+		t.Fatalf("empty block must render nothing, got %q", got)
+	}
+	both := widget.SideBlock{Sec: &sec, Field: &field}
+	if got := both.Render(); got != "" {
+		t.Fatalf("two kinds must render nothing, got %q", got)
+	}
+}

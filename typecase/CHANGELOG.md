@@ -19,6 +19,9 @@ L-4.4) are in [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
   `widget.Paragraph("text")` as a `Node` inside the slice; for bar actions
   use `widget.ActionsAsNodes([]widget.Action{...})` or
   `[]widget.Node{widget.Action{Label: "Save"}}`.
+- **`SideBlock` carries one kind of content.** Each block sets exactly one of
+  `Sec`, `Fields`, or `Field` (as a pointer). The old `SideBlock{Sec: …}`
+  value form is invalid — use `Sec: &widget.Sec{…}` or `Field: &widget.Field{…}`.
 - **Redefine tokens if you override the bundle.** `--tc-row-height` is now
   `38px`, `--tc-font-size` is `13px`, and two new required tokens appear:
   `--tc-page-gutter` (`20px`), `--tc-page-gutter-narrow` (`14px`), and
@@ -42,6 +45,10 @@ L-4.4) are in [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
 
 - `widget.Node` and `[]Node` on `Main`, `Card`, `Sec`, and `Bar` shelves
   (`typecase-compose` §1); gate `screens-compose` on `/notes`.
+- `SideBlock` union (`*Sec`, `*Fields`, `*Field`); `/notes` side panel through
+  `Side.Render()` (`typecase-compose` §2).
+- Empty `RailSection.Title` omits `tc-railsec__title`; gate
+  `inv-railsec-untitled-no-title` (`typecase-compose` §3).
 - Mockup-aligned geometry: row height 38, row gap 12, rail tickrow padding 16,
   top bar 52, default button 26, second radius 2 px on check/badge/mark.
 - Gates `geometry`, `screens-css`, and `screens-coverage` (L-8).

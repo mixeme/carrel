@@ -192,30 +192,35 @@ func notesDocPreview() widget.Doc {
 }
 
 func notesSide() string {
-	id := "notes-side"
-	fields := widget.Field{Name: "title", Label: "Title", Kind: widget.InputText, Value: "Заметка со встречи 10.08"}.Render() +
-		widget.Field{Name: "text", Label: "Text", Kind: widget.InputTextarea, Value: "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна…"}.Render() +
-		widget.Field{Name: "date", Label: "Date", Kind: widget.InputDate, Value: "2026-08-10"}.Render() +
-		widget.Field{Name: "time", Label: "Time", Kind: widget.InputTime, Value: "11:05"}.Render() +
-		widget.Field{Name: "tags", Label: "Tags", Kind: widget.InputText, Value: "встречи, релиз"}.Render()
-
+	title := widget.Field{Name: "title", Label: "Title", Kind: widget.InputText, Value: "Заметка со встречи 10.08"}
+	text := widget.Field{Name: "text", Label: "Text", Kind: widget.InputTextarea, Value: "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна…"}
+	date := widget.Field{Name: "date", Label: "Date", Kind: widget.InputDate, Value: "2026-08-10"}
+	timeF := widget.Field{Name: "time", Label: "Time", Kind: widget.InputTime, Value: "11:05"}
+	tags := widget.Field{Name: "tags", Label: "Tags", Kind: widget.InputText, Value: "встречи, релиз"}
 	attach := widget.Sec{
 		Rubric: widget.Rubric{Text: "Attachments"},
 		Body:   []widget.Node{widget.Paragraph("2026-08-10-sync-board.png · 412 KB · in the note")},
-	}.Render()
+	}
 	related := widget.Sec{
 		Rubric: widget.Rubric{Text: "Related"},
 		Body:   []widget.Node{widget.Paragraph("Синк-ап по релизу · event · 10 Aug")},
+	}
+	return widget.Side{
+		Label: "Note details",
+		Title: "Заметка со встречи 10.08",
+		Open:  true,
+		Blocks: []widget.SideBlock{
+			{Field: &title},
+			{Field: &text},
+			{Field: &date},
+			{Field: &timeF},
+			{Field: &tags},
+			{Sec: &attach},
+			{Sec: &related},
+		},
+		Actions: []widget.Action{
+			{Label: "Save", Kind: widget.ButtonPrimary},
+			{Label: "Open full screen", Icon: "⤢"},
+		},
 	}.Render()
-
-	return `<aside class="tc-side is-open" data-tc-side id="` + id + `" aria-label="Note details">` +
-		`<header class="tc-side__head"><h2 class="tc-side__title">Заметка со встречи 10.08</h2>` +
-		widget.Close{For: id, Label: "Close the panel"}.Render() +
-		`</header><div class="tc-side__body">` + fields + attach + related +
-		`</div><footer class="tc-side__foot">` +
-		widget.Bar{Left: []widget.Node{
-			widget.Action{Label: "Save", Kind: widget.ButtonPrimary},
-			widget.Action{Label: "Open full screen", Icon: "⤢"},
-		}}.Render() +
-		`</footer></aside>`
 }

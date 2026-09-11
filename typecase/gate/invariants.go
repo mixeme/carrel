@@ -49,7 +49,7 @@ var invariantBindings = map[string][]string{
 	"tc-queue":    {"gate:inv-queue-question", "gate:inv-queue-meter"},
 	"tc-rail":     {"gate:inv-rail-foot", "gate:inv-rail-drawer-class"},
 	"tc-railfoot": {"gate:inv-railfoot-build", "gate:inv-railfoot-actions"},
-	"tc-railsec":  {"gate:inv-railsec-state"},
+	"tc-railsec":  {"gate:inv-railsec-state", "gate:inv-railsec-untitled-no-title"},
 	"tc-range":    {"gate:range-order", "gate:inv-range-field-width"},
 	"tc-row":      {"gate:inv-row-mark", "gate:inv-row-tail", "gate:inv-row-menu-in-tail"},
 	"tc-rubric":   {"gate:inv-rubric-not-heading"},

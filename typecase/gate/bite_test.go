@@ -403,12 +403,12 @@ func TestBite_screensCompose(t *testing.T) {
 	if err := os.MkdirAll(screensDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(screensDir, "notes.go"), []byte("package screens\n\nfunc Notes() string {\n\treturn `<main class=\"tc-main\"`\n}\n"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(screensDir, "notes.go"), []byte("package screens\n\nfunc Notes() string {\n\treturn `<aside class=\"tc-side\"`\n}\n"), 0644); err != nil {
 		t.Fatal(err)
 	}
 	p.Root = tmp
 	if err := gate.CheckScreensCompose(p); err == nil {
-		t.Fatal("expected screens-compose gate to fail on manual tc-main")
+		t.Fatal("expected screens-compose gate to fail on manual tc-side")
 	}
 }
 

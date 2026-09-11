@@ -148,7 +148,7 @@ func (r Rail) Render() string {
 // Роль. Заголовок группы и её строки.
 // Вход. RailSection{ Title, State, Rows }.
 // Состояния. ok | muted | alert.
-// Инварианты. Недоступная группа помечена цветом и словом.
+// Инварианты. Недоступная группа помечена цветом и словом; пустой Title не выпускает заголовок.
 // Поведение. нет.
 // Геометрия. Заголовок — мелкий кегль с разрядкой.
 // Содержимое. tc-tickrow.
@@ -162,7 +162,11 @@ func (rs RailSection) Render() string {
 	for _, r := range rs.Rows {
 		rows += r.Render()
 	}
-	return `<section` + classAttr(cls) + `><h3 class="tc-railsec__title">` + esc(rs.Title) + `</h3><div class="tc-railsec__rows">` + rows + `</div></section>`
+	title := ""
+	if rs.Title != "" {
+		title = `<h3 class="tc-railsec__title">` + esc(rs.Title) + `</h3>`
+	}
+	return `<section` + classAttr(cls) + `>` + title + `<div class="tc-railsec__rows">` + rows + `</div></section>`
 }
 
 // RailFoot — tc-railfoot
@@ -213,7 +217,7 @@ func (b Build) Render() string {
 // Инварианты. Закрывается крестиком, кнопкой и Esc.
 // Поведение. Открытие, закрытие, возврат фокуса.
 // Геометрия. 400px; содержимое прокручивается.
-// Содержимое. tc-sec, tc-fields, tc-btn, tc-bar.
+// Содержимое. tc-sec, tc-fields, tc-field, tc-btn, tc-bar.
 // Чего нет. Не редактирует.
 type Side struct {
 	Label   string
@@ -232,10 +236,42 @@ func (s Side) Render() string {
 	}
 	var blocks string
 	for _, b := range s.Blocks {
-		blocks += b.Sec.Render()
+		blocks += b.Render()
 	}
 	id := uniqueID("tc-side")
 	return `<aside` + classAttr(cls) + ` data-tc-side` + attr("id", id) + attr("aria-label", s.Label) + `><header class="tc-side__head"><h2 class="tc-side__title">` + esc(s.Title) + `</h2>` + Close{For: id, Label: labels.ClosePanel}.Render() + `</header><div class="tc-side__body">` + blocks + `</div><footer class="tc-side__foot">` + Bar{Left: ActionsAsNodes(s.Actions)}.Render() + `</footer></aside>`
+}
+
+func (b SideBlock) kindCount() int {
+	n := 0
+	if b.Sec != nil {
+		n++
+	}
+	if b.Fields != nil {
+		n++
+	}
+	if b.Field != nil {
+		n++
+	}
+	return n
+}
+
+// Render emits one side-panel block. Zero kinds render nothing; more than one is invalid.
+func (b SideBlock) Render() string {
+	switch b.kindCount() {
+	case 0:
+		return ""
+	case 1:
+		if b.Sec != nil {
+			return b.Sec.Render()
+		}
+		if b.Fields != nil {
+			return b.Fields.Render()
+		}
+		return b.Field.Render()
+	default:
+		return ""
+	}
 }
 
 // Nav — tc-nav

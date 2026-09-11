@@ -406,9 +406,11 @@ type MetaSection struct {
 	Rows2 []Row
 }
 
-// SideBlock is one block in the side panel.
+// SideBlock is one block in the side panel: exactly one of Sec, Fields, or Field.
 type SideBlock struct {
-	Sec Sec
+	Sec    *Sec
+	Fields *Fields
+	Field  *Field
 }
 
 // ListGroup is a rubric and its rows.
