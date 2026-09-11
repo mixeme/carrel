@@ -5,6 +5,41 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.23 — 2026-09-08
+
+Closes admin panel handlers from [users-tail.md](../../docs/plan/users-tail.md)
+and [before-providers.md](../../docs/plan/before-providers.md) §3 (people,
+invites, roles, wipe/recover, audit).
+
+### For consumers
+
+- **`POST /admin/` and `POST /admin/invites` perform administrator actions**
+  instead of re-rendering GET. People: disable, delete (type login to confirm),
+  change role, end sessions, reset password (same wipe token as `/forgot`, with
+  actor in the journal). Invites: create, revoke, extend (+7 days, same
+  secret), resend (new secret). Last administrator cannot be disabled,
+  demoted, or deleted. Escrow-covered accounts get recovery instead of wipe.
+  Without confirmed email the wipe link is shown to the administrator; until
+  S-26 outbound mail stays honest (`SMTP not configured`).
+- **`GET /admin/` lists people** (role, created, last login, connection count,
+  live sessions, disabled, escrowed). **`GET /admin/invites`** lists live
+  invites with copyable links. **`GET /admin/audit`** shows the instance
+  journal.
+
+### Included
+
+- `internal/store`: invite `Secret` inside encrypted state for panel links
+  (S-10.3).
+- `internal/user`: `RevokeInvite`, `ExtendInvite`, `DeleteUser`, `SetUserRole`,
+  `EndUserSessions`, `AdminResetPassword`, `SetSelfRegEnabled`.
+- `internal/session`: `LiveCount`.
+- `internal/web`: admin panel handlers; `sendInviteMail` stub until S-26.
+- Tests: `admin_test.go` in `user` and `web`.
+
+### Not yet included
+
+Admin settings, DAV allowlist, install screen; escrow recovery UI gaps.
+
 ## v0.0.22 — 2026-09-08
 
 Closes `CARREL_BASE_PATH` from [users-tail.md](../../docs/plan/users-tail.md).

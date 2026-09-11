@@ -32,11 +32,11 @@ type InstanceSettings struct {
 	SelfRegEnabled bool `json:"selfRegEnabled,omitempty"`
 	EscrowEnabled  bool `json:"escrowEnabled,omitempty"`
 
-	EscrowPublicKey      []byte    `json:"escrowPublicKey,omitempty"`
-	EscrowPrivateWrap    []byte    `json:"escrowPrivateWrap,omitempty"`
-	EscrowMasterSalt     []byte    `json:"escrowMasterSalt,omitempty"`
-	EscrowMasterKDF      kdfRecord `json:"escrowMasterKdf,omitempty"`
-	EscrowCoverNewUsers  bool      `json:"escrowCoverNewUsers,omitempty"`
+	EscrowPublicKey     []byte    `json:"escrowPublicKey,omitempty"`
+	EscrowPrivateWrap   []byte    `json:"escrowPrivateWrap,omitempty"`
+	EscrowMasterSalt    []byte    `json:"escrowMasterSalt,omitempty"`
+	EscrowMasterKDF     kdfRecord `json:"escrowMasterKdf,omitempty"`
+	EscrowCoverNewUsers bool      `json:"escrowCoverNewUsers,omitempty"`
 }
 
 // Invite is a pending account invitation (S-10.2).
@@ -45,6 +45,7 @@ type Invite struct {
 	Login      string    `json:"login"`
 	Email      string    `json:"email,omitempty"`
 	SecretHash []byte    `json:"secretHash"`
+	Secret     string    `json:"secret,omitempty"` // raw token; lives only inside encrypted state.enc for the admin panel link (S-10.3)
 	CreatedAt  time.Time `json:"createdAt"`
 	ExpiresAt  time.Time `json:"expiresAt"`
 	Revoked    bool      `json:"revoked,omitempty"` // withdrawn by an administrator or replaced by a resend
@@ -71,15 +72,15 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt"`
 	Disabled  bool      `json:"disabled,omitempty"`
 
-	Email              string `json:"email,omitempty"`
-	EmailConfirmed     bool   `json:"emailConfirmed,omitempty"`
-	MustChangePassword bool   `json:"mustChangePassword,omitempty"`
-	DisplayName        string `json:"displayName,omitempty"`
-	EscrowOptIn           bool       `json:"escrowOptIn,omitempty"`
-	EscrowDeposited       []byte     `json:"escrowDeposited,omitempty"`
-	EscrowDepositedAt     *time.Time `json:"escrowDepositedAt,omitempty"`
-	EscrowLastRecovery    *time.Time `json:"escrowLastRecovery,omitempty"`
-	EscrowNoticePending   bool       `json:"escrowNoticePending,omitempty"`
+	Email               string     `json:"email,omitempty"`
+	EmailConfirmed      bool       `json:"emailConfirmed,omitempty"`
+	MustChangePassword  bool       `json:"mustChangePassword,omitempty"`
+	DisplayName         string     `json:"displayName,omitempty"`
+	EscrowOptIn         bool       `json:"escrowOptIn,omitempty"`
+	EscrowDeposited     []byte     `json:"escrowDeposited,omitempty"`
+	EscrowDepositedAt   *time.Time `json:"escrowDepositedAt,omitempty"`
+	EscrowLastRecovery  *time.Time `json:"escrowLastRecovery,omitempty"`
+	EscrowNoticePending bool       `json:"escrowNoticePending,omitempty"`
 
 	LoginSalt  []byte     `json:"loginSalt,omitempty"`
 	LoginHash  []byte     `json:"loginHash,omitempty"`

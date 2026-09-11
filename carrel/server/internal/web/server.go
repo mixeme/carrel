@@ -60,6 +60,16 @@ type Users interface {
 	// every other session of the account.
 	ChangePassword(ctx context.Context, accountID, exceptSID, current, newPW, newPW2 string) error
 
+	CreateInvite(actorID, login, email string) (secret string, err error)
+	RevokeInvite(actorID, inviteID string) error
+	ExtendInvite(actorID, inviteID string) error
+	DisableUser(actorID, targetID string) error
+	DeleteUser(actorID, targetID, loginConfirm string) error
+	SetUserRole(actorID, targetID string, role store.Role) error
+	EndUserSessions(actorID, targetID string) error
+	AdminResetPassword(ctx context.Context, actorID, targetID string) (token string, mailed, escrowAsk, handLink bool, err error)
+	SetSelfRegEnabled(actorID string, enabled bool) error
+
 	EnableEscrow(ctx context.Context, actorID, master, master2 string) error
 	SetEscrowCoverNew(actorID string, cover bool) error
 	ChangeEscrowMaster(ctx context.Context, actorID, current, newPW, newPW2 string) error

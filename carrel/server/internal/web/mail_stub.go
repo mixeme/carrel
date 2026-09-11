@@ -30,3 +30,13 @@ func (s *Server) sendConfirmMail(ctx context.Context, login, email, token string
 	_ = token
 	return false
 }
+
+// sendInviteMail dispatches an invitation link (S-26). Until the mail layer
+// exists it always returns false.
+func (s *Server) sendInviteMail(ctx context.Context, login, email, token string) bool {
+	_ = ctx
+	_ = login
+	_ = email
+	_ = token
+	return false
+}

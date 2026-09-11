@@ -87,6 +87,21 @@ func (m *Manager) End(sid string) {
 	}
 }
 
+// LiveCount reports non-expired sessions for one account (S-10.6).
+func (m *Manager) LiveCount(accountID string) int {
+	now := time.Now()
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	n := 0
+	for _, s := range m.byID {
+		if s.accountID != accountID || s.ended || s.expiredAt(now) {
+			continue
+		}
+		n++
+	}
+	return n
+}
+
 // EndAccount terminates every live session for one account (S-10).
 func (m *Manager) EndAccount(accountID string) {
 	m.mu.Lock()

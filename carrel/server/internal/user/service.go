@@ -47,6 +47,7 @@ var (
 	ErrPasswordMismatch = errors.New("passwords do not match")
 	ErrLoginTaken       = errors.New("login is already taken")
 	ErrLastAdmin        = errors.New("cannot remove the last administrator")
+	ErrLoginConfirm     = errors.New("type the login to confirm deletion")
 	ErrNotFound         = errors.New("not found")
 )
 
