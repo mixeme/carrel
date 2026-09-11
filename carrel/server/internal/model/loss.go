@@ -49,11 +49,12 @@ func CompareAfterPut(serverID string, sent, got *Object, agg LossAggregator) *Lo
 }
 
 func (o *Object) propKeys() []string {
-	if o == nil {
+	p := o.activePayload()
+	if p == nil {
 		return nil
 	}
-	out := make([]string, 0, len(o.raw.props))
-	for k := range o.raw.props {
+	out := make([]string, 0, len(p.props))
+	for k := range p.props {
 		out = append(out, k)
 	}
 	sort.Strings(out)
@@ -78,7 +79,11 @@ func propsEqual(a, b *Object, prop string) bool {
 }
 
 func (o *Object) propValues(prop string) []propValue {
-	st, ok := o.raw.props[strings.ToUpper(prop)]
+	p := o.activePayload()
+	if p == nil {
+		return nil
+	}
+	st, ok := p.props[strings.ToUpper(prop)]
 	if !ok {
 		return nil
 	}

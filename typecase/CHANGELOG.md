@@ -54,6 +54,11 @@ do, not what the authors did.
 
 - An open side panel still covers the viewport at phone width, including the
   rail chrome (U-9: row menu instead of the panel).
+- Assembled screens do not yet match mockup drawing (mark, icons, nav, rail,
+  surfaces). The work and closed forks are in
+  [docs/plan/typecase-look.md](../docs/plan/typecase-look.md). Nothing to do
+  until that plan lands: `Icon` stays whatever the current widgets accept;
+  palette stays eight slots.
 
 The typecase wordmark work documented below stays documentation-only until
 released separately.

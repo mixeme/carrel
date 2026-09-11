@@ -12,6 +12,7 @@ type Object struct {
 	Path string
 	ETag string
 	raw  payload
+	cal  *calendarPayload
 }
 
 // Patch is a validated, atomic set of property operations (S-7). An rejected
@@ -167,8 +168,12 @@ func (o *Object) Props() map[string][]RawValue {
 	if o == nil {
 		return nil
 	}
-	out := make(map[string][]RawValue, len(o.raw.props))
-	for name, st := range o.raw.props {
+	p := o.activePayload()
+	if p == nil {
+		return nil
+	}
+	out := make(map[string][]RawValue, len(p.props))
+	for name, st := range p.props {
 		values := make([]RawValue, len(st.values))
 		for i, v := range st.values {
 			values[i].Text = v.text
@@ -204,13 +209,21 @@ func (p *Patch) Apply(obj *Object) error {
 	if obj == nil {
 		return errors.New("model: nil object")
 	}
-	next := obj.raw.clone()
+	base := obj.activePayload()
+	if base == nil {
+		return errors.New("model: nil object")
+	}
+	next := base.clone()
 	for _, op := range p.ops {
 		if err := applyOp(next, op); err != nil {
 			return err
 		}
 	}
-	obj.raw = next
+	if obj.cal != nil {
+		obj.cal.main = next.props
+	} else {
+		obj.raw = next
+	}
 	return nil
 }
 
@@ -269,7 +282,11 @@ func applyOp(p payload, op PatchOp) error {
 
 // PropText returns property values for tests and loss comparison.
 func (o *Object) PropText(prop string) []string {
-	st, ok := o.raw.props[strings.ToUpper(prop)]
+	p := o.activePayload()
+	if p == nil {
+		return nil
+	}
+	st, ok := p.props[strings.ToUpper(prop)]
 	if !ok {
 		return nil
 	}

@@ -276,15 +276,6 @@ func (c *Client) doMultiStatus(req *http.Request) (*MultiStatus, error) {
 	return decodeMultiStatus(resp.Body)
 }
 
-func httpStatusError(resp *http.Response) error {
-	b, _ := io.ReadAll(io.LimitReader(resp.Body, 256))
-	msg := sanitizeRemoteText(b)
-	if msg == "" {
-		msg = resp.Status
-	}
-	return fmt.Errorf("dav: HTTP %d: %s", resp.StatusCode, msg)
-}
-
 func propFindXML(props []xml.Name) *propFind {
 	raw := make([]rawXML, len(props))
 	for i, n := range props {

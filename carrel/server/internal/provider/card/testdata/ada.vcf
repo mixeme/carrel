@@ -1,0 +1,7 @@
+BEGIN:VCARD
+VERSION:4.0
+UID:test-uid
+FN:Ada Lovelace
+EMAIL:ada@example.com
+X-CUSTOM:foreign-value
+END:VCARD

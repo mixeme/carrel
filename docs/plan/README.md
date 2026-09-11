@@ -9,6 +9,7 @@
 | [architecture.md](architecture.md) | Модули (`typecase/`, `carrel/server/`), зависимости на 04.09.2026, закрытые развилки, сроки и лимиты |
 | [server.md](server.md) | План серверной половины (`S`) |
 | [reviews.md](reviews.md) | Opus-ревью и аудиты Fable |
+| [typecase-look.md](typecase-look.md) | Рисунок собранных экранов против кадров макета |
 
 **Исполнитель по умолчанию — Composer.** Если шаг делает другая модель, это написано в чекбоксе: `Opus`, `Fable`. Composer эти шаги не выполняет.
 

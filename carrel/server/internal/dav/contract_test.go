@@ -6,6 +6,7 @@ package dav
 // so until those packages exist.
 var (
 	_ Transport    = (*Client)(nil)
+	_ Creator      = (*Client)(nil)
 	_ CalReporter  = calReports{}
 	_ CardReporter = cardReports{}
 )

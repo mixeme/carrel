@@ -1,0 +1,6 @@
+BEGIN:VCARD
+VERSION:4.0
+UID:photo-uri
+FN:Remote Photo
+PHOTO;VALUE=uri:https://example.com/p.jpg
+END:VCARD

@@ -31,6 +31,9 @@ func (f *mutateFake) handler() http.HandlerFunc {
 			ifMatch: r.Header.Get("If-Match"),
 			dest:    r.Header.Get("Destination"),
 		}
+		if r.Header.Get("If-None-Match") != "" {
+			rec.ifMatch = r.Header.Get("If-None-Match")
+		}
 		f.mu.Lock()
 		f.records = append(f.records, rec)
 		f.mu.Unlock()

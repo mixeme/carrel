@@ -5,6 +5,39 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.30 — 2026-09-08
+
+Closes the **Провайдеры** section in [server.md](../../docs/plan/server.md).
+HTTP routes C-5 still return stub view models; wiring GET records, photos, and
+file download is S-11 / S-13 / S-17. Remaining S-30.2 on live Radicale / Baikal /
+SFTPGo follows providers.
+
+### For consumers
+
+- **Conditional file create uses `If-None-Match: *`.** New `dav.Creator.PutCreate`
+  on `*Client`; `Transport.Put` is unchanged (`If-Match` only). Occupied names
+  surface as HTTP 412 — suffix and overwrite are S-17 queue, not this layer.
+- **Record providers reject updates without ETag** (S-8). Empty `ifMatch` never
+  reaches the wire from `card` or `cal`.
+- **`model.NewCalendarObject`** holds a full iCalendar tree; patch applies only
+  to the main VEVENT / VTODO / VJOURNAL (no `RECURRENCE-ID`). VTIMEZONE, VALARM,
+  and unknown properties survive encode.
+- **`card.Foreign`** returns `[]view.Field` for unknown vCard properties; PHOTO,
+  UID, and VERSION are excluded. `VALUE=uri` photos are not fetched (SSRF).
+- **`cal.Expand`** returns UTC instants in a caller-supplied window; `cal.RawRRULE`
+  returns the rule text; human recurrence copy stays in `web` (C-10).
+- **`cal.RenderMarkdown`** (goldmark v1.8.6) produces `[]view.Block`; raw HTML
+  nodes become escaped `BlockPara`, not nested markup.
+
+### Included
+
+- `internal/dav`: `Creator`, `PutCreate`, `StatusError`.
+- `internal/model`: `NewCalendarObject`, calendar patch target.
+- `internal/provider/file`: stream `Get`, `UploadCreate`, `Join`.
+- `internal/provider/card`: parse/encode vCard, `Foreign`, inline `PhotoOpen`.
+- `internal/provider/cal`: parse/encode iCalendar, `Expand`, `RenderMarkdown`.
+- Direct deps: `go-ical`, `go-vcard` (pinned), `goldmark` v1.8.6, `rrule-go` v1.8.2.
+
 ## v0.0.29 — 2026-09-08
 
 Closes the pre-provider gate. Remaining S-30.2 coverage (foreign properties,
@@ -40,6 +73,16 @@ collection CRUD, large-file RSS, occupied names, merge) stays in
   `TestGetAdminEscrowCoveredOmitsUncovered`,
   `TestEscrowWithdrawActionCarriesAction`,
   `TestRedirectRefusesHTTPSDowngrade`.
+
+### Not yet included
+
+- Provider packages. Leftover and closed forks:
+  [server.md](../../docs/plan/server.md) («Провайдеры»).
+  Create is `dav.Creator.PutCreate` (`If-None-Match: *`), not a
+  `Transport.Put` argument. Providers do not assemble C-6 pages.
+  Calendar records are a component tree; `NewObject` stays for cards.
+  PHOTO `VALUE=uri` is not fetched. Order: Creator → file → card → cal.
+  Package tests only; live HTTP and the rest of S-30.2 come after.
 
 ## v0.0.28 — 2026-09-08
 

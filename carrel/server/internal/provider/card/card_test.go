@@ -1,0 +1,114 @@
+package card
+
+import (
+	"bytes"
+	"io"
+	"os"
+	"strings"
+	"testing"
+
+	"carrel.dev/carrel/server/internal/model"
+)
+
+func TestParsePreservesForeign(t *testing.T) {
+	data, err := os.ReadFile("testdata/ada.vcf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	obj, err := Parse("/c/ada.vcf", "e1", bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := obj.PropText("FN"); len(got) != 1 || got[0] != "Ada Lovelace" {
+		t.Fatalf("FN = %v", got)
+	}
+	foreign := Foreign(obj)
+	if len(foreign) != 1 || string(foreign[0].Label) != "X-CUSTOM" {
+		t.Fatalf("foreign = %+v", foreign)
+	}
+}
+
+func TestEncodeRoundTrip(t *testing.T) {
+	obj := model.NewObject("/c/x.vcf", "1", map[string][]model.RawValue{
+		"VERSION": {{Text: "4.0"}},
+		"FN":      {{Text: "Test"}},
+		"UID":     {{Text: "u1"}},
+	})
+	var buf bytes.Buffer
+	if err := Encode(&buf, obj); err != nil {
+		t.Fatal(err)
+	}
+	back, err := Parse("/c/x.vcf", "1", &buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if back.PropText("FN")[0] != "Test" {
+		t.Fatalf("FN = %v", back.PropText("FN"))
+	}
+}
+
+func TestPhotoInline(t *testing.T) {
+	data, _ := os.ReadFile("testdata/photo-inline.vcf")
+	obj, err := Parse("/c/p.vcf", "e", bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rc, ct, err := PhotoOpen(obj)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rc.Close()
+	b, _ := io.ReadAll(rc)
+	if string(b) != "Photo" || ct != "JPEG" {
+		t.Fatalf("body=%q ct=%q", b, ct)
+	}
+}
+
+func TestPhotoURINotFetched(t *testing.T) {
+	data, _ := os.ReadFile("testdata/photo-uri.vcf")
+	obj, err := Parse("/c/p.vcf", "e", bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if uri, ok := PhotoURI(obj); !ok || !strings.Contains(uri, "example.com") {
+		t.Fatalf("uri=%q ok=%v", uri, ok)
+	}
+	_, _, err = PhotoOpen(obj)
+	if err == nil {
+		t.Fatal("expected error opening uri photo")
+	}
+}
+
+func TestUpdateRejectsEmptyETag(t *testing.T) {
+	p := &Provider{}
+	_, err := p.Update(t.Context(), model.NewObject("/c/x.vcf", "", nil))
+	if err != ErrEmptyETag {
+		t.Fatalf("got %v", err)
+	}
+}
+
+func TestPatchPreservesForeign(t *testing.T) {
+	data, _ := os.ReadFile("testdata/ada.vcf")
+	obj, err := Parse("/c/ada.vcf", "e1", bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	patch, err := model.NewPatch(model.SetText{Prop: "FN", Value: "Grace"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := patch.Apply(obj); err != nil {
+		t.Fatal(err)
+	}
+	if len(Foreign(obj)) != 1 {
+		t.Fatalf("lost foreign: %+v", Foreign(obj))
+	}
+	var buf bytes.Buffer
+	if err := Encode(&buf, obj); err != nil {
+		t.Fatal(err)
+	}
+	back, _ := Parse("/c/ada.vcf", "e1", &buf)
+	if back.PropText("X-CUSTOM")[0] != "foreign-value" {
+		t.Fatal("foreign property lost on encode")
+	}
+}
