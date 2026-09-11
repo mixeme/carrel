@@ -12,9 +12,7 @@ import (
 )
 
 // TestEmptyVolumeStarts confirms the server comes up and answers /healthz
-// with no state on disk at all — the plan's first-run mode. There is no
-// store yet to point at an empty CARREL_DATA_DIR; this test exists so the
-// check has somewhere to grow into as internal/store lands.
+// with no state file yet — first-run mode via internal/store.
 func TestEmptyVolumeStarts(t *testing.T) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -33,7 +31,7 @@ func TestEmptyVolumeStarts(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse port: %v", err)
 	}
-	cfg := &conf.Config{Bind: host, Port: portN}
+	cfg := &conf.Config{Bind: host, Port: portN, DataDir: t.TempDir()}
 
 	errc := make(chan error, 1)
 	go func() { errc <- run(cfg) }()

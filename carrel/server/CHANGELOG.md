@@ -4,6 +4,39 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.5 — 2026-09-04
+
+Encrypted storage and in-memory sessions.
+
+### For consumers
+
+- `internal/store` owns the on-disk instance state: one `state.enc` file
+  (`CRL1` header, format version, XChaCha20-Poly1305 under `server.key`).
+  Writes are atomic (temp + fsync + rename); a failed write leaves neither
+  data nor audit lines changed. Files from a newer build are rejected.
+- `ConnectionCount` lives outside each user's sealed blob so administration
+  can read it without the data key.
+- `internal/session` holds data keys, CSRF tokens, idle (12 h) and absolute
+  (7 d) lifetimes, drafts, ten-line query history, per-server loss notes, and
+  at most four live fanouts per session.
+- Session cache keys include object versions; bodies are evicted before etag
+  maps; a process-wide byte budget evicts across all live sessions without
+  mixing data. `End`, expiry, and `EndAll` wipe keys and cache entries.
+- `cmd/carrel` opens the store on startup and logs first-run mode when
+  `state.enc` is absent. Routing is still only `/healthz`.
+
+### Included
+
+- `internal/store`: `Open`, `Mutate`, `Snapshot`, `ConnectionCount`,
+  `FirstRun`; audit validation; S-30.1 storage tests.
+- `internal/session`: `Manager`, `Session`, cache, drafts, history, loss
+  registry, fanout slots; S-30.1 cache and session tests.
+
+### Not yet included
+
+Transport, guard, discovery, the request layer, users, providers, and
+everything above them.
+
 ## carrel/server/v0.0.4 — 2026-09-04
 
 Configuration, crypto, and the record model foundations.

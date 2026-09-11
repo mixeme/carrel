@@ -10,6 +10,9 @@ import (
 	"strconv"
 
 	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/internal/crypt"
+	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/store"
 )
 
 // version and commit are set by -ldflags at build time (C-13: the About
@@ -32,6 +35,19 @@ func main() {
 }
 
 func run(cfg *conf.Config) error {
+	serverKey, err := crypt.LoadOrCreateServerKey(cfg.DataDir)
+	if err != nil {
+		return err
+	}
+	st, err := store.Open(cfg.DataDir, serverKey)
+	if err != nil {
+		return err
+	}
+	if st.FirstRun() {
+		slog.Info("carrel: first-run mode", "dataDir", cfg.DataDir)
+	}
+	_ = session.NewManager(cfg)
+
 	addr := net.JoinHostPort(cfg.Bind, strconv.Itoa(cfg.Port))
 
 	mux := http.NewServeMux()
