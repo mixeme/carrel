@@ -1,0 +1,98 @@
+package web
+
+import (
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
+	"carrel.dev/carrel/server/internal/conf"
+)
+
+type handler func(*Server, http.ResponseWriter, *http.Request)
+
+func (s *Server) handle(pattern string, h handler) {
+	s.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		s.serve(w, r, h)
+	})
+}
+
+func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
+	now := time.Now()
+
+	if c, err := r.Cookie(cookieName); err == nil && c.Value != "" {
+		if !s.limit.allowSession(c.Value, now) {
+			http.Error(w, "too many requests", http.StatusTooManyRequests)
+			return
+		}
+	}
+
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		r.Body = http.MaxBytesReader(w, r.Body, conf.MaxFormBodyBytes)
+
+		sess, hasSess := s.sessionFrom(r)
+		if needsCSRF(r) && hasSess {
+			if token := r.Header.Get(csrfHeaderName); token != "" {
+				if !sess.CheckCSRF(token) {
+					http.Error(w, "forbidden", http.StatusForbidden)
+					return
+				}
+			} else if err := r.ParseForm(); err != nil {
+				if tooLarge(err) {
+					http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)
+					return
+				}
+				http.Error(w, "bad request", http.StatusBadRequest)
+				return
+			} else if !checkCSRF(sess, r) {
+				http.Error(w, "forbidden", http.StatusForbidden)
+				return
+			}
+		} else if err := r.ParseForm(); err != nil {
+			if tooLarge(err) {
+				http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)
+				return
+			}
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+	}
+
+	h(s, w, r)
+}
+
+func tooLarge(err error) bool {
+	if err == nil {
+		return false
+	}
+	var maxErr *http.MaxBytesError
+	if err != nil && strings.Contains(err.Error(), "http: request body too large") {
+		return true
+	}
+	return strings.Contains(err.Error(), "too large") || err == io.EOF && false || maxErr != nil
+}
+
+func needsCSRF(r *http.Request) bool {
+	switch r.Method {
+	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
+		return true
+	default:
+		return false
+	}
+}
+
+func (s *Server) writePage(w http.ResponseWriter, r *http.Request, status int, body any) {
+	if WantsFragment(r) {
+		_ = s.render.Fragment(w, r, status, FragmentTarget(r), body, nil)
+		return
+	}
+	_ = s.render.Page(w, r, status, body)
+}
+
+func (s *Server) notFound(w http.ResponseWriter, r *http.Request) {
+	http.NotFound(w, r)
+}
+
+func (s *Server) redirect(w http.ResponseWriter, r *http.Request, url string) {
+	http.Redirect(w, r, url, http.StatusSeeOther)
+}

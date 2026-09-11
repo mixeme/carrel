@@ -10,7 +10,7 @@
 	color: var(--tc-ink);
 	font-family: var(--tc-font-sans);
 	font-size: var(--tc-font-size);
-	line-height: 1;
+	line-height: 1.35;
 	padding: 0 0.6em;
 	min-height: 28px;
 	cursor: pointer;
@@ -57,6 +57,22 @@
 	min-height: var(--tc-row-height-touch);
 	cursor: pointer;
 }
+.tc-check input[type="checkbox"],
+.tc-check input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+.tc-check__box {
+	width: 13px;
+	height: 13px;
+	min-width: 13px;
+	border: var(--tc-stroke) solid var(--tc-rule);
+	border-radius: var(--tc-radius);
+	flex: none;
+}
+.tc-check input:checked + .tc-check__box { background: var(--tc-accent); }
 .tc-check__label { color: var(--tc-ink); }
 .tc-check__hint { display: block; color: var(--tc-muted); font-size: 0.9em; }
 .tc-check.is-disabled { opacity: 0.55; cursor: not-allowed; }
@@ -75,6 +91,7 @@
 	background: var(--tc-bg);
 	font-size: 0.85em;
 }
+.tc-kbd__sep { opacity: 0.6; }
 
 .tc-close {
 	border: 0;
@@ -180,6 +197,7 @@
 .tc-msg--accent { border-color: var(--tc-accent); }
 .tc-msg--alert { border-color: var(--tc-danger); }
 .tc-msg__title { font-weight: 600; margin-bottom: 0.25em; }
+.tc-msg__body { color: var(--tc-muted); margin: 0; }
 .tc-msg__actions { margin-top: 0.5em; display: flex; gap: 0.5em; }
 
 .tc-empty {
@@ -190,6 +208,7 @@
 }
 .tc-empty__title { margin: 0 0 0.25em; font-family: var(--tc-font-serif); }
 .tc-empty__body { color: var(--tc-muted); margin: 0 0 1em; }
+.tc-empty__action { margin-top: 0.5em; }
 
 .tc-skel { display: flex; flex-direction: column; gap: 0.35em; }
 .tc-skel__line {

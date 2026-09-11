@@ -39,6 +39,7 @@
 	flex: none;
 	font-size: 0.9em;
 }
+.tc-docmeta__section { margin-bottom: 1em; }
 .tc-docmeta__title {
 	font-size: 0.75em;
 	letter-spacing: 0.06em;
@@ -47,6 +48,7 @@
 	margin: 0 0 0.5em;
 }
 .tc-docmeta__tags { display: flex; flex-wrap: wrap; gap: 0.35em; margin-bottom: 0.75em; }
+.tc-docmeta__rows { display: flex; flex-direction: column; gap: 0.35em; }
 
 @media (max-width: 720px) {
 	.tc-doc__layout { flex-direction: column; }

@@ -96,7 +96,7 @@ func renderRowCells(v RowVariant, c RowCells) string {
 	case RowAvatar:
 		av := c.Avatar
 		if av.Initials == "" && av.Image == "" {
-			av = Avatar{Initials: c.Title, Image: c.Subtitle}
+			av = Avatar{Initials: initials(c.Title)}
 		}
 		return av.Render() + `<div class="tc-row__text"><span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__subtitle">` + esc(c.Subtitle) + `</span></div>`
 	case RowLead:

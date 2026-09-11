@@ -1,0 +1,488 @@
+package web
+
+import (
+	"net/http"
+	"time"
+
+	"carrel.dev/carrel/server/view"
+)
+
+func (s *Server) getHealthz(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = w.Write([]byte("ok"))
+}
+
+func (s *Server) getAbout(w http.ResponseWriter, r *http.Request) {
+	page := view.AboutPage{
+		Plain: view.Plain{
+			Title: text("About Carrel"),
+			Lede:  text("One desk. Every server."),
+		},
+		Version: text(s.version),
+		Commit:  text(s.commit),
+		Source: view.Action{
+			ID: "about.source", Label: "Source code", Href: "https://carrel.dev", Method: "GET", Enabled: true,
+		},
+		Third: view.Action{ID: "about.third", Label: "Third-party notices", Href: "/about", Method: "GET", Enabled: true},
+		Back:  view.Action{ID: "about.back", Label: "Back", Href: "/login", Method: "GET", Enabled: true},
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) getLogin(w http.ResponseWriter, r *http.Request) {
+	if s.users.FirstRun() {
+		s.redirect(w, r, "/setup")
+		return
+	}
+	if sess, ok := s.sessionFrom(r); ok {
+		s.redirect(w, r, "/app/contacts")
+		_ = sess
+		return
+	}
+	page := view.LoginPage{
+		Plain: view.Plain{Title: text("Sign in"), Lede: text("One desk. Every server.")},
+		Form: plainForm("/login", "POST",
+			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
+			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
+		),
+		Forgot: view.Action{ID: "login.forgot", Label: "Forgotten your password?", Href: "/forgot", Method: "GET", Enabled: true},
+		About:  view.Action{ID: "login.about", Label: "About", Href: "/about", Method: "GET", Enabled: true},
+	}
+	if s.users.RegisterOpen() {
+		page.Form.Sets[0].Rows = append(page.Form.Sets[0].Rows,
+			view.FormRow{Name: "register", Label: "", Kind: view.InputText, Extra: &view.Action{
+				ID: "login.register", Label: "Create an account", Href: "/register", Method: "GET", Enabled: true,
+			}},
+		)
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	ip := clientIP(r)
+	login := r.FormValue("login")
+	if !s.limit.allowLogin(login, ip, start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	password := r.FormValue("password")
+	accountID, dataKey, mustChange, ok := s.users.Authenticate(r.Context(), login, password)
+	if !ok {
+		constantTimeDelay(start, 300*time.Millisecond)
+		page := view.LoginPage{
+			Plain: view.Plain{Title: text("Sign in"), Lede: text("One desk. Every server.")},
+			Form: plainForm("/login", "POST",
+				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true},
+				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: text("Login or password is wrong.")},
+			),
+			Forgot: view.Action{ID: "login.forgot", Label: "Forgotten your password?", Href: "/forgot", Method: "GET", Enabled: true},
+			About:  view.Action{ID: "login.about", Label: "About", Href: "/about", Method: "GET", Enabled: true},
+		}
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
+	sess, err := s.sessions.Create(accountID, login, dataKey)
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	s.setSessionCookie(w, r, sess.ID())
+	if mustChange {
+		s.redirect(w, r, "/app/password")
+		return
+	}
+	s.redirect(w, r, "/app/contacts")
+}
+
+func (s *Server) postLogout(w http.ResponseWriter, r *http.Request) {
+	if sess, ok := s.sessionFrom(r); ok {
+		s.sessions.End(sess.ID())
+	}
+	s.clearSessionCookie(w, r)
+	s.redirect(w, r, "/login")
+}
+
+func (s *Server) getSetup(w http.ResponseWriter, r *http.Request) {
+	if !s.users.FirstRun() {
+		s.notFound(w, r)
+		return
+	}
+	page := view.SetupPage{
+		Plain: view.Plain{
+			Title: text("Create administrator"),
+			Lede:  text("This instance has no accounts yet. Choose a login and password for the first administrator."),
+		},
+		Form: plainForm("/setup", "POST",
+			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
+			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Hint: text("At least 8 characters.")},
+			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
+		),
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
+	if !s.users.FirstRun() {
+		s.notFound(w, r)
+		return
+	}
+	login := r.FormValue("login")
+	password := r.FormValue("password")
+	password2 := r.FormValue("password2")
+	if password != password2 {
+		page := view.SetupPage{
+			Plain: view.Plain{Title: text("Create administrator"), Lede: text("This instance has no accounts yet.")},
+			Form: plainForm("/setup", "POST",
+				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true},
+				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: text("Passwords do not match.")},
+				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
+			),
+		}
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
+	if err := s.users.SetupFirstAdmin(r.Context(), login, password); err != nil {
+		page := view.SetupPage{
+			Plain: view.Plain{Title: text("Create administrator"), Lede: text("This instance has no accounts yet.")},
+			Form: plainForm("/setup", "POST",
+				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Error: text(err.Error())},
+				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
+				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
+			),
+		}
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
+	s.redirect(w, r, "/login")
+}
+
+func (s *Server) getRegister(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	if !s.users.RegisterOpen() {
+		s.notFound(w, r)
+		return
+	}
+	page := view.RegisterPage{
+		Plain: view.Plain{Title: text("Create account"), Lede: text("Registration is open on this instance.")},
+		Form: plainForm("/register", "POST",
+			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
+			view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail, Required: true},
+			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
+		),
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	ip := clientIP(r)
+	if !s.limit.allowAnon(ip, start) || !s.limit.allowLogin(r.FormValue("login"), ip, start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	if !s.users.RegisterOpen() {
+		s.notFound(w, r)
+		return
+	}
+	if err := s.users.Register(r.Context(), r.FormValue("login"), r.FormValue("email"), r.FormValue("password")); err != nil {
+		page := view.RegisterPage{
+			Plain: view.Plain{Title: text("Create account"), Lede: text("Registration is open on this instance.")},
+			Form: plainForm("/register", "POST",
+				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(r.FormValue("login")), Error: text(err.Error())},
+				view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail, Value: text(r.FormValue("email"))},
+				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
+			),
+		}
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
+	page := view.RegisterPage{
+		Plain: view.Plain{Title: text("Create account"), Lede: text("Check your email to confirm your address.")},
+		Sent:  true,
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) getInvite(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	token := r.PathValue("token")
+	valid := s.users.InviteValid(r.Context(), token)
+	if !valid {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	page := view.InvitePage{
+		Plain: view.Plain{Title: text("Accept invitation"), Lede: text("Choose a password for your new account.")},
+		Valid: true,
+		Form: plainForm("/invite/"+token, "POST",
+			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
+			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
+		),
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	token := r.PathValue("token")
+	if !s.users.InviteValid(r.Context(), token) {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	if r.FormValue("password") != r.FormValue("password2") {
+		page := view.InvitePage{
+			Plain: view.Plain{Title: text("Accept invitation"), Lede: text("Choose a password.")},
+			Valid: true,
+			Form: plainForm("/invite/"+token, "POST",
+				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Error: text("Passwords do not match.")},
+				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword},
+			),
+		}
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
+	if err := s.users.CompleteInvite(r.Context(), token, r.FormValue("password")); err != nil {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	s.redirect(w, r, "/login")
+}
+
+func (s *Server) getConfirmEmail(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	token := r.PathValue("token")
+	ok := s.users.ConfirmEmail(r.Context(), token)
+	if !ok {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	page := view.ConfirmEmailPage{
+		Plain: view.Plain{Title: text("Email confirmed"), Lede: text("You can sign in now.")},
+		OK:    true,
+		Next:  view.Action{ID: "confirm.login", Label: "Sign in", Href: "/login", Method: "GET", Enabled: true},
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) getForgot(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	page := view.ForgotPage{
+		Plain: view.Plain{
+			Title: text("Forgotten password"),
+			Lede:  text("Carrel cannot recover your encrypted data. You can wipe the account and set a new password, or ask an administrator."),
+		},
+		Form: plainForm("/forgot", "POST",
+			view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText, Required: true},
+		),
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	ip := clientIP(r)
+	if !s.limit.allowAnon(ip, start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	sent, asked, hasMail, err := s.users.ForgotRequest(r.Context(), r.FormValue("login"))
+	if err != nil {
+		constantTimeDelay(start, 300*time.Millisecond)
+	}
+	page := view.ForgotPage{
+		Plain: view.Plain{Title: text("Forgotten password"), Lede: text("Carrel cannot recover your encrypted data.")},
+		Form:  plainForm("/forgot", "POST", view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText}),
+		Sent:  sent,
+		Asked: asked,
+		HasMail: hasMail,
+	}
+	if !hasMail && !sent && !asked {
+		page.HasMail = false
+		page.Plain.Lede = text("Without a confirmed email address on the account, sign-in recovery from here is not possible.")
+	}
+	_ = err
+	constantTimeDelay(start, 300*time.Millisecond)
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) getForgotWipe(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	token := r.PathValue("token")
+	login, step, valid := s.users.ForgotWipeState(r.Context(), token)
+	if !valid {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	page := s.forgotWipePage(token, login, step)
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) postForgotWipe(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	token := r.PathValue("token")
+	login, step, valid := s.users.ForgotWipeState(r.Context(), token)
+	if !valid {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	switch step {
+	case string(view.WipeConfirm):
+		if r.FormValue("confirm") != "yes" {
+			page := s.forgotWipePage(token, login, step)
+			page.Form.Sets[0].Rows[0].Error = text("Confirmation is required.")
+			s.writePage(w, r, http.StatusOK, page)
+			return
+		}
+		if err := s.users.ForgotConfirmWipe(r.Context(), token); err != nil {
+			s.tokenNotFound(w, r, start)
+			return
+		}
+		login, step, valid = s.users.ForgotWipeState(r.Context(), token)
+		page := s.forgotWipePage(token, login, step)
+		s.writePage(w, r, http.StatusOK, page)
+	case string(view.WipePassword):
+		if err := s.users.ForgotSetPassword(r.Context(), token, r.FormValue("password")); err != nil {
+			page := s.forgotWipePage(token, login, step)
+			page.Form.Sets[0].Rows[0].Error = text(err.Error())
+			s.writePage(w, r, http.StatusOK, page)
+			return
+		}
+		s.redirect(w, r, "/login")
+	default:
+		s.tokenNotFound(w, r, start)
+	}
+}
+
+func (s *Server) forgotWipePage(token, login, step string) view.ForgotWipePage {
+	page := view.ForgotWipePage{
+		Plain: view.Plain{Title: text("Reset account"), Lede: text("This destroys encrypted connections and cannot be undone.")},
+		Login: text(login),
+		Warning: view.Notice{
+			Role:  view.NoticeAlert,
+			Title: text("Encrypted data will be destroyed"),
+			Body:  text("Connections become unreadable and are removed. Data on remote servers is not touched."),
+		},
+	}
+	switch step {
+	case string(view.WipeConfirm):
+		page.Step = view.WipeConfirm
+		page.Form = plainForm("/forgot/"+token, "POST",
+			view.FormRow{Name: "confirm", Label: "Type yes to wipe encrypted data", Kind: view.InputText, Required: true},
+		)
+	case string(view.WipePassword):
+		page.Step = view.WipePassword
+		page.Form = plainForm("/forgot/"+token, "POST",
+			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true},
+			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
+		)
+		page.Warning = view.Notice{
+			Role: view.NoticeInfo,
+			Body: text("Choose a new password. The same login and role are kept."),
+		}
+	}
+	return page
+}
+
+func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	token := r.PathValue("token")
+	if !s.users.PublicLinkValid(r.Context(), token) {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	page := view.PublishedPage{
+		Plain: view.Plain{Title: text("Published"), Lede: text("Read-only view.")},
+		ReadOnly: true,
+	}
+	s.writePage(w, r, http.StatusOK, page)
+}
+
+func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	if !s.users.PublicLinkValid(r.Context(), r.PathValue("token")) {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	s.notFound(w, r)
+}
+
+func (s *Server) getPublishedFile(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	if !s.users.PublicLinkValid(r.Context(), r.PathValue("token")) {
+		s.tokenNotFound(w, r, start)
+		return
+	}
+	s.notFound(w, r)
+}
+
+func (s *Server) postBackupRun(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	s.tokenNotFound(w, r, start)
+}
+
+func (s *Server) getBackupStatus(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	s.tokenNotFound(w, r, start)
+}
+
+func (s *Server) getBackupDownload(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	if !s.limit.allowAnon(clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	s.tokenNotFound(w, r, start)
+}
+
+func (s *Server) getBackupDownloadLegacy(w http.ResponseWriter, r *http.Request) {
+	s.getBackupDownload(w, r)
+}

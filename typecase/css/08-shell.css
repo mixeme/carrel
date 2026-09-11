@@ -60,6 +60,7 @@
 	margin: 0;
 }
 .tc-railsec--alert .tc-railsec__title { color: var(--tc-danger); }
+.tc-railsec__rows { display: flex; flex-direction: column; }
 
 .tc-railfoot {
 	margin-top: auto;
@@ -106,6 +107,8 @@
 	text-decoration: none;
 }
 .tc-nav__item.is-current { font-weight: 600; color: var(--tc-accent); }
+.tc-nav__icon { flex: none; }
+.tc-nav__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tc-nav--bottom .tc-nav__item { min-height: 44px; flex: 1; justify-content: center; }
 
 .tc-head {
@@ -137,4 +140,5 @@
 	white-space: nowrap;
 }
 .tc-crumbs__link { color: var(--tc-accent); text-decoration: none; }
+.tc-crumbs__sep { color: var(--tc-muted); margin: 0 0.25em; }
 .tc-crumbs__current { color: var(--tc-ink); }

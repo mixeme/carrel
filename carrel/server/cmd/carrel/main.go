@@ -1,5 +1,4 @@
-// Command carrel is the Carrel server binary. It is still a skeleton: it
-// listens and answers /healthz, and nothing else yet.
+// Command carrel is the Carrel server binary.
 package main
 
 import (
@@ -14,6 +13,7 @@ import (
 	"carrel.dev/carrel/server/internal/crypt"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/internal/web"
 )
 
 // version and commit are set by -ldflags at build time (C-13: the About
@@ -64,25 +64,17 @@ func run(cfg *conf.Config) error {
 	stopPurge := runSessionPurge(mgr, time.Minute)
 	defer stopPurge()
 
+	users := web.NewStubUsers(st)
+	srv := web.New(cfg, st, mgr, users, web.JSONRenderer{}, version, commit)
+
 	addr := net.JoinHostPort(cfg.Bind, strconv.Itoa(cfg.Port))
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", healthz)
-
-	srv := &http.Server{
-		Addr:    addr,
-		Handler: mux,
-		// A request that never finishes its headers must not hold a
-		// connection open forever.
+	httpSrv := &http.Server{
+		Addr:              addr,
+		Handler:           srv.Handler(),
 		ReadHeaderTimeout: 20 * time.Second,
 	}
 	slog.Info("carrel: listening", "addr", addr, "version", version, "commit", commit)
-	return srv.ListenAndServe()
-}
-
-func healthz(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	_, _ = w.Write([]byte("ok"))
+	return httpSrv.ListenAndServe()
 }
 
 func runSessionPurge(mgr *session.Manager, interval time.Duration) func() {

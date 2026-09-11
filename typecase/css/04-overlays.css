@@ -86,6 +86,7 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	max-width: 12em;
+	line-height: 1.35;
 }
 .tc-menu__arrow {
 	width: 0.45em;
@@ -118,6 +119,7 @@
 	margin-bottom: 2px;
 }
 .tc-menu__popover--end, .tc-usermenu__popover { right: 0; left: auto; }
+.tc-menu__popover--start { left: 0; right: auto; }
 .tc-menu:not(.is-open) .tc-menu__popover,
 .tc-usermenu:not(.is-open) .tc-usermenu__popover { display: none; }
 .tc-menu__item, .tc-usermenu__item {

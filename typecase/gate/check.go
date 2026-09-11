@@ -116,7 +116,7 @@ func FindModuleRoot() (string, error) {
 func Run(name Name, p ModulePaths, catalog []CatalogEntry) error {
 	switch name {
 	case Completeness:
-		return CheckCompleteness(p)
+		return CheckCompleteness(p, catalog)
 	case Ownership:
 		return CheckOwnership(p)
 	case NodeNames:
@@ -203,8 +203,9 @@ func gateImplemented(name Name) bool {
 	}
 }
 
-// CheckCompleteness ensures every tc-* root widget has CSS and a Go widget.
-func CheckCompleteness(p ModulePaths) error {
+// CheckCompleteness ensures every tc-* root widget has CSS and a Go widget,
+// and every tc-*__* class in catalog markup has a stylesheet rule or hook.
+func CheckCompleteness(p ModulePaths, catalog []CatalogEntry) error {
 	widgets, err := LoadWidgets(p.WidgetDir)
 	if err != nil {
 		return err
@@ -234,7 +235,7 @@ func CheckCompleteness(p ModulePaths) error {
 	if len(missing) > 0 {
 		return fmt.Errorf("completeness: %s", strings.Join(missing, "; "))
 	}
-	return nil
+	return checkCatalogElementClasses(p, catalog)
 }
 
 func isVariantOnly(name string) bool {

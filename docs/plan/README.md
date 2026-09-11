@@ -10,6 +10,7 @@
 | [typecase.md](typecase.md) | План библиотеки виджетов (`L`) |
 | [server.md](server.md) | План серверной половины (`S`) |
 | [reviews.md](reviews.md) | Opus-ревью и аудиты Fable |
+| [catalog-visual.md](catalog-visual.md) | Визуальный аудит каталога на браузере, находки `В-` |
 
 **Исполнитель по умолчанию — Composer.** Если шаг делает другая модель, это написано в чекбоксе: `Opus`, `Fable`. Composer эти шаги не выполняет.
 

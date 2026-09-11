@@ -62,6 +62,35 @@ type Foo struct{}
 	}
 }
 
+func TestBite_completeness_elementClass(t *testing.T) {
+	p := brokenModule(t)
+	widgetSrc := `package widget
+
+// Foo — tc-foo
+//
+// Роль. Test widget.
+// Вход. Foo{}.
+// Состояния. default.
+// Инварианты. none.
+// Поведение. none.
+// Геометрия. none.
+// Содержимое. none.
+// Чего нет. none.
+type Foo struct{}
+func (Foo) Render() string { return "<div class=\"tc-foo\"><span class=\"tc-foo__orphan\">x</span></div>" }
+`
+	if err := os.WriteFile(filepath.Join(p.WidgetDir, "foo.go"), []byte(widgetSrc), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(p.CSSDir, "01-base.css"), []byte(".tc-foo { display: block; }\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	cat := []gate.CatalogEntry{{Widget: "tc-foo", State: "default", HTML: `<div class="tc-foo"><span class="tc-foo__orphan">x</span></div>`}}
+	if err := gate.CheckCompleteness(p, cat); err == nil {
+		t.Fatal("expected completeness gate to fail on element class without css")
+	}
+}
+
 func TestBite_domainNaming(t *testing.T) {
 	p := brokenModule(t)
 	for _, name := range []string{"domain.go", "enumvalue.go"} {

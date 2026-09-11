@@ -56,6 +56,19 @@ func TestRender_smoke(t *testing.T) {
 	}
 }
 
+func TestRowAvatar_fallbackNoImageSrc(t *testing.T) {
+	html := widget.Row{
+		Variant: widget.RowAvatar,
+		Cells:   widget.RowCells{Title: "Alex", Subtitle: "alex@example.com"},
+	}.Render()
+	if strings.Contains(html, "<img") {
+		t.Fatalf("avatar fallback must not emit img: %s", html)
+	}
+	if !strings.Contains(html, "tc-avatar__initials") {
+		t.Fatalf("avatar fallback should use initials: %s", html)
+	}
+}
+
 func TestCatalog_entries(t *testing.T) {
 	entries := catalog.Entries()
 	if len(entries) < 50 {

@@ -54,7 +54,7 @@
 	border-color: var(--tc-accent);
 	box-shadow: inset 0 0 0 1px var(--tc-accent);
 }
-.tc-chip__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 12em; }
+.tc-chip__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 12em; line-height: 1.35; }
 
 .tc-range { display: flex; align-items: center; gap: 0.75em; flex-wrap: wrap; }
 .tc-range__fields { display: flex; align-items: center; gap: 0.35em; }

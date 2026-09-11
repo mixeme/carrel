@@ -35,6 +35,7 @@
 .tc-field__hint { grid-column: 2; color: var(--tc-muted); font-size: 0.9em; }
 .tc-field__error { grid-column: 2; color: var(--tc-danger); font-size: 0.9em; }
 .tc-field.is-error .tc-in { border-color: var(--tc-danger); }
+.tc-field__control { grid-column: 2; min-width: 0; }
 .tc-field__extra { margin-top: 0.35em; }
 
 .tc-formfoot {
@@ -45,6 +46,8 @@
 	padding-top: 0.75em;
 	border-top: var(--tc-stroke) solid var(--tc-rule);
 }
+.tc-formfoot__primary,
+.tc-formfoot__rest { display: flex; gap: 0.5em; flex-wrap: wrap; }
 .tc-formfoot__danger { margin-left: auto; display: flex; gap: 0.5em; }
 
 .tc-danger {
@@ -61,4 +64,7 @@
 	padding: 0.75em 0;
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 }
+.tc-danger__text { flex: 1; min-width: 0; }
 .tc-danger__text p { margin: 0.25em 0 0; color: var(--tc-muted); }
+.tc-danger__text strong { display: block; }
+.tc-danger__action { flex: none; }

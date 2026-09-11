@@ -33,6 +33,8 @@
 	z-index: 40;
 }
 .tc-search:not(.is-suggesting) .tc-search__popover { display: none; }
+.tc-search__history,
+.tc-search__jump { padding: 0.35em 0.75em; }
 .tc-search__all {
 	border-top: var(--tc-stroke) solid var(--tc-rule);
 	padding: 0.35em 0.75em;
@@ -86,6 +88,7 @@
 .tc-diff.is-agreed { opacity: 0.65; }
 .tc-diff__property { margin: 0 0 0.5em; font-family: var(--tc-font-serif); }
 .tc-diff__options { display: flex; flex-direction: column; gap: 0.5em; }
+.tc-diff__option { display: flex; gap: 0.5em; align-items: flex-start; }
 .tc-diff__value { overflow-wrap: anywhere; margin-top: 0.25em; color: var(--tc-muted); }
 
 .tc-crop { display: flex; flex-direction: column; gap: 0.75em; }
@@ -125,6 +128,7 @@
 	background: var(--tc-surface);
 	margin-bottom: 0.75em;
 }
+.tc-card__body { margin-top: 0.5em; }
 .tc-sec { margin-bottom: 1em; }
 .tc-sec__body { margin-top: 0.35em; }
 

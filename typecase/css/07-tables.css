@@ -12,7 +12,10 @@
 	top: 0;
 }
 .tc-table__th--number, .tc-table__td--number { text-align: right; }
+.tc-table__th--text, .tc-table__td--text { text-align: left; }
+.tc-table__th--action, .tc-table__td--action { text-align: right; white-space: nowrap; }
 .tc-table__td { padding: 0 0.5em; height: var(--tc-row-height); border-bottom: var(--tc-stroke) solid var(--tc-rule); }
+.tc-table__tr { display: table-row; }
 .tc-table__tr.is-selected { background: color-mix(in srgb, var(--tc-accent) 10%, var(--tc-surface)); }
 
 .tc-grid {
@@ -57,10 +60,16 @@
 .tc-tree { font-size: var(--tc-font-size); }
 .tc-tree__node {
 	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	min-height: var(--tc-row-height);
+	padding-left: 0;
+}
+.tc-tree__row {
+	display: flex;
 	align-items: center;
 	gap: 0.25em;
 	min-height: var(--tc-row-height);
-	padding-left: 0;
 }
 .tc-tree__label {
 	border: 0;
@@ -72,13 +81,14 @@
 	white-space: nowrap;
 	color: var(--tc-ink);
 	flex: 1;
+	line-height: 1.35;
 }
 .tc-tree__node.is-chosen .tc-tree__label { font-weight: 600; color: var(--tc-accent); }
 .tc-tree__node.is-disabled { opacity: 0.55; }
 .tc-tree__node.is-disabled .tc-tree__label,
 .tc-tree__node.is-disabled .tc-tree__toggle { pointer-events: none; cursor: default; }
 .tc-tree__toggle, .tc-tree__spacer { width: 1em; flex: none; }
-.tc-tree__children { width: 100%; margin-left: 1.25em; }
+.tc-tree__children { margin-left: 0; padding-left: 1.25em; }
 
 .tc-queue {
 	position: sticky;
@@ -94,5 +104,13 @@
 	padding: 0.35em 0;
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 }
+.tc-queue__label { flex: 1; min-width: 0; }
+.tc-queue__row--idle { opacity: 0.65; }
+.tc-queue__row--running .tc-queue__label { font-weight: 600; }
+.tc-queue__row--done .tc-queue__label { color: var(--tc-muted); }
+.tc-queue__row--failed .tc-queue__label { color: var(--tc-danger); }
+.tc-queue__row--partial .tc-queue__label { color: var(--tc-accent); }
+.tc-queue__row--cancelled { opacity: 0.55; }
+.tc-queue__row--cancelled .tc-queue__label { text-decoration: line-through; }
 .tc-queue__question { flex: 1; }
 .tc-queue__note { color: var(--tc-muted); font-size: 0.9em; margin: 0.35em 0 0; }

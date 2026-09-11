@@ -4,7 +4,36 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
-## carrel/server/v0.0.11 — 2026-09-05
+## carrel/server/v0.0.12 — 2026-09-05
+
+Adds the HTTP request layer (S-9): all C-5 routes, CSRF, rate limits,
+ownership checks, JSON `Renderer`, and page/fragment distinction by
+`Carrel-View` header.
+
+### For consumers
+
+- `internal/web` registers every route from C-5. Mutating requests with a
+  session require `X-CSRF-Token` or `_csrf` before the handler runs; bodies are
+  capped at 1 MiB.
+- Rate buckets from architecture.md: login 5/min per account and 20/min per IP,
+  anonymous tokens 30/min per IP, 120/min per session after login.
+- Foreign `{account}` / `{col}` / `{uid}` returns 404, same as missing (S-9.5).
+- Invalid public secrets use uniform timing and a single 404 response.
+- `http://` connections show a warning on the connections screen (F-13); DAV
+  transport errors surface as `DiagnosticTrace` on screen, not HTTP 500.
+- Out-of-band fragment targets follow the closed C-7.3 table.
+- App routes return minimal view models until providers land; auth routes call
+  `web.Users` (implemented by `internal/user` in v0.0.13).
+
+### Included
+
+- `internal/web`: routes, middleware, `JSONRenderer`, `NewStubUsers` for tests.
+- `cmd/carrel`: serves the full route map through `web.Server`.
+
+### Not yet included
+
+Providers, fanout, and feature handlers that need live DAV data.
+
 
 Fixes a cache-eviction defect found while verifying that the Fable debt was
 actually closed. The gates were green; the test that guards the rule passed by

@@ -216,7 +216,7 @@ func renderTreeNodes(nodes []TreeNode, chosen string, disabled []string, depth i
 		if dis {
 			btnDis = " disabled"
 		}
-		out += `<div` + classAttr(cls) + ` role="treeitem" data-tc-tree-item` + attr("data-id", n.ID) + `>` + toggle + n.Mark.Render() + `<button type="button" class="tc-tree__label"` + btnDis + `>` + esc(n.Label) + `</button>` + badges + children + `</div>`
+		out += `<div` + classAttr(cls) + ` role="treeitem" data-tc-tree-item` + attr("data-id", n.ID) + `><div class="tc-tree__row">` + toggle + n.Mark.Render() + `<button type="button" class="tc-tree__label"` + btnDis + `>` + esc(n.Label) + `</button>` + badges + `</div>` + children + `</div>`
 	}
 	return out
 }
