@@ -41,7 +41,7 @@ func filesRail() widget.Rail {
 			},
 		},
 		Foot: widget.RailFoot{
-			Actions: []widget.Action{{Label: "Connect account", Icon: "+"}},
+			Actions: []widget.Action{{Label: "Connect account", Icon: "tc-i-server"}},
 			Build:   demoBuild,
 		},
 	}
@@ -57,11 +57,11 @@ func filesMain() widget.Main {
 		}},
 		Sub: "sftpgo · vps",
 		Actions: []widget.Action{
-			{Label: "Upload", Kind: widget.ButtonPrimary, Icon: "↑"},
+			{Label: "Upload", Kind: widget.ButtonPrimary, Icon: "tc-i-up"},
 		},
 		Rank2: []widget.Action{
-			{Label: "New folder", Icon: "+"},
-			{Label: "Refresh", Icon: "↻"},
+			{Label: "New folder", Icon: "tc-i-plus"},
+			{Label: "Refresh", Icon: "tc-i-refresh"},
 		},
 	}
 
@@ -69,13 +69,13 @@ func filesMain() widget.Main {
 		Separators: true,
 		Left: []widget.Node{
 			widget.Paragraph("1 selected · 412 KB"),
-			widget.Action{Label: "Download", Icon: "↓"},
+			widget.Action{Label: "Download", Icon: "tc-i-down"},
 		},
 		Rank2: []widget.Action{
-			{Label: "Rename", Icon: "✎"},
-			{Label: "Move", Icon: "⇄"},
-			{Label: "Copy", Icon: "⧉"},
-			{Label: "Delete", Kind: widget.ButtonDanger, Icon: "🗑"},
+			{Label: "Rename", Icon: "tc-i-pencil"},
+			{Label: "Move", Icon: "tc-i-move"},
+			{Label: "Copy", Icon: "tc-i-dup"},
+			{Label: "Delete", Kind: widget.ButtonDanger, Icon: "tc-i-trash"},
 		},
 		Right: []widget.Node{widget.Action{Label: "Clear selection", Size: widget.ButtonSizeBar}},
 	}
@@ -90,7 +90,7 @@ func filesMain() widget.Main {
 			},
 		},
 		Right: []widget.Node{
-			widget.Button{Label: "Columns", Icon: "▦", Size: widget.ButtonSizeBar},
+			widget.Button{Label: "Columns", Icon: "tc-i-cols", Size: widget.ButtonSizeBar},
 			widget.Num{Value: intPtr(14)},
 		},
 	}
@@ -114,15 +114,15 @@ func filesMain() widget.Main {
 			{
 				Selected: true,
 				Cells:    []string{"🖼 2026-08-10-sync-board.png", "412 KB", "image/png", "2026-08-10 11:07"},
-				Actions:  []widget.Action{{Label: "Download", Icon: "↓"}, {Label: "More", Icon: "⋯"}},
+				Actions:  []widget.Action{{Label: "Download", Icon: "tc-i-down"}, {Label: "More", Icon: "tc-i-more"}},
 			},
 			{
 				Cells:   []string{"📄 release-checklist.md", "3 KB", "text/markdown", "2026-08-09 18:44"},
-				Actions: []widget.Action{{Label: "Download", Icon: "↓"}, {Label: "More", Icon: "⋯"}},
+				Actions: []widget.Action{{Label: "Download", Icon: "tc-i-down"}, {Label: "More", Icon: "tc-i-more"}},
 			},
 			{
 				Cells:   []string{"📄 смета-подрядчик.pdf", "1.2 MB", "application/pdf", "2026-08-05 14:20"},
-				Actions: []widget.Action{{Label: "Download", Icon: "↓"}, {Label: "More", Icon: "⋯"}},
+				Actions: []widget.Action{{Label: "Download", Icon: "tc-i-down"}, {Label: "More", Icon: "tc-i-more"}},
 			},
 		},
 	}
@@ -134,7 +134,7 @@ func filesMain() widget.Main {
 					Variant:  widget.RowMeta,
 					Selected: true,
 					Cells: widget.RowCells{
-						Icon: "🖼",
+						Icon: "tc-i-img",
 						Name: "2026-08-10-sync-board.png",
 						Size: "412 KB",
 						Time: "2026-08-10 11:07",
@@ -143,7 +143,7 @@ func filesMain() widget.Main {
 				{
 					Variant: widget.RowMeta,
 					Cells: widget.RowCells{
-						Icon: "📄",
+						Icon: "tc-i-doc",
 						Name: "release-checklist.md",
 						Size: "3 KB",
 						Time: "2026-08-09 18:44",
@@ -156,7 +156,7 @@ func filesMain() widget.Main {
 	grid := widget.Grid{Tiles: []widget.Tile{
 		{Name: "2026-08-10-sync-board.png", Selected: true, Thumb: widget.Thumb{Href: "/img/sample.svg", Alt: "Board"}},
 		{Name: "2026-08-04-whiteboard.jpg", Thumb: widget.Thumb{Href: "/img/sample.svg", Alt: "Whiteboard"}},
-		{Name: "release-checklist.md", Icon: "📄"},
+		{Name: "release-checklist.md", Icon: "tc-i-doc"},
 	}}
 
 	p100, p62 := 100, 62
@@ -233,7 +233,7 @@ func filesSide() widget.Side {
 		Body: []widget.Node{widget.Danger{Title: "Danger zone", Rows: []widget.DangerRow{{
 			Title:  "Delete",
 			Text:   "Removes the file from the server.",
-			Action: widget.Action{Label: "Delete", Kind: widget.ButtonDanger, Icon: "🗑"},
+			Action: widget.Action{Label: "Delete", Kind: widget.ButtonDanger, Icon: "tc-i-trash"},
 		}}}},
 	}
 
@@ -245,10 +245,10 @@ func filesSide() widget.Side {
 			{Sec: &widget.Sec{Body: []widget.Node{
 				widget.Thumb{Href: "/img/sample.svg", Alt: "Preview", Size: widget.ThumbSizeTile},
 				widget.Bar{Left: []widget.Node{
-					widget.Action{Label: "Download", Kind: widget.ButtonPrimary, Icon: "↓"},
+					widget.Action{Label: "Download", Kind: widget.ButtonPrimary, Icon: "tc-i-down"},
 					widget.Action{Label: "Open"},
-					widget.Action{Label: "Rename", Icon: "✎"},
-					widget.Action{Label: "Move", Icon: "⇄"},
+					widget.Action{Label: "Rename", Icon: "tc-i-pencil"},
+					widget.Action{Label: "Move", Icon: "tc-i-move"},
 				}},
 			}}},
 			{Fields: &fields},

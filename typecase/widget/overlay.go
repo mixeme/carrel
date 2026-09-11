@@ -156,7 +156,7 @@ func (d Dialog) Render() string {
 // Menu — tc-menu
 //
 // Роль. Список действий, открывающийся у своего контрола.
-// Вход. Menu{ Label, Icon, Items, Align, State, ID }.
+// Вход. Menu{ Label, Icon, Kind, Items, Align, State, ID }.
 // Состояния. open | closed | disabled.
 // Инварианты. Стрелка есть всегда; всплывающее под контролом; Esc и мимо закрывают.
 // Поведение. Открытие, стрелки, Home/End, первая буква, Esc, мимо.
@@ -166,6 +166,7 @@ func (d Dialog) Render() string {
 type Menu struct {
 	Label string
 	Icon  string
+	Kind  ButtonKind
 	Items []MenuItem
 	Align MenuAlign
 	State MenuState
@@ -220,7 +221,11 @@ func (m Menu) Render() string {
 		items += `<li role="none"><a href="` + esc(it.Href) + `" class="` + icls + `" role="menuitem"` + title + `>` + icon + esc(it.Label) + `</a></li>`
 	}
 	pop := `<ul class="tc-menu__popover tc-menu__popover--` + string(align) + `" role="menu" data-tc-menu-popover` + attr("id", id+"-popover") + `>` + items + `</ul>`
-	btn := `<button type="button" class="tc-menu__control" data-tc-menu` + attr("data-tc-menu-id", id) + ` aria-haspopup="menu" aria-expanded="` + exp + `" aria-controls="` + esc(id) + `-popover"` + dis + `>` + renderIcon(m.Icon) + `<span class="tc-menu__label">` + esc(m.Label) + `</span><span class="tc-menu__arrow" aria-hidden="true"></span></button>`
+	btnCls := "tc-menu__control"
+	if m.Kind != "" {
+		btnCls = classes(btnCls, btnKindClass(m.Kind, m.State != MenuDisabled))
+	}
+	btn := `<button type="button" class="` + btnCls + `" data-tc-menu` + attr("data-tc-menu-id", id) + ` aria-haspopup="menu" aria-expanded="` + exp + `" aria-controls="` + esc(id) + `-popover"` + dis + `>` + renderIcon(m.Icon) + `<span class="tc-menu__label">` + esc(m.Label) + `</span><span class="tc-menu__arrow" aria-hidden="true"></span></button>`
 	return `<div` + classAttr(cls) + attr("id", id) + ` data-tc-overlay-anchor>` + btn + pop + `</div>`
 }
 

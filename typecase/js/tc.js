@@ -648,6 +648,10 @@
 	}
 
 	function menuItemsFromBarNode(node) {
+		if (node.hasAttribute && node.hasAttribute("data-tc-bar-rank2")) {
+			var btn = node.querySelector(".tc-btn");
+			if (btn) node = btn;
+		}
 		var items = [];
 		if (node.matches("a.tc-btn[href]")) {
 			items.push({ label: node.textContent.trim(), href: node.getAttribute("href") || "#" });

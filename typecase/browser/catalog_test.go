@@ -436,9 +436,9 @@ func TestCatalogTypography(t *testing.T) {
 	if len(probe.Families) > 0 {
 		t.Errorf("text drawn with undeclared families: %v", probe.Families)
 	}
-	// 1.6em заголовка против 0.9em подзаголовка; браузерное умолчание дало бы 2.22.
-	if probe.Ratio < 1.7 || probe.Ratio > 1.85 {
-		t.Errorf("tc-head title/sub size ratio %.2f, want ≈1.78", probe.Ratio)
+	// 22px заголовка против 0.9em подзаголовка (≈11.7px).
+	if probe.Ratio < 1.85 || probe.Ratio > 1.92 {
+		t.Errorf("tc-head title/sub size ratio %.2f, want ≈1.88", probe.Ratio)
 	}
 }
 
@@ -589,8 +589,8 @@ func TestCatalogBaseWithoutScript(t *testing.T) {
 	if probe.Family != "Public Sans" {
 		t.Errorf("base family without script is %q, want Public Sans", probe.Family)
 	}
-	if probe.TitleSize != "20.8px" {
-		t.Errorf("tc-head title without script is %s, want 20.8px", probe.TitleSize)
+	if probe.TitleSize != "22px" {
+		t.Errorf("tc-head title without script is %s, want 22px", probe.TitleSize)
 	}
 }
 

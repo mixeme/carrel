@@ -42,13 +42,11 @@
 .tc-main {
 	display: flex;
 	flex-direction: column;
-	/* Тянется по своей колонке, как tc-rail и tc-side: иначе рабочая
-	   поверхность обрывается по высоте содержимого. */
 	height: 100%;
 	overflow: auto;
-	background: var(--tc-surface);
+	background: transparent;
 }
-.tc-main__body { flex: 1; padding: var(--tc-page-gutter); min-width: 0; }
+.tc-main__body { flex: 1; padding: 0; min-width: 0; }
 .tc-main__body > .tc-bar { min-width: 0; }
 
 .tc-rail {
@@ -116,7 +114,19 @@
 	padding: 0.5em var(--tc-page-gutter);
 	border-top: var(--tc-stroke) solid var(--tc-rule);
 }
-.tc-railfoot__actions { display: flex; gap: 0.35em; margin-bottom: 0.35em; }
+.tc-railfoot__actions {
+	display: flex;
+	gap: 0.35em;
+	margin-bottom: 0.35em;
+	flex: none;
+}
+.tc-railfoot__actions .tc-btn {
+	flex: none;
+	width: 29px;
+	min-width: 29px;
+	padding-inline: 0;
+	justify-content: center;
+}
 .tc-railfoot__build {
 	display: block;
 	font-size: 0.8em;
@@ -163,15 +173,18 @@
 	border-left: var(--tc-stroke) solid var(--tc-rule);
 	background: var(--tc-surface);
 }
+.tc-side--wide { width: 440px; }
 .tc-side.is-closed { display: none; }
 .tc-side__head {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: space-between;
 	padding: 0.75em var(--tc-page-gutter);
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 }
+.tc-side__titles { flex: 1; min-width: 0; }
 .tc-side__title { margin: 0; font-family: var(--tc-font-serif); font-size: 1.1em; }
+.tc-side__sub { margin: 0.15em 0 0; color: var(--tc-muted); font-size: 0.9em; }
 .tc-side__head .tc-close { position: absolute; top: 8px; right: 8px; }
 .tc-side__body { flex: 1; overflow: auto; padding: var(--tc-page-gutter); }
 .tc-side__foot { border-top: var(--tc-stroke) solid var(--tc-rule); padding: 0.35em 0.5em; }
@@ -183,12 +196,17 @@
 	align-items: center;
 	gap: 0.35em;
 	padding: 0.35em 0.5em;
-	min-height: var(--tc-row-height);
+	min-height: 29px;
+	font-size: 13.5px;
 	color: var(--tc-ink);
 	text-decoration: none;
 }
-.tc-nav__item.is-current { font-weight: 600; color: var(--tc-accent); }
-.tc-nav__icon { flex: none; }
+.tc-nav__item.is-current {
+	font-weight: 600;
+	color: var(--tc-ink);
+	background: var(--tc-card);
+}
+.tc-nav__icon-svg { width: 16px; height: 16px; flex: none; }
 .tc-nav__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tc-nav--bottom .tc-nav__item { min-height: 44px; flex: 1; justify-content: center; }
 
@@ -208,13 +226,10 @@
 .tc-head__title {
 	margin: 0;
 	font-family: var(--tc-font-serif);
-	/* 22 px по макету при базе 13; вес обычный — крупность и есть ранг.
-	   Межстрочное не 1.15, как в макете: здесь заголовок обрезается многоточием,
-	   и строчный бокс обязан покрывать шрифтовой, иначе возвращается В-1.
-	   Шрифтовой бокс Literata — 1.48 кегля, отсюда 1.5. */
-	font-size: 1.6em;
+	font-size: 22px;
 	font-weight: 400;
 	line-height: 1.5;
+	padding-block: 0.28em 0.2em;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

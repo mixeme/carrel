@@ -4,8 +4,9 @@
 (`v0.0.30`, правка `v0.0.31`). Ниже — то, что в пакеты `provider/*` не
 класть и иначе потеряется при сокращении [server.md](server.md).
 
-Закон развилок — [architecture.md](architecture.md), «Провайдеры (08.09.2026)».
-S-11…S-26, проводка GET, фото, файлы, веер — чеклист [server.md](server.md).
+S-11…S-26 — закрытые развилки в [server.md](server.md), дубль в
+[architecture.md](architecture.md). Хвост ниже в пакеты `provider/*` не
+класть.
 
 ---
 

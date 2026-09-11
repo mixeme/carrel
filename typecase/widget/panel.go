@@ -30,23 +30,20 @@ func (b Bar) Render() string {
 	if b.Separators {
 		sep = `<span class="tc-bar__sep" aria-hidden="true"></span>`
 	}
-	more := ""
-	if len(b.Rank2) > 0 {
-		label := b.MoreLabel
-		if label == "" {
-			label = labels.More
+	more := `<div class="tc-bar__overflow" data-tc-bar-overflow hidden></div>`
+	var rank2HTML string
+	for _, a := range b.Rank2 {
+		aa := a
+		if aa.Size == "" {
+			aa.Size = ButtonSizeBar
 		}
-		var items []MenuItem
-		for _, a := range b.Rank2 {
-			items = append(items, MenuItem{Label: a.Label, Icon: a.Icon, Href: a.Href})
-		}
-		more = Menu{Label: label, Items: items}.Render()
+		rank2HTML += `<span data-tc-bar-rank2>` + aa.Render() + `</span>`
 	}
 	moreLabel := b.MoreLabel
 	if moreLabel == "" {
 		moreLabel = labels.More
 	}
-	return `<div` + classAttr(cls) + ` data-tc-bar` + attr("data-tc-more", moreLabel) + `><div class="tc-bar__left">` + left + `</div>` + sep + `<div class="tc-bar__right">` + right + more + `</div></div>`
+	return `<div` + classAttr(cls) + ` data-tc-bar` + attr("data-tc-more", moreLabel) + `><div class="tc-bar__left">` + left + `</div>` + sep + `<div class="tc-bar__right">` + right + rank2HTML + more + `</div></div>`
 }
 
 // Seg — tc-seg

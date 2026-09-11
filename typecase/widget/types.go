@@ -2,13 +2,14 @@ package widget
 
 // Action is a labeled control used in bars, forms, and menus.
 type Action struct {
-	Label  string
-	Icon   string
-	Href   string
-	Method string
-	Kind   ButtonKind
-	Size   ButtonSize
-	Reason string
+	Label    string
+	Icon     string
+	Href     string
+	Method   string
+	Kind     ButtonKind
+	Size     ButtonSize
+	Reason   string
+	IconOnly bool
 }
 
 // Render returns the tc-btn markup for this action.
@@ -100,6 +101,14 @@ const (
 	NavLayoutColumn NavLayout = "column"
 	NavLayoutIcons  NavLayout = "icons"
 	NavLayoutBottom NavLayout = "bottom"
+)
+
+// SideSize is the width tier of tc-side.
+type SideSize string
+
+const (
+	SideSizeDefault SideSize = ""
+	SideSizeWide    SideSize = "wide"
 )
 
 // ThumbSize is the geometry tier of tc-thumb.

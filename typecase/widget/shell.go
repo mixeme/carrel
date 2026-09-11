@@ -64,7 +64,7 @@ func shellRailApplyBtn() string {
 // Top — tc-top
 //
 // Роль. Знак, поиск, создание, меню учётной записи. Одна на страницу.
-// Вход. Top{ Brand, Nav, Search, Create, User, Mark }.
+// Вход. Top{ Brand, Nav, Search, Create, Refresh, User, Mark }.
 // Состояния. normal | full.
 // Инварианты. Знак один раз слева; поиск виден всегда.
 // Поведение. Отступление правой группы; меню создания и учётной записи.
@@ -72,12 +72,13 @@ func shellRailApplyBtn() string {
 // Содержимое. tc-brand, tc-search, tc-menu, tc-usermenu, tc-nav.
 // Чего нет. Нет второй строки.
 type Top struct {
-	Brand  Brand
-	Nav    Nav
-	Search Search
-	Create Menu
-	User   UserMenu
-	Mark   Mark
+	Brand   Brand
+	Nav     Nav
+	Search  Search
+	Create  Menu
+	Refresh Action
+	User    UserMenu
+	Mark    Mark
 }
 
 func (t Top) Render() string {
@@ -94,6 +95,10 @@ func (t Top) render(railChrome bool) string {
 	if t.User.Name != "" || len(t.User.Items) > 0 {
 		user = t.User.Render()
 	}
+	refresh := ""
+	if t.Refresh.Label != "" || t.Refresh.Icon != "" {
+		refresh = t.Refresh.Render()
+	}
 	nav := t.Nav.Render()
 	// Поиск рисуется всегда: «поле не убирается параметром» — инвариант tc-top,
 	// а не недосмотр. Ширину ему задаёт геометрия панели, а не наличие входа.
@@ -105,7 +110,7 @@ func (t Top) render(railChrome bool) string {
 		chrome = shellRailToggleBtn()
 		apply = shellRailApplyBtn()
 	}
-	return `<header` + classAttr(cls) + ` data-tc-top` + attr("data-tc-more", labels.More) + `>` + chrome + t.Brand.Render() + nav + search + `<div class="tc-top__actions">` + apply + create + user + `</div>` + mark + `</header>`
+	return `<header` + classAttr(cls) + ` data-tc-top` + attr("data-tc-more", labels.More) + `>` + chrome + t.Brand.Render() + nav + search + `<div class="tc-top__actions">` + apply + create + refresh + user + `</div>` + mark + `</header>`
 }
 
 // Main — tc-main
@@ -189,7 +194,7 @@ func (r Rail) Render() string {
 	if r.Note != "" {
 		note = `<p class="tc-rail__note">` + esc(r.Note) + `</p>`
 	}
-	return `<aside` + classAttr(cls) + ` data-tc-rail` + ariaBool("aria-expanded", r.Open) + `>` + chips + `<div class="tc-rail__sections">` + secs + `</div>` + note + r.Foot.Render() + `</aside>`
+	return `<aside` + classAttr(cls) + ` data-tc-rail` + ariaBool("aria-expanded", r.Open) + `><div class="tc-rail__sections">` + secs + `</div>` + chips + note + r.Foot.Render() + `</aside>`
 }
 
 // RailSection — tc-railsec
@@ -246,6 +251,9 @@ func (rf RailFoot) Render() string {
 	for _, a := range rf.Actions {
 		aa := a
 		aa.Size = ButtonSizeBar
+		if aa.Icon != "" {
+			aa.IconOnly = true
+		}
 		acts += aa.Render()
 	}
 	build := rf.Build.Render()
@@ -269,7 +277,7 @@ func (b Build) Render() string {
 // Side — tc-side
 //
 // Роль. Колонка справа, отвечающая на выделение.
-// Вход. Side{ Label, Title, Blocks, Actions, Open }.
+// Вход. Side{ Label, Title, Sub, Blocks, Actions, Open, Size }.
 // Состояния. open | closed.
 // Инварианты. Закрывается крестиком, кнопкой и Esc.
 // Поведение. Открытие, закрытие, возврат фокуса.
@@ -279,9 +287,11 @@ func (b Build) Render() string {
 type Side struct {
 	Label   string
 	Title   string
+	Sub     string
 	Blocks  []SideBlock
 	Actions []Action
 	Open    bool
+	Size    SideSize
 }
 
 func (s Side) IsZero() bool {
@@ -293,6 +303,9 @@ func (s Side) IsZero() bool {
 
 func (s Side) Render() string {
 	cls := "tc-side"
+	if s.Size == SideSizeWide {
+		cls = classes(cls, "tc-side--wide")
+	}
 	if s.Open {
 		cls = classes(cls, "is-open")
 	} else {
@@ -303,7 +316,11 @@ func (s Side) Render() string {
 		blocks += b.Render()
 	}
 	id := uniqueID("tc-side")
-	return `<aside` + classAttr(cls) + ` data-tc-side` + attr("id", id) + attr("aria-label", s.Label) + `><header class="tc-side__head"><h2 class="tc-side__title">` + esc(s.Title) + `</h2>` + Close{For: id, Label: labels.ClosePanel}.Render() + `</header><div class="tc-side__body">` + blocks + `</div><footer class="tc-side__foot">` + Bar{Left: ActionsAsNodes(s.Actions)}.Render() + `</footer></aside>`
+	sub := ""
+	if s.Sub != "" {
+		sub = `<p class="tc-side__sub">` + esc(s.Sub) + `</p>`
+	}
+	return `<aside` + classAttr(cls) + ` data-tc-side` + attr("id", id) + attr("aria-label", s.Label) + `><header class="tc-side__head"><div class="tc-side__titles"><h2 class="tc-side__title">` + esc(s.Title) + `</h2>` + sub + `</div>` + Close{For: id, Label: labels.ClosePanel}.Render() + `</header><div class="tc-side__body">` + blocks + `</div><footer class="tc-side__foot">` + Bar{Left: ActionsAsNodes(s.Actions)}.Render() + `</footer></aside>`
 }
 
 func (b SideBlock) kindCount() int {
@@ -372,7 +389,7 @@ func (n Nav) Render() string {
 		if it.Href == n.Current {
 			cls = classes(cls, "is-current")
 		}
-		items += `<a href="` + esc(it.Href) + `"` + classAttr(cls) + `><span class="tc-nav__icon" aria-hidden="true">` + esc(it.Icon) + `</span><span class="tc-nav__label">` + esc(it.Label) + `</span>` + Num{Value: it.Count}.Render() + `</a>`
+		items += `<a href="` + esc(it.Href) + `"` + classAttr(cls) + `>` + renderNavIcon(it.Icon) + `<span class="tc-nav__label">` + esc(it.Label) + `</span>` + Num{Value: it.Count}.Render() + `</a>`
 	}
 	return `<nav` + classAttr("tc-nav", "tc-nav--"+string(layout)) + ` aria-label="` + esc(labels.Main) + `">` + items + `</nav>`
 }

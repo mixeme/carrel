@@ -1,5 +1,7 @@
 package widget
 
+import "strings"
+
 // List — tc-list
 //
 // Роль. Ряд строк, разделённых линовкой, с рубрикаторами между группами.
@@ -111,7 +113,11 @@ func renderRowCells(v RowVariant, c RowCells) string {
 		}
 		return `<span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__excerpt">` + esc(c.Excerpt) + `</span><span class="tc-row__tags">` + tags + `</span><span class="tc-row__date">` + esc(c.Date) + `</span><span class="tc-row__source">` + esc(c.Source) + `</span>`
 	case RowMeta:
-		return `<span class="tc-row__icon" aria-hidden="true">` + esc(c.Icon) + `</span><span class="tc-row__name">` + esc(c.Name) + `</span><span class="tc-row__size">` + esc(c.Size) + `</span><span class="tc-row__time">` + esc(c.Time) + `</span>`
+		icon := esc(c.Icon)
+		if strings.HasPrefix(c.Icon, "tc-i-") {
+			icon = renderNavIcon(c.Icon)
+		}
+		return `<span class="tc-row__icon" aria-hidden="true">` + icon + `</span><span class="tc-row__name">` + esc(c.Name) + `</span><span class="tc-row__size">` + esc(c.Size) + `</span><span class="tc-row__time">` + esc(c.Time) + `</span>`
 	case RowFind:
 		return `<span class="tc-row__icon" aria-hidden="true">` + esc(c.Icon) + `</span><div class="tc-row__find"><span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__detail">` + esc(c.Detail) + `</span><span class="tc-row__caption">` + esc(c.Caption) + `</span></div>`
 	default:
@@ -122,7 +128,7 @@ func renderRowCells(v RowVariant, c RowCells) string {
 // TickRow — tc-tickrow
 //
 // Роль. Отмечаемая строка: галка, метка, подпись, счётчик, только чтение.
-// Вход. TickRow{ Href, Label, Mark, Count, Tick, ReadOnly, State, Menu }.
+// Вход. TickRow{ Href, Label, Mark, Count, Tick, ReadOnly, State, Current, Menu }.
 // Состояния. ok | read-only | unavailable | gone; галка on | off | partial.
 // Инварианты. Три состояния галки — одно поле; счётчик пуст при отсутствии.
 // Поведение. Галка и подпись — разные зоны.
@@ -137,11 +143,15 @@ type TickRow struct {
 	Tick     TickState
 	ReadOnly bool
 	State    TickRowState
+	Current  bool
 	Menu     []MenuItem
 }
 
 func (t TickRow) Render() string {
 	cls := "tc-tickrow"
+	if t.Current {
+		cls = classes(cls, "is-current")
+	}
 	switch t.State {
 	case TickRowReadOnly:
 		cls = classes(cls, "is-read-only")

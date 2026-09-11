@@ -110,6 +110,11 @@
 	cursor: pointer;
 	max-width: 100%;
 }
+.tc-menu__control.tc-btn--primary {
+	background: var(--tc-accent);
+	border-color: var(--tc-accent);
+	color: var(--tc-surface);
+}
 .tc-menu__label, .tc-usermenu__label {
 	flex: 1 1 auto;
 	min-width: 0;

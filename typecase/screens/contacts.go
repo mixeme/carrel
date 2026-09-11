@@ -41,9 +41,9 @@ func contactsRail() widget.Rail {
 		},
 		Foot: widget.RailFoot{
 			Actions: []widget.Action{
-				{Label: "New address book", Icon: "+"},
-				{Label: "Connect account", Icon: "⎈"},
-				{Label: "Subscribe to a feed", Icon: "🔗"},
+				{Label: "New address book", Icon: "tc-i-plus"},
+				{Label: "Connect account", Icon: "tc-i-server"},
+				{Label: "Subscribe to a feed", Icon: "tc-i-link"},
 			},
 			Build: demoBuild,
 		},
@@ -56,12 +56,12 @@ func contactsMain() widget.Main {
 		Title: "Combined address book",
 		Sub:   "3 of 4 books · 2 accounts · 312 cards",
 		Actions: []widget.Action{
-			{Label: "New contact", Kind: widget.ButtonPrimary, Icon: "+"},
+			{Label: "New contact", Kind: widget.ButtonPrimary, Icon: "tc-i-plus"},
 		},
 		Rank2: []widget.Action{
-			{Label: "Import", Icon: "↑"},
-			{Label: "Export", Icon: "↓"},
-			{Label: "Print", Icon: "🖨"},
+			{Label: "Import", Icon: "tc-i-up"},
+			{Label: "Export", Icon: "tc-i-down"},
+			{Label: "Print", Icon: "tc-i-print"},
 		},
 	}
 
@@ -86,7 +86,7 @@ func contactsMain() widget.Main {
 			},
 		},
 		Right: []widget.Node{
-			widget.Button{Label: "Columns", Icon: "▦", Size: widget.ButtonSizeBar},
+			widget.Button{Label: "Columns", Icon: "tc-i-cols", Size: widget.ButtonSizeBar},
 			widget.Check{Name: "compact", Label: "Compact rows"},
 			widget.Num{Value: intPtr(312)},
 		},

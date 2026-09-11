@@ -27,18 +27,16 @@ func statesTop(refresh bool) widget.Top {
 	top := shellTop()
 	top.Create = widget.Menu{}
 	if refresh {
-		top.Create = widget.Menu{
-			Label: "New note",
-			Icon:  "✎",
-			Items: []widget.MenuItem{{Label: "New note", Href: "/notes/new"}},
-		}
+		top.Refresh = widget.Action{Label: "2 min ago", Icon: "tc-i-refresh"}
+	} else {
+		top.Refresh = widget.Action{}
 	}
 	return top
 }
 
 func statesRailFoot() widget.RailFoot {
 	return widget.RailFoot{
-		Actions: []widget.Action{{Label: "Connect account", Icon: "⊕"}},
+		Actions: []widget.Action{{Label: "Connect account", Icon: "tc-i-server"}},
 		Build:   demoBuild,
 	}
 }
@@ -65,7 +63,7 @@ func statesEmpty() string {
 				Action: widget.Action{
 					Label: "Connect account",
 					Kind:  widget.ButtonPrimary,
-					Icon:  "+",
+					Icon:  "tc-i-plus",
 				},
 			},
 		},
@@ -110,7 +108,7 @@ func statesLoading() string {
 				Title: "Combined calendar",
 				Sub:   "5 of 7 calendars · 10 – 16 August 2026",
 				Actions: []widget.Action{
-					{Label: "New event", Kind: widget.ButtonPrimary, Icon: "+"},
+					{Label: "New event", Kind: widget.ButtonPrimary, Icon: "tc-i-plus"},
 				},
 			},
 			widget.RunBar{
@@ -221,7 +219,7 @@ func statesPartial() string {
 				Title: "Combined calendar",
 				Sub:   "6 of 7 calendars · one source did not answer",
 				Actions: []widget.Action{
-					{Label: "New event", Kind: widget.ButtonPrimary, Icon: "+"},
+					{Label: "New event", Kind: widget.ButtonPrimary, Icon: "tc-i-plus"},
 				},
 			},
 			widget.RunBar{

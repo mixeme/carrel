@@ -5,6 +5,31 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.32 — 2026-09-08
+
+Closes forks for **S-11…S-26** in [server.md](../../docs/plan/server.md).
+No binary change. Composer starts at the collection catalog in the
+sealed blob, not at a GET stub.
+
+### For consumers
+
+Nothing in the running server. HTTP routes C-5 stay stubs until the
+checklist in that section is ticked.
+
+### Included
+
+- Commit order is not S-number order: fanout before unified view, collection
+  move after record move, mail after publish.
+- `Transport` is not extended (`Copy` is `Get` + `PutCreate`). Unconditional
+  PUT is only file overwrite-on-demand. File `Get` drops the 10 MiB
+  `LimitReader`; PROPFIND/REPORT keep it.
+- Reminders are nested VALARM via `cal.SetAlarms`, not a new `PatchOp`.
+- Unified-view ticks live in the blob; empty selection is empty, not “all”.
+- Public `/p` live-reads with a per-link connection-password envelope under
+  `server.key`. Duplicate detection uses the session cache only.
+- Architecture: `Source` lives in `internal/fanout`; PHOTO URI proxy is
+  `internal/photo` through the guard.
+
 ## v0.0.31 — 2026-09-08
 
 Provider review. Closes the **Провайдеры** section in

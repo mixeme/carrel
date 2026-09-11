@@ -57,9 +57,12 @@ func CheckGeometryCSS(cssText string) error {
 		{".tc-row", "gap", 12},
 		{".tc-tickrow", "padding-left", 16},
 		{".tc-tickrow", "padding-right", 16},
+		{".tc-tickrow", "min-height", 26},
+		{".tc-nav__item", "min-height", 29},
 		{".tc-top", "min-height", 52},
 		{".tc-btn", "min-height", 26},
 		{".tc-btn--form", "min-height", 28},
+		{".tc-list", "border-top-width", 0},
 	}
 	rules := ruleValues(cssText)
 	for _, rc := range ruleChecks {

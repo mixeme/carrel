@@ -77,7 +77,7 @@ func renderProseBlock(b ProseBlock) string {
 // DocBar — tc-docbar
 //
 // Роль. Действия над документом: сохранить, переключить меру, сосредоточиться.
-// Вход. DocBar{ Left, Right, Rank2, Dirty, Collapsed }.
+// Вход. DocBar{ Left, Right, RightNodes, Rank2, Dirty, Collapsed }.
 // Состояния. full | collapsed.
 // Инварианты. Свой порог отступления; одна строка.
 // Поведение. Как tc-bar, плюс признак несохранённого.
@@ -85,11 +85,12 @@ func renderProseBlock(b ProseBlock) string {
 // Содержимое. tc-btn, tc-menu, tc-kbd.
 // Чего нет. Нет кнопок, не относящихся к документу.
 type DocBar struct {
-	Left      []Action
-	Right     []Action
-	Rank2     []Action
-	Dirty     bool
-	Collapsed bool
+	Left       []Action
+	Right      []Action
+	RightNodes []Node
+	Rank2      []Action
+	Dirty      bool
+	Collapsed  bool
 }
 
 func (d DocBar) Render() string {
@@ -104,7 +105,8 @@ func (d DocBar) Render() string {
 	if d.Dirty {
 		dirty = `<span class="tc-docbar__dirty" aria-label="` + esc(labels.UnsavedChanges) + `">●</span>`
 	}
-	return `<div` + classAttr(cls) + `>` + dirty + Bar{Left: ActionsAsNodes(d.Left), Right: ActionsAsNodes(d.Right), Rank2: d.Rank2}.Render() + `</div>`
+	right := append(ActionsAsNodes(d.Right), d.RightNodes...)
+	return `<div` + classAttr(cls) + `>` + dirty + Bar{Left: ActionsAsNodes(d.Left), Right: right, Rank2: d.Rank2}.Render() + `</div>`
 }
 
 // DocMeta — tc-docmeta

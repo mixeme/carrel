@@ -36,10 +36,11 @@ func notesRail() widget.Rail {
 		Sections: []widget.RailSection{
 			{
 				Rows: []widget.TickRow{{
-					Label: "Combined notebook",
-					Mark:  widget.Mark{Colour: "#4a6b52", Label: "Combined"},
-					Count: intPtr(n86),
-					Tick:  widget.TickPartial,
+					Label:   "Combined notebook",
+					Mark:    widget.Mark{Colours: []string{"#4a6b52", "#6B4E7A", "#A05A2C"}, Label: "Combined"},
+					Count:   intPtr(n86),
+					Tick:    widget.TickPartial,
+					Current: true,
 				}},
 			},
 			{
@@ -60,9 +61,9 @@ func notesRail() widget.Rail {
 		},
 		Foot: widget.RailFoot{
 			Actions: []widget.Action{
-				{Label: "New notebook", Icon: "+"},
-				{Label: "Connect account", Icon: "⎈"},
-				{Label: "Subscribe to a feed", Icon: "🔗"},
+				{Label: "New notebook", Icon: "tc-i-plus"},
+				{Label: "Connect account", Icon: "tc-i-server"},
+				{Label: "Subscribe to a feed", Icon: "tc-i-link"},
 			},
 			Build: demoBuild,
 		},
@@ -71,7 +72,7 @@ func notesRail() widget.Rail {
 
 func notesReadNav() widget.Nav {
 	return widget.Nav{
-		Items:   []widget.NavItem{{Label: "Combined notebook", Icon: "←", Href: "/notes"}},
+		Items:   []widget.NavItem{{Label: "Combined notebook", Icon: "tc-i-back", Href: "/notes"}},
 		Current: "/notes",
 	}
 }
@@ -114,7 +115,7 @@ func notesListMain() widget.Main {
 				Title: "Combined notebook",
 				Sub:   "2 of 3 notebooks · 86 notes · VJOURNAL",
 				Actions: []widget.Action{
-					{Label: "New note", Kind: widget.ButtonPrimary, Icon: "+"},
+					{Label: "New note", Kind: widget.ButtonPrimary, Icon: "tc-i-plus"},
 				},
 				Rank2: []widget.Action{
 					{Label: "Import Markdown"},
@@ -131,7 +132,7 @@ func notesListMain() widget.Main {
 					},
 				},
 				Right: []widget.Node{
-					widget.Button{Label: "Columns", Icon: "▦", Size: widget.ButtonSizeBar},
+					widget.Button{Label: "Columns", Icon: "tc-i-cols", Size: widget.ButtonSizeBar},
 					widget.Num{Value: intPtr(n86)},
 				},
 			},
@@ -193,11 +194,18 @@ func notesReadDoc() widget.Doc {
 		Width: widget.DocWidthFull,
 		Bar: widget.DocBar{
 			Left: []widget.Action{
-				{Label: "Edit", Kind: widget.ButtonPrimary, Icon: "✎"},
+				{Label: "Edit", Kind: widget.ButtonPrimary, Icon: "tc-i-pencil"},
+			},
+			RightNodes: []widget.Node{
+				widget.Seg{
+					Name:    "width",
+					Chosen:  "full",
+					Options: []widget.SegOption{{Label: "Full width", Value: "full"}, {Label: "Reading width", Value: "reading"}},
+				},
 			},
 			Rank2: []widget.Action{
 				{Label: "Export Markdown"},
-				{Label: "Print", Icon: "🖨"},
+				{Label: "Print", Icon: "tc-i-print"},
 				{Label: "Source"},
 			},
 		},
@@ -244,12 +252,12 @@ func notesEditMain() widget.Main {
 						{Label: "I"},
 						{Label: "H2"},
 						{Label: "• list"},
-						{Label: "task", Icon: "☑"},
-						{Label: "Link", Icon: "🔗"},
-						{Label: "Attach", Icon: "↑"},
+						{Label: "task", Icon: "tc-i-task"},
+						{Label: "Link", Icon: "tc-i-link"},
+						{Label: "Attach", Icon: "tc-i-up"},
 					},
 					Right: []widget.Action{
-						{Label: "Focus", Icon: "⤢"},
+						{Label: "Focus", Icon: "tc-i-expand"},
 					},
 					Dirty: true,
 				},
@@ -293,7 +301,10 @@ func notesSide() widget.Side {
 	tags := widget.Field{Name: "tags", Label: "Tags", Kind: widget.InputText, Value: "встречи, релиз"}
 	attach := widget.Sec{
 		Rubric: widget.Rubric{Text: "Attachments"},
-		Body:   []widget.Node{widget.Paragraph("2026-08-10-sync-board.png · 412 KB · in the note")},
+		Body: []widget.Node{
+			widget.Row{Variant: widget.RowMeta, Cells: widget.RowCells{Name: "2026-08-10-sync-board.png", Size: "412 KB · in the note", Icon: "tc-i-img"}},
+			widget.Row{Variant: widget.RowMeta, Cells: widget.RowCells{Name: "запись-встречи.m4a", Size: "24 MB · Documents / carrel", Icon: "tc-i-doc"}},
+		},
 	}
 	related := widget.Sec{
 		Rubric: widget.Rubric{Text: "Related"},
@@ -302,7 +313,9 @@ func notesSide() widget.Side {
 	return widget.Side{
 		Label: "Note details",
 		Title: "Заметка со встречи 10.08",
+		Sub:   "nextcloud · Записи · 2 min ago",
 		Open:  true,
+		Size:  widget.SideSizeWide,
 		Blocks: []widget.SideBlock{
 			{Field: &title},
 			{Field: &text},
@@ -314,7 +327,7 @@ func notesSide() widget.Side {
 		},
 		Actions: []widget.Action{
 			{Label: "Save", Kind: widget.ButtonPrimary},
-			{Label: "Open full screen", Icon: "⤢"},
+			{Label: "Open full screen", Icon: "tc-i-expand"},
 		},
 	}
 }

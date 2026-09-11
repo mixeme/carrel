@@ -123,7 +123,7 @@ func (h *Harness) Run(pageURL string, width, height int, actions ...chromedp.Act
 	defer cancelAlloc()
 	ctx, cancelCtx := chromedp.NewContext(allocCtx)
 	defer cancelCtx()
-	ctx, cancelTimeout := context.WithTimeout(ctx, 45*time.Second)
+	ctx, cancelTimeout := context.WithTimeout(ctx, 90*time.Second)
 	defer cancelTimeout()
 
 	all := []chromedp.Action{

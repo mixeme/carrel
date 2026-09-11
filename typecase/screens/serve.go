@@ -109,6 +109,7 @@ func PageHTML(title, current string, screens []Screen, theme string) string {
 		body = `<p>Pick a screen above.</p>`
 	}
 	themeJS := `<script src="/theme.js"></script>`
+	defs := InlineSVG()
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en" data-tc-root>
 <head>
@@ -120,11 +121,14 @@ func PageHTML(title, current string, screens []Screen, theme string) string {
 <link rel="stylesheet" href="/screens.css">
 </head>
 <body data-tc-root>
-<header class="screens-nav">%s</header>
+<div hidden aria-hidden="true">%s</div>
+<header class="screens-chrome">
+<nav class="screens-nav">%s</nav>
 %s
 <h1>%s</h1>
+</header>
 <div class="screens-stage">%s</div>
 <script src="/tc.js"></script>
 </body>
-</html>`, title, themeJS, nav.String(), toolbar, title, body)
+</html>`, title, themeJS, defs, nav.String(), toolbar, title, body)
 }

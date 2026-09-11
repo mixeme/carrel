@@ -11,6 +11,7 @@
 	overflow: hidden;
 }
 .tc-bar__left, .tc-bar__right { display: flex; align-items: center; gap: 0.35em; flex: none; }
+.tc-bar__overflow { display: inline-block; flex: none; }
 .tc-bar__left { flex: 1 1 auto; min-width: 0; overflow: hidden; }
 .tc-bar__right { margin-left: auto; }
 .tc-bar [data-tc-bar-stash] { display: none; }
