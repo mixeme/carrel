@@ -13,6 +13,7 @@ import (
 	"carrel.dev/carrel/server/internal/crypt"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/internal/web"
 )
 
@@ -64,7 +65,7 @@ func run(cfg *conf.Config) error {
 	stopPurge := runSessionPurge(mgr, time.Minute)
 	defer stopPurge()
 
-	users := web.NewStubUsers(st)
+	users := user.New(st, mgr, cfg)
 	srv := web.New(cfg, st, mgr, users, web.JSONRenderer{}, version, commit)
 
 	addr := net.JoinHostPort(cfg.Bind, strconv.Itoa(cfg.Port))

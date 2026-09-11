@@ -4,6 +4,34 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.13 — 2026-09-05
+
+Implements S-10 user administration: accounts, invitations, registration,
+forgot-password wipe flow, and console recovery.
+
+### For consumers
+
+- `internal/user` manages two roles, first-run setup, invite links (≥32-byte
+  secrets, hashed at rest, constant-time compare), self-registration when mail
+  is configured, and the two-step `/forgot/{token}` wipe (not recovery).
+- `cmd/carrel-wipe <login>` prints a one-time 15-minute console wipe link and
+  records the event in the audit log.
+- Escrow stays disabled by default; instance settings live in `state.enc`.
+- One in-memory unlock window (`CARREL_UNLOCK_TTL`) applies to all secret
+  releases via `UnlockUntil` / `SetUnlockUntil`.
+- The last administrator cannot be disabled (`ErrLastAdmin`).
+
+### Included
+
+- `internal/store`: `InstanceSettings`, `Invite`, `SecretToken`, profile fields
+  on `User`, `ApplyPassword`, `WipeCredentials`, `DataKeyForLogin`, lookups.
+- `internal/user`: `Service` implementing `web.Users`.
+- `cmd/carrel-wipe`, `cmd/carrel` wired to `user.New`.
+
+### Not yet included
+
+Providers and S-11…S-26 features above the request layer.
+
 ## carrel/server/v0.0.12 — 2026-09-05
 
 Adds the HTTP request layer (S-9): all C-5 routes, CSRF, rate limits,

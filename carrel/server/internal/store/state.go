@@ -1,8 +1,10 @@
 package store
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"carrel.dev/carrel/server/internal/crypt"
@@ -18,8 +20,39 @@ const (
 
 // State is the decrypted on-disk instance state.
 type State struct {
-	Users []User       `json:"users"`
-	Audit []AuditEntry `json:"audit"`
+	Users    []User             `json:"users"`
+	Audit    []AuditEntry       `json:"audit"`
+	Settings InstanceSettings   `json:"settings"`
+	Invites  []Invite           `json:"invites"`
+	Tokens   []SecretToken      `json:"tokens"`
+}
+
+// InstanceSettings holds instance-wide configuration stored in state.enc.
+type InstanceSettings struct {
+	SelfRegEnabled bool `json:"selfRegEnabled,omitempty"`
+	EscrowEnabled  bool `json:"escrowEnabled,omitempty"`
+}
+
+// Invite is a pending account invitation (S-10.2).
+type Invite struct {
+	ID         string    `json:"id"`
+	Login      string    `json:"login"`
+	Email      string    `json:"email,omitempty"`
+	SecretHash []byte    `json:"secretHash"`
+	CreatedAt  time.Time `json:"createdAt"`
+	ExpiresAt  time.Time `json:"expiresAt"`
+	Revoked    bool      `json:"revoked,omitempty"`
+}
+
+// SecretToken covers email confirmation, forgot/console wipe links (S-10).
+type SecretToken struct {
+	Kind      string    `json:"kind"`
+	Hash      []byte    `json:"hash"`
+	UserID    string    `json:"userID"`
+	Step      string    `json:"step,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
+	ExpiresAt time.Time `json:"expiresAt"`
+	Used      bool      `json:"used,omitempty"`
 }
 
 // User is one account on the instance. ConnectionCount is stored outside the
@@ -30,6 +63,12 @@ type User struct {
 	Role      Role      `json:"role"`
 	CreatedAt time.Time `json:"createdAt"`
 	Disabled  bool      `json:"disabled,omitempty"`
+
+	Email            string `json:"email,omitempty"`
+	EmailConfirmed   bool   `json:"emailConfirmed,omitempty"`
+	MustChangePassword bool `json:"mustChangePassword,omitempty"`
+	DisplayName      string `json:"displayName,omitempty"`
+	EscrowOptIn        bool   `json:"escrowOptIn,omitempty"`
 
 	LoginSalt  []byte     `json:"loginSalt,omitempty"`
 	LoginHash  []byte     `json:"loginHash,omitempty"`
@@ -111,4 +150,47 @@ func (s *State) userByID(id string) *User {
 		}
 	}
 	return nil
+}
+
+func (s *State) userByLogin(login string) *User {
+	login = strings.ToLower(strings.TrimSpace(login))
+	for i := range s.Users {
+		if strings.ToLower(s.Users[i].Login) == login {
+			return &s.Users[i]
+		}
+	}
+	return nil
+}
+
+func (s *State) inviteByHash(hash []byte) *Invite {
+	for i := range s.Invites {
+		if len(s.Invites[i].SecretHash) == len(hash) &&
+			subtle.ConstantTimeCompare(s.Invites[i].SecretHash, hash) == 1 {
+			return &s.Invites[i]
+		}
+	}
+	return nil
+}
+
+func (s *State) tokenByHash(kind string, hash []byte) *SecretToken {
+	for i := range s.Tokens {
+		if s.Tokens[i].Kind != kind {
+			continue
+		}
+		if len(s.Tokens[i].Hash) == len(hash) &&
+			subtle.ConstantTimeCompare(s.Tokens[i].Hash, hash) == 1 {
+			return &s.Tokens[i]
+		}
+	}
+	return nil
+}
+
+func adminCount(s *State) int {
+	n := 0
+	for _, u := range s.Users {
+		if u.Role == RoleAdmin && !u.Disabled {
+			n++
+		}
+	}
+	return n
 }
