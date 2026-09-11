@@ -73,7 +73,7 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 			return nil, ErrLoginTaken
 		}
 		if u == nil {
-			id, err := NewAccountID()
+			id, err := NewUserID()
 			if err != nil {
 				return nil, err
 			}
@@ -119,17 +119,21 @@ func (s *Service) CreateInvite(actorID, login, email string) (secret string, err
 				st.Invites[i].Revoked = true
 			}
 		}
-		id, err := NewAccountID()
+		inviteID, err := NewInviteID()
 		if err != nil {
 			return nil, err
 		}
 		st.Invites = append(st.Invites, store.Invite{
-			ID: id, Login: login, Email: email,
+			ID: inviteID, Login: login, Email: email,
 			SecretHash: hash, CreatedAt: now, ExpiresAt: now.Add(conf.InviteTTL),
 		})
 		if st.UserByLogin(login) == nil {
+			userID, err := NewUserID()
+			if err != nil {
+				return nil, err
+			}
 			st.Users = append(st.Users, store.User{
-				ID: id, Login: login, Email: email, Role: store.RoleUser, CreatedAt: now,
+				ID: userID, Login: login, Email: email, Role: store.RoleUser, CreatedAt: now,
 			})
 		}
 		return []store.AuditEntry{{
@@ -180,7 +184,7 @@ func (s *Service) Register(ctx context.Context, login, email, password string) (
 			if hasLiveInvite(st, login, now) {
 				return nil, ErrLoginTaken
 			}
-			id, err := NewAccountID()
+			id, err := NewUserID()
 			if err != nil {
 				return nil, err
 			}

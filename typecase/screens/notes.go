@@ -146,6 +146,8 @@ func notesMain() string {
 								Title:   "Заметка со встречи 10.08",
 								Excerpt: "Договорились заморозить ветку в среду; письмо пользователям пишет Анна…",
 								Tags:    []widget.Tag{{Label: "встречи", On: true, Href: "/tags/встречи"}},
+								Date:    "10 Aug",
+								Source:  "nextcloud · Записи",
 							},
 						},
 						{
@@ -155,6 +157,8 @@ func notesMain() string {
 								Title:   "Что почитать про CRDT",
 								Excerpt: "Кляйн, глава 5; статья Шапиро 2011; демка automerge…",
 								Tags:    []widget.Tag{{Label: "книги", Href: "/tags/книги"}},
+								Date:    "8 Aug",
+								Source:  "nextcloud · Записи",
 							},
 						},
 						{
@@ -163,6 +167,8 @@ func notesMain() string {
 							Cells: widget.RowCells{
 								Title:   "Про дорогу до дачи",
 								Excerpt: "Съезд после заправки, потом грунтовка два километра…",
+								Date:    "3 Aug",
+								Source:  "nextcloud · Дневник",
 							},
 							Badges: []widget.Badge{{Label: "linked", Role: widget.BadgeLinked}},
 						},

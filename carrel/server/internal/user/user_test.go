@@ -2,6 +2,7 @@ package user_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -41,6 +42,43 @@ func TestSetupFirstAdmin(t *testing.T) {
 	id, key, _, ok := svc.Authenticate(context.Background(), "admin", "password123")
 	if !ok || id == "" || key == [32]byte{} {
 		t.Fatalf("auth failed: ok=%v id=%s", ok, id)
+	}
+}
+
+func TestEntityIDPrefixes(t *testing.T) {
+	svc, st := testService(t)
+	if err := svc.SetupFirstAdmin(context.Background(), "admin", "password123"); err != nil {
+		t.Fatal(err)
+	}
+	snap := st.Snapshot()
+	admin := snap.UserByLogin("admin")
+	if admin == nil || !strings.HasPrefix(admin.ID, "u-") {
+		t.Fatalf("user id %q should start with u-", admin.ID)
+	}
+	secret, err := svc.CreateInvite(admin.ID, "bob", "bob@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !svc.InviteValid(context.Background(), secret) {
+		t.Fatal("invite should be valid")
+	}
+	snap = st.Snapshot()
+	var inv *store.Invite
+	for i := range snap.Invites {
+		if snap.Invites[i].Login == "bob" {
+			inv = &snap.Invites[i]
+			break
+		}
+	}
+	if inv == nil || !strings.HasPrefix(inv.ID, "i-") {
+		t.Fatalf("invite id %q should start with i-", inv.ID)
+	}
+	bob := snap.UserByLogin("bob")
+	if bob == nil || !strings.HasPrefix(bob.ID, "u-") {
+		t.Fatalf("placeholder user id %q should start with u-", bob.ID)
+	}
+	if bob.ID == inv.ID {
+		t.Fatal("invite and user must not share an id")
 	}
 }
 

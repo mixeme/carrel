@@ -71,7 +71,7 @@ func (s *Server) getLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	page := view.LoginPage{
 		Plain: view.Plain{Title: text("Sign in"), Lede: text("One desk. Every server.")},
-		Form: plainForm("/login", "POST",
+		Form: s.anonPlainForm(w, r, "/login", "POST",
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 		),
@@ -102,7 +102,7 @@ func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		constantTimeDelay(start, 300*time.Millisecond)
 		page := view.LoginPage{
 			Plain: view.Plain{Title: text("Sign in"), Lede: text("One desk. Every server.")},
-			Form: plainForm("/login", "POST",
+			Form: s.anonPlainForm(w, r, "/login", "POST",
 				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: text("Login or password is wrong.")},
 			),
@@ -148,7 +148,7 @@ func (s *Server) getSetup(w http.ResponseWriter, r *http.Request) {
 			Title: text("Create administrator"),
 			Lede:  text("This instance has no accounts yet. Choose a login and password for the first administrator."),
 		},
-		Form: plainForm("/setup", "POST",
+		Form: s.anonPlainForm(w, r, "/setup", "POST",
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Hint: text("At least 8 characters.")},
 			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
@@ -168,7 +168,7 @@ func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
 	if password != password2 {
 		page := view.SetupPage{
 			Plain: view.Plain{Title: text("Create administrator"), Lede: text("This instance has no accounts yet.")},
-			Form: plainForm("/setup", "POST",
+			Form: s.anonPlainForm(w, r, "/setup", "POST",
 				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: text("Passwords do not match.")},
 				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
@@ -180,7 +180,7 @@ func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
 	if err := s.users.SetupFirstAdmin(r.Context(), login, password); err != nil {
 		page := view.SetupPage{
 			Plain: view.Plain{Title: text("Create administrator"), Lede: text("This instance has no accounts yet.")},
-			Form: plainForm("/setup", "POST",
+			Form: s.anonPlainForm(w, r, "/setup", "POST",
 				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Error: formError(err)},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
@@ -204,7 +204,7 @@ func (s *Server) getRegister(w http.ResponseWriter, r *http.Request) {
 	}
 	page := view.RegisterPage{
 		Plain: view.Plain{Title: text("Create account"), Lede: text("Registration is open on this instance.")},
-		Form: plainForm("/register", "POST",
+		Form: s.anonPlainForm(w, r, "/register", "POST",
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail, Required: true},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
@@ -226,10 +226,11 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 	}
 	// The confirmation token goes to the mail layer (S-26), never into a
 	// response.
-	if _, err := s.users.Register(r.Context(), r.FormValue("login"), r.FormValue("email"), r.FormValue("password")); err != nil {
+	token, err := s.users.Register(r.Context(), r.FormValue("login"), r.FormValue("email"), r.FormValue("password"))
+	if err != nil {
 		page := view.RegisterPage{
 			Plain: view.Plain{Title: text("Create account"), Lede: text("Registration is open on this instance.")},
-			Form: plainForm("/register", "POST",
+			Form: s.anonPlainForm(w, r, "/register", "POST",
 				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(r.FormValue("login")), Error: formError(err)},
 				view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail, Value: text(r.FormValue("email"))},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
@@ -238,9 +239,15 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
+	mailSent := token != "" && s.sendConfirmMail(r.Context(), r.FormValue("login"), r.FormValue("email"), token)
 	page := view.RegisterPage{
-		Plain: view.Plain{Title: text("Create account"), Lede: text("Check your email to confirm your address.")},
-		Sent:  true,
+		Plain: view.Plain{Title: text("Create account")},
+	}
+	if mailSent {
+		page.Plain.Lede = text("Check your email to confirm your address.")
+		page.Sent = true
+	} else {
+		page.Plain.Lede = text("Your account was created, but the confirmation email could not be sent yet. Outbound mail is not available on this instance. Ask an administrator.")
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
@@ -260,7 +267,7 @@ func (s *Server) getInvite(w http.ResponseWriter, r *http.Request) {
 	page := view.InvitePage{
 		Plain: view.Plain{Title: text("Accept invitation"), Lede: text("Choose a password for your new account.")},
 		Valid: true,
-		Form: plainForm("/invite/"+token, "POST",
+		Form: s.anonPlainForm(w, r, "/invite/"+token, "POST",
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 		),
@@ -283,7 +290,7 @@ func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
 		page := view.InvitePage{
 			Plain: view.Plain{Title: text("Accept invitation"), Lede: text("Choose a password.")},
 			Valid: true,
-			Form: plainForm("/invite/"+token, "POST",
+			Form: s.anonPlainForm(w, r, "/invite/"+token, "POST",
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: formError(err)},
 				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 			),
@@ -332,7 +339,7 @@ func (s *Server) getForgot(w http.ResponseWriter, r *http.Request) {
 			Title: text("Forgotten password"),
 			Lede:  text("Carrel cannot recover your encrypted data. You can wipe the account and set a new password, or ask an administrator."),
 		},
-		Form: plainForm("/forgot", "POST",
+		Form: s.anonPlainForm(w, r, "/forgot", "POST",
 			view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText, Required: true},
 		),
 	}
@@ -347,22 +354,26 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// The wipe token goes to the mail layer (S-26), never into a response.
-	_, sent, asked, hasMail, err := s.users.ForgotRequest(r.Context(), r.FormValue("login"))
+	token, issued, asked, hasMail, err := s.users.ForgotRequest(r.Context(), r.FormValue("login"))
 	if err != nil {
 		// The person sees the same page as when nothing could be issued;
 		// the operator sees why. No identifier from the form goes to the
 		// log: it is whatever was typed.
 		slog.Error("forgot: issuing wipe token failed", "error", err)
-		sent, asked = false, false
+		issued, asked = false, false
 	}
+	mailSent := issued && token != "" && s.sendForgotWipeMail(r.Context(), r.FormValue("login"), token)
 	page := view.ForgotPage{
 		Plain:   view.Plain{Title: text("Forgotten password"), Lede: text("Carrel cannot recover your encrypted data.")},
-		Form:    plainForm("/forgot", "POST", view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText}),
-		Sent:    sent,
+		Form:    s.anonPlainForm(w, r, "/forgot", "POST", view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText}),
+		Sent:    mailSent,
 		Asked:   asked,
 		HasMail: hasMail,
 	}
-	if !hasMail && !sent && !asked {
+	if issued && !mailSent && hasMail && !asked {
+		page.Plain.Lede = text("A recovery link was prepared but could not be emailed: outbound mail is not available on this instance yet. Ask an administrator.")
+	}
+	if !hasMail && !issued && !asked {
 		page.HasMail = false
 		page.Plain.Lede = text("Without a confirmed email address on the account, sign-in recovery from here is not possible.")
 	}
@@ -382,7 +393,7 @@ func (s *Server) getForgotWipe(w http.ResponseWriter, r *http.Request) {
 		s.tokenNotFound(w, r, start)
 		return
 	}
-	page := s.forgotWipePage(token, login, step)
+	page := s.forgotWipePage(w, r, token, login, step)
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -401,7 +412,7 @@ func (s *Server) postForgotWipe(w http.ResponseWriter, r *http.Request) {
 	switch step {
 	case string(view.WipeConfirm):
 		if r.FormValue("confirm") != "yes" {
-			page := s.forgotWipePage(token, login, step)
+			page := s.forgotWipePage(w, r, token, login, step)
 			page.Form.Sets[0].Rows[0].Error = text("Confirmation is required.")
 			s.writePage(w, r, http.StatusOK, page)
 			return
@@ -411,11 +422,11 @@ func (s *Server) postForgotWipe(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		login, step, valid = s.users.ForgotWipeState(r.Context(), token)
-		page := s.forgotWipePage(token, login, step)
+		page := s.forgotWipePage(w, r, token, login, step)
 		s.writePage(w, r, http.StatusOK, page)
 	case string(view.WipePassword):
 		if err := passwordPair(r.FormValue("password"), r.FormValue("password2")); err != nil {
-			page := s.forgotWipePage(token, login, step)
+			page := s.forgotWipePage(w, r, token, login, step)
 			page.Form.Sets[0].Rows[0].Error = formError(err)
 			s.writePage(w, r, http.StatusOK, page)
 			return
@@ -430,7 +441,7 @@ func (s *Server) postForgotWipe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) forgotWipePage(token, login, step string) view.ForgotWipePage {
+func (s *Server) forgotWipePage(w http.ResponseWriter, r *http.Request, token, login, step string) view.ForgotWipePage {
 	page := view.ForgotWipePage{
 		Plain: view.Plain{Title: text("Reset account"), Lede: text("This destroys encrypted connections and cannot be undone.")},
 		Login: text(login),
@@ -443,12 +454,12 @@ func (s *Server) forgotWipePage(token, login, step string) view.ForgotWipePage {
 	switch step {
 	case string(view.WipeConfirm):
 		page.Step = view.WipeConfirm
-		page.Form = plainForm("/forgot/"+token, "POST",
+		page.Form = s.anonPlainForm(w, r, "/forgot/"+token, "POST",
 			view.FormRow{Name: "confirm", Label: "Type yes to wipe encrypted data", Kind: view.InputText, Required: true},
 		)
 	case string(view.WipePassword):
 		page.Step = view.WipePassword
-		page.Form = plainForm("/forgot/"+token, "POST",
+		page.Form = s.anonPlainForm(w, r, "/forgot/"+token, "POST",
 			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 		)

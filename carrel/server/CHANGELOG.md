@@ -5,6 +5,42 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.18 — 2026-09-07
+
+Continues [users-tail.md](../../docs/plan/users-tail.md) after audit №2:
+anonymous CSRF, entity ID prefixes, and honest mail copy before S-26. Each
+fix ships with a test that was red on v0.0.17.
+
+### For consumers
+
+- **Anonymous forms require double-submit CSRF.** GET `/login`, `/setup`,
+  `/register`, `/forgot`, `/invite/{token}`, and `/forgot/{token}` set
+  `carrel_csrf` and `_csrf`. POST without a matching cookie and field (or
+  `X-CSRF-Token`) answers 403 before the handler runs. Cross-site POST
+  `/login` no longer authenticates (Ф2-15). Logged-in POST still uses the
+  session token.
+- **People, invitations, and connections have distinct ID prefixes.**
+  `User.ID` is `u-`, `Invite.ID` is `i-`, DAV connections stay `a-`. Invite
+  placeholders no longer share the invitation id.
+- **`/forgot` and `/register` no longer claim an email was sent** while the
+  mail layer (S-26) is absent. Tokens stay in state and never appear in HTTP
+  responses; the page says outbound mail is unavailable instead.
+
+### Included
+
+- `internal/web`: `csrf_anon.go`, `anonPlainForm`, anonymous CSRF in
+  `middleware`; `mail_stub.go` until S-26 dispatches messages.
+- `internal/user`: `NewUserID`, `NewInviteID`; `NewAccountID` reserved for
+  connections.
+- Tests: `TestAnonymousCSRFBlocksLoginWithoutCookie`,
+  `TestForgotDoesNotClaimMailSent`, `TestEntityIDPrefixes`; existing web
+  tests updated for anonymous CSRF on public forms.
+
+### Not yet included
+
+Key escrow (S-10.5), admin panel actions, `/app/password`, CSRF on
+multipart uploads, `CARREL_BASE_PATH` on cookies and routes.
+
 ## v0.0.17 — 2026-09-07
 
 Closes Fable audit №2 (accounts and secrets, Ф2-1…Ф2-15 in
@@ -62,8 +98,9 @@ was red on v0.0.16. What the audit left to the next layers is in
 
 ### Not yet included
 
-Mail delivery (S-26): `/forgot` and `/register` store the token but nobody
-sends it yet. Key escrow (S-10.5), admin panel actions, `/app/password`.
+Key escrow (S-10.5), admin panel actions, `/app/password`, CSRF on
+multipart uploads, `CARREL_BASE_PATH` on cookies and routes. Mail delivery
+(S-26): tokens are stored; dispatch is still a stub.
 
 ## v0.0.16 — 2026-09-05
 

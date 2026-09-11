@@ -141,6 +141,27 @@ func postForm(path string, sess *session.Session, form url.Values) *http.Request
 	return req
 }
 
+// anonPostForm loads an anonymous form (GET getPath) for carrel_csrf, then
+// builds POST postPath with a matching _csrf field.
+func (h *harness) anonPostForm(getPath, postPath string, form url.Values) *http.Request {
+	h.t.Helper()
+	rec := h.do(get(getPath, nil))
+	var token string
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == "carrel_csrf" {
+			token = c.Value
+		}
+	}
+	if token == "" {
+		h.t.Fatalf("GET %s: no carrel_csrf cookie", getPath)
+	}
+	form.Set("_csrf", token)
+	req := httptest.NewRequest(http.MethodPost, postPath, strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.AddCookie(&http.Cookie{Name: "carrel_csrf", Value: token})
+	return req
+}
+
 func fragment(req *http.Request, target string) *http.Request {
 	req.Header.Set("Carrel-View", "fragment")
 	req.Header.Set("Carrel-Target", target)
@@ -177,6 +198,27 @@ func TestFragmentHeader(t *testing.T) {
 	rec := h.do(fragment(get("/app/contacts", sess), "main"))
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"target":"main"`) {
 		t.Fatalf("status = %d body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+// Ф2-15. Cross-site POST /login without carrel_csrf must not authenticate.
+func TestAnonymousCSRFBlocksLoginWithoutCookie(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	req := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader("login=alice&password=password123"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := h.do(req)
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("cross-site login without carrel_csrf: status = %d, want 403", rec.Code)
+	}
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == "carrel_sid" && c.Value != "" {
+			t.Fatal("login without CSRF set session cookie")
+		}
+	}
+	rec = h.do(h.anonPostForm("/login", "/login", url.Values{"login": {"alice"}, "password": {"password123"}}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("login with carrel_csrf: status = %d", rec.Code)
 	}
 }
 
@@ -280,13 +322,24 @@ func TestLoginWrongPasswordSameForm(t *testing.T) {
 	h.admin("alice", "password123")
 	bodies := map[string]string{}
 	for _, c := range [][2]string{{"alice", "wrongpassword"}, {"nobody", "wrongpassword"}} {
-		rec := h.do(postForm("/login", nil, url.Values{"login": {c[0]}, "password": {c[1]}}))
+		rec := h.do(h.anonPostForm("/login", "/login", url.Values{"login": {c[0]}, "password": {c[1]}}))
 		if rec.Code != http.StatusOK {
 			t.Fatalf("%s: status = %d", c[0], rec.Code)
 		}
-		bodies[c[0]] = strings.ReplaceAll(rec.Body.String(), c[0], "LOGIN")
-		if len(rec.Result().Cookies()) != 0 {
-			t.Fatalf("%s: cookie set on failed login", c[0])
+		body := strings.ReplaceAll(rec.Body.String(), c[0], "LOGIN")
+		if i := strings.Index(body, `"name":"_csrf"`); i >= 0 {
+			if j := strings.Index(body[i:], `"value":"`); j >= 0 {
+				start := i + j + len(`"value":"`)
+				if end := strings.Index(body[start:], `"`); end >= 0 {
+					body = body[:start] + "TOKEN" + body[start+end:]
+				}
+			}
+		}
+		bodies[c[0]] = body
+		for _, cookie := range rec.Result().Cookies() {
+			if cookie.Name == "carrel_sid" && cookie.Value != "" {
+				t.Fatalf("%s: session cookie set on failed login", c[0])
+			}
 		}
 	}
 	if bodies["alice"] != bodies["nobody"] {
@@ -348,7 +401,7 @@ func TestSecureCookieFromTrustedProxyOnly(t *testing.T) {
 	h.cfg.TrustedProxies = "127.0.0.1"
 	h.rebuild()
 	secure := func(remote string) bool {
-		req := postForm("/login", nil, url.Values{"login": {"alice"}, "password": {"password123"}})
+		req := h.anonPostForm("/login", "/login", url.Values{"login": {"alice"}, "password": {"password123"}})
 		req.RemoteAddr = remote
 		req.Header.Set("X-Forwarded-Proto", "https")
 		rec := h.do(req)
@@ -450,18 +503,18 @@ func TestInviteFormErrorsAreNot404(t *testing.T) {
 	if rec := h.do(get(path, nil)); rec.Code != http.StatusOK {
 		t.Fatalf("GET invite: %d", rec.Code)
 	}
-	rec := h.do(postForm(path, nil, url.Values{"password": {"short"}, "password2": {"short"}}))
+	rec := h.do(h.anonPostForm(path, path, url.Values{"password": {"short"}, "password2": {"short"}}))
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "at least 8") {
 		t.Fatalf("short password: status = %d body = %s", rec.Code, rec.Body.String())
 	}
-	rec = h.do(postForm(path, nil, url.Values{"password": {"bobpass123"}, "password2": {"bobpass124"}}))
+	rec = h.do(h.anonPostForm(path, path, url.Values{"password": {"bobpass123"}, "password2": {"bobpass124"}}))
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "do not match") {
 		t.Fatalf("mismatch: status = %d body = %s", rec.Code, rec.Body.String())
 	}
 	if _, _, _, ok := h.users.Authenticate(context.Background(), "bob", "bobpass123"); ok {
 		t.Fatal("password set despite the form error")
 	}
-	rec = h.do(postForm(path, nil, url.Values{"password": {"bobpass123"}, "password2": {"bobpass123"}}))
+	rec = h.do(h.anonPostForm(path, path, url.Values{"password": {"bobpass123"}, "password2": {"bobpass123"}}))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("accept: status = %d", rec.Code)
 	}
@@ -483,13 +536,13 @@ func TestForgotWipeRouteAndDeadTokensAlike(t *testing.T) {
 	if rec := h.do(get(link, nil)); rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"step":"confirm"`) {
 		t.Fatalf("GET link: %d %s", rec.Code, rec.Body.String())
 	}
-	if rec := h.do(postForm(link, nil, url.Values{"confirm": {"no"}})); !strings.Contains(rec.Body.String(), "Confirmation is required") {
+	if rec := h.do(h.anonPostForm(link, link, url.Values{"confirm": {"no"}})); !strings.Contains(rec.Body.String(), "Confirmation is required") {
 		t.Fatalf("confirm=no: %s", rec.Body.String())
 	}
 	if _, _, _, ok := h.users.Authenticate(context.Background(), "alice", "password123"); !ok {
 		t.Fatal("wiped without confirmation")
 	}
-	rec := h.do(postForm(link, nil, url.Values{"confirm": {"yes"}}))
+	rec := h.do(h.anonPostForm(link, link, url.Values{"confirm": {"yes"}}))
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"step":"password"`) {
 		t.Fatalf("confirm=yes: %d %s", rec.Code, rec.Body.String())
 	}
@@ -497,14 +550,14 @@ func TestForgotWipeRouteAndDeadTokensAlike(t *testing.T) {
 		t.Fatal("session alive after wipe")
 	}
 	// Ф2-10. Mismatched repeat is a form error, and no password is set.
-	rec = h.do(postForm(link, nil, url.Values{"password": {"newpass123"}, "password2": {"newpass124"}}))
+	rec = h.do(h.anonPostForm(link, link, url.Values{"password": {"newpass123"}, "password2": {"newpass124"}}))
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), "do not match") {
 		t.Fatalf("mismatch: %d %s", rec.Code, rec.Body.String())
 	}
 	if _, _, _, ok := h.users.Authenticate(context.Background(), "alice", "newpass123"); ok {
 		t.Fatal("password set from a mismatched pair")
 	}
-	rec = h.do(postForm(link, nil, url.Values{"password": {"newpass123"}, "password2": {"newpass123"}}))
+	rec = h.do(h.anonPostForm(link, link, url.Values{"password": {"newpass123"}, "password2": {"newpass123"}}))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("set password: %d %s", rec.Code, rec.Body.String())
 	}
@@ -520,8 +573,37 @@ func TestForgotWipeRouteAndDeadTokensAlike(t *testing.T) {
 			t.Fatalf("%s token: %d %q", name, rec.Code, rec.Body.String())
 		}
 	}
-	if rec := h.do(postForm(link, nil, url.Values{"confirm": {"yes"}})); rec.Code != http.StatusNotFound {
+	if rec := h.do(h.anonPostForm("/forgot", link, url.Values{"confirm": {"yes"}})); rec.Code != http.StatusNotFound {
 		t.Fatalf("dead token wiped again: %d", rec.Code)
+	}
+}
+
+// /forgot must not claim the wipe email was sent until S-26 dispatches it.
+func TestForgotDoesNotClaimMailSent(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByLogin("alice")
+		u.Email = "alice@example.com"
+		u.EmailConfirmed = true
+		return nil, nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := h.do(h.anonPostForm("/forgot", "/forgot", url.Values{"login": {"alice"}}))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("forgot: status = %d", rec.Code)
+	}
+	body := rec.Body.String()
+	if strings.Contains(body, `"sent":true`) {
+		t.Fatalf("forgot claims mail sent: %s", body)
+	}
+	if !strings.Contains(body, "could not be emailed") {
+		t.Fatalf("forgot should explain mail is unavailable: %s", body)
+	}
+	if strings.Contains(body, "/forgot/") {
+		t.Fatal("forgot response leaks wipe link token")
 	}
 }
 

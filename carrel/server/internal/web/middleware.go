@@ -49,6 +49,23 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 				http.Error(w, "forbidden", http.StatusForbidden)
 				return
 			}
+		} else if needsCSRF(r) && !hasSess && needsAnonymousCSRF(r) {
+			if token := r.Header.Get(csrfHeaderName); token != "" {
+				if !checkAnonymousCSRF(r, token) {
+					http.Error(w, "forbidden", http.StatusForbidden)
+					return
+				}
+			} else if err := r.ParseForm(); err != nil {
+				if tooLarge(err) {
+					http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)
+					return
+				}
+				http.Error(w, "bad request", http.StatusBadRequest)
+				return
+			} else if !checkAnonymousCSRF(r, anonymousCSRFFromRequest(r)) {
+				http.Error(w, "forbidden", http.StatusForbidden)
+				return
+			}
 		} else if err := r.ParseForm(); err != nil {
 			if tooLarge(err) {
 				http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)

@@ -88,7 +88,7 @@ func Entries() []Entry {
 	add("lists", "tc-row--avatar", "default", widget.Row{Variant: widget.RowAvatar, Cells: widget.RowCells{Title: "Alex", Subtitle: "alex@example.com"}}.Render())
 	add("lists", "tc-row--lead", "default", widget.Row{Variant: widget.RowLead, Cells: widget.RowCells{Lead: "09:00", Title: "Standup", Subtitle: "Room A"}}.Render())
 	add("lists", "tc-row--tick", "default", widget.Row{Variant: widget.RowTick, Cells: widget.RowCells{Title: "Task", Due: "Fri"}}.Render())
-	add("lists", "tc-row--excerpt", "default", widget.Row{Variant: widget.RowExcerpt, Cells: widget.RowCells{Title: "Post", Excerpt: "First lines of content…"}}.Render())
+	add("lists", "tc-row--excerpt", "default", widget.Row{Variant: widget.RowExcerpt, Cells: widget.RowCells{Title: "Post", Excerpt: "First lines of content…", Tags: []widget.Tag{{Label: "draft", Href: "/tags/draft"}}, Date: "10 Aug", Source: "nextcloud · Notes"}}.Render())
 	add("lists", "tc-row--meta", "default", widget.Row{Variant: widget.RowMeta, Cells: widget.RowCells{Icon: "📄", Name: "readme.txt", Size: "2 KB", Time: "10:30"}}.Render())
 	add("lists", "tc-row--find", "default", widget.Row{Variant: widget.RowFind, Cells: widget.RowCells{Icon: "⌕", Title: "Query", Detail: "Jump to section", Caption: "Recent"}}.Render())
 	add("lists", "tc-tickrow", "ok", widget.TickRow{Label: "Inbox", Tick: widget.TickOn, Count: &n}.Render())

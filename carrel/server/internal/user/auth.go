@@ -14,7 +14,7 @@ func (s *Service) SetupFirstAdmin(ctx context.Context, login, password string) e
 	if login == "" {
 		return ErrNotFound
 	}
-	id, err := NewAccountID()
+	id, err := NewUserID()
 	if err != nil {
 		return err
 	}

@@ -473,4 +473,6 @@ type RowCells struct {
 	Progress *int
 	Done     bool
 	Tags     []Tag
+	Date     string
+	Source   string
 }

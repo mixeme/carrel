@@ -1,6 +1,7 @@
 package web
 
 import (
+	"net/http"
 	"time"
 
 	"carrel.dev/carrel/server/internal/session"
@@ -69,4 +70,14 @@ func csrfField(sess *session.Session) view.FormRow {
 		return view.FormRow{Name: "_csrf", Kind: view.InputText, Value: ""}
 	}
 	return view.FormRow{Name: "_csrf", Kind: view.InputText, Value: text(sess.CSRFToken())}
+}
+
+func csrfFormRow(token string) view.FormRow {
+	return view.FormRow{Name: "_csrf", Kind: view.InputText, Value: text(token)}
+}
+
+func (s *Server) anonPlainForm(w http.ResponseWriter, r *http.Request, action, method string, rows ...view.FormRow) view.Form {
+	token := s.issueAnonymousCSRF(w, r)
+	all := append([]view.FormRow{csrfFormRow(token)}, rows...)
+	return plainForm(action, method, all...)
 }

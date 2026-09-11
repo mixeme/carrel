@@ -152,6 +152,24 @@ func TestRailSection_titledKeepsHeading(t *testing.T) {
 	}
 }
 
+func TestRowExcerpt_dateAndSource(t *testing.T) {
+	html := widget.Row{
+		Variant: widget.RowExcerpt,
+		Cells: widget.RowCells{
+			Title:   "Note",
+			Excerpt: "Body text",
+			Date:    "10 Aug",
+			Source:  "nextcloud · Notes",
+		},
+	}.Render()
+	if !strings.Contains(html, `<span class="tc-row__date">10 Aug</span>`) {
+		t.Fatalf("excerpt row must render date: %s", html)
+	}
+	if !strings.Contains(html, `<span class="tc-row__source">nextcloud · Notes</span>`) {
+		t.Fatalf("excerpt row must render source: %s", html)
+	}
+}
+
 func TestSideBlock_exactlyOne(t *testing.T) {
 	sec := widget.Sec{Rubric: widget.Rubric{Text: "Info"}, Body: []widget.Node{widget.Paragraph("Details")}}
 	field := widget.Field{Name: "title", Label: "Title", Kind: widget.InputText, Value: "Note"}

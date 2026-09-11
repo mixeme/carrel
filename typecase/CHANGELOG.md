@@ -49,6 +49,8 @@ L-4.4) are in [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
   `Side.Render()` (`typecase-compose` §2).
 - Empty `RailSection.Title` omits `tc-railsec__title`; gate
   `inv-railsec-untitled-no-title` (`typecase-compose` §3).
+- `RowCells.Date` and `Source` on `tc-row--excerpt`; excerpt is one line with
+  ellipsis (`typecase-compose` §4).
 - Mockup-aligned geometry: row height 38, row gap 12, rail tickrow padding 16,
   top bar 52, default button 26, second radius 2 px on check/badge/mark.
 - Gates `geometry`, `screens-css`, and `screens-coverage` (L-8).

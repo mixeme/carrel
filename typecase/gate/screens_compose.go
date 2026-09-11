@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"carrel.dev/typecase/screens"
 )
 
 var notesComposeBypass = []string{
@@ -29,6 +31,12 @@ func CheckScreensCompose(p ModulePaths) error {
 	}
 	if len(found) > 0 {
 		return fmt.Errorf("screens-compose: notes.go bypasses widgets: %s", strings.Join(found, ", "))
+	}
+	html := screens.Notes()
+	if strings.Contains(html, "tc-row--excerpt") {
+		if !strings.Contains(html, "tc-row__date") || !strings.Contains(html, "tc-row__source") {
+			return fmt.Errorf("screens-compose: notes excerpt rows must include date and source cells")
+		}
 	}
 	return nil
 }
