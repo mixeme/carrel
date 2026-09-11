@@ -41,6 +41,23 @@
 		first.focus();
 	}
 
+	function positionPopover(menuRoot) {
+		var pop = menuRoot.querySelector(popoverSelector);
+		var btn = menuRoot.querySelector(menuSelector);
+		if (!pop || !btn) return;
+		pop.classList.remove("is-flip-up");
+		var prev = pop.style.display;
+		pop.style.display = "block";
+		pop.style.visibility = "hidden";
+		var btnRect = btn.getBoundingClientRect();
+		var popRect = pop.getBoundingClientRect();
+		pop.style.display = prev || "";
+		pop.style.visibility = "";
+		if (btnRect.bottom + popRect.height + 4 > window.innerHeight) {
+			pop.classList.add("is-flip-up");
+		}
+	}
+
 	function openMenu(menuRoot) {
 		var pop = menuRoot.querySelector(popoverSelector);
 		var btn = menuRoot.querySelector(menuSelector);
@@ -48,6 +65,7 @@
 		menuRoot.classList.add(OPEN);
 		btn.setAttribute("aria-expanded", "true");
 		menuRoot._tcTrigger = document.activeElement;
+		positionPopover(menuRoot);
 		var item = pop.querySelector('[role="menuitem"]');
 		if (item) item.focus();
 	}
@@ -138,6 +156,30 @@
 		if (ov && ov._tcTrigger) ov._tcTrigger.focus();
 	}
 
+	function initDynamic() {
+		document.querySelectorAll("[data-tc-colour]").forEach(function (el) {
+			var c = el.getAttribute("data-tc-colour");
+			if (c) el.style.backgroundColor = c;
+		});
+		document.querySelectorAll("[data-tc-pct]").forEach(function (el) {
+			var bar = el.querySelector(".tc-meter__bar");
+			var pct = el.getAttribute("data-tc-pct");
+			if (bar && pct) bar.style.width = pct + "%";
+		});
+		document.querySelectorAll("[data-tc-width]").forEach(function (el) {
+			var w = el.getAttribute("data-tc-width");
+			if (w) el.style.width = w;
+		});
+		document.querySelectorAll(".tc-crop__img").forEach(function (img) {
+			var z = img.getAttribute("data-tc-zoom") || "100";
+			var r = img.getAttribute("data-tc-rotate") || "0";
+			var x = img.getAttribute("data-tc-offset-x") || "0";
+			var y = img.getAttribute("data-tc-offset-y") || "0";
+			img.style.transform =
+				"rotate(" + r + "deg) scale(" + z / 100 + ") translate(" + x + "px, " + y + "px)";
+		});
+	}
+
 	function initRoots() {
 		document.querySelectorAll("[data-tc-root]").forEach(function (root) {
 			root.classList.add("tc-root");
@@ -150,6 +192,7 @@
 
 	document.addEventListener("DOMContentLoaded", function () {
 		initRoots();
+		initDynamic();
 		document.addEventListener("click", onDocClick);
 		document.addEventListener("keydown", onKeydown);
 		document.addEventListener("click", onCloseClick);

@@ -1,7 +1,7 @@
 {
   "title": "Contacts",
   "top": {
-    "search": { "query": "", "action": "/app/search", "history": [], "jump": [] },
+    "search": { "query": "", "action": "/app/search", "history": [], "jump": [], "whole": null },
     "newMenu": [
       { "id": "new.note", "label": "New note", "icon": "i-quill", "href": "/app/notes/quick", "method": "GET", "enabled": true },
       { "id": "new.contact", "label": "New contact…", "href": "/app/contacts/a-nc-home/kontakty/new", "method": "GET", "enabled": true, "separator": true },

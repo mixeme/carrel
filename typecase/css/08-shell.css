@@ -46,7 +46,11 @@
 .tc-rail__chips { display: flex; flex-wrap: wrap; gap: 0.35em; padding: 0.5em; border-bottom: var(--tc-stroke) solid var(--tc-rule); }
 .tc-rail--drawer { position: fixed; inset: 0; z-index: 90; width: 100%; transform: translateX(-100%); transition: transform 0.2s ease; }
 .tc-rail--drawer.is-open { transform: translateX(0); }
+.tc-rail--icons { width: 56px; }
+.tc-shell--narrow .tc-shell__rail { width: 56px; }
+.tc-nav--bottom { display: flex; flex-direction: row; }
 
+.tc-railsec { display: block; }
 .tc-railsec__title {
 	font-size: 0.75em;
 	letter-spacing: 0.06em;

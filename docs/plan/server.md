@@ -26,13 +26,13 @@
 
 ## Каркас модуля
 
-- [ ] `carrel/server/go.mod`: `module carrel.dev/carrel/server`, `go 1.27`
-- [ ] `carrel/server/LICENSE` — AGPL-3.0-or-later
-- [ ] Корневой `LICENSE` продукта, если его ещё нет — тот же текст
-- [ ] Ворота: `gofmt`, `go test ./...`, `go vet`, `python docs/spec/check.py`
-- [ ] Тест или `go list`: среди импортов модуля нет `carrel.dev/typecase`
-- [ ] `cmd/carrel` — заготовка `main`, слушает `CARREL_BIND`/`CARREL_PORT`, `-ldflags` версия и коммит
-- [ ] Пустой том не падает: режим первого запуска
+- [x] `carrel/server/go.mod`: `module carrel.dev/carrel/server`, `go 1.27`
+- [x] `carrel/server/LICENSE` — AGPL-3.0-or-later
+- [x] Корневой `LICENSE` продукта, если его ещё нет — тот же текст
+- [x] Ворота: `gofmt`, `go test ./...`, `go vet`, `python docs/spec/check.py`
+- [x] Тест или `go list`: среди импортов модуля нет `carrel.dev/typecase`
+- [x] `cmd/carrel` — заготовка `main`, слушает `CARREL_BIND`/`CARREL_PORT`, `-ldflags` версия и коммит
+- [x] Пустой том не падает: режим первого запуска
 
 ---
 
@@ -40,10 +40,10 @@
 
 Путь импорта: `carrel.dev/carrel/server/view`. Файлы — `carrel/server/view/`.
 
-- [ ] **Opus.** Типы дословно из C-6, C-8, C-9. JSON-теги — camelCase с маленькой буквы. `Shell` встроен анонимно. Указатели там, где в C-6 указатель. Полей сверх схемы нет
-- [ ] Загрузка `docs/spec/fixtures/**/*.json`
-- [ ] Тест: каждая существующая фикстура анмаршалится в свой тип без неизвестных полей (`DisallowUnknownFields`)
-- [ ] Сверка сборки с фикстурой — `cmp.Diff`, не байтовый JSON
+- [x] **Opus.** Типы дословно из C-6, C-8, C-9. JSON-теги — camelCase с маленькой буквы. `Shell` встроен анонимно. Указатели там, где в C-6 указатель. Полей сверх схемы нет
+- [x] Загрузка `docs/spec/fixtures/**/*.json`
+- [x] Тест: каждая существующая фикстура анмаршалится в свой тип без неизвестных полей (`DisallowUnknownFields`)
+- [x] Сверка сборки с фикстурой — `cmp.Diff`, не байтовый JSON
 
 Реализацию по готовым типам после ревью Opus может писать Composer.
 

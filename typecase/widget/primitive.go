@@ -82,6 +82,7 @@ func btnKindClass(k ButtonKind, enabled bool) string {
 // Чего нет. Нет масок ввода и автодополнения из чужих источников.
 type Input struct {
 	Name        string
+	Label       string
 	Kind        InputKind
 	Value       string
 	Options     []SelectOption
@@ -98,9 +99,13 @@ func (in Input) Render() string {
 	ph := attr("placeholder", in.Placeholder)
 	name := attr("name", in.Name)
 	id := attr("id", in.Name)
+	al := attr("aria-label", in.Label)
+	if in.Label == "" && in.Name != "" {
+		al = attr("aria-label", in.Name)
+	}
 	switch kind {
 	case InputTextarea:
-		return `<textarea` + classAttr("tc-in", "tc-in--textarea", "tc-in--"+string(kind)) + name + id + ph + ro + `>` + esc(in.Value) + `</textarea>`
+		return `<textarea` + classAttr("tc-in", "tc-in--textarea", "tc-in--"+string(kind)) + name + id + al + ph + ro + `>` + esc(in.Value) + `</textarea>`
 	case InputSelect:
 		var opts string
 		for _, o := range in.Options {
@@ -110,9 +115,9 @@ func (in Input) Render() string {
 			}
 			opts += `<option value="` + esc(o.Value) + `"` + sel + `>` + esc(o.Label) + `</option>`
 		}
-		return `<div class="tc-in-wrap tc-in-wrap--select"><select` + classAttr("tc-in", "tc-in--select") + name + id + ro + `>` + opts + `</select><span class="tc-in__arrow" aria-hidden="true"></span></div>`
+		return `<div class="tc-in-wrap tc-in-wrap--select"><select` + classAttr("tc-in", "tc-in--select") + name + id + al + ro + `>` + opts + `</select><span class="tc-in__arrow" aria-hidden="true"></span></div>`
 	default:
-		return `<input type="` + esc(string(kind)) + `"` + classAttr("tc-in", "tc-in--"+string(kind)) + name + id + attr("value", in.Value) + ph + ro + `>`
+		return `<input type="` + esc(string(kind)) + `"` + classAttr("tc-in", "tc-in--"+string(kind)) + name + id + al + attr("value", in.Value) + ph + ro + `>`
 	}
 }
 
@@ -257,7 +262,7 @@ type Mark struct {
 }
 
 func (m Mark) Render() string {
-	return `<span class="tc-mark" style="background-color:` + esc(m.Colour) + `"` + attr("aria-label", m.Label) + ` title="` + esc(m.Label) + `"></span>`
+	return `<span class="tc-mark"` + attr("data-tc-colour", m.Colour) + attr("aria-label", m.Label) + ` title="` + esc(m.Label) + `"></span>`
 }
 
 // Num — tc-num
@@ -329,7 +334,7 @@ func (a Avatar) Render() string {
 		inner = `<img class="tc-avatar__img" src="` + esc(a.Image) + `" alt="">`
 		cls = classes(cls, "tc-avatar--image")
 	} else if a.Initials != "" {
-		inner = `<span class="tc-avatar__initials" style="background-color:` + esc(a.Colour) + `">` + esc(a.Initials) + `</span>`
+		inner = `<span class="tc-avatar__initials"` + attr("data-tc-colour", a.Colour) + `>` + esc(a.Initials) + `</span>`
 		cls = classes(cls, "tc-avatar--initials")
 	} else {
 		inner = `<span class="tc-avatar__empty" aria-hidden="true">?</span>`
@@ -496,15 +501,15 @@ func (s Skel) Render() string {
 	if lines < 1 {
 		lines = 1
 	}
-	style := ""
+	widthAttr := ""
 	if s.Width != "" {
-		style = ` style="width:` + esc(s.Width) + `"`
+		widthAttr = attr("data-tc-width", s.Width)
 	}
 	var inner string
 	for i := 0; i < lines; i++ {
 		inner += `<span class="tc-skel__line"></span>`
 	}
-	return `<div class="tc-skel tc-skel--` + esc(string(shape)) + `"` + style + ` role="status" aria-label="Loading">` + inner + `</div>`
+	return `<div class="tc-skel tc-skel--` + esc(string(shape)) + `"` + widthAttr + ` role="status" aria-label="Loading">` + inner + `</div>`
 }
 
 // Meter — tc-meter
@@ -535,7 +540,7 @@ func (m Meter) Render() string {
 	if pct > 100 {
 		pct = 100
 	}
-	return `<div class="tc-meter"` + attr("aria-label", m.Label) + ` role="meter" aria-valuenow="` + esc(strconv.Itoa(m.Value)) + `" aria-valuemin="0" aria-valuemax="` + esc(strconv.Itoa(max)) + `"><div class="tc-meter__bar" style="width:` + esc(strconv.FormatFloat(pct, 'f', 1, 64)) + `%"></div><span class="tc-meter__label">` + esc(m.Label) + `</span></div>`
+	return `<div class="tc-meter"` + attr("aria-label", m.Label) + attr("data-tc-pct", strconv.FormatFloat(pct, 'f', 1, 64)) + ` role="meter" aria-valuenow="` + esc(strconv.Itoa(m.Value)) + `" aria-valuemin="0" aria-valuemax="` + esc(strconv.Itoa(max)) + `"><div class="tc-meter__bar"></div><span class="tc-meter__label">` + esc(m.Label) + `</span></div>`
 }
 
 func renderIcon(name string) string {

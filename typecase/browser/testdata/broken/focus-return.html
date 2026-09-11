@@ -1,0 +1,18 @@
+<div class="tc-menu is-closed" id="bad-menu" data-tc-overlay-anchor>
+<button type="button" class="tc-menu__control" data-tc-menu aria-haspopup="menu" aria-expanded="false">
+<span class="tc-menu__label">Actions</span>
+<span class="tc-menu__arrow" aria-hidden="true"></span>
+</button>
+<ul class="tc-menu__popover tc-menu__popover--start" role="menu" data-tc-menu-popover>
+<li role="none"><a href="/edit" class="tc-menu__item" role="menuitem">Edit</a></li>
+</ul>
+</div>
+<script>
+window.addEventListener("load", function () {
+	var orig = HTMLButtonElement.prototype.focus;
+	HTMLButtonElement.prototype.focus = function () {
+		if (this.classList && this.classList.contains("tc-menu__control")) return;
+		return orig.apply(this, arguments);
+	};
+});
+</script>

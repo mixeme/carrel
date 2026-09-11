@@ -1,7 +1,5 @@
 package widget
 
-import "strconv"
-
 // Table — tc-table
 //
 // Роль. Данные по колонкам: сравнение, предпросмотр, журнал.
@@ -197,7 +195,7 @@ func renderTreeNodes(nodes []TreeNode, chosen string, disabled []string, depth i
 		} else {
 			toggle = `<span class="tc-tree__spacer" aria-hidden="true"></span>`
 		}
-		out += `<div` + classAttr(cls) + ` role="treeitem" style="padding-left:` + esc(strconv.Itoa(depth*5)) + `px" data-tc-tree-item` + attr("data-id", n.ID) + `>` + toggle + n.Mark.Render() + `<button type="button" class="tc-tree__label">` + esc(n.Label) + `</button>` + badges + children + `</div>`
+		out += `<div` + classAttr(cls) + ` role="treeitem" data-tc-tree-item` + attr("data-id", n.ID) + `>` + toggle + n.Mark.Render() + `<button type="button" class="tc-tree__label">` + esc(n.Label) + `</button>` + badges + children + `</div>`
 	}
 	return out
 }

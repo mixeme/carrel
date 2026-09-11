@@ -16,6 +16,7 @@ type Shell struct {
 	Main    Main
 	Side    Side
 	Density Density
+	Narrow  bool
 }
 
 func (s Shell) Render() string {
@@ -23,7 +24,11 @@ func (s Shell) Render() string {
 	if dens == "" {
 		dens = DensityNormal
 	}
-	return `<div` + classAttr("tc-shell", "tc-shell--"+string(dens)) + ` data-tc-shell data-tc-root>` + s.Top.Render() + `<div class="tc-shell__body"><div class="tc-shell__rail">` + s.Rail.Render() + `</div><div class="tc-shell__main">` + s.Main.Render() + `</div><div class="tc-shell__side">` + s.Side.Render() + `</div></div></div>`
+	cls := classes("tc-shell", "tc-shell--"+string(dens))
+	if s.Narrow {
+		cls = classes(cls, "tc-shell--narrow")
+	}
+	return `<div` + classAttr(cls) + ` data-tc-shell data-tc-root>` + s.Top.Render() + `<div class="tc-shell__body"><div class="tc-shell__rail">` + s.Rail.Render() + `</div><div class="tc-shell__main">` + s.Main.Render() + `</div><div class="tc-shell__side">` + s.Side.Render() + `</div></div></div>`
 }
 
 // Top — tc-top
@@ -90,15 +95,21 @@ type Rail struct {
 	Chips    []Chip
 	Foot     RailFoot
 	Note     string
+	Layout   string
 	Drawer   bool
 	Open     bool
 }
 
 func (r Rail) Render() string {
 	cls := "tc-rail"
-	if r.Drawer {
-		cls = classes(cls, "tc-rail--drawer")
+	layout := r.Layout
+	if layout == "" && r.Drawer {
+		layout = "drawer"
 	}
+	if layout == "" {
+		layout = "column"
+	}
+	cls = classes(cls, "tc-rail--"+layout)
 	if r.Open {
 		cls = classes(cls, "is-open")
 	}

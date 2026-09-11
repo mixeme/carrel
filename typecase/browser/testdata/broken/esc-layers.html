@@ -1,0 +1,14 @@
+<div class="tc-scrim is-on" data-tc-scrim data-tc-for="bottom-sheet"></div>
+<div class="tc-overlay tc-overlay--sheet is-open" data-tc-overlay id="bottom-sheet" role="dialog" aria-modal="true">
+<div class="tc-sheet is-open" data-tc-trap><header class="tc-sheet__head"><div class="tc-sheet__target">Item</div><h2 class="tc-sheet__title">Sheet</h2></header><div class="tc-sheet__body"><p>Under</p></div></div>
+</div>
+<div class="tc-scrim is-on" data-tc-scrim data-tc-for="top-dialog"></div>
+<div class="tc-overlay tc-overlay--dialog is-open" data-tc-overlay id="top-dialog" role="dialog" aria-modal="true">
+<div class="tc-dialog is-open" data-tc-trap><header class="tc-dialog__head"><h2 class="tc-dialog__title">Confirm</h2></header><div class="tc-dialog__body"><p>On top</p></div></div>
+</div>
+<script>
+document.addEventListener("keydown", function (e) {
+	if (e.key !== "Escape") return;
+	document.querySelectorAll("[data-tc-overlay]").forEach(function (ov) { ov.hidden = true; });
+});
+</script>

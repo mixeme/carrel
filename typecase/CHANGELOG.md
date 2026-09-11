@@ -4,6 +4,58 @@ All notable changes to Typecase are documented here. Versioning follows
 [semantic versioning](https://semver.org/). This file tells consumers what to
 do, not what the authors did.
 
+## typecase/v0.0.4 — 2026-09-04
+
+L-9.2 browser checks (chromedp) and menu popover positioning.
+
+### For consumers
+
+- Run `go test ./...` from the module root to execute L-8 gate checks and L-9.2
+  browser checks in the `browser` package. Set `CHROME_PATH` if Chrome is not on
+  `PATH` (Microsoft Edge is used automatically on Windows when Chrome is absent).
+- `tc-menu` popovers flip upward when there is not enough space below the
+  control; long labels no longer overlap the arrow.
+
+### Included
+
+- `browser` package: chromedp v0.16.0 checks for menu geometry, ellipsis,
+  single-row bar, 44 px tap targets, focus return, stacked `Esc`, WCAG AA
+  contrast, and stable geometry across themes.
+- L-9.3 bite fixtures under `browser/testdata/broken/`.
+- `tc.js` `positionPopover()` and `is-flip-up` CSS for menus.
+
+### Not yet included
+
+- Opus API review.
+
+## typecase/v0.0.3 — 2026-09-04
+
+L-8 gates, full catalog coverage, and markup without inline styles.
+
+### For consumers
+
+- Run `go test ./...` from the module root to execute L-8 gate checks in the
+  `gate` package. Each gate has a bite test under `gate/testdata/broken/` (L-9.3).
+- The live catalog now includes every widget in each declared state. Start it
+  with `go run ./cmd/catalog` as before; `/static` still serves the same set
+  without `tc.js`.
+- Widget markup no longer emits `style=` attributes. Dynamic colours, meter
+  width, skeleton width, and crop transforms are carried in `data-tc-*`
+  attributes; `tc.js` applies them on load.
+- `Input` accepts an optional `Label` field used for `aria-label` when the
+  control is not wrapped in `tc-field`.
+
+### Included
+
+- `gate` package: completeness, ownership, node names, typed input,
+  enumerations, domain naming, doc format, catalog, no-inline, and a11y checks.
+- Catalog entries for all missing widget states; `Shell.Narrow`, `Rail.Layout`.
+- `tc.js` `initDynamic()` for data-driven presentation.
+
+### Not yet included
+
+- Opus API review.
+
 ## typecase/v0.0.2 — 2026-09-04
 
 Widget families, catalog server, and expanded behavior script.
@@ -35,8 +87,7 @@ Widget families, catalog server, and expanded behavior script.
 
 ### Not yet included
 
-- L-8 gate tests beyond token validation, L-9 browser checks (chromedp), and
-  Opus API review.
+- L-9.2 browser checks (chromedp), Opus API review.
 
 ## typecase/v0.0.1 — 2026-09-04
 

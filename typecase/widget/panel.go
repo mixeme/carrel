@@ -99,7 +99,7 @@ func (c Chip) Render() string {
 	if c.Href != "" {
 		return `<a href="` + esc(c.Href) + `"` + classAttr(cls) + `>` + inner + `</a>`
 	}
-	return `<button type="button"` + classAttr(cls) + `>` + inner + `</button>`
+	return `<button type="button"` + classAttr(cls) + attr("aria-label", c.Label) + `>` + inner + `</button>`
 }
 
 // Range — tc-range
@@ -133,7 +133,7 @@ func (r Range) Render() string {
 	for _, p := range r.Presets {
 		presets += p.Render()
 	}
-	return `<div class="tc-range" data-tc-range><div class="tc-range__fields">` + Input{Name: from, Kind: InputDate, Value: r.From}.Render() + `<span class="tc-range__dash" aria-hidden="true">–</span>` + Input{Name: to, Kind: InputDate, Value: r.To}.Render() + `</div><div class="tc-range__presets">` + presets + `</div></div>`
+	return `<div class="tc-range" data-tc-range><div class="tc-range__fields">` + Input{Name: from, Label: "From", Kind: InputDate, Value: r.From}.Render() + `<span class="tc-range__dash" aria-hidden="true">–</span>` + Input{Name: to, Label: "To", Kind: InputDate, Value: r.To}.Render() + `</div><div class="tc-range__presets">` + presets + `</div></div>`
 }
 
 func renderActions(actions []Action) string {

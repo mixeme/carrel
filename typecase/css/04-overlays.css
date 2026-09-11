@@ -77,8 +77,11 @@
 	min-height: 26px;
 	padding: 0 0.5em;
 	cursor: pointer;
+	max-width: 100%;
 }
-.tc-menu__label {
+.tc-menu__label, .tc-usermenu__label {
+	flex: 1 1 auto;
+	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -91,6 +94,7 @@
 	border-bottom: var(--tc-stroke) solid var(--tc-muted);
 	transform: rotate(45deg) translateY(-2px);
 	flex: none;
+	flex-shrink: 0;
 	margin-left: 0.25em;
 }
 .tc-menu__popover, .tc-usermenu__popover {
@@ -106,6 +110,12 @@
 	padding: 0.25em 0;
 	margin-left: 0;
 	z-index: 60;
+}
+.tc-menu__popover.is-flip-up, .tc-usermenu__popover.is-flip-up {
+	top: auto;
+	bottom: 100%;
+	margin-top: 0;
+	margin-bottom: 2px;
 }
 .tc-menu__popover--end, .tc-usermenu__popover { right: 0; left: auto; }
 .tc-menu:not(.is-open) .tc-menu__popover,

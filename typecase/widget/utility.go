@@ -177,7 +177,7 @@ func (c Crop) Render() string {
 	if c.Narrow {
 		cls = classes(cls, "tc-crop--centre")
 	}
-	return `<div` + classAttr(cls) + ` data-tc-crop><div class="tc-crop__canvas"><img src="` + esc(c.Href) + `" alt="" class="tc-crop__img" style="transform: rotate(` + esc(itoa(c.Rotate)) + `deg) scale(` + esc(itoa(c.Zoom)) + `) translate(` + esc(itoa(c.OffsetX)) + `px, ` + esc(itoa(c.OffsetY)) + `px)"><div class="tc-crop__frame" aria-hidden="true"></div></div><div class="tc-crop__controls">` + Input{Name: "zoom", Kind: InputNumber, Value: itoa(c.Zoom)}.Render() + Input{Name: "offsetX", Kind: InputNumber, Value: itoa(c.OffsetX)}.Render() + Input{Name: "offsetY", Kind: InputNumber, Value: itoa(c.OffsetY)}.Render() + Button{Label: "Rotate 90°"}.Render() + `</div></div>`
+	return `<div` + classAttr(cls) + ` data-tc-crop><div class="tc-crop__canvas"><img src="` + esc(c.Href) + `" alt="" class="tc-crop__img"` + attr("data-tc-zoom", itoa(c.Zoom)) + attr("data-tc-rotate", itoa(c.Rotate)) + attr("data-tc-offset-x", itoa(c.OffsetX)) + attr("data-tc-offset-y", itoa(c.OffsetY)) + `><div class="tc-crop__frame" aria-hidden="true"></div></div><div class="tc-crop__controls">` + Input{Name: "zoom", Kind: InputNumber, Value: itoa(c.Zoom)}.Render() + Input{Name: "offsetX", Kind: InputNumber, Value: itoa(c.OffsetX)}.Render() + Input{Name: "offsetY", Kind: InputNumber, Value: itoa(c.OffsetY)}.Render() + Button{Label: "Rotate 90°"}.Render() + `</div></div>`
 }
 
 // Steps — tc-steps

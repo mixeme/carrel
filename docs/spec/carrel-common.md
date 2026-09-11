@@ -493,6 +493,11 @@ Combined list, Combined notebook. Вью-модель у него та же, ч�
   структура с флагом. Неизвестное число — `nil`, а не `0`.
 - **Лишних полей нет.** Поле, которого нет ни на одном кадре, не заводится: его
   однажды отрисуют.
+- **Имя поля страницы не повторяет имя поля встроенной `Shell`.** Оба лежат в
+  одном объекте рядом (C-3.2), и под одним именем одно молча вытеснит другое —
+  ни один разбор этого не скажет. Поэтому заголовок записи на карточке события и
+  задачи зовётся `Summary`, как в строке списка, а `Title` остаётся заголовком
+  документа.
 
 ### C-6.2 Общие типы
 
@@ -908,7 +913,7 @@ type PhotoPreviewPage struct {
 type EventPage struct { // чтение: то, что открывается по ссылке и печатается
     Shell
     UID       string
-    Title     Text
+    Summary   Text // заголовок записи; заголовок документа — Shell.Title
     Fields    []Field
     Body      Text
     Recurrence RecurrenceBlock
@@ -955,7 +960,7 @@ type AttachRow struct {
 type TaskPage struct { // чтение
     Shell
     UID       string
-    Title     Text
+    Summary   Text // заголовок записи; заголовок документа — Shell.Title
     Fields    []Field
     Body      Text
     Done      bool
@@ -1845,7 +1850,8 @@ const ( FileRename FileOp = "rename"; FileMove = "move"
         FileCopy = "copy"; FileDelete = "delete" )
 
 type ImportStep string
-const ( ImportSource ImportStep = "source"; ImportPreview = "preview"; ImportReport = "report" )
+const ( ImportStepSource ImportStep = "source"; ImportStepPreview = "preview"
+        ImportStepReport = "report" )
 
 type ConflictChoice string
 const ( ChoiceMine ConflictChoice = "mine"; ChoiceTheirs = "theirs"; ChoiceUnset = "" )
