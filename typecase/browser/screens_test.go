@@ -230,6 +230,12 @@ type railDrawerProbe struct {
 	Open             bool    `json:"open"`
 	HScroll          float64 `json:"hScroll"`
 	OutOfBounds      int     `json:"outOfBounds"`
+	ApplyInStash     bool    `json:"applyInStash"`
+	ApplyClickable   bool    `json:"applyClickable"`
+	ClosedByApply    bool    `json:"closedByApply"`
+	FocusAfterApply  bool    `json:"focusAfterApply"`
+	ClosedByEsc      bool    `json:"closedByEsc"`
+	FocusAfterEsc    bool    `json:"focusAfterEsc"`
 }
 
 const railDrawerProbeJS = `(() => {
@@ -284,13 +290,39 @@ const railDrawerProbeJS = `(() => {
     hScroll,
     outOfBounds
   };
+  const hit = (el) => {
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    if (r.width <= 1 || r.height <= 1) return false;
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+    const node = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return !!(node && (el === node || el.contains(node)));
+  };
   if (toggle) toggle.click();
+  const opened = !!(rail && rail.classList.contains('is-open'));
+  const apply = shell && shell.querySelector('[data-tc-rail-apply]');
   const openRect = rail && rail.getBoundingClientRect();
   const openInView = !!(openRect && openRect.width > 1 && openRect.left >= -1 && openRect.right <= vw + 1);
+  const applyInStash = !!(apply && apply.closest('[data-tc-top-stash]'));
+  const applyClickable = hit(apply);
+  if (apply) apply.click();
+  const closedByApply = !!(rail && !rail.classList.contains('is-open'));
+  const focusAfterApply = !!(toggle && document.activeElement === toggle);
+  if (toggle) toggle.click();
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  const closedByEsc = !!(rail && !rail.classList.contains('is-open'));
+  const focusAfterEsc = !!(toggle && document.activeElement === toggle);
   return {
     ...closed,
     openRailInView: openInView,
-    open: !!(rail && rail.classList.contains('is-open'))
+    open: opened,
+    applyInStash,
+    applyClickable,
+    closedByApply,
+    focusAfterApply,
+    closedByEsc,
+    focusAfterEsc
   };
 })()`
 
@@ -305,7 +337,10 @@ func TestScreensNarrowRailDrawer(t *testing.T) {
 	h := browser.NewHarness(t)
 
 	var probe railDrawerProbe
-	url := screenURL(srv.URL, "notes", "")
+	// /io has a rail and the five-section nav, and no open side. /notes at 375 px
+	// covers the viewport with the side panel (U-9 leftover), so Apply is not
+	// a fair target there.
+	url := screenURL(srv.URL, "io", "")
 	if err := h.Run(url, 375, 812,
 		chromedp.Evaluate(`new Promise(function(resolve) {
   (function tick(n) {
@@ -345,5 +380,23 @@ func TestScreensNarrowRailDrawer(t *testing.T) {
 	}
 	if !probe.OpenRailInView {
 		t.Error("open tc-rail must be in viewport")
+	}
+	if probe.ApplyInStash {
+		t.Error("Apply must stay in tc-top, not the overflow stash")
+	}
+	if !probe.ApplyClickable {
+		t.Error("Apply must be visible and clickable above the open drawer")
+	}
+	if !probe.ClosedByApply {
+		t.Error("Apply must close the rail drawer")
+	}
+	if !probe.FocusAfterApply {
+		t.Error("closing with Apply must return focus to the rail toggle")
+	}
+	if !probe.ClosedByEsc {
+		t.Error("Escape must close the rail drawer")
+	}
+	if !probe.FocusAfterEsc {
+		t.Error("closing with Escape must return focus to the rail toggle")
 	}
 }

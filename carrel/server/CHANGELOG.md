@@ -5,6 +5,26 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.28 — 2026-09-08
+
+Closes Linux-machine hygiene from
+[before-providers.md](../../docs/plan/before-providers.md) §5.
+
+### For consumers
+
+- **Radicale in `docker-compose.linux.yml` binds to `127.0.0.1:5232` only.**
+  The test stack no longer listens on all interfaces on the shared dev host
+  (SelfPost on the same machine).
+- **Radicale integration tests use CalDAV resources, not generic WebDAV files.**
+  `PUT`/`GET` run against valid `.ics` inside a typed calendar collection, as
+  Radicale requires. Verify on Linux with `scripts/linux-gates.sh`.
+
+### Included
+
+- `docker-compose.linux.yml`: loopback port publish.
+- `integration/radicale_test.go`: `icsEvent`, `largeICS`; PutIfMatch and
+  GetStreams use `/cal/personal/*.ics`.
+
 ## v0.0.27 — 2026-09-08
 
 Closes discovery well-known defects from

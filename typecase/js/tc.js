@@ -542,7 +542,7 @@
 			actions.appendChild(stash);
 		}
 		var movable = Array.prototype.filter.call(actions.children, function (c) {
-			return !c.hasAttribute("data-tc-top-stash") && !c.hasAttribute("data-tc-top-overflow");
+			return !c.hasAttribute("data-tc-top-stash") && !c.hasAttribute("data-tc-top-overflow") && !c.hasAttribute("data-tc-rail-apply");
 		});
 		var shell = closest(top, "[data-tc-shell]");
 		var narrow = shell && shell.classList.contains("tc-shell--narrow");
@@ -973,6 +973,7 @@
 			function setRailOpen(open) {
 				rail.classList.toggle("is-open", open);
 				rail.setAttribute("aria-expanded", open ? "true" : "false");
+				layoutUpdates();
 			}
 			function closeRail() {
 				setRailOpen(false);

@@ -3,8 +3,8 @@
 package integration
 
 import (
-	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -151,33 +151,56 @@ func TestRadicaleDiscoveryFindsBothKinds(t *testing.T) {
 	}
 }
 
+const calEventPath = "/cal/personal/event.ics"
+
+func icsEvent(uid, summary string) string {
+	return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Carrel//Integration//EN\r\n" +
+		"BEGIN:VEVENT\r\nUID:" + uid + "\r\nDTSTAMP:20260101T120000Z\r\nSUMMARY:" + summary + "\r\n" +
+		"END:VEVENT\r\nEND:VCALENDAR\r\n"
+}
+
+func largeICS(minBytes int) string {
+	var b strings.Builder
+	b.WriteString("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Carrel//Integration//EN\r\n")
+	for i := 0; b.Len() < minBytes; i++ {
+		b.WriteString(fmt.Sprintf(
+			"BEGIN:VEVENT\r\nUID:evt%d@carrel.test\r\nDTSTAMP:20260101T120000Z\r\nSUMMARY:Event %d\r\nEND:VEVENT\r\n",
+			i, i,
+		))
+	}
+	b.WriteString("END:VCALENDAR\r\n")
+	return b.String()
+}
+
 func TestRadicalePutIfMatch(t *testing.T) {
 	endpoint := radicaleEndpoint(t)
+	resetRadicale(t, endpoint)
 	client := testClient(t, endpoint)
 	ctx := context.Background()
-	path := "/note.txt"
+	path := calEventPath
 	_ = client.Delete(ctx, path, "")
 
-	etag, err := client.Put(ctx, path, strings.NewReader("first"), "")
+	etag, err := client.Put(ctx, path, strings.NewReader(icsEvent("put-if-match@carrel.test", "first")), "")
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
-	if _, err := client.Put(ctx, path, strings.NewReader("second"), `"wrong"`); err == nil {
+	if _, err := client.Put(ctx, path, strings.NewReader(icsEvent("put-if-match@carrel.test", "second")), `"wrong"`); err == nil {
 		t.Fatal("expected wrong If-Match to fail")
 	}
-	if _, err := client.Put(ctx, path, strings.NewReader("third"), `"`+etag+`"`); err != nil {
+	if _, err := client.Put(ctx, path, strings.NewReader(icsEvent("put-if-match@carrel.test", "third")), `"`+etag+`"`); err != nil {
 		t.Fatalf("update with etag: %v", err)
 	}
 }
 
 func TestRadicaleGetStreams(t *testing.T) {
 	endpoint := radicaleEndpoint(t)
+	resetRadicale(t, endpoint)
 	client := testClient(t, endpoint)
 	ctx := context.Background()
-	path := "/stream.bin"
-	payload := bytes.Repeat([]byte("x"), 256*1024)
+	path := "/cal/personal/large.ics"
+	payload := largeICS(256 * 1024)
 	_ = client.Delete(ctx, path, "")
-	if _, err := client.Put(ctx, path, bytes.NewReader(payload), ""); err != nil {
+	if _, err := client.Put(ctx, path, strings.NewReader(payload), ""); err != nil {
 		t.Fatalf("put: %v", err)
 	}
 	body, etag, err := client.Get(ctx, path, nil)

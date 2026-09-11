@@ -4,7 +4,7 @@ services:
   radicale:
     image: kozea/radicale:3.2.4
     ports:
-      - "5232:5232"
+      - "127.0.0.1:5232:5232"
     volumes:
       - ./testdata/radicale/config:/config/config:ro
       - ./testdata/radicale/users:/config/users:ro

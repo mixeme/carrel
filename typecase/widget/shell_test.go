@@ -24,6 +24,9 @@ func TestShell_omitsEmptyColumns(t *testing.T) {
 	if !strings.Contains(html, "tc-shell__main") {
 		t.Fatal("shell must still emit main column")
 	}
+	if strings.Contains(html, "data-tc-rail-toggle") || strings.Contains(html, "data-tc-rail-apply") {
+		t.Fatal("shell without a rail column must not emit rail chrome in tc-top")
+	}
 }
 
 func TestShell_keepsPopulatedColumns(t *testing.T) {
@@ -44,5 +47,16 @@ func TestShell_keepsPopulatedColumns(t *testing.T) {
 	}
 	if !strings.Contains(html, "data-tc-rail-apply") {
 		t.Fatal("shell with rail column must emit data-tc-rail-apply in tc-top")
+	}
+	if !strings.Contains(html, ">Sources</span>") {
+		t.Fatal("rail toggle must use labels.Sources")
+	}
+	if !strings.Contains(html, ">Apply</span>") {
+		t.Fatal("rail apply must use labels.Apply")
+	}
+	toggleAt := strings.Index(html, "data-tc-rail-toggle")
+	headerAt := strings.Index(html, "data-tc-top")
+	if toggleAt < 0 || headerAt < 0 || toggleAt < headerAt {
+		t.Fatal("rail toggle must be the first node of tc-top")
 	}
 }

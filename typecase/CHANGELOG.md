@@ -13,8 +13,9 @@ do, not what the authors did.
   is a shell with `Top` + `Main` only.
 - **Narrow layout.** At phone widths the rail column collapses; `Sources` in `tc-top`
   opens the rail as a full-screen `tc-rail--drawer`; `Apply`, `Esc`, or the toggle
-  again closes it and returns focus. Section nav stays as `tc-nav--bottom`, not
-  inside the drawer. An open side panel still covers the viewport. `tc-bar` and
+  again closes it and returns focus. Search hides while the panel is open (it is
+  still in the markup). Section nav stays as `tc-nav--bottom`, not inside the
+  drawer. An open side panel still covers the viewport. `tc-bar` and
   `tc-crumbs` clamp to the viewport; middle crumbs collapse into a menu. The
   screen check measures those widgets at 375 px (it does not skip `.tc-main`).
 - **Gate `screens-compose`** now scans all demo screen assemblers, not only
@@ -31,15 +32,26 @@ do, not what the authors did.
   apply / `Esc`). Browser screen check measures `.tc-bar` / `.tc-crumbs` /
   `.tc-head` / `.tc-top` / `.tc-docbar` against the viewport at 375 px; other
   nodes use the clipped box so `overflow: auto` in `tc-main` does not flag
-  every cell. `TestScreensNarrowRailDrawer` opens the rail at 375 px.
-- CSS: narrow rail drawer, bottom section nav, rail toggle/apply in `tc-top`,
-  narrow side overlay, bar/crumbs/head/docbar overflow.
+  every cell. `TestScreensNarrowRailDrawer` opens the rail at 375 px on `/io`,
+  then closes it with Apply and Escape.
+- CSS: narrow rail drawer in `.tc-shell__body` (does not cover `tc-top`);
+  bottom section nav; rail toggle/apply in `tc-top`; search hidden while the
+  drawer is open; narrow side overlay; bar/crumbs/head/docbar overflow.
 - `widget.Shell`: `data-tc-rail-toggle` and `data-tc-rail-apply` in `tc-top` when
   the rail column is non-empty; `labels.Sources` and `labels.Apply`.
+- `tc.js` `updateTop` leaves `[data-tc-rail-apply]` in the actions row; it is
+  not stashed under `labels.More`.
+
+### Fixed
+
+- Narrow `Apply` was packed into the `tc-top` overflow stash, then painted
+  under `tc-search`, so it could not be pressed. It stays in the bar above the
+  open drawer.
 
 ### Not yet included
 
-- Nothing from [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawer.md).
+- An open side panel still covers the viewport at phone width, including the
+  rail chrome (U-9: row menu instead of the panel).
 
 The typecase wordmark work documented below stays documentation-only until
 released separately.
@@ -99,8 +111,8 @@ released separately.
 Screens assembled from widgets. Geometry matches the mockups; notes frames no
 longer bypass `tc-main`, `tc-bar`, or `tc-side`; `tc-seg` and `tc-top` collapse
 when width runs short. Remaining demo pages still wrapped the shell by hand;
-that leftover is closed in Unreleased. The narrow rail still has no open
-control — [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawer.md).
+that leftover is closed in Unreleased. The narrow rail's open control is also
+closed in Unreleased.
 
 ### For consumers (v0.2.0 → v0.3.0)
 
@@ -172,10 +184,8 @@ control — [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawe
 
 ### Not yet included
 
-- Narrow rail has no open control; leftover and closed forks:
-  [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawer.md).
-  Hand-wrapped shells and the 375 px `OutOfBounds` skip of `.tc-main` are
-  closed in Unreleased.
+- Narrow rail open control and hand-wrapped shells: closed in Unreleased.
+  The 375 px `OutOfBounds` skip of `.tc-main` is also closed there.
 
 ## typecase/v0.2.0 — 2026-09-05
 

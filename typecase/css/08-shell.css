@@ -16,6 +16,7 @@
 	min-height: 0;
 	min-width: 0;
 	overflow-x: clip;
+	position: relative;
 }
 .tc-shell__rail { width: 264px; flex: none; }
 .tc-shell__main { flex: 1; min-width: 0; }
@@ -59,8 +60,23 @@
 }
 .tc-rail__sections { flex: 1; overflow: auto; }
 .tc-rail__chips { display: flex; flex-wrap: wrap; gap: 0.35em; padding: 0.5em var(--tc-page-gutter); border-bottom: var(--tc-stroke) solid var(--tc-rule); }
-.tc-rail--drawer { position: fixed; inset: 0; z-index: 90; width: 100%; transform: translateX(-100%); }
+.tc-rail--drawer {
+	position: fixed;
+	inset: 0;
+	z-index: 90;
+	width: 100%;
+	height: auto;
+	transform: translateX(-100%);
+}
+.tc-rail--drawer:not(.is-open) {
+	inset: auto;
+	width: 0;
+	height: 0;
+	overflow: hidden;
+	transform: none;
+}
 .tc-rail--drawer.is-open { transform: translateX(0); }
+.tc-shell--narrow .tc-rail--drawer { position: absolute; }
 .tc-rail--icons { width: 56px; }
 .tc-shell--narrow {
 	--tc-page-gutter: var(--tc-page-gutter-narrow);
@@ -72,7 +88,15 @@
 [data-tc-rail-toggle],
 [data-tc-rail-apply] { display: none; flex: none; }
 .tc-shell--narrow [data-tc-rail-toggle] { display: inline-flex; }
-.tc-shell--narrow:has(.tc-rail.is-open) [data-tc-rail-apply] { display: inline-flex; }
+.tc-shell--narrow:has(.tc-rail.is-open) [data-tc-rail-apply] {
+	display: inline-flex;
+	position: relative;
+	z-index: 1;
+}
+/* Search stays in the markup (L-4.1); the open sources panel is a mode, not a
+   Top parameter. Frame 10 has no field on that bar, and position:relative on
+   tc-search would otherwise paint over Apply. */
+.tc-shell--narrow:has(.tc-rail.is-open) .tc-search { display: none; }
 
 .tc-railsec { display: block; }
 .tc-railsec__title {
