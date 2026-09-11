@@ -1,0 +1,13 @@
+# Manual stack for the Linux dev machine (docs/plan/server.md, «Linux-машина»).
+# Not used in GitHub Actions — start locally before integration tests.
+services:
+  radicale:
+    image: kozea/radicale:3.2.4
+    ports:
+      - "5232:5232"
+    volumes:
+      - ./testdata/radicale/config:/config/config:ro
+      - ./testdata/radicale/users:/config/users:ro
+      - radicale-data:/data
+volumes:
+  radicale-data:

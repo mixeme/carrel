@@ -5,6 +5,31 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.16 — 2026-09-05
+
+Adds Linux-only delivery and acceptance infrastructure from
+[server.md](../../docs/plan/server.md) («Linux-машина»).
+
+### For consumers
+
+- `Dockerfile`: multi-stage static `carrel` image, non-root user, `/data` volume.
+- `docker-compose.linux.yml` + `testdata/radicale/`: live Radicale for manual
+  S-30.2 checks on the dev Linux host (not CI).
+- `scripts/linux-gates.sh`: runs F-10 (`server.key` mode test), S-28 container
+  smoke (`--read-only`, `--cap-drop=ALL`, `/healthz`), and S-30.2 integration
+  tests against Radicale.
+
+### Included
+
+- `integration/` with `-tags=integration`: discovery on a real Radicale, PUT
+  `If-Match`, streaming GET.
+- S-28 Dockerfile at `carrel/server/Dockerfile` per [architecture.md](../../docs/plan/architecture.md).
+
+### Not yet included
+
+Full S-30.2 checklist (collection CRUD through providers, merge, large-file RSS)
+— blocked on provider layers; integration tests cover transport and discovery only.
+
 ## v0.0.15 — 2026-09-05
 
 Closes the Composer tail from [server.md](../../docs/plan/server.md) (Fable audit
