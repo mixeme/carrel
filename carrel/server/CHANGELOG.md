@@ -5,6 +5,15 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.35 — 2026-09-09
+
+Withdraws the eight-device cap from the S-27 plan. That number was not in
+the spec; there is no ceiling until a person sets one.
+
+### For consumers
+
+Nothing in the running server.
+
 ## v0.0.34 — 2026-09-08
 
 Closes forks for **davloom and delivery** (S-27, S-28) in

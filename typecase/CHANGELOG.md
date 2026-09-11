@@ -24,9 +24,12 @@ do, not what the authors did.
 - **`Mark.Colours`** draws equal horizontal stripes when more than one colour is given.
 - **Rank2 bar actions render as buttons first.** `tc.js` stashes them under «More» only
   when the bar runs short; at 1280 px Import/Export stay visible on `/notes`.
-- **Assembled screens match mockup drawing** at 1280×900 (browser probe
-  `screens_look_test.go`). Demo chrome lives in `.screens-chrome`; the product shell
-  inside `.screens-stage` uses `min-height: 100%`, not `100vh` with page chrome.
+- **Assembled screens match mockup drawing** at 1280×900. The browser probe
+  (`screens_look_test.go`) checks nav 29 px and `--tc-card` current, tickrow 26,
+  `tc-main` on `--tc-bg`, list without border, sprite ids, `/notes` side 440 px,
+  Rank2 buttons, head title 22 px / line-height 1.15, and every `/states` mock.
+  Demo chrome lives in `.screens-chrome`; the product shell inside
+  `.screens-stage` uses `min-height: 100%`, not `100vh` with page chrome.
 
 ### Included
 
@@ -36,8 +39,9 @@ do, not what the authors did.
 - `screens/carrel-logo.svg`; `Brand.SVG` on demo screens.
 - `Top.Refresh`, `Side.Size` / `Side.Sub`, `Menu.Kind`, `TickRow.Current`,
   `Mark.Colours`, icon-only railfoot buttons, `DocBar.RightNodes`.
-- `gate/geometry`: nav 29, tickrow 26, list `border-width` 0.
-- `browser/screens_look_test.go`: per-screen look probe at 1280×900.
+- `gate/geometry`: nav 29, tickrow 26, list `border-width` 0, head title 22 px.
+- `browser/screens_look_test.go`: per-screen look probe at 1280×900, including
+  `/states` frames, current-nav background, main surface, and head title measure.
 - Demo `screens-chrome` + stage layout in `screens.css` / `PageHTML`.
 
 ### Fixed
@@ -45,6 +49,9 @@ do, not what the authors did.
 - Rank2 Import/Export were only reachable through the bar overflow menu at desktop width.
 - Rail tag chips rendered above sections instead of after them.
 - Demo page chrome was counted in `.tc-shell { min-height: 100vh }`.
+- Head title used `line-height: 1.5` instead of 1.15; ink overflow is absorbed
+  by `padding-block` so the В-1 check does not return.
+- Notes reading frame omitted the panel-hide control (`tc-i-panel`).
 
 ### Not yet included
 
@@ -52,6 +59,9 @@ do, not what the authors did.
   rail chrome (U-9: row menu instead of the panel).
 - Calendar (7.2) and tasks (7.3) — no routes in `screens.All()`.
 - Overflow of `tc-top` / `tc-seg` at 375 px — not this plan.
+- Notes frames 7.4 that the library cannot assemble yet (`Э-7`…`Э-10`: date/time
+  in a row, stacked full-width side fields, focus-edit metadata row, reading
+  head as one bar).
 
 The typecase wordmark work documented below stays documentation-only until
 released separately.

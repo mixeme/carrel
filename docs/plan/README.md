@@ -10,7 +10,7 @@
 | [server.md](server.md) | План серверной половины (`S`) |
 | [providers-tail.md](providers-tail.md) | Хвост проверки провайдеров: потолок GET, S-30.2 |
 | [reviews.md](reviews.md) | Opus-ревью и аудиты Fable |
-| [typecase-look.md](typecase-look.md) | Рисунок собранных экранов против кадров макета |
+| [typecase-look-tail.md](typecase-look-tail.md) | Хвост рисунка экранов: Э-7…Э-10 |
 
 **Исполнитель по умолчанию — Composer.** Если шаг делает другая модель, это написано в чекбоксе: `Opus`, `Fable`. Composer эти шаги не выполняет.
 

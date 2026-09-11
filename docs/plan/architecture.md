@@ -200,7 +200,7 @@ flowchart TD
 
 **Веер.** Параллельность источников и потолок живых задач — таблица **Сроки и лимиты**, не настройка. Таймауты — C-12. Задача — объект в сессии, не счётчик слотов. Интерфейс `Source` живёт в `internal/fanout`, общего `internal/provider` нет. Отмена контекстом.
 
-**davloom.** `CARREL_DAVLOOM_PORT` пусто = выключен. Иначе второй listener в том же процессе, свои лимиты. В C-12 этой переменной нет — она добавляется здесь. Закон S-27/S-28 — [server.md](server.md). Кратко: пакет `internal/proxy`, не `web`; обёртка устройства на `User` с AAD `carrel.device.v1|<login>|<id>`; Basic логин = логин человека; href коллекции `/c/{account}/{col}`, не индекс; XML-префикс потоком; корень — `AboutPage`; выдача после unlock; не больше 8 устройств.
+**davloom.** `CARREL_DAVLOOM_PORT` пусто = выключен. Иначе второй listener в том же процессе, свои лимиты. В C-12 этой переменной нет — она добавляется здесь. Закон S-27/S-28 — [server.md](server.md). Кратко: пакет `internal/proxy`, не `web`; обёртка устройства на `User` с AAD `carrel.device.v1|<login>|<id>`; Basic логин = логин человека; href коллекции `/c/{account}/{col}`, не индекс; XML-префикс потоком; корень — `AboutPage`; выдача после unlock. Потолка числа устройств нет.
 
 **Markdown.** AST goldmark → `[]view.Block`. Выделение и ссылки — вложенные Kind C-8 (`emph`, `strong`, `link`), не сплющенный текст. Сырой HTML — экранированный текст в `BlockPara`. HTML-рендерер goldmark не подключать. Kind — только C-8 (`para`, `heading`, `list`, `item`, `code`, `quote`, `link`, `emph`, `strong`); неизвестный узел AST с текстом — `BlockPara`, нового Kind нет.
 
@@ -239,7 +239,7 @@ Fable на первом аудите может пересмотреть **то�
 
 Ведро — token bucket в памяти процесса. 429 без различимых тел для «нет / отозвано / истекло». Unlock листа секретов — `CARREL_UNLOCK_TTL` = 300 с из C-12.
 
-Именованные константы рядом с таблицей, тоже не `CARREL_*`: `AttachInlineMax` = **2 МиБ** (S-20; коллекция может только опустить через `max-resource-size`); `FileThumbMaxBytes` = **512 КиБ** (S-17: оригинал как миниатюра, иначе значок); `MaxProxyDevices` = **8** (S-27); потолок shutdown — `CARREL_PROGRESS_TOTAL_TIMEOUT` (умолчание 30 с), не новый `CARREL_*`.
+Именованные константы рядом с таблицей, тоже не `CARREL_*`: `AttachInlineMax` = **2 МиБ** (S-20; коллекция может только опустить через `max-resource-size`); `FileThumbMaxBytes` = **512 КиБ** (S-17: оригинал как миниатюра, иначе значок); потолок shutdown — `CARREL_PROGRESS_TOTAL_TIMEOUT` (умолчание 30 с), не новый `CARREL_*`.
 
 **Копия.** zip + манифест. `Encrypted=true` по умолчанию → age passphrase поверх zip. Выключено — голый zip. Архив на том Carrel не класть. Внешний триггер без сессии — только с явно сохранённым конвертом ключа данных в `store.State`.
 

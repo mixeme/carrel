@@ -196,6 +196,9 @@ func notesReadDoc() widget.Doc {
 			Left: []widget.Action{
 				{Label: "Edit", Kind: widget.ButtonPrimary, Icon: "tc-i-pencil"},
 			},
+			Right: []widget.Action{
+				{Label: "Hide the side column", Icon: "tc-i-panel"},
+			},
 			RightNodes: []widget.Node{
 				widget.Seg{
 					Name:    "width",

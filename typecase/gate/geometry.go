@@ -63,6 +63,7 @@ func CheckGeometryCSS(cssText string) error {
 		{".tc-btn", "min-height", 26},
 		{".tc-btn--form", "min-height", 28},
 		{".tc-list", "border-top-width", 0},
+		{".tc-head__title", "font-size", 22},
 	}
 	rules := ruleValues(cssText)
 	for _, rc := range ruleChecks {

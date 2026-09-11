@@ -99,7 +99,8 @@ const screenProbeJS = `(() => {
     const m = ctx.measureText(text);
     const fontBox = (m.fontBoundingBoxAscent || m.actualBoundingBoxAscent || 0) +
       (m.fontBoundingBoxDescent || m.actualBoundingBoxDescent || 0);
-    if (fontBox > lh + 0.5) {
+    const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    if (fontBox > lh + pad + 0.5) {
       inkOverflow.push(label(el));
     }
   }
