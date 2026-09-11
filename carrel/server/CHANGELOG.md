@@ -5,6 +5,29 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.34 — 2026-09-08
+
+Closes forks for **davloom and delivery** (S-27, S-28) in
+[server.md](../../docs/plan/server.md). No binary change. The image,
+`/healthz`, and slog are already shipped; Composer does not rebuild them.
+
+### For consumers
+
+Nothing in the running server. `/app/settings/davloom` and `/admin/install`
+stay stubs until that checklist is ticked.
+
+### Included
+
+- Same binary, second listener; device wraps live on `User` with AAD
+  `carrel.device.v1`, not the login wrap. Changing the login password does
+  not revoke devices; wipe does.
+- Collection hrefs are `/c/{account}/{col}`, never a connection-order index.
+  XML href prefixes rewrite as a stream; record bodies are not parsed.
+- GET `/` on the davloom port is `AboutPage` (C-13). Basic username is the
+  Carrel login. At most eight devices. Issue requires unlock.
+- Install check is eleven named rows; the probe client is not the DAV guard.
+  Image publish and CI stay out of this plan.
+
 ## v0.0.33 — 2026-09-08
 
 Closes the provider tail in
