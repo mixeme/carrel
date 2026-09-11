@@ -5,7 +5,20 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
-## v0.0.37 — 2026-09-11
+## v0.0.38 — 2026-09-11
+
+Changelog verified against full git history from the initial commit.
+
+### For consumers
+
+Nothing in the running server.
+
+### Fixed
+
+- `v0.0.21` date aligned with commit `2891831` (2026-09-08).
+- `v0.0.37` date aligned with commit `4589e0b` (2026-09-10).
+
+## v0.0.37 — 2026-09-10
 
 Typecase now lives in its own repository; this tree is Carrel server and
 product docs only.
@@ -381,7 +394,7 @@ Closes `CARREL_BASE_PATH` from the audit №2 tail.
 
 Admin panel actions (other than escrow), escrow recovery UI gaps.
 
-## v0.0.21 — 2026-09-07
+## v0.0.21 — 2026-09-08
 
 Closes `/app/password` from the pre-provider gate.
 
