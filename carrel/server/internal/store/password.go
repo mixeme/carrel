@@ -2,13 +2,15 @@ package store
 
 import (
 	"context"
+	"time"
 
 	"carrel.dev/carrel/server/internal/crypt"
 )
 
 // ApplyPassword sets login hash, wrap key, empty sealed blob, and KDF records
-// for a new or reset account (S-10).
-func ApplyPassword(ctx context.Context, u *User, login, password string) error {
+// for a new or reset account (S-10). When escrow is active and the user is
+// covered, a copy of the data key is deposited in the same mutation.
+func ApplyPassword(ctx context.Context, u *User, login, password string, st *State, now time.Time) error {
 	loginSalt, err := crypt.NewSalt()
 	if err != nil {
 		return err
@@ -47,10 +49,15 @@ func ApplyPassword(ctx context.Context, u *User, login, password string) error {
 	u.WrapKDF = kdfFromCrypt(wrapKDF)
 	u.SealedBlob = blob
 	u.MustChangePassword = false
+	if st != nil {
+		if err := TryDepositEscrow(st, u, dataKey, now); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-// WipeCredentials removes decryptable material while keeping identity (S-10.4).
+// ClearEscrowDeposit removes decryptable material while keeping identity (S-10.4).
 func WipeCredentials(u *User) {
 	u.LoginSalt = nil
 	u.LoginHash = nil
@@ -60,6 +67,7 @@ func WipeCredentials(u *User) {
 	u.WrapKDF = kdfRecord{}
 	u.SealedBlob = nil
 	u.ConnCount = 0
+	ClearEscrowDeposit(u)
 }
 
 // VerifyPassword checks a password against the login hash without touching
@@ -116,6 +124,40 @@ func RewrapLogin(u *User, newLogin string, wrapKey, dataKey [crypt.KeyLen]byte) 
 	u.WrappedKey = wrapped
 	u.SealedBlob = blob
 	u.Login = newLogin
+	return nil
+}
+
+// RewrapPasswordWithKey sets new login credentials while keeping the data key
+// and sealed blob intact (escrow recovery, S-10.5).
+func RewrapPasswordWithKey(ctx context.Context, u *User, login, password string, dataKey [crypt.KeyLen]byte) error {
+	loginSalt, err := crypt.NewSalt()
+	if err != nil {
+		return err
+	}
+	wrapSalt, err := crypt.NewSalt()
+	if err != nil {
+		return err
+	}
+	loginHash, loginKDF, err := crypt.HashLogin(ctx, password, loginSalt)
+	if err != nil {
+		return err
+	}
+	wrapKey, wrapKDF, err := crypt.DeriveWrapKey(ctx, password, wrapSalt)
+	if err != nil {
+		return err
+	}
+	wrapped, err := crypt.WrapDataKey(key32(wrapKey), dataKey, login)
+	crypt.Wipe(wrapKey)
+	if err != nil {
+		return err
+	}
+	u.LoginSalt = loginSalt
+	u.LoginHash = loginHash
+	u.LoginKDF = kdfFromCrypt(loginKDF)
+	u.WrapSalt = wrapSalt
+	u.WrappedKey = wrapped
+	u.WrapKDF = kdfFromCrypt(wrapKDF)
+	u.MustChangePassword = true
 	return nil
 }
 

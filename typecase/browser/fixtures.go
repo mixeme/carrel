@@ -36,7 +36,7 @@ func GoodFixtures() map[Name]Fixture {
 	}.Render()
 
 	sheet := widget.Sheet{
-		Title: "Sheet", Target: "Item", Body: widget.Paragraph("Under"), Open: true, ID: "bottom-sheet",
+		Title: "Sheet", Target: "Item", Body: []widget.Node{widget.Paragraph("Under")}, Open: true, ID: "bottom-sheet",
 		Actions: []widget.Action{{Label: "OK"}},
 	}.Render()
 	dialog := widget.Dialog{

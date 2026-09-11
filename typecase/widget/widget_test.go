@@ -152,6 +152,41 @@ func TestRailSection_titledKeepsHeading(t *testing.T) {
 	}
 }
 
+func TestRailSection_bodyWhenNoRows(t *testing.T) {
+	html := widget.RailSection{
+		Title: "Neighbours",
+		Body:  []widget.Node{widget.Tree{Nodes: []widget.TreeNode{{ID: "a", Label: "One"}}}},
+	}.Render()
+	if strings.Contains(html, "tc-railsec__rows") {
+		t.Fatalf("body section must not render rows container: %s", html)
+	}
+	if !strings.Contains(html, "tc-tree") {
+		t.Fatalf("body section must render tree: %s", html)
+	}
+}
+
+func TestRailSection_rowsTakePrecedenceOverBody(t *testing.T) {
+	html := widget.RailSection{
+		Rows: []widget.TickRow{{Label: "All"}},
+		Body: []widget.Node{widget.Paragraph("ignored")},
+	}.Render()
+	if strings.Contains(html, "tc-prose") {
+		t.Fatalf("rows must take precedence over body: %s", html)
+	}
+}
+
+func TestSheet_bodyNodes(t *testing.T) {
+	html := widget.Sheet{
+		Title:  "Quick",
+		Target: "Notes",
+		Open:   true,
+		Body:   []widget.Node{widget.Field{Name: "quick", Kind: widget.InputTextarea, Value: "draft"}},
+	}.Render()
+	if !strings.Contains(html, `class="tc-in`) {
+		t.Fatalf("sheet body must render field nodes: %s", html)
+	}
+}
+
 func TestRowExcerpt_dateAndSource(t *testing.T) {
 	html := widget.Row{
 		Variant: widget.RowExcerpt,

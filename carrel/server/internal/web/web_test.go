@@ -1,9 +1,11 @@
 package web_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -141,6 +143,21 @@ func postForm(path string, sess *session.Session, form url.Values) *http.Request
 	return req
 }
 
+func multipartPost(path string, sess *session.Session, fields map[string]string) *http.Request {
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+	for k, v := range fields {
+		_ = w.WriteField(k, v)
+	}
+	_ = w.Close()
+	req := httptest.NewRequest(http.MethodPost, path, &b)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	if sess != nil {
+		req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: sess.ID()})
+	}
+	return req
+}
+
 // anonPostForm loads an anonymous form (GET getPath) for carrel_csrf, then
 // builds POST postPath with a matching _csrf field.
 func (h *harness) anonPostForm(getPath, postPath string, form url.Values) *http.Request {
@@ -239,6 +256,26 @@ func TestCSRFRequiredForMutatingSessionRequest(t *testing.T) {
 	}
 	if _, ok := h.mgr.Get(sess.ID()); ok {
 		t.Fatal("session alive after logout")
+	}
+}
+
+// Multipart POST must accept _csrf in the body when X-CSRF-Token is absent.
+func TestMultipartCSRFWithoutHeader(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	sess := h.login("alice", "password123")
+	if rec := h.do(multipartPost("/logout", sess, map[string]string{})); rec.Code != http.StatusForbidden {
+		t.Fatalf("multipart without _csrf: status = %d, want 403", rec.Code)
+	}
+	if _, ok := h.mgr.Get(sess.ID()); !ok {
+		t.Fatal("session ended by multipart POST without CSRF")
+	}
+	rec := h.do(multipartPost("/logout", sess, map[string]string{"_csrf": sess.CSRFToken()}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("multipart with _csrf: status = %d, want 303", rec.Code)
+	}
+	if _, ok := h.mgr.Get(sess.ID()); ok {
+		t.Fatal("session alive after multipart logout")
 	}
 }
 

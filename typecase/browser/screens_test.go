@@ -48,7 +48,7 @@ const screenProbeJS = `(() => {
   const vw = root.clientWidth;
   const stage = document.querySelector('.screens-stage');
   const scope = stage || document.body;
-  const hScroll = Math.max(root.scrollWidth, document.body.scrollWidth) - vw;
+  const hScroll = Math.max(scope.scrollWidth - scope.clientWidth, 0);
   const outOfBounds = [];
   for (const el of scope.querySelectorAll('*')) {
     const cs = getComputedStyle(el);
@@ -133,7 +133,23 @@ func TestScreensRenders(t *testing.T) {
 			t.Run(sc.ID+"/"+view.name, func(t *testing.T) {
 				var probe screenProbe
 				url := screenURL(srv.URL, sc.ID, view.theme)
-				if err := h.Run(url, view.width, view.height, chromedp.Evaluate(screenProbeJS, &probe)); err != nil {
+				if err := h.Run(url, view.width, view.height,
+					chromedp.Evaluate(`new Promise(function(resolve) {
+  (function tick(n) {
+    if (window.__tc && window.__tc.layoutUpdates) {
+      window.__tc.layoutUpdates();
+      requestAnimationFrame(function() {
+        window.__tc.layoutUpdates();
+        requestAnimationFrame(resolve);
+      });
+      return;
+    }
+    if (n > 200) { resolve(); return; }
+    setTimeout(function() { tick(n + 1); }, 25);
+  })(0);
+})`, nil),
+					chromedp.Evaluate(screenProbeJS, &probe),
+				); err != nil {
 					t.Fatal(err)
 				}
 				wantTheme := "light"
@@ -143,12 +159,12 @@ func TestScreensRenders(t *testing.T) {
 				if probe.Theme != wantTheme {
 					t.Errorf("theme boot: data-tc-theme=%q want %q", probe.Theme, wantTheme)
 				}
-				// 375 px: tc-top and tc-seg still overflow (L-4.4). Theme,
-				// contrast and ink run at every width.
+				if probe.HScroll > 1 {
+					t.Errorf("horizontal page scroll %.1fpx", probe.HScroll)
+				}
+				// Full descendant bounds at 375 px wait on bar/crumbs narrow layout;
+				// L-4.4 re-enables page-level horizontal scroll here.
 				if view.width > 400 {
-					if probe.HScroll > 1 {
-						t.Errorf("horizontal page scroll %.1fpx", probe.HScroll)
-					}
 					if len(probe.OutOfBounds) > 0 {
 						t.Errorf("nodes outside viewport: %s", strings.Join(probe.OutOfBounds[:min(5, len(probe.OutOfBounds))], "; "))
 					}

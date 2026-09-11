@@ -2,68 +2,31 @@ package screens
 
 import "carrel.dev/typecase/widget"
 
-// Notes assembles mockup s-notes figure 1: list, side panel, shell, and a
-// closed quick-note sheet in the DOM.
+// Notes assembles mockup s-notes figure 1: list, side panel, and a closed
+// quick-note sheet in the DOM.
 func Notes() string {
-	top := notesTop().Render()
-	rail := notesNav() + notesRail().Render()
-	main := notesMain()
-	side := notesSide()
-	quick := widget.Sheet{
-		ID:     "quick-note",
-		Title:  "New note",
-		Target: "Записи · nextcloud",
-		Body:   widget.Paragraph("Позвонить в МФЦ во вторник до 12:00 — уточнить, нужен ли оригинал доверенности."),
-		Actions: []widget.Action{
-			{Label: "Save note", Kind: widget.ButtonPrimary},
-			{Label: "Open full screen"},
-			{Label: "Cancel"},
-		},
-	}.Render()
-
-	return `<div class="tc-shell" data-tc-shell data-tc-root>` + top +
-		`<div class="tc-shell__body"><div class="tc-shell__rail">` + rail +
-		`</div><div class="tc-shell__main">` + main +
-		`</div><div class="tc-shell__side">` + side +
-		`</div></div>` + quick + `</div>`
+	return notesListFrame(false)
 }
 
-func notesTop() widget.Top {
-	return widget.Top{
-		Brand: widget.Brand{Mark: "◆", Word: "Carrel", Href: "/"},
-		Search: widget.Search{
-			Action: "/search",
-		},
-		Create: widget.Menu{
-			Label: "New note",
-			Icon:  "✎",
-			Items: []widget.MenuItem{
-				{Label: "New note", Href: "/notes/new"},
-				{Separator: true},
-				{Label: "Quick note", Href: "/notes/quick"},
-			},
-		},
-		User: widget.UserMenu{
-			Name:  "mix",
-			Note:  "Signed in",
-			Items: []widget.MenuItem{{Label: "Sign out", Href: "/logout"}},
-		},
-	}
+// NotesRead is full-screen reading with neighbour notes in the rail tree.
+func NotesRead() string {
+	return shellWrap(notesReadNav()+notesReadRail().Render(), notesReadMain(), "", "")
 }
 
-func notesNav() string {
-	n312, n14, n3, n86 := 312, 14, 3, 86
-	return widget.Nav{
-		Items: []widget.NavItem{
-			{Label: "Contacts", Icon: "👤", Href: "/contacts", Count: intPtr(n312)},
-			{Label: "Calendar", Icon: "📅", Href: "/calendar", Count: intPtr(n14)},
-			{Label: "Tasks", Icon: "☑", Href: "/tasks", Count: intPtr(n3)},
-			{Label: "Notes", Icon: "📝", Href: "/notes", Count: intPtr(n86)},
-			{Label: "Files", Icon: "📁", Href: "/files"},
-			{Label: "Duplicates", Icon: "⧉", Href: "/duplicates", Count: intPtr(3)},
-		},
-		Current: "/notes",
-	}.Render()
+// NotesEdit is focus editing: top bar and main column only, no rail or side.
+func NotesEdit() string {
+	return `<div class="tc-shell" data-tc-shell data-tc-root>` + shellTop().Render() +
+		`<div class="tc-shell__body"><div class="tc-shell__main">` + notesEditMain() +
+		`</div></div></div>`
+}
+
+// NotesQuick is the list frame with the quick-note sheet open.
+func NotesQuick() string {
+	return notesListFrame(true)
+}
+
+func notesListFrame(quickOpen bool) string {
+	return shellWrap(shellNav("/notes")+notesRail().Render(), notesListMain(), notesSide(), notesQuickSheet(quickOpen))
 }
 
 func notesRail() widget.Rail {
@@ -105,7 +68,42 @@ func notesRail() widget.Rail {
 	}
 }
 
-func notesMain() string {
+func notesReadNav() string {
+	return widget.Nav{
+		Items:   []widget.NavItem{{Label: "Combined notebook", Icon: "←", Href: "/notes"}},
+		Current: "/notes",
+	}.Render()
+}
+
+func notesReadRail() widget.Rail {
+	n64, n22 := 64, 22
+	return widget.Rail{
+		Sections: []widget.RailSection{
+			{
+				Title: "nextcloud · home",
+				Rows: []widget.TickRow{
+					{Label: "Записи", Mark: widget.Mark{Colour: "#4A6B52", Label: "Записи"}, Count: intPtr(n64), Tick: widget.TickOn},
+					{Label: "Дневник", Mark: widget.Mark{Colour: "#6B4E7A", Label: "Дневник"}, Count: intPtr(n22), State: widget.TickRowUnavailable},
+				},
+			},
+			{
+				Title: "Neighbours",
+				Body: []widget.Node{
+					widget.Tree{
+						Nodes: []widget.TreeNode{
+							{ID: "crdt", Label: "Что почитать про CRDT"},
+							{ID: "meeting", Label: "Заметка со встречи"},
+							{ID: "dacha", Label: "Про дорогу до дачи"},
+						},
+						Chosen: "meeting",
+					},
+				},
+			},
+		},
+	}
+}
+
+func notesListMain() string {
 	n86, n9 := 86, 9
 	return widget.Main{
 		Label: "Notes",
@@ -175,26 +173,109 @@ func notesMain() string {
 					},
 				}},
 			},
-			notesDocPreview(),
 		},
 	}.Render()
 }
 
-func notesDocPreview() widget.Doc {
+func notesReadMain() string {
+	return widget.Main{
+		Label: "Note",
+		Body:  []widget.Node{notesReadDoc()},
+	}.Render()
+}
+
+func notesReadDoc() widget.Doc {
 	return widget.Doc{
-		Mode: widget.DocReading,
+		Mode:  widget.DocReading,
+		Width: widget.DocWidthFull,
 		Bar: widget.DocBar{
-			Left: []widget.Action{{Label: "Edit"}, {Label: "Export"}},
+			Left: []widget.Action{
+				{Label: "Edit", Kind: widget.ButtonPrimary, Icon: "✎"},
+				{Label: "Export Markdown"},
+				{Label: "Print", Icon: "🖨"},
+				{Label: "Source"},
+			},
 		},
 		Body: widget.Prose{Blocks: []widget.ProseBlock{
-			{Kind: widget.ProseH2, Text: "Заметка со встречи 10.08"},
-			{Kind: widget.ProseP, Text: "Договорились заморозить ветку в среду; письмо пользователям пишет Анна."},
+			{Kind: widget.ProseH1, Text: "Заметка со встречи 10.08"},
+			{Kind: widget.ProseP, Text: "Договорились заморозить ветку в среду."},
+			{Kind: widget.ProseP, Text: "Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."},
+			{Kind: widget.ProseH2, Text: "Что делаем"},
+			{Kind: widget.ProseUL, Items: []string{"проверить changelog", "попросить у Артёма скриншоты"}},
+			{Kind: widget.ProseP, Text: "Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще, и скажет в четверг."},
 		}},
-		Meta: widget.DocMeta{Sections: []widget.MetaSection{{
-			Title: "Tags",
-			Tags:  []widget.Tag{{Label: "встречи", On: true, Href: "/tags/встречи"}},
-		}}},
+		Meta: widget.DocMeta{Sections: []widget.MetaSection{
+			{Title: "Tags", Tags: []widget.Tag{{Label: "встречи", Href: "/tags/встречи"}, {Label: "релиз", Href: "/tags/релиз"}}},
+			{Title: "Related", Rows: []widget.FieldRow{
+				{Label: "Синк-ап по релизу", Value: "event · 10 Aug"},
+				{Label: "Дописать раздел про кэш", Value: "task"},
+			}},
+			{Title: "Attachments", Rows: []widget.FieldRow{
+				{Label: "2026-08-10-sync-board.png", Value: "412 KB · in the note"},
+				{Label: "запись-встречи.m4a", Value: "24 MB · Documents / carrel"},
+			}},
+			{Title: "Source", Rows: []widget.FieldRow{
+				{Label: "UID", Value: "9e31-40b7-c012", Path: true},
+				{Label: "Read", Value: "2 min ago"},
+			}},
+		}},
 	}
+}
+
+func notesEditMain() string {
+	return widget.Main{
+		Label: "Edit note",
+		Body: []widget.Node{
+			widget.Doc{
+				Mode:  widget.DocEditing,
+				Width: widget.DocWidthFull,
+				Bar: widget.DocBar{
+					Left: []widget.Action{
+						{Label: "Save", Kind: widget.ButtonPrimary},
+						{Label: "Cancel"},
+						{Label: "B"},
+						{Label: "I"},
+						{Label: "H2"},
+						{Label: "• list"},
+						{Label: "task", Icon: "☑"},
+						{Label: "Link", Icon: "🔗"},
+						{Label: "Attach", Icon: "↑"},
+					},
+					Right: []widget.Action{
+						{Label: "Focus", Icon: "⤢"},
+					},
+					Dirty: true,
+				},
+				Body: widget.Prose{Blocks: []widget.ProseBlock{
+					{Kind: widget.ProseH1, Text: "Заметка со встречи 10.08"},
+					{Kind: widget.ProseP, Text: "Договорились заморозить ветку в среду."},
+					{Kind: widget.ProseP, Text: "Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."},
+					{Kind: widget.ProseH2, Text: "Что делаем"},
+					{Kind: widget.ProseUL, Items: []string{"проверить changelog", "попросить у Артёма скриншоты"}},
+					{Kind: widget.ProseH2, Text: "Отложено до следующего спринта"},
+					{Kind: widget.ProseP, Text: "Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще."},
+				}},
+			},
+		},
+	}.Render()
+}
+
+func notesQuickSheet(open bool) string {
+	return widget.Sheet{
+		ID:     "quick-note",
+		Title:  "New note",
+		Target: "Записи · nextcloud",
+		Open:   open,
+		Body: []widget.Node{
+			widget.Field{Name: "quick", Kind: widget.InputTextarea, Value: "Позвонить в МФЦ во вторник до 12:00 — уточнить, нужен ли оригинал доверенности."},
+			widget.Paragraph("The title is taken from the first line. The date is now."),
+		},
+		Actions: []widget.Action{
+			{Label: "Save note", Kind: widget.ButtonPrimary},
+			{Label: "Open full screen"},
+			{Label: "Cancel"},
+		},
+	}.Render()
 }
 
 func notesSide() string {

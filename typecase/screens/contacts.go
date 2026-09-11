@@ -75,20 +75,24 @@ func contactsMain() string {
 		Suggesting: true,
 	}.Render()
 
-	bar := `<div class="tc-bar"><div class="tc-bar__left">` +
-		widget.Input{Name: "filter", Kind: widget.InputText, Placeholder: "Filter the loaded cards"}.Render() +
-		widget.Kbd{Keys: []string{"Ctrl", "F"}}.Render() +
-		widget.Kbd{Keys: []string{"Ctrl", "F"}}.Render() +
-		widget.Seg{
-			Name:    "sort",
-			Chosen:  "az",
-			Options: []widget.SegOption{{Label: "A–Z", Value: "az"}, {Label: "Recently changed", Value: "changed"}},
-		}.Render() +
-		widget.Range{From: "2026-01-01", To: "2026-08-31", Presets: []widget.Action{{Label: "Last 7 days"}}}.Render() +
-		`</div><div class="tc-bar__right">` +
-		widget.Button{Label: "Columns", Icon: "▦", Size: widget.ButtonSizeBar}.Render() +
-		widget.Check{Name: "compact", Label: "Compact rows"}.Render() +
-		widget.Num{Value: intPtr(312)}.Render() + `</div></div>`
+	bar := widget.Bar{
+		Left: []widget.Node{
+			widget.Input{Name: "filter", Kind: widget.InputText, Placeholder: "Filter the loaded cards"},
+			widget.Kbd{Keys: []string{"Ctrl", "F"}},
+			widget.Kbd{Keys: []string{"Ctrl", "F"}},
+			widget.Seg{
+				Name:    "sort",
+				Chosen:  "az",
+				Options: []widget.SegOption{{Label: "A–Z", Value: "az"}, {Label: "Recently changed", Value: "changed"}},
+			},
+			widget.Range{From: "2026-01-01", To: "2026-08-31", Presets: []widget.Action{{Label: "Last 7 days"}}},
+		},
+		Right: []widget.Node{
+			widget.Button{Label: "Columns", Icon: "▦", Size: widget.ButtonSizeBar},
+			widget.Check{Name: "compact", Label: "Compact rows"},
+			widget.Num{Value: intPtr(312)},
+		},
+	}.Render()
 
 	n3, n2 := 3, 2
 	listA := widget.List{

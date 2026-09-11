@@ -424,6 +424,7 @@ type RailSection struct {
 	Title string
 	State RailSectionState
 	Rows  []TickRow
+	Body  []Node
 }
 
 // DangerRow is one destructive action row.

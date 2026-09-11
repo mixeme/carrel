@@ -82,7 +82,8 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 			})
 			u = st.UserByLogin(inv.Login)
 		}
-		if err := store.ApplyPassword(ctx, u, u.Login, password); err != nil {
+		applyEscrowCoverage(st, u)
+		if err := store.ApplyPassword(ctx, u, u.Login, password, st, now); err != nil {
 			return nil, err
 		}
 		if u.Email != "" {
@@ -135,6 +136,9 @@ func (s *Service) CreateInvite(actorID, login, email string) (secret string, err
 			st.Users = append(st.Users, store.User{
 				ID: userID, Login: login, Email: email, Role: store.RoleUser, CreatedAt: now,
 			})
+		}
+		if u := st.UserByLogin(login); u != nil {
+			applyEscrowCoverage(st, u)
 		}
 		return []store.AuditEntry{{
 			When: now, Who: actorLogin(st, actorID), What: "user.invite.create", Whom: login,
@@ -193,7 +197,8 @@ func (s *Service) Register(ctx context.Context, login, email, password string) (
 			})
 			u = st.UserByLogin(login)
 		}
-		if err := store.ApplyPassword(ctx, u, login, password); err != nil {
+		applyEscrowCoverage(st, u)
+		if err := store.ApplyPassword(ctx, u, login, password, st, now); err != nil {
 			return nil, err
 		}
 		u.EmailConfirmed = false
@@ -263,7 +268,7 @@ func (s *Service) ForgotRequest(ctx context.Context, loginOrEmail string) (token
 	if u == nil || u.Disabled || u.Email == "" || !u.EmailConfirmed {
 		return "", false, false, false, nil
 	}
-	if snap.Settings.EscrowEnabled && u.EscrowOptIn {
+	if snap.Settings.EscrowEnabled && store.UserDeposited(u) {
 		return "", false, true, true, nil
 	}
 	raw, hash, err := newSecret()
@@ -372,7 +377,7 @@ func (s *Service) ForgotSetPassword(ctx context.Context, token, password string)
 			if u == nil {
 				continue
 			}
-			if err := store.ApplyPassword(ctx, u, u.Login, password); err != nil {
+			if err := store.ApplyPassword(ctx, u, u.Login, password, st, now); err != nil {
 				return nil, err
 			}
 			burnWipeTokens(st, u.ID)

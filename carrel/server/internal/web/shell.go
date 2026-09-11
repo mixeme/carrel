@@ -35,6 +35,13 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 			{Action: view.Action{ID: "account.settings", Label: "Account", Href: "/app/settings/account", Method: "GET", Enabled: true}},
 			{Action: view.Action{ID: "logout", Label: "Sign out", Href: "/logout", Method: "POST", Enabled: true}},
 		}
+		if s.users.ConsumeEscrowNotice(sess.AccountID()) {
+			sh.Notices = []view.Notice{{
+				Role:  view.NoticeAlert,
+				Title: text("Key escrow applies to your account"),
+				Body:  text("An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars. This is not backup."),
+			}}
+		}
 	}
 	return sh
 }

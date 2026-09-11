@@ -64,10 +64,3 @@ func checkAnonymousCSRF(r *http.Request, token string) bool {
 	return tokensEqual(c.Value, token)
 }
 
-func anonymousCSRFFromRequest(r *http.Request) string {
-	token := r.Header.Get(csrfHeaderName)
-	if token == "" {
-		token = r.FormValue(csrfFormField)
-	}
-	return token
-}

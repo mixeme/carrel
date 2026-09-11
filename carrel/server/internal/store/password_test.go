@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"testing"
+	"time"
 
 	"carrel.dev/carrel/server/internal/crypt"
 )
@@ -14,7 +15,7 @@ func TestRewrapLoginChangesAAD(t *testing.T) {
 	password := "password123"
 
 	u := &User{Login: login}
-	if err := ApplyPassword(ctx, u, login, password); err != nil {
+	if err := ApplyPassword(ctx, u, login, password, nil, time.Time{}); err != nil {
 		t.Fatal(err)
 	}
 	dataKey, ok := DataKeyForLogin(ctx, u, password)

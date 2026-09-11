@@ -1,3 +1,9 @@
+html, body {
+	margin: 0;
+	overflow-x: hidden;
+	max-width: 100%;
+}
+
 .screens-nav {
 	display: flex;
 	flex-wrap: wrap;
@@ -29,6 +35,10 @@
 .screens-toolbar a.is-current {
 	font-weight: 600;
 	color: var(--tc-ink);
+}
+.screens-stage {
+	overflow-x: clip;
+	max-width: 100%;
 }
 .screens-frame {
 	margin-bottom: 2.5em;

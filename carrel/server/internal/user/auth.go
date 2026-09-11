@@ -29,7 +29,7 @@ func (s *Service) SetupFirstAdmin(ctx context.Context, login, password string) e
 			Role:      store.RoleAdmin,
 			CreatedAt: now,
 		}
-		if err := store.ApplyPassword(ctx, &u, login, password); err != nil {
+		if err := store.ApplyPassword(ctx, &u, login, password, st, now); err != nil {
 			return nil, err
 		}
 		st.Users = []store.User{u}

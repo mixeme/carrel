@@ -75,7 +75,7 @@ func (o Overlay) Render() string {
 type Sheet struct {
 	Title      string
 	Target     string
-	Body       Prose
+	Body       []Node
 	Actions    []Action
 	MustAnswer bool
 	Open       bool
@@ -98,7 +98,7 @@ func (s Sheet) Render() string {
 	scrim := Scrim{For: id, On: s.Open, MustAnswer: s.MustAnswer}.Render()
 	// Заголовок первым, цель за ним: подпись цели прижата вправо, и порядок в
 	// разметке совпадает с порядком чтения.
-	body := `<header class="tc-sheet__head"><h2 class="tc-sheet__title">` + esc(s.Title) + `</h2><div class="tc-sheet__target">` + esc(s.Target) + `</div>` + Close{For: id, Label: labels.Close}.Render() + `</header><div class="tc-sheet__body">` + s.Body.Render() + `</div><footer class="tc-sheet__foot">` + acts + `</footer>`
+	body := `<header class="tc-sheet__head"><h2 class="tc-sheet__title">` + esc(s.Title) + `</h2><div class="tc-sheet__target">` + esc(s.Target) + `</div>` + Close{For: id, Label: labels.Close}.Render() + `</header><div class="tc-sheet__body">` + renderNodes(s.Body) + `</div><footer class="tc-sheet__foot">` + acts + `</footer>`
 	return scrim + renderOverlay(OverlaySheet, s.Open, id, "", `<div`+classAttr(cls)+` data-tc-trap>`+body+`</div>`)
 }
 

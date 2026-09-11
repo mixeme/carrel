@@ -70,27 +70,6 @@ func (s *Server) postAdminMailTest(w http.ResponseWriter, r *http.Request) {
 	s.notFound(w, r)
 }
 
-func (s *Server) getAdminEscrow(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireAdmin(w, r)
-	if !ok {
-		return
-	}
-	page := view.AdminEscrowPage{
-		Shell:   s.buildShell(sess, "Key escrow"),
-		Enabled: false,
-		Warning: view.Notice{
-			Role:  view.NoticeAlert,
-			Title: text("Administrative access to saved credentials"),
-			Body:  text("An administrator who knows the master password can access stored credentials and therefore contacts and calendars. This is not backup."),
-		},
-	}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
-	s.getAdminEscrow(w, r)
-}
-
 func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {

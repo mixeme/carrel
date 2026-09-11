@@ -449,22 +449,6 @@ func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	s.getSettingsAccount(w, r)
 }
 
-func (s *Server) getSettingsEscrow(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.EscrowPage{
-		Shell:  s.buildShell(sess, "Key escrow"),
-		Status: view.EscrowStatus{Active: false, Note: text("Key escrow is disabled on this instance.")},
-	}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postSettingsEscrow(w http.ResponseWriter, r *http.Request) {
-	s.getSettingsEscrow(w, r)
-}
-
 func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {

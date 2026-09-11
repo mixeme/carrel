@@ -38,14 +38,14 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 					http.Error(w, "forbidden", http.StatusForbidden)
 					return
 				}
-			} else if err := r.ParseForm(); err != nil {
+			} else if token, err := csrfTokenFromBody(r); err != nil {
 				if tooLarge(err) {
 					http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)
 					return
 				}
 				http.Error(w, "bad request", http.StatusBadRequest)
 				return
-			} else if !checkCSRF(sess, r) {
+			} else if !sess.CheckCSRF(token) {
 				http.Error(w, "forbidden", http.StatusForbidden)
 				return
 			}
@@ -55,14 +55,14 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 					http.Error(w, "forbidden", http.StatusForbidden)
 					return
 				}
-			} else if err := r.ParseForm(); err != nil {
+			} else if token, err := csrfTokenFromBody(r); err != nil {
 				if tooLarge(err) {
 					http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)
 					return
 				}
 				http.Error(w, "bad request", http.StatusBadRequest)
 				return
-			} else if !checkAnonymousCSRF(r, anonymousCSRFFromRequest(r)) {
+			} else if !checkAnonymousCSRF(r, token) {
 				http.Error(w, "forbidden", http.StatusForbidden)
 				return
 			}

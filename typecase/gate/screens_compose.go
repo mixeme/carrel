@@ -38,5 +38,24 @@ func CheckScreensCompose(p ModulePaths) error {
 			return fmt.Errorf("screens-compose: notes excerpt rows must include date and source cells")
 		}
 	}
+	list := screens.Notes()
+	if strings.Contains(list, "tc-doc") {
+		return fmt.Errorf("screens-compose: notes list must not include tc-doc preview")
+	}
+	read := screens.NotesRead()
+	if !strings.Contains(read, "tc-tree") {
+		return fmt.Errorf("screens-compose: notes-read must include tc-tree neighbours")
+	}
+	quick := screens.NotesQuick()
+	if !strings.Contains(quick, "tc-sheet is-open") {
+		return fmt.Errorf("screens-compose: notes-quick must have open sheet")
+	}
+	edit := screens.NotesEdit()
+	if strings.Contains(edit, "tc-shell__rail") {
+		return fmt.Errorf("screens-compose: notes-edit must not include rail column")
+	}
+	if strings.Contains(edit, "tc-side") {
+		return fmt.Errorf("screens-compose: notes-edit must not include side panel")
+	}
 	return nil
 }

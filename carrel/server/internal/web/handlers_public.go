@@ -17,6 +17,8 @@ import (
 func formError(err error) view.Text {
 	for _, known := range []error{
 		user.ErrPasswordShort, user.ErrPasswordMismatch, user.ErrLoginTaken, user.ErrLastAdmin,
+		user.ErrMasterPasswordShort, user.ErrMasterPasswordMismatch,
+		user.ErrEscrowNotConfigured, user.ErrEscrowConfigured, user.ErrNotDeposited, user.ErrEscrowDisabled,
 	} {
 		if errors.Is(err, known) {
 			return text(known.Error())

@@ -11,6 +11,9 @@ type Screen struct {
 func All() []Screen {
 	return []Screen{
 		{ID: "notes", Title: "7.4 Notes", Body: Notes},
+		{ID: "notes-read", Title: "7.4 Notes · read", Body: NotesRead},
+		{ID: "notes-edit", Title: "7.4 Notes · edit", Body: NotesEdit},
+		{ID: "notes-quick", Title: "7.4 Notes · quick", Body: NotesQuick},
 		{ID: "files", Title: "7.5 Files", Body: Files},
 		{ID: "contacts", Title: "7.1 Contacts", Body: Contacts},
 		{ID: "io", Title: "7.9 Import and export", Body: ImportExport},

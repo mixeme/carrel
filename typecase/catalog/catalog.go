@@ -69,7 +69,7 @@ func Entries() []Entry {
 	// Overlays
 	add("overlays", "tc-scrim", "on", widget.Scrim{For: "sheet", On: true}.Render())
 	add("overlays", "tc-overlay", "sheet", widget.Overlay{Kind: widget.OverlaySheet, Open: true, ID: "demo-overlay", Body: widget.Paragraph("Overlay body")}.Render())
-	add("overlays", "tc-sheet", "open", widget.Sheet{Title: "Edit", Target: "Settings", Body: widget.Paragraph("Sheet body"), Open: true, Actions: []widget.Action{{Label: "Apply", Kind: widget.ButtonPrimary}}}.Render())
+	add("overlays", "tc-sheet", "open", widget.Sheet{Title: "Edit", Target: "Settings", Body: []widget.Node{widget.Paragraph("Sheet body")}, Open: true, Actions: []widget.Action{{Label: "Apply", Kind: widget.ButtonPrimary}}}.Render())
 	add("overlays", "tc-dialog", "open", widget.Dialog{Title: "Delete?", Text: "This removes the item.", Open: true, Danger: true, Confirm: widget.Action{Label: "Delete item", Kind: widget.ButtonDanger}, Cancel: widget.Action{Label: "Keep"}}.Render())
 	add("overlays", "tc-menu", "closed", widget.Menu{Label: "Actions", Items: []widget.MenuItem{{Label: "Edit", Href: "/edit"}, {Separator: true}, {Label: "Remove", Href: "/remove"}}}.Render())
 	add("overlays", "tc-menu", "open", widget.Menu{Label: "Actions", State: widget.MenuOpen, Items: []widget.MenuItem{{Label: "Edit", Href: "/edit"}}}.Render())
@@ -160,7 +160,7 @@ func Entries() []Entry {
 	add("overlays", "tc-scrim", "off", widget.Scrim{For: "sheet", On: false}.Render())
 	add("overlays", "tc-overlay", "dialog", widget.Overlay{Kind: widget.OverlayDialog, Open: true, ID: "dlg", Body: widget.Paragraph("Dialog body")}.Render())
 	add("overlays", "tc-overlay", "popover", widget.Overlay{Kind: widget.OverlayPopover, Open: true, ID: "pop", Body: widget.Paragraph("Popover")}.Render())
-	add("overlays", "tc-sheet", "closed", widget.Sheet{Title: "Edit", Target: "Settings", Body: widget.Paragraph("Closed"), Open: false}.Render())
+	add("overlays", "tc-sheet", "closed", widget.Sheet{Title: "Edit", Target: "Settings", Body: []widget.Node{widget.Paragraph("Closed")}, Open: false}.Render())
 	add("overlays", "tc-dialog", "closed", widget.Dialog{Title: "Delete?", Text: "Closed.", Open: false, Confirm: widget.Action{Label: "Delete", Kind: widget.ButtonDanger}, Cancel: widget.Action{Label: "Keep"}}.Render())
 	add("overlays", "tc-menu", "disabled", widget.Menu{Label: "Actions", State: widget.MenuDisabled, Items: []widget.MenuItem{{Label: "Edit", Href: "/edit"}}}.Render())
 	add("overlays", "tc-usermenu", "open", widget.UserMenu{Name: "Alex", Note: "Signed in", State: widget.MenuOpen, Items: []widget.MenuItem{{Label: "Sign out", Href: "/logout"}}}.Render())
@@ -189,7 +189,12 @@ func Entries() []Entry {
 	add("tables", "tc-queue", "cancelled", widget.Queue{Rows: []widget.QueueRow{{Label: "Cancelled", State: widget.QueueCancelled}}}.Render())
 
 	add("shell", "tc-shell", "narrow", widget.Shell{Narrow: true, Rail: widget.Rail{Foot: widget.RailFoot{Build: demoBuild}}, Main: widget.Main{Label: "Main", Body: []widget.Node{widget.Paragraph("Narrow")}}}.Render())
-	add("shell", "tc-top", "narrow", widget.Top{Narrow: true, Brand: widget.Brand{Mark: "◆", Word: "App"}}.Render())
+	add("shell", "tc-top", "full", widget.Top{
+		Brand:  widget.Brand{Mark: "◆", Word: "App"},
+		Search: widget.Search{Action: "/search"},
+		Create: widget.Menu{Label: "New", Icon: "✎", Items: []widget.MenuItem{{Label: "Item", Href: "/new"}}},
+		User:   widget.UserMenu{Name: "user", Items: []widget.MenuItem{{Label: "Sign out", Href: "/logout"}}},
+	}.Render())
 	add("shell", "tc-rail", "icons", railDemo(widget.Rail{Layout: widget.RailLayoutIcons, Sections: []widget.RailSection{{Title: "Views", Rows: []widget.TickRow{{Label: "All"}}}}}))
 	add("shell", "tc-rail", "drawer", railDemo(widget.Rail{Layout: widget.RailLayoutDrawer, Open: true, Sections: []widget.RailSection{{Title: "Views", Rows: []widget.TickRow{{Label: "All"}}}}}))
 	add("shell", "tc-railsec", "muted", widget.RailSection{Title: "Muted", State: widget.RailSecMuted, Rows: []widget.TickRow{{Label: "One"}}}.Render())

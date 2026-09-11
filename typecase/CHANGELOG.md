@@ -19,9 +19,10 @@ L-4.4) are in [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
   `widget.Paragraph("text")` as a `Node` inside the slice; for bar actions
   use `widget.ActionsAsNodes([]widget.Action{...})` or
   `[]widget.Node{widget.Action{Label: "Save"}}`.
-- **`SideBlock` carries one kind of content.** Each block sets exactly one of
-  `Sec`, `Fields`, or `Field` (as a pointer). The old `SideBlock{Sec: …}`
-  value form is invalid — use `Sec: &widget.Sec{…}` or `Field: &widget.Field{…}`.
+- **`Sheet.Body` is `[]Node`.** Pass `[]widget.Node{widget.Paragraph("…")}` or
+  fields and other widgets; a bare `Prose` value no longer compiles.
+- **`RailSection.Body` for non-tickrow rail content.** When `Rows` is empty,
+  `Body` renders instead (for example a neighbour `tc-tree`); do not set both.
 - **Redefine tokens if you override the bundle.** `--tc-row-height` is now
   `38px`, `--tc-font-size` is `13px`, and two new required tokens appear:
   `--tc-page-gutter` (`20px`), `--tc-page-gutter-narrow` (`14px`), and
@@ -36,8 +37,8 @@ L-4.4) are in [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
   `var(--tc-page-gutter-narrow)` via `.tc-shell--narrow`.
 - **Run the screens demo beside the catalog.** `scripts/typecase-screens.bat`
   serves `http://localhost:8081/` — assembled mockup pages, not widget
-  cells. Routes: `/notes`, `/files`, `/contacts`, `/io`, `/duplicates`,
-  `/states`. Append `?theme=dark` for a dark rerender before first paint.
+  cells. Routes: `/notes`, `/notes-read`, `/notes-edit`, `/notes-quick`,
+  `/files`, `/contacts`, `/io`, `/duplicates`, `/states`. Append `?theme=dark` for a dark rerender before first paint.
   `screens.css` holds page chrome only; it must not contain `.tc-`
   selectors.
 
@@ -51,14 +52,19 @@ L-4.4) are in [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
   `inv-railsec-untitled-no-title` (`typecase-compose` §3).
 - `RowCells.Date` and `Source` on `tc-row--excerpt`; excerpt is one line with
   ellipsis (`typecase-compose` §4).
+- Narrow layout (L-4.4): `tc-seg` collapses to `tc-menu` when width runs short;
+  `tc-top` shrinks search first and stashes the right group under `labels.More`;
+  `Top.Narrow` / `tc-top--narrow` removed (`typecase-compose` §5).
+- Notes demo frames (`typecase-compose` §6): routes `notes-read`, `notes-edit`,
+  and `notes-quick`; list frame drops inline `tc-doc` preview; read frame carries
+  neighbour `tc-tree` in the rail; `RailSection.Body` and `Sheet.Body []Node`.
 - Mockup-aligned geometry: row height 38, row gap 12, rail tickrow padding 16,
   top bar 52, default button 26, second radius 2 px on check/badge/mark.
 - Gates `geometry`, `screens-css`, and `screens-coverage` (L-8).
 - Package `typecase/screens`, binary `cmd/screens`, routes for s-notes,
   s-files, s-contacts, s-io, s-dup and m-states mockup frames.
 - Browser check `screens_test.go`: each screen at 1280×900 and 375×812, light
-  and dark (`?theme=dark`). Phone overflow of `tc-top` / `tc-seg` is deferred
-  (L-4.4); theme, contrast and ink overflow still run at 375 px.
+  and dark (`?theme=dark`), including horizontal overflow at 375 px.
 - Demo chrome follows the palette tokens, so dark theme does not leave the
   screens nav in light ink. Theme links: `?theme=light` / `?theme=dark`.
 - Findings `Э-1`…`Э-6` and the remaining assembly work live in

@@ -11,6 +11,7 @@
 }
 .tc-bar__left, .tc-bar__right { display: flex; align-items: center; gap: 0.35em; flex: none; }
 .tc-bar__right { margin-left: auto; }
+.tc-bar [data-tc-bar-stash] { display: none; }
 .tc-bar__sep {
 	width: var(--tc-stroke);
 	align-self: stretch;
@@ -42,6 +43,20 @@
    первичное действие и «сделано», и переключатель вида его не занимает.
    Жирность — второй, нецветовой признак выбранного. */
 .tc-seg__opt.is-chosen { background: var(--tc-card); color: var(--tc-ink); font-weight: 600; }
+.tc-seg.is-menu { border: 0; overflow: visible; }
+.tc-seg.is-menu > button[data-tc-seg] {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+.tc-seg > [data-tc-seg-menu] { display: none; }
+.tc-seg.is-menu > [data-tc-seg-menu] { display: inline-block; }
 
 .tc-chip {
 	display: inline-flex;

@@ -5,6 +5,63 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.20 — 2026-09-07
+
+Closes key escrow (S-10.5) from [users-tail.md](../../docs/plan/users-tail.md).
+
+### For consumers
+
+- **Key escrow is implemented end-to-end.** An administrator enables it with a
+  master password on `/admin/escrow`. New accounts created while coverage is on
+  deposit their data key when the password is set; existing accounts opt in from
+  `/app/settings/escrow` after unlock. Recovery re-wraps the data key under a
+  temporary password (connections stay readable), is rate-limited like login,
+  and is always logged and mailed. Withdrawal removes the copy in one step.
+- **`/forgot` asks for the administrator** when the account has a deposited
+  key, not merely when escrow policy applies. Wipe links are unchanged for
+  everyone else.
+- **First login under escrow coverage** shows an explicit notice in the shell.
+
+### Included
+
+- `internal/crypt`: X25519 deposit/open, master-password wrap (`escrow.go`).
+- `internal/store`: escrow fields in state, deposit on `ApplyPassword`,
+  `RewrapPasswordWithKey` for recovery.
+- `internal/user`: `escrow.go` — enable, policy, master change, deposit,
+  withdraw, recover, first-login notice.
+- `internal/web`: `handlers_escrow.go`, mail stub for recovery notice.
+- Tests: `TestEscrowNotRetroactive`, `TestEscrowWithdrawRemovesCopy`,
+  `TestEscrowRecoverRewrapsDataKey`, `TestForgotEscrowRequiresAdminWhenDeposited`,
+  `TestEscrowDepositRoundTrip`, `TestEscrowMasterWrapRoundTrip`.
+
+### Not yet included
+
+Admin panel actions (other than escrow), `/app/password`,
+`CARREL_BASE_PATH` on cookies and routes.
+
+## v0.0.19 — 2026-09-07
+
+Continues [users-tail.md](../../docs/plan/users-tail.md): multipart CSRF.
+
+### For consumers
+
+- **Multipart POST accepts `_csrf` in the body.** When `X-CSRF-Token` is
+  absent, the server reads `_csrf` from `multipart/form-data` within the
+  route body limit (1 MiB for forms). Upload and import routes can rely on
+  the header without buffering the file for the token; native form POSTs
+  still send `_csrf` as a field (C-11).
+
+### Included
+
+- `internal/web`: `csrf_body.go`; middleware uses `ParseMultipartForm` for
+  CSRF when the header is missing.
+- Test: `TestMultipartCSRFWithoutHeader`.
+
+### Not yet included
+
+Admin panel actions (other than escrow), `/app/password`,
+`CARREL_BASE_PATH` on cookies and routes.
+
 ## v0.0.18 — 2026-09-07
 
 Continues [users-tail.md](../../docs/plan/users-tail.md) after audit №2:
@@ -38,8 +95,8 @@ fix ships with a test that was red on v0.0.17.
 
 ### Not yet included
 
-Key escrow (S-10.5), admin panel actions, `/app/password`, CSRF on
-multipart uploads, `CARREL_BASE_PATH` on cookies and routes.
+Key escrow (S-10.5), admin panel actions, `/app/password`,
+`CARREL_BASE_PATH` on cookies and routes.
 
 ## v0.0.17 — 2026-09-07
 

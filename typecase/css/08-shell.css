@@ -4,12 +4,18 @@
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
+	min-width: 0;
+	width: 100%;
+	max-width: 100%;
 	background: var(--tc-bg);
+	overflow-x: clip;
 }
 .tc-shell__body {
 	display: flex;
 	flex: 1;
 	min-height: 0;
+	min-width: 0;
+	overflow-x: clip;
 }
 .tc-shell__rail { width: 264px; flex: none; }
 .tc-shell__main { flex: 1; min-width: 0; }
@@ -23,11 +29,14 @@
 	align-items: center;
 	gap: 0.75em;
 	min-height: 52px;
+	min-width: 0;
+	overflow: hidden;
 	padding: 0 var(--tc-page-gutter);
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 	background: var(--tc-surface);
 }
-.tc-top__actions { margin-left: auto; display: flex; gap: 0.5em; align-items: center; }
+.tc-top__actions { margin-left: auto; display: flex; gap: 0.5em; align-items: center; flex: none; }
+.tc-top [data-tc-top-stash] { display: none; }
 
 .tc-main {
 	display: flex;
@@ -55,6 +64,10 @@
 .tc-shell--narrow {
 	--tc-page-gutter: var(--tc-page-gutter-narrow);
 }
+.tc-shell--narrow > .tc-top {
+	width: 100%;
+	max-width: 100%;
+}
 .tc-nav--bottom { display: flex; flex-direction: row; }
 
 .tc-railsec { display: block; }
@@ -68,6 +81,7 @@
 }
 .tc-railsec--alert .tc-railsec__title { color: var(--tc-danger); }
 .tc-railsec__rows { display: flex; flex-direction: column; }
+.tc-railsec__body { display: block; padding: 0 8px; }
 
 .tc-railfoot {
 	margin-top: auto;

@@ -55,6 +55,15 @@ type Users interface {
 	// Unlock confirms the password of the session's own account for the
 	// S-10.7 sheet and journals it.
 	Unlock(ctx context.Context, accountID, password string) bool
+
+	EnableEscrow(ctx context.Context, actorID, master, master2 string) error
+	SetEscrowCoverNew(actorID string, cover bool) error
+	ChangeEscrowMaster(ctx context.Context, actorID, current, newPW, newPW2 string) error
+	DepositEscrow(accountID string, dataKey [32]byte) error
+	WithdrawEscrow(accountID string) error
+	RecoverEscrow(ctx context.Context, actorID, login, masterPassword string) (tempPassword string, err error)
+	ConsumeEscrowNotice(accountID string) bool
+	EscrowEnabled() bool
 }
 
 // Server is the HTTP front door (S-9).

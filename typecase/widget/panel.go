@@ -42,7 +42,11 @@ func (b Bar) Render() string {
 		}
 		more = Menu{Label: label, Items: items}.Render()
 	}
-	return `<div` + classAttr(cls) + ` data-tc-bar><div class="tc-bar__left">` + left + `</div>` + sep + `<div class="tc-bar__right">` + right + more + `</div></div>`
+	moreLabel := b.MoreLabel
+	if moreLabel == "" {
+		moreLabel = labels.More
+	}
+	return `<div` + classAttr(cls) + ` data-tc-bar` + attr("data-tc-more", moreLabel) + `><div class="tc-bar__left">` + left + `</div>` + sep + `<div class="tc-bar__right">` + right + more + `</div></div>`
 }
 
 // Seg — tc-seg

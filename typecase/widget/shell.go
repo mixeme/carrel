@@ -34,8 +34,8 @@ func (s Shell) Render() string {
 // Top — tc-top
 //
 // Роль. Знак, поиск, создание, меню учётной записи. Одна на страницу.
-// Вход. Top{ Brand, Nav, Search, Create, User, Mark, Narrow }.
-// Состояния. normal | narrow.
+// Вход. Top{ Brand, Nav, Search, Create, User, Mark }.
+// Состояния. normal | full.
 // Инварианты. Знак один раз слева; поиск виден всегда.
 // Поведение. Отступление правой группы; меню создания и учётной записи.
 // Геометрия. Высота фиксирована; поиск тянется.
@@ -48,14 +48,10 @@ type Top struct {
 	Create Menu
 	User   UserMenu
 	Mark   Mark
-	Narrow bool
 }
 
 func (t Top) Render() string {
 	cls := "tc-top"
-	if t.Narrow {
-		cls = classes(cls, "tc-top--narrow")
-	}
 	create := ""
 	if t.Create.Label != "" || t.Create.Icon != "" || len(t.Create.Items) > 0 {
 		create = t.Create.Render()
@@ -69,7 +65,7 @@ func (t Top) Render() string {
 	// а не недосмотр. Ширину ему задаёт геометрия панели, а не наличие входа.
 	search := t.Search.Render()
 	mark := t.Mark.Render()
-	return `<header` + classAttr(cls) + `>` + t.Brand.Render() + nav + search + `<div class="tc-top__actions">` + create + user + `</div>` + mark + `</header>`
+	return `<header` + classAttr(cls) + ` data-tc-top` + attr("data-tc-more", labels.More) + `>` + t.Brand.Render() + nav + search + `<div class="tc-top__actions">` + create + user + `</div>` + mark + `</header>`
 }
 
 // Main — tc-main
@@ -146,27 +142,35 @@ func (r Rail) Render() string {
 // RailSection — tc-railsec
 //
 // Роль. Заголовок группы и её строки.
-// Вход. RailSection{ Title, State, Rows }.
+// Вход. RailSection{ Title, State, Rows, Body }.
 // Состояния. ok | muted | alert.
 // Инварианты. Недоступная группа помечена цветом и словом; пустой Title не выпускает заголовок.
 // Поведение. нет.
 // Геометрия. Заголовок — мелкий кегль с разрядкой.
-// Содержимое. tc-tickrow.
+// Содержимое. tc-tickrow; при пустых Rows — любые виджеты в Body.
 // Чего нет. Не сворачивается.
 func (rs RailSection) Render() string {
 	cls := "tc-railsec"
 	if rs.State != "" {
 		cls = classes(cls, "tc-railsec--"+string(rs.State))
 	}
-	var rows string
-	for _, r := range rs.Rows {
-		rows += r.Render()
-	}
 	title := ""
 	if rs.Title != "" {
 		title = `<h3 class="tc-railsec__title">` + esc(rs.Title) + `</h3>`
 	}
-	return `<section` + classAttr(cls) + `>` + title + `<div class="tc-railsec__rows">` + rows + `</div></section>`
+	body := ""
+	if len(rs.Rows) > 0 {
+		var rows string
+		for _, r := range rs.Rows {
+			rows += r.Render()
+		}
+		body = `<div class="tc-railsec__rows">` + rows + `</div>`
+	} else if len(rs.Body) > 0 {
+		body = `<div class="tc-railsec__body">` + renderNodes(rs.Body) + `</div>`
+	} else {
+		body = `<div class="tc-railsec__rows"></div>`
+	}
+	return `<section` + classAttr(cls) + `>` + title + body + `</section>`
 }
 
 // RailFoot — tc-railfoot
