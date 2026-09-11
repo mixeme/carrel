@@ -662,6 +662,84 @@ func TestForgotWipeRouteAndDeadTokensAlike(t *testing.T) {
 	}
 }
 
+// Audit №3: every public secret stub answers like a token that never
+// existed — same body and timing path through tokenNotFound.
+func TestPublicSecretStubsAnswerAlike(t *testing.T) {
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	secret, err := h.users.CreateInvite(adminID, "bob", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = h.do(h.anonPostForm("/invite/"+secret, "/invite/"+secret, url.Values{
+		"password": {"bobpass123"}, "password2": {"bobpass123"},
+	}))
+	never := strings.Repeat("A", 43)
+	baseline := h.do(get("/forgot/"+never, nil))
+	if baseline.Code != http.StatusNotFound {
+		t.Fatalf("baseline: %d", baseline.Code)
+	}
+	paths := []string{
+		"/invite/" + never,
+		"/invite/not-a-token",
+		"/invite/" + secret,
+		"/confirm-email/" + never,
+		"/confirm-email/not-a-token",
+		"/forgot/not-a-token",
+		"/p/" + never,
+		"/p/not-a-token",
+		"/p/" + never + "/download",
+		"/p/" + never + "/file/readme.txt",
+		"/api/backup/status",
+		"/api/backup/download",
+		"/api/backup/anything/download",
+	}
+	for _, path := range paths {
+		rec := h.do(get(path, nil))
+		if rec.Code != http.StatusNotFound || rec.Body.String() != baseline.Body.String() {
+			t.Fatalf("%s: status=%d body=%q", path, rec.Code, rec.Body.String())
+		}
+	}
+	if rec := h.do(httptest.NewRequest(http.MethodPost, "/api/backup/run", nil)); rec.Code != http.StatusNotFound || rec.Body.String() != baseline.Body.String() {
+		t.Fatalf("POST /api/backup/run: status=%d body=%q", rec.Code, rec.Body.String())
+	}
+}
+
+// Audit №3: secrets in the URL must not leak through Referer on outbound links.
+func TestSecretPathReferrerPolicy(t *testing.T) {
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	secret, err := h.users.CreateInvite(adminID, "bob", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	link, err := h.users.IssueConsoleWipeLink("alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+	never := strings.Repeat("A", 43)
+	for _, path := range []string{
+		"/invite/" + secret,
+		"/invite/" + never,
+		"/forgot/" + strings.TrimPrefix(link, "/forgot/"),
+		"/forgot/" + never,
+		"/confirm-email/" + never,
+		"/p/" + never,
+		"/p/" + never + "/download",
+	} {
+		rec := h.do(get(path, nil))
+		if got := rec.Header().Get("Referrer-Policy"); got != "no-referrer" {
+			t.Errorf("%s: Referrer-Policy = %q", path, got)
+		}
+	}
+	if rec := h.do(get("/login", nil)); rec.Header().Get("Referrer-Policy") == "no-referrer" {
+		t.Error("/login should not set Referrer-Policy: no-referrer")
+	}
+	if rec := h.do(get("/forgot", nil)); rec.Header().Get("Referrer-Policy") == "no-referrer" {
+		t.Error("/forgot without token should not set Referrer-Policy: no-referrer")
+	}
+}
+
 // POST /app/password re-wraps the data key, burns wipe tokens, and ends
 // other sessions of the same account (before-providers.md §2).
 func TestChangePasswordHTTP(t *testing.T) {

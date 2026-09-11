@@ -13,7 +13,8 @@ do, not what the authors did.
   is a shell with `Top` + `Main` only.
 - **Narrow layout.** At phone widths the rail column collapses to an off-screen
   drawer; an open side panel covers the viewport. `tc-bar` and `tc-crumbs` clamp
-  to the viewport; middle crumbs collapse into a menu.
+  to the viewport; middle crumbs collapse into a menu. The screen check measures
+  those widgets at 375 px (it does not skip `.tc-main`).
 - **Gate `screens-compose`** now scans all demo screen assemblers, not only
   `notes.go`.
 
@@ -23,8 +24,11 @@ do, not what the authors did.
   `Rail`, and `Side`; empty columns omitted from markup.
 - Demo screens (`files`, `contacts`, `io`, `duplicates`, `states`, all notes
   frames) assembled via `shellFrame` and widgets — no `shellWrap`.
-- `tc.js`: `updateCrumbs`, `clampBar`; browser screen check includes
-  `OutOfBounds` at 375 px.
+- `tc.js`: `updateCrumbs` (middle crumbs → menu, then clamp to the viewport),
+  `clampBar`. Browser screen check measures `.tc-bar` / `.tc-crumbs` /
+  `.tc-head` / `.tc-top` / `.tc-docbar` against the viewport at 375 px; other
+  nodes use the clipped box so `overflow: auto` in `tc-main` does not flag
+  every cell.
 - CSS: narrow rail drawer, narrow side overlay, bar/crumbs/head/docbar overflow.
 
 The typecase wordmark work documented below stays documentation-only until
@@ -84,8 +88,9 @@ released separately.
 
 Screens assembled from widgets. Geometry matches the mockups; notes frames no
 longer bypass `tc-main`, `tc-bar`, or `tc-side`; `tc-seg` and `tc-top` collapse
-when width runs short. Remaining demo pages still wrap the shell by hand —
-[docs/plan/typecase-shell.md](../docs/plan/typecase-shell.md).
+when width runs short. Remaining demo pages still wrapped the shell by hand;
+that leftover is closed in Unreleased. The narrow rail still has no open
+control — [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawer.md).
 
 ### For consumers (v0.2.0 → v0.3.0)
 
@@ -157,9 +162,10 @@ when width runs short. Remaining demo pages still wrap the shell by hand —
 
 ### Not yet included
 
-- Other assembled screens still wrap `tc-shell` by hand; descendant overflow
-  at 375 px is still skipped. See
-  [docs/plan/typecase-shell.md](../docs/plan/typecase-shell.md).
+- Narrow rail has no open control; see
+  [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawer.md).
+  Hand-wrapped shells and the 375 px `OutOfBounds` skip of `.tc-main` are
+  closed in Unreleased.
 
 ## typecase/v0.2.0 — 2026-09-05
 

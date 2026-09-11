@@ -497,11 +497,7 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
-	if !s.users.PublicLinkValid(r.Context(), r.PathValue("token")) {
-		s.tokenNotFound(w, r, start)
-		return
-	}
-	s.notFound(w, r)
+	s.tokenNotFound(w, r, start)
 }
 
 func (s *Server) getPublishedFile(w http.ResponseWriter, r *http.Request) {
@@ -510,11 +506,7 @@ func (s *Server) getPublishedFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
-	if !s.users.PublicLinkValid(r.Context(), r.PathValue("token")) {
-		s.tokenNotFound(w, r, start)
-		return
-	}
-	s.notFound(w, r)
+	s.tokenNotFound(w, r, start)
 }
 
 func (s *Server) postBackupRun(w http.ResponseWriter, r *http.Request) {

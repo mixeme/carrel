@@ -9,7 +9,7 @@
 | [architecture.md](architecture.md) | Модули (`typecase/`, `carrel/server/`), зависимости на 04.09.2026, закрытые развилки, сроки и лимиты |
 | [server.md](server.md) | План серверной половины (`S`) |
 | [reviews.md](reviews.md) | Opus-ревью и аудиты Fable |
-| [typecase-shell.md](typecase-shell.md) | Хвост сборки экранов: оболочка на остальных экранах демо, вылет узлов на 375 px |
+| [typecase-rail-drawer.md](typecase-rail-drawer.md) | Хвост узкой оболочки: рейл прячется на 375 px, открыть панель нечем |
 | [users-tail.md](users-tail.md) | Хвост аудита Fable №2: учётки, секреты, депонирование, панель — что осталось после коммита аудита |
 | [before-providers.md](before-providers.md) | Ворота в провайдеры: дыры депонирования, смена пароля, панель, дефекты обнаружения, Linux |
 

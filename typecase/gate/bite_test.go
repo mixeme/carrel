@@ -396,7 +396,7 @@ func TestBite_screensCompose(t *testing.T) {
 	}
 	p := gate.Paths(root)
 	if err := gate.CheckScreensCompose(p); err != nil {
-		t.Fatalf("live notes.go should pass: %v", err)
+		t.Fatalf("live screen assemblers should pass: %v", err)
 	}
 	tmp := t.TempDir()
 	screensDir := filepath.Join(tmp, "screens")
@@ -409,6 +409,15 @@ func TestBite_screensCompose(t *testing.T) {
 	p.Root = tmp
 	if err := gate.CheckScreensCompose(p); err == nil {
 		t.Fatal("expected screens-compose gate to fail on manual tc-side")
+	}
+	if err := os.WriteFile(filepath.Join(screensDir, "notes.go"), []byte("package screens\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(screensDir, "files.go"), []byte("package screens\n\nfunc Files() string {\n\treturn `<div class=\"tc-shell\"`\n}\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := gate.CheckScreensCompose(p); err == nil {
+		t.Fatal("expected screens-compose gate to fail on files.go, not only notes.go")
 	}
 }
 

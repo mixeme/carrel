@@ -49,16 +49,39 @@ const screenProbeJS = `(() => {
   const stage = document.querySelector('.screens-stage');
   const scope = stage || document.body;
   const hScroll = Math.max(scope.scrollWidth - scope.clientWidth, 0);
+  const clipRect = (el) => {
+    let left = -Infinity, right = Infinity;
+    let p = el.parentElement;
+    while (p && p !== document.documentElement) {
+      const cs = getComputedStyle(p);
+      if (cs.overflowX !== 'visible') {
+        const pr = p.getBoundingClientRect();
+        left = Math.max(left, pr.left);
+        right = Math.min(right, pr.right);
+      }
+      p = p.parentElement;
+    }
+    const r = el.getBoundingClientRect();
+    return {
+      left: Math.max(r.left, left === -Infinity ? r.left : left),
+      right: Math.min(r.right, right === Infinity ? r.right : right)
+    };
+  };
   const outOfBounds = [];
   for (const el of scope.querySelectorAll('*')) {
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden') continue;
     if (el.hidden) continue;
-    const r = el.getBoundingClientRect();
-    if (r.width === 0 && r.height === 0) continue;
+    const box = el.getBoundingClientRect();
+    if (box.width === 0 && box.height === 0) continue;
+    // Chrome of the page must itself fit the viewport (L-4.4, tc-crumbs).
+    // Other nodes use the visible (clipped) box so overflow:auto in tc-main
+    // does not flag every table cell.
+    const chrome = el.matches('.tc-bar, .tc-crumbs, .tc-head, .tc-top, .tc-docbar');
+    const r = chrome ? box : clipRect(el);
+    if (!chrome && r.right - r.left <= 1) continue;
     if (r.right > vw + 1 || r.left < -1) {
       if (el.closest('.tc-shell--narrow .tc-shell__rail')) continue;
-      if (el.closest('.tc-main')) continue;
       outOfBounds.push(label(el));
     }
   }

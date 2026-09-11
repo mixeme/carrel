@@ -5,6 +5,26 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.24 — 2026-09-08
+
+Closes audit perimeter №3 from [users-tail.md](../../docs/plan/users-tail.md).
+
+### For consumers
+
+- **Pages with a secret in the URL send `Referrer-Policy: no-referrer`.**
+  Applies to `/invite/{token}`, `/forgot/{token}`, `/confirm-email/{token}`,
+  and `/p/{token}` (including subpaths). Outbound links from these pages no
+  longer leak the token through the `Referer` header.
+- **Public secret stubs answer invalid, revoked, and expired tokens the same
+  way.** Download, file, and backup routes use `tokenNotFound` until
+  implemented, so probing cannot distinguish a dead token from a missing one.
+
+### Included
+
+- `internal/web`: `headers.go`, `setSecretPathHeaders` in middleware;
+  published download/file stubs always route through `tokenNotFound`.
+- Tests: `TestSecretPathReferrerPolicy`, `TestPublicSecretStubsAnswerAlike`.
+
 ## v0.0.23 — 2026-09-08
 
 Closes admin panel handlers from [users-tail.md](../../docs/plan/users-tail.md)

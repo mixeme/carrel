@@ -767,37 +767,47 @@
 		nav.style.maxWidth = "";
 	}
 
+	function clampCrumbs(nav) {
+		var vw = document.documentElement.clientWidth;
+		var rect = nav.getBoundingClientRect();
+		var max = Math.max(vw - rect.left - 1, 0);
+		var head = closest(nav, ".tc-head");
+		if (head) {
+			var hw = head.getBoundingClientRect().width;
+			if (hw > 0 && hw < max) max = hw;
+		}
+		nav.style.maxWidth = max + "px";
+	}
+
 	function updateCrumbs(nav) {
 		restoreCrumbs(nav);
 		if (crumbsFits(nav)) return;
 		var links = Array.prototype.slice.call(nav.querySelectorAll(".tc-crumbs__link"));
-		if (links.length < 2) return;
-		var root = links[0];
-		var middleItems = [];
-		for (var i = 1; i < links.length; i++) {
-			var link = links[i];
-			middleItems.push({ label: link.textContent.trim(), href: link.getAttribute("href") || "#" });
-			var sep = link.previousElementSibling;
-			if (sep && sep.classList.contains("tc-crumbs__sep")) sep.hidden = true;
-			link.hidden = true;
+		if (links.length >= 2) {
+			var root = links[0];
+			var middleItems = [];
+			for (var i = 1; i < links.length; i++) {
+				var link = links[i];
+				middleItems.push({ label: link.textContent.trim(), href: link.getAttribute("href") || "#" });
+				var sep = link.previousElementSibling;
+				if (sep && sep.classList.contains("tc-crumbs__sep")) sep.hidden = true;
+				link.hidden = true;
+			}
+			var ellipsis = document.createElement("span");
+			ellipsis.className = "tc-crumbs__ellipsis";
+			ellipsis.setAttribute("data-tc-crumbs-ellipsis", "");
+			ellipsis.appendChild(buildMenuElement(tcUnique("tc-crumbs-more"), "…", middleItems));
+			var rootSep = root.nextElementSibling;
+			if (rootSep && rootSep.classList.contains("tc-crumbs__sep")) {
+				rootSep.insertAdjacentElement("afterend", ellipsis);
+				var sep = document.createElement("span");
+				sep.className = "tc-crumbs__sep";
+				sep.setAttribute("aria-hidden", "true");
+				sep.textContent = "/";
+				ellipsis.insertAdjacentElement("afterend", sep);
+			}
 		}
-		var ellipsis = document.createElement("span");
-		ellipsis.className = "tc-crumbs__ellipsis";
-		ellipsis.setAttribute("data-tc-crumbs-ellipsis", "");
-		ellipsis.appendChild(buildMenuElement(tcUnique("tc-crumbs-more"), "…", middleItems));
-		var rootSep = root.nextElementSibling;
-		if (rootSep && rootSep.classList.contains("tc-crumbs__sep")) {
-			rootSep.insertAdjacentElement("afterend", ellipsis);
-			var sep = document.createElement("span");
-			sep.className = "tc-crumbs__sep";
-			sep.setAttribute("aria-hidden", "true");
-			sep.textContent = "/";
-			ellipsis.insertAdjacentElement("afterend", sep);
-		}
-		if (!crumbsFits(nav)) {
-			var head = closest(nav, ".tc-head");
-			if (head) nav.style.maxWidth = head.getBoundingClientRect().width + "px";
-		}
+		if (!crumbsFits(nav)) clampCrumbs(nav);
 	}
 
 	function layoutUpdates() {

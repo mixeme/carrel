@@ -17,6 +17,7 @@ func (s *Server) handle(pattern string, h handler) {
 }
 
 func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
+	setSecretPathHeaders(w, r)
 	now := time.Now()
 
 	// /healthz and /about carry no bucket at all (architecture.md): probes
