@@ -4,6 +4,23 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.14 — 2026-09-05
+
+Restores the `docs/spec/check.py` step in `carrel-server.yml`. No server
+code changes.
+
+### For consumers
+
+- No API, binary, or configuration changes. Skip this tag if you only track
+  functional server releases.
+
+### Fixed
+
+- Checks 3 and 3b failed on every server commit: `carrel-client.md` still
+  named `tc-row--file` in five U-6 widget lists after Typecase renamed the
+  row to `tc-row--meta`, and map U-5.4 had no row for frame class
+  `m-row--file`. The spec now matches L-4 and the mockups; `check.py` returns 0.
+
 ## carrel/server/v0.0.13 — 2026-09-05
 
 Implements S-10 user administration: accounts, invitations, registration,

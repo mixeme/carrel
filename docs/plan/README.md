@@ -7,7 +7,6 @@
 | Файл | О чём |
 |---|---|
 | [architecture.md](architecture.md) | Модули (`typecase/`, `carrel/server/`), зависимости на 04.09.2026, закрытые развилки, сроки и лимиты |
-| [typecase.md](typecase.md) | План библиотеки виджетов (`L`) |
 | [server.md](server.md) | План серверной половины (`S`) |
 | [reviews.md](reviews.md) | Opus-ревью и аудиты Fable |
 | [catalog-visual.md](catalog-visual.md) | Визуальный аудит каталога на браузере, находки `В-` |

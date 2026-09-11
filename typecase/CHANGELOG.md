@@ -4,9 +4,15 @@ All notable changes to Typecase are documented here. Versioning follows
 [semantic versioning](https://semver.org/). This file tells consumers what to
 do, not what the authors did.
 
-## typecase/v0.1.1 — 2026-09-05
+## Unreleased — v0.1.1
 
 Visual audit fixes from the catalog browser review (findings В-1…В-7).
+
+**Do not pin this yet. Stay on `typecase/v0.1.0`.** The changes below are on
+`main` but carry no tag, and three follow-ups from the same audit are still
+open: gate coverage for bare `tc-x--y` modifiers, one bite test that calls the
+check helper instead of `gate.Run`, and a queue-state browser check that passes
+with no margin. The `v0.1.1` tag goes on once those are closed.
 
 ### For consumers (v0.1.0 → v0.1.1)
 
