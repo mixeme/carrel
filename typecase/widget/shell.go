@@ -45,7 +45,20 @@ func (s Shell) Render() string {
 		body += `<div class="tc-shell__side">` + s.Side.Render() + `</div>`
 	}
 	body += `</div>`
-	return `<div` + classAttr(cls) + ` data-tc-shell data-tc-root>` + s.Top.Render() + body + `</div>`
+	hasRailCol := !s.Nav.IsZero() || !s.Rail.IsZero()
+	shellAttr := ` data-tc-shell data-tc-root`
+	if s.Narrow {
+		shellAttr += ` data-tc-shell-narrow`
+	}
+	return `<div` + classAttr(cls) + shellAttr + `>` + s.Top.render(hasRailCol) + body + `</div>`
+}
+
+func shellRailToggleBtn() string {
+	return `<button type="button" class="tc-btn tc-btn--bar tc-btn--normal" data-tc-rail-toggle><span class="tc-btn__label">` + esc(labels.Sources) + `</span></button>`
+}
+
+func shellRailApplyBtn() string {
+	return `<button type="button" class="tc-btn tc-btn--bar tc-btn--primary" data-tc-rail-apply><span class="tc-btn__label">` + esc(labels.Apply) + `</span></button>`
 }
 
 // Top — tc-top
@@ -68,6 +81,10 @@ type Top struct {
 }
 
 func (t Top) Render() string {
+	return t.render(false)
+}
+
+func (t Top) render(railChrome bool) string {
 	cls := "tc-top"
 	create := ""
 	if t.Create.Label != "" || t.Create.Icon != "" || len(t.Create.Items) > 0 {
@@ -82,7 +99,13 @@ func (t Top) Render() string {
 	// а не недосмотр. Ширину ему задаёт геометрия панели, а не наличие входа.
 	search := t.Search.Render()
 	mark := t.Mark.Render()
-	return `<header` + classAttr(cls) + ` data-tc-top` + attr("data-tc-more", labels.More) + `>` + t.Brand.Render() + nav + search + `<div class="tc-top__actions">` + create + user + `</div>` + mark + `</header>`
+	chrome := ""
+	apply := ""
+	if railChrome {
+		chrome = shellRailToggleBtn()
+		apply = shellRailApplyBtn()
+	}
+	return `<header` + classAttr(cls) + ` data-tc-top` + attr("data-tc-more", labels.More) + `>` + chrome + t.Brand.Render() + nav + search + `<div class="tc-top__actions">` + apply + create + user + `</div>` + mark + `</header>`
 }
 
 // Main — tc-main

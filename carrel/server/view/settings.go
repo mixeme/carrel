@@ -262,14 +262,23 @@ type MailTestResult struct {
 	Reply Text `json:"reply"`
 }
 
+type EscrowRecoveryResult struct {
+	Login    Text   `json:"login"`
+	Password Text   `json:"password"` // shown once; not stored in state
+	Copy     Action `json:"copy"`
+	Mailed   Text   `json:"mailed"` // «отправлено», «SMTP не настроен»
+}
+
 type AdminEscrowPage struct {
 	Shell
-	Enabled bool           `json:"enabled"`
-	Warning Notice         `json:"warning"`
-	Form    Form           `json:"form"`
-	Covered []AdminUserRow `json:"covered"`
-	Recover Form           `json:"recover"`
-	History []AuditRow     `json:"history"`
+	Enabled bool                  `json:"enabled"`
+	Warning Notice                `json:"warning"`
+	Form    Form                  `json:"form"`
+	Master  Form                  `json:"master"`
+	Covered []AdminUserRow        `json:"covered"`
+	Recover Form                  `json:"recover"`
+	Result  *EscrowRecoveryResult `json:"result,omitempty"`
+	History []AuditRow            `json:"history"`
 }
 
 type AdminAuditPage struct {

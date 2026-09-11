@@ -1565,13 +1565,22 @@ type AdminSettingsPage struct {
 }
 type MailTestResult struct { OK bool; Reply Text } // полный ответ сервера, без пароля реле
 
+type EscrowRecoveryResult struct {
+    Login    Text
+    Password Text // shown once; not stored in state
+    Copy     Action
+    Mailed   Text // «отправлено», «SMTP не настроен»
+}
+
 type AdminEscrowPage struct {
     Shell
     Enabled  bool
     Warning  Notice
     Form     Form
+    Master   Form
     Covered  []AdminUserRow
     Recover  Form
+    Result   *EscrowRecoveryResult
     History  []AuditRow
 }
 

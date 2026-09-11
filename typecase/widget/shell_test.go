@@ -39,4 +39,10 @@ func TestShell_keepsPopulatedColumns(t *testing.T) {
 			t.Fatalf("populated shell missing %s", zone)
 		}
 	}
+	if !strings.Contains(html, "data-tc-rail-toggle") {
+		t.Fatal("shell with rail column must emit data-tc-rail-toggle in tc-top")
+	}
+	if !strings.Contains(html, "data-tc-rail-apply") {
+		t.Fatal("shell with rail column must emit data-tc-rail-apply in tc-top")
+	}
 }

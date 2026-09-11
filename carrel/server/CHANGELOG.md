@@ -5,9 +5,31 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.26 — 2026-09-08
+
+Closes escrow admin UI gaps from
+[before-providers.md](../../docs/plan/before-providers.md) §1.
+
+### For consumers
+
+- **Escrow recovery shows the temporary password on `/admin/escrow`.** After
+  a successful recover the page returns with a copyable one-time password and
+  an honest mail status (`SMTP not configured` until S-26). The password is
+  not stored in state; refresh clears it.
+- **Changing the escrow master password has a form when escrow is on.** Policy,
+  master rotation, and account recovery are separate forms on the same page.
+
+### Included
+
+- `view`: `EscrowRecoveryResult`; `AdminEscrowPage.Master` and `.Result`.
+- `internal/web`: recover success renders the page instead of redirecting;
+  master-password form when escrow is enabled.
+- Tests: `TestPostAdminEscrowRecoverShowsTempPassword`,
+  `TestGetAdminEscrowMasterFormWhenEnabled`, `TestPostAdminEscrowChangeMaster`.
+
 ## v0.0.25 — 2026-09-08
 
-Closes the audit №2 tail. Remaining work (escrow recovery UI, discovery,
+Closes the audit №2 tail. Remaining work (discovery,
 Linux) stays in [before-providers.md](../../docs/plan/before-providers.md).
 
 ### For consumers
@@ -24,8 +46,8 @@ Linux) stays in [before-providers.md](../../docs/plan/before-providers.md).
 
 ### Not yet included
 
-Escrow recovery still discards the temporary password on the admin screen;
-changing the master password has no form when escrow is already on.
+Discovery defects and Linux compose remain in
+[before-providers.md](../../docs/plan/before-providers.md).
 
 ## v0.0.24 — 2026-09-08
 

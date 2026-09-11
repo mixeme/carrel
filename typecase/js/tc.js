@@ -597,8 +597,40 @@
 		overflow.hidden = false;
 	}
 
+	function shellNarrow(shell) {
+		return shell.hasAttribute("data-tc-shell-narrow") || shell.clientWidth < 640;
+	}
+
 	function updateShell(shell) {
-		shell.classList.toggle("tc-shell--narrow", shell.clientWidth < 640);
+		var narrow = shellNarrow(shell);
+		shell.classList.toggle("tc-shell--narrow", narrow);
+		var rail = shell.querySelector(".tc-shell__rail [data-tc-rail]");
+		var nav = shell.querySelector(".tc-shell__rail .tc-nav");
+		if (rail) {
+			var icons = rail.classList.contains("tc-rail--icons");
+			rail.classList.toggle("tc-rail--drawer", narrow);
+			if (narrow) {
+				rail.classList.remove("tc-rail--column");
+			} else {
+				rail.classList.remove("tc-rail--drawer", "is-open");
+				rail.setAttribute("aria-expanded", "false");
+				if (!icons) {
+					rail.classList.add("tc-rail--column");
+				}
+			}
+		}
+		if (nav) {
+			var iconNav = nav.classList.contains("tc-nav--icons");
+			nav.classList.toggle("tc-nav--bottom", narrow);
+			if (narrow) {
+				nav.classList.remove("tc-nav--column");
+			} else {
+				nav.classList.remove("tc-nav--bottom");
+				if (!iconNav) {
+					nav.classList.add("tc-nav--column");
+				}
+			}
+		}
 	}
 
 	function barMoreLabel(bar) {
@@ -933,18 +965,43 @@
 			});
 		});
 
-		document.querySelectorAll("[data-tc-rail]").forEach(function (rail) {
-			var toggle = rail.querySelector("[data-tc-rail-toggle]");
-			function flipRail() {
-				var open = rail.classList.toggle("is-open");
+		document.querySelectorAll("[data-tc-shell]").forEach(function (shell) {
+			var rail = shell.querySelector("[data-tc-rail]");
+			if (!rail) return;
+			var toggle = shell.querySelector("[data-tc-rail-toggle]");
+			var apply = shell.querySelector("[data-tc-rail-apply]");
+			function setRailOpen(open) {
+				rail.classList.toggle("is-open", open);
 				rail.setAttribute("aria-expanded", open ? "true" : "false");
+			}
+			function closeRail() {
+				setRailOpen(false);
+				if (toggle) toggle.focus();
+			}
+			function flipRail() {
+				setRailOpen(!rail.classList.contains("is-open"));
 			}
 			if (toggle) {
 				toggle.addEventListener("click", flipRail);
 			}
+			if (apply) {
+				apply.addEventListener("click", closeRail);
+			}
 			var header = rail.querySelector(".tc-rail__chips");
 			if (header) {
 				header.addEventListener("dblclick", flipRail);
+			}
+			shell._tcCloseRail = closeRail;
+		});
+
+		document.addEventListener("keydown", function (e) {
+			if (e.key !== "Escape") return;
+			var open = document.querySelector(".tc-rail--drawer.is-open");
+			if (!open) return;
+			var shell = closest(open, "[data-tc-shell]");
+			if (shell && shell._tcCloseRail) {
+				e.preventDefault();
+				shell._tcCloseRail();
 			}
 		});
 

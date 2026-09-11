@@ -221,3 +221,129 @@ func min(a, b int) int {
 	}
 	return b
 }
+
+type railDrawerProbe struct {
+	ClosedRailInView bool    `json:"closedRailInView"`
+	NavBottom        bool    `json:"navBottom"`
+	OpenRailInView   bool    `json:"openRailInView"`
+	Drawer           bool    `json:"drawer"`
+	Open             bool    `json:"open"`
+	HScroll          float64 `json:"hScroll"`
+	OutOfBounds      int     `json:"outOfBounds"`
+}
+
+const railDrawerProbeJS = `(() => {
+  const shell = document.querySelector('[data-tc-shell]');
+  const toggle = shell && shell.querySelector('[data-tc-rail-toggle]');
+  const rail = shell && shell.querySelector('[data-tc-rail]');
+  const nav = shell && shell.querySelector('.tc-nav');
+  const vw = document.documentElement.clientWidth;
+  const railPeeks = (el) => {
+    if (!el || el.classList.contains('is-open')) return false;
+    const r = el.getBoundingClientRect();
+    if (r.width <= 1) return false;
+    if (el.classList.contains('tc-rail--drawer')) return r.right > 1;
+    return r.left >= -1 && r.right <= vw + 1;
+  };
+  const stage = document.querySelector('.screens-stage') || document.body;
+  const hScroll = Math.max(stage.scrollWidth - stage.clientWidth, 0);
+  const clipRect = (el) => {
+    let left = -Infinity, right = Infinity;
+    let p = el.parentElement;
+    while (p && p !== document.documentElement) {
+      const cs = getComputedStyle(p);
+      if (cs.overflowX !== 'visible') {
+        const pr = p.getBoundingClientRect();
+        left = Math.max(left, pr.left);
+        right = Math.min(right, pr.right);
+      }
+      p = p.parentElement;
+    }
+    const r = el.getBoundingClientRect();
+    return {
+      left: Math.max(r.left, left === -Infinity ? r.left : left),
+      right: Math.min(r.right, right === Infinity ? r.right : right)
+    };
+  };
+  let outOfBounds = 0;
+  for (const el of stage.querySelectorAll('*')) {
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || el.hidden) continue;
+    const box = el.getBoundingClientRect();
+    if (box.width === 0 && box.height === 0) continue;
+    const chrome = el.matches('.tc-bar, .tc-crumbs, .tc-head, .tc-top, .tc-docbar');
+    const r = chrome ? box : clipRect(el);
+    if (!chrome && r.right - r.left <= 1) continue;
+    if (el.closest('.tc-shell--narrow .tc-shell__rail')) continue;
+    if (r.right > vw + 1 || r.left < -1) outOfBounds++;
+  }
+  const closed = {
+    closedRailInView: railPeeks(rail),
+    navBottom: !!(nav && nav.classList.contains('tc-nav--bottom')),
+    drawer: !!(rail && rail.classList.contains('tc-rail--drawer')),
+    hScroll,
+    outOfBounds
+  };
+  if (toggle) toggle.click();
+  const openRect = rail && rail.getBoundingClientRect();
+  const openInView = !!(openRect && openRect.width > 1 && openRect.left >= -1 && openRect.right <= vw + 1);
+  return {
+    ...closed,
+    openRailInView: openInView,
+    open: !!(rail && rail.classList.contains('is-open'))
+  };
+})()`
+
+func TestScreensNarrowRailDrawer(t *testing.T) {
+	if !browser.ChromeAvailable() {
+		t.Skip("no Chromium-based browser found (set CHROME_PATH)")
+	}
+	if testing.Short() {
+		t.Skip("rail drawer check needs Chrome")
+	}
+	srv := screensServer(t)
+	h := browser.NewHarness(t)
+
+	var probe railDrawerProbe
+	url := screenURL(srv.URL, "notes", "")
+	if err := h.Run(url, 375, 812,
+		chromedp.Evaluate(`new Promise(function(resolve) {
+  (function tick(n) {
+    if (window.__tc && window.__tc.layoutUpdates) {
+      window.__tc.layoutUpdates();
+      requestAnimationFrame(function() {
+        window.__tc.layoutUpdates();
+        requestAnimationFrame(resolve);
+      });
+      return;
+    }
+    if (n > 200) { resolve(); return; }
+    setTimeout(function() { tick(n + 1); }, 25);
+  })(0);
+})`, nil),
+		chromedp.Evaluate(railDrawerProbeJS, &probe),
+	); err != nil {
+		t.Fatal(err)
+	}
+	if probe.ClosedRailInView {
+		t.Error("closed rail must not be in viewport")
+	}
+	if !probe.NavBottom {
+		t.Error("tc-nav must use tc-nav--bottom when drawer is closed")
+	}
+	if probe.HScroll > 1 {
+		t.Errorf("horizontal page scroll %.1fpx with closed drawer", probe.HScroll)
+	}
+	if probe.OutOfBounds > 0 {
+		t.Errorf("%d nodes outside viewport with closed drawer", probe.OutOfBounds)
+	}
+	if !probe.Drawer {
+		t.Error("narrow shell must apply tc-rail--drawer before opening")
+	}
+	if !probe.Open {
+		t.Error("toggle must open the rail drawer")
+	}
+	if !probe.OpenRailInView {
+		t.Error("open tc-rail must be in viewport")
+	}
+}

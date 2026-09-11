@@ -9,6 +9,13 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
+type adminEscrowFlash struct {
+	formErr    string
+	masterErr  string
+	recoverErr string
+	result     *view.EscrowRecoveryResult
+}
+
 func (s *Server) getSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -96,7 +103,7 @@ func (s *Server) getAdminEscrow(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	page := s.buildAdminEscrowPage(sess, "")
+	page := s.buildAdminEscrowPage(sess, adminEscrowFlash{})
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -107,24 +114,24 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := r.Context()
 	action := r.FormValue("action")
-	var errText string
+	var flash adminEscrowFlash
 	switch action {
 	case "enable":
 		err := s.users.EnableEscrow(ctx, sess.AccountID(),
 			r.FormValue("master"), r.FormValue("master2"))
 		if err != nil {
-			errText = string(formError(err))
+			flash.formErr = string(formError(err))
 		}
 	case "policy":
 		cover := r.FormValue("coverNew") == "on" || r.FormValue("coverNew") == "true"
 		if err := s.users.SetEscrowCoverNew(sess.AccountID(), cover); err != nil {
-			errText = string(formError(err))
+			flash.formErr = string(formError(err))
 		}
 	case "master":
 		err := s.users.ChangeEscrowMaster(ctx, sess.AccountID(),
 			r.FormValue("current"), r.FormValue("master"), r.FormValue("master2"))
 		if err != nil {
-			errText = string(formError(err))
+			flash.masterErr = string(formError(err))
 		}
 	case "recover":
 		login := r.FormValue("login")
@@ -134,22 +141,40 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 		}
 		temp, err := s.users.RecoverEscrow(ctx, sess.AccountID(), login, r.FormValue("master"))
 		if err != nil {
-			errText = string(formError(err))
+			flash.recoverErr = string(formError(err))
 		} else {
-			s.sendEscrowRecoveryMail(ctx, login, temp)
+			mailed := s.sendEscrowRecoveryMail(ctx, login, temp)
+			flash.result = &view.EscrowRecoveryResult{
+				Login:    text(login),
+				Password: text(temp),
+				Copy: view.Action{
+					ID: "admin.escrow.copy", Label: "Copy", Method: "GET", Enabled: true,
+				},
+				Mailed: escrowRecoveryMailedStatus(mailed),
+			}
+			page := s.buildAdminEscrowPage(sess, flash)
+			s.writePage(w, r, http.StatusOK, page)
+			return
 		}
 	default:
-		errText = "Unknown action."
+		flash.formErr = "Unknown action."
 	}
-	if errText != "" {
-		page := s.buildAdminEscrowPage(sess, errText)
+	if flash.formErr != "" || flash.masterErr != "" || flash.recoverErr != "" {
+		page := s.buildAdminEscrowPage(sess, flash)
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
 	s.redirect(w, r, "/admin/escrow")
 }
 
-func (s *Server) buildAdminEscrowPage(sess *session.Session, errText string) view.AdminEscrowPage {
+func escrowRecoveryMailedStatus(sent bool) view.Text {
+	if sent {
+		return text("sent")
+	}
+	return text("SMTP not configured")
+}
+
+func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFlash) view.AdminEscrowPage {
 	snap := s.store.Snapshot()
 	enabled := store.EscrowActive(&snap)
 	page := view.AdminEscrowPage{
@@ -160,6 +185,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, errText string) vie
 			Title: text("Administrative access to saved credentials"),
 			Body:  text("Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user's saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and mailed to them."),
 		},
+		Result: flash.result,
 	}
 	if enabled {
 		page.Form = s.plainForm("/admin/escrow", "POST",
@@ -168,14 +194,28 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, errText string) vie
 			view.FormRow{Name: "coverNew", Label: "New accounts are covered", Kind: view.InputCheck,
 				Value: text(boolStr(snap.Settings.EscrowCoverNewUsers))},
 		)
+		if flash.formErr != "" {
+			page.Form.Sets[0].Rows[len(page.Form.Sets[0].Rows)-1].Error = text(flash.formErr)
+		}
+		page.Master = s.plainForm("/admin/escrow", "POST",
+			csrfField(sess),
+			view.FormRow{Name: "action", Kind: view.InputText, Value: text("master")},
+			view.FormRow{Name: "current", Label: "Current", Kind: view.InputPassword, Required: true},
+			view.FormRow{Name: "master", Label: "New", Kind: view.InputPassword, Required: true,
+				Hint: text("Only the recovery private key is re-encrypted. Deposited copies are untouched.")},
+			view.FormRow{Name: "master2", Label: "Repeat", Kind: view.InputPassword, Required: true},
+		)
+		if flash.masterErr != "" {
+			page.Master.Sets[0].Rows[len(page.Master.Sets[0].Rows)-1].Error = text(flash.masterErr)
+		}
 		page.Recover = s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputText, Value: text("recover")},
 			view.FormRow{Name: "login", Label: "Account", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true},
 		)
-		if errText != "" {
-			page.Recover.Sets[0].Rows[len(page.Recover.Sets[0].Rows)-1].Error = text(errText)
+		if flash.recoverErr != "" {
+			page.Recover.Sets[0].Rows[len(page.Recover.Sets[0].Rows)-1].Error = text(flash.recoverErr)
 		}
 	} else {
 		page.Form = s.plainForm("/admin/escrow", "POST",
@@ -185,8 +225,8 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, errText string) vie
 				Hint: text("If you lose this password, deposited keys cannot be opened. This is not backup.")},
 			view.FormRow{Name: "master2", Label: "Repeat", Kind: view.InputPassword, Required: true},
 		)
-		if errText != "" {
-			page.Form.Sets[0].Rows[len(page.Form.Sets[0].Rows)-1].Error = text(errText)
+		if flash.formErr != "" {
+			page.Form.Sets[0].Rows[len(page.Form.Sets[0].Rows)-1].Error = text(flash.formErr)
 		}
 	}
 	for _, u := range snap.Users {

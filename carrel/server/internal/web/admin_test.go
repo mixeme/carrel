@@ -1,12 +1,114 @@
 package web_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/url"
 	"testing"
 
 	"carrel.dev/carrel/server/view"
 )
+
+func (h *harness) enableEscrow(adminLogin, adminPassword, master string) {
+	h.t.Helper()
+	adminID := h.admin(adminLogin, adminPassword)
+	alice := h.login(adminLogin, adminPassword)
+	form := url.Values{
+		"action":  {"enable"},
+		"master":  {master},
+		"master2": {master},
+	}
+	rec := h.do(postForm("/admin/escrow", alice, form))
+	if rec.Code != 303 {
+		h.t.Fatalf("POST enable escrow: %d, want redirect", rec.Code)
+	}
+	_ = adminID
+}
+
+func TestPostAdminEscrowRecoverShowsTempPassword(t *testing.T) {
+	h := newHarness(t)
+	const master = "sixteen-char-pass!"
+	h.enableEscrow("alice", "password123", master)
+	alice := h.login("alice", "password123")
+	snap := h.st.Snapshot()
+	adminID := snap.UserByLogin("alice").ID
+	h.invite(adminID, "bob", "bobpass123")
+
+	form := url.Values{"action": {"recover"}, "login": {"bob"}, "master": {master}}
+	rec := h.do(postForm("/admin/escrow", alice, form))
+	if rec.Code != 200 {
+		t.Fatalf("POST recover: %d, want 200 with temp password on page", rec.Code)
+	}
+	var page view.AdminEscrowPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+		t.Fatal(err)
+	}
+	if page.Result == nil || page.Result.Password == "" {
+		t.Fatal("recovery result missing temporary password")
+	}
+	if page.Result.Mailed != "SMTP not configured" {
+		t.Fatalf("mailed = %q, want SMTP not configured", page.Result.Mailed)
+	}
+	temp := string(page.Result.Password)
+	if _, _, ok, _ := h.users.Authenticate(context.Background(), "bob", temp); !ok {
+		t.Fatal("cannot sign in with temporary password from recovery page")
+	}
+}
+
+func TestGetAdminEscrowMasterFormWhenEnabled(t *testing.T) {
+	h := newHarness(t)
+	h.enableEscrow("alice", "password123", "sixteen-char-pass!")
+	alice := h.login("alice", "password123")
+
+	rec := h.do(get("/admin/escrow", alice))
+	if rec.Code != 200 {
+		t.Fatalf("GET escrow: %d", rec.Code)
+	}
+	var page view.AdminEscrowPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+		t.Fatal(err)
+	}
+	if len(page.Master.Sets) == 0 || len(page.Master.Sets[0].Rows) == 0 {
+		t.Fatal("master form missing when escrow is enabled")
+	}
+	found := false
+	for _, row := range page.Master.Sets[0].Rows {
+		if row.Name == "action" && row.Value == "master" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatal("master form missing action=master when escrow is enabled")
+	}
+}
+
+func TestPostAdminEscrowChangeMaster(t *testing.T) {
+	h := newHarness(t)
+	const oldMaster = "sixteen-char-pass!"
+	const newMaster = "another-sixteen!!"
+	h.enableEscrow("alice", "password123", oldMaster)
+	alice := h.login("alice", "password123")
+	snap := h.st.Snapshot()
+	adminID := snap.UserByLogin("alice").ID
+	h.invite(adminID, "bob", "bobpass123")
+
+	form := url.Values{
+		"action":  {"master"},
+		"current": {oldMaster},
+		"master":  {newMaster},
+		"master2": {newMaster},
+	}
+	rec := h.do(postForm("/admin/escrow", alice, form))
+	if rec.Code != 303 {
+		t.Fatalf("POST change master: %d, want redirect", rec.Code)
+	}
+	form = url.Values{"action": {"recover"}, "login": {"bob"}, "master": {newMaster}}
+	rec = h.do(postForm("/admin/escrow", alice, form))
+	if rec.Code != 200 {
+		t.Fatalf("POST recover with new master: %d", rec.Code)
+	}
+}
 
 func TestPostAdminUsersDisable(t *testing.T) {
 	h := newHarness(t)

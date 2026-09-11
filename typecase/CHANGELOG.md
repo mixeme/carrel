@@ -11,10 +11,12 @@ do, not what the authors did.
 - **Assemble screens through `widget.Shell`.** Pass `Nav`, `Rail`, `Main`, and `Side`
   as typed widgets. Empty `Rail` / `Side` no longer emit a column; `notes-edit`
   is a shell with `Top` + `Main` only.
-- **Narrow layout.** At phone widths the rail column collapses to an off-screen
-  drawer; an open side panel covers the viewport. `tc-bar` and `tc-crumbs` clamp
-  to the viewport; middle crumbs collapse into a menu. The screen check measures
-  those widgets at 375 px (it does not skip `.tc-main`).
+- **Narrow layout.** At phone widths the rail column collapses; `Sources` in `tc-top`
+  opens the rail as a full-screen `tc-rail--drawer`; `Apply`, `Esc`, or the toggle
+  again closes it and returns focus. Section nav stays as `tc-nav--bottom`, not
+  inside the drawer. An open side panel still covers the viewport. `tc-bar` and
+  `tc-crumbs` clamp to the viewport; middle crumbs collapse into a menu. The
+  screen check measures those widgets at 375 px (it does not skip `.tc-main`).
 - **Gate `screens-compose`** now scans all demo screen assemblers, not only
   `notes.go`.
 
@@ -25,19 +27,19 @@ do, not what the authors did.
 - Demo screens (`files`, `contacts`, `io`, `duplicates`, `states`, all notes
   frames) assembled via `shellFrame` and widgets — no `shellWrap`.
 - `tc.js`: `updateCrumbs` (middle crumbs → menu, then clamp to the viewport),
-  `clampBar`. Browser screen check measures `.tc-bar` / `.tc-crumbs` /
+  `clampBar`, narrow rail drawer (`tc-rail--drawer`, `tc-nav--bottom`, toggle /
+  apply / `Esc`). Browser screen check measures `.tc-bar` / `.tc-crumbs` /
   `.tc-head` / `.tc-top` / `.tc-docbar` against the viewport at 375 px; other
   nodes use the clipped box so `overflow: auto` in `tc-main` does not flag
-  every cell.
-- CSS: narrow rail drawer, narrow side overlay, bar/crumbs/head/docbar overflow.
+  every cell. `TestScreensNarrowRailDrawer` opens the rail at 375 px.
+- CSS: narrow rail drawer, bottom section nav, rail toggle/apply in `tc-top`,
+  narrow side overlay, bar/crumbs/head/docbar overflow.
+- `widget.Shell`: `data-tc-rail-toggle` and `data-tc-rail-apply` in `tc-top` when
+  the rail column is non-empty; `labels.Sources` and `labels.Apply`.
 
 ### Not yet included
 
-- Narrow rail has no open control. Leftover:
-  [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawer.md).
-  Drawer is `tc-rail--drawer` (full screen); open/Apply live in `tc-top`
-  (`labels.Sources`, `labels.Apply`); `tc-nav` goes `bottom`, not into the
-  drawer. Do not pass `Rail.Layout` / `Nav.Layout` from the screen.
+- Nothing from [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawer.md).
 
 The typecase wordmark work documented below stays documentation-only until
 released separately.

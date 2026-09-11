@@ -189,7 +189,20 @@ func Entries() []Entry {
 	add("tables", "tc-queue", "partial", widget.Queue{Rows: []widget.QueueRow{{Label: "Partial", State: widget.QueuePartial}}}.Render())
 	add("tables", "tc-queue", "cancelled", widget.Queue{Rows: []widget.QueueRow{{Label: "Cancelled", State: widget.QueueCancelled}}}.Render())
 
-	add("shell", "tc-shell", "narrow", widget.Shell{Narrow: true, Rail: widget.Rail{Foot: widget.RailFoot{Build: demoBuild}}, Main: widget.Main{Label: "Main", Body: []widget.Node{widget.Paragraph("Narrow")}}, Side: shellSide}.Render())
+	add("shell", "tc-shell", "narrow", widget.Shell{
+		Narrow: true,
+		Top:    widget.Top{Brand: widget.Brand{Mark: "◆", Word: "App"}},
+		Nav: widget.Nav{
+			Items:   []widget.NavItem{{Label: "Notes", Icon: "📝", Href: "/notes"}, {Label: "Files", Icon: "📁", Href: "/files"}},
+			Current: "/notes",
+		},
+		Rail: widget.Rail{
+			Foot:     widget.RailFoot{Build: demoBuild},
+			Sections: []widget.RailSection{{Title: "Views", Rows: []widget.TickRow{{Label: "All", Tick: widget.TickOn}}}},
+		},
+		Main: widget.Main{Label: "Main", Body: []widget.Node{widget.Paragraph("Narrow")}},
+		Side: shellSide,
+	}.Render())
 	add("shell", "tc-top", "full", widget.Top{
 		Brand:  widget.Brand{Mark: "◆", Word: "App"},
 		Search: widget.Search{Action: "/search"},
