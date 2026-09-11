@@ -3,7 +3,7 @@ package widget
 // Bar — tc-bar
 //
 // Роль. Строка кнопок и переключателей над содержимым или в панели.
-// Вход. Bar{ Left, Right, Rank2, Separators, Collapsed, MoreLabel }.
+// Вход. Bar{ Left []Node, Right []Node, Rank2, Separators, Collapsed, MoreLabel }.
 // Состояния. full | collapsed.
 // Инварианты. Одна строка при любой ширине; лишнее под «ещё» по рангу.
 // Поведение. Пересчёт при изменении ширины, «ещё» как tc-menu.
@@ -11,8 +11,8 @@ package widget
 // Содержимое. tc-btn, tc-seg, tc-menu, tc-range, разделители.
 // Чего нет. Нет второй строки и горизонтальной прокрутки.
 type Bar struct {
-	Left       []Action
-	Right      []Action
+	Left       []Node
+	Right      []Node
 	Rank2      []Action
 	Separators bool
 	Collapsed  bool
@@ -24,8 +24,8 @@ func (b Bar) Render() string {
 	if b.Collapsed {
 		cls = classes(cls, "is-collapsed")
 	}
-	left := renderActions(b.Left)
-	right := renderActions(b.Right)
+	left := renderNodes(b.Left)
+	right := renderNodes(b.Right)
 	sep := ""
 	if b.Separators {
 		sep = `<span class="tc-bar__sep" aria-hidden="true"></span>`

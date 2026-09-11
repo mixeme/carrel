@@ -16,7 +16,8 @@
 .catalog-nav { display: flex; gap: 1em; margin-bottom: 1em; }
 /* Scrims, overlays and the rail drawer are fixed to the viewport by design.
    In the catalog every state is on one page, so each such cell becomes its own
-   containing block; otherwise one open scrim covers every other entry. */
+   containing block; otherwise one open scrim covers every other entry.
+   Empty-looking space below overlay content is this min-height, not a broken widget. */
 .catalog-demo:has(.tc-scrim, .tc-overlay, .tc-rail--drawer, .tc-menu, .tc-usermenu, .tc-search) {
 	position: relative;
 	min-height: 220px;
@@ -26,3 +27,9 @@
 .catalog-demo:has(.tc-meter) {
 	padding-bottom: 1.25em;
 }
+
+/* Библиотека сбросила кегль заголовков (L-5.2), а страница каталога — это её
+   собственная обвязка: её лестницу называем здесь, а не в бандле. */
+body > h1 { font-size: 1.8em; font-weight: 400; margin: 0 0 0.5em; }
+.catalog-family > h2 { font-size: 1.3em; margin: 0 0 0.5em; }
+.catalog-entry > h3 { font-size: 1em; margin: 0; }

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"carrel.dev/typecase/css"
 	"carrel.dev/typecase/gate"
 )
 
@@ -360,6 +361,77 @@ func TestBite_specL4_missingSpec(t *testing.T) {
 	p := brokenModule(t)
 	if err := gate.Run(gate.SpecL4, p, nil); err == nil {
 		t.Fatal("expected spec-l4 gate to fail when spec unavailable")
+	}
+}
+
+func TestBite_geometry(t *testing.T) {
+	broken := readBroken(t, "geometry.css")
+	live, err := css.Bundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := gate.CheckGeometryCSS(live); err != nil {
+		t.Fatalf("live bundle should pass geometry: %v", err)
+	}
+	if err := gate.CheckGeometryCSS(live + broken); err == nil {
+		t.Fatal("expected geometry gate to fail on broken css")
+	}
+}
+
+func TestBite_screensCoverage(t *testing.T) {
+	entries := catalogEntries()
+	if err := gate.CheckScreensCoverage(entries); err != nil {
+		t.Fatalf("live screens should cover catalog widgets: %v", err)
+	}
+	entries = append(entries, gate.CatalogEntry{Widget: "tc-not-a-widget", HTML: `<div class="tc-not-a-widget"></div>`})
+	if err := gate.CheckScreensCoverage(entries); err == nil {
+		t.Fatal("expected screens-coverage gate to fail on extra catalog widget")
+	}
+}
+
+func TestBite_screensCompose(t *testing.T) {
+	root, err := gate.FindModuleRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := gate.Paths(root)
+	if err := gate.CheckScreensCompose(p); err != nil {
+		t.Fatalf("live notes.go should pass: %v", err)
+	}
+	tmp := t.TempDir()
+	screensDir := filepath.Join(tmp, "screens")
+	if err := os.MkdirAll(screensDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(screensDir, "notes.go"), []byte("package screens\n\nfunc Notes() string {\n\treturn `<main class=\"tc-main\"`\n}\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	p.Root = tmp
+	if err := gate.CheckScreensCompose(p); err == nil {
+		t.Fatal("expected screens-compose gate to fail on manual tc-main")
+	}
+}
+
+func TestBite_screensCSS(t *testing.T) {
+	root, err := gate.FindModuleRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := gate.Paths(root)
+	if err := gate.CheckScreensCSS(p); err != nil {
+		t.Fatalf("live screens.css should pass: %v", err)
+	}
+	tmp := t.TempDir()
+	screensDir := filepath.Join(tmp, "screens")
+	if err := os.MkdirAll(screensDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(screensDir, "screens.css"), []byte(readBroken(t, "screens-css.css")), 0644); err != nil {
+		t.Fatal(err)
+	}
+	p.Root = tmp
+	if err := gate.CheckScreensCSS(p); err == nil {
+		t.Fatal("expected screens-css gate to fail on .tc- selector")
 	}
 }
 

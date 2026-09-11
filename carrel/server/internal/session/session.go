@@ -32,6 +32,7 @@ type Session struct {
 	history    []HistoryEntry
 	losses     LossRegistry
 	fanout     int
+	unlockAt   time.Time
 
 	cache *Cache
 	mgr   *Manager
@@ -118,6 +119,30 @@ func (s *Session) Expired(now time.Time) bool {
 		return true
 	}
 	return !now.Before(s.lastSeen.Add(conf.SessionIdleTimeout))
+}
+
+// UnlockUntil returns the end of the S-10.7 secret-release window, or nil
+// when the sheet was not confirmed or the window has passed. The window is
+// per session: it dies with the cookie, and another device of the same
+// person confirms its own password.
+func (s *Session) UnlockUntil(now time.Time) *time.Time {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.ended || !now.Before(s.unlockAt) {
+		return nil
+	}
+	t := s.unlockAt
+	return &t
+}
+
+// SetUnlockUntil opens the secret-release window until t.
+func (s *Session) SetUnlockUntil(t time.Time) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.ended {
+		return
+	}
+	s.unlockAt = t
 }
 
 // Cache returns the session cache (S-4.2).
@@ -262,6 +287,7 @@ func (s *Session) end() {
 	s.history = nil
 	s.losses.byServer = nil
 	s.fanout = 0
+	s.unlockAt = time.Time{}
 	s.mu.Unlock()
 
 	s.cache.markEnded()

@@ -91,4 +91,16 @@ func TestIssueConsoleWipeLink(t *testing.T) {
 	if !foundAudit {
 		t.Fatal("audit entry missing")
 	}
+
+	// A data directory without a volume is a mistake, not a first run: the
+	// command must fail and must not plant a server.key there.
+	empty := t.TempDir()
+	cmd = exec.Command(bin, "admin")
+	cmd.Env = append(os.Environ(), "CARREL_DATA_DIR="+empty)
+	if err := cmd.Run(); err == nil {
+		t.Fatal("carrel-wipe succeeded on an empty data dir")
+	}
+	if _, err := os.Stat(filepath.Join(empty, crypt.ServerKey)); !os.IsNotExist(err) {
+		t.Fatalf("server.key created in an empty data dir (stat err = %v)", err)
+	}
 }

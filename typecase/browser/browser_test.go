@@ -85,3 +85,34 @@ func TestL9_3_biteTests(t *testing.T) {
 		})
 	}
 }
+
+func TestParseCSSColor(t *testing.T) {
+	cases := []struct {
+		in   string
+		want [3]float64
+	}{
+		{"rgb(23, 33, 28)", [3]float64{23.0 / 255, 33.0 / 255, 28.0 / 255}},
+		{"color(srgb 0.914824 0.923451 0.89098)", [3]float64{0.914824, 0.923451, 0.89098}},
+		{"color(srgb 0.152941 0.196078 0.162667 / 1)", [3]float64{0.152941, 0.196078, 0.162667}},
+		{"#17211c", [3]float64{0x17 / 255.0, 0x21 / 255.0, 0x1c / 255.0}},
+	}
+	for _, c := range cases {
+		got, err := browser.ParseCSSColor(c.in)
+		if err != nil {
+			t.Errorf("%q: %v", c.in, err)
+			continue
+		}
+		for i := 0; i < 3; i++ {
+			d := got[i] - c.want[i]
+			if d < 0 {
+				d = -d
+			}
+			if d > 1e-6 {
+				t.Errorf("%q channel %d: got %g want %g", c.in, i, got[i], c.want[i])
+			}
+		}
+	}
+	if _, err := browser.ParseCSSColor("hsla(0, 0%, 0%, 1)"); err == nil {
+		t.Fatal("expected unsupported color to fail")
+	}
+}

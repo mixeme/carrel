@@ -65,6 +65,8 @@ func (t Top) Render() string {
 		user = t.User.Render()
 	}
 	nav := t.Nav.Render()
+	// Поиск рисуется всегда: «поле не убирается параметром» — инвариант tc-top,
+	// а не недосмотр. Ширину ему задаёт геометрия панели, а не наличие входа.
 	search := t.Search.Render()
 	mark := t.Mark.Render()
 	return `<header` + classAttr(cls) + `>` + t.Brand.Render() + nav + search + `<div class="tc-top__actions">` + create + user + `</div>` + mark + `</header>`
@@ -73,7 +75,7 @@ func (t Top) Render() string {
 // Main — tc-main
 //
 // Роль. Всё, что осталось после рейла и панели.
-// Вход. Main{ Label, Body }.
+// Вход. Main{ Label, Body []Node }.
 // Состояния. нет.
 // Инварианты. Ширину не ограничивает.
 // Поведение. Своя прокрутка.
@@ -82,11 +84,11 @@ func (t Top) Render() string {
 // Чего нет. Нет отступов «на всякий случай».
 type Main struct {
 	Label string
-	Body  Prose
+	Body  []Node
 }
 
 func (m Main) Render() string {
-	return `<main class="tc-main"` + attr("aria-label", m.Label) + `><div class="tc-main__body">` + m.Body.Render() + `</div></main>`
+	return `<main class="tc-main"` + attr("aria-label", m.Label) + `><div class="tc-main__body">` + renderNodes(m.Body) + `</div></main>`
 }
 
 // Rail — tc-rail
@@ -126,6 +128,10 @@ func (r Rail) Render() string {
 	for _, c := range r.Chips {
 		chips += c.Render()
 	}
+	if chips != "" {
+		// Пустая полоса чипов рисовала линовку и отступ из ничего.
+		chips = `<div class="tc-rail__chips">` + chips + `</div>`
+	}
 	var secs string
 	for _, s := range r.Sections {
 		secs += s.Render()
@@ -134,7 +140,7 @@ func (r Rail) Render() string {
 	if r.Note != "" {
 		note = `<p class="tc-rail__note">` + esc(r.Note) + `</p>`
 	}
-	return `<aside` + classAttr(cls) + ` data-tc-rail` + ariaBool("aria-expanded", r.Open) + `><div class="tc-rail__chips">` + chips + `</div><div class="tc-rail__sections">` + secs + `</div>` + note + r.Foot.Render() + `</aside>`
+	return `<aside` + classAttr(cls) + ` data-tc-rail` + ariaBool("aria-expanded", r.Open) + `>` + chips + `<div class="tc-rail__sections">` + secs + `</div>` + note + r.Foot.Render() + `</aside>`
 }
 
 // RailSection — tc-railsec
@@ -229,7 +235,7 @@ func (s Side) Render() string {
 		blocks += b.Sec.Render()
 	}
 	id := uniqueID("tc-side")
-	return `<aside` + classAttr(cls) + ` data-tc-side` + attr("id", id) + attr("aria-label", s.Label) + `><header class="tc-side__head"><h2 class="tc-side__title">` + esc(s.Title) + `</h2>` + Close{For: id, Label: labels.ClosePanel}.Render() + `</header><div class="tc-side__body">` + blocks + `</div><footer class="tc-side__foot">` + Bar{Left: s.Actions}.Render() + `</footer></aside>`
+	return `<aside` + classAttr(cls) + ` data-tc-side` + attr("id", id) + attr("aria-label", s.Label) + `><header class="tc-side__head"><h2 class="tc-side__title">` + esc(s.Title) + `</h2>` + Close{For: id, Label: labels.ClosePanel}.Render() + `</header><div class="tc-side__body">` + blocks + `</div><footer class="tc-side__foot">` + Bar{Left: ActionsAsNodes(s.Actions)}.Render() + `</footer></aside>`
 }
 
 // Nav — tc-nav
@@ -287,7 +293,7 @@ type Head struct {
 }
 
 func (h Head) Render() string {
-	return `<header class="tc-head">` + h.Crumbs.Render() + h.Mark.Render() + `<div class="tc-head__titles"><h1 class="tc-head__title">` + esc(h.Title) + `</h1><p class="tc-head__sub">` + esc(h.Sub) + `</p></div>` + Bar{Right: h.Actions, Rank2: h.Rank2}.Render() + `</header>`
+	return `<header class="tc-head">` + h.Crumbs.Render() + h.Mark.Render() + `<div class="tc-head__titles"><h1 class="tc-head__title">` + esc(h.Title) + `</h1><p class="tc-head__sub">` + esc(h.Sub) + `</p></div>` + Bar{Right: ActionsAsNodes(h.Actions), Rank2: h.Rank2}.Render() + `</header>`
 }
 
 // Crumbs — tc-crumbs

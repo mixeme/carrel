@@ -22,7 +22,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	key, err := crypt.LoadOrCreateServerKey(cfg.DataDir)
+	// The console command only reads an existing volume. A typo in
+	// CARREL_DATA_DIR must fail, not plant a fresh server.key in the wrong
+	// place.
+	key, err := crypt.LoadServerKey(cfg.DataDir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

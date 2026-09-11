@@ -2,7 +2,6 @@ package browser
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -179,16 +178,60 @@ func checkBarOneRow(h *Harness, url string, width, height int) error {
 	return nil
 }
 
+// tapHitJS probes the hit area rather than the drawn box: four points 21 px
+// from the centre must land on the control itself. A pseudo-element that
+// widens the zone is hit-tested as its owner, so this sees the zone a finger
+// sees — and a control that merely grew its paint passes for the wrong reason,
+// which the drawn-size probe below catches.
+const tapHitJS = `(() => {
+  const sels = [".tc-tick", ".tc-tickrow__tick", ".tc-close", ".tc-check", ".tc-nav--bottom .tc-nav__item"];
+  const bad = [];
+  for (const sel of sels) {
+    const el = document.querySelector(sel);
+    if (!el) { bad.push(sel + ": missing"); continue; }
+    const r = el.getBoundingClientRect();
+    const cx = r.x + r.width / 2, cy = r.y + r.height / 2;
+    for (const [x, y] of [[cx - 21, cy], [cx + 21, cy], [cx, cy - 21], [cx, cy + 21]]) {
+      const hit = document.elementFromPoint(x, y);
+      if (!hit || !(el === hit || el.contains(hit))) {
+        bad.push(sel + ": no hit at " + Math.round(x - cx) + "," + Math.round(y - cy));
+        break;
+      }
+    }
+  }
+  return bad;
+})()`
+
+// tapDrawnJS reports the drawn rectangle of the marks that must stay small in
+// the normal density: 13 px for a tick, 24 px for a close.
+const tapDrawnJS = `(() => {
+  const want = { ".tc-tick": 13, ".tc-tickrow__tick": 13, ".tc-close": 24 };
+  const bad = [];
+  for (const sel of Object.keys(want)) {
+    const el = document.querySelector(sel);
+    if (!el) { bad.push(sel + ": missing"); continue; }
+    const r = el.getBoundingClientRect();
+    if (Math.abs(r.width - want[sel]) > 1 || Math.abs(r.height - want[sel]) > 1) {
+      bad.push(sel + ": " + r.width.toFixed(1) + "x" + r.height.toFixed(1) + ", want " + want[sel]);
+    }
+  }
+  return bad;
+})()`
+
 func checkTapTarget(h *Harness, url string, width, height int) error {
-	var hgt float64
-	err := h.Run(url, width, height,
-		chromedp.Evaluate(`(() => { const el = document.querySelector(".tc-nav--bottom .tc-nav__item"); return el ? el.getBoundingClientRect().height : 0; })()`, &hgt),
-	)
-	if err != nil {
+	var missed []string
+	if err := h.Run(url, width, height, chromedp.Evaluate(tapHitJS, &missed)); err != nil {
 		return err
 	}
-	if hgt+1e-9 < 44 {
-		return fmt.Errorf("tap-target: height %.1f < 44px", hgt)
+	if len(missed) > 0 {
+		return fmt.Errorf("tap-target: hit area under 44px: %s", strings.Join(missed, "; "))
+	}
+	var grown []string
+	if err := h.Run(url, 1280, 900, chromedp.Evaluate(tapDrawnJS, &grown)); err != nil {
+		return err
+	}
+	if len(grown) > 0 {
+		return fmt.Errorf("tap-target: mark drawn at tap size: %s", strings.Join(grown, "; "))
 	}
 	return nil
 }
@@ -256,11 +299,11 @@ func checkContrast(h *Harness, url string, width, height int) error {
 		{"light", light},
 		{"dark", dark},
 	} {
-		fg, err := parseRGB(theme.s.Fg)
+		fg, err := ParseCSSColor(theme.s.Fg)
 		if err != nil {
 			return fmt.Errorf("contrast %s fg: %w", theme.name, err)
 		}
-		bg, err := parseRGB(theme.s.Bg)
+		bg, err := ParseCSSColor(theme.s.Bg)
 		if err != nil {
 			return fmt.Errorf("contrast %s bg: %w", theme.name, err)
 		}
@@ -287,42 +330,4 @@ func checkThemeGeometry(h *Harness, url string, width, height int) error {
 		return fmt.Errorf("theme-geometry: rectangles differ between themes")
 	}
 	return nil
-}
-
-func parseRGB(css string) ([3]float64, error) {
-	css = strings.TrimSpace(css)
-	if strings.HasPrefix(css, "rgb(") {
-		return parseRGBTuple(css)
-	}
-	if strings.HasPrefix(css, "#") {
-		r, g, b, err := ParseHexColor(css)
-		return [3]float64{r, g, b}, err
-	}
-	return [3]float64{}, fmt.Errorf("unsupported color %q", css)
-}
-
-func parseRGBTuple(css string) ([3]float64, error) {
-	inner := css[4 : len(css)-1]
-	parts := strings.Split(inner, ",")
-	if len(parts) != 3 {
-		return [3]float64{}, fmt.Errorf("bad rgb %q", css)
-	}
-	var out [3]float64
-	for i, p := range parts {
-		p = strings.TrimSpace(p)
-		if strings.HasSuffix(p, "%") {
-			v, err := strconv.ParseFloat(strings.TrimSuffix(p, "%"), 64)
-			if err != nil {
-				return out, err
-			}
-			out[i] = v / 100
-			continue
-		}
-		v, err := strconv.ParseFloat(p, 64)
-		if err != nil {
-			return out, err
-		}
-		out[i] = v / 255
-	}
-	return out, nil
 }

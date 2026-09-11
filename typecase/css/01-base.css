@@ -22,7 +22,10 @@
 	src: url("../fonts/SourceCodePro.ttf") format("truetype");
 }
 
-.tc-root {
+/* База висит на атрибуте, который разметка несёт сама. Пока она держалась за
+   класс, класс вешал сценарий, и без него страница рисовалась умолчаниями
+   браузера — 16 px Times вместо названного кегля (L-6.1). */
+[data-tc-root] {
 	box-sizing: border-box;
 	color: var(--tc-ink);
 	background: var(--tc-bg);
@@ -31,10 +34,33 @@
 	line-height: 1.45;
 }
 
-.tc-root *,
-.tc-root *::before,
-.tc-root *::after {
+[data-tc-root] *,
+[data-tc-root] *::before,
+[data-tc-root] *::after {
 	box-sizing: border-box;
+}
+
+/* Заголовок не несёт кегля браузера: размер называет тот виджет, которому он
+   нужен. Иначе h1 в tc-head оказывается вдвое крупнее базы просто потому, что
+   так решил браузер, а не библиотека (L-5.2). Сброс написан через :where,
+   чтобы его вес был нулевым: правило виджета перекрывает его без !important. */
+:where([data-tc-root]) :where(h1, h2, h3, h4) {
+	font-size: inherit;
+	font-weight: 600;
+	margin: 0;
+}
+
+/* Контролы шрифт не наследуют: браузер даёт им системный. Одно правило вместо
+   перечисления семейства у каждого класса. */
+:where([data-tc-root]) :where(button, input, select, textarea) {
+	font: inherit;
+}
+
+/* Тем же браузерным умолчанием живут kbd, code, samp и pre: у них своя
+   моноширинная и свой кегль. Моноширинная у библиотеки одна — названная. */
+:where([data-tc-root]) :where(code, kbd, samp, pre) {
+	font-family: var(--tc-font-mono);
+	font-size: inherit;
 }
 
 .tc-icon {

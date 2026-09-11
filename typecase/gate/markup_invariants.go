@@ -18,6 +18,9 @@ func checkInvariantGate(ref, widget string, catalog []CatalogEntry, widgetDir st
 		return nil
 	}
 	html := widgetHTML(catalog, widget)
+	if compositeInvariants[name] {
+		html = composedHTML(catalog, widget)
+	}
 	return spec.fn(widget, html, widgetDir)
 }
 

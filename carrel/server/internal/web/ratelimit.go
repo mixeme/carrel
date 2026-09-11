@@ -1,8 +1,6 @@
 package web
 
 import (
-	"net"
-	"net/http"
 	"sync"
 	"time"
 
@@ -42,91 +40,98 @@ func (b *bucket) allow(now time.Time, n float64) bool {
 	return true
 }
 
+// full reports whether the bucket has refilled completely: nobody is being
+// limited by it, so it can be forgotten and rebuilt on the next request.
+func (b *bucket) full(now time.Time) bool {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.tokens+now.Sub(b.last).Seconds()*b.rate >= b.capacity
+}
+
+// bucketMap is one keyed family of buckets. Keys arrive from the network
+// (addresses, cookie values, typed logins), so the map must not grow with the
+// attacker: once it holds more than sweepAbove entries, a lookup first drops
+// every bucket that has refilled. A full bucket carries no state worth
+// keeping, and rebuilding it costs one allocation.
+type bucketMap struct {
+	perMinute int
+	buckets   map[string]*bucket
+	lastSweep time.Time
+}
+
+const (
+	sweepAbove    = 4096
+	sweepInterval = time.Second
+)
+
+func newBucketMap(perMinute int) *bucketMap {
+	return &bucketMap{perMinute: perMinute, buckets: make(map[string]*bucket)}
+}
+
+func (m *bucketMap) get(key string, now time.Time) *bucket {
+	if len(m.buckets) > sweepAbove && now.Sub(m.lastSweep) >= sweepInterval {
+		m.lastSweep = now
+		for k, b := range m.buckets {
+			if b.full(now) {
+				delete(m.buckets, k)
+			}
+		}
+	}
+	b, ok := m.buckets[key]
+	if !ok {
+		b = newBucket(float64(m.perMinute), m.perMinute)
+		b.last = now
+		m.buckets[key] = b
+	}
+	return b
+}
+
 // Limiter applies architecture.md rate buckets in memory.
 type Limiter struct {
-	loginAccount map[string]*bucket
-	loginIP      map[string]*bucket
-	anonIP       map[string]*bucket
-	session      map[string]*bucket
 	mu           sync.Mutex
+	loginAccount *bucketMap
+	loginIP      *bucketMap
+	anonIP       *bucketMap
+	session      *bucketMap
 }
 
 func NewLimiter() *Limiter {
 	return &Limiter{
-		loginAccount: make(map[string]*bucket),
-		loginIP:      make(map[string]*bucket),
-		anonIP:       make(map[string]*bucket),
-		session:      make(map[string]*bucket),
+		loginAccount: newBucketMap(conf.LoginRatePerAccount),
+		loginIP:      newBucketMap(conf.LoginRatePerIP),
+		anonIP:       newBucketMap(conf.AnonTokenRatePerIP),
+		session:      newBucketMap(conf.SessionRateLimit),
 	}
 }
 
-func (l *Limiter) loginAccountBucket(key string) *bucket {
+func (l *Limiter) take(m *bucketMap, key string, now time.Time) *bucket {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	b, ok := l.loginAccount[key]
-	if !ok {
-		b = newBucket(float64(conf.LoginRatePerAccount), conf.LoginRatePerAccount)
-		l.loginAccount[key] = b
-	}
-	return b
+	return m.get(key, now)
 }
 
-func (l *Limiter) loginIPBucket(key string) *bucket {
+// size returns how many buckets one family holds (tests).
+func (l *Limiter) size(m *bucketMap) int {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	b, ok := l.loginIP[key]
-	if !ok {
-		b = newBucket(float64(conf.LoginRatePerIP), conf.LoginRatePerIP)
-		l.loginIP[key] = b
-	}
-	return b
-}
-
-func (l *Limiter) anonIPBucket(key string) *bucket {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	b, ok := l.anonIP[key]
-	if !ok {
-		b = newBucket(float64(conf.AnonTokenRatePerIP), conf.AnonTokenRatePerIP)
-		l.anonIP[key] = b
-	}
-	return b
-}
-
-func (l *Limiter) sessionBucket(sid string) *bucket {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	b, ok := l.session[sid]
-	if !ok {
-		b = newBucket(float64(conf.SessionRateLimit), conf.SessionRateLimit)
-		l.session[sid] = b
-	}
-	return b
-}
-
-func clientIP(r *http.Request) string {
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
-	}
-	return host
+	return len(m.buckets)
 }
 
 func (l *Limiter) allowLogin(login, ip string, now time.Time) bool {
 	login = normalizeLogin(login)
-	if !l.loginAccountBucket(login).allow(now, 1) {
+	if !l.take(l.loginAccount, login, now).allow(now, 1) {
 		return false
 	}
-	return l.loginIPBucket(ip).allow(now, 1)
+	return l.take(l.loginIP, ip, now).allow(now, 1)
 }
 
 func (l *Limiter) allowAnon(ip string, now time.Time) bool {
-	return l.anonIPBucket(ip).allow(now, 1)
+	return l.take(l.anonIP, ip, now).allow(now, 1)
 }
 
 func (l *Limiter) allowSession(sid string, now time.Time) bool {
 	if sid == "" {
 		return true
 	}
-	return l.sessionBucket(sid).allow(now, 1)
+	return l.take(l.session, sid, now).allow(now, 1)
 }

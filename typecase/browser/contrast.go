@@ -9,6 +9,65 @@ import (
 
 const minContrastAA = 4.5
 
+// ParseCSSColor parses a computed CSS color: #rrggbb, rgb(), rgba(), or
+// color(srgb …). Alpha is ignored. sRGB channel values in color() are 0–1.
+func ParseCSSColor(css string) ([3]float64, error) {
+	css = strings.TrimSpace(css)
+	switch {
+	case strings.HasPrefix(css, "#"):
+		r, g, b, err := ParseHexColor(css)
+		return [3]float64{r, g, b}, err
+	case strings.HasPrefix(css, "rgb("):
+		return parseRGBChannels(css[4:len(css)-1], 255)
+	case strings.HasPrefix(css, "rgba("):
+		return parseRGBChannels(css[5:len(css)-1], 255)
+	case strings.HasPrefix(css, "color(srgb"):
+		inner := strings.TrimSpace(strings.TrimPrefix(css, "color(srgb"))
+		inner = strings.TrimSuffix(inner, ")")
+		if i := strings.Index(inner, "/"); i >= 0 {
+			inner = inner[:i]
+		}
+		parts := strings.Fields(inner)
+		if len(parts) < 3 {
+			return [3]float64{}, fmt.Errorf("bad color(srgb) %q", css)
+		}
+		return parseRGBChannels(strings.Join(parts[:3], " "), 1)
+	default:
+		return [3]float64{}, fmt.Errorf("unsupported color %q", css)
+	}
+}
+
+func parseRGBChannels(inner string, scale float64) ([3]float64, error) {
+	inner = strings.TrimSpace(inner)
+	var parts []string
+	if strings.Contains(inner, ",") {
+		parts = strings.Split(inner, ",")
+	} else {
+		parts = strings.Fields(inner)
+	}
+	if len(parts) < 3 {
+		return [3]float64{}, fmt.Errorf("bad rgb channels %q", inner)
+	}
+	var out [3]float64
+	for i := 0; i < 3; i++ {
+		p := strings.TrimSpace(parts[i])
+		if strings.HasSuffix(p, "%") {
+			v, err := strconv.ParseFloat(strings.TrimSuffix(p, "%"), 64)
+			if err != nil {
+				return out, err
+			}
+			out[i] = v / 100
+			continue
+		}
+		v, err := strconv.ParseFloat(p, 64)
+		if err != nil {
+			return out, err
+		}
+		out[i] = v / scale
+	}
+	return out, nil
+}
+
 // ParseHexColor parses #rrggbb.
 func ParseHexColor(hex string) (r, g, b float64, err error) {
 	hex = strings.TrimPrefix(strings.TrimSpace(hex), "#")

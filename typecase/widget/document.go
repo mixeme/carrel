@@ -104,7 +104,7 @@ func (d DocBar) Render() string {
 	if d.Dirty {
 		dirty = `<span class="tc-docbar__dirty" aria-label="` + esc(labels.UnsavedChanges) + `">●</span>`
 	}
-	return `<div` + classAttr(cls) + `>` + dirty + Bar{Left: d.Left, Right: d.Right, Rank2: d.Rank2}.Render() + `</div>`
+	return `<div` + classAttr(cls) + `>` + dirty + Bar{Left: ActionsAsNodes(d.Left), Right: ActionsAsNodes(d.Right), Rank2: d.Rank2}.Render() + `</div>`
 }
 
 // DocMeta — tc-docmeta

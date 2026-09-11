@@ -39,18 +39,17 @@ func (s *Service) SetupFirstAdmin(ctx context.Context, login, password string) e
 	})
 }
 
+// Authenticate checks a login and password and returns the account ID and
+// data key. Unknown login, wrong password, disabled account, unconfirmed
+// address, and an account without a password yet all answer the same way and
+// cost the same: every miss pays one Argon2 derivation (S-29.1).
 func (s *Service) Authenticate(ctx context.Context, login, password string) (string, [32]byte, bool, bool) {
 	var zero [32]byte
 	login = normalizeLogin(login)
 	snap := s.st.Snapshot()
 	u := snap.UserByLogin(login)
-	if u == nil || u.Disabled {
-		return "", zero, false, false
-	}
-	if u.Email != "" && !u.EmailConfirmed {
-		return "", zero, false, false
-	}
-	if len(u.LoginHash) == 0 {
+	if u == nil || u.Disabled || (u.Email != "" && !u.EmailConfirmed) || len(u.LoginHash) == 0 {
+		s.verifyDummy(ctx, password)
 		return "", zero, false, false
 	}
 	key, ok := store.DataKeyForLogin(ctx, u, password)

@@ -19,6 +19,13 @@
 	}
 
 	function resolveTheme() {
+		try {
+			var params = new URLSearchParams(window.location.search);
+			var q = params.get("theme");
+			if (q === "light" || q === "dark") {
+				return q;
+			}
+		} catch (e) {}
 		var stored = readStored();
 		if (stored === "light" || stored === "dark") {
 			return stored;

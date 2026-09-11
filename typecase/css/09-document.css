@@ -22,7 +22,12 @@
 	flex: 1;
 	min-width: 0;
 }
-.tc-prose__h1, .tc-prose__h2, .tc-prose__h3 { font-family: var(--tc-font-serif); margin: 1em 0 0.5em; }
+/* Документ — единственное место, где заголовкам нужна своя лестница; после
+   сброса в 01-base.css её называют здесь. */
+.tc-prose__h1, .tc-prose__h2, .tc-prose__h3 { font-family: var(--tc-font-serif); font-weight: 400; margin: 1em 0 0.5em; }
+.tc-prose__h1 { font-size: 1.6em; }
+.tc-prose__h2 { font-size: 1.3em; }
+.tc-prose__h3 { font-size: 1.1em; }
 .tc-prose__p { margin: 0 0 0.75em; overflow-wrap: anywhere; }
 .tc-prose__code {
 	font-family: var(--tc-font-mono);

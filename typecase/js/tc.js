@@ -302,6 +302,9 @@
 	}
 
 	function initDynamic() {
+		// Цвет метки приходит значением. Встроенных стилей в разметке не бывает
+		// (ворота no-inline), поэтому значение ставит сценарий; без него метка
+		// остаётся непокрашенной, а не берёт цвет из палитры темы.
 		document.querySelectorAll("[data-tc-colour]").forEach(function (el) {
 			var c = el.getAttribute("data-tc-colour");
 			if (c) el.style.backgroundColor = c;
@@ -319,9 +322,8 @@
 	}
 
 	function initRoots() {
-		document.querySelectorAll("[data-tc-root]").forEach(function (root) {
-			root.classList.add("tc-root");
-		});
+		// Базовые стили висят на самом атрибуте data-tc-root, поэтому класс
+		// вешать не нужно: без сценария страница выглядит так же.
 		syncOverlayTraps();
 	}
 
@@ -421,8 +423,13 @@
 
 		document.querySelectorAll("[data-tc-seg]").forEach(function (group) {
 			function selectSeg(btn) {
+				// Класс и озвучка переставляются вместе: вид держится на
+				// is-chosen, и без него выбранных оказывалось двое — один
+				// глазами, другой для скринридера.
 				group.querySelectorAll("button[data-tc-seg]").forEach(function (b) {
-					b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+					var on = b === btn;
+					b.setAttribute("aria-pressed", on ? "true" : "false");
+					b.classList.toggle("is-chosen", on);
 				});
 			}
 			group.addEventListener("click", function (e) {

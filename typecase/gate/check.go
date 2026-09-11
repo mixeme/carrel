@@ -15,27 +15,31 @@ import (
 type Name string
 
 const (
-	Completeness Name = "completeness"
-	Ownership    Name = "ownership"
-	NodeNames    Name = "node-names"
-	TypedInput   Name = "typed-input"
-	Enumerations Name = "enumerations"
-	DomainNaming Name = "domain-naming"
-	DocFormat    Name = "doc-format"
-	Catalog      Name = "catalog"
-	SpecL4       Name = "spec-l4"
-	Verifiable   Name = "verifiable"
-	NoInline     Name = "no-inline"
-	A11y         Name = "a11y"
-	Gofmt        Name = "gofmt"
-	Vet          Name = "vet"
+	Completeness    Name = "completeness"
+	Ownership       Name = "ownership"
+	NodeNames       Name = "node-names"
+	TypedInput      Name = "typed-input"
+	Enumerations    Name = "enumerations"
+	DomainNaming    Name = "domain-naming"
+	DocFormat       Name = "doc-format"
+	Catalog         Name = "catalog"
+	SpecL4          Name = "spec-l4"
+	Verifiable      Name = "verifiable"
+	NoInline        Name = "no-inline"
+	A11y            Name = "a11y"
+	Gofmt           Name = "gofmt"
+	Vet             Name = "vet"
+	Geometry        Name = "geometry"
+	ScreensCSS      Name = "screens-css"
+	ScreensCoverage Name = "screens-coverage"
+	ScreensCompose  Name = "screens-compose"
 )
 
 // AllGates lists every L-8 gate in stable order.
 var AllGates = []Name{
 	Completeness, Ownership, NodeNames, TypedInput, Enumerations,
 	DomainNaming, DocFormat, Catalog, SpecL4, Verifiable, NoInline, A11y,
-	Gofmt, Vet,
+	Geometry, ScreensCSS, ScreensCoverage, ScreensCompose, Gofmt, Vet,
 }
 
 // browserChecks lists L-9.2 invariant names that must have broken HTML fixtures.
@@ -139,6 +143,14 @@ func Run(name Name, p ModulePaths, catalog []CatalogEntry) error {
 		return CheckNoInline(catalog)
 	case A11y:
 		return CheckA11y(catalog)
+	case Geometry:
+		return CheckGeometry(p)
+	case ScreensCSS:
+		return CheckScreensCSS(p)
+	case ScreensCoverage:
+		return CheckScreensCoverage(catalog)
+	case ScreensCompose:
+		return CheckScreensCompose(p)
 	case Gofmt:
 		return CheckGofmt(p.Root)
 	case Vet:
@@ -196,7 +208,8 @@ func CheckUniqueIDs(catalog []CatalogEntry) error {
 func gateImplemented(name Name) bool {
 	switch name {
 	case Completeness, Ownership, NodeNames, TypedInput, Enumerations,
-		DomainNaming, DocFormat, Catalog, SpecL4, Verifiable, NoInline, A11y, Gofmt, Vet:
+		DomainNaming, DocFormat, Catalog, SpecL4, Verifiable, NoInline, A11y,
+		Geometry, ScreensCSS, ScreensCoverage, ScreensCompose, Gofmt, Vet:
 		return true
 	default:
 		return false
@@ -225,7 +238,7 @@ func CheckCompleteness(p ModulePaths, catalog []CatalogEntry) error {
 		}
 	}
 	for name := range cssWidgets {
-		if name == "tc-root" || name == "tc-icon" {
+		if name == "tc-icon" {
 			continue
 		}
 		if _, ok := goNames[name]; !ok && !isVariantOnly(name) {

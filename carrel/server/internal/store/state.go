@@ -41,7 +41,8 @@ type Invite struct {
 	SecretHash []byte    `json:"secretHash"`
 	CreatedAt  time.Time `json:"createdAt"`
 	ExpiresAt  time.Time `json:"expiresAt"`
-	Revoked    bool      `json:"revoked,omitempty"`
+	Revoked    bool      `json:"revoked,omitempty"` // withdrawn by an administrator or replaced by a resend
+	Used       bool      `json:"used,omitempty"`    // accepted: the invitee set a password
 }
 
 // SecretToken covers email confirmation, forgot/console wipe links (S-10).

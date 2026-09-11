@@ -130,6 +130,9 @@ func sortStrings(ss []string) {
 	}
 }
 
+// widgetHTML returns the catalog entries declared for the widget. Structural
+// invariants — «rail must include foot» — only make sense on the widget's own
+// entry, so this stays narrow.
 func widgetHTML(catalog []CatalogEntry, widget string) []string {
 	var html []string
 	for _, e := range catalog {
@@ -138,6 +141,46 @@ func widgetHTML(catalog []CatalogEntry, widget string) []string {
 		}
 	}
 	return html
+}
+
+// compositeInvariants are per-occurrence checks: they hold wherever the widget
+// is drawn, including inside another widget. tc-usermenu shipped an empty
+// tc-badge for an unset tag, and the badge check never saw it because it only
+// read entries named "tc-badge" (В-19).
+var compositeInvariants = map[string]bool{
+	"inv-badge-has-text": true,
+	"inv-badge-not-link": true,
+}
+
+// composedHTML returns every catalog entry in which the widget is drawn,
+// whoever owns the entry. The class is matched at its boundary so that
+// tc-rail does not swallow tc-railsec.
+func composedHTML(catalog []CatalogEntry, widget string) []string {
+	var html []string
+	for _, e := range catalog {
+		if hasClass(e.HTML, widget) {
+			html = append(html, e.HTML)
+		}
+	}
+	return html
+}
+
+func hasClass(html, widget string) bool {
+	needle := `class="` + widget
+	for i := 0; ; {
+		j := strings.Index(html[i:], needle)
+		if j < 0 {
+			return false
+		}
+		i += j + len(needle)
+		if i >= len(html) {
+			return false
+		}
+		switch c := html[i]; c {
+		case '"', ' ', '-':
+			return true
+		}
+	}
 }
 
 func forEachHTML(widget string, html []string, fn func(h string) error) error {
@@ -235,17 +278,24 @@ func checkInvAvatarSquare(widget string, html []string, _ string) error {
 
 func checkInvBadgeHasText(widget string, html []string, _ string) error {
 	return forEachHTML(widget, html, func(h string) error {
-		start := strings.Index(h, `class="tc-badge`)
-		if start < 0 {
+		if !strings.Contains(h, `class="tc-badge`) {
 			return fmt.Errorf("%s: badge must have visible text", widget)
 		}
-		rest := h[start:]
-		open := strings.Index(rest, ">")
-		close := strings.Index(rest, "</span>")
-		if open < 0 || close <= open+1 || strings.TrimSpace(rest[open+1:close]) == "" {
-			return fmt.Errorf("%s: badge must have visible text", widget)
+		// Каждый бейдж, а не только первый: пустой мог прийти из составного
+		// виджета вторым или третьим.
+		for rest := h; ; {
+			start := strings.Index(rest, `class="tc-badge`)
+			if start < 0 {
+				return nil
+			}
+			rest = rest[start:]
+			open := strings.Index(rest, ">")
+			end := strings.Index(rest, "</span>")
+			if open < 0 || end <= open+1 || strings.TrimSpace(rest[open+1:end]) == "" {
+				return fmt.Errorf("%s: badge must have visible text", widget)
+			}
+			rest = rest[end:]
 		}
-		return nil
 	})
 }
 

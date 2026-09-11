@@ -14,7 +14,7 @@ func TestBundle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out, "--tc-ink") || !strings.Contains(out, ".tc-root") {
+	if !strings.Contains(out, "--tc-ink") || !strings.Contains(out, "[data-tc-root]") {
 		t.Fatal("bundle missing expected token or base rules")
 	}
 	if err := token.Validate(out); err != nil {

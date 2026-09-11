@@ -8,14 +8,13 @@
 	border-radius: var(--tc-radius);
 	background: var(--tc-surface);
 	color: var(--tc-ink);
-	font-family: var(--tc-font-sans);
-	font-size: var(--tc-font-size);
 	line-height: 1.35;
 	padding: 0 0.6em;
-	min-height: 28px;
+	min-height: 26px;
 	cursor: pointer;
 	text-decoration: none;
 }
+.tc-btn--form { min-height: 28px; }
 .tc-btn--bar { min-height: 26px; }
 .tc-btn--table { min-height: 22px; }
 .tc-btn--primary { background: var(--tc-accent); color: var(--tc-surface); border-color: var(--tc-accent); }
@@ -28,8 +27,6 @@
 	border-radius: var(--tc-radius);
 	background: var(--tc-surface);
 	color: var(--tc-ink);
-	font-family: var(--tc-font-sans);
-	font-size: var(--tc-font-size);
 	min-height: 28px;
 	padding: 0 0.5em;
 	width: 100%;
@@ -54,7 +51,6 @@
 	display: inline-flex;
 	align-items: flex-start;
 	gap: 0.4em;
-	min-height: var(--tc-row-height-touch);
 	cursor: pointer;
 }
 .tc-check input[type="checkbox"],
@@ -69,7 +65,7 @@
 	height: 13px;
 	min-width: 13px;
 	border: var(--tc-stroke) solid var(--tc-rule);
-	border-radius: var(--tc-radius);
+	border-radius: var(--tc-radius-sm);
 	flex: none;
 }
 .tc-check input:checked + .tc-check__box { background: var(--tc-accent); }
@@ -94,13 +90,18 @@
 .tc-kbd__sep { opacity: 0.6; }
 
 .tc-close {
+	position: relative;
 	border: 0;
 	background: transparent;
 	color: var(--tc-muted);
-	min-width: 44px;
-	min-height: 44px;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	cursor: pointer;
-	font-size: 1.25rem;
+	font-size: 1.25em;
 	line-height: 1;
 }
 .tc-close__icon { display: block; }
@@ -116,11 +117,15 @@
 .tc-brand--mark-only .tc-brand__word { display: none; }
 .tc-brand__mark { font-weight: 700; }
 
+/* Цвет метки приходит значением и ставится на месте отрисовки. Умолчания из
+   палитры темы у неё нет: это чужой цвет, и подменять его своим — значит
+   сказать неправду о принадлежности (L-4.2). */
 .tc-mark {
 	display: inline-block;
 	width: 3px;
 	min-height: var(--tc-row-height);
-	background: var(--tc-accent);
+	border-radius: var(--tc-radius-sm);
+	background: transparent;
 	flex: none;
 }
 
@@ -130,7 +135,7 @@
 .tc-badge {
 	display: inline-block;
 	border: var(--tc-stroke) solid var(--tc-rule);
-	border-radius: var(--tc-radius);
+	border-radius: var(--tc-radius-sm);
 	padding: 0 0.35em;
 	font-size: 0.85em;
 	white-space: nowrap;
@@ -163,12 +168,11 @@
 }
 
 .tc-tick {
+	position: relative;
 	border: var(--tc-stroke) solid var(--tc-rule);
-	border-radius: var(--tc-radius);
+	border-radius: var(--tc-radius-sm);
 	width: 13px;
 	height: 13px;
-	min-width: 44px;
-	min-height: 44px;
 	padding: 0;
 	background: var(--tc-surface);
 	cursor: pointer;
@@ -206,7 +210,7 @@
 	border: var(--tc-stroke) dashed var(--tc-rule);
 	border-radius: var(--tc-radius);
 }
-.tc-empty__title { margin: 0 0 0.25em; font-family: var(--tc-font-serif); }
+.tc-empty__title { margin: 0 0 0.25em; font-family: var(--tc-font-serif); font-size: 1.1em; font-weight: 400; }
 .tc-empty__body { color: var(--tc-muted); margin: 0 0 1em; }
 .tc-empty__action { margin-top: 0.5em; }
 
@@ -244,4 +248,22 @@
 	top: 100%;
 	font-size: 0.85em;
 	color: var(--tc-muted);
+}
+
+/* Зона нажатия — не метка. В обычной плотности отметка 13 px, крестик 24 px;
+   в узкой раскладке зону до 44 px расширяет прозрачный псевдоэлемент, а
+   нарисованный размер не меняется (L-4.2, L-4.4). Порог 720 px — тот же, что
+   в 09-document.css и 10-utility.css. */
+@media (max-width: 720px) {
+	.tc-tick::after,
+	.tc-close::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 44px;
+		height: 44px;
+		transform: translate(-50%, -50%);
+	}
+	.tc-check { min-height: 44px; align-items: center; }
 }

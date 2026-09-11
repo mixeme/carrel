@@ -15,24 +15,54 @@
 .tc-overlay[hidden] { display: none; }
 .tc-overlay--popover { position: absolute; z-index: 50; }
 
+/* Лист и диалог сами себя не ставят: их ставит слой. Он занимает всё окно,
+   центрирует по горизонтали и отступает 44 px сверху. Без этого наложение
+   садится в статическую позицию — в левый верхний угол, шириной по
+   содержимому. */
+.tc-overlay--sheet,
+.tc-overlay--dialog {
+	inset: 0;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding-top: 44px;
+	/* Слой лежит поверх скрима, поэтому нажатия сквозь него проходят: иначе
+	   закрытие нажатием мимо перестаёт работать. */
+	pointer-events: none;
+}
+.tc-overlay--sheet > *,
+.tc-overlay--dialog > * { pointer-events: auto; }
+
 .tc-sheet {
+	position: relative;
 	background: var(--tc-surface);
 	border: var(--tc-stroke) solid var(--tc-rule);
 	border-radius: var(--tc-radius);
-	max-width: 36em;
+	width: 560px;
+	max-width: 92%;
 	max-height: 80vh;
 	display: flex;
 	flex-direction: column;
 }
 .tc-sheet__head {
 	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	padding: 0.75em 1em;
+	align-items: center;
+	gap: 0.5em;
+	/* Правое поле — под приколотый крестик. */
+	padding: 0.75em 40px 0.75em 1em;
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 }
-.tc-sheet__target { font-size: 0.85em; color: var(--tc-muted); width: 100%; }
-.tc-sheet__title { margin: 0.25em 0 0; font-family: var(--tc-font-serif); }
+/* Цель прижата вправо, а не растянута на всю строку: с width: 100% флекс
+   сжимал её и ставил слева от заголовка, вместо того чтобы развести их. */
+.tc-sheet__target {
+	font-size: 0.85em;
+	color: var(--tc-muted);
+	margin-left: auto;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.tc-sheet__title { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tc-sheet__body { padding: 1em; overflow: auto; flex: 1; }
 .tc-sheet__foot {
 	display: flex;
@@ -43,6 +73,7 @@
 }
 
 .tc-dialog {
+	position: relative;
 	background: var(--tc-surface);
 	border: var(--tc-stroke) solid var(--tc-rule);
 	border-radius: var(--tc-radius);
@@ -137,6 +168,7 @@
 }
 .tc-menu.is-disabled .tc-menu__control { opacity: 0.55; cursor: not-allowed; }
 
+.tc-usermenu__list { list-style: none; margin: 0; padding: 0; }
 .tc-usermenu__head {
 	padding: 0.5em 0.75em;
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
@@ -153,4 +185,13 @@
 	align-items: center;
 	justify-content: center;
 	font-size: 0.75em;
+}
+
+/* Крестик стоит в шапке своего наложения и приколот к углу: в потоке он
+   раздвигал шапку и уезжал от заголовка. */
+.tc-sheet__head .tc-close,
+.tc-dialog__head .tc-close {
+	position: absolute;
+	top: 8px;
+	right: 8px;
 }

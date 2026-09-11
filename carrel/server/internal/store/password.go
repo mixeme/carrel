@@ -62,6 +62,17 @@ func WipeCredentials(u *User) {
 	u.ConnCount = 0
 }
 
+// VerifyPassword checks a password against the login hash without touching
+// the wrap key: the S-10.7 confirmation sheet needs a yes or no, not key
+// material. Accounts without a password answer false.
+func VerifyPassword(ctx context.Context, u *User, password string) bool {
+	if len(u.LoginHash) == 0 {
+		return false
+	}
+	ok, err := crypt.VerifyLogin(ctx, password, u.LoginSalt, u.LoginHash, u.LoginKDF.toCrypt())
+	return err == nil && ok
+}
+
 // DataKeyForLogin verifies password and returns the data key.
 func DataKeyForLogin(ctx context.Context, u *User, password string) ([crypt.KeyLen]byte, bool) {
 	var zero [crypt.KeyLen]byte

@@ -3,11 +3,31 @@ package user
 import (
 	"context"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/view"
 )
+
+const (
+	tokenEmailConfirm = "email_confirm"
+	tokenForgotWipe   = "forgot_wipe"
+	tokenConsoleWipe  = "console_wipe"
+)
+
+func inviteLive(inv *store.Invite, now time.Time) bool {
+	return !inv.Revoked && !inv.Used && now.Before(inv.ExpiresAt)
+}
+
+func hasLiveInvite(st *store.State, login string, now time.Time) bool {
+	for i := range st.Invites {
+		if st.Invites[i].Login == login && inviteLive(&st.Invites[i], now) {
+			return true
+		}
+	}
+	return false
+}
 
 func (s *Service) InviteValid(ctx context.Context, token string) bool {
 	hash, err := hashToken(token)
@@ -15,11 +35,10 @@ func (s *Service) InviteValid(ctx context.Context, token string) bool {
 		return false
 	}
 	snap := s.st.Snapshot()
-	for _, inv := range snap.Invites {
-		if inv.Revoked {
-			continue
-		}
-		if !s.now().Before(inv.ExpiresAt) {
+	now := s.now()
+	for i := range snap.Invites {
+		inv := &snap.Invites[i]
+		if !inviteLive(inv, now) {
 			continue
 		}
 		if verifyHash(inv.SecretHash, hash) {
@@ -41,7 +60,7 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		var inv *store.Invite
 		for i := range st.Invites {
-			if verifyHash(st.Invites[i].SecretHash, hash) && !st.Invites[i].Revoked && now.Before(st.Invites[i].ExpiresAt) {
+			if inviteLive(&st.Invites[i], now) && verifyHash(st.Invites[i].SecretHash, hash) {
 				inv = &st.Invites[i]
 				break
 			}
@@ -49,10 +68,10 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 		if inv == nil {
 			return nil, ErrNotFound
 		}
-		if st.UserByLogin(inv.Login) != nil && len(st.UserByLogin(inv.Login).LoginHash) > 0 {
+		u := st.UserByLogin(inv.Login)
+		if u != nil && len(u.LoginHash) > 0 {
 			return nil, ErrLoginTaken
 		}
-		u := st.UserByLogin(inv.Login)
 		if u == nil {
 			id, err := NewAccountID()
 			if err != nil {
@@ -69,7 +88,9 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 		if u.Email != "" {
 			u.EmailConfirmed = true
 		}
-		inv.Revoked = true
+		inv.Used = true
+		burnWipeTokens(st, u.ID)
+		pruneTokens(st, now)
 		return []store.AuditEntry{{
 			When: now, Who: u.Login, What: "user.invite.complete", Whom: u.Login,
 		}}, nil
@@ -77,16 +98,26 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 }
 
 // CreateInvite adds an invitation and returns the raw secret for the link.
-func (s *Service) CreateInvite(login, email string) (secret string, err error) {
+// A second invitation for the same login replaces the secret: the earlier
+// link stops working (S-10.3, "отправить повторно с заменой секрета").
+func (s *Service) CreateInvite(actorID, login, email string) (secret string, err error) {
 	login = normalizeLogin(login)
+	if login == "" {
+		return "", ErrNotFound
+	}
 	raw, hash, err := newSecret()
 	if err != nil {
 		return "", err
 	}
 	now := s.now()
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
-		if st.UserByLogin(login) != nil && len(st.UserByLogin(login).LoginHash) > 0 {
+		if u := st.UserByLogin(login); u != nil && len(u.LoginHash) > 0 {
 			return nil, ErrLoginTaken
+		}
+		for i := range st.Invites {
+			if st.Invites[i].Login == login && inviteLive(&st.Invites[i], now) {
+				st.Invites[i].Revoked = true
+			}
 		}
 		id, err := NewAccountID()
 		if err != nil {
@@ -102,7 +133,7 @@ func (s *Service) CreateInvite(login, email string) (secret string, err error) {
 			})
 		}
 		return []store.AuditEntry{{
-			When: now, Who: "admin", What: "user.invite.create", Whom: login,
+			When: now, Who: actorLogin(st, actorID), What: "user.invite.create", Whom: login,
 		}}, nil
 	})
 	if err != nil {
@@ -111,51 +142,70 @@ func (s *Service) CreateInvite(login, email string) (secret string, err error) {
 	return raw, nil
 }
 
-func (s *Service) Register(ctx context.Context, login, email, password string) error {
+// Register creates an unconfirmed account and returns the confirmation
+// token for the mail layer (S-10.2). An existing record is reused only when
+// it is this same self-registration still awaiting confirmation: same login,
+// same address, a password already set, and no invitation pending for the
+// login. Anything else is somebody's account and answers ErrLoginTaken —
+// open registration must never wipe or take over an existing record.
+func (s *Service) Register(ctx context.Context, login, email, password string) (token string, err error) {
 	if !s.RegisterOpen() {
-		return ErrNotFound
+		return "", ErrNotFound
 	}
 	if err := validatePassword(password); err != nil {
-		return err
+		return "", err
 	}
 	login = normalizeLogin(login)
+	email = strings.TrimSpace(email)
+	if login == "" || email == "" {
+		return "", ErrNotFound
+	}
 	raw, hash, err := newSecret()
 	if err != nil {
-		return err
+		return "", err
 	}
 	now := s.now()
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		pruneTokens(st, now)
 		u := st.UserByLogin(login)
-		if u != nil && u.EmailConfirmed {
-			return nil, ErrLoginTaken
-		}
-		id, err := NewAccountID()
-		if err != nil {
-			return nil, err
-		}
-		if u == nil {
+		if u != nil {
+			resubmit := u.Email != "" && !u.EmailConfirmed && len(u.LoginHash) > 0 &&
+				strings.EqualFold(u.Email, email) && !hasLiveInvite(st, login, now)
+			if !resubmit {
+				return nil, ErrLoginTaken
+			}
+			store.WipeCredentials(u)
+			burnTokens(st, u.ID, tokenEmailConfirm)
+		} else {
+			if hasLiveInvite(st, login, now) {
+				return nil, ErrLoginTaken
+			}
+			id, err := NewAccountID()
+			if err != nil {
+				return nil, err
+			}
 			st.Users = append(st.Users, store.User{
 				ID: id, Login: login, Email: email, Role: store.RoleUser, CreatedAt: now,
 			})
 			u = st.UserByLogin(login)
-		} else {
-			u.Email = email
-			store.WipeCredentials(u)
 		}
 		if err := store.ApplyPassword(ctx, u, login, password); err != nil {
 			return nil, err
 		}
 		u.EmailConfirmed = false
+		burnWipeTokens(st, u.ID)
 		st.Tokens = append(st.Tokens, store.SecretToken{
-			Kind: "email_confirm", Hash: hash, UserID: u.ID,
+			Kind: tokenEmailConfirm, Hash: hash, UserID: u.ID,
 			CreatedAt: now, ExpiresAt: now.Add(conf.EmailConfirmTTL),
 		})
 		return []store.AuditEntry{{
 			When: now, Who: login, What: "user.register", Whom: login,
 		}}, nil
 	})
-	_ = raw // mail layer sends link later
-	return err
+	if err != nil {
+		return "", err
+	}
+	return raw, nil
 }
 
 func (s *Service) ConfirmEmail(ctx context.Context, token string) bool {
@@ -168,7 +218,7 @@ func (s *Service) ConfirmEmail(ctx context.Context, token string) bool {
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		for i := range st.Tokens {
 			t := &st.Tokens[i]
-			if t.Kind != "email_confirm" || t.Used || !now.Before(t.ExpiresAt) {
+			if t.Kind != tokenEmailConfirm || t.Used || !now.Before(t.ExpiresAt) {
 				continue
 			}
 			if !verifyHash(t.Hash, hash) {
@@ -181,42 +231,44 @@ func (s *Service) ConfirmEmail(ctx context.Context, token string) bool {
 			u.EmailConfirmed = true
 			t.Used = true
 			ok = true
+			pruneTokens(st, now)
 			return []store.AuditEntry{{
 				When: now, Who: u.Login, What: "user.email.confirm", Whom: u.Login,
 			}}, nil
 		}
-		return nil, nil
+		return nil, ErrNotFound
 	})
 	return ok && err == nil
 }
 
-const (
-	tokenForgotWipe  = "forgot_wipe"
-	tokenConsoleWipe = "console_wipe"
-)
-
-func (s *Service) ForgotRequest(ctx context.Context, loginOrEmail string) (sent, asked, hasMail bool, err error) {
+// ForgotRequest answers /forgot (S-10.4). It returns the wipe token for the
+// mail layer when a link was issued. Unknown login, unconfirmed address, and
+// a disabled account all come back with nothing: none of them can be helped
+// from the sign-in screen, and none is confirmed to exist.
+func (s *Service) ForgotRequest(ctx context.Context, loginOrEmail string) (token string, sent, asked, hasMail bool, err error) {
 	loginOrEmail = strings.TrimSpace(loginOrEmail)
 	snap := s.st.Snapshot()
 	var u *store.User
-	for _, x := range snap.Users {
-		if strings.EqualFold(x.Login, loginOrEmail) || strings.EqualFold(x.Email, loginOrEmail) {
-			u = &x
+	for i := range snap.Users {
+		x := &snap.Users[i]
+		if strings.EqualFold(x.Login, loginOrEmail) || (x.Email != "" && strings.EqualFold(x.Email, loginOrEmail)) {
+			u = x
 			break
 		}
 	}
-	if u == nil || !u.EmailConfirmed {
-		return false, false, false, nil
+	if u == nil || u.Disabled || u.Email == "" || !u.EmailConfirmed {
+		return "", false, false, false, nil
 	}
 	if snap.Settings.EscrowEnabled && u.EscrowOptIn {
-		return false, false, true, nil
+		return "", false, true, true, nil
 	}
 	raw, hash, err := newSecret()
 	if err != nil {
-		return false, false, true, err
+		return "", false, false, true, err
 	}
 	now := s.now()
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		pruneTokens(st, now)
 		st.Tokens = append(st.Tokens, store.SecretToken{
 			Kind: tokenForgotWipe, Hash: hash, UserID: u.ID, Step: string(view.WipeConfirm),
 			CreatedAt: now, ExpiresAt: now.Add(conf.ForgotLinkTTL),
@@ -226,10 +278,13 @@ func (s *Service) ForgotRequest(ctx context.Context, loginOrEmail string) (sent,
 		}}, nil
 	})
 	if err != nil {
-		return false, false, true, err
+		return "", false, false, true, err
 	}
-	_ = raw
-	return true, false, true, nil
+	return raw, true, false, true, nil
+}
+
+func isWipeToken(t *store.SecretToken) bool {
+	return t.Kind == tokenForgotWipe || t.Kind == tokenConsoleWipe
 }
 
 func (s *Service) ForgotWipeState(ctx context.Context, token string) (login string, step string, valid bool) {
@@ -239,11 +294,9 @@ func (s *Service) ForgotWipeState(ctx context.Context, token string) (login stri
 	}
 	snap := s.st.Snapshot()
 	now := s.now()
-	for _, t := range snap.Tokens {
-		if t.Kind != tokenForgotWipe && t.Kind != tokenConsoleWipe {
-			continue
-		}
-		if t.Used || !now.Before(t.ExpiresAt) {
+	for i := range snap.Tokens {
+		t := &snap.Tokens[i]
+		if !isWipeToken(t) || t.Used || !now.Before(t.ExpiresAt) {
 			continue
 		}
 		if !verifyHash(t.Hash, hash) {
@@ -271,10 +324,7 @@ func (s *Service) ForgotConfirmWipe(ctx context.Context, token string) error {
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		for i := range st.Tokens {
 			t := &st.Tokens[i]
-			if t.Kind != tokenForgotWipe && t.Kind != tokenConsoleWipe {
-				continue
-			}
-			if t.Used || !now.Before(t.ExpiresAt) || !verifyHash(t.Hash, hash) {
+			if !isWipeToken(t) || t.Used || !now.Before(t.ExpiresAt) || !verifyHash(t.Hash, hash) {
 				continue
 			}
 			u := st.UserByID(t.UserID)
@@ -292,6 +342,10 @@ func (s *Service) ForgotConfirmWipe(ctx context.Context, token string) error {
 	})
 }
 
+// ForgotSetPassword is step two. Setting the password burns this token and
+// every other outstanding wipe token of the person: an older link must not
+// wipe the account a second time (S-10.4, "сгорает вместе с заданным
+// паролем").
 func (s *Service) ForgotSetPassword(ctx context.Context, token, password string) error {
 	if err := validatePassword(password); err != nil {
 		return err
@@ -304,10 +358,7 @@ func (s *Service) ForgotSetPassword(ctx context.Context, token, password string)
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		for i := range st.Tokens {
 			t := &st.Tokens[i]
-			if t.Kind != tokenForgotWipe && t.Kind != tokenConsoleWipe {
-				continue
-			}
-			if t.Used || !now.Before(t.ExpiresAt) || !verifyHash(t.Hash, hash) {
+			if !isWipeToken(t) || t.Used || !now.Before(t.ExpiresAt) || !verifyHash(t.Hash, hash) {
 				continue
 			}
 			if t.Step != string(view.WipePassword) {
@@ -320,7 +371,8 @@ func (s *Service) ForgotSetPassword(ctx context.Context, token, password string)
 			if err := store.ApplyPassword(ctx, u, u.Login, password); err != nil {
 				return nil, err
 			}
-			t.Used = true
+			burnWipeTokens(st, u.ID)
+			pruneTokens(st, now)
 			return []store.AuditEntry{{
 				When: now, Who: u.Login, What: "user.password.set", Whom: u.Login,
 			}}, nil
@@ -330,6 +382,7 @@ func (s *Service) ForgotSetPassword(ctx context.Context, token, password string)
 }
 
 // IssueConsoleWipeLink creates a one-time console wipe link (S-10.4).
+// Repeating the command issues a new secret; the previous one dies.
 func (s *Service) IssueConsoleWipeLink(login string) (url string, err error) {
 	login = normalizeLogin(login)
 	snap := s.st.Snapshot()
@@ -343,11 +396,8 @@ func (s *Service) IssueConsoleWipeLink(login string) (url string, err error) {
 	}
 	now := s.now()
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
-		for i := range st.Tokens {
-			if st.Tokens[i].Kind == tokenConsoleWipe && st.Tokens[i].UserID == u.ID && !st.Tokens[i].Used {
-				st.Tokens[i].Used = true
-			}
-		}
+		pruneTokens(st, now)
+		burnTokens(st, u.ID, tokenConsoleWipe)
 		st.Tokens = append(st.Tokens, store.SecretToken{
 			Kind: tokenConsoleWipe, Hash: hash, UserID: u.ID, Step: string(view.WipeConfirm),
 			CreatedAt: now, ExpiresAt: now.Add(conf.ConsoleWipeLinkTTL),
@@ -374,13 +424,48 @@ func (s *Service) DisableUser(actorID, targetID string) error {
 		}
 		u.Disabled = true
 		s.mgr.EndAccount(targetID)
-		actor := st.UserByID(actorID)
-		who := "admin"
-		if actor != nil {
-			who = actor.Login
-		}
 		return []store.AuditEntry{{
-			When: s.now(), Who: who, What: "user.disable", Whom: u.Login,
+			When: s.now(), Who: actorLogin(st, actorID), What: "user.disable", Whom: u.Login,
 		}}, nil
 	})
+}
+
+// actorLogin names the acting account in the journal. An unknown actor is
+// recorded as "admin" so the entry still says who could have done it.
+func actorLogin(st *store.State, actorID string) string {
+	if a := st.UserByID(actorID); a != nil {
+		return a.Login
+	}
+	return "admin"
+}
+
+// burnTokens marks every live token of one kind for one account as used.
+func burnTokens(st *store.State, userID, kind string) {
+	for i := range st.Tokens {
+		t := &st.Tokens[i]
+		if t.Kind == kind && t.UserID == userID {
+			t.Used = true
+		}
+	}
+}
+
+// burnWipeTokens kills every outstanding forgot and console link of one
+// account. Called whenever the account gets a password.
+func burnWipeTokens(st *store.State, userID string) {
+	burnTokens(st, userID, tokenForgotWipe)
+	burnTokens(st, userID, tokenConsoleWipe)
+}
+
+// pruneTokens drops used and expired tokens. A dead token can never match
+// again, and keeping it only grows the state file that every Mutate
+// re-encodes and rewrites.
+func pruneTokens(st *store.State, now time.Time) {
+	kept := st.Tokens[:0]
+	for _, t := range st.Tokens {
+		if t.Used || !now.Before(t.ExpiresAt) {
+			continue
+		}
+		kept = append(kept, t)
+	}
+	st.Tokens = kept
 }

@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/internal/crypt"
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 )
@@ -19,18 +21,24 @@ type Service struct {
 	cfg *conf.Config
 	now func() time.Time
 
-	mu     sync.Mutex
-	unlock map[string]time.Time
+	// dummy is a login record with a random password. Authenticate verifies
+	// against it when the login is unknown, disabled, unconfirmed, or has no
+	// password yet, so a miss costs one Argon2 like a wrong password does
+	// (S-29.1: unknown login and wrong password answer alike). Built on first
+	// use; startup does not pay for it.
+	dummyOnce sync.Once
+	dummySalt []byte
+	dummyHash []byte
+	dummyKDF  crypt.KDFParams
 }
 
 // New creates a user service.
 func New(st *store.Store, mgr *session.Manager, cfg *conf.Config) *Service {
 	return &Service{
-		st:     st,
-		mgr:    mgr,
-		cfg:    cfg,
-		now:    time.Now,
-		unlock: make(map[string]time.Time),
+		st:  st,
+		mgr: mgr,
+		cfg: cfg,
+		now: time.Now,
 	}
 }
 
@@ -69,41 +77,92 @@ func (s *Service) AccountRole(accountID string) store.Role {
 	return u.Role
 }
 
-func (s *Service) OwnsAccount(viewerID, accountParam string) bool {
-	return viewerID == accountParam
+// OwnsAccount reports whether {account} is one of the viewer's connections.
+// An account is a DAV connection (C-4), and the only list of a person's
+// connections lives in their sealed blob, so the check opens the blob with
+// the session's data key. A foreign ID, a stale key, and the viewer's own
+// user ID all come back false: the user ID is not a connection.
+func (s *Service) OwnsAccount(viewerID string, dataKey [crypt.KeyLen]byte, accountParam string) bool {
+	if accountParam == "" {
+		return false
+	}
+	snap := s.st.Snapshot()
+	u := snap.UserByID(viewerID)
+	if u == nil || u.Disabled {
+		return false
+	}
+	blob, err := sealed.Open(dataKey, u.SealedBlob, u.Login)
+	if err != nil {
+		return false
+	}
+	for _, c := range blob.Connections {
+		if c.ID == accountParam {
+			return true
+		}
+	}
+	return false
 }
 
+// OwnsCollection checks the shape of {col}: one path segment (C-4.1).
+// Whether the collection exists under the connection is the DAV server's
+// answer, and "missing" and "foreign" look the same either way (S-9.5).
 func (s *Service) OwnsCollection(viewerID, accountParam, col string) bool {
-	return s.OwnsAccount(viewerID, accountParam) && col != "" && !strings.Contains(col, "/")
+	return col != "" && !strings.Contains(col, "/")
 }
 
+// OwnsRecord checks the shape of {uid} under an owned collection.
 func (s *Service) OwnsRecord(viewerID, accountParam, col, uid string) bool {
 	return s.OwnsCollection(viewerID, accountParam, col) && uid != ""
 }
 
-func (s *Service) UnlockUntil(accountID string) *time.Time {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	t, ok := s.unlock[accountID]
-	if !ok || !s.now().Before(t) {
-		delete(s.unlock, accountID)
-		return nil
+// Unlock verifies the password of the session's own account for the S-10.7
+// confirmation sheet and journals the unlock. It never returns key material:
+// the session already holds the data key.
+func (s *Service) Unlock(ctx context.Context, accountID, password string) bool {
+	snap := s.st.Snapshot()
+	u := snap.UserByID(accountID)
+	if u == nil || u.Disabled || len(u.LoginHash) == 0 {
+		s.verifyDummy(ctx, password)
+		return false
 	}
-	return &t
-}
-
-func (s *Service) SetUnlockUntil(accountID string, until *time.Time) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if until == nil {
-		delete(s.unlock, accountID)
-		return
+	if !store.VerifyPassword(ctx, u, password) {
+		return false
 	}
-	s.unlock[accountID] = *until
+	now := s.now()
+	_ = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		return []store.AuditEntry{{
+			When: now, Who: u.Login, What: "secret.unlock", Whom: u.Login,
+		}}, nil
+	})
+	return true
 }
 
 func (s *Service) PublicLinkValid(_ context.Context, token string) bool {
 	return false
+}
+
+// verifyDummy burns one login derivation so a miss is not faster than a
+// wrong password. The result is discarded.
+func (s *Service) verifyDummy(ctx context.Context, password string) {
+	s.dummyOnce.Do(func() {
+		salt, err := crypt.NewSalt()
+		if err != nil {
+			return
+		}
+		pw, err := crypt.NewDataKey()
+		if err != nil {
+			return
+		}
+		hash, p, err := crypt.HashLogin(context.Background(), string(pw[:]), salt)
+		if err != nil {
+			return
+		}
+		s.dummySalt, s.dummyHash, s.dummyKDF = salt, hash, p
+	})
+	if s.dummyHash == nil {
+		return
+	}
+	_, _ = crypt.VerifyLogin(ctx, password, s.dummySalt, s.dummyHash, s.dummyKDF)
 }
 
 func normalizeLogin(login string) string {

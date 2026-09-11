@@ -1,9 +1,8 @@
 package web
 
 import (
-	"io"
+	"errors"
 	"net/http"
-	"strings"
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -20,7 +19,9 @@ func (s *Server) handle(pattern string, h handler) {
 func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 	now := time.Now()
 
-	if c, err := r.Cookie(cookieName); err == nil && c.Value != "" {
+	// /healthz and /about carry no bucket at all (architecture.md): probes
+	// and the licence obligation never see 429, cookie or not.
+	if c, err := r.Cookie(cookieName); err == nil && c.Value != "" && !unmetered(r.URL.Path) {
 		if !s.limit.allowSession(c.Value, now) {
 			http.Error(w, "too many requests", http.StatusTooManyRequests)
 			return
@@ -61,15 +62,13 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 	h(s, w, r)
 }
 
+func unmetered(path string) bool {
+	return path == "/healthz" || path == "/about"
+}
+
 func tooLarge(err error) bool {
-	if err == nil {
-		return false
-	}
 	var maxErr *http.MaxBytesError
-	if err != nil && strings.Contains(err.Error(), "http: request body too large") {
-		return true
-	}
-	return strings.Contains(err.Error(), "too large") || err == io.EOF && false || maxErr != nil
+	return errors.As(err, &maxErr)
 }
 
 func needsCSRF(r *http.Request) bool {

@@ -5,6 +5,66 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.17 — 2026-09-07
+
+Closes Fable audit №2 (accounts and secrets, Ф2-1…Ф2-15 in
+[reviews.md](../../docs/plan/reviews.md)). Every fix ships with a test that
+was red on v0.0.16. What the audit left to the next layers is in
+[users-tail.md](../../docs/plan/users-tail.md).
+
+### For consumers
+
+- **Open self-registration can no longer wipe an existing account.** A
+  record is reused only as the same unconfirmed self-registration (same
+  login, same address, password already set, no pending invite); anything
+  else answers "login is already taken". Before: `POST /register` with an
+  existing login that had no confirmed address — the first administrator,
+  for one — destroyed that account's data key (Ф2-1).
+- `{account}` in every `/app/...` route is now checked against the
+  connections in the viewer's sealed blob, opened with the session key. A
+  foreign connection and the viewer's own user ID both answer 404 (Ф2-7).
+- `POST /app/settings/unlock` requires the account password, opens the
+  window in this session only, counts against the login bucket (5/min), and
+  writes `secret.unlock` to the audit log. `UnlockSheet` is served by
+  `GET /app/settings/unlock` as a fragment (Ф2-9).
+- `CARREL_TRUSTED_PROXIES` is honoured: behind a listed proxy the rate
+  buckets key on the rightmost untrusted `X-Forwarded-For` address and
+  `X-Forwarded-Proto: https` sets the Secure cookie flag. From an untrusted
+  peer both headers are ignored (Ф2-11).
+- Logging in ends the session the browser presented and issues a fresh SID;
+  the session stores the normalised login (Ф2-8).
+- Resending an invitation kills the previous secret; setting a password by
+  any path burns every outstanding forgot and console link of that account
+  (Ф2-3, Ф2-4). Disabled accounts get no `/forgot` link (Ф2-14).
+- Unknown login, disabled account, unconfirmed address, and an account
+  without a password each cost one Argon2 derivation, like a wrong password
+  (Ф2-6).
+- Password forms on `/invite/{token}` and `/forgot/{token}` show "at least 8
+  characters" and "passwords do not match" instead of a 404; internal error
+  text no longer reaches any form (Ф2-10).
+- `/healthz` and `/about` are exempt from the session bucket (Ф2-13).
+- `carrel-wipe` fails on a data directory without a volume instead of
+  creating a `server.key` there (Ф2-12).
+
+### Included
+
+- `internal/user`: `Register` and `ForgotRequest` return the link token for
+  the mail layer; `CreateInvite(actorID, …)` records the actor; `Unlock`;
+  `OwnsAccount(viewerID, dataKey, account)`; `verifyDummy`;
+  `burnWipeTokens`; `pruneTokens` (used and expired tokens are dropped).
+- `internal/store`: `Invite.Used`; `VerifyPassword`.
+- `internal/session`: `UnlockUntil` / `SetUnlockUntil`, cleared on end.
+- `internal/web`: `Limiter` sweeps refilled buckets past 4096 entries per
+  family (Ф2-2); `tooLarge` uses `errors.As`; `NewStubUsers` removed —
+  tests run against `user.Service`.
+- Tests: 17 new in `internal/user`, 14 in `internal/web`, 2 in the limiter.
+  `internal/user` coverage across module tests 34.3% → 81.0%.
+
+### Not yet included
+
+Mail delivery (S-26): `/forgot` and `/register` store the token but nobody
+sends it yet. Key escrow (S-10.5), admin panel actions, `/app/password`.
+
 ## v0.0.16 — 2026-09-05
 
 Adds Linux-only delivery and acceptance infrastructure from

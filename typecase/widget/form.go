@@ -158,10 +158,17 @@ type FormFoot struct {
 func (ff FormFoot) Render() string {
 	var rest, danger string
 	for _, a := range ff.Rest {
-		rest += a.Render()
+		aa := a
+		if aa.Size == "" {
+			aa.Size = ButtonSizeForm
+		}
+		rest += aa.Render()
 	}
 	for _, a := range ff.Danger {
 		da := a
+		if da.Size == "" {
+			da.Size = ButtonSizeForm
+		}
 		if da.Kind == "" {
 			da.Kind = ButtonDanger
 		}
@@ -170,6 +177,9 @@ func (ff FormFoot) Render() string {
 	primary := ""
 	if ff.Primary.Label != "" || ff.Primary.Icon != "" || ff.Primary.Href != "" {
 		p := ff.Primary
+		if p.Size == "" {
+			p.Size = ButtonSizeForm
+		}
 		if p.Kind == "" {
 			p.Kind = ButtonPrimary
 		}
@@ -197,6 +207,9 @@ func (d Danger) Render() string {
 	var rows string
 	for _, r := range d.Rows {
 		a := r.Action
+		if a.Size == "" {
+			a.Size = ButtonSizeForm
+		}
 		if a.Kind == "" {
 			a.Kind = ButtonDanger
 		}

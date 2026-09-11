@@ -212,7 +212,7 @@ func (s Steps) Render() string {
 // Card — tc-card
 //
 // Роль. Блок с рамкой.
-// Вход. Card{ Rubric, Body }.
+// Вход. Card{ Rubric, Body []Node }.
 // Состояния. нет.
 // Инварианты. Пары выравниваются по колонке подписей.
 // Поведение. нет.
@@ -221,17 +221,17 @@ func (s Steps) Render() string {
 // Чего нет. Нет теней.
 type Card struct {
 	Rubric Rubric
-	Body   Prose
+	Body   []Node
 }
 
 func (c Card) Render() string {
-	return `<div class="tc-card">` + c.Rubric.Render() + `<div class="tc-card__body">` + c.Body.Render() + `</div></div>`
+	return `<div class="tc-card">` + c.Rubric.Render() + `<div class="tc-card__body">` + renderNodes(c.Body) + `</div></div>`
 }
 
 // Sec — tc-sec
 //
 // Роль. Именованный подраздел внутри блока.
-// Вход. Sec{ Rubric, Body }.
+// Вход. Sec{ Rubric, Body []Node }.
 // Состояния. нет.
 // Инварианты. Как tc-card без рамки.
 // Поведение. нет.
@@ -240,11 +240,11 @@ func (c Card) Render() string {
 // Чего нет. Нет теней.
 type Sec struct {
 	Rubric Rubric
-	Body   Prose
+	Body   []Node
 }
 
 func (s Sec) Render() string {
-	return `<section class="tc-sec">` + s.Rubric.Render() + `<div class="tc-sec__body">` + s.Body.Render() + `</div></section>`
+	return `<section class="tc-sec">` + s.Rubric.Render() + `<div class="tc-sec__body">` + renderNodes(s.Body) + `</div></section>`
 }
 
 // Fields — tc-fields

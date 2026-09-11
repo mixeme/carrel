@@ -42,6 +42,9 @@ func TestL8_gates(t *testing.T) {
 		gate.Verifiable,
 		gate.NoInline,
 		gate.A11y,
+		gate.Geometry,
+		gate.ScreensCSS,
+		gate.ScreensCoverage,
 	}
 	for _, name := range checks {
 		t.Run(string(name), func(t *testing.T) {
@@ -61,7 +64,7 @@ func TestL8_verifiable(t *testing.T) {
 	if err := gate.Run(gate.Verifiable, p, catalogEntries()); err != nil {
 		t.Fatal(err)
 	}
-	if len(gate.AllGates) != 14 {
-		t.Fatalf("expected 14 gates, got %d", len(gate.AllGates))
+	if len(gate.AllGates) != 18 {
+		t.Fatalf("expected 18 gates, got %d", len(gate.AllGates))
 	}
 }

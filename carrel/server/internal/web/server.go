@@ -3,7 +3,9 @@ package web
 import (
 	"context"
 	"crypto/subtle"
+	"net"
 	"net/http"
+	"net/netip"
 	"strings"
 	"time"
 
@@ -30,23 +32,29 @@ type Users interface {
 	CompleteInvite(ctx context.Context, token, password string) error
 
 	ConfirmEmail(ctx context.Context, token string) (ok bool)
-	Register(ctx context.Context, login, email, password string) error
+	// Register and ForgotRequest return the raw link token for the mail
+	// layer; the request layer never puts it in a response.
+	Register(ctx context.Context, login, email, password string) (token string, err error)
 
-	ForgotRequest(ctx context.Context, loginOrEmail string) (sent, asked, hasMail bool, err error)
+	ForgotRequest(ctx context.Context, loginOrEmail string) (token string, sent, asked, hasMail bool, err error)
 	ForgotWipeState(ctx context.Context, token string) (login string, step string, valid bool)
 	ForgotConfirmWipe(ctx context.Context, token string) error
 	ForgotSetPassword(ctx context.Context, token, password string) error
 
 	IsAdmin(accountID string) bool
 	AccountRole(accountID string) store.Role
-	OwnsAccount(viewerID, accountParam string) bool
+	// OwnsAccount opens the viewer's sealed blob with the session's data key
+	// and looks for the connection: {account} is a connection (C-4), never
+	// the user ID.
+	OwnsAccount(viewerID string, dataKey [32]byte, accountParam string) bool
 	OwnsCollection(viewerID, accountParam, col string) bool
 	OwnsRecord(viewerID, accountParam, col, uid string) bool
 
 	PublicLinkValid(ctx context.Context, token string) bool
 
-	UnlockUntil(accountID string) *time.Time
-	SetUnlockUntil(accountID string, until *time.Time)
+	// Unlock confirms the password of the session's own account for the
+	// S-10.7 sheet and journals it.
+	Unlock(ctx context.Context, accountID, password string) bool
 }
 
 // Server is the HTTP front door (S-9).
@@ -60,6 +68,7 @@ type Server struct {
 	version  string
 	commit   string
 	mux      *http.ServeMux
+	proxies  []netip.Prefix // CARREL_TRUSTED_PROXIES
 }
 
 // New builds a Server with all C-5 routes registered.
@@ -76,6 +85,7 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 		limit:    NewLimiter(),
 		version:  version,
 		commit:   commit,
+		proxies:  parseProxies(cfg.TrustedProxies),
 	}
 	s.mux = http.NewServeMux()
 	s.registerRoutes()
@@ -122,8 +132,83 @@ func (s *Server) secureCookies(r *http.Request) bool {
 	if r.TLS != nil {
 		return true
 	}
-	// Trusted proxy may terminate TLS; CARREL_PUBLIC_URL https implies Secure cookies.
+	// A trusted proxy may terminate TLS (S-28.1): its protocol header counts,
+	// and so does an https CARREL_PUBLIC_URL.
+	if s.fromTrustedProxy(r) && strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
+		return true
+	}
 	return strings.HasPrefix(strings.ToLower(s.cfg.PublicURL), "https://")
+}
+
+// parseProxies reads CARREL_TRUSTED_PROXIES: comma- or space-separated IPs
+// and CIDRs. Anything unparsable is ignored rather than trusted.
+func parseProxies(list string) []netip.Prefix {
+	var out []netip.Prefix
+	for _, item := range strings.FieldsFunc(list, func(r rune) bool { return r == ',' || r == ' ' || r == ';' }) {
+		if p, err := netip.ParsePrefix(item); err == nil {
+			out = append(out, p.Masked())
+			continue
+		}
+		if a, err := netip.ParseAddr(item); err == nil {
+			out = append(out, netip.PrefixFrom(a, a.BitLen()))
+		}
+	}
+	return out
+}
+
+func (s *Server) trustedAddr(a netip.Addr) bool {
+	a = a.Unmap()
+	for _, p := range s.proxies {
+		if p.Contains(a) {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Server) fromTrustedProxy(r *http.Request) bool {
+	a, ok := remoteAddr(r)
+	return ok && s.trustedAddr(a)
+}
+
+func remoteAddr(r *http.Request) (netip.Addr, bool) {
+	host := r.RemoteAddr
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	a, err := netip.ParseAddr(host)
+	if err != nil {
+		return netip.Addr{}, false
+	}
+	return a.Unmap(), true
+}
+
+// clientIP is the address the rate buckets key on. Directly connected, it is
+// the peer. Behind a proxy listed in CARREL_TRUSTED_PROXIES it is the
+// rightmost X-Forwarded-For entry that is not itself a trusted proxy.
+// Otherwise every client would share the proxy's bucket, and twenty login
+// attempts from one attacker would lock the whole instance out (S-28.1: the
+// service believes address headers only from trusted proxies).
+func (s *Server) clientIP(r *http.Request) string {
+	peer, ok := remoteAddr(r)
+	if !ok {
+		return r.RemoteAddr
+	}
+	if !s.trustedAddr(peer) {
+		return peer.String()
+	}
+	hops := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
+	for i := len(hops) - 1; i >= 0; i-- {
+		a, err := netip.ParseAddr(strings.TrimSpace(hops[i]))
+		if err != nil {
+			break
+		}
+		a = a.Unmap()
+		if !s.trustedAddr(a) {
+			return a.String()
+		}
+	}
+	return peer.String()
 }
 
 func checkCSRF(sess *session.Session, r *http.Request) bool {

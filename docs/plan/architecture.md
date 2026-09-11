@@ -57,7 +57,9 @@
     token/
     css/  js/  fonts/  icons/
     catalog/
+    screens/
     cmd/catalog/
+    cmd/screens/
     testdata/broken/
   carrel/
     server/                  модуль серверной половины

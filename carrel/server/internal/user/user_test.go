@@ -47,7 +47,8 @@ func TestSetupFirstAdmin(t *testing.T) {
 func TestInviteSecretLength(t *testing.T) {
 	svc, _ := testService(t)
 	_ = svc.SetupFirstAdmin(context.Background(), "admin", "password123")
-	secret, err := svc.CreateInvite("bob", "bob@example.com")
+	adminID, _, _, _ := svc.Authenticate(context.Background(), "admin", "password123")
+	secret, err := svc.CreateInvite(adminID, "bob", "bob@example.com")
 	if err != nil {
 		t.Fatal(err)
 	}

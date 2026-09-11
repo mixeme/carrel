@@ -23,18 +23,25 @@
 	border: var(--tc-stroke) solid var(--tc-rule);
 	border-radius: var(--tc-radius);
 	overflow: hidden;
+	/* Целиком или под «ещё»: доля не сжимается до нечитаемой (L-4.4). */
+	flex: none;
+	white-space: nowrap;
 }
 .tc-seg__opt {
 	border: 0;
 	border-right: var(--tc-stroke) solid var(--tc-rule);
-	background: var(--tc-surface);
+	background: transparent;
 	padding: 0 0.6em;
 	min-height: 26px;
 	cursor: pointer;
-	color: var(--tc-ink);
+	color: var(--tc-muted);
+	line-height: 1.35;
 }
 .tc-seg__opt:last-child { border-right: 0; }
-.tc-seg__opt.is-chosen { background: var(--tc-accent); color: var(--tc-surface); }
+/* Выбранная доля — подложка и чернила, а не заливка акцентом: акцент несёт
+   первичное действие и «сделано», и переключатель вида его не занимает.
+   Жирность — второй, нецветовой признак выбранного. */
+.tc-seg__opt.is-chosen { background: var(--tc-card); color: var(--tc-ink); font-weight: 600; }
 
 .tc-chip {
 	display: inline-flex;

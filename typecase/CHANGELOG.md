@@ -4,6 +4,215 @@ All notable changes to Typecase are documented here. Versioning follows
 [semantic versioning](https://semver.org/). This file tells consumers what to
 do, not what the authors did.
 
+## Unreleased
+
+Library geometry now matches the Carrel mockups; assembled screens demo
+covers all six mockup pages including States, with dark-theme rerenders and
+widget-coverage gates. Open library holes found by assembly (`Э-1`…`Э-6`,
+L-4.4) are in [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
+
+### For consumers
+
+- **`Node` and `[]Node` for widget composition.** `Main.Body`, `Card.Body`,
+  `Sec.Body`, `Bar.Left`, and `Bar.Right` now take `[]Node` (any value with
+  `Render() string`), not `Prose` or `[]Action`. Use
+  `widget.Paragraph("text")` as a `Node` inside the slice; for bar actions
+  use `widget.ActionsAsNodes([]widget.Action{...})` or
+  `[]widget.Node{widget.Action{Label: "Save"}}`.
+- **Redefine tokens if you override the bundle.** `--tc-row-height` is now
+  `38px`, `--tc-font-size` is `13px`, and two new required tokens appear:
+  `--tc-page-gutter` (`20px`), `--tc-page-gutter-narrow` (`14px`), and
+  `--tc-radius-sm` (`2px`). `token.Validate` fails without them. Defaults ship
+  in the bundle; nothing to do if you use `typecase.CSS()` as is.
+- **Default button height is bar (26 px), not form (28 px).** Bare `Button{}`
+  and `Action{}` now render `tc-btn--bar`. Form footers still get
+  `tc-btn--form` automatically; elsewhere pass `Size: ButtonSizeForm` when the
+  control sits in a form.
+- **Page gutter replaces ad‑hoc horizontal padding.** Panels, rows and headers
+  read `var(--tc-page-gutter)`; narrow shells swap it for
+  `var(--tc-page-gutter-narrow)` via `.tc-shell--narrow`.
+- **Run the screens demo beside the catalog.** `scripts/typecase-screens.bat`
+  serves `http://localhost:8081/` — assembled mockup pages, not widget
+  cells. Routes: `/notes`, `/files`, `/contacts`, `/io`, `/duplicates`,
+  `/states`. Append `?theme=dark` for a dark rerender before first paint.
+  `screens.css` holds page chrome only; it must not contain `.tc-`
+  selectors.
+
+### Included
+
+- `widget.Node` and `[]Node` on `Main`, `Card`, `Sec`, and `Bar` shelves
+  (`typecase-compose` §1); gate `screens-compose` on `/notes`.
+- Mockup-aligned geometry: row height 38, row gap 12, rail tickrow padding 16,
+  top bar 52, default button 26, second radius 2 px on check/badge/mark.
+- Gates `geometry`, `screens-css`, and `screens-coverage` (L-8).
+- Package `typecase/screens`, binary `cmd/screens`, routes for s-notes,
+  s-files, s-contacts, s-io, s-dup and m-states mockup frames.
+- Browser check `screens_test.go`: each screen at 1280×900 and 375×812, light
+  and dark (`?theme=dark`). Phone overflow of `tc-top` / `tc-seg` is deferred
+  (L-4.4); theme, contrast and ink overflow still run at 375 px.
+- Demo chrome follows the palette tokens, so dark theme does not leave the
+  screens nav in light ink. Theme links: `?theme=light` / `?theme=dark`.
+- Findings `Э-1`…`Э-6` and the remaining assembly work live in
+  [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
+
+### Fixed
+
+- Screens browser probe: SVG `className` is not a string; `color-mix`
+  backgrounds come back as `color(srgb …)` and now parse for contrast.
+
+### Not yet included
+
+- The typecase wordmark work documented below stays documentation-only until
+  released separately.
+
+### For consumers (wordmark preview)
+
+- **Nothing to do for the wordmark.** No module code, token, markup or behaviour
+  changed for v0.2.0 consumers beyond the geometry items above.
+- **The wordmark belongs to the library's own pages** — the widget catalog, the
+  README, a release page — and nowhere else. It marks the library, not an
+  application built on it, so it does not go into a consumer's interface, and it
+  never stands next to the marks of the application that depends on it.
+- **Do not set the word in Literata and call it the mark.** The nests, the air
+  inside them and the empty nest are measured, not typed; `typecase-logotype.svg`
+  is the only file that carries them.
+- **Below 164 px wide, do not use it.** That is where the hairline of “e” still
+  holds 1.5 px. There is no hinted small version and no icon yet, so in square
+  formats the library has no mark at all.
+
+### Included
+
+- `docs/visual/typecase-logotype.svg`: the master. Eight letters, each in its own
+  nest, and one empty nest as the accent. Three fills, no strokes, no embedded
+  text and no metadata, 8.1 KB.
+- `docs/visual/typecase-logotype.html`: the construction reference — the single
+  source of truth for the mark, in the genre of the Carrel references next to it.
+  It records what was chosen and why, including the five rejected accent
+  placements and the two rejected nest geometries.
+- The instance is `opsz 12, wght 400`, and the reference shows the measurement
+  behind it: across the optical size axis the hairline of “e” varies from 5.89 to
+  1.34 units, so at `opsz 72` the word would need 564 px of width to keep that
+  stroke at 1.5 px, against 164 px here. It is also the instance that sets the
+  library's own text.
+- The grid is derived, not designed: a nest is the letter's ink plus the
+  instance's mean side bearing (3.24) on all four sides, which makes the nests
+  sum to the font's own advances exactly (420.42 against 420.42). The partition
+  between nests and the corner radius are one module — the stem of “p”, 8.77.
+- The accent is an empty nest after the word, as wide as the average nest
+  (52.55): in a case, an empty nest means the sort is already set in the line and
+  its place is still there.
+- `docs/visual/tools/`: `typecase_logotype.py` builds the mark from the font,
+  `build_typecase_logotype.py` releases the master and the reference together,
+  `checks.py` measures contours against the font, containment, gaps, the sums and
+  the size limit. Every number printed in the reference comes from that
+  measurement, so the document cannot drift away from the file it describes.
+
+### Not yet included
+
+- An icon. The 3×3 case sketches — `docs/visual/typecase-logo-v2.svg` and
+  `typecase-logo-bg.svg`, which differ only by a background plate — are a
+  separate piece of work with its own reference.
+- A Cyrillic wordmark. There is none, and Literata set next to the mark stays
+  text.
+
+## typecase/v0.2.0 — 2026-09-05
+
+The second visual audit pass, closed (`В-12`…`В-27`). The palette gains an
+eighth slot, small controls stop drawing their tap area, headings stop
+inheriting the browser's scale, and sheets and dialogs are finally positioned
+by the library.
+
+### For consumers (v0.1.1 → v0.2.0)
+
+- **Define `--tc-card` if you override the palette.** The eighth palette slot: a
+  quiet surface tone one step off the page ground. `token.Validate` and
+  `token.ValidateWidget` now require it, so a consumer stylesheet that redefines
+  the palette without it fails validation. Defaults ship in the bundle:
+  `#e8dfcb` light, `#242e27` dark. Nothing to do if you use the bundle as is.
+- **Mark the root with `data-tc-root`, not the `tc-root` class.** Base
+  typography, colour and `box-sizing` now hang on the attribute the markup
+  already carries, so the library no longer needs a script to look like itself.
+  `tc.js` stops adding the class; if your own CSS targeted `.tc-root`, retarget
+  it at `[data-tc-root]`.
+- **Small controls are drawn at their real size again.** `tc-tick` and the
+  tick in `tc-tickrow` are 13 px, `tc-close` is 24 px. The 44 px tap area comes
+  from a transparent pseudo-element below 720 px, so layouts that reserved
+  44 px of space for these marks will now see them take 13 or 24. `tc-check`
+  no longer forces the touch row height at every width.
+- **Headings inherit the base size unless a widget names one.** If you styled
+  around `h1` being 2em inside `tc-head`, drop those overrides: the title is
+  `1.6em`, the sheet and dialog titles are body size in bold.
+- **`tc-usermenu` markup changed.** The popover is a `div` wrapping the header
+  and a `ul[role=menu]`; `aria-controls` points at the list. CSS or scripts
+  that assumed `ul.tc-usermenu__popover` need updating.
+- **`Badge` with an empty label renders nothing** instead of an empty chip.
+- **`tc-seg` changed appearance.** The chosen part is `--tc-card` with ink text
+  and `font-weight: 600`; the others are muted with no fill. A solid accent
+  marks the primary action and the "done" state, and a view switch does not
+  take that rank.
+- **The side column's width moved to `.tc-side`.** `.tc-shell__side` is
+  `width: auto`, so a closed panel collapses its column instead of holding
+  400 px open.
+- **Run `go test ./...`** from the module root after upgrading. The browser
+  gates need Chrome or Edge (`CHROME_PATH` overrides detection).
+
+### Fixed
+
+- `tc-tick`, `tc-tickrow__tick`, `tc-close`, `tc-check`: the 44 px tap area was
+  written as `min-width`/`min-height` on the mark itself, so it was painted at
+  every width instead of being reserved for the narrow layout (`В-14`).
+- `tc-tickrow` in the narrow layout spaces the tick and the label by `1.2em`, so
+  the tick's tap area does not swallow taps meant for the label.
+- Heading sizes: no `h1`–`h4` inside the library inherits the browser scale any
+  more. `tc-head__title` is `1.6em/1.5` serif, `tc-sheet__title` and
+  `tc-dialog__title` are body size in bold, `tc-empty__title` is `1.1em`, and
+  the document heading scale is stated in `09-document.css` (`В-15`).
+- `button`, `input`, `select`, `textarea` take `font: inherit`; `code`, `kbd`,
+  `samp` and `pre` take the declared monospace. Nineteen controls were drawn
+  with the system face (`В-16`).
+- `tc-sheet` and `tc-dialog` are centred by their overlay layer, 44 px from the
+  top, at `560px`/`92%` and `24em`/`90vw`. The layer is transparent to pointer
+  events so the scrim still closes on a click outside (`В-17`).
+- `tc-sheet__head`: the title leads and the target caption is pushed right;
+  `width: 100%` on the caption used to squeeze it against the title (`В-18`).
+- `Badge.Render` with no label renders nothing; `tc-usermenu` no longer emits
+  the empty badge that its own `inv-badge-has-text` fixture describes, and the
+  popover header no longer sits inside the `ul` (`В-19`).
+- `.tc-main` fills its column, like `.tc-rail` and `.tc-side` (`В-20`).
+- A closed side panel collapses its column (`В-21`).
+- `tc-rail` draws no chip strip when there are no chips (`В-23`).
+- Base styles hang on `[data-tc-root]`, so the library looks the same without
+  `tc.js`; the static catalog page used to fall back to 16 px Times (`В-24`).
+- `.tc-mark` has no palette default: without a supplied colour it is not
+  painted, rather than painted with the theme accent (`В-25`).
+- `tc-seg`: chosen part follows the mockups, carries a non-colour cue, and takes
+  `flex: none`/`white-space: nowrap` so a part is never squeezed below its
+  label (`В-26`).
+- `tc.js` moves `is-chosen` together with `aria-pressed` when a segment is
+  clicked; the visible and the announced selection used to diverge (`В-27`).
+
+### Included
+
+- `catalog.Mux`: the catalog site — pages, styles, scripts, fonts, icons and a
+  sample image — built once and used by both `cmd/catalog` and the browser
+  checks. Unknown paths answer 404 instead of the page, which is what made font
+  faces fail to parse and images fail to decode (`В-12`).
+- `--tc-card` in `css/00-tokens.css`, in `token.Palette`, and in the L-5.1
+  palette list in `docs/spec/typecase.md`.
+- `browser.TapTarget` measures the hit area with `elementFromPoint` at four
+  points 21 px from the centre, across five controls, and separately checks the
+  drawn size at 1280 px.
+- `gate.compositeInvariants`: per-occurrence markup invariants read every
+  catalog entry the widget is drawn in, not only the entry named after it.
+- Browser checks for catalog assets, typography, overlay geometry, shell
+  geometry, the no-script base, and segment selection agreement.
+- Catalog fixtures carry a build caption; `tc-railfoot — missing` shows the
+  unassembled-input state on purpose.
+
+### Not yet included
+
+- `tc-seg` does not collapse into a menu when width runs short (L-4.4).
+
 ## typecase/v0.1.1 — 2026-09-05
 
 Visual audit fixes from the catalog browser review (findings В-1…В-7) and

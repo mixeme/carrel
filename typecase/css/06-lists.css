@@ -7,7 +7,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0.35em 0.75em;
+	padding: 0.35em var(--tc-page-gutter);
 	font-size: 0.75em;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -18,9 +18,9 @@
 .tc-row {
 	display: flex;
 	align-items: center;
-	gap: 0.5em;
+	gap: 12px;
 	min-height: var(--tc-row-height);
-	padding: 0 0.75em;
+	padding: 0 var(--tc-page-gutter);
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 	text-decoration: none;
 	color: var(--tc-ink);
@@ -54,18 +54,36 @@
 	align-items: center;
 	gap: 0.35em;
 	min-height: var(--tc-row-height);
-	padding: 0 0.5em;
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 16px;
+	padding-right: 16px;
 }
 .tc-tickrow__tick {
+	position: relative;
 	width: 13px;
 	height: 13px;
-	min-width: 44px;
-	min-height: 44px;
 	border: var(--tc-stroke) solid var(--tc-rule);
-	border-radius: var(--tc-radius);
+	border-radius: var(--tc-radius-sm);
 	background: var(--tc-surface);
 	cursor: pointer;
 	flex: none;
+}
+/* Зона нажатия отделена от метки, как у tc-tick: см. 02-primitives.css.
+   Зоны галки и подписи не перепутаны, поэтому в узкой раскладке строка не
+   только растёт по высоте, но и разводит их: 1.2em зазора выносит подпись за
+   44-пиксельную зону галки. */
+@media (max-width: 720px) {
+	.tc-tickrow { min-height: 44px; gap: 1.2em; }
+	.tc-tickrow__tick::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 44px;
+		height: 44px;
+		transform: translate(-50%, -50%);
+	}
 }
 .tc-tickrow__tick.is-on { background: var(--tc-accent); }
 .tc-tickrow__tick.is-partial { background: color-mix(in srgb, var(--tc-accent) 50%, var(--tc-surface)); }

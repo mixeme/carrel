@@ -24,7 +24,7 @@ func GoodFixtures() map[Name]Fixture {
 	for i := 0; i < 6; i++ {
 		actions = append(actions, widget.Action{Label: "Action"})
 	}
-	bar := widget.Bar{Left: actions, Right: []widget.Action{{Label: "Save"}}}.Render()
+	bar := widget.Bar{Left: widget.ActionsAsNodes(actions), Right: widget.ActionsAsNodes([]widget.Action{{Label: "Save"}})}.Render()
 
 	fields := widget.Fields{Rows: []widget.FieldRow{
 		{Label: "Path", Value: "/very/long/path/that/must/truncate/in/its/cell/without/overflow", Path: true},
@@ -44,6 +44,18 @@ func GoodFixtures() map[Name]Fixture {
 		Confirm: widget.Action{Label: "Yes"},
 		Cancel:  widget.Action{Label: "No"},
 	}.Render()
+
+	// Каждый мелкий контрол на одной странице: у всех зона нажатия обязана
+	// добирать до 44 px в узкой раскладке, не увеличивая нарисованный размер.
+	taps := `<div class="tap-grid">` +
+		widget.Tick{Done: true, Label: "Mark done"}.Render() +
+		widget.TickRow{Label: "Inbox", Tick: widget.TickOn}.Render() +
+		widget.Check{Name: "agree", Label: "I agree", Checked: true}.Render() +
+		widget.Close{For: "tap-demo", Label: "Close"}.Render() +
+		nav + `</div>`
+	// Контролы разведены, чтобы зона одного не перекрывалась соседом: проверка
+	// спрашивает про каждый в отдельности, а не про их соседство.
+	tapsCSS := `.tap-grid { display: flex; flex-direction: column; gap: 40px; align-items: stretch; }`
 
 	sample := `<p class="tc-sample">Sample text</p>`
 	sampleCSS := `.tc-sample { display: inline-block; width: 180px; padding: 8px; background: var(--tc-surface); color: var(--tc-ink); }`
@@ -71,7 +83,7 @@ func GoodFixtures() map[Name]Fixture {
 			Width: 280,
 			Extra: `.demo { width: 260px; }`,
 		},
-		TapTarget:     {Body: nav, Width: 375, Height: 200},
+		TapTarget:     {Body: taps, Width: 375, Height: 600, Extra: tapsCSS},
 		FocusReturn:   {Body: menuShort},
 		EscLayers:     {Body: sheet + dialog, Width: 800, Height: 600},
 		Contrast:      {Body: sample, Extra: sampleCSS},

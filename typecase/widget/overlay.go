@@ -96,7 +96,9 @@ func (s Sheet) Render() string {
 		id = uniqueID("tc-sheet")
 	}
 	scrim := Scrim{For: id, On: s.Open, MustAnswer: s.MustAnswer}.Render()
-	body := `<header class="tc-sheet__head"><div class="tc-sheet__target">` + esc(s.Target) + `</div><h2 class="tc-sheet__title">` + esc(s.Title) + `</h2>` + Close{For: id, Label: labels.Close}.Render() + `</header><div class="tc-sheet__body">` + s.Body.Render() + `</div><footer class="tc-sheet__foot">` + acts + `</footer>`
+	// Заголовок первым, цель за ним: подпись цели прижата вправо, и порядок в
+	// разметке совпадает с порядком чтения.
+	body := `<header class="tc-sheet__head"><h2 class="tc-sheet__title">` + esc(s.Title) + `</h2><div class="tc-sheet__target">` + esc(s.Target) + `</div>` + Close{For: id, Label: labels.Close}.Render() + `</header><div class="tc-sheet__body">` + s.Body.Render() + `</div><footer class="tc-sheet__foot">` + acts + `</footer>`
 	return scrim + renderOverlay(OverlaySheet, s.Open, id, "", `<div`+classAttr(cls)+` data-tc-trap>`+body+`</div>`)
 }
 
@@ -266,8 +268,11 @@ func (u UserMenu) Render() string {
 		items += `<li role="none"><a href="` + esc(it.Href) + `" class="tc-usermenu__item" role="menuitem">` + esc(it.Label) + `</a></li>`
 	}
 	head := `<div class="tc-usermenu__head"><span class="tc-usermenu__name">` + esc(u.Name) + `</span>` + u.Mark.Render() + `<span class="tc-usermenu__note">` + esc(u.Note) + `</span></div>`
-	pop := `<ul class="tc-usermenu__popover" role="menu" data-tc-menu-popover` + attr("id", id+"-popover") + `>` + head + items + `</ul>`
-	btn := `<button type="button" class="tc-usermenu__control" data-tc-menu` + attr("data-tc-menu-id", id) + ` aria-haspopup="menu" aria-expanded="` + exp + `" aria-controls="` + esc(id) + `-popover"><span class="tc-usermenu__avatar" aria-hidden="true">` + esc(initials(u.Name)) + `</span><span class="tc-usermenu__label">` + esc(u.Name) + `</span><span class="tc-menu__arrow" aria-hidden="true"></span></button>`
+	// Шапка — не пункт меню, поэтому лежит рядом со списком, а не внутри него:
+	// div прямым ребёнком ul — невалидная вложенность и разорванная роль menu.
+	pop := `<div class="tc-usermenu__popover" data-tc-menu-popover` + attr("id", id+"-popover") + `>` + head +
+		`<ul class="tc-usermenu__list" role="menu"` + attr("id", id+"-menu") + `>` + items + `</ul></div>`
+	btn := `<button type="button" class="tc-usermenu__control" data-tc-menu` + attr("data-tc-menu-id", id) + ` aria-haspopup="menu" aria-expanded="` + exp + `" aria-controls="` + esc(id) + `-menu"><span class="tc-usermenu__avatar" aria-hidden="true">` + esc(initials(u.Name)) + `</span><span class="tc-usermenu__label">` + esc(u.Name) + `</span><span class="tc-menu__arrow" aria-hidden="true"></span></button>`
 	return `<div` + classAttr(cls) + attr("id", id) + ` data-tc-overlay-anchor>` + btn + pop + `</div>`
 }
 

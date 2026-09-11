@@ -1,11 +1,41 @@
 package web
 
 import (
+	"errors"
+	"log/slog"
 	"net/http"
 	"time"
 
+	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
+
+// formError turns a service error into the text a form may show. Only the
+// errors a person can act on are named; anything else (a failed write, a
+// path in an os error) stays out of the response.
+func formError(err error) view.Text {
+	for _, known := range []error{
+		user.ErrPasswordShort, user.ErrPasswordMismatch, user.ErrLoginTaken, user.ErrLastAdmin,
+	} {
+		if errors.Is(err, known) {
+			return text(known.Error())
+		}
+	}
+	return text("Something went wrong. Try again.")
+}
+
+// passwordPair validates a new password and its repeat the way every
+// password form does (S-10.2, S-10.4): length first, then equality.
+func passwordPair(password, password2 string) error {
+	if len(password) < conf.MinPasswordLen {
+		return user.ErrPasswordShort
+	}
+	if password != password2 {
+		return user.ErrPasswordMismatch
+	}
+	return nil
+}
 
 func (s *Server) getHealthz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -60,7 +90,7 @@ func (s *Server) getLogin(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	ip := clientIP(r)
+	ip := s.clientIP(r)
 	login := r.FormValue("login")
 	if !s.limit.allowLogin(login, ip, start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
@@ -82,7 +112,12 @@ func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
-	sess, err := s.sessions.Create(accountID, login, dataKey)
+	// A new SID on every login (architecture.md): whatever session the
+	// browser presented ends here, so the old cookie value opens nothing.
+	if old, ok := s.sessionFrom(r); ok {
+		s.sessions.End(old.ID())
+	}
+	sess, err := s.sessions.Create(accountID, normalizeLogin(login), dataKey)
 	if err != nil {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
@@ -146,7 +181,7 @@ func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
 		page := view.SetupPage{
 			Plain: view.Plain{Title: text("Create administrator"), Lede: text("This instance has no accounts yet.")},
 			Form: plainForm("/setup", "POST",
-				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Error: text(err.Error())},
+				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Error: formError(err)},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 			),
@@ -159,7 +194,7 @@ func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getRegister(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -180,7 +215,7 @@ func (s *Server) getRegister(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	ip := clientIP(r)
+	ip := s.clientIP(r)
 	if !s.limit.allowAnon(ip, start) || !s.limit.allowLogin(r.FormValue("login"), ip, start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
@@ -189,11 +224,13 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	if err := s.users.Register(r.Context(), r.FormValue("login"), r.FormValue("email"), r.FormValue("password")); err != nil {
+	// The confirmation token goes to the mail layer (S-26), never into a
+	// response.
+	if _, err := s.users.Register(r.Context(), r.FormValue("login"), r.FormValue("email"), r.FormValue("password")); err != nil {
 		page := view.RegisterPage{
 			Plain: view.Plain{Title: text("Create account"), Lede: text("Registration is open on this instance.")},
 			Form: plainForm("/register", "POST",
-				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(r.FormValue("login")), Error: text(err.Error())},
+				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(r.FormValue("login")), Error: formError(err)},
 				view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail, Value: text(r.FormValue("email"))},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
 			),
@@ -210,7 +247,7 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getInvite(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -233,7 +270,7 @@ func (s *Server) getInvite(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -242,18 +279,21 @@ func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
 		s.tokenNotFound(w, r, start)
 		return
 	}
-	if r.FormValue("password") != r.FormValue("password2") {
+	if err := passwordPair(r.FormValue("password"), r.FormValue("password2")); err != nil {
 		page := view.InvitePage{
 			Plain: view.Plain{Title: text("Accept invitation"), Lede: text("Choose a password.")},
 			Valid: true,
 			Form: plainForm("/invite/"+token, "POST",
-				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Error: text("Passwords do not match.")},
-				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword},
+				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: formError(err)},
+				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 			),
 		}
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
+	// Whatever else goes wrong (the login got taken meanwhile, the token
+	// died between GET and POST) answers like a dead token: the form has
+	// nothing more to say to someone holding an invalid secret.
 	if err := s.users.CompleteInvite(r.Context(), token, r.FormValue("password")); err != nil {
 		s.tokenNotFound(w, r, start)
 		return
@@ -263,7 +303,7 @@ func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -283,7 +323,7 @@ func (s *Server) getConfirmEmail(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getForgot(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -301,14 +341,19 @@ func (s *Server) getForgot(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	ip := clientIP(r)
+	ip := s.clientIP(r)
 	if !s.limit.allowAnon(ip, start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
-	sent, asked, hasMail, err := s.users.ForgotRequest(r.Context(), r.FormValue("login"))
+	// The wipe token goes to the mail layer (S-26), never into a response.
+	_, sent, asked, hasMail, err := s.users.ForgotRequest(r.Context(), r.FormValue("login"))
 	if err != nil {
-		constantTimeDelay(start, 300*time.Millisecond)
+		// The person sees the same page as when nothing could be issued;
+		// the operator sees why. No identifier from the form goes to the
+		// log: it is whatever was typed.
+		slog.Error("forgot: issuing wipe token failed", "error", err)
+		sent, asked = false, false
 	}
 	page := view.ForgotPage{
 		Plain:   view.Plain{Title: text("Forgotten password"), Lede: text("Carrel cannot recover your encrypted data.")},
@@ -321,14 +366,13 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 		page.HasMail = false
 		page.Plain.Lede = text("Without a confirmed email address on the account, sign-in recovery from here is not possible.")
 	}
-	_ = err
 	constantTimeDelay(start, 300*time.Millisecond)
 	s.writePage(w, r, http.StatusOK, page)
 }
 
 func (s *Server) getForgotWipe(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -344,7 +388,7 @@ func (s *Server) getForgotWipe(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) postForgotWipe(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -370,10 +414,14 @@ func (s *Server) postForgotWipe(w http.ResponseWriter, r *http.Request) {
 		page := s.forgotWipePage(token, login, step)
 		s.writePage(w, r, http.StatusOK, page)
 	case string(view.WipePassword):
-		if err := s.users.ForgotSetPassword(r.Context(), token, r.FormValue("password")); err != nil {
+		if err := passwordPair(r.FormValue("password"), r.FormValue("password2")); err != nil {
 			page := s.forgotWipePage(token, login, step)
-			page.Form.Sets[0].Rows[0].Error = text(err.Error())
+			page.Form.Sets[0].Rows[0].Error = formError(err)
 			s.writePage(w, r, http.StatusOK, page)
+			return
+		}
+		if err := s.users.ForgotSetPassword(r.Context(), token, r.FormValue("password")); err != nil {
+			s.tokenNotFound(w, r, start)
 			return
 		}
 		s.redirect(w, r, "/login")
@@ -414,7 +462,7 @@ func (s *Server) forgotWipePage(token, login, step string) view.ForgotWipePage {
 
 func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -432,7 +480,7 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -445,7 +493,7 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getPublishedFile(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -458,7 +506,7 @@ func (s *Server) getPublishedFile(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) postBackupRun(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -467,7 +515,7 @@ func (s *Server) postBackupRun(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getBackupStatus(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -476,7 +524,7 @@ func (s *Server) getBackupStatus(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getBackupDownload(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	if !s.limit.allowAnon(clientIP(r), start) {
+	if !s.limit.allowAnon(s.clientIP(r), start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}

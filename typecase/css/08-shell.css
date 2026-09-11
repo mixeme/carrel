@@ -13,15 +13,17 @@
 }
 .tc-shell__rail { width: 264px; flex: none; }
 .tc-shell__main { flex: 1; min-width: 0; }
-.tc-shell__side { width: 400px; flex: none; }
+/* Ширину держит сама панель, а не обёртка: закрытая панель тогда
+   схлопывает колонку, а не оставляет пустые 400 px. */
+.tc-shell__side { flex: none; width: auto; }
 .tc-shell--touch .tc-shell__rail { width: 232px; }
 
 .tc-top {
 	display: flex;
 	align-items: center;
 	gap: 0.75em;
-	min-height: 44px;
-	padding: 0 0.75em;
+	min-height: 52px;
+	padding: 0 var(--tc-page-gutter);
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 	background: var(--tc-surface);
 }
@@ -30,10 +32,13 @@
 .tc-main {
 	display: flex;
 	flex-direction: column;
+	/* Тянется по своей колонке, как tc-rail и tc-side: иначе рабочая
+	   поверхность обрывается по высоте содержимого. */
+	height: 100%;
 	overflow: auto;
 	background: var(--tc-surface);
 }
-.tc-main__body { flex: 1; padding: 1em; min-width: 0; }
+.tc-main__body { flex: 1; padding: var(--tc-page-gutter); min-width: 0; }
 
 .tc-rail {
 	display: flex;
@@ -43,11 +48,13 @@
 	background: var(--tc-surface);
 }
 .tc-rail__sections { flex: 1; overflow: auto; }
-.tc-rail__chips { display: flex; flex-wrap: wrap; gap: 0.35em; padding: 0.5em; border-bottom: var(--tc-stroke) solid var(--tc-rule); }
+.tc-rail__chips { display: flex; flex-wrap: wrap; gap: 0.35em; padding: 0.5em var(--tc-page-gutter); border-bottom: var(--tc-stroke) solid var(--tc-rule); }
 .tc-rail--drawer { position: fixed; inset: 0; z-index: 90; width: 100%; transform: translateX(-100%); transition: transform 0.2s ease; }
 .tc-rail--drawer.is-open { transform: translateX(0); }
 .tc-rail--icons { width: 56px; }
-.tc-shell--narrow .tc-shell__rail { width: 56px; }
+.tc-shell--narrow {
+	--tc-page-gutter: var(--tc-page-gutter-narrow);
+}
 .tc-nav--bottom { display: flex; flex-direction: row; }
 
 .tc-railsec { display: block; }
@@ -56,7 +63,7 @@
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: var(--tc-muted);
-	padding: 0.5em 0.75em 0.25em;
+	padding: 0.5em var(--tc-page-gutter) 0.25em;
 	margin: 0;
 }
 .tc-railsec--alert .tc-railsec__title { color: var(--tc-danger); }
@@ -64,7 +71,7 @@
 
 .tc-railfoot {
 	margin-top: auto;
-	padding: 0.5em 0.75em;
+	padding: 0.5em var(--tc-page-gutter);
 	border-top: var(--tc-stroke) solid var(--tc-rule);
 }
 .tc-railfoot__actions { display: flex; gap: 0.35em; margin-bottom: 0.35em; }
@@ -77,8 +84,10 @@
 .tc-railfoot__build--missing { color: var(--tc-danger); }
 
 .tc-side {
+	position: relative;
 	display: flex;
 	flex-direction: column;
+	width: 400px;
 	height: 100%;
 	border-left: var(--tc-stroke) solid var(--tc-rule);
 	background: var(--tc-surface);
@@ -88,11 +97,12 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0.75em 1em;
+	padding: 0.75em var(--tc-page-gutter);
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 }
 .tc-side__title { margin: 0; font-family: var(--tc-font-serif); font-size: 1.1em; }
-.tc-side__body { flex: 1; overflow: auto; padding: 1em; }
+.tc-side__head .tc-close { position: absolute; top: 8px; right: 8px; }
+.tc-side__body { flex: 1; overflow: auto; padding: var(--tc-page-gutter); }
 .tc-side__foot { border-top: var(--tc-stroke) solid var(--tc-rule); padding: 0.35em 0.5em; }
 
 .tc-nav { display: flex; flex-direction: column; gap: 0.15em; }
@@ -115,7 +125,7 @@
 	display: flex;
 	align-items: center;
 	gap: 0.75em;
-	padding: 0.75em 0;
+	padding: 0.75em var(--tc-page-gutter) 0;
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 	margin-bottom: 1em;
 	min-height: 26px;
@@ -124,6 +134,13 @@
 .tc-head__title {
 	margin: 0;
 	font-family: var(--tc-font-serif);
+	/* 22 px по макету при базе 13; вес обычный — крупность и есть ранг.
+	   Межстрочное не 1.15, как в макете: здесь заголовок обрезается многоточием,
+	   и строчный бокс обязан покрывать шрифтовой, иначе возвращается В-1.
+	   Шрифтовой бокс Literata — 1.48 кегля, отсюда 1.5. */
+	font-size: 1.6em;
+	font-weight: 400;
+	line-height: 1.5;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

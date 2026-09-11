@@ -607,24 +607,59 @@ func (s *Server) postSettingsAppearance(w http.ResponseWriter, r *http.Request) 
 	s.getSettingsAppearance(w, r)
 }
 
-func (s *Server) getSettingsUnlock(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
+func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.UnlockSheet {
+	sheet := view.UnlockSheet{
+		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, or change key escrow."),
+		Warning: text("Everything revealed in this window is written to the audit log."),
+		Form: plainForm("/app/settings/unlock", "POST",
+			csrfField(sess),
+			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: errText},
+		),
+	}
+	if until := sess.UnlockUntil(time.Now()); until != nil {
+		sheet.Until = ptrWhen(formatWhen(*until, s.tz(), false, time.Now()))
+	}
+	return sheet
 }
 
-func (s *Server) postSettingsUnlock(w http.ResponseWriter, r *http.Request) {
+func (s *Server) getSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
 		return
 	}
-	until := s.cfg.UnlockTTL
-	s.users.SetUnlockUntil(sess.AccountID(), ptrTime(time.Now().Add(until)))
-	top := s.buildShell(sess, "").Top
-	extra := []OOB{{Target: TargetTopbar, Body: top}}
 	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, view.UnlockSheet{}, extra)
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.unlockSheet(sess, ""), nil)
 		return
 	}
 	s.notFound(w, r)
 }
 
-func ptrTime(t time.Time) *time.Time { return &t }
+// postSettingsUnlock is the one confirmation sheet behind every secret
+// release (S-10.7): the person's own password, checked against their login
+// hash, opens the window for CARREL_UNLOCK_TTL in this session only. Wrong
+// answers share the login bucket, so a stolen cookie gets five guesses a
+// minute and every guess costs an Argon2.
+func (s *Server) postSettingsUnlock(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	if !WantsFragment(r) {
+		s.notFound(w, r)
+		return
+	}
+	start := time.Now()
+	if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
+	if !s.users.Unlock(r.Context(), sess.AccountID(), r.FormValue("password")) {
+		constantTimeDelay(start, 300*time.Millisecond)
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.unlockSheet(sess, text("Password is wrong.")), nil)
+		return
+	}
+	sess.SetUnlockUntil(time.Now().Add(s.cfg.UnlockTTL))
+	top := s.buildShell(sess, "").Top
+	extra := []OOB{{Target: TargetTopbar, Body: top}}
+	_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.unlockSheet(sess, ""), extra)
+}

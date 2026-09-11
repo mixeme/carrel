@@ -35,10 +35,10 @@ func TestRender_smoke(t *testing.T) {
 		{"meter", widget.Meter{Value: 1, Max: 10, Label: "1/10"}.Render()},
 		{"form", widget.Form{Action: "/f", Sets: []widget.FieldSet{{Legend: "L", Rows: []widget.Field{{Name: "n", Label: "N", Kind: widget.InputText}}}}}.Render()},
 		{"menu", widget.Menu{Label: "Menu", Items: []widget.MenuItem{{Label: "One", Href: "#"}}}.Render()},
-		{"bar", widget.Bar{Left: []widget.Action{{Label: "A"}}}.Render()},
+		{"bar", widget.Bar{Left: []widget.Node{widget.Action{Label: "A"}}}.Render()},
 		{"list", widget.List{Groups: []widget.ListGroup{{Rows: []widget.Row{{Cells: widget.RowCells{Title: "T"}}}}}}.Render()},
 		{"table", widget.Table{Columns: []widget.Column{{Label: "C"}}, Rows: []widget.TableRow{{Cells: []string{"v"}}}}.Render()},
-		{"shell", widget.Shell{Main: widget.Main{Label: "M", Body: widget.Paragraph("b")}}.Render()},
+		{"shell", widget.Shell{Main: widget.Main{Label: "M", Body: []widget.Node{widget.Paragraph("b")}}}.Render()},
 		{"doc", widget.Doc{Body: widget.Paragraph("x")}.Render()},
 		{"search", widget.Search{Action: "/s"}.Render()},
 		{"stat", widget.Stat{Label: "Users", Value: "1,234"}.Render()},
@@ -110,5 +110,27 @@ func TestEscape_html(t *testing.T) {
 	html := widget.Button{Label: `<script>"&`}.Render()
 	if strings.Contains(html, "<script>") {
 		t.Fatal("unescaped HTML in label")
+	}
+}
+
+// Пустой бейдж — ломаная фикстура ворот inv-badge-has-text. tc-usermenu отдавал
+// её всякий раз, когда метка не задана (В-19).
+func TestUserMenu_noEmptyBadge(t *testing.T) {
+	html := widget.UserMenu{
+		Name:  "Alex",
+		Note:  "Signed in",
+		Items: []widget.MenuItem{{Label: "Sign out", Href: "/logout"}},
+	}.Render()
+	if strings.Contains(html, `class="tc-badge`) {
+		t.Fatalf("user menu without Mark must not render a badge: %s", html)
+	}
+	if strings.Contains(html, `<ul class="tc-usermenu__popover`) {
+		t.Fatal("popover head must not sit inside the menu list")
+	}
+}
+
+func TestBadge_emptyLabelRendersNothing(t *testing.T) {
+	if got := (widget.Badge{}).Render(); got != "" {
+		t.Fatalf("empty badge must render nothing, got %q", got)
 	}
 }
