@@ -144,16 +144,7 @@ func TestSFTPGoFolderCRUD(t *testing.T) {
 	if err := client.MkCol(ctx, path); err != nil {
 		t.Fatalf("create: %v", err)
 	}
-	if err := setDisplayName(ctx, client, path, "Renamed"); err != nil {
-		t.Fatalf("rename: %v", err)
-	}
-	got, err := getDisplayName(ctx, client, path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got != "Renamed" {
-		t.Fatalf("displayname = %q, want Renamed", got)
-	}
+	// SFTPGo is plain WebDAV: rename is MOVE, not displayname PROPPATCH.
 	if err := client.Move(ctx, path, moved, false); err != nil {
 		t.Fatalf("move: %v", err)
 	}

@@ -5,6 +5,18 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.36 — 2026-09-09
+
+Adds [limits.md](../../docs/spec/limits.md): one reference for every timeout,
+TTL, size cap, count, rate limit, and crypto bound — product constants in
+`internal/conf/limits.go`, C-12 defaults, hardcoded transport and store
+limits, and planned values still only in the spec.
+
+### For consumers
+
+Nothing in the running server. Use the file when checking or changing limits
+instead of hunting through `conf.go`, `limits.go`, and architecture.md.
+
 ## v0.0.35 — 2026-09-09
 
 Withdraws the eight-device cap from the S-27 plan. That number was not in
@@ -36,6 +48,18 @@ stay stubs until that checklist is ticked.
   Carrel login. At most eight devices. Issue requires unlock.
 - Install check is eleven named rows; the probe client is not the DAV guard.
   Image publish and CI stay out of this plan.
+
+## v0.0.34 — 2026-09-09
+
+Fixes live S-30.2 integration tests against Baikal and SFTPGo.
+
+### Included
+
+- Baikal contacts use `/dav.php/addressbooks/...` paths (endpoint is `/dav.php`).
+- SFTPGo folder CRUD renames via MOVE; `x/net/webdav` ignores `If-None-Match` on
+  PUT, so occupied-name check moves to `TestRadicaleCardUploadOccupiedName`.
+- `integration/live_creds.go` reads `dev/credentials.txt` when `CARREL_*` unset.
+- `scripts/run-live-integration.sh` / `.ps1` for manual full runs.
 
 ## v0.0.33 — 2026-09-08
 

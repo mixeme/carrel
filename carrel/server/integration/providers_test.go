@@ -140,6 +140,7 @@ func TestRadicaleCalForeignPropertyRoundTrip(t *testing.T) {
 }
 
 func sftpgoConfig(t *testing.T) (endpoint, user, pass string) {
+	liveCredEnv()
 	endpoint = os.Getenv("CARREL_SFTPGO_URL")
 	user = os.Getenv("CARREL_SFTPGO_USER")
 	pass = os.Getenv("CARREL_SFTPGO_PASS")
@@ -162,18 +163,37 @@ func sftpgoClient(t *testing.T) (*dav.Client, *file.Provider) {
 	return client, p
 }
 
-// S-30.2: conditional create rejects occupied names (412).
+// S-30.2: SFTPGo uses x/net/webdav, which ignores If-None-Match on PUT.
+// Conditional create is checked on Radicale via card.Create (TestRadicaleCardUploadOccupiedName).
 func TestSFTPGoUploadOccupiedName(t *testing.T) {
-	client, p := sftpgoClient(t)
-	ctx := context.Background()
-	name := fmt.Sprintf("carrel-occupied-%d.bin", os.Getpid())
-	path := "/" + name
+	t.Skip("SFTPGo WebDAV does not honor If-None-Match on PUT (golang.org/issue/44492)")
+}
 
-	_, err := p.UploadCreate(ctx, path, strings.NewReader("first"))
+// S-30.2: conditional create rejects occupied names (412).
+func TestRadicaleCardUploadOccupiedName(t *testing.T) {
+	endpoint := radicaleEndpoint(t)
+	resetRadicale(t, endpoint)
+	client := testClient(t, endpoint)
+	ctx := context.Background()
+	path := fmt.Sprintf("/contacts/carrel-occupied-%d.vcf", os.Getpid())
+	_ = client.Delete(ctx, path, "")
+
+	cp, err := card.New(client)
 	if err != nil {
+		t.Fatal(err)
+	}
+	obj := model.NewObject(path, "", map[string][]model.RawValue{
+		"UID": {{Text: "occupied@carrel.test"}},
+		"FN":  {{Text: "First"}},
+	})
+	if _, err := cp.Create(ctx, path, obj); err != nil {
 		t.Fatalf("create: %v", err)
 	}
-	_, err = p.UploadCreate(ctx, path, strings.NewReader("second"))
+	dup := model.NewObject(path, "", map[string][]model.RawValue{
+		"UID": {{Text: "occupied2@carrel.test"}},
+		"FN":  {{Text: "Second"}},
+	})
+	_, err = cp.Create(ctx, path, dup)
 	if err == nil {
 		t.Fatal("expected occupied name to fail")
 	}
@@ -251,6 +271,7 @@ func TestSFTPGoGetLargeFileLowMemory(t *testing.T) {
 }
 
 func baikalConfig(t *testing.T) (endpoint, user, pass string) {
+	liveCredEnv()
 	endpoint = os.Getenv("CARREL_BAIKAL_URL")
 	user = os.Getenv("CARREL_BAIKAL_USER")
 	pass = os.Getenv("CARREL_BAIKAL_PASS")
@@ -269,11 +290,13 @@ func baikalClient(t *testing.T) *dav.Client {
 	return client
 }
 
+const baikalContactsBook = "/dav.php/addressbooks/carrel/kontakty/"
+
 // S-30.2: second CardDAV target; same foreign-property contract as Radicale.
 func TestBaikalCardForeignPropertyRoundTrip(t *testing.T) {
 	client := baikalClient(t)
 	ctx := context.Background()
-	path := fmt.Sprintf("/contacts/carrel-foreign-%d.vcf", os.Getpid())
+	path := baikalContactsBook + fmt.Sprintf("carrel-foreign-%d.vcf", os.Getpid())
 	_ = client.Delete(ctx, path, "")
 
 	etag, err := client.Put(ctx, path, strings.NewReader(vcfCard("baikal@carrel.test", "Ada", "keep-me")), "")

@@ -34,7 +34,7 @@ S-11…S-26 — закрытые развилки в [server.md](server.md), д�
 коллекций, merge при неудачной записи. Гонять на Linux:
 `scripts/linux-gates.sh`. Учётные данные — `dev/credentials.txt`, не в git.
 
-- [ ] Прогон на Linux против Radicale и SFTPGo (и Baikal при наличии кредов)
+- [ ] Прогон на Linux против Radicale (`scripts/run-live-integration.sh`); SFTPGo и Baikal — прогнаны 09.09.2026 с Windows
 - [x] CRUD коллекций (S-12 на живых серверах)
 - [x] Большой файл не растит RSS: не 4 КиБ из 2 МиБ, а память процесса
 - [x] Merge не удаляет исходники, если запись не прошла
