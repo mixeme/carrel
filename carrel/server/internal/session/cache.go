@@ -4,10 +4,20 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 )
+
+// touchSeq stamps recency. Two puts in the same clock tick get the same
+// time.Now(), and eviction walked a map to find the oldest — map order is
+// randomised, so the newest entry was evicted instead of the oldest about one
+// time in eight. The counter is process-wide because evictProcessWide ranks
+// entries from different sessions against each other.
+var touchSeq atomic.Uint64
+
+func nextSeq() uint64 { return touchSeq.Add(1) }
 
 type cacheKind int
 
@@ -23,7 +33,8 @@ type cacheEntry struct {
 	key       string
 	data      []byte
 	bytes     int64
-	at        time.Time // last access; eviction picks the oldest within a kind
+	seq       uint64    // last access, monotonic; eviction picks the lowest within a kind
+	at        time.Time // last access, for reporting only — never for ordering
 	fetchedAt time.Time // when stored; TTL applies to collection lists and etag maps
 }
 
@@ -151,7 +162,8 @@ func (c *Cache) put(kind cacheKind, key string, data []byte) {
 	n := int64(len(data))
 	now := time.Now()
 	c.entries[key] = &cacheEntry{
-		kind: kind, key: key, data: data, bytes: n, at: now, fetchedAt: now,
+		kind: kind, key: key, data: data, bytes: n,
+		seq: nextSeq(), at: now, fetchedAt: now,
 	}
 	c.addBytesLocked(kind, n)
 	c.enforceSessionLimitsLocked()
@@ -171,6 +183,7 @@ func (c *Cache) get(key string) ([]byte, bool) {
 		c.removeLocked(key)
 		return nil, false
 	}
+	e.seq = nextSeq()
 	e.at = time.Now()
 	return e.data, true
 }
@@ -237,14 +250,14 @@ func (c *Cache) countLocked(kind cacheKind) int {
 // a body budget is not paid for with someone else's version map.
 func (c *Cache) evictOneLocked(kind cacheKind) bool {
 	var victim string
-	var oldest time.Time
+	var oldest uint64
 	for k, e := range c.entries {
 		if e.kind != kind {
 			continue
 		}
-		if victim == "" || e.at.Before(oldest) {
+		if victim == "" || e.seq < oldest {
 			victim = k
-			oldest = e.at
+			oldest = e.seq
 		}
 	}
 	if victim == "" {
@@ -320,7 +333,7 @@ func (c *Cache) enforceProcessBudget() {
 type evictCandidate struct {
 	key  string
 	kind cacheKind
-	at   time.Time
+	seq  uint64
 }
 
 func (c *Cache) evictionCandidates() []evictCandidate {
@@ -328,7 +341,7 @@ func (c *Cache) evictionCandidates() []evictCandidate {
 	defer c.mu.Unlock()
 	out := make([]evictCandidate, 0, len(c.entries))
 	for _, e := range c.entries {
-		out = append(out, evictCandidate{key: e.key, kind: e.kind, at: e.at})
+		out = append(out, evictCandidate{key: e.key, kind: e.kind, seq: e.seq})
 	}
 	return out
 }
@@ -354,7 +367,7 @@ func (m *Manager) evictProcessWide(need int64) {
 		sid  string
 		key  string
 		kind cacheKind
-		at   time.Time
+		seq  uint64
 	}
 
 	m.mu.Lock()
@@ -367,7 +380,7 @@ func (m *Manager) evictProcessWide(need int64) {
 	var all []pick
 	for sid, c := range caches {
 		for _, e := range c.evictionCandidates() {
-			all = append(all, pick{sid: sid, key: e.key, kind: e.kind, at: e.at})
+			all = append(all, pick{sid: sid, key: e.key, kind: e.kind, seq: e.seq})
 		}
 	}
 
@@ -376,7 +389,7 @@ func (m *Manager) evictProcessWide(need int64) {
 		if ai, bi := evictRank(a.kind), evictRank(b.kind); ai != bi {
 			return ai < bi
 		}
-		return a.at.Before(b.at)
+		return a.seq < b.seq
 	})
 
 	var freed int64

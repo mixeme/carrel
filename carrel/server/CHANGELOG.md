@@ -4,6 +4,38 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.11 — 2026-09-05
+
+Fixes a cache-eviction defect found while verifying that the Fable debt was
+actually closed. The gates were green; the test that guards the rule passed by
+luck about seven runs in eight.
+
+### For consumers
+
+- Cache eviction now picks the genuinely least recently used entry. Recency is
+  a monotonic counter, not `time.Now()`. Two entries stored in the same clock
+  tick carried identical timestamps, and the victim was chosen by walking a Go
+  map — whose iteration order is randomised — so the **newest** body was
+  evicted instead of the oldest in 12.75% of rounds (255 failures in 2000).
+  Both the per-session and the process-wide paths were affected.
+
+  The kind ordering (bodies before version maps, S-4.2 and C-12) was never in
+  doubt; what was random was which body went. In service this showed up as a
+  cache that could drop a body fetched moments ago and keep an older one —
+  the thrash S-4.2 exists to prevent.
+
+- `TestBodiesEvictedBeforeMaps` now runs its scenario 200 times. A single pass
+  could not tell a correct cache from a coin flip; the strengthened test fails
+  on round 4 against the old code.
+
+### Note on the previous fix
+
+`v0.0.9` replaced insertion order with `at` timestamps to give the per-session
+and process-wide paths one rule. The instruction to do that is mine — it is in
+the debt section of [server.md](../../docs/plan/server.md) — and it traded a
+deterministic tiebreak for a coarse clock. One rule was the right goal; the
+clock was the wrong key for it.
+
 ## carrel/server/v0.0.10 — 2026-09-05
 
 Closes the Fable verification debt on commit `1dd02cb` (findings Ф-15…Ф-17 and

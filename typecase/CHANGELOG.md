@@ -4,14 +4,10 @@ All notable changes to Typecase are documented here. Versioning follows
 [semantic versioning](https://semver.org/). This file tells consumers what to
 do, not what the authors did.
 
-## Unreleased — v0.1.0
+## typecase/v0.1.0 — 2026-09-05
 
-**Do not pin `typecase/v0.1.0`.** That tag marks an older commit (before `RowMeta`
-and the naming gates) and does not match the breaking changes below. Stay on
-`typecase/v0.0.5` until a new tag is published on `main`.
-
-When `v0.1.0` ships, upgrade in one step from `v0.0.5` and run `go test ./...`
-from the module root before deploying.
+First tagged release after the pre-tag reviews. Upgrade in one step from
+`v0.0.5` and run `go test ./...` from the module root before deploying.
 
 ### For consumers (v0.0.5 → v0.1.0)
 
@@ -40,7 +36,7 @@ from the module root before deploying.
   gates live in `gate/`; L-9.2 browser checks in `browser/` need Chrome or
   Edge (`CHROME_PATH` overrides detection).
 
-### Included (on `main`, not yet tagged)
+### Included
 
 - `gate.CheckDocInput`: L-3.2 «Вход» field lists must match exported struct fields.
 - `gate.CheckDomainNaming`: const names, enum string values, and L-3.2 «Состояния»
@@ -78,11 +74,6 @@ from the module root before deploying.
 - `Button.Enabled` / `Action.Enabled` removed; use `Reason`.
 - `RowFile` / `tc-row--file` renamed to `RowMeta` / `tc-row--meta`.
 - `RowCells` gained `Done` and `Tags`; avatar variant prefers `Avatar` field.
-
-### Not yet released
-
-- Move tag: `git tag -f -a typecase/v0.1.0 -m "typecase/v0.1.0"` on the commit
-  that passes L-11.2 acceptance, then rename this section to `typecase/v0.1.0`.
 
 ## typecase/v0.0.5 — 2026-09-04
 

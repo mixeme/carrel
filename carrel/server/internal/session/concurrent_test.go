@@ -89,27 +89,33 @@ func TestFanoutCeilingUnderRace(t *testing.T) {
 // S-4.2 and C-12: bodies are given up before version maps, both inside one
 // session and when the process budget forces eviction across sessions.
 func TestBodiesEvictedBeforeMaps(t *testing.T) {
-	cfg := testCfg()
-	cfg.CacheMaxBodyBytes = 100
-	cfg.CacheMaxETagEntries = 64
-	mgr := NewManager(cfg)
-	s, err := mgr.Create("a-1", "alice", testDataKey(t))
-	if err != nil {
-		t.Fatal(err)
-	}
-	c := s.Cache()
-	c.PutETagMap("conn-a", "/c/one", make([]byte, 60))
-	c.PutBody("conn-a", "/c/one/a", "v1", make([]byte, 60))
-	c.PutBody("conn-a", "/c/one/b", "v1", make([]byte, 60)) // pushes bodies past the cap
+	// Repeated because the two puts below can land in one clock tick: while
+	// recency came from time.Now() and the victim was found by walking a map,
+	// the newest body was evicted about one round in eight, and a single pass
+	// passed by luck.
+	for round := 0; round < 200; round++ {
+		cfg := testCfg()
+		cfg.CacheMaxBodyBytes = 100
+		cfg.CacheMaxETagEntries = 64
+		mgr := NewManager(cfg)
+		s, err := mgr.Create("a-1", "alice", testDataKey(t))
+		if err != nil {
+			t.Fatal(err)
+		}
+		c := s.Cache()
+		c.PutETagMap("conn-a", "/c/one", make([]byte, 60))
+		c.PutBody("conn-a", "/c/one/a", "v1", make([]byte, 60))
+		c.PutBody("conn-a", "/c/one/b", "v1", make([]byte, 60)) // pushes bodies past the cap
 
-	if _, ok := c.GetETagMap("conn-a", "/c/one"); !ok {
-		t.Fatal("version map evicted while a body was still cached")
-	}
-	if _, ok := c.GetBody("conn-a", "/c/one/a", "v1"); ok {
-		t.Fatal("oldest body should have been evicted first")
-	}
-	if _, ok := c.GetBody("conn-a", "/c/one/b", "v1"); !ok {
-		t.Fatal("newest body should have survived")
+		if _, ok := c.GetETagMap("conn-a", "/c/one"); !ok {
+			t.Fatalf("round %d: version map evicted while a body was still cached", round)
+		}
+		if _, ok := c.GetBody("conn-a", "/c/one/a", "v1"); ok {
+			t.Fatalf("round %d: oldest body should have been evicted first", round)
+		}
+		if _, ok := c.GetBody("conn-a", "/c/one/b", "v1"); !ok {
+			t.Fatalf("round %d: newest body should have survived", round)
+		}
 	}
 }
 
