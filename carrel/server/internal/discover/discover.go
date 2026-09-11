@@ -58,7 +58,7 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string)
 		endpoint = baseURL
 	}
 
-	client, err := dav.NewClient(g, endpoint, username, password)
+	client, err := dav.NewClient(g, endpoint, username, password, "")
 	if err != nil {
 		trace.Steps = steps
 		return nil, trace, err

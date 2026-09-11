@@ -51,7 +51,7 @@ func testAuthClient(t *testing.T, endpoint string) *Client {
 	t.Helper()
 	c := testConfig()
 	c.DAVSSRFAllowlist = "127.0.0.1,localhost"
-	client, err := NewClient(NewGuard(c), endpoint, "alice", "secret")
+	client, err := NewClient(NewGuard(c), endpoint, "alice", "secret", "")
 	if err != nil {
 		t.Fatal(err)
 	}

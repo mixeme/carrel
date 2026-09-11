@@ -29,7 +29,7 @@ func (s *Service) SetupFirstAdmin(ctx context.Context, login, password string) e
 			Role:      store.RoleAdmin,
 			CreatedAt: now,
 		}
-		if err := store.ApplyPassword(&u, login, password); err != nil {
+		if err := store.ApplyPassword(ctx, &u, login, password); err != nil {
 			return nil, err
 		}
 		st.Users = []store.User{u}
@@ -53,7 +53,7 @@ func (s *Service) Authenticate(ctx context.Context, login, password string) (str
 	if len(u.LoginHash) == 0 {
 		return "", zero, false, false
 	}
-	key, ok := store.DataKeyForLogin(u, password)
+	key, ok := store.DataKeyForLogin(ctx, u, password)
 	if !ok {
 		return "", zero, false, false
 	}

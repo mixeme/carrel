@@ -59,12 +59,23 @@ func NewGuard(c *conf.Config) *Guard {
 
 // HTTPClient returns an HTTP client that enforces SSRF rules on every request.
 func (g *Guard) HTTPClient() *http.Client {
+	return g.httpClient("")
+}
+
+// HTTPClientWithCertPin returns a client that accepts a leaf certificate when
+// standard chain verification fails but the SHA-256 fingerprint matches pin
+// (F-13). Empty pin keeps standard verification only.
+func (g *Guard) HTTPClientWithCertPin(pinnedFingerprint string) *http.Client {
+	return g.httpClient(pinnedFingerprint)
+}
+
+func (g *Guard) httpClient(pinnedFingerprint string) *http.Client {
 	transport := &http.Transport{
 		// No proxy: with one set, the dialler would connect to the proxy and
 		// the real target would never be IP-checked (architecture.md, SSRF).
 		Proxy:                 nil,
 		DialContext:           g.dialContext,
-		DialTLSContext:        g.dialTLSContext,
+		DialTLSContext:        g.dialTLSContext(pinnedFingerprint),
 		TLSClientConfig:       &tls.Config{MinVersion: tls.VersionTLS12},
 		ForceAttemptHTTP2:     true,
 		MaxIdleConns:          10,
@@ -119,17 +130,19 @@ func (g *Guard) dialContext(ctx context.Context, network, address string) (net.C
 	return nil, lastErr
 }
 
-func (g *Guard) dialTLSContext(ctx context.Context, network, address string) (net.Conn, error) {
-	host, _, err := net.SplitHostPort(address)
-	if err != nil {
-		return nil, err
+func (g *Guard) dialTLSContext(pinnedFingerprint string) func(ctx context.Context, network, address string) (net.Conn, error) {
+	return func(ctx context.Context, network, address string) (net.Conn, error) {
+		host, _, err := net.SplitHostPort(address)
+		if err != nil {
+			return nil, err
+		}
+		conn, err := g.dialContext(ctx, network, address)
+		if err != nil {
+			return nil, err
+		}
+		cfg := tlsConfigWithPin(host, pinnedFingerprint)
+		return tls.Client(conn, cfg), nil
 	}
-	conn, err := g.dialContext(ctx, network, address)
-	if err != nil {
-		return nil, err
-	}
-	cfg := &tls.Config{ServerName: host, MinVersion: tls.VersionTLS12}
-	return tls.Client(conn, cfg), nil
 }
 
 func (g *Guard) allowlisted(host string) bool {

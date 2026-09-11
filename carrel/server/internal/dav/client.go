@@ -28,8 +28,9 @@ type Client struct {
 }
 
 // NewClient dials endpoint through guard. Username and password may be empty.
-func NewClient(g *Guard, endpoint, username, password string) (*Client, error) {
-	httpClient := g.HTTPClient()
+// certPin is an optional lowercase hex SHA-256 leaf fingerprint (F-13).
+func NewClient(g *Guard, endpoint, username, password, certPin string) (*Client, error) {
+	httpClient := g.HTTPClientWithCertPin(certPin)
 	var hc webdav.HTTPClient = httpClient
 	if username != "" {
 		hc = webdav.HTTPClientWithBasicAuth(httpClient, username, password)

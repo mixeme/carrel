@@ -478,26 +478,39 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 			view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(r.FormValue("server"))},
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
+			view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint (SHA-256)", Kind: view.InputText, Value: text(r.FormValue("certFingerprint"))},
 		),
 	}
-	if warn := connectionWarnings(r.FormValue("server")); warn != nil {
-		page.Shell.Notices = append(page.Shell.Notices, *warn)
+	for _, warn := range connectionWarnings(r.FormValue("server"), r.FormValue("certFingerprint")) {
+		page.Shell.Notices = append(page.Shell.Notices, warn)
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-func connectionWarnings(server string) *view.Notice {
+func connectionWarnings(server, certFingerprint string) []view.Notice {
 	if server == "" {
 		return nil
 	}
-	if strings.HasPrefix(strings.ToLower(server), "http://") {
-		return &view.Notice{
+	lower := strings.ToLower(server)
+	var out []view.Notice
+	if strings.HasPrefix(lower, "http://") {
+		out = append(out, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: text("Unencrypted connection"),
 			Body:  text("Credentials will be sent in clear text. Continue only if you accept this risk."),
+		})
+	}
+	if strings.HasPrefix(lower, "https://") {
+		pin := dav.NormalizeFingerprint(certFingerprint)
+		if pin == "" {
+			out = append(out, view.Notice{
+				Role:  view.NoticeAlert,
+				Title: text("Certificate verification"),
+				Body:  text("If the server uses a self-signed or otherwise untrusted certificate, run Test and enter the SHA-256 fingerprint shown there. The fingerprint is stored with the connection password and must be accepted again if the certificate changes."),
+			})
 		}
 	}
-	return nil
+	return out
 }
 
 func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request) {

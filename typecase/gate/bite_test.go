@@ -86,7 +86,7 @@ func (Foo) Render() string { return "<div class=\"tc-foo\"><span class=\"tc-foo_
 		t.Fatal(err)
 	}
 	cat := []gate.CatalogEntry{{Widget: "tc-foo", State: "default", HTML: `<div class="tc-foo"><span class="tc-foo__orphan">x</span></div>`}}
-	if err := gate.CheckCompleteness(p, cat); err == nil {
+	if err := gate.Run(gate.Completeness, p, cat); err == nil {
 		t.Fatal("expected completeness gate to fail on element class without css")
 	}
 }

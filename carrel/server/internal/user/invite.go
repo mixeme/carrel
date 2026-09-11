@@ -63,7 +63,7 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 			})
 			u = st.UserByLogin(inv.Login)
 		}
-		if err := store.ApplyPassword(u, u.Login, password); err != nil {
+		if err := store.ApplyPassword(ctx, u, u.Login, password); err != nil {
 			return nil, err
 		}
 		if u.Email != "" {
@@ -142,7 +142,7 @@ func (s *Service) Register(ctx context.Context, login, email, password string) e
 			u.Email = email
 			store.WipeCredentials(u)
 		}
-		if err := store.ApplyPassword(u, login, password); err != nil {
+		if err := store.ApplyPassword(ctx, u, login, password); err != nil {
 			return nil, err
 		}
 		u.EmailConfirmed = false
@@ -317,7 +317,7 @@ func (s *Service) ForgotSetPassword(ctx context.Context, token, password string)
 			if u == nil {
 				continue
 			}
-			if err := store.ApplyPassword(u, u.Login, password); err != nil {
+			if err := store.ApplyPassword(ctx, u, u.Login, password); err != nil {
 				return nil, err
 			}
 			t.Used = true

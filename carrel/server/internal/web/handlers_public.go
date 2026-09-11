@@ -311,10 +311,10 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 		constantTimeDelay(start, 300*time.Millisecond)
 	}
 	page := view.ForgotPage{
-		Plain: view.Plain{Title: text("Forgotten password"), Lede: text("Carrel cannot recover your encrypted data.")},
-		Form:  plainForm("/forgot", "POST", view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText}),
-		Sent:  sent,
-		Asked: asked,
+		Plain:   view.Plain{Title: text("Forgotten password"), Lede: text("Carrel cannot recover your encrypted data.")},
+		Form:    plainForm("/forgot", "POST", view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText}),
+		Sent:    sent,
+		Asked:   asked,
 		HasMail: hasMail,
 	}
 	if !hasMail && !sent && !asked {
@@ -424,7 +424,7 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	page := view.PublishedPage{
-		Plain: view.Plain{Title: text("Published"), Lede: text("Read-only view.")},
+		Plain:    view.Plain{Title: text("Published"), Lede: text("Read-only view.")},
 		ReadOnly: true,
 	}
 	s.writePage(w, r, http.StatusOK, page)

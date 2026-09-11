@@ -2,6 +2,7 @@ package crypt
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -23,13 +24,23 @@ func TestKDFIndependent(t *testing.T) {
 		t.Fatal("salts should differ in this test")
 	}
 
-	loginHash, _ := HashLogin(password, loginSalt)
-	wrapKey, _ := DeriveWrapKey(password, wrapSalt)
+	loginHash, _, err := HashLogin(context.Background(), password, loginSalt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrapKey, _, err := DeriveWrapKey(context.Background(), password, wrapSalt)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if bytes.Equal(loginHash, wrapKey) {
 		t.Fatal("login hash and wrap key must not be equal")
 	}
-	if bytes.Equal(DeriveKey(password, loginSalt, WrapKDF), wrapKey) {
+	alt, err := DeriveKey(context.Background(), password, loginSalt, WrapKDF)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Equal(alt, wrapKey) {
 		t.Fatal("wrap salt must be required for wrap key")
 	}
 }
@@ -43,10 +54,16 @@ func TestPasswordChangePreservesDataKey(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	oldWrapBytes, _ := DeriveWrapKey(oldPass, wrapSalt)
+	oldWrapBytes, _, err := DeriveWrapKey(context.Background(), oldPass, wrapSalt)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var oldWrap, newWrap [KeyLen]byte
 	copy(oldWrap[:], oldWrapBytes)
-	newWrapBytes, _ := DeriveWrapKey(newPass, wrapSalt)
+	newWrapBytes, _, err := DeriveWrapKey(context.Background(), newPass, wrapSalt)
+	if err != nil {
+		t.Fatal(err)
+	}
 	copy(newWrap[:], newWrapBytes)
 
 	dataKey, err := NewDataKey()
@@ -87,7 +104,10 @@ func TestPasswordChangePreservesDataKey(t *testing.T) {
 func TestWipeMakesBlobUnreadable(t *testing.T) {
 	login := "bob"
 	wrapSalt, _ := NewSalt()
-	wrapBytes, _ := DeriveWrapKey("pass", wrapSalt)
+	wrapBytes, _, err := DeriveWrapKey(context.Background(), "pass", wrapSalt)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var wrap [KeyLen]byte
 	copy(wrap[:], wrapBytes)
 

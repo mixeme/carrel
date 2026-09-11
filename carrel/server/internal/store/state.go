@@ -20,11 +20,11 @@ const (
 
 // State is the decrypted on-disk instance state.
 type State struct {
-	Users    []User             `json:"users"`
-	Audit    []AuditEntry       `json:"audit"`
-	Settings InstanceSettings   `json:"settings"`
-	Invites  []Invite           `json:"invites"`
-	Tokens   []SecretToken      `json:"tokens"`
+	Users    []User           `json:"users"`
+	Audit    []AuditEntry     `json:"audit"`
+	Settings InstanceSettings `json:"settings"`
+	Invites  []Invite         `json:"invites"`
+	Tokens   []SecretToken    `json:"tokens"`
 }
 
 // InstanceSettings holds instance-wide configuration stored in state.enc.
@@ -64,10 +64,10 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt"`
 	Disabled  bool      `json:"disabled,omitempty"`
 
-	Email            string `json:"email,omitempty"`
-	EmailConfirmed   bool   `json:"emailConfirmed,omitempty"`
-	MustChangePassword bool `json:"mustChangePassword,omitempty"`
-	DisplayName      string `json:"displayName,omitempty"`
+	Email              string `json:"email,omitempty"`
+	EmailConfirmed     bool   `json:"emailConfirmed,omitempty"`
+	MustChangePassword bool   `json:"mustChangePassword,omitempty"`
+	DisplayName        string `json:"displayName,omitempty"`
 	EscrowOptIn        bool   `json:"escrowOptIn,omitempty"`
 
 	LoginSalt  []byte     `json:"loginSalt,omitempty"`

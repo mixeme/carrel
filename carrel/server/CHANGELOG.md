@@ -1,10 +1,47 @@
 # Changelog
 
-All notable changes to the Carrel server are documented here. Versioning
-follows [semantic versioning](https://semver.org/). This file tells
-consumers what to do, not what the authors did.
+All notable changes to the Carrel server are documented here. Numbers like
+`v0.0.N` name releases in this file only — they are not git tags unless an
+entry lists **Tagged:**. This file tells consumers what to do, not what the
+authors did.
 
-## carrel/server/v0.0.14 — 2026-09-05
+## v0.0.15 — 2026-09-05
+
+Closes the Composer tail from [server.md](../../docs/plan/server.md) (Fable audit
+№1 leftovers and the 05.09.2026 verification pass).
+
+### For consumers
+
+- Argon2id runs under a process-wide semaphore (four concurrent derivations).
+  Extra login, registration, password-change, and escrow attempts wait on the
+  request context instead of piling up memory (F-7).
+- HTTPS DAV connections can proceed with a self-signed or otherwise untrusted
+  leaf certificate only after the human accepts its SHA-256 fingerprint on the
+  connections screen; the fingerprint is stored in the sealed connection blob
+  beside the password and must be accepted again when the certificate changes
+  (F-13). Plain `http://` still shows a warning, not a refusal.
+- `store.RewrapLogin` re-seals the wrapped data key and user blob when a login
+  rename is added later (F-14).
+
+### Included
+
+- `internal/crypt`: KDF semaphore; `DeriveKey`, `HashLogin`, `VerifyLogin`, and
+  `DeriveWrapKey` take `context.Context`.
+- `internal/dav`: `LeafFingerprint`, `HTTPClientWithCertPin`, pin-aware TLS
+  dial; `NewClient` gains a `certPin` argument.
+- `internal/sealed`: connection blob with `certFingerprint`.
+- `internal/store`: `RewrapLogin`; `ApplyPassword` and `DataKeyForLogin` pass
+  context through to KDF.
+- `internal/web`: certificate fingerprint field and warning on the connections
+  screen.
+- `cmd/carrel-wipe/main_test.go`: one-time link, 15-minute token, audit entry.
+
+### Fixed
+
+- CHANGELOG no longer uses `carrel/server/v0.0.N` headings that looked like git
+  tags when none existed.
+
+## v0.0.14 — 2026-09-05
 
 Restores the `docs/spec/check.py` step in `carrel-server.yml`. No server
 code changes.
@@ -21,7 +58,7 @@ code changes.
   row to `tc-row--meta`, and map U-5.4 had no row for frame class
   `m-row--file`. The spec now matches L-4 and the mockups; `check.py` returns 0.
 
-## carrel/server/v0.0.13 — 2026-09-05
+## v0.0.13 — 2026-09-05
 
 Implements S-10 user administration: accounts, invitations, registration,
 forgot-password wipe flow, and console recovery.
@@ -49,7 +86,7 @@ forgot-password wipe flow, and console recovery.
 
 Providers and S-11…S-26 features above the request layer.
 
-## carrel/server/v0.0.12 — 2026-09-05
+## v0.0.12 — 2026-09-05
 
 Adds the HTTP request layer (S-9): all C-5 routes, CSRF, rate limits,
 ownership checks, JSON `Renderer`, and page/fragment distinction by
@@ -110,7 +147,7 @@ the debt section of [server.md](../../docs/plan/server.md) — and it traded a
 deterministic tiebreak for a coarse clock. One rule was the right goal; the
 clock was the wrong key for it.
 
-## carrel/server/v0.0.10 — 2026-09-05
+## v0.0.10 — 2026-09-05
 
 Closes the Fable verification debt on commit `1dd02cb` (findings Ф-15…Ф-17 and
 follow-ups from [reviews.md](../../docs/plan/reviews.md)).
@@ -139,7 +176,7 @@ follow-ups from [reviews.md](../../docs/plan/reviews.md)).
 
 The request layer — ready to start per [server.md](../../docs/plan/server.md).
 
-## carrel/server/v0.0.9 — 2026-09-05
+## v0.0.9 — 2026-09-05
 
 Closes the first Fable audit debt from [docs/plan/server.md](../../docs/plan/server.md)
 ("Долг после аудита Fable №1", findings Ф-1…Ф-12).
@@ -183,7 +220,7 @@ The request layer — Ф-7 (KDF process semaphore), Ф-8 (`store.User` projectio
 Ф-13 (Basic over plain HTTP), Ф-14 (login rename re-wrap) are constraints on
 later layers; audit №2 checks them.
 
-## carrel/server/v0.0.8 — 2026-09-04
+## v0.0.8 — 2026-09-04
 
 Closes the layer-review debt from [docs/plan/server.md](../../docs/plan/server.md)
 ("Долг после ревью слоёв"), except the Fable audit perimeter.
@@ -218,7 +255,7 @@ Closes the layer-review debt from [docs/plan/server.md](../../docs/plan/server.m
 
 The request layer — unblocked after v0.0.9 closes Fable audit №1 debt.
 
-## carrel/server/v0.0.7 — 2026-09-04
+## v0.0.7 — 2026-09-04
 
 Review of the crypt / store / session / dav layers, and the eight defects it
 found. No new packages.
@@ -353,7 +390,7 @@ None of these add new `CARREL_*` variables.
 The request layer, users, providers, and everything above them — after the
 debt listed below is closed (done in v0.0.8 except the Fable perimeter).
 
-## carrel/server/v0.0.6 — 2026-09-04
+## v0.0.6 — 2026-09-04
 
 DAV transport, SSRF guard, discovery, and loss detection.
 
@@ -388,7 +425,7 @@ DAV transport, SSRF guard, discovery, and loss detection.
 
 The request layer, users, providers, and everything above them.
 
-## carrel/server/v0.0.5 — 2026-09-04
+## v0.0.5 — 2026-09-04
 
 Encrypted storage and in-memory sessions.
 
@@ -421,7 +458,7 @@ Encrypted storage and in-memory sessions.
 Transport, guard, discovery, the request layer, users, providers, and
 everything above them.
 
-## carrel/server/v0.0.4 — 2026-09-04
+## v0.0.4 — 2026-09-04
 
 Configuration, crypto, and the record model foundations.
 
@@ -458,7 +495,7 @@ Configuration, crypto, and the record model foundations.
 Storage, sessions, transport, the request layer, and everything above them.
 `cmd/carrel` still serves only `/healthz`.
 
-## carrel/server/v0.0.3 — 2026-09-04
+## v0.0.3 — 2026-09-04
 
 Three spec corrections, and `view` follows them.
 
@@ -499,7 +536,7 @@ Changed together with the code, as C-3.3 requires:
   CRLF endings. It silently found nothing under CRLF before, and a test
   that finds nothing passes.
 
-## carrel/server/v0.0.2 — 2026-09-04
+## v0.0.2 — 2026-09-04
 
 Two wire-format corrections in `view`, and gates that hold the package to
 the spec.
@@ -539,7 +576,7 @@ the spec.
 - `Shell.Title` reaching the client on `EventPage` and `TaskPage`.
 - `SearchBox.Whole` encoding absence as a missing key rather than `null`.
 
-## carrel/server/v0.0.1 — 2026-09-04
+## v0.0.1 — 2026-09-04
 
 Module skeleton and the `view` package.
 

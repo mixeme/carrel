@@ -13,6 +13,11 @@ var tcHTMLClass = regexp.MustCompile(`\btc-([a-z][a-z0-9_-]+)\b`)
 
 // CatalogClassHooks lists tc-* element classes that appear in catalog markup
 // without a dedicated stylesheet rule. Each value explains why no rule is needed.
+//
+// Bare variant modifiers (tc-widget--slug, no __) are outside completeness gate
+// scope: most inherit styling from the root tc-* rule, and requiring a
+// dedicated rule per modifier would mean a long hook list with little benefit.
+// Only element classes (tc-*__*) are checked; see catalogElementClasses.
 var CatalogClassHooks = map[string]string{}
 
 func checkCatalogElementClasses(p ModulePaths, catalog []CatalogEntry) error {

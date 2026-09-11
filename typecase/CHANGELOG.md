@@ -4,15 +4,10 @@ All notable changes to Typecase are documented here. Versioning follows
 [semantic versioning](https://semver.org/). This file tells consumers what to
 do, not what the authors did.
 
-## Unreleased — v0.1.1
+## typecase/v0.1.1 — 2026-09-05
 
-Visual audit fixes from the catalog browser review (findings В-1…В-7).
-
-**Do not pin this yet. Stay on `typecase/v0.1.0`.** The changes below are on
-`main` but carry no tag, and three follow-ups from the same audit are still
-open: gate coverage for bare `tc-x--y` modifiers, one bite test that calls the
-check helper instead of `gate.Run`, and a queue-state browser check that passes
-with no margin. The `v0.1.1` tag goes on once those are closed.
+Visual audit fixes from the catalog browser review (findings В-1…В-7) and
+follow-up gate/browser checks (В-8…В-10).
 
 ### For consumers (v0.1.0 → v0.1.1)
 
@@ -24,7 +19,9 @@ with no margin. The `v0.1.1` tag goes on once those are closed.
 - `.tc-btn` and ellipsis labels: `line-height` raised so descenders are not clipped
   inside `overflow: hidden` (`В-1`).
 - `gate.CheckCompleteness` now requires every `tc-*__*` class in catalog markup to
-  have a stylesheet rule or an explicit hook (`В-6`).
+  have a stylesheet rule or an explicit hook (`В-6`). Bare variant modifiers
+  (`tc-row--lead` and similar) stay outside gate scope; see `CatalogClassHooks`
+  (`В-8`).
 - `.tc-row__text`: column layout so title and subtitle stack (`В-2`).
 - `tc-tree`: children moved out of the node flex row (`В-3`).
 - `tc-row--avatar` fallback: no longer puts subtitle in `<img src>`; initials use
@@ -36,9 +33,12 @@ with no margin. The `v0.1.1` tag goes on once those are closed.
 ### Included
 
 - Browser checks: ink overflow (`fontBoundingBox` vs line box), row text stacking,
-  tree label width, queue state colours, popover containment.
+  tree label width, queue state fingerprints (colour, weight, decoration,
+  opacity), popover containment.
 - `gate.CatalogClassHooks` for element classes intentionally without CSS.
 - Stylesheet rules for catalog element classes that were markup-only.
+- `TestBite_completeness_elementClass` runs through `gate.Run` (`В-9`).
+- `TestBite_catalogQueueStates`: removing the idle rule fails the queue check (`В-10`).
 
 ## typecase/v0.1.0 — 2026-09-05
 

@@ -3,6 +3,7 @@ package browser_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/chromedp/chromedp"
@@ -14,10 +15,18 @@ import (
 
 // catalogServer serves the catalog page plus the assets it links.
 func catalogServer(t *testing.T, withJS bool) *httptest.Server {
+	return catalogServerCSS(t, withJS, "")
+}
+
+func catalogServerCSS(t *testing.T, withJS bool, cssOverride string) *httptest.Server {
 	t.Helper()
-	css, err := typecase.CSS()
-	if err != nil {
-		t.Fatalf("css: %v", err)
+	css := cssOverride
+	if css == "" {
+		bundle, err := typecase.CSS()
+		if err != nil {
+			t.Fatalf("css: %v", err)
+		}
+		css = bundle
 	}
 	themeJS, err := typecase.ThemeJS()
 	if err != nil {
@@ -240,6 +249,49 @@ func TestCatalogTreeLabelWidth(t *testing.T) {
 	}
 }
 
+// queueRowFingerprintJS returns how many distinct row-style fingerprints the six
+// queue states have, and whether idle is visually muted. Colour alone is not enough:
+// idle, running and cancelled share the base ink colour.
+const queueRowFingerprintJS = `(() => {
+  const states = ['idle', 'running', 'done', 'failed', 'partial', 'cancelled'];
+  const prints = [];
+  for (const st of states) {
+    const row = document.querySelector('#tc-queue-' + st + ' .tc-queue__row');
+    if (!row) continue;
+    const label = row.querySelector('.tc-queue__label');
+    const rowCS = getComputedStyle(row);
+    const labelCS = getComputedStyle(label);
+    prints.push([
+      labelCS.color,
+      labelCS.fontWeight,
+      labelCS.textDecorationLine,
+      rowCS.opacity
+    ].join('|'));
+  }
+  const idleRow = document.querySelector('#tc-queue-idle .tc-queue__row');
+  const idleMuted = idleRow && parseFloat(getComputedStyle(idleRow).opacity) < 0.9;
+  return { distinct: new Set(prints).size, idleMuted };
+})()`
+
+type queueFingerprintProbe struct {
+	Distinct  int  `json:"distinct"`
+	IdleMuted bool `json:"idleMuted"`
+}
+
+func assertQueueStatesDistinct(t *testing.T, h *browser.Harness, srv *httptest.Server) {
+	t.Helper()
+	var probe queueFingerprintProbe
+	if err := h.Run(srv.URL, 1280, 900, chromedp.Evaluate(queueRowFingerprintJS, &probe)); err != nil {
+		t.Fatal(err)
+	}
+	if probe.Distinct < 6 {
+		t.Fatalf("tc-queue states look alike: only %d distinct row fingerprints", probe.Distinct)
+	}
+	if !probe.IdleMuted {
+		t.Fatal("tc-queue idle state is not visually muted")
+	}
+}
+
 func TestCatalogQueueStatesDiffer(t *testing.T) {
 	if !browser.ChromeAvailable() {
 		t.Skip("no Chromium-based browser found (set CHROME_PATH)")
@@ -249,22 +301,29 @@ func TestCatalogQueueStatesDiffer(t *testing.T) {
 	}
 	srv := catalogServer(t, true)
 	h := browser.NewHarness(t)
+	assertQueueStatesDistinct(t, h, srv)
+}
 
-	var distinct int
-	js := `(() => {
-	  const states = ['idle', 'running', 'done', 'failed', 'partial', 'cancelled'];
-	  const colours = new Set();
-	  for (const st of states) {
-	    const row = document.querySelector('#tc-queue-' + st + ' .tc-queue__row');
-	    if (!row) continue;
-	    colours.add(getComputedStyle(row.querySelector('.tc-queue__label')).color);
-	  }
-	  return colours.size;
-	})()`
-	if err := h.Run(srv.URL, 1280, 900, chromedp.Evaluate(js, &distinct)); err != nil {
+func TestBite_catalogQueueStates(t *testing.T) {
+	if !browser.ChromeAvailable() {
+		t.Skip("no Chromium-based browser found (set CHROME_PATH)")
+	}
+	if testing.Short() {
+		t.Skip("catalog queue bite needs Chrome")
+	}
+	css, err := typecase.CSS()
+	if err != nil {
 		t.Fatal(err)
 	}
-	if distinct < 4 {
-		t.Fatalf("tc-queue states look alike: only %d distinct label colours", distinct)
+	css = strings.Replace(css, ".tc-queue__row--idle { opacity: 0.65; }\n", "", 1)
+	srv := catalogServerCSS(t, true, css)
+	h := browser.NewHarness(t)
+
+	var probe queueFingerprintProbe
+	if err := h.Run(srv.URL, 1280, 900, chromedp.Evaluate(queueRowFingerprintJS, &probe)); err != nil {
+		t.Fatal(err)
+	}
+	if probe.Distinct >= 6 && probe.IdleMuted {
+		t.Fatal("removing idle rule should fail queue state check")
 	}
 }

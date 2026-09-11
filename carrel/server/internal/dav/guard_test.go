@@ -149,7 +149,7 @@ func TestGetReturnsStream(t *testing.T) {
 	c := testConfig()
 	c.DAVSSRFAllowlist = "127.0.0.1"
 	g := NewGuard(c)
-	client, err := NewClient(g, srv.URL, "", "")
+	client, err := NewClient(g, srv.URL, "", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -94,7 +94,7 @@ func TestResponseLimitBoundary(t *testing.T) {
 			c := testConfig()
 			c.DAVSSRFAllowlist = "127.0.0.1"
 			c.DAVMaxResponseBytes = limit
-			client, err := NewClient(NewGuard(c), srv.URL, "", "")
+			client, err := NewClient(NewGuard(c), srv.URL, "", "", "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -133,7 +133,7 @@ func testClient(t *testing.T, endpoint string) *Client {
 	t.Helper()
 	c := testConfig()
 	c.DAVSSRFAllowlist = "127.0.0.1"
-	client, err := NewClient(NewGuard(c), endpoint, "", "")
+	client, err := NewClient(NewGuard(c), endpoint, "", "", "")
 	if err != nil {
 		t.Fatal(err)
 	}

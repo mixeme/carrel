@@ -3,6 +3,7 @@
 package crypt
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/binary"
@@ -62,26 +63,36 @@ func NewDataKey() ([KeyLen]byte, error) {
 	return k, nil
 }
 
-func DeriveKey(password string, salt []byte, p KDFParams) []byte {
-	return argon2.IDKey([]byte(password), salt, p.Time, p.Memory, p.Threads, p.KeyLen)
+// DeriveKey runs Argon2id under the process-wide KDF semaphore (F-7).
+func DeriveKey(ctx context.Context, password string, salt []byte, p KDFParams) ([]byte, error) {
+	if err := acquireKDF(ctx); err != nil {
+		return nil, err
+	}
+	defer releaseKDF()
+	return argon2.IDKey([]byte(password), salt, p.Time, p.Memory, p.Threads, p.KeyLen), nil
 }
 
 // HashLogin derives a login verifier. Salt must be unique per account.
-func HashLogin(password string, salt []byte) ([]byte, KDFParams) {
-	return DeriveKey(password, salt, LoginKDF), LoginKDF
+func HashLogin(ctx context.Context, password string, salt []byte) ([]byte, KDFParams, error) {
+	key, err := DeriveKey(ctx, password, salt, LoginKDF)
+	return key, LoginKDF, err
 }
 
 // VerifyLogin compares a password to a stored login hash in constant time.
-func VerifyLogin(password string, salt, hash []byte, p KDFParams) bool {
-	got := DeriveKey(password, salt, p)
-	return subtle.ConstantTimeCompare(got, hash) == 1
+func VerifyLogin(ctx context.Context, password string, salt, hash []byte, p KDFParams) (bool, error) {
+	got, err := DeriveKey(ctx, password, salt, p)
+	if err != nil {
+		return false, err
+	}
+	return subtle.ConstantTimeCompare(got, hash) == 1, nil
 }
 
 // DeriveWrapKey derives the wrap key from a different salt than login (S-2).
 // The returned slice holds key material; wipe it after UnwrapDataKey or copy
 // into a fixed-size buffer.
-func DeriveWrapKey(password string, salt []byte) ([]byte, KDFParams) {
-	return DeriveKey(password, salt, WrapKDF), WrapKDF
+func DeriveWrapKey(ctx context.Context, password string, salt []byte) ([]byte, KDFParams, error) {
+	key, err := DeriveKey(ctx, password, salt, WrapKDF)
+	return key, WrapKDF, err
 }
 
 // ValidateKDFParams checks stored cost parameters. All-zero params are allowed
