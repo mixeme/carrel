@@ -325,7 +325,10 @@ func ResolveWellKnown(ctx context.Context, client *http.Client, base, wellKnown 
 	if err != nil {
 		return "", "", err
 	}
-	u.Path = strings.TrimSuffix(u.Path, "/") + wellKnown
+	// RFC 6764: well-known URIs are anchored at the origin, not the entered path.
+	u.Path = wellKnown
+	u.RawQuery = ""
+	u.Fragment = ""
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return "", "", err

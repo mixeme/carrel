@@ -3,6 +3,7 @@ package discover
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/emersion/go-webdav/caldav"
@@ -38,24 +39,27 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string)
 	}
 
 	httpClient := g.HTTPClient()
-	baseURL := strings.TrimRight(endpoint, "/") + "/"
-	var resolved string
-	var detail string
-	var err error
+	entered := strings.TrimRight(endpoint, "/") + "/"
+	var wellKnownTarget string
 
 	for _, wk := range []string{"/.well-known/caldav", "/.well-known/carddav"} {
-		resolved, detail, err = dav.ResolveWellKnown(ctx, httpClient, baseURL, wk)
-		if err == nil {
+		candidate, detail, err := dav.ResolveWellKnown(ctx, httpClient, entered, wk)
+		if err != nil {
+			add(stepWellKnown, detail, false)
+			continue
+		}
+		ok, note := acceptWellKnownTarget(ctx, g, entered, candidate, username, password)
+		if ok {
 			add(stepWellKnown, detail, true)
-			baseURL = resolved
+			wellKnownTarget = candidate
 			break
 		}
-		add(stepWellKnown, detail, false)
+		add(stepWellKnown, detail+"; "+note, false)
 	}
-	if resolved == "" {
+	if wellKnownTarget == "" {
 		add(stepDirect, "using entered URL as-is", true)
 	} else {
-		endpoint = baseURL
+		endpoint = wellKnownTarget
 	}
 
 	client, err := dav.NewClient(g, endpoint, username, password, "")
@@ -229,4 +233,32 @@ func formatErr(err error) string {
 		return ""
 	}
 	return err.Error()
+}
+
+// acceptWellKnownTarget gates a well-known redirect before credentials are sent
+// to the candidate (S-6, before-providers §4).
+func acceptWellKnownTarget(ctx context.Context, g *dav.Guard, entered, candidate, username, password string) (bool, string) {
+	enteredURL, err := url.Parse(entered)
+	if err != nil {
+		return false, formatErr(err)
+	}
+	candidateURL, err := url.Parse(candidate)
+	if err != nil {
+		return false, formatErr(err)
+	}
+	if strings.EqualFold(enteredURL.Scheme, "https") && strings.EqualFold(candidateURL.Scheme, "http") {
+		return false, "redirect downgrades HTTPS to HTTP"
+	}
+	client, err := dav.NewClient(g, candidate, username, password, "")
+	if err != nil {
+		return false, formatErr(err)
+	}
+	principal, err := client.WebDAV().FindCurrentUserPrincipal(ctx)
+	if err != nil {
+		return false, formatErr(err)
+	}
+	if principal == "" {
+		return false, "no current-user-principal"
+	}
+	return true, principal
 }

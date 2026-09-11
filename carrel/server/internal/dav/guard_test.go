@@ -176,3 +176,31 @@ func testConfig() *conf.Config {
 		DAVMaxRedirects:     5,
 	}
 }
+
+func TestResolveWellKnownFromOriginRoot(t *testing.T) {
+	var wellKnownPath string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/.well-known/caldav" {
+			wellKnownPath = r.URL.Path
+			http.Redirect(w, r, "/dav/", http.StatusFound)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	c := testConfig()
+	c.DAVSSRFAllowlist = "127.0.0.1"
+	g := NewGuard(c)
+
+	final, _, err := ResolveWellKnown(context.Background(), g.HTTPClient(), srv.URL+"/nested/path/", "/.well-known/caldav")
+	if err != nil {
+		t.Fatalf("ResolveWellKnown: %v", err)
+	}
+	if wellKnownPath != "/.well-known/caldav" {
+		t.Fatalf("requested path %q, want /.well-known/caldav at origin", wellKnownPath)
+	}
+	if !strings.HasSuffix(strings.TrimRight(final, "/"), "/dav") {
+		t.Fatalf("final URL = %q, want redirect target /dav/", final)
+	}
+}

@@ -5,6 +5,33 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.27 — 2026-09-08
+
+Closes discovery well-known defects from
+[before-providers.md](../../docs/plan/before-providers.md) §4.
+
+### For consumers
+
+- **Well-known redirects are validated before discovery switches away from the
+  entered URL.** A redirect target is accepted only when a
+  `current-user-principal` is found there; otherwise discovery keeps the URL
+  you typed (Radicale-style web UI traps no longer replace a working path).
+- **Well-known probes use the server origin** (`/.well-known/...` at the host
+  root), not a path relative to the entered URL (RFC 6764).
+- **HTTPS→HTTP downgrade during discovery is refused.** Credentials are not
+  sent to a downgraded scheme while probing well-known; plain HTTP entered
+  directly is unchanged (F-13 warning on the connections screen).
+
+### Included
+
+- `internal/dav`: `ResolveWellKnown` anchors well-known URIs at the origin.
+- `internal/discover`: `acceptWellKnownTarget` gates principal and scheme
+  before adopting a well-known redirect.
+- Tests: `TestResolveWellKnownFromOriginRoot`,
+  `TestWellKnownHTMLWithoutPrincipalStaysOnEnteredURL`,
+  `TestAcceptWellKnownTargetRejectsHTTPDowngrade`,
+  `TestWellKnownAcceptsValidRedirect`.
+
 ## v0.0.26 — 2026-09-08
 
 Closes escrow admin UI gaps from
