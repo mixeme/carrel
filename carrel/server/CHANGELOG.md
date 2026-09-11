@@ -4,6 +4,41 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.6 — 2026-09-04
+
+DAV transport, SSRF guard, discovery, and loss detection.
+
+### For consumers
+
+- `internal/dav` implements the S-5 `Transport` interface. `Get` returns an
+  `io.ReadCloser` stream with an ETag, not `[]byte`. Outbound requests use
+  `Guard` from C-12: resolve → IP check → dial to the verified address,
+  re-check after each redirect, host allowlist (`CARREL_DAV_SSRF_ALLOWLIST`),
+  connect/request timeouts, redirect cap, and `LimitReader` on responses.
+- CalDAV and CardDAV `REPORT` methods live on separate `CalReporter` and
+  `CardReporter` interfaces — the file provider needs only `Transport`.
+- `internal/discover` runs S-6 discovery: `.well-known`, direct URL, principal,
+  home-sets, collections. Each step appends to `view.DiagnosticTrace`. No
+  principal means a file collection, not failure. `CompareCollections` returns
+  added/removed paths for re-discovery without silent replacement.
+- `internal/model.CompareAfterPut` compares a sent object with a re-read copy
+  after PUT (S-7.1). Losses aggregate per server through `LossAggregator`
+  (implemented by `session.LossRegistry`); repeat losses set `Aggregated`.
+- Runtime dependency: `github.com/emersion/go-webdav`
+  `v0.0.0-20260625083450-1901d193ce99`.
+
+### Included
+
+- `internal/dav`: `Transport`, `Guard`, `Client`, `CalReporter`, `CardReporter`;
+  SSRF and streaming GET tests.
+- `internal/discover`: `Run`, `CompareCollections`, `Collection`; unit tests.
+- `internal/model`: `CompareAfterPut`, `LossAggregator`, `Loss`; loss tests
+  (patch apply tests unchanged from v0.0.4).
+
+### Not yet included
+
+The request layer, users, providers, and everything above them.
+
 ## carrel/server/v0.0.5 — 2026-09-04
 
 Encrypted storage and in-memory sessions.

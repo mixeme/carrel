@@ -1,0 +1,390 @@
+package dav
+
+import (
+	"bytes"
+	"context"
+	"encoding/xml"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"path"
+	"strconv"
+	"strings"
+
+	"github.com/emersion/go-webdav"
+	"github.com/emersion/go-webdav/caldav"
+	"github.com/emersion/go-webdav/carddav"
+)
+
+// Client is a guarded DAV transport plus optional CalDAV/CardDAV reporters.
+type Client struct {
+	base    *url.URL
+	http    *http.Client
+	webdav  *webdav.Client
+	caldav  *caldav.Client
+	carddav *carddav.Client
+	maxBody int64
+}
+
+// NewClient dials endpoint through guard. Username and password may be empty.
+func NewClient(g *Guard, endpoint, username, password string) (*Client, error) {
+	httpClient := g.HTTPClient()
+	var hc webdav.HTTPClient = httpClient
+	if username != "" {
+		hc = webdav.HTTPClientWithBasicAuth(httpClient, username, password)
+	}
+	wc, err := webdav.NewClient(hc, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	cc, err := caldav.NewClient(hc, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	adc, err := carddav.NewClient(hc, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	if u.Path == "" {
+		u.Path = "/"
+	}
+	return &Client{
+		base:    u,
+		http:    httpClient,
+		webdav:  wc,
+		caldav:  cc,
+		carddav: adc,
+		maxBody: g.maxBody,
+	}, nil
+}
+
+// WebDAV returns the underlying webdav client for discovery helpers.
+func (c *Client) WebDAV() *webdav.Client { return c.webdav }
+
+// CalDAV returns the underlying caldav client.
+func (c *Client) CalDAV() *caldav.Client { return c.caldav }
+
+// CardDAV returns the underlying carddav client.
+func (c *Client) CardDAV() *carddav.Client { return c.carddav }
+
+func (c *Client) resolve(p string) string {
+	hasTrail := strings.HasSuffix(p, "/") || (p == "" && strings.HasSuffix(c.base.Path, "/"))
+	if !strings.HasPrefix(p, "/") {
+		p = path.Join(c.base.Path, p)
+	}
+	if hasTrail && !strings.HasSuffix(p, "/") {
+		p += "/"
+	}
+	u := *c.base
+	u.Path = p
+	return u.String()
+}
+
+func (c *Client) PropFind(ctx context.Context, p string, depth Depth, props []xml.Name) (*MultiStatus, error) {
+	pf := propFindXML(props)
+	req, err := c.xmlRequest("PROPFIND", p, pf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Depth", depth.String())
+	return c.doMultiStatus(req.WithContext(ctx))
+}
+
+func (c *Client) Get(ctx context.Context, p string, rng *Range) (io.ReadCloser, string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.resolve(p), nil)
+	if err != nil {
+		return nil, "", err
+	}
+	if rng != nil {
+		if rng.End >= 0 {
+			req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", rng.Start, rng.End))
+		} else {
+			req.Header.Set("Range", fmt.Sprintf("bytes=%d-", rng.Start))
+		}
+	}
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, "", err
+	}
+	if resp.StatusCode/100 != 2 {
+		defer resp.Body.Close()
+		return nil, "", httpStatusError(resp)
+	}
+	etag := strings.Trim(resp.Header.Get("ETag"), `"`)
+	var body io.ReadCloser = resp.Body
+	if c.maxBody > 0 {
+		body = &limitedBody{ReadCloser: resp.Body, remain: c.maxBody}
+	}
+	return body, etag, nil
+}
+
+func (c *Client) Put(ctx context.Context, p string, body io.Reader, ifMatch string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, c.resolve(p), body)
+	if err != nil {
+		return "", err
+	}
+	if ifMatch != "" {
+		req.Header.Set("If-Match", ifMatch)
+	}
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode/100 != 2 {
+		return "", httpStatusError(resp)
+	}
+	return strings.Trim(resp.Header.Get("ETag"), `"`), nil
+}
+
+func (c *Client) Delete(ctx context.Context, p, ifMatch string) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, c.resolve(p), nil)
+	if err != nil {
+		return err
+	}
+	if ifMatch != "" {
+		req.Header.Set("If-Match", ifMatch)
+	}
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode/100 != 2 && resp.StatusCode != http.StatusNotFound {
+		return httpStatusError(resp)
+	}
+	return nil
+}
+
+func (c *Client) MkCol(ctx context.Context, p string) error {
+	return c.webdav.Mkdir(ctx, p)
+}
+
+func (c *Client) MkColProps(ctx context.Context, method, p string, props []Prop) error {
+	if method == "" {
+		method = "MKCOL"
+	}
+	body, err := mkcolBody(props)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, method, c.resolve(p), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", `application/xml; charset="utf-8"`)
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode/100 != 2 {
+		return httpStatusError(resp)
+	}
+	return nil
+}
+
+func (c *Client) PropPatch(ctx context.Context, p string, set []Prop, remove []xml.Name) error {
+	body, err := propPatchBody(set, remove)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, "PROPPATCH", c.resolve(p), bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", `application/xml; charset="utf-8"`)
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusMultiStatus && resp.StatusCode/100 != 2 {
+		return httpStatusError(resp)
+	}
+	return nil
+}
+
+func (c *Client) Move(ctx context.Context, src, dst string, overwrite bool) error {
+	opts := &webdav.MoveOptions{NoOverwrite: !overwrite}
+	return c.webdav.Move(ctx, src, dst, opts)
+}
+
+// CalReporter returns the CalDAV report surface for this client.
+func (c *Client) CalReporter() CalReporter { return calReports{c} }
+
+// CardReporter returns the CardDAV report surface for this client.
+func (c *Client) CardReporter() CardReporter { return cardReports{c} }
+
+type calReports struct{ *Client }
+
+func (c calReports) QueryCalendar(ctx context.Context, calendar string, query *caldav.CalendarQuery) ([]caldav.CalendarObject, error) {
+	return c.caldav.QueryCalendar(ctx, calendar, query)
+}
+
+func (c calReports) MultiGetCalendar(ctx context.Context, p string, multiGet *caldav.CalendarMultiGet) ([]caldav.CalendarObject, error) {
+	return c.caldav.MultiGetCalendar(ctx, p, multiGet)
+}
+
+func (c calReports) SyncCollection(ctx context.Context, p string, query *caldav.SyncQuery) (*caldav.SyncResponse, error) {
+	return c.caldav.SyncCollection(ctx, p, query)
+}
+
+type cardReports struct{ *Client }
+
+func (c cardReports) QueryAddressBook(ctx context.Context, addressBook string, query *carddav.AddressBookQuery) ([]carddav.AddressObject, error) {
+	return c.carddav.QueryAddressBook(ctx, addressBook, query)
+}
+
+func (c cardReports) MultiGetAddressBook(ctx context.Context, p string, multiGet *carddav.AddressBookMultiGet) ([]carddav.AddressObject, error) {
+	return c.carddav.MultiGetAddressBook(ctx, p, multiGet)
+}
+
+func (c cardReports) SyncCollection(ctx context.Context, p string, query *carddav.SyncQuery) (*carddav.SyncResponse, error) {
+	return c.carddav.SyncCollection(ctx, p, query)
+}
+
+func (c *Client) xmlRequest(method, p string, v any) (*http.Request, error) {
+	var buf bytes.Buffer
+	buf.WriteString(xml.Header)
+	if err := xml.NewEncoder(&buf).Encode(v); err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(method, c.resolve(p), &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", `text/xml; charset="utf-8"`)
+	return req, nil
+}
+
+func (c *Client) doMultiStatus(req *http.Request) (*MultiStatus, error) {
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusMultiStatus {
+		return nil, httpStatusError(resp)
+	}
+	return decodeMultiStatus(resp.Body)
+}
+
+func httpStatusError(resp *http.Response) error {
+	const max = 1024
+	b, _ := io.ReadAll(io.LimitReader(resp.Body, max))
+	msg := strings.TrimSpace(string(b))
+	if msg == "" {
+		msg = resp.Status
+	}
+	return fmt.Errorf("dav: HTTP %d: %s", resp.StatusCode, msg)
+}
+
+func propFindXML(props []xml.Name) *propFind {
+	raw := make([]rawXML, len(props))
+	for i, n := range props {
+		raw[i] = rawXML{XMLName: n}
+	}
+	return &propFind{Prop: propBody{Raw: raw}}
+}
+
+func propPatchBody(set []Prop, remove []xml.Name) ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteString(xml.Header)
+	enc := xml.NewEncoder(&buf)
+	enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "propertyupdate"}})
+	for _, n := range remove {
+		enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "remove"}})
+		enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
+		enc.EncodeElement("", xml.StartElement{Name: n})
+		enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
+		enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "remove"}})
+	}
+	if len(set) > 0 {
+		enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "set"}})
+		enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
+		for _, p := range set {
+			enc.EncodeElement(string(p.Value), xml.StartElement{Name: p.Name})
+		}
+		enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
+		enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "set"}})
+	}
+	enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "propertyupdate"}})
+	return buf.Bytes(), enc.Flush()
+}
+
+func mkcolBody(props []Prop) ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteString(xml.Header)
+	enc := xml.NewEncoder(&buf)
+	enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "mkcol"}})
+	enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "set"}})
+	enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
+	for _, p := range props {
+		enc.EncodeElement(string(p.Value), xml.StartElement{Name: p.Name})
+	}
+	enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
+	enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "set"}})
+	enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "mkcol"}})
+	return buf.Bytes(), enc.Flush()
+}
+
+type propFind struct {
+	XMLName xml.Name `xml:"DAV: propfind"`
+	Prop    propBody `xml:"prop"`
+}
+
+type propBody struct {
+	Raw []rawXML `xml:",any"`
+}
+
+type rawXML struct {
+	XMLName xml.Name
+}
+
+type xmlMultiStatus struct {
+	Responses []xmlResponse `xml:"response"`
+}
+
+type xmlResponse struct {
+	Href     string        `xml:"href"`
+	PropStat []xmlPropStat `xml:"propstat"`
+}
+
+type xmlPropStat struct {
+	Prop   propBody `xml:"prop"`
+	Status string   `xml:"status"`
+}
+
+func decodeMultiStatus(r io.Reader) (*MultiStatus, error) {
+	var ms xmlMultiStatus
+	if err := xml.NewDecoder(r).Decode(&ms); err != nil {
+		return nil, err
+	}
+	out := &MultiStatus{Responses: make([]Response, 0, len(ms.Responses))}
+	for _, resp := range ms.Responses {
+		r := Response{Href: resp.Href, Props: make(map[xml.Name][]byte)}
+		for _, ps := range resp.PropStat {
+			r.StatusCode = parseStatus(ps.Status)
+			for _, raw := range ps.Prop.Raw {
+				r.Props[raw.XMLName] = nil
+			}
+		}
+		out.Responses = append(out.Responses, r)
+	}
+	return out, nil
+}
+
+func parseStatus(s string) int {
+	parts := strings.Fields(s)
+	if len(parts) < 2 {
+		return 0
+	}
+	code, _ := strconv.Atoi(parts[1])
+	return code
+}
