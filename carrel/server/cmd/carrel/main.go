@@ -29,10 +29,23 @@ func main() {
 		slog.Error("carrel: config", "error", err)
 		os.Exit(1)
 	}
+	if err := setupLog(cfg); err != nil {
+		slog.Error("carrel: config", "error", err)
+		os.Exit(1)
+	}
 	if err := run(cfg); err != nil {
 		slog.Error("carrel: exiting", "error", err)
 		os.Exit(1)
 	}
+}
+
+func setupLog(cfg *conf.Config) error {
+	level, err := cfg.ParseLogLevel()
+	if err != nil {
+		return err
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level})))
+	return nil
 }
 
 func run(cfg *conf.Config) error {

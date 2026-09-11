@@ -75,6 +75,8 @@
 }
 .tc-tree__node.is-chosen .tc-tree__label { font-weight: 600; color: var(--tc-accent); }
 .tc-tree__node.is-disabled { opacity: 0.55; }
+.tc-tree__node.is-disabled .tc-tree__label,
+.tc-tree__node.is-disabled .tc-tree__toggle { pointer-events: none; cursor: default; }
 .tc-tree__toggle, .tc-tree__spacer { width: 1em; flex: none; }
 .tc-tree__children { width: 100%; margin-left: 1.25em; }
 

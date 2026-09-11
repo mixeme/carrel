@@ -75,7 +75,7 @@ func (r Row) Render() string {
 	}
 	menu := ""
 	if len(r.Menu) > 0 {
-		menu = Menu{Label: "Actions", Items: r.Menu, ID: "tc-row-menu"}.Render()
+		menu = Menu{Label: labels.Actions, Items: r.Menu}.Render()
 	}
 	inner := mark + `<div class="tc-row__cells">` + cells + `</div><div class="tc-row__badges">` + badges + `</div><div class="tc-row__tail">` + menu + `</div>`
 	if r.Href != "" {
@@ -94,16 +94,23 @@ func rowVariantClass(v RowVariant) string {
 func renderRowCells(v RowVariant, c RowCells) string {
 	switch v {
 	case RowAvatar:
-		return Avatar{Initials: c.Title, Image: c.Subtitle}.Render() + `<div class="tc-row__text"><span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__subtitle">` + esc(c.Subtitle) + `</span></div>`
+		av := c.Avatar
+		if av.Initials == "" && av.Image == "" {
+			av = Avatar{Initials: c.Title, Image: c.Subtitle}
+		}
+		return av.Render() + `<div class="tc-row__text"><span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__subtitle">` + esc(c.Subtitle) + `</span></div>`
 	case RowLead:
 		return `<span class="tc-row__lead">` + esc(c.Lead) + `</span><div class="tc-row__text"><span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__subtitle">` + esc(c.Subtitle) + `</span></div>`
 	case RowTick:
-		tick := Tick{Done: c.Progress != nil && *c.Progress > 0, Label: c.Title}.Render()
+		tick := Tick{Done: c.Done, Label: c.Title}.Render()
 		return tick + `<span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__due">` + esc(c.Due) + `</span>`
 	case RowExcerpt:
 		var tags string
-		return `<span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__excerpt">` + esc(c.Excerpt) + `</span>` + tags
-	case RowFile:
+		for _, t := range c.Tags {
+			tags += t.Render()
+		}
+		return `<span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__excerpt">` + esc(c.Excerpt) + `</span><span class="tc-row__tags">` + tags + `</span>`
+	case RowMeta:
 		return `<span class="tc-row__icon" aria-hidden="true">` + esc(c.Icon) + `</span><span class="tc-row__name">` + esc(c.Name) + `</span><span class="tc-row__size">` + esc(c.Size) + `</span><span class="tc-row__time">` + esc(c.Time) + `</span>`
 	case RowFind:
 		return `<span class="tc-row__icon" aria-hidden="true">` + esc(c.Icon) + `</span><div class="tc-row__find"><span class="tc-row__title">` + esc(c.Title) + `</span><span class="tc-row__detail">` + esc(c.Detail) + `</span><span class="tc-row__caption">` + esc(c.Caption) + `</span></div>`
@@ -154,13 +161,13 @@ func (t TickRow) Render() string {
 	}
 	menu := ""
 	if len(t.Menu) > 0 {
-		menu = Menu{Label: "Actions", Items: t.Menu}.Render()
+		menu = Menu{Label: labels.Actions, Items: t.Menu}.Render()
 	}
 	stateWord := ""
 	if t.State == TickRowUnavailable {
-		stateWord = `<span class="tc-tickrow__state">unavailable</span>`
+		stateWord = `<span class="tc-tickrow__state">` + esc(labels.Unavailable) + `</span>`
 	}
-	inner := `<button type="button" class="` + tickCls + `" aria-label="Toggle ` + esc(t.Label) + `"></button>` + t.Mark.Render() + `<span class="tc-tickrow__label">` + esc(t.Label) + `</span>` + stateWord + Num{Value: t.Count}.Render() + menu
+	inner := `<button type="button" class="` + tickCls + `" aria-label="` + esc(labels.Toggle) + ` ` + esc(t.Label) + `"></button>` + t.Mark.Render() + `<span class="tc-tickrow__label">` + esc(t.Label) + `</span>` + stateWord + Num{Value: t.Count}.Render() + menu
 	if t.Href != "" {
 		return `<div` + classAttr(cls) + ` data-tc-tickrow><a href="` + esc(t.Href) + `" class="tc-tickrow__link">` + inner + `</a></div>`
 	}

@@ -3,6 +3,7 @@ package conf
 import (
 	"bufio"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -375,7 +376,47 @@ func (c *Config) validate() error {
 	if c.DataDir == "" {
 		return fmt.Errorf("CARREL_DATA_DIR: empty")
 	}
+	if c.CacheCollectionTTL < 0 {
+		return fmt.Errorf("CARREL_CACHE_COLLECTION_TTL: negative")
+	}
+	if c.CacheMaxCollections < 0 {
+		return fmt.Errorf("CARREL_CACHE_MAX_COLLECTIONS: negative")
+	}
+	if c.CacheMaxETagEntries < 0 {
+		return fmt.Errorf("CARREL_CACHE_MAX_ETAG_ENTRIES: negative")
+	}
+	if c.CacheMaxBodyBytes < 0 {
+		return fmt.Errorf("CARREL_CACHE_MAX_BODY_BYTES: negative")
+	}
+	if c.CacheMaxProcessBytes < 0 {
+		return fmt.Errorf("CARREL_CACHE_MAX_PROCESS_BYTES: negative")
+	}
+	if c.CacheMaxThumbBytes < 0 {
+		return fmt.Errorf("CARREL_CACHE_MAX_THUMB_BYTES: negative")
+	}
+	if c.CacheMaxThumbEntries < 0 {
+		return fmt.Errorf("CARREL_CACHE_MAX_THUMB_ENTRIES: negative")
+	}
+	if _, err := c.ParseLogLevel(); err != nil {
+		return err
+	}
 	return nil
+}
+
+// ParseLogLevel maps CARREL_LOG_LEVEL to a slog level (C-12).
+func (c *Config) ParseLogLevel() (slog.Level, error) {
+	switch strings.ToLower(strings.TrimSpace(c.LogLevel)) {
+	case "debug":
+		return slog.LevelDebug, nil
+	case "info", "":
+		return slog.LevelInfo, nil
+	case "warn", "warning":
+		return slog.LevelWarn, nil
+	case "error":
+		return slog.LevelError, nil
+	default:
+		return slog.LevelInfo, fmt.Errorf("CARREL_LOG_LEVEL: unknown level %q", c.LogLevel)
+	}
 }
 
 // A malformed value is a configuration error the operator can read and fix,

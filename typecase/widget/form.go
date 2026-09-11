@@ -74,7 +74,7 @@ func (fs FieldSet) Render() string {
 // Field — tc-field
 //
 // Роль. Подпись, ввод, подсказка, ошибка и кнопка, относящаяся к полю.
-// Вход. Field{ Name, Label, Kind, Value, Options, Hint, Error, Extra, ReadOnly, Required, Disabled }.
+// Вход. Field{ Name, Label, Kind, Value, Options, Hint, Error, Extra, ReadOnly, Required, Disabled, Check }.
 // Состояния. normal | error | read-only | disabled.
 // Инварианты. Подпись связана с полем; ширина по роду содержимого.
 // Поведение. Показ ошибки, связь подсказки с полем.
@@ -111,15 +111,6 @@ func (f Field) Render() string {
 	if f.Required {
 		req = `<span class="tc-field__req" aria-hidden="true">*</span>`
 	}
-	var input string
-	if f.Check != nil {
-		chk := *f.Check
-		chk.Name = f.Name
-		chk.Label = f.Label
-		input = chk.Render()
-	} else {
-		input = Input{Name: f.Name, Kind: f.Kind, Value: f.Value, Options: f.Options, ReadOnly: f.ReadOnly || f.Disabled}.Render()
-	}
 	hint := ""
 	if f.Hint != "" {
 		hint = `<span class="tc-field__hint" id="` + esc(f.Name) + `-hint">` + esc(f.Hint) + `</span>`
@@ -132,7 +123,20 @@ func (f Field) Render() string {
 	if f.Extra.Label != "" {
 		extra = `<div class="tc-field__extra">` + f.Extra.Render() + `</div>`
 	}
-	return `<div` + classAttr(cls) + `><label class="tc-field__label" for="` + esc(f.Name) + `">` + esc(f.Label) + req + `</label><div class="tc-field__control">` + input + extra + `</div>` + hint + err + `</div>`
+	fieldID := uniqueID("tc-field")
+	if f.Check != nil {
+		chk := *f.Check
+		chk.ID = fieldID
+		if chk.Name == "" {
+			chk.Name = f.Name
+		}
+		if chk.Label == "" {
+			chk.Label = f.Label
+		}
+		return `<div` + classAttr(cls) + `><div class="tc-field__control">` + chk.Render() + extra + `</div>` + hint + err + `</div>`
+	}
+	input := Input{ID: fieldID, Name: f.Name, Kind: f.Kind, Value: f.Value, Options: f.Options, ReadOnly: f.ReadOnly || f.Disabled}.Render()
+	return `<div` + classAttr(cls) + `><label class="tc-field__label" for="` + esc(fieldID) + `">` + esc(f.Label) + req + `</label><div class="tc-field__control">` + input + extra + `</div>` + hint + err + `</div>`
 }
 
 // FormFoot — tc-formfoot
@@ -163,11 +167,15 @@ func (ff FormFoot) Render() string {
 		}
 		danger += da.Render()
 	}
-	primary := ff.Primary
-	if primary.Kind == "" {
-		primary.Kind = ButtonPrimary
+	primary := ""
+	if ff.Primary.Label != "" || ff.Primary.Icon != "" || ff.Primary.Href != "" {
+		p := ff.Primary
+		if p.Kind == "" {
+			p.Kind = ButtonPrimary
+		}
+		primary = p.Render()
 	}
-	return `<div class="tc-formfoot"><div class="tc-formfoot__primary">` + primary.Render() + `</div><div class="tc-formfoot__rest">` + rest + `</div><div class="tc-formfoot__danger">` + danger + `</div></div>`
+	return `<div class="tc-formfoot"><div class="tc-formfoot__primary">` + primary + `</div><div class="tc-formfoot__rest">` + rest + `</div><div class="tc-formfoot__danger">` + danger + `</div></div>`
 }
 
 // Danger — tc-danger
@@ -192,7 +200,7 @@ func (d Danger) Render() string {
 		if a.Kind == "" {
 			a.Kind = ButtonDanger
 		}
-		rows += `<div class="tc-danger__row"><div class="tc-danger__text"><strong>` + esc(r.Title) + `</strong><p>` + esc(r.Body) + `</p></div><div class="tc-danger__action">` + a.Render() + `</div></div>`
+		rows += `<div class="tc-danger__row"><div class="tc-danger__text"><strong>` + esc(r.Title) + `</strong><p>` + esc(r.Text) + `</p></div><div class="tc-danger__action">` + a.Render() + `</div></div>`
 	}
 	return `<section class="tc-danger"><h2 class="tc-danger__title">` + esc(d.Title) + `</h2>` + rows + `</section>`
 }

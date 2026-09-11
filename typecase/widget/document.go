@@ -13,7 +13,7 @@ package widget
 type Doc struct {
 	Mode  DocMode
 	Width DocWidth
-	Body  string
+	Body  Prose
 	Bar   DocBar
 	Meta  DocMeta
 }
@@ -27,7 +27,7 @@ func (d Doc) Render() string {
 	if width == "" {
 		width = DocWidthMeasure
 	}
-	return `<article` + classAttr("tc-doc", "tc-doc--"+string(mode), "tc-doc--"+string(width)) + `>` + d.Bar.Render() + `<div class="tc-doc__layout">` + d.Body + d.Meta.Render() + `</div></article>`
+	return `<article` + classAttr("tc-doc", "tc-doc--"+string(mode), "tc-doc--"+string(width)) + `>` + d.Bar.Render() + `<div class="tc-doc__layout">` + d.Body.Render() + d.Meta.Render() + `</div></article>`
 }
 
 // Prose — tc-prose
@@ -54,19 +54,20 @@ func (p Prose) Render() string {
 
 func renderProseBlock(b ProseBlock) string {
 	switch b.Kind {
-	case "h1", "h2", "h3":
-		return `<` + b.Kind + ` class="tc-prose__` + b.Kind + `">` + esc(b.Text) + `</` + b.Kind + `>`
-	case "p":
+	case ProseH1, ProseH2, ProseH3:
+		tag := string(b.Kind)
+		return `<` + tag + ` class="tc-prose__` + tag + `">` + esc(b.Text) + `</` + tag + `>`
+	case ProseP:
 		return `<p class="tc-prose__p">` + esc(b.Text) + `</p>`
-	case "ul":
+	case ProseUL:
 		var items string
 		for _, it := range b.Items {
 			items += `<li>` + esc(it) + `</li>`
 		}
 		return `<ul class="tc-prose__ul">` + items + `</ul>`
-	case "code":
+	case ProseCode:
 		return `<pre class="tc-prose__code"><code>` + esc(b.Code) + `</code></pre>`
-	case "a":
+	case ProseLink:
 		return `<p class="tc-prose__p"><a href="` + esc(b.Href) + `" class="tc-prose__link">` + esc(b.Text) + `</a></p>`
 	default:
 		return `<p class="tc-prose__p">` + esc(b.Text) + `</p>`
@@ -101,7 +102,7 @@ func (d DocBar) Render() string {
 	}
 	dirty := ""
 	if d.Dirty {
-		dirty = `<span class="tc-docbar__dirty" aria-label="Unsaved changes">●</span>`
+		dirty = `<span class="tc-docbar__dirty" aria-label="` + esc(labels.UnsavedChanges) + `">●</span>`
 	}
 	return `<div` + classAttr(cls) + `>` + dirty + Bar{Left: d.Left, Right: d.Right, Rank2: d.Rank2}.Render() + `</div>`
 }

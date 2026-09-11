@@ -6,10 +6,10 @@ package widget
 // Вход. Table{ Columns, Rows, Selectable, Empty }.
 // Состояния. normal | empty.
 // Инварианты. Ширина колонки по роду; числовые колонки вправо; прокручивается сама.
-// Поведение. Выделение строк; ходьба клавишами.
+// Поведение. нет.
 // Геометрия. Высота строки 22px; шапка не прокручивается.
 // Содержимое. Ячейки, tc-btn в колонке действий.
-// Чего нет. Не сортирует и не подгружает.
+// Чего нет. Не сортирует и не подгружает; выделение строк — у потребителя.
 type Table struct {
 	Columns    []Column
 	Rows       []TableRow
@@ -21,9 +21,19 @@ func (t Table) Render() string {
 	if len(t.Rows) == 0 {
 		return `<div class="tc-table tc-table--empty">` + t.Empty.Render() + `</div>`
 	}
+	hasActions := false
+	for _, r := range t.Rows {
+		if len(r.Actions) > 0 {
+			hasActions = true
+			break
+		}
+	}
 	var head string
 	for _, c := range t.Columns {
 		head += `<th class="tc-table__th tc-table__th--` + string(c.Kind) + `">` + esc(c.Label) + `</th>`
+	}
+	if hasActions {
+		head += `<th class="tc-table__th tc-table__th--action">` + esc(labels.Actions) + `</th>`
 	}
 	var body string
 	for _, r := range t.Rows {
@@ -39,18 +49,20 @@ func (t Table) Render() string {
 			}
 			cells += `<td class="tc-table__td tc-table__td--` + string(kind) + `">` + esc(cell) + `</td>`
 		}
-		if len(r.Actions) > 0 {
-			var acts string
-			for _, a := range r.Actions {
-				aa := a
-				aa.Size = ButtonSizeTable
-				acts += aa.Render()
+		if hasActions {
+			acts := ""
+			if len(r.Actions) > 0 {
+				for _, a := range r.Actions {
+					aa := a
+					aa.Size = ButtonSizeTable
+					acts += aa.Render()
+				}
 			}
 			cells += `<td class="tc-table__td tc-table__td--action">` + acts + `</td>`
 		}
 		body += `<tr` + classAttr(cls) + `>` + cells + `</tr>`
 	}
-	return `<div class="tc-table" data-tc-table><table class="tc-table__grid"><thead><tr>` + head + `</tr></thead><tbody>` + body + `</tbody></table></div>`
+	return `<div class="tc-table"><table class="tc-table__grid"><thead><tr>` + head + `</tr></thead><tbody>` + body + `</tbody></table></div>`
 }
 
 // Grid — tc-grid
@@ -59,10 +71,10 @@ func (t Table) Render() string {
 // Вход. Grid{ Tiles }.
 // Состояния. нет.
 // Инварианты. Плитки одного размера; имя не больше двух строк.
-// Поведение. Выделение, открытие, подгрузка миниатюр.
+// Поведение. нет.
 // Геометрия. Размер плитки фиксирован.
 // Содержимое. tc-thumb, tc-badge.
-// Чего нет. Нет предпросмотра при наведении.
+// Чего нет. Нет предпросмотра при наведении; выделение и открытие — у потребителя.
 type Grid struct {
 	Tiles []Tile
 }
@@ -72,7 +84,7 @@ func (g Grid) Render() string {
 	for _, t := range g.Tiles {
 		tiles += t.Render()
 	}
-	return `<div class="tc-grid" data-tc-grid>` + tiles + `</div>`
+	return `<div class="tc-grid">` + tiles + `</div>`
 }
 
 // Tile — tc-tile
@@ -128,16 +140,16 @@ type Thumb struct {
 	Href    string
 	Icon    string
 	Alt     string
-	Size    string
+	Size    ThumbSize
 	Loading bool
 }
 
 func (t Thumb) Render() string {
 	size := t.Size
 	if size == "" {
-		size = "tile"
+		size = ThumbSizeTile
 	}
-	cls := classes("tc-thumb", "tc-thumb--"+size)
+	cls := classes("tc-thumb", "tc-thumb--"+string(size))
 	if t.Loading {
 		return `<div` + classAttr(cls, "tc-thumb--loading") + ` aria-busy="true"></div>`
 	}
@@ -170,11 +182,12 @@ func (t Tree) Render() string {
 func renderTreeNodes(nodes []TreeNode, chosen string, disabled []string, depth int) string {
 	var out string
 	for _, n := range nodes {
+		dis := contains(disabled, n.ID)
 		cls := "tc-tree__node"
-		if n.ID == chosen {
+		if n.ID == chosen && !dis {
 			cls = classes(cls, "is-chosen")
 		}
-		if contains(disabled, n.ID) {
+		if dis {
 			cls = classes(cls, "is-disabled")
 		}
 		exp := "false"
@@ -191,11 +204,15 @@ func renderTreeNodes(nodes []TreeNode, chosen string, disabled []string, depth i
 		}
 		toggle := ""
 		if len(n.Children) > 0 {
-			toggle = `<button type="button" class="tc-tree__toggle" data-tc-tree-toggle aria-expanded="` + exp + `" aria-label="Toggle"></button>`
+			toggle = `<button type="button" class="tc-tree__toggle" data-tc-tree-toggle aria-expanded="` + exp + `" aria-label="` + esc(labels.Toggle) + `"></button>`
 		} else {
 			toggle = `<span class="tc-tree__spacer" aria-hidden="true"></span>`
 		}
-		out += `<div` + classAttr(cls) + ` role="treeitem" data-tc-tree-item` + attr("data-id", n.ID) + `>` + toggle + n.Mark.Render() + `<button type="button" class="tc-tree__label">` + esc(n.Label) + `</button>` + badges + children + `</div>`
+		btnDis := ""
+		if dis {
+			btnDis = " disabled"
+		}
+		out += `<div` + classAttr(cls) + ` role="treeitem" data-tc-tree-item` + attr("data-id", n.ID) + `>` + toggle + n.Mark.Render() + `<button type="button" class="tc-tree__label"` + btnDis + `>` + esc(n.Label) + `</button>` + badges + children + `</div>`
 	}
 	return out
 }
@@ -215,10 +232,10 @@ func contains(list []string, id string) bool {
 // Вход. Queue{ Rows, Note }.
 // Состояния. idle | running | done | failed | partial | cancelled.
 // Инварианты. Ожидающая строка показывает вопрос; ход — числом.
-// Поведение. Отмена, ответ, скрытие завершённых.
+// Поведение. нет.
 // Геометрия. Прижата к нижнему краю рабочей поверхности.
 // Содержимое. tc-meter, tc-btn.
-// Чего нет. Не хранит очередь между заходами.
+// Чего нет. Не хранит очередь между заходами; отмена и ответ — у потребителя.
 type Queue struct {
 	Rows []QueueRow
 	Note string
@@ -250,5 +267,5 @@ func (q Queue) Render() string {
 	if q.Note != "" {
 		note = `<p class="tc-queue__note">` + esc(q.Note) + `</p>`
 	}
-	return `<div class="tc-queue" data-tc-queue>` + rows + note + `</div>`
+	return `<div class="tc-queue">` + rows + note + `</div>`
 }

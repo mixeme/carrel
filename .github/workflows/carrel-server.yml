@@ -1,0 +1,43 @@
+name: carrel-server
+
+on:
+  push:
+    paths:
+      - "carrel/server/**"
+      - "docs/spec/**"
+      - ".github/workflows/carrel-server.yml"
+  pull_request:
+    paths:
+      - "carrel/server/**"
+      - "docs/spec/**"
+      - ".github/workflows/carrel-server.yml"
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: carrel/server
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.1"
+          cache-dependency-path: carrel/server/go.sum
+
+      - name: gofmt
+        run: test -z "$(gofmt -l .)"
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: static build
+        run: CGO_ENABLED=0 go build -o /dev/null ./cmd/carrel
+
+      - name: tests with race detector
+        run: CGO_ENABLED=1 go test -race ./...
+
+      - name: spec check
+        working-directory: .
+        run: python docs/spec/check.py

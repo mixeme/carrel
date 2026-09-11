@@ -132,6 +132,18 @@ func (s *Session) LostProps(serverID string) []string {
 	return s.losses.Props(serverID)
 }
 
+// LossNotes is one session's loss registry, safe for concurrent use. Its
+// method set is model.LossAggregator, matched structurally — session stays
+// below model and does not import it.
+type LossNotes struct{ s *Session }
+
+func (n LossNotes) Note(serverID, prop string)     { n.s.NoteLoss(serverID, prop) }
+func (n LossNotes) Has(serverID, prop string) bool { return n.s.HasLoss(serverID, prop) }
+func (n LossNotes) Props(serverID string) []string { return n.s.LostProps(serverID) }
+
+// Losses returns the aggregator to hand to model.CompareAfterPut after a PUT.
+func (s *Session) Losses() LossNotes { return LossNotes{s} }
+
 // AcquireFanout reserves a live fanout slot (S-15). At most MaxLiveFanouts
 // per session.
 func (s *Session) AcquireFanout() bool {

@@ -5,7 +5,7 @@ import "strconv"
 // Button — tc-btn
 //
 // Роль. Действие: кнопка формы или ссылка, выглядящая как кнопка.
-// Вход. Button{ Label, Icon, Href, Method, Kind, Size, Enabled, Reason }.
+// Вход. Button{ Label, Icon, Href, Method, Kind, Size, Reason }.
 // Состояния. normal | primary | danger | disabled; по умолчанию normal.
 // Инварианты. Выключенная несёт причину; опасная не бывает первичной; подпись не обрезается до неузнаваемости.
 // Поведение. Нажатие, Enter и пробел на фокусе, подсказка причины у выключенной.
@@ -13,14 +13,13 @@ import "strconv"
 // Содержимое. нет.
 // Чего нет. Нет кнопки только со значком, кроме узнаваемых вслепую.
 type Button struct {
-	Label   string
-	Icon    string
-	Href    string
-	Method  string
-	Kind    ButtonKind
-	Size    ButtonSize
-	Enabled bool
-	Reason  string
+	Label  string
+	Icon   string
+	Href   string
+	Method string
+	Kind   ButtonKind
+	Size   ButtonSize
+	Reason string
 }
 
 func (b Button) Render() string {
@@ -73,7 +72,7 @@ func btnKindClass(k ButtonKind, enabled bool) string {
 // Input — tc-in
 //
 // Роль. Строка, число, дата, время, выбор из списка, многострочный текст.
-// Вход. Input{ Name, Kind, Value, Options, Placeholder, ReadOnly }.
+// Вход. Input{ Name, ID, Label, Kind, Value, Options, Placeholder, ReadOnly }.
 // Состояния. по роду ввода.
 // Инварианты. Подсказка не заменяет подписи; у select стрелка — часть виджета.
 // Поведение. Ввод, выбор, Esc возвращает исходное значение до отправки.
@@ -82,6 +81,7 @@ func btnKindClass(k ButtonKind, enabled bool) string {
 // Чего нет. Нет масок ввода и автодополнения из чужих источников.
 type Input struct {
 	Name        string
+	ID          string
 	Label       string
 	Kind        InputKind
 	Value       string
@@ -98,7 +98,11 @@ func (in Input) Render() string {
 	ro := boolAttr("readonly", in.ReadOnly)
 	ph := attr("placeholder", in.Placeholder)
 	name := attr("name", in.Name)
-	id := attr("id", in.Name)
+	idVal := in.ID
+	if idVal == "" {
+		idVal = uniqueID("tc-in")
+	}
+	id := attr("id", idVal)
 	al := attr("aria-label", in.Label)
 	if in.Label == "" && in.Name != "" {
 		al = attr("aria-label", in.Name)
@@ -124,7 +128,7 @@ func (in Input) Render() string {
 // Check — tc-check
 //
 // Роль. Флажок или радиокнопка с подписью.
-// Вход. Check{ Name, Label, Value, Kind, Checked, Hint, Disabled, Reason }.
+// Вход. Check{ Name, ID, Label, Value, Kind, Checked, Hint, Reason }.
 // Состояния. on | off | disabled.
 // Инварианты. Подпись — часть зоны нажатия; выключенный несёт причину.
 // Поведение. Нажатие, пробел; для радиогруппы — стрелки.
@@ -132,14 +136,14 @@ func (in Input) Render() string {
 // Содержимое. нет.
 // Чего нет. Нет промежуточного состояния.
 type Check struct {
-	Name     string
-	Label    string
-	Value    string
-	Kind     CheckKind
-	Checked  bool
-	Hint     string
-	Disabled bool
-	Reason   string
+	Name    string
+	ID      string
+	Label   string
+	Value   string
+	Kind    CheckKind
+	Checked bool
+	Hint    string
+	Reason  string
 }
 
 func (c Check) Render() string {
@@ -147,12 +151,13 @@ func (c Check) Render() string {
 	if kind == "" {
 		kind = CheckCheckbox
 	}
+	disabled := c.Reason != ""
 	cls := classes("tc-check", "tc-check--"+string(kind))
-	if c.Disabled {
+	if disabled {
 		cls = classes(cls, "is-disabled")
 	}
 	title := ""
-	if c.Disabled && c.Reason != "" {
+	if disabled {
 		title = ` title="` + esc(c.Reason) + `"`
 	}
 	chk := ""
@@ -160,20 +165,25 @@ func (c Check) Render() string {
 		chk = " checked"
 	}
 	dis := ""
-	if c.Disabled {
+	if disabled {
 		dis = " disabled"
 	}
 	hint := ""
 	if c.Hint != "" {
 		hint = `<span class="tc-check__hint">` + esc(c.Hint) + `</span>`
 	}
-	return `<label` + classAttr(cls) + title + `><input type="` + esc(string(kind)) + `"` + attr("name", c.Name) + attr("value", c.Value) + chk + dis + `><span class="tc-check__box" aria-hidden="true"></span><span class="tc-check__label">` + esc(c.Label) + `</span>` + hint + `</label>`
+	idVal := c.ID
+	if idVal == "" {
+		idVal = uniqueID("tc-check")
+	}
+	id := attr("id", idVal)
+	return `<label` + classAttr(cls) + title + `><input type="` + esc(string(kind)) + `"` + attr("name", c.Name) + id + attr("value", c.Value) + chk + dis + `><span class="tc-check__box" aria-hidden="true"></span><span class="tc-check__label">` + esc(c.Label) + `</span>` + hint + `</label>`
 }
 
 // Kbd — tc-kbd
 //
 // Роль. Аккорд в подсказке или в таблице клавиш.
-// Вход. Kbd{ Keys []string }.
+// Вход. Kbd{ Keys }.
 // Состояния. нет.
 // Инварианты. Не кликается.
 // Поведение. нет.
@@ -217,7 +227,7 @@ func (c Close) Render() string {
 // Brand — tc-brand
 //
 // Роль. Марка продукта в шапке и на страницах без оболочки.
-// Вход. Brand{ Mark, Word, Href, Size }.
+// Вход. Brand{ Mark, Word, Href, Size, MarkOnly }.
 // Состояния. full | markOnly.
 // Инварианты. Ниже предела ширины только знак; знак и слово не дублируются.
 // Поведение. нет.
@@ -228,7 +238,7 @@ type Brand struct {
 	Mark     string
 	Word     string
 	Href     string
-	Size     string
+	Size     BrandSize
 	MarkOnly bool
 }
 
@@ -257,18 +267,25 @@ func (b Brand) Render() string {
 // Содержимое. нет.
 // Чего нет. Нет формы кружка и заливки строки.
 type Mark struct {
-	Colour string
+	Colour   MarkColour
 	Label  string
 }
 
 func (m Mark) Render() string {
-	return `<span class="tc-mark"` + attr("data-tc-colour", m.Colour) + attr("aria-label", m.Label) + ` title="` + esc(m.Label) + `"></span>`
+	if m.Label == "" && m.Colour == "" {
+		return ""
+	}
+	title := ""
+	if m.Label != "" {
+		title = ` title="` + esc(m.Label) + `"`
+	}
+	return `<span class="tc-mark"` + attr("data-tc-colour", string(m.Colour)) + attr("aria-label", m.Label) + title + `></span>`
 }
 
 // Num — tc-num
 //
 // Роль. Счётчик в строке, в разделе, у чипа.
-// Вход. Num{ Value *int }.
+// Вход. Num{ Value }.
 // Состояния. known | unknown.
 // Инварианты. Неизвестное число не рисуется; ноль вместо неизвестного невыразим.
 // Поведение. нет.
@@ -322,19 +339,19 @@ func (b Badge) Render() string {
 type Avatar struct {
 	Href     string
 	Initials string
-	Colour   string
-	Size     string
+	Colour   MarkColour
+	Size     AvatarSize
 	Image    string
 }
 
 func (a Avatar) Render() string {
-	cls := classes("tc-avatar", "tc-avatar--"+a.sizeOrDefault())
+	cls := classes("tc-avatar", "tc-avatar--"+string(a.sizeOrDefault()))
 	var inner string
 	if a.Image != "" {
 		inner = `<img class="tc-avatar__img" src="` + esc(a.Image) + `" alt="">`
 		cls = classes(cls, "tc-avatar--image")
 	} else if a.Initials != "" {
-		inner = `<span class="tc-avatar__initials"` + attr("data-tc-colour", a.Colour) + `>` + esc(a.Initials) + `</span>`
+		inner = `<span class="tc-avatar__initials"` + attr("data-tc-colour", string(a.Colour)) + `>` + esc(a.Initials) + `</span>`
 		cls = classes(cls, "tc-avatar--initials")
 	} else {
 		inner = `<span class="tc-avatar__empty" aria-hidden="true">?</span>`
@@ -346,9 +363,9 @@ func (a Avatar) Render() string {
 	return `<span` + classAttr(cls) + `>` + inner + `</span>`
 }
 
-func (a Avatar) sizeOrDefault() string {
+func (a Avatar) sizeOrDefault() AvatarSize {
 	if a.Size == "" {
-		return "row"
+		return AvatarSizeRow
 	}
 	return a.Size
 }
@@ -356,7 +373,7 @@ func (a Avatar) sizeOrDefault() string {
 // Tick — tc-tick
 //
 // Роль. Маленькая галка внутри строки: отметить сделанным.
-// Вход. Tick{ Done, Label, Action, Disabled, Reason }.
+// Вход. Tick{ Done, Label, Action, Reason }.
 // Состояния. on | off | disabled.
 // Инварианты. Имеет доступное имя; выключена несёт причину.
 // Поведение. Нажатие, пробел на фокусе.
@@ -364,27 +381,27 @@ func (a Avatar) sizeOrDefault() string {
 // Содержимое. нет.
 // Чего нет. Нет промежуточного состояния.
 type Tick struct {
-	Done     bool
-	Label    string
-	Action   string
-	Disabled bool
-	Reason   string
+	Done   bool
+	Label  string
+	Action string
+	Reason string
 }
 
 func (t Tick) Render() string {
+	disabled := t.Reason != ""
 	cls := "tc-tick"
 	if t.Done {
 		cls = classes(cls, "is-on")
 	}
-	if t.Disabled {
+	if disabled {
 		cls = classes(cls, "is-disabled")
 	}
 	title := ""
-	if t.Disabled && t.Reason != "" {
+	if disabled {
 		title = ` title="` + esc(t.Reason) + `"`
 	}
 	dis := ""
-	if t.Disabled {
+	if disabled {
 		dis = " disabled"
 	}
 	return `<button type="button"` + classAttr(cls) + attr("aria-label", t.Label) + attr("data-tc-action", t.Action) + title + dis + `><span class="tc-tick__box" aria-hidden="true"></span></button>`
@@ -420,7 +437,7 @@ func (t Tag) Render() string {
 // Msg — tc-msg
 //
 // Роль. Сообщение над содержимым: уведомление, предупреждение, отказ.
-// Вход. Msg{ Role, Title, Body, Details, Actions, Diag }.
+// Вход. Msg{ Role, Title, Text, Details, Actions, Diag }.
 // Состояния. info | accent | alert.
 // Инварианты. Стоит над содержимым, не поверх; подробности — отдельным блоком.
 // Поведение. Раскрытие подробностей, закрытие если задано.
@@ -430,7 +447,7 @@ func (t Tag) Render() string {
 type Msg struct {
 	Role    MsgRole
 	Title   string
-	Body    string
+	Text    string
 	Details string
 	Actions []Action
 	Diag    Diag
@@ -453,13 +470,13 @@ func (m Msg) Render() string {
 	if m.Details != "" {
 		details = `<p class="tc-msg__details">` + esc(m.Details) + `</p>`
 	}
-	return `<div` + classAttr("tc-msg", "tc-msg--"+string(role)) + ` role="status"><div class="tc-msg__title">` + esc(m.Title) + `</div><div class="tc-msg__body">` + esc(m.Body) + `</div>` + details + diag + `<div class="tc-msg__actions">` + acts + `</div></div>`
+	return `<div` + classAttr("tc-msg", "tc-msg--"+string(role)) + ` role="status"><div class="tc-msg__title">` + esc(m.Title) + `</div><div class="tc-msg__body">` + esc(m.Text) + `</div>` + details + diag + `<div class="tc-msg__actions">` + acts + `</div></div>`
 }
 
 // Empty — tc-empty
 //
 // Роль. Место, где данных ещё нет.
-// Вход. Empty{ Title, Body, Action }.
+// Вход. Empty{ Title, Text, Action }.
 // Состояния. нет.
 // Инварианты. Несёт действие: пустое состояние без кнопки невыразимо.
 // Поведение. нет.
@@ -468,12 +485,16 @@ func (m Msg) Render() string {
 // Чего нет. Нет иллюстраций.
 type Empty struct {
 	Title  string
-	Body   string
+	Text   string
 	Action Action
 }
 
 func (e Empty) Render() string {
-	return `<div class="tc-empty"><h3 class="tc-empty__title">` + esc(e.Title) + `</h3><p class="tc-empty__body">` + esc(e.Body) + `</p><div class="tc-empty__action">` + e.Action.Render() + `</div></div>`
+	action := ""
+	if e.Action.Label != "" || e.Action.Icon != "" {
+		action = `<div class="tc-empty__action">` + e.Action.Render() + `</div>`
+	}
+	return `<div class="tc-empty"><h3 class="tc-empty__title">` + esc(e.Title) + `</h3><p class="tc-empty__body">` + esc(e.Text) + `</p>` + action + `</div>`
 }
 
 // Skel — tc-skel
@@ -488,7 +509,7 @@ func (e Empty) Render() string {
 // Чего нет. Не знает, чего ждёт.
 type Skel struct {
 	Shape SkelShape
-	Width string
+	Width SkelWidth
 	Lines int
 }
 
@@ -503,13 +524,13 @@ func (s Skel) Render() string {
 	}
 	widthAttr := ""
 	if s.Width != "" {
-		widthAttr = attr("data-tc-width", s.Width)
+		widthAttr = attr("data-tc-width", string(s.Width))
 	}
 	var inner string
 	for i := 0; i < lines; i++ {
 		inner += `<span class="tc-skel__line"></span>`
 	}
-	return `<div class="tc-skel tc-skel--` + esc(string(shape)) + `"` + widthAttr + ` role="status" aria-label="Loading">` + inner + `</div>`
+	return `<div class="tc-skel tc-skel--` + esc(string(shape)) + `"` + widthAttr + ` role="status" aria-label="` + esc(labels.Loading) + `">` + inner + `</div>`
 }
 
 // Meter — tc-meter

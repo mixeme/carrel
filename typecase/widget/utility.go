@@ -28,7 +28,7 @@ func (s Search) Render() string {
 	}
 	var history string
 	for _, h := range s.History {
-		r := Row{Variant: RowFind, Href: h.Href, Cells: RowCells{Title: h.Query, Caption: "Recent"}}
+		r := Row{Variant: RowFind, Href: h.Href, Cells: RowCells{Title: h.Query, Caption: labels.Recent}}
 		history += r.Render()
 	}
 	var jump string
@@ -38,13 +38,13 @@ func (s Search) Render() string {
 	}
 	pop := ""
 	if s.Suggesting {
-		pop = `<div class="tc-search__popover" data-tc-search-popover><div class="tc-search__history">` + history + `</div><div class="tc-search__jump">` + jump + `</div><div class="tc-search__all"><button type="submit" class="tc-search__submit">All results</button></div></div>`
+		pop = `<div class="tc-search__popover" data-tc-search-popover><div class="tc-search__history">` + history + `</div><div class="tc-search__jump">` + jump + `</div><div class="tc-search__all"><button type="submit" class="tc-search__submit">` + esc(labels.AllResults) + `</button></div></div>`
 	}
 	note := ""
 	if s.Note != "" {
 		note = `<span class="tc-search__note">` + esc(s.Note) + `</span>`
 	}
-	return `<form` + classAttr(cls) + ` action="` + esc(s.Action) + `" method="get" data-tc-search role="search"><div class="tc-search__field"><input type="search" name="q" class="tc-search__input" value="` + esc(s.Query) + `" aria-label="Search">` + note + `<button type="button" class="tc-search__clear" data-tc-search-clear aria-label="Clear">×</button></div>` + pop + `</form>`
+	return `<form` + classAttr(cls) + ` action="` + esc(s.Action) + `" method="get" data-tc-search role="search"><div class="tc-search__field"><input type="search" name="q" class="tc-search__input" value="` + esc(s.Query) + `" aria-label="` + esc(labels.Search) + `">` + note + `<button type="button" class="tc-search__clear" data-tc-search-clear aria-label="` + esc(labels.Clear) + `">×</button></div>` + pop + `</form>`
 }
 
 // RunBar — tc-runbar
@@ -53,10 +53,10 @@ func (s Search) Render() string {
 // Вход. RunBar{ Summary, At, Running, Percent, Items, Actions }.
 // Состояния. участников: waiting | running | done | empty | error | timeout | cancelled | unavailable.
 // Инварианты. Индикатор исчезает по завершении; «пусто» и «отказ» разные.
-// Поведение. Обновление, отмена, повтор участника.
+// Поведение. нет.
 // Геометрия. Одна строка сводки.
 // Содержимое. tc-meter, tc-btn, tc-mark.
-// Чего нет. Нет вращающегося кружка без счёта.
+// Чего нет. Нет вращающегося кружка без счёта; обновление и отмена — у потребителя.
 type RunBar struct {
 	Summary string
 	At      string
@@ -77,7 +77,7 @@ func (r RunBar) Render() string {
 	}
 	var items string
 	for _, it := range r.Items {
-		items += `<div class="tc-runbar__item tc-runbar__item--` + esc(it.State) + `"><span class="tc-runbar__item-label">` + esc(it.Label) + `</span>` + it.Action.Render() + `</div>`
+		items += `<div class="tc-runbar__item tc-runbar__item--` + esc(string(it.State)) + `"><span class="tc-runbar__item-label">` + esc(it.Label) + `</span>` + it.Action.Render() + `</div>`
 	}
 	var acts string
 	for _, a := range r.Actions {
@@ -87,7 +87,7 @@ func (r RunBar) Render() string {
 	if r.At != "" {
 		at = `<span class="tc-runbar__at">` + esc(r.At) + `</span>`
 	}
-	return `<div` + classAttr(cls) + ` data-tc-runbar>` + meter + `<div class="tc-runbar__summary">` + esc(r.Summary) + at + `</div><div class="tc-runbar__items">` + items + `</div><div class="tc-runbar__actions">` + acts + `</div></div>`
+	return `<div` + classAttr(cls) + `>` + meter + `<div class="tc-runbar__summary">` + esc(r.Summary) + at + `</div><div class="tc-runbar__items">` + items + `</div><div class="tc-runbar__actions">` + acts + `</div></div>`
 }
 
 // Diag — tc-diag
@@ -118,7 +118,7 @@ func (d Diag) Render() string {
 	}
 	var steps string
 	for _, s := range d.Steps {
-		steps += `<li class="tc-diag__step tc-diag__step--` + esc(s.Status) + `">` + esc(s.Label) + `</li>`
+		steps += `<li class="tc-diag__step tc-diag__step--` + esc(string(s.Status)) + `">` + esc(s.Label) + `</li>`
 	}
 	return `<details` + classAttr(cls) + ` data-tc-diag` + ariaBool("open", d.Expanded) + `><summary class="tc-diag__summary">` + esc(d.Summary) + `</summary><pre class="tc-diag__body" tabindex="0">` + lines + `</pre><ol class="tc-diag__steps">` + steps + `</ol></details>`
 }
@@ -129,7 +129,7 @@ func (d Diag) Render() string {
 // Вход. Diff{ Property, Options, Chosen, Agreed }.
 // Состояния. open | agreed.
 // Инварианты. Варианты столбиком; выбран не более одного.
-// Поведение. Выбор варианта, стрелки между вариантами.
+// Поведение. Выбор варианта; стрелки в радиогруппе — средствами браузера.
 // Геометрия. Одна карточка на свойство.
 // Содержимое. tc-fields, tc-check.
 // Чего нет. Не решает ничего само.
@@ -150,7 +150,7 @@ func (d Diff) Render() string {
 		chk := Check{Name: d.Property, Label: o.Label, Value: o.Value, Kind: CheckRadio, Checked: o.Value == d.Chosen}
 		opts += `<div class="tc-diff__option">` + chk.Render() + `<div class="tc-diff__value">` + esc(o.Label) + `</div></div>`
 	}
-	return `<div` + classAttr(cls) + ` data-tc-diff><h3 class="tc-diff__property">` + esc(d.Property) + `</h3><div class="tc-diff__options">` + opts + `</div></div>`
+	return `<div` + classAttr(cls) + `><h3 class="tc-diff__property">` + esc(d.Property) + `</h3><div class="tc-diff__options">` + opts + `</div></div>`
 }
 
 // Crop — tc-crop
@@ -177,7 +177,7 @@ func (c Crop) Render() string {
 	if c.Narrow {
 		cls = classes(cls, "tc-crop--centre")
 	}
-	return `<div` + classAttr(cls) + ` data-tc-crop><div class="tc-crop__canvas"><img src="` + esc(c.Href) + `" alt="" class="tc-crop__img"` + attr("data-tc-zoom", itoa(c.Zoom)) + attr("data-tc-rotate", itoa(c.Rotate)) + attr("data-tc-offset-x", itoa(c.OffsetX)) + attr("data-tc-offset-y", itoa(c.OffsetY)) + `><div class="tc-crop__frame" aria-hidden="true"></div></div><div class="tc-crop__controls">` + Input{Name: "zoom", Kind: InputNumber, Value: itoa(c.Zoom)}.Render() + Input{Name: "offsetX", Kind: InputNumber, Value: itoa(c.OffsetX)}.Render() + Input{Name: "offsetY", Kind: InputNumber, Value: itoa(c.OffsetY)}.Render() + Button{Label: "Rotate 90°"}.Render() + `</div></div>`
+	return `<div` + classAttr(cls) + ` data-tc-crop><div class="tc-crop__canvas"><img src="` + esc(c.Href) + `" alt="" class="tc-crop__img"` + attr("data-tc-zoom", itoa(c.Zoom)) + attr("data-tc-rotate", itoa(c.Rotate)) + attr("data-tc-offset-x", itoa(c.OffsetX)) + attr("data-tc-offset-y", itoa(c.OffsetY)) + `><div class="tc-crop__frame" aria-hidden="true"></div></div><div class="tc-crop__controls">` + Input{Name: "zoom", Kind: InputNumber, Value: itoa(c.Zoom)}.Render() + Input{Name: "offsetX", Kind: InputNumber, Value: itoa(c.OffsetX)}.Render() + Input{Name: "offsetY", Kind: InputNumber, Value: itoa(c.OffsetY)}.Render() + Button{Label: labels.Rotate90}.Render() + `</div></div>`
 }
 
 // Steps — tc-steps
@@ -206,7 +206,7 @@ func (s Steps) Render() string {
 		}
 		items += `<span` + classAttr(cls) + `>` + esc(label) + `</span>`
 	}
-	return `<div class="tc-steps" aria-label="Progress" data-tc-steps>` + items + `<span class="tc-steps__count">Step ` + esc(itoa(s.Current+1)) + ` of ` + esc(itoa(len(s.Items))) + `</span></div>`
+	return `<div class="tc-steps" aria-label="` + esc(labels.Progress) + `" data-tc-steps>` + items + `<span class="tc-steps__count">` + esc(formatStep(s.Current+1, len(s.Items))) + `</span></div>`
 }
 
 // Card — tc-card
@@ -221,11 +221,11 @@ func (s Steps) Render() string {
 // Чего нет. Нет теней.
 type Card struct {
 	Rubric Rubric
-	Body   string
+	Body   Prose
 }
 
 func (c Card) Render() string {
-	return `<div class="tc-card">` + c.Rubric.Render() + `<div class="tc-card__body">` + c.Body + `</div></div>`
+	return `<div class="tc-card">` + c.Rubric.Render() + `<div class="tc-card__body">` + c.Body.Render() + `</div></div>`
 }
 
 // Sec — tc-sec
@@ -240,11 +240,11 @@ func (c Card) Render() string {
 // Чего нет. Нет теней.
 type Sec struct {
 	Rubric Rubric
-	Body   string
+	Body   Prose
 }
 
 func (s Sec) Render() string {
-	return `<section class="tc-sec">` + s.Rubric.Render() + `<div class="tc-sec__body">` + s.Body + `</div></section>`
+	return `<section class="tc-sec">` + s.Rubric.Render() + `<div class="tc-sec__body">` + s.Body.Render() + `</div></section>`
 }
 
 // Fields — tc-fields

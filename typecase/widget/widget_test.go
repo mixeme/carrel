@@ -17,7 +17,7 @@ func TestRender_smoke(t *testing.T) {
 		name string
 		html string
 	}{
-		{"btn", widget.Button{Label: "Go", Enabled: true}.Render()},
+		{"btn", widget.Button{Label: "Go"}.Render()},
 		{"input", widget.Input{Name: "x", Kind: widget.InputText}.Render()},
 		{"check", widget.Check{Name: "c", Label: "Check"}.Render()},
 		{"kbd", widget.Kbd{Keys: []string{"Esc"}}.Render()},
@@ -29,17 +29,17 @@ func TestRender_smoke(t *testing.T) {
 		{"avatar", widget.Avatar{Initials: "AB"}.Render()},
 		{"tick", widget.Tick{Label: "Done"}.Render()},
 		{"tag", widget.Tag{Label: "Tag"}.Render()},
-		{"msg", widget.Msg{Title: "Hi", Body: "There"}.Render()},
-		{"empty", widget.Empty{Title: "Empty", Body: "None", Action: widget.Action{Label: "Add", Enabled: true}}.Render()},
+		{"msg", widget.Msg{Title: "Hi", Text: "There"}.Render()},
+		{"empty", widget.Empty{Title: "Empty", Text: "None", Action: widget.Action{Label: "Add"}}.Render()},
 		{"skel", widget.Skel{Lines: 2}.Render()},
 		{"meter", widget.Meter{Value: 1, Max: 10, Label: "1/10"}.Render()},
 		{"form", widget.Form{Action: "/f", Sets: []widget.FieldSet{{Legend: "L", Rows: []widget.Field{{Name: "n", Label: "N", Kind: widget.InputText}}}}}.Render()},
 		{"menu", widget.Menu{Label: "Menu", Items: []widget.MenuItem{{Label: "One", Href: "#"}}}.Render()},
-		{"bar", widget.Bar{Left: []widget.Action{{Label: "A", Enabled: true}}}.Render()},
+		{"bar", widget.Bar{Left: []widget.Action{{Label: "A"}}}.Render()},
 		{"list", widget.List{Groups: []widget.ListGroup{{Rows: []widget.Row{{Cells: widget.RowCells{Title: "T"}}}}}}.Render()},
 		{"table", widget.Table{Columns: []widget.Column{{Label: "C"}}, Rows: []widget.TableRow{{Cells: []string{"v"}}}}.Render()},
-		{"shell", widget.Shell{Main: widget.Main{Label: "M", Body: "b"}}.Render()},
-		{"doc", widget.Doc{Body: widget.Prose{Blocks: []widget.ProseBlock{{Kind: "p", Text: "x"}}}.Render()}.Render()},
+		{"shell", widget.Shell{Main: widget.Main{Label: "M", Body: widget.Paragraph("b")}}.Render()},
+		{"doc", widget.Doc{Body: widget.Paragraph("x")}.Render()},
 		{"search", widget.Search{Action: "/s"}.Render()},
 	}
 	for _, tc := range cases {
@@ -92,7 +92,7 @@ func TestCSS_widgetTokenValidation(t *testing.T) {
 }
 
 func TestEscape_html(t *testing.T) {
-	html := widget.Button{Label: `<script>"&`, Enabled: true}.Render()
+	html := widget.Button{Label: `<script>"&`}.Render()
 	if strings.Contains(html, "<script>") {
 		t.Fatal("unescaped HTML in label")
 	}

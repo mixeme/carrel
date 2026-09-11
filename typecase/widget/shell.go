@@ -3,7 +3,7 @@ package widget
 // Shell — tc-shell
 //
 // Роль. Четыре зоны страницы и переходы между раскладками по ширине.
-// Вход. Shell{ Top, Rail, Main, Side, Density }.
+// Вход. Shell{ Top, Rail, Main, Side, Density, Narrow }.
 // Состояния. wide | narrow; по ширине окна.
 // Инварианты. Пятой зоны нет; раскладка считается виджетом.
 // Поведение. Следит за шириной; рейл становится выдвижной панелью.
@@ -56,9 +56,18 @@ func (t Top) Render() string {
 	if t.Narrow {
 		cls = classes(cls, "tc-top--narrow")
 	}
-	create := t.Create.Render()
-	user := t.User.Render()
-	return `<header` + classAttr(cls) + `>` + t.Brand.Render() + t.Nav.Render() + t.Search.Render() + `<div class="tc-top__actions">` + create + user + `</div>` + t.Mark.Render() + `</header>`
+	create := ""
+	if t.Create.Label != "" || t.Create.Icon != "" || len(t.Create.Items) > 0 {
+		create = t.Create.Render()
+	}
+	user := ""
+	if t.User.Name != "" || len(t.User.Items) > 0 {
+		user = t.User.Render()
+	}
+	nav := t.Nav.Render()
+	search := t.Search.Render()
+	mark := t.Mark.Render()
+	return `<header` + classAttr(cls) + `>` + t.Brand.Render() + nav + search + `<div class="tc-top__actions">` + create + user + `</div>` + mark + `</header>`
 }
 
 // Main — tc-main
@@ -73,17 +82,17 @@ func (t Top) Render() string {
 // Чего нет. Нет отступов «на всякий случай».
 type Main struct {
 	Label string
-	Body  string
+	Body  Prose
 }
 
 func (m Main) Render() string {
-	return `<main class="tc-main"` + attr("aria-label", m.Label) + `><div class="tc-main__body">` + m.Body + `</div></main>`
+	return `<main class="tc-main"` + attr("aria-label", m.Label) + `><div class="tc-main__body">` + m.Body.Render() + `</div></main>`
 }
 
 // Rail — tc-rail
 //
 // Роль. Сгруппированный список с подвалом действий и фильтром.
-// Вход. Rail{ Sections, Chips, Foot, Note, Drawer, Open }.
+// Вход. Rail{ Sections, Chips, Foot, Note, Layout, Drawer, Open }.
 // Состояния. column | icons | drawer.
 // Инварианты. В узкой раскладке — выдвижная панель; подвал прижат вниз.
 // Поведение. Открытие/закрытие панели, Esc, возврат фокуса.
@@ -95,7 +104,7 @@ type Rail struct {
 	Chips    []Chip
 	Foot     RailFoot
 	Note     string
-	Layout   string
+	Layout   RailLayout
 	Drawer   bool
 	Open     bool
 }
@@ -104,12 +113,12 @@ func (r Rail) Render() string {
 	cls := "tc-rail"
 	layout := r.Layout
 	if layout == "" && r.Drawer {
-		layout = "drawer"
+		layout = RailLayoutDrawer
 	}
 	if layout == "" {
-		layout = "column"
+		layout = RailLayoutColumn
 	}
-	cls = classes(cls, "tc-rail--"+layout)
+	cls = classes(cls, "tc-rail--"+string(layout))
 	if r.Open {
 		cls = classes(cls, "is-open")
 	}
@@ -141,7 +150,7 @@ func (r Rail) Render() string {
 func (rs RailSection) Render() string {
 	cls := "tc-railsec"
 	if rs.State != "" {
-		cls = classes(cls, "tc-railsec--"+rs.State)
+		cls = classes(cls, "tc-railsec--"+string(rs.State))
 	}
 	var rows string
 	for _, r := range rs.Rows {
@@ -178,7 +187,7 @@ func (rf RailFoot) Render() string {
 
 func (b Build) Render() string {
 	if b.Name == "" && b.Version == "" {
-		return `<p class="tc-railfoot__build tc-railfoot__build--missing" role="alert">Build information missing</p>`
+		return `<p class="tc-railfoot__build tc-railfoot__build--missing" role="alert">` + esc(labels.BuildMissing) + `</p>`
 	}
 	text := esc(b.Name) + " " + esc(b.Version)
 	if b.Commit != "" {
@@ -219,8 +228,8 @@ func (s Side) Render() string {
 	for _, b := range s.Blocks {
 		blocks += b.Sec.Render()
 	}
-	id := "tc-side"
-	return `<aside` + classAttr(cls) + ` data-tc-side` + attr("aria-label", s.Label) + `><header class="tc-side__head"><h2 class="tc-side__title">` + esc(s.Title) + `</h2>` + Close{For: id, Label: "Close panel"}.Render() + `</header><div class="tc-side__body">` + blocks + `</div><footer class="tc-side__foot">` + Bar{Left: s.Actions}.Render() + `</footer></aside>`
+	id := uniqueID("tc-side")
+	return `<aside` + classAttr(cls) + ` data-tc-side` + attr("id", id) + attr("aria-label", s.Label) + `><header class="tc-side__head"><h2 class="tc-side__title">` + esc(s.Title) + `</h2>` + Close{For: id, Label: labels.ClosePanel}.Render() + `</header><div class="tc-side__body">` + blocks + `</div><footer class="tc-side__foot">` + Bar{Left: s.Actions}.Render() + `</footer></aside>`
 }
 
 // Nav — tc-nav
@@ -236,13 +245,16 @@ func (s Side) Render() string {
 type Nav struct {
 	Items   []NavItem
 	Current string
-	Layout  string
+	Layout  NavLayout
 }
 
 func (n Nav) Render() string {
+	if len(n.Items) == 0 {
+		return ""
+	}
 	layout := n.Layout
 	if layout == "" {
-		layout = "column"
+		layout = NavLayoutColumn
 	}
 	var items string
 	for _, it := range n.Items {
@@ -252,7 +264,7 @@ func (n Nav) Render() string {
 		}
 		items += `<a href="` + esc(it.Href) + `"` + classAttr(cls) + `><span class="tc-nav__icon" aria-hidden="true">` + esc(it.Icon) + `</span><span class="tc-nav__label">` + esc(it.Label) + `</span>` + Num{Value: it.Count}.Render() + `</a>`
 	}
-	return `<nav` + classAttr("tc-nav", "tc-nav--"+layout) + ` aria-label="Main">` + items + `</nav>`
+	return `<nav` + classAttr("tc-nav", "tc-nav--"+string(layout)) + ` aria-label="` + esc(labels.Main) + `">` + items + `</nav>`
 }
 
 // Head — tc-head
@@ -307,5 +319,5 @@ func (c Crumbs) Render() string {
 			parts += `<a href="` + esc(item.Href) + `" class="tc-crumbs__link">` + esc(item.Label) + `</a>`
 		}
 	}
-	return `<nav class="tc-crumbs" aria-label="Breadcrumb">` + parts + `</nav>`
+	return `<nav class="tc-crumbs" aria-label="` + esc(labels.Breadcrumb) + `">` + parts + `</nav>`
 }

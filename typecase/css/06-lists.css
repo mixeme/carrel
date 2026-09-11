@@ -41,6 +41,8 @@
 	overflow: hidden;
 }
 .tc-row--find .tc-row__find { display: flex; flex-direction: column; min-width: 0; }
+.tc-row--meta .tc-row__size,
+.tc-row--meta .tc-row__time { flex: none; color: var(--tc-muted); font-size: 0.9em; }
 
 .tc-tickrow {
 	display: flex;

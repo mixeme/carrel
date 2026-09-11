@@ -35,7 +35,7 @@ func (s Scrim) Render() string {
 // Overlay — tc-overlay
 //
 // Роль. Общий контейнер для всего, что ложится поверх.
-// Вход. Overlay{ Kind, Anchor, Open, ID }.
+// Вход. Overlay{ Kind, Anchor, Open, ID, Body }.
 // Состояния. sheet | dialog | popover.
 // Инварианты. Порядок слоёв принадлежит библиотеке; всплывающее привязано к контролу.
 // Поведение. Позиционирование, переворот, сдвиг внутрь окна.
@@ -47,7 +47,7 @@ type Overlay struct {
 	Anchor string
 	Open   bool
 	ID     string
-	Body   string
+	Body   Prose
 }
 
 func (o Overlay) Render() string {
@@ -59,7 +59,7 @@ func (o Overlay) Render() string {
 	if !o.Open {
 		hidden = ` hidden`
 	}
-	return `<div` + classAttr(cls) + ` data-tc-overlay` + attr("data-tc-anchor", o.Anchor) + attr("id", o.ID) + ` role="dialog" aria-modal="true"` + hidden + `>` + o.Body + `</div>`
+	return `<div` + classAttr(cls) + ` data-tc-overlay` + attr("data-tc-anchor", o.Anchor) + attr("id", o.ID) + ` role="dialog" aria-modal="true"` + hidden + `>` + o.Body.Render() + `</div>`
 }
 
 // Sheet — tc-sheet
@@ -75,7 +75,7 @@ func (o Overlay) Render() string {
 type Sheet struct {
 	Title      string
 	Target     string
-	Body       string
+	Body       Prose
 	Actions    []Action
 	MustAnswer bool
 	Open       bool
@@ -93,17 +93,17 @@ func (s Sheet) Render() string {
 	}
 	id := s.ID
 	if id == "" {
-		id = "tc-sheet"
+		id = uniqueID("tc-sheet")
 	}
 	scrim := Scrim{For: id, On: s.Open, MustAnswer: s.MustAnswer}.Render()
-	body := `<header class="tc-sheet__head"><div class="tc-sheet__target">` + esc(s.Target) + `</div><h2 class="tc-sheet__title">` + esc(s.Title) + `</h2>` + Close{For: id, Label: "Close"}.Render() + `</header><div class="tc-sheet__body">` + s.Body + `</div><footer class="tc-sheet__foot">` + acts + `</footer>`
-	return scrim + Overlay{Kind: OverlaySheet, Open: s.Open, ID: id, Body: `<div` + classAttr(cls) + ` data-tc-trap>` + body + `</div>`}.Render()
+	body := `<header class="tc-sheet__head"><div class="tc-sheet__target">` + esc(s.Target) + `</div><h2 class="tc-sheet__title">` + esc(s.Title) + `</h2>` + Close{For: id, Label: labels.Close}.Render() + `</header><div class="tc-sheet__body">` + s.Body.Render() + `</div><footer class="tc-sheet__foot">` + acts + `</footer>`
+	return scrim + renderOverlay(OverlaySheet, s.Open, id, "", `<div`+classAttr(cls)+` data-tc-trap>`+body+`</div>`)
 }
 
 // Dialog — tc-dialog
 //
 // Роль. Вопрос, на который нельзя не ответить.
-// Вход. Dialog{ Title, Body, Confirm, Cancel, Danger, Typed, TypedLabel, Open, ID }.
+// Вход. Dialog{ Title, Text, Confirm, Cancel, Danger, Typed, TypedLabel, Open, ID }.
 // Состояния. open | closed.
 // Инварианты. Опасное подтверждение называет последствие; барьер набором по флагу.
 // Поведение. Esc, нажатие мимо, запертый фокус, начальный фокус на безопасном действии.
@@ -112,7 +112,7 @@ func (s Sheet) Render() string {
 // Чего нет. Нет третьей кнопки.
 type Dialog struct {
 	Title      string
-	Body       string
+	Text       string
 	Confirm    Action
 	Cancel     Action
 	Danger     bool
@@ -132,7 +132,7 @@ func (d Dialog) Render() string {
 	}
 	id := d.ID
 	if id == "" {
-		id = "tc-dialog"
+		id = uniqueID("tc-dialog")
 	}
 	confirm := d.Confirm
 	if d.Danger && confirm.Kind == "" {
@@ -140,15 +140,15 @@ func (d Dialog) Render() string {
 	}
 	cancel := d.Cancel
 	if cancel.Label == "" {
-		cancel.Label = "Cancel"
+		cancel.Label = labels.Cancel
 	}
 	typed := ""
 	if d.Typed {
 		typed = `<div class="tc-dialog__typed">` + Input{Name: "confirm", Kind: InputText, Placeholder: d.TypedLabel}.Render() + `</div>`
 	}
-	body := `<header class="tc-dialog__head"><h2 class="tc-dialog__title">` + esc(d.Title) + `</h2>` + Close{For: id, Label: "Close"}.Render() + `</header><div class="tc-dialog__body"><p>` + esc(d.Body) + `</p>` + typed + `</div><footer class="tc-dialog__foot">` + cancel.Render() + confirm.Render() + `</footer>`
+	body := `<header class="tc-dialog__head"><h2 class="tc-dialog__title">` + esc(d.Title) + `</h2>` + Close{For: id, Label: labels.Close}.Render() + `</header><div class="tc-dialog__body"><p>` + esc(d.Text) + `</p>` + typed + `</div><footer class="tc-dialog__foot">` + cancel.Render() + confirm.Render() + `</footer>`
 	scrim := Scrim{For: id, On: d.Open}.Render()
-	return scrim + Overlay{Kind: OverlayDialog, Open: d.Open, ID: id, Body: `<div` + classAttr(cls) + ` data-tc-trap>` + body + `</div>`}.Render()
+	return scrim + renderOverlay(OverlayDialog, d.Open, id, "", `<div`+classAttr(cls)+` data-tc-trap>`+body+`</div>`)
 }
 
 // Menu — tc-menu
@@ -171,9 +171,12 @@ type Menu struct {
 }
 
 func (m Menu) Render() string {
+	if m.Label == "" && m.Icon == "" && len(m.Items) == 0 {
+		return ""
+	}
 	id := m.ID
 	if id == "" {
-		id = "tc-menu"
+		id = uniqueID("tc-menu")
 	}
 	cls := "tc-menu"
 	switch m.State {
@@ -203,11 +206,12 @@ func (m Menu) Render() string {
 			continue
 		}
 		icls := "tc-menu__item"
-		if it.Disabled {
+		disabled := it.Reason != ""
+		if disabled {
 			icls = classes(icls, "is-disabled")
 		}
 		title := ""
-		if it.Disabled && it.Reason != "" {
+		if disabled {
 			title = ` title="` + esc(it.Reason) + `"`
 		}
 		icon := renderIcon(it.Icon)
@@ -238,9 +242,12 @@ type UserMenu struct {
 }
 
 func (u UserMenu) Render() string {
+	if u.Name == "" && len(u.Items) == 0 {
+		return ""
+	}
 	id := u.ID
 	if id == "" {
-		id = "tc-usermenu"
+		id = uniqueID("tc-usermenu")
 	}
 	cls := "tc-usermenu"
 	if u.State == MenuOpen {
@@ -273,4 +280,16 @@ func initials(name string) string {
 		return string(runes[0])
 	}
 	return "?"
+}
+
+func renderOverlay(kind OverlayKind, open bool, id, anchor, inner string) string {
+	cls := classes("tc-overlay", "tc-overlay--"+string(kind))
+	if open {
+		cls = classes(cls, "is-open")
+	}
+	hidden := ""
+	if !open {
+		hidden = ` hidden`
+	}
+	return `<div` + classAttr(cls) + ` data-tc-overlay` + attr("data-tc-anchor", anchor) + attr("id", id) + ` role="dialog" aria-modal="true"` + hidden + `>` + inner + `</div>`
 }

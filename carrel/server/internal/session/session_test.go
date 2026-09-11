@@ -209,3 +209,58 @@ func TestLossRegistry(t *testing.T) {
 		t.Fatal("loss leaked to another server")
 	}
 }
+
+func TestCacheCollectionTTLExpires(t *testing.T) {
+	cfg := testCfg()
+	cfg.CacheCollectionTTL = 50 * time.Millisecond
+	mgr := NewManager(cfg)
+	s, err := mgr.Create("a-1", "alice", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := s.Cache()
+	c.PutCollectionList("alice", []byte("collections"))
+	c.PutETagMap("/cal/personal", []byte("etag-map"))
+	if _, ok := c.GetCollectionList("alice"); !ok {
+		t.Fatal("fresh collection list should hit")
+	}
+	if _, ok := c.GetETagMap("/cal/personal"); !ok {
+		t.Fatal("fresh etag map should hit")
+	}
+	time.Sleep(60 * time.Millisecond)
+	if _, ok := c.GetCollectionList("alice"); ok {
+		t.Fatal("stale collection list should miss")
+	}
+	if _, ok := c.GetETagMap("/cal/personal"); ok {
+		t.Fatal("stale etag map should miss")
+	}
+	c.PutBody("/cal/personal/a.ics", "v1", []byte("body"))
+	time.Sleep(60 * time.Millisecond)
+	if _, ok := c.GetBody("/cal/personal/a.ics", "v1"); !ok {
+		t.Fatal("body should not expire by collection TTL")
+	}
+}
+
+func TestSessionEvictionByAccessTime(t *testing.T) {
+	cfg := testCfg()
+	cfg.CacheMaxBodyBytes = 80
+	mgr := NewManager(cfg)
+	s, err := mgr.Create("a-1", "alice", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := s.Cache()
+	c.PutBody("/a", "v1", make([]byte, 40))
+	time.Sleep(5 * time.Millisecond)
+	c.PutBody("/b", "v1", make([]byte, 40))
+	if _, ok := c.GetBody("/a", "v1"); !ok {
+		t.Fatal("a should be present")
+	}
+	c.PutBody("/c", "v1", make([]byte, 40))
+	if _, ok := c.GetBody("/b", "v1"); ok {
+		t.Fatal("b should be evicted before a (least recently used)")
+	}
+	if _, ok := c.GetBody("/a", "v1"); !ok {
+		t.Fatal("a should survive after recent access")
+	}
+}

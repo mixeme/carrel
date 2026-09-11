@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,6 +28,12 @@ func TestDefaults(t *testing.T) {
 	}
 	if MaxFormBodyBytes != 1<<20 {
 		t.Fatalf("MaxFormBodyBytes = %d", MaxFormBodyBytes)
+	}
+	if c.LogLevel != "info" {
+		t.Fatalf("LogLevel = %q, want info", c.LogLevel)
+	}
+	if c.CacheCollectionTTL != 60*time.Second {
+		t.Fatalf("CacheCollectionTTL = %v", c.CacheCollectionTTL)
 	}
 }
 
@@ -117,5 +124,82 @@ func TestDavloomPortMustDifferFromWebPort(t *testing.T) {
 	}
 	if c.DAVloomPort != 0 {
 		t.Fatalf("empty CARREL_DAVLOOM_PORT should disable davloom, got %d", c.DAVloomPort)
+	}
+}
+
+func TestCacheCollectionTTLFromFileAndEnv(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, settingsFile), []byte("CARREL_CACHE_COLLECTION_TTL=120\nCARREL_LOG_LEVEL=warn\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("CARREL_DATA_DIR", dir)
+	t.Setenv("CARREL_CACHE_COLLECTION_TTL", "30")
+
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.CacheCollectionTTL != 30*time.Second {
+		t.Fatalf("CacheCollectionTTL = %v, want 30s (env wins)", c.CacheCollectionTTL)
+	}
+	if c.LogLevel != "warn" {
+		t.Fatalf("LogLevel = %q, want warn from file", c.LogLevel)
+	}
+	level, err := c.ParseLogLevel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if level != slog.LevelWarn {
+		t.Fatalf("ParseLogLevel = %v, want warn", level)
+	}
+}
+
+func TestParseLogLevel(t *testing.T) {
+	for _, tc := range []struct {
+		in   string
+		want slog.Level
+	}{
+		{"debug", slog.LevelDebug},
+		{"INFO", slog.LevelInfo},
+		{"warning", slog.LevelWarn},
+		{"error", slog.LevelError},
+	} {
+		c := defaults()
+		c.LogLevel = tc.in
+		got, err := c.ParseLogLevel()
+		if err != nil {
+			t.Fatalf("%q: %v", tc.in, err)
+		}
+		if got != tc.want {
+			t.Fatalf("%q = %v, want %v", tc.in, got, tc.want)
+		}
+	}
+}
+
+func TestInvalidLogLevelRejected(t *testing.T) {
+	t.Setenv("CARREL_DATA_DIR", t.TempDir())
+	t.Setenv("CARREL_LOG_LEVEL", "verbose")
+	if _, err := Load(); err == nil {
+		t.Fatal("expected an error for unknown log level")
+	} else if !strings.Contains(err.Error(), "CARREL_LOG_LEVEL") {
+		t.Fatalf("error should name the variable: %v", err)
+	}
+}
+
+func TestNegativeCacheLimitsRejected(t *testing.T) {
+	for _, tc := range []struct{ key, val string }{
+		{"CARREL_CACHE_COLLECTION_TTL", "-1"},
+		{"CARREL_CACHE_MAX_BODY_BYTES", "-1"},
+		{"CARREL_CACHE_MAX_COLLECTIONS", "-1"},
+	} {
+		t.Run(tc.key, func(t *testing.T) {
+			t.Setenv("CARREL_DATA_DIR", t.TempDir())
+			t.Setenv(tc.key, tc.val)
+			if _, err := Load(); err == nil {
+				t.Fatalf("%s=%q: expected an error", tc.key, tc.val)
+			} else if !strings.Contains(err.Error(), tc.key) {
+				t.Fatalf("error should name the variable: %v", err)
+			}
+		})
 	}
 }

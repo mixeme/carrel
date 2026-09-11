@@ -2,14 +2,13 @@ package widget
 
 // Action is a labeled control used in bars, forms, and menus.
 type Action struct {
-	Label   string
-	Icon    string
-	Href    string
-	Method  string
-	Kind    ButtonKind
-	Size    ButtonSize
-	Enabled bool
-	Reason  string
+	Label  string
+	Icon   string
+	Href   string
+	Method string
+	Kind   ButtonKind
+	Size   ButtonSize
+	Reason string
 }
 
 // Render returns the tc-btn markup for this action.
@@ -23,7 +22,6 @@ type MenuItem struct {
 	Icon      string
 	Href      string
 	Separator bool
-	Disabled  bool
 	Reason    string
 }
 
@@ -69,8 +67,92 @@ const (
 	CheckRadio    CheckKind = "radio"
 )
 
-// MarkColour is an external colour token for tc-mark.
+// MarkColour is an external colour token for tc-mark and tc-avatar.
 type MarkColour string
+
+// BrandSize is the visual size tier of tc-brand.
+type BrandSize string
+
+// AvatarSize is the geometry tier of tc-avatar.
+type AvatarSize string
+
+const (
+	AvatarSizeRow  AvatarSize = "row"
+	AvatarSizeCard AvatarSize = "card"
+)
+
+// SkelWidth is a width token applied via data-tc-width.
+type SkelWidth string
+
+// RailLayout is the rail presentation mode.
+type RailLayout string
+
+const (
+	RailLayoutColumn RailLayout = "column"
+	RailLayoutIcons  RailLayout = "icons"
+	RailLayoutDrawer RailLayout = "drawer"
+)
+
+// NavLayout is the navigation presentation mode.
+type NavLayout string
+
+const (
+	NavLayoutColumn NavLayout = "column"
+	NavLayoutIcons  NavLayout = "icons"
+	NavLayoutBottom NavLayout = "bottom"
+)
+
+// ThumbSize is the geometry tier of tc-thumb.
+type ThumbSize string
+
+const (
+	ThumbSizeTile ThumbSize = "tile"
+)
+
+// ProseKind is the block role in tc-prose.
+type ProseKind string
+
+const (
+	ProseH1   ProseKind = "h1"
+	ProseH2   ProseKind = "h2"
+	ProseH3   ProseKind = "h3"
+	ProseP    ProseKind = "p"
+	ProseUL   ProseKind = "ul"
+	ProseCode ProseKind = "code"
+	ProseLink ProseKind = "a"
+)
+
+// StepStatus is the state of one diagnostic step.
+type StepStatus string
+
+const (
+	StepPending StepStatus = "pending"
+	StepDone    StepStatus = "done"
+	StepError   StepStatus = "error"
+)
+
+// RunItemState is the state of one run-bar participant.
+type RunItemState string
+
+const (
+	RunItemWaiting      RunItemState = "waiting"
+	RunItemRunning      RunItemState = "running"
+	RunItemDone         RunItemState = "done"
+	RunItemEmpty        RunItemState = "empty"
+	RunItemError        RunItemState = "error"
+	RunItemTimeout      RunItemState = "timeout"
+	RunItemCancelled    RunItemState = "cancelled"
+	RunItemUnavailable  RunItemState = "unavailable"
+)
+
+// RailSectionState is the availability tone of a rail section.
+type RailSectionState string
+
+const (
+	RailSecOK    RailSectionState = "ok"
+	RailSecMuted RailSectionState = "muted"
+	RailSecAlert RailSectionState = "alert"
+)
 
 // BadgeRole is the semantic role of a badge.
 type BadgeRole string
@@ -154,7 +236,7 @@ const (
 	RowLead    RowVariant = "lead"
 	RowTick    RowVariant = "tick"
 	RowExcerpt RowVariant = "excerpt"
-	RowFile    RowVariant = "file"
+	RowMeta    RowVariant = "meta"
 	RowFind    RowVariant = "find"
 )
 
@@ -228,7 +310,7 @@ const (
 
 // ProseBlock is one block in structured prose.
 type ProseBlock struct {
-	Kind  string
+	Kind  ProseKind
 	Text  string
 	Items []string
 	Href  string
@@ -293,13 +375,13 @@ type DiffOption struct {
 // Step is one step in a diagnostic block.
 type Step struct {
 	Label  string
-	Status string
+	Status StepStatus
 }
 
 // RunItem is one participant in a run bar.
 type RunItem struct {
 	Label  string
-	State  string
+	State  RunItemState
 	Action Action
 }
 
@@ -338,14 +420,14 @@ type ListGroup struct {
 // RailSection is one group in the rail.
 type RailSection struct {
 	Title string
-	State string
+	State RailSectionState
 	Rows  []TickRow
 }
 
 // DangerRow is one destructive action row.
 type DangerRow struct {
 	Title  string
-	Body   string
+	Text   string
 	Action Action
 }
 
@@ -387,4 +469,6 @@ type RowCells struct {
 	Caption  string
 	Due      string
 	Progress *int
+	Done     bool
+	Tags     []Tag
 }

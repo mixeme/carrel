@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+
+	"carrel.dev/carrel/server/internal/model"
 )
 
 // One session serves several requests at once: the desk asks for fragments
@@ -137,3 +139,8 @@ func TestProcessBudgetEvictsAcrossSessions(t *testing.T) {
 		}
 	}
 }
+
+// After a PUT the request layer hands the session's registry to
+// model.CompareAfterPut. Nothing else in the module references the interface
+// yet, so without this assertion the two sides can drift apart unnoticed.
+var _ model.LossAggregator = LossNotes{}

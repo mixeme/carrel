@@ -1,6 +1,6 @@
 package widget
 
 type Bad struct {
-	Open   bool
-	Closed bool
+	Reason   string
+	Disabled bool
 }

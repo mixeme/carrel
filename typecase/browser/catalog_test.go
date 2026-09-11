@@ -107,3 +107,26 @@ func TestCatalogCellsContainOverlays(t *testing.T) {
 		t.Errorf("escapes its cell: %s", e)
 	}
 }
+
+// TestCatalogFocusOnLoad ensures pre-open overlays do not steal focus at load.
+func TestCatalogFocusOnLoad(t *testing.T) {
+	if !browser.ChromeAvailable() {
+		t.Skip("no Chromium-based browser found (set CHROME_PATH)")
+	}
+	if testing.Short() {
+		t.Skip("catalog focus check needs Chrome")
+	}
+	srv := catalogServer(t, true)
+	h := browser.NewHarness(t)
+
+	var onBody bool
+	if err := h.Run(srv.URL, 1200, 900, chromedp.Evaluate(
+		`document.activeElement === document.body || document.activeElement === document.documentElement`,
+		&onBody,
+	)); err != nil {
+		t.Fatal(err)
+	}
+	if !onBody {
+		t.Fatalf("focus should stay on document body after catalog load, got %v", onBody)
+	}
+}

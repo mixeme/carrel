@@ -2,6 +2,8 @@ module carrel.dev/carrel/server
 
 go 1.27
 
+toolchain go1.27.1
+
 require (
 	github.com/emersion/go-webdav v0.0.0-20260625083450-1901d193ce99
 	github.com/google/go-cmp v0.7.0

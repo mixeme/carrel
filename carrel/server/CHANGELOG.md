@@ -4,6 +4,43 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.8 — 2026-09-04
+
+Closes the layer-review debt from [docs/plan/server.md](../../docs/plan/server.md)
+("Долг после ревью слоёв"), except the Fable audit perimeter.
+
+### For consumers
+
+- `CARREL_CACHE_COLLECTION_TTL` now governs collection lists and etag maps in
+  the session cache. Bodies and thumbnails stay keyed by object version and are
+  not TTL-governed (S-4.2).
+- `CARREL_LOG_LEVEL` configures `slog` at startup (`debug`, `info`, `warn`,
+  `error`). An unknown level is a startup error, not a silent fallback.
+- Session cache eviction within one session now uses the same rule as the
+  process-wide budget: least recently used by `at`, with bodies evicted before
+  maps.
+
+### Included
+
+- `internal/session/cache.go`: TTL on read for collection lists and etag maps;
+  unified eviction by `at`; tests for TTL expiry and recency under byte pressure.
+- `cmd/carrel`: `setupLog` from C-12; S-29 test that debug startup lines carry
+  no passwords or tokens.
+- `internal/conf`: `ParseLogLevel`, negative cache-limit validation, expanded
+  tests for `settings.env`, env override, and bounds.
+- `internal/dav/client_mutate_test.go`: `Put`, `Delete`, `Move`, `PropPatch`,
+  `MkCol`, `MkColProps` against a fake server, including `If-Match` and 404-on-
+  `Delete` as success.
+- `.github/workflows/carrel-server.yml`: separate `CGO_ENABLED=0` build and
+  `CGO_ENABLED=1 go test -race`, plus `gofmt`, `go vet`, and `docs/spec/check.py`.
+- `go.mod`: `toolchain go1.27.1` per [architecture.md](../../docs/plan/architecture.md).
+
+### Not yet included
+
+The request layer — blocked until the first Fable audit in
+[reviews.md](../../docs/plan/reviews.md) closes the three remaining perimeter
+items (extended SSRF cases, `containsSecret` heuristic, audit itself).
+
 ## carrel/server/v0.0.7 — 2026-09-04
 
 Review of the crypt / store / session / dav layers, and the eight defects it
@@ -23,8 +60,9 @@ found. No new packages.
   are gone; they handed out pointers to fields that other requests were
   writing. Use `Draft(slot)` / `SetDraft(slot, data)` with `DraftRejectedEdit`,
   `DraftPendingPhoto`, `DraftPendingImport`, and `NoteLoss` / `HasLoss` /
-  `LostProps`. `LossRegistry` still satisfies `model.LossAggregator` inside
-  the package.
+  `LostProps`. `Session.Losses()` still returns the aggregator to hand to
+  `model.CompareAfterPut` — now a `LossNotes` value that locks the session,
+  rather than a pointer into it.
 - `internal/dav` exports `ErrResponseTooLarge`. A reply over
   `CARREL_DAV_MAX_RESPONSE_BYTES` is a state to put on the screen, not a 500.
 - `conf.Load` returns an error for a malformed value instead of panicking, and
@@ -74,17 +112,69 @@ found. No new packages.
   session and across the process budget.
 - Regression tests for the config errors, the davloom port collision, audit
   identities that look like keywords, and the model's ingress.
+- `internal/discover/run_test.go`: `Run` is finally executed — no principal
+  gives file collections, a bare server falls back to the root, a principal
+  with no home-sets is a bad check, and every step leaves a trace with a
+  detail. Coverage of the package went from 18.5% to 79.0%; the test that
+  claimed to cover the file-only path asserted the fields of a struct literal
+  it had just written, so neither `Run` nor `fileCollections` had ever run.
+- Compile-time contract assertions: `Client` satisfies `Transport`,
+  `calReports`/`cardReports` satisfy the reporter interfaces, and `LossNotes`
+  satisfies `model.LossAggregator`. Nothing in the module refers to these
+  interfaces as types yet, so until the request layer and the providers exist
+  they were held to nothing.
 
-### Known gap
+### Verified
 
-`-race` needs cgo and there is no C compiler on the development machine, so
-the concurrency tests ran without it here. They still fail on
-`concurrent map writes` and on the fanout ceiling without the fix, but CI
-should run `go test -race` for this module.
+The whole module is clean under `go test -race` (gcc 16.1.0 from the MSYS2
+UCRT64 environment). Both concurrency tests were shown red first, as C-16
+asks: with the cache locks removed the detector reports the race in
+`Cache.put` against `Cache.InvalidatePath`, and with the lock removed from
+`AcquireFanout` the four-fanout ceiling test fails outright.
+
+Building the server stays `CGO_ENABLED=0` — S-28 wants a static binary and
+architecture.md forbids cgo in the product. The compiler is for the test
+run only, and the two are separate commands.
+
+The `gofmt` gate was red on any fresh clone: with `core.autocrlf=true` and no
+`.gitattributes`, a Windows checkout gets CRLF and `gofmt -l` flags every Go
+file in the repository. A root `.gitattributes` now pins LF. This working
+copy only looked green because its files had been written with LF and never
+checked out again.
+
+### Known debt
+
+The layer review fixed the eight defects above but left the rest for the work
+between v0.0.7 and the request layer. Checklist with rationale:
+[docs/plan/server.md](../../docs/plan/server.md) ("Долг после ревью слоёв").
+None of these add new `CARREL_*` variables.
+
+- **`CARREL_CACHE_COLLECTION_TTL` and `CARREL_LOG_LEVEL` are parsed but not
+  applied.** Collections can sit in the session cache past the configured TTL;
+  `slog` stays at its default level. At `debug`, S-29 still needs a check that
+  passwords, tokens, and record bodies never reach the log.
+- **Session cache eviction follows two rules.** `evictProcessWide` evicts by
+  `at`, while `c.order` is named LRU but tracks insertion order — a `get` bumps
+  the timestamp, not the position.
+- **Coverage gaps (04 Sep 2026).** `session` 87.5%, `discover` 79.0%,
+  `crypt` 78.0%, `store` 77.4%, `model` 73.8%; `internal/dav` 44.2% and
+  `internal/conf` 41.2% still need tests — DAV mutating methods against a fake
+  server (including `If-Match` / S-8 and 404-on-`Delete` as success), and
+  `settings.env` merge order with bounds.
+- **Gates have no CI home yet.** Build stays `CGO_ENABLED=0`; tests need
+  `CGO_ENABLED=1 go test -race` as a separate command. `gofmt` must run on a
+  clean checkout, not only this working tree. The toolchain pin says Go 1.27.1;
+  this machine runs 1.27.0.
+- **First Fable audit not run.** Two SSRF cases beyond the architecture.md
+  fork list (IPv4-mapped IPv6, NAT64, 6to4 with a private address inside) and
+  `store.containsSecret` as a `Detail`-only heuristic are for the audit to
+  decide, not for Composer to close alone. The request layer must not start
+  until that audit is done ([reviews.md](../../docs/plan/reviews.md)).
 
 ### Not yet included
 
-The request layer, users, providers, and everything above them.
+The request layer, users, providers, and everything above them — after the
+debt listed below is closed (done in v0.0.8 except the Fable perimeter).
 
 ## carrel/server/v0.0.6 — 2026-09-04
 

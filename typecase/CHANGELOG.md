@@ -4,63 +4,77 @@ All notable changes to Typecase are documented here. Versioning follows
 [semantic versioning](https://semver.org/). This file tells consumers what to
 do, not what the authors did.
 
-## Unreleased — v0.1.0 is on hold
+## Unreleased — v0.1.0
 
-The pre-tag API review (L-11.2) found ten blocking discrepancies, so no tag was
-cut. Findings Б-1…Б-10 are in `docs/plan/reviews.md`. Nothing in the module
-changed in this entry; it exists so that anyone already building against
-`v0.0.5` knows which parts of the public API are going to move.
+**Do not pin `typecase/v0.1.0`.** That tag marks an older commit (before `RowMeta`
+and the naming gates) and does not match the breaking changes below. Stay on
+`typecase/v0.0.5` until a new tag is published on `main`.
 
-### For consumers
+When `v0.1.0` ships, upgrade in one step from `v0.0.5` and run `go test ./...`
+from the module root before deploying.
 
-- **Do not pass markup to a `Body` field.** `Overlay.Body`, `Sheet.Body`,
-  `Dialog.Body`, `Doc.Body`, `Main.Body`, `Card.Body`, and `Sec.Body` are
-  `string` and are written to the output **unescaped** today. That is a defect,
-  not a feature: it contradicts L-3.1 mechanism 1, and consumer data reaching
-  one of those fields is an injection hole. These fields will become typed
-  block structures (as `Prose.Blocks` already is) before v0.1.0, which is a
-  breaking change. Until then, escape anything you put there yourself, and do
-  not route user-supplied text through them.
-- **Stop setting `Button.Enabled` / `Action.Enabled`.** The field is never read.
-  Disabled state is derived from `Reason != ""`, so `Button{Enabled: false}`
-  renders an enabled button. The field will be removed and disabled state will
-  become one enumerated field shared by `Button`, `Check`, and `Tick`.
-- **Give every `Menu`, `Sheet`, `Dialog`, and `Side` an explicit unique `ID`.**
-  The defaults collide: a page with two menus emits `id="tc-menu"` twice, and
-  `aria-controls` then resolves to the wrong popover. `Row` menus are worse —
-  every row hardcodes `id="tc-row-menu"`. Uniqueness will move inside the
-  widget; until it does, pass your own.
-- **Do not rely on the behavior documented under «Поведение» for**
-  `tc-seg`, `tc-tree`, `tc-search`, `tc-rail`, `tc-shell`, `tc-bar`, `tc-diag`,
-  `tc-crop`, `tc-range`, `tc-list`, or `tc-side`. Those widgets emit
-  `data-tc-*` hooks that `tc.js` has no handler for: the search clear button
-  does not clear, tree nodes do not expand, the rail does not slide out, and the
-  bar does not recompute on resize. Menus support click and `Esc` only — no
-  arrow keys, `Home`/`End`, or first-letter jump.
-- **`tc-row` variants `--avatar` and `--tick` read the wrong cells.**
-  `--avatar` uses `Cells.Title` as initials and `Cells.Subtitle` as the image
-  `src`; `Cells.Avatar` is ignored. `--tick` derives its checkmark from
-  `Cells.Progress`. Both will change shape.
-- **`tc-field` with `Check` set produces nested `<label>` elements** and a
-  dangling `for`. Render `tc-check` directly instead until this is fixed.
-- **A disabled `tc-tree` node is still selectable.** `Tree.Disabled` currently
-  only dims the node; the label stays a live, focusable button.
-- **Widget text is hard-coded English** and cannot be supplied by the consumer:
-  "Close", "Cancel", "Search", "Clear", "All results", "Loading", "Step N of M",
-  "Main", "Breadcrumb", "More", "unavailable", "Unsaved changes", "Toggle",
-  "Recent", "Build information missing". Label fields will be added to the input
-  of the affected widgets before v0.1.0.
+### For consumers (v0.0.5 → v0.1.0)
 
-### Gates
+- **Body fields are `Prose`, not HTML strings.** `Overlay.Body`, `Sheet.Body`,
+  `Dialog.Body`, `Doc.Body`, `Main.Body`, `Card.Body`, and `Sec.Body` now take
+  `widget.Prose`. Use `widget.Paragraph("text")` for a single paragraph, or build
+  `Prose{Blocks: ...}` for richer content. This is a breaking change from
+  v0.0.5, where those fields were unescaped `string` markup.
+- **Disabled controls use `Reason`, not `Enabled`.** `Button`, `Action`, `Check`,
+  and `Tick` no longer have an `Enabled` field. Set `Reason` to a non-empty
+  string to disable; leave `Reason` empty for an enabled control.
+- **IDs are generated inside widgets.** `Menu`, `Sheet`, `Dialog`, `Side`,
+  `Field`, `Input`, and `Check` assign unique `id` values automatically. Pass
+  `ID` only when you need a stable reference for tests or `aria-controls`.
+- **`RowMeta` replaces `RowFile`.** The row variant constant is now `RowMeta`
+  (`"meta"`); CSS class is `tc-row--meta`. Update any code that used
+  `RowFile` / `tc-row--file`.
+- **CSS-bound fields use named enum types.** `Brand.Size`, `Avatar.Size`,
+  `Skel.Width`, `Rail.Layout`, `Nav.Layout`, `Thumb.Size`, `ProseBlock.Kind`,
+  `Step.Status`, `RunItem.State`, and `RailSection.State` are no longer plain
+  `string`. `Mark.Colour` and `Avatar.Colour` use `MarkColour`.
+- **Localise UI strings with `widget.SetLabels`.** Call before rendering to
+  replace defaults such as "Close", "Cancel", "Search", and "More". Use
+  `widget.SetStepOfFunc` for step progress text.
+- **Run the full check suite** with `go test ./...` from the module root. L-8
+  gates live in `gate/`; L-9.2 browser checks in `browser/` need Chrome or
+  Edge (`CHROME_PATH` overrides detection).
 
-Five L-8 gates and the L-9.3 bite requirement were marked done in the plan and
-are not: typed input, enumerations, role naming, verifiability, and
-accessibility. The verifiability gate has no branch in `gate.Run` at all, and
-three bite tests exercise helper functions that the real gates never call. The
-plan's checkboxes have been reverted to match.
+### Included (on `main`, not yet tagged)
 
-`gofmt`, `go vet`, and `go test ./...` remain green, and the L-9.2 browser
-checks do run a real browser and do go red on their broken fixtures.
+- `gate.CheckDocInput`: L-3.2 «Вход» field lists must match exported struct fields.
+- `gate.CheckDomainNaming`: const names, enum string values, and L-3.2 «Состояния»
+  slugs are checked without the catalog whitelist.
+- `gate.CheckInvariantCoverage`: `widget:smoke` is rejected; `todo:` bindings are
+  counted against ceiling 65; markup gates for seg, crumbs, range, and table.
+- `gate.CheckTableColumns`: actions column header when any row has actions.
+- `tc.js`: focus trap lifecycle (`attachTrap` / `releaseOverlayTrap`); no
+  autofocus on pre-open overlays at load.
+- `gate.CheckUniqueIDs`: catalog HTML must not repeat `id` attributes.
+- `gate.CheckA11y`: each button and field in catalog HTML is checked individually.
+- `widget.Paragraph`, `widget.SetLabels`, `widget.SetStepOfFunc`, internal
+  `uniqueID` for collision-free markup.
+- `gate.CheckVerifiable` and bite tests that call `gate.Run` for every gate.
+- `tc-table`, `tc-grid`, `tc-queue`, and `tc-runbar`: behaviour moved to
+  «Чего нет» (consumer-owned); orphan `data-tc-*` hooks removed.
+- `tc-diff`: arrow keys documented as native radio-group behaviour.
+- `tc.js`: menu keyboard navigation (arrows, Home/End, first letter), seg
+  arrows, tree toggle/selection, search clear, rail drawer, bar collapse,
+  side-panel close, crop controls, list arrows, range validation, tickrow toggle.
+- `tc-tree` disabled nodes: `disabled` button and `pointer-events: none`.
+- `tc-row` avatar/tick variants read `RowCells.Avatar` and `RowCells.Done`.
+
+### Breaking changes from v0.0.5
+
+- `Body string` → `Body Prose` on overlay, document, shell, and utility widgets.
+- `Button.Enabled` / `Action.Enabled` removed; use `Reason`.
+- `RowFile` / `tc-row--file` renamed to `RowMeta` / `tc-row--meta`.
+- `RowCells` gained `Done` and `Tags`; avatar variant prefers `Avatar` field.
+
+### Not yet released
+
+- Corrected `typecase/v0.1.0` tag on a commit that passes L-11.2 acceptance
+  (`gofmt`, `go vet`, ownership gate, `go test ./...`).
 
 ## typecase/v0.0.5 — 2026-09-04
 

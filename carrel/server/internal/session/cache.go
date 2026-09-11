@@ -19,11 +19,12 @@ const (
 )
 
 type cacheEntry struct {
-	kind  cacheKind
-	key   string
-	data  []byte
-	bytes int64
-	at    time.Time
+	kind      cacheKind
+	key       string
+	data      []byte
+	bytes     int64
+	at        time.Time // last access; eviction picks the oldest within a kind
+	fetchedAt time.Time // when stored; TTL applies to collection lists and etag maps
 }
 
 // Cache stores discovered collections, version maps, bodies, and related data
@@ -40,7 +41,6 @@ type Cache struct {
 
 	mu         sync.Mutex
 	entries    map[string]*cacheEntry
-	order      []string // insertion order, oldest first
 	bodyBytes  int64
 	etagBytes  int64
 	thumbBytes int64
@@ -122,8 +122,10 @@ func (c *Cache) put(kind cacheKind, key string, data []byte) {
 		c.removeLocked(key)
 	}
 	n := int64(len(data))
-	c.entries[key] = &cacheEntry{kind: kind, key: key, data: data, bytes: n, at: time.Now()}
-	c.order = append(c.order, key)
+	now := time.Now()
+	c.entries[key] = &cacheEntry{
+		kind: kind, key: key, data: data, bytes: n, at: now, fetchedAt: now,
+	}
 	c.addBytesLocked(kind, n)
 	c.enforceSessionLimitsLocked()
 	c.mu.Unlock()
@@ -138,8 +140,28 @@ func (c *Cache) get(key string) ([]byte, bool) {
 	if !ok {
 		return nil, false
 	}
+	if c.ttlExpiredLocked(e) {
+		c.removeLocked(key)
+		return nil, false
+	}
 	e.at = time.Now()
 	return e.data, true
+}
+
+// ttlExpiredLocked reports whether a collection list or version map has lived
+// past CARREL_CACHE_COLLECTION_TTL. Bodies and thumbnails are keyed by object
+// version and are not TTL-governed (S-4.2).
+func (c *Cache) ttlExpiredLocked(e *cacheEntry) bool {
+	ttl := c.cfg.CacheCollectionTTL
+	if ttl <= 0 {
+		return false
+	}
+	switch e.kind {
+	case kindETagMap, kindOther:
+		return time.Since(e.fetchedAt) > ttl
+	default:
+		return false
+	}
 }
 
 func (c *Cache) enforceSessionLimitsLocked() {
@@ -183,16 +205,26 @@ func (c *Cache) countLocked(kind cacheKind) int {
 	return n
 }
 
-// evictOneLocked drops the oldest entry of kind. It does not fall back to
-// another kind: a body budget is not paid for with someone else's version map.
+// evictOneLocked drops the least recently used entry of kind — same rule as
+// evictProcessWide uses within a kind. It does not fall back to another kind:
+// a body budget is not paid for with someone else's version map.
 func (c *Cache) evictOneLocked(kind cacheKind) bool {
-	for _, k := range c.order {
-		if e := c.entries[k]; e != nil && e.kind == kind {
-			c.removeLocked(k)
-			return true
+	var victim string
+	var oldest time.Time
+	for k, e := range c.entries {
+		if e.kind != kind {
+			continue
+		}
+		if victim == "" || e.at.Before(oldest) {
+			victim = k
+			oldest = e.at
 		}
 	}
-	return false
+	if victim == "" {
+		return false
+	}
+	c.removeLocked(victim)
+	return true
 }
 
 func (c *Cache) removeLocked(key string) {
@@ -202,12 +234,6 @@ func (c *Cache) removeLocked(key string) {
 	}
 	c.addBytesLocked(e.kind, -e.bytes)
 	delete(c.entries, key)
-	for i, k := range c.order {
-		if k == key {
-			c.order = append(c.order[:i], c.order[i+1:]...)
-			break
-		}
-	}
 }
 
 func (c *Cache) addBytesLocked(kind cacheKind, n int64) {
@@ -233,7 +259,6 @@ func (c *Cache) clear() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.entries = make(map[string]*cacheEntry)
-	c.order = nil
 	c.bodyBytes = 0
 	c.etagBytes = 0
 	c.thumbBytes = 0

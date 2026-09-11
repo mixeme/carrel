@@ -3,7 +3,7 @@ package widget
 // Bar — tc-bar
 //
 // Роль. Строка кнопок и переключателей над содержимым или в панели.
-// Вход. Bar{ Left, Right, Rank2, Separators, Collapsed }.
+// Вход. Bar{ Left, Right, Rank2, Separators, Collapsed, MoreLabel }.
 // Состояния. full | collapsed.
 // Инварианты. Одна строка при любой ширине; лишнее под «ещё» по рангу.
 // Поведение. Пересчёт при изменении ширины, «ещё» как tc-menu.
@@ -34,13 +34,13 @@ func (b Bar) Render() string {
 	if len(b.Rank2) > 0 {
 		label := b.MoreLabel
 		if label == "" {
-			label = "More"
+			label = labels.More
 		}
 		var items []MenuItem
 		for _, a := range b.Rank2 {
 			items = append(items, MenuItem{Label: a.Label, Icon: a.Icon, Href: a.Href})
 		}
-		more = Menu{Label: label, Items: items, ID: "tc-bar-more"}.Render()
+		more = Menu{Label: label, Items: items}.Render()
 	}
 	return `<div` + classAttr(cls) + ` data-tc-bar><div class="tc-bar__left">` + left + `</div>` + sep + `<div class="tc-bar__right">` + right + more + `</div></div>`
 }
@@ -133,7 +133,7 @@ func (r Range) Render() string {
 	for _, p := range r.Presets {
 		presets += p.Render()
 	}
-	return `<div class="tc-range" data-tc-range><div class="tc-range__fields">` + Input{Name: from, Label: "From", Kind: InputDate, Value: r.From}.Render() + `<span class="tc-range__dash" aria-hidden="true">–</span>` + Input{Name: to, Label: "To", Kind: InputDate, Value: r.To}.Render() + `</div><div class="tc-range__presets">` + presets + `</div></div>`
+	return `<div class="tc-range" data-tc-range><div class="tc-range__fields">` + Input{Name: from, Label: labels.From, Kind: InputDate, Value: r.From}.Render() + `<span class="tc-range__dash" aria-hidden="true">–</span>` + Input{Name: to, Label: labels.To, Kind: InputDate, Value: r.To}.Render() + `</div><div class="tc-range__presets">` + presets + `</div></div>`
 }
 
 func renderActions(actions []Action) string {

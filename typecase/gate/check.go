@@ -28,8 +28,20 @@ const (
 	A11y         Name = "a11y"
 )
 
+// AllGates lists every L-8 gate in stable order.
+var AllGates = []Name{
+	Completeness, Ownership, NodeNames, TypedInput, Enumerations,
+	DomainNaming, DocFormat, Catalog, Verifiable, NoInline, A11y,
+}
+
+// browserChecks lists L-9.2 invariant names that must have broken HTML fixtures.
+var browserChecks = []string{
+	"menu-label-arrow", "popover-anchor", "popover-flip", "ellipsis", "bar-one-row",
+	"tap-target", "focus-return", "esc-layers", "contrast", "theme-geometry",
+}
+
 var domainWords = []string{
-	"dav", "vcard", "ical", "contact", "calendar", "note", "task",
+	"dav", "vcard", "ical", "contact", "calendar", "note", "task", "file",
 	"collection", "account", "carrel", "caldav", "carddav",
 }
 
@@ -37,6 +49,7 @@ var (
 	tcRootClass = regexp.MustCompile(`\.tc-([a-z][a-z0-9-]*)\s*[{:,]`)
 	tcClass     = regexp.MustCompile(`\btc-([a-z][a-z0-9-]+)\b`)
 	inlineBad   = regexp.MustCompile(`(?i)(\bon[a-z]+\s*=|<script\b|<style\b|style\s*=)`)
+	idAttr      = regexp.MustCompile(`\sid="([^"]+)"`)
 )
 
 // CatalogEntry is a minimal catalog row for gate checks.
@@ -48,12 +61,29 @@ type CatalogEntry struct {
 
 // ModulePaths locates typecase module directories from module root.
 type ModulePaths struct {
-	Root      string
-	WidgetDir string
-	CSSDir    string
-	RepoRoot  string
+	Root           string
+	WidgetDir      string
+	CSSDir         string
+	RepoRoot       string // ownership scan root; empty disables CheckOwnership
 }
 
+// Paths resolves standard directories under module root.
+// Ownership scans only the module root unless widened via PathsWithOwnership.
+func Paths(root string) ModulePaths {
+	return ModulePaths{
+		Root:      root,
+		WidgetDir: filepath.Join(root, "widget"),
+		CSSDir:    filepath.Join(root, "css"),
+		RepoRoot:  root,
+	}
+}
+
+// PathsWithOwnership sets an explicit ownership scan root (e.g. monorepo root).
+func PathsWithOwnership(moduleRoot, ownershipRoot string) ModulePaths {
+	p := Paths(moduleRoot)
+	p.RepoRoot = ownershipRoot
+	return p
+}
 // FindModuleRoot returns the directory containing go.mod.
 func FindModuleRoot() (string, error) {
 	dir, err := os.Getwd()
@@ -69,17 +99,6 @@ func FindModuleRoot() (string, error) {
 			return "", fmt.Errorf("gate: module root not found")
 		}
 		dir = parent
-	}
-}
-
-// Paths resolves standard directories under module root.
-func Paths(root string) ModulePaths {
-	repo := filepath.Dir(root)
-	return ModulePaths{
-		Root:      root,
-		WidgetDir: filepath.Join(root, "widget"),
-		CSSDir:    filepath.Join(root, "css"),
-		RepoRoot:  repo,
 	}
 }
 
@@ -102,12 +121,69 @@ func Run(name Name, p ModulePaths, catalog []CatalogEntry) error {
 		return CheckDocFormat(p.WidgetDir)
 	case Catalog:
 		return CheckCatalog(p.WidgetDir, catalog)
+	case Verifiable:
+		return CheckVerifiable(p, catalog)
 	case NoInline:
 		return CheckNoInline(catalog)
 	case A11y:
 		return CheckA11y(catalog)
 	default:
 		return fmt.Errorf("gate: unknown check %q", name)
+	}
+}
+
+// CheckVerifiable ensures browser bite fixtures exist, every gate is wired in Run,
+// and every invariant clause has a named executable check.
+func CheckVerifiable(p ModulePaths, catalog []CatalogEntry) error {
+	var missing []string
+	brokenDir := filepath.Join(p.Root, "browser", "testdata", "broken")
+	for _, name := range browserChecks {
+		htmlPath := filepath.Join(brokenDir, name+".html")
+		if _, err := os.Stat(htmlPath); err != nil {
+			missing = append(missing, "browser broken fixture missing for "+name)
+		}
+	}
+	for _, name := range AllGates {
+		if !gateImplemented(name) {
+			missing = append(missing, "gate not implemented in Run: "+string(name))
+		}
+	}
+	if err := CheckInvariantCoverage(p.WidgetDir, catalog); err != nil {
+		missing = append(missing, err.Error())
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("verifiable: %s", strings.Join(missing, "; "))
+	}
+	return nil
+}
+
+// CheckUniqueIDs rejects duplicate id attributes in catalog HTML.
+func CheckUniqueIDs(catalog []CatalogEntry) error {
+	seen := make(map[string]string)
+	var dups []string
+	for _, e := range catalog {
+		for _, m := range idAttr.FindAllStringSubmatch(e.HTML, -1) {
+			id := m[1]
+			if prev, ok := seen[id]; ok {
+				dups = append(dups, id+" in "+prev+" and "+e.Widget+"/"+e.State)
+				continue
+			}
+			seen[id] = e.Widget + "/" + e.State
+		}
+	}
+	if len(dups) > 0 {
+		return fmt.Errorf("unique-ids: %s", strings.Join(dups, "; "))
+	}
+	return nil
+}
+
+func gateImplemented(name Name) bool {
+	switch name {
+	case Completeness, Ownership, NodeNames, TypedInput, Enumerations,
+		DomainNaming, DocFormat, Catalog, Verifiable, NoInline, A11y:
+		return true
+	default:
+		return false
 	}
 }
 
@@ -173,8 +249,11 @@ func cssRootWidgets(dir string) (map[string]bool, error) {
 	return found, nil
 }
 
-// CheckOwnership flags tc-* classes outside the typecase module.
+// CheckOwnership flags tc-* classes outside the configured ownership root.
 func CheckOwnership(p ModulePaths) error {
+	if p.RepoRoot == "" {
+		return fmt.Errorf("ownership: search root not configured")
+	}
 	var hits []string
 	err := walkFiles(p.RepoRoot, func(path string, data []byte) error {
 		if strings.Contains(path, string(filepath.Separator)+"typecase"+string(filepath.Separator)) {
@@ -230,9 +309,20 @@ func CheckNodeNames(catalog []CatalogEntry) error {
 	return nil
 }
 
-// CheckTypedInput rejects template.HTML-like fields in widget structs.
+// CheckTypedInput rejects template.HTML-like fields and string fields bound to CSS classes.
 func CheckTypedInput(widgetDir string) error {
-	var err error
+	widgets, err := LoadWidgets(widgetDir)
+	if err != nil {
+		return err
+	}
+	widgetStructs := make(map[string]bool, len(widgets))
+	for _, spec := range widgets {
+		widgetStructs[spec.GoType] = true
+	}
+	classBound := map[string]bool{
+		"Size": true, "Layout": true, "Width": true, "Kind": true, "Status": true, "State": true,
+	}
+	var errOut error
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, widgetDir, func(fi os.FileInfo) bool {
 		name := fi.Name()
@@ -243,8 +333,18 @@ func CheckTypedInput(widgetDir string) error {
 	}
 	for _, pkg := range pkgs {
 		for _, f := range pkg.Files {
+			var structName string
 			ast.Inspect(f, func(n ast.Node) bool {
 				if n == nil {
+					return true
+				}
+				if ts, ok := n.(*ast.TypeSpec); ok {
+					if st, ok := ts.Type.(*ast.StructType); ok && ts.Name != nil {
+						structName = ts.Name.Name
+						_ = st
+					} else {
+						structName = ""
+					}
 					return true
 				}
 				field, ok := n.(*ast.Field)
@@ -253,9 +353,20 @@ func CheckTypedInput(widgetDir string) error {
 				}
 				typ := exprString(field.Type)
 				for _, name := range field.Names {
+					if !name.IsExported() {
+						continue
+					}
 					lower := strings.ToLower(name.Name)
 					if typ == "template.HTML" || typ == "html.HTML" || strings.HasSuffix(lower, "html") || lower == "markup" {
-						err = fmt.Errorf("typed-input: %s field %s uses markup type", f.Name.Name, name.Name)
+						errOut = fmt.Errorf("typed-input: %s field %s uses markup type", structName, name.Name)
+						return false
+					}
+					if typ == "string" && (name.Name == "Body" || name.Name == "HTML" || name.Name == "Markup") {
+						errOut = fmt.Errorf("typed-input: %s field %s is string markup", structName, name.Name)
+						return false
+					}
+					if typ == "string" && widgetStructs[structName] && classBound[name.Name] {
+						errOut = fmt.Errorf("typed-input: %s field %s must be a named enum type", structName, name.Name)
 						return false
 					}
 				}
@@ -263,7 +374,7 @@ func CheckTypedInput(widgetDir string) error {
 			})
 		}
 	}
-	return err
+	return errOut
 }
 
 // CheckEnumerations flags paired bool state fields on widget structs.
@@ -290,15 +401,27 @@ func CheckEnumerations(widgetDir string) error {
 					return true
 				}
 				boolFields := map[string]bool{}
+				hasReason := false
+				hasEnabled := false
+				hasDisabled := false
 				for _, field := range st.Fields.List {
 					if len(field.Names) == 0 {
 						continue
 					}
-					if exprString(field.Type) != "bool" {
-						continue
-					}
+					typ := exprString(field.Type)
 					for _, name := range field.Names {
-						boolFields[name.Name] = true
+						switch {
+						case typ == "bool":
+							boolFields[name.Name] = true
+							if name.Name == "Enabled" {
+								hasEnabled = true
+							}
+							if name.Name == "Disabled" {
+								hasDisabled = true
+							}
+						case typ == "string" && name.Name == "Reason":
+							hasReason = true
+						}
 					}
 				}
 				for _, pair := range pairs {
@@ -306,6 +429,10 @@ func CheckEnumerations(widgetDir string) error {
 						err = fmt.Errorf("enumerations: struct has both %s and %s", pair[0], pair[1])
 						return false
 					}
+				}
+				if hasReason && (hasEnabled || hasDisabled) {
+					err = fmt.Errorf("enumerations: struct has Reason with Enabled or Disabled")
+					return false
 				}
 				return true
 			})
@@ -321,29 +448,82 @@ func CheckDomainNaming(widgetDir string, catalog []CatalogEntry) error {
 		return err
 	}
 	var hits []string
-	checkID := func(id string) {
+	checkWhitelisted := func(id string) {
 		if whitelist[id] {
 			return
 		}
-		low := strings.ToLower(id)
-		for _, w := range domainWords {
-			if low == w || strings.Contains(low, w) {
-				hits = append(hits, id)
-				return
-			}
+		if containsDomainWord(id) {
+			hits = append(hits, id)
+		}
+	}
+	checkFieldName := func(id string) {
+		if containsDomainWordInField(id) {
+			hits = append(hits, id)
 		}
 	}
 	for _, e := range catalog {
-		checkID(e.Widget)
-		checkID(e.State)
+		checkWhitelisted(e.Widget)
+		checkWhitelisted(e.State)
+	}
+	fset := token.NewFileSet()
+	pkgs, err := parser.ParseDir(fset, widgetDir, func(fi os.FileInfo) bool {
+		name := fi.Name()
+		return strings.HasSuffix(name, ".go") && !strings.HasSuffix(name, "_test.go")
+	}, 0)
+	if err != nil {
+		return err
+	}
+	for _, pkg := range pkgs {
+		for _, f := range pkg.Files {
+			ast.Inspect(f, func(n ast.Node) bool {
+				switch n := n.(type) {
+				case *ast.TypeSpec:
+					if n.Name != nil {
+						checkWhitelisted(n.Name.Name)
+					}
+				case *ast.ValueSpec:
+					for _, name := range n.Names {
+						checkWhitelisted(name.Name)
+					}
+				case *ast.Field:
+					for _, name := range n.Names {
+						checkFieldName(name.Name)
+					}
+				}
+				return true
+			})
+		}
 	}
 	if len(hits) > 0 {
 		return fmt.Errorf("domain-naming: %s", strings.Join(hits, ", "))
 	}
-	return nil
+	return checkRoleNaming(widgetDir)
 }
 
-// CheckDocFormat requires eight L-3.2 sections per widget.
+func containsDomainWord(id string) bool {
+	low := strings.ToLower(id)
+	for _, w := range domainWords {
+		if low == w || strings.Contains(low, w) {
+			return true
+		}
+	}
+	return false
+}
+
+func containsDomainWordInField(id string) bool {
+	low := strings.ToLower(id)
+	for _, w := range domainWords {
+		if low == w {
+			continue
+		}
+		if strings.Contains(low, w) {
+			return true
+		}
+	}
+	return false
+}
+
+// CheckDocFormat requires eight L-3.2 sections per widget and matching «Вход» fields.
 func CheckDocFormat(widgetDir string) error {
 	widgets, err := LoadWidgets(widgetDir)
 	if err != nil {
@@ -360,7 +540,7 @@ func CheckDocFormat(widgetDir string) error {
 	if len(bad) > 0 {
 		return fmt.Errorf("doc-format: %s", strings.Join(bad, "; "))
 	}
-	return nil
+	return CheckDocInput(widgetDir, widgets)
 }
 
 // CheckCatalog requires every declared state in catalog entries.
@@ -393,10 +573,12 @@ func CheckCatalog(widgetDir string, catalog []CatalogEntry) error {
 	if len(missing) > 0 {
 		return fmt.Errorf("catalog: missing entries: %s", strings.Join(missing, ", "))
 	}
-	return nil
+	if err := CheckTableColumns(catalog); err != nil {
+		return err
+	}
+	return CheckUniqueIDs(catalog)
 }
 
-// CheckNoInline rejects handlers, script/style blocks, and style attributes.
 func CheckNoInline(catalog []CatalogEntry) error {
 	var bad []string
 	for _, e := range catalog {
@@ -410,41 +592,18 @@ func CheckNoInline(catalog []CatalogEntry) error {
 	return nil
 }
 
-// CheckA11y requires accessible names on controls in catalog HTML.
+// CheckA11y requires accessible names on each control in catalog HTML.
 func CheckA11y(catalog []CatalogEntry) error {
 	var bad []string
 	for _, e := range catalog {
-		html := e.HTML
-		if strings.Contains(html, "<button") {
-			if !hasAccessibleName(html) {
-				bad = append(bad, e.Widget+"/"+e.State+": button")
-			}
-		}
-		if strings.Contains(html, `class="tc-in`) || strings.Contains(html, `class="tc-in-wrap`) {
-			if !strings.Contains(html, "aria-label=") && !strings.Contains(html, "<label") {
-				bad = append(bad, e.Widget+"/"+e.State+": field")
-			}
+		for _, kind := range checkEntryA11y(e.HTML) {
+			bad = append(bad, e.Widget+"/"+e.State+": "+kind)
 		}
 	}
 	if len(bad) > 0 {
 		return fmt.Errorf("a11y: %s", strings.Join(bad, ", "))
 	}
 	return nil
-}
-
-func hasAccessibleName(html string) bool {
-	if strings.Contains(html, "aria-label=") {
-		return true
-	}
-	for _, cls := range []string{
-		"tc-btn__label", "tc-menu__label", "tc-usermenu__label", "tc-tree__label",
-		"tc-chip__label", "tc-close", "tc-tick",
-	} {
-		if strings.Contains(html, cls) {
-			return true
-		}
-	}
-	return false
 }
 
 // CheckCompletenessCSS is a bite helper: css text must mention widget class.
@@ -457,11 +616,8 @@ func CheckCompletenessCSS(widgetName, css string) error {
 
 // CheckDomainInSource is a bite helper for domain word in Go source.
 func CheckDomainInSource(src string) error {
-	low := strings.ToLower(src)
-	for _, w := range domainWords {
-		if strings.Contains(low, w) {
-			return fmt.Errorf("domain-naming: contains %q", w)
-		}
+	if containsDomainWord(src) {
+		return fmt.Errorf("domain-naming: contains forbidden domain word")
 	}
 	return nil
 }

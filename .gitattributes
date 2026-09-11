@@ -1,0 +1,18 @@
+# Every text file checks out with LF on every platform.
+#
+# Without this, core.autocrlf=true hands a Windows checkout CRLF files, and
+# `gofmt -l` flags all 106 of them — the first gate of docs/plan/server.md and
+# docs/plan/typecase.md, red on a fresh clone. The index has always held LF;
+# only the working copy was being rewritten.
+* text=auto eol=lf
+
+# iCalendar and vCard are CRLF by RFC 5545 and RFC 6350. These are test
+# fixtures fed to parsers, so their line endings are part of the data.
+*.ics text eol=crlf
+*.vcf text eol=crlf
+
+# Fonts: never touched.
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.otf binary
