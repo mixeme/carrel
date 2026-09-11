@@ -69,12 +69,12 @@ func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.Esc
 			status.LastUsed = formatWhen(*u.EscrowDepositedAt, s.tz(), false, time.Now())
 		}
 		status.Actions = []view.Action{{
-			ID: "escrow.withdraw", Label: "Withdraw my deposited key", Href: "/app/settings/escrow",
+			ID: "escrow.withdraw", Label: "Withdraw my deposited key", Href: s.route("/app/settings/escrow"),
 			Method: "POST", Enabled: true,
 		}}
 	} else if active {
 		status.Actions = []view.Action{{
-			ID: "escrow.deposit", Label: "Deposit my key", Href: "/app/settings/escrow",
+			ID: "escrow.deposit", Label: "Deposit my key", Href: s.route("/app/settings/escrow"),
 			Method: "POST", Enabled: sess.UnlockUntil(time.Now()) != nil,
 		}}
 	}
@@ -162,13 +162,13 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, errText string) vie
 		},
 	}
 	if enabled {
-		page.Form = plainForm("/admin/escrow", "POST",
+		page.Form = s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputText, Value: text("policy")},
 			view.FormRow{Name: "coverNew", Label: "New accounts are covered", Kind: view.InputCheck,
 				Value: text(boolStr(snap.Settings.EscrowCoverNewUsers))},
 		)
-		page.Recover = plainForm("/admin/escrow", "POST",
+		page.Recover = s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputText, Value: text("recover")},
 			view.FormRow{Name: "login", Label: "Account", Kind: view.InputText, Required: true},
@@ -178,7 +178,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, errText string) vie
 			page.Recover.Sets[0].Rows[len(page.Recover.Sets[0].Rows)-1].Error = text(errText)
 		}
 	} else {
-		page.Form = plainForm("/admin/escrow", "POST",
+		page.Form = s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputText, Value: text("enable")},
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true,

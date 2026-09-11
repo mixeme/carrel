@@ -21,7 +21,7 @@ func (s *Server) setAnonymousCSRFCookie(w http.ResponseWriter, r *http.Request, 
 	http.SetCookie(w, &http.Cookie{
 		Name:     anonCSRFCookieName,
 		Value:    token,
-		Path:     "/",
+		Path:     s.cookiePath(),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Secure:   s.secureCookies(r),
@@ -63,4 +63,3 @@ func checkAnonymousCSRF(r *http.Request, token string) bool {
 	}
 	return tokensEqual(c.Value, token)
 }
-

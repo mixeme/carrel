@@ -9,28 +9,43 @@ import (
 	"carrel.dev/typecase/screens"
 )
 
-var notesComposeBypass = []string{
+var screensComposeBypass = []string{
 	`<main class="tc-main"`,
+	`<div class="tc-shell"`,
 	`<div class="tc-bar"`,
 	`<aside class="tc-side"`,
 }
 
-// CheckScreensCompose rejects hand-built tc-main, tc-bar, and tc-side markup in notes.go.
+// CheckScreensCompose rejects hand-built shell markup in demo screen assemblers.
 func CheckScreensCompose(p ModulePaths) error {
-	path := filepath.Join(p.Root, "screens", "notes.go")
-	src, err := os.ReadFile(path)
+	screensDir := filepath.Join(p.Root, "screens")
+	entries, err := os.ReadDir(screensDir)
 	if err != nil {
-		return fmt.Errorf("screens-compose: read notes.go: %w", err)
+		return fmt.Errorf("screens-compose: read screens: %w", err)
 	}
-	text := string(src)
-	var found []string
-	for _, pat := range notesComposeBypass {
-		if strings.Contains(text, pat) {
-			found = append(found, pat)
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".go") {
+			continue
 		}
-	}
-	if len(found) > 0 {
-		return fmt.Errorf("screens-compose: notes.go bypasses widgets: %s", strings.Join(found, ", "))
+		switch e.Name() {
+		case "fixtures.go", "serve.go", "shell_common.go", "style.go", "widgets.go":
+			continue
+		}
+		path := filepath.Join(screensDir, e.Name())
+		src, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("screens-compose: read %s: %w", e.Name(), err)
+		}
+		text := string(src)
+		var found []string
+		for _, pat := range screensComposeBypass {
+			if strings.Contains(text, pat) {
+				found = append(found, pat)
+			}
+		}
+		if len(found) > 0 {
+			return fmt.Errorf("screens-compose: %s bypasses widgets: %s", e.Name(), strings.Join(found, ", "))
+		}
 	}
 	html := screens.Notes()
 	if strings.Contains(html, "tc-row--excerpt") {

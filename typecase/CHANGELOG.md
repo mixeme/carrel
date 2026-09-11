@@ -6,84 +6,34 @@ do, not what the authors did.
 
 ## Unreleased
 
-Library geometry now matches the Carrel mockups; assembled screens demo
-covers all six mockup pages including States, with dark-theme rerenders and
-widget-coverage gates. Open library holes found by assembly (`Э-1`…`Э-6`,
-L-4.4) are in [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
-
 ### For consumers
 
-- **`Node` and `[]Node` for widget composition.** `Main.Body`, `Card.Body`,
-  `Sec.Body`, `Bar.Left`, and `Bar.Right` now take `[]Node` (any value with
-  `Render() string`), not `Prose` or `[]Action`. Use
-  `widget.Paragraph("text")` as a `Node` inside the slice; for bar actions
-  use `widget.ActionsAsNodes([]widget.Action{...})` or
-  `[]widget.Node{widget.Action{Label: "Save"}}`.
-- **`Sheet.Body` is `[]Node`.** Pass `[]widget.Node{widget.Paragraph("…")}` or
-  fields and other widgets; a bare `Prose` value no longer compiles.
-- **`RailSection.Body` for non-tickrow rail content.** When `Rows` is empty,
-  `Body` renders instead (for example a neighbour `tc-tree`); do not set both.
-- **Redefine tokens if you override the bundle.** `--tc-row-height` is now
-  `38px`, `--tc-font-size` is `13px`, and two new required tokens appear:
-  `--tc-page-gutter` (`20px`), `--tc-page-gutter-narrow` (`14px`), and
-  `--tc-radius-sm` (`2px`). `token.Validate` fails without them. Defaults ship
-  in the bundle; nothing to do if you use `typecase.CSS()` as is.
-- **Default button height is bar (26 px), not form (28 px).** Bare `Button{}`
-  and `Action{}` now render `tc-btn--bar`. Form footers still get
-  `tc-btn--form` automatically; elsewhere pass `Size: ButtonSizeForm` when the
-  control sits in a form.
-- **Page gutter replaces ad‑hoc horizontal padding.** Panels, rows and headers
-  read `var(--tc-page-gutter)`; narrow shells swap it for
-  `var(--tc-page-gutter-narrow)` via `.tc-shell--narrow`.
-- **Run the screens demo beside the catalog.** `scripts/typecase-screens.bat`
-  serves `http://localhost:8081/` — assembled mockup pages, not widget
-  cells. Routes: `/notes`, `/notes-read`, `/notes-edit`, `/notes-quick`,
-  `/files`, `/contacts`, `/io`, `/duplicates`, `/states`. Append `?theme=dark` for a dark rerender before first paint.
-  `screens.css` holds page chrome only; it must not contain `.tc-`
-  selectors.
+- **Assemble screens through `widget.Shell`.** Pass `Nav`, `Rail`, `Main`, and `Side`
+  as typed widgets. Empty `Rail` / `Side` no longer emit a column; `notes-edit`
+  is a shell with `Top` + `Main` only.
+- **Narrow layout.** At phone widths the rail column collapses to an off-screen
+  drawer; an open side panel covers the viewport. `tc-bar` and `tc-crumbs` clamp
+  to the viewport; middle crumbs collapse into a menu.
+- **Gate `screens-compose`** now scans all demo screen assemblers, not only
+  `notes.go`.
 
 ### Included
 
-- `widget.Node` and `[]Node` on `Main`, `Card`, `Sec`, and `Bar` shelves
-  (`typecase-compose` §1); gate `screens-compose` on `/notes`.
-- `SideBlock` union (`*Sec`, `*Fields`, `*Field`); `/notes` side panel through
-  `Side.Render()` (`typecase-compose` §2).
-- Empty `RailSection.Title` omits `tc-railsec__title`; gate
-  `inv-railsec-untitled-no-title` (`typecase-compose` §3).
-- `RowCells.Date` and `Source` on `tc-row--excerpt`; excerpt is one line with
-  ellipsis (`typecase-compose` §4).
-- Narrow layout (L-4.4): `tc-seg` collapses to `tc-menu` when width runs short;
-  `tc-top` shrinks search first and stashes the right group under `labels.More`;
-  `Top.Narrow` / `tc-top--narrow` removed (`typecase-compose` §5).
-- Notes demo frames (`typecase-compose` §6): routes `notes-read`, `notes-edit`,
-  and `notes-quick`; list frame drops inline `tc-doc` preview; read frame carries
-  neighbour `tc-tree` in the rail; `RailSection.Body` and `Sheet.Body []Node`.
-- Mockup-aligned geometry: row height 38, row gap 12, rail tickrow padding 16,
-  top bar 52, default button 26, second radius 2 px on check/badge/mark.
-- Gates `geometry`, `screens-css`, and `screens-coverage` (L-8).
-- Package `typecase/screens`, binary `cmd/screens`, routes for s-notes,
-  s-files, s-contacts, s-io, s-dup and m-states mockup frames.
-- Browser check `screens_test.go`: each screen at 1280×900 and 375×812, light
-  and dark (`?theme=dark`), including horizontal overflow at 375 px.
-- Demo chrome follows the palette tokens, so dark theme does not leave the
-  screens nav in light ink. Theme links: `?theme=light` / `?theme=dark`.
-- Findings `Э-1`…`Э-6` and the remaining assembly work live in
-  [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
+- `widget.Shell`: optional `Nav` in the rail column; `IsZero()` on `Nav`,
+  `Rail`, and `Side`; empty columns omitted from markup.
+- Demo screens (`files`, `contacts`, `io`, `duplicates`, `states`, all notes
+  frames) assembled via `shellFrame` and widgets — no `shellWrap`.
+- `tc.js`: `updateCrumbs`, `clampBar`; browser screen check includes
+  `OutOfBounds` at 375 px.
+- CSS: narrow rail drawer, narrow side overlay, bar/crumbs/head/docbar overflow.
 
-### Fixed
-
-- Screens browser probe: SVG `className` is not a string; `color-mix`
-  backgrounds come back as `color(srgb …)` and now parse for contrast.
-
-### Not yet included
-
-- The typecase wordmark work documented below stays documentation-only until
-  released separately.
+The typecase wordmark work documented below stays documentation-only until
+released separately.
 
 ### For consumers (wordmark preview)
 
 - **Nothing to do for the wordmark.** No module code, token, markup or behaviour
-  changed for v0.2.0 consumers beyond the geometry items above.
+  changed for the wordmark; it is not part of this library release.
 - **The wordmark belongs to the library's own pages** — the widget catalog, the
   README, a release page — and nowhere else. It marks the library, not an
   application built on it, so it does not go into a consumer's interface, and it
@@ -129,6 +79,87 @@ L-4.4) are in [docs/plan/typecase-compose.md](../docs/plan/typecase-compose.md).
   separate piece of work with its own reference.
 - A Cyrillic wordmark. There is none, and Literata set next to the mark stays
   text.
+
+## typecase/v0.3.0 — 2026-09-07
+
+Screens assembled from widgets. Geometry matches the mockups; notes frames no
+longer bypass `tc-main`, `tc-bar`, or `tc-side`; `tc-seg` and `tc-top` collapse
+when width runs short. Remaining demo pages still wrap the shell by hand —
+[docs/plan/typecase-shell.md](../docs/plan/typecase-shell.md).
+
+### For consumers (v0.2.0 → v0.3.0)
+
+- **`Node` and `[]Node` for widget composition.** `Main.Body`, `Card.Body`,
+  `Sec.Body`, `Bar.Left`, and `Bar.Right` now take `[]Node` (any value with
+  `Render() string`), not `Prose` or `[]Action`. Use
+  `widget.Paragraph("text")` as a `Node` inside the slice; for bar actions
+  use `widget.ActionsAsNodes([]widget.Action{...})` or
+  `[]widget.Node{widget.Action{Label: "Save"}}`.
+- **`Sheet.Body` is `[]Node`.** Pass `[]widget.Node{widget.Paragraph("…")}` or
+  fields and other widgets; a bare `Prose` value no longer compiles.
+- **`RailSection.Body` for non-tickrow rail content.** When `Rows` is empty,
+  `Body` renders instead (for example a neighbour `tc-tree`); do not set both.
+- **`Top.Narrow` and `tc-top--narrow` are gone.** Narrow layout is computed in
+  `tc.js` from width: search shrinks first, then the right group goes under
+  `labels.More`. Do not pass window width as widget input.
+- **Redefine tokens if you override the bundle.** `--tc-row-height` is now
+  `38px`, `--tc-font-size` is `13px`, and three new required tokens appear:
+  `--tc-page-gutter` (`20px`), `--tc-page-gutter-narrow` (`14px`), and
+  `--tc-radius-sm` (`2px`). `token.Validate` fails without them. Defaults ship
+  in the bundle; nothing to do if you use `typecase.CSS()` as is.
+- **Default button height is bar (26 px), not form (28 px).** Bare `Button{}`
+  and `Action{}` now render `tc-btn--bar`. Form footers still get
+  `tc-btn--form` automatically; elsewhere pass `Size: ButtonSizeForm` when the
+  control sits in a form.
+- **Page gutter replaces ad-hoc horizontal padding.** Panels, rows and headers
+  read `var(--tc-page-gutter)`; narrow shells swap it for
+  `var(--tc-page-gutter-narrow)` via `.tc-shell--narrow`.
+- **Run the screens demo beside the catalog.** `scripts/typecase-screens.bat`
+  serves `http://localhost:8081/` — assembled mockup pages, not widget
+  cells. Routes: `/notes`, `/notes-read`, `/notes-edit`, `/notes-quick`,
+  `/files`, `/contacts`, `/io`, `/duplicates`, `/states`. Append `?theme=dark`
+  for a dark rerender before first paint. `screens.css` holds page chrome
+  only; it must not contain `.tc-` selectors.
+
+### Included
+
+- `widget.Node` and `[]Node` on `Main`, `Card`, `Sec`, and `Bar` shelves; gate
+  `screens-compose` on `/notes`.
+- `SideBlock` union (`*Sec`, `*Fields`, `*Field`); `/notes` side panel through
+  `Side.Render()`.
+- Empty `RailSection.Title` omits `tc-railsec__title`.
+- `RowCells.Date` and `Source` on `tc-row--excerpt`; excerpt is one line with
+  ellipsis.
+- Narrow layout (L-4.4): `tc-seg` collapses to `tc-menu` when width runs short;
+  `tc-top` shrinks search first and stashes the right group under `labels.More`.
+- Notes demo frames: routes `notes-read`, `notes-edit`, and `notes-quick`; list
+  frame drops inline `tc-doc` preview; read frame carries neighbour `tc-tree`
+  in the rail; `RailSection.Body` and `Sheet.Body []Node`.
+- Mockup-aligned geometry: row height 38, row gap 12, rail tickrow padding 16,
+  top bar 52, default button 26, second radius 2 px on check/badge/mark.
+- Gates `geometry`, `screens-css`, `screens-coverage`, and `screens-compose`.
+- Package `typecase/screens`, binary `cmd/screens`, routes for s-notes,
+  s-files, s-contacts, s-io, s-dup and m-states mockup frames.
+- Browser check `screens_test.go`: each screen at 1280×900 and 375×812, light
+  and dark (`?theme=dark`), including page-level horizontal overflow at 375 px.
+- Demo chrome follows the palette tokens, so dark theme does not leave the
+  screens nav in light ink. Theme links: `?theme=light` / `?theme=dark`.
+
+### Fixed
+
+- Screens browser probe: SVG `className` is not a string; `color-mix`
+  backgrounds come back as `color(srgb …)` and now parse for contrast.
+- Completeness: `tc-btn__icon` had no stylesheet rule.
+- `tc.js` treated every `data-tc-seg` node as a group, including the option
+  buttons; layout and keyboard now bind to `.tc-seg`.
+- `tc-bar` restore after collapse: left-shelf items were inserted before the
+  overflow menu, which lives on the right shelf, so a second layout pass threw.
+
+### Not yet included
+
+- Other assembled screens still wrap `tc-shell` by hand; descendant overflow
+  at 375 px is still skipped. See
+  [docs/plan/typecase-shell.md](../docs/plan/typecase-shell.md).
 
 ## typecase/v0.2.0 — 2026-09-05
 

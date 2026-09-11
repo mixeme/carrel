@@ -3,15 +3,16 @@ package widget
 // Shell — tc-shell
 //
 // Роль. Четыре зоны страницы и переходы между раскладками по ширине.
-// Вход. Shell{ Top, Rail, Main, Side, Density, Narrow }.
+// Вход. Shell{ Top, Nav, Rail, Main, Side, Density, Narrow }.
 // Состояния. wide | narrow; по ширине окна.
 // Инварианты. Пятой зоны нет; раскладка считается виджетом.
 // Поведение. Следит за шириной; рейл становится выдвижной панелью.
 // Геометрия. Рейл 264/232/56px; side 400px.
-// Содержимое. tc-top, tc-rail, tc-main, tc-side.
+// Содержимое. tc-top, tc-nav, tc-rail, tc-main, tc-side.
 // Чего нет. Нет своей прокрутки страницы.
 type Shell struct {
 	Top     Top
+	Nav     Nav
 	Rail    Rail
 	Main    Main
 	Side    Side
@@ -28,7 +29,23 @@ func (s Shell) Render() string {
 	if s.Narrow {
 		cls = classes(cls, "tc-shell--narrow")
 	}
-	return `<div` + classAttr(cls) + ` data-tc-shell data-tc-root>` + s.Top.Render() + `<div class="tc-shell__body"><div class="tc-shell__rail">` + s.Rail.Render() + `</div><div class="tc-shell__main">` + s.Main.Render() + `</div><div class="tc-shell__side">` + s.Side.Render() + `</div></div></div>`
+	body := `<div class="tc-shell__body">`
+	if !s.Nav.IsZero() || !s.Rail.IsZero() {
+		body += `<div class="tc-shell__rail">`
+		if !s.Nav.IsZero() {
+			body += s.Nav.Render()
+		}
+		if !s.Rail.IsZero() {
+			body += s.Rail.Render()
+		}
+		body += `</div>`
+	}
+	body += `<div class="tc-shell__main">` + s.Main.Render() + `</div>`
+	if !s.Side.IsZero() {
+		body += `<div class="tc-shell__side">` + s.Side.Render() + `</div>`
+	}
+	body += `</div>`
+	return `<div` + classAttr(cls) + ` data-tc-shell data-tc-root>` + s.Top.Render() + body + `</div>`
 }
 
 // Top — tc-top
@@ -105,6 +122,19 @@ type Rail struct {
 	Layout   RailLayout
 	Drawer   bool
 	Open     bool
+}
+
+func (r Rail) IsZero() bool {
+	if r.Note != "" || r.Drawer || r.Open || r.Layout != "" {
+		return false
+	}
+	if len(r.Chips) > 0 || len(r.Sections) > 0 {
+		return false
+	}
+	if len(r.Foot.Actions) > 0 {
+		return false
+	}
+	return r.Foot.Build == Build{}
 }
 
 func (r Rail) Render() string {
@@ -222,13 +252,20 @@ func (b Build) Render() string {
 // Поведение. Открытие, закрытие, возврат фокуса.
 // Геометрия. 400px; содержимое прокручивается.
 // Содержимое. tc-sec, tc-fields, tc-field, tc-btn, tc-bar.
-// Чего нет. Не редактирует.
+// Чего нет. Своей семантики сохранения нет; tc-field в панели допустим.
 type Side struct {
 	Label   string
 	Title   string
 	Blocks  []SideBlock
 	Actions []Action
 	Open    bool
+}
+
+func (s Side) IsZero() bool {
+	if s.Open || s.Label != "" || s.Title != "" {
+		return false
+	}
+	return len(s.Blocks) == 0 && len(s.Actions) == 0
 }
 
 func (s Side) Render() string {
@@ -292,6 +329,10 @@ type Nav struct {
 	Items   []NavItem
 	Current string
 	Layout  NavLayout
+}
+
+func (n Nav) IsZero() bool {
+	return len(n.Items) == 0
 }
 
 func (n Nav) Render() string {
@@ -365,5 +406,5 @@ func (c Crumbs) Render() string {
 			parts += `<a href="` + esc(item.Href) + `" class="tc-crumbs__link">` + esc(item.Label) + `</a>`
 		}
 	}
-	return `<nav class="tc-crumbs" aria-label="` + esc(labels.Breadcrumb) + `">` + parts + `</nav>`
+	return `<nav class="tc-crumbs" data-tc-crumbs aria-label="` + esc(labels.Breadcrumb) + `">` + parts + `</nav>`
 }

@@ -158,8 +158,19 @@ func checkBarOneRow(h *Harness, url string, width, height int) error {
 	var barH float64
 	var tops []float64
 	err := h.Run(url, width, height,
-		chromedp.Evaluate(`(() => { const b = document.querySelector(".tc-bar"); return b ? b.getBoundingClientRect().height : 0; })()`, &barH),
-		chromedp.Evaluate(`Array.from(document.querySelectorAll(".tc-bar .tc-btn")).map(b => b.getBoundingClientRect().top)`, &tops),
+		chromedp.Evaluate(`(() => {
+  if (window.__tc && window.__tc.layoutUpdates) window.__tc.layoutUpdates();
+  const b = document.querySelector(".tc-bar");
+  return b ? b.getBoundingClientRect().height : 0;
+})()`, &barH),
+		chromedp.Evaluate(`(() => {
+  if (window.__tc && window.__tc.layoutUpdates) window.__tc.layoutUpdates();
+  return Array.from(document.querySelectorAll(".tc-bar .tc-btn")).filter((el) => {
+    if (el.closest("[data-tc-bar-stash]")) return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  }).map((el) => el.getBoundingClientRect().top);
+})()`, &tops),
 	)
 	if err != nil {
 		return err

@@ -5,6 +5,28 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.22 — 2026-09-08
+
+Closes `CARREL_BASE_PATH` from [users-tail.md](../../docs/plan/users-tail.md).
+
+### For consumers
+
+- **`CARREL_BASE_PATH` prefixes routes, redirects, form actions, and cookie
+  paths.** Set it when Carrel sits behind a reverse proxy in a subdirectory
+  (for example `/carrel`). Requests must include the prefix; bare `/login` no
+  longer matches. Session and CSRF cookies are scoped to the base path.
+
+### Included
+
+- `internal/conf`: `NormalizeBasePath` canonicalises the setting on load.
+- `internal/web`: `http.StripPrefix` on the handler, `route()` for outbound
+  paths, cookie `Path` from `CARREL_BASE_PATH`.
+- Tests: `TestNormalizeBasePath`, `TestBasePathRoutesAndCookies`.
+
+### Not yet included
+
+Admin panel actions (other than escrow), escrow recovery UI gaps.
+
 ## v0.0.21 — 2026-09-07
 
 Closes `/app/password` from [before-providers.md](../../docs/plan/before-providers.md).

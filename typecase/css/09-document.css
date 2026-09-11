@@ -2,7 +2,8 @@
 
 .tc-doc { display: flex; flex-direction: column; }
 .tc-doc--measure .tc-doc__layout { max-width: 72ch; margin: 0 auto; }
-.tc-doc__layout { display: flex; gap: 2em; padding: 1em; }
+.tc-doc__layout { display: flex; gap: 2em; padding: 1em; min-width: 0; }
+.tc-shell--narrow .tc-doc__layout { flex-direction: column; }
 
 .tc-docbar {
 	display: flex;
@@ -12,6 +13,8 @@
 	border-bottom: var(--tc-stroke) solid var(--tc-rule);
 	background: var(--tc-bg);
 	min-height: 26px;
+	min-width: 0;
+	overflow: hidden;
 }
 .tc-docbar.is-dirty .tc-docbar__dirty { color: var(--tc-danger); }
 

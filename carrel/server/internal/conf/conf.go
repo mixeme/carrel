@@ -84,10 +84,28 @@ func Load() (*Config, error) {
 	if err := mergeEnv(c); err != nil {
 		return nil, err
 	}
+	c.BasePath = NormalizeBasePath(c.BasePath)
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
 	return c, nil
+}
+
+// NormalizeBasePath canonicalises CARREL_BASE_PATH: empty or "/" means root;
+// otherwise a leading slash, no trailing slash.
+func NormalizeBasePath(p string) string {
+	p = strings.TrimSpace(p)
+	if p == "" || p == "/" {
+		return ""
+	}
+	if !strings.HasPrefix(p, "/") {
+		p = "/" + p
+	}
+	p = strings.TrimRight(p, "/")
+	if p == "/" {
+		return ""
+	}
+	return p
 }
 
 func defaults() *Config {

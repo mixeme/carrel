@@ -5,46 +5,27 @@ import "carrel.dev/typecase/widget"
 // Duplicates assembles mockup s-dup: candidate groups, property diffs, tick rows,
 // and the merge confirmation dialog.
 func Duplicates() string {
-	return shellWrap(dupRail(), dupMain(), "", dupOverlays())
+	return shellFrame(shellNav("/duplicates"), dupRail(), dupMain(), widget.Side{}, dupOverlays())
 }
 
-func dupRail() string {
+func dupRail() widget.Rail {
 	n248, n13, n51 := 248, 13, 51
-	return shellNav("/duplicates") +
-		widget.Rail{
-			Sections: []widget.RailSection{
-				{
-					Title: "Sources",
-					Rows: []widget.TickRow{
-						{Label: "Контакты", Mark: widget.Mark{Colour: "#4A6B52", Label: "Контакты"}, Count: intPtr(n248)},
-						{Label: "Команда", Mark: widget.Mark{Colour: "#6B4E7A", Label: "Команда"}, Count: intPtr(n13)},
-						{Label: "Архив", Mark: widget.Mark{Colour: "#A05A2C", Label: "Архив"}, Count: intPtr(n51)},
-					},
+	return widget.Rail{
+		Sections: []widget.RailSection{
+			{
+				Title: "Sources",
+				Rows: []widget.TickRow{
+					{Label: "Контакты", Mark: widget.Mark{Colour: "#4A6B52", Label: "Контакты"}, Count: intPtr(n248)},
+					{Label: "Команда", Mark: widget.Mark{Colour: "#6B4E7A", Label: "Команда"}, Count: intPtr(n13)},
+					{Label: "Архив", Mark: widget.Mark{Colour: "#A05A2C", Label: "Архив"}, Count: intPtr(n51)},
 				},
 			},
-			Foot: widget.RailFoot{
-				Actions: []widget.Action{},
-				Build:   demoBuild,
-			},
-		}.Render()
+		},
+		Foot: widget.RailFoot{Build: demoBuild},
+	}
 }
 
-func dupMain() string {
-	head := widget.Head{
-		Title: "Duplicates",
-		Sub:   "361 records compared · 4 to look at · matching at 70 points and above",
-	}.Render() +
-		widget.Seg{
-			Name:    "kind",
-			Chosen:  "all",
-			Options: []widget.SegOption{{Label: "All 4", Value: "all"}, {Label: "Contacts 1", Value: "contacts"}, {Label: "Events 1", Value: "events"}, {Label: "Tasks 1", Value: "tasks"}, {Label: "Notes 1", Value: "notes"}},
-		}.Render()
-
-	msg := widget.Msg{
-		Role: widget.MsgAccent,
-		Text: "Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.",
-	}.Render()
-
+func dupMain() widget.Main {
 	contactGroup := dupCard("Артём Белов", "candidate ×2 · 86 points",
 		widget.List{Groups: []widget.ListGroup{{Rows: []widget.Row{
 			{
@@ -117,32 +98,52 @@ func dupMain() string {
 		},
 	)
 
-	agreed := widget.Diff{
-		Property: "FN",
-		Agreed:   true,
-		Options:  []widget.DiffOption{{Label: "Анна Ковалёва", Value: "a"}},
-		Chosen:   "a",
-	}.Render()
-
-	return `<main class="tc-main" aria-label="Duplicates"><div class="tc-main__body">` +
-		head + msg + agreed + contactGroup + taskGroup + noteGroup +
-		`</div></main>`
+	return widget.Main{
+		Label: "Duplicates",
+		Body: []widget.Node{
+			widget.Head{
+				Title: "Duplicates",
+				Sub:   "361 records compared · 4 to look at · matching at 70 points and above",
+			},
+			widget.Seg{
+				Name:    "kind",
+				Chosen:  "all",
+				Options: []widget.SegOption{{Label: "All 4", Value: "all"}, {Label: "Contacts 1", Value: "contacts"}, {Label: "Events 1", Value: "events"}, {Label: "Tasks 1", Value: "tasks"}, {Label: "Notes 1", Value: "notes"}},
+			},
+			widget.Msg{
+				Role: widget.MsgAccent,
+				Text: "Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.",
+			},
+			widget.Diff{
+				Property: "FN",
+				Agreed:   true,
+				Options:  []widget.DiffOption{{Label: "Анна Ковалёва", Value: "a"}},
+				Chosen:   "a",
+			},
+			contactGroup,
+			taskGroup,
+			noteGroup,
+		},
+	}
 }
 
-func dupCard(title, badge string, list widget.List, diffs []widget.Diff) string {
-	var diffHTML string
-	for _, d := range diffs {
-		diffHTML += d.Render()
+func dupCard(title, badge string, list widget.List, diffs []widget.Diff) widget.Card {
+	body := []widget.Node{
+		widget.Paragraph(badge),
+		list,
 	}
-	actions := widget.Bar{Left: []widget.Node{
+	for _, d := range diffs {
+		body = append(body, d)
+	}
+	body = append(body, widget.Bar{Left: []widget.Node{
 		widget.Action{Label: "Link them", Kind: widget.ButtonPrimary},
 		widget.Action{Label: "Not duplicates"},
 		widget.Action{Label: "Merge on the server", Kind: widget.ButtonDanger},
-	}}.Render()
+	}})
 	return widget.Card{
 		Rubric: widget.Rubric{Text: title},
-		Body:   []widget.Node{widget.Paragraph(badge)},
-	}.Render() + list.Render() + diffHTML + actions
+		Body:   body,
+	}
 }
 
 func dupOverlays() string {

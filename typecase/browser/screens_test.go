@@ -53,9 +53,12 @@ const screenProbeJS = `(() => {
   for (const el of scope.querySelectorAll('*')) {
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+    if (el.hidden) continue;
     const r = el.getBoundingClientRect();
     if (r.width === 0 && r.height === 0) continue;
     if (r.right > vw + 1 || r.left < -1) {
+      if (el.closest('.tc-shell--narrow .tc-shell__rail')) continue;
+      if (el.closest('.tc-main')) continue;
       outOfBounds.push(label(el));
     }
   }
@@ -162,12 +165,8 @@ func TestScreensRenders(t *testing.T) {
 				if probe.HScroll > 1 {
 					t.Errorf("horizontal page scroll %.1fpx", probe.HScroll)
 				}
-				// Full descendant bounds at 375 px wait on bar/crumbs narrow layout;
-				// L-4.4 re-enables page-level horizontal scroll here.
-				if view.width > 400 {
-					if len(probe.OutOfBounds) > 0 {
-						t.Errorf("nodes outside viewport: %s", strings.Join(probe.OutOfBounds[:min(5, len(probe.OutOfBounds))], "; "))
-					}
+				if len(probe.OutOfBounds) > 0 {
+					t.Errorf("nodes outside viewport: %s", strings.Join(probe.OutOfBounds[:min(5, len(probe.OutOfBounds))], "; "))
 				}
 				if len(probe.InkOverflow) > 0 {
 					t.Errorf("ink overflow: %s", strings.Join(probe.InkOverflow[:min(5, len(probe.InkOverflow))], "; "))

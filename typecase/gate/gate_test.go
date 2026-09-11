@@ -45,6 +45,7 @@ func TestL8_gates(t *testing.T) {
 		gate.Geometry,
 		gate.ScreensCSS,
 		gate.ScreensCoverage,
+		gate.ScreensCompose,
 	}
 	for _, name := range checks {
 		t.Run(string(name), func(t *testing.T) {

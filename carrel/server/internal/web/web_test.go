@@ -193,6 +193,53 @@ func TestHealthz(t *testing.T) {
 	}
 }
 
+func TestBasePathRoutesAndCookies(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	h.cfg.BasePath = "/carrel"
+	h.rebuild()
+
+	if rec := h.do(get("/healthz", nil)); rec.Code != http.StatusNotFound {
+		t.Fatalf("bare /healthz: %d, want 404", rec.Code)
+	}
+	rec := h.do(get("/carrel/healthz", nil))
+	if rec.Code != http.StatusOK || rec.Body.String() != "ok" {
+		t.Fatalf("/carrel/healthz: %d body = %q", rec.Code, rec.Body.String())
+	}
+
+	rec = h.do(get("/carrel/login", nil))
+	var csrfPath string
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == "carrel_csrf" {
+			csrfPath = c.Path
+		}
+	}
+	if csrfPath != "/carrel" {
+		t.Fatalf("carrel_csrf Path = %q, want /carrel", csrfPath)
+	}
+
+	rec = h.do(h.anonPostForm("/carrel/login", "/carrel/login", url.Values{
+		"login":    {"alice"},
+		"password": {"password123"},
+	}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("login: status = %d", rec.Code)
+	}
+	loc := rec.Header().Get("Location")
+	if loc != "/carrel/app/contacts" {
+		t.Fatalf("login redirect Location = %q, want /carrel/app/contacts", loc)
+	}
+	var sidPath string
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == "carrel_sid" {
+			sidPath = c.Path
+		}
+	}
+	if sidPath != "/carrel" {
+		t.Fatalf("carrel_sid Path = %q, want /carrel", sidPath)
+	}
+}
+
 func TestSetupRedirectWhenFirstRun(t *testing.T) {
 	h := newHarness(t)
 	rec := h.do(get("/login", nil))

@@ -15,7 +15,7 @@ func (s *Server) getAdminUsers(w http.ResponseWriter, r *http.Request) {
 		Shell: s.buildShell(sess, "Users"),
 		Rows:  nil,
 		Add: []view.Action{
-			{ID: "admin.invite", Label: "Invite", Href: "/admin/invites", Method: "GET", Enabled: true},
+			{ID: "admin.invite", Label: "Invite", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
 		},
 	}
 	s.writePage(w, r, http.StatusOK, page)
@@ -32,7 +32,7 @@ func (s *Server) getAdminInvites(w http.ResponseWriter, r *http.Request) {
 	}
 	page := view.AdminInvitesPage{
 		Shell: s.buildShell(sess, "Invites"),
-		Add: plainForm("/admin/invites", "POST",
+		Add: s.plainForm("/admin/invites", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail},

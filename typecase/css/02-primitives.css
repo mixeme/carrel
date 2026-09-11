@@ -20,6 +20,7 @@
 .tc-btn--primary { background: var(--tc-accent); color: var(--tc-surface); border-color: var(--tc-accent); }
 .tc-btn--danger { background: var(--tc-danger); color: var(--tc-surface); border-color: var(--tc-danger); }
 .tc-btn.is-disabled, .tc-btn--disabled { opacity: 0.55; cursor: not-allowed; }
+.tc-btn__icon { flex: none; }
 .tc-btn__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .tc-in {

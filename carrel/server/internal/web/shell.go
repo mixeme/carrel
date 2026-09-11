@@ -13,7 +13,7 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 		Title: text(title),
 		Top: view.TopBar{
 			Search: view.SearchBox{
-				Action:  "/app/search",
+				Action:  s.route("/app/search"),
 				History: nil,
 				Jump:    nil,
 				Whole:   nil,
@@ -32,8 +32,8 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 			sh.Top.Unlocked = ptrWhen(formatWhen(*until, s.tz(), false, now))
 		}
 		sh.Top.User = []view.MenuItem{
-			{Action: view.Action{ID: "account.settings", Label: "Account", Href: "/app/settings/account", Method: "GET", Enabled: true}},
-			{Action: view.Action{ID: "logout", Label: "Sign out", Href: "/logout", Method: "POST", Enabled: true}},
+			{Action: view.Action{ID: "account.settings", Label: "Account", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}},
+			{Action: view.Action{ID: "logout", Label: "Sign out", Href: s.route("/logout"), Method: "POST", Enabled: true}},
 		}
 		if s.users.ConsumeEscrowNotice(sess.AccountID()) {
 			sh.Notices = []view.Notice{{
@@ -48,7 +48,7 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 
 func (s *Server) aboutAction() view.Action {
 	return view.Action{
-		ID: "about", Label: text("Carrel"), Href: "/about", Method: "GET", Enabled: true,
+		ID: "about", Label: text("Carrel"), Href: s.route("/about"), Method: "GET", Enabled: true,
 	}
 }
 
@@ -62,9 +62,9 @@ func (s *Server) tz() *time.Location {
 
 func ptrWhen(w view.When) *view.When { return &w }
 
-func plainForm(action, method string, rows ...view.FormRow) view.Form {
+func (s *Server) plainForm(action, method string, rows ...view.FormRow) view.Form {
 	return view.Form{
-		Action: action,
+		Action: s.route(action),
 		Method: method,
 		Sets: []view.FieldSet{{
 			Rows: rows,
@@ -86,5 +86,5 @@ func csrfFormRow(token string) view.FormRow {
 func (s *Server) anonPlainForm(w http.ResponseWriter, r *http.Request, action, method string, rows ...view.FormRow) view.Form {
 	token := s.issueAnonymousCSRF(w, r)
 	all := append([]view.FormRow{csrfFormRow(token)}, rows...)
-	return plainForm(action, method, all...)
+	return s.plainForm(action, method, all...)
 }

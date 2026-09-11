@@ -794,10 +794,16 @@ func checkInvSegNarrowMenu(widget string, html []string, _ string) error {
 
 func checkInvShellFourZones(widget string, html []string, _ string) error {
 	return forEachHTML(widget, html, func(h string) error {
-		for _, zone := range []string{"tc-top", "tc-shell__rail", "tc-shell__main", "tc-shell__side"} {
+		for _, zone := range []string{"tc-top", "tc-shell__main"} {
 			if !strings.Contains(h, zone) {
-				return fmt.Errorf("%s: shell must have four zones (missing %s)", widget, zone)
+				return fmt.Errorf("%s: shell must include %s", widget, zone)
 			}
+		}
+		if strings.Contains(h, "tc-shell__rail") && !strings.Contains(h, "tc-rail") && !strings.Contains(h, "tc-nav") {
+			return fmt.Errorf("%s: rail column must hold tc-rail or tc-nav", widget)
+		}
+		if strings.Contains(h, "tc-shell__side") && !strings.Contains(h, "tc-side") {
+			return fmt.Errorf("%s: side column must hold tc-side", widget)
 		}
 		return nil
 	})

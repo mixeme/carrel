@@ -80,6 +80,9 @@
 .tc-diag:not(.is-expanded) .tc-diag__steps { display: none; }
 
 .tc-diff {
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
 	border: var(--tc-stroke) solid var(--tc-rule);
 	border-radius: var(--tc-radius);
 	padding: 0.75em 1em;
@@ -88,7 +91,7 @@
 .tc-diff.is-agreed { opacity: 0.65; }
 .tc-diff__property { margin: 0 0 0.5em; font-family: var(--tc-font-serif); }
 .tc-diff__options { display: flex; flex-direction: column; gap: 0.5em; }
-.tc-diff__option { display: flex; gap: 0.5em; align-items: flex-start; }
+.tc-diff__option { display: flex; gap: 0.5em; align-items: flex-start; min-width: 0; max-width: 100%; }
 .tc-diff__value { overflow-wrap: anywhere; margin-top: 0.25em; color: var(--tc-muted); }
 
 .tc-crop { display: flex; flex-direction: column; gap: 0.75em; }
@@ -132,7 +135,7 @@
 .tc-sec { margin-bottom: 1em; }
 .tc-sec__body { margin-top: 0.35em; }
 
-.tc-fields { margin: 0; }
+.tc-fields { margin: 0; min-width: 0; max-width: 100%; }
 .tc-fields__row {
 	display: grid;
 	grid-template-columns: 8em 1fr;

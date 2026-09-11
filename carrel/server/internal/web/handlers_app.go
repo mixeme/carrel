@@ -212,7 +212,7 @@ func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error)
 	}
 	page := view.PasswordPage{
 		Shell: s.buildShell(sess, "Change password"),
-		Form: plainForm("/app/password", "POST", csrfField(sess),
+		Form: s.plainForm("/app/password", "POST", csrfField(sess),
 			view.FormRow{Name: "current", Label: "Current password", Kind: view.InputPassword, Required: true, Error: currentErr},
 			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true, Error: passErr, Hint: text("At least 8 characters.")},
 			view.FormRow{Name: "password2", Label: "Repeat new password", Kind: view.InputPassword, Required: true, Error: pass2Err},
@@ -511,7 +511,7 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 	page := view.ConnectionsPage{
 		Shell:    s.buildShell(sess, "Connections"),
 		Accounts: nil,
-		Add: plainForm("/app/settings/connections", "POST",
+		Add: s.plainForm("/app/settings/connections", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(r.FormValue("server"))},
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText},
@@ -649,7 +649,7 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.Unlo
 	sheet := view.UnlockSheet{
 		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, or change key escrow."),
 		Warning: text("Everything revealed in this window is written to the audit log."),
-		Form: plainForm("/app/settings/unlock", "POST",
+		Form: s.plainForm("/app/settings/unlock", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: errText},
 		),

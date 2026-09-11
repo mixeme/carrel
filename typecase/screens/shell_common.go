@@ -1,6 +1,10 @@
 package screens
 
-import "carrel.dev/typecase/widget"
+import (
+	"strings"
+
+	"carrel.dev/typecase/widget"
+)
 
 func shellTop() widget.Top {
 	return widget.Top{
@@ -25,7 +29,7 @@ func shellTop() widget.Top {
 	}
 }
 
-func shellNav(current string) string {
+func shellNav(current string) widget.Nav {
 	n312, n14, n3, n86, n3dup := 312, 14, 3, 86, 3
 	return widget.Nav{
 		Items: []widget.NavItem{
@@ -37,13 +41,23 @@ func shellNav(current string) string {
 			{Label: "Duplicates", Icon: "⧉", Href: "/duplicates", Count: intPtr(n3dup)},
 		},
 		Current: current,
-	}.Render()
+	}
 }
 
-func shellWrap(rail, main, side, extra string) string {
-	return `<div class="tc-shell" data-tc-shell data-tc-root>` + shellTop().Render() +
-		`<div class="tc-shell__body"><div class="tc-shell__rail">` + rail +
-		`</div><div class="tc-shell__main">` + main +
-		`</div><div class="tc-shell__side">` + side +
-		`</div></div>` + extra + `</div>`
+func shellFrame(nav widget.Nav, rail widget.Rail, main widget.Main, side widget.Side, tail string) string {
+	html := widget.Shell{
+		Top:  shellTop(),
+		Nav:  nav,
+		Rail: rail,
+		Main: main,
+		Side: side,
+	}.Render()
+	if tail == "" {
+		return html
+	}
+	i := strings.LastIndex(html, "</div>")
+	if i < 0 {
+		return html + tail
+	}
+	return html[:i] + tail + html[i:]
 }

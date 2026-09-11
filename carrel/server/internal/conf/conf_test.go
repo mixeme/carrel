@@ -207,6 +207,23 @@ func TestZeroDAVTimeoutsRejected(t *testing.T) {
 	}
 }
 
+func TestNormalizeBasePath(t *testing.T) {
+	for _, tc := range []struct {
+		in, want string
+	}{
+		{"", ""},
+		{"/", ""},
+		{"/carrel", "/carrel"},
+		{"/carrel/", "/carrel"},
+		{"carrel", "/carrel"},
+		{"  /nested/path/  ", "/nested/path"},
+	} {
+		if got := NormalizeBasePath(tc.in); got != tc.want {
+			t.Fatalf("NormalizeBasePath(%q) = %q, want %q", tc.in, got, tc.want)
+		}
+	}
+}
+
 func TestNegativeCacheLimitsRejected(t *testing.T) {
 	for _, tc := range []struct{ key, val string }{
 		{"CARREL_CACHE_COLLECTION_TTL", "-1"},

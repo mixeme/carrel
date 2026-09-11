@@ -10,14 +10,15 @@ func Notes() string {
 
 // NotesRead is full-screen reading with neighbour notes in the rail tree.
 func NotesRead() string {
-	return shellWrap(notesReadNav()+notesReadRail().Render(), notesReadMain(), "", "")
+	return shellFrame(notesReadNav(), notesReadRail(), notesReadMain(), widget.Side{}, "")
 }
 
 // NotesEdit is focus editing: top bar and main column only, no rail or side.
 func NotesEdit() string {
-	return `<div class="tc-shell" data-tc-shell data-tc-root>` + shellTop().Render() +
-		`<div class="tc-shell__body"><div class="tc-shell__main">` + notesEditMain() +
-		`</div></div></div>`
+	return widget.Shell{
+		Top:  shellTop(),
+		Main: notesEditMain(),
+	}.Render()
 }
 
 // NotesQuick is the list frame with the quick-note sheet open.
@@ -26,7 +27,7 @@ func NotesQuick() string {
 }
 
 func notesListFrame(quickOpen bool) string {
-	return shellWrap(shellNav("/notes")+notesRail().Render(), notesListMain(), notesSide(), notesQuickSheet(quickOpen))
+	return shellFrame(shellNav("/notes"), notesRail(), notesListMain(), notesSide(), notesQuickSheet(quickOpen))
 }
 
 func notesRail() widget.Rail {
@@ -68,11 +69,11 @@ func notesRail() widget.Rail {
 	}
 }
 
-func notesReadNav() string {
+func notesReadNav() widget.Nav {
 	return widget.Nav{
 		Items:   []widget.NavItem{{Label: "Combined notebook", Icon: "←", Href: "/notes"}},
 		Current: "/notes",
-	}.Render()
+	}
 }
 
 func notesReadRail() widget.Rail {
@@ -103,7 +104,7 @@ func notesReadRail() widget.Rail {
 	}
 }
 
-func notesListMain() string {
+func notesListMain() widget.Main {
 	n86, n9 := 86, 9
 	return widget.Main{
 		Label: "Notes",
@@ -114,6 +115,8 @@ func notesListMain() string {
 				Sub:   "2 of 3 notebooks · 86 notes · VJOURNAL",
 				Actions: []widget.Action{
 					{Label: "New note", Kind: widget.ButtonPrimary, Icon: "+"},
+				},
+				Rank2: []widget.Action{
 					{Label: "Import Markdown"},
 					{Label: "Export"},
 				},
@@ -174,14 +177,14 @@ func notesListMain() string {
 				}},
 			},
 		},
-	}.Render()
+	}
 }
 
-func notesReadMain() string {
+func notesReadMain() widget.Main {
 	return widget.Main{
 		Label: "Note",
 		Body:  []widget.Node{notesReadDoc()},
-	}.Render()
+	}
 }
 
 func notesReadDoc() widget.Doc {
@@ -191,6 +194,8 @@ func notesReadDoc() widget.Doc {
 		Bar: widget.DocBar{
 			Left: []widget.Action{
 				{Label: "Edit", Kind: widget.ButtonPrimary, Icon: "✎"},
+			},
+			Rank2: []widget.Action{
 				{Label: "Export Markdown"},
 				{Label: "Print", Icon: "🖨"},
 				{Label: "Source"},
@@ -222,7 +227,7 @@ func notesReadDoc() widget.Doc {
 	}
 }
 
-func notesEditMain() string {
+func notesEditMain() widget.Main {
 	return widget.Main{
 		Label: "Edit note",
 		Body: []widget.Node{
@@ -233,6 +238,8 @@ func notesEditMain() string {
 					Left: []widget.Action{
 						{Label: "Save", Kind: widget.ButtonPrimary},
 						{Label: "Cancel"},
+					},
+					Rank2: []widget.Action{
 						{Label: "B"},
 						{Label: "I"},
 						{Label: "H2"},
@@ -257,7 +264,7 @@ func notesEditMain() string {
 				}},
 			},
 		},
-	}.Render()
+	}
 }
 
 func notesQuickSheet(open bool) string {
@@ -278,7 +285,7 @@ func notesQuickSheet(open bool) string {
 	}.Render()
 }
 
-func notesSide() string {
+func notesSide() widget.Side {
 	title := widget.Field{Name: "title", Label: "Title", Kind: widget.InputText, Value: "Заметка со встречи 10.08"}
 	text := widget.Field{Name: "text", Label: "Text", Kind: widget.InputTextarea, Value: "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна…"}
 	date := widget.Field{Name: "date", Label: "Date", Kind: widget.InputDate, Value: "2026-08-10"}
@@ -309,5 +316,5 @@ func notesSide() string {
 			{Label: "Save", Kind: widget.ButtonPrimary},
 			{Label: "Open full screen", Icon: "⤢"},
 		},
-	}.Render()
+	}
 }

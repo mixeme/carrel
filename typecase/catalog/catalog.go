@@ -35,7 +35,7 @@ func Entries() []Entry {
 	}
 
 	// Primitives
-	add("primitives", "tc-btn", "normal", widget.Button{Label: "Save"}.Render())
+	add("primitives", "tc-btn", "normal", widget.Button{Label: "Save", Icon: "+"}.Render())
 	add("primitives", "tc-btn", "primary", widget.Button{Label: "Create", Kind: widget.ButtonPrimary}.Render())
 	add("primitives", "tc-btn", "danger", widget.Button{Label: "Delete permanently", Kind: widget.ButtonDanger}.Render())
 	add("primitives", "tc-btn", "disabled", widget.Button{Label: "Unavailable", Reason: "Nothing selected"}.Render())
@@ -104,7 +104,8 @@ func Entries() []Entry {
 	add("tables", "tc-queue", "running", widget.Queue{Rows: []widget.QueueRow{{Label: "Import", State: widget.QueueRunning, Percent: &p}}}.Render())
 
 	// Shell
-	add("shell", "tc-shell", "wide", widget.Shell{Top: widget.Top{Brand: widget.Brand{Mark: "◆", Word: "App"}}, Rail: widget.Rail{Foot: widget.RailFoot{Build: demoBuild}, Sections: []widget.RailSection{{Title: "Views", Rows: []widget.TickRow{{Label: "All", Tick: widget.TickOn}}}}}, Main: widget.Main{Label: "Main", Body: []widget.Node{widget.Paragraph("Content")}}}.Render())
+	shellSide := widget.Side{Label: "Details", Title: "Item", Open: false, Blocks: []widget.SideBlock{{Sec: &widget.Sec{Rubric: widget.Rubric{Text: "Info"}, Body: []widget.Node{widget.Paragraph("Details")}}}}}
+	add("shell", "tc-shell", "wide", widget.Shell{Top: widget.Top{Brand: widget.Brand{Mark: "◆", Word: "App"}}, Rail: widget.Rail{Foot: widget.RailFoot{Build: demoBuild}, Sections: []widget.RailSection{{Title: "Views", Rows: []widget.TickRow{{Label: "All", Tick: widget.TickOn}}}}}, Main: widget.Main{Label: "Main", Body: []widget.Node{widget.Paragraph("Content")}}, Side: shellSide}.Render())
 	add("shell", "tc-top", "normal", widget.Top{Brand: widget.Brand{Mark: "◆", Word: "App"}, Search: widget.Search{Action: "/search"}}.Render())
 	add("shell", "tc-main", "default", widget.Main{Label: "Workspace", Body: []widget.Node{widget.Paragraph("Main area")}}.Render())
 	add("shell", "tc-rail", "column", railDemo(widget.Rail{Sections: []widget.RailSection{{Title: "Views", Rows: []widget.TickRow{{Label: "All", Tick: widget.TickOn}}}}}))
@@ -188,7 +189,7 @@ func Entries() []Entry {
 	add("tables", "tc-queue", "partial", widget.Queue{Rows: []widget.QueueRow{{Label: "Partial", State: widget.QueuePartial}}}.Render())
 	add("tables", "tc-queue", "cancelled", widget.Queue{Rows: []widget.QueueRow{{Label: "Cancelled", State: widget.QueueCancelled}}}.Render())
 
-	add("shell", "tc-shell", "narrow", widget.Shell{Narrow: true, Rail: widget.Rail{Foot: widget.RailFoot{Build: demoBuild}}, Main: widget.Main{Label: "Main", Body: []widget.Node{widget.Paragraph("Narrow")}}}.Render())
+	add("shell", "tc-shell", "narrow", widget.Shell{Narrow: true, Rail: widget.Rail{Foot: widget.RailFoot{Build: demoBuild}}, Main: widget.Main{Label: "Main", Body: []widget.Node{widget.Paragraph("Narrow")}}, Side: shellSide}.Render())
 	add("shell", "tc-top", "full", widget.Top{
 		Brand:  widget.Brand{Mark: "◆", Word: "App"},
 		Search: widget.Search{Action: "/search"},

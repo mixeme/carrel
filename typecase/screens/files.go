@@ -5,50 +5,49 @@ import "carrel.dev/typecase/widget"
 // Files assembles mockup s-files figure 1: folder view, table, tiles, queue,
 // move dialog, filter chips, and the properties side panel.
 func Files() string {
-	return shellWrap(filesRail(), filesMain(), filesSide(), filesOverlays())
+	return shellFrame(shellNav("/files"), filesRail(), filesMain(), filesSide(), filesOverlays())
 }
 
-func filesRail() string {
+func filesRail() widget.Rail {
 	n2of3 := 2
-	return shellNav("/files") +
-		widget.Rail{
-			Sections: []widget.RailSection{
-				{
-					Rows: []widget.TickRow{{
-						Label: "Selected collections",
-						Count: intPtr(n2of3),
-						Tick:  widget.TickPartial,
-					}},
-				},
-				{
-					Title: "sftpgo · vps",
-					Rows: []widget.TickRow{
-						{Label: "Documents", Mark: widget.Mark{Colour: "#4A6B52", Label: "Documents"}, Tick: widget.TickOn},
-						{Label: "Public", Mark: widget.Mark{Colour: "#9A9280", Label: "Public"}, Tick: widget.TickOff, State: widget.TickRowReadOnly},
-					},
-				},
-				{
-					Title: "nextcloud · home",
-					Rows: []widget.TickRow{
-						{Label: "Files", Mark: widget.Mark{Colour: "#3F6E8C", Label: "Files"}},
-					},
-				},
-				{
-					Title: "Shortcuts",
-					Rows: []widget.TickRow{
-						{Label: "Attachments"},
-						{Label: "Published", Count: intPtr(2)},
-					},
+	return widget.Rail{
+		Sections: []widget.RailSection{
+			{
+				Rows: []widget.TickRow{{
+					Label: "Selected collections",
+					Count: intPtr(n2of3),
+					Tick:  widget.TickPartial,
+				}},
+			},
+			{
+				Title: "sftpgo · vps",
+				Rows: []widget.TickRow{
+					{Label: "Documents", Mark: widget.Mark{Colour: "#4A6B52", Label: "Documents"}, Tick: widget.TickOn},
+					{Label: "Public", Mark: widget.Mark{Colour: "#9A9280", Label: "Public"}, Tick: widget.TickOff, State: widget.TickRowReadOnly},
 				},
 			},
-			Foot: widget.RailFoot{
-				Actions: []widget.Action{{Label: "Connect account", Icon: "+"}},
-				Build:   demoBuild,
+			{
+				Title: "nextcloud · home",
+				Rows: []widget.TickRow{
+					{Label: "Files", Mark: widget.Mark{Colour: "#3F6E8C", Label: "Files"}},
+				},
 			},
-		}.Render()
+			{
+				Title: "Shortcuts",
+				Rows: []widget.TickRow{
+					{Label: "Attachments"},
+					{Label: "Published", Count: intPtr(2)},
+				},
+			},
+		},
+		Foot: widget.RailFoot{
+			Actions: []widget.Action{{Label: "Connect account", Icon: "+"}},
+			Build:   demoBuild,
+		},
+	}
 }
 
-func filesMain() string {
+func filesMain() widget.Main {
 	head := widget.Head{
 		Title: "attachments",
 		Crumbs: widget.Crumbs{Items: []widget.Crumb{
@@ -59,37 +58,48 @@ func filesMain() string {
 		Sub: "sftpgo · vps",
 		Actions: []widget.Action{
 			{Label: "Upload", Kind: widget.ButtonPrimary, Icon: "↑"},
+		},
+		Rank2: []widget.Action{
 			{Label: "New folder", Icon: "+"},
 			{Label: "Refresh", Icon: "↻"},
 		},
-	}.Render()
+	}
 
-	selBar := `<div class="tc-bar"><div class="tc-bar__left"><strong>1 selected</strong> <span class="tc-row__size">412 KB</span></div>` +
-		widget.Bar{
-			Separators: true,
-			Left: []widget.Node{
-				widget.Action{Label: "Download", Icon: "↓"},
-				widget.Action{Label: "Rename", Icon: "✎"},
-				widget.Action{Label: "Move", Icon: "⇄"},
-				widget.Action{Label: "Copy", Icon: "⧉"},
-				widget.Action{Label: "Delete", Kind: widget.ButtonDanger, Icon: "🗑"},
+	selBar := widget.Bar{
+		Separators: true,
+		Left: []widget.Node{
+			widget.Paragraph("1 selected · 412 KB"),
+			widget.Action{Label: "Download", Icon: "↓"},
+		},
+		Rank2: []widget.Action{
+			{Label: "Rename", Icon: "✎"},
+			{Label: "Move", Icon: "⇄"},
+			{Label: "Copy", Icon: "⧉"},
+			{Label: "Delete", Kind: widget.ButtonDanger, Icon: "🗑"},
+		},
+		Right: []widget.Node{widget.Action{Label: "Clear selection", Size: widget.ButtonSizeBar}},
+	}
+
+	filterBar := widget.Bar{
+		Left: []widget.Node{
+			widget.Input{Name: "filter", Kind: widget.InputText, Placeholder: "Filter this folder"},
+			widget.Seg{
+				Name:    "sort",
+				Chosen:  "name",
+				Options: []widget.SegOption{{Label: "Name", Value: "name"}, {Label: "Size", Value: "size"}, {Label: "Changed", Value: "changed"}},
 			},
-			Right: []widget.Node{widget.Action{Label: "Clear selection", Size: widget.ButtonSizeBar}},
-		}.Render() + `</div>`
+		},
+		Right: []widget.Node{
+			widget.Button{Label: "Columns", Icon: "▦", Size: widget.ButtonSizeBar},
+			widget.Num{Value: intPtr(14)},
+		},
+	}
 
-	chips := widget.Chip{Label: "images", On: true}.Render() +
-		widget.Chip{Label: "documents"}.Render() +
-		widget.Chip{Label: "folders"}.Render()
-
-	filterBar := `<div class="tc-bar"><div class="tc-bar__left">` +
-		widget.Input{Name: "filter", Kind: widget.InputText, Placeholder: "Filter this folder"}.Render() +
-		widget.Seg{
-			Name:    "sort",
-			Chosen:  "name",
-			Options: []widget.SegOption{{Label: "Name", Value: "name"}, {Label: "Size", Value: "size"}, {Label: "Changed", Value: "changed"}},
-		}.Render() + chips + `</div><div class="tc-bar__right">` +
-		widget.Button{Label: "Columns", Icon: "▦", Size: widget.ButtonSizeBar}.Render() +
-		widget.Num{Value: intPtr(14)}.Render() + `</div></div>`
+	chips := []widget.Node{
+		widget.Chip{Label: "images", On: true},
+		widget.Chip{Label: "documents"},
+		widget.Chip{Label: "folders"},
+	}
 
 	table := widget.Table{
 		Columns: []widget.Column{
@@ -115,7 +125,7 @@ func filesMain() string {
 				Actions: []widget.Action{{Label: "Download", Icon: "↓"}, {Label: "More", Icon: "⋯"}},
 			},
 		},
-	}.Render()
+	}
 
 	metaList := widget.List{
 		Groups: []widget.ListGroup{{
@@ -141,13 +151,13 @@ func filesMain() string {
 				},
 			},
 		}},
-	}.Render()
+	}
 
 	grid := widget.Grid{Tiles: []widget.Tile{
 		{Name: "2026-08-10-sync-board.png", Selected: true, Thumb: widget.Thumb{Href: "/img/sample.svg", Alt: "Board"}},
 		{Name: "2026-08-04-whiteboard.jpg", Thumb: widget.Thumb{Href: "/img/sample.svg", Alt: "Whiteboard"}},
 		{Name: "release-checklist.md", Icon: "📄"},
-	}}.Render()
+	}}
 
 	p100, p62 := 100, 62
 	queue := widget.Queue{
@@ -162,67 +172,90 @@ func filesMain() string {
 			},
 		},
 		Note: "Uploading 2 of 3 · 12.4 MB",
-	}.Render()
+	}
 
-	moveCard := widget.Card{
+	moveCard := widget.Sec{
 		Rubric: widget.Rubric{Text: "Move 3 items"},
-		Body:   []widget.Node{widget.Paragraph("from Documents / carrel / attachments")},
-	}.Render() +
-		widget.Tree{
-			Nodes: []widget.TreeNode{
-				{ID: "documents", Label: "Documents", Open: true, Children: []widget.TreeNode{
-					{ID: "carrel", Label: "carrel", Open: true, Children: []widget.TreeNode{
-						{ID: "2026-07", Label: "2026-07"},
-						{ID: "attachments", Label: "attachments"},
+		Body: []widget.Node{
+			widget.Paragraph("from Documents / carrel / attachments"),
+			widget.Tree{
+				Nodes: []widget.TreeNode{
+					{ID: "documents", Label: "Documents", Open: true, Children: []widget.TreeNode{
+						{ID: "carrel", Label: "carrel", Open: true, Children: []widget.TreeNode{
+							{ID: "2026-07", Label: "2026-07"},
+							{ID: "attachments", Label: "attachments"},
+						}},
 					}},
-				}},
-				{ID: "files-nc", Label: "Files"},
+					{ID: "files-nc", Label: "Files"},
+				},
+				Chosen: "2026-07",
 			},
-			Chosen: "2026-07",
-		}.Render() +
-		widget.FormFoot{
-			Primary: widget.Action{Label: "Move here", Kind: widget.ButtonPrimary},
-			Rest:    []widget.Action{{Label: "Cancel"}},
-		}.Render()
+			widget.FormFoot{
+				Primary: widget.Action{Label: "Move here", Kind: widget.ButtonPrimary},
+				Rest:    []widget.Action{{Label: "Cancel"}},
+			},
+		},
+	}
 
-	msg := widget.Msg{Text: "Drop files onto the window, or onto a folder in the list. A name that is already taken is refused rather than overwritten, and the queue says so."}.Render()
-
-	return `<main class="tc-main" aria-label="Files"><div class="tc-main__body">` +
-		head + selBar + filterBar + table + metaList + grid + msg + moveCard + queue +
-		`</div></main>`
+	return widget.Main{
+		Label: "Files",
+		Body: []widget.Node{
+			head,
+			selBar,
+			filterBar,
+			chips[0],
+			chips[1],
+			chips[2],
+			table,
+			metaList,
+			grid,
+			widget.Msg{Text: "Drop files onto the window, or onto a folder in the list. A name that is already taken is refused rather than overwritten, and the queue says so."},
+			moveCard,
+			queue,
+		},
+	}
 }
 
-func filesSide() string {
-	id := "files-side"
+func filesSide() widget.Side {
 	fields := widget.Fields{Rows: []widget.FieldRow{
 		{Label: "Size", Value: "412 KB"},
 		{Label: "Type", Value: "image/png"},
 		{Label: "Changed", Value: "2026-08-10 11:07"},
 		{Label: "Path", Value: "/dav/Documents/carrel/attachments/2026-08-10-sync-board.png", Path: true},
-	}}.Render()
+	}}
 
 	links := widget.Sec{
 		Rubric: widget.Rubric{Text: "Links"},
 		Body:   []widget.Node{widget.Paragraph("Carrel keeps no index of what points at this file. It may be attached to a note or an event — check before deleting.")},
-	}.Render()
+	}
 
-	return `<aside class="tc-side is-open" data-tc-side id="` + id + `" aria-label="File details">` +
-		`<header class="tc-side__head"><h2 class="tc-side__title">2026-08-10-sync-board.png</h2>` +
-		widget.Close{For: id, Label: "Close the panel"}.Render() +
-		`</header><div class="tc-side__body">` +
-		widget.Thumb{Href: "/img/sample.svg", Alt: "Preview", Size: widget.ThumbSizeTile}.Render() +
-		widget.Bar{Left: []widget.Node{
-			widget.Action{Label: "Download", Kind: widget.ButtonPrimary, Icon: "↓"},
-			widget.Action{Label: "Open"},
-			widget.Action{Label: "Rename", Icon: "✎"},
-			widget.Action{Label: "Move", Icon: "⇄"},
-		}}.Render() + fields + links +
-		widget.Danger{Title: "Danger zone", Rows: []widget.DangerRow{{
+	danger := widget.Sec{
+		Body: []widget.Node{widget.Danger{Title: "Danger zone", Rows: []widget.DangerRow{{
 			Title:  "Delete",
 			Text:   "Removes the file from the server.",
 			Action: widget.Action{Label: "Delete", Kind: widget.ButtonDanger, Icon: "🗑"},
-		}}}.Render() +
-		`</div></aside>`
+		}}}},
+	}
+
+	return widget.Side{
+		Label: "File details",
+		Title: "2026-08-10-sync-board.png",
+		Open:  true,
+		Blocks: []widget.SideBlock{
+			{Sec: &widget.Sec{Body: []widget.Node{
+				widget.Thumb{Href: "/img/sample.svg", Alt: "Preview", Size: widget.ThumbSizeTile},
+				widget.Bar{Left: []widget.Node{
+					widget.Action{Label: "Download", Kind: widget.ButtonPrimary, Icon: "↓"},
+					widget.Action{Label: "Open"},
+					widget.Action{Label: "Rename", Icon: "✎"},
+					widget.Action{Label: "Move", Icon: "⇄"},
+				}},
+			}}},
+			{Fields: &fields},
+			{Sec: &links},
+			{Sec: &danger},
+		},
+	}
 }
 
 func filesOverlays() string {

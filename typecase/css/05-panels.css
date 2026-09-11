@@ -5,11 +5,13 @@
 	align-items: center;
 	justify-content: space-between;
 	min-height: 26px;
+	min-width: 0;
 	gap: 0.5em;
 	white-space: nowrap;
 	overflow: hidden;
 }
 .tc-bar__left, .tc-bar__right { display: flex; align-items: center; gap: 0.35em; flex: none; }
+.tc-bar__left { flex: 1 1 auto; min-width: 0; overflow: hidden; }
 .tc-bar__right { margin-left: auto; }
 .tc-bar [data-tc-bar-stash] { display: none; }
 .tc-bar__sep {
@@ -78,7 +80,7 @@
 }
 .tc-chip__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 12em; line-height: 1.35; }
 
-.tc-range { display: flex; align-items: center; gap: 0.75em; flex-wrap: wrap; }
+.tc-range { display: flex; align-items: center; gap: 0.75em; flex-wrap: wrap; max-width: 100%; min-width: 0; }
 .tc-range__fields { display: flex; align-items: center; gap: 0.35em; }
 .tc-range__dash { color: var(--tc-muted); }
 .tc-range__presets { display: flex; gap: 0.35em; }

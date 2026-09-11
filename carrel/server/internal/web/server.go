@@ -73,6 +73,7 @@ type Users interface {
 // Server is the HTTP front door (S-9).
 type Server struct {
 	cfg      *conf.Config
+	basePath string // normalised CARREL_BASE_PATH
 	store    *store.Store
 	sessions *session.Manager
 	users    Users
@@ -91,6 +92,7 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 	}
 	s := &Server{
 		cfg:      cfg,
+		basePath: conf.NormalizeBasePath(cfg.BasePath),
 		store:    st,
 		sessions: mgr,
 		users:    users,
@@ -107,7 +109,10 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 
 // Handler returns the root HTTP handler.
 func (s *Server) Handler() http.Handler {
-	return s.mux
+	if s.basePath == "" {
+		return s.mux
+	}
+	return http.StripPrefix(s.basePath, s.mux)
 }
 
 func (s *Server) sessionFrom(r *http.Request) (*session.Session, bool) {
@@ -122,7 +127,7 @@ func (s *Server) setSessionCookie(w http.ResponseWriter, r *http.Request, sid st
 	http.SetCookie(w, &http.Cookie{
 		Name:     cookieName,
 		Value:    sid,
-		Path:     "/",
+		Path:     s.cookiePath(),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Secure:   s.secureCookies(r),
@@ -133,7 +138,7 @@ func (s *Server) clearSessionCookie(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     cookieName,
 		Value:    "",
-		Path:     "/",
+		Path:     s.cookiePath(),
 		MaxAge:   -1,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,

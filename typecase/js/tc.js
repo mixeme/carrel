@@ -226,7 +226,7 @@
 			var segPick = menuItem.getAttribute("data-tc-seg-pick");
 			if (segPick) {
 				e.preventDefault();
-				var segGroup = closest(menuItem, "[data-tc-seg]");
+				var segGroup = closest(menuItem, ".tc-seg");
 				if (segGroup) {
 					var segBtn = segGroup.querySelector(
 						'button[data-tc-seg][data-value="' + segPick + '"]'
@@ -649,15 +649,31 @@
 		var stash = bar.querySelector("[data-tc-bar-stash]");
 		var overflow = bar.querySelector("[data-tc-bar-overflow]");
 		if (stash) {
-			while (stash.firstChild) {
-				var node = stash.firstChild;
+			while (stash.lastChild) {
+				var node = stash.lastChild;
 				var shelf = node._tcBarShelf === "left" ? left : right;
-				shelf.insertBefore(node, overflow || null);
+				if (shelf === right && overflow) {
+					shelf.insertBefore(node, overflow);
+				} else {
+					shelf.appendChild(node);
+				}
 				delete node._tcBarShelf;
 			}
 		}
 		if (overflow) overflow.hidden = true;
 		bar.classList.remove("is-collapsed");
+		bar.style.maxWidth = "";
+	}
+
+	function clampBar(bar) {
+		var vw = document.documentElement.clientWidth;
+		var rect = bar.getBoundingClientRect();
+		if (rect.right <= vw + 1) {
+			bar.style.maxWidth = "";
+			return;
+		}
+		var max = Math.max(vw - rect.left - 1, 0);
+		bar.style.maxWidth = max + "px";
 	}
 
 	function updateBar(bar) {
@@ -665,7 +681,10 @@
 		var left = bar.querySelector(".tc-bar__left");
 		var right = bar.querySelector(".tc-bar__right");
 		if (!left || !right) return;
-		if (barFits(bar)) return;
+		if (barFits(bar)) {
+			clampBar(bar);
+			return;
+		}
 		var stash = bar.querySelector("[data-tc-bar-stash]");
 		if (!stash) {
 			stash = document.createElement("div");
@@ -689,6 +708,7 @@
 		}
 		if (!stash.children.length) {
 			bar.classList.toggle("is-collapsed", !barFits(bar));
+			clampBar(bar);
 			return;
 		}
 		var items = [];
@@ -731,12 +751,60 @@
 		}
 		overflow.hidden = false;
 		bar.classList.add("is-collapsed");
+		clampBar(bar);
+	}
+
+	function crumbsFits(nav) {
+		return nav.scrollWidth <= nav.clientWidth + 1 && fitsViewport(nav);
+	}
+
+	function restoreCrumbs(nav) {
+		var ellipsis = nav.querySelector("[data-tc-crumbs-ellipsis]");
+		if (ellipsis) ellipsis.remove();
+		nav.querySelectorAll(".tc-crumbs__link[hidden], .tc-crumbs__sep[hidden]").forEach(function (el) {
+			el.hidden = false;
+		});
+		nav.style.maxWidth = "";
+	}
+
+	function updateCrumbs(nav) {
+		restoreCrumbs(nav);
+		if (crumbsFits(nav)) return;
+		var links = Array.prototype.slice.call(nav.querySelectorAll(".tc-crumbs__link"));
+		if (links.length < 2) return;
+		var root = links[0];
+		var middleItems = [];
+		for (var i = 1; i < links.length; i++) {
+			var link = links[i];
+			middleItems.push({ label: link.textContent.trim(), href: link.getAttribute("href") || "#" });
+			var sep = link.previousElementSibling;
+			if (sep && sep.classList.contains("tc-crumbs__sep")) sep.hidden = true;
+			link.hidden = true;
+		}
+		var ellipsis = document.createElement("span");
+		ellipsis.className = "tc-crumbs__ellipsis";
+		ellipsis.setAttribute("data-tc-crumbs-ellipsis", "");
+		ellipsis.appendChild(buildMenuElement(tcUnique("tc-crumbs-more"), "…", middleItems));
+		var rootSep = root.nextElementSibling;
+		if (rootSep && rootSep.classList.contains("tc-crumbs__sep")) {
+			rootSep.insertAdjacentElement("afterend", ellipsis);
+			var sep = document.createElement("span");
+			sep.className = "tc-crumbs__sep";
+			sep.setAttribute("aria-hidden", "true");
+			sep.textContent = "/";
+			ellipsis.insertAdjacentElement("afterend", sep);
+		}
+		if (!crumbsFits(nav)) {
+			var head = closest(nav, ".tc-head");
+			if (head) nav.style.maxWidth = head.getBoundingClientRect().width + "px";
+		}
 	}
 
 	function layoutUpdates() {
 		document.querySelectorAll("[data-tc-shell]").forEach(updateShell);
-		document.querySelectorAll("[data-tc-seg]").forEach(updateSeg);
+		document.querySelectorAll(".tc-seg").forEach(updateSeg);
 		document.querySelectorAll("[data-tc-bar]").forEach(updateBar);
+		document.querySelectorAll("[data-tc-crumbs]").forEach(updateCrumbs);
 		document.querySelectorAll("[data-tc-top]").forEach(updateTop);
 	}
 
@@ -811,7 +879,7 @@
 			}
 		});
 
-		document.querySelectorAll("[data-tc-seg]").forEach(function (group) {
+		document.querySelectorAll(".tc-seg").forEach(function (group) {
 			function selectSeg(btn) {
 				// Класс и озвучка переставляются вместе: вид держится на
 				// is-chosen, и без него выбранных оказывалось двое — один

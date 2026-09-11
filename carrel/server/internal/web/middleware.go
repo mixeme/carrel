@@ -110,5 +110,5 @@ func (s *Server) notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) redirect(w http.ResponseWriter, r *http.Request, url string) {
-	http.Redirect(w, r, url, http.StatusSeeOther)
+	http.Redirect(w, r, s.route(url), http.StatusSeeOther)
 }

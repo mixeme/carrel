@@ -5,64 +5,65 @@ import "carrel.dev/typecase/widget"
 // Contacts assembles mockup s-contacts: list, card panel, edit form with
 // field sets, crop, range filter, search jumps, and a loading run bar.
 func Contacts() string {
-	return shellWrap(contactsRail(), contactsMain(), contactsSide(), contactsOverlays())
+	return shellFrame(shellNav("/contacts"), contactsRail(), contactsMain(), contactsSide(), contactsOverlays())
 }
 
-func contactsRail() string {
+func contactsRail() widget.Rail {
 	n312, n248, n51, n13 := 312, 248, 51, 13
-	return shellNav("/contacts") +
-		widget.Rail{
-			Sections: []widget.RailSection{
-				{
-					Rows: []widget.TickRow{{
-						Label: "Combined address book",
-						Count: intPtr(n312),
-						Tick:  widget.TickPartial,
-					}},
-				},
-				{
-					Title: "nextcloud · home",
-					Rows: []widget.TickRow{
-						{Label: "Контакты", Mark: widget.Mark{Colour: "#4A6B52", Label: "Контакты"}, Count: intPtr(n248)},
-						{Label: "Архив", Mark: widget.Mark{Colour: "#A05A2C", Label: "Архив"}, Count: intPtr(n51)},
-					},
-				},
-				{
-					Title: "radicale · vps",
-					Rows: []widget.TickRow{
-						{Label: "Команда", Mark: widget.Mark{Colour: "#6B4E7A", Label: "Команда"}, Count: intPtr(n13), State: widget.TickRowReadOnly},
-						{Label: "Рассылки", Mark: widget.Mark{Colour: "#8C6239", Label: "Рассылки"}, Tick: widget.TickOff, State: widget.TickRowGone},
-					},
+	return widget.Rail{
+		Sections: []widget.RailSection{
+			{
+				Rows: []widget.TickRow{{
+					Label: "Combined address book",
+					Count: intPtr(n312),
+					Tick:  widget.TickPartial,
+				}},
+			},
+			{
+				Title: "nextcloud · home",
+				Rows: []widget.TickRow{
+					{Label: "Контакты", Mark: widget.Mark{Colour: "#4A6B52", Label: "Контакты"}, Count: intPtr(n248)},
+					{Label: "Архив", Mark: widget.Mark{Colour: "#A05A2C", Label: "Архив"}, Count: intPtr(n51)},
 				},
 			},
-			Chips: []widget.Chip{
-				{Label: "all", On: true},
-				{Label: "работа"},
-				{Label: "издательство"},
-			},
-			Foot: widget.RailFoot{
-				Actions: []widget.Action{
-					{Label: "New address book", Icon: "+"},
-					{Label: "Connect account", Icon: "⎈"},
-					{Label: "Subscribe to a feed", Icon: "🔗"},
+			{
+				Title: "radicale · vps",
+				Rows: []widget.TickRow{
+					{Label: "Команда", Mark: widget.Mark{Colour: "#6B4E7A", Label: "Команда"}, Count: intPtr(n13), State: widget.TickRowReadOnly},
+					{Label: "Рассылки", Mark: widget.Mark{Colour: "#8C6239", Label: "Рассылки"}, Tick: widget.TickOff, State: widget.TickRowGone},
 				},
-				Build: demoBuild,
 			},
-		}.Render()
+		},
+		Chips: []widget.Chip{
+			{Label: "all", On: true},
+			{Label: "работа"},
+			{Label: "издательство"},
+		},
+		Foot: widget.RailFoot{
+			Actions: []widget.Action{
+				{Label: "New address book", Icon: "+"},
+				{Label: "Connect account", Icon: "⎈"},
+				{Label: "Subscribe to a feed", Icon: "🔗"},
+			},
+			Build: demoBuild,
+		},
+	}
 }
 
-func contactsMain() string {
+func contactsMain() widget.Main {
 	head := widget.Head{
 		Mark:  widget.Mark{Colour: "#4a6b52", Label: "Combined"},
 		Title: "Combined address book",
 		Sub:   "3 of 4 books · 2 accounts · 312 cards",
 		Actions: []widget.Action{
 			{Label: "New contact", Kind: widget.ButtonPrimary, Icon: "+"},
+		},
+		Rank2: []widget.Action{
 			{Label: "Import", Icon: "↑"},
 			{Label: "Export", Icon: "↓"},
 			{Label: "Print", Icon: "🖨"},
 		},
-	}.Render()
+	}
 
 	search := widget.Search{
 		Action: "/search",
@@ -73,26 +74,25 @@ func contactsMain() string {
 			{Label: "Анна Ковалёва", Hint: "Contact", Href: "/contacts/anna"},
 		},
 		Suggesting: true,
-	}.Render()
+	}
 
 	bar := widget.Bar{
 		Left: []widget.Node{
 			widget.Input{Name: "filter", Kind: widget.InputText, Placeholder: "Filter the loaded cards"},
-			widget.Kbd{Keys: []string{"Ctrl", "F"}},
-			widget.Kbd{Keys: []string{"Ctrl", "F"}},
 			widget.Seg{
 				Name:    "sort",
 				Chosen:  "az",
 				Options: []widget.SegOption{{Label: "A–Z", Value: "az"}, {Label: "Recently changed", Value: "changed"}},
 			},
-			widget.Range{From: "2026-01-01", To: "2026-08-31", Presets: []widget.Action{{Label: "Last 7 days"}}},
 		},
 		Right: []widget.Node{
 			widget.Button{Label: "Columns", Icon: "▦", Size: widget.ButtonSizeBar},
 			widget.Check{Name: "compact", Label: "Compact rows"},
 			widget.Num{Value: intPtr(312)},
 		},
-	}.Render()
+	}
+
+	rangeFilter := widget.Range{From: "2026-01-01", To: "2026-08-31", Presets: []widget.Action{{Label: "Last 7 days"}}}
 
 	n3, n2 := 3, 2
 	listA := widget.List{
@@ -130,7 +130,7 @@ func contactsMain() string {
 				},
 			},
 		}},
-	}.Render()
+	}
 
 	listV := widget.List{
 		Groups: []widget.ListGroup{{
@@ -156,7 +156,7 @@ func contactsMain() string {
 				},
 			},
 		}},
-	}.Render()
+	}
 
 	runbar := widget.RunBar{
 		Summary: "Loading more cards",
@@ -167,7 +167,7 @@ func contactsMain() string {
 			{Label: "nextcloud · Архив", State: widget.RunItemRunning},
 			{Label: "radicale · Команда", State: widget.RunItemWaiting},
 		},
-	}.Render()
+	}
 
 	editForm := widget.Form{
 		Action: "/contacts/save",
@@ -201,17 +201,26 @@ func contactsMain() string {
 			Primary: widget.Action{Label: "Save", Kind: widget.ButtonPrimary},
 			Rest:    []widget.Action{{Label: "Cancel"}},
 		},
-	}.Render()
+	}
 
-	crop := widget.Crop{Href: "/img/sample.svg", Zoom: 100}.Render()
-
-	return `<main class="tc-main" aria-label="Contacts"><div class="tc-main__body">` +
-		head + search + bar + listA + listV + runbar + editForm + crop +
-		`</div></main>`
+	return widget.Main{
+		Label: "Contacts",
+		Body: []widget.Node{
+			head,
+			search,
+			bar,
+			rangeFilter,
+			widget.Kbd{Keys: []string{"Ctrl", "F"}},
+			listA,
+			listV,
+			runbar,
+			editForm,
+			widget.Crop{Href: "/img/sample.svg", Zoom: 100},
+		},
+	}
 }
 
-func contactsSide() string {
-	id := "contacts-side"
+func contactsSide() widget.Side {
 	fields := widget.Fields{Rows: []widget.FieldRow{
 		{Label: "Organisation", Value: "Издательство «Слово»"},
 		{Label: "Title", Value: "Выпускающий редактор"},
@@ -220,26 +229,35 @@ func contactsSide() string {
 		{Label: "Email · work", Value: "a.kovaleva@example.org"},
 		{Label: "Birthday", Value: "1987-03-14"},
 		{Label: "Note", Value: "Пишет по вторникам, отвечает в тот же день."},
-	}}.Render()
+	}}
 
 	source := widget.Sec{
 		Rubric: widget.Rubric{Text: "Source"},
 		Body:   []widget.Node{widget.Prose{Blocks: []widget.ProseBlock{{Kind: widget.ProseCode, Code: "UID   4f2b-9c31-a0e7\nRead  2 min ago"}}}},
-	}.Render()
+	}
 
-	return `<aside class="tc-side is-open" data-tc-side id="` + id + `" aria-label="Contact details">` +
-		`<header class="tc-side__head"><h2 class="tc-side__title">Анна Ковалёва</h2>` +
-		widget.Close{For: id, Label: "Close the panel"}.Render() +
-		`</header><div class="tc-side__body">` +
-		widget.Avatar{Initials: "АК", Colour: "#4A6B52", Size: widget.AvatarSizeCard}.Render() +
-		widget.Bar{Left: []widget.Node{widget.Action{Label: "Edit"}, widget.Action{Label: "All records"}}}.Render() +
-		fields + source +
-		widget.Danger{Title: "Danger zone", Rows: []widget.DangerRow{{
+	danger := widget.Sec{
+		Body: []widget.Node{widget.Danger{Title: "Danger zone", Rows: []widget.DangerRow{{
 			Title:  "Delete contact",
 			Text:   "Removes the card from the server.",
 			Action: widget.Action{Label: "Delete contact", Kind: widget.ButtonDanger},
-		}}}.Render() +
-		`</div></aside>`
+		}}}},
+	}
+
+	return widget.Side{
+		Label: "Contact details",
+		Title: "Анна Ковалёва",
+		Open:  true,
+		Blocks: []widget.SideBlock{
+			{Sec: &widget.Sec{Body: []widget.Node{
+				widget.Avatar{Initials: "АК", Colour: "#4A6B52", Size: widget.AvatarSizeCard},
+				widget.Bar{Left: []widget.Node{widget.Action{Label: "Edit"}, widget.Action{Label: "All records"}}},
+			}}},
+			{Fields: &fields},
+			{Sec: &source},
+			{Sec: &danger},
+		},
+	}
 }
 
 func contactsOverlays() string {

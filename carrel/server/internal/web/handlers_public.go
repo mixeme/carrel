@@ -55,8 +55,8 @@ func (s *Server) getAbout(w http.ResponseWriter, r *http.Request) {
 		Source: view.Action{
 			ID: "about.source", Label: "Source code", Href: "https://carrel.dev", Method: "GET", Enabled: true,
 		},
-		Third: view.Action{ID: "about.third", Label: "Third-party notices", Href: "/about", Method: "GET", Enabled: true},
-		Back:  view.Action{ID: "about.back", Label: "Back", Href: "/login", Method: "GET", Enabled: true},
+		Third: view.Action{ID: "about.third", Label: "Third-party notices", Href: s.route("/about"), Method: "GET", Enabled: true},
+		Back:  view.Action{ID: "about.back", Label: "Back", Href: s.route("/login"), Method: "GET", Enabled: true},
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
@@ -77,13 +77,13 @@ func (s *Server) getLogin(w http.ResponseWriter, r *http.Request) {
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 		),
-		Forgot: view.Action{ID: "login.forgot", Label: "Forgotten your password?", Href: "/forgot", Method: "GET", Enabled: true},
-		About:  view.Action{ID: "login.about", Label: "About", Href: "/about", Method: "GET", Enabled: true},
+		Forgot: view.Action{ID: "login.forgot", Label: "Forgotten your password?", Href: s.route("/forgot"), Method: "GET", Enabled: true},
+		About:  view.Action{ID: "login.about", Label: "About", Href: s.route("/about"), Method: "GET", Enabled: true},
 	}
 	if s.users.RegisterOpen() {
 		page.Form.Sets[0].Rows = append(page.Form.Sets[0].Rows,
 			view.FormRow{Name: "register", Label: "", Kind: view.InputText, Extra: &view.Action{
-				ID: "login.register", Label: "Create an account", Href: "/register", Method: "GET", Enabled: true,
+				ID: "login.register", Label: "Create an account", Href: s.route("/register"), Method: "GET", Enabled: true,
 			}},
 		)
 	}
@@ -325,7 +325,7 @@ func (s *Server) getConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	page := view.ConfirmEmailPage{
 		Plain: view.Plain{Title: text("Email confirmed"), Lede: text("You can sign in now.")},
 		OK:    true,
-		Next:  view.Action{ID: "confirm.login", Label: "Sign in", Href: "/login", Method: "GET", Enabled: true},
+		Next:  view.Action{ID: "confirm.login", Label: "Sign in", Href: s.route("/login"), Method: "GET", Enabled: true},
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
