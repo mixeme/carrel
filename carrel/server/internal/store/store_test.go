@@ -223,3 +223,45 @@ func TestAtomicWriteUsesTempFile(t *testing.T) {
 		t.Fatal("temp file should be gone")
 	}
 }
+
+// The secret scan looks at the free-form field. A person may legitimately be
+// called "secretary" or "tokarev", and a name must never make an account
+// unauditable — a rejected audit entry fails the whole Mutate, which would
+// leave that account unmanageable.
+func TestAuditAllowsIdentitiesThatLookLikeKeywords(t *testing.T) {
+	dir := t.TempDir()
+	key := testKey(t)
+	st, err := Open(dir, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	when := time.Now().UTC()
+	err = st.Mutate(func(s *State) ([]AuditEntry, error) {
+		return []AuditEntry{
+			{When: when, Who: "admin", What: "password.change", Whom: "secretary@corp.example"},
+			{When: when, Who: "tokarev", What: "user.create", Whom: "passwordless@corp.example"},
+		}, nil
+	})
+	if err != nil {
+		t.Fatalf("legitimate audit entries rejected: %v", err)
+	}
+	if got := len(st.Snapshot().Audit); got != 2 {
+		t.Fatalf("audit = %d entries, want 2", got)
+	}
+}
+
+// What is a programmer-chosen event code, not prose: nothing a person typed
+// arrives through it.
+func TestAuditWhatMustBeAnEventCode(t *testing.T) {
+	dir := t.TempDir()
+	st, err := Open(dir, testKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = st.Mutate(func(s *State) ([]AuditEntry, error) {
+		return []AuditEntry{{When: time.Now().UTC(), Who: "admin", What: "changed the password to hunter2"}}, nil
+	})
+	if !errors.Is(err, ErrAuditWhat) {
+		t.Fatalf("expected ErrAuditWhat, got %v", err)
+	}
+}

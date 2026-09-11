@@ -52,6 +52,12 @@ func CreateServerKey(dataDir string) ([KeyLen]byte, error) {
 		_ = os.Remove(path)
 		return key, err
 	}
+	// Without the sync a crash can leave a zero-length key: the volume then
+	// refuses to start (ErrServerKeyCorrupt) with the data still sealed.
+	if err := f.Sync(); err != nil {
+		_ = os.Remove(path)
+		return key, err
+	}
 	return key, nil
 }
 

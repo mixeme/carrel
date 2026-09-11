@@ -128,18 +128,60 @@ type propValue struct {
 	params map[string]string
 }
 
-// NewObjectFromRaw constructs an Object from a parsed property map. Used by
-// providers after fetching from DAV.
-func NewObjectFromRaw(path, etag string, props map[string]propState) *Object {
+// RawValue is one value of one property as it arrived from the far server:
+// the text plus its parameters. It is the only way in — the parsed record
+// itself stays unexported, so nothing above this package can rebuild an
+// iCalendar or vCard object out of form fields (S-7).
+type RawValue struct {
+	Text   string
+	Params map[string]string
+}
+
+// NewObject constructs an Object from parsed properties. Providers call it
+// after fetching from DAV; property names are folded to upper case.
+func NewObject(path, etag string, props map[string][]RawValue) *Object {
 	cp := make(map[string]propState, len(props))
-	for k, v := range props {
-		cp[k] = v.clone()
+	for name, values := range props {
+		st := propState{values: make([]propValue, len(values))}
+		for i, v := range values {
+			st.values[i].text = v.Text
+			if len(v.Params) > 0 {
+				st.values[i].params = make(map[string]string, len(v.Params))
+				for k, pv := range v.Params {
+					st.values[i].params[strings.ToUpper(k)] = pv
+				}
+			}
+		}
+		cp[strings.ToUpper(name)] = st
 	}
 	return &Object{
 		Path: path,
 		ETag: etag,
 		raw:  payload{props: cp},
 	}
+}
+
+// Props returns the record for display: property names with their values and
+// parameters, copied out. Callers get a view, never the record itself.
+func (o *Object) Props() map[string][]RawValue {
+	if o == nil {
+		return nil
+	}
+	out := make(map[string][]RawValue, len(o.raw.props))
+	for name, st := range o.raw.props {
+		values := make([]RawValue, len(st.values))
+		for i, v := range st.values {
+			values[i].Text = v.text
+			if len(v.params) > 0 {
+				values[i].Params = make(map[string]string, len(v.params))
+				for k, pv := range v.params {
+					values[i].Params[k] = pv
+				}
+			}
+		}
+		out[name] = values
+	}
+	return out
 }
 
 func (p propState) clone() propState {

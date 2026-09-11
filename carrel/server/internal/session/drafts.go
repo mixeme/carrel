@@ -8,17 +8,43 @@ type HistoryEntry struct {
 	At    time.Time
 }
 
+// DraftSlot names one multi-step edit held between requests.
+type DraftSlot int
+
+const (
+	// DraftRejectedEdit is the edit a conflicting write handed back (S-8).
+	DraftRejectedEdit DraftSlot = iota
+	// DraftPendingPhoto is an uploaded photo awaiting confirmation (S-13).
+	DraftPendingPhoto
+	// DraftPendingImport is a parsed import awaiting confirmation (S-19).
+	DraftPendingImport
+	numDraftSlots
+)
+
 // Drafts holds multi-step edits that survive one request but not the session.
+// Access goes through Session so the slots stay behind the session lock.
 type Drafts struct {
-	RejectedEdit  []byte
-	PendingPhoto  []byte
-	PendingImport []byte
+	slots [numDraftSlots][]byte
+}
+
+func (d *Drafts) get(slot DraftSlot) []byte {
+	if slot < 0 || slot >= numDraftSlots {
+		return nil
+	}
+	return d.slots[slot]
+}
+
+func (d *Drafts) set(slot DraftSlot, data []byte) {
+	if slot < 0 || slot >= numDraftSlots {
+		return
+	}
+	d.slots[slot] = data
 }
 
 func (d *Drafts) clear() {
-	d.RejectedEdit = nil
-	d.PendingPhoto = nil
-	d.PendingImport = nil
+	for i := range d.slots {
+		d.slots[i] = nil
+	}
 }
 
 // LossRegistry records properties a server has already been seen dropping (S-7).

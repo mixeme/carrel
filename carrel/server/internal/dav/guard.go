@@ -18,6 +18,10 @@ import (
 // ErrSSRF is returned when a target address is not permitted.
 var ErrSSRF = errors.New("dav: outbound address blocked")
 
+// ErrResponseTooLarge is returned when a reply exceeds
+// CARREL_DAV_MAX_RESPONSE_BYTES. It is a state on the screen, not a 500.
+var ErrResponseTooLarge = errors.New("dav: response exceeds limit")
+
 // Guard validates outbound DAV targets and builds guarded HTTP clients (S-5.1).
 type Guard struct {
 	allow       map[string]struct{}
@@ -50,7 +54,9 @@ func NewGuard(c *conf.Config) *Guard {
 // HTTPClient returns an HTTP client that enforces SSRF rules on every request.
 func (g *Guard) HTTPClient() *http.Client {
 	transport := &http.Transport{
-		Proxy:                 http.ProxyFromEnvironment,
+		// No proxy: with one set, the dialler would connect to the proxy and
+		// the real target would never be IP-checked (architecture.md, SSRF).
+		Proxy:                 nil,
 		DialContext:           g.dialContext,
 		DialTLSContext:        g.dialTLSContext,
 		TLSClientConfig:       &tls.Config{MinVersion: tls.VersionTLS12},
@@ -88,12 +94,23 @@ func (g *Guard) dialContext(ctx context.Context, network, address string) (net.C
 	}
 
 	dialer := net.Dialer{Timeout: g.connect}
+	var permitted bool
+	var lastErr error
 	for _, ip := range ips {
-		if allow || !blockedIP(ip.IP) {
-			return dialer.DialContext(ctx, network, net.JoinHostPort(ip.IP.String(), port))
+		if !allow && blockedIP(ip.IP) {
+			continue
 		}
+		permitted = true
+		conn, err := dialer.DialContext(ctx, network, net.JoinHostPort(ip.IP.String(), port))
+		if err == nil {
+			return conn, nil
+		}
+		lastErr = err
 	}
-	return nil, fmt.Errorf("%w: %s", ErrSSRF, host)
+	if !permitted {
+		return nil, fmt.Errorf("%w: %s", ErrSSRF, host)
+	}
+	return nil, lastErr
 }
 
 func (g *Guard) dialTLSContext(ctx context.Context, network, address string) (net.Conn, error) {
@@ -187,15 +204,20 @@ type limitedBody struct {
 	remain int64
 }
 
+// Read passes the body through until one byte more than the cap has been
+// seen. Reading exactly the cap is a complete reply, not an overrun.
 func (b *limitedBody) Read(p []byte) (int, error) {
-	if b.remain <= 0 {
-		return 0, fmt.Errorf("dav: response exceeds limit")
+	if b.remain < 0 {
+		return 0, ErrResponseTooLarge
 	}
-	if int64(len(p)) > b.remain {
-		p = p[:b.remain]
+	if int64(len(p)) > b.remain+1 {
+		p = p[:b.remain+1]
 	}
 	n, err := b.ReadCloser.Read(p)
 	b.remain -= int64(n)
+	if b.remain < 0 {
+		return 0, ErrResponseTooLarge
+	}
 	return n, err
 }
 

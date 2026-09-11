@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/crypt"
@@ -53,7 +54,13 @@ func run(cfg *conf.Config) error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", healthz)
 
-	srv := &http.Server{Addr: addr, Handler: mux}
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: mux,
+		// A request that never finishes its headers must not hold a
+		// connection open forever.
+		ReadHeaderTimeout: 20 * time.Second,
+	}
 	slog.Info("carrel: listening", "addr", addr, "version", version, "commit", commit)
 	return srv.ListenAndServe()
 }

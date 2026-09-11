@@ -344,7 +344,8 @@ type propBody struct {
 }
 
 type rawXML struct {
-	XMLName xml.Name
+	XMLName  xml.Name
+	InnerXML []byte `xml:",innerxml"`
 }
 
 type xmlMultiStatus struct {
@@ -361,6 +362,9 @@ type xmlPropStat struct {
 	Status string   `xml:"status"`
 }
 
+// propFindXML asks for named properties; the reply carries their values, so
+// rawXML keeps the inner XML rather than the element name alone.
+
 func decodeMultiStatus(r io.Reader) (*MultiStatus, error) {
 	var ms xmlMultiStatus
 	if err := xml.NewDecoder(r).Decode(&ms); err != nil {
@@ -369,10 +373,22 @@ func decodeMultiStatus(r io.Reader) (*MultiStatus, error) {
 	out := &MultiStatus{Responses: make([]Response, 0, len(ms.Responses))}
 	for _, resp := range ms.Responses {
 		r := Response{Href: resp.Href, Props: make(map[xml.Name][]byte)}
+		// A reply normally carries several propstat blocks: 200 for the
+		// properties that exist, 404 for the ones that do not. Only the
+		// successful block contributes values, and the resource status is
+		// that block's — a trailing 404 for absent properties does not make
+		// the resource missing.
 		for _, ps := range resp.PropStat {
-			r.StatusCode = parseStatus(ps.Status)
+			code := parseStatus(ps.Status)
+			if code/100 != 2 {
+				if r.StatusCode == 0 {
+					r.StatusCode = code
+				}
+				continue
+			}
+			r.StatusCode = code
 			for _, raw := range ps.Prop.Raw {
-				r.Props[raw.XMLName] = nil
+				r.Props[raw.XMLName] = append([]byte(nil), raw.InnerXML...)
 			}
 		}
 		out.Responses = append(out.Responses, r)

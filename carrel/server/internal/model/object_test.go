@@ -6,8 +6,8 @@ import (
 )
 
 func TestPatchRejectedDoesNotChangeObject(t *testing.T) {
-	obj := NewObjectFromRaw("/c/u.vcf", `"1"`, map[string]propState{
-		"FN": {values: []propValue{{text: "Ada"}}},
+	obj := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"FN": {{Text: "Ada"}},
 	})
 	before := obj.PropText("FN")
 
@@ -24,8 +24,8 @@ func TestPatchRejectedDoesNotChangeObject(t *testing.T) {
 }
 
 func TestPatchApplyAllOrNothing(t *testing.T) {
-	obj := NewObjectFromRaw("/c/u.vcf", `"1"`, map[string]propState{
-		"FN": {values: []propValue{{text: "Ada"}}},
+	obj := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"FN": {{Text: "Ada"}},
 	})
 	p, err := NewPatch(SetText{Prop: "NOTE", Value: "hello"})
 	if err != nil {
@@ -43,11 +43,11 @@ func TestPatchApplyAllOrNothing(t *testing.T) {
 }
 
 func TestRemovePropDistinctFromEmpty(t *testing.T) {
-	obj1 := NewObjectFromRaw("/c/u.vcf", `"1"`, map[string]propState{
-		"NOTE": {values: []propValue{{text: "x"}}},
+	obj1 := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"NOTE": {{Text: "x"}},
 	})
-	obj2 := NewObjectFromRaw("/c/u.vcf", `"1"`, map[string]propState{
-		"NOTE": {values: []propValue{{text: "x"}}},
+	obj2 := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"NOTE": {{Text: "x"}},
 	})
 
 	p1, err := NewPatch(SetText{Prop: "NOTE", Value: ""})
@@ -80,8 +80,8 @@ func TestNewPatchValidatesUpFront(t *testing.T) {
 }
 
 func TestRejectedApplyRollsBack(t *testing.T) {
-	obj := NewObjectFromRaw("/c/u.vcf", `"1"`, map[string]propState{
-		"FN": {values: []propValue{{text: "Ada"}}},
+	obj := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"FN": {{Text: "Ada"}},
 	})
 	p, err := NewPatch(
 		SetText{Prop: "FN", Value: "Grace"},
@@ -95,5 +95,30 @@ func TestRejectedApplyRollsBack(t *testing.T) {
 	}
 	if got := obj.PropText("FN"); len(got) != 1 || got[0] != "Ada" {
 		t.Fatalf("partial apply left FN = %v", got)
+	}
+}
+
+// Providers live in another package, so the way into the model has to be
+// callable from there: exported constructor, exported argument types, and the
+// parsed record itself still unreachable (S-7).
+func TestObjectIngressIsUsableFromOtherPackages(t *testing.T) {
+	obj := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"fn":    {{Text: "Ada"}},
+		"EMAIL": {{Text: "ada@example.com", Params: map[string]string{"type": "WORK"}}},
+	})
+
+	props := obj.Props()
+	if got := props["FN"]; len(got) != 1 || got[0].Text != "Ada" {
+		t.Fatalf("FN = %#v (property names fold to upper case)", got)
+	}
+	email := props["EMAIL"]
+	if len(email) != 1 || email[0].Params["TYPE"] != "WORK" {
+		t.Fatalf("EMAIL = %#v (parameter names fold to upper case)", email)
+	}
+
+	// Props hands out a copy: writing to it does not reach the record.
+	props["FN"][0].Text = "Grace"
+	if got := obj.PropText("FN"); got[0] != "Ada" {
+		t.Fatalf("mutating the returned view changed the record: %q", got[0])
 	}
 }

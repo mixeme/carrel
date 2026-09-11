@@ -211,6 +211,9 @@ func PageHTML(title string, entries []Entry, withJS bool) string {
 	if family != "" {
 		sections.WriteString("</section>")
 	}
+	// The theme boot script runs on both pages: it must precede first paint
+	// (L-5.3) and is not widget behavior. Only tc.js is withheld from the
+	// second page.
 	js := ""
 	if withJS {
 		js = `<script src="/tc.js"></script>`
@@ -221,12 +224,17 @@ func PageHTML(title string, entries []Entry, withJS bool) string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>%s</title>
+<script src="/theme.js"></script>
 <link rel="stylesheet" href="/typecase.css">
 <style>
 .catalog-family { margin: 2em 0; }
 .catalog-entry { margin: 1.5em 0; padding: 1em; border: 1px solid var(--tc-rule); border-radius: var(--tc-radius); background: var(--tc-surface); }
 .catalog-demo { margin-top: 0.75em; padding: 0.75em; background: var(--tc-bg); border-radius: var(--tc-radius); }
 .catalog-nav { display: flex; gap: 1em; margin-bottom: 1em; }
+/* Scrims, overlays and the rail drawer are fixed to the viewport by design.
+   In the catalog every state is on one page, so each such cell becomes its own
+   containing block; otherwise one open scrim covers every other entry. */
+.catalog-demo:has(.tc-scrim, .tc-overlay, .tc-rail--drawer) { position: relative; min-height: 220px; overflow: hidden; transform: translate(0); }
 </style>
 </head>
 <body data-tc-root>

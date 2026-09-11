@@ -198,12 +198,14 @@ func TestLossRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r := s.Losses()
-	r.Note("srv1", "X-FOO")
-	if !r.Has("srv1", "X-FOO") {
+	s.NoteLoss("srv1", "X-FOO")
+	if !s.HasLoss("srv1", "X-FOO") {
 		t.Fatal("loss not recorded")
 	}
-	if len(r.Props("srv1")) != 1 {
+	if len(s.LostProps("srv1")) != 1 {
 		t.Fatal("expected one prop")
+	}
+	if s.HasLoss("srv2", "X-FOO") {
+		t.Fatal("loss leaked to another server")
 	}
 }

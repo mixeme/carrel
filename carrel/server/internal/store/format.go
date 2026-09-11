@@ -93,7 +93,25 @@ func atomicWrite(path string, data []byte) error {
 	if err := f.Close(); err != nil {
 		return err
 	}
-	return os.Rename(tmp, path)
+	if err := os.Rename(tmp, path); err != nil {
+		return err
+	}
+	return syncDir(dir)
+}
+
+// syncDir makes the rename itself durable: without it a crash can leave the
+// directory entry pointing at neither the old file nor the new one. Best
+// effort — Windows does not let a directory handle be synced, and there the
+// rename is already the strongest guarantee the filesystem offers, so a
+// failure here is not reported as a failed write.
+func syncDir(dir string) error {
+	d, err := os.Open(dir)
+	if err != nil {
+		return nil
+	}
+	defer d.Close()
+	_ = d.Sync()
+	return nil
 }
 
 // jsonMarshal/jsonUnmarshal are thin wrappers so tests can stay in the package

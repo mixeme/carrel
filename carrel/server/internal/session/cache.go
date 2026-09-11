@@ -1,7 +1,9 @@
 package session
 
 import (
+	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -26,13 +28,19 @@ type cacheEntry struct {
 
 // Cache stores discovered collections, version maps, bodies, and related data
 // for one session (S-4.2).
+//
+// Several requests of one session run at once — the desk asks for fragments
+// while a fanout is still going — so every method takes mu. The process-wide
+// budget is enforced after mu is released: the manager lock is never taken
+// while a cache lock is held, and evictProcessWide takes one cache lock at a
+// time, so the two locks are never nested in both orders.
 type Cache struct {
 	cfg *conf.Config
 	mgr *Manager
 
-	entries map[string]*cacheEntry
-	order   []string // LRU, oldest first
-
+	mu         sync.Mutex
+	entries    map[string]*cacheEntry
+	order      []string // insertion order, oldest first
 	bodyBytes  int64
 	etagBytes  int64
 	thumbBytes int64
@@ -94,31 +102,38 @@ func (c *Cache) GetThumb(path, version string) ([]byte, bool) {
 
 // InvalidatePath drops cached data for one object path (after write/delete).
 func (c *Cache) InvalidatePath(path string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	var drop []string
 	for k, e := range c.entries {
-		if strings.Contains(e.key, "\x00"+path+"\x00") || e.key == etagKey(path) {
+		if strings.Contains(e.key, "\x00"+path+"\x00") ||
+			e.key == etagKey(path) || e.key == collKey(path) {
 			drop = append(drop, k)
 		}
 	}
 	for _, k := range drop {
-		c.remove(k)
+		c.removeLocked(k)
 	}
 }
 
 func (c *Cache) put(kind cacheKind, key string, data []byte) {
-	if old, ok := c.entries[key]; ok {
-		c.subtract(old)
-		c.removeKey(key)
+	c.mu.Lock()
+	if _, ok := c.entries[key]; ok {
+		c.removeLocked(key)
 	}
 	n := int64(len(data))
-	e := &cacheEntry{kind: kind, key: key, data: data, bytes: n, at: time.Now()}
-	c.entries[key] = e
+	c.entries[key] = &cacheEntry{kind: kind, key: key, data: data, bytes: n, at: time.Now()}
 	c.order = append(c.order, key)
-	c.addBytes(kind, n)
-	c.enforceLimits()
+	c.addBytesLocked(kind, n)
+	c.enforceSessionLimitsLocked()
+	c.mu.Unlock()
+
+	c.enforceProcessBudget()
 }
 
 func (c *Cache) get(key string) ([]byte, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	e, ok := c.entries[key]
 	if !ok {
 		return nil, false
@@ -127,53 +142,65 @@ func (c *Cache) get(key string) ([]byte, bool) {
 	return e.data, true
 }
 
-func (c *Cache) enforceLimits() {
-	c.evictSession(kindBody, c.cfg.CacheMaxBodyBytes, &c.bodyBytes)
-	c.evictSession(kindThumb, c.cfg.CacheMaxThumbBytes, &c.thumbBytes)
-	c.evictSession(kindETagMap, int64(c.cfg.CacheMaxETagEntries)*64, &c.etagBytes)
-	if c.mgr != nil && c.mgr.ProcessBytes() > c.cfg.CacheMaxProcessBytes {
-		need := c.mgr.ProcessBytes() - c.cfg.CacheMaxProcessBytes
-		c.mgr.evictProcessWide(need)
-	}
+func (c *Cache) enforceSessionLimitsLocked() {
+	c.evictBytesLocked(kindBody, c.cfg.CacheMaxBodyBytes, &c.bodyBytes)
+	c.evictBytesLocked(kindThumb, c.cfg.CacheMaxThumbBytes, &c.thumbBytes)
+	// C-12 counts these in entries, not bytes.
+	c.evictCountLocked(kindETagMap, c.cfg.CacheMaxETagEntries)
+	c.evictCountLocked(kindThumb, c.cfg.CacheMaxThumbEntries)
+	c.evictCountLocked(kindOther, c.cfg.CacheMaxCollections)
 }
 
-func (c *Cache) evictSession(kind cacheKind, max int64, counter *int64) {
+func (c *Cache) evictBytesLocked(kind cacheKind, max int64, counter *int64) {
+	if max <= 0 {
+		return
+	}
 	for *counter > max {
-		if !c.evictOne(kind) {
-			break
+		if !c.evictOneLocked(kind) {
+			return
 		}
 	}
 }
 
-func (c *Cache) evictOne(prefer cacheKind) bool {
-	// Bodies before maps (S-4.2).
-	for _, k := range c.order {
-		e := c.entries[k]
-		if e == nil || e.kind != prefer {
-			continue
-		}
-		c.remove(k)
-		return true
+func (c *Cache) evictCountLocked(kind cacheKind, max int) {
+	if max <= 0 {
+		return
 	}
+	for c.countLocked(kind) > max {
+		if !c.evictOneLocked(kind) {
+			return
+		}
+	}
+}
+
+func (c *Cache) countLocked(kind cacheKind) int {
+	var n int
+	for _, e := range c.entries {
+		if e.kind == kind {
+			n++
+		}
+	}
+	return n
+}
+
+// evictOneLocked drops the oldest entry of kind. It does not fall back to
+// another kind: a body budget is not paid for with someone else's version map.
+func (c *Cache) evictOneLocked(kind cacheKind) bool {
 	for _, k := range c.order {
-		if c.entries[k] != nil {
-			c.remove(k)
+		if e := c.entries[k]; e != nil && e.kind == kind {
+			c.removeLocked(k)
 			return true
 		}
 	}
 	return false
 }
 
-func (c *Cache) remove(key string) {
+func (c *Cache) removeLocked(key string) {
 	e := c.entries[key]
 	if e == nil {
 		return
 	}
-	c.subtract(e)
-	c.removeKey(key)
-}
-
-func (c *Cache) removeKey(key string) {
+	c.addBytesLocked(e.kind, -e.bytes)
 	delete(c.entries, key)
 	for i, k := range c.order {
 		if k == key {
@@ -183,20 +210,7 @@ func (c *Cache) removeKey(key string) {
 	}
 }
 
-func (c *Cache) subtract(e *cacheEntry) {
-	switch e.kind {
-	case kindBody:
-		c.bodyBytes -= e.bytes
-	case kindETagMap:
-		c.etagBytes -= e.bytes
-	case kindThumb:
-		c.thumbBytes -= e.bytes
-	default:
-		c.otherBytes -= e.bytes
-	}
-}
-
-func (c *Cache) addBytes(kind cacheKind, n int64) {
+func (c *Cache) addBytesLocked(kind cacheKind, n int64) {
 	switch kind {
 	case kindBody:
 		c.bodyBytes += n
@@ -210,16 +224,34 @@ func (c *Cache) addBytes(kind cacheKind, n int64) {
 }
 
 func (c *Cache) totalBytes() int64 {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.bodyBytes + c.etagBytes + c.thumbBytes + c.otherBytes
 }
 
 func (c *Cache) clear() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.entries = make(map[string]*cacheEntry)
 	c.order = nil
 	c.bodyBytes = 0
 	c.etagBytes = 0
 	c.thumbBytes = 0
 	c.otherBytes = 0
+}
+
+// enforceProcessBudget trims caches across every session once this one has
+// pushed the process past CARREL_CACHE_MAX_PROCESS_BYTES. Called with no cache
+// lock held.
+func (c *Cache) enforceProcessBudget() {
+	if c.mgr == nil || c.cfg.CacheMaxProcessBytes <= 0 {
+		return
+	}
+	total := c.mgr.ProcessBytes()
+	if total <= c.cfg.CacheMaxProcessBytes {
+		return
+	}
+	c.mgr.evictProcessWide(total - c.cfg.CacheMaxProcessBytes)
 }
 
 type evictCandidate struct {
@@ -229,6 +261,8 @@ type evictCandidate struct {
 }
 
 func (c *Cache) evictionCandidates() []evictCandidate {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	out := make([]evictCandidate, 0, len(c.entries))
 	for _, e := range c.entries {
 		out = append(out, evictCandidate{key: e.key, kind: e.kind, at: e.at})
@@ -236,16 +270,22 @@ func (c *Cache) evictionCandidates() []evictCandidate {
 	return out
 }
 
+// drop removes one entry if it is still present with the expected kind and
+// reports how many bytes that freed.
 func (c *Cache) drop(kind cacheKind, key string) int64 {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	e := c.entries[key]
 	if e == nil || e.kind != kind {
 		return 0
 	}
 	n := e.bytes
-	c.remove(key)
+	c.removeLocked(key)
 	return n
 }
 
+// evictProcessWide frees need bytes across every live session. Bodies go
+// before version maps (S-4.2, C-12), oldest first within a kind.
 func (m *Manager) evictProcessWide(need int64) {
 	type pick struct {
 		sid  string
@@ -253,46 +293,52 @@ func (m *Manager) evictProcessWide(need int64) {
 		kind cacheKind
 		at   time.Time
 	}
-	var all []pick
+
 	m.mu.Lock()
+	caches := make(map[string]*Cache, len(m.byID))
 	for sid, s := range m.byID {
-		for _, e := range s.cache.evictionCandidates() {
-			all = append(all, pick{sid: sid, key: e.key, kind: e.kind, at: e.at})
-		}
+		caches[sid] = s.cache
 	}
 	m.mu.Unlock()
 
-	// Sort: bodies first, then oldest within kind.
-	for i := 0; i < len(all); i++ {
-		for j := i + 1; j < len(all); j++ {
-			a, b := all[i], all[j]
-			if bodyBefore(a.kind, b.kind) || (a.kind == b.kind && a.at.After(b.at)) {
-				all[i], all[j] = all[j], all[i]
-			}
+	var all []pick
+	for sid, c := range caches {
+		for _, e := range c.evictionCandidates() {
+			all = append(all, pick{sid: sid, key: e.key, kind: e.kind, at: e.at})
 		}
 	}
 
-	freed := int64(0)
+	sort.SliceStable(all, func(i, j int) bool {
+		a, b := all[i], all[j]
+		if ai, bi := evictRank(a.kind), evictRank(b.kind); ai != bi {
+			return ai < bi
+		}
+		return a.at.Before(b.at)
+	})
+
+	var freed int64
 	for _, p := range all {
 		if freed >= need {
-			break
+			return
 		}
-		m.mu.Lock()
-		s := m.byID[p.sid]
-		m.mu.Unlock()
-		if s == nil {
-			continue
+		if c := caches[p.sid]; c != nil {
+			freed += c.drop(p.kind, p.key)
 		}
-		freed += s.cache.drop(p.kind, p.key)
 	}
 }
 
-func bodyBefore(a, b cacheKind) bool {
-	if a == kindBody && b != kindBody {
-		return true
+// evictRank orders kinds by how early they are given up: bodies first, then
+// thumbnails, then collection lists, and version maps last — a map is small,
+// and losing it costs another round trip to the far server.
+func evictRank(k cacheKind) int {
+	switch k {
+	case kindBody:
+		return 0
+	case kindThumb:
+		return 1
+	case kindOther:
+		return 2
+	default:
+		return 3
 	}
-	if a != kindBody && b == kindBody {
-		return false
-	}
-	return false
 }

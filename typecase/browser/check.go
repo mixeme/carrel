@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/chromedp/chromedp"
 )
@@ -78,7 +79,7 @@ func checkMenuLabelArrow(h *Harness, url string, width, height int) error {
 	var label, arrow Rect
 	err := h.Run(url, width, height,
 		chromedp.Click(".tc-menu__control", chromedp.ByQuery),
-		chromedp.Sleep(80),
+		chromedp.Sleep(80*time.Millisecond),
 		rectAction(".tc-menu__label", &label),
 		rectAction(".tc-menu__arrow", &arrow),
 	)
@@ -98,7 +99,7 @@ func checkPopoverAnchor(h *Harness, url string, width, height int) error {
 	var btn, pop Rect
 	err := h.Run(url, width, height,
 		chromedp.Click(".tc-menu__control", chromedp.ByQuery),
-		chromedp.Sleep(80),
+		chromedp.Sleep(80*time.Millisecond),
 		rectAction(".tc-menu__control", &btn),
 		rectAction(".tc-menu__popover", &pop),
 	)
@@ -122,7 +123,7 @@ func checkPopoverFlip(h *Harness, url string, width, height int) error {
 	var vw, vh float64
 	err := h.Run(url, width, height,
 		chromedp.Click(".tc-menu__control", chromedp.ByQuery),
-		chromedp.Sleep(80),
+		chromedp.Sleep(80*time.Millisecond),
 		rectAction(".tc-menu__control", &btn),
 		rectAction(".tc-menu__popover", &pop),
 		chromedp.Evaluate(`window.innerWidth`, &vw),
@@ -198,9 +199,9 @@ func checkFocusReturn(h *Harness, url string, width, height int) error {
 	var active string
 	err := h.Run(url, width, height,
 		chromedp.Click(".tc-menu__control", chromedp.ByQuery),
-		chromedp.Sleep(80),
+		chromedp.Sleep(80*time.Millisecond),
 		chromedp.Evaluate(keyEscapeJS, nil),
-		chromedp.Sleep(80),
+		chromedp.Sleep(80*time.Millisecond),
 		chromedp.Evaluate(`document.activeElement ? document.activeElement.className : ""`, &active),
 	)
 	if err != nil {
@@ -216,7 +217,7 @@ func checkEscLayers(h *Harness, url string, width, height int) error {
 	var dialogHidden, sheetHidden bool
 	err := h.Run(url, width, height,
 		chromedp.Evaluate(keyEscapeJS, nil),
-		chromedp.Sleep(80),
+		chromedp.Sleep(80*time.Millisecond),
 		chromedp.Evaluate(`(() => { const el = document.getElementById("top-dialog"); return el ? el.hidden : true; })()`, &dialogHidden),
 		chromedp.Evaluate(`(() => { const el = document.getElementById("bottom-sheet"); return el ? el.hidden : true; })()`, &sheetHidden),
 	)
@@ -242,7 +243,7 @@ func checkContrast(h *Harness, url string, width, height int) error {
 	err := h.Run(url, width, height,
 		chromedp.Evaluate(sampleJS, &light),
 		chromedp.Evaluate(`document.documentElement.setAttribute("data-tc-theme","dark")`, nil),
-		chromedp.Sleep(50),
+		chromedp.Sleep(50*time.Millisecond),
 		chromedp.Evaluate(sampleJS, &dark),
 	)
 	if err != nil {
@@ -276,7 +277,7 @@ func checkThemeGeometry(h *Harness, url string, width, height int) error {
 	err := h.Run(url, width, height,
 		rectAction(".tc-sample", &light),
 		chromedp.Evaluate(`document.documentElement.setAttribute("data-tc-theme","dark")`, nil),
-		chromedp.Sleep(50),
+		chromedp.Sleep(50*time.Millisecond),
 		rectAction(".tc-sample", &dark),
 	)
 	if err != nil {

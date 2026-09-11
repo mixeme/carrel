@@ -80,7 +80,9 @@ func Load() (*Config, error) {
 	if err := mergeFile(c, filepath.Join(c.DataDir, settingsFile)); err != nil {
 		return nil, err
 	}
-	mergeEnv(c)
+	if err := mergeEnv(c); err != nil {
+		return nil, err
+	}
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
@@ -154,25 +156,34 @@ func mergeFile(c *Config, path string) error {
 		if !ok {
 			continue
 		}
-		applyKV(c, strings.TrimSpace(key), strings.TrimSpace(val))
+		if err := applyKV(c, strings.TrimSpace(key), strings.TrimSpace(val)); err != nil {
+			return fmt.Errorf("%s: %w", path, err)
+		}
 	}
 	return sc.Err()
 }
 
-func mergeEnv(c *Config) {
+func mergeEnv(c *Config) error {
 	for _, kv := range os.Environ() {
 		key, val, ok := strings.Cut(kv, "=")
 		if !ok {
 			continue
 		}
-		applyKV(c, key, val)
+		if err := applyKV(c, key, val); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func applyKV(c *Config, key, val string) {
+func applyKV(c *Config, key, val string) error {
+	var err error
 	switch key {
 	case "CARREL_PORT":
-		c.Port = atoi(key, val)
+		c.Port, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_BIND":
 		c.Bind = val
 	case "CARREL_DATA_DIR":
@@ -190,72 +201,163 @@ func applyKV(c *Config, key, val string) {
 	case "CARREL_DAV_SSRF_ALLOWLIST":
 		c.DAVSSRFAllowlist = val
 	case "CARREL_DAV_CONNECT_TIMEOUT":
-		c.DAVConnectTimeout = seconds(key, val)
+		c.DAVConnectTimeout, err = seconds(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_DAV_REQUEST_TIMEOUT":
-		c.DAVRequestTimeout = seconds(key, val)
+		c.DAVRequestTimeout, err = seconds(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_DAV_MAX_RESPONSE_BYTES":
-		c.DAVMaxResponseBytes = atoi64(key, val)
+		c.DAVMaxResponseBytes, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_DAV_MAX_REDIRECTS":
-		c.DAVMaxRedirects = atoi(key, val)
+		c.DAVMaxRedirects, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_CACHE_COLLECTION_TTL":
-		c.CacheCollectionTTL = seconds(key, val)
+		c.CacheCollectionTTL, err = seconds(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_CACHE_MAX_COLLECTIONS":
-		c.CacheMaxCollections = atoi(key, val)
+		c.CacheMaxCollections, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_CACHE_MAX_ETAG_ENTRIES":
-		c.CacheMaxETagEntries = atoi(key, val)
+		c.CacheMaxETagEntries, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_CACHE_MAX_BODY_BYTES":
-		c.CacheMaxBodyBytes = atoi64(key, val)
+		c.CacheMaxBodyBytes, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_CACHE_MAX_PROCESS_BYTES":
-		c.CacheMaxProcessBytes = atoi64(key, val)
+		c.CacheMaxProcessBytes, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_CACHE_MAX_THUMB_BYTES":
-		c.CacheMaxThumbBytes = atoi64(key, val)
+		c.CacheMaxThumbBytes, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_CACHE_MAX_THUMB_ENTRIES":
-		c.CacheMaxThumbEntries = atoi(key, val)
+		c.CacheMaxThumbEntries, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_PHOTO_MAX_SIDE":
-		c.PhotoMaxSide = atoi(key, val)
+		c.PhotoMaxSide, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_PHOTO_JPEG_QUALITY":
-		c.PhotoJPEGQuality = atoi(key, val)
+		c.PhotoJPEGQuality, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_PHOTO_MAX_PIXELS":
-		c.PhotoMaxPixels = atoi64(key, val)
+		c.PhotoMaxPixels, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_PHOTO_THUMB_SIDE":
-		c.PhotoThumbSide = atoi(key, val)
+		c.PhotoThumbSide, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_PHOTO_MAX_UPLOAD_BYTES":
-		c.PhotoMaxUploadBytes = atoi64(key, val)
+		c.PhotoMaxUploadBytes, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_IMPORT_MAX_BYTES":
-		c.ImportMaxBytes = atoi64(key, val)
+		c.ImportMaxBytes, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_IMPORT_MAX_RECORDS":
-		c.ImportMaxRecords = atoi(key, val)
+		c.ImportMaxRecords, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_FILES_MAX_ENTRIES":
-		c.FilesMaxEntries = atoi(key, val)
+		c.FilesMaxEntries, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_PROGRESS_MODE":
 		c.ProgressMode = val
 	case "CARREL_PROGRESS_POLL_MILLIS":
-		c.ProgressPollMillis = atoi(key, val)
+		c.ProgressPollMillis, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_PROGRESS_SOURCE_TIMEOUT":
-		c.ProgressSourceTimeout = seconds(key, val)
+		c.ProgressSourceTimeout, err = seconds(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_PROGRESS_TOTAL_TIMEOUT":
-		c.ProgressTotalTimeout = seconds(key, val)
+		c.ProgressTotalTimeout, err = seconds(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_DUPLICATES_THRESHOLD":
-		c.DuplicatesThreshold = atoi(key, val)
+		c.DuplicatesThreshold, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_UNLOCK_TTL":
-		c.UnlockTTL = seconds(key, val)
+		c.UnlockTTL, err = seconds(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_MAIL_ENABLED":
-		c.MailEnabled = boolVal(key, val)
+		c.MailEnabled, err = boolVal(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_MAIL_MAX_ATTACH_BYTES":
-		c.MailMaxAttachBytes = atoi64(key, val)
+		c.MailMaxAttachBytes, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_MAIL_MAX_MESSAGE_BYTES":
-		c.MailMaxMessageBytes = atoi64(key, val)
+		c.MailMaxMessageBytes, err = atoi64(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_MAIL_MAX_RECIPIENTS":
-		c.MailMaxRecipients = atoi(key, val)
+		c.MailMaxRecipients, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_MAIL_MAX_PER_DAY":
-		c.MailMaxPerDay = atoi(key, val)
+		c.MailMaxPerDay, err = atoi(key, val)
+		if err != nil {
+			return err
+		}
 	case "CARREL_DAVLOOM_PORT":
 		if val == "" {
 			c.DAVloomPort = 0
 		} else {
-			c.DAVloomPort = atoi(key, val)
+			c.DAVloomPort, err = atoi(key, val)
+			if err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
 func (c *Config) validate() error {
@@ -265,39 +367,50 @@ func (c *Config) validate() error {
 	if c.DAVloomPort < 0 || c.DAVloomPort > 65535 {
 		return fmt.Errorf("CARREL_DAVLOOM_PORT: out of range %d", c.DAVloomPort)
 	}
+	// davloom gets its own listener and its own buckets; it does not share the
+	// web port (architecture.md).
+	if c.DAVloomPort != 0 && c.DAVloomPort == c.Port {
+		return fmt.Errorf("CARREL_DAVLOOM_PORT: must differ from CARREL_PORT (%d)", c.Port)
+	}
 	if c.DataDir == "" {
 		return fmt.Errorf("CARREL_DATA_DIR: empty")
 	}
 	return nil
 }
 
-func atoi(key, val string) int {
+// A malformed value is a configuration error the operator can read and fix,
+// not a panic in the middle of startup.
+func atoi(key, val string) (int, error) {
 	n, err := strconv.Atoi(val)
 	if err != nil {
-		panic(fmt.Sprintf("%s: %v", key, err))
+		return 0, fmt.Errorf("%s: not a number: %q", key, val)
 	}
-	return n
+	return n, nil
 }
 
-func atoi64(key, val string) int64 {
+func atoi64(key, val string) (int64, error) {
 	n, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
-		panic(fmt.Sprintf("%s: %v", key, err))
+		return 0, fmt.Errorf("%s: not a number: %q", key, val)
 	}
-	return n
+	return n, nil
 }
 
-func seconds(key, val string) time.Duration {
-	return time.Duration(atoi(key, val)) * time.Second
+func seconds(key, val string) (time.Duration, error) {
+	n, err := atoi(key, val)
+	if err != nil {
+		return 0, err
+	}
+	return time.Duration(n) * time.Second, nil
 }
 
-func boolVal(key, val string) bool {
+func boolVal(key, val string) (bool, error) {
 	switch strings.ToLower(val) {
 	case "1", "true", "yes", "on":
-		return true
+		return true, nil
 	case "0", "false", "no", "off":
-		return false
+		return false, nil
 	default:
-		panic(fmt.Sprintf("%s: not a bool: %q", key, val))
+		return false, fmt.Errorf("%s: not a bool: %q", key, val)
 	}
 }

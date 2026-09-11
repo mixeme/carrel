@@ -3,6 +3,7 @@ package conf
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -76,5 +77,45 @@ func TestDAVloomEmptyDisables(t *testing.T) {
 	}
 	if c.DAVloomPort != 0 {
 		t.Fatalf("DAVloomPort = %d, want 0", c.DAVloomPort)
+	}
+}
+
+// A typo in a variable is a startup error the operator can read, not a panic
+// halfway through Load.
+func TestBadValuesAreErrorsNotPanics(t *testing.T) {
+	for _, tc := range []struct{ key, val string }{
+		{"CARREL_PORT", "eighty"},
+		{"CARREL_DAV_MAX_RESPONSE_BYTES", "10MiB"},
+		{"CARREL_DAV_REQUEST_TIMEOUT", "30s"},
+		{"CARREL_MAIL_ENABLED", "maybe"},
+	} {
+		t.Run(tc.key, func(t *testing.T) {
+			t.Setenv("CARREL_DATA_DIR", t.TempDir())
+			t.Setenv(tc.key, tc.val)
+			if _, err := Load(); err == nil {
+				t.Fatalf("%s=%q: expected an error", tc.key, tc.val)
+			} else if !strings.Contains(err.Error(), tc.key) {
+				t.Fatalf("error should name the variable: %v", err)
+			}
+		})
+	}
+}
+
+// davloom gets its own listener; sharing the web port is a misconfiguration.
+func TestDavloomPortMustDifferFromWebPort(t *testing.T) {
+	t.Setenv("CARREL_DATA_DIR", t.TempDir())
+	t.Setenv("CARREL_PORT", "8080")
+	t.Setenv("CARREL_DAVLOOM_PORT", "8080")
+	if _, err := Load(); err == nil {
+		t.Fatal("expected an error for a shared port")
+	}
+
+	t.Setenv("CARREL_DAVLOOM_PORT", "")
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.DAVloomPort != 0 {
+		t.Fatalf("empty CARREL_DAVLOOM_PORT should disable davloom, got %d", c.DAVloomPort)
 	}
 }

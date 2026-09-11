@@ -30,9 +30,10 @@ type Rect struct {
 
 // Harness serves typecase assets and runs chromedp actions.
 type Harness struct {
-	t      *testing.T
-	server *httptest.Server
-	pages  map[string]string
+	t       *testing.T
+	server  *httptest.Server
+	pages   map[string]string
+	browser *instance
 }
 
 // NewHarness starts a test server with bundled CSS and JS.
@@ -88,6 +89,13 @@ func NewHarness(t *testing.T) *Harness {
 	h.server.Listener = ln
 	h.server.Start()
 	t.Cleanup(h.server.Close)
+
+	in, err := launchChrome()
+	if err != nil {
+		t.Fatalf("launch %s: %v", ChromePath(), err)
+	}
+	h.browser = in
+	t.Cleanup(in.stop)
 	return h
 }
 
@@ -98,6 +106,10 @@ func (h *Harness) RegisterPage(id, html string) string {
 }
 
 // Run executes chromedp actions against a registered page URL.
+//
+// Each call gets a fresh tab in the harness browser; the viewport is set with
+// device metrics rather than a window-size flag, so one process serves every
+// check.
 func (h *Harness) Run(pageURL string, width, height int, actions ...chromedp.Action) error {
 	h.t.Helper()
 	if width <= 0 {
@@ -107,16 +119,7 @@ func (h *Harness) Run(pageURL string, width, height int, actions ...chromedp.Act
 		height = 600
 	}
 
-	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", true),
-		chromedp.Flag("disable-gpu", true),
-		chromedp.Flag("no-sandbox", true),
-		chromedp.WindowSize(width, height),
-	)
-	if chromeExec != "" {
-		opts = append(opts, chromedp.ExecPath(chromeExec))
-	}
-	allocCtx, cancelAlloc := chromedp.NewExecAllocator(context.Background(), opts...)
+	allocCtx, cancelAlloc := chromedp.NewRemoteAllocator(context.Background(), h.browser.endpoint)
 	defer cancelAlloc()
 	ctx, cancelCtx := chromedp.NewContext(allocCtx)
 	defer cancelCtx()
@@ -124,6 +127,7 @@ func (h *Harness) Run(pageURL string, width, height int, actions ...chromedp.Act
 	defer cancelTimeout()
 
 	all := []chromedp.Action{
+		chromedp.EmulateViewport(int64(width), int64(height)),
 		chromedp.Navigate(pageURL),
 		chromedp.WaitReady("body"),
 	}

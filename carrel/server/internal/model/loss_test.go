@@ -5,12 +5,12 @@ import (
 )
 
 func TestCompareAfterPutDetectsLoss(t *testing.T) {
-	sent := NewObjectFromRaw("/c/u.vcf", `"1"`, map[string]propState{
-		"FN":   {values: []propValue{{text: "Ada"}}},
-		"NOTE": {values: []propValue{{text: "secret"}}},
+	sent := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"FN":   {{Text: "Ada"}},
+		"NOTE": {{Text: "secret"}},
 	})
-	got := NewObjectFromRaw("/c/u.vcf", `"2"`, map[string]propState{
-		"FN": {values: []propValue{{text: "Ada"}}},
+	got := NewObject("/c/u.vcf", `"2"`, map[string][]RawValue{
+		"FN": {{Text: "Ada"}},
 	})
 	agg := newMapAgg()
 	loss := CompareAfterPut("srv1", sent, got, agg)
@@ -23,10 +23,10 @@ func TestCompareAfterPutDetectsLoss(t *testing.T) {
 }
 
 func TestCompareAfterPutAggregatesRepeat(t *testing.T) {
-	sent := NewObjectFromRaw("/c/u.vcf", `"1"`, map[string]propState{
-		"NOTE": {values: []propValue{{text: "x"}}},
+	sent := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"NOTE": {{Text: "x"}},
 	})
-	got := NewObjectFromRaw("/c/u.vcf", `"2"`, map[string]propState{})
+	got := NewObject("/c/u.vcf", `"2"`, map[string][]RawValue{})
 	agg := newMapAgg()
 	agg.Note("srv1", "NOTE")
 	loss := CompareAfterPut("srv1", sent, got, agg)
@@ -36,13 +36,13 @@ func TestCompareAfterPutAggregatesRepeat(t *testing.T) {
 }
 
 func TestCompareAfterPutIgnoresServerStamps(t *testing.T) {
-	sent := NewObjectFromRaw("/c/e.ics", `"1"`, map[string]propState{
-		"SUMMARY": {values: []propValue{{text: "Meet"}}},
-		"DTSTAMP": {values: []propValue{{text: "20260101T120000Z"}}},
+	sent := NewObject("/c/e.ics", `"1"`, map[string][]RawValue{
+		"SUMMARY": {{Text: "Meet"}},
+		"DTSTAMP": {{Text: "20260101T120000Z"}},
 	})
-	got := NewObjectFromRaw("/c/e.ics", `"2"`, map[string]propState{
-		"SUMMARY": {values: []propValue{{text: "Meet"}}},
-		"DTSTAMP": {values: []propValue{{text: "20260102T120000Z"}}},
+	got := NewObject("/c/e.ics", `"2"`, map[string][]RawValue{
+		"SUMMARY": {{Text: "Meet"}},
+		"DTSTAMP": {{Text: "20260102T120000Z"}},
 	})
 	if loss := CompareAfterPut("srv1", sent, got, nil); loss != nil {
 		t.Fatalf("stamp change should not count as loss: %#v", loss)

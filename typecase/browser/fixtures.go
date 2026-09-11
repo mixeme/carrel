@@ -71,9 +71,9 @@ func GoodFixtures() map[Name]Fixture {
 			Width: 280,
 			Extra: `.demo { width: 260px; }`,
 		},
-		TapTarget: {Body: nav, Width: 375, Height: 200},
-		FocusReturn: {Body: menuShort},
-		EscLayers:   {Body: sheet + dialog, Width: 800, Height: 600},
+		TapTarget:     {Body: nav, Width: 375, Height: 200},
+		FocusReturn:   {Body: menuShort},
+		EscLayers:     {Body: sheet + dialog, Width: 800, Height: 600},
 		Contrast:      {Body: sample, Extra: sampleCSS},
 		ThemeGeometry: {Body: sample, Extra: sampleCSS},
 	}

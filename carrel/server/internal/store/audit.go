@@ -6,15 +6,28 @@ import (
 	"unicode"
 )
 
-const maxAuditEntries = 10_000
+const (
+	maxAuditEntries = 10_000
+	maxAuditIdent   = 320 // a login is at most an address
+)
 
 var (
 	ErrAuditSecret    = errors.New("store: audit entry must not contain secrets")
 	ErrAuditEmptyWho  = errors.New("store: audit entry needs who")
 	ErrAuditEmptyWhat = errors.New("store: audit entry needs what")
+	ErrAuditWhat      = errors.New("store: audit what must be an event code")
+	ErrAuditIdent     = errors.New("store: audit identity too long")
 )
 
-// validateAudit rejects entries that would leak secrets into the log.
+// validateAudit rejects entries that would leak secrets into the log (S-3).
+//
+// Who and Whom are identities the instance already stores in the clear, and
+// they are not scanned for keywords: a person may legitimately be called
+// "secretary" or "tokarev", and a name must never make an account
+// unauditable — and so unmanageable, since a failed audit fails the whole
+// Mutate. What is a programmer-chosen event code, checked for shape so prose
+// (and anything a person typed) cannot arrive through it. Detail is the only
+// free-form field, and it is the one scanned.
 func validateAudit(e AuditEntry) error {
 	if strings.TrimSpace(e.Who) == "" {
 		return ErrAuditEmptyWho
@@ -22,12 +35,33 @@ func validateAudit(e AuditEntry) error {
 	if strings.TrimSpace(e.What) == "" {
 		return ErrAuditEmptyWhat
 	}
-	for _, field := range []string{e.Who, e.What, e.Whom, e.Detail} {
-		if containsSecret(field) {
-			return ErrAuditSecret
-		}
+	if len(e.Who) > maxAuditIdent || len(e.Whom) > maxAuditIdent {
+		return ErrAuditIdent
+	}
+	if !isEventCode(e.What) {
+		return ErrAuditWhat
+	}
+	if containsSecret(e.Detail) {
+		return ErrAuditSecret
 	}
 	return nil
+}
+
+// isEventCode accepts lowercase dotted codes such as "user.create" or
+// "password.change": letters, digits, dot, underscore and hyphen, no spaces.
+func isEventCode(s string) bool {
+	if len(s) > 64 {
+		return false
+	}
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z', r >= '0' && r <= '9':
+		case r == '.' || r == '_' || r == '-':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func containsSecret(s string) bool {

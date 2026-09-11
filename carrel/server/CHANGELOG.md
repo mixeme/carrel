@@ -4,6 +4,88 @@ All notable changes to the Carrel server are documented here. Versioning
 follows [semantic versioning](https://semver.org/). This file tells
 consumers what to do, not what the authors did.
 
+## carrel/server/v0.0.7 — 2026-09-04
+
+Review of the crypt / store / session / dav layers, and the eight defects it
+found. No new packages.
+
+### For consumers
+
+- **Breaking (`internal/model`).** `NewObjectFromRaw` is replaced by
+  `NewObject(path, etag string, props map[string][]RawValue)`. The old
+  constructor was exported but took `map[string]propState`, an unexported
+  type — no provider package could name the argument, so the model had no
+  usable way in. `RawValue` carries a value's text and parameters; property
+  and parameter names fold to upper case. `Object.Props()` returns the record
+  for display as a copy. `raw` stays unexported: nothing above this package
+  can rebuild an iCalendar or vCard object out of form fields (S-7).
+- **Breaking (`internal/session`).** `Session.Drafts()` and `Session.Losses()`
+  are gone; they handed out pointers to fields that other requests were
+  writing. Use `Draft(slot)` / `SetDraft(slot, data)` with `DraftRejectedEdit`,
+  `DraftPendingPhoto`, `DraftPendingImport`, and `NoteLoss` / `HasLoss` /
+  `LostProps`. `LossRegistry` still satisfies `model.LossAggregator` inside
+  the package.
+- `internal/dav` exports `ErrResponseTooLarge`. A reply over
+  `CARREL_DAV_MAX_RESPONSE_BYTES` is a state to put on the screen, not a 500.
+- `conf.Load` returns an error for a malformed value instead of panicking, and
+  rejects `CARREL_DAVLOOM_PORT` equal to `CARREL_PORT` — davloom gets its own
+  listener.
+- Outbound DAV requests no longer honour `HTTP_PROXY`/`HTTPS_PROXY`. With a
+  proxy set, the dialler connected to the proxy and the real target was never
+  IP-checked, which is the whole of the guard.
+- Audit `What` must now be an event code (lowercase letters, digits, `.`, `_`,
+  `-`; no spaces) such as `user.create` or `password.change`.
+
+### Fixed
+
+- `Transport.PropFind` returned property names with no values: the decoder
+  kept only the element name. Nothing could read `displayname`, `getctag`, or
+  `getetag`. It also took the status from the last `propstat`, so an ordinary
+  reply (200 for the properties present, 404 for those asked for and absent)
+  came back as 404 with both sets of names merged.
+- `Session` and its `Cache` had no lock. One session serves several requests
+  at once, so `Cache.put` was a `concurrent map writes` crash, not a latent
+  race; and the "at most four live fanouts" ceiling did not hold under
+  concurrent starts.
+- Cache eviction ran backwards: version maps were given up before bodies,
+  the reverse of C-12 and S-4.2. `CARREL_CACHE_MAX_ETAG_ENTRIES` and
+  `CARREL_CACHE_MAX_THUMB_ENTRIES` count entries, as C-12 says, instead of
+  being multiplied into a byte budget; `CARREL_CACHE_MAX_COLLECTIONS` is now
+  enforced at all.
+- A reply of exactly `CARREL_DAV_MAX_RESPONSE_BYTES` was refused as an
+  overrun. One byte more still is.
+- A login containing `secret`, `token`, or `password` made every audit entry
+  about that account invalid, and a rejected audit entry fails the whole
+  `Mutate` — the account could not be created, changed, or disabled. The
+  secret scan now covers `Detail`, the one free-form field.
+- `state.enc` is durable across a crash: the directory is synced after the
+  rename. `server.key` is synced before it is trusted.
+- Discovery reported `trace.OK = true` even when both home-set lookups
+  failed. A principal with no collections is a bad check on the screen.
+- `Guard` tried only the first permitted address for a host with several.
+- `cmd/carrel` sets `ReadHeaderTimeout`.
+
+### Included
+
+- `internal/dav/multistatus_test.go`: PROPFIND keeps values and takes the
+  status from the successful `propstat`; the response cap is exact.
+- `internal/session/concurrent_test.go`: sixteen goroutines on one session;
+  the four-fanout ceiling under a burst; bodies evicted before maps within a
+  session and across the process budget.
+- Regression tests for the config errors, the davloom port collision, audit
+  identities that look like keywords, and the model's ingress.
+
+### Known gap
+
+`-race` needs cgo and there is no C compiler on the development machine, so
+the concurrency tests ran without it here. They still fail on
+`concurrent map writes` and on the fanout ceiling without the fix, but CI
+should run `go test -race` for this module.
+
+### Not yet included
+
+The request layer, users, providers, and everything above them.
+
 ## carrel/server/v0.0.6 — 2026-09-04
 
 DAV transport, SSRF guard, discovery, and loss detection.

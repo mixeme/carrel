@@ -114,9 +114,11 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string)
 		}
 	}
 
-	add(stepCollections, fmt.Sprintf("%d collection(s)", len(all)), len(all) > 0 || perr == nil)
+	add(stepCollections, fmt.Sprintf("%d collection(s)", len(all)), len(all) > 0)
 	trace.Steps = steps
-	trace.OK = true
+	// OK means the run reached collections, not merely that it did not crash:
+	// a principal whose home-sets both failed is a bad check on the screen.
+	trace.OK = len(all) > 0
 	return &Result{
 		BaseURL:     endpoint,
 		Principal:   principal,
