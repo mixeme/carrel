@@ -31,6 +31,14 @@ do, not what the authors did.
   every cell.
 - CSS: narrow rail drawer, narrow side overlay, bar/crumbs/head/docbar overflow.
 
+### Not yet included
+
+- Narrow rail has no open control. Leftover:
+  [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawer.md).
+  Drawer is `tc-rail--drawer` (full screen); open/Apply live in `tc-top`
+  (`labels.Sources`, `labels.Apply`); `tc-nav` goes `bottom`, not into the
+  drawer. Do not pass `Rail.Layout` / `Nav.Layout` from the screen.
+
 The typecase wordmark work documented below stays documentation-only until
 released separately.
 
@@ -162,7 +170,7 @@ control — [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawe
 
 ### Not yet included
 
-- Narrow rail has no open control; see
+- Narrow rail has no open control; leftover and closed forks:
   [docs/plan/typecase-rail-drawer.md](../docs/plan/typecase-rail-drawer.md).
   Hand-wrapped shells and the 375 px `OutOfBounds` skip of `.tc-main` are
   closed in Unreleased.

@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	ErrMasterPasswordShort = errors.New("master password must be at least 16 characters")
+	ErrMasterPasswordShort    = errors.New("master password must be at least 16 characters")
 	ErrMasterPasswordMismatch = errors.New("master passwords do not match")
-	ErrEscrowNotConfigured   = errors.New("key escrow is not configured")
-	ErrEscrowConfigured      = errors.New("key escrow is already configured")
-	ErrNotDeposited          = errors.New("no deposited key for this account")
-	ErrEscrowDisabled          = errors.New("key escrow is disabled on this instance")
+	ErrEscrowNotConfigured    = errors.New("key escrow is not configured")
+	ErrEscrowConfigured       = errors.New("key escrow is already configured")
+	ErrNotDeposited           = errors.New("no deposited key for this account")
+	ErrEscrowDisabled         = errors.New("key escrow is disabled on this instance")
 )
 
 func validateMasterPassword(pw string) error {
@@ -207,11 +207,12 @@ func (s *Service) RecoverEscrow(ctx context.Context, actorID, login, masterPassw
 		if err := store.RewrapPasswordWithKey(ctx, x, login, temp, dataKey); err != nil {
 			return nil, err
 		}
+		burnWipeTokens(st, x.ID)
+		pruneTokens(st, now)
 		x.EscrowLastRecovery = &now
 		s.mgr.EndAccount(x.ID)
 		return []store.AuditEntry{{
 			When: now, Who: actorLogin(st, actorID), What: "escrow.recover", Whom: login,
-			Detail: "notice mailed",
 		}}, nil
 	})
 	crypt.Wipe(dataKey[:])

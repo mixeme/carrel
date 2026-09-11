@@ -8,7 +8,7 @@ import (
 const referrerPolicyNoReferrer = "no-referrer"
 
 // pathHasURLSecret reports whether the request path carries a secret in the
-// URL (C-5, users-tail.md audit №3).
+// URL (C-5).
 func pathHasURLSecret(path string) bool {
 	switch {
 	case strings.HasPrefix(path, "/invite/"):

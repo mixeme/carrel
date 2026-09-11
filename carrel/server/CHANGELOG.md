@@ -5,9 +5,31 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.25 — 2026-09-08
+
+Closes the audit №2 tail. Remaining work (escrow recovery UI, discovery,
+Linux) stays in [before-providers.md](../../docs/plan/before-providers.md).
+
+### For consumers
+
+- **Escrow recovery burns outstanding wipe tokens (Ф2-4).** After an
+  administrator recovers a deposited account, old `/forgot/{token}` and
+  console wipe links cannot empty it. The recovery journal entry no longer
+  claims a notice was mailed while outbound mail (S-26) is absent.
+
+### Included
+
+- `internal/user`: `burnWipeTokens` in `RecoverEscrow`; honest recover audit.
+- Test: `TestEscrowRecoverBurnsWipeTokens`.
+
+### Not yet included
+
+Escrow recovery still discards the temporary password on the admin screen;
+changing the master password has no form when escrow is already on.
+
 ## v0.0.24 — 2026-09-08
 
-Closes audit perimeter №3 from [users-tail.md](../../docs/plan/users-tail.md).
+Closes audit perimeter №3 (secret-in-URL headers and public stubs).
 
 ### For consumers
 
@@ -27,7 +49,7 @@ Closes audit perimeter №3 from [users-tail.md](../../docs/plan/users-tail.md).
 
 ## v0.0.23 — 2026-09-08
 
-Closes admin panel handlers from [users-tail.md](../../docs/plan/users-tail.md)
+Closes admin panel handlers from the audit №2 tail
 and [before-providers.md](../../docs/plan/before-providers.md) §3 (people,
 invites, roles, wipe/recover, audit).
 
@@ -62,7 +84,7 @@ Admin settings, DAV allowlist, install screen; escrow recovery UI gaps.
 
 ## v0.0.22 — 2026-09-08
 
-Closes `CARREL_BASE_PATH` from [users-tail.md](../../docs/plan/users-tail.md).
+Closes `CARREL_BASE_PATH` from the audit №2 tail.
 
 ### For consumers
 
@@ -114,7 +136,7 @@ Admin panel actions (other than escrow), escrow recovery UI gaps,
 
 ## v0.0.20 — 2026-09-07
 
-Closes key escrow (S-10.5) from [users-tail.md](../../docs/plan/users-tail.md).
+Closes key escrow (S-10.5) from the audit №2 tail.
 
 ### For consumers
 
@@ -148,7 +170,7 @@ Admin panel actions (other than escrow), escrow recovery UI gaps,
 
 ## v0.0.19 — 2026-09-07
 
-Continues [users-tail.md](../../docs/plan/users-tail.md): multipart CSRF.
+Continues the audit №2 tail: multipart CSRF.
 
 ### For consumers
 
@@ -171,7 +193,7 @@ Admin panel actions (other than escrow), `/app/password`,
 
 ## v0.0.18 — 2026-09-07
 
-Continues [users-tail.md](../../docs/plan/users-tail.md) after audit №2:
+Continues the audit №2 tail:
 anonymous CSRF, entity ID prefixes, and honest mail copy before S-26. Each
 fix ships with a test that was red on v0.0.17.
 
@@ -209,8 +231,9 @@ Key escrow (S-10.5), admin panel actions, `/app/password`,
 
 Closes Fable audit №2 (accounts and secrets, Ф2-1…Ф2-15 in
 [reviews.md](../../docs/plan/reviews.md)). Every fix ships with a test that
-was red on v0.0.16. What the audit left to the next layers is in
-[users-tail.md](../../docs/plan/users-tail.md).
+was red on v0.0.16. Layers after the audit closed in `v0.0.18`…`v0.0.25`;
+remaining gaps are in
+[before-providers.md](../../docs/plan/before-providers.md).
 
 ### For consumers
 

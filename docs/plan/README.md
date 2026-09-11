@@ -10,8 +10,7 @@
 | [server.md](server.md) | План серверной половины (`S`) |
 | [reviews.md](reviews.md) | Opus-ревью и аудиты Fable |
 | [typecase-rail-drawer.md](typecase-rail-drawer.md) | Хвост узкой оболочки: рейл прячется на 375 px, открыть панель нечем |
-| [users-tail.md](users-tail.md) | Хвост аудита Fable №2: учётки, секреты, депонирование, панель — что осталось после коммита аудита |
-| [before-providers.md](before-providers.md) | Ворота в провайдеры: дыры депонирования, смена пароля, панель, дефекты обнаружения, Linux |
+| [before-providers.md](before-providers.md) | Ворота в провайдеры: дыры UI депонирования, дефекты обнаружения, Linux |
 
 **Исполнитель по умолчанию — Composer.** Если шаг делает другая модель, это написано в чекбоксе: `Opus`, `Fable`. Composer эти шаги не выполняет.
 

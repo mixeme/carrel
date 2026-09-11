@@ -2,6 +2,7 @@ package user_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"carrel.dev/carrel/server/internal/store"
@@ -139,5 +140,45 @@ func TestForgotEscrowRequiresAdminWhenDeposited(t *testing.T) {
 	}
 	if !asked {
 		t.Fatal("deposited account should ask administrator on /forgot")
+	}
+}
+
+func TestEscrowRecoverBurnsWipeTokens(t *testing.T) {
+	svc, st := testService(t)
+	ctx := context.Background()
+	if err := svc.SetupFirstAdmin(ctx, "admin", "password123"); err != nil {
+		t.Fatal(err)
+	}
+	snap := st.Snapshot()
+	adminID := snap.UserByLogin("admin").ID
+	master := "sixteen-char-pass!"
+	if err := svc.EnableEscrow(ctx, adminID, master, master); err != nil {
+		t.Fatal(err)
+	}
+	secret, err := svc.CreateInvite(adminID, "bob", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.CompleteInvite(ctx, secret, "bobpass1234"); err != nil {
+		t.Fatal(err)
+	}
+	link, err := svc.IssueConsoleWipeLink("bob")
+	if err != nil {
+		t.Fatal(err)
+	}
+	token := strings.TrimPrefix(link, "/forgot/")
+	if _, err := svc.RecoverEscrow(ctx, adminID, "bob", master); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, valid := svc.ForgotWipeState(ctx, token); valid {
+		t.Fatal("wipe token still valid after escrow recovery")
+	}
+	snap = st.Snapshot()
+	bob := snap.UserByLogin("bob")
+	if bob == nil || len(bob.SealedBlob) == 0 {
+		t.Fatal("blob should survive recovery")
+	}
+	if last := snap.Audit[len(snap.Audit)-1]; last.What != "escrow.recover" || last.Detail != "" {
+		t.Fatalf("recover audit = %+v, want empty Detail until mail is sent", last)
 	}
 }
