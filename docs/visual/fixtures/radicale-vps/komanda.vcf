@@ -1,0 +1,13 @@
+BEGIN:VCARD
+VERSION:3.0
+UID:d41a-6f30-92be
+N:Белов;Артём;;;
+FN:Артём Белов
+ORG:Тензор
+TITLE:Ведущий инженер
+TEL;TYPE=CELL:+7 903 118-22-04
+TEL;TYPE=WORK:+7 495 780-11-90
+EMAIL;TYPE=WORK:a.belov@example.org
+PHOTO;VALUE=uri:https://example.org/avatars/belov.jpg
+REV:20260810T081200Z
+END:VCARD

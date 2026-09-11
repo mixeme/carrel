@@ -1,0 +1,9 @@
+BEGIN:VCARD
+VERSION:3.0
+UID:e7c2-3b95-6a14
+N:Лебедева;Вера;;;
+FN:Вера Лебедева
+TEL;TYPE=CELL:+7 905 331-09-42
+EMAIL;TYPE=HOME:vera@example.net
+REV:20240218T203311Z
+END:VCARD

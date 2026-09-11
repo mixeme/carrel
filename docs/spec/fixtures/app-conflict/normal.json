@@ -1,0 +1,92 @@
+{
+  "title": "This contact changed elsewhere",
+  "top": {
+    "search": { "query": "", "action": "/app/search", "history": [], "jump": [] },
+    "newMenu": [
+      { "id": "new.note", "label": "New note", "icon": "i-quill", "href": "/app/notes/quick", "method": "GET", "enabled": true }
+    ],
+    "user": [
+      { "id": "user.account", "label": "Account", "href": "/app/settings/account", "method": "GET", "enabled": true },
+      { "id": "user.logout", "label": "Sign out", "href": "/logout", "method": "POST", "enabled": true, "separator": true }
+    ],
+    "unlocked": null,
+    "refresh": {
+      "action": { "id": "poll.again", "label": "Refresh", "icon": "i-refresh", "method": "POST", "href": "/app/sources/contacts", "enabled": true },
+      "answered": "6 min ago",
+      "running": false
+    }
+  },
+  "rail": {
+    "nav": [
+      { "id": "nav.contacts", "label": "Contacts", "icon": "i-con", "href": "/app/contacts", "method": "GET", "enabled": true, "count": 312, "on": true },
+      { "id": "nav.calendar", "label": "Calendar", "icon": "i-cal", "href": "/app/calendar", "method": "GET", "enabled": true, "count": 14, "on": false },
+      { "id": "nav.tasks", "label": "Tasks", "icon": "i-task", "href": "/app/tasks", "method": "GET", "enabled": true, "count": 3, "on": false },
+      { "id": "nav.notes", "label": "Notes", "icon": "i-note", "href": "/app/notes", "method": "GET", "enabled": true, "count": 86, "on": false },
+      { "id": "nav.files", "label": "Files", "icon": "i-file", "href": "/app/files", "method": "GET", "enabled": true, "count": null, "on": false },
+      { "id": "nav.duplicates", "label": "Duplicates", "icon": "i-dup", "href": "/app/duplicates", "method": "GET", "enabled": true, "count": 3, "on": false }
+    ],
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "state": "ok",
+        "rows": [
+          { "href": "/app/contacts", "label": "Combined address book", "colour": "", "count": 312, "tick": "part", "readOnly": false, "state": "ok", "menu": [] },
+          { "href": "/app/contacts/a-nc-home/kontakty", "label": "Контакты", "colour": "#4A6B52", "count": 248, "tick": "on", "readOnly": false, "state": "ok", "menu": [] },
+          { "href": "/app/contacts/a-nc-home/arhiv", "label": "Архив", "colour": "#A05A2C", "count": 51, "tick": "on", "readOnly": false, "state": "ok", "menu": [] }
+        ]
+      }
+    ],
+    "tags": [],
+    "foot": [],
+    "about": { "id": "nav.about", "label": "Carrel 0.0.1 · 786949a", "href": "/about", "method": "GET", "enabled": true },
+    "note": ""
+  },
+  "notices": [
+    {
+      "role": "alert",
+      "title": "Saved elsewhere while you were editing",
+      "body": "Nothing has been written. Choose what the record should contain.",
+      "details": null,
+      "actions": []
+    }
+  ],
+  "details": null,
+  "print": { "title": "", "range": "", "taken": "" },
+  "kind": "contact",
+  "uid": "urn:uuid:9f2c",
+  "readAt": "2 September 2026, 16:51",
+  "serverAt": "2 September 2026, 17:02",
+  "rows": [
+    {
+      "property": "Full name",
+      "mine": "Анна Ковалёва",
+      "theirs": "Анна Ковалёва-Штерн",
+      "choice": ""
+    },
+    {
+      "property": "Telephone (work)",
+      "mine": "+7 912 445-10-88",
+      "theirs": "+7 912 445-10-88, ext. 214",
+      "choice": ""
+    },
+    {
+      "property": "Organisation",
+      "mine": "Издательство «Слово»",
+      "theirs": "",
+      "choice": ""
+    },
+    {
+      "property": "Note",
+      "mine": "Договорились созвониться после 15-го; черновик договора у неё, правки по разделу 4 — на нашей стороне, срок до конца месяца.",
+      "theirs": "Договорились созвониться после 20-го. Черновик договора у неё.",
+      "choice": ""
+    }
+  ],
+  "actions": [
+    { "id": "conflict.combine", "label": "Write this combination", "method": "POST", "href": "/app/contacts/a-nc-home/kontakty/urn%3Auuid%3A9f2c/conflict", "enabled": true },
+    { "id": "conflict.mine", "label": "Use only my edit", "method": "POST", "href": "/app/contacts/a-nc-home/kontakty/urn%3Auuid%3A9f2c/conflict?take=mine", "enabled": true },
+    { "id": "conflict.theirs", "label": "Use only the server version", "method": "POST", "href": "/app/contacts/a-nc-home/kontakty/urn%3Auuid%3A9f2c/conflict?take=theirs", "enabled": true },
+    { "id": "conflict.cancel", "label": "Cancel", "href": "/app/contacts/a-nc-home/kontakty/urn%3Auuid%3A9f2c", "method": "GET", "enabled": true }
+  ]
+}
