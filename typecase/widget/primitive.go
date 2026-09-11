@@ -5,7 +5,7 @@ import "strconv"
 // Button — tc-btn
 //
 // Роль. Действие: кнопка формы или ссылка, выглядящая как кнопка.
-// Вход. Button{ Label, Icon, Href, Method, Kind, Size, Reason }.
+// Вход. Button{ Label, Icon, Href, Method, Kind, Size, Reason, IconOnly }.
 // Состояния. normal | primary | danger | disabled; по умолчанию normal.
 // Инварианты. Выключенная несёт причину; опасная не бывает первичной; подпись не обрезается до неузнаваемости.
 // Поведение. Нажатие, Enter и пробел на фокусе, подсказка причины у выключенной.
@@ -13,13 +13,14 @@ import "strconv"
 // Содержимое. нет.
 // Чего нет. Нет кнопки только со значком, кроме узнаваемых вслепую.
 type Button struct {
-	Label  string
-	Icon   string
-	Href   string
-	Method string
-	Kind   ButtonKind
-	Size   ButtonSize
-	Reason string
+	Label    string
+	Icon     string
+	Href     string
+	Method   string
+	Kind     ButtonKind
+	Size     ButtonSize
+	Reason   string
+	IconOnly bool
 }
 
 func (b Button) Render() string {
@@ -33,19 +34,27 @@ func (b Button) Render() string {
 		title = ` title="` + esc(b.Reason) + `"`
 	}
 	icon := renderIcon(b.Icon)
-	inner := icon + `<span class="tc-btn__label">` + esc(b.Label) + `</span>`
+	label := `<span class="tc-btn__label">` + esc(b.Label) + `</span>`
+	access := ""
+	if b.Icon != "" && (b.IconOnly || IconOnly(b.Icon)) {
+		label = `<span class="tc-btn__label" hidden>` + esc(b.Label) + `</span>`
+		if b.Label != "" {
+			access = attr("aria-label", b.Label) + attr("title", b.Label)
+		}
+	}
+	inner := icon + label
 	if b.Href != "" && !disabled {
 		method := ""
 		if b.Method != "" && b.Method != "GET" {
 			method = attr("data-tc-method", b.Method)
 		}
-		return `<a href="` + esc(b.Href) + `"` + classAttr(cls) + title + method + `>` + inner + `</a>`
+		return `<a href="` + esc(b.Href) + `"` + classAttr(cls) + title + access + method + `>` + inner + `</a>`
 	}
 	dis := ""
 	if disabled {
 		dis = " disabled"
 	}
-	return `<button type="button"` + classAttr(cls) + title + dis + `>` + inner + `</button>`
+	return `<button type="button"` + classAttr(cls) + title + access + dis + `>` + inner + `</button>`
 }
 
 func (b Button) sizeOrDefault() ButtonSize {
@@ -227,7 +236,7 @@ func (c Close) Render() string {
 // Brand — tc-brand
 //
 // Роль. Марка продукта в шапке и на страницах без оболочки.
-// Вход. Brand{ Mark, Word, Href, Size, MarkOnly }.
+// Вход. Brand{ SVG, Mark, Word, Href, Size, MarkOnly }.
 // Состояния. full | markOnly.
 // Инварианты. Ниже предела ширины только знак; знак и слово не дублируются.
 // Поведение. нет.
@@ -235,6 +244,7 @@ func (c Close) Render() string {
 // Содержимое. нет.
 // Чего нет. Нет перекраски в произвольный цвет.
 type Brand struct {
+	SVG      string
 	Mark     string
 	Word     string
 	Href     string
@@ -247,9 +257,14 @@ func (b Brand) Render() string {
 	if b.MarkOnly {
 		cls = classes(cls, "tc-brand--mark-only")
 	}
-	mark := `<span class="tc-brand__mark" aria-hidden="true">` + esc(b.Mark) + `</span>`
-	word := `<span class="tc-brand__word">` + esc(b.Word) + `</span>`
-	inner := mark + word
+	var inner string
+	if b.SVG != "" {
+		inner = b.SVG
+	} else {
+		mark := `<span class="tc-brand__mark" aria-hidden="true">` + esc(b.Mark) + `</span>`
+		word := `<span class="tc-brand__word">` + esc(b.Word) + `</span>`
+		inner = mark + word
+	}
 	if b.Href != "" {
 		return `<a href="` + esc(b.Href) + `"` + classAttr(cls) + `>` + inner + `</a>`
 	}
@@ -259,7 +274,7 @@ func (b Brand) Render() string {
 // Mark — tc-mark
 //
 // Роль. Узкая вертикальная полоса, обозначающая принадлежность.
-// Вход. Mark{ Colour, Label }.
+// Вход. Mark{ Colour, Colours, Label }.
 // Состояния. нет.
 // Инварианты. Цвет приходит значением; всегда сопровождается доступным именем.
 // Поведение. нет.
@@ -267,19 +282,31 @@ func (b Brand) Render() string {
 // Содержимое. нет.
 // Чего нет. Нет формы кружка и заливки строки.
 type Mark struct {
-	Colour MarkColour
-	Label  string
+	Colour  MarkColour
+	Colours []string
+	Label   string
 }
 
 func (m Mark) Render() string {
-	if m.Label == "" && m.Colour == "" {
+	if m.Label == "" && m.Colour == "" && len(m.Colours) == 0 {
 		return ""
 	}
 	title := ""
 	if m.Label != "" {
 		title = ` title="` + esc(m.Label) + `"`
 	}
-	return `<span class="tc-mark"` + attr("data-tc-colour", string(m.Colour)) + attr("aria-label", m.Label) + title + `></span>`
+	if len(m.Colours) > 1 {
+		var stripes string
+		for _, c := range m.Colours {
+			stripes += `<span class="tc-mark__stripe" data-tc-colour="` + esc(c) + `"></span>`
+		}
+		return `<span class="tc-mark tc-mark--multi"` + attr("aria-label", m.Label) + title + `>` + stripes + `</span>`
+	}
+	colour := m.Colour
+	if colour == "" && len(m.Colours) == 1 {
+		colour = MarkColour(m.Colours[0])
+	}
+	return `<span class="tc-mark"` + attr("data-tc-colour", string(colour)) + attr("aria-label", m.Label) + title + `></span>`
 }
 
 // Num — tc-num
@@ -567,11 +594,4 @@ func (m Meter) Render() string {
 		pct = 100
 	}
 	return `<div class="tc-meter"` + attr("aria-label", m.Label) + attr("data-tc-pct", strconv.FormatFloat(pct, 'f', 1, 64)) + ` role="meter" aria-valuenow="` + esc(strconv.Itoa(m.Value)) + `" aria-valuemin="0" aria-valuemax="` + esc(strconv.Itoa(max)) + `"><div class="tc-meter__bar"></div><span class="tc-meter__label">` + esc(m.Label) + `</span></div>`
-}
-
-func renderIcon(name string) string {
-	if name == "" {
-		return ""
-	}
-	return `<svg class="tc-icon tc-btn__icon" aria-hidden="true"><use href="#` + esc(name) + `"></use></svg>`
 }

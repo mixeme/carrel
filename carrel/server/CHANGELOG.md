@@ -5,12 +5,37 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.31 — 2026-09-08
+
+Provider review. Closes the **Провайдеры** section in
+[server.md](../../docs/plan/server.md); leftover:
+[providers-tail.md](../../docs/plan/providers-tail.md).
+
+### For consumers
+
+- **Note Markdown keeps emphasis, strong, and links** as C-8 block kinds
+  (`emph`, `strong`, `link`), not flattened text. Raw HTML is still an escaped
+  `para`. Fenced code uses the node's lines, so the body is not empty.
+- **`cal.Expand` uses rrule-go** on the master component: RRULE window minus
+  EXDATE plus RDATE. RDATE-only events expand. Times stay UTC.
+- **`file.Join` rejects `.`, `..`, empty, slash, and backslash** — not every
+  leading-dot name. `.hidden` is a legal segment.
+- **`card.Foreign` lists RFC properties that C-6 does not name** (LOGO, FBURL,
+  …). The known set is Name / Fields / Tags, not the whole RFC 6350 dump.
+
+### Included
+
+- VALARM and `RECURRENCE-ID` siblings survive encode after a series patch.
+- `rrule-go` v1.8.2 is a direct `require`.
+- Tests: EXDATE/RDATE, RDATE without RRULE, Markdown inline kinds, code fence,
+  Join slash/backslash, LOGO in Foreign.
+
 ## v0.0.30 — 2026-09-08
 
 Closes the **Провайдеры** section in [server.md](../../docs/plan/server.md).
 HTTP routes C-5 still return stub view models; wiring GET records, photos, and
-file download is S-11 / S-13 / S-17. Remaining S-30.2 on live Radicale / Baikal /
-SFTPGo follows providers.
+file download is S-11 / S-13 / S-17. Remaining S-30.2:
+[providers-tail.md](../../docs/plan/providers-tail.md).
 
 ### For consumers
 

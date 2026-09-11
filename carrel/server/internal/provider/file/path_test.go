@@ -18,8 +18,32 @@ func TestJoinRejectsEmpty(t *testing.T) {
 	}
 }
 
-func TestJoinRejectsLeadingDot(t *testing.T) {
-	_, err := Join("/dav/", ".hidden")
+func TestJoinRejectsDot(t *testing.T) {
+	_, err := Join("/dav/", ".")
+	if err != ErrBadSegment {
+		t.Fatalf("got %v", err)
+	}
+}
+
+func TestJoinAllowsDotfile(t *testing.T) {
+	got, err := Join("/dav/", ".hidden")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "/dav/.hidden" {
+		t.Fatalf("got %q", got)
+	}
+}
+
+func TestJoinRejectsSlash(t *testing.T) {
+	_, err := Join("/dav/", "a/b")
+	if err != ErrBadSegment {
+		t.Fatalf("got %v", err)
+	}
+}
+
+func TestJoinRejectsBackslash(t *testing.T) {
+	_, err := Join("/dav/", "a\\b")
 	if err != ErrBadSegment {
 		t.Fatalf("got %v", err)
 	}

@@ -5,7 +5,7 @@ import "strconv"
 // Search — tc-search
 //
 // Роль. Поле, под которым живут недавние запросы и переходы к известному.
-// Вход. Search{ Query, Action, History, Jump, Note, Suggesting }.
+// Вход. Search{ Query, Placeholder, Action, History, Jump, Note, Suggesting }.
 // Состояния. idle | suggesting.
 // Инварианты. Подсказки под полем; пустой запрос никуда не ведёт.
 // Поведение. Открытие подсказок, стрелки, Enter, Esc, крестик очищает.
@@ -13,12 +13,13 @@ import "strconv"
 // Содержимое. tc-row--find.
 // Чего нет. Не ищет само.
 type Search struct {
-	Query      string
-	Action     string
-	History    []SearchRow
-	Jump       []JumpRow
-	Note       string
-	Suggesting bool
+	Query       string
+	Placeholder string
+	Action      string
+	History     []SearchRow
+	Jump        []JumpRow
+	Note        string
+	Suggesting  bool
 }
 
 func (s Search) Render() string {
@@ -44,7 +45,11 @@ func (s Search) Render() string {
 	if s.Note != "" {
 		note = `<span class="tc-search__note">` + esc(s.Note) + `</span>`
 	}
-	return `<form` + classAttr(cls) + ` action="` + esc(s.Action) + `" method="get" data-tc-search role="search"><div class="tc-search__field"><input type="search" name="q" class="tc-search__input" value="` + esc(s.Query) + `" aria-label="` + esc(labels.Search) + `">` + note + `<button type="button" class="tc-search__clear" data-tc-search-clear aria-label="` + esc(labels.Clear) + `">×</button></div>` + pop + `</form>`
+	ph := s.Placeholder
+	if ph == "" {
+		ph = labels.Search
+	}
+	return `<form` + classAttr(cls) + ` action="` + esc(s.Action) + `" method="get" data-tc-search role="search"><div class="tc-search__field"><input type="search" name="q" class="tc-search__input" value="` + esc(s.Query) + `" placeholder="` + esc(ph) + `" aria-label="` + esc(labels.Search) + `">` + note + `<button type="button" class="tc-search__clear" data-tc-search-clear aria-label="` + esc(labels.Clear) + `">×</button></div>` + pop + `</form>`
 }
 
 // RunBar — tc-runbar

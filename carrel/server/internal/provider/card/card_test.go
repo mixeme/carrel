@@ -87,6 +87,18 @@ func TestUpdateRejectsEmptyETag(t *testing.T) {
 	}
 }
 
+func TestLogoIsForeign(t *testing.T) {
+	vcf := "BEGIN:VCARD\r\nVERSION:4.0\r\nUID:u\r\nFN:Ada\r\nLOGO:http://example.com/l.png\r\nEND:VCARD\r\n"
+	obj, err := Parse("/c/l.vcf", "e", strings.NewReader(vcf))
+	if err != nil {
+		t.Fatal(err)
+	}
+	foreign := Foreign(obj)
+	if len(foreign) != 1 || string(foreign[0].Label) != "LOGO" {
+		t.Fatalf("foreign = %+v", foreign)
+	}
+}
+
 func TestPatchPreservesForeign(t *testing.T) {
 	data, _ := os.ReadFile("testdata/ada.vcf")
 	obj, err := Parse("/c/ada.vcf", "e1", bytes.NewReader(data))

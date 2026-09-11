@@ -64,9 +64,6 @@ func checkSegment(seg string) error {
 	if strings.Contains(seg, "/") || strings.Contains(seg, "\\") {
 		return ErrBadSegment
 	}
-	if strings.HasPrefix(seg, ".") {
-		return ErrBadSegment
-	}
 	return nil
 }
 

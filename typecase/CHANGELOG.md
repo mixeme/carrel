@@ -8,57 +8,50 @@ do, not what the authors did.
 
 ### For consumers
 
-- **Assemble screens through `widget.Shell`.** Pass `Nav`, `Rail`, `Main`, and `Side`
-  as typed widgets. Empty `Rail` / `Side` no longer emit a column; `notes-edit`
-  is a shell with `Top` + `Main` only.
-- **Narrow layout.** At phone widths the rail column collapses; `Sources` in `tc-top`
-  opens the rail as a full-screen `tc-rail--drawer`; `Apply`, `Esc`, or the toggle
-  again closes it and returns focus. Search hides while the panel is open (it is
-  still in the markup). Section nav stays as `tc-nav--bottom`, not inside the
-  drawer. An open side panel still covers the viewport. `tc-bar` and
-  `tc-crumbs` clamp to the viewport; middle crumbs collapse into a menu. The
-  screen check measures those widgets at 375 px (it does not skip `.tc-main`).
-- **Gate `screens-compose`** now scans all demo screen assemblers, not only
-  `notes.go`.
+- **Redefine the palette if you override the bundle.** Three new required slots:
+  `--tc-edge`, `--tc-hair`, and `--tc-dusty` (light/dark values ship in the bundle).
+  `token.Validate` fails without them.
+- **`Icon` is a sprite id (`tc-i-*`), not a glyph or `#+` href.** Pass ids such as
+  `tc-i-plus`; empty string omits the icon node. Nav icons render through the sprite too.
+- **`Brand.SVG` replaces `Mark`/`Word` when set.** Inline `<svg>…</svg>` markup is
+  inserted as HTML; screens use the Carrel logo from `screens/carrel-logo.svg`.
+- **`Top.Refresh`** is an optional poll action between Create and User (`Label` is
+  the time caption, `Icon` is `tc-i-refresh`). Zero value hides the button.
+- **`Side.Size`**: `SideSizeWide` (`"wide"`) sets 440 px (`tc-side--wide`); default
+  stays 400 px. **`Side.Sub`** adds a panel subtitle under the title.
+- **`Menu.Kind`** styles the create control (`ButtonPrimary` + `tc-i-quill` on screens).
+- **`TickRow.Current`** marks the active source row (`is-current`, `--tc-card` background).
+- **`Mark.Colours`** draws equal horizontal stripes when more than one colour is given.
+- **Rank2 bar actions render as buttons first.** `tc.js` stashes them under «More» only
+  when the bar runs short; at 1280 px Import/Export stay visible on `/notes`.
+- **Assembled screens match mockup drawing** at 1280×900 (browser probe
+  `screens_look_test.go`). Demo chrome lives in `.screens-chrome`; the product shell
+  inside `.screens-stage` uses `min-height: 100%`, not `100vh` with page chrome.
 
 ### Included
 
-- `widget.Shell`: optional `Nav` in the rail column; `IsZero()` on `Nav`,
-  `Rail`, and `Side`; empty columns omitted from markup.
-- Demo screens (`files`, `contacts`, `io`, `duplicates`, `states`, all notes
-  frames) assembled via `shellFrame` and widgets — no `shellWrap`.
-- `tc.js`: `updateCrumbs` (middle crumbs → menu, then clamp to the viewport),
-  `clampBar`, narrow rail drawer (`tc-rail--drawer`, `tc-nav--bottom`, toggle /
-  apply / `Esc`). Browser screen check measures `.tc-bar` / `.tc-crumbs` /
-  `.tc-head` / `.tc-top` / `.tc-docbar` against the viewport at 375 px; other
-  nodes use the clipped box so `overflow: auto` in `tc-main` does not flag
-  every cell. `TestScreensNarrowRailDrawer` opens the rail at 375 px on `/io`,
-  then closes it with Apply and Escape.
-- CSS: narrow rail drawer in `.tc-shell__body` (does not cover `tc-top`);
-  bottom section nav; rail toggle/apply in `tc-top`; search hidden while the
-  drawer is open; narrow side overlay; bar/crumbs/head/docbar overflow.
-- `widget.Shell`: `data-tc-rail-toggle` and `data-tc-rail-apply` in `tc-top` when
-  the rail column is non-empty; `labels.Sources` and `labels.Apply`.
-- `tc.js` `updateTop` leaves `[data-tc-rail-apply]` in the actions row; it is
-  not stashed under `labels.More`.
+- Palette slots `--tc-edge`, `--tc-hair`, `--tc-dusty`; mockup-aligned shell CSS (nav
+  29 px, tickrow 26 px, transparent `tc-main`, list hairline, card selection).
+- Expanded `icons/sprite.svg`; sprite + logo defs embedded in screens and catalog pages.
+- `screens/carrel-logo.svg`; `Brand.SVG` on demo screens.
+- `Top.Refresh`, `Side.Size` / `Side.Sub`, `Menu.Kind`, `TickRow.Current`,
+  `Mark.Colours`, icon-only railfoot buttons, `DocBar.RightNodes`.
+- `gate/geometry`: nav 29, tickrow 26, list `border-width` 0.
+- `browser/screens_look_test.go`: per-screen look probe at 1280×900.
+- Demo `screens-chrome` + stage layout in `screens.css` / `PageHTML`.
 
 ### Fixed
 
-- `scripts/typecase-screens.bat` opens the browser when the server is listening,
-  prints the route list, and pauses on startup failure (e.g. port already in use).
-- Narrow `Apply` was packed into the `tc-top` overflow stash, then painted
-  under `tc-search`, so it could not be pressed. It stays in the bar above the
-  open drawer.
+- Rank2 Import/Export were only reachable through the bar overflow menu at desktop width.
+- Rail tag chips rendered above sections instead of after them.
+- Demo page chrome was counted in `.tc-shell { min-height: 100vh }`.
 
 ### Not yet included
 
 - An open side panel still covers the viewport at phone width, including the
   rail chrome (U-9: row menu instead of the panel).
-- Assembled screens do not yet match mockup drawing (mark, icons, nav, rail,
-  surfaces). The work and closed forks are in
-  [docs/plan/typecase-look.md](../docs/plan/typecase-look.md). Nothing to do
-  until that plan lands: `Icon` stays whatever the current widgets accept;
-  palette stays eight slots.
+- Calendar (7.2) and tasks (7.3) — no routes in `screens.All()`.
+- Overflow of `tc-top` / `tc-seg` at 375 px — not this plan.
 
 The typecase wordmark work documented below stays documentation-only until
 released separately.

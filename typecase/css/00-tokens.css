@@ -1,4 +1,4 @@
-/* Palette — light theme defaults. Only these eight change in dark (L-5.3). */
+/* Palette — light theme defaults. Only these eleven change in dark (L-5.3). */
 :root {
 	--tc-ink: #17211c;
 	--tc-surface: #fffdf7;
@@ -8,6 +8,9 @@
 	--tc-muted: #56503f;
 	--tc-accent: #4a6b52;
 	--tc-danger: #a84232;
+	--tc-edge: #c9bfa6;
+	--tc-hair: #e2daca;
+	--tc-dusty: #6f6856;
 
 	--tc-font-serif: "Literata", Georgia, "Times New Roman", serif;
 	--tc-font-sans: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -34,4 +37,7 @@
 	--tc-muted: #a79e88;
 	--tc-accent: #7fa085;
 	--tc-danger: #d5786b;
+	--tc-edge: #3a463d;
+	--tc-hair: #28332b;
+	--tc-dusty: #99927c;
 }

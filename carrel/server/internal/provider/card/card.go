@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/emersion/go-vcard"
@@ -105,6 +106,12 @@ func Foreign(obj *model.Object) []view.Field {
 			})
 		}
 	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Label != out[j].Label {
+			return out[i].Label < out[j].Label
+		}
+		return out[i].Value < out[j].Value
+	})
 	return out
 }
 

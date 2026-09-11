@@ -10,6 +10,7 @@ func TestValidate_complete(t *testing.T) {
 		":root {",
 		"--tc-ink: #000; --tc-surface: #111; --tc-bg: #222; --tc-card: #777; --tc-rule: #333;",
 		"--tc-muted: #444; --tc-accent: #555; --tc-danger: #666;",
+		"--tc-edge: #888; --tc-hair: #999; --tc-dusty: #aaa;",
 		"--tc-font-serif: a; --tc-font-sans: b; --tc-font-mono: c; --tc-font-size: 13px;",
 		"--tc-row-height: 38px; --tc-row-height-touch: 52px;",
 		"--tc-page-gutter: 20px; --tc-page-gutter-narrow: 14px;",

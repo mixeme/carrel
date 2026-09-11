@@ -22,6 +22,9 @@ func RenderMarkdown(src string) []view.Block {
 	doc := md.Parser().Parse(reader)
 	var out []view.Block
 	for n := doc.FirstChild(); n != nil; n = n.NextSibling() {
+		if n.Kind() == ast.KindThematicBreak {
+			continue
+		}
 		out = append(out, blockFromNode(n, srcBytes))
 	}
 	return out
@@ -31,20 +34,15 @@ func blockFromNode(n ast.Node, src []byte) view.Block {
 	switch n.Kind() {
 	case ast.KindHeading:
 		h := n.(*ast.Heading)
-		return view.Block{
-			Kind:  view.BlockHeading,
-			Level: h.Level,
-			Text:  view.Text(textContent(n, src)),
-		}
-	case ast.KindParagraph:
-		return view.Block{
-			Kind: view.BlockPara,
-			Text: view.Text(inlineText(n, src)),
-		}
+		b := withInlines(view.BlockHeading, n, src)
+		b.Level = h.Level
+		return b
+	case ast.KindParagraph, ast.KindTextBlock:
+		return withInlines(view.BlockPara, n, src)
 	case ast.KindFencedCodeBlock, ast.KindCodeBlock:
 		return view.Block{
 			Kind: view.BlockCode,
-			Text: view.Text(textContent(n, src)),
+			Text: view.Text(lineText(n, src)),
 		}
 	case ast.KindBlockquote:
 		var kids []view.Block
@@ -53,15 +51,9 @@ func blockFromNode(n ast.Node, src []byte) view.Block {
 		}
 		return view.Block{Kind: view.BlockQuote, Children: kids}
 	case ast.KindHTMLBlock:
-		hb := n.(*ast.HTMLBlock)
-		var raw bytes.Buffer
-		for i := 0; i < hb.Lines().Len(); i++ {
-			seg := hb.Lines().At(i)
-			raw.Write(seg.Value(src))
-		}
 		return view.Block{
 			Kind: view.BlockPara,
-			Text: view.Text(html.EscapeString(raw.String())),
+			Text: view.Text(html.EscapeString(lineText(n, src))),
 		}
 	case ast.KindList:
 		var items []view.Block
@@ -70,10 +62,16 @@ func blockFromNode(n ast.Node, src []byte) view.Block {
 		}
 		return view.Block{Kind: view.BlockList, Children: items}
 	case ast.KindListItem:
-		return view.Block{
-			Kind: view.BlockItem,
-			Text: view.Text(inlineText(n, src)),
+		var kids []view.Block
+		for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+			kids = append(kids, blockFromNode(c, src))
 		}
+		if len(kids) == 1 && kids[0].Kind == view.BlockPara {
+			item := kids[0]
+			item.Kind = view.BlockItem
+			return item
+		}
+		return view.Block{Kind: view.BlockItem, Children: kids}
 	default:
 		if s := textContent(n, src); s != "" {
 			return view.Block{Kind: view.BlockPara, Text: view.Text(s)}
@@ -82,44 +80,98 @@ func blockFromNode(n ast.Node, src []byte) view.Block {
 	}
 }
 
+func withInlines(kind view.BlockKind, n ast.Node, src []byte) view.Block {
+	kids := inlines(n, src)
+	b := view.Block{Kind: kind}
+	if len(kids) == 1 && kids[0].Kind == view.BlockPara && len(kids[0].Children) == 0 {
+		b.Text = kids[0].Text
+		return b
+	}
+	b.Children = kids
+	return b
+}
+
+func inlines(n ast.Node, src []byte) []view.Block {
+	var out []view.Block
+	var text bytes.Buffer
+	flush := func() {
+		if text.Len() == 0 {
+			return
+		}
+		out = append(out, view.Block{Kind: view.BlockPara, Text: view.Text(text.String())})
+		text.Reset()
+	}
+	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+		switch c.Kind() {
+		case ast.KindText:
+			t := c.(*ast.Text)
+			text.Write(t.Segment.Value(src))
+			if t.HardLineBreak() || t.SoftLineBreak() {
+				text.WriteByte('\n')
+			}
+		case ast.KindString:
+			text.Write(c.(*ast.String).Value)
+		case ast.KindEmphasis:
+			flush()
+			em := c.(*ast.Emphasis)
+			kind := view.BlockEmph
+			if em.Level >= 2 {
+				kind = view.BlockStrong
+			}
+			out = append(out, inlineMark(kind, c, src, ""))
+		case ast.KindLink:
+			flush()
+			link := c.(*ast.Link)
+			out = append(out, inlineMark(view.BlockLink, c, src, string(link.Destination)))
+		case ast.KindAutoLink:
+			flush()
+			al := c.(*ast.AutoLink)
+			u := string(al.URL(src))
+			out = append(out, view.Block{Kind: view.BlockLink, Href: u, Text: view.Text(u)})
+		case ast.KindCodeSpan:
+			flush()
+			out = append(out, view.Block{Kind: view.BlockCode, Text: view.Text(textContent(c, src))})
+		case ast.KindRawHTML:
+			flush()
+			raw := string(c.(*ast.RawHTML).Segments.Value(src))
+			out = append(out, view.Block{Kind: view.BlockPara, Text: view.Text(html.EscapeString(raw))})
+		default:
+			if s := textContent(c, src); s != "" {
+				text.WriteString(s)
+			}
+		}
+	}
+	flush()
+	return out
+}
+
+func inlineMark(kind view.BlockKind, n ast.Node, src []byte, href string) view.Block {
+	b := withInlines(kind, n, src)
+	b.Href = href
+	return b
+}
+
+func lineText(n ast.Node, src []byte) string {
+	var buf bytes.Buffer
+	lines := n.Lines()
+	for i := 0; i < lines.Len(); i++ {
+		seg := lines.At(i)
+		buf.Write(seg.Value(src))
+	}
+	return buf.String()
+}
+
 func textContent(n ast.Node, src []byte) string {
 	var buf bytes.Buffer
 	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-		buf.WriteString(segment(c, src))
+		switch c.Kind() {
+		case ast.KindText:
+			buf.Write(c.(*ast.Text).Segment.Value(src))
+		case ast.KindString:
+			buf.Write(c.(*ast.String).Value)
+		default:
+			buf.WriteString(textContent(c, src))
+		}
 	}
 	return buf.String()
-}
-
-func inlineText(n ast.Node, src []byte) string {
-	var buf bytes.Buffer
-	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-		buf.WriteString(inlineSegment(c, src))
-	}
-	return buf.String()
-}
-
-func inlineSegment(n ast.Node, src []byte) string {
-	switch n.Kind() {
-	case ast.KindText:
-		return string(n.(*ast.Text).Segment.Value(src))
-	case ast.KindString:
-		return string(n.(*ast.String).Value)
-	case ast.KindEmphasis:
-		return inlineText(n, src)
-	case ast.KindLink:
-		return inlineText(n, src)
-	case ast.KindRawHTML:
-		return html.EscapeString(string(n.(*ast.RawHTML).Segments.Value(src)))
-	case ast.KindHTMLBlock:
-		return html.EscapeString(segment(n, src))
-	default:
-		return segment(n, src)
-	}
-}
-
-func segment(n ast.Node, src []byte) string {
-	if t, ok := n.(*ast.Text); ok {
-		return string(t.Segment.Value(src))
-	}
-	return inlineText(n, src)
 }
