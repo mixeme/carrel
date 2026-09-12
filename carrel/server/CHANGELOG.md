@@ -5,6 +5,18 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.39 — 2026-09-12
+
+Copies the Typecase mockup through plan 1 step 2: product CSS in
+`<style data-tc>`, page chrome in a second `<style>`, and Public Sans,
+Literata, and Source Code Pro next to the file.
+
+### For consumers
+
+Nothing in the running server. Open
+[carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
+current mockup; fonts are in `docs/visual/fonts/`.
+
 ## v0.0.38 — 2026-09-11
 
 Changelog verified against full git history from the initial commit.
