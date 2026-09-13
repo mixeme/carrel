@@ -5,6 +5,32 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.41 — 2026-09-13
+
+Compresses [server.md](../../docs/plan/server.md) from 783 to 655 lines.
+Closed layers become one table with the versions that shipped them; the
+S-11…S-26 and davloom forks stay word for word.
+
+### For consumers
+
+Nothing in the running server. Read what still binds wiring in «Что держится
+при проводке»; closed findings and the decisions that hold live in
+[reviews.md](../../docs/plan/reviews.md), «Ограничения на следующие слои».
+
+### Changed
+
+- Closed sections (skeleton, `view`, crypto, store, session, transport, request
+  layer, users, providers), the 05.09 tail, and the first S-30.2 run are
+  replaced by a version table. Their findings were already in `reviews.md`
+  and this changelog.
+- «Linux-машина» keeps the `dev/` and SelfPost rules and gains what the
+  13.09 run taught: `GOTOOLCHAIN=auto`, Radicale `owner_only` layout, and its
+  403 / 400 / 405 refusals.
+- The open `gofmt` item now lists the manual gates.
+- S-12 links the open `Prop.Value` question; S-30.2 acceptance is ticked for
+  layers up to providers.
+- `reviews.md` no longer points at the removed «Хвост» section.
+
 ## v0.0.40 — 2026-09-13
 
 The Linux gates pass end to end for the first time: F-10, the S-28 container
