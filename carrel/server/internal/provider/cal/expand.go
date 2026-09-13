@@ -36,9 +36,11 @@ func Expand(obj *model.Object, from, to time.Time, loc *time.Location) ([]time.T
 		loc = time.UTC
 	}
 
-	start, err := comp.Props.DateTime(ical.PropDateTimeStart, loc)
-	if err != nil {
-		return nil, err
+	var start time.Time
+	if p := comp.Props.Get(ical.PropDateTimeStart); p != nil {
+		if start, err = propTime(p, loc); err != nil {
+			return nil, err
+		}
 	}
 
 	set := &rrule.Set{}
@@ -60,7 +62,7 @@ func Expand(obj *model.Object, from, to time.Time, loc *time.Location) ([]time.T
 	}
 
 	for _, p := range comp.Props[ical.PropExceptionDates] {
-		ex, err := p.DateTime(loc)
+		ex, err := propTime(&p, loc)
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +70,7 @@ func Expand(obj *model.Object, from, to time.Time, loc *time.Location) ([]time.T
 	}
 	hasRDate := false
 	for _, p := range comp.Props[ical.PropRecurrenceDates] {
-		rd, err := p.DateTime(loc)
+		rd, err := propTime(&p, loc)
 		if err != nil {
 			return nil, err
 		}

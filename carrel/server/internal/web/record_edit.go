@@ -1,0 +1,1005 @@
+package web
+
+import (
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
+	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/model"
+	"carrel.dev/carrel/server/internal/provider/cal"
+	"carrel.dev/carrel/server/internal/provider/card"
+	"carrel.dev/carrel/server/view"
+)
+
+// An edit never rebuilds a record from its form (S-7). The form shows values;
+// what differs between the values it was read with and the values it came back
+// with becomes patch operations on the record the server holds. A field that
+// did not change produces nothing, so normalisation in the form cannot rewrite
+// what another client wrote.
+
+// formValues is a form as values: one entry per field, rows in order. A time
+// field is date, clock, all-day; a list field ends with the empty "add" row.
+type formValues map[string][]string
+
+type fieldType int
+
+const (
+	fieldText fieldType = iota
+	fieldArea
+	fieldMulti
+	fieldTime
+	fieldDone
+	fieldPercent
+	fieldReminders
+)
+
+type editField struct {
+	name     string
+	label    string
+	prop     string
+	typ      fieldType
+	required bool
+	allDay   bool // fieldTime: the field has its own all-day box
+}
+
+var editFields = map[view.Kind][]editField{
+	view.KindContact: {
+		{name: "fn", label: "Name", prop: "FN", typ: fieldText, required: true},
+		{name: "email", label: "Email", prop: "EMAIL", typ: fieldMulti},
+		{name: "tel", label: "Phone", prop: "TEL", typ: fieldMulti},
+		{name: "org", label: "Organisation", prop: "ORG", typ: fieldText},
+		{name: "title", label: "Title", prop: "TITLE", typ: fieldText},
+		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea},
+	},
+	view.KindEvent: {
+		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
+		{name: "start", label: "Starts", prop: "DTSTART", typ: fieldTime, required: true, allDay: true},
+		{name: "end", label: "Ends", prop: "DTEND", typ: fieldTime},
+		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
+		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
+		{name: "reminder", label: "Reminders", typ: fieldReminders},
+	},
+	view.KindTask: {
+		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
+		{name: "due", label: "Due", prop: "DUE", typ: fieldTime, allDay: true},
+		{name: "done", label: "Done", prop: "STATUS", typ: fieldDone},
+		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent},
+		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
+		{name: "reminder", label: "Reminders", typ: fieldReminders},
+	},
+	view.KindNote: {
+		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
+		{name: "description", label: "Body", prop: "DESCRIPTION", typ: fieldArea},
+	},
+}
+
+// reminderPresets are the triggers the form offers. A trigger another client
+// wrote is offered too, so keeping it is always a choice.
+var reminderPresets = []string{"PT0S", "-PT5M", "-PT10M", "-PT15M", "-PT30M", "-PT1H", "-PT2H", "-P1D", "-P2D", "-P1W"}
+
+func first(v []string) string {
+	if len(v) == 0 {
+		return ""
+	}
+	return v[0]
+}
+
+func triple(v []string) [3]string {
+	var out [3]string
+	copy(out[:], v)
+	return out
+}
+
+// sameRows compares rows, ignoring trailing empty ones.
+func sameRows(a, b []string) bool {
+	trim := func(v []string) []string {
+		for len(v) > 0 && strings.TrimSpace(v[len(v)-1]) == "" {
+			v = v[:len(v)-1]
+		}
+		return v
+	}
+	a, b = trim(a), trim(b)
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func sortedKeys(m map[string]string) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// currentValues reads the form values of a record, and its reminders.
+func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues, []cal.Alarm, error) {
+	tz := s.tz()
+	vals := formValues{}
+	props := obj.Props()
+	var alarms []cal.Alarm
+	for _, f := range editFields[c.spec.kind] {
+		switch f.typ {
+		case fieldText, fieldArea:
+			vals[f.name] = []string{c.text(obj, f.prop)}
+		case fieldMulti:
+			var rows []string
+			for _, v := range props[f.prop] {
+				rows = append(rows, v.Text)
+			}
+			vals[f.name] = append(rows, "")
+		case fieldTime:
+			tm, err := cal.TimingOf(obj, tz)
+			if f.prop == "DUE" {
+				tm, err = cal.DueOf(obj, tz)
+			}
+			if err != nil {
+				return nil, nil, err
+			}
+			vals[f.name] = timeRow(f, tm, tz)
+		case fieldDone:
+			vals[f.name] = []string{""}
+			if taskDone(obj) {
+				vals[f.name] = []string{"on"}
+			}
+		case fieldPercent:
+			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
+		case fieldReminders:
+			var err error
+			if alarms, err = cal.Alarms(obj); err != nil {
+				return nil, nil, err
+			}
+			rows := make([]string, 0, len(alarms)+1)
+			for _, a := range alarms {
+				rows = append(rows, a.Trigger)
+			}
+			vals[f.name] = append(rows, "")
+		}
+	}
+	return vals, alarms, nil
+}
+
+func timeRow(f editField, tm cal.Timing, tz *time.Location) []string {
+	at := tm.Start
+	if f.name == "end" {
+		at = tm.End
+		if tm.AllDay && !at.IsZero() {
+			// DTEND of a day is exclusive; the form shows the last day.
+			at = at.AddDate(0, 0, -1)
+		}
+	}
+	if at.IsZero() {
+		return []string{"", "", ""}
+	}
+	row := []string{at.In(tz).Format("2006-01-02"), "", ""}
+	if !tm.AllDay {
+		row[1] = at.In(tz).Format("15:04")
+	}
+	if tm.AllDay && f.allDay {
+		row[2] = "on"
+	}
+	return row
+}
+
+func (s *Server) emptyValues(c *collectionCtx) formValues {
+	vals := formValues{}
+	for _, f := range editFields[c.spec.kind] {
+		switch f.typ {
+		case fieldTime:
+			vals[f.name] = []string{"", "", ""}
+		default:
+			vals[f.name] = []string{""}
+		}
+	}
+	return vals
+}
+
+func checkbox(r *http.Request, name string) string {
+	if v := r.FormValue(name); v != "" && v != "off" {
+		return "on"
+	}
+	return ""
+}
+
+// indexedRows reads name.0, name.1, … and name.new.
+func indexedRows(r *http.Request, name string) []string {
+	var rows []string
+	for i := 0; ; i++ {
+		key := name + "." + strconv.Itoa(i)
+		if _, ok := r.Form[key]; !ok {
+			break
+		}
+		rows = append(rows, strings.TrimSpace(r.FormValue(key)))
+	}
+	return append(rows, strings.TrimSpace(r.FormValue(name+".new")))
+}
+
+func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
+	vals := formValues{}
+	for _, f := range editFields[c.spec.kind] {
+		switch f.typ {
+		case fieldText, fieldPercent:
+			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name))}
+		case fieldArea:
+			vals[f.name] = []string{strings.TrimRight(strings.ReplaceAll(r.FormValue(f.name), "\r\n", "\n"), "\n ")}
+		case fieldMulti, fieldReminders:
+			vals[f.name] = indexedRows(r, f.name)
+		case fieldTime:
+			row := []string{strings.TrimSpace(r.FormValue(f.name + ".date")), strings.TrimSpace(r.FormValue(f.name + ".time")), ""}
+			if f.allDay {
+				row[2] = checkbox(r, f.name+".allday")
+			}
+			vals[f.name] = row
+		case fieldDone:
+			vals[f.name] = []string{checkbox(r, f.name)}
+		}
+	}
+	return vals
+}
+
+// change is what a form asks of a record.
+type change struct {
+	ops           []model.PatchOp
+	alarms        []cal.Alarm
+	alarmsChanged bool
+	errors        map[string]string
+}
+
+// buildChange turns the fields that differ between have and want into patch
+// operations on obj. cur is obj's reminder set.
+func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alarm, have, want formValues, now time.Time) change {
+	tz := s.tz()
+	ch := change{errors: map[string]string{}}
+	props := obj.Props()
+	escape := c.spec.kind != view.KindContact
+	startRow := triple(want["start"])
+	startChanged := !sameRows(want["start"], have["start"])
+	var startAt, endAt time.Time
+
+	for _, f := range editFields[c.spec.kind] {
+		w, h := want[f.name], have[f.name]
+		switch f.typ {
+		case fieldText, fieldArea:
+			v := first(w)
+			if f.required && strings.TrimSpace(v) == "" {
+				ch.errors[f.name] = f.label + " is required."
+				continue
+			}
+			if v == first(h) {
+				continue
+			}
+			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], v, escape)...)
+		case fieldMulti:
+			if sameRows(w, h) {
+				continue
+			}
+			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], w)...)
+		case fieldTime:
+			row := triple(w)
+			allDay := row[2] == "on"
+			if f.name == "end" {
+				allDay = startRow[2] == "on"
+			}
+			if f.required && row[0] == "" {
+				ch.errors[f.name] = f.label + " needs a date."
+				continue
+			}
+			at, err := rowTime(row, allDay, tz)
+			if err != nil {
+				ch.errors[f.name] = err.Error()
+				continue
+			}
+			switch f.name {
+			case "start":
+				startAt = at
+			case "end":
+				endAt = at
+			}
+			if sameRows(w, h) && !(f.name == "end" && startChanged && row[0] != "") {
+				continue
+			}
+			shift := 0
+			if f.name == "end" && allDay {
+				shift = 1
+			}
+			ops := timeOps(f.prop, props[f.prop], row, allDay, shift, tz)
+			if f.name == "end" && len(props["DURATION"]) > 0 && row[0] != "" {
+				ops = append([]model.PatchOp{model.RemoveProp{Prop: "DURATION"}}, ops...)
+			}
+			ch.ops = append(ch.ops, ops...)
+		case fieldDone:
+			wantDone, hadDone := first(w) == "on", first(h) == "on"
+			if wantDone == hadDone {
+				continue
+			}
+			if wantDone {
+				ch.ops = append(ch.ops,
+					model.SetText{Prop: "STATUS", Value: "COMPLETED"},
+					model.SetText{Prop: "COMPLETED", Value: now.UTC().Format("20060102T150405Z")})
+				continue
+			}
+			ch.ops = append(ch.ops, model.SetText{Prop: "STATUS", Value: "NEEDS-ACTION"})
+			if len(props["COMPLETED"]) > 0 {
+				ch.ops = append(ch.ops, model.RemoveProp{Prop: "COMPLETED"})
+			}
+		case fieldPercent:
+			v := first(w)
+			if v == first(h) {
+				continue
+			}
+			if v == "" {
+				if len(props[f.prop]) > 0 {
+					ch.ops = append(ch.ops, model.RemoveProp{Prop: f.prop})
+				}
+				continue
+			}
+			if n, err := strconv.Atoi(v); err != nil || n < 0 || n > 100 {
+				ch.errors[f.name] = "Enter a number from 0 to 100."
+				continue
+			}
+			ch.ops = append(ch.ops, model.SetText{Prop: f.prop, Value: v})
+		case fieldReminders:
+			ch.alarms = cur
+			if sameRows(w, h) {
+				continue
+			}
+			allowed := make(map[string]bool)
+			for _, p := range reminderPresets {
+				allowed[p] = true
+			}
+			for _, a := range cur {
+				allowed[a.Trigger] = true
+			}
+			var next []cal.Alarm
+			for i, v := range w {
+				if v == "" {
+					continue
+				}
+				if !allowed[v] {
+					ch.errors[f.name] = "Choose a reminder from the list."
+					break
+				}
+				if i < len(cur) && cur[i].Trigger == v {
+					next = append(next, cur[i])
+				} else {
+					next = append(next, cal.NewAlarm(v))
+				}
+			}
+			ch.alarms, ch.alarmsChanged = next, true
+		}
+	}
+	if !startAt.IsZero() && !endAt.IsZero() && endAt.Before(startAt) {
+		ch.errors["end"] = "The end is before the start."
+	}
+	if c.spec.kind == view.KindTask && ch.alarmsChanged && len(ch.alarms) > 0 &&
+		triple(want["due"])[0] == "" && len(props["DTSTART"]) == 0 {
+		ch.errors["reminder"] = "Reminders need a due date."
+	}
+	return ch
+}
+
+// rowTime is the instant a time row names, for validation. An empty row is
+// the zero time.
+func rowTime(row [3]string, allDay bool, tz *time.Location) (time.Time, error) {
+	if row[0] == "" {
+		return time.Time{}, nil
+	}
+	if allDay {
+		t, err := time.ParseInLocation("2006-01-02", row[0], tz)
+		if err != nil {
+			return time.Time{}, errors.New("Enter the date as YYYY-MM-DD.")
+		}
+		return t, nil
+	}
+	if row[1] == "" {
+		return time.Time{}, errors.New("Enter a time, or mark it as all day.")
+	}
+	t, err := time.ParseInLocation("2006-01-02 15:04", row[0]+" "+row[1], tz)
+	if err != nil {
+		return time.Time{}, errors.New("Enter the date as YYYY-MM-DD and the time as HH:MM.")
+	}
+	return t, nil
+}
+
+// textOps sets one value and keeps the parameters it was written with. An
+// empty value removes the property: empty is not removal (S-7).
+func textOps(prop string, cur []model.RawValue, v string, escape bool) []model.PatchOp {
+	if v == "" {
+		if len(cur) > 0 {
+			return []model.PatchOp{model.RemoveProp{Prop: prop}}
+		}
+		return nil
+	}
+	if escape {
+		v = cal.EscapeText(v)
+	}
+	ops := []model.PatchOp{model.SetText{Prop: prop, Value: v}}
+	if len(cur) > 0 {
+		for _, k := range sortedKeys(cur[0].Params) {
+			ops = append(ops, model.SetParam{Prop: prop, Index: 0, Param: k, Value: cur[0].Params[k]})
+		}
+	}
+	return ops
+}
+
+// multiOps rewrites a list property row by row: a kept row keeps its
+// parameters (TYPE=work stays on the address it was on), an emptied row
+// disappears, the add row comes without parameters.
+func multiOps(prop string, cur []model.RawValue, rows []string) []model.PatchOp {
+	var texts []string
+	var from []int
+	for i, v := range rows {
+		if v = strings.TrimSpace(v); v == "" {
+			continue
+		}
+		texts = append(texts, v)
+		if i < len(cur) {
+			from = append(from, i)
+		} else {
+			from = append(from, -1)
+		}
+	}
+	if len(texts) == 0 {
+		if len(cur) > 0 {
+			return []model.PatchOp{model.RemoveProp{Prop: prop}}
+		}
+		return nil
+	}
+	ops := []model.PatchOp{model.SetValues{Prop: prop, Values: texts}}
+	for i, src := range from {
+		if src < 0 {
+			continue
+		}
+		for _, k := range sortedKeys(cur[src].Params) {
+			ops = append(ops, model.SetParam{Prop: prop, Index: i, Param: k, Value: cur[src].Params[k]})
+		}
+	}
+	return ops
+}
+
+// timeOps writes a date or date-time in the form it had: a TZID stays with
+// its zone, UTC stays UTC, a floating time stays floating. A day is a DATE;
+// shiftDays turns the last day of an all-day event into its exclusive DTEND.
+// The row is already validated by rowTime.
+func timeOps(prop string, cur []model.RawValue, row [3]string, allDay bool, shiftDays int, tz *time.Location) []model.PatchOp {
+	if row[0] == "" {
+		if len(cur) > 0 {
+			return []model.PatchOp{model.RemoveProp{Prop: prop}}
+		}
+		return nil
+	}
+	var old model.RawValue
+	if len(cur) > 0 {
+		old = cur[0]
+	}
+	params := make(map[string]string)
+	for k, v := range old.Params {
+		if k != "VALUE" && k != "TZID" {
+			params[k] = v
+		}
+	}
+	var value string
+	if allDay {
+		day, _ := time.ParseInLocation("2006-01-02", row[0], tz)
+		value = day.AddDate(0, 0, shiftDays).Format("20060102")
+		params["VALUE"] = "DATE"
+	} else {
+		at, _ := time.ParseInLocation("2006-01-02 15:04", row[0]+" "+row[1], tz)
+		wasDate := old.Params["VALUE"] == "DATE" || len(old.Text) == len("20060102")
+		switch zone := old.Params["TZID"]; {
+		case zone != "":
+			params["TZID"] = zone
+			if loc, err := time.LoadLocation(zone); err == nil {
+				value = at.In(loc).Format("20060102T150405")
+			} else {
+				// A zone Go does not know was read as a wall clock in the
+				// instance zone; it is written back the same way.
+				value = at.Format("20060102T150405")
+			}
+		case old.Text == "" || wasDate || strings.HasSuffix(old.Text, "Z"):
+			value = at.UTC().Format("20060102T150405Z")
+		default:
+			value = at.Format("20060102T150405")
+		}
+	}
+	ops := []model.PatchOp{model.SetText{Prop: prop, Value: value}}
+	for _, k := range sortedKeys(params) {
+		ops = append(ops, model.SetParam{Prop: prop, Index: 0, Param: k, Value: params[k]})
+	}
+	return ops
+}
+
+// apply patches obj and, when the reminder set changed, rewrites it.
+func (c *collectionCtx) apply(obj *model.Object, ch change) (*model.Object, error) {
+	if len(ch.ops) > 0 {
+		patch, err := model.NewPatch(ch.ops...)
+		if err != nil {
+			return nil, err
+		}
+		if err := patch.Apply(obj); err != nil {
+			return nil, err
+		}
+	}
+	if ch.alarmsChanged {
+		return cal.SetAlarms(obj, ch.alarms)
+	}
+	return obj, nil
+}
+
+// editState is everything an edit page shows.
+type editState struct {
+	obj     *model.Object // the record as read; nil for a new one
+	uid     string
+	values  formValues
+	alarms  []cal.Alarm
+	errors  map[string]string
+	etag    string
+	readAt  time.Time
+	isNew   bool
+	loss    *view.LossReport
+	notices []view.Notice
+}
+
+func (s *Server) editAction(c *collectionCtx, st editState) string {
+	if st.isNew {
+		return c.listPath() + "/new"
+	}
+	return c.recordPath(st.uid) + "/edit"
+}
+
+func (s *Server) editPage(c *collectionCtx, st editState) any {
+	tz := s.tz()
+	title := "Edit " + c.spec.noun
+	if st.isNew {
+		title = "New " + c.spec.noun
+	}
+	sh := s.buildShell(c.sess, title)
+	sh.Notices = append(sh.Notices, st.notices...)
+	if len(st.errors) > 0 {
+		sh.Notices = append(sh.Notices, view.Notice{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "Correct the marked fields and save again."})
+	}
+	form := s.recordForm(c, st)
+	switch c.spec.kind {
+	case view.KindContact:
+		page := view.ContactEditPage{Shell: sh, UID: st.uid, Form: form, Loss: st.loss, ReadOnly: c.col.ReadOnly}
+		page.Photo = view.PhotoBlock{Initials: text(initials(first(st.values["fn"])))}
+		if st.obj != nil {
+			if _, external := card.PhotoURI(st.obj); external {
+				page.Photo.Note = "External photo link; editing is not available."
+			}
+		}
+		return page
+	case view.KindEvent:
+		page := view.EventEditPage{Shell: sh, UID: st.uid, Form: form, Reminders: reminderRows(st.alarms, tz), Loss: st.loss}
+		if st.obj != nil {
+			if cal.HasRecurrence(st.obj) {
+				page.Recurrence = s.recurrenceBlock(st.obj, tz)
+			}
+			for _, a := range cal.Attendees(st.obj) {
+				page.Attendees = append(page.Attendees, view.AttendeeRow{Name: text(a.Name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
+			}
+		}
+		return page
+	case view.KindTask:
+		page := view.TaskEditPage{Shell: sh, UID: st.uid, Form: form, Done: first(st.values["done"]) == "on", Reminders: reminderRows(st.alarms, tz), Loss: st.loss}
+		if n, err := strconv.Atoi(first(st.values["percent"])); err == nil {
+			page.Percent = &n
+		}
+		return page
+	default:
+		body := first(st.values["description"])
+		doc := view.NoteDoc{
+			Mode: view.NoteEditing, Title: text(first(st.values["summary"])), Body: text(body),
+			Rendered: cal.RenderMarkdown(body), ReadOnly: c.col.ReadOnly,
+			Bar: []view.Action{
+				{ID: "record.save", Label: "Save", Href: s.postQuery(s.editAction(c, st), url.Values{"etag": {st.etag}, "readat": {strconv.FormatInt(st.readAt.Unix(), 10)}}), Method: "POST", Enabled: true},
+				s.cancelAction(c, st),
+			},
+		}
+		// NoteDoc has no shell: a loss or a notice needs the page around it.
+		if st.loss != nil || len(sh.Notices) > 0 {
+			return view.NotePage{Shell: sh, UID: st.uid, Doc: doc, Source: c.source(), Loss: st.loss}
+		}
+		return doc
+	}
+}
+
+func (s *Server) cancelAction(c *collectionCtx, st editState) view.Action {
+	href := c.recordPath(st.uid)
+	if st.isNew {
+		href = c.listPath()
+	}
+	return view.Action{ID: "record.cancel", Label: "Cancel", Href: s.route(href), Method: "GET", Enabled: true}
+}
+
+func (s *Server) recordForm(c *collectionCtx, st editState) view.Form {
+	tz := s.tz()
+	main := view.FieldSet{Rows: []view.FormRow{
+		csrfField(c.sess),
+		{Name: "etag", Label: "Version", Kind: view.InputText, Value: text(st.etag), ReadOnly: true},
+		{Name: "readat", Label: "Read at", Kind: view.InputText, Value: text(strconv.FormatInt(st.readAt.Unix(), 10)), ReadOnly: true},
+	}}
+	var props map[string][]model.RawValue
+	if st.obj != nil {
+		props = st.obj.Props()
+	}
+	var sets []view.FieldSet
+	var reminders *view.FieldSet
+	for _, f := range editFields[c.spec.kind] {
+		vals, errText := st.values[f.name], text(st.errors[f.name])
+		switch f.typ {
+		case fieldText:
+			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Error: errText, Required: f.required})
+		case fieldArea:
+			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
+		case fieldMulti:
+			kind := view.InputText
+			if f.prop == "EMAIL" {
+				kind = view.InputEmail
+			}
+			for i, v := range vals {
+				row := view.FormRow{Name: fmt.Sprintf("%s.%d", f.name, i), Label: text(f.label), Kind: kind, Value: text(v)}
+				if i == len(vals)-1 {
+					row.Name, row.Label = f.name+".new", text("Add "+strings.ToLower(f.label))
+				} else if i < len(props[f.prop]) {
+					row.Label = text(typedLabel(f.label, props[f.prop][i].Params))
+				}
+				if i == 0 {
+					row.Error = errText
+				}
+				main.Rows = append(main.Rows, row)
+			}
+		case fieldTime:
+			row := triple(vals)
+			main.Rows = append(main.Rows,
+				view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required},
+				view.FormRow{Name: f.name + ".time", Label: text(f.label + " at"), Kind: view.InputTime, Value: text(row[1])})
+			if f.allDay {
+				main.Rows = append(main.Rows, view.FormRow{Name: f.name + ".allday", Label: "All day", Kind: view.InputCheck, Value: text(row[2])})
+			}
+		case fieldDone:
+			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck, Value: text(first(vals))})
+		case fieldPercent:
+			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputNumber, Value: text(first(vals)), Error: errText})
+		case fieldReminders:
+			set := view.FieldSet{Legend: text(f.label)}
+			for i, v := range vals {
+				row := view.FormRow{Name: fmt.Sprintf("reminder.%d", i), Label: "Reminder", Kind: view.InputSelect, Value: text(v), Options: reminderOptions(v, st.alarms, i, tz)}
+				if i == len(vals)-1 {
+					row.Name, row.Label = "reminder.new", "Add a reminder"
+				}
+				if i == 0 {
+					row.Error = errText
+				}
+				set.Rows = append(set.Rows, row)
+			}
+			reminders = &set
+		}
+	}
+	sets = append(sets, main)
+	if reminders != nil {
+		sets = append(sets, *reminders)
+	}
+	form := view.Form{
+		Action: s.route(s.editAction(c, st)), Method: "POST", Sets: sets,
+		Actions: []view.Action{{ID: "record.save", Label: "Save", Method: "POST", Enabled: !c.col.ReadOnly}, s.cancelAction(c, st)},
+	}
+	names := make([]string, 0, len(st.errors))
+	for name := range st.errors {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		form.Errors = append(form.Errors, view.FieldError{Name: name, Message: text(st.errors[name])})
+	}
+	return form
+}
+
+func reminderOptions(selected string, alarms []cal.Alarm, row int, tz *time.Location) []view.Option {
+	opts := []view.Option{{Value: "", Label: "No reminder", Selected: selected == ""}}
+	seen := false
+	for _, p := range reminderPresets {
+		opts = append(opts, view.Option{Value: p, Label: text(reminderLabel(cal.NewAlarm(p), tz)), Selected: p == selected})
+		seen = seen || p == selected
+	}
+	if selected != "" && !seen {
+		label := selected
+		if row < len(alarms) && alarms[row].Trigger == selected {
+			label = reminderLabel(alarms[row], tz)
+		}
+		opts = append(opts, view.Option{Value: selected, Label: text(label), Selected: true})
+	}
+	return opts
+}
+
+func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string) {
+	c, ok := s.openCollection(w, r, kind, true)
+	if !ok {
+		return
+	}
+	if c.col.ReadOnly {
+		s.notFound(w, r)
+		return
+	}
+	uid := r.PathValue("uid")
+	obj, err := c.find(r.Context(), uid)
+	switch {
+	case notFoundErr(err):
+		s.notFound(w, r)
+		return
+	case err != nil:
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid)+"/edit", err)))
+		return
+	}
+	vals, alarms, err := s.currentValues(c, obj)
+	if err != nil {
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, readNotice(obj.Path, err)))
+		return
+	}
+	s.rememberBody(c, obj)
+	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
+		obj: obj, uid: uid, values: vals, alarms: alarms, etag: obj.ETag, readAt: time.Now(),
+	}))
+}
+
+// postKindEdit writes a patch with If-Match of the version the form was read
+// at (S-8). A 412 keeps what the person changed in DraftRejectedEdit and
+// opens the conflict screen; nothing is resolved automatically.
+func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind string) {
+	c, ok := s.openCollection(w, r, kind, true)
+	if !ok {
+		return
+	}
+	if c.col.ReadOnly {
+		s.notFound(w, r)
+		return
+	}
+	uid := r.PathValue("uid")
+	etag := strings.TrimSpace(r.FormValue("etag"))
+	readAt := unixForm(r.FormValue("readat"))
+	want := s.submittedValues(c, r)
+	st := editState{uid: uid, values: want, etag: etag, readAt: readAt}
+
+	obj, err := c.find(r.Context(), uid)
+	switch {
+	case notFoundErr(err):
+		s.notFound(w, r)
+		return
+	case err != nil:
+		st.notices = []view.Notice{s.unavailableNotice(c, c.recordPath(uid)+"/edit", err)}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
+	have, alarms, err := s.currentValues(c, obj)
+	if err != nil {
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, readNotice(obj.Path, err)))
+		return
+	}
+	st.obj, st.alarms = obj, alarms
+	if etag == "" {
+		st.notices = []view.Notice{{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "The form does not say which version it edits. Open the record again."}}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
+
+	ch := s.buildChange(c, obj, alarms, have, want, time.Now())
+	if len(ch.errors) > 0 {
+		st.errors = ch.errors
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
+	if len(ch.ops) == 0 && !ch.alarmsChanged {
+		s.redirect(w, r, c.recordPath(uid))
+		return
+	}
+	// What the person changed is measured against the version the form was
+	// read at. Without it in the cache, against the server's version — then
+	// the conflict screen may also offer what only the server changed.
+	base := have
+	if read, ok := s.readVersion(c, obj.Path, etag); ok {
+		if rv, _, err := s.currentValues(c, read); err == nil {
+			base = rv
+		}
+	}
+
+	sent, err := c.apply(obj, ch)
+	if err != nil {
+		st.notices = []view.Notice{s.writeFailure(c, "PUT", obj.Path, err)}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
+	sent.ETag = etag
+	err = c.update(r.Context(), sent)
+	switch {
+	case dav.IsStatus(err, http.StatusPreconditionFailed):
+		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, want))
+		s.redirect(w, r, c.recordPath(uid)+"/conflict")
+		return
+	case err != nil:
+		st.notices = []view.Notice{s.writeFailure(c, "PUT", obj.Path, err)}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
+	c.dropIndex()
+	s.finishWrite(w, r, c, uid, sent)
+}
+
+func changedValues(fields []editField, base, want formValues) formValues {
+	out := formValues{}
+	for _, f := range fields {
+		if !sameRows(want[f.name], base[f.name]) {
+			out[f.name] = want[f.name]
+		}
+	}
+	return out
+}
+
+func unixForm(v string) time.Time {
+	n, err := strconv.ParseInt(strings.TrimSpace(v), 10, 64)
+	if err != nil || n <= 0 {
+		return time.Time{}
+	}
+	return time.Unix(n, 0)
+}
+
+// finishWrite re-reads what was written and compares (S-7.1). A loss is a
+// notice on the edit page, said once per server and property; no loss is a
+// redirect to the record.
+func (s *Server) finishWrite(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, sent *model.Object) {
+	got, err := c.find(r.Context(), uid)
+	if err != nil {
+		s.redirect(w, r, c.recordPath(uid))
+		return
+	}
+	loss := model.CompareAfterPut(c.conn.ID, sent, got, c.sess.Losses())
+	if loss == nil {
+		s.redirect(w, r, c.recordPath(uid))
+		return
+	}
+	vals, alarms, err := s.currentValues(c, got)
+	if err != nil {
+		s.redirect(w, r, c.recordPath(uid))
+		return
+	}
+	s.rememberBody(c, got)
+	report := &view.LossReport{
+		Note:       "The change was saved, but the server did not keep these properties. Other clients will not see them either.",
+		Aggregated: loss.Aggregated,
+	}
+	for _, p := range loss.Properties {
+		report.Properties = append(report.Properties, text(p))
+	}
+	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
+		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: time.Now(), loss: report,
+	}))
+}
+
+// getKindNew: as a sheet, the target collection stated; as a page, the empty
+// edit form of the kind (C-5.4).
+func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string) {
+	c, ok := s.openCollection(w, r, kind, false)
+	if !ok {
+		return
+	}
+	if c.col.ReadOnly {
+		s.notFound(w, r)
+		return
+	}
+	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
+		id := c.conn.ID + " " + c.col.Path
+		sheet := view.NewSheet{
+			Kind: c.spec.kind,
+			Target: view.TargetPicker{Chosen: id, Options: []view.TargetOption{{
+				ID: id, Label: text(collectionLabel(c.col)), Stamp: c.stamp(), Colour: catalogColour(c.col),
+			}}},
+			Actions: []view.Action{{ID: "record.new", Label: text("New " + c.spec.noun), Href: s.route(c.listPath() + "/new"), Method: "GET", Enabled: true}},
+		}
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		return
+	}
+	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: s.emptyValues(c), isNew: true, readAt: time.Now()}))
+}
+
+// postKindNew creates with If-None-Match (S-8). The record starts as a
+// skeleton — UID of 32 hex digits, file {uid}.vcf or {uid}.ics — and the form
+// arrives as a patch on it.
+func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string) {
+	c, ok := s.openCollection(w, r, kind, false)
+	if !ok {
+		return
+	}
+	if c.col.ReadOnly {
+		s.notFound(w, r)
+		return
+	}
+	want := s.submittedValues(c, r)
+	st := editState{values: want, isNew: true, readAt: time.Now()}
+	uid, err := model.NewUID()
+	if err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	now := time.Now()
+	var obj *model.Object
+	if c.card != nil {
+		obj = card.NewObject(uid)
+	} else if obj, err = cal.NewObject(c.spec.component, uid, now); err != nil {
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	ch := s.buildChange(c, obj, nil, s.emptyValues(c), want, now)
+	if len(ch.errors) > 0 {
+		st.errors = ch.errors
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
+	path := strings.TrimSuffix(c.col.Path, "/") + "/" + uid + c.spec.ext
+	sent, err := c.apply(obj, ch)
+	if err == nil {
+		sent.Path = path
+		err = c.create(r.Context(), path, sent)
+	}
+	if err != nil {
+		st.notices = []view.Notice{s.writeFailure(c, "PUT", path, err)}
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
+	c.dropIndex()
+	s.finishWrite(w, r, c, uid, sent)
+}
+
+// postKindDelete deletes with If-Match of the version the page showed. A
+// changed record is not deleted: the page says so and shows what is there now.
+func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind string) {
+	c, ok := s.openCollection(w, r, kind, true)
+	if !ok {
+		return
+	}
+	if c.col.ReadOnly {
+		s.notFound(w, r)
+		return
+	}
+	uid := r.PathValue("uid")
+	etag := strings.TrimSpace(r.FormValue("etag"))
+	obj, err := c.find(r.Context(), uid)
+	switch {
+	case notFoundErr(err):
+		s.redirect(w, r, c.listPath())
+		return
+	case err != nil:
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		return
+	case etag == "":
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+			Role: view.NoticeAlert, Title: "Nothing was deleted", Body: "The request did not say which version to delete.",
+		}))
+		return
+	}
+	err = c.remove(r.Context(), obj.Path, etag)
+	switch {
+	case dav.IsStatus(err, http.StatusPreconditionFailed):
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+			Role:  view.NoticeAlert,
+			Title: "Changed elsewhere, so nothing was deleted",
+			Body:  "This record changed after you opened it. Check the current version below and delete again if you still mean to.",
+		}))
+	case err != nil:
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.writeFailure(c, "DELETE", obj.Path, err)))
+	default:
+		c.dropIndex()
+		s.redirect(w, r, c.listPath())
+	}
+}

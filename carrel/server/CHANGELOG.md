@@ -5,6 +5,78 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.43 — 2026-09-13
+
+Step 2 of S-11…S-26 in [server.md](../../docs/plan/server.md): records. The
+four record kinds of one collection are listed, read, edited, created and
+deleted over C-5.4, and a write against a version that moved on opens the
+conflict screen.
+
+### For consumers
+
+- **Lists** (`/app/{kind}/{account}/{col}`). `ContactsListPage` groups by
+  initial. `AgendaPage` is one week in the instance zone: `?from=YYYY-MM-DD`
+  picks the week and `bar.range.presets` step it; series are expanded, and an
+  instance another client rewrote is shown in place of the one it replaces.
+  `TasksPage` takes `?show=open|done|all` (default open) with counted
+  segments. `NotesPage` is newest first. `poll` stays null: one collection is
+  not a fanout.
+- **Record pages** (`/{uid}`). Contacts: fields, tags, foreign properties.
+  Events and tasks: time, the original time zone when it differs, reminders,
+  attendees (read only), related records, recurrence in words with the raw rule
+  and "Edited as a whole series". Notes: Markdown rendered as blocks. A related
+  record is a link only when it is in a list this session already loaded for
+  the collection; otherwise its UID is shown without a link.
+- **Edit** (`GET`/`POST /{uid}/edit`). The form carries `etag` and `readat`.
+  List fields post as `name.0`, `name.1`, … and `name.new`; times as
+  `name.date`, `name.time`, `name.allday`; reminders as `reminder.N` and
+  `reminder.new` from the offered options. Only changed fields are written, and
+  parameters stay with their value. Success redirects to the record. When the
+  server drops properties, the edit page comes back with `loss`. Notes answer
+  `NoteDoc`, or `NotePage` when there is a loss or a notice.
+- **Conflict** (`/{uid}/conflict`). A write whose version moved redirects
+  here. Rows are the fields you changed that the server now holds otherwise.
+  Post an action's `href`, adding `choice.N=theirs` to keep the server's value
+  in row N; rows without a choice take your edit.
+- **New** (`/new`). As a sheet fragment it answers `NewSheet` naming the
+  collection; as a page, the empty edit form. The record gets a 32-hex UID and
+  the file `{uid}.vcf` or `{uid}.ics`.
+- **Delete** (`POST /{uid}/delete`) needs `etag`; the record page's action
+  carries it. If the version moved, nothing is deleted and the record page
+  answers with a notice.
+- A source that refuses is a notice with the server's answer and a
+  `source.retry` action, status 200. A read-only collection has no edit,
+  delete or new: those routes answer 404.
+
+### Fixed
+
+- Record PUTs sent no `Content-Type`, and CalDAV/CardDAV servers that check it
+  refused the write (go-webdav answers 400). Providers now send
+  `text/calendar` and `text/vcard` through `dav.Typed`; `Transport` is
+  unchanged.
+- Descriptions and notes showed iCalendar escapes (`\n`, `\,`).
+  `cal.Description` unescapes.
+- A TZID the Go zone database does not know (Outlook writes Windows names) no
+  longer fails the record: it is read as a wall clock in the instance zone.
+
+### Included
+
+- `provider/card`: `Query`, `FindUID`, `NewObject`, `Delete`.
+- `provider/cal`: `Query` (objects that cannot be read are named, not fatal),
+  `FindUID`, `NewObject`, `Delete`, `Alarms` and `SetAlarms`, `TimingOf`,
+  `DueOf`, `Overrides`, `Attendees`, `RelatedTo`, `Text`, `EscapeText`,
+  `TextList`, `TimeOf`.
+- `model.NewUID`.
+- `davtest`: `Drop` for lossy servers; an address book filter without
+  prop-filters matches every card (RFC 6352 §10.5).
+
+### Not yet included
+
+- Live S-30.2 runs for records on Radicale and Baikal, and a note written by a
+  real foreign client.
+- First day of the week and 12/24 hours from the account: Monday and 24 hours
+  until that setting exists.
+
 ## v0.0.42 — 2026-09-13
 
 Step 1 of S-11…S-26 in [server.md](../../docs/plan/server.md): the collection

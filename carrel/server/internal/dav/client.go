@@ -129,6 +129,9 @@ func (c *Client) Put(ctx context.Context, p string, body io.Reader, ifMatch stri
 	if err != nil {
 		return "", err
 	}
+	if ct := contentTypeOf(body); ct != "" {
+		req.Header.Set("Content-Type", ct)
+	}
 	if ifMatch != "" {
 		req.Header.Set("If-Match", ifMatch)
 	}

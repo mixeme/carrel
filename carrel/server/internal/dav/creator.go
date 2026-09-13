@@ -20,6 +20,9 @@ func (c *Client) PutCreate(ctx context.Context, p string, body io.Reader) (strin
 		return "", err
 	}
 	req.Header.Set("If-None-Match", "*")
+	if ct := contentTypeOf(body); ct != "" {
+		req.Header.Set("Content-Type", ct)
+	}
 	resp, err := c.hc.Do(req)
 	if err != nil {
 		return "", err

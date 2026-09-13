@@ -236,20 +236,6 @@ func (s *Server) getKindRoot(w http.ResponseWriter, r *http.Request, kind string
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	account := r.PathValue("account")
-	col := r.PathValue("col")
-	if !s.checkOwnership(w, r, sess, account, col, "") {
-		return
-	}
-	page := s.emptyListPage(sess, kind)
-	s.writePage(w, r, http.StatusOK, page)
-}
-
 func (s *Server) emptyListPage(sess *session.Session, kind string) any {
 	sh := s.buildShell(sess, kindTitle(kind))
 	switch kind {
@@ -281,58 +267,12 @@ func kindTitle(kind string) string {
 	}
 }
 
-func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind string) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	if !s.checkOwnership(w, r, sess, r.PathValue("account"), r.PathValue("col"), r.PathValue("uid")) {
-		return
-	}
-	s.notFound(w, r)
-}
-
-func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string) {
-	s.getKindRecord(w, r, kind)
-}
-
-func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind string) {
-	s.getKindRecord(w, r, kind)
-}
-
-func (s *Server) getKindConflict(w http.ResponseWriter, r *http.Request, kind string) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	if !s.checkOwnership(w, r, sess, r.PathValue("account"), r.PathValue("col"), r.PathValue("uid")) {
-		return
-	}
-	page := view.ConflictPage{Shell: s.buildShell(sess, "Conflict")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind string) {
-	s.getKindConflict(w, r, kind)
-}
-
 func (s *Server) getKindMove(w http.ResponseWriter, r *http.Request, kind string) {
 	s.getQuickNote(w, r)
 }
 
 func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind string) {
 	s.getKindMove(w, r, kind)
-}
-
-func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind string) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	if !s.checkOwnership(w, r, sess, r.PathValue("account"), r.PathValue("col"), r.PathValue("uid")) {
-		return
-	}
-	s.redirect(w, r, "/app/"+kind+"/"+r.PathValue("account")+"/"+r.PathValue("col"))
 }
 
 func (s *Server) getKindImport(w http.ResponseWriter, r *http.Request, kind string) {
@@ -355,20 +295,25 @@ func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind stri
 	s.notFound(w, r)
 }
 
-func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string) {
-	s.getQuickNote(w, r)
-}
-
-func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string) {
-	s.getKindNew(w, r, kind)
-}
-
 func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
-	s.getKindRecord(w, r, "contacts")
+	s.ownedRecordStub(w, r)
 }
 
 func (s *Server) getPhotoPreview(w http.ResponseWriter, r *http.Request) {
-	s.getKindRecord(w, r, "contacts")
+	s.ownedRecordStub(w, r)
+}
+
+// ownedRecordStub answers record routes whose functions come in later steps
+// (S-13, S-14): ownership first, then 404.
+func (s *Server) ownedRecordStub(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	if !s.checkOwnership(w, r, sess, r.PathValue("account"), r.PathValue("col"), r.PathValue("uid")) {
+		return
+	}
+	s.notFound(w, r)
 }
 
 func (s *Server) postPhotoPreview(w http.ResponseWriter, r *http.Request) {

@@ -114,7 +114,9 @@ func (h *harness) putConnections(login string, key [32]byte, ids ...string) {
 	h.t.Helper()
 	var b sealed.Blob
 	for _, id := range ids {
-		b.Connections = append(b.Connections, sealed.Connection{ID: id, Server: "https://dav.example.com"})
+		// The guard refuses loopback without an allowlist, so a record route
+		// opened on a seeded connection fails at once, without the network.
+		b.Connections = append(b.Connections, sealed.Connection{ID: id, Server: "http://127.0.0.1:1/dav/"})
 		b.Collections = append(b.Collections,
 			sealed.Collection{AccountID: id, Path: seedBook, Name: "Personal", Kinds: []view.Kind{view.KindContact}},
 			sealed.Collection{AccountID: id, Path: seedFiles, Name: "Docs", Kinds: []view.Kind{view.KindFile}},
@@ -370,7 +372,8 @@ func TestOwnershipByConnection(t *testing.T) {
 		{"/app/contacts/a-alice00001/personal", http.StatusNotFound},
 		{"/app/files/a-alice00001/" + seedFilesSeg + "/", http.StatusOK},
 		{"/app/files/a-bob0000001/" + seedFilesSeg + "/", http.StatusNotFound},
-		{"/app/contacts/a-alice00001/" + seedBookSeg + "/uid-1/conflict", http.StatusOK},
+		// Own record with no rejected edit: the conflict address sends back to it.
+		{"/app/contacts/a-alice00001/" + seedBookSeg + "/uid-1/conflict", http.StatusSeeOther},
 		{"/app/contacts/a-bob0000001/" + seedBookSeg + "/uid-1/conflict", http.StatusNotFound},
 	}
 	for _, c := range cases {

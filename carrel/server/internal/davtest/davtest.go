@@ -41,6 +41,10 @@ type Server struct {
 	// Login and Password, when Login is set, are required as HTTP Basic.
 	Login, Password string
 
+	// Drop names properties the server silently discards on PUT, in every
+	// component, the way lossy servers do (S-7.1).
+	Drop []string
+
 	mu        sync.Mutex
 	calendars map[string]caldav.Calendar
 	books     map[string]carddav.AddressBook
@@ -406,7 +410,17 @@ func (b calBackend) QueryCalendarObjects(ctx context.Context, p string, q *calda
 	return caldav.Filter(q, all)
 }
 
+func dropComponentProps(c *ical.Component, names []string) {
+	for _, n := range names {
+		c.Props.Del(n)
+	}
+	for _, child := range c.Children {
+		dropComponentProps(child, names)
+	}
+}
+
 func (b calBackend) PutCalendarObject(_ context.Context, p string, cal *ical.Calendar, opts *caldav.PutCalendarObjectOptions) (*caldav.CalendarObject, error) {
+	dropComponentProps(cal.Component, b.s.Drop)
 	var buf bytes.Buffer
 	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
 		return nil, webdav.NewHTTPError(http.StatusBadRequest, err)
@@ -496,10 +510,18 @@ func (b cardBackend) QueryAddressObjects(ctx context.Context, p string, q *cardd
 	if err != nil {
 		return nil, err
 	}
+	// RFC 6352 §10.5: a filter without prop-filters matches every card.
+	// go-webdav's Match answers false there, which no real server does.
+	if len(q.PropFilters) == 0 {
+		return all, nil
+	}
 	return carddav.Filter(q, all)
 }
 
 func (b cardBackend) PutAddressObject(_ context.Context, p string, card vcard.Card, opts *carddav.PutAddressObjectOptions) (*carddav.AddressObject, error) {
+	for _, n := range b.s.Drop {
+		delete(card, strings.ToUpper(n))
+	}
 	var buf bytes.Buffer
 	if err := vcard.NewEncoder(&buf).Encode(card); err != nil {
 		return nil, webdav.NewHTTPError(http.StatusBadRequest, err)

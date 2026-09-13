@@ -62,8 +62,11 @@ func (p *Provider) Create(ctx context.Context, path string, obj *model.Object) (
 	if err := Encode(&buf, obj); err != nil {
 		return "", err
 	}
-	return p.c.PutCreate(ctx, path, &buf)
+	return p.c.PutCreate(ctx, path, dav.Typed(&buf, MediaType))
 }
+
+// MediaType is the Content-Type of a contact on PUT.
+const MediaType = "text/vcard; charset=utf-8"
 
 // Update writes with If-Match (S-8).
 func (p *Provider) Update(ctx context.Context, obj *model.Object) (string, error) {
@@ -75,7 +78,7 @@ func (p *Provider) Update(ctx context.Context, obj *model.Object) (string, error
 		return "", err
 	}
 	tag := strings.Trim(obj.ETag, `"`)
-	return p.t.Put(ctx, obj.Path, &buf, `"`+tag+`"`)
+	return p.t.Put(ctx, obj.Path, dav.Typed(&buf, MediaType), `"`+tag+`"`)
 }
 
 // Encode serializes an Object to vCard.

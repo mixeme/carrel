@@ -1,0 +1,600 @@
+package web_test
+
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"regexp"
+	"strings"
+	"testing"
+	_ "time/tzdata"
+
+	"github.com/emersion/go-webdav/caldav"
+	"github.com/emersion/go-webdav/carddav"
+
+	"carrel.dev/carrel/server/internal/davtest"
+	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/view"
+)
+
+// davFixture is a person with one connection to an in-memory DAV server,
+// connected through POST /app/settings/connections like anyone else.
+type davFixture struct {
+	srv  *davtest.Server
+	h    *harness
+	sess *session.Session
+	id   string
+	col  string
+}
+
+func (f davFixture) path(kind string) string {
+	return "/app/" + kind + "/" + f.id + "/" + url.PathEscape(f.col)
+}
+
+func connectFixture(t *testing.T, srv *davtest.Server, col string, configure func(*harness)) davFixture {
+	t.Helper()
+	h, sess := davHarness(t)
+	if configure != nil {
+		configure(h)
+		h.rebuild()
+	}
+	rec := h.do(postForm("/app/settings/connections", sess, url.Values{
+		"server": {srv.URL}, "login": {srv.Login}, "password": {srv.Password},
+	}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("connect: %d %s", rec.Code, rec.Body.String())
+	}
+	key, _ := sess.DataKey()
+	blob, _ := h.users.Catalog(sess.AccountID(), key)
+	return davFixture{srv: srv, h: h, sess: sess, id: blob.Connections[0].ID, col: col}
+}
+
+var uidLine = regexp.MustCompile(`(?m)^UID:(\S+)`)
+
+func contactsFixture(t *testing.T, readOnly bool, cards ...string) davFixture {
+	t.Helper()
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	book := davtest.AddressBookHome + "people/"
+	srv.AddAddressBook(carddav.AddressBook{Path: book, Name: "People", ReadOnly: readOnly})
+	for _, c := range cards {
+		srv.Seed(book+uidLine.FindStringSubmatch(c)[1]+".vcf", c)
+	}
+	return connectFixture(t, srv, book, nil)
+}
+
+// calendarFixture seeds name, body pairs into one calendar.
+func calendarFixture(t *testing.T, configure func(*harness), files ...string) davFixture {
+	t.Helper()
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	work := davtest.CalendarHome + "work/"
+	srv.AddCalendar(caldav.Calendar{Path: work, Name: "Work"})
+	for i := 0; i+1 < len(files); i += 2 {
+		srv.Seed(work+files[i], files[i+1])
+	}
+	return connectFixture(t, srv, work, configure)
+}
+
+func ics(components string) string {
+	return "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Other client//EN\n" + components + "\nEND:VCALENDAR\n"
+}
+
+func decode[T any](t *testing.T, rec *httptest.ResponseRecorder) T {
+	t.Helper()
+	var v T
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status %d, want 200: %s", rec.Code, rec.Body.String())
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &v); err != nil {
+		t.Fatalf("decode %T: %v\n%s", v, err, rec.Body.String())
+	}
+	return v
+}
+
+// formFields posts a form back the way a browser would: every row as shown.
+func formFields(f view.Form) url.Values {
+	out := url.Values{}
+	for _, set := range f.Sets {
+		for _, row := range set.Rows {
+			if row.Name != "_csrf" {
+				out.Set(row.Name, string(row.Value))
+			}
+		}
+	}
+	return out
+}
+
+func actionHref(t *testing.T, actions []view.Action, id string) string {
+	t.Helper()
+	for _, a := range actions {
+		if a.ID == id {
+			return a.Href
+		}
+	}
+	t.Fatalf("no action %q in %+v", id, actions)
+	return ""
+}
+
+func hasNotice(notices []view.Notice, title string) bool {
+	for _, n := range notices {
+		if string(n.Title) == title {
+			return true
+		}
+	}
+	return false
+}
+
+func body(t *testing.T, f davFixture, name string) string {
+	t.Helper()
+	b, _, ok := f.srv.Object(f.col + name)
+	if !ok {
+		t.Fatalf("%s: not on the server", name)
+	}
+	return b
+}
+
+func mustContain(t *testing.T, got string, want ...string) {
+	t.Helper()
+	for _, w := range want {
+		if !strings.Contains(got, w) {
+			t.Errorf("missing %q in\n%s", w, got)
+		}
+	}
+}
+
+func TestContactsListAndCard(t *testing.T) {
+	f := contactsFixture(t, false,
+		"BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEMAIL;TYPE=work:ada@example.com\nTEL:+44 20 1\nORG:Analytical;Engines\nCATEGORIES:math,poetry\nX-CUSTOM:keep\nEND:VCARD\n",
+		"BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:bob builder\nEND:VCARD\n",
+		"BEGIN:VCARD\nVERSION:4.0\nUID:num\nFN:42 Club\nEND:VCARD\n",
+	)
+	list := f.path("contacts")
+
+	page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
+	var rubrics, names []string
+	for _, g := range page.Groups {
+		rubrics = append(rubrics, string(g.Rubric))
+		for _, row := range g.Rows {
+			names = append(names, string(row.Name))
+		}
+	}
+	if strings.Join(rubrics, ",") != "A,B,#" || strings.Join(names, ",") != "Ada Lovelace,bob builder,42 Club" {
+		t.Fatalf("groups %v, names %v", rubrics, names)
+	}
+	ada := page.Groups[0].Rows[0]
+	if ada.Href != list+"/ada" || ada.Email != "ada@example.com" || ada.Phone != "+44 20 1" ||
+		ada.Org != "Analytical, Engines" || ada.Avatar.Initials != "AL" || ada.Avatar.Colour == "" {
+		t.Errorf("row = %+v", ada)
+	}
+	if page.Poll != nil || page.Bar.Total == nil || *page.Bar.Total != 3 {
+		t.Errorf("one collection is not a fanout: poll %v, total %v", page.Poll, page.Bar.Total)
+	}
+	if n := f.srv.CountRequests("GET", f.col); n != 0 {
+		t.Errorf("GET requests = %d: bodies from the REPORT were fetched again", n)
+	}
+
+	card := decode[view.ContactPage](t, f.h.do(get(list+"/ada", f.sess)))
+	if card.Name != "Ada Lovelace" || card.ReadOnly || !strings.Contains(string(card.Source.Stamp), "People") {
+		t.Errorf("card = %+v", card)
+	}
+	var email *view.Field
+	for i := range card.Fields {
+		if card.Fields[i].Label == "Email · work" {
+			email = &card.Fields[i]
+		}
+	}
+	if email == nil || email.Value != "ada@example.com" || email.Href != "mailto:ada@example.com" {
+		t.Errorf("fields = %+v", card.Fields)
+	}
+	if len(card.Tags) != 2 || len(card.Foreign) != 1 || card.Foreign[0].Label != "X-CUSTOM" {
+		t.Errorf("tags %+v, foreign %+v", card.Tags, card.Foreign)
+	}
+	if !strings.Contains(actionHref(t, card.Actions, "record.delete"), "etag=") {
+		t.Error("delete does not carry the version it was shown at")
+	}
+	actionHref(t, card.Actions, "record.edit")
+
+	if rec := f.h.do(get(list+"/nobody", f.sess)); rec.Code != http.StatusNotFound {
+		t.Errorf("missing record: %d", rec.Code)
+	}
+	if rec := f.h.do(get(f.path("calendar"), f.sess)); rec.Code != http.StatusNotFound {
+		t.Errorf("an address book opened as a calendar: %d", rec.Code)
+	}
+}
+
+func agendaLines(p view.AgendaPage) []string {
+	var out []string
+	for _, d := range p.Days {
+		for _, r := range d.Rows {
+			out = append(out, strings.Join([]string{string(d.Rubric), string(r.Time), string(r.Summary), string(r.Zone)}, "|"))
+		}
+	}
+	return out
+}
+
+// S-11: the week goes to the server as the window; series expand here; an
+// instance rewritten by another client replaces the instant it names; the
+// original zone shows only where it differs from the instance zone (C-10).
+func TestAgendaWeekOverridesAndZones(t *testing.T) {
+	f := calendarFixture(t, func(h *harness) { h.cfg.Timezone = "Europe/Berlin" },
+		"series.ics", ics("BEGIN:VEVENT\nUID:series\nDTSTAMP:20260101T000000Z\nDTSTART:20260112T090000Z\nDTEND:20260112T093000Z\n"+
+			"RRULE:FREQ=WEEKLY;COUNT=4\nSUMMARY:Standup\nEND:VEVENT\n"+
+			"BEGIN:VEVENT\nUID:series\nDTSTAMP:20260101T000000Z\nRECURRENCE-ID:20260119T090000Z\nDTSTART:20260119T110000Z\n"+
+			"DTEND:20260119T113000Z\nSUMMARY:Standup moved\nEND:VEVENT"),
+		"ny.ics", ics("BEGIN:VEVENT\nUID:ny\nDTSTAMP:20260101T000000Z\nDTSTART;TZID=America/New_York:20260114T100000\n"+
+			"DTEND;TZID=America/New_York:20260114T110000\nSUMMARY:Call New York\nEND:VEVENT"),
+		"day.ics", ics("BEGIN:VEVENT\nUID:day\nDTSTAMP:20260101T000000Z\nDTSTART;VALUE=DATE:20260113\nDTEND;VALUE=DATE:20260114\nSUMMARY:Holiday\nEND:VEVENT"),
+		"later.ics", ics("BEGIN:VEVENT\nUID:later\nDTSTAMP:20260101T000000Z\nDTSTART:20260220T100000Z\nSUMMARY:Later\nEND:VEVENT"),
+	)
+	agenda := f.path("calendar")
+
+	page := decode[view.AgendaPage](t, f.h.do(get(agenda+"?from=2026-01-12", f.sess)))
+	want := []string{
+		"Monday, 12 January|10:00|Standup|",
+		"Tuesday, 13 January|All day|Holiday|",
+		"Wednesday, 14 January|16:00|Call New York|America/New_York",
+	}
+	if got := agendaLines(page); strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("week of 12 January:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
+	}
+	if page.Bar.Range == nil || page.Bar.Range.From != "12 January 2026" || page.Bar.Range.To != "18 January 2026" {
+		t.Errorf("range = %+v", page.Bar.Range)
+	}
+
+	page = decode[view.AgendaPage](t, f.h.do(get(agenda+"?from=2026-01-19", f.sess)))
+	if got := agendaLines(page); strings.Join(got, "\n") != "Monday, 19 January|12:00|Standup moved|" {
+		t.Errorf("week of 19 January: %v", got)
+	}
+}
+
+func TestEventPageRelatedRemindersAttendees(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"task.ics", ics("BEGIN:VTODO\nUID:task-1\nDTSTAMP:20260101T000000Z\nSUMMARY:Prepare slides\nEND:VTODO"),
+		"meet.ics", ics("BEGIN:VEVENT\nUID:meet\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nDTEND:20260115T110000Z\n"+
+			"RRULE:FREQ=WEEKLY;BYDAY=TH;COUNT=5\nSUMMARY:Review\nATTENDEE;CN=Ada;PARTSTAT=ACCEPTED:mailto:ada@example.com\n"+
+			"RELATED-TO:task-1\nRELATED-TO:elsewhere\nBEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:x\nTRIGGER:-PT15M\nEND:VALARM\nEND:VEVENT"),
+	)
+	events, tasks := f.path("calendar"), f.path("tasks")
+
+	ev := decode[view.EventPage](t, f.h.do(get(events+"/meet", f.sess)))
+	if len(ev.Related) != 2 || ev.Related[0].Href != "" || ev.Related[1].Href != "" || ev.Related[0].Title != "task-1" {
+		t.Errorf("before any list is loaded, related = %+v", ev.Related)
+	}
+	if len(ev.Reminders) != 1 || ev.Reminders[0].Label != "15 minutes before" {
+		t.Errorf("reminders = %+v", ev.Reminders)
+	}
+	if len(ev.Attendees) != 1 || ev.Attendees[0] != (view.AttendeeRow{Name: "Ada", Email: "ada@example.com", Status: "Accepted"}) {
+		t.Errorf("attendees = %+v", ev.Attendees)
+	}
+	if !strings.Contains(string(ev.Recurrence.Raw), "FREQ=WEEKLY") || ev.Recurrence.Summary != "Weekly on Thursday, 5 times" ||
+		ev.Recurrence.Note != "Edited as a whole series" {
+		t.Errorf("recurrence = %+v", ev.Recurrence)
+	}
+	if len(ev.Fields) == 0 || ev.Fields[0].Value != "Thursday, 15 January 2026, 10:00 – 11:00" {
+		t.Errorf("fields = %+v", ev.Fields)
+	}
+
+	_ = decode[view.TasksPage](t, f.h.do(get(tasks+"?show=all", f.sess)))
+	reports := f.srv.CountRequests("REPORT", f.col)
+	ev = decode[view.EventPage](t, f.h.do(get(events+"/meet", f.sess)))
+	if n := f.srv.CountRequests("REPORT", f.col) - reports; n != 1 {
+		t.Errorf("the record page made %d REPORTs; related records come from the loaded list", n)
+	}
+	if len(ev.Related) != 2 || ev.Related[0].Href != tasks+"/task-1" || ev.Related[0].Kind != view.KindTask ||
+		ev.Related[0].Title != "Prepare slides" || ev.Related[1].Href != "" || ev.Related[1].Title != "elsewhere" {
+		t.Errorf("with the task list loaded, related = %+v", ev.Related)
+	}
+
+	_ = decode[view.AgendaPage](t, f.h.do(get(events+"?from=2026-01-12", f.sess)))
+	task := decode[view.TaskPage](t, f.h.do(get(tasks+"/task-1", f.sess)))
+	if len(task.Related) != 1 || task.Related[0].Href != events+"/meet" || task.Related[0].Why != "Refers to this" {
+		t.Errorf("reverse link = %+v", task.Related)
+	}
+}
+
+// S-7: the patch touches what the form changed and nothing else; a kept row
+// keeps its parameters; foreign properties survive.
+func TestEditContactWritesOnlyWhatChanged(t *testing.T) {
+	f := contactsFixture(t, false,
+		"BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEMAIL;TYPE=work:ada@old.example\nEMAIL:second@example.com\nTEL:+44 20 1\nX-CUSTOM:keep\nEND:VCARD\n")
+	rec := f.path("contacts") + "/ada"
+
+	edit := decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess)))
+	form := formFields(edit.Form)
+	if form.Get("etag") == "" || form.Get("email.0") != "ada@old.example" || form.Get("email.1") != "second@example.com" {
+		t.Fatalf("form = %v", form)
+	}
+	form.Set("fn", "Ada King")
+	form.Set("email.0", "ada@new.example")
+	resp := f.h.do(postForm(rec+"/edit", f.sess, form))
+	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != rec {
+		t.Fatalf("POST: %d %s %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
+	}
+	got := body(t, f, "ada.vcf")
+	mustContain(t, got, "FN:Ada King", "EMAIL;TYPE=work:ada@new.example", "EMAIL:second@example.com", "TEL:+44 20 1", "X-CUSTOM:keep", "UID:ada")
+	if strings.Contains(got, "ada@old.example") {
+		t.Errorf("old address still there:\n%s", got)
+	}
+
+	// Saving an unchanged form writes nothing.
+	puts := f.srv.CountRequests("PUT", f.col)
+	edit = decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess)))
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, formFields(edit.Form))); resp.Code != http.StatusSeeOther {
+		t.Fatalf("unchanged POST: %d", resp.Code)
+	}
+	if n := f.srv.CountRequests("PUT", f.col) - puts; n != 0 {
+		t.Errorf("an unchanged form sent %d PUT", n)
+	}
+}
+
+// S-8: a write against a version that moved on is not sent over it. The
+// screen lists only what the person changed and the server holds otherwise;
+// the chosen combination lands on the server version with its If-Match.
+func TestConflictScreenAndCombination(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nNOTE:first note\nEND:VCARD\n")
+	rec := f.path("contacts") + "/ada"
+
+	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	f.srv.Seed(f.col+"ada.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Byron\nNOTE:server note\nEND:VCARD\n")
+	form.Set("fn", "Ada King")
+	form.Set("title", "Countess")
+	resp := f.h.do(postForm(rec+"/edit", f.sess, form))
+	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != rec+"/conflict" {
+		t.Fatalf("POST over a moved version: %d %q", resp.Code, resp.Header().Get("Location"))
+	}
+	mustContain(t, body(t, f, "ada.vcf"), "FN:Ada Byron", "NOTE:server note")
+
+	page := decode[view.ConflictPage](t, f.h.do(get(rec+"/conflict", f.sess)))
+	want := []view.ConflictRow{
+		{Property: "Name", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceUnset},
+		{Property: "Title", Mine: "Countess", Theirs: "Empty", Choice: view.ChoiceUnset},
+	}
+	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] {
+		t.Fatalf("rows = %+v", page.Rows)
+	}
+	if page.ReadAt == "" || page.Kind != view.KindContact {
+		t.Errorf("page = %+v", page)
+	}
+
+	resp = f.h.do(postForm(actionHref(t, page.Actions, "conflict.combine"), f.sess, url.Values{"choice.0": {"theirs"}}))
+	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != rec {
+		t.Fatalf("combine: %d %q %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
+	}
+	mustContain(t, body(t, f, "ada.vcf"), "FN:Ada Byron", "TITLE:Countess", "NOTE:server note")
+	if resp := f.h.do(get(rec+"/conflict", f.sess)); resp.Code != http.StatusSeeOther {
+		t.Errorf("the draft outlived the written combination: %d", resp.Code)
+	}
+}
+
+// S-11: reminders are the VALARM set of the record. A save that does not
+// touch them leaves the other client's alarm as it was; a changed set is
+// rewritten; a trigger the form did not offer is refused.
+func TestRemindersKeepUntouchedAlarms(t *testing.T) {
+	f := calendarFixture(t, nil, "meet.ics", ics("BEGIN:VEVENT\nUID:meet\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\n"+
+		"SUMMARY:Review\nBEGIN:VALARM\nACTION:AUDIO\nTRIGGER:-PT10M\nX-KEEP:yes\nEND:VALARM\nEND:VEVENT"))
+	rec := f.path("calendar") + "/meet"
+	editForm := func() url.Values {
+		return formFields(decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	}
+
+	form := editForm()
+	if form.Get("reminder.0") != "-PT10M" || form.Get("start.date") != "2026-01-15" || form.Get("start.time") != "10:00" {
+		t.Fatalf("form = %v", form)
+	}
+	form.Set("summary", "Review, again")
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	mustContain(t, body(t, f, "meet.ics"), `SUMMARY:Review\, again`, "X-KEEP:yes", "ACTION:AUDIO", "TRIGGER:-PT10M", "DTSTART:20260115T100000Z")
+
+	form = editForm()
+	form.Set("reminder.0", "")
+	form.Set("reminder.new", "-PT1H")
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	got := body(t, f, "meet.ics")
+	mustContain(t, got, "TRIGGER:-PT1H")
+	if strings.Contains(got, "TRIGGER:-PT10M") || strings.Contains(got, "X-KEEP") {
+		t.Errorf("the removed alarm is still there:\n%s", got)
+	}
+
+	form = editForm()
+	form.Set("reminder.new", "-PT3H")
+	page := decode[view.EventEditPage](t, f.h.do(postForm(rec+"/edit", f.sess, form)))
+	if len(page.Form.Errors) == 0 || page.Form.Errors[0].Name != "reminder" {
+		t.Errorf("errors = %+v", page.Form.Errors)
+	}
+	if body(t, f, "meet.ics") != got {
+		t.Error("a refused form changed the server")
+	}
+}
+
+func TestDeleteNeedsTheVersionShown(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:Bob\nEND:VCARD\n")
+	list := f.path("contacts")
+
+	del := actionHref(t, decode[view.ContactPage](t, f.h.do(get(list+"/bob", f.sess))).Actions, "record.delete")
+	f.srv.Seed(f.col+"bob.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:Robert\nEND:VCARD\n")
+	page := decode[view.ContactPage](t, f.h.do(postForm(del, f.sess, url.Values{})))
+	if page.Name != "Robert" || !hasNotice(page.Notices, "Changed elsewhere, so nothing was deleted") {
+		t.Errorf("stale delete page = %+v", page)
+	}
+	body(t, f, "bob.vcf")
+
+	del = actionHref(t, page.Actions, "record.delete")
+	resp := f.h.do(postForm(del, f.sess, url.Values{}))
+	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != list {
+		t.Fatalf("delete: %d %q", resp.Code, resp.Header().Get("Location"))
+	}
+	if _, _, ok := f.srv.Object(f.col + "bob.vcf"); ok {
+		t.Error("still on the server")
+	}
+}
+
+func TestNewEventIsSkeletonPlusPatch(t *testing.T) {
+	f := calendarFixture(t, nil)
+	events := f.path("calendar")
+
+	page := decode[view.EventEditPage](t, f.h.do(get(events+"/new", f.sess)))
+	form := formFields(page.Form)
+	form.Set("summary", "No date")
+	refused := decode[view.EventEditPage](t, f.h.do(postForm(events+"/new", f.sess, form)))
+	if len(refused.Form.Errors) == 0 || refused.Form.Errors[0].Name != "start" || len(f.srv.Paths(f.col)) != 0 {
+		t.Fatalf("an event without a start: errors %+v, stored %v", refused.Form.Errors, f.srv.Paths(f.col))
+	}
+
+	form.Set("summary", "Dentist")
+	form.Set("start.date", "2026-03-02")
+	form.Set("start.time", "09:30")
+	form.Set("reminder.new", "-PT1H")
+	resp := f.h.do(postForm(events+"/new", f.sess, form))
+	if resp.Code != http.StatusSeeOther {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	m := regexp.MustCompile(`^` + regexp.QuoteMeta(events) + `/([0-9a-f]{32})$`).FindStringSubmatch(resp.Header().Get("Location"))
+	if m == nil {
+		t.Fatalf("Location = %q, want the record under a 32-hex UID", resp.Header().Get("Location"))
+	}
+	mustContain(t, body(t, f, m[1]+".ics"), "UID:"+m[1], "SUMMARY:Dentist", "DTSTART:20260302T093000Z", "TRIGGER:-PT1H", "DTSTAMP:", "PRODID:")
+
+	sheet := f.h.do(fragment(get(events+"/new", f.sess), "sheet"))
+	var payload struct {
+		Target string        `json:"target"`
+		Body   view.NewSheet `json:"body"`
+	}
+	if err := json.Unmarshal(sheet.Body.Bytes(), &payload); err != nil || payload.Target != "sheet" ||
+		payload.Body.Kind != view.KindEvent || len(payload.Body.Target.Options) != 1 {
+		t.Errorf("new sheet = %+v (%v)", payload, err)
+	}
+}
+
+// S-7.1: a server that drops a property is named after the write, once per
+// server and property.
+func TestLossIsReportedOncePerServer(t *testing.T) {
+	f := contactsFixture(t, false,
+		"BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada\nX-CUSTOM:keep\nEND:VCARD\n",
+		"BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:Bob\nX-CUSTOM:keep\nEND:VCARD\n")
+	f.srv.Drop = []string{"X-CUSTOM"}
+	list := f.path("contacts")
+
+	for i, uid := range []string{"ada", "bob"} {
+		form := formFields(decode[view.ContactEditPage](t, f.h.do(get(list+"/"+uid+"/edit", f.sess))).Form)
+		form.Set("fn", "Renamed")
+		page := decode[view.ContactEditPage](t, f.h.do(postForm(list+"/"+uid+"/edit", f.sess, form)))
+		if page.Loss == nil || len(page.Loss.Properties) != 1 || page.Loss.Properties[0] != "X-CUSTOM" {
+			t.Fatalf("%s: loss = %+v", uid, page.Loss)
+		}
+		if page.Loss.Aggregated != (i == 1) {
+			t.Errorf("%s: aggregated = %v, want %v", uid, page.Loss.Aggregated, i == 1)
+		}
+	}
+}
+
+// C-9.1, S-21: a source that refuses is a screen with the answer and a retry
+// of that source, never a 500.
+func TestUnavailableSourceIsAScreen(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada\nEND:VCARD\n")
+	f.srv.Password = "changed on the server"
+	list := f.path("contacts")
+
+	page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
+	if len(page.Groups) != 0 || len(page.Notices) == 0 || page.Notices[0].Details == nil {
+		t.Fatalf("page = %+v", page)
+	}
+	if !strings.Contains(strings.Join(func() []string {
+		var l []string
+		for _, line := range page.Notices[0].Details.Lines {
+			l = append(l, string(line))
+		}
+		return l
+	}(), " "), "401") {
+		t.Errorf("details = %+v, want the server's answer", page.Notices[0].Details)
+	}
+	if actionHref(t, page.Notices[0].Actions, "source.retry") != list {
+		t.Error("retry is not this source")
+	}
+	card := decode[view.ContactPage](t, f.h.do(get(list+"/ada", f.sess)))
+	if len(card.Notices) == 0 || card.Actions != nil {
+		t.Errorf("record page = %+v", card)
+	}
+}
+
+func TestReadOnlyCollectionHasNoEditing(t *testing.T) {
+	f := contactsFixture(t, true, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada\nEND:VCARD\n")
+	list := f.path("contacts")
+
+	card := decode[view.ContactPage](t, f.h.do(get(list+"/ada", f.sess)))
+	if !card.ReadOnly || len(card.Actions) != 0 {
+		t.Errorf("card = %+v", card)
+	}
+	page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
+	if len(page.Bar.Actions) != 1 || page.Bar.Actions[0].Enabled || page.Bar.Actions[0].Reason == "" {
+		t.Errorf("new action = %+v", page.Bar.Actions)
+	}
+	before := body(t, f, "ada.vcf")
+	for _, req := range []*http.Request{
+		get(list+"/ada/edit", f.sess),
+		postForm(list+"/ada/edit", f.sess, url.Values{"fn": {"X"}, "etag": {"e1"}}),
+		postForm(list+"/ada/delete", f.sess, url.Values{"etag": {"e1"}}),
+		postForm(list+"/new", f.sess, url.Values{"fn": {"X"}}),
+	} {
+		if resp := f.h.do(req); resp.Code != http.StatusNotFound {
+			t.Errorf("%s %s: %d, want 404", req.Method, req.URL.Path, resp.Code)
+		}
+	}
+	if body(t, f, "ada.vcf") != before {
+		t.Error("a read-only collection was written")
+	}
+}
+
+func TestTasksAndNotes(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"a.ics", ics("BEGIN:VTODO\nUID:open-1\nDTSTAMP:20260101T000000Z\nSUMMARY:Write report\nDUE:20260110T120000Z\nEND:VTODO"),
+		"b.ics", ics("BEGIN:VTODO\nUID:done-1\nDTSTAMP:20260101T000000Z\nSUMMARY:Old\nSTATUS:COMPLETED\nEND:VTODO"),
+		"n.ics", ics("BEGIN:VJOURNAL\nUID:note-1\nDTSTAMP:20260101T000000Z\nDTSTART;VALUE=DATE:20260105\nSUMMARY:Ideas\n"+
+			"DESCRIPTION:# Ideas\\n\\nFirst **bold** line\nEND:VJOURNAL"),
+	)
+	tasks, notes := f.path("tasks"), f.path("notes")
+
+	open := decode[view.TasksPage](t, f.h.do(get(tasks, f.sess)))
+	if len(open.Groups) != 1 || len(open.Groups[0].Rows) != 1 {
+		t.Fatalf("open tasks = %+v", open.Groups)
+	}
+	row := open.Groups[0].Rows[0]
+	if row.Summary != "Write report" || row.Done || !row.Overdue || row.Due != "10 January 2026, 12:00" {
+		t.Errorf("row = %+v", row)
+	}
+	var segments []string
+	for _, s := range open.Bar.Segments {
+		segments = append(segments, string(s.Label))
+	}
+	if strings.Join(segments, ",") != "Open · 1,Done · 1,All · 2" {
+		t.Errorf("segments = %v", segments)
+	}
+	done := decode[view.TasksPage](t, f.h.do(get(tasks+"?show=done", f.sess)))
+	if len(done.Groups) != 1 || !done.Groups[0].Rows[0].Done || done.Groups[0].Rows[0].Summary != "Old" {
+		t.Errorf("done tasks = %+v", done.Groups)
+	}
+
+	list := decode[view.NotesPage](t, f.h.do(get(notes, f.sess)))
+	if len(list.Groups) != 1 || list.Groups[0].Rows[0].Title != "Ideas" ||
+		list.Groups[0].Rows[0].Excerpt != "First **bold** line" || list.Groups[0].Rows[0].Date != "5 January 2026" {
+		t.Errorf("notes = %+v", list.Groups)
+	}
+	note := decode[view.NotePage](t, f.h.do(get(notes+"/note-1", f.sess)))
+	if len(note.Doc.Rendered) == 0 || note.Doc.Rendered[0].Kind != view.BlockHeading || note.Doc.Body != "# Ideas\n\nFirst **bold** line" {
+		t.Errorf("note doc = %+v", note.Doc)
+	}
+	actionHref(t, note.Doc.Bar, "record.edit")
+	actionHref(t, note.Meta.Actions, "record.delete")
+
+	form := formFields(decode[view.TaskEditPage](t, f.h.do(get(tasks+"/open-1/edit", f.sess))).Form)
+	form.Set("done", "on")
+	if resp := f.h.do(postForm(tasks+"/open-1/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	mustContain(t, body(t, f, "a.ics"), "STATUS:COMPLETED", "COMPLETED:", "DUE:20260110T120000Z")
+}

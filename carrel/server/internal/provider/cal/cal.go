@@ -45,8 +45,11 @@ func (p *Provider) Create(ctx context.Context, path string, obj *model.Object) (
 	if err := Encode(&buf, obj); err != nil {
 		return "", err
 	}
-	return p.c.PutCreate(ctx, path, &buf)
+	return p.c.PutCreate(ctx, path, dav.Typed(&buf, MediaType))
 }
+
+// MediaType is the Content-Type of a calendar object on PUT.
+const MediaType = "text/calendar; charset=utf-8"
 
 // Update writes with If-Match (S-8).
 func (p *Provider) Update(ctx context.Context, obj *model.Object) (string, error) {
@@ -58,7 +61,7 @@ func (p *Provider) Update(ctx context.Context, obj *model.Object) (string, error
 		return "", err
 	}
 	tag := strings.Trim(obj.ETag, `"`)
-	return p.t.Put(ctx, obj.Path, &buf, `"`+tag+`"`)
+	return p.t.Put(ctx, obj.Path, dav.Typed(&buf, MediaType), `"`+tag+`"`)
 }
 
 // Kind reports event, task, or note from the main component.
@@ -75,10 +78,8 @@ func Kind(obj *model.Object) view.Kind {
 	}
 }
 
-// Description returns the Markdown body for notes and other components.
+// Description returns the Markdown body for notes and other components,
+// unescaped: a line break is a line break, not "\n".
 func Description(obj *model.Object) string {
-	if txt := obj.PropText("DESCRIPTION"); len(txt) > 0 {
-		return txt[0]
-	}
-	return ""
+	return Text(obj, "DESCRIPTION")
 }
