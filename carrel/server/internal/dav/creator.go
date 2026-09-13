@@ -15,12 +15,13 @@ type Creator interface {
 
 // PutCreate writes a new resource; the server must reject an existing one (412).
 func (c *Client) PutCreate(ctx context.Context, p string, body io.Reader) (string, error) {
+	body, ct := unwrap(body)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPut, c.resolve(p), body)
 	if err != nil {
 		return "", err
 	}
 	req.Header.Set("If-None-Match", "*")
-	if ct := contentTypeOf(body); ct != "" {
+	if ct != "" {
 		req.Header.Set("Content-Type", ct)
 	}
 	resp, err := c.hc.Do(req)

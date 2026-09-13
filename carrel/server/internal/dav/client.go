@@ -125,11 +125,12 @@ func (c *Client) Get(ctx context.Context, p string, rng *Range) (io.ReadCloser, 
 }
 
 func (c *Client) Put(ctx context.Context, p string, body io.Reader, ifMatch string) (string, error) {
+	body, ct := unwrap(body)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPut, c.resolve(p), body)
 	if err != nil {
 		return "", err
 	}
-	if ct := contentTypeOf(body); ct != "" {
+	if ct != "" {
 		req.Header.Set("Content-Type", ct)
 	}
 	if ifMatch != "" {

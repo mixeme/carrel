@@ -5,6 +5,39 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.44 — 2026-09-13
+
+S-11 records pass against live Radicale and Baikal
+(`TestRadicaleRecords`, `TestBaikalRecords`). The run found a regression in
+`v0.0.43`.
+
+### For consumers
+
+- **Record writes work on Radicale again.** Since `v0.0.43` every record PUT
+  went out chunked, without Content-Length, and Radicale answered 400 to
+  edits and new records. Baikal and go-webdav accepted it, so the httptest
+  suite stayed green.
+
+### Fixed
+
+- `dav.Typed` no longer hides the body length: `Put` and `PutCreate` unwrap
+  it before building the request. `TestPutSendsTheBodyType` also checks
+  Content-Length and the absence of chunked encoding.
+
+### Included
+
+- `integration/records_live_test.go`: through the real request layer, on each
+  live server — connect and check the catalog (colour, change tag, rights,
+  kinds); contacts: list, card, edit keeping `X-CUSTOM` and `TYPE`, a write by
+  another client leading to the conflict screen and its combination, delete;
+  calendar: new event with a reminder, agenda, a series with a RECURRENCE-ID
+  override, a new task marked done, delete. It makes its own calendar and
+  address book and removes them.
+
+### Not yet included
+
+- A note written by a real foreign client, read, changed and read again (S-11).
+
 ## v0.0.43 — 2026-09-13
 
 Step 2 of S-11…S-26 in [server.md](../../docs/plan/server.md): records. The

@@ -16,9 +16,13 @@ func Typed(r io.Reader, contentType string) io.Reader {
 	return typedBody{Reader: r, contentType: contentType}
 }
 
-func contentTypeOf(body io.Reader) string {
+// unwrap returns the reader to send and its media type. The wrapper must not
+// reach http.NewRequest: it learns the length only from a *bytes.Buffer,
+// *bytes.Reader or *strings.Reader, and without it the PUT goes out chunked —
+// Radicale answers that with 400.
+func unwrap(body io.Reader) (io.Reader, string) {
 	if tb, ok := body.(typedBody); ok {
-		return tb.contentType
+		return tb.Reader, tb.contentType
 	}
-	return ""
+	return body, ""
 }

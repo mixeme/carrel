@@ -11,11 +11,15 @@ import (
 )
 
 // A CalDAV or CardDAV server refuses a record PUT without Content-Type
-// (go-webdav answers 400); the providers' writes used to send none.
+// (go-webdav answers 400); the providers' writes used to send none. The type
+// must not cost the length: a chunked PUT is refused by Radicale.
 func TestPutSendsTheBodyType(t *testing.T) {
 	var got []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		got = append(got, r.Header.Get("Content-Type"))
+		if r.ContentLength != 1 || len(r.TransferEncoding) != 0 {
+			t.Errorf("%s: Content-Length %d, Transfer-Encoding %v; want a length, not chunked", r.URL.Path, r.ContentLength, r.TransferEncoding)
+		}
 		w.Header().Set("ETag", `"e"`)
 		w.WriteHeader(http.StatusCreated)
 	}))
