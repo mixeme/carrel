@@ -18,16 +18,23 @@ docker build -t carrel:linux-gates \
   --build-arg VERSION=linux-gates \
   --build-arg COMMIT=local \
   .
-cid=$(docker run -d --rm \
+# A fresh volume every run: the first start on an empty /data is what ships.
+# CARREL_BIND stays at the image default (0.0.0.0 inside the container);
+# the host side is loopback-only through -p.
+docker volume rm -f carrel-linux-gates-data >/dev/null
+cid=$(docker run -d \
   --read-only \
   --cap-drop=ALL \
   --tmpfs /tmp:rw,noexec,nosuid,size=64m \
   -v carrel-linux-gates-data:/data \
-  -e CARREL_BIND=127.0.0.1 \
   -e CARREL_PORT=8080 \
   -p 127.0.0.1:18080:8080 \
   carrel:linux-gates)
-trap 'docker rm -f "$cid" >/dev/null 2>&1 || true' EXIT
+cleanup_smoke() {
+  docker rm -f "$cid" >/dev/null 2>&1 || true
+  docker volume rm -f carrel-linux-gates-data >/dev/null 2>&1 || true
+}
+trap cleanup_smoke EXIT
 
 for _ in $(seq 1 30); do
   if curl -sf http://127.0.0.1:18080/healthz | grep -qx ok; then
@@ -36,11 +43,14 @@ for _ in $(seq 1 30); do
   fi
   sleep 0.2
 done
-curl -sf http://127.0.0.1:18080/healthz | grep -qx ok
+if ! curl -sf http://127.0.0.1:18080/healthz | grep -qx ok; then
+  docker logs "$cid" >&2 || true
+  exit 1
+fi
 
 echo "== S-30.2: Radicale integration =="
 docker compose -f docker-compose.linux.yml up -d radicale
-trap 'docker compose -f docker-compose.linux.yml down -v; docker rm -f "$cid" >/dev/null 2>&1 || true' EXIT
+trap 'docker compose -f docker-compose.linux.yml down -v; cleanup_smoke' EXIT
 for _ in $(seq 1 30); do
   if curl -sf -u test:test http://127.0.0.1:5232/test/ >/dev/null 2>&1; then
     break

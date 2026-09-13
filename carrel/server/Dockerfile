@@ -14,7 +14,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -trimpath \
 
 FROM alpine:3.22
 RUN apk add --no-cache ca-certificates \
-    && adduser -D -u 1000 -h /home/carrel carrel
+    && adduser -D -u 1000 -h /home/carrel carrel \
+    && mkdir /data && chown carrel:carrel /data
 COPY --from=build /out/carrel /usr/local/bin/carrel
 USER carrel
 ENV CARREL_BIND=0.0.0.0 \

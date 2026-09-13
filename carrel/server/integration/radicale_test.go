@@ -4,7 +4,6 @@ package integration
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -75,28 +74,13 @@ func resetRadicale(t *testing.T, endpoint string) {
 	client := testClient(t, endpoint)
 	base := strings.TrimRight(endpoint, "/")
 
-	_ = client.Delete(ctx, "/cal/", "")
-	_ = client.Delete(ctx, "/contacts/", "")
+	// Paths are relative to the home: dav.Client resolves a leading "/" from
+	// the host root, where Radicale sees another principal and answers 403.
+	_ = client.Delete(ctx, "cal/", "")
+	_ = client.Delete(ctx, "contacts/", "")
 
-	// Radicale rejects untyped MKCOL (403, type:UNKNOWN). Parent folders
-	// must declare DAV:collection; calendars use MKCALENDAR.
-	parentBody := `<?xml version="1.0" encoding="utf-8"?>
-<D:mkcol xmlns:D="DAV:">
-  <D:set>
-    <D:prop>
-      <D:resourcetype><D:collection/></D:resourcetype>
-    </D:prop>
-  </D:set>
-</D:mkcol>`
-	resp, err := davRequest(ctx, g, "MKCOL", base+"/cal/", parentBody)
-	if err != nil {
-		t.Fatal(err)
-	}
-	resp.Body.Close()
-	if resp.StatusCode/100 != 2 && resp.StatusCode != http.StatusMethodNotAllowed {
-		t.Fatalf("MKCOL /cal/: %s", resp.Status)
-	}
-
+	// Radicale's default owner_only rights allow calendars and address books
+	// directly in the home and nothing deeper: no plain folder in between.
 	calBody := `<?xml version="1.0" encoding="utf-8"?>
 <C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
   <D:set>
@@ -106,7 +90,7 @@ func resetRadicale(t *testing.T, endpoint string) {
     </D:prop>
   </D:set>
 </C:mkcalendar>`
-	resp, err = davRequest(ctx, g, "MKCALENDAR", base+"/cal/personal/", calBody)
+	resp, err := davRequest(ctx, g, "MKCALENDAR", base+"/cal/", calBody)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,24 +145,26 @@ func TestRadicaleDiscoveryFindsBothKinds(t *testing.T) {
 	}
 }
 
-const calEventPath = "/cal/personal/event.ics"
+const calEventPath = "cal/event.ics"
 
 func icsEvent(uid, summary string) string {
 	return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Carrel//Integration//EN\r\n" +
-		"BEGIN:VEVENT\r\nUID:" + uid + "\r\nDTSTAMP:20260101T120000Z\r\nSUMMARY:" + summary + "\r\n" +
-		"END:VEVENT\r\nEND:VCALENDAR\r\n"
+		"BEGIN:VEVENT\r\nUID:" + uid + "\r\nDTSTAMP:20260101T120000Z\r\nDTSTART:20260101T100000Z\r\n" +
+		"SUMMARY:" + summary + "\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
 }
 
+// largeICS is one event with a long folded DESCRIPTION: Radicale refuses
+// several VEVENTs with different UIDs in one resource (400).
 func largeICS(minBytes int) string {
 	var b strings.Builder
-	b.WriteString("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Carrel//Integration//EN\r\n")
-	for i := 0; b.Len() < minBytes; i++ {
-		b.WriteString(fmt.Sprintf(
-			"BEGIN:VEVENT\r\nUID:evt%d@carrel.test\r\nDTSTAMP:20260101T120000Z\r\nSUMMARY:Event %d\r\nEND:VEVENT\r\n",
-			i, i,
-		))
+	b.WriteString("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Carrel//Integration//EN\r\n" +
+		"BEGIN:VEVENT\r\nUID:large@carrel.test\r\nDTSTAMP:20260101T120000Z\r\n" +
+		"DTSTART:20260101T100000Z\r\nSUMMARY:Large\r\nDESCRIPTION:x")
+	chunk := "\r\n " + strings.Repeat("x", 73)
+	for b.Len() < minBytes {
+		b.WriteString(chunk)
 	}
-	b.WriteString("END:VCALENDAR\r\n")
+	b.WriteString("\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n")
 	return b.String()
 }
 
@@ -207,7 +193,7 @@ func TestRadicaleGetStreams(t *testing.T) {
 	resetRadicale(t, endpoint)
 	client := testClient(t, endpoint)
 	ctx := context.Background()
-	path := "/cal/personal/large.ics"
+	path := "cal/large.ics"
 	payload := largeICS(256 * 1024)
 	_ = client.Delete(ctx, path, "")
 	if _, err := client.Put(ctx, path, strings.NewReader(payload), ""); err != nil {

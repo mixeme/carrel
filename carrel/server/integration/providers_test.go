@@ -19,20 +19,23 @@ import (
 )
 
 const (
-	contactPath = "/contacts/ada.vcf"
+	contactPath = "contacts/ada.vcf"
 )
 
+// vcfCard omits X-CUSTOM when custom is empty: an empty line would still be a
+// value, and the merge test checks the target carries none.
 func vcfCard(uid, fn, custom string) string {
-	return fmt.Sprintf(
-		"BEGIN:VCARD\r\nVERSION:4.0\r\nUID:%s\r\nFN:%s\r\nX-CUSTOM:%s\r\nEND:VCARD\r\n",
-		uid, fn, custom,
-	)
+	card := "BEGIN:VCARD\r\nVERSION:4.0\r\nUID:" + uid + "\r\nFN:" + fn + "\r\n"
+	if custom != "" {
+		card += "X-CUSTOM:" + custom + "\r\n"
+	}
+	return card + "END:VCARD\r\n"
 }
 
 func icsEventCustom(uid, summary, custom string) string {
 	return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Carrel//Integration//EN\r\n" +
-		"BEGIN:VEVENT\r\nUID:" + uid + "\r\nDTSTAMP:20260101T120000Z\r\nSUMMARY:" + summary + "\r\n" +
-		"X-CUSTOM:" + custom + "\r\n" +
+		"BEGIN:VEVENT\r\nUID:" + uid + "\r\nDTSTAMP:20260101T120000Z\r\nDTSTART:20260101T100000Z\r\n" +
+		"SUMMARY:" + summary + "\r\nX-CUSTOM:" + custom + "\r\n" +
 		"END:VEVENT\r\nEND:VCALENDAR\r\n"
 }
 
@@ -175,7 +178,7 @@ func TestRadicaleCardUploadOccupiedName(t *testing.T) {
 	resetRadicale(t, endpoint)
 	client := testClient(t, endpoint)
 	ctx := context.Background()
-	path := fmt.Sprintf("/contacts/carrel-occupied-%d.vcf", os.Getpid())
+	path := fmt.Sprintf("contacts/carrel-occupied-%d.vcf", os.Getpid())
 	_ = client.Delete(ctx, path, "")
 
 	cp, err := card.New(client)
@@ -348,8 +351,8 @@ func TestRadicaleCardMergeKeepsSourcesOnFailedWrite(t *testing.T) {
 	client := testClient(t, endpoint)
 	ctx := context.Background()
 
-	targetPath := fmt.Sprintf("/contacts/merge-target-%d.vcf", os.Getpid())
-	sourcePath := fmt.Sprintf("/contacts/merge-source-%d.vcf", os.Getpid())
+	targetPath := fmt.Sprintf("contacts/merge-target-%d.vcf", os.Getpid())
+	sourcePath := fmt.Sprintf("contacts/merge-source-%d.vcf", os.Getpid())
 	_ = client.Delete(ctx, targetPath, "")
 	_ = client.Delete(ctx, sourcePath, "")
 
@@ -387,7 +390,8 @@ func TestRadicaleCardMergeKeepsSourcesOnFailedWrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	merged.ETag = `"wrong"`
-	if _, err := cp.Update(ctx, merged); err == nil {
+	_, err = cp.Update(ctx, merged)
+	if err == nil {
 		t.Fatal("expected merged write to fail on stale ETag")
 	}
 	if !dav.IsStatus(err, http.StatusPreconditionFailed) && !dav.IsStatus(err, http.StatusConflict) {

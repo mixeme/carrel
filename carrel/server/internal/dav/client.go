@@ -284,45 +284,87 @@ func propFindXML(props []xml.Name) *propFind {
 	return &propFind{Prop: propBody{Raw: raw}}
 }
 
+// xmlDoc builds a request body token by token and keeps the first error.
+type xmlDoc struct {
+	buf bytes.Buffer
+	enc *xml.Encoder
+	err error
+}
+
+func newXMLDoc() *xmlDoc {
+	d := &xmlDoc{}
+	d.buf.WriteString(xml.Header)
+	d.enc = xml.NewEncoder(&d.buf)
+	return d
+}
+
+func (d *xmlDoc) open(local string) {
+	d.token(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: local}})
+}
+
+func (d *xmlDoc) close(local string) {
+	d.token(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: local}})
+}
+
+func (d *xmlDoc) token(t xml.Token) {
+	if d.err == nil {
+		d.err = d.enc.EncodeToken(t)
+	}
+}
+
+func (d *xmlDoc) text(name xml.Name, v string) {
+	if d.err == nil {
+		d.err = d.enc.EncodeElement(v, xml.StartElement{Name: name})
+	}
+}
+
+// bytes flushes before reading the buffer. `return buf.Bytes(), enc.Flush()`
+// took the slice first and sent Radicale a truncated body (400).
+func (d *xmlDoc) bytes() ([]byte, error) {
+	if d.err == nil {
+		d.err = d.enc.Flush()
+	}
+	if d.err != nil {
+		return nil, d.err
+	}
+	return d.buf.Bytes(), nil
+}
+
 func propPatchBody(set []Prop, remove []xml.Name) ([]byte, error) {
-	var buf bytes.Buffer
-	buf.WriteString(xml.Header)
-	enc := xml.NewEncoder(&buf)
-	enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "propertyupdate"}})
+	d := newXMLDoc()
+	d.open("propertyupdate")
 	for _, n := range remove {
-		enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "remove"}})
-		enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
-		enc.EncodeElement("", xml.StartElement{Name: n})
-		enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
-		enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "remove"}})
+		d.open("remove")
+		d.open("prop")
+		d.text(n, "")
+		d.close("prop")
+		d.close("remove")
 	}
 	if len(set) > 0 {
-		enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "set"}})
-		enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
+		d.open("set")
+		d.open("prop")
 		for _, p := range set {
-			enc.EncodeElement(string(p.Value), xml.StartElement{Name: p.Name})
+			d.text(p.Name, string(p.Value))
 		}
-		enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
-		enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "set"}})
+		d.close("prop")
+		d.close("set")
 	}
-	enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "propertyupdate"}})
-	return buf.Bytes(), enc.Flush()
+	d.close("propertyupdate")
+	return d.bytes()
 }
 
 func mkcolBody(props []Prop) ([]byte, error) {
-	var buf bytes.Buffer
-	buf.WriteString(xml.Header)
-	enc := xml.NewEncoder(&buf)
-	enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "mkcol"}})
-	enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "set"}})
-	enc.EncodeToken(xml.StartElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
+	d := newXMLDoc()
+	d.open("mkcol")
+	d.open("set")
+	d.open("prop")
 	for _, p := range props {
-		enc.EncodeElement(string(p.Value), xml.StartElement{Name: p.Name})
+		d.text(p.Name, string(p.Value))
 	}
-	enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "prop"}})
-	enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "set"}})
-	enc.EncodeToken(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: "mkcol"}})
-	return buf.Bytes(), enc.Flush()
+	d.close("prop")
+	d.close("set")
+	d.close("mkcol")
+	return d.bytes()
 }
 
 type propFind struct {

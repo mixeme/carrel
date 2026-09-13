@@ -158,6 +158,53 @@ func TestPropPatchAgainstFakeServer(t *testing.T) {
 	}
 }
 
+// Radicale answered 400 "no element found": the body was cut before the
+// encoder flushed. The fake server above never read it.
+func TestPropPatchBodyIsCompleteXML(t *testing.T) {
+	set := []Prop{{Name: xml.Name{Space: "DAV:", Local: "displayname"}, Value: []byte("Renamed")}}
+	remove := []xml.Name{{Space: "DAV:", Local: "getcontentlength"}}
+	body, err := propPatchBody(set, remove)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		XMLName xml.Name `xml:"DAV: propertyupdate"`
+		Set     struct {
+			Name string `xml:"DAV: prop>displayname"`
+		} `xml:"DAV: set"`
+		Remove struct {
+			Len *struct{} `xml:"DAV: prop>getcontentlength"`
+		} `xml:"DAV: remove"`
+	}
+	if err := xml.Unmarshal(body, &doc); err != nil {
+		t.Fatalf("body is not XML: %v\n%s", err, body)
+	}
+	if doc.Set.Name != "Renamed" {
+		t.Fatalf("displayname = %q\n%s", doc.Set.Name, body)
+	}
+	if doc.Remove.Len == nil {
+		t.Fatalf("remove lost getcontentlength\n%s", body)
+	}
+}
+
+func TestMkColBodyIsCompleteXML(t *testing.T) {
+	props := []Prop{{Name: xml.Name{Space: "DAV:", Local: "displayname"}, Value: []byte("Book")}}
+	body, err := mkcolBody(props)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		XMLName xml.Name `xml:"DAV: mkcol"`
+		Name    string   `xml:"DAV: set>prop>displayname"`
+	}
+	if err := xml.Unmarshal(body, &doc); err != nil {
+		t.Fatalf("body is not XML: %v\n%s", err, body)
+	}
+	if doc.Name != "Book" {
+		t.Fatalf("displayname = %q\n%s", doc.Name, body)
+	}
+}
+
 func TestMkColPropsAgainstFakeServer(t *testing.T) {
 	fake := &mutateFake{}
 	srv := httptest.NewServer(fake.handler())

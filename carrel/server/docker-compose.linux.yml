@@ -2,7 +2,7 @@
 # Not used in GitHub Actions — start locally before integration tests.
 services:
   radicale:
-    image: kozea/radicale:3.2.4
+    image: tomsquest/docker-radicale:3.5.4.0
     ports:
       - "127.0.0.1:5232:5232"
     volumes:

@@ -5,6 +5,54 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.40 — 2026-09-13
+
+The Linux gates pass end to end for the first time: F-10, the S-28 container
+smoke, and S-30.2 against a live Radicale (`scripts/linux-gates.sh`). Closes
+the last run in [providers-tail.md](../../docs/plan/providers-tail.md).
+
+### For consumers
+
+- **The image starts on an empty volume.** `/data` now ships owned by
+  `carrel` (uid 1000). A fresh named volume used to come up root-owned, and
+  the server exited with `open /data/server.key: permission denied`. A volume
+  already created by an older image keeps root ownership: `chown 1000:1000`
+  its contents or start from a new volume.
+- **PROPPATCH and MKCOL with properties send the whole XML body.** The bytes
+  were taken before the encoder flushed; Radicale answered 400
+  (`no element found`) to a collection rename.
+
+### Fixed
+
+- `docker-compose.linux.yml`: `kozea/radicale:3.2.4` does not exist in any
+  registry. Now `tomsquest/docker-radicale:3.5.4.0`, the layout
+  `testdata/radicale` was written for (`/config/config`, `/config/users`,
+  `/data`).
+- `scripts/linux-gates.sh`: the smoke run no longer sets `CARREL_BIND=127.0.0.1`
+  inside the container, where the published port cannot reach it. Each run
+  starts on a fresh volume; container logs print when `/healthz` fails.
+- Radicale integration tests, which had never passed on a live server:
+  - calendars and address books live directly in the home — Radicale's
+    default `owner_only` rights allow nothing deeper;
+  - paths are relative to the endpoint (`dav.Client` resolves a leading `/`
+    from the host root);
+  - events carry `DTSTART`; the large item is one event, not several UIDs in
+    one resource;
+  - collection CRUD on Radicale is create, rename (displayname), delete, and
+    checks the collection is gone. No MOVE: the address is immutable
+    (S-12.2), and Radicale answers 405;
+  - the merge test read a shadowed `err` and seeded the target with an empty
+    `X-CUSTOM`.
+
+### Included
+
+- `internal/dav`: `xmlDoc` builds `propPatchBody` and `mkcolBody` and keeps
+  the first encoder error. `TestPropPatchBodyIsCompleteXML` and
+  `TestMkColBodyIsCompleteXML` fail on the previous code.
+- Open for S-12, in [providers-tail.md](../../docs/plan/providers-tail.md):
+  `Prop.Value` is written as escaped text, so a raw `<collection/>` in
+  `resourcetype` would not arrive as XML.
+
 ## v0.0.39 — 2026-09-12
 
 Copies the Typecase mockup through plan 1 step 2: product CSS in

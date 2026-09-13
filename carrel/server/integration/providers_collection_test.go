@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -32,7 +33,21 @@ func getDisplayName(ctx context.Context, c *dav.Client, path string) (string, er
 	return "", fmt.Errorf("displayname missing on %s", path)
 }
 
-// S-30.2 / S-12: create, rename, move, delete an address book on Radicale.
+// deleteCollection removes a collection and checks it is gone: Delete treats
+// 404 as success, so a no-op on the wrong path would pass on its own.
+func deleteCollection(t *testing.T, ctx context.Context, c *dav.Client, path string) {
+	t.Helper()
+	if err := c.Delete(ctx, path, ""); err != nil {
+		t.Fatalf("delete: %v", err)
+	}
+	if _, err := c.PropFind(ctx, path, dav.DepthZero, []xml.Name{davDisplayName}); !dav.IsStatus(err, http.StatusNotFound) {
+		t.Fatalf("PROPFIND %s after delete: %v, want 404", path, err)
+	}
+}
+
+// S-30.2 / S-12: create, rename, delete an address book on Radicale.
+// Rename is the displayname only — the address never changes (S-12.2), so
+// there is no MOVE here; Radicale answers MOVE on a collection with 405.
 func TestRadicaleAddressBookCRUD(t *testing.T) {
 	endpoint := radicaleEndpoint(t)
 	resetRadicale(t, endpoint)
@@ -41,9 +56,8 @@ func TestRadicaleAddressBookCRUD(t *testing.T) {
 	g := testGuard(t)
 	base := strings.TrimRight(endpoint, "/")
 
-	slug := fmt.Sprintf("carrel-book-%d", os.Getpid())
-	path := "/contacts/" + slug + "/"
-	moved := "/contacts/" + slug + "-moved/"
+	// Directly in the home: owner_only allows nothing deeper (resetRadicale).
+	path := fmt.Sprintf("carrel-book-%d/", os.Getpid())
 
 	bookBody := `<?xml version="1.0" encoding="utf-8"?>
 <D:mkcol xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
@@ -54,7 +68,7 @@ func TestRadicaleAddressBookCRUD(t *testing.T) {
     </D:prop>
   </D:set>
 </D:mkcol>`
-	resp, err := davRequest(ctx, g, "MKCOL", base+path, bookBody)
+	resp, err := davRequest(ctx, g, "MKCOL", base+"/"+path, bookBody)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,15 +88,10 @@ func TestRadicaleAddressBookCRUD(t *testing.T) {
 		t.Fatalf("displayname = %q, want Renamed", got)
 	}
 
-	if err := client.Move(ctx, path, moved, false); err != nil {
-		t.Fatalf("move: %v", err)
-	}
-	if err := client.Delete(ctx, moved, ""); err != nil {
-		t.Fatalf("delete: %v", err)
-	}
+	deleteCollection(t, ctx, client, path)
 }
 
-// S-30.2 / S-12: create, rename, move, delete a calendar on Radicale.
+// S-30.2 / S-12: create, rename, delete a calendar on Radicale.
 func TestRadicaleCalendarCRUD(t *testing.T) {
 	endpoint := radicaleEndpoint(t)
 	resetRadicale(t, endpoint)
@@ -91,9 +100,7 @@ func TestRadicaleCalendarCRUD(t *testing.T) {
 	g := testGuard(t)
 	base := strings.TrimRight(endpoint, "/")
 
-	slug := fmt.Sprintf("carrel-cal-%d", os.Getpid())
-	path := "/cal/" + slug + "/"
-	moved := "/cal/" + slug + "-moved/"
+	path := fmt.Sprintf("carrel-cal-%d/", os.Getpid())
 
 	calBody := `<?xml version="1.0" encoding="utf-8"?>
 <C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
@@ -104,7 +111,7 @@ func TestRadicaleCalendarCRUD(t *testing.T) {
     </D:prop>
   </D:set>
 </C:mkcalendar>`
-	resp, err := davRequest(ctx, g, "MKCALENDAR", base+path, calBody)
+	resp, err := davRequest(ctx, g, "MKCALENDAR", base+"/"+path, calBody)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,12 +131,7 @@ func TestRadicaleCalendarCRUD(t *testing.T) {
 		t.Fatalf("displayname = %q, want Renamed", got)
 	}
 
-	if err := client.Move(ctx, path, moved, false); err != nil {
-		t.Fatalf("move: %v", err)
-	}
-	if err := client.Delete(ctx, moved, ""); err != nil {
-		t.Fatalf("delete: %v", err)
-	}
+	deleteCollection(t, ctx, client, path)
 }
 
 // S-30.2 / S-17: folder create, rename, move, delete on SFTPGo.

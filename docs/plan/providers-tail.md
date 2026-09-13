@@ -25,6 +25,11 @@ S-11…S-26 — закрытые развилки в [server.md](server.md), д�
 - [ ] **Параметр свойства — только первое значение.** `TYPE=HOME,WORK`
       схлопывается в HOME. Достаточно для показа; полный мешок — если S-7
       это увидит
+- [ ] **`Prop.Value` уходит текстом.** `mkcolBody` и `propPatchBody` пишут
+      значение через `EncodeElement(string)`: для `displayname` верно, а
+      `resourcetype` с `<collection/>` уйдёт экранированным текстом.
+      Производственных вызовов `MkColProps` пока нет. Сырой XML или текст —
+      решить в S-12 до первого вызова
 
 ## S-30.2
 
@@ -34,7 +39,7 @@ S-11…S-26 — закрытые развилки в [server.md](server.md), д�
 коллекций, merge при неудачной записи. Гонять на Linux:
 `scripts/linux-gates.sh`. Учётные данные — `dev/credentials.txt`, не в git.
 
-- [ ] Прогон на Linux против Radicale (`scripts/run-live-integration.sh`); SFTPGo и Baikal — прогнаны 09.09.2026 с Windows
+- [x] Прогон на Linux против Radicale — 13.09.2026, `scripts/linux-gates.sh` зелёный (`v0.0.40`); SFTPGo и Baikal — с Windows 09.09 и 13.09.2026
 - [x] CRUD коллекций (S-12 на живых серверах)
 - [x] Большой файл не растит RSS: не 4 КиБ из 2 МиБ, а память процесса
 - [x] Merge не удаляет исходники, если запись не прошла
