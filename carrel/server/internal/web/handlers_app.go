@@ -551,19 +551,6 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 	s.getSettingsBackup(w, r)
 }
 
-func (s *Server) getSettingsAppearance(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.AppearancePage{Shell: s.buildShell(sess, "Appearance")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postSettingsAppearance(w http.ResponseWriter, r *http.Request) {
-	s.getSettingsAppearance(w, r)
-}
-
 func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.UnlockSheet {
 	sheet := view.UnlockSheet{
 		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, or change key escrow."),
@@ -574,7 +561,7 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.Unlo
 		),
 	}
 	if until := sess.UnlockUntil(time.Now()); until != nil {
-		sheet.Until = ptrWhen(formatWhen(*until, s.tz(), false, time.Now()))
+		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, time.Now()))
 	}
 	return sheet
 }

@@ -64,8 +64,7 @@ func conflictFields(kind view.Kind, d editDraft, theirs formValues) []editField 
 	return out
 }
 
-func (s *Server) showValues(f editField, vals []string, alarms []cal.Alarm) string {
-	tz := s.tz()
+func (s *Server) showValues(c *collectionCtx, f editField, vals []string, alarms []cal.Alarm) string {
 	var parts []string
 	switch f.typ {
 	case fieldTime:
@@ -88,7 +87,7 @@ func (s *Server) showValues(f editField, vals []string, alarms []cal.Alarm) stri
 			if i < len(alarms) && alarms[i].Trigger == v {
 				a = alarms[i]
 			}
-			parts = append(parts, reminderLabel(a, tz))
+			parts = append(parts, c.tf.reminder(a))
 		}
 	default:
 		for _, v := range vals {
@@ -104,10 +103,10 @@ func (s *Server) showValues(f editField, vals []string, alarms []cal.Alarm) stri
 }
 
 func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, theirs formValues, alarms []cal.Alarm, notices []view.Notice) view.ConflictPage {
-	tz, now := s.tz(), time.Now()
+	now := time.Now()
 	sh := s.buildShell(c.sess, "Changed elsewhere")
 	sh.Notices = append(sh.Notices, notices...)
-	page := view.ConflictPage{Shell: sh, Kind: c.spec.kind, UID: d.UID, ReadAt: formatWhen(d.ReadAt, tz, false, now)}
+	page := view.ConflictPage{Shell: sh, Kind: c.spec.kind, UID: d.UID, ReadAt: c.tf.formatWhen(d.ReadAt, false, now)}
 	path := c.recordPath(d.UID) + "/conflict"
 	cancel := view.Action{ID: "conflict.cancel", Label: "Cancel", Href: s.postQuery(path, url.Values{"op": {"cancel"}}), Method: "POST", Enabled: true}
 	if obj == nil {
@@ -118,8 +117,8 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 	for _, f := range conflictFields(c.spec.kind, d, theirs) {
 		page.Rows = append(page.Rows, view.ConflictRow{
 			Property: text(f.label),
-			Mine:     text(s.showValues(f, d.Mine[f.name], alarms)),
-			Theirs:   text(s.showValues(f, theirs[f.name], alarms)),
+			Mine:     text(s.showValues(c, f, d.Mine[f.name], alarms)),
+			Theirs:   text(s.showValues(c, f, theirs[f.name], alarms)),
 			Choice:   view.ChoiceUnset,
 		})
 	}

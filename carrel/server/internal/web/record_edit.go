@@ -561,7 +561,7 @@ func (s *Server) editAction(c *collectionCtx, st editState) string {
 }
 
 func (s *Server) editPage(c *collectionCtx, st editState) any {
-	tz := s.tz()
+	tf := c.tf
 	title := "Edit " + c.spec.noun
 	if st.isNew {
 		title = "New " + c.spec.noun
@@ -583,10 +583,10 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		}
 		return page
 	case view.KindEvent:
-		page := view.EventEditPage{Shell: sh, UID: st.uid, Form: form, Reminders: reminderRows(st.alarms, tz), Loss: st.loss}
+		page := view.EventEditPage{Shell: sh, UID: st.uid, Form: form, Reminders: reminderRows(st.alarms, tf), Loss: st.loss}
 		if st.obj != nil {
 			if cal.HasRecurrence(st.obj) {
-				page.Recurrence = s.recurrenceBlock(st.obj, tz)
+				page.Recurrence = s.recurrenceBlock(st.obj, tf)
 			}
 			for _, a := range cal.Attendees(st.obj) {
 				page.Attendees = append(page.Attendees, view.AttendeeRow{Name: text(a.Name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
@@ -594,7 +594,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		}
 		return page
 	case view.KindTask:
-		page := view.TaskEditPage{Shell: sh, UID: st.uid, Form: form, Done: first(st.values["done"]) == "on", Reminders: reminderRows(st.alarms, tz), Loss: st.loss}
+		page := view.TaskEditPage{Shell: sh, UID: st.uid, Form: form, Done: first(st.values["done"]) == "on", Reminders: reminderRows(st.alarms, tf), Loss: st.loss}
 		if n, err := strconv.Atoi(first(st.values["percent"])); err == nil {
 			page.Percent = &n
 		}
@@ -626,7 +626,7 @@ func (s *Server) cancelAction(c *collectionCtx, st editState) view.Action {
 }
 
 func (s *Server) recordForm(c *collectionCtx, st editState) view.Form {
-	tz := s.tz()
+	tf := c.tf
 	main := view.FieldSet{Rows: []view.FormRow{
 		csrfField(c.sess),
 		{Name: "etag", Label: "Version", Kind: view.InputText, Value: text(st.etag), ReadOnly: true},
@@ -677,7 +677,7 @@ func (s *Server) recordForm(c *collectionCtx, st editState) view.Form {
 		case fieldReminders:
 			set := view.FieldSet{Legend: text(f.label)}
 			for i, v := range vals {
-				row := view.FormRow{Name: fmt.Sprintf("reminder.%d", i), Label: "Reminder", Kind: view.InputSelect, Value: text(v), Options: reminderOptions(v, st.alarms, i, tz)}
+				row := view.FormRow{Name: fmt.Sprintf("reminder.%d", i), Label: "Reminder", Kind: view.InputSelect, Value: text(v), Options: reminderOptions(v, st.alarms, i, tf)}
 				if i == len(vals)-1 {
 					row.Name, row.Label = "reminder.new", "Add a reminder"
 				}
@@ -708,17 +708,17 @@ func (s *Server) recordForm(c *collectionCtx, st editState) view.Form {
 	return form
 }
 
-func reminderOptions(selected string, alarms []cal.Alarm, row int, tz *time.Location) []view.Option {
+func reminderOptions(selected string, alarms []cal.Alarm, row int, tf timeFmt) []view.Option {
 	opts := []view.Option{{Value: "", Label: "No reminder", Selected: selected == ""}}
 	seen := false
 	for _, p := range reminderPresets {
-		opts = append(opts, view.Option{Value: p, Label: text(reminderLabel(cal.NewAlarm(p), tz)), Selected: p == selected})
+		opts = append(opts, view.Option{Value: p, Label: text(tf.reminder(cal.NewAlarm(p))), Selected: p == selected})
 		seen = seen || p == selected
 	}
 	if selected != "" && !seen {
 		label := selected
 		if row < len(alarms) && alarms[row].Trigger == selected {
-			label = reminderLabel(alarms[row], tz)
+			label = tf.reminder(alarms[row])
 		}
 		opts = append(opts, view.Option{Value: selected, Label: text(label), Selected: true})
 	}

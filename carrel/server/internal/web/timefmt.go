@@ -9,87 +9,143 @@ import (
 	"github.com/teambition/rrule-go"
 
 	"carrel.dev/carrel/server/internal/provider/cal"
+	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/view"
 )
 
-// C-10 for records: one instance zone for every time shown, absolute times in
-// lists, the original zone only where it differs. The account setting for the
-// first day of the week and 12/24 hours does not exist yet; Monday and 24 hours
-// stand in for it.
+// timeFmt is C-10 for one person: one instance zone for every time shown, and
+// from their account the first day of the week and 12 or 24 hours (unset:
+// Monday and 24 hours). Lists show absolute times; the original zone shows
+// only where it differs.
+type timeFmt struct {
+	tz   *time.Location
+	week time.Weekday
+	h12  bool
+}
 
-// weekStart is midnight of the Monday of the week holding t, in t's zone.
-func weekStart(t time.Time) time.Time {
-	back := (int(t.Weekday()) + 6) % 7
+// timeFor reads the account settings of the session's person. Build it once
+// per page: it takes a snapshot of the state.
+func (s *Server) timeFor(sess *session.Session) timeFmt {
+	f := timeFmt{tz: s.tz(), week: time.Monday}
+	if sess == nil {
+		return f
+	}
+	snap := s.store.Snapshot()
+	if u := snap.UserByID(sess.AccountID()); u != nil {
+		if d, ok := user.WeekStarts[u.WeekStart]; ok {
+			f.week = d
+		}
+		f.h12 = u.Clock12
+	}
+	return f
+}
+
+// weekStart is midnight of the first day of the week holding t, in t's zone.
+func (f timeFmt) weekStart(t time.Time) time.Time {
+	back := (int(t.Weekday()) - int(f.week) + 7) % 7
 	y, m, d := t.Date()
 	return time.Date(y, m, d-back, 0, 0, 0, 0, t.Location())
 }
 
-func dateLabel(t time.Time, tz *time.Location) string {
-	return t.In(tz).Format("2 January 2006")
+func (f timeFmt) date(t time.Time) string {
+	return t.In(f.tz).Format("2 January 2006")
 }
 
-func dayRubric(t time.Time, tz *time.Location) string {
-	return t.In(tz).Format("Monday, 2 January")
+func (f timeFmt) dayRubric(t time.Time) string {
+	return t.In(f.tz).Format("Monday, 2 January")
 }
 
-func dayKey(t time.Time, tz *time.Location) string {
-	return t.In(tz).Format("2006-01-02")
+func (f timeFmt) dayKey(t time.Time) string {
+	return t.In(f.tz).Format("2006-01-02")
 }
 
-func clockLabel(t time.Time, tz *time.Location) string {
-	return t.In(tz).Format("15:04")
+func (f timeFmt) clock(t time.Time) string {
+	if f.h12 {
+		return t.In(f.tz).Format("3:04 PM")
+	}
+	return t.In(f.tz).Format("15:04")
 }
 
 // timeLabel is the time column of an agenda row.
-func timeLabel(t time.Time, allDay bool, tz *time.Location) string {
+func (f timeFmt) timeLabel(t time.Time, allDay bool) string {
 	if allDay {
 		return "All day"
 	}
-	return clockLabel(t, tz)
+	return f.clock(t)
 }
 
 // timeOrDate is a due date: the day, and the time when there is one.
-func timeOrDate(tm cal.Timing, tz *time.Location) string {
+func (f timeFmt) timeOrDate(tm cal.Timing) string {
 	if tm.AllDay {
-		return dateLabel(tm.Start, tz)
+		return f.date(tm.Start)
 	}
-	return dateLabel(tm.Start, tz) + ", " + clockLabel(tm.Start, tz)
+	return f.date(tm.Start) + ", " + f.clock(tm.Start)
 }
 
-// whenLabel is the When field of a record.
-func whenLabel(tm cal.Timing, tz *time.Location) string {
+// when is the When field of a record.
+func (f timeFmt) when(tm cal.Timing) string {
 	const long = "Monday, 2 January 2006"
 	if tm.AllDay {
-		first := tm.Start.In(tz)
+		first := tm.Start.In(f.tz)
 		if !tm.End.IsZero() {
 			// DTEND of a day is exclusive: the last day is the one before.
-			if last := tm.End.In(tz).AddDate(0, 0, -1); last.After(first) {
+			if last := tm.End.In(f.tz).AddDate(0, 0, -1); last.After(first) {
 				return first.Format(long) + " – " + last.Format(long) + ", all day"
 			}
 		}
 		return first.Format(long) + ", all day"
 	}
-	start := tm.Start.In(tz)
-	label := start.Format(long + ", 15:04")
+	start := tm.Start.In(f.tz)
+	label := start.Format(long) + ", " + f.clock(start)
 	if tm.End.IsZero() {
 		return label
 	}
-	end := tm.End.In(tz)
-	if dayKey(start, tz) == dayKey(end, tz) {
-		return label + " – " + end.Format("15:04")
+	end := tm.End.In(f.tz)
+	if f.dayKey(start) == f.dayKey(end) {
+		return label + " – " + f.clock(end)
 	}
-	return label + " – " + end.Format(long+", 15:04")
+	return label + " – " + end.Format(long) + ", " + f.clock(end)
 }
 
-// zoneLabel is the original zone when it differs from the instance zone, and
-// empty otherwise (C-10).
-func zoneLabel(zone string, tz *time.Location) string {
+// zone is the original zone when it differs from the instance zone, and empty
+// otherwise (C-10).
+func (f timeFmt) zone(zone string) string {
 	if zone == "" {
 		return ""
 	}
-	if loc, err := time.LoadLocation(zone); err == nil && loc.String() == tz.String() {
+	if loc, err := time.LoadLocation(zone); err == nil && loc.String() == f.tz.String() {
 		return ""
 	}
 	return zone
+}
+
+// formatWhen is a When: the day and time, or "2 min ago" where the frame draws
+// relative time.
+func (f timeFmt) formatWhen(t time.Time, relative bool, now time.Time) view.When {
+	if t.IsZero() {
+		return ""
+	}
+	if relative {
+		d := now.Sub(t)
+		switch {
+		case d < time.Minute:
+			return "just now"
+		case d < time.Hour:
+			m := int(d.Minutes())
+			if m == 1 {
+				return "1 min ago"
+			}
+			return view.When(fmt.Sprintf("%d min ago", m))
+		case d < 24*time.Hour:
+			h := int(d.Hours())
+			if h == 1 {
+				return "1 hour ago"
+			}
+			return view.When(fmt.Sprintf("%d hours ago", h))
+		}
+	}
+	return view.When(t.In(f.tz).Format("2 January") + ", " + f.clock(t))
 }
 
 func plural(n int, unit string) string {
@@ -118,11 +174,11 @@ func humanDuration(d time.Duration) string {
 	}
 }
 
-// reminderLabel says when a reminder fires, in words.
-func reminderLabel(a cal.Alarm, tz *time.Location) string {
+// reminder says when a reminder fires, in words.
+func (f timeFmt) reminder(a cal.Alarm) string {
 	if a.Absolute {
 		if t, err := time.Parse("20060102T150405Z", a.Trigger); err == nil {
-			return "At " + dateLabel(t, tz) + ", " + clockLabel(t, tz)
+			return "At " + f.date(t) + ", " + f.clock(t)
 		}
 		return a.Trigger
 	}
@@ -188,9 +244,9 @@ func ordinal(n int) string {
 	}
 }
 
-// recurrenceSummary is RecurrenceBlock.Summary: the rule in words. What the
-// words do not cover is admitted, and the raw rule stands beside it.
-func recurrenceSummary(raw string, tz *time.Location) string {
+// recurrence is RecurrenceBlock.Summary: the rule in words. What the words do
+// not cover is admitted, and the raw rule stands beside it.
+func (f timeFmt) recurrence(raw string) string {
 	if raw == "" {
 		return "On extra dates"
 	}
@@ -243,7 +299,7 @@ func recurrenceSummary(raw string, tz *time.Location) string {
 		fmt.Fprintf(&b, ", %d times", opt.Count)
 	}
 	if !opt.Until.IsZero() {
-		b.WriteString(", until " + dateLabel(opt.Until, tz))
+		b.WriteString(", until " + f.date(opt.Until))
 	}
 	if len(opt.Bysetpos)+len(opt.Byyearday)+len(opt.Byweekno)+len(opt.Byhour)+len(opt.Byminute)+len(opt.Bysecond)+len(opt.Byeaster) > 0 {
 		b.WriteString(", with further conditions")

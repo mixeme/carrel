@@ -5,11 +5,13 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -20,20 +22,43 @@ type connectionForm struct {
 	ServerErr                      view.Text
 }
 
+// getSettingsConnections shows the connections; ?reveal={account} fills that
+// card's password when the unlock window is open (S-10.7).
 func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
 		return
 	}
 	f := connectionForm{Server: r.FormValue("server"), CertFingerprint: r.FormValue("certFingerprint")}
-	s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+	page := s.connectionsPage(sess, f, nil)
+	if id := r.URL.Query().Get("reveal"); id != "" && s.revealPassword(sess, &page, id) {
+		w.Header().Set("Cache-Control", "no-store")
+	}
+	s.writePage(w, r, http.StatusOK, page)
 }
 
-// postSettingsConnections runs discovery (S-6) through the guard with the
-// accepted fingerprint (F-13) and writes the connection with its collections
-// into the catalog. A failed discovery saves nothing and says at which step it
-// stopped, with the whole trace beside it (C-9.1) — screen state, not a 500.
+// postSettingsConnections adds a connection. op=rediscover and op=apply run
+// discovery again on one that exists (S-6.1).
 func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request) {
+	switch r.FormValue("op") {
+	case "":
+		s.addConnection(w, r)
+	case "rediscover":
+		s.rediscover(w, r, false)
+	case "apply":
+		s.rediscover(w, r, true)
+	default:
+		if _, ok := s.requireLogin(w, r); ok {
+			s.notFound(w, r)
+		}
+	}
+}
+
+// addConnection runs discovery (S-6) through the guard with the accepted
+// fingerprint (F-13) and writes the connection with its collections into the
+// catalog. A failed discovery saves nothing and says at which step it stopped,
+// with the whole trace beside it (C-9.1) — screen state, not a 500.
+func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
 		return
@@ -58,7 +83,7 @@ func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request)
 
 	res, trace, err := discover.Run(r.Context(), s.guard, f.Server, f.Login, password, pin)
 	if err != nil || res == nil || trace == nil || !trace.OK {
-		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, discoveryFailure(trace, err)))
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, discoveryFailure(trace, err, "Nothing was saved.")))
 		return
 	}
 
@@ -73,27 +98,113 @@ func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request)
 	if res.FileOnly {
 		conn.FileRoot = res.BaseURL
 	}
-	cols := make([]sealed.Collection, 0, len(res.Collections))
-	for _, c := range res.Collections {
-		cols = append(cols, sealed.Collection{
-			Path:            c.Path,
-			Name:            c.DisplayName,
-			Kinds:           c.Kinds,
-			Colour:          c.Colour,
-			ReadOnly:        c.ReadOnly,
-			Components:      c.Components,
-			ChangeTag:       c.ChangeTag,
-			MaxResourceSize: c.MaxResourceSize,
-		})
-	}
-	if _, err := s.users.AddConnection(sess.AccountID(), key, conn, cols); err != nil {
+	if _, err := s.users.AddConnection(sess.AccountID(), key, conn, catalogEntries(res.Collections)); err != nil {
 		http.Error(w, "could not save the connection", http.StatusInternalServerError)
 		return
 	}
 	s.redirect(w, r, "/app/settings/connections")
 }
 
-func (s *Server) connectionsPage(sess *session.Session, f connectionForm, failure *view.Notice) view.ConnectionsPage {
+// rediscover runs discovery again for one connection with what the catalog
+// holds (S-6.1). Without apply it only offers the difference; with apply it
+// writes what the person was shown and the server still confirms. A failed
+// run changes nothing and marks nothing gone: a server that does not answer
+// has not deleted anything (C-8.2).
+func (s *Server) rediscover(w http.ResponseWriter, r *http.Request, apply bool) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	key, live := sess.DataKey()
+	if !live {
+		s.notFound(w, r)
+		return
+	}
+	blob, opened := s.users.Catalog(sess.AccountID(), key)
+	conn, known := blob.Connection(r.FormValue("account"))
+	if !opened || !known {
+		s.notFound(w, r)
+		return
+	}
+	res, trace, err := discover.Run(r.Context(), s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
+	if err != nil || res == nil || trace == nil || !trace.OK {
+		page := s.connectionsPage(sess, connectionForm{}, discoveryFailure(trace, err, "Nothing was changed."))
+		for i := range page.Accounts {
+			if page.Accounts[i].AccountID == conn.ID {
+				page.Accounts[i].State, page.Accounts[i].Trace = view.CollectionUnavailable, trace
+			}
+		}
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
+	if !apply {
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, s.rediscoveryNotice(blob, conn, res.Collections)))
+		return
+	}
+	proposal := user.Rediscovery{Found: catalogEntries(res.Collections), Add: r.Form["add"], Gone: r.Form["gone"]}
+	if err := s.users.ApplyRediscovery(sess.AccountID(), key, conn.ID, proposal); err != nil {
+		http.Error(w, "could not save the catalog", http.StatusInternalServerError)
+		return
+	}
+	s.redirect(w, r, "/app/settings/connections")
+}
+
+// rediscoveryNotice is the S-6.1 proposal: what appeared and what disappeared
+// against the catalog, and Apply. Entries already marked gone stay out of the
+// comparison, so one that came back is offered again.
+func (s *Server) rediscoveryNotice(blob sealed.Blob, conn sealed.Connection, found []discover.Collection) *view.Notice {
+	var stored []discover.Collection
+	names := map[string]string{}
+	for _, c := range blob.CollectionsOf(conn.ID) {
+		if !c.Gone {
+			stored = append(stored, discover.Collection{Path: c.Path, DisplayName: c.Name})
+			names[c.Path] = collectionLabel(c)
+		}
+	}
+	d := discover.CompareCollections(found, stored)
+	host := serverHost(conn.Server)
+	if len(d.Added) == 0 && len(d.Removed) == 0 {
+		return &view.Notice{
+			Role:  view.NoticeInfo,
+			Title: text("Nothing appeared or disappeared"),
+			Body:  text(fmt.Sprintf("%s holds the same %s as the catalog.", host, plural(len(stored), "collection"))),
+		}
+	}
+	apply := url.Values{"op": {"apply"}, "account": {conn.ID}}
+	var parts []string
+	details := &view.Diagnostic{Summary: text("Addresses")}
+	if len(d.Added) > 0 {
+		var added []string
+		for _, c := range d.Added {
+			added = append(added, collectionLabel(sealed.Collection{Path: c.Path, Name: c.DisplayName}))
+			apply.Add("add", c.Path)
+			details.Lines = append(details.Lines, text("appeared · "+c.Path))
+		}
+		parts = append(parts, "Appeared: "+strings.Join(added, ", ")+".")
+	}
+	if len(d.Removed) > 0 {
+		var gone []string
+		for _, p := range d.Removed {
+			gone = append(gone, names[p])
+			apply.Add("gone", p)
+			details.Lines = append(details.Lines, text("gone · "+p))
+		}
+		parts = append(parts, "Gone: "+strings.Join(gone, ", ")+".")
+	}
+	return &view.Notice{
+		Role:  view.NoticeAccent,
+		Title: text("Collections changed on the server"),
+		Body: text(fmt.Sprintf("%s holds %s; the catalog has %s. %s",
+			host, plural(len(found), "collection"), plural(len(stored), "collection"), strings.Join(parts, " "))),
+		Details: details,
+		Actions: []view.Action{
+			{ID: "connection.rediscover.apply", Label: "Apply", Href: s.postQuery("/app/settings/connections", apply), Method: "POST", Enabled: true},
+			{ID: "connection.rediscover.keep", Label: "Keep the catalog", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		},
+	}
+}
+
+func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice *view.Notice) view.ConnectionsPage {
 	page := view.ConnectionsPage{
 		Shell: s.buildShell(sess, "Connections"),
 		Add: s.plainForm("/app/settings/connections", "POST",
@@ -106,30 +217,47 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, failur
 	}
 	if key, live := sess.DataKey(); live {
 		if blob, ok := s.users.Catalog(sess.AccountID(), key); ok {
+			unlocked := sess.UnlockUntil(time.Now()) != nil
 			for _, c := range blob.Connections {
-				page.Accounts = append(page.Accounts, s.connectionCard(blob, c))
+				page.Accounts = append(page.Accounts, s.connectionCard(blob, c, unlocked))
+			}
+			if n, ok := goneNotice(blob); ok {
+				page.Shell.Notices = append(page.Shell.Notices, n)
 			}
 		}
 	}
-	if failure != nil {
-		page.Shell.Notices = append(page.Shell.Notices, *failure)
+	if notice != nil {
+		page.Shell.Notices = append(page.Shell.Notices, *notice)
 	}
 	page.Shell.Notices = append(page.Shell.Notices, connectionWarnings(f.Server, f.CertFingerprint)...)
 	return page
 }
 
-func (s *Server) connectionCard(blob sealed.Blob, c sealed.Connection) view.ConnectionCard {
+// connectionCard never carries the password. Outside the unlock window Show
+// password opens the sheet; inside it asks for this card's password, and that
+// request is what releases and journals it (S-10.7).
+func (s *Server) connectionCard(blob sealed.Blob, c sealed.Connection, unlocked bool) view.ConnectionCard {
+	reveal := view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}
+	if unlocked {
+		reveal.Href = s.postQuery("/app/settings/connections", url.Values{"reveal": {c.ID}})
+	}
 	card := view.ConnectionCard{
 		AccountID: c.ID,
 		Title:     text(serverHost(c.Server)),
 		Server:    text(c.Server),
 		Login:     text(c.Login),
-		Password: view.SecretField{
-			Reveal: view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true},
-		},
-		State: view.CollectionOK,
+		Password:  view.SecretField{Reveal: reveal},
+		State:     view.CollectionOK,
+		Actions: []view.Action{{
+			ID: "connection.rediscover", Label: "Look for changes",
+			Href:   s.postQuery("/app/settings/connections", url.Values{"op": {"rediscover"}, "account": {c.ID}}),
+			Method: "POST", Enabled: true,
+		}},
 	}
 	for _, col := range blob.CollectionsOf(c.ID) {
+		if col.Gone {
+			continue // named by goneNotice: a row has no state to carry it
+		}
 		card.Collections = append(card.Collections, view.CollectionRow{
 			Label:    text(collectionLabel(col)),
 			Path:     text(col.Path),
@@ -141,13 +269,81 @@ func (s *Server) connectionCard(blob sealed.Blob, c sealed.Connection) view.Conn
 	return card
 }
 
+// revealPassword fills one card's password: only inside this session's unlock
+// window, only for this person's connection, and only once the release is in
+// the journal.
+func (s *Server) revealPassword(sess *session.Session, page *view.ConnectionsPage, id string) bool {
+	key, live := sess.DataKey()
+	if !live || sess.UnlockUntil(time.Now()) == nil {
+		return false
+	}
+	for i := range page.Accounts {
+		if page.Accounts[i].AccountID != id {
+			continue
+		}
+		password, err := s.users.RevealConnectionPassword(sess.AccountID(), key, id)
+		if err != nil {
+			return false
+		}
+		page.Accounts[i].Password = view.SecretField{
+			Shown:  true,
+			Value:  text(password),
+			Reveal: view.Action{ID: "connection.password", Label: "Hide password", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		}
+		return true
+	}
+	return false
+}
+
+// goneNotice names catalog entries the server no longer holds (S-6.1). They
+// stay in the catalog, so a selection that ticks one says gone instead of
+// losing it.
+func goneNotice(blob sealed.Blob) (view.Notice, bool) {
+	var names []string
+	for _, c := range blob.Collections {
+		if !c.Gone {
+			continue
+		}
+		conn, _ := blob.Connection(c.AccountID)
+		names = append(names, serverHost(conn.Server)+" · "+collectionLabel(c))
+	}
+	if len(names) == 0 {
+		return view.Notice{}, false
+	}
+	return view.Notice{
+		Role:  view.NoticeInfo,
+		Title: text("Gone from the server"),
+		Body:  text("No longer on the server: " + strings.Join(names, ", ") + ". Where they were selected they stay, marked gone; Look for changes offers them again if they come back."),
+	}, true
+}
+
+// catalogEntries turns what discovery found into catalog entries.
+func catalogEntries(found []discover.Collection) []sealed.Collection {
+	cols := make([]sealed.Collection, 0, len(found))
+	for _, c := range found {
+		cols = append(cols, sealed.Collection{
+			Path:            c.Path,
+			Name:            c.DisplayName,
+			Kinds:           c.Kinds,
+			Colour:          c.Colour,
+			ReadOnly:        c.ReadOnly,
+			Components:      c.Components,
+			ChangeTag:       c.ChangeTag,
+			MaxResourceSize: c.MaxResourceSize,
+		})
+	}
+	return cols
+}
+
 // discoveryFailure names the last step that went wrong — steps run in order,
 // and an earlier bad well-known probe is routine — and carries every step.
-func discoveryFailure(trace *view.DiagnosticTrace, err error) *view.Notice {
+// nothing says what did not happen: a new connection is not saved, an
+// existing one is not changed.
+func discoveryFailure(trace *view.DiagnosticTrace, err error, nothing string) *view.Notice {
 	n := &view.Notice{
 		Role:  view.NoticeAlert,
 		Title: text("Could not connect"),
-		Body:  text("Nothing was saved."),
+		Body:  text(nothing),
 	}
 	d := &view.Diagnostic{Summary: text("Discovery trace")}
 	var failed view.Text
@@ -163,7 +359,7 @@ func discoveryFailure(trace *view.DiagnosticTrace, err error) *view.Notice {
 		d.Lines = append(d.Lines, text(err.Error()))
 	}
 	if failed != "" {
-		n.Body = text(fmt.Sprintf("Discovery stopped at the %s step. Nothing was saved.", failed))
+		n.Body = text(fmt.Sprintf("Discovery stopped at the %s step. %s", failed, nothing))
 	}
 	n.Details = d
 	return n

@@ -74,7 +74,7 @@ func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.Esc
 		status.Covered = true
 		status.By = text("administrator with master password")
 		if u.EscrowDepositedAt != nil {
-			status.LastUsed = formatWhen(*u.EscrowDepositedAt, s.tz(), false, time.Now())
+			status.LastUsed = s.timeFor(sess).formatWhen(*u.EscrowDepositedAt, false, time.Now())
 		}
 		status.Actions = []view.Action{{
 			ID: "escrow.withdraw", Label: "Withdraw my deposited key",
@@ -232,6 +232,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 			page.Form.Sets[0].Rows[len(page.Form.Sets[0].Rows)-1].Error = text(flash.formErr)
 		}
 	}
+	tf := s.timeFor(sess)
 	for _, u := range snap.Users {
 		if u.Disabled || !store.UserDeposited(&u) {
 			continue
@@ -241,10 +242,10 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 			Escrowed: true,
 		}
 		if u.EscrowDepositedAt != nil {
-			row.Created = formatWhen(*u.EscrowDepositedAt, s.tz(), false, time.Now())
+			row.Created = tf.formatWhen(*u.EscrowDepositedAt, false, time.Now())
 		}
 		if u.EscrowLastRecovery != nil {
-			row.LastLogin = formatWhen(*u.EscrowLastRecovery, s.tz(), false, time.Now())
+			row.LastLogin = tf.formatWhen(*u.EscrowLastRecovery, false, time.Now())
 		}
 		page.Covered = append(page.Covered, row)
 	}

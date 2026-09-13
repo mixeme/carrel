@@ -149,24 +149,25 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	if obj == nil {
 		return page
 	}
-	tz := s.tz()
+	tf := c.tf
+	tz := tf.tz
 	summary := titleOr(cal.Text(obj, "SUMMARY"), "Untitled event")
 	page.Shell.Title, page.Summary = text(summary), text(summary)
 	if tm, err := cal.TimingOf(obj, tz); err != nil {
 		page.Notices = append(page.Notices, readNotice(obj.Path, err))
 	} else if !tm.Start.IsZero() {
-		page.Fields = append(page.Fields, view.Field{Label: "When", Value: text(whenLabel(tm, tz))})
-		if z := zoneLabel(tm.Zone, tz); z != "" {
+		page.Fields = append(page.Fields, view.Field{Label: "When", Value: text(tf.when(tm))})
+		if z := tf.zone(tm.Zone); z != "" {
 			page.Fields = append(page.Fields, view.Field{Label: "Original time zone", Value: text(z)})
 		}
 	}
 	page.Fields = append(page.Fields, calendarFields(obj)...)
 	page.Body = text(cal.Description(obj))
 	if cal.HasRecurrence(obj) {
-		page.Recurrence = s.recurrenceBlock(obj, tz)
+		page.Recurrence = s.recurrenceBlock(obj, tf)
 	}
 	alarms, _ := cal.Alarms(obj)
-	page.Reminders = reminderRows(alarms, tz)
+	page.Reminders = reminderRows(alarms, tf)
 	for _, a := range cal.Attendees(obj) {
 		page.Attendees = append(page.Attendees, view.AttendeeRow{Name: text(a.Name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
 	}
@@ -180,19 +181,20 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	if obj == nil {
 		return page
 	}
-	tz := s.tz()
+	tf := c.tf
+	tz := tf.tz
 	summary := titleOr(cal.Text(obj, "SUMMARY"), "Untitled task")
 	page.Shell.Title, page.Summary = text(summary), text(summary)
 	if due, err := cal.DueOf(obj, tz); err != nil {
 		page.Notices = append(page.Notices, readNotice(obj.Path, err))
 	} else if !due.Start.IsZero() {
-		page.Fields = append(page.Fields, view.Field{Label: "Due", Value: text(timeOrDate(due, tz))})
-		if z := zoneLabel(due.Zone, tz); z != "" {
+		page.Fields = append(page.Fields, view.Field{Label: "Due", Value: text(tf.timeOrDate(due))})
+		if z := tf.zone(due.Zone); z != "" {
 			page.Fields = append(page.Fields, view.Field{Label: "Original time zone", Value: text(z)})
 		}
 	}
 	if start, err := cal.TimingOf(obj, tz); err == nil && !start.Start.IsZero() {
-		page.Fields = append(page.Fields, view.Field{Label: "Starts", Value: text(timeOrDate(start, tz))})
+		page.Fields = append(page.Fields, view.Field{Label: "Starts", Value: text(tf.timeOrDate(start))})
 	}
 	if p := firstValue(obj, "PRIORITY"); p != "" && p != "0" {
 		page.Fields = append(page.Fields, view.Field{Label: "Priority", Value: text(p)})
@@ -201,7 +203,7 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Body = text(cal.Description(obj))
 	page.Done, page.Percent = taskDone(obj), percentOf(obj)
 	alarms, _ := cal.Alarms(obj)
-	page.Reminders = reminderRows(alarms, tz)
+	page.Reminders = reminderRows(alarms, tf)
 	page.Related = s.relatedRows(c, obj)
 	page.Actions = s.recordActions(c, uid, obj.ETag)
 	return page
@@ -213,7 +215,8 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	if obj == nil {
 		return page
 	}
-	tz := s.tz()
+	tf := c.tf
+	tz := tf.tz
 	body := cal.Description(obj)
 	title := noteTitle(cal.Text(obj, "SUMMARY"), body)
 	page.Shell.Title = text(title)
@@ -224,7 +227,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 		page.Meta.Actions = actions[1:]
 	}
 	if at := noteTime(obj, tz); !at.IsZero() {
-		page.Meta.Date = text(dateLabel(at, tz))
+		page.Meta.Date = text(tf.date(at))
 	}
 	page.Meta.Tags = tagsOf(cal.TextList(obj, "CATEGORIES"))
 	page.Meta.Related = s.relatedRows(c, obj)
@@ -297,10 +300,10 @@ func (s *Server) relatedRows(c *collectionCtx, obj *model.Object) []view.Timelin
 	return rows
 }
 
-func reminderRows(alarms []cal.Alarm, tz *time.Location) []view.ReminderRow {
+func reminderRows(alarms []cal.Alarm, tf timeFmt) []view.ReminderRow {
 	var rows []view.ReminderRow
 	for _, a := range alarms {
-		rows = append(rows, view.ReminderRow{Label: text(reminderLabel(a, tz))})
+		rows = append(rows, view.ReminderRow{Label: text(tf.reminder(a))})
 	}
 	return rows
 }
@@ -324,10 +327,11 @@ func partstatLabel(v string) string {
 
 // recurrenceBlock: the rule in words (C-10, here in web), the raw rule, the
 // next instants, and the plain statement that the series is edited whole.
-func (s *Server) recurrenceBlock(obj *model.Object, tz *time.Location) view.RecurrenceBlock {
+func (s *Server) recurrenceBlock(obj *model.Object, tf timeFmt) view.RecurrenceBlock {
+	tz := tf.tz
 	raw := cal.RawRRULE(obj)
 	b := view.RecurrenceBlock{
-		Summary: text(recurrenceSummary(raw, tz)),
+		Summary: text(tf.recurrence(raw)),
 		Raw:     text(raw),
 		Note:    "Edited as a whole series",
 	}
@@ -348,9 +352,9 @@ func (s *Server) recurrenceBlock(obj *model.Object, tz *time.Location) view.Recu
 		if i > 0 {
 			label = "Then"
 		}
-		value := dateLabel(at, tz)
+		value := tf.date(at)
 		if !allDay {
-			value += ", " + clockLabel(at, tz)
+			value += ", " + tf.clock(at)
 		}
 		b.Fields = append(b.Fields, view.Field{Label: text(label), Value: text(value)})
 	}
@@ -359,16 +363,16 @@ func (s *Server) recurrenceBlock(obj *model.Object, tz *time.Location) view.Recu
 
 // serverStamp is when the server version was last changed, as the record says.
 func (s *Server) serverStamp(c *collectionCtx, obj *model.Object) view.When {
-	tz, now := s.tz(), time.Now()
+	tf, now := c.tf, time.Now()
 	if c.card != nil {
 		if t, err := time.Parse("20060102T150405Z", firstValue(obj, "REV")); err == nil {
-			return formatWhen(t, tz, false, now)
+			return tf.formatWhen(t, false, now)
 		}
 		return ""
 	}
 	for _, prop := range []string{"LAST-MODIFIED", "DTSTAMP"} {
-		if t, ok := cal.TimeOf(obj, prop, tz); ok {
-			return formatWhen(t, tz, false, now)
+		if t, ok := cal.TimeOf(obj, prop, tf.tz); ok {
+			return tf.formatWhen(t, false, now)
 		}
 	}
 	return ""

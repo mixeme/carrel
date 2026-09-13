@@ -29,7 +29,7 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 	if sess != nil {
 		now := time.Now()
 		if until := sess.UnlockUntil(now); until != nil {
-			sh.Top.Unlocked = ptrWhen(formatWhen(*until, s.tz(), false, now))
+			sh.Top.Unlocked = ptrWhen(s.timeFor(sess).formatWhen(*until, false, now))
 		}
 		sh.Top.User = []view.MenuItem{
 			{Action: view.Action{ID: "account.settings", Label: "Account", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}},

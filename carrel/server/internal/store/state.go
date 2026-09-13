@@ -72,10 +72,14 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt"`
 	Disabled  bool      `json:"disabled,omitempty"`
 
-	Email               string     `json:"email,omitempty"`
-	EmailConfirmed      bool       `json:"emailConfirmed,omitempty"`
-	MustChangePassword  bool       `json:"mustChangePassword,omitempty"`
-	DisplayName         string     `json:"displayName,omitempty"`
+	Email              string `json:"email,omitempty"`
+	EmailConfirmed     bool   `json:"emailConfirmed,omitempty"`
+	MustChangePassword bool   `json:"mustChangePassword,omitempty"`
+	DisplayName        string `json:"displayName,omitempty"`
+	// WeekStart and Clock12 are the account's C-10 display settings: the first
+	// day of the week ("sunday", "saturday"; empty is Monday) and 12 hours.
+	WeekStart           string     `json:"weekStart,omitempty"`
+	Clock12             bool       `json:"clock12,omitempty"`
 	EscrowOptIn         bool       `json:"escrowOptIn,omitempty"`
 	EscrowDeposited     []byte     `json:"escrowDeposited,omitempty"`
 	EscrowDepositedAt   *time.Time `json:"escrowDepositedAt,omitempty"`

@@ -59,6 +59,7 @@ type collectionCtx struct {
 	col  sealed.Collection
 	card *card.Provider
 	cal  *cal.Provider
+	tf   timeFmt
 }
 
 // openCollection checks ownership and looks the collection up in the
@@ -95,7 +96,7 @@ func (s *Server) openCollection(w http.ResponseWriter, r *http.Request, segment 
 		s.notFound(w, r)
 		return nil, false
 	}
-	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: entry}
+	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: entry, tf: s.timeFor(sess)}
 	if spec.kind == view.KindContact {
 		c.card, err = card.New(client)
 	} else {
@@ -407,8 +408,9 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 // the REPORT time-range. Series are expanded here, and an instance another
 // client rewrote (RECURRENCE-ID) is laid over the instant it replaces.
 func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
-	tz := s.tz()
-	from := weekStart(time.Now().In(tz))
+	tf := c.tf
+	tz := tf.tz
+	from := tf.weekStart(time.Now().In(tz))
 	if q := r.URL.Query().Get("from"); q != "" {
 		if d, err := time.ParseInLocation("2006-01-02", q, tz); err == nil {
 			from = d
@@ -420,8 +422,8 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
 	week := func(t time.Time) string { return s.route(c.listPath() + "?from=" + t.Format("2006-01-02")) }
 	page.Bar.Range = &view.Range{
-		From: text(dateLabel(from, tz)),
-		To:   text(dateLabel(to.AddDate(0, 0, -1), tz)),
+		From: text(tf.date(from)),
+		To:   text(tf.date(to.AddDate(0, 0, -1))),
 		Presets: []view.Action{
 			{ID: "range.previous", Label: "Previous week", Href: week(from.AddDate(0, 0, -7)), Method: "GET", Enabled: true},
 			{ID: "range.current", Label: "This week", Href: s.route(c.listPath()), Method: "GET", Enabled: true},
@@ -467,8 +469,8 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 			occ := occurrence{at: at, allDay: tm.AllDay, row: view.AgendaRow{
 				Href:     s.route(c.recordPath(uid)),
 				UID:      uid,
-				Time:     text(timeLabel(at, tm.AllDay, tz)),
-				Zone:     text(zoneLabel(tm.Zone, tz)),
+				Time:     text(tf.timeLabel(at, tm.AllDay)),
+				Zone:     text(tf.zone(tm.Zone)),
 				Summary:  text(summary),
 				Location: text(cal.Text(o, "LOCATION")),
 				State:    view.RecordOK,
@@ -479,8 +481,8 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 				}
 				if !ov.Timing.Start.IsZero() {
 					occ.at, occ.allDay = ov.Timing.Start, ov.Timing.AllDay
-					occ.row.Time = text(timeLabel(ov.Timing.Start, ov.Timing.AllDay, tz))
-					occ.row.Zone = text(zoneLabel(ov.Timing.Zone, tz))
+					occ.row.Time = text(tf.timeLabel(ov.Timing.Start, ov.Timing.AllDay))
+					occ.row.Zone = text(tf.zone(ov.Timing.Zone))
 				}
 				if ov.Summary != "" {
 					occ.row.Summary = text(ov.Summary)
@@ -497,7 +499,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	}
 
 	sort.SliceStable(occs, func(i, j int) bool {
-		if di, dj := dayKey(occs[i].at, tz), dayKey(occs[j].at, tz); di != dj {
+		if di, dj := tf.dayKey(occs[i].at), tf.dayKey(occs[j].at); di != dj {
 			return di < dj
 		}
 		if occs[i].allDay != occs[j].allDay {
@@ -509,7 +511,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 		return occs[i].row.Summary < occs[j].row.Summary
 	})
 	for _, o := range occs {
-		rubric := dayRubric(o.at, tz)
+		rubric := tf.dayRubric(o.at)
 		if n := len(page.Days); n == 0 || string(page.Days[n-1].Rubric) != rubric {
 			page.Days = append(page.Days, view.AgendaDay{Rubric: text(rubric)})
 		}
@@ -525,7 +527,8 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 }
 
 func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
-	tz, now := s.tz(), time.Now()
+	tf, now := c.tf, time.Now()
+	tz := tf.tz
 	show := r.URL.Query().Get("show")
 	if show != "done" && show != "all" {
 		show = "open"
@@ -568,7 +571,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 			Percent: percentOf(o), Tags: tagsOf(cal.TextList(o, "CATEGORIES")), State: view.RecordOK,
 		}
 		if !due.Start.IsZero() {
-			row.Due = text(timeOrDate(due, tz))
+			row.Due = text(tf.timeOrDate(due))
 			row.Overdue = !isDone && due.Start.Before(now)
 		}
 		items = append(items, item{row: row, due: due.Start})
@@ -614,7 +617,8 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 }
 
 func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
-	tz := s.tz()
+	tf := c.tf
+	tz := tf.tz
 	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
 	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, nil, nil)
@@ -638,7 +642,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 			Tags: tagsOf(cal.TextList(o, "CATEGORIES")), State: view.RecordOK,
 		}
 		if !at.IsZero() {
-			row.Date = text(dateLabel(at, tz))
+			row.Date = text(tf.date(at))
 		}
 		items = append(items, item{row: row, at: at})
 	}

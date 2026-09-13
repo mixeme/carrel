@@ -14,6 +14,7 @@ import (
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/internal/user"
 )
 
 const (
@@ -58,6 +59,16 @@ type Users interface {
 	// discovered connection with its collections and returns its ID.
 	Catalog(viewerID string, dataKey [32]byte) (sealed.Blob, bool)
 	AddConnection(viewerID string, dataKey [32]byte, conn sealed.Connection, cols []sealed.Collection) (string, error)
+	// ApplyRediscovery writes a re-discovery the person confirmed (S-6.1):
+	// only what they were shown and the server still confirms.
+	ApplyRediscovery(viewerID string, dataKey [32]byte, accountID string, rd user.Rediscovery) error
+	// RevealConnectionPassword returns one stored password and journals the
+	// release; the caller checks the unlock window (S-10.7).
+	RevealConnectionPassword(viewerID string, dataKey [32]byte, accountID string) (string, error)
+
+	// SetTimePrefs stores the account's first day of the week and 12-hour
+	// clock (C-10).
+	SetTimePrefs(accountID, weekStart string, clock12 bool) error
 
 	PublicLinkValid(ctx context.Context, token string) bool
 

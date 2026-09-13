@@ -46,6 +46,9 @@ type Collection struct {
 	Components      []string    `json:"components,omitempty"`
 	ChangeTag       string      `json:"changeTag,omitempty"`
 	MaxResourceSize int64       `json:"maxResourceSize,omitempty"`
+	// Gone marks an entry re-discovery no longer found and the person applied
+	// (S-6.1). It stays so a selection holding it says gone (C-8.2).
+	Gone bool `json:"gone,omitempty"`
 }
 
 // Has reports whether the collection holds records of kind k.

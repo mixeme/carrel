@@ -125,6 +125,7 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 			}},
 		})
 	}
+	tf := s.timeFor(sess)
 	for _, u := range snap.Users {
 		if len(u.LoginHash) == 0 && u.Disabled {
 			continue
@@ -132,7 +133,7 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 		row := view.AdminUserRow{
 			Login:    text(u.Login),
 			Role:     text(string(u.Role)),
-			Created:  formatWhen(u.CreatedAt, s.tz(), false, now),
+			Created:  tf.formatWhen(u.CreatedAt, false, now),
 			Accounts: u.ConnCount,
 			Sessions: s.sessions.LiveCount(u.ID),
 			Disabled: u.Disabled,
@@ -140,7 +141,7 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 			Menu:     s.adminUserMenu(sess, snap, &u),
 		}
 		if u.LastLogin != nil {
-			row.LastLogin = formatWhen(*u.LastLogin, s.tz(), true, now)
+			row.LastLogin = tf.formatWhen(*u.LastLogin, true, now)
 		}
 		page.Rows = append(page.Rows, row)
 	}
@@ -267,6 +268,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvites
 	if flash.errText != "" {
 		page.Add.Sets[0].Rows[len(page.Add.Sets[0].Rows)-1].Error = text(flash.errText)
 	}
+	tf := s.timeFor(sess)
 	for i := range snap.Invites {
 		inv := &snap.Invites[i]
 		if !inviteLive(inv, now) {
@@ -276,7 +278,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvites
 			Login:   text(inv.Login),
 			Address: text(inv.Email),
 			Sent:    inviteSentStatus(s.cfg.MailEnabled),
-			Expires: formatWhen(inv.ExpiresAt, s.tz(), false, now),
+			Expires: tf.formatWhen(inv.ExpiresAt, false, now),
 			Actions: []view.Action{
 				{ID: "admin.invite.extend", Label: "Extend",
 					Href:   s.postQuery("/admin/invites", url.Values{"action": {"extend"}, "invite": {inv.ID}}),
@@ -341,10 +343,11 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	snap := s.store.Snapshot()
 	now := time.Now()
 	page := view.AdminAuditPage{Shell: s.buildShell(sess, "Audit log")}
+	tf := s.timeFor(sess)
 	for i := len(snap.Audit) - 1; i >= 0; i-- {
 		e := snap.Audit[i]
 		page.Rows = append(page.Rows, view.AuditRow{
-			When:   formatWhen(e.When, s.tz(), false, now),
+			When:   tf.formatWhen(e.When, false, now),
 			Who:    text(e.Who),
 			What:   text(e.What),
 			Whom:   text(e.Whom),

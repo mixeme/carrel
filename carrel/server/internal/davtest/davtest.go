@@ -108,6 +108,23 @@ func (s *Server) SetColour(collection, colour string) {
 	s.colours[collectionKey(collection)] = colour
 }
 
+// RemoveCollection deletes a calendar or an address book with everything in
+// it, as another client would.
+func (s *Server) RemoveCollection(p string) {
+	p = collectionKey(p)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.calendars, p)
+	delete(s.books, p)
+	delete(s.colours, p)
+	delete(s.ctags, p)
+	for k := range s.objects {
+		if strings.HasPrefix(k, p) {
+			delete(s.objects, k)
+		}
+	}
+}
+
 // Seed stores a resource as another client would have written it and returns
 // its new ETag. Bare LF line ends become CRLF.
 func (s *Server) Seed(p, body string) string {

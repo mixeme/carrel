@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"time"
 
 	"carrel.dev/carrel/server/view"
 )
@@ -26,33 +25,6 @@ func formatSize(n int64) view.Size {
 	suffix := []string{"B", "KB", "MB", "GB", "TB"}[exp]
 	val := float64(n) / math.Pow(unit, float64(exp))
 	return view.Size(fmt.Sprintf("%.1f %s", val, suffix))
-}
-
-func formatWhen(t time.Time, tz *time.Location, relative bool, now time.Time) view.When {
-	if t.IsZero() {
-		return ""
-	}
-	local := t.In(tz)
-	if relative {
-		d := now.Sub(t)
-		switch {
-		case d < time.Minute:
-			return "just now"
-		case d < time.Hour:
-			m := int(d.Minutes())
-			if m == 1 {
-				return "1 min ago"
-			}
-			return view.When(fmt.Sprintf("%d min ago", m))
-		case d < 24*time.Hour:
-			h := int(d.Hours())
-			if h == 1 {
-				return "1 hour ago"
-			}
-			return view.When(fmt.Sprintf("%d hours ago", h))
-		}
-	}
-	return view.When(local.Format("2 January, 15:04"))
 }
 
 func collectionColour(path string) view.Colour {

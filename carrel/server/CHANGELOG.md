@@ -5,6 +5,65 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.45 — 2026-09-13
+
+Closes the tails in front of S-12 in [server.md](../../docs/plan/server.md):
+re-discovery on a connection, the connection password behind the unlock
+window, and the first day of the week and 12/24 hours from the account.
+
+### For consumers
+
+- **Re-discovery** (S-6.1). Every `ConnectionCard` has the action
+  `connection.rediscover` (POST). It answers the connections page with one
+  notice: "Nothing appeared or disappeared", or "Collections changed on the
+  server" naming what appeared and what is gone, the addresses in `details`,
+  and two actions: `connection.rediscover.apply` (POST; its href carries
+  `op=apply`, `account` and one `add` or `gone` per address) and
+  `connection.rediscover.keep`. Nothing changes before Apply, and Apply writes
+  only the addresses in its href that the server still confirms; the names,
+  colours, rights and change tags of the other collections are refreshed with
+  it. A server that does not answer changes nothing: the page carries "Could
+  not connect", and that card has `state: "unavailable"` and its `trace`.
+- **Gone collections** stay in the catalog and in the selection. They are no
+  longer rows of their card: the page names them in a "Gone from the server"
+  notice, and their routes answer 404. One that comes back is offered again
+  as appeared and becomes the same entry.
+- **Connection password** (S-10.7). Outside the unlock window
+  `password.reveal` opens `/app/settings/unlock`, as before. Inside it the
+  href is `/app/settings/connections?reveal={account}`; that GET answers
+  `password.shown: true` with the value, a "Hide password" action and
+  `Cache-Control: no-store`, and writes `connection.password.reveal` to the
+  journal. An open window alone puts no password on the page, and another
+  session of the same person has its own window.
+- **Appearance** (`/app/settings/appearance`). `account` is a form with
+  `weekStart` (`monday`, `sunday`, `saturday`) and `clock` (`24`, `12`); POST
+  redirects back, and an unknown value comes back with the row's `error`.
+  `instance` shows the time zone, read only. `browser` stays empty: theme,
+  density and columns belong to the browser. Every time the server assembles
+  for that person follows the setting: the agenda week and "This week", agenda
+  rows, record fields, reminders, recurrence, and the `When` values of the
+  unlock sheet, top bar, escrow and admin pages ("10:00 AM").
+
+### Included
+
+- `user`: `ApplyRediscovery` (journal `connection.rediscover`, detail
+  `{account} +added -gone`, no addresses), `RevealConnectionPassword`,
+  `SetTimePrefs`. `store.User.WeekStart` and `Clock12`: empty is Monday and
+  24 hours, so existing state reads as before. `sealed.Collection.Gone`.
+- `web`: one `timeFmt` per page instead of the loose C-10 helpers.
+- `davtest.Server.RemoveCollection`.
+- Tests: `TestRediscoveryOffersThenApplies`,
+  `TestRediscoveryFailureChangesNothing`,
+  `TestConnectionPasswordOnlyInsideUnlockWindow`,
+  `TestAccountWeekStartAndClock`.
+
+### Not yet included
+
+- A note written by a real foreign client, read, changed and read again
+  (S-11). It needs a real client; a machine run does not close it.
+- The rail does not list selected collections yet (S-14); a gone one will
+  carry `state: "gone"` there.
+
 ## v0.0.44 — 2026-09-13
 
 S-11 records pass against live Radicale and Baikal
