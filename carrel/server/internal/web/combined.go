@@ -200,10 +200,15 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 	default:
 		snap := task.Snapshot()
 		st.task, st.snap = task, &snap
-		*st.poll = s.pollBar(tf, blob, snap, listOwner(task))
+		// A poll asked again from a filtered view comes back filtered.
+		owner, again := listOwner(task), task.page
+		if tag := strings.TrimSpace(r.URL.Query().Get("tag")); tag != "" {
+			owner.again, again = withQuery(owner.again, "tag", tag), withQuery(again, "tag", tag)
+		}
+		*st.poll = s.pollBar(tf, blob, snap, owner)
 		s.indexAnswered(sess, blob, spec, snap)
 		st.items = listedOf(blob, snap.Items)
-		refresh := view.Action{ID: "poll.again", Label: "Refresh", Href: s.route(task.page), Method: "GET", Enabled: !snap.Running}
+		refresh := view.Action{ID: "poll.again", Label: "Refresh", Href: s.route(again), Method: "GET", Enabled: !snap.Running}
 		if snap.Running {
 			refresh.Reason = "The poll is still running."
 		}
@@ -225,38 +230,77 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	}
 	tf, base := s.timeFor(sess), "/app/"+spec.segment
 	actions := []view.Action{s.combinedNewAction(blob, spec)}
+	// The filter's links name the task, so choosing a category reads the
+	// records already polled instead of asking the servers again.
+	query := r.URL.Query()
+	if st.task != nil {
+		query.Set("task", st.task.ID())
+	}
+	filter := s.tagFilter(base, query)
+	shown := filter.keep(spec.kind, st.items)
+	st.shell.Rail.Tags = filter.rail(spec.kind, st.items)
+
+	// The print header says how many collections the view shows and, once the
+	// poll is over, how many records; nothing ticked has nothing to print.
+	var sources string
+	var taken view.When
+	if st.snap != nil {
+		sources = plural(len(st.snap.Sources), collectionNouns[spec.kind])
+		taken = tf.taken(time.Now())
+		if !st.snap.Running {
+			taken = tf.taken(st.snap.Finished)
+		}
+	}
+	counted := func(n int, unit string) string {
+		if st.snap == nil || st.snap.Running {
+			return ""
+		}
+		return plural(n, unit)
+	}
+	header := func(parts ...string) view.Print {
+		if st.snap == nil {
+			return view.Print{Title: st.shell.Title}
+		}
+		parts = append(append([]string{sources}, parts...), filter.tag)
+		return view.Print{Title: st.shell.Title, Range: printRange(parts...), Taken: taken}
+	}
+
 	switch spec.kind {
 	case view.KindContact:
 		page := view.ContactsListPage{Shell: st.shell, Poll: st.poll}
-		page.Groups = s.contactGroups(st.items, spec.segment, true)
+		page.Groups = s.contactGroups(shown, spec.segment, true)
 		total := len(st.items)
-		page.Bar = view.ListBar{Loaded: total, Total: &total, Actions: actions}
+		page.Bar = view.ListBar{Loaded: len(shown), Total: &total, Actions: actions}
+		page.Print = header(counted(len(shown), "card"))
 		return page, nil
 	case view.KindEvent:
 		page := view.AgendaPage{Shell: st.shell, Poll: st.poll}
 		from, to := weekWindow(tf, r.FormValue("from"))
 		var bad []unreadable
-		page.Days, page.Bar.Loaded, bad = s.agendaDays(tf, st.items, from, to, spec.segment, true)
-		page.Bar.Range = s.agendaRange(tf, base, from, to)
+		page.Days, page.Bar.Loaded, bad = s.agendaDays(tf, shown, from, to, spec.segment, true)
+		page.Bar.Range = s.agendaRange(tf, base, filter.tag, from, to)
 		page.Bar.Actions = actions
 		page.Notices = appendUnreadable(page.Notices, bad)
+		page.Print = header(agendaPrint(tf, from, to), counted(page.Bar.Loaded, "event"))
 		return page, nil
 	case view.KindTask:
 		page := view.TasksPage{Shell: st.shell, Poll: st.poll}
 		show := taskShow(r)
 		var open, done int
 		var bad []unreadable
-		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, st.items, spec.segment, true, time.Now())
-		page.Bar.Segments = s.taskSegments(base, show, open, done)
+		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, shown, spec.segment, true, filter, time.Now())
+		page.Bar.Segments = s.taskSegments(base, filter.tag, show, open, done)
 		page.Bar.Actions = actions
 		page.Notices = appendUnreadable(page.Notices, bad)
+		page.Print = header(showLabels[show], counted(page.Bar.Loaded, "task"))
 		return page, nil
 	default:
 		page := view.NotesPage{Shell: st.shell, Poll: st.poll}
 		var bad []unreadable
-		page.Groups, page.Bar.Loaded, bad = s.noteGroups(tf, st.items, spec.segment, true)
+		page.Groups, page.Bar.Loaded, bad = s.noteGroups(tf, shown, spec.segment, true, filter)
 		page.Bar.Actions = actions
 		page.Notices = appendUnreadable(page.Notices, bad)
+		page.Print = header(counted(page.Bar.Loaded, "note"))
 		return page, nil
 	}
 }
@@ -385,8 +429,39 @@ func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 			}
 		}
 	}
-	live, on := 0, 0
-	var sections []view.RailSection
+	sections, live, on := s.railSections(sess, blob, spec, unavailable)
+	combined := view.SourceRow{
+		Href: s.route("/app/" + spec.segment), Label: text(combinedTitles[spec.kind]),
+		Count: kindCount(sess, blob, spec), Tick: view.TickPart, State: view.CollectionOK,
+	}
+	switch on {
+	case 0:
+		combined.Tick, combined.Count = view.TickOff, nil
+	case live:
+		combined.Tick = view.TickOn
+	}
+	rail.Sections = append([]view.RailSection{{State: view.CollectionOK, Rows: []view.SourceRow{combined}}}, sections...)
+	rail.Foot = []view.Action{
+		{ID: "rail.apply", Label: "Apply", Href: s.route("/app/sources/" + spec.segment), Method: "POST", Enabled: true},
+		{ID: "collection.new", Label: "New collection", Icon: "i-plus", Href: s.postQuery("/app/collections/new", url.Values{"kind": {string(spec.kind)}}), Method: "GET", Enabled: true},
+		{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+	}
+	rail.Note = text(fmt.Sprintf("%d of %s ticked", on, plural(live, "collection")))
+	return rail
+}
+
+// backRail is the back rail of a record screen (C-6.3): one row out of it and
+// the same collections as the list, without the combined row, the tags and
+// the foot — what to look at is already chosen here.
+func (s *Server) backRail(sess *session.Session, blob sealed.Blob, spec kindSpec, back view.Action) view.Rail {
+	sections, _, _ := s.railSections(sess, blob, spec, nil)
+	return view.Rail{Nav: []view.NavRow{{Action: back}}, Sections: sections, About: s.aboutAction()}
+}
+
+// railSections are the collections of a kind by connection with their ticks
+// and counts; live counts the rows that can be opened, on the ticked ones
+// among them.
+func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kindSpec, unavailable map[string]bool) (sections []view.RailSection, live, on int) {
 	for _, conn := range blob.Connections {
 		sec := view.RailSection{Account: text(serverHost(conn.Server)), AccountID: conn.ID, State: view.CollectionOK}
 		down := 0
@@ -434,24 +509,7 @@ func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 		}
 		sections = append(sections, sec)
 	}
-	combined := view.SourceRow{
-		Href: s.route("/app/" + spec.segment), Label: text(combinedTitles[spec.kind]),
-		Count: kindCount(sess, blob, spec), Tick: view.TickPart, State: view.CollectionOK,
-	}
-	switch on {
-	case 0:
-		combined.Tick, combined.Count = view.TickOff, nil
-	case live:
-		combined.Tick = view.TickOn
-	}
-	rail.Sections = append([]view.RailSection{{State: view.CollectionOK, Rows: []view.SourceRow{combined}}}, sections...)
-	rail.Foot = []view.Action{
-		{ID: "rail.apply", Label: "Apply", Href: s.route("/app/sources/" + spec.segment), Method: "POST", Enabled: true},
-		{ID: "collection.new", Label: "New collection", Icon: "i-plus", Href: s.postQuery("/app/collections/new", url.Values{"kind": {string(spec.kind)}}), Method: "GET", Enabled: true},
-		{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
-	}
-	rail.Note = text(fmt.Sprintf("%d of %s ticked", on, plural(live, "collection")))
-	return rail
+	return sections, live, on
 }
 
 // postSources writes the ticks of one kind (S-14). The rail is a form, and it

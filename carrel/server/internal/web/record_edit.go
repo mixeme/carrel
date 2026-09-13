@@ -567,6 +567,11 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		title = "New " + c.spec.noun
 	}
 	sh := s.buildShell(c.sess, title)
+	back := s.cardBack(c, st.uid)
+	if st.isNew {
+		back = s.listBack(c)
+	}
+	sh.Rail = s.recordRail(c, back)
 	sh.Notices = append(sh.Notices, st.notices...)
 	if len(st.errors) > 0 {
 		sh.Notices = append(sh.Notices, view.Notice{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "Correct the marked fields and save again."})

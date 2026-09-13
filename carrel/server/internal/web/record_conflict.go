@@ -105,6 +105,7 @@ func (s *Server) showValues(c *collectionCtx, f editField, vals []string, alarms
 func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, theirs formValues, alarms []cal.Alarm, notices []view.Notice) view.ConflictPage {
 	now := time.Now()
 	sh := s.buildShell(c.sess, "Changed elsewhere")
+	sh.Rail = s.recordRail(c, s.listBack(c))
 	sh.Notices = append(sh.Notices, notices...)
 	page := view.ConflictPage{Shell: sh, Kind: c.spec.kind, UID: d.UID, ReadAt: c.tf.formatWhen(d.ReadAt, false, now)}
 	path := c.recordPath(d.UID) + "/conflict"

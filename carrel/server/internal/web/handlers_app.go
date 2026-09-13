@@ -203,10 +203,18 @@ func (s *Server) getKindImport(w http.ResponseWriter, r *http.Request, kind stri
 	if !ok {
 		return
 	}
-	if !s.checkOwnership(w, r, sess, r.PathValue("account"), r.PathValue("col"), "") {
+	account, col := r.PathValue("account"), r.PathValue("col")
+	if !s.checkOwnership(w, r, sess, account, col, "") {
 		return
 	}
 	page := view.ImportPage{Shell: s.buildShell(sess, "Import")}
+	blob := s.catalogOf(sess)
+	conn, hasConn := blob.Connection(account)
+	entry, hasCol := blob.Collection(account, col)
+	if spec, known := recordKinds[kind]; known && hasConn && hasCol && entry.Has(spec.kind) {
+		o := origin{conn: conn, col: entry}
+		page.Rail = s.backRail(sess, blob, spec, s.backAction(spec, "", o.listPath(spec.segment)))
+	}
 	s.writePage(w, r, http.StatusOK, page)
 }
 

@@ -436,24 +436,29 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 		return
 	}
 	// The rail is built after the list: the list is what fills its counts.
-	rail := func() view.Rail { return s.kindRail(c.sess, s.catalogOf(c.sess), c.spec, nil) }
+	// The list leaves the tags of what it read in the shell's rail.
+	rail := func(tags []view.Tag) view.Rail {
+		rl := s.kindRail(c.sess, s.catalogOf(c.sess), c.spec, nil)
+		rl.Tags = tags
+		return rl
+	}
 	var page any
 	switch c.spec.kind {
 	case view.KindContact:
 		p := s.contactsList(r, c)
-		p.Rail = rail()
+		p.Rail = rail(p.Rail.Tags)
 		page = p
 	case view.KindEvent:
 		p := s.agenda(r, c)
-		p.Rail = rail()
+		p.Rail = rail(p.Rail.Tags)
 		page = p
 	case view.KindTask:
 		p := s.tasksList(r, c)
-		p.Rail = rail()
+		p.Rail = rail(p.Rail.Tags)
 		page = p
 	default:
 		p := s.notesList(r, c)
-		p.Rail = rail()
+		p.Rail = rail(p.Rail.Tags)
 		page = p
 	}
 	s.writePage(w, r, http.StatusOK, page)
@@ -462,16 +467,20 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsListPage {
 	page := view.ContactsListPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
+	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, err := c.card.Query(r.Context(), c.col.Path)
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
 	items := c.listed(objs)
-	page.Groups = s.contactGroups(items, c.spec.segment, false)
+	shown := filter.keep(view.KindContact, items)
+	page.Groups = s.contactGroups(shown, c.spec.segment, false)
+	page.Rail.Tags = filter.rail(view.KindContact, items)
 	c.putIndex(indexOf(view.KindContact, items))
 	total := len(objs)
-	page.Bar.Loaded, page.Bar.Total = total, &total
+	page.Bar.Loaded, page.Bar.Total = len(shown), &total
+	page.Print = view.Print{Title: page.Title, Range: printRange(plural(len(shown), "card"), filter.tag), Taken: c.tf.taken(time.Now())}
 	return page
 }
 
@@ -537,17 +546,28 @@ func weekWindow(tf timeFmt, from string) (time.Time, time.Time) {
 	return start, start.AddDate(0, 0, 7)
 }
 
-func (s *Server) agendaRange(tf timeFmt, base string, from, to time.Time) *view.Range {
-	week := func(t time.Time) string { return s.route(base + "?from=" + t.Format("2006-01-02")) }
+// agendaRange moves the week and keeps the category filter.
+func (s *Server) agendaRange(tf timeFmt, base, tag string, from, to time.Time) *view.Range {
+	f := tagFilter{tag: tag, base: base, query: url.Values{}, route: s.route}
+	week := func(t time.Time) string {
+		f.query = url.Values{"from": {t.Format("2006-01-02")}}
+		return f.href(tag)
+	}
+	current := tagFilter{base: base, query: url.Values{}, route: s.route}.href(tag)
 	return &view.Range{
 		From: text(tf.date(from)),
 		To:   text(tf.date(to.AddDate(0, 0, -1))),
 		Presets: []view.Action{
 			{ID: "range.previous", Label: "Previous week", Href: week(from.AddDate(0, 0, -7)), Method: "GET", Enabled: true},
-			{ID: "range.current", Label: "This week", Href: s.route(base), Method: "GET", Enabled: true},
+			{ID: "range.current", Label: "This week", Href: current, Method: "GET", Enabled: true},
 			{ID: "range.next", Label: "Next week", Href: week(to), Method: "GET", Enabled: true},
 		},
 	}
+}
+
+// agendaPrint is the week of an agenda in its print header.
+func agendaPrint(tf timeFmt, from, to time.Time) string {
+	return tf.date(from) + " – " + tf.date(to.AddDate(0, 0, -1))
 }
 
 // agenda is one week of one calendar in the instance zone. Without a window
@@ -558,7 +578,8 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	from, to := weekWindow(tf, r.URL.Query().Get("from"))
 	page := view.AgendaPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
-	page.Bar.Range = s.agendaRange(tf, c.listPath(), from, to)
+	filter := s.tagFilter(c.listPath(), r.URL.Query())
+	page.Bar.Range = s.agendaRange(tf, c.listPath(), filter.tag, from, to)
 
 	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, &from, &to)
 	if err != nil {
@@ -567,9 +588,14 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	}
 	items := c.listed(objs)
 	var more []unreadable
-	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, items, from, to, c.spec.segment, false)
+	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, filter.keep(view.KindEvent, items), from, to, c.spec.segment, false)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
+	page.Rail.Tags = filter.rail(view.KindEvent, items)
 	c.putIndex(indexOf(view.KindEvent, items))
+	page.Print = view.Print{
+		Title: page.Title, Range: printRange(agendaPrint(tf, from, to), plural(page.Bar.Loaded, "event"), filter.tag),
+		Taken: tf.taken(time.Now()),
+	}
 	return page
 }
 
@@ -685,6 +711,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	show := taskShow(r)
 	page := view.TasksPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
+	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, nil, nil)
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
@@ -693,16 +720,21 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	items := c.listed(objs)
 	var open, done int
 	var more []unreadable
-	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, items, c.spec.segment, false, time.Now())
-	page.Bar.Segments = s.taskSegments(c.listPath(), show, open, done)
+	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, filter.keep(view.KindTask, items), c.spec.segment, false, filter, time.Now())
+	page.Bar.Segments = s.taskSegments(c.listPath(), filter.tag, show, open, done)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
+	page.Rail.Tags = filter.rail(view.KindTask, items)
 	c.putIndex(indexOf(view.KindTask, items))
+	page.Print = view.Print{
+		Title: page.Title, Range: printRange(showLabels[show], plural(page.Bar.Loaded, "task"), filter.tag),
+		Taken: c.tf.taken(time.Now()),
+	}
 	return page
 }
 
 // taskGroups shows open, done or all tasks: open first, then by due date,
-// undated last.
-func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment string, mark bool, now time.Time) (groups []view.TaskGroup, open, done, loaded int, bad []unreadable) {
+// undated last. A row's categories link to the list filtered to each.
+func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment string, mark bool, filter tagFilter, now time.Time) (groups []view.TaskGroup, open, done, loaded int, bad []unreadable) {
 	type item struct {
 		row   view.TaskRow
 		due   time.Time
@@ -733,7 +765,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		row := view.TaskRow{
 			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Done: isDone,
 			Summary: text(titleOr(cal.Text(o, "SUMMARY"), "Untitled task")),
-			Percent: percentOf(o), Tags: tagsOf(cal.TextList(o, "CATEGORIES")), State: view.RecordOK,
+			Percent: percentOf(o), Tags: filter.tags(categoriesOf(view.KindTask, o)), State: view.RecordOK,
 		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
@@ -770,9 +802,12 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 	return groups, open, done, len(rows), bad
 }
 
-func (s *Server) taskSegments(base, show string, open, done int) []view.Action {
+// taskSegments switch between open, done and all, and keep the category
+// filter.
+func (s *Server) taskSegments(base, tag, show string, open, done int) []view.Action {
 	segment := func(id, label, value string, n int) view.Action {
-		a := view.Action{ID: id, Label: text(fmt.Sprintf("%s · %d", label, n)), Href: s.route(base + "?show=" + value), Method: "GET", Enabled: show != value}
+		f := tagFilter{base: base, query: url.Values{"show": {value}}, route: s.route}
+		a := view.Action{ID: id, Label: text(fmt.Sprintf("%s · %d", label, n)), Href: f.href(tag), Method: "GET", Enabled: show != value}
 		if show == value {
 			a.Reason = "Shown now."
 		}
@@ -788,6 +823,7 @@ func (s *Server) taskSegments(base, show string, open, done int) []view.Action {
 func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
+	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, nil, nil)
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
@@ -795,14 +831,17 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	}
 	items := c.listed(objs)
 	var more []unreadable
-	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, items, c.spec.segment, false)
+	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, filter.keep(view.KindNote, items), c.spec.segment, false, filter)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
+	page.Rail.Tags = filter.rail(view.KindNote, items)
 	c.putIndex(indexOf(view.KindNote, items))
+	page.Print = view.Print{Title: page.Title, Range: printRange(plural(page.Bar.Loaded, "note"), filter.tag), Taken: c.tf.taken(time.Now())}
 	return page
 }
 
-// noteGroups lists notes newest first.
-func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark bool) ([]view.NoteGroup, int, []unreadable) {
+// noteGroups lists notes newest first. A row's categories link to the list
+// filtered to each.
+func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark bool, filter tagFilter) ([]view.NoteGroup, int, []unreadable) {
 	type item struct {
 		row   view.NoteRow
 		at    time.Time
@@ -816,7 +855,7 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		at := noteTime(o, tf.tz)
 		row := view.NoteRow{
 			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Title: text(title), Excerpt: text(noteExcerpt(body, title)),
-			Tags: tagsOf(cal.TextList(o, "CATEGORIES")), State: view.RecordOK,
+			Tags: filter.tags(categoriesOf(view.KindNote, o)), State: view.RecordOK,
 		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
@@ -924,14 +963,6 @@ func percentOf(obj *model.Object) *int {
 		return nil
 	}
 	return &n
-}
-
-func tagsOf(values []string) []view.Tag {
-	var out []view.Tag
-	for _, v := range values {
-		out = append(out, view.Tag{Label: text(v)})
-	}
-	return out
 }
 
 // noteTitle is SUMMARY, else the first line of the body without its heading

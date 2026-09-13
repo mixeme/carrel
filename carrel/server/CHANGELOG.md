@@ -5,6 +5,77 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.50 — 2026-09-13
+
+The rest of S-14 in [server.md](../../docs/plan/server.md): the back rail on
+record screens, the category filter of lists, and the print header.
+
+### For consumers
+
+- **Back rail.** The `rail` of a record (`/app/{kind}/{account}/{col}/{uid}`),
+  its edit, a new record, the import screen and the conflict screen is now the
+  back rail of C-6.3. `nav` holds one row with `id` `nav.back` and icon
+  `i-back`: "Back to list" to the collection's list ("Back to calendar" for
+  events), or "Back to the card" on the edit of an existing record. `sections`
+  are the collections of the kind as on the list, with ticks and counts, but
+  without the combined row. `tags` and `foot` are `null`. The way back leads
+  to the collection's own list, even for a record opened from the combined
+  view.
+- **Tag filter.** The list of one collection and the combined view fill
+  `rail.tags`. `all` comes first, then every category of the records read,
+  most used first. Each `href` is the same list with `?tag=`.
+  - **Matching.** `?tag=` compares without case and cuts what was already
+    read; no server is asked for it.
+  - **Counts.** The rail's counts and `bar.total` stay the whole collection,
+    and `bar.loaded` counts the rows shown. On a contacts list `bar.loaded`
+    used to equal `bar.total`; without a tag it still does.
+  - **Unknown or empty.** A tag in the address that no record has stays in
+    `tags` with `on: true`, so it can be cleared. With no categories and no
+    tag, `tags` is `null`.
+  - **Combined view.** Tag links carry `task=`, so a category is chosen from
+    the finished poll without polling again. `top.refresh` and `poll.again`
+    of a filtered view keep `tag`.
+  - **Kept by other links.** The week presets of the agenda and the task
+    segments keep `tag`.
+  - **Tags elsewhere.** The `tags` of task rows, note rows, the contact card
+    and the note's meta now have an `href` to the filter of their collection,
+    and `on` for the category shown.
+- **Print header.** `print` of a list:
+  - **`title`** is the page title.
+  - **`range`** joins with " · " what the list shows, in this order: the
+    number of collections in a combined view ("2 books"), the agenda week
+    ("7 September 2026 – 13 September 2026"), the task segment ("Open"), the
+    number of rows ("3 cards"; in a combined view only once the poll is
+    over), and the tag.
+  - **`taken`** is absolute with the year: when the list was read, or when
+    the combined poll finished.
+  - **Nothing ticked:** a combined view with no ticked collections has only
+    `title`.
+
+  On a record page, `title` is the record's title, `range` is its stamp
+  (`account · collection`), and `taken` is when it was read. Edit, new and
+  conflict screens leave `print` empty.
+
+### Included
+
+- `web`: `frame.go` holds the back row, `tagFilter`, `categoriesOf`, the
+  print time (`timeFmt.taken`) and `printRange`. `kindRail` is split into
+  `railSections`, shared by the sections rail and `backRail`. `taskGroups`,
+  `noteGroups`, `agendaRange` and `taskSegments` take the filter.
+- Tests: `TestBackRailOnRecordScreens`, `TestTagFilterOnContacts`,
+  `TestTagFilterOnCalendars`, `TestCombinedTagFilterReadsThePoll`;
+  `TestConflictScreenAndCombination` checks the conflict screen's rail.
+
+### Not yet included
+
+- Stop and Retry of a filtered combined view, sent without scripts, return to
+  the view without its tag.
+- Events have no count in the rail: the agenda reads one week, not the whole
+  calendar.
+- Records a combined REPORT returned unreadable are left out without a notice;
+  the collection's own list names them.
+- S-22: `LastRead` and `Changed` of a collection are not filled yet.
+
 ## v0.0.49 — 2026-09-13
 
 Two tails of S-14 in [server.md](../../docs/plan/server.md), closed before

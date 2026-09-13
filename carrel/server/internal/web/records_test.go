@@ -357,6 +357,10 @@ func TestConflictScreenAndCombination(t *testing.T) {
 	if page.ReadAt == "" || page.Kind != view.KindContact {
 		t.Errorf("page = %+v", page)
 	}
+	// C-6.3: the conflict screen is left for the list; it is not printed.
+	if nav := page.Rail.Nav; len(nav) != 1 || nav[0].ID != "nav.back" || nav[0].Href != f.path("contacts") || page.Print != (view.Print{}) {
+		t.Errorf("conflict rail %+v, print %+v", nav, page.Print)
+	}
 
 	resp = f.h.do(postForm(actionHref(t, page.Actions, "conflict.combine"), f.sess, url.Values{"choice.0": {"theirs"}}))
 	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != rec {

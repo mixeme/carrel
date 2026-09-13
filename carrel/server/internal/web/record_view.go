@@ -46,8 +46,12 @@ func (s *Server) recordPage(c *collectionCtx, uid string, obj *model.Object, not
 	}
 }
 
+// recordShell carries the back rail (C-6.3). The print header is filled by
+// the page once the record is read: a record that could not be asked for has
+// nothing to print.
 func (s *Server) recordShell(c *collectionCtx, title string, notices []view.Notice) view.Shell {
 	sh := s.buildShell(c.sess, title)
+	sh.Rail = s.recordRail(c, s.listBack(c))
 	sh.Notices = append(sh.Notices, notices...)
 	return sh
 }
@@ -114,6 +118,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	}
 	name := contactName(obj)
 	page.Shell.Title, page.Name, page.Avatar = text(name), text(name), avatarFor(uid, name)
+	page.Print = s.recordPrint(c, page.Name)
 	props := obj.Props()
 	for _, f := range contactFields {
 		for _, v := range props[f.prop] {
@@ -127,15 +132,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 			page.Fields = append(page.Fields, field)
 		}
 	}
-	var tags []string
-	for _, v := range obj.PropText("CATEGORIES") {
-		for _, t := range strings.Split(v, ",") {
-			if t = strings.TrimSpace(t); t != "" {
-				tags = append(tags, t)
-			}
-		}
-	}
-	page.Tags = tagsOf(tags)
+	page.Tags = s.recordTags(c, obj)
 	page.Foreign = card.Foreign(obj)
 	if _, external := card.PhotoURI(obj); external {
 		page.PhotoNote = "External photo link; editing is not available."
@@ -153,6 +150,7 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	tz := tf.tz
 	summary := titleOr(cal.Text(obj, "SUMMARY"), "Untitled event")
 	page.Shell.Title, page.Summary = text(summary), text(summary)
+	page.Print = s.recordPrint(c, page.Summary)
 	if tm, err := cal.TimingOf(obj, tz); err != nil {
 		page.Notices = append(page.Notices, readNotice(obj.Path, err))
 	} else if !tm.Start.IsZero() {
@@ -185,6 +183,7 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	tz := tf.tz
 	summary := titleOr(cal.Text(obj, "SUMMARY"), "Untitled task")
 	page.Shell.Title, page.Summary = text(summary), text(summary)
+	page.Print = s.recordPrint(c, page.Summary)
 	if due, err := cal.DueOf(obj, tz); err != nil {
 		page.Notices = append(page.Notices, readNotice(obj.Path, err))
 	} else if !due.Start.IsZero() {
@@ -220,6 +219,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	body := cal.Description(obj)
 	title := noteTitle(cal.Text(obj, "SUMMARY"), body)
 	page.Shell.Title = text(title)
+	page.Print = s.recordPrint(c, text(title))
 	page.Doc.Title, page.Doc.Body, page.Doc.Rendered = text(title), text(body), cal.RenderMarkdown(body)
 	actions := s.recordActions(c, uid, obj.ETag)
 	if len(actions) == 2 {
@@ -229,7 +229,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	if at := noteTime(obj, tz); !at.IsZero() {
 		page.Meta.Date = text(tf.date(at))
 	}
-	page.Meta.Tags = tagsOf(cal.TextList(obj, "CATEGORIES"))
+	page.Meta.Tags = s.recordTags(c, obj)
 	page.Meta.Related = s.relatedRows(c, obj)
 	return page
 }
