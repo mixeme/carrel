@@ -5,6 +5,18 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.51 — 2026-09-13
+
+Copies the Typecase mockup through plan 1 step 3: classes inside frames
+are the Typecase dictionary (`tc-*`, states `is-*`); desktop window chrome
+is page classes `mk-*`.
+
+### For consumers
+
+Nothing in the running server. Open
+[carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
+current mockup; fonts are in `docs/visual/fonts/`.
+
 ## v0.0.50 — 2026-09-13
 
 The rest of S-14 in [server.md](../../docs/plan/server.md): the back rail on
