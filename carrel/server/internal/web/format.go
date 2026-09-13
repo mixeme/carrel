@@ -27,14 +27,16 @@ func formatSize(n int64) view.Size {
 	return view.Size(fmt.Sprintf("%.1f %s", val, suffix))
 }
 
+// collectionPalette is the eight muted tones from architecture.md: the colour
+// derived from an address, and the only colours the collection sheets offer.
+var collectionPalette = []view.Colour{
+	"#5c6b73", "#6b5c73", "#736b5c", "#5c736b",
+	"#6b735c", "#735c6b", "#5c6773", "#67735c",
+}
+
 func collectionColour(path string) view.Colour {
 	h := sha256.Sum256([]byte(path))
-	// Eight muted tones from architecture.md — index from hash.
-	palette := []view.Colour{
-		"#5c6b73", "#6b5c73", "#736b5c", "#5c736b",
-		"#6b735c", "#735c6b", "#5c6773", "#67735c",
-	}
-	return palette[int(h[0])%len(palette)]
+	return collectionPalette[int(h[0])%len(collectionPalette)]
 }
 
 func stamp(account, collection string) view.Stamp {

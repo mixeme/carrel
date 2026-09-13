@@ -5,6 +5,83 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.46 — 2026-09-13
+
+S-12.1–12.2 in [server.md](../../docs/plan/server.md): collections are
+created and renamed from Carrel. Passes against live Baikal
+(`TestBaikalCollections`).
+
+### For consumers
+
+- **New collection** (`/app/collections/new`, `CollectionNewSheet`). Opened
+  with `?kind=contact|event|task|note` (the rail) or `?a={account}` (a
+  connection card, whose `collection.new` action is new); without `kind` the
+  form has a `kind` row, Calendar or Address book. Form rows: `account` (only
+  servers with that home; the others are `target` options with `readOnly` and
+  a `reason`, and `note` says why), `name`, `colour` (radio, the eight C-10
+  tones — calendars only), `components` (check, `VEVENT` `VTODO` `VJOURNAL` —
+  calendars only, the sheet's kind preselected), `address`. POST goes to the
+  form's action; success redirects to the list of the new collection.
+- **The address** comes from the name when `address` is empty: NFD, the
+  closed Cyrillic table, lower case, runs of spaces and hyphens to one hyphen,
+  `[a-z0-9-]`, empty becomes `col`; `-2`, `-3` where the server already holds
+  it. "Дни рождения" is `dni-rozhdeniya`. A typed address is kept as typed and
+  must be one segment of `[A-Za-z0-9._~-]`, not starting with a dot and without
+  `..`; a taken one is a row `error`, not a suffix. The address never changes
+  afterwards.
+- **Rename** (`/app/collections/rename?a={account}&c={address}`,
+  `CollectionRenameSheet`). Every non-file `CollectionRow` of a connection
+  card has `menu` item `collection.rename`. Rows `name` and, for calendars,
+  `colour`; `address` is the full URL, shown and not editable. One PROPPATCH
+  of `displayname` (and `calendar-color`), no MOVE; success redirects to the
+  connections page. A colour left unchosen stays as it is.
+- **A refusal** fills the new `failure` notice of either sheet: title, what did
+  not happen, and `details` with method, address, `→ code` and the server's
+  body. 403 reads "This account can read here but not create" (or "… not change
+  it"). The form keeps what was entered; nothing is created, renamed, added to
+  the catalog or journaled. Neither door is hidden or disabled in advance: the
+  right to create is not guessed.
+- **C-6 change:** `CollectionNewSheet.Failure` and
+  `CollectionRenameSheet.Failure` (`*Notice`, `failure`). The failure frame
+  (s-profile-6) had no field to carry it.
+- Journal: `collection.create` and `collection.rename`, detail the connection
+  ID only.
+
+### For operators
+
+- A PROPPATCH answered 207 is read now: a property refused inside it fails the
+  request. Before, a 207 counted as success whatever it said.
+
+### Included
+
+- `dav`: `Prop.Value` is the XML content of the property element, checked
+  before sending; `TextValue` escapes text for it. `MkColProps("MKCALENDAR")`
+  sends a CalDAV `mkcalendar` root. PROPPATCH reports the refused property's
+  code (a 424 of the others does not hide it). Closes the `Prop.Value` item of
+  [providers-tail.md](../../docs/plan/providers-tail.md).
+- `web`: `handlers_collections.go`, `slug.go`; `golang.org/x/text` v0.42.0 for
+  NFD.
+- `user`: `AddCollection` (an entry marked gone at the same path becomes the
+  new one), `RenameCollection`. A catalog that cannot be written after the
+  server created the collection deletes it again.
+- `davtest`: MKCALENDAR with name, colour and components; PROPPATCH of
+  `displayname` and `calendar-color` on collections, atomic; MKCOL on an
+  existing collection answers 405; `Refuse`, `Calendar`, `AddressBook`,
+  `Colour`.
+- Tests: `TestNewCalendarTakesItsAddressFromTheName`,
+  `TestNewAddressBookWithAddressByHand`, `TestRefusedCreateLeavesNothing`,
+  `TestRenameWritesTheLabelNotTheAddress`, `TestCollectionSlug`,
+  `TestUniqueSlug`, `TestAddressProblem`, `TestPropValueIsXMLContent`,
+  `TestPropPatchReportsRefusedProperty`; live `TestBaikalCollections`,
+  `TestRadicaleCollections`.
+
+### Not yet included
+
+- `TestRadicaleCollections` has not run: Radicale runs in the Linux gates
+  (`scripts/linux-gates.sh`).
+- The rail's `collection.new` door (S-14); the card door works now.
+- Move and delete of a collection (S-12.3 after S-18, S-12.4 after S-19).
+
 ## v0.0.45 — 2026-09-13
 
 Closes the tails in front of S-12 in [server.md](../../docs/plan/server.md):

@@ -170,11 +170,15 @@ func (c *Client) MkCol(ctx context.Context, p string) error {
 	return c.webdav.Mkdir(ctx, p)
 }
 
+// MkColProps creates a collection with properties in one request: extended
+// MKCOL (RFC 5689) or MKCALENDAR (RFC 4791). The two differ only in the method
+// name and the root element of the body (S-12.1). Both are atomic on the
+// server: a refused property creates nothing.
 func (c *Client) MkColProps(ctx context.Context, method, p string, props []Prop) error {
 	if method == "" {
 		method = "MKCOL"
 	}
-	body, err := mkcolBody(props)
+	body, err := mkcolBody(method, props)
 	if err != nil {
 		return err
 	}
@@ -209,8 +213,45 @@ func (c *Client) PropPatch(ctx context.Context, p string, set []Prop, remove []x
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusMultiStatus && resp.StatusCode/100 != 2 {
+	if resp.StatusCode/100 != 2 {
 		return httpStatusError(resp)
+	}
+	if resp.StatusCode == http.StatusMultiStatus {
+		return c.propPatchRefusal(resp.Body)
+	}
+	return nil
+}
+
+// propPatchRefusal reads the 207 of a PROPPATCH. The request is atomic, and a
+// server that refuses one property says so per property inside a 207: taking
+// the 207 alone for success would report a rename that did not happen. The
+// refused property's code wins over the 424 Failed Dependency of the others.
+func (c *Client) propPatchRefusal(body io.Reader) error {
+	if c.maxBody > 0 {
+		body = io.LimitReader(body, c.maxBody)
+	}
+	var ms xmlMultiStatus
+	if err := xml.NewDecoder(body).Decode(&ms); err != nil {
+		return fmt.Errorf("dav: PROPPATCH answered 207 without a readable multistatus: %w", err)
+	}
+	var refused *StatusError
+	for _, resp := range ms.Responses {
+		for _, ps := range resp.PropStat {
+			code := parseStatus(ps.Status)
+			if code/100 == 2 {
+				continue
+			}
+			var names []string
+			for _, raw := range ps.Prop.Raw {
+				names = append(names, raw.XMLName.Local)
+			}
+			if refused == nil || (refused.Code == http.StatusFailedDependency && code != http.StatusFailedDependency) {
+				refused = &StatusError{Code: code, Msg: "refused " + strings.Join(names, ", ")}
+			}
+		}
+	}
+	if refused != nil {
+		return refused
 	}
 	return nil
 }
@@ -322,6 +363,52 @@ func (d *xmlDoc) text(name xml.Name, v string) {
 	}
 }
 
+// prop writes a property element with its value as XML content. Before the
+// content goes into the buffer the encoder is flushed, so the bytes land after
+// the start tag and not ahead of it.
+func (d *xmlDoc) prop(p Prop) {
+	if d.err == nil && !xmlContent(p.Value) {
+		d.err = fmt.Errorf("dav: property %s: value is not XML content", p.Name.Local)
+	}
+	d.token(xml.StartElement{Name: p.Name})
+	if d.err == nil {
+		d.err = d.enc.Flush()
+	}
+	if d.err == nil {
+		d.buf.Write(p.Value)
+	}
+	d.token(xml.EndElement{Name: p.Name})
+}
+
+// xmlContent reports whether v can stand between a start and an end tag:
+// balanced elements and escaped text.
+func xmlContent(v []byte) bool {
+	dec := xml.NewDecoder(io.MultiReader(strings.NewReader("<v>"), bytes.NewReader(v), strings.NewReader("</v>")))
+	depth := 0
+	for {
+		tok, err := dec.Token()
+		if err == io.EOF {
+			return depth == 0
+		}
+		if err != nil {
+			return false
+		}
+		switch tok.(type) {
+		case xml.StartElement:
+			depth++
+		case xml.EndElement:
+			depth--
+		}
+	}
+}
+
+// TextValue escapes s as the text content of a Prop.
+func TextValue(s string) []byte {
+	var b bytes.Buffer
+	_ = xml.EscapeText(&b, []byte(s))
+	return b.Bytes()
+}
+
 // bytes flushes before reading the buffer. `return buf.Bytes(), enc.Flush()`
 // took the slice first and sent Radicale a truncated body (400).
 func (d *xmlDoc) bytes() ([]byte, error) {
@@ -348,7 +435,7 @@ func propPatchBody(set []Prop, remove []xml.Name) ([]byte, error) {
 		d.open("set")
 		d.open("prop")
 		for _, p := range set {
-			d.text(p.Name, string(p.Value))
+			d.prop(p)
 		}
 		d.close("prop")
 		d.close("set")
@@ -357,17 +444,23 @@ func propPatchBody(set []Prop, remove []xml.Name) ([]byte, error) {
 	return d.bytes()
 }
 
-func mkcolBody(props []Prop) ([]byte, error) {
+// mkcolBody is the body of extended MKCOL, or of MKCALENDAR, whose root is
+// CalDAV's mkcalendar; the rest is the same.
+func mkcolBody(method string, props []Prop) ([]byte, error) {
+	root := xml.Name{Space: "DAV:", Local: "mkcol"}
+	if strings.EqualFold(method, "MKCALENDAR") {
+		root = xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "mkcalendar"}
+	}
 	d := newXMLDoc()
-	d.open("mkcol")
+	d.token(xml.StartElement{Name: root})
 	d.open("set")
 	d.open("prop")
 	for _, p := range props {
-		d.text(p.Name, string(p.Value))
+		d.prop(p)
 	}
 	d.close("prop")
 	d.close("set")
-	d.close("mkcol")
+	d.token(xml.EndElement{Name: root})
 	return d.bytes()
 }
 

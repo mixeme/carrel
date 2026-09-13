@@ -176,6 +176,72 @@ func (s *Service) RevealConnectionPassword(viewerID string, dataKey [crypt.KeyLe
 	return password, nil
 }
 
+// AddCollection puts a collection the person has just created on the server
+// into the catalog of its connection (S-12). An entry already at that path —
+// one marked gone — becomes the new one in its place. Nothing is selected, the
+// same as for any collection that joins the catalog (S-6.1). The journal
+// names the connection, not the address.
+func (s *Service) AddCollection(viewerID string, dataKey [crypt.KeyLen]byte, accountID string, col sealed.Collection) error {
+	col.AccountID, col.Gone = accountID, false
+	return s.editCatalog(viewerID, dataKey, "collection.create", accountID, func(blob *sealed.Blob) error {
+		if _, ok := blob.Connection(accountID); !ok {
+			return ErrNotFound
+		}
+		for i := range blob.Collections {
+			if c := &blob.Collections[i]; c.AccountID == accountID && c.Path == col.Path {
+				*c = col
+				return nil
+			}
+		}
+		blob.Collections = append(blob.Collections, col)
+		return nil
+	})
+}
+
+// RenameCollection writes the label the server has accepted (S-12.2): the
+// name and, when one was chosen, the colour. The path never changes here.
+func (s *Service) RenameCollection(viewerID string, dataKey [crypt.KeyLen]byte, accountID, path, name, colour string) error {
+	return s.editCatalog(viewerID, dataKey, "collection.rename", accountID, func(blob *sealed.Blob) error {
+		for i := range blob.Collections {
+			c := &blob.Collections[i]
+			if c.AccountID != accountID || c.Path != path || c.Gone {
+				continue
+			}
+			c.Name = name
+			if colour != "" {
+				c.Colour = colour
+			}
+			return nil
+		}
+		return ErrNotFound
+	})
+}
+
+// editCatalog opens the viewer's blob, applies edit, seals it back and
+// journals what with detail. A failed edit writes nothing.
+func (s *Service) editCatalog(viewerID string, dataKey [crypt.KeyLen]byte, what, detail string, edit func(*sealed.Blob) error) error {
+	now := s.now()
+	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByID(viewerID)
+		if u == nil || u.Disabled {
+			return nil, ErrNotFound
+		}
+		blob, err := sealed.Open(dataKey, u.SealedBlob, u.Login)
+		if err != nil {
+			return nil, fmt.Errorf("user: open blob: %w", err)
+		}
+		if err := edit(&blob); err != nil {
+			return nil, err
+		}
+		sealedBlob, err := sealed.Seal(dataKey, blob, u.Login)
+		if err != nil {
+			return nil, err
+		}
+		u.SealedBlob = sealedBlob
+		return []store.AuditEntry{{When: now, Who: u.Login, What: what, Whom: u.Login, Detail: detail}}, nil
+	})
+}
+
 func pathSet(paths []string) map[string]bool {
 	out := make(map[string]bool, len(paths))
 	for _, p := range paths {

@@ -65,6 +65,10 @@ type Users interface {
 	// RevealConnectionPassword returns one stored password and journals the
 	// release; the caller checks the unlock window (S-10.7).
 	RevealConnectionPassword(viewerID string, dataKey [32]byte, accountID string) (string, error)
+	// AddCollection writes a collection the server has just created into the
+	// catalog; RenameCollection writes the name and colour it accepted (S-12).
+	AddCollection(viewerID string, dataKey [32]byte, accountID string, col sealed.Collection) error
+	RenameCollection(viewerID string, dataKey [32]byte, accountID, path, name, colour string) error
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).

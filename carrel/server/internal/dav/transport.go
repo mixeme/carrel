@@ -33,7 +33,10 @@ type Range struct {
 	Start, End int64 // End < 0 means open-ended.
 }
 
-// Prop is one DAV property for PROPPATCH or MKCOL.
+// Prop is one DAV property for PROPPATCH, MKCOL or MKCALENDAR. Value is the
+// content of the property element and goes out as XML, not as text:
+// `<collection xmlns="DAV:"/>` stays an element. A text value goes through
+// TextValue, so a name with "&" or "<" is escaped once.
 type Prop struct {
 	Name  xml.Name
 	Value []byte

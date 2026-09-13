@@ -1,0 +1,150 @@
+//go:build integration
+
+package integration
+
+import (
+	"context"
+	"encoding/xml"
+	"fmt"
+	"net/url"
+	"os"
+	"strings"
+	"testing"
+	"time"
+
+	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/discover"
+	"carrel.dev/carrel/server/view"
+)
+
+// S-30.2 for S-12.1–12.2: create and rename through the request layer on a
+// live server — the slug, one MKCALENDAR or MKCOL with name, colour and
+// components, a PROPPATCH for the label, and a catalog path that re-discovery
+// recognises as the one the server reports.
+func TestRadicaleCollections(t *testing.T) {
+	runCollections(t, radicaleEndpoint(t), radicaleUser, radicalePass)
+}
+
+func TestBaikalCollections(t *testing.T) {
+	endpoint, user, pass := baikalConfig(t)
+	runCollections(t, endpoint, user, pass)
+}
+
+func liveProps(ctx context.Context, t *testing.T, c *dav.Client, path string, names ...xml.Name) map[string]string {
+	t.Helper()
+	ms, err := c.PropFind(ctx, path, dav.DepthZero, names)
+	if err != nil {
+		t.Fatalf("PROPFIND %s: %v", path, err)
+	}
+	out := map[string]string{}
+	for _, r := range ms.Responses {
+		for n, v := range r.Props {
+			inner := strings.TrimSpace(string(v))
+			// A text property arrives as XML content: "&" is "&amp;".
+			var txt struct {
+				Text string `xml:",chardata"`
+			}
+			if !strings.Contains(inner, "<") && xml.Unmarshal([]byte("<v>"+inner+"</v>"), &txt) == nil {
+				inner = strings.TrimSpace(txt.Text)
+			}
+			out[n.Local] = inner
+		}
+	}
+	return out
+}
+
+func runCollections(t *testing.T, endpoint, user, pass string) {
+	ctx := context.Background()
+	g := testGuard(t)
+	client, err := dav.NewClient(g, endpoint, user, pass, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, trace, err := discover.Run(ctx, g, endpoint, user, pass, "")
+	if err != nil || res.CalendarHome == "" || res.AddressBookHome == "" {
+		t.Fatalf("discovery: %v %+v %+v", err, res, trace)
+	}
+	suffix := fmt.Sprintf("carrel-s12-%d-%d", os.Getpid(), time.Now().Unix()%100000)
+	home := func(h string) string { return strings.TrimSuffix(h, "/") + "/" }
+
+	// Connecting needs one collection on the server; this one is made by hand.
+	seed := home(res.AddressBookHome) + suffix + "-seed/"
+	liveRequest(ctx, t, endpoint, user, pass, "MKCOL", seed, `<?xml version="1.0" encoding="utf-8"?>
+<D:mkcol xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
+  <D:set><D:prop><D:resourcetype><D:collection/><C:addressbook/></D:resourcetype></D:prop></D:set>
+</D:mkcol>`)
+	t.Cleanup(func() { _ = client.Delete(context.Background(), seed, "") })
+
+	app := newLiveApp(t)
+	redirected(t, "connect", app.post("/app/settings/connections", url.Values{
+		"server": {endpoint}, "login": {user}, "password": {pass},
+	}))
+	key, _ := app.sess.DataKey()
+	blob, _ := app.users.Catalog(app.sess.AccountID(), key)
+	conn := blob.Connections[0]
+
+	displayName := xml.Name{Space: "DAV:", Local: "displayname"}
+	colour := xml.Name{Space: "http://apple.com/ns/ical/", Local: "calendar-color"}
+	comps := xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "supported-calendar-component-set"}
+	resourceType := xml.Name{Space: "DAV:", Local: "resourcetype"}
+
+	name := "Поездки & планы " + suffix
+	calPath := home(res.CalendarHome) + "poezdki-plany-" + suffix + "/"
+	loc := redirected(t, "new calendar", app.post("/app/collections/new?kind=event", url.Values{
+		"account": {conn.ID}, "name": {name}, "colour": {"#6b5c73"}, "components": {"VEVENT", "VTODO"},
+	}))
+	t.Cleanup(func() { _ = client.Delete(context.Background(), calPath, "") })
+	if loc != "/app/calendar/"+conn.ID+"/"+url.PathEscape(calPath) {
+		t.Fatalf("new calendar went to %q, want %q", loc, calPath)
+	}
+	got := liveProps(ctx, t, client, calPath, displayName, colour, comps)
+	if got["displayname"] != name || !strings.Contains(strings.ToLower(got["calendar-color"]), "6b5c73") ||
+		!strings.Contains(got["supported-calendar-component-set"], "VEVENT") || !strings.Contains(got["supported-calendar-component-set"], "VTODO") ||
+		strings.Contains(got["supported-calendar-component-set"], "VJOURNAL") {
+		t.Errorf("calendar on the server = %+v", got)
+	}
+	if agenda := liveDecode[view.AgendaPage](t, "agenda", app.get(loc)); len(agenda.Notices) > 0 {
+		t.Errorf("agenda of the new calendar: %+v", agenda.Notices)
+	}
+
+	redirected(t, "rename", app.post("/app/collections/rename?"+url.Values{"a": {conn.ID}, "c": {calPath}}.Encode(),
+		url.Values{"name": {name + " renamed"}, "colour": {"#5c736b"}}))
+	got = liveProps(ctx, t, client, calPath, displayName, colour)
+	if got["displayname"] != name+" renamed" || !strings.Contains(strings.ToLower(got["calendar-color"]), "5c736b") {
+		t.Errorf("after rename = %+v", got)
+	}
+
+	bookPath := home(res.AddressBookHome) + suffix + "-team/"
+	redirected(t, "new address book", app.post("/app/collections/new?kind=contact", url.Values{
+		"account": {conn.ID}, "name": {"Team " + suffix}, "address": {suffix + "-team"},
+	}))
+	t.Cleanup(func() { _ = client.Delete(context.Background(), bookPath, "") })
+	got = liveProps(ctx, t, client, bookPath, displayName, resourceType)
+	if got["displayname"] != "Team "+suffix || !strings.Contains(got["resourcetype"], "addressbook") {
+		t.Errorf("address book on the server = %+v", got)
+	}
+
+	// Radicale keeps both kinds in one home: the book's address is taken for a
+	// calendar too, and the PROPFIND of the home is what says so.
+	if home(res.CalendarHome) == home(res.AddressBookHome) {
+		sheet := liveDecode[view.CollectionNewSheet](t, "taken address", app.post("/app/collections/new?kind=event", url.Values{
+			"account": {conn.ID}, "name": {"Taken"}, "components": {"VEVENT"}, "address": {suffix + "-team"},
+		}))
+		var addrErr view.Text
+		for _, r := range sheet.Form.Sets[0].Rows {
+			if r.Name == "address" {
+				addrErr = r.Error
+			}
+		}
+		if addrErr == "" {
+			t.Errorf("a taken address in a shared home was not refused: %+v", sheet)
+		}
+	}
+
+	page := liveDecode[view.ConnectionsPage](t, "rediscover", app.post("/app/settings/connections", url.Values{"op": {"rediscover"}, "account": {conn.ID}}))
+	for _, n := range page.Notices {
+		if n.Title == "Collections changed on the server" && strings.Contains(string(n.Body), suffix) {
+			t.Errorf("re-discovery offers what Carrel created as new: %s", n.Body)
+		}
+	}
+}

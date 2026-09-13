@@ -254,17 +254,35 @@ func (s *Server) connectionCard(blob sealed.Blob, c sealed.Connection, unlocked 
 			Method: "POST", Enabled: true,
 		}},
 	}
+	// Not hidden in advance and not greyed on read-only rows: the right to
+	// create or rename is not guessed, a refusal is shown when it happens
+	// (S-12.2).
+	if c.CalendarHome != "" || c.AddressBookHome != "" {
+		card.Actions = append(card.Actions, view.Action{
+			ID: "collection.new", Label: "New collection", Icon: "i-plus",
+			Href:   s.postQuery("/app/collections/new", url.Values{"a": {c.ID}}),
+			Method: "GET", Enabled: true,
+		})
+	}
 	for _, col := range blob.CollectionsOf(c.ID) {
 		if col.Gone {
 			continue // named by goneNotice: a row has no state to carry it
 		}
-		card.Collections = append(card.Collections, view.CollectionRow{
+		row := view.CollectionRow{
 			Label:    text(collectionLabel(col)),
 			Path:     text(col.Path),
 			Colour:   catalogColour(col),
 			Kinds:    col.Kinds,
 			ReadOnly: col.ReadOnly,
-		})
+		}
+		if !col.Has(view.KindFile) {
+			row.Menu = []view.MenuItem{{Action: view.Action{
+				ID: "collection.rename", Label: "Rename…",
+				Href:   s.postQuery("/app/collections/rename", url.Values{"a": {c.ID}, "c": {col.Path}}),
+				Method: "GET", Enabled: true,
+			}}}
+		}
+		card.Collections = append(card.Collections, row)
 	}
 	return card
 }

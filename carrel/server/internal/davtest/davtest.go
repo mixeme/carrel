@@ -51,8 +51,14 @@ type Server struct {
 	colours   map[string]string
 	ctags     map[string]int
 	objects   map[string]object
+	refuse    map[string]refusal
 	requests  []string
 	seq       int
+}
+
+type refusal struct {
+	code int
+	body string
 }
 
 type object struct {
@@ -70,6 +76,7 @@ func New(t testing.TB) *Server {
 		colours:   make(map[string]string),
 		ctags:     make(map[string]int),
 		objects:   make(map[string]object),
+		refuse:    make(map[string]refusal),
 	}
 	cal := &caldav.Handler{Backend: calBackend{s}}
 	card := &carddav.Handler{Backend: cardBackend{s}}
@@ -123,6 +130,45 @@ func (s *Server) RemoveCollection(p string) {
 			delete(s.objects, k)
 		}
 	}
+}
+
+// Refuse makes every request with the method answer code and body, the way a
+// server answers an account without the right.
+func (s *Server) Refuse(method string, code int, body string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.refuse[method] = refusal{code: code, body: body}
+}
+
+// Colour returns the calendar-color stored on a collection.
+func (s *Server) Colour(collection string) string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.colours[collectionKey(collection)]
+}
+
+// Calendar returns a calendar as the server holds it.
+func (s *Server) Calendar(p string) (caldav.Calendar, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	c, ok := s.calendars[collectionKey(p)]
+	return c, ok
+}
+
+// AddressBook returns an address book as the server holds it.
+func (s *Server) AddressBook(p string) (carddav.AddressBook, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	b, ok := s.books[collectionKey(p)]
+	return b, ok
+}
+
+func (s *Server) hasCollection(p string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	_, cal := s.calendars[collectionKey(p)]
+	_, book := s.books[collectionKey(p)]
+	return cal || book
 }
 
 // Seed stores a resource as another client would have written it and returns
@@ -190,6 +236,15 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card http.Ha
 			return
 		}
 	}
+	s.mu.Lock()
+	ref, refused := s.refuse[r.Method]
+	s.mu.Unlock()
+	if refused {
+		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+		w.WriteHeader(ref.code)
+		_, _ = io.WriteString(w, ref.body)
+		return
+	}
 	if strings.HasPrefix(r.URL.Path, "/.well-known/") {
 		http.NotFound(w, r)
 		return
@@ -197,6 +252,24 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card http.Ha
 	body, _ := io.ReadAll(r.Body)
 	r.Body = io.NopCloser(bytes.NewReader(body))
 	p := r.URL.Path
+
+	// go-webdav's server knows neither MKCALENDAR nor PROPPATCH on a
+	// collection, and lets MKCOL overwrite one that exists.
+	switch r.Method {
+	case "MKCALENDAR":
+		s.mkcalendar(w, p, body)
+		return
+	case "MKCOL":
+		if s.hasCollection(p) {
+			http.Error(w, "a collection already exists here", http.StatusMethodNotAllowed)
+			return
+		}
+	case "PROPPATCH":
+		if s.hasCollection(p) {
+			s.proppatch(w, p, body)
+			return
+		}
+	}
 
 	if r.Method == "PROPFIND" && (p == CalendarHome || p == AddressBookHome) && bytes.Contains(body, []byte("getctag")) {
 		s.homeProps(w, p)
@@ -279,6 +352,119 @@ func (s *Server) homeProps(w http.ResponseWriter, home string) {
 	_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>`+
 		`<D:multistatus xmlns:D="DAV:" xmlns:CS="http://calendarserver.org/ns/" xmlns:I="http://apple.com/ns/ical/">`+
 		b.String()+`</D:multistatus>`)
+}
+
+type mkcalendarRequest struct {
+	XMLName xml.Name
+	Prop    struct {
+		Name       string `xml:"DAV: displayname"`
+		Colour     string `xml:"http://apple.com/ns/ical/ calendar-color"`
+		Components struct {
+			Comp []struct {
+				Name string `xml:"name,attr"`
+			} `xml:"urn:ietf:params:xml:ns:caldav comp"`
+		} `xml:"urn:ietf:params:xml:ns:caldav supported-calendar-component-set"`
+	} `xml:"DAV: set>prop"`
+}
+
+// mkcalendar creates a calendar directly in CalendarHome with its name,
+// colour and component set (RFC 4791 §5.3.1).
+func (s *Server) mkcalendar(w http.ResponseWriter, p string, body []byte) {
+	key := collectionKey(p)
+	if parent(strings.TrimSuffix(key, "/")) != CalendarHome {
+		http.Error(w, "calendar creation not allowed here", http.StatusForbidden)
+		return
+	}
+	if s.hasCollection(key) {
+		http.Error(w, "a collection already exists here", http.StatusMethodNotAllowed)
+		return
+	}
+	var req mkcalendarRequest
+	if err := xml.Unmarshal(body, &req); err != nil || req.XMLName != (xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "mkcalendar"}) {
+		http.Error(w, "not a mkcalendar body", http.StatusBadRequest)
+		return
+	}
+	var comps []string
+	for _, c := range req.Prop.Components.Comp {
+		comps = append(comps, c.Name)
+	}
+	s.AddCalendar(caldav.Calendar{Path: key, Name: req.Prop.Name, SupportedComponentSet: comps})
+	if c := strings.TrimSpace(req.Prop.Colour); c != "" {
+		s.SetColour(key, c)
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+type propertyUpdate struct {
+	Set []struct {
+		Props []struct {
+			XMLName xml.Name
+			Value   string `xml:",chardata"`
+		} `xml:",any"`
+	} `xml:"DAV: set>prop"`
+}
+
+// proppatch sets displayname and calendar-color on a collection. Anything
+// else is refused, and then nothing is set: PROPPATCH is atomic (RFC 4918
+// §9.2), and the others answer 424.
+func (s *Server) proppatch(w http.ResponseWriter, p string, body []byte) {
+	var pu propertyUpdate
+	if err := xml.Unmarshal(body, &pu); err != nil {
+		http.Error(w, "not a propertyupdate body", http.StatusBadRequest)
+		return
+	}
+	displayName := xml.Name{Space: "DAV:", Local: "displayname"}
+	colour := xml.Name{Space: "http://apple.com/ns/ical/", Local: "calendar-color"}
+	type change struct {
+		name  xml.Name
+		value string
+	}
+	var changes []change
+	refused := false
+	for _, set := range pu.Set {
+		for _, prop := range set.Props {
+			changes = append(changes, change{prop.XMLName, prop.Value})
+			refused = refused || (prop.XMLName != displayName && prop.XMLName != colour)
+		}
+	}
+	key := collectionKey(p)
+	s.mu.Lock()
+	if !refused {
+		for _, ch := range changes {
+			switch ch.name {
+			case displayName:
+				if c, ok := s.calendars[key]; ok {
+					c.Name = ch.value
+					s.calendars[key] = c
+				}
+				if b, ok := s.books[key]; ok {
+					b.Name = ch.value
+					s.books[key] = b
+				}
+			case colour:
+				s.colours[key] = strings.TrimSpace(ch.value)
+			}
+		}
+		s.ctags[key]++
+	}
+	s.mu.Unlock()
+
+	var b strings.Builder
+	for _, ch := range changes {
+		status := "200 OK"
+		switch {
+		case refused && ch.name != displayName && ch.name != colour:
+			status = "403 Forbidden"
+		case refused:
+			status = "424 Failed Dependency"
+		}
+		b.WriteString(`<D:propstat><D:prop><X:` + escape(ch.name.Local) + ` xmlns:X="` + escape(ch.name.Space) + `"/></D:prop>`)
+		b.WriteString(`<D:status>HTTP/1.1 ` + status + `</D:status></D:propstat>`)
+	}
+	w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+	w.WriteHeader(http.StatusMultiStatus)
+	_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?><D:multistatus xmlns:D="DAV:"><D:response><D:href>`+
+		escape(key)+`</D:href>`+b.String()+`</D:response></D:multistatus>`)
 }
 
 func (s *Server) storeLocked(p string, data []byte) string {

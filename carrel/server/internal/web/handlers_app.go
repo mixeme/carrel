@@ -403,22 +403,6 @@ func (s *Server) getAttach(w http.ResponseWriter, r *http.Request) {
 	s.notFound(w, r)
 }
 
-func (s *Server) getCollectionNew(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
-}
-
-func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
-	s.getCollectionNew(w, r)
-}
-
-func (s *Server) getCollectionRename(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
-}
-
-func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
-	s.getCollectionRename(w, r)
-}
-
 func (s *Server) getCollectionMove(w http.ResponseWriter, r *http.Request) {
 	s.getQuickNote(w, r)
 }

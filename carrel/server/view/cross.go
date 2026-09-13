@@ -140,9 +140,10 @@ type MoveSheet struct {
 // берётся из Kind, а состав полей у всех четырёх один и тот же.
 type CollectionNewSheet struct {
 	Kind    Kind         `json:"kind"`
-	Target  TargetPicker `json:"target"` // «на каком сервере»; неотвечающий виден с причиной
-	Note    Text         `json:"note"`   // почему в списке не все подключения
-	Form    Form         `json:"form"`   // имя, цвет, набор компонентов, адрес с подсказкой
+	Target  TargetPicker `json:"target"`  // «на каком сервере»; неотвечающий виден с причиной
+	Note    Text         `json:"note"`    // почему в списке не все подключения
+	Form    Form         `json:"form"`    // имя, цвет, набор компонентов, адрес с подсказкой
+	Failure *Notice      `json:"failure"` // отказ сервера: метод, адрес, код, тело (S-12.2); nil — отказа не было
 	Actions []Action     `json:"actions"`
 }
 
@@ -152,6 +153,7 @@ type CollectionRenameSheet struct {
 	Form    Form     `json:"form"`    // имя и цвет одним листом: оба уходят одним запросом
 	Address Text     `json:"address"` // показан и не правится (S-12.2)
 	Note    Text     `json:"note"`    // «переименование — не перенос»: адрес остаётся прежним
+	Failure *Notice  `json:"failure"` // отказ сервера; форма хранит введённое
 	Actions []Action `json:"actions"`
 }
 

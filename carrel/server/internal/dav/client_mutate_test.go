@@ -189,7 +189,7 @@ func TestPropPatchBodyIsCompleteXML(t *testing.T) {
 
 func TestMkColBodyIsCompleteXML(t *testing.T) {
 	props := []Prop{{Name: xml.Name{Space: "DAV:", Local: "displayname"}, Value: []byte("Book")}}
-	body, err := mkcolBody(props)
+	body, err := mkcolBody("MKCOL", props)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -236,5 +236,80 @@ func TestMkColAgainstFakeServer(t *testing.T) {
 	client := testClient(t, srv.URL)
 	if err := client.MkCol(t.Context(), "/cal/new/"); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// providers-tail.md: Prop.Value went out as text, so resourcetype with
+// <collection/> reached the server escaped. The value is XML content now, and
+// text goes through TextValue.
+func TestPropValueIsXMLContent(t *testing.T) {
+	caldavNS := "urn:ietf:params:xml:ns:caldav"
+	props := []Prop{
+		{Name: xml.Name{Space: "DAV:", Local: "displayname"}, Value: TextValue("Trips & <plans>")},
+		{Name: xml.Name{Space: caldavNS, Local: "supported-calendar-component-set"},
+			Value: []byte(`<comp xmlns="` + caldavNS + `" name="VEVENT"/><comp xmlns="` + caldavNS + `" name="VTODO"/>`)},
+	}
+	body, err := mkcolBody("MKCALENDAR", props)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		XMLName xml.Name `xml:"urn:ietf:params:xml:ns:caldav mkcalendar"`
+		Prop    struct {
+			Name  string `xml:"DAV: displayname"`
+			Comps struct {
+				Comp []struct {
+					Name string `xml:"name,attr"`
+				} `xml:"urn:ietf:params:xml:ns:caldav comp"`
+			} `xml:"urn:ietf:params:xml:ns:caldav supported-calendar-component-set"`
+		} `xml:"DAV: set>prop"`
+	}
+	if err := xml.Unmarshal(body, &doc); err != nil {
+		t.Fatalf("body is not a mkcalendar: %v\n%s", err, body)
+	}
+	if doc.Prop.Name != "Trips & <plans>" {
+		t.Errorf("displayname = %q\n%s", doc.Prop.Name, body)
+	}
+	if c := doc.Prop.Comps.Comp; len(c) != 2 || c[0].Name != "VEVENT" || c[1].Name != "VTODO" {
+		t.Errorf("components = %+v\n%s", c, body)
+	}
+
+	book, err := mkcolBody("MKCOL", []Prop{{Name: xml.Name{Space: "DAV:", Local: "resourcetype"},
+		Value: []byte(`<collection xmlns="DAV:"/><addressbook xmlns="urn:ietf:params:xml:ns:carddav"/>`)}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var mk struct {
+		XMLName xml.Name `xml:"DAV: mkcol"`
+		Type    struct {
+			Collection  *struct{} `xml:"DAV: collection"`
+			AddressBook *struct{} `xml:"urn:ietf:params:xml:ns:carddav addressbook"`
+		} `xml:"DAV: set>prop>resourcetype"`
+	}
+	if err := xml.Unmarshal(book, &mk); err != nil || mk.Type.Collection == nil || mk.Type.AddressBook == nil {
+		t.Errorf("resourcetype lost its elements (%v)\n%s", err, book)
+	}
+
+	if _, err := mkcolBody("MKCOL", []Prop{{Name: xml.Name{Space: "DAV:", Local: "displayname"}, Value: []byte("a < b")}}); err == nil {
+		t.Error("unescaped text went out as XML")
+	}
+}
+
+// A 207 is not success by itself: the property that was refused says so
+// inside it, and the rename did not happen.
+func TestPropPatchReportsRefusedProperty(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMultiStatus)
+		_, _ = io.WriteString(w, `<?xml version="1.0"?><D:multistatus xmlns:D="DAV:" xmlns:I="http://apple.com/ns/ical/"><D:response><D:href>/cal/</D:href>`+
+			`<D:propstat><D:prop><D:displayname/></D:prop><D:status>HTTP/1.1 424 Failed Dependency</D:status></D:propstat>`+
+			`<D:propstat><D:prop><I:calendar-color/></D:prop><D:status>HTTP/1.1 403 Forbidden</D:status></D:propstat>`+
+			`</D:response></D:multistatus>`)
+	}))
+	defer srv.Close()
+
+	client := testClient(t, srv.URL)
+	err := client.PropPatch(t.Context(), "/cal/", []Prop{{Name: xml.Name{Space: "DAV:", Local: "displayname"}, Value: TextValue("New")}}, nil)
+	if !IsStatus(err, http.StatusForbidden) || !strings.Contains(err.Error(), "calendar-color") {
+		t.Fatalf("err = %v, want the refused property's 403", err)
 	}
 }
