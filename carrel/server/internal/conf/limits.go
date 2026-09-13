@@ -19,8 +19,13 @@ const (
 	AnonTokenRatePerIP  = 30  // per minute
 	SessionRateLimit    = 120 // per minute, post-login
 
-	MaxLiveFanouts       = 4
-	FanoutParallelism    = 4
+	MaxLiveFanouts    = 4
+	FanoutParallelism = 4
+	SearchHistoryLen  = 10 // S-15.3
+	// MaxKeptFanouts is how many tasks a session keeps, running or finished:
+	// as many as the history has rows, so a query picked from it can open
+	// the result it names (S-15.3).
+	MaxKeptFanouts       = SearchHistoryLen
 	MinPasswordLen       = 8
 	MinMasterPasswordLen = 16
 )

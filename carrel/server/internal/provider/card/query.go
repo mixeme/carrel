@@ -32,6 +32,30 @@ func (p *Provider) Query(ctx context.Context, collection string) ([]*model.Objec
 	})
 }
 
+// searchProps are the card properties a search looks in: what the list and
+// the card show.
+var searchProps = []string{
+	vcard.FieldFormattedName, vcard.FieldName, vcard.FieldNickname,
+	vcard.FieldEmail, vcard.FieldTelephone, vcard.FieldOrganization,
+}
+
+// Search reads the contacts that hold text in a shown property, with one
+// REPORT: a text-match per property, any of them (RFC 6352 §10.5). The match
+// is the server's; its default collation ignores ASCII case (S-15.2).
+func (p *Provider) Search(ctx context.Context, collection, text string) ([]*model.Object, error) {
+	q := &carddav.AddressBookQuery{
+		DataRequest: carddav.AddressDataRequest{AllProp: true},
+		FilterTest:  carddav.FilterAnyOf,
+	}
+	for _, name := range searchProps {
+		q.PropFilters = append(q.PropFilters, carddav.PropFilter{
+			Name:        name,
+			TextMatches: []carddav.TextMatch{{Text: text}},
+		})
+	}
+	return p.query(ctx, collection, q)
+}
+
 // FindUID reads the contact with this UID; the exact UID is checked here as
 // well, whatever the server made of text-match.
 func (p *Provider) FindUID(ctx context.Context, collection, uid string) (*model.Object, error) {

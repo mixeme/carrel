@@ -13,7 +13,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -32,6 +34,9 @@ const (
 	Principal       = "/alice/"
 	CalendarHome    = "/alice/calendars/"
 	AddressBookHome = "/alice/contacts/"
+	// FileRoot holds plain folders and files, served by go-webdav's own
+	// WebDAV handler over a temporary directory.
+	FileRoot = "/alice/files/"
 )
 
 // Server is one in-memory DAV account.
@@ -52,8 +57,10 @@ type Server struct {
 	ctags     map[string]int
 	objects   map[string]object
 	refuse    map[string]refusal
+	stalls    map[string]chan struct{}
 	requests  []string
 	seq       int
+	dir       string // the file tree behind FileRoot
 }
 
 type refusal struct {
@@ -77,15 +84,70 @@ func New(t testing.TB) *Server {
 		ctags:     make(map[string]int),
 		objects:   make(map[string]object),
 		refuse:    make(map[string]refusal),
+		stalls:    make(map[string]chan struct{}),
+		dir:       t.TempDir(),
+	}
+	if err := os.MkdirAll(s.localPath(FileRoot), 0o755); err != nil {
+		t.Fatal(err)
 	}
 	cal := &caldav.Handler{Backend: calBackend{s}}
 	card := &carddav.Handler{Backend: cardBackend{s}}
+	files := &webdav.Handler{FileSystem: webdav.LocalFileSystem(s.dir)}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s.serve(w, r, cal, card)
+		s.serve(w, r, cal, card, files)
 	}))
 	t.Cleanup(srv.Close)
+	// Cleanups run last first: a stalled request is let go before Close waits
+	// for it.
+	t.Cleanup(func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		for m, ch := range s.stalls {
+			close(ch)
+			delete(s.stalls, m)
+		}
+	})
 	s.URL = srv.URL
 	return s
+}
+
+func (s *Server) localPath(p string) string {
+	return filepath.Join(s.dir, filepath.FromSlash(strings.TrimPrefix(p, "/")))
+}
+
+// SeedFile stores a file under FileRoot, creating its folders.
+func (s *Server) SeedFile(p, body string) {
+	local := s.localPath(p)
+	if err := os.MkdirAll(filepath.Dir(local), 0o755); err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(local, []byte(body), 0o644); err != nil {
+		panic(err)
+	}
+}
+
+// Accept lifts a Refuse.
+func (s *Server) Accept(method string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.refuse, method)
+}
+
+// Stall holds every request with the method until release is called or the
+// client gives up, the way a server that does not answer holds a connection.
+func (s *Server) Stall(method string) (release func()) {
+	ch := make(chan struct{})
+	s.mu.Lock()
+	s.stalls[method] = ch
+	s.mu.Unlock()
+	return func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		if s.stalls[method] == ch {
+			close(ch)
+			delete(s.stalls, method)
+		}
+	}
 }
 
 // AddCalendar adds a calendar under CalendarHome. An empty component set
@@ -223,10 +285,18 @@ func (s *Server) CountRequests(method, prefix string) int {
 	return n
 }
 
-func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card http.Handler) {
+func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files http.Handler) {
 	s.mu.Lock()
 	s.requests = append(s.requests, r.Method+" "+r.URL.Path)
+	hold := s.stalls[r.Method]
 	s.mu.Unlock()
+	if hold != nil {
+		select {
+		case <-hold:
+		case <-r.Context().Done():
+			return
+		}
+	}
 
 	if s.Login != "" {
 		u, p, ok := r.BasicAuth()
@@ -281,6 +351,8 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card http.Ha
 	}
 
 	switch {
+	case strings.HasPrefix(p, FileRoot):
+		files.ServeHTTP(w, r)
 	case strings.HasPrefix(p, CalendarHome):
 		cal.ServeHTTP(w, r)
 	case strings.HasPrefix(p, AddressBookHome):

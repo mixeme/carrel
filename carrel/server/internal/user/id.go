@@ -28,6 +28,12 @@ func NewInviteID() (string, error) {
 	return newEntityID("i-")
 }
 
+// NewTaskID returns a fanout task ID (S-15): t- + 10 Crockford chars from 6
+// random bytes. A task answers in its own session only.
+func NewTaskID() (string, error) {
+	return newEntityID("t-")
+}
+
 // NewAccountID returns a connection ID: a- + 10 Crockford chars from 6 random bytes.
 func NewAccountID() (string, error) {
 	return newEntityID("a-")

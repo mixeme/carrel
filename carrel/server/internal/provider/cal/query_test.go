@@ -124,6 +124,40 @@ func TestQueryNamesUnreadableAndKeepsTheRest(t *testing.T) {
 	}
 }
 
+// S-15.2: CalDAV prop-filters are all-of, so any-of is one REPORT per
+// property, and a record two of them find is returned once.
+func TestSearchIsAnyOfShownProperties(t *testing.T) {
+	p, srv := davProvider(t)
+	event := func(uid, extra string) string {
+		return "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//T//EN\nBEGIN:VEVENT\nUID:" + uid +
+			"\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\n" + extra + "\nEND:VEVENT\nEND:VCALENDAR\n"
+	}
+	srv.Seed(work+"plan.ics", event("plan", "SUMMARY:Launch plan"))
+	srv.Seed(work+"pad.ics", event("pad", "SUMMARY:Visit\nLOCATION:Launch pad"))
+	srv.Seed(work+"day.ics", event("day", "SUMMARY:Launch\nDESCRIPTION:Launch day"))
+	srv.Seed(work+"other.ics", event("other", "SUMMARY:Other\nCOMMENT:Launch"))
+	srv.Seed(work+"todo.ics", "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//T//EN\nBEGIN:VTODO\nUID:t\nDTSTAMP:20260101T000000Z\nSUMMARY:Launch\nEND:VTODO\nEND:VCALENDAR\n")
+
+	objs, bad, err := p.Search(t.Context(), work, "VEVENT", "Launch")
+	if err != nil || len(bad) != 0 {
+		t.Fatalf("err %v, unreadable %v", err, bad)
+	}
+	var uids []string
+	for _, o := range objs {
+		uids = append(uids, UID(o))
+	}
+	seen := map[string]int{}
+	for _, u := range uids {
+		seen[u]++
+	}
+	if seen["plan"] != 1 || seen["pad"] != 1 || seen["day"] != 1 || seen["other"] != 0 || seen["t"] != 0 {
+		t.Fatalf("found %v", uids)
+	}
+	if n := srv.CountRequests("REPORT", work); n != 3 {
+		t.Errorf("REPORT requests = %d, want one per property", n)
+	}
+}
+
 func TestFindUIDIsExact(t *testing.T) {
 	p, srv := davProvider(t)
 	srv.Seed(work+"a.ics", vevent("abc", "20260115T100000Z", "Short"))

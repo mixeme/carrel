@@ -2,6 +2,8 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -32,6 +34,9 @@ type Renderer interface {
 	Page(w http.ResponseWriter, r *http.Request, status int, body any) error
 	Fragment(w http.ResponseWriter, r *http.Request, status int, target string, body any, extra []OOB) error
 	JSON(w http.ResponseWriter, status int, body any) error
+	// Event writes one server-sent event (C-7.4): its name, and the fragment
+	// for the target as the data line.
+	Event(w io.Writer, event, target string, body any) error
 }
 
 // OOB is an out-of-band fragment update allowed by C-7.3.
@@ -60,6 +65,17 @@ func (JSONRenderer) Fragment(w http.ResponseWriter, r *http.Request, status int,
 
 func (JSONRenderer) JSON(w http.ResponseWriter, status int, body any) error {
 	return writeJSON(w, status, body)
+}
+
+// Event puts the fragment envelope on one data line: encoding/json writes no
+// newline inside it.
+func (JSONRenderer) Event(w io.Writer, event, target string, body any) error {
+	data, err := json.Marshal(FragmentPayload{Target: target, Body: body})
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event, data)
+	return err
 }
 
 func writeJSON(w http.ResponseWriter, status int, body any) error {

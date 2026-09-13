@@ -5,6 +5,106 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.47 — 2026-09-13
+
+S-15 in [server.md](../../docs/plan/server.md): search across the ticked
+collections, run as a fanout task of the session. Passes against live Baikal
+(`TestBaikalSearch`).
+
+### For consumers
+
+- **Search** (`/app/search?q=…`, `SearchPage`) answers at once: `poll` lists
+  every source as `waiting` or `querying`, and reading the page again shows
+  what has arrived. The sources are the collections ticked in `Selected`, each
+  asked for every kind it is ticked for; a gone collection is not asked.
+  Nothing ticked: no task, and `poll.summary` says so. An empty `q` searches
+  nothing and writes nothing.
+- **Results** (`results`, `FindRow`) come in kind order — contacts by name,
+  events and tasks by time, notes newest first, files by name — each with
+  `stamp` (`host · collection`), `colour`, `href` (the record route; a file's
+  is `/app/files/{account}/{col}/{path}`), `detail` and `when`. `note` says
+  files are searched by name only whenever a file collection was asked.
+- **Segments and filter** (`bar.segments` with ID `search.kind`, `?kind=`,
+  `?filter=`) cut what has arrived and ask no server. `bar.total` counts all.
+- **Poll bar** (`PollBar`): `taskID`; `summary` ("3 of 3 sources answered ·
+  7 found · 1 refused"); `percent`; `running`; `answeredAt` once it is over.
+  `sources[]` carry `state` (C-8.1), `count` when answered, and `message` with
+  `retry` (`source.retry`, POST) for `error`, `timeout`, `unavailable` and
+  `cancelled`. `actions`: `poll.stop` (POST, while running) and `poll.again`
+  (GET with `again=1`, once over).
+- **Back to a result**: the same `q` in the same session opens its task from
+  memory — no server is asked, `answeredAt` says when it was collected;
+  `again=1` asks anew. A new query stops a running search; what it found stays.
+- **Progress routes.** `GET /app/search/progress/{task}` is SSE: `: ping` at
+  once, `event: poll` with `{"target":"poll","body":PollBar}` on every change,
+  `event: poll-finished` at the end; closing the stream while the task runs
+  cancels it. `…/poll` (fragment) is the fallback; with
+  `CARREL_PROGRESS_MODE=poll` the stream is 404. `POST …/retry?source={id}`
+  asks that source only, `POST …/cancel` stops; both answer the bar as a
+  fragment, or redirect to the result without the fragment header. A task of
+  another session is 404.
+- **History** (`top.search.history`, `SearchHistoryRow`): up to ten, newest
+  first, written when a poll ends. `outcome` is "7 found", "nothing found"
+  (a source answered) or "no source answered"; a repeat updates its row;
+  `href` reopens the result. **Hints** (`top.search.jump`) on the result page:
+  collection names and records of lists this session already loaded, no server
+  asked.
+- **Too many searches**: past four live fanouts nothing starts and the page
+  carries a notice; a retry without a free slot says so in that source's
+  `message`.
+
+### For operators
+
+- `CARREL_PROGRESS_MODE`, `CARREL_PROGRESS_SOURCE_TIMEOUT` and
+  `CARREL_PROGRESS_TOTAL_TIMEOUT` take effect. A proxy in front must not buffer
+  `text/event-stream` (the stream sends `X-Accel-Buffering: no`); otherwise
+  set `CARREL_PROGRESS_MODE=poll`.
+- The DAV server does the matching. On Baikal, lower-case Cyrillic finds
+  contacts but not events, tasks or notes: its CardDAV ignores Unicode case,
+  its CalDAV only ASCII case.
+- A file collection is walked with one PROPFIND a folder, up to
+  `CARREL_FILES_MAX_ENTRIES` entries; past that the source answers with a note.
+  No file body is read.
+
+### Included
+
+- `fanout`: `Query`, `Item`, `Source`, `Task` (`Start`, `Snapshot`,
+  `Changed`, `Retry`, `Cancel`) over a `golang.org/x/sync` v0.23.0 semaphore.
+  Answers are merged in order; a source that ignores its context still ends at
+  the ceiling, and its late answer is dropped.
+- `session`: kept tasks (`KeepTask`, `Task`, `Tasks`), at most
+  `conf.MaxKeptFanouts` (10), cancelled when the session ends;
+  `HistoryEntry.Hits` and `None`; `AddHistory(HistoryEntry)`.
+- `provider`: `card.Search` (one REPORT, any of FN, N, NICKNAME, EMAIL, TEL,
+  ORG), `cal.Search` (a REPORT per property: SUMMARY, LOCATION, DESCRIPTION
+  for events; SUMMARY, DESCRIPTION for tasks and notes), `file.List`
+  (PROPFIND depth 1, for S-17 too).
+- `web`: `search.go`, `Renderer.Event`; `user.NewTaskID` (`t-`).
+- `davtest`: `FileRoot` over go-webdav's WebDAV handler, `SeedFile`, `Accept`,
+  `Stall`.
+- Tests: `TestItemsArriveInPlace`, `TestStatesTellEmptyFromRefusal`,
+  `TestSourceTimeout`, `TestParallelismIsACeiling`,
+  `TestCancelKeepsWhatArrived`, `TestCeilingEndsASourceThatNeverReturns`,
+  `TestRetryAsksOnlyThatSource`, `TestBusyAsksNobody`,
+  `TestNoSourcesEndsAtOnce`, `TestHistoryRepeatUpdatesItsRow`,
+  `TestKeptTasksAreBoundedAndEndWithTheSession`,
+  `TestSearchLooksInShownPropertiesWithOneReport`,
+  `TestSearchIsAnyOfShownProperties`, `TestListReadsOneFolder`,
+  `TestSearchAcrossTickedSources`, `TestSearchRefusalRetriesOneSource`,
+  `TestSearchStopAndCeiling`, `TestSearchStartsOnlyWithTextTicksAndASlot`,
+  `TestSearchProgressStream`; live `TestBaikalSearch`, `TestRadicaleSearch`.
+
+### Not yet included
+
+- Ticks: `POST /app/sources/{kind}` and the rail are S-14. Until then nothing
+  writes `Selected`, and search says nothing is ticked.
+- `TestRadicaleSearch` has not run: Radicale runs in the Linux gates
+  (`scripts/linux-gates.sh`), as `TestRadicaleCollections` still does.
+- Lower-case Cyrillic in calendars on Baikal (above): go-webdav cannot send a
+  collation with text-match; the way out is not chosen yet.
+- Hints while typing: C-5 has no route for them; `jump` is filled on the
+  result page only.
+
 ## v0.0.46 — 2026-09-13
 
 S-12.1–12.2 in [server.md](../../docs/plan/server.md): collections are

@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
+	"strings"
 	"sync"
 	"time"
 
@@ -15,7 +16,9 @@ import (
 //
 // One session serves several requests at once, so everything that changes
 // after Create is behind mu: the deadlines, the drafts, the history, the loss
-// registry, and the live-fanout count. Cache has its own lock.
+// registry, the live-fanout count and the kept tasks. Cache has its own lock.
+// No method calls into a task that locks while mu is held: a task takes mu
+// through AcquireFanout and ReleaseFanout under its own lock.
 type Session struct {
 	id        string
 	accountID string
@@ -32,6 +35,7 @@ type Session struct {
 	history    []HistoryEntry
 	losses     LossRegistry
 	fanout     int
+	tasks      []Task // newest first
 	unlockAt   time.Time
 
 	cache *Cache
@@ -230,17 +234,86 @@ func (s *Session) LiveFanouts() int {
 	return s.fanout
 }
 
-// AddHistory prepends a query to the ten-line history (S-15).
-func (s *Session) AddHistory(query string) {
+// Task is a fanout the session owns (S-15.1). The session does not know what
+// a task asks: it keeps it for the screens that read it, bounds how many it
+// keeps, and cancels them when it ends. fanout.Task satisfies it. Running
+// must not lock: the session asks it under its own lock.
+type Task interface {
+	ID() string
+	Running() bool
+	Cancel()
+}
+
+// KeepTask stores a started task, newest first. Past MaxKeptFanouts the
+// oldest finished task goes, a running one only when no finished one is left;
+// whatever goes is cancelled. An ended session cancels the task at once.
+func (s *Session) KeepTask(t Task) {
+	s.mu.Lock()
+	if s.ended {
+		s.mu.Unlock()
+		t.Cancel()
+		return
+	}
+	s.tasks = append([]Task{t}, s.tasks...)
+	var gone []Task
+	for len(s.tasks) > conf.MaxKeptFanouts {
+		victim := len(s.tasks) - 1
+		for i := len(s.tasks) - 1; i > 0; i-- {
+			if !s.tasks[i].Running() {
+				victim = i
+				break
+			}
+		}
+		gone = append(gone, s.tasks[victim])
+		s.tasks = append(s.tasks[:victim], s.tasks[victim+1:]...)
+	}
+	s.mu.Unlock()
+	for _, g := range gone {
+		g.Cancel()
+	}
+}
+
+// Task returns a kept task of this session. A task ID of another session is
+// not found here.
+func (s *Session) Task(id string) (Task, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, t := range s.tasks {
+		if t.ID() == id {
+			return t, true
+		}
+	}
+	return nil, false
+}
+
+// Tasks returns the kept tasks, newest first.
+func (s *Session) Tasks() []Task {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return append([]Task(nil), s.tasks...)
+}
+
+// AddHistory writes a finished search at the top of the ten-line history
+// (S-15.3). The query is kept as typed without outer spaces; an empty one is
+// not written; a repeat replaces its row instead of adding a second.
+func (s *Session) AddHistory(e HistoryEntry) {
+	e.Query = strings.TrimSpace(e.Query)
+	if e.Query == "" {
+		return
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.ended {
 		return
 	}
-	s.history = append([]HistoryEntry{{Query: query, At: time.Now()}}, s.history...)
-	if len(s.history) > 10 {
-		s.history = s.history[:10]
+	out := make([]HistoryEntry, 0, conf.SearchHistoryLen)
+	out = append(out, e)
+	for _, h := range s.history {
+		if h.Query != e.Query && len(out) < conf.SearchHistoryLen {
+			out = append(out, h)
+		}
 	}
+	s.history = out
 }
 
 // History returns a copy of the query history.
@@ -287,8 +360,13 @@ func (s *Session) end() {
 	s.history = nil
 	s.losses.byServer = nil
 	s.fanout = 0
+	tasks := s.tasks
+	s.tasks = nil
 	s.unlockAt = time.Time{}
 	s.mu.Unlock()
 
+	for _, t := range tasks {
+		t.Cancel()
+	}
 	s.cache.markEnded()
 }

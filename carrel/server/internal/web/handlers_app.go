@@ -28,41 +28,6 @@ func (s *Server) stubShellPage(w http.ResponseWriter, r *http.Request, title str
 	s.writePage(w, r, http.StatusOK, body)
 }
 
-func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.SearchPage{Shell: s.buildShell(sess, "Search")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
-	s.notFound(w, r)
-}
-
-func (s *Server) getSearchProgressPoll(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	bar := view.PollBar{}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetPoll, bar, nil)
-		return
-	}
-	_ = sess
-	s.notFound(w, r)
-}
-
-func (s *Server) postSearchProgressRetry(w http.ResponseWriter, r *http.Request) {
-	s.getSearchProgressPoll(w, r)
-}
-
-func (s *Server) postSearchProgressCancel(w http.ResponseWriter, r *http.Request) {
-	s.getSearchProgressPoll(w, r)
-}
-
 func (s *Server) getQuickNote(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {

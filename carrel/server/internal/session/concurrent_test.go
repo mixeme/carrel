@@ -29,7 +29,7 @@ func TestSessionConcurrentUse(t *testing.T) {
 				s.Cache().GetBody("conn-a", key, "v1")
 				s.Cache().PutETagMap("conn-a", key, []byte("map"))
 				s.Cache().InvalidatePath("conn-a", key)
-				s.AddHistory(key)
+				s.AddHistory(HistoryEntry{Query: key})
 				s.NoteLoss("srv1", key)
 				s.HasLoss("srv1", key)
 				s.SetDraft(DraftPendingPhoto, []byte(key))

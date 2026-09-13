@@ -44,6 +44,7 @@ func TestBaikalRecords(t *testing.T) {
 type liveApp struct {
 	t     *testing.T
 	srv   *web.Server
+	st    *store.Store
 	users *user.Service
 	sess  *session.Session
 }
@@ -81,7 +82,7 @@ func newLiveApp(t *testing.T) *liveApp {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &liveApp{t: t, srv: web.New(cfg, st, mgr, users, web.JSONRenderer{}, "live", "live"), users: users, sess: sess}
+	return &liveApp{t: t, srv: web.New(cfg, st, mgr, users, web.JSONRenderer{}, "live", "live"), st: st, users: users, sess: sess}
 }
 
 func (a *liveApp) get(path string) *httptest.ResponseRecorder {

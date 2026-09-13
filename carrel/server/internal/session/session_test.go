@@ -2,6 +2,7 @@ package session
 
 import (
 	"fmt"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -105,7 +106,7 @@ func TestHistoryKeepsTen(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i := 0; i < 12; i++ {
-		s.AddHistory(fmt.Sprintf("q%d", i))
+		s.AddHistory(HistoryEntry{Query: fmt.Sprintf("q%d", i)})
 	}
 	h := s.History()
 	if len(h) != 10 {
@@ -113,6 +114,86 @@ func TestHistoryKeepsTen(t *testing.T) {
 	}
 	if h[0].Query != "q11" {
 		t.Fatalf("newest first: %q", h[0].Query)
+	}
+}
+
+// S-15.3: the query without outer spaces, no empty rows, and a repeat
+// updates its row instead of adding a second — a query that found nothing
+// included.
+func TestHistoryRepeatUpdatesItsRow(t *testing.T) {
+	mgr := NewManager(testCfg())
+	s, err := mgr.Create("a-1", "alice", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.AddHistory(HistoryEntry{Query: "  ada ", None: true})
+	s.AddHistory(HistoryEntry{Query: "   "})
+	s.AddHistory(HistoryEntry{Query: "bob", Hits: 2})
+	s.AddHistory(HistoryEntry{Query: "ada", Hits: 3})
+	h := s.History()
+	if len(h) != 2 || h[0].Query != "ada" || h[0].Hits != 3 || h[0].None || h[1].Query != "bob" {
+		t.Fatalf("history = %+v", h)
+	}
+}
+
+type fakeTask struct {
+	id        string
+	running   atomic.Bool
+	cancelled atomic.Int32
+}
+
+func (f *fakeTask) ID() string    { return f.id }
+func (f *fakeTask) Running() bool { return f.running.Load() }
+func (f *fakeTask) Cancel() {
+	f.cancelled.Add(1)
+	f.running.Store(false)
+}
+
+// S-15.1: tasks belong to the session, are bounded, and are cancelled with
+// it. The oldest finished task goes before a running one.
+func TestKeptTasksAreBoundedAndEndWithTheSession(t *testing.T) {
+	mgr := NewManager(testCfg())
+	s, err := mgr.Create("a-1", "alice", testDataKey(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var all []*fakeTask
+	for i := 0; i < conf.MaxKeptFanouts; i++ {
+		ft := &fakeTask{id: fmt.Sprintf("t-%d", i)}
+		ft.running.Store(i == 0) // the oldest still runs
+		all = append(all, ft)
+		s.KeepTask(ft)
+	}
+	extra := &fakeTask{id: "t-new"}
+	extra.running.Store(true)
+	s.KeepTask(extra)
+
+	if len(s.Tasks()) != conf.MaxKeptFanouts {
+		t.Fatalf("kept %d", len(s.Tasks()))
+	}
+	if _, ok := s.Task("t-1"); ok || all[1].cancelled.Load() != 1 {
+		t.Error("the oldest finished task should have gone, cancelled")
+	}
+	if _, ok := s.Task("t-0"); !ok || all[0].cancelled.Load() != 0 {
+		t.Error("a running task went while finished ones were left")
+	}
+	if got, _ := s.Task("t-new"); got != extra || s.Tasks()[0] != extra {
+		t.Error("the new task is not kept first")
+	}
+
+	other, _ := mgr.Create("a-1", "alice", testDataKey(t))
+	if _, ok := other.Task("t-new"); ok {
+		t.Error("another session sees this session's task")
+	}
+
+	mgr.End(s.ID())
+	if extra.cancelled.Load() != 1 || all[0].cancelled.Load() != 1 {
+		t.Error("ending the session did not cancel its tasks")
+	}
+	late := &fakeTask{id: "t-late"}
+	s.KeepTask(late)
+	if late.cancelled.Load() != 1 || len(s.Tasks()) != 0 {
+		t.Error("an ended session kept a task")
 	}
 }
 
@@ -182,7 +263,7 @@ func TestEndAllWipesSessions(t *testing.T) {
 		t.Fatal(err)
 	}
 	s.Cache().PutBody("conn-a", "/x", "v1", []byte("data"))
-	s.AddHistory("find me")
+	s.AddHistory(HistoryEntry{Query: "find me"})
 	mgr.EndAll()
 	if _, ok := mgr.Get(s.ID()); ok {
 		t.Fatal("session should be removed")

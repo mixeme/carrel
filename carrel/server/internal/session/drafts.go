@@ -2,10 +2,15 @@ package session
 
 import "time"
 
-// HistoryEntry is one line in the ten-entry query history (S-15).
+// HistoryEntry is one line in the ten-entry query history (S-15.3): the query
+// as typed, how it ended, and when the poll finished.
 type HistoryEntry struct {
 	Query string
-	At    time.Time
+	Hits  int
+	// None: at least one source answered and nothing was found. Zero hits
+	// with None false means no source answered at all.
+	None bool
+	At   time.Time
 }
 
 // DraftSlot names one multi-step edit held between requests.

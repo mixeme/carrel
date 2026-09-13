@@ -49,6 +49,51 @@ func (p *Provider) Query(ctx context.Context, collection, component string, from
 	return p.query(ctx, collection, component, filter)
 }
 
+// searchProps are the properties a search looks in, per main component: what
+// the lists and the records show.
+var searchProps = map[string][]string{
+	ical.CompEvent:   {ical.PropSummary, ical.PropLocation, ical.PropDescription},
+	ical.CompToDo:    {ical.PropSummary, ical.PropDescription},
+	ical.CompJournal: {ical.PropSummary, ical.PropDescription},
+}
+
+// Search reads the records of one component that hold text in a shown
+// property (S-15.2). Prop-filters inside one comp-filter must all match (RFC
+// 4791 §9.7.1), so "any of them" is one REPORT per property; a record found
+// by two of them is kept once. The match is the server's.
+func (p *Provider) Search(ctx context.Context, collection, component, text string) ([]*model.Object, []Unreadable, error) {
+	props, ok := searchProps[component]
+	if !ok {
+		props = []string{ical.PropSummary}
+	}
+	seen := map[string]bool{}
+	var objs []*model.Object
+	var bad []Unreadable
+	for _, prop := range props {
+		filter := caldav.CompFilter{
+			Name:  component,
+			Props: []caldav.PropFilter{{Name: prop, TextMatch: &caldav.TextMatch{Text: text}}},
+		}
+		found, unreadable, err := p.query(ctx, collection, component, filter)
+		if err != nil {
+			return nil, nil, err
+		}
+		for _, o := range found {
+			if !seen[o.Path] {
+				seen[o.Path] = true
+				objs = append(objs, o)
+			}
+		}
+		for _, u := range unreadable {
+			if !seen[u.Path] {
+				seen[u.Path] = true
+				bad = append(bad, u)
+			}
+		}
+	}
+	return objs, bad, nil
+}
+
 // FindUID reads the record with this UID. CalDAV text-match is a substring
 // test, so the exact UID is checked here.
 func (p *Provider) FindUID(ctx context.Context, collection, component, uid string) (*model.Object, error) {

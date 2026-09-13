@@ -31,6 +31,17 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 		if until := sess.UnlockUntil(now); until != nil {
 			sh.Top.Unlocked = ptrWhen(s.timeFor(sess).formatWhen(*until, false, now))
 		}
+		if history := sess.History(); len(history) > 0 {
+			tf := s.timeFor(sess)
+			for _, e := range history {
+				sh.Top.Search.History = append(sh.Top.Search.History, view.SearchHistoryRow{
+					Query:   text(e.Query),
+					Outcome: text(historyOutcome(e)),
+					When:    tf.formatWhen(e.At, true, now),
+					Href:    s.route(searchHref(e.Query)),
+				})
+			}
+		}
 		sh.Top.User = []view.MenuItem{
 			{Action: view.Action{ID: "account.settings", Label: "Account", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}},
 			{Action: view.Action{ID: "logout", Label: "Sign out", Href: s.route("/logout"), Method: "POST", Enabled: true}},

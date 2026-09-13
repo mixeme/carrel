@@ -62,6 +62,30 @@ func TestQueryReadsCardsFromOneReport(t *testing.T) {
 	}
 }
 
+// S-15.2: one REPORT, any shown property. davtest matches case-sensitively;
+// a real server's default collation does not.
+func TestSearchLooksInShownPropertiesWithOneReport(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.Seed(book+"ada.vcf", vcf("ada", "Ada Lovelace"))
+	srv.Seed(book+"fan.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:fan\nFN:Bob\nEMAIL:lovelace-fan@example.com\nEND:VCARD\n")
+	srv.Seed(book+"cyd.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:cyd\nFN:Cyd\nNOTE:Lovelace\nEND:VCARD\n")
+
+	objs, err := p.Search(t.Context(), book, "ovelace")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]bool{}
+	for _, o := range objs {
+		got[UID(o)] = true
+	}
+	if len(objs) != 2 || !got["ada"] || !got["fan"] {
+		t.Fatalf("found %v; a NOTE is not a shown property", got)
+	}
+	if n := srv.CountRequests("REPORT", book); n != 1 {
+		t.Errorf("REPORT requests = %d, want 1", n)
+	}
+}
+
 func TestFindUIDIsExact(t *testing.T) {
 	p, srv := davProvider(t)
 	srv.Seed(book+"a.vcf", vcf("abc", "Short"))

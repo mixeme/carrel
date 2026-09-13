@@ -103,7 +103,7 @@ func TestEndedSessionIsInert(t *testing.T) {
 	if got := s.Draft(DraftPendingPhoto); got != nil {
 		t.Fatal("ended session should not store drafts")
 	}
-	s.AddHistory("ghost")
+	s.AddHistory(HistoryEntry{Query: "ghost"})
 	if len(s.History()) != 0 {
 		t.Fatal("ended session should not store history")
 	}
