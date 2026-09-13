@@ -452,8 +452,14 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
 
 ### Чеклист
 
-- [ ] Каталог коллекций в `sealed.Blob`; POST подключений пишет; обнаружение
-      добирает цвет и `max-resource-size`
+- [x] Каталог коллекций в `sealed.Blob`; POST подключений пишет; обнаружение
+      добирает цвет и `max-resource-size` (`v0.0.42`; права адресных книг
+      go-webdav не читал — берутся тем же PROPFIND дома)
+- [ ] S-6.1: повторное обнаружение на карточке подключения —
+      `CompareCollections` против каталога, разница предложением, применение
+      явным действием, исчезнувшие — `gone`
+- [ ] Пароль подключения на `ConnectionsPage` — только после `UnlockUntil`,
+      строкой журнала (S-10.7)
 - [ ] S-11: `Query` у card/cal; список одной коллекции без веера; карточка
       и правка; conflict; VALARM через `SetAlarms`; RELATED-TO; RecurrenceBlock
       и наложение `RECURRENCE-ID` в `web`

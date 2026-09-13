@@ -5,6 +5,55 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.42 — 2026-09-13
+
+Step 1 of S-11…S-26 in [server.md](../../docs/plan/server.md): the collection
+catalog lives in the sealed blob, and connecting a server writes it.
+
+### For consumers
+
+- **POST `/app/settings/connections` connects a server.** Fields `server`,
+  `login`, `password`, `certFingerprint`. Discovery runs through the outbound
+  guard with the fingerprint. Success redirects to the page (303). Failure
+  answers the page again (200) with an alert notice that names the step
+  discovery stopped at and carries every step in `details.lines`; nothing is
+  saved, and the password is not echoed.
+- **GET `/app/settings/connections` lists connections** in `accounts`: server,
+  login, and per collection its label, address, colour, kinds and read-only
+  flag. The password stays hidden.
+- **`{col}` is the collection address encoded into one segment**
+  (`/dav/personal/` → `%2Fdav%2Fpersonal%2F`), and it must be in the catalog.
+  An address the catalog does not hold answers 404, like a foreign one. Bare
+  names such as `/app/contacts/{account}/personal` no longer pass.
+- Collection colour is the server's `calendar-color` without alpha, else one of
+  eight muted tones derived from the address (C-10).
+
+### Fixed
+
+- Address books came back writable from every server: go-webdav's
+  `FindAddressBooks` never asks for `current-user-privilege-set`. Discovery now
+  reads rights for calendars and address books in the same home PROPFIND that
+  fetches colour and change tag.
+- Discovery ignored the accepted certificate fingerprint (F-13).
+  `discover.Run` takes it and uses it for every request, well-known included.
+
+### Included
+
+- `sealed.Blob`: `Collections` and `Selected`; `Connection` gains
+  `CalendarHome`, `AddressBookHome` and `FileRoot`.
+- `discover`: homes on `Result`; `Collection.Colour`, `MaxResourceSize` and
+  `ChangeTag`; calendar kinds in a fixed order.
+- `user`: `Catalog`; `AddConnection` (journal `connection.add` with the
+  connection ID only, `ConnCount`); `OwnsCollection` and `OwnsRecord` check the
+  catalog.
+- `internal/davtest`: in-memory CalDAV/CardDAV on go-webdav's own server, for
+  tests.
+
+### Not yet included
+
+- Re-discovery offering the difference (S-6.1), and revealing a connection
+  password after the unlock sheet.
+
 ## v0.0.41 — 2026-09-13
 
 Compresses [server.md](../../docs/plan/server.md) from 783 to 655 lines.

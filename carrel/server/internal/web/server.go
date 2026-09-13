@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 )
@@ -47,8 +49,15 @@ type Users interface {
 	// and looks for the connection: {account} is a connection (C-4), never
 	// the user ID.
 	OwnsAccount(viewerID string, dataKey [32]byte, accountParam string) bool
-	OwnsCollection(viewerID, accountParam, col string) bool
-	OwnsRecord(viewerID, accountParam, col, uid string) bool
+	// OwnsCollection looks {col} up in the catalog of the sealed blob: the
+	// collection address, decoded from its one segment (C-4.1).
+	OwnsCollection(viewerID string, dataKey [32]byte, accountParam, col string) bool
+	OwnsRecord(viewerID string, dataKey [32]byte, accountParam, col, uid string) bool
+
+	// Catalog opens the viewer's sealed blob; AddConnection appends a
+	// discovered connection with its collections and returns its ID.
+	Catalog(viewerID string, dataKey [32]byte) (sealed.Blob, bool)
+	AddConnection(viewerID string, dataKey [32]byte, conn sealed.Connection, cols []sealed.Collection) (string, error)
 
 	PublicLinkValid(ctx context.Context, token string) bool
 
@@ -89,6 +98,7 @@ type Server struct {
 	users    Users
 	render   Renderer
 	limit    *Limiter
+	guard    *dav.Guard // every outbound DAV request of this server (S-5.1)
 	version  string
 	commit   string
 	mux      *http.ServeMux
@@ -108,6 +118,7 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 		users:    users,
 		render:   render,
 		limit:    NewLimiter(),
+		guard:    dav.NewGuard(cfg),
 		version:  version,
 		commit:   commit,
 		proxies:  parseProxies(cfg.TrustedProxies),

@@ -10,14 +10,20 @@ type Collection struct {
 	ReadOnly    bool
 	Components  []string
 	ChangeTag   string
+	// Colour is calendar-color as the server sent it; empty when it sent none
+	// (C-10 then derives one from the path).
+	Colour          string
+	MaxResourceSize int64
 }
 
 // Result is a successful discovery outcome.
 type Result struct {
-	BaseURL     string
-	Principal   string
-	Collections []Collection
-	FileOnly    bool
+	BaseURL         string
+	Principal       string
+	CalendarHome    string
+	AddressBookHome string
+	Collections     []Collection
+	FileOnly        bool
 }
 
 // Diff is the proposed change set for re-discovery (S-6.1).

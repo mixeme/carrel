@@ -19,6 +19,7 @@ import (
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/internal/web"
+	"carrel.dev/carrel/server/view"
 )
 
 // harness wires the request layer to the real user.Service: the tests below
@@ -97,11 +98,27 @@ func (h *harness) login(login, password string) *session.Session {
 	return s
 }
 
+// Every seeded connection carries the same two catalog entries: an address
+// book and a file collection. {col} in a route is the encoded address.
+const (
+	seedBook  = "/dav/personal/"
+	seedFiles = "/dav/docs/"
+)
+
+var (
+	seedBookSeg  = url.PathEscape(seedBook)
+	seedFilesSeg = url.PathEscape(seedFiles)
+)
+
 func (h *harness) putConnections(login string, key [32]byte, ids ...string) {
 	h.t.Helper()
 	var b sealed.Blob
 	for _, id := range ids {
 		b.Connections = append(b.Connections, sealed.Connection{ID: id, Server: "https://dav.example.com"})
+		b.Collections = append(b.Collections,
+			sealed.Collection{AccountID: id, Path: seedBook, Name: "Personal", Kinds: []view.Kind{view.KindContact}},
+			sealed.Collection{AccountID: id, Path: seedFiles, Name: "Docs", Kinds: []view.Kind{view.KindFile}},
+		)
 	}
 	blob, err := sealed.Seal(key, b, login)
 	if err != nil {
@@ -344,26 +361,29 @@ func TestOwnershipByConnection(t *testing.T) {
 		path string
 		want int
 	}{
-		{"/app/contacts/a-alice00001/personal", http.StatusOK},
-		{"/app/contacts/a-bob0000001/personal", http.StatusNotFound},
-		{"/app/contacts/" + aliceID + "/personal", http.StatusNotFound},
-		{"/app/contacts/a-nowhere000/personal", http.StatusNotFound},
-		{"/app/files/a-alice00001/docs/", http.StatusOK},
-		{"/app/files/a-bob0000001/docs/", http.StatusNotFound},
-		{"/app/contacts/a-alice00001/personal/uid-1/conflict", http.StatusOK},
-		{"/app/contacts/a-bob0000001/personal/uid-1/conflict", http.StatusNotFound},
+		{"/app/contacts/a-alice00001/" + seedBookSeg, http.StatusOK},
+		{"/app/contacts/a-bob0000001/" + seedBookSeg, http.StatusNotFound},
+		{"/app/contacts/" + aliceID + "/" + seedBookSeg, http.StatusNotFound},
+		{"/app/contacts/a-nowhere000/" + seedBookSeg, http.StatusNotFound},
+		// Own connection, address the catalog does not hold: same as foreign.
+		{"/app/contacts/a-alice00001/" + url.PathEscape("/dav/other/"), http.StatusNotFound},
+		{"/app/contacts/a-alice00001/personal", http.StatusNotFound},
+		{"/app/files/a-alice00001/" + seedFilesSeg + "/", http.StatusOK},
+		{"/app/files/a-bob0000001/" + seedFilesSeg + "/", http.StatusNotFound},
+		{"/app/contacts/a-alice00001/" + seedBookSeg + "/uid-1/conflict", http.StatusOK},
+		{"/app/contacts/a-bob0000001/" + seedBookSeg + "/uid-1/conflict", http.StatusNotFound},
 	}
 	for _, c := range cases {
 		if rec := h.do(get(c.path, alice)); rec.Code != c.want {
 			t.Errorf("%s: status = %d, want %d", c.path, rec.Code, c.want)
 		}
 	}
-	if rec := h.do(get("/app/contacts/a-bob0000001/personal", bob)); rec.Code != http.StatusOK {
+	if rec := h.do(get("/app/contacts/a-bob0000001/"+seedBookSeg, bob)); rec.Code != http.StatusOK {
 		t.Errorf("bob on his own connection: status = %d", rec.Code)
 	}
 	// ".." never reaches a listing: the mux redirects to the cleaned path
 	// and rejectPathTraversal stands behind it.
-	if rec := h.do(get("/app/files/a-alice00001/docs/../etc", alice)); rec.Code == http.StatusOK {
+	if rec := h.do(get("/app/files/a-alice00001/"+seedFilesSeg+"/../etc", alice)); rec.Code == http.StatusOK {
 		t.Errorf("path traversal answered 200")
 	}
 }

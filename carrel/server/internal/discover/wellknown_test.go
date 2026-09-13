@@ -50,7 +50,7 @@ func TestWellKnownHTMLWithoutPrincipalStaysOnEnteredURL(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	entered := srv.URL + "/test/"
-	res, trace, err := Run(t.Context(), testGuard(t), entered, "", "")
+	res, trace, err := Run(t.Context(), testGuard(t), entered, "", "", "")
 	if err != nil {
 		t.Fatalf("Run: %v", err)
 	}
@@ -79,6 +79,7 @@ func TestAcceptWellKnownTargetRejectsHTTPDowngrade(t *testing.T) {
 		testGuard(t),
 		"https://example.test/app/",
 		srv.URL+"/dav/",
+		"",
 		"",
 		"",
 	)
@@ -110,7 +111,7 @@ func TestWellKnownAcceptsValidRedirect(t *testing.T) {
 	t.Cleanup(srv.Close)
 
 	want := srv.URL + "/dav/"
-	res, trace, err := Run(t.Context(), testGuard(t), srv.URL+"/nested/", "", "")
+	res, trace, err := Run(t.Context(), testGuard(t), srv.URL+"/nested/", "", "", "")
 	if err != nil {
 		t.Fatalf("Run: %v", err)
 	}

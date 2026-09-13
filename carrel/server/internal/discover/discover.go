@@ -2,6 +2,7 @@ package discover
 
 import (
 	"context"
+	"encoding/xml"
 	"fmt"
 	"net/url"
 	"strings"
@@ -19,10 +20,22 @@ const (
 	stepPrincipal   = "principal"
 	stepHomeSet     = "home-set"
 	stepCollections = "collections"
+	stepProperties  = "properties"
+)
+
+// Properties go-webdav does not read: colour, the change tag, and — for address
+// books, whose FindAddressBooks never asks — the current user's rights (S-6).
+var (
+	propCalendarColor = xml.Name{Space: "http://apple.com/ns/ical/", Local: "calendar-color"}
+	propGetCTag       = xml.Name{Space: "http://calendarserver.org/ns/", Local: "getctag"}
+	propSyncToken     = xml.Name{Space: "DAV:", Local: "sync-token"}
+	propPrivileges    = xml.Name{Space: "DAV:", Local: "current-user-privilege-set"}
 )
 
 // Run discovers collections at endpoint (S-6). Trace records every step.
-func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string) (*Result, *view.DiagnosticTrace, error) {
+// certPin is the accepted leaf fingerprint of the connection (F-13), empty for
+// standard verification only; it applies to every request of the run.
+func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPin string) (*Result, *view.DiagnosticTrace, error) {
 	trace := &view.DiagnosticTrace{}
 	var steps []view.TraceStep
 
@@ -38,7 +51,7 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string)
 		})
 	}
 
-	httpClient := g.HTTPClient()
+	httpClient := g.HTTPClientWithCertPin(certPin)
 	entered := strings.TrimRight(endpoint, "/") + "/"
 	var wellKnownTarget string
 
@@ -48,7 +61,7 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string)
 			add(stepWellKnown, detail, false)
 			continue
 		}
-		ok, note := acceptWellKnownTarget(ctx, g, entered, candidate, username, password)
+		ok, note := acceptWellKnownTarget(ctx, g, entered, candidate, username, password, certPin)
 		if ok {
 			add(stepWellKnown, detail, true)
 			wellKnownTarget = candidate
@@ -62,7 +75,7 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string)
 		endpoint = wellKnownTarget
 	}
 
-	client, err := dav.NewClient(g, endpoint, username, password, "")
+	client, err := dav.NewClient(g, endpoint, username, password, certPin)
 	if err != nil {
 		trace.Steps = steps
 		return nil, trace, err
@@ -87,19 +100,23 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string)
 	}
 	add(stepPrincipal, principal, true)
 
+	res := &Result{BaseURL: endpoint, Principal: principal}
 	var all []Collection
 	calHome, err := client.CalDAV().FindCalendarHomeSet(ctx, principal)
 	if err != nil {
 		add(stepHomeSet, "calendar: "+formatErr(err), false)
 	} else {
 		add(stepHomeSet, "calendar: "+calHome, true)
+		res.CalendarHome = calHome
 		cals, err := client.CalDAV().FindCalendars(ctx, calHome)
 		if err != nil {
 			add(stepCollections, "calendar: "+formatErr(err), false)
 		} else {
+			var found []Collection
 			for _, cal := range cals {
-				all = append(all, calendarToCollection(cal))
+				found = append(found, calendarToCollection(cal))
 			}
+			all = append(all, withHomeProps(ctx, client, calHome, "calendar", found, add)...)
 		}
 	}
 
@@ -108,13 +125,16 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string)
 		add(stepHomeSet, "address book: "+formatErr(err), false)
 	} else {
 		add(stepHomeSet, "address book: "+cardHome, true)
+		res.AddressBookHome = cardHome
 		books, err := client.CardDAV().FindAddressBooks(ctx, cardHome)
 		if err != nil {
 			add(stepCollections, "address book: "+formatErr(err), false)
 		} else {
+			var found []Collection
 			for _, ab := range books {
-				all = append(all, addressBookToCollection(ab))
+				found = append(found, addressBookToCollection(ab))
 			}
+			all = append(all, withHomeProps(ctx, client, cardHome, "address book", found, add)...)
 		}
 	}
 
@@ -123,11 +143,82 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password string)
 	// OK means the run reached collections, not merely that it did not crash:
 	// a principal whose home-sets both failed is a bad check on the screen.
 	trace.OK = len(all) > 0
-	return &Result{
-		BaseURL:     endpoint,
-		Principal:   principal,
-		Collections: all,
-	}, trace, nil
+	res.Collections = all
+	return res, trace, nil
+}
+
+// withHomeProps reads colour and change tag for every collection of one home
+// in a single depth-1 PROPFIND. A refusal leaves the collections as found:
+// C-10 derives a colour from the path, and a missing tag only means the next
+// read cannot be skipped. The refusal is still written on the trace.
+func withHomeProps(ctx context.Context, client *dav.Client, home, label string, cols []Collection, add func(string, string, bool)) []Collection {
+	if len(cols) == 0 {
+		return cols
+	}
+	ms, err := client.PropFind(ctx, home, dav.DepthOne, []xml.Name{propCalendarColor, propGetCTag, propSyncToken, propPrivileges})
+	if err != nil {
+		add(stepProperties, label+": "+formatErr(err), false)
+		return cols
+	}
+	byPath := make(map[string]dav.Response, len(ms.Responses))
+	for _, r := range ms.Responses {
+		byPath[hrefKey(r.Href)] = r
+	}
+	var coloured int
+	for i := range cols {
+		r, ok := byPath[hrefKey(cols[i].Path)]
+		if !ok {
+			continue
+		}
+		if c := strings.TrimSpace(string(r.Props[propCalendarColor])); c != "" {
+			cols[i].Colour = c
+			coloured++
+		}
+		tag := strings.TrimSpace(string(r.Props[propGetCTag]))
+		if tag == "" {
+			tag = strings.TrimSpace(string(r.Props[propSyncToken]))
+		}
+		cols[i].ChangeTag = tag
+		if canWrite, known := writable(r.Props[propPrivileges]); known {
+			cols[i].ReadOnly = !canWrite
+		}
+	}
+	add(stepProperties, fmt.Sprintf("%s: %d of %d with colour", label, coloured, len(cols)), true)
+	return cols
+}
+
+// writable reads a current-user-privilege-set. Known is false when the server
+// did not send one: rights are then left as go-webdav found them, not guessed.
+func writable(inner []byte) (canWrite, known bool) {
+	if len(strings.TrimSpace(string(inner))) == 0 {
+		return false, false
+	}
+	// The inner XML keeps prefixes declared on the root; the decoder is
+	// lenient about them, and only local names matter here.
+	dec := xml.NewDecoder(strings.NewReader("<set>" + string(inner) + "</set>"))
+	dec.Strict = false
+	for {
+		tok, err := dec.Token()
+		if err != nil {
+			return canWrite, true
+		}
+		if el, ok := tok.(xml.StartElement); ok {
+			switch el.Name.Local {
+			case "write", "write-content", "bind", "all":
+				canWrite = true
+			}
+		}
+	}
+}
+
+// hrefKey reduces an href to a comparable path: servers answer with absolute
+// URLs or paths, percent-encoded or not, with or without the trailing slash.
+func hrefKey(href string) string {
+	p := href
+	if u, err := url.Parse(href); err == nil {
+		p = u.Path
+	}
+	return strings.TrimSuffix(p, "/")
 }
 
 func fileCollections(ctx context.Context, client *dav.Client) ([]Collection, error) {
@@ -159,11 +250,12 @@ func fileCollections(ctx context.Context, client *dav.Client) ([]Collection, err
 func calendarToCollection(cal caldav.Calendar) Collection {
 	kinds := calendarKinds(cal.SupportedComponentSet)
 	return Collection{
-		Path:        cal.Path,
-		DisplayName: cal.Name,
-		Kinds:       kinds,
-		ReadOnly:    cal.ReadOnly,
-		Components:  append([]string(nil), cal.SupportedComponentSet...),
+		Path:            cal.Path,
+		DisplayName:     cal.Name,
+		Kinds:           kinds,
+		ReadOnly:        cal.ReadOnly,
+		Components:      append([]string(nil), cal.SupportedComponentSet...),
+		MaxResourceSize: cal.MaxResourceSize,
 	}
 }
 
@@ -189,34 +281,39 @@ func CompareCollections(found, stored []Collection) Diff {
 	return d
 }
 
+// calendarKinds keeps the order event, task, note so the catalog does not
+// shuffle between runs.
 func calendarKinds(components []string) []view.Kind {
-	seen := make(map[view.Kind]struct{})
+	seen := make(map[view.Kind]bool)
 	for _, c := range components {
 		switch strings.ToUpper(c) {
 		case "VEVENT":
-			seen[view.KindEvent] = struct{}{}
+			seen[view.KindEvent] = true
 		case "VTODO":
-			seen[view.KindTask] = struct{}{}
+			seen[view.KindTask] = true
 		case "VJOURNAL":
-			seen[view.KindNote] = struct{}{}
+			seen[view.KindNote] = true
 		}
 	}
 	if len(seen) == 0 {
 		return []view.Kind{view.KindEvent, view.KindTask, view.KindNote}
 	}
-	out := make([]view.Kind, 0, len(seen))
-	for k := range seen {
-		out = append(out, k)
+	var out []view.Kind
+	for _, k := range []view.Kind{view.KindEvent, view.KindTask, view.KindNote} {
+		if seen[k] {
+			out = append(out, k)
+		}
 	}
 	return out
 }
 
 func addressBookToCollection(ab carddav.AddressBook) Collection {
 	return Collection{
-		Path:        ab.Path,
-		DisplayName: ab.Name,
-		Kinds:       []view.Kind{view.KindContact},
-		ReadOnly:    ab.ReadOnly,
+		Path:            ab.Path,
+		DisplayName:     ab.Name,
+		Kinds:           []view.Kind{view.KindContact},
+		ReadOnly:        ab.ReadOnly,
+		MaxResourceSize: ab.MaxResourceSize,
 	}
 }
 
@@ -238,7 +335,7 @@ func formatErr(err error) string {
 // acceptWellKnownTarget gates a well-known redirect before discovery switches
 // to the candidate. HTTPS→HTTP is refused here and again in Guard.CheckRedirect
 // so credentials are not sent to a downgraded scheme (S-6).
-func acceptWellKnownTarget(ctx context.Context, g *dav.Guard, entered, candidate, username, password string) (bool, string) {
+func acceptWellKnownTarget(ctx context.Context, g *dav.Guard, entered, candidate, username, password, certPin string) (bool, string) {
 	enteredURL, err := url.Parse(entered)
 	if err != nil {
 		return false, formatErr(err)
@@ -250,7 +347,7 @@ func acceptWellKnownTarget(ctx context.Context, g *dav.Guard, entered, candidate
 	if strings.EqualFold(enteredURL.Scheme, "https") && strings.EqualFold(candidateURL.Scheme, "http") {
 		return false, "redirect downgrades HTTPS to HTTP"
 	}
-	client, err := dav.NewClient(g, candidate, username, password, "")
+	client, err := dav.NewClient(g, candidate, username, password, certPin)
 	if err != nil {
 		return false, formatErr(err)
 	}

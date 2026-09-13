@@ -37,18 +37,20 @@ func (s *Server) requireAdmin(w http.ResponseWriter, r *http.Request) (*session.
 // checkOwnership returns false and writes 404 when the viewer does not own the
 // resource. Foreign and missing are indistinguishable (S-9.5).
 func (s *Server) checkOwnership(w http.ResponseWriter, r *http.Request, sess *session.Session, account, col, uid string) bool {
-	if account != "" {
-		key, live := sess.DataKey()
-		if !live || !s.users.OwnsAccount(sess.AccountID(), key, account) {
-			s.notFound(w, r)
-			return false
-		}
-	}
-	if col != "" && !s.users.OwnsCollection(sess.AccountID(), account, col) {
+	key, live := sess.DataKey()
+	if !live {
 		s.notFound(w, r)
 		return false
 	}
-	if uid != "" && !s.users.OwnsRecord(sess.AccountID(), account, col, uid) {
+	if account != "" && !s.users.OwnsAccount(sess.AccountID(), key, account) {
+		s.notFound(w, r)
+		return false
+	}
+	if col != "" && !s.users.OwnsCollection(sess.AccountID(), key, account, col) {
+		s.notFound(w, r)
+		return false
+	}
+	if uid != "" && !s.users.OwnsRecord(sess.AccountID(), key, account, col, uid) {
 		s.notFound(w, r)
 		return false
 	}

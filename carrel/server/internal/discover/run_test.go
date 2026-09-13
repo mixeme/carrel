@@ -83,7 +83,7 @@ func runAgainst(t *testing.T, f fakeDAV) (*Result, *view.DiagnosticTrace, error)
 		DAVMaxRedirects:     5,
 		DAVSSRFAllowlist:    "127.0.0.1",
 	}
-	return Run(t.Context(), dav.NewGuard(cfg), srv.URL, "", "")
+	return Run(t.Context(), dav.NewGuard(cfg), srv.URL, "", "", "")
 }
 
 // S-6: a server with no principal is a file collection, not a refusal. The

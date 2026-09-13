@@ -122,7 +122,7 @@ func TestRadicaleDiscoveryFindsBothKinds(t *testing.T) {
 	endpoint := radicaleEndpoint(t)
 	resetRadicale(t, endpoint)
 
-	result, trace, err := discover.Run(context.Background(), testGuard(t), endpoint, radicaleUser, radicalePass)
+	result, trace, err := discover.Run(context.Background(), testGuard(t), endpoint, radicaleUser, radicalePass, "")
 	if err != nil {
 		t.Fatal(err)
 	}

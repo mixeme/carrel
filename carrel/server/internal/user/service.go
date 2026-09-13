@@ -104,18 +104,6 @@ func (s *Service) OwnsAccount(viewerID string, dataKey [crypt.KeyLen]byte, accou
 	return false
 }
 
-// OwnsCollection checks the shape of {col}: one path segment (C-4.1).
-// Whether the collection exists under the connection is the DAV server's
-// answer, and "missing" and "foreign" look the same either way (S-9.5).
-func (s *Service) OwnsCollection(viewerID, accountParam, col string) bool {
-	return col != "" && !strings.Contains(col, "/")
-}
-
-// OwnsRecord checks the shape of {uid} under an owned collection.
-func (s *Service) OwnsRecord(viewerID, accountParam, col, uid string) bool {
-	return s.OwnsCollection(viewerID, accountParam, col) && uid != ""
-}
-
 // Unlock verifies the password of the session's own account for the S-10.7
 // confirmation sheet and journals the unlock. It never returns key material:
 // the session already holds the data key.

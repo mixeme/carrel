@@ -503,28 +503,6 @@ func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	s.getSettingsAccount(w, r)
 }
 
-func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.ConnectionsPage{
-		Shell:    s.buildShell(sess, "Connections"),
-		Accounts: nil,
-		Add: s.plainForm("/app/settings/connections", "POST",
-			csrfField(sess),
-			view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(r.FormValue("server"))},
-			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText},
-			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
-			view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint (SHA-256)", Kind: view.InputText, Value: text(r.FormValue("certFingerprint"))},
-		),
-	}
-	for _, warn := range connectionWarnings(r.FormValue("server"), r.FormValue("certFingerprint")) {
-		page.Shell.Notices = append(page.Shell.Notices, warn)
-	}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
 func connectionWarnings(server, certFingerprint string) []view.Notice {
 	if server == "" {
 		return nil
@@ -549,10 +527,6 @@ func connectionWarnings(server, certFingerprint string) []view.Notice {
 		}
 	}
 	return out
-}
-
-func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request) {
-	s.getSettingsConnections(w, r)
 }
 
 func (s *Server) postSettingsConnectionsTest(w http.ResponseWriter, r *http.Request) {
