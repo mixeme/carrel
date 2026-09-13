@@ -580,12 +580,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 	switch c.spec.kind {
 	case view.KindContact:
 		page := view.ContactEditPage{Shell: sh, UID: st.uid, Form: form, Loss: st.loss, ReadOnly: c.col.ReadOnly}
-		page.Photo = view.PhotoBlock{Initials: text(initials(first(st.values["fn"])))}
-		if st.obj != nil {
-			if _, external := card.PhotoURI(st.obj); external {
-				page.Photo.Note = "External photo link; editing is not available."
-			}
-		}
+		page.Photo = s.photoBlock(c, st)
 		return page
 	case view.KindEvent:
 		page := view.EventEditPage{Shell: sh, UID: st.uid, Form: form, Reminders: reminderRows(st.alarms, tf), Loss: st.loss}
@@ -838,7 +833,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
-	s.finishWrite(w, r, c, uid, sent)
+	s.finishWrite(w, r, c, uid, sent, c.recordPath(uid))
 }
 
 func changedValues(fields []editField, base, want formValues) formValues {
@@ -861,25 +856,26 @@ func unixForm(v string) time.Time {
 
 // finishWrite re-reads what was written and compares (S-7.1). A loss is a
 // notice on the edit page, said once per server and property; no loss is a
-// redirect to the record. The loaded list takes the record as re-read, or as
-// sent with no known version when the re-read failed.
-func (s *Server) finishWrite(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, sent *model.Object) {
+// redirect to done: the record, or its edit page after a photo. The loaded
+// list takes the record as re-read, or as sent with no known version when the
+// re-read failed.
+func (s *Server) finishWrite(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, sent *model.Object, done string) {
 	got, err := c.find(r.Context(), uid)
 	if err != nil {
 		sent.ETag = ""
 		c.noteWrite(sent.Path, sent)
-		s.redirect(w, r, c.recordPath(uid))
+		s.redirect(w, r, done)
 		return
 	}
 	c.noteWrite(got.Path, got)
 	loss := model.CompareAfterPut(c.conn.ID, sent, got, c.sess.Losses())
 	if loss == nil {
-		s.redirect(w, r, c.recordPath(uid))
+		s.redirect(w, r, done)
 		return
 	}
 	vals, alarms, err := s.currentValues(c, got)
 	if err != nil {
-		s.redirect(w, r, c.recordPath(uid))
+		s.redirect(w, r, done)
 		return
 	}
 	s.rememberBody(c, got)
@@ -999,7 +995,7 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
-	s.finishWrite(w, r, c, uid, sent)
+	s.finishWrite(w, r, c, uid, sent, c.recordPath(uid))
 }
 
 // postKindDelete deletes with If-Match of the version the page showed. A

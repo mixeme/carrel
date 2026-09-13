@@ -118,6 +118,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	}
 	name := contactName(obj)
 	page.Shell.Title, page.Name, page.Avatar = text(name), text(name), avatarFor(uid, name)
+	page.Avatar.Href, page.PhotoHref = s.cardPhoto(c, uid, obj)
 	page.Print = s.recordPrint(c, page.Name)
 	props := obj.Props()
 	for _, f := range contactFields {
@@ -134,8 +135,8 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	}
 	page.Tags = s.recordTags(c, obj)
 	page.Foreign = card.Foreign(obj)
-	if _, external := card.PhotoURI(obj); external {
-		page.PhotoNote = "External photo link; editing is not available."
+	if photoOf(obj) == linkedPhoto {
+		page.PhotoNote = externalPhotoNote
 	}
 	page.Actions = s.recordActions(c, uid, obj.ETag)
 	return page

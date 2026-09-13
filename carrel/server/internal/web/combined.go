@@ -268,7 +268,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	switch spec.kind {
 	case view.KindContact:
 		page := view.ContactsListPage{Shell: st.shell, Poll: st.poll}
-		page.Groups = s.contactGroups(shown, spec.segment, true)
+		page.Groups = s.contactGroups(sess, shown, spec.segment, true)
 		total := len(st.items)
 		page.Bar = view.ListBar{Loaded: len(shown), Total: &total, Actions: actions}
 		page.Print = header(counted(len(shown), "card"))

@@ -475,7 +475,7 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 	}
 	items := c.listed(objs)
 	shown := filter.keep(view.KindContact, items)
-	page.Groups = s.contactGroups(shown, c.spec.segment, false)
+	page.Groups = s.contactGroups(c.sess, shown, c.spec.segment, false)
 	page.Rail.Tags = filter.rail(view.KindContact, items)
 	c.putIndex(indexOf(view.KindContact, items))
 	total := len(objs)
@@ -486,8 +486,9 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 
 // contactGroups sorts contacts by name under letter rubrics; "#" gathers
 // everything that does not start with a letter, last. mark puts the origin on
-// every row.
-func (s *Server) contactGroups(items []listed, segment string, mark bool) []view.ContactGroup {
+// every row. A row's avatar is its photo's thumbnail when there is one to show.
+func (s *Server) contactGroups(sess *session.Session, items []listed, segment string, mark bool) []view.ContactGroup {
+	avatars := s.listAvatars(sess, items)
 	names := make([]string, len(items))
 	order := make([]int, len(items))
 	for i, it := range items {
@@ -521,6 +522,7 @@ func (s *Server) contactGroups(items []listed, segment string, mark bool) []view
 			Org:    text(structured(firstValue(it.obj, "ORG"))),
 			State:  view.RecordOK,
 		}
+		row.Avatar.Href = avatars[i]
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
 		}

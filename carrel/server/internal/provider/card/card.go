@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/emersion/go-vcard"
 
@@ -87,7 +89,50 @@ func Encode(w io.Writer, obj *model.Object) error {
 	if card.Get(vcard.FieldVersion) == nil {
 		card.SetValue(vcard.FieldVersion, "4.0")
 	}
-	return vcard.NewEncoder(w).Encode(card)
+	var buf bytes.Buffer
+	if err := vcard.NewEncoder(&buf).Encode(card); err != nil {
+		return err
+	}
+	_, err := w.Write(unescapeDataURIs(buf.Bytes()))
+	return err
+}
+
+// unescapeDataURIs gives back the comma of a data: URI. go-vcard escapes
+// every comma of every value; the comma of a data: URI belongs to the URI
+// (RFC 2397), and a client that reads a URI as it stands finds no data after
+// "base64\". Only the properties whose value is a URI to binary content:
+// PHOTO, LOGO, SOUND and KEY. Another client's photo would otherwise break on
+// any edit of the card, not only on a photo of Carrel's.
+func unescapeDataURIs(doc []byte) []byte {
+	lines := bytes.Split(doc, []byte("\r\n"))
+	for i, line := range lines {
+		colon := bytes.IndexByte(line, ':')
+		if colon < 0 {
+			continue
+		}
+		name := line[:colon]
+		if semi := bytes.IndexByte(name, ';'); semi >= 0 {
+			name = name[:semi]
+		}
+		if dot := bytes.LastIndexByte(name, '.'); dot >= 0 {
+			name = name[dot+1:]
+		}
+		switch strings.ToUpper(string(name)) {
+		case "PHOTO", "LOGO", "SOUND", "KEY":
+		default:
+			continue
+		}
+		value := line[colon+1:]
+		if !isDataURI(string(value)) {
+			continue
+		}
+		if j := bytes.Index(value, []byte(`\,`)); j >= 0 {
+			fixed := append([]byte{}, line[:colon+1+j]...)
+			fixed = append(fixed, ',')
+			lines[i] = append(fixed, value[j+2:]...)
+		}
+	}
+	return bytes.Join(lines, []byte("\r\n"))
 }
 
 // Foreign returns unknown properties for ContactPage.Foreign (C-6).
@@ -118,48 +163,148 @@ func Foreign(obj *model.Object) []view.Field {
 	return out
 }
 
-// PhotoURI reports an external PHOTO; such URLs are never fetched (SSRF).
+// A PHOTO either holds its image or points at one. A data: URI and a value
+// with ENCODING=b hold it; any other URI points outside the card, with or
+// without VALUE=uri (vCard 4.0 writes none); a bare value is the base64 of
+// vCard 2.1 and 3.0. Only the first PHOTO counts.
+
+// PhotoURI reports a PHOTO that points outside the card. It is never fetched
+// here (SSRF): internal/photo fetches it, through the guard.
 func PhotoURI(obj *model.Object) (string, bool) {
-	for _, v := range obj.Props()["PHOTO"] {
-		if strings.EqualFold(v.Params["VALUE"], "uri") {
-			return v.Text, true
-		}
+	props := obj.Props()["PHOTO"]
+	if len(props) == 0 {
+		return "", false
+	}
+	if link := photoLink(props[0]); link != "" {
+		return link, true
 	}
 	return "", false
 }
 
-// PhotoOpen returns an inline PHOTO stream and its declared media type.
+// PhotoOpen returns the image a PHOTO holds and the type the card declares
+// for it — the data: URI's own, else MEDIATYPE, else TYPE — as written.
+// Which types are acceptable, and what TYPE=JPEG is served as, is
+// internal/photo's question.
 func PhotoOpen(obj *model.Object) (io.ReadCloser, string, error) {
-	if uri, ok := PhotoURI(obj); ok {
-		return nil, "", fmt.Errorf("card: external photo %q", uri)
-	}
 	props := obj.Props()["PHOTO"]
 	if len(props) == 0 {
 		return nil, "", errors.New("card: no photo")
 	}
-	data, err := decodePhoto(props[0])
+	v := props[0]
+	if link := photoLink(v); link != "" {
+		return nil, "", fmt.Errorf("card: external photo %q", link)
+	}
+	declared := v.Params["MEDIATYPE"]
+	if declared == "" {
+		declared = v.Params["TYPE"]
+	}
+	text := strings.TrimSpace(v.Text)
+	var data []byte
+	var err error
+	if isDataURI(text) {
+		var own string
+		if data, own, err = decodeDataURI(text); own != "" {
+			declared = own
+		}
+	} else {
+		data, err = decodeBase64(text)
+	}
 	if err != nil {
 		return nil, "", err
 	}
-	return io.NopCloser(bytes.NewReader(data)), photoContentType(props[0]), nil
+	return io.NopCloser(bytes.NewReader(data)), declared, nil
 }
 
-func decodePhoto(v model.RawValue) ([]byte, error) {
-	if strings.EqualFold(v.Params["VALUE"], "uri") {
-		return nil, errors.New("card: uri photo")
+// PhotoOps write a JPEG as the card's PHOTO in the form of the card's own
+// version, which stays as it came (S-13): a data: URI in 4.0, base64 with
+// ENCODING and TYPE in 3.0 and 2.1. The old PHOTO goes first, with every
+// parameter it had; the image travels as text, there is no binary operation.
+func PhotoOps(obj *model.Object, jpeg []byte) []model.PatchOp {
+	b64 := base64.StdEncoding.EncodeToString(jpeg)
+	ops := []model.PatchOp{model.RemoveProp{Prop: vcard.FieldPhoto}}
+	version := ""
+	if v := obj.PropText(vcard.FieldVersion); len(v) > 0 {
+		version = strings.TrimSpace(v[0])
+	}
+	encoding := "b"
+	switch version {
+	case "2.1":
+		encoding = "BASE64"
+	case "3.0":
+	default:
+		return append(ops, model.SetText{Prop: vcard.FieldPhoto, Value: "data:image/jpeg;base64," + b64})
+	}
+	return append(ops,
+		model.SetText{Prop: vcard.FieldPhoto, Value: b64},
+		model.SetParam{Prop: vcard.FieldPhoto, Param: "ENCODING", Value: encoding},
+		model.SetParam{Prop: vcard.FieldPhoto, Param: "TYPE", Value: "JPEG"},
+	)
+}
+
+func photoLink(v model.RawValue) string {
+	text := strings.TrimSpace(v.Text)
+	if isDataURI(text) {
+		return ""
 	}
 	if enc := strings.ToUpper(v.Params["ENCODING"]); enc == "B" || enc == "BASE64" {
-		return base64.StdEncoding.DecodeString(v.Text)
+		return ""
 	}
-	return base64.StdEncoding.DecodeString(v.Text)
+	if strings.EqualFold(v.Params["VALUE"], "uri") || hasScheme(text) {
+		return text
+	}
+	return ""
 }
 
-func photoContentType(v model.RawValue) string {
-	if mt := v.Params["MEDIATYPE"]; mt != "" {
-		return mt
+func isDataURI(s string) bool {
+	return len(s) >= 5 && strings.EqualFold(s[:5], "data:")
+}
+
+// hasScheme reports an RFC 3986 scheme before a colon. Base64 has no colon.
+func hasScheme(s string) bool {
+	i := strings.IndexByte(s, ':')
+	if i < 1 {
+		return false
 	}
-	if t := v.Params["TYPE"]; t != "" {
-		return t
+	for j, r := range s[:i] {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z':
+		case j > 0 && (r >= '0' && r <= '9' || r == '+' || r == '-' || r == '.'):
+		default:
+			return false
+		}
 	}
-	return "application/octet-stream"
+	return true
+}
+
+// decodeDataURI reads data:[type][;base64],payload (RFC 2397).
+func decodeDataURI(s string) ([]byte, string, error) {
+	meta, payload, ok := strings.Cut(s[len("data:"):], ",")
+	if !ok {
+		return nil, "", errors.New("card: data URI without a comma")
+	}
+	parts := strings.Split(meta, ";")
+	declared := strings.TrimSpace(parts[0])
+	for _, p := range parts[1:] {
+		if strings.EqualFold(strings.TrimSpace(p), "base64") {
+			data, err := decodeBase64(payload)
+			return data, declared, err
+		}
+	}
+	text, err := url.PathUnescape(payload)
+	return []byte(text), declared, err
+}
+
+// decodeBase64 takes base64 with or without padding, and whatever whitespace
+// the folding of a long line left in it.
+func decodeBase64(s string) ([]byte, error) {
+	s = strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return -1
+		}
+		return r
+	}, s)
+	if data, err := base64.StdEncoding.DecodeString(s); err == nil {
+		return data, nil
+	}
+	return base64.RawStdEncoding.DecodeString(strings.TrimRight(s, "="))
 }

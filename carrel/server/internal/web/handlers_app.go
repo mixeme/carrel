@@ -230,28 +230,9 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 	s.ownedRecordStub(w, r)
 }
 
-func (s *Server) getPhotoPreview(w http.ResponseWriter, r *http.Request) {
-	s.ownedRecordStub(w, r)
-}
-
-// ownedRecordStub answers record routes whose functions come in later steps
-// (S-13, S-14): ownership first, then 404.
+// ownedRecordStub answers record routes whose functions come in later steps:
+// ownership first, then 404.
 func (s *Server) ownedRecordStub(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	if !s.checkOwnership(w, r, sess, r.PathValue("account"), r.PathValue("col"), r.PathValue("uid")) {
-		return
-	}
-	s.notFound(w, r)
-}
-
-func (s *Server) postPhotoPreview(w http.ResponseWriter, r *http.Request) {
-	s.getPhotoPreview(w, r)
-}
-
-func (s *Server) getContactPhoto(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
 		return

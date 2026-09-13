@@ -5,6 +5,133 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.52 — 2026-09-13
+
+S-13 in [server.md](../../docs/plan/server.md): contact photos. One route
+serves them; the edit page and the frame screen upload, frame, save and
+remove them. A photo a card only links to is shown through Carrel and is not
+edited.
+
+### For consumers
+
+- **Photo route.** `GET /c/{account}/{col}/{uid}/photo` streams the photo the
+  card keeps, typed as the card declares it: `TYPE=JPEG`,
+  `MEDIATYPE=image/jpeg` and a `data:image/jpeg` URI are all `image/jpeg`;
+  likewise PNG, GIF and WebP. Any other declared type, no type, or bytes that
+  are not the declared format answer 404: nothing is guessed. Responses carry
+  `X-Content-Type-Options: nosniff` and `Cache-Control: private, no-cache`.
+  - **`?size=thumb`** is a JPEG square of `CARREL_PHOTO_THUMB_SIDE`, from the
+    centre.
+  - **`?v=`** is the version (ETag) of the card the link was made from. The
+    response's `ETag` is that version: `"<etag>"`, or `"<etag>-thumb"` for the
+    thumbnail. `If-None-Match` answers 304.
+  - **`?preview=`** is the frame of the draft being chosen (below).
+  - **Linked photos.** A photo the card links to (`VALUE=uri`, or any URI in
+    vCard 4.0) is fetched through the DAV guard when the route is asked for
+    it. Only http and https, only an `image/*` reply in one of the four
+    formats, within `CARREL_DAV_MAX_RESPONSE_BYTES` and
+    `CARREL_PHOTO_MAX_PIXELS`. A failed fetch is 404.
+- **Avatars.** Contact rows (one collection and the combined view) and the
+  contact card fill `avatar.href` with the thumbnail address. It stays empty
+  when the card has no photo, or one that cannot be shown. The list makes the
+  thumbnails from the cards it has already read, so showing them asks the DAV
+  server nothing. `photoHref` of the contact card is the photo itself.
+- **Edit page.** `photo` of `ContactEditPage`:
+  - **No photo:** `editable: true`, `note` "JPEG, PNG, GIF or WebP.", action
+    `photo.add` "Add".
+  - **A kept photo:** `href`, and actions `photo.replace` "Replace",
+    `photo.crop` "Crop", `photo.remove` "Remove" (danger).
+  - **A kept photo that cannot be shown:** a `note`, `photo.replace` and
+    `photo.remove`.
+  - **A linked photo:** `href`, `note` "External photo link; editing is not
+    available.", `editable: false`, no actions.
+
+  Every action is a POST to `photo-preview` with `op` and the form's `etag`
+  in the query. `photo.add` and `photo.replace` send `multipart/form-data`
+  with the file in the field `photo`: `_csrf` goes in the body before the
+  file, or in `X-CSRF-Token`.
+- **Upload.** The body of
+  `POST /app/contacts/{account}/{col}/{uid}/photo-preview` may be
+  `CARREL_PHOTO_MAX_UPLOAD_BYTES` plus 1 MiB; other POSTs keep 1 MiB. A body
+  over that cap with `_csrf` in it is 413 before the handler.
+  - **Nothing kept.** The file goes to a temporary file, removed whatever
+    happens. The dimensions are checked before anything is decoded. Nothing is
+    written to the card before Save photo.
+  - **Refusals.** A refusal is the edit page with a notice: "No photo was
+    chosen", "The photo is too large", "The photo has too many pixels", or
+    "This file is not a photo Carrel can use".
+- **Frame.** `GET .../photo-preview` is `PhotoPreviewPage` for this card's
+  draft; without a draft it redirects to the edit page. The title is "Photo"
+  and the rail is "Back to the card". `href` is the preview: a JPEG of
+  `CARREL_PHOTO_MAX_SIDE`, never enlarged past the crop.
+  - **`zoom`**: percent of the largest square that fits, 100 to 400.
+  - **`offsetX`, `offsetY`**: percent of the room left on each side, from
+    -100 (left, top) to 100; 0 is the centre.
+  - **`rotate`**: 0, 90, 180 or 270, clockwise, applied after the EXIF
+    orientation.
+  - **Actions.** `photo.rotate.0` to `photo.rotate.270` ("0°" to "270°"; the
+    one shown is disabled), `photo.save` "Save photo", `photo.cancel`
+    "Cancel", and `photo.remove` "Remove photo" when the card keeps a photo.
+  - **Fields.** A turn and Save photo read `zoom`, `offsetX`, `offsetY` and
+    `rotate` from the form body. A turn's own `rotate` travels in its address
+    and wins. Values out of range are clamped.
+- **Save photo.** One patch on PHOTO, with `If-Match` of the version the photo
+  was chosen for, then a redirect to the edit page (or the edit page with a
+  loss report).
+  - **What is written.** A JPEG at `CARREL_PHOTO_JPEG_QUALITY`, without any of
+    the upload's metadata, in the card's own version:
+    `PHOTO:data:image/jpeg;base64,…` in 4.0, `PHOTO;ENCODING=b;TYPE=JPEG:…`
+    in 3.0, `ENCODING=BASE64` in 2.1.
+  - **A card changed since.** The preview page answers with "Changed
+    elsewhere, so the photo was not saved". The draft now holds the new
+    version, and Save photo writes over it only when pressed again.
+- **Remove.** Deletes the PHOTO property (not an empty value), with `If-Match`
+  of the version the page showed. A card changed since is the edit page with
+  "Changed elsewhere, so the photo was not removed". Upload, Crop and Remove
+  on a linked photo answer 404.
+- **Other clients' photos.** A vCard 4.0 `data:` URI in PHOTO, LOGO, SOUND or
+  KEY used to go back to the server with its comma escaped (`base64\,`) on
+  any edit of the card. It now goes back as it came.
+
+### Included
+
+- `photo`: new package. `Load`, `Open`, `Render`, `Fetch`, `MediaType` and
+  `Crop`. The orientation is EXIF tag 0x0112 from APP1, read without an EXIF
+  library. Large sources are halved before Catmull-Rom; transparency lands on
+  white.
+- Dependencies: `golang.org/x/image` v0.46.0 (webp, draw); `golang.org/x/sys`
+  v0.48.0 comes with it.
+- `conf`: `PhotoMaxZoom` = 400.
+- `card`:
+  - `PhotoURI` and `PhotoOpen` read vCard 4.0 `data:` URIs and links without
+    `VALUE=uri`.
+  - `PhotoOpen` returns the declared type as written: empty when there is
+    none, no longer `application/octet-stream`.
+  - New `PhotoOps`; `Encode` keeps the `data:` URI comma.
+- `web`:
+  - `photo.go`, and `bodyLimit` in the middleware.
+  - `contactGroups` takes the session; `finishWrite` takes where to go when
+    nothing was lost.
+  - Both photo sizes live in the session's thumbnail cache, keyed by card
+    version.
+- `davtest`: a PUT is stored as sent unless `Drop` is set. Re-encoding with
+  go-vcard had hidden what Carrel really sends.
+- Tests: `internal/photo`; `TestPhotoForms`,
+  `TestEncodeKeepsTheDataURIComma`, `TestPhotoOpsFollowTheVersion`;
+  `TestPhotoRouteServesWhatTheCardKeeps`, `TestPhotoUploadFrameAndSave`,
+  `TestPhotoUploadCaps`, `TestPhotoRefusalsLeaveNothing`,
+  `TestPhotoSaveOnAMovedCard`, `TestVCard3PhotoCropAndRemove`,
+  `TestLinkedPhotoIsProxiedAndNotEdited`.
+
+### Not yet included
+
+- The frame mockup's "Saved as 512 × 512 · JPEG · about 90 KB" line has no
+  field in `PhotoPreviewPage`.
+- Not checked against Radicale and Baikal: how they keep a 4.0 `data:` URI
+  and an unfolded PHOTO line of a hundred kilobytes.
+- vCard property groups (`item1.EMAIL`) are dropped when a card is read, so
+  any edit loses them. This predates S-13.
+
 ## v0.0.51 — 2026-09-13
 
 Copies the Typecase mockup through plan 1 step 3: classes inside frames

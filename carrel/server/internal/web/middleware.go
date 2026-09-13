@@ -3,6 +3,7 @@ package web
 import (
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -30,7 +31,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 	}
 
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
-		r.Body = http.MaxBytesReader(w, r.Body, conf.MaxFormBodyBytes)
+		r.Body = http.MaxBytesReader(w, r.Body, s.bodyLimit(r))
 
 		sess, hasSess := s.sessionFrom(r)
 		if needsCSRF(r) && hasSess {
@@ -78,6 +79,18 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 	}
 
 	h(s, w, r)
+}
+
+// bodyLimit is the cap of a request body before anything reads it: 1 MiB for
+// a form; for a contact photo upload, CARREL_PHOTO_MAX_UPLOAD_BYTES and a
+// form's worth for the fields around the file (architecture.md, CSRF and
+// multipart). The _csrf of that upload is read within this cap too.
+func (s *Server) bodyLimit(r *http.Request) int64 {
+	seg := strings.Split(r.URL.EscapedPath(), "/")
+	if len(seg) == 7 && seg[1] == "app" && seg[2] == "contacts" && seg[6] == "photo-preview" {
+		return s.cfg.PhotoMaxUploadBytes + conf.MaxFormBodyBytes
+	}
+	return conf.MaxFormBodyBytes
 }
 
 func unmetered(path string) bool {

@@ -251,5 +251,5 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		return
 	}
 	clearDraft(c)
-	s.finishWrite(w, r, c, uid, sent)
+	s.finishWrite(w, r, c, uid, sent, c.recordPath(uid))
 }

@@ -28,4 +28,8 @@ const (
 	MaxKeptFanouts       = SearchHistoryLen
 	MinPasswordLen       = 8
 	MinMasterPasswordLen = 16
+
+	// PhotoMaxZoom is the closest frame of a contact photo, in percent of the
+	// largest square that fits: 400 is a quarter of its side (S-13).
+	PhotoMaxZoom = 400
 )

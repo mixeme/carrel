@@ -125,6 +125,8 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | Что | Значение | Константа | Статус |
 |---|---|---|---|
 | Тело обычного POST (формы, JSON, CSRF) | 1 MiB | `MaxFormBodyBytes` | ✅ |
+| Тело POST `photo-preview` (загрузка фото) | `CARREL_PHOTO_MAX_UPLOAD_BYTES` + 1 MiB | `bodyLimit` | ✅ |
+| Ближайший кадр фото контакта | 400 % наибольшего квадрата | `PhotoMaxZoom` | ✅ |
 
 Фото и импорт — отдельные C-12. Файлы на чужой WebDAV — **без потолка Carrel**
 (C-12). Сверх 1 MiB — 413, тело дальше не читается.

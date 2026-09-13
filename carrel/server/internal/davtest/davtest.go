@@ -47,10 +47,13 @@ type Server struct {
 	Login, Password string
 
 	// Drop names properties the server silently discards on PUT, in every
-	// component, the way lossy servers do (S-7.1).
+	// component, the way lossy servers do (S-7.1). Without it a PUT is kept
+	// byte for byte as sent, as Radicale and Baikal keep it; with it the object
+	// is kept as go-vcard or go-ical write it back.
 	Drop []string
 
 	mu        sync.Mutex
+	sent      map[string][]byte // the body of the PUT being handled, by path
 	calendars map[string]caldav.Calendar
 	books     map[string]carddav.AddressBook
 	colours   map[string]string
@@ -83,6 +86,7 @@ func New(t testing.TB) *Server {
 		colours:   make(map[string]string),
 		ctags:     make(map[string]int),
 		objects:   make(map[string]object),
+		sent:      make(map[string][]byte),
 		refuse:    make(map[string]refusal),
 		stalls:    make(map[string]chan struct{}),
 		dir:       t.TempDir(),
@@ -322,6 +326,11 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files 
 	body, _ := io.ReadAll(r.Body)
 	r.Body = io.NopCloser(bytes.NewReader(body))
 	p := r.URL.Path
+	if r.Method == http.MethodPut {
+		s.mu.Lock()
+		s.sent[p] = body
+		s.mu.Unlock()
+	}
 
 	// go-webdav's server knows neither MKCALENDAR nor PROPPATCH on a
 	// collection, and lets MKCOL overwrite one that exists.
@@ -539,6 +548,15 @@ func (s *Server) proppatch(w http.ResponseWriter, p string, body []byte) {
 		escape(key)+`</D:href>`+b.String()+`</D:response></D:multistatus>`)
 }
 
+// takeSent is the body of the PUT to p as it came, once.
+func (s *Server) takeSent(p string) []byte {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	data := s.sent[p]
+	delete(s.sent, p)
+	return data
+}
+
 func (s *Server) storeLocked(p string, data []byte) string {
 	s.seq++
 	etag := fmt.Sprintf("e%d", s.seq)
@@ -695,12 +713,16 @@ func dropComponentProps(c *ical.Component, names []string) {
 }
 
 func (b calBackend) PutCalendarObject(_ context.Context, p string, cal *ical.Calendar, opts *caldav.PutCalendarObjectOptions) (*caldav.CalendarObject, error) {
-	dropComponentProps(cal.Component, b.s.Drop)
-	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
-		return nil, webdav.NewHTTPError(http.StatusBadRequest, err)
+	data := b.s.takeSent(p)
+	if len(b.s.Drop) > 0 || data == nil {
+		dropComponentProps(cal.Component, b.s.Drop)
+		var buf bytes.Buffer
+		if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
+			return nil, webdav.NewHTTPError(http.StatusBadRequest, err)
+		}
+		data = buf.Bytes()
 	}
-	o, err := b.s.put(p, buf.Bytes(), opts.IfMatch, opts.IfNoneMatch)
+	o, err := b.s.put(p, data, opts.IfMatch, opts.IfNoneMatch)
 	if err != nil {
 		return nil, err
 	}
@@ -794,14 +816,18 @@ func (b cardBackend) QueryAddressObjects(ctx context.Context, p string, q *cardd
 }
 
 func (b cardBackend) PutAddressObject(_ context.Context, p string, card vcard.Card, opts *carddav.PutAddressObjectOptions) (*carddav.AddressObject, error) {
-	for _, n := range b.s.Drop {
-		delete(card, strings.ToUpper(n))
+	data := b.s.takeSent(p)
+	if len(b.s.Drop) > 0 || data == nil {
+		for _, n := range b.s.Drop {
+			delete(card, strings.ToUpper(n))
+		}
+		var buf bytes.Buffer
+		if err := vcard.NewEncoder(&buf).Encode(card); err != nil {
+			return nil, webdav.NewHTTPError(http.StatusBadRequest, err)
+		}
+		data = buf.Bytes()
 	}
-	var buf bytes.Buffer
-	if err := vcard.NewEncoder(&buf).Encode(card); err != nil {
-		return nil, webdav.NewHTTPError(http.StatusBadRequest, err)
-	}
-	o, err := b.s.put(p, buf.Bytes(), opts.IfMatch, opts.IfNoneMatch)
+	o, err := b.s.put(p, data, opts.IfMatch, opts.IfNoneMatch)
 	if err != nil {
 		return nil, err
 	}

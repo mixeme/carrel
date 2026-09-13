@@ -16,9 +16,10 @@ S-11…S-26 — закрытые развилки в [server.md](server.md), д�
       на `CARREL_DAV_MAX_RESPONSE_BYTES` (10 МиБ, C-12). Провайдер пробрасывает
       этот поток — файл больше потолка не скачается. Это не буфер в `[]byte`.
       Снимать потолок со стрима файла — S-17 / `dav`, не `provider/file`
-- [ ] **PHOTO `TYPE=JPEG` уходит как Content-Type.** Тип из TYPE/MEDIATYPE
+- [x] **PHOTO `TYPE=JPEG` уходит как Content-Type.** Тип из TYPE/MEDIATYPE
       как есть, без угадывания по байтам. HTTP `JPEG` невалиден; `image/jpeg`
-      — S-13
+      — S-13 (`v0.0.52`: `photo.MediaType`, байты обязаны быть объявленным
+      форматом)
 - [x] **RECURRENCE-ID на показе.** `Expand` раскрывает мастер (RRULE − EXDATE
       + RDATE). Экземпляр с `RECURRENCE-ID` в дереве живёт, в окно Expand не
       подмешивается. Наложение на агенду — S-11 / `web` (`v0.0.43`)
