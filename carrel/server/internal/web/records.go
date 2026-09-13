@@ -300,11 +300,31 @@ func (c *collectionCtx) index() []indexEntry {
 	return out
 }
 
-// dropIndex forgets the loaded lists after a write: versions in them are stale.
-func (c *collectionCtx) dropIndex() {
-	for _, comp := range c.components() {
-		c.sess.Cache().InvalidatePath(c.conn.ID, c.indexKey(comp))
+// noteWrite keeps the loaded list of this kind in step with a write the
+// server accepted: the record at path is replaced by obj, or leaves when obj
+// is nil. A count once shown stays until the list is read again (C-6.3); the
+// other entries are as that read left them. Nothing loaded, nothing kept.
+func (c *collectionCtx) noteWrite(path string, obj *model.Object) {
+	key := c.indexKey(c.spec.component)
+	data, ok := c.sess.Cache().GetETagMap(c.conn.ID, key)
+	if !ok {
+		return
 	}
+	var entries []indexEntry
+	if json.Unmarshal(data, &entries) != nil {
+		c.sess.Cache().InvalidatePath(c.conn.ID, key)
+		return
+	}
+	kept := entries[:0]
+	for _, e := range entries {
+		if e.Path != path {
+			kept = append(kept, e)
+		}
+	}
+	if obj != nil {
+		kept = append(kept, indexOf(c.spec.kind, c.listed([]*model.Object{obj}))...)
+	}
+	c.putIndex(kept)
 }
 
 // rememberBody keeps the version an edit form was read at, so a rejected

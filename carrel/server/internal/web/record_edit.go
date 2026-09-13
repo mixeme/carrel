@@ -833,7 +833,6 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
-	c.dropIndex()
 	s.finishWrite(w, r, c, uid, sent)
 }
 
@@ -857,13 +856,17 @@ func unixForm(v string) time.Time {
 
 // finishWrite re-reads what was written and compares (S-7.1). A loss is a
 // notice on the edit page, said once per server and property; no loss is a
-// redirect to the record.
+// redirect to the record. The loaded list takes the record as re-read, or as
+// sent with no known version when the re-read failed.
 func (s *Server) finishWrite(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, sent *model.Object) {
 	got, err := c.find(r.Context(), uid)
 	if err != nil {
+		sent.ETag = ""
+		c.noteWrite(sent.Path, sent)
 		s.redirect(w, r, c.recordPath(uid))
 		return
 	}
+	c.noteWrite(got.Path, got)
 	loss := model.CompareAfterPut(c.conn.ID, sent, got, c.sess.Losses())
 	if loss == nil {
 		s.redirect(w, r, c.recordPath(uid))
@@ -888,7 +891,10 @@ func (s *Server) finishWrite(w http.ResponseWriter, r *http.Request, c *collecti
 }
 
 // getKindNew: as a sheet, the target collection stated; as a page, the empty
-// edit form of the kind (C-5.4).
+// edit form of the kind (C-5.4). From a combined view (?pick=1) there is no
+// target to open a form for, so without the fragment header the sheet is the
+// page: the choice is its options' links, as U-8 asks of a page without
+// scripts.
 func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string) {
 	c, ok := s.openCollection(w, r, kind, false)
 	if !ok {
@@ -898,11 +904,15 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 		s.notFound(w, r)
 		return
 	}
-	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.newSheet(c, r.URL.Query().Get("pick") != ""), nil)
-		return
+	pick := r.URL.Query().Get("pick") != ""
+	switch {
+	case WantsFragment(r) && FragmentTarget(r) == TargetSheet:
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.newSheet(c, pick), nil)
+	case pick:
+		s.writePage(w, r, http.StatusOK, s.newSheet(c, true))
+	default:
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: s.emptyValues(c), isNew: true, readAt: time.Now()}))
 	}
-	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: s.emptyValues(c), isNew: true, readAt: time.Now()}))
 }
 
 // newSheet is where a new record goes: every live collection of the kind,
@@ -984,7 +994,6 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
-	c.dropIndex()
 	s.finishWrite(w, r, c, uid, sent)
 }
 
@@ -1026,7 +1035,7 @@ func (s *Server) postKindDelete(w http.ResponseWriter, r *http.Request, kind str
 	case err != nil:
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.writeFailure(c, "DELETE", obj.Path, err)))
 	default:
-		c.dropIndex()
+		c.noteWrite(obj.Path, nil)
 		s.redirect(w, r, c.listPath())
 	}
 }

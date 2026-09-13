@@ -5,6 +5,45 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.49 — 2026-09-13
+
+Two tails of S-14 in [server.md](../../docs/plan/server.md), closed before
+S-13: "New" from the combined view without scripts, and the rail's count after
+a write.
+
+### For consumers
+
+- **New without scripts.** `GET /app/{kind}/{account}/{col}/new?pick=1`
+  without the fragment header now answers the `NewSheet` as the page, the same
+  body the sheet fragment has: `target.options` with `chosen` empty and
+  `record.new` disabled. Follow an option's `id` to its new-record form. Before,
+  that address opened the form of the collection in its path, which the
+  combined view only names because the route needs one. Without `pick` the page
+  is still the empty form of that collection.
+- **Counts after a write.** A save, a new record, a conflict resolved and a
+  delete now change the rail's `count` of that collection by what was written,
+  instead of turning it into `null` until the list is read again (C-6.3). A
+  list that fails to read afterwards still shows that count. Links from
+  RELATED-TO to the written record keep its new title.
+
+### Included
+
+- `web`: `collectionCtx.noteWrite` replaces `dropIndex`: the written record
+  replaces its entry in the loaded list, a new one is added, a deleted one
+  leaves; the other entries are as the last read left them.
+- Tests: `TestCountSurvivesWrites`; `TestNewFromCombinedChoosesTheTarget`
+  reads the page without the fragment header.
+
+### Not yet included
+
+- The rail on record, edit, import and conflict pages ("Back to list"), the
+  tag filter, and `print` are not filled.
+- Events have no count in the rail: the agenda reads one week, not the whole
+  calendar.
+- Records a combined REPORT returned unreadable are left out without a notice;
+  the collection's own list names them.
+- S-22: `LastRead` and `Changed` of a collection are not filled yet.
+
 ## v0.0.48 — 2026-09-13
 
 S-14 in [server.md](../../docs/plan/server.md): the combined view. Each

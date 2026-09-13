@@ -250,6 +250,5 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		return
 	}
 	clearDraft(c)
-	c.dropIndex()
 	s.finishWrite(w, r, c, uid, sent)
 }

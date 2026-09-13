@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -377,5 +378,55 @@ func TestNewFromCombinedChoosesTheTarget(t *testing.T) {
 	own := decode[sheetFragment](t, f.h.do(fragment(get(f.path("contacts")+"/new", f.sess), "sheet"))).Body
 	if own.Target.Chosen != sheet.Target.Options[0].ID || !own.Actions[0].Enabled {
 		t.Errorf("from one collection = %+v", own)
+	}
+	// Without scripts the same choice is the page, not the form of a guessed
+	// collection (U-8).
+	plain := decode[view.NewSheet](t, f.h.do(get(href, f.sess)))
+	if plain.Kind != view.KindContact || plain.Target.Chosen != "" || len(plain.Target.Options) != 2 || plain.Actions[0].Enabled {
+		t.Errorf("new without scripts = %+v", plain)
+	}
+}
+
+// C-6.3: a count once shown does not disappear after a write in its
+// collection. A new record adds one and a deleted one takes one away, and a
+// list that then fails to read still shows the count the writes left.
+func TestCountSurvivesWrites(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEND:VCARD\n")
+	list := f.path("contacts")
+	tickRail(t, f.h, f.sess, "contacts", list)
+	count := func() string {
+		t.Helper()
+		page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
+		_, row := railRow(t, page.Rail, "People")
+		if row.Count == nil {
+			return "-"
+		}
+		return strconv.Itoa(*row.Count)
+	}
+	unread := func() string {
+		t.Helper()
+		f.srv.Refuse("REPORT", http.StatusServiceUnavailable, "")
+		defer f.srv.Accept("REPORT")
+		return count()
+	}
+	if n := count(); n != "1" {
+		t.Fatalf("after the list = %s, want 1", n)
+	}
+
+	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(list+"/new", f.sess))).Form)
+	form.Set("fn", "Bob Builder")
+	if resp := f.h.do(postForm(list+"/new", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("new: %d %s", resp.Code, resp.Body.String())
+	}
+	if n := unread(); n != "2" {
+		t.Errorf("after a new record = %s, want 2", n)
+	}
+
+	del := actionHref(t, decode[view.ContactPage](t, f.h.do(get(list+"/ada", f.sess))).Actions, "record.delete")
+	if resp := f.h.do(postForm(del, f.sess, url.Values{})); resp.Code != http.StatusSeeOther {
+		t.Fatalf("delete: %d %s", resp.Code, resp.Body.String())
+	}
+	if n := unread(); n != "1" {
+		t.Errorf("after a delete = %s, want 1", n)
 	}
 }
