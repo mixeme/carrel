@@ -7,6 +7,7 @@ import (
 	"carrel.dev/carrel/server/internal/crypt"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/view"
 )
 
 // Catalog opens the viewer's sealed blob: connections, the collection catalog,
@@ -214,6 +215,42 @@ func (s *Service) RenameCollection(viewerID string, dataKey [crypt.KeyLen]byte, 
 			return nil
 		}
 		return ErrNotFound
+	})
+}
+
+// SetSelection replaces the ticks of one kind with picks (S-14); the ticks of
+// other kinds stay as they are. A pick the catalog does not hold for that kind
+// is dropped. A gone entry stays ticked only if it was ticked already: a tick
+// is taken off by the person, never put on what is no longer there (S-6.1).
+// The journal names the kind, not the addresses.
+func (s *Service) SetSelection(viewerID string, dataKey [crypt.KeyLen]byte, kind view.Kind, picks []sealed.Selection) error {
+	type at struct{ account, path string }
+	want := make(map[at]bool, len(picks))
+	for _, p := range picks {
+		want[at{p.AccountID, p.Path}] = true
+	}
+	return s.editCatalog(viewerID, dataKey, "sources.select", string(kind), func(blob *sealed.Blob) error {
+		was := map[at]bool{}
+		var out []sealed.Selection
+		for _, sel := range blob.Selected {
+			if sel.Kind == kind {
+				was[at{sel.AccountID, sel.Path}] = true
+				continue
+			}
+			out = append(out, sel)
+		}
+		for _, c := range blob.Collections {
+			key := at{c.AccountID, c.Path}
+			if !want[key] || !c.Has(kind) || (c.Gone && !was[key]) {
+				continue
+			}
+			if _, ok := blob.Connection(c.AccountID); !ok {
+				continue
+			}
+			out = append(out, sealed.Selection{Kind: kind, AccountID: c.AccountID, Path: c.Path})
+		}
+		blob.Selected = out
+		return nil
 	})
 }
 

@@ -5,6 +5,87 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.48 — 2026-09-13
+
+S-14 in [server.md](../../docs/plan/server.md): the combined view. Each
+record kind shows the collections ticked for it in one list, from any number
+of servers, and the ticks are kept in the account's sealed settings.
+
+### For consumers
+
+- **Ticks** (`POST /app/sources/{kind}`, `kind` one of `contacts`,
+  `calendar`, `tasks`, `notes`). The rail is a form: send the `href` of every
+  ticked row as a repeated `tick` field, exactly as the rail gave it. The form
+  replaces the ticks of that kind only; the other kinds keep theirs. An empty
+  form unticks everything. A row that is not a collection of that kind in the
+  catalog is ignored, and so is a gone collection that was not ticked already.
+  Without the fragment header the answer redirects to `/app/{kind}`; with it,
+  the answer is the `rail` and, out of band, the `poll` of the new selection.
+  `files` answers 404 (the files root is S-17).
+- **Combined view** (`/app/{kind}`) has the same view model as one collection,
+  plus `poll` and, on every row, `stamp` (`host · collection`) and `colour`.
+  Rows are merged, not grouped by source: contacts by name, events and tasks
+  by time, notes newest first. `href` of a row is the record in its own
+  collection, so editing always happens there. The agenda takes `?from=` like
+  a single calendar; tasks take `?show=`.
+- **Nothing ticked** is an empty screen: `poll.taskID` is empty,
+  `poll.summary` says nothing is ticked, and no server is asked.
+- **Poll and reload.** The page answers at once and the sources fill in the
+  background, as in search: follow `GET /app/search/progress/{task}` (or
+  `…/poll`) and read the page again. `?task={id}` reopens that result without
+  asking again; a plain `GET /app/{kind}` asks again once the previous poll is
+  over, and reuses it while it is still running. Stop and Retry work the same as
+  in search; without the fragment header they return to `/app/{kind}?task={id}`.
+  `poll.again` is "Refresh", a GET on the view's own address.
+- **Refresh** (`top.refresh`): `action` is `poll.again` (GET on the combined
+  view, disabled while the poll runs), `answered` is when it ended, `running`
+  says whether it is still going. The mockups show Refresh as a POST to
+  `/app/sources/{kind}`; the server does not take that.
+- **Rail** on the combined view and on a single collection: `nav` has the four
+  kinds with `count` (the sum of the ticked collections, `null` while one has
+  none), then Files and Duplicates without a count. The first section holds
+  one row, the combined view, with `tick` `off`, `on` or `part`. Then one section
+  per connection (`account` is the host) with the collections of the kind:
+  `href` to the collection, `tick`, `count` (whole collection, only when ticked
+  and read in this session), `state` `ok`, `read-only`, `unavailable` (the
+  server did not answer this poll) or `gone`. A gone collection stays in
+  the rail while ticked, without `href`, and is not asked. `menu` has
+  `collection.rename`. `foot`: `rail.apply` (POST `/app/sources/{kind}`),
+  `collection.new`, `account.connect`. `note`: "2 of 3 collections ticked".
+- **New from the combined view.** `bar.actions` has `record.new` pointing at
+  `…/{account}/{col}/new?pick=1`. As a sheet it lists every collection of the
+  kind as `target.options` (read-only ones with `readOnly` and `reason`),
+  `chosen` empty, and `record.new` disabled until a target is chosen. **An
+  option's `id` is now the address of its new-record page**; open it to
+  continue. Opened from one collection, that collection is `chosen`.
+
+### Included
+
+- `user.SetSelection` (journal `sources.select`, detail the kind).
+- `web`: `combined.go` — the combined view, its `listTask`, the rail,
+  `postSources`. List rows are built by the same code for one collection and
+  for the combined view (`contactGroups`, `agendaDays`, `taskGroups`,
+  `noteGroups`). The poll bar takes the owner of the task, so search and lists
+  share the progress routes.
+- Tests: `TestCombinedContactsFollowTheTicks`,
+  `TestCombinedAgendaTasksAndNotesMerge`, `TestCombinedGoneIsNotUnavailable`,
+  `TestNewFromCombinedChoosesTheTarget`.
+
+### Not yet included
+
+- Without scripts, "New" from the combined view opens the form of the first
+  writable collection: the choice of target is the sheet, and a sheet needs the
+  fragment header.
+- Events have no count in the rail: the agenda reads one week, not the whole
+  calendar.
+- A count goes back to a dash after a write in that collection until the list
+  is read again.
+- The rail on record, edit, import and conflict pages ("Back to list"), the
+  tag filter, and `print` are not filled.
+- Records a combined REPORT returned unreadable are left out without a notice;
+  the collection's own list names them.
+- S-22: `LastRead` and `Changed` of a collection are not filled yet.
+
 ## v0.0.47 — 2026-09-13
 
 S-15 in [server.md](../../docs/plan/server.md): search across the ticked

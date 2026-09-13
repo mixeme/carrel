@@ -196,7 +196,7 @@ func (s *Server) fillResults(page *view.SearchPage, sess *session.Session, blob 
 		segment(view.KindNote, "Notes", counts[view.KindNote]),
 		segment(view.KindFile, "Files", counts[view.KindFile]),
 	}
-	page.Poll = s.pollBar(tf, blob, snap)
+	page.Poll = s.pollBar(tf, blob, snap, searchOwner(q))
 	for _, st := range snap.Sources {
 		account, path, _ := strings.Cut(st.ID, ":")
 		if col, ok := blob.Collection(account, path); ok && col.Has(view.KindFile) {
@@ -307,10 +307,31 @@ func newestFirst(t time.Time) string {
 	return fmt.Sprintf("%019d", math.MaxInt64-u)
 }
 
+// pollOwner is what a poll bar says around its sources, which differs between
+// a search and a combined list (S-14): the page the task answers, where asking
+// again goes, and how the bar names what it collects.
+type pollOwner struct {
+	page       string // where a Stop or a Retry from a plain form returns
+	again      string
+	againLabel view.Text
+	what       string
+	found      func(n int) string
+}
+
+func searchOwner(q string) pollOwner {
+	return pollOwner{
+		page:       searchHref(q),
+		again:      searchHref(q) + "&again=1",
+		againLabel: "Search again",
+		what:       "search",
+		found:      func(n int) string { return fmt.Sprintf("%d found", n) },
+	}
+}
+
 // pollBar is the fanout on the screen (C-8.1): every source with its state
 // and count, a short reason and a retry of that source alone where it did not
 // answer, and a summary that says whether the poll is over.
-func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot) view.PollBar {
+func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, owner pollOwner) view.PollBar {
 	now := time.Now()
 	bar := view.PollBar{TaskID: snap.ID, Running: snap.Running}
 	base := "/app/search/progress/" + snap.ID
@@ -361,11 +382,11 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot) vie
 		bar.Percent = (answered + refused + timedOut + unreachable + stopped) * 100 / total
 	}
 	if snap.Running {
-		bar.Summary = text(fmt.Sprintf("Asking %s · %d answered · %d found", plural(total, "source"), answered, len(snap.Items)))
+		bar.Summary = text(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(len(snap.Items))))
 	} else {
 		parts := []string{
 			fmt.Sprintf("%d of %s answered", answered, plural(total, "source")),
-			fmt.Sprintf("%d found", len(snap.Items)),
+			owner.found(len(snap.Items)),
 		}
 		for _, c := range []struct {
 			n    int
@@ -379,11 +400,11 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot) vie
 		bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
 	}
 	stop := view.Action{ID: "poll.stop", Label: "Stop", Href: s.route(base + "/cancel"), Method: "POST", Enabled: snap.Running}
-	again := view.Action{ID: "poll.again", Label: "Search again", Href: s.route(searchHref(snap.Query.Text) + "&again=1"), Method: "GET", Enabled: !snap.Running}
+	again := view.Action{ID: "poll.again", Label: owner.againLabel, Href: s.route(owner.again), Method: "GET", Enabled: !snap.Running}
 	if snap.Running {
-		again.Reason = "The search is still running."
+		again.Reason = text("The " + owner.what + " is still running.")
 	} else {
-		stop.Reason = "The search has finished."
+		stop.Reason = text("The " + owner.what + " has finished.")
 	}
 	bar.Actions = []view.Action{stop, again}
 	return bar
@@ -624,20 +645,23 @@ func (c *collectionSource) findFiles(ctx context.Context, q fanout.Query) ([]fan
 	return items, nil
 }
 
-// openSearchTask finds a task of this session. Another session's task, or an
-// ID never issued, is not found (C-4).
-func (s *Server) openSearchTask(w http.ResponseWriter, r *http.Request) (*session.Session, *fanout.Task, bool) {
+// openSearchTask finds a task of this session: a search or the list of a
+// combined view, which share the progress routes (C-5.3). Another session's
+// task, or an ID never issued, is not found (C-4).
+func (s *Server) openSearchTask(w http.ResponseWriter, r *http.Request) (*session.Session, *fanout.Task, pollOwner, bool) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
-		return nil, nil, false
+		return nil, nil, pollOwner{}, false
 	}
-	t, found := sess.Task(r.PathValue("task"))
-	ft, isSearch := t.(*fanout.Task)
-	if !found || !isSearch {
-		s.notFound(w, r)
-		return nil, nil, false
+	t, _ := sess.Task(r.PathValue("task"))
+	switch v := t.(type) {
+	case *fanout.Task:
+		return sess, v, searchOwner(v.Query().Text), true
+	case *listTask:
+		return sess, v.Task, listOwner(v), true
 	}
-	return sess, ft, true
+	s.notFound(w, r)
+	return nil, nil, pollOwner{}, false
 }
 
 func (s *Server) catalogOf(sess *session.Session) sealed.Blob {
@@ -651,7 +675,7 @@ func (s *Server) catalogOf(sess *session.Session) sealed.Blob {
 // at the end. The stream closing while the task runs is the page being left,
 // and cancels the task (S-15.1).
 func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
-	sess, task, ok := s.openSearchTask(w, r)
+	sess, task, owner, ok := s.openSearchTask(w, r)
 	if !ok {
 		return
 	}
@@ -677,7 +701,7 @@ func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
 	for {
 		changed := task.Changed()
 		snap := task.Snapshot()
-		bar := s.pollBar(tf, blob, snap)
+		bar := s.pollBar(tf, blob, snap, owner)
 		if err := s.render.Event(w, "poll", TargetPoll, bar); err != nil {
 			return
 		}
@@ -706,7 +730,7 @@ func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
 
 // getSearchProgressPoll is the fallback of the stream (CARREL_PROGRESS_MODE).
 func (s *Server) getSearchProgressPoll(w http.ResponseWriter, r *http.Request) {
-	sess, task, ok := s.openSearchTask(w, r)
+	sess, task, owner, ok := s.openSearchTask(w, r)
 	if !ok {
 		return
 	}
@@ -714,12 +738,12 @@ func (s *Server) getSearchProgressPoll(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	_ = s.render.Fragment(w, r, http.StatusOK, TargetPoll, s.pollBar(s.timeFor(sess), s.catalogOf(sess), task.Snapshot()), nil)
+	_ = s.render.Fragment(w, r, http.StatusOK, TargetPoll, s.pollBar(s.timeFor(sess), s.catalogOf(sess), task.Snapshot(), owner), nil)
 }
 
 // postSearchProgressRetry asks one source again and nobody else (S-15.1).
 func (s *Server) postSearchProgressRetry(w http.ResponseWriter, r *http.Request) {
-	sess, task, ok := s.openSearchTask(w, r)
+	sess, task, owner, ok := s.openSearchTask(w, r)
 	if !ok {
 		return
 	}
@@ -729,28 +753,28 @@ func (s *Server) postSearchProgressRetry(w http.ResponseWriter, r *http.Request)
 		s.notFound(w, r)
 		return
 	}
-	s.answerPollAction(w, r, sess, task, source, err)
+	s.answerPollAction(w, r, sess, task, owner, source, err)
 }
 
 // postSearchProgressCancel stops the task; what arrived stays, marked.
 func (s *Server) postSearchProgressCancel(w http.ResponseWriter, r *http.Request) {
-	sess, task, ok := s.openSearchTask(w, r)
+	sess, task, owner, ok := s.openSearchTask(w, r)
 	if !ok {
 		return
 	}
 	task.Cancel()
-	s.answerPollAction(w, r, sess, task, "", nil)
+	s.answerPollAction(w, r, sess, task, owner, "", nil)
 }
 
 // answerPollAction answers a button of the poll bar: the bar as a fragment,
-// or the result page again for a plain form.
-func (s *Server) answerPollAction(w http.ResponseWriter, r *http.Request, sess *session.Session, task *fanout.Task, source string, err error) {
+// or the page of the task again for a plain form.
+func (s *Server) answerPollAction(w http.ResponseWriter, r *http.Request, sess *session.Session, task *fanout.Task, owner pollOwner, source string, err error) {
 	if !WantsFragment(r) {
-		s.redirect(w, r, searchHref(task.Query().Text))
+		s.redirect(w, r, owner.page)
 		return
 	}
 	snap := task.Snapshot()
-	bar := s.pollBar(s.timeFor(sess), s.catalogOf(sess), snap)
+	bar := s.pollBar(s.timeFor(sess), s.catalogOf(sess), snap, owner)
 	if errors.Is(err, fanout.ErrBusy) {
 		for i, st := range snap.Sources {
 			if st.ID == source {

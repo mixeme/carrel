@@ -15,6 +15,7 @@ import (
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/view"
 )
 
 const (
@@ -69,6 +70,9 @@ type Users interface {
 	// catalog; RenameCollection writes the name and colour it accepted (S-12).
 	AddCollection(viewerID string, dataKey [32]byte, accountID string, col sealed.Collection) error
 	RenameCollection(viewerID string, dataKey [32]byte, accountID, path, name, colour string) error
+	// SetSelection replaces the ticks of one kind (S-14); other kinds keep
+	// theirs.
+	SetSelection(viewerID string, dataKey [32]byte, kind view.Kind, picks []sealed.Selection) error
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).

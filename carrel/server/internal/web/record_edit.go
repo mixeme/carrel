@@ -899,18 +899,45 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 		return
 	}
 	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
-		id := c.conn.ID + " " + c.col.Path
-		sheet := view.NewSheet{
-			Kind: c.spec.kind,
-			Target: view.TargetPicker{Chosen: id, Options: []view.TargetOption{{
-				ID: id, Label: text(collectionLabel(c.col)), Stamp: c.stamp(), Colour: catalogColour(c.col),
-			}}},
-			Actions: []view.Action{{ID: "record.new", Label: text("New " + c.spec.noun), Href: s.route(c.listPath() + "/new"), Method: "GET", Enabled: true}},
-		}
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.newSheet(c, r.URL.Query().Get("pick") != ""), nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: s.emptyValues(c), isNew: true, readAt: time.Now()}))
+}
+
+// newSheet is where a new record goes: every live collection of the kind,
+// read-only ones shown and closed with the reason. An option's ID is the
+// address of its new-record page. Opened from one collection, that collection
+// is chosen; opened from a combined view (?pick=1) nothing is, and the target
+// is chosen, not guessed (S-14).
+func (s *Server) newSheet(c *collectionCtx, pick bool) view.NewSheet {
+	blob := s.catalogOf(c.sess)
+	own := s.route(c.listPath() + "/new")
+	sheet := view.NewSheet{Kind: c.spec.kind}
+	for _, conn := range blob.Connections {
+		for _, col := range blob.CollectionsOf(conn.ID) {
+			if col.Gone || !col.Has(c.spec.kind) {
+				continue
+			}
+			o := origin{conn: conn, col: col}
+			opt := view.TargetOption{
+				ID: s.route(o.listPath(c.spec.segment) + "/new"), Label: text(collectionLabel(col)),
+				Stamp: o.stamp(), Colour: catalogColour(col), ReadOnly: col.ReadOnly,
+			}
+			if col.ReadOnly {
+				opt.Reason = "Read-only"
+			}
+			sheet.Target.Options = append(sheet.Target.Options, opt)
+		}
+	}
+	next := view.Action{ID: "record.new", Label: text("New " + c.spec.noun), Href: own, Method: "GET", Enabled: true}
+	if pick {
+		next.Enabled, next.Reason = false, text("Choose the collection the new "+c.spec.noun+" goes to.")
+	} else {
+		sheet.Target.Chosen = own
+	}
+	sheet.Actions = []view.Action{next}
+	return sheet
 }
 
 // postKindNew creates with If-None-Match (S-8). The record starts as a

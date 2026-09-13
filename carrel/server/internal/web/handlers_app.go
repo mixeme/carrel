@@ -83,23 +83,6 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 	s.getDuplicatesMerge(w, r)
 }
 
-func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	rail := s.buildShell(sess, "").Rail
-	extra := []OOB{
-		{Target: TargetRail, Body: rail},
-		{Target: TargetPoll, Body: view.PollBar{}},
-	}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetRail, rail, extra[1:])
-		return
-	}
-	s.notFound(w, r)
-}
-
 func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
 	s.getQuickNote(w, r) // sheet pattern
 }
@@ -190,31 +173,6 @@ func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error)
 		}
 	}
 	return page
-}
-
-func (s *Server) getKindRoot(w http.ResponseWriter, r *http.Request, kind string) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := s.emptyListPage(sess, kind)
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) emptyListPage(sess *session.Session, kind string) any {
-	sh := s.buildShell(sess, kindTitle(kind))
-	switch kind {
-	case "contacts":
-		return view.ContactsListPage{Shell: sh}
-	case "calendar":
-		return view.AgendaPage{Shell: sh}
-	case "tasks":
-		return view.TasksPage{Shell: sh}
-	case "notes":
-		return view.NotesPage{Shell: sh}
-	default:
-		return view.ContactsListPage{Shell: sh}
-	}
 }
 
 func kindTitle(kind string) string {

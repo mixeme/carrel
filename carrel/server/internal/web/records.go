@@ -49,6 +49,31 @@ func segmentOf(k view.Kind) string {
 	return ""
 }
 
+// origin is where a listed record lives: one catalog entry of one connection.
+type origin struct {
+	conn sealed.Connection
+	col  sealed.Collection
+}
+
+func (o origin) listPath(segment string) string {
+	return "/app/" + segment + "/" + o.conn.ID + "/" + url.PathEscape(o.col.Path)
+}
+
+func (o origin) recordPath(segment, uid string) string {
+	return o.listPath(segment) + "/" + url.PathEscape(uid)
+}
+
+func (o origin) stamp() view.Stamp {
+	return stamp(serverHost(o.conn.Server), collectionLabel(o.col))
+}
+
+// listed is one record of a list with its origin. The rows of a combined view
+// carry the origin (S-14); the rows of a single collection do not repeat it.
+type listed struct {
+	obj  *model.Object
+	from origin
+}
+
 // collectionCtx is one owned collection opened for a request: the catalog
 // entry, its connection, and a provider over a guarded client. A single
 // collection is not a fanout (S-11): nothing here polls.
@@ -109,21 +134,28 @@ func (s *Server) openCollection(w http.ResponseWriter, r *http.Request, segment 
 	return c, true
 }
 
-func (c *collectionCtx) listPath() string {
-	return "/app/" + c.spec.segment + "/" + c.conn.ID + "/" + url.PathEscape(c.col.Path)
-}
+func (c *collectionCtx) origin() origin { return origin{conn: c.conn, col: c.col} }
+
+func (c *collectionCtx) listPath() string { return c.origin().listPath(c.spec.segment) }
 
 func (c *collectionCtx) recordPath(uid string) string {
-	return c.listPath() + "/" + url.PathEscape(uid)
+	return c.origin().recordPath(c.spec.segment, uid)
 }
 
 // kindRecordPath is a record of another kind in the same calendar collection.
 func (c *collectionCtx) kindRecordPath(k view.Kind, uid string) string {
-	return "/app/" + segmentOf(k) + "/" + c.conn.ID + "/" + url.PathEscape(c.col.Path) + "/" + url.PathEscape(uid)
+	return c.origin().recordPath(segmentOf(k), uid)
 }
 
-func (c *collectionCtx) stamp() view.Stamp {
-	return stamp(serverHost(c.conn.Server), collectionLabel(c.col))
+func (c *collectionCtx) stamp() view.Stamp { return c.origin().stamp() }
+
+// listed pairs the objects of this collection with it.
+func (c *collectionCtx) listed(objs []*model.Object) []listed {
+	out := make([]listed, len(objs))
+	for i, o := range objs {
+		out[i] = listed{obj: o, from: c.origin()}
+	}
+	return out
 }
 
 func (c *collectionCtx) source() view.SourceBlock {
@@ -207,6 +239,35 @@ type indexEntry struct {
 	Related []string  `json:"related,omitempty"`
 }
 
+// indexOf is the index of listed records of kind k.
+func indexOf(k view.Kind, items []listed) []indexEntry {
+	out := make([]indexEntry, 0, len(items))
+	for _, it := range items {
+		o := it.obj
+		e := indexEntry{Path: o.Path, ETag: o.ETag, Kind: k}
+		switch k {
+		case view.KindContact:
+			e.UID, e.Title = card.UID(o), contactName(o)
+		case view.KindEvent:
+			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled event"), cal.RelatedTo(o)
+		case view.KindTask:
+			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled task"), cal.RelatedTo(o)
+		default:
+			e.UID, e.Title, e.Related = cal.UID(o), noteTitle(cal.Text(o, "SUMMARY"), cal.Description(o)), cal.RelatedTo(o)
+		}
+		out = append(out, e)
+	}
+	return out
+}
+
+func putIndex(sess *session.Session, accountID, path, component string, entries []indexEntry) {
+	data, err := json.Marshal(entries)
+	if err != nil {
+		return
+	}
+	sess.Cache().PutETagMap(accountID, path+"\x00"+component, data)
+}
+
 func (c *collectionCtx) indexKey(component string) string {
 	return c.col.Path + "\x00" + component
 }
@@ -221,11 +282,7 @@ func (c *collectionCtx) components() []string {
 }
 
 func (c *collectionCtx) putIndex(entries []indexEntry) {
-	data, err := json.Marshal(entries)
-	if err != nil {
-		return
-	}
-	c.sess.Cache().PutETagMap(c.conn.ID, c.indexKey(c.spec.component), data)
+	putIndex(c.sess, c.conn.ID, c.col.Path, c.spec.component, entries)
 }
 
 func (c *collectionCtx) index() []indexEntry {
@@ -282,9 +339,24 @@ func (s *Server) unavailableNotice(c *collectionCtx, retry string, err error) vi
 	}
 }
 
-func unreadableNotice(bad []cal.Unreadable) (view.Notice, bool) {
+// unreadable is a record that could not be read, with the stamp of its
+// collection when the list is combined.
+type unreadable struct {
+	cal.Unreadable
+	stamp view.Stamp
+}
+
+func unreadableOf(bad []cal.Unreadable) []unreadable {
+	out := make([]unreadable, len(bad))
+	for i, b := range bad {
+		out[i] = unreadable{Unreadable: b}
+	}
+	return out
+}
+
+func appendUnreadable(notices []view.Notice, bad []unreadable) []view.Notice {
 	if len(bad) == 0 {
-		return view.Notice{}, false
+		return notices
 	}
 	n := view.Notice{
 		Role:    view.NoticeAlert,
@@ -293,9 +365,13 @@ func unreadableNotice(bad []cal.Unreadable) (view.Notice, bool) {
 		Details: &view.Diagnostic{Summary: text("Unreadable records")},
 	}
 	for _, b := range bad {
-		n.Details.Lines = append(n.Details.Lines, text(b.Path+" · "+b.Err.Error()))
+		line := b.Path + " · " + b.Err.Error()
+		if b.stamp != "" {
+			line = string(b.stamp) + " · " + line
+		}
+		n.Details.Lines = append(n.Details.Lines, text(line))
 	}
-	return n, true
+	return append(notices, n)
 }
 
 // writeFailure is a refused write: nothing saved, the form keeps its values.
@@ -339,16 +415,26 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	if !ok {
 		return
 	}
+	// The rail is built after the list: the list is what fills its counts.
+	rail := func() view.Rail { return s.kindRail(c.sess, s.catalogOf(c.sess), c.spec, nil) }
 	var page any
 	switch c.spec.kind {
 	case view.KindContact:
-		page = s.contactsList(r, c)
+		p := s.contactsList(r, c)
+		p.Rail = rail()
+		page = p
 	case view.KindEvent:
-		page = s.agenda(r, c)
+		p := s.agenda(r, c)
+		p.Rail = rail()
+		page = p
 	case view.KindTask:
-		page = s.tasksList(r, c)
+		p := s.tasksList(r, c)
+		p.Rail = rail()
+		page = p
 	default:
-		page = s.notesList(r, c)
+		p := s.notesList(r, c)
+		p.Rail = rail()
+		page = p
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
@@ -361,94 +447,129 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
-	names := make(map[*model.Object]string, len(objs))
-	for _, o := range objs {
-		names[o] = contactName(o)
-	}
-	sort.SliceStable(objs, func(i, j int) bool {
-		ri, rj := rubricOf(names[objs[i]]), rubricOf(names[objs[j]])
-		if ri != rj {
-			// "#" gathers everything that does not start with a letter, last.
-			return rj == "#" || (ri != "#" && ri < rj)
-		}
-		if a, b := strings.ToLower(names[objs[i]]), strings.ToLower(names[objs[j]]); a != b {
-			return a < b
-		}
-		return card.UID(objs[i]) < card.UID(objs[j])
-	})
-	entries := make([]indexEntry, 0, len(objs))
-	for _, o := range objs {
-		uid, name := card.UID(o), names[o]
-		row := view.ContactRow{
-			Href:   s.route(c.recordPath(uid)),
-			UID:    uid,
-			Avatar: avatarFor(uid, name),
-			Name:   text(name),
-			Phone:  text(firstValue(o, "TEL")),
-			Email:  text(firstValue(o, "EMAIL")),
-			Org:    text(structured(firstValue(o, "ORG"))),
-			State:  view.RecordOK,
-		}
-		rubric := rubricOf(name)
-		if n := len(page.Groups); n == 0 || string(page.Groups[n-1].Rubric) != rubric {
-			page.Groups = append(page.Groups, view.ContactGroup{Rubric: text(rubric)})
-		}
-		g := &page.Groups[len(page.Groups)-1]
-		g.Rows = append(g.Rows, row)
-		entries = append(entries, indexEntry{UID: uid, Path: o.Path, ETag: o.ETag, Kind: view.KindContact, Title: name})
-	}
-	c.putIndex(entries)
+	items := c.listed(objs)
+	page.Groups = s.contactGroups(items, c.spec.segment, false)
+	c.putIndex(indexOf(view.KindContact, items))
 	total := len(objs)
 	page.Bar.Loaded, page.Bar.Total = total, &total
 	return page
 }
 
-// agenda is one week of one calendar in the instance zone. Without a window
-// the calendar is never read whole (S-11); the window goes to the server as
-// the REPORT time-range. Series are expanded here, and an instance another
-// client rewrote (RECURRENCE-ID) is laid over the instant it replaces.
-func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
-	tf := c.tf
-	tz := tf.tz
-	from := tf.weekStart(time.Now().In(tz))
-	if q := r.URL.Query().Get("from"); q != "" {
-		if d, err := time.ParseInLocation("2006-01-02", q, tz); err == nil {
-			from = d
+// contactGroups sorts contacts by name under letter rubrics; "#" gathers
+// everything that does not start with a letter, last. mark puts the origin on
+// every row.
+func (s *Server) contactGroups(items []listed, segment string, mark bool) []view.ContactGroup {
+	names := make([]string, len(items))
+	order := make([]int, len(items))
+	for i, it := range items {
+		names[i], order[i] = contactName(it.obj), i
+	}
+	sort.SliceStable(order, func(a, b int) bool {
+		i, j := order[a], order[b]
+		ri, rj := rubricOf(names[i]), rubricOf(names[j])
+		if ri != rj {
+			return rj == "#" || (ri != "#" && ri < rj)
+		}
+		if x, y := strings.ToLower(names[i]), strings.ToLower(names[j]); x != y {
+			return x < y
+		}
+		if x, y := card.UID(items[i].obj), card.UID(items[j].obj); x != y {
+			return x < y
+		}
+		return items[i].from.listPath(segment) < items[j].from.listPath(segment)
+	})
+	var groups []view.ContactGroup
+	for _, i := range order {
+		it, name := items[i], names[i]
+		uid := card.UID(it.obj)
+		row := view.ContactRow{
+			Href:   s.route(it.from.recordPath(segment, uid)),
+			UID:    uid,
+			Avatar: avatarFor(uid, name),
+			Name:   text(name),
+			Phone:  text(firstValue(it.obj, "TEL")),
+			Email:  text(firstValue(it.obj, "EMAIL")),
+			Org:    text(structured(firstValue(it.obj, "ORG"))),
+			State:  view.RecordOK,
+		}
+		if mark {
+			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
+		}
+		rubric := rubricOf(name)
+		if n := len(groups); n == 0 || string(groups[n-1].Rubric) != rubric {
+			groups = append(groups, view.ContactGroup{Rubric: text(rubric)})
+		}
+		g := &groups[len(groups)-1]
+		g.Rows = append(g.Rows, row)
+	}
+	return groups
+}
+
+// weekWindow is the agenda week in the instance zone: the week of today, or
+// the one starting at from.
+func weekWindow(tf timeFmt, from string) (time.Time, time.Time) {
+	start := tf.weekStart(time.Now().In(tf.tz))
+	if from != "" {
+		if d, err := time.ParseInLocation("2006-01-02", from, tf.tz); err == nil {
+			start = d
 		}
 	}
-	to := from.AddDate(0, 0, 7)
+	return start, start.AddDate(0, 0, 7)
+}
 
-	page := view.AgendaPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
-	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
-	week := func(t time.Time) string { return s.route(c.listPath() + "?from=" + t.Format("2006-01-02")) }
-	page.Bar.Range = &view.Range{
+func (s *Server) agendaRange(tf timeFmt, base string, from, to time.Time) *view.Range {
+	week := func(t time.Time) string { return s.route(base + "?from=" + t.Format("2006-01-02")) }
+	return &view.Range{
 		From: text(tf.date(from)),
 		To:   text(tf.date(to.AddDate(0, 0, -1))),
 		Presets: []view.Action{
 			{ID: "range.previous", Label: "Previous week", Href: week(from.AddDate(0, 0, -7)), Method: "GET", Enabled: true},
-			{ID: "range.current", Label: "This week", Href: s.route(c.listPath()), Method: "GET", Enabled: true},
+			{ID: "range.current", Label: "This week", Href: s.route(base), Method: "GET", Enabled: true},
 			{ID: "range.next", Label: "Next week", Href: week(to), Method: "GET", Enabled: true},
 		},
 	}
+}
+
+// agenda is one week of one calendar in the instance zone. Without a window
+// the calendar is never read whole (S-11); the window goes to the server as
+// the REPORT time-range.
+func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
+	tf := c.tf
+	from, to := weekWindow(tf, r.URL.Query().Get("from"))
+	page := view.AgendaPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
+	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
+	page.Bar.Range = s.agendaRange(tf, c.listPath(), from, to)
 
 	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, &from, &to)
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
+	items := c.listed(objs)
+	var more []unreadable
+	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, items, from, to, c.spec.segment, false)
+	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
+	c.putIndex(indexOf(view.KindEvent, items))
+	return page
+}
 
+// agendaDays expands series into the window and lays an instance another
+// client rewrote (RECURRENCE-ID) over the instant it replaces; the rows go
+// under day rubrics, all-day first, then by time.
+func (s *Server) agendaDays(tf timeFmt, items []listed, from, to time.Time, segment string, mark bool) ([]view.AgendaDay, int, []unreadable) {
+	tz := tf.tz
 	type occurrence struct {
 		at     time.Time
 		allDay bool
+		order  string
 		row    view.AgendaRow
 	}
 	var occs []occurrence
-	entries := make([]indexEntry, 0, len(objs))
-	for _, o := range objs {
+	var bad []unreadable
+	for _, it := range items {
+		o := it.obj
 		uid := cal.UID(o)
 		summary := titleOr(cal.Text(o, "SUMMARY"), "Untitled event")
-		entries = append(entries, indexEntry{UID: uid, Path: o.Path, ETag: o.ETag, Kind: view.KindEvent, Title: summary, Related: cal.RelatedTo(o)})
-
 		tm, err := cal.TimingOf(o, tz)
 		var instants []time.Time
 		if err == nil {
@@ -459,15 +580,19 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 			overrides, err = cal.Overrides(o, tz)
 		}
 		if err != nil {
-			bad = append(bad, cal.Unreadable{Path: o.Path, UID: uid, Err: err})
+			u := unreadable{Unreadable: cal.Unreadable{Path: o.Path, UID: uid, Err: err}}
+			if mark {
+				u.stamp = it.from.stamp()
+			}
+			bad = append(bad, u)
 			continue
 		}
 		for _, at := range instants {
 			if at.Before(from) || !at.Before(to) {
 				continue
 			}
-			occ := occurrence{at: at, allDay: tm.AllDay, row: view.AgendaRow{
-				Href:     s.route(c.recordPath(uid)),
+			occ := occurrence{at: at, allDay: tm.AllDay, order: it.from.listPath(segment), row: view.AgendaRow{
+				Href:     s.route(it.from.recordPath(segment, uid)),
 				UID:      uid,
 				Time:     text(tf.timeLabel(at, tm.AllDay)),
 				Zone:     text(tf.zone(tm.Zone)),
@@ -475,6 +600,9 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 				Location: text(cal.Text(o, "LOCATION")),
 				State:    view.RecordOK,
 			}}
+			if mark {
+				occ.row.Stamp, occ.row.Colour = it.from.stamp(), catalogColour(it.from.col)
+			}
 			for _, ov := range overrides {
 				if !ov.RecurrenceID.Equal(at) {
 					continue
@@ -508,31 +636,33 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 		if !occs[i].at.Equal(occs[j].at) {
 			return occs[i].at.Before(occs[j].at)
 		}
-		return occs[i].row.Summary < occs[j].row.Summary
+		if occs[i].row.Summary != occs[j].row.Summary {
+			return occs[i].row.Summary < occs[j].row.Summary
+		}
+		return occs[i].order < occs[j].order
 	})
+	var days []view.AgendaDay
 	for _, o := range occs {
 		rubric := tf.dayRubric(o.at)
-		if n := len(page.Days); n == 0 || string(page.Days[n-1].Rubric) != rubric {
-			page.Days = append(page.Days, view.AgendaDay{Rubric: text(rubric)})
+		if n := len(days); n == 0 || string(days[n-1].Rubric) != rubric {
+			days = append(days, view.AgendaDay{Rubric: text(rubric)})
 		}
-		d := &page.Days[len(page.Days)-1]
+		d := &days[len(days)-1]
 		d.Rows = append(d.Rows, o.row)
 	}
-	if n, ok := unreadableNotice(bad); ok {
-		page.Notices = append(page.Notices, n)
-	}
-	c.putIndex(entries)
-	page.Bar.Loaded = len(occs)
-	return page
+	return days, len(occs), bad
 }
 
-func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
-	tf, now := c.tf, time.Now()
-	tz := tf.tz
+func taskShow(r *http.Request) string {
 	show := r.URL.Query().Get("show")
 	if show != "done" && show != "all" {
 		show = "open"
 	}
+	return show
+}
+
+func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
+	show := taskShow(r)
 	page := view.TasksPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
 	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, nil, nil)
@@ -540,18 +670,28 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
-
-	type item struct {
-		row view.TaskRow
-		due time.Time
-	}
-	var items []item
+	items := c.listed(objs)
 	var open, done int
-	entries := make([]indexEntry, 0, len(objs))
-	for _, o := range objs {
+	var more []unreadable
+	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, items, c.spec.segment, false, time.Now())
+	page.Bar.Segments = s.taskSegments(c.listPath(), show, open, done)
+	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
+	c.putIndex(indexOf(view.KindTask, items))
+	return page
+}
+
+// taskGroups shows open, done or all tasks: open first, then by due date,
+// undated last.
+func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment string, mark bool, now time.Time) (groups []view.TaskGroup, open, done, loaded int, bad []unreadable) {
+	type item struct {
+		row   view.TaskRow
+		due   time.Time
+		order string
+	}
+	var rows []item
+	for _, it := range items {
+		o := it.obj
 		uid := cal.UID(o)
-		summary := titleOr(cal.Text(o, "SUMMARY"), "Untitled task")
-		entries = append(entries, indexEntry{UID: uid, Path: o.Path, ETag: o.ETag, Kind: view.KindTask, Title: summary, Related: cal.RelatedTo(o)})
 		isDone := taskDone(o)
 		if isDone {
 			done++
@@ -561,23 +701,31 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 		if (show == "open" && isDone) || (show == "done" && !isDone) {
 			continue
 		}
-		due, err := cal.DueOf(o, tz)
+		due, err := cal.DueOf(o, tf.tz)
 		if err != nil {
-			bad = append(bad, cal.Unreadable{Path: o.Path, UID: uid, Err: err})
+			u := unreadable{Unreadable: cal.Unreadable{Path: o.Path, UID: uid, Err: err}}
+			if mark {
+				u.stamp = it.from.stamp()
+			}
+			bad = append(bad, u)
 			continue
 		}
 		row := view.TaskRow{
-			Href: s.route(c.recordPath(uid)), UID: uid, Done: isDone, Summary: text(summary),
+			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Done: isDone,
+			Summary: text(titleOr(cal.Text(o, "SUMMARY"), "Untitled task")),
 			Percent: percentOf(o), Tags: tagsOf(cal.TextList(o, "CATEGORIES")), State: view.RecordOK,
+		}
+		if mark {
+			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
 		}
 		if !due.Start.IsZero() {
 			row.Due = text(tf.timeOrDate(due))
 			row.Overdue = !isDone && due.Start.Before(now)
 		}
-		items = append(items, item{row: row, due: due.Start})
+		rows = append(rows, item{row: row, due: due.Start, order: it.from.listPath(segment)})
 	}
-	sort.SliceStable(items, func(i, j int) bool {
-		a, b := items[i], items[j]
+	sort.SliceStable(rows, func(i, j int) bool {
+		a, b := rows[i], rows[j]
 		if a.row.Done != b.row.Done {
 			return !a.row.Done
 		}
@@ -587,38 +735,37 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 		if !a.due.Equal(b.due) {
 			return a.due.Before(b.due)
 		}
-		return a.row.Summary < b.row.Summary
+		if a.row.Summary != b.row.Summary {
+			return a.row.Summary < b.row.Summary
+		}
+		return a.order < b.order
 	})
-	if len(items) > 0 {
+	if len(rows) > 0 {
 		group := view.TaskGroup{}
-		for _, it := range items {
+		for _, it := range rows {
 			group.Rows = append(group.Rows, it.row)
 		}
-		page.Groups = []view.TaskGroup{group}
+		groups = []view.TaskGroup{group}
 	}
+	return groups, open, done, len(rows), bad
+}
+
+func (s *Server) taskSegments(base, show string, open, done int) []view.Action {
 	segment := func(id, label, value string, n int) view.Action {
-		a := view.Action{ID: id, Label: text(fmt.Sprintf("%s · %d", label, n)), Href: s.route(c.listPath() + "?show=" + value), Method: "GET", Enabled: show != value}
+		a := view.Action{ID: id, Label: text(fmt.Sprintf("%s · %d", label, n)), Href: s.route(base + "?show=" + value), Method: "GET", Enabled: show != value}
 		if show == value {
 			a.Reason = "Shown now."
 		}
 		return a
 	}
-	page.Bar.Segments = []view.Action{
+	return []view.Action{
 		segment("tasks.open", "Open", "open", open),
 		segment("tasks.done", "Done", "done", done),
 		segment("tasks.all", "All", "all", open+done),
 	}
-	if n, ok := unreadableNotice(bad); ok {
-		page.Notices = append(page.Notices, n)
-	}
-	c.putIndex(entries)
-	page.Bar.Loaded = len(items)
-	return page
 }
 
 func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
-	tf := c.tf
-	tz := tf.tz
 	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
 	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, nil, nil)
@@ -626,45 +773,57 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
+	items := c.listed(objs)
+	var more []unreadable
+	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, items, c.spec.segment, false)
+	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
+	c.putIndex(indexOf(view.KindNote, items))
+	return page
+}
+
+// noteGroups lists notes newest first.
+func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark bool) ([]view.NoteGroup, int, []unreadable) {
 	type item struct {
-		row view.NoteRow
-		at  time.Time
+		row   view.NoteRow
+		at    time.Time
+		order string
 	}
-	items := make([]item, 0, len(objs))
-	entries := make([]indexEntry, 0, len(objs))
-	for _, o := range objs {
+	rows := make([]item, 0, len(items))
+	for _, it := range items {
+		o := it.obj
 		uid, body := cal.UID(o), cal.Description(o)
 		title := noteTitle(cal.Text(o, "SUMMARY"), body)
-		entries = append(entries, indexEntry{UID: uid, Path: o.Path, ETag: o.ETag, Kind: view.KindNote, Title: title, Related: cal.RelatedTo(o)})
-		at := noteTime(o, tz)
+		at := noteTime(o, tf.tz)
 		row := view.NoteRow{
-			Href: s.route(c.recordPath(uid)), UID: uid, Title: text(title), Excerpt: text(noteExcerpt(body, title)),
+			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Title: text(title), Excerpt: text(noteExcerpt(body, title)),
 			Tags: tagsOf(cal.TextList(o, "CATEGORIES")), State: view.RecordOK,
+		}
+		if mark {
+			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
 		}
 		if !at.IsZero() {
 			row.Date = text(tf.date(at))
 		}
-		items = append(items, item{row: row, at: at})
+		rows = append(rows, item{row: row, at: at, order: it.from.listPath(segment)})
 	}
-	sort.SliceStable(items, func(i, j int) bool {
-		if !items[i].at.Equal(items[j].at) {
-			return items[i].at.After(items[j].at)
+	sort.SliceStable(rows, func(i, j int) bool {
+		if !rows[i].at.Equal(rows[j].at) {
+			return rows[i].at.After(rows[j].at)
 		}
-		return items[i].row.Title < items[j].row.Title
+		if rows[i].row.Title != rows[j].row.Title {
+			return rows[i].row.Title < rows[j].row.Title
+		}
+		return rows[i].order < rows[j].order
 	})
-	if len(items) > 0 {
+	var groups []view.NoteGroup
+	if len(rows) > 0 {
 		group := view.NoteGroup{}
-		for _, it := range items {
+		for _, it := range rows {
 			group.Rows = append(group.Rows, it.row)
 		}
-		page.Groups = []view.NoteGroup{group}
+		groups = []view.NoteGroup{group}
 	}
-	if n, ok := unreadableNotice(bad); ok {
-		page.Notices = append(page.Notices, n)
-	}
-	c.putIndex(entries)
-	page.Bar.Loaded = len(items)
-	return page
+	return groups, len(rows), nil
 }
 
 func firstValue(obj *model.Object, prop string) string {
