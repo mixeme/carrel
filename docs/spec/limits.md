@@ -127,6 +127,8 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | Тело обычного POST (формы, JSON, CSRF) | 1 MiB | `MaxFormBodyBytes` | ✅ |
 | Тело POST `photo-preview` (загрузка фото) | `CARREL_PHOTO_MAX_UPLOAD_BYTES` + 1 MiB | `bodyLimit` | ✅ |
 | Ближайший кадр фото контакта | 400 % наибольшего квадрата | `PhotoMaxZoom` | ✅ |
+| Тело multipart POST `upload` (файлы) | без потолка; поля перед первым файлом — 1 MiB | `isFileUpload`, `readUploadFields` | ✅ |
+| Строк в очереди передач сессии | 50 | `TransferQueueLen` | ✅ |
 
 Фото и импорт — отдельные C-12. Файлы на чужой WebDAV — **без потолка Carrel**
 (C-12). Сверх 1 MiB — 413, тело дальше не читается.
@@ -135,7 +137,7 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 
 | Переменная | Умолчание | Человекочитаемо | Назначение |
 |---|---|---|---|
-| `CARREL_DAV_MAX_RESPONSE_BYTES` | 10 485 760 | 10 MiB | Потолок одного DAV-ответа |
+| `CARREL_DAV_MAX_RESPONSE_BYTES` | 10 485 760 | 10 MiB | Потолок одного DAV-ответа; тело файла (`dav.Streamer`) — без него |
 | `CARREL_CACHE_MAX_BODY_BYTES` | 67 108 864 | 64 MiB | Тела объектов на сессию |
 | `CARREL_CACHE_MAX_PROCESS_BYTES` | 268 435 456 | 256 MiB | Общий кэш процесса |
 | `CARREL_CACHE_MAX_THUMB_BYTES` | 16 777 216 | 16 MiB | Миниатюры на сессию |
@@ -153,7 +155,7 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | Что | Значение | Константа (план) | Статус |
 |---|---|---|---|
 | Inline-вложение | 2 MiB | `AttachInlineMax` | 📋 |
-| Миниатюра из оригинала файла | 512 KiB | `FileThumbMaxBytes` | 📋 |
+| Миниатюра из оригинала файла | 512 KiB | `FileThumbMaxBytes` | ✅ |
 
 Коллекция может только **уменьшить** порог через `max-resource-size` (RFC 4791).
 

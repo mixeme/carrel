@@ -219,7 +219,7 @@ func (s *Server) findRow(tf timeFmt, blob sealed.Blob, it fanout.Item) view.Find
 	case view.KindFile:
 		row.Title = text(it.FileName)
 		row.Detail = text(string(formatSize(it.FileSize)))
-		row.Href = s.route(fileHref(it))
+		row.Href = s.route(foundFileHref(it))
 		return row
 	case view.KindContact:
 		row.Title = text(contactName(o))
@@ -254,15 +254,11 @@ func (s *Server) findRow(tf timeFmt, blob sealed.Blob, it fanout.Item) view.Find
 	return row
 }
 
-// fileHref is the folder route of a file: the collection as one segment, the
-// rest of the path as a path (C-4.1).
-func fileHref(it fanout.Item) string {
+// foundFileHref is the folder route of a found file: its folder with the file
+// selected (S-17).
+func foundFileHref(it fanout.Item) string {
 	rel := strings.TrimPrefix(it.Path, strings.TrimSuffix(it.Col, "/")+"/")
-	parts := strings.Split(rel, "/")
-	for i, p := range parts {
-		parts[i] = url.PathEscape(p)
-	}
-	return "/app/files/" + it.AccountID + "/" + url.PathEscape(it.Col) + "/" + strings.Join(parts, "/")
+	return fileHref(it.AccountID, it.Col, "", strings.Split(rel, "/"), false)
 }
 
 // searchKey orders the result by kind — contacts, events, tasks, notes, files

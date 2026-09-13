@@ -243,57 +243,6 @@ func (s *Server) ownedRecordStub(w http.ResponseWriter, r *http.Request) {
 	s.notFound(w, r)
 }
 
-func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.FilesRootPage{Shell: s.buildShell(sess, "Files")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) getFiles(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	path := r.PathValue("path")
-	if !s.rejectPathTraversal(w, r, path) {
-		return
-	}
-	if !s.checkOwnership(w, r, sess, r.PathValue("account"), r.PathValue("col"), "") {
-		return
-	}
-	page := view.FilesPage{Shell: s.buildShell(sess, "Files")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) getFilesDownload(w http.ResponseWriter, r *http.Request) {
-	s.notFound(w, r)
-}
-
-func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	q := view.TransferQueue{}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetQueue, q, nil)
-		return
-	}
-	_ = sess
-	s.notFound(w, r)
-}
-
-func (s *Server) postFilesMkcol(w http.ResponseWriter, r *http.Request) {
-	s.getFiles(w, r)
-}
-
-func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
-}
-
 func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 	s.getQuickNote(w, r)
 }

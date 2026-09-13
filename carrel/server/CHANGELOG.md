@@ -5,6 +5,145 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.53 — 2026-09-14
+
+S-17 in [server.md](../../docs/plan/server.md): files. The C-5.5 routes that
+were stubs answer: the root of the section, a folder, download, upload, new
+folder and the operations, with the transfer queue that asks about taken
+names.
+
+### For consumers
+
+- **Root.** `GET /app/files` is `FilesRootPage`: the ticked file collections
+  as rows (a gone one stays, `state: gone`, without `href`), the shortcuts
+  `files.attachments` and `files.published`, and `empty` when nothing shows —
+  "No file storage is connected" (with `account.connect`) or "No storage is
+  ticked".
+- **Rail.** The files rail has `nav.files` on, a first row "Selected
+  collections" whose tick is off, part or on, and the file collections by
+  connection. Their `href` is the collection root and ends in `/`; no count, no
+  menu. `POST /app/sources/files` with `tick` = those hrefs replaces the file
+  ticks, as for the record kinds; a fragment answers `rail` alone.
+- **Folder.** `GET /app/files/{account}/{col}/{path…}` is `FilesPage`. A
+  folder address ends in `/`; each segment is decoded on its own, and an
+  empty, `.` or `..` segment is 404.
+  - **Rows.** Folders first. A folder's `href` is its address and `type`
+    "folder". A file's `href` is its download, `type` its media type, and
+    `thumb` its download with `?inline=1` when it is PNG, JPEG, GIF or WebP of
+    at most 512 KiB; otherwise empty.
+  - **Menu.** `file.download` (files), `file.rename`, `file.move`,
+    `file.copy`, `file.delete`. On a read-only storage everything except
+    download and copy is disabled with a reason.
+  - **Bar.** `file.upload`, `folder.new`, and over a selection `file.download`
+    (one file), `file.rename` (one item), `file.move`, `file.copy`,
+    `file.delete`. `segments` are `files.view.list`, `files.view.tiles`,
+    `files.sort.name`, `files.sort.size`, `files.sort.changed`.
+  - **Query.** `filter`, `sort`, `view` and `select` (repeatable) cut the
+    listing this session read last; the plain address reads the server.
+  - **A file's address** without the trailing slash — what search results link
+    to — is its folder with the file selected. A folder's address without the
+    slash redirects to it.
+  - **Other fields.** `crumbs` lead to the root, the current one without
+    `href`. `queue` is the transfer queue, or null. Over
+    `CARREL_FILES_MAX_ENTRIES` rows the page says how many it shows.
+  - A server that does not answer is a notice with `source.retry`, not 500.
+- **Download.** `GET …/download/{path…}` streams the file with no ceiling of
+  Carrel's. The header `Range: bytes=a-b` or `a-` is passed on, and a 206
+  comes back with `Content-Range`. Every response carries
+  `Content-Disposition: attachment` with the file name,
+  `Content-Security-Policy: sandbox; default-src 'none'`, `nosniff`,
+  `Cache-Control: private, no-cache`, and the server's `ETag`,
+  `Last-Modified` and `Content-Length`.
+  - Only `?inline=1` on the four raster types is `inline`.
+  - A missing file is 404; a refusal is the folder page with a notice.
+  - An address after `download/` that ends in `/` is the folder `download`
+    at the root of the collection.
+- **Upload.** `POST …/upload/{folder}/`, `multipart/form-data`, one or more
+  file parts named `file`. The body has no cap.
+  - **Token.** `_csrf` must come before the first file (the fields in front of
+    it are capped at 1 MiB), or go in `X-CSRF-Token`. A file part before the
+    token is 403, and nothing is written.
+  - **A free name** goes straight to the server, streamed.
+  - **A taken name** is never overwritten, also on servers that ignore
+    `If-None-Match`. The row waits with a question, and its file is kept in
+    the temporary directory until the answer or the end of the session.
+  - **The answer.** A fragment answers target `queue` with `TransferQueue`; a
+    plain form redirects to the folder.
+- **Queue.** Rows have `state` `done`, `failed`, `cancelled` (skipped) or
+  `idle` (asking).
+  - **Question.** An asking row carries `question` with `transfer.skip`
+    "Skip", `transfer.both` "Keep both" and `transfer.overwrite` "Overwrite
+    this one" (danger). Each is a POST to the same upload or op address with
+    `transfer` and `answer`.
+  - **Answers.** Keep both takes the first free `name-2.ext`, `name-3.ext`, …;
+    Overwrite is the only write without a precondition. A row answers once
+    and in its own session; otherwise 404.
+  - **Shown once.** Asking rows stay; a finished row appears once, in the
+    first queue shown after it finished. `note` summarises the rows and says
+    why each failed one failed.
+- **New folder.** `POST …/mkcol/{folder}/` with the field `name`. Success
+  redirects, or answers `main` with the folder. A taken name ("… is already
+  here"), a bad name or a read-only storage is the folder with a notice.
+- **Operations.** `POST …/op/{folder}/?op=rename|move|copy|delete&item=…`
+  answers `FileOpSheet` (`sheet`). Its first action runs the operation, with
+  `go=1` in its address; the second, `file.op.cancel`, returns to the folder.
+  - **Rename.** Takes one item and the form field `name`.
+  - **Move and copy.** `target` is every live file collection as a root,
+    read-only ones marked, opened along the chosen folder. A form field or
+    query `to` = a node's `id` chooses it; the folder of the address is the
+    default.
+    - **Refused before it starts.** Moving into the same folder, a folder into
+      itself, onto a read-only storage, and moving out of one.
+    - **Across connections.** Another connection has `warning` said before it
+      starts. The files go GET → PUT and nothing moves on a server; a move
+      deletes the original only after the whole copy arrived.
+    - **One connection.** Moves and renames are MOVE, without traffic.
+  - **Delete.** `warning` says Carrel keeps no index of what points at a file.
+    The run sends the versions the sheet read, so a file changed since stays:
+    "0 of 1 item deleted".
+  - **Reports.** Rename, move and copy report in the queue, a taken name as a
+    question. Delete reports in notices. A plain form redirects when there is
+    nothing to say.
+- **Known limits.** `CARREL_DAV_REQUEST_TIMEOUT` still bounds a whole DAV
+  request, body included, so a download or upload that takes longer is cut.
+  A folder copy stops at `CARREL_FILES_MAX_ENTRIES` entries and says so.
+
+### Included
+
+- `dav`:
+  - `Streamer` and `Client.Open` return a `Download` without the response cap;
+    `Get` keeps the cap.
+  - `Sized` gives a PUT body its length.
+  - `MkCol` and `Move` send their own requests and refuse with a
+    `StatusError`, and a 207 from MOVE or DELETE is a refusal. `Move` sends
+    `Overwrite: F` or `T`.
+- `file`:
+  - New `Open`, `Stat`, `NotFound`, `MkCol`, `Move`, `Delete` (with the
+    version as If-Match), `UploadOverwrite`, `Copy`, `CopyTree`, `Suffixed`
+    and `CheckName`.
+  - `Entry.Type`.
+  - `List` drops hrefs outside the folder or deeper in it.
+- `session`: `Transfer`, `KeepTransfer`, `TakeTransfer`, `ReadTransfers`. The
+  end of a session discards every row.
+- `conf`: `FileThumbMaxBytes` = 512 KiB, `TransferQueueLen` = 50.
+- `user`: `NewTransferID` (`q-`).
+- `davtest`:
+  - `FilesIgnoreIfNoneMatch` (SFTPGo's PUT), `File` and `SeedFolder`.
+  - A DELETE under `FileRoot` is checked by the file server.
+- `web`:
+  - `files.go`, `files_ops.go`.
+  - The rail's section rows come from `navRows`.
+  - The upload body is read as a stream in the middleware.
+- Tests:
+  - `dav`: `TestOpenPassesTheWholeFile`, `TestSizedBodyIsNotChunked`,
+    `TestMoveMkColAndDeleteRefusals`.
+  - `file`: `TestFileOperations`, `TestListKeepsTheFolderOnly`,
+    `TestGetIsNotCapped`.
+  - `session`: `TestTransferQueue`.
+  - `web`: seven tests in `files_test.go`.
+  - `integration/files_live_test.go` (`TestSFTPGoFiles`), not run: the live
+    servers did not answer on 14.09.2026.
+
 ## v0.0.52 — 2026-09-13
 
 S-13 in [server.md](../../docs/plan/server.md): contact photos. One route

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -31,15 +32,36 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 	}
 
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
-		r.Body = http.MaxBytesReader(w, r.Body, s.bodyLimit(r))
-
 		sess, hasSess := s.sessionFrom(r)
+		// A file upload has no ceiling of Carrel's (C-12): its body is read as it
+		// arrives, and only the fields in front of the files are bounded.
+		stream := hasSess && isFileUpload(r)
+		if !stream {
+			r.Body = http.MaxBytesReader(w, r.Body, s.bodyLimit(r))
+		}
+
 		if needsCSRF(r) && hasSess {
 			if token := r.Header.Get(csrfHeaderName); token != "" {
 				if !sess.CheckCSRF(token) {
 					http.Error(w, "forbidden", http.StatusForbidden)
 					return
 				}
+			} else if stream {
+				// _csrf comes before the first file: a token after it cannot be
+				// read without buffering the file.
+				up, err := readUploadFields(r)
+				switch {
+				case err != nil && tooLarge(err):
+					http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)
+					return
+				case err != nil:
+					http.Error(w, "bad request", http.StatusBadRequest)
+					return
+				case !sess.CheckCSRF(up.fields.Get(csrfFormField)):
+					http.Error(w, "forbidden", http.StatusForbidden)
+					return
+				}
+				r = r.WithContext(context.WithValue(r.Context(), uploadKey{}, up))
 			} else if token, err := csrfTokenFromBody(r); err != nil {
 				if tooLarge(err) {
 					http.Error(w, "payload too large", http.StatusRequestEntityTooLarge)

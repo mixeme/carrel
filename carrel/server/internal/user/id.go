@@ -34,6 +34,13 @@ func NewTaskID() (string, error) {
 	return newEntityID("t-")
 }
 
+// NewTransferID returns the ID of a row of the transfer queue (S-17.3): q- +
+// 10 Crockford chars from 6 random bytes. A row answers in its own session
+// only.
+func NewTransferID() (string, error) {
+	return newEntityID("q-")
+}
+
 // NewAccountID returns a connection ID: a- + 10 Crockford chars from 6 random bytes.
 func NewAccountID() (string, error) {
 	return newEntityID("a-")

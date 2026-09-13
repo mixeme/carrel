@@ -12,10 +12,11 @@ S-11…S-26 — закрытые развилки в [server.md](server.md), д�
 
 ## Не этот слой
 
-- [ ] **Потолок GET режет файлы.** `dav.Get` и страж оба вешают `LimitReader`
+- [x] **Потолок GET режет файлы.** `dav.Get` и страж оба вешают `LimitReader`
       на `CARREL_DAV_MAX_RESPONSE_BYTES` (10 МиБ, C-12). Провайдер пробрасывает
       этот поток — файл больше потолка не скачается. Это не буфер в `[]byte`.
       Снимать потолок со стрима файла — S-17 / `dav`, не `provider/file`
+      (`v0.0.53`: `dav.Streamer`, `Client.Open`; `Get` записей под потолком)
 - [x] **PHOTO `TYPE=JPEG` уходит как Content-Type.** Тип из TYPE/MEDIATYPE
       как есть, без угадывания по байтам. HTTP `JPEG` невалиден; `image/jpeg`
       — S-13 (`v0.0.52`: `photo.MediaType`, байты обязаны быть объявленным

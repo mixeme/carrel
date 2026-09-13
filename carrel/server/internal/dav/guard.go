@@ -286,7 +286,7 @@ func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	if resp.Body != nil && t.max > 0 {
+	if resp.Body != nil && t.max > 0 && !uncapped(req) {
 		resp.Body = &limitedBody{ReadCloser: resp.Body, remain: t.max}
 	}
 	return resp, nil

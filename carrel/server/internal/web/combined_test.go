@@ -211,8 +211,17 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 	if after := decode[view.ContactsListPage](t, f.h.do(get("/app/contacts", f.sess))); len(after.Groups) != 0 || after.Poll.TaskID != "" {
 		t.Errorf("unticked everything, still shown: %+v", after.Groups)
 	}
-	if rec := f.h.do(postForm("/app/sources/files", f.sess, url.Values{})); rec.Code != http.StatusNotFound {
-		t.Errorf("files have no combined view: %d", rec.Code)
+	// Files tick their root (S-17.2), not a combined view, and leave the ticks of
+	// the record kinds alone.
+	tickRail(t, f.h, f.sess, "contacts", people.Href)
+	if rec := f.h.do(postForm("/app/sources/files", f.sess, url.Values{"tick": {people.Href}})); rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/app/files" {
+		t.Errorf("files ticks: %d %q", rec.Code, rec.Header().Get("Location"))
+	}
+	if got := selected(t, f.h, f.sess, view.KindContact); len(got) != 1 {
+		t.Errorf("ticking files changed the contacts: %v", got)
+	}
+	if got := selected(t, f.h, f.sess, view.KindFile); len(got) != 0 {
+		t.Errorf("an address book was ticked as files: %v", got)
 	}
 }
 

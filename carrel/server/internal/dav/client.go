@@ -101,13 +101,7 @@ func (c *Client) Get(ctx context.Context, p string, rng *Range) (io.ReadCloser, 
 	if err != nil {
 		return nil, "", err
 	}
-	if rng != nil {
-		if rng.End >= 0 {
-			req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", rng.Start, rng.End))
-		} else {
-			req.Header.Set("Range", fmt.Sprintf("bytes=%d-", rng.Start))
-		}
-	}
+	setRange(req, rng)
 	resp, err := c.hc.Do(req)
 	if err != nil {
 		return nil, "", err
@@ -124,14 +118,21 @@ func (c *Client) Get(ctx context.Context, p string, rng *Range) (io.ReadCloser, 
 	return body, etag, nil
 }
 
+func setRange(req *http.Request, rng *Range) {
+	if rng == nil {
+		return
+	}
+	if rng.End >= 0 {
+		req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", rng.Start, rng.End))
+	} else {
+		req.Header.Set("Range", fmt.Sprintf("bytes=%d-", rng.Start))
+	}
+}
+
 func (c *Client) Put(ctx context.Context, p string, body io.Reader, ifMatch string) (string, error) {
-	body, ct := unwrap(body)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, c.resolve(p), body)
+	req, err := c.putRequest(ctx, p, body)
 	if err != nil {
 		return "", err
-	}
-	if ct != "" {
-		req.Header.Set("Content-Type", ct)
 	}
 	if ifMatch != "" {
 		req.Header.Set("If-Match", ifMatch)
@@ -160,14 +161,46 @@ func (c *Client) Delete(ctx context.Context, p, ifMatch string) error {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode/100 != 2 && resp.StatusCode != http.StatusNotFound {
+	switch {
+	case resp.StatusCode == http.StatusMultiStatus:
+		// A folder some of whose members the server could not delete (RFC
+		// 4918 §9.6.1): it is still there.
+		return &StatusError{Code: resp.StatusCode, Msg: "some members were not deleted"}
+	case resp.StatusCode/100 != 2 && resp.StatusCode != http.StatusNotFound:
 		return httpStatusError(resp)
 	}
 	return nil
 }
 
+// MkCol creates a plain collection. A refusal is a StatusError: a name already
+// taken answers 405 (RFC 4918 §9.3.1).
 func (c *Client) MkCol(ctx context.Context, p string) error {
-	return c.webdav.Mkdir(ctx, p)
+	req, err := http.NewRequestWithContext(ctx, "MKCOL", c.resolve(p), nil)
+	if err != nil {
+		return err
+	}
+	return c.doStatus(req, "")
+}
+
+// doStatus sends a request whose answer is its status. A 207 is not a success:
+// a MOVE answers it for a folder some of whose members did not move (RFC 4918
+// §9.9.4).
+func (c *Client) doStatus(req *http.Request, partial string) error {
+	resp, err := c.hc.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	switch {
+	case resp.StatusCode == http.StatusMultiStatus:
+		if partial == "" {
+			partial = resp.Status
+		}
+		return &StatusError{Code: resp.StatusCode, Msg: partial}
+	case resp.StatusCode/100 != 2:
+		return httpStatusError(resp)
+	}
+	return nil
 }
 
 // MkColProps creates a collection with properties in one request: extended
@@ -256,9 +289,20 @@ func (c *Client) propPatchRefusal(body io.Reader) error {
 	return nil
 }
 
+// Move moves or renames inside this server; no body travels. Without
+// overwrite a taken destination answers 412, a StatusError like every other
+// refusal.
 func (c *Client) Move(ctx context.Context, src, dst string, overwrite bool) error {
-	opts := &webdav.MoveOptions{NoOverwrite: !overwrite}
-	return c.webdav.Move(ctx, src, dst, opts)
+	req, err := http.NewRequestWithContext(ctx, "MOVE", c.resolve(src), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Destination", c.resolve(dst))
+	req.Header.Set("Overwrite", "F")
+	if overwrite {
+		req.Header.Set("Overwrite", "T")
+	}
+	return c.doStatus(req, "some members were not moved")
 }
 
 // CalReporter returns the CalDAV report surface for this client.

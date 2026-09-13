@@ -32,4 +32,13 @@ const (
 	// PhotoMaxZoom is the closest frame of a contact photo, in percent of the
 	// largest square that fits: 400 is a quarter of its side (S-13).
 	PhotoMaxZoom = 400
+
+	// FileThumbMaxBytes is the largest image a folder shows as its own
+	// thumbnail: the original is what is served, so a larger one gets the icon
+	// of its type (S-17).
+	FileThumbMaxBytes = 512 << 10
+	// TransferQueueLen is how many rows the transfer queue of a session keeps
+	// (S-17.3). Past it the oldest row that asks nothing goes, then the oldest
+	// question with the upload it holds.
+	TransferQueueLen = 50
 )

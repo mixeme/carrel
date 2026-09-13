@@ -52,6 +52,11 @@ type Server struct {
 	// is kept as go-vcard or go-ical write it back.
 	Drop []string
 
+	// FilesIgnoreIfNoneMatch makes a PUT under FileRoot overwrite a taken
+	// name, the way x/net/webdav does (SFTPGo): the header is dropped before
+	// the file server sees it.
+	FilesIgnoreIfNoneMatch bool
+
 	mu        sync.Mutex
 	sent      map[string][]byte // the body of the PUT being handled, by path
 	calendars map[string]caldav.Calendar
@@ -126,6 +131,22 @@ func (s *Server) SeedFile(p, body string) {
 		panic(err)
 	}
 	if err := os.WriteFile(local, []byte(body), 0o644); err != nil {
+		panic(err)
+	}
+}
+
+// File returns a file under FileRoot as the server holds it.
+func (s *Server) File(p string) (string, bool) {
+	data, err := os.ReadFile(s.localPath(p))
+	if err != nil {
+		return "", false
+	}
+	return string(data), true
+}
+
+// SeedFolder creates an empty folder under FileRoot.
+func (s *Server) SeedFolder(p string) {
+	if err := os.MkdirAll(s.localPath(p), 0o755); err != nil {
 		panic(err)
 	}
 }
@@ -354,9 +375,13 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files 
 		s.homeProps(w, p)
 		return
 	}
-	// go-webdav hands DELETE to the backend without its If-Match.
-	if r.Method == http.MethodDelete && !s.deletePrecondition(w, r) {
+	// go-webdav hands a record's DELETE to the backend without its If-Match;
+	// its file server checks the header itself.
+	if r.Method == http.MethodDelete && !strings.HasPrefix(p, FileRoot) && !s.deletePrecondition(w, r) {
 		return
+	}
+	if r.Method == http.MethodPut && s.FilesIgnoreIfNoneMatch && strings.HasPrefix(p, FileRoot) {
+		r.Header.Del("If-None-Match")
 	}
 
 	switch {

@@ -16,7 +16,8 @@ import (
 //
 // One session serves several requests at once, so everything that changes
 // after Create is behind mu: the deadlines, the drafts, the history, the loss
-// registry, the live-fanout count and the kept tasks. Cache has its own lock.
+// registry, the live-fanout count, the kept tasks and the transfer queue.
+// Cache has its own lock.
 // No method calls into a task that locks while mu is held: a task takes mu
 // through AcquireFanout and ReleaseFanout under its own lock.
 type Session struct {
@@ -36,6 +37,7 @@ type Session struct {
 	losses     LossRegistry
 	fanout     int
 	tasks      []Task // newest first
+	transfers  []Transfer
 	unlockAt   time.Time
 
 	cache *Cache
@@ -362,11 +364,16 @@ func (s *Session) end() {
 	s.fanout = 0
 	tasks := s.tasks
 	s.tasks = nil
+	transfers := s.transfers
+	s.transfers = nil
 	s.unlockAt = time.Time{}
 	s.mu.Unlock()
 
 	for _, t := range tasks {
 		t.Cancel()
+	}
+	for _, t := range transfers {
+		t.Discard()
 	}
 	s.cache.markEnded()
 }

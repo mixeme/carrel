@@ -407,19 +407,7 @@ func kindCount(sess *session.Session, blob sealed.Blob, spec kindSpec) *int {
 // marked gone and not asked; one whose server did not answer this poll is
 // unavailable — the two are never the same state (S-21).
 func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec, snap *fanout.Snapshot) view.Rail {
-	rail := view.Rail{About: s.aboutAction()}
-	for _, seg := range []string{"contacts", "calendar", "tasks", "notes"} {
-		k := recordKinds[seg]
-		rail.Nav = append(rail.Nav, view.NavRow{
-			Action: view.Action{ID: "nav." + seg, Label: text(kindTitle(seg)), Href: s.route("/app/" + seg), Method: "GET", Enabled: true},
-			Count:  kindCount(sess, blob, k),
-			On:     seg == spec.segment,
-		})
-	}
-	rail.Nav = append(rail.Nav,
-		view.NavRow{Action: view.Action{ID: "nav.files", Label: "Files", Href: s.route("/app/files"), Method: "GET", Enabled: true}},
-		view.NavRow{Action: view.Action{ID: "nav.duplicates", Label: "Duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true}},
-	)
+	rail := view.Rail{About: s.aboutAction(), Nav: s.navRows(sess, blob, spec.segment)}
 
 	unavailable := map[string]bool{}
 	if snap != nil {
@@ -448,6 +436,22 @@ func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 	}
 	rail.Note = text(fmt.Sprintf("%d of %s ticked", on, plural(live, "collection")))
 	return rail
+}
+
+// navRows are the sections of the rail, the open one marked.
+func (s *Server) navRows(sess *session.Session, blob sealed.Blob, open string) []view.NavRow {
+	var nav []view.NavRow
+	for _, seg := range []string{"contacts", "calendar", "tasks", "notes"} {
+		nav = append(nav, view.NavRow{
+			Action: view.Action{ID: "nav." + seg, Label: text(kindTitle(seg)), Href: s.route("/app/" + seg), Method: "GET", Enabled: true},
+			Count:  kindCount(sess, blob, recordKinds[seg]),
+			On:     seg == open,
+		})
+	}
+	return append(nav,
+		view.NavRow{Action: view.Action{ID: "nav.files", Label: "Files", Href: s.route("/app/files"), Method: "GET", Enabled: true}, On: open == filesSpec.segment},
+		view.NavRow{Action: view.Action{ID: "nav.duplicates", Label: "Duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true}},
+	)
 }
 
 // backRail is the back rail of a record screen (C-6.3): one row out of it and
@@ -486,7 +490,17 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 			case col.ReadOnly:
 				row.State = view.CollectionReadOnly
 			}
-			if !col.Gone {
+			switch {
+			case col.Gone:
+			case spec.kind == view.KindFile:
+				// A file collection opens at its root folder; it has no count and
+				// no name of its own to change (S-12 renames records' collections).
+				live++
+				row.Href = s.route(fileHref(conn.ID, col.Path, "", nil, true))
+				if tick {
+					on++
+				}
+			default:
 				live++
 				row.Href = s.route(origin{conn: conn, col: col}.listPath(spec.segment))
 				row.Menu = []view.MenuItem{{Action: view.Action{
@@ -523,6 +537,9 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	spec, known := recordKinds[r.PathValue("kind")]
+	if r.PathValue("kind") == filesSpec.segment {
+		spec, known = filesSpec, true // the ticks of the files root (S-17.2)
+	}
 	key, live := sess.DataKey()
 	if !known || !live || r.ParseForm() != nil {
 		s.notFound(w, r)
@@ -539,6 +556,10 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 	}
 	if !WantsFragment(r) {
 		s.redirect(w, r, "/app/"+spec.segment)
+		return
+	}
+	if spec.kind == view.KindFile {
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetRail, s.filesRail(sess, s.catalogOf(sess)), nil)
 		return
 	}
 	st, err := s.readCombined(r, sess, s.catalogOf(sess), spec)
@@ -561,6 +582,7 @@ func (s *Server) tickPicks(spec kindSpec, hrefs []string) []sealed.Selection {
 		if !ok {
 			continue
 		}
+		rest = strings.TrimSuffix(rest, "/") // a file collection's root ends in "/"
 		account, seg, ok := strings.Cut(rest, "/")
 		if !ok || account == "" || seg == "" || strings.Contains(seg, "/") {
 			continue

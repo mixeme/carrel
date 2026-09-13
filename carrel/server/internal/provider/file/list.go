@@ -19,6 +19,7 @@ type Entry struct {
 	Name     string
 	Dir      bool
 	Size     int64
+	Type     string // getcontenttype as the server sent it; empty for a folder
 	ETag     string
 	Modified time.Time
 }
@@ -26,15 +27,18 @@ type Entry struct {
 var (
 	propResourceType  = xml.Name{Space: "DAV:", Local: "resourcetype"}
 	propContentLength = xml.Name{Space: "DAV:", Local: "getcontentlength"}
+	propContentType   = xml.Name{Space: "DAV:", Local: "getcontenttype"}
 	propETag          = xml.Name{Space: "DAV:", Local: "getetag"}
 	propLastModified  = xml.Name{Space: "DAV:", Local: "getlastmodified"}
+
+	entryProps = []xml.Name{propResourceType, propContentLength, propContentType, propETag, propLastModified}
 )
 
-// List reads one folder with PROPFIND depth 1 (S-17): names, sizes and
-// versions, no bodies. The folder itself is not among the entries.
+// List reads one folder with PROPFIND depth 1 (S-17): names, sizes, types and
+// versions, no bodies. The folder itself is not among the entries, and neither
+// is anything the server names outside it.
 func (p *Provider) List(ctx context.Context, folder string) ([]Entry, error) {
-	ms, err := p.t.PropFind(ctx, folder, dav.DepthOne,
-		[]xml.Name{propResourceType, propContentLength, propETag, propLastModified})
+	ms, err := p.t.PropFind(ctx, folder, dav.DepthOne, entryProps)
 	if err != nil {
 		return nil, err
 	}
@@ -44,28 +48,62 @@ func (p *Provider) List(ctx context.Context, folder string) ([]Entry, error) {
 		if r.StatusCode != 0 && r.StatusCode/100 != 2 {
 			continue
 		}
-		bare := strings.TrimSuffix(hrefPath(r.Href), "/")
-		if bare == self || bare == "" {
+		e, ok := entryOf(r)
+		if !ok || strings.TrimSuffix(e.Path, "/") == self || !strings.HasPrefix(e.Path, self+"/") ||
+			strings.Contains(strings.TrimSuffix(strings.TrimPrefix(e.Path, self+"/"), "/"), "/") {
 			continue
-		}
-		e := Entry{
-			Path: bare,
-			Name: bare[strings.LastIndex(bare, "/")+1:],
-			Dir:  isCollection(r.Props[propResourceType]),
-			ETag: strings.Trim(propText(r.Props[propETag]), `"`),
-		}
-		if e.Dir {
-			e.Path += "/"
-		}
-		if n, err := strconv.ParseInt(propText(r.Props[propContentLength]), 10, 64); err == nil {
-			e.Size = n
-		}
-		if t, err := http.ParseTime(propText(r.Props[propLastModified])); err == nil {
-			e.Modified = t
 		}
 		out = append(out, e)
 	}
 	return out, nil
+}
+
+// Stat reads one file or folder with PROPFIND depth 0. Nothing at the path is
+// a 404, whether the server said so by status or by an empty answer.
+func (p *Provider) Stat(ctx context.Context, path string) (Entry, error) {
+	ms, err := p.t.PropFind(ctx, path, dav.DepthZero, entryProps)
+	if err != nil {
+		return Entry{}, err
+	}
+	for _, r := range ms.Responses {
+		if r.StatusCode != 0 && r.StatusCode/100 != 2 {
+			continue
+		}
+		if e, ok := entryOf(r); ok {
+			return e, nil
+		}
+	}
+	return Entry{}, &dav.StatusError{Code: http.StatusNotFound, Msg: "nothing at " + path}
+}
+
+// NotFound reports whether err says nothing is at the path.
+func NotFound(err error) bool {
+	return dav.IsStatus(err, http.StatusNotFound)
+}
+
+func entryOf(r dav.Response) (Entry, bool) {
+	bare := strings.TrimSuffix(hrefPath(r.Href), "/")
+	if bare == "" {
+		return Entry{}, false
+	}
+	e := Entry{
+		Path: bare,
+		Name: bare[strings.LastIndex(bare, "/")+1:],
+		Dir:  isCollection(r.Props[propResourceType]),
+		ETag: strings.Trim(propText(r.Props[propETag]), `"`),
+	}
+	if e.Dir {
+		e.Path += "/"
+	} else {
+		e.Type = propText(r.Props[propContentType])
+	}
+	if n, err := strconv.ParseInt(propText(r.Props[propContentLength]), 10, 64); err == nil {
+		e.Size = n
+	}
+	if t, err := http.ParseTime(propText(r.Props[propLastModified])); err == nil {
+		e.Modified = t
+	}
+	return e, true
 }
 
 func hrefPath(href string) string {
