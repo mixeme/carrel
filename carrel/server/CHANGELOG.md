@@ -5,6 +5,27 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.59 — 2026-09-14
+
+A contact search works on Radicale before 3.7.7. It no longer looks in `N`;
+`FN` carries the same name.
+
+### For consumers
+
+- **Radicale.** Versions before 3.7.7 (released 2026-07-19; Debian stable
+  ships 3.5.3, oldstable 3.1.8) answer 500 to a text-match on a structured
+  vCard property. Every contact search on them failed with an error source
+  since `v0.0.47`.
+- **What is searched.** `FN`, `NICKNAME`, `EMAIL`, `TEL`, `ORG`. A card whose
+  family or given name appears only in `N` and not in `FN` is not found by it;
+  vCard 3.0 and 4.0 require `FN`.
+
+### Included
+
+- `card`: `N` left `searchProps`.
+- Test: `TestSearchSendsNoTextMatchOnN`. `TestRadicaleSearch` fails on
+  Radicale 3.5.4 before this version and passes after it.
+
 ## v0.0.58 — 2026-09-14
 
 S-22: a record's source block and a collection row on the connection card

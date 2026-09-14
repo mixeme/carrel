@@ -374,7 +374,9 @@ text-match в REPORT; файлы — совпадение в имени посл
 `net.OpError`/DNS — `unavailable`. CalDAV prop-filter — allof (RFC 4791
 §9.7.1): «любое свойство» — REPORT на свойство (события SUMMARY, LOCATION,
 DESCRIPTION; задачи и заметки SUMMARY, DESCRIPTION); CardDAV — один REPORT
-anyof (FN, N, NICKNAME, EMAIL, TEL, ORG). Сравнивает сервер, без
+anyof (FN, NICKNAME, EMAIL, TEL, ORG; N снят в `v0.0.59`, решение человека
+14.09.2026: Radicale до 3.7.7 — Debian stable 3.5.3 — отвечает 500 на
+text-match по составному свойству, а FN обязателен и несёт то же имя). Сравнивает сервер, без
 регистра в любой письменности: CardDAV — умолчание `i;unicode-casemap` (RFC
 6352), CalDAV — `collation="i;unicode-casemap"` именем (`v0.0.57`; умолчание
 RFC 4791 — `i;ascii-casemap`, у Baikal календари находили кириллицу только в

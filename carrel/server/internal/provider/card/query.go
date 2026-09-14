@@ -33,9 +33,11 @@ func (p *Provider) Query(ctx context.Context, collection string) ([]*model.Objec
 }
 
 // searchProps are the card properties a search looks in: what the list and
-// the card show.
+// the card show. N is not among them: Radicale before 3.7.7 answers 500 to a
+// text-match on a structured property, and FN, which vCard 3.0 and 4.0
+// require, carries the same name.
 var searchProps = []string{
-	vcard.FieldFormattedName, vcard.FieldName, vcard.FieldNickname,
+	vcard.FieldFormattedName, vcard.FieldNickname,
 	vcard.FieldEmail, vcard.FieldTelephone, vcard.FieldOrganization,
 }
 
