@@ -20,6 +20,10 @@ var (
 	ErrNoReporter = errors.New("cal: the connection offers no CalDAV REPORT")
 	// ErrNotFound: no record with this UID in the collection.
 	ErrNotFound = errors.New("cal: no record with this UID")
+	// ErrLatinCaseOnly: the server refused to compare in every script, and its
+	// default ignores letter case in Latin only (i;ascii-casemap). The records
+	// it found come with this error.
+	ErrLatinCaseOnly = errors.New("cal: the server ignores letter case in Latin script only")
 )
 
 // Unreadable is a resource the REPORT returned that could not become a record.
@@ -60,21 +64,39 @@ var searchProps = map[string][]string{
 // Search reads the records of one component that hold text in a shown
 // property (S-15.2). Prop-filters inside one comp-filter must all match (RFC
 // 4791 §9.7.1), so "any of them" is one REPORT per property; a record found
-// by two of them is kept once. The match is the server's.
+// by two of them is kept once. The match is the server's, in i;unicode-casemap:
+// letter case does not count in any script. A server that refuses that
+// collation is asked again with its default, and what it found comes with
+// ErrLatinCaseOnly.
 func (p *Provider) Search(ctx context.Context, collection, component, text string) ([]*model.Object, []Unreadable, error) {
 	props, ok := searchProps[component]
 	if !ok {
 		props = []string{ical.PropSummary}
 	}
+	searcher := p.searcher()
+	latinOnly := false
 	seen := map[string]bool{}
 	var objs []*model.Object
 	var bad []Unreadable
 	for _, prop := range props {
-		filter := caldav.CompFilter{
-			Name:  component,
-			Props: []caldav.PropFilter{{Name: prop, TextMatch: &caldav.TextMatch{Text: text}}},
+		var found []*model.Object
+		var unreadable []Unreadable
+		var err error
+		if searcher != nil && !latinOnly {
+			var cos []caldav.CalendarObject
+			cos, err = searcher.SearchCalendar(ctx, collection, dav.CalSearch{
+				Component: component, Prop: prop, Text: text, Collation: dav.UnicodeCaseMap,
+			})
+			found, unreadable = fromReports(cos, component)
+			latinOnly = refusedCollation(err)
 		}
-		found, unreadable, err := p.query(ctx, collection, component, filter)
+		if searcher == nil || latinOnly {
+			filter := caldav.CompFilter{
+				Name:  component,
+				Props: []caldav.PropFilter{{Name: prop, TextMatch: &caldav.TextMatch{Text: text}}},
+			}
+			found, unreadable, err = p.query(ctx, collection, component, filter)
+		}
 		if err != nil {
 			return nil, nil, err
 		}
@@ -91,7 +113,31 @@ func (p *Provider) Search(ctx context.Context, collection, component, text strin
 			}
 		}
 	}
+	if latinOnly {
+		return objs, bad, ErrLatinCaseOnly
+	}
 	return objs, bad, nil
+}
+
+func (p *Provider) searcher() dav.CalSearcher {
+	rs, ok := p.t.(calReporting)
+	if !ok {
+		return nil
+	}
+	s, _ := rs.CalReporter().(dav.CalSearcher)
+	return s
+}
+
+// refusedCollation reports a refusal a server gives a collation it does not
+// know: sabre/dav answers 400, RFC 4791 names the precondition
+// supported-collation.
+func refusedCollation(err error) bool {
+	for _, code := range []int{400, 403, 412, 415, 422, 501} {
+		if dav.IsStatus(err, code) {
+			return true
+		}
+	}
+	return false
 }
 
 // FindUID reads the record with this UID. CalDAV text-match is a substring
@@ -130,6 +176,12 @@ func (p *Provider) query(ctx context.Context, collection, component string, filt
 	if err != nil {
 		return nil, nil, err
 	}
+	objs, bad := fromReports(cos, component)
+	return objs, bad, nil
+}
+
+// fromReports turns REPORT entries into records of one component.
+func fromReports(cos []caldav.CalendarObject, component string) ([]*model.Object, []Unreadable) {
 	var objs []*model.Object
 	var bad []Unreadable
 	for _, co := range cos {
@@ -143,7 +195,7 @@ func (p *Provider) query(ctx context.Context, collection, component string, filt
 		}
 		objs = append(objs, obj)
 	}
-	return objs, bad, nil
+	return objs, bad
 }
 
 // fromReport turns a REPORT entry into a record. go-webdav hands the body over

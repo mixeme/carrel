@@ -540,6 +540,7 @@ func (c *collectionSource) Run(ctx context.Context, q fanout.Query) ([]fanout.It
 		return nil, c.broken
 	}
 	var items []fanout.Item
+	var note error
 	for _, k := range c.kinds {
 		var found []fanout.Item
 		var err error
@@ -553,13 +554,15 @@ func (c *collectionSource) Run(ctx context.Context, q fanout.Query) ([]fanout.It
 		}
 		items = append(items, found...)
 		if err != nil {
+			// A note on one kind does not stop the others of the collection.
 			if errors.Is(err, fanout.ErrIncomplete) {
-				return items, err
+				note = err
+				continue
 			}
 			return nil, err
 		}
 	}
-	return items, nil
+	return items, note
 }
 
 func (c *collectionSource) contacts(ctx context.Context, q fanout.Query) ([]fanout.Item, error) {
@@ -589,6 +592,11 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 	} else {
 		objs, _, err = c.cal.Search(ctx, c.col.Path, component, q.Text)
 	}
+	var note error
+	if errors.Is(err, cal.ErrLatinCaseOnly) {
+		note = fmt.Errorf("%w: the server ignores letter case in Latin script only", fanout.ErrIncomplete)
+		err = nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -596,7 +604,7 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 	for _, o := range objs {
 		items = append(items, c.item(k, cal.UID(o), o))
 	}
-	return items, nil
+	return items, note
 }
 
 func (c *collectionSource) item(k view.Kind, uid string, o *model.Object) fanout.Item {

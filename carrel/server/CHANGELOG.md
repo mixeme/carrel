@@ -5,6 +5,43 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.57 — 2026-09-14
+
+Search ignores letter case in every script. "ковал" finds "Встреча с
+Ковалёвой" in events, tasks and notes, not only in contacts.
+
+### For consumers
+
+- **Calendars.** A search asks the calendar server for `i;unicode-casemap` by
+  name. Until now it went with CalDAV's default, `i;ascii-casemap`, which
+  ignores case in Latin only: Baikal found Cyrillic in the case it was written
+  in. Contacts already went with CardDAV's default, `i;unicode-casemap`.
+- **A server that refuses it.** The same search is asked again with the
+  server's default. The source answers with the note "the server ignores
+  letter case in Latin script only".
+- **One collection, several kinds.** A note on one kind (the file ceiling, the
+  case note) no longer stops the other kinds of the same collection from being
+  searched.
+
+### Included
+
+- `dav`: `CalSearcher` and `CalSearch`, a calendar-query REPORT of its own
+  whose text-match names a collation; `UnicodeCaseMap`. It reads bodies escaped
+  or in CDATA; a body that does not parse stays a record that could not be
+  read. `Transport` is unchanged.
+- `cal`: `Search` uses it; a refusal of 400, 403, 412, 415, 422 or 501 falls
+  back to go-webdav's query and returns `ErrLatinCaseOnly` with the records.
+- `web`: the search source turns `ErrLatinCaseOnly` into the source note.
+- `davtest`: honours `i;unicode-casemap` (go-webdav's own text-match counts
+  case); `RefuseCollation` answers 400 the way sabre/dav does.
+- Tests: `TestSearchCalendarNamesItsCollation`,
+  `TestSearchIgnoresCaseInEveryScript`,
+  `TestSearchFallsBackWhenCollationIsRefused`, `TestSearchNotesLatinOnlyCase`.
+  `TestRadicaleSearch` and `TestBaikalSearch` now require "ковал" to find both;
+  not run in this version.
+- `TestRequestTimeoutCountsSilenceOnStreams` (`v0.0.56`) has wider steps: under
+  a loaded run 80 ms against a 300 ms timeout read as silence.
+
 ## v0.0.56 — 2026-09-14
 
 `CARREL_DAV_REQUEST_TIMEOUT` no longer cuts a file that is still moving. On

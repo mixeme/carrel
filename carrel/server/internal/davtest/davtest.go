@@ -57,6 +57,11 @@ type Server struct {
 	// the file server sees it.
 	FilesIgnoreIfNoneMatch bool
 
+	// RefuseCollation answers 400 to a REPORT that names a collation, the way
+	// sabre/dav answers one it does not know. Without it i;unicode-casemap is
+	// honoured: go-webdav's own text-match counts case and ignores collation.
+	RefuseCollation bool
+
 	mu        sync.Mutex
 	sent      map[string][]byte // the body of the PUT being handled, by path
 	calendars map[string]caldav.Calendar
@@ -347,6 +352,15 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files 
 	body, _ := io.ReadAll(r.Body)
 	r.Body = io.NopCloser(bytes.NewReader(body))
 	p := r.URL.Path
+	if r.Method == "REPORT" && bytes.Contains(body, []byte("collation=")) {
+		if s.RefuseCollation {
+			http.Error(w, "Collation type is not supported", http.StatusBadRequest)
+			return
+		}
+		if bytes.Contains(body, []byte(`"i;unicode-casemap"`)) {
+			r = r.WithContext(context.WithValue(r.Context(), foldCase{}, true))
+		}
+	}
 	if r.Method == http.MethodPut {
 		s.mu.Lock()
 		s.sent[p] = body
@@ -720,12 +734,80 @@ func (b calBackend) ListCalendarObjects(_ context.Context, p string, _ *caldav.C
 	return out, nil
 }
 
+// foldCase marks a REPORT that asked for i;unicode-casemap.
+type foldCase struct{}
+
 func (b calBackend) QueryCalendarObjects(ctx context.Context, p string, q *caldav.CalendarQuery) ([]caldav.CalendarObject, error) {
 	all, err := b.ListCalendarObjects(ctx, p, nil)
 	if err != nil {
 		return nil, err
 	}
-	return caldav.Filter(q, all)
+	if ctx.Value(foldCase{}) == nil {
+		return caldav.Filter(q, all)
+	}
+	// go-webdav's text-match counts case. Under i;unicode-casemap the query and
+	// a copy of each object are folded to lower case in the matched properties,
+	// and the objects whose copies match come back as stored.
+	names := map[string]bool{}
+	folded := *q
+	folded.CompFilter = foldFilter(q.CompFilter, names)
+	byPath := make(map[string]caldav.CalendarObject, len(all))
+	copies := make([]caldav.CalendarObject, 0, len(all))
+	for _, co := range all {
+		byPath[co.Path] = co
+		o, err := b.s.get(co.Path)
+		if err != nil {
+			return nil, err
+		}
+		c, err := calendarObject(co.Path, o)
+		if err != nil {
+			return nil, err
+		}
+		foldComponent(c.Data.Component, names)
+		copies = append(copies, *c)
+	}
+	matched, err := caldav.Filter(&folded, copies)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]caldav.CalendarObject, 0, len(matched))
+	for _, m := range matched {
+		out = append(out, byPath[m.Path])
+	}
+	return out, nil
+}
+
+func foldFilter(f caldav.CompFilter, names map[string]bool) caldav.CompFilter {
+	out := f
+	out.Props = make([]caldav.PropFilter, len(f.Props))
+	for i, pf := range f.Props {
+		if pf.TextMatch != nil {
+			tm := *pf.TextMatch
+			tm.Text = strings.ToLower(tm.Text)
+			pf.TextMatch = &tm
+			names[pf.Name] = true
+		}
+		out.Props[i] = pf
+	}
+	out.Comps = make([]caldav.CompFilter, len(f.Comps))
+	for i, c := range f.Comps {
+		out.Comps[i] = foldFilter(c, names)
+	}
+	return out
+}
+
+func foldComponent(c *ical.Component, names map[string]bool) {
+	for name, props := range c.Props {
+		if !names[name] {
+			continue
+		}
+		for i := range props {
+			props[i].Value = strings.ToLower(props[i].Value)
+		}
+	}
+	for _, child := range c.Children {
+		foldComponent(child, names)
+	}
 }
 
 func dropComponentProps(c *ical.Component, names []string) {

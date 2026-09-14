@@ -41,7 +41,8 @@ var searchProps = []string{
 
 // Search reads the contacts that hold text in a shown property, with one
 // REPORT: a text-match per property, any of them (RFC 6352 §10.5). The match
-// is the server's; its default collation ignores ASCII case (S-15.2).
+// is the server's; CardDAV's default collation is i;unicode-casemap (RFC 6352
+// §8.3), so letter case does not count in any script (S-15.2).
 func (p *Provider) Search(ctx context.Context, collection, text string) ([]*model.Object, error) {
 	q := &carddav.AddressBookQuery{
 		DataRequest: carddav.AddressDataRequest{AllProp: true},

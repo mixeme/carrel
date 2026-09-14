@@ -235,6 +235,37 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 	waitPoll(t, f.h, f.sess, hint.Poll.TaskID, nil)
 }
 
+// S-15.2: a calendar server that refuses i;unicode-casemap is asked with its
+// default. The source answers with a note that case counts outside Latin, and
+// the note on events does not stop the tasks of the same collection.
+func TestSearchNotesLatinOnlyCase(t *testing.T) {
+	srv := searchServer(t)
+	srv.RefuseCollation = true
+	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work"})
+	srv.Seed(searchBook+"ada.vcf", adaCard())
+	srv.Seed(searchWork+"call.ics", ics("BEGIN:VEVENT\nUID:call\nDTSTAMP:20260101T000000Z\nDTSTART:20260910T150000Z\nSUMMARY:Call with Ada\nEND:VEVENT"))
+	srv.Seed(searchWork+"todo.ics", ics("BEGIN:VTODO\nUID:todo\nDTSTAMP:20260101T000000Z\nDUE:20260912T100000Z\nSUMMARY:Write to Ada\nEND:VTODO"))
+
+	f := connectFixture(t, srv, searchBook, nil)
+	tickAll(t, f.h, f.sess)
+	page := search(t, f.h, f.sess, "q=Ada")
+	bar := waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+	if work := sourceNamed(t, bar, "Work"); work.State != view.SourceDone || !strings.Contains(string(work.Message), "Latin script only") {
+		t.Errorf("work = %+v", work)
+	}
+	if people := sourceNamed(t, bar, "People"); people.State != view.SourceDone || people.Message != "" {
+		t.Errorf("people = %+v", people)
+	}
+	var got []string
+	for _, row := range search(t, f.h, f.sess, "q=Ada").Results {
+		got = append(got, string(row.Kind)+":"+string(row.Title))
+	}
+	if want := "contact:Ada Lovelace,event:Call with Ada,task:Write to Ada"; strings.Join(got, ",") != want {
+		t.Errorf("results\n got %s\nwant %s", strings.Join(got, ","), want)
+	}
+}
+
 // S-15.1 and S-21: a refusal is a state on the screen, the other source's
 // answer stays, and a retry asks the refused source and nobody else.
 func TestSearchRefusalRetriesOneSource(t *testing.T) {

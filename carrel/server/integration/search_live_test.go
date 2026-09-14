@@ -23,7 +23,7 @@ import (
 
 // S-30.2 for S-15: a search through the request layer against a live server —
 // CardDAV any-of in one REPORT, CalDAV one REPORT a property, and the match
-// done by the server's own collation, which davtest does not imitate.
+// done by the server itself: i;unicode-casemap, which CalDAV asks for by name.
 func TestRadicaleSearch(t *testing.T) {
 	runSearch(t, radicaleEndpoint(t), radicaleUser, radicalePass)
 }
@@ -166,5 +166,7 @@ func runSearch(t *testing.T, endpoint, user, pass string) {
 	if got := strings.Join(find("Ковал"), "|"); got != "Встреча с Ковалёвой|Ковалёва Анна" {
 		t.Errorf("Ковал (Cyrillic as written) = %q", got)
 	}
-	t.Logf("%s: ковал (Cyrillic, other case) finds %q", endpoint, find("ковал"))
+	if got := strings.Join(find("ковал"), "|"); got != "Встреча с Ковалёвой|Ковалёва Анна" {
+		t.Errorf("ковал (Cyrillic, other case) = %q", got)
+	}
 }

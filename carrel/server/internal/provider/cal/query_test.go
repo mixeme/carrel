@@ -171,6 +171,39 @@ func TestFindUIDIsExact(t *testing.T) {
 	}
 }
 
+// S-15.2: a search does not count letter case, in any script. The REPORT names
+// i;unicode-casemap; CalDAV's default ignores case in Latin only.
+func TestSearchIgnoresCaseInEveryScript(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.Seed(work+"meet.ics", vevent("meet", "20260115T100000Z", "Встреча с Ковалёвой"))
+	srv.Seed(work+"plan.ics", vevent("plan", "20260116T100000Z", "Launch plan"))
+	for _, q := range []string{"ковал", "КОВАЛ", "Ковал"} {
+		objs, bad, err := p.Search(t.Context(), work, "VEVENT", q)
+		if err != nil || len(bad) != 0 || len(objs) != 1 || UID(objs[0]) != "meet" {
+			t.Errorf("%s: objs %v, unreadable %v, err %v", q, objs, bad, err)
+		}
+	}
+	if objs, _, err := p.Search(t.Context(), work, "VEVENT", "LAUNCH"); err != nil || len(objs) != 1 || UID(objs[0]) != "plan" {
+		t.Errorf("LAUNCH: %v, %v", objs, err)
+	}
+}
+
+// A server that refuses the collation is asked again with its default. What it
+// found comes with ErrLatinCaseOnly, and the other properties are not asked by
+// name again.
+func TestSearchFallsBackWhenCollationIsRefused(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.RefuseCollation = true
+	srv.Seed(work+"plan.ics", vevent("plan", "20260116T100000Z", "Launch plan"))
+	objs, bad, err := p.Search(t.Context(), work, "VEVENT", "Launch")
+	if !errors.Is(err, ErrLatinCaseOnly) || len(bad) != 0 || len(objs) != 1 || UID(objs[0]) != "plan" {
+		t.Fatalf("objs %v, unreadable %v, err %v", objs, bad, err)
+	}
+	if n := srv.CountRequests("REPORT", work); n != 4 {
+		t.Errorf("REPORT requests = %d, want 4: one refused, then one a property", n)
+	}
+}
+
 type noReports struct {
 	dav.Transport
 }

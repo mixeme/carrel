@@ -67,12 +67,13 @@ func TestOpenPassesTheWholeFile(t *testing.T) {
 	}
 }
 
-// slowClient has a request timeout of 300 ms.
+// slowClient has a request timeout of one second: five times a step of the
+// test below, so a loaded machine that oversleeps does not look like silence.
 func slowClient(t *testing.T, endpoint string) *Client {
 	t.Helper()
 	c := testConfig()
 	c.DAVSSRFAllowlist = "127.0.0.1"
-	c.DAVRequestTimeout = 300 * time.Millisecond
+	c.DAVRequestTimeout = time.Second
 	client, err := NewClient(NewGuard(c), endpoint, "", "", "")
 	if err != nil {
 		t.Fatal(err)
@@ -101,7 +102,7 @@ func (r *dripReader) Read(p []byte) (int, error) {
 // moving for longer than the timeout passes; a stream that stops is cut, and
 // the failure is a timeout, as http.Client.Timeout's was.
 func TestRequestTimeoutCountsSilenceOnStreams(t *testing.T) {
-	const chunks, step = 10, 80 * time.Millisecond // 800 ms in all
+	const chunks, step = 8, 200 * time.Millisecond // 1.6 s in all
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.Method == http.MethodPut:
@@ -161,7 +162,7 @@ func TestRequestTimeoutCountsSilenceOnStreams(t *testing.T) {
 	start := time.Now()
 	_, err = io.Copy(io.Discard, d.Body)
 	d.Body.Close()
-	if !errors.Is(err, ErrTimeout) || time.Since(start) > 2*time.Second {
+	if !errors.Is(err, ErrTimeout) || time.Since(start) > 4*time.Second {
 		t.Errorf("Open of a stalled file: %v after %v", err, time.Since(start))
 	}
 

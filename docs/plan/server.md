@@ -374,9 +374,12 @@ text-match в REPORT; файлы — совпадение в имени посл
 `net.OpError`/DNS — `unavailable`. CalDAV prop-filter — allof (RFC 4791
 §9.7.1): «любое свойство» — REPORT на свойство (события SUMMARY, LOCATION,
 DESCRIPTION; задачи и заметки SUMMARY, DESCRIPTION); CardDAV — один REPORT
-anyof (FN, N, NICKNAME, EMAIL, TEL, ORG). Сравнивает сервер: davtest — с
-регистром; Baikal — карточки без регистра и в кириллице, календари — только
-ASCII (`TestBaikalSearch`). Файлы — обход в ширину `file.List` (PROPFIND
+anyof (FN, N, NICKNAME, EMAIL, TEL, ORG). Сравнивает сервер, без
+регистра в любой письменности: CardDAV — умолчание `i;unicode-casemap` (RFC
+6352), CalDAV — `collation="i;unicode-casemap"` именем (`v0.0.57`; умолчание
+RFC 4791 — `i;ascii-casemap`, у Baikal календари находили кириллицу только в
+написанном регистре). Сервер отказал в collation — тот же запрос умолчанием
+и заметка источника «только латиница». Файлы — обход в ширину `file.List` (PROPFIND
 depth 1, заведён здесь, S-17 берёт его же), имя без регистра; на потолке
 `CARREL_FILES_MAX_ENTRIES` источник ответил с заметкой. SSE: `: ping` сразу,
 `poll` на изменение, `poll-finished` в конце; закрытый поток при идущей
@@ -577,9 +580,13 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
       файлы ищутся по имени (`v0.0.47`; `web/search.go`; вживую — Baikal,
       `integration/search_live_test.go`; галочки пишет S-14)
 - [ ] S-15 на Radicale: `TestRadicaleSearch` в Linux-воротах
-- [ ] S-15: кириллица в другом регистре в календарях — Baikal CalDAV сравнивает
+- [x] S-15: кириллица в другом регистре в календарях — Baikal CalDAV сравнивает
       только ASCII (карточки находит, события, задачи и заметки — нет). Решить:
-      collation в теле REPORT (у go-webdav поля нет) или иное
+      collation в теле REPORT (у go-webdav поля нет) или иное (`v0.0.57`;
+      решение человека 14.09.2026 — поиск без регистра всегда; свой REPORT
+      `dav.CalSearcher` с `i;unicode-casemap`, отказ — повтор умолчанием и
+      `cal.ErrLatinCaseOnly` заметкой; вживую — `TestBaikalSearch`,
+      `TestRadicaleSearch` теперь требуют «ковал»)
 - [x] S-14: `/app/{kind}` сводит отмеченные; пустой выбор пуст; галочки в блобе;
       отмеченная `Gone` — строка рейла `state: gone`, не пропадает (S-6.1)
       (`v0.0.48`; `web/combined.go`, `combined_test.go`)
