@@ -5,6 +5,18 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.54 — 2026-09-14
+
+Copies the Typecase mockup through plan 1 step 4: frames use the same tags
+the widgets print (`button`, `input`/`textarea`, `a href`, `kbd`); menus
+that sat inside a button become `.tc-drop`.
+
+### For consumers
+
+Nothing in the running server. Open
+[carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
+current mockup; fonts are in `docs/visual/fonts/`.
+
 ## v0.0.53 — 2026-09-14
 
 S-17 in [server.md](../../docs/plan/server.md): files. The C-5.5 routes that
