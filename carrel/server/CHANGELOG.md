@@ -5,6 +5,43 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.60 — 2026-09-15
+
+vCard 4.0 cards on sabre/dav servers (Baikal, Nextcloud) are no longer
+downgraded to 3.0 by an edit, and keep what only 4.0 holds.
+
+### For consumers
+
+- **What was wrong.** Carrel read contacts with a REPORT that named no vCard
+  version. sabre/dav answers such a REPORT in 3.0 and drops what 3.0 cannot
+  hold — `KIND`, among others. An edit through Carrel then wrote the card back
+  as 3.0: on Baikal a 4.0 card with `KIND:individual` lost it for good when
+  only `FN` was changed. The loss report did not show it: it happened on read,
+  before the patch. Found by the live checks of S-13.
+- **Now.** Every contact read (list, card, search, the lookup by UID) asks for
+  `text/vcard; version=4.0`. A server that keeps cards as sent (Radicale)
+  answers as kept. A converting server answers 4.0; a 3.0 card read that way is
+  written back as 4.0 after an edit — the format changes, the data does not. A
+  server that refuses 4.0 is asked again without a version.
+
+### Included
+
+- `dav`: `CardQuerier`, `CardQuery`, `CardMatch`, `VCard4` — an
+  addressbook-query of its own whose `address-data` names content type and
+  version, which go-webdav cannot. It reads cards escaped or in CDATA and the
+  modification time. `Transport` is unchanged.
+- `card`: `Query`, `Search` and `FindUID` go through it; a refusal of 400, 403,
+  409, 412, 415, 422 or 501 is asked again without a version.
+- Tests: `TestQueryCardsNamesTheVersion`, `TestCardReadsAskForVCard4`,
+  `TestCardReadFallsBackWhenVersionIsRefused`.
+- Live (S-30.2): `TestBaikalVCard4Edit`, `TestRadicaleVCard4Edit` — a 4.0 card
+  edited through Carrel stays 4.0 with `KIND` and `GENDER`;
+  `TestBaikalPhoto`, `TestRadicalePhoto` — a saved photo is one unfolded
+  PHOTO line of hundreds of KiB, a data URI in 4.0, and decodes to the framed
+  JPEG. Baikal green; Radicale in the Linux gates.
+- Live tests seed and clean up with a fresh client: Apache closes an idle
+  connection after 5 s, and a PUT down it fails with EOF.
+
 ## v0.0.59 — 2026-09-14
 
 A contact search works on Radicale before 3.7.7. It no longer looks in `N`;

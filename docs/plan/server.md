@@ -612,7 +612,14 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
       страж; `image/jpeg`; патч PHOTO (`v0.0.52`; `web/photo.go`,
       `photo_test.go`)
 - [ ] S-13 на Radicale и Baikal: data URI 4.0 и незавёрнутая строка PHOTO
-      в сотню КиБ сохраняются как отправлены
+      в сотню КиБ сохраняются как отправлены (`integration/photo_live_test.go`;
+      Baikal — зелёный `v0.0.60`, карточка 3.0 после сохранения хранится 4.0;
+      Radicale — Linux-ворота)
+- [x] S-7 на sabre/dav (Baikal, Nextcloud): REPORT без версии отдаёт 3.0 и
+      теряет свойства 4.0 (KIND), правка писала 3.0 обратно — найдено живым
+      S-13 (`v0.0.60`; решение человека 15.09.2026 — просить 4.0: свой
+      `dav.CardQuerier` с `address-data version="4.0"`, отказ — повтор без
+      версии; 3.0 после правки становится 4.0; `TestBaikalVCard4Edit`)
 - [x] S-17: List/MKCOL/MOVE; очередь столкновений; `UploadOverwrite`; Get без
       потолка 10 МиБ; корень — отмеченные хранилища (`v0.0.53`; `web/files.go`,
       `web/files_ops.go`, `files_test.go`)

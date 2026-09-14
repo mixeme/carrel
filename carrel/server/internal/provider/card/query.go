@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/emersion/go-vcard"
-	"github.com/emersion/go-webdav/carddav"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/model"
@@ -27,9 +26,7 @@ type cardReporting interface {
 // Query reads every contact of an address book with a single REPORT. The
 // cards come back in that reply and are not fetched again (S-11).
 func (p *Provider) Query(ctx context.Context, collection string) ([]*model.Object, error) {
-	return p.query(ctx, collection, &carddav.AddressBookQuery{
-		DataRequest: carddav.AddressDataRequest{AllProp: true},
-	})
+	return p.query(ctx, collection, dav.CardQuery{})
 }
 
 // searchProps are the card properties a search looks in: what the list and
@@ -46,15 +43,9 @@ var searchProps = []string{
 // is the server's; CardDAV's default collation is i;unicode-casemap (RFC 6352
 // §8.3), so letter case does not count in any script (S-15.2).
 func (p *Provider) Search(ctx context.Context, collection, text string) ([]*model.Object, error) {
-	q := &carddav.AddressBookQuery{
-		DataRequest: carddav.AddressDataRequest{AllProp: true},
-		FilterTest:  carddav.FilterAnyOf,
-	}
+	q := dav.CardQuery{AnyOf: true}
 	for _, name := range searchProps {
-		q.PropFilters = append(q.PropFilters, carddav.PropFilter{
-			Name:        name,
-			TextMatches: []carddav.TextMatch{{Text: text}},
-		})
+		q.Matches = append(q.Matches, dav.CardMatch{Prop: name, Text: text})
 	}
 	return p.query(ctx, collection, q)
 }
@@ -62,12 +53,8 @@ func (p *Provider) Search(ctx context.Context, collection, text string) ([]*mode
 // FindUID reads the contact with this UID; the exact UID is checked here as
 // well, whatever the server made of text-match.
 func (p *Provider) FindUID(ctx context.Context, collection, uid string) (*model.Object, error) {
-	objs, err := p.query(ctx, collection, &carddav.AddressBookQuery{
-		DataRequest: carddav.AddressDataRequest{AllProp: true},
-		PropFilters: []carddav.PropFilter{{
-			Name:        vcard.FieldUID,
-			TextMatches: []carddav.TextMatch{{Text: uid, MatchType: carddav.MatchEquals}},
-		}},
+	objs, err := p.query(ctx, collection, dav.CardQuery{
+		Matches: []dav.CardMatch{{Prop: vcard.FieldUID, Text: uid, Equals: true}},
 	})
 	if err != nil {
 		return nil, err
@@ -80,12 +67,27 @@ func (p *Provider) FindUID(ctx context.Context, collection, uid string) (*model.
 	return nil, ErrNotFound
 }
 
-func (p *Provider) query(ctx context.Context, collection string, q *carddav.AddressBookQuery) ([]*model.Object, error) {
+// query asks for the cards in vCard 4.0 (S-7). A server that converts cards
+// (sabre/dav: Baikal, Nextcloud) answers a REPORT without a version in 3.0 and
+// drops what 3.0 cannot hold before any patch, and the edit writes 3.0 back. A
+// server that keeps cards as sent answers as kept either way. A server that
+// refuses 4.0 is asked again without a version; a 3.0 card read as 4.0 is
+// written back as 4.0, a change of format and not of data.
+func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery) ([]*model.Object, error) {
 	rs, ok := p.t.(cardReporting)
 	if !ok {
 		return nil, ErrNoReporter
 	}
-	aos, err := rs.CardReporter().QueryAddressBook(ctx, collection, q)
+	cq, ok := rs.CardReporter().(dav.CardQuerier)
+	if !ok {
+		return nil, ErrNoReporter
+	}
+	q.Version = dav.VCard4
+	aos, err := cq.QueryCards(ctx, collection, q)
+	if refusedVersion(err) {
+		q.Version = ""
+		aos, err = cq.QueryCards(ctx, collection, q)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +98,18 @@ func (p *Provider) query(ctx context.Context, collection string, q *carddav.Addr
 		out = append(out, obj)
 	}
 	return out, nil
+}
+
+// refusedVersion reports a refusal of the address-data version: RFC 6352 §8.6
+// names the precondition supported-address-data, and go-webdav's server
+// answers it with 409.
+func refusedVersion(err error) bool {
+	for _, code := range []int{400, 403, 409, 412, 415, 422, 501} {
+		if dav.IsStatus(err, code) {
+			return true
+		}
+	}
+	return false
 }
 
 // UID returns the UID of a contact.
