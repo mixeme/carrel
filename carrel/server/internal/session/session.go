@@ -16,7 +16,8 @@ import (
 //
 // One session serves several requests at once, so everything that changes
 // after Create is behind mu: the deadlines, the drafts, the history, the loss
-// registry, the live-fanout count, the kept tasks and the transfer queue.
+// registry, the live-fanout count, the kept tasks, the transfer queue and the
+// readings of collections.
 // Cache has its own lock.
 // No method calls into a task that locks while mu is held: a task takes mu
 // through AcquireFanout and ReleaseFanout under its own lock.
@@ -39,6 +40,7 @@ type Session struct {
 	tasks      []Task // newest first
 	transfers  []Transfer
 	unlockAt   time.Time
+	readings   map[string]Reading // by connection and collection path (S-22)
 
 	cache *Cache
 	mgr   *Manager
@@ -367,6 +369,7 @@ func (s *Session) end() {
 	transfers := s.transfers
 	s.transfers = nil
 	s.unlockAt = time.Time{}
+	s.readings = nil
 	s.mu.Unlock()
 
 	for _, t := range tasks {

@@ -159,7 +159,42 @@ func (c *collectionCtx) listed(objs []*model.Object) []listed {
 }
 
 func (c *collectionCtx) source() view.SourceBlock {
-	return view.SourceBlock{Stamp: c.stamp(), Colour: catalogColour(c.col), ReadOnly: c.col.ReadOnly}
+	b := view.SourceBlock{Stamp: c.stamp(), Colour: catalogColour(c.col), ReadOnly: c.col.ReadOnly}
+	b.LastRead, b.Changed = readingOf(c.sess, c.tf, c.conn.ID, c.col.Path)
+	return b
+}
+
+// noteRead keeps when this list was read and, for a whole read, the newest
+// change among its records (S-22). An agenda reads a week: it tells when, not
+// what changed in the collection — the same rule as its count.
+func (c *collectionCtx) noteRead(items []listed, whole bool) {
+	noteRead(c.sess, c.conn.ID, c.col.Path, time.Now(), items, whole)
+}
+
+func noteRead(sess *session.Session, accountID, path string, at time.Time, items []listed, whole bool) {
+	r := session.Reading{At: at}
+	if whole {
+		for _, it := range items {
+			if it.obj != nil && it.obj.Modified.After(r.Changed) {
+				r.Changed = it.obj.Modified
+			}
+		}
+	}
+	sess.NoteReading(accountID, path, r)
+}
+
+// readingOf is LastRead and Changed of a collection (S-22), from what this
+// session read; both empty when it has read no list of it.
+func readingOf(sess *session.Session, tf timeFmt, accountID, path string) (lastRead, changed view.When) {
+	r, ok := sess.ReadingOf(accountID, path)
+	if !ok {
+		return "", ""
+	}
+	lastRead = tf.formatWhen(r.At, true, time.Now())
+	if !r.Changed.IsZero() {
+		changed = view.When(tf.date(r.Changed) + ", " + tf.clock(r.Changed))
+	}
+	return lastRead, changed
 }
 
 func (c *collectionCtx) find(ctx context.Context, uid string) (*model.Object, error) {
@@ -478,6 +513,7 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 	page.Groups = s.contactGroups(c.sess, shown, c.spec.segment, false)
 	page.Rail.Tags = filter.rail(view.KindContact, items)
 	c.putIndex(indexOf(view.KindContact, items))
+	c.noteRead(items, true)
 	total := len(objs)
 	page.Bar.Loaded, page.Bar.Total = len(shown), &total
 	page.Print = view.Print{Title: page.Title, Range: printRange(plural(len(shown), "card"), filter.tag), Taken: c.tf.taken(time.Now())}
@@ -594,6 +630,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindEvent, items)
 	c.putIndex(indexOf(view.KindEvent, items))
+	c.noteRead(items, false)
 	page.Print = view.Print{
 		Title: page.Title, Range: printRange(agendaPrint(tf, from, to), plural(page.Bar.Loaded, "event"), filter.tag),
 		Taken: tf.taken(time.Now()),
@@ -727,6 +764,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindTask, items)
 	c.putIndex(indexOf(view.KindTask, items))
+	c.noteRead(items, true)
 	page.Print = view.Print{
 		Title: page.Title, Range: printRange(showLabels[show], plural(page.Bar.Loaded, "task"), filter.tag),
 		Taken: c.tf.taken(time.Now()),
@@ -837,6 +875,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindNote, items)
 	c.putIndex(indexOf(view.KindNote, items))
+	c.noteRead(items, true)
 	page.Print = view.Print{Title: page.Title, Range: printRange(plural(page.Bar.Loaded, "note"), filter.tag), Taken: c.tf.taken(time.Now())}
 	return page
 }

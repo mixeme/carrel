@@ -5,6 +5,40 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.58 — 2026-09-14
+
+S-22: a record's source block and a collection row on the connection card
+say when the collection was last read and when it last changed on the server.
+Neither costs a request.
+
+### For consumers
+
+- **`lastRead`.** When this session last read a list of the collection:
+  "just now", "2 min ago", later the date and time. Empty until a list of it
+  was read in this session. A record page alone is not a read of the
+  collection; neither is a search.
+- **`changed`.** The newest modification time the server sent
+  (`getlastmodified`) among the records of a whole read, as date, year and
+  time: "14 September 2026, 11:02". Empty when no whole list was read or the
+  server sent no times. The agenda reads one week and fills `lastRead` only,
+  the same rule as the rail's count; a task or note list of the same calendar
+  fills `changed`.
+- **Combined views.** A finished poll counts as a read of each collection
+  that answered from the network, at the time the poll ended.
+- **Where.** `SourceBlock` on contact, event, task and note pages;
+  `CollectionRow` on `/app/settings/connections`. `objects` in both is still
+  empty.
+
+### Included
+
+- `model.Object.Modified`: the reply's `getlastmodified`; `cal` and `card`
+  fill it from the REPORT. It is never written back.
+- `session.Reading`, `NoteReading`, `ReadingOf`: kept in the session, not in
+  the list index, whose `CARREL_CACHE_COLLECTION_TTL` would drop it after a
+  minute. Reads of several kinds fold: the later read and the newer change
+  win. The session's end wipes them.
+- Tests: `TestReadingFoldsReads`, `TestCollectionStateFromWhatWasRead`.
+
 ## v0.0.57 — 2026-09-14
 
 Search ignores letter case in every script. "ковал" finds "Встреча с

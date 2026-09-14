@@ -218,8 +218,9 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 	if key, live := sess.DataKey(); live {
 		if blob, ok := s.users.Catalog(sess.AccountID(), key); ok {
 			unlocked := sess.UnlockUntil(time.Now()) != nil
+			tf := s.timeFor(sess)
 			for _, c := range blob.Connections {
-				page.Accounts = append(page.Accounts, s.connectionCard(blob, c, unlocked))
+				page.Accounts = append(page.Accounts, s.connectionCard(sess, tf, blob, c, unlocked))
 			}
 			if n, ok := goneNotice(blob); ok {
 				page.Shell.Notices = append(page.Shell.Notices, n)
@@ -236,7 +237,7 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 // connectionCard never carries the password. Outside the unlock window Show
 // password opens the sheet; inside it asks for this card's password, and that
 // request is what releases and journals it (S-10.7).
-func (s *Server) connectionCard(blob sealed.Blob, c sealed.Connection, unlocked bool) view.ConnectionCard {
+func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.Blob, c sealed.Connection, unlocked bool) view.ConnectionCard {
 	reveal := view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}
 	if unlocked {
 		reveal.Href = s.postQuery("/app/settings/connections", url.Values{"reveal": {c.ID}})
@@ -275,6 +276,7 @@ func (s *Server) connectionCard(blob sealed.Blob, c sealed.Connection, unlocked 
 			Kinds:    col.Kinds,
 			ReadOnly: col.ReadOnly,
 		}
+		row.LastRead, row.Changed = readingOf(sess, tf, c.ID, col.Path)
 		if !col.Has(view.KindFile) {
 			row.Menu = []view.MenuItem{{Action: view.Action{
 				ID: "collection.rename", Label: "Rename…",

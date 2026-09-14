@@ -89,7 +89,9 @@ func (p *Provider) query(ctx context.Context, collection string, q *carddav.Addr
 	}
 	out := make([]*model.Object, 0, len(aos))
 	for _, ao := range aos {
-		out = append(out, model.NewObject(ao.Path, strings.Trim(ao.ETag, `"`), cardToProps(ao.Card)))
+		obj := model.NewObject(ao.Path, strings.Trim(ao.ETag, `"`), cardToProps(ao.Card))
+		obj.Modified = ao.ModTime
+		out = append(out, obj)
 	}
 	return out, nil
 }

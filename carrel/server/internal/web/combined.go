@@ -345,12 +345,16 @@ func listedOf(blob sealed.Blob, items []fanout.Item) []listed {
 
 // indexAnswered keeps what every answered source returned the way a single
 // list does: RELATED-TO, hints and the rail's counts read it, and none of
-// them asks a server.
+// them asks a server. A finished round is also a read of each collection that
+// answered from the network (S-22), at the time the round ended: a page drawn
+// later from the same poll does not move it.
 func (s *Server) indexAnswered(sess *session.Session, blob sealed.Blob, spec kindSpec, snap fanout.Snapshot) {
 	bySource := map[string][]listed{}
+	fresh := map[string]bool{}
 	for _, st := range snap.Sources {
 		if st.State == view.SourceDone || st.State == view.SourceEmpty {
 			bySource[st.ID] = []listed{}
+			fresh[st.ID] = !st.FromCache
 		}
 	}
 	for _, it := range listedOf(blob, snap.Items) {
@@ -362,6 +366,9 @@ func (s *Server) indexAnswered(sess *session.Session, blob sealed.Blob, spec kin
 	for id, part := range bySource {
 		account, path, _ := strings.Cut(id, ":")
 		putIndex(sess, account, path, spec.component, indexOf(spec.kind, part))
+		if !snap.Finished.IsZero() && fresh[id] {
+			noteRead(sess, account, path, snap.Finished, part, spec.kind != view.KindEvent)
+		}
 	}
 }
 

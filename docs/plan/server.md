@@ -479,8 +479,10 @@ renamed.
 
 **S-21 и S-22.** Пакетов нет. Отказ источника — состояние C-8.1 на
 экране, не 500; частичный результат остаётся; повтор — один источник.
-`gone` ≠ `unavailable`. Состояние коллекции (`LastRead`, `Changed`) и
-`FromCache` — из кэша и `ChangeTag`, без лишнего запроса. Исходный пояс —
+`gone` ≠ `unavailable`. Состояние коллекции (`LastRead`, `Changed`) — из
+того, что сессия прочитала: время чтения списка и самое свежее
+`getlastmodified` среди записей (`v0.0.58`); `FromCache` — из кэша. Без
+лишнего запроса. Исходный пояс —
 S-11. Потеря при записи — уже `LossReport`. Тесты пишутся в коммитах
 S-14/S-15.
 
@@ -596,9 +598,14 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
       (`v0.0.49`; `noteWrite`, `TestCountSurvivesWrites`)
 - [x] S-14: рейл «Back to list» на карточке, правке, импорте и расхождении;
       фильтр тегов; `print` (`v0.0.50`; `web/frame.go`, `frame_test.go`)
-- [ ] S-21/S-22: отказ источника не 500; `gone` ≠ `unavailable`; LastRead
+- [x] S-21/S-22: отказ источника не 500; `gone` ≠ `unavailable`; LastRead
       из кэша (тестами S-14/S-15) — первые два закрыты тестами `v0.0.47`,
-      `v0.0.48`; `LastRead` / `Changed` не заполнены
+      `v0.0.48`; `LastRead` / `Changed` не заполнены (`v0.0.58`;
+      `session.Reading` — не индекс кэша, у того TTL 60 с; чтение отмечают
+      списки одной коллекции и законченный круг единого вида не из кэша;
+      `Changed` — только целое чтение, агенда недели его не даёт, как и число;
+      `model.Object.Modified` из `ModTime` REPORT. `Objects` в `SourceBlock` и
+      `CollectionRow` по-прежнему пуст)
 - [x] S-13: `internal/photo`; DecodeConfig; JPEG без EXIF; прокси URI через
       страж; `image/jpeg`; патч PHOTO (`v0.0.52`; `web/photo.go`,
       `photo_test.go`)

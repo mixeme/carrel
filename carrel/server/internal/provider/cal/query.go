@@ -210,7 +210,12 @@ func fromReport(co caldav.CalendarObject) (*model.Object, error) {
 	if err := ical.NewEncoder(&buf).Encode(co.Data); err != nil {
 		return nil, err
 	}
-	return Parse(co.Path, strings.Trim(co.ETag, `"`), &buf)
+	obj, err := Parse(co.Path, strings.Trim(co.ETag, `"`), &buf)
+	if err != nil {
+		return nil, err
+	}
+	obj.Modified = co.ModTime
+	return obj, nil
 }
 
 func reportUID(co caldav.CalendarObject) string {

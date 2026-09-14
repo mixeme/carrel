@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
 
 // Object is a DAV record. raw is not exportable: callers see only a view for
@@ -11,8 +12,12 @@ import (
 type Object struct {
 	Path string
 	ETag string
-	raw  payload
-	cal  *calendarPayload
+	// Modified is when the server says the record last changed
+	// (getlastmodified in the reply that brought it); zero when it did not say.
+	// It is not part of the record and never written back.
+	Modified time.Time
+	raw      payload
+	cal      *calendarPayload
 }
 
 // Patch is a validated, atomic set of property operations (S-7). An rejected
