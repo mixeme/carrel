@@ -128,14 +128,14 @@ func (p *Provider) Open(ctx context.Context, path string, rng *dav.Range) (*dav.
 // A server that ignores If-None-Match overwrites instead, so a caller that
 // must not overwrite asks Stat first.
 func (p *Provider) UploadCreate(ctx context.Context, path string, body io.Reader) (string, error) {
-	return p.c.PutCreate(ctx, path, body)
+	return p.c.PutCreate(dav.Stream(ctx), path, body)
 }
 
 // UploadOverwrite writes a file whether its name is taken or not. It is the
 // only PUT without a precondition (S-17.1): the answer "Overwrite this one" to
 // a question in the queue, never a setting.
 func (p *Provider) UploadOverwrite(ctx context.Context, path string, body io.Reader) (string, error) {
-	return p.t.Put(ctx, path, body, "")
+	return p.t.Put(dav.Stream(ctx), path, body, "")
 }
 
 // MkCol creates a folder. A name already taken answers 405 (RFC 4918 §9.3.1).

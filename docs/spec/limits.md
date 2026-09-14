@@ -46,7 +46,7 @@
 | Переменная | Умолчание | Назначение |
 |---|---|---|
 | `CARREL_DAV_CONNECT_TIMEOUT` | 10 с | Подключение к удалённому DAV |
-| `CARREL_DAV_REQUEST_TIMEOUT` | 30 с | Запрос целиком (и `http.Client.Timeout`) |
+| `CARREL_DAV_REQUEST_TIMEOUT` | 30 с | Запрос записи целиком, с телом; у файла (скачивание, загрузка, копия) — простой без единого байта |
 | `CARREL_CACHE_COLLECTION_TTL` | 60 с | До перечитывания коллекции из кэша сессии |
 | `CARREL_PROGRESS_SOURCE_TIMEOUT` | 10 с | Один источник в опросе/веере |
 | `CARREL_PROGRESS_TOTAL_TIMEOUT` | 30 с | Весь опрос; потолок graceful shutdown |
@@ -65,7 +65,7 @@
 | Параметр | Значение | Место |
 |---|---|---|
 | Dial timeout | = `CARREL_DAV_CONNECT_TIMEOUT` | `internal/dav/guard.go` |
-| Request timeout | = `CARREL_DAV_REQUEST_TIMEOUT` | `internal/dav/guard.go` |
+| Request timeout | = `CARREL_DAV_REQUEST_TIMEOUT`; сторож транспорта, не `http.Client.Timeout` | `internal/dav/guard.go` |
 | Idle connection timeout | 90 с | `internal/dav/guard.go` |
 | TLS handshake timeout | 10 с | `internal/dav/guard.go` |
 | Expect-Continue timeout | 1 с | `internal/dav/guard.go` |

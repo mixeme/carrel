@@ -11,6 +11,21 @@ import (
 // guard's CARREL_DAV_MAX_RESPONSE_BYTES stays off it.
 type uncappedKey struct{}
 
+// streamKey marks a request that carries a file: CARREL_DAV_REQUEST_TIMEOUT
+// counts silence on it, not the whole request.
+type streamKey struct{}
+
+// Stream marks the requests made with ctx as carrying a file (S-17): they are
+// cut after CARREL_DAV_REQUEST_TIMEOUT without a byte either way, not after
+// that long in all. Open marks its own; an upload marks its context.
+func Stream(ctx context.Context) context.Context {
+	return context.WithValue(ctx, streamKey{}, true)
+}
+
+func streaming(req *http.Request) bool {
+	return req.Context().Value(streamKey{}) != nil
+}
+
 // Download is a file as the server sends it (S-17): the body, neither capped
 // nor buffered, and what a browser needs to take it.
 type Download struct {
@@ -26,14 +41,14 @@ type Download struct {
 // Streamer opens a file without the response cap (S-17). Carrel sets no
 // ceiling on a file (C-12): the far server decides its size. The cap stays on
 // PROPFIND, REPORT and discovery, and on Get, whose records are parsed into
-// memory. The request timeout is the same as for any request.
+// memory. The request timeout counts silence, not the whole download (Stream).
 type Streamer interface {
 	Open(ctx context.Context, path string, rng *Range) (*Download, error)
 }
 
 // Open is a GET whose body the guard does not cap. The caller closes Body.
 func (c *Client) Open(ctx context.Context, p string, rng *Range) (*Download, error) {
-	req, err := http.NewRequestWithContext(context.WithValue(ctx, uncappedKey{}, true), http.MethodGet, c.resolve(p), nil)
+	req, err := http.NewRequestWithContext(context.WithValue(Stream(ctx), uncappedKey{}, true), http.MethodGet, c.resolve(p), nil)
 	if err != nil {
 		return nil, err
 	}

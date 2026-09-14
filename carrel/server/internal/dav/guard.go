@@ -11,6 +11,7 @@ import (
 	"net/netip"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
@@ -83,9 +84,11 @@ func (g *Guard) httpClient(pinnedFingerprint string) *http.Client {
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 	}
+	// No http.Client.Timeout: it counts the body too and cut every file that
+	// took longer than a request (S-17). The transport keeps the deadline
+	// instead, and for a stream counts silence rather than the whole.
 	return &http.Client{
-		Transport: &limitTransport{base: transport, max: g.maxBody},
-		Timeout:   g.request,
+		Transport: &limitTransport{base: transport, max: g.maxBody, request: g.request},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= g.maxRedirect {
 				return fmt.Errorf("dav: too many redirects")
@@ -273,8 +276,9 @@ func privateIPv6(addr netip.Addr) bool {
 }
 
 type limitTransport struct {
-	base http.RoundTripper
-	max  int64
+	base    http.RoundTripper
+	max     int64
+	request time.Duration // CARREL_DAV_REQUEST_TIMEOUT
 }
 
 func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -282,9 +286,29 @@ func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if base == nil {
 		base = http.DefaultTransport
 	}
+	var w *watchdog
+	if t.request > 0 {
+		var ctx context.Context
+		ctx, w = watch(req.Context(), t.request, streaming(req))
+		req = req.WithContext(ctx)
+		if w.stream && req.Body != nil && req.Body != http.NoBody {
+			req.Body = &watchedBody{ReadCloser: req.Body, w: w, out: true}
+		}
+	}
 	resp, err := base.RoundTrip(req)
 	if err != nil {
+		if w != nil {
+			w.stop()
+			err = w.err(err)
+		}
 		return nil, err
+	}
+	if w != nil {
+		if resp.Body == nil {
+			w.stop()
+		} else {
+			resp.Body = &watchedBody{ReadCloser: resp.Body, w: w}
+		}
 	}
 	if resp.Body != nil && t.max > 0 && !uncapped(req) {
 		resp.Body = &limitedBody{ReadCloser: resp.Body, remain: t.max}
@@ -312,6 +336,119 @@ func (b *limitedBody) Read(p []byte) (int, error) {
 		return 0, ErrResponseTooLarge
 	}
 	return n, err
+}
+
+// ErrTimeout is what a request cut by CARREL_DAV_REQUEST_TIMEOUT fails with.
+// It is a timeout to net.Error and context.DeadlineExceeded to errors.Is, as
+// http.Client.Timeout was.
+var ErrTimeout error = timeoutError{}
+
+type timeoutError struct{}
+
+func (timeoutError) Error() string   { return "dav: request timed out" }
+func (timeoutError) Timeout() bool   { return true }
+func (timeoutError) Temporary() bool { return true }
+func (timeoutError) Is(target error) bool {
+	return target == context.DeadlineExceeded
+}
+
+// watchdog cancels a request that took too long. A plain request has one
+// deadline for all of it, body included. A stream (Stream) is cut only after
+// that long without a byte: each byte that goes out or comes in starts the
+// count again, so a large file on a slow line passes and a silent server does
+// not hold the connection.
+type watchdog struct {
+	mu     sync.Mutex
+	timer  *time.Timer
+	d      time.Duration
+	stream bool
+	fired  bool
+	done   bool
+	cancel context.CancelFunc
+}
+
+func watch(parent context.Context, d time.Duration, stream bool) (context.Context, *watchdog) {
+	ctx, cancel := context.WithCancel(parent)
+	w := &watchdog{d: d, stream: stream, cancel: cancel}
+	w.mu.Lock()
+	w.timer = time.AfterFunc(d, w.fire)
+	w.mu.Unlock()
+	return ctx, w
+}
+
+func (w *watchdog) fire() {
+	w.mu.Lock()
+	if !w.done {
+		w.fired = true
+	}
+	w.mu.Unlock()
+	w.cancel()
+}
+
+// progress starts the count again for a stream; a plain request keeps its
+// deadline.
+func (w *watchdog) progress() {
+	if !w.stream {
+		return
+	}
+	w.mu.Lock()
+	if !w.fired && !w.done {
+		w.timer.Reset(w.d)
+	}
+	w.mu.Unlock()
+}
+
+// stop ends the request: the timer and its context go.
+func (w *watchdog) stop() {
+	w.mu.Lock()
+	w.done = true
+	w.timer.Stop()
+	w.mu.Unlock()
+	w.cancel()
+}
+
+// err names a failure the watchdog caused; any other passes as it is.
+func (w *watchdog) err(err error) error {
+	w.mu.Lock()
+	fired := w.fired
+	w.mu.Unlock()
+	if fired {
+		return ErrTimeout
+	}
+	return err
+}
+
+// watchedBody reports bytes to the watchdog: a request body as the transport
+// sends it (out), a response body as the caller reads it, which also ends the
+// request at EOF or Close.
+type watchedBody struct {
+	io.ReadCloser
+	w   *watchdog
+	out bool
+}
+
+func (b *watchedBody) Read(p []byte) (int, error) {
+	n, err := b.ReadCloser.Read(p)
+	if n > 0 {
+		b.w.progress()
+	}
+	switch {
+	case err == io.EOF:
+		if !b.out {
+			b.w.stop()
+		}
+	case err != nil:
+		err = b.w.err(err)
+	}
+	return n, err
+}
+
+func (b *watchedBody) Close() error {
+	err := b.ReadCloser.Close()
+	if !b.out {
+		b.w.stop()
+	}
+	return err
 }
 
 // sanitizeRemoteText trims a remote error body for operator-facing messages.

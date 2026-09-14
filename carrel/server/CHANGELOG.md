@@ -5,6 +5,36 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.56 — 2026-09-14
+
+`CARREL_DAV_REQUEST_TIMEOUT` no longer cuts a file that is still moving. On
+a download, an upload and a copy it counts silence: the transfer is cut after
+that many seconds without a byte either way. A record request keeps one
+deadline for all of it, body included.
+
+### For consumers
+
+- **Files.** A download, an upload or a copy between storages lasts as long
+  as bytes keep coming; a server that stops answering mid-file is cut after
+  `CARREL_DAV_REQUEST_TIMEOUT` (30 s) of silence. The known limit of `v0.0.53`
+  is gone.
+- **Everything else.** PROPFIND, REPORT, discovery, records and photos: the
+  same 30 s for the whole request as before.
+- **Failure.** A cut request fails with a timeout, as before: a source in a
+  search is `timeout`, not `error`.
+
+### Included
+
+- `dav`: the guarded client has no `http.Client.Timeout`; its transport holds
+  a watchdog per request. `Stream(ctx)` marks the requests that carry a file;
+  `Open` marks its own. `ErrTimeout` is `context.DeadlineExceeded` to
+  `errors.Is` and a `net.Error` with `Timeout()`.
+- `file`: `UploadCreate` and `UploadOverwrite` mark their context, so `Copy`
+  and `CopyTree` stream both ways.
+- Test: `TestRequestTimeoutCountsSilenceOnStreams` — a file moving for longer
+  than the timeout passes both ways; a stalled one is cut; a record GET and
+  PUT past it are cut.
+
 ## v0.0.55 — 2026-09-14
 
 `docs/spec/check.py`, check 8 (a fixture draws into its frame), reads the

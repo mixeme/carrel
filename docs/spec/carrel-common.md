@@ -2041,7 +2041,7 @@ type LossReport struct { // сервер принял запись, но что-
 | `CARREL_TIMEZONE` | системная | Часовой пояс экземпляра (C-10) | админ |
 | `CARREL_DAV_SSRF_ALLOWLIST` | пусто | Хосты, которым разрешены частные адреса. Именует хосты, не сети | админ |
 | `CARREL_DAV_CONNECT_TIMEOUT` | `10` | Секунд на подключение | — |
-| `CARREL_DAV_REQUEST_TIMEOUT` | `30` | Секунд на запрос целиком | — |
+| `CARREL_DAV_REQUEST_TIMEOUT` | `30` | Секунд на запрос целиком; у файла — секунд без единого байта в любую сторону | — |
 | `CARREL_DAV_MAX_RESPONSE_BYTES` | `10485760` | Потолок одного ответа | — |
 | `CARREL_DAV_MAX_REDIRECTS` | `5` | Длина цепочки редиректов | — |
 | `CARREL_CACHE_COLLECTION_TTL` | `60` | Секунд, пока коллекция не перечитывается | — |
