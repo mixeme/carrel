@@ -5,6 +5,18 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.55 — 2026-09-14
+
+`docs/spec/check.py`, check 8 (a fixture draws into its frame), reads the
+rail under the `tc-*` class names. It had been red since `v0.0.51`: it still
+looked for `m-src`, `m-meta`, `m-nav`, `m-num` and found an empty rail in
+every frame.
+
+### For consumers
+
+Nothing in the running server. `python docs/spec/check.py` is green again; a
+red check 8 now means the fixture and the mockup frame really disagree.
+
 ## v0.0.54 — 2026-09-14
 
 Copies the Typecase mockup through plan 1 step 4: frames use the same tags

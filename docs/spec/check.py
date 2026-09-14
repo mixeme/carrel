@@ -177,18 +177,22 @@ def canon_frame(route):
 
 def frame_rail(frame):
     cols = []
-    for m in re.finditer(r'<div class="m-src([^"]*)">(.*?)</div>', frame, re.S):
-        lab = re.search(r'<span class="t">([^<]*)</span>', m.group(2))
-        meta = re.search(r'<span class="m-meta">([^<]*)</span>', m.group(2))
+    # Модификаторы стоят в классе с любой стороны: "tc-tickrow is-all is-on".
+    # Шаблон — сразу строка рейла: общий <div class="..."> съел бы внешнюю
+    # секцию до первого </div> вместе с первой строкой.
+    for m in re.finditer(r'<div class="((?:[^" ]+ )*tc-tickrow(?: [^"]*)?)">(.*?)</div>', frame, re.S):
+        classes = m.group(1).split()
+        lab = re.search(r'<span class="tc-tickrow__label">([^<]*)</span>', m.group(2))
+        meta = re.search(r'<span class="tc-tickrow__meta">([^<]*)</span>', m.group(2))
         if lab and meta:
             cols.append((lab.group(1), meta.group(1),
-                         "off" if "is-off" in m.group(1) else "on"))
+                         "off" if "is-off" in classes else "on"))
     nav = []
-    nm = re.search(r'<div class="m-nav">(.*?)</div>', frame, re.S)
+    nm = re.search(r'<div class="tc-nav">(.*?)</div>', frame, re.S)
     if nm:
         for a in re.finditer(r'<a[^>]*>(.*?)</a>', nm.group(1), re.S):
-            num = re.search(r'<span class="m-num">([^<]*)</span>', a.group(1))
-            lab = re.sub(r'<[^>]+>', '', re.sub(r'<span class="m-num">.*?</span>', '', a.group(1))).strip()
+            num = re.search(r'<span class="tc-num">([^<]*)</span>', a.group(1))
+            lab = re.sub(r'<[^>]+>', '', re.sub(r'<span class="tc-num">.*?</span>', '', a.group(1))).strip()
             nav.append((lab, num.group(1) if num else None))
     return cols, nav
 
