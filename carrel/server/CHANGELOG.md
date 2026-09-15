@@ -5,6 +5,29 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.65 — 2026-09-15
+
+A note written in a real foreign client was read, edited and read again. Nothing
+changes in the running server.
+
+### For consumers
+
+- **Checked.** jtx Board through DAVx5 4.5.19 on Baikal: a note with CLASS,
+  COLOR, GEO, LOCATION, STATUS, URL, CATEGORIES, COMMENT and an inline
+  attachment of 395 KiB. Carrel read the text with escaped commas,
+  semicolons, backslashes and emoji as written; an edit of title and text
+  kept every other property and the attachment byte for byte, with no loss
+  report; jtx showed the edit and everything else after syncing.
+- **Seen on the way, not changed yet.**
+  - An edit leaves `LAST-MODIFIED` and `DTSTAMP` as they were, so a client
+    shows the old time of change.
+  - Carrel writes long lines unfolded (go-ical does not fold) and sorts
+    properties and parameters: an inline attachment goes out as one line of
+    hundreds of KiB. jtx and Baikal accept it.
+  - Edited at the same time in jtx, the note kept jtx's version over an edit
+    Carrel had written with the right If-Match; Baikal refuses a stale
+    If-Match. How DAVx5 sent its PUT is still to be seen.
+
 ## v0.0.64 — 2026-09-15
 
 Every server quirk in [docs/servers.md](../../docs/servers.md) now has a test
