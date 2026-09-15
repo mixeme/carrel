@@ -224,7 +224,8 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 	if err != nil {
 		return "", davRefusal(moveCollectionRefusal(m.title(), label), m.conn, "PROPFIND", m.col.Path, err)
 	}
-	records, err := m.readRecords(ctx, m.src)
+	// Every record, a stray task in a calendar of events too.
+	records, err := m.src.allRecords(ctx)
 	if err != nil {
 		return "", davRefusal(moveCollectionRefusal(m.title(), label), m.conn, "REPORT", m.col.Path, err)
 	}
@@ -346,24 +347,6 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 	return m.newAddress(), nil
 }
 
-// readRecords reads every record of the collection: one REPORT for an address
-// book, one a component for a calendar — all three, so a stray task in a
-// calendar of events travels too.
-func (m *collectionMove) readRecords(ctx context.Context, c *collectionCtx) ([]*model.Object, error) {
-	if c.card != nil {
-		return c.card.Query(ctx, c.col.Path)
-	}
-	var out []*model.Object
-	for _, p := range calendarParts {
-		objs, _, err := c.cal.Query(ctx, c.col.Path, p.component, nil, nil)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, objs...)
-	}
-	return out, nil
-}
-
 // copyAll writes each resource of the original into the new collection. A
 // record goes as S-18 sends it; what is not a readable record — a broken one,
 // another component — goes as its bytes. A name taken there becomes {uid}-2.
@@ -434,7 +417,7 @@ func (m *collectionMove) copyBytes(ctx context.Context, from, to string) error {
 // readBack reads the new collection once and compares every record with what
 // was sent; a resource copied as bytes only has to be there.
 func (m *collectionMove) readBack(ctx context.Context, sent []transferred) ([]view.Text, error) {
-	got, err := m.readRecords(ctx, m.dst)
+	got, err := m.dst.allRecords(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -71,6 +71,8 @@ type Users interface {
 	AddCollection(viewerID string, dataKey [32]byte, accountID string, col sealed.Collection) error
 	RenameCollection(viewerID string, dataKey [32]byte, accountID, path, name, colour string) error
 	PlaceMovedCollection(viewerID string, dataKey [32]byte, fromAccount, fromPath, toAccount string, col sealed.Collection, move bool) error
+	// RemoveCollection takes a deleted collection and its ticks out (S-12.4).
+	RemoveCollection(viewerID string, dataKey [32]byte, accountID, path string) error
 	// SetSelection replaces the ticks of one kind (S-14); other kinds keep
 	// theirs.
 	SetSelection(viewerID string, dataKey [32]byte, kind view.Kind, picks []sealed.Selection) error

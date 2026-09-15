@@ -249,6 +249,32 @@ func (s *Service) PlaceMovedCollection(viewerID string, dataKey [crypt.KeyLen]by
 	})
 }
 
+// RemoveCollection takes a collection the server has deleted out of the catalog
+// with its ticks (S-12.4): it is not gone by re-discovery, it is no more. The
+// journal names the connection, not the address.
+func (s *Service) RemoveCollection(viewerID string, dataKey [crypt.KeyLen]byte, accountID, path string) error {
+	return s.editCatalog(viewerID, dataKey, "collection.delete", accountID, func(blob *sealed.Blob) error {
+		at := -1
+		for i, c := range blob.Collections {
+			if c.AccountID == accountID && c.Path == path {
+				at = i
+			}
+		}
+		if at < 0 {
+			return ErrNotFound
+		}
+		blob.Collections = append(blob.Collections[:at], blob.Collections[at+1:]...)
+		var ticks []sealed.Selection
+		for _, t := range blob.Selected {
+			if t.AccountID != accountID || t.Path != path {
+				ticks = append(ticks, t)
+			}
+		}
+		blob.Selected = ticks
+		return nil
+	})
+}
+
 // RenameCollection writes the label the server has accepted (S-12.2): the
 // name and, when one was chosen, the colour. The path never changes here.
 func (s *Service) RenameCollection(viewerID string, dataKey [crypt.KeyLen]byte, accountID, path, name, colour string) error {

@@ -228,14 +228,6 @@ func (s *Server) getAttach(w http.ResponseWriter, r *http.Request) {
 	s.notFound(w, r)
 }
 
-func (s *Server) getCollectionDelete(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
-}
-
-func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
-	s.getCollectionDelete(w, r)
-}
-
 func (s *Server) getSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {

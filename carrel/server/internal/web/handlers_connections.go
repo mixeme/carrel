@@ -286,6 +286,9 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			if item, ok := s.collectionMoveItem(blob, c, col); ok {
 				row.Menu = append(row.Menu, item)
 			}
+			if item, ok := s.collectionDeleteItem(c, col); ok {
+				row.Menu = append(row.Menu, item)
+			}
 		}
 		card.Collections = append(card.Collections, row)
 	}

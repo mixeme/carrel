@@ -68,6 +68,13 @@ func parseDay(tf timeFmt, v string) (time.Time, bool) {
 	return d, err == nil
 }
 
+// exportWhole is a calendar asked for with every component it holds (whole=1):
+// what the delete sheet hands over (S-12.4), so a task in a calendar of events
+// is not lost with it. It is .ics whatever the kind, and has no window.
+func exportWhole(c *collectionCtx, r *http.Request) bool {
+	return c.card == nil && r.URL.Query().Get("whole") != ""
+}
+
 // exportRecords reads what the file will hold: one REPORT for a book, one for
 // the component of the kind, with the window when there is one.
 func (c *collectionCtx) exportRecords(ctx context.Context, from, to *time.Time) ([]*model.Object, error) {
@@ -78,14 +85,45 @@ func (c *collectionCtx) exportRecords(ctx context.Context, from, to *time.Time) 
 	return objs, err
 }
 
+// allRecords reads every record of the collection: one REPORT for an address
+// book, one a component for a calendar — all three, so a stray task in a
+// calendar of events is read too. A resource two REPORTs name is read once.
+func (c *collectionCtx) allRecords(ctx context.Context) ([]*model.Object, error) {
+	if c.card != nil {
+		return c.card.Query(ctx, c.col.Path)
+	}
+	var out []*model.Object
+	seen := map[string]bool{}
+	for _, p := range calendarParts {
+		objs, _, err := c.cal.Query(ctx, c.col.Path, p.component, nil, nil)
+		if err != nil {
+			return nil, err
+		}
+		for _, obj := range objs {
+			if !seen[obj.Path] {
+				seen[obj.Path] = true
+				out = append(out, obj)
+			}
+		}
+	}
+	return out, nil
+}
+
 // getKindExport hands the collection over as a file.
 func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind string) {
 	c, ok := s.openCollection(w, r, kind, false)
 	if !ok {
 		return
 	}
-	from, to := exportWindow(c, r)
-	objs, err := c.exportRecords(r.Context(), from, to)
+	whole := exportWhole(c, r)
+	var objs []*model.Object
+	var err error
+	if whole {
+		objs, err = c.allRecords(r.Context())
+	} else {
+		from, to := exportWindow(c, r)
+		objs, err = c.exportRecords(r.Context(), from, to)
+	}
 	if err != nil {
 		// Nothing was read, so there is no file to hand over: the list says
 		// what the server answered (S-21), and the export is one click away
@@ -94,6 +132,9 @@ func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind stri
 		return
 	}
 	f := exportFormats[c.spec.kind]
+	if whole {
+		f = exportFormats[view.KindEvent]
+	}
 	h := w.Header()
 	h.Set("Content-Type", f.media)
 	if v := mime.FormatMediaType("attachment", map[string]string{"filename": exportFileName(c, f.ext)}); v != "" {
@@ -105,6 +146,10 @@ func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind stri
 	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
 	h.Set("Cache-Control", "private, no-store")
 	w.WriteHeader(http.StatusOK)
+	if whole {
+		writeCalendar(w, objs)
+		return
+	}
 	writeExport(w, c, objs)
 }
 

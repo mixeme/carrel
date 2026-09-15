@@ -5,6 +5,52 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.73 — 2026-09-15
+
+A calendar or an address book is deleted on the server, once its name is
+typed (S-12.4).
+
+### For consumers
+
+- **Where it opens.** Every collection row of the rail and of the connections
+  page ends with `Delete…` (`collection.delete`, `danger`, after a separator),
+  read-only rows included: the right to delete is not guessed. The sheet is
+  `/app/collections/delete?a=&c=` (`CollectionDeleteSheet`). A file collection
+  has none: it is the root of a storage, and its folders go through `op`.
+- **What the sheet says before anything is sent.** `Warning` names the server
+  and how many records go with it — counted by one PROPFIND, left out when the
+  server does not answer — and that Carrel keeps no copy. `References` is an
+  empty list: published links, backup jobs and davloom devices fill it once
+  those exist. `Archive` says that no backup job holds it, and that a restore
+  brings records back into a new collection at a new address.
+- **The file comes first.** `Export` is `Download .vcf first` or
+  `Download .ics first`, the same stream as S-19. A calendar's link carries
+  `whole=1`: every component it holds, events, tasks and notes, in one `.ics`
+  with no range, so a task in a calendar of events is not lost with it. An
+  empty collection has no `Export`, and `ExportNote` says there is nothing in
+  it.
+- **The confirmation is the name.** `Form` holds `name`; `Hint` is the name as
+  shown. It must match in letters and case — spaces around it and the Unicode
+  form it was typed in do not count. Anything else answers the sheet again
+  with the field's error and the typed value, and nothing goes to the server.
+- **After.** The name typed sends `DELETE` on the collection and redirects to
+  `/app/settings/connections`; the catalog loses the entry and its ticks, and
+  the journal writes `collection.delete` with the connection. A refusal leaves
+  the collection, in the catalog too, and the connections page carries the
+  notice with method, address, code and body. A server answering 404 no longer
+  has it: it leaves the catalog the same way.
+
+### Included
+
+- `internal/web/collection_delete.go`; `user.RemoveCollection`;
+  `collectionCtx.allRecords` shared by the export and the move (S-12.3), a
+  resource two REPORTs name read once.
+- Tests: `web/collection_delete_test.go` — the menu in both places, the sheet
+  and its file holding a task and an instance, a book and an empty calendar,
+  wrong names that send nothing, a delete that forgets the ticks, a decomposed
+  name, a refusal, a server that has it no more.
+- Not live yet: Radicale, Baikal.
+
 ## v0.0.72 — 2026-09-15
 
 A file is imported into a collection, and a collection is handed over as a

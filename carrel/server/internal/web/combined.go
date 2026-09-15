@@ -530,6 +530,9 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 				row.Menu = append(row.Menu, view.MenuItem{Separator: col.ReadOnly, Action: view.Action{
 					ID: "collection.export", Label: "Export", Icon: "i-down",
 					Href: s.route(list + "/export"), Method: "GET", Enabled: true}})
+				if item, ok := s.collectionDeleteItem(conn, col); ok {
+					row.Menu = append(row.Menu, item)
+				}
 				if tick {
 					on++
 					row.Count = collectionCount(sess, conn.ID, col, spec)
