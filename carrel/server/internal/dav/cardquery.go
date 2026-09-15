@@ -16,7 +16,7 @@ import (
 // VCard4 is the vCard version a card query asks for (RFC 6352 §10.4.2). A
 // server that converts cards (sabre/dav: Baikal, Nextcloud) otherwise answers
 // in its default, 3.0, and what 3.0 cannot hold — KIND, among others — is gone
-// before any patch; an edit then writes 3.0 back.
+// before any patch; an edit then writes 3.0 back (docs/servers.md, SV-1).
 const VCard4 = "4.0"
 
 const cardDAVNS = "urn:ietf:params:xml:ns:carddav"

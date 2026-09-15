@@ -5,6 +5,29 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.63 — 2026-09-15
+
+Server quirks found and worked around are kept in one place:
+[docs/servers.md](../../docs/servers.md). Nothing changes in the running server.
+
+### For consumers
+
+- **What is there.** Each deviation of a real DAV server or library from the
+  standard, or from what Carrel expects: the version it was seen on, what the
+  standard says, what the server does, what Carrel does about it, and the test
+  that will notice when the server changes. Radicale, sabre/dav (Baikal,
+  Nextcloud), SFTPGo, the Apache in front of Baikal, go-webdav and go-vcard;
+  thirteen entries, `SV-1` to `SV-13`.
+- **Without a watch.** SFTPGo's If-None-Match (SV-8), Apache's keep-alive
+  (SV-9) and Baikal's well-known downgrade (SV-10) have no test that would
+  notice a change; the file says so.
+
+### Included
+
+- `docs/servers.md`; the plan links to it from «Живые серверы» and
+  `providers-tail.md`.
+- Comments at the workarounds name their entry (`docs/servers.md, SV-n`).
+
 ## v0.0.62 — 2026-09-15
 
 When a server cuts a contact photo, the loss report offers to save it in the

@@ -32,7 +32,7 @@ func (p *Provider) Query(ctx context.Context, collection string) ([]*model.Objec
 // searchProps are the card properties a search looks in: what the list and
 // the card show. N is not among them: Radicale before 3.7.7 answers 500 to a
 // text-match on a structured property, and FN, which vCard 3.0 and 4.0
-// require, carries the same name.
+// require, carries the same name (docs/servers.md, SV-3).
 var searchProps = []string{
 	vcard.FieldFormattedName, vcard.FieldNickname,
 	vcard.FieldEmail, vcard.FieldTelephone, vcard.FieldOrganization,
@@ -72,7 +72,8 @@ func (p *Provider) FindUID(ctx context.Context, collection, uid string) (*model.
 // drops what 3.0 cannot hold before any patch, and the edit writes 3.0 back. A
 // server that keeps cards as sent answers as kept either way. A server that
 // refuses 4.0 is asked again without a version; a 3.0 card read as 4.0 is
-// written back as 4.0, a change of format and not of data.
+// written back as 4.0, a change of format and not of data (docs/servers.md,
+// SV-1).
 func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery) ([]*model.Object, error) {
 	rs, ok := p.t.(cardReporting)
 	if !ok {

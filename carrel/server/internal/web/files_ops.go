@@ -23,7 +23,8 @@ import (
 // Writes to a file collection (S-17.1, S-17.3). An upload never overwrites: a
 // taken name is a question in the transfer queue — Skip, Keep both, Overwrite
 // this one — and so is a move or a copy onto one. The name is looked up
-// before the conditional PUT: a server that ignores If-None-Match (SFTPGo)
+// before the conditional PUT: a server that ignores If-None-Match (SFTPGo,
+// docs/servers.md, SV-8)
 // would overwrite otherwise. An upload that asks keeps its file in the
 // temporary directory until the answer or the end of the session.
 

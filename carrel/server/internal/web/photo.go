@@ -749,7 +749,8 @@ func (s *Server) photoSave(w http.ResponseWriter, r *http.Request, c *collection
 	}
 	// A server that cuts a data: URI (Radicale, through vobject) keeps no
 	// image. The loss report offers the older form and names its risk; the
-	// frame waits in the draft, at the version this write left.
+	// frame waits in the draft, at the version this write left
+	// (docs/servers.md, SV-4).
 	s.finishWriteWith(w, r, c, uid, obj, c.recordPath(uid)+"/edit", func(loss *model.Loss, got *model.Object) ([]view.Action, []view.Notice) {
 		if older || got == nil || !lostProp(loss, "PHOTO") || !card.PhotoIsDataURI(obj) {
 			clearPhotoDraft(c, uid)

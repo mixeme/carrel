@@ -67,7 +67,7 @@ var searchProps = map[string][]string{
 // by two of them is kept once. The match is the server's, in i;unicode-casemap:
 // letter case does not count in any script. A server that refuses that
 // collation is asked again with its default, and what it found comes with
-// ErrLatinCaseOnly.
+// ErrLatinCaseOnly (docs/servers.md, SV-2).
 func (p *Provider) Search(ctx context.Context, collection, component, text string) ([]*model.Object, []Unreadable, error) {
 	props, ok := searchProps[component]
 	if !ok {

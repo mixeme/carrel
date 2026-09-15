@@ -36,7 +36,8 @@ func Sized(r io.Reader, length int64) io.Reader {
 // unwrap returns the reader to send, its media type and its length (-1 when
 // no label says). The wrappers must not reach http.NewRequest: it learns the
 // length only from a *bytes.Buffer, *bytes.Reader or *strings.Reader, and
-// without it the PUT goes out chunked — Radicale answers that with 400.
+// without it the PUT goes out chunked — Radicale answers that with 400
+// (docs/servers.md, SV-5).
 func unwrap(body io.Reader) (io.Reader, string, int64) {
 	contentType, length := "", int64(-1)
 	for {
