@@ -5,6 +5,26 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.69 — 2026-09-15
+
+Moving and copying records has run on live servers. Nothing changes in the
+running server.
+
+### For consumers
+
+- **Checked.** On Radicale and on Baikal, a contact moved between two address
+  books of one account is one MOVE and arrives byte for byte; the copy back
+  keeps the UID and a foreign property. An event with an overridden instance
+  moves with its RRULE and RECURRENCE-ID, and the agenda of the target shows
+  the override. Between accounts, a contact from Radicale to Baikal and an
+  event from Baikal to Radicale arrive whole and the original is gone.
+
+### Included
+
+- `integration/move_live_test.go`: `TestRadicaleMove`, `TestBaikalMove`,
+  `TestRadicaleBaikalMove`. Green with the whole live suite on the Linux
+  machine; `TestBaikalMove` also from Windows.
+
 ## v0.0.68 — 2026-09-15
 
 A contact, an event, a task or a note moves or is copied to another
