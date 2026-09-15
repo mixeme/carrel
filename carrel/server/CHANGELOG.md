@@ -5,6 +5,31 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.66 — 2026-09-15
+
+A record written through Carrel carries the time of that write, so clients
+show Carrel's edit as the latest change.
+
+### For consumers
+
+- **Events, tasks and notes.** Every write — a new record, an edit, the
+  conflict screen, reminders — sets `DTSTAMP` and `LAST-MODIFIED` of the main
+  component to the time of the write, in UTC. RFC 5545 §3.8.7.2 has `DTSTAMP`
+  of an object without METHOD say when it was last revised. Until now an edit
+  left both as they were, and jtx showed the time of change from before it.
+- **Contacts.** Every write, the photo included, sets `REV` (RFC 6350 §6.7.4).
+  The card page shows `REV` as the server's time of change.
+- **Loss report.** Unchanged: these properties were already not counted as
+  lost when a server rewrites them.
+
+### Included
+
+- `cal.Provider` and `card.Provider` stamp the object before `Create` and
+  `Update`, through a patch.
+- Tests: `TestWritesStampTheRevision` in `cal` and `card`; live
+  `TestBaikalRecords`, `TestBaikalVCard4Edit`,
+  `TestBaikalCardForeignPropertyRoundTrip` green.
+
 ## v0.0.65 — 2026-09-15
 
 A note written in a real foreign client was read, edited and read again. Nothing

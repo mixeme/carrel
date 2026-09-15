@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/emersion/go-vcard"
@@ -25,8 +26,9 @@ var (
 
 // Provider reads and writes vCard contacts.
 type Provider struct {
-	t dav.Transport
-	c dav.Creator
+	t   dav.Transport
+	c   dav.Creator
+	now func() time.Time
 }
 
 // New wires a card provider.
@@ -35,7 +37,18 @@ func New(t dav.Transport) (*Provider, error) {
 	if !ok {
 		return nil, fmt.Errorf("card: transport lacks PutCreate")
 	}
-	return &Provider{t: t, c: c}, nil
+	return &Provider{t: t, c: c, now: time.Now}, nil
+}
+
+// stamp marks a write as a revision: REV is when the card was last revised
+// (RFC 6350 §6.7.4), and Carrel shows it as the server's time of change. The
+// loss check ignores it.
+func (p *Provider) stamp(obj *model.Object) error {
+	patch, err := model.NewPatch(model.SetText{Prop: vcard.FieldRevision, Value: p.now().UTC().Format("20060102T150405Z")})
+	if err != nil {
+		return err
+	}
+	return patch.Apply(obj)
 }
 
 // Get fetches and parses one contact.
@@ -60,6 +73,9 @@ func Parse(path, etag string, r io.Reader) (*model.Object, error) {
 
 // Create writes a new contact with If-None-Match.
 func (p *Provider) Create(ctx context.Context, path string, obj *model.Object) (string, error) {
+	if err := p.stamp(obj); err != nil {
+		return "", err
+	}
 	var buf bytes.Buffer
 	if err := Encode(&buf, obj); err != nil {
 		return "", err
@@ -74,6 +90,9 @@ const MediaType = "text/vcard; charset=utf-8"
 func (p *Provider) Update(ctx context.Context, obj *model.Object) (string, error) {
 	if obj == nil || obj.ETag == "" {
 		return "", ErrEmptyETag
+	}
+	if err := p.stamp(obj); err != nil {
+		return "", err
 	}
 	var buf bytes.Buffer
 	if err := Encode(&buf, obj); err != nil {
