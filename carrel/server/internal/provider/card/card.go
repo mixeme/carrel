@@ -241,6 +241,31 @@ func PhotoOps(obj *model.Object, jpeg []byte) []model.PatchOp {
 	)
 }
 
+// PhotoOpsBase64 write the JPEG in the older form, base64 with ENCODING and
+// TYPE=JPEG, whatever the card's version; VERSION stays (S-13). vCard 4.0 has
+// no ENCODING parameter, and a strict 4.0 client may not show the photo. It is
+// what a server that cuts a data: URI (Radicale) keeps whole, and only the
+// person's answer to a loss report writes it.
+func PhotoOpsBase64(obj *model.Object, jpeg []byte) []model.PatchOp {
+	encoding := "b"
+	if v := obj.PropText(vcard.FieldVersion); len(v) > 0 && strings.TrimSpace(v[0]) == "2.1" {
+		encoding = "BASE64"
+	}
+	return []model.PatchOp{
+		model.RemoveProp{Prop: vcard.FieldPhoto},
+		model.SetText{Prop: vcard.FieldPhoto, Value: base64.StdEncoding.EncodeToString(jpeg)},
+		model.SetParam{Prop: vcard.FieldPhoto, Param: "ENCODING", Value: encoding},
+		model.SetParam{Prop: vcard.FieldPhoto, Param: "TYPE", Value: "JPEG"},
+	}
+}
+
+// PhotoIsDataURI reports a first PHOTO written as a data: URI, the vCard 4.0
+// form.
+func PhotoIsDataURI(obj *model.Object) bool {
+	props := obj.Props()[vcard.FieldPhoto]
+	return len(props) > 0 && isDataURI(strings.TrimSpace(props[0].Text))
+}
+
 func photoLink(v model.RawValue) string {
 	text := strings.TrimSpace(v.Text)
 	if isDataURI(text) {

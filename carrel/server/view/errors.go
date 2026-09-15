@@ -19,7 +19,8 @@ type TraceStep struct {
 
 // LossReport — сервер принял запись, но что-то потерял.
 type LossReport struct {
-	Properties []Text `json:"properties"`
-	Note       Text   `json:"note"`       // уведомление, не блокировка: запись уже произошла
-	Aggregated bool   `json:"aggregated"` // повторная потеря на этом сервере: сказано один раз
+	Properties []Text   `json:"properties"`
+	Note       Text     `json:"note"`       // уведомление, не блокировка: запись уже произошла
+	Aggregated bool     `json:"aggregated"` // повторная потеря на этом сервере: сказано один раз
+	Actions    []Action `json:"actions"`    // что можно сделать с потерей; пусто — нечего
 }

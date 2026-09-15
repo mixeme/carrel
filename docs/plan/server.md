@@ -620,11 +620,13 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
       `PHOTO;ENCODING=b;TYPE=JPEG` внутри 4.0. Решение человека 15.09.2026:
       писать по RFC, потеря — `LossReport`; тест Radicale держит эту потерю,
       `v0.0.61`)
-- [ ] S-13: действие в `LossReport` после потерянного PHOTO — «сохранить фото
+- [x] S-13: действие в `LossReport` после потерянного PHOTO — «сохранить фото
       в старом формате» (форма 3.0 внутри 4.0, риск строгих клиентов назван);
       решение человека 15.09.2026 — в отчёте о потере, по одной карточке, не
-      настройка. Нужны: `LossReport.Actions` в C-9, черновик кадра не стирать
-      при потере PHOTO, шаг `op` того же маршрута `photo-preview`
+      настройка (`v0.0.62`; `LossReport.Actions` в C-9, `photo.save.legacy` —
+      `op=legacy` того же `photo-preview`; черновик кадра ждёт на версии первой
+      записи; `web.finishWriteWith`, `card.PhotoOpsBase64`,
+      `davtest.CutPhotoDataURI`; вживую — `TestRadicalePhoto`)
 - [x] S-7 на sabre/dav (Baikal, Nextcloud): REPORT без версии отдаёт 3.0 и
       теряет свойства 4.0 (KIND), правка писала 3.0 обратно — найдено живым
       S-13 (`v0.0.60`; решение человека 15.09.2026 — просить 4.0: свой

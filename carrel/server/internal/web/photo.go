@@ -499,7 +499,9 @@ func (s *Server) postPhotoPreview(w http.ResponseWriter, r *http.Request) {
 		savePhotoDraft(c, d)
 		s.redirect(w, r, photoAddress(c, uid))
 	case "save":
-		s.photoSave(w, r, c, uid)
+		s.photoSave(w, r, c, uid, false)
+	case "legacy":
+		s.photoSave(w, r, c, uid, true)
 	case "cancel":
 		clearPhotoDraft(c, uid)
 		s.redirect(w, r, c.recordPath(uid)+"/edit")
@@ -696,8 +698,10 @@ func submittedCrop(r *http.Request, crop photo.Crop) photo.Crop {
 // photoSave writes the frame into the card: PHOTO replaced by one patch, with
 // the If-Match of the version the photo was chosen for (S-8). A card changed
 // since keeps the draft, now at the new version, and says so: saving again is
-// the person's choice, not an automatic one.
-func (s *Server) photoSave(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
+// the person's choice, not an automatic one. older writes the older form,
+// base64 with ENCODING, whatever the card's version: the answer to a loss
+// report after a server cut the data: URI (S-13).
+func (s *Server) photoSave(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, older bool) {
 	d, ok := loadPhotoDraft(c, uid)
 	if !ok {
 		s.redirect(w, r, c.recordPath(uid)+"/edit")
@@ -715,7 +719,11 @@ func (s *Server) photoSave(w http.ResponseWriter, r *http.Request, c *collection
 		return
 	}
 	current, had := obj.ETag, photoOf(obj) == keptPhoto
-	patch, err := model.NewPatch(card.PhotoOps(obj, jpeg)...)
+	ops := card.PhotoOps(obj, jpeg)
+	if older {
+		ops = card.PhotoOpsBase64(obj, jpeg)
+	}
+	patch, err := model.NewPatch(ops...)
 	if err == nil {
 		err = patch.Apply(obj)
 	}
@@ -739,8 +747,41 @@ func (s *Server) photoSave(w http.ResponseWriter, r *http.Request, c *collection
 		s.writePage(w, r, http.StatusOK, s.photoPreviewPage(c, uid, d, s.writeFailure(c, "PUT", obj.Path, err)))
 		return
 	}
-	clearPhotoDraft(c, uid)
-	s.finishWrite(w, r, c, uid, obj, c.recordPath(uid)+"/edit")
+	// A server that cuts a data: URI (Radicale, through vobject) keeps no
+	// image. The loss report offers the older form and names its risk; the
+	// frame waits in the draft, at the version this write left.
+	s.finishWriteWith(w, r, c, uid, obj, c.recordPath(uid)+"/edit", func(loss *model.Loss, got *model.Object) ([]view.Action, []view.Notice) {
+		if older || got == nil || !lostProp(loss, "PHOTO") || !card.PhotoIsDataURI(obj) {
+			clearPhotoDraft(c, uid)
+			return nil, nil
+		}
+		d.ETag, d.HadPhoto = got.ETag, photoOf(got) == keptPhoto
+		d.Step++
+		savePhotoDraft(c, d)
+		return []view.Action{{
+			ID: "photo.save.legacy", Label: "Save the photo in the older form",
+			Href:   s.postQuery(photoAddress(c, uid), url.Values{"op": {"legacy"}, "etag": {got.ETag}}),
+			Method: "POST", Enabled: true,
+		}}, []view.Notice{{
+			Role:  view.NoticeAccent,
+			Title: "The server did not keep the photo",
+			Body: "This server cuts a photo written the way vCard 4.0 asks. Carrel can save it in the older form instead: " +
+				"this server keeps that, but apps that follow vCard 4.0 strictly may not show it.",
+		}}
+	})
+}
+
+// lostProp reports whether a loss names prop.
+func lostProp(loss *model.Loss, prop string) bool {
+	if loss == nil {
+		return false
+	}
+	for _, p := range loss.Properties {
+		if strings.EqualFold(p, prop) {
+			return true
+		}
+	}
+	return false
 }
 
 // photoRemove removes PHOTO from the card: the property, not an empty value

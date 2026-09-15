@@ -5,6 +5,42 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.62 — 2026-09-15
+
+When a server cuts a contact photo, the loss report offers to save it in the
+older form.
+
+### For consumers
+
+- **The offer.** Saving a photo into a vCard 4.0 card writes it as RFC 6350
+  has it, a `data:` URI. A server that cuts that (Radicale) now answers with
+  the loss report for `PHOTO`, a notice "The server did not keep the photo"
+  that names the risk, and `loss.actions` with `photo.save.legacy` — POST to
+  the same `photo-preview` address, `op=legacy`.
+- **The older form.** `PHOTO;ENCODING=b;TYPE=JPEG:` with the base64, in the
+  same card version: this server keeps it whole, but apps that follow vCard
+  4.0 strictly may not show it. The choice is per card, not a setting.
+- **The frame waits.** Until the person answers, the framed photo stays in the
+  session draft at the version the first save left; the older form writes with
+  that version as If-Match, and the draft goes. Any other outcome of a save
+  clears the draft as before. A 3.0 card, which already writes base64, is
+  offered nothing.
+- **`LossReport`** (C-9) gains `actions`: what can be done about the loss;
+  empty when nothing can. Record edits leave it empty.
+
+### Included
+
+- `web`: `finishWriteWith` — `finishWrite` with a say in the loss report;
+  `photoSave` writes the older form for `op=legacy`.
+- `card`: `PhotoOpsBase64`, `PhotoIsDataURI`.
+- `davtest`: `CutPhotoDataURI`, Radicale's cut.
+- Spec: C-9 `LossReport.Actions`; S-13 says the version kept is the one the
+  server hands over (a converting server hands over 4.0), and how a cut photo
+  is offered the older form.
+- Tests: `TestPhotoOlderFormAfterACutDataURI`,
+  `TestPhotoOpsBase64KeepsTheVersion`; `TestRadicalePhoto` takes the offer and
+  checks the photo is kept.
+
 ## v0.0.61 — 2026-09-15
 
 The live photo test holds Radicale to the loss it causes. Nothing changes in

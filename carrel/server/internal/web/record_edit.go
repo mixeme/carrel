@@ -860,8 +860,26 @@ func unixForm(v string) time.Time {
 // list takes the record as re-read, or as sent with no known version when the
 // re-read failed.
 func (s *Server) finishWrite(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, sent *model.Object, done string) {
+	s.finishWriteWith(w, r, c, uid, sent, done, nil)
+}
+
+// afterWrite is told what a write left once it is read back — got nil when it
+// could not be, loss nil when nothing was lost — and answers what the loss
+// report offers and says beside it.
+type afterWrite func(loss *model.Loss, got *model.Object) ([]view.Action, []view.Notice)
+
+// finishWriteWith is finishWrite with a say in the loss report. after, when
+// set, is called exactly once, whatever the outcome.
+func (s *Server) finishWriteWith(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, sent *model.Object, done string, after afterWrite) {
+	tell := func(loss *model.Loss, got *model.Object) ([]view.Action, []view.Notice) {
+		if after == nil {
+			return nil, nil
+		}
+		return after(loss, got)
+	}
 	got, err := c.find(r.Context(), uid)
 	if err != nil {
+		tell(nil, nil)
 		sent.ETag = ""
 		c.noteWrite(sent.Path, sent)
 		s.redirect(w, r, done)
@@ -869,6 +887,7 @@ func (s *Server) finishWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	}
 	c.noteWrite(got.Path, got)
 	loss := model.CompareAfterPut(c.conn.ID, sent, got, c.sess.Losses())
+	actions, notices := tell(loss, got)
 	if loss == nil {
 		s.redirect(w, r, done)
 		return
@@ -882,12 +901,13 @@ func (s *Server) finishWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	report := &view.LossReport{
 		Note:       "The change was saved, but the server did not keep these properties. Other clients will not see them either.",
 		Aggregated: loss.Aggregated,
+		Actions:    actions,
 	}
 	for _, p := range loss.Properties {
 		report.Properties = append(report.Properties, text(p))
 	}
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
-		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: time.Now(), loss: report,
+		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: time.Now(), loss: report, notices: notices,
 	}))
 }
 

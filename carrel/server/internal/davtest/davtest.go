@@ -62,6 +62,10 @@ type Server struct {
 	// honoured: go-webdav's own text-match counts case and ignores collation.
 	RefuseCollation bool
 
+	// CutPhotoDataURI keeps a card's PHOTO data: URI the way Radicale does
+	// through vobject: cut at its comma, with ';' escaped — the image is gone.
+	CutPhotoDataURI bool
+
 	mu        sync.Mutex
 	sent      map[string][]byte // the body of the PUT being handled, by path
 	calendars map[string]caldav.Calendar
@@ -924,6 +928,9 @@ func (b cardBackend) QueryAddressObjects(ctx context.Context, p string, q *cardd
 
 func (b cardBackend) PutAddressObject(_ context.Context, p string, card vcard.Card, opts *carddav.PutAddressObjectOptions) (*carddav.AddressObject, error) {
 	data := b.s.takeSent(p)
+	if b.s.CutPhotoDataURI && data != nil {
+		data = cutPhotoDataURI(data)
+	}
 	if len(b.s.Drop) > 0 || data == nil {
 		for _, n := range b.s.Drop {
 			delete(card, strings.ToUpper(n))
@@ -939,6 +946,21 @@ func (b cardBackend) PutAddressObject(_ context.Context, p string, card vcard.Ca
 		return nil, err
 	}
 	return &carddav.AddressObject{Path: p, ETag: o.etag, ModTime: o.mod}, nil
+}
+
+// cutPhotoDataURI is Radicale's handling of a PHOTO data: URI: the value ends
+// at its first comma and ';' in what is left is escaped.
+func cutPhotoDataURI(doc []byte) []byte {
+	lines := strings.Split(string(doc), "\r\n")
+	for i, l := range lines {
+		name, value, ok := strings.Cut(l, ":")
+		if !ok || !strings.HasPrefix(strings.ToUpper(name), "PHOTO") || !strings.HasPrefix(strings.ToLower(value), "data:") {
+			continue
+		}
+		value, _, _ = strings.Cut(value, ",")
+		lines[i] = name + ":" + strings.ReplaceAll(value, ";", `\;`)
+	}
+	return []byte(strings.Join(lines, "\r\n"))
 }
 
 func (b cardBackend) DeleteAddressObject(_ context.Context, p string) error { return b.s.remove(p) }

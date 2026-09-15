@@ -337,6 +337,63 @@ func TestPhotoUploadFrameAndSave(t *testing.T) {
 	}
 }
 
+// S-13: a server that cuts a 4.0 PHOTO data: URI (Radicale) keeps no image.
+// The loss report says so, names the risk and offers the older form; the
+// frame waits in the draft; the older form goes into the same card version,
+// and the draft goes with it. A 3.0 card already writes that form: its loss
+// report offers nothing.
+func TestPhotoOlderFormAfterACutDataURI(t *testing.T) {
+	f := bookFixture(t, nil, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEND:VCARD\n")
+	f.srv.CutPhotoDataURI = true
+	rec := f.path("contacts") + "/ada"
+	add := actionHref(t, decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Photo.Actions, "photo.add")
+	if resp := f.h.do(uploadRequest(add, f.sess, false, "a.jpg", jpegOf(t, halvesImage(600, 600)))); resp.Code != http.StatusSeeOther {
+		t.Fatalf("upload: %d %s", resp.Code, resp.Body.String())
+	}
+	preview := decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
+	saved := decode[view.ContactEditPage](t, f.h.do(postForm(actionHref(t, preview.Actions, "photo.save"), f.sess, url.Values{})))
+	if saved.Loss == nil || len(saved.Loss.Properties) != 1 || saved.Loss.Properties[0] != "PHOTO" {
+		t.Fatalf("loss = %+v", saved.Loss)
+	}
+	if !hasNotice(saved.Notices, "The server did not keep the photo") {
+		t.Errorf("the risk is not named: %+v", saved.Notices)
+	}
+	older := actionHref(t, saved.Loss.Actions, "photo.save.legacy")
+	if resp := f.h.do(get(rec+"/photo-preview", f.sess)); resp.Code != http.StatusOK {
+		t.Fatalf("the frame did not wait in the draft: %d", resp.Code)
+	}
+
+	resp := f.h.do(postForm(older, f.sess, url.Values{}))
+	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != rec+"/edit" {
+		t.Fatalf("older form: %d %s %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
+	}
+	doc := body(t, f, "ada.vcf")
+	mustContain(t, doc, "VERSION:4.0", "FN:Ada Lovelace", "PHOTO;ENCODING=b;TYPE=JPEG:")
+	img, err := jpeg.Decode(bytes.NewReader(photoBytes(t, doc)))
+	if err != nil || img.Bounds().Dx() != 512 {
+		t.Errorf("older form photo: %v", err)
+	}
+	if resp := f.h.do(get(rec+"/photo-preview", f.sess)); resp.Code != http.StatusSeeOther {
+		t.Errorf("the draft outlived the older form: %d", resp.Code)
+	}
+
+	g := bookFixture(t, nil, "BEGIN:VCARD\nVERSION:3.0\nUID:bob\nFN:Bob\nEND:VCARD\n")
+	g.srv.Drop = []string{"PHOTO"}
+	bob := g.path("contacts") + "/bob"
+	add = actionHref(t, decode[view.ContactEditPage](t, g.h.do(get(bob+"/edit", g.sess))).Photo.Actions, "photo.add")
+	if resp := g.h.do(uploadRequest(add, g.sess, false, "b.jpg", jpegOf(t, halvesImage(600, 600)))); resp.Code != http.StatusSeeOther {
+		t.Fatalf("3.0 upload: %d %s", resp.Code, resp.Body.String())
+	}
+	preview = decode[view.PhotoPreviewPage](t, g.h.do(get(bob+"/photo-preview", g.sess)))
+	saved = decode[view.ContactEditPage](t, g.h.do(postForm(actionHref(t, preview.Actions, "photo.save"), g.sess, url.Values{})))
+	if saved.Loss == nil || len(saved.Loss.Actions) != 0 {
+		t.Errorf("3.0 card losing PHOTO: loss %+v", saved.Loss)
+	}
+	if resp := g.h.do(get(bob+"/photo-preview", g.sess)); resp.Code != http.StatusSeeOther {
+		t.Errorf("a loss without an offer kept the draft: %d", resp.Code)
+	}
+}
+
 func actionEnabled(actions []view.Action, id string) bool {
 	for _, a := range actions {
 		if a.ID == id {

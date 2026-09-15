@@ -186,6 +186,37 @@ func runPhoto(t *testing.T, endpoint, user, pass string, keepsDataURI bool) {
 					}
 				}
 				t.Logf("seeded as %s: the server cut the PHOTO data URI and Carrel reported the loss", version)
+
+				// The person takes the older form the report offers.
+				var older string
+				for _, a := range page.Loss.Actions {
+					if a.ID == "photo.save.legacy" {
+						older = a.Href
+					}
+				}
+				if older == "" {
+					t.Fatalf("the loss report offers no older form: %+v", page.Loss)
+				}
+				redirected(t, "older form", app.post(older, url.Values{}))
+				held = rawCard(ctx, t, endpoint, user, pass, file, "text/vcard; version=4.0")
+				var line string
+				for _, l := range strings.Split(held, "\n") {
+					if strings.HasPrefix(l, "PHOTO") {
+						line = strings.TrimRight(l, "\r")
+					}
+				}
+				head, value, _ := strings.Cut(line, ":")
+				if !strings.Contains(strings.ToUpper(head), "ENCODING=B") || !strings.Contains(strings.ToUpper(head), "TYPE=JPEG") {
+					t.Fatalf("older form PHOTO starts %.80q", line)
+				}
+				data, err := base64.StdEncoding.DecodeString(value)
+				if err != nil {
+					t.Fatalf("older form PHOTO is not whole base64: %v", err)
+				}
+				if img, err := jpeg.Decode(bytes.NewReader(data)); err != nil || img.Bounds().Dx() != 512 {
+					t.Errorf("older form photo: %v", err)
+				}
+				mustHave(t, "older form", held, "VERSION:4.0", "X-CUSTOM:keep-me")
 				return
 			}
 
