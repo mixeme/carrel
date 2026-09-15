@@ -256,14 +256,6 @@ func (s *Server) getAttach(w http.ResponseWriter, r *http.Request) {
 	s.notFound(w, r)
 }
 
-func (s *Server) getCollectionMove(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
-}
-
-func (s *Server) postCollectionMove(w http.ResponseWriter, r *http.Request) {
-	s.getCollectionMove(w, r)
-}
-
 func (s *Server) getCollectionDelete(w http.ResponseWriter, r *http.Request) {
 	s.getQuickNote(w, r)
 }

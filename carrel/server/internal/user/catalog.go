@@ -199,6 +199,56 @@ func (s *Service) AddCollection(viewerID string, dataKey [crypt.KeyLen]byte, acc
 	})
 }
 
+// PlaceMovedCollection puts a collection made on another connection by a move
+// or a copy into the catalog in one edit (S-12.3). A move carries the ticks of
+// the old entry to the new one and takes the old entry out with its ticks: the
+// server no longer holds it, and it is not gone by re-discovery. A copy is a
+// new collection and gets no tick (S-6.1). The journal names the connections,
+// not the addresses.
+func (s *Service) PlaceMovedCollection(viewerID string, dataKey [crypt.KeyLen]byte, fromAccount, fromPath, toAccount string, col sealed.Collection, move bool) error {
+	col.AccountID, col.Gone = toAccount, false
+	what := "collection.copy"
+	if move {
+		what = "collection.move"
+	}
+	return s.editCatalog(viewerID, dataKey, what, fromAccount+" → "+toAccount, func(blob *sealed.Blob) error {
+		if _, ok := blob.Connection(toAccount); !ok {
+			return ErrNotFound
+		}
+		src := -1
+		for i, c := range blob.Collections {
+			if c.AccountID == fromAccount && c.Path == fromPath && !c.Gone {
+				src = i
+			}
+		}
+		if src < 0 {
+			return ErrNotFound
+		}
+		placed := false
+		for i, c := range blob.Collections {
+			if c.AccountID == toAccount && c.Path == col.Path {
+				blob.Collections[i], placed = col, true
+			}
+		}
+		if !placed {
+			blob.Collections = append(blob.Collections, col)
+		}
+		if !move {
+			return nil
+		}
+		var ticks []sealed.Selection
+		for _, t := range blob.Selected {
+			if t.AccountID == fromAccount && t.Path == fromPath {
+				t.AccountID, t.Path = toAccount, col.Path
+			}
+			ticks = append(ticks, t)
+		}
+		blob.Selected = ticks
+		blob.Collections = append(blob.Collections[:src], blob.Collections[src+1:]...)
+		return nil
+	})
+}
+
 // RenameCollection writes the label the server has accepted (S-12.2): the
 // name and, when one was chosen, the colour. The path never changes here.
 func (s *Service) RenameCollection(viewerID string, dataKey [crypt.KeyLen]byte, accountID, path, name, colour string) error {

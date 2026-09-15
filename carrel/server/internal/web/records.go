@@ -128,20 +128,27 @@ func (s *Server) collectionOf(sess *session.Session, spec kindSpec, account, col
 	if !live || !opened || !hasConn || !hasCol || !entry.Has(spec.kind) {
 		return nil, false
 	}
+	c, err := s.newCollectionCtx(sess, spec, conn, entry)
+	return c, err == nil
+}
+
+// newCollectionCtx wires providers for a collection, in the catalog or not
+// yet: a collection being made by a move joins the catalog last (S-12.3).
+func (s *Server) newCollectionCtx(sess *session.Session, spec kindSpec, conn sealed.Connection, col sealed.Collection) (*collectionCtx, error) {
 	client, err := dav.NewClient(s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
 	if err != nil {
-		return nil, false
+		return nil, err
 	}
-	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: entry, t: client, tf: s.timeFor(sess)}
+	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: col, t: client, tf: s.timeFor(sess)}
 	if spec.kind == view.KindContact {
 		c.card, err = card.New(client)
 	} else {
 		c.cal, err = cal.New(client)
 	}
 	if err != nil {
-		return nil, false
+		return nil, err
 	}
-	return c, true
+	return c, nil
 }
 
 func (c *collectionCtx) origin() origin { return origin{conn: c.conn, col: c.col} }

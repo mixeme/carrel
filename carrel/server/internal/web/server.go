@@ -70,6 +70,7 @@ type Users interface {
 	// catalog; RenameCollection writes the name and colour it accepted (S-12).
 	AddCollection(viewerID string, dataKey [32]byte, accountID string, col sealed.Collection) error
 	RenameCollection(viewerID string, dataKey [32]byte, accountID, path, name, colour string) error
+	PlaceMovedCollection(viewerID string, dataKey [32]byte, fromAccount, fromPath, toAccount string, col sealed.Collection, move bool) error
 	// SetSelection replaces the ticks of one kind (S-14); other kinds keep
 	// theirs.
 	SetSelection(viewerID string, dataKey [32]byte, kind view.Kind, picks []sealed.Selection) error

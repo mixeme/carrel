@@ -381,6 +381,14 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files 
 			s.move(w, r)
 			return
 		}
+	case http.MethodDelete:
+		// go-webdav's CalDAV backend takes a calendar's address for a record
+		// and answers 404; a server deletes the collection with what it holds.
+		if s.hasCollection(p) {
+			s.RemoveCollection(p)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 	case "MKCALENDAR":
 		s.mkcalendar(w, p, body)
 		return
@@ -398,6 +406,10 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files 
 
 	if r.Method == "PROPFIND" && (p == CalendarHome || p == AddressBookHome) && bytes.Contains(body, []byte("getctag")) {
 		s.homeProps(w, p)
+		return
+	}
+	if r.Method == "PROPFIND" && r.Header.Get("Depth") == "0" && s.hasCollection(p) && bytes.Contains(body, []byte("calendar-color")) {
+		s.collectionProps(w, p)
 		return
 	}
 	// go-webdav hands a record's DELETE to the backend without its If-Match;
@@ -483,6 +495,35 @@ func (s *Server) homeProps(w http.ResponseWriter, home string) {
 	_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>`+
 		`<D:multistatus xmlns:D="DAV:" xmlns:CS="http://calendarserver.org/ns/" xmlns:I="http://apple.com/ns/ical/">`+
 		b.String()+`</D:multistatus>`)
+}
+
+// collectionProps answers the depth-0 PROPFIND of one collection for its
+// displayname and calendar-color, as Radicale and sabre/dav do; go-webdav's
+// server does not know calendar-color.
+func (s *Server) collectionProps(w http.ResponseWriter, p string) {
+	key := collectionKey(p)
+	s.mu.Lock()
+	name := s.calendars[key].Name
+	if book, ok := s.books[key]; ok {
+		name = book.Name
+	}
+	colour, hasColour := s.colours[key]
+	s.mu.Unlock()
+	var b strings.Builder
+	b.WriteString(`<D:response><D:href>` + escape(key) + `</D:href><D:propstat><D:prop>`)
+	b.WriteString(`<D:displayname>` + escape(name) + `</D:displayname>`)
+	if hasColour {
+		b.WriteString(`<I:calendar-color>` + escape(colour) + `</I:calendar-color>`)
+	}
+	b.WriteString(`</D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat>`)
+	if !hasColour {
+		b.WriteString(`<D:propstat><D:prop><I:calendar-color/></D:prop><D:status>HTTP/1.1 404 Not Found</D:status></D:propstat>`)
+	}
+	b.WriteString(`</D:response>`)
+	w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+	w.WriteHeader(http.StatusMultiStatus)
+	_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>`+
+		`<D:multistatus xmlns:D="DAV:" xmlns:I="http://apple.com/ns/ical/">`+b.String()+`</D:multistatus>`)
 }
 
 type mkcalendarRequest struct {

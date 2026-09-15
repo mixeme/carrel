@@ -5,6 +5,55 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.70 — 2026-09-15
+
+A calendar or an address book moves or is copied to another connection
+(S-12.3).
+
+### For consumers
+
+- **Where it opens.** A collection row on the connections page and in the rail
+  has `Move to another server…` (`collection.move`) when another connection
+  can hold its kind; with none there is no item, and the sheet answers 404.
+  Files are not offered: they move as a tree (S-17).
+- **The sheet.** `/app/collections/move?a=&c=` (`CollectionMoveSheet`):
+  `Subject` is the collection and its server; every connection is an option,
+  the current one `Already here`, one without a home for the kind closed with
+  the reason. An option's `ID` is the sheet with it chosen (`to`). The confirm
+  (`collection.move.confirm` / `collection.copy.confirm`) is closed with a
+  reason until a server is chosen; the second action switches between move and
+  copy (`copy=1`). `Warning`, before the start, says what happens — for a
+  move, that the address changes and the original goes only if every record
+  arrived whole. A read-only collection can be copied, not moved.
+- **What a move does.** The collection is made there with the name and colour
+  the server holds now and the same component set, at the same last segment
+  of its address when that is free (else `-2`). Every resource of the original
+  goes one at a time: a record as S-18 sends it, anything else — a broken
+  record, another component — as its bytes. The new collection is read back
+  and each record compared.
+- **When the original stays.** A refused record takes the new collection back
+  and nothing changes. A loss, a copy that cannot be read back, a change to the
+  original while it was copied (its members and versions are compared before
+  the delete) or a refused delete leave both collections, with a notice on the
+  connections page and a link to the copy.
+- **Catalog.** A move carries the ticks of the original to the new collection
+  and takes the original out; a copy ticks nothing. The journal has
+  `collection.move` / `collection.copy` with both connections, not addresses.
+- **Limits.** One request does the whole move: a reverse proxy with a short
+  read timeout can cut the answer of a large collection while the move goes
+  on. Each whole-collection REPORT is under `CARREL_DAV_MAX_RESPONSE_BYTES`.
+
+### Included
+
+- `internal/web/collection_move.go`; `user.PlaceMovedCollection`;
+  `newCollectionCtx` opens a collection that is not in the catalog yet.
+- `davtest`: `DELETE` of a collection, and depth-0 PROPFIND of a collection
+  with `displayname` and `calendar-color` (`docs/servers.md`, SV-12).
+- Tests: `collection_move_test.go` — the menu and the sheet, move with
+  override, task, colour and ticks, copy to a taken address, refusal taking
+  the new one back, loss keeping both, read-only copies not moves.
+- Not live yet: Radicale and Baikal.
+
 ## v0.0.69 — 2026-09-15
 
 Moving and copying records has run on live servers. Nothing changes in the

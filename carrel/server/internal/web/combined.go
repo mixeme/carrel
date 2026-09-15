@@ -515,6 +515,9 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 					Href:   s.postQuery("/app/collections/rename", url.Values{"a": {conn.ID}, "c": {col.Path}}),
 					Method: "GET", Enabled: true,
 				}}}
+				if item, ok := s.collectionMoveItem(blob, conn, col); ok {
+					row.Menu = append(row.Menu, item)
+				}
 				if tick {
 					on++
 					row.Count = collectionCount(sess, conn.ID, col, spec)

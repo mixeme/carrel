@@ -49,7 +49,7 @@
 | SV-9 | Baikal (хостинг) | Apache закрывает простаивающее соединение через 5 с | не держит соединения между запросами | `TestBaikalIdleConnectionClosed` |
 | SV-10 | Baikal (хостинг) | well-known уводит с https на http | не идёт по такому перенаправлению | `TestBaikalWellKnownDowngradesScheme` |
 | SV-11 | go-webdav (клиент) | нет полей для collation и версии vCard | свои REPORT в `dav` | `TestQueryCardsNamesTheVersion` |
-| SV-12 | go-webdav (сервер, `davtest`) | text-match с регистром, без collation; пустой фильтр не находит ничего | `davtest` поправляет | тесты `davtest` |
+| SV-12 | go-webdav (сервер, `davtest`) | text-match с регистром, без collation; пустой фильтр не находит ничего; нет `MOVE` записи и `DELETE` календаря | `davtest` поправляет | тесты `davtest` |
 | SV-13 | go-vcard | экранирует запятую в data: URI | `card.Encode` возвращает запятую | тесты `card` |
 
 ---
@@ -232,8 +232,16 @@
   (`TODO: handle text-match collation attribute`).
 - `carddav.Filter` без prop-filter не находит ничего; RFC 6352 §10.5 — находит
   всё.
+- `MOVE` записи — 501 (`caldav: Move not implemented`, так же у CardDAV).
+- `DELETE` по адресу календаря уходит в удаление записи и отвечает 404.
+- `calendar-color` не знает: PROPFIND глубины 0 самой коллекции его не отдаёт.
 - **Carrel.** `davtest` сворачивает регистр под `i;unicode-casemap` и отдаёт все
-  карточки на пустой фильтр. Иначе тесты проверяли бы go-webdav, а не серверы.
+  карточки на пустой фильтр. `MOVE` записи он делает сам, как Radicale и
+  sabre/dav: 412 на занятое имя при `Overwrite: F`, 409 вне коллекции (`v0.0.68`).
+  `DELETE` коллекции удаляет её со всем содержимым, PROPFIND глубины 0
+  коллекции отдаёт `displayname` и `calendar-color` (`v0.0.70`). Иначе тесты
+  проверяли бы go-webdav, а не серверы; живые `TestRadicaleMove` и
+  `TestBaikalMove` держат то же поведение настоящих серверов.
 
 ### SV-13. go-vcard экранирует запятую в data: URI
 
