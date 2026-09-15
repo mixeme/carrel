@@ -166,11 +166,8 @@ func sftpgoClient(t *testing.T) (*dav.Client, *file.Provider) {
 	return client, p
 }
 
-// S-30.2: SFTPGo uses x/net/webdav, which ignores If-None-Match on PUT.
-// Conditional create is checked on Radicale via card.Create (TestRadicaleCardUploadOccupiedName).
-func TestSFTPGoUploadOccupiedName(t *testing.T) {
-	t.Skip("SFTPGo WebDAV does not honor If-None-Match on PUT (golang.org/issue/44492)")
-}
+// SFTPGo ignores If-None-Match on PUT (docs/servers.md, SV-8,
+// TestSFTPGoIgnoresIfNoneMatch): conditional create is checked on Radicale.
 
 // S-30.2: conditional create rejects occupied names (412).
 func TestRadicaleCardUploadOccupiedName(t *testing.T) {

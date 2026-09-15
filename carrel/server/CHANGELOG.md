@@ -5,6 +5,33 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.64 — 2026-09-15
+
+Every server quirk in [docs/servers.md](../../docs/servers.md) now has a test
+that notices when the server changes, and the connection trace says why a
+well-known redirect was not followed.
+
+### For consumers
+
+- **Connection trace.** A failed `.well-known` step carries its reason, such as
+  "GET /.well-known/caldav: dav: redirect downgrades HTTPS to HTTP". It was
+  an empty detail; on the test Baikal both well-known steps looked failed for
+  no reason.
+- **Checked on the live servers, 15.09.2026.** SFTPGo still overwrites a taken
+  name despite If-None-Match (SV-8). The Apache in front of Baikal closes an
+  idle connection after 5 s (SV-9). Baikal's well-known answers https with a
+  302 to `http://…/dav.php` (SV-10).
+
+### Included
+
+- `dav.ResolveWellKnown` returns a detail for a failed request; test
+  `TestResolveWellKnownSaysWhyItFailed`.
+- Live watches: `TestSFTPGoIgnoresIfNoneMatch` (in place of the skipped
+  `TestSFTPGoUploadOccupiedName`), `TestBaikalIdleConnectionClosed`,
+  `TestBaikalWellKnownDowngradesScheme`.
+- `docs/servers.md`: SV-8, SV-9 and SV-10 name their watches and what was
+  seen.
+
 ## v0.0.63 — 2026-09-15
 
 Server quirks found and worked around are kept in one place:

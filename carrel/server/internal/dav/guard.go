@@ -482,7 +482,15 @@ func ResolveWellKnown(ctx context.Context, client *http.Client, base, wellKnown 
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", "", err
+		// The trace says why the step failed: a redirect refused by the guard
+		// (an https well-known sending to http, docs/servers.md, SV-10) reads as
+		// that refusal, not as an empty detail.
+		reason := err.Error()
+		var ue *url.Error
+		if errors.As(err, &ue) {
+			reason = ue.Err.Error()
+		}
+		return "", fmt.Sprintf("GET %s: %s", wellKnown, reason), err
 	}
 	defer resp.Body.Close()
 	io.Copy(io.Discard, resp.Body)
