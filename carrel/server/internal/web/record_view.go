@@ -57,12 +57,18 @@ func (s *Server) recordShell(c *collectionCtx, title string, notices []view.Noti
 }
 
 // recordActions: a read-only collection has no edit at all, not a locked form.
+// What stays is a copy: it writes elsewhere and leaves this record as it is
+// (S-18).
 func (s *Server) recordActions(c *collectionCtx, uid, etag string) []view.Action {
+	move := c.recordPath(uid) + "/move"
+	copyAction := view.Action{ID: "record.copy", Label: "Copy…", Href: s.postQuery(move, url.Values{"copy": {"1"}}), Method: "GET", Enabled: true}
 	if c.col.ReadOnly {
-		return nil
+		return []view.Action{copyAction}
 	}
 	return []view.Action{
 		{ID: "record.edit", Label: text("Edit " + c.spec.noun), Href: s.route(c.recordPath(uid) + "/edit"), Method: "GET", Enabled: true},
+		{ID: "record.move", Label: "Move…", Href: s.route(move), Method: "GET", Enabled: true},
+		copyAction,
 		{ID: "record.delete", Label: text("Delete " + c.spec.noun), Href: s.postQuery(c.recordPath(uid)+"/delete", url.Values{"etag": {etag}}), Method: "POST", Danger: true, Enabled: true},
 	}
 }
@@ -222,10 +228,13 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Shell.Title = text(title)
 	page.Print = s.recordPrint(c, text(title))
 	page.Doc.Title, page.Doc.Body, page.Doc.Rendered = text(title), text(body), cal.RenderMarkdown(body)
-	actions := s.recordActions(c, uid, obj.ETag)
-	if len(actions) == 2 {
-		page.Doc.Bar = actions[:1]
-		page.Meta.Actions = actions[1:]
+	// Edit sits in the document bar; the rest belong to the note, beside it.
+	for _, a := range s.recordActions(c, uid, obj.ETag) {
+		if a.ID == "record.edit" {
+			page.Doc.Bar = append(page.Doc.Bar, a)
+		} else {
+			page.Meta.Actions = append(page.Meta.Actions, a)
+		}
 	}
 	if at := noteTime(obj, tz); !at.IsZero() {
 		page.Meta.Date = text(tf.date(at))

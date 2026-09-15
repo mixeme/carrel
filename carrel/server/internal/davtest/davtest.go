@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -372,8 +373,14 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files 
 	}
 
 	// go-webdav's server knows neither MKCALENDAR nor PROPPATCH on a
-	// collection, and lets MKCOL overwrite one that exists.
+	// collection, lets MKCOL overwrite one that exists, and answers 501 to
+	// MOVE of a record.
 	switch r.Method {
+	case "MOVE":
+		if !strings.HasPrefix(p, FileRoot) {
+			s.move(w, r)
+			return
+		}
 	case "MKCALENDAR":
 		s.mkcalendar(w, p, body)
 		return
@@ -627,6 +634,43 @@ func (s *Server) put(p string, data []byte, ifMatch, ifNoneMatch webdav.Conditio
 	}
 	s.storeLocked(p, data)
 	return s.objects[p], nil
+}
+
+// move moves one record to another collection of this server, the way
+// Radicale and sabre/dav do: the body and its version travel as they are, a
+// taken name with Overwrite: F is 412, and a destination outside a collection
+// is 409 (RFC 4918 §9.9.4).
+func (s *Server) move(w http.ResponseWriter, r *http.Request) {
+	dest, err := url.Parse(r.Header.Get("Destination"))
+	if err != nil || dest.Path == "" {
+		http.Error(w, "bad Destination", http.StatusBadRequest)
+		return
+	}
+	src, dst := r.URL.Path, dest.Path
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	o, ok := s.objects[src]
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	_, isCal := s.calendars[parent(dst)]
+	_, isBook := s.books[parent(dst)]
+	if !isCal && !isBook {
+		http.Error(w, "no collection at the destination", http.StatusConflict)
+		return
+	}
+	if _, taken := s.objects[dst]; taken {
+		if r.Header.Get("Overwrite") != "T" {
+			http.Error(w, "the destination exists", http.StatusPreconditionFailed)
+			return
+		}
+	}
+	delete(s.objects, src)
+	s.objects[dst] = o
+	s.ctags[parent(src)]++
+	s.ctags[parent(dst)]++
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (s *Server) remove(p string) error {

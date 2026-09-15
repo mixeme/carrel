@@ -190,14 +190,6 @@ func kindTitle(kind string) string {
 	}
 }
 
-func (s *Server) getKindMove(w http.ResponseWriter, r *http.Request, kind string) {
-	s.getQuickNote(w, r)
-}
-
-func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind string) {
-	s.getKindMove(w, r, kind)
-}
-
 func (s *Server) getKindImport(w http.ResponseWriter, r *http.Request, kind string) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {

@@ -5,6 +5,52 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.68 — 2026-09-15
+
+A contact, an event, a task or a note moves or is copied to another
+collection of its kind, on this account or another one (S-18).
+
+### For consumers
+
+- **Where it opens.** The record page has `Move…` (`record.move`) and `Copy…`
+  (`record.copy`) beside Edit and Delete; a note has them with Delete. A
+  record in a read-only collection keeps `Copy…` only. The sheet is
+  `/app/{kind}/{account}/{col}/{uid}/move` (`MoveSheet`), `?copy=1` for the
+  copy.
+- **The sheet.** Every live collection of the kind, the current one (`Already
+  here`) and read-only ones (`Read-only`) shown and closed. An option's `ID`
+  is the sheet with it chosen (`to`, `into`); the confirm
+  (`record.move.confirm` / `record.copy.confirm`) is closed with a reason
+  until a collection that can take the record is chosen. A move to another
+  account says before it starts that it is a copy, a check and a delete.
+- **On one account a move is one MOVE.** The server moves the resource; no
+  body travels and nothing is re-encoded.
+- **To another account, and any copy,** the record read whole — time zone and
+  overridden instances with the event — is created there with its UID. A move
+  reads the copy back and deletes the original, with If-Match of the version
+  read, only if nothing was lost. A loss, a copy that cannot be read back, a
+  refused or conditional-failed delete leave both records and say so, with a
+  link to the copy. A copy with a loss shows the loss report, as an edit does.
+- **Names.** The file name stays; a name taken there becomes `{uid}-2.vcf` /
+  `.ics` once. A UID the target already holds stops before any write, with a
+  link to the record there.
+- **Stamps.** A copy is a write through Carrel: `DTSTAMP` and `LAST-MODIFIED`,
+  or `REV`, become the time of the copy (as in `v0.0.66`). A MOVE keeps the
+  bytes as they were.
+
+### Included
+
+- `internal/web/record_move.go`; `collectionOf` opens a catalog collection
+  without a request, for the target.
+- `davtest` answers MOVE of a record (go-webdav's CalDAV and CardDAV backends
+  answer 501): 412 on a taken name with `Overwrite: F`, 409 outside a
+  collection.
+- Tests: `record_move_test.go` — the sheet, MOVE on one account, copy and
+  delete across accounts, loss and changed original keep both, copy keeps the
+  UID, taken name and taken UID, read-only source and target, an event with
+  VTIMEZONE and RECURRENCE-ID.
+- Not live yet: MOVE between collections on Radicale and Baikal.
+
 ## v0.0.67 — 2026-09-15
 
 Three live checks the plan still listed as open have run green. Nothing

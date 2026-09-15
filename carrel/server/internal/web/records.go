@@ -82,6 +82,7 @@ type collectionCtx struct {
 	spec kindSpec
 	conn sealed.Connection
 	col  sealed.Collection
+	t    dav.Transport // for MOVE between collections of this connection (S-18)
 	card *card.Provider
 	cal  *cal.Provider
 	tf   timeFmt
@@ -108,27 +109,36 @@ func (s *Server) openCollection(w http.ResponseWriter, r *http.Request, segment 
 	if !s.checkOwnership(w, r, sess, account, col, uid) {
 		return nil, false
 	}
+	c, ok := s.collectionOf(sess, spec, account, col)
+	if !ok {
+		s.notFound(w, r)
+		return nil, false
+	}
+	return c, true
+}
+
+// collectionOf opens a collection of the person's catalog that holds records
+// of the kind, or reports that there is none: a foreign, gone-from-catalog or
+// other-kind collection is the same "no".
+func (s *Server) collectionOf(sess *session.Session, spec kindSpec, account, col string) (*collectionCtx, bool) {
 	key, live := sess.DataKey()
 	blob, opened := s.users.Catalog(sess.AccountID(), key)
 	conn, hasConn := blob.Connection(account)
 	entry, hasCol := blob.Collection(account, col)
 	if !live || !opened || !hasConn || !hasCol || !entry.Has(spec.kind) {
-		s.notFound(w, r)
 		return nil, false
 	}
 	client, err := dav.NewClient(s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
 	if err != nil {
-		s.notFound(w, r)
 		return nil, false
 	}
-	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: entry, tf: s.timeFor(sess)}
+	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: entry, t: client, tf: s.timeFor(sess)}
 	if spec.kind == view.KindContact {
 		c.card, err = card.New(client)
 	} else {
 		c.cal, err = cal.New(client)
 	}
 	if err != nil {
-		s.notFound(w, r)
 		return nil, false
 	}
 	return c, true

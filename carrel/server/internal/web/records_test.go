@@ -531,7 +531,7 @@ func TestReadOnlyCollectionHasNoEditing(t *testing.T) {
 	list := f.path("contacts")
 
 	card := decode[view.ContactPage](t, f.h.do(get(list+"/ada", f.sess)))
-	if !card.ReadOnly || len(card.Actions) != 0 {
+	if !card.ReadOnly || len(card.Actions) != 1 || card.Actions[0].ID != "record.copy" {
 		t.Errorf("card = %+v", card)
 	}
 	page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
