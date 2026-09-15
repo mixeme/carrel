@@ -5,6 +5,27 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.74 — 2026-09-15
+
+Import, export and deleting a collection have run on live servers. Nothing
+changes in the running server.
+
+### Included
+
+- `integration/import_live_test.go` (S-19): on Radicale and Baikal, a `.ics`
+  whose series takes an identity the calendar holds goes in under a new one,
+  its instance too, and the series that was there is untouched; a task the
+  calendar of events does not take is skipped; a taken card is created under
+  a new identity. The book goes out as `.vcf`, the calendar with `whole=1` as
+  one `.ics` envelope holding the task once. Markdown files in an SFTPGo
+  folder become notes in a Baikal notebook, which goes out as `.md`.
+- `integration/collection_delete_live_test.go` (S-12.4): on Radicale and
+  Baikal, the sheet counts what the server holds, its file carries the series,
+  the instance and the task, a name in another case sends nothing, and the
+  name shown deletes the collection on the server and out of the catalog.
+- Green with the whole live suite on the Linux machine (59 s): Radicale in
+  Docker, Baikal and SFTPGo over the internet.
+
 ## v0.0.73 — 2026-09-15
 
 A calendar or an address book is deleted on the server, once its name is
