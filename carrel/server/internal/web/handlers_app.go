@@ -190,34 +190,6 @@ func kindTitle(kind string) string {
 	}
 }
 
-func (s *Server) getKindImport(w http.ResponseWriter, r *http.Request, kind string) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	account, col := r.PathValue("account"), r.PathValue("col")
-	if !s.checkOwnership(w, r, sess, account, col, "") {
-		return
-	}
-	page := view.ImportPage{Shell: s.buildShell(sess, "Import")}
-	blob := s.catalogOf(sess)
-	conn, hasConn := blob.Connection(account)
-	entry, hasCol := blob.Collection(account, col)
-	if spec, known := recordKinds[kind]; known && hasConn && hasCol && entry.Has(spec.kind) {
-		o := origin{conn: conn, col: entry}
-		page.Rail = s.backRail(sess, blob, spec, s.backAction(spec, "", o.listPath(spec.segment)))
-	}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postKindImport(w http.ResponseWriter, r *http.Request, kind string) {
-	s.getKindImport(w, r, kind)
-}
-
-func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind string) {
-	s.notFound(w, r)
-}
-
 func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 	s.ownedRecordStub(w, r)
 }

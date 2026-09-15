@@ -518,6 +518,18 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 				if item, ok := s.collectionMoveItem(blob, conn, col); ok {
 					row.Menu = append(row.Menu, item)
 				}
+				// The wizard and the file it hands over are one click from the
+				// rail as well as from the list (S-19). A read-only collection
+				// is handed over and not written into.
+				list := origin{conn: conn, col: col}.listPath(spec.segment)
+				if !col.ReadOnly {
+					row.Menu = append(row.Menu, view.MenuItem{Separator: true, Action: view.Action{
+						ID: "collection.import", Label: "Import…", Icon: "i-up",
+						Href: s.route(list + "/import"), Method: "GET", Enabled: true}})
+				}
+				row.Menu = append(row.Menu, view.MenuItem{Separator: col.ReadOnly, Action: view.Action{
+					ID: "collection.export", Label: "Export", Icon: "i-down",
+					Href: s.route(list + "/export"), Method: "GET", Enabled: true}})
 				if tick {
 					on++
 					row.Count = collectionCount(sess, conn.ID, col, spec)

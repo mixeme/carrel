@@ -104,13 +104,17 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, h handler) {
 }
 
 // bodyLimit is the cap of a request body before anything reads it: 1 MiB for
-// a form; for a contact photo upload, CARREL_PHOTO_MAX_UPLOAD_BYTES and a
-// form's worth for the fields around the file (architecture.md, CSRF and
-// multipart). The _csrf of that upload is read within this cap too.
+// a form; for a contact photo upload, CARREL_PHOTO_MAX_UPLOAD_BYTES, and for
+// an import CARREL_IMPORT_MAX_BYTES, each with a form's worth for the fields
+// around the file (architecture.md, CSRF and multipart). The _csrf of such an
+// upload is read within this cap too.
 func (s *Server) bodyLimit(r *http.Request) int64 {
 	seg := strings.Split(r.URL.EscapedPath(), "/")
-	if len(seg) == 7 && seg[1] == "app" && seg[2] == "contacts" && seg[6] == "photo-preview" {
+	switch {
+	case len(seg) == 7 && seg[1] == "app" && seg[2] == "contacts" && seg[6] == "photo-preview":
 		return s.cfg.PhotoMaxUploadBytes + conf.MaxFormBodyBytes
+	case len(seg) == 6 && seg[1] == "app" && seg[5] == "import":
+		return s.cfg.ImportMaxBytes + conf.MaxFormBodyBytes
 	}
 	return conf.MaxFormBodyBytes
 }

@@ -475,6 +475,18 @@ func (s *Server) newRecordAction(c *collectionCtx) view.Action {
 	return a
 }
 
+// listActions are the operations of one collection's list (S-19): a new
+// record, the wizard that brings a file in, and the file it hands over. A
+// read-only collection is not offered the wizard — nothing here would write
+// it — and is handed over like any other: reading is what it allows.
+func (s *Server) listActions(c *collectionCtx, export url.Values) []view.Action {
+	out := []view.Action{s.newRecordAction(c)}
+	if !c.col.ReadOnly {
+		out = append(out, s.importAction(c))
+	}
+	return append(out, s.exportAction(c, export))
+}
+
 func retryPath(c *collectionCtx, r *http.Request) string {
 	if r.URL.RawQuery != "" {
 		return c.listPath() + "?" + r.URL.RawQuery
@@ -518,7 +530,7 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 
 func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsListPage {
 	page := view.ContactsListPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
-	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
+	page.Bar.Actions = s.listActions(c, nil)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, err := c.card.Query(r.Context(), c.col.Path)
 	if err != nil {
@@ -632,7 +644,11 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	tf := c.tf
 	from, to := weekWindow(tf, r.URL.Query().Get("from"))
 	page := view.AgendaPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
-	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
+	// The export of a calendar takes the week the screen shows: that is where
+	// the range is (S-19). Every other list is handed over whole.
+	page.Bar.Actions = s.listActions(c, url.Values{
+		"from": {from.Format("2006-01-02")}, "to": {to.AddDate(0, 0, -1).Format("2006-01-02")},
+	})
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	page.Bar.Range = s.agendaRange(tf, c.listPath(), filter.tag, from, to)
 
@@ -766,7 +782,7 @@ func taskShow(r *http.Request) string {
 func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	show := taskShow(r)
 	page := view.TasksPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
-	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
+	page.Bar.Actions = s.listActions(c, nil)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, nil, nil)
 	if err != nil {
@@ -879,7 +895,7 @@ func (s *Server) taskSegments(base, tag, show string, open, done int) []view.Act
 
 func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
-	page.Bar.Actions = []view.Action{s.newRecordAction(c)}
+	page.Bar.Actions = s.listActions(c, nil)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, nil, nil)
 	if err != nil {

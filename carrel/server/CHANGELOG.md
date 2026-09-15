@@ -5,6 +5,86 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.72 — 2026-09-15
+
+A file is imported into a collection, and a collection is handed over as a
+file (S-19).
+
+### For consumers
+
+- **Where it opens.** The list of one collection has `Import…`
+  (`collection.import`) and `Export` (`collection.export`) beside `New …`, and
+  every collection row of the rail has both. The wizard is
+  `/app/{kind}/{account}/{col}/import` (`ImportPage`); the export is
+  `/app/{kind}/{account}/{col}/export` and answers with the file itself.
+- **The wizard.** `Step` is `source`, then `preview`, then `report`.
+  `Source.Kinds` are the formats of the kind: `.vcf` for contacts, `.ics` for
+  events, tasks and notes, and `.md` for notes as well. The file goes in the
+  `file` part of a multipart POST, with `_csrf` before it or `X-CSRF-Token` on
+  the request.
+- **The destination is chosen, not assumed.** `Into` holds every collection of
+  the kind, read-only ones shown and closed with the reason; an option's `ID`
+  is the wizard with that collection chosen (`to`, `into`), and choosing
+  another one counts the same file against it again. The list the wizard was
+  opened from is only the first value.
+- **Notes have a second source** (`Source.Folder`): a folder of a file
+  collection of this person, read one level deep through the guard. `.md` and
+  `.markdown` become notes; a file with a header block gives back what the
+  block names, a file without one is a note whose body is the whole file.
+- **What the preview says.** One table of what will be created in the chosen
+  collection, each record `New` or marked as already there under this
+  identity. Its columns are the kind's own: a contact by its address, an event
+  and a task by their time, a note by its date. A second table names what this
+  import does not write — a task or a
+  note in a calendar of events, a `VFREEBUSY`, an occurrence whose series the
+  file does not hold — with the section it belongs in. Half a file is never
+  dropped in silence.
+- **An import always creates.** Every write is `If-None-Match: *`. A record
+  whose identity the collection already holds is given a fresh one before the
+  write — in the instances of a series too, so it stays one record — and the
+  record that was there is not touched. `ImportReport` counts `Created`,
+  `Renamed` and `Skipped`, lists every row and names what the server refused.
+  The file waits in `DraftPendingImport` until it is written, dropped, or the
+  session ends; a run empties that slot, so a report cannot be run twice.
+- **Ceilings.** `CARREL_IMPORT_MAX_BYTES` (16 MiB) on the file, and on a
+  folder taken together; `CARREL_IMPORT_MAX_RECORDS` (5000) on the records in
+  it. Over either, the whole file is refused: half of it is not written and
+  then called an import.
+- **The export has no screen.** It is a GET that writes the file as the
+  records arrive — no temporary file — always an attachment in a sandbox
+  (`Content-Disposition: attachment`, `nosniff`, `sandbox`,
+  `Cache-Control: private, no-store`), named after the collection. A book is
+  `.vcf`, a calendar and a task list `.ics` under one envelope with each time
+  zone written once, a notebook `.md`.
+- **A note goes out whole.** The header block names `title`, `date`,
+  `categories` and `uid`; every other property of the record keeps its own
+  name below them, parameters included, and the body is the description
+  unescaped. Nothing of the record is left out of the file.
+- **A calendar takes a range where the screen has one:** the agenda's Export
+  carries the week it shows (`from`, `to`); without them the collection goes
+  whole.
+- **A source that does not answer** leaves the list screen with the usual
+  notice (S-21), not a broken download.
+
+### Included
+
+- `internal/provider/cal`: `Split`, `Components`, `SetUID`, `NoteMarkdown`,
+  `ParseNote`, `ProdID`, and the line-level helpers under them — an imported
+  file is cut into records and an exported one copied out without decoding
+  either, so what another program wrote travels as it wrote it.
+- `internal/provider/card`: `Split`, `SetUID`.
+- `internal/web/import.go`, `internal/web/export.go`; the import route's body
+  ceiling in `bodyLimit`; `listActions` on the four lists; import and export in
+  the rail's collection menu.
+- Tests: `cal/split_test.go`, `cal/note_test.go`, `card/split_test.go` —
+  series with instances and zones, strays, a file that left out UID or
+  DTSTAMP, a note written and read back. `web/import_test.go`,
+  `web/export_test.go` — the preview against two collections, an import that
+  creates and renames, a second run that writes nothing, a file over the
+  ceiling, notes from a folder, one envelope and one zone on the way out, the
+  week of an agenda, an unavailable source.
+- Not live yet: Radicale, Baikal and SFTPGo.
+
 ## v0.0.71 — 2026-09-15
 
 Moving a whole collection has run between two live servers. Nothing changes in
