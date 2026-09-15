@@ -602,11 +602,15 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
 - [x] S-12.1–12.2: MKCALENDAR / MKCOL; slug; переименование — подпись
       (`v0.0.46`; `web/handlers_collections.go`, `web/slug.go`; вживую —
       Baikal, `integration/collections_live_test.go`)
-- [ ] S-12.1–12.2 на Radicale: `TestRadicaleCollections` в Linux-воротах
+- [x] S-12.1–12.2 на Radicale: `TestRadicaleCollections` в Linux-воротах
+      (зелёный на `v0.0.66`, 15.09.2026: ворота гоняют весь `integration`
+      против Radicale, без сервера тест падает, а не пропускается)
 - [x] S-15: `internal/fanout`; 4 живых / 4 параллели; SSE+poll; история 10;
       файлы ищутся по имени (`v0.0.47`; `web/search.go`; вживую — Baikal,
       `integration/search_live_test.go`; галочки пишет S-14)
-- [ ] S-15 на Radicale: `TestRadicaleSearch` в Linux-воротах
+- [x] S-15 на Radicale: `TestRadicaleSearch` в Linux-воротах (зелёный на
+      `v0.0.66`, 15.09.2026, с «ковал» в другом регистре; до `v0.0.59` падал
+      500 Radicale на text-match по N — SV-3 в `docs/servers.md`)
 - [x] S-15: кириллица в другом регистре в календарях — Baikal CalDAV сравнивает
       только ASCII (карточки находит, события, задачи и заметки — нет). Решить:
       collation в теле REPORT (у go-webdav поля нет) или иное (`v0.0.57`;
@@ -658,9 +662,10 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
 - [x] S-17: List/MKCOL/MOVE; очередь столкновений; `UploadOverwrite`; Get без
       потолка 10 МиБ; корень — отмеченные хранилища (`v0.0.53`; `web/files.go`,
       `web/files_ops.go`, `files_test.go`)
-- [ ] S-17 на SFTPGo: `TestSFTPGoFiles` (11 МиБ целиком, Stat занятого имени,
+- [x] S-17 на SFTPGo: `TestSFTPGoFiles` (11 МиБ целиком, Stat занятого имени,
       MOVE без перезаписи — 412, MKCOL — 405, CopyTree). 14.09.2026 не прогнан:
-      webdav.mixeme.ru и baikal.mixeme.ru не отвечали
+      SFTPGo и Baikal не отвечали (зелёный на `v0.0.66` с Windows,
+      15.09.2026, 28 с)
 - [x] S-17: долгое скачивание и загрузка упираются в `CARREL_DAV_REQUEST_TIMEOUT`
       (`http.Client.Timeout` считает и тело). План велел оставить; решить
       (`v0.0.56`; решение — простой: `http.Client.Timeout` снят, сторож в

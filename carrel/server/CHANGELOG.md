@@ -5,6 +5,22 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.67 — 2026-09-15
+
+Three live checks the plan still listed as open have run green. Nothing
+changes in the running server.
+
+### For consumers
+
+- **Checked.** Collections (create, rename) and case-insensitive search on
+  Radicale pass in the Linux gates; files on SFTPGo — an 11 MiB file whole, a
+  taken name, MOVE without overwrite, MKCOL, copying a tree — pass live.
+
+### Included
+
+- `docs/plan/server.md`: `TestRadicaleCollections`, `TestRadicaleSearch` and
+  `TestSFTPGoFiles` ticked with the run they passed on.
+
 ## v0.0.66 — 2026-09-15
 
 A record written through Carrel carries the time of that write, so clients
