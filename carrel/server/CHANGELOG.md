@@ -5,6 +5,21 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.75 — 2026-09-15
+
+`docs/servers.md` is shorter and up to date. Nothing changes in the running
+server.
+
+### Included
+
+- Every entry SV-1…SV-13 keeps its number: the server behaviour, what Carrel
+  does, the version and the test that notices a change. A comment in code that
+  names `SV-n` still leads to it.
+- The line-up says that one live suite runs Radicale, Baikal (sabre/dav 4.7.0)
+  and SFTPGo on the Linux machine.
+- SV-12 names the live tests that hold what `davtest` imitates, moving and
+  deleting a collection included.
+
 ## v0.0.74 — 2026-09-15
 
 Import, export and deleting a collection have run on live servers. Nothing
