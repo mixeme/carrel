@@ -5,6 +5,29 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.61 — 2026-09-15
+
+The live photo test holds Radicale to the loss it causes. Nothing changes in
+the running server.
+
+### For consumers
+
+- **Radicale and contact photos.** Radicale (3.5.4 and 3.8.0 checked) cuts a
+  vCard 4.0 photo written as RFC 6350 has it, `PHOTO:data:image/jpeg;base64,…`,
+  at its comma: the server keeps `data:image/jpeg\;base64` and the image is
+  gone. Saving a photo into a 4.0 card on Radicale therefore answers with the
+  loss report for `PHOTO`. A 3.0 card keeps its photo. Radicale's issues #1795
+  and #1863 were closed without a fix.
+- **Carrel keeps writing RFC 6350.** Baikal and Nextcloud keep the photo
+  whole. A way to save the photo in the older form, from the loss report, is
+  the next step.
+
+### Included
+
+- `TestRadicalePhoto` expects the loss report for `PHOTO` in a 4.0 card and
+  checks the server really cut it; it fails the day Radicale keeps the photo.
+  `TestBaikalPhoto` expects the photo kept.
+
 ## v0.0.60 — 2026-09-15
 
 vCard 4.0 cards on sabre/dav servers (Baikal, Nextcloud) are no longer

@@ -31,13 +31,18 @@ import (
 // escaped, for 3.0 base64 with ENCODING and TYPE — on one PHOTO line of some
 // hundreds of KiB that the server neither folds nor cuts, and it decodes to
 // the whole framed JPEG.
+//
+// Radicale (3.5.4 and 3.8.0, through vobject) cuts a 4.0 PHOTO data URI at its
+// comma: the image is gone, and Carrel says so with a loss report. Carrel keeps
+// writing RFC 6350 there (owner's decision 2026-09-15); the test holds Radicale
+// to that loss, and fails the day Radicale keeps the photo.
 func TestRadicalePhoto(t *testing.T) {
-	runPhoto(t, radicaleEndpoint(t), radicaleUser, radicalePass)
+	runPhoto(t, radicaleEndpoint(t), radicaleUser, radicalePass, false)
 }
 
 func TestBaikalPhoto(t *testing.T) {
 	endpoint, user, pass := baikalConfig(t)
-	runPhoto(t, endpoint, user, pass)
+	runPhoto(t, endpoint, user, pass, true)
 }
 
 // upload sends a file the way a page without scripts does: _csrf first.
@@ -114,7 +119,7 @@ func noiseJPEG(t *testing.T, side int) []byte {
 	return buf.Bytes()
 }
 
-func runPhoto(t *testing.T, endpoint, user, pass string) {
+func runPhoto(t *testing.T, endpoint, user, pass string, keepsDataURI bool) {
 	ctx := context.Background()
 	res, trace, err := discover.Run(ctx, testGuard(t), endpoint, user, pass, "")
 	if err != nil || res.AddressBookHome == "" {
@@ -160,9 +165,29 @@ func runPhoto(t *testing.T, endpoint, user, pass string) {
 				t.Fatalf("upload: %d %s", resp.Code, resp.Body.String())
 			}
 			preview := liveDecode[view.PhotoPreviewPage](t, "preview", app.get(rec+"/photo-preview"))
-			redirected(t, "save", app.post(liveAction(t, preview.Actions, "photo.save"), url.Values{
+			saved := app.post(liveAction(t, preview.Actions, "photo.save"), url.Values{
 				"zoom": {"100"}, "offsetX": {"0"}, "offsetY": {"0"}, "rotate": {"0"},
-			}))
+			})
+			if saved.Code != http.StatusSeeOther {
+				page := liveDecode[view.ContactEditPage](t, "save", saved)
+				var photoLost bool
+				if page.Loss != nil {
+					for _, p := range page.Loss.Properties {
+						photoLost = photoLost || p == "PHOTO"
+					}
+				}
+				if keepsDataURI || !photoLost {
+					t.Fatalf("save answered %d with loss %+v and notices %+v", saved.Code, page.Loss, page.Notices)
+				}
+				held := rawCard(ctx, t, endpoint, user, pass, file, "text/vcard; version=4.0")
+				for _, l := range strings.Split(held, "\n") {
+					if strings.HasPrefix(l, "PHOTO") && strings.Contains(l, ",") {
+						t.Errorf("a loss was reported, yet the server holds a whole PHOTO: %.80q", l)
+					}
+				}
+				t.Logf("seeded as %s: the server cut the PHOTO data URI and Carrel reported the loss", version)
+				return
+			}
 
 			// Carrel reads cards as 4.0 (S-7), so on a converting server a 3.0
 			// card comes back 4.0 after the save; a server that keeps cards as
