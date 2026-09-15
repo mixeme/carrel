@@ -5,6 +5,25 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.71 — 2026-09-15
+
+Moving a whole collection has run between two live servers. Nothing changes in
+the running server.
+
+### For consumers
+
+- **Checked.** A calendar with a recurring event, its overridden instance and a
+  task moved from Radicale to Baikal: it was made there with its name, colour
+  and component set, every record arrived whole, and the original was gone from
+  the server and the catalog. An address book copied the same way left the
+  original where it was.
+
+### Included
+
+- `integration/collection_move_live_test.go`:
+  `TestRadicaleBaikalCollectionMove`. Green with the whole live suite on the
+  Linux machine.
+
 ## v0.0.70 — 2026-09-15
 
 A calendar or an address book moves or is copied to another connection
