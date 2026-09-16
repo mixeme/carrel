@@ -302,6 +302,48 @@ func uploadForm(path string, sess *session.Session, header bool, files ...upload
 	return req
 }
 
+// S-17.1 and docs/servers.md, SV-15: a storage that writes only what it was
+// told the length of. The row says why, and names what to do about it.
+func TestUploadNeedsASizeOnSuchAServer(t *testing.T) {
+	f := filesFixture(t, true)
+	f.srv.RefuseUnsizedPUT = true
+	// The folder itself has to be there: the only write this test makes is the
+	// one the server refuses, and a folder page of nothing is a 404.
+	f.srv.SeedFolder(filesDocs)
+
+	if rec := f.h.do(uploadForm(f.at("upload"), f.sess, false, upload{"plain.txt", "body"})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("upload: %d %s", rec.Code, rec.Body.String())
+	}
+	queue := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess))).Queue
+	if row := queueRow(t, queue, "plain.txt"); row.State != view.OpFailed {
+		t.Fatalf("row = %+v", row)
+	}
+	if !strings.Contains(string(queue.Note), "size") {
+		t.Errorf("the queue does not say why: %q", queue.Note)
+	}
+	if _, ok := f.srv.File(filesDocs + "plain.txt"); ok {
+		t.Errorf("the file was written after all")
+	}
+
+	// With the size in front of it the same upload goes through.
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	_ = w.WriteField("_csrf", f.sess.CSRFToken())
+	_ = w.WriteField("size.sized.txt", "4")
+	part, _ := w.CreateFormFile("file", "sized.txt")
+	_, _ = part.Write([]byte("body"))
+	_ = w.Close()
+	req := httptest.NewRequest(http.MethodPost, f.at("upload"), &buf)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: f.sess.ID()})
+	if rec := f.h.do(req); rec.Code != http.StatusSeeOther {
+		t.Fatalf("sized upload: %d %s", rec.Code, rec.Body.String())
+	}
+	if got, ok := f.srv.File(filesDocs + "sized.txt"); !ok || got != "body" {
+		t.Errorf("sized upload wrote %q, %v", got, ok)
+	}
+}
+
 func heldUploads(t *testing.T) int {
 	t.Helper()
 	m, _ := filepath.Glob(filepath.Join(os.TempDir(), "carrel-upload-*"))

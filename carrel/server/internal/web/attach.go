@@ -381,8 +381,12 @@ func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectio
 	}
 	var placed *placedFile
 	if sent == nil {
+		// A file that ended inside what was read never gets here — it travels
+		// in the record. So the only length this path can know is the one the
+		// page sent in front of the files (S-17.1).
+		size := declaredSize(r, name)
 		var notice *view.Notice
-		placed, notice = s.placeAttachment(ctx, c, obj, name, mediaType, io.MultiReader(bytes.NewReader(head), part), limit)
+		placed, notice = s.placeAttachment(ctx, c, obj, name, mediaType, io.MultiReader(bytes.NewReader(head), part), limit, size)
 		if notice != nil {
 			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, *notice))
 			return
@@ -464,7 +468,10 @@ func (p *placedFile) remove(ctx context.Context) {
 // placeAttachment writes body to the attachment folder under a free name: the
 // folder is made on first use, a taken name gets a number and nothing is
 // overwritten. A notice says why nothing was written.
-func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *model.Object, name, mediaType string, body io.Reader, limit int64) (*placedFile, *view.Notice) {
+// size is the length of body when it is known: the file ended inside what was
+// read to measure it against the limit, or the page sent it. -1 means nothing
+// said, and then the body goes out as a stream (S-17.1).
+func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *model.Object, name, mediaType string, body io.Reader, limit, size int64) (*placedFile, *view.Notice) {
 	large := fmt.Sprintf("The file is larger than %s, the most %s takes inside a record, so it goes to the folder for attachments.", sizeText(limit), collectionLabel(c.col))
 	settings := []view.Action{{ID: "settings.attachments", Label: "Choose the folder", Href: s.route("/app/settings/attachments"), Method: "GET", Enabled: true}}
 	refuse := func(title, body string) (*placedFile, *view.Notice) {
@@ -513,9 +520,19 @@ func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *mod
 			return failed("PROPFIND", target, err)
 		}
 		counted := &countingReader{r: body}
-		etag, err := fc.files.UploadCreate(ctx, target, dav.Typed(counted, mediaType))
+		var send io.Reader = dav.Typed(counted, mediaType)
+		if size >= 0 {
+			send = dav.Sized(send, size)
+		}
+		etag, err := fc.files.UploadCreate(ctx, target, send)
 		forgetFolder(c.sess, fc.conn.ID, folder)
 		if err != nil {
+			if size < 0 && needsLength(err) {
+				// S-17.1: this server writes only what it was told the size of,
+				// and Carrel does not keep the file to measure it.
+				return refuse("this server needs the size of a file before it writes it",
+					"The page did not send one. Turn scripts on, or attach a file small enough to travel inside the record.")
+			}
 			return failed("PUT", target, err)
 		}
 		return &placedFile{files: fc, path: target, uri: fileURI(fc.conn.Server, target), size: counted.n, etag: etag}, nil

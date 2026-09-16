@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -241,7 +242,7 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		n++
-		if err := s.uploadOne(r.Context(), c, part); err != nil {
+		if err := s.uploadOne(r, c, part); err != nil {
 			http.Error(w, "could not keep the upload", http.StatusInternalServerError)
 			return
 		}
@@ -258,8 +259,10 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 }
 
 // uploadOne sends one file part: straight to the server when its name is
-// free, to a temporary file and a question when it is taken.
-func (s *Server) uploadOne(ctx context.Context, c *fileCtx, part *multipart.Part) error {
+// free, to a temporary file and a question when it is taken. The length goes
+// with it when the page sent one (S-17.1).
+func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part) error {
+	ctx := r.Context()
 	name := part.FileName()
 	if i := strings.LastIndexAny(name, `/\`); i >= 0 {
 		name = name[i+1:]
@@ -294,13 +297,23 @@ func (s *Server) uploadOne(ctx context.Context, c *fileCtx, part *multipart.Part
 		t.temp, t.state = f.Name(), view.OpIdle
 	case file.NotFound(err):
 		body := &countingReader{r: part}
-		_, err = c.files.UploadCreate(ctx, target, dav.Typed(body, uploadType(part, name)))
+		var send io.Reader = dav.Typed(body, uploadType(part, name))
+		declared := declaredSize(r, name)
+		if declared >= 0 {
+			send = dav.Sized(send, declared)
+		}
+		_, err = c.files.UploadCreate(ctx, target, send)
 		t.size = body.n
 		switch {
 		case err == nil:
 			t.state = view.OpDone
 		case file.ErrOccupied(err):
 			t.state, t.note = view.OpFailed, "the name was taken while it uploaded; nothing was overwritten. Upload it again to choose"
+		case declared < 0 && needsLength(err):
+			// S-17.1: the length was not sent and this server will not write
+			// without one. Carrel does not keep the body to measure it — there
+			// is no ceiling on a file — so it says so instead.
+			t.state, t.note = view.OpFailed, "this server writes a file only when its size is sent first, and the page did not send it. Turn scripts on, or put the file there with another client"
 		default:
 			t.state, t.note = view.OpFailed, sentenceEnd(fileReason(err))
 		}
@@ -308,6 +321,34 @@ func (s *Server) uploadOne(ctx context.Context, c *fileCtx, part *multipart.Part
 		t.state, t.note = view.OpFailed, sentenceEnd(fileReason(err))
 	}
 	return nil
+}
+
+// declaredSize is the length of a file the page sent in front of the files —
+// "size.<name>" — or -1 when nothing said. A body of unknown length goes out
+// without a Content-Length, and some servers refuse that (S-17.1,
+// docs/servers.md, SV-15); measuring it here would mean keeping the whole file,
+// and there is no ceiling on one (C-12).
+func declaredSize(r *http.Request, name string) int64 {
+	up, err := uploadOf(r)
+	if err != nil {
+		return -1
+	}
+	for _, key := range []string{"size." + name, "size"} {
+		if v := up.fields.Get(key); v != "" {
+			if n, err := strconv.ParseInt(v, 10, 64); err == nil && n >= 0 {
+				return n
+			}
+		}
+	}
+	return -1
+}
+
+// needsLength reports the refusals a server gives a body whose length it was
+// not told: OpenCloud behind Apache answers 400 over HTTP/1.1 and 502 over
+// HTTP/2 (docs/servers.md, SV-15).
+func needsLength(err error) bool {
+	return dav.IsStatus(err, http.StatusBadRequest) || dav.IsStatus(err, http.StatusBadGateway) ||
+		dav.IsStatus(err, http.StatusLengthRequired)
 }
 
 // sentenceEnd is a reason as part of a longer line: without its full stop.

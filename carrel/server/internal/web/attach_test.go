@@ -3,8 +3,11 @@ package web_test
 import (
 	"bytes"
 	"encoding/base64"
+	"mime/multipart"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -12,6 +15,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/internal/sealed"
+	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -26,7 +30,13 @@ const attachFiles = davtest.FileRoot + "docs/"
 // given, is the attachment folder under the file collection.
 func attachFixture(t *testing.T, limit int64, folder []string, events ...string) davFixture {
 	t.Helper()
-	srv := davtest.New(t)
+	return attachFixtureOn(t, davtest.New(t), limit, folder, events...)
+}
+
+// attachFixtureOn is attachFixture on a server a test has already set up — one
+// that refuses a body of unknown length, say (SV-15).
+func attachFixtureOn(t *testing.T, srv *davtest.Server, limit int64, folder []string, events ...string) davFixture {
+	t.Helper()
 	srv.Login, srv.Password = "alice", "secret"
 	work := davtest.CalendarHome + "work/"
 	srv.AddCalendar(caldav.Calendar{Path: work, Name: "Work"})
@@ -303,6 +313,69 @@ func TestDetachLinkKeepsTheFile(t *testing.T) {
 	if len(eventAt(t, f, "e1").Attach) != 0 {
 		t.Errorf("the block still has rows")
 	}
+}
+
+// attachRequest sends a file the way a page does, with the fields it puts in
+// front of it — the size among them when scripts are on (S-17.1).
+func attachRequest(path string, sess *session.Session, fields map[string]string, name string, data []byte) *http.Request {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	_ = w.WriteField("_csrf", sess.CSRFToken())
+	for k, v := range fields {
+		_ = w.WriteField(k, v)
+	}
+	part, _ := w.CreateFormFile("file", name)
+	_, _ = part.Write(data)
+	_ = w.Close()
+	req := httptest.NewRequest(http.MethodPost, path, &buf)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: sess.ID()})
+	return req
+}
+
+// S-17.1 and docs/servers.md, SV-15: a server that will not write a body whose
+// length it was not told. The size the page sends is what lets the file
+// through; without it Carrel says so and writes nothing, because measuring the
+// body would mean keeping a file that has no ceiling (C-12).
+func TestAttachmentNeedsASizeOnSuchAServer(t *testing.T) {
+	srv := davtest.New(t)
+	srv.RefuseUnsizedPUT = true
+	f := attachFixtureOn(t, srv, 1024, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
+	big := bytes.Repeat([]byte("x"), 2048)
+
+	href := actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
+	page := decode[view.EventPage](t, f.h.do(attachRequest(href, f.sess, nil, "report.pdf", big)))
+	if !hasNotice(page.Notices, "Nothing was attached: this server needs the size of a file before it writes it") {
+		t.Fatalf("notices = %+v", page.Notices)
+	}
+	if rows := folderRows(t, f, "carrel"); len(rows) != 0 {
+		t.Errorf("the folder holds %+v, want nothing written", rows)
+	}
+	if strings.Contains(body(t, f, "e1.ics"), "ATTACH") {
+		t.Errorf("the record points at a file that was never written")
+	}
+
+	// The same file, with the size in front of it.
+	href = actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
+	fields := map[string]string{"size.report.pdf": strconv.Itoa(len(big))}
+	if resp := f.h.do(attachRequest(href, f.sess, fields, "report.pdf", big)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("attach with a size: %d %s", resp.Code, resp.Body.String())
+	}
+	if rows := folderRows(t, f, "carrel"); len(rows) != 1 {
+		t.Fatalf("the folder holds %+v, want the file", rows)
+	}
+	row := eventAt(t, f, "e1").Attach[0]
+	if row.Inline || row.Href == "" {
+		t.Errorf("row = %+v", row)
+	}
+
+	// A file small enough to travel in the record never asks the file server
+	// for anything, so such a server changes nothing for it.
+	href = actionHref(t, eventAt(t, f, "e1").Actions, "attach.add")
+	if resp := f.h.do(attachRequest(href, f.sess, nil, "note.txt", []byte("small"))); resp.Code != http.StatusSeeOther {
+		t.Fatalf("small attach: %d %s", resp.Code, resp.Body.String())
+	}
+	mustContain(t, body(t, f, "e1.ics"), "FILENAME=note.txt", "ENCODING=BASE64")
 }
 
 // A read-only collection is not offered attaching at all, and the address

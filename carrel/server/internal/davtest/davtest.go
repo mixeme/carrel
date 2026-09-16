@@ -58,6 +58,13 @@ type Server struct {
 	// the file server sees it.
 	FilesIgnoreIfNoneMatch bool
 
+	// RefuseUnsizedPUT answers 400 to a PUT that carries no Content-Length,
+	// the way OpenCloud behind Apache does past a few kilobytes
+	// (docs/servers.md, SV-15). It is how the rule "the length goes with the
+	// body when it is known, and a refusal is said out loud otherwise" is held
+	// without a network.
+	RefuseUnsizedPUT bool
+
 	// RefuseCollation answers 400 to a REPORT that names a collation, the way
 	// sabre/dav answers one it does not know. Without it i;unicode-casemap is
 	// honoured: go-webdav's own text-match counts case and ignores collation.
@@ -419,6 +426,12 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files 
 	}
 	if r.Method == http.MethodPut && s.FilesIgnoreIfNoneMatch && strings.HasPrefix(p, FileRoot) {
 		r.Header.Del("If-None-Match")
+	}
+	// docs/servers.md, SV-15: a body whose length the client did not declare is
+	// refused. ContentLength is -1 exactly when the request went out chunked.
+	if r.Method == http.MethodPut && s.RefuseUnsizedPUT && strings.HasPrefix(p, FileRoot) && r.ContentLength < 0 {
+		http.Error(w, "Content-Length required", http.StatusBadRequest)
+		return
 	}
 
 	switch {

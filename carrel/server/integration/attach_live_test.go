@@ -33,16 +33,120 @@ import (
 
 func TestBaikalAttachments(t *testing.T) {
 	endpoint, user, pass := baikalConfig(t)
-	runAttachments(t, endpoint, user, pass)
+	sEndpoint, sUser, sPass := sftpgoConfig(t)
+	runAttachments(t, endpoint, user, pass, sEndpoint, sUser, sPass)
+}
+
+// The folder on OpenCloud: there the storage is a space — a path under the
+// host, not its root — and the server writes nothing whose length it was not
+// told (docs/servers.md, SV-15). So the small file still travels inside the
+// record, and the large one is not written at all: the screen says why, and
+// the folder stays as it was. Carrel does not keep the file to measure it —
+// there is no ceiling on a file (C-12, S-17.1).
+func TestBaikalOpenCloudAttachments(t *testing.T) {
+	endpoint, user, pass := baikalConfig(t)
+	sEndpoint, sUser, sPass := opencloudConfig(t)
+	sClient, files := liveFiles(t, sEndpoint, sUser, sPass)
+	ctx := context.Background()
+	suffix := fmt.Sprintf("carrel-s20-oc-%d-%d", os.Getpid(), time.Now().Unix()%100000)
+
+	client := liveClient(t, endpoint, user, pass)
+	calHome, _ := liveHomes(ctx, t, endpoint, user, pass)
+	calPath := calHome + suffix + "-cal/"
+	liveRequest(ctx, t, endpoint, user, pass, "MKCALENDAR", calPath, `<?xml version="1.0" encoding="utf-8"?>
+<C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:set><D:prop>
+    <D:displayname>Carrel S-20 OpenCloud</D:displayname>
+    <C:supported-calendar-component-set><C:comp name="VEVENT"/></C:supported-calendar-component-set>
+  </D:prop></D:set>
+</C:mkcalendar>`)
+	t.Cleanup(func() { _ = client.Delete(context.Background(), calPath, "") })
+
+	uid := "event-" + suffix
+	seedRecord(ctx, t, client, calPath+uid+".ics", "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n"+
+		"BEGIN:VEVENT\r\nUID:"+uid+"\r\nDTSTAMP:20260101T000000Z\r\nDTSTART:20260810T100000Z\r\n"+
+		"SUMMARY:Синк-ап "+suffix+"\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n")
+
+	app := newLiveApp(t)
+	calID := connectLive(t, app, endpoint, user, pass)
+	sID := connectLive(t, app, sEndpoint, sUser, sPass)
+	cal := catalogEntry(t, liveCatalog(t, app), calPath)
+	record := "/app/calendar/" + calID + "/" + url.PathEscape(cal.Path) + "/" + uid
+
+	sub := suffix + "-attach"
+	settings := liveDecode[view.AttachmentsPage](t, "attachment settings", app.get("/app/settings/attachments"))
+	to := ""
+	for _, node := range settings.Folder.Nodes {
+		if strings.HasPrefix(node.ID, "/app/files/"+sID+"/") {
+			to = node.ID
+		}
+	}
+	if to == "" {
+		t.Fatalf("no space of the file server in the tree: %+v", settings.Folder.Nodes)
+	}
+	redirected(t, "choose the folder", app.post("/app/settings/attachments", url.Values{"to": {to}, "sub": {sub}}))
+	af := liveCatalog(t, app).Attachments
+	if af == nil {
+		t.Fatal("the folder was not stored")
+	}
+	folder := strings.TrimSuffix(af.Path, "/") + "/" + sub + "/"
+	t.Logf("space %q, attachment folder %q", af.Path, folder)
+	t.Cleanup(func() { _ = sClient.Delete(context.Background(), folder, "") })
+
+	// Small enough to travel in the record: nothing is asked of the file server.
+	small := bytes.Repeat([]byte{0x00, 0x01, 0x02, 0xfe}, 800)
+	page := liveDecode[view.EventPage](t, "event", app.get(record))
+	redirected(t, "attach a small file", app.attach(liveAction(t, page.Actions, "attach.add"), "notes.bin", small))
+	raw, _ := rawBody(ctx, t, client, calPath+uid+".ics")
+	mustHave(t, "the record after a small attachment", raw, "FILENAME=notes.bin", liveBase64(small))
+
+	// Larger than the record takes, and nothing said how long it is.
+	big := bytes.Repeat([]byte("carrel-attachment-"), 150000)
+	page = liveDecode[view.EventPage](t, "event with one attachment", app.get(record))
+	refused := liveDecode[view.EventPage](t, "attach a large file",
+		app.attach(liveAction(t, page.Actions, "attach.add"), "report.pdf", big))
+	if !hasLiveNotice(refused.Notices, "needs the size of a file") {
+		t.Fatalf("notices = %+v", refused.Notices)
+	}
+	if names := liveNames(ctx, t, files, folder); len(names) != 0 {
+		t.Errorf("the folder holds %v, want nothing written", names)
+	}
+	if raw, _ = rawBody(ctx, t, client, calPath+uid+".ics"); strings.Contains(raw, "report.pdf") {
+		t.Errorf("the record points at a file that was never written")
+	}
+}
+
+// liveFiles is a file provider over one connection.
+func liveFiles(t *testing.T, endpoint, user, pass string) (*dav.Client, *file.Provider) {
+	t.Helper()
+	client := liveClient(t, endpoint, user, pass)
+	p, err := file.New(client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return client, p
+}
+
+func hasLiveNotice(notices []view.Notice, part string) bool {
+	for _, n := range notices {
+		if strings.Contains(string(n.Title), part) || strings.Contains(string(n.Body), part) {
+			return true
+		}
+	}
+	return false
 }
 
 func TestRadicaleAttachments(t *testing.T) {
-	runAttachments(t, radicaleEndpoint(t), radicaleUser, radicalePass)
+	sEndpoint, sUser, sPass := sftpgoConfig(t)
+	runAttachments(t, radicaleEndpoint(t), radicaleUser, radicalePass, sEndpoint, sUser, sPass)
 }
 
-func runAttachments(t *testing.T, endpoint, user, pass string) {
-	sEndpoint, sUser, sPass := sftpgoConfig(t)
-	sClient, files := sftpgoClient(t)
+func runAttachments(t *testing.T, endpoint, user, pass, sEndpoint, sUser, sPass string) {
+	sClient := liveClient(t, sEndpoint, sUser, sPass)
+	files, err := file.New(sClient)
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctx := context.Background()
 	suffix := fmt.Sprintf("carrel-s20-%d-%d", os.Getpid(), time.Now().Unix()%100000)
 
