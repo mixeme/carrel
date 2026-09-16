@@ -9,47 +9,36 @@ import (
 	"strings"
 )
 
-// liveCredEnv fills CARREL_* from dev/credentials.txt when unset (local dev only).
+// dev/credentials.txt is written for people, not for programs: sections under
+// "# Name", subsections under "## Name", then "key: value" lines and bare
+// URLs. It is read here into CARREL_* variables when they are not set already,
+// so a live test finds its server without anyone exporting anything first. A
+// section the file does not hold sets nothing, and the tests of that server
+// skip themselves.
+//
+// The shapes differ per server because the servers do: one names a token
+// instead of a password, another splits into subsections with an address and
+// an app password each. Every such turn is named below, next to the server it
+// belongs to.
+
 func liveCredEnv() {
-	if os.Getenv("CARREL_SFTPGO_URL") != "" && os.Getenv("CARREL_BAIKAL_URL") != "" {
-		return
-	}
-	_, file, _, ok := runtime.Caller(0)
-	if !ok {
-		return
-	}
-	// integration/live_creds.go → carrel/server → carrel_reborn
-	root := filepath.Clean(filepath.Join(filepath.Dir(file), "..", "..", ".."))
-	path := filepath.Join(root, "dev", "credentials.txt")
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(credentialsFile())
 	if err != nil {
 		return
 	}
-	section := ""
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		switch line {
-		case "Baikal DAV":
-			section = "baikal"
-			continue
-		case "SFTPGo WebDAV":
-			section = "sftpgo"
-			continue
-		case "":
-			section = ""
-			continue
-		}
-		switch section {
-		case "baikal":
-			setIfEmpty("CARREL_BAIKAL_URL", urlLine(line))
-			setIfEmpty("CARREL_BAIKAL_USER", loginLine(line))
-			setIfEmpty("CARREL_BAIKAL_PASS", passwordLine(line))
-		case "sftpgo":
-			setIfEmpty("CARREL_SFTPGO_URL", urlLine(line))
-			setIfEmpty("CARREL_SFTPGO_USER", loginLine(line))
-			setIfEmpty("CARREL_SFTPGO_PASS", passwordLine(line))
-		}
+	for key, val := range credEnv(string(data)) {
+		setIfEmpty(key, val)
 	}
+}
+
+func credentialsFile() string {
+	_, file, _, ok := runtime.Caller(0)
+	if !ok {
+		return ""
+	}
+	// integration/live_creds.go → carrel/server → carrel_reborn
+	root := filepath.Clean(filepath.Join(filepath.Dir(file), "..", "..", ".."))
+	return filepath.Join(root, "dev", "credentials.txt")
 }
 
 func setIfEmpty(key, val string) {
@@ -58,25 +47,137 @@ func setIfEmpty(key, val string) {
 	}
 }
 
-func urlLine(line string) string {
-	if strings.HasPrefix(line, "http://") || strings.HasPrefix(line, "https://") {
-		return line
+// credSection is one block of the file: the section it stands under, the
+// subsection when it has one, and its lines as key and value.
+type credSection struct {
+	name string
+	sub  string
+	keys map[string]string
+}
+
+func (s credSection) get(names ...string) string {
+	for _, n := range names {
+		if v := s.keys[n]; v != "" {
+			return v
+		}
 	}
 	return ""
 }
 
-func loginLine(line string) string {
-	const p = "login:"
-	if strings.HasPrefix(line, p) {
-		return strings.TrimSpace(strings.TrimPrefix(line, p))
+func parseCreds(text string) []credSection {
+	var out []credSection
+	cur := credSection{keys: map[string]string{}}
+	flush := func() {
+		if cur.name != "" {
+			out = append(out, cur)
+		}
 	}
-	return ""
+	for _, raw := range strings.Split(text, "\n") {
+		line := strings.TrimSpace(raw)
+		lower := strings.ToLower(line)
+		switch {
+		case strings.HasPrefix(line, "## "):
+			flush()
+			cur = credSection{name: cur.name, sub: credKey(line[3:]), keys: map[string]string{}}
+		case strings.HasPrefix(line, "# "):
+			flush()
+			cur = credSection{name: credKey(line[2:]), keys: map[string]string{}}
+		case strings.HasPrefix(lower, "http://"), strings.HasPrefix(lower, "https://"):
+			// A bare address on its own line is the address of the section.
+			cur.keys["url"] = line
+		default:
+			if k, v, ok := strings.Cut(line, ":"); ok {
+				if v = strings.TrimSpace(v); v != "" {
+					cur.keys[credKey(k)] = v
+				}
+			}
+		}
+	}
+	flush()
+	return out
 }
 
-func passwordLine(line string) string {
-	const p = "password:"
-	if strings.HasPrefix(line, p) {
-		return strings.TrimSpace(strings.TrimPrefix(line, p))
+func credKey(s string) string { return strings.ToLower(strings.TrimSpace(s)) }
+
+// credEnv maps the file onto the variables the live tests read.
+func credEnv(text string) map[string]string {
+	sections := parseCreds(text)
+	find := func(name, sub string) credSection {
+		for _, s := range sections {
+			if strings.Contains(s.name, name) && s.sub == sub {
+				return s
+			}
+		}
+		return credSection{keys: map[string]string{}}
 	}
-	return ""
+	out := map[string]string{}
+	set := func(key, val string) {
+		if val != "" {
+			out[key] = val
+		}
+	}
+
+	baikal := find("baikal", "")
+	set("CARREL_BAIKAL_URL", baikal.get("url"))
+	set("CARREL_BAIKAL_USER", baikal.get("login"))
+	set("CARREL_BAIKAL_PASS", baikal.get("password"))
+
+	sftpgo := find("sftpgo", "")
+	set("CARREL_SFTPGO_URL", sftpgo.get("url"))
+	set("CARREL_SFTPGO_USER", sftpgo.get("login"))
+	set("CARREL_SFTPGO_PASS", sftpgo.get("password"))
+
+	// OpenCloud: one space of a file server. Basic auth takes the app token,
+	// not the password of the account — the password answers 401 (16.09.2026).
+	oc := find("opencloud", "")
+	set("CARREL_OPENCLOUD_URL", oc.get("url"))
+	set("CARREL_OPENCLOUD_USER", oc.get("login"))
+	set("CARREL_OPENCLOUD_PASS", oc.get("token", "password"))
+
+	// Yandex: three addresses under one login, an app password each. The login
+	// must be the whole address: "mixeum" answers 401 on CalDAV, and
+	// "mixeum@yandex.ru" answers on both (16.09.2026). The Disk (WebDAV) answers
+	// 402 for this account and is left out on purpose.
+	yandex := find("yandex", "")
+	user := yandexLogin(yandex.get("login"))
+	cal, card := find("yandex", "caldav"), find("yandex", "carddav")
+	set("CARREL_YANDEX_CALDAV_URL", credURL(cal.get("url")))
+	set("CARREL_YANDEX_CALDAV_USER", user)
+	set("CARREL_YANDEX_CALDAV_PASS", cal.get("app password, caldav", "app password"))
+	set("CARREL_YANDEX_CARDDAV_URL", credURL(card.get("url")))
+	set("CARREL_YANDEX_CARDDAV_USER", user)
+	set("CARREL_YANDEX_CARDDAV_PASS", card.get("app password, carddav", "app password"))
+
+	// Mail.ru names one calendar, not a home: the address is the collection.
+	mail := find("mail.ru", "")
+	set("CARREL_MAILRU_URL", mail.get("url"))
+	set("CARREL_MAILRU_USER", mail.get("login"))
+	set("CARREL_MAILRU_PASS", mail.get("app password, caldav", "app password"))
+
+	// SoGo names one calendar and one address book of a mailbox account.
+	sogo := find("sogo", "")
+	set("CARREL_SOGO_CAL_URL", sogo.get("caldav"))
+	set("CARREL_SOGO_CARD_URL", sogo.get("carddav"))
+	set("CARREL_SOGO_USER", sogo.get("e-mail/login", "login"))
+	set("CARREL_SOGO_PASS", sogo.get("password"))
+
+	return out
+}
+
+// yandexLogin is the login Yandex wants: the whole address.
+func yandexLogin(login string) string {
+	if login == "" || strings.Contains(login, "@") {
+		return login
+	}
+	return login + "@yandex.ru"
+}
+
+// credURL is an address written for a person: without a scheme, or with the
+// full stop that ends the sentence it stood in.
+func credURL(raw string) string {
+	raw = strings.TrimSuffix(strings.TrimSpace(raw), ".")
+	if raw == "" || strings.HasPrefix(strings.ToLower(raw), "http://") || strings.HasPrefix(strings.ToLower(raw), "https://") {
+		return raw
+	}
+	return "https://" + raw
 }
