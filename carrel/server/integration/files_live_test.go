@@ -24,18 +24,16 @@ func TestSFTPGoFiles(t *testing.T) {
 	ctx := context.Background()
 	root := fmt.Sprintf("/carrel-files-%d/", os.Getpid())
 	_ = client.Delete(ctx, root, "")
+	removeLater(t, client, root)
 	if err := p.MkCol(ctx, root); err != nil {
 		t.Fatalf("mkcol: %v", err)
 	}
-	defer client.Delete(ctx, root, "")
 	if err := p.MkCol(ctx, root); !dav.IsStatus(err, http.StatusMethodNotAllowed) {
 		t.Errorf("MKCOL of a taken name: %v", err)
 	}
 
 	const big = 11 << 20
-	if _, err := p.UploadOverwrite(ctx, root+"big.bin", strings.NewReader(strings.Repeat("z", big))); err != nil {
-		t.Fatalf("put: %v", err)
-	}
+	seedFile(ctx, t, p, root+"big.bin", func() io.Reader { return strings.NewReader(strings.Repeat("z", big)) })
 	d, err := p.Open(ctx, root+"big.bin", nil)
 	if err != nil {
 		t.Fatal(err)

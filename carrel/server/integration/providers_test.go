@@ -210,11 +210,11 @@ func TestSFTPGoGetStreams(t *testing.T) {
 	name := fmt.Sprintf("carrel-large-%d.bin", os.Getpid())
 	path := "/" + name
 
+	removeLater(t, client, path)
 	payload := strings.Repeat("x", 2*1024*1024)
 	if _, err := client.Put(ctx, path, strings.NewReader(payload), ""); err != nil {
 		t.Fatalf("put: %v", err)
 	}
-	defer client.Delete(ctx, path, "")
 
 	body, _, err := p.Get(ctx, path, nil)
 	if err != nil {
@@ -244,11 +244,11 @@ func TestSFTPGoGetLargeFileLowMemory(t *testing.T) {
 	name := fmt.Sprintf("carrel-rss-%d.bin", os.Getpid())
 	path := "/" + name
 
+	removeLater(t, client, path)
 	payload := strings.Repeat("x", largeFileBytes)
 	if _, err := client.Put(ctx, path, strings.NewReader(payload), ""); err != nil {
 		t.Fatalf("put: %v", err)
 	}
-	defer client.Delete(ctx, path, "")
 
 	before := heapAllocBytes()
 	body, _, err := p.Get(ctx, path, nil)

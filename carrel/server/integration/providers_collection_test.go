@@ -142,6 +142,9 @@ func TestSFTPGoFolderCRUD(t *testing.T) {
 	slug := fmt.Sprintf("carrel-folder-%d", os.Getpid())
 	path := "/" + slug + "/"
 	moved := "/" + slug + "-moved/"
+	// Both names: a MOVE that fails leaves the first, and one that works the
+	// second.
+	removeLater(t, client, path, moved)
 
 	if err := client.MkCol(ctx, path); err != nil {
 		t.Fatalf("create: %v", err)
