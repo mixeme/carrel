@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 	"unicode"
 
@@ -281,7 +282,56 @@ type limitTransport struct {
 	request time.Duration // CARREL_DAV_REQUEST_TIMEOUT
 }
 
+// RoundTrip sends the request and, when a connection the pool had kept turns
+// out to be closed, sends it once more (docs/servers.md, SV-14). Go replays
+// only the methods it knows as safe, and PROPFIND and REPORT are not among
+// them; the pool lives in this guard, so every DAV client of the process
+// shares it and inherits the race.
 func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := t.attempt(req)
+	if err == nil || !replayable(req) || !idleClosed(err) {
+		return resp, err
+	}
+	again, rerr := rewound(req)
+	if rerr != nil {
+		return resp, err
+	}
+	return t.attempt(again)
+}
+
+// replayable reports whether sending the request again changes nothing: a
+// method that only reads, and a body the request can produce a second time.
+func replayable(req *http.Request) bool {
+	switch req.Method {
+	case http.MethodGet, http.MethodHead, http.MethodOptions, "PROPFIND", "REPORT":
+	default:
+		return false
+	}
+	return req.Body == nil || req.Body == http.NoBody || req.GetBody != nil
+}
+
+// idleClosed reports the errors a connection closed before the answer gives.
+// A timeout, a refusal and a cancelled request are not among them.
+func idleClosed(err error) bool {
+	return errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) ||
+		errors.Is(err, syscall.ECONNRESET) || errors.Is(err, syscall.EPIPE) || errors.Is(err, net.ErrClosed)
+}
+
+func rewound(req *http.Request) (*http.Request, error) {
+	out := req.Clone(req.Context())
+	if req.GetBody == nil {
+		out.Body = nil
+		return out, nil
+	}
+	body, err := req.GetBody()
+	if err != nil {
+		return nil, err
+	}
+	out.Body = body
+	return out, nil
+}
+
+func (t *limitTransport) attempt(req *http.Request) (*http.Response, error) {
 	base := t.base
 	if base == nil {
 		base = http.DefaultTransport

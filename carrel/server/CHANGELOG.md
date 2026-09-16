@@ -5,6 +5,45 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.77 — 2026-09-16
+
+Attachments have run on live servers, and a read that meets a connection the
+server has closed is sent again instead of failing.
+
+### For consumers
+
+- **A closed idle connection no longer fails a read.** Servers close
+  connections they have kept for a while (Apache does it after 5 seconds), and
+  the pool that holds them is shared by every DAV client of the process. Go
+  sends again only the methods it knows as safe, and `PROPFIND` and `REPORT`
+  are not among them, so such a request failed with `EOF` and the screen said
+  the server could not be reached. Carrel now sends it a second time: only a
+  method that reads, only when the body can be produced again, and only once.
+  **A write is never sent twice** — the server may have taken the first one —
+  so a PUT that meets a closed connection still says so.
+- This is what made a live test fail now and then with no explanation, and it
+  is what stopped an attachment from being written on a live run
+  (`docs/servers.md`, SV-14; SV-9 said the pool was per client, which was
+  wrong).
+
+### Included
+
+- `integration/attach_live_test.go` (S-20): the calendar on one server and the
+  attachment folder on another, which is how two connections of one person
+  stand. A 3 KB file goes into the record on Baikal and comes back byte for
+  byte; the 200 KB attachment another client left inline is untouched by every
+  write that follows; a 2.7 MB file is streamed to the folder on SFTPGo as
+  `2026-08-10 Синк-ап … - report.pdf`, the record keeps the link with `SIZE`,
+  and `/app/attach` gives all of it back; the same name again becomes
+  `- report-2.pdf` with the first file unchanged; removing the link leaves the
+  file in the folder. The folder itself is chosen through the settings page.
+- `internal/dav`: the retry in `limitTransport`, with `retry_test.go` — a read
+  sent again, a write never, a timeout or a refusal never, and one retry only.
+- `TestRadicaleAttachments` is the same run against Radicale; it belongs to the
+  Linux gates and has not run yet.
+- `gofmt`, `go vet`, `go test ./...`, `docs/spec/check.py` green; the live run
+  green from Windows against Baikal and SFTPGo (59 s).
+
 ## v0.0.76 — 2026-09-16
 
 A file attached to an event, a task or a note travels inside the record when it
