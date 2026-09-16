@@ -271,6 +271,15 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 	if err := client.MkColProps(ctx, method, newPath, props); err != nil {
 		return "", davRefusal(moveCollectionRefusal(m.title(), label), m.dest, method, newPath, err)
 	}
+	// Where it actually landed, before anything is copied into it: a server
+	// that picks its own address (SV-19) would otherwise take every record at
+	// an address that holds nothing.
+	settled, err := settlePath(ctx, client, home, newPath, taken)
+	if err != nil {
+		return "", lostCollection(m.dest, method, newPath, err,
+			label+" here is as it was: run re-discovery on that connection to see what the server made.")
+	}
+	newPath = settled
 	m.placed = sealed.Collection{Path: newPath, Name: label, Kinds: kinds, Colour: colour, Components: f.components}
 	if m.dst, err = m.s.newCollectionCtx(m.sess, spec, m.dest, m.placed); err != nil {
 		m.takeBack(ctx)

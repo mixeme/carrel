@@ -68,6 +68,12 @@ type Server struct {
 	// (docs/servers.md, SV-16).
 	SearchIgnoresFilter bool
 
+	// CreateAssignsItsOwnAddress answers 201 to MKCALENDAR and puts the
+	// calendar at an address of its own, the way Yandex does (docs/servers.md,
+	// SV-19): nothing is left at the address that was asked for, and the home
+	// holds one child it did not hold before.
+	CreateAssignsItsOwnAddress bool
+
 	// RefuseUnsizedPUT answers 400 to a PUT that carries no Content-Length,
 	// the way OpenCloud behind Apache does past a few kilobytes
 	// (docs/servers.md, SV-15). It is how the rule "the length goes with the
@@ -582,6 +588,14 @@ func (s *Server) mkcalendar(w http.ResponseWriter, p string, body []byte) {
 	var comps []string
 	for _, c := range req.Prop.Components.Comp {
 		comps = append(comps, c.Name)
+	}
+	if s.CreateAssignsItsOwnAddress {
+		// docs/servers.md, SV-19: nothing is left at the address that was
+		// asked for; the calendar is at one the server picked itself.
+		s.mu.Lock()
+		s.seq++
+		key = CalendarHome + fmt.Sprintf("events-%d/", s.seq)
+		s.mu.Unlock()
 	}
 	s.AddCalendar(caldav.Calendar{Path: key, Name: req.Prop.Name, SupportedComponentSet: comps})
 	if c := strings.TrimSpace(req.Prop.Colour); c != "" {

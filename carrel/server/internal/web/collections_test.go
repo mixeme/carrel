@@ -85,6 +85,47 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 	}
 }
 
+// docs/servers.md, SV-19: a server that answers 201 and puts the collection at
+// an address of its own, saying nothing about it. What goes into the catalog
+// is where it went, not where it was asked to go: an entry that points at
+// nothing opens nothing, and every write after it would go to the wrong place.
+func TestCreateWhereTheServerPicksTheAddress(t *testing.T) {
+	f := calendarFixture(t, nil)
+	f.srv.CreateAssignsItsOwnAddress = true
+	before := map[string]bool{}
+	for _, c := range catalogOf(t, f).Collections {
+		before[c.Path] = true
+	}
+
+	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess,
+		url.Values{"account": {f.id}, "name": {"Trips"}, "components": {"VEVENT"}}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("create: %d %s", rec.Code, rec.Body.String())
+	}
+	asked := davtest.CalendarHome + "trips/"
+	if _, ok := f.srv.Calendar(asked); ok {
+		t.Fatal("the fixture kept the address it was given: this test would hold nothing")
+	}
+
+	var placed string
+	for _, c := range catalogOf(t, f).Collections {
+		if !before[c.Path] {
+			placed = c.Path
+		}
+	}
+	if placed == "" || placed == asked {
+		t.Fatalf("the catalog holds %q, want the address the server picked", placed)
+	}
+	if cal, ok := f.srv.Calendar(placed); !ok || cal.Name != "Trips" {
+		t.Errorf("the catalog points at %q, which the server does not hold as Trips: %+v %v", placed, cal, ok)
+	}
+	if loc, want := rec.Header().Get("Location"), "/app/calendar/"+f.id+"/"+url.PathEscape(placed); loc != want {
+		t.Errorf("went to %q, want %q", loc, want)
+	}
+	// And the page at that address opens.
+	decode[view.AgendaPage](t, f.h.do(get(rec.Header().Get("Location"), f.sess)))
+}
+
 // An address typed by hand is kept as typed, refused when it is not one
 // segment, and not suffixed when taken: the person chose it.
 func TestNewAddressBookWithAddressByHand(t *testing.T) {

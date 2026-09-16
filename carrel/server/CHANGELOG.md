@@ -5,6 +5,43 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.80 — 2026-09-17
+
+A new collection goes into the catalog at the address the server actually made
+it at, and Yandex joins the live set.
+
+### For consumers
+
+- **A new collection is found where the server put it.** A server may answer a
+  create with 201 and make the collection at an address of its own, sending
+  nothing to say where: Yandex names a new calendar `events-<id>` whatever
+  address it was asked for. Carrel now reads the address back, and when nothing
+  is there, reads the home again — the one collection that was not there before
+  the create is the new one, and that is what the catalog keeps. It matters
+  most when a collection is moved to such a server, because the address of the
+  destination is taken before the records are copied into it
+  (`docs/servers.md`, SV-19).
+- **When there is no telling where it went, Carrel says so** instead of filling
+  the catalog in with a guess: the screen says the server made it at an address
+  of its own, and that re-discovery on that connection will take it in.
+
+### Included
+
+- `integration/yandex_live_test.go` (S-30.2): the shared harness does not fit
+  this server — every wrapper seeds an address book first, and Yandex refuses
+  MKCOL of a book with 405 from nginx — so what it does allow is tested
+  instead: a calendar made, renamed and deleted through the pages, a refused
+  book that arrives as the content of the sheet, and a contact written into the
+  one book the account has.
+- A watchdog that needs no network: `davtest.CreateAssignsItsOwnAddress` with
+  `TestCreateWhereTheServerPicksTheAddress`.
+- Two findings recorded and deliberately not worked around: an address book
+  cannot be made on Yandex at all (SV-20), and the server builds `FN` from `N`
+  and discards the `FN` it was sent — so a contact made through Carrel, whose
+  form writes `FN` and no `N`, arrives there without a name (SV-21). Filling
+  `N` in from a typed name would be inventing something the person did not
+  enter, which is not this changelog's to decide.
+
 ## v0.0.79 — 2026-09-16
 
 SoGo joins the live set, and three things it does its own way are now held by

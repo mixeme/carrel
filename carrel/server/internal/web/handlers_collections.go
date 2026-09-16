@@ -222,6 +222,13 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, davRefusal(createRefusal, conn, method, path, err)))
 		return
 	}
+	settled, err := settlePath(r.Context(), client, home, path, taken)
+	if err != nil {
+		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, lostCollection(conn, method, path, err,
+			"It is not in the list here: run re-discovery on this connection to take in what the server holds.")))
+		return
+	}
+	path = settled
 	name := s.settleName(r.Context(), client, path, f.name)
 	col := sealed.Collection{Path: path, Name: name, Kinds: kinds, Colour: f.colour, Components: f.components}
 	if err := s.users.AddCollection(sess.AccountID(), key, conn.ID, col); err != nil {
@@ -252,6 +259,69 @@ func (s *Server) settleName(ctx context.Context, client *dav.Client, path, want 
 		return after
 	}
 	return want
+}
+
+// settlePath is the address the collection ends up at. A create carries one,
+// but not every server takes it: Yandex answers 201 to MKCALENDAR and puts the
+// calendar at an address of its own (`events-<id>`), leaving nothing at the
+// address that was asked for and sending no Location to say so
+// (docs/servers.md, SV-19). So the address is read back, and when it holds
+// nothing, the home is read again: the one child that was not there before the
+// create is where the collection went. None, or more than one — someone else
+// created one at the same moment — is not guessed at, because a catalog entry
+// that points at nothing is worse than saying so.
+func settlePath(ctx context.Context, client *dav.Client, home, path string, before map[string]bool) (string, error) {
+	if _, err := client.PropFind(ctx, path, dav.DepthZero, []xml.Name{propResourceType}); err == nil {
+		return path, nil
+	}
+	fresh, err := newChildren(ctx, client, home, before)
+	if err != nil {
+		return "", fmt.Errorf("nothing at %s, and %s could not be read again: %w", path, home, err)
+	}
+	if len(fresh) != 1 {
+		return "", fmt.Errorf("nothing at %s, and %s holds %d new collections", path, home, len(fresh))
+	}
+	return strings.TrimSuffix(home, "/") + "/" + fresh[0] + "/", nil
+}
+
+// newChildren are the children of the home that before does not name. The
+// segments come back as the server spells them: before is keyed in lower case
+// for the comparison only, because an address is not the catalog's to change.
+func newChildren(ctx context.Context, client *dav.Client, home string, before map[string]bool) ([]string, error) {
+	ms, err := client.PropFind(ctx, home, dav.DepthOne, []xml.Name{propResourceType})
+	if err != nil {
+		return nil, err
+	}
+	self := strings.TrimSuffix(hrefPath(home), "/")
+	var fresh []string
+	for _, resp := range ms.Responses {
+		p := strings.TrimSuffix(hrefPath(resp.Href), "/")
+		if p == self || p == "" {
+			continue
+		}
+		seg := p[strings.LastIndex(p, "/")+1:]
+		if !before[strings.ToLower(seg)] {
+			fresh = append(fresh, seg)
+		}
+	}
+	return fresh, nil
+}
+
+// lostCollection is the answer when a server made the collection somewhere
+// other than the address it was given and there is no telling where: the
+// catalog is not filled in with a guess. Re-discovery on the connection offers
+// what the server holds (S-12.1), which is how a collection made elsewhere
+// enters the catalog anyway.
+func lostCollection(conn sealed.Connection, method, path string, err error, tail string) *view.Notice {
+	return &view.Notice{
+		Role:  view.NoticeAlert,
+		Title: text("Made, but not at the address it was given"),
+		Body:  text(serverHost(conn.Server) + " took the request and put the collection at an address of its own, and Carrel could not tell which. " + tail),
+		Details: &view.Diagnostic{
+			Summary: text(method + " " + path),
+			Lines:   []view.Text{text(err.Error())},
+		},
+	}
 }
 
 func collectionDisplayName(ctx context.Context, client *dav.Client, path string) string {
