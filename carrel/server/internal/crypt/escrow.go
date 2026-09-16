@@ -12,7 +12,7 @@ import (
 
 const escrowPrivLen = curve25519.ScalarSize
 
-func aadEscrowMaster() []byte  { return []byte("carrel.escrow.master.v1") }
+func aadEscrowMaster() []byte { return []byte("carrel.escrow.master.v1") }
 func aadEscrowDeposit(login string) []byte {
 	return []byte("carrel.escrow.deposit.v1|" + login)
 }

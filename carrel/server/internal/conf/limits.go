@@ -37,6 +37,11 @@ const (
 	// thumbnail: the original is what is served, so a larger one gets the icon
 	// of its type (S-17).
 	FileThumbMaxBytes = 512 << 10
+	// AttachInlineMax is the largest record an attachment is written into
+	// (S-20): up to it the file travels inside the event, the task or the note;
+	// past it the file goes to the attachment folder and the record keeps a
+	// link. A collection's max-resource-size can only lower it.
+	AttachInlineMax = 2 << 20
 	// TransferQueueLen is how many rows the transfer queue of a session keeps
 	// (S-17.3). Past it the oldest row that asks nothing goes, then the oldest
 	// question with the upload it holds.

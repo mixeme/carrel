@@ -5,6 +5,73 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.76 — 2026-09-16
+
+A file attached to an event, a task or a note travels inside the record when it
+fits, and goes to a folder on your file server when it does not (S-20).
+
+### For consumers
+
+- **Where it is.** Every event, task and note carries an `Attachments` block on
+  its reading page and on its edit page: `Attach` (`attach.add`) adds one,
+  `Remove` (`attach.remove`) takes one off. Both are writes of their own on the
+  edit address (`?op=attach`, `?op=detach`) with `If-Match` of the version the
+  page showed, the way the steps of a contact photo are — no new address. A
+  record that changed elsewhere is not written to, and the screen says so.
+- **The boundary is 2 MB, and nothing raises it.** Up to it the file is written
+  into the record itself (`ATTACH` with binary data) and travels with it: a
+  phone with only the calendar gets the file with the event. The size is
+  measured on the finished object before the PUT, so a collection that declares
+  a smaller `max-resource-size` lowers the boundary for itself.
+- **Larger goes to the attachment folder**, chosen once in Settings →
+  Attachments, and the record keeps a link. The folder is made on first use and
+  stays an ordinary folder. Without a folder chosen nothing is written at all:
+  the notice says where to choose one, and the record is not left pointing at
+  something that is not there. A write the server then refuses takes the file
+  back out of the folder.
+- **The name in the folder** is the date of the record, its title and the name
+  the file came with: `2026-08-10 Синк-ап по релизу - report.pdf`. Characters a
+  file system refuses become `-`, a long title is cut, the extension is not. A
+  name already taken gets a number (`- report-2.pdf`); nothing is overwritten,
+  and the row of the attachment shows the name the file actually got.
+- **What another client stored stays as it is.** An inline attachment is never
+  moved to a folder, whatever its size; a record already over the boundary
+  simply sends its next attachment to the folder. Removing a link removes the
+  link — the file stays, the label says so — while an inline attachment goes
+  with its only copy.
+- **Opening one** is `/app/attach/{account}/{col}/…`: an inline attachment as
+  `{uid}/{n}` straight from its record, a link only when it points into a file
+  collection of your catalog. A link anywhere else is shown and never fetched.
+  Attachments are handed over the way downloads are: an attachment in a sandbox,
+  `nosniff`, `private, no-cache`.
+- **Settings → Attachments** shows the two ways side by side — what stays in the
+  record, what goes to the folder, and the boundary each collection declares —
+  and none of them is editable. The folder is picked in the same tree as a move
+  or a copy, with an optional folder to make inside it. Changing the folder
+  moves nothing: records already written keep their links.
+
+### Included
+
+- `internal/provider/cal/attach.go`: `Attachments`, `AttachmentData`,
+  `AttachInline`, `AttachLink`, `Detach`. Adding one appends a value; removing
+  one writes every other value back with its parameters. A name with a double
+  quote, which has no escape in an iCalendar parameter, is written with
+  apostrophes instead of breaking the record.
+- `internal/web/attach.go`, `internal/web/attach_settings.go`;
+  `sealed.AttachmentFolder` in the catalog and `user.SetAttachmentFolder`
+  (journal `attachments.folder`). The upload streams: the attachment route
+  joins the file upload route in reading `_csrf` in front of the file, so the
+  body has no ceiling of Carrel's (C-12).
+- `sendFile` and `downloadHeaders` shared by the files section and attachments;
+  `folderAddress` shared by a move, a copy and the settings tree.
+- Tests: `provider/cal/attach_test.go` and `web/attach_test.go` — the boundary
+  both ways, the name and its cleaning, the counter on a taken name, a missing
+  folder, a record changed elsewhere, a foreign inline attachment left byte for
+  byte, a link removed with its file kept, a read-only collection, and the
+  settings page.
+- `gofmt`, `go vet`, `go test ./...`, `docs/spec/check.py` green. Not live yet:
+  Radicale, Baikal, SFTPGo.
+
 ## v0.0.75 — 2026-09-15
 
 `docs/servers.md` is shorter and up to date. Nothing changes in the running

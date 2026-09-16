@@ -139,15 +139,22 @@ type uploadBody struct {
 
 type uploadKey struct{}
 
-// isFileUpload reports whether r is a multipart POST to the upload route. Its
-// body has no cap of Carrel's (C-12): only the fields in front of the files
-// are bounded.
+// isFileUpload reports whether r is a multipart POST that carries a file to a
+// storage: the upload route, or an attachment to a record (S-20), which goes
+// to the attachment folder when it is large. Its body has no cap of Carrel's
+// (C-12): only the fields in front of the files are bounded.
 func isFileUpload(r *http.Request) bool {
 	if r.Method != http.MethodPost || !strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
 		return false
 	}
 	seg := strings.Split(r.URL.EscapedPath(), "/")
-	return len(seg) >= 7 && seg[1] == "app" && seg[2] == "files" && seg[5] == "upload"
+	switch {
+	case len(seg) >= 7 && seg[1] == "app" && seg[2] == "files" && seg[5] == "upload":
+		return true
+	case len(seg) == 7 && seg[1] == "app" && seg[6] == "edit" && r.URL.Query().Get("op") == "attach":
+		return recordKinds[seg[2]].component != ""
+	}
+	return false
 }
 
 // readUploadFields reads the fields in front of the first file, a form's worth
@@ -462,8 +469,14 @@ func (s *Server) destination(c *fileCtx, q url.Values) (*fileCtx, bool) {
 	if to == "" {
 		return c.at(c.segs), true
 	}
-	u, err := url.Parse(to)
-	if err != nil {
+	return s.folderAddress(c.sess, to)
+}
+
+// folderAddress is the folder a href of the files section names — a node of
+// the tree (C-6.7) — in a live file collection of the catalog.
+func (s *Server) folderAddress(sess *session.Session, href string) (*fileCtx, bool) {
+	u, err := url.Parse(href)
+	if err != nil || href == "" {
 		return nil, false
 	}
 	escaped := u.EscapedPath()
@@ -478,7 +491,7 @@ func (s *Server) destination(c *fileCtx, q url.Values) (*fileCtx, bool) {
 	if !ok || !dir {
 		return nil, false
 	}
-	dest, ok := s.fileCollection(c.sess, account, col)
+	dest, ok := s.fileCollection(sess, account, col)
 	if !ok {
 		return nil, false
 	}

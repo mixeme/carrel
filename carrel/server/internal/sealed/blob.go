@@ -17,6 +17,16 @@ type Blob struct {
 	Connections []Connection `json:"connections,omitempty"`
 	Collections []Collection `json:"collections,omitempty"`
 	Selected    []Selection  `json:"selected,omitempty"`
+	// Attachments is the folder chosen once in settings (S-20); nil until then.
+	Attachments *AttachmentFolder `json:"attachments,omitempty"`
+}
+
+// AttachmentFolder is where an attachment too large for its record goes: a
+// folder of a file collection, bound to the collection address (S-6.1).
+type AttachmentFolder struct {
+	AccountID string   `json:"accountID"`
+	Path      string   `json:"path"`             // the file collection
+	Folder    []string `json:"folder,omitempty"` // segments under its root; created on first use
 }
 
 // Connection stores DAV credentials, the homes discovery found, and an

@@ -176,8 +176,9 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	for _, a := range cal.Attendees(obj) {
 		page.Attendees = append(page.Attendees, view.AttendeeRow{Name: text(a.Name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
 	}
+	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Related = s.relatedRows(c, obj)
-	page.Actions = s.recordActions(c, uid, obj.ETag)
+	page.Actions = s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag))
 	return page
 }
 
@@ -210,8 +211,9 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Done, page.Percent = taskDone(obj), percentOf(obj)
 	alarms, _ := cal.Alarms(obj)
 	page.Reminders = reminderRows(alarms, tf)
+	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Related = s.relatedRows(c, obj)
-	page.Actions = s.recordActions(c, uid, obj.ETag)
+	page.Actions = s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag))
 	return page
 }
 
@@ -229,7 +231,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Print = s.recordPrint(c, text(title))
 	page.Doc.Title, page.Doc.Body, page.Doc.Rendered = text(title), text(body), cal.RenderMarkdown(body)
 	// Edit sits in the document bar; the rest belong to the note, beside it.
-	for _, a := range s.recordActions(c, uid, obj.ETag) {
+	for _, a := range s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag)) {
 		if a.ID == "record.edit" {
 			page.Doc.Bar = append(page.Doc.Bar, a)
 		} else {
@@ -240,6 +242,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 		page.Meta.Date = text(tf.date(at))
 	}
 	page.Meta.Tags = s.recordTags(c, obj)
+	page.Meta.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Meta.Related = s.relatedRows(c, obj)
 	return page
 }

@@ -330,6 +330,21 @@ func (s *Service) SetSelection(viewerID string, dataKey [crypt.KeyLen]byte, kind
 	})
 }
 
+// SetAttachmentFolder stores the folder large attachments go to (S-20). It
+// must be a live file collection of the catalog; the folder under it need not
+// exist yet. Nothing already written moves. The journal names the connection,
+// not the address.
+func (s *Service) SetAttachmentFolder(viewerID string, dataKey [crypt.KeyLen]byte, folder sealed.AttachmentFolder) error {
+	return s.editCatalog(viewerID, dataKey, "attachments.folder", folder.AccountID, func(blob *sealed.Blob) error {
+		col, ok := blob.Collection(folder.AccountID, folder.Path)
+		if _, hasConn := blob.Connection(folder.AccountID); !hasConn || !ok || col.Gone || !col.Has(view.KindFile) {
+			return ErrNotFound
+		}
+		blob.Attachments = &folder
+		return nil
+	})
+}
+
 // editCatalog opens the viewer's blob, applies edit, seals it back and
 // journals what with detail. A failed edit writes nothing.
 func (s *Service) editCatalog(viewerID string, dataKey [crypt.KeyLen]byte, what, detail string, edit func(*sealed.Blob) error) error {

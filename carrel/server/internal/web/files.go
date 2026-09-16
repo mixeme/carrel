@@ -57,7 +57,13 @@ type fileCtx struct {
 // empty one, "." or ".." is a refusal (S-17.4). A trailing slash names a
 // folder; the root of the collection is always a folder.
 func parseFileAddress(escaped, marker string) (account, col string, segs []string, dir, ok bool) {
-	rest, found := strings.CutPrefix(escaped, "/app/files/")
+	return parseAddress(escaped, "/app/files/", marker)
+}
+
+// parseAddress reads {account}/{col}/[{marker}/]{path…} after prefix, the
+// same way for the files section and for /app/attach/ (S-20).
+func parseAddress(escaped, prefix, marker string) (account, col string, segs []string, dir, ok bool) {
+	rest, found := strings.CutPrefix(escaped, prefix)
 	if !found {
 		return "", "", nil, false, false
 	}
@@ -638,17 +644,20 @@ func (s *Server) getFilesDownload(w http.ResponseWriter, r *http.Request) {
 	}
 	name := c.segs[len(c.segs)-1]
 	inline := r.URL.Query().Get("inline") != ""
-	d, err := c.files.Open(r.Context(), p, requestRange(r))
-	switch {
-	case err != nil && (file.NotFound(err) || inline):
+	switch err := s.sendFile(w, r, c, p, name, inline); {
+	case err == nil:
+	case file.NotFound(err) || inline:
 		s.notFound(w, r)
-		return
-	case err != nil:
+	default:
 		s.writeFolder(w, r, c, c.segs[:len(c.segs)-1], "", url.Values{}, "", s.fileFailure(c, name+" could not be downloaded", "GET", p, err))
-		return
 	}
-	defer d.Body.Close()
-	mt := fileType(name, d.Type)
+}
+
+// downloadHeaders are the headers of a file handed to the browser: its type,
+// its name, and the sandbox that keeps it from running on Carrel's origin.
+// Only inline of one of the raster types is shown in place.
+func downloadHeaders(h http.Header, name, sentType string, inline bool) {
+	mt := fileType(name, sentType)
 	disposition := "attachment"
 	if inline && inlineTypes[mt] {
 		disposition = "inline"
@@ -656,7 +665,6 @@ func (s *Server) getFilesDownload(w http.ResponseWriter, r *http.Request) {
 	if mt == "" {
 		mt = "application/octet-stream"
 	}
-	h := w.Header()
 	h.Set("Content-Type", mt)
 	if v := mime.FormatMediaType(disposition, map[string]string{"filename": name}); v != "" {
 		h.Set("Content-Disposition", v)
@@ -666,6 +674,18 @@ func (s *Server) getFilesDownload(w http.ResponseWriter, r *http.Request) {
 	h.Set("X-Content-Type-Options", "nosniff")
 	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
 	h.Set("Cache-Control", "private, no-cache")
+}
+
+// sendFile streams the file at p as it comes. An error is the server's refusal
+// to open it, before anything was written to w.
+func (s *Server) sendFile(w http.ResponseWriter, r *http.Request, c *fileCtx, p, name string, inline bool) error {
+	d, err := c.files.Open(r.Context(), p, requestRange(r))
+	if err != nil {
+		return err
+	}
+	defer d.Body.Close()
+	h := w.Header()
+	downloadHeaders(h, name, d.Type, inline)
 	h.Set("Accept-Ranges", "bytes")
 	if d.ETag != "" {
 		h.Set("ETag", `"`+d.ETag+`"`)
@@ -683,6 +703,7 @@ func (s *Server) getFilesDownload(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(status)
 	_, _ = io.Copy(w, d.Body)
+	return nil
 }
 
 // requestRange is one byte range the browser asked for, passed on to the

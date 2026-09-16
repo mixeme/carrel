@@ -76,6 +76,8 @@ type Users interface {
 	// SetSelection replaces the ticks of one kind (S-14); other kinds keep
 	// theirs.
 	SetSelection(viewerID string, dataKey [32]byte, kind view.Kind, picks []sealed.Selection) error
+	// SetAttachmentFolder stores the folder large attachments go to (S-20).
+	SetAttachmentFolder(viewerID string, dataKey [32]byte, folder sealed.AttachmentFolder) error
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).

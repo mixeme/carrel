@@ -577,6 +577,12 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		sh.Notices = append(sh.Notices, view.Notice{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "Correct the marked fields and save again."})
 	}
 	form := s.recordForm(c, st)
+	// Attaching is a write of its own (S-20): a record not yet created has
+	// nowhere to take a file.
+	attaching := st.obj != nil && !st.isNew && !c.col.ReadOnly && c.cal != nil
+	if attaching && c.spec.kind != view.KindNote {
+		form.Actions = append(form.Actions, s.attachAction(c, st.uid, st.etag, "edit"))
+	}
 	switch c.spec.kind {
 	case view.KindContact:
 		page := view.ContactEditPage{Shell: sh, UID: st.uid, Form: form, Loss: st.loss, ReadOnly: c.col.ReadOnly}
@@ -591,10 +597,14 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 			for _, a := range cal.Attendees(st.obj) {
 				page.Attendees = append(page.Attendees, view.AttendeeRow{Name: text(a.Name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
 			}
+			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
 		}
 		return page
 	case view.KindTask:
 		page := view.TaskEditPage{Shell: sh, UID: st.uid, Form: form, Done: first(st.values["done"]) == "on", Reminders: reminderRows(st.alarms, tf), Loss: st.loss}
+		if st.obj != nil {
+			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
+		}
 		if n, err := strconv.Atoi(first(st.values["percent"])); err == nil {
 			page.Percent = &n
 		}
@@ -608,6 +618,9 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 				{ID: "record.save", Label: "Save", Href: s.postQuery(s.editAction(c, st), url.Values{"etag": {st.etag}, "readat": {strconv.FormatInt(st.readAt.Unix(), 10)}}), Method: "POST", Enabled: true},
 				s.cancelAction(c, st),
 			},
+		}
+		if attaching {
+			doc.Bar = append(doc.Bar, s.attachAction(c, st.uid, st.etag, "edit"))
 		}
 		// NoteDoc has no shell: a loss or a notice needs the page around it.
 		if st.loss != nil || len(sh.Notices) > 0 {
@@ -768,6 +781,19 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	uid := r.PathValue("uid")
+	// An attachment is a write of its own on this address (S-20). Its file is
+	// read from the body as it comes: nothing may parse the form before.
+	switch op := r.URL.Query().Get("op"); {
+	case op == "attach" && c.cal != nil:
+		s.postAttach(w, r, c, uid)
+		return
+	case op == "detach" && c.cal != nil:
+		s.postDetach(w, r, c, uid)
+		return
+	case op != "":
+		s.notFound(w, r)
+		return
+	}
 	etag := strings.TrimSpace(r.FormValue("etag"))
 	readAt := unixForm(r.FormValue("readat"))
 	want := s.submittedValues(c, r)

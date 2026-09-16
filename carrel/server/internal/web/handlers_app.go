@@ -224,10 +224,6 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-func (s *Server) getAttach(w http.ResponseWriter, r *http.Request) {
-	s.notFound(w, r)
-}
-
 func (s *Server) getSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -286,19 +282,6 @@ func (s *Server) postSettingsConnectionsTest(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	s.notFound(w, r)
-}
-
-func (s *Server) getSettingsAttachments(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.AttachmentsPage{Shell: s.buildShell(sess, "Attachments")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postSettingsAttachments(w http.ResponseWriter, r *http.Request) {
-	s.getSettingsAttachments(w, r)
 }
 
 func (s *Server) getSettingsDevices(w http.ResponseWriter, r *http.Request) {
