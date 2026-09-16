@@ -77,7 +77,11 @@ func runVCard4Edit(t *testing.T, endpoint, user, pass string) {
 	redirected(t, "edit", app.post(rec+"/edit", form))
 
 	got := rawCard(ctx, t, endpoint, user, pass, file, "text/vcard; version=4.0")
-	mustHave(t, "after the edit", got, "VERSION:4.0", "FN:Four Card Edited", "KIND:individual", "GENDER:F", "X-CUSTOM:keep-me", "UID:"+uid)
+	// The version number is the server's business: SoGo hands the card back as
+	// 3.0 whatever the Accept says, and keeps every 4.0 property in it
+	// (docs/servers.md, SV-17). What must survive an edit is the properties —
+	// that is what a loss report is about (S-7.1).
+	mustHave(t, "after the edit", got, "FN:Four Card Edited", "KIND:individual", "GENDER:F", "X-CUSTOM:keep-me", "UID:"+uid)
 	if strings.Contains(got, "PRODID:-//Sabre") {
 		t.Errorf("the server holds a converted card: Carrel wrote another version back\n%s", got)
 	}

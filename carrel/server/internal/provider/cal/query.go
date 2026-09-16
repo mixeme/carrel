@@ -24,6 +24,11 @@ var (
 	// default ignores letter case in Latin only (i;ascii-casemap). The records
 	// it found come with this error.
 	ErrLatinCaseOnly = errors.New("cal: the server ignores letter case in Latin script only")
+	// ErrServerDoesNotFilter: the server answered a text-match with records
+	// that do not hold the text — it returned the collection and left the
+	// searching to whoever asked (docs/servers.md, SV-16). Carrel sifted the
+	// answer itself, and says so beside the results.
+	ErrServerDoesNotFilter = errors.New("cal: the server returned records the search did not ask for")
 )
 
 // Unreadable is a resource the REPORT returned that could not become a record.
@@ -113,10 +118,37 @@ func (p *Provider) Search(ctx context.Context, collection, component, text strin
 			}
 		}
 	}
+	// A server that answers a text-match with the whole collection has not
+	// searched at all (docs/servers.md, SV-16: SoGo). Sifting what came back
+	// through the same properties and the same term keeps the promise of S-15;
+	// on a server that filtered, nothing is taken away by this.
+	if kept, sifted := sift(objs, props, text); sifted {
+		if latinOnly {
+			return kept, bad, ErrLatinCaseOnly
+		}
+		return kept, bad, ErrServerDoesNotFilter
+	}
 	if latinOnly {
 		return objs, bad, ErrLatinCaseOnly
 	}
 	return objs, bad, nil
+}
+
+// sift keeps the records that hold text in one of props, and says whether it
+// had to take anything away. The comparison is the one asked of the server:
+// letter case does not count, in any script.
+func sift(objs []*model.Object, props []string, text string) ([]*model.Object, bool) {
+	needle := strings.ToLower(text)
+	kept := make([]*model.Object, 0, len(objs))
+	for _, o := range objs {
+		for _, prop := range props {
+			if strings.Contains(strings.ToLower(Text(o, prop)), needle) {
+				kept = append(kept, o)
+				break
+			}
+		}
+	}
+	return kept, len(kept) != len(objs)
 }
 
 func (p *Provider) searcher() dav.CalSearcher {

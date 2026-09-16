@@ -4,8 +4,10 @@ package integration
 
 import (
 	"context"
+	"encoding/xml"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"strings"
@@ -99,25 +101,50 @@ func runMove(t *testing.T, endpoint, user, pass string) {
 		uid := "move-ada-" + suffix
 		seedCard(ctx, t, cols.client, cols.bookA, uid)
 		before, _ := rawBody(ctx, t, cols.client, cols.bookA+uid+".vcf")
+		isAda := func(b string) bool { return strings.Contains(b, "FN:Ada Lovelace") }
+		intoA := "/app/contacts/" + connID + "/" + url.PathEscape(catalogEntry(t, blob, cols.bookA).Path)
+		intoB := "/app/contacts/" + connID + "/" + url.PathEscape(catalogEntry(t, blob, cols.bookB).Path)
 
 		sheet := liveDecode[view.MoveSheet](t, "move sheet", app.get(moveURL("contacts", cols.bookA, uid, cols.bookB, false)))
 		if sheet.Warning != "" {
 			t.Errorf("a move on one account warned: %q", sheet.Warning)
 		}
-		redirected(t, "move", app.post(liveAction(t, sheet.Actions, "record.move.confirm"), url.Values{}))
+		// A server may give the moved record an identity of its own (SoGo does:
+		// docs/servers.md, SV-18). Then the move is done and said out loud, and
+		// the address the record had is not offered again, because it opens
+		// nothing.
+		loc := liveLanded(t, "move", app.post(liveAction(t, sheet.Actions, "record.move.confirm"), url.Values{}), intoB)
+		kept := loc != ""
+		if kept && loc != intoB+"/"+url.PathEscape(uid) {
+			t.Errorf("move went to %q", loc)
+		}
 		if _, _, err := cols.client.Get(ctx, cols.bookA+uid+".vcf", nil); !dav.IsStatus(err, http.StatusNotFound) {
 			t.Errorf("the original after MOVE: GET = %v, want 404", err)
 		}
-		moved, _ := rawBody(ctx, t, cols.client, cols.bookB+uid+".vcf")
-		if moved != before {
-			t.Errorf("MOVE changed the card:\nbefore %s\nafter  %s", before, moved)
+		// The name of the resource is the server's to choose, so the card is
+		// looked for by what is written in it.
+		moved, movedUID := liveRecordWhere(ctx, t, cols.client, cols.bookB, "of Ada", isAda)
+		if kept {
+			if moved != before {
+				t.Errorf("MOVE changed the card:\nbefore %s\nafter  %s", before, moved)
+			}
+		} else {
+			// The notice is only true if the identity really did change.
+			mustHave(t, "moved card", moved, "FN:Ada Lovelace", "X-CUSTOM:keep-me")
+			if movedUID == uid {
+				t.Errorf("the page said the identity changed, but the card still carries UID %s", uid)
+			}
 		}
 
-		sheet = liveDecode[view.MoveSheet](t, "copy sheet", app.get(moveURL("contacts", cols.bookB, uid, cols.bookA, true)))
-		redirected(t, "copy back", app.post(liveAction(t, sheet.Actions, "record.copy.confirm"), url.Values{}))
-		copied, _ := rawBody(ctx, t, cols.client, cols.bookA+uid+".vcf")
-		mustHave(t, "copy", copied, "UID:"+uid, "FN:Ada Lovelace", "X-CUSTOM:keep-me")
-		rawBody(ctx, t, cols.client, cols.bookB+uid+".vcf")
+		sheet = liveDecode[view.MoveSheet](t, "copy sheet", app.get(moveURL("contacts", cols.bookB, movedUID, cols.bookA, true)))
+		back := liveLanded(t, "copy back", app.post(liveAction(t, sheet.Actions, "record.copy.confirm"), url.Values{}), intoA)
+		if back != "" && back != intoA+"/"+url.PathEscape(movedUID) {
+			t.Errorf("copy went to %q", back)
+		}
+		copied, _ := liveRecordWhere(ctx, t, cols.client, cols.bookA, "of Ada", isAda)
+		mustHave(t, "copy", copied, "FN:Ada Lovelace", "X-CUSTOM:keep-me")
+		// A copy leaves the original where it was.
+		liveRecordWhere(ctx, t, cols.client, cols.bookB, "of Ada", isAda)
 	})
 
 	t.Run("event", func(t *testing.T) {
@@ -128,7 +155,7 @@ func runMove(t *testing.T, endpoint, user, pass string) {
 		if _, _, err := cols.client.Get(ctx, cols.calA+series+".ics", nil); !dav.IsStatus(err, http.StatusNotFound) {
 			t.Errorf("the original after MOVE: GET = %v, want 404", err)
 		}
-		got, _ := rawBody(ctx, t, cols.client, cols.calB+series+".ics")
+		got := liveCardByUID(ctx, t, cols.client, cols.calB, series)
 		mustHave(t, "moved event", got, "UID:"+series, "RRULE:FREQ=WEEKLY;COUNT=3", "RECURRENCE-ID:20261013T100000Z", "SUMMARY:Standup moved")
 		agenda := liveDecode[view.AgendaPage](t, "agenda at the target",
 			app.get("/app/calendar/"+connID+"/"+url.PathEscape(catalogEntry(t, blob, cols.calB).Path)+"?from=2026-10-12"))
@@ -141,6 +168,93 @@ func runMove(t *testing.T, endpoint, user, pass string) {
 type moveCollections struct {
 	client                   *dav.Client
 	bookA, bookB, calA, calB string
+}
+
+// liveCardByUID is the record of a collection that carries this UID, whatever
+// the server called the resource. SoGo names a moved or copied resource itself
+// (docs/servers.md, SV-18), and Carrel finds a record by its UID for the same
+// reason; a test that looked it up by name would be testing an assumption no
+// standard makes.
+func liveCardByUID(ctx context.Context, t *testing.T, client *dav.Client, collection, uid string) string {
+	t.Helper()
+	body, _ := liveRecordWhere(ctx, t, client, collection, "with UID "+uid, func(b string) bool {
+		return strings.Contains(b, "UID:"+uid)
+	})
+	return body
+}
+
+// liveRecordWhere is the record of a collection the test recognises, with the
+// UID the server ended up giving it. A server may re-identify a record it was
+// handed (SV-18), so what is written in the record is the only thing a test
+// can look for; neither the address nor the identifier is Carrel's to assume.
+func liveRecordWhere(ctx context.Context, t *testing.T, client *dav.Client, collection, what string, match func(string) bool) (string, string) {
+	t.Helper()
+	ms, err := client.PropFind(ctx, collection, dav.DepthOne, []xml.Name{{Space: "DAV:", Local: "getetag"}})
+	if err != nil {
+		t.Fatalf("PROPFIND %s: %v", collection, err)
+	}
+	var walked []string
+	for _, resp := range ms.Responses {
+		href := resp.Href
+		if u, err := url.Parse(href); err == nil {
+			href = u.Path
+		}
+		if strings.HasSuffix(href, "/") {
+			continue
+		}
+		body, _ := rawBody(ctx, t, client, href)
+		if match(body) {
+			return body, uidOf(body)
+		}
+		found := "no UID line"
+		if u := uidOf(body); u != "" {
+			found = "UID:" + u
+		}
+		walked = append(walked, href+" ("+found+")")
+	}
+	// What the walk saw is the evidence: a resource under another name or
+	// another identifier is one thing (SV-18), an empty listing quite another.
+	t.Fatalf("no record %s in %s; %d resource(s) walked: %s",
+		what, collection, len(walked), strings.Join(walked, ", "))
+	return "", ""
+}
+
+// uidOf is the identifier a record carries, or "" when it carries none.
+func uidOf(body string) string {
+	for _, line := range strings.Split(body, "\n") {
+		if strings.HasPrefix(line, "UID:") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "UID:"))
+		}
+	}
+	return ""
+}
+
+// liveLanded is where a write into another collection ended up: the address it
+// redirected to when the server kept the identity of the record, and "" when
+// the server gave it one of its own (SV-18) and Carrel said so instead of
+// redirecting to an address that opens nothing. wantOpen is the collection the
+// notice has to lead into, since that is all the person has left to follow.
+func liveLanded(t *testing.T, step string, rec *httptest.ResponseRecorder, wantOpen string) string {
+	t.Helper()
+	if rec.Code == http.StatusSeeOther {
+		return rec.Header().Get("Location")
+	}
+	page := liveDecode[view.ContactPage](t, step, rec)
+	if !hasLiveNotice(page.Notices, "another identity") {
+		t.Fatalf("%s: a page with nothing said about the identity: %+v", step, page.Notices)
+	}
+	for _, n := range page.Notices {
+		for _, a := range n.Actions {
+			if a.ID == "collection.open" {
+				if a.Href != wantOpen {
+					t.Errorf("%s: the notice leads to %q, want %q", step, a.Href, wantOpen)
+				}
+				return ""
+			}
+		}
+	}
+	t.Fatalf("%s: the notice offers no way into the collection: %+v", step, page.Notices)
+	return ""
 }
 
 func moveSuffix() string {

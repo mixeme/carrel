@@ -235,6 +235,31 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 	waitPoll(t, f.h, f.sess, hint.Poll.TaskID, nil)
 }
 
+// docs/servers.md, SV-16: a server that answers a text-match with the whole
+// collection has not searched at all. Carrel sifts what came back through the
+// properties it asked about, and the source says so beside the results — the
+// promise of S-15 is that what is shown holds the text.
+func TestSearchSiftsWhatAServerDoesNotFilter(t *testing.T) {
+	srv := searchServer(t)
+	srv.SearchIgnoresFilter = true
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work"})
+	srv.Seed(searchWork+"call.ics", ics("BEGIN:VEVENT\nUID:call\nDTSTAMP:20260101T000000Z\nDTSTART:20260910T150000Z\nSUMMARY:Call with Ada\nEND:VEVENT"))
+	srv.Seed(searchWork+"other.ics", ics("BEGIN:VEVENT\nUID:other\nDTSTAMP:20260101T000000Z\nDTSTART:20260902T090000Z\nSUMMARY:Standup\nEND:VEVENT"))
+	srv.Seed(searchWork+"third.ics", ics("BEGIN:VEVENT\nUID:third\nDTSTAMP:20260101T000000Z\nDTSTART:20260903T090000Z\nSUMMARY:Retro\nEND:VEVENT"))
+
+	f := connectFixture(t, srv, searchWork, nil)
+	tickAll(t, f.h, f.sess)
+	page := search(t, f.h, f.sess, "q=Ada")
+	bar := waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+	if work := sourceNamed(t, bar, "Work"); !strings.Contains(string(work.Message), "sifted") {
+		t.Errorf("the source does not say the server did not search: %+v", work)
+	}
+	page = search(t, f.h, f.sess, "q=Ada")
+	if len(page.Results) != 1 || string(page.Results[0].Title) != "Call with Ada" {
+		t.Fatalf("results = %+v: only what holds the text stays", page.Results)
+	}
+}
+
 // S-15.2: a calendar server that refuses i;unicode-casemap is asked with its
 // default. The source answers with a note that case counts outside Latin, and
 // the note on events does not stop the tasks of the same collection.

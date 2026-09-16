@@ -147,7 +147,10 @@ func runSearch(t *testing.T, endpoint, user, pass string) {
 			if time.Now().After(deadline) {
 				t.Fatalf("search %q still running: %+v", q, bar)
 			}
-			time.Sleep(50 * time.Millisecond)
+			// Not faster than that: the session's own bucket is 120 requests a
+			// minute (architecture.md), and four searches polled every 50 ms
+			// spend it before the servers have answered.
+			time.Sleep(400 * time.Millisecond)
 		}
 		var titles []string
 		for _, row := range liveDecode[view.SearchPage](t, "result "+q, app.get(href)).Results {

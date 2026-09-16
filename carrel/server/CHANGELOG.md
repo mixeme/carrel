@@ -5,6 +5,44 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.79 — 2026-09-16
+
+SoGo joins the live set, and three things it does its own way are now held by
+Carrel instead of by luck.
+
+### For consumers
+
+- **A search on a server that does not search.** SoGo answers a calendar
+  text-match with the whole collection, whatever was asked of it. Carrel sifts
+  such an answer through the same properties and the same term, so what is
+  shown holds the text, and the source says "this server does not search its
+  calendars, so Carrel sifted its answer" beside the results. A server that
+  filtered for itself loses nothing by this (`docs/servers.md`, SV-16).
+- **A new collection keeps the name the server shows.** SoGo names a new
+  address book after its address and ignores the name the create carried.
+  Carrel reads the name back, sends it once more on its own when it differs,
+  and keeps in the catalog what the server shows — because that is the name a
+  person sees, and the one the delete sheet asks them to type (SV-17).
+- **A move that changes the identity of a record is said out loud.** SoGo
+  gives a card moved into another address book a UID of its own. That
+  identifier is what duplicates are matched by and what a move promises not to
+  change, so instead of a redirect to an address that no longer opens
+  anything, the page says the record is there under another identity and
+  offers the collection it went into (SV-18).
+
+### Included
+
+- `integration/sogo_live_test.go` (S-30.2): seven wrappers over the same
+  harness the other servers run — records, collections, search, a move, import
+  and export, a collection deleted by name, and a vCard 4 edit. No new code
+  stands behind them, which is the point of a harness parameterised by server.
+- Watchdogs that need no network: `davtest.SearchIgnoresFilter` and
+  `davtest.MoveRewritesUID`, with `TestSearchSiftsWhatAServerDoesNotFilter`
+  and `TestMoveWhereTheServerChangesTheUID`.
+- The live tests no longer assume the address, the name or the identifier a
+  server gives a record: they look for what is written in it, take both
+  endings of a move, and a decode that met a redirect now says where it went.
+
 ## v0.0.78 — 2026-09-16
 
 Copies the Typecase mockup through plan 1 step 5: inline `style=` is gone

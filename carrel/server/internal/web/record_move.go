@@ -253,12 +253,28 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 		return
 	}
 	c.noteWrite(obj.Path, nil)
-	if got, err := dest.find(ctx, uid); err == nil {
-		dest.noteWrite(got.Path, got)
-	} else {
+	got, err := dest.find(ctx, uid)
+	if err != nil {
+		// The record is there, but not under the identity it had: SoGo gives a
+		// card moved into another book a UID of its own (docs/servers.md,
+		// SV-18). That identifier is what S-16 counts duplicates by and what
+		// S-18 promises not to change, so the person is told — sending them to
+		// an address that no longer opens would be the worse answer.
 		obj.Path, obj.ETag = dst, ""
 		dest.noteWrite(dst, obj)
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, view.Notice{
+			Role:  view.NoticeAlert,
+			Title: "Moved, but the server gave it another identity",
+			Body: text("The " + c.spec.noun + " is in " + collectionLabel(dest.col) + " with everything it held, but that server " +
+				"replaced its UID, so the address it had no longer opens it. Duplicates are matched by that identifier."),
+			Actions: []view.Action{{
+				ID: "collection.open", Label: text("Open " + collectionLabel(dest.col)),
+				Href: s.route(dest.listPath()), Method: "GET", Enabled: true,
+			}},
+		}))
+		return
 	}
+	dest.noteWrite(got.Path, got)
 	s.redirect(w, r, dest.recordPath(uid))
 }
 

@@ -215,6 +215,30 @@ func TestMoveKeepsTheOriginalWhenTheCopyLoses(t *testing.T) {
 }
 
 // A record changed after it was read stays, and so does the copy.
+// docs/servers.md, SV-18: a server that gives a moved card a UID of its own.
+// The record is there and nothing in it is lost, but the address it had no
+// longer opens it — and UID is what duplicates are matched by (S-16), so this
+// is said out loud instead of a redirect into nothing.
+func TestMoveWhereTheServerChangesTheUID(t *testing.T) {
+	f := newMoveFixture(t)
+	f.srv.MoveRewritesUID = true
+	page := decode[view.ContactPage](t, f.h.do(postConfirm(t, f, sheetFor(f, peopleBook, "ada", f.id, friendsBook, false))))
+	if !hasNotice(page.Notices, "Moved, but the server gave it another identity") {
+		t.Fatalf("notices = %+v", page.Notices)
+	}
+	var opens string
+	for _, n := range page.Notices {
+		for _, a := range n.Actions {
+			if a.ID == "collection.open" {
+				opens = a.Href
+			}
+		}
+	}
+	if opens != "/app/contacts/"+f.id+"/"+url.PathEscape(friendsBook) {
+		t.Errorf("the notice leads to %q, want the destination collection", opens)
+	}
+}
+
 func TestMoveKeepsAChangedOriginal(t *testing.T) {
 	f := newMoveFixture(t)
 	req := postConfirm(t, f, sheetFor(f, peopleBook, "ada", f.otherID, workBook, false))

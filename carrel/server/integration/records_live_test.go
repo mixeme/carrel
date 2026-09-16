@@ -117,6 +117,12 @@ func liveDecode[T any](t *testing.T, step string, rec *httptest.ResponseRecorder
 	t.Helper()
 	var v T
 	if rec.Code != http.StatusOK {
+		// Where a redirect went is the whole difference between a write that
+		// was carried out and a session that lapsed, and the body of a
+		// redirect is empty, so the header is the only evidence there is.
+		if loc := rec.Header().Get("Location"); loc != "" {
+			t.Fatalf("%s: status %d to %s:\n%s", step, rec.Code, loc, rec.Body.String())
+		}
 		t.Fatalf("%s: status %d:\n%s", step, rec.Code, rec.Body.String())
 	}
 	if err := json.Unmarshal(rec.Body.Bytes(), &v); err != nil {

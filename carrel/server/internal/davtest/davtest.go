@@ -58,6 +58,16 @@ type Server struct {
 	// the file server sees it.
 	FilesIgnoreIfNoneMatch bool
 
+	// MoveRewritesUID gives a record moved into another address book a UID of
+	// the server's own, the way SoGo does (docs/servers.md, SV-18). The name it
+	// lands under is not what the record layer keys on; the UID is.
+	MoveRewritesUID bool
+
+	// SearchIgnoresFilter answers a calendar-query with every object of the
+	// collection, whatever the text-match said, the way SoGo does
+	// (docs/servers.md, SV-16).
+	SearchIgnoresFilter bool
+
 	// RefuseUnsizedPUT answers 400 to a PUT that carries no Content-Length,
 	// the way OpenCloud behind Apache does past a few kilobytes
 	// (docs/servers.md, SV-15). It is how the rule "the length goes with the
@@ -721,10 +731,31 @@ func (s *Server) move(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	delete(s.objects, src)
-	s.objects[dst] = o
+	if s.MoveRewritesUID && isBook {
+		s.seq++
+		s.storeLocked(dst, rewriteUID(o.data, fmt.Sprintf("sv18-%d", s.seq)))
+	} else {
+		s.objects[dst] = o
+	}
 	s.ctags[parent(src)]++
 	s.ctags[parent(dst)]++
 	w.WriteHeader(http.StatusCreated)
+}
+
+// rewriteUID puts another identifier in a record, leaving everything else as
+// it was — what SV-18 does to a card on its way to another book.
+func rewriteUID(data []byte, uid string) []byte {
+	lines := strings.Split(string(data), "\n")
+	for i, line := range lines {
+		if !strings.HasPrefix(line, "UID:") {
+			continue
+		}
+		lines[i] = "UID:" + uid
+		if strings.HasSuffix(line, "\r") {
+			lines[i] += "\r"
+		}
+	}
+	return []byte(strings.Join(lines, "\n"))
 }
 
 func (s *Server) remove(p string) error {
@@ -843,6 +874,11 @@ func (b calBackend) QueryCalendarObjects(ctx context.Context, p string, q *calda
 	all, err := b.ListCalendarObjects(ctx, p, nil)
 	if err != nil {
 		return nil, err
+	}
+	if b.s.SearchIgnoresFilter {
+		// docs/servers.md, SV-16: SoGo answers a text-match with the whole
+		// collection, so the search has to happen on this side.
+		return all, nil
 	}
 	if ctx.Value(foldCase{}) == nil {
 		return caldav.Filter(q, all)

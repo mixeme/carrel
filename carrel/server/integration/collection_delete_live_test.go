@@ -86,7 +86,10 @@ func runCollectionDelete(t *testing.T, endpoint, user, pass string) {
 		}
 		mustHave(t, "file before deleting", body, "UID:"+series, "RRULE:FREQ=WEEKLY;COUNT=3", "RECURRENCE-ID:20261013T100000Z", "UID:"+task, "X-CUSTOM:keep-me")
 
-		liveDeleteByName(ctx, t, app, client, connID, cal.Path, sheet, "Carrel S-12.4")
+		// The name is the server's to keep: SoGo names a collection after its
+		// address and ignores the displayname of the create (SV-17). The sheet
+		// asks for what the catalog holds, which is what the person sees.
+		liveDeleteByName(ctx, t, app, client, connID, cal.Path, sheet, cal.Name)
 	})
 
 	t.Run("contacts", func(t *testing.T) {
@@ -100,7 +103,7 @@ func runCollectionDelete(t *testing.T, endpoint, user, pass string) {
 		body := liveDownload(t, app, sheet.Export.Href, ".vcf")
 		mustHave(t, "file before deleting", body, "UID:"+ada, "FN:Ada Lovelace", "X-CUSTOM:keep-me")
 
-		liveDeleteByName(ctx, t, app, client, connID, book.Path, sheet, "Carrel S-12.4 book")
+		liveDeleteByName(ctx, t, app, client, connID, book.Path, sheet, book.Name)
 	})
 }
 
@@ -128,7 +131,10 @@ func liveDeleteByName(ctx context.Context, t *testing.T, app *liveApp, client *d
 	}
 	confirm := liveAction(t, sheet.Actions, "collection.delete.confirm")
 
-	again := liveDecode[view.CollectionDeleteSheet](t, "wrong name", app.post(confirm, url.Values{"name": {strings.ToLower(name)}}))
+	// A wrong name has to be wrong on every server: lower case is not, because
+	// SoGo names a collection after its address and that is lower case already
+	// (docs/servers.md, SV-17).
+	again := liveDecode[view.CollectionDeleteSheet](t, "wrong name", app.post(confirm, url.Values{"name": {name + " (not this one)"}}))
 	if again.Subject != sheet.Subject {
 		t.Errorf("a wrong name answered %+v", again)
 	}

@@ -222,7 +222,8 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, davRefusal(createRefusal, conn, method, path, err)))
 		return
 	}
-	col := sealed.Collection{Path: path, Name: f.name, Kinds: kinds, Colour: f.colour, Components: f.components}
+	name := s.settleName(r.Context(), client, path, f.name)
+	col := sealed.Collection{Path: path, Name: name, Kinds: kinds, Colour: f.colour, Components: f.components}
 	if err := s.users.AddCollection(sess.AccountID(), key, conn.ID, col); err != nil {
 		// The server holds it and the catalog does not: take it back, so a
 		// failure leaves nothing behind (S-12.2).
@@ -231,6 +232,39 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.redirect(w, r, "/app/"+segmentOf(kinds[0])+"/"+conn.ID+"/"+url.PathEscape(path))
+}
+
+// settleName is the name the collection ends up with. A create carries it, but
+// not every server takes it: SoGo names a new address book after its address
+// and ignores the displayname of the MKCOL (docs/servers.md, SV-17). So the
+// name is read back, sent once more on its own when it differs, and read again
+// — and what the catalog keeps is what the server shows, because that is the
+// name a person sees and types to delete it (S-12.4).
+func (s *Server) settleName(ctx context.Context, client *dav.Client, path, want string) string {
+	got := collectionDisplayName(ctx, client, path)
+	if got == "" || got == want {
+		return want
+	}
+	if err := client.PropPatch(ctx, path, []dav.Prop{{Name: propDisplayName, Value: dav.TextValue(want)}}, nil); err != nil {
+		return got
+	}
+	if after := collectionDisplayName(ctx, client, path); after != "" {
+		return after
+	}
+	return want
+}
+
+func collectionDisplayName(ctx context.Context, client *dav.Client, path string) string {
+	ms, err := client.PropFind(ctx, path, dav.DepthZero, []xml.Name{propDisplayName})
+	if err != nil {
+		return ""
+	}
+	for _, resp := range ms.Responses {
+		if v := propText(resp.Props[propDisplayName]); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // createRequest is the one request that makes the collection: MKCALENDAR with

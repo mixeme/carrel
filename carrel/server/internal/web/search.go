@@ -593,8 +593,12 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 		objs, _, err = c.cal.Search(ctx, c.col.Path, component, q.Text)
 	}
 	var note error
-	if errors.Is(err, cal.ErrLatinCaseOnly) {
+	switch {
+	case errors.Is(err, cal.ErrLatinCaseOnly):
 		note = fmt.Errorf("%w: the server ignores letter case in Latin script only", fanout.ErrIncomplete)
+		err = nil
+	case errors.Is(err, cal.ErrServerDoesNotFilter):
+		note = fmt.Errorf("%w: this server does not search its calendars, so Carrel sifted its answer", fanout.ErrIncomplete)
 		err = nil
 	}
 	if err != nil {
