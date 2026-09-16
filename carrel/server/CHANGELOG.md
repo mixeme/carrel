@@ -5,6 +5,18 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.78 — 2026-09-16
+
+Copies the Typecase mockup through plan 1 step 5: inline `style=` is gone
+from frames; one-off layout is `--rN` and `tc-table--fit`. The Р-13
+visible list is approved.
+
+### For consumers
+
+Nothing in the running server. Open
+[carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
+current mockup; fonts are in `docs/visual/fonts/`.
+
 ## v0.0.77 — 2026-09-16
 
 Attachments have run on live servers, and a read that meets a connection the
