@@ -31,6 +31,15 @@ var (
 	propSyncToken     = xml.Name{Space: "DAV:", Local: "sync-token"}
 	propPrivileges    = xml.Name{Space: "DAV:", Local: "current-user-privilege-set"}
 
+	// A server with a trash bin keeps a deleted calendar at its address, among
+	// the children of the home, and calls it a calendar to any request that
+	// does not ask about the deletion: Nextcloud answers its own deleted-at
+	// only when asked (docs/servers.md, SV-30). Asking costs nothing — it
+	// rides in the PROPFIND that already reads colour and the change tag — and
+	// without it a collection the person deleted comes back at the next
+	// discovery (S-6).
+	propDeletedAt = xml.Name{Space: "http://nextcloud.com/ns", Local: "deleted-at"}
+
 	// Asked of the entered address itself when there is no principal: the
 	// handed-over link may be one collection rather than a home (S-6).
 	propResourceType = xml.Name{Space: "DAV:", Local: "resourcetype"}
@@ -171,7 +180,8 @@ func withHomeProps(ctx context.Context, client *dav.Client, home, label string, 
 	if len(cols) == 0 {
 		return cols
 	}
-	ms, err := client.PropFind(ctx, home, dav.DepthOne, []xml.Name{propCalendarColor, propGetCTag, propSyncToken, propPrivileges})
+	ms, err := client.PropFind(ctx, home, dav.DepthOne,
+		[]xml.Name{propCalendarColor, propGetCTag, propSyncToken, propPrivileges, propDeletedAt})
 	if err != nil {
 		add(stepProperties, label+": "+formatErr(err), false)
 		return cols
@@ -180,10 +190,18 @@ func withHomeProps(ctx context.Context, client *dav.Client, home, label string, 
 	for _, r := range ms.Responses {
 		byPath[hrefKey(r.Href)] = r
 	}
-	var coloured int
+	var coloured, deleted int
+	kept := cols[:0]
 	for i := range cols {
 		r, ok := byPath[hrefKey(cols[i].Path)]
 		if !ok {
+			kept = append(kept, cols[i])
+			continue
+		}
+		if strings.TrimSpace(string(r.Props[propDeletedAt])) != "" {
+			// In the server's own trash bin: not a collection of this account
+			// any more, whatever its resource type still says (SV-30).
+			deleted++
 			continue
 		}
 		if c := strings.TrimSpace(string(r.Props[propCalendarColor])); c != "" {
@@ -198,9 +216,14 @@ func withHomeProps(ctx context.Context, client *dav.Client, home, label string, 
 		if canWrite, known := writable(r.Props[propPrivileges]); known {
 			cols[i].ReadOnly = !canWrite
 		}
+		kept = append(kept, cols[i])
 	}
-	add(stepProperties, fmt.Sprintf("%s: %d of %d with colour", label, coloured, len(cols)), true)
-	return cols
+	note := fmt.Sprintf("%s: %d of %d with colour", label, coloured, len(cols))
+	if deleted > 0 {
+		note += fmt.Sprintf("; %d in the server's trash bin, left out", deleted)
+	}
+	add(stepProperties, note, true)
+	return kept
 }
 
 // writable reads a current-user-privilege-set. Known is false when the server

@@ -187,6 +187,31 @@ func liveCardByUID(ctx context.Context, t *testing.T, client *dav.Client, collec
 // UID the server ended up giving it. A server may re-identify a record it was
 // handed (SV-18), so what is written in the record is the only thing a test
 // can look for; neither the address nor the identifier is Carrel's to assume.
+// liveHasRecord walks a collection and answers with the address and body of
+// the first resource that matches, or two empty strings. Unlike
+// liveRecordWhere it does not fail: a caller may be proving absence, and
+// absence is not a broken test.
+func liveHasRecord(ctx context.Context, t *testing.T, client *dav.Client, collection string, match func(string) bool) (href, body string) {
+	t.Helper()
+	ms, err := client.PropFind(ctx, collection, dav.DepthOne, []xml.Name{{Space: "DAV:", Local: "getetag"}})
+	if err != nil {
+		t.Fatalf("PROPFIND %s: %v", collection, err)
+	}
+	for _, resp := range ms.Responses {
+		at := resp.Href
+		if u, err := url.Parse(at); err == nil {
+			at = u.Path
+		}
+		if strings.HasSuffix(at, "/") {
+			continue
+		}
+		if b, _ := rawBody(ctx, t, client, at); match(b) {
+			return at, b
+		}
+	}
+	return "", ""
+}
+
 func liveRecordWhere(ctx context.Context, t *testing.T, client *dav.Client, collection, what string, match func(string) bool) (string, string) {
 	t.Helper()
 	ms, err := client.PropFind(ctx, collection, dav.DepthOne, []xml.Name{{Space: "DAV:", Local: "getetag"}})

@@ -179,6 +179,26 @@ func credEnv(text string) map[string]string {
 	set("CARREL_GOOGLE_CALDAV_USER", google.get("login"))
 	set("CARREL_GOOGLE_CALDAV_PASS", gpass)
 
+	// Nextcloud on shared hosting: login and password of the account, and one
+	// address — /remote.php/dav/, from which discovery walks to both homes.
+	// sabre/dav underneath, like Baikal, so the same quirks are expected
+	// (SV-1, SV-2) on a different deployment.
+	nc := find("nextcloud", "")
+	set("CARREL_NEXTCLOUD_URL", credURL(nc.get("url")))
+	set("CARREL_NEXTCLOUD_USER", nc.get("login"))
+	set("CARREL_NEXTCLOUD_PASS", nc.get("password"))
+
+	// iCloud: contacts and calendars on hosts of their own, as with Google,
+	// and an app password that Apple prints in groups of four.
+	icloud := find("icloud", "")
+	ipass := strings.ReplaceAll(icloud.get("app password, carrel", "app password"), " ", "")
+	set("CARREL_ICLOUD_CARDDAV_URL", credURL(pickAddress(icloud, "carddav", "contacts.icloud")))
+	set("CARREL_ICLOUD_CARDDAV_USER", icloud.get("login"))
+	set("CARREL_ICLOUD_CARDDAV_PASS", ipass)
+	set("CARREL_ICLOUD_CALDAV_URL", credURL(pickAddress(icloud, "caldav", "caldav.icloud")))
+	set("CARREL_ICLOUD_CALDAV_USER", icloud.get("login"))
+	set("CARREL_ICLOUD_CALDAV_PASS", ipass)
+
 	// SoGo names one calendar and one address book of a mailbox account.
 	sogo := find("sogo", "")
 	set("CARREL_SOGO_CAL_URL", sogo.get("caldav"))

@@ -124,6 +124,7 @@ type Server struct {
 	calendars map[string]caldav.Calendar
 	books     map[string]carddav.AddressBook
 	colours   map[string]string
+	trashed   map[string]string // collection -> the time the server says it was deleted
 	ctags     map[string]int
 	objects   map[string]object
 	refuse    map[string]refusal
@@ -151,6 +152,7 @@ func New(t testing.TB) *Server {
 		calendars: make(map[string]caldav.Calendar),
 		books:     make(map[string]carddav.AddressBook),
 		colours:   make(map[string]string),
+		trashed:   make(map[string]string),
 		ctags:     make(map[string]int),
 		objects:   make(map[string]object),
 		sent:      make(map[string][]byte),
@@ -262,6 +264,16 @@ func (s *Server) SetColour(collection, colour string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.colours[collectionKey(collection)] = colour
+}
+
+// Trash puts a collection in the server's own trash bin the way Nextcloud
+// does (docs/servers.md, SV-30): it stays at its address, stays among the
+// children of the home, and still calls itself a calendar — only a request
+// that asks about the deletion is told, through nc:deleted-at.
+func (s *Server) Trash(collection, when string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.trashed[collectionKey(collection)] = when
 }
 
 // RemoveCollection deletes a calendar or an address book with everything in
@@ -557,6 +569,9 @@ func (s *Server) homeProps(w http.ResponseWriter, home string) {
 		if hasColour {
 			b.WriteString(`<I:calendar-color>` + escape(colour) + `</I:calendar-color>`)
 		}
+		if when, trashed := s.trashed[p]; trashed {
+			b.WriteString(`<NC:deleted-at>` + escape(when) + `</NC:deleted-at>`)
+		}
 		b.WriteString(`</D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat>`)
 		if !hasColour {
 			b.WriteString(`<D:propstat><D:prop><I:calendar-color/></D:prop><D:status>HTTP/1.1 404 Not Found</D:status></D:propstat>`)
@@ -567,8 +582,8 @@ func (s *Server) homeProps(w http.ResponseWriter, home string) {
 	w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
 	w.WriteHeader(http.StatusMultiStatus)
 	_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>`+
-		`<D:multistatus xmlns:D="DAV:" xmlns:CS="http://calendarserver.org/ns/" xmlns:I="http://apple.com/ns/ical/">`+
-		b.String()+`</D:multistatus>`)
+		`<D:multistatus xmlns:D="DAV:" xmlns:CS="http://calendarserver.org/ns/" xmlns:I="http://apple.com/ns/ical/" `+
+		`xmlns:NC="http://nextcloud.com/ns">`+b.String()+`</D:multistatus>`)
 }
 
 // collectionProps answers the depth-0 PROPFIND of one collection for its

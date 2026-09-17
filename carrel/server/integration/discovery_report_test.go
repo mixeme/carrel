@@ -53,6 +53,9 @@ func liveServers() []liveServer {
 		{"sogo-contacts", env("CARREL_SOGO_CARD_URL"), env("CARREL_SOGO_USER"), env("CARREL_SOGO_PASS")},
 		{"google-carddav", env("CARREL_GOOGLE_CARDDAV_URL"), env("CARREL_GOOGLE_CARDDAV_USER"), env("CARREL_GOOGLE_CARDDAV_PASS")},
 		{"google-caldav", env("CARREL_GOOGLE_CALDAV_URL"), env("CARREL_GOOGLE_CALDAV_USER"), env("CARREL_GOOGLE_CALDAV_PASS")},
+		{"nextcloud", env("CARREL_NEXTCLOUD_URL"), env("CARREL_NEXTCLOUD_USER"), env("CARREL_NEXTCLOUD_PASS")},
+		{"icloud-carddav", env("CARREL_ICLOUD_CARDDAV_URL"), env("CARREL_ICLOUD_CARDDAV_USER"), env("CARREL_ICLOUD_CARDDAV_PASS")},
+		{"icloud-caldav", env("CARREL_ICLOUD_CALDAV_URL"), env("CARREL_ICLOUD_CALDAV_USER"), env("CARREL_ICLOUD_CALDAV_PASS")},
 	}
 	if u := env("CARREL_RADICALE_URL"); u != "" {
 		out = append(out, liveServer{"radicale", u, radicaleUser, radicalePass})

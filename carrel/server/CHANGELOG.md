@@ -5,6 +5,61 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.89 — 2026-09-18
+
+Nextcloud and iCloud are in the live set.
+
+### For consumers
+
+- **Nextcloud takes the whole harness.** Records, collections, search, a move,
+  import and export, a collection deleted by name, a vCard 4.0 edit and a
+  photo, all on Nextcloud 28.0.3 behind nginx on shared hosting. sabre/dav
+  underneath, like Baikal, so the interest is the deployment: this account's
+  principal path holds spaces ("MIX_1 for tests"), so every address in it
+  arrives percent-encoded — the shape that breaks a client which builds
+  addresses by hand. Nothing needed changing.
+- **iCloud contacts work.** A card is created from the page, opens at the
+  address the page gives, takes an edit of one field with the others untouched,
+  and deletes. iCloud keeps a card exactly as it was sent — version, UID, name
+  parts, a foreign property — and answers `addressbook-query` with and without
+  a filter. No workaround was needed for any of it.
+- **A calendar deleted on Nextcloud stays deleted.** Nextcloud puts it in its
+  own trash bin, where it keeps its address, keeps its place among the children
+  of the calendar home, and calls itself a calendar to any request that does not
+  ask about the deletion. So the person deleted a calendar and the next
+  discovery offered it back, alive. Discovery now asks about the deletion — one
+  more property in the PROPFIND it already makes — and leaves out what the
+  server says is deleted, saying on the trace how many (`docs/servers.md`,
+  SV-30).
+- **iCloud calendars do not work, and not because of Carrel.** The calendar
+  host refuses the same Apple ID and app password that the contacts host
+  accepts: 401 on every address and method (`docs/servers.md`, SV-28). The owner
+  confirmed it: the account is a limited one, and Apple wants a sign-in from an
+  Apple device before it will turn the calendar on. The connection says the
+  refusal plainly and is not created.
+- **iCloud's only address book has no name.** The server sends no
+  `displayname` at all, so the book is labelled by the last segment of its
+  address — "card" (SV-29). That is the address, not an invention; a friendlier
+  fallback is an open question for the owner.
+
+### Included
+
+- `integration.nextcloudConfig` with the eight harness entry points, and
+  `integration.icloudCardConfig` with `TestICloudContactLifecycle`.
+- `integration.liveHasRecord`: the address and body of the first record that
+  matches, or nothing — a live test may be proving absence, and absence is not
+  a broken test.
+- Both servers in `liveServers` for the discovery report, both in the
+  credentials mapping, and Google, Nextcloud and iCloud now in the shapes
+  `TestCredentialsFileIsRead` holds.
+- `discover.propDeletedAt` and `davtest.Trash`, with
+  `TestDiscoverySkipsWhatTheServerPutInItsTrashBin`. S-6 states the rule: a
+  collection the server considers deleted is not a collection.
+- The live check after a collection delete no longer demands a 404: the
+  collection either goes, or stays and stops being a collection of its kind.
+  That covers all three behaviours — Baikal and SoGo delete outright, Nextcloud
+  hides in a trash bin.
+
 ## v0.0.88 — 2026-09-17
 
 A name written shorter is the same name, and no longer reported as a loss.

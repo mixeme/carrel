@@ -155,4 +155,8 @@ func livePathOf(t *testing.T, loc, prefix string) string {
 var (
 	displayNameProp    = xml.Name{Space: "DAV:", Local: "displayname"}
 	calendarColourProp = xml.Name{Space: "http://apple.com/ns/ical/", Local: "calendar-color"}
+	resourceTypeProp   = xml.Name{Space: "DAV:", Local: "resourcetype"}
+	// A server with a trash bin tells the truth about a deleted collection
+	// only when asked about it (docs/servers.md, SV-30).
+	deletedAtProp = xml.Name{Space: "http://nextcloud.com/ns", Local: "deleted-at"}
 )

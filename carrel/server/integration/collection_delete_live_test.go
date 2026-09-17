@@ -143,8 +143,30 @@ func liveDeleteByName(ctx context.Context, t *testing.T, app *liveApp, client *d
 	if loc := redirected(t, "delete", app.post(confirm, url.Values{"name": {" " + name + " "}})); loc != "/app/settings/connections" {
 		t.Errorf("delete went to %q", loc)
 	}
-	if _, err := client.PropFind(ctx, path, dav.DepthZero, []xml.Name{displayNameProp}); !dav.IsStatus(err, http.StatusNotFound) {
-		t.Errorf("after delete PROPFIND = %v, want 404", err)
+	// The collection is gone from the server: either the address answers 404,
+	// or the server says it is deleted. Nextcloud keeps a deleted calendar at
+	// its address, among the children of the home, and calls it a calendar to
+	// any request that does not ask about the deletion — so the question is
+	// asked here the way discovery asks it, with nc:deleted-at beside the
+	// resource type (docs/servers.md, SV-30). An address book on the same
+	// server is deleted outright.
+	ms, err := client.PropFind(ctx, path, dav.DepthZero, []xml.Name{resourceTypeProp, deletedAtProp})
+	switch {
+	case dav.IsStatus(err, http.StatusNotFound):
+	case err != nil:
+		t.Errorf("after delete PROPFIND = %v, want 404 or a collection the server calls deleted", err)
+	default:
+		var kind, when string
+		for _, resp := range ms.Responses {
+			kind += string(resp.Props[resourceTypeProp])
+			when += strings.TrimSpace(string(resp.Props[deletedAtProp]))
+		}
+		stillOfItsKind := strings.Contains(kind, ":calendar/") || strings.Contains(kind, ":addressbook/") ||
+			strings.Contains(kind, "<calendar ") || strings.Contains(kind, "<addressbook ")
+		if when == "" && stillOfItsKind {
+			t.Errorf("after delete the address is still a collection of its kind and says nothing about a deletion: %s", kind)
+		}
+		t.Logf("the address still answers: resourcetype %s, deleted at %q", kind, when)
 	}
 	if _, ok := liveCatalog(t, app).Collection(connID, path); ok {
 		t.Error("the catalog still holds it")

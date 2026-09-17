@@ -56,6 +56,31 @@ password: sogo-pass
 SMTP/IMAP server: mc.example.org
 CalDAV: https://sogo.example.org/SOGo/dav/carrel@example.org/Calendar/personal/
 CardDAV: https://sogo.example.org/SOGo/dav/carrel@example.org/Contacts/personal/
+
+# Google
+login: someone@gmail.com
+app password, CarrelDAV: abcd efgh ijkl mnop
+
+Проверено: оба адреса ниже отвечают, OAuth не нужен.
+
+CardDAV: https://www.googleapis.com/carddav/v1/principals/
+CalDAV: https://www.google.com/calendar/dav/
+
+не работает, 401 loginRequired: https://apidata.googleusercontent.com/caldav/v2/
+
+https://calendar.google.com/calendar/ical/someone/private-feed/basic.ics
+
+# Nextcloud, CardDAV/CalDAV/WebDAV
+login: nc-user
+password: nc-pass
+https://nextcloud.example.org/remote.php/dav/
+
+# iCloud
+login: robot@example.org
+app password, Carrel: qrst uvwx yzab cdef
+
+CardDAV: https://contacts.icloud.com
+CalDAV: https://caldav.icloud.com
 `
 
 func TestCredentialsFileIsRead(t *testing.T) {
@@ -91,6 +116,31 @@ func TestCredentialsFileIsRead(t *testing.T) {
 		"CARREL_SOGO_CARD_URL": "https://sogo.example.org/SOGo/dav/carrel@example.org/Contacts/personal/",
 		"CARREL_SOGO_USER":     "carrel@example.org",
 		"CARREL_SOGO_PASS":     "sogo-pass",
+
+		// Google names its protocols under keys of their own, and the CardDAV
+		// prefix is completed with the login: the prefix alone answers 404
+		// (docs/servers.md, SV-24). The app password loses its spaces, and the
+		// .ics feed on its own line is not taken for a server.
+		"CARREL_GOOGLE_CARDDAV_URL":  "https://www.googleapis.com/carddav/v1/principals/someone@gmail.com/",
+		"CARREL_GOOGLE_CARDDAV_USER": "someone@gmail.com",
+		"CARREL_GOOGLE_CARDDAV_PASS": "abcdefghijklmnop",
+		"CARREL_GOOGLE_CALDAV_URL":   "https://www.google.com/calendar/dav/",
+		"CARREL_GOOGLE_CALDAV_USER":  "someone@gmail.com",
+		"CARREL_GOOGLE_CALDAV_PASS":  "abcdefghijklmnop",
+
+		// Nextcloud: a section whose name carries the protocols after a comma,
+		// and one bare address.
+		"CARREL_NEXTCLOUD_URL":  "https://nextcloud.example.org/remote.php/dav/",
+		"CARREL_NEXTCLOUD_USER": "nc-user",
+		"CARREL_NEXTCLOUD_PASS": "nc-pass",
+
+		// iCloud: two hosts, one app password, spaces dropped.
+		"CARREL_ICLOUD_CARDDAV_URL":  "https://contacts.icloud.com",
+		"CARREL_ICLOUD_CARDDAV_USER": "robot@example.org",
+		"CARREL_ICLOUD_CARDDAV_PASS": "qrstuvwxyzabcdef",
+		"CARREL_ICLOUD_CALDAV_URL":   "https://caldav.icloud.com",
+		"CARREL_ICLOUD_CALDAV_USER":  "robot@example.org",
+		"CARREL_ICLOUD_CALDAV_PASS":  "qrstuvwxyzabcdef",
 	}
 	for key, w := range want {
 		if got[key] != w {
@@ -110,7 +160,8 @@ func TestCredentialsFileIsRead(t *testing.T) {
 // instead of dialling an empty address.
 func TestMissingSectionSetsNothing(t *testing.T) {
 	got := credEnv("# Baikal DAV\nhttps://baikal.example.org/dav.php\nlogin: u\npassword: p\n")
-	for _, key := range []string{"CARREL_SFTPGO_URL", "CARREL_SOGO_CAL_URL", "CARREL_MAILRU_URL", "CARREL_OPENCLOUD_URL"} {
+	for _, key := range []string{"CARREL_SFTPGO_URL", "CARREL_SOGO_CAL_URL", "CARREL_MAILRU_URL", "CARREL_OPENCLOUD_URL",
+		"CARREL_NEXTCLOUD_URL", "CARREL_ICLOUD_CARDDAV_URL", "CARREL_GOOGLE_CARDDAV_URL"} {
 		if v, ok := got[key]; ok {
 			t.Errorf("%s = %q, want nothing", key, v)
 		}

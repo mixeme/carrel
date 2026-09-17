@@ -2,6 +2,7 @@ package discover
 
 import (
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -72,5 +73,47 @@ func TestDiscoveryFillsTheCatalog(t *testing.T) {
 	}
 	if !traceHas(trace, stepProperties, view.CheckOK) {
 		t.Error("the properties step belongs on the trace")
+	}
+}
+
+// docs/servers.md, SV-30: a server with a trash bin keeps a deleted calendar at
+// its address, among the children of the home, and calls it a calendar to any
+// request that does not ask about the deletion. Discovery asks, in the
+// PROPFIND it already makes, and leaves the trashed one out — otherwise a
+// collection the person deleted comes back at the next discovery (S-6). The
+// trace says how many were left out, because a collection quietly missing is
+// its own kind of lie.
+func TestDiscoverySkipsWhatTheServerPutInItsTrashBin(t *testing.T) {
+	srv := davtest.New(t)
+	live := davtest.CalendarHome + "live/"
+	gone := davtest.CalendarHome + "gone/"
+	srv.AddCalendar(caldav.Calendar{Path: live, Name: "Live"})
+	srv.AddCalendar(caldav.Calendar{Path: gone, Name: "Deleted last week"})
+	srv.Trash(gone, "2026-09-17T21:53:30+00:00")
+
+	res, trace, err := Run(t.Context(), loopbackGuard(), srv.URL, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range res.Collections {
+		if c.Path == gone {
+			t.Errorf("the trashed calendar is in the catalog: %+v", c)
+		}
+	}
+	var found bool
+	for _, c := range res.Collections {
+		found = found || c.Path == live
+	}
+	if !found {
+		t.Fatalf("collections = %+v, want %s", res.Collections, live)
+	}
+	var said string
+	for _, st := range trace.Steps {
+		if st.Name == stepProperties {
+			said = string(st.Detail)
+		}
+	}
+	if !strings.Contains(said, "trash bin") {
+		t.Errorf("the trace does not say what was left out: %q", said)
 	}
 }
