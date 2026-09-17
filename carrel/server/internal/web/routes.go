@@ -37,8 +37,6 @@ func (s *Server) registerRoutes() {
 	s.handle("GET /app/search/progress/{task}/poll", (*Server).getSearchProgressPoll)
 	s.handle("POST /app/search/progress/{task}/retry", (*Server).postSearchProgressRetry)
 	s.handle("POST /app/search/progress/{task}/cancel", (*Server).postSearchProgressCancel)
-	s.handle("GET /app/notes/quick", (*Server).getQuickNote)
-	s.handle("POST /app/notes/quick", (*Server).postQuickNote)
 	s.handle("GET /app/duplicates", (*Server).getDuplicates)
 	s.handle("POST /app/duplicates/decide", (*Server).postDuplicatesDecide)
 	s.handle("GET /app/duplicates/merge", (*Server).getDuplicatesMerge)
@@ -140,6 +138,7 @@ func registerKindRoutes(s *Server, kind string) {
 	s.handle("GET /app/"+kind+"/{account}/{col}/export", kindExportHandler(kind))
 	s.handle("GET /app/"+kind+"/{account}/{col}/new", kindNewGetHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/new", kindNewPostHandler(kind))
+	s.handle("GET /app/"+kind+"/quick", kindQuickEntryHandler(kind))
 	s.handle("GET /app/"+kind+"/{account}/{col}/new/quick", kindQuickGetHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/new/quick", kindQuickPostHandler(kind))
 }
@@ -231,6 +230,12 @@ func kindNewGetHandler(kind string) handler {
 func kindNewPostHandler(kind string) handler {
 	return func(s *Server, w http.ResponseWriter, r *http.Request) {
 		s.postKindNew(w, r, kind)
+	}
+}
+
+func kindQuickEntryHandler(kind string) handler {
+	return func(s *Server, w http.ResponseWriter, r *http.Request) {
+		s.getKindQuickEntry(w, r, kind)
 	}
 }
 

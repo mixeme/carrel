@@ -389,6 +389,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — |
 | `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NoteDoc` |
 | `/app/{kind}/{account}/{col}/new/quick` | GET, POST | вход | лист, редирект | `NewSheet`; POST сохраняет запись, «Open the card» переносит набранное в `/new` телом запроса |
+| `/app/{kind}/quick` | GET | вход | лист | `NewSheet` — вход из шапки: на последней использованной коллекции рода, а пока её нет — только выбор «куда» |
 
 **Единый вид живёт внутри раздела.** `/app/{kind}` — это первая строка рейла,
 «все отмеченные коллекции этого рода»: Combined address book, Combined calendar,

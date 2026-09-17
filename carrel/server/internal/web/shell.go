@@ -18,7 +18,7 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 				Jump:    nil,
 				Whole:   nil,
 			},
-			NewMenu: nil,
+			NewMenu: s.newMenu(sess),
 			User:    nil,
 			Refresh: view.Refresh{},
 		},
@@ -98,4 +98,36 @@ func (s *Server) anonPlainForm(w http.ResponseWriter, r *http.Request, action, m
 	token := s.issueAnonymousCSRF(w, r)
 	all := append([]view.FormRow{csrfFormRow(token)}, rows...)
 	return s.plainForm(action, method, all...)
+}
+
+// newMenu is the create menu of the top bar: one item per kind, each opening
+// the quick sheet from the shell (U-6.16). The sheet itself decides where the
+// record goes — the collection the last one was created in, or a question when
+// there is none — so the menu does not need to know about collections.
+// Publishing a file and writing mail belong here too and are not built yet
+// (C-6), so they are absent rather than shown dead.
+func (s *Server) newMenu(sess *session.Session) []view.MenuItem {
+	if sess == nil {
+		return nil
+	}
+	kinds := []struct {
+		segment string
+		label   string
+	}{
+		{"contacts", "Contact"},
+		{"calendar", "Event"},
+		{"tasks", "Task"},
+		{"notes", "Note"},
+	}
+	out := make([]view.MenuItem, 0, len(kinds))
+	for _, k := range kinds {
+		out = append(out, view.MenuItem{Action: view.Action{
+			ID:      "new." + k.segment,
+			Label:   text(k.label),
+			Href:    s.route("/app/" + k.segment + "/quick"),
+			Method:  "GET",
+			Enabled: true,
+		}})
+	}
+	return out
 }

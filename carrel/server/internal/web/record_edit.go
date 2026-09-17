@@ -14,6 +14,7 @@ import (
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -1090,6 +1091,54 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 	}
 }
 
+// getKindQuickEntry is the way in from the shell, where no collection is known
+// (U-6.16). It opens the sheet on the collection a record of this kind was
+// last created in — the person's own last choice, not a guess. When there is
+// none, or it is gone or read-only now, the sheet asks where first and shows
+// no fields: filling in a form with nowhere to put it helps nobody.
+func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind string) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	spec, known := recordKinds[kind]
+	if !known {
+		s.notFound(w, r)
+		return
+	}
+	blob := s.catalogOf(sess)
+	writable := func(col sealed.Collection) bool {
+		return !col.Gone && !col.ReadOnly && col.Has(spec.kind)
+	}
+	if last, remembered := blob.LastFor(spec.kind); remembered {
+		if col, found := blob.Collection(last.AccountID, last.Path); found && writable(col) {
+			if c, made := s.collectionOf(sess, spec, last.AccountID, last.Path); made {
+				s.redirect(w, r, c.listPath()+"/new/quick")
+				return
+			}
+		}
+	}
+	for _, conn := range blob.Connections {
+		for _, col := range blob.CollectionsOf(conn.ID) {
+			if !writable(col) {
+				continue
+			}
+			c, made := s.collectionOf(sess, spec, conn.ID, col.Path)
+			if !made {
+				continue
+			}
+			sheet := s.newSheet(c, true)
+			if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
+				_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+				return
+			}
+			s.writePage(w, r, http.StatusOK, sheet)
+			return
+		}
+	}
+	s.notFound(w, r)
+}
+
 // getKindQuick is the quick sheet (U-6.16): where the record goes, and the few
 // fields without which it does not exist. The full creation form lives at
 // /new; this sheet supplements it and does not replace it.
@@ -1233,6 +1282,13 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 		st.notices = []view.Notice{s.writeFailure(c, "PUT", path, err)}
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
+	}
+	// Where a record was made is where the next one starts from, when the way
+	// in named no collection (U-6.16). A failure to remember is not a failure
+	// to save: the record is written either way.
+	if key, unlocked := c.sess.DataKey(); unlocked {
+		_ = s.users.SetLastUsed(c.sess.AccountID(), key,
+			sealed.Selection{Kind: c.spec.kind, AccountID: c.col.AccountID, Path: c.col.Path})
 	}
 	s.finishWrite(w, r, c, uid, sent, c.recordPath(uid))
 }

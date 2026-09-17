@@ -345,10 +345,35 @@ func (s *Service) SetAttachmentFolder(viewerID string, dataKey [crypt.KeyLen]byt
 	})
 }
 
+// SetLastUsed remembers the collection a record of this kind was just created
+// in, so the quick sheet opened from the shell starts there (U-6.16). It
+// writes nothing to the journal: this happens on every record made, and a hint
+// for a form is not an event of the account.
+func (s *Service) SetLastUsed(viewerID string, dataKey [crypt.KeyLen]byte, sel sealed.Selection) error {
+	return s.editBlob(viewerID, dataKey, nil, func(blob *sealed.Blob) error {
+		kept := make([]sealed.Selection, 0, len(blob.LastUsed)+1)
+		for _, was := range blob.LastUsed {
+			if was.Kind != sel.Kind {
+				kept = append(kept, was)
+			}
+		}
+		blob.LastUsed = append(kept, sel)
+		return nil
+	})
+}
+
 // editCatalog opens the viewer's blob, applies edit, seals it back and
 // journals what with detail. A failed edit writes nothing.
 func (s *Service) editCatalog(viewerID string, dataKey [crypt.KeyLen]byte, what, detail string, edit func(*sealed.Blob) error) error {
 	now := s.now()
+	return s.editBlob(viewerID, dataKey, func(login string) []store.AuditEntry {
+		return []store.AuditEntry{{When: now, Who: login, What: what, Whom: login, Detail: detail}}
+	}, edit)
+}
+
+// editBlob opens the viewer's blob, applies edit and seals it back. journal
+// may be nil, for a change that is not an event of the account.
+func (s *Service) editBlob(viewerID string, dataKey [crypt.KeyLen]byte, journal func(login string) []store.AuditEntry, edit func(*sealed.Blob) error) error {
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		u := st.UserByID(viewerID)
 		if u == nil || u.Disabled {
@@ -366,7 +391,10 @@ func (s *Service) editCatalog(viewerID string, dataKey [crypt.KeyLen]byte, what,
 			return nil, err
 		}
 		u.SealedBlob = sealedBlob
-		return []store.AuditEntry{{When: now, Who: u.Login, What: what, Whom: u.Login, Detail: detail}}, nil
+		if journal == nil {
+			return nil, nil
+		}
+		return journal(u.Login), nil
 	})
 }
 

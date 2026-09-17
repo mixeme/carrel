@@ -19,6 +19,21 @@ type Blob struct {
 	Selected    []Selection  `json:"selected,omitempty"`
 	// Attachments is the folder chosen once in settings (S-20); nil until then.
 	Attachments *AttachmentFolder `json:"attachments,omitempty"`
+	// LastUsed is where a record of each kind was last created, one entry per
+	// kind. The quick sheet opened from the shell has no collection to go by
+	// and starts there (U-6.16). Empty until the first record is made, and a
+	// blob written before this field reads as empty — nothing to migrate.
+	LastUsed []Selection `json:"lastUsed,omitempty"`
+}
+
+// LastFor is where a record of this kind was last created.
+func (b Blob) LastFor(k view.Kind) (Selection, bool) {
+	for _, s := range b.LastUsed {
+		if s.Kind == k {
+			return s, true
+		}
+	}
+	return Selection{}, false
 }
 
 // AttachmentFolder is where an attachment too large for its record goes: a

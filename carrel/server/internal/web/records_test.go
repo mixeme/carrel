@@ -329,6 +329,52 @@ func TestEditContactWritesOnlyWhatChanged(t *testing.T) {
 	}
 }
 
+// U-6.16: the way in from the shell. The create menu points at it; the first
+// time there is nothing to go by, so the sheet asks where and shows no fields;
+// once a record has been made somewhere, the next one starts there — the
+// person's own last choice, remembered, not guessed.
+func TestQuickSheetFromTheShellRemembersWhereRecordsGo(t *testing.T) {
+	f := contactsFixture(t, false)
+	entry := "/app/contacts/quick"
+
+	page := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
+	if href := actionHref(t, menuActions(page.Top.NewMenu), "new.contacts"); href != entry {
+		t.Errorf("the create menu points at %q, want %q", href, entry)
+	}
+
+	// Nothing made yet: the sheet asks where, and carries no fields.
+	sheet := decode[view.NewSheet](t, f.h.do(get(entry, f.sess)))
+	if len(sheet.Form.Sets) != 0 {
+		t.Errorf("the sheet offered fields before a collection was chosen: %+v", sheet.Form)
+	}
+	if len(sheet.Target.Options) == 0 {
+		t.Fatalf("the sheet asks where, but offers nothing: %+v", sheet.Target)
+	}
+
+	// Make one through the sheet of the collection itself.
+	quick := f.path("contacts") + "/new/quick"
+	form := formFields(decode[view.NewSheet](t, f.h.do(get(quick, f.sess))).Form)
+	form.Set("fn", "Ada Lovelace")
+	if resp := f.h.do(postForm(quick, f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
+	}
+
+	// Now the way in goes straight there.
+	resp := f.h.do(get(entry, f.sess))
+	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != quick {
+		t.Fatalf("the shell entry went to %d %q, want %q", resp.Code, resp.Header().Get("Location"), quick)
+	}
+}
+
+// menuActions is the actions of a menu, for actionHref.
+func menuActions(items []view.MenuItem) []view.Action {
+	out := make([]view.Action, 0, len(items))
+	for _, it := range items {
+		out = append(out, it.Action)
+	}
+	return out
+}
+
 // U-6.16: the quick sheet holds a few of the full form's own fields, saves on
 // Save, and only then. "Open the card" carries what was typed into the full
 // form at /new and writes nothing: until Save there is no record, so changing

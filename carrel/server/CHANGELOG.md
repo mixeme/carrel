@@ -5,6 +5,37 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.86 — 2026-09-17
+
+The create menu works, and a new record starts where the last one was made.
+
+### For consumers
+
+- **The create menu in the top bar is no longer empty.** Contact, Event, Task
+  and Note each open the quick sheet. A file and mail belong there too and are
+  not built yet, so they are absent rather than shown dead.
+- **The sheet opens where the last record of that kind was created.** Not a
+  guess: it is the collection the person chose themselves last time, marked in
+  the list of places to put it. The first time — or when that collection is
+  gone, or has become read-only — the sheet asks where and shows no fields,
+  because filling in a form with nowhere to put it helps nobody.
+- **Only a record that was actually created counts.** Opening a sheet and
+  walking away changes nothing, and none of this reaches the journal: a hint
+  for a form is not an event of the account.
+
+### Included
+
+- `sealed.Blob.LastUsed`, one entry per kind, and `user.SetLastUsed` writing
+  through `editBlob` without a journal entry. The field is optional, so a blob
+  written before it reads as empty — there is nothing to migrate.
+- `web.newMenu` and `web.getKindQuickEntry` at `/app/{kind}/quick`, with the
+  route for the quick note folded into it: `/app/notes/quick` was a stub, and
+  notes now go the same way as every other kind. The stub itself stays under an
+  honest name, `sheetStub`, for the screens that still need one.
+- `TestQuickSheetFromTheShellRemembersWhereRecordsGo` follows the whole way in:
+  the menu points at the entry, the entry asks where while nothing is
+  remembered, and goes straight to the collection once a record has been made.
+
 ## v0.0.85 — 2026-09-17
 
 A record can be started from a sheet of a few fields, and nothing is written

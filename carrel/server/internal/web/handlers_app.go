@@ -28,22 +28,20 @@ func (s *Server) stubShellPage(w http.ResponseWriter, r *http.Request, title str
 	s.writePage(w, r, http.StatusOK, body)
 }
 
-func (s *Server) getQuickNote(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
+// sheetStub answers the sheet-shaped screens that are not wired yet: publish,
+// mail, the mail attachment and the file picker. An empty sheet as a fragment,
+// 404 otherwise. It used to be getQuickNote and carried the notes route too;
+// the quick note goes through the common sheet now (U-6.16), and what is left
+// here is only the stub.
+func (s *Server) sheetStub(w http.ResponseWriter, r *http.Request) {
+	if _, ok := s.requireLogin(w, r); !ok {
 		return
 	}
-	sheet := view.QuickNoteSheet{}
 	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, view.QuickNoteSheet{}, nil)
 		return
 	}
-	_ = sess
 	s.notFound(w, r)
-}
-
-func (s *Server) postQuickNote(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
 }
 
 func (s *Server) getDuplicates(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +82,7 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r) // sheet pattern
+	s.sheetStub(w, r)
 }
 
 func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +90,7 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getMailCompose(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
+	s.sheetStub(w, r)
 }
 
 func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +98,7 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getMailAttach(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
+	s.sheetStub(w, r)
 }
 
 func (s *Server) postMailAttach(w http.ResponseWriter, r *http.Request) {
@@ -208,7 +206,7 @@ func (s *Server) ownedRecordStub(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
-	s.getQuickNote(w, r)
+	s.sheetStub(w, r)
 }
 
 func (s *Server) postFilesPicker(w http.ResponseWriter, r *http.Request) {

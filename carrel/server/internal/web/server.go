@@ -78,6 +78,9 @@ type Users interface {
 	SetSelection(viewerID string, dataKey [32]byte, kind view.Kind, picks []sealed.Selection) error
 	// SetAttachmentFolder stores the folder large attachments go to (S-20).
 	SetAttachmentFolder(viewerID string, dataKey [32]byte, folder sealed.AttachmentFolder) error
+	// SetLastUsed remembers where a record of a kind was last created, so
+	// the sheet opened from the shell starts there (U-6.16). No journal entry.
+	SetLastUsed(viewerID string, dataKey [32]byte, sel sealed.Selection) error
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).
