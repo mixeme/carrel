@@ -123,9 +123,12 @@ type TargetOption struct {
 }
 
 type NewSheet struct {
-	Kind    Kind         `json:"kind"`
-	Target  TargetPicker `json:"target"`
-	Actions []Action     `json:"actions"`
+	Kind   Kind         `json:"kind"`
+	Target TargetPicker `json:"target"`
+	// Form holds the few fields without which the record does not exist
+	// (U-6.16). Empty when the sheet only asks where the record goes.
+	Form    Form     `json:"form"`
+	Actions []Action `json:"actions"`
 }
 
 type MoveSheet struct {

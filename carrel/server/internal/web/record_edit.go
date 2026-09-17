@@ -86,6 +86,29 @@ var editFields = map[view.Kind][]editField{
 	},
 }
 
+// quickFieldNames are what the quick sheet holds: the few things without which
+// the record does not exist, and the one or two people jot down on the move
+// (U-6.16). They name fields of editFields rather than describing their own,
+// so the sheet and the full form cannot drift apart.
+var quickFieldNames = map[view.Kind][]string{
+	view.KindContact: {"fn", "tel", "email"},
+	view.KindEvent:   {"summary", "start", "end", "reminder"},
+	view.KindTask:    {"summary", "due"},
+	view.KindNote:    {"description"},
+}
+
+func quickFields(k view.Kind) []editField {
+	var out []editField
+	for _, name := range quickFieldNames[k] {
+		for _, f := range editFields[k] {
+			if f.name == name {
+				out = append(out, f)
+			}
+		}
+	}
+	return out
+}
+
 // reminderPresets are the triggers the form offers. A trigger another client
 // wrote is offered too, so keeping it is always a choice.
 var reminderPresets = []string{"PT0S", "-PT5M", "-PT10M", "-PT15M", "-PT30M", "-PT1H", "-PT2H", "-P1D", "-P2D", "-P1W"}
@@ -732,6 +755,13 @@ func (s *Server) cancelAction(c *collectionCtx, st editState) view.Action {
 }
 
 func (s *Server) recordForm(c *collectionCtx, st editState) view.Form {
+	return s.recordFormOf(c, st, editFields[c.spec.kind])
+}
+
+// recordFormOf draws the fields it is given. The quick sheet draws a few of
+// the same ones (U-6.16), by name and not by a list of its own, so the two
+// screens cannot drift apart.
+func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField) view.Form {
 	tf := c.tf
 	main := view.FieldSet{Rows: []view.FormRow{
 		csrfField(c.sess),
@@ -744,7 +774,7 @@ func (s *Server) recordForm(c *collectionCtx, st editState) view.Form {
 	}
 	var sets []view.FieldSet
 	var reminders *view.FieldSet
-	for _, f := range editFields[c.spec.kind] {
+	for _, f := range fields {
 		vals, errText := st.values[f.name], text(st.errors[f.name])
 		switch f.typ {
 		case fieldText:
@@ -1060,6 +1090,66 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 	}
 }
 
+// getKindQuick is the quick sheet (U-6.16): where the record goes, and the few
+// fields without which it does not exist. The full creation form lives at
+// /new; this sheet supplements it and does not replace it.
+func (s *Server) getKindQuick(w http.ResponseWriter, r *http.Request, kind string) {
+	c, ok := s.openCollection(w, r, kind, false)
+	if !ok {
+		return
+	}
+	if c.col.ReadOnly {
+		s.notFound(w, r)
+		return
+	}
+	sheet := s.quickSheet(c, editState{values: s.emptyValues(c), isNew: true, readAt: time.Now()})
+	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		return
+	}
+	s.writePage(w, r, http.StatusOK, sheet)
+}
+
+// postKindQuick saves the record, or carries what was typed into the full form
+// without saving anything. Until Save is pressed there is no record: a button
+// that opened the card and quietly created one would leave it behind for
+// anyone who then changed their mind (U-6.16).
+func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind string) {
+	c, ok := s.openCollection(w, r, kind, false)
+	if !ok {
+		return
+	}
+	if c.col.ReadOnly {
+		s.notFound(w, r)
+		return
+	}
+	want := s.submittedValues(c, r)
+	if r.URL.Query().Get("op") == "open" {
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: time.Now()}))
+		return
+	}
+	s.createRecord(w, r, c, want)
+}
+
+// quickSheet is the collection picker of newSheet with a form under it. The
+// fields are the full form's own, by name (quickFields), and the form posts to
+// the sheet's address; "Open the card" posts to the same address with op=open,
+// so what was typed travels in the body and never in the address bar.
+func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
+	sheet := s.newSheet(c, false)
+	form := s.recordFormOf(c, st, quickFields(c.spec.kind))
+	quick := c.listPath() + "/new/quick"
+	form.Action = s.route(quick)
+	form.Method = "POST"
+	form.Actions = []view.Action{
+		{ID: "record.save", Label: text("Save " + c.spec.noun), Method: "POST", Enabled: !c.col.ReadOnly},
+		{ID: "record.open", Label: "Open the card", Href: s.route(quick + "?op=open"), Method: "POST", Enabled: true},
+		s.cancelAction(c, st),
+	}
+	sheet.Form = form
+	return sheet
+}
+
 // newSheet is where a new record goes: every live collection of the kind,
 // read-only ones shown and closed with the reason. An option's ID is the
 // address of its new-record page. Opened from one collection, that collection
@@ -1107,7 +1197,12 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		s.notFound(w, r)
 		return
 	}
-	want := s.submittedValues(c, r)
+	s.createRecord(w, r, c, s.submittedValues(c, r))
+}
+
+// createRecord writes a new record. The full form and the quick sheet both
+// come here: two screens, one way of saving (U-6.16).
+func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collectionCtx, want formValues) {
 	st := editState{values: want, isNew: true, readAt: time.Now()}
 	uid, err := model.NewUID()
 	if err != nil {

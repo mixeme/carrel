@@ -5,6 +5,39 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.85 — 2026-09-17
+
+A record can be started from a sheet of a few fields, and nothing is written
+until Save.
+
+### For consumers
+
+- **The quick sheet is there**, at `/new/quick` for contacts, events, tasks and
+  notes: where the record goes, and the few fields without which it does not
+  exist. The full creation form keeps `/new` and is not replaced — a record can
+  be started either way.
+- **"Open the card" saves nothing.** It carries what was typed into the full
+  form, and until Save is pressed there is no record: opening the card and then
+  changing your mind leaves nothing behind. What was typed travels in the body
+  of the request, never in the address — a telephone number has no business in
+  the address bar, in browser history or in a proxy's logs, and without
+  JavaScript it behaves the same.
+- **The sheet's fields are the full form's own**, named rather than copied, so
+  the two screens cannot drift apart.
+
+### Included
+
+- `internal/web`: `getKindQuick`, `postKindQuick` and `quickSheet`;
+  `recordFormOf` now draws the fields it is given, and `createRecord` is the
+  one way a new record is written, used by both screens.
+- `view.NewSheet` gains `Form`.
+- `TestQuickSheetSavesOnlyOnSave` counts the writes before and after: opening
+  the card writes none, Save writes one.
+
+Still missing, and recorded in the plan: the create menu in the shell is `nil`,
+so the sheet is reachable by address but not from the shell; and
+`/app/notes/quick` is a stub that should fold into this one.
+
 ## v0.0.84 — 2026-09-17
 
 The live tests take away what they make, on servers that name collections

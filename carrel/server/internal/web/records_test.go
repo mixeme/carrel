@@ -329,6 +329,47 @@ func TestEditContactWritesOnlyWhatChanged(t *testing.T) {
 	}
 }
 
+// U-6.16: the quick sheet holds a few of the full form's own fields, saves on
+// Save, and only then. "Open the card" carries what was typed into the full
+// form at /new and writes nothing: until Save there is no record, so changing
+// your mind after opening the card leaves nothing behind.
+func TestQuickSheetSavesOnlyOnSave(t *testing.T) {
+	f := contactsFixture(t, false)
+	quick := f.path("contacts") + "/new/quick"
+
+	sheet := decode[view.NewSheet](t, f.h.do(get(quick, f.sess)))
+	if len(sheet.Form.Sets) == 0 {
+		t.Fatalf("the sheet carries no form: %+v", sheet)
+	}
+	for _, name := range []string{"fn", "tel.new", "email.new"} {
+		rowNamed(t, sheet.Form, name)
+	}
+	// "Open the card" carries its own address, so the browser posts the same
+	// form there: what was typed travels in the body, never in the address.
+	if href := actionHref(t, sheet.Form.Actions, "record.open"); !strings.HasSuffix(href, "/new/quick?op=open") {
+		t.Errorf("Open the card goes to %q", href)
+	}
+
+	form := formFields(sheet.Form)
+	form.Set("fn", "Ada Lovelace")
+	puts := f.srv.CountRequests("PUT", f.col)
+
+	edit := decode[view.ContactEditPage](t, f.h.do(postForm(quick+"?op=open", f.sess, form)))
+	if got := string(rowNamed(t, edit.Form, "fn").Value); got != "Ada Lovelace" {
+		t.Errorf("the full form opened with %q, want what was typed in the sheet", got)
+	}
+	if n := f.srv.CountRequests("PUT", f.col) - puts; n != 0 {
+		t.Errorf("opening the card wrote %d record(s); until Save there is none", n)
+	}
+
+	if resp := f.h.do(postForm(quick, f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save from the sheet: %d %s", resp.Code, resp.Body.String())
+	}
+	if n := f.srv.CountRequests("PUT", f.col) - puts; n != 1 {
+		t.Errorf("Save wrote %d records, want one", n)
+	}
+}
+
 // U-6.1: the contact editor holds three name fields — Display name, Given and
 // Family. Given and Family are the two components of N a person types; the
 // three the form does not offer — middle name, prefix, suffix — come back

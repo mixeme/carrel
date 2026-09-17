@@ -140,6 +140,8 @@ func registerKindRoutes(s *Server, kind string) {
 	s.handle("GET /app/"+kind+"/{account}/{col}/export", kindExportHandler(kind))
 	s.handle("GET /app/"+kind+"/{account}/{col}/new", kindNewGetHandler(kind))
 	s.handle("POST /app/"+kind+"/{account}/{col}/new", kindNewPostHandler(kind))
+	s.handle("GET /app/"+kind+"/{account}/{col}/new/quick", kindQuickGetHandler(kind))
+	s.handle("POST /app/"+kind+"/{account}/{col}/new/quick", kindQuickPostHandler(kind))
 }
 
 func kindRootHandler(kind string) handler {
@@ -229,5 +231,17 @@ func kindNewGetHandler(kind string) handler {
 func kindNewPostHandler(kind string) handler {
 	return func(s *Server, w http.ResponseWriter, r *http.Request) {
 		s.postKindNew(w, r, kind)
+	}
+}
+
+func kindQuickGetHandler(kind string) handler {
+	return func(s *Server, w http.ResponseWriter, r *http.Request) {
+		s.getKindQuick(w, r, kind)
+	}
+}
+
+func kindQuickPostHandler(kind string) handler {
+	return func(s *Server, w http.ResponseWriter, r *http.Request) {
+		s.postKindQuick(w, r, kind)
 	}
 }
