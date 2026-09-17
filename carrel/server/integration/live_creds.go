@@ -53,6 +53,10 @@ type credSection struct {
 	name string
 	sub  string
 	keys map[string]string
+	// urls are every bare address of the section, in order. A section may hold
+	// several — Google names CardDAV, its well-known and an .ics feed — and
+	// keeping only the last one silently picks the wrong server.
+	urls []string
 }
 
 func (s credSection) get(names ...string) string {
@@ -83,8 +87,9 @@ func parseCreds(text string) []credSection {
 			flush()
 			cur = credSection{name: credKey(line[2:]), keys: map[string]string{}}
 		case strings.HasPrefix(lower, "http://"), strings.HasPrefix(lower, "https://"):
-			// A bare address on its own line is the address of the section.
+			// A bare address on its own line is an address of the section.
 			cur.keys["url"] = line
+			cur.urls = append(cur.urls, line)
 		default:
 			if k, v, ok := strings.Cut(line, ":"); ok {
 				if v = strings.TrimSpace(v); v != "" {
@@ -154,6 +159,29 @@ func credEnv(text string) map[string]string {
 	set("CARREL_MAILRU_USER", mail.get("login"))
 	set("CARREL_MAILRU_PASS", mail.get("app password, caldav", "app password"))
 
+	// Google: CardDAV over Basic with an app password — the password of the
+	// account itself is refused. The section also names a private .ics feed of
+	// the calendar, which is a file to read and not a CalDAV server, so only
+	// the CardDAV address is taken here. Google writes app passwords in groups
+	// of four; the spaces are for reading, not for sending.
+	google := find("google", "")
+	// The file names the shared prefix; the account's own address is that plus
+	// the login (the prefix alone answers 404).
+	set("CARREL_GOOGLE_CARDDAV_URL", googleAddress(pickURL(google, "carddav/v1"), google.get("login")))
+	set("CARREL_GOOGLE_CARDDAV_USER", google.get("login"))
+	gpass := strings.ReplaceAll(google.get("app password, carreldav", "app password"), " ", "")
+	set("CARREL_GOOGLE_CARDDAV_PASS", gpass)
+	// The calendar is not in the file: it names a private .ics feed, which is a
+	// file to read and not a server. This address is Google's own and public,
+	// and it is the one that answers an app password — the documented
+	// apidata.googleusercontent.com/caldav/v2 answers 401 loginRequired and
+	// wants OAuth2 (docs/servers.md, SV-24).
+	if google.get("login") != "" {
+		set("CARREL_GOOGLE_CALDAV_URL", "https://www.google.com/calendar/dav/")
+		set("CARREL_GOOGLE_CALDAV_USER", google.get("login"))
+		set("CARREL_GOOGLE_CALDAV_PASS", gpass)
+	}
+
 	// SoGo names one calendar and one address book of a mailbox account.
 	sogo := find("sogo", "")
 	set("CARREL_SOGO_CAL_URL", sogo.get("caldav"))
@@ -180,4 +208,25 @@ func credURL(raw string) string {
 		return raw
 	}
 	return "https://" + raw
+}
+
+// pickURL is the address of the section that holds want; empty when none does.
+// A section with several addresses would otherwise be read by whichever came
+// last in the file.
+func pickURL(s credSection, want string) string {
+	for _, u := range s.urls {
+		if strings.Contains(strings.ToLower(u), want) {
+			return u
+		}
+	}
+	return ""
+}
+
+// googleAddress completes the CardDAV prefix with the login it belongs to.
+func googleAddress(raw, login string) string {
+	raw = credURL(raw)
+	if raw == "" || login == "" || !strings.HasSuffix(raw, "principals/") {
+		return raw
+	}
+	return raw + login + "/"
 }
