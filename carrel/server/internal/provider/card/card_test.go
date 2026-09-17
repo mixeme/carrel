@@ -47,6 +47,55 @@ func TestEncodeRoundTrip(t *testing.T) {
 	}
 }
 
+// N is structured — Family;Given;Middle;Prefix;Suffix — and it travels as one
+// flat value. go-vcard escapes a backslash, a newline and a comma, and neither
+// its encoder nor its decoder touches the semicolon, so the components stay
+// components. Nothing covered this, and the editor is about to start writing
+// two of the five (U-6.1, docs/servers.md SV-21): the three it will not offer
+// have to come back untouched.
+func TestEncodeKeepsStructuredName(t *testing.T) {
+	const name = "Lovelace;Ada;Byron;;Countess"
+	obj := model.NewObject("/c/n.vcf", "1", map[string][]model.RawValue{
+		"VERSION": {{Text: "4.0"}},
+		"UID":     {{Text: "u1"}},
+		"FN":      {{Text: "Ada Lovelace"}},
+		"N":       {{Text: name}},
+	})
+	var buf bytes.Buffer
+	if err := Encode(&buf, obj); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(buf.String(), "N:"+name) {
+		t.Fatalf("the card on the wire does not hold N:%s\n%s", name, buf.String())
+	}
+	back, err := Parse("/c/n.vcf", "1", &buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := back.PropText("N"); len(got) != 1 || got[0] != name {
+		t.Fatalf("N = %v, want %q", got, name)
+	}
+
+	// A comma inside a component is escaped on the way out and given back on
+	// the way in: the round trip is what matters, not the bytes between.
+	comma := model.NewObject("/c/c.vcf", "1", map[string][]model.RawValue{
+		"VERSION": {{Text: "4.0"}},
+		"UID":     {{Text: "u2"}},
+		"N":       {{Text: "Lovelace, Jr.;Ada;;;"}},
+	})
+	buf.Reset()
+	if err := Encode(&buf, comma); err != nil {
+		t.Fatal(err)
+	}
+	back, err = Parse("/c/c.vcf", "1", &buf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := back.PropText("N"); len(got) != 1 || got[0] != "Lovelace, Jr.;Ada;;;" {
+		t.Fatalf("N with a comma = %v", got)
+	}
+}
+
 func TestPhotoInline(t *testing.T) {
 	data, _ := os.ReadFile("testdata/photo-inline.vcf")
 	obj, err := Parse("/c/p.vcf", "e", bytes.NewReader(data))
