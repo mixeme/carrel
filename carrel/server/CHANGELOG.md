@@ -5,6 +5,41 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.82 — 2026-09-17
+
+A calendar handed over as a link stays a calendar instead of arriving as a
+folder.
+
+### For consumers
+
+- **A link to one collection is taken for what it is.** Some servers give out
+  the address of a single calendar rather than a home, and such an address
+  names no principal — Mail.ru is one. Discovery used to read the missing
+  principal as "this must be a file server" and offered the calendar as a
+  folder of files. It now asks the address what it is first: a resource type
+  carrying the calendar or address-book mark means the link is that collection,
+  taken with its name and its components, and the connection holds it alone.
+- **Nothing changes for file servers.** A file collection is one whose resource
+  type carries neither mark, which is what S-6 said all along; SFTPGo and
+  OpenCloud discover exactly as before.
+- **The screen says which it was.** The trace step reads "the entered address
+  is itself a calendar" where it used to read "1 file collection(s)", because a
+  discovery that cannot be read is a discovery nobody can act on.
+
+### Included
+
+- `internal/discover`: `addressIsCollection` between the principal step and the
+  file fallback, with the resource type and the component set read by local
+  name — prefixes are declared on the root of the answer and every server picks
+  its own. A refusal there changes nothing: the fallback runs as it did.
+- Watchdogs: `TestEnteredAddressIsACalendar` and
+  `TestEnteredAddressIsAnAddressBook`, both with a non-empty list of folders so
+  that a file walk taking over would fail them; the file-server tests stay as
+  they were. Live: `TestLiveDiscoveryReport`, where Mail.ru shows one calendar
+  named «Основной».
+- `docs/spec/carrel-server.md` (S-6) now says the rule outright, and
+  `docs/servers.md` gains SV-22.
+
 ## v0.0.81 — 2026-09-17
 
 The contact editor has the name fields the frames always drew, and a contact

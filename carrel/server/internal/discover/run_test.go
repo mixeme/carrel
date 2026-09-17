@@ -19,6 +19,10 @@ type fakeDAV struct {
 	principal string // empty: the server has no current-user-principal
 	homeSets  bool   // false: both home-set lookups come back 404
 	dirs      []string
+	// selfKind makes the entered address answer as a collection of its own —
+	// "calendar" or "addressbook" — the way a handed-over link does (S-6).
+	selfKind string
+	selfName string
 }
 
 func (f fakeDAV) handler() http.Handler {
@@ -43,6 +47,18 @@ func (f fakeDAV) handler() http.Handler {
 			f.reply(w, notFoundProp(f.principal, "C:calendar-home-set"))
 		case strings.Contains(asked, "addressbook-home-set"):
 			f.reply(w, notFoundProp(f.principal, "A:addressbook-home-set"))
+		// The entered address answering for itself. Discovery asks for the
+		// component set here and ReadDir never does, so the file walk below
+		// keeps its own answer.
+		case f.selfKind != "" && strings.Contains(asked, "supported-calendar-component-set"):
+			mark, comps := `<C:calendar/>`, `<C:supported-calendar-component-set><C:comp name="VEVENT"/></C:supported-calendar-component-set>`
+			if f.selfKind == "addressbook" {
+				mark, comps = `<A:addressbook/>`, ``
+			}
+			f.reply(w, `<D:response><D:href>/</D:href><D:propstat><D:prop>`+
+				`<D:resourcetype><D:collection/>`+mark+`</D:resourcetype>`+
+				`<D:displayname>`+f.selfName+`</D:displayname>`+comps+
+				`</D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>`)
 		default: // ReadDir: resourcetype and friends
 			var b strings.Builder
 			for _, d := range f.dirs {
@@ -84,6 +100,49 @@ func runAgainst(t *testing.T, f fakeDAV) (*Result, *view.DiagnosticTrace, error)
 		DAVSSRFAllowlist:    "127.0.0.1",
 	}
 	return Run(t.Context(), dav.NewGuard(cfg), srv.URL, "", "", "")
+}
+
+// S-6: the entered address is itself a calendar. Mail.ru hands out a
+// calendar's own link, and such an address names no principal — but a file
+// collection is one whose resource type carries neither mark, so the mark is
+// what decides. The file walk must not run: dirs are there to prove it did
+// not, and that a handed-over calendar does not arrive as a folder.
+func TestEnteredAddressIsACalendar(t *testing.T) {
+	res, trace, err := runAgainst(t, fakeDAV{selfKind: "calendar", selfName: "Основной", dirs: []string{"/", "/docs/"}})
+	if err != nil {
+		t.Fatalf("discovery refused a handed-over calendar: %v", err)
+	}
+	if res.FileOnly {
+		t.Error("the calendar came back as a file root")
+	}
+	if len(res.Collections) != 1 {
+		t.Fatalf("collections = %#v, want the one that was handed over", res.Collections)
+	}
+	col := res.Collections[0]
+	if col.DisplayName != "Основной" {
+		t.Errorf("name = %q, want the one the server shows", col.DisplayName)
+	}
+	if len(col.Kinds) != 1 || col.Kinds[0] != view.KindEvent {
+		t.Errorf("kinds = %v, want the components the server named", col.Kinds)
+	}
+	if !trace.OK {
+		t.Error("a handed-over calendar is a successful check")
+	}
+}
+
+// The same for an address book: the two marks are read the same way.
+func TestEnteredAddressIsAnAddressBook(t *testing.T) {
+	res, _, err := runAgainst(t, fakeDAV{selfKind: "addressbook", selfName: "Contacts", dirs: []string{"/", "/docs/"}})
+	if err != nil {
+		t.Fatalf("discovery refused a handed-over address book: %v", err)
+	}
+	if res.FileOnly || len(res.Collections) != 1 {
+		t.Fatalf("fileOnly %v, collections %#v", res.FileOnly, res.Collections)
+	}
+	col := res.Collections[0]
+	if col.DisplayName != "Contacts" || len(col.Kinds) != 1 || col.Kinds[0] != view.KindContact {
+		t.Errorf("collection = %+v", col)
+	}
 }
 
 // S-6: a server with no principal is a file collection, not a refusal. The

@@ -30,6 +30,12 @@ var (
 	propGetCTag       = xml.Name{Space: "http://calendarserver.org/ns/", Local: "getctag"}
 	propSyncToken     = xml.Name{Space: "DAV:", Local: "sync-token"}
 	propPrivileges    = xml.Name{Space: "DAV:", Local: "current-user-privilege-set"}
+
+	// Asked of the entered address itself when there is no principal: the
+	// handed-over link may be one collection rather than a home (S-6).
+	propResourceType = xml.Name{Space: "DAV:", Local: "resourcetype"}
+	propDisplayName  = xml.Name{Space: "DAV:", Local: "displayname"}
+	propCompSet      = xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "supported-calendar-component-set"}
 )
 
 // Run discovers collections at endpoint (S-6). Trace records every step.
@@ -84,6 +90,16 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPi
 	principal, perr := client.WebDAV().FindCurrentUserPrincipal(ctx)
 	if perr != nil {
 		add(stepPrincipal, formatErr(perr), false)
+		// The link may be one collection rather than a home: Mail.ru hands out
+		// a calendar's own address, and such an address names no principal
+		// (S-6). A file collection is one whose resource type carries neither
+		// the calendar nor the address-book mark, so the mark is what decides.
+		if col, ok := addressIsCollection(ctx, client, endpoint); ok {
+			add(stepCollections, "the entered address is itself "+collectionNoun(col), true)
+			trace.Steps = steps
+			trace.OK = true
+			return &Result{BaseURL: endpoint, Collections: []Collection{col}}, trace, nil
+		}
 		cols, ferr := fileCollections(ctx, client)
 		if ferr != nil {
 			trace.Steps = steps
@@ -219,6 +235,107 @@ func hrefKey(href string) string {
 		p = u.Path
 	}
 	return strings.TrimSuffix(p, "/")
+}
+
+// addressIsCollection asks the entered address what it is. A server that names
+// no principal may still have handed over one collection — Mail.ru gives out a
+// calendar's own address — and S-6 tells a file collection apart by exactly
+// this: a resource type carrying neither the calendar nor the address-book
+// mark. A refusal here is not a failure of the run: the caller falls back to
+// file collections, which is what happened before this existed.
+func addressIsCollection(ctx context.Context, client *dav.Client, endpoint string) (Collection, bool) {
+	ms, err := client.PropFind(ctx, "", dav.DepthZero, []xml.Name{propResourceType, propDisplayName, propCompSet})
+	if err != nil || len(ms.Responses) == 0 {
+		return Collection{}, false
+	}
+	r := ms.Responses[0]
+	kind := resourceKind(r.Props[propResourceType])
+	if kind == "" {
+		return Collection{}, false
+	}
+	path := hrefKey(r.Href) + "/"
+	if p := hrefKey(endpoint); path == "/" && p != "" {
+		path = p + "/"
+	}
+	col := Collection{
+		Path:        path,
+		DisplayName: strings.TrimSpace(string(r.Props[propDisplayName])),
+		ChangeTag:   "",
+	}
+	if col.DisplayName == "" {
+		col.DisplayName = pathBase(path)
+	}
+	if kind == "addressbook" {
+		col.Kinds = []view.Kind{view.KindContact}
+		return col, true
+	}
+	col.Components = componentNames(r.Props[propCompSet])
+	col.Kinds = calendarKinds(col.Components)
+	if len(col.Kinds) == 0 {
+		// A calendar that named no components holds events until it says
+		// otherwise: RFC 4791 §5.2.3 makes the set optional, not empty.
+		col.Kinds = []view.Kind{view.KindEvent}
+	}
+	return col, true
+}
+
+// resourceKind is "calendar", "addressbook" or "" — read from the inner XML by
+// local name, because the prefixes are declared on the root of the answer and
+// every server picks its own.
+func resourceKind(inner []byte) string {
+	if len(strings.TrimSpace(string(inner))) == 0 {
+		return ""
+	}
+	dec := xml.NewDecoder(strings.NewReader("<set>" + string(inner) + "</set>"))
+	dec.Strict = false
+	for {
+		tok, err := dec.Token()
+		if err != nil {
+			return ""
+		}
+		if el, ok := tok.(xml.StartElement); ok {
+			switch el.Name.Local {
+			case "calendar":
+				return "calendar"
+			case "addressbook":
+				return "addressbook"
+			}
+		}
+	}
+}
+
+// componentNames reads the comp names out of supported-calendar-component-set.
+func componentNames(inner []byte) []string {
+	if len(strings.TrimSpace(string(inner))) == 0 {
+		return nil
+	}
+	dec := xml.NewDecoder(strings.NewReader("<set>" + string(inner) + "</set>"))
+	dec.Strict = false
+	var out []string
+	for {
+		tok, err := dec.Token()
+		if err != nil {
+			return out
+		}
+		el, ok := tok.(xml.StartElement)
+		if !ok || el.Name.Local != "comp" {
+			continue
+		}
+		for _, a := range el.Attr {
+			if strings.EqualFold(a.Name.Local, "name") && strings.TrimSpace(a.Value) != "" {
+				out = append(out, strings.TrimSpace(a.Value))
+			}
+		}
+	}
+}
+
+func collectionNoun(col Collection) string {
+	for _, k := range col.Kinds {
+		if k == view.KindContact {
+			return "an address book"
+		}
+	}
+	return "a calendar"
 }
 
 func fileCollections(ctx context.Context, client *dav.Client) ([]Collection, error) {
