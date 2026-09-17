@@ -79,8 +79,10 @@ func propsEqual(a, b *Object, prop string) bool {
 	if len(av) != len(bv) {
 		return false
 	}
+	structured := isStructured(prop)
 	for i := range av {
-		if av[i].text != bv[i].text {
+		if av[i].text != bv[i].text &&
+			!(structured && withoutTrailingEmpty(av[i].text) == withoutTrailingEmpty(bv[i].text)) {
 			return false
 		}
 		if !paramsEqual(av[i].params, bv[i].params) {
@@ -115,6 +117,29 @@ func paramsEqual(a, b map[string]string) bool {
 }
 
 // Server stamps that may legitimately change on write.
+// isStructured names the properties whose value is a list of components
+// separated by ';'. A trailing empty component carries nothing: RFC 6350
+// §6.2.2 reads a short N as the rest empty, so a server may hand back fewer
+// components than it was sent and mean the same name (docs/servers.md, SV-27).
+func isStructured(prop string) bool {
+	switch strings.ToUpper(prop) {
+	case "N", "ADR", "ORG", "GENDER":
+		return true
+	default:
+		return false
+	}
+}
+
+// withoutTrailingEmpty is a structured value with its trailing empty
+// components dropped: "Lovelace;Ada;;;" is the name "Lovelace;Ada".
+func withoutTrailingEmpty(v string) string {
+	parts := strings.Split(v, ";")
+	for len(parts) > 1 && parts[len(parts)-1] == "" {
+		parts = parts[:len(parts)-1]
+	}
+	return strings.Join(parts, ";")
+}
+
 func isServerStamp(prop string) bool {
 	switch strings.ToUpper(prop) {
 	case "DTSTAMP", "LAST-MODIFIED", "SEQUENCE", "CREATED", "REV", "VERSION":

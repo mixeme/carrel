@@ -48,3 +48,41 @@ func TestCompareAfterPutIgnoresServerStamps(t *testing.T) {
 		t.Fatalf("stamp change should not count as loss: %#v", loss)
 	}
 }
+
+// docs/servers.md, SV-27: a server that hands a structured value back with its
+// trailing empty components dropped. "Lovelace;Ada" is the name
+// "Lovelace;Ada;;;" — nothing was lost, and a loss report about it would teach
+// people to close the report unread. A component that actually changed still
+// counts.
+func TestCompareIgnoresTrailingEmptyComponents(t *testing.T) {
+	sent := NewObject("/c/u.vcf", `"1"`, map[string][]RawValue{
+		"FN":  {{Text: "Ada Lovelace"}},
+		"N":   {{Text: "Lovelace;Ada;;;"}},
+		"ADR": {{Text: ";;Main St;Town;;;"}},
+	})
+	got := NewObject("/c/u.vcf", `"2"`, map[string][]RawValue{
+		"FN":  {{Text: "Ada Lovelace"}},
+		"N":   {{Text: "Lovelace;Ada"}},
+		"ADR": {{Text: ";;Main St;Town"}},
+	})
+	if loss := CompareAfterPut("srv1", sent, got, nil); loss != nil {
+		t.Fatalf("a shorter structured value is the same value: %#v", loss)
+	}
+
+	cut := NewObject("/c/u.vcf", `"2"`, map[string][]RawValue{
+		"FN":  {{Text: "Ada Lovelace"}},
+		"N":   {{Text: "Lovelace"}},
+		"ADR": {{Text: ";;Main St;Town"}},
+	})
+	loss := CompareAfterPut("srv2", sent, cut, nil)
+	if loss == nil || len(loss.Properties) != 1 || loss.Properties[0] != "N" {
+		t.Fatalf("a dropped given name is a loss: %#v", loss)
+	}
+
+	// A plain text property keeps every semicolon it was given.
+	text := NewObject("/c/n.ics", `"1"`, map[string][]RawValue{"SUMMARY": {{Text: "Two;"}}})
+	same := NewObject("/c/n.ics", `"2"`, map[string][]RawValue{"SUMMARY": {{Text: "Two"}}})
+	if loss := CompareAfterPut("srv3", text, same, nil); loss == nil {
+		t.Error("SUMMARY is not structured: a changed value is a loss")
+	}
+}

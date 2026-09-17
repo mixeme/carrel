@@ -3,8 +3,15 @@
 package integration
 
 import (
+	"context"
+	"fmt"
 	"os"
+	"strings"
 	"testing"
+	"time"
+
+	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/discover"
 )
 
 // S-30.2 on SoGo. The credentials name one calendar and one address book, but
@@ -61,4 +68,35 @@ func TestSoGoCollectionDelete(t *testing.T) {
 func TestSoGoVCard4Edit(t *testing.T) {
 	endpoint, user, pass := sogoConfig(t)
 	runVCard4Edit(t, endpoint, user, pass)
+}
+
+// docs/servers.md, SV-27: the server hands a structured value back with its
+// trailing empty components dropped. Carrel's loss report must not call that a
+// loss, and this test holds the server's side of it: red on the day SoGo keeps
+// every component it was sent.
+func TestSoGoTrimsEmptyNameComponents(t *testing.T) {
+	endpoint, user, pass := sogoConfig(t)
+	ctx := context.Background()
+	g := testGuard(t)
+	client, err := dav.NewClient(g, endpoint, user, pass, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, trace, err := discover.Run(ctx, g, endpoint, user, pass, "")
+	if err != nil || res.AddressBookHome == "" {
+		t.Fatalf("discovery: %v %+v %+v", err, res, trace)
+	}
+	uid := fmt.Sprintf("carrel-sv27-%d-%d", os.Getpid(), time.Now().Unix()%100000)
+	file := strings.TrimSuffix(res.AddressBookHome, "/") + "/personal/" + uid + ".vcf"
+	card := "BEGIN:VCARD\r\nVERSION:4.0\r\nUID:" + uid +
+		"\r\nFN:Ada Lovelace\r\nN:Lovelace;Ada;;;\r\nEND:VCARD\r\n"
+	if _, err := client.PutCreate(ctx, file, dav.Typed(strings.NewReader(card), "text/vcard; charset=utf-8")); err != nil {
+		t.Fatalf("seed %s: %v", file, err)
+	}
+	removeLater(t, freshClient(t, endpoint, user, pass), file)
+
+	got := rawCard(ctx, t, endpoint, user, pass, file, "text/vcard; version=4.0")
+	if !strings.Contains(got, "N:Lovelace;Ada\r\n") && !strings.HasSuffix(strings.TrimSpace(got), "N:Lovelace;Ada") {
+		t.Errorf("the server kept the empty components, so SV-27 is over:\n%s", got)
+	}
 }

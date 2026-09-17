@@ -5,6 +5,28 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.88 — 2026-09-17
+
+A name written shorter is the same name, and no longer reported as a loss.
+
+### For consumers
+
+- **Editing a contact on SoGo no longer claims the server dropped the name.**
+  SoGo hands a structured value back with its trailing empty components gone —
+  `N:Lovelace;Ada;;;` comes back `N:Lovelace;Ada` — which is the same name
+  (RFC 6350 §6.2.2). The loss check compared the text, so every edit ended with
+  "the server did not keep: N" over an intact name (`docs/servers.md`, SV-27).
+- **A component that really changed still counts.** A dropped given name is a
+  loss; a semicolon in a plain text property is still data.
+- The false report appeared with the name fields of v0.0.84 — before them
+  Carrel never wrote N — and the live suite caught it, not a fixture.
+
+### Included
+
+- `model.isStructured` (N, ADR, ORG, GENDER) and `withoutTrailingEmpty` in the
+  loss comparison, with `TestCompareIgnoresTrailingEmptyComponents`.
+- `TestSoGoTrimsEmptyNameComponents` holds the server's side of it.
+
 ## v0.0.87 — 2026-09-17
 
 Contacts work on Google: the book reads, and a new card keeps the identity the
