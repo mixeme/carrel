@@ -58,22 +58,20 @@ func runSearch(t *testing.T, endpoint, user, pass string) {
 	suffix := fmt.Sprintf("carrel-s15-%d-%d", os.Getpid(), time.Now().Unix()%100000)
 	calPath := strings.TrimSuffix(res.CalendarHome, "/") + "/" + suffix + "-cal/"
 	bookPath := strings.TrimSuffix(res.AddressBookHome, "/") + "/" + suffix + "-book/"
-	liveRequest(ctx, t, endpoint, user, pass, "MKCALENDAR", calPath, `<?xml version="1.0" encoding="utf-8"?>
+	calPath = makeCollection(ctx, t, client, endpoint, user, pass, "MKCALENDAR", calPath, `<?xml version="1.0" encoding="utf-8"?>
 <C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
   <D:set><D:prop>
     <D:displayname>Carrel S-15</D:displayname>
     <C:supported-calendar-component-set><C:comp name="VEVENT"/><C:comp name="VTODO"/></C:supported-calendar-component-set>
   </D:prop></D:set>
 </C:mkcalendar>`)
-	t.Cleanup(func() { _ = client.Delete(context.Background(), calPath, "") })
-	liveRequest(ctx, t, endpoint, user, pass, "MKCOL", bookPath, `<?xml version="1.0" encoding="utf-8"?>
+	bookPath = makeCollection(ctx, t, client, endpoint, user, pass, "MKCOL", bookPath, `<?xml version="1.0" encoding="utf-8"?>
 <D:mkcol xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
   <D:set><D:prop>
     <D:resourcetype><D:collection/><C:addressbook/></D:resourcetype>
     <D:displayname>Carrel S-15</D:displayname>
   </D:prop></D:set>
 </D:mkcol>`)
-	t.Cleanup(func() { _ = client.Delete(context.Background(), bookPath, "") })
 
 	put := func(path, body, typ string) {
 		t.Helper()

@@ -223,7 +223,7 @@ func runRecords(t *testing.T, endpoint, user, pass string) {
 	// Radicale has one home for both kinds: the two names must differ.
 	calPath := strings.TrimSuffix(res.CalendarHome, "/") + "/" + suffix + "-cal/"
 	bookPath := strings.TrimSuffix(res.AddressBookHome, "/") + "/" + suffix + "-book/"
-	liveRequest(ctx, t, endpoint, user, pass, "MKCALENDAR", calPath, `<?xml version="1.0" encoding="utf-8"?>
+	calPath = makeCollection(ctx, t, client, endpoint, user, pass, "MKCALENDAR", calPath, `<?xml version="1.0" encoding="utf-8"?>
 <C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:I="http://apple.com/ns/ical/">
   <D:set><D:prop>
     <D:displayname>Carrel S-11</D:displayname>
@@ -231,15 +231,13 @@ func runRecords(t *testing.T, endpoint, user, pass string) {
     <C:supported-calendar-component-set><C:comp name="VEVENT"/><C:comp name="VTODO"/></C:supported-calendar-component-set>
   </D:prop></D:set>
 </C:mkcalendar>`)
-	t.Cleanup(func() { _ = client.Delete(context.Background(), calPath, "") })
-	liveRequest(ctx, t, endpoint, user, pass, "MKCOL", bookPath, `<?xml version="1.0" encoding="utf-8"?>
+	bookPath = makeCollection(ctx, t, client, endpoint, user, pass, "MKCOL", bookPath, `<?xml version="1.0" encoding="utf-8"?>
 <D:mkcol xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
   <D:set><D:prop>
     <D:resourcetype><D:collection/><C:addressbook/></D:resourcetype>
     <D:displayname>Carrel S-11</D:displayname>
   </D:prop></D:set>
 </D:mkcol>`)
-	t.Cleanup(func() { _ = client.Delete(context.Background(), bookPath, "") })
 
 	app := newLiveApp(t)
 	redirected(t, "connect", app.post("/app/settings/connections", url.Values{

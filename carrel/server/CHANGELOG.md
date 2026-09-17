@@ -5,6 +5,33 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.84 — 2026-09-17
+
+The live tests take away what they make, on servers that name collections
+themselves.
+
+### For consumers
+
+Nothing in the running server. This is the test suite keeping real accounts
+clean.
+
+### Included
+
+- `integration/live_cleanup_test.go`: `makeCollection` creates a collection and
+  answers with the address it actually got, comparing the home before and after
+  — on a server that assigns its own (`docs/servers.md`, SV-19) the asked-for
+  address holds nothing, so a cleanup aimed there took nothing away. The
+  cleanup now goes through `removeLater`, which sends the delete again and logs
+  "left on the server", instead of `_ = client.Delete(...)`, which swallowed
+  the miss and let the leftovers pass unheard.
+- Every create site moved over: fourteen mechanically, the two loops in
+  `makeMoveCollections` by hand because a value loop had nowhere to put the
+  address back, and `photo` and `vcard4`, whose cleanups already spoke up but
+  aimed at the wrong address.
+- `TestYandexMakeCollectionFindsTheRealAddress` holds it on the server that
+  made it necessary: the helper must answer with an address other than the one
+  it asked for, and the asked-for one must answer 404.
+
 ## v0.0.83 — 2026-09-17
 
 An address book on a server without the search report is read instead of

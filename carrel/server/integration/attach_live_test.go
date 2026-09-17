@@ -53,14 +53,13 @@ func TestBaikalOpenCloudAttachments(t *testing.T) {
 	client := liveClient(t, endpoint, user, pass)
 	calHome, _ := liveHomes(ctx, t, endpoint, user, pass)
 	calPath := calHome + suffix + "-cal/"
-	liveRequest(ctx, t, endpoint, user, pass, "MKCALENDAR", calPath, `<?xml version="1.0" encoding="utf-8"?>
+	calPath = makeCollection(ctx, t, client, endpoint, user, pass, "MKCALENDAR", calPath, `<?xml version="1.0" encoding="utf-8"?>
 <C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
   <D:set><D:prop>
     <D:displayname>Carrel S-20 OpenCloud</D:displayname>
     <C:supported-calendar-component-set><C:comp name="VEVENT"/></C:supported-calendar-component-set>
   </D:prop></D:set>
 </C:mkcalendar>`)
-	t.Cleanup(func() { _ = client.Delete(context.Background(), calPath, "") })
 
 	uid := "event-" + suffix
 	seedRecord(ctx, t, client, calPath+uid+".ics", "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other client//EN\r\n"+
@@ -153,14 +152,13 @@ func runAttachments(t *testing.T, endpoint, user, pass, sEndpoint, sUser, sPass 
 	client := liveClient(t, endpoint, user, pass)
 	calHome, _ := liveHomes(ctx, t, endpoint, user, pass)
 	calPath := calHome + suffix + "-cal/"
-	liveRequest(ctx, t, endpoint, user, pass, "MKCALENDAR", calPath, `<?xml version="1.0" encoding="utf-8"?>
+	calPath = makeCollection(ctx, t, client, endpoint, user, pass, "MKCALENDAR", calPath, `<?xml version="1.0" encoding="utf-8"?>
 <C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
   <D:set><D:prop>
     <D:displayname>Carrel S-20</D:displayname>
     <C:supported-calendar-component-set><C:comp name="VEVENT"/></C:supported-calendar-component-set>
   </D:prop></D:set>
 </C:mkcalendar>`)
-	t.Cleanup(func() { _ = client.Delete(context.Background(), calPath, "") })
 
 	// An event another client wrote, with an inline attachment of its own:
 	// whatever Carrel writes afterwards, this one stays as it is (S-20).

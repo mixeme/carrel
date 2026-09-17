@@ -4,7 +4,9 @@ package integration
 
 import (
 	"context"
+	"encoding/xml"
 	"io"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -68,4 +70,65 @@ func removeLater(t *testing.T, c *dav.Client, paths ...string) {
 			}
 		})
 	}
+}
+
+// makeCollection creates one and answers with the address it actually got. A
+// server may put it somewhere of its own (docs/servers.md, SV-19): Yandex
+// names a new calendar events-<id> whatever was asked for, and a cleanup aimed
+// at the asked-for address then deletes nothing. That is how four calendars
+// were left on a real account — and nobody heard it, because the cleanups
+// wrote `_ = client.Delete(...)`. The cleanup goes to removeLater, which sends
+// it again and says out loud what it could not take away.
+func makeCollection(ctx context.Context, t *testing.T, client *dav.Client, endpoint, user, pass, method, want, body string) string {
+	t.Helper()
+	home := want[:strings.LastIndex(strings.TrimSuffix(want, "/"), "/")+1]
+	before := collectionChildren(ctx, t, client, home)
+	liveRequest(ctx, t, endpoint, user, pass, method, want, body)
+
+	resourceType := []xml.Name{{Space: "DAV:", Local: "resourcetype"}}
+	if _, err := client.PropFind(ctx, want, dav.DepthZero, resourceType); err == nil {
+		removeLater(t, client, want)
+		return want
+	}
+	var fresh []string
+	for p := range collectionChildren(ctx, t, client, home) {
+		if !before[p] {
+			fresh = append(fresh, p)
+		}
+	}
+	if len(fresh) != 1 {
+		t.Fatalf("%s %s: nothing at that address and %d new collections in %s — %v",
+			method, want, len(fresh), home, fresh)
+	}
+	t.Logf("%s went to %s, not %s (SV-19)", method, fresh[0], want)
+	removeLater(t, client, fresh[0])
+	return fresh[0]
+}
+
+// collectionChildren is the set of collections one level under home.
+func collectionChildren(ctx context.Context, t *testing.T, client *dav.Client, home string) map[string]bool {
+	t.Helper()
+	ms, err := client.PropFind(ctx, home, dav.DepthOne, []xml.Name{{Space: "DAV:", Local: "resourcetype"}})
+	if err != nil {
+		t.Fatalf("PROPFIND %s: %v", home, err)
+	}
+	self := strings.TrimSuffix(hrefPathOf(home), "/")
+	out := map[string]bool{}
+	for _, r := range ms.Responses {
+		p := hrefPathOf(r.Href)
+		if p == "" || strings.TrimSuffix(p, "/") == self {
+			continue
+		}
+		out[strings.TrimSuffix(p, "/")+"/"] = true
+	}
+	return out
+}
+
+// hrefPathOf reduces an href to its path: servers answer with absolute URLs or
+// paths, percent-encoded or not.
+func hrefPathOf(href string) string {
+	if u, err := url.Parse(href); err == nil {
+		return u.Path
+	}
+	return href
 }

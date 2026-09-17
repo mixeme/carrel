@@ -127,7 +127,7 @@ func runPhoto(t *testing.T, endpoint, user, pass string, keepsDataURI bool) {
 	}
 	suffix := fmt.Sprintf("carrel-s13-%d-%d", os.Getpid(), time.Now().Unix()%100000)
 	bookPath := strings.TrimSuffix(res.AddressBookHome, "/") + "/" + suffix + "-book/"
-	liveRequest(ctx, t, endpoint, user, pass, "MKCOL", bookPath, `<?xml version="1.0" encoding="utf-8"?>
+	bookPath = makeCollection(ctx, t, freshClient(t, endpoint, user, pass), endpoint, user, pass, "MKCOL", bookPath, `<?xml version="1.0" encoding="utf-8"?>
 <D:mkcol xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
   <D:set><D:prop>
     <D:resourcetype><D:collection/><C:addressbook/></D:resourcetype>

@@ -283,25 +283,27 @@ func makeMoveCollections(ctx context.Context, t *testing.T, endpoint, user, pass
 		calA:   home(res.CalendarHome) + suffix + "-cal-a/",
 		calB:   home(res.CalendarHome) + suffix + "-cal-b/",
 	}
-	for _, book := range []string{c.bookA, c.bookB} {
-		liveRequest(ctx, t, endpoint, user, pass, "MKCOL", book, `<?xml version="1.0" encoding="utf-8"?>
+	for _, bp := range []*string{&c.bookA, &c.bookB} {
+		want := *bp
+		letter := want[len(want)-2 : len(want)-1]
+		*bp = makeCollection(ctx, t, client, endpoint, user, pass, "MKCOL", want, `<?xml version="1.0" encoding="utf-8"?>
 <D:mkcol xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
   <D:set><D:prop>
     <D:resourcetype><D:collection/><C:addressbook/></D:resourcetype>
-    <D:displayname>Carrel S-18 `+book[len(book)-2:len(book)-1]+`</D:displayname>
+    <D:displayname>Carrel S-18 `+letter+`</D:displayname>
   </D:prop></D:set>
 </D:mkcol>`)
-		t.Cleanup(func() { _ = client.Delete(context.Background(), book, "") })
 	}
-	for _, cal := range []string{c.calA, c.calB} {
-		liveRequest(ctx, t, endpoint, user, pass, "MKCALENDAR", cal, `<?xml version="1.0" encoding="utf-8"?>
+	for _, cp := range []*string{&c.calA, &c.calB} {
+		want := *cp
+		letter := want[len(want)-2 : len(want)-1]
+		*cp = makeCollection(ctx, t, client, endpoint, user, pass, "MKCALENDAR", want, `<?xml version="1.0" encoding="utf-8"?>
 <C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
   <D:set><D:prop>
-    <D:displayname>Carrel S-18 `+cal[len(cal)-2:len(cal)-1]+`</D:displayname>
+    <D:displayname>Carrel S-18 `+letter+`</D:displayname>
     <C:supported-calendar-component-set><C:comp name="VEVENT"/></C:supported-calendar-component-set>
   </D:prop></D:set>
 </C:mkcalendar>`)
-		t.Cleanup(func() { _ = client.Delete(context.Background(), cal, "") })
 	}
 	return c
 }

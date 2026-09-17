@@ -69,11 +69,10 @@ func runCollections(t *testing.T, endpoint, user, pass string) {
 
 	// Connecting needs one collection on the server; this one is made by hand.
 	seed := home(res.AddressBookHome) + suffix + "-seed/"
-	liveRequest(ctx, t, endpoint, user, pass, "MKCOL", seed, `<?xml version="1.0" encoding="utf-8"?>
+	seed = makeCollection(ctx, t, client, endpoint, user, pass, "MKCOL", seed, `<?xml version="1.0" encoding="utf-8"?>
 <D:mkcol xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
   <D:set><D:prop><D:resourcetype><D:collection/><C:addressbook/></D:resourcetype></D:prop></D:set>
 </D:mkcol>`)
-	t.Cleanup(func() { _ = client.Delete(context.Background(), seed, "") })
 
 	app := newLiveApp(t)
 	redirected(t, "connect", app.post("/app/settings/connections", url.Values{

@@ -126,6 +126,37 @@ func TestYandexCalendarLifecycle(t *testing.T) {
 	}
 }
 
+// The helper every live test makes its collections with, on the server that
+// made it necessary. Yandex puts a new calendar at an address of its own
+// (SV-19), so a cleanup aimed at the address that was asked for takes nothing
+// away — which is how four calendars were left on this account on 17.09.2026,
+// silently, because the cleanups threw the error away.
+func TestYandexMakeCollectionFindsTheRealAddress(t *testing.T) {
+	endpoint, user, pass := yandexConfig(t)
+	ctx := context.Background()
+	client := liveClient(t, endpoint, user, pass)
+	calHome, _ := liveHomes(ctx, t, endpoint, user, pass)
+	want := calHome + yandexSuffix("helper") + "-cal/"
+
+	got := makeCollection(ctx, t, client, endpoint, user, pass, "MKCALENDAR", want, `<?xml version="1.0" encoding="utf-8"?>
+<C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:set><D:prop>
+    <D:displayname>Carrel helper</D:displayname>
+    <C:supported-calendar-component-set><C:comp name="VEVENT"/></C:supported-calendar-component-set>
+  </D:prop></D:set>
+</C:mkcalendar>`)
+
+	if got == want {
+		t.Errorf("the helper answered with the address it asked for (%s); on this server that address holds nothing", want)
+	}
+	if _, err := client.PropFind(ctx, got, dav.DepthZero, []xml.Name{{Space: "DAV:", Local: "displayname"}}); err != nil {
+		t.Fatalf("the address the helper answered with holds nothing: PROPFIND %s = %v", got, err)
+	}
+	if _, err := client.PropFind(ctx, want, dav.DepthZero, []xml.Name{{Space: "DAV:", Local: "displayname"}}); !dav.IsStatus(err, http.StatusNotFound) {
+		t.Errorf("the asked-for address answers %v, so this test no longer proves anything", err)
+	}
+}
+
 // docs/servers.md, SV-20: an address book cannot be made on this server at all
 // — nginx answers MKCOL with 405. What is asked of Carrel is that the refusal
 // arrives as the content of the sheet, with the method and the code in it, and
