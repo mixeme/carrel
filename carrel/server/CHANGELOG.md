@@ -35,12 +35,14 @@ it at, and Yandex joins the live set.
   one book the account has.
 - A watchdog that needs no network: `davtest.CreateAssignsItsOwnAddress` with
   `TestCreateWhereTheServerPicksTheAddress`.
-- Two findings recorded and deliberately not worked around: an address book
-  cannot be made on Yandex at all (SV-20), and the server builds `FN` from `N`
-  and discards the `FN` it was sent — so a contact made through Carrel, whose
-  form writes `FN` and no `N`, arrives there without a name (SV-21). Filling
-  `N` in from a typed name would be inventing something the person did not
-  enter, which is not this changelog's to decide.
+- Two findings recorded: an address book cannot be made on Yandex at all
+  (SV-20), and the server builds `FN` from `N` and discards the `FN` it was
+  sent — so a contact made through Carrel, whose form writes `FN` and no `N`,
+  arrives there without a name (SV-21). That second one is a gap on this side,
+  not a quirk to work around: the frames have held Given and Family beside the
+  display name from the start, Carrel already reads `N` and keeps it, and only
+  the fields to enter it are missing. The spec said nothing about them and now
+  does (U-6.1); the editor itself is still to come.
 
 ## v0.0.79 — 2026-09-16
 
