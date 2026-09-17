@@ -387,7 +387,8 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект | — |
 | `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage` |
 | `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — |
-| `/app/{kind}/{account}/{col}/new` | GET, POST | вход | лист, страница, редирект | `NewSheet` и полная форма создания рода; POST сохраняет запись, «Open the card» переносит набранное в полную форму и не сохраняет |
+| `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NoteDoc` |
+| `/app/{kind}/{account}/{col}/new/quick` | GET, POST | вход | лист, редирект | `NewSheet`; POST сохраняет запись, «Open the card» переносит набранное в `/new` телом запроса |
 
 **Единый вид живёт внутри раздела.** `/app/{kind}` — это первая строка рейла,
 «все отмеченные коллекции этого рода»: Combined address book, Combined calendar,
