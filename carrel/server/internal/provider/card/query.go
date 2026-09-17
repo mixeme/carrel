@@ -17,6 +17,11 @@ var (
 	ErrNoReporter = errors.New("card: the connection offers no CardDAV REPORT")
 	// ErrNotFound: no contact with this UID in the address book.
 	ErrNotFound = errors.New("card: no contact with this UID")
+	// ErrServerDoesNotQuery: the server has no addressbook-query at all, so
+	// the book was listed and fetched instead and the search happened here
+	// (docs/servers.md, SV-23). The records are good; the note travels with
+	// them so the screen can say who did the searching.
+	ErrServerDoesNotQuery = errors.New("card: the server has no addressbook-query, so Carrel searched its answer")
 )
 
 type cardReporting interface {
@@ -26,7 +31,8 @@ type cardReporting interface {
 // Query reads every contact of an address book with a single REPORT. The
 // cards come back in that reply and are not fetched again (S-11).
 func (p *Provider) Query(ctx context.Context, collection string) ([]*model.Object, error) {
-	return p.query(ctx, collection, dav.CardQuery{})
+	objs, _, err := p.query(ctx, collection, dav.CardQuery{})
+	return objs, err
 }
 
 // searchProps are the card properties a search looks in: what the list and
@@ -47,13 +53,36 @@ func (p *Provider) Search(ctx context.Context, collection, text string) ([]*mode
 	for _, name := range searchProps {
 		q.Matches = append(q.Matches, dav.CardMatch{Prop: name, Text: text})
 	}
-	return p.query(ctx, collection, q)
+	objs, fetched, err := p.query(ctx, collection, q)
+	if err != nil || !fetched {
+		return objs, err
+	}
+	// Read in the round-about way: no filter travelled with it, so the
+	// searching is ours and the note says so beside the results (S-15).
+	return siftCards(objs, text), ErrServerDoesNotQuery
+}
+
+// siftCards keeps the cards that hold text in a property a search looks in.
+// The comparison is the one asked of the server: letter case does not count,
+// in any script.
+func siftCards(objs []*model.Object, text string) []*model.Object {
+	needle := strings.ToLower(text)
+	kept := make([]*model.Object, 0, len(objs))
+	for _, o := range objs {
+		for _, name := range searchProps {
+			if hit := o.PropText(name); len(hit) > 0 && strings.Contains(strings.ToLower(strings.Join(hit, " ")), needle) {
+				kept = append(kept, o)
+				break
+			}
+		}
+	}
+	return kept
 }
 
 // FindUID reads the contact with this UID; the exact UID is checked here as
 // well, whatever the server made of text-match.
 func (p *Provider) FindUID(ctx context.Context, collection, uid string) (*model.Object, error) {
-	objs, err := p.query(ctx, collection, dav.CardQuery{
+	objs, _, err := p.query(ctx, collection, dav.CardQuery{
 		Matches: []dav.CardMatch{{Prop: vcard.FieldUID, Text: uid, Equals: true}},
 	})
 	if err != nil {
@@ -74,14 +103,17 @@ func (p *Provider) FindUID(ctx context.Context, collection, uid string) (*model.
 // refuses 4.0 is asked again without a version; a 3.0 card read as 4.0 is
 // written back as 4.0, a change of format and not of data (docs/servers.md,
 // SV-1).
-func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery) ([]*model.Object, error) {
+// The bool says the book was read the round-about way: listed and fetched,
+// with no filter on the wire. Whoever asked for a search must then do the
+// searching; whoever asked for everything loses nothing.
+func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery) ([]*model.Object, bool, error) {
 	rs, ok := p.t.(cardReporting)
 	if !ok {
-		return nil, ErrNoReporter
+		return nil, false, ErrNoReporter
 	}
 	cq, ok := rs.CardReporter().(dav.CardQuerier)
 	if !ok {
-		return nil, ErrNoReporter
+		return nil, false, ErrNoReporter
 	}
 	q.Version = dav.VCard4
 	aos, err := cq.QueryCards(ctx, collection, q)
@@ -89,8 +121,20 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 		q.Version = ""
 		aos, err = cq.QueryCards(ctx, collection, q)
 	}
+	fetched := false
 	if err != nil {
-		return nil, err
+		// Refused twice, and the second one carried no version: the report
+		// itself is what the server does not have, not the format we asked
+		// the cards in (docs/servers.md, SV-23). Yandex answers 400, and 403
+		// with the supported-report precondition when a filter travels.
+		f, can := rs.CardReporter().(dav.CardFetcher)
+		if !can || !refusedVersion(err) {
+			return nil, false, err
+		}
+		if aos, err = f.FetchCards(ctx, collection); err != nil {
+			return nil, false, err
+		}
+		fetched = true
 	}
 	out := make([]*model.Object, 0, len(aos))
 	for _, ao := range aos {
@@ -98,7 +142,7 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 		obj.Modified = ao.ModTime
 		out = append(out, obj)
 	}
-	return out, nil
+	return out, fetched, nil
 }
 
 // refusedVersion reports a refusal of the address-data version: RFC 6352 §8.6

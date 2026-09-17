@@ -93,6 +93,51 @@ func (c cardReports) QueryCards(ctx context.Context, addressBook string, q CardQ
 	return out, nil
 }
 
+// CardFetcher reads an address book without an addressbook-query. Some servers
+// have no such report at all: Yandex answers 400 to a plain one and 403 with
+// the supported-report precondition to a filtered one, while PROPFIND and
+// addressbook-multiget both work (docs/servers.md, SV-23). It sits beside
+// CardQuerier, outside Transport.
+type CardFetcher interface {
+	FetchCards(ctx context.Context, addressBook string) ([]carddav.AddressObject, error)
+}
+
+// FetchCards lists the book at depth one and fetches what it found by
+// multiget. Two requests instead of one, and no filter travels with them: a
+// caller that wanted a search has to sift the answer itself, the way cal.Search
+// does for a server that ignores text-match (SV-16).
+func (c cardReports) FetchCards(ctx context.Context, addressBook string) ([]carddav.AddressObject, error) {
+	ms, err := c.PropFind(ctx, addressBook, DepthOne, []xml.Name{{Space: "DAV:", Local: "getetag"}})
+	if err != nil {
+		return nil, err
+	}
+	self := strings.TrimSuffix(cardHrefPath(addressBook), "/")
+	var paths []string
+	for _, r := range ms.Responses {
+		p := cardHrefPath(r.Href)
+		if p == "" || strings.HasSuffix(p, "/") || strings.TrimSuffix(p, "/") == self {
+			continue
+		}
+		paths = append(paths, p)
+	}
+	if len(paths) == 0 {
+		return nil, nil
+	}
+	return c.carddav.MultiGetAddressBook(ctx, addressBook, &carddav.AddressBookMultiGet{
+		Paths:       paths,
+		DataRequest: carddav.AddressDataRequest{AllProp: true},
+	})
+}
+
+// cardHrefPath is an href reduced to its path: servers answer with absolute
+// URLs or paths, percent-encoded or not.
+func cardHrefPath(href string) string {
+	if u, err := url.Parse(href); err == nil {
+		return u.Path
+	}
+	return href
+}
+
 func cardQueryBody(q CardQuery) ([]byte, error) {
 	name := func(local string) xml.Name { return xml.Name{Space: cardDAVNS, Local: local} }
 	attr := func(local, value string) xml.Attr { return xml.Attr{Name: xml.Name{Local: local}, Value: value} }

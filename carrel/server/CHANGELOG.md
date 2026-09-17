@@ -5,6 +5,41 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.83 — 2026-09-17
+
+An address book on a server without the search report is read instead of
+falling over.
+
+### For consumers
+
+- **A book that could not be read now reads.** Some servers have no
+  `addressbook-query` at all: Yandex answers 400 to it, and 403 with the
+  supported-report precondition when a filter travels. Carrel read books only
+  that way, so the whole source failed and the screen said "Personal is
+  unavailable" — while the card sat on the server, written moments earlier by
+  the same person. The book is now listed and its cards fetched by multiget,
+  which that server does support.
+- **A search over such a book is honest about who searched.** No filter travels
+  with a fetch, so Carrel sifts the answer itself and the source says "this
+  server does not search its address books, so Carrel sifted its answer" — the
+  same words, and the same rule, as for a calendar server that ignores
+  text-match (`docs/servers.md`, SV-16 and SV-23).
+- **Nothing is lost from the list.** Fetching returns every card; only the
+  searching moved.
+
+### Included
+
+- `internal/dav`: `FetchCards` beside `QueryCards` — a PROPFIND of depth one
+  and an `addressbook-multiget`, behind the `CardFetcher` interface.
+- `internal/provider/card`: the fallback fires only after a refusal that
+  survived dropping the version, because that is what tells "no such report"
+  from "not in that format"; `siftCards` then does the searching, and
+  `ErrServerDoesNotQuery` carries the note.
+- Watchdog with no network: `davtest.RefuseCardQuery` answers exactly as Yandex
+  does, with `TestSearchFetchesWhatAServerCannotQuery`. Live, the Yandex test
+  now requires what it used to merely print: the record page shows the name and
+  carries no notices.
+
 ## v0.0.82 — 2026-09-17
 
 A calendar handed over as a link stays a calendar instead of arriving as a

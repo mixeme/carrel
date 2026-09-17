@@ -68,6 +68,12 @@ type Server struct {
 	// (docs/servers.md, SV-16).
 	SearchIgnoresFilter bool
 
+	// RefuseCardQuery answers 403 with the supported-report precondition to an
+	// addressbook-query, the way Yandex does — it has no such report at all,
+	// while PROPFIND and addressbook-multiget both work (docs/servers.md,
+	// SV-23).
+	RefuseCardQuery bool
+
 	// CreateAssignsItsOwnAddress answers 201 to MKCALENDAR and puts the
 	// calendar at an address of its own, the way Yandex does (docs/servers.md,
 	// SV-19): nothing is left at the address that was asked for, and the home
@@ -380,6 +386,11 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files 
 	body, _ := io.ReadAll(r.Body)
 	r.Body = io.NopCloser(bytes.NewReader(body))
 	p := r.URL.Path
+	if s.RefuseCardQuery && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) {
+		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+		http.Error(w, `<?xml version="1.0" encoding="UTF-8"?><D:error xmlns:D="DAV:"><supported-report xmlns="DAV:"/></D:error>`, http.StatusForbidden)
+		return
+	}
 	if r.Method == "REPORT" && bytes.Contains(body, []byte("collation=")) {
 		if s.RefuseCollation {
 			http.Error(w, "Collation type is not supported", http.StatusBadRequest)

@@ -573,6 +573,14 @@ func (c *collectionSource) contacts(ctx context.Context, q fanout.Query) ([]fano
 	} else {
 		objs, err = c.card.Search(ctx, c.col.Path, q.Text)
 	}
+	var note error
+	if errors.Is(err, card.ErrServerDoesNotQuery) {
+		// The book was listed and fetched because this server has no
+		// addressbook-query at all (docs/servers.md, SV-23). The records are
+		// good and the searching was ours, which is what the source says.
+		note = fmt.Errorf("%w: this server does not search its address books, so Carrel sifted its answer", fanout.ErrIncomplete)
+		err = nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -580,7 +588,7 @@ func (c *collectionSource) contacts(ctx context.Context, q fanout.Query) ([]fano
 	for _, o := range objs {
 		items = append(items, c.item(view.KindContact, card.UID(o), o))
 	}
-	return items, nil
+	return items, note
 }
 
 func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Query) ([]fanout.Item, error) {

@@ -158,12 +158,14 @@ func TestYandexAddressBookRefused(t *testing.T) {
 }
 
 // The one address book this server has is writable, even though none can be
-// made (SV-20). What it does to the card is the finding: this server builds FN
-// from N and throws away the FN it was given (docs/servers.md, SV-21), and the
-// contact form has one name field — FN — and no N at all (`web.editFields`).
-// So a contact made here arrives without a name, and the record page cannot
-// show one. The test holds the server's behaviour as it is: it goes red the
-// day Yandex keeps what it is sent, which is the day the finding is stale.
+// made (SV-20) — and readable, which took two findings to earn. The server
+// builds FN from N and throws away the FN it was sent (SV-21), so a card whose
+// N Carrel never wrote arrived with no name at all; and it has no
+// addressbook-query (SV-23), so reading the book fell over entirely and the
+// screen said "Personal is unavailable" while the card sat there, written and
+// unreadable. Both are answered: the editor writes N (U-6.1), and the book is
+// listed and fetched by multiget. This test holds both ends — what the server
+// keeps, and what the page then shows.
 func TestYandexContactInTheOnlyBook(t *testing.T) {
 	endpoint, user, pass := yandexConfig(t)
 	ctx := context.Background()
@@ -216,14 +218,20 @@ func TestYandexContactInTheOnlyBook(t *testing.T) {
 		t.Errorf("the server kept no %q, so the cut did not reach it:\n%s", wantN, stored)
 	}
 
-	// The page is logged and not asserted: reading this book answers
-	// "Personal is unavailable" in most runs, which is its own open question.
+	// The page reads the book now. This server has no addressbook-query at all
+	// (SV-23), and Carrel lists the book and fetches the cards instead; before
+	// that the whole source fell over and the screen said "Personal is
+	// unavailable" while the card sat on the server, written and unreadable.
 	page := liveDecode[view.ContactPage](t, "card", app.get(loc))
-	t.Logf("the record page shows name %q, %d notice(s), %d action(s): %+v",
-		page.Name, len(page.Notices), len(page.Actions), page.Notices)
+	if string(page.Name) != fn {
+		t.Errorf("the record page shows %q, want %q", page.Name, fn)
+	}
+	if len(page.Notices) > 0 {
+		t.Errorf("reading the book reported: %+v", page.Notices)
+	}
 
-	// Taken away directly: a record the page cannot read offers no delete.
-	if err := client.Delete(ctx, book.Path+uid+".vcf", ""); err != nil {
-		t.Errorf("delete %s: %v", book.Path+uid+".vcf", err)
+	// Taken away the way a person would, which the page can offer again.
+	if loc := redirected(t, "delete", app.post(liveAction(t, page.Actions, "record.delete"), url.Values{})); loc != list {
+		t.Errorf("the delete went to %q", loc)
 	}
 }

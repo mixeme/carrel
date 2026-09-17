@@ -235,6 +235,31 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 	waitPoll(t, f.h, f.sess, hint.Poll.TaskID, nil)
 }
 
+// docs/servers.md, SV-23: a server with no addressbook-query at all — Yandex
+// answers 403 with the supported-report precondition, and 400 to a plain one.
+// The book is listed and fetched by multiget instead, so the cards arrive
+// whole; the searching is then ours, and the source says so rather than the
+// whole book falling over, which is what used to happen.
+func TestSearchFetchesWhatAServerCannotQuery(t *testing.T) {
+	srv := searchServer(t)
+	srv.RefuseCardQuery = true
+	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	srv.Seed(searchBook+"ada.vcf", adaCard())
+	srv.Seed(searchBook+"bob.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:Bob Builder\nEND:VCARD\n")
+
+	f := connectFixture(t, srv, searchBook, nil)
+	tickAll(t, f.h, f.sess)
+	page := search(t, f.h, f.sess, "q=Ada")
+	bar := waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+	if src := sourceNamed(t, bar, "People"); !strings.Contains(string(src.Message), "sifted") {
+		t.Errorf("the source does not say the server could not search: %+v", src)
+	}
+	page = search(t, f.h, f.sess, "q=Ada")
+	if len(page.Results) != 1 || string(page.Results[0].Title) != "Ada Lovelace" {
+		t.Fatalf("results = %+v: only the card that holds the text stays", page.Results)
+	}
+}
+
 // docs/servers.md, SV-16: a server that answers a text-match with the whole
 // collection has not searched at all. Carrel sifts what came back through the
 // properties it asked about, and the source says so beside the results — the

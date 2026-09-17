@@ -56,6 +56,7 @@
 | SV-20 | Yandex | адресную книгу создать нельзя: `MKCOL` — 405 от nginx, обоими паролями приложения | отказ приходит содержимым листа: метод, адрес, код; каталог не меняется | `TestYandexAddressBookRefused` |
 | SV-21 | Yandex | `FN` строит из `N`, а присланный `FN` выбрасывает | обхода не нужно: редактор пишет `N` (U-6.1), и имя приезжает целым | `TestYandexContactInTheOnlyBook`, `TestContactNameFieldsWriteN` |
 | SV-22 | Mail.ru | ссылку выдают на один календарь, а не на дом; принципала нет | род ресурса спрашивается до файлового отката: календарь остаётся календарём | `TestEnteredAddressIsACalendar`, `TestLiveDiscoveryReport` |
+| SV-23 | Yandex | `addressbook-query` нет вовсе: 400, а с фильтром 403 `supported-report` | книга читается списком и `addressbook-multiget`; поиск просеивается у нас и говорит об этом | `TestSearchFetchesWhatAServerCannotQuery`, `TestYandexContactInTheOnlyBook` |
 
 ---
 
@@ -373,6 +374,33 @@
   прислали.
 - **Сторож.** `TestYandexContactInTheOnlyBook` держит поведение сервера как оно
   есть: краснеет в тот день, когда Yandex оставит присланное имя.
+
+### SV-23. Отчёта addressbook-query нет вовсе
+
+- **Сервер.** `REPORT addressbook-query` — **400 Bad Request**; тот же отчёт с
+  фильтром — **403** с телом `<D:error><supported-report/></D:error>`, то есть
+  предусловием RFC 3253: такого отчёта здесь нет. Версия в `address-data` ни
+  при чём, без неё тот же 400. При этом `PROPFIND` глубины 1 перечисляет
+  карточки, `addressbook-multiget` отдаёт их целиком с `address-data`, а
+  `address-data`, запрошенное через `PROPFIND`, приходит с 404. Проба
+  17.09.2026.
+- **Чем грозило.** Книгу Carrel читал только этим отчётом, поэтому источник
+  падал целиком: на экране «Personal is unavailable — сервер ответил не так,
+  как ожидалось», ни имени, ни действий над карточкой. Запись при этом шла
+  обычным PUT и проходила — карточка лежала на сервере, недоступная тому, кто
+  её только что завёл. Четыре прогона из пяти, и я считал это случайностью,
+  пока не спросил сам сервер.
+- **Carrel.** Отказано дважды, и второй раз без версии — значит дело не в
+  формате карточки, а в самом отчёте: книга перечисляется `PROPFIND` глубины 1
+  и забирается `addressbook-multiget` (`dav.FetchCards`). Фильтр при этом на
+  сервер не уезжает, поэтому поиск по книге просеивается здесь
+  (`card.siftCards`), а источник говорит «этот сервер не ищет по своим адресным
+  книгам, Carrel просеял ответ» (`card.ErrServerDoesNotQuery`) — так же, как с
+  календарями SoGo (SV-16). Списку контактов не теряется ничего: multiget
+  отдаёт всё.
+- **Сторож.** `TestSearchFetchesWhatAServerCannotQuery` на `davtest` с
+  `RefuseCardQuery`; живьём — `TestYandexContactInTheOnlyBook`: страница записи
+  показывает имя и не несёт уведомлений.
 
 ---
 
