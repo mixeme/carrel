@@ -1026,13 +1026,32 @@ type afterWrite func(loss *model.Loss, got *model.Object) ([]view.Action, []view
 // finishWriteWith is finishWrite with a say in the loss report. after, when
 // set, is called exactly once, whatever the outcome.
 func (s *Server) finishWriteWith(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, sent *model.Object, done string, after afterWrite) {
+	got, err := c.find(r.Context(), uid)
+	s.reportWrite(w, r, c, sent, done, written{uid: uid, got: got, err: err}, after)
+}
+
+// written is what a write left on the server: the identity the record has
+// there now, what was read back under it — nil when it could not be — and why.
+// theirUID marks an identity the server chose itself, which is not a loss
+// (S-7.1).
+type written struct {
+	uid      string
+	got      *model.Object
+	err      error
+	theirUID bool
+}
+
+// reportWrite is the answer to a write once it has been read back: a redirect
+// to done when nothing was lost, the loss report on the edit page when
+// something was.
+func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collectionCtx, sent *model.Object, done string, wr written, after afterWrite) {
 	tell := func(loss *model.Loss, got *model.Object) ([]view.Action, []view.Notice) {
 		if after == nil {
 			return nil, nil
 		}
 		return after(loss, got)
 	}
-	got, err := c.find(r.Context(), uid)
+	uid, got, err := wr.uid, wr.got, wr.err
 	if err != nil {
 		tell(nil, nil)
 		sent.ETag = ""
@@ -1041,7 +1060,11 @@ func (s *Server) finishWriteWith(w http.ResponseWriter, r *http.Request, c *coll
 		return
 	}
 	c.noteWrite(got.Path, got)
-	loss := model.CompareAfterPut(c.conn.ID, sent, got, c.sess.Losses())
+	compare := model.CompareAfterPut
+	if wr.theirUID {
+		compare = model.CompareAfterCreate
+	}
+	loss := compare(c.conn.ID, sent, got, c.sess.Losses())
 	actions, notices := tell(loss, got)
 	if loss == nil {
 		s.redirect(w, r, done)
@@ -1290,7 +1313,56 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 		_ = s.users.SetLastUsed(c.sess.AccountID(), key,
 			sealed.Selection{Kind: c.spec.kind, AccountID: c.col.AccountID, Path: c.col.Path})
 	}
-	s.finishWrite(w, r, c, uid, sent, c.recordPath(uid))
+	s.finishCreate(w, r, c, uid, sent)
+}
+
+// finishCreate reads a new record back and sends the person to it. A server
+// may name the resource itself and write its own UID over the one it was sent
+// — Google does both with a contact (docs/servers.md, SV-25) — so a record
+// that does not answer under the UID it was given is looked for at the address
+// it was written to, and the identity found there is the one it has in Carrel
+// (S-7.1). A record that is nowhere ends as a notice: sending a person to an
+// address that does not open would be the worse answer.
+func (s *Server) finishCreate(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, sent *model.Object) {
+	ctx := r.Context()
+	wr := written{uid: uid}
+	wr.got, wr.err = c.find(ctx, uid)
+	if notFoundErr(wr.err) {
+		at, err := c.fetch(ctx, sent.Path)
+		made := ""
+		if err == nil {
+			made = uidOf(c, at)
+		}
+		switch {
+		case made == "" || made == uid:
+			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.namelessNotice(c)))
+			return
+		default:
+			// The server keeps it under a name of its own too, so the address
+			// comes from a read by that identity when there is one.
+			wr = written{uid: made, got: at, theirUID: true}
+			if kept, err := c.find(ctx, made); err == nil {
+				wr.got = kept
+			}
+		}
+	}
+	s.reportWrite(w, r, c, sent, c.recordPath(wr.uid), wr, nil)
+}
+
+// namelessNotice is a record the server took and then did not show: not under
+// the identity it was sent, not at the address it was written to. The
+// collection is the one honest way on.
+func (s *Server) namelessNotice(c *collectionCtx) view.Notice {
+	return view.Notice{
+		Role:  view.NoticeAlert,
+		Title: text("Saved, but the server does not show it"),
+		Body: text("The server took the " + c.spec.noun + " and answers neither at the address it was written to nor " +
+			"under the identity it was given. Open " + collectionLabel(c.col) + " to see what is there."),
+		Actions: []view.Action{{
+			ID: "collection.open", Label: text("Open " + collectionLabel(c.col)),
+			Href: s.route(c.listPath()), Method: "GET", Enabled: true,
+		}},
+	}
 }
 
 // postKindDelete deletes with If-Match of the version the page showed. A

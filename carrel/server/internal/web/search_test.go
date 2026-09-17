@@ -260,6 +260,31 @@ func TestSearchFetchesWhatAServerCannotQuery(t *testing.T) {
 	}
 }
 
+// docs/servers.md, SV-26: a server whose addressbook-query answers nothing
+// about a book that holds cards — Google. The empty answer is checked against
+// the book, the cards are read the round-about way, and the source says the
+// searching was ours.
+func TestSearchLooksAgainWhenAQueryAnswersNothing(t *testing.T) {
+	srv := searchServer(t)
+	srv.HollowCardQuery = true
+	srv.RefuseAllPropInAddressData = true
+	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	srv.Seed(searchBook+"ada.vcf", adaCard())
+	srv.Seed(searchBook+"bob.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:Bob Builder\nEND:VCARD\n")
+
+	f := connectFixture(t, srv, searchBook, nil)
+	tickAll(t, f.h, f.sess)
+	page := search(t, f.h, f.sess, "q=Ada")
+	bar := waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+	if src := sourceNamed(t, bar, "People"); !strings.Contains(string(src.Message), "sifted") {
+		t.Errorf("the source does not say the searching was ours: %+v", src)
+	}
+	page = search(t, f.h, f.sess, "q=Ada")
+	if len(page.Results) != 1 || string(page.Results[0].Title) != "Ada Lovelace" {
+		t.Fatalf("results = %+v", page.Results)
+	}
+}
+
 // docs/servers.md, SV-16: a server that answers a text-match with the whole
 // collection has not searched at all. Carrel sifts what came back through the
 // properties it asked about, and the source says so beside the results — the

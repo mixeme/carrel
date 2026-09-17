@@ -636,6 +636,57 @@ func TestNewEventIsSkeletonPlusPatch(t *testing.T) {
 	}
 }
 
+// docs/servers.md, SV-25: a server that writes its own UID over the one a new
+// card was sent with. The record is read back at the address it was written
+// to, the identity found there becomes the record's, and the person lands on
+// it — the UID Carrel gave was never theirs to lose, so it is no loss (S-7.1).
+func TestCreateWhereTheServerRewritesTheUID(t *testing.T) {
+	f := contactsFixture(t, false)
+	f.srv.CreateRewritesUID = true
+	list := f.path("contacts")
+
+	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(list+"/new", f.sess))).Form)
+	form.Set("fn", "Ada Lovelace")
+	resp := f.h.do(postForm(list+"/new", f.sess, form))
+	if resp.Code != http.StatusSeeOther {
+		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
+	}
+	loc := resp.Header().Get("Location")
+	if !strings.HasPrefix(loc, list+"/sv25-") {
+		t.Fatalf("Location = %q, want the record under the UID the server kept", loc)
+	}
+	page := decode[view.ContactPage](t, f.h.do(get(loc, f.sess)))
+	if page.Name != "Ada Lovelace" || len(page.Notices) != 0 {
+		t.Errorf("the card at %s: name %q, notices %+v", loc, page.Name, page.Notices)
+	}
+}
+
+// The same server, and nothing to be found under either identity or address:
+// the truth and a way on, not a redirect into nothing (S-7.1).
+func TestCreateWhereTheServerShowsNothing(t *testing.T) {
+	f := contactsFixture(t, false)
+	f.srv.CreateHidesTheRecord = true
+	list := f.path("contacts")
+
+	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(list+"/new", f.sess))).Form)
+	form.Set("fn", "Ada Lovelace")
+	page := decode[view.ContactPage](t, f.h.do(postForm(list+"/new", f.sess, form)))
+	if !hasNotice(page.Notices, "Saved, but the server does not show it") {
+		t.Fatalf("notices = %+v", page.Notices)
+	}
+	var opens string
+	for _, n := range page.Notices {
+		for _, a := range n.Actions {
+			if a.ID == "collection.open" {
+				opens = a.Href
+			}
+		}
+	}
+	if opens != list {
+		t.Errorf("the notice leads to %q, want the collection", opens)
+	}
+}
+
 // S-7.1: a server that drops a property is named after the write, once per
 // server and property.
 func TestLossIsReportedOncePerServer(t *testing.T) {

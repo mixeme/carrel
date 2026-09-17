@@ -21,6 +21,18 @@ type Loss struct {
 // Server-set stamps and parameter order are ignored; property presence and
 // values are compared per value index.
 func CompareAfterPut(serverID string, sent, got *Object, agg LossAggregator) *Loss {
+	return compare(serverID, sent, got, agg, false)
+}
+
+// CompareAfterCreate is CompareAfterPut for a record just made under an
+// identity the server chose itself: UID is left out, because a server may name
+// the record and rewrite the UID it was sent (docs/servers.md, SV-25) and that
+// UID was Carrel's to give, never the person's to lose (S-7.1).
+func CompareAfterCreate(serverID string, sent, got *Object, agg LossAggregator) *Loss {
+	return compare(serverID, sent, got, agg, true)
+}
+
+func compare(serverID string, sent, got *Object, agg LossAggregator, theirUID bool) *Loss {
 	if sent == nil || got == nil {
 		return nil
 	}
@@ -28,7 +40,7 @@ func CompareAfterPut(serverID string, sent, got *Object, agg LossAggregator) *Lo
 	allAggregated := true
 	keys := sent.propKeys()
 	for _, prop := range keys {
-		if isServerStamp(prop) {
+		if isServerStamp(prop) || theirUID && strings.EqualFold(prop, "UID") {
 			continue
 		}
 		if !propsEqual(sent, got, prop) {

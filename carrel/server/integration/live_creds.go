@@ -167,7 +167,7 @@ func credEnv(text string) map[string]string {
 	google := find("google", "")
 	// The file names the shared prefix; the account's own address is that plus
 	// the login (the prefix alone answers 404).
-	set("CARREL_GOOGLE_CARDDAV_URL", googleAddress(pickURL(google, "carddav/v1"), google.get("login")))
+	set("CARREL_GOOGLE_CARDDAV_URL", googleAddress(pickAddress(google, "carddav", "carddav/v1"), google.get("login")))
 	set("CARREL_GOOGLE_CARDDAV_USER", google.get("login"))
 	gpass := strings.ReplaceAll(google.get("app password, carreldav", "app password"), " ", "")
 	set("CARREL_GOOGLE_CARDDAV_PASS", gpass)
@@ -175,7 +175,7 @@ func credEnv(text string) map[string]string {
 	// each is taken by what it contains. The documented
 	// apidata.googleusercontent.com/caldav/v2 is not among them: it answers 401
 	// loginRequired and wants OAuth2 (docs/servers.md, SV-24).
-	set("CARREL_GOOGLE_CALDAV_URL", credURL(pickURL(google, "calendar/dav")))
+	set("CARREL_GOOGLE_CALDAV_URL", credURL(pickAddress(google, "caldav", "calendar/dav")))
 	set("CARREL_GOOGLE_CALDAV_USER", google.get("login"))
 	set("CARREL_GOOGLE_CALDAV_PASS", gpass)
 
@@ -205,6 +205,17 @@ func credURL(raw string) string {
 		return raw
 	}
 	return "https://" + raw
+}
+
+// pickAddress is the address a section names under a key of its own, or, where
+// the file writes it as a bare line among others, the one that holds want. The
+// file is written for people: a server named twice over the months may be
+// under either.
+func pickAddress(s credSection, key, want string) string {
+	if v := s.get(key); v != "" {
+		return v
+	}
+	return pickURL(s, want)
 }
 
 // pickURL is the address of the section that holds want; empty when none does.

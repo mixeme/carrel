@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/emersion/go-vcard"
+	"github.com/emersion/go-webdav/carddav"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/model"
@@ -136,6 +137,11 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 		}
 		fetched = true
 	}
+	if len(aos) == 0 && !fetched {
+		if listed, hollow := confirmEmpty(ctx, rs, collection, len(q.Matches) > 0); hollow {
+			aos, fetched = listed, true
+		}
+	}
 	out := make([]*model.Object, 0, len(aos))
 	for _, ao := range aos {
 		obj := model.NewObject(ao.Path, strings.Trim(ao.ETag, `"`), cardToProps(ao.Card))
@@ -183,4 +189,35 @@ func (p *Provider) Delete(ctx context.Context, path, etag string) error {
 		return ErrEmptyETag
 	}
 	return p.t.Delete(ctx, path, `"`+strings.Trim(etag, `"`)+`"`)
+}
+
+// confirmEmpty asks whether an empty answer was the truth. A hollow
+// addressbook-query answers nothing about a book that holds cards: Google
+// answers 207 with no responses, filter or none, while the same book lists
+// its cards and hands them over to a multiget (docs/servers.md, SV-26).
+// Telling the two apart costs no card bodies — an unfiltered query for
+// versions alone, and the book's own listing when that comes back empty too.
+// Proven hollow, the book is read the round-about way, and whoever asked for a
+// search does the searching.
+func confirmEmpty(ctx context.Context, rs cardReporting, collection string, filtered bool) ([]carddav.AddressObject, bool) {
+	f, can := rs.CardReporter().(dav.CardFetcher)
+	if !can {
+		return nil, false
+	}
+	if filtered {
+		// An unfiltered answer of its own means the query works: nothing
+		// matched, and that is the answer.
+		if etags, err := f.QueryEtags(ctx, collection); err != nil || len(etags) > 0 {
+			return nil, false
+		}
+	}
+	paths, err := f.ListCards(ctx, collection)
+	if err != nil || len(paths) == 0 {
+		return nil, false
+	}
+	aos, err := f.MultiGetCards(ctx, collection, paths)
+	if err != nil {
+		return nil, false
+	}
+	return aos, len(aos) > 0
 }

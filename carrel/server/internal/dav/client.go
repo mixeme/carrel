@@ -395,6 +395,12 @@ func (d *xmlDoc) close(local string) {
 	d.token(xml.EndElement{Name: xml.Name{Space: "DAV:", Local: local}})
 }
 
+// empty writes one element with its attributes and nothing inside it.
+func (d *xmlDoc) empty(e xml.StartElement) {
+	d.token(e)
+	d.token(xml.EndElement{Name: e.Name})
+}
+
 func (d *xmlDoc) token(t xml.Token) {
 	if d.err == nil {
 		d.err = d.enc.EncodeToken(t)

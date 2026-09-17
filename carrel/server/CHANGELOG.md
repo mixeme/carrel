@@ -5,6 +5,65 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.87 — 2026-09-17
+
+Contacts work on Google: the book reads, and a new card keeps the identity the
+server gave it.
+
+### For consumers
+
+- **Google address books read.** Contacts on a Google account were listed as
+  empty, a card would not open by the address its own list pointed at, and a
+  search over the book found nothing and said nothing. All three were one
+  server answering `addressbook-query` with an empty multistatus whatever the
+  book holds, and one non-conformant element in Carrel's own request
+  (`docs/servers.md`, SV-26).
+- **A report that says the book is empty is now checked.** An unfiltered query
+  for versions alone, against the book's own listing: two answers that carry no
+  cards. Proven hollow, the book is read by listing and multiget, and a search
+  over it says the sifting was Carrel's — the same note SV-23 already shows for
+  Yandex. A server whose report works pays nothing extra.
+- **No behaviour change for servers that answer.** Baikal, SoGo, Yandex and
+  Radicale read and search as before; what changed on the wire is one element
+  fewer.
+
+### Included
+
+- `dav.cardQueryBody` and the new `dav.cardMultiGetBody` ask for the whole card
+  with an empty `address-data`, which is how RFC 6352 §10.4 asks for it.
+  go-webdav's own multiget put `<D:allprop/>` inside it, and Google answers 400
+  `INVALID_ARGUMENT` to that element in either namespace.
+- `dav.CardFetcher` gained `ListCards`, `MultiGetCards` and `QueryEtags`;
+  `FetchCards` is now the first two together.
+- `card.confirmEmpty` behind `card.query`: an empty answer, filtered or not, is
+  taken as the truth only when the book agrees.
+- `davtest.HollowCardQuery` and `davtest.RefuseAllPropInAddressData`, with
+  `TestHollowQueryIsCheckedAgainstTheBook`, `TestAnEmptyBookIsTakenAsEmpty` and
+  `TestSearchLooksAgainWhenAQueryAnswersNothing`.
+- `integration.pickAddress`: the credentials file names a server's protocols
+  under keys of their own now, and a bare address among others is still read.
+
+### Also: a record created under another identity
+
+- **A new contact on Google no longer opens a 404.** Google names the resource
+  itself and writes its own UID over the one it was sent, so the address the
+  page sent the person to did not exist — the card was whole, and unreachable
+  (`docs/servers.md`, SV-25).
+- **A created record is now read back at the address it was written to** when
+  nothing answers under the UID it was given, and the identity found there is
+  the one it has in Carrel (S-7.1). That UID was Carrel's to give, so it is not
+  counted as a property the server lost.
+- **A record that is nowhere says so.** Neither under the identity nor at the
+  address: an alert and a way into the collection, the way a move already
+  answers (SV-18), instead of a redirect into nothing.
+- Included: `web.finishCreate`, `web.reportWrite` split out of
+  `finishWriteWith`, `model.CompareAfterCreate`, `web.collectionCtx.fetch`;
+  `davtest.CreateRewritesUID` and `davtest.CreateHidesTheRecord` with
+  `TestCreateWhereTheServerRewritesTheUID` and
+  `TestCreateWhereTheServerShowsNothing`; live —
+  `TestGoogleContactInTheOnlyBook`, the wrapper for what this account allows
+  (neither a calendar nor a second address book can be made on it).
+
 ## v0.0.86 — 2026-09-17
 
 The create menu works, and a new record starts where the last one was made.

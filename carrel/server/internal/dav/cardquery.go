@@ -51,6 +51,12 @@ func (c cardReports) QueryCards(ctx context.Context, addressBook string, q CardQ
 	if err != nil {
 		return nil, err
 	}
+	return c.cardReport(ctx, addressBook, body)
+}
+
+// cardReport sends a CardDAV REPORT of Depth 1 and reads the cards out of the
+// multistatus it answers with.
+func (c cardReports) cardReport(ctx context.Context, addressBook string, body []byte) ([]carddav.AddressObject, error) {
 	req, err := http.NewRequestWithContext(ctx, "REPORT", c.resolve(addressBook), bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -98,8 +104,16 @@ func (c cardReports) QueryCards(ctx context.Context, addressBook string, q CardQ
 // the supported-report precondition to a filtered one, while PROPFIND and
 // addressbook-multiget both work (docs/servers.md, SV-23). It sits beside
 // CardQuerier, outside Transport.
+// A hollow query is the other reason to read a book this way: Google answers
+// an addressbook-query 207 with no responses at all, filter or none, while the
+// same book lists its cards to PROPFIND and hands them over to a multiget
+// (docs/servers.md, SV-26). ListCards and QueryEtags are what tells the two
+// apart without pulling a single card.
 type CardFetcher interface {
 	FetchCards(ctx context.Context, addressBook string) ([]carddav.AddressObject, error)
+	ListCards(ctx context.Context, addressBook string) ([]string, error)
+	MultiGetCards(ctx context.Context, addressBook string, paths []string) ([]carddav.AddressObject, error)
+	QueryEtags(ctx context.Context, addressBook string) ([]string, error)
 }
 
 // FetchCards lists the book at depth one and fetches what it found by
@@ -107,6 +121,16 @@ type CardFetcher interface {
 // caller that wanted a search has to sift the answer itself, the way cal.Search
 // does for a server that ignores text-match (SV-16).
 func (c cardReports) FetchCards(ctx context.Context, addressBook string) ([]carddav.AddressObject, error) {
+	paths, err := c.ListCards(ctx, addressBook)
+	if err != nil || len(paths) == 0 {
+		return nil, err
+	}
+	return c.MultiGetCards(ctx, addressBook, paths)
+}
+
+// ListCards is the book's own listing: the address of every resource in it,
+// the collection itself left out. One PROPFIND, no card bodies.
+func (c cardReports) ListCards(ctx context.Context, addressBook string) ([]string, error) {
 	ms, err := c.PropFind(ctx, addressBook, DepthOne, []xml.Name{{Space: "DAV:", Local: "getetag"}})
 	if err != nil {
 		return nil, err
@@ -120,13 +144,83 @@ func (c cardReports) FetchCards(ctx context.Context, addressBook string) ([]card
 		}
 		paths = append(paths, p)
 	}
+	return paths, nil
+}
+
+// MultiGetCards reads these addresses as cards in one addressbook-multiget.
+func (c cardReports) MultiGetCards(ctx context.Context, addressBook string, paths []string) ([]carddav.AddressObject, error) {
 	if len(paths) == 0 {
 		return nil, nil
 	}
-	return c.carddav.MultiGetAddressBook(ctx, addressBook, &carddav.AddressBookMultiGet{
-		Paths:       paths,
-		DataRequest: carddav.AddressDataRequest{AllProp: true},
-	})
+	body, err := cardMultiGetBody(paths)
+	if err != nil {
+		return nil, err
+	}
+	return c.cardReport(ctx, addressBook, body)
+}
+
+// QueryEtags asks an unfiltered addressbook-query for versions alone: what a
+// server says the book holds, in one small answer and no card bodies. A server
+// whose query is hollow (SV-26) answers with nothing here while the book
+// itself lists cards.
+func (c cardReports) QueryEtags(ctx context.Context, addressBook string) ([]string, error) {
+	body, err := cardEtagQueryBody()
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, "REPORT", c.resolve(addressBook), bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", `application/xml; charset="utf-8"`)
+	req.Header.Set("Depth", "1")
+	ms, err := c.doMultiStatus(req)
+	if err != nil {
+		return nil, err
+	}
+	self := strings.TrimSuffix(cardHrefPath(addressBook), "/")
+	var paths []string
+	for _, r := range ms.Responses {
+		p := cardHrefPath(r.Href)
+		if p == "" || strings.HasSuffix(p, "/") || strings.TrimSuffix(p, "/") == self {
+			continue
+		}
+		paths = append(paths, p)
+	}
+	return paths, nil
+}
+
+func cardEtagQueryBody() ([]byte, error) {
+	name := func(local string) xml.Name { return xml.Name{Space: cardDAVNS, Local: local} }
+	d := newXMLDoc()
+	d.token(xml.StartElement{Name: name("addressbook-query")})
+	d.open("prop")
+	d.text(xml.Name{Space: "DAV:", Local: "getetag"}, "")
+	d.close("prop")
+	d.empty(xml.StartElement{Name: name("filter")})
+	d.token(xml.EndElement{Name: name("addressbook-query")})
+	return d.bytes()
+}
+
+// cardMultiGetBody is an addressbook-multiget of these addresses asking for
+// the whole card — an empty address-data, which is how RFC 6352 §10.4 says to
+// ask for it. go-webdav's own multiget puts <allprop/> inside address-data
+// instead, and that element is not defined there: Google answers 400
+// INVALID_ARGUMENT to it (docs/servers.md, SV-26).
+func cardMultiGetBody(paths []string) ([]byte, error) {
+	name := func(local string) xml.Name { return xml.Name{Space: cardDAVNS, Local: local} }
+	d := newXMLDoc()
+	d.token(xml.StartElement{Name: name("addressbook-multiget")})
+	d.open("prop")
+	d.text(xml.Name{Space: "DAV:", Local: "getetag"}, "")
+	d.text(xml.Name{Space: "DAV:", Local: "getlastmodified"}, "")
+	d.empty(xml.StartElement{Name: name("address-data")})
+	d.close("prop")
+	for _, p := range paths {
+		d.text(xml.Name{Space: "DAV:", Local: "href"}, p)
+	}
+	d.token(xml.EndElement{Name: name("addressbook-multiget")})
+	return d.bytes()
 }
 
 // cardHrefPath is an href reduced to its path: servers answer with absolute
@@ -154,9 +248,7 @@ func cardQueryBody(q CardQuery) ([]byte, error) {
 	d.open("prop")
 	d.text(xml.Name{Space: "DAV:", Local: "getetag"}, "")
 	d.text(xml.Name{Space: "DAV:", Local: "getlastmodified"}, "")
-	d.token(data)
-	d.text(name("allprop"), "")
-	d.token(xml.EndElement{Name: name("address-data")})
+	d.empty(data)
 	d.close("prop")
 	d.token(filter)
 	for _, m := range q.Matches {

@@ -221,6 +221,15 @@ func (c *collectionCtx) find(ctx context.Context, uid string) (*model.Object, er
 	return c.cal.FindUID(ctx, c.col.Path, c.spec.component, uid)
 }
 
+// fetch reads one record by its address, whatever identity it holds: the way
+// to a record a server named itself (S-7.1).
+func (c *collectionCtx) fetch(ctx context.Context, path string) (*model.Object, error) {
+	if c.card != nil {
+		return c.card.Get(ctx, path)
+	}
+	return c.cal.Get(ctx, path)
+}
+
 func (c *collectionCtx) update(ctx context.Context, obj *model.Object) error {
 	var err error
 	if c.card != nil {

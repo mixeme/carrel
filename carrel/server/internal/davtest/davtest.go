@@ -63,6 +63,29 @@ type Server struct {
 	// lands under is not what the record layer keys on; the UID is.
 	MoveRewritesUID bool
 
+	// HollowCardQuery answers every addressbook-query 207 with no responses
+	// at all, filter or none, the way Google does (docs/servers.md, SV-26),
+	// while PROPFIND and addressbook-multiget hand the same book over.
+	HollowCardQuery bool
+
+	// RefuseAllPropInAddressData answers 400 to a REPORT whose address-data
+	// holds an allprop element, the way Google does: RFC 6352 §10.4 does not
+	// define one there, and an empty address-data is how the whole card is
+	// asked for (docs/servers.md, SV-26).
+	RefuseAllPropInAddressData bool
+
+	// CreateRewritesUID writes a UID of the server's own over the one a new
+	// card was sent with, the way Google does (docs/servers.md, SV-25). Google
+	// names the resource itself as well; the fake keeps the address, because
+	// the address is not what a record is found by — the UID is.
+	CreateRewritesUID bool
+
+	// CreateHidesTheRecord takes a new card and then shows it neither at the
+	// address it was written to nor under any UID. No server seen does this;
+	// Carrel's last answer to a record it cannot find again needs a guard all
+	// the same (S-7.1).
+	CreateHidesTheRecord bool
+
 	// SearchIgnoresFilter answers a calendar-query with every object of the
 	// collection, whatever the text-match said, the way SoGo does
 	// (docs/servers.md, SV-16).
@@ -386,6 +409,17 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files 
 	body, _ := io.ReadAll(r.Body)
 	r.Body = io.NopCloser(bytes.NewReader(body))
 	p := r.URL.Path
+	if s.RefuseAllPropInAddressData && r.Method == "REPORT" && bytes.Contains(body, []byte("address-data")) &&
+		bytes.Contains(body, []byte("allprop")) {
+		http.Error(w, `{"error":{"code":400,"status":"INVALID_ARGUMENT"}}`, http.StatusBadRequest)
+		return
+	}
+	if s.HollowCardQuery && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) {
+		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+		w.WriteHeader(http.StatusMultiStatus)
+		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"/>`)
+		return
+	}
 	if s.RefuseCardQuery && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) {
 		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
 		http.Error(w, `<?xml version="1.0" encoding="UTF-8"?><D:error xmlns:D="DAV:"><supported-report xmlns="DAV:"/></D:error>`, http.StatusForbidden)
@@ -721,6 +755,16 @@ func (s *Server) put(p string, data []byte, ifMatch, ifNoneMatch webdav.Conditio
 			return object{}, webdav.NewHTTPError(http.StatusPreconditionFailed, fmt.Errorf("If-Match condition failed"))
 		}
 	}
+	if _, isBook := s.books[parent(p)]; isBook && !exists {
+		switch {
+		case s.CreateHidesTheRecord:
+			s.seq++
+			return object{etag: fmt.Sprintf("e%d", s.seq), mod: time.Now()}, nil
+		case s.CreateRewritesUID:
+			s.seq++
+			data = rewriteUID(data, fmt.Sprintf("sv25-%d", s.seq))
+		}
+	}
 	s.storeLocked(p, data)
 	return s.objects[p], nil
 }
@@ -768,7 +812,8 @@ func (s *Server) move(w http.ResponseWriter, r *http.Request) {
 }
 
 // rewriteUID puts another identifier in a record, leaving everything else as
-// it was — what SV-18 does to a card on its way to another book.
+// it was — what SV-18 does to a card on its way to another book, and SV-25
+// to one on its way in.
 func rewriteUID(data []byte, uid string) []byte {
 	lines := strings.Split(string(data), "\n")
 	for i, line := range lines {

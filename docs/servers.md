@@ -54,10 +54,12 @@
 | SV-18 | SoGo | после `MOVE` в другую книгу меняет и имя ресурса, и `UID` записи | называет смену личности и ведёт в коллекцию, а не редиректом на исчезнувший адрес | `TestMoveWhereTheServerChangesTheUID`, `TestSoGoMove` |
 | SV-19 | Yandex | `MKCALENDAR` отвечает 201, календарь кладёт по своему адресу (`events-<id>`), `Location` не шлёт | перечитывает адрес, сверяет детей дома до и после; не угадывает — говорит | `TestCreateWhereTheServerPicksTheAddress`, `TestYandexCalendarLifecycle` |
 | SV-20 | Yandex | адресную книгу создать нельзя: `MKCOL` — 405 от nginx, обоими паролями приложения | отказ приходит содержимым листа: метод, адрес, код; каталог не меняется | `TestYandexAddressBookRefused` |
-| SV-21 | Yandex | `FN` строит из `N`, а присланный `FN` выбрасывает | обхода не нужно: редактор пишет `N` (U-6.1), и имя приезжает целым | `TestYandexContactInTheOnlyBook`, `TestContactNameFieldsWriteN` |
+| SV-21 | Yandex, Google | `FN` строит из `N`, а присланный `FN` выбрасывает | обхода не нужно: редактор пишет `N` (U-6.1), и имя приезжает целым | `TestYandexContactInTheOnlyBook`, `TestContactNameFieldsWriteN` |
 | SV-22 | Mail.ru | ссылку выдают на один календарь, а не на дом; принципала нет | род ресурса спрашивается до файлового отката: календарь остаётся календарём | `TestEnteredAddressIsACalendar`, `TestLiveDiscoveryReport` |
 | SV-23 | Yandex | `addressbook-query` нет вовсе: 400, а с фильтром 403 `supported-report` | книга читается списком и `addressbook-multiget`; поиск просеивается у нас и говорит об этом | `TestSearchFetchesWhatAServerCannotQuery`, `TestYandexContactInTheOnlyBook` |
-| SV-24 | Google | контакты и календари на разных хостах; рекомендованный `caldav/v2` требует OAuth | подключение на протокол, как у Yandex; прямой путь обнаружения работает без правок | сторожа нет |
+| SV-24 | Google | контакты и календари на разных хостах; рекомендованный `caldav/v2` требует OAuth | подключение на протокол, как у Yandex; прямой путь обнаружения работает без правок | `TestGoogleContactInTheOnlyBook`, `TestLiveDiscoveryReport` |
+| SV-25 | Google | новую карточку называет сам и переписывает её `UID`; `Location` при этом шлёт | созданную запись перечитывает по адресу, куда писал, и берёт личность оттуда; нигде не нашлась — говорит и ведёт в коллекцию | `TestCreateWhereTheServerRewritesTheUID`, `TestGoogleContactInTheOnlyBook` |
+| SV-26 | Google (и go-webdav) | `addressbook-query` отвечает 207 без ответов; `allprop` внутри `address-data` — 400 | просит карточку пустым `address-data`, своим multiget'ом; пустому отчёту не верит на слово, а сверяет со списком книги | `TestHollowQueryIsCheckedAgainstTheBook`, `TestSearchLooksAgainWhenAQueryAnswersNothing` |
 
 ---
 
@@ -230,7 +232,69 @@
   неработающие, чтобы их не пробовали заново. Ссылка на `basic.ics` осталась
   как есть: это файл для чтения, не сервер. «Праздники России» приходят
   `readOnly` — виртуальный календарь.
-- **Сторож.** Пока нет: живых обёрток для Google не написано (план).
+- **Сторож.** `TestGoogleContactInTheOnlyBook` — живая обёртка по тому, что
+  этот аккаунт позволяет: календарь и вторую книгу здесь не создать
+  (`MKCALENDAR` — 404, `MKCOL` — 400), поэтому пишется в единственную книгу,
+  которая есть; и `TestLiveDiscoveryReport`, где google-carddav и google-caldav
+  показывают каждый свой дом.
+
+### SV-25. Новую карточку называет сам и переписывает UID
+
+- **Сервер.** `PUT` нового ресурса в книгу — **201** и `Location:
+  <книга>/<свой-id>`: имя ресурса Google выбирает сам, а `UID` в карточке
+  переписывает своим (16 шестнадцатеричных знаков вместо наших 32). `GET` по
+  адресу, куда писали, отвечает **200** и отдаёт карточку — уже с чужим `UID`;
+  `DELETE` по тому же адресу — **404**, удалять надо по адресу из `Location`.
+  Календарь так себя не ведёт: событие сохраняет и `UID`, и имя ресурса
+  (`PUT` 201, `GET` 200, `DELETE` 204), зато Google дописывает ему два своих
+  `VALARM`. Пробы 17.09.2026.
+- **Чем грозило.** После создания страница уводила на `recordPath(<наш UID>)`
+  — адрес, которого на сервере нет: человек нажимал «Save» и получал 404 на
+  запись, которая только что записалась целой.
+- **Carrel.** Спека первой (S-7.1): созданную запись ищут по личности, которую
+  ей дали; не нашлась — читают адрес, по которому её записали, и личность
+  оттуда становится личностью записи (`web.finishCreate`). Сам `UID` при этом
+  не потеря — его дал Carrel, а не человек, — поэтому сравнение после создания
+  его не считает (`model.CompareAfterCreate`), и отчёт о потерях остаётся про
+  содержимое. Ни под личностью, ни по адресу — уведомление «Saved, but the
+  server does not show it» со ссылкой на коллекцию, как при переносе (SV-18):
+  редирект в никуда был бы худшим ответом. `Location` не читается: адрес, по
+  которому писали, у Google отвечает, а личность записи — не адрес, а `UID`.
+- **Сторож.** `TestCreateWhereTheServerRewritesTheUID` и
+  `TestCreateWhereTheServerShowsNothing` на `davtest` (`CreateRewritesUID`,
+  `CreateHidesTheRecord`); живьём — `TestGoogleContactInTheOnlyBook`, где
+  страница ведёт на карточку под тем `UID`, который оставил сервер.
+
+### SV-26. Отчёт отвечает 207 без ответов, а allprop в address-data — 400
+
+- **Сервер.** `addressbook-query` отвечает **207 без единого ответа**: с
+  фильтром и без, с версией в `address-data` и без неё — книга с карточкой
+  выглядит пустой. При этом `PROPFIND` глубины 1 её перечисляет, а
+  `addressbook-multiget` отдаёт карточку целиком. Отдельно: `allprop` внутри
+  `address-data` — **400 `INVALID_ARGUMENT`**, и в query, и в multiget. Пустое
+  `address-data`, которым RFC 6352 §10.4 и просит всю карточку, принимается.
+  Пробы 17.09.2026.
+- **Чем грозило.** Дыра была наполовину наша. `card.cardQueryBody` писал
+  `<C:allprop/>` внутрь `address-data`, а go-webdav в своём multiget —
+  `<D:allprop/>`; ни того, ни другого RFC 6352 не определяет, и Google отвечал
+  400 на оба чтения книги. Вторая половина — серверная: даже правильный запрос
+  приходит пустым, поэтому список книги был пуст, запись не находилась по `UID`
+  (404 на только что созданную карточку), а поиск молча ничего не находил. Тихая
+  ложь, а не отказ.
+- **Carrel.** `allprop` из `address-data` убран, а multiget теперь свой
+  (`dav.cardMultiGetBody`) — тот же путь, каким в `dav` уже пишутся запросы с
+  версией (SV-11). И пустому отчёту не верят на слово: неотфильтрованный
+  запрос одних версий (`dav.QueryEtags`) против списка книги
+  (`dav.ListCards`) стоит двух ответов без единой карточки и отличает пустую
+  книгу от пустого отчёта (`card.confirmEmpty`). Доказано пустым — книга
+  читается списком и multiget'ом, а поиск по ней просеивается здесь и говорит
+  об этом, как при SV-23. Сервер с рабочим отчётом лишнего не платит: у него
+  неотфильтрованный запрос отвечает, и на этом проверка кончается.
+- **Сторож.** `TestHollowQueryIsCheckedAgainstTheBook`,
+  `TestAnEmptyBookIsTakenAsEmpty` и `TestSearchLooksAgainWhenAQueryAnswersNothing`
+  на `davtest` (`HollowCardQuery`, `RefuseAllPropInAddressData`);
+  `TestQueryCardsNamesTheVersion` держит тело запроса; живьём —
+  `TestGoogleContactInTheOnlyBook`.
 
 ---
 
@@ -404,8 +468,12 @@
   слева направо. Живьём карточка теперь приезжает с `FN:Carrel Probe …` и
   `N:Probe …;Carrel;;;`, то есть сервер строит имя ровно из того, что мы
   прислали.
+- **То же у Google.** Послали `FN:Carrel Echo Probe` при `N:Probe;Echo;;;` —
+  вернулось `FN:Echo Probe` (проба 17.09.2026). Обход тот же и не понадобился
+  второй раз: редактор пишет `N`, и имя приезжает целым.
 - **Сторож.** `TestYandexContactInTheOnlyBook` держит поведение сервера как оно
-  есть: краснеет в тот день, когда Yandex оставит присланное имя.
+  есть: краснеет в тот день, когда Yandex оставит присланное имя. У Google —
+  `TestGoogleContactInTheOnlyBook`.
 
 ### SV-23. Отчёта addressbook-query нет вовсе
 

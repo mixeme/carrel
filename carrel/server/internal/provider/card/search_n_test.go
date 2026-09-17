@@ -18,7 +18,12 @@ import (
 func TestSearchSendsNoTextMatchOnN(t *testing.T) {
 	var body []byte
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, _ = io.ReadAll(r.Body)
+		// The search itself is the first request: an empty answer is then
+		// checked against the book, and those requests are not the one under
+		// test (SV-26).
+		if body == nil {
+			body, _ = io.ReadAll(r.Body)
+		}
 		w.Header().Set("Content-Type", "application/xml")
 		w.WriteHeader(http.StatusMultiStatus)
 		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?><d:multistatus xmlns:d="DAV:"/>`)

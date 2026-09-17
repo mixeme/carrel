@@ -96,7 +96,7 @@ func TestQueryCardsNamesTheVersion(t *testing.T) {
 	for key, text := range map[string]string{
 		"addressbook-query/prop/getetag":                                                           "",
 		"addressbook-query/prop/getlastmodified":                                                   "",
-		"addressbook-query/prop/address-data{content-type=text/vcard}{version=4.0}/allprop":        "",
+		"addressbook-query/prop/address-data{content-type=text/vcard}{version=4.0}":                "",
 		"addressbook-query/filter{test=anyof}/prop-filter{name=FN}/text-match":                     "ada & co",
 		"addressbook-query/filter{test=anyof}/prop-filter{name=UID}/text-match{match-type=equals}": "ada",
 	} {
@@ -121,7 +121,7 @@ func TestQueryCardsNamesTheVersion(t *testing.T) {
 		t.Fatal(err)
 	}
 	// The XML declaration says version="1.0" too: look at the element.
-	if _, ok := xmlPaths(t, bodies[1])["addressbook-query/prop/address-data/allprop"]; !ok {
+	if _, ok := xmlPaths(t, bodies[1])["addressbook-query/prop/address-data"]; !ok {
 		t.Errorf("a query without a version named one: %s", bodies[1])
 	}
 }

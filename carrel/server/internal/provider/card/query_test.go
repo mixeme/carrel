@@ -105,3 +105,48 @@ func TestNewObjectIsASkeleton(t *testing.T) {
 		t.Fatalf("skeleton = %v", obj.Props())
 	}
 }
+
+// docs/servers.md, SV-26: a server whose addressbook-query answers 207 with no
+// responses at all while the same book lists its cards and hands them over to
+// a multiget — Google. An empty answer is checked against the book itself, and
+// what is there is read the round-about way; a search over it is then ours to
+// do, and it says so. The same server answers 400 to an allprop inside
+// address-data, so a body that carries one fails here outright.
+func TestHollowQueryIsCheckedAgainstTheBook(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.HollowCardQuery = true
+	srv.RefuseAllPropInAddressData = true
+	srv.Seed(book+"ada.vcf", vcf("ada", "Ada Lovelace"))
+	srv.Seed(book+"bob.vcf", vcf("bob", "Bob Builder"))
+
+	objs, err := p.Query(t.Context(), book)
+	if err != nil || len(objs) != 2 {
+		t.Fatalf("the whole book: %d objects, err %v", len(objs), err)
+	}
+	obj, err := p.FindUID(t.Context(), book, "ada")
+	if err != nil || obj.PropText("FN")[0] != "Ada Lovelace" {
+		t.Fatalf("FindUID = %+v, err %v", obj, err)
+	}
+	if _, err := p.FindUID(t.Context(), book, "zzz"); !errors.Is(err, ErrNotFound) {
+		t.Errorf("a UID that is nowhere = %v, want ErrNotFound", err)
+	}
+	found, err := p.Search(t.Context(), book, "ovelace")
+	if !errors.Is(err, ErrServerDoesNotQuery) {
+		t.Fatalf("search err = %v, want the note that the searching was ours", err)
+	}
+	if len(found) != 1 || UID(found[0]) != "ada" {
+		t.Errorf("found %+v, want the one card that holds the text", found)
+	}
+}
+
+// An empty book is an empty book: the listing says so, and nothing is fetched.
+func TestAnEmptyBookIsTakenAsEmpty(t *testing.T) {
+	p, srv := davProvider(t)
+	objs, err := p.Query(t.Context(), book)
+	if err != nil || len(objs) != 0 {
+		t.Fatalf("objects = %+v, err = %v", objs, err)
+	}
+	if n := srv.CountRequests("GET", book); n != 0 {
+		t.Errorf("GET requests = %d", n)
+	}
+}
