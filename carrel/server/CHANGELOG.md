@@ -5,6 +5,42 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.81 — 2026-09-17
+
+The contact editor has the name fields the frames always drew, and a contact
+written to a server that builds the display name from them arrives with a name.
+
+### For consumers
+
+- **Given and Family are in the contact editor.** The frames have held three
+  name fields from the start — Display name, Given, Family — and the editor
+  offered one: it wrote `FN` and never `N`. Both parts are written now.
+- **The two sides fill each other in.** An empty display name is made from
+  Given and Family when the card is saved. A display name typed on its own is
+  cut left to right — the first word is the given name, the rest the family
+  name — and a hint under the field says so, because the order cannot be
+  guessed: «Ковалёв Пётр» would come apart the wrong way round. Only a display
+  name that was **changed** is cut: editing a phone on a card that carries no
+  `N` does not quietly grow one.
+- **What no field offers is left alone.** A middle name, a prefix and a suffix
+  another client wrote come back exactly as they were.
+- **On Yandex a contact now arrives with a name.** That server builds `FN` from
+  `N` and throws away the `FN` it was sent, so a card with an empty `N` had no
+  name at all there — `FN:` and `N:;;;;` with nothing in them
+  (`docs/servers.md`, SV-21).
+
+### Included
+
+- `internal/web/record_edit.go`: a field type that is two inputs and one
+  property (`fieldName`), `nameOps` beside `textOps`, and the five loops of the
+  editor — read, empty, submitted, changed, drawn.
+- Watchdogs with no network: `TestContactNameFieldsWriteN`,
+  `TestEditingAnotherFieldDoesNotGrowAName`, and
+  `card.TestEncodeKeepsStructuredName`, which covers what nothing covered — `N`
+  travels as one flat value and its five components survive the trip. Live:
+  `TestYandexContactInTheOnlyBook`, where the card came back holding
+  `FN:Carrel Probe …` and `N:Probe …;Carrel;;;`.
+
 ## v0.0.80 — 2026-09-17
 
 A new collection goes into the catalog at the address the server actually made

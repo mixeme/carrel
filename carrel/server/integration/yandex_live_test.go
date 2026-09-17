@@ -203,19 +203,24 @@ func TestYandexContactInTheOnlyBook(t *testing.T) {
 	if storedUID != uid {
 		t.Errorf("the identifier changed: wrote %q, the server holds %q", uid, storedUID)
 	}
-	if strings.Contains(stored, fn) {
-		t.Errorf("the server kept the name it was sent, so SV-21 is stale and so is this test")
+	// The name arrives whole. This server builds FN from N and throws away the
+	// FN it was sent (docs/servers.md, SV-21), so the card is nameless unless
+	// N is written — and the editor writes it now, cutting a display name into
+	// Given and Family when the two parts are empty (U-6.1). Before that, this
+	// same write left FN: and N:;;;; on the server.
+	if !strings.Contains(stored, "FN:"+fn) {
+		t.Errorf("the server kept no FN:%s\n%s", fn, stored)
+	}
+	parts := strings.SplitN(fn, " ", 2)
+	if wantN := "N:" + parts[1] + ";" + parts[0] + ";"; !strings.Contains(stored, wantN) {
+		t.Errorf("the server kept no %q, so the cut did not reach it:\n%s", wantN, stored)
 	}
 
-	// The page can show only what the server kept, and that is a card whose FN
-	// is empty. The notices are logged and not asserted: the same request
-	// answered "Personal is unavailable" in one run of two (16.09.2026).
+	// The page is logged and not asserted: reading this book answers
+	// "Personal is unavailable" in most runs, which is its own open question.
 	page := liveDecode[view.ContactPage](t, "card", app.get(loc))
 	t.Logf("the record page shows name %q, %d notice(s), %d action(s): %+v",
 		page.Name, len(page.Notices), len(page.Actions), page.Notices)
-	if string(page.Name) == fn {
-		t.Errorf("the page shows %q, which is not what the server holds", page.Name)
-	}
 
 	// Taken away directly: a record the page cannot read offers no delete.
 	if err := client.Delete(ctx, book.Path+uid+".vcf", ""); err != nil {

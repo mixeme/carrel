@@ -37,6 +37,10 @@ const (
 	fieldDone
 	fieldPercent
 	fieldReminders
+	// fieldName is Given and Family in one field: two inputs, one property.
+	// N is structured — Family;Given;Middle;Prefix;Suffix — and the three
+	// components no input offers come back untouched (U-6.1, S-7).
+	fieldName
 )
 
 type editField struct {
@@ -45,12 +49,15 @@ type editField struct {
 	prop     string
 	typ      fieldType
 	required bool
-	allDay   bool // fieldTime: the field has its own all-day box
+	allDay   bool   // fieldTime: the field has its own all-day box
+	hint     string // shown under the field, when the rule needs saying
 }
 
 var editFields = map[view.Kind][]editField{
 	view.KindContact: {
-		{name: "fn", label: "Name", prop: "FN", typ: fieldText, required: true},
+		{name: "fn", label: "Display name", prop: "FN", typ: fieldText,
+			hint: "Left empty, it is made from Given and Family. Fill it alone and it is cut the other way: the first word is the given name, the rest the family name."},
+		{name: "n", label: "Name", prop: "N", typ: fieldName},
 		{name: "email", label: "Email", prop: "EMAIL", typ: fieldMulti},
 		{name: "tel", label: "Phone", prop: "TEL", typ: fieldMulti},
 		{name: "org", label: "Organisation", prop: "ORG", typ: fieldText},
@@ -96,6 +103,13 @@ func triple(v []string) [3]string {
 	return out
 }
 
+// pair is a two-slot field: Given and Family, in that order.
+func pair(v []string) [2]string {
+	var out [2]string
+	copy(out[:], v)
+	return out
+}
+
 // sameRows compares rows, ignoring trailing empty ones.
 func sameRows(a, b []string) bool {
 	trim := func(v []string) []string {
@@ -135,6 +149,9 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 		switch f.typ {
 		case fieldText, fieldArea:
 			vals[f.name] = []string{c.text(obj, f.prop)}
+		case fieldName:
+			p := nameParts(c.text(obj, f.prop))
+			vals[f.name] = []string{p[1], p[0]}
 		case fieldMulti:
 			var rows []string
 			for _, v := range props[f.prop] {
@@ -200,6 +217,8 @@ func (s *Server) emptyValues(c *collectionCtx) formValues {
 		switch f.typ {
 		case fieldTime:
 			vals[f.name] = []string{"", "", ""}
+		case fieldName:
+			vals[f.name] = []string{"", ""}
 		default:
 			vals[f.name] = []string{""}
 		}
@@ -235,6 +254,8 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name))}
 		case fieldArea:
 			vals[f.name] = []string{strings.TrimRight(strings.ReplaceAll(r.FormValue(f.name), "\r\n", "\n"), "\n ")}
+		case fieldName:
+			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name + ".given")), strings.TrimSpace(r.FormValue(f.name + ".family"))}
 		case fieldMulti, fieldReminders:
 			vals[f.name] = indexedRows(r, f.name)
 		case fieldTime:
@@ -265,6 +286,31 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	ch := change{errors: map[string]string{}}
 	props := obj.Props()
 	escape := c.spec.kind != view.KindContact
+	// U-6.1: the display name and the two parts of N fill each other in, and
+	// both directions happen before the fields are walked — so what reaches the
+	// server is what the screen would show, and whoever filled one side is
+	// never told the other is missing. One switch, so the two cannot undo each
+	// other's work.
+	if c.spec.kind == view.KindContact {
+		fn := strings.TrimSpace(first(want["fn"]))
+		n := pair(want["n"])
+		given, family := strings.TrimSpace(n[0]), strings.TrimSpace(n[1])
+		switch {
+		case fn == "" && given+family != "":
+			want["fn"] = []string{strings.TrimSpace(given + " " + family)}
+		case fn != "" && given == "" && family == "" && fn != strings.TrimSpace(first(have["fn"])):
+			// Only when the display name itself was changed. Editing a phone
+			// on a card that carries no N must not quietly grow one: what the
+			// person did not touch stays as it was (S-7).
+			// Cut left to right, the way the quick sheet cuts it (U-6.16):
+			// the first word is the given name, the rest the family name.
+			given, family = fn, ""
+			if i := strings.IndexByte(fn, ' '); i > 0 {
+				given, family = fn[:i], strings.TrimSpace(fn[i+1:])
+			}
+			want["n"] = []string{given, family}
+		}
+	}
 	startRow := triple(want["start"])
 	startChanged := !sameRows(want["start"], have["start"])
 	var startAt, endAt time.Time
@@ -287,6 +333,12 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				continue
 			}
 			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], w)...)
+		case fieldName:
+			if sameRows(w, h) {
+				continue
+			}
+			row := pair(w)
+			ch.ops = append(ch.ops, nameOps(f.prop, props[f.prop], row[0], row[1])...)
 		case fieldTime:
 			row := triple(w)
 			allDay := row[2] == "on"
@@ -427,6 +479,47 @@ func textOps(prop string, cur []model.RawValue, v string, escape bool) []model.P
 		v = cal.EscapeText(v)
 	}
 	ops := []model.PatchOp{model.SetText{Prop: prop, Value: v}}
+	if len(cur) > 0 {
+		for _, k := range sortedKeys(cur[0].Params) {
+			ops = append(ops, model.SetParam{Prop: prop, Index: 0, Param: k, Value: cur[0].Params[k]})
+		}
+	}
+	return ops
+}
+
+// nameParts splits N into the five components RFC 6350 gives it: family,
+// given, middle, prefix, suffix. The property travels as one value, and
+// go-vcard escapes a backslash, a newline and a comma but never the semicolon
+// (card.TestEncodeKeepsStructuredName), so splitting and joining happens here
+// and nowhere else.
+func nameParts(v string) [5]string {
+	var out [5]string
+	for i, p := range strings.SplitN(v, ";", 5) {
+		out[i] = p
+	}
+	return out
+}
+
+// nameOps writes Given and Family into N and leaves the three components no
+// field offers — middle name, prefix, suffix — exactly as they were (S-7). A
+// semicolon typed into either box is dropped: nothing escapes it on the way
+// out, so it would arrive as a separator and shift every component after it.
+// The property goes only when nothing is left in it at all: empty is not
+// removal, but a name emptied of every part is.
+func nameOps(prop string, cur []model.RawValue, given, family string) []model.PatchOp {
+	var parts [5]string
+	if len(cur) > 0 {
+		parts = nameParts(cur[0].Text)
+	}
+	parts[0] = strings.ReplaceAll(family, ";", "")
+	parts[1] = strings.ReplaceAll(given, ";", "")
+	if strings.TrimSpace(strings.Join(parts[:], "")) == "" {
+		if len(cur) > 0 {
+			return []model.PatchOp{model.RemoveProp{Prop: prop}}
+		}
+		return nil
+	}
+	ops := []model.PatchOp{model.SetText{Prop: prop, Value: strings.Join(parts[:], ";")}}
 	if len(cur) > 0 {
 		for _, k := range sortedKeys(cur[0].Params) {
 			ops = append(ops, model.SetParam{Prop: prop, Index: 0, Param: k, Value: cur[0].Params[k]})
@@ -655,9 +748,14 @@ func (s *Server) recordForm(c *collectionCtx, st editState) view.Form {
 		vals, errText := st.values[f.name], text(st.errors[f.name])
 		switch f.typ {
 		case fieldText:
-			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Error: errText, Required: f.required})
+			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required})
 		case fieldArea:
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
+		case fieldName:
+			row := pair(vals)
+			main.Rows = append(main.Rows,
+				view.FormRow{Name: f.name + ".given", Label: "Given", Kind: view.InputText, Value: text(row[0]), Error: errText},
+				view.FormRow{Name: f.name + ".family", Label: "Family", Kind: view.InputText, Value: text(row[1])})
 		case fieldMulti:
 			kind := view.InputText
 			if f.prop == "EMAIL" {

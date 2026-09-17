@@ -329,6 +329,77 @@ func TestEditContactWritesOnlyWhatChanged(t *testing.T) {
 	}
 }
 
+// U-6.1: the contact editor holds three name fields — Display name, Given and
+// Family. Given and Family are the two components of N a person types; the
+// three the form does not offer — middle name, prefix, suffix — come back
+// untouched (S-7). An empty display name is assembled from the two on save.
+// Without N a server that builds FN from it leaves the contact with no name at
+// all (docs/servers.md, SV-21).
+func TestContactNameFieldsWriteN(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nN:Lovelace;Ada;Byron;;Countess\nEND:VCARD\n")
+	rec := f.path("contacts") + "/ada"
+
+	edit := decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess)))
+	if got := string(rowNamed(t, edit.Form, "n.given").Value); got != "Ada" {
+		t.Errorf("Given = %q, want the given name out of N", got)
+	}
+	if got := string(rowNamed(t, edit.Form, "n.family").Value); got != "Lovelace" {
+		t.Errorf("Family = %q, want the family name out of N", got)
+	}
+
+	form := formFields(edit.Form)
+	form.Set("n.family", "King")
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
+	}
+	// Byron and Countess are nobody's to drop: no field offers them.
+	mustContain(t, body(t, f, "ada.vcf"), "N:King;Ada;Byron;;Countess")
+
+	form = formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	form.Set("fn", "")
+	form.Set("n.given", "Augusta")
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save without a display name: %d %s", resp.Code, resp.Body.String())
+	}
+	mustContain(t, body(t, f, "ada.vcf"), "FN:Augusta King", "N:King;Augusta;Byron;;Countess")
+
+	// The other way round (U-6.16): one display name and both parts emptied —
+	// it is cut left to right, and the components no field offers stay put.
+	// The two rules must not undo each other: what was assembled a moment ago
+	// is not re-cut, and what is cut here is not assembled back.
+	form = formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	form.Set("fn", "Grace Hopper")
+	form.Set("n.given", "")
+	form.Set("n.family", "")
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save with a display name alone: %d %s", resp.Code, resp.Body.String())
+	}
+	mustContain(t, body(t, f, "ada.vcf"), "FN:Grace Hopper", "N:Hopper;Grace;Byron;;Countess")
+}
+
+// A card another client wrote without N keeps having none when the person
+// edits something else entirely: the cut happens on a changed display name,
+// not on every save. What nobody touched is not written (S-7, U-6.1).
+func TestEditingAnotherFieldDoesNotGrowAName(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEND:VCARD\n")
+	rec := f.path("contacts") + "/ada"
+
+	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	form.Set("title", "Countess")
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
+	}
+	got := body(t, f, "ada.vcf")
+	mustContain(t, got, "TITLE:Countess", "FN:Ada Lovelace")
+	// A property, not a substring: "N:" lives inside BEGIN: and VERSION: too.
+	for _, line := range strings.Split(got, "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), "N:") {
+			t.Errorf("editing the title wrote a name nobody entered:\n%s", got)
+			break
+		}
+	}
+}
+
 // S-8: a write against a version that moved on is not sent over it. The
 // screen lists only what the person changed and the server holds otherwise;
 // the chosen combination lands on the server version with its If-Match.
@@ -347,11 +418,14 @@ func TestConflictScreenAndCombination(t *testing.T) {
 	mustContain(t, body(t, f, "ada.vcf"), "FN:Ada Byron", "NOTE:server note")
 
 	page := decode[view.ConflictPage](t, f.h.do(get(rec+"/conflict", f.sess)))
+	// The name was changed, so N is part of that change and the screen says so
+	// (U-6.1): the card on the server carries none, and this one now would.
 	want := []view.ConflictRow{
-		{Property: "Name", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceUnset},
+		{Property: "Display name", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceUnset},
+		{Property: "Name", Mine: "Ada, King", Theirs: "Empty", Choice: view.ChoiceUnset},
 		{Property: "Title", Mine: "Countess", Theirs: "Empty", Choice: view.ChoiceUnset},
 	}
-	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] {
+	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] || page.Rows[2] != want[2] {
 		t.Fatalf("rows = %+v", page.Rows)
 	}
 	if page.ReadAt == "" || page.Kind != view.KindContact {
