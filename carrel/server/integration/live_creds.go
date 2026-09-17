@@ -171,16 +171,13 @@ func credEnv(text string) map[string]string {
 	set("CARREL_GOOGLE_CARDDAV_USER", google.get("login"))
 	gpass := strings.ReplaceAll(google.get("app password, carreldav", "app password"), " ", "")
 	set("CARREL_GOOGLE_CARDDAV_PASS", gpass)
-	// The calendar is not in the file: it names a private .ics feed, which is a
-	// file to read and not a server. This address is Google's own and public,
-	// and it is the one that answers an app password — the documented
-	// apidata.googleusercontent.com/caldav/v2 answers 401 loginRequired and
-	// wants OAuth2 (docs/servers.md, SV-24).
-	if google.get("login") != "" {
-		set("CARREL_GOOGLE_CALDAV_URL", "https://www.google.com/calendar/dav/")
-		set("CARREL_GOOGLE_CALDAV_USER", google.get("login"))
-		set("CARREL_GOOGLE_CALDAV_PASS", gpass)
-	}
+	// Contacts and calendars sit on different hosts, so the file names both and
+	// each is taken by what it contains. The documented
+	// apidata.googleusercontent.com/caldav/v2 is not among them: it answers 401
+	// loginRequired and wants OAuth2 (docs/servers.md, SV-24).
+	set("CARREL_GOOGLE_CALDAV_URL", credURL(pickURL(google, "calendar/dav")))
+	set("CARREL_GOOGLE_CALDAV_USER", google.get("login"))
+	set("CARREL_GOOGLE_CALDAV_PASS", gpass)
 
 	// SoGo names one calendar and one address book of a mailbox account.
 	sogo := find("sogo", "")
