@@ -28,8 +28,8 @@ func (s *Server) stubShellPage(w http.ResponseWriter, r *http.Request, title str
 	s.writePage(w, r, http.StatusOK, body)
 }
 
-// sheetStub answers the sheet-shaped screens that are not wired yet: publish,
-// mail, the mail attachment and the file picker. An empty sheet as a fragment,
+// sheetStub answers the sheet-shaped screens that are not wired yet: mail,
+// the mail attachment and the file picker. An empty sheet as a fragment,
 // 404 otherwise. It used to be getQuickNote and carried the notes route too;
 // the quick note goes through the common sheet now (U-6.16), and what is left
 // here is only the stub.
@@ -42,14 +42,6 @@ func (s *Server) sheetStub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.notFound(w, r)
-}
-
-func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
-	s.sheetStub(w, r)
-}
-
-func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
-	s.getPublish(w, r)
 }
 
 func (s *Server) getMailCompose(w http.ResponseWriter, r *http.Request) {
@@ -174,15 +166,6 @@ func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) postFilesPicker(w http.ResponseWriter, r *http.Request) {
 	s.getFilesPicker(w, r)
-}
-
-func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.PublishedLinksPage{Shell: s.buildShell(sess, "Published links")}
-	s.writePage(w, r, http.StatusOK, page)
 }
 
 func (s *Server) getSettingsAccount(w http.ResponseWriter, r *http.Request) {

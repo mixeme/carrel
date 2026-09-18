@@ -1,0 +1,199 @@
+package web_test
+
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
+	"testing"
+
+	"github.com/emersion/go-webdav/caldav"
+	"github.com/emersion/go-webdav/carddav"
+
+	"carrel.dev/carrel/server/internal/davtest"
+	"carrel.dev/carrel/server/view"
+)
+
+// publishFixture: a book with two people and a calendar with an event and a
+// note, on one server whose password must never leave the envelope.
+func publishFixture(t *testing.T) davFixture {
+	t.Helper()
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "dav-secret-pw"
+	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work"})
+	srv.Seed(searchBook+"ada.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEMAIL:ada@example.com\nEND:VCARD\n")
+	srv.Seed(searchBook+"bob.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:bob\nFN:Bob Builder\nEND:VCARD\n")
+	srv.Seed(searchWork+"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260801T000000Z\nSUMMARY:Standup\nDTSTART:20260810T090000Z\nLOCATION:Room 4\nEND:VEVENT"))
+	srv.Seed(searchWork+"n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260801T000000Z\nSUMMARY:Reading list\nDTSTART;VALUE=DATE:20260808\nDESCRIPTION:# CRDT\\n\\nKleppmann\\, chapter 5\nEND:VJOURNAL"))
+	return connectFixture(t, srv, searchBook, nil)
+}
+
+func (f davFixture) publishHref(segment, col, uid string) string {
+	q := url.Values{"k": {segment}, "a": {f.id}, "c": {col}}
+	if uid != "" {
+		q.Set("uid", uid)
+	}
+	return "/app/publish?" + q.Encode()
+}
+
+// publishLink makes a link the way the sheet does and returns its address.
+func publishLink(t *testing.T, f davFixture, href string, forever bool) string {
+	t.Helper()
+	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
+	id := "publish.create"
+	if forever {
+		id = "publish.forever"
+	}
+	got := decode[view.PublishSheet](t, f.h.do(postForm(actionHref(t, sheet.Actions, id), f.sess, url.Values{})))
+	if !strings.HasPrefix(string(got.Link), "/p/") {
+		t.Fatalf("no link: %+v", got)
+	}
+	return string(got.Link)
+}
+
+// anon is a request from someone with no session at all.
+func anon(path string) *http.Request { return httptest.NewRequest(http.MethodGet, path, nil) }
+
+func publicPage(t *testing.T, f davFixture, link string) view.PublishedPage {
+	t.Helper()
+	return decode[view.PublishedPage](t, f.h.do(anon(link)))
+}
+
+// S-25.1: the sheet names the thing and the lifetime and makes nothing; the
+// link is shown once and only its hash is kept; the envelope keeps the
+// password sealed; the page is read live, without a session, read-only, and
+// leads nowhere into the owner's Carrel.
+func TestPublishedBookIsReadLive(t *testing.T) {
+	f := publishFixture(t)
+	href := f.publishHref("contacts", searchBook, "")
+	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
+	if !strings.Contains(string(sheet.Target), "People") || !strings.Contains(string(sheet.Expires), "30 days") || sheet.Link != "" {
+		t.Fatalf("sheet = %+v", sheet)
+	}
+	if len(journaled(f, "publish.create")) != 0 {
+		t.Fatal("opening the sheet published")
+	}
+
+	link := publishLink(t, f, href, false)
+	token := strings.TrimPrefix(link, "/p/")
+	state, _ := json.Marshal(f.h.st.Snapshot())
+	if strings.Contains(string(state), token) || strings.Contains(string(state), "dav-secret-pw") {
+		t.Fatal("the state holds the secret or the password in the clear")
+	}
+	if len(journaled(f, "publish.create")) != 1 {
+		t.Error("publishing is not in the journal")
+	}
+
+	f.srv.Seed(searchBook+"cy.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:cy\nFN:Cy Twombly\nEND:VCARD\n")
+	rec := f.h.do(anon(link))
+	page := decode[view.PublishedPage](t, rec)
+	if !page.ReadOnly || page.Kind != view.KindContact || len(page.Contacts) != 3 {
+		t.Fatalf("page = %+v", page)
+	}
+	if rec.Header().Get("Referrer-Policy") != "no-referrer" || !strings.Contains(rec.Header().Get("Cache-Control"), "no-store") {
+		t.Errorf("headers = %v", rec.Header())
+	}
+	if body := rec.Body.String(); strings.Contains(body, "/app/") || strings.Contains(body, f.id) || strings.Contains(body, "alice") {
+		t.Errorf("the public page leads into the owner's Carrel:\n%s", body)
+	}
+
+	dl := f.h.do(anon(link + "/download"))
+	if dl.Code != http.StatusOK || !strings.Contains(dl.Body.String(), "FN:Cy Twombly") || !strings.Contains(dl.Header().Get("Content-Disposition"), "attachment") {
+		t.Errorf("download: %d %v", dl.Code, dl.Header())
+	}
+}
+
+// One record, three kinds: an event with its fields and body, a note as a
+// document, a contact with its fields.
+func TestPublishedRecords(t *testing.T) {
+	f := publishFixture(t)
+	ev := publicPage(t, f, publishLink(t, f, f.publishHref("calendar", searchWork, "e1"), false))
+	if ev.Title != "Standup" || ev.Kind != view.KindEvent {
+		t.Fatalf("event = %+v", ev)
+	}
+	room := false
+	for _, fl := range ev.Fields {
+		room = room || fl.Value == "Room 4"
+	}
+	if !room {
+		t.Errorf("event fields = %+v", ev.Fields)
+	}
+	note := publicPage(t, f, publishLink(t, f, f.publishHref("notes", searchWork, "n1"), true))
+	if note.Note == nil || note.Note.Title != "Reading list" || !note.Note.ReadOnly || len(note.Note.Rendered) == 0 {
+		t.Errorf("note = %+v", note.Note)
+	}
+	ada := publicPage(t, f, publishLink(t, f, f.publishHref("contacts", searchBook, "ada"), false))
+	if ada.Title != "Ada Lovelace" || len(ada.Fields) == 0 || len(ada.Contacts) != 0 {
+		t.Errorf("contact = %+v", ada)
+	}
+}
+
+// Revoked is never-was: the same 404 as a link that never existed. The list
+// shows the link without its secret; someone else cannot revoke it.
+func TestRevokedIsNeverWas(t *testing.T) {
+	f := publishFixture(t)
+	link := publishLink(t, f, f.publishHref("calendar", searchWork, ""), false)
+	cal := publicPage(t, f, link)
+	if cal.Range == nil || len(cal.Range.Presets) != 3 || !strings.HasPrefix(cal.Range.Presets[0].Href, link+"?from=") {
+		t.Errorf("calendar range = %+v", cal.Range)
+	}
+
+	list := decode[view.PublishedLinksPage](t, f.h.do(get("/app/files/published", f.sess)))
+	if len(list.Rows) != 1 || list.Rows[0].Title != "Work" || list.Rows[0].Link != "" || strings.Contains(list.Rows[0].Actions[0].Href, strings.TrimPrefix(link, "/p/")) {
+		t.Fatalf("links = %+v", list.Rows)
+	}
+	revoke := actionHref(t, list.Rows[0].Actions, "publish.revoke")
+
+	adminID := f.h.st.Snapshot().Users[0].ID
+	f.h.invite(adminID, "mallory", "password456")
+	if rec := f.h.do(postForm(revoke, f.h.login("mallory", "password456"), url.Values{})); rec.Code != http.StatusNotFound {
+		t.Errorf("someone else revoked: %d", rec.Code)
+	}
+	if rec := f.h.do(postForm(revoke, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("revoke: %d", rec.Code)
+	}
+	gone := f.h.do(anon(link))
+	never := f.h.do(anon("/p/" + strings.Repeat("A", 43)))
+	if gone.Code != http.StatusNotFound || never.Code != http.StatusNotFound || gone.Body.String() != never.Body.String() {
+		t.Errorf("revoked %d %q, never %d %q", gone.Code, gone.Body.String(), never.Code, never.Body.String())
+	}
+	if f.h.do(anon(link+"/download")).Code != http.StatusNotFound {
+		t.Error("a revoked link still downloads")
+	}
+	if len(f.h.st.Snapshot().Published) != 0 {
+		t.Error("the revoked link's envelope is still in the state")
+	}
+}
+
+// A server that does not answer is a notice to the reader — not a 500, and
+// not the server's name.
+func TestPublishedSourceDown(t *testing.T) {
+	f := publishFixture(t)
+	link := publishLink(t, f, f.publishHref("contacts", searchBook, ""), false)
+	f.srv.Refuse("REPORT", http.StatusServiceUnavailable, "down")
+	rec := f.h.do(anon(link))
+	page := decode[view.PublishedPage](t, rec)
+	if !hasNotice(page.Notices, "The source did not answer") || len(page.Actions) != 0 {
+		t.Errorf("page = %+v", page)
+	}
+	if strings.Contains(rec.Body.String(), "127.0.0.1") {
+		t.Errorf("the reader is told the server:\n%s", rec.Body.String())
+	}
+}
+
+// Publishing is reading: a record page and a list offer it, a read-only
+// collection too.
+func TestPublishIsOffered(t *testing.T) {
+	f := publishFixture(t)
+	card := decode[view.ContactPage](t, f.h.do(get(f.path("contacts")+"/ada", f.sess)))
+	if actionHref(t, card.Actions, "publish") != f.publishHref("contacts", searchBook, "ada") {
+		t.Errorf("record actions = %+v", card.Actions)
+	}
+	list := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
+	actionHref(t, list.Bar.Actions, "publish")
+	if rec := f.h.do(get("/app/publish?k=contacts&a=nope&c=x", f.sess)); rec.Code != http.StatusNotFound {
+		t.Errorf("a foreign target: %d", rec.Code)
+	}
+}

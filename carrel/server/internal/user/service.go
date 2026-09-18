@@ -126,10 +126,6 @@ func (s *Service) Unlock(ctx context.Context, accountID, password string) bool {
 	return true
 }
 
-func (s *Service) PublicLinkValid(_ context.Context, token string) bool {
-	return false
-}
-
 // verifyDummy burns one login derivation so a miss is not faster than a
 // wrong password. The result is discarded.
 func (s *Service) verifyDummy(ctx context.Context, password string) {

@@ -25,6 +25,32 @@ type State struct {
 	Settings InstanceSettings `json:"settings"`
 	Invites  []Invite         `json:"invites"`
 	Tokens   []SecretToken    `json:"tokens"`
+	// Published are the links out (S-25). A link reads without a session, so
+	// its target and an envelope with its connection's credentials live here
+	// — never the secret, only its hash.
+	Published []PublishedLink `json:"published,omitempty"`
+}
+
+// PublishedLink is one secret link to one thing, read-only (S-25).
+type PublishedLink struct {
+	Hash      []byte `json:"hash"` // SHA-256 of the 32-byte secret
+	UserID    string `json:"userID"`
+	AccountID string `json:"accountID"`
+	Kind      string `json:"kind"` // view.Kind of the thing
+	Col       string `json:"col"`  // the collection
+	UID       string `json:"uid,omitempty"`
+	// Path is a file or a folder under a file collection; Folder marks one.
+	Path   string `json:"path,omitempty"`
+	Folder bool   `json:"folder,omitempty"`
+	// Title is the label the link was made under: the collection's name or
+	// the record's title as it stood. The page shows the live one.
+	Title     string     `json:"title"`
+	CreatedAt time.Time  `json:"createdAt"`
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"` // nil: no expiry, chosen explicitly
+	LastSeen  *time.Time `json:"lastSeen,omitempty"`
+	// Envelope holds the connection's address and credentials, sealed again
+	// under the server key and bound to Hash (crypt.SealLink).
+	Envelope []byte `json:"envelope"`
 }
 
 // InstanceSettings holds instance-wide configuration stored in state.enc.

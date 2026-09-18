@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"fmt"
 
@@ -200,6 +201,22 @@ func EncryptState(serverKey [KeyLen]byte, plaintext []byte, version uint32) ([]b
 // DecryptState opens the instance state file.
 func DecryptState(serverKey [KeyLen]byte, ciphertext []byte, version uint32) ([]byte, error) {
 	return open(serverKey[:], aadState(version), ciphertext)
+}
+
+// aadLink binds a published link's envelope to the link: the hex of its
+// secret's hash (S-25).
+func aadLink(hash []byte) []byte { return []byte("carrel.publish.v1|" + hex.EncodeToString(hash)) }
+
+// SealLink seals what a published link needs to read without a session —
+// the credentials of its one connection — under the server key, inside the
+// already sealed state: a nested AEAD bound to the link (S-25).
+func SealLink(serverKey [KeyLen]byte, hash, plaintext []byte) ([]byte, error) {
+	return seal(serverKey[:], aadLink(hash), plaintext)
+}
+
+// OpenLink opens a published link's envelope.
+func OpenLink(serverKey [KeyLen]byte, hash, ciphertext []byte) ([]byte, error) {
+	return open(serverKey[:], aadLink(hash), ciphertext)
 }
 
 // Wipe overwrites wrapped key material so the data key cannot be recovered.

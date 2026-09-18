@@ -473,42 +473,6 @@ func (s *Server) forgotWipePage(w http.ResponseWriter, r *http.Request, token, l
 	return page
 }
 
-func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	if !s.limit.allowAnon(s.clientIP(r), start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return
-	}
-	token := r.PathValue("token")
-	if !s.users.PublicLinkValid(r.Context(), token) {
-		s.tokenNotFound(w, r, start)
-		return
-	}
-	page := view.PublishedPage{
-		Plain:    view.Plain{Title: text("Published"), Lede: text("Read-only view.")},
-		ReadOnly: true,
-	}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	if !s.limit.allowAnon(s.clientIP(r), start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return
-	}
-	s.tokenNotFound(w, r, start)
-}
-
-func (s *Server) getPublishedFile(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	if !s.limit.allowAnon(s.clientIP(r), start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return
-	}
-	s.tokenNotFound(w, r, start)
-}
-
 func (s *Server) postBackupRun(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	if !s.limit.allowAnon(s.clientIP(r), start) {

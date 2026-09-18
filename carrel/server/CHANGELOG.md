@@ -5,6 +5,40 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.100 — 2026-09-18
+
+A collection or a record can be published as a secret read-only link
+(S-25.1, first part).
+
+### For consumers
+
+- **"Publish…"** on every record page and in every list's bar, read-only
+  collections included: publishing only reads. `GET /app/publish?k=&a=&c=`
+  (and `uid=` for one record) is the sheet — what is published and until
+  when, before anything is made; its actions POST the same address for 30
+  days or, explicitly, without an expiry. The answer carries the link once.
+- **`/p/{token}` is read live, without a session**: an address book, one week
+  of a calendar with its range, a task list, a notebook, or one record. The
+  page is read-only and leads nowhere into the owner's Carrel: no app
+  addresses, no server, no login. A server that does not answer is a notice,
+  not a 500. `/p/{token}/download` hands the collection or the record over as
+  a file.
+- **Revoked, expired and never-existing links are one 404**, in one time.
+  So is the link of a disabled account.
+- **`/app/files/published`** lists the live links — what, created, until,
+  last opened — with Revoke. The link itself is not shown again: only its
+  hash is kept.
+- `PublishedPage` gains `Tasks`, `Notes`, `Fields` and `Body`.
+
+### Security
+
+- The state keeps each link's hash, target and expiry, and an envelope with
+  the address and credentials of that link's one connection, sealed again
+  under `server.key` and bound to the link. A stolen volume together with
+  `server.key` opens the passwords of connections that have a live link —
+  the price of reading without a session. Revoking a link deletes its
+  envelope.
+
 ## v0.0.99 — 2026-09-18
 
 The Android tab has a code that opens DAVx5 (S-23).

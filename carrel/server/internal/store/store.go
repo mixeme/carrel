@@ -107,3 +107,13 @@ func (s *Store) Mutate(fn func(*State) ([]AuditEntry, error)) error {
 	s.firstRun = false
 	return nil
 }
+
+// SealLink seals a published link's envelope under the server key (S-25).
+func (s *Store) SealLink(hash, plaintext []byte) ([]byte, error) {
+	return crypt.SealLink(s.serverKey, hash, plaintext)
+}
+
+// OpenLink opens a published link's envelope.
+func (s *Store) OpenLink(hash, ciphertext []byte) ([]byte, error) {
+	return crypt.OpenLink(s.serverKey, hash, ciphertext)
+}

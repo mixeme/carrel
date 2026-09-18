@@ -547,7 +547,7 @@ func (s *Server) listActions(c *collectionCtx, export url.Values) []view.Action 
 	if !c.col.ReadOnly {
 		out = append(out, s.importAction(c))
 	}
-	return append(out, s.exportAction(c, export))
+	return append(out, s.exportAction(c, export), s.publishAction(c, ""))
 }
 
 func retryPath(c *collectionCtx, r *http.Request) string {

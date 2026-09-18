@@ -72,6 +72,10 @@ type PublishedPage struct {
 	Range    *Range           `json:"range"`
 	Contacts []ContactRow     `json:"contacts"`
 	Days     []AgendaDay      `json:"days"`
+	Tasks    []TaskRow        `json:"tasks"`  // опубликованный список задач
+	Notes    []NoteRow        `json:"notes"`  // опубликованная тетрадь
+	Fields   []Field          `json:"fields"` // одна запись: контакт, событие, задача
+	Body     Text             `json:"body"`   // описание события или задачи
 	Note     *NoteDoc         `json:"note"`
 	File     *PublishedFile   `json:"file"`
 	Folder   *PublishedFolder `json:"folder"`

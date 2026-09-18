@@ -90,6 +90,13 @@ type Users interface {
 	TakeDeviceProfile(viewerID, token string) ([]string, bool)
 	RevokeDeviceProfiles(viewerID string) error
 	SetDeviceExcluded(viewerID string, dataKey [32]byte, accountID string, excluded bool) error
+	// Published links (S-25): made with the one connection's credentials in
+	// a sealed envelope, opened without a session, listed and revoked by
+	// their owner.
+	Publish(viewerID string, conn sealed.Connection, target user.PublishTarget, expires *time.Time) (string, error)
+	OpenPublished(token string) (user.OpenLink, bool)
+	PublishedLinks(viewerID string) []user.PublishedLink
+	RevokePublished(viewerID, id string) error
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).

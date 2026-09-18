@@ -1699,6 +1699,10 @@ type PublishedPage struct {
     Range    *Range
     Contacts []ContactRow
     Days     []AgendaDay
+    Tasks    []TaskRow  // опубликованный список задач
+    Notes    []NoteRow  // опубликованная тетрадь
+    Fields   []Field    // одна запись: контакт, событие, задача
+    Body     Text       // описание события или задачи
     Note     *NoteDoc
     File     *PublishedFile
     Folder   *PublishedFolder

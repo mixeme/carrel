@@ -315,7 +315,8 @@ func TestReadOnlyAndMove(t *testing.T) {
 	old := f.record(f.id, archiveBook, "old")
 
 	card := decode[view.ContactPage](t, f.h.do(get(old, f.sess)))
-	if len(card.Actions) != 1 || card.Actions[0].ID != "record.copy" {
+	// Copy and Publish only: both read, neither writes here (S-18, S-25).
+	if len(card.Actions) != 2 || card.Actions[0].ID != "record.copy" || card.Actions[1].ID != "publish" {
 		t.Errorf("read-only actions = %+v", card.Actions)
 	}
 	for _, req := range []*http.Request{
