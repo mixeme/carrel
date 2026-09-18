@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"strings"
@@ -27,8 +28,43 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 	case err != nil:
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 	default:
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj))
+		s.writePage(w, r, http.StatusOK, s.withLinked(r.Context(), c, uid, obj, s.recordPage(c, uid, obj)))
 	}
+}
+
+// withLinked is the reading page of a record in a linked group: the card of
+// the entity (S-16). A record in no group is its page as it is.
+func (s *Server) withLinked(ctx context.Context, c *collectionCtx, uid string, obj *model.Object, page any) any {
+	switch p := page.(type) {
+	case view.ContactPage:
+		s.linkedContact(ctx, c, uid, obj, &p)
+		return p
+	case view.EventPage:
+		if title, fields, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
+			if title != "" {
+				p.Shell.Title, p.Summary = text(title), text(title)
+			}
+			p.Fields, p.Linked = fields(p.Fields), rows
+		}
+		return p
+	case view.TaskPage:
+		if title, fields, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
+			if title != "" {
+				p.Shell.Title, p.Summary = text(title), text(title)
+			}
+			p.Fields, p.Linked = fields(p.Fields), rows
+		}
+		return p
+	case view.NotePage:
+		if title, _, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
+			if title != "" {
+				p.Shell.Title, p.Doc.Title = text(title), text(title)
+			}
+			p.Meta.Linked = rows
+		}
+		return p
+	}
+	return page
 }
 
 // recordPage builds the reading page of the collection's kind. A nil obj is
@@ -126,6 +162,28 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	page.Shell.Title, page.Name, page.Avatar = text(name), text(name), avatarFor(uid, name)
 	page.Avatar.Href, page.PhotoHref = s.cardPhoto(c, uid, obj)
 	page.Print = s.recordPrint(c, page.Name)
+	for _, f := range contactFieldsOf(obj) {
+		page.Fields = append(page.Fields, f.Field)
+	}
+	page.Tags = s.recordTags(c, obj)
+	page.Foreign = card.Foreign(obj)
+	if photoOf(obj) == linkedPhoto {
+		page.PhotoNote = externalPhotoNote
+	}
+	page.Actions = s.recordActions(c, uid, obj.ETag)
+	return page
+}
+
+// propField is a field of the card with the property it shows.
+type propField struct {
+	view.Field
+	prop string
+}
+
+// contactFieldsOf are the fields of a contact card, in the order of
+// contactFields.
+func contactFieldsOf(obj *model.Object) []propField {
+	var out []propField
 	props := obj.Props()
 	for _, f := range contactFields {
 		for _, v := range props[f.prop] {
@@ -136,16 +194,10 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 			if f.href != nil {
 				field.Href = f.href(v.Text)
 			}
-			page.Fields = append(page.Fields, field)
+			out = append(out, propField{Field: field, prop: f.prop})
 		}
 	}
-	page.Tags = s.recordTags(c, obj)
-	page.Foreign = card.Foreign(obj)
-	if photoOf(obj) == linkedPhoto {
-		page.PhotoNote = externalPhotoNote
-	}
-	page.Actions = s.recordActions(c, uid, obj.ETag)
-	return page
+	return out
 }
 
 func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, notices []view.Notice) view.EventPage {

@@ -84,6 +84,7 @@ type EventPage struct {
 	Attendees  []AttendeeRow   `json:"attendees"` // только чтение, без согласования
 	Attach     []AttachRow     `json:"attach"`
 	Related    []TimelineRow   `json:"related"`
+	Linked     []Field         `json:"linked"` // та же встреча в других календарях (S-16)
 	Source     SourceBlock     `json:"source"`
 	Loss       *LossReport     `json:"loss"`
 	Actions    []Action        `json:"actions"`  // правка, перенос, копия, печать, письмо, удаление
@@ -141,6 +142,7 @@ type TaskPage struct {
 	Reminders []ReminderRow `json:"reminders"`
 	Attach    []AttachRow   `json:"attach"`
 	Related   []TimelineRow `json:"related"`
+	Linked    []Field       `json:"linked"` // та же задача в других списках (S-16)
 	Source    SourceBlock   `json:"source"`
 	Loss      *LossReport   `json:"loss"`
 	Actions   []Action      `json:"actions"`
@@ -183,6 +185,7 @@ type NoteMeta struct {
 	Date    Text          `json:"date"`
 	Tags    []Tag         `json:"tags"`
 	Related []TimelineRow `json:"related"`
+	Linked  []Field       `json:"linked"` // та же заметка в других тетрадях (S-16)
 	Attach  []AttachRow   `json:"attach"`
 	Actions []Action      `json:"actions"`
 }

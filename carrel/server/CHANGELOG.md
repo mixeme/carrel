@@ -5,6 +5,27 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.97 — 2026-09-18
+
+The card of a linked record is the card of the entity.
+
+### For consumers
+
+- **Opening a record of a linked group shows the group**: the name,
+  organisation and photo (contacts) or title and place (events, tasks, notes)
+  chosen when linking; every member's fields without exact repeats; and a
+  single-valued field only another member holds, taken from it.
+- **One row per other member**: `ContactPage.Books`, and the new
+  `EventPage.Linked`, `TaskPage.Linked`, `NoteMeta.Linked` — `Label` is where
+  it lives, `Href` its own card, `Value` what it holds differently
+  ("Phone, email differ", "Holds the same") or that its server did not
+  answer.
+- **The card reads the other members from their servers** when it is opened.
+  A server that does not answer is named in its row and the group stays; a
+  member its server no longer holds leaves the group silently.
+- Time, repetition, reminders and editing stay the opened record's own: an
+  edit on the card writes that record only.
+
 ## v0.0.96 — 2026-09-18
 
 Linking asks once where the records disagree, and remembers.

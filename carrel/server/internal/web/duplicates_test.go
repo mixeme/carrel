@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
 
 	"carrel.dev/carrel/server/internal/davtest"
@@ -510,5 +511,88 @@ func TestLinkRemembersTheAnswer(t *testing.T) {
 		if row.Property == "FN" && string(row.Options[row.Chosen]) != "LOVELACE Ada" {
 			t.Errorf("merge does not start from the answer: %+v", row)
 		}
+	}
+}
+
+// S-16: the card of a linked record is the card of the entity — the chosen
+// name, the fields of every member without repeats, a field only another
+// member holds, and a row per other member with what it holds differently.
+// A server that does not answer is said in its row and takes nobody out.
+func TestLinkedCardShowsTheEntity(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	g := onlyGroup(t, f.page(t))
+	pick := optionIndex(t, g.Choices[0], "LOVELACE Ada")
+	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{"choice.FN": {strconv.Itoa(pick)}}))
+
+	card := decode[view.ContactPage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here"), f.sess)))
+	if card.Name != "LOVELACE Ada" {
+		t.Errorf("name = %q, want the chosen one", card.Name)
+	}
+	fields := map[string]int{}
+	for _, fl := range card.Fields {
+		fields[string(fl.Label)+" "+string(fl.Value)]++
+	}
+	for _, want := range []string{"Email · home ada@example.com", "Email · work ada@engines.example",
+		"Phone +44 20 7946 0000", "Organisation Analytical Engines"} {
+		if fields[want] != 1 {
+			t.Errorf("field %q shown %d times in %+v", want, fields[want], card.Fields)
+		}
+	}
+	if len(card.Books) != 1 || !strings.HasSuffix(string(card.Books[0].Label), "Work") ||
+		card.Books[0].Href != f.record(f.otherID, workBook, "ada-there") || !strings.Contains(string(card.Books[0].Value), "differ") {
+		t.Fatalf("books = %+v", card.Books)
+	}
+	if n := f.writes(); n != 0 {
+		t.Errorf("opening a linked card wrote %d times", n)
+	}
+
+	f.other.Refuse("REPORT", http.StatusServiceUnavailable, "down")
+	down := decode[view.ContactPage](t, f.h.do(get(f.record(f.id, peopleBook, "ada-here"), f.sess)))
+	if len(down.Books) != 1 || !strings.Contains(string(down.Books[0].Value), "did not answer") {
+		t.Errorf("books with the other server down = %+v", down.Books)
+	}
+	if d := f.decisions(t); len(d.Linked) != 1 {
+		t.Errorf("an unavailable member left the group: %+v", d.Linked)
+	}
+
+	bob := decode[view.ContactPage](t, f.h.do(get(f.record(f.id, peopleBook, "bob"), f.sess)))
+	if len(bob.Books) != 0 {
+		t.Errorf("an unlinked card has books: %+v", bob.Books)
+	}
+}
+
+// The same card for the calendar kinds: a linked event names the other
+// calendar and takes the place only the other holds.
+func TestLinkedEventCard(t *testing.T) {
+	srv := searchServer(t)
+	duty := davtest.CalendarHome + "duty/"
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work"})
+	srv.AddCalendar(caldav.Calendar{Path: duty, Name: "Duty"})
+	srv.Seed(searchWork+"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260801T000000Z\nSUMMARY:On duty\nDTSTART;VALUE=DATE:20260810\nEND:VEVENT"))
+	srv.Seed(duty+"e2.ics", ics("BEGIN:VEVENT\nUID:e2\nDTSTAMP:20260801T000000Z\nSUMMARY:On duty\nDTSTART;VALUE=DATE:20260810\nLOCATION:Room 4\nEND:VEVENT"))
+	f := connectFixture(t, srv, searchWork, nil)
+	cal := func(col string) string { return "/app/calendar/" + f.id + "/" + url.PathEscape(col) }
+	for _, col := range []string{searchWork, duty} {
+		f.h.do(get(cal(col)+"?from=2026-08-10", f.sess))
+	}
+	p := decode[view.DuplicatesPage](t, f.h.do(get("/app/duplicates", f.sess)))
+	g := onlyGroup(t, p)
+	if g.Kind != view.KindEvent {
+		t.Fatalf("group = %+v", g)
+	}
+	f.h.do(postForm(actionOf(t, g, "duplicates.link").Href, f.sess, url.Values{}))
+	page := decode[view.EventPage](t, f.h.do(get(cal(searchWork)+"/e1", f.sess)))
+	if len(page.Linked) != 1 || !strings.HasSuffix(string(page.Linked[0].Label), "Duty") {
+		t.Fatalf("linked = %+v", page.Linked)
+	}
+	found := false
+	for _, fl := range page.Fields {
+		if fl.Label == "Location" && fl.Value == "Room 4" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("the place only the other holds is not shown: %+v", page.Fields)
 	}
 }

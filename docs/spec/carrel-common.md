@@ -927,6 +927,7 @@ type EventPage struct { // чтение: то, что открывается п�
     Attendees []AttendeeRow // только чтение, без согласования
     Attach    []AttachRow
     Related   []TimelineRow
+    Linked    []Field // та же встреча в других календарях (S-16)
     Source    SourceBlock
     Loss      *LossReport
     Actions   []Action // правка, перенос, копия, печать, письмо, удаление
@@ -974,6 +975,7 @@ type TaskPage struct { // чтение
     Reminders []ReminderRow
     Attach    []AttachRow
     Related   []TimelineRow
+    Linked    []Field // та же задача в других списках (S-16)
     Source    SourceBlock
     Loss      *LossReport
     Actions   []Action
@@ -1014,6 +1016,7 @@ type NoteMeta struct {
     Date    Text
     Tags    []Tag
     Related []TimelineRow
+    Linked  []Field // та же заметка в других тетрадях (S-16)
     Attach  []AttachRow
     Actions []Action
 }
