@@ -349,6 +349,19 @@ func (s *Service) SetAttachmentFolder(viewerID string, dataKey [crypt.KeyLen]byt
 	})
 }
 
+// SetUploadFolder remembers where "Upload file" puts files. No journal: a
+// folder chosen for the next upload is a hint of a form, not an event.
+func (s *Service) SetUploadFolder(viewerID string, dataKey [crypt.KeyLen]byte, folder sealed.AttachmentFolder) error {
+	return s.editBlob(viewerID, dataKey, nil, func(blob *sealed.Blob) error {
+		col, ok := blob.Collection(folder.AccountID, folder.Path)
+		if _, hasConn := blob.Connection(folder.AccountID); !hasConn || !ok || col.Gone || !col.Has(view.KindFile) {
+			return ErrNotFound
+		}
+		blob.UploadTo = &folder
+		return nil
+	})
+}
+
 // SetLastUsed remembers the collection a record of this kind was just created
 // in, so the quick sheet opened from the shell starts there (U-6.16). It
 // writes nothing to the journal: this happens on every record made, and a hint

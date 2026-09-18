@@ -5,6 +5,16 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.114 — 2026-09-19
+
+"Upload file" in the create menu asks where the files go.
+
+### For consumers
+
+- **Upload file** opens a sheet with the tree of folders: the attachment
+  folder first, and after that the folder you chose there last. "Upload here"
+  sends the files to it the usual way; read-only storage is shown and closed.
+
 ## v0.0.113 — 2026-09-19
 
 The account page lists your sessions and can delete the account.

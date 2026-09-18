@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"carrel.dev/carrel/server/internal/session"
@@ -129,11 +130,15 @@ func (s *Server) newMenu(sess *session.Session) []view.MenuItem {
 			Enabled: true,
 		}})
 	}
-	// A letter creates nothing in a collection, so it stands last, past the
-	// line (U-6.4); without mail on the instance it is not offered.
+	// A file and a letter create nothing in a collection of records, so they
+	// stand last, past the line (U-6.4). The upload asks where on its sheet;
+	// without mail on the instance the letter is not offered.
+	out = append(out, view.MenuItem{Separator: true, Action: view.Action{
+		ID: "new.upload", Label: "Upload file", Icon: "i-up", Href: s.postQuery("/app/files/picker", url.Values{"for": {"upload"}}), Method: "GET", Enabled: true,
+	}})
 	if s.mailOn() {
-		out = append(out, view.MenuItem{Separator: true, Action: view.Action{
-			ID: "new.letter", Label: "Letter", Href: s.route("/app/mail/compose"), Method: "GET", Enabled: true,
+		out = append(out, view.MenuItem{Action: view.Action{
+			ID: "new.letter", Label: "Letter", Icon: "i-mail", Href: s.route("/app/mail/compose"), Method: "GET", Enabled: true,
 		}})
 	}
 	return out

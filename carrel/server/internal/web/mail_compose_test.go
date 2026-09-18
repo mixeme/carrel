@@ -256,8 +256,9 @@ func TestNoLetterWithoutMail(t *testing.T) {
 	h.cfg.MailEnabled = true
 	h.rebuild()
 	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", alice)))
-	if m := page.Top.NewMenu[len(page.Top.NewMenu)-1]; m.ID != "new.letter" || !m.Separator {
-		t.Errorf("last item = %+v", m)
+	n := len(page.Top.NewMenu)
+	if last, upload := page.Top.NewMenu[n-1], page.Top.NewMenu[n-2]; last.ID != "new.letter" || upload.ID != "new.upload" || !upload.Separator {
+		t.Errorf("last items = %+v %+v", upload, last)
 	}
 }
 

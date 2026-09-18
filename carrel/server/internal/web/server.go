@@ -148,6 +148,7 @@ type Users interface {
 	RequestEmail(userID, email string) (token string, err error)
 	EmailToConfirm(userID string) string
 	LettersLeft(userID string, perDay int) int
+	SetUploadFolder(viewerID string, dataKey [32]byte, folder sealed.AttachmentFolder) error
 	Settings() store.InstanceSettings
 	SetInstance(actorID string, in user.InstanceUpdate) error
 	InviteTTL() time.Duration

@@ -19,31 +19,6 @@ func (s *Server) getAppRoot(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/app/contacts")
 }
 
-func (s *Server) stubShellPage(w http.ResponseWriter, r *http.Request, title string, body any) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	_ = sess
-	s.writePage(w, r, http.StatusOK, body)
-}
-
-// sheetStub answers the sheet-shaped screens that are not wired yet: mail,
-// the mail attachment and the file picker. An empty sheet as a fragment,
-// 404 otherwise. It used to be getQuickNote and carried the notes route too;
-// the quick note goes through the common sheet now (U-6.16), and what is left
-// here is only the stub.
-func (s *Server) sheetStub(w http.ResponseWriter, r *http.Request) {
-	if _, ok := s.requireLogin(w, r); !ok {
-		return
-	}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, view.QuickNoteSheet{}, nil)
-		return
-	}
-	s.notFound(w, r)
-}
-
 func (s *Server) getPassword(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -142,14 +117,6 @@ func (s *Server) ownedRecordStub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.notFound(w, r)
-}
-
-func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
-	s.sheetStub(w, r)
-}
-
-func (s *Server) postFilesPicker(w http.ResponseWriter, r *http.Request) {
-	s.getFilesPicker(w, r)
 }
 
 func connectionWarnings(server, certFingerprint string) []view.Notice {

@@ -47,6 +47,9 @@ type Blob struct {
 	// under the data key, for Copy and for a letter (owner's decision
 	// 19.09.2026). A link made before this field has no entry.
 	Links map[string]string `json:"links,omitempty"`
+	// UploadTo is where "Upload file" of the create menu puts files, once
+	// chosen on its sheet; until then the attachment folder (U-6.4).
+	UploadTo *AttachmentFolder `json:"uploadTo,omitempty"`
 }
 
 // Destinations of a backup job (S-24.1).
