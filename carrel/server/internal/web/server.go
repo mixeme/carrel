@@ -84,6 +84,12 @@ type Users interface {
 	// EditDuplicates changes the decisions about duplicates (S-16); an
 	// empty what journals nothing.
 	EditDuplicates(viewerID string, dataKey [32]byte, what, detail string, edit func(*sealed.Duplicates) error) error
+	// A device profile (S-23): the one-time link, followed once by the same
+	// person; the connections left out of every device set-up.
+	IssueDeviceProfile(viewerID string, accounts []string) (string, time.Time, error)
+	TakeDeviceProfile(viewerID, token string) ([]string, bool)
+	RevokeDeviceProfiles(viewerID string) error
+	SetDeviceExcluded(viewerID string, dataKey [32]byte, accountID string, excluded bool) error
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).

@@ -245,23 +245,6 @@ func (s *Server) postSettingsConnectionsTest(w http.ResponseWriter, r *http.Requ
 	s.notFound(w, r)
 }
 
-func (s *Server) getSettingsDevices(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.DevicesPage{Shell: s.buildShell(sess, "Devices")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postSettingsDevices(w http.ResponseWriter, r *http.Request) {
-	s.getSettingsDevices(w, r)
-}
-
-func (s *Server) getSettingsDevicesProfile(w http.ResponseWriter, r *http.Request) {
-	s.notFound(w, r)
-}
-
 func (s *Server) getSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {

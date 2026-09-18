@@ -29,6 +29,19 @@ type Blob struct {
 	// that lies on disk, and so sealed like the credentials. Metadata only —
 	// addresses and UIDs, never a record. Empty in a blob written before it.
 	Duplicates Duplicates `json:"duplicates,omitzero"`
+	// DeviceExcluded are the connections left out of every device set-up
+	// (S-23): not in an Apple profile, not in the tables of the other tabs.
+	DeviceExcluded []string `json:"deviceExcluded,omitempty"`
+}
+
+// IsDeviceExcluded reports whether the connection is left out of devices.
+func (b Blob) IsDeviceExcluded(accountID string) bool {
+	for _, id := range b.DeviceExcluded {
+		if id == accountID {
+			return true
+		}
+	}
+	return false
 }
 
 // Duplicates are the decisions of S-16. Nothing here is written to a server.

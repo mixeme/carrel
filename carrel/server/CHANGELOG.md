@@ -5,6 +5,31 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.98 — 2026-09-18
+
+A new device is set up from what Carrel already knows (S-23).
+
+### For consumers
+
+- **`/app/settings/devices` is live**, with four tabs (`?tab=apple`,
+  `android`, `thunderbird`, `other`): every collection's address whole, its
+  type (CalDAV, CardDAV, WebDAV) and a Copy action. File collections are only
+  under "anything else".
+- **The Apple profile** — CalDAV and CardDAV accounts with their passwords —
+  is issued only inside the unlock window: outside it the button opens the
+  password sheet, and `POST ?op=profile` issues nothing. Inside, it answers a
+  one-time link that lives 5 minutes (`conf.DeviceProfileLinkTTL`).
+- **The link opens once, for the same person signed in to Carrel.** Someone
+  else's session, a used, expired or revoked link all answer 404. The
+  profile is built from that session's data when the link is followed, in
+  memory; it is never written to disk and is sent with `Cache-Control:
+  no-store`. `op=revoke` burns the links not yet followed.
+- **A connection can be left out** (`op=exclude` / `op=include` with
+  `account=`): it goes into no profile, and its rows say so on every tab.
+- Issue and download are in the audit log with the connections that went in,
+  never the passwords.
+- The QR code stays empty: no QR library is pinned.
+
 ## v0.0.97 — 2026-09-18
 
 The card of a linked record is the card of the entity.

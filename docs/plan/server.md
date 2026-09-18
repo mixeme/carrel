@@ -1124,7 +1124,29 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
       цела; сказавший «нет такой» — участник выпадает молча. Время, повтор,
       напоминания и правка — свои у открытой записи. Сторожа —
       `TestLinkedCardShowsTheEntity`, `TestLinkedEventCard`
-- [ ] S-23: unlock; одноразовая ссылка 5 мин; no-store; mobileconfig в памяти
+- [x] S-23: unlock; одноразовая ссылка 5 мин; no-store; mobileconfig в памяти
+      (`v0.0.98`, 18.09.2026; `web/devices.go`, `user/devices.go`,
+      `sealed.Blob.DeviceExcluded`). Четыре вкладки: Apple — профиль;
+      Android, Thunderbird, «всё остальное» — адреса коллекций целиком с Copy,
+      файловые коллекции только в последней. Профиль выдаётся только внутри
+      окна `UnlockUntil`, иначе кнопка ведёт на лист S-10.7. Ссылка —
+      `SecretToken` kind `device-profile`: в состоянии свёртка, человек и
+      подключения, **не профиль**; открывается один раз, тем же человеком,
+      вошедшим в Carrel (маршрут C-5 — «вход»), чужой сессии — тот же 404,
+      что мёртвой ссылке. Профиль собирается при переходе по ссылке из блоба
+      этой сессии, в памяти; `Cache-Control: no-store`, `Referrer-Policy:
+      no-referrer`. Plist руками, без зависимости, неподписанный. Журнал:
+      `device.profile.link` и `device.profile.download` с ID подключений,
+      `device.profile.revoke`, `device.exclude`/`include`. Исключение — по
+      подключению (S-23: «учётные записи»); строка коллекции несёт `Included`
+      своего подключения. QR пустой (пина библиотеки нет). Кадр макета пишет
+      «10 minutes» — действует `conf.DeviceProfileLinkTTL`, 5. Сторожа —
+      `TestProfile*`, `TestLeftOutAccountsGoNowhere`, `TestDeviceTabs`,
+      `TestDeviceProfileLinkLifetime`
+- [ ] S-23: ссылка DAVx5 и QR — нет пина QR-библиотеки и нет проверенной
+      схемы ссылки DAVx5; вкладка Android пока даёт адреса и логин. Пароль на
+      вкладках без профиля — через страницу подключений, не поле этой
+      страницы
 - [ ] S-25: живое чтение; конверт пароля на ссылку; отозванная = несуществовавшая
 - [ ] S-24: zip+манифест; age; ротация после сверки; restore = импорт
 - [ ] S-26: `internal/mail`; From экземпляра; заглушки приглашений сняты
