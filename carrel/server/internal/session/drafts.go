@@ -23,6 +23,8 @@ const (
 	DraftPendingPhoto
 	// DraftPendingImport is a parsed import awaiting confirmation (S-19).
 	DraftPendingImport
+	// DraftMail is the letter being written (S-26.2); it never reaches disk.
+	DraftMail
 	numDraftSlots
 )
 

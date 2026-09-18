@@ -130,6 +130,14 @@ func (s *Server) madeSheet(sess *session.Session, sheet view.PublishSheet, token
 		{ID: "publish.open", Label: "Open the link", Href: link, Method: "GET", Enabled: true},
 		{ID: "publish.list", Label: "All published links", Href: s.route("/app/files/published"), Method: "GET", Enabled: true},
 	}
+	// The link is shown this once; a letter can carry it only now, from this
+	// session (S-26.2).
+	if s.mailOn() {
+		if id := rememberLink(sess, token); id != "" {
+			sheet.Actions = append(sheet.Actions, view.Action{ID: "publish.mail", Label: "Send by letter", Method: "POST", Enabled: true,
+				Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {id}})})
+		}
+	}
 	return sheet
 }
 

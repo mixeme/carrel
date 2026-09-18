@@ -129,5 +129,12 @@ func (s *Server) newMenu(sess *session.Session) []view.MenuItem {
 			Enabled: true,
 		}})
 	}
+	// A letter creates nothing in a collection, so it stands last, past the
+	// line (U-6.4); without mail on the instance it is not offered.
+	if s.mailOn() {
+		out = append(out, view.MenuItem{Separator: true, Action: view.Action{
+			ID: "new.letter", Label: "Letter", Href: s.route("/app/mail/compose"), Method: "GET", Enabled: true,
+		}})
+	}
 	return out
 }

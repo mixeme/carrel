@@ -144,10 +144,13 @@ type Invite struct {
 
 // SecretToken covers email confirmation, forgot/console wipe links (S-10).
 type SecretToken struct {
-	Kind      string    `json:"kind"`
-	Hash      []byte    `json:"hash"`
-	UserID    string    `json:"userID"`
-	Step      string    `json:"step,omitempty"`
+	Kind   string `json:"kind"`
+	Hash   []byte `json:"hash"`
+	UserID string `json:"userID"`
+	Step   string `json:"step,omitempty"`
+	// Email is the address an email-confirmation token confirms; empty for
+	// the address the account already has (registration).
+	Email     string    `json:"email,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`
 	ExpiresAt time.Time `json:"expiresAt"`
 	Used      bool      `json:"used,omitempty"`
@@ -162,8 +165,15 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt"`
 	Disabled  bool      `json:"disabled,omitempty"`
 
-	Email              string `json:"email,omitempty"`
-	EmailConfirmed     bool   `json:"emailConfirmed,omitempty"`
+	Email          string `json:"email,omitempty"`
+	EmailConfirmed bool   `json:"emailConfirmed,omitempty"`
+	// PendingEmail is a new address waiting for its link; Email stays in use
+	// until then.
+	PendingEmail string `json:"pendingEmail,omitempty"`
+	// MailDay and MailSent count the letters sent on one UTC day (S-26.2,
+	// C-12): the day as 2006-01-02 and the letters so far.
+	MailDay            string `json:"mailDay,omitempty"`
+	MailSent           int    `json:"mailSent,omitempty"`
 	MustChangePassword bool   `json:"mustChangePassword,omitempty"`
 	DisplayName        string `json:"displayName,omitempty"`
 	// WeekStart and Clock12 are the account's C-10 display settings: the first

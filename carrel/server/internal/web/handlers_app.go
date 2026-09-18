@@ -44,22 +44,6 @@ func (s *Server) sheetStub(w http.ResponseWriter, r *http.Request) {
 	s.notFound(w, r)
 }
 
-func (s *Server) getMailCompose(w http.ResponseWriter, r *http.Request) {
-	s.sheetStub(w, r)
-}
-
-func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
-	s.getMailCompose(w, r)
-}
-
-func (s *Server) getMailAttach(w http.ResponseWriter, r *http.Request) {
-	s.sheetStub(w, r)
-}
-
-func (s *Server) postMailAttach(w http.ResponseWriter, r *http.Request) {
-	s.getMailAttach(w, r)
-}
-
 func (s *Server) getPassword(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -166,19 +150,6 @@ func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) postFilesPicker(w http.ResponseWriter, r *http.Request) {
 	s.getFilesPicker(w, r)
-}
-
-func (s *Server) getSettingsAccount(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.AccountPage{Shell: s.buildShell(sess, "Account")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
-	s.getSettingsAccount(w, r)
 }
 
 func connectionWarnings(server, certFingerprint string) []view.Notice {

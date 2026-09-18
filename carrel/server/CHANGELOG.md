@@ -5,6 +5,43 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.110 — 2026-09-19
+
+People send letters: with records and files attached, or with links to
+them, from the instance's domain. Off unless the operator turns it on.
+
+### For operators
+
+- With `CARREL_MAIL_ENABLED=true` and a relay configured, "Letter" appears
+  last in the create menu. The ceilings are `CARREL_MAIL_MAX_*`; letters a
+  day are counted per person per UTC day.
+- The journal records each letter as `mail.send`: to whom, and the kinds
+  attached. Never the subject or the text.
+
+### For consumers
+
+- **Account** now has a display name — the sender's name and the signature —
+  and an address with confirmation. A new address waits until its link is
+  opened; the one before stays in use until then.
+- **Letter**: recipients are suggested from the ticked address books, one row
+  per address; books that did not answer are named. Attach a contact, a
+  book, an event, a calendar for a period, a task, a note (Markdown or the
+  source .ics), a file, or a folder link.
+- Whether a thing goes as a file or as a link is shown when you attach it: a
+  folder always goes as a link, and so does anything over the ceilings.
+  Links are made when the letter goes, last 30 days, and are listed in
+  Published links.
+- A link you have just published can be sent by letter from its sheet.
+- Replies go to your confirmed address. Without one, the letter says at its
+  foot that it cannot be answered.
+
+### Changed
+
+- An invitation confirms the invitee's address only when it was mailed to
+  that address. A link handed over no longer confirms the address typed
+  beside it: that address waits on the account page for its confirmation
+  link, and sign-in is not held up by it.
+
 ## v0.0.109 — 2026-09-18
 
 The administrator chooses the sender of people's letters.

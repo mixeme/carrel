@@ -143,6 +143,13 @@ type Users interface {
 	SetSMTP(actorID string, in store.SMTPSettings) error
 	MarkInviteMailed(secret string, sent bool) error
 	ConfirmedAddress(loginOrEmail string) string
+	SetDisplayName(userID, name string) error
+	RequestEmail(userID, email string) (token string, err error)
+	EmailToConfirm(userID string) string
+	LettersLeft(userID string, perDay int) int
+	ReserveLetter(userID string, perDay int) error
+	ReleaseLetter(userID string)
+	LetterSent(userID string, to []string, attached string)
 
 	EnableEscrow(ctx context.Context, actorID, master, master2 string) error
 	SetEscrowCoverNew(actorID string, cover bool) error

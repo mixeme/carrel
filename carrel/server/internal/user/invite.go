@@ -86,8 +86,15 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 		if err := store.ApplyPassword(ctx, u, u.Login, password, st, now); err != nil {
 			return nil, err
 		}
-		if u.Email != "" {
-			u.EmailConfirmed = true
+		// The address is proven only when the invitation went to it: a link
+		// handed over proves nothing about the address typed beside it, and
+		// with Reply-To (S-26.1) a wrong one sends people's answers to a
+		// stranger.
+		// An unproven address waits as pending — in Email it would lock the
+		// person out: sign-in refuses an unconfirmed Email (registration).
+		u.EmailConfirmed = u.Email != "" && inv.Mailed == "sent"
+		if u.Email != "" && !u.EmailConfirmed {
+			u.Email, u.PendingEmail = "", u.Email
 		}
 		inv.Used = true
 		burnWipeTokens(st, u.ID)
@@ -236,6 +243,12 @@ func (s *Service) ConfirmEmail(ctx context.Context, token string) bool {
 			u := st.UserByID(t.UserID)
 			if u == nil {
 				continue
+			}
+			if t.Email != "" {
+				if !strings.EqualFold(t.Email, u.PendingEmail) && !strings.EqualFold(t.Email, u.Email) {
+					continue // an address asked for and then replaced
+				}
+				u.Email, u.PendingEmail = t.Email, ""
 			}
 			u.EmailConfirmed = true
 			t.Used = true
