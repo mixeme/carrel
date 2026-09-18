@@ -5,6 +5,39 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.103 — 2026-09-18
+
+Backup jobs: an archive of chosen collections, written, read back and kept
+in rotation (S-24, first part).
+
+### For consumers
+
+- **`/app/settings/backup`** lists the jobs — what, where, how many kept,
+  sealed or not, how the last run ended — with their history, and holds the
+  editor (`?job=` to edit; `op=save`, `op=delete`, `op=run`).
+- **A job** copies collections of every kind — a file collection as files —
+  to a folder of a WebDAV file collection (made on first use), to the
+  browser (`op=download`, nothing written to a server), or both.
+- **The archive** is one zip: a folder per collection and `manifest.json`
+  with where each came from, its kind, how many records or files, when and by
+  which version, and the error of any collection that did not go in. It is
+  sealed with age under the job's own password by default; an unsealed one
+  opens in any archiver, and the editor says what that means.
+- **A run is verified or it is not**: the archive is read back from where it
+  was written and its SHA-256 compared. Copies past the job's number are
+  deleted only after that, and only when the new copy is whole — a partial
+  copy never pushes out a whole one. A copy that is not whole is red on the
+  screen.
+- A job can run at sign-in when its last whole copy is older than a number of
+  days. Carrel keeps no clock of its own; the external trigger comes next.
+- An archive in the history downloads from where it lies, never from
+  Carrel's volume.
+
+### Included
+
+- **New dependencies: `filippo.io/age` v1.3.2** (pinned in
+  `docs/plan/architecture.md`) and, through it, `filippo.io/hpke` v0.4.0.
+
 ## v0.0.102 — 2026-09-18
 
 Somebody else's calendar or address book can be subscribed to (S-25.2).

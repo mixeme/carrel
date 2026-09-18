@@ -29,6 +29,44 @@ type State struct {
 	// its target and an envelope with its connection's credentials live here
 	// — never the secret, only its hash.
 	Published []PublishedLink `json:"published,omitempty"`
+	// Backups are what a copy job leaves outside the sealed blob (S-24): its
+	// runs — so a status can be answered without the data key — and, when
+	// the person turns the external trigger on, its secret's hash and an
+	// envelope of their data key.
+	Backups []BackupState `json:"backups,omitempty"`
+}
+
+// BackupState is one job's state outside the blob.
+type BackupState struct {
+	JobID  string      `json:"jobID"`
+	UserID string      `json:"userID"`
+	Runs   []BackupRun `json:"runs,omitempty"` // newest last, at most BackupRunsKept
+	// TriggerHash is the hash of the external trigger's secret; empty when
+	// the trigger is off.
+	TriggerHash []byte `json:"triggerHash,omitempty"`
+	// KeyEnvelope is the person's data key sealed under server.key, bound to
+	// the job (crypt.SealBackupKey) — the named loss of protection that lets
+	// an external trigger read without a session.
+	KeyEnvelope []byte `json:"keyEnvelope,omitempty"`
+}
+
+// BackupRunsKept is how many runs a job's history keeps.
+const BackupRunsKept = 20
+
+// BackupRun is one run of a job: when, what went in, how it ended, how big.
+type BackupRun struct {
+	ID          string     `json:"id"`
+	Started     time.Time  `json:"started"`
+	Finished    *time.Time `json:"finished,omitempty"`
+	State       string     `json:"state"` // running, done, partial, failed
+	Trigger     string     `json:"trigger"`
+	Mode        string     `json:"mode"`
+	File        string     `json:"file,omitempty"`
+	Size        int64      `json:"size,omitempty"`
+	Collections int        `json:"collections"`
+	Whole       int        `json:"whole"`
+	Verified    bool       `json:"verified,omitempty"`
+	Error       string     `json:"error,omitempty"`
 }
 
 // PublishedLink is one secret link to one thing, read-only (S-25).

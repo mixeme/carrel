@@ -125,6 +125,9 @@ func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.setSessionCookie(w, r, sess.ID())
+	// A job that runs at sign-in when its last copy is old starts now: the
+	// session holds the data key it reads with (S-24.4).
+	s.backupOnSignIn(sess)
 	if mustChange {
 		s.redirect(w, r, "/app/password")
 		return

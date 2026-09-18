@@ -5,6 +5,7 @@ go 1.27
 toolchain go1.27.1
 
 require (
+	filippo.io/age v1.3.2
 	github.com/emersion/go-ical v0.0.0-20250609112844-439c63cef608
 	github.com/emersion/go-vcard v0.1.0
 	github.com/emersion/go-webdav v0.0.0-20260625083450-1901d193ce99
@@ -18,4 +19,7 @@ require (
 	rsc.io/qr v0.2.0
 )
 
-require golang.org/x/sys v0.48.0 // indirect
+require (
+	filippo.io/hpke v0.4.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+)

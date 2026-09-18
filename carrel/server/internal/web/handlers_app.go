@@ -241,19 +241,6 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 	s.getSettingsDavloom(w, r)
 }
 
-func (s *Server) getSettingsBackup(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.BackupPage{Shell: s.buildShell(sess, "Backup")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
-	s.getSettingsBackup(w, r)
-}
-
 func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.UnlockSheet {
 	sheet := view.UnlockSheet{
 		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, or change key escrow."),

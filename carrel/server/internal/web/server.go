@@ -101,6 +101,12 @@ type Users interface {
 	Subscribe(viewerID string, dataKey [32]byte, f sealed.Subscription) (string, error)
 	Unsubscribe(viewerID string, dataKey [32]byte, id string) error
 	EditFeed(viewerID string, dataKey [32]byte, id, name, colour string, kinds []view.Kind) error
+	// Backup (S-24): jobs in the blob, runs in the state.
+	SaveBackupJob(viewerID string, dataKey [32]byte, job sealed.BackupJob) (string, error)
+	DeleteBackupJob(viewerID string, dataKey [32]byte, id string) error
+	BackupRuns(viewerID string) map[string][]store.BackupRun
+	StartBackupRun(viewerID, jobID, trigger, mode string, running func(runID string) bool) (string, error)
+	FinishBackupRun(viewerID, jobID, runID string, finish func(r *store.BackupRun)) error
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).

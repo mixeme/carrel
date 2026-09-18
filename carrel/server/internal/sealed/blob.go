@@ -38,6 +38,46 @@ type Blob struct {
 	// and ticks work the same, and nothing that walks Connections or
 	// Collections — devices, re-discovery, the connection cards — sees it.
 	Subscriptions []Subscription `json:"subscriptions,omitempty"`
+	// BackupJobs are the person's copy jobs (S-24.1): what, where, how many
+	// to keep, sealed or not, and the job's own password — under the data
+	// key, like the credentials.
+	BackupJobs []BackupJob `json:"backupJobs,omitempty"`
+}
+
+// Destinations of a backup job (S-24.1).
+const (
+	BackupToWebDAV   = "webdav"
+	BackupToDownload = "download"
+	BackupToBoth     = "both"
+)
+
+// BackupJob is one copy job.
+type BackupJob struct {
+	ID      string      `json:"id"` // "j-…"
+	Name    string      `json:"name"`
+	Sources []Selection `json:"sources"` // catalog collections, by address
+	Mode    string      `json:"mode"`    // BackupTo…
+	// DestAccount and DestPath are the file collection the archive goes to,
+	// DestFolder the folder under its root; created on first use.
+	DestAccount string   `json:"destAccount,omitempty"`
+	DestPath    string   `json:"destPath,omitempty"`
+	DestFolder  []string `json:"destFolder,omitempty"`
+	Keep        int      `json:"keep"`
+	Encrypted   bool     `json:"encrypted"`
+	Password    string   `json:"password,omitempty"`
+	// OnSignInDays runs the job at sign-in when its last whole copy is older
+	// than that many days; 0 is never. Carrel keeps no clock of its own.
+	OnSignInDays int `json:"onSignInDays,omitempty"`
+}
+
+// BackupJob returns the job with id.
+func (b Blob) BackupJob(id string) (BackupJob, bool) {
+	for _, j := range b.BackupJobs {
+		if j.ID == id {
+			return j, true
+		}
+	}
+	return BackupJob{}, false
 }
 
 // FeedPath is the {col} of every subscription: a feed is one file, one
