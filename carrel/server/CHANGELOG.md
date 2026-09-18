@@ -5,6 +5,28 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.92 — 2026-09-18
+
+The live set stops shouting about a server that is not there, and a search
+that ends wrong says why.
+
+### For consumers
+
+- Nothing in the running server changed: this is the live set.
+
+### Included
+
+- `radicaleEndpoint` skips the Radicale set when nothing is listening at the
+  address. Radicale runs in docker-compose beside the gates of the Linux
+  machine and nowhere else, so on any other machine fourteen tests failed with
+  nothing to say — and a real failure is easy to lose among them. Only a
+  refused connection is a skip, never a wrong answer from a server that is up.
+- `integration.sourceStates`: a live search that ends in a bad state, or is
+  still running after 60 s, prints every source with its state and message
+  rather than the first bad one. The one unexplained failure of
+  `TestSoGoSearch` was lost because the run’s output was filtered to status
+  lines, not because the test said nothing.
+
 ## v0.0.91 — 2026-09-18
 
 A folder uploads as a folder (S-17.1).

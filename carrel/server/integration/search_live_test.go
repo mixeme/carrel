@@ -135,15 +135,23 @@ func runSearch(t *testing.T, endpoint, user, pass string) {
 				Body view.PollBar `json:"body"`
 			}](t, "poll "+q, app.getFragment("/app/search/progress/"+page.Poll.TaskID+"/poll")).Body
 			if !bar.Running {
+				var bad []string
 				for _, sp := range bar.Sources {
 					if sp.State != view.SourceDone && sp.State != view.SourceEmpty {
-						t.Fatalf("search %q: %s is %s: %s", q, sp.Stamp, sp.State, sp.Message)
+						bad = append(bad, fmt.Sprintf("%s is %s: %s", sp.Stamp, sp.State, sp.Message))
 					}
+				}
+				if len(bad) > 0 {
+					// Every source, not the first bad one: a search that ends
+					// wrong is rare and does not repeat, so the whole answer
+					// goes into the log while it is here.
+					t.Fatalf("search %q ended with %s; all sources: %s", q, strings.Join(bad, "; "), sourceStates(bar))
 				}
 				break
 			}
 			if time.Now().After(deadline) {
-				t.Fatalf("search %q still running: %+v", q, bar)
+				t.Fatalf("search %q still running after 60s at %d%%: %s; summary %q",
+					q, bar.Percent, sourceStates(bar), bar.Summary)
 			}
 			// Not faster than that: the session's own bucket is 120 requests a
 			// minute (architecture.md), and four searches polled every 50 ms
@@ -170,4 +178,21 @@ func runSearch(t *testing.T, endpoint, user, pass string) {
 	if got := strings.Join(find("ковал"), "|"); got != "Встреча с Ковалёвой|Ковалёва Анна" {
 		t.Errorf("ковал (Cyrillic, other case) = %q", got)
 	}
+}
+
+// sourceStates is every source of a poll bar with its state and message: what
+// a search that ended wrong has to say for itself.
+func sourceStates(bar view.PollBar) string {
+	var out []string
+	for _, sp := range bar.Sources {
+		line := fmt.Sprintf("%s=%s", sp.Stamp, sp.State)
+		if sp.Message != "" {
+			line += " (" + string(sp.Message) + ")"
+		}
+		out = append(out, line)
+	}
+	if len(out) == 0 {
+		return "no sources at all"
+	}
+	return strings.Join(out, " · ")
 }

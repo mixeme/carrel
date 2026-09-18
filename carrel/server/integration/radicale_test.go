@@ -5,7 +5,9 @@ package integration
 import (
 	"context"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"testing"
@@ -22,12 +24,37 @@ const (
 	radicalePass = "test"
 )
 
+// radicaleEndpoint is the address of the Radicale of the Linux machine, and it
+// skips the test when nothing is listening there. Radicale runs in
+// docker-compose beside the gates of that machine and nowhere else, so on any
+// other machine the whole set used to fail — fourteen red lines that say
+// nothing, in which a real failure is easy to lose. Baikal and SoGo skip
+// themselves when the credentials name no server; this is the same courtesy
+// for a server named by a default. A server that answers is tested: only a
+// refused connection is a skip, never a wrong answer.
 func radicaleEndpoint(t *testing.T) string {
 	t.Helper()
-	if u := os.Getenv("CARREL_RADICALE_URL"); u != "" {
-		return u
+	addr := os.Getenv("CARREL_RADICALE_URL")
+	if addr == "" {
+		addr = "http://127.0.0.1:5232/test/"
 	}
-	return "http://127.0.0.1:5232/test/"
+	u, err := url.Parse(addr)
+	if err != nil {
+		t.Fatalf("CARREL_RADICALE_URL = %q: %v", addr, err)
+	}
+	host := u.Host
+	if u.Port() == "" {
+		host = u.Hostname() + ":80"
+		if u.Scheme == "https" {
+			host = u.Hostname() + ":443"
+		}
+	}
+	conn, err := net.DialTimeout("tcp", host, 2*time.Second)
+	if err != nil {
+		t.Skipf("no Radicale at %s (%v): it runs on the Linux machine, with scripts/linux-gates.sh", addr, err)
+	}
+	_ = conn.Close()
+	return addr
 }
 
 func testGuard(t *testing.T) *dav.Guard {
