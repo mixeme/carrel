@@ -5,6 +5,25 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.99 — 2026-09-18
+
+The Android tab has a code that opens DAVx5 (S-23).
+
+### For consumers
+
+- **`DevicesPage.QR` is filled on the Android tab**: a `data:image/png`
+  image of the DAVx5 link of one connection — `davx5://login@host/path/` for
+  HTTPS, `caldav://` for plain HTTP, as the DAVx5 manual gives it. It carries
+  the address and the login, **never the password**.
+- The same link is an action, "Open in DAVx5 · host", for a page already on
+  the phone; "Code for host" switches the code to another connection
+  (`?account=`). A connection left out of devices has no code.
+
+### Included
+
+- **New dependency: `rsc.io/qr` v0.2.0** (BSD-3, one package, no
+  dependencies of its own), pinned in `docs/plan/architecture.md`.
+
 ## v0.0.98 — 2026-09-18
 
 A new device is set up from what Carrel already knows (S-23).

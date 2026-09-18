@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"rsc.io/qr"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/sealed"
@@ -19,13 +22,13 @@ import (
 )
 
 // S-23: a new device. Everything discovery found, handed out four ways: an
-// Apple profile, the addresses for DAVx5, the addresses for Thunderbird, and
-// every address for anything else. The profile holds passwords, so it is the
-// most dangerous file the service makes: it is issued only inside the unlock
-// window (S-10.7), through a link that opens once and lives
-// conf.DeviceProfileLinkTTL, and it is built in memory when the link is
-// followed — never written to disk, never cached. A connection the person
-// left out goes nowhere.
+// Apple profile, the addresses for DAVx5 — also as a code — the addresses
+// for Thunderbird, and every address for anything else. The profile holds
+// passwords, so it is the most dangerous file the service makes: it is
+// issued only inside the unlock window (S-10.7), through a link that opens
+// once and lives conf.DeviceProfileLinkTTL, and it is built in memory when
+// the link is followed — never written to disk, never cached. A connection
+// the person left out goes nowhere.
 
 var deviceTabs = []view.DeviceTab{view.TabApple, view.TabAndroid, view.TabThunderbird, view.TabOther}
 
@@ -74,7 +77,44 @@ func onTab(tab view.DeviceTab, col sealed.Collection) bool {
 	return tab == view.TabOther || !col.Has(view.KindFile)
 }
 
+// davx5Link is the address DAVx5 opens with the server and the login filled
+// in (manual.davx5.com, "Integration"): davx5:// is HTTPS, caldav:// plain
+// HTTP. The password is never in it — the manual advises against it, and a
+// code on a screen is seen by whoever stands behind the person.
+func davx5Link(conn sealed.Connection) string {
+	u, err := url.Parse(conn.Server)
+	if err != nil || u.Host == "" {
+		return ""
+	}
+	scheme := "davx5"
+	if u.Scheme == "http" {
+		scheme = "caldav"
+	}
+	link := url.URL{Scheme: scheme, User: url.User(conn.Login), Host: u.Host, Path: u.Path}
+	if link.Path == "" {
+		link.Path = "/"
+	}
+	return link.String()
+}
+
+// qrImage is the code of text as an image address: a data: URI, so the page
+// needs no route of its own (C-5) and nothing is kept.
+func qrImage(text string) string {
+	code, err := qr.Encode(text, qr.M)
+	if err != nil {
+		return ""
+	}
+	code.Scale = 6
+	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(code.PNG())
+}
+
 func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices ...view.Notice) view.DevicesPage {
+	return s.devicesPageFor(sess, tab, "", notices...)
+}
+
+// devicesPageFor is the page with the DAVx5 code for account, or for the
+// first included account when none is named.
+func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, account string, notices ...view.Notice) view.DevicesPage {
 	blob := s.catalogOf(sess)
 	unlocked := sess.UnlockUntil(time.Now()) != nil
 	page := view.DevicesPage{Shell: s.buildShell(sess, "Set up a new device"), Tab: tab}
@@ -148,7 +188,30 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 		}
 		page.Actions = append(page.Actions, gen)
 	case view.TabAndroid:
-		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "Add each account in DAVx5 with its address, login and password. The password is shown on the connections page, inside the unlock window."}
+		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "Scan the code with the phone: DAVx5 opens with the address and the login filled in. The password is not in the code — type it from the connections page, inside the unlock window."}
+		var coded []sealed.Connection
+		for _, conn := range blob.Connections {
+			if cal, card := profileParts(blob, conn.ID); (cal || card) && !blob.IsDeviceExcluded(conn.ID) && davx5Link(conn) != "" {
+				coded = append(coded, conn)
+			}
+		}
+		for i, conn := range coded {
+			if account == "" && i == 0 || conn.ID == account {
+				link := davx5Link(conn)
+				page.QR = qrImage(link)
+				page.Actions = append(page.Actions, view.Action{ID: "device.davx5", Label: text("Open in DAVx5 · " + serverHost(conn.Server)), Href: link, Method: "GET", Enabled: true})
+				account = conn.ID
+			}
+		}
+		for _, conn := range coded {
+			if conn.ID == account {
+				continue
+			}
+			page.Actions = append(page.Actions, view.Action{
+				ID: "device.code", Label: text("Code for " + serverHost(conn.Server)), Method: "GET", Enabled: true,
+				Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "account": {conn.ID}}),
+			})
+		}
 	case view.TabThunderbird:
 		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book. There is no import file and none is needed."}
 	default:
@@ -163,7 +226,7 @@ func (s *Server) getSettingsDevices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Cache-Control", "no-store")
-	s.writePage(w, r, http.StatusOK, s.devicesPage(sess, deviceTab(r)))
+	s.writePage(w, r, http.StatusOK, s.devicesPageFor(sess, deviceTab(r), r.URL.Query().Get("account")))
 }
 
 // postSettingsDevices takes op=exclude or include with account=, or

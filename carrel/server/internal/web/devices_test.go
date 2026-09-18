@@ -1,6 +1,9 @@
 package web_test
 
 import (
+	"bytes"
+	"encoding/base64"
+	"image/png"
 	"net/http"
 	"net/url"
 	"strings"
@@ -217,6 +220,41 @@ func TestDeviceTabs(t *testing.T) {
 		t.Errorf("types = %v", types)
 	}
 	if p.QR != "" {
-		t.Errorf("a QR without a pinned library: %q", p.QR)
+		t.Errorf("a code outside the Android tab: %q", p.QR)
+	}
+}
+
+// Android: a code per account that opens DAVx5 with the address and the
+// login — never the password — and a code for another account one link
+// away. A left-out account has no code.
+func TestDAVx5Code(t *testing.T) {
+	f, otherID := deviceFixture(t)
+	p := devicesPage(t, f, "android")
+	img, ok := strings.CutPrefix(p.QR, "data:image/png;base64,")
+	if !ok {
+		t.Fatalf("QR = %.60q", p.QR)
+	}
+	raw, err := base64.StdEncoding.DecodeString(img)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pic, err := png.Decode(bytes.NewReader(raw))
+	if err != nil || pic.Bounds().Dx() < 100 || pic.Bounds().Dx() != pic.Bounds().Dy() {
+		t.Fatalf("code image: %v %v", pic, err)
+	}
+	open := deviceAction(t, p.Actions, "device.davx5")
+	u, err := url.Parse(open.Href)
+	if err != nil || u.Scheme != "caldav" || u.User.Username() != "alice" || strings.Contains(open.Href, "s3cret") {
+		t.Errorf("DAVx5 link = %q", open.Href) // the test server is plain HTTP: caldav://, not davx5://
+	}
+	other := decode[view.DevicesPage](t, f.h.do(get(deviceAction(t, p.Actions, "device.code").Href, f.sess)))
+	if other.QR == "" || other.QR == p.QR || !strings.Contains(deviceAction(t, other.Actions, "device.davx5").Href, "bob@") {
+		t.Errorf("the other account's code: %+v", other.Actions)
+	}
+	f.h.do(postForm("/app/settings/devices?op=exclude&account="+otherID, f.sess, url.Values{}))
+	for _, a := range devicesPage(t, f, "android").Actions {
+		if a.ID == "device.code" {
+			t.Errorf("a left-out account has a code: %+v", a)
+		}
 	}
 }
