@@ -41,6 +41,10 @@ func Multistatus(entries []DAVEntry) []byte {
 	for _, e := range entries {
 		b.WriteString("<D:response><D:href>" + esc(e.Href) + "</D:href><D:propstat><D:prop>")
 		b.WriteString("<D:displayname>" + esc(e.Name) + "</D:displayname>")
+		// Read and nothing else: a client that connects the mount as an
+		// account — another Carrel's discovery among them — learns it is
+		// read-only from the answer, not from a refused write (RFC 3744 §5.4).
+		b.WriteString("<D:current-user-privilege-set><D:privilege><D:read/></D:privilege></D:current-user-privilege-set>")
 		if e.Dir {
 			b.WriteString("<D:resourcetype><D:collection/></D:resourcetype>")
 		} else {

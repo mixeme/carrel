@@ -315,7 +315,11 @@ func (s *Service) SetSelection(viewerID string, dataKey [crypt.KeyLen]byte, kind
 			}
 			out = append(out, sel)
 		}
-		for _, c := range blob.Collections {
+		cols := append([]sealed.Collection(nil), blob.Collections...)
+		for _, f := range blob.Subscriptions {
+			cols = append(cols, f.FeedCollection())
+		}
+		for _, c := range cols {
 			key := at{c.AccountID, c.Path}
 			if !want[key] || !c.Has(kind) || (c.Gone && !was[key]) {
 				continue

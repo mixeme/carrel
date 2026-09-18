@@ -45,3 +45,9 @@ func NewTransferID() (string, error) {
 func NewAccountID() (string, error) {
 	return newEntityID("a-")
 }
+
+// NewFeedID is the {account} of a subscription (S-25.2): issued here, like a
+// connection's, never derived from its address.
+func NewFeedID() (string, error) {
+	return newEntityID("f-")
+}

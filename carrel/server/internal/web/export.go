@@ -79,9 +79,9 @@ func exportWhole(c *collectionCtx, r *http.Request) bool {
 // the component of the kind, with the window when there is one.
 func (c *collectionCtx) exportRecords(ctx context.Context, from, to *time.Time) ([]*model.Object, error) {
 	if c.card != nil {
-		return c.card.Query(ctx, c.col.Path)
+		return c.contactsAll(ctx)
 	}
-	objs, _, err := c.cal.Query(ctx, c.col.Path, c.spec.component, from, to)
+	objs, _, err := c.calQuery(ctx, c.spec.component, from, to)
 	return objs, err
 }
 
@@ -90,12 +90,12 @@ func (c *collectionCtx) exportRecords(ctx context.Context, from, to *time.Time) 
 // calendar of events is read too. A resource two REPORTs name is read once.
 func (c *collectionCtx) allRecords(ctx context.Context) ([]*model.Object, error) {
 	if c.card != nil {
-		return c.card.Query(ctx, c.col.Path)
+		return c.contactsAll(ctx)
 	}
 	var out []*model.Object
 	seen := map[string]bool{}
 	for _, p := range calendarParts {
-		objs, _, err := c.cal.Query(ctx, c.col.Path, p.component, nil, nil)
+		objs, _, err := c.calQuery(ctx, p.component, nil, nil)
 		if err != nil {
 			return nil, err
 		}

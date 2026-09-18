@@ -98,6 +98,9 @@ func (s *Server) recordShell(c *collectionCtx, title string, notices []view.Noti
 func (s *Server) recordActions(c *collectionCtx, uid, etag string) []view.Action {
 	move := c.recordPath(uid) + "/move"
 	copyAction := view.Action{ID: "record.copy", Label: "Copy…", Href: s.postQuery(move, url.Values{"copy": {"1"}}), Method: "GET", Enabled: true}
+	if c.feed != nil {
+		return []view.Action{copyAction}
+	}
 	if c.col.ReadOnly {
 		return []view.Action{copyAction, s.publishAction(c, uid)}
 	}

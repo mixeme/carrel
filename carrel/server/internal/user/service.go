@@ -96,6 +96,9 @@ func (s *Service) OwnsAccount(viewerID string, dataKey [crypt.KeyLen]byte, accou
 	if err != nil {
 		return false
 	}
+	if _, ok := blob.Subscription(accountParam); ok {
+		return true // a subscription is the person's too (S-25.2)
+	}
 	for _, c := range blob.Connections {
 		if c.ID == accountParam {
 			return true

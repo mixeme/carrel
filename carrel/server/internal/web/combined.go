@@ -440,6 +440,7 @@ func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 		{ID: "rail.apply", Label: "Apply", Href: s.route("/app/sources/" + spec.segment), Method: "POST", Enabled: true},
 		{ID: "collection.new", Label: "New collection", Icon: "i-plus", Href: s.postQuery("/app/collections/new", url.Values{"kind": {string(spec.kind)}}), Method: "GET", Enabled: true},
 		{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link", Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}}), Method: "GET", Enabled: true},
 	}
 	rail.Note = text(fmt.Sprintf("%d of %s ticked", on, plural(live, "collection")))
 	return rail
@@ -551,6 +552,37 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 			sec.State = view.CollectionUnavailable
 		}
 		sections = append(sections, sec)
+	}
+	// Subscriptions last, as a section of their own: someone else's, read
+	// only, renamed here and nowhere else (S-25.2).
+	feeds := view.RailSection{Account: "Subscriptions", State: view.CollectionOK}
+	for _, f := range blob.Subscriptions {
+		col, conn := f.FeedCollection(), f.FeedConnection()
+		if !col.Has(spec.kind) {
+			continue
+		}
+		tick := isTicked(blob, spec.kind, f.ID, col.Path)
+		row := view.SourceRow{
+			Label: text(collectionLabel(col)), Colour: catalogColour(col), Tick: view.TickOff, ReadOnly: true,
+			State: view.CollectionReadOnly, Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment)),
+		}
+		if unavailable[f.ID+":"+col.Path] {
+			row.State = view.CollectionUnavailable
+		}
+		row.Menu = []view.MenuItem{
+			{Action: view.Action{ID: "feed.edit", Label: "Rename…", Href: s.postQuery("/app/collections/rename", url.Values{"a": {f.ID}, "c": {col.Path}}), Method: "GET", Enabled: true}},
+			{Action: view.Action{ID: "collection.export", Label: "Export", Icon: "i-down", Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment) + "/export"), Method: "GET", Enabled: true}},
+		}
+		live++
+		if tick {
+			row.Tick = view.TickOn
+			on++
+			row.Count = collectionCount(sess, f.ID, col, spec)
+		}
+		feeds.Rows = append(feeds.Rows, row)
+	}
+	if len(feeds.Rows) > 0 {
+		sections = append(sections, feeds)
 	}
 	return sections, live, on
 }

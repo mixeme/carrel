@@ -114,6 +114,10 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPi
 			trace.Steps = steps
 			return nil, trace, ferr
 		}
+		// Rights too: a storage that says it can only be read — a folder
+		// another Carrel published (S-25.1) — is read-only here from the
+		// start, not after a refused write.
+		cols = withHomeProps(ctx, client, "", "files", cols, add)
 		add(stepCollections, fmt.Sprintf("%d file collection(s)", len(cols)), true)
 		trace.Steps = steps
 		trace.OK = true

@@ -5,6 +5,43 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.102 — 2026-09-18
+
+Somebody else's calendar or address book can be subscribed to (S-25.2).
+
+### For consumers
+
+- **"Subscribe to a feed"** on the connections page and in the rail foot of
+  every record section (`/app/settings/connections?op=feed`). A feed is one
+  `.ics` or `.vcf` at an address; `webcal://` is HTTPS, and another Carrel's
+  secret link is read at its `/download`. `op=feed.check` shows what the
+  address answered — status, size, time, type, what is inside, the name —
+  and saves nothing; `op=feed.subscribe` reads it once more and keeps the
+  subscription. A feed with no records, or one that refuses the password, is
+  not subscribed to.
+- **Nothing of the feed is kept**: it is read through the guard on every
+  visit, under `CARREL_DAV_MAX_RESPONSE_BYTES`. The sealed blob keeps the
+  address, the local name and colour, the login and password when the feed
+  asks, and the kinds it carries.
+- **A feed reads like a read-only collection**, at
+  `/app/{kind}/f-…/feed`: lists, records, export, copying a record out, the
+  rail's "Subscriptions" section, ticks, the combined views, search (sifted
+  by Carrel) and duplicates. Editing, creating, importing, deleting and
+  moving are 404, as for a foreign address; a feed is not published onwards.
+- **`SubscriptionCard`** on the connections page: Check (reads again and
+  keeps the kinds it carries now), Edit (the rename sheet — the name and
+  colour stay in Carrel), Unsubscribe (the subscription and its ticks, never
+  anybody's data).
+
+### Changed
+
+- **Discovery reads rights for file collections too.** A storage that says it
+  can only be read is read-only from the start. A folder published by
+  another Carrel now says so: its `/dav/` answers `current-user-privilege-set`
+  with `read` only, so connecting it as an ordinary connection — the way a
+  folder is followed, since files are not feeds — gives a read-only
+  collection. Other WebDAV servers that send no rights are unchanged.
+
 ## v0.0.101 — 2026-09-18
 
 A file or a folder can be published, and a published folder mounts as a

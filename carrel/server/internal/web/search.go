@@ -488,7 +488,8 @@ type collectionSource struct {
 	cal        *cal.Provider
 	files      *file.Provider
 	maxEntries int
-	broken     error // the connection could not be opened at all
+	broken     error       // the connection could not be opened at all
+	feed       *feedReader // a subscription: read whole and sifted here (S-25.2)
 }
 
 // searchSources are the ticked collections, one source each, in the order of
@@ -518,6 +519,10 @@ func (s *Server) searchSources(blob sealed.Blob) []fanout.Source {
 
 func (s *Server) openSource(id string, conn sealed.Connection, col sealed.Collection) *collectionSource {
 	src := &collectionSource{id: id, conn: conn, col: col, maxEntries: s.cfg.FilesMaxEntries}
+	if conn.Feed {
+		src.feed = s.newFeedReader(conn.Server, conn.Login, conn.Password)
+		return src
+	}
 	client, err := dav.NewClient(s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
 	if err != nil {
 		src.broken = err
@@ -568,9 +573,14 @@ func (c *collectionSource) Run(ctx context.Context, q fanout.Query) ([]fanout.It
 func (c *collectionSource) contacts(ctx context.Context, q fanout.Query) ([]fanout.Item, error) {
 	var objs []*model.Object
 	var err error
-	if q.Text == "" {
+	switch {
+	case c.feed != nil && q.Text == "":
+		objs, err = c.feed.records(ctx, view.KindContact)
+	case c.feed != nil:
+		objs, err = c.feed.search(ctx, view.KindContact, q.Text)
+	case q.Text == "":
 		objs, err = c.card.Query(ctx, c.col.Path)
-	} else {
+	default:
 		objs, err = c.card.Search(ctx, c.col.Path, q.Text)
 	}
 	var note error
@@ -595,9 +605,14 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 	component := recordKinds[segmentOf(k)].component
 	var objs []*model.Object
 	var err error
-	if q.Text == "" {
+	switch {
+	case c.feed != nil && q.Text == "":
+		objs, err = c.feed.records(ctx, k)
+	case c.feed != nil:
+		objs, err = c.feed.search(ctx, k, q.Text)
+	case q.Text == "":
 		objs, _, err = c.cal.Query(ctx, c.col.Path, component, q.From, q.To)
-	} else {
+	default:
 		objs, _, err = c.cal.Search(ctx, c.col.Path, component, q.Text)
 	}
 	var note error

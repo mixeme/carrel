@@ -20,6 +20,7 @@ import (
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
+	"carrel.dev/carrel/server/internal/publish"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
@@ -109,6 +110,8 @@ type collectionCtx struct {
 	card *card.Provider
 	cal  *cal.Provider
 	tf   timeFmt
+	// feed reads a subscription (S-25.2); nil for a collection of a server.
+	feed *feedReader
 }
 
 // openCollection checks ownership and looks the collection up in the
@@ -133,7 +136,7 @@ func (s *Server) openCollection(w http.ResponseWriter, r *http.Request, segment 
 		return nil, false
 	}
 	c, ok := s.collectionOf(sess, spec, account, col)
-	if !ok {
+	if !ok || (c.feed != nil && !feedRoute(r)) {
 		s.notFound(w, r)
 		return nil, false
 	}
@@ -158,11 +161,20 @@ func (s *Server) collectionOf(sess *session.Session, spec kindSpec, account, col
 // newCollectionCtx wires providers for a collection, in the catalog or not
 // yet: a collection being made by a move joins the catalog last (S-12.3).
 func (s *Server) newCollectionCtx(sess *session.Session, spec kindSpec, conn sealed.Connection, col sealed.Collection) (*collectionCtx, error) {
-	client, err := dav.NewClient(s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
+	endpoint := conn.Server
+	if conn.Feed {
+		// The providers of a feed only encode and parse; its records come
+		// from the feed reader. Their client needs an address it can hold.
+		endpoint, _ = publish.FeedURL(conn.Server)
+	}
+	client, err := dav.NewClient(s.guard, endpoint, conn.Login, conn.Password, conn.CertFingerprint)
 	if err != nil {
 		return nil, err
 	}
 	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: col, t: client, tf: s.timeFor(sess)}
+	if conn.Feed {
+		c.feed = s.newFeedReader(conn.Server, conn.Login, conn.Password)
+	}
 	if spec.kind == view.KindContact {
 		c.card, err = card.New(client)
 	} else {
@@ -238,6 +250,9 @@ func readingOf(sess *session.Session, tf timeFmt, accountID, path string) (lastR
 }
 
 func (c *collectionCtx) find(ctx context.Context, uid string) (*model.Object, error) {
+	if c.feed != nil {
+		return c.feed.find(ctx, c.spec.kind, uid)
+	}
 	if c.card != nil {
 		return c.card.FindUID(ctx, c.col.Path, uid)
 	}
@@ -247,6 +262,9 @@ func (c *collectionCtx) find(ctx context.Context, uid string) (*model.Object, er
 // fetch reads one record by its address, whatever identity it holds: the way
 // to a record a server named itself (S-7.1).
 func (c *collectionCtx) fetch(ctx context.Context, path string) (*model.Object, error) {
+	if c.feed != nil {
+		return c.feed.find(ctx, c.spec.kind, strings.TrimPrefix(path, "feed/"))
+	}
 	if c.card != nil {
 		return c.card.Get(ctx, path)
 	}
@@ -547,7 +565,11 @@ func (s *Server) listActions(c *collectionCtx, export url.Values) []view.Action 
 	if !c.col.ReadOnly {
 		out = append(out, s.importAction(c))
 	}
-	return append(out, s.exportAction(c, export), s.publishAction(c, ""))
+	out = append(out, s.exportAction(c, export))
+	if c.feed != nil {
+		return out // a subscription is not published onwards: it is someone else's
+	}
+	return append(out, s.publishAction(c, ""))
 }
 
 func retryPath(c *collectionCtx, r *http.Request) string {
@@ -595,7 +617,7 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 	page := view.ContactsListPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = s.listActions(c, nil)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
-	objs, err := c.card.Query(r.Context(), c.col.Path)
+	objs, err := c.contactsAll(r.Context())
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
@@ -729,7 +751,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	page.Bar.Range = s.agendaRange(tf, c.listPath(), filter.tag, from, to)
 
-	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, &from, &to)
+	objs, bad, err := c.calQuery(r.Context(), c.spec.component, &from, &to)
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
@@ -863,7 +885,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	page := view.TasksPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = s.listActions(c, nil)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
-	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, nil, nil)
+	objs, bad, err := c.calQuery(r.Context(), c.spec.component, nil, nil)
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
@@ -977,7 +999,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = s.listActions(c, nil)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
-	objs, bad, err := c.cal.Query(r.Context(), c.col.Path, c.spec.component, nil, nil)
+	objs, bad, err := c.calQuery(r.Context(), c.spec.component, nil, nil)
 	if err != nil {
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page

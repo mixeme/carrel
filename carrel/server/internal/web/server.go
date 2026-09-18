@@ -97,6 +97,10 @@ type Users interface {
 	OpenPublished(token string) (user.OpenLink, bool)
 	PublishedLinks(viewerID string) []user.PublishedLink
 	RevokePublished(viewerID, id string) error
+	// Subscriptions (S-25.2): feeds in the blob, renamed only here.
+	Subscribe(viewerID string, dataKey [32]byte, f sealed.Subscription) (string, error)
+	Unsubscribe(viewerID string, dataKey [32]byte, id string) error
+	EditFeed(viewerID string, dataKey [32]byte, id, name, colour string, kinds []view.Kind) error
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).

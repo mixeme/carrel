@@ -32,6 +32,49 @@ type Blob struct {
 	// DeviceExcluded are the connections left out of every device set-up
 	// (S-23): not in an Apple profile, not in the tables of the other tabs.
 	DeviceExcluded []string `json:"deviceExcluded,omitempty"`
+	// Subscriptions are feeds read on every visit, never kept (S-25.2). A
+	// subscription is not a collection of any server: Connection and
+	// Collection answer for it as a read-only one, so addresses, ownership
+	// and ticks work the same, and nothing that walks Connections or
+	// Collections — devices, re-discovery, the connection cards — sees it.
+	Subscriptions []Subscription `json:"subscriptions,omitempty"`
+}
+
+// FeedPath is the {col} of every subscription: a feed is one file, one
+// collection.
+const FeedPath = "feed"
+
+// Subscription is one feed: its address, the local name and colour, the
+// optional credentials (sealed with the rest of the blob) and the kinds of
+// record it carried when it was checked.
+type Subscription struct {
+	ID       string      `json:"id"` // "f-…", the {account} of its addresses
+	URL      string      `json:"url"`
+	Name     string      `json:"name"`
+	Colour   string      `json:"colour,omitempty"`
+	Login    string      `json:"login,omitempty"`
+	Password string      `json:"password,omitempty"`
+	Kinds    []view.Kind `json:"kinds"`
+}
+
+// Subscription returns the feed with id.
+func (b Blob) Subscription(id string) (Subscription, bool) {
+	for _, f := range b.Subscriptions {
+		if f.ID == id {
+			return f, true
+		}
+	}
+	return Subscription{}, false
+}
+
+// FeedCollection is a subscription as a read-only catalog entry.
+func (f Subscription) FeedCollection() Collection {
+	return Collection{AccountID: f.ID, Path: FeedPath, Name: f.Name, Kinds: f.Kinds, Colour: f.Colour, ReadOnly: true, Feed: true}
+}
+
+// FeedConnection is a subscription as the connection it is read through.
+func (f Subscription) FeedConnection() Connection {
+	return Connection{ID: f.ID, Server: f.URL, Login: f.Login, Password: f.Password, Feed: true}
 }
 
 // IsDeviceExcluded reports whether the connection is left out of devices.
@@ -121,6 +164,8 @@ type Connection struct {
 	// FileRoot is the entered address when the server named no principal:
 	// that address is the file collection (S-6).
 	FileRoot string `json:"fileRoot,omitempty"`
+	// Feed marks a subscription answered as a connection; never stored.
+	Feed bool `json:"-"`
 }
 
 // Collection is one catalog entry. Path is the address on the server, the key
@@ -138,6 +183,8 @@ type Collection struct {
 	// Gone marks an entry re-discovery no longer found and the person applied
 	// (S-6.1). It stays so a selection holding it says gone (C-8.2).
 	Gone bool `json:"gone,omitempty"`
+	// Feed marks a subscription answered as a collection; never stored.
+	Feed bool `json:"-"`
 }
 
 // Has reports whether the collection holds records of kind k.
@@ -165,6 +212,9 @@ func (b Blob) Connection(id string) (Connection, bool) {
 			return c, true
 		}
 	}
+	if f, ok := b.Subscription(id); ok {
+		return f.FeedConnection(), true
+	}
 	return Connection{}, false
 }
 
@@ -174,6 +224,9 @@ func (b Blob) Collection(accountID, path string) (Collection, bool) {
 		if c.AccountID == accountID && c.Path == path {
 			return c, true
 		}
+	}
+	if f, ok := b.Subscription(accountID); ok && path == FeedPath {
+		return f.FeedCollection(), true
 	}
 	return Collection{}, false
 }

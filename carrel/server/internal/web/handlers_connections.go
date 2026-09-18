@@ -31,6 +31,9 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 	}
 	f := connectionForm{Server: r.FormValue("server"), CertFingerprint: r.FormValue("certFingerprint")}
 	page := s.connectionsPage(sess, f, nil)
+	if r.URL.Query().Get("op") == "feed" {
+		page.Add = s.feedForm(sess, feedForm{})
+	}
 	if id := r.URL.Query().Get("reveal"); id != "" && s.revealPassword(sess, &page, id) {
 		w.Header().Set("Cache-Control", "no-store")
 	}
@@ -47,6 +50,12 @@ func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request)
 		s.rediscover(w, r, false)
 	case "apply":
 		s.rediscover(w, r, true)
+	case "feed.check", "feed.subscribe":
+		s.postFeed(w, r)
+	case "feed.recheck":
+		s.recheckFeed(w, r)
+	case "feed.unsubscribe":
+		s.unsubscribe(w, r)
 	default:
 		if _, ok := s.requireLogin(w, r); ok {
 			s.notFound(w, r)
@@ -222,6 +231,11 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 			for _, c := range blob.Connections {
 				page.Accounts = append(page.Accounts, s.connectionCard(sess, tf, blob, c, unlocked))
 			}
+			for _, f := range blob.Subscriptions {
+				page.Subscriptions = append(page.Subscriptions, s.subscriptionCard(sess, tf, f))
+			}
+			page.Actions = append(page.Actions, view.Action{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link",
+				Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}}), Method: "GET", Enabled: true})
 			if n, ok := goneNotice(blob); ok {
 				page.Shell.Notices = append(page.Shell.Notices, n)
 			}

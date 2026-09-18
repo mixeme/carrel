@@ -481,6 +481,9 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 // openCollectionSheet finds the collection a rename sheet is about: ?a is the
 // connection, ?c the collection address. Gone, foreign and file collections
 // answer 404; folders are renamed by S-17, not here.
+// openCollectionSheet opens the catalog entry a sheet names. A subscription
+// opens only for renaming: moving and deleting are things of a server, and a
+// feed is nobody's collection here (S-25.2).
 func (s *Server) openCollectionSheet(w http.ResponseWriter, r *http.Request) (*session.Session, [32]byte, sealed.Connection, sealed.Collection, bool) {
 	sess, key, blob, ok := s.openCatalog(w, r)
 	if !ok {
@@ -489,7 +492,8 @@ func (s *Server) openCollectionSheet(w http.ResponseWriter, r *http.Request) (*s
 	q := r.URL.Query()
 	conn, hasConn := blob.Connection(q.Get("a"))
 	col, hasCol := blob.Collection(q.Get("a"), q.Get("c"))
-	if !hasConn || !hasCol || col.Gone || len(col.Kinds) == 0 || col.Has(view.KindFile) {
+	if !hasConn || !hasCol || col.Gone || len(col.Kinds) == 0 || col.Has(view.KindFile) ||
+		(col.Feed && !strings.HasSuffix(r.URL.Path, "/rename")) {
 		s.notFound(w, r)
 		return nil, key, sealed.Connection{}, sealed.Collection{}, false
 	}
@@ -529,6 +533,16 @@ func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.collectionRenameSheet(sess, conn, col, name, colour, errs, nil))
 		return
 	}
+	if conn.Feed {
+		// A subscription's name and colour are its own here: nothing goes to
+		// the feed's server (S-25.2).
+		if err := s.users.EditFeed(sess.AccountID(), key, conn.ID, name, colour, nil); err != nil {
+			http.Error(w, "could not save the subscription", http.StatusInternalServerError)
+			return
+		}
+		s.redirect(w, r, "/app/settings/connections")
+		return
+	}
 	props := []dav.Prop{{Name: propDisplayName, Value: dav.TextValue(name)}}
 	if colour != "" {
 		props = append(props, dav.Prop{Name: propCalendarColor, Value: dav.TextValue(colour)})
@@ -557,6 +571,18 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 	}
 	if !col.Has(view.KindContact) {
 		rows = append(rows, paletteRow(colour, errs["colour"], "Written to the server as calendar-color. Left unchosen, the colour stays as it is."))
+	}
+	if conn.Feed {
+		if !col.Has(view.KindContact) {
+			rows[len(rows)-1] = paletteRow(colour, errs["colour"], "Kept here: a feed sends no colour of its own.")
+		}
+		return view.CollectionRenameSheet{
+			Kind:    col.Kinds[0],
+			Form:    s.plainForm(action, "POST", rows...),
+			Address: text(conn.Server),
+			Note:    "The name is yours: it stays in Carrel and is never sent to the feed.",
+			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Enabled: true}},
+		}
 	}
 	return view.CollectionRenameSheet{
 		Kind:    col.Kinds[0],

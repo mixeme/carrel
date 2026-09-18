@@ -51,7 +51,7 @@ func (s *Server) publishTarget(r *http.Request, sess *session.Session) (*collect
 		return nil, "", false
 	}
 	c, ok := s.collectionOf(sess, spec, r.FormValue("a"), r.FormValue("c"))
-	if !ok || c.col.Gone {
+	if !ok || c.col.Gone || c.feed != nil {
 		return nil, "", false
 	}
 	return c, r.FormValue("uid"), true
@@ -386,7 +386,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, token strin
 	tf := c.tf
 	switch c.spec.kind {
 	case view.KindContact:
-		objs, err := c.card.Query(ctx, c.col.Path)
+		objs, err := c.contactsAll(ctx)
 		if err != nil {
 			return err
 		}
@@ -403,7 +403,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, token strin
 		}
 	case view.KindEvent:
 		from, to := weekWindow(tf, r.URL.Query().Get("from"))
-		objs, _, err := c.cal.Query(ctx, c.col.Path, c.spec.component, &from, &to)
+		objs, _, err := c.calQuery(ctx, c.spec.component, &from, &to)
 		if err != nil {
 			return err
 		}
@@ -425,7 +425,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, token strin
 			},
 		}
 	case view.KindTask:
-		objs, _, err := c.cal.Query(ctx, c.col.Path, c.spec.component, nil, nil)
+		objs, _, err := c.calQuery(ctx, c.spec.component, nil, nil)
 		if err != nil {
 			return err
 		}
@@ -438,7 +438,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, token strin
 		}
 		sort.SliceStable(page.Tasks, func(i, j int) bool { return !page.Tasks[i].Done && page.Tasks[j].Done })
 	default:
-		objs, _, err := c.cal.Query(ctx, c.col.Path, c.spec.component, nil, nil)
+		objs, _, err := c.calQuery(ctx, c.spec.component, nil, nil)
 		if err != nil {
 			return err
 		}
