@@ -263,5 +263,6 @@ type MailAttachSheet struct {
 	Rail    Rail            `json:"rail"`
 	Rows    []FindRow       `json:"rows"`
 	Preview []MailAttachRow `json:"preview"` // что окажется в списке вложений — до нажатия
+	Range   *Form           `json:"range"`   // «Calendar for a range»: с и по; nil у остальных
 	Actions []Action        `json:"actions"`
 }

@@ -27,7 +27,7 @@ const attachRowsMax = 200
 // attachQuery is the sheet's address with one thing changed.
 func attachQuery(r *http.Request, set url.Values) url.Values {
 	q := url.Values{}
-	for _, k := range []string{"what", "a", "c", "f", "q"} {
+	for _, k := range []string{"what", "a", "c", "f", "q", "from", "to"} {
 		if v := r.FormValue(k); v != "" {
 			q.Set(k, v)
 		}
@@ -102,6 +102,21 @@ func (s *Server) attachSheet(r *http.Request, sess *session.Session, k attachKin
 	parts := s.reckonLinks(append(d.Parts, part))
 	part = parts[len(parts)-1]
 	sheet.Preview = []view.MailAttachRow{attachRow(part)}
+	if k.What == "range" {
+		// The days go by the address, so the preview — file or link, and
+		// its size — follows them before Attach (owner's decision 19.09.2026).
+		sheet.Range = &view.Form{
+			Action: s.route("/app/mail/attach"), Method: "GET",
+			Sets: []view.FieldSet{{Rows: []view.FormRow{
+				{Name: "what", Kind: view.InputText, Value: "range"},
+				{Name: "a", Kind: view.InputText, Value: text(part.Account)},
+				{Name: "c", Kind: view.InputText, Value: text(part.Col)},
+				{Name: "from", Label: "From", Kind: view.InputDate, Value: text(part.From)},
+				{Name: "to", Label: "To", Kind: view.InputDate, Value: text(part.To), Hint: "Both days are in the file."},
+			}}},
+			Actions: []view.Action{{ID: "mail.attach.range", Label: "Show", Method: "GET", Enabled: true}},
+		}
+	}
 	attach := func(label string, format string) view.Action {
 		q := attachQuery(r, url.Values{"uid": {r.FormValue("uid")}, "file": {r.FormValue("file")}, "format": {format}})
 		return view.Action{ID: "mail.attach.add", Label: text(label), Href: s.postQuery("/app/mail/attach", q), Method: "POST", Enabled: true}

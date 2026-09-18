@@ -93,7 +93,8 @@ type Users interface {
 	// Published links (S-25): made with the one connection's credentials in
 	// a sealed envelope, opened without a session, listed and revoked by
 	// their owner.
-	Publish(viewerID string, conn sealed.Connection, target user.PublishTarget, expires *time.Time) (string, error)
+	Publish(viewerID string, dataKey [32]byte, conn sealed.Connection, target user.PublishTarget, expires *time.Time) (string, error)
+	LinkOf(viewerID string, dataKey [32]byte, id string) string
 	OpenPublished(token string) (user.OpenLink, bool)
 	PublishedLinks(viewerID string) []user.PublishedLink
 	RevokePublished(viewerID, id string) error

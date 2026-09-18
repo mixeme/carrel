@@ -1268,6 +1268,7 @@ type MailAttachSheet struct {
     Rail    Rail
     Rows    []FindRow
     Preview []MailAttachRow // что окажется в списке вложений — до нажатия
+    Range   *Form           // «Calendar for a range»: с и по; nil у остальных
     Actions []Action
 }
 ```

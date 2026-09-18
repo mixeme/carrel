@@ -38,9 +38,6 @@ type mailDraft struct {
 	Subject string
 	Body    string
 	Parts   []mailPart
-	// Fresh are links made in this session, by ID: a link is shown once and
-	// only its hash is kept, so only a link just made can be mailed.
-	Fresh map[string]string
 }
 
 // mailPart is one thing attached.
@@ -60,7 +57,7 @@ type mailPart struct {
 	Media   string
 	Size    int64
 	AsLink  bool
-	LinkID  string // a link made in this session (Fresh)
+	LinkID  string // one of the person's live links, kept in the blob
 }
 
 // attachKind is one line of the attach menu, in rail order.
@@ -94,9 +91,6 @@ func loadMailDraft(sess *session.Session) *mailDraft {
 	if data := sess.Draft(session.DraftMail); data != nil {
 		_ = gob.NewDecoder(bytes.NewReader(data)).Decode(d)
 	}
-	if d.Fresh == nil {
-		d.Fresh = map[string]string{}
-	}
 	return d
 }
 
@@ -107,16 +101,10 @@ func saveMailDraft(sess *session.Session, d *mailDraft) {
 	}
 }
 
-// rememberLink keeps a link just made, so its sheet can offer to mail it.
-func rememberLink(sess *session.Session, token string) string {
-	id := user.LinkID(token)
-	if id == "" {
-		return ""
-	}
-	d := loadMailDraft(sess)
-	d.Fresh[id] = token
-	saveMailDraft(sess, d)
-	return id
+// linkToken is one of the person's links whole, from the blob.
+func (s *Server) linkToken(sess *session.Session, id string) string {
+	key, _ := sess.DataKey()
+	return s.users.LinkOf(sess.AccountID(), key, id)
 }
 
 // mailOn reports whether people may send letters here at all: the instance
@@ -173,12 +161,11 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 	op := r.FormValue("op")
 	switch op {
 	case "discard":
-		saveMailDraft(sess, &mailDraft{Fresh: d.Fresh})
+		saveMailDraft(sess, &mailDraft{})
 		s.redirect(w, r, "/app/mail/compose")
 		return
 	case "link":
-		token := d.Fresh[r.FormValue("id")]
-		if token == "" {
+		if s.linkToken(sess, r.FormValue("id")) == "" {
 			s.notFound(w, r)
 			return
 		}
@@ -187,7 +174,7 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 			s.notFound(w, r)
 			return
 		}
-		d = &mailDraft{Fresh: d.Fresh, Parts: []mailPart{part}, Subject: part.Title}
+		d = &mailDraft{Parts: []mailPart{part}, Subject: part.Title}
 		saveMailDraft(sess, d)
 		s.redirect(w, r, "/app/mail/compose")
 		return
@@ -214,7 +201,7 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 			s.writeMailSheet(w, r, s.mailSheet(r.Context(), sess, d, "", err.Error()))
 			return
 		}
-		saveMailDraft(sess, &mailDraft{Fresh: d.Fresh})
+		saveMailDraft(sess, &mailDraft{})
 		s.redirect(w, r, "/app/mail/compose?sent="+strconv.Itoa(n))
 		return
 	}
@@ -540,7 +527,10 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		if !p.AsLink {
 			continue
 		}
-		token := d.Fresh[p.LinkID]
+		token := ""
+		if p.LinkID != "" {
+			token = s.linkToken(sess, p.LinkID)
+		}
 		if token == "" {
 			token, err = s.partLink(sess, p)
 			if err != nil {
@@ -600,7 +590,8 @@ func (s *Server) partLink(sess *session.Session, p mailPart) (string, error) {
 	} else {
 		target.UID = p.UID // empty for a book or a calendar: the whole of it
 	}
-	token, err := s.users.Publish(sess.AccountID(), conn, target, &expires)
+	key, _ := sess.DataKey()
+	token, err := s.users.Publish(sess.AccountID(), key, conn, target, &expires)
 	if err != nil {
 		return "", err
 	}

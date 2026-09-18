@@ -130,10 +130,8 @@ func (s *Server) madeSheet(sess *session.Session, sheet view.PublishSheet, token
 		{ID: "publish.open", Label: "Open the link", Href: link, Method: "GET", Enabled: true},
 		{ID: "publish.list", Label: "All published links", Href: s.route("/app/files/published"), Method: "GET", Enabled: true},
 	}
-	// The link is shown this once; a letter can carry it only now, from this
-	// session (S-26.2).
 	if s.mailOn() {
-		if id := rememberLink(sess, token); id != "" {
+		if id := user.LinkID(token); id != "" {
 			sheet.Actions = append(sheet.Actions, view.Action{ID: "publish.mail", Label: "Send by letter", Method: "POST", Enabled: true,
 				Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {id}})})
 		}
@@ -218,7 +216,8 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	token, err := s.users.Publish(sess.AccountID(), c.conn, user.PublishTarget{
+	key, _ := sess.DataKey()
+	token, err := s.users.Publish(sess.AccountID(), key, c.conn, user.PublishTarget{
 		AccountID: c.conn.ID, Kind: string(c.spec.kind), Col: c.col.Path, UID: uid, Title: title,
 	}, expires)
 	if err != nil {
@@ -228,9 +227,10 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 	s.writeSheet(w, r, s.madeSheet(sess, s.publishSheet(sess, c, uid, title), token, expires))
 }
 
-// getFilesPublished lists the person's live links. A link is not shown
-// again — only its hash is kept — so a row says what it opens, until when,
-// when it was last opened, and offers Revoke.
+// getFilesPublished lists the person's live links: what each opens, until
+// when, when it was last opened, the link itself from the blob with Copy
+// and, with mail on, Send this link — and Revoke. A link made before links
+// were kept has no link to show.
 func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -256,6 +256,16 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		}
 		if l.ExpiresAt != nil {
 			row.Expires = text(tf.date(*l.ExpiresAt))
+		}
+		if token := blob.Links[l.ID]; token != "" {
+			link := s.route("/p/" + token)
+			row.Link = text(link)
+			more := []view.Action{{ID: "publish.copy", Label: "Copy", Href: link, Method: "GET", Enabled: true}}
+			if s.mailOn() {
+				more = append(more, view.Action{ID: "publish.mail", Label: "Send this link", Method: "POST", Enabled: true,
+					Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {l.ID}})})
+			}
+			row.Actions = append(more, row.Actions...)
 		}
 		if l.LastSeen != nil {
 			row.LastSeen = tf.formatWhen(*l.LastSeen, true, now)

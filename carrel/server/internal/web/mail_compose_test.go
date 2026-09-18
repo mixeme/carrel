@@ -260,3 +260,56 @@ func TestNoLetterWithoutMail(t *testing.T) {
 		t.Errorf("last item = %+v", m)
 	}
 }
+
+// Owner's decision 19.09.2026: a link is kept whole in the person's blob, so
+// Published links shows it, copies it and mails it later, from another
+// session; the instance still keeps only its hash.
+func TestOldLinkGoesByLetterFromPublishedLinks(t *testing.T) {
+	f, relay := letterFixture(t)
+	made := decode[view.PublishSheet](t, f.h.do(postForm("/app/publish?"+url.Values{"k": {"contacts"}, "a": {f.id}, "c": {searchBook}, "uid": {"ada"}}.Encode(), f.sess, url.Values{})))
+	snap := f.h.st.Snapshot()
+	if len(snap.Published) != 1 || strings.Contains(string(snap.Published[0].Hash), strings.TrimPrefix(string(made.Link), "/p/")) {
+		t.Fatalf("published = %+v", snap.Published)
+	}
+
+	later := f.h.login("owner", "password123")
+	page := decode[view.PublishedLinksPage](t, f.h.do(get("/app/files/published", later)))
+	if len(page.Rows) != 1 || page.Rows[0].Link != made.Link || actionHref(t, page.Rows[0].Actions, "publish.copy") != string(made.Link) {
+		t.Fatalf("rows = %+v", page.Rows)
+	}
+	if rec := f.h.do(postForm(actionHref(t, page.Rows[0].Actions, "publish.mail"), later, url.Values{})); rec.Code != 303 {
+		t.Fatalf("send this link: %d", rec.Code)
+	}
+	if rec := f.h.do(postForm("/app/mail/compose?op=send", later, url.Values{"to": {"ann@example.org"}, "subject": {"Ada"}, "body": {"See"}})); rec.Code != 303 {
+		t.Fatalf("send: %d %s", rec.Code, rec.Body)
+	}
+	_, body := letterBody(t, relay.Letters()[0])
+	if !strings.Contains(body, "http://example.com"+string(made.Link)) || len(f.h.users.PublishedLinks(f.sess.AccountID())) != 1 {
+		t.Errorf("body:\n%s", body)
+	}
+}
+
+// «Calendar for a range» takes its days from the sheet's own fields; both
+// days are in the file, and a day outside is not.
+func TestLetterCalendarRange(t *testing.T) {
+	f := calendarFixture(t, func(h *harness) { h.cfg.MailEnabled = true },
+		"in.ics", ics("BEGIN:VEVENT\nUID:in\nDTSTAMP:20260101T000000Z\nDTSTART:20261005T100000Z\nDTEND:20261005T110000Z\nSUMMARY:Inside\nEND:VEVENT"),
+		"out.ics", ics("BEGIN:VEVENT\nUID:out\nDTSTAMP:20260101T000000Z\nDTSTART:20261020T100000Z\nDTEND:20261020T110000Z\nSUMMARY:Outside\nEND:VEVENT"))
+	relay := f.h.relayed()
+	q := url.Values{"what": {"range"}, "a": {f.id}, "c": {f.col}, "from": {"2026-10-01"}, "to": {"2026-10-10"}}
+	sheet := attachOne(t, f, q)
+	if sheet.Range == nil || formFields(*sheet.Range).Get("from") != "2026-10-01" || formFields(*sheet.Range).Get("to") != "2026-10-10" {
+		t.Fatalf("range form = %+v", sheet.Range)
+	}
+	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"October"}, "body": {"x"}})); rec.Code != 303 {
+		t.Fatalf("send: %d %s", rec.Code, rec.Body)
+	}
+	_, files := parts(t, relay.Letters()[0])
+	var ics string
+	for _, v := range files {
+		ics = v
+	}
+	if !strings.Contains(ics, "Inside") || strings.Contains(ics, "Outside") {
+		t.Errorf("calendar:\n%s", ics)
+	}
+}

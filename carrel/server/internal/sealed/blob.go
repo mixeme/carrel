@@ -42,6 +42,11 @@ type Blob struct {
 	// to keep, sealed or not, and the job's own password — under the data
 	// key, like the credentials.
 	BackupJobs []BackupJob `json:"backupJobs,omitempty"`
+	// Links are the person's published links whole, by ID (S-25.1): the
+	// instance keeps only their hashes, so the link itself is kept here,
+	// under the data key, for Copy and for a letter (owner's decision
+	// 19.09.2026). A link made before this field has no entry.
+	Links map[string]string `json:"links,omitempty"`
 }
 
 // Destinations of a backup job (S-24.1).

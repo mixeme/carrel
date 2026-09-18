@@ -131,7 +131,8 @@ func TestPublishedRecords(t *testing.T) {
 }
 
 // Revoked is never-was: the same 404 as a link that never existed. The list
-// shows the link without its secret; someone else cannot revoke it.
+// shows its owner the link, kept in the blob (owner's decision 19.09.2026);
+// Revoke goes by the link's ID, not its secret; someone else cannot revoke it.
 func TestRevokedIsNeverWas(t *testing.T) {
 	f := publishFixture(t)
 	link := publishLink(t, f, f.publishHref("calendar", searchWork, ""), false)
@@ -141,10 +142,13 @@ func TestRevokedIsNeverWas(t *testing.T) {
 	}
 
 	list := decode[view.PublishedLinksPage](t, f.h.do(get("/app/files/published", f.sess)))
-	if len(list.Rows) != 1 || list.Rows[0].Title != "Work" || list.Rows[0].Link != "" || strings.Contains(list.Rows[0].Actions[0].Href, strings.TrimPrefix(link, "/p/")) {
+	if len(list.Rows) != 1 || list.Rows[0].Title != "Work" || string(list.Rows[0].Link) != link {
 		t.Fatalf("links = %+v", list.Rows)
 	}
 	revoke := actionHref(t, list.Rows[0].Actions, "publish.revoke")
+	if strings.Contains(revoke, strings.TrimPrefix(link, "/p/")) {
+		t.Fatalf("Revoke carries the secret: %s", revoke)
+	}
 
 	adminID := f.h.st.Snapshot().Users[0].ID
 	f.h.invite(adminID, "mallory", "password456")

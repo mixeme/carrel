@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -15,15 +16,16 @@ import (
 func TestPublishedLinkLifetime(t *testing.T) {
 	f := newFixture(t)
 	id := f.setupAdmin(t)
+	_, key, _, _ := f.svc.Authenticate(context.Background(), "admin", "password123")
 	conn := sealed.Connection{ID: "a1", Server: "https://dav.example.org/", Login: "ann", Password: "pw"}
 	target := PublishTarget{AccountID: "a1", Kind: "contact", Col: "/book/", Title: "Book"}
 
 	until := f.now.Add(publish.DefaultTTL)
-	dated, err := f.svc.Publish(id, conn, target, &until)
+	dated, err := f.svc.Publish(id, key, conn, target, &until)
 	if err != nil {
 		t.Fatal(err)
 	}
-	forever, _ := f.svc.Publish(id, conn, target, nil)
+	forever, _ := f.svc.Publish(id, key, conn, target, nil)
 	if l, ok := f.svc.OpenPublished(dated); !ok || l.Conn.Password != "pw" || l.Target.Col != "/book/" {
 		t.Fatalf("a live link: %+v %v", l, ok)
 	}
@@ -40,7 +42,7 @@ func TestPublishedLinkLifetime(t *testing.T) {
 	}
 
 	// Swap the two envelopes: each is bound to its own hash.
-	another, _ := f.svc.Publish(id, sealed.Connection{Server: "https://other.example/", Login: "x", Password: "other"}, target, nil)
+	another, _ := f.svc.Publish(id, key, sealed.Connection{Server: "https://other.example/", Login: "x", Password: "other"}, target, nil)
 	_ = f.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		n := len(st.Published)
 		st.Published[n-1].Envelope, st.Published[n-2].Envelope = st.Published[n-2].Envelope, st.Published[n-1].Envelope

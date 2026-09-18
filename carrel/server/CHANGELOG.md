@@ -5,6 +5,25 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.112 — 2026-09-19
+
+Published links can be copied and mailed at any time; a calendar goes into a
+letter for the days you choose.
+
+### For consumers
+
+- **Published links** shows each link made from now on in full, with Copy
+  and, when people's mail is on, "Send this link". The link is kept in your
+  encrypted account data, under your password like your connections; the
+  instance itself still keeps only its hash. Links made before this version
+  cannot be shown: nobody has them.
+- **Calendar for a range** in a letter has From and To fields; both days are
+  in the file. It starts at 30 days from today.
+
+### Changed
+
+- `MailAttachSheet` has `Range`, a form with the two days (C-6).
+
 ## v0.0.111 — 2026-09-19
 
 The administrator sets the instance's name, the lifetimes of sessions and

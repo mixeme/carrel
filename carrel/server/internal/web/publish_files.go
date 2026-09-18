@@ -115,7 +115,8 @@ func (s *Server) postPublishFile(w http.ResponseWriter, r *http.Request, sess *s
 		}
 	}
 	title := fileTitle(c, segs)
-	token, err := s.users.Publish(sess.AccountID(), c.conn, user.PublishTarget{
+	key, _ := sess.DataKey()
+	token, err := s.users.Publish(sess.AccountID(), key, c.conn, user.PublishTarget{
 		AccountID: c.conn.ID, Kind: string(view.KindFile), Col: c.col.Path, Path: strings.Join(segs, "/"), Folder: dir, Title: title,
 	}, expires)
 	if err != nil {

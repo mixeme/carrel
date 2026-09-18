@@ -45,7 +45,7 @@ const lastSeenEvery = time.Hour
 // holds it: its address and credentials go into the link's envelope, sealed
 // under the server key. The secret is returned once and never kept. The
 // journal names the kind and the connection.
-func (s *Service) Publish(viewerID string, conn sealed.Connection, target PublishTarget, expires *time.Time) (string, error) {
+func (s *Service) Publish(viewerID string, dataKey [crypt.KeyLen]byte, conn sealed.Connection, target PublishTarget, expires *time.Time) (string, error) {
 	raw, hash, err := newSecret()
 	if err != nil {
 		return "", err
@@ -76,6 +76,27 @@ func (s *Service) Publish(viewerID string, conn sealed.Connection, target Publis
 		}}, nil
 	})
 	if err != nil {
+		return "", err
+	}
+	// The link itself goes into the person's blob; links revoked or expired
+	// since are dropped from it on the way.
+	live := map[string]bool{}
+	for _, l := range s.PublishedLinks(viewerID) {
+		live[l.ID] = true
+	}
+	id := publish.ID(hash)
+	if err := s.editBlob(viewerID, dataKey, nil, func(b *sealed.Blob) error {
+		for k := range b.Links {
+			if !live[k] {
+				delete(b.Links, k)
+			}
+		}
+		if b.Links == nil {
+			b.Links = map[string]string{}
+		}
+		b.Links[id] = raw
+		return nil
+	}); err != nil {
 		return "", err
 	}
 	return raw, nil
@@ -195,4 +216,19 @@ func prunePublished(st *store.State, now time.Time) {
 
 func targetOf(l store.PublishedLink) PublishTarget {
 	return PublishTarget{AccountID: l.AccountID, Kind: l.Kind, Col: l.Col, UID: l.UID, Path: l.Path, Folder: l.Folder, Title: l.Title}
+}
+
+// LinkOf is the whole link of one of the viewer's live links, from the
+// blob; "" for a link made before links were kept, or not the viewer's.
+func (s *Service) LinkOf(viewerID string, dataKey [crypt.KeyLen]byte, id string) string {
+	for _, l := range s.PublishedLinks(viewerID) {
+		if l.ID == id {
+			blob, ok := s.Catalog(viewerID, dataKey)
+			if !ok {
+				return ""
+			}
+			return blob.Links[id]
+		}
+	}
+	return ""
 }
