@@ -53,6 +53,11 @@ func TestICloudContactLifecycle(t *testing.T) {
 	if book.Path == "" {
 		t.Skip("no address book in the catalog")
 	}
+	// iCloud sends no name for it at all, so discovery names it by what it is
+	// (docs/servers.md, SV-29): the last segment of that address is "card".
+	if book.Name != "Address book" {
+		t.Errorf("the book is called %q; iCloud sends no displayname, so the kind is the name", book.Name)
+	}
 	list := "/app/contacts/" + connID + "/" + url.PathEscape(book.Path)
 	family := "Probe-" + yandexSuffix("icloud")
 

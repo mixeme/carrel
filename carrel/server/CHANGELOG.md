@@ -5,6 +5,44 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.90 — 2026-09-18
+
+A collection with no name gets one, and a write is sent again when the server
+had closed the connection before it.
+
+### For consumers
+
+- **A collection the server does not name is named by what it is.** iCloud
+  sends no `displayname` at all for the only address book it has, and the last
+  segment of that address reads "card" to the person whose contacts are in it.
+  It is now called "Address book" — and where a home holds several nameless
+  ones of a kind, each keeps that segment beside the name, "Address book
+  (card)", because two identical rows are worse than a technical word
+  (`docs/servers.md`, SV-29).
+- **A write that died on a connection the pool had kept idle is sent again.**
+  On shared hosting a server closes idle connections fast, and the request
+  after one of those ends before the answer: `MKCALENDAR` on Nextcloud failed
+  that way in a full live run, with nothing having reached the server. The
+  guard now sends such a write once more — but only when the connection came
+  out of the pool idle, because that is the case where the server had closed
+  its side before the request and never saw it (S-5.1, SV-14).
+- **A connection dialled for the request is not retried, and neither is a
+  streamed body.** There the failure says nothing about what the server did,
+  and a file on its way to another server cannot be produced twice.
+- Safe by a second measure: every write Carrel sends is conditional (S-8) or
+  idempotent, so one that did land answers the retry with a failed
+  precondition instead of doubling.
+
+### Included
+
+- `discover.named` and `kindNoun`, with
+  `TestACollectionWithoutANameIsNamedByItsKind`; the name is given where the
+  whole home is in view, so `web.collectionLabel` is untouched and its fallback
+  to the address stays for file collections.
+- `dav.limitTransport` reads `httptrace.GotConnInfo` for `Reused` and
+  `WasIdle`; `replayable` split into `readOnly` and `rewindable`. Four tests in
+  `internal/dav/retry_test.go` hold the four cases.
+
 ## v0.0.89 — 2026-09-18
 
 Nextcloud and iCloud are in the live set.

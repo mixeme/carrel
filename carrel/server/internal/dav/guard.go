@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httptrace"
 	"net/netip"
 	"net/url"
 	"strings"
@@ -283,30 +284,49 @@ type limitTransport struct {
 }
 
 // RoundTrip sends the request and, when a connection the pool had kept turns
-// out to be closed, sends it once more (docs/servers.md, SV-14). Go replays
-// only the methods it knows as safe, and PROPFIND and REPORT are not among
-// them; the pool lives in this guard, so every DAV client of the process
+// out to be closed, sends it once more (docs/servers.md, SV-14, S-5.1). Go
+// replays only the methods it knows as safe, and PROPFIND and REPORT are not
+// among them; the pool lives in this guard, so every DAV client of the process
 // shares it and inherits the race.
+//
+// A read goes again whatever the pool said. A write goes again only when the
+// connection came out of the pool idle: the server had closed its side before
+// the request, so it never saw it. A connection dialled for this request is
+// not retried — there the error says nothing about what the server did with
+// it. The second reason it is safe: every write Carrel sends is conditional
+// (S-8) or idempotent, so one that did land answers the retry with a failed
+// precondition instead of doubling.
 func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	resp, err := t.attempt(req)
-	if err == nil || !replayable(req) || !idleClosed(err) {
+	resp, err, fromIdle := t.attempt(req)
+	switch {
+	case err == nil || !idleClosed(err) || !rewindable(req):
+		return resp, err
+	case !readOnly(req) && !fromIdle:
 		return resp, err
 	}
 	again, rerr := rewound(req)
 	if rerr != nil {
 		return resp, err
 	}
-	return t.attempt(again)
+	resp, err, _ = t.attempt(again)
+	return resp, err
 }
 
-// replayable reports whether sending the request again changes nothing: a
-// method that only reads, and a body the request can produce a second time.
-func replayable(req *http.Request) bool {
+// readOnly reports whether the method only reads, so sending it again changes
+// nothing on the server whatever happened to the first one.
+func readOnly(req *http.Request) bool {
 	switch req.Method {
 	case http.MethodGet, http.MethodHead, http.MethodOptions, "PROPFIND", "REPORT":
+		return true
 	default:
 		return false
 	}
+}
+
+// rewindable reports whether the request can produce its body a second time.
+// A body streamed from somewhere else — a file on its way to another server —
+// cannot, and is never sent twice.
+func rewindable(req *http.Request) bool {
 	return req.Body == nil || req.Body == http.NoBody || req.GetBody != nil
 }
 
@@ -331,11 +351,17 @@ func rewound(req *http.Request) (*http.Request, error) {
 	return out, nil
 }
 
-func (t *limitTransport) attempt(req *http.Request) (*http.Response, error) {
+// attempt sends the request once. fromIdle is true when the connection it
+// went out on came from the pool having sat idle — the one case where a
+// connection closed mid-flight says the server never saw the request.
+func (t *limitTransport) attempt(req *http.Request) (resp *http.Response, err error, fromIdle bool) {
 	base := t.base
 	if base == nil {
 		base = http.DefaultTransport
 	}
+	req = req.WithContext(httptrace.WithClientTrace(req.Context(), &httptrace.ClientTrace{
+		GotConn: func(info httptrace.GotConnInfo) { fromIdle = info.Reused && info.WasIdle },
+	}))
 	var w *watchdog
 	if t.request > 0 {
 		var ctx context.Context
@@ -345,13 +371,13 @@ func (t *limitTransport) attempt(req *http.Request) (*http.Response, error) {
 			req.Body = &watchedBody{ReadCloser: req.Body, w: w, out: true}
 		}
 	}
-	resp, err := base.RoundTrip(req)
+	resp, err = base.RoundTrip(req)
 	if err != nil {
 		if w != nil {
 			w.stop()
 			err = w.err(err)
 		}
-		return nil, err
+		return nil, err, fromIdle
 	}
 	if w != nil {
 		if resp.Body == nil {
@@ -363,7 +389,7 @@ func (t *limitTransport) attempt(req *http.Request) (*http.Response, error) {
 	if resp.Body != nil && t.max > 0 && !uncapped(req) {
 		resp.Body = &limitedBody{ReadCloser: resp.Body, remain: t.max}
 	}
-	return resp, nil
+	return resp, nil, fromIdle
 }
 
 type limitedBody struct {

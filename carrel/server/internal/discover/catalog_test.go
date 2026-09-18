@@ -117,3 +117,46 @@ func TestDiscoverySkipsWhatTheServerPutInItsTrashBin(t *testing.T) {
 		t.Errorf("the trace does not say what was left out: %q", said)
 	}
 }
+
+// docs/servers.md, SV-29: a server that sends no displayname at all. What the
+// collection is, is its name then — the last segment of the address is a
+// technical word to the person whose contacts are in it (iCloud's only book is
+// at .../carddavhome/card/). Two nameless ones of a kind in one home are told
+// apart by that segment, because two identical rows are worse.
+func TestACollectionWithoutANameIsNamedByItsKind(t *testing.T) {
+	srv := davtest.New(t)
+	only := davtest.AddressBookHome + "card/"
+	srv.AddAddressBook(carddav.AddressBook{Path: only})
+	cal := davtest.CalendarHome + "events/"
+	srv.AddCalendar(caldav.Calendar{Path: cal})
+
+	res, _, err := Run(t.Context(), loopbackGuard(), srv.URL, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	byPath := map[string]string{}
+	for _, c := range res.Collections {
+		byPath[c.Path] = c.DisplayName
+	}
+	if byPath[only] != "Address book" || byPath[cal] != "Calendar" {
+		t.Fatalf("names = %+v", byPath)
+	}
+
+	// A second nameless book in the same home: now the address tells them apart.
+	second := davtest.AddressBookHome + "other/"
+	srv.AddAddressBook(carddav.AddressBook{Path: second})
+	res, _, err = Run(t.Context(), loopbackGuard(), srv.URL, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	byPath = map[string]string{}
+	for _, c := range res.Collections {
+		byPath[c.Path] = c.DisplayName
+	}
+	if byPath[only] != "Address book (card)" || byPath[second] != "Address book (other)" {
+		t.Errorf("names = %+v", byPath)
+	}
+	if byPath[cal] != "Calendar" {
+		t.Errorf("the calendar is alone and keeps its plain name: %q", byPath[cal])
+	}
+}

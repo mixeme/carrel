@@ -5,27 +5,35 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"net/http/httptrace"
 	"strings"
 	"testing"
 )
 
-// docs/servers.md, SV-14: a server closes a connection the pool kept idle, and
-// the next request on it ends before the answer. Go sends a second time only
-// what it knows as safe, and the DAV methods are not on that list, so the
-// guard does it: once, for a request that only reads and can produce its body
-// again.
+// docs/servers.md, SV-14 and S-5.1: a server closes a connection the pool kept
+// idle, and the next request on it ends before the answer. Go sends a second
+// time only what it knows as safe, and the DAV methods are not on that list,
+// so the guard does it: once, for a read whatever the pool said, and for a
+// write only when the connection came out of the pool idle — there the server
+// had closed its side before the request and never saw it.
 
 // flakyBase fails the first n calls with err and answers afterwards, keeping
-// the body of every call.
+// the body of every call. fromIdle is what it reports through httptrace about
+// the connection the request went out on: a real transport reports it, and
+// the guard reads it from there.
 type flakyBase struct {
-	err    error
-	fail   int
-	calls  int
-	bodies []string
+	err      error
+	fail     int
+	calls    int
+	bodies   []string
+	fromIdle bool
 }
 
 func (f *flakyBase) RoundTrip(req *http.Request) (*http.Response, error) {
 	f.calls++
+	if trace := httptrace.ContextClientTrace(req.Context()); trace != nil && trace.GotConn != nil {
+		trace.GotConn(httptrace.GotConnInfo{Reused: f.fromIdle, WasIdle: f.fromIdle})
+	}
 	body := ""
 	if req.Body != nil {
 		b, _ := io.ReadAll(req.Body)
@@ -68,9 +76,10 @@ func TestReadOnlyRequestIsSentAgainAfterAnIdleClose(t *testing.T) {
 	}
 }
 
-// A write is never sent twice: the server may have taken the first one.
-func TestWritesAreNotSentAgain(t *testing.T) {
-	for _, method := range []string{http.MethodPut, http.MethodDelete, "MKCOL", "MOVE", "PROPPATCH"} {
+// A write on a connection dialled for it is not sent twice: the error says
+// nothing about what the server did with the first one.
+func TestWriteOnAFreshConnectionIsNotSentAgain(t *testing.T) {
+	for _, method := range []string{http.MethodPut, http.MethodDelete, "MKCOL", "MKCALENDAR", "MOVE", "PROPPATCH"} {
 		base := &flakyBase{err: io.EOF, fail: 1}
 		if _, err := roundTrip(t, base, method, bytes.NewReader([]byte("x"))); err == nil {
 			t.Errorf("%s: the error was swallowed", method)
@@ -78,6 +87,47 @@ func TestWritesAreNotSentAgain(t *testing.T) {
 		if base.calls != 1 {
 			t.Errorf("%s: %d calls, want one", method, base.calls)
 		}
+	}
+}
+
+// A write on a connection the pool had kept idle is sent again, with its body
+// rewound: the server closed its side before the request and never saw it
+// (S-5.1). One that did land answers the second try with a failed
+// precondition — every write Carrel sends is conditional or idempotent (S-8).
+func TestWriteOnAnIdleConnectionIsSentAgain(t *testing.T) {
+	for _, method := range []string{http.MethodPut, http.MethodDelete, "MKCOL", "MKCALENDAR", "MOVE", "PROPPATCH"} {
+		base := &flakyBase{err: io.EOF, fail: 1, fromIdle: true}
+		resp, err := roundTrip(t, base, method, bytes.NewReader([]byte("<mkcol/>")))
+		if err != nil {
+			t.Fatalf("%s: %v", method, err)
+		}
+		resp.Body.Close()
+		if base.calls != 2 {
+			t.Errorf("%s: %d calls, want a second one", method, base.calls)
+		}
+		if len(base.bodies) == 2 && (base.bodies[1] != "<mkcol/>" || base.bodies[0] != base.bodies[1]) {
+			t.Errorf("%s: the body was not rewound: %q then %q", method, base.bodies[0], base.bodies[1])
+		}
+	}
+}
+
+// A body that cannot be produced a second time — a file on its way to another
+// server — is never sent twice, idle connection or not.
+func TestAStreamedBodyIsNotSentAgain(t *testing.T) {
+	base := &flakyBase{err: io.EOF, fail: 1, fromIdle: true}
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, "http://server.example/dav/f",
+		struct{ io.Reader }{strings.NewReader("a stream")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if req.GetBody != nil {
+		t.Fatal("this body was rewindable after all; the test proves nothing")
+	}
+	if _, err := (&limitTransport{base: base}).RoundTrip(req); err == nil {
+		t.Error("the error was swallowed")
+	}
+	if base.calls != 1 {
+		t.Errorf("%d calls, want one", base.calls)
 	}
 }
 

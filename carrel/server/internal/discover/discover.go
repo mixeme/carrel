@@ -141,7 +141,7 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPi
 			for _, cal := range cals {
 				found = append(found, calendarToCollection(cal))
 			}
-			all = append(all, withHomeProps(ctx, client, calHome, "calendar", found, add)...)
+			all = append(all, named(withHomeProps(ctx, client, calHome, "calendar", found, add))...)
 		}
 	}
 
@@ -159,7 +159,7 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPi
 			for _, ab := range books {
 				found = append(found, addressBookToCollection(ab))
 			}
-			all = append(all, withHomeProps(ctx, client, cardHome, "address book", found, add)...)
+			all = append(all, named(withHomeProps(ctx, client, cardHome, "address book", found, add))...)
 		}
 	}
 
@@ -252,6 +252,55 @@ func writable(inner []byte) (canWrite, known bool) {
 
 // hrefKey reduces an href to a comparable path: servers answer with absolute
 // URLs or paths, percent-encoded or not, with or without the trailing slash.
+// named gives a name to a collection whose server sent none. iCloud sends no
+// displayname at all for the only address book it has (docs/servers.md,
+// SV-29), and the last segment of that address reads "card" to the person
+// whose contacts are in it. What the collection is, is an honest name for it:
+// it is an address book. Several nameless ones of the same kind in one home
+// are told apart by that last segment — two rows reading the same would be
+// worse than a technical word (owner's decision, 18.09.2026).
+func named(cols []Collection) []Collection {
+	nameless := map[string]int{}
+	for _, c := range cols {
+		if strings.TrimSpace(c.DisplayName) == "" {
+			nameless[kindNoun(c)]++
+		}
+	}
+	for i := range cols {
+		if strings.TrimSpace(cols[i].DisplayName) != "" {
+			continue
+		}
+		noun := kindNoun(cols[i])
+		cols[i].DisplayName = noun
+		if nameless[noun] > 1 {
+			cols[i].DisplayName = noun + " (" + lastSegment(cols[i].Path) + ")"
+		}
+	}
+	return cols
+}
+
+// kindNoun is what a collection is, for a server that never said what it is
+// called: a collection of contacts is an address book, anything else here is a
+// calendar, whatever components it holds.
+func kindNoun(c Collection) string {
+	for _, k := range c.Kinds {
+		if k == view.KindContact {
+			return "Address book"
+		}
+	}
+	return "Calendar"
+}
+
+// lastSegment is the final name in an address, which is what tells two
+// otherwise identical collections apart.
+func lastSegment(path string) string {
+	p := strings.TrimSuffix(path, "/")
+	if i := strings.LastIndex(p, "/"); i >= 0 {
+		return p[i+1:]
+	}
+	return p
+}
+
 func hrefKey(href string) string {
 	p := href
 	if u, err := url.Parse(href); err == nil {
