@@ -42,7 +42,7 @@ func (s *Server) postAdminSettings(w http.ResponseWriter, r *http.Request) {
 	in := store.SMTPSettings{
 		Host: r.FormValue("host"), Port: port, Security: r.FormValue("security"),
 		Username: r.FormValue("username"), Password: r.FormValue("password"),
-		From: r.FormValue("from"), FromName: r.FormValue("fromName"),
+		From: r.FormValue("from"), FromName: r.FormValue("fromName"), Sender: r.FormValue("sender"),
 	}
 	if err := s.users.SetSMTP(sess.AccountID(), in); err != nil {
 		in.Password = ""
@@ -143,8 +143,10 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 			{Name: "username", Label: "Username", Kind: view.InputText, Value: text(shown.Username)},
 			{Name: "password", Label: "Password", Kind: view.InputPassword, Hint: pwHint},
 			{Name: "from", Label: "From address", Kind: view.InputEmail, Value: text(shown.From),
-				Hint: "Every letter goes from this address, a person's too: the relay vouches for this domain, not for theirs."},
+				Hint: "The instance's own letters go from it, and it is the envelope sender of every letter. A person's letter never goes from their own domain: the relay vouches for this one."},
 			{Name: "fromName", Label: "From name", Kind: view.InputText, Value: text(shown.FromName)},
+			{Name: "sender", Label: "Sender address", Kind: view.InputRadio, Options: senderOptions(shown),
+				Hint: "Of people's letters. Your relay decides which of the two it will let out. The envelope sender stays the From address either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here. Replies go to the person's confirmed address in both cases."},
 		}}},
 		Actions: []view.Action{{ID: "admin.settings.save", Label: "Save", Method: "POST", Enabled: true}},
 	}
@@ -163,9 +165,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		Sets: []view.FieldSet{{Legend: "Letters", Rows: []view.FormRow{
 			csrfField(sess),
 			{Name: "people", Label: "Letters from users", Kind: view.InputText, Value: text(people), ReadOnly: true,
-				Hint: "When on, everyone signed in may send mail through this relay, from this address, with their name and — once confirmed — their address to reply to. Set with CARREL_MAIL_ENABLED; off by default."},
-			{Name: "sender", Label: "Sender address", Kind: view.InputText, Value: text(cur.From), ReadOnly: true,
-				Hint: "A person's login is never the sender."},
+				Hint: "When on, everyone signed in may send mail through this relay, from this domain, with their name and — once confirmed — their address to reply to. Set with CARREL_MAIL_ENABLED; off by default."},
 			{Name: "to", Label: "Send test message to", Kind: view.InputEmail, Value: text(flash.testTo)},
 		}}},
 		Actions: []view.Action{{ID: "admin.settings.mailtest", Label: "Send test", Method: "POST", Enabled: cur.Configured()}},
@@ -185,4 +185,20 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 			Hint: "Per person, per UTC day. CARREL_MAIL_MAX_PER_DAY."},
 	}}}}
 	return page
+}
+
+// senderOptions are the two forms of a person's From (S-26.1), shown as the
+// addresses they make.
+func senderOptions(st store.SMTPSettings) []view.Option {
+	service, login := st.From, "login@…"
+	if at := strings.LastIndex(st.From, "@"); at >= 0 {
+		login = "login" + st.From[at:]
+	}
+	if service == "" {
+		service = "the From address"
+	}
+	return []view.Option{
+		{Value: cmail.SenderService, Label: text(service), Selected: st.Sender != cmail.SenderLogin},
+		{Value: cmail.SenderLogin, Label: text(login), Selected: st.Sender == cmail.SenderLogin},
+	}
 }

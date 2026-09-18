@@ -5,6 +5,24 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.109 — 2026-09-18
+
+The administrator chooses the sender of people's letters.
+
+### For operators
+
+- **Sender address** on Admin → Settings → Mail: people's letters go either
+  from the instance's address ("Ann (via Carrel) <noreply@…>") or from
+  their login on the instance's domain ("Ann <ann@…>"). The envelope sender
+  stays the instance's address either way, so SPF is unaffected; the relay
+  decides which of the two it lets out. The instance's own letters always go
+  from its address.
+
+### For consumers
+
+- Every letter a person sends carries Reply-To with their address when it
+  is confirmed, whichever sender form the instance uses.
+
 ## v0.0.108 — 2026-09-18
 
 The instance sends mail: invitations, address confirmations, reset links and

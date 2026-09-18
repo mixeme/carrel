@@ -41,12 +41,41 @@ func TestBuildAndSend(t *testing.T) {
 		t.Fatal(err)
 	}
 	from, _ := mail.ParseAddress(msg.Header.Get("From"))
-	if from.Address != "noreply@carrel.example" || from.Name != "Mix via Carrel" || msg.Header.Get("Reply-To") != "mix@example.org" {
+	if from.Address != "noreply@carrel.example" || from.Name != "Mix (via Carrel)" || msg.Header.Get("Reply-To") != "mix@example.org" {
 		t.Errorf("From %q Reply-To %q", msg.Header.Get("From"), msg.Header.Get("Reply-To"))
 	}
 	subject, _ := new(mime.WordDecoder).DecodeHeader(msg.Header.Get("Subject"))
 	if subject != "Встреча в пятницу" || !strings.Contains(got[0].Data, `filename=event.ics`) {
 		t.Errorf("subject %q, data:\n%s", subject, got[0].Data)
+	}
+}
+
+// S-26.1: with the login form the From is the person's own address on the
+// instance's domain, with their name alone; the envelope and the Reply-To
+// do not change.
+func TestFromLogin(t *testing.T) {
+	s := mailtest.New(t)
+	r := relay(s)
+	data, err := cmail.Build(r, cmail.Message{To: []string{"ann@example.org"}, ReplyTo: "mix@example.org",
+		Sender: "Михаил Енученко", FromLogin: "mix", Subject: "x", Text: "x"}, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	msg, _ := mail.ReadMessage(strings.NewReader(string(data)))
+	from, err := mail.ParseAddress(msg.Header.Get("From"))
+	if err != nil || from.Address != "mix@carrel.example" || from.Name != "Михаил Енученко" || msg.Header.Get("Reply-To") != "mix@example.org" {
+		t.Errorf("From %q Reply-To %q", msg.Header.Get("From"), msg.Header.Get("Reply-To"))
+	}
+	if _, err := cmail.Send(context.Background(), r, []string{"ann@example.org"}, data); err != nil {
+		t.Fatal(err)
+	}
+	if got := s.Letters(); got[0].From != "noreply@carrel.example" {
+		t.Errorf("envelope = %q", got[0].From)
+	}
+	for _, bad := range []string{"a b", "x@evil.example", "x>"} {
+		if _, err := cmail.Build(r, cmail.Message{To: []string{"a@example.org"}, FromLogin: bad}, time.Now()); err == nil {
+			t.Errorf("login %q made an address", bad)
+		}
 	}
 }
 

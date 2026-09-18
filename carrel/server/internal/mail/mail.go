@@ -33,6 +33,12 @@ const (
 	None     = "none"     // a relay on the same host or network; no password leaves in the clear
 )
 
+// The From of a person's letter (S-26.1): the administrator's choice.
+const (
+	SenderService = "noreply" // "Ann (via Carrel) <noreply@domain>"
+	SenderLogin   = "login"   // "Ann <ann@domain>", on the instance's domain
+)
+
 // Relay is the instance's outgoing server and its sender (store.SMTP).
 type Relay struct {
 	Host     string
@@ -61,9 +67,13 @@ type Attachment struct {
 type Message struct {
 	To      []string
 	ReplyTo string // a confirmed address, or empty
-	// Sender is the person's name for the From line: "Ann via Carrel". Empty
-	// for the instance's own letters.
-	Sender      string
+	// Sender is the person's name for the From line: "Ann (via Carrel)".
+	// Empty for the instance's own letters.
+	Sender string
+	// FromLogin, when set, makes the From the person's own address on the
+	// instance's domain, "Ann <login@domain>". The envelope stays the
+	// instance's address either way (Send), so SPF is not touched.
+	FromLogin   string
 	Subject     string
 	Text        string
 	Attachments []Attachment
@@ -125,10 +135,17 @@ func Build(relay Relay, m Message, now time.Time) ([]byte, error) {
 		if name == "" {
 			name = "Carrel"
 		}
-		name = sender + " via " + name
+		name = sender + " (via " + name + ")"
 	}
 	from := mail.Address{Name: name, Address: relay.From}
 	domain := relay.From[strings.LastIndex(relay.From, "@")+1:]
+	if m.FromLogin != "" {
+		own, err := mail.ParseAddress(m.FromLogin + "@" + domain)
+		if err != nil || strings.ContainsAny(m.FromLogin, "@<>\r\n") {
+			return nil, fmt.Errorf("mail: the login %q is not an address on %s", m.FromLogin, domain)
+		}
+		from = mail.Address{Name: strings.TrimSpace(m.Sender), Address: own.Address}
+	}
 	id := make([]byte, 12)
 	if _, err := rand.Read(id); err != nil {
 		return nil, err

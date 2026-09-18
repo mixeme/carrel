@@ -48,6 +48,13 @@ func (s *Service) SetSMTP(actorID string, in store.SMTPSettings) error {
 		if strings.ContainsAny(in.FromName, "\r\n") {
 			return &ErrSMTP{"fromName", "One line."}
 		}
+		switch in.Sender {
+		case "", cmail.SenderService:
+			in.Sender = ""
+		case cmail.SenderLogin:
+		default:
+			return &ErrSMTP{"sender", "Choose the sender of people's letters."}
+		}
 	}
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		if in.Password == "" && in.Username != "" {
@@ -60,6 +67,9 @@ func (s *Service) SetSMTP(actorID string, in store.SMTPSettings) error {
 		detail := "off"
 		if in.Host != "" {
 			detail = fmt.Sprintf("%s:%d %s", in.Host, in.Port, in.Security)
+			if in.Sender == cmail.SenderLogin {
+				detail += ", people send as login@"
+			}
 		}
 		return []store.AuditEntry{{
 			When: s.now(), Who: actorLogin(st, actorID), What: "settings.smtp", Detail: detail,

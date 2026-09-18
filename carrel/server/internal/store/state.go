@@ -116,6 +116,9 @@ type SMTPSettings struct {
 	Password string `json:"password,omitempty"`
 	From     string `json:"from,omitempty"`
 	FromName string `json:"fromName,omitempty"`
+	// Sender is the From of people's letters: mail.SenderService (empty) or
+	// mail.SenderLogin.
+	Sender string `json:"sender,omitempty"`
 }
 
 // Configured reports whether letters can be sent: a relay and a sender.

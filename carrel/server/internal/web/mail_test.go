@@ -94,6 +94,24 @@ func TestAdminSetsRelayAndSendsATestLetter(t *testing.T) {
 	if page.SMTP.Sets[0].Legend != "Mail" || formFields(page.SMTP).Get("host") != relay.Host {
 		t.Errorf("SMTP form = %+v", page.SMTP)
 	}
+	var senders []string
+	for _, row := range page.SMTP.Sets[0].Rows {
+		if row.Name == "sender" {
+			for _, o := range row.Options {
+				senders = append(senders, string(o.Label))
+			}
+		}
+	}
+	if strings.Join(senders, " ") != "noreply@carrel.example login@carrel.example" {
+		t.Errorf("sender options = %v", senders)
+	}
+	form.Set("sender", "login")
+	if rec := h.do(postForm("/admin/settings", alice, form)); rec.Code != 303 {
+		t.Fatalf("save the login sender: %d", rec.Code)
+	}
+	if snap := h.st.Snapshot(); snap.Settings.SMTP.Sender != "login" || snap.Settings.SMTP.Password != "relay-secret" {
+		t.Errorf("sender = %q", snap.Settings.SMTP.Sender)
+	}
 
 	result := decode[testFragment](t, h.do(fragment(postForm("/admin/settings/mail-test", alice, url.Values{"to": {"alice@example.org"}}), "main"))).Body
 	if !result.OK || !strings.HasPrefix(string(result.Reply), "250") || strings.Contains(string(result.Reply), "relay-secret") {
