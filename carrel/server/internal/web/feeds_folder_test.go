@@ -10,36 +10,33 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// C-2.1's named exception for files: a folder is not a feed. Somebody's
-// published folder — here another Carrel's /p/{token}/dav/ — is connected
-// like any WebDAV address: discovery finds no principal and takes the
-// address as the file collection (S-6), and it reads like one.
-func TestPublishedFolderConnectsAsAFileCollection(t *testing.T) {
+// The owner's definition (18.09.2026): an address without a login is a
+// link, and a link is subscribed to, not connected. "Connect account" with
+// no login makes no connection and offers the subscribe form for the same
+// address — a folder here, a feed for an .ics.
+func TestAddressWithoutLoginIsSubscribedTo(t *testing.T) {
 	owner := pubDocs(t)
 	link := publishFile(t, owner, "share", true)
 	other := httptest.NewServer(owner.h.srv.Handler())
 	t.Cleanup(other.Close)
 
 	reader := feedHarness(t)
-	rec := reader.h.do(postForm("/app/settings/connections", reader.sess, url.Values{"server": {other.URL + link + "/dav/"}}))
-	if rec.Code != http.StatusSeeOther {
-		t.Fatalf("connect: %d %s", rec.Code, rec.Body.String())
+	for addr, folder := range map[string]bool{other.URL + link + "/dav/": true, "https://feeds.example/ru.ics": false} {
+		page := decode[view.ConnectionsPage](t, reader.h.do(postForm("/app/settings/connections", reader.sess, url.Values{"server": {addr}})))
+		if !hasNotice(page.Notices, "An address without a login is a link, not an account") {
+			t.Fatalf("%s: notices = %+v", addr, page.Notices)
+		}
+		if page.Add.Action != "/app/settings/connections?op=feed.subscribe&kind=folder" != !folder {
+			t.Errorf("%s: form = %q", addr, page.Add.Action)
+		}
+		if got := formFields(page.Add).Get("url"); got != addr {
+			t.Errorf("%s: the form lost the address: %q", addr, got)
+		}
 	}
 	key, _ := reader.sess.DataKey()
 	blob, _ := reader.h.users.Catalog(reader.sess.AccountID(), key)
-	root := link + "/dav/"
-	found := false
-	for _, c := range blob.Collections {
-		if !c.Has(view.KindFile) {
-			continue
-		}
-		if !c.ReadOnly {
-			t.Errorf("%s connects as writable", c.Path)
-		}
-		found = found || c.Path == root
-	}
-	if !found {
-		t.Fatalf("the published folder is not a collection: %+v", blob.Collections)
+	if len(blob.Connections) != 1 || len(blob.Subscriptions) != 0 {
+		t.Errorf("an address without a login was saved: %+v %+v", blob.Connections, blob.Subscriptions)
 	}
 }
 

@@ -55,8 +55,9 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) view.Form {
 		address,
 		view.FormRow{Name: "name", Label: "Name here", Kind: view.InputText, Value: text(f.Name),
 			Hint: "Taken from the feed when left empty. The name is yours and is never sent to the feed."},
-		view.FormRow{Name: "login", Label: "Login, if the feed asks for one", Kind: view.InputText, Value: text(f.Login)},
-		view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
+		view.FormRow{Name: "login", Label: "Login of the link, if it asks for one", Kind: view.InputText, Value: text(f.Login),
+			Hint: "A shared link sometimes has a password of its own. That is the link's, not an account on that server: an account is connected, not subscribed to."},
+		view.FormRow{Name: "password", Label: "Password of the link", Kind: view.InputPassword},
 	)
 	form.Actions = []view.Action{
 		{ID: "feed.check", Label: "Check the address", Href: q("feed.check"), Method: "POST", Enabled: true},
@@ -221,6 +222,17 @@ func (s *Server) postFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.redirect(w, r, "/app/settings/connections")
+}
+
+// looksLikeFeed reports whether an address names a feed file rather than a
+// folder: webcal://, or a .ics or .vcf at the end of the path.
+func looksLikeFeed(addr string) bool {
+	u, err := url.Parse(addr)
+	if err != nil {
+		return false
+	}
+	p := strings.ToLower(u.Path)
+	return strings.HasPrefix(strings.ToLower(u.Scheme), "webcal") || strings.HasSuffix(p, ".ics") || strings.HasSuffix(p, ".vcf")
 }
 
 // feedNameOf is a name from the address when the feed gives none: the file

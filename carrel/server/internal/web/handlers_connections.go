@@ -87,6 +87,21 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
 		return
 	}
+	if f.Login == "" {
+		// An address without a login is a link, not an account (owner's
+		// definition, 18.09.2026): it is subscribed to, read-only, and the
+		// same address is already in the subscribe form. The address is not
+		// put in a URL — a link may carry its secret in it.
+		page := s.connectionsPage(sess, connectionForm{}, &view.Notice{
+			Role:  view.NoticeInfo,
+			Title: "An address without a login is a link, not an account",
+			Body: "An account is an address with its login and password: that is what Carrel writes to. A collection reached by a link — " +
+				"a calendar's secret address, a shared folder, another Carrel's published link — is a subscription: read-only, and the link's own password, if it has one, is kept with it. The form below subscribes to this address.",
+		})
+		page.Add = s.feedForm(sess, feedForm{URL: f.Server, Folder: !looksLikeFeed(f.Server)})
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
 	password := r.FormValue("password")
 	pin := dav.NormalizeFingerprint(f.CertFingerprint)
 

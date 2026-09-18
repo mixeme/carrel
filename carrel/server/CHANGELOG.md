@@ -5,6 +5,28 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.107 — 2026-09-18
+
+What a subscription is, and what a connection is, is written down, and the
+screens follow it.
+
+### For consumers
+
+- **A subscription is a collection reached by a link** — of any kind, read
+  only, whoever it belongs to. A link may have a password of its own; the
+  subscribe form now names its fields "Login of the link" and "Password of
+  the link".
+- **A connection is an account**: an address with its login and password,
+  and everything written to goes through one.
+- **"Connect account" without a login no longer makes a connection.** The
+  page says the address is a link and shows the subscribe form with the same
+  address — as a folder, or as a feed for `webcal://`, `.ics` and `.vcf`.
+
+### Changed
+
+- Breaking for anyone who connected a password-less WebDAV server as an
+  account: that is now refused and offered as a subscription, read-only.
+
 ## v0.0.106 — 2026-09-18
 
 A backup can be restored — into new collections, never over what is there
