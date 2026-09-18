@@ -3,6 +3,7 @@ package web_test
 import (
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -442,5 +443,72 @@ func TestMergeUnavailableWithAReadOnlyMember(t *testing.T) {
 	merge := actionOf(t, onlyGroup(t, f.page(t)), "duplicates.merge")
 	if merge.Enabled || merge.Reason == "" {
 		t.Errorf("merge with a read-only member = %+v", merge)
+	}
+}
+
+func optionIndex(t *testing.T, row view.MergeRow, label string) int {
+	t.Helper()
+	for i, o := range row.Options {
+		if string(o) == label {
+			return i
+		}
+	}
+	t.Fatalf("no option %q in %+v", label, row)
+	return -1
+}
+
+// S-16: members that disagree on a single-valued field are asked about once,
+// under the group, and the answer goes with Link. It is kept with the linked
+// group: the combined row shows the chosen value, the group shows it chosen,
+// and a later merge starts from it.
+func TestLinkRemembersTheAnswer(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	g := onlyGroup(t, f.page(t))
+	if len(g.Choices) != 1 || g.Choices[0].Property != "FN" || len(g.Choices[0].Options) != 2 {
+		t.Fatalf("choices = %+v", g.Choices)
+	}
+	pick := optionIndex(t, g.Choices[0], "LOVELACE Ada")
+	link := actionOf(t, g, "duplicates.link")
+	rec := f.h.do(postForm(link.Href, f.sess, url.Values{"choice.FN": {strconv.Itoa(pick)}}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("link: %d %s", rec.Code, rec.Body.String())
+	}
+	d := f.decisions(t)
+	if len(d.Linked) != 1 || d.Linked[0].Prefs["FN"].UID != "ada-there" {
+		t.Fatalf("answer not kept: %+v", d.Linked)
+	}
+	if n := f.writes(); n != 0 {
+		t.Fatalf("linking with an answer wrote %d times", n)
+	}
+
+	linked := onlyGroup(t, f.page(t))
+	if linked.Choices[0].Chosen != optionIndex(t, linked.Choices[0], "LOVELACE Ada") {
+		t.Errorf("the linked group does not show the answer: %+v", linked.Choices)
+	}
+	actionOf(t, linked, "duplicates.choose")
+
+	tickRail(t, f.h, f.sess, "contacts", f.book(f.id, peopleBook), f.book(f.otherID, workBook))
+	book := combined(t, f.h, f.sess, "/app/contacts", contactsPoll)
+	found := false
+	for _, grp := range book.Groups {
+		for _, r := range grp.Rows {
+			if r.State == view.RecordLinked {
+				found = true
+				if r.Name != "LOVELACE Ada" {
+					t.Errorf("linked row name = %q, want the chosen one", r.Name)
+				}
+			}
+		}
+	}
+	if !found {
+		t.Fatal("no linked row")
+	}
+
+	p := mergePage(t, f, actionOf(t, linked, "duplicates.merge").Href)
+	for _, row := range p.Rows {
+		if row.Property == "FN" && string(row.Options[row.Chosen]) != "LOVELACE Ada" {
+			t.Errorf("merge does not start from the answer: %+v", row)
+		}
 	}
 }

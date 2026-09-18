@@ -5,6 +5,25 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.96 — 2026-09-18
+
+Linking asks once where the records disagree, and remembers.
+
+### For consumers
+
+- **`DuplicateGroup.Choices`**: one `MergeRow` per single-valued field the
+  loaded members hold differently — for contacts FN, ORG and PHOTO, for
+  events SUMMARY and LOCATION, for tasks and notes SUMMARY. `Property` is the
+  property name; a photo's options are named by where they come from.
+- **The answer goes with Link**: `choice.<PROP>=<option>` beside `group` and
+  `do=link`. It is kept with the linked group; `do=choose` changes it later
+  (action `duplicates.choose`, "Keep these values"). Still nothing is written
+  to a server.
+- The folded row of a linked group shows the chosen value, and a merge of
+  that group starts from the same answers.
+- The values come from the loaded lists, not from a new request: a member
+  whose list this session has not read offers nothing to choose.
+
 ## v0.0.95 — 2026-09-18
 
 The points of duplicates are the person's to set, and one strong key is

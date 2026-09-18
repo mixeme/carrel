@@ -67,6 +67,9 @@ type DuplicateGroup struct {
 	Rows     []DuplicateMember `json:"rows"`
 	Actions  []Action          `json:"actions"`  // Link · Not duplicates · Merge on the server
 	Decision DuplicateDecision `json:"decision"` // C-8
+	// Расхождения в однозначных полях: ответ уходит с Link как
+	// choice.<Property>=<номер варианта> и запоминается при связанной группе
+	Choices []MergeRow `json:"choices"`
 }
 
 type DuplicateMember struct {

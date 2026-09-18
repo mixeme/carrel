@@ -1101,6 +1101,9 @@ type DuplicateGroup struct {
     Rows    []DuplicateMember
     Actions []Action // Link · Not duplicates · Merge on the server
     Decision DuplicateDecision // C-8
+    // Расхождения в однозначных полях: ответ уходит с Link как
+    // choice.<Property>=<номер варианта> и запоминается при связанной группе
+    Choices []MergeRow
 }
 
 type DuplicateMember struct {

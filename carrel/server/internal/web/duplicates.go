@@ -1,6 +1,8 @@
 package web
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +13,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dupes"
+	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
@@ -299,9 +302,21 @@ func (s *Server) groupView(st dupState, g dupGroup) view.DuplicateGroup {
 	if reason := mergeBlock(st.blob, g.refs); reason != "" {
 		merge.Enabled, merge.Reason = false, text(reason)
 	}
+	cs := st.choices(g)
+	prefs := st.linkedPrefs(g.id)
+	for _, c := range cs {
+		row := view.MergeRow{Property: text(c.prop), Chosen: chosen(c, prefs)}
+		for _, o := range c.opts {
+			row.Options = append(row.Options, text(o.label))
+		}
+		out.Choices = append(out.Choices, row)
+	}
 	switch g.decision {
 	case view.DecisionLinked:
 		out.Actions = []view.Action{s.decideAction("duplicates.unlink", "Unlink", g.id, "unlink"), merge}
+		if len(cs) > 0 {
+			out.Actions = append([]view.Action{s.decideAction("duplicates.choose", "Keep these values", g.id, "choose")}, out.Actions...)
+		}
 	case view.DecisionIgnored:
 		out.Actions = []view.Action{s.decideAction("duplicates.again", "Offer again", g.id, "again")}
 	default:
@@ -402,7 +417,8 @@ func (s *Server) getDuplicates(w http.ResponseWriter, r *http.Request) {
 }
 
 // postDuplicatesDecide takes one decision: do=link, unlink, ignore or again
-// on group=; do=threshold with value= (empty or 0: the instance's number
+// on group=, a link carrying the answers to the group's Choices as
+// choice.<PROP>=<option>, and do=choose changing them on a linked group; do=threshold with value= (empty or 0: the instance's number
 // again); or do=weights with weight.<signal>= for the signals sent (empty:
 // the instance's weight again). The answer to a decision is the group as it
 // now stands (C-5); a form without scripts, the threshold and the weights go
@@ -473,9 +489,26 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 			Body: "The lists it came from are no longer loaded, or a record in it changed. Nothing was decided. Open the lists again, then the duplicates.",
 		}
 	case do == "link" && g.decision != view.DecisionLinked:
+		prefs := answers(r, st.choices(g))
 		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", string(g.kind), func(d *sealed.Duplicates) error {
-			d.Linked = dupes.Link(d.Linked, sealed.LinkedGroup{Kind: g.kind, Members: g.refs})
+			d.Linked = dupes.Link(d.Linked, sealed.LinkedGroup{Kind: g.kind, Members: g.refs, Prefs: prefs})
 			d.Ignored = without(d.Ignored, g.id)
+			return nil
+		})
+	case do == "choose" && g.decision == view.DecisionLinked:
+		prefs := answers(r, st.choices(g))
+		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.choose", string(g.kind), func(d *sealed.Duplicates) error {
+			for i := range d.Linked {
+				if d.Linked[i].ID != g.id {
+					continue
+				}
+				if d.Linked[i].Prefs == nil {
+					d.Linked[i].Prefs = map[string]sealed.RecordRef{}
+				}
+				for prop, ref := range prefs {
+					d.Linked[i].Prefs[prop] = ref
+				}
+			}
 			return nil
 		})
 	case do == "unlink" && g.decision == view.DecisionLinked:
@@ -569,9 +602,20 @@ func (s *Server) foldLinked(blob sealed.Blob, k view.Kind, items []listed) []lis
 		}
 		if at, seen := keep[g.ID]; seen {
 			out[at].also = append(out[at].also, it)
+			for prop, want := range g.Prefs {
+				if want == ref {
+					out[at].prefer[prop] = it.obj
+				}
+			}
 			continue
 		}
 		keep[g.ID] = len(out)
+		it.prefer = map[string]*model.Object{}
+		for prop, want := range g.Prefs {
+			if want == ref {
+				it.prefer[prop] = it.obj
+			}
+		}
 		out = append(out, it)
 	}
 	return out
@@ -601,4 +645,110 @@ func linkedState(it listed) view.RecordState {
 		return view.RecordLinked
 	}
 	return view.RecordOK
+}
+
+// choiceProps are the single-valued properties a row of the kind shows —
+// the ones asked about when linked members disagree (S-16).
+var choiceProps = map[view.Kind][]string{
+	view.KindContact: {"FN", "ORG", "PHOTO"},
+	view.KindEvent:   {"SUMMARY", "LOCATION"},
+	view.KindTask:    {"SUMMARY"},
+	view.KindNote:    {"SUMMARY"},
+}
+
+// choiceFields are the values of choiceProps as the record holds them; a
+// photo is a digest, enough to tell two apart.
+func choiceFields(k view.Kind, o *model.Object) map[string]string {
+	out := map[string]string{}
+	for _, prop := range choiceProps[k] {
+		vals := o.PropText(prop)
+		if len(vals) == 0 || strings.TrimSpace(vals[0]) == "" {
+			continue
+		}
+		v := vals[0]
+		if prop == "PHOTO" {
+			sum := sha256.Sum256([]byte(v))
+			v = hex.EncodeToString(sum[:8])
+		} else if k != view.KindContact {
+			v = calUnescape.Replace(v)
+		}
+		out[prop] = v
+	}
+	return out
+}
+
+// choice is one disagreement of a group: the property and, per distinct
+// value, the first member that holds it.
+type choice struct {
+	prop string
+	opts []choiceOption
+}
+
+type choiceOption struct {
+	label string
+	ref   sealed.RecordRef
+}
+
+// choices are the single-valued properties the loaded members of g hold
+// differently. A member whose list is not loaded has nothing to offer.
+func (st dupState) choices(g dupGroup) []choice {
+	var out []choice
+	for _, prop := range choiceProps[g.kind] {
+		c := choice{prop: prop}
+		seen := map[string]bool{}
+		for _, ref := range g.refs {
+			l, ok := st.records[ref]
+			if !ok {
+				continue
+			}
+			v, ok := l.entry.Fields[prop]
+			if !ok || seen[v] {
+				continue
+			}
+			seen[v] = true
+			label := v
+			if prop == "PHOTO" {
+				label = string(l.from.stamp())
+			}
+			c.opts = append(c.opts, choiceOption{label: label, ref: ref})
+		}
+		if len(c.opts) > 1 {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+// chosen is the option the linked group's answer names, else the first.
+func chosen(c choice, prefs map[string]sealed.RecordRef) int {
+	if ref, ok := prefs[c.prop]; ok {
+		for i, o := range c.opts {
+			if o.ref == ref {
+				return i
+			}
+		}
+	}
+	return 0
+}
+
+// answers read choice.<PROP>= of the request against the group's choices.
+func answers(r *http.Request, cs []choice) map[string]sealed.RecordRef {
+	out := map[string]sealed.RecordRef{}
+	for _, c := range cs {
+		n, err := strconv.Atoi(r.FormValue("choice." + c.prop))
+		if err != nil || n < 0 || n >= len(c.opts) {
+			continue
+		}
+		out[c.prop] = c.opts[n].ref
+	}
+	return out
+}
+
+func (st dupState) linkedPrefs(id string) map[string]sealed.RecordRef {
+	for _, l := range st.blob.Duplicates.Linked {
+		if l.ID == id {
+			return l.Prefs
+		}
+	}
+	return nil
 }

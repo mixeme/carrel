@@ -254,6 +254,23 @@ func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[stri
 	for i, o := range others {
 		objs[i] = o.obj
 	}
+	// A linked group's answers are the merge's defaults: asked once (S-16).
+	if prefs := mr.st.linkedPrefs(mr.g.id); len(prefs) > 0 {
+		if _, probe, err := dupes.Merge(target.obj, objs, nil); err == nil {
+			all := append([]mergeMember{target}, others...)
+			for _, qn := range probe.Questions {
+				ref, ok := prefs[qn.Prop]
+				if _, answered := choices[qn.Prop]; answered || !ok {
+					continue
+				}
+				for i, o := range qn.Options {
+					if all[o.From].ref == ref {
+						choices[qn.Prop] = i
+					}
+				}
+			}
+		}
+	}
 	merged, plan, err := dupes.Merge(target.obj, objs, choices)
 	if err != nil {
 		confirm.Reason = text("These records could not be put together: " + err.Error())

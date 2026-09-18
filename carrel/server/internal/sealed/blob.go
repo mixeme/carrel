@@ -53,6 +53,10 @@ type LinkedGroup struct {
 	ID      string      `json:"id"`
 	Kind    view.Kind   `json:"kind"`
 	Members []RecordRef `json:"members"`
+	// Prefs answer a single-valued property the members disagree on: the
+	// member whose value the group shows, by property name. Asked once, when
+	// linking, and kept (S-16).
+	Prefs map[string]RecordRef `json:"prefs,omitempty"`
 }
 
 // RecordRef is a record by its connection, collection address and UID.

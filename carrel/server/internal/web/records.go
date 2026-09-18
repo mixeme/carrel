@@ -75,6 +75,18 @@ type listed struct {
 	from origin
 	// also are the other members of a linked group shown in this row (S-16).
 	also []listed
+	// prefer names, by property, the member whose value the linked row shows:
+	// the answer the person gave when linking.
+	prefer map[string]*model.Object
+}
+
+// pick is the record whose prop the row shows: the chosen member of a linked
+// group, else the row's own record.
+func (it listed) pick(prop string) *model.Object {
+	if o := it.prefer[prop]; o != nil {
+		return o
+	}
+	return it.obj
 }
 
 // listedUID is the identity of a listed record of kind k.
@@ -315,6 +327,10 @@ type indexEntry struct {
 	Related []string   `json:"related,omitempty"`
 	Detail  string     `json:"detail,omitempty"`
 	Keys    dupes.Keys `json:"keys,omitzero"`
+	// Fields are the single-valued properties a row shows, as the record
+	// holds them: what the duplicates screen asks about when members
+	// disagree, without reading a record again. PHOTO is a digest.
+	Fields map[string]string `json:"fields,omitempty"`
 }
 
 // indexOf is the index of listed records of kind k; days are read in the
@@ -323,7 +339,7 @@ func indexOf(tf timeFmt, k view.Kind, items []listed) []indexEntry {
 	out := make([]indexEntry, 0, len(items))
 	for _, it := range items {
 		o := it.obj
-		e := indexEntry{Path: o.Path, ETag: o.ETag, Kind: k, Keys: dupes.KeysOf(k, o, tf.tz)}
+		e := indexEntry{Path: o.Path, ETag: o.ETag, Kind: k, Keys: dupes.KeysOf(k, o, tf.tz), Fields: choiceFields(k, o)}
 		switch k {
 		case view.KindContact:
 			e.UID, e.Title = card.UID(o), contactName(o)
@@ -604,7 +620,7 @@ func (s *Server) contactGroups(sess *session.Session, items []listed, segment st
 	names := make([]string, len(items))
 	order := make([]int, len(items))
 	for i, it := range items {
-		names[i], order[i] = contactName(it.obj), i
+		names[i], order[i] = contactName(it.pick("FN")), i
 	}
 	sort.SliceStable(order, func(a, b int) bool {
 		i, j := order[a], order[b]
@@ -631,7 +647,7 @@ func (s *Server) contactGroups(sess *session.Session, items []listed, segment st
 			Name:   text(name),
 			Phone:  text(firstValue(it.obj, "TEL")),
 			Email:  text(firstValue(it.obj, "EMAIL")),
-			Org:    text(structured(firstValue(it.obj, "ORG"))),
+			Org:    text(structured(firstValue(it.pick("ORG"), "ORG"))),
 			State:  linkedState(it),
 		}
 		// A linked row shows the fields of the whole group: what the row
@@ -775,8 +791,8 @@ func (s *Server) agendaDays(tf timeFmt, items []listed, from, to time.Time, segm
 				UID:      uid,
 				Time:     text(tf.timeLabel(at, tm.AllDay)),
 				Zone:     text(tf.zone(tm.Zone)),
-				Summary:  text(summary),
-				Location: text(cal.Text(o, "LOCATION")),
+				Summary:  text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), summary)),
+				Location: text(cal.Text(it.pick("LOCATION"), "LOCATION")),
 				State:    linkedState(it),
 				Badges:   linkedBadge(it),
 				Sources:  linkedSources(it),
@@ -900,7 +916,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		}
 		row := view.TaskRow{
 			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Done: isDone,
-			Summary: text(titleOr(cal.Text(o, "SUMMARY"), "Untitled task")),
+			Summary: text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), "Untitled task")),
 			Percent: percentOf(o), Tags: filter.tags(categoriesOf(view.KindTask, o)), State: linkedState(it),
 			Badges: linkedBadge(it), Sources: linkedSources(it),
 		}
@@ -989,7 +1005,7 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 	for _, it := range items {
 		o := it.obj
 		uid, body := cal.UID(o), cal.Description(o)
-		title := noteTitle(cal.Text(o, "SUMMARY"), body)
+		title := noteTitle(cal.Text(it.pick("SUMMARY"), "SUMMARY"), body)
 		at := noteTime(o, tf.tz)
 		row := view.NoteRow{
 			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Title: text(title), Excerpt: text(noteExcerpt(body, title)),
