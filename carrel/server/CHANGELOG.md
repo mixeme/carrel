@@ -5,6 +5,24 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.115 — 2026-09-19
+
+Test beside the connection form, and the administrator's DAV validator, show
+what each step of discovery asked and what the server answered.
+
+### For consumers
+
+- **Test** on the connection form runs discovery and saves nothing. The
+  trace names the step that failed: .well-known, principal, home set,
+  collections.
+
+### For operators
+
+- **Admin → DAV validator** runs the same discovery for any server. Its
+  second stage creates a test event, task, contact and file, reads them back
+  and deletes them. It runs only with the box ticked and is written to the
+  audit log. An object the server would not delete is named by its path.
+
 ## v0.0.114 — 2026-09-19
 
 "Upload file" in the create menu asks where the files go.

@@ -102,3 +102,12 @@ func (s *Service) InviteTTL() time.Duration {
 	snap := s.st.Snapshot()
 	return inviteTTL(&snap)
 }
+
+// Journal writes one entry of the actor's: what was done and on what, for
+// actions that change nothing of the instance itself (a check of somebody's
+// server, S-6).
+func (s *Service) Journal(actorID, what, detail string) {
+	_ = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		return []store.AuditEntry{{When: s.now(), Who: actorLogin(st, actorID), What: what, Detail: detail}}, nil
+	})
+}

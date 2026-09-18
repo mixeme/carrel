@@ -145,27 +145,6 @@ func connectionWarnings(server, certFingerprint string) []view.Notice {
 	return out
 }
 
-func (s *Server) postSettingsConnectionsTest(w http.ResponseWriter, r *http.Request) {
-	if _, ok := s.requireLogin(w, r); !ok {
-		return
-	}
-	trace := view.DiagnosticTrace{OK: false}
-	// DAV failures become screen state, not 500 (S-9.5).
-	if r.FormValue("simulate") == "large" {
-		_ = dav.ErrResponseTooLarge
-		trace.Steps = []view.TraceStep{{
-			Name:   text("response"),
-			State:  view.CheckBad,
-			Detail: text("response too large"),
-		}}
-	}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetMain, trace, nil)
-		return
-	}
-	s.notFound(w, r)
-}
-
 func (s *Server) getSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {

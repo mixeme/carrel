@@ -344,19 +344,6 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-func (s *Server) getAdminDav(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireAdmin(w, r)
-	if !ok {
-		return
-	}
-	page := view.AdminDavPage{Shell: s.buildShell(sess, "DAV allowlist")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postAdminDav(w http.ResponseWriter, r *http.Request) {
-	s.getAdminDav(w, r)
-}
-
 func (s *Server) getAdminInstall(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {
