@@ -134,25 +134,28 @@ func Encrypted(data []byte) bool {
 	return bytes.HasPrefix(data, []byte("age-encryption.org/v1\n"))
 }
 
-// Open reads an archive held in memory: decrypted with password when it is
-// an age file, then the zip and its manifest.
+// Open reads an archive held in memory.
 func Open(data []byte, password string) (*zip.Reader, Manifest, error) {
+	return OpenAt(bytes.NewReader(data), int64(len(data)), password)
+}
+
+// OpenAt reads an archive of size bytes from r — a file on disk, never all
+// of it in memory: decrypted with password when it is an age file, then the
+// zip and its manifest.
+func OpenAt(r io.ReaderAt, size int64, password string) (*zip.Reader, Manifest, error) {
 	var m Manifest
-	raw := data
-	if Encrypted(data) {
+	head := make([]byte, 32)
+	n, _ := r.ReadAt(head, 0)
+	if Encrypted(head[:n]) {
 		id, err := age.NewScryptIdentity(password)
 		if err != nil {
 			return nil, m, err
 		}
-		r, err := age.Decrypt(bytes.NewReader(data), id)
-		if err != nil {
+		if r, size, err = age.DecryptReaderAt(r, size, id); err != nil {
 			return nil, m, ErrWrongPassword
 		}
-		if raw, err = io.ReadAll(r); err != nil {
-			return nil, m, err
-		}
 	}
-	zr, err := zip.NewReader(bytes.NewReader(raw), int64(len(raw)))
+	zr, err := zip.NewReader(r, size)
 	if err != nil {
 		return nil, m, fmt.Errorf("backup: not a Carrel archive: %w", err)
 	}

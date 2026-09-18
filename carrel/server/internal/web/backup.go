@@ -442,7 +442,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 		job = *editing
 	}
 	page.Add = s.backupForm(sess, blob, job, errs)
-	page.Restore.Note = "Restoring creates: the records go into a new collection, never over what is there now."
+	page.Restore = s.restoreBlock(sess, blob)
 	return page
 }
 
@@ -685,6 +685,13 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "could not turn the trigger off", http.StatusInternalServerError)
 			return
 		}
+		s.redirect(w, r, "/app/settings/backup")
+	case "restore-open":
+		s.openRestore(w, r, sess, blob)
+	case "restore-run":
+		s.runRestore(w, r, sess, key, blob)
+	case "restore-cancel":
+		endRestore(sess)
 		s.redirect(w, r, "/app/settings/backup")
 	case "run":
 		if !has || job.Mode == sealed.BackupToDownload {

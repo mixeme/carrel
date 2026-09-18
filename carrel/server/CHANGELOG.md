@@ -5,6 +5,29 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.106 — 2026-09-18
+
+A backup can be restored — into new collections, never over what is there
+(S-24.3).
+
+### For consumers
+
+- **Restore** on `/app/settings/backup` (`BackupPage.Restore`): the archive
+  comes from a job's history, from a file on a WebDAV storage, or from this
+  computer (`op=restore-open`, the file streamed with the form). A wrong
+  password or a file that is not a Carrel archive is said, and nothing is
+  kept.
+- **Preview before anything is written**: every collection of the archive
+  with its first records or files and its count, and where it can go
+  (`Targets`). Nothing is created until `op=restore-run` names targets as
+  `target.<n>=`.
+- **Restoring creates**: records go into a new collection "… (restored
+  DATE)" on the chosen server, files into a new folder of that name; nothing
+  that was there before is touched. `op=restore-cancel` closes the archive.
+- The archive waits between steps in a temporary file of the session, never
+  in memory; it is deleted when the restore ends, when it is closed, or with
+  the session.
+
 ## v0.0.105 — 2026-09-18
 
 Somebody's folder can be subscribed to, like a feed (S-25.2, owner's
