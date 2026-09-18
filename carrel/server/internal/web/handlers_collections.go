@@ -492,7 +492,7 @@ func (s *Server) openCollectionSheet(w http.ResponseWriter, r *http.Request) (*s
 	q := r.URL.Query()
 	conn, hasConn := blob.Connection(q.Get("a"))
 	col, hasCol := blob.Collection(q.Get("a"), q.Get("c"))
-	if !hasConn || !hasCol || col.Gone || len(col.Kinds) == 0 || col.Has(view.KindFile) ||
+	if !hasConn || !hasCol || col.Gone || len(col.Kinds) == 0 || (col.Has(view.KindFile) && !col.Feed) ||
 		(col.Feed && !strings.HasSuffix(r.URL.Path, "/rename")) {
 		s.notFound(w, r)
 		return nil, key, sealed.Connection{}, sealed.Collection{}, false

@@ -490,6 +490,7 @@ type collectionSource struct {
 	maxEntries int
 	broken     error       // the connection could not be opened at all
 	feed       *feedReader // a subscription: read whole and sifted here (S-25.2)
+	root       string      // where a file collection starts on its server
 }
 
 // searchSources are the ticked collections, one source each, in the order of
@@ -519,7 +520,8 @@ func (s *Server) searchSources(blob sealed.Blob) []fanout.Source {
 
 func (s *Server) openSource(id string, conn sealed.Connection, col sealed.Collection) *collectionSource {
 	src := &collectionSource{id: id, conn: conn, col: col, maxEntries: s.cfg.FilesMaxEntries}
-	if conn.Feed {
+	src.root = fileRoot(conn, col)
+	if conn.Feed && !col.Has(view.KindFile) {
 		src.feed = s.newFeedReader(conn.Server, conn.Login, conn.Password)
 		return src
 	}
@@ -645,7 +647,7 @@ func (c *collectionSource) item(k view.Kind, uid string, o *model.Object) fanout
 func (c *collectionSource) findFiles(ctx context.Context, q fanout.Query) ([]fanout.Item, error) {
 	needle := strings.ToLower(q.Text)
 	var items []fanout.Item
-	queue := []string{c.col.Path}
+	queue := []string{c.root}
 	seen := 0
 	for len(queue) > 0 {
 		folder := queue[0]

@@ -53,14 +53,17 @@ func filePublishQuery(c *fileCtx, segs []string, dir bool) url.Values {
 }
 
 func (s *Server) filePublishAction(c *fileCtx, segs []string, dir bool) view.Action {
+	if c.col.Feed {
+		return view.Action{ID: "publish", Label: "Publish…", Icon: "i-link", Method: "GET", Reason: "Somebody else's folder is not published onwards."}
+	}
 	return view.Action{ID: "publish", Label: "Publish…", Icon: "i-link", Method: "GET", Enabled: true,
 		Href: s.postQuery("/app/publish", filePublishQuery(c, segs, dir))}
 }
 
 func (s *Server) publishFileTarget(r *http.Request, sess *session.Session) (*fileCtx, []string, bool, bool) {
 	c, ok := s.fileCollection(sess, r.FormValue("a"), r.FormValue("c"))
-	if !ok {
-		return nil, nil, false, false
+	if !ok || c.col.Feed {
+		return nil, nil, false, false // someone else's folder is not published onwards
 	}
 	segs, ok := relSegs(r.FormValue("f"))
 	if !ok {
@@ -134,7 +137,7 @@ func (s *Server) publicFiles(link user.OpenLink) (*fileCtx, []string, error) {
 	}
 	base, _ := relSegs(link.Target.Path)
 	col := sealed.Collection{AccountID: link.Target.AccountID, Path: link.Target.Col, Name: link.Target.Title, Kinds: []view.Kind{view.KindFile}}
-	return &fileCtx{conn: link.Conn, col: col, files: files, tf: s.timeFor(nil), segs: base, dir: link.Target.Folder}, base, nil
+	return &fileCtx{conn: link.Conn, col: col, files: files, tf: s.timeFor(nil), segs: base, dir: link.Target.Folder, root: col.Path}, base, nil
 }
 
 // inside is the server path of rel under a published folder, and its

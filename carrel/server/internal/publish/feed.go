@@ -62,6 +62,31 @@ func FeedURL(raw string) (string, error) {
 	return u.String(), nil
 }
 
+// FolderURL is the WebDAV address of a folder someone shares: a secret link
+// of another Carrel is its read-only mount, /p/{token}/dav/; any other address
+// is taken as it is. A folder address ends in "/".
+func FolderURL(raw string) (string, error) {
+	raw = strings.TrimSpace(raw)
+	u, err := url.Parse(raw)
+	if err != nil || u.Host == "" {
+		return "", fmt.Errorf("publish: %q is not an address", raw)
+	}
+	switch strings.ToLower(u.Scheme) {
+	case "http", "https":
+	case "webdav", "webdavs", "dav", "davs":
+		u.Scheme = "https"
+	default:
+		return "", fmt.Errorf("publish: %s:// is not a folder address", u.Scheme)
+	}
+	if carrelLink.MatchString(u.Path) {
+		u.Path = strings.TrimSuffix(u.Path, "/") + "/dav/"
+	}
+	if !strings.HasSuffix(u.Path, "/") {
+		u.Path += "/"
+	}
+	return u.String(), nil
+}
+
 // Fetch reads a feed whole, with Basic credentials when login is set, up to
 // max bytes.
 func Fetch(ctx context.Context, client *http.Client, raw, login, password string, max int64) (Feed, error) {

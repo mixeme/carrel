@@ -32,7 +32,7 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 	f := connectionForm{Server: r.FormValue("server"), CertFingerprint: r.FormValue("certFingerprint")}
 	page := s.connectionsPage(sess, f, nil)
 	if r.URL.Query().Get("op") == "feed" {
-		page.Add = s.feedForm(sess, feedForm{})
+		page.Add = s.feedForm(sess, feedForm{Folder: r.URL.Query().Get("kind") == "folder"})
 	}
 	if id := r.URL.Query().Get("reveal"); id != "" && s.revealPassword(sess, &page, id) {
 		w.Header().Set("Cache-Control", "no-store")

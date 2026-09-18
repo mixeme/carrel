@@ -566,12 +566,17 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 			Label: text(collectionLabel(col)), Colour: catalogColour(col), Tick: view.TickOff, ReadOnly: true,
 			State: view.CollectionReadOnly, Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment)),
 		}
+		if spec.kind == view.KindFile {
+			row.Href = s.route(fileHref(f.ID, col.Path, "", nil, true))
+		}
 		if unavailable[f.ID+":"+col.Path] {
 			row.State = view.CollectionUnavailable
 		}
 		row.Menu = []view.MenuItem{
 			{Action: view.Action{ID: "feed.edit", Label: "Rename…", Href: s.postQuery("/app/collections/rename", url.Values{"a": {f.ID}, "c": {col.Path}}), Method: "GET", Enabled: true}},
-			{Action: view.Action{ID: "collection.export", Label: "Export", Icon: "i-down", Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment) + "/export"), Method: "GET", Enabled: true}},
+		}
+		if spec.kind != view.KindFile {
+			row.Menu = append(row.Menu, view.MenuItem{Action: view.Action{ID: "collection.export", Label: "Export", Icon: "i-down", Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment) + "/export"), Method: "GET", Enabled: true}})
 		}
 		live++
 		if tick {

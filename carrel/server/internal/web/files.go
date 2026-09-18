@@ -50,6 +50,10 @@ type fileCtx struct {
 	tf    timeFmt
 	segs  []string // under the collection root, decoded
 	dir   bool     // the address names a folder: it ends in "/"
+	// root is the collection's root on its server: its path, or for a
+	// subscribed folder the path of the address it was subscribed by —
+	// {col} of a subscription is "feed", not a place on any server.
+	root string
 }
 
 // parseFileAddress reads /app/files/{account}/{col}/[{marker}/]{path…} from an
@@ -163,15 +167,25 @@ func (s *Server) fileCollection(sess *session.Session, account, colPath string) 
 	if err != nil {
 		return nil, false
 	}
-	return &fileCtx{sess: sess, blob: blob, conn: conn, col: col, files: files, tf: s.timeFor(sess), dir: true}, true
+	return &fileCtx{sess: sess, blob: blob, conn: conn, col: col, files: files, tf: s.timeFor(sess), dir: true, root: fileRoot(conn, col)}, true
+}
+
+// fileRoot is where a file collection starts on its server.
+func fileRoot(conn sealed.Connection, col sealed.Collection) string {
+	if col.Feed {
+		if u, err := url.Parse(conn.Server); err == nil {
+			return u.Path
+		}
+	}
+	return col.Path
 }
 
 // path is the server path of segs under the collection root.
 func (c *fileCtx) path(segs []string, dir bool) (string, error) {
 	if len(segs) == 0 {
-		return strings.TrimSuffix(c.col.Path, "/") + "/", nil
+		return strings.TrimSuffix(c.root, "/") + "/", nil
 	}
-	p, err := file.Join(c.col.Path, segs...)
+	p, err := file.Join(c.root, segs...)
 	if err != nil {
 		return "", err
 	}
@@ -361,6 +375,7 @@ func (s *Server) filesRail(sess *session.Session, blob sealed.Blob) view.Rail {
 	rail.Foot = []view.Action{
 		{ID: "rail.apply", Label: "Apply", Href: s.route("/app/sources/files"), Method: "POST", Enabled: true},
 		{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		{ID: "feed.subscribe", Label: "Subscribe to a folder", Icon: "i-link", Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}, "kind": {"folder"}}), Method: "GET", Enabled: true},
 	}
 	rail.Note = text(fmt.Sprintf("%d of %s ticked", on, plural(live, "storage")))
 	return rail

@@ -7,7 +7,10 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
+	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/provider/file"
 	"carrel.dev/carrel/server/internal/publish"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -25,23 +28,101 @@ import (
 type feedForm struct {
 	URL, Name, Login string
 	URLErr           view.Text
+	// Folder is a WebDAV folder somebody shares rather than a feed file.
+	Folder bool
 }
 
 func (s *Server) feedForm(sess *session.Session, f feedForm) view.Form {
-	form := s.plainForm("/app/settings/connections?op=feed.subscribe", "POST",
+	q := func(op string) string {
+		v := url.Values{"op": {op}}
+		if f.Folder {
+			v.Set("kind", "folder")
+		}
+		return s.postQuery("/app/settings/connections", v)
+	}
+	address := view.FormRow{Name: "url", Label: "Feed address", Kind: view.InputURL, Value: text(f.URL), Error: f.URLErr, Required: true,
+		Hint: "https://, webcal:// and a secret link from another Carrel are all understood. The feed is fetched by the Carrel server, not by your browser."}
+	if f.Folder {
+		address.Label = "Folder address"
+		address.Hint = "A WebDAV folder somebody shares: a secret link from another Carrel, or any WebDAV address. It is read here and never written, whatever the server would allow."
+	}
+	action := "/app/settings/connections?op=feed.subscribe"
+	if f.Folder {
+		action += "&kind=folder"
+	}
+	form := s.plainForm(action, "POST",
 		csrfField(sess),
-		view.FormRow{Name: "url", Label: "Feed address", Kind: view.InputURL, Value: text(f.URL), Error: f.URLErr, Required: true,
-			Hint: "https://, webcal:// and a secret link from another Carrel are all understood. The feed is fetched by the Carrel server, not by your browser."},
+		address,
 		view.FormRow{Name: "name", Label: "Name here", Kind: view.InputText, Value: text(f.Name),
 			Hint: "Taken from the feed when left empty. The name is yours and is never sent to the feed."},
 		view.FormRow{Name: "login", Label: "Login, if the feed asks for one", Kind: view.InputText, Value: text(f.Login)},
 		view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
 	)
 	form.Actions = []view.Action{
-		{ID: "feed.check", Label: "Check the address", Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed.check"}}), Method: "POST", Enabled: true},
-		{ID: "feed.subscribe", Label: "Subscribe", Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed.subscribe"}}), Method: "POST", Enabled: true},
+		{ID: "feed.check", Label: "Check the address", Href: q("feed.check"), Method: "POST", Enabled: true},
+		{ID: "feed.subscribe", Label: "Subscribe", Href: q("feed.subscribe"), Method: "POST", Enabled: true},
 	}
 	return form
+}
+
+// probeFolder lists a shared folder once: how many entries, how fast.
+func (s *Server) probeFolder(ctx context.Context, addr, login, password string) (int, time.Duration, error) {
+	client, err := dav.NewClient(s.guard, addr, login, password, "")
+	if err != nil {
+		return 0, 0, err
+	}
+	files, err := file.New(client)
+	if err != nil {
+		return 0, 0, err
+	}
+	u, _ := url.Parse(addr)
+	start := time.Now()
+	entries, err := files.List(ctx, u.Path)
+	return len(entries), time.Since(start), err
+}
+
+// folderTrace is what a folder check found.
+func folderTrace(addr string, n int, took time.Duration, err error) view.Notice {
+	if err != nil {
+		n := view.Notice{Role: view.NoticeAlert, Title: "The folder could not be read", Body: "Nothing was saved.",
+			Details: &view.Diagnostic{Summary: text(addr), Lines: []view.Text{text("[list] PROPFIND · " + err.Error())}}}
+		if dav.IsStatus(err, http.StatusUnauthorized) {
+			n.Body = "The folder asks for a login and password, and the ones given do not fit."
+		}
+		return n
+	}
+	return view.Notice{Role: view.NoticeInfo, Title: "The folder answers",
+		Body:    text(fmt.Sprintf("%s in it. It lands in Files, read-only.", plural(n, "entry"))),
+		Details: &view.Diagnostic{Summary: text(addr), Lines: []view.Text{text(fmt.Sprintf("[list] PROPFIND → %d entries · %d ms", n, took.Milliseconds()))}}}
+}
+
+// postFolder checks or subscribes to a shared folder: its address and name,
+// never its files.
+func (s *Server) postFolder(w http.ResponseWriter, r *http.Request, sess *session.Session, key [32]byte, f feedForm, password string) {
+	page := s.connectionsPage(sess, connectionForm{}, nil)
+	addr, err := publish.FolderURL(f.URL)
+	if err != nil {
+		f.URLErr = "Give the address of a WebDAV folder: https://."
+		page.Add = s.feedForm(sess, f)
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
+	n, took, err := s.probeFolder(r.Context(), addr, f.Login, password)
+	if err != nil || r.FormValue("op") == "feed.check" {
+		page.Add = s.feedForm(sess, f)
+		page.Shell.Notices = append(page.Shell.Notices, folderTrace(addr, n, took, err))
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
+	name := f.Name
+	if name == "" {
+		name = feedNameOf(strings.TrimSuffix(addr, "/"))
+	}
+	if _, err := s.users.Subscribe(sess.AccountID(), key, sealed.Subscription{URL: addr, Name: name, Login: f.Login, Password: password, Kinds: []view.Kind{view.KindFile}}); err != nil {
+		http.Error(w, "could not subscribe", http.StatusInternalServerError)
+		return
+	}
+	s.redirect(w, r, "/app/settings/connections")
 }
 
 var sectionTitles = map[view.Kind]string{view.KindContact: "Contacts", view.KindEvent: "Calendar", view.KindTask: "Tasks", view.KindNote: "Notes"}
@@ -100,8 +181,13 @@ func (s *Server) postFeed(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	f := feedForm{URL: strings.TrimSpace(r.FormValue("url")), Name: strings.TrimSpace(r.FormValue("name")), Login: strings.TrimSpace(r.FormValue("login"))}
+	f := feedForm{URL: strings.TrimSpace(r.FormValue("url")), Name: strings.TrimSpace(r.FormValue("name")), Login: strings.TrimSpace(r.FormValue("login")),
+		Folder: r.FormValue("kind") == "folder"}
 	password := r.FormValue("password")
+	if f.Folder {
+		s.postFolder(w, r, sess, key, f, password)
+		return
+	}
 	page := s.connectionsPage(sess, connectionForm{}, nil)
 	if _, err := publish.FeedURL(f.URL); err != nil {
 		f.URLErr = "Give the address of a .ics or .vcf file: https:// or webcal://."
@@ -167,11 +253,18 @@ func (s *Server) recheckFeed(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
+	page := s.connectionsPage(sess, connectionForm{}, nil)
+	if f.FeedCollection().Has(view.KindFile) {
+		n, took, err := s.probeFolder(r.Context(), f.URL, f.Login, f.Password)
+		page.Shell.Notices = append(page.Shell.Notices, folderTrace(f.URL, n, took, err))
+		s.writePage(w, r, http.StatusOK, page)
+		return
+	}
 	parsed, got, err := s.readFeed(r.Context(), f.URL, f.Login, f.Password)
 	if err == nil && len(parsed.Kinds()) > 0 {
 		_ = s.users.EditFeed(sess.AccountID(), key, f.ID, "", "", parsed.Kinds())
 	}
-	page := s.connectionsPage(sess, connectionForm{}, nil)
+	page = s.connectionsPage(sess, connectionForm{}, nil)
 	page.Shell.Notices = append(page.Shell.Notices, feedTrace(f.URL, got, parsed, err))
 	s.writePage(w, r, http.StatusOK, page)
 }

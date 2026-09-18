@@ -5,6 +5,25 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.105 — 2026-09-18
+
+Somebody's folder can be subscribed to, like a feed (S-25.2, owner's
+decision).
+
+### For consumers
+
+- **"Subscribe to a folder"** in the Files rail's foot opens the subscribe
+  form in folder mode (`/app/settings/connections?op=feed&kind=folder`): a
+  WebDAV address — another Carrel's secret link is read at its `/dav/` —
+  an optional login, a name. Checking lists the folder and saves nothing.
+- **A subscribed folder** is one read-only file collection under
+  "Subscriptions" in the Files rail, read live on every visit. It is never
+  written, whatever its server would allow, is not published onwards and is
+  not copied by backup jobs; its files can be downloaded and copied to your
+  own storage. Unsubscribing leaves the folder as it is.
+- Yesterday's note that files are not subscribed to is withdrawn: all five
+  kinds can be subscribed to (C-2.1).
+
 ## v0.0.104 — 2026-09-18
 
 A backup job can be started from outside (S-24.4).

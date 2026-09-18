@@ -48,3 +48,20 @@ func TestParseFeed(t *testing.T) {
 		t.Errorf("html: %v", err)
 	}
 }
+
+// A shared folder's address: another Carrel's secret link is its read-only
+// mount; any WebDAV address is taken as a folder.
+func TestFolderURL(t *testing.T) {
+	token := strings.Repeat("b", 43)
+	for _, c := range []struct{ in, want string }{
+		{"https://carrel.example/p/" + token, "https://carrel.example/p/" + token + "/dav/"},
+		{"https://cloud.example/remote.php/dav/files/ann/Shared", "https://cloud.example/remote.php/dav/files/ann/Shared/"},
+		{"davs://files.example/share/", "https://files.example/share/"},
+		{"ftp://files.example/", ""},
+	} {
+		got, err := FolderURL(c.in)
+		if got != c.want || (c.want == "") != (err != nil) {
+			t.Errorf("%s: %q %v, want %q", c.in, got, err, c.want)
+		}
+	}
+}
