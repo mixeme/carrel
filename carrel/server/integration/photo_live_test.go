@@ -61,6 +61,27 @@ func (a *liveApp) upload(path, name string, data []byte) *httptest.ResponseRecor
 	return rec
 }
 
+// uploadFiles sends a set of files the way a page without scripts does: _csrf
+// first, then one part per file named by its path inside the chosen folder
+// (S-17.1). The map's order does not matter: the service creates the folders
+// it needs whichever file comes first.
+func (a *liveApp) uploadFiles(path string, files map[string]string) *httptest.ResponseRecorder {
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	_ = w.WriteField("_csrf", a.sess.CSRFToken())
+	for name, body := range files {
+		part, _ := w.CreateFormFile("file", name)
+		_, _ = part.Write([]byte(body))
+	}
+	_ = w.Close()
+	req := httptest.NewRequest(http.MethodPost, path, &buf)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	req.AddCookie(&http.Cookie{Name: "carrel_sid", Value: a.sess.ID()})
+	rec := httptest.NewRecorder()
+	a.srv.Handler().ServeHTTP(rec, req)
+	return rec
+}
+
 // rawCard is a card's body as the server answers a GET with this Accept.
 func rawCard(ctx context.Context, t *testing.T, endpoint, user, pass, path, accept string) string {
 	t.Helper()

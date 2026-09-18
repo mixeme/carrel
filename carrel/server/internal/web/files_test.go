@@ -667,3 +667,94 @@ func TestMoveBetweenStorages(t *testing.T) {
 		t.Errorf("row = %+v", row)
 	}
 }
+
+// S-17.1: a folder arrives as a set of files, each named by its path inside
+// it. The folders are created before the files, each file gets its own queue
+// row named by that path, and a refusal on one is not a refusal of the rest.
+// Part.FileName would have cut the path off (RFC 7578 §4.2), so the name is
+// read from the part's own header.
+func TestFolderUploadKeepsThePathsInside(t *testing.T) {
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"trip/taken.txt", "original")
+
+	rec := f.h.do(uploadForm(f.at("upload"), f.sess, false,
+		upload{"trip/a.txt", "first"},
+		upload{"trip/2020/b.txt", "second"},
+		upload{"trip/2020/c.txt", "third"},
+		upload{"trip/taken.txt", "mine"},
+		upload{"loose.txt", "flat"}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("upload: %d %s", rec.Code, rec.Body.String())
+	}
+	for path, want := range map[string]string{
+		filesDocs + "trip/a.txt":      "first",
+		filesDocs + "trip/2020/b.txt": "second",
+		filesDocs + "trip/2020/c.txt": "third",
+		filesDocs + "loose.txt":       "flat",
+		filesDocs + "trip/taken.txt":  "original", // never overwritten (S-17.3)
+	} {
+		if got, ok := f.srv.File(path); got != want {
+			t.Errorf("%s = %q, %v; want %q", path, got, ok, want)
+		}
+	}
+
+	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	// The rows are named by the path, so two files called the same are told
+	// apart, and the taken one asks about itself by that path.
+	deep := queueRow(t, page.Queue, "trip/2020/b.txt")
+	flat := queueRow(t, page.Queue, "loose.txt")
+	ask := queueRow(t, page.Queue, "trip/taken.txt")
+	if deep.State != view.OpDone || flat.State != view.OpDone || ask.State != view.OpIdle {
+		t.Fatalf("queue = %+v", page.Queue)
+	}
+	if ask.Question == nil || string(ask.Question.Name) != "trip/taken.txt" {
+		t.Fatalf("question = %+v", ask.Question)
+	}
+
+	// Keep both puts the second file beside the first one, in its own folder.
+	if rec := f.h.do(postForm(option(t, ask, "transfer.both"), f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("keep both: %d %s", rec.Code, rec.Body.String())
+	}
+	if got, _ := f.srv.File(filesDocs + "trip/taken-2.txt"); got != "mine" {
+		t.Errorf("trip/taken-2.txt = %q", got)
+	}
+	if got, _ := f.srv.File(filesDocs + "trip/taken.txt"); got != "original" {
+		t.Errorf("trip/taken.txt = %q, want the original", got)
+	}
+}
+
+// S-17.4 and S-17.1: a part that names a way out of the folder is refused, and
+// says so in its own row; an address of the person's own machine is a name,
+// not a path. Neither stops the file that came with it.
+func TestFolderUploadRefusesAWayOut(t *testing.T) {
+	f := filesFixture(t, true)
+	f.srv.SeedFolder(filesDocs)
+	rec := f.h.do(uploadForm(f.at("upload"), f.sess, false,
+		upload{"../escape.txt", "no"},
+		upload{"trip/../../escape.txt", "no"},
+		upload{`C:\fakepath\local.txt`, "yes"},
+		upload{"/etc/passwd", "no"},
+		upload{"good.txt", "yes"}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("upload: %d %s", rec.Code, rec.Body.String())
+	}
+	for path, want := range map[string]string{
+		filesDocs + "local.txt": "yes",
+		filesDocs + "good.txt":  "yes",
+		filesDocs + "passwd":    "no", // the leading slash made it a name
+	} {
+		if got, ok := f.srv.File(path); got != want {
+			t.Errorf("%s = %q, %v; want %q", path, got, ok, want)
+		}
+	}
+	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	for _, name := range []string{"../escape.txt", "trip/../../escape.txt"} {
+		row := queueRow(t, page.Queue, name)
+		if row.State != view.OpFailed {
+			t.Errorf("%s = %+v, want a refusal", name, row)
+		}
+	}
+	if _, ok := f.srv.File(davtest.FileRoot + "escape.txt"); ok {
+		t.Error("a file landed outside the folder")
+	}
+}

@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"slices"
 	"strconv"
 	"strings"
@@ -39,15 +41,24 @@ type transfer struct {
 	size  int64
 	dir   bool
 
-	// where it goes: a folder of a collection, and the name
+	// where it goes: a folder of a collection, the folders inside it a folder
+	// upload adds (S-17.1), and the name
 	account, col string
 	folder       []string
+	rel          []string
 	name         string
 
 	// what it moves: an upload's file on disk, or a member of a collection
 	temp               string
 	srcAccount, srcCol string
 	src                []string
+}
+
+// label is what the queue row says: the path inside the chosen folder for a
+// folder upload, so two files of one name are told apart, and the name alone
+// for everything else.
+func (t *transfer) label() string {
+	return strings.Join(append(slices.Clone(t.rel), t.name), "/")
 }
 
 func (t *transfer) ID() string    { return t.id }
@@ -89,7 +100,7 @@ func (s *Server) transferQueue(sess *session.Session) *view.TransferQueue {
 			continue
 		}
 		counts[t.state]++
-		tr := view.TransferRow{Name: text(t.name), State: t.state}
+		tr := view.TransferRow{Name: text(t.label()), State: t.state}
 		if !t.dir {
 			tr.Size = formatSize(t.size)
 		}
@@ -97,7 +108,7 @@ func (s *Server) transferQueue(sess *session.Session) *view.TransferQueue {
 			tr.Percent = 100
 		}
 		if t.note != "" {
-			reasons = append(reasons, t.name+": "+t.note)
+			reasons = append(reasons, t.label()+": "+t.note)
 		}
 		if t.Waiting() {
 			answer := func(id, label, value string, danger bool) view.Action {
@@ -106,7 +117,7 @@ func (s *Server) transferQueue(sess *session.Session) *view.TransferQueue {
 					Href: s.postQuery(fileHref(t.account, t.col, t.marker(), t.folder, true), url.Values{"transfer": {t.id}, "answer": {value}}),
 				}
 			}
-			tr.Question = &view.NameClash{Name: text(t.name), Options: []view.Action{
+			tr.Question = &view.NameClash{Name: text(t.label()), Options: []view.Action{
 				answer("transfer.skip", "Skip", "skip", false),
 				answer("transfer.both", "Keep both", "both", false),
 				answer("transfer.overwrite", "Overwrite this one", "overwrite", true),
@@ -232,6 +243,7 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	n := 0
+	made := map[string]bool{}
 	for part := up.next; ; part = nil {
 		if part == nil {
 			if part, err = up.mr.NextPart(); err != nil {
@@ -242,7 +254,7 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		n++
-		if err := s.uploadOne(r, c, part); err != nil {
+		if err := s.uploadOne(r, c, part, made); err != nil {
 			http.Error(w, "could not keep the upload", http.StatusInternalServerError)
 			return
 		}
@@ -260,21 +272,29 @@ func (s *Server) postFilesUpload(w http.ResponseWriter, r *http.Request) {
 
 // uploadOne sends one file part: straight to the server when its name is
 // free, to a temporary file and a question when it is taken. The length goes
-// with it when the page sent one (S-17.1).
-func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part) error {
+// with it when the page sent one (S-17.1). A folder upload names every part by
+// its path inside the chosen folder, so the folders it needs are created
+// first, and made keeps the ones this upload has already made.
+func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part, made map[string]bool) error {
 	ctx := r.Context()
-	name := part.FileName()
-	if i := strings.LastIndexAny(name, `/\`); i >= 0 {
-		name = name[i+1:]
-	}
+	rel, name := uploadPath(partName(part))
 	t, err := newTransfer("upload", c, name)
 	if err != nil {
 		return err
 	}
+	t.rel = rel
 	defer func() { c.sess.KeepTransfer(t) }()
-	target, err := c.path(append(slices.Clone(c.segs), name), false)
+	if name == "" {
+		t.name, t.state, t.note = part.FileName(), view.OpFailed, "this cannot be the name of a file"
+		return nil
+	}
+	target, err := c.path(append(append(slices.Clone(c.segs), rel...), name), false)
 	if err != nil {
 		t.state, t.note = view.OpFailed, "this cannot be the name of a file"
+		return nil
+	}
+	if err := s.makeFolders(ctx, c, rel, made); err != nil {
+		t.state, t.note = view.OpFailed, "the folder it goes in was not created: "+sentenceEnd(fileReason(err))
 		return nil
 	}
 	_, err = c.files.Stat(ctx, target)
@@ -298,7 +318,7 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part) er
 	case file.NotFound(err):
 		body := &countingReader{r: part}
 		var send io.Reader = dav.Typed(body, uploadType(part, name))
-		declared := declaredSize(r, name)
+		declared := declaredSize(r, t.label())
 		if declared >= 0 {
 			send = dav.Sized(send, declared)
 		}
@@ -323,8 +343,74 @@ func (s *Server) uploadOne(r *http.Request, c *fileCtx, part *multipart.Part) er
 	return nil
 }
 
+// partName is the file name a part carries, whole. Part.FileName cuts the
+// directory off it — RFC 7578 §4.2 tells a server not to use path information,
+// and Go obeys — but a folder upload carries the path of each file inside the
+// chosen folder there, and that path is the one thing it must keep (S-17.1).
+// What to make of the name is uploadPath's business, not this one's.
+func partName(part *multipart.Part) string {
+	if _, params, err := mime.ParseMediaType(part.Header.Get("Content-Disposition")); err == nil {
+		if name := params["filename"]; name != "" {
+			return name
+		}
+	}
+	return part.FileName()
+}
+
+// uploadPath takes a part's file name apart: a folder upload names every file
+// by its path inside the chosen folder ("photos/2020/a.jpg"), a plain upload
+// by its name alone. Browsers write that path with "/" and older ones with
+// "\\"; an empty segment and "." carry nothing and go. ".." stays, to be
+// refused where the address is built rather than normalised away in silence
+// (S-17.4).
+func uploadPath(filename string) (rel []string, name string) {
+	sep := func(r rune) bool { return r == '/' || r == '\\' }
+	segs := strings.FieldsFunc(filename, sep)
+	kept := make([]string, 0, len(segs))
+	for _, seg := range segs {
+		if seg == "." {
+			continue
+		}
+		kept = append(kept, seg)
+	}
+	if len(kept) == 0 {
+		return nil, ""
+	}
+	// An address on the person's own machine is not a path inside the chosen
+	// folder: a browser that sends "C:\fakepath\photo.jpg" for one file
+	// means the name alone, and so does a name that starts at the root.
+	if sep(rune(filename[0])) || strings.Contains(kept[0], ":") {
+		return nil, kept[len(kept)-1]
+	}
+	return kept[:len(kept)-1], kept[len(kept)-1]
+}
+
+// makeFolders creates the folders a file's path inside the chosen folder needs,
+// outermost first and once each per upload (S-17.1). A folder already there
+// answers 405, which is not a failure: a folder upload sent twice writes into
+// what is there rather than refusing the lot.
+func (s *Server) makeFolders(ctx context.Context, c *fileCtx, rel []string, made map[string]bool) error {
+	for i := range rel {
+		p, err := c.path(append(slices.Clone(c.segs), rel[:i+1]...), true)
+		if err != nil {
+			return err
+		}
+		if made[p] {
+			continue
+		}
+		switch err := c.files.MkCol(ctx, p); {
+		case err == nil, dav.IsStatus(err, http.StatusMethodNotAllowed):
+			made[p] = true
+		default:
+			return err
+		}
+	}
+	return nil
+}
+
 // declaredSize is the length of a file the page sent in front of the files —
-// "size.<name>" — or -1 when nothing said. A body of unknown length goes out
+// "size.<name>", where the name is the path a folder upload gave the file —
+// or -1 when nothing said. A body of unknown length goes out
 // without a Content-Length, and some servers refuse that (S-17.1,
 // docs/servers.md, SV-15); measuring it here would mean keeping the whole file,
 // and there is no ceiling on one (C-12).
@@ -333,7 +419,7 @@ func declaredSize(r *http.Request, name string) int64 {
 	if err != nil {
 		return -1
 	}
-	for _, key := range []string{"size." + name, "size"} {
+	for _, key := range []string{"size." + name, "size." + path.Base(name), "size"} {
 		if v := up.fields.Get(key); v != "" {
 			if n, err := strconv.ParseInt(v, 10, 64); err == nil && n >= 0 {
 				return n
@@ -818,7 +904,7 @@ func (p *partialCopy) Unwrap() error { return p.err }
 // streamed into a PUT, a folder at a time (S-17.1). A move between connections
 // deletes the original only after the whole copy arrived.
 func (s *Server) place(ctx context.Context, sess *session.Session, dest *fileCtx, t *transfer, name string, overwrite bool) error {
-	dst, err := dest.path(append(slices.Clone(t.folder), name), t.dir)
+	dst, err := dest.path(append(append(slices.Clone(t.folder), t.rel...), name), t.dir)
 	if err != nil {
 		return err
 	}
@@ -904,7 +990,7 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 			next.state, next.note = view.OpFailed, "the server refused to overwrite it"
 		}
 	case "both":
-		name, err := s.freeName(ctx, c, t.name)
+		name, err := s.freeName(ctx, c, t.rel, t.name)
 		if err == nil {
 			next.name = name
 			err = s.place(ctx, c.sess, c, t, name, false)
@@ -936,8 +1022,8 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 
 // freeName is the first name with a number the folder does not hold, read
 // from one listing.
-func (s *Server) freeName(ctx context.Context, c *fileCtx, name string) (string, error) {
-	folder, _ := c.path(c.segs, true)
+func (s *Server) freeName(ctx context.Context, c *fileCtx, rel []string, name string) (string, error) {
+	folder, _ := c.path(append(slices.Clone(c.segs), rel...), true)
 	entries, err := c.files.List(ctx, folder)
 	if err != nil {
 		return "", err

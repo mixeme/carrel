@@ -5,6 +5,40 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.91 — 2026-09-18
+
+A folder uploads as a folder (S-17.1).
+
+### For consumers
+
+- **A folder can be uploaded.** The browser sends the chosen folder as a set of
+  files, each named by its path inside it; the service creates the folders that
+  path needs before it writes the file, once each per upload, and writes every
+  file where it belongs.
+- **Every file is its own row in the queue, named by that path.** Two files
+  called the same from different folders are told apart, and a taken name is
+  the same question as ever — Skip, Keep both, Overwrite this one — asked about
+  the file that clashed, with "Keep both" looking for a free name in the folder
+  that file was going to. Nothing is overwritten (S-17.3), and a refusal on one
+  file is not a refusal of the rest.
+- **Not every name is a path.** A part named after a place on the person’s own
+  machine — `C:\fakepath\photo.jpg`, or a name starting at the root — means the
+  file name alone. A path that would lead out of the chosen folder is refused
+  segment by segment and says so in its own row, rather than being quietly
+  corrected (S-17.4).
+- The two ways in, "Files" and "Folder", are the client’s two menu rows
+  (U-6.5): one address, one method, one parse.
+
+### Included
+
+- `web.partName` reads the name from the part’s own Content-Disposition:
+  `Part.FileName` strips the directory, as RFC 7578 §4.2 tells a server to, and
+  a folder upload is exactly that directory.
+- `web.uploadPath`, `web.makeFolders`, and `transfer.rel` carried through
+  `place` and `freeName`, so an answer to a question lands in the right folder.
+- `TestFolderUploadKeepsThePathsInside`, `TestFolderUploadRefusesAWayOut`, and
+  live `TestSFTPGoFolderUpload` through the pages of a real file server.
+
 ## v0.0.90 — 2026-09-18
 
 A collection with no name gets one, and a write is sent again when the server
