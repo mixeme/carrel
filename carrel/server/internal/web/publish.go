@@ -96,21 +96,50 @@ func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, titl
 	if uid != "" {
 		what = c.spec.noun
 	}
+	return s.sheetFor(sess, c.spec.kind, what, title, c.stamp(), publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid), c.listPath())
+}
+
+// sheetFor is the sheet of any target: what, where, for how long, and the
+// two ways to make it — thirty days or, explicitly, no expiry.
+func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title string, where view.Stamp, q url.Values, cancel string) view.PublishSheet {
 	tf := s.timeFor(sess)
 	until := time.Now().Add(publish.DefaultTTL)
-	q := publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid)
-	forever := publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid)
+	forever := cloneValues(q)
 	forever.Set("expires", "never")
 	return view.PublishSheet{
-		Kind:    c.spec.kind,
-		Target:  text(strings.ToUpper(what[:1]) + what[1:] + " «" + title + "» · " + string(c.stamp())),
+		Kind:    kind,
+		Target:  text(strings.ToUpper(what[:1]) + what[1:] + " «" + title + "» · " + string(where)),
 		Expires: text("30 days, until " + tf.date(until)),
 		Actions: []view.Action{
 			{ID: "publish.create", Label: "Publish for 30 days", Href: s.postQuery("/app/publish", q), Method: "POST", Enabled: true},
 			{ID: "publish.forever", Label: "Publish without an expiry", Href: s.postQuery("/app/publish", forever), Method: "POST", Enabled: true},
-			{ID: "publish.cancel", Label: "Cancel", Href: s.route(c.listPath()), Method: "GET", Enabled: true},
+			{ID: "publish.cancel", Label: "Cancel", Href: s.route(cancel), Method: "GET", Enabled: true},
 		},
 	}
+}
+
+// madeSheet is the sheet once the link is made: the link, shown this once.
+func (s *Server) madeSheet(sess *session.Session, sheet view.PublishSheet, token string, expires *time.Time) view.PublishSheet {
+	link := s.route("/p/" + token)
+	sheet.Link = text(link)
+	sheet.Expires = "No expiry. Revoke it when it is no longer needed."
+	if expires != nil {
+		sheet.Expires = text("Until " + s.timeFor(sess).date(*expires))
+	}
+	sheet.Actions = []view.Action{
+		{ID: "publish.open", Label: "Open the link", Href: link, Method: "GET", Enabled: true},
+		{ID: "publish.list", Label: "All published links", Href: s.route("/app/files/published"), Method: "GET", Enabled: true},
+	}
+	return sheet
+}
+
+// publishExpiry is the lifetime the form chose.
+func publishExpiry(r *http.Request) *time.Time {
+	if r.FormValue("expires") == "never" {
+		return nil
+	}
+	t := time.Now().Add(publish.DefaultTTL)
+	return &t
 }
 
 // getPublish is the sheet: what will be published and for how long, before
@@ -118,6 +147,15 @@ func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, titl
 func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
+		return
+	}
+	if r.FormValue("k") == filesSpec.segment {
+		fc, segs, dir, ok := s.publishFileTarget(r, sess)
+		if !ok {
+			s.notFound(w, r)
+			return
+		}
+		s.writeSheet(w, r, s.fileSheet(sess, fc, segs, dir))
 		return
 	}
 	c, uid, ok := s.publishTarget(r, sess)
@@ -157,6 +195,11 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, "/app/files/published")
 		return
 	}
+	expires := publishExpiry(r)
+	if r.FormValue("k") == filesSpec.segment {
+		s.postPublishFile(w, r, sess, expires)
+		return
+	}
 	c, uid, ok := s.publishTarget(r, sess)
 	if !ok {
 		s.notFound(w, r)
@@ -167,11 +210,6 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	var expires *time.Time
-	if r.FormValue("expires") != "never" {
-		t := time.Now().Add(publish.DefaultTTL)
-		expires = &t
-	}
 	token, err := s.users.Publish(sess.AccountID(), c.conn, user.PublishTarget{
 		AccountID: c.conn.ID, Kind: string(c.spec.kind), Col: c.col.Path, UID: uid, Title: title,
 	}, expires)
@@ -179,18 +217,7 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not publish", http.StatusInternalServerError)
 		return
 	}
-	sheet := s.publishSheet(sess, c, uid, title)
-	link := s.route("/p/" + token)
-	sheet.Link = text(link)
-	sheet.Expires = "No expiry. Revoke it when it is no longer needed."
-	if expires != nil {
-		sheet.Expires = text("Until " + s.timeFor(sess).date(*expires))
-	}
-	sheet.Actions = []view.Action{
-		{ID: "publish.open", Label: "Open the link", Href: link, Method: "GET", Enabled: true},
-		{ID: "publish.list", Label: "All published links", Href: s.route("/app/files/published"), Method: "GET", Enabled: true},
-	}
-	s.writeSheet(w, r, sheet)
+	s.writeSheet(w, r, s.madeSheet(sess, s.publishSheet(sess, c, uid, title), token, expires))
 }
 
 // getFilesPublished lists the person's live links. A link is not shown
@@ -230,32 +257,47 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-// openPublished opens the link a public request names, or answers the one
-// "no" and reports false.
-func (s *Server) openPublished(w http.ResponseWriter, r *http.Request) (user.OpenLink, *collectionCtx, bool) {
+// openLink opens the link a public request names, or answers the one "no"
+// and reports false. Guessing is what the address's bucket is for, so only a
+// miss spends it; a matching secret is an identity, as a session is, and
+// spends the link's own bucket of the same size (owner's decision,
+// 18.09.2026) — a mounted drive would not live on 30 a minute.
+func (s *Server) openLink(w http.ResponseWriter, r *http.Request) (user.OpenLink, bool) {
 	start := time.Now()
-	if !s.limit.allowAnon(s.clientIP(r), start) {
+	ip := s.clientIP(r)
+	if !s.limit.anonRoom(ip, start) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return user.OpenLink{}, nil, false
+		return user.OpenLink{}, false
 	}
 	link, ok := s.users.OpenPublished(r.PathValue("token"))
 	if !ok {
+		s.limit.allowAnon(ip, start)
 		s.tokenNotFound(w, r, start)
-		return user.OpenLink{}, nil, false
+		return user.OpenLink{}, false
 	}
+	if !s.limit.allowLink(link.ID, start) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return user.OpenLink{}, false
+	}
+	w.Header().Set("Cache-Control", "private, no-store")
+	return link, true
+}
+
+// openPublished opens a link to a collection or a record with its provider.
+func (s *Server) openPublished(w http.ResponseWriter, r *http.Request, link user.OpenLink) (*collectionCtx, bool) {
+	start := time.Now()
 	spec, ok := recordKinds[segmentOf(view.Kind(link.Target.Kind))]
 	if !ok {
 		s.tokenNotFound(w, r, start)
-		return user.OpenLink{}, nil, false
+		return nil, false
 	}
 	col := sealed.Collection{AccountID: link.Target.AccountID, Path: link.Target.Col, Name: link.Target.Title, Kinds: []view.Kind{spec.kind}}
 	c, err := s.newCollectionCtx(nil, spec, link.Conn, col)
 	if err != nil {
 		s.tokenNotFound(w, r, start)
-		return user.OpenLink{}, nil, false
+		return nil, false
 	}
-	w.Header().Set("Cache-Control", "private, no-store")
-	return link, c, true
+	return c, true
 }
 
 // publicTrouble is a source that did not answer, said to a reader who came
@@ -270,7 +312,15 @@ func publicGone() view.Notice {
 
 // getPublished is the page of a link: the thing, read now, read-only.
 func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
-	link, c, ok := s.openPublished(w, r)
+	link, ok := s.openLink(w, r)
+	if !ok {
+		return
+	}
+	if link.Target.Kind == string(view.KindFile) {
+		s.publishedFilesPage(w, r, link)
+		return
+	}
+	c, ok := s.openPublished(w, r, link)
 	if !ok {
 		return
 	}
@@ -409,7 +459,15 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, token strin
 // getPublishedDownload hands the thing over as a file, as it is now: the
 // collection whole, or the one record.
 func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
-	link, c, ok := s.openPublished(w, r)
+	link, ok := s.openLink(w, r)
+	if !ok {
+		return
+	}
+	if link.Target.Kind == string(view.KindFile) {
+		s.publishedFilesDownload(w, r, link)
+		return
+	}
+	c, ok := s.openPublished(w, r, link)
 	if !ok {
 		return
 	}
@@ -443,15 +501,4 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
 	w.WriteHeader(http.StatusOK)
 	writeExport(w, c, objs)
-}
-
-// getPublishedFile streams a file of a published folder; files come with
-// S-25.1's second half, so for now every path is the one "no".
-func (s *Server) getPublishedFile(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	if !s.limit.allowAnon(s.clientIP(r), start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return
-	}
-	s.tokenNotFound(w, r, start)
 }

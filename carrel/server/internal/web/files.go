@@ -583,6 +583,7 @@ func (s *Server) fileMenu(c *fileCtx, segs []string, e file.Entry) []view.MenuIt
 		view.MenuItem{Action: writeAction(c, view.Action{ID: "file.rename", Label: "Rename…", Icon: "i-pencil", Href: s.opHref(c, segs, view.FileRename, e.Name), Method: "POST", Enabled: true})},
 		view.MenuItem{Action: writeAction(c, view.Action{ID: "file.move", Label: "Move…", Icon: "i-move", Href: s.opHref(c, segs, view.FileMove, e.Name), Method: "POST", Enabled: true})},
 		view.MenuItem{Action: view.Action{ID: "file.copy", Label: "Copy…", Icon: "i-dup", Href: s.opHref(c, segs, view.FileCopy, e.Name), Method: "POST", Enabled: true}},
+		view.MenuItem{Action: s.filePublishAction(c, append(slices.Clone(segs), e.Name), e.Dir)},
 		view.MenuItem{Separator: true, Action: writeAction(c, view.Action{ID: "file.delete", Label: "Delete…", Icon: "i-trash", Href: s.opHref(c, segs, view.FileDelete, e.Name), Method: "POST", Danger: true, Enabled: true})},
 	)
 	return menu
@@ -594,6 +595,7 @@ func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry) [
 	actions := []view.Action{
 		writeAction(c, view.Action{ID: "file.upload", Label: "Upload", Icon: "i-up", Href: s.route(c.href("upload", segs, true)), Method: "POST", Enabled: true}),
 		writeAction(c, view.Action{ID: "folder.new", Label: "New folder", Icon: "i-plus", Href: s.route(c.href("mkcol", segs, true)), Method: "POST", Enabled: true}),
+		s.filePublishAction(c, segs, true),
 	}
 	if len(picked) == 0 {
 		return actions

@@ -40,6 +40,13 @@ func (b *bucket) allow(now time.Time, n float64) bool {
 	return true
 }
 
+// room reports whether one more request would pass, without taking it.
+func (b *bucket) room(now time.Time) bool {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.tokens+now.Sub(b.last).Seconds()*b.rate >= 1
+}
+
 // full reports whether the bucket has refilled completely: nobody is being
 // limited by it, so it can be forgotten and rebuilt on the next request.
 func (b *bucket) full(now time.Time) bool {
@@ -93,6 +100,9 @@ type Limiter struct {
 	loginIP      *bucketMap
 	anonIP       *bucketMap
 	session      *bucketMap
+	// link is the bucket of one published link once its secret matched: the
+	// link is an identity then, as a session is (S-25).
+	link *bucketMap
 }
 
 func NewLimiter() *Limiter {
@@ -101,6 +111,7 @@ func NewLimiter() *Limiter {
 		loginIP:      newBucketMap(conf.LoginRatePerIP),
 		anonIP:       newBucketMap(conf.AnonTokenRatePerIP),
 		session:      newBucketMap(conf.SessionRateLimit),
+		link:         newBucketMap(conf.SessionRateLimit),
 	}
 }
 
@@ -127,6 +138,18 @@ func (l *Limiter) allowLogin(login, ip string, now time.Time) bool {
 
 func (l *Limiter) allowAnon(ip string, now time.Time) bool {
 	return l.take(l.anonIP, ip, now).allow(now, 1)
+}
+
+// anonRoom reports whether the address may try a secret now. A published
+// link spends the address's bucket only on a miss: the bucket is there
+// against guessing, and a matching secret is not a guess (S-25).
+func (l *Limiter) anonRoom(ip string, now time.Time) bool {
+	return l.take(l.anonIP, ip, now).room(now)
+}
+
+// allowLink takes one request of a published link whose secret matched.
+func (l *Limiter) allowLink(id string, now time.Time) bool {
+	return l.take(l.link, id, now).allow(now, 1)
 }
 
 func (l *Limiter) allowSession(sid string, now time.Time) bool {

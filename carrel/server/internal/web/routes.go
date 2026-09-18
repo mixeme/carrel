@@ -25,6 +25,7 @@ func (s *Server) registerRoutes() {
 	s.handle("GET /p/{token}", (*Server).getPublished)
 	s.handle("GET /p/{token}/download", (*Server).getPublishedDownload)
 	s.handle("GET /p/{token}/file/{path...}", (*Server).getPublishedFile)
+	s.handle("/p/{token}/dav/{path...}", (*Server).publishedDAV)
 	s.handle("POST /api/backup/run", (*Server).postBackupRun)
 	s.handle("GET /api/backup/status", (*Server).getBackupStatus)
 	s.handle("GET /api/backup/{id}/download", (*Server).getBackupDownload)

@@ -1224,8 +1224,21 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
       чтение). `PublishedPage` получил `Tasks`, `Notes`, `Fields`, `Body` (C-6).
       Сторожа — `TestPublished*`, `TestRevokedIsNeverWas`,
       `TestPublishIsOffered`, `TestPublishedLinkLifetime`
-- [ ] S-25.1, часть 2: файл и папка — страница, поток `/p/{token}/file/…`,
-      архив папки, `/p/{token}/dav/…` только чтение
+- [x] S-25.1, часть 2: файл и папка (`v0.0.101`, 18.09.2026;
+      `web/publish_files.go`, `publish.Multistatus`). «Publish…» в меню строки
+      и в полосе папки; лист тот же (`k=files`, `f=` путь, `dir=1`), нет
+      такого на сервере — ничего не создаётся. Страница папки листает её и
+      вниз (`?in=`), никогда вверх и вбок: каждый сегмент — имя (S-17.4).
+      `/p/{token}/file/…` — поток в песочнице; `/download` — файл или папка
+      zip-ом, собранным по ходу чтения (оборвалось — архив без оглавления,
+      а не молча неполный; потолок — `CARREL_FILES_MAX_ENTRIES`).
+      `/p/{token}/dav/…` — диск только для чтения: OPTIONS, GET, HEAD,
+      PROPFIND со **своим** multistatus из листинга Carrel, не пересказ
+      чужого XML; остальные методы — 405, на хранилище не доходят. Лимит —
+      решение владельца: промах тратит ведро IP (30/мин), живая ссылка — своё
+      (120/мин, как сессия). Сторожа — `TestPublishedFolder`,
+      `TestPublishedFile`, `TestPublishedFolderMountsReadOnly`,
+      `TestPublishedLinkLimits`, `TestFilesOfferPublish`
 - [ ] S-25.2: подписки
 - [ ] S-24: zip+манифест; age; ротация после сверки; restore = импорт
 - [ ] S-26: `internal/mail`; From экземпляра; заглушки приглашений сняты

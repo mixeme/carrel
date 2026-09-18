@@ -11,11 +11,14 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+
+	"carrel.dev/carrel/server/internal/conf"
 )
 
 // DefaultTTL is how long a link lives unless the person chooses otherwise
-// (S-25): thirty days. "No expiry" is an explicit choice, never a default.
-const DefaultTTL = 30 * 24 * time.Hour
+// (S-25): conf.PublicLinkDefaultTTL, thirty days. "No expiry" is an explicit
+// choice, never a default.
+const DefaultTTL = conf.PublicLinkDefaultTTL
 
 // Envelope is what a link needs to read its one connection without a
 // session: the address, the login, the password and an accepted certificate.

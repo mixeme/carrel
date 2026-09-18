@@ -5,6 +5,32 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.101 — 2026-09-18
+
+A file or a folder can be published, and a published folder mounts as a
+read-only drive (S-25.1, second part).
+
+### For consumers
+
+- **"Publish…"** in every file row's menu and in a folder's bar. The sheet is
+  the same (`k=files`, `f=` the path, `dir=1` a folder); a path that is not on
+  the server publishes nothing.
+- **A folder's page** lists it (`PublishedPage.Folder`) and goes down into its
+  folders with `?in=`, never up or sideways. `/p/{token}/file/{path…}`
+  streams a file in a sandbox; `/p/{token}/download` is the file, or the
+  folder — or `?in=` a folder in it — as a zip written while it is read.
+- **`/p/{token}/dav/`** mounts the folder as a drive that can only be read:
+  OPTIONS, GET, HEAD and PROPFIND answer; PUT, DELETE, MKCOL, MOVE, COPY,
+  PROPPATCH, LOCK and POST are 405 and never reach the storage. The listing
+  is Carrel's own: no address, name or property of the storage server.
+
+### Changed
+
+- **Rate limit of `/p/`** (owner's decision): only a miss spends the
+  address's bucket of 30 a minute, and an empty bucket is 429 before any
+  check. A link whose secret matched has a bucket of its own, 120 a minute,
+  the size of a session's — a mounted drive would not live on 30.
+
 ## v0.0.100 — 2026-09-18
 
 A collection or a record can be published as a secret read-only link

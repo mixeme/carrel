@@ -32,6 +32,7 @@ type PublishedLink struct {
 
 // OpenLink is a live link opened for a reader without a session.
 type OpenLink struct {
+	ID     string // publish.ID of the link: its rate bucket, never its secret
 	Target PublishTarget
 	Conn   sealed.Connection
 }
@@ -124,6 +125,7 @@ func (s *Service) OpenPublished(token string) (OpenLink, bool) {
 		})
 	}
 	return OpenLink{
+		ID:     publish.ID(found.Hash),
 		Target: targetOf(*found),
 		Conn:   sealed.Connection{ID: found.AccountID, Server: env.Server, Login: env.Login, Password: env.Password, CertFingerprint: env.CertFingerprint},
 	}, true
