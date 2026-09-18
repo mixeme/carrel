@@ -298,18 +298,27 @@ type limitTransport struct {
 // precondition instead of doubling.
 func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	resp, err, fromIdle := t.attempt(req)
+	// A connection that ended before the answer says why it was not sent
+	// again. Such a failure is rare, does not repeat, and is read months later
+	// out of a log: "EOF" alone leaves the reader guessing which rule applied.
 	switch {
-	case err == nil || !idleClosed(err) || !rewindable(req):
+	case err == nil || !idleClosed(err):
 		return resp, err
+	case !rewindable(req):
+		return resp, fmt.Errorf("%w (not sent again: its body cannot be produced a second time)", err)
 	case !readOnly(req) && !fromIdle:
-		return resp, err
+		return resp, fmt.Errorf("%w (not sent again: a write on a connection dialled for it, "+
+			"so what the server did with it is unknown)", err)
 	}
 	again, rerr := rewound(req)
 	if rerr != nil {
-		return resp, err
+		return resp, fmt.Errorf("%w (not sent again: the body would not rewind: %v)", err, rerr)
 	}
-	resp, err, _ = t.attempt(again)
-	return resp, err
+	resp, second, _ := t.attempt(again)
+	if second != nil && idleClosed(second) {
+		return resp, fmt.Errorf("%w (sent again after a connection closed before the answer, and it ended the same way)", second)
+	}
+	return resp, second
 }
 
 // readOnly reports whether the method only reads, so sending it again changes

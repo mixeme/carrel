@@ -21,6 +21,18 @@ that ends wrong says why.
   machine and nowhere else, so on any other machine fourteen tests failed with
   nothing to say — and a real failure is easy to lose among them. Only a
   refused connection is a skip, never a wrong answer from a server that is up.
+- `scripts/gates.sh`: the gates of the plan in one command, with `--fix` for
+  formatting. Its gofmt check compares gofmt’s output with the file ignoring
+  carriage returns, so it tells the truth whatever the working copy’s line
+  endings are — no more 106 false hits with a real one hidden among them — and
+  it names a file gofmt cannot parse as exactly that. The working tree was
+  rewritten to LF as well: 41 files predated `.gitattributes`, and no file’s
+  content changed, the index having always held LF.
+- The guard now says which rule it applied to a connection that ended before
+  the answer: not sent again because the body cannot rewind, or because it is
+  a write on a connection dialled for it, or sent again and ended the same
+  way. A failure that does not repeat is read out of a log months later, and
+  "EOF" alone leaves the reader guessing.
 - `integration.sourceStates`: a live search that ends in a bad state, or is
   still running after 60 s, prints every source with its state and message
   rather than the first bad one. The one unexplained failure of

@@ -3,6 +3,7 @@ package dav
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptrace"
@@ -150,6 +151,43 @@ func TestOneRetryOnly(t *testing.T) {
 	base := &flakyBase{err: io.EOF, fail: 2}
 	if _, err := roundTrip(t, base, "PROPFIND", nil); err == nil {
 		t.Error("the error was swallowed")
+	}
+	if base.calls != 2 {
+		t.Errorf("%d calls, want two", base.calls)
+	}
+}
+
+// The error says which rule applied, because such a failure is read out of a
+// log months later and "EOF" alone leaves the reader guessing (S-5.1).
+func TestTheErrorSaysWhyItWasNotSentAgain(t *testing.T) {
+	for _, c := range []struct {
+		what, want string
+		fromIdle   bool
+		method     string
+		body       io.Reader
+	}{
+		{"a write on a fresh connection", "a write on a connection dialled for it", false, http.MethodPut, bytes.NewReader([]byte("x"))},
+		{"a body that cannot rewind", "its body cannot be produced a second time", true, http.MethodPut, struct{ io.Reader }{strings.NewReader("x")}},
+	} {
+		base := &flakyBase{err: io.EOF, fail: 1, fromIdle: c.fromIdle}
+		req, err := http.NewRequestWithContext(context.Background(), c.method, "http://server.example/dav/f", c.body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, got := (&limitTransport{base: base}).RoundTrip(req)
+		if got == nil || !strings.Contains(got.Error(), c.want) {
+			t.Errorf("%s: err = %v, want it to say %q", c.what, got, c.want)
+		}
+		if !errors.Is(got, io.EOF) {
+			t.Errorf("%s: the error stopped being an EOF: %v", c.what, got)
+		}
+	}
+
+	// Twice in a row is the server's answer, and the error says it was tried.
+	base := &flakyBase{err: io.EOF, fail: 2, fromIdle: true}
+	_, err := roundTrip(t, base, "MKCALENDAR", bytes.NewReader([]byte("<mkcalendar/>")))
+	if err == nil || !strings.Contains(err.Error(), "ended the same way") {
+		t.Errorf("err = %v, want it to say the second try ended the same way", err)
 	}
 	if base.calls != 2 {
 		t.Errorf("%d calls, want two", base.calls)
