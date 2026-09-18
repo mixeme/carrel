@@ -237,7 +237,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		query.Set("task", st.task.ID())
 	}
 	filter := s.tagFilter(base, query)
-	shown := filter.keep(spec.kind, st.items)
+	shown := s.foldLinked(blob, spec.kind, filter.keep(spec.kind, st.items))
 	st.shell.Rail.Tags = filter.rail(spec.kind, st.items)
 
 	// The print header says how many collections the view shows and, once the
@@ -365,7 +365,7 @@ func (s *Server) indexAnswered(sess *session.Session, blob sealed.Blob, spec kin
 	}
 	for id, part := range bySource {
 		account, path, _ := strings.Cut(id, ":")
-		putIndex(sess, account, path, spec.component, indexOf(spec.kind, part))
+		putIndex(sess, account, path, spec.component, indexOf(s.timeFor(sess), spec.kind, part))
 		if !snap.Finished.IsZero() && fresh[id] {
 			noteRead(sess, account, path, snap.Finished, part, spec.kind != view.KindEvent)
 		}
@@ -457,7 +457,11 @@ func (s *Server) navRows(sess *session.Session, blob sealed.Blob, open string) [
 	}
 	return append(nav,
 		view.NavRow{Action: view.Action{ID: "nav.files", Label: "Files", Href: s.route("/app/files"), Method: "GET", Enabled: true}, On: open == filesSpec.segment},
-		view.NavRow{Action: view.Action{ID: "nav.duplicates", Label: "Duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true}},
+		view.NavRow{
+			Action: view.Action{ID: "nav.duplicates", Label: "Duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true},
+			Count:  s.duplicateCount(sess),
+			On:     open == "duplicates",
+		},
 	)
 }
 

@@ -81,6 +81,9 @@ type Users interface {
 	// SetLastUsed remembers where a record of a kind was last created, so
 	// the sheet opened from the shell starts there (U-6.16). No journal entry.
 	SetLastUsed(viewerID string, dataKey [32]byte, sel sealed.Selection) error
+	// EditDuplicates changes the decisions about duplicates (S-16); an
+	// empty what journals nothing.
+	EditDuplicates(viewerID string, dataKey [32]byte, what, detail string, edit func(*sealed.Duplicates) error) error
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).

@@ -205,7 +205,7 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | Суффикс entity ID | 10 Crockford-символов | `internal/user/id.go` |
 | Версия формата state.enc | 1 | `internal/store/format.go` |
 
-### 4.4. Дубликаты — веса сигналов (📋 в коде scoring ещё нет)
+### 4.4. Дубликаты — веса сигналов (`internal/dupes`)
 
 | Сигнал | Очки |
 |---|---|

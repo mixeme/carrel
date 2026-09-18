@@ -1,0 +1,550 @@
+package web
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+
+	"carrel.dev/carrel/server/internal/dupes"
+	"carrel.dev/carrel/server/internal/sealed"
+	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/view"
+)
+
+// S-16: duplicates are found on the fly among the records this session has
+// already loaded — the index every list leaves in the cache — and never by
+// asking a server. Three decisions: Link (the blob only, no server is
+// written), Not duplicates (the group's signature in the blob) and Merge on
+// the server, which writes the kept record with If-Match and only then
+// deletes the others, each with its own.
+
+// loadedRecord is one record of a loaded list with where it lives.
+type loadedRecord struct {
+	rec   dupes.Record
+	entry indexEntry
+	from  origin
+}
+
+// dupState is what the duplicates screen is built from: every loaded record,
+// the groups found among them and the person's decisions.
+type dupState struct {
+	blob      sealed.Blob
+	records   map[sealed.RecordRef]loadedRecord
+	compared  int
+	threshold int
+	found     []dupes.Group
+}
+
+// dupThreshold is the person's number of points, else the instance's.
+func (s *Server) dupThreshold(blob sealed.Blob) int {
+	if blob.Duplicates.Threshold > 0 {
+		return blob.Duplicates.Threshold
+	}
+	return s.cfg.DuplicatesThreshold
+}
+
+var dupKinds = []view.Kind{view.KindContact, view.KindEvent, view.KindTask, view.KindNote}
+
+// loadedRecords reads the index of every catalog collection the session has
+// loaded. present holds, per collection and kind, the UIDs of a list read
+// whole: only such a list says a member is gone. The agenda reads a week, so
+// an event missing from it may simply be in another week. A collection the
+// catalog no longer holds, or holds as gone, has nothing in it.
+func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loadedRecord, map[dupes.CollectionRef]map[string]bool) {
+	var out []loadedRecord
+	present := map[dupes.CollectionRef]map[string]bool{}
+	for _, col := range blob.Collections {
+		conn, ok := blob.Connection(col.AccountID)
+		if !ok || col.Gone {
+			continue
+		}
+		for _, k := range dupKinds {
+			if !col.Has(k) {
+				continue
+			}
+			spec := recordKinds[segmentOf(k)]
+			data, ok := sess.Cache().GetETagMap(conn.ID, col.Path+"\x00"+spec.component)
+			if !ok {
+				continue
+			}
+			var entries []indexEntry
+			if json.Unmarshal(data, &entries) != nil {
+				continue
+			}
+			uids := map[string]bool{}
+			for _, e := range entries {
+				if e.Kind != k || e.UID == "" {
+					continue
+				}
+				uids[e.UID] = true
+				ref := sealed.RecordRef{AccountID: conn.ID, Col: col.Path, UID: e.UID}
+				out = append(out, loadedRecord{
+					rec:   dupes.Record{Ref: ref, Kind: k, Keys: e.Keys},
+					entry: e,
+					from:  origin{conn: conn, col: col},
+				})
+			}
+			if k != view.KindEvent {
+				present[dupes.CollectionRef{AccountID: conn.ID, Col: col.Path, Kind: k}] = uids
+			}
+		}
+	}
+	for _, g := range blob.Duplicates.Linked {
+		for _, m := range g.Members {
+			if col, ok := blob.Collection(m.AccountID, m.Col); !ok || col.Gone {
+				present[dupes.CollectionRef{AccountID: m.AccountID, Col: m.Col, Kind: g.Kind}] = map[string]bool{}
+			}
+		}
+	}
+	return out, present
+}
+
+// readDuplicates finds the groups among what is loaded. A linked member the
+// loaded lists say is gone leaves its group silently, and the blob is written
+// without a journal line (S-16).
+func (s *Server) readDuplicates(sess *session.Session, prune bool) dupState {
+	blob := s.catalogOf(sess)
+	loaded, present := s.loadedRecords(sess, blob)
+	if prune {
+		if kept, changed := dupes.Prune(blob.Duplicates.Linked, present); changed {
+			key, _ := sess.DataKey()
+			err := s.users.EditDuplicates(sess.AccountID(), key, "", "", func(d *sealed.Duplicates) error {
+				d.Linked, _ = dupes.Prune(d.Linked, present)
+				return nil
+			})
+			if err == nil {
+				blob.Duplicates.Linked = kept
+			}
+		}
+	}
+	st := dupState{blob: blob, records: map[sealed.RecordRef]loadedRecord{}, threshold: s.dupThreshold(blob)}
+	recs := make([]dupes.Record, 0, len(loaded))
+	for _, l := range loaded {
+		if _, seen := st.records[l.rec.Ref]; seen {
+			continue
+		}
+		st.records[l.rec.Ref] = l
+		recs = append(recs, l.rec)
+	}
+	st.compared = len(recs)
+	st.found = dupes.Find(recs, st.threshold)
+	return st
+}
+
+// candidates are the found groups still to decide: not held by one linked
+// group and not marked "not duplicates".
+func (st dupState) candidates() []dupes.Group {
+	var out []dupes.Group
+	for _, g := range st.found {
+		if !dupes.Covered(st.blob.Duplicates.Linked, g) && !st.blob.Duplicates.IsIgnored(g.ID) {
+			out = append(out, g)
+		}
+	}
+	return out
+}
+
+// duplicateCount is the number beside Duplicates in the rail: the groups
+// still to decide among what is loaded.
+func (s *Server) duplicateCount(sess *session.Session) *int {
+	n := len(s.readDuplicates(sess, false).candidates())
+	return &n
+}
+
+// dupGroup is one group of the screen, whatever its decision.
+type dupGroup struct {
+	id       string
+	kind     view.Kind
+	score    int
+	reasons  []dupes.Reason
+	refs     []sealed.RecordRef
+	decision view.DuplicateDecision
+}
+
+// groups are the groups of the screen: to decide first, then linked, then
+// those marked "not duplicates" — shown so the mark can be taken back where
+// it was made.
+func (st dupState) groups() []dupGroup {
+	var todo, linked, ignored []dupGroup
+	for _, g := range st.found {
+		dg := dupGroup{id: g.ID, kind: g.Kind, score: g.Score, reasons: g.Reasons, refs: g.Refs()}
+		switch {
+		case dupes.Covered(st.blob.Duplicates.Linked, g):
+		case st.blob.Duplicates.IsIgnored(g.ID):
+			dg.decision = view.DecisionIgnored
+			ignored = append(ignored, dg)
+		default:
+			todo = append(todo, dg)
+		}
+	}
+	for _, l := range st.blob.Duplicates.Linked {
+		dg := dupGroup{id: l.ID, kind: l.Kind, refs: l.Members, decision: view.DecisionLinked}
+		for _, g := range st.found {
+			if dupes.Covered([]sealed.LinkedGroup{l}, g) && len(g.Members) == len(l.Members) {
+				dg.score, dg.reasons = g.Score, g.Reasons
+			}
+		}
+		linked = append(linked, dg)
+	}
+	return append(append(todo, linked...), ignored...)
+}
+
+func (st dupState) group(id string) (dupGroup, bool) {
+	for _, g := range st.groups() {
+		if g.id == id {
+			return g, true
+		}
+	}
+	return dupGroup{}, false
+}
+
+func reasonText(k view.Kind, r dupes.Reason) string {
+	switch r {
+	case dupes.SameUID:
+		return "same UID"
+	case dupes.SameEmail:
+		return "same email"
+	case dupes.SamePhone:
+		return "same phone"
+	case dupes.SameName:
+		return "same name"
+	case dupes.SameBirthday:
+		return "same birthday"
+	}
+	switch k {
+	case view.KindEvent:
+		return "same title, same start"
+	case view.KindTask:
+		return "same title, same due date"
+	default:
+		return "same title, same date"
+	}
+}
+
+// member is one row of a group: the record as its list left it, or — for a
+// linked member whose list this session has not read — its address alone.
+func (s *Server) member(st dupState, kind view.Kind, ref sealed.RecordRef) view.DuplicateMember {
+	conn, _ := st.blob.Connection(ref.AccountID)
+	col, ok := st.blob.Collection(ref.AccountID, ref.Col)
+	if !ok {
+		col = sealed.Collection{AccountID: ref.AccountID, Path: ref.Col}
+	}
+	o := origin{conn: conn, col: col}
+	m := view.DuplicateMember{
+		Href: s.route(o.recordPath(segmentOf(kind), ref.UID)), Stamp: o.stamp(), Colour: catalogColour(col),
+		Title: text(ref.UID), Detail: "Not loaded in this session", ReadOnly: col.ReadOnly,
+	}
+	if l, ok := st.records[ref]; ok {
+		m.Title, m.Detail = text(l.entry.Title), text(l.entry.Detail)
+	}
+	return m
+}
+
+// mergeBlock is why a group cannot be merged, or "": every member is written
+// or deleted, so every one must be in a live collection that takes writes.
+func mergeBlock(blob sealed.Blob, refs []sealed.RecordRef) string {
+	for _, ref := range refs {
+		col, ok := blob.Collection(ref.AccountID, ref.Col)
+		if _, hasConn := blob.Connection(ref.AccountID); !ok || !hasConn || col.Gone {
+			return "A member is in a collection that is no longer in the catalog."
+		}
+		if col.ReadOnly {
+			return collectionLabel(col) + " is read-only: its record could be neither rewritten nor deleted."
+		}
+	}
+	return ""
+}
+
+func (s *Server) decideAction(id, label, group, do string) view.Action {
+	return view.Action{
+		ID: id, Label: text(label), Method: "POST", Enabled: true,
+		Href: s.postQuery("/app/duplicates/decide", url.Values{"group": {group}, "do": {do}}),
+	}
+}
+
+func (s *Server) groupView(st dupState, g dupGroup) view.DuplicateGroup {
+	out := view.DuplicateGroup{ID: g.id, Kind: g.kind, Score: g.score, Decision: g.decision}
+	for _, r := range g.reasons {
+		out.Reasons = append(out.Reasons, text(reasonText(g.kind, r)))
+	}
+	for _, ref := range g.refs {
+		out.Rows = append(out.Rows, s.member(st, g.kind, ref))
+	}
+	merge := view.Action{
+		ID: "duplicates.merge", Label: "Merge on the server", Method: "GET", Danger: true, Enabled: true,
+		Href: s.postQuery("/app/duplicates/merge", url.Values{"group": {g.id}}),
+	}
+	if reason := mergeBlock(st.blob, g.refs); reason != "" {
+		merge.Enabled, merge.Reason = false, text(reason)
+	}
+	switch g.decision {
+	case view.DecisionLinked:
+		out.Actions = []view.Action{s.decideAction("duplicates.unlink", "Unlink", g.id, "unlink"), merge}
+	case view.DecisionIgnored:
+		out.Actions = []view.Action{s.decideAction("duplicates.again", "Offer again", g.id, "again")}
+	default:
+		out.Actions = []view.Action{
+			s.decideAction("duplicates.link", "Link them", g.id, "link"),
+			s.decideAction("duplicates.ignore", "Not duplicates", g.id, "ignore"),
+			merge,
+		}
+	}
+	return out
+}
+
+func kindFilter(r *http.Request) view.Kind {
+	k := view.Kind(r.URL.Query().Get("kind"))
+	for _, have := range dupKinds {
+		if k == have {
+			return k
+		}
+	}
+	return ""
+}
+
+var dupSegmentLabels = map[view.Kind]string{
+	view.KindContact: "Contacts", view.KindEvent: "Events", view.KindTask: "Tasks", view.KindNote: "Notes",
+}
+
+func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Kind) view.DuplicatesPage {
+	page := view.DuplicatesPage{Shell: s.buildShell(sess, "Duplicates")}
+	page.Rail = view.Rail{Nav: s.navRows(sess, st.blob, "duplicates"), About: s.aboutAction()}
+	all := st.groups()
+	counts := map[view.Kind]int{}
+	for _, g := range all {
+		if g.decision == view.DecisionNone {
+			counts[g.kind]++
+		}
+		if only == "" || g.kind == only {
+			page.Groups = append(page.Groups, s.groupView(st, g))
+		}
+	}
+	segment := func(k view.Kind, label string, n int) view.Action {
+		q := url.Values{}
+		if k != "" {
+			q.Set("kind", string(k))
+		}
+		a := view.Action{ID: "duplicates.kind." + string(k), Label: text(fmt.Sprintf("%s %d", label, n)), Href: s.postQuery("/app/duplicates", q), Method: "GET", Enabled: only != k}
+		if k == "" {
+			a.ID = "duplicates.kind.all"
+		}
+		if only == k {
+			a.Reason = "Shown now."
+		}
+		return a
+	}
+	total := 0
+	for _, n := range counts {
+		total += n
+	}
+	page.Bar.Segments = []view.Action{segment("", "All", total)}
+	for _, k := range dupKinds {
+		page.Bar.Segments = append(page.Bar.Segments, segment(k, dupSegmentLabels[k], counts[k]))
+	}
+	page.Bar.Loaded = st.compared
+	page.Threshold = view.ThresholdControl{Value: st.threshold, Default: s.cfg.DuplicatesThreshold}
+	if st.blob.Duplicates.Threshold > 0 {
+		page.Threshold.Note = text(fmt.Sprintf("Your own number, kept with your decisions. The instance uses %d.", s.cfg.DuplicatesThreshold))
+	} else {
+		page.Threshold.Note = "The instance's number. Set your own to change what is offered."
+	}
+	page.Notices = append(page.Notices, view.Notice{
+		Role: view.NoticeAccent,
+		Body: "Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.",
+	})
+	if st.compared == 0 {
+		page.Notices = append(page.Notices, view.Notice{
+			Role:  view.NoticeInfo,
+			Title: "Nothing is loaded yet",
+			Body:  "Duplicates are found only among the records this session has already read, so no server was asked. Open a list or a combined view, then come back.",
+		})
+	}
+	page.Print = view.Print{Title: page.Title, Range: printRange(plural(st.compared, "record")+" compared", fmt.Sprintf("%d points and above", st.threshold))}
+	return page
+}
+
+func (s *Server) getDuplicates(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	s.writePage(w, r, http.StatusOK, s.duplicatesPage(sess, s.readDuplicates(sess, true), kindFilter(r)))
+}
+
+// maxThreshold keeps a typed number sane: every signal together is 210.
+const maxThreshold = 1000
+
+// postDuplicatesDecide takes one decision: do=link, unlink, ignore or again
+// on group=, or do=threshold with value= (empty or 0: the instance's number
+// again). The answer to a decision is the group as it now stands (C-5); a
+// form without scripts, and the threshold, go back to the screen.
+func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	key, live := sess.DataKey()
+	if !live {
+		s.notFound(w, r)
+		return
+	}
+	do := r.FormValue("do")
+	if do == "threshold" {
+		raw := strings.TrimSpace(r.FormValue("value"))
+		n, err := strconv.Atoi(raw)
+		if raw == "" {
+			n, err = 0, nil
+		}
+		if err == nil && n >= 0 && n <= maxThreshold {
+			_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.threshold", strconv.Itoa(n), func(d *sealed.Duplicates) error {
+				d.Threshold = n
+				return nil
+			})
+		}
+		s.redirect(w, r, "/app/duplicates")
+		return
+	}
+	st := s.readDuplicates(sess, true)
+	g, found := st.group(r.FormValue("group"))
+	var notice *view.Notice
+	var err error
+	switch {
+	case !found:
+		notice = &view.Notice{
+			Role: view.NoticeAlert, Title: "This group is not among the loaded records",
+			Body: "The lists it came from are no longer loaded, or a record in it changed. Nothing was decided. Open the lists again, then the duplicates.",
+		}
+	case do == "link" && g.decision != view.DecisionLinked:
+		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", string(g.kind), func(d *sealed.Duplicates) error {
+			d.Linked = dupes.Link(d.Linked, sealed.LinkedGroup{Kind: g.kind, Members: g.refs})
+			d.Ignored = without(d.Ignored, g.id)
+			return nil
+		})
+	case do == "unlink" && g.decision == view.DecisionLinked:
+		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.unlink", string(g.kind), func(d *sealed.Duplicates) error {
+			var kept []sealed.LinkedGroup
+			for _, l := range d.Linked {
+				if l.ID != g.id {
+					kept = append(kept, l)
+				}
+			}
+			d.Linked = kept
+			return nil
+		})
+	case do == "ignore" && g.decision == view.DecisionNone:
+		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.ignore", string(g.kind), func(d *sealed.Duplicates) error {
+			d.Ignored = append(without(d.Ignored, g.id), g.id)
+			return nil
+		})
+	case do == "again" && g.decision == view.DecisionIgnored:
+		err = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.again", string(g.kind), func(d *sealed.Duplicates) error {
+			d.Ignored = without(d.Ignored, g.id)
+			return nil
+		})
+	}
+	if errors.Is(err, user.ErrNotFound) {
+		s.notFound(w, r)
+		return
+	}
+	if err != nil {
+		http.Error(w, "could not save the decision", http.StatusInternalServerError)
+		return
+	}
+	if !WantsFragment(r) {
+		s.redirect(w, r, "/app/duplicates")
+		return
+	}
+	var out view.DuplicateGroup
+	if found {
+		st = s.readDuplicates(sess, false)
+		if now, ok := st.decided(g, do); ok {
+			out = s.groupView(st, now)
+		}
+	}
+	notices := []view.Notice{}
+	if notice != nil {
+		notices = append(notices, *notice)
+	}
+	_ = s.render.Fragment(w, r, http.StatusOK, TargetMain, out, []OOB{{Target: TargetNotices, Body: notices}})
+}
+
+// decided is the group a decision left: a link is the linked group that
+// holds the first member, anything else the same set of records.
+func (st dupState) decided(g dupGroup, do string) (dupGroup, bool) {
+	if do == "link" && len(g.refs) > 0 {
+		if l, ok := dupes.LinkedOf(st.blob.Duplicates.Linked, g.refs[0]); ok {
+			return st.group(l.ID)
+		}
+	}
+	if do == "unlink" {
+		return st.group(dupes.Signature(g.kind, g.refs))
+	}
+	return st.group(g.id)
+}
+
+func without(list []string, v string) []string {
+	var out []string
+	for _, s := range list {
+		if s != v {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// foldLinked shows the members of a linked group as one row (S-16): the
+// first member present keeps its place and carries the others, which leave
+// the list. Nothing is folded that the person did not link.
+func (s *Server) foldLinked(blob sealed.Blob, k view.Kind, items []listed) []listed {
+	if len(blob.Duplicates.Linked) == 0 {
+		return items
+	}
+	uidOf := func(it listed) string { return listedUID(k, it) }
+	keep := map[string]int{} // linked group → index in out
+	out := make([]listed, 0, len(items))
+	for _, it := range items {
+		ref := sealed.RecordRef{AccountID: it.from.conn.ID, Col: it.from.col.Path, UID: uidOf(it)}
+		g, ok := dupes.LinkedOf(blob.Duplicates.Linked, ref)
+		if !ok || g.Kind != k {
+			out = append(out, it)
+			continue
+		}
+		if at, seen := keep[g.ID]; seen {
+			out[at].also = append(out[at].also, it)
+			continue
+		}
+		keep[g.ID] = len(out)
+		out = append(out, it)
+	}
+	return out
+}
+
+// linkedSources are the stamps of a folded row: its own and its others'.
+func linkedSources(it listed) []view.Stamp {
+	if len(it.also) == 0 {
+		return nil
+	}
+	out := []view.Stamp{it.from.stamp()}
+	for _, o := range it.also {
+		out = append(out, o.from.stamp())
+	}
+	return out
+}
+
+func linkedBadge(it listed) []view.Badge {
+	if len(it.also) == 0 {
+		return nil
+	}
+	return []view.Badge{{Label: text(plural(len(it.also)+1, "source")), Role: view.BadgeLinked}}
+}
+
+func linkedState(it listed) view.RecordState {
+	if len(it.also) > 0 {
+		return view.RecordLinked
+	}
+	return view.RecordOK
+}

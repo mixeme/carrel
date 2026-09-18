@@ -5,6 +5,46 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.94 — 2026-09-18
+
+Duplicates are found, linked and merged (S-16).
+
+### For consumers
+
+- **`/app/duplicates` is live.** Groups are found only among records this
+  session has already read — the screen asks no server, and says so when
+  nothing is loaded. Each group carries its score and the reasons beside it
+  ("same email, same name"); segments split them by kind; the threshold is
+  the person's own once they set it, the instance's (`CARREL_DUPLICATES_THRESHOLD`)
+  until then.
+- **Link** and **Not duplicates** write the sealed blob and nothing else.
+  `POST /app/duplicates/decide` takes `group` and `do` (`link`, `unlink`,
+  `ignore`, `again`) and answers the group as a fragment, or `do=threshold`
+  with `value` (empty: the instance's number again) and answers 303.
+- **Linked records are one row** in every list: `State: "linked"`, and on
+  contacts and the agenda a "2 sources" badge and `Sources`. A linked contact
+  row fills an empty phone, email or organisation from the others.
+- **Merge on the server** (`/app/duplicates/merge`): GET names the kept
+  record, what is deleted and every value the kept record gains; a question
+  only for a single-valued property whose values differ, answered as
+  `choice.<PROP>=<index>`. POST writes the kept record with If-Match, reads it
+  back, and deletes the others one by one with their own If-Match only when
+  the server kept everything; the first refusal stops the rest and nothing is
+  rolled back. A record that changed since the page was shown is not merged
+  over. A read-only member makes the group unmergeable, said on the screen.
+- The Duplicates row of the rail has a count: groups still to decide.
+- A linked member leaves its group silently when a list read whole no longer
+  holds it; an unavailable server takes nobody out.
+
+### Included
+
+- `internal/dupes`: `KeysOf`, `Find` (buckets by strong key, never every
+  pair), `Score`, `Merge`, `Prune`, `Link`; names folded after NFD with
+  `golang.org/x/text`, not `strings.EqualFold`.
+- `sealed.Blob.Duplicates` (threshold, linked groups, ignored signatures) —
+  an older blob reads as empty; `user.EditDuplicates`.
+- The list index keeps each record's keys and a detail line.
+
 ## v0.0.93 — 2026-09-18
 
 Long lines are folded on the way out, as both formats ask.

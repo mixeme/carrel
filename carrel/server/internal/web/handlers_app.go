@@ -44,43 +44,6 @@ func (s *Server) sheetStub(w http.ResponseWriter, r *http.Request) {
 	s.notFound(w, r)
 }
 
-func (s *Server) getDuplicates(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.DuplicatesPage{Shell: s.buildShell(sess, "Duplicates")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	group := view.DuplicateGroup{}
-	extra := []OOB{{Target: TargetNotices, Body: []view.Notice{}}}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetMain, group, extra)
-		return
-	}
-	_ = sess
-	s.notFound(w, r)
-}
-
-func (s *Server) getDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge duplicates")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
-	s.getDuplicatesMerge(w, r)
-}
-
 func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
 	s.sheetStub(w, r)
 }

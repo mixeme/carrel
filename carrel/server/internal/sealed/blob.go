@@ -24,6 +24,49 @@ type Blob struct {
 	// and starts there (U-6.16). Empty until the first record is made, and a
 	// blob written before this field reads as empty — nothing to migrate.
 	LastUsed []Selection `json:"lastUsed,omitempty"`
+	// Duplicates are the person's decisions about duplicates and their own
+	// threshold (S-16): the only knowledge of what foreign collections hold
+	// that lies on disk, and so sealed like the credentials. Metadata only —
+	// addresses and UIDs, never a record. Empty in a blob written before it.
+	Duplicates Duplicates `json:"duplicates,omitzero"`
+}
+
+// Duplicates are the decisions of S-16. Nothing here is written to a server.
+type Duplicates struct {
+	// Threshold is the person's own number of points; 0 until they choose
+	// one, and the instance value applies (CARREL_DUPLICATES_THRESHOLD).
+	Threshold int `json:"threshold,omitempty"`
+	// Linked are groups shown as one entity. Linking changes nothing on any
+	// server and is undone at any time.
+	Linked []LinkedGroup `json:"linked,omitempty"`
+	// Ignored are the signatures of groups marked "not duplicates": such a
+	// group is not offered again until it gains a member.
+	Ignored []string `json:"ignored,omitempty"`
+}
+
+// LinkedGroup is a set of records the person linked.
+type LinkedGroup struct {
+	ID      string      `json:"id"`
+	Kind    view.Kind   `json:"kind"`
+	Members []RecordRef `json:"members"`
+}
+
+// RecordRef is a record by its connection, collection address and UID.
+type RecordRef struct {
+	AccountID string `json:"accountID"`
+	Col       string `json:"col"`
+	UID       string `json:"uid"`
+}
+
+// IsIgnored reports whether the group with this signature is marked "not
+// duplicates".
+func (d Duplicates) IsIgnored(id string) bool {
+	for _, s := range d.Ignored {
+		if s == id {
+			return true
+		}
+	}
+	return false
 }
 
 // LastFor is where a record of this kind was last created.

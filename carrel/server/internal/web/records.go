@@ -16,6 +16,7 @@ import (
 	"unicode/utf8"
 
 	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/dupes"
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
@@ -72,6 +73,16 @@ func (o origin) stamp() view.Stamp {
 type listed struct {
 	obj  *model.Object
 	from origin
+	// also are the other members of a linked group shown in this row (S-16).
+	also []listed
+}
+
+// listedUID is the identity of a listed record of kind k.
+func listedUID(k view.Kind, it listed) string {
+	if k == view.KindContact {
+		return card.UID(it.obj)
+	}
+	return cal.UID(it.obj)
 }
 
 // collectionCtx is one owned collection opened for a request: the catalog
@@ -291,32 +302,59 @@ func notFoundErr(err error) bool {
 // indexEntry is one record of a list this session loaded. RELATED-TO resolves
 // against these entries and nothing else: no second REPORT, no other
 // collection (S-11).
+//
+// Duplicates are found among these entries too, and only these (S-16): Keys
+// are what the record is compared by and Detail the line that tells two
+// members apart on the duplicates screen, both taken when the list was read.
 type indexEntry struct {
-	UID     string    `json:"uid"`
-	Path    string    `json:"path"`
-	ETag    string    `json:"etag"`
-	Kind    view.Kind `json:"kind"`
-	Title   string    `json:"title"`
-	Related []string  `json:"related,omitempty"`
+	UID     string     `json:"uid"`
+	Path    string     `json:"path"`
+	ETag    string     `json:"etag"`
+	Kind    view.Kind  `json:"kind"`
+	Title   string     `json:"title"`
+	Related []string   `json:"related,omitempty"`
+	Detail  string     `json:"detail,omitempty"`
+	Keys    dupes.Keys `json:"keys,omitzero"`
 }
 
-// indexOf is the index of listed records of kind k.
-func indexOf(k view.Kind, items []listed) []indexEntry {
+// indexOf is the index of listed records of kind k; days are read in the
+// zone of tf.
+func indexOf(tf timeFmt, k view.Kind, items []listed) []indexEntry {
 	out := make([]indexEntry, 0, len(items))
 	for _, it := range items {
 		o := it.obj
-		e := indexEntry{Path: o.Path, ETag: o.ETag, Kind: k}
+		e := indexEntry{Path: o.Path, ETag: o.ETag, Kind: k, Keys: dupes.KeysOf(k, o, tf.tz)}
 		switch k {
 		case view.KindContact:
 			e.UID, e.Title = card.UID(o), contactName(o)
+			e.Detail = strings.Join(nonEmpty(firstValue(o, "TEL"), firstValue(o, "EMAIL")), " · ")
 		case view.KindEvent:
 			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled event"), cal.RelatedTo(o)
+			if tm, err := cal.TimingOf(o, tf.tz); err == nil && !tm.Start.IsZero() {
+				e.Detail = tf.timeOrDate(tm)
+			}
 		case view.KindTask:
 			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled task"), cal.RelatedTo(o)
+			if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
+				e.Detail = "Due " + tf.timeOrDate(due)
+			}
 		default:
 			e.UID, e.Title, e.Related = cal.UID(o), noteTitle(cal.Text(o, "SUMMARY"), cal.Description(o)), cal.RelatedTo(o)
+			if at := noteTime(o, tf.tz); !at.IsZero() {
+				e.Detail = tf.date(at)
+			}
 		}
 		out = append(out, e)
+	}
+	return out
+}
+
+func nonEmpty(values ...string) []string {
+	var out []string
+	for _, v := range values {
+		if v = strings.TrimSpace(v); v != "" {
+			out = append(out, v)
+		}
 	}
 	return out
 }
@@ -383,7 +421,7 @@ func (c *collectionCtx) noteWrite(path string, obj *model.Object) {
 		}
 	}
 	if obj != nil {
-		kept = append(kept, indexOf(c.spec.kind, c.listed([]*model.Object{obj}))...)
+		kept = append(kept, indexOf(c.tf, c.spec.kind, c.listed([]*model.Object{obj}))...)
 	}
 	c.putIndex(kept)
 }
@@ -547,10 +585,10 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 		return page
 	}
 	items := c.listed(objs)
-	shown := filter.keep(view.KindContact, items)
+	shown := s.foldLinked(s.catalogOf(c.sess), view.KindContact, filter.keep(view.KindContact, items))
 	page.Groups = s.contactGroups(c.sess, shown, c.spec.segment, false)
 	page.Rail.Tags = filter.rail(view.KindContact, items)
-	c.putIndex(indexOf(view.KindContact, items))
+	c.putIndex(indexOf(c.tf, view.KindContact, items))
 	c.noteRead(items, true)
 	total := len(objs)
 	page.Bar.Loaded, page.Bar.Total = len(shown), &total
@@ -594,8 +632,22 @@ func (s *Server) contactGroups(sess *session.Session, items []listed, segment st
 			Phone:  text(firstValue(it.obj, "TEL")),
 			Email:  text(firstValue(it.obj, "EMAIL")),
 			Org:    text(structured(firstValue(it.obj, "ORG"))),
-			State:  view.RecordOK,
+			State:  linkedState(it),
 		}
+		// A linked row shows the fields of the whole group: what the row
+		// lacks comes from the others (S-16).
+		for _, o := range it.also {
+			if row.Phone == "" {
+				row.Phone = text(firstValue(o.obj, "TEL"))
+			}
+			if row.Email == "" {
+				row.Email = text(firstValue(o.obj, "EMAIL"))
+			}
+			if row.Org == "" {
+				row.Org = text(structured(firstValue(o.obj, "ORG")))
+			}
+		}
+		row.Badges, row.Sources = linkedBadge(it), linkedSources(it)
 		row.Avatar.Href = avatars[i]
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
@@ -668,10 +720,10 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	}
 	items := c.listed(objs)
 	var more []unreadable
-	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, filter.keep(view.KindEvent, items), from, to, c.spec.segment, false)
+	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, s.foldLinked(s.catalogOf(c.sess), view.KindEvent, filter.keep(view.KindEvent, items)), from, to, c.spec.segment, false)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindEvent, items)
-	c.putIndex(indexOf(view.KindEvent, items))
+	c.putIndex(indexOf(c.tf, view.KindEvent, items))
 	c.noteRead(items, false)
 	page.Print = view.Print{
 		Title: page.Title, Range: printRange(agendaPrint(tf, from, to), plural(page.Bar.Loaded, "event"), filter.tag),
@@ -725,7 +777,9 @@ func (s *Server) agendaDays(tf timeFmt, items []listed, from, to time.Time, segm
 				Zone:     text(tf.zone(tm.Zone)),
 				Summary:  text(summary),
 				Location: text(cal.Text(o, "LOCATION")),
-				State:    view.RecordOK,
+				State:    linkedState(it),
+				Badges:   linkedBadge(it),
+				Sources:  linkedSources(it),
 			}}
 			if mark {
 				occ.row.Stamp, occ.row.Colour = it.from.stamp(), catalogColour(it.from.col)
@@ -801,11 +855,11 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	items := c.listed(objs)
 	var open, done int
 	var more []unreadable
-	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, filter.keep(view.KindTask, items), c.spec.segment, false, filter, time.Now())
+	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items)), c.spec.segment, false, filter, time.Now())
 	page.Bar.Segments = s.taskSegments(c.listPath(), filter.tag, show, open, done)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindTask, items)
-	c.putIndex(indexOf(view.KindTask, items))
+	c.putIndex(indexOf(c.tf, view.KindTask, items))
 	c.noteRead(items, true)
 	page.Print = view.Print{
 		Title: page.Title, Range: printRange(showLabels[show], plural(page.Bar.Loaded, "task"), filter.tag),
@@ -847,7 +901,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		row := view.TaskRow{
 			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Done: isDone,
 			Summary: text(titleOr(cal.Text(o, "SUMMARY"), "Untitled task")),
-			Percent: percentOf(o), Tags: filter.tags(categoriesOf(view.KindTask, o)), State: view.RecordOK,
+			Percent: percentOf(o), Tags: filter.tags(categoriesOf(view.KindTask, o)), State: linkedState(it),
 		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
@@ -913,10 +967,10 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	}
 	items := c.listed(objs)
 	var more []unreadable
-	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, filter.keep(view.KindNote, items), c.spec.segment, false, filter)
+	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items)), c.spec.segment, false, filter)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindNote, items)
-	c.putIndex(indexOf(view.KindNote, items))
+	c.putIndex(indexOf(c.tf, view.KindNote, items))
 	c.noteRead(items, true)
 	page.Print = view.Print{Title: page.Title, Range: printRange(plural(page.Bar.Loaded, "note"), filter.tag), Taken: c.tf.taken(time.Now())}
 	return page
@@ -938,7 +992,7 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		at := noteTime(o, tf.tz)
 		row := view.NoteRow{
 			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Title: text(title), Excerpt: text(noteExcerpt(body, title)),
-			Tags: filter.tags(categoriesOf(view.KindNote, o)), State: view.RecordOK,
+			Tags: filter.tags(categoriesOf(view.KindNote, o)), State: linkedState(it),
 		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
