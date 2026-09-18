@@ -107,6 +107,12 @@ type Users interface {
 	BackupRuns(viewerID string) map[string][]store.BackupRun
 	StartBackupRun(viewerID, jobID, trigger, mode string, running func(runID string) bool) (string, error)
 	FinishBackupRun(viewerID, jobID, runID string, finish func(r *store.BackupRun)) error
+	// The external trigger (S-24.4): a secret per job and an envelope of the
+	// data key under server.key.
+	EnableBackupTrigger(viewerID string, dataKey [32]byte, jobID string) (string, error)
+	DisableBackupTrigger(viewerID, jobID string) error
+	BackupTriggerOn(viewerID, jobID string) bool
+	OpenBackupTrigger(token string) (userID, jobID string, dataKey [32]byte, ok bool)
 
 	// SetTimePrefs stores the account's first day of the week and 12-hour
 	// clock (C-10).

@@ -254,3 +254,32 @@ func TestValidateKDFParams(t *testing.T) {
 		t.Fatal("Time=0 should fail")
 	}
 }
+
+// S-24.4, S-25: an envelope under the server key is bound to what it was
+// made for — a backup key to its job, a link's credentials to its hash — and
+// opens for nothing else.
+func TestEnvelopesAreBound(t *testing.T) {
+	var server, data [KeyLen]byte
+	server[0], data[0] = 1, 2
+	env, err := SealBackupKey(server, "j-1", data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, err := OpenBackupKey(server, "j-1", env); err != nil || got != data {
+		t.Fatalf("own job: %v", err)
+	}
+	if _, err := OpenBackupKey(server, "j-2", env); err == nil {
+		t.Error("a job's envelope opened for another job")
+	}
+	link, err := SealLink(server, []byte{1, 2, 3}, []byte("creds"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := OpenLink(server, []byte{1, 2, 4}, link); err == nil {
+		t.Error("a link's envelope opened under another hash")
+	}
+	var other [KeyLen]byte
+	if _, err := OpenBackupKey(other, "j-1", env); err == nil {
+		t.Error("an envelope opened under another server key")
+	}
+}

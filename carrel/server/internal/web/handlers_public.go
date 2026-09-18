@@ -475,34 +475,3 @@ func (s *Server) forgotWipePage(w http.ResponseWriter, r *http.Request, token, l
 	}
 	return page
 }
-
-func (s *Server) postBackupRun(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	if !s.limit.allowAnon(s.clientIP(r), start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return
-	}
-	s.tokenNotFound(w, r, start)
-}
-
-func (s *Server) getBackupStatus(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	if !s.limit.allowAnon(s.clientIP(r), start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return
-	}
-	s.tokenNotFound(w, r, start)
-}
-
-func (s *Server) getBackupDownload(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
-	if !s.limit.allowAnon(s.clientIP(r), start) {
-		http.Error(w, "too many requests", http.StatusTooManyRequests)
-		return
-	}
-	s.tokenNotFound(w, r, start)
-}
-
-func (s *Server) getBackupDownloadLegacy(w http.ResponseWriter, r *http.Request) {
-	s.getBackupDownload(w, r)
-}

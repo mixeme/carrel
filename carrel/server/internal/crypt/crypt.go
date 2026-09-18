@@ -219,6 +219,32 @@ func OpenLink(serverKey [KeyLen]byte, hash, ciphertext []byte) ([]byte, error) {
 	return open(serverKey[:], aadLink(hash), ciphertext)
 }
 
+// aadBackup binds a backup job's key envelope to the job (S-24.4).
+func aadBackup(jobID string) []byte { return []byte("carrel.backup.v1|" + jobID) }
+
+// SealBackupKey seals a person's data key under the server key for one job's
+// external trigger — the named loss of protection that lets a job read
+// without a session.
+func SealBackupKey(serverKey [KeyLen]byte, jobID string, dataKey [KeyLen]byte) ([]byte, error) {
+	return seal(serverKey[:], aadBackup(jobID), dataKey[:])
+}
+
+// OpenBackupKey opens a job's key envelope.
+func OpenBackupKey(serverKey [KeyLen]byte, jobID string, envelope []byte) ([KeyLen]byte, error) {
+	var out [KeyLen]byte
+	plain, err := open(serverKey[:], aadBackup(jobID), envelope)
+	if err != nil {
+		return out, err
+	}
+	if len(plain) != KeyLen {
+		Wipe(plain)
+		return out, fmt.Errorf("crypt: backup key length %d", len(plain))
+	}
+	copy(out[:], plain)
+	Wipe(plain)
+	return out, nil
+}
+
 // Wipe overwrites wrapped key material so the data key cannot be recovered.
 func Wipe(wrapped []byte) {
 	for i := range wrapped {

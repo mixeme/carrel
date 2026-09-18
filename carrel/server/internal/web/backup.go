@@ -374,6 +374,16 @@ func (s *Server) destLabel(blob sealed.Blob, job sealed.BackupJob) string {
 }
 
 func (s *Server) backupPage(sess *session.Session, editing *sealed.BackupJob, errs map[string]view.Text, notices ...view.Notice) view.BackupPage {
+	return s.backupPageWith(sess, editing, errs, nil, nil, notices...)
+}
+
+// backupPageIssued is the page right after a trigger was issued: its command
+// and secret, shown this once.
+func (s *Server) backupPageIssued(sess *session.Session, commands, secrets map[string]string) view.BackupPage {
+	return s.backupPageWith(sess, nil, nil, commands, secrets)
+}
+
+func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob, errs map[string]view.Text, commands, secrets map[string]string, notices ...view.Notice) view.BackupPage {
 	blob := s.catalogOf(sess)
 	tf, now := s.timeFor(sess), time.Now()
 	page := view.BackupPage{Shell: s.buildShell(sess, "Backup")}
@@ -406,7 +416,14 @@ func (s *Server) backupPage(sess *session.Session, editing *sealed.BackupJob, er
 			}
 			row.Runs = append(row.Runs, run)
 		}
+		row.Trigger = s.triggerBlock(sess, job, commands)
+		if secrets[job.ID] != "" {
+			row.Trigger.Password.Value = text(secrets[job.ID])
+		}
 		q := func(op string) url.Values { return url.Values{"op": {op}, "job": {job.ID}} }
+		if s.users.BackupTriggerOn(sess.AccountID(), job.ID) {
+			row.Actions = append(row.Actions, view.Action{ID: "backup.trigger.off", Label: "Turn the external trigger off", Href: s.postQuery("/app/settings/backup", q("trigger-off")), Method: "POST", Enabled: true})
+		}
 		if job.Mode != sealed.BackupToDownload {
 			row.Actions = append(row.Actions, view.Action{ID: "backup.run", Label: "Run", Href: s.postQuery("/app/settings/backup", q("run")), Method: "POST", Enabled: true})
 		}
@@ -650,6 +667,22 @@ func (s *Server) postSettingsBackup(w http.ResponseWriter, r *http.Request) {
 		}
 		if err := s.users.DeleteBackupJob(sess.AccountID(), key, id); err != nil {
 			http.Error(w, "could not delete the job", http.StatusInternalServerError)
+			return
+		}
+		s.redirect(w, r, "/app/settings/backup")
+	case "trigger":
+		if !has {
+			s.notFound(w, r)
+			return
+		}
+		s.enableTrigger(w, r, sess, key, job)
+	case "trigger-off":
+		if !has {
+			s.notFound(w, r)
+			return
+		}
+		if err := s.users.DisableBackupTrigger(sess.AccountID(), job.ID); err != nil {
+			http.Error(w, "could not turn the trigger off", http.StatusInternalServerError)
 			return
 		}
 		s.redirect(w, r, "/app/settings/backup")

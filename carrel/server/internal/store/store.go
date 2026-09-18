@@ -108,6 +108,16 @@ func (s *Store) Mutate(fn func(*State) ([]AuditEntry, error)) error {
 	return nil
 }
 
+// SealBackupKey seals a data key for one backup job's external trigger.
+func (s *Store) SealBackupKey(jobID string, dataKey [crypt.KeyLen]byte) ([]byte, error) {
+	return crypt.SealBackupKey(s.serverKey, jobID, dataKey)
+}
+
+// OpenBackupKey opens a backup job's key envelope.
+func (s *Store) OpenBackupKey(jobID string, envelope []byte) ([crypt.KeyLen]byte, error) {
+	return crypt.OpenBackupKey(s.serverKey, jobID, envelope)
+}
+
 // SealLink seals a published link's envelope under the server key (S-25).
 func (s *Store) SealLink(hash, plaintext []byte) ([]byte, error) {
 	return crypt.SealLink(s.serverKey, hash, plaintext)

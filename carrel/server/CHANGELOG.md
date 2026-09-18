@@ -5,6 +5,35 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.104 — 2026-09-18
+
+A backup job can be started from outside (S-24.4).
+
+### For consumers
+
+- **External trigger per job**, turned on in the job's card inside the unlock
+  window (`op=trigger`; `op=trigger-off` turns it off). The secret — `cbk_…` —
+  belongs to the job, not the account, and is shown once. What the card hands
+  over is what to paste: a crontab line for a job that writes to WebDAV, a
+  line with `-o` for one that downloads, a short script for Both.
+- **`/api/backup/…`** answers a script, not a browser: the secret in
+  `Authorization: Bearer`, plain text back, no cookie, no redirect.
+  `POST /api/backup/run` → 202 and the run's id; `GET /api/backup/status?id=`
+  → one word (`running`, `done`, `partial`, `failed`), `?job=` → the last run
+  and the last whole copy; `GET /api/backup/{id}/download` → the archive from
+  its destination, 409 while the run runs; `GET /api/backup/download` → a
+  fresh archive streamed in the same request. A wrong secret is the same 404
+  as any secret that never existed.
+
+### Security
+
+- **Turning the trigger on stores the person's data key for that job**, sealed
+  under `server.key` and bound to the job. That is what lets the job read
+  without anyone signed in, and the card says so: a stolen volume together
+  with `server.key` reads what the job reads. An unencrypted job with a
+  trigger is warned about twice. Every use of the secret is journaled;
+  turning the trigger off deletes the secret's hash and the envelope.
+
 ## v0.0.103 — 2026-09-18
 
 Backup jobs: an archive of chosen collections, written, read back and kept
