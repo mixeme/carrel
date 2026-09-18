@@ -101,6 +101,17 @@ func folderTrace(addr string, n int, took time.Duration, err error) view.Notice 
 // never its files.
 func (s *Server) postFolder(w http.ResponseWriter, r *http.Request, sess *session.Session, key [32]byte, f feedForm, password string) {
 	page := s.connectionsPage(sess, connectionForm{}, nil)
+	// A Nextcloud or ownCloud share link is a page for people; its WebDAV is
+	// public.php/webdav with the token as the login and the link's password,
+	// if it has one, as the password.
+	if share, token, ok := publish.ShareLink(f.URL); ok && f.Login == "" {
+		f.URL, f.Login = share, token
+		if f.Name == "" {
+			if u, err := url.Parse(share); err == nil {
+				f.Name = "Shared folder · " + u.Host
+			}
+		}
+	}
 	addr, err := publish.FolderURL(f.URL)
 	if err != nil {
 		f.URLErr = "Give the address of a WebDAV folder: https://."

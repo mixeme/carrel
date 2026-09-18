@@ -87,6 +87,32 @@ func FolderURL(raw string) (string, error) {
 	return u.String(), nil
 }
 
+// nextcloudShare is the path of a Nextcloud or ownCloud share link:
+// /s/{token}, or /index.php/s/{token}, under wherever the server lives.
+var nextcloudShare = regexp.MustCompile(`^(.*?)/(?:index\.php/)?s/([A-Za-z0-9]{8,64})/?$`)
+
+// ShareLink turns the link a Nextcloud or ownCloud user sends — a page for
+// people, not WebDAV — into the public WebDAV of that share: the address,
+// and the token as its login; a password of the link goes with it as the
+// password. ok is false for any other address.
+func ShareLink(raw string) (addr, login string, ok bool) {
+	u, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil || u.Host == "" {
+		return "", "", false
+	}
+	m := nextcloudShare.FindStringSubmatch(u.Path)
+	if m == nil {
+		return "", "", false
+	}
+	u.Path, u.RawQuery, u.Fragment = strings.TrimSuffix(m[1], "/")+"/public.php/webdav/", "", ""
+	switch strings.ToLower(u.Scheme) {
+	case "http", "https":
+	default:
+		u.Scheme = "https"
+	}
+	return u.String(), m[2], true
+}
+
 // Fetch reads a feed whole, with Basic credentials when login is set, up to
 // max bytes.
 func Fetch(ctx context.Context, client *http.Client, raw, login, password string, max int64) (Feed, error) {

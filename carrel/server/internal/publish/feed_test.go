@@ -65,3 +65,23 @@ func TestFolderURL(t *testing.T) {
 		}
 	}
 }
+
+// A Nextcloud or ownCloud share link is a page for people; its WebDAV is
+// public.php/webdav with the token as the login.
+func TestShareLink(t *testing.T) {
+	for raw, want := range map[string][2]string{
+		"https://cloud.example/s/AbCdEf123456":                 {"https://cloud.example/public.php/webdav/", "AbCdEf123456"},
+		"https://cloud.example/index.php/s/AbCdEf123456/":      {"https://cloud.example/public.php/webdav/", "AbCdEf123456"},
+		"https://example.org/nextcloud/index.php/s/Zz9Zz9Zz9Z": {"https://example.org/nextcloud/public.php/webdav/", "Zz9Zz9Zz9Z"},
+	} {
+		addr, login, ok := ShareLink(raw)
+		if !ok || addr != want[0] || login != want[1] {
+			t.Errorf("%s → %q %q %v", raw, addr, login, ok)
+		}
+	}
+	for _, raw := range []string{"https://cloud.example/remote.php/dav/files/ann/", "https://carrel.example/p/" + strings.Repeat("a", 43), "https://x.example/s/ab"} {
+		if _, _, ok := ShareLink(raw); ok {
+			t.Errorf("%s taken for a share link", raw)
+		}
+	}
+}

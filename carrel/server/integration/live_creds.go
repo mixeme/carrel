@@ -205,6 +205,21 @@ func credEnv(text string) map[string]string {
 	set("CARREL_SOGO_CARD_URL", sogo.get("carddav"))
 	set("CARREL_SOGO_USER", sogo.get("e-mail/login", "login"))
 	set("CARREL_SOGO_PASS", sogo.get("password"))
+	// The same account is the mailbox letters are delivered to (S-26): its
+	// server takes IMAP as well as SMTP.
+	set("CARREL_IMAP_HOST", sogo.get("smtp/imap server"))
+	set("CARREL_IMAP_USER", sogo.get("e-mail/login", "login"))
+	set("CARREL_IMAP_PASS", sogo.get("password"))
+
+	// The SelfPost relay sends Carrel's letters in the live check of S-26.
+	relay := find("релей", "")
+	set("CARREL_SMTP_HOST", relay.get("host"))
+	set("CARREL_SMTP_PORT", relay.get("port"))
+	set("CARREL_SMTP_USER", relay.get("login"))
+	set("CARREL_SMTP_PASS", relay.get("password"))
+	// The address the relay lets this login send from ("not owned by user"
+	// otherwise): the section names it as From.
+	set("CARREL_SMTP_FROM", relay.get("from"))
 
 	return out
 }

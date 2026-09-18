@@ -5,6 +5,22 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.116 — 2026-09-19
+
+A Nextcloud or ownCloud share link can be subscribed to.
+
+### For consumers
+
+- **Subscribe to a folder** takes the link a Nextcloud or ownCloud user
+  sends, `https://host/s/…`. Carrel reads it as that share's WebDAV. If the
+  link has a password, it goes in the link's password field. The folder is
+  named "Shared folder · host" unless you name it.
+
+### Fixed
+
+- Subscribing to a Nextcloud share link used to fail: the link is a page
+  for people, not WebDAV.
+
 ## v0.0.115 — 2026-09-19
 
 Test beside the connection form, and the administrator's DAV validator, show
