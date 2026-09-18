@@ -69,9 +69,9 @@ func (f *fixture) idOf(t *testing.T, login string) string {
 
 func (f *fixture) openRegistration(t *testing.T) {
 	t.Helper()
-	f.cfg.MailEnabled = true
 	err := f.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		st.Settings.SelfRegEnabled = true
+		st.Settings.SMTP = store.SMTPSettings{Host: "127.0.0.1", Port: 25, From: "noreply@carrel.example"}
 		return nil, nil
 	})
 	if err != nil {

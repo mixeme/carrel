@@ -138,6 +138,12 @@ type Users interface {
 	AdminResetPassword(ctx context.Context, actorID, targetID string) (token string, mailed, escrowAsk, handLink bool, err error)
 	SetSelfRegEnabled(actorID string, enabled bool) error
 
+	// S-26: the relay and the letters' bookkeeping.
+	SMTP() store.SMTPSettings
+	SetSMTP(actorID string, in store.SMTPSettings) error
+	MarkInviteMailed(secret string, sent bool) error
+	ConfirmedAddress(loginOrEmail string) string
+
 	EnableEscrow(ctx context.Context, actorID, master, master2 string) error
 	SetEscrowCoverNew(actorID string, cover bool) error
 	ChangeEscrowMaster(ctx context.Context, actorID, current, newPW, newPW2 string) error

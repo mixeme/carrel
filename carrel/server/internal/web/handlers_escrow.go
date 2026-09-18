@@ -146,14 +146,14 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			flash.recoverErr = string(formError(err))
 		} else {
-			mailed := s.sendEscrowRecoveryMail(ctx, login, temp)
+			mailed := s.sendEscrowRecoveryMail(r, login, sess.Login())
 			flash.result = &view.EscrowRecoveryResult{
 				Login:    text(login),
 				Password: text(temp),
 				Copy: view.Action{
 					ID: "admin.escrow.copy", Label: "Copy", Method: "GET", Enabled: true,
 				},
-				Mailed: escrowRecoveryMailedStatus(mailed),
+				Mailed: s.escrowRecoveryMailedStatus(login, mailed),
 			}
 			page := s.buildAdminEscrowPage(sess, flash)
 			s.writePage(w, r, http.StatusOK, page)
@@ -170,11 +170,16 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/admin/escrow")
 }
 
-func escrowRecoveryMailedStatus(sent bool) view.Text {
-	if sent {
+func (s *Server) escrowRecoveryMailedStatus(login string, sent bool) view.Text {
+	switch {
+	case sent:
 		return text("sent")
+	case !s.mailConfigured():
+		return text("SMTP not configured")
+	case s.users.ConfirmedAddress(login) == "":
+		return text("no confirmed address")
 	}
-	return text("SMTP not configured")
+	return text("failed")
 }
 
 func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFlash) view.AdminEscrowPage {

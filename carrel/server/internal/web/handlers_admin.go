@@ -68,8 +68,11 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 		if u := snap.UserByID(target); u != nil {
 			login = u.Login
 		}
-		if token != "" && !s.sendForgotWipeMail(ctx, login, token) {
-			flash.errText = "A recovery link was prepared but outbound mail is not available on this instance yet."
+		if token != "" && !s.sendForgotWipeMail(r, login, token) {
+			// The letter did not go: the administrator hands the link over,
+			// as for an account without an address.
+			flash.wipeLink = s.route("/forgot/" + token)
+			flash.errText = "The letter with the recovery link could not be sent. Hand the link over in person."
 		}
 	case "selfreg":
 		enabled := r.FormValue("selfReg") == "on" || r.FormValue("selfReg") == "true"
@@ -213,7 +216,6 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	ctx := r.Context()
 	actorID := sess.AccountID()
 	action := r.FormValue("action")
 	var flash adminInvitesFlash
@@ -225,7 +227,7 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 		var secret string
 		secret, err = s.users.CreateInvite(actorID, login, email)
 		if err == nil && secret != "" {
-			_ = s.sendInviteMail(ctx, login, email, secret)
+			_ = s.sendInviteMail(r, login, email, secret)
 		}
 	case "revoke":
 		err = s.users.RevokeInvite(actorID, r.FormValue("invite"))
@@ -236,7 +238,7 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 			var secret string
 			secret, err = s.users.CreateInvite(actorID, r.FormValue("login"), r.FormValue("email"))
 			if err == nil && secret != "" {
-				_ = s.sendInviteMail(ctx, r.FormValue("login"), r.FormValue("email"), secret)
+				_ = s.sendInviteMail(r, r.FormValue("login"), r.FormValue("email"), secret)
 			}
 		} else {
 			flash.errText = "Unknown action."
@@ -277,7 +279,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvites
 		row := view.InviteRow{
 			Login:   text(inv.Login),
 			Address: text(inv.Email),
-			Sent:    inviteSentStatus(s.cfg.MailEnabled),
+			Sent:    inviteSentStatus(inv, s.mailConfigured()),
 			Expires: tf.formatWhen(inv.ExpiresAt, false, now),
 			Actions: []view.Action{
 				{ID: "admin.invite.extend", Label: "Extend",
@@ -303,36 +305,21 @@ func inviteLive(inv *store.Invite, now time.Time) bool {
 	return !inv.Revoked && !inv.Used && now.Before(inv.ExpiresAt)
 }
 
-func inviteSentStatus(mailEnabled bool) view.Text {
-	if !mailEnabled {
+// inviteSentStatus is how the invitation's letter went (C-6: "sent",
+// "failed", "SMTP not configured"); nothing for an invitation without an
+// address — its link is handed over.
+func inviteSentStatus(inv *store.Invite, configured bool) view.Text {
+	switch {
+	case inv.Email == "":
+		return ""
+	case inv.Mailed == "sent":
+		return text("sent")
+	case inv.Mailed == "failed":
+		return text("failed")
+	case !configured:
 		return text("SMTP not configured")
 	}
-	return text("SMTP not configured")
-}
-
-func (s *Server) getAdminSettings(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireAdmin(w, r)
-	if !ok {
-		return
-	}
-	page := view.AdminSettingsPage{Shell: s.buildShell(sess, "Instance settings")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postAdminSettings(w http.ResponseWriter, r *http.Request) {
-	s.getAdminSettings(w, r)
-}
-
-func (s *Server) postAdminMailTest(w http.ResponseWriter, r *http.Request) {
-	if _, ok := s.requireAdmin(w, r); !ok {
-		return
-	}
-	result := view.MailTestResult{OK: false, Reply: text("SMTP is not configured.")}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetMain, result, nil)
-		return
-	}
-	s.notFound(w, r)
+	return ""
 }
 
 func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {

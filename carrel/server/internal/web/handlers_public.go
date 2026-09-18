@@ -244,7 +244,7 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
-	mailSent := token != "" && s.sendConfirmMail(r.Context(), r.FormValue("login"), r.FormValue("email"), token)
+	mailSent := token != "" && s.sendConfirmMail(r, r.FormValue("login"), r.FormValue("email"), token)
 	page := view.RegisterPage{
 		Plain: view.Plain{Title: text("Create account")},
 	}
@@ -252,7 +252,7 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 		page.Plain.Lede = text("Check your email to confirm your address.")
 		page.Sent = true
 	} else {
-		page.Plain.Lede = text("Your account was created, but the confirmation email could not be sent yet. Outbound mail is not available on this instance. Ask an administrator.")
+		page.Plain.Lede = text("Your account was created, but the confirmation email could not be sent. Ask an administrator.")
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
@@ -367,7 +367,7 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 		slog.Error("forgot: issuing wipe token failed", "error", err)
 		issued, asked = false, false
 	}
-	mailSent := issued && token != "" && s.sendForgotWipeMail(r.Context(), r.FormValue("login"), token)
+	mailSent := issued && token != "" && s.sendForgotWipeMail(r, r.FormValue("login"), token)
 	page := view.ForgotPage{
 		Plain:   view.Plain{Title: text("Forgotten password"), Lede: text("Carrel cannot recover your encrypted data.")},
 		Form:    s.anonPlainForm(w, r, "/forgot", "POST", view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText}),
@@ -376,7 +376,7 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 		HasMail: hasMail,
 	}
 	if issued && !mailSent && hasMail && !asked {
-		page.Plain.Lede = text("A recovery link was prepared but could not be emailed: outbound mail is not available on this instance yet. Ask an administrator.")
+		page.Plain.Lede = text("A recovery link was prepared but could not be emailed. Ask an administrator.")
 	}
 	if !hasMail && !issued && !asked {
 		page.HasMail = false

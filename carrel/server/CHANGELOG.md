@@ -5,6 +5,41 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.108 — 2026-09-18
+
+The instance sends mail: invitations, address confirmations, reset links and
+recovery notices go by letter through a relay the administrator sets.
+
+### For operators
+
+- **Admin → Settings → Mail** takes the relay: host, port, STARTTLS / TLS /
+  none, login, password and the instance's From address. The password is
+  never shown back; leave the field empty to keep it. "Send test" shows the
+  relay's whole answer. An empty host turns mail off.
+- STARTTLS, when chosen, is required: a relay that does not offer it is an
+  error, never a fall back to the clear.
+- Links in letters start with `CARREL_PUBLIC_URL`; set it when Carrel sits
+  behind a proxy, or links take the address each request came to.
+- Letters from people stay off (`CARREL_MAIL_ENABLED`); the page shows that
+  and the limits, read-only.
+
+### For consumers
+
+- **Invitations** with an address are mailed; the list says "sent",
+  "failed" or "SMTP not configured". The link is shown either way.
+- **Forgotten password** mails the reset link to the confirmed address, and
+  nowhere else. An administrator's reset does too; if the letter fails, the
+  administrator gets the link to hand over.
+- **Key-escrow recovery** mails the person a notice, always. The temporary
+  password is not in it: it goes hand to hand.
+- Every letter goes from the instance's address, with no Reply-To.
+
+### Changed
+
+- Open registration now needs a configured relay (it used to need
+  `CARREL_MAIL_ENABLED`): without a confirmation letter nobody who registers
+  could sign in.
+
 ## v0.0.107 — 2026-09-18
 
 What a subscription is, and what a connection is, is written down, and the

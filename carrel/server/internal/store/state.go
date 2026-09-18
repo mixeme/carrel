@@ -101,6 +101,26 @@ type InstanceSettings struct {
 	EscrowMasterSalt    []byte    `json:"escrowMasterSalt,omitempty"`
 	EscrowMasterKDF     kdfRecord `json:"escrowMasterKdf,omitempty"`
 	EscrowCoverNewUsers bool      `json:"escrowCoverNewUsers,omitempty"`
+
+	// SMTP is the outgoing relay (S-26): an administrator's setting, not an
+	// environment variable. The password lives only here, inside state.enc.
+	SMTP SMTPSettings `json:"smtp,omitempty"`
+}
+
+// SMTPSettings is the relay and the instance's sender address.
+type SMTPSettings struct {
+	Host     string `json:"host,omitempty"`
+	Port     int    `json:"port,omitempty"`
+	Security string `json:"security,omitempty"` // mail.StartTLS, mail.TLS, mail.None
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	From     string `json:"from,omitempty"`
+	FromName string `json:"fromName,omitempty"`
+}
+
+// Configured reports whether letters can be sent: a relay and a sender.
+func (s SMTPSettings) Configured() bool {
+	return s.Host != "" && s.Port > 0 && s.From != ""
 }
 
 // Invite is a pending account invitation (S-10.2).
@@ -114,6 +134,9 @@ type Invite struct {
 	ExpiresAt  time.Time `json:"expiresAt"`
 	Revoked    bool      `json:"revoked,omitempty"` // withdrawn by an administrator or replaced by a resend
 	Used       bool      `json:"used,omitempty"`    // accepted: the invitee set a password
+	// Mailed is how the last letter went: "sent", "failed", or empty when
+	// none was tried (no address, or no relay).
+	Mailed string `json:"mailed,omitempty"`
 }
 
 // SecretToken covers email confirmation, forgot/console wipe links (S-10).

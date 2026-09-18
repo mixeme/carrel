@@ -55,7 +55,9 @@ func (s *Service) FirstRun() bool { return s.st.FirstRun() }
 
 func (s *Service) RegisterOpen() bool {
 	snap := s.st.Snapshot()
-	return snap.Settings.SelfRegEnabled && s.cfg.MailEnabled
+	// The confirmation letter needs a relay (S-26); without one nobody who
+	// registers could ever sign in.
+	return snap.Settings.SelfRegEnabled && snap.Settings.SMTP.Configured()
 }
 
 func (s *Service) LoginExists(login string) bool {
