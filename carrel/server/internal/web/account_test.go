@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -152,5 +153,95 @@ func TestFirstAddressDoesNotLockOut(t *testing.T) {
 	}
 	if _, _, _, ok := h.users.Authenticate(t.Context(), "bob", "bobpass123"); !ok {
 		t.Error("a pending address locked bob out")
+	}
+}
+
+// The account page lists the person's sessions — browser, address, when —
+// by a name that is not the cookie, and ends one or every other.
+func TestAccountSessions(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	loginAs := func(ua string) *http.Cookie {
+		req := h.anonPostForm("/login", "/login", url.Values{"login": {"alice"}, "password": {"password123"}})
+		req.Header.Set("User-Agent", ua)
+		rec := h.do(req)
+		for _, c := range rec.Result().Cookies() {
+			if c.Name == "carrel_sid" {
+				return c
+			}
+		}
+		t.Fatalf("no session: %d", rec.Code)
+		return nil
+	}
+	firefox := loginAs("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0")
+	loginAs("Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Mobile Safari/537.36")
+	loginAs("curl/8.5.0")
+	sess, _ := h.mgr.Get(firefox.Value)
+
+	page := decode[view.AccountPage](t, h.do(get("/app/settings/account", sess)))
+	var agents []string
+	var other string
+	for _, row := range page.Sessions {
+		agents = append(agents, string(row.Agent))
+		if strings.Contains(row.End.Href, firefox.Value) {
+			t.Fatal("a session is named by its cookie")
+		}
+		if row.Current && row.End.Enabled {
+			t.Error("the current session offers End")
+		}
+		if row.Agent == "Chrome · Android" {
+			other = row.End.Href
+		}
+	}
+	if len(page.Sessions) != 3 || !strings.Contains(strings.Join(agents, "|"), "Firefox · Windows") {
+		t.Fatalf("sessions = %v", agents)
+	}
+	if rec := h.do(postForm(other, sess, url.Values{})); rec.Code != 303 {
+		t.Fatalf("end: %d", rec.Code)
+	}
+	if n := h.mgr.LiveCount(sess.AccountID()); n != 2 {
+		t.Errorf("live after End = %d", n)
+	}
+	if rec := h.do(postForm(actionHref(t, page.Actions, "account.session.others"), sess, url.Values{})); rec.Code != 303 {
+		t.Fatalf("end others: %d", rec.Code)
+	}
+	if n := h.mgr.LiveCount(sess.AccountID()); n != 1 {
+		t.Errorf("live after End every other = %d", n)
+	}
+}
+
+// Owner's decision 19.09.2026: Delete account asks the password first (the
+// unlock sheet), then deletes; the last administrator stays.
+func TestAccountDeletesItself(t *testing.T) {
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	h.invite(adminID, "bob", "bobpass123")
+	bob := h.login("bob", "bobpass123")
+
+	page := decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
+	if len(page.Danger) != 1 || page.Danger[0].Method != "GET" || !strings.HasSuffix(page.Danger[0].Href, "/app/settings/unlock") {
+		t.Fatalf("danger before unlock = %+v", page.Danger)
+	}
+	if rec := h.do(postForm("/app/settings/account?op=delete", bob, url.Values{})); rec.Code != 200 {
+		t.Fatalf("delete without the password: %d", rec.Code)
+	}
+	if snap := h.st.Snapshot(); snap.UserByLogin("bob") == nil {
+		t.Fatal("deleted without the password")
+	}
+	h.do(fragment(postForm("/app/settings/unlock", bob, url.Values{"password": {"bobpass123"}}), "sheet"))
+	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
+	rec := h.do(postForm(actionHref(t, page.Danger, "account.delete"), bob, url.Values{}))
+	if rec.Code != 303 || rec.Header().Get("Location") != "/login" {
+		t.Fatalf("delete: %d %s", rec.Code, rec.Header().Get("Location"))
+	}
+	if snap := h.st.Snapshot(); snap.UserByLogin("bob") != nil {
+		t.Error("bob is still there")
+	}
+
+	alice := h.login("alice", "password123")
+	h.do(fragment(postForm("/app/settings/unlock", alice, url.Values{"password": {"password123"}}), "sheet"))
+	page = decode[view.AccountPage](t, h.do(postForm("/app/settings/account?op=delete", alice, url.Values{})))
+	if len(page.Notices) != 1 || !strings.Contains(string(page.Notices[0].Body), "last administrator") {
+		t.Errorf("notices = %+v", page.Notices)
 	}
 }

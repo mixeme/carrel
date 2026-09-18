@@ -124,6 +124,7 @@ func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
+	sess.SetClient(agentLabel(r.UserAgent()), s.clientIP(r))
 	s.setSessionCookie(w, r, sess.ID())
 	// A job that runs at sign-in when its last copy is old starts now: the
 	// session holds the data key it reads with (S-24.4).

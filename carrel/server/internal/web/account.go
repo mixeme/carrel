@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/mail"
 	"strings"
+	"time"
 
 	cmail "carrel.dev/carrel/server/internal/mail"
 	"carrel.dev/carrel/server/internal/session"
@@ -76,9 +77,27 @@ func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if s.postAccountSessions(w, r, sess) {
+		return
+	}
 	var flash accountFlash
 	id := sess.AccountID()
 	switch r.FormValue("op") {
+	case "delete":
+		// Only inside the unlock window: the password was asked a moment
+		// ago (S-10.7). The last administrator stays.
+		if sess.UnlockUntil(time.Now()) == nil {
+			flash.notice = &view.Notice{Role: view.NoticeAlert, Title: "Confirm your password first",
+				Body: "Deleting the account asks for your password: open Delete account again."}
+			break
+		}
+		if err := s.users.DeleteUser(id, id, sess.Login()); err != nil {
+			flash.notice = &view.Notice{Role: view.NoticeAlert, Title: "The account was not deleted", Body: formError(err)}
+			break
+		}
+		s.clearSessionCookie(w, r)
+		s.redirect(w, r, "/login")
+		return
 	case "confirm":
 		to := s.users.EmailToConfirm(id)
 		if to == "" {
@@ -188,5 +207,11 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 		{ID: "account.password", Label: "Change password", Href: s.route("/app/password"), Method: "GET", Enabled: true},
 		{ID: "account.escrow", Label: "Key escrow", Href: s.route("/app/settings/escrow"), Method: "GET", Enabled: true},
 	}
+	page.Sessions = s.sessionRows(sess)
+	if len(page.Sessions) > 1 {
+		page.Actions = append(page.Actions, view.Action{ID: "account.session.others", Label: "End every other session", Method: "POST", Enabled: true,
+			Href: s.postQuery("/app/settings/account", map[string][]string{"op": {"end-others"}})})
+	}
+	page.Danger = []view.Action{s.deleteAction(sess)}
 	return page
 }

@@ -5,6 +5,19 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.113 — 2026-09-19
+
+The account page lists your sessions and can delete the account.
+
+### For consumers
+
+- **Sessions**: every live session with its browser, address, start and last
+  activity; End one, or End every other session.
+- **Delete account** asks for your password first, on the same sheet that
+  reveals saved passwords; then it deletes the account and its saved
+  connections. Data on the DAV servers stays. The last administrator cannot
+  delete their own account.
+
 ## v0.0.112 — 2026-09-19
 
 Published links can be copied and mailed at any time; a calendar goes into a

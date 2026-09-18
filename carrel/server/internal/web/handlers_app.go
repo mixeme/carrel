@@ -214,7 +214,7 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.UnlockSheet {
 	sheet := view.UnlockSheet{
-		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, or change key escrow."),
+		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, change key escrow, or delete your account."),
 		Warning: text("Everything revealed in this window is written to the audit log."),
 		Form: s.plainForm("/app/settings/unlock", "POST",
 			csrfField(sess),

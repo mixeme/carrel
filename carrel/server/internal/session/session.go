@@ -41,6 +41,8 @@ type Session struct {
 	transfers  []Transfer
 	unlockAt   time.Time
 	readings   map[string]Reading // by connection and collection path (S-22)
+	agent      string             // the browser, as the account page names it
+	address    string             // the client address at sign-in
 
 	cache *Cache
 	mgr   *Manager
