@@ -2103,11 +2103,11 @@ type LossReport struct { // сервер принял запись, но что-
 | `CARREL_DUPLICATES_WEIGHT_BIRTHDAY` | `10` | Очков за тот же день рождения | свой |
 | `CARREL_DUPLICATES_WEIGHT_TITLE_DATE` | `70` | Очков за тот же заголовок и дату у события, задачи, заметки | свой |
 | `CARREL_UNLOCK_TTL` | `300` | Секунд, пока открыта выдача учётных данных | — |
-| `CARREL_MAIL_ENABLED` | `false` | Отправка почтой людьми; выключена по умолчанию | админ |
-| `CARREL_MAIL_MAX_ATTACH_BYTES` | `10485760` | Потолок одного вложения | админ |
-| `CARREL_MAIL_MAX_MESSAGE_BYTES` | `26214400` | Потолок письма целиком | админ |
-| `CARREL_MAIL_MAX_RECIPIENTS` | `20` | Получателей в письме | админ |
-| `CARREL_MAIL_MAX_PER_DAY` | `50` | Писем на человека в сутки | админ |
+| `CARREL_MAIL_ENABLED` | `false` | Отправка почтой людьми, пока администратор не решил на `/admin/settings`; выключена по умолчанию | админ |
+| `CARREL_MAIL_MAX_ATTACH_BYTES` | `10485760` | Потолок одного вложения, пока не задан на `/admin/settings` (там — в МБ) | админ |
+| `CARREL_MAIL_MAX_MESSAGE_BYTES` | `26214400` | Потолок письма целиком, пока не задан на `/admin/settings` | админ |
+| `CARREL_MAIL_MAX_RECIPIENTS` | `20` | Получателей в письме, пока не задано на `/admin/settings` | админ |
+| `CARREL_MAIL_MAX_PER_DAY` | `50` | Писем на человека в сутки, пока не задано на `/admin/settings` | админ |
 
 **Потолка на размер файла Carrel не ставит.** Поток идёт на чужой WebDAV и с
 него, и размер решает тот сервер; обрезать может обратный прокси, и это видно на

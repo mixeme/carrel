@@ -42,7 +42,7 @@ func (s *Server) senderOf(u *store.User) letterSender {
 	}
 	via := relay.FromName
 	if via == "" {
-		via = "Carrel"
+		via = s.users.Settings().InstanceName()
 	}
 	ls.From = ls.Name + " (via " + via + ") <" + relay.From + ">"
 	return ls
@@ -175,7 +175,7 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 			}(),
 		})
 	}
-	if s.cfg.MailEnabled && s.mailConfigured() {
+	if s.mailOn() {
 		ls := s.senderOf(u)
 		page.Mail = view.Form{Sets: []view.FieldSet{{Legend: "Letters you send", Rows: []view.FormRow{
 			{Name: "from", Label: "Sent as", Kind: view.InputText, Value: text(ls.From), ReadOnly: true,

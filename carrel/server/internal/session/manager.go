@@ -2,6 +2,7 @@ package session
 
 import (
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -13,6 +14,36 @@ type Manager struct {
 	cfg  *conf.Config
 	mu   sync.Mutex
 	byID map[string]*Session
+	// idle and absolute are the lifetimes of sessions, set by the
+	// administrator. Idle applies to live sessions at once; absolute to the
+	// ones started after it changed.
+	idle, absolute atomic.Int64
+}
+
+// SetLifetimes changes how long sessions live; zero keeps the default.
+func (m *Manager) SetLifetimes(idle, absolute time.Duration) {
+	if idle <= 0 {
+		idle = conf.SessionIdleTimeout
+	}
+	if absolute <= 0 {
+		absolute = conf.SessionAbsoluteTimeout
+	}
+	m.idle.Store(int64(idle))
+	m.absolute.Store(int64(absolute))
+}
+
+func (m *Manager) idleTimeout() time.Duration {
+	if m == nil || m.idle.Load() == 0 {
+		return conf.SessionIdleTimeout
+	}
+	return time.Duration(m.idle.Load())
+}
+
+func (m *Manager) absoluteTimeout() time.Duration {
+	if m == nil || m.absolute.Load() == 0 {
+		return conf.SessionAbsoluteTimeout
+	}
+	return time.Duration(m.absolute.Load())
 }
 
 // NewManager creates a session manager.

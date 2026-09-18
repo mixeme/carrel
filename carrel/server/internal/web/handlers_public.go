@@ -72,7 +72,7 @@ func (s *Server) getLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	page := view.LoginPage{
-		Plain: view.Plain{Title: text("Sign in"), Lede: text("One desk. Every server.")},
+		Plain: view.Plain{Title: text(s.signInTitle()), Lede: text("One desk. Every server.")},
 		Form: s.anonPlainForm(w, r, "/login", "POST",
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
@@ -103,7 +103,7 @@ func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		constantTimeDelay(start, 300*time.Millisecond)
 		page := view.LoginPage{
-			Plain: view.Plain{Title: text("Sign in"), Lede: text("One desk. Every server.")},
+			Plain: view.Plain{Title: text(s.signInTitle()), Lede: text("One desk. Every server.")},
 			Form: s.anonPlainForm(w, r, "/login", "POST",
 				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: text("Login or password is wrong.")},

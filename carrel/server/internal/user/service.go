@@ -34,12 +34,14 @@ type Service struct {
 
 // New creates a user service.
 func New(st *store.Store, mgr *session.Manager, cfg *conf.Config) *Service {
-	return &Service{
+	s := &Service{
 		st:  st,
 		mgr: mgr,
 		cfg: cfg,
 		now: time.Now,
 	}
+	s.applyLifetimes()
+	return s
 }
 
 var (

@@ -116,7 +116,7 @@ func (s *Session) expiredAt(now time.Time) bool {
 	if !now.Before(s.absoluteAt) {
 		return true
 	}
-	return !now.Before(s.lastSeen.Add(conf.SessionIdleTimeout))
+	return !now.Before(s.lastSeen.Add(s.mgr.idleTimeout()))
 }
 
 // Expired reports whether idle or absolute lifetime has ended (S-4).
@@ -126,7 +126,7 @@ func (s *Session) Expired(now time.Time) bool {
 	if !now.Before(s.absoluteAt) {
 		return true
 	}
-	return !now.Before(s.lastSeen.Add(conf.SessionIdleTimeout))
+	return !now.Before(s.lastSeen.Add(s.mgr.idleTimeout()))
 }
 
 // UnlockUntil returns the end of the S-10.7 secret-release window, or nil
@@ -346,7 +346,7 @@ func newSession(mgr *Manager, accountID, login string, dataKey [crypt.KeyLen]byt
 		csrf:       csrf,
 		created:    now,
 		lastSeen:   now,
-		absoluteAt: now.Add(conf.SessionAbsoluteTimeout),
+		absoluteAt: now.Add(mgr.absoluteTimeout()),
 		cache:      newCache(mgr.cfg, mgr),
 		losses:     LossRegistry{byServer: make(map[string]map[string]struct{})},
 		mgr:        mgr,

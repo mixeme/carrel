@@ -133,7 +133,7 @@ func (s *Service) CreateInvite(actorID, login, email string) (secret string, err
 		}
 		st.Invites = append(st.Invites, store.Invite{
 			ID: inviteID, Login: login, Email: email,
-			SecretHash: hash, Secret: raw, CreatedAt: now, ExpiresAt: now.Add(conf.InviteTTL),
+			SecretHash: hash, Secret: raw, CreatedAt: now, ExpiresAt: now.Add(inviteTTL(st)),
 		})
 		if st.UserByLogin(login) == nil {
 			userID, err := NewUserID()

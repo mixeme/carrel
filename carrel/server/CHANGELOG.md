@@ -5,6 +5,26 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.111 — 2026-09-19
+
+The administrator sets the instance's name, the lifetimes of sessions and
+invitations, and people's mail on Admin → Settings.
+
+### For operators
+
+- **Instance name**: on the sign-in screen and in the letters the instance
+  sends. Empty means "Carrel".
+- **Lifetimes**: idle timeout (1–168 h, applies to open sessions at once),
+  session life (1–365 days, for sessions started afterwards), invitation
+  lifetime (1–720 h).
+- **Letters from users** and their four ceilings are set on the same page.
+  `CARREL_MAIL_*` are the defaults until the administrator sets a value.
+
+### Changed
+
+- Default session life is 30 days (was 7) and default invitation lifetime is
+  72 hours (was 7 days), as on the settings screen design.
+
 ## v0.0.110 — 2026-09-19
 
 People send letters: with records and files attached, or with links to

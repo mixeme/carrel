@@ -21,6 +21,52 @@ type settingsFlash struct {
 	errText  string
 	testTo   string
 	test     *view.MailTestResult
+	set      *store.InstanceSettings // the Global or letters form as typed, when refused
+}
+
+// postInstanceSettings saves the Global form or the letters form; the
+// values of the other stay as they are.
+func (s *Server) postInstanceSettings(w http.ResponseWriter, r *http.Request, sess *session.Session, op string) {
+	cur := s.users.Settings()
+	in := user.InstanceUpdate{
+		Name: cur.Name, IdleHours: cur.IdleHours, SessionDays: cur.SessionDays, InviteHours: cur.InviteHours,
+		PeopleMail: s.mailPolicy().People, MailMaxAttachMB: cur.MailMaxAttachMB, MailMaxMessageMB: cur.MailMaxMessageMB,
+		MailMaxRecipients: cur.MailMaxRecipients, MailMaxPerDay: cur.MailMaxPerDay,
+	}
+	atoi := func(name string) int {
+		n, err := strconv.Atoi(strings.TrimSpace(r.FormValue(name)))
+		if err != nil {
+			return -1 // out of every range: the field says so
+		}
+		return n
+	}
+	if op == "instance" {
+		in.Name = r.FormValue("name")
+		if strings.TrimSpace(in.Name) == "Carrel" {
+			in.Name = ""
+		}
+		in.InviteHours, in.IdleHours, in.SessionDays = atoi("inviteTTL"), atoi("idle"), atoi("session")
+	} else {
+		v := r.FormValue("people")
+		in.PeopleMail = v == "on" || v == "true"
+		in.MailMaxAttachMB, in.MailMaxMessageMB = atoi("attach"), atoi("letter")
+		in.MailMaxRecipients, in.MailMaxPerDay = atoi("recipients"), atoi("perDay")
+	}
+	if err := s.users.SetInstance(sess.AccountID(), in); err != nil {
+		typed := cur
+		typed.Name, typed.IdleHours, typed.SessionDays, typed.InviteHours = in.Name, in.IdleHours, in.SessionDays, in.InviteHours
+		typed.PeopleMail = &in.PeopleMail
+		typed.MailMaxAttachMB, typed.MailMaxMessageMB = in.MailMaxAttachMB, in.MailMaxMessageMB
+		typed.MailMaxRecipients, typed.MailMaxPerDay = in.MailMaxRecipients, in.MailMaxPerDay
+		flash := settingsFlash{set: &typed, errField: "name", errText: string(formError(err))}
+		var bad *user.ErrSetting
+		if errors.As(err, &bad) {
+			flash.errField, flash.errText = bad.Field, bad.Msg
+		}
+		s.writePage(w, r, http.StatusOK, s.adminSettingsPage(sess, flash))
+		return
+	}
+	s.redirect(w, r, "/admin/settings")
 }
 
 func (s *Server) getAdminSettings(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +82,10 @@ func (s *Server) getAdminSettings(w http.ResponseWriter, r *http.Request) {
 func (s *Server) postAdminSettings(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {
+		return
+	}
+	if op := r.FormValue("op"); op == "instance" || op == "limits" {
+		s.postInstanceSettings(w, r, sess, op)
 		return
 	}
 	port, _ := strconv.Atoi(strings.TrimSpace(r.FormValue("port")))
@@ -101,13 +151,34 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 	if origin == "" {
 		origin = "the address each request comes to"
 	}
-	page.Instance = view.Form{Sets: []view.FieldSet{{Legend: "Global", Rows: []view.FormRow{
-		{Name: "publicURL", Label: "Public address", Kind: view.InputText, Value: text(origin), ReadOnly: true,
-			Hint: "Links in letters start with it. Set with CARREL_PUBLIC_URL."},
-		{Name: "inviteTTL", Label: "Invite lifetime, h", Kind: view.InputNumber, Value: num(int(conf.InviteTTL.Hours())), ReadOnly: true},
-		{Name: "idle", Label: "Idle timeout, h", Kind: view.InputNumber, Value: num(int(conf.SessionIdleTimeout.Hours())), ReadOnly: true},
-		{Name: "session", Label: "Session life, d", Kind: view.InputNumber, Value: num(int(conf.SessionAbsoluteTimeout.Hours() / 24)), ReadOnly: true},
-	}}}}
+	set := s.users.Settings()
+	if flash.set != nil {
+		set = *flash.set
+	}
+	orDefault := func(v, def int) view.Text {
+		if v != 0 {
+			return num(v)
+		}
+		return num(def)
+	}
+	page.Instance = view.Form{
+		Action: s.route("/admin/settings"), Method: "POST",
+		Sets: []view.FieldSet{{Legend: "Global", Rows: []view.FormRow{
+			csrfField(sess),
+			{Name: "op", Kind: view.InputText, Value: "instance"},
+			{Name: "inviteTTL", Label: "Invite lifetime, h", Kind: view.InputNumber, Value: orDefault(set.InviteHours, int(conf.InviteTTL.Hours())),
+				Hint: "From 1 to 720. A new invitation, and one extended, live this long."},
+			{Name: "idle", Label: "Idle timeout, h", Kind: view.InputNumber, Value: orDefault(set.IdleHours, int(conf.SessionIdleTimeout.Hours())),
+				Hint: "From 1 to 168. Applies to sessions already open."},
+			{Name: "session", Label: "Session life, d", Kind: view.InputNumber, Value: orDefault(set.SessionDays, int(conf.SessionAbsoluteTimeout.Hours()/24)),
+				Hint: "From 1 to 365. Applies to sessions started from now on."},
+			{Name: "name", Label: "Instance name", Kind: view.InputText, Value: text(set.InstanceName()),
+				Hint: "On the sign-in screen and in the letters this instance sends."},
+			{Name: "publicURL", Label: "Public address", Kind: view.InputText, Value: text(origin), ReadOnly: true,
+				Hint: "Links in letters start with it. Set with CARREL_PUBLIC_URL."},
+		}}},
+		Actions: []view.Action{{ID: "admin.settings.instance", Label: "Save", Method: "POST", Enabled: true}},
+	}
 
 	port := ""
 	if shown.Port > 0 {
@@ -156,34 +227,50 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		}
 	}
 
-	people := "off"
-	if s.cfg.MailEnabled {
-		people = "on"
-	}
 	page.Mail = view.Form{
 		Action: s.route("/admin/settings/mail-test"), Method: "POST",
-		Sets: []view.FieldSet{{Legend: "Letters", Rows: []view.FormRow{
+		Sets: []view.FieldSet{{Legend: "Test", Rows: []view.FormRow{
 			csrfField(sess),
-			{Name: "people", Label: "Letters from users", Kind: view.InputText, Value: text(people), ReadOnly: true,
-				Hint: "When on, everyone signed in may send mail through this relay, from this domain, with their name and — once confirmed — their address to reply to. Set with CARREL_MAIL_ENABLED; off by default."},
 			{Name: "to", Label: "Send test message to", Kind: view.InputEmail, Value: text(flash.testTo)},
 		}}},
 		Actions: []view.Action{{ID: "admin.settings.mailtest", Label: "Send test", Method: "POST", Enabled: cur.Configured()}},
 	}
 
-	mb := func(n int64) view.Text {
-		return text(strconv.FormatFloat(float64(n)/(1<<20), 'f', -1, 64))
+	people := s.mailPolicy().People
+	if flash.set != nil && flash.set.PeopleMail != nil {
+		people = *flash.set.PeopleMail
 	}
-	page.Limits = view.Form{Sets: []view.FieldSet{{Legend: "Limits of a person's letters", Rows: []view.FormRow{
-		{Name: "attach", Label: "Attachment, MB", Kind: view.InputNumber, Value: mb(s.cfg.MailMaxAttachBytes), ReadOnly: true,
-			Hint: "A larger file goes as a published link, shown as such before sending. CARREL_MAIL_MAX_ATTACH_BYTES."},
-		{Name: "letter", Label: "Letter, MB", Kind: view.InputNumber, Value: mb(s.cfg.MailMaxMessageBytes), ReadOnly: true,
-			Hint: "CARREL_MAIL_MAX_MESSAGE_BYTES."},
-		{Name: "recipients", Label: "Recipients", Kind: view.InputNumber, Value: num(s.cfg.MailMaxRecipients), ReadOnly: true,
-			Hint: "CARREL_MAIL_MAX_RECIPIENTS."},
-		{Name: "perDay", Label: "Letters a day", Kind: view.InputNumber, Value: num(s.cfg.MailMaxPerDay), ReadOnly: true,
-			Hint: "Per person, per UTC day. CARREL_MAIL_MAX_PER_DAY."},
-	}}}}
+	mb := func(v int, bytes int64) view.Text {
+		if v != 0 {
+			return num(v)
+		}
+		return num(int(bytes >> 20))
+	}
+	page.Limits = view.Form{
+		Action: s.route("/admin/settings"), Method: "POST",
+		Sets: []view.FieldSet{{Legend: "Letters from users", Rows: []view.FormRow{
+			csrfField(sess),
+			{Name: "op", Kind: view.InputText, Value: "limits"},
+			{Name: "people", Label: "Let users send letters and links from Carrel", Kind: view.InputCheck, Value: text(boolStr(people)),
+				Hint: "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form."},
+			{Name: "attach", Label: "Attachment, MB", Kind: view.InputNumber, Value: mb(set.MailMaxAttachMB, s.cfg.MailMaxAttachBytes),
+				Hint: "From 1 to 100. A larger file goes as a published link, shown as such before sending."},
+			{Name: "letter", Label: "Letter, MB", Kind: view.InputNumber, Value: mb(set.MailMaxMessageMB, s.cfg.MailMaxMessageBytes),
+				Hint: "From 1 to 100, and not less than an attachment."},
+			{Name: "recipients", Label: "Recipients", Kind: view.InputNumber, Value: orDefault(set.MailMaxRecipients, s.cfg.MailMaxRecipients),
+				Hint: "From 1 to 100."},
+			{Name: "perDay", Label: "Letters a day", Kind: view.InputNumber, Value: orDefault(set.MailMaxPerDay, s.cfg.MailMaxPerDay),
+				Hint: "From 1 to 1000, per person, per UTC day."},
+		}}},
+		Actions: []view.Action{{ID: "admin.settings.limits", Label: "Save", Method: "POST", Enabled: true}},
+	}
+	for _, f := range []*view.Form{&page.Instance, &page.Limits} {
+		for i := range f.Sets[0].Rows {
+			if flash.errText != "" && f.Sets[0].Rows[i].Name == flash.errField {
+				f.Sets[0].Rows[i].Error = text(flash.errText)
+			}
+		}
+	}
 	return page
 }
 
@@ -201,4 +288,13 @@ func senderOptions(st store.SMTPSettings) []view.Option {
 		{Value: cmail.SenderService, Label: text(service), Selected: st.Sender != cmail.SenderLogin},
 		{Value: cmail.SenderLogin, Label: text(login), Selected: st.Sender == cmail.SenderLogin},
 	}
+}
+
+// signInTitle names the instance on the sign-in screen when it has a name
+// of its own.
+func (s *Server) signInTitle() string {
+	if name := s.users.Settings().Name; name != "" {
+		return "Sign in to " + name
+	}
+	return "Sign in"
 }

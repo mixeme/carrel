@@ -123,7 +123,7 @@ func rememberLink(sess *session.Session, token string) string {
 // lets them and there is a relay. Off, the sheet is not there — sharing a
 // link by hand still is.
 func (s *Server) mailOn() bool {
-	return s.cfg.MailEnabled && s.mailConfigured()
+	return s.mailPolicy().People && s.mailConfigured()
 }
 
 func (s *Server) writeMailSheet(w http.ResponseWriter, r *http.Request, sheet any) {
@@ -275,11 +275,11 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 		sheet.Attach = append(sheet.Attach, row)
 	}
 
-	left := s.users.LettersLeft(u.ID, s.cfg.MailMaxPerDay)
+	left := s.users.LettersLeft(u.ID, s.mailPolicy().PerDay)
 	limits := []string{
-		fmt.Sprintf("%d of %d recipients. Everyone sees the whole list.", len(d.To), s.cfg.MailMaxRecipients),
+		fmt.Sprintf("%d of %d recipients. Everyone sees the whole list.", len(d.To), s.mailPolicy().Recipients),
 		fmt.Sprintf("An attachment up to %s, the letter up to %s; a folder, and anything larger, goes as a link that lives 30 days and can be revoked in Published links.",
-			formatSize(s.cfg.MailMaxAttachBytes), formatSize(s.cfg.MailMaxMessageBytes)),
+			formatSize(s.mailPolicy().Attach), formatSize(s.mailPolicy().Letter)),
 		fmt.Sprintf("%s left today.", plural(left, "letter")),
 	}
 	if links > 0 {
@@ -299,8 +299,8 @@ func (s *Server) mailSheet(ctx context.Context, sess *session.Session, d *mailDr
 	switch {
 	case len(d.To) == 0:
 		send.Enabled, send.Reason = false, "Add a recipient."
-	case len(d.To) > s.cfg.MailMaxRecipients:
-		send.Enabled, send.Reason = false, text(fmt.Sprintf("A letter goes to %d recipients at most.", s.cfg.MailMaxRecipients))
+	case len(d.To) > s.mailPolicy().Recipients:
+		send.Enabled, send.Reason = false, text(fmt.Sprintf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients))
 	case left == 0:
 		send.Enabled, send.Reason = false, text(user.ErrLetterLimit.Error())
 	}
@@ -390,7 +390,7 @@ func (s *Server) reckonLinks(parts []mailPart) []mailPart {
 			p.AsLink = true
 			continue
 		}
-		p.AsLink = p.Size > s.cfg.MailMaxAttachBytes || total+p.Size > s.cfg.MailMaxMessageBytes
+		p.AsLink = p.Size > s.mailPolicy().Attach || total+p.Size > s.mailPolicy().Letter
 		if !p.AsLink {
 			total += p.Size
 		}
@@ -435,7 +435,7 @@ func (s *Server) partContent(ctx context.Context, sess *session.Session, p mailP
 			return nil, err
 		}
 		defer body.Close()
-		return io.ReadAll(io.LimitReader(body, s.cfg.MailMaxAttachBytes+1))
+		return io.ReadAll(io.LimitReader(body, s.mailPolicy().Attach+1))
 	}
 	c, ok := s.collectionOf(sess, recordKinds[k.Segment], p.Account, p.Col)
 	if !ok || c.col.Gone {
@@ -500,8 +500,8 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		return 0, errors.New("A recipient is not an address: " + strings.TrimPrefix(err.Error(), "mail: "))
 	case len(to) == 0:
 		return 0, errors.New("Add a recipient.")
-	case len(to) > s.cfg.MailMaxRecipients:
-		return 0, fmt.Errorf("A letter goes to %d recipients at most.", s.cfg.MailMaxRecipients)
+	case len(to) > s.mailPolicy().Recipients:
+		return 0, fmt.Errorf("A letter goes to %d recipients at most.", s.mailPolicy().Recipients)
 	}
 	d.Parts = s.reckonLinks(d.Parts)
 
@@ -517,7 +517,7 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		if err != nil {
 			return 0, fmt.Errorf("«%s» could not be read: %s. Remove it or try again.", p.Title, sentence(err.Error()))
 		}
-		if int64(len(data)) > s.cfg.MailMaxAttachBytes || total+int64(len(data)) > s.cfg.MailMaxMessageBytes {
+		if int64(len(data)) > s.mailPolicy().Attach || total+int64(len(data)) > s.mailPolicy().Letter {
 			return 0, fmt.Errorf("«%s» has grown since it was attached and no longer fits the letter. Attach it again: it will go as a link.", p.Title)
 		}
 		total += int64(len(data))
@@ -525,7 +525,7 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		kinds[string(p.Kind)]++
 	}
 
-	if err := s.users.ReserveLetter(u.ID, s.cfg.MailMaxPerDay); err != nil {
+	if err := s.users.ReserveLetter(u.ID, s.mailPolicy().PerDay); err != nil {
 		return 0, err
 	}
 	sent := false
@@ -560,7 +560,7 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 		body += "\n-- \nThis letter was sent from Carrel at " + s.publicOrigin(r) +
 			". Do not reply to it: the sender's address is not confirmed, and a reply would reach nobody.\n"
 	}
-	data, err := cmail.Build(relayOf(s.users.SMTP()), cmail.Message{
+	data, err := cmail.Build(s.relay(), cmail.Message{
 		To: to, ReplyTo: ls.ReplyTo, Sender: ls.Name, FromLogin: ls.FromLogin,
 		Subject: d.Subject, Text: body, Attachments: files,
 	}, time.Now())
@@ -569,7 +569,7 @@ func (s *Server) sendLetter(r *http.Request, sess *session.Session, d *mailDraft
 	}
 	sendCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
-	if _, err := cmail.Send(sendCtx, relayOf(s.users.SMTP()), to, data); err != nil {
+	if _, err := cmail.Send(sendCtx, s.relay(), to, data); err != nil {
 		return 0, errors.New("The relay did not take the letter: " + err.Error())
 	}
 	sent = true

@@ -2,11 +2,13 @@ package conf
 
 import "time"
 
-// Product limits from architecture.md — not C-12, not CARREL_*, not settings UI.
+// Product limits from architecture.md — not C-12, not CARREL_*. The first
+// three are the defaults of settings the administrator changes on
+// /admin/settings (owner's decision 19.09.2026).
 const (
 	SessionIdleTimeout     = 12 * time.Hour
-	SessionAbsoluteTimeout = 7 * 24 * time.Hour
-	InviteTTL              = 7 * 24 * time.Hour
+	SessionAbsoluteTimeout = 30 * 24 * time.Hour
+	InviteTTL              = 72 * time.Hour
 	EmailConfirmTTL        = 48 * time.Hour
 	ForgotLinkTTL          = 24 * time.Hour
 	ConsoleWipeLinkTTL     = 15 * time.Minute

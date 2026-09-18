@@ -51,7 +51,7 @@ func (s *Service) ExtendInvite(actorID, inviteID string) error {
 		if inv == nil || !inviteLive(inv, now) {
 			return nil, ErrNotFound
 		}
-		inv.ExpiresAt = now.Add(conf.InviteTTL)
+		inv.ExpiresAt = now.Add(inviteTTL(st))
 		return []store.AuditEntry{{
 			When: now, Who: actorLogin(st, actorID), What: "user.invite.extend", Whom: inv.Login,
 		}}, nil

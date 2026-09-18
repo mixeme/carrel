@@ -105,6 +105,27 @@ type InstanceSettings struct {
 	// SMTP is the outgoing relay (S-26): an administrator's setting, not an
 	// environment variable. The password lives only here, inside state.enc.
 	SMTP SMTPSettings `json:"smtp,omitempty"`
+
+	// The administrator's settings of the instance (owner's decision
+	// 19.09.2026): zero is the default — the constants of conf for the
+	// lifetimes, the CARREL_MAIL_* of the first start for mail.
+	Name              string `json:"name,omitempty"`
+	IdleHours         int    `json:"idleHours,omitempty"`
+	SessionDays       int    `json:"sessionDays,omitempty"`
+	InviteHours       int    `json:"inviteHours,omitempty"`
+	PeopleMail        *bool  `json:"peopleMail,omitempty"`
+	MailMaxAttachMB   int    `json:"mailMaxAttachMB,omitempty"`
+	MailMaxMessageMB  int    `json:"mailMaxMessageMB,omitempty"`
+	MailMaxRecipients int    `json:"mailMaxRecipients,omitempty"`
+	MailMaxPerDay     int    `json:"mailMaxPerDay,omitempty"`
+}
+
+// InstanceName is the name the instance goes by: "Carrel" unless set.
+func (s InstanceSettings) InstanceName() string {
+	if s.Name == "" {
+		return "Carrel"
+	}
+	return s.Name
 }
 
 // SMTPSettings is the relay and the instance's sender address.

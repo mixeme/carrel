@@ -147,6 +147,9 @@ type Users interface {
 	RequestEmail(userID, email string) (token string, err error)
 	EmailToConfirm(userID string) string
 	LettersLeft(userID string, perDay int) int
+	Settings() store.InstanceSettings
+	SetInstance(actorID string, in user.InstanceUpdate) error
+	InviteTTL() time.Duration
 	ReserveLetter(userID string, perDay int) error
 	ReleaseLetter(userID string)
 	LetterSent(userID string, to []string, attached string)

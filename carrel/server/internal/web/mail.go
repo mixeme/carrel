@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"carrel.dev/carrel/server/internal/conf"
 	cmail "carrel.dev/carrel/server/internal/mail"
 	"carrel.dev/carrel/server/internal/store"
 )
@@ -21,6 +20,45 @@ func relayOf(st store.SMTPSettings) cmail.Relay {
 	}
 }
 
+// relay is the instance's relay; an empty From name is the instance's name.
+func (s *Server) relay() cmail.Relay {
+	r := relayOf(s.users.SMTP())
+	if r.FromName == "" {
+		r.FromName = s.users.Settings().InstanceName()
+	}
+	return r
+}
+
+// mailPolicy is what people's letters may be (C-12): the administrator's
+// settings, and where one is not set, the CARREL_MAIL_* of the start.
+type mailPolicy struct {
+	People             bool
+	Attach, Letter     int64
+	Recipients, PerDay int
+}
+
+func (s *Server) mailPolicy() mailPolicy {
+	set := s.users.Settings()
+	p := mailPolicy{People: s.cfg.MailEnabled, Attach: s.cfg.MailMaxAttachBytes, Letter: s.cfg.MailMaxMessageBytes,
+		Recipients: s.cfg.MailMaxRecipients, PerDay: s.cfg.MailMaxPerDay}
+	if set.PeopleMail != nil {
+		p.People = *set.PeopleMail
+	}
+	if set.MailMaxAttachMB > 0 {
+		p.Attach = int64(set.MailMaxAttachMB) << 20
+	}
+	if set.MailMaxMessageMB > 0 {
+		p.Letter = int64(set.MailMaxMessageMB) << 20
+	}
+	if set.MailMaxRecipients > 0 {
+		p.Recipients = set.MailMaxRecipients
+	}
+	if set.MailMaxPerDay > 0 {
+		p.PerDay = set.MailMaxPerDay
+	}
+	return p
+}
+
 // mailConfigured reports whether the instance can send at all.
 func (s *Server) mailConfigured() bool {
 	return s.users.SMTP().Configured()
@@ -30,7 +68,7 @@ func (s *Server) mailConfigured() bool {
 // instance's address, with no person's name and no Reply-To. The relay's
 // answer goes to the log without the address: it is somebody's mailbox.
 func (s *Server) sendSystemMail(ctx context.Context, to, subject, body string) (string, error) {
-	relay := relayOf(s.users.SMTP())
+	relay := s.relay()
 	data, err := cmail.Build(relay, cmail.Message{To: []string{to}, Subject: subject, Text: body}, time.Now())
 	if err == nil {
 		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
@@ -108,10 +146,10 @@ func (s *Server) sendInviteMail(r *http.Request, login, email, token string) boo
 	if email == "" || !s.mailConfigured() {
 		return false
 	}
-	body := s.letter(r, fmt.Sprintf("You are invited to Carrel at %s, as %s.\n\n"+
+	body := s.letter(r, fmt.Sprintf("You are invited to %s at %s, as %s.\n\n"+
 		"Open this link to choose your password:\n%s\n\n"+
 		"The link works until %s and only once. If you did not expect this letter, do nothing.",
-		s.publicOrigin(r), login, s.absURL(r, "/invite/"+token), time.Now().Add(conf.InviteTTL).UTC().Format("2006-01-02 15:04 UTC")))
+		s.users.Settings().InstanceName(), s.publicOrigin(r), login, s.absURL(r, "/invite/"+token), time.Now().Add(s.users.InviteTTL()).UTC().Format("2006-01-02 15:04 UTC")))
 	_, err := s.sendSystemMail(r.Context(), email, "An invitation to Carrel", body)
 	_ = s.users.MarkInviteMailed(token, err == nil)
 	return err == nil
