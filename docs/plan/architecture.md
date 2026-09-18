@@ -121,7 +121,7 @@ Runtime: только стандартная библиотека.
 | `golang.org/x/image` | то же | DecodeConfig, webp при необходимости |
 | `github.com/emersion/go-webdav` | **не `@latest`** (`@latest` = v0.7.0 от 18.10.2025). Брать `@master`, пол: `v0.0.0-20260625083450-1901d193ce99` | PROPFIND, REPORT, PUT, CalDAV/CardDAV/WebDAV |
 | `github.com/emersion/go-ical` | `v0.0.0-20250609112844-439c63cef608` | iCalendar как мешок `Props`. Encoder пишет все свойства; список RFC — про мощность, не белый список |
-| `github.com/emersion/go-vcard` | `v0.0.0-20260618161152-d854b7e0e2d3` | vCard как мешок свойств |
+| `github.com/emersion/go-vcard` | `v0.1.0` (с 18.09.2026: разворачивание длинной строки перестало быть квадратичным, SV-31) | vCard как мешок свойств |
 | `github.com/teambition/rrule-go` | **v1.8.2** | раскрытие RRULE. Серия правится целиком (S-11) |
 | `github.com/yuin/goldmark` | **v1.8.6** | Markdown → `[]view.Block`. HTML-рендерер не используется. **Не v2** (на 02.08.2026 ещё `v2.0.0-beta.9`) |
 | `filippo.io/age` | **v1.3.2** | шифрование архива копии паролем задания. Без флажка шифрования — голый zip |

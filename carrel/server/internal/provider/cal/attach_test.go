@@ -26,13 +26,24 @@ func attachDoc(t *testing.T) *model.Object {
 	return obj
 }
 
+// attachEncoded is the record as it goes out, unfolded: what is written is
+// folded at 75 octets (SV-31), and an assertion here is about what the record
+// holds, not about how the line was broken. TestEncodeFoldsLongLines holds the
+// folding itself.
 func attachEncoded(t *testing.T, obj *model.Object) string {
 	t.Helper()
 	var buf bytes.Buffer
 	if err := Encode(&buf, obj); err != nil {
 		t.Fatalf("encode: %v", err)
 	}
-	return buf.String()
+	return unfolded(buf.String())
+}
+
+// unfolded is what a parser does with a fold: a CRLF and one space or tab are
+// not there (RFC 5545 §3.1).
+func unfolded(doc string) string {
+	doc = strings.ReplaceAll(doc, "\r\n ", "")
+	return strings.ReplaceAll(doc, "\r\n\t", "")
 }
 
 func attachApply(t *testing.T, obj *model.Object, ops []model.PatchOp) *model.Object {
@@ -136,5 +147,39 @@ func TestDetachKeepsTheOthers(t *testing.T) {
 	ops, _ = Detach(obj, 1)
 	if doc := attachEncoded(t, attachApply(t, obj, ops)); strings.Contains(doc, "shot.png") || !strings.Contains(doc, "notes.md") {
 		t.Errorf("the inline one should be gone and the link stay:\n%s", doc)
+	}
+}
+
+// docs/servers.md, SV-31: go-ical writes a property of any length on one line,
+// so Carrel folds what goes out. An inline attachment is the case that made it
+// matter: hundreds of kilobytes of base64 on a single line.
+func TestEncodeFoldsLongLines(t *testing.T) {
+	obj := attachDoc(t)
+	big := make([]byte, 60<<10)
+	for i := range big {
+		big[i] = byte('a' + i%26)
+	}
+	obj = attachApply(t, obj, AttachInline(obj, "big.bin", "application/octet-stream", big))
+	var buf bytes.Buffer
+	if err := Encode(&buf, obj); err != nil {
+		t.Fatal(err)
+	}
+	doc := buf.String()
+	if len(doc) < 60<<10 {
+		t.Fatalf("the attachment did not get in: %d octets", len(doc))
+	}
+	for i, line := range strings.Split(strings.TrimSuffix(doc, "\r\n"), "\r\n") {
+		if len(line) > 75 {
+			t.Fatalf("line %d is %d octets", i+1, len(line))
+		}
+	}
+	// And it is the same record: unfolded, the attachment is whole.
+	back, err := Parse("/c/e.ics", "", strings.NewReader(doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, data, err := AttachmentData(back, len(Attachments(back))-1)
+	if err != nil || !bytes.Equal(data, big) {
+		t.Errorf("the attachment came back as %d octets, err %v", len(data), err)
 	}
 }

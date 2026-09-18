@@ -46,8 +46,15 @@ func Encode(w io.Writer, obj *model.Object) error {
 		return fmt.Errorf("cal: no main component")
 	}
 	main.Props = rawToProps(obj.Props())
-	enc := ical.NewEncoder(w)
-	return enc.Encode(cal)
+	// Folded on the way out: go-ical writes an inline attachment as one line
+	// of hundreds of kilobytes, and upstream will not fold (docs/servers.md,
+	// SV-31).
+	var out bytes.Buffer
+	if err := ical.NewEncoder(&out).Encode(cal); err != nil {
+		return err
+	}
+	_, err = w.Write(model.FoldLines(out.Bytes()))
+	return err
 }
 
 func findMain(cal *ical.Calendar) *ical.Component {

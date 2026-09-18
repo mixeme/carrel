@@ -173,3 +173,34 @@ func TestPatchPreservesForeign(t *testing.T) {
 		t.Fatal("foreign property lost on encode")
 	}
 }
+
+// docs/servers.md, SV-31: go-vcard writes a property of any length on one
+// line, so Carrel folds what goes out. A photo is the case that made it
+// matter: a data: URI of hundreds of kilobytes on a single line.
+func TestEncodeFoldsLongLines(t *testing.T) {
+	photo := "data:image/png;base64," + strings.Repeat("Q", 40<<10)
+	obj := model.NewObject("/b/ada.vcf", "", map[string][]model.RawValue{
+		"VERSION": {{Text: "4.0"}},
+		"UID":     {{Text: "ada"}},
+		"FN":      {{Text: "Ada Lovelace"}},
+		"PHOTO":   {{Text: photo}},
+	})
+	var buf bytes.Buffer
+	if err := Encode(&buf, obj); err != nil {
+		t.Fatal(err)
+	}
+	doc := buf.String()
+	for i, line := range strings.Split(strings.TrimSuffix(doc, "\r\n"), "\r\n") {
+		if len(line) > 75 {
+			t.Fatalf("line %d is %d octets", i+1, len(line))
+		}
+	}
+	// And it is the same card: the library unfolds it back whole.
+	back, err := Parse("/b/ada.vcf", "", strings.NewReader(doc))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := back.PropText("PHOTO"); len(got) != 1 || got[0] != photo {
+		t.Errorf("the photo came back as %d octets", len(strings.Join(got, "")))
+	}
+}

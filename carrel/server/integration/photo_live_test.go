@@ -107,7 +107,10 @@ func rawCard(ctx context.Context, t *testing.T, endpoint, user, pass, path, acce
 	if err != nil || resp.StatusCode != http.StatusOK {
 		t.Fatalf("GET %s: %s %v", path, resp.Status, err)
 	}
-	return string(body)
+	// Unfolded, like rawBody: Carrel folds what it writes (docs/servers.md,
+	// SV-31) and a server keeps or redoes that folding, so a test that reads a
+	// PHOTO line has to see the value whole.
+	return strings.ReplaceAll(strings.ReplaceAll(string(body), "\r\n ", ""), "\r\n\t", "")
 }
 
 // freshClient is a client with no idle connection. A client kept across the

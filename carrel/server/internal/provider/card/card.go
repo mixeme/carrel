@@ -112,7 +112,9 @@ func Encode(w io.Writer, obj *model.Object) error {
 	if err := vcard.NewEncoder(&buf).Encode(card); err != nil {
 		return err
 	}
-	_, err := w.Write(unescapeDataURIs(buf.Bytes()))
+	// Folded on the way out: go-vcard writes a photo as one line of hundreds
+	// of kilobytes, and upstream will not fold (docs/servers.md, SV-31).
+	_, err := w.Write(model.FoldLines(unescapeDataURIs(buf.Bytes())))
 	return err
 }
 

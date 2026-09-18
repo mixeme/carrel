@@ -52,6 +52,7 @@ Windows. Nextcloud берёт весь общий набор, как Baikal; у 
 | SV-11 | go-webdav (клиент) | нет полей для collation и версии vCard | свои REPORT в `dav` | `TestQueryCardsNamesTheVersion` |
 | SV-12 | go-webdav (сервер, `davtest`) | text-match с регистром; пустой фильтр пуст; нет `MOVE` записи, `DELETE` календаря, `calendar-color` | `davtest` поправляет | тесты `davtest` |
 | SV-13 | go-vcard | экранирует запятую в data: URI | `card.Encode` возвращает запятую | тесты `card` |
+| SV-31 | go-ical и go-vcard | не сворачивают строки по 75 октетов (RFC 5545 §3.1, RFC 6350 §3.2); наверху отказались дважды | своя свёртка на выходе обоих провайдеров (`model.FoldLines`), не на границе символа | `TestFoldLines`, `TestEncodeFoldsLongLines` (оба провайдера) |
 | SV-14 | net/http + любой сервер | закрытое простаивающее соединение: `PROPFIND` и `REPORT` не повторяются, а на общем хостинге так же умирает и запись | повтор один раз в страже: чтение — всегда, запись — если соединение взято из пула простаивающим | `TestReadOnlyRequestIsSentAgainAfterAnIdleClose`, `TestWriteOnAnIdleConnectionIsSentAgain` |
 | SV-15 | OpenCloud за Apache | PUT без `Content-Length` — 400 / 502 | длину шлёт, когда знает; иначе отказ со строкой очереди | `TestOpenCloudFiles`, `TestAttachmentNeedsASizeOnSuchAServer` |
 | SV-16 | SoGo | text-match в `calendar-query` не соблюдается: отдаёт всю коллекцию | просеивает ответ сам и говорит об этом у выдачи | `TestSoGoSearch` |
@@ -667,6 +668,45 @@ Windows. Nextcloud берёт весь общий набор, как Baikal; у 
 ---
 
 ## Библиотеки
+
+### SV-31. Ни одна из библиотек не сворачивает строки
+
+- **Библиотеки.** `ical.Encoder.encodeProp` пишет `имя;параметры:значение
+`
+  без свёртки; `vcard.formatLine` — то же. Значит встроенное вложение или фото
+  уходило одной строкой в сотни килобайт, тогда как RFC 5545 §3.1 и RFC 6350
+  §3.2 просят не длиннее 75 октетов.
+- **Наверх писать нечего: там уже отказали, дважды.**
+  [go-ical#18](https://github.com/emersion/go-ical/issues/18) закрыт 25.02.2023
+  словами автора: «I would rather not. This is just a SHOULD. I've implemented
+  it for go-message and it caused a ton of regressions», а на вопрос, примет ли
+  он PR, — «No.»; до него заброшен
+  [PR #5](https://github.com/emersion/go-ical/pull/5) (2021).
+  В go-vcard та же история: PR
+  [#37](https://github.com/emersion/go-vcard/pull/37) и
+  [#38](https://github.com/emersion/go-vcard/pull/38) закрыты — «It doesn't
+  serve any actual purpose, and from my experience with go-message, is very
+  difficult to get right». Проверено 18.09.2026.
+- **Чем грозило.** Разбирающая сторона имеет право отказать в строке сверх
+  предела: наши три сервера и jtx принимают, а следующий клиент — как повезёт.
+  Узнать об этом от человека, у которого не открылась запись, — худший способ.
+- **Carrel.** Одна свёртка на оба формата (`model.FoldLines`), потому что
+  правило одно: не длиннее 75 октетов, перенос — `CRLF` и пробел, который
+  разворачивание убирает. Применяется там, где документ уходит на провод и в
+  выгрузку — `cal.Encode` и `card.Encode`, — а внутренние сборки остаются
+  развёрнутыми. Свёртка не попадает внутрь символа (RFC 6350 §3.2 это
+  рекомендует, а разрезанная руна — это испорченная запись, а не длинная
+  строка), и повторная свёртка ничего не меняет.
+- **Заодно понадобилось обновление.** В нашем пине go-vcard разворачивал
+  свёрнутую строку конкатенацией в цикле — квадратично; свёрнутое фото на 500
+  КиБ это ~7000 строк и около 1,7 ГБ копирования при чтении. В `v0.1.0` их
+  же правка (issue #41) заменила это на `strings.Builder`, поэтому
+  зависимость поднята в том же коммите, что и свёртка.
+- **Сторож.** `TestFoldLines` и соседние в `internal/model`;
+  `TestEncodeFoldsLongLines` у обоих провайдеров — 60 КиБ вложения и 40 КиБ
+  фото уходят строками не длиннее 75 и возвращаются целыми. Живьём — весь
+  набор, который пишет фото и вложения: он же показал, что серверы принимают
+  свёрнутое как своё.
 
 ### SV-13. go-vcard экранирует запятую в data: URI
 

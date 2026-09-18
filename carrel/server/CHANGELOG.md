@@ -5,6 +5,43 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.93 — 2026-09-18
+
+Long lines are folded on the way out, as both formats ask.
+
+### For consumers
+
+- **Every line Carrel writes is at most 75 octets.** An inline attachment or a
+  photo used to go out as one line of hundreds of kilobytes, which RFC 5545
+  §3.1 and RFC 6350 §3.2 both ask not to do: a parser with a line limit had
+  every right to refuse it, and we would have heard about it from whoever
+  could not open the record.
+- **Neither library will do it, and both said so.** go-ical#18 was closed
+  "I would rather not. This is just a SHOULD", and a pull request for it was
+  refused outright; go-vcard closed two of the same. So the rule lives here,
+  once for both formats (`docs/servers.md`, SV-31).
+- A fold never falls inside a character, and folding an already folded
+  document changes nothing.
+- **Breaking for anything that reads a written record byte for byte.** What
+  goes on the wire and into an export is folded now, so a search for a long
+  value has to unfold first — a CRLF followed by one space or tab is not
+  there. Properties, parsing and comparison are unchanged: unfolded, the
+  record is exactly what it was.
+
+### Included
+
+- `model.FoldLines`, used by `cal.Encode` and `card.Encode`; documents built
+  inside the service stay unfolded.
+- **go-vcard raised to v0.1.0**, and that is part of this change rather than
+  housekeeping: in the version pinned before, unfolding a long line was
+  string concatenation in a loop, and a folded 500 KiB photo is some 7000
+  lines — about 1.7 GB of copying to read one card. Upstream fixed it with a
+  `strings.Builder` (their issue #41).
+- `TestFoldLines` and neighbours in `internal/model`; `TestEncodeFoldsLongLines`
+  in both providers, with 60 KiB of attachment and 40 KiB of photo going out
+  in lines of 75 and coming back whole. Test helpers that read a raw body
+  unfold it: an assertion about content should not know where a line broke.
+
 ## v0.0.92 — 2026-09-18
 
 The live set stops shouting about a server that is not there, and a search

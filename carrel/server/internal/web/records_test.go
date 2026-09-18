@@ -126,13 +126,24 @@ func hasNotice(notices []view.Notice, title string) bool {
 	return false
 }
 
+// body is the record as the server holds it, unfolded: what Carrel writes is
+// folded at 75 octets (docs/servers.md, SV-31), and an assertion here is
+// about what the record holds, not about where the line was broken. The
+// folding itself is held by the tests of the providers.
 func body(t *testing.T, f davFixture, name string) string {
 	t.Helper()
 	b, _, ok := f.srv.Object(f.col + name)
 	if !ok {
 		t.Fatalf("%s: not on the server", name)
 	}
-	return b
+	return unfolded(b)
+}
+
+// unfolded is what a parser does with a fold: a CRLF and one space or tab are
+// not there (RFC 5545 §3.1, RFC 6350 §3.2).
+func unfolded(doc string) string {
+	doc = strings.ReplaceAll(doc, "\r\n ", "")
+	return strings.ReplaceAll(doc, "\r\n\t", "")
 }
 
 func mustContain(t *testing.T, got string, want ...string) {
