@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dupes"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -46,6 +47,23 @@ func (s *Server) dupThreshold(blob sealed.Blob) int {
 		return blob.Duplicates.Threshold
 	}
 	return s.cfg.DuplicatesThreshold
+}
+
+// dupWeights are the person's points per signal over the instance's.
+func (s *Server) dupWeights(blob sealed.Blob) dupes.Weights {
+	w := s.cfg.DuplicatesWeights
+	for _, sig := range dupes.Signals {
+		if n, ok := blob.Duplicates.Weights[string(sig)]; ok {
+			dupes.SetWeight(&w, sig, n)
+		}
+	}
+	return w
+}
+
+var signalLabels = map[dupes.Reason]string{
+	dupes.SameUID: "Same UID", dupes.SameEmail: "Same email", dupes.SamePhone: "Same phone",
+	dupes.SameName: "Same name", dupes.SameBirthday: "Same birthday",
+	dupes.SameTitleWhen: "Same title and date (events, tasks, notes)",
 }
 
 var dupKinds = []view.Kind{view.KindContact, view.KindEvent, view.KindTask, view.KindNote}
@@ -132,7 +150,7 @@ func (s *Server) readDuplicates(sess *session.Session, prune bool) dupState {
 		recs = append(recs, l.rec)
 	}
 	st.compared = len(recs)
-	st.found = dupes.Find(recs, st.threshold)
+	st.found = dupes.Find(recs, s.dupWeights(blob), st.threshold)
 	return st
 }
 
@@ -347,6 +365,14 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 	}
 	page.Bar.Loaded = st.compared
 	page.Threshold = view.ThresholdControl{Value: st.threshold, Default: s.cfg.DuplicatesThreshold}
+	mine := s.dupWeights(st.blob)
+	for _, sig := range dupes.Signals {
+		_, own := st.blob.Duplicates.Weights[string(sig)]
+		page.Threshold.Weights = append(page.Threshold.Weights, view.WeightControl{
+			Signal: string(sig), Label: text(signalLabels[sig]), Value: dupes.Weight(mine, sig),
+			Default: dupes.Weight(s.cfg.DuplicatesWeights, sig), Own: own,
+		})
+	}
 	if st.blob.Duplicates.Threshold > 0 {
 		page.Threshold.Note = text(fmt.Sprintf("Your own number, kept with your decisions. The instance uses %d.", s.cfg.DuplicatesThreshold))
 	} else {
@@ -375,13 +401,13 @@ func (s *Server) getDuplicates(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, s.duplicatesPage(sess, s.readDuplicates(sess, true), kindFilter(r)))
 }
 
-// maxThreshold keeps a typed number sane: every signal together is 210.
-const maxThreshold = 1000
-
 // postDuplicatesDecide takes one decision: do=link, unlink, ignore or again
-// on group=, or do=threshold with value= (empty or 0: the instance's number
-// again). The answer to a decision is the group as it now stands (C-5); a
-// form without scripts, and the threshold, go back to the screen.
+// on group=; do=threshold with value= (empty or 0: the instance's number
+// again); or do=weights with weight.<signal>= for the signals sent (empty:
+// the instance's weight again). The answer to a decision is the group as it
+// now stands (C-5); a form without scripts, the threshold and the weights go
+// back to the screen. No weighting suits everyone, so the person sets their
+// own; a number out of range is not saved.
 func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -399,9 +425,37 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		if raw == "" {
 			n, err = 0, nil
 		}
-		if err == nil && n >= 0 && n <= maxThreshold {
+		if err == nil && n >= 0 && n <= conf.MaxDuplicatesPoints {
 			_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.threshold", strconv.Itoa(n), func(d *sealed.Duplicates) error {
 				d.Threshold = n
+				return nil
+			})
+		}
+		s.redirect(w, r, "/app/duplicates")
+		return
+	}
+	if do == "weights" {
+		if r.ParseForm() == nil {
+			_ = s.users.EditDuplicates(sess.AccountID(), key, "duplicates.weights", "", func(d *sealed.Duplicates) error {
+				for _, sig := range dupes.Signals {
+					vals, sent := r.Form["weight."+string(sig)]
+					if !sent || len(vals) == 0 {
+						continue
+					}
+					raw := strings.TrimSpace(vals[0])
+					if raw == "" {
+						delete(d.Weights, string(sig))
+						continue
+					}
+					n, err := strconv.Atoi(raw)
+					if err != nil || n < 0 || n > conf.MaxDuplicatesPoints {
+						continue
+					}
+					if d.Weights == nil {
+						d.Weights = map[string]int{}
+					}
+					d.Weights[string(sig)] = n
+				}
 				return nil
 			})
 		}

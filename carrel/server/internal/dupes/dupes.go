@@ -21,26 +21,18 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/unicode/norm"
 
+	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
 
-// Points of each signal (docs/spec/limits.md §4.4, architecture.md). The
-// threshold is points, not a probability: a number the person can change and
-// check. One strong key with the name passes the default of 60; weak signals
-// together never do.
-const (
-	ScoreUID      = 80
-	ScoreEmail    = 50
-	ScorePhone    = 50
-	ScoreName     = 20
-	ScoreBirthday = 10
-	// ScoreTitleWhen is an event's title with its start, a task's with its
-	// due day, a note's with its day: the date plays the part of a strong
-	// key and the title the part of the name, so it weighs what those two
-	// weigh together. Neither alone is a signal — a title alone is noise.
-	ScoreTitleWhen = ScoreEmail + ScoreName
-)
+// Weights are the points of each signal. They are the person's own once
+// they set them and the instance's until then (conf, C-12): no weighting
+// suits everyone, so the defaults are only a reasonable start. The threshold
+// is points too, not a probability — numbers the person can change and
+// check. With the defaults one strong key passes 60 on its own; weak signals
+// together never do. A weight of 0 turns its signal off.
+type Weights = conf.DuplicatesWeights
 
 // Reason is why two records were matched; the screen puts it beside the
 // score, because a reason can be checked and a number cannot.
@@ -52,10 +44,49 @@ const (
 	SamePhone     Reason = "phone"
 	SameName      Reason = "name"
 	SameBirthday  Reason = "birthday"
-	SameTitleWhen Reason = "title-when"
+	SameTitleWhen Reason = "title-date"
 )
 
-var reasonOrder = []Reason{SameUID, SameEmail, SamePhone, SameName, SameBirthday, SameTitleWhen}
+// Signals are the reasons in the order they are listed and weighed.
+var Signals = []Reason{SameUID, SameEmail, SamePhone, SameName, SameBirthday, SameTitleWhen}
+
+var reasonOrder = Signals
+
+// Weight is the points w gives a signal.
+func Weight(w Weights, r Reason) int {
+	switch r {
+	case SameUID:
+		return w.UID
+	case SameEmail:
+		return w.Email
+	case SamePhone:
+		return w.Phone
+	case SameName:
+		return w.Name
+	case SameBirthday:
+		return w.Birthday
+	default:
+		return w.TitleDate
+	}
+}
+
+// SetWeight sets the points of one signal.
+func SetWeight(w *Weights, r Reason, n int) {
+	switch r {
+	case SameUID:
+		w.UID = n
+	case SameEmail:
+		w.Email = n
+	case SamePhone:
+		w.Phone = n
+	case SameName:
+		w.Name = n
+	case SameBirthday:
+		w.Birthday = n
+	case SameTitleWhen:
+		w.TitleDate = n
+	}
+}
 
 // Keys are the values a record is compared by, already normalised. They are
 // kept with the loaded list, so finding duplicates reads no record again.
@@ -108,10 +139,10 @@ func Signature(kind view.Kind, refs []sealed.RecordRef) string {
 	return hex.EncodeToString(sum[:16])
 }
 
-// Find groups the records that match at threshold points or more. Records of
-// different kinds are never compared; a record without a UID cannot be
-// addressed and is left out, and one listed twice counts once.
-func Find(records []Record, threshold int) []Group {
+// Find groups the records that match at threshold points or more under w.
+// Records of different kinds are never compared; a record without a UID
+// cannot be addressed and is left out, and one listed twice counts once.
+func Find(records []Record, w Weights, threshold int) []Group {
 	recs := make([]Record, 0, len(records))
 	seen := map[sealed.RecordRef]bool{}
 	for _, r := range records {
@@ -161,7 +192,7 @@ func Find(records []Record, threshold int) []Group {
 	}
 	var edges []edge
 	for p := range pairs {
-		score, reasons := Score(recs[p.a], recs[p.b])
+		score, reasons := Score(recs[p.a], recs[p.b], w)
 		if score < threshold || score <= 0 {
 			continue
 		}
@@ -210,28 +241,28 @@ func Find(records []Record, threshold int) []Group {
 
 // Score is the points of one pair and why. Records of different kinds score
 // nothing.
-func Score(a, b Record) (int, []Reason) {
+func Score(a, b Record, w Weights) (int, []Reason) {
 	if a.Kind != b.Kind {
 		return 0, nil
 	}
 	var score int
 	var reasons []Reason
 	add := func(ok bool, n int, r Reason) {
-		if ok {
+		if ok && n > 0 {
 			score += n
 			reasons = append(reasons, r)
 		}
 	}
-	add(a.Ref.UID != "" && a.Ref.UID == b.Ref.UID, ScoreUID, SameUID)
+	add(a.Ref.UID != "" && a.Ref.UID == b.Ref.UID, w.UID, SameUID)
 	if a.Kind == view.KindContact {
-		add(shares(a.Keys.Emails, b.Keys.Emails), ScoreEmail, SameEmail)
-		add(shares(a.Keys.Phones, b.Keys.Phones), ScorePhone, SamePhone)
-		add(a.Keys.Name != "" && a.Keys.Name == b.Keys.Name, ScoreName, SameName)
-		add(a.Keys.Birthday != "" && a.Keys.Birthday == b.Keys.Birthday, ScoreBirthday, SameBirthday)
+		add(shares(a.Keys.Emails, b.Keys.Emails), w.Email, SameEmail)
+		add(shares(a.Keys.Phones, b.Keys.Phones), w.Phone, SamePhone)
+		add(a.Keys.Name != "" && a.Keys.Name == b.Keys.Name, w.Name, SameName)
+		add(a.Keys.Birthday != "" && a.Keys.Birthday == b.Keys.Birthday, w.Birthday, SameBirthday)
 		return score, reasons
 	}
 	add(a.Keys.Title != "" && a.Keys.When != "" && a.Keys.Title == b.Keys.Title && a.Keys.When == b.Keys.When,
-		ScoreTitleWhen, SameTitleWhen)
+		w.TitleDate, SameTitleWhen)
 	return score, reasons
 }
 
@@ -349,21 +380,16 @@ func NormEmail(s string) string {
 	return s
 }
 
-// minPhoneDigits keeps short numbers out: a short code or an extension is
-// shared by strangers, and a false match is worse than a missed one (S-16).
-const minPhoneDigits = 7
-
 // NormPhone is the last ten digits of a number, so "+7 903 118-22-04" and
-// "8 (903) 118 22 04" meet; fewer than seven digits is not a key.
+// "8 (903) 118 22 04" meet. A shorter number is a key as it is: whether a
+// short code shared by strangers counts is the person's call, through the
+// weight of the phone.
 func NormPhone(s string) string {
 	var d []byte
 	for i := 0; i < len(s); i++ {
 		if s[i] >= '0' && s[i] <= '9' {
 			d = append(d, s[i])
 		}
-	}
-	if len(d) < minPhoneDigits {
-		return ""
 	}
 	if len(d) > 10 {
 		d = d[len(d)-10:]

@@ -37,6 +37,9 @@ func ics(t *testing.T, comp string, lines ...string) *model.Object {
 	return obj
 }
 
+// std are the instance's default weights (conf, TestDuplicatesWeights).
+var std = Weights{UID: 80, Email: 60, Phone: 60, Name: 20, Birthday: 10, TitleDate: 70}
+
 func rec(account, col, uid string, k view.Kind, obj *model.Object) Record {
 	return Record{Ref: sealed.RecordRef{AccountID: account, Col: col, UID: uid}, Kind: k, Keys: KeysOf(k, obj, time.UTC)}
 }
@@ -63,8 +66,8 @@ func TestNormalisation(t *testing.T) {
 	if NormPhone("+7 903 118-22-04") != NormPhone("8 (903) 118 22 04") || NormPhone("+7 903 118-22-04") != "9031182204" {
 		t.Errorf("phones: %q %q", NormPhone("+7 903 118-22-04"), NormPhone("8 (903) 118 22 04"))
 	}
-	if NormPhone("112") != "" || NormPhone("ext. 204") != "" {
-		t.Error("a short number is not a key")
+	if NormPhone("112") != "112" || NormPhone("ext. 204") != "204" || NormPhone("no digits") != "" {
+		t.Error("a short number is a key as it is; whether it counts is the weight of the phone")
 	}
 	if NormEmail(" mailto:Ada@Example.COM ") != "ada@example.com" || NormEmail("not an address") != "" {
 		t.Errorf("email: %q", NormEmail(" mailto:Ada@Example.COM "))
@@ -74,8 +77,8 @@ func TestNormalisation(t *testing.T) {
 	}
 }
 
-// The points of limits.md §4.4: one strong key with the name passes 60, a
-// strong key alone does not, weak signals together never do, a UID does.
+// The default points (limits.md §4.4): one strong key passes 60 on its own,
+// weak signals together never do.
 func TestScoresAndThreshold(t *testing.T) {
 	ada := vcard(t, "UID:a1", "FN:Ada Lovelace", "EMAIL:ada@example.com", "BDAY:1815-12-10")
 	cases := []struct {
@@ -86,19 +89,19 @@ func TestScoresAndThreshold(t *testing.T) {
 		reasons []Reason
 		group   bool
 	}{
-		{"email and name", vcard(t, "UID:b1", "FN:ADA LOVELACE", "EMAIL:ADA@example.com"), "b1", 70, []Reason{SameEmail, SameName}, true},
-		{"email alone", vcard(t, "UID:b2", "FN:Office", "EMAIL:ada@example.com"), "b2", 50, []Reason{SameEmail}, false},
+		{"email and name", vcard(t, "UID:b1", "FN:ADA LOVELACE", "EMAIL:ADA@example.com"), "b1", 80, []Reason{SameEmail, SameName}, true},
+		{"email alone", vcard(t, "UID:b2", "FN:Office", "EMAIL:ada@example.com"), "b2", 60, []Reason{SameEmail}, true},
 		{"name and birthday", vcard(t, "UID:b3", "FN:Lovelace Ada", "BDAY:18151210"), "b3", 30, []Reason{SameName, SameBirthday}, false},
 		{"same UID", vcard(t, "UID:a1", "FN:Someone else"), "a1", 80, []Reason{SameUID}, true},
 	}
 	for _, c := range cases {
 		a := rec("s1", "/book/", "a1", view.KindContact, ada)
 		b := rec("s2", "/other/", c.uid, view.KindContact, c.other)
-		score, reasons := Score(a, b)
+		score, reasons := Score(a, b, std)
 		if score != c.score || !cmp.Equal(reasons, c.reasons) {
 			t.Errorf("%s: %d %v, want %d %v", c.name, score, reasons, c.score, c.reasons)
 		}
-		groups := Find([]Record{a, b}, 60)
+		groups := Find([]Record{a, b}, std, 60)
 		if (len(groups) == 1) != c.group {
 			t.Errorf("%s: groups = %+v", c.name, groups)
 		}
@@ -121,7 +124,7 @@ func TestFindEveryKind(t *testing.T) {
 		rec("s2", "/diary/", "n2", view.KindNote, ics(t, "VJOURNAL", "UID:n2", "SUMMARY:Что почитать про CRDT", "DTSTART;VALUE=DATE:20260808", "DESCRIPTION:another body")),
 		rec("s2", "/diary/", "p1", view.KindNote, ics(t, "VJOURNAL", "UID:p1", "SUMMARY:x")),
 	}
-	groups := Find(recs, 60)
+	groups := Find(recs, std, 60)
 	var got []string
 	for _, g := range groups {
 		var uids []string
@@ -131,10 +134,10 @@ func TestFindEveryKind(t *testing.T) {
 		got = append(got, fmt.Sprintf("%s %d %v %v", g.Kind, g.Score, uids, g.Reasons))
 	}
 	want := []string{
-		"contact 70 [p1 p2] [phone name]",
-		"event 70 [e1 e2] [title-when]",
-		"task 70 [t1 t2] [title-when]",
-		"note 70 [n1 n2] [title-when]",
+		"contact 80 [p1 p2] [phone name]",
+		"event 70 [e1 e2] [title-date]",
+		"task 70 [t1 t2] [title-date]",
+		"note 70 [n1 n2] [title-date]",
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("groups (-want +got):\n%s", diff)
@@ -146,8 +149,8 @@ func TestGroupsJoinAndCountOnce(t *testing.T) {
 	a := rec("s", "/a/", "1", view.KindContact, vcard(t, "UID:1", "FN:Ada", "EMAIL:a@x.org"))
 	b := rec("s", "/b/", "2", view.KindContact, vcard(t, "UID:2", "FN:Ada", "EMAIL:a@x.org", "TEL:+44 20 7946 0000"))
 	c := rec("s", "/c/", "3", view.KindContact, vcard(t, "UID:3", "FN:Ada", "TEL:020 7946 0000"))
-	groups := Find([]Record{a, b, c, b}, 60)
-	if len(groups) != 1 || len(groups[0].Members) != 3 || groups[0].Score != 70 {
+	groups := Find([]Record{a, b, c, b}, std, 60)
+	if len(groups) != 1 || len(groups[0].Members) != 3 || groups[0].Score != 80 {
 		t.Fatalf("groups = %+v", groups)
 	}
 	if groups[0].ID != Signature(view.KindContact, []sealed.RecordRef{c.Ref, a.Ref, b.Ref}) {
@@ -167,11 +170,31 @@ func TestFindDoesNotCompareEveryPair(t *testing.T) {
 		})
 	}
 	start := time.Now()
-	if g := Find(recs, 60); len(g) != 0 {
+	if g := Find(recs, std, 60); len(g) != 0 {
 		t.Fatalf("strangers grouped: %d", len(g))
 	}
 	if d := time.Since(start); d > 5*time.Second {
 		t.Errorf("20000 records took %v", d)
+	}
+}
+
+// The weights are the person's: a signal set to 0 is off, and a heavier name
+// lets a name with a birthday pass.
+func TestWeightsDecide(t *testing.T) {
+	a := rec("s", "/a/", "1", view.KindContact, vcard(t, "UID:1", "FN:Ada Lovelace", "EMAIL:office@x.org", "BDAY:1815-12-10"))
+	b := rec("s", "/b/", "2", view.KindContact, vcard(t, "UID:2", "FN:Lovelace Ada", "EMAIL:office@x.org", "BDAY:18151210"))
+	if g := Find([]Record{a, b}, std, 60); len(g) != 1 || g[0].Score != 90 {
+		t.Fatalf("defaults: %+v", g)
+	}
+	noEmail := std
+	SetWeight(&noEmail, SameEmail, 0)
+	if g := Find([]Record{a, b}, noEmail, 60); len(g) != 0 {
+		t.Errorf("email off, name and birthday 30: %+v", g)
+	}
+	SetWeight(&noEmail, SameName, 50)
+	g := Find([]Record{a, b}, noEmail, 60)
+	if len(g) != 1 || !cmp.Equal(g[0].Reasons, []Reason{SameName, SameBirthday}) || Weight(noEmail, SameName) != 50 {
+		t.Errorf("heavier name: %+v", g)
 	}
 }
 

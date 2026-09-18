@@ -79,9 +79,20 @@ type DuplicateMember struct {
 }
 
 type ThresholdControl struct {
-	Value   int  `json:"value"`
-	Default int  `json:"default"`
-	Note    Text `json:"note"`
+	Value   int             `json:"value"`
+	Default int             `json:"default"`
+	Note    Text            `json:"note"`
+	Weights []WeightControl `json:"weights"` // очки каждого признака; своё у человека, иначе экземпляра
+}
+
+// WeightControl — очки одного признака дубликата (S-16). Signal — имя поля
+// формы weight.<Signal>; 0 выключает признак.
+type WeightControl struct {
+	Signal  string `json:"signal"`
+	Label   Text   `json:"label"`
+	Value   int    `json:"value"`
+	Default int    `json:"default"`
+	Own     bool   `json:"own"` // значение человека, а не экземпляра
 }
 
 type DuplicatesMergePage struct {

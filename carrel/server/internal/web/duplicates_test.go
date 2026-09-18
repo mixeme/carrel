@@ -133,7 +133,7 @@ func TestDuplicatesFoundAmongLoadedLists(t *testing.T) {
 		t.Errorf("the duplicates screen asked the servers %d times", n)
 	}
 	g := onlyGroup(t, p)
-	if g.Kind != view.KindContact || g.Score != 70 || len(g.Rows) != 2 || g.Decision != view.DecisionNone {
+	if g.Kind != view.KindContact || g.Score != 80 || len(g.Rows) != 2 || g.Decision != view.DecisionNone {
 		t.Fatalf("group = %+v", g)
 	}
 	if strings.Join([]string{string(g.Reasons[0]), string(g.Reasons[1])}, ", ") != "same email, same name" {
@@ -165,7 +165,7 @@ func TestLinkWritesNoServer(t *testing.T) {
 		t.Fatalf("blob = %+v", d)
 	}
 	linked := onlyGroup(t, f.page(t))
-	if linked.Decision != view.DecisionLinked || linked.Score != 70 {
+	if linked.Decision != view.DecisionLinked || linked.Score != 80 {
 		t.Errorf("linked group = %+v", linked)
 	}
 	if c := navCount(t, f.page(t).Rail); c == nil || *c != 0 {
@@ -236,14 +236,55 @@ func TestThresholdIsThePersons(t *testing.T) {
 			t.Fatalf("threshold %q: %d", v, rec.Code)
 		}
 	}
-	set("71")
+	set("81")
 	p := f.page(t)
-	if len(p.Groups) != 0 || p.Threshold.Value != 71 || f.decisions(t).Threshold != 71 {
-		t.Errorf("at 71: groups %d threshold %+v", len(p.Groups), p.Threshold)
+	if len(p.Groups) != 0 || p.Threshold.Value != 81 || f.decisions(t).Threshold != 81 {
+		t.Errorf("at 81: groups %d threshold %+v", len(p.Groups), p.Threshold)
 	}
 	set("")
 	if p := f.page(t); len(p.Groups) != 1 || p.Threshold.Value != 60 {
 		t.Errorf("back to the instance: %+v", p.Threshold)
+	}
+}
+
+// The weights are the person's, set on the duplicates screen: a signal
+// turned off takes its groups away, and an empty field is the instance's
+// weight again.
+func TestWeightsAreThePersons(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	p := f.page(t)
+	if len(p.Threshold.Weights) != 6 {
+		t.Fatalf("weights = %+v", p.Threshold.Weights)
+	}
+	for _, w := range p.Threshold.Weights {
+		if w.Own || w.Value != w.Default || w.Label == "" {
+			t.Errorf("before any choice: %+v", w)
+		}
+	}
+	set := func(v string) {
+		rec := f.h.do(postForm("/app/duplicates/decide", f.sess, url.Values{"do": {"weights"}, "weight.email": {v}}))
+		if rec.Code != http.StatusSeeOther {
+			t.Fatalf("weights: %d", rec.Code)
+		}
+	}
+	set("0")
+	p = f.page(t)
+	if len(p.Groups) != 0 || f.decisions(t).Weights["email"] != 0 {
+		t.Errorf("email off: groups %d, blob %+v", len(p.Groups), f.decisions(t))
+	}
+	for _, w := range p.Threshold.Weights {
+		if w.Signal == "email" && (!w.Own || w.Value != 0 || w.Default != 60) {
+			t.Errorf("email = %+v", w)
+		}
+	}
+	set("-3")
+	if f.decisions(t).Weights["email"] != 0 {
+		t.Error("a weight out of range was saved")
+	}
+	set("")
+	if p := f.page(t); len(p.Groups) != 1 || len(f.decisions(t).Weights) != 0 {
+		t.Errorf("back to the instance: %d groups, %+v", len(p.Groups), f.decisions(t).Weights)
 	}
 }
 

@@ -807,6 +807,8 @@ type TaskRow struct {
     Overdue   bool
     Percent   *int
     Tags      []Tag
+    Badges    []Badge  // «2 источника» у связанной задачи
+    Sources   []Stamp  // источники связанной группы
     Menu      []MenuItem
     State     RecordState
 }
@@ -826,6 +828,8 @@ type NoteRow struct {
     Excerpt   Text
     Date      Text
     Tags      []Tag
+    Badges    []Badge  // «2 источника» у связанной заметки
+    Sources   []Stamp  // источники связанной группы
     Menu      []MenuItem
     State     RecordState
 }
@@ -1108,7 +1112,22 @@ type DuplicateMember struct {
     ReadOnly bool
 }
 
-type ThresholdControl struct { Value int; Default int; Note Text }
+type ThresholdControl struct {
+    Value   int
+    Default int
+    Note    Text
+    Weights []WeightControl // очки каждого признака; своё у человека, иначе экземпляра
+}
+
+// Очки признака дубликата (S-16). Signal — имя поля формы weight.<Signal>;
+// 0 выключает признак.
+type WeightControl struct {
+    Signal  string
+    Label   Text
+    Value   int
+    Default int
+    Own     bool // значение человека, а не экземпляра
+}
 
 type DuplicatesMergePage struct {
     Shell
@@ -2067,6 +2086,12 @@ type LossReport struct { // сервер принял запись, но что-
 | `CARREL_PROGRESS_SOURCE_TIMEOUT` | `10` | Секунд на один источник | — |
 | `CARREL_PROGRESS_TOTAL_TIMEOUT` | `30` | Секунд на весь опрос | — |
 | `CARREL_DUPLICATES_THRESHOLD` | `60` | Очков для попадания в кандидаты; человек может задать своё | свой |
+| `CARREL_DUPLICATES_WEIGHT_UID` | `80` | Очков за тот же UID | свой |
+| `CARREL_DUPLICATES_WEIGHT_EMAIL` | `60` | Очков за тот же адрес почты | свой |
+| `CARREL_DUPLICATES_WEIGHT_PHONE` | `60` | Очков за тот же телефон (последние 10 цифр) | свой |
+| `CARREL_DUPLICATES_WEIGHT_NAME` | `20` | Очков за то же имя | свой |
+| `CARREL_DUPLICATES_WEIGHT_BIRTHDAY` | `10` | Очков за тот же день рождения | свой |
+| `CARREL_DUPLICATES_WEIGHT_TITLE_DATE` | `70` | Очков за тот же заголовок и дату у события, задачи, заметки | свой |
 | `CARREL_UNLOCK_TTL` | `300` | Секунд, пока открыта выдача учётных данных | — |
 | `CARREL_MAIL_ENABLED` | `false` | Отправка почтой людьми; выключена по умолчанию | админ |
 | `CARREL_MAIL_MAX_ATTACH_BYTES` | `10485760` | Потолок одного вложения | админ |

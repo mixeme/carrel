@@ -241,3 +241,26 @@ func TestNegativeCacheLimitsRejected(t *testing.T) {
 		})
 	}
 }
+
+// S-16: the instance's weights are the reasonable start the owner chose on
+// 18.09.2026 — one strong key passes 60 alone — and an administrator can
+// change each, or turn one off with 0.
+func TestDuplicatesWeights(t *testing.T) {
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := DuplicatesWeights{UID: 80, Email: 60, Phone: 60, Name: 20, Birthday: 10, TitleDate: 70}
+	if c.DuplicatesWeights != want || c.DuplicatesThreshold != 60 {
+		t.Fatalf("defaults = %+v, threshold %d", c.DuplicatesWeights, c.DuplicatesThreshold)
+	}
+	t.Setenv("CARREL_DUPLICATES_WEIGHT_PHONE", "0")
+	t.Setenv("CARREL_DUPLICATES_WEIGHT_TITLE_DATE", "90")
+	if c, err = Load(); err != nil || c.DuplicatesWeights.Phone != 0 || c.DuplicatesWeights.TitleDate != 90 {
+		t.Fatalf("from the environment: %+v %v", c, err)
+	}
+	t.Setenv("CARREL_DUPLICATES_WEIGHT_NAME", "-5")
+	if _, err := Load(); err == nil {
+		t.Error("a negative weight was taken")
+	}
+}

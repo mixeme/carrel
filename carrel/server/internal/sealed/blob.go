@@ -36,6 +36,10 @@ type Duplicates struct {
 	// Threshold is the person's own number of points; 0 until they choose
 	// one, and the instance value applies (CARREL_DUPLICATES_THRESHOLD).
 	Threshold int `json:"threshold,omitempty"`
+	// Weights are the person's own points per signal, by the signal's name
+	// ("email", "phone", "uid", "name", "birthday", "title-date"); a signal
+	// not here weighs what the instance says. 0 is a weight: the signal off.
+	Weights map[string]int `json:"weights,omitempty"`
 	// Linked are groups shown as one entity. Linking changes nothing on any
 	// server and is undone at any time.
 	Linked []LinkedGroup `json:"linked,omitempty"`

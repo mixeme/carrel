@@ -5,6 +5,32 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.95 — 2026-09-18
+
+The points of duplicates are the person's to set, and one strong key is
+enough by default.
+
+### For consumers
+
+- **Every signal's points can be set**, beside the threshold on the
+  duplicates screen: `ThresholdControl.Weights` lists them (`Signal`,
+  `Label`, `Value`, `Default`, `Own`). `POST /app/duplicates/decide` with
+  `do=weights` and `weight.<signal>=N` saves the person's own; an empty value
+  is the instance's weight again, 0 turns the signal off, a number outside
+  0…1000 is not saved. Signals: `uid`, `email`, `phone`, `name`, `birthday`,
+  `title-date`.
+- **The instance's defaults are environment variables**:
+  `CARREL_DUPLICATES_WEIGHT_UID` (80), `_EMAIL` (60), `_PHONE` (60), `_NAME`
+  (20), `_BIRTHDAY` (10), `_TITLE_DATE` (70).
+- **Breaking for anyone who counted on the old numbers:** email and phone
+  score 60, so one shared address or number is a candidate on its own at the
+  default threshold of 60. A shared family or office address is now offered;
+  "Not duplicates" or a lower weight takes it away.
+- A phone number of any length is a key; a short one used to be ignored.
+- The reason formerly `title-when` is `title-date`.
+- `TaskRow` and `NoteRow` carry `Badges` and `Sources`: a linked task or note
+  says "2 sources" and where from, like a contact or an event.
+
 ## v0.0.94 — 2026-09-18
 
 Duplicates are found, linked and merged (S-16).

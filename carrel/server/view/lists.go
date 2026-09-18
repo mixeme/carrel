@@ -92,6 +92,8 @@ type TaskRow struct {
 	Overdue bool        `json:"overdue"`
 	Percent *int        `json:"percent"`
 	Tags    []Tag       `json:"tags"`
+	Badges  []Badge     `json:"badges"`  // «2 источника» у связанной задачи
+	Sources []Stamp     `json:"sources"` // источники связанной группы
 	Menu    []MenuItem  `json:"menu"`
 	State   RecordState `json:"state"`
 }
@@ -115,6 +117,8 @@ type NoteRow struct {
 	Excerpt Text        `json:"excerpt"`
 	Date    Text        `json:"date"`
 	Tags    []Tag       `json:"tags"`
+	Badges  []Badge     `json:"badges"`  // «2 источника» у связанной заметки
+	Sources []Stamp     `json:"sources"` // источники связанной группы
 	Menu    []MenuItem  `json:"menu"`
 	State   RecordState `json:"state"`
 }

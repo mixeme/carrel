@@ -902,6 +902,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Done: isDone,
 			Summary: text(titleOr(cal.Text(o, "SUMMARY"), "Untitled task")),
 			Percent: percentOf(o), Tags: filter.tags(categoriesOf(view.KindTask, o)), State: linkedState(it),
+			Badges: linkedBadge(it), Sources: linkedSources(it),
 		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
@@ -993,6 +994,7 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		row := view.NoteRow{
 			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Title: text(title), Excerpt: text(noteExcerpt(body, title)),
 			Tags: filter.tags(categoriesOf(view.KindNote, o)), State: linkedState(it),
+			Badges: linkedBadge(it), Sources: linkedSources(it),
 		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)

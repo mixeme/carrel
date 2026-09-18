@@ -56,6 +56,9 @@ type Config struct {
 	ProgressTotalTimeout  time.Duration
 
 	DuplicatesThreshold int
+	// DuplicatesWeights are the instance's points per signal (S-16); a person
+	// may set their own on the duplicates screen. Zero turns a signal off.
+	DuplicatesWeights DuplicatesWeights
 
 	UnlockTTL time.Duration
 
@@ -145,6 +148,9 @@ func defaults() *Config {
 		ProgressTotalTimeout:  30 * time.Second,
 
 		DuplicatesThreshold: 60,
+		DuplicatesWeights: DuplicatesWeights{
+			UID: 80, Email: 60, Phone: 60, Name: 20, Birthday: 10, TitleDate: 70,
+		},
 
 		UnlockTTL: 300 * time.Second,
 
@@ -336,6 +342,18 @@ func applyKV(c *Config, key, val string) error {
 		if err != nil {
 			return err
 		}
+	case "CARREL_DUPLICATES_WEIGHT_UID":
+		return weight(key, val, &c.DuplicatesWeights.UID)
+	case "CARREL_DUPLICATES_WEIGHT_EMAIL":
+		return weight(key, val, &c.DuplicatesWeights.Email)
+	case "CARREL_DUPLICATES_WEIGHT_PHONE":
+		return weight(key, val, &c.DuplicatesWeights.Phone)
+	case "CARREL_DUPLICATES_WEIGHT_NAME":
+		return weight(key, val, &c.DuplicatesWeights.Name)
+	case "CARREL_DUPLICATES_WEIGHT_BIRTHDAY":
+		return weight(key, val, &c.DuplicatesWeights.Birthday)
+	case "CARREL_DUPLICATES_WEIGHT_TITLE_DATE":
+		return weight(key, val, &c.DuplicatesWeights.TitleDate)
 	case "CARREL_UNLOCK_TTL":
 		c.UnlockTTL, err = seconds(key, val)
 		if err != nil {
@@ -457,6 +475,30 @@ func (c *Config) ParseLogLevel() (slog.Level, error) {
 
 // A malformed value is a configuration error the operator can read and fix,
 // not a panic in the middle of startup.
+// DuplicatesWeights are points per duplicate signal (S-16).
+type DuplicatesWeights struct {
+	UID, Email, Phone, Name, Birthday int
+	// TitleDate is a calendar record's title together with its date: an
+	// event's start, a task's due day, a note's day.
+	TitleDate int
+}
+
+// MaxDuplicatesPoints bounds a threshold or a weight: a typed number stays
+// sane, and every signal together stays far below it.
+const MaxDuplicatesPoints = 1000
+
+func weight(key, val string, into *int) error {
+	n, err := atoi(key, val)
+	if err != nil {
+		return err
+	}
+	if n < 0 || n > MaxDuplicatesPoints {
+		return fmt.Errorf("%s: %d is not between 0 and %d", key, n, MaxDuplicatesPoints)
+	}
+	*into = n
+	return nil
+}
+
 func atoi(key, val string) (int, error) {
 	n, err := strconv.Atoi(val)
 	if err != nil {

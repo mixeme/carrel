@@ -192,6 +192,7 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 | `CARREL_MAIL_MAX_RECIPIENTS` | 20 | Получателей в письме |
 | `CARREL_MAIL_MAX_PER_DAY` | 50 | Писем на человека в сутки |
 | `CARREL_DUPLICATES_THRESHOLD` | 60 | Очков для кандидата-дубликата |
+| `CARREL_DUPLICATES_WEIGHT_*` | см. §4.4 | Очки признаков дубликата; человек задаёт свои |
 
 ### 4.3. Сессия, хранилище, сеть (зашито)
 
@@ -207,8 +208,20 @@ Token bucket в памяти процесса (`internal/web/ratelimit.go`). П�
 
 ### 4.4. Дубликаты — веса сигналов (`internal/dupes`)
 
-| Сигнал | Очки |
-|---|---|
+Умолчания экземпляра; у человека свои — в блобе, правятся на экране
+дубликатов. 0 выключает признак.
+
+| Сигнал | Очки | Переменная |
+|---|---|---|
+| UID | 80 | `CARREL_DUPLICATES_WEIGHT_UID` |
+| Email (нормализованный) | 60 | `CARREL_DUPLICATES_WEIGHT_EMAIL` |
+| Телефон (последние 10 цифр; короче — как есть) | 60 | `CARREL_DUPLICATES_WEIGHT_PHONE` |
+| Имя (fold-equal) | 20 | `CARREL_DUPLICATES_WEIGHT_NAME` |
+| День рождения (бонус) | +10 | `CARREL_DUPLICATES_WEIGHT_BIRTHDAY` |
+| Заголовок + дата (событие, задача, заметка) | 70 | `CARREL_DUPLICATES_WEIGHT_TITLE_DATE` |
+| **Порог** | **60** | `CARREL_DUPLICATES_THRESHOLD` |
+
+---|---|
 | Email (нормализованный) | 50 |
 | Телефон (последние 10 цифр) | 50 |
 | UID | 80 |
