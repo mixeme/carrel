@@ -5,6 +5,23 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.140 — 2026-09-19
+
+connections-tail.md, step 1.
+
+### Added
+
+- **`user.RemoveConnection`**: a connection leaves Carrel whole in one edit
+  of the blob and the state — its catalog, ticks, last-used places, linked
+  duplicates (a group left with one member dissolves, a preference naming a
+  member gone is asked again), device exclusion, attachment and upload
+  folders, the sources of copy jobs, its published links with their
+  envelopes, and the collections davloom devices saw of it. Nothing on the
+  server is touched. A copy job is never deleted: one whose destination was
+  the connection says the destination is no longer in the catalog. The
+  journal line `connection.remove` carries the counts, not the address.
+  No screen reaches it yet.
+
 ## v0.0.135 — 2026-09-19
 
 Fable audit №3 (Ф3-4).

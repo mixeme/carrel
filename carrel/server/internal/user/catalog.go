@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"carrel.dev/carrel/server/internal/crypt"
+	"carrel.dev/carrel/server/internal/publish"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/view"
@@ -144,6 +145,159 @@ func (s *Service) ApplyRediscovery(viewerID string, dataKey [crypt.KeyLen]byte, 
 			Detail: fmt.Sprintf("%s +%d -%d", accountID, added, gone),
 		}}, nil
 	})
+}
+
+// Disconnected counts what went with a connection: the numbers of its
+// journal line and of the page that follows.
+type Disconnected struct {
+	Collections int // catalog entries
+	Links       int // published links revoked
+	Jobs        int // backup jobs that lost a source or their destination
+	Devices     int // davloom devices that lost a collection
+}
+
+// RemoveConnection takes a connection out of Carrel whole, in one edit of the
+// blob and the state (connections-tail.md): its catalog, ticks, last-used
+// places, linked duplicates, device exclusion, attachment and upload folders,
+// the sources of copy jobs and its published links with their envelopes;
+// davloom devices stop seeing its collections. Nothing on the server is
+// touched. A copy job is never deleted silently: one whose destination was
+// here keeps naming it, and its screen says the destination is gone. The
+// "not duplicates" signatures stay — a group without these members is another
+// group. The journal names the connection and the counts, not the address.
+func (s *Service) RemoveConnection(viewerID string, dataKey [crypt.KeyLen]byte, accountID string) (Disconnected, error) {
+	var res Disconnected
+	now := s.now()
+	err := s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		res = Disconnected{}
+		u := st.UserByID(viewerID)
+		if u == nil || u.Disabled {
+			return nil, ErrNotFound
+		}
+		blob, err := sealed.Open(dataKey, u.SealedBlob, u.Login)
+		if err != nil {
+			return nil, fmt.Errorf("user: open blob: %w", err)
+		}
+		at := -1
+		for i, c := range blob.Connections {
+			if c.ID == accountID {
+				at = i
+			}
+		}
+		if at < 0 {
+			return nil, ErrNotFound
+		}
+		blob.Connections = append(blob.Connections[:at], blob.Connections[at+1:]...)
+
+		var cols []sealed.Collection
+		for _, c := range blob.Collections {
+			if c.AccountID == accountID {
+				res.Collections++
+				continue
+			}
+			cols = append(cols, c)
+		}
+		blob.Collections = cols
+		blob.Selected = selectionsNotOf(blob.Selected, accountID)
+		blob.LastUsed = selectionsNotOf(blob.LastUsed, accountID)
+		if blob.Attachments != nil && blob.Attachments.AccountID == accountID {
+			blob.Attachments = nil
+		}
+		if blob.UploadTo != nil && blob.UploadTo.AccountID == accountID {
+			blob.UploadTo = nil
+		}
+		var excluded []string
+		for _, id := range blob.DeviceExcluded {
+			if id != accountID {
+				excluded = append(excluded, id)
+			}
+		}
+		blob.DeviceExcluded = excluded
+
+		var groups []sealed.LinkedGroup
+		for _, g := range blob.Duplicates.Linked {
+			var members []sealed.RecordRef
+			for _, m := range g.Members {
+				if m.AccountID != accountID {
+					members = append(members, m)
+				}
+			}
+			if len(members) < 2 {
+				continue // a group of one is no group (S-16)
+			}
+			g.Members = members
+			for prop, m := range g.Prefs {
+				if m.AccountID == accountID {
+					delete(g.Prefs, prop)
+				}
+			}
+			groups = append(groups, g)
+		}
+		blob.Duplicates.Linked = groups
+
+		for i := range blob.BackupJobs {
+			j := &blob.BackupJobs[i]
+			sources := selectionsNotOf(j.Sources, accountID)
+			if len(sources) != len(j.Sources) || j.DestAccount == accountID {
+				res.Jobs++
+			}
+			j.Sources = sources
+		}
+
+		published := st.Published[:0]
+		for _, l := range st.Published {
+			if l.UserID == viewerID && l.AccountID == accountID {
+				delete(blob.Links, publish.ID(l.Hash))
+				crypt.Wipe(l.Envelope)
+				res.Links++
+				continue
+			}
+			published = append(published, l)
+		}
+		st.Published = published
+
+		for i := range u.ProxyDevices {
+			d := &u.ProxyDevices[i]
+			var scope []store.DeviceScope
+			for _, c := range d.ScopeCols {
+				if c.AccountID != accountID {
+					scope = append(scope, c)
+				}
+			}
+			if len(scope) != len(d.ScopeCols) {
+				res.Devices++
+			}
+			d.ScopeCols = scope
+		}
+
+		sealedBlob, err := sealed.Seal(dataKey, blob, u.Login)
+		if err != nil {
+			return nil, err
+		}
+		u.SealedBlob = sealedBlob
+		u.ConnCount = len(blob.Connections)
+		return []store.AuditEntry{{
+			When: now, Who: u.Login, What: "connection.remove", Whom: u.Login,
+			Detail: fmt.Sprintf("%s collections %d links %d jobs %d devices %d", accountID, res.Collections, res.Links, res.Jobs, res.Devices),
+		}}, nil
+	})
+	if err != nil {
+		return Disconnected{}, err
+	}
+	if res.Devices > 0 {
+		s.devicesChanged(viewerID)
+	}
+	return res, nil
+}
+
+func selectionsNotOf(sels []sealed.Selection, accountID string) []sealed.Selection {
+	var out []sealed.Selection
+	for _, sel := range sels {
+		if sel.AccountID != accountID {
+			out = append(out, sel)
+		}
+	}
+	return out
 }
 
 // RevealConnectionPassword returns the stored password of one of the viewer's
