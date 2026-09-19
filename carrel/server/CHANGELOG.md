@@ -5,6 +5,32 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.155 — 2026-09-19
+
+timeline-tail.md. S-15.4.
+
+### Added
+
+- **The person's timeline** (`/app/contacts/{account}/{col}/{uid}/timeline`,
+  `s-contacts-7`): it answered 404. A search for one person over the ticked
+  collections: events of the window, tasks and notes whole, matched by the
+  card's addresses in `ATTENDEE` ("attendee · accepted") and `ORGANIZER`
+  ("organiser") and by `RELATED-TO` the card's UID ("related to this
+  person"); files by the person's name in their name. Nothing is matched by
+  a name in the text. From 12 months back to 3 ahead; "Widen the range"
+  moves the start back 3 months at a time; the footer says since when it
+  looked. Newest first, by month, the undated last; segments All · Events ·
+  Tasks · Notes · Files with counts. The poll bar, Retry of one source,
+  Stop and the stream are the search's (`/app/search/progress/{task}`).
+- **The card's inset** (`ContactPage.Timeline`) shows the newest rows of
+  the timeline this session opened for the person; opening the card gathers
+  nothing. `More` — "Open the timeline" — is always there.
+- **Write a note, New event, New task** from the timeline: the sheets of the
+  kind with the person in them — a note and a task relate to the card's UID
+  (`RELATED-TO`), an event invites its first address (`ATTENDEE`). The way
+  in from the shell (`/app/{kind}/quick`) and the full new form carry
+  `related` and `attendee` from the address.
+
 ## v0.0.154 — 2026-09-19
 
 Live runs of forms-tail.md and connections-tail.md.

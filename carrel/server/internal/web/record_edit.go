@@ -66,6 +66,10 @@ const (
 	// fieldRelated is the first RELATED-TO: picked from the records this
 	// session has loaded for the collection, or typed as a UID (S-11).
 	fieldRelated
+	// fieldAttendee adds one ATTENDEE to a new event: the person a timeline
+	// creates it for (S-15.4). It shows nothing of what the event holds —
+	// attendees are EventEditPage.Attendees — and travels hidden.
+	fieldAttendee
 )
 
 type editField struct {
@@ -155,6 +159,44 @@ func zoneOffered(z, held, instance string) (*time.Location, bool) {
 	}
 	loc, err := time.LoadLocation(z)
 	return loc, err == nil
+}
+
+// carriedFields are what a sheet or a new form may be opened with, by the
+// address: a relation and an attendee.
+var carriedFields = []string{"related", "attendee"}
+
+func hasField(k view.Kind, name string) bool {
+	for _, f := range editFields[k] {
+		if f.name == name {
+			return true
+		}
+	}
+	return false
+}
+
+// carried puts into values what the address brings for the fields this kind
+// has.
+func carried(c *collectionCtx, r *http.Request, values formValues) {
+	for _, name := range carriedFields {
+		if v := strings.TrimSpace(r.URL.Query().Get(name)); v != "" && hasField(c.spec.kind, name) {
+			values[name] = []string{v}
+		}
+	}
+}
+
+// carriedQuery is what of the address goes on to the sheet or form it leads
+// to.
+func carriedQuery(r *http.Request) string {
+	q := url.Values{}
+	for _, name := range carriedFields {
+		if v := strings.TrimSpace(r.URL.Query().Get(name)); v != "" {
+			q.Set(name, v)
+		}
+	}
+	if len(q) == 0 {
+		return ""
+	}
+	return "?" + q.Encode()
 }
 
 // timeLabel names the time input of a time field.
@@ -454,6 +496,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "end", label: "Ends", prop: "DTEND", typ: fieldTime},
 		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone},
 		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat},
+		{name: "attendee", label: "Attendee", prop: "ATTENDEE", typ: fieldAttendee},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: eventStatuses},
 		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
@@ -602,6 +645,8 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			vals[f.name] = repeatValues(firstValue(obj, f.prop), tz)
 		case fieldRelated:
 			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
+		case fieldAttendee:
+			vals[f.name] = []string{""}
 		case fieldList:
 			vals[f.name] = []string{strings.Join(categoriesOf(c.spec.kind, obj), ", ")}
 		case fieldBirthday:
@@ -727,7 +772,7 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 	vals := formValues{}
 	for _, f := range editFields[c.spec.kind] {
 		switch f.typ {
-		case fieldText, fieldPercent, fieldList, fieldBirthday, fieldChoice, fieldZone:
+		case fieldText, fieldPercent, fieldList, fieldBirthday, fieldChoice, fieldZone, fieldAttendee:
 			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name))}
 		case fieldArea:
 			vals[f.name] = []string{strings.TrimRight(strings.ReplaceAll(r.FormValue(f.name), "\r\n", "\n"), "\n ")}
@@ -917,6 +962,16 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				}
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], v, false)...)
+		case fieldAttendee:
+			v := strings.ToLower(strings.TrimPrefix(first(w), "mailto:"))
+			if v == "" {
+				continue
+			}
+			if !strings.Contains(v, "@") || strings.ContainsAny(v, " \t;:,<>") {
+				ch.errors[f.name] = "An attendee is an e-mail address."
+				continue
+			}
+			ch.ops = append(ch.ops, model.AddValue{Prop: f.prop, Value: "mailto:" + v})
 		case fieldRelated:
 			if first(w) == first(h) {
 				continue
@@ -1601,6 +1656,10 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
 		case fieldRepeat:
 			extra = append(extra, repeatSet(f, vals, errText))
+		case fieldAttendee:
+			if v := first(vals); v != "" {
+				main.Rows = append(main.Rows, view.FormRow{Name: f.name, Kind: view.InputHidden, Value: text(v), Error: errText})
+			}
 		case fieldRelated:
 			main.Rows = append(main.Rows,
 				view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
@@ -2055,7 +2114,9 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 	case pick:
 		s.writePage(w, r, http.StatusOK, s.newSheet(c, true))
 	default:
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: s.emptyValues(c), isNew: true, readAt: time.Now()}))
+		values := s.emptyValues(c)
+		carried(c, r, values)
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: values, isNew: true, readAt: time.Now()}))
 	}
 }
 
@@ -2081,7 +2142,7 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 	if last, remembered := blob.LastFor(spec.kind); remembered {
 		if col, found := blob.Collection(last.AccountID, last.Path); found && writable(col) {
 			if c, made := s.collectionOf(sess, spec, last.AccountID, last.Path); made {
-				s.redirect(w, r, c.listPath()+"/new/quick")
+				s.redirect(w, r, c.listPath()+"/new/quick"+carriedQuery(r))
 				return
 			}
 		}
@@ -2096,6 +2157,9 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 				continue
 			}
 			sheet := s.newSheet(c, true)
+			for i := range sheet.Target.Options {
+				sheet.Target.Options[i].ID += carriedQuery(r)
+			}
 			if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
 				_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
 				return
@@ -2131,9 +2195,7 @@ func (s *Server) getKindQuick(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	values := s.emptyValues(c)
-	if rel := strings.TrimSpace(r.FormValue("related")); rel != "" && c.spec.kind == view.KindTask {
-		values["related"] = []string{rel} // New task from an event (forms-tail.md)
-	}
+	carried(c, r, values)
 	sheet := s.quickSheet(c, editState{values: values, isNew: true, readAt: time.Now()})
 	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
 		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
@@ -2170,9 +2232,12 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
 	sheet := s.newSheet(c, false)
 	form := s.recordFormOf(c, st, quickFields(c.spec.kind))
-	if rel := first(st.values["related"]); rel != "" && len(form.Sets) > 0 {
-		// The relation travels with the sheet, not as a field of it.
-		form.Sets[0].Rows = append(form.Sets[0].Rows, view.FormRow{Name: "related", Kind: view.InputHidden, Value: text(rel)})
+	for _, name := range carriedFields {
+		if v := first(st.values[name]); v != "" && len(form.Sets) > 0 && hasField(c.spec.kind, name) {
+			// What a sheet was opened for travels with it, not as a field of
+			// it: New task from an event, a note or an event from a timeline.
+			form.Sets[0].Rows = append(form.Sets[0].Rows, view.FormRow{Name: name, Kind: view.InputHidden, Value: text(v)})
+		}
 	}
 	quick := c.listPath() + "/new/quick"
 	form.Action = s.route(quick)

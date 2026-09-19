@@ -171,6 +171,10 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	}
 	page.Tags = s.recordTags(c, obj)
 	page.Foreign = card.Foreign(obj)
+	// The inset shows the timeline this session gathered; opening the card
+	// gathers nothing (S-15.4). The way to it is always there.
+	page.Timeline = s.timelineInset(c, uid, obj)
+	page.More = view.Action{ID: "contact.timeline", Label: "Open the timeline", Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}
 	if photoOf(obj) == linkedPhoto {
 		page.PhotoNote = externalPhotoNote
 	}

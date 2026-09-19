@@ -102,10 +102,6 @@ func kindTitle(kind string) string {
 	}
 }
 
-func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
-	s.ownedRecordStub(w, r)
-}
-
 // ownedRecordStub answers record routes whose functions come in later steps:
 // ownership first, then 404.
 func (s *Server) ownedRecordStub(w http.ResponseWriter, r *http.Request) {

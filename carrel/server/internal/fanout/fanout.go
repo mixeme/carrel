@@ -36,6 +36,7 @@ type Item struct {
 	Object                          *model.Object // records; nil for files
 	FileName                        string
 	FileSize                        int64
+	FileModified                    time.Time // the listing's getlastmodified; zero when the server sent none
 }
 
 // Source is one collection behind a task.

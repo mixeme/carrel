@@ -670,7 +670,7 @@ func (c *collectionSource) findFiles(ctx context.Context, q fanout.Query) ([]fan
 			if needle == "" || strings.Contains(strings.ToLower(e.Name), needle) {
 				items = append(items, fanout.Item{
 					AccountID: c.conn.ID, Col: c.col.Path, Path: e.Path, ETag: e.ETag,
-					Kind: view.KindFile, FileName: e.Name, FileSize: e.Size,
+					Kind: view.KindFile, FileName: e.Name, FileSize: e.Size, FileModified: e.Modified,
 				})
 			}
 		}
@@ -692,6 +692,8 @@ func (s *Server) openSearchTask(w http.ResponseWriter, r *http.Request) (*sessio
 		return sess, v, searchOwner(v.Query().Text), true
 	case *listTask:
 		return sess, v.Task, listOwner(v), true
+	case *timelineTask:
+		return sess, v.Task, timelineOwner(v), true
 	}
 	s.notFound(w, r)
 	return nil, nil, pollOwner{}, false

@@ -85,11 +85,14 @@ timeline»). Поле `Books` заполняется только связанн
       правки, если хватает `ContactTimelinePage`. S-15.4; не хватило —
       `ContactTimelinePage` получила `Poll`, `Groups` (`TimelineGroup` по
       месяцам вместо `Rows`) и `Note` (подвал), правка C-6 и U-6
-- [ ] `web.getContactTimeline`: задача веера `t-…` с источниками — отмеченные
+- [x] `web.getContactTimeline`: задача веера `t-…` с источниками — отмеченные
       календарные коллекции всех трёх родов; SSE и poll теми же маршрутами
-      `/app/search/progress/{task}`; `Rows` — `TimelineRow` с `Why`
-- [ ] Сегменты и диапазон; файлы из `ATTACH` найденных записей
-- [ ] Карточка: `More` всегда; `Timeline` — из выдачи этой сессии
-- [ ] Кнопки создания с подставленным человеком
+      `/app/search/progress/{task}`; `Groups` по месяцам — `TimelineRow` с `Why`
+- [x] Сегменты и диапазон; файлы — по имени человека в имени файла (решение
+      владельца вместо «из `ATTACH`»)
+- [x] Карточка: `More` всегда; `Timeline` — из выдачи этой сессии
+- [x] Кнопки создания с подставленным человеком (`v0.0.155`,
+      `TestContactTimeline` — все шаги кода)
 - [ ] Живой тест: Baikal и Nextcloud, событие с `ATTENDEE` карточки находится
-      с «attendee», заметка с именем — с «mentioned in the text»
+      с «attendee», заметка с `RELATED-TO` карточки — с «related to this
+      person», событие с именем только в тексте не находится
