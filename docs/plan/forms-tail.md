@@ -70,7 +70,11 @@
       `TestRowLabelSurvivesTheConflictScreen`). Попутно: черновик конфликта
       заполнял N против серверной версии и предлагал имя, которого никто
       не набирал
-- [ ] Событие: Status, Categories, пояс
+- [x] Событие: Status, Categories, пояс (`v0.0.145`,
+      `TestEventStatusAndCategories`, `TestEventTimeZone`,
+      `cal.TestTimezoneFromTheZoneDatabase`). Новый `TZID` приносит свой
+      `VTIMEZONE` (RFC 5545 §3.2.19), собранный из базы поясов сервера;
+      список поясов — UTC, пояс экземпляра и ~60 распространённых
 - [ ] Событие: Repeats — простые поля и Advanced RRULE; `RecurrenceBlock.Fields`
       заполняется для формы. Живой тест: серия правится, исключения целы
 - [ ] Задача: Start date, Status, Priority, Location, Categories, Related to

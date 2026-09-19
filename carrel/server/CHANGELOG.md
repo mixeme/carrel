@@ -5,6 +5,30 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.145 — 2026-09-19
+
+forms-tail.md, step 3.
+
+### Added
+
+- **The event form has Status, Categories and Time zone** (`s-agenda-3`).
+  Status is a choice of no status, Tentative, Confirmed, Cancelled, and a
+  value another client wrote stays a choice; anything else is refused.
+  Categories are one comma field, each item written as a TEXT item of one
+  `CATEGORIES` line.
+- **Time zone** shows the zone the event came in, marked "as sent", then
+  UTC, the instance zone and a list of common zones. Saves that do not
+  change it keep `DTSTART` and `DTEND` as they were. Another zone rewrites
+  both at the same instants in that zone and adds its `VTIMEZONE` when the
+  document has none (built from the server's zone database for the event's
+  year, with the yearly rule of its changes); UTC writes `Z` and no `TZID`.
+  The form's own times stay in the instance zone (C-10). An all-day event
+  has no zone and no such field.
+
+### Changed
+
+- `cal.EnsureTimezone`, `cal.Timezone`.
+
 ## v0.0.144 — 2026-09-19
 
 forms-tail.md, step 2.

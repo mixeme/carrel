@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -51,6 +52,12 @@ const (
 	// fieldAddress is ADR as five inputs a row: street, city, region,
 	// postcode, country. PO box and extended are kept as they were.
 	fieldAddress
+	// fieldChoice is one value of a fixed list, written as it is: STATUS.
+	// A value another client wrote is kept as a choice.
+	fieldChoice
+	// fieldZone is the zone DTSTART and DTEND are written in: their TZID,
+	// "UTC" or "floating". The form's times stay in the instance zone (C-10).
+	fieldZone
 )
 
 type editField struct {
@@ -59,10 +66,85 @@ type editField struct {
 	prop     string
 	typ      fieldType
 	required bool
-	allDay   bool   // fieldTime: the field has its own all-day box
-	typed    bool   // fieldMulti: each row has its label, the TYPE parameter
+	allDay   bool // fieldTime: the field has its own all-day box
+	typed    bool // fieldMulti: each row has its label, the TYPE parameter
+	choices  []fieldOption
 	hint     string // shown under the field, when the rule needs saying
 }
+
+// fieldOption is one value a fieldChoice offers.
+type fieldOption struct{ value, label string }
+
+// zoneChoices are the zones the form offers besides the one the event came
+// in, UTC and the instance's own.
+var zoneChoices = []string{
+	"Europe/London", "Europe/Dublin", "Europe/Lisbon", "Europe/Paris", "Europe/Berlin", "Europe/Madrid", "Europe/Rome",
+	"Europe/Amsterdam", "Europe/Stockholm", "Europe/Warsaw", "Europe/Prague", "Europe/Vienna", "Europe/Athens",
+	"Europe/Helsinki", "Europe/Kyiv", "Europe/Istanbul", "Europe/Minsk", "Europe/Moscow", "Europe/Samara",
+	"Asia/Yekaterinburg", "Asia/Omsk", "Asia/Novosibirsk", "Asia/Krasnoyarsk", "Asia/Irkutsk", "Asia/Yakutsk",
+	"Asia/Vladivostok", "Asia/Magadan", "Asia/Kamchatka", "Asia/Tbilisi", "Asia/Yerevan", "Asia/Baku",
+	"Asia/Almaty", "Asia/Tashkent", "Asia/Dubai", "Asia/Kolkata", "Asia/Bangkok", "Asia/Shanghai", "Asia/Singapore",
+	"Asia/Tokyo", "Asia/Seoul", "Australia/Perth", "Australia/Sydney", "Pacific/Auckland",
+	"America/St_Johns", "America/Halifax", "America/New_York", "America/Chicago", "America/Denver",
+	"America/Phoenix", "America/Los_Angeles", "America/Anchorage", "Pacific/Honolulu",
+	"America/Mexico_City", "America/Bogota", "America/Sao_Paulo", "America/Argentina/Buenos_Aires",
+	"Africa/Cairo", "Africa/Johannesburg", "Africa/Lagos", "Africa/Nairobi",
+}
+
+// zoneOf is the zone a DTSTART is written in: its TZID, "UTC", "floating",
+// or "" for a day, which has none.
+func zoneOf(cur []model.RawValue) string {
+	if len(cur) == 0 {
+		return ""
+	}
+	v := cur[0]
+	switch {
+	case v.Params["VALUE"] == "DATE" || len(strings.TrimSpace(v.Text)) == len("20060102"):
+		return ""
+	case v.Params["TZID"] != "":
+		return v.Params["TZID"]
+	case strings.HasSuffix(v.Text, "Z"):
+		return "UTC"
+	}
+	return "floating"
+}
+
+// zoneOptions are the zone the event came in, marked so, then UTC, the
+// instance zone and zoneChoices.
+func zoneOptions(held, selected, instance string) []view.Option {
+	label := func(z string) string {
+		if z == "floating" {
+			return "Floating — the same clock time everywhere"
+		}
+		return z
+	}
+	opts := []view.Option{{Value: held, Label: text(label(held) + " · as sent"), Selected: selected == held}}
+	seen := map[string]bool{held: true}
+	for _, z := range append([]string{"UTC", instance}, zoneChoices...) {
+		if seen[z] {
+			continue
+		}
+		seen[z] = true
+		opts = append(opts, view.Option{Value: z, Label: text(label(z)), Selected: z == selected})
+	}
+	return opts
+}
+
+// zoneOffered reports whether a zone may be chosen: the one held, or one the
+// list offers and the zone database knows.
+func zoneOffered(z, held, instance string) (*time.Location, bool) {
+	if z == held {
+		return nil, true
+	}
+	if z != "UTC" && z != instance && !slices.Contains(zoneChoices, z) {
+		return nil, false
+	}
+	loc, err := time.LoadLocation(z)
+	return loc, err == nil
+}
+
+// eventStatuses are the STATUS values of an event (RFC 5545 §3.8.1.11).
+var eventStatuses = []fieldOption{{"", "No status"}, {"TENTATIVE", "Tentative"}, {"CONFIRMED", "Confirmed"}, {"CANCELLED", "Cancelled"}}
 
 var editFields = map[view.Kind][]editField{
 	view.KindContact: {
@@ -84,7 +166,10 @@ var editFields = map[view.Kind][]editField{
 		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
 		{name: "start", label: "Starts", prop: "DTSTART", typ: fieldTime, required: true, allDay: true},
 		{name: "end", label: "Ends", prop: "DTEND", typ: fieldTime},
+		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
+		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: eventStatuses},
+		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
 		{name: "reminder", label: "Reminders", typ: fieldReminders},
 	},
@@ -213,6 +298,10 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 		switch f.typ {
 		case fieldText, fieldArea:
 			vals[f.name] = []string{c.text(obj, f.prop)}
+		case fieldChoice:
+			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
+		case fieldZone:
+			vals[f.name] = []string{zoneOf(props[f.prop])}
 		case fieldList:
 			vals[f.name] = []string{strings.Join(categoriesOf(c.spec.kind, obj), ", ")}
 		case fieldBirthday:
@@ -332,7 +421,7 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 	vals := formValues{}
 	for _, f := range editFields[c.spec.kind] {
 		switch f.typ {
-		case fieldText, fieldPercent, fieldList, fieldBirthday:
+		case fieldText, fieldPercent, fieldList, fieldBirthday, fieldChoice, fieldZone:
 			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name))}
 		case fieldArea:
 			vals[f.name] = []string{strings.TrimRight(strings.ReplaceAll(r.FormValue(f.name), "\r\n", "\n"), "\n ")}
@@ -382,7 +471,11 @@ type change struct {
 	ops           []model.PatchOp
 	alarms        []cal.Alarm
 	alarmsChanged bool
-	errors        map[string]string
+	// zone is a zone the record's times moved to, whose VTIMEZONE the
+	// document must carry; zoneYear is the year it is taken for.
+	zone     *time.Location
+	zoneYear int
+	errors   map[string]string
 }
 
 // buildChange turns the fields that differ between have and want into patch
@@ -395,6 +488,20 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	fillNames(c.spec.kind, have, want)
 	startRow := triple(want["start"])
 	startChanged := !sameRows(want["start"], have["start"])
+	// A new zone rewrites both times at the instants the form names, even
+	// when neither row changed.
+	var zone string
+	if held := first(have["tz"]); held != "" && first(want["tz"]) != held && startRow[2] != "on" {
+		loc, ok := zoneOffered(first(want["tz"]), held, tz.String())
+		if !ok {
+			ch.errors["tz"] = "Choose a time zone from the list."
+		} else {
+			zone = first(want["tz"])
+			if loc != nil && zone != "UTC" {
+				ch.zone = loc
+			}
+		}
+	}
 	var startAt, endAt time.Time
 
 	for _, f := range editFields[c.spec.kind] {
@@ -452,6 +559,16 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				items[i] = cal.EscapeText(items[i])
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], strings.Join(items, ","), false)...)
+		case fieldChoice:
+			v := first(w)
+			if v == first(h) {
+				continue
+			}
+			if !offered(f.choices, v, first(h)) {
+				ch.errors[f.name] = "Choose a " + strings.ToLower(f.label) + " from the list."
+				continue
+			}
+			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], v, false)...)
 		case fieldBirthday:
 			v := first(w)
 			if v == first(h) {
@@ -490,14 +607,17 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			case "end":
 				endAt = at
 			}
-			if sameRows(w, h) && !(f.name == "end" && startChanged && row[0] != "") {
+			if sameRows(w, h) && !(f.name == "end" && startChanged && row[0] != "") && (zone == "" || row[0] == "") {
 				continue
 			}
 			shift := 0
 			if f.name == "end" && allDay {
 				shift = 1
 			}
-			ops := timeOps(f.prop, props[f.prop], row, allDay, shift, tz)
+			ops := timeOps(f.prop, props[f.prop], row, allDay, shift, tz, zone)
+			if f.name == "start" && ch.zone != nil {
+				ch.zoneYear = at.Year()
+			}
 			if f.name == "end" && len(props["DURATION"]) > 0 && row[0] != "" {
 				ops = append([]model.PatchOp{model.RemoveProp{Prop: "DURATION"}}, ops...)
 			}
@@ -818,6 +938,35 @@ func multiOps(prop string, cur []model.RawValue, rows, labels []string) []model.
 	return ops
 }
 
+// offered reports whether v is one of the choices or the value the record
+// holds.
+func offered(choices []fieldOption, v, held string) bool {
+	if v == held {
+		return true
+	}
+	for _, c := range choices {
+		if c.value == v {
+			return true
+		}
+	}
+	return false
+}
+
+// choiceOptions are the choices and, after them, the value the record holds
+// when it is none of them.
+func choiceOptions(choices []fieldOption, selected, held string) []view.Option {
+	var opts []view.Option
+	seen := false
+	for _, c := range choices {
+		opts = append(opts, view.Option{Value: c.value, Label: text(c.label), Selected: c.value == selected})
+		seen = seen || c.value == held
+	}
+	if held != "" && !seen {
+		opts = append(opts, view.Option{Value: held, Label: text(held), Selected: held == selected})
+	}
+	return opts
+}
+
 // sameLabels compares the labels of the rows the form had.
 func sameLabels(a, b []string) bool {
 	for i := 0; i < max(len(a), len(b)); i++ {
@@ -844,10 +993,11 @@ func labelOptions(selected string) []view.Option {
 }
 
 // timeOps writes a date or date-time in the form it had: a TZID stays with
-// its zone, UTC stays UTC, a floating time stays floating. A day is a DATE;
-// shiftDays turns the last day of an all-day event into its exclusive DTEND.
-// The row is already validated by rowTime.
-func timeOps(prop string, cur []model.RawValue, row [3]string, allDay bool, shiftDays int, tz *time.Location) []model.PatchOp {
+// its zone, UTC stays UTC, a floating time stays floating — unless zone
+// names another one to write it in (a TZID, "UTC" or "floating"). A day is a
+// DATE; shiftDays turns the last day of an all-day event into its exclusive
+// DTEND. The row is already validated by rowTime.
+func timeOps(prop string, cur []model.RawValue, row [3]string, allDay bool, shiftDays int, tz *time.Location, zone string) []model.PatchOp {
 	if row[0] == "" {
 		if len(cur) > 0 {
 			return []model.PatchOp{model.RemoveProp{Prop: prop}}
@@ -872,8 +1022,18 @@ func timeOps(prop string, cur []model.RawValue, row [3]string, allDay bool, shif
 	} else {
 		at, _ := time.ParseInLocation("2006-01-02 15:04", row[0]+" "+row[1], tz)
 		wasDate := old.Params["VALUE"] == "DATE" || len(old.Text) == len("20060102")
-		switch zone := old.Params["TZID"]; {
-		case zone != "":
+		switch zone {
+		case "UTC":
+			old = model.RawValue{Text: "Z"}
+			delete(params, "TZID")
+		case "floating":
+			old = model.RawValue{Text: "local"}
+			delete(params, "TZID")
+		case "":
+			zone = old.Params["TZID"]
+		}
+		switch {
+		case zone != "" && zone != "UTC" && zone != "floating":
 			params["TZID"] = zone
 			if loc, err := time.LoadLocation(zone); err == nil {
 				value = at.In(loc).Format("20060102T150405")
@@ -907,7 +1067,13 @@ func (c *collectionCtx) apply(obj *model.Object, ch change) (*model.Object, erro
 		}
 	}
 	if ch.alarmsChanged {
-		return cal.SetAlarms(obj, ch.alarms)
+		var err error
+		if obj, err = cal.SetAlarms(obj, ch.alarms); err != nil {
+			return nil, err
+		}
+	}
+	if ch.zone != nil {
+		return cal.EnsureTimezone(obj, ch.zone, ch.zoneYear)
 	}
 	return obj, nil
 }
@@ -1040,6 +1206,20 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
 		case fieldList:
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
+		case fieldZone:
+			held := zoneOf(props[f.prop])
+			if held == "" {
+				continue // a day has no zone; a new event is written in UTC
+			}
+			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
+				Options: zoneOptions(held, first(vals), s.tz().String()), Error: errText})
+		case fieldChoice:
+			var held string
+			if st.obj != nil {
+				held = strings.TrimSpace(firstValue(st.obj, f.prop))
+			}
+			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
+				Options: choiceOptions(f.choices, first(vals), held), Error: errText})
 		case fieldBirthday:
 			// A date input cannot hold a day without a year: such a value is
 			// shown as text, as it is.
