@@ -83,10 +83,10 @@
       целы
 - [x] Задача: Start date, Status, Priority, Location, Categories, Related to
       (`v0.0.147`, `TestTaskFields`)
-- [ ] Заметка: Date и Time (`DTSTART` журнала), Tags, Related to. **Решить с
-      владельцем**: правка заметки отдаёт `NoteDoc` (C-6.9) — заголовок и
-      текст, полей нет. Нужна правка C-6: `NoteDoc.Meta *Form` (или
-      `Fields []FormRow`) для правки, либо `NotePage` с формой
+- [x] Заметка: Date и Time (`DTSTART` журнала), Tags, Related to
+      (`v0.0.152`, `TestNoteDateTagsRelated`). Правка контракта (решение
+      владельца 19.09.2026: ошибка контракта, форма получает всё, что ей
+      нужно): `NoteDoc.Fields []FormRow` в C-6 и U
 - [x] Mark done в карточке задачи и в строке списка (`v0.0.148`,
       `TestMarkDoneFromTheCardAndTheRow`). Флажку строки своего поля в
       `TaskRow` нет — действие лежит в `TaskRow.Menu` с ID `task.done`;

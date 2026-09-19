@@ -179,6 +179,9 @@ type NoteDoc struct {
 	Bar      []Action `json:"bar"`      // панель правки; отступает по рангу (L-4)
 	Dirty    bool     `json:"dirty"`
 	ReadOnly bool     `json:"readOnly"`
+	// Fields — поля правки вне текста: дата и время, теги, связь. Только в
+	// режиме правки; уходят тем же сохранением, что заголовок и тело.
+	Fields []FormRow `json:"fields"`
 }
 
 type NoteMeta struct {

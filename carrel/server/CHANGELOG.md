@@ -5,6 +5,26 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.152 — 2026-09-19
+
+forms-tail.md, step 6. **Contract change (C-6).**
+
+### Changed
+
+- **`NoteDoc.Fields []FormRow`** (C-6, U: the note's edit screen): the
+  fields of the note's edit that are not the text — Date and Time (the
+  journal's `DTSTART`), Tags, Related to. `NoteDoc` carried the title and
+  the body only, and the frame `s-notes-4` has more beside the text. Empty
+  when reading. They go with the same Save as the title and the body.
+
+### Added
+
+- **A note's date, time, tags and relation are edited** (`s-notes-4`). A
+  date without a time is a day (`VALUE=DATE`); there is no all-day box.
+  Tags are one comma field, `CATEGORIES`. Related to is picked from the
+  records the session has loaded, or typed as a UID. A refused value comes
+  back on its field.
+
 ## v0.0.151 — 2026-09-19
 
 connections-tail.md, step 6.

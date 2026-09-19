@@ -79,8 +79,11 @@ type editField struct {
 	// optional fields a record leaves empty go into a set of their own on
 	// its full form, "Show N empty fields"; the client folds it.
 	optional bool
-	choices  []fieldOption
-	hint     string // shown under the field, when the rule needs saying
+	// timeOptional: a date without a time is a day (a note's DTSTART), and
+	// there is no all-day box.
+	timeOptional bool
+	choices      []fieldOption
+	hint         string // shown under the field, when the rule needs saying
 }
 
 // fieldOption is one value a fieldChoice offers.
@@ -152,6 +155,14 @@ func zoneOffered(z, held, instance string) (*time.Location, bool) {
 	}
 	loc, err := time.LoadLocation(z)
 	return loc, err == nil
+}
+
+// timeLabel names the time input of a time field.
+func timeLabel(f editField) string {
+	if f.timeOptional {
+		return "Time"
+	}
+	return f.label + " at"
 }
 
 // relatedOptions are "nothing", the record related now, and every record of
@@ -466,6 +477,9 @@ var editFields = map[view.Kind][]editField{
 	view.KindNote: {
 		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
 		{name: "description", label: "Body", prop: "DESCRIPTION", typ: fieldArea},
+		{name: "start", label: "Date", prop: "DTSTART", typ: fieldTime, timeOptional: true},
+		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
+		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
 	},
 }
 
@@ -662,7 +676,7 @@ func timeRow(f editField, tm cal.Timing, tz *time.Location) []string {
 	if !tm.AllDay {
 		row[1] = at.In(tz).Format("15:04")
 	}
-	if tm.AllDay && f.allDay {
+	if tm.AllDay && (f.allDay || f.timeOptional) {
 		row[2] = "on"
 	}
 	return row
@@ -763,6 +777,9 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 			row := []string{strings.TrimSpace(r.FormValue(f.name + ".date")), strings.TrimSpace(r.FormValue(f.name + ".time")), ""}
 			if f.allDay {
 				row[2] = checkbox(r, f.name+".allday")
+			}
+			if f.timeOptional && row[0] != "" && row[1] == "" {
+				row[2] = "on"
 			}
 			vals[f.name] = row
 		case fieldDone:
@@ -1500,6 +1517,15 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		if attaching {
 			doc.Bar = append(doc.Bar, s.attachAction(c, st.uid, st.etag, "edit"))
 		}
+		// The title and the body are the document; the version travels in
+		// the address of Save. The rest of the form is Fields (C-6).
+		for _, set := range form.Sets {
+			for _, row := range set.Rows {
+				if row.Kind != view.InputHidden && row.Name != "summary" && row.Name != "description" {
+					doc.Fields = append(doc.Fields, row)
+				}
+			}
+		}
 		// NoteDoc has no shell: a loss or a notice needs the page around it.
 		if st.loss != nil || len(sh.Notices) > 0 {
 			return view.NotePage{Shell: sh, UID: st.uid, Doc: doc, Source: c.source(), Loss: st.loss}
@@ -1633,7 +1659,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			row := triple(vals)
 			main.Rows = append(main.Rows,
 				view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required},
-				view.FormRow{Name: f.name + ".time", Label: text(f.label + " at"), Kind: view.InputTime, Value: text(row[1])})
+				view.FormRow{Name: f.name + ".time", Label: text(timeLabel(f)), Kind: view.InputTime, Value: text(row[1])})
 			if f.allDay {
 				main.Rows = append(main.Rows, view.FormRow{Name: f.name + ".allday", Label: "All day", Kind: view.InputCheck, Value: text(row[2])})
 			}

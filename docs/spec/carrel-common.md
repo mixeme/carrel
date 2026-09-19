@@ -1010,6 +1010,7 @@ type NoteDoc struct { // фрагмент: чтение или правка
     Bar      []Action // панель правки; отступает по рангу (L-4)
     Dirty    bool
     ReadOnly bool
+    Fields   []FormRow // правка: дата и время, теги, связь; уходят с тем же сохранением
 }
 
 type NoteMeta struct {

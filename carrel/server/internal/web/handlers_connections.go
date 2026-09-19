@@ -19,7 +19,7 @@ import (
 // echoed: a failed attempt asks for it again.
 type connectionForm struct {
 	Label, Server, Login, CertFingerprint string
-	ServerErr                      view.Text
+	ServerErr                             view.Text
 	// Editing is the connection the form edits; empty for a new one.
 	Editing string
 }
