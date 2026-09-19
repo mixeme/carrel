@@ -758,3 +758,39 @@ func TestFolderUploadRefusesAWayOut(t *testing.T) {
 		t.Error("a file landed outside the folder")
 	}
 }
+
+// Overwriting a folder is the one answer that removes what was there. The
+// copy is written beside it first, under a name of its own, and the old
+// folder goes only when the new one is whole: a copy that fails half way
+// leaves the destination as it was, instead of deleted and half-filled.
+func TestOverwritingAFolderKeepsItUntilTheCopyIsWhole(t *testing.T) {
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"sub/inner.txt", "new")
+	f.srv.SeedFile(filesDocs+"dest/sub/keep.txt", "old")
+	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	sheet := opSheet(t, f, rowMenu(t, fileRow(t, page, "sub"), "file.copy"), url.Values{"to": {f.at("", "dest", "")}})
+	f.h.do(postForm(confirmHref(t, sheet), f.sess, url.Values{}))
+	page = decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	f.srv.Refuse(http.MethodPut, http.StatusInsufficientStorage, "full")
+	f.h.do(postForm(option(t, queueRow(t, page.Queue, "sub"), "transfer.overwrite"), f.sess, url.Values{}))
+	if got, ok := f.srv.File(filesDocs + "dest/sub/keep.txt"); !ok || got != "old" {
+		t.Errorf("a failed overwrite took the folder it was to replace: keep.txt %q, %v", got, ok)
+	}
+	f.srv.Accept(http.MethodPut)
+	page = decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	sheet = opSheet(t, f, rowMenu(t, fileRow(t, page, "sub"), "file.copy"), url.Values{"to": {f.at("", "dest", "")}})
+	f.h.do(postForm(confirmHref(t, sheet), f.sess, url.Values{}))
+	page = decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	f.h.do(postForm(option(t, queueRow(t, page.Queue, "sub"), "transfer.overwrite"), f.sess, url.Values{}))
+	if got, _ := f.srv.File(filesDocs + "dest/sub/inner.txt"); got != "new" {
+		t.Errorf("the overwrite: inner.txt %q", got)
+	}
+	if _, ok := f.srv.File(filesDocs + "dest/sub/keep.txt"); ok {
+		t.Error("an overwritten folder kept what the new one does not hold")
+	}
+	for _, n := range f.srv.Names(filesDocs + "dest/") {
+		if strings.Contains(n, "carrel") {
+			t.Errorf("a temporary folder was left: %s", n)
+		}
+	}
+}

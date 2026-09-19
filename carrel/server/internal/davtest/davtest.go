@@ -208,6 +208,20 @@ func (s *Server) File(p string) (string, bool) {
 	return string(data), true
 }
 
+// Names lists the entries of a folder under FileRoot, as the server holds
+// them; nil for a folder that is not there.
+func (s *Server) Names(p string) []string {
+	entries, err := os.ReadDir(s.localPath(p))
+	if err != nil {
+		return nil
+	}
+	out := make([]string, len(entries))
+	for i, e := range entries {
+		out[i] = e.Name()
+	}
+	return out
+}
+
 // SeedFolder creates an empty folder under FileRoot.
 func (s *Server) SeedFolder(p string) {
 	if err := os.MkdirAll(s.localPath(p), 0o755); err != nil {

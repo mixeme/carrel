@@ -5,6 +5,18 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.132 — 2026-09-19
+
+### Fixed
+
+- **"Overwrite this one" on a folder no longer deletes the folder before its
+  replacement exists.** The old folder was deleted first and then the new one
+  was copied in. A copy that failed half way (the server full, the connection
+  dropped) left neither. The copy is now written beside the old folder under
+  a name of its own. The old folder goes only when the copy is whole, and the
+  copy then takes its name. A failed copy is removed and leaves the
+  destination as it was.
+
 ## v0.0.131 — 2026-09-19
 
 ### Fixed

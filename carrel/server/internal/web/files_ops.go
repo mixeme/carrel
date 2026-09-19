@@ -944,16 +944,32 @@ func (s *Server) place(ctx context.Context, sess *session.Session, dest *fileCtx
 		return dest.files.Move(ctx, srcPath, dst, overwrite)
 	}
 	if t.dir {
+		// Overwriting a folder removes what was there, so the copy is written
+		// beside it first and the old folder goes only when the new one is
+		// whole: a copy that fails half way leaves the destination as it was.
+		into := dst
 		if overwrite {
-			if err := dest.files.Delete(ctx, dst, ""); err != nil {
+			if into, err = dest.path(append(append(slices.Clone(t.folder), t.rel...), name+".carrel-"+t.id), true); err != nil {
 				return err
 			}
 		}
-		if n, err := file.CopyTree(ctx, src.files, srcPath, dest.files, dst, s.cfg.FilesMaxEntries); err != nil {
+		if n, err := file.CopyTree(ctx, src.files, srcPath, dest.files, into, s.cfg.FilesMaxEntries); err != nil {
+			if overwrite {
+				_ = dest.files.Delete(ctx, into, "")
+			}
 			if n == 0 && dav.IsStatus(err, http.StatusMethodNotAllowed) {
 				return err
 			}
 			return &partialCopy{n: n, err: err}
+		}
+		if overwrite {
+			if err := dest.files.Delete(ctx, dst, ""); err != nil {
+				_ = dest.files.Delete(ctx, into, "")
+				return err
+			}
+			if err := dest.files.Move(ctx, into, dst, false); err != nil {
+				return fmt.Errorf("the copy is whole under %s, but it could not take the old name: %w", name+".carrel-"+t.id, err)
+			}
 		}
 	} else if err := file.Copy(ctx, src.files, srcPath, dest.files, dst, overwrite); err != nil {
 		return err
