@@ -63,6 +63,9 @@ const (
 	// fieldRepeat is RRULE, edited as a whole series (S-11): Frequency,
 	// Every, On, Until, Times, and the rule itself. See repeatValues.
 	fieldRepeat
+	// fieldRelated is the first RELATED-TO: picked from the records this
+	// session has loaded for the collection, or typed as a UID (S-11).
+	fieldRelated
 )
 
 type editField struct {
@@ -146,6 +149,33 @@ func zoneOffered(z, held, instance string) (*time.Location, bool) {
 	}
 	loc, err := time.LoadLocation(z)
 	return loc, err == nil
+}
+
+// relatedOptions are "nothing", the record related now, and every record of
+// the loaded lists of this collection but the record itself.
+func relatedOptions(index []indexEntry, self, selected string) []view.Option {
+	opts := []view.Option{{Value: "", Label: "Nothing", Selected: selected == ""}}
+	seen := map[string]bool{self: true, "": true}
+	title := map[string]string{}
+	for _, e := range index {
+		title[e.UID] = e.Title
+	}
+	if selected != "" && selected != self {
+		label := selected + " · not in the lists loaded for this collection"
+		if t, ok := title[selected]; ok {
+			label = t
+		}
+		opts = append(opts, view.Option{Value: selected, Label: text(label), Selected: true})
+		seen[selected] = true
+	}
+	for _, e := range index {
+		if seen[e.UID] {
+			continue
+		}
+		seen[e.UID] = true
+		opts = append(opts, view.Option{Value: e.UID, Label: text(e.Title + " · " + string(e.Kind))})
+	}
+	return opts
 }
 
 // repeatDays are the days of On, in the order the form shows them.
@@ -377,6 +407,14 @@ func repeatSet(f editField, vals []string, errText view.Text) view.FieldSet {
 	return set
 }
 
+// taskStatuses are the STATUS values of a task (RFC 5545 §3.8.1.11).
+var taskStatuses = []fieldOption{{"", "No status"}, {"NEEDS-ACTION", "Needs action"}, {"IN-PROCESS", "In progress"},
+	{"COMPLETED", "Completed"}, {"CANCELLED", "Cancelled"}}
+
+// priorities are PRIORITY as three steps (RFC 5545 §3.8.1.9: 1 is the
+// highest, 9 the lowest); another number stays a choice.
+var priorities = []fieldOption{{"", "No priority"}, {"1", "High"}, {"5", "Medium"}, {"9", "Low"}}
+
 // eventStatuses are the STATUS values of an event (RFC 5545 §3.8.1.11).
 var eventStatuses = []fieldOption{{"", "No status"}, {"TENTATIVE", "Tentative"}, {"CONFIRMED", "Confirmed"}, {"CANCELLED", "Cancelled"}}
 
@@ -410,9 +448,15 @@ var editFields = map[view.Kind][]editField{
 	},
 	view.KindTask: {
 		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
+		{name: "start", label: "Starts", prop: "DTSTART", typ: fieldTime, allDay: true},
 		{name: "due", label: "Due", prop: "DUE", typ: fieldTime, allDay: true},
 		{name: "done", label: "Done", prop: "STATUS", typ: fieldDone},
+		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: taskStatuses},
+		{name: "priority", label: "Priority", prop: "PRIORITY", typ: fieldChoice, choices: priorities},
 		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent},
+		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
+		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
+		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
 		{name: "reminder", label: "Reminders", typ: fieldReminders},
 	},
@@ -539,6 +583,8 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			vals[f.name] = []string{zoneOf(props[f.prop])}
 		case fieldRepeat:
 			vals[f.name] = repeatValues(firstValue(obj, f.prop), tz)
+		case fieldRelated:
+			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
 		case fieldList:
 			vals[f.name] = []string{strings.Join(categoriesOf(c.spec.kind, obj), ", ")}
 		case fieldBirthday:
@@ -675,6 +721,12 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 				}
 				vals[f.name+".type"] = append(labels, strings.TrimSpace(r.FormValue(f.name+".new.type")))
 			}
+		case fieldRelated:
+			v := strings.TrimSpace(r.FormValue(f.name + ".uid"))
+			if v == "" {
+				v = strings.TrimSpace(r.FormValue(f.name))
+			}
+			vals[f.name] = []string{v}
 		case fieldRepeat:
 			var on []string
 			for _, d := range repeatDays {
@@ -829,7 +881,29 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				ch.errors[f.name] = "Choose a " + strings.ToLower(f.label) + " from the list."
 				continue
 			}
+			if f.prop == "STATUS" && c.spec.kind == view.KindTask {
+				if first(want["done"]) != first(have["done"]) {
+					continue // the Done box said it, and says COMPLETED with it
+				}
+				switch {
+				case v == "COMPLETED" && len(props["COMPLETED"]) == 0:
+					ch.ops = append(ch.ops, model.SetText{Prop: "COMPLETED", Value: now.UTC().Format("20060102T150405Z")})
+				case v != "COMPLETED" && len(props["COMPLETED"]) > 0:
+					ch.ops = append(ch.ops, model.RemoveProp{Prop: "COMPLETED"})
+				}
+			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], v, false)...)
+		case fieldRelated:
+			if first(w) == first(h) {
+				continue
+			}
+			rows := []string{first(w)}
+			for i, v := range props[f.prop] {
+				if i > 0 {
+					rows = append(rows, v.Text)
+				}
+			}
+			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], rows, nil)...)
 		case fieldBirthday:
 			v := first(w)
 			if v == first(h) {
@@ -1470,6 +1544,12 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
 		case fieldRepeat:
 			extra = append(extra, repeatSet(f, vals, errText))
+		case fieldRelated:
+			main.Rows = append(main.Rows,
+				view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
+					Options: relatedOptions(c.index(), st.uid, first(vals)), Error: errText},
+				view.FormRow{Name: f.name + ".uid", Label: "Or enter a UID by hand", Kind: view.InputText,
+					Hint: "Filled, it wins over the choice above. Only the records already loaded for this collection are offered: nothing is asked of the servers."})
 		case fieldZone:
 			held := zoneOf(props[f.prop])
 			if held == "" {

@@ -5,6 +5,22 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.147 — 2026-09-19
+
+forms-tail.md, step 5.
+
+### Added
+
+- **The task form has Starts, Status, Priority, Location, Categories and
+  Related to** (`s-tasks-3`). Status is a choice of RFC 5545's four; set to
+  Completed it adds `COMPLETED`, set away from it takes `COMPLETED` off, as
+  the Done box does, and when the Done box changed in the same save the box
+  decides. Priority is High (1), Medium (5), Low (9) or none, and another
+  client's number stays a choice. Related to is picked from the records this
+  session has loaded for the collection — nothing is asked of the servers —
+  or typed as a UID, which wins; it writes the first `RELATED-TO` and keeps
+  the others and the parameters of the line.
+
 ## v0.0.146 — 2026-09-19
 
 forms-tail.md, step 4.

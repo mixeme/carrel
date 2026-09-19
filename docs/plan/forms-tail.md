@@ -81,8 +81,12 @@
       экземпляр целы)
 - [ ] Живой тест Repeats на Baikal и Radicale: серия правится, исключения
       целы
-- [ ] Задача: Start date, Status, Priority, Location, Categories, Related to
-- [ ] Заметка: Date и Time (`DTSTART` журнала), Tags, Related to
+- [x] Задача: Start date, Status, Priority, Location, Categories, Related to
+      (`v0.0.147`, `TestTaskFields`)
+- [ ] Заметка: Date и Time (`DTSTART` журнала), Tags, Related to. **Решить с
+      владельцем**: правка заметки отдаёт `NoteDoc` (C-6.9) — заголовок и
+      текст, полей нет. Нужна правка C-6: `NoteDoc.Meta *Form` (или
+      `Fields []FormRow`) для правки, либо `NotePage` с формой
 - [ ] Mark done в карточке задачи и в строке списка
 - [ ] New task из события (быстрый лист с `RELATED-TO`), Send у контакта,
       Export Markdown у заметки
