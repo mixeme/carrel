@@ -5,6 +5,31 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.142 — 2026-09-19
+
+connections-tail.md, steps 4 and 5.
+
+### Added
+
+- **Test and Test again on a saved connection** (C-6 `ConnectionCard`):
+  `POST /app/settings/connections?op=test&account=…` runs discovery with the
+  stored credentials and writes nothing. The trace stays on the card for the
+  session (`ConnectionCard.Trace`, C-9.1), as does the trace of Look for
+  changes; a card whose last check failed is `unavailable` and its button
+  says Test again.
+- **Edit on a connection card**: `GET …?op=edit&account=…` gives the add form
+  filled with the address, login and fingerprint, the password empty ("Leave
+  it empty to keep the stored one"), Save and Cancel. Save runs discovery
+  with the new values and writes only when it answers; the connection keeps
+  its ID, ticks and links, and what the server holds now is compared with
+  the catalog and offered as Look for changes offers it (S-6.1). A failed
+  save changes nothing and gives the form back with the trace. What the
+  session has cached of the connection is dropped.
+
+### Changed
+
+- `session.Cache.InvalidateConnection`, `Session.NoteCheck`, `CheckOf`.
+
 ## v0.0.141 — 2026-09-19
 
 connections-tail.md, step 3.

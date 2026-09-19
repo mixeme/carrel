@@ -10,14 +10,15 @@ import (
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/crypt"
+	"carrel.dev/carrel/server/view"
 )
 
 // Session holds per-login state that dies with the session (S-4).
 //
 // One session serves several requests at once, so everything that changes
 // after Create is behind mu: the deadlines, the drafts, the history, the loss
-// registry, the live-fanout count, the kept tasks, the transfer queue and the
-// readings of collections.
+// registry, the live-fanout count, the kept tasks, the transfer queue, the
+// readings of collections and the last checks of connections.
 // Cache has its own lock.
 // No method calls into a task that locks while mu is held: a task takes mu
 // through AcquireFanout and ReleaseFanout under its own lock.
@@ -40,9 +41,10 @@ type Session struct {
 	tasks      []Task // newest first
 	transfers  []Transfer
 	unlockAt   time.Time
-	readings   map[string]Reading // by connection and collection path (S-22)
-	agent      string             // the browser, as the account page names it
-	address    string             // the client address at sign-in
+	readings   map[string]Reading               // by connection and collection path (S-22)
+	checks     map[string]*view.DiagnosticTrace // last check of each connection (C-6)
+	agent      string                           // the browser, as the account page names it
+	address    string                           // the client address at sign-in
 
 	cache *Cache
 	mgr   *Manager

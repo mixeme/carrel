@@ -20,6 +20,8 @@ import (
 type connectionForm struct {
 	Server, Login, CertFingerprint string
 	ServerErr                      view.Text
+	// Editing is the connection the form edits; empty for a new one.
+	Editing string
 }
 
 // getSettingsConnections shows the connections; ?reveal={account} fills that
@@ -30,6 +32,16 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	f := connectionForm{Server: r.FormValue("server"), CertFingerprint: r.FormValue("certFingerprint")}
+	if r.URL.Query().Get("op") == "edit" {
+		key, live := sess.DataKey()
+		blob, opened := s.users.Catalog(sess.AccountID(), key)
+		conn, known := blob.Connection(r.URL.Query().Get("account"))
+		if !live || !opened || !known || conn.Feed {
+			s.notFound(w, r)
+			return
+		}
+		f = connectionForm{Server: conn.Server, Login: conn.Login, CertFingerprint: conn.CertFingerprint, Editing: conn.ID}
+	}
 	page := s.connectionsPage(sess, f, nil)
 	if r.URL.Query().Get("op") == "feed" {
 		page.Add = s.feedForm(sess, feedForm{Folder: r.URL.Query().Get("kind") == "folder"})
@@ -50,6 +62,10 @@ func (s *Server) postSettingsConnections(w http.ResponseWriter, r *http.Request)
 		s.rediscover(w, r, false)
 	case "apply":
 		s.rediscover(w, r, true)
+	case "test":
+		s.testConnection(w, r)
+	case "edit":
+		s.editConnection(w, r)
 	case "feed.check", "feed.subscribe":
 		s.postFeed(w, r)
 	case "feed.recheck":
@@ -151,14 +167,11 @@ func (s *Server) rediscover(w http.ResponseWriter, r *http.Request, apply bool) 
 		return
 	}
 	res, trace, err := discover.Run(r.Context(), s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
+	if trace != nil {
+		sess.NoteCheck(conn.ID, trace) // a re-discovery is a check too
+	}
 	if err != nil || res == nil || trace == nil || !trace.OK {
-		page := s.connectionsPage(sess, connectionForm{}, discoveryFailure(trace, err, "Nothing was changed."))
-		for i := range page.Accounts {
-			if page.Accounts[i].AccountID == conn.ID {
-				page.Accounts[i].State, page.Accounts[i].Trace = view.CollectionUnavailable, trace
-			}
-		}
-		s.writePage(w, r, http.StatusOK, page)
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, discoveryFailure(trace, err, "Nothing was changed.")))
 		return
 	}
 	if !apply {
@@ -171,6 +184,101 @@ func (s *Server) rediscover(w http.ResponseWriter, r *http.Request, apply bool) 
 		return
 	}
 	s.redirect(w, r, "/app/settings/connections")
+}
+
+// editConnection saves a connection's new address, login, password or
+// fingerprint under the same ID (C-4.1), and only after discovery answers
+// with them: a failed run changes nothing and gives the form back. An empty
+// password is the stored one. The catalog is not replaced: what discovery
+// finds is compared with it and offered, as re-discovery does (S-6.1), so a
+// collection at the same path keeps its ticks and its links.
+func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	key, live := sess.DataKey()
+	if !live {
+		s.notFound(w, r)
+		return
+	}
+	blob, opened := s.users.Catalog(sess.AccountID(), key)
+	conn, known := blob.Connection(r.FormValue("account"))
+	if !opened || !known || conn.Feed {
+		s.notFound(w, r)
+		return
+	}
+	f := connectionForm{
+		Server:          strings.TrimSpace(r.FormValue("server")),
+		Login:           strings.TrimSpace(r.FormValue("login")),
+		CertFingerprint: strings.TrimSpace(r.FormValue("certFingerprint")),
+		Editing:         conn.ID,
+	}
+	if !validServerURL(f.Server) {
+		f.ServerErr = text("Enter the full address, starting with https:// or http://.")
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+		return
+	}
+	password := r.FormValue("password")
+	if password == "" {
+		password = conn.Password
+	}
+	pin := dav.NormalizeFingerprint(f.CertFingerprint)
+	res, trace, err := discover.Run(r.Context(), s.guard, f.Server, f.Login, password, pin)
+	if err != nil || res == nil || trace == nil || !trace.OK {
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, discoveryFailure(trace, err, "Nothing was changed.")))
+		return
+	}
+	edited := sealed.Connection{
+		ID:              conn.ID,
+		Server:          res.BaseURL,
+		Login:           f.Login,
+		Password:        password,
+		CertFingerprint: pin,
+		CalendarHome:    res.CalendarHome,
+		AddressBookHome: res.AddressBookHome,
+	}
+	if res.FileOnly {
+		edited.FileRoot = res.BaseURL
+	}
+	if err := s.users.UpdateConnection(sess.AccountID(), key, edited); err != nil {
+		http.Error(w, "could not save the connection", http.StatusInternalServerError)
+		return
+	}
+	sess.Cache().InvalidateConnection(conn.ID)
+	sess.NoteCheck(conn.ID, trace)
+	s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, s.rediscoveryNotice(blob, edited, res.Collections)))
+}
+
+// testConnection is Test on a saved connection: discovery with the stored
+// credentials through the guard, nothing written (C-6, C-9.1). The trace
+// stays on the card for the session; a failed one turns the card
+// unavailable and its button into Test again.
+func (s *Server) testConnection(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	key, live := sess.DataKey()
+	if !live {
+		s.notFound(w, r)
+		return
+	}
+	blob, opened := s.users.Catalog(sess.AccountID(), key)
+	conn, known := blob.Connection(r.FormValue("account"))
+	if !opened || !known || conn.Feed {
+		s.notFound(w, r)
+		return
+	}
+	_, trace, err := discover.Run(r.Context(), s.guard, conn.Server, conn.Login, conn.Password, conn.CertFingerprint)
+	if trace == nil {
+		trace = &view.DiagnosticTrace{}
+	}
+	if err != nil && len(trace.Steps) == 0 {
+		trace.Steps = []view.TraceStep{{Name: "connect", State: view.CheckBad, Detail: text(err.Error())}}
+	}
+	sess.NoteCheck(conn.ID, trace)
+	s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, nil))
 }
 
 // rediscoveryNotice is the S-6.1 proposal: what appeared and what disappeared
@@ -231,13 +339,7 @@ func (s *Server) rediscoveryNotice(blob sealed.Blob, conn sealed.Connection, fou
 func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice *view.Notice) view.ConnectionsPage {
 	page := view.ConnectionsPage{
 		Shell: s.buildShell(sess, "Connections"),
-		Add: withSubmit(s.plainForm("/app/settings/connections", "POST",
-			csrfField(sess),
-			view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true},
-			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(f.Login)},
-			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
-			view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint (SHA-256)", Kind: view.InputText, Value: text(f.CertFingerprint)},
-		), "connection.add", "Connect", view.Action{ID: "connection.test", Label: "Test only", Href: s.route("/app/settings/connections/test"), Method: "POST", Enabled: true}),
+		Add:   s.connectionForm(sess, f),
 	}
 	if key, live := sess.DataKey(); live {
 		if blob, ok := s.users.Catalog(sess.AccountID(), key); ok {
@@ -263,6 +365,32 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 	return page
 }
 
+// connectionForm is Add, or Edit of one connection: the same fields, the
+// address and login filled, the password empty and kept when left so.
+func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Form {
+	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword}
+	action, id, label := "/app/settings/connections", "connection.add", "Connect"
+	if f.Editing != "" {
+		password.Hint = "Leave it empty to keep the stored one."
+		action = s.postQuery("/app/settings/connections", url.Values{"op": {"edit"}, "account": {f.Editing}})
+		id, label = "connection.edit.save", "Save"
+	}
+	form := s.plainForm(action, "POST",
+		csrfField(sess),
+		view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true},
+		view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(f.Login)},
+		password,
+		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint (SHA-256)", Kind: view.InputText, Value: text(f.CertFingerprint)},
+	)
+	if f.Editing != "" {
+		form.Action = action
+		return withSubmit(form, id, label,
+			view.Action{ID: "connection.edit.cancel", Label: "Cancel", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true})
+	}
+	return withSubmit(form, id, label,
+		view.Action{ID: "connection.test", Label: "Test only", Href: s.route("/app/settings/connections/test"), Method: "POST", Enabled: true})
+}
+
 // connectionCard never carries the password. Outside the unlock window Show
 // password opens the sheet; inside it asks for this card's password, and that
 // request is what releases and journals it (S-10.7).
@@ -279,10 +407,25 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 		Password:  view.SecretField{Reveal: reveal},
 		State:     view.CollectionOK,
 		Actions: []view.Action{{
+			ID: "connection.test", Label: "Test",
+			Href:   s.postQuery("/app/settings/connections", url.Values{"op": {"test"}, "account": {c.ID}}),
+			Method: "POST", Enabled: true,
+		}, {
+			ID: "connection.edit", Label: "Edit",
+			Href:   s.postQuery("/app/settings/connections", url.Values{"op": {"edit"}, "account": {c.ID}}),
+			Method: "GET", Enabled: true,
+		}, {
 			ID: "connection.rediscover", Label: "Look for changes",
 			Href:   s.postQuery("/app/settings/connections", url.Values{"op": {"rediscover"}, "account": {c.ID}}),
 			Method: "POST", Enabled: true,
 		}},
+	}
+	if trace := sess.CheckOf(c.ID); trace != nil {
+		card.Trace = trace
+		if !trace.OK {
+			card.State = view.CollectionUnavailable
+			card.Actions[0].Label = "Test again"
+		}
 	}
 	// Not hidden in advance and not greyed on read-only rows: the right to
 	// create or rename is not guessed, a refusal is shown when it happens

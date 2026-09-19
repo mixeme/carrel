@@ -145,6 +145,32 @@ func (c *Cache) InvalidateCollectionList(account string) {
 	}
 }
 
+// InvalidateConnection drops everything cached of one connection: bodies,
+// version maps, thumbnails and its collection list. A connection that moved
+// to another server or was taken out has nothing the session read of it
+// that still holds.
+func (c *Cache) InvalidateConnection(connID string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.ended {
+		return
+	}
+	var drop []string
+	for k, e := range c.entries {
+		for _, kind := range []string{"body", "etag", "thumb"} {
+			if strings.HasPrefix(e.key, kind+"\x00"+connID+"\x00") {
+				drop = append(drop, k)
+			}
+		}
+		if e.key == collKey(connID) {
+			drop = append(drop, k)
+		}
+	}
+	for _, k := range drop {
+		c.removeLocked(k)
+	}
+}
+
 // InvalidatePath drops cached data for one object path on a connection.
 func (c *Cache) InvalidatePath(connID, path string) {
 	c.mu.Lock()

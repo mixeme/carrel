@@ -63,6 +63,8 @@ type Users interface {
 	// ApplyRediscovery writes a re-discovery the person confirmed (S-6.1):
 	// only what they were shown and the server still confirms.
 	ApplyRediscovery(viewerID string, dataKey [32]byte, accountID string, rd user.Rediscovery) error
+	UpdateConnection(viewerID string, dataKey [32]byte, conn sealed.Connection) error
+	RemoveConnection(viewerID string, dataKey [32]byte, accountID string) (user.Disconnected, error)
 	// RevealConnectionPassword returns one stored password and journals the
 	// release; the caller checks the unlock window (S-10.7).
 	RevealConnectionPassword(viewerID string, dataKey [32]byte, accountID string) (string, error)
