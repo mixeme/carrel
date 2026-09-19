@@ -182,6 +182,7 @@ type Server struct {
 	render   Renderer
 	limit    *Limiter
 	guard    *dav.Guard // every outbound DAV request of this server (S-5.1)
+	probes   probes     // self-requests of a running installation check (S-28.1)
 	version  string
 	commit   string
 	mux      *http.ServeMux
@@ -214,9 +215,9 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 // Handler returns the root HTTP handler.
 func (s *Server) Handler() http.Handler {
 	if s.basePath == "" {
-		return s.mux
+		return s.observe(s.mux)
 	}
-	return http.StripPrefix(s.basePath, s.mux)
+	return s.observe(http.StripPrefix(s.basePath, s.mux))
 }
 
 func (s *Server) sessionFrom(r *http.Request) (*session.Session, bool) {

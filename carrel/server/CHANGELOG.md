@@ -5,6 +5,23 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.120 — 2026-09-19
+
+The installation check: Carrel calls itself at its public address and says
+what a browser or a sync client will meet.
+
+### For operators
+
+- **Admin → Installation** takes the public address and saves it to
+  `settings.env` as `CARREL_PUBLIC_URL`. A variable in the process
+  environment still wins at the next start, and the page says so.
+- **Run the check** reports eleven rows, each with what happened and what to
+  do: reachable from outside, certificate, base address, scheme behind the
+  proxy, client address, event stream buffering, upload size, long request
+  timeout (not measurable from outside, shown grey), cookie, clock, and data
+  folder.
+- The check changes nothing but the address. Each run goes to the audit log.
+
 ## v0.0.119 — 2026-09-19
 
 ### Fixed

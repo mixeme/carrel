@@ -344,15 +344,3 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-func (s *Server) getAdminInstall(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireAdmin(w, r)
-	if !ok {
-		return
-	}
-	page := view.AdminInstallPage{Shell: s.buildShell(sess, "Install")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postAdminInstall(w http.ResponseWriter, r *http.Request) {
-	s.getAdminInstall(w, r)
-}
