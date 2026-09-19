@@ -33,6 +33,27 @@ Fable audit №3 (Ф3-5).
 
 - `conf.ParseTrustedProxies`, `conf.TrustedAddr`.
 
+## v0.0.137 — 2026-09-19
+
+Fable audit №3 (Ф3-6).
+
+### Security
+
+- **A wipe revokes everything that read the connections without the
+  person's password**: the published links (their envelopes hold the
+  connections' own credentials under `server.key`), the external backup
+  triggers (theirs hold the old data key) and the davloom devices. Until
+  now the links and the triggers outlived the wipe: a link made by whoever
+  held the account went on reading after the owner wiped it to lock them
+  out, and the state kept the trigger's secret with an envelope of the old
+  key (Ф3-6).
+
+### Changed
+
+- `store.WipeAccount(st, u)` is the wipe on both paths (`/forgot/{token}`
+  and a repeated self-registration); `store.WipeCredentials` stays for the
+  credentials alone.
+
 ## v0.0.134 — 2026-09-19
 
 Fable audit №3 (Ф3-2, Ф3-3).

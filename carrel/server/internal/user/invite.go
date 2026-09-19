@@ -189,7 +189,7 @@ func (s *Service) Register(ctx context.Context, login, email, password string) (
 			if !resubmit {
 				return nil, ErrLoginTaken
 			}
-			store.WipeCredentials(u)
+			store.WipeAccount(st, u)
 			burnTokens(st, u.ID, tokenEmailConfirm)
 		} else {
 			if hasLiveInvite(st, login, now) {
@@ -359,7 +359,7 @@ func (s *Service) ForgotConfirmWipe(ctx context.Context, token string) error {
 			if u == nil {
 				continue
 			}
-			store.WipeCredentials(u)
+			store.WipeAccount(st, u)
 			wiped = u.ID
 			t.Step = string(view.WipePassword)
 			s.mgr.EndAccount(u.ID)

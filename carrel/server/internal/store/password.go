@@ -72,6 +72,35 @@ func WipeCredentials(u *User) {
 	ClearEscrowDeposit(u)
 }
 
+// WipeAccount is the wipe of S-10.4 whole: the credentials, and with them
+// everything of the state that read the connections without the person's
+// password — the published links, whose envelopes hold the connections'
+// own credentials under server.key, and the external backup triggers,
+// whose envelopes hold the old data key. Without this a link made by
+// whoever held the account went on reading after the owner wiped it
+// (audit №3, Ф3-6).
+func WipeAccount(st *State, u *User) {
+	WipeCredentials(u)
+	kept := st.Published[:0]
+	for _, l := range st.Published {
+		if l.UserID == u.ID {
+			crypt.Wipe(l.Envelope)
+			continue
+		}
+		kept = append(kept, l)
+	}
+	st.Published = kept
+	backups := st.Backups[:0]
+	for _, b := range st.Backups {
+		if b.UserID == u.ID {
+			crypt.Wipe(b.KeyEnvelope)
+			continue
+		}
+		backups = append(backups, b)
+	}
+	st.Backups = backups
+}
+
 // VerifyPassword checks a password against the login hash without touching
 // the wrap key: the S-10.7 confirmation sheet needs a yes or no, not key
 // material. Accounts without a password answer false.
