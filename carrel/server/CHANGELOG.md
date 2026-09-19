@@ -5,6 +5,15 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.123 — 2026-09-19
+
+### For operators
+
+- **README**: what Carrel is, how to run it, the variables that matter on
+  day one, a reverse-proxy setup for nginx and Apache (davloom under `/dav/`
+  included), the checks of the repository, and what a person still checks
+  by hand (S-30.4).
+
 ## v0.0.122 — 2026-09-19
 
 The acceptance checks of S-30 that a machine can run.
