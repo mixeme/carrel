@@ -1738,7 +1738,13 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	case op == "detach" && c.cal != nil:
 		s.postDetach(w, r, c, uid)
 		return
-	case op != "":
+	case op == "done" && c.spec.kind == view.KindTask:
+		// Mark done (forms-tail.md): the Done box alone, the rest of the
+		// record as the server holds it; below, want is have with it. A
+		// client may post the action's query as its body: an attachment
+		// never comes that way, so only then is the body read for op.
+	case op == "" && r.FormValue("op") == "done" && c.spec.kind == view.KindTask:
+	case op != "" || r.FormValue("op") != "":
 		s.notFound(w, r)
 		return
 	}
@@ -1763,6 +1769,15 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	st.obj, st.alarms = obj, alarms
+	markDone := r.URL.Query().Get("op") == "done" || r.URL.Query().Get("op") == "" && r.FormValue("op") == "done"
+	if markDone {
+		want = formValues{}
+		for k, v := range have {
+			want[k] = append([]string(nil), v...)
+		}
+		want["done"] = []string{checkbox(r, "done")}
+		st.values = want
+	}
 	if etag == "" {
 		st.notices = []view.Notice{{Role: view.NoticeAlert, Title: "Nothing was saved", Body: "The form does not say which version it edits. Open the record again."}}
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
@@ -1816,7 +1831,37 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
-	s.finishWrite(w, r, c, uid, sent, c.recordPath(uid))
+	back := c.recordPath(uid)
+	if markDone {
+		back = doneBack(c, uid, r.FormValue("from"))
+	}
+	s.finishWrite(w, r, c, uid, sent, back)
+}
+
+// doneAction is Mark done or Mark not done of a task, at the version etag.
+// from says where to come back: "" the card, "list" its list, "all" the
+// combined list of tasks.
+func (s *Server) doneAction(edit, etag string, done bool, from string) view.Action {
+	a := view.Action{ID: "task.done", Label: "Mark done", Method: "POST", Enabled: true}
+	q := url.Values{"op": {"done"}, "etag": {etag}, "done": {"on"}}
+	if done {
+		a.Label, q["done"] = "Mark not done", []string{"off"}
+	}
+	if from != "" {
+		q.Set("from", from)
+	}
+	a.Href = s.postQuery(edit, q)
+	return a
+}
+
+func doneBack(c *collectionCtx, uid, from string) string {
+	switch from {
+	case "list":
+		return c.listPath()
+	case "all":
+		return "/app/tasks"
+	}
+	return c.recordPath(uid)
 }
 
 func changedValues(fields []editField, base, want formValues) formValues {

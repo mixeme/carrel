@@ -5,6 +5,29 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.148 — 2026-09-19
+
+forms-tail.md, step 7.
+
+### Added
+
+- **Mark done** beside Edit on the task card (`s-tasks-2`) and in the menu
+  of every task row (`s-tasks-1`): Mark not done when the task is done. No
+  address of its own: a POST to the record's edit with `op=done`, `done`
+  and the version; the rest of the record is taken as the server holds it,
+  and only `STATUS`, `COMPLETED` (and nothing else) change, as with the
+  Done box. A version that moved is the conflict screen. From a row it
+  comes back to the list the row was on, single or combined.
+
+### Fixed
+
+- **A POST to a record's edit that carried only some fields wiped the
+  rest.** The edit reads the whole form; a body with `op` in it — an
+  action's query posted as its body — was taken for a form whose other
+  fields were emptied. Such a body is now Mark done when `op=done` on a
+  task, and 404 for any other `op`; `op` in the address (attachments) is
+  unchanged.
+
 ## v0.0.147 — 2026-09-19
 
 forms-tail.md, step 5.

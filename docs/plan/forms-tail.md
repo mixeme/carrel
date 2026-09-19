@@ -87,7 +87,10 @@
       владельцем**: правка заметки отдаёт `NoteDoc` (C-6.9) — заголовок и
       текст, полей нет. Нужна правка C-6: `NoteDoc.Meta *Form` (или
       `Fields []FormRow`) для правки, либо `NotePage` с формой
-- [ ] Mark done в карточке задачи и в строке списка
+- [x] Mark done в карточке задачи и в строке списка (`v0.0.148`,
+      `TestMarkDoneFromTheCardAndTheRow`). Флажку строки своего поля в
+      `TaskRow` нет — действие лежит в `TaskRow.Menu` с ID `task.done`;
+      клиент рисует его флажком
 - [ ] New task из события (быстрый лист с `RELATED-TO`), Send у контакта,
       Export Markdown у заметки
 - [ ] «Show N empty fields»: форма отдаёт пустые необязательные поля отдельным

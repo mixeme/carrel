@@ -60,7 +60,7 @@ func postHref(f davFixture, href string) *http.Request {
 	if err != nil {
 		panic(err)
 	}
-	return postForm(u.Path, f.sess, u.Query())
+	return postForm(u.EscapedPath(), f.sess, u.Query())
 }
 
 func rediscoverPage(t *testing.T, f davFixture) view.ConnectionsPage {

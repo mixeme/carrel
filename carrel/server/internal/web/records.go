@@ -945,6 +945,13 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
 		}
+		if !it.from.col.ReadOnly && !it.from.conn.Feed {
+			from := "list"
+			if mark {
+				from = "all"
+			}
+			row.Menu = append(row.Menu, view.MenuItem{Action: s.doneAction(it.from.recordPath(segment, uid)+"/edit", o.ETag, isDone, from)})
+		}
 		if !due.Start.IsZero() {
 			row.Due = text(tf.timeOrDate(due))
 			row.Overdue = !isDone && due.Start.Before(now)

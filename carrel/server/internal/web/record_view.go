@@ -270,6 +270,9 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Related = s.relatedRows(c, obj)
 	page.Actions = s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag))
+	if c.feed == nil && !c.col.ReadOnly {
+		page.Actions = append([]view.Action{s.doneAction(c.recordPath(uid)+"/edit", obj.ETag, page.Done, "")}, page.Actions...)
+	}
 	return page
 }
 
