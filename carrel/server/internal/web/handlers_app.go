@@ -145,22 +145,9 @@ func connectionWarnings(server, certFingerprint string) []view.Notice {
 	return out
 }
 
-func (s *Server) getSettingsDavloom(w http.ResponseWriter, r *http.Request) {
-	sess, ok := s.requireLogin(w, r)
-	if !ok {
-		return
-	}
-	page := view.DavloomPage{Shell: s.buildShell(sess, "DAV proxy")}
-	s.writePage(w, r, http.StatusOK, page)
-}
-
-func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
-	s.getSettingsDavloom(w, r)
-}
-
 func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.UnlockSheet {
 	sheet := view.UnlockSheet{
-		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, change key escrow, or delete your account."),
+		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, issue a davloom device password, change key escrow, or delete your account."),
 		Warning: text("Everything revealed in this window is written to the audit log."),
 		Form: s.plainForm("/app/settings/unlock", "POST",
 			csrfField(sess),

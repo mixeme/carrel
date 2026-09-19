@@ -5,6 +5,22 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.117 — 2026-09-19
+
+davloom devices: a password per device, shown once, with what it may see.
+The proxy that uses them comes in the next versions.
+
+### For consumers
+
+- **Settings → DAV proxy** issues a device password after you confirm your
+  own. It is shown once. It unlocks your credentials for that device only,
+  and changing your Carrel password does not disconnect it; revoking it
+  does.
+- What a device sees — kinds and collections — is chosen when it is made,
+  and changed later without a new password.
+- **Deleting a collection** now names what points at it: published links,
+  backup jobs, and devices that see it.
+
 ## v0.0.116 — 2026-09-19
 
 A Nextcloud or ownCloud share link can be subscribed to.

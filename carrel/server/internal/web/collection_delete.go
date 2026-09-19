@@ -65,10 +65,10 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 		Subject: text(label + " · " + host),
 		Warning: text(fmt.Sprintf("The %s and %s are deleted on %s. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.",
 			noun, what, host)),
-		// Published links (S-25), backup jobs (S-24) and davloom devices whose
-		// scope names it (S-23) are listed here once they exist; none do yet,
-		// and nothing is made up in their place.
-		References: []view.Text{},
+		// What else points at it and stops working with it (S-12.4): the
+		// person's published links (S-25), copy jobs (S-24) and davloom
+		// devices whose scope names it (S-27).
+		References: s.collectionReferences(sess, conn, col),
 		Archive: text("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new " +
 			noun + " at a new address — not into this one, and not to this address."),
 		Form: s.plainForm(action, "POST",
@@ -167,4 +167,36 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.redirect(w, r, "/app/settings/connections")
+}
+
+// collectionReferences names every published link, copy job and davloom
+// device of the person that names the collection.
+func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connection, col sealed.Collection) []view.Text {
+	refs := []view.Text{}
+	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
+		if l.Target.AccountID == conn.ID && l.Target.Col == col.Path {
+			refs = append(refs, text("Published link «"+l.Target.Title+"» — it stops opening"))
+		}
+	}
+	blob := s.catalogOf(sess)
+	for _, j := range blob.BackupJobs {
+		for _, src := range j.Sources {
+			if src.AccountID == conn.ID && src.Path == col.Path {
+				refs = append(refs, text("Backup job «"+j.Name+"» — it copies the others and says this one is gone"))
+				break
+			}
+		}
+		if j.DestAccount == conn.ID && j.DestPath == col.Path {
+			refs = append(refs, text("Backup job «"+j.Name+"» — its copies are written here"))
+		}
+	}
+	for _, d := range s.users.Devices(sess.AccountID()) {
+		for _, c := range d.ScopeCols {
+			if c.AccountID == conn.ID && c.Path == col.Path {
+				refs = append(refs, text("davloom device «"+d.Name+"» — the collection leaves it at its next sync"))
+				break
+			}
+		}
+	}
+	return refs
 }

@@ -163,6 +163,31 @@ type Invite struct {
 	Mailed string `json:"mailed,omitempty"`
 }
 
+// ProxyDevice is one davloom device: its wrapper and what it may see.
+type ProxyDevice struct {
+	ID         string        `json:"id"` // "d-…"
+	Name       string        `json:"name"`
+	Salt       []byte        `json:"salt"`
+	KDF        kdfRecord     `json:"kdf"`
+	WrappedKey []byte        `json:"wrappedKey"`
+	Created    time.Time     `json:"created"`
+	ScopeKinds []string      `json:"scopeKinds"`
+	ScopeCols  []DeviceScope `json:"scopeCols"`
+}
+
+// DeviceScope is one collection a device sees: the connection and the
+// collection's path, as the catalog names them.
+type DeviceScope struct {
+	AccountID string `json:"accountID"`
+	Path      string `json:"path"`
+}
+
+// DeviceKDF is the KDF record of a device wrapper as crypt wants it.
+func (d ProxyDevice) DeviceKDF() crypt.KDFParams { return d.KDF.toCrypt() }
+
+// SetDeviceKDF records the parameters a device wrapper was derived with.
+func (d *ProxyDevice) SetDeviceKDF(p crypt.KDFParams) { d.KDF = kdfFromCrypt(p) }
+
 // SecretToken covers email confirmation, forgot/console wipe links (S-10).
 type SecretToken struct {
 	Kind   string `json:"kind"`
@@ -191,6 +216,10 @@ type User struct {
 	// PendingEmail is a new address waiting for its link; Email stays in use
 	// until then.
 	PendingEmail string `json:"pendingEmail,omitempty"`
+	// ProxyDevices are the davloom devices (S-27.2): each wraps the data key
+	// under a password of its own. They live here, not in the blob — the
+	// wrapper is opened before there is a data key to open a blob with.
+	ProxyDevices []ProxyDevice `json:"proxyDevices,omitempty"`
 	// MailDay and MailSent count the letters sent on one UTC day (S-26.2,
 	// C-12): the day as 2006-01-02 and the letters so far.
 	MailDay            string `json:"mailDay,omitempty"`

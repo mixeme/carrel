@@ -26,6 +26,9 @@ type Service struct {
 	// password yet, so a miss costs one Argon2 like a wrong password does
 	// (S-29.1: unknown login and wrong password answer alike). Built on first
 	// use; startup does not pay for it.
+	// seen is the last request of each davloom device, in memory (S-27).
+	seen deviceSeen
+
 	dummyOnce sync.Once
 	dummySalt []byte
 	dummyHash []byte

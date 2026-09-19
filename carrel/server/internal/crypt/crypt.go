@@ -174,6 +174,33 @@ func UnwrapDataKey(wrapKey [KeyLen]byte, wrapped []byte, login string) ([KeyLen]
 	return out, nil
 }
 
+func aadDevice(login, deviceID string) []byte {
+	return []byte("carrel.device.v1|" + login + "|" + deviceID)
+}
+
+// WrapDeviceKey wraps the data key under a davloom device's own password
+// (S-27.2): its own AAD, so a device wrapper never opens as the login's and
+// the other way round, and one device's never as another's.
+func WrapDeviceKey(wrapKey, dataKey [KeyLen]byte, login, deviceID string) ([]byte, error) {
+	return seal(wrapKey[:], aadDevice(login, deviceID), dataKey[:])
+}
+
+// UnwrapDeviceKey opens a device wrapper.
+func UnwrapDeviceKey(wrapKey [KeyLen]byte, wrapped []byte, login, deviceID string) ([KeyLen]byte, error) {
+	var out [KeyLen]byte
+	plain, err := open(wrapKey[:], aadDevice(login, deviceID), wrapped)
+	if err != nil {
+		return out, err
+	}
+	if len(plain) != KeyLen {
+		Wipe(plain)
+		return out, fmt.Errorf("crypt: wrapped key length %d", len(plain))
+	}
+	copy(out[:], plain)
+	Wipe(plain)
+	return out, nil
+}
+
 // RewrapDataKey changes the wrap password without touching the data key (S-2).
 func RewrapDataKey(oldWrap, newWrap [KeyLen]byte, wrapped []byte, login string) ([]byte, error) {
 	dataKey, err := UnwrapDataKey(oldWrap, wrapped, login)

@@ -149,6 +149,11 @@ type Users interface {
 	EmailToConfirm(userID string) string
 	LettersLeft(userID string, perDay int) int
 	Journal(actorID, what, detail string)
+	IssueDevice(ctx context.Context, userID string, dataKey [32]byte, name string, sc user.DeviceScope) (id, password string, err error)
+	RevokeDevice(userID, id string) error
+	SetDeviceScope(userID string, dataKey [32]byte, id string, sc user.DeviceScope) error
+	Devices(userID string) []store.ProxyDevice
+	DeviceLastSeen(id string) time.Time
 	SetUploadFolder(viewerID string, dataKey [32]byte, folder sealed.AttachmentFolder) error
 	Settings() store.InstanceSettings
 	SetInstance(actorID string, in user.InstanceUpdate) error

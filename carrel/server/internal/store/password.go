@@ -68,6 +68,7 @@ func WipeCredentials(u *User) {
 	u.WrapKDF = kdfRecord{}
 	u.SealedBlob = nil
 	u.ConnCount = 0
+	u.ProxyDevices = nil // a device opens nothing once the data key is gone
 	ClearEscrowDeposit(u)
 }
 

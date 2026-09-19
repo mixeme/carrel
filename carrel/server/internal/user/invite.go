@@ -343,6 +343,12 @@ func (s *Service) ForgotConfirmWipe(ctx context.Context, token string) error {
 		return ErrNotFound
 	}
 	now := s.now()
+	var wiped string
+	defer func() {
+		if wiped != "" {
+			s.devicesChanged(wiped)
+		}
+	}()
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		for i := range st.Tokens {
 			t := &st.Tokens[i]
@@ -354,6 +360,7 @@ func (s *Service) ForgotConfirmWipe(ctx context.Context, token string) error {
 				continue
 			}
 			store.WipeCredentials(u)
+			wiped = u.ID
 			t.Step = string(view.WipePassword)
 			s.mgr.EndAccount(u.ID)
 			return []store.AuditEntry{{
@@ -436,6 +443,7 @@ func (s *Service) IssueConsoleWipeLink(login string) (url string, err error) {
 
 // DisableUser disables an account; refuses last admin (S-10.6).
 func (s *Service) DisableUser(actorID, targetID string) error {
+	defer s.devicesChanged(targetID) // the proxy forgets the keys it opened
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		u := st.UserByID(targetID)
 		if u == nil {

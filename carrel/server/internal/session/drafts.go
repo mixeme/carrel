@@ -25,6 +25,9 @@ const (
 	DraftPendingImport
 	// DraftMail is the letter being written (S-26.2); it never reaches disk.
 	DraftMail
+	// DraftIssuedDevice is a davloom device password just issued (S-27.2):
+	// the next GET of the page shows it once and clears it.
+	DraftIssuedDevice
 	numDraftSlots
 )
 

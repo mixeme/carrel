@@ -62,6 +62,7 @@ func (s *Service) ExtendInvite(actorID, inviteID string) error {
 // (S-10.6). Data and sessions are destroyed; the last administrator cannot
 // be removed.
 func (s *Service) DeleteUser(actorID, targetID, loginConfirm string) error {
+	defer s.devicesChanged(targetID) // the proxy forgets the keys it opened
 	loginConfirm = normalizeLogin(loginConfirm)
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		u := st.UserByID(targetID)
