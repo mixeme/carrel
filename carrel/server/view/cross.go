@@ -187,6 +187,17 @@ type CollectionDeleteSheet struct {
 	Actions    []Action `json:"actions"`
 }
 
+// ConnectionRemoveSheet — лист «Disconnect»: подключение уходит из Carrel, на
+// сервере не трогается ничего. Брат CollectionDeleteSheet, без экспорта и
+// архива — удалять нечего.
+type ConnectionRemoveSheet struct {
+	Subject    Text     `json:"subject"`    // подпись подключения и его адрес
+	Warning    Text     `json:"warning"`    // что уходит вместе с ним и что на сервере всё остаётся
+	References []Text   `json:"references"` // коллекции, ссылки, задания копии, устройства davloom
+	Form       Form     `json:"form"`       // подтверждение: скрытое подключение и CSRF
+	Actions    []Action `json:"actions"`    // Disconnect · Cancel
+}
+
 type ImportPage struct {
 	Shell
 	Kind    Kind          `json:"kind"`

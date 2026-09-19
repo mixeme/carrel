@@ -5,6 +5,27 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.156 — 2026-09-19
+
+connections-tail.md, step 2. **Contract change (C-5.7, C-6, U-6).**
+
+### Added
+
+- **Disconnect on the connection card** (`s-profile-1`): a connection could
+  be made and never taken out. `/app/settings/connections/disconnect` is the
+  sheet of what exactly goes — the brother of the collection's delete sheet
+  (`s-profile-9`, owner's decision 19.09.2026), without an export or an
+  archive: nothing is deleted on the server, so there is nothing to save
+  first. It names the collections and the ticks that leave the rail, the
+  published links that stop opening with their passwords, the copy jobs that
+  lose a source or their destination, the davloom devices that stop seeing
+  it, and the linked groups of duplicates that lose members. Confirmed, the
+  connection leaves Carrel whole (`user.RemoveConnection`, `v0.0.140`), the
+  session's cache of it is dropped, and `connection.remove` goes in the
+  journal with the counts.
+- `ConnectionRemoveSheet` (C-6), the route row (C-5.7); the comment of
+  `ConnectionCard.Actions` says Disconnect, not Delete.
+
 ## v0.0.155 — 2026-09-19
 
 timeline-tail.md. S-15.4.

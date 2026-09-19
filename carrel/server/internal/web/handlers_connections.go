@@ -421,6 +421,10 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			Href:   s.postQuery("/app/settings/connections", url.Values{"op": {"edit"}, "account": {c.ID}}),
 			Method: "GET", Enabled: true,
 		}, {
+			ID: "connection.disconnect", Label: "Disconnect", Danger: true,
+			Href:   s.postQuery("/app/settings/connections/disconnect", url.Values{"account": {c.ID}}),
+			Method: "GET", Enabled: true,
+		}, {
 			ID: "connection.rediscover", Label: "Look for changes",
 			Href:   s.postQuery("/app/settings/connections", url.Values{"op": {"rediscover"}, "account": {c.ID}}),
 			Method: "POST", Enabled: true,

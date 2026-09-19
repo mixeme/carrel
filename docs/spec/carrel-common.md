@@ -445,6 +445,7 @@ Combined list, Combined notebook. Вью-модель у него та же, ч�
 | `/app/settings/escrow` | GET, POST | вход | страница | `EscrowPage` |
 | `/app/settings/connections` | GET, POST | вход | страница | `ConnectionsPage` |
 | `/app/settings/connections/test` | POST | вход | фрагмент | `DiagnosticTrace` |
+| `/app/settings/connections/disconnect` | GET, POST | вход | лист | `ConnectionRemoveSheet` |
 | `/app/settings/attachments` | GET, POST | вход | страница | `AttachmentsPage` |
 | `/app/settings/devices` | GET, POST | вход | страница | `DevicesPage` |
 | `/app/settings/devices/profile` | GET | вход | файл | — |
@@ -1446,8 +1447,18 @@ type ConnectionCard struct {
     State       CollectionState
     Collections []CollectionRow
     Trace       *DiagnosticTrace // след последней проверки
-    Actions     []Action // Test · Test again · Edit · New collection · Delete
+    Actions     []Action // Test · Test again · Edit · New collection · Disconnect
 }
+// Лист «Disconnect»: подключение уходит из Carrel, на сервере не трогается
+// ничего. Брат CollectionDeleteSheet, без экспорта и архива — удалять нечего.
+type ConnectionRemoveSheet struct {
+    Subject    Text     // подпись подключения и его адрес
+    Warning    Text     // что уходит вместе с ним и что на сервере всё остаётся
+    References []Text   // коллекции, ссылки, задания копии, устройства davloom
+    Form       Form     // подтверждение: скрытое подключение и CSRF
+    Actions    []Action // Disconnect · Cancel
+}
+
 type SecretField struct {
     Shown  bool
     Value  Text  // заполняется только после подтверждения пароля

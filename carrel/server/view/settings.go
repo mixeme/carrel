@@ -96,7 +96,7 @@ type ConnectionCard struct {
 	State       CollectionState  `json:"state"`
 	Collections []CollectionRow  `json:"collections"`
 	Trace       *DiagnosticTrace `json:"trace"`   // след последней проверки
-	Actions     []Action         `json:"actions"` // Test · Test again · Edit · New collection · Delete
+	Actions     []Action         `json:"actions"` // Test · Test again · Edit · New collection · Disconnect
 }
 type SecretField struct {
 	Shown  bool   `json:"shown"`

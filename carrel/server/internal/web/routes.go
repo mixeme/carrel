@@ -92,6 +92,8 @@ func (s *Server) registerRoutes() {
 	s.handle("GET /app/settings/connections", (*Server).getSettingsConnections)
 	s.handle("POST /app/settings/connections", (*Server).postSettingsConnections)
 	s.handle("POST /app/settings/connections/test", (*Server).postSettingsConnectionsTest)
+	s.handle("GET /app/settings/connections/disconnect", (*Server).getConnectionDisconnect)
+	s.handle("POST /app/settings/connections/disconnect", (*Server).postConnectionDisconnect)
 	s.handle("GET /app/settings/attachments", (*Server).getSettingsAttachments)
 	s.handle("POST /app/settings/attachments", (*Server).postSettingsAttachments)
 	s.handle("GET /app/settings/devices", (*Server).getSettingsDevices)
