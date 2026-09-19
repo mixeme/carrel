@@ -101,8 +101,12 @@ func runTimeline(t *testing.T, endpoint, user, pass string) {
 		}
 	}
 
-	page := url.URL{Path: "/app/contacts/" + conn.ID + "/" + url.PathEscape(book.Path) + "/" + url.PathEscape(uid) + "/timeline"}
-	got := liveDecode[view.ContactTimelinePage](t, "timeline", app.get(page.String()))
+	rec := "/app/contacts/" + conn.ID + "/" + url.PathEscape(book.Path) + "/" + url.PathEscape(uid)
+	if got := app.get(rec); got.Code != 200 {
+		t.Fatalf("the card itself: %d %s", got.Code, got.Body.String())
+	}
+	page := rec + "/timeline"
+	got := liveDecode[view.ContactTimelinePage](t, "timeline", app.get(page))
 	if got.Poll.TaskID == "" {
 		t.Fatalf("no task: %+v", got.Poll)
 	}
@@ -112,7 +116,7 @@ func runTimeline(t *testing.T, endpoint, user, pass string) {
 			t.Fatalf("the timeline never finished: %+v", got.Poll)
 		}
 		time.Sleep(200 * time.Millisecond)
-		got = liveDecode[view.ContactTimelinePage](t, "timeline", app.get(page.String()))
+		got = liveDecode[view.ContactTimelinePage](t, "timeline", app.get(page))
 	}
 	why := map[string]string{}
 	for _, g := range got.Groups {

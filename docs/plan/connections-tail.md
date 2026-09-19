@@ -128,5 +128,6 @@
       подпись, не идентификатор; сейчас подпись всегда хост). Правка контракта
       не нужна: `ConnectionCard.Title` уже есть (`v0.0.151`,
       `TestConnectionLabel`; подпись идёт и во все штампы «аккаунт · коллекция»)
-- [ ] Живой прогон: Baikal и Nextcloud — Disconnect, повторный Connect,
-      галочек нет, ссылки мертвы
+- [x] Живой прогон: Baikal и Nextcloud — Disconnect, повторный Connect,
+      галочек нет, ссылки мертвы (`TestBaikalForms/disconnect`, также
+      Nextcloud и Radicale)

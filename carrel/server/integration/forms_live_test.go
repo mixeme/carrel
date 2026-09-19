@@ -13,6 +13,8 @@ import (
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
+	"carrel.dev/carrel/server/internal/sealed"
+	user2 "carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -82,6 +84,55 @@ func runForms(t *testing.T, endpoint, user, pass string) {
 		t.Logf("the calendar took no VJOURNAL: the note part is skipped")
 	}
 	t.Run("connection", func(t *testing.T) { liveConnectionEdit(t, app, conn.ID, endpoint, user, pass) })
+	// Last: it takes the connection out from under the rest.
+	t.Run("disconnect", func(t *testing.T) { liveDisconnect(t, app, conn.ID, endpoint, user, pass, cal.Path) })
+}
+
+// connections-tail.md: Disconnect leaves the server alone and Carrel with
+// nothing of the connection; connecting again finds the collections anew,
+// without the ticks, and the links made before are dead.
+func liveDisconnect(t *testing.T, app *liveApp, connID, endpoint, user, pass, calPath string) {
+	key, _ := app.sess.DataKey()
+	blob, _ := app.users.Catalog(app.sess.AccountID(), key)
+	conn, _ := blob.Connection(connID)
+	if err := app.users.SetSelection(app.sess.AccountID(), key, view.KindEvent,
+		[]sealed.Selection{{Kind: view.KindEvent, AccountID: connID, Path: calPath}}); err != nil {
+		t.Fatal(err)
+	}
+	link, err := app.users.Publish(app.sess.AccountID(), key, conn,
+		user2.PublishTarget{AccountID: connID, Kind: "calendar", Col: calPath, Title: "Carrel forms"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sheet := liveDecode[view.ConnectionRemoveSheet](t, "disconnect sheet",
+		app.get("/app/settings/connections/disconnect?account="+connID))
+	if len(sheet.References) == 0 {
+		t.Errorf("the sheet names nothing that goes: %+v", sheet)
+	}
+	confirm, _ := url.Parse(liveAction(t, sheet.Actions, "connection.disconnect.confirm"))
+	redirected(t, "disconnect", app.post(confirm.EscapedPath()+"?"+confirm.RawQuery, url.Values{}))
+
+	blob, _ = app.users.Catalog(app.sess.AccountID(), key)
+	if len(blob.Connections) != 0 || len(blob.Collections) != 0 || len(blob.Selected) != 0 {
+		t.Fatalf("after Disconnect the catalog holds %+v", blob)
+	}
+	if _, ok := app.users.OpenPublished(link); ok {
+		t.Error("a link of the connection still opens")
+	}
+	// The server kept everything, and connecting again finds it — unticked.
+	redirected(t, "connect again", app.post("/app/settings/connections", url.Values{
+		"server": {endpoint}, "login": {user}, "password": {pass},
+	}))
+	blob, _ = app.users.Catalog(app.sess.AccountID(), key)
+	if len(blob.Connections) != 1 || blob.Connections[0].ID == connID {
+		t.Fatalf("connected again: %+v", blob.Connections)
+	}
+	if len(blob.Selected) != 0 {
+		t.Errorf("the ticks came back: %+v", blob.Selected)
+	}
+	if catalogEntry(t, blob, calPath).Path == "" {
+		t.Error("the calendar is gone from the server")
+	}
 }
 
 // liveEdit opens a record's form, sets fields and saves; the answer must be

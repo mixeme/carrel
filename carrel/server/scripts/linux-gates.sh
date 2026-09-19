@@ -58,7 +58,7 @@ for _ in $(seq 1 30); do
   sleep 0.2
 done
 CARREL_RADICALE_URL=http://127.0.0.1:5232/test/ \
-  go test -tags=integration -count=1 ./integration/...
+  go test -tags=integration -count=1 -timeout 30m ./integration/...
 
 if [[ -n "${CARREL_SFTPGO_URL:-}" && -n "${CARREL_SFTPGO_USER:-}" && -n "${CARREL_SFTPGO_PASS:-}" ]]; then
   echo "== S-30.2: SFTPGo integration =="

@@ -86,7 +86,11 @@ specGate() {
 step "gofmt" gofmtGate
 step "go vet" go vet ./...
 step "go vet -tags=integration" go vet -tags=integration ./integration/
-step "go test" go test ./...
+# 30 minutes, not go test's own 10: internal/web alone is 264 tests, each
+# deriving a login key with Argon2id as the product does (11 minutes on the
+# development machine, more under load). The parameters are the product's and
+# are not lowered for tests.
+step "go test" go test -timeout 30m ./...
 step "docs/spec/check.py" specGate
 
 if (( ${#failed[@]} )); then

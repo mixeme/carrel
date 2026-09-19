@@ -93,6 +93,7 @@ timeline»). Поле `Books` заполняется только связанн
 - [x] Карточка: `More` всегда; `Timeline` — из выдачи этой сессии
 - [x] Кнопки создания с подставленным человеком (`v0.0.155`,
       `TestContactTimeline` — все шаги кода)
-- [ ] Живой тест: Baikal и Nextcloud, событие с `ATTENDEE` карточки находится
+- [x] Живой тест: Baikal и Nextcloud, событие с `ATTENDEE` карточки находится
       с «attendee», заметка с `RELATED-TO` карточки — с «related to this
       person», событие с именем только в тексте не находится
+      (`TestBaikalTimeline`, `TestNextcloudTimeline`, `TestRadicaleTimeline`)

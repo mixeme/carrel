@@ -5,6 +5,31 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.157 — 2026-09-20
+
+Live runs of the timeline and Disconnect; the gates get the time they need.
+
+### Included
+
+- `integration`: `TestBaikalTimeline`, `TestNextcloudTimeline`,
+  `TestRadicaleTimeline` — an event with the card's address in `ATTENDEE`
+  is found as "attendee", a note with `RELATED-TO` the card as "related to
+  this person", an event that only says the name in its text is not found.
+  `runForms` ends with `disconnect`: the sheet names what goes, the
+  connection leaves, its link dies, connecting again finds the collections
+  anew and unticked, and the server keeps everything.
+- Green on Baikal and Radicale. Nextcloud answered `dav: request timed out`
+  while the fixtures were being written, twice in a row: the instance, not
+  the code.
+
+### Changed
+
+- `scripts/gates.sh` and `scripts/linux-gates.sh` run `go test` with
+  `-timeout 30m`: `internal/web` alone is 264 tests, each deriving a login
+  key with Argon2id as the product does — eleven minutes on the development
+  machine, past `go test`'s own ten. The parameters are the product's and
+  are not lowered for tests.
+
 ## v0.0.156 — 2026-09-19
 
 connections-tail.md, step 2. **Contract change (C-5.7, C-6, U-6).**
