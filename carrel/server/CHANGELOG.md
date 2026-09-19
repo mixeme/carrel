@@ -5,6 +5,35 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.129 — 2026-09-19
+
+### For consumers
+
+- **Every form that posts now carries its button** in `Form.Actions`, with the
+  words from the frames. Until now a client had to invent the label.
+  - Sign in, and Create an account while registration is open.
+  - Create administrator, Create account (register and invite), Continue
+    (forgot).
+  - Erase and set a new password, then Set the password and sign in (the two
+    steps of the wipe link).
+  - Change password, and Show on the unlock sheet.
+  - Connect and Test only on the add-connection form.
+  - Save (open registration), Create link (invitation), Save (backup job).
+  - Save, Change, Recover and Turn on key escrow on the admin escrow screen.
+  - The two restore buttons now belong to the restore form (`Source.Actions`),
+    not to the whole block.
+- **"Create an account" on the sign-in page is a button of the form.** It
+  used to be a text field named `register` with no label and the link hung
+  on it.
+
+### Fixed
+
+- A failed sign-in linked "Forgotten your password?" and "About" to the root
+  of the host. An instance under `CARREL_BASE_PATH` sent people nowhere.
+- `GET /app/settings/unlock` without the fragment header now answers with the
+  sheet as a page, as the other sheets do. It answered 404, so "Show password"
+  led nowhere without scripts.
+
 ## v0.0.128 — 2026-09-19
 
 ### Fixed

@@ -98,12 +98,12 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 		Add: []view.Action{
 			{ID: "admin.invite", Label: "Invite", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
 		},
-		SelfReg: s.plainForm("/admin/", "POST",
+		SelfReg: withSubmit(s.plainForm("/admin/", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("selfreg")},
 			view.FormRow{Name: "selfReg", Label: "Open registration", Kind: view.InputCheck,
 				Value: text(boolStr(snap.Settings.SelfRegEnabled))},
-		),
+		), "admin.selfreg.save", "Save"),
 	}
 	if flash.errText != "" {
 		page.SelfReg.Sets[0].Rows[len(page.SelfReg.Sets[0].Rows)-1].Error = text(flash.errText)
@@ -260,12 +260,12 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvites
 	now := time.Now()
 	page := view.AdminInvitesPage{
 		Shell: s.buildShell(sess, "Invites"),
-		Add: s.plainForm("/admin/invites", "POST",
+		Add: withSubmit(s.plainForm("/admin/invites", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("create")},
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail},
-		),
+		), "admin.invite.create", "Create link"),
 	}
 	if flash.errText != "" {
 		page.Add.Sets[0].Rows[len(page.Add.Sets[0].Rows)-1].Error = text(flash.errText)

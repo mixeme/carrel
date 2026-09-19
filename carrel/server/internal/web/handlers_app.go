@@ -72,11 +72,11 @@ func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error)
 	}
 	page := view.PasswordPage{
 		Shell: s.buildShell(sess, "Change password"),
-		Form: s.plainForm("/app/password", "POST", csrfField(sess),
+		Form: withSubmit(s.plainForm("/app/password", "POST", csrfField(sess),
 			view.FormRow{Name: "current", Label: "Current password", Kind: view.InputPassword, Required: true, Error: currentErr},
 			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true, Error: passErr, Hint: text("At least 8 characters.")},
 			view.FormRow{Name: "password2", Label: "Repeat new password", Kind: view.InputPassword, Required: true, Error: pass2Err},
-		),
+		), "password.save", "Change password"),
 	}
 	if mustChange {
 		page.Warning = view.Notice{
@@ -149,10 +149,10 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.Unlo
 	sheet := view.UnlockSheet{
 		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, issue a davloom device password, change key escrow, or delete your account."),
 		Warning: text("Everything revealed in this window is written to the audit log."),
-		Form: s.plainForm("/app/settings/unlock", "POST",
+		Form: withSubmit(s.plainForm("/app/settings/unlock", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: errText},
-		),
+		), "unlock.submit", "Show"),
 	}
 	if until := sess.UnlockUntil(time.Now()); until != nil {
 		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, time.Now()))
@@ -169,7 +169,9 @@ func (s *Server) getSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.unlockSheet(sess, ""), nil)
 		return
 	}
-	s.notFound(w, r)
+	// Without scripts a sheet is a page of its own (U-8): "Show password" is
+	// a plain link here, and a 404 behind it left no way to the password.
+	s.writePage(w, r, http.StatusOK, s.unlockSheet(sess, ""))
 }
 
 // postSettingsUnlock is the one confirmation sheet behind every secret

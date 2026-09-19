@@ -137,7 +137,7 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.Rest
 		view.FormRow{Name: "file", Label: "File in it", Kind: view.InputText, Hint: "The path of the archive under the storage's root, such as backups/carrel-work-2026-08-16T031000Z.zip.age."},
 		view.FormRow{Name: "password", Label: "Archive password", Kind: view.InputPassword, Hint: "The job's own password. An archive that is not encrypted needs none."},
 	)
-	b.Actions = []view.Action{
+	b.Source.Actions = []view.Action{
 		{ID: "restore.open", Label: "Open the archive", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}}), Method: "POST", Enabled: true},
 		{ID: "restore.upload", Label: "Open a file from this computer", Icon: "i-up", Href: s.postQuery("/app/settings/backup", url.Values{"op": {"restore-open"}, "source": {"upload"}}), Method: "POST", Enabled: true},
 	}

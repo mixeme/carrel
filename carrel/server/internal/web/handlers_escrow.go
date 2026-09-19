@@ -196,43 +196,43 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 		Result: flash.result,
 	}
 	if enabled {
-		page.Form = s.plainForm("/admin/escrow", "POST",
+		page.Form = withSubmit(s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("policy")},
 			view.FormRow{Name: "coverNew", Label: "New accounts are covered", Kind: view.InputCheck,
 				Value: text(boolStr(snap.Settings.EscrowCoverNewUsers))},
-		)
+		), "escrow.policy.save", "Save")
 		if flash.formErr != "" {
 			page.Form.Sets[0].Rows[len(page.Form.Sets[0].Rows)-1].Error = text(flash.formErr)
 		}
-		page.Master = s.plainForm("/admin/escrow", "POST",
+		page.Master = withSubmit(s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("master")},
 			view.FormRow{Name: "current", Label: "Current", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "master", Label: "New", Kind: view.InputPassword, Required: true,
 				Hint: text("Only the recovery private key is re-encrypted. Deposited copies are untouched.")},
 			view.FormRow{Name: "master2", Label: "Repeat", Kind: view.InputPassword, Required: true},
-		)
+		), "escrow.master.change", "Change")
 		if flash.masterErr != "" {
 			page.Master.Sets[0].Rows[len(page.Master.Sets[0].Rows)-1].Error = text(flash.masterErr)
 		}
-		page.Recover = s.plainForm("/admin/escrow", "POST",
+		page.Recover = withSubmit(s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("recover")},
 			view.FormRow{Name: "login", Label: "Account", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true},
-		)
+		), "escrow.recover", "Recover")
 		if flash.recoverErr != "" {
 			page.Recover.Sets[0].Rows[len(page.Recover.Sets[0].Rows)-1].Error = text(flash.recoverErr)
 		}
 	} else {
-		page.Form = s.plainForm("/admin/escrow", "POST",
+		page.Form = withSubmit(s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("enable")},
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true,
 				Hint: text("If you lose this password, deposited keys cannot be opened. This is not backup.")},
 			view.FormRow{Name: "master2", Label: "Repeat", Kind: view.InputPassword, Required: true},
-		)
+		), "escrow.enable", "Turn on key escrow")
 		if flash.formErr != "" {
 			page.Form.Sets[0].Rows[len(page.Form.Sets[0].Rows)-1].Error = text(flash.formErr)
 		}

@@ -143,3 +143,11 @@ func (s *Server) newMenu(sess *session.Session) []view.MenuItem {
 	}
 	return out
 }
+
+// withSubmit gives a form the button that sends it, and any others after it.
+// The words on a button are the server's (C-3.1): a client that has to guess
+// "Submit" is guessing the product.
+func withSubmit(f view.Form, id, label string, more ...view.Action) view.Form {
+	f.Actions = append([]view.Action{{ID: id, Label: text(label), Href: f.Action, Method: f.Method, Enabled: true}}, more...)
+	return f
+}

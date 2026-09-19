@@ -231,13 +231,13 @@ func (s *Server) rediscoveryNotice(blob sealed.Blob, conn sealed.Connection, fou
 func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice *view.Notice) view.ConnectionsPage {
 	page := view.ConnectionsPage{
 		Shell: s.buildShell(sess, "Connections"),
-		Add: s.plainForm("/app/settings/connections", "POST",
+		Add: withSubmit(s.plainForm("/app/settings/connections", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true},
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(f.Login)},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword},
 			view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint (SHA-256)", Kind: view.InputText, Value: text(f.CertFingerprint)},
-		),
+		), "connection.add", "Connect", view.Action{ID: "connection.test", Label: "Test only", Href: s.route("/app/settings/connections/test"), Method: "POST", Enabled: true}),
 	}
 	if key, live := sess.DataKey(); live {
 		if blob, ok := s.users.Catalog(sess.AccountID(), key); ok {

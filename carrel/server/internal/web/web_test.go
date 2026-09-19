@@ -908,3 +908,23 @@ func TestAdminRoutesNeedAdminRole(t *testing.T) {
 		t.Errorf("/p/{token}: %d", rec.Code)
 	}
 }
+
+// A failed sign-in answers with the same page, links and all: its "Forgotten
+// your password?" and "About" pointed at the root and missed an instance under
+// a base path.
+func TestFailedSignInKeepsTheBasePath(t *testing.T) {
+	h := newHarness(t)
+	h.admin("alice", "password123")
+	h.cfg.BasePath = "/carrel"
+	h.rebuild()
+	rec := h.do(h.anonPostForm("/carrel/login", "/carrel/login", url.Values{
+		"login": {"alice"}, "password": {"wrong-password"},
+	}))
+	page := decode[view.LoginPage](t, rec)
+	if page.Forgot.Href != "/carrel/forgot" || page.About.Href != "/carrel/about" {
+		t.Errorf("forgot %q, about %q", page.Forgot.Href, page.About.Href)
+	}
+	if len(page.Form.Actions) == 0 || page.Form.Actions[0].Label != "Sign in" || page.Form.Actions[0].Href != "/carrel/login" {
+		t.Errorf("actions = %+v", page.Form.Actions)
+	}
+}
