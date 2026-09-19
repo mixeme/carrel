@@ -33,8 +33,7 @@ in the one volume: the server key and the encrypted state.
 
 Carrel reads `settings.env` in the data folder, and then the environment of
 the process; the environment wins. The complete list of variables is in C-12
-of [`docs/spec/carrel-common.md`](../../docs/spec/carrel-common.md);
-`CARREL_DAVLOOM_PORT` is in [`docs/plan/architecture.md`](../../docs/plan/architecture.md).
+of [`docs/spec/carrel-common.md`](../../docs/spec/carrel-common.md).
 The variables that matter on day one:
 
 | Variable | What it is |

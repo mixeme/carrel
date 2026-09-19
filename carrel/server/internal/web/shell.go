@@ -105,8 +105,6 @@ func (s *Server) anonPlainForm(w http.ResponseWriter, r *http.Request, action, m
 // the quick sheet from the shell (U-6.16). The sheet itself decides where the
 // record goes — the collection the last one was created in, or a question when
 // there is none — so the menu does not need to know about collections.
-// Publishing a file and writing mail belong here too and are not built yet
-// (C-6), so they are absent rather than shown dead.
 func (s *Server) newMenu(sess *session.Session) []view.MenuItem {
 	if sess == nil {
 		return nil

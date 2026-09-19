@@ -5,6 +5,15 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.130 — 2026-09-19
+
+Nothing in the running server changed.
+
+### For operators
+
+- `CARREL_DAVLOOM_PORT` is listed in C-12 with the rest of the variables, so
+  the README points to one list instead of two.
+
 ## v0.0.129 — 2026-09-19
 
 ### For consumers

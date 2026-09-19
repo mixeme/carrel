@@ -201,7 +201,7 @@ flowchart TD
 
 **Веер.** Параллельность источников и потолок живых задач — таблица **Сроки и лимиты**, не настройка. Таймауты — C-12. Задача — объект в сессии, не счётчик слотов. Интерфейс `Source` живёт в `internal/fanout`, общего `internal/provider` нет. Отмена контекстом.
 
-**davloom.** `CARREL_DAVLOOM_PORT` пусто = выключен. Иначе второй listener в том же процессе, свои лимиты. В C-12 этой переменной нет — она добавляется здесь. Закон S-27/S-28 — [server.md](server.md). Кратко: пакет `internal/proxy`, не `web`; обёртка устройства на `User` с AAD `carrel.device.v1|<login>|<id>`; Basic логин = логин человека; href коллекции `/c/{account}/{col}`, не индекс; XML-префикс потоком; корень — `AboutPage`; выдача после unlock. Потолка числа устройств нет.
+**davloom.** `CARREL_DAVLOOM_PORT` пусто = выключен. Иначе второй listener в том же процессе, свои лимиты. В C-12 она стоит с 19.09.2026 (ревью перед S-30): список переменных один. Закон S-27/S-28 — [server.md](server.md). Кратко: пакет `internal/proxy`, не `web`; обёртка устройства на `User` с AAD `carrel.device.v1|<login>|<id>`; Basic логин = логин человека; href коллекции `/c/{account}/{col}`, не индекс; XML-префикс потоком; корень — `AboutPage`; выдача после unlock. Потолка числа устройств нет.
 
 **Markdown.** AST goldmark → `[]view.Block`. Выделение и ссылки — вложенные Kind C-8 (`emph`, `strong`, `link`), не сплющенный текст. Сырой HTML — экранированный текст в `BlockPara`. HTML-рендерер goldmark не подключать. Kind — только C-8 (`para`, `heading`, `list`, `item`, `code`, `quote`, `link`, `emph`, `strong`); неизвестный узел AST с текстом — `BlockPara`, нового Kind нет.
 

@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// Config holds every C-12 variable plus CARREL_DAVLOOM_PORT from architecture.md.
+// Config holds every C-12 variable.
 // Values come from settings.env in the data directory, overridden by the
 // process environment.
 type Config struct {
