@@ -70,13 +70,7 @@ func New(cfg *conf.Config, users Users, guard *dav.Guard, version, commit string
 		failLogin: newBuckets(conf.LoginRatePerAccount), failIP: newBuckets(conf.LoginRatePerIP),
 		device: newBuckets(120), // a device syncing is not a person typing (plan S-27)
 	}
-	for _, p := range strings.Split(cfg.TrustedProxies, ",") {
-		if pfx, err := netip.ParsePrefix(strings.TrimSpace(p)); err == nil {
-			s.proxies = append(s.proxies, pfx)
-		} else if a, err := netip.ParseAddr(strings.TrimSpace(p)); err == nil {
-			s.proxies = append(s.proxies, netip.PrefixFrom(a, a.BitLen()))
-		}
-	}
+	s.proxies = conf.ParseTrustedProxies(cfg.TrustedProxies)
 	users.OnDevicesChanged(s.forget)
 	return s
 }
@@ -265,12 +259,7 @@ func (s *Server) clientIP(r *http.Request) string {
 }
 
 func (s *Server) trusted(a netip.Addr) bool {
-	for _, p := range s.proxies {
-		if p.Contains(a) {
-			return true
-		}
-	}
-	return false
+	return conf.TrustedAddr(s.proxies, a)
 }
 
 type statusWriter struct {

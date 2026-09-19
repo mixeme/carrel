@@ -16,6 +16,23 @@ Fable audit №3 (Ф3-4).
   bucket). Its POST derives a key, and a fresh instance could be kept busy
   by anybody who found it before its administrator did (Ф3-4).
 
+## v0.0.136 — 2026-09-19
+
+Fable audit №3 (Ф3-5).
+
+### Security
+
+- **davloom reads `CARREL_TRUSTED_PROXIES` the way the web does.** It split
+  the list on commas only, so a list separated by spaces or semicolons —
+  which the web accepts — trusted nobody: behind such a proxy every device
+  shared the proxy's address, and twenty wrong passwords from one stranger
+  locked every device out for a minute (Ф2-11 over again, Ф3-5). One parser
+  serves both listeners.
+
+### Changed
+
+- `conf.ParseTrustedProxies`, `conf.TrustedAddr`.
+
 ## v0.0.134 — 2026-09-19
 
 Fable audit №3 (Ф3-2, Ф3-3).

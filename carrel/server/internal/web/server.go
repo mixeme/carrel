@@ -205,7 +205,7 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 		guard:    dav.NewGuard(cfg),
 		version:  version,
 		commit:   commit,
-		proxies:  parseProxies(cfg.TrustedProxies),
+		proxies:  conf.ParseTrustedProxies(cfg.TrustedProxies),
 	}
 	s.mux = http.NewServeMux()
 	s.registerRoutes()
@@ -264,30 +264,8 @@ func (s *Server) secureCookies(r *http.Request) bool {
 	return strings.HasPrefix(strings.ToLower(s.cfg.PublicURL), "https://")
 }
 
-// parseProxies reads CARREL_TRUSTED_PROXIES: comma- or space-separated IPs
-// and CIDRs. Anything unparsable is ignored rather than trusted.
-func parseProxies(list string) []netip.Prefix {
-	var out []netip.Prefix
-	for _, item := range strings.FieldsFunc(list, func(r rune) bool { return r == ',' || r == ' ' || r == ';' }) {
-		if p, err := netip.ParsePrefix(item); err == nil {
-			out = append(out, p.Masked())
-			continue
-		}
-		if a, err := netip.ParseAddr(item); err == nil {
-			out = append(out, netip.PrefixFrom(a, a.BitLen()))
-		}
-	}
-	return out
-}
-
 func (s *Server) trustedAddr(a netip.Addr) bool {
-	a = a.Unmap()
-	for _, p := range s.proxies {
-		if p.Contains(a) {
-			return true
-		}
-	}
-	return false
+	return conf.TrustedAddr(s.proxies, a)
 }
 
 func (s *Server) fromTrustedProxy(r *http.Request) bool {
