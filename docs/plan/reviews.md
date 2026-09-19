@@ -30,7 +30,7 @@ Composer эти шаги **не выполняет**. Он останавлив�
 - [x] **Opus.** Ревью сервера после crypt/store/session/dav
 - [x] **Opus.** Ревью Typecase перед v0.1.0
 - [ ] **Opus.** Ревью Typecase после слоя раскладки (`layout`)
-- [ ] **Opus.** Ревью сервера перед S-30
+- [x] **Opus.** Ревью сервера перед S-30 — 19.09.2026, [review-server.md](review-server.md)
 
 ---
 
