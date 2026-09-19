@@ -79,8 +79,10 @@
       заполняется для формы (`v0.0.146`, `TestEventRepeats`,
       `TestNewEventRepeats`: серия правится, `EXDATE` и перенесённый
       экземпляр целы)
-- [ ] Живой тест Repeats на Baikal и Radicale: серия правится, исключения
-      целы
+- [x] Живой тест Repeats на Baikal и Radicale: серия правится, исключения
+      целы (`TestBaikalForms`, `TestNextcloudForms`, `TestRadicaleForms`,
+      19.09.2026; Radicale — Linux-ворота на `9202a1a`). Прогон нашёл: sabre
+      хранит день рождения без года как `X-APPLE-OMIT-YEAR=1604` — `v0.0.154`
 - [x] Задача: Start date, Status, Priority, Location, Categories, Related to
       (`v0.0.147`, `TestTaskFields`)
 - [x] Заметка: Date и Time (`DTSTART` журнала), Tags, Related to

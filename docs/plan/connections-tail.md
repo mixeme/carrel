@@ -107,8 +107,9 @@
       `TestEditConnectionAfterPasswordAndAddressChange`: пароль сменили,
       сервер переехал — тот же `a-…`, галочки целы, новая коллекция
       предложена, а не добавлена; кэш сессии по подключению сброшен)
-- [ ] Живой тест Edit на Baikal: неверный пароль → Edit → подключение снова
-      отвечает
+- [x] Живой тест Edit на Baikal: неверный пароль → Edit → подключение снова
+      отвечает (`TestBaikalForms/connection`, также Nextcloud и Radicale,
+      19.09.2026)
 - [x] Test и Test again в карточке: `discover.Run` без записи, след в
       `ConnectionCard.Trace` (C-9.1), в сессии (`v0.0.142`,
       `TestSavedConnectionIsTestedAndTestedAgain`). Test again — у карточки,
