@@ -5,6 +5,25 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.146 — 2026-09-19
+
+forms-tail.md, step 4.
+
+### Added
+
+- **Repeats on the event form** (`s-agenda-3`, S-11): Frequency, Every,
+  On (the seven days), Until, Times and Advanced RRULE, in a field set of
+  their own, for a new event too. Only the parts that changed are written
+  into the rule as it was, in their places, so what the fields do not show
+  (WKST, BYMONTHDAY, a numbered BYDAY) stays. A changed Advanced RRULE is
+  written as typed and wins. Until of a timed series is the end of that day
+  in the instance zone, in UTC (RFC 5545 §3.3.10). Until and Times together,
+  a count or interval below 1 and a rule that does not parse are refused.
+  "Does not repeat" takes RRULE away. EXDATE, RDATE and moved instances are
+  never touched: the series is edited as a whole.
+- `RecurrenceBlock.Fields` of the edit form describe the rule (Frequency,
+  Every, On, Until or Times) before the next occurrences.
+
 ## v0.0.145 — 2026-09-19
 
 forms-tail.md, step 3.

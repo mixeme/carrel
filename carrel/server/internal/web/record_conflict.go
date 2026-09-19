@@ -90,6 +90,11 @@ func (s *Server) showValues(c *collectionCtx, f editField, vals, labels []string
 			}
 			parts = append(parts, c.tf.reminder(a))
 		}
+	case fieldRepeat:
+		v := append(append([]string(nil), vals...), make([]string, 6)...)[:6]
+		for _, fl := range repeatFields(v) {
+			parts = append(parts, string(fl.Label)+" "+string(fl.Value))
+		}
 	case fieldAddress:
 		for _, v := range vals {
 			var shown []string

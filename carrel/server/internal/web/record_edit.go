@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/teambition/rrule-go"
+
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
@@ -58,6 +60,9 @@ const (
 	// fieldZone is the zone DTSTART and DTEND are written in: their TZID,
 	// "UTC" or "floating". The form's times stay in the instance zone (C-10).
 	fieldZone
+	// fieldRepeat is RRULE, edited as a whole series (S-11): Frequency,
+	// Every, On, Until, Times, and the rule itself. See repeatValues.
+	fieldRepeat
 )
 
 type editField struct {
@@ -143,6 +148,235 @@ func zoneOffered(z, held, instance string) (*time.Location, bool) {
 	return loc, err == nil
 }
 
+// repeatDays are the days of On, in the order the form shows them.
+var repeatDays = []struct{ code, label string }{
+	{"MO", "Monday"}, {"TU", "Tuesday"}, {"WE", "Wednesday"}, {"TH", "Thursday"}, {"FR", "Friday"}, {"SA", "Saturday"}, {"SU", "Sunday"},
+}
+
+// The values of a repeat field, in order.
+const (
+	repFreq = iota
+	repInterval
+	repOn
+	repUntil
+	repCount
+	repRule
+)
+
+// ruleParts are the parts of an RRULE in the order they are written.
+type ruleParts [][2]string
+
+func parseRule(raw string) ruleParts {
+	var out ruleParts
+	for _, part := range strings.Split(strings.TrimSpace(raw), ";") {
+		if k, v, ok := strings.Cut(part, "="); ok {
+			out = append(out, [2]string{strings.ToUpper(strings.TrimSpace(k)), strings.TrimSpace(v)})
+		}
+	}
+	return out
+}
+
+func (r ruleParts) get(k string) string {
+	for _, p := range r {
+		if p[0] == k {
+			return p[1]
+		}
+	}
+	return ""
+}
+
+// set replaces a part where it stands, appends a new one, and takes one out
+// when v is empty.
+func (r ruleParts) set(k, v string) ruleParts {
+	var out ruleParts
+	done := false
+	for _, p := range r {
+		if p[0] != k {
+			out = append(out, p)
+			continue
+		}
+		if v != "" && !done {
+			out = append(out, [2]string{k, v})
+		}
+		done = true
+	}
+	if !done && v != "" {
+		out = append(out, [2]string{k, v})
+	}
+	return out
+}
+
+func (r ruleParts) String() string {
+	parts := make([]string, len(r))
+	for i, p := range r {
+		parts[i] = p[0] + "=" + p[1]
+	}
+	return strings.Join(parts, ";")
+}
+
+// repeatValues are an RRULE as the form shows it: frequency, every, the plain
+// days of BYDAY in the form's order, until as a day in tz, count, and the rule
+// itself.
+func repeatValues(raw string, tz *time.Location) []string {
+	r := parseRule(raw)
+	out := make([]string, 6)
+	out[repFreq], out[repCount], out[repRule] = r.get("FREQ"), r.get("COUNT"), strings.TrimSpace(raw)
+	if out[repFreq] != "" {
+		out[repInterval] = r.get("INTERVAL")
+		if out[repInterval] == "" {
+			out[repInterval] = "1"
+		}
+	}
+	days := map[string]bool{}
+	for _, d := range strings.Split(r.get("BYDAY"), ",") {
+		days[strings.ToUpper(d)] = true
+	}
+	var on []string
+	for _, d := range repeatDays {
+		if days[d.code] {
+			on = append(on, d.code)
+		}
+	}
+	out[repOn] = strings.Join(on, ",")
+	if u := r.get("UNTIL"); len(u) == len("20060102") {
+		if t, err := time.Parse("20060102", u); err == nil {
+			out[repUntil] = t.Format("2006-01-02")
+		}
+	} else if t, err := time.Parse("20060102T150405Z", u); err == nil && tz != nil {
+		out[repUntil] = t.In(tz).Format("2006-01-02")
+	}
+	return out
+}
+
+// repeatRule is the RRULE a changed form asks for; "" is none. A changed raw
+// rule wins and is written as typed. Otherwise only the simple parts that
+// changed are written into the rule as it was, in their places, so what the
+// fields do not show — WKST, BYMONTHDAY, a numbered BYDAY — stays.
+func repeatRule(want, have []string, allDay bool, tz *time.Location) (string, error) {
+	pad := func(v []string) []string { return append(append([]string(nil), v...), make([]string, 6)...)[:6] }
+	want, have = pad(want), pad(have)
+	var rule string
+	if want[repRule] != have[repRule] {
+		rule = strings.TrimSpace(want[repRule])
+	} else if want[repFreq] == "" {
+		return "", nil
+	} else {
+		r := parseRule(have[repRule])
+		if want[repFreq] != have[repFreq] {
+			r = r.set("FREQ", strings.ToUpper(want[repFreq]))
+		}
+		if want[repInterval] != have[repInterval] {
+			v := want[repInterval]
+			if n, err := strconv.Atoi(v); v != "" && (err != nil || n < 1) {
+				return "", errors.New("Every is a number of 1 or more.")
+			}
+			if v == "1" {
+				v = ""
+			}
+			r = r.set("INTERVAL", v)
+		}
+		if want[repOn] != have[repOn] {
+			r = r.set("BYDAY", want[repOn])
+		}
+		if want[repCount] != have[repCount] {
+			if n, err := strconv.Atoi(want[repCount]); want[repCount] != "" && (err != nil || n < 1) {
+				return "", errors.New("Times is a number of 1 or more.")
+			}
+			r = r.set("COUNT", want[repCount])
+		}
+		if want[repUntil] != have[repUntil] {
+			v := ""
+			if want[repUntil] != "" {
+				day, err := time.ParseInLocation("2006-01-02", want[repUntil], tz)
+				if err != nil {
+					return "", errors.New("Enter the last day as YYYY-MM-DD.")
+				}
+				v = day.Format("20060102")
+				if !allDay {
+					// UNTIL of a timed series is UTC (RFC 5545 §3.3.10): the
+					// end of that day where the form's times are.
+					v = day.AddDate(0, 0, 1).Add(-time.Second).UTC().Format("20060102T150405Z")
+				}
+			}
+			r = r.set("UNTIL", v)
+		}
+		rule = r.String()
+	}
+	if rule == "" {
+		return "", nil
+	}
+	r := parseRule(rule)
+	if r.get("COUNT") != "" && r.get("UNTIL") != "" {
+		return "", errors.New("A series ends after a number of times or on a day, not both.")
+	}
+	if _, err := rrule.StrToROption(rule); err != nil || r.get("FREQ") == "" {
+		return "", errors.New("The rule is not one RFC 5545 reads: " + rule)
+	}
+	return rule, nil
+}
+
+// repeatFields describe a rule the way the form's fields hold it, for the
+// recurrence block beside the form.
+func repeatFields(v []string) []view.Field {
+	if v[repFreq] == "" {
+		return nil
+	}
+	out := []view.Field{{Label: "Frequency", Value: text(strings.ToLower(v[repFreq]))}, {Label: "Every", Value: text(v[repInterval])}}
+	if v[repOn] != "" {
+		var days []string
+		for _, d := range repeatDays {
+			if strings.Contains(v[repOn], d.code) {
+				days = append(days, d.label)
+			}
+		}
+		out = append(out, view.Field{Label: "On", Value: text(strings.Join(days, ", "))})
+	}
+	switch {
+	case v[repUntil] != "":
+		out = append(out, view.Field{Label: "Until", Value: text(v[repUntil])})
+	case v[repCount] != "":
+		out = append(out, view.Field{Label: "Times", Value: text(v[repCount])})
+	}
+	return out
+}
+
+// repeatSet is the Repeats field set of the event form.
+func repeatSet(f editField, vals []string, errText view.Text) view.FieldSet {
+	v := append(append([]string(nil), vals...), make([]string, 6)...)[:6]
+	freqs := []view.Option{{Value: "", Label: "Does not repeat"}, {Value: "DAILY", Label: "Daily"}, {Value: "WEEKLY", Label: "Weekly"},
+		{Value: "MONTHLY", Label: "Monthly"}, {Value: "YEARLY", Label: "Yearly"}}
+	seen := false
+	for i := range freqs {
+		freqs[i].Selected = freqs[i].Value == v[repFreq]
+		seen = seen || freqs[i].Selected
+	}
+	if !seen {
+		freqs = append(freqs, view.Option{Value: v[repFreq], Label: text(v[repFreq]), Selected: true})
+	}
+	set := view.FieldSet{Legend: text(f.label), Rows: []view.FormRow{
+		{Name: f.name + ".freq", Label: "Frequency", Kind: view.InputSelect, Value: text(v[repFreq]), Options: freqs, Error: errText},
+		{Name: f.name + ".interval", Label: "Every", Kind: view.InputNumber, Value: text(v[repInterval])},
+	}}
+	on := map[string]bool{}
+	for _, d := range strings.Split(v[repOn], ",") {
+		on[d] = true
+	}
+	for _, d := range repeatDays {
+		val := ""
+		if on[d.code] {
+			val = "on"
+		}
+		set.Rows = append(set.Rows, view.FormRow{Name: f.name + ".on." + d.code, Label: text("On " + d.label), Kind: view.InputCheck, Value: text(val)})
+	}
+	set.Rows = append(set.Rows,
+		view.FormRow{Name: f.name + ".until", Label: "Until", Kind: view.InputDate, Value: text(v[repUntil])},
+		view.FormRow{Name: f.name + ".count", Label: "Times", Kind: view.InputNumber, Value: text(v[repCount]), Hint: "Until or Times, not both."},
+		view.FormRow{Name: f.name + ".rule", Label: "Advanced RRULE", Kind: view.InputText, Value: text(v[repRule]),
+			Hint: "Changed here, the rule is written as typed and wins over the fields above. Exceptions and moved instances are not edited: the series is edited as a whole."},
+	)
+	return set
+}
+
 // eventStatuses are the STATUS values of an event (RFC 5545 §3.8.1.11).
 var eventStatuses = []fieldOption{{"", "No status"}, {"TENTATIVE", "Tentative"}, {"CONFIRMED", "Confirmed"}, {"CANCELLED", "Cancelled"}}
 
@@ -167,6 +401,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "start", label: "Starts", prop: "DTSTART", typ: fieldTime, required: true, allDay: true},
 		{name: "end", label: "Ends", prop: "DTEND", typ: fieldTime},
 		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone},
+		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: eventStatuses},
 		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
@@ -302,6 +537,8 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
 		case fieldZone:
 			vals[f.name] = []string{zoneOf(props[f.prop])}
+		case fieldRepeat:
+			vals[f.name] = repeatValues(firstValue(obj, f.prop), tz)
 		case fieldList:
 			vals[f.name] = []string{strings.Join(categoriesOf(c.spec.kind, obj), ", ")}
 		case fieldBirthday:
@@ -390,6 +627,8 @@ func (s *Server) emptyValues(c *collectionCtx) formValues {
 			vals[f.name] = []string{"", "", ""}
 		case fieldName:
 			vals[f.name] = []string{"", ""}
+		case fieldRepeat:
+			vals[f.name] = repeatValues("", nil)
 		default:
 			vals[f.name] = []string{""}
 		}
@@ -435,6 +674,18 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 					labels = append(labels, strings.TrimSpace(r.FormValue(fmt.Sprintf("%s.%d.type", f.name, i))))
 				}
 				vals[f.name+".type"] = append(labels, strings.TrimSpace(r.FormValue(f.name+".new.type")))
+			}
+		case fieldRepeat:
+			var on []string
+			for _, d := range repeatDays {
+				if checkbox(r, f.name+".on."+d.code) == "on" {
+					on = append(on, d.code)
+				}
+			}
+			vals[f.name] = []string{
+				strings.TrimSpace(r.FormValue(f.name + ".freq")), strings.TrimSpace(r.FormValue(f.name + ".interval")),
+				strings.Join(on, ","), strings.TrimSpace(r.FormValue(f.name + ".until")),
+				strings.TrimSpace(r.FormValue(f.name + ".count")), strings.TrimSpace(r.FormValue(f.name + ".rule")),
 			}
 		case fieldAddress:
 			part := func(prefix string) string {
@@ -559,6 +810,16 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				items[i] = cal.EscapeText(items[i])
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], strings.Join(items, ","), false)...)
+		case fieldRepeat:
+			if sameRows(w, h) {
+				continue
+			}
+			rule, err := repeatRule(w, h, zoneOf(props["DTSTART"]) == "" && len(props["DTSTART"]) > 0, tz)
+			if err != nil {
+				ch.errors[f.name] = err.Error()
+				continue
+			}
+			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], rule, false)...)
 		case fieldChoice:
 			v := first(w)
 			if v == first(h) {
@@ -1132,6 +1393,7 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		if st.obj != nil {
 			if cal.HasRecurrence(st.obj) {
 				page.Recurrence = s.recurrenceBlock(st.obj, tf)
+				page.Recurrence.Fields = append(repeatFields(repeatValues(cal.RawRRULE(st.obj), tf.tz)), page.Recurrence.Fields...)
 			}
 			for _, a := range cal.Attendees(st.obj) {
 				page.Attendees = append(page.Attendees, view.AttendeeRow{Name: text(a.Name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
@@ -1206,6 +1468,8 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
 		case fieldList:
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
+		case fieldRepeat:
+			extra = append(extra, repeatSet(f, vals, errText))
 		case fieldZone:
 			held := zoneOf(props[f.prop])
 			if held == "" {

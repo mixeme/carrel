@@ -75,8 +75,12 @@
       `cal.TestTimezoneFromTheZoneDatabase`). Новый `TZID` приносит свой
       `VTIMEZONE` (RFC 5545 §3.2.19), собранный из базы поясов сервера;
       список поясов — UTC, пояс экземпляра и ~60 распространённых
-- [ ] Событие: Repeats — простые поля и Advanced RRULE; `RecurrenceBlock.Fields`
-      заполняется для формы. Живой тест: серия правится, исключения целы
+- [x] Событие: Repeats — простые поля и Advanced RRULE; `RecurrenceBlock.Fields`
+      заполняется для формы (`v0.0.146`, `TestEventRepeats`,
+      `TestNewEventRepeats`: серия правится, `EXDATE` и перенесённый
+      экземпляр целы)
+- [ ] Живой тест Repeats на Baikal и Radicale: серия правится, исключения
+      целы
 - [ ] Задача: Start date, Status, Priority, Location, Categories, Related to
 - [ ] Заметка: Date и Time (`DTSTART` журнала), Tags, Related to
 - [ ] Mark done в карточке задачи и в строке списка
