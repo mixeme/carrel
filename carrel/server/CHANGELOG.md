@@ -5,6 +5,19 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.150 — 2026-09-19
+
+forms-tail.md, step 9.
+
+### Added
+
+- **"Show N empty fields" on the contact form** (`s-contacts-3`): the
+  optional fields a card leaves empty — nickname, organisation, title,
+  birthday, categories, note — come in a field set of their own whose
+  legend says how many; the client folds it. A filled field stays in the
+  main set, a field with an error is never hidden, and a new contact shows
+  every field. No contract change: it is a `FieldSet` with a `Legend`.
+
 ## v0.0.149 — 2026-09-19
 
 forms-tail.md, step 8.

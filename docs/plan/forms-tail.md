@@ -96,6 +96,7 @@
       `TestSendAContactFromItsCard`, `TestExportOneNoteAsMarkdown`). Новых
       адресов нет: быстрый лист задачи с `?related=`, POST листа вложения,
       `export?uid=`
-- [ ] «Show N empty fields»: форма отдаёт пустые необязательные поля отдельным
+- [x] «Show N empty fields»: форма отдаёт пустые необязательные поля отдельным
       `FieldSet` с `Legend` — клиент сворачивает его сам (правка C-6 не нужна,
-      если хватает `FieldSet`; иначе — согласовать)
+      если хватает `FieldSet`; иначе — согласовать). `v0.0.150`,
+      `TestContactEmptyFieldsInTheirOwnSet`: хватило

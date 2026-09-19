@@ -76,6 +76,9 @@ type editField struct {
 	required bool
 	allDay   bool // fieldTime: the field has its own all-day box
 	typed    bool // fieldMulti: each row has its label, the TYPE parameter
+	// optional fields a record leaves empty go into a set of their own on
+	// its full form, "Show N empty fields"; the client folds it.
+	optional bool
 	choices  []fieldOption
 	hint     string // shown under the field, when the rule needs saying
 }
@@ -423,16 +426,16 @@ var editFields = map[view.Kind][]editField{
 		{name: "fn", label: "Display name", prop: "FN", typ: fieldText,
 			hint: "Left empty, it is made from Given and Family. Fill it alone and it is cut the other way: the first word is the given name, the rest the family name."},
 		{name: "n", label: "Name", prop: "N", typ: fieldName},
-		{name: "nickname", label: "Nickname", prop: "NICKNAME", typ: fieldText},
+		{name: "nickname", label: "Nickname", prop: "NICKNAME", typ: fieldText, optional: true},
 		{name: "email", label: "Email", prop: "EMAIL", typ: fieldMulti, typed: true},
 		{name: "tel", label: "Phone", prop: "TEL", typ: fieldMulti, typed: true},
 		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress},
-		{name: "org", label: "Organisation", prop: "ORG", typ: fieldText},
-		{name: "title", label: "Title", prop: "TITLE", typ: fieldText},
-		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday,
+		{name: "org", label: "Organisation", prop: "ORG", typ: fieldText, optional: true},
+		{name: "title", label: "Title", prop: "TITLE", typ: fieldText, optional: true},
+		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday, optional: true,
 			hint: "--MM-DD for a birthday without a year."},
-		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
-		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea},
+		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, optional: true, hint: "Separated by commas."},
+		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea, optional: true},
 	},
 	view.KindEvent: {
 		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
@@ -1533,8 +1536,12 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 	}
 	var sets, extra []view.FieldSet
 	var reminders *view.FieldSet
+	var empty []view.FormRow
+	full := len(fields) == len(editFields[c.spec.kind])
 	for _, f := range fields {
 		vals, errText := st.values[f.name], text(st.errors[f.name])
+		hide := f.optional && full && st.obj != nil && strings.TrimSpace(first(vals)) == "" && errText == ""
+		before := len(main.Rows)
 		switch f.typ {
 		case fieldText:
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required})
@@ -1648,6 +1655,17 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			}
 			reminders = &set
 		}
+		if hide {
+			empty = append(empty, main.Rows[before:]...)
+			main.Rows = main.Rows[:before]
+		}
+	}
+	if len(empty) > 0 {
+		legend := fmt.Sprintf("Show %d empty fields", len(empty))
+		if len(empty) == 1 {
+			legend = "Show 1 empty field"
+		}
+		extra = append(extra, view.FieldSet{Legend: text(legend), Rows: empty})
 	}
 	sets = append(sets, main)
 	sets = append(sets, extra...)
