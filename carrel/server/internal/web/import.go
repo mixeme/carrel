@@ -482,7 +482,7 @@ func (s *Server) takeFolder(w http.ResponseWriter, r *http.Request, c *collectio
 		fail(view.Notice{
 			Role: view.NoticeAlert, Title: text(collectionLabel(col) + " is unavailable"),
 			Body:    text("The folder could not be read, so nothing was taken from it."),
-			Details: &view.Diagnostic{Summary: text("PROPFIND " + col.Path), Lines: []view.Text{text(serverHost(conn.Server)), text(err.Error())}},
+			Details: &view.Diagnostic{Summary: text("PROPFIND " + col.Path), Lines: []view.Text{text(connLabel(conn)), text(err.Error())}},
 		})
 		return
 	}

@@ -202,7 +202,10 @@ type AttachmentFolder struct {
 // Connection stores DAV credentials, the homes discovery found, and an
 // optional accepted leaf certificate fingerprint (F-13).
 type Connection struct {
-	ID              string `json:"id"`
+	ID string `json:"id"`
+	// Label is the person's name for the connection; empty, it goes by its
+	// host. A label, never an identifier (C-4).
+	Label           string `json:"label,omitempty"`
 	Server          string `json:"server"`
 	Login           string `json:"login"`
 	Password        string `json:"password"`

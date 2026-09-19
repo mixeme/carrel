@@ -242,7 +242,7 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
 		host := l.Target.AccountID
 		if conn, ok := blob.Connection(l.Target.AccountID); ok {
-			host = serverHost(conn.Server)
+			host = connLabel(conn)
 		}
 		label := l.Target.Col
 		if col, ok := blob.Collection(l.Target.AccountID, l.Target.Col); ok {

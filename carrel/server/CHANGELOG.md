@@ -5,6 +5,20 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.151 — 2026-09-19
+
+connections-tail.md, step 6.
+
+### Added
+
+- **A connection has a label** (`s-profile-2`, C-4: the account is a label,
+  not an identifier). The add and the edit form have a Label field, first
+  as on the frame; one line, at most 60 characters. The label names the
+  connection card and every "account · collection" stamp — lists, rails,
+  search, backups, devices, the attach sheet, move and restore; left empty,
+  the host, as before. It lives in the sealed blob with the connection; a
+  blob written before it has none and reads as the host.
+
 ## v0.0.150 — 2026-09-19
 
 forms-tail.md, step 9.

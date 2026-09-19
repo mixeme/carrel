@@ -121,7 +121,7 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.Rest
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Has(view.KindFile) && !col.Gone {
-				stores = append(stores, view.Option{Value: selValue(conn.ID, col.Path), Label: text(string(stamp(serverHost(conn.Server), collectionLabel(col))))})
+				stores = append(stores, view.Option{Value: selValue(conn.ID, col.Path), Label: text(string(stamp(connLabel(conn), collectionLabel(col))))})
 			}
 		}
 	}
@@ -193,12 +193,12 @@ func (s *Server) fillRestore(sess *session.Session, blob sealed.Blob, t *restore
 			if e.Kind == view.KindFile {
 				for _, col := range blob.CollectionsOf(conn.ID) {
 					if col.Has(view.KindFile) && !col.Gone && !col.ReadOnly {
-						picker.Options = append(picker.Options, view.TargetOption{ID: selValue(conn.ID, col.Path), Label: text(collectionLabel(col)), Stamp: stamp(serverHost(conn.Server), collectionLabel(col))})
+						picker.Options = append(picker.Options, view.TargetOption{ID: selValue(conn.ID, col.Path), Label: text(collectionLabel(col)), Stamp: stamp(connLabel(conn), collectionLabel(col))})
 					}
 				}
 				continue
 			}
-			opt := view.TargetOption{ID: conn.ID, Label: text(serverHost(conn.Server)), Stamp: stamp(serverHost(conn.Server), "")}
+			opt := view.TargetOption{ID: conn.ID, Label: text(connLabel(conn)), Stamp: stamp(connLabel(conn), "")}
 			if homeFor(conn, e.Kind) == "" {
 				opt.ReadOnly, opt.Reason = true, "Makes no collections of this kind"
 			}
@@ -473,7 +473,7 @@ func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key 
 		}
 		made++
 	}
-	line := fmt.Sprintf("%s → %s · %s: %s created", e.Name, serverHost(conn.Server), col.Name, plural(made, "record"))
+	line := fmt.Sprintf("%s → %s · %s: %s created", e.Name, connLabel(conn), col.Name, plural(made, "record"))
 	if refused > 0 {
 		line += fmt.Sprintf(", %d refused", refused)
 		return line, errors.New(line)
@@ -582,5 +582,5 @@ func (s *Server) restoreFiles(ctx context.Context, blob sealed.Blob, zr *zip.Rea
 		}
 		count++
 	}
-	return fmt.Sprintf("%s → %s · %s: %s", e.Name, serverHost(conn.Server), strings.TrimPrefix(base, fileRoot(conn, col)), plural(count, "file")), nil
+	return fmt.Sprintf("%s → %s · %s: %s", e.Name, connLabel(conn), strings.TrimPrefix(base, fileRoot(conn, col)), plural(count, "file")), nil
 }

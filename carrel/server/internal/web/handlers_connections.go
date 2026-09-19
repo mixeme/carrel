@@ -18,7 +18,7 @@ import (
 // connectionForm is what the Add form shows back. The password is never
 // echoed: a failed attempt asks for it again.
 type connectionForm struct {
-	Server, Login, CertFingerprint string
+	Label, Server, Login, CertFingerprint string
 	ServerErr                      view.Text
 	// Editing is the connection the form edits; empty for a new one.
 	Editing string
@@ -40,7 +40,7 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 			s.notFound(w, r)
 			return
 		}
-		f = connectionForm{Server: conn.Server, Login: conn.Login, CertFingerprint: conn.CertFingerprint, Editing: conn.ID}
+		f = connectionForm{Label: conn.Label, Server: conn.Server, Login: conn.Login, CertFingerprint: conn.CertFingerprint, Editing: conn.ID}
 	}
 	page := s.connectionsPage(sess, f, nil)
 	if r.URL.Query().Get("op") == "feed" {
@@ -94,6 +94,7 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	f := connectionForm{
+		Label:           connectionLabel(r.FormValue("label")),
 		Server:          strings.TrimSpace(r.FormValue("server")),
 		Login:           strings.TrimSpace(r.FormValue("login")),
 		CertFingerprint: strings.TrimSpace(r.FormValue("certFingerprint")),
@@ -128,6 +129,7 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	conn := sealed.Connection{
+		Label:           f.Label,
 		Server:          res.BaseURL,
 		Login:           f.Login,
 		Password:        password,
@@ -209,6 +211,7 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	f := connectionForm{
+		Label:           connectionLabel(r.FormValue("label")),
 		Server:          strings.TrimSpace(r.FormValue("server")),
 		Login:           strings.TrimSpace(r.FormValue("login")),
 		CertFingerprint: strings.TrimSpace(r.FormValue("certFingerprint")),
@@ -231,6 +234,7 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 	}
 	edited := sealed.Connection{
 		ID:              conn.ID,
+		Label:           f.Label,
 		Server:          res.BaseURL,
 		Login:           f.Login,
 		Password:        password,
@@ -294,7 +298,7 @@ func (s *Server) rediscoveryNotice(blob sealed.Blob, conn sealed.Connection, fou
 		}
 	}
 	d := discover.CompareCollections(found, stored)
-	host := serverHost(conn.Server)
+	host := connLabel(conn)
 	if len(d.Added) == 0 && len(d.Removed) == 0 {
 		return &view.Notice{
 			Role:  view.NoticeInfo,
@@ -377,6 +381,8 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 	}
 	form := s.plainForm(action, "POST",
 		csrfField(sess),
+		view.FormRow{Name: "label", Label: "Label", Kind: view.InputText, Value: text(f.Label),
+			Hint: "Your name for this account, as the lists show it. Left empty, the server's host."},
 		view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true},
 		view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(f.Login)},
 		password,
@@ -401,7 +407,7 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 	}
 	card := view.ConnectionCard{
 		AccountID: c.ID,
-		Title:     text(serverHost(c.Server)),
+		Title:     text(connLabel(c)),
 		Server:    text(c.Server),
 		Login:     text(c.Login),
 		Password:  view.SecretField{Reveal: reveal},
@@ -503,7 +509,7 @@ func goneNotice(blob sealed.Blob) (view.Notice, bool) {
 			continue
 		}
 		conn, _ := blob.Connection(c.AccountID)
-		names = append(names, serverHost(conn.Server)+" · "+collectionLabel(c))
+		names = append(names, connLabel(conn)+" · "+collectionLabel(c))
 	}
 	if len(names) == 0 {
 		return view.Notice{}, false
@@ -569,6 +575,24 @@ func validServerURL(raw string) bool {
 		return false
 	}
 	return strings.EqualFold(u.Scheme, "https") || strings.EqualFold(u.Scheme, "http")
+}
+
+// connectionLabel is a typed label: one line, at most 60 characters.
+func connectionLabel(v string) string {
+	v = strings.Join(strings.Fields(v), " ")
+	if r := []rune(v); len(r) > 60 {
+		v = string(r[:60])
+	}
+	return v
+}
+
+// connLabel is what a connection is called on every screen: the person's
+// label, else its host (C-4: the account is a label, not an identifier).
+func connLabel(c sealed.Connection) string {
+	if c.Label != "" {
+		return c.Label
+	}
+	return serverHost(c.Server)
 }
 
 func serverHost(raw string) string {

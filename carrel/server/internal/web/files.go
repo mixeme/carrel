@@ -204,7 +204,7 @@ func (c *fileCtx) href(marker string, segs []string, dir bool) string {
 }
 
 func (c *fileCtx) stamp() view.Stamp {
-	return stamp(serverHost(c.conn.Server), collectionLabel(c.col))
+	return stamp(connLabel(c.conn), collectionLabel(c.col))
 }
 
 // at is the same collection at another address.
@@ -286,7 +286,7 @@ func (s *Server) fileFailure(c *fileCtx, title, method, p string, err error) vie
 		Body:  text(fileReason(err)),
 		Details: &view.Diagnostic{
 			Summary: text(method + " " + p),
-			Lines:   []view.Text{text(serverHost(c.conn.Server) + p), text(err.Error())},
+			Lines:   []view.Text{text(connLabel(c.conn) + p), text(err.Error())},
 		},
 	}
 }
@@ -314,7 +314,7 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 		conn, _ := blob.Connection(col.AccountID)
 		row := view.FileCollectionRow{
 			Label:    text(collectionLabel(col)),
-			Stamp:    stamp(serverHost(conn.Server), collectionLabel(col)),
+			Stamp:    stamp(connLabel(conn), collectionLabel(col)),
 			Colour:   catalogColour(col),
 			ReadOnly: col.ReadOnly,
 			State:    view.CollectionOK,
@@ -427,7 +427,7 @@ func (s *Server) writeFolder(w http.ResponseWriter, r *http.Request, c *fileCtx,
 			Body:  text(fileReason(err) + " Nothing on this screen comes from the server."),
 			Details: &view.Diagnostic{
 				Summary: text("PROPFIND " + folder),
-				Lines:   []view.Text{text(serverHost(c.conn.Server) + folder), text(err.Error())},
+				Lines:   []view.Text{text(connLabel(c.conn) + folder), text(err.Error())},
 			},
 			Actions: []view.Action{{ID: "source.retry", Label: "Try again", Href: s.route(retry), Method: "GET", Enabled: true}},
 		})

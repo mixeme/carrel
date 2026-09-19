@@ -97,7 +97,7 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 			continue
 		}
 		small.Rows = append(small.Rows, view.FormRow{
-			Name: "limit." + conn.ID + "." + col.Path, Label: view.Text(stamp(serverHost(conn.Server), collectionLabel(col))),
+			Name: "limit." + conn.ID + "." + col.Path, Label: view.Text(stamp(connLabel(conn), collectionLabel(col))),
 			Kind: view.InputText, Value: text(sizeText(attachLimit(col))), ReadOnly: true,
 		})
 	}

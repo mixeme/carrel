@@ -165,7 +165,7 @@ func (s *Server) attachRail(r *http.Request, blob sealed.Blob, k attachKind, acc
 		if conn.Feed {
 			continue
 		}
-		sec := view.RailSection{Account: text(serverHost(conn.Server)), AccountID: conn.ID, State: view.CollectionOK}
+		sec := view.RailSection{Account: text(connLabel(conn)), AccountID: conn.ID, State: view.CollectionOK}
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if !col.Has(k.Kind) || col.Gone {
 				continue

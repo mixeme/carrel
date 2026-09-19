@@ -114,8 +114,9 @@
       `TestSavedConnectionIsTestedAndTestedAgain`). Test again — у карточки,
       чья последняя проверка в этой сессии (Test, Look for changes, Edit)
       не прошла; отказ списка в опросе карточку пока не помечает
-- [ ] Форма добавления: поле Label (имя подключения, C-4 `account` —
+- [x] Форма добавления: поле Label (имя подключения, C-4 `account` —
       подпись, не идентификатор; сейчас подпись всегда хост). Правка контракта
-      не нужна: `ConnectionCard.Title` уже есть
+      не нужна: `ConnectionCard.Title` уже есть (`v0.0.151`,
+      `TestConnectionLabel`; подпись идёт и во все штампы «аккаунт · коллекция»)
 - [ ] Живой прогон: Baikal и Nextcloud — Disconnect, повторный Connect,
       галочек нет, ссылки мертвы

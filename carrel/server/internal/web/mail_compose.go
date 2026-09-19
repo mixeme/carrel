@@ -360,7 +360,7 @@ func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q
 		account, path, _ := strings.Cut(st.ID, ":")
 		conn, _ := blob.Connection(account)
 		col, _ := blob.Collection(account, path)
-		notAsked = append(notAsked, stamp(serverHost(conn.Server), collectionLabel(col)))
+		notAsked = append(notAsked, stamp(connLabel(conn), collectionLabel(col)))
 	}
 	return out, notAsked
 }

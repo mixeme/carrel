@@ -724,7 +724,7 @@ func (s *Server) fileTree(ctx context.Context, c *fileCtx, chosen *fileCtx) *vie
 		node := view.FileTreeNode{
 			ID:       s.route(fileHref(conn.ID, col.Path, "", nil, true)),
 			Label:    collectionLabel(col),
-			Stamp:    stamp(serverHost(conn.Server), collectionLabel(col)),
+			Stamp:    stamp(connLabel(conn), collectionLabel(col)),
 			ReadOnly: col.ReadOnly,
 		}
 		if chosen != nil && chosen.conn.ID == conn.ID && chosen.col.Path == col.Path {

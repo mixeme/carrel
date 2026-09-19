@@ -300,7 +300,7 @@ func moveFailure(c *collectionCtx, title, method, target string, err error) view
 		Body:  text("The " + c.spec.noun + " is where it was."),
 		Details: &view.Diagnostic{
 			Summary: text(method + " " + target),
-			Lines:   []view.Text{text(serverHost(c.conn.Server)), text(err.Error())},
+			Lines:   []view.Text{text(connLabel(c.conn)), text(err.Error())},
 		},
 	}
 	if dav.IsStatus(err, http.StatusForbidden) {

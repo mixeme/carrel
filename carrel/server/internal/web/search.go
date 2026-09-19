@@ -213,7 +213,7 @@ func (s *Server) findRow(tf timeFmt, blob sealed.Blob, it fanout.Item) view.Find
 		col = sealed.Collection{AccountID: it.AccountID, Path: it.Col}
 	}
 	conn, _ := blob.Connection(it.AccountID)
-	row := view.FindRow{Kind: it.Kind, Colour: catalogColour(col), Stamp: stamp(serverHost(conn.Server), collectionLabel(col))}
+	row := view.FindRow{Kind: it.Kind, Colour: catalogColour(col), Stamp: stamp(connLabel(conn), collectionLabel(col))}
 	o := it.Object
 	switch it.Kind {
 	case view.KindFile:
@@ -340,7 +340,7 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 		}
 		conn, _ := blob.Connection(account)
 		sp := view.SourceProgress{
-			Stamp:     stamp(serverHost(conn.Server), collectionLabel(col)),
+			Stamp:     stamp(connLabel(conn), collectionLabel(col)),
 			Colour:    catalogColour(col),
 			State:     st.State,
 			FromCache: st.FromCache,
@@ -439,7 +439,7 @@ func (s *Server) jumpRows(sess *session.Session, blob sealed.Blob, q string) []v
 		if col.Gone || !ok || len(col.Kinds) == 0 {
 			continue
 		}
-		host, label := serverHost(conn.Server), collectionLabel(col)
+		host, label := connLabel(conn), collectionLabel(col)
 		if strings.Contains(strings.ToLower(label), needle) && len(out) < jumpRowsMost {
 			out = append(out, view.JumpRow{Href: s.route(collectionHref(col)), Kind: col.Kinds[0], Title: text(label), Stamp: stamp(host, label)})
 		}

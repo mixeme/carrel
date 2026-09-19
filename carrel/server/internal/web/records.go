@@ -66,7 +66,7 @@ func (o origin) recordPath(segment, uid string) string {
 }
 
 func (o origin) stamp() view.Stamp {
-	return stamp(serverHost(o.conn.Server), collectionLabel(o.col))
+	return stamp(connLabel(o.conn), collectionLabel(o.col))
 }
 
 // listed is one record of a list with its origin. The rows of a combined view
@@ -486,7 +486,7 @@ func (s *Server) unavailableNotice(c *collectionCtx, retry string, err error) vi
 		Body:  text("The server did not answer as expected, so nothing on this screen comes from it."),
 		Details: &view.Diagnostic{
 			Summary: text("REPORT " + c.col.Path),
-			Lines:   []view.Text{text(serverHost(c.conn.Server)), text(err.Error())},
+			Lines:   []view.Text{text(connLabel(c.conn)), text(err.Error())},
 		},
 		Actions: []view.Action{{ID: "source.retry", Label: "Try again", Href: s.route(retry), Method: "GET", Enabled: true}},
 	}
@@ -536,7 +536,7 @@ func (s *Server) writeFailure(c *collectionCtx, method, path string, err error) 
 		Body:  text("Nothing was saved. The form keeps what you entered."),
 		Details: &view.Diagnostic{
 			Summary: text(method + " " + path),
-			Lines:   []view.Text{text(serverHost(c.conn.Server) + path), text(err.Error())},
+			Lines:   []view.Text{text(connLabel(c.conn) + path), text(err.Error())},
 		},
 	}
 	if dav.IsStatus(err, http.StatusForbidden) {

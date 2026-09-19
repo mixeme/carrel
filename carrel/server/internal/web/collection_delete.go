@@ -54,7 +54,7 @@ func recordNoun(col sealed.Collection) string {
 // collectionDeleteSheet is the sheet; count is the resources the server holds
 // in it, or -1 when it did not say.
 func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connection, col sealed.Collection, count int, typed string, errText view.Text) view.CollectionDeleteSheet {
-	noun, label, host := collectionNoun(col), collectionLabel(col), serverHost(conn.Server)
+	noun, label, host := collectionNoun(col), collectionLabel(col), connLabel(conn)
 	what := "everything in it"
 	if count > 0 {
 		what = "all " + plural(count, recordNoun(col)) + " in it"
@@ -162,7 +162,7 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 	if err := s.users.RemoveCollection(sess.AccountID(), key, conn.ID, col.Path); err != nil {
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, &view.Notice{
 			Role: view.NoticeAlert, Title: text("Deleted, but the list of collections still names it"),
-			Body: text(label + " was deleted on " + serverHost(conn.Server) + "; run re-discovery on its connection to take it out."),
+			Body: text(label + " was deleted on " + connLabel(conn) + "; run re-discovery on its connection to take it out."),
 		}))
 		return
 	}

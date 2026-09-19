@@ -316,7 +316,7 @@ func lostCollection(conn sealed.Connection, method, path string, err error, tail
 	return &view.Notice{
 		Role:  view.NoticeAlert,
 		Title: text("Made, but not at the address it was given"),
-		Body:  text(serverHost(conn.Server) + " took the request and put the collection at an address of its own, and Carrel could not tell which. " + tail),
+		Body:  text(connLabel(conn) + " took the request and put the collection at an address of its own, and Carrel could not tell which. " + tail),
 		Details: &view.Diagnostic{
 			Summary: text(method + " " + path),
 			Lines:   []view.Text{text(err.Error())},
@@ -397,7 +397,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	sheet := view.CollectionNewSheet{Kind: f.kind, Failure: failure}
 	var eligible []sealed.Connection
 	for _, c := range blob.Connections {
-		opt := view.TargetOption{ID: c.ID, Label: text(serverHost(c.Server))}
+		opt := view.TargetOption{ID: c.ID, Label: text(connLabel(c))}
 		switch {
 		case homeFor(c, f.kind) != "":
 			eligible = append(eligible, c)
@@ -444,7 +444,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	}
 	server := view.FormRow{Name: "account", Label: "On which server", Kind: view.InputSelect, Value: text(chosen.ID), Required: true, Error: errs["account"]}
 	for _, c := range eligible {
-		server.Options = append(server.Options, view.Option{Value: c.ID, Label: text(serverHost(c.Server)), Selected: c.ID == chosen.ID})
+		server.Options = append(server.Options, view.Option{Value: c.ID, Label: text(connLabel(c)), Selected: c.ID == chosen.ID})
 	}
 	rows = append(rows, server,
 		view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(f.name), Required: true, Error: errs["name"]})
@@ -586,7 +586,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 	}
 	return view.CollectionRenameSheet{
 		Kind:    col.Kinds[0],
-		Stamp:   view.Stamp(serverHost(conn.Server)),
+		Stamp:   view.Stamp(connLabel(conn)),
 		Form:    s.plainForm(action, "POST", rows...),
 		Address: text(serverOrigin(conn.Server) + col.Path),
 		Note: text("Renaming is not moving: the address stays as it is, so devices, published links and backup jobs pointing here go on working. " +
@@ -645,7 +645,7 @@ func davRefusal(rt refusalText, conn sealed.Connection, method, path string, err
 		Body:  text(rt.nothing),
 		Details: &view.Diagnostic{
 			Summary: text(method + " " + path),
-			Lines:   []view.Text{text(serverHost(conn.Server) + path)},
+			Lines:   []view.Text{text(connLabel(conn) + path)},
 		},
 	}
 	code := dav.StatusCode(err)

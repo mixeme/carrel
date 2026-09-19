@@ -129,7 +129,7 @@ func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, accou
 	profileAccounts := 0
 	for _, conn := range blob.Connections {
 		included := !blob.IsDeviceExcluded(conn.ID)
-		acct := view.DeviceAccount{Title: text(serverHost(conn.Server) + " · " + conn.Login)}
+		acct := view.DeviceAccount{Title: text(connLabel(conn) + " · " + conn.Login)}
 		dav := false
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || !onTab(tab, col) {
@@ -153,9 +153,9 @@ func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, accou
 			profileAccounts++
 		}
 		page.Accounts = append(page.Accounts, acct)
-		op, label := "exclude", "Leave out "+serverHost(conn.Server)
+		op, label := "exclude", "Leave out "+connLabel(conn)
 		if !included {
-			op, label = "include", "Include "+serverHost(conn.Server)
+			op, label = "include", "Include "+connLabel(conn)
 		}
 		page.Actions = append(page.Actions, view.Action{
 			ID: "device." + op, Label: text(label), Method: "POST", Enabled: true,
@@ -199,7 +199,7 @@ func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, accou
 			if account == "" && i == 0 || conn.ID == account {
 				link := davx5Link(conn)
 				page.QR = qrImage(link)
-				page.Actions = append(page.Actions, view.Action{ID: "device.davx5", Label: text("Open in DAVx5 · " + serverHost(conn.Server)), Href: link, Method: "GET", Enabled: true})
+				page.Actions = append(page.Actions, view.Action{ID: "device.davx5", Label: text("Open in DAVx5 · " + connLabel(conn)), Href: link, Method: "GET", Enabled: true})
 				account = conn.ID
 			}
 		}
@@ -208,7 +208,7 @@ func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, accou
 				continue
 			}
 			page.Actions = append(page.Actions, view.Action{
-				ID: "device.code", Label: text("Code for " + serverHost(conn.Server)), Method: "GET", Enabled: true,
+				ID: "device.code", Label: text("Code for " + connLabel(conn)), Method: "GET", Enabled: true,
 				Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "account": {conn.ID}}),
 			})
 		}
@@ -413,7 +413,7 @@ func appleProfile(accounts []profileAccount) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-			desc := serverHost(a.conn.Server) + " · " + part.prefix
+			desc := connLabel(a.conn) + " · " + part.prefix
 			b.WriteString("<dict>\n")
 			str(part.prefix+"AccountDescription", desc)
 			str(part.prefix+"HostName", u.Hostname())

@@ -479,7 +479,7 @@ func (s *Server) backRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 // among them.
 func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kindSpec, unavailable map[string]bool) (sections []view.RailSection, live, on int) {
 	for _, conn := range blob.Connections {
-		sec := view.RailSection{Account: text(serverHost(conn.Server)), AccountID: conn.ID, State: view.CollectionOK}
+		sec := view.RailSection{Account: text(connLabel(conn)), AccountID: conn.ID, State: view.CollectionOK}
 		down := 0
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			tick := isTicked(blob, spec.kind, conn.ID, col.Path)

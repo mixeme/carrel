@@ -55,8 +55,8 @@ func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection,
 	for _, c := range blob.Connections {
 		opt := view.TargetOption{
 			ID:    s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, c.ID, copying)),
-			Label: text(serverHost(c.Server)),
-			Stamp: view.Stamp(serverHost(c.Server)),
+			Label: text(connLabel(c)),
+			Stamp: view.Stamp(connLabel(c)),
 		}
 		switch {
 		case c.ID == conn.ID:
@@ -110,7 +110,7 @@ func collectionMoveBlock(conn sealed.Connection, col sealed.Collection, dest sea
 // it goes, that the address changes, and when the original is deleted.
 func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, to string) view.CollectionMoveSheet {
 	noun, label := collectionNoun(col), collectionLabel(col)
-	sheet := view.CollectionMoveSheet{Kind: col.Kinds[0], Copy: copying, Subject: text(label + " · " + serverHost(conn.Server))}
+	sheet := view.CollectionMoveSheet{Kind: col.Kinds[0], Copy: copying, Subject: text(label + " · " + connLabel(conn))}
 	sheet.Target.Options, _ = s.collectionMoveTargets(blob, conn, col, copying)
 	dest, known := blob.Connection(to)
 	confirm := view.Action{ID: "collection.move.confirm", Label: "Move", Method: "POST", Enabled: true}
@@ -126,7 +126,7 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 	} else {
 		chosen := s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, dest.ID, copying))
 		sheet.Target.Chosen, confirm.Href = chosen, chosen
-		host := serverHost(dest.Server)
+		host := connLabel(dest)
 		if copying {
 			sheet.Warning = text(fmt.Sprintf("Carrel makes %s on %s with the same name, colour and contents, and copies every record there one at a time. The %s here stays as it is.", label, host, noun))
 		} else {
@@ -295,7 +295,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 			Role:  view.NoticeAlert,
 			Title: text(m.title()),
 			Body: text(fmt.Sprintf("%s refused %s of %d, so the new %s there was taken back. %s is as it was.",
-				serverHost(m.dest.Server), plural(len(refused), "record"), len(before), noun, label)),
+				connLabel(m.dest), plural(len(refused), "record"), len(before), noun, label)),
 			Details: &view.Diagnostic{Summary: text("PUT " + newPath), Lines: refused},
 		}
 		return "", n
@@ -313,7 +313,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 		}
 		if len(lost) > 0 {
 			return "", m.kept("Copied, but the server did not keep everything",
-				fmt.Sprintf("%s did not keep all of what was copied; %s here has it all.", serverHost(m.dest.Server), label), lost)
+				fmt.Sprintf("%s did not keep all of what was copied; %s here has it all.", connLabel(m.dest), label), lost)
 		}
 		return m.newAddress(), nil
 	}
@@ -323,7 +323,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 			return "", m.catalogFailure()
 		}
 		return "", m.kept("Copied, and the original kept",
-			fmt.Sprintf("%s did not keep all of what was copied, so %s here was not deleted. Both are there now.", serverHost(m.dest.Server), label), lost)
+			fmt.Sprintf("%s did not keep all of what was copied, so %s here was not deleted. Both are there now.", connLabel(m.dest), label), lost)
 	}
 
 	// The original is deleted only as it was read: a record added or changed
@@ -335,7 +335,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 			return "", m.catalogFailure()
 		}
 		return "", m.kept("Copied, but the original changed, so it stays",
-			fmt.Sprintf("%s changed on %s while it was copied. The copy holds it as it was read; both are there now.", label, serverHost(m.conn.Server)), nil)
+			fmt.Sprintf("%s changed on %s while it was copied. The copy holds it as it was read; both are there now.", label, connLabel(m.conn)), nil)
 	}
 	// The catalog holds both before anything is deleted: whatever happens next,
 	// it does not point at nothing.
@@ -345,7 +345,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 	}
 	if err := m.src.t.Delete(ctx, m.col.Path, ""); err != nil {
 		n := m.kept("Copied, but the original could not be deleted",
-			fmt.Sprintf("Both are there now. Delete %s on %s yourself once the server lets you.", label, serverHost(m.conn.Server)), nil)
+			fmt.Sprintf("Both are there now. Delete %s on %s yourself once the server lets you.", label, connLabel(m.conn)), nil)
 		n.Details = davRefusal(moveCollectionRefusal("", label), m.conn, "DELETE", m.col.Path, err).Details
 		return "", n
 	}
@@ -487,7 +487,7 @@ func (m *collectionMove) kept(title, body string, lines []view.Text) *view.Notic
 		Actions: []view.Action{{ID: "collection.open", Label: "Open the copy", Href: m.s.route(m.newAddress()), Method: "GET", Enabled: true}},
 	}
 	if len(lines) > 0 {
-		n.Details = &view.Diagnostic{Summary: text("What " + serverHost(m.dest.Server) + " did not keep"), Lines: lines}
+		n.Details = &view.Diagnostic{Summary: text("What " + connLabel(m.dest) + " did not keep"), Lines: lines}
 	}
 	return n
 }

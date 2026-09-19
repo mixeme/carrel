@@ -70,7 +70,7 @@ func (s *Server) backupSources(ctx context.Context, blob sealed.Blob, job sealed
 			}})
 			continue
 		}
-		entry.Connection, entry.Name, entry.Kinds = serverHost(conn.Server), collectionLabel(col), col.Kinds
+		entry.Connection, entry.Name, entry.Kinds = connLabel(conn), collectionLabel(col), col.Kinds
 		if len(col.Kinds) > 0 {
 			entry.Kind = col.Kinds[0]
 		}
@@ -370,7 +370,7 @@ func (s *Server) destLabel(blob sealed.Blob, job sealed.BackupJob) string {
 	if !ok {
 		return "A destination that is no longer in the catalog"
 	}
-	label := string(stamp(serverHost(conn.Server), collectionLabel(col)))
+	label := string(stamp(connLabel(conn), collectionLabel(col)))
 	if len(job.DestFolder) > 0 {
 		label += " /" + strings.Join(job.DestFolder, "/")
 	}
@@ -403,7 +403,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 		for _, sel := range job.Sources {
 			if col, ok := blob.Collection(sel.AccountID, sel.Path); ok {
 				conn, _ := blob.Connection(sel.AccountID)
-				row.Sources = append(row.Sources, stamp(serverHost(conn.Server), collectionLabel(col)))
+				row.Sources = append(row.Sources, stamp(connLabel(conn), collectionLabel(col)))
 			}
 		}
 		for i, r := range runs[job.ID] {
@@ -467,7 +467,7 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 				continue
 			}
 			v := selValue(conn.ID, col.Path)
-			label := text(string(stamp(serverHost(conn.Server), collectionLabel(col))))
+			label := text(string(stamp(connLabel(conn), collectionLabel(col))))
 			srcOpts = append(srcOpts, view.Option{Value: v, Label: label, Selected: chosen[v]})
 			if col.Has(view.KindFile) && !col.ReadOnly {
 				destOpts = append(destOpts, view.Option{Value: v, Label: label, Selected: v == selValue(job.DestAccount, job.DestPath)})

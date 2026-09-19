@@ -230,7 +230,7 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 				continue
 			}
 			name := "col." + conn.ID + "|" + col.Path
-			rows = append(rows, view.FormRow{Name: name, Label: view.Text(stamp(serverHost(conn.Server), collectionLabel(col))), Kind: view.InputCheck,
+			rows = append(rows, view.FormRow{Name: name, Label: view.Text(stamp(connLabel(conn), collectionLabel(col))), Kind: view.InputCheck,
 				Value: on(name, edited == nil || cols[conn.ID+"|"+col.Path])})
 		}
 	}
