@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
@@ -594,5 +595,24 @@ func TestLinkedEventCard(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("the place only the other holds is not shown: %+v", page.Fields)
+	}
+}
+
+// What the session has read stays read. CARREL_CACHE_COLLECTION_TTL is how
+// soon a list is worth asking again, not how soon it is forgotten: the index
+// of what was read went with it, and a minute after the lists the duplicates
+// screen said "Nothing is loaded yet" and the rail lost its numbers (S-16,
+// C-6.3). Found by the review before S-30.
+func TestWhatWasReadOutlivesTheCollectionTTL(t *testing.T) {
+	f := newDupFixture(t)
+	f.h.cfg.CacheCollectionTTL = time.Millisecond
+	f.load(t)
+	time.Sleep(20 * time.Millisecond)
+	p := f.page(t)
+	if len(p.Groups) != 1 || hasNotice(p.Notices, "Nothing is loaded yet") {
+		t.Fatalf("after the TTL: groups %d, notices %+v", len(p.Groups), p.Notices)
+	}
+	if c := navCount(t, p.Rail); c == nil || *c != 1 {
+		t.Errorf("rail count = %v", c)
 	}
 }

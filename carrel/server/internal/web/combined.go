@@ -379,7 +379,7 @@ func collectionCount(sess *session.Session, accountID string, col sealed.Collect
 	if spec.kind == view.KindEvent {
 		return nil
 	}
-	data, ok := sess.Cache().GetETagMap(accountID, col.Path+"\x00"+spec.component)
+	data, ok := sess.Cache().PeekETagMap(accountID, col.Path+"\x00"+spec.component)
 	if !ok {
 		return nil
 	}

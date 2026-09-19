@@ -89,7 +89,7 @@ func (s *Server) loadedRecords(sess *session.Session, blob sealed.Blob) ([]loade
 				continue
 			}
 			spec := recordKinds[segmentOf(k)]
-			data, ok := sess.Cache().GetETagMap(conn.ID, col.Path+"\x00"+spec.component)
+			data, ok := sess.Cache().PeekETagMap(conn.ID, col.Path+"\x00"+spec.component)
 			if !ok {
 				continue
 			}

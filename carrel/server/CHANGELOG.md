@@ -5,6 +5,21 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.128 — 2026-09-19
+
+### Fixed
+
+- **What the session has read stays read after a minute.** The index of
+  records read by a list or a combined view lived only as long as
+  `CARREL_CACHE_COLLECTION_TTL` (60 s). After that the duplicates screen
+  said "Nothing is loaded yet", the numbers in the rail turned into dashes,
+  the search suggestions lost their records, and links between records fell
+  back to bare UIDs. The TTL now says only when a list is worth asking the
+  server again. What was read goes only when the cache budgets of S-4.2 need
+  the room, or when the session ends (`session.Cache.PeekETagMap`). Folder
+  listings still use the TTL: there it decides whether a folder is read
+  again.
+
 ## v0.0.127 — 2026-09-19
 
 ### Fixed

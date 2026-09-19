@@ -421,7 +421,7 @@ func (c *collectionCtx) putIndex(entries []indexEntry) {
 func (c *collectionCtx) index() []indexEntry {
 	var out []indexEntry
 	for _, comp := range c.components() {
-		data, ok := c.sess.Cache().GetETagMap(c.conn.ID, c.indexKey(comp))
+		data, ok := c.sess.Cache().PeekETagMap(c.conn.ID, c.indexKey(comp))
 		if !ok {
 			continue
 		}
@@ -439,7 +439,7 @@ func (c *collectionCtx) index() []indexEntry {
 // other entries are as that read left them. Nothing loaded, nothing kept.
 func (c *collectionCtx) noteWrite(path string, obj *model.Object) {
 	key := c.indexKey(c.spec.component)
-	data, ok := c.sess.Cache().GetETagMap(c.conn.ID, key)
+	data, ok := c.sess.Cache().PeekETagMap(c.conn.ID, key)
 	if !ok {
 		return
 	}

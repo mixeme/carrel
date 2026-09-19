@@ -96,6 +96,23 @@ func (c *Cache) GetETagMap(connID, collection string) ([]byte, bool) {
 	return c.get(etagKey(connID, collection))
 }
 
+// PeekETagMap returns a version map whatever its age. CARREL_CACHE_COLLECTION_TTL
+// says when a map is worth asking the server again; what the session has read
+// is still what it has read — the numbers of the rail, the duplicates among
+// the loaded lists, the links between records (S-16, C-6.3). Only the budgets
+// of S-4.2 take such a map away.
+func (c *Cache) PeekETagMap(connID, collection string) ([]byte, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	e, ok := c.entries[etagKey(connID, collection)]
+	if !ok {
+		return nil, false
+	}
+	e.seq = nextSeq()
+	e.at = time.Now()
+	return e.data, true
+}
+
 // PutCollectionList stores a discovered collection list.
 func (c *Cache) PutCollectionList(account string, data []byte) {
 	c.put(kindOther, collKey(account), data)

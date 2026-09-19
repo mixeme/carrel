@@ -444,7 +444,7 @@ func (s *Server) jumpRows(sess *session.Session, blob sealed.Blob, q string) []v
 			out = append(out, view.JumpRow{Href: s.route(collectionHref(col)), Kind: col.Kinds[0], Title: text(label), Stamp: stamp(host, label)})
 		}
 		for _, comp := range []string{"", "VEVENT", "VTODO", "VJOURNAL"} {
-			data, ok := sess.Cache().GetETagMap(conn.ID, col.Path+"\x00"+comp)
+			data, ok := sess.Cache().PeekETagMap(conn.ID, col.Path+"\x00"+comp)
 			if !ok {
 				continue
 			}
