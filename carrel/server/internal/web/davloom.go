@@ -207,13 +207,13 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 	legend := view.Text("Add device")
 	if edited != nil {
 		legend = text("What «" + edited.Name + "» sees — changed without a new password")
-		rows = append(rows, view.FormRow{Name: "op", Kind: view.InputText, Value: "scope"}, view.FormRow{Name: "id", Kind: view.InputText, Value: text(edited.ID)})
+		rows = append(rows, view.FormRow{Name: "op", Kind: view.InputHidden, Value: "scope"}, view.FormRow{Name: "id", Kind: view.InputHidden, Value: text(edited.ID)})
 	} else {
 		name := ""
 		if posted {
 			name = r.PostForm.Get("name")
 		}
-		rows = append(rows, view.FormRow{Name: "op", Kind: view.InputText, Value: "issue"},
+		rows = append(rows, view.FormRow{Name: "op", Kind: view.InputHidden, Value: "issue"},
 			view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(name), Required: true,
 				Hint: "For you: this is how you will know what you are revoking later."})
 	}

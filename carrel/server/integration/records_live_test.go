@@ -261,6 +261,7 @@ func runRecords(t *testing.T, endpoint, user, pass string) {
 	}
 
 	t.Run("contacts", func(t *testing.T) { liveContacts(ctx, t, app, client, conn.ID, book.Path, suffix) })
+	t.Run("apple card", func(t *testing.T) { liveAppleCard(ctx, t, app, client, conn.ID, book.Path, suffix) })
 	t.Run("calendar", func(t *testing.T) { liveCalendar(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 }
 
@@ -338,6 +339,30 @@ func liveContacts(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	}
 	if _, _, err := client.Get(ctx, file, nil); !dav.IsStatus(err, http.StatusNotFound) {
 		t.Errorf("after delete GET = %v, want 404", err)
+	}
+}
+
+// liveAppleCard edits one field of a card as Apple Contacts writes it and
+// reads the server's copy: the groups that tie a label to its value, every
+// TYPE value and the list of categories are still there (SV-32). Through
+// go-vcard alone one save dropped all three.
+func liveAppleCard(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, book, suffix string) {
+	uid := "apple-" + suffix
+	file := book + uid + ".vcf"
+	card := strings.Join([]string{"BEGIN:VCARD", "VERSION:3.0", "UID:" + uid, "FN:Grace Hopper", "N:Hopper;Grace;;;",
+		"item1.EMAIL;type=INTERNET;type=HOME;type=pref:grace@home.carrel.test", "item1.X-ABLabel:_$!<Home>!$_",
+		"item2.TEL;type=CELL;type=VOICE:+1 555 0100", "item2.X-ABLabel:Navy", "CATEGORIES:work,friends", "END:VCARD", ""}, "\r\n")
+	if _, err := client.PutCreate(ctx, file, dav.Typed(strings.NewReader(card), "text/vcard; charset=utf-8")); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	rec := "/app/contacts/" + connID + "/" + url.PathEscape(book) + "/" + url.PathEscape(uid)
+	form := liveForm(liveDecode[view.ContactEditPage](t, "edit", app.get(rec+"/edit")).Form)
+	form.Set("title", "Rear Admiral")
+	redirected(t, "edit", app.post(rec+"/edit", form))
+	got, _ := rawBody(ctx, t, client, file)
+	mustHave(t, "edit", got, "TITLE:Rear Admiral", "item1.EMAIL", "item1.X-ABLabel", "item2.TEL", "item2.X-ABLabel:Navy", "home", "voice", "grace@home.carrel.test")
+	if strings.Contains(got, `work\,friends`) || !strings.Contains(strings.ToLower(got), "categories:work,friends") {
+		t.Errorf("categories are no longer a list:\n%s", got)
 	}
 }
 

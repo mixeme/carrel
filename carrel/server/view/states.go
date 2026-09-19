@@ -144,6 +144,10 @@ const (
 	InputCheck    InputKind = "check"
 	InputRadio    InputKind = "radio"
 	InputArea     InputKind = "area"
+	// InputHidden is a value the form carries and nobody fills in: the
+	// token, the version a form was read at, the step it stands for. It is
+	// never shown and has no label.
+	InputHidden InputKind = "hidden"
 )
 
 type DeviceTab string

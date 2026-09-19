@@ -165,7 +165,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		Action: s.route("/admin/settings"), Method: "POST",
 		Sets: []view.FieldSet{{Legend: "Global", Rows: []view.FormRow{
 			csrfField(sess),
-			{Name: "op", Kind: view.InputText, Value: "instance"},
+			{Name: "op", Kind: view.InputHidden, Value: "instance"},
 			{Name: "inviteTTL", Label: "Invite lifetime, h", Kind: view.InputNumber, Value: orDefault(set.InviteHours, int(conf.InviteTTL.Hours())),
 				Hint: "From 1 to 720. A new invitation, and one extended, live this long."},
 			{Name: "idle", Label: "Idle timeout, h", Kind: view.InputNumber, Value: orDefault(set.IdleHours, int(conf.SessionIdleTimeout.Hours())),
@@ -250,7 +250,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		Action: s.route("/admin/settings"), Method: "POST",
 		Sets: []view.FieldSet{{Legend: "Letters from users", Rows: []view.FormRow{
 			csrfField(sess),
-			{Name: "op", Kind: view.InputText, Value: "limits"},
+			{Name: "op", Kind: view.InputHidden, Value: "limits"},
 			{Name: "people", Label: "Let users send letters and links from Carrel", Kind: view.InputCheck, Value: text(boolStr(people)),
 				Hint: "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form."},
 			{Name: "attach", Label: "Attachment, MB", Kind: view.InputNumber, Value: mb(set.MailMaxAttachMB, s.cfg.MailMaxAttachBytes),

@@ -198,7 +198,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 	if enabled {
 		page.Form = s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
-			view.FormRow{Name: "action", Kind: view.InputText, Value: text("policy")},
+			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("policy")},
 			view.FormRow{Name: "coverNew", Label: "New accounts are covered", Kind: view.InputCheck,
 				Value: text(boolStr(snap.Settings.EscrowCoverNewUsers))},
 		)
@@ -207,7 +207,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 		}
 		page.Master = s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
-			view.FormRow{Name: "action", Kind: view.InputText, Value: text("master")},
+			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("master")},
 			view.FormRow{Name: "current", Label: "Current", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "master", Label: "New", Kind: view.InputPassword, Required: true,
 				Hint: text("Only the recovery private key is re-encrypted. Deposited copies are untouched.")},
@@ -218,7 +218,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 		}
 		page.Recover = s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
-			view.FormRow{Name: "action", Kind: view.InputText, Value: text("recover")},
+			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("recover")},
 			view.FormRow{Name: "login", Label: "Account", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true},
 		)
@@ -228,7 +228,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 	} else {
 		page.Form = s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
-			view.FormRow{Name: "action", Kind: view.InputText, Value: text("enable")},
+			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("enable")},
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true,
 				Hint: text("If you lose this password, deposited keys cannot be opened. This is not backup.")},
 			view.FormRow{Name: "master2", Label: "Repeat", Kind: view.InputPassword, Required: true},

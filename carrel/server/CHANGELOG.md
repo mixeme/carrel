@@ -5,6 +5,20 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.126 — 2026-09-19
+
+### For consumers
+
+- **New input kind `hidden` (C-8, `view.InputHidden`).** A value the form
+  carries and nobody fills in now comes as a hidden row with no label: `_csrf`,
+  the version a record form was read at (`etag`, `readat`), and the step a
+  form stands for (`op`, `action`, `id`, and the collection of the calendar
+  range in the mail attachment sheet). Before, these came as text rows with no
+  label, and a client had no way to tell them from fields. Render them as
+  `<input type="hidden">`.
+- The record edit form no longer shows "Version" and "Read at". They were
+  read-only text rows holding an ETag and a Unix time.
+
 ## v0.0.125 — 2026-09-19
 
 ### Fixed

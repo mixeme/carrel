@@ -108,9 +108,9 @@ func (s *Server) attachSheet(r *http.Request, sess *session.Session, k attachKin
 		sheet.Range = &view.Form{
 			Action: s.route("/app/mail/attach"), Method: "GET",
 			Sets: []view.FieldSet{{Rows: []view.FormRow{
-				{Name: "what", Kind: view.InputText, Value: "range"},
-				{Name: "a", Kind: view.InputText, Value: text(part.Account)},
-				{Name: "c", Kind: view.InputText, Value: text(part.Col)},
+				{Name: "what", Kind: view.InputHidden, Value: "range"},
+				{Name: "a", Kind: view.InputHidden, Value: text(part.Account)},
+				{Name: "c", Kind: view.InputHidden, Value: text(part.Col)},
 				{Name: "from", Label: "From", Kind: view.InputDate, Value: text(part.From)},
 				{Name: "to", Label: "To", Kind: view.InputDate, Value: text(part.To), Hint: "Both days are in the file."},
 			}}},

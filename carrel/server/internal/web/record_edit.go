@@ -766,8 +766,8 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 	tf := c.tf
 	main := view.FieldSet{Rows: []view.FormRow{
 		csrfField(c.sess),
-		{Name: "etag", Label: "Version", Kind: view.InputText, Value: text(st.etag), ReadOnly: true},
-		{Name: "readat", Label: "Read at", Kind: view.InputText, Value: text(strconv.FormatInt(st.readAt.Unix(), 10)), ReadOnly: true},
+		{Name: "etag", Kind: view.InputHidden, Value: text(st.etag)},
+		{Name: "readat", Kind: view.InputHidden, Value: text(strconv.FormatInt(st.readAt.Unix(), 10))},
 	}}
 	var props map[string][]model.RawValue
 	if st.obj != nil {

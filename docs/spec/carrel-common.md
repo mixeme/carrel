@@ -1930,7 +1930,10 @@ const ( BadgeNeutral BadgeRole = "neutral"; BadgeLinked = "linked"
 type InputKind string
 const ( InputText InputKind = "text"; InputPassword = "password"; InputEmail = "email"
         InputURL = "url"; InputDate = "date"; InputTime = "time"; InputNumber = "number"
-        InputSelect = "select"; InputCheck = "check"; InputRadio = "radio"; InputArea = "area" )
+        InputSelect = "select"; InputCheck = "check"; InputRadio = "radio"; InputArea = "area"
+        InputHidden = "hidden" ) // значение, которое форма несёт и никто не заполняет:
+                                 // _csrf, версия, на которой прочитана форма, шаг формы.
+                                 // Не показывается, подписи не имеет
 
 type DeviceTab string
 const ( TabApple DeviceTab = "apple"; TabAndroid = "android"
