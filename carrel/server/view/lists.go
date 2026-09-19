@@ -17,7 +17,8 @@ type ListBar struct {
 type Range struct {
 	From    Text     `json:"from"`
 	To      Text     `json:"to"`
-	Presets []Action `json:"presets"`
+	Presets []Action `json:"presets"` // Day · Week · Month, «предыдущая» и «следующая»
+	Form    *Form    `json:"form"`    // произвольный диапазон: два поля и «Show»; nil — его нет
 }
 
 type ContactsListPage struct {
@@ -57,6 +58,7 @@ type AgendaDay struct {
 	Rows   []AgendaRow `json:"rows"`
 }
 type AgendaRow struct {
+	Kind     Kind        `json:"kind"` // event, task (срок) или note на одной ленте
 	Href     string      `json:"href"`
 	UID      string      `json:"uid"`
 	Colour   Colour      `json:"colour"`

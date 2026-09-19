@@ -19,6 +19,12 @@ type PublishTarget struct {
 	Path      string
 	Folder    bool
 	Title     string
+	// From and To are the days a published calendar shows (2006-01-02, both
+	// in it); empty is the whole calendar. NoDownload takes the .ics away,
+	// HideDescriptions the text of the events (S-25.1).
+	From, To         string
+	NoDownload       bool
+	HideDescriptions bool
 }
 
 // PublishedLink is a link as its owner's screens show it: no secret.
@@ -69,6 +75,7 @@ func (s *Service) Publish(viewerID string, dataKey [crypt.KeyLen]byte, conn seal
 		st.Published = append(st.Published, store.PublishedLink{
 			Hash: hash, UserID: u.ID, AccountID: target.AccountID, Kind: target.Kind, Col: target.Col,
 			UID: target.UID, Path: target.Path, Folder: target.Folder, Title: target.Title,
+			From: target.From, To: target.To, NoDownload: target.NoDownload, HideDescriptions: target.HideDescriptions,
 			CreatedAt: now, ExpiresAt: expires, Envelope: env,
 		})
 		return []store.AuditEntry{{
@@ -215,7 +222,8 @@ func prunePublished(st *store.State, now time.Time) {
 }
 
 func targetOf(l store.PublishedLink) PublishTarget {
-	return PublishTarget{AccountID: l.AccountID, Kind: l.Kind, Col: l.Col, UID: l.UID, Path: l.Path, Folder: l.Folder, Title: l.Title}
+	return PublishTarget{AccountID: l.AccountID, Kind: l.Kind, Col: l.Col, UID: l.UID, Path: l.Path, Folder: l.Folder,
+		Title: l.Title, From: l.From, To: l.To, NoDownload: l.NoDownload, HideDescriptions: l.HideDescriptions}
 }
 
 // LinkOf is the whole link of one of the viewer's live links, from the

@@ -100,13 +100,16 @@ func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, titl
 }
 
 // sheetFor is the sheet of any target: what, where, for how long, and the
-// two ways to make it — thirty days or, explicitly, no expiry.
+// two ways to make it — thirty days or, explicitly, no expiry. A whole
+// calendar is also asked how much of it the link shows, whether its .ics may
+// be downloaded and subscribed to, and whether the text of its events goes
+// with the times (s-publish-2).
 func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title string, where view.Stamp, q url.Values, cancel string) view.PublishSheet {
 	tf := s.timeFor(sess)
 	until := time.Now().Add(publish.DefaultTTL)
 	forever := cloneValues(q)
 	forever.Set("expires", "never")
-	return view.PublishSheet{
+	sheet := view.PublishSheet{
 		Kind:    kind,
 		Target:  text(strings.ToUpper(what[:1]) + what[1:] + " «" + title + "» · " + string(where)),
 		Expires: text("30 days, until " + tf.date(until)),
@@ -116,6 +119,34 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 			{ID: "publish.cancel", Label: "Cancel", Href: s.route(cancel), Method: "GET", Enabled: true},
 		},
 	}
+	if kind == view.KindEvent && q.Get("uid") == "" {
+		today := dayOf(time.Now(), tf.tz)
+		sheet.Form = s.plainForm("/app/publish", "POST",
+			csrfField(sess),
+			view.FormRow{Name: "from", Label: "How much of it · from", Kind: view.InputDate,
+				Hint: "Empty on both sides: the whole calendar, week by week."},
+			view.FormRow{Name: "to", Label: "How much of it · to", Kind: view.InputDate,
+				Hint: text("Both days are in it. " + tf.date(today) + " is today.")},
+			view.FormRow{Name: "download", Label: "Allow .ics download and subscription", Kind: view.InputCheck, Value: "on"},
+			view.FormRow{Name: "descriptions", Label: "Show event descriptions", Kind: view.InputCheck, Value: "on"},
+		)
+		sheet.Form.Action = s.postQuery("/app/publish", q)
+		sheet.Form.Actions = sheet.Actions
+	}
+	return sheet
+}
+
+// publishWindow is the range a published calendar shows: both days or
+// neither. A range that ends before it starts is no range at all — the whole
+// calendar, as the sheet says by default.
+func publishWindow(r *http.Request) (from, to string) {
+	from, to = strings.TrimSpace(r.FormValue("from")), strings.TrimSpace(r.FormValue("to"))
+	f, errFrom := time.Parse("2006-01-02", from)
+	t, errTo := time.Parse("2006-01-02", to)
+	if errFrom != nil || errTo != nil || t.Before(f) {
+		return "", ""
+	}
+	return from, to
 }
 
 // madeSheet is the sheet once the link is made: the link, shown this once.
@@ -217,9 +248,20 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	key, _ := sess.DataKey()
-	token, err := s.users.Publish(sess.AccountID(), key, c.conn, user.PublishTarget{
+	target := user.PublishTarget{
 		AccountID: c.conn.ID, Kind: string(c.spec.kind), Col: c.col.Path, UID: uid, Title: title,
-	}, expires)
+	}
+	if c.spec.kind == view.KindEvent && uid == "" {
+		// The sheet of a whole calendar (s-publish-2). A form that was never
+		// shown — an old client, a plain POST — publishes as before: the
+		// whole calendar, downloadable, with its descriptions.
+		if _, shown := r.Form["descriptions"]; shown || r.FormValue("from") != "" || r.FormValue("to") != "" {
+			target.From, target.To = publishWindow(r)
+			target.NoDownload = checkbox(r, "download") != "on"
+			target.HideDescriptions = checkbox(r, "descriptions") != "on"
+		}
+	}
+	token, err := s.users.Publish(sess.AccountID(), key, c.conn, target, expires)
 	if err != nil {
 		http.Error(w, "could not publish", http.StatusInternalServerError)
 		return
@@ -349,6 +391,11 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 		ReadOnly: true,
 		Actions:  []view.Action{{ID: "published.download", Label: "Download", Icon: "i-down", Href: s.route("/p/" + token + "/download"), Method: "GET", Enabled: true}},
 	}
+	if link.Target.NoDownload {
+		// The link was made without the file: the page stays, the .ics and
+		// the subscription are not offered and not served (s-publish-2).
+		page.Actions = nil
+	}
 	ctx := r.Context()
 	if uid := link.Target.UID; uid != "" {
 		obj, err := c.find(ctx, uid)
@@ -363,7 +410,7 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
-	if err := s.publicCollection(r, c, token, &page); err != nil {
+	if err := s.publicCollection(r, c, link, token, &page); err != nil {
 		page.Notices, page.Actions = []view.Notice{publicTrouble()}, nil
 	}
 	s.writePage(w, r, http.StatusOK, page)
@@ -399,7 +446,7 @@ func (s *Server) publicRecord(c *collectionCtx, obj *model.Object, page *view.Pu
 
 // publicCollection fills the page with the collection read now: a book, one
 // week of a calendar with its range, a task list, a notebook.
-func (s *Server) publicCollection(r *http.Request, c *collectionCtx, token string, page *view.PublishedPage) error {
+func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.OpenLink, token string, page *view.PublishedPage) error {
 	ctx := r.Context()
 	tf := c.tf
 	switch c.spec.kind {
@@ -421,11 +468,15 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, token strin
 		}
 	case view.KindEvent:
 		from, to := weekWindow(tf, r.URL.Query().Get("from"))
+		fixed := publishedWindow(tf, link)
+		if fixed != nil {
+			from, to = fixed[0], fixed[1]
+		}
 		objs, _, err := c.calQuery(ctx, c.spec.component, &from, &to)
 		if err != nil {
 			return err
 		}
-		page.Days, _, _ = s.agendaDays(tf, c.listed(objs), from, to, c.spec.segment, false)
+		page.Days, _, _ = s.agendaDays(tf, kindedAll(c.listed(objs), view.KindEvent), from, to, c.spec.segment, false)
 		for i := range page.Days {
 			for j := range page.Days[i].Rows {
 				page.Days[i].Rows[j].Href, page.Days[i].Rows[j].Menu = "", nil
@@ -441,6 +492,11 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, token strin
 				{ID: "range.current", Label: "This week", Href: s.route("/p/" + token), Method: "GET", Enabled: true},
 				{ID: "range.next", Label: "Next week", Href: week(to), Method: "GET", Enabled: true},
 			},
+		}
+		if fixed != nil {
+			// The days are the link's, not the reader's: there is nowhere
+			// to step, and a preset that moves out of them would lie.
+			page.Range.Presets = nil
 		}
 	case view.KindTask:
 		objs, _, err := c.calQuery(ctx, c.spec.component, nil, nil)
@@ -481,6 +537,10 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if link.Target.NoDownload {
+		s.notFound(w, r)
+		return
+	}
 	if link.Target.Kind == string(view.KindFile) {
 		s.publishedFilesDownload(w, r, link)
 		return
@@ -496,6 +556,8 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 		var obj *model.Object
 		obj, err = c.find(ctx, uid)
 		objs = []*model.Object{obj}
+	} else if w := publishedWindow(s.timeFor(nil), link); w != nil {
+		objs, err = c.exportRecords(ctx, &w[0], &w[1])
 	} else {
 		objs, err = c.exportRecords(ctx, nil, nil)
 	}
@@ -518,5 +580,43 @@ func (s *Server) getPublishedDownload(w http.ResponseWriter, r *http.Request) {
 	h.Set("X-Content-Type-Options", "nosniff")
 	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
 	w.WriteHeader(http.StatusOK)
+	if link.Target.HideDescriptions {
+		objs = withoutDescriptions(objs)
+	}
 	writeExport(w, c, objs)
+}
+
+// publishedWindow is the days a published calendar shows, when the link was
+// made with them: the first and the day after the last. nil — the whole
+// calendar.
+func publishedWindow(tf timeFmt, link user.OpenLink) *[2]time.Time {
+	if link.Target.From == "" || link.Target.To == "" {
+		return nil
+	}
+	from, errFrom := time.ParseInLocation("2006-01-02", link.Target.From, tf.tz)
+	to, errTo := time.ParseInLocation("2006-01-02", link.Target.To, tf.tz)
+	if errFrom != nil || errTo != nil || to.Before(from) {
+		return nil
+	}
+	return &[2]time.Time{from, to.AddDate(0, 0, 1)}
+}
+
+// withoutDescriptions is the records with their text taken out: a link made
+// without descriptions shares the times, not what was said at them.
+func withoutDescriptions(objs []*model.Object) []*model.Object {
+	out := make([]*model.Object, 0, len(objs))
+	for _, o := range objs {
+		if o == nil {
+			continue
+		}
+		if len(o.Props()["DESCRIPTION"]) > 0 {
+			patch, err := model.NewPatch(model.RemoveProp{Prop: "DESCRIPTION"})
+			if err == nil && patch.Apply(o) == nil {
+				out = append(out, o)
+				continue
+			}
+		}
+		out = append(out, o)
+	}
+	return out
 }

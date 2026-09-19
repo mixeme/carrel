@@ -5,6 +5,73 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.158 — 2026-09-20
+
+views-tail.md: the orders, the groups and the windows of the lists.
+**Contract change (C-6).**
+
+### Added
+
+- **The order of a list is the server's** (C-3.1): contacts A–Z or
+  Recently changed, notes Newest · Oldest · Title, tasks By due · By
+  priority · Recently changed, in `ListBar.Segments` — in one collection
+  and in the combined view alike. A–Z keeps its letter rubrics; Recently
+  changed is one list.
+- **Tasks are grouped by their due date** (`s-tasks-1`): Overdue · This
+  week · Later · No due date. "This week" is the seven days ahead, not the
+  calendar week, or on a Sunday evening tomorrow would be "later". The
+  other orders are one list.
+- **The agenda has its windows** (`s-agenda-1`): Day, Week, Month and a
+  range of one's own ("From → Show"); the window on the screen is the
+  window asked of the servers. Switching the window keeps where the person
+  is — today when today is in it. A range that ends before it starts is
+  the week: the address is never half-obeyed.
+- **Every day of the window stands**, the empty ones included: a day with
+  nothing in it says so instead of being skipped.
+- **Tasks due and notes on the line of days**, each behind its own switch
+  (`agenda.tasks`, `agenda.notes`); events are always there. They are read
+  whole and placed here: `DUE` and a journal's `DTSTART` are not what a
+  server's time-range filter answers for.
+
+- **`/setup` takes an address** (`s-auth-4`): the first administrator may
+  leave one, optional, so getting back in later is possible at all. It is
+  not confirmed here — nothing was sent to it — and until the account page
+  sends the letter it recovers nothing (S-10.5).
+- **A relation to another collection has a name** (`s-notes-2`,
+  `s-agenda-2`): `RELATED-TO` whose target is not in this collection was a
+  bare UID; it now shows the target's title when some list this session
+  read holds it, saying "in another collection". The link still stays
+  inside the collection: a record is opened at its own address (S-11).
+
+- **The journal is read with filters** (`s-admin-7`): All · Security ·
+  Failures with their counts, and "Export CSV" — the filter of the screen
+  is the filter of the file, oldest first, times in RFC 3339.
+- **A published calendar is asked how much of it to show** (`s-publish-2`):
+  the days of the link, whether its `.ics` may be downloaded and subscribed
+  to, and whether the text of its events goes with the times. A link made
+  with days shows those days and no way to step out of them; one made
+  without the file answers 404 to `/download` and offers nothing; one made
+  without descriptions hands over an `.ics` with none. A publish that
+  never saw the form is what it was: the whole calendar, downloadable,
+  with its text.
+- **Import and Export in the combined view** (`s-contacts-1`):
+  `/app/{kind}/import` opens the wizard with its "Into" picker,
+  `/app/{kind}/export` a sheet of the collections to hand over. Neither
+  guesses the collection (S-14).
+
+### Changed
+
+- C-6: `Action.On` — an open section of the rail, a chosen segment, a
+  switch that is on; `NavRow.On` moved into it. `AgendaRow.Kind` — a task
+  or a note on the line is visible as one. `Range.Form` — the range of
+  one's own. The three fixtures lose the `"on": false` the rail rows had.
+- C-5.4: `/app/{kind}/import` and `/app/{kind}/export`; C-5.6:
+  `/admin/audit` also hands over a file (`?format=csv`). C-6:
+  `PublishSheet.Form` and the new `ExportSheet`.
+- `user.SetupFirstAdminWith` beside `SetupFirstAdmin`;
+  `store.PublishedLink` and `user.PublishTarget` carry the days of a
+  published calendar, `NoDownload` and `HideDescriptions`.
+
 ## v0.0.157 — 2026-09-20
 
 Live runs of the timeline and Disconnect; the gates get the time they need.

@@ -384,7 +384,9 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage` |
 | `/app/{kind}/{account}/{col}/{uid}/move` | GET, POST | вход | лист | `MoveSheet` |
 | `/app/{kind}/{account}/{col}/{uid}/delete` | POST | вход | редирект | — |
+| `/app/{kind}/import` | GET | вход | страница | `ImportPage` — вход из сведённого вида: мастер спрашивает «Into» |
 | `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage` |
+| `/app/{kind}/export` | GET | вход | лист | `ExportSheet` — вход из сведённого вида: из какой коллекции |
 | `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — |
 | `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NoteDoc` |
 | `/app/{kind}/{account}/{col}/new/quick` | GET, POST | вход | лист, редирект | `NewSheet`; POST сохраняет запись, «Open the card» переносит набранное в `/new` телом запроса |
@@ -468,7 +470,7 @@ Combined list, Combined notebook. Вью-модель у него та же, ч�
 | `/admin/settings` | GET, POST | админ | страница | `AdminSettingsPage` |
 | `/admin/settings/mail-test` | POST | админ | фрагмент | `MailTestResult` |
 | `/admin/escrow` | GET, POST | админ | страница | `AdminEscrowPage` |
-| `/admin/audit` | GET | админ | страница | `AdminAuditPage` |
+| `/admin/audit` | GET | админ | страница, файл (`?format=csv`) | `AdminAuditPage` |
 | `/admin/dav` | GET, POST | админ | страница | `AdminDavPage` |
 | `/admin/install` | GET, POST | админ | страница | `AdminInstallPage` |
 
@@ -521,6 +523,7 @@ type Action struct {
     Method  string  // "GET" | "POST"
     Danger  bool    // разрушающее: удаление, сброс, объединение
     Enabled bool
+    On      bool    // включено: открытый раздел рейла, выбранный сегмент, включённый флажок ленты
     Reason  Text    // почему выключено; пусто, если включено
 }
 
@@ -613,9 +616,8 @@ type Rail struct {
 }
 
 type NavRow struct {
-    Action
-    Count *int // nil — счёт этому разделу не считается: прочерк, не ноль
-    On    bool // открытый раздел; на выдаче поиска не отмечен ни один
+    Action // On — открытый раздел; на выдаче поиска не отмечен ни один
+    Count  *int // nil — счёт этому разделу не считается: прочерк, не ноль
 }
 
 type RailSection struct {
@@ -745,7 +747,11 @@ type ListBar struct {
     Selected int
 }
 
-type Range struct { From, To Text; Presets []Action }
+type Range struct {
+    From, To Text
+    Presets  []Action // Day · Week · Month, «предыдущая» и «следующая»
+    Form     *Form    // произвольный диапазон: два поля и «Show»; nil — его нет
+}
 
 type ContactsListPage struct {
     Shell
@@ -777,6 +783,7 @@ type AgendaPage struct {
 }
 type AgendaDay struct { Rubric Text; Rows []AgendaRow }
 type AgendaRow struct {
+    Kind      Kind // event, task (срок) или note на одной ленте
     Href, UID string
     Colour    Colour
     Stamp     Stamp
@@ -1217,6 +1224,13 @@ type CollectionDeleteSheet struct {
     Actions    []Action
 }
 
+// Лист «из какой коллекции отдать» — вход в экспорт из сведённого вида.
+type ExportSheet struct {
+    Kind    Kind
+    Target  TargetPicker // варианты — адреса выдачи каждой коллекции
+    Actions []Action
+}
+
 type ImportPage struct {
     Shell
     Kind    Kind
@@ -1235,6 +1249,7 @@ type PublishSheet struct {
     Kind    Kind
     Target  Text     // что публикуется — написано в шапке, не переспрашивается
     Range   *Range   // только у календаря
+    Form    Form     // сколько показывать, разрешить ли .ics, показывать ли описания
     Expires Text
     Link    Text     // готовая ссылка после создания
     Actions []Action

@@ -1,8 +1,12 @@
 package web
 
 import (
+	"encoding/csv"
+	"fmt"
+	"mime"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"carrel.dev/carrel/server/internal/session"
@@ -322,6 +326,28 @@ func inviteSentStatus(inv *store.Invite, configured bool) view.Text {
 	return ""
 }
 
+// auditSecurity are the lines about who may get in and what may read
+// without a session: sign-ins, passwords, escrow, devices, links, wipes
+// (s-admin-7 · Security).
+var auditSecurity = []string{
+	"login.", "password", "escrow", "device", "publish", "davloom", "session", "setup", "wipe", "invite",
+	"connection.password", "backup.trigger", "dav.exercise", "user.",
+}
+
+func auditIsSecurity(what string) bool {
+	for _, p := range auditSecurity {
+		if strings.HasPrefix(what, p) {
+			return true
+		}
+	}
+	return false
+}
+
+// auditIsFailure is a line that says something did not happen.
+func auditIsFailure(what string) bool {
+	return strings.HasSuffix(what, ".fail") || strings.HasSuffix(what, ".failed") || strings.HasSuffix(what, ".refused")
+}
+
 func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {
@@ -329,10 +355,40 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	}
 	snap := s.store.Snapshot()
 	now := time.Now()
+	show := r.URL.Query().Get("show")
+	if show != "security" && show != "failures" {
+		show = "all"
+	}
+	keep := func(what string) bool {
+		switch show {
+		case "security":
+			return auditIsSecurity(what)
+		case "failures":
+			return auditIsFailure(what)
+		}
+		return true
+	}
+	var all, security, failures int
+	for _, e := range snap.Audit {
+		all++
+		if auditIsSecurity(e.What) {
+			security++
+		}
+		if auditIsFailure(e.What) {
+			failures++
+		}
+	}
+	if r.URL.Query().Get("format") == "csv" {
+		s.writeAuditCSV(w, snap.Audit, keep)
+		return
+	}
 	page := view.AdminAuditPage{Shell: s.buildShell(sess, "Audit log")}
 	tf := s.timeFor(sess)
 	for i := len(snap.Audit) - 1; i >= 0; i-- {
 		e := snap.Audit[i]
+		if !keep(e.What) {
+			continue
+		}
 		page.Rows = append(page.Rows, view.AuditRow{
 			When:   tf.formatWhen(e.When, false, now),
 			Who:    text(e.Who),
@@ -341,5 +397,59 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 			Detail: text(e.Detail),
 		})
 	}
+	page.Bar.Loaded = len(page.Rows)
+	total := all
+	page.Bar.Total = &total
+	for _, seg := range []struct {
+		id, label, value string
+		n                int
+	}{
+		{"audit.all", "All", "all", all},
+		{"audit.security", "Security", "security", security},
+		{"audit.failures", "Failures", "failures", failures},
+	} {
+		q := url.Values{}
+		if seg.value != "all" {
+			q.Set("show", seg.value)
+		}
+		page.Bar.Segments = append(page.Bar.Segments, view.Action{
+			ID: seg.id, Label: text(fmt.Sprintf("%s · %d", seg.label, seg.n)), Method: "GET",
+			Enabled: seg.value != show, On: seg.value == show, Href: s.postQuery("/admin/audit", q),
+		})
+	}
+	csv := url.Values{"format": {"csv"}}
+	if show != "all" {
+		csv.Set("show", show)
+	}
+	page.Bar.Actions = []view.Action{{ID: "audit.export", Label: "Export CSV", Icon: "i-down", Method: "GET", Enabled: true,
+		Href: s.postQuery("/admin/audit", csv)}}
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// writeAuditCSV hands over what the screen shows, oldest first, as the
+// journal holds it: the times in RFC 3339 and no zone of the reader's, so
+// two exports can be compared.
+func (s *Server) writeAuditCSV(w http.ResponseWriter, entries []store.AuditEntry, keep func(string) bool) {
+	h := w.Header()
+	h.Set("Content-Type", "text/csv; charset=utf-8")
+	if v := mime.FormatMediaType("attachment", map[string]string{"filename": "carrel-audit.csv"}); v != "" {
+		h.Set("Content-Disposition", v)
+	} else {
+		h.Set("Content-Disposition", "attachment")
+	}
+	h.Set("X-Content-Type-Options", "nosniff")
+	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
+	h.Set("Cache-Control", "private, no-store")
+	w.WriteHeader(http.StatusOK)
+	out := csv.NewWriter(w)
+	_ = out.Write([]string{"when", "who", "what", "whom", "detail"})
+	for _, e := range entries {
+		if !keep(e.What) {
+			continue
+		}
+		if out.Write([]string{e.When.UTC().Format(time.RFC3339), e.Who, e.What, e.Whom, e.Detail}) != nil {
+			return
+		}
+	}
+	out.Flush()
 }

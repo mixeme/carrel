@@ -2,11 +2,21 @@ package user
 
 import (
 	"context"
+	"strings"
 
 	"carrel.dev/carrel/server/internal/store"
 )
 
+// SetupFirstAdmin makes the first administrator without an address.
 func (s *Service) SetupFirstAdmin(ctx context.Context, login, password string) error {
+	return s.SetupFirstAdminWith(ctx, login, password, "")
+}
+
+// SetupFirstAdminWith makes the first administrator, with an address when
+// one was given (s-auth-4: Email is optional). The address is not confirmed
+// here — nothing was sent to it — and until it is confirmed it recovers
+// nothing (S-10.5); the account page sends the letter.
+func (s *Service) SetupFirstAdminWith(ctx context.Context, login, password, email string) error {
 	if err := validatePassword(password); err != nil {
 		return err
 	}
@@ -28,6 +38,7 @@ func (s *Service) SetupFirstAdmin(ctx context.Context, login, password string) e
 			Login:     login,
 			Role:      store.RoleAdmin,
 			CreatedAt: now,
+			Email:     strings.TrimSpace(email),
 		}
 		if err := store.ApplyPassword(ctx, &u, login, password, st, now); err != nil {
 			return nil, err

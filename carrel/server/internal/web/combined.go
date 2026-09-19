@@ -93,9 +93,32 @@ func (s *Server) combinedQuery(r *http.Request, tf timeFmt, spec kindSpec) (fano
 	if spec.kind != view.KindEvent {
 		return fanout.Query{}, page
 	}
-	from, to := weekWindow(tf, r.FormValue("from"))
-	if r.FormValue("from") != "" {
-		page += "?from=" + from.Format("2006-01-02")
+	kind, from, to := agendaWindow(tf, r.URL.Query())
+	// The window of the screen is the window asked of the servers: a month
+	// shown is a month read (views-tail.md).
+	q := url.Values{}
+	if kind != agendaWeek {
+		q.Set("view", kind)
+	}
+	if r.URL.Query().Get("from") != "" || kind != agendaWeek {
+		q.Set("from", from.Format("2006-01-02"))
+	}
+	if kind == agendaRange {
+		q.Set("to", to.AddDate(0, 0, -1).Format("2006-01-02"))
+	}
+	// The switches belong to the window too: a list of events is not the
+	// list of events and tasks, and reusing one for the other would show a
+	// poll that never asked for them.
+	for _, k := range []struct {
+		value string
+		kind  view.Kind
+	}{{"tasks", view.KindTask}, {"notes", view.KindNote}} {
+		if agendaWith(r.URL.Query())[k.kind] {
+			q.Add("with", k.value)
+		}
+	}
+	if len(q) > 0 {
+		page += "?" + q.Encode()
 	}
 	return fanout.Query{From: &from, To: &to}, page
 }
@@ -108,6 +131,7 @@ func (s *Server) combinedTask(r *http.Request, sess *session.Session, blob seale
 	q, page := s.combinedQuery(r, s.timeFor(sess), spec)
 	var sources []fanout.Source
 	var ids []string
+	on := agendaWith(r.URL.Query())
 	for _, col := range ticked(blob, spec.kind) {
 		if col.Gone {
 			continue // not asked (S-6.1): its rail row says gone
@@ -115,6 +139,17 @@ func (s *Server) combinedTask(r *http.Request, sess *session.Session, blob seale
 		conn, _ := blob.Connection(col.AccountID)
 		src := s.openSource(conn.ID+":"+col.Path, conn, col)
 		src.kinds = []view.Kind{spec.kind}
+		if spec.kind == view.KindEvent {
+			// The switches of the agenda ask the same collections for what
+			// they turned on (views-tail.md). Their window is applied when
+			// the rows are placed: DUE and a journal's DTSTART are not what
+			// a server filters by time-range.
+			for _, k := range []view.Kind{view.KindTask, view.KindNote} {
+				if on[k] && col.Has(k) {
+					src.kinds = append(src.kinds, k)
+				}
+			}
+		}
 		sources = append(sources, src)
 		ids = append(ids, src.id)
 	}
@@ -229,7 +264,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		return nil, err
 	}
 	tf, base := s.timeFor(sess), "/app/"+spec.segment
-	actions := []view.Action{s.combinedNewAction(blob, spec)}
+	actions := append([]view.Action{s.combinedNewAction(blob, spec)}, s.combinedIOActions(blob, spec)...)
 	// The filter's links name the task, so choosing a category reads the
 	// records already polled instead of asking the servers again.
 	query := r.URL.Query()
@@ -268,17 +303,30 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	switch spec.kind {
 	case view.KindContact:
 		page := view.ContactsListPage{Shell: st.shell, Poll: st.poll}
-		page.Groups = s.contactGroups(sess, shown, spec.segment, true)
+		by := sortOf(r, view.KindContact)
+		page.Groups = s.contactGroups(sess, tf, shown, spec.segment, true, by)
 		total := len(st.items)
-		page.Bar = view.ListBar{Loaded: len(shown), Total: &total, Actions: actions}
+		page.Bar = view.ListBar{Loaded: len(shown), Total: &total, Actions: actions,
+			Segments: s.sortSegments(base, view.KindContact, by, r.URL.Query())}
 		page.Print = header(counted(len(shown), "card"))
 		return page, nil
 	case view.KindEvent:
 		page := view.AgendaPage{Shell: st.shell, Poll: st.poll}
-		from, to := weekWindow(tf, r.FormValue("from"))
+		kind, from, to := agendaWindow(tf, r.URL.Query())
 		var bad []unreadable
-		page.Days, page.Bar.Loaded, bad = s.agendaDays(tf, shown, from, to, spec.segment, true)
-		page.Bar.Range = s.agendaRange(tf, base, filter.tag, from, to)
+		on := agendaWith(r.URL.Query())
+		rows := kindedAll(shown, view.KindEvent)
+		for _, k := range []view.Kind{view.KindTask, view.KindNote} {
+			if !on[k] {
+				continue
+			}
+			// The same poll answered for these kinds too (combinedTask asks
+			// each ticked calendar for what the switches turned on).
+			rows = append(rows, kindedAll(filter.keep(k, listedOfKind(blob, st.snap, k)), k)...)
+		}
+		page.Days, page.Bar.Loaded, bad = s.agendaDays(tf, rows, from, to, spec.segment, true)
+		page.Bar.Range = s.agendaRange(sess, tf, base, filter.tag, kind, from, to, r.URL.Query())
+		page.Bar.Segments = s.agendaSegments(base, filter.tag, on, r.URL.Query())
 		page.Bar.Actions = actions
 		page.Notices = appendUnreadable(page.Notices, bad)
 		page.Print = header(agendaPrint(tf, from, to), counted(page.Bar.Loaded, "event"))
@@ -288,8 +336,10 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		show := taskShow(r)
 		var open, done int
 		var bad []unreadable
-		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, shown, spec.segment, true, filter, time.Now())
-		page.Bar.Segments = s.taskSegments(base, filter.tag, show, open, done)
+		by := sortOf(r, view.KindTask)
+		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, shown, spec.segment, true, filter, time.Now(), by)
+		page.Bar.Segments = append(s.taskSegments(base, filter.tag, show, open, done),
+			s.sortSegments(base, view.KindTask, by, r.URL.Query())...)
 		page.Bar.Actions = actions
 		page.Notices = appendUnreadable(page.Notices, bad)
 		page.Print = header(showLabels[show], counted(page.Bar.Loaded, "task"))
@@ -297,7 +347,9 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	default:
 		page := view.NotesPage{Shell: st.shell, Poll: st.poll}
 		var bad []unreadable
-		page.Groups, page.Bar.Loaded, bad = s.noteGroups(tf, shown, spec.segment, true, filter)
+		by := sortOf(r, view.KindNote)
+		page.Groups, page.Bar.Loaded, bad = s.noteGroups(tf, shown, spec.segment, true, filter, by)
+		page.Bar.Segments = s.sortSegments(base, view.KindNote, by, r.URL.Query())
 		page.Bar.Actions = actions
 		page.Notices = appendUnreadable(page.Notices, bad)
 		page.Print = header(counted(page.Bar.Loaded, "note"))
@@ -309,6 +361,34 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 // combined view the target collection is chosen, not guessed (S-14). The
 // address carries the first writable collection only because the route needs
 // one.
+// combinedIOActions are Import and Export of a combined view: the wizard
+// asks which collection, because there is more than one (s-contacts-1). The
+// import opens on the first writable collection with its "Into" picker; the
+// export opens a sheet of the collections to hand over.
+func (s *Server) combinedIOActions(blob sealed.Blob, spec kindSpec) []view.Action {
+	imp := view.Action{ID: "collection.import", Label: "Import", Method: "GET",
+		Href: s.route("/app/" + spec.segment + "/import")}
+	exp := view.Action{ID: "collection.export", Label: "Export", Icon: "i-down", Method: "GET",
+		Href: s.route("/app/" + spec.segment + "/export")}
+	for _, col := range blob.Collections {
+		conn, ok := blob.Connection(col.AccountID)
+		if !ok || col.Gone || !col.Has(spec.kind) {
+			continue
+		}
+		exp.Enabled = true
+		if !col.ReadOnly && !conn.Feed {
+			imp.Enabled = true
+		}
+	}
+	if !imp.Enabled {
+		imp.Reason = text("No collection of this kind takes records.")
+	}
+	if !exp.Enabled {
+		exp.Reason = text("No collection of this kind to hand over.")
+	}
+	return []view.Action{imp, exp}
+}
+
 func (s *Server) combinedNewAction(blob sealed.Blob, spec kindSpec) view.Action {
 	a := view.Action{ID: "record.new", Label: text("New " + spec.noun), Method: "GET"}
 	for _, col := range blob.Collections {
@@ -324,6 +404,20 @@ func (s *Server) combinedNewAction(blob sealed.Blob, spec kindSpec) view.Action 
 }
 
 // listedOf turns the items of a snapshot into rows' input with their origin.
+// listedOfKind are the answers of one kind in a snapshot.
+func listedOfKind(blob sealed.Blob, snap *fanout.Snapshot, k view.Kind) []listed {
+	if snap == nil {
+		return nil
+	}
+	var items []fanout.Item
+	for _, it := range snap.Items {
+		if it.Kind == k {
+			items = append(items, it)
+		}
+	}
+	return listedOf(blob, items)
+}
+
 func listedOf(blob sealed.Blob, items []fanout.Item) []listed {
 	out := make([]listed, 0, len(items))
 	for _, it := range items {
@@ -451,17 +545,15 @@ func (s *Server) navRows(sess *session.Session, blob sealed.Blob, open string) [
 	var nav []view.NavRow
 	for _, seg := range []string{"contacts", "calendar", "tasks", "notes"} {
 		nav = append(nav, view.NavRow{
-			Action: view.Action{ID: "nav." + seg, Label: text(kindTitle(seg)), Href: s.route("/app/" + seg), Method: "GET", Enabled: true},
+			Action: view.Action{ID: "nav." + seg, Label: text(kindTitle(seg)), Href: s.route("/app/" + seg), Method: "GET", Enabled: true, On: seg == open},
 			Count:  kindCount(sess, blob, recordKinds[seg]),
-			On:     seg == open,
 		})
 	}
 	return append(nav,
-		view.NavRow{Action: view.Action{ID: "nav.files", Label: "Files", Href: s.route("/app/files"), Method: "GET", Enabled: true}, On: open == filesSpec.segment},
+		view.NavRow{Action: view.Action{ID: "nav.files", Label: "Files", Href: s.route("/app/files"), Method: "GET", Enabled: true, On: open == filesSpec.segment}},
 		view.NavRow{
-			Action: view.Action{ID: "nav.duplicates", Label: "Duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true},
+			Action: view.Action{ID: "nav.duplicates", Label: "Duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true, On: open == "duplicates"},
 			Count:  s.duplicateCount(sess),
-			On:     open == "duplicates",
 		},
 	)
 }

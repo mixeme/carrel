@@ -198,6 +198,14 @@ type ConnectionRemoveSheet struct {
 	Actions    []Action `json:"actions"`    // Disconnect · Cancel
 }
 
+// ExportSheet — «из какой коллекции отдать»: вход в экспорт из сведённого
+// вида, где коллекция не одна.
+type ExportSheet struct {
+	Kind    Kind         `json:"kind"`
+	Target  TargetPicker `json:"target"` // варианты — адреса выдачи каждой коллекции
+	Actions []Action     `json:"actions"`
+}
+
 type ImportPage struct {
 	Shell
 	Kind    Kind          `json:"kind"`
@@ -231,6 +239,7 @@ type PublishSheet struct {
 	Kind    Kind     `json:"kind"`
 	Target  Text     `json:"target"` // что публикуется — написано в шапке, не переспрашивается
 	Range   *Range   `json:"range"`  // только у календаря
+	Form    Form     `json:"form"`   // сколько показывать, разрешить ли .ics, показывать ли описания
 	Expires Text     `json:"expires"`
 	Link    Text     `json:"link"` // готовая ссылка после создания
 	Actions []Action `json:"actions"`

@@ -19,28 +19,31 @@
 
 ## Виды списков
 
-| Экран | Кадр | Чего нет на сервере |
-|---|---|---|
-| Календарь | `s-agenda-1` | Вид Day и Month и произвольный Range (→ Show) — есть только неделя (`range.previous/current/next`) |
-| Календарь | `s-agenda-1` | Сегменты Events · Tasks due · Notes: задачи со сроком и заметки на той же ленте |
-| Календарь | `s-agenda-1` | День без событий («Nothing this day.») — сейчас пустые дни не отдаются вовсе |
-| Задачи | `s-tasks-1` | Группы Overdue · This week · No due date (сейчас одна группа без рубрики) |
-| Задачи | `s-tasks-1` | Порядок By due · By priority · Recently changed |
-| Контакты | `s-contacts-1` | Порядок A–Z · Recently changed |
-| Заметки | `s-notes-1` | Порядок Newest · Oldest · Title |
-| Единый вид | `s-contacts-1` | Import и Export с полем «Into»: мастер про одну коллекцию, выбранную в нём |
+| Экран | Кадр | Чего нет на сервере | Сделано |
+|---|---|---|---|
+| Календарь | `s-agenda-1` | Вид Day и Month и произвольный Range (→ Show) — есть только неделя (`range.previous/current/next`) | `v0.0.158` |
+| Календарь | `s-agenda-1` | Сегменты Events · Tasks due · Notes: задачи со сроком и заметки на той же ленте | `v0.0.158` |
+| Календарь | `s-agenda-1` | День без событий («Nothing this day.») — сейчас пустые дни не отдаются вовсе | `v0.0.158` |
+| Задачи | `s-tasks-1` | Группы Overdue · This week · No due date (сейчас одна группа без рубрики) | `v0.0.158`, плюс «Later» |
+| Задачи | `s-tasks-1` | Порядок By due · By priority · Recently changed | `v0.0.158` |
+| Контакты | `s-contacts-1` | Порядок A–Z · Recently changed | `v0.0.158` |
+| Заметки | `s-notes-1` | Порядок Newest · Oldest · Title | `v0.0.158` |
+| Единый вид | `s-contacts-1` | Import и Export с полем «Into»: мастер про одну коллекцию, выбранную в нём | `v0.0.158`: `/app/{kind}/import` открывает мастер с «Into», `/app/{kind}/export` — лист «из какой коллекции» (`ExportSheet`) |
 
 Порядок и группы — данные сервера (C-3.1: клиент не сортирует и не
-вычисляет): `ListBar.Segments` с `On`, группы с `Rubric`. C-6 менять не нужно.
+вычисляет): `ListBar.Segments` с `On`, группы с `Rubric`. Правка C-6
+понадобилась (`v0.0.158`): `Action.On` (и `NavRow.On` уехало в него),
+`AgendaRow.Kind` — задача и заметка на ленте видны как таковые — и
+`Range.Form` для произвольного диапазона «From → Show».
 
 ## Прочее
 
 | Экран | Кадр | Что |
 |---|---|---|
-| `/app/publish` | `s-publish-2` | Лист календаря: «How much of it» (диапазон или весь), «Allow .ics download and subscription», «Show event descriptions». Сейчас две кнопки: 30 дней и без срока |
-| `/admin/audit` | `s-admin-7` | Фильтры All · Security · Failures, Export CSV. Вход пишется с `v0.0.138`: `login.ok` и `login.fail` по существующей учётке, без адреса и без набранного текста (аудит Fable №3, Ф3-7); фильтры и экспорт — по-прежнему хвост |
-| `/setup` | `s-auth-4` | Поле Email (optional) первого администратора |
-| Строка связи | `s-notes-2`, `s-agenda-2` | Цель `RELATED-TO` в другой коллекции показывается голым UID с «Not in the lists loaded for this collection». По S-11 это законно («видимое обозначение»), но UID человеку ничего не говорит. Предложение: заголовок из любого загруженного индекса сессии, ссылка — только в той же коллекции |
+| `/app/publish` | `s-publish-2` | Лист календаря: «How much of it» (диапазон или весь), «Allow .ics download and subscription», «Show event descriptions». Сейчас две кнопки: 30 дней и без срока. `v0.0.158`: сделано, у ссылки свои дни, запрет `.ics` и вычистка описаний из файла |
+| `/admin/audit` | `s-admin-7` | `v0.0.158`: фильтры All · Security · Failures и Export CSV сделаны. Фильтры All · Security · Failures, Export CSV. Вход пишется с `v0.0.138`: `login.ok` и `login.fail` по существующей учётке, без адреса и без набранного текста (аудит Fable №3, Ф3-7); фильтры и экспорт — по-прежнему хвост |
+| `/setup` | `s-auth-4` | Поле Email (optional) первого администратора. `v0.0.158` |
+| Строка связи | `s-notes-2`, `s-agenda-2` | Цель `RELATED-TO` в другой коллекции показывается голым UID с «Not in the lists loaded for this collection». По S-11 это законно («видимое обозначение»), но UID человеку ничего не говорит. Предложение: заголовок из любого загруженного индекса сессии, ссылка — только в той же коллекции. `v0.0.158`: сделано так |
 
 ## Спека против кода — решения владельца 19.09.2026
 

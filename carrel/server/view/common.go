@@ -19,6 +19,7 @@ type Action struct {
 	Method  string `json:"method"`           // "GET" | "POST"
 	Danger  bool   `json:"danger,omitempty"` // разрушающее: удаление, сброс, объединение
 	Enabled bool   `json:"enabled"`
+	On      bool   `json:"on,omitempty"`     // включённый переключатель: флажок ленты, сегмент «сейчас показано»
 	Reason  Text   `json:"reason,omitempty"` // почему выключено; пусто, если включено
 }
 

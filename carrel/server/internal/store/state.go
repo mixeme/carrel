@@ -80,6 +80,16 @@ type PublishedLink struct {
 	// Path is a file or a folder under a file collection; Folder marks one.
 	Path   string `json:"path,omitempty"`
 	Folder bool   `json:"folder,omitempty"`
+	// From and To are the days a published calendar shows, 2006-01-02 and
+	// both in it; empty means the whole calendar, week by week (S-25.1).
+	From string `json:"from,omitempty"`
+	To   string `json:"to,omitempty"`
+	// NoDownload keeps the .ics of a published calendar from being handed
+	// over at all — the page stays, the file and the subscription go.
+	NoDownload bool `json:"noDownload,omitempty"`
+	// HideDescriptions leaves the text of events out of the public page and
+	// the file: the times are shared, what was said at them is not.
+	HideDescriptions bool `json:"hideDescriptions,omitempty"`
 	// Title is the label the link was made under: the collection's name or
 	// the record's title as it stood. The page shows the live one.
 	Title     string     `json:"title"`

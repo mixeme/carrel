@@ -28,6 +28,8 @@ const (
 type Users interface {
 	FirstRun() bool
 	SetupFirstAdmin(ctx context.Context, login, password string) error
+	// SetupFirstAdminWith is the same with an address (s-auth-4: optional).
+	SetupFirstAdminWith(ctx context.Context, login, password, email string) error
 	Authenticate(ctx context.Context, login, password string) (accountID string, dataKey [32]byte, mustChange bool, ok bool)
 	LoginExists(login string) bool
 	RegisterOpen() bool

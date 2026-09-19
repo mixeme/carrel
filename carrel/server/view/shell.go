@@ -45,9 +45,8 @@ type Rail struct {
 }
 
 type NavRow struct {
-	Action
-	Count *int `json:"count"` // nil — счёт этому разделу не считается: прочерк, не ноль
-	On    bool `json:"on"`    // открытый раздел; на выдаче поиска не отмечен ни один
+	Action      // On — открытый раздел; на выдаче поиска не отмечен ни один
+	Count  *int `json:"count"` // nil — счёт этому разделу не считается: прочерк, не ноль
 }
 
 type RailSection struct {

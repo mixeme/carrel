@@ -253,7 +253,8 @@ func TestCombinedAgendaTasksAndNotesMerge(t *testing.T) {
 			events = append(events, string(r.Summary)+" · "+strings.SplitN(string(r.Stamp), " · ", 2)[1])
 		}
 	}
-	if strings.Join(events, ", ") != "Gym · Home, Standup · Work, Dinner · Home" || len(agenda.Days) != 2 {
+	// Seven days: the empty ones stand too (views-tail.md, s-agenda-1).
+	if strings.Join(events, ", ") != "Gym · Home, Standup · Work, Dinner · Home" || len(agenda.Days) != 7 {
 		t.Fatalf("agenda = %v (%d days)", events, len(agenda.Days))
 	}
 	if agenda.Bar.Range == nil || actionHref(t, agenda.Bar.Range.Presets, "range.next") != "/app/calendar?from=2026-09-14" {

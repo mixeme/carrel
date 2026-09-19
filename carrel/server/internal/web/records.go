@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -418,6 +419,36 @@ func (c *collectionCtx) putIndex(entries []indexEntry) {
 	putIndex(c.sess, c.conn.ID, c.col.Path, c.spec.component, entries)
 }
 
+// sessionIndex is every list this session has loaded, of every collection
+// of the catalog. A RELATED-TO whose target is not in this collection still
+// has a title when the target's own list was opened (views-tail.md); the
+// link, though, stays inside the collection — the address of a record is
+// its collection's (S-11).
+func (s *Server) sessionIndex(sess *session.Session, blob sealed.Blob) map[string]indexEntry {
+	out := map[string]indexEntry{}
+	for _, col := range blob.Collections {
+		if col.Gone {
+			continue
+		}
+		for _, comp := range []string{"", "VEVENT", "VTODO", "VJOURNAL"} {
+			data, ok := sess.Cache().PeekETagMap(col.AccountID, col.Path+"\x00"+comp)
+			if !ok {
+				continue
+			}
+			var part []indexEntry
+			if json.Unmarshal(data, &part) != nil {
+				continue
+			}
+			for _, e := range part {
+				if _, seen := out[e.UID]; !seen {
+					out[e.UID] = e
+				}
+			}
+		}
+	}
+	return out
+}
+
 func (c *collectionCtx) index() []indexEntry {
 	var out []indexEntry
 	for _, comp := range c.components() {
@@ -613,6 +644,55 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	s.writePage(w, r, http.StatusOK, page)
 }
 
+// listSort is the order a list is shown in (views-tail.md, s-contacts-1,
+// s-tasks-1, s-notes-1): the server sorts and groups, the client neither
+// sorts nor reckons (C-3.1). The first of each kind is its default.
+type listSort struct{ id, label, value string }
+
+var listSorts = map[view.Kind][]listSort{
+	view.KindContact: {{"sort.az", "A–Z", "az"}, {"sort.changed", "Recently changed", "changed"}},
+	view.KindNote:    {{"sort.newest", "Newest", "newest"}, {"sort.oldest", "Oldest", "oldest"}, {"sort.title", "Title", "title"}},
+	view.KindTask:    {{"sort.due", "By due", "due"}, {"sort.priority", "By priority", "priority"}, {"sort.changed", "Recently changed", "changed"}},
+}
+
+// sortOf is the order the address asks for, or the kind's default.
+func sortOf(r *http.Request, k view.Kind) string {
+	want := strings.TrimSpace(r.FormValue("sort"))
+	for _, o := range listSorts[k] {
+		if o.value == want {
+			return want
+		}
+	}
+	return listSorts[k][0].value
+}
+
+// sortSegments are the orders of the kind, the current one closed. They keep
+// the category filter and the task segment of the address.
+func (s *Server) sortSegments(base string, k view.Kind, current string, keep url.Values) []view.Action {
+	var out []view.Action
+	for _, o := range listSorts[k] {
+		q := keptQuery(keep)
+		q.Set("sort", o.value)
+		f := tagFilter{base: base, query: q, route: s.route}
+		out = append(out, view.Action{ID: o.id, Label: text(o.label), Href: f.href(keep.Get("tag")), Method: "GET", Enabled: o.value != current})
+	}
+	return out
+}
+
+// changedAt is when the server last said the record changed, for the
+// "Recently changed" order; zero when it never said.
+func changedAt(obj *model.Object, tz *time.Location) time.Time {
+	if t, err := time.Parse("20060102T150405Z", strings.TrimSpace(firstValue(obj, "REV"))); err == nil {
+		return t
+	}
+	for _, prop := range []string{"LAST-MODIFIED", "DTSTAMP"} {
+		if t, ok := cal.TimeOf(obj, prop, tz); ok {
+			return t
+		}
+	}
+	return time.Time{}
+}
+
 func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsListPage {
 	page := view.ContactsListPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = s.listActions(c, nil)
@@ -624,7 +704,9 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 	}
 	items := c.listed(objs)
 	shown := s.foldLinked(s.catalogOf(c.sess), view.KindContact, filter.keep(view.KindContact, items))
-	page.Groups = s.contactGroups(c.sess, shown, c.spec.segment, false)
+	by := sortOf(r, view.KindContact)
+	page.Groups = s.contactGroups(c.sess, c.tf, shown, c.spec.segment, false, by)
+	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindContact, by, r.URL.Query())
 	page.Rail.Tags = filter.rail(view.KindContact, items)
 	c.putIndex(indexOf(c.tf, view.KindContact, items))
 	c.noteRead(items, true)
@@ -637,15 +719,23 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 // contactGroups sorts contacts by name under letter rubrics; "#" gathers
 // everything that does not start with a letter, last. mark puts the origin on
 // every row. A row's avatar is its photo's thumbnail when there is one to show.
-func (s *Server) contactGroups(sess *session.Session, items []listed, segment string, mark bool) []view.ContactGroup {
+func (s *Server) contactGroups(sess *session.Session, tf timeFmt, items []listed, segment string, mark bool, by string) []view.ContactGroup {
 	avatars := s.listAvatars(sess, items)
 	names := make([]string, len(items))
+	changed := make([]time.Time, len(items))
 	order := make([]int, len(items))
 	for i, it := range items {
 		names[i], order[i] = contactName(it.pick("FN")), i
+		changed[i] = changedAt(it.obj, tf.tz)
 	}
 	sort.SliceStable(order, func(a, b int) bool {
 		i, j := order[a], order[b]
+		if by == "changed" {
+			if !changed[i].Equal(changed[j]) {
+				return changed[i].After(changed[j])
+			}
+			return strings.ToLower(names[i]) < strings.ToLower(names[j])
+		}
 		ri, rj := rubricOf(names[i]), rubricOf(names[j])
 		if ri != rj {
 			return rj == "#" || (ri != "#" && ri < rj)
@@ -691,6 +781,10 @@ func (s *Server) contactGroups(sess *session.Session, items []listed, segment st
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
 		}
 		rubric := rubricOf(name)
+		if by == "changed" {
+			// One list: the letters say nothing about when a card changed.
+			rubric = ""
+		}
 		if n := len(groups); n == 0 || string(groups[n-1].Rubric) != rubric {
 			groups = append(groups, view.ContactGroup{Rubric: text(rubric)})
 		}
@@ -712,23 +806,196 @@ func weekWindow(tf timeFmt, from string) (time.Time, time.Time) {
 	return start, start.AddDate(0, 0, 7)
 }
 
-// agendaRange moves the week and keeps the category filter.
-func (s *Server) agendaRange(tf timeFmt, base, tag string, from, to time.Time) *view.Range {
-	f := tagFilter{tag: tag, base: base, query: url.Values{}, route: s.route}
-	week := func(t time.Time) string {
-		f.query = url.Values{"from": {t.Format("2006-01-02")}}
-		return f.href(tag)
+// The windows of the agenda (views-tail.md, s-agenda-1). It stays a list in
+// every one of them: Day, Week and Month are how much of it is shown, not a
+// grid (U-6).
+const (
+	agendaDay   = "day"
+	agendaWeek  = "week"
+	agendaMonth = "month"
+	agendaRange = "range"
+)
+
+// agendaWindow is the window the address asks for: its kind, its first day
+// and the day after its last. An unreadable date, or a range that ends
+// before it starts, is the week — the address is never half-obeyed.
+func agendaWindow(tf timeFmt, q url.Values) (kind string, from, to time.Time) {
+	day := func(name string) (time.Time, bool) {
+		d, err := time.ParseInLocation("2006-01-02", strings.TrimSpace(q.Get(name)), tf.tz)
+		return d, err == nil
 	}
-	current := tagFilter{base: base, query: url.Values{}, route: s.route}.href(tag)
-	return &view.Range{
-		From: text(tf.date(from)),
-		To:   text(tf.date(to.AddDate(0, 0, -1))),
-		Presets: []view.Action{
-			{ID: "range.previous", Label: "Previous week", Href: week(from.AddDate(0, 0, -7)), Method: "GET", Enabled: true},
-			{ID: "range.current", Label: "This week", Href: current, Method: "GET", Enabled: true},
-			{ID: "range.next", Label: "Next week", Href: week(to), Method: "GET", Enabled: true},
-		},
+	today := dayOf(time.Now(), tf.tz)
+	switch q.Get("view") {
+	case agendaDay:
+		from = today
+		if d, ok := day("from"); ok {
+			from = d
+		}
+		return agendaDay, from, from.AddDate(0, 0, 1)
+	case agendaMonth:
+		from = time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, tf.tz)
+		if d, ok := day("from"); ok {
+			from = time.Date(d.Year(), d.Month(), 1, 0, 0, 0, 0, tf.tz)
+		}
+		return agendaMonth, from, from.AddDate(0, 1, 0)
+	case agendaRange:
+		f, okFrom := day("from")
+		t, okTo := day("to")
+		if okFrom && okTo && !t.Before(f) {
+			return agendaRange, f, t.AddDate(0, 0, 1)
+		}
 	}
+	from, to = weekWindow(tf, q.Get("from"))
+	return agendaWeek, from, to
+}
+
+// untitledOf names a record of the agenda that has no title of its own.
+func untitledOf(k view.Kind) string {
+	switch k {
+	case view.KindTask:
+		return "Untitled task"
+	case view.KindNote:
+		return "Untitled note"
+	}
+	return "Untitled event"
+}
+
+// keptQuery is the address's parameters a segment or a window keeps: not
+// the window itself, not the category, and not the poll — another list is
+// another poll (S-15.1).
+func keptQuery(keep url.Values, drop ...string) url.Values {
+	out := url.Values{}
+	for name, v := range keep {
+		switch name {
+		case "tag", "task", "again":
+			continue
+		}
+		if slices.Contains(drop, name) {
+			continue
+		}
+		out[name] = v
+	}
+	return out
+}
+
+// agendaWith are the kinds the agenda shows besides events: tasks by their
+// due date and notes by their date, on the same line of days (s-agenda-1,
+// U-6: they are switches, not a choice of one).
+func agendaWith(q url.Values) map[view.Kind]bool {
+	on := map[view.Kind]bool{view.KindEvent: true}
+	for _, v := range q["with"] {
+		switch strings.TrimSpace(v) {
+		case "tasks":
+			on[view.KindTask] = true
+		case "notes":
+			on[view.KindNote] = true
+		}
+	}
+	return on
+}
+
+// agendaSegments are the three switches of the line. Events are always on
+// it: the agenda is the calendar, and a calendar without its events is not
+// one.
+func (s *Server) agendaSegments(base, tag string, on map[view.Kind]bool, keep url.Values) []view.Action {
+	out := []view.Action{{ID: "agenda.events", Label: "Events", Method: "GET", Enabled: false, On: true,
+		Reason: "The agenda always shows its events."}}
+	for _, seg := range []struct {
+		id, label, value string
+		kind             view.Kind
+	}{
+		{"agenda.tasks", "Tasks due", "tasks", view.KindTask},
+		{"agenda.notes", "Notes", "notes", view.KindNote},
+	} {
+		q := keptQuery(keep, "with")
+		for _, other := range []struct {
+			value string
+			kind  view.Kind
+		}{{"tasks", view.KindTask}, {"notes", view.KindNote}} {
+			// The switch keeps the other one as it stands and turns itself.
+			stays := on[other.kind]
+			if other.kind == seg.kind {
+				stays = !stays
+			}
+			if stays {
+				q.Add("with", other.value)
+			}
+		}
+		out = append(out, view.Action{ID: seg.id, Label: text(seg.label), Method: "GET", Enabled: true, On: on[seg.kind],
+			Href: tagFilter{base: base, query: q, route: s.route}.href(tag)})
+	}
+	return out
+}
+
+// todayQuery is the window of today: the week is the address without a view
+// at all, so the plainest address stays the plainest.
+func todayQuery(kind string) url.Values {
+	if kind == agendaWeek {
+		return url.Values{}
+	}
+	return url.Values{"view": {kind}}
+}
+
+// agendaRange is the window on the screen: Day, Week and Month to switch
+// between, the one before and the one after, and a range of one's own. It
+// keeps the category filter and the segment of the address.
+func (s *Server) agendaRange(sess *session.Session, tf timeFmt, base, tag, kind string, from, to time.Time, keep url.Values) *view.Range {
+	href := func(set url.Values) string {
+		q := keptQuery(keep, "view", "from", "to")
+		for name, v := range set {
+			q[name] = v
+		}
+		return tagFilter{base: base, query: q, route: s.route}.href(tag)
+	}
+	window := func(k string, day time.Time) string {
+		set := url.Values{"view": {k}, "from": {day.Format("2006-01-02")}}
+		if k == agendaWeek {
+			delete(set, "view") // the week is the address without a view
+		}
+		return href(set)
+	}
+	back, ahead := from, to
+	switch kind {
+	case agendaDay:
+		back, ahead = from.AddDate(0, 0, -1), to
+	case agendaMonth:
+		back, ahead = from.AddDate(0, -1, 0), to
+	case agendaRange:
+		span := to.Sub(from)
+		back, ahead = from.Add(-span), to
+	default:
+		back, ahead = from.AddDate(0, 0, -7), to
+	}
+	rng := &view.Range{From: text(tf.date(from)), To: text(tf.date(to.AddDate(0, 0, -1)))}
+	if kind != agendaRange {
+		rng.Presets = []view.Action{
+			{ID: "range.previous", Label: "Previous", Href: window(kind, back), Method: "GET", Enabled: true},
+			{ID: "range.current", Label: "Today", Href: href(todayQuery(kind)), Method: "GET", Enabled: true},
+			{ID: "range.next", Label: "Next", Href: window(kind, ahead), Method: "GET", Enabled: true},
+		}
+	}
+	// Switching the window keeps where the person is: today when today is in
+	// it, else its first day.
+	anchor := from
+	if today := dayOf(time.Now(), tf.tz); !today.Before(from) && today.Before(to) {
+		anchor = today
+	}
+	for _, w := range []struct{ id, label, kind string }{
+		{"range.day", "Day", agendaDay}, {"range.week", "Week", agendaWeek}, {"range.month", "Month", agendaMonth},
+	} {
+		rng.Presets = append(rng.Presets, view.Action{ID: w.id, Label: text(w.label), Method: "GET", Enabled: w.kind != kind,
+			Href: window(w.kind, anchor)})
+	}
+	form := s.plainForm(base, "GET",
+		csrfField(sess),
+		view.FormRow{Name: "view", Kind: view.InputHidden, Value: agendaRange},
+		view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02"))},
+		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(to.AddDate(0, 0, -1).Format("2006-01-02")),
+			Hint: "Both days are in the list."},
+	)
+	form.Actions = []view.Action{{ID: "range.show", Label: "Show", Href: s.route(base), Method: "GET", Enabled: true}}
+	rng.Form = &form
+	return rng
 }
 
 // agendaPrint is the week of an agenda in its print header.
@@ -741,7 +1008,7 @@ func agendaPrint(tf timeFmt, from, to time.Time) string {
 // the REPORT time-range.
 func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	tf := c.tf
-	from, to := weekWindow(tf, r.URL.Query().Get("from"))
+	kind, from, to := agendaWindow(tf, r.URL.Query())
 	page := view.AgendaPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	// The export of a calendar takes the week the screen shows: that is where
 	// the range is (S-19). Every other list is handed over whole.
@@ -749,7 +1016,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 		"from": {from.Format("2006-01-02")}, "to": {to.AddDate(0, 0, -1).Format("2006-01-02")},
 	})
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
-	page.Bar.Range = s.agendaRange(tf, c.listPath(), filter.tag, from, to)
+	page.Bar.Range = s.agendaRange(c.sess, tf, c.listPath(), filter.tag, kind, from, to, r.URL.Query())
 
 	objs, bad, err := c.calQuery(r.Context(), c.spec.component, &from, &to)
 	if err != nil {
@@ -757,8 +1024,28 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 		return page
 	}
 	items := c.listed(objs)
+	on := agendaWith(r.URL.Query())
+	page.Bar.Segments = s.agendaSegments(c.listPath(), filter.tag, on, r.URL.Query())
+	shown := kindedAll(s.foldLinked(s.catalogOf(c.sess), view.KindEvent, filter.keep(view.KindEvent, items)), view.KindEvent)
+	// Tasks due and notes come from the same collection, each by its own
+	// component (s-agenda-1); a collection that holds none is simply silent.
+	for _, k := range []view.Kind{view.KindTask, view.KindNote} {
+		if !on[k] || !c.col.Has(k) {
+			continue
+		}
+		// Whole, not by time-range: a VTODO is placed by DUE and a VJOURNAL
+		// by DTSTART, and servers filter neither reliably (docs/servers.md).
+		// The window is applied here, where the date is read anyway.
+		more, moreBad, err := c.calQuery(r.Context(), recordKinds[segmentOf(k)].component, nil, nil)
+		if err != nil {
+			page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
+			continue
+		}
+		bad = append(bad, moreBad...)
+		shown = append(shown, kindedAll(filter.keep(k, c.listed(more)), k)...)
+	}
 	var more []unreadable
-	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, s.foldLinked(s.catalogOf(c.sess), view.KindEvent, filter.keep(view.KindEvent, items)), from, to, c.spec.segment, false)
+	page.Days, page.Bar.Loaded, more = s.agendaDays(tf, shown, from, to, c.spec.segment, false)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindEvent, items)
 	c.putIndex(indexOf(c.tf, view.KindEvent, items))
@@ -773,7 +1060,22 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 // agendaDays expands series into the window and lays an instance another
 // client rewrote (RECURRENCE-ID) over the instant it replaces; the rows go
 // under day rubrics, all-day first, then by time.
-func (s *Server) agendaDays(tf timeFmt, items []listed, from, to time.Time, segment string, mark bool) ([]view.AgendaDay, int, []unreadable) {
+// kinded is a record of the agenda with the kind it is shown as: an event,
+// a task by its due date, a note by its date.
+type kinded struct {
+	listed
+	kind view.Kind
+}
+
+func kindedAll(items []listed, k view.Kind) []kinded {
+	out := make([]kinded, 0, len(items))
+	for _, it := range items {
+		out = append(out, kinded{listed: it, kind: k})
+	}
+	return out
+}
+
+func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segment string, mark bool) ([]view.AgendaDay, int, []unreadable) {
 	tz := tf.tz
 	type occurrence struct {
 		at     time.Time
@@ -786,6 +1088,30 @@ func (s *Server) agendaDays(tf timeFmt, items []listed, from, to time.Time, segm
 	for _, it := range items {
 		o := it.obj
 		uid := cal.UID(o)
+		if it.kind != view.KindEvent {
+			// A task stands on the day it is due, a note on its date; one
+			// row each, no recurrence to expand here (S-11).
+			at := timelineWhen(it.kind, o, tz)
+			if at.IsZero() || at.Before(from) || !at.Before(to) {
+				continue
+			}
+			row := view.AgendaRow{
+				Kind:    it.kind,
+				Href:    s.route(it.from.recordPath(segmentOf(it.kind), uid)),
+				UID:     uid,
+				Time:    text(tf.timeLabel(at, false)),
+				Summary: text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), untitledOf(it.kind))),
+				State:   linkedState(it.listed),
+			}
+			if it.kind == view.KindTask {
+				row.Badges = append(row.Badges, view.Badge{Label: "Due", Role: view.BadgeNeutral})
+			}
+			if mark {
+				row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
+			}
+			occs = append(occs, occurrence{at: at, order: it.from.listPath(segment), row: row})
+			continue
+		}
 		summary := titleOr(cal.Text(o, "SUMMARY"), "Untitled event")
 		tm, err := cal.TimingOf(o, tz)
 		var instants []time.Time
@@ -809,15 +1135,16 @@ func (s *Server) agendaDays(tf timeFmt, items []listed, from, to time.Time, segm
 				continue
 			}
 			occ := occurrence{at: at, allDay: tm.AllDay, order: it.from.listPath(segment), row: view.AgendaRow{
+				Kind:     view.KindEvent,
 				Href:     s.route(it.from.recordPath(segment, uid)),
 				UID:      uid,
 				Time:     text(tf.timeLabel(at, tm.AllDay)),
 				Zone:     text(tf.zone(tm.Zone)),
 				Summary:  text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), summary)),
 				Location: text(cal.Text(it.pick("LOCATION"), "LOCATION")),
-				State:    linkedState(it),
-				Badges:   linkedBadge(it),
-				Sources:  linkedSources(it),
+				State:    linkedState(it.listed),
+				Badges:   linkedBadge(it.listed),
+				Sources:  linkedSources(it.listed),
 			}}
 			if mark {
 				occ.row.Stamp, occ.row.Colour = it.from.stamp(), catalogColour(it.from.col)
@@ -860,14 +1187,17 @@ func (s *Server) agendaDays(tf timeFmt, items []listed, from, to time.Time, segm
 		}
 		return occs[i].order < occs[j].order
 	})
-	var days []view.AgendaDay
+	// Every day of the window stands, empty ones included (s-agenda-1: a day
+	// with nothing in it says so). Without them the list silently skips days
+	// and a week looks shorter than it is.
+	byDay := map[string][]view.AgendaRow{}
 	for _, o := range occs {
-		rubric := tf.dayRubric(o.at)
-		if n := len(days); n == 0 || string(days[n-1].Rubric) != rubric {
-			days = append(days, view.AgendaDay{Rubric: text(rubric)})
-		}
-		d := &days[len(days)-1]
-		d.Rows = append(d.Rows, o.row)
+		k := tf.dayKey(o.at)
+		byDay[k] = append(byDay[k], o.row)
+	}
+	var days []view.AgendaDay
+	for day := from; day.Before(to); day = day.AddDate(0, 0, 1) {
+		days = append(days, view.AgendaDay{Rubric: text(tf.dayRubric(day)), Rows: byDay[tf.dayKey(day)]})
 	}
 	return days, len(occs), bad
 }
@@ -893,8 +1223,10 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	items := c.listed(objs)
 	var open, done int
 	var more []unreadable
-	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items)), c.spec.segment, false, filter, time.Now())
-	page.Bar.Segments = s.taskSegments(c.listPath(), filter.tag, show, open, done)
+	by := sortOf(r, view.KindTask)
+	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items)), c.spec.segment, false, filter, time.Now(), by)
+	page.Bar.Segments = append(s.taskSegments(c.listPath(), filter.tag, show, open, done),
+		s.sortSegments(c.listPath(), view.KindTask, by, r.URL.Query())...)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindTask, items)
 	c.putIndex(indexOf(c.tf, view.KindTask, items))
@@ -908,11 +1240,13 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 
 // taskGroups shows open, done or all tasks: open first, then by due date,
 // undated last. A row's categories link to the list filtered to each.
-func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment string, mark bool, filter tagFilter, now time.Time) (groups []view.TaskGroup, open, done, loaded int, bad []unreadable) {
+func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment string, mark bool, filter tagFilter, now time.Time, by string) (groups []view.TaskGroup, open, done, loaded int, bad []unreadable) {
 	type item struct {
-		row   view.TaskRow
-		due   time.Time
-		order string
+		row      view.TaskRow
+		due      time.Time
+		priority int
+		changed  time.Time
+		order    string
 	}
 	var rows []item
 	for _, it := range items {
@@ -956,32 +1290,75 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 			row.Due = text(tf.timeOrDate(due))
 			row.Overdue = !isDone && due.Start.Before(now)
 		}
-		rows = append(rows, item{row: row, due: due.Start, order: it.from.listPath(segment)})
+		rows = append(rows, item{row: row, due: due.Start, priority: priorityOf(o), changed: changedAt(o, tf.tz), order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {
 		a, b := rows[i], rows[j]
 		if a.row.Done != b.row.Done {
 			return !a.row.Done
 		}
-		if a.due.IsZero() != b.due.IsZero() {
-			return !a.due.IsZero()
-		}
-		if !a.due.Equal(b.due) {
-			return a.due.Before(b.due)
+		switch by {
+		case "priority":
+			// 1 is the highest and 0 is none (RFC 5545 §3.8.1.9): none last.
+			if a.priority != b.priority {
+				return a.priority < b.priority
+			}
+		case "changed":
+			if !a.changed.Equal(b.changed) {
+				return a.changed.After(b.changed)
+			}
+		default:
+			if a.due.IsZero() != b.due.IsZero() {
+				return !a.due.IsZero()
+			}
+			if !a.due.Equal(b.due) {
+				return a.due.Before(b.due)
+			}
 		}
 		if a.row.Summary != b.row.Summary {
 			return a.row.Summary < b.row.Summary
 		}
 		return a.order < b.order
 	})
-	if len(rows) > 0 {
-		group := view.TaskGroup{}
-		for _, it := range rows {
-			group.Rows = append(group.Rows, it.row)
+	for _, it := range rows {
+		rubric := ""
+		if by == "due" {
+			rubric = dueRubric(it.due, it.row.Done, now)
 		}
-		groups = []view.TaskGroup{group}
+		if n := len(groups); n == 0 || string(groups[n-1].Rubric) != rubric {
+			groups = append(groups, view.TaskGroup{Rubric: text(rubric)})
+		}
+		g := &groups[len(groups)-1]
+		g.Rows = append(g.Rows, it.row)
 	}
 	return groups, open, done, len(rows), bad
+}
+
+// priorityOf is PRIORITY as a number to sort by; 0 — none — sorts last, so
+// it answers 10 (RFC 5545 §3.8.1.9: 1 is the highest, 9 the lowest).
+func priorityOf(obj *model.Object) int {
+	n, err := strconv.Atoi(strings.TrimSpace(firstValue(obj, "PRIORITY")))
+	if err != nil || n < 1 || n > 9 {
+		return 10
+	}
+	return n
+}
+
+// dueRubric groups tasks by their due date the way the frame does
+// (s-tasks-1): what is late, what is due this week, what is dated later,
+// and what has no date at all. A task already done is not late.
+func dueRubric(due time.Time, done bool, now time.Time) string {
+	switch {
+	case due.IsZero():
+		return "No due date"
+	case !done && due.Before(now):
+		return "Overdue"
+	case due.Before(now.AddDate(0, 0, 7)):
+		// The seven days ahead, not the calendar week: on a Sunday evening
+		// "this week" would otherwise be empty and tomorrow would be "later".
+		return "This week"
+	}
+	return "Later"
 }
 
 // taskSegments switch between open, done and all, and keep the category
@@ -1013,7 +1390,9 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	}
 	items := c.listed(objs)
 	var more []unreadable
-	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items)), c.spec.segment, false, filter)
+	by := sortOf(r, view.KindNote)
+	page.Groups, page.Bar.Loaded, more = s.noteGroups(c.tf, s.foldLinked(s.catalogOf(c.sess), view.KindNote, filter.keep(view.KindNote, items)), c.spec.segment, false, filter, by)
+	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindNote, by, r.URL.Query())
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
 	page.Rail.Tags = filter.rail(view.KindNote, items)
 	c.putIndex(indexOf(c.tf, view.KindNote, items))
@@ -1024,7 +1403,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 
 // noteGroups lists notes newest first. A row's categories link to the list
 // filtered to each.
-func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark bool, filter tagFilter) ([]view.NoteGroup, int, []unreadable) {
+func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark bool, filter tagFilter, by string) ([]view.NoteGroup, int, []unreadable) {
 	type item struct {
 		row   view.NoteRow
 		at    time.Time
@@ -1050,7 +1429,15 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		rows = append(rows, item{row: row, at: at, order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {
-		if !rows[i].at.Equal(rows[j].at) {
+		switch {
+		case by == "title":
+			if x, y := strings.ToLower(string(rows[i].row.Title)), strings.ToLower(string(rows[j].row.Title)); x != y {
+				return x < y
+			}
+		case !rows[i].at.Equal(rows[j].at):
+			if by == "oldest" {
+				return rows[i].at.Before(rows[j].at)
+			}
 			return rows[i].at.After(rows[j].at)
 		}
 		if rows[i].row.Title != rows[j].row.Title {

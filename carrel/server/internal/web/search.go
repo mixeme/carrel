@@ -613,7 +613,15 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 	case c.feed != nil:
 		objs, err = c.feed.search(ctx, k, q.Text)
 	case q.Text == "":
-		objs, _, err = c.cal.Query(ctx, c.col.Path, component, q.From, q.To)
+		from, to := q.From, q.To
+		if k != view.KindEvent {
+			// A task is placed by DUE and a note by its DTSTART; a server's
+			// time-range filter answers for neither reliably, so the whole
+			// component is read and the window is applied where the rows are
+			// placed (views-tail.md).
+			from, to = nil, nil
+		}
+		objs, _, err = c.cal.Query(ctx, c.col.Path, component, from, to)
 	default:
 		objs, _, err = c.cal.Search(ctx, c.col.Path, component, q.Text)
 	}

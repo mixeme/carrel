@@ -262,6 +262,79 @@ func targetOf(dest *collectionCtx) (string, string) {
 
 // getKindImport is the wizard: the source step, or the preview of the file
 // that is already in hand, counted against the collection now chosen.
+// getKindImportEntry is the way into the import from a combined view, where
+// no collection is chosen yet (s-contacts-1): the wizard opens on the first
+// writable collection of the kind and asks "Into" for the rest. Nothing of
+// the kind takes records — 404, and the bar says so before the click.
+func (s *Server) getKindImportEntry(w http.ResponseWriter, r *http.Request, kind string) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	spec, known := recordKinds[kind]
+	if !known {
+		s.notFound(w, r)
+		return
+	}
+	blob := s.catalogOf(sess)
+	for _, conn := range blob.Connections {
+		for _, col := range blob.CollectionsOf(conn.ID) {
+			if col.Gone || col.ReadOnly || conn.Feed || !col.Has(spec.kind) {
+				continue
+			}
+			if c, made := s.collectionOf(sess, spec, conn.ID, col.Path); made {
+				s.redirect(w, r, c.listPath()+"/import")
+				return
+			}
+		}
+	}
+	s.notFound(w, r)
+}
+
+// getKindExportEntry is the way into the export from a combined view: which
+// collection to hand over. One is not guessed — the file would be somebody
+// else's records (S-14).
+func (s *Server) getKindExportEntry(w http.ResponseWriter, r *http.Request, kind string) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	spec, known := recordKinds[kind]
+	if !known {
+		s.notFound(w, r)
+		return
+	}
+	blob := s.catalogOf(sess)
+	sheet := view.ExportSheet{Kind: spec.kind, Actions: []view.Action{
+		{ID: "export.cancel", Label: "Cancel", Href: s.route("/app/" + spec.segment), Method: "GET", Enabled: true},
+	}}
+	for _, conn := range blob.Connections {
+		for _, col := range blob.CollectionsOf(conn.ID) {
+			if col.Gone || !col.Has(spec.kind) {
+				continue
+			}
+			o := origin{conn: conn, col: col}
+			q := url.Values{}
+			if spec.kind == view.KindEvent {
+				q.Set("whole", "1") // a calendar goes whole from here: there is no week on this screen
+			}
+			sheet.Target.Options = append(sheet.Target.Options, view.TargetOption{
+				ID: s.postQuery(o.listPath(spec.segment)+"/export", q), Label: text(collectionLabel(col)),
+				Stamp: o.stamp(), Colour: catalogColour(col),
+			})
+		}
+	}
+	if len(sheet.Target.Options) == 0 {
+		s.notFound(w, r)
+		return
+	}
+	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		return
+	}
+	s.writePage(w, r, http.StatusOK, sheet)
+}
+
 func (s *Server) getKindImport(w http.ResponseWriter, r *http.Request, kind string) {
 	c, ok := s.openCollection(w, r, kind, false)
 	if !ok {

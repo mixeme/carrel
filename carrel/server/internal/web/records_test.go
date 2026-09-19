@@ -804,7 +804,8 @@ func TestTasksAndNotes(t *testing.T) {
 	for _, s := range open.Bar.Segments {
 		segments = append(segments, string(s.Label))
 	}
-	if strings.Join(segments, ",") != "Open · 1,Done · 1,All · 2" {
+	// The orders of the list stand beside the segments (views-tail.md).
+	if strings.Join(segments, ",") != "Open · 1,Done · 1,All · 2,By due,By priority,Recently changed" {
 		t.Errorf("segments = %v", segments)
 	}
 	done := decode[view.TasksPage](t, f.h.do(get(tasks+"?show=done", f.sess)))

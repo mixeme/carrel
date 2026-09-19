@@ -160,6 +160,8 @@ func (s *Server) getSetup(w http.ResponseWriter, r *http.Request) {
 		},
 		Form: withSubmit(s.anonPlainForm(w, r, "/setup", "POST",
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
+			view.FormRow{Name: "email", Label: "Email (optional)", Kind: view.InputEmail,
+				Hint: text("For getting back in if the password is lost. It is not confirmed yet: the account page sends the letter.")},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Hint: text("At least 8 characters.")},
 			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 		), "setup.submit", "Create administrator"),
@@ -184,6 +186,7 @@ func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
 			Plain: view.Plain{Title: text("Create administrator"), Lede: text("This instance has no accounts yet.")},
 			Form: withSubmit(s.anonPlainForm(w, r, "/setup", "POST",
 				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true},
+				view.FormRow{Name: "email", Label: "Email (optional)", Kind: view.InputEmail, Value: text(r.FormValue("email"))},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: text("Passwords do not match.")},
 				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 			), "setup.submit", "Create administrator"),
@@ -191,11 +194,12 @@ func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
-	if err := s.users.SetupFirstAdmin(r.Context(), login, password); err != nil {
+	if err := s.users.SetupFirstAdminWith(r.Context(), login, password, r.FormValue("email")); err != nil {
 		page := view.SetupPage{
 			Plain: view.Plain{Title: text("Create administrator"), Lede: text("This instance has no accounts yet.")},
 			Form: withSubmit(s.anonPlainForm(w, r, "/setup", "POST",
 				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Error: formError(err)},
+				view.FormRow{Name: "email", Label: "Email (optional)", Kind: view.InputEmail, Value: text(r.FormValue("email"))},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 			), "setup.submit", "Create administrator"),

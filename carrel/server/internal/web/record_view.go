@@ -377,6 +377,14 @@ func (s *Server) relatedRows(c *collectionCtx, obj *model.Object) []view.Timelin
 			rows = append(rows, view.TimelineRow{Href: s.route(c.kindRecordPath(e.Kind, target)), Kind: e.Kind, Title: text(e.Title), Why: "Related to"})
 			continue
 		}
+		// The target is in another collection, or in none this session has
+		// read: a title when some list of this session holds it, the UID
+		// itself when nothing does. No link either way — a record is opened
+		// at its own collection's address (S-11).
+		if e, ok := s.sessionIndex(c.sess, s.catalogOf(c.sess))[target]; ok && e.Title != "" {
+			rows = append(rows, view.TimelineRow{Kind: e.Kind, Title: text(e.Title), Why: "Related to · in another collection"})
+			continue
+		}
 		rows = append(rows, view.TimelineRow{Title: text(target), Why: "Not in the lists loaded for this collection"})
 	}
 	for _, e := range index {
