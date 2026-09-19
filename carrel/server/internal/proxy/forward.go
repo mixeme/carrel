@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"bytes"
 	"io"
 	"mime"
 	"net/http"
@@ -16,6 +17,10 @@ import (
 // Below /c/{account}/{col}/ everything goes to that collection's server
 // through the guard (S-27.3). The bytes of records and files pass as they
 // are (S-7); only XML has its hrefs rewritten, on the stream, both ways.
+
+// maxRequestXML is the largest XML body a device may send: a multiget of
+// thousands of hrefs is well under it.
+const maxRequestXML = 10 << 20
 
 // requestHeaders are the headers a device's request carries on: what DAV
 // needs and nothing of the device's credentials.
@@ -136,7 +141,15 @@ func (s *Server) forward(w http.ResponseWriter, r *http.Request, blob sealed.Blo
 	}
 	length := r.ContentLength
 	if body != nil && isXML(r.Header.Get("Content-Type")) {
-		body, length = newRewriter(body, toFar), -1
+		// A request body is small — a query, a multiget — and goes out with
+		// its length: a chunked REPORT is refused by some servers (SV-5).
+		// The response, which can be big, stays a stream.
+		data, err := io.ReadAll(io.LimitReader(newRewriter(body, toFar), maxRequestXML+1))
+		if err != nil || int64(len(data)) > maxRequestXML {
+			http.Error(w, "request body too large", http.StatusRequestEntityTooLarge)
+			return
+		}
+		body, length = bytes.NewReader(data), int64(len(data))
 	}
 	file := r.Method == http.MethodGet || r.Method == http.MethodHead || r.Method == http.MethodPut
 	resp, err := client.Forward(r.Context(), r.Method, t.upstream(), header, body, length, file)

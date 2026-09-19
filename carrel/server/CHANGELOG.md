@@ -5,6 +5,15 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.119 — 2026-09-19
+
+### Fixed
+
+- **davloom and Nextcloud**: a device's REPORT (calendar query, multiget)
+  reached Nextcloud chunked and got a 500. The rewritten request body now
+  goes with its length, up to 10 MiB. Checked live through Baikal and
+  Nextcloud.
+
 ## v0.0.118 — 2026-09-19
 
 davloom works: a device connects to one address and sees the collections you
