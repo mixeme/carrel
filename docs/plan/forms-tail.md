@@ -62,9 +62,9 @@
 
 ## Шаги
 
-- [ ] Контакт: Nickname, Birthday (дата; `BDAY` без года — `--MMDD` читается и
+- [x] Контакт: Nickname, Birthday (дата; `BDAY` без года — `--MMDD` читается и
       пишется как был), Categories. Тест: правка каждого поля не меняет
-      остальные строки
+      остальные строки (`v0.0.143`, `TestContactNicknameBirthdayCategories`)
 - [ ] Контакт: метка строки телефона и почты; Address[] по пяти частям
 - [ ] Событие: Status, Categories, пояс
 - [ ] Событие: Repeats — простые поля и Advanced RRULE; `RecurrenceBlock.Fields`

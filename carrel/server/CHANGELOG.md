@@ -5,6 +5,21 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.143 — 2026-09-19
+
+forms-tail.md, step 1.
+
+### Added
+
+- **The contact form has Nickname, Birthday and Categories**
+  (`s-contacts-3`). Categories are one field, commas between them, written
+  as one `CATEGORIES` line. Birthday takes YYYY-MM-DD, or --MM-DD for a
+  day without a year, and is written in the form the stored one has
+  (basic `18151210`, extended `1815-12-10`); without one, vCard 3 gets
+  extended and vCard 4 basic. A value that is not a date is refused and
+  nothing is written. Changing one field writes that line, its parameters
+  kept (S-7).
+
 ## v0.0.142 — 2026-09-19
 
 connections-tail.md, steps 4 and 5.

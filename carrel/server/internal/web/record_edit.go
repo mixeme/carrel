@@ -42,6 +42,12 @@ const (
 	// N is structured — Family;Given;Middle;Prefix;Suffix — and the three
 	// components no input offers come back untouched (U-6.1, S-7).
 	fieldName
+	// fieldList is a text list typed with commas between items: CATEGORIES,
+	// one line on the way out, the items' parameters kept.
+	fieldList
+	// fieldBirthday is BDAY: a date, or --MM-DD without a year, written back
+	// in the form it came in (basic or extended).
+	fieldBirthday
 )
 
 type editField struct {
@@ -59,10 +65,14 @@ var editFields = map[view.Kind][]editField{
 		{name: "fn", label: "Display name", prop: "FN", typ: fieldText,
 			hint: "Left empty, it is made from Given and Family. Fill it alone and it is cut the other way: the first word is the given name, the rest the family name."},
 		{name: "n", label: "Name", prop: "N", typ: fieldName},
+		{name: "nickname", label: "Nickname", prop: "NICKNAME", typ: fieldText},
 		{name: "email", label: "Email", prop: "EMAIL", typ: fieldMulti},
 		{name: "tel", label: "Phone", prop: "TEL", typ: fieldMulti},
 		{name: "org", label: "Organisation", prop: "ORG", typ: fieldText},
 		{name: "title", label: "Title", prop: "TITLE", typ: fieldText},
+		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday,
+			hint: "--MM-DD for a birthday without a year."},
+		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
 		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea},
 	},
 	view.KindEvent: {
@@ -173,6 +183,10 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 		switch f.typ {
 		case fieldText, fieldArea:
 			vals[f.name] = []string{c.text(obj, f.prop)}
+		case fieldList:
+			vals[f.name] = []string{strings.Join(categoriesOf(c.spec.kind, obj), ", ")}
+		case fieldBirthday:
+			vals[f.name] = []string{birthdayShown(c.text(obj, f.prop))}
 		case fieldName:
 			p := nameParts(c.text(obj, f.prop))
 			vals[f.name] = []string{p[1], p[0]}
@@ -274,7 +288,7 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 	vals := formValues{}
 	for _, f := range editFields[c.spec.kind] {
 		switch f.typ {
-		case fieldText, fieldPercent:
+		case fieldText, fieldPercent, fieldList, fieldBirthday:
 			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name))}
 		case fieldArea:
 			vals[f.name] = []string{strings.TrimRight(strings.ReplaceAll(r.FormValue(f.name), "\r\n", "\n"), "\n ")}
@@ -357,6 +371,30 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				continue
 			}
 			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], w)...)
+		case fieldList:
+			items := listItems(first(w))
+			if sameRows(items, listItems(first(h))) {
+				continue
+			}
+			if !escape {
+				ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], strings.Join(items, ","), false)...)
+				continue
+			}
+			for i := range items {
+				items[i] = cal.EscapeText(items[i])
+			}
+			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], strings.Join(items, ","), false)...)
+		case fieldBirthday:
+			v := first(w)
+			if v == first(h) {
+				continue
+			}
+			written, err := birthdayWritten(v, props[f.prop], firstValue(obj, "VERSION"))
+			if err != nil {
+				ch.errors[f.name] = err.Error()
+				continue
+			}
+			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], written, false)...)
 		case fieldName:
 			if sameRows(w, h) {
 				continue
@@ -509,6 +547,91 @@ func textOps(prop string, cur []model.RawValue, v string, escape bool) []model.P
 		}
 	}
 	return ops
+}
+
+// listItems are the items of a list field as typed: split on commas,
+// trimmed, the empty ones dropped.
+func listItems(v string) []string {
+	var out []string
+	for _, item := range strings.Split(v, ",") {
+		if item = strings.TrimSpace(item); item != "" {
+			out = append(out, item)
+		}
+	}
+	return out
+}
+
+// birthdayShown is BDAY as the form shows it: YYYY-MM-DD, or --MM-DD for a
+// day without a year (RFC 6350 §4.3.1). A date-time shows its date; what is
+// not a date at all (vCard 4 allows text) is shown as it is.
+func birthdayShown(raw string) string {
+	v := strings.TrimSpace(raw)
+	if i := strings.IndexByte(v, 'T'); i > 0 {
+		v = v[:i]
+	}
+	digits := strings.ReplaceAll(strings.TrimPrefix(v, "--"), "-", "")
+	switch {
+	case strings.HasPrefix(v, "--") && len(digits) == 4 && isDigits(digits):
+		return "--" + digits[:2] + "-" + digits[2:]
+	case len(digits) == 8 && isDigits(digits):
+		return digits[:4] + "-" + digits[4:6] + "-" + digits[6:]
+	}
+	return raw
+}
+
+// birthdayWritten turns what was typed into BDAY in the form the stored one
+// has: basic (18151210, --0412) or extended (1815-12-10, --04-12). Without a
+// stored one, vCard 3 gets extended and vCard 4 basic, as each writes it.
+func birthdayWritten(typed string, cur []model.RawValue, version string) (string, error) {
+	if typed == "" {
+		return "", nil
+	}
+	yearless := strings.HasPrefix(typed, "--")
+	digits := strings.ReplaceAll(strings.TrimPrefix(typed, "--"), "-", "")
+	layout, want := "20060102", 8
+	if yearless {
+		layout, want = "0102", 4
+	}
+	check := digits
+	if yearless {
+		check = "2000" + digits // 29 February is a birthday too
+		layout = "20060102"
+	}
+	if len(digits) != want || !isDigits(digits) {
+		return "", errors.New("Enter the date as YYYY-MM-DD, or --MM-DD without a year.")
+	}
+	if _, err := time.Parse(layout, check); err != nil {
+		return "", errors.New("Enter the date as YYYY-MM-DD, or --MM-DD without a year.")
+	}
+	extended := strings.TrimSpace(version) == "3.0"
+	if len(cur) > 0 {
+		old := strings.TrimPrefix(strings.TrimSpace(cur[0].Text), "--")
+		if i := strings.IndexByte(old, 'T'); i > 0 {
+			old = old[:i]
+		}
+		extended = strings.Contains(old, "-")
+	}
+	out := digits
+	if extended {
+		if yearless {
+			out = digits[:2] + "-" + digits[2:]
+		} else {
+			out = digits[:4] + "-" + digits[4:6] + "-" + digits[6:]
+		}
+	}
+	if yearless {
+		out = "--" + out
+	}
+	return out, nil
+}
+
+func isDigits(s string) bool {
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return s != ""
 }
 
 // nameParts splits N into the five components RFC 6350 gives it: family,
@@ -782,6 +905,16 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required})
 		case fieldArea:
 			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
+		case fieldList:
+			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
+		case fieldBirthday:
+			// A date input cannot hold a day without a year: such a value is
+			// shown as text, as it is.
+			kind := view.InputDate
+			if strings.HasPrefix(first(vals), "--") {
+				kind = view.InputText
+			}
+			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: kind, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
 		case fieldName:
 			row := pair(vals)
 			main.Rows = append(main.Rows,
