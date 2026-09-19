@@ -5,6 +5,20 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.141 — 2026-09-19
+
+connections-tail.md, step 3.
+
+### Added
+
+- **`user.UpdateConnection`**: a connection takes a new address, login,
+  password or accepted fingerprint and keeps its ID (C-4.1), with its
+  catalog and ticks; an empty password keeps the stored one. Every
+  published link of the connection has its envelope sealed again with the
+  new credentials in the same edit — a link made before a password change
+  opens after it. The journal line `connection.edit` names the connection
+  and the number of links. No screen reaches it yet.
+
 ## v0.0.140 — 2026-09-19
 
 connections-tail.md, step 1.

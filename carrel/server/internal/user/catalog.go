@@ -290,6 +290,73 @@ func (s *Service) RemoveConnection(viewerID string, dataKey [crypt.KeyLen]byte, 
 	return res, nil
 }
 
+// UpdateConnection writes what discovery found at the connection's new
+// address or with its new credentials: the server, login, password, the
+// accepted fingerprint and the homes. The ID stays (C-4.1) and with it the
+// catalog, the ticks and everything bound to them; the catalog is reconciled
+// by ApplyRediscovery, as the person confirms it (S-6.1). An empty password
+// keeps the stored one. Every published link of the connection gets its
+// envelope sealed again with the new credentials in the same edit, or the
+// public page would go on reading with the old ones. The journal names the
+// connection and the number of links, not the address.
+func (s *Service) UpdateConnection(viewerID string, dataKey [crypt.KeyLen]byte, conn sealed.Connection) error {
+	now := s.now()
+	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByID(viewerID)
+		if u == nil || u.Disabled {
+			return nil, ErrNotFound
+		}
+		blob, err := sealed.Open(dataKey, u.SealedBlob, u.Login)
+		if err != nil {
+			return nil, fmt.Errorf("user: open blob: %w", err)
+		}
+		var stored *sealed.Connection
+		for i := range blob.Connections {
+			if blob.Connections[i].ID == conn.ID {
+				stored = &blob.Connections[i]
+			}
+		}
+		if stored == nil {
+			return nil, ErrNotFound
+		}
+		if conn.Password == "" {
+			conn.Password = stored.Password
+		}
+		conn.Feed = false
+		*stored = conn
+
+		plain, err := publish.Envelope{Server: conn.Server, Login: conn.Login, Password: conn.Password, CertFingerprint: conn.CertFingerprint}.Marshal()
+		if err != nil {
+			return nil, err
+		}
+		defer crypt.Wipe(plain)
+		links := 0
+		for i := range st.Published {
+			l := &st.Published[i]
+			if l.UserID != viewerID || l.AccountID != conn.ID {
+				continue
+			}
+			env, err := s.st.SealLink(l.Hash, plain)
+			if err != nil {
+				return nil, err
+			}
+			crypt.Wipe(l.Envelope)
+			l.Envelope = env
+			links++
+		}
+
+		sealedBlob, err := sealed.Seal(dataKey, blob, u.Login)
+		if err != nil {
+			return nil, err
+		}
+		u.SealedBlob = sealedBlob
+		return []store.AuditEntry{{
+			When: now, Who: u.Login, What: "connection.edit", Whom: u.Login,
+			Detail: fmt.Sprintf("%s links %d", conn.ID, links),
+		}}, nil
+	})
+}
+
 func selectionsNotOf(sels []sealed.Selection, accountID string) []sealed.Selection {
 	var out []sealed.Selection
 	for _, sel := range sels {
