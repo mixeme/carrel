@@ -51,6 +51,7 @@
   `TestQuickSheetWithNowhereToWrite`). **Кадры `s-notes-5` и `s-notes-6`
   правит владелец в Typecase**: лист заметки — общий `NewSheet` с полем тела,
   «Save note» и «Open the card», адрес входа `/app/{kind}/quick`.
+  Задача выписана к остальным правкам кадров в [server.md](server.md).
   Было: С `v0.0.86` этот
   адрес — общий `/app/{kind}/quick` (C-5.4) с `NewSheet`, POST на нём нет, и
   `QuickNoteSheet` не отдаёт ни один обработчик. Кадры `s-notes-5` и
