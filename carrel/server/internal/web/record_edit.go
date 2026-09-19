@@ -605,7 +605,11 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 		case fieldList:
 			vals[f.name] = []string{strings.Join(categoriesOf(c.spec.kind, obj), ", ")}
 		case fieldBirthday:
-			vals[f.name] = []string{birthdayShown(c.text(obj, f.prop))}
+			var params map[string]string
+			if cur := props[f.prop]; len(cur) > 0 {
+				params = cur[0].Params
+			}
+			vals[f.name] = []string{birthdayShown(c.text(obj, f.prop), params)}
 		case fieldName:
 			p := nameParts(c.text(obj, f.prop))
 			vals[f.name] = []string{p[1], p[0]}
@@ -935,6 +939,10 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				continue
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], written, false)...)
+			if written != "" && !strings.HasPrefix(v, "--") && len(props[f.prop]) > 0 && props[f.prop][0].Params[appleOmitYear] != "" {
+				// A full date: the marker would hide the year typed.
+				ch.ops = append(ch.ops, model.RemoveParam{Prop: f.prop, Index: 0, Param: appleOmitYear})
+			}
 		case fieldName:
 			if sameRows(w, h) {
 				continue
@@ -1135,8 +1143,13 @@ func listItems(v string) []string {
 // birthdayShown is BDAY as the form shows it: YYYY-MM-DD, or --MM-DD for a
 // day without a year (RFC 6350 §4.3.1). A date-time shows its date; what is
 // not a date at all (vCard 4 allows text) is shown as it is.
-func birthdayShown(raw string) string {
+func birthdayShown(raw string, params map[string]string) string {
 	v := strings.TrimSpace(raw)
+	if omit := params[appleOmitYear]; omit != "" && strings.HasPrefix(v, omit) {
+		// Apple's day without a year, as sabre keeps --MMDD: the year is a
+		// placeholder the marker names.
+		v = "--" + strings.TrimLeft(strings.TrimPrefix(v, omit), "-")
+	}
 	if i := strings.IndexByte(v, 'T'); i > 0 {
 		v = v[:i]
 	}
@@ -1149,6 +1162,10 @@ func birthdayShown(raw string) string {
 	}
 	return raw
 }
+
+// appleOmitYear marks the year of BDAY as a placeholder: Apple writes a day
+// without a year so, and Baikal and Nextcloud (sabre) store --MMDD that way.
+const appleOmitYear = "X-APPLE-OMIT-YEAR"
 
 // birthdayWritten turns what was typed into BDAY in the form the stored one
 // has: basic (18151210, --0412) or extended (1815-12-10, --04-12). Without a
@@ -1192,6 +1209,13 @@ func birthdayWritten(typed string, cur []model.RawValue, version string) (string
 	}
 	if yearless {
 		out = "--" + out
+		if len(cur) > 0 && len(cur[0].Params[appleOmitYear]) == 4 {
+			// Written the way the card holds such a day: the marker's year.
+			out = cur[0].Params[appleOmitYear] + strings.TrimPrefix(out, "--")
+			if extended {
+				out = cur[0].Params[appleOmitYear] + "-" + strings.TrimPrefix(strings.TrimPrefix(typed, "--"), "-")
+			}
+		}
 	}
 	return out, nil
 }

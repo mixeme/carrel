@@ -96,3 +96,39 @@ func TestContactNicknameBirthdayCategories(t *testing.T) {
 		t.Errorf("a refused birthday sent %d PUT", n)
 	}
 }
+
+// Baikal and Nextcloud (sabre) keep a birthday without a year as Apple
+// writes it: BDAY;X-APPLE-OMIT-YEAR=1604:1604-04-12 (found live, 19.09.2026).
+// That is --04-12 to a person, not the year 1604; a day without a year is
+// written back in the same form, and a full date takes the marker off, or
+// the year typed would be hidden.
+func TestAppleBirthdayWithoutAYear(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:3.0\nUID:vera\nFN:Vera\nBDAY;X-APPLE-OMIT-YEAR=1604:1604-04-12\nEND:VCARD\n")
+	rec := f.path("contacts") + "/vera"
+	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	if form.Get("bday") != "--04-12" {
+		t.Fatalf("bday shown %q, want --04-12", form.Get("bday"))
+	}
+	shown := false
+	for _, fl := range decode[view.ContactPage](t, f.h.do(get(rec, f.sess))).Fields {
+		shown = shown || fl.Label == "Birthday" && fl.Value == "--04-12"
+	}
+	if !shown {
+		t.Error("the card shows the placeholder year")
+	}
+	save := func(v string) string {
+		t.Helper()
+		form := formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+		form.Set("bday", v)
+		if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+			t.Fatalf("POST %s: %d %s", v, resp.Code, resp.Body.String())
+		}
+		return body(t, f, "vera.vcf")
+	}
+	mustContain(t, save("--04-13"), "BDAY;X-APPLE-OMIT-YEAR=1604:1604-04-13")
+	got := save("1990-04-13")
+	mustContain(t, got, "BDAY:1990-04-13")
+	if strings.Contains(got, "X-APPLE-OMIT-YEAR") {
+		t.Errorf("a full date kept the marker that hides its year:\n%s", got)
+	}
+}

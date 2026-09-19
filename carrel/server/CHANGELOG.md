@@ -5,6 +5,26 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.154 — 2026-09-19
+
+Live runs of forms-tail.md and connections-tail.md.
+
+### Fixed
+
+- **A birthday without a year showed the year 1604 on Baikal and
+  Nextcloud.** sabre keeps `--MMDD` as Apple writes it,
+  `BDAY;X-APPLE-OMIT-YEAR=1604:1604-04-12`. The card and the form show it
+  as `--04-12`; a day without a year is written back in that form, and a
+  full date takes `X-APPLE-OMIT-YEAR` off, or the year typed would be
+  hidden (found live, `TestAppleBirthdayWithoutAYear`).
+
+### Included
+
+- `integration`: `TestBaikalForms`, `TestNextcloudForms`, `TestRadicaleForms`
+  — the new fields of every form, a series' rule with its exceptions, the
+  time zone, Mark done, and a connection whose password went wrong: Test,
+  Test again, Edit, Test passes.
+
 ## v0.0.153 — 2026-09-19
 
 views-tail.md, owner's decision 19.09.2026. **Contract change (C-5.3, C-6,

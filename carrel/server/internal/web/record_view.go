@@ -201,6 +201,9 @@ func contactFieldsOf(obj *model.Object) []propField {
 			if f.shape != nil {
 				field.Value = text(f.shape(v.Text))
 			}
+			if f.prop == "BDAY" {
+				field.Value = text(birthdayShown(v.Text, v.Params)) // Apple's day without a year too
+			}
 			if f.href != nil {
 				field.Href = f.href(v.Text)
 			}
