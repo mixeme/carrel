@@ -5,6 +5,32 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.131 — 2026-09-19
+
+### Fixed
+
+- **An address book or a calendar bigger than one answer now opens.** The
+  whole book used to come in one REPORT, and past
+  `CARREL_DAV_MAX_RESPONSE_BYTES` (10 MiB) Carrel said the collection was
+  unavailable. Three hundred contacts with a photo each already reach that.
+  Such a collection is now read in parts, under the same ceiling:
+  - a book: its listing, then `addressbook-multiget` of up to 100 cards, and a
+    batch whose answer is too large is split in halves;
+  - a calendar read whole (tasks, notes, export, backup): its listing, then
+    `calendar-multiget` the same way.
+  
+  A single record larger than the ceiling is left out: a card is logged by
+  path, a calendar object is named as unreadable.
+- A book read by multiget, whether too large for one answer or on a server
+  without `addressbook-query` (Yandex, SV-23), is now asked for in vCard 4.0,
+  as the query is. Before, a converting server answered in 3.0, and an edit
+  wrote 3.0 back (SV-1).
+
+### Changed
+
+- `dav.CalFetcher.FetchCalendar`; `dav.cardReports.MultiGetCards` asks in
+  batches.
+
 ## v0.0.130 — 2026-09-19
 
 Nothing in the running server changed.

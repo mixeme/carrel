@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -154,4 +155,88 @@ func timeRange(d *xmlDoc, start, end time.Time) {
 		e.Attr = append(e.Attr, xml.Attr{Name: xml.Name{Local: "end"}, Value: end.UTC().Format("20060102T150405Z")})
 	}
 	d.empty(e)
+}
+
+// CalFetcher reads a calendar without a calendar-query: its own listing, then
+// calendar-multiget in parts. It is the way to a calendar whose whole answer
+// is larger than one answer may be (CARREL_DAV_MAX_RESPONSE_BYTES); both
+// requests are required of every CalDAV server (RFC 4791 §7.9). It sits
+// beside CalReporter, outside Transport.
+type CalFetcher interface {
+	FetchCalendar(ctx context.Context, calendar string) ([]caldav.CalendarObject, error)
+}
+
+// FetchCalendar lists the calendar at depth one and reads what it holds by
+// calendar-multiget, at most multiGetBatch a request. A batch whose answer is
+// too large is asked again in halves; a single object larger than the ceiling
+// comes back without data, as an object that could not be read.
+func (c calReports) FetchCalendar(ctx context.Context, calendar string) ([]caldav.CalendarObject, error) {
+	ms, err := c.PropFind(ctx, calendar, DepthOne, []xml.Name{{Space: "DAV:", Local: "getetag"}})
+	if err != nil {
+		return nil, err
+	}
+	self := strings.TrimSuffix(cardHrefPath(calendar), "/")
+	var paths []string
+	for _, r := range ms.Responses {
+		p := cardHrefPath(r.Href)
+		if p == "" || strings.HasSuffix(p, "/") || strings.TrimSuffix(p, "/") == self {
+			continue
+		}
+		paths = append(paths, p)
+	}
+	var out []caldav.CalendarObject
+	for len(paths) > 0 {
+		n := min(multiGetBatch, len(paths))
+		got, err := c.multiGetCalendar(ctx, calendar, paths[:n])
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, got...)
+		paths = paths[n:]
+	}
+	return out, nil
+}
+
+func (c calReports) multiGetCalendar(ctx context.Context, calendar string, paths []string) ([]caldav.CalendarObject, error) {
+	d := newXMLDoc()
+	d.token(xml.StartElement{Name: calName("calendar-multiget")})
+	d.open("prop")
+	d.text(xml.Name{Space: "DAV:", Local: "getetag"}, "")
+	d.text(xml.Name{Space: "DAV:", Local: "getlastmodified"}, "")
+	d.text(calName("calendar-data"), "")
+	d.close("prop")
+	for _, p := range paths {
+		d.text(xml.Name{Space: "DAV:", Local: "href"}, p)
+	}
+	d.token(xml.EndElement{Name: calName("calendar-multiget")})
+	body, err := d.bytes()
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, "REPORT", c.resolve(calendar), bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", `application/xml; charset="utf-8"`)
+	req.Header.Set("Depth", "1")
+	ms, err := c.doMultiStatus(req)
+	if errors.Is(err, ErrResponseTooLarge) {
+		if len(paths) == 1 {
+			return []caldav.CalendarObject{{Path: paths[0]}}, nil
+		}
+		half := len(paths) / 2
+		a, err := c.multiGetCalendar(ctx, calendar, paths[:half])
+		if err != nil {
+			return nil, err
+		}
+		b, err := c.multiGetCalendar(ctx, calendar, paths[half:])
+		if err != nil {
+			return nil, err
+		}
+		return append(a, b...), nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return calendarObjects(ms), nil
 }

@@ -127,8 +127,10 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 		// itself is what the server does not have, not the format we asked
 		// the cards in (docs/servers.md, SV-23). Yandex answers 400, and 403
 		// with the supported-report precondition when a filter travels.
+		// A book larger than one answer may be (CARREL_DAV_MAX_RESPONSE_BYTES)
+		// is read the same round-about way: its multigets come in parts.
 		f, can := rs.CardReporter().(dav.CardFetcher)
-		if !can || !refusedVersion(err) {
+		if !can || !refusedVersion(err) && !errors.Is(err, dav.ErrResponseTooLarge) {
 			return nil, false, err
 		}
 		if aos, err = f.FetchCards(ctx, collection); err != nil {

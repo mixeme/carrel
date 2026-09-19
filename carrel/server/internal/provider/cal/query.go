@@ -205,6 +205,15 @@ func (p *Provider) query(ctx context.Context, collection, component string, filt
 		CompFilter: caldav.CompFilter{Name: ical.CompCalendar, Comps: []caldav.CompFilter{filter}},
 	}
 	cos, err := rs.CalReporter().QueryCalendar(ctx, collection, q)
+	// A collection read whole whose answer is larger than one answer may be
+	// (CARREL_DAV_MAX_RESPONSE_BYTES) is read in parts: its listing, then
+	// multigets. Only a whole read goes this way — a window or a text-match
+	// is the server's to apply, and its answer is small anyway.
+	if errors.Is(err, dav.ErrResponseTooLarge) && filter.Start.IsZero() && filter.End.IsZero() && len(filter.Props) == 0 {
+		if f, ok := rs.CalReporter().(dav.CalFetcher); ok {
+			cos, err = f.FetchCalendar(ctx, collection)
+		}
+	}
 	if err != nil {
 		return nil, nil, err
 	}

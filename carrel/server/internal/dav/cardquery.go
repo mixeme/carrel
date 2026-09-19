@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -155,16 +157,72 @@ func (c cardReports) ListCards(ctx context.Context, addressBook string) ([]strin
 	return paths, nil
 }
 
-// MultiGetCards reads these addresses as cards in one addressbook-multiget.
+// multiGetBatch is how many cards one addressbook-multiget asks for at first.
+// An answer past CARREL_DAV_MAX_RESPONSE_BYTES splits its batch in two.
+const multiGetBatch = 100
+
+// MultiGetCards reads these addresses as cards, in addressbook-multigets of
+// at most multiGetBatch. A batch whose answer is larger than one answer may
+// be is asked again in halves, so a book of any size is read, a part at a
+// time, under the same ceiling (S-5.1). A single card larger than the ceiling
+// is left out and logged by path: it cannot be read without lifting the
+// ceiling for everyone.
 func (c cardReports) MultiGetCards(ctx context.Context, addressBook string, paths []string) ([]CardObject, error) {
-	if len(paths) == 0 {
+	var out []CardObject
+	for len(paths) > 0 {
+		n := min(multiGetBatch, len(paths))
+		got, err := c.multiGetCards(ctx, addressBook, paths[:n])
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, got...)
+		paths = paths[n:]
+	}
+	return out, nil
+}
+
+func (c cardReports) multiGetCards(ctx context.Context, addressBook string, paths []string) ([]CardObject, error) {
+	got, err := c.multiGetVersion(ctx, addressBook, paths, VCard4)
+	if refusedCardVersion(err) {
+		got, err = c.multiGetVersion(ctx, addressBook, paths, "")
+	}
+	if !errors.Is(err, ErrResponseTooLarge) {
+		return got, err
+	}
+	if len(paths) == 1 {
+		slog.Warn("dav: a card larger than one answer may be is left out", "path", paths[0])
 		return nil, nil
 	}
-	body, err := cardMultiGetBody(paths)
+	half := len(paths) / 2
+	a, err := c.multiGetCards(ctx, addressBook, paths[:half])
+	if err != nil {
+		return nil, err
+	}
+	b, err := c.multiGetCards(ctx, addressBook, paths[half:])
+	if err != nil {
+		return nil, err
+	}
+	return append(a, b...), nil
+}
+
+func (c cardReports) multiGetVersion(ctx context.Context, addressBook string, paths []string, version string) ([]CardObject, error) {
+	body, err := cardMultiGetBody(paths, version)
 	if err != nil {
 		return nil, err
 	}
 	return c.cardReport(ctx, addressBook, body)
+}
+
+// refusedCardVersion is a refusal of the address-data version, as the card
+// provider reads it: a converting server answers the multiget in 3.0
+// otherwise, and an edit would write 3.0 back (SV-1).
+func refusedCardVersion(err error) bool {
+	for _, code := range []int{400, 403, 409, 412, 415, 422, 501} {
+		if IsStatus(err, code) {
+			return true
+		}
+	}
+	return false
 }
 
 // QueryEtags asks an unfiltered addressbook-query for versions alone: what a
@@ -215,14 +273,18 @@ func cardEtagQueryBody() ([]byte, error) {
 // ask for it. go-webdav's own multiget puts <allprop/> inside address-data
 // instead, and that element is not defined there: Google answers 400
 // INVALID_ARGUMENT to it (docs/servers.md, SV-26).
-func cardMultiGetBody(paths []string) ([]byte, error) {
+func cardMultiGetBody(paths []string, version string) ([]byte, error) {
 	name := func(local string) xml.Name { return xml.Name{Space: cardDAVNS, Local: local} }
+	data := xml.StartElement{Name: name("address-data")}
+	if version != "" {
+		data.Attr = []xml.Attr{{Name: xml.Name{Local: "content-type"}, Value: "text/vcard"}, {Name: xml.Name{Local: "version"}, Value: version}}
+	}
 	d := newXMLDoc()
 	d.token(xml.StartElement{Name: name("addressbook-multiget")})
 	d.open("prop")
 	d.text(xml.Name{Space: "DAV:", Local: "getetag"}, "")
 	d.text(xml.Name{Space: "DAV:", Local: "getlastmodified"}, "")
-	d.empty(xml.StartElement{Name: name("address-data")})
+	d.empty(data)
 	d.close("prop")
 	for _, p := range paths {
 		d.text(xml.Name{Space: "DAV:", Local: "href"}, p)
