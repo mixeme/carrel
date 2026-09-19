@@ -5,6 +5,30 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.118 — 2026-09-19
+
+davloom works: a device connects to one address and sees the collections you
+gave it, from every server.
+
+### For operators
+
+- With `CARREL_DAVLOOM_PORT` set, a second listener serves the DAV proxy on
+  that port, bound to `CARREL_BIND`. Put it behind your reverse proxy at
+  `/dav/` of `CARREL_PUBLIC_URL`, the proxy stripping `/dav/`.
+- The proxy has its own rate buckets and logs with `listener=davloom`. It
+  sets no cookies.
+- SIGINT and SIGTERM stop both listeners, give running requests up to
+  `CARREL_PROGRESS_TOTAL_TIMEOUT`, then wipe every session and device key.
+
+### For consumers
+
+- **A CalDAV, CardDAV or WebDAV client** signs in with your Carrel login and
+  the device's password. It sees one principal with calendars, address books
+  and folders — exactly the collections the device may see.
+- Collection addresses stay the same across reconnections and restarts.
+- A server that does not answer leaves its collections listed; the others
+  work.
+
 ## v0.0.117 — 2026-09-19
 
 davloom devices: a password per device, shown once, with what it may see.

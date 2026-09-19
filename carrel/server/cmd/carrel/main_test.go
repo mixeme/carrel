@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"io"
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -63,5 +65,63 @@ func TestEmptyVolumeStarts(t *testing.T) {
 	case err := <-errc:
 		t.Fatalf("server exited early: %v", err)
 	default:
+	}
+}
+
+// S-27.1, S-28: with CARREL_DAVLOOM_PORT the second listener answers its
+// own root; when the signal comes both stop and serve returns.
+func TestBothListenersStopOnSignal(t *testing.T) {
+	free := func() int {
+		ln, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer ln.Close()
+		return ln.Addr().(*net.TCPAddr).Port
+	}
+	web, davloom := free(), free()
+	cfg := &conf.Config{Bind: "127.0.0.1", Port: web, DAVloomPort: davloom, DataDir: t.TempDir(), ProgressTotalTimeout: 2 * time.Second}
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() { done <- serve(ctx, cfg) }()
+
+	client := &http.Client{Timeout: time.Second}
+	get := func(port int, path string) (*http.Response, error) {
+		return client.Get("http://127.0.0.1:" + strconv.Itoa(port) + path)
+	}
+	var resp *http.Response
+	var err error
+	for i := 0; i < 50; i++ {
+		if resp, err = get(davloom, "/"); err == nil {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatalf("davloom did not come up: %v", err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if !strings.Contains(string(body), `"title":"davloom"`) || resp.Header.Get("Set-Cookie") != "" {
+		t.Errorf("davloom root: %s", body)
+	}
+	if resp, err := get(davloom, "/healthz"); err == nil {
+		if resp.StatusCode != http.StatusUnauthorized {
+			t.Errorf("the web's routes answer on the davloom port: %d", resp.StatusCode)
+		}
+		resp.Body.Close()
+	}
+
+	cancel()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("serve: %v", err)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("serve did not return after the signal")
+	}
+	if _, err := get(web, "/healthz"); err == nil {
+		t.Error("the web port still answers")
 	}
 }
