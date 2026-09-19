@@ -7,6 +7,7 @@ package fanout
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"sort"
 	"strings"
@@ -267,8 +268,20 @@ func (t *Task) work(ctx context.Context, i, gen int, src Source) {
 	}
 	sctx, cancel := context.WithTimeout(ctx, t.opts.SourceTimeout)
 	defer cancel()
-	items, err := src.Run(sctx, t.query)
+	items, err := ask(sctx, src, t.query)
 	t.settle(ctx, sctx, i, gen, items, err)
+}
+
+// ask asks one source, and a panic inside it is that source's failure. The
+// source parses what a far server sent; nothing it meets may end the process
+// and every session in it (S-21).
+func ask(ctx context.Context, src Source, q Query) (items []Item, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			items, err = nil, fmt.Errorf("fanout: source %s failed: %v", src.ID(), r)
+		}
+	}()
+	return src.Run(ctx, q)
 }
 
 func (t *Task) markQuerying(i, gen int) bool {

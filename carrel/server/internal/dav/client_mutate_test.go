@@ -239,7 +239,7 @@ func TestMkColAgainstFakeServer(t *testing.T) {
 	}
 }
 
-// providers-tail.md: Prop.Value went out as text, so resourcetype with
+// Prop.Value went out as text (v0.0.46), so resourcetype with
 // <collection/> reached the server escaped. The value is XML content now, and
 // text goes through TextValue.
 func TestPropValueIsXMLContent(t *testing.T) {

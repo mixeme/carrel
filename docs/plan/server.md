@@ -207,7 +207,7 @@ S-12.4 после S-19, S-26 после S-25 (крупное уходит ссы
 17. S-26: `internal/mail` (и замена заглушек приглашения).
 
 **Критерий закрытия.** Пакеты с тестами. Живой HTTP — `httptest`, не
-Radicale. Живые серверы — остаток S-30.2, [providers-tail.md](providers-tail.md).
+Radicale. Живые серверы — остаток S-30.2, живой набор `integration/`.
 Проводка маршрута закрыта, когда вью-модель не пустая заглушка: список,
 карточка, отказ источника, пустой выбор.
 
@@ -228,7 +228,7 @@ Carrel, C-4); имя файла `{uid}.vcf` / `{uid}.ics`.
 `cal.RawRRULE`; `Note` — «Edited as a whole series». `Expand` даёт UTC
 мастер-серии. Экземпляр с `RECURRENCE-ID` в дереве: на агенде `web`
 накладывает его на совпавший instant из Expand; не правит, не раскрывает
-отдельно ([providers-tail.md](providers-tail.md)).
+отдельно.
 
 Напоминания — вложенные VALARM главного компонента, не замороженные
 соседи. Сигнатуры `Patch` не трогать: `cal.SetAlarms` переписывает набор
@@ -288,8 +288,8 @@ JPEG, качество C-12, без EXIF. Ориентация: из APP1 тол
 умолчание — квадрат по центру. Сторона после кадра — `CARREL_PHOTO_MAX_SIDE`.
 Миниатюра списка — `CARREL_PHOTO_THUMB_SIDE` в кэше сессии; HTTP-маршрут
 один (`/c/.../photo`). Версия ответа — ETag объекта. `Cache-Control:
-private, no-cache`. `TYPE=JPEG` → `image/jpeg`, не сырой `JPEG`
-([providers-tail.md](providers-tail.md)). Патч — `RemoveProp PHOTO` плюс
+private, no-cache`. `TYPE=JPEG` → `image/jpeg`, не сырой `JPEG`.
+Патч — `RemoveProp PHOTO` плюс
 `SetText` (base64) и `SetParam`; нового `SetBinary` нет. Удаление —
 `RemoveProp`, не пустое значение.
 
@@ -440,7 +440,7 @@ depth 1, заведён здесь, S-17 берёт его же), имя без 
 `UploadOverwrite` (`Put` с пустым `ifMatch` — **единственное** место
 безусловного PUT). `Copy` в транспорт не добавлять: поток `Get` →
 `PutCreate`. Потолок `CARREL_DAV_MAX_RESPONSE_BYTES` с тела `Get`
-снимается: он режет файлы ([providers-tail.md](providers-tail.md)). Лимит
+снимается: он режет файлы. Лимит
 остаётся на PROPFIND / REPORT / обнаружении. Таймаут запроса у файла —
 простой, не весь запрос (`v0.0.56`, решение человека 14.09.2026).
 Потолка размера файла нет (C-12).
@@ -1788,7 +1788,7 @@ URL этого экземпляра, иначе петля прокси запр
       корень отвергался молча. Теперь веб (`parseAddress`, `relSegs`) и
       davloom пишут `slog.Warn` с путём — без содержимого, без
       пользователя (`file.Escapes`); сторож — в `TestDebugLogHoldsNoSecrets`
-- [x] S-30.2 для слоёв до провайдеров: Radicale на Linux, Baikal и SFTPGo — зелёные 13.09.2026 (`v0.0.40`, [providers-tail.md](providers-tail.md)). Функции S-11…S-26 добавляют свои живые проверки
+- [x] S-30.2 для слоёв до провайдеров: Radicale на Linux, Baikal и SFTPGo — зелёные 13.09.2026 (`v0.0.40`). Функции S-11…S-26 добавляют свои живые проверки
 - [x] S-30.3 (`v0.0.122`, 19.09.2026):
       - уход со страницы во время опроса — `TestLeavingThePollLeavesNothingRunning`:
         поток событий закрыт, горутины возвращаются к исходному числу, запрос

@@ -5,6 +5,22 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.125 — 2026-09-19
+
+### Fixed
+
+- **A source that fails badly fails alone.** A panic while one source of a
+  search or combined view is asked now settles that source as an error, with
+  the reason. The other sources answer as before. It used to end the process
+  and every session in it. Background thumbnails and backup runs are guarded
+  the same way: a thumbnail is lost, or the run is recorded as failed.
+
+### Plans
+
+- `docs/plan/providers-tail.md` is removed: its last open item, parameters
+  with several values, was closed in `v0.0.124`. The review before S-30 keeps
+  its findings in `docs/plan/review-server.md`.
+
 ## v0.0.124 — 2026-09-19
 
 An edit changes what was edited, and nothing else. A broken record is one

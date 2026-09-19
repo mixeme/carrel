@@ -296,6 +296,13 @@ func (s *Server) startBackup(userID string, blob sealed.Blob, job sealed.BackupJ
 	runners.set(runID, true)
 	go func() {
 		defer runners.set(runID, false)
+		// The run parses every record of every source; a panic in it is a
+		// failed run on the screen (S-24.3), not the end of the process.
+		defer func() {
+			if r := recover(); r != nil {
+				_ = s.users.FinishBackupRun(userID, job.ID, runID, finishWith(backup.Result{}, fmt.Errorf("backup: %v", r)))
+			}
+		}()
 		ctx := context.Background()
 		at := time.Now()
 		res, err := backup.Run(ctx, dest, backup.FileName(job.Name, at, job.Encrypted), job.Name, job.Keep,

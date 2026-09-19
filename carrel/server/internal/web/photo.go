@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -191,6 +192,13 @@ func (s *Server) listAvatars(sess *session.Session, items []listed) []string {
 			sem <- struct{}{}
 			go func() {
 				defer func() { <-sem; wg.Done() }()
+				// A photo is a far server's bytes through an image decoder;
+				// a panic there loses one thumbnail, not the process.
+				defer func() {
+					if r := recover(); r != nil {
+						slog.Warn("photo: thumbnail failed", "error", r)
+					}
+				}()
 				if _, _, ok := s.photoFrom(context.Background(), sess, it.from, uid, it.obj, photoThumb); ok {
 					hrefs[i] = s.photoHref(it.from, uid, it.obj.ETag, photoThumb)
 				}

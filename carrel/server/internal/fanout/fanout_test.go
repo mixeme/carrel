@@ -369,3 +369,25 @@ func TestNoSourcesEndsAtOnce(t *testing.T) {
 		t.Fatalf("err %v, running %v, released %d, finished %d", err, task.Running(), released.Load(), finished.Load())
 	}
 }
+
+// A source that panics is a source that failed: its state says so, the others
+// answer, and the process lives. Without this, one malformed record in one
+// collection ended the server for everyone (S-21).
+func TestPanickingSourceIsAnError(t *testing.T) {
+	task, err := Start("t-1", Query{}, []Source{
+		fake{"boom", func(context.Context) ([]Item, error) { panic("malformed") }},
+		fake{"found", answer(files("found", "one"), nil)},
+	}, options())
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := wait(t, task)
+	if states(s)["boom"] != view.SourceError || states(s)["found"] != view.SourceDone {
+		t.Errorf("states = %v", states(s))
+	}
+	for _, src := range s.Sources {
+		if src.ID == "boom" && (src.Err == nil || !strings.Contains(src.Err.Error(), "malformed")) {
+			t.Errorf("boom err = %v", src.Err)
+		}
+	}
+}

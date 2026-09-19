@@ -8,8 +8,8 @@
 |---|---|
 | [architecture.md](architecture.md) | Модули (`typecase/`, `carrel/server/`), зависимости на 04.09.2026, закрытые развилки, сроки и лимиты |
 | [server.md](server.md) | План серверной половины (`S`) |
-| [providers-tail.md](providers-tail.md) | Хвост проверки провайдеров: потолок GET, S-30.2 |
 | [reviews.md](reviews.md) | Opus-ревью и аудиты Fable |
+| [review-server.md](review-server.md) | Ревью сервера перед S-30: находки и что с ними сделано |
 
 **Исполнитель по умолчанию — Composer.** Если шаг делает другая модель, это написано в чекбоксе: `Opus`, `Fable`. Composer эти шаги не выполняет.
 
