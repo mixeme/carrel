@@ -54,6 +54,23 @@ Fable audit №3 (Ф3-6).
   and a repeated self-registration); `store.WipeCredentials` stays for the
   credentials alone.
 
+## v0.0.139 — 2026-09-19
+
+Fable audit №3 (Ф3-8).
+
+### Security
+
+- **davloom forwards only the methods it advertises** (the `Allow` of
+  OPTIONS): TRACE, CONNECT or anything a client invents is answered 405 on
+  the listener and never reaches the collection's server with the person's
+  credentials. It is a DAV proxy, not a general one (S-27.3, Ф3-8).
+
+### Included
+
+- A guard that a published calendar names no server: the agenda rows of
+  the app carry "host · collection" and the sources of a linked group, the
+  public page must not. It held; the test stays.
+
 ## v0.0.138 — 2026-09-19
 
 Fable audit №3 (Ф3-7).

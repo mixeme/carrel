@@ -23,6 +23,15 @@ import (
 // thousands of hrefs is well under it.
 const maxRequestXML = 10 << 20
 
+// forwardedMethods are the methods davloom passes on — the Allow of
+// davHeaders — and no other: a method a client invents is answered here,
+// never sent to the collection's server with the person's credentials
+// (S-27.3, audit №3, Ф3-8).
+var forwardedMethods = map[string]bool{
+	http.MethodOptions: true, http.MethodGet: true, http.MethodHead: true, http.MethodPut: true, http.MethodDelete: true,
+	"PROPFIND": true, "PROPPATCH": true, "REPORT": true, "MKCOL": true, "MOVE": true, "COPY": true, "LOCK": true, "UNLOCK": true,
+}
+
 // requestHeaders are the headers a device's request carries on: what DAV
 // needs and nothing of the device's credentials.
 var requestHeaders = []string{"Content-Type", "Depth", "If-Match", "If-None-Match", "If-Modified-Since", "Overwrite",
@@ -86,6 +95,11 @@ func (t target) upstream() string {
 }
 
 func (s *Server) forward(w http.ResponseWriter, r *http.Request, blob sealed.Blob, d store.ProxyDevice, rest string) {
+	if !forwardedMethods[r.Method] {
+		davHeaders(w)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	t, ok := parseTarget(blob, d, rest)
 	if !ok {
 		http.Error(w, "not found", http.StatusNotFound)
