@@ -85,7 +85,7 @@ func propsEqual(a, b *Object, prop string) bool {
 			!(structured && withoutTrailingEmpty(av[i].text) == withoutTrailingEmpty(bv[i].text)) {
 			return false
 		}
-		if !paramsEqual(av[i].params, bv[i].params) {
+		if !sameParams(av[i].params, bv[i].params) {
 			return false
 		}
 	}
@@ -102,18 +102,6 @@ func (o *Object) propValues(prop string) []propValue {
 		return nil
 	}
 	return st.values
-}
-
-func paramsEqual(a, b map[string]string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for k, v := range a {
-		if b[strings.ToUpper(k)] != v {
-			return false
-		}
-	}
-	return true
 }
 
 // Server stamps that may legitimately change on write.

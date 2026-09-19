@@ -132,6 +132,12 @@ type propState struct {
 type propValue struct {
 	text   string
 	params map[string]string
+	group  string
+	// wire is the value's content line as the server sent it, unfolded. It
+	// lives only while nobody has touched the value: every operation that
+	// changes it clears wire, and an encoder writes a value that still has
+	// one exactly as it came (S-7).
+	wire string
 }
 
 // RawValue is one value of one property as it arrived from the far server:
@@ -139,18 +145,28 @@ type propValue struct {
 // itself stays unexported, so nothing above this package can rebuild an
 // iCalendar or vCard object out of form fields (S-7).
 type RawValue struct {
-	Text   string
+	Text string
+	// Params holds every parameter under its upper-case name; a parameter
+	// with several values has them joined by commas (ParamValues splits them).
 	Params map[string]string
+	// Group is the vCard group the value belongs to (item1.EMAIL): Apple
+	// ties a label to a value by it. Empty in iCalendar.
+	Group string
+	// Wire is the content line the value arrived in, unfolded; empty for a
+	// value Carrel made or changed. An encoder writes a value with a wire line
+	// as that line, so what nobody edited goes back as it came.
+	Wire string
 }
 
 // NewObject constructs an Object from parsed properties. Providers call it
 // after fetching from DAV; property names are folded to upper case.
-func NewObject(path, etag string, props map[string][]RawValue) *Object {
+// ingest copies raw values in, property names folded to upper case.
+func ingest(props map[string][]RawValue) map[string]propState {
 	cp := make(map[string]propState, len(props))
 	for name, values := range props {
 		st := propState{values: make([]propValue, len(values))}
 		for i, v := range values {
-			st.values[i].text = v.Text
+			st.values[i] = propValue{text: v.Text, group: v.Group, wire: v.Wire}
 			if len(v.Params) > 0 {
 				st.values[i].params = make(map[string]string, len(v.Params))
 				for k, pv := range v.Params {
@@ -160,6 +176,11 @@ func NewObject(path, etag string, props map[string][]RawValue) *Object {
 		}
 		cp[strings.ToUpper(name)] = st
 	}
+	return cp
+}
+
+func NewObject(path, etag string, props map[string][]RawValue) *Object {
+	cp := ingest(props)
 	return &Object{
 		Path: path,
 		ETag: etag,
@@ -181,7 +202,7 @@ func (o *Object) Props() map[string][]RawValue {
 	for name, st := range p.props {
 		values := make([]RawValue, len(st.values))
 		for i, v := range st.values {
-			values[i].Text = v.text
+			values[i].Text, values[i].Group, values[i].Wire = v.text, v.group, v.wire
 			if len(v.params) > 0 {
 				values[i].Params = make(map[string]string, len(v.params))
 				for k, pv := range v.params {
@@ -197,12 +218,17 @@ func (o *Object) Props() map[string][]RawValue {
 func (p propState) clone() propState {
 	out := propState{values: make([]propValue, len(p.values))}
 	for i, v := range p.values {
-		out.values[i].text = v.text
-		if len(v.params) > 0 {
-			out.values[i].params = make(map[string]string, len(v.params))
-			for k, val := range v.params {
-				out.values[i].params[k] = val
-			}
+		out.values[i] = v.clone()
+	}
+	return out
+}
+
+func (v propValue) clone() propValue {
+	out := propValue{text: v.text, group: v.group, wire: v.wire}
+	if len(v.params) > 0 {
+		out.params = make(map[string]string, len(v.params))
+		for k, val := range v.params {
+			out.params[k] = val
 		}
 	}
 	return out
@@ -243,19 +269,34 @@ func (p payload) clone() payload {
 func applyOp(p payload, op PatchOp) error {
 	switch o := op.(type) {
 	case SetText:
-		p.props[strings.ToUpper(o.Prop)] = propState{
-			values: []propValue{{text: o.Value}},
+		key := strings.ToUpper(o.Prop)
+		v := propValue{text: o.Value}
+		if old := p.props[key].values; len(old) > 0 {
+			v.group = old[0].group
 		}
+		p.props[key] = propState{values: []propValue{v}}
 	case AddValue:
 		key := strings.ToUpper(o.Prop)
 		st := p.props[key]
 		st.values = append(st.values, propValue{text: o.Value})
 		p.props[key] = st
 	case SetValues:
+		// A value whose text is among the new ones, in the same order, is the
+		// same value: it keeps its parameters, group and wire line, so
+		// rewriting a list after one row changed does not rewrite the rest.
 		key := strings.ToUpper(o.Prop)
+		old := p.props[key].values
 		vals := make([]propValue, len(o.Values))
+		next := 0
 		for i, v := range o.Values {
 			vals[i] = propValue{text: v}
+			for j := next; j < len(old); j++ {
+				if old[j].text == v {
+					vals[i] = old[j].clone()
+					next = j + 1
+					break
+				}
+			}
 		}
 		p.props[key] = propState{values: vals}
 	case RemoveProp:
@@ -266,10 +307,15 @@ func applyOp(p payload, op PatchOp) error {
 		if !ok || o.Index < 0 || o.Index >= len(st.values) {
 			return fmt.Errorf("model: %s[%d]: no such value", key, o.Index)
 		}
+		name := strings.ToUpper(o.Param)
+		if cur, has := st.values[o.Index].params[name]; has && cur == o.Value {
+			return nil
+		}
 		if st.values[o.Index].params == nil {
 			st.values[o.Index].params = make(map[string]string)
 		}
-		st.values[o.Index].params[strings.ToUpper(o.Param)] = o.Value
+		st.values[o.Index].params[name] = o.Value
+		st.values[o.Index].wire = ""
 		p.props[key] = st
 	case RemoveParam:
 		key := strings.ToUpper(o.Prop)
@@ -277,7 +323,11 @@ func applyOp(p payload, op PatchOp) error {
 		if !ok || o.Index < 0 || o.Index >= len(st.values) {
 			return fmt.Errorf("model: %s[%d]: no such value", key, o.Index)
 		}
-		delete(st.values[o.Index].params, strings.ToUpper(o.Param))
+		name := strings.ToUpper(o.Param)
+		if _, has := st.values[o.Index].params[name]; has {
+			delete(st.values[o.Index].params, name)
+			st.values[o.Index].wire = ""
+		}
 		p.props[key] = st
 	default:
 		return fmt.Errorf("model: unknown patch operation %T", op)

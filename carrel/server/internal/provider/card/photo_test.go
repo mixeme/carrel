@@ -59,9 +59,17 @@ func TestPhotoForms(t *testing.T) {
 }
 
 // go-vcard escapes the comma of a data: URI; it must leave as written, for
-// Carrel's photo and for another client's on an unrelated edit.
+// Carrel's photo and for another client's on an unrelated edit. A text comma
+// written fresh is escaped: NOTE is changed here, so it is written anew.
 func TestEncodeKeepsTheDataURIComma(t *testing.T) {
-	obj := parseCard(t, "BEGIN:VCARD\nVERSION:4.0\nUID:a\nPHOTO:data:image/png;base64,UGhvdG8=\nNOTE:one, two\nEND:VCARD\n")
+	obj := parseCard(t, "BEGIN:VCARD\nVERSION:4.0\nUID:a\nPHOTO:data:image/png;base64,UGhvdG8=\nNOTE:old\nEND:VCARD\n")
+	patch, err := model.NewPatch(model.SetText{Prop: "NOTE", Value: "one, two"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := patch.Apply(obj); err != nil {
+		t.Fatal(err)
+	}
 	var buf bytes.Buffer
 	if err := Encode(&buf, obj); err != nil {
 		t.Fatal(err)

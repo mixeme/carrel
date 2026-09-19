@@ -139,3 +139,25 @@ func replaceProp(lines []string, name, value string) ([]string, int) {
 	}
 	return out, replaced
 }
+
+// mainLines are the own content lines, unfolded, of the component go-ical
+// takes as the record: the first child of VCALENDAR named main that carries
+// no RECURRENCE-ID (findMain).
+func mainLines(doc []byte, main string) []string {
+	lines := rawLines(doc)
+	for i := 0; i < len(lines); i++ {
+		name, ok := beginName(lines[i])
+		if !ok {
+			continue
+		}
+		if name == "VCALENDAR" {
+			continue
+		}
+		end := matchingEnd(lines, i)
+		if name == main && !hasProp(lines[i:end+1], "RECURRENCE-ID") {
+			return logicalLines(ownLines(lines[i : end+1]))
+		}
+		i = end
+	}
+	return nil
+}

@@ -152,7 +152,7 @@ func webHref(v string) string {
 
 func typedLabel(label string, params map[string]string) string {
 	if t := params["TYPE"]; t != "" {
-		return label + " · " + strings.ToLower(t)
+		return label + " · " + strings.ToLower(strings.ReplaceAll(t, ",", ", "))
 	}
 	return label
 }

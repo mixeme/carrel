@@ -19,6 +19,7 @@ import (
 // one could be written but never found again.
 func Split(doc []byte) ([]*model.Object, error) {
 	dec := vcard.NewDecoder(bytes.NewReader(doc))
+	blocks := cardBlocks(doc)
 	var out []*model.Object
 	for {
 		c, err := dec.Decode()
@@ -33,14 +34,19 @@ func Split(doc []byte) ([]*model.Object, error) {
 			// the caller says how many arrived.
 			return out, nil
 		}
+		var lines []string
+		if len(out) < len(blocks) {
+			lines = blocks[len(out)]
+		}
+		props := cardToProps(c, lines)
 		if c.Value(vcard.FieldUID) == "" {
 			uid, err := model.NewUID()
 			if err != nil {
 				return nil, err
 			}
-			c.SetValue(vcard.FieldUID, uid)
+			props[vcard.FieldUID] = []model.RawValue{{Text: uid}}
 		}
-		out = append(out, model.NewObject("", "", cardToProps(c)))
+		out = append(out, model.NewObject("", "", props))
 	}
 	if len(out) == 0 {
 		return nil, fmt.Errorf("card: the file holds no vCard")

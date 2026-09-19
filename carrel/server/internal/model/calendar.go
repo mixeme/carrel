@@ -1,8 +1,6 @@
 package model
 
-import (
-	"strings"
-)
+import "strings"
 
 // calendarPayload holds a full iCalendar document. Patch applies only to the
 // main component (first VEVENT / VTODO / VJOURNAL without RECURRENCE-ID).
@@ -16,20 +14,7 @@ type calendarPayload struct {
 // and the full wire document. Siblings (VTIMEZONE, VALARM, RECURRENCE-ID
 // instances, VCALENDAR props) survive encode via doc.
 func NewCalendarObject(path, etag, mainName string, mainProps map[string][]RawValue, doc []byte) *Object {
-	cp := make(map[string]propState, len(mainProps))
-	for name, values := range mainProps {
-		st := propState{values: make([]propValue, len(values))}
-		for i, v := range values {
-			st.values[i].text = v.Text
-			if len(v.Params) > 0 {
-				st.values[i].params = make(map[string]string, len(v.Params))
-				for k, pv := range v.Params {
-					st.values[i].params[strings.ToUpper(k)] = pv
-				}
-			}
-		}
-		cp[strings.ToUpper(name)] = st
-	}
+	cp := ingest(mainProps)
 	return &Object{
 		Path: path,
 		ETag: etag,

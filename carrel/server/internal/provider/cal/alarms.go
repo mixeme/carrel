@@ -77,7 +77,7 @@ func SetAlarms(obj *model.Object, alarms []Alarm) (*model.Object, error) {
 	if _, err := mainComponent(obj); err != nil {
 		return nil, err
 	}
-	cal, err := ical.NewDecoder(bytes.NewReader(obj.CalendarDoc())).Decode()
+	cal, err := decode(obj.CalendarDoc())
 	if err != nil {
 		return nil, err
 	}

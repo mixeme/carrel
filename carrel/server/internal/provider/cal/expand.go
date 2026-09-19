@@ -1,7 +1,6 @@
 package cal
 
 import (
-	"bytes"
 	"time"
 
 	"github.com/emersion/go-ical"
@@ -97,8 +96,7 @@ func Expand(obj *model.Object, from, to time.Time, loc *time.Location) ([]time.T
 }
 
 func loadMain(obj *model.Object) (*ical.Component, error) {
-	dec := ical.NewDecoder(bytes.NewReader(obj.CalendarDoc()))
-	cal, err := dec.Decode()
+	cal, err := decode(obj.CalendarDoc())
 	if err != nil {
 		return nil, err
 	}

@@ -313,11 +313,14 @@ func (c *Client) CardReporter() CardReporter { return cardReports{c} }
 
 type calReports struct{ *Client }
 
-func (c calReports) QueryCalendar(ctx context.Context, calendar string, query *caldav.CalendarQuery) ([]caldav.CalendarObject, error) {
-	return c.caldav.QueryCalendar(ctx, calendar, query)
-}
-
-func (c calReports) MultiGetCalendar(ctx context.Context, p string, multiGet *caldav.CalendarMultiGet) ([]caldav.CalendarObject, error) {
+// MultiGetCalendar is go-webdav's, which decodes every body with go-ical; a
+// panic there is an error of the answer, not the end of the process.
+func (c calReports) MultiGetCalendar(ctx context.Context, p string, multiGet *caldav.CalendarMultiGet) (out []caldav.CalendarObject, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			out, err = nil, fmt.Errorf("dav: malformed calendar: %v", r)
+		}
+	}()
 	return c.caldav.MultiGetCalendar(ctx, p, multiGet)
 }
 

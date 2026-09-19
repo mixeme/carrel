@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/emersion/go-vcard"
-	"github.com/emersion/go-webdav/carddav"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/model"
@@ -144,7 +143,11 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 	}
 	out := make([]*model.Object, 0, len(aos))
 	for _, ao := range aos {
-		obj := model.NewObject(ao.Path, strings.Trim(ao.ETag, `"`), cardToProps(ao.Card))
+		var lines []string
+		if blocks := cardBlocks([]byte(ao.Data)); len(blocks) > 0 {
+			lines = blocks[0]
+		}
+		obj := model.NewObject(ao.Path, strings.Trim(ao.ETag, `"`), cardToProps(ao.Card, lines))
 		obj.Modified = ao.ModTime
 		out = append(out, obj)
 	}
@@ -199,7 +202,7 @@ func (p *Provider) Delete(ctx context.Context, path, etag string) error {
 // versions alone, and the book's own listing when that comes back empty too.
 // Proven hollow, the book is read the round-about way, and whoever asked for a
 // search does the searching.
-func confirmEmpty(ctx context.Context, rs cardReporting, collection string, filtered bool) ([]carddav.AddressObject, bool) {
+func confirmEmpty(ctx context.Context, rs cardReporting, collection string, filtered bool) ([]dav.CardObject, bool) {
 	f, can := rs.CardReporter().(dav.CardFetcher)
 	if !can {
 		return nil, false

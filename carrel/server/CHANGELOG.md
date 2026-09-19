@@ -5,6 +5,46 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.124 — 2026-09-19
+
+An edit changes what was edited, and nothing else. A broken record is one
+record, not a broken calendar or a stopped server.
+
+### Fixed
+
+- **Editing a contact no longer rewrites the rest of the card.** Every save
+  used to write the whole card afresh through go-vcard. Cards from Apple
+  Contacts lost the link between a phone or address and its label
+  (`item1.EMAIL` / `item1.X-ABLabel`), all but the first `TYPE` value (`HOME`,
+  `pref`, `VOICE`), and a quoted parameter was cut at its comma. Categories
+  `work,friends` became one category, `work\,friends`. Other clients saw all
+  this; Carrel itself did not, because it read the card back the same way.
+  Now any value nobody edited goes back in the line it arrived in, byte for
+  byte. An edited value is written with all of its parameter values.
+  (docs/servers.md, SV-32)
+- **Editing an event keeps every value of a parameter**: the second address
+  of `DELEGATED-TO` and `MEMBER`, and the values of unknown parameters.
+- **The loss report no longer reports reordered or recased `TYPE` values**
+  as lost. A value that is really missing is still reported.
+- **One malformed calendar record no longer hides the whole calendar**, and
+  can no longer stop the process. go-ical panics on some malformed lines
+  (a parameter with no colon after it, text after a closing quote). The
+  record could come from a far server, a subscription or an imported file,
+  and in a combined view or a search the panic ended the server for every
+  user. The record is now named as unreadable, and the rest of the calendar
+  shows as before (docs/servers.md, SV-33).
+- A contact's type label reads `Email · internet, home, pref` rather than
+  showing only the first type.
+
+### Changed
+
+- `model.RawValue` carries `Group` and `Wire`, the line the value came in.
+  A patch that changes the value clears its `Wire`. `SetValues` keeps
+  whatever it does not change: a value whose text stays, in order.
+- `dav.CardObject`: a card as the REPORT returned it, with its text.
+  `CardQuerier` and `CardFetcher` return it.
+- `calReports.QueryCalendar` is Carrel's own `calendar-query` (`dav/calquery.go`).
+
 ## v0.0.123 — 2026-09-19
 
 ### For operators

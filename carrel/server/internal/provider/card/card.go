@@ -63,12 +63,24 @@ func (p *Provider) Get(ctx context.Context, path string) (*model.Object, error) 
 
 // Parse reads a vCard stream into an Object.
 func Parse(path, etag string, r io.Reader) (*model.Object, error) {
-	dec := vcard.NewDecoder(r)
-	card, err := dec.Decode()
+	doc, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
-	return model.NewObject(path, etag, cardToProps(card)), nil
+	return parseDoc(path, etag, doc)
+}
+
+// parseDoc reads the first card of doc, keeping the lines it came in.
+func parseDoc(path, etag string, doc []byte) (*model.Object, error) {
+	card, err := vcard.NewDecoder(bytes.NewReader(doc)).Decode()
+	if err != nil {
+		return nil, err
+	}
+	var lines []string
+	if blocks := cardBlocks(doc); len(blocks) > 0 {
+		lines = blocks[0]
+	}
+	return model.NewObject(path, etag, cardToProps(card, lines)), nil
 }
 
 // Create writes a new contact with If-None-Match.
@@ -102,58 +114,13 @@ func (p *Provider) Update(ctx context.Context, obj *model.Object) (string, error
 	return p.t.Put(ctx, obj.Path, dav.Typed(&buf, MediaType), `"`+tag+`"`)
 }
 
-// Encode serializes an Object to vCard.
+// Encode serializes an Object to vCard. A value nobody changed goes out in
+// the line it came in; the rest is written fresh.
 func Encode(w io.Writer, obj *model.Object) error {
-	card := propsToCard(obj.Props())
-	if card.Get(vcard.FieldVersion) == nil {
-		card.SetValue(vcard.FieldVersion, "4.0")
-	}
-	var buf bytes.Buffer
-	if err := vcard.NewEncoder(&buf).Encode(card); err != nil {
-		return err
-	}
-	// Folded on the way out: go-vcard writes a photo as one line of hundreds
-	// of kilobytes, and upstream will not fold (docs/servers.md, SV-31).
-	_, err := w.Write(model.FoldLines(unescapeDataURIs(buf.Bytes())))
+	// Folded on the way out: a photo is one line of hundreds of kilobytes
+	// (docs/servers.md, SV-31). A line already folded stays as it is.
+	_, err := w.Write(model.FoldLines(encodeCard(obj.Props())))
 	return err
-}
-
-// unescapeDataURIs gives back the comma of a data: URI. go-vcard escapes
-// every comma of every value; the comma of a data: URI belongs to the URI
-// (RFC 2397), and a client that reads a URI as it stands finds no data after
-// "base64\". Only the properties whose value is a URI to binary content:
-// PHOTO, LOGO, SOUND and KEY. Another client's photo would otherwise break on
-// any edit of the card, not only on a photo of Carrel's.
-func unescapeDataURIs(doc []byte) []byte {
-	lines := bytes.Split(doc, []byte("\r\n"))
-	for i, line := range lines {
-		colon := bytes.IndexByte(line, ':')
-		if colon < 0 {
-			continue
-		}
-		name := line[:colon]
-		if semi := bytes.IndexByte(name, ';'); semi >= 0 {
-			name = name[:semi]
-		}
-		if dot := bytes.LastIndexByte(name, '.'); dot >= 0 {
-			name = name[dot+1:]
-		}
-		switch strings.ToUpper(string(name)) {
-		case "PHOTO", "LOGO", "SOUND", "KEY":
-		default:
-			continue
-		}
-		value := line[colon+1:]
-		if !isDataURI(string(value)) {
-			continue
-		}
-		if j := bytes.Index(value, []byte(`\,`)); j >= 0 {
-			fixed := append([]byte{}, line[:colon+1+j]...)
-			fixed = append(fixed, ',')
-			lines[i] = append(fixed, value[j+2:]...)
-		}
-	}
-	return bytes.Join(lines, []byte("\r\n"))
 }
 
 // Foreign returns unknown properties for ContactPage.Foreign (C-6).

@@ -35,18 +35,26 @@ type CardMatch struct {
 	Equals bool // the whole value; otherwise a substring
 }
 
+// CardObject is a card as a REPORT returned it: decoded, and the text it was
+// decoded from. The text is what lets a value nobody edited go back as it
+// came (S-7): the decoded card has already lost groups and parameter values.
+type CardObject struct {
+	carddav.AddressObject
+	Data string
+}
+
 // CardQuerier sends an addressbook-query whose address-data names a version,
 // which go-webdav has no field for. It sits beside CardReporter, outside
 // Transport.
 type CardQuerier interface {
-	QueryCards(ctx context.Context, addressBook string, q CardQuery) ([]carddav.AddressObject, error)
+	QueryCards(ctx context.Context, addressBook string, q CardQuery) ([]CardObject, error)
 }
 
 // QueryCards is an addressbook-query REPORT (RFC 6352 §8.6) of Depth 1 for the
 // version, the modification time and the whole card. A refusal is a
 // StatusError: a server that does not offer the version asked for answers the
 // precondition supported-address-data.
-func (c cardReports) QueryCards(ctx context.Context, addressBook string, q CardQuery) ([]carddav.AddressObject, error) {
+func (c cardReports) QueryCards(ctx context.Context, addressBook string, q CardQuery) ([]CardObject, error) {
 	body, err := cardQueryBody(q)
 	if err != nil {
 		return nil, err
@@ -56,7 +64,7 @@ func (c cardReports) QueryCards(ctx context.Context, addressBook string, q CardQ
 
 // cardReport sends a CardDAV REPORT of Depth 1 and reads the cards out of the
 // multistatus it answers with.
-func (c cardReports) cardReport(ctx context.Context, addressBook string, body []byte) ([]carddav.AddressObject, error) {
+func (c cardReports) cardReport(ctx context.Context, addressBook string, body []byte) ([]CardObject, error) {
 	req, err := http.NewRequestWithContext(ctx, "REPORT", c.resolve(addressBook), bytes.NewReader(body))
 	if err != nil {
 		return nil, err
@@ -67,13 +75,13 @@ func (c cardReports) cardReport(ctx context.Context, addressBook string, body []
 	if err != nil {
 		return nil, err
 	}
-	var out []carddav.AddressObject
+	var out []CardObject
 	for _, r := range ms.Responses {
 		raw, ok := r.Props[xml.Name{Space: cardDAVNS, Local: "address-data"}]
 		if r.StatusCode/100 != 2 || !ok {
 			continue
 		}
-		ao := carddav.AddressObject{Path: r.Href}
+		ao := CardObject{AddressObject: carddav.AddressObject{Path: r.Href}}
 		if u, err := url.Parse(r.Href); err == nil {
 			ao.Path = u.Path
 		}
@@ -93,7 +101,7 @@ func (c cardReports) cardReport(ctx context.Context, addressBook string, body []
 		if err != nil {
 			return nil, fmt.Errorf("dav: %s: %w", ao.Path, err)
 		}
-		ao.Card = card
+		ao.Card, ao.Data = card, text
 		out = append(out, ao)
 	}
 	return out, nil
@@ -110,9 +118,9 @@ func (c cardReports) cardReport(ctx context.Context, addressBook string, body []
 // (docs/servers.md, SV-26). ListCards and QueryEtags are what tells the two
 // apart without pulling a single card.
 type CardFetcher interface {
-	FetchCards(ctx context.Context, addressBook string) ([]carddav.AddressObject, error)
+	FetchCards(ctx context.Context, addressBook string) ([]CardObject, error)
 	ListCards(ctx context.Context, addressBook string) ([]string, error)
-	MultiGetCards(ctx context.Context, addressBook string, paths []string) ([]carddav.AddressObject, error)
+	MultiGetCards(ctx context.Context, addressBook string, paths []string) ([]CardObject, error)
 	QueryEtags(ctx context.Context, addressBook string) ([]string, error)
 }
 
@@ -120,7 +128,7 @@ type CardFetcher interface {
 // multiget. Two requests instead of one, and no filter travels with them: a
 // caller that wanted a search has to sift the answer itself, the way cal.Search
 // does for a server that ignores text-match (SV-16).
-func (c cardReports) FetchCards(ctx context.Context, addressBook string) ([]carddav.AddressObject, error) {
+func (c cardReports) FetchCards(ctx context.Context, addressBook string) ([]CardObject, error) {
 	paths, err := c.ListCards(ctx, addressBook)
 	if err != nil || len(paths) == 0 {
 		return nil, err
@@ -148,7 +156,7 @@ func (c cardReports) ListCards(ctx context.Context, addressBook string) ([]strin
 }
 
 // MultiGetCards reads these addresses as cards in one addressbook-multiget.
-func (c cardReports) MultiGetCards(ctx context.Context, addressBook string, paths []string) ([]carddav.AddressObject, error) {
+func (c cardReports) MultiGetCards(ctx context.Context, addressBook string, paths []string) ([]CardObject, error) {
 	if len(paths) == 0 {
 		return nil, nil
 	}

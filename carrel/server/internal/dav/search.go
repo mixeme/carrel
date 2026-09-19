@@ -5,10 +5,7 @@ import (
 	"context"
 	"encoding/xml"
 	"net/http"
-	"net/url"
-	"strings"
 
-	"github.com/emersion/go-ical"
 	"github.com/emersion/go-webdav/caldav"
 )
 
@@ -51,27 +48,7 @@ func (c calReports) SearchCalendar(ctx context.Context, calendar string, s CalSe
 	if err != nil {
 		return nil, err
 	}
-	var out []caldav.CalendarObject
-	for _, r := range ms.Responses {
-		raw, ok := r.Props[xml.Name{Space: calDAVNS, Local: "calendar-data"}]
-		if r.StatusCode/100 != 2 || !ok {
-			continue
-		}
-		co := caldav.CalendarObject{Path: r.Href}
-		if u, err := url.Parse(r.Href); err == nil {
-			co.Path = u.Path
-		}
-		if etag, err := innerText(r.Props[xml.Name{Space: "DAV:", Local: "getetag"}]); err == nil {
-			co.ETag = etag
-		}
-		if text, err := innerText(raw); err == nil {
-			if data, err := ical.NewDecoder(strings.NewReader(text)).Decode(); err == nil {
-				co.Data = data
-			}
-		}
-		out = append(out, co)
-	}
-	return out, nil
+	return calendarObjects(ms), nil
 }
 
 func calSearchBody(s CalSearch) ([]byte, error) {
