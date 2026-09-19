@@ -5,6 +5,19 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.127 — 2026-09-19
+
+### Fixed
+
+- **A file upload no longer fails at random with "The server could not be
+  reached".** A streamed body — a file, an attachment in the folder, a copy
+  between servers, a davloom write — cannot be sent a second time. When it
+  went out on a pooled connection that the server had just closed (Apache
+  and SFTPGo close idle connections within seconds), the upload was lost.
+  Such a request now always opens a connection of its own
+  (docs/servers.md, SV-14). A body that can be sent again still uses the
+  pool and its one retry.
+
 ## v0.0.126 — 2026-09-19
 
 ### For consumers

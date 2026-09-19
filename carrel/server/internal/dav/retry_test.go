@@ -193,3 +193,36 @@ func TestTheErrorSaysWhyItWasNotSentAgain(t *testing.T) {
 		t.Errorf("%d calls, want two", base.calls)
 	}
 }
+
+// A body that cannot be sent twice never rides a connection the pool kept:
+// the server may have closed it a moment before, and then the upload is lost
+// with nothing to do but tell the person (the SFTPGo attachment of the live
+// run, 19.09.2026). Such a request dials a connection of its own; a body that
+// rewinds keeps the pool and its retry.
+func TestAStreamedBodyTakesAConnectionOfItsOwn(t *testing.T) {
+	pooled, fresh := &flakyBase{}, &flakyBase{}
+	lt := &limitTransport{base: pooled, fresh: fresh}
+	stream, err := http.NewRequestWithContext(context.Background(), http.MethodPut, "http://server.example/dav/f",
+		struct{ io.Reader }{strings.NewReader("a stream")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp, err := lt.RoundTrip(stream); err != nil {
+		t.Fatal(err)
+	} else {
+		resp.Body.Close()
+	}
+	rewinds, err := http.NewRequestWithContext(context.Background(), http.MethodPut, "http://server.example/dav/g",
+		bytes.NewReader([]byte("a record")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp, err := lt.RoundTrip(rewinds); err != nil {
+		t.Fatal(err)
+	} else {
+		resp.Body.Close()
+	}
+	if fresh.calls != 1 || pooled.calls != 1 {
+		t.Errorf("fresh %d, pooled %d: the stream goes on its own connection, the record through the pool", fresh.calls, pooled.calls)
+	}
+}

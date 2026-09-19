@@ -89,8 +89,13 @@ func (g *Guard) httpClient(pinnedFingerprint string) *http.Client {
 	// No http.Client.Timeout: it counts the body too and cut every file that
 	// took longer than a request (S-17). The transport keeps the deadline
 	// instead, and for a stream counts silence rather than the whole.
+	// A body that cannot be sent twice gets a connection of its own: one the
+	// pool kept may have been closed by the server a moment before, and such a
+	// request cannot be sent again (limitTransport.RoundTrip).
+	fresh := transport.Clone()
+	fresh.DisableKeepAlives = true
 	return &http.Client{
-		Transport: &limitTransport{base: transport, max: g.maxBody, request: g.request},
+		Transport: &limitTransport{base: transport, fresh: fresh, max: g.maxBody, request: g.request},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= g.maxRedirect {
 				return fmt.Errorf("dav: too many redirects")
@@ -278,7 +283,12 @@ func privateIPv6(addr netip.Addr) bool {
 }
 
 type limitTransport struct {
-	base    http.RoundTripper
+	base http.RoundTripper
+	// fresh dials a connection for each request and keeps none. A body that
+	// cannot be produced a second time goes through it: on a pooled
+	// connection the server closed a moment before, such a request fails with
+	// nothing left to retry — an upload lost to a race (SV-9, SV-14).
+	fresh   http.RoundTripper
 	max     int64
 	request time.Duration // CARREL_DAV_REQUEST_TIMEOUT
 }
@@ -365,6 +375,9 @@ func rewound(req *http.Request) (*http.Request, error) {
 // connection closed mid-flight says the server never saw the request.
 func (t *limitTransport) attempt(req *http.Request) (resp *http.Response, err error, fromIdle bool) {
 	base := t.base
+	if !rewindable(req) && t.fresh != nil {
+		base = t.fresh
+	}
 	if base == nil {
 		base = http.DefaultTransport
 	}

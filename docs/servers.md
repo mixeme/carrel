@@ -55,7 +55,7 @@ Windows. Nextcloud берёт весь общий набор, как Baikal; у 
 | SV-31 | go-ical и go-vcard | не сворачивают строки по 75 октетов (RFC 5545 §3.1, RFC 6350 §3.2); наверху отказались дважды | своя свёртка на выходе обоих провайдеров (`model.FoldLines`), не на границе символа | `TestFoldLines`, `TestEncodeFoldsLongLines` (оба провайдера) |
 | SV-32 | go-vcard и go-ical | go-vcard теряет группы (`item1.`), второе и дальше значения параметра, запятую-разделитель в `CATEGORIES` и режет кавычки по запятой; go-ical хранит все значения, но наш перевод брал первое | значение, которого никто не трогал, уходит своей строкой как пришло; изменённое пишется заново со всеми значениями параметра; проверка потерь читает `TYPE` множеством | `TestUntouchedLinesGoBackAsTheyCame`, `TestListEditKeepsTheOtherRows`, `TestEventEditKeepsEveryParameterValue` |
 | SV-33 | go-ical и go-webdav (клиент) | go-ical паникует на параметре без двоеточия и на тексте после закрывающей кавычки; `caldav.Client` роняет весь REPORT на первой нечитаемой записи | свой `calendar-query`: запись, которая не читается, — одна строка «не прочитана», остальное на месте; разбор нигде не паникует | `TestCalendarQueryKeepsTheReadableRecords`, `TestMalformedRecordIsAnErrorNotAPanic` |
-| SV-14 | net/http + любой сервер | закрытое простаивающее соединение: `PROPFIND` и `REPORT` не повторяются, а на общем хостинге так же умирает и запись | повтор один раз в страже: чтение — всегда, запись — если соединение взято из пула простаивающим | `TestReadOnlyRequestIsSentAgainAfterAnIdleClose`, `TestWriteOnAnIdleConnectionIsSentAgain` |
+| SV-14 | net/http + любой сервер | закрытое простаивающее соединение: `PROPFIND` и `REPORT` не повторяются, а на общем хостинге так же умирает и запись | повтор один раз в страже: чтение — всегда, запись — если соединение взято из пула простаивающим; поток, который не повторить, идёт своим соединением мимо пула | `TestReadOnlyRequestIsSentAgainAfterAnIdleClose`, `TestWriteOnAnIdleConnectionIsSentAgain`, `TestAStreamedBodyTakesAConnectionOfItsOwn` |
 | SV-15 | OpenCloud за Apache | PUT без `Content-Length` — 400 / 502 | длину шлёт, когда знает; иначе отказ со строкой очереди | `TestOpenCloudFiles`, `TestAttachmentNeedsASizeOnSuchAServer` |
 | SV-16 | SoGo | text-match в `calendar-query` не соблюдается: отдаёт всю коллекцию | просеивает ответ сам и говорит об этом у выдачи | `TestSoGoSearch` |
 | SV-17 | SoGo | `displayname` при создании книги не берётся; карточка отдаётся в 3.0 | дошлёт имя `PROPPATCH`; версию не трогает — свойства целы | `TestSoGoCollections`, `TestSoGoVCard4Edit` |
@@ -363,7 +363,17 @@ Windows. Nextcloud берёт весь общий набор, как Baikal; у 
   Carrel условна (S-8) или идемпотентна, поэтому долетевшая дважды отвергается
   предусловием (412, 405), а не удваивается. Тело, которое нельзя отдать
   заново, — файл в пути к другому серверу — не повторяется никогда.
-- **Сторож.** `TestReadOnlyRequestIsSentAgainAfterAnIdleClose`,
+- **Поэтому такое тело в пул не ходит** (`v0.0.127`, ревью 19.09.2026). Полный
+  живой прогон потерял вложение на SFTPGo:
+  `PUT …report-2.pdf: EOF (not sent again: its body cannot be produced a second
+  time)` — загрузка ушла в соединение, которое сервер как раз закрыл, и
+  повторить её было нечем. Запрос с неперематываемым телом теперь идёт через
+  отдельный транспорт стража без пула (`DisableKeepAlives`): соединение
+  поднимается ради него, и закрыть его заранее сервер не может. Цена — одно
+  рукопожатие TLS на загрузку файла; записи с перематываемым телом ходят
+  через пул, как раньше.
+- **Сторож.** `TestAStreamedBodyTakesAConnectionOfItsOwn`,
+  `TestReadOnlyRequestIsSentAgainAfterAnIdleClose`,
   `TestWriteOnAnIdleConnectionIsSentAgain`,
   `TestWriteOnAFreshConnectionIsNotSentAgain`,
   `TestAStreamedBodyIsNotSentAgain` в `internal/dav/retry_test.go`; живьём —
