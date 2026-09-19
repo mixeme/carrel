@@ -141,7 +141,14 @@ func (s *Server) postLogout(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/login")
 }
 
+// /setup is a route without a session (S-29.3) and its POST derives a key,
+// so it lives under the sign-in buckets: five a minute for one login,
+// twenty for one address (audit №3, Ф3-4).
 func (s *Server) getSetup(w http.ResponseWriter, r *http.Request) {
+	if !s.limit.allowAnon(s.clientIP(r), time.Now()) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
 	if !s.users.FirstRun() {
 		s.notFound(w, r)
 		return
@@ -161,11 +168,15 @@ func (s *Server) getSetup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
+	login := r.FormValue("login")
+	if !s.limit.allowLogin(login, s.clientIP(r), time.Now()) {
+		http.Error(w, "too many requests", http.StatusTooManyRequests)
+		return
+	}
 	if !s.users.FirstRun() {
 		s.notFound(w, r)
 		return
 	}
-	login := r.FormValue("login")
 	password := r.FormValue("password")
 	password2 := r.FormValue("password2")
 	if password != password2 {

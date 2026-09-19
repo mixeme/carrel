@@ -5,6 +5,17 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.135 — 2026-09-19
+
+Fable audit №3 (Ф3-4).
+
+### Security
+
+- **`/setup` is rate limited like sign-in**: five attempts a minute for one
+  login, twenty for one address (S-29.3: every route without a session has a
+  bucket). Its POST derives a key, and a fresh instance could be kept busy
+  by anybody who found it before its administrator did (Ф3-4).
+
 ## v0.0.134 — 2026-09-19
 
 Fable audit №3 (Ф3-2, Ф3-3).
