@@ -115,6 +115,10 @@ func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind stri
 	if !ok {
 		return
 	}
+	if uid := r.FormValue("uid"); uid != "" && c.spec.kind == view.KindNote {
+		s.exportNote(w, r, c, uid)
+		return
+	}
 	whole := exportWhole(c, r)
 	var objs []*model.Object
 	var err error
@@ -226,4 +230,32 @@ func (s *Server) emptyListPage(c *collectionCtx, notices ...view.Notice) any {
 	default:
 		return view.NotesPage{Shell: shell}
 	}
+}
+
+// exportNote hands over one note as Markdown, the format of the notebook
+// export (S-19), named after its title (forms-tail.md, Export Markdown).
+func (s *Server) exportNote(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
+	obj, err := c.find(r.Context(), uid)
+	switch {
+	case notFoundErr(err):
+		s.notFound(w, r)
+		return
+	case err != nil:
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		return
+	}
+	f := exportFormats[view.KindNote]
+	h := w.Header()
+	h.Set("Content-Type", f.media)
+	name := collectionSlug(noteTitle(cal.Text(obj, "SUMMARY"), cal.Description(obj))) + f.ext
+	if v := mime.FormatMediaType("attachment", map[string]string{"filename": name}); v != "" {
+		h.Set("Content-Disposition", v)
+	} else {
+		h.Set("Content-Disposition", "attachment")
+	}
+	h.Set("X-Content-Type-Options", "nosniff")
+	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
+	h.Set("Cache-Control", "private, no-store")
+	w.WriteHeader(http.StatusOK)
+	_ = cal.NoteMarkdown(w, obj)
 }

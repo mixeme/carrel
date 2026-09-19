@@ -175,6 +175,12 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 		page.PhotoNote = externalPhotoNote
 	}
 	page.Actions = s.recordActions(c, uid, obj.ETag)
+	if s.mailOn() && c.feed == nil {
+		// Send (s-contacts-6): the card goes into a letter by the attach
+		// sheet's own POST, and the letter opens (S-26.2).
+		page.Actions = append(page.Actions, view.Action{ID: "record.send", Label: "Send", Icon: "i-mail", Method: "POST", Enabled: true,
+			Href: s.postQuery("/app/mail/attach", url.Values{"what": {"contact"}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}})})
+	}
 	return page
 }
 
@@ -235,6 +241,12 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Related = s.relatedRows(c, obj)
 	page.Actions = s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag))
+	if c.feed == nil && !c.col.ReadOnly && c.col.Has(view.KindTask) {
+		// New task (s-agenda-2): the quick sheet of a task in this calendar,
+		// related to the event.
+		page.Actions = append(page.Actions, view.Action{ID: "event.task", Label: "New task", Icon: "i-plus", Method: "GET", Enabled: true,
+			Href: s.postQuery(c.origin().listPath(segmentOf(view.KindTask))+"/new/quick", url.Values{"related": {uid}})})
+	}
 	return page
 }
 
@@ -301,6 +313,8 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 		page.Meta.Date = text(tf.date(at))
 	}
 	page.Meta.Tags = s.recordTags(c, obj)
+	page.Meta.Actions = append(page.Meta.Actions, view.Action{ID: "note.export", Label: "Export Markdown", Icon: "i-down", Method: "GET", Enabled: true,
+		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})})
 	page.Meta.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Meta.Related = s.relatedRows(c, obj)
 	return page

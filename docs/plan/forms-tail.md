@@ -91,8 +91,11 @@
       `TestMarkDoneFromTheCardAndTheRow`). Флажку строки своего поля в
       `TaskRow` нет — действие лежит в `TaskRow.Menu` с ID `task.done`;
       клиент рисует его флажком
-- [ ] New task из события (быстрый лист с `RELATED-TO`), Send у контакта,
-      Export Markdown у заметки
+- [x] New task из события (быстрый лист с `RELATED-TO`), Send у контакта,
+      Export Markdown у заметки (`v0.0.149`, `TestNewTaskFromAnEvent`,
+      `TestSendAContactFromItsCard`, `TestExportOneNoteAsMarkdown`). Новых
+      адресов нет: быстрый лист задачи с `?related=`, POST листа вложения,
+      `export?uid=`
 - [ ] «Show N empty fields»: форма отдаёт пустые необязательные поля отдельным
       `FieldSet` с `Legend` — клиент сворачивает его сам (правка C-6 не нужна,
       если хватает `FieldSet`; иначе — согласовать)

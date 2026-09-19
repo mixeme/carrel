@@ -2051,7 +2051,11 @@ func (s *Server) getKindQuick(w http.ResponseWriter, r *http.Request, kind strin
 		s.notFound(w, r)
 		return
 	}
-	sheet := s.quickSheet(c, editState{values: s.emptyValues(c), isNew: true, readAt: time.Now()})
+	values := s.emptyValues(c)
+	if rel := strings.TrimSpace(r.FormValue("related")); rel != "" && c.spec.kind == view.KindTask {
+		values["related"] = []string{rel} // New task from an event (forms-tail.md)
+	}
+	sheet := s.quickSheet(c, editState{values: values, isNew: true, readAt: time.Now()})
 	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
 		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
 		return
@@ -2087,6 +2091,10 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
 	sheet := s.newSheet(c, false)
 	form := s.recordFormOf(c, st, quickFields(c.spec.kind))
+	if rel := first(st.values["related"]); rel != "" && len(form.Sets) > 0 {
+		// The relation travels with the sheet, not as a field of it.
+		form.Sets[0].Rows = append(form.Sets[0].Rows, view.FormRow{Name: "related", Kind: view.InputHidden, Value: text(rel)})
+	}
 	quick := c.listPath() + "/new/quick"
 	form.Action = s.route(quick)
 	form.Method = "POST"

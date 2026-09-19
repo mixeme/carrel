@@ -5,6 +5,23 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.149 — 2026-09-19
+
+forms-tail.md, step 8.
+
+### Added
+
+- **Send on the contact card** (`s-contacts-6`) when people may write
+  letters on the instance: the card goes into the letter through the attach
+  sheet's own POST, and the letter opens (S-26.2).
+- **New task on the event card** (`s-agenda-2`) when the calendar holds
+  tasks: the quick sheet of a task in the same calendar, with `RELATED-TO`
+  the event carried as a hidden row; "Open the card" carries it to the full
+  form, where Related to shows it.
+- **Export Markdown on the note** (`s-notes-2`): `GET …/export?uid=…` of the
+  notebook hands over that one note in the notebook export's format (S-19),
+  named after its title. An unknown UID is 404.
+
 ## v0.0.148 — 2026-09-19
 
 forms-tail.md, step 7.
