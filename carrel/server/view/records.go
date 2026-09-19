@@ -25,13 +25,21 @@ type ContactPage struct {
 // записей, а не карточка.
 type ContactTimelinePage struct {
 	Shell
-	UID     string        `json:"uid"`
-	Name    Text          `json:"name"`
-	Card    Details       `json:"card"` // карточка стоит в панели как контекст экрана, а не как выделение
-	Bar     ListBar       `json:"bar"`
-	Range   Range         `json:"range"`
-	Rows    []TimelineRow `json:"rows"`
-	Actions []Action      `json:"actions"`
+	UID     string          `json:"uid"`
+	Name    Text            `json:"name"`
+	Card    Details         `json:"card"` // карточка стоит в панели как контекст экрана, а не как выделение
+	Bar     ListBar         `json:"bar"`
+	Range   Range           `json:"range"` // «Widen the range» — в Presets
+	Poll    PollBar         `json:"poll"`  // хронология — поиск по одному человеку (S-15.4)
+	Groups  []TimelineGroup `json:"groups"`
+	Note    Text            `json:"note"` // «Nothing was looked for before …»
+	Actions []Action        `json:"actions"`
+}
+
+// TimelineGroup — месяц хронологии; записи без даты — последней группой.
+type TimelineGroup struct {
+	Rubric Text          `json:"rubric"`
+	Rows   []TimelineRow `json:"rows"`
 }
 
 // TimelineRow — хронология человека: события, задачи, заметки и файлы, где

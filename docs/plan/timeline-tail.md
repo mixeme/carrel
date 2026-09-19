@@ -81,8 +81,10 @@ timeline»). Поле `Books` заполняется только связанн
 
 ## Шаги
 
-- [ ] Раздел спеки (S-15.4 или новый S-31) по решениям выше; C-6.5 без
-      правки, если хватает `ContactTimelinePage`
+- [x] Раздел спеки (S-15.4 или новый S-31) по решениям выше; C-6.5 без
+      правки, если хватает `ContactTimelinePage`. S-15.4; не хватило —
+      `ContactTimelinePage` получила `Poll`, `Groups` (`TimelineGroup` по
+      месяцам вместо `Rows`) и `Note` (подвал), правка C-6 и U-6
 - [ ] `web.getContactTimeline`: задача веера `t-…` с источниками — отмеченные
       календарные коллекции всех трёх родов; SSE и poll теми же маршрутами
       `/app/search/progress/{task}`; `Rows` — `TimelineRow` с `Why`

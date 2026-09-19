@@ -873,10 +873,15 @@ type ContactTimelinePage struct {
     Name    Text
     Card    Details // карточка стоит в панели как контекст экрана, а не как выделение
     Bar     ListBar
-    Range   Range
-    Rows    []TimelineRow
+    Range   Range   // «Widen the range» — в Presets
+    Poll    PollBar // хронология — поиск по одному человеку (S-15.4)
+    Groups  []TimelineGroup
+    Note    Text    // «Nothing was looked for before …»
     Actions []Action
 }
+
+// Группа хронологии — месяц; записи без даты — последней группой.
+type TimelineGroup struct { Rubric Text; Rows []TimelineRow }
 
 // Хронология человека: события, задачи, заметки и файлы, где он упомянут.
 type TimelineRow struct {
