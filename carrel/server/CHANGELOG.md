@@ -5,6 +5,28 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.159 — 2026-09-20
+
+fixtures-tail.md, step 1.
+
+### Included
+
+- **The comparison "the view model equals the fixture"** (C-14.2), the
+  criterion that had nothing behind it at all. The mockup set of
+  `docs/visual/fixtures` is loaded into two `davtest` servers labelled as
+  the frames label them, the collections of its README are made with their
+  colours, and the answer of a screen is compared with
+  `docs/spec/fixtures` by `cmp.Diff` after the identifiers Carrel issues
+  (`a-…`, `t-…`) and the session's CSRF are normalised away.
+- The first pair — the combined address book against
+  `app-contacts/normal.json` — is red, as the plan asks it to be shown
+  once, and runs under `CARREL_FIXTURE_DIFF=1` until the fixtures are
+  rewritten against the set. What it found is written down in
+  fixtures-tail.md: the fixture invented its UIDs and collection
+  addresses, its rail counts are the mockup's illustration, the server
+  fills no details panel on a list at all, and empty lists answer `null`
+  where the fixture has `[]`.
+
 ## v0.0.158 — 2026-09-20
 
 views-tail.md: the orders, the groups and the windows of the lists.
