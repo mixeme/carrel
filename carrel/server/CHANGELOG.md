@@ -5,6 +5,30 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.134 — 2026-09-19
+
+Fable audit №3 (Ф3-2, Ф3-3).
+
+### Security
+
+- **An archive is restored under the ceilings of an import** (S-29.4,
+  S-24.3): a member is not read into memory past `CARREL_IMPORT_MAX_BYTES`,
+  and a collection of more than `CARREL_IMPORT_MAX_RECORDS` is refused
+  whole, on the preview and on the run — as the import wizard refuses such
+  a file. `backup.OpenAt` refuses a manifest past 1 MiB and an archive of
+  more than 50 000 members. Until now every member was read with
+  `io.ReadAll`: a small zip that inflates to gigabytes took the process down
+  on the preview, on every view of the Backup screen while it stayed open
+  (Ф3-2).
+- **Nothing is written by a path taken from the archive** (S-29.4): the
+  collection's name in the manifest became the folder restored files went
+  under, so a manifest saying `../../x` wrote outside the chosen storage.
+  A name that is not one segment is now made one (`backup.Slug`) (Ф3-3).
+
+### Changed
+
+- `backup.MaxManifestBytes`, `backup.MaxEntries`, `backup.Slug`.
+
 ## v0.0.133 — 2026-09-19
 
 Fable audit №3 (S-29 final, Ф3-1 in [reviews.md](../../docs/plan/reviews.md)).

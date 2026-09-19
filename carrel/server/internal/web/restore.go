@@ -168,7 +168,11 @@ func (s *Server) fillRestore(sess *session.Session, blob sealed.Blob, t *restore
 			}
 		default:
 			table.Columns = []view.Text{"Record", "Kind"}
-			objs, _ := archiveRecords(zr, e)
+			objs, err := s.archiveRecords(zr, e)
+			if err != nil {
+				table.Rubric += text(" · cannot be restored: " + err.Error())
+				objs = nil
+			}
 			for _, o := range objs {
 				if len(table.Rows) >= 10 {
 					break
@@ -208,35 +212,47 @@ func (s *Server) fillRestore(sess *session.Session, blob sealed.Blob, t *restore
 	)
 }
 
-// archiveRecords are the records of one collection of the archive.
-func archiveRecords(zr *zip.Reader, e backup.Entry) ([]*model.Object, error) {
+// archiveRecords are the records of one collection of the archive, read
+// under the ceilings of an import (S-29.4, S-24.3: restoring is an import):
+// a member is not held past CARREL_IMPORT_MAX_BYTES, and a collection of
+// more than CARREL_IMPORT_MAX_RECORDS is refused whole, as the wizard
+// refuses such a file. The archive is somebody else's file; what it says
+// of itself is not what it is.
+func (s *Server) archiveRecords(zr *zip.Reader, e backup.Entry) ([]*model.Object, error) {
 	var out []*model.Object
+	max := s.cfg.ImportMaxBytes
 	for _, zf := range zr.File {
 		if !strings.HasPrefix(zf.Name, e.Dir) || strings.HasPrefix(zf.Name, e.Dir+"files/") {
 			continue
 		}
+		ext := path.Ext(zf.Name)
+		if ext != ".vcf" && ext != ".ics" {
+			continue
+		}
 		rc, err := zf.Open()
 		if err != nil {
-			return out, err
+			return nil, err
 		}
-		body, err := io.ReadAll(rc)
+		body, err := io.ReadAll(io.LimitReader(rc, max+1))
 		rc.Close()
 		if err != nil {
-			return out, err
+			return nil, err
 		}
-		switch path.Ext(zf.Name) {
-		case ".vcf":
-			objs, err := card.Split(body)
-			if err != nil {
-				return out, err
-			}
-			out = append(out, objs...)
-		case ".ics":
-			objs, _, err := cal.Split(body, time.Now())
-			if err != nil {
-				return out, err
-			}
-			out = append(out, objs...)
+		if int64(len(body)) > max {
+			return nil, fmt.Errorf("%s is larger than an import takes (%s)", path.Base(zf.Name), formatSize(max))
+		}
+		var objs []*model.Object
+		if ext == ".vcf" {
+			objs, err = card.Split(body)
+		} else {
+			objs, _, err = cal.Split(body, time.Now())
+		}
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, objs...)
+		if len(out) > s.cfg.ImportMaxRecords {
+			return nil, errTooManyRecords{len(out), s.cfg.ImportMaxRecords}
 		}
 	}
 	return out, nil
@@ -419,7 +435,7 @@ func (s *Server) restoreRecords(ctx context.Context, sess *session.Session, key 
 	if !ok || conn.Feed {
 		return "", errors.New("the chosen server is not in the catalog")
 	}
-	objs, err := archiveRecords(zr, e)
+	objs, err := s.archiveRecords(zr, e)
 	if err != nil {
 		return "", err
 	}
@@ -511,7 +527,13 @@ func (s *Server) restoreFiles(ctx context.Context, blob sealed.Blob, zr *zip.Rea
 	if err != nil {
 		return "", err
 	}
-	base := strings.TrimSuffix(fileRoot(conn, col), "/") + "/" + e.Name + " (restored " + day + ")/"
+	// The folder's name comes from the manifest, and a manifest is part of
+	// the archive: a name that is not one segment is made one (S-29.4).
+	name := e.Name
+	if file.CheckName(name) != nil {
+		name = backup.Slug(name)
+	}
+	base := strings.TrimSuffix(fileRoot(conn, col), "/") + "/" + name + " (restored " + day + ")/"
 	if _, err := files.Stat(ctx, base); err == nil {
 		return "", errors.New(base + " is already there")
 	}

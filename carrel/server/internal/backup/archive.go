@@ -159,12 +159,22 @@ func OpenAt(r io.ReaderAt, size int64, password string) (*zip.Reader, Manifest, 
 	if err != nil {
 		return nil, m, fmt.Errorf("backup: not a Carrel archive: %w", err)
 	}
+	if len(zr.File) > MaxEntries {
+		return nil, m, fmt.Errorf("backup: the archive has %d members; one this Carrel reads has at most %d", len(zr.File), MaxEntries)
+	}
 	f, err := zr.Open(ManifestName)
 	if err != nil {
 		return nil, m, errors.New("backup: the archive has no manifest")
 	}
 	defer f.Close()
-	if err := json.NewDecoder(f).Decode(&m); err != nil {
+	raw, err := io.ReadAll(io.LimitReader(f, MaxManifestBytes+1))
+	if err != nil {
+		return nil, m, fmt.Errorf("backup: the manifest cannot be read: %w", err)
+	}
+	if len(raw) > MaxManifestBytes {
+		return nil, m, fmt.Errorf("backup: the manifest is larger than %d bytes", MaxManifestBytes)
+	}
+	if err := json.Unmarshal(raw, &m); err != nil {
 		return nil, m, fmt.Errorf("backup: the manifest cannot be read: %w", err)
 	}
 	if m.Format != FormatVersion {
@@ -200,6 +210,11 @@ func Rotation(job string, names []string, keep int) []string {
 	return mine[:len(mine)-keep]
 }
 
+// Slug is a name as one safe file-name segment: letters and digits of any
+// script kept, everything else a dash. A name from a manifest goes through
+// it before it becomes a path (S-29.4).
+func Slug(s string) string { return slug(s) }
+
 // slug is a name as a file-name segment: letters and digits of any script
 // kept, everything else a dash.
 func slug(s string) string {
@@ -220,3 +235,13 @@ func slug(s string) string {
 	}
 	return out
 }
+
+// The ceilings of an archive read (S-29.4): what is held in memory of a
+// file somebody else may have made. MaxManifestBytes bounds the manifest;
+// MaxEntries the members, far above what a copy of CARREL_FILES_MAX_ENTRIES
+// files per collection writes. The records of a member are read under the
+// import ceilings by the caller: restoring is an import (S-24.3).
+const (
+	MaxManifestBytes = 1 << 20
+	MaxEntries       = 50_000
+)
