@@ -5,6 +5,25 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.133 — 2026-09-19
+
+Fable audit №3 (S-29 final, Ф3-1 in [reviews.md](../../docs/plan/reviews.md)).
+
+### Security
+
+- **Every answer of the web listener now carries the security headers**
+  S-29.1 and C-11 promise: `Content-Security-Policy` without `unsafe-inline`
+  (`default-src 'self'`, `img-src 'self' data:` for the QR code,
+  `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`,
+  `form-action 'self'`), `X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: DENY`, `Referrer-Policy: same-origin` and
+  `Cache-Control: no-store`. Until now no page had any of them: the JSON
+  renderer set only `Content-Type`, and a client rendering on this origin
+  had the policy in the spec, not in the headers (Ф3-1). A download keeps
+  its own sandbox and caching, a photo its ETag, a path with a secret its
+  `no-referrer`; the mux's own 404 carries the defaults too.
+- davloom answers with `X-Content-Type-Options: nosniff` on every path.
+
 ## v0.0.132 — 2026-09-19
 
 ### Fixed

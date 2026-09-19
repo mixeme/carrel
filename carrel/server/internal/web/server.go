@@ -212,12 +212,13 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 	return s
 }
 
-// Handler returns the root HTTP handler.
+// Handler returns the root HTTP handler: the security headers of every
+// answer around the mux, so the mux's own 404 carries them too.
 func (s *Server) Handler() http.Handler {
 	if s.basePath == "" {
-		return s.observe(s.mux)
+		return s.observe(secureHeaders(s.mux))
 	}
-	return s.observe(http.StripPrefix(s.basePath, s.mux))
+	return s.observe(http.StripPrefix(s.basePath, secureHeaders(s.mux)))
 }
 
 func (s *Server) sessionFrom(r *http.Request) (*session.Session, bool) {

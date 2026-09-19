@@ -125,6 +125,8 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		s.log.Debug("davloom: request", "method", r.Method, "path", r.URL.EscapedPath(), "status", sw.status, "ms", time.Since(start).Milliseconds())
 	}()
+	// Nothing here is a page, and a client must not take it for one.
+	sw.Header().Set("X-Content-Type-Options", "nosniff")
 	escaped := r.URL.EscapedPath()
 	if base := s.hrefBase(); base != "" {
 		if rest, ok := strings.CutPrefix(escaped, base); ok && (rest == "" || strings.HasPrefix(rest, "/")) {
