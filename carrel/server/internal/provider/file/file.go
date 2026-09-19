@@ -62,6 +62,14 @@ func normalizeRoot(root string) string {
 // not "." or "..", without a slash or a backslash.
 func CheckName(name string) error { return checkSegment(name) }
 
+// Escapes reports whether a segment tries to leave its folder — "..", or a
+// separator smuggled inside one — rather than being merely empty or ".":
+// such a request is refused, and the attempt is worth a line in the log
+// (S-30.1).
+func Escapes(seg string) bool {
+	return seg == ".." || strings.ContainsAny(seg, "/\\")
+}
+
 func checkSegment(seg string) error {
 	if seg == "" {
 		return ErrBadSegment

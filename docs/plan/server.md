@@ -1460,7 +1460,15 @@ SMTP — поля `store.InstanceSettings`, не `CARREL_*`.
       зелёных; линуксовые ворота — F-10, образ и запуск контейнера,
       Radicale — зелёные на `run-ef3e79d`, контейнеров и томов Carrel после
       прогона нет, SelfPost не тронут
-- [ ] **Живая почта S-26** — `TestSelfPostRelayDelivers` (`v0.0.116`)
+- [x] **Живая почта S-26** — зелёная 19.09.2026 (`v0.0.122`): письмо
+      `internal/mail` уходит через релей SelfPost и за 9 с лежит во
+      «Входящих» тестового ящика; From — адрес экземпляра с «(via Carrel)»,
+      Reply-To — как задан; тест удаляет письмо. Отправитель — любой ящик в
+      `carrel.mixfed.ru` (владелец, 19.09.2026; `From:` в разделе релея
+      `dev/credentials.txt`). Первые письма не дошли по двум причинам: адрес
+      тестового ящика в файле был неверный (владелец поправил), и
+      принимающий сервер откладывает письмо нового отправителя (soft reject,
+      грейлистинг) — поэтому тест ждёт письмо до 8 минут (в пределах 10 минут `go test` по умолчанию), а не 3. Было: `TestSelfPostRelayDelivers` (`v0.0.116`)
       написан и ждёт двух вещей от владельца. Релей SelfPost принимает TLS
       и вход `test-carrel`, но отказывает отправителю: «Sender address
       rejected: not owned by user test-carrel» — и для
@@ -1763,9 +1771,46 @@ URL этого экземпляра, иначе петля прокси запр
 
 ## Приёмка S-30
 
-- [ ] S-30.1 без сети — закрыт тестами пакетов выше
+- [x] S-30.1 без сети — закрыт тестами пакетов выше (сверено 19.09.2026,
+      `v0.0.122`). Криптосхема: `TestKDFIndependent`,
+      `TestPasswordChangePreservesDataKey`, `TestWipeMakesBlobUnreadable`,
+      `TestAADPreventsSubstitution`, `TestEnvelopesAreBound`. Хранилище:
+      `TestFailedWriteLeavesStateAndAuditUnchanged`, `TestRejectNewerVersion`,
+      `TestConnectionCountWithoutOpeningBlob`. Модель:
+      `TestParsePreservesForeign`, `TestPatchPreservesForeign`,
+      `TestObjectIngressIsUsableFromOtherPackages`,
+      `TestPatchRejectedDoesNotChangeObject`, `TestRemovePropDistinctFromEmpty`.
+      Кэш: `TestCacheVersionKeyMakesOldBodyUnreachable`,
+      `TestCacheEvictsBodiesBeforeMaps`, `TestProcessWideEviction`. Дубликаты:
+      `TestFindDoesNotCompareEveryPair`, `TestScoresAndThreshold`,
+      `TestWeightsDecide`. Пути: `TestJoinRejectsDotDot`,
+      `TestJoinStaysUnderRoot` — и **недоставало «попытка видна»**: выход за
+      корень отвергался молча. Теперь веб (`parseAddress`, `relSegs`) и
+      davloom пишут `slog.Warn` с путём — без содержимого, без
+      пользователя (`file.Escapes`); сторож — в `TestDebugLogHoldsNoSecrets`
 - [x] S-30.2 для слоёв до провайдеров: Radicale на Linux, Baikal и SFTPGo — зелёные 13.09.2026 (`v0.0.40`, [providers-tail.md](providers-tail.md)). Функции S-11…S-26 добавляют свои живые проверки
-- [ ] S-30.3: отмена веера не оставляет горутин; отказ одного из трёх аккаунтов; сигнал не рвёт активный запрос
+- [x] S-30.3 (`v0.0.122`, 19.09.2026):
+      - уход со страницы во время опроса — `TestLeavingThePollLeavesNothingRunning`:
+        поток событий закрыт, горутины возвращаются к исходному числу, запрос
+        к зависшему серверу оборван; Stop рвёт соединение источника сразу;
+        частичное остаётся — `TestCancelKeepsWhatArrived`
+      - отказ одного подключения из трёх — `TestOneConnectionOfThreeDown`:
+        шестнадцать экранов (списки родов, файлы, поиск, дубликаты,
+        настройки, письмо, коллекции упавшего подключения) — ни одного 5xx,
+        найденное живым подключением не теряется
+      - сигнал — `TestSignalDoesNotCutARequest`: запрос, начатый до сигнала,
+        дописывается и получает ответ, `serve` возвращается после;
+        `TestBothListenersStopOnSignal`; ключи — `EndAll`
+        (`TestEndAllWipesSessions`) и `proxy.Wipe`
+      - гонки — `go test -race` сессий, веера, прокси, сервиса учёток, веба и
+        `cmd/carrel` в контейнере `golang:1.27` на машине разработки (на
+        Windows нет cgo): ни одной гонки (19.09.2026); пакет `user` под `-race` гонять последовательно (`-p 1 -parallel 1`) — параллельные Argon2 съедают память машины, и процесс убивается, не падает. Приёмочные тесты S-30.3 под `-race` — зелёные трижды подряд
+      - журнал на уровне debug — `TestDebugLogHoldsNoSecrets` проходит
+        настоящий сценарий (запись, поиск, ссылка, устройство, письмо,
+        пароль релея) и не находит в логе ни пароля входа, ни пароля DAV,
+        ни пароля устройства, ни токена ссылки, ни пароля релея, ни текста
+        записи, ни SID, ни CSRF; прежний `TestDebugLogDoesNotLeakSecrets`
+        проверял строки, которые сам же и писал
 - [ ] **Opus.** Ревью перед объявлением S-30 закрытым
 - [ ] Финальный аудит Fable ([reviews.md](reviews.md))
 

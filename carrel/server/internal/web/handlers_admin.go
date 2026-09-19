@@ -343,4 +343,3 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
-

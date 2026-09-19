@@ -5,6 +5,28 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.122 — 2026-09-19
+
+The acceptance checks of S-30 that a machine can run.
+
+### For operators
+
+- A request for a path that leaves its collection (`..` or a separator
+  inside a segment) is logged as a warning, with the path only. It used to
+  be refused silently.
+
+### Changed
+
+- New tests check, for the process as a whole, that:
+  - leaving the page during a poll leaves nothing running, and Stop closes
+    the far connection at once;
+  - one connection of three down breaks no screen;
+  - the shutdown signal lets a request under way finish;
+  - the debug log of a whole flow holds no password, token or record
+    content.
+- The race detector runs over sessions, fanout, the proxy, accounts and the
+  web layer.
+
 ## v0.0.121 — 2026-09-19
 
 A live check behind a real nginx, and what it taught about the proxy's

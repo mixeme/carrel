@@ -125,3 +125,54 @@ func TestBothListenersStopOnSignal(t *testing.T) {
 		t.Error("the web port still answers")
 	}
 }
+
+// S-30.3: a request under way when the signal comes is answered, not cut;
+// only then does serve return.
+func TestSignalDoesNotCutARequest(t *testing.T) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+	cfg := &conf.Config{Bind: "127.0.0.1", Port: port, DataDir: t.TempDir(), ProgressTotalTimeout: 5 * time.Second}
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() { done <- serve(ctx, cfg) }()
+
+	var conn net.Conn
+	for i := 0; i < 50; i++ {
+		if conn, err = net.Dial("tcp", "127.0.0.1:"+strconv.Itoa(port)); err == nil {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	body := "login=x&password=y"
+	// Headers and half the body before the signal, the rest after it.
+	if _, err := io.WriteString(conn, "POST /setup HTTP/1.1\r\nHost: x\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: "+strconv.Itoa(len(body))+"\r\n\r\n"+body[:5]); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(200 * time.Millisecond)
+	cancel()
+	time.Sleep(300 * time.Millisecond)
+	if _, err := io.WriteString(conn, body[5:]); err != nil {
+		t.Fatalf("the connection was cut at the signal: %v", err)
+	}
+	_ = conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+	status := make([]byte, 12)
+	if _, err := io.ReadFull(conn, status); err != nil || !strings.HasPrefix(string(status), "HTTP/1.1 ") {
+		t.Fatalf("no answer after the signal: %q %v", status, err)
+	}
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatalf("serve: %v", err)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("serve did not return")
+	}
+}

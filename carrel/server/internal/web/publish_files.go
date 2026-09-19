@@ -3,6 +3,7 @@ package web
 import (
 	"archive/zip"
 	"io"
+	"log/slog"
 	"mime"
 	"net/http"
 	"net/url"
@@ -35,6 +36,9 @@ func relSegs(rel string) ([]string, bool) {
 	var out []string
 	for _, seg := range strings.Split(rel, "/") {
 		if file.CheckName(seg) != nil {
+			if file.Escapes(seg) {
+				slog.Warn("web: a path that leaves its collection was refused", "path", rel)
+			}
 			return nil, false
 		}
 		out = append(out, seg)

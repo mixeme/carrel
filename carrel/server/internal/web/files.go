@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"mime"
 	"net/http"
 	"net/url"
@@ -94,6 +95,9 @@ func parseAddress(escaped, prefix, marker string) (account, col string, segs []s
 	for _, p := range parts {
 		name, err := url.PathUnescape(p)
 		if err != nil || file.CheckName(name) != nil {
+			if err == nil && file.Escapes(name) {
+				slog.Warn("web: a path that leaves its collection was refused", "path", escaped)
+			}
 			return "", "", nil, false, false
 		}
 		segs = append(segs, name)

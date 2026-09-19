@@ -62,14 +62,19 @@ func TestSelfPostRelayDelivers(t *testing.T) {
 	}
 	t.Logf("relay: %s", reply)
 
-	im, err := dialIMAP(imapHost, box, boxPass)
-	if err != nil {
-		t.Fatalf("imap: %v", err)
-	}
-	defer im.close()
+	// Each look is a connection of its own: a server may close one that
+	// only polls. A letter from a sender the receiving server has not seen
+	// is deferred at first (a soft reject, greylisting), so the wait is long.
 	var uid string
-	deadline := time.Now().Add(2 * time.Minute)
+	var im *imapConn
+	deadline := time.Now().Add(8 * time.Minute) // inside go test's default 10 minutes
 	for uid == "" && time.Now().Before(deadline) {
+		if im != nil {
+			im.close()
+		}
+		if im, err = dialIMAP(imapHost, box, boxPass); err != nil {
+			t.Fatalf("imap: %v", err)
+		}
 		lines, err := im.cmd("UID SEARCH SUBJECT " + quoteIMAP(token))
 		if err != nil {
 			t.Fatalf("search: %v", err)
@@ -80,14 +85,12 @@ func TestSelfPostRelayDelivers(t *testing.T) {
 			}
 		}
 		if uid == "" {
-			time.Sleep(3 * time.Second)
-			if _, err := im.cmd("NOOP"); err != nil {
-				t.Fatal(err)
-			}
+			time.Sleep(5 * time.Second)
 		}
 	}
+	defer im.close()
 	if uid == "" {
-		t.Fatalf("the letter did not arrive in two minutes (relay said %q)", reply)
+		t.Fatalf("the letter did not arrive in eight minutes (relay said %q)", reply)
 	}
 	header, err := im.cmd("UID FETCH " + uid + " BODY.PEEK[HEADER.FIELDS (FROM REPLY-TO)]")
 	if err != nil {
@@ -114,7 +117,7 @@ func dialIMAP(host, user, pass string) (*imapConn, error) {
 	if err != nil {
 		return nil, err
 	}
-	_ = c.SetDeadline(time.Now().Add(4 * time.Minute))
+	_ = c.SetDeadline(time.Now().Add(2 * time.Minute))
 	im := &imapConn{c: c, r: bufio.NewReader(c)}
 	if _, err := im.r.ReadString('\n'); err != nil {
 		c.Close()

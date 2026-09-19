@@ -3,6 +3,7 @@ package proxy
 import (
 	"bytes"
 	"io"
+	"log/slog"
 	"mime"
 	"net/http"
 	"net/url"
@@ -60,6 +61,9 @@ func parseTarget(blob sealed.Blob, d store.ProxyDevice, rest string) (target, bo
 		}
 		raw, err := url.PathUnescape(seg)
 		if err != nil || raw == "." || raw == ".." || strings.ContainsAny(raw, "/\\") {
+			if err == nil && raw != "." {
+				slog.Warn("davloom: a path that leaves its collection was refused", "listener", "davloom", "path", rest)
+			}
 			return target{}, false
 		}
 		segs = append(segs, url.PathEscape(raw))
