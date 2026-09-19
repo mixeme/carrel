@@ -10,6 +10,11 @@
 | [server.md](server.md) | План серверной половины (`S`) |
 | [reviews.md](reviews.md) | Opus-ревью и аудиты Fable |
 | [review-server.md](review-server.md) | Ревью сервера перед S-30: находки и что с ними сделано |
+| [connections-tail.md](connections-tail.md) | Отключить, поправить и проверить подключение |
+| [forms-tail.md](forms-tail.md) | Формы правки и действия записи по кадрам |
+| [timeline-tail.md](timeline-tail.md) | Хронология человека (`/timeline`) |
+| [views-tail.md](views-tail.md) | Виды списков, мелкие расхождения с кадрами, спека против кода |
+| [fixtures-tail.md](fixtures-tail.md) | Фикстуры и проверка «вью-модель равна фикстуре» (C-14.2) |
 
 **Исполнитель по умолчанию — Composer.** Если шаг делает другая модель, это написано в чекбоксе: `Opus`, `Fable`. Composer эти шаги не выполняет.
 
