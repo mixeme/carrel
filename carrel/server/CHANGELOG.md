@@ -5,6 +5,23 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.121 — 2026-09-19
+
+A live check behind a real nginx, and what it taught about the proxy's
+settings.
+
+### For operators
+
+- **davloom behind nginx**: forward `/dav/` without a path after the
+  address, `proxy_pass http://127.0.0.1:8081;`. With one
+  (`…:8081/`), nginx decodes the path first; the `%2F` in a collection's
+  address turns into `/`, and requests miss the collection. davloom strips
+  the `/dav` prefix itself. With Apache, set `AllowEncodedSlashes NoDecode`
+  and `ProxyPass … nocanon`.
+- `scripts/proxy-check/` runs Carrel, nginx and Radicale in Docker on a
+  Linux host and checks both the installation check and davloom through
+  nginx: once with nginx left at its defaults, once as S-28.1 asks.
+
 ## v0.0.120 — 2026-09-19
 
 The installation check: Carrel calls itself at its public address and says
