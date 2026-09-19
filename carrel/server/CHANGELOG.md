@@ -54,6 +54,20 @@ Fable audit №3 (Ф3-6).
   and a repeated self-registration); `store.WipeCredentials` stays for the
   credentials alone.
 
+## v0.0.138 — 2026-09-19
+
+Fable audit №3 (Ф3-7).
+
+### For consumers
+
+- **Sign-ins are in the journal** (S-10.6, frame s-admin-7): `login.ok` for
+  a successful one, `login.fail` for a wrong password on an account that
+  exists. An unknown login writes nothing — the journal keeps no typed text
+  — and neither does a disabled account, whose answer to the client is the
+  same. No address is recorded: the journal is kept for good, and the
+  sessions list shows where a live session came from. This decides the
+  note the pre-S-30 review left in views-tail.md (Ф3-7).
+
 ## v0.0.134 — 2026-09-19
 
 Fable audit №3 (Ф3-2, Ф3-3).
