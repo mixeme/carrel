@@ -113,14 +113,6 @@ type MergeRow struct {
 	Union    bool   `json:"union"`
 }
 
-type QuickNoteSheet struct {
-	Title    Text         `json:"title"`
-	Target   TargetPicker `json:"target"`
-	Body     Text         `json:"body"`
-	Actions  []Action     `json:"actions"`
-	NoTarget bool         `json:"noTarget"` // ни одной тетради: «No notebook» и Connect account
-}
-
 // TargetPicker — «куда» в шапке листа.
 type TargetPicker struct {
 	Options []TargetOption `json:"options"`

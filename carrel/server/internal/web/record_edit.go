@@ -2080,7 +2080,18 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 			return
 		}
 	}
-	s.notFound(w, r)
+	// Nowhere to write (s-notes-6): no collection of the kind takes a
+	// record. The sheet says so by having no target, and offers the way out
+	// instead of an empty choice (U-6.16).
+	sheet := view.NewSheet{Kind: spec.kind, Actions: []view.Action{
+		{ID: "connection.add", Label: "Connect account", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		{ID: "record.cancel", Label: "Cancel", Href: s.route("/app/" + kind), Method: "GET", Enabled: true},
+	}}
+	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		return
+	}
+	s.writePage(w, r, http.StatusOK, sheet)
 }
 
 // getKindQuick is the quick sheet (U-6.16): where the record goes, and the few

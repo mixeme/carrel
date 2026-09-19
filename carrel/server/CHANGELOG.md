@@ -5,6 +5,28 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.153 — 2026-09-19
+
+views-tail.md, owner's decision 19.09.2026. **Contract change (C-5.3, C-6,
+C-14.3, U-6).**
+
+### Removed
+
+- **`/app/notes/quick` and `QuickNoteSheet`** from C-5.3, C-6 and `view`:
+  a sheet of one kind broke the equality of collections (C-2.1). The note
+  has the common sheet (`/app/{kind}/quick`, `NewSheet`) since `v0.0.86`.
+
+### Added
+
+- **"Nowhere to write" on the common sheet** (`s-notes-6`): when no
+  collection of the kind takes a record, `/app/{kind}/quick` answers a
+  `NewSheet` without a target or fields, with Connect account and Cancel —
+  it answered 404.
+
+### Changed
+
+- C-14.3: `narrow` is the client's (U-9); the server has no such fixture.
+
 ## v0.0.152 — 2026-09-19
 
 forms-tail.md, step 6. **Contract change (C-6).**

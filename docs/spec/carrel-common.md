@@ -353,7 +353,6 @@ spec/fixtures/<screen>/<state>.json
 | `/app/search/progress/{task}/poll` | GET | вход | фрагмент | `PollBar` |
 | `/app/search/progress/{task}/retry` | POST | вход | фрагмент | `PollBar` |
 | `/app/search/progress/{task}/cancel` | POST | вход | фрагмент | `PollBar` |
-| `/app/notes/quick` | GET, POST | вход | лист | `QuickNoteSheet` |
 | `/app/duplicates` | GET | вход | страница | `DuplicatesPage` |
 | `/app/duplicates/decide` | POST | вход | фрагмент | `DuplicateGroup` |
 | `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage` |
@@ -1145,14 +1144,6 @@ type DuplicatesMergePage struct {
     Actions []Action
 }
 type MergeRow struct { Property Text; Options []Text; Chosen int; Union bool }
-
-type QuickNoteSheet struct {
-    Title    Text
-    Target   TargetPicker
-    Body     Text
-    Actions  []Action
-    NoTarget bool // ни одной тетради: «No notebook» и Connect account
-}
 
 type TargetPicker struct { // «куда» в шапке листа
     Options []TargetOption
@@ -2197,7 +2188,7 @@ type LossReport struct { // сервер принял запись, но что-
 | `partial` | Опрос не закончен: часть источников отвечает, часть ждёт | Везде, где есть `PollBar` |
 | `long` | Операция идёт: показан ход, действие прерываемо | Загрузка, импорт, копия, объединение, проверка сервера |
 | `conflict` | Версия разошлась | Карточки записей, конфликт |
-| `narrow` | Узкий экран (U-9) | Везде |
+| `narrow` | Узкий экран (U-9) — забота клиента: вью-модель та же, что у `normal`, своего файла нет; раскладку клиент проверяет на `normal` | Нигде: не фикстура сервера |
 | `loss` | Сервер принял запись и что-то потерял | Формы правки |
 | `unavailable` | Аккаунт целиком не отвечает | Рейл, единый вид, поиск |
 

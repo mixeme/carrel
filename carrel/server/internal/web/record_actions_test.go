@@ -92,3 +92,20 @@ func TestExportOneNoteAsMarkdown(t *testing.T) {
 		t.Errorf("unknown note: %d, want 404", resp.Code)
 	}
 }
+
+// views-tail.md, owner's decision 19.09.2026: the note has no sheet of its
+// own (C-2.1, equality of collections), and "nowhere to write" (s-notes-6)
+// is the common sheet's too: no collection of the kind to write to, and the
+// sheet says so with the way out, not a 404.
+func TestQuickSheetWithNowhereToWrite(t *testing.T) {
+	h, sess := davHarness(t)
+	for _, kind := range []string{"notes", "contacts"} {
+		sheet := decode[view.NewSheet](t, h.do(get("/app/"+kind+"/quick", sess)))
+		if len(sheet.Target.Options) != 0 || len(sheet.Form.Sets) != 0 {
+			t.Errorf("%s: sheet = %+v, want nowhere to write", kind, sheet)
+		}
+		if a := actionByID(sheet.Actions, "connection.add"); a == nil || a.Href != "/app/settings/connections" {
+			t.Errorf("%s: actions = %+v, want Connect account", kind, sheet.Actions)
+		}
+	}
+}
