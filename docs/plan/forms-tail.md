@@ -65,7 +65,11 @@
 - [x] Контакт: Nickname, Birthday (дата; `BDAY` без года — `--MMDD` читается и
       пишется как был), Categories. Тест: правка каждого поля не меняет
       остальные строки (`v0.0.143`, `TestContactNicknameBirthdayCategories`)
-- [ ] Контакт: метка строки телефона и почты; Address[] по пяти частям
+- [x] Контакт: метка строки телефона и почты; Address[] по пяти частям
+      (`v0.0.144`, `TestContactRowLabelsAndAddresses`,
+      `TestRowLabelSurvivesTheConflictScreen`). Попутно: черновик конфликта
+      заполнял N против серверной версии и предлагал имя, которого никто
+      не набирал
 - [ ] Событие: Status, Categories, пояс
 - [ ] Событие: Repeats — простые поля и Advanced RRULE; `RecurrenceBlock.Fields`
       заполняется для формы. Живой тест: серия правится, исключения целы

@@ -57,14 +57,15 @@ func conflictFields(kind view.Kind, d editDraft, theirs formValues) []editField 
 	var out []editField
 	for _, f := range editFields[kind] {
 		mine, changed := d.Mine[f.name]
-		if changed && !sameRows(mine, theirs[f.name]) {
+		relabelled := f.typed && !sameLabels(d.Mine[f.name+".type"], theirs[f.name+".type"])
+		if changed && (!sameRows(mine, theirs[f.name]) || relabelled) {
 			out = append(out, f)
 		}
 	}
 	return out
 }
 
-func (s *Server) showValues(c *collectionCtx, f editField, vals []string, alarms []cal.Alarm) string {
+func (s *Server) showValues(c *collectionCtx, f editField, vals, labels []string, alarms []cal.Alarm) string {
 	var parts []string
 	switch f.typ {
 	case fieldTime:
@@ -89,11 +90,27 @@ func (s *Server) showValues(c *collectionCtx, f editField, vals []string, alarms
 			}
 			parts = append(parts, c.tf.reminder(a))
 		}
-	default:
+	case fieldAddress:
 		for _, v := range vals {
-			if strings.TrimSpace(v) != "" {
-				parts = append(parts, v)
+			var shown []string
+			for _, p := range addressRowParts(v) {
+				if p != "" {
+					shown = append(shown, p)
+				}
 			}
+			if len(shown) > 0 {
+				parts = append(parts, strings.Join(shown, " "))
+			}
+		}
+	default:
+		for i, v := range vals {
+			if strings.TrimSpace(v) == "" {
+				continue
+			}
+			if i < len(labels) && labels[i] != "" {
+				v += " · " + labels[i]
+			}
+			parts = append(parts, v)
 		}
 	}
 	if len(parts) == 0 {
@@ -118,8 +135,8 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 	for _, f := range conflictFields(c.spec.kind, d, theirs) {
 		page.Rows = append(page.Rows, view.ConflictRow{
 			Property: text(f.label),
-			Mine:     text(s.showValues(c, f, d.Mine[f.name], alarms)),
-			Theirs:   text(s.showValues(c, f, theirs[f.name], alarms)),
+			Mine:     text(s.showValues(c, f, d.Mine[f.name], d.Mine[f.name+".type"], alarms)),
+			Theirs:   text(s.showValues(c, f, theirs[f.name], theirs[f.name+".type"], alarms)),
 			Choice:   view.ChoiceUnset,
 		})
 	}
@@ -218,6 +235,9 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 	for i, f := range conflictFields(c.spec.kind, d, theirs) {
 		if op == "mine" || r.FormValue(fmt.Sprintf("choice.%d", i)) != string(view.ChoiceTheirs) {
 			want[f.name] = d.Mine[f.name]
+			if f.typed {
+				want[f.name+".type"] = d.Mine[f.name+".type"]
+			}
 		}
 	}
 	ch := s.buildChange(c, obj, alarms, theirs, want, time.Now())

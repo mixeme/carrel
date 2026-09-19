@@ -48,6 +48,9 @@ const (
 	// fieldBirthday is BDAY: a date, or --MM-DD without a year, written back
 	// in the form it came in (basic or extended).
 	fieldBirthday
+	// fieldAddress is ADR as five inputs a row: street, city, region,
+	// postcode, country. PO box and extended are kept as they were.
+	fieldAddress
 )
 
 type editField struct {
@@ -57,6 +60,7 @@ type editField struct {
 	typ      fieldType
 	required bool
 	allDay   bool   // fieldTime: the field has its own all-day box
+	typed    bool   // fieldMulti: each row has its label, the TYPE parameter
 	hint     string // shown under the field, when the rule needs saying
 }
 
@@ -66,8 +70,9 @@ var editFields = map[view.Kind][]editField{
 			hint: "Left empty, it is made from Given and Family. Fill it alone and it is cut the other way: the first word is the given name, the rest the family name."},
 		{name: "n", label: "Name", prop: "N", typ: fieldName},
 		{name: "nickname", label: "Nickname", prop: "NICKNAME", typ: fieldText},
-		{name: "email", label: "Email", prop: "EMAIL", typ: fieldMulti},
-		{name: "tel", label: "Phone", prop: "TEL", typ: fieldMulti},
+		{name: "email", label: "Email", prop: "EMAIL", typ: fieldMulti, typed: true},
+		{name: "tel", label: "Phone", prop: "TEL", typ: fieldMulti, typed: true},
+		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress},
 		{name: "org", label: "Organisation", prop: "ORG", typ: fieldText},
 		{name: "title", label: "Title", prop: "TITLE", typ: fieldText},
 		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday,
@@ -117,6 +122,31 @@ func quickFields(k view.Kind) []editField {
 			}
 		}
 	}
+	return out
+}
+
+// rowLabels are the labels a phone or an address row is offered (TYPE). A
+// label another client wrote is offered too, so keeping it is a choice.
+var rowLabels = []string{"home", "work", "cell", "voice", "fax", "other"}
+
+// addressParts are the inputs of an address row: ADR components 2 to 6
+// (RFC 6350 §6.3.1).
+var addressParts = []struct{ name, label string }{
+	{"street", "Street"}, {"city", "City"}, {"region", "Region"}, {"code", "Postcode"}, {"country", "Country"},
+}
+
+// addressRow is the five shown parts of an ADR value, one string for
+// comparison: "" when every part is empty.
+func addressRow(parts []string) string {
+	if strings.TrimSpace(strings.Join(parts, "")) == "" {
+		return ""
+	}
+	return strings.Join(parts, "\x1f")
+}
+
+func addressRowParts(row string) [5]string {
+	var out [5]string
+	copy(out[:], strings.Split(row, "\x1f"))
 	return out
 }
 
@@ -191,9 +221,23 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			p := nameParts(c.text(obj, f.prop))
 			vals[f.name] = []string{p[1], p[0]}
 		case fieldMulti:
-			var rows []string
+			var rows, labels []string
 			for _, v := range props[f.prop] {
 				rows = append(rows, v.Text)
+				labels = append(labels, v.Params["TYPE"])
+			}
+			vals[f.name] = append(rows, "")
+			if f.typed {
+				vals[f.name+".type"] = append(labels, "")
+			}
+		case fieldAddress:
+			var rows []string
+			for _, v := range props[f.prop] {
+				p := strings.SplitN(v.Text, ";", 7)
+				for len(p) < 7 {
+					p = append(p, "")
+				}
+				rows = append(rows, addressRow(p[2:]))
 			}
 			vals[f.name] = append(rows, "")
 		case fieldTime:
@@ -296,6 +340,30 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name + ".given")), strings.TrimSpace(r.FormValue(f.name + ".family"))}
 		case fieldMulti, fieldReminders:
 			vals[f.name] = indexedRows(r, f.name)
+			if f.typed {
+				var labels []string
+				for i := 0; i < len(vals[f.name])-1; i++ {
+					labels = append(labels, strings.TrimSpace(r.FormValue(fmt.Sprintf("%s.%d.type", f.name, i))))
+				}
+				vals[f.name+".type"] = append(labels, strings.TrimSpace(r.FormValue(f.name+".new.type")))
+			}
+		case fieldAddress:
+			part := func(prefix string) string {
+				var parts []string
+				for _, p := range addressParts {
+					parts = append(parts, strings.TrimSpace(r.FormValue(prefix+"."+p.name)))
+				}
+				return addressRow(parts)
+			}
+			var rows []string
+			for i := 0; ; i++ {
+				prefix := fmt.Sprintf("%s.%d", f.name, i)
+				if _, ok := r.Form[prefix+".street"]; !ok {
+					break
+				}
+				rows = append(rows, part(prefix))
+			}
+			vals[f.name] = append(rows, part(f.name+".new"))
 		case fieldTime:
 			row := []string{strings.TrimSpace(r.FormValue(f.name + ".date")), strings.TrimSpace(r.FormValue(f.name + ".time")), ""}
 			if f.allDay {
@@ -324,31 +392,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	ch := change{errors: map[string]string{}}
 	props := obj.Props()
 	escape := c.spec.kind != view.KindContact
-	// U-6.1: the display name and the two parts of N fill each other in, and
-	// both directions happen before the fields are walked — so what reaches the
-	// server is what the screen would show, and whoever filled one side is
-	// never told the other is missing. One switch, so the two cannot undo each
-	// other's work.
-	if c.spec.kind == view.KindContact {
-		fn := strings.TrimSpace(first(want["fn"]))
-		n := pair(want["n"])
-		given, family := strings.TrimSpace(n[0]), strings.TrimSpace(n[1])
-		switch {
-		case fn == "" && given+family != "":
-			want["fn"] = []string{strings.TrimSpace(given + " " + family)}
-		case fn != "" && given == "" && family == "" && fn != strings.TrimSpace(first(have["fn"])):
-			// Only when the display name itself was changed. Editing a phone
-			// on a card that carries no N must not quietly grow one: what the
-			// person did not touch stays as it was (S-7).
-			// Cut left to right, the way the quick sheet cuts it (U-6.16):
-			// the first word is the given name, the rest the family name.
-			given, family = fn, ""
-			if i := strings.IndexByte(fn, ' '); i > 0 {
-				given, family = fn[:i], strings.TrimSpace(fn[i+1:])
-			}
-			want["n"] = []string{given, family}
-		}
-	}
+	fillNames(c.spec.kind, have, want)
 	startRow := triple(want["start"])
 	startChanged := !sameRows(want["start"], have["start"])
 	var startAt, endAt time.Time
@@ -367,10 +411,34 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], v, escape)...)
 		case fieldMulti:
+			var labels []string
+			if f.typed {
+				labels = want[f.name+".type"]
+			}
+			if sameRows(w, h) && (!f.typed || sameLabels(labels, have[f.name+".type"])) {
+				continue
+			}
+			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], w, labels)...)
+		case fieldAddress:
 			if sameRows(w, h) {
 				continue
 			}
-			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], w)...)
+			cur := props[f.prop]
+			rows := make([]string, len(w))
+			for i, row := range w {
+				if row == "" {
+					continue
+				}
+				full := make([]string, 7)
+				if i < len(cur) {
+					copy(full, strings.SplitN(cur[i].Text, ";", 7))
+				}
+				for j, p := range addressRowParts(row) {
+					full[2+j] = strings.ReplaceAll(p, ";", "")
+				}
+				rows[i] = strings.Join(full, ";")
+			}
+			ch.ops = append(ch.ops, multiOps(f.prop, cur, rows, nil)...)
 		case fieldList:
 			items := listItems(first(w))
 			if sameRows(items, listItems(first(h))) {
@@ -503,6 +571,34 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 		ch.errors["reminder"] = "Reminders need a due date."
 	}
 	return ch
+}
+
+// fillNames is U-6.1: the display name and the two parts of N fill each
+// other in, and both directions happen before the fields are walked — so what
+// reaches the server is what the screen would show, and whoever filled one
+// side is never told the other is missing. One switch, so the two cannot undo
+// each other's work. have is the version the change is measured against.
+func fillNames(kind view.Kind, have, want formValues) {
+	if kind == view.KindContact {
+		fn := strings.TrimSpace(first(want["fn"]))
+		n := pair(want["n"])
+		given, family := strings.TrimSpace(n[0]), strings.TrimSpace(n[1])
+		switch {
+		case fn == "" && given+family != "":
+			want["fn"] = []string{strings.TrimSpace(given + " " + family)}
+		case fn != "" && given == "" && family == "" && fn != strings.TrimSpace(first(have["fn"])):
+			// Only when the display name itself was changed. Editing a phone
+			// on a card that carries no N must not quietly grow one: what the
+			// person did not touch stays as it was (S-7).
+			// Cut left to right, the way the quick sheet cuts it (U-6.16):
+			// the first word is the given name, the rest the family name.
+			given, family = fn, ""
+			if i := strings.IndexByte(fn, ' '); i > 0 {
+				given, family = fn[:i], strings.TrimSpace(fn[i+1:])
+			}
+			want["n"] = []string{given, family}
+		}
+	}
 }
 
 // rowTime is the instant a time row names, for validation. An empty row is
@@ -677,15 +773,17 @@ func nameOps(prop string, cur []model.RawValue, given, family string) []model.Pa
 
 // multiOps rewrites a list property row by row: a kept row keeps its
 // parameters (TYPE=work stays on the address it was on), an emptied row
-// disappears, the add row comes without parameters.
-func multiOps(prop string, cur []model.RawValue, rows []string) []model.PatchOp {
+// disappears, the add row comes without parameters. labels, when given, are
+// the TYPE of each row as the form chose it: empty takes the label off.
+func multiOps(prop string, cur []model.RawValue, rows, labels []string) []model.PatchOp {
 	var texts []string
-	var from []int
+	var from, rowOf []int
 	for i, v := range rows {
 		if v = strings.TrimSpace(v); v == "" {
 			continue
 		}
 		texts = append(texts, v)
+		rowOf = append(rowOf, i)
 		if i < len(cur) {
 			from = append(from, i)
 		} else {
@@ -700,14 +798,49 @@ func multiOps(prop string, cur []model.RawValue, rows []string) []model.PatchOp 
 	}
 	ops := []model.PatchOp{model.SetValues{Prop: prop, Values: texts}}
 	for i, src := range from {
-		if src < 0 {
+		if src >= 0 {
+			for _, k := range sortedKeys(cur[src].Params) {
+				if labels != nil && k == "TYPE" {
+					continue
+				}
+				ops = append(ops, model.SetParam{Prop: prop, Index: i, Param: k, Value: cur[src].Params[k]})
+			}
+		}
+		if labels == nil {
 			continue
 		}
-		for _, k := range sortedKeys(cur[src].Params) {
-			ops = append(ops, model.SetParam{Prop: prop, Index: i, Param: k, Value: cur[src].Params[k]})
+		if label := first(labels[min(rowOf[i], len(labels)):]); label != "" {
+			ops = append(ops, model.SetParam{Prop: prop, Index: i, Param: "TYPE", Value: label})
+		} else {
+			ops = append(ops, model.RemoveParam{Prop: prop, Index: i, Param: "TYPE"})
 		}
 	}
 	return ops
+}
+
+// sameLabels compares the labels of the rows the form had.
+func sameLabels(a, b []string) bool {
+	for i := 0; i < max(len(a), len(b)); i++ {
+		if first(a[min(i, len(a)):]) != first(b[min(i, len(b)):]) {
+			return false
+		}
+	}
+	return true
+}
+
+// labelOptions are rowLabels, "no label", and the row's own label when it
+// is none of them.
+func labelOptions(selected string) []view.Option {
+	opts := []view.Option{{Value: "", Label: "No label", Selected: selected == ""}}
+	seen := selected == ""
+	for _, l := range rowLabels {
+		opts = append(opts, view.Option{Value: l, Label: text(l), Selected: l == selected})
+		seen = seen || l == selected
+	}
+	if !seen {
+		opts = append(opts, view.Option{Value: selected, Label: text(strings.ToLower(strings.ReplaceAll(selected, ",", ", "))), Selected: true})
+	}
+	return opts
 }
 
 // timeOps writes a date or date-time in the form it had: a TZID stays with
@@ -896,7 +1029,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 	if st.obj != nil {
 		props = st.obj.Props()
 	}
-	var sets []view.FieldSet
+	var sets, extra []view.FieldSet
 	var reminders *view.FieldSet
 	for _, f := range fields {
 		vals, errText := st.values[f.name], text(st.errors[f.name])
@@ -936,7 +1069,35 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 					row.Error = errText
 				}
 				main.Rows = append(main.Rows, row)
+				if f.typed {
+					label := first(st.values[f.name+".type"][min(i, len(st.values[f.name+".type"])):])
+					name := fmt.Sprintf("%s.%d.type", f.name, i)
+					if i == len(vals)-1 {
+						name = f.name + ".new.type"
+					}
+					main.Rows = append(main.Rows, view.FormRow{Name: name, Label: text(f.label + " label"), Kind: view.InputSelect, Value: text(label), Options: labelOptions(label)})
+				}
 			}
+		case fieldAddress:
+			set := view.FieldSet{Legend: "Addresses"}
+			for i, v := range vals {
+				prefix, label := fmt.Sprintf("%s.%d", f.name, i), f.label
+				if i == len(vals)-1 {
+					prefix, label = f.name+".new", "Add an address"
+				} else if i < len(props[f.prop]) {
+					label = typedLabel(f.label, props[f.prop][i].Params)
+				}
+				parts := addressRowParts(v)
+				for j, p := range addressParts {
+					row := view.FormRow{Name: prefix + "." + p.name, Label: text(p.label), Kind: view.InputText, Value: text(parts[j])}
+					if j == 0 {
+						row.Label = text(label + " · " + p.label)
+						row.Error = errText
+					}
+					set.Rows = append(set.Rows, row)
+				}
+			}
+			extra = append(extra, set)
 		case fieldTime:
 			row := triple(vals)
 			main.Rows = append(main.Rows,
@@ -965,6 +1126,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		}
 	}
 	sets = append(sets, main)
+	sets = append(sets, extra...)
 	if reminders != nil {
 		sets = append(sets, *reminders)
 	}
@@ -1083,6 +1245,10 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 
+	typed := formValues{}
+	for k, v := range want {
+		typed[k] = append([]string(nil), v...)
+	}
 	ch := s.buildChange(c, obj, alarms, have, want, time.Now())
 	if len(ch.errors) > 0 {
 		st.errors = ch.errors
@@ -1113,7 +1279,12 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	err = c.update(r.Context(), sent)
 	switch {
 	case dav.IsStatus(err, http.StatusPreconditionFailed):
-		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, want))
+		// The draft is what the person changed against what they read: the
+		// names fill each other in against that version, not the server's,
+		// or a display name renamed elsewhere would put an N in the draft
+		// nobody typed.
+		fillNames(c.spec.kind, base, typed)
+		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed))
 		s.redirect(w, r, c.recordPath(uid)+"/conflict")
 		return
 	case err != nil:
@@ -1127,8 +1298,12 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 func changedValues(fields []editField, base, want formValues) formValues {
 	out := formValues{}
 	for _, f := range fields {
-		if !sameRows(want[f.name], base[f.name]) {
+		labelled := f.typed && !sameLabels(want[f.name+".type"], base[f.name+".type"])
+		if !sameRows(want[f.name], base[f.name]) || labelled {
 			out[f.name] = want[f.name]
+			if f.typed {
+				out[f.name+".type"] = want[f.name+".type"]
+			}
 		}
 	}
 	return out

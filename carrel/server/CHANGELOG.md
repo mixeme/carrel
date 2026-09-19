@@ -5,6 +5,33 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.144 — 2026-09-19
+
+forms-tail.md, step 2.
+
+### Added
+
+- **A phone or an email row has its label** (`TYPE`, `s-contacts-3`): a
+  choice of home, work, cell, voice, fax, other or none, and the label the
+  row already has when it is none of these — a label another client wrote
+  is kept by leaving it. Changing a label writes that row's `TYPE` and
+  nothing else; the conflict screen shows a label changed alone
+  ("+44 20 1 · cell") and writes it.
+- **Addresses are edited**: each `ADR` is five inputs — street, city,
+  region, postcode, country — in a field set of their own, and an empty
+  one to add. The PO box and extended parts no input offers stay as they
+  were; a semicolon typed into a part is dropped. An address emptied of
+  every part goes. The row keeps its parameters.
+
+### Fixed
+
+- **The conflict screen offered a name nobody typed.** When the display
+  name was changed elsewhere and the person changed something else, the
+  display name and N filled each other in against the server's version:
+  the draft carried an N, the screen listed it, and "Use only my edit"
+  wrote it. The draft now measures the names against the version the form
+  was read at.
+
 ## v0.0.143 — 2026-09-19
 
 forms-tail.md, step 1.
