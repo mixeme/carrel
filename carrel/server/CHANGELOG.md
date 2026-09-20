@@ -5,6 +5,29 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.7 — 2026-09-20
+
+fixtures-tail.md: карточка контакта по кадру `s-contacts-6`.
+
+### Added
+
+- **`ContactPage.Subtitle`** (C-6): the line under the name — where the
+  person works and as what. A linked card takes each half from the member
+  the person chose (S-16).
+
+### Changed
+
+- **Organisation and title leave the field list of a card** and stand in
+  its head, as the frame draws them. The panel beside a list has no such
+  head and keeps them as fields, also as the frame draws it.
+- **The fields of a card stand in the order of the frame**: the telephones,
+  then the addresses, then who the person is, then what is written about
+  them.
+- **CATEGORIES is a field of the card**, beside the tags of the rail: a
+  card read on its own should say what it is filed under.
+- **«Phone · mobile», not «Phone · cell».** `TYPE=CELL` is the format's
+  word (C-10).
+
 ## v0.1.6 — 2026-09-20
 
 fixtures-tail.md: стенды держат день кадров.

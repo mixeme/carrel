@@ -534,8 +534,11 @@ func TestLinkedCardShowsTheEntity(t *testing.T) {
 	for _, fl := range card.Fields {
 		fields[string(fl.Label)+" "+string(fl.Value)]++
 	}
+	if card.Subtitle != "Analytical Engines" {
+		t.Errorf("the head of the card = %q", card.Subtitle)
+	}
 	for _, want := range []string{"Email · home ada@example.com", "Email · work ada@engines.example",
-		"Phone +44 20 7946 0000", "Organisation Analytical Engines"} {
+		"Phone +44 20 7946 0000"} {
 		if fields[want] != 1 {
 			t.Errorf("field %q shown %d times in %+v", want, fields[want], card.Fields)
 		}

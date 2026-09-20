@@ -210,11 +210,13 @@ func (s *Server) linkedContact(ctx context.Context, c *collectionCtx, uid string
 			}
 		}
 	}
-	org := lc.preferred("ORG", obj)
+	// Where the person works and as what is the head of the card, and each
+	// half comes from the member the person chose (s-contacts-6, S-16).
+	page.Subtitle = text(contactSubtitleOf(lc.preferred("ORG", obj), lc.preferred("TITLE", obj)))
 	fieldsOf := func(o *model.Object) []view.Field {
 		var out []view.Field
 		for _, f := range contactFieldsOf(o) {
-			if f.prop == "ORG" && o != org {
+			if f.prop == "ORG" || f.prop == "TITLE" {
 				continue
 			}
 			out = append(out, f.Field)

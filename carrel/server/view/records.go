@@ -7,6 +7,7 @@ type ContactPage struct {
 	Shell
 	UID       string        `json:"uid"`
 	Name      Text          `json:"name"`
+	Subtitle  Text          `json:"subtitle"` // «Издательство «Слово» · Выпускающий редактор» — где и кем
 	Avatar    Avatar        `json:"avatar"`
 	PhotoHref string        `json:"photoHref"` // пусто — фотографии нет
 	PhotoNote Text          `json:"photoNote"` // «внешняя ссылка, правка недоступна»

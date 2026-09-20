@@ -163,11 +163,11 @@ type displayField struct {
 // apart from FN and N (the name) and CATEGORIES (the tags): a known property
 // that is never shown would be lost from sight (S-7.2).
 var contactFields = []displayField{
-	{prop: "EMAIL", label: "Email", href: func(v string) string { return "mailto:" + v }},
-	{prop: "TEL", label: "Phone", href: func(v string) string { return "tel:" + strings.ReplaceAll(v, " ", "") }},
-	{prop: "ADR", label: "Address", shape: structured},
 	{prop: "ORG", label: "Organisation", shape: structured},
 	{prop: "TITLE", label: "Title"},
+	{prop: "TEL", label: "Phone", href: func(v string) string { return "tel:" + strings.ReplaceAll(v, " ", "") }},
+	{prop: "EMAIL", label: "Email", href: func(v string) string { return "mailto:" + v }},
+	{prop: "ADR", label: "Address", shape: structured},
 	{prop: "ROLE", label: "Role"},
 	{prop: "URL", label: "Website", href: webHref},
 	{prop: "IMPP", label: "Messaging"},
@@ -179,7 +179,14 @@ var contactFields = []displayField{
 	{prop: "LANG", label: "Language"},
 	{prop: "TZ", label: "Time zone"},
 	{prop: "GEO", label: "Location"},
+	{prop: "CATEGORIES", label: "Categories", shape: listShown},
 	{prop: "NOTE", label: "Note"},
+}
+
+// listShown is a comma-separated property read as the list it is: the
+// commas of CATEGORIES separate values, and the card shows them apart.
+func listShown(v string) string {
+	return strings.Join(listItems(v), ", ")
 }
 
 func webHref(v string) string {
@@ -189,11 +196,29 @@ func webHref(v string) string {
 	return ""
 }
 
+// typeWords are the words of the product for the words of the format: a
+// telephone is mobile, not «cell» (C-10, s-contacts-6).
+var typeWords = map[string]string{"cell": "mobile"}
+
 func typedLabel(label string, params map[string]string) string {
-	if t := params["TYPE"]; t != "" {
-		return label + " · " + strings.ToLower(strings.ReplaceAll(t, ",", ", "))
+	t := params["TYPE"]
+	if t == "" {
+		return label
 	}
-	return label
+	var parts []string
+	for _, one := range strings.Split(t, ",") {
+		one = strings.ToLower(strings.TrimSpace(one))
+		if w, ok := typeWords[one]; ok {
+			one = w
+		}
+		if one != "" {
+			parts = append(parts, one)
+		}
+	}
+	if len(parts) == 0 {
+		return label
+	}
+	return label + " · " + strings.Join(parts, ", ")
 }
 
 func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, notices []view.Notice) view.ContactPage {
@@ -205,7 +230,13 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	page.Shell.Title, page.Name, page.Avatar = text(name), text(name), avatarFor(uid, name)
 	page.Avatar.Href, page.PhotoHref = s.cardPhoto(c, uid, obj)
 	page.Print = s.recordPrint(c, page.Name)
+	page.Subtitle = text(contactSubtitle(obj))
 	for _, f := range contactFieldsOf(obj) {
+		// Where the person works and as what is the head of the card; the
+		// panel beside a list has no such head and keeps them as fields.
+		if f.prop == "ORG" || f.prop == "TITLE" {
+			continue
+		}
 		page.Fields = append(page.Fields, f.Field)
 	}
 	page.Tags = s.recordTags(c, obj)
@@ -225,6 +256,33 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 			Href: s.postQuery("/app/mail/attach", url.Values{"what": {"contact"}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}})})
 	}
 	return page
+}
+
+// contactSubtitle is the line under the name: where the person works and as
+// what (s-contacts-6). It is the head of the card, not two rows of its field
+// list — the client is not left to guess which two to lift out.
+func contactSubtitle(obj *model.Object) string {
+	return contactSubtitleOf(obj, obj)
+}
+
+// contactSubtitleOf builds the same line from two records: a linked card
+// takes the organisation from one member and the title from another, by the
+// answer the person gave when linking (S-16).
+func contactSubtitleOf(org, title *model.Object) string {
+	var parts []string
+	if org != nil {
+		if v := org.Props()["ORG"]; len(v) > 0 {
+			if name := structured(v[0].Text); name != "" {
+				parts = append(parts, name)
+			}
+		}
+	}
+	if title != nil {
+		if v := title.Props()["TITLE"]; len(v) > 0 && v[0].Text != "" {
+			parts = append(parts, v[0].Text)
+		}
+	}
+	return strings.Join(parts, " · ")
 }
 
 // propField is a field of the card with the property it shows.

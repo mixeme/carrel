@@ -875,6 +875,7 @@ type ContactPage struct {
     Shell
     UID       string
     Name      Text
+    Subtitle  Text     // «Издательство «Слово» · Выпускающий редактор» — где и кем
     Avatar    Avatar
     PhotoHref string   // пусто — фотографии нет
     PhotoNote Text     // «внешняя ссылка, правка недоступна»
