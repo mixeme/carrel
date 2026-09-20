@@ -914,3 +914,30 @@ func TestFixtureContactsStates(t *testing.T) {
 			app.h.do(get(app.listPath(t, "contacts", "kontakty"), app.sess)))
 	})
 }
+
+// C-14.3: the states of the combined address book.
+func TestFixtureCombinedContactsStates(t *testing.T) {
+	// empty: nothing is ticked, so there is nothing to poll and the screen
+	// says so rather than showing an empty list (C-8).
+	t.Run("empty", func(t *testing.T) {
+		app := newMockupApp(t)
+		rec := app.h.do(postForm("/app/sources/contacts", app.sess, url.Values{}))
+		if rec.Code != 303 {
+			t.Fatalf("untick everything: %d", rec.Code)
+		}
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		app.compare(t, "app-contacts/empty.json", app.h.do(get("/app/contacts", app.sess)))
+	})
+	// unavailable: one of the two stands refuses, and the poll says which
+	// book is missing from the answer instead of quietly dropping it.
+	t.Run("unavailable", func(t *testing.T) {
+		app := newMockupApp(t)
+		app.servers["radicale · vps"].Refuse("REPORT", 503, "the server is busy")
+		defer app.servers["radicale · vps"].Accept("REPORT")
+		app.h.srv.SetClock(mockupNow(t))
+		page := combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		app.compare(t, "app-contacts/unavailable.json",
+			app.h.do(get("/app/contacts?task="+page.Poll.TaskID, app.sess)))
+	})
+}

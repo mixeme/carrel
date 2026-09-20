@@ -5,6 +5,24 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.2.5 — 2026-09-21
+
+fixtures-tail.md: состояния сведённого вида.
+
+### Changed
+
+- `app-contacts/empty.json` and `app-contacts/unavailable.json`: nothing
+  ticked, where the screen explains the emptiness instead of showing an
+  empty list; and one stand answering 503, where the poll names the book
+  that is missing from the answer.
+
+### Notes
+
+- A 503 is an answer, so the source stands as `error` («ответил
+  отказом») and the summary says «refused»; `unavailable` is for a
+  server that does not answer at all. The two agree, and C-8 means what
+  it says.
+
 ## v0.2.4 — 2026-09-21
 
 fixtures-tail.md: состояния списка одной коллекции.
