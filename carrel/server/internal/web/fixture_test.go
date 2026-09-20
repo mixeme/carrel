@@ -121,13 +121,13 @@ type mockupApp struct {
 }
 
 // listPath is the address of one collection of the set, as Carrel issued it.
-func (a *mockupApp) listPath(t *testing.T, slug string) string {
+func (a *mockupApp) listPath(t *testing.T, segment, slug string) string {
 	t.Helper()
 	key, _ := a.sess.DataKey()
 	blob, _ := a.h.users.Catalog(a.sess.AccountID(), key)
 	for _, c := range blob.Collections {
 		if collectionSlugOf(c.Path) == slug {
-			return "/app/contacts/" + c.AccountID + "/" + url.PathEscape(c.Path)
+			return "/app/" + segment + "/" + c.AccountID + "/" + url.PathEscape(c.Path)
 		}
 	}
 	t.Fatalf("the set has no %q", slug)
@@ -185,7 +185,17 @@ func splitRecords(body string) []string {
 		}
 		return out
 	}
-	head := body[:strings.Index(body, "BEGIN:V")]
+	// The head is everything before the first component of the set: the
+	// calendar's own lines and its VTIMEZONEs. Cutting at the first
+	// «BEGIN:V» left the zones behind, and an event whose TZID nothing
+	// defines is an event nobody can place.
+	cut := len(body)
+	for _, comp := range []string{"BEGIN:VEVENT", "BEGIN:VTODO", "BEGIN:VJOURNAL"} {
+		if at := strings.Index(body, comp); at >= 0 && at < cut {
+			cut = at
+		}
+	}
+	head := body[:cut]
 	var out []string
 	for _, comp := range []string{"VEVENT", "VTODO", "VJOURNAL"} {
 		for _, part := range strings.SplitAfter(body, "END:"+comp+"\n") {
@@ -501,7 +511,7 @@ func TestFixtureCombinedContactsPartial(t *testing.T) {
 	app := newMockupApp(t)
 	// «Контакты» is read alone first, so the combined poll finds it in the
 	// session and answers from there: that is what «from cache» means.
-	if rec := app.h.do(get(app.listPath(t, "kontakty"), app.sess)); rec.Code != 200 {
+	if rec := app.h.do(get(app.listPath(t, "contacts", "kontakty"), app.sess)); rec.Code != 200 {
 		t.Fatalf("read the book alone: %d", rec.Code)
 	}
 	// «Команда» lives on the other stand, and that stand is held: its book
@@ -545,7 +555,7 @@ func TestFixtureCombinedContactsPartial(t *testing.T) {
 func TestFixtureContactConflict(t *testing.T) {
 	app := newMockupApp(t)
 	const uid = "4f2b-9c31-a0e7"
-	rec := app.listPath(t, "kontakty") + "/" + uid
+	rec := app.listPath(t, "contacts", "kontakty") + "/" + uid
 	// Nobody arrives at a conflict from nowhere: the list was opened, the
 	// card after it. That is also where the counts in the rail come from.
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
@@ -590,6 +600,14 @@ func TestFixtureContactCard(t *testing.T) {
 	// and «read 2 min ago» come from.
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-	rec := app.listPath(t, "kontakty") + "/4f2b-9c31-a0e7"
+	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
 	app.compare(t, "app-contact/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: one calendar as an agenda (s-agenda-1).
+func TestFixtureCalendarAgenda(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	here := app.listPath(t, "calendar", "lichnyj") + "?from=2026-08-10"
+	app.compare(t, "app-agenda/normal.json", app.h.do(get(here, app.sess)))
 }

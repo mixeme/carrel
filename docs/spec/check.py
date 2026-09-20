@@ -157,6 +157,7 @@ check("7. фикстуры разбираются", badfix)
 FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут из C-5
     "app-contacts": "/app/contacts",
     "app-contact": "/app/contacts/{account}/{col}/{uid}",
+    "app-agenda": "/app/calendar/{account}/{col}",
     "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
 }
 
@@ -165,6 +166,9 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # потому что кадры правятся не здесь, но печатаются каждый раз: молчаливое
 # исключение — то же расхождение, только невидимое.
 FRAME_TODO = {
+    "app-agenda/normal: коллекции рейла":
+        "кадр рисует две подписки — «Праздники РФ» и «Расписание лиги», — "
+        "которых нет в наборе docs/visual/fixtures; добавить их в набор или снять с кадров",
     "app-contact/normal: коллекции рейла":
         "s-contacts-6 показывает одни «Контакты», s-conflict-1 — обе книги "
         "аккаунта; рейл возврата несёт коллекции своего подключения (C-6.3)",
@@ -175,15 +179,25 @@ def as_kind(x):
     return re.sub(r'/app/(contacts|calendar|tasks|notes)/', '/app/{kind}/', x)
 
 def canon_frame(route):
-    """Кадр маршрута: тот, что рисует экран целиком, а не его кусок."""
-    for m in re.finditer(r'<div class="frame"([^>]*)>', mock):
-        attrs = m.group(1)
-        if 'data-part=' in attrs:
-            continue
-        ds = re.search(r'data-screen="([^"]+)"', attrs)
-        if ds and as_kind(route) in [as_kind(s) for s in ds.group(1).split()]:
-            nxt = mock.find('<div class="frame"', m.end())
-            return mock[m.end():nxt if nxt > 0 else len(mock)]
+    """Кадр маршрута: тот, что рисует экран целиком, а не его кусок.
+
+    Сначала точное совпадение, и только потом по шаблону рода:
+    `/app/calendar/{account}/{col}` и `/app/contacts/{account}/{col}` сводятся
+    к одному шаблону, и без этого агенда сверялась с кадром контактов.
+    """
+    for exact in (True, False):
+        for m in re.finditer(r'<div class="frame"([^>]*)>', mock):
+            attrs = m.group(1)
+            if 'data-part=' in attrs:
+                continue
+            ds = re.search(r'data-screen="([^"]+)"', attrs)
+            if not ds:
+                continue
+            names = ds.group(1).split()
+            hit = route in names if exact else as_kind(route) in [as_kind(s) for s in names]
+            if hit:
+                nxt = mock.find('<div class="frame"', m.end())
+                return mock[m.end():nxt if nxt > 0 else len(mock)]
     return None
 
 def frame_rail(frame):

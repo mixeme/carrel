@@ -5,6 +5,26 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.9 — 2026-09-20
+
+fixtures-tail.md: пятая пара — агенда одного календаря.
+
+### Fixed
+
+- **The mockup set lost its time zones.** The loader cut each calendar
+  file at the first `BEGIN:V`, which is the first `VTIMEZONE`, so every
+  event arrived with a `TZID` nothing defined and no agenda could place
+  it. A week of the set's own calendar came back empty. The zones travel
+  with their events now.
+- **A fixture is matched to its frame exactly first.**
+  `/app/calendar/{account}/{col}` and `/app/contacts/{account}/{col}`
+  fold to one kind template, and the agenda was being compared with the
+  frame of the contacts.
+
+### Changed
+
+- `docs/spec/fixtures/app-agenda/normal.json` is the fifth pair.
+
 ## v0.1.8 — 2026-09-20
 
 fixtures-tail.md: четвёртая пара — карточка контакта.
