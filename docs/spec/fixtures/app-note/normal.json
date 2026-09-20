@@ -1,0 +1,394 @@
+{
+  "details": null,
+  "doc": {
+    "bar": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+        "id": "record.edit",
+        "label": "Edit note",
+        "method": "GET"
+      }
+    ],
+    "body": "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.\n\n## Что делаем\n\n- [ ] проверить changelog\n- [x] попросить у Артёма скриншоты\n\n## Отложено до следующего спринта\n\nПеренос старых вложений в новую папку — Виктор посмотрит, сколько их вообще.",
+    "dirty": false,
+    "fields": [],
+    "mode": "reading",
+    "readOnly": false,
+    "rendered": [
+      {
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Договорились заморозить ветку в среду."
+      },
+      {
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."
+      },
+      {
+        "children": [],
+        "href": "",
+        "kind": "heading",
+        "level": 2,
+        "text": "Что делаем"
+      },
+      {
+        "children": [
+          {
+            "children": [],
+            "href": "",
+            "kind": "item",
+            "level": 0,
+            "text": "[ ] проверить changelog"
+          },
+          {
+            "children": [],
+            "href": "",
+            "kind": "item",
+            "level": 0,
+            "text": "[x] попросить у Артёма скриншоты"
+          }
+        ],
+        "href": "",
+        "kind": "list",
+        "level": 0,
+        "text": ""
+      },
+      {
+        "children": [],
+        "href": "",
+        "kind": "heading",
+        "level": 2,
+        "text": "Отложено до следующего спринта"
+      },
+      {
+        "children": [],
+        "href": "",
+        "kind": "para",
+        "level": 0,
+        "text": "Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще."
+      }
+    ],
+    "title": "Заметка со встречи 10.08"
+  },
+  "loss": null,
+  "meta": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e14\u0026op=attach",
+        "icon": "i-up",
+        "id": "attach.add",
+        "label": "Attach",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move",
+        "id": "record.move",
+        "label": "Move…",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move?copy=1",
+        "id": "record.copy",
+        "label": "Copy…",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+        "icon": "i-link",
+        "id": "publish",
+        "label": "Publish…",
+        "method": "GET"
+      },
+      {
+        "danger": true,
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e14",
+        "id": "record.delete",
+        "label": "Delete note",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64",
+        "icon": "i-down",
+        "id": "note.export",
+        "label": "Export Markdown",
+        "method": "GET"
+      }
+    ],
+    "attach": [],
+    "date": "10 August 2026",
+    "linked": [],
+    "related": [
+      {
+        "href": "",
+        "kind": "",
+        "stamp": "",
+        "title": "8f1c-4a02-b7d3",
+        "when": "",
+        "why": "Not in the lists loaded for this collection"
+      }
+    ],
+    "tags": [
+      {
+        "href": "/app/notes/a-nc-home/zapisi?tag=%D0%B2%D1%81%D1%82%D1%80%D0%B5%D1%87%D0%B8",
+        "label": "встречи",
+        "on": false
+      },
+      {
+        "href": "/app/notes/a-nc-home/zapisi?tag=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7",
+        "label": "релиз",
+        "on": false
+      }
+    ]
+  },
+  "notices": [],
+  "print": {
+    "range": "nextcloud · home · Записи",
+    "taken": "10 August 2026, 17:06",
+    "title": "Заметка со встречи 10.08"
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "href": "/app/notes/a-nc-home/dnevnik",
+            "label": "Дневник",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/dnevnik/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/dnevnik/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "off"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 2,
+            "href": "/app/notes/a-nc-home/zapisi",
+            "label": "Записи",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/zapisi/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/zapisi/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "source": {
+    "changed": "10 August 2026, 17:04",
+    "colour": "#4a6b52",
+    "lastRead": "2 min ago",
+    "objects": null,
+    "readOnly": false,
+    "stamp": "nextcloud · home · Записи"
+  },
+  "title": "Заметка со встречи 10.08",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  },
+  "uid": "5c81-77aa-0d64"
+}

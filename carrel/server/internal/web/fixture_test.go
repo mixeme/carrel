@@ -91,8 +91,10 @@ var mockupSet = []mockupCollection{
 		kinds: []view.Kind{view.KindTask}, comps: []string{"VTODO"}, file: "nextcloud-home/dela.ics"},
 	{account: "nextcloud · home", slug: "zapisi", name: "Записи", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/zapisi.ics"},
+	// «Дневник» stands in the catalog with its tick off, as the
+	// frames of the notes draw it (s-notes-1, s-notes-2).
 	{account: "nextcloud · home", slug: "dnevnik", name: "Дневник", colour: "#6B4E7A",
-		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/dnevnik.ics"},
+		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/dnevnik.ics", unticked: true},
 	// «Команда» is a book this account may only read, and «Рассылки» stands
 	// in the catalog out of the combined views: both are what the frames show.
 	{account: "radicale · vps", slug: "komanda", name: "Команда", colour: "#6B4E7A",
@@ -633,4 +635,62 @@ func TestFixtureNoteList(t *testing.T) {
 	app := newMockupApp(t)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	app.compare(t, "app-notes/normal.json", app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess)))
+}
+
+// C-14.2: the card of a task (s-tasks-2).
+func TestFixtureTaskCard(t *testing.T) {
+	app := newMockupApp(t)
+	// The lists were opened before the record: that is where the counts
+	// of the rail come from.
+	combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	rec := app.listPath(t, "tasks", "dela") + "/aa10-77bc-0e31"
+	app.compare(t, "app-task/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: one note, read (s-notes-2).
+func TestFixtureNoteCard(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess))
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
+	app.compare(t, "app-note/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: the full form of a contact (s-contacts-3).
+func TestFixtureContactEdit(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.do(get(app.listPath(t, "contacts", "kontakty"), app.sess))
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7/edit"
+	app.compare(t, "app-contact-edit/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: the form of an event (s-agenda-3).
+func TestFixtureEventEdit(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-08-10", app.sess))
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3/edit"
+	app.compare(t, "app-event-edit/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: the form of a task (s-tasks-3).
+func TestFixtureTaskEdit(t *testing.T) {
+	app := newMockupApp(t)
+	// The lists were opened before the record: that is where the counts
+	// of the rail come from.
+	combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	rec := app.listPath(t, "tasks", "dela") + "/aa10-77bc-0e31/edit"
+	app.compare(t, "app-task-edit/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: a note in edit (s-notes-3).
+func TestFixtureNoteEdit(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess))
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64/edit"
+	app.compare(t, "app-note-edit/normal.json", app.h.do(get(rec, app.sess)))
 }

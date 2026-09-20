@@ -161,6 +161,12 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-event": "/app/calendar/{account}/{col}/{uid}",
     "app-tasks": "/app/tasks/{account}/{col}",
     "app-notes": "/app/notes/{account}/{col}",
+    "app-task": "/app/tasks/{account}/{col}/{uid}",
+    "app-note": "/app/notes/{account}/{col}/{uid}",
+    "app-contact-edit": "/app/contacts/{account}/{col}/{uid}/edit",
+    "app-event-edit": "/app/calendar/{account}/{col}/{uid}/edit",
+    "app-task-edit": "/app/tasks/{account}/{col}/{uid}/edit",
+    "app-note-edit": "/app/notes/{account}/{col}/{uid}/edit",
     "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
 }
 
@@ -169,6 +175,17 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # потому что кадры правятся не здесь, но печатаются каждый раз: молчаливое
 # исключение — то же расхождение, только невидимое.
 FRAME_TODO = {
+    "app-contact-edit/normal: коллекции рейла":
+        "s-contacts-3 рисует рейл возврата короче — то же, что у s-contacts-6",
+    "app-event-edit/normal: коллекции рейла":
+        "s-agenda-3 рисует рейл возврата короче — то же, что у s-agenda-2",
+    "app-note/normal: навигация":
+        "три кадра называют возврат по-разному: «Back to list» у контактов, "
+        "«Combined notebook» у заметок, «Back to tasks» у задач; сервер говорит одно",
+    "app-task/normal: навигация":
+        "то же: кадр задач говорит «Back to tasks», остальные — «Back to list»",
+    "app-task-edit/normal: навигация":
+        "то же; с правки возврат ведёт на карточку, а не в список",
     "app-event/normal: коллекции рейла":
         "s-agenda-2 не рисует «Дни рождения»; рейл возврата несёт все "
         "календари своего подключения (C-6.3) — то же, что у s-contacts-6",

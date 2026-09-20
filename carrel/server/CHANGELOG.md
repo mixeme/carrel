@@ -5,6 +5,30 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.11 — 2026-09-20
+
+fixtures-tail.md: шесть пар — карточки задачи и заметки и четыре формы правки.
+
+### Changed
+
+- **The form of a contact asks in the order of the frame** (s-contacts-3):
+  who the person is, then where they work and when they were born, then
+  how to reach them, and last what is written about them. It used to ask
+  for the telephones before the organisation.
+- `app-task`, `app-note`, `app-contact-edit`, `app-event-edit`,
+  `app-task-edit` and `app-note-edit` are pairs nine to fourteen.
+- The mockup harness follows the frames further: «Дневник» stands in the
+  catalog with its tick off, and the lists are opened before a record is,
+  which is where the counts in its rail come from.
+
+### Notes
+
+- A place is «Where» on a card and «Location» on a form, and both are the
+  frames' (s-agenda-2, s-agenda-3): a form names fields, a card speaks.
+- Five more discrepancies that are the frames': three frames name the way
+  back with three different words, and two forms draw the rail a row
+  short. Listed in check.py, written into plan/server.md.
+
 ## v0.1.10 — 2026-09-20
 
 fixtures-tail.md: ещё три пары — карточка события, список задач, тетрадь.

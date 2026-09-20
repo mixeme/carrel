@@ -1,0 +1,1151 @@
+{
+  "attach": [
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026from=edit\u0026n=0\u0026op=detach",
+          "icon": "i-trash",
+          "id": "attach.remove",
+          "label": "Remove link, keep the file",
+          "method": "POST"
+        }
+      ],
+      "href": "",
+      "inline": false,
+      "name": "release-checklist.md",
+      "size": "3.0 KB",
+      "state": "ok",
+      "type": "text/markdown"
+    }
+  ],
+  "attendees": [
+    {
+      "email": "a.kovaleva@example.org",
+      "name": "Анна Ковалёва",
+      "status": "Accepted"
+    },
+    {
+      "email": "a.belov@example.org",
+      "name": "Артём Белов",
+      "status": "Tentative"
+    },
+    {
+      "email": "v.goncharov@example.org",
+      "name": "Виктор Гончаров",
+      "status": "No reply"
+    }
+  ],
+  "details": null,
+  "form": {
+    "action": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
+    "actions": [
+      {
+        "enabled": true,
+        "id": "record.save",
+        "label": "Save",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+        "id": "record.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026from=edit\u0026op=attach",
+        "icon": "i-up",
+        "id": "attach.add",
+        "label": "Attach",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "etag",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "e6"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "readat",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1786370760"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Title",
+            "name": "summary",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Синк-ап по релизу"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "date",
+            "label": "Starts",
+            "name": "start.date",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "2026-08-10"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "time",
+            "label": "Starts at",
+            "name": "start.time",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "10:00"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "All day",
+            "name": "start.allday",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "date",
+            "label": "Ends",
+            "name": "end.date",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "2026-08-10"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "time",
+            "label": "Ends at",
+            "name": "end.time",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "11:00"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Time zone",
+            "name": "tz",
+            "options": [
+              {
+                "label": "Asia/Yekaterinburg · as sent",
+                "selected": true,
+                "value": "Asia/Yekaterinburg"
+              },
+              {
+                "label": "UTC",
+                "selected": false,
+                "value": "UTC"
+              },
+              {
+                "label": "Europe/Moscow",
+                "selected": false,
+                "value": "Europe/Moscow"
+              },
+              {
+                "label": "Europe/London",
+                "selected": false,
+                "value": "Europe/London"
+              },
+              {
+                "label": "Europe/Dublin",
+                "selected": false,
+                "value": "Europe/Dublin"
+              },
+              {
+                "label": "Europe/Lisbon",
+                "selected": false,
+                "value": "Europe/Lisbon"
+              },
+              {
+                "label": "Europe/Paris",
+                "selected": false,
+                "value": "Europe/Paris"
+              },
+              {
+                "label": "Europe/Berlin",
+                "selected": false,
+                "value": "Europe/Berlin"
+              },
+              {
+                "label": "Europe/Madrid",
+                "selected": false,
+                "value": "Europe/Madrid"
+              },
+              {
+                "label": "Europe/Rome",
+                "selected": false,
+                "value": "Europe/Rome"
+              },
+              {
+                "label": "Europe/Amsterdam",
+                "selected": false,
+                "value": "Europe/Amsterdam"
+              },
+              {
+                "label": "Europe/Stockholm",
+                "selected": false,
+                "value": "Europe/Stockholm"
+              },
+              {
+                "label": "Europe/Warsaw",
+                "selected": false,
+                "value": "Europe/Warsaw"
+              },
+              {
+                "label": "Europe/Prague",
+                "selected": false,
+                "value": "Europe/Prague"
+              },
+              {
+                "label": "Europe/Vienna",
+                "selected": false,
+                "value": "Europe/Vienna"
+              },
+              {
+                "label": "Europe/Athens",
+                "selected": false,
+                "value": "Europe/Athens"
+              },
+              {
+                "label": "Europe/Helsinki",
+                "selected": false,
+                "value": "Europe/Helsinki"
+              },
+              {
+                "label": "Europe/Kyiv",
+                "selected": false,
+                "value": "Europe/Kyiv"
+              },
+              {
+                "label": "Europe/Istanbul",
+                "selected": false,
+                "value": "Europe/Istanbul"
+              },
+              {
+                "label": "Europe/Minsk",
+                "selected": false,
+                "value": "Europe/Minsk"
+              },
+              {
+                "label": "Europe/Samara",
+                "selected": false,
+                "value": "Europe/Samara"
+              },
+              {
+                "label": "Asia/Omsk",
+                "selected": false,
+                "value": "Asia/Omsk"
+              },
+              {
+                "label": "Asia/Novosibirsk",
+                "selected": false,
+                "value": "Asia/Novosibirsk"
+              },
+              {
+                "label": "Asia/Krasnoyarsk",
+                "selected": false,
+                "value": "Asia/Krasnoyarsk"
+              },
+              {
+                "label": "Asia/Irkutsk",
+                "selected": false,
+                "value": "Asia/Irkutsk"
+              },
+              {
+                "label": "Asia/Yakutsk",
+                "selected": false,
+                "value": "Asia/Yakutsk"
+              },
+              {
+                "label": "Asia/Vladivostok",
+                "selected": false,
+                "value": "Asia/Vladivostok"
+              },
+              {
+                "label": "Asia/Magadan",
+                "selected": false,
+                "value": "Asia/Magadan"
+              },
+              {
+                "label": "Asia/Kamchatka",
+                "selected": false,
+                "value": "Asia/Kamchatka"
+              },
+              {
+                "label": "Asia/Tbilisi",
+                "selected": false,
+                "value": "Asia/Tbilisi"
+              },
+              {
+                "label": "Asia/Yerevan",
+                "selected": false,
+                "value": "Asia/Yerevan"
+              },
+              {
+                "label": "Asia/Baku",
+                "selected": false,
+                "value": "Asia/Baku"
+              },
+              {
+                "label": "Asia/Almaty",
+                "selected": false,
+                "value": "Asia/Almaty"
+              },
+              {
+                "label": "Asia/Tashkent",
+                "selected": false,
+                "value": "Asia/Tashkent"
+              },
+              {
+                "label": "Asia/Dubai",
+                "selected": false,
+                "value": "Asia/Dubai"
+              },
+              {
+                "label": "Asia/Kolkata",
+                "selected": false,
+                "value": "Asia/Kolkata"
+              },
+              {
+                "label": "Asia/Bangkok",
+                "selected": false,
+                "value": "Asia/Bangkok"
+              },
+              {
+                "label": "Asia/Shanghai",
+                "selected": false,
+                "value": "Asia/Shanghai"
+              },
+              {
+                "label": "Asia/Singapore",
+                "selected": false,
+                "value": "Asia/Singapore"
+              },
+              {
+                "label": "Asia/Tokyo",
+                "selected": false,
+                "value": "Asia/Tokyo"
+              },
+              {
+                "label": "Asia/Seoul",
+                "selected": false,
+                "value": "Asia/Seoul"
+              },
+              {
+                "label": "Australia/Perth",
+                "selected": false,
+                "value": "Australia/Perth"
+              },
+              {
+                "label": "Australia/Sydney",
+                "selected": false,
+                "value": "Australia/Sydney"
+              },
+              {
+                "label": "Pacific/Auckland",
+                "selected": false,
+                "value": "Pacific/Auckland"
+              },
+              {
+                "label": "America/St_Johns",
+                "selected": false,
+                "value": "America/St_Johns"
+              },
+              {
+                "label": "America/Halifax",
+                "selected": false,
+                "value": "America/Halifax"
+              },
+              {
+                "label": "America/New_York",
+                "selected": false,
+                "value": "America/New_York"
+              },
+              {
+                "label": "America/Chicago",
+                "selected": false,
+                "value": "America/Chicago"
+              },
+              {
+                "label": "America/Denver",
+                "selected": false,
+                "value": "America/Denver"
+              },
+              {
+                "label": "America/Phoenix",
+                "selected": false,
+                "value": "America/Phoenix"
+              },
+              {
+                "label": "America/Los_Angeles",
+                "selected": false,
+                "value": "America/Los_Angeles"
+              },
+              {
+                "label": "America/Anchorage",
+                "selected": false,
+                "value": "America/Anchorage"
+              },
+              {
+                "label": "Pacific/Honolulu",
+                "selected": false,
+                "value": "Pacific/Honolulu"
+              },
+              {
+                "label": "America/Mexico_City",
+                "selected": false,
+                "value": "America/Mexico_City"
+              },
+              {
+                "label": "America/Bogota",
+                "selected": false,
+                "value": "America/Bogota"
+              },
+              {
+                "label": "America/Sao_Paulo",
+                "selected": false,
+                "value": "America/Sao_Paulo"
+              },
+              {
+                "label": "America/Argentina/Buenos_Aires",
+                "selected": false,
+                "value": "America/Argentina/Buenos_Aires"
+              },
+              {
+                "label": "Africa/Cairo",
+                "selected": false,
+                "value": "Africa/Cairo"
+              },
+              {
+                "label": "Africa/Johannesburg",
+                "selected": false,
+                "value": "Africa/Johannesburg"
+              },
+              {
+                "label": "Africa/Lagos",
+                "selected": false,
+                "value": "Africa/Lagos"
+              },
+              {
+                "label": "Africa/Nairobi",
+                "selected": false,
+                "value": "Africa/Nairobi"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "Asia/Yekaterinburg"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Location",
+            "name": "location",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Переговорная 2"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Status",
+            "name": "status",
+            "options": [
+              {
+                "label": "No status",
+                "selected": false,
+                "value": ""
+              },
+              {
+                "label": "Tentative",
+                "selected": false,
+                "value": "TENTATIVE"
+              },
+              {
+                "label": "Confirmed",
+                "selected": true,
+                "value": "CONFIRMED"
+              },
+              {
+                "label": "Cancelled",
+                "selected": false,
+                "value": "CANCELLED"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "CONFIRMED"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Separated by commas.",
+            "kind": "text",
+            "label": "Categories",
+            "name": "categories",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "release, team"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "area",
+            "label": "Description",
+            "name": "description",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Обсудить оставшиеся блокеры, дату заморозки и кто пишет письмо пользователям."
+          }
+        ]
+      },
+      {
+        "legend": "Repeats",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Frequency",
+            "name": "repeat.freq",
+            "options": [
+              {
+                "label": "Does not repeat",
+                "selected": false,
+                "value": ""
+              },
+              {
+                "label": "Daily",
+                "selected": false,
+                "value": "DAILY"
+              },
+              {
+                "label": "Weekly",
+                "selected": true,
+                "value": "WEEKLY"
+              },
+              {
+                "label": "Monthly",
+                "selected": false,
+                "value": "MONTHLY"
+              },
+              {
+                "label": "Yearly",
+                "selected": false,
+                "value": "YEARLY"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "WEEKLY"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Every",
+            "name": "repeat.interval",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "On Monday",
+            "name": "repeat.on.MO",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "on"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "On Tuesday",
+            "name": "repeat.on.TU",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "On Wednesday",
+            "name": "repeat.on.WE",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "On Thursday",
+            "name": "repeat.on.TH",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "On Friday",
+            "name": "repeat.on.FR",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "On Saturday",
+            "name": "repeat.on.SA",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "On Sunday",
+            "name": "repeat.on.SU",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "date",
+            "label": "Until",
+            "name": "repeat.until",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "2026-12-29"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Until or Times, not both.",
+            "kind": "number",
+            "label": "Times",
+            "name": "repeat.count",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Changed here, the rule is written as typed and wins over the fields above. Exceptions and moved instances are not edited: the series is edited as a whole.",
+            "kind": "text",
+            "label": "Advanced RRULE",
+            "name": "repeat.rule",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z"
+          }
+        ]
+      },
+      {
+        "legend": "Reminders",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Add a reminder",
+            "name": "reminder.new",
+            "options": [
+              {
+                "label": "No reminder",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "At the start",
+                "selected": false,
+                "value": "PT0S"
+              },
+              {
+                "label": "5 minutes before",
+                "selected": false,
+                "value": "-PT5M"
+              },
+              {
+                "label": "10 minutes before",
+                "selected": false,
+                "value": "-PT10M"
+              },
+              {
+                "label": "15 minutes before",
+                "selected": false,
+                "value": "-PT15M"
+              },
+              {
+                "label": "30 minutes before",
+                "selected": false,
+                "value": "-PT30M"
+              },
+              {
+                "label": "1 hour before",
+                "selected": false,
+                "value": "-PT1H"
+              },
+              {
+                "label": "2 hours before",
+                "selected": false,
+                "value": "-PT2H"
+              },
+              {
+                "label": "1 day before",
+                "selected": false,
+                "value": "-P1D"
+              },
+              {
+                "label": "2 days before",
+                "selected": false,
+                "value": "-P2D"
+              },
+              {
+                "label": "1 week before",
+                "selected": false,
+                "value": "-P1W"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "loss": null,
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to the card",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+            "label": "Дни рождения",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "href": "/app/calendar/a-nc-home/lichnyj",
+            "label": "Личный",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=lichnyj",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/lichnyj/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/lichnyj/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=lichnyj",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "href": "/app/calendar/a-nc-home/rabota",
+            "label": "Работа",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/rabota/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/rabota/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "recurrence": {
+    "fields": [
+      {
+        "href": "",
+        "label": "Frequency",
+        "mono": false,
+        "value": "weekly"
+      },
+      {
+        "href": "",
+        "label": "Every",
+        "mono": false,
+        "value": "1"
+      },
+      {
+        "href": "",
+        "label": "On",
+        "mono": false,
+        "value": "Monday"
+      },
+      {
+        "href": "",
+        "label": "Until",
+        "mono": false,
+        "value": "2026-12-29"
+      },
+      {
+        "href": "",
+        "label": "Next",
+        "mono": false,
+        "value": "17 August 2026, 10:00"
+      },
+      {
+        "href": "",
+        "label": "Then",
+        "mono": false,
+        "value": "24 August 2026, 10:00"
+      },
+      {
+        "href": "",
+        "label": "Then",
+        "mono": false,
+        "value": "31 August 2026, 10:00"
+      }
+    ],
+    "note": "Edited as a whole series",
+    "raw": "FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z",
+    "summary": "Weekly on Monday, until 29 December 2026"
+  },
+  "reminders": [],
+  "title": "Edit event",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  },
+  "uid": "8f1c-4a02-b7d3"
+}

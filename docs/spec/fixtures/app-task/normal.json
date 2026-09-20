@@ -1,0 +1,320 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e11\u0026op=done",
+      "id": "task.done",
+      "label": "Mark done",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit",
+      "id": "record.edit",
+      "label": "Edit task",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e11\u0026op=attach",
+      "icon": "i-up",
+      "id": "attach.add",
+      "label": "Attach",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/move",
+      "id": "record.move",
+      "label": "Move…",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/move?copy=1",
+      "id": "record.copy",
+      "label": "Copy…",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/publish?a=a-nc-home\u0026c=dela\u0026k=tasks\u0026uid=aa10-77bc-0e31",
+      "icon": "i-link",
+      "id": "publish",
+      "label": "Publish…",
+      "method": "GET"
+    },
+    {
+      "danger": true,
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e11",
+      "id": "record.delete",
+      "label": "Delete task",
+      "method": "POST"
+    }
+  ],
+  "attach": [],
+  "body": "",
+  "details": null,
+  "done": false,
+  "fields": [
+    {
+      "href": "",
+      "label": "Due",
+      "mono": false,
+      "value": "7 August 2026"
+    },
+    {
+      "href": "",
+      "label": "Categories",
+      "mono": false,
+      "value": "дом"
+    }
+  ],
+  "linked": [],
+  "loss": null,
+  "notices": [],
+  "percent": null,
+  "print": {
+    "range": "nextcloud · home · Дела",
+    "taken": "10 August 2026, 17:06",
+    "title": "Отправить документы в МФЦ"
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": 3,
+            "href": "/app/tasks/a-nc-home/dela",
+            "label": "Дела",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/dela/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/dela/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": 0,
+            "href": "/app/tasks/a-nc-home/rabota",
+            "label": "Работа",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/rabota/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/rabota/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "readOnly": false,
+  "related": [],
+  "reminders": [],
+  "source": {
+    "changed": "10 August 2026, 17:04",
+    "colour": "#4a6b52",
+    "lastRead": "2 min ago",
+    "objects": null,
+    "readOnly": false,
+    "stamp": "nextcloud · home · Дела"
+  },
+  "summary": "Отправить документы в МФЦ",
+  "title": "Отправить документы в МФЦ",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  },
+  "uid": "aa10-77bc-0e31"
+}

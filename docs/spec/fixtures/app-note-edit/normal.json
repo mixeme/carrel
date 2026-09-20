@@ -1,0 +1,168 @@
+{
+  "bar": [
+    {
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e14\u0026readat=1786370760",
+      "id": "record.save",
+      "label": "Save",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+      "id": "record.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e14\u0026from=edit\u0026op=attach",
+      "icon": "i-up",
+      "id": "attach.add",
+      "label": "Attach",
+      "method": "POST"
+    }
+  ],
+  "body": "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.\n\n## Что делаем\n\n- [ ] проверить changelog\n- [x] попросить у Артёма скриншоты\n\n## Отложено до следующего спринта\n\nПеренос старых вложений в новую папку — Виктор посмотрит, сколько их вообще.",
+  "dirty": false,
+  "fields": [
+    {
+      "error": "",
+      "extra": null,
+      "hint": "",
+      "kind": "date",
+      "label": "Date",
+      "name": "start.date",
+      "options": [],
+      "readOnly": false,
+      "required": false,
+      "value": "2026-08-10"
+    },
+    {
+      "error": "",
+      "extra": null,
+      "hint": "",
+      "kind": "time",
+      "label": "Time",
+      "name": "start.time",
+      "options": [],
+      "readOnly": false,
+      "required": false,
+      "value": "11:05"
+    },
+    {
+      "error": "",
+      "extra": null,
+      "hint": "Separated by commas.",
+      "kind": "text",
+      "label": "Tags",
+      "name": "categories",
+      "options": [],
+      "readOnly": false,
+      "required": false,
+      "value": "встречи, релиз"
+    },
+    {
+      "error": "",
+      "extra": null,
+      "hint": "",
+      "kind": "select",
+      "label": "Related to",
+      "name": "related",
+      "options": [
+        {
+          "label": "Nothing",
+          "selected": false,
+          "value": ""
+        },
+        {
+          "label": "8f1c-4a02-b7d3 · not in the lists loaded for this collection",
+          "selected": true,
+          "value": "8f1c-4a02-b7d3"
+        },
+        {
+          "label": "Что почитать про CRDT · note",
+          "selected": false,
+          "value": "6d92-13ef-b408"
+        }
+      ],
+      "readOnly": false,
+      "required": false,
+      "value": "8f1c-4a02-b7d3"
+    },
+    {
+      "error": "",
+      "extra": null,
+      "hint": "Filled, it wins over the choice above. Only the records already loaded for this collection are offered: nothing is asked of the servers.",
+      "kind": "text",
+      "label": "Or enter a UID by hand",
+      "name": "related.uid",
+      "options": [],
+      "readOnly": false,
+      "required": false,
+      "value": ""
+    }
+  ],
+  "mode": "editing",
+  "readOnly": false,
+  "rendered": [
+    {
+      "children": [],
+      "href": "",
+      "kind": "para",
+      "level": 0,
+      "text": "Договорились заморозить ветку в среду."
+    },
+    {
+      "children": [],
+      "href": "",
+      "kind": "para",
+      "level": 0,
+      "text": "Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."
+    },
+    {
+      "children": [],
+      "href": "",
+      "kind": "heading",
+      "level": 2,
+      "text": "Что делаем"
+    },
+    {
+      "children": [
+        {
+          "children": [],
+          "href": "",
+          "kind": "item",
+          "level": 0,
+          "text": "[ ] проверить changelog"
+        },
+        {
+          "children": [],
+          "href": "",
+          "kind": "item",
+          "level": 0,
+          "text": "[x] попросить у Артёма скриншоты"
+        }
+      ],
+      "href": "",
+      "kind": "list",
+      "level": 0,
+      "text": ""
+    },
+    {
+      "children": [],
+      "href": "",
+      "kind": "heading",
+      "level": 2,
+      "text": "Отложено до следующего спринта"
+    },
+    {
+      "children": [],
+      "href": "",
+      "kind": "para",
+      "level": 0,
+      "text": "Перенос старых вложений в новую папку — Виктор посмотрит, сколько их вообще."
+    }
+  ],
+  "title": "Заметка со встречи 10.08"
+}

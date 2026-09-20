@@ -191,7 +191,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 2,
         "enabled": true,
         "href": "/app/notes",
         "id": "nav.notes",
@@ -216,7 +216,7 @@
         "method": "GET"
       }
     ],
-    "note": "2 of 2 collections ticked",
+    "note": "1 of 2 collections ticked",
     "sections": [
       {
         "account": "",
@@ -224,13 +224,13 @@
         "rows": [
           {
             "colour": "",
-            "count": null,
+            "count": 2,
             "href": "/app/notes",
             "label": "Combined notebook",
             "menu": [],
             "readOnly": false,
             "state": "ok",
-            "tick": "on"
+            "tick": "part"
           }
         ],
         "state": "ok"
@@ -288,7 +288,7 @@
             ],
             "readOnly": false,
             "state": "ok",
-            "tick": "on"
+            "tick": "off"
           },
           {
             "colour": "#4a6b52",
