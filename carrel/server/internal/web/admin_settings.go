@@ -145,6 +145,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		shown = *flash.form
 	}
 	page := view.AdminSettingsPage{Shell: s.buildShell(sess, "Instance settings"), Test: flash.test}
+	page.Rail = s.adminRail(sess, "/admin/settings")
 	num := func(n int) view.Text { return text(strconv.Itoa(n)) }
 
 	origin := s.cfg.PublicURL

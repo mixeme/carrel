@@ -1,0 +1,391 @@
+{
+  "details": null,
+  "folder": {
+    "chosen": "",
+    "nodes": []
+  },
+  "form": {
+    "action": "/app/settings/attachments",
+    "actions": [
+      {
+        "enabled": true,
+        "id": "attachments.save",
+        "label": "Save",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Small files stay in the record",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Up to 2 MB",
+            "name": "inline",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "Written into the event, the task or the note itself, and travels with it."
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "A collection that says it takes less (max-resource-size) lowers the boundary for itself. Nothing here raises it.",
+            "kind": "text",
+            "label": "Larger",
+            "name": "larger",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "Put in the folder below; the record keeps a link to it."
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "nextcloud · home · Дела",
+            "name": "limit.a-nc-home./alice/calendars/dela/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "nextcloud · home · Дневник",
+            "name": "limit.a-nc-home./alice/calendars/dnevnik/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "nextcloud · home · Дни рождения",
+            "name": "limit.a-nc-home./alice/calendars/dni-rozhdeniya/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "nextcloud · home · Личный",
+            "name": "limit.a-nc-home./alice/calendars/lichnyj/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "nextcloud · home · Работа",
+            "name": "limit.a-nc-home./alice/calendars/rabota/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "nextcloud · home · Записи",
+            "name": "limit.a-nc-home./alice/calendars/zapisi/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "radicale · vps · Дежурства",
+            "name": "limit.a-rad-vps./alice/calendars/dezhurstva/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "radicale · vps · Проекты",
+            "name": "limit.a-rad-vps./alice/calendars/proekty/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
+          }
+        ]
+      },
+      {
+        "legend": "Folder",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Any folder of a file collection you can write to, chosen in the tree.",
+            "kind": "text",
+            "label": "Folder",
+            "name": "to",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Optional, such as carrel/attachments. Made when the first attachment goes there; it stays an ordinary folder, readable without Carrel.",
+            "kind": "text",
+            "label": "New folder inside",
+            "name": "sub",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      },
+      {
+        "legend": "File name",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "2026-08-10 Sync-up - report.pdf. A name already taken is never overwritten: a number is added.",
+            "kind": "text",
+            "label": "Written as",
+            "name": "name",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "The date of the record, its title, then the file's own name"
+          }
+        ]
+      }
+    ]
+  },
+  "note": "Removing an attachment from a record does not delete its file: another record may point at it, and Carrel keeps no index of what does. Changing the folder moves nothing: records already written keep their links, and only new attachments go to the new place.",
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/files/published",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [],
+    "tags": []
+  },
+  "title": "Attachments",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}

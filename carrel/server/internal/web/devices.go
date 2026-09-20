@@ -118,6 +118,7 @@ func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, accou
 	blob := s.catalogOf(sess)
 	unlocked := sess.UnlockUntil(time.Now()) != nil
 	page := view.DevicesPage{Shell: s.buildShell(sess, "Set up a new device"), Tab: tab}
+	page.Rail = s.settingsRail(sess, "/app/settings/devices")
 	page.Notices = append(page.Notices, notices...)
 	for _, t := range deviceTabs {
 		a := view.Action{ID: "device.tab." + string(t), Label: text(deviceTabLabels[t]), Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(t)}}), Method: "GET", Enabled: t != tab}

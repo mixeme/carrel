@@ -5,6 +5,32 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.2.0 — 2026-09-21
+
+fixtures-tail.md: у настроек и администрирования появился рейл, и с ним четырнадцать пар.
+
+### Added
+
+- **The settings and the administration have their rail** (C-6.3, the
+  third kind). Fourteen screens answered with nothing in it but the line
+  about the build: a person who opened the settings had no way back to
+  the application except the browser's own button, and no way from one
+  setting to the next. Both rails are now what the frames draw — «Back to
+  app» first, then the screens with their counts, the open one marked.
+- Fourteen pairs: every screen of `/app/settings` and of `/admin`.
+
+### Changed
+
+- The comparison holds steady what the run itself makes: the stands' port,
+  the identifiers of a person and a task, and the stamps of what the run
+  did — when this session began, when this account was made, when a line
+  went into the journal. A session begun on the day of the frames would be
+  an expired session today, so those times cannot be frozen; they are of
+  the same kind as an issued identifier and are replaced by the day of the
+  frames, which still teaches the shape of a date.
+- `check.py` reads the rail's rows by the rows themselves. The rail of the
+  settings is drawn in two blocks, and the check saw one row of nine.
+
 ## v0.1.11 — 2026-09-20
 
 fixtures-tail.md: шесть пар — карточки задачи и заметки и четыре формы правки.

@@ -167,6 +167,20 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-event-edit": "/app/calendar/{account}/{col}/{uid}/edit",
     "app-task-edit": "/app/tasks/{account}/{col}/{uid}/edit",
     "app-note-edit": "/app/notes/{account}/{col}/{uid}/edit",
+    "app-settings-account": "/app/settings/account",
+    "app-settings-connections": "/app/settings/connections",
+    "app-settings-appearance": "/app/settings/appearance",
+    "app-settings-attachments": "/app/settings/attachments",
+    "app-settings-devices": "/app/settings/devices",
+    "app-settings-backup": "/app/settings/backup",
+    "app-settings-davloom": "/app/settings/davloom",
+    "app-settings-escrow": "/app/settings/escrow",
+    "admin-users": "/admin/",
+    "admin-invites": "/admin/invites",
+    "admin-settings": "/admin/settings",
+    "admin-audit": "/admin/audit",
+    "admin-dav": "/admin/dav",
+    "admin-escrow": "/admin/escrow",
     "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
 }
 
@@ -240,13 +254,14 @@ def frame_rail(frame):
         if lab and meta:
             cols.append((lab.group(1), meta.group(1),
                          "off" if "is-off" in classes else "on"))
+    # Строки навигации собираются по самим строкам, а не по обёртке: рейл
+    # настроек делит их на два `tc-nav`, и поиск по первому видел одну строку
+    # из девяти — и считал полный рейл расхождением.
     nav = []
-    nm = re.search(r'<div class="tc-nav">(.*?)</div>', frame, re.S)
-    if nm:
-        for a in re.finditer(r'<a[^>]*>(.*?)</a>', nm.group(1), re.S):
-            num = re.search(r'<span class="tc-num">([^<]*)</span>', a.group(1))
-            lab = re.sub(r'<[^>]+>', '', re.sub(r'<span class="tc-num">.*?</span>', '', a.group(1))).strip()
-            nav.append((lab, num.group(1) if num else None))
+    for a in re.finditer(r'<a[^>]*class="[^"]*tc-nav__item[^"]*"[^>]*>(.*?)</a>', frame, re.S):
+        num = re.search(r'<span class="tc-num">([^<]*)</span>', a.group(1))
+        lab = re.sub(r'<[^>]+>', '', re.sub(r'<span class="tc-num">.*?</span>', '', a.group(1))).strip()
+        nav.append((lab, num.group(1) if num else None))
     return cols, nav
 
 def fixture_rail(data):

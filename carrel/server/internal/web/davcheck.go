@@ -85,6 +85,7 @@ func (s *Server) postAdminDav(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) adminDavPage(sess *session.Session, r *http.Request, trace *view.DiagnosticTrace, full *view.ExerciseReport, agreeErr string) view.AdminDavPage {
 	page := view.AdminDavPage{Shell: s.buildShell(sess, "DAV validator"), Trace: trace, Full: full}
+	page.Rail = s.adminRail(sess, "/admin/dav")
 	rows := []view.FormRow{
 		csrfField(sess),
 		{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(strings.TrimSpace(r.FormValue("server"))), Required: true},

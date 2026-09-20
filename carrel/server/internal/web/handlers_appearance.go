@@ -68,7 +68,7 @@ func (s *Server) appearancePage(sess *session.Session, weekErr, clockErr view.Te
 	)
 	account.Actions = []view.Action{{ID: "appearance.save", Label: "Save", Method: "POST", Enabled: true}}
 	return view.AppearancePage{
-		Shell:   s.buildShell(sess, "Appearance"),
+		Shell:   s.withRail(s.buildShell(sess, "Appearance"), s.settingsRail(sess, "/app/settings/appearance")),
 		Account: account,
 		Instance: view.Form{Sets: []view.FieldSet{{Rows: []view.FormRow{
 			{Name: "timezone", Label: "Time zone", Kind: view.InputText, Value: text(tf.tz.String()), Hint: "This instance", ReadOnly: true},

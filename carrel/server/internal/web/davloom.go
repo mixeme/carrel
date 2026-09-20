@@ -128,7 +128,7 @@ func scopeFromForm(r *http.Request) user.DeviceScope {
 
 func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *issuedDevice, formErr error, editing string) view.DavloomPage {
 	page := view.DavloomPage{
-		Shell:   s.buildShell(sess, "DAV proxy"),
+		Shell:   s.withRail(s.buildShell(sess, "DAV proxy"), s.settingsRail(sess, "/app/settings/davloom")),
 		Enabled: s.cfg.DAVloomPort != 0,
 		Address: text(s.davloomAddress()),
 		Note: "Changing your Carrel password does not disconnect devices: each has its own key wrapper. " +

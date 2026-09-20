@@ -149,6 +149,7 @@ func (s *Server) confirmationSent(r *http.Request, sess *session.Session, to str
 
 func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.AccountPage {
 	page := view.AccountPage{Shell: s.buildShell(sess, "Account")}
+	page.Rail = s.settingsRail(sess, "/app/settings/account")
 	if flash.notice != nil {
 		page.Notices = append(page.Notices, *flash.notice)
 	}

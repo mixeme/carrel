@@ -98,7 +98,7 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 	snap := s.store.Snapshot()
 	now := s.now()
 	page := view.AdminUsersPage{
-		Shell: s.buildShell(sess, "Users"),
+		Shell: s.withRail(s.buildShell(sess, "Users"), s.adminRail(sess, "/admin/")),
 		Add: []view.Action{
 			{ID: "admin.invite", Label: "Invite", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
 		},
@@ -263,7 +263,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvites
 	snap := s.store.Snapshot()
 	now := s.now()
 	page := view.AdminInvitesPage{
-		Shell: s.buildShell(sess, "Invites"),
+		Shell: s.withRail(s.buildShell(sess, "Invites"), s.adminRail(sess, "/admin/invites")),
 		Add: withSubmit(s.plainForm("/admin/invites", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("create")},
@@ -383,6 +383,7 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	page := view.AdminAuditPage{Shell: s.buildShell(sess, "Audit log")}
+	page.Rail = s.adminRail(sess, "/admin/audit")
 	tf := s.timeFor(sess)
 	for i := len(snap.Audit) - 1; i >= 0; i-- {
 		e := snap.Audit[i]

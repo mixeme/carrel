@@ -1,0 +1,866 @@
+{
+  "accounts": [
+    {
+      "accountID": "a-nc-home",
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-nc-home\u0026op=test",
+          "id": "connection.test",
+          "label": "Test",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-nc-home\u0026op=edit",
+          "id": "connection.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections/disconnect?account=a-nc-home",
+          "id": "connection.disconnect",
+          "label": "Disconnect",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-nc-home\u0026op=rediscover",
+          "id": "connection.rediscover",
+          "label": "Look for changes",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/new?a=a-nc-home",
+          "icon": "i-plus",
+          "id": "collection.new",
+          "label": "New collection",
+          "method": "GET"
+        }
+      ],
+      "collections": [
+        {
+          "changed": "",
+          "colour": "#4a6b52",
+          "kinds": [
+            "task"
+          ],
+          "label": "Дела",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/dela/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#6b4e7a",
+          "kinds": [
+            "note"
+          ],
+          "label": "Дневник",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/dnevnik/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#a05a2c",
+          "kinds": [
+            "event"
+          ],
+          "label": "Дни рождения",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/dni-rozhdeniya/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#4a6b52",
+          "kinds": [
+            "event"
+          ],
+          "label": "Личный",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026c=lichnyj",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026c=lichnyj",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/lichnyj/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#3f6e8c",
+          "kinds": [
+            "event",
+            "task"
+          ],
+          "label": "Работа",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/rabota/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#4a6b52",
+          "kinds": [
+            "note"
+          ],
+          "label": "Записи",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/zapisi/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#a05a2c",
+          "kinds": [
+            "contact"
+          ],
+          "label": "Архив",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/contacts/arhiv/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#4a6b52",
+          "kinds": [
+            "contact"
+          ],
+          "label": "Контакты",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/contacts/kontakty/",
+          "readOnly": false
+        }
+      ],
+      "login": "alice",
+      "password": {
+        "reveal": {
+          "enabled": true,
+          "href": "/app/settings/unlock",
+          "id": "connection.password",
+          "label": "Show password",
+          "method": "GET"
+        },
+        "shown": false,
+        "value": ""
+      },
+      "server": "https://nextcloud.example/dav.php",
+      "state": "ok",
+      "title": "nextcloud · home",
+      "trace": null
+    },
+    {
+      "accountID": "a-rad-vps",
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-rad-vps\u0026op=test",
+          "id": "connection.test",
+          "label": "Test",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-rad-vps\u0026op=edit",
+          "id": "connection.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections/disconnect?account=a-rad-vps",
+          "id": "connection.disconnect",
+          "label": "Disconnect",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-rad-vps\u0026op=rediscover",
+          "id": "connection.rediscover",
+          "label": "Look for changes",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/new?a=a-rad-vps",
+          "icon": "i-plus",
+          "id": "collection.new",
+          "label": "New collection",
+          "method": "GET"
+        }
+      ],
+      "collections": [
+        {
+          "changed": "",
+          "colour": "#8c6239",
+          "kinds": [
+            "event"
+          ],
+          "label": "Дежурства",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-rad-vps\u0026c=dezhurstva",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-rad-vps\u0026c=dezhurstva",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/dezhurstva/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#6b4e7a",
+          "kinds": [
+            "event"
+          ],
+          "label": "Проекты",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-rad-vps\u0026c=proekty",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-rad-vps\u0026c=proekty",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/proekty/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#6b4e7a",
+          "kinds": [
+            "contact"
+          ],
+          "label": "Команда",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-rad-vps\u0026c=komanda",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026c=komanda",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-rad-vps\u0026c=komanda",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/contacts/komanda/",
+          "readOnly": true
+        },
+        {
+          "changed": "",
+          "colour": "#6b4e7a",
+          "kinds": [
+            "contact"
+          ],
+          "label": "Рассылки",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-rad-vps\u0026c=rassylki",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026c=rassylki",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-rad-vps\u0026c=rassylki",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/contacts/rassylki/",
+          "readOnly": false
+        }
+      ],
+      "login": "alice",
+      "password": {
+        "reveal": {
+          "enabled": true,
+          "href": "/app/settings/unlock",
+          "id": "connection.password",
+          "label": "Show password",
+          "method": "GET"
+        },
+        "shown": false,
+        "value": ""
+      },
+      "server": "https://radicale.example",
+      "state": "ok",
+      "title": "radicale · vps",
+      "trace": null
+    }
+  ],
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/settings/connections?op=feed",
+      "icon": "i-link",
+      "id": "feed.subscribe",
+      "label": "Subscribe to a feed",
+      "method": "GET"
+    }
+  ],
+  "add": {
+    "action": "/app/settings/connections",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "id": "connection.add",
+        "label": "Connect",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections/test",
+        "id": "connection.test",
+        "label": "Test only",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Your name for this account, as the lists show it. Left empty, the server's host.",
+            "kind": "text",
+            "label": "Label",
+            "name": "label",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "url",
+            "label": "Server URL",
+            "name": "server",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Login",
+            "name": "login",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Certificate fingerprint (SHA-256)",
+            "name": "certFingerprint",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "details": null,
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/files/published",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [],
+    "tags": []
+  },
+  "subscriptions": [],
+  "title": "Connections",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}

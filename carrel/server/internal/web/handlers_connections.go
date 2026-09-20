@@ -342,7 +342,7 @@ func (s *Server) rediscoveryNotice(blob sealed.Blob, conn sealed.Connection, fou
 
 func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice *view.Notice) view.ConnectionsPage {
 	page := view.ConnectionsPage{
-		Shell: s.buildShell(sess, "Connections"),
+		Shell: s.withRail(s.buildShell(sess, "Connections"), s.settingsRail(sess, "/app/settings/connections")),
 		Add:   s.connectionForm(sess, f),
 	}
 	if key, live := sess.DataKey(); live {

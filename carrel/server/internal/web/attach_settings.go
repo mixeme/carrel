@@ -83,6 +83,7 @@ func (s *Server) postSettingsAttachments(w http.ResponseWriter, r *http.Request)
 
 func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blob sealed.Blob, f attachForm) view.AttachmentsPage {
 	page := view.AttachmentsPage{Shell: s.buildShell(sess, "Attachments")}
+	page.Rail = s.settingsRail(sess, "/app/settings/attachments")
 
 	small := view.FieldSet{Legend: "Small files stay in the record", Rows: []view.FormRow{
 		{Name: "inline", Label: text("Up to " + sizeText(conf.AttachInlineMax)), Kind: view.InputText, ReadOnly: true,

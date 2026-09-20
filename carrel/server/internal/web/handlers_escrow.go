@@ -89,7 +89,7 @@ func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.Esc
 		}}
 	}
 	page := view.EscrowPage{
-		Shell:  s.buildShell(sess, "Key escrow"),
+		Shell:  s.withRail(s.buildShell(sess, "Key escrow"), s.settingsRail(sess, "/app/settings/escrow")),
 		Status: status,
 	}
 	if active && u != nil && !store.UserDeposited(u) {
@@ -186,7 +186,7 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 	snap := s.store.Snapshot()
 	enabled := store.EscrowActive(&snap)
 	page := view.AdminEscrowPage{
-		Shell:   s.buildShell(sess, "Key escrow"),
+		Shell:   s.withRail(s.buildShell(sess, "Key escrow"), s.adminRail(sess, "/admin/escrow")),
 		Enabled: enabled,
 		Warning: view.Notice{
 			Role:  view.NoticeAlert,

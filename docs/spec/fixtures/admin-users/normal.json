@@ -1,0 +1,294 @@
+{
+  "add": [
+    {
+      "enabled": true,
+      "href": "/admin/invites",
+      "id": "admin.invite",
+      "label": "Invite",
+      "method": "GET"
+    }
+  ],
+  "details": null,
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "admin.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/admin/invites",
+        "id": "admin.invites",
+        "label": "Add users",
+        "method": "GET"
+      },
+      {
+        "count": 1,
+        "enabled": true,
+        "href": "/admin/",
+        "id": "admin.users",
+        "label": "Users",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/settings",
+        "id": "admin.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/install",
+        "id": "admin.install",
+        "label": "Installation",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/dav",
+        "id": "admin.dav",
+        "label": "DAV validator",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/escrow",
+        "id": "admin.escrow",
+        "label": "Key escrow",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/audit",
+        "id": "admin.audit",
+        "label": "Audit log",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [],
+    "tags": []
+  },
+  "rows": [
+    {
+      "accounts": 2,
+      "created": "10 August 2026, 17:04",
+      "disabled": false,
+      "escrowed": false,
+      "lastLogin": "just now",
+      "login": "mix",
+      "menu": [
+        {
+          "enabled": true,
+          "href": "/admin/?action=sessions\u0026target=u-mix",
+          "id": "admin.user.sessions",
+          "label": "End sessions",
+          "method": "POST"
+        },
+        {
+          "enabled": false,
+          "href": "/admin/?action=disable\u0026target=u-mix",
+          "id": "admin.user.disable",
+          "label": "Disable",
+          "method": "POST",
+          "reason": "Cannot disable the last administrator."
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/admin/?action=reset\u0026target=u-mix",
+          "id": "admin.user.reset",
+          "label": "Reset password",
+          "method": "POST",
+          "reason": "Destroys encrypted connections. Issues the same wipe link as /forgot.",
+          "separator": true
+        },
+        {
+          "danger": true,
+          "enabled": false,
+          "href": "/admin/?action=delete\u0026target=u-mix",
+          "id": "admin.user.delete",
+          "label": "Delete",
+          "method": "POST",
+          "reason": "Type the login to confirm. Cannot delete the last administrator."
+        }
+      ],
+      "role": "admin",
+      "sessions": 1
+    }
+  ],
+  "selfReg": {
+    "action": "/admin/",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "id": "admin.selfreg.save",
+        "label": "Save",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "action",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "selfreg"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Open registration",
+            "name": "selfReg",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "title": "Users",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}

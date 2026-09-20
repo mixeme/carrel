@@ -420,13 +420,65 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	for path, slug := range a.byPath {
 		s = strings.ReplaceAll(s, path, slug)
 	}
+	// The stands listen on whatever port the machine had free; the frames
+	// show an address. Same kind as an issued identifier.
+	for label, name := range map[string]string{
+		"nextcloud · home": "https://nextcloud.example/dav.php",
+		"radicale · vps":   "https://radicale.example",
+	} {
+		if srv := a.servers[label]; srv != nil {
+			s = strings.ReplaceAll(s, srv.URL, name)
+		}
+	}
 	s = regexp.MustCompile(`t-[0-9A-Z]{10}`).ReplaceAllString(s, "t-task")
+	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
 	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
+	// When the run itself did something — started this session, created
+	// this account, wrote this journal line — the stamp is the wall clock's
+	// and cannot be frozen: a session begun on the day of the frames would
+	// be an expired session today. Those stamps are of the same kind as an
+	// issued identifier, and they are replaced by the day of the frames, so
+	// a fixture still teaches the shape of a date without moving.
+
 	var out map[string]any
 	if err := json.Unmarshal([]byte(s), &out); err != nil {
 		t.Fatalf("decode the answer: %v", err)
 	}
+	steadyStamps(out)
 	return out
+}
+
+// runStamps are the fields that say when the run itself did something: this
+// session began, this account was made, this line went into the journal.
+// Their times are the wall clock's and cannot be frozen — a session begun on
+// the day of the frames would be an expired session today — so they are of
+// the same kind as an issued identifier and are replaced by the day of the
+// frames. The shape of a date is still taught; it just stops moving.
+var runStamps = map[string]bool{
+	"started": true, "lastSeen": true, "created": true, "lastLogin": true,
+	"lastUsed": true, "expires": true, "issued": true, "when": true,
+}
+
+var dateLike = regexp.MustCompile(
+	`^\d{1,2} (January|February|March|April|May|June|July|August|September|October|November|December)( \d{4})?, \d{2}:\d{2}$`)
+
+const mockupStamp = "10 August 2026, 17:04"
+
+func steadyStamps(v any) {
+	switch t := v.(type) {
+	case map[string]any:
+		for k, x := range t {
+			if s, ok := x.(string); ok && runStamps[k] && dateLike.MatchString(s) {
+				t[k] = mockupStamp
+				continue
+			}
+			steadyStamps(x)
+		}
+	case []any:
+		for _, x := range t {
+			steadyStamps(x)
+		}
+	}
 }
 
 func loadFixture(t *testing.T, name string) map[string]any {
@@ -693,4 +745,31 @@ func TestFixtureNoteEdit(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64/edit"
 	app.compare(t, "app-note-edit/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: the screens of the settings and of the administration. They hold
+// no records of the set, so each is one call.
+func TestFixtureSettingsAndAdmin(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	for _, one := range []struct{ dir, route string }{
+		{"app-settings-account", "/app/settings/account"},
+		{"app-settings-connections", "/app/settings/connections"},
+		{"app-settings-appearance", "/app/settings/appearance"},
+		{"app-settings-attachments", "/app/settings/attachments"},
+		{"app-settings-devices", "/app/settings/devices"},
+		{"app-settings-backup", "/app/settings/backup"},
+		{"app-settings-davloom", "/app/settings/davloom"},
+		{"app-settings-escrow", "/app/settings/escrow"},
+		{"admin-users", "/admin/"},
+		{"admin-invites", "/admin/invites"},
+		{"admin-settings", "/admin/settings"},
+		{"admin-audit", "/admin/audit"},
+		{"admin-dav", "/admin/dav"},
+		{"admin-escrow", "/admin/escrow"},
+	} {
+		t.Run(one.dir, func(t *testing.T) {
+			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
+		})
+	}
 }

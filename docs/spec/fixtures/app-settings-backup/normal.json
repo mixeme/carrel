@@ -1,0 +1,536 @@
+{
+  "add": {
+    "action": "/app/settings/backup?op=save",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/settings/backup?op=save",
+        "id": "backup.save",
+        "label": "Save",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Name",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them.",
+            "kind": "check",
+            "label": "What to copy",
+            "name": "src",
+            "options": [
+              {
+                "label": "nextcloud · home · Дела",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/dela/"
+              },
+              {
+                "label": "nextcloud · home · Дневник",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/dnevnik/"
+              },
+              {
+                "label": "nextcloud · home · Дни рождения",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/dni-rozhdeniya/"
+              },
+              {
+                "label": "nextcloud · home · Личный",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/lichnyj/"
+              },
+              {
+                "label": "nextcloud · home · Работа",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/rabota/"
+              },
+              {
+                "label": "nextcloud · home · Записи",
+                "selected": false,
+                "value": "a-nc-home|/alice/calendars/zapisi/"
+              },
+              {
+                "label": "nextcloud · home · Архив",
+                "selected": false,
+                "value": "a-nc-home|/alice/contacts/arhiv/"
+              },
+              {
+                "label": "nextcloud · home · Контакты",
+                "selected": false,
+                "value": "a-nc-home|/alice/contacts/kontakty/"
+              },
+              {
+                "label": "radicale · vps · Дежурства",
+                "selected": false,
+                "value": "a-rad-vps|/alice/calendars/dezhurstva/"
+              },
+              {
+                "label": "radicale · vps · Проекты",
+                "selected": false,
+                "value": "a-rad-vps|/alice/calendars/proekty/"
+              },
+              {
+                "label": "radicale · vps · Команда",
+                "selected": false,
+                "value": "a-rad-vps|/alice/contacts/komanda/"
+              },
+              {
+                "label": "radicale · vps · Рассылки",
+                "selected": false,
+                "value": "a-rad-vps|/alice/contacts/rassylki/"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "radio",
+            "label": "Where to",
+            "name": "mode",
+            "options": [
+              {
+                "label": "To WebDAV",
+                "selected": true,
+                "value": "webdav"
+              },
+              {
+                "label": "Download",
+                "selected": false,
+                "value": "download"
+              },
+              {
+                "label": "Both",
+                "selected": false,
+                "value": "both"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Collection",
+            "name": "dest",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Created on first use.",
+            "kind": "text",
+            "label": "Folder",
+            "name": "folder",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Copies past this number are deleted after the new one has been read back and checked, not before. An archive is dated and never overwritten.",
+            "kind": "number",
+            "label": "Keep copies",
+            "name": "keep",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "8"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it, without Carrel and without a password.",
+            "kind": "check",
+            "label": "Encrypt the archive",
+            "name": "encrypted",
+            "options": [
+              {
+                "label": "Encrypt the archive",
+                "selected": true,
+                "value": "1"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "1"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you.",
+            "kind": "password",
+            "label": "Archive password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "0 is never. Carrel keeps no clock of its own.",
+            "kind": "number",
+            "label": "On sign-in, if the last copy is older than (days)",
+            "name": "signin",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "details": null,
+  "jobs": [],
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/account",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "id": "settings.connections",
+        "label": "Connections",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/attachments",
+        "id": "settings.attachments",
+        "label": "Attachments",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/devices",
+        "id": "settings.devices",
+        "label": "New device",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/files/published",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "id": "settings.appearance",
+        "label": "Appearance",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [],
+    "tags": []
+  },
+  "restore": {
+    "actions": [],
+    "note": "Restoring creates: the records go into a new collection, never over what is there now. The archive is opened and shown before anything is written.",
+    "preview": [],
+    "source": {
+      "action": "/app/settings/backup?op=restore-open",
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?op=restore-open",
+          "id": "restore.open",
+          "label": "Open the archive",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/backup?op=restore-open\u0026source=upload",
+          "icon": "i-up",
+          "id": "restore.upload",
+          "label": "Open a file from this computer",
+          "method": "POST"
+        }
+      ],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "radio",
+              "label": "Which archive",
+              "name": "source",
+              "options": [
+                {
+                  "label": "From a job's history",
+                  "selected": false,
+                  "value": "run"
+                },
+                {
+                  "label": "From a storage (WebDAV)",
+                  "selected": true,
+                  "value": "webdav"
+                },
+                {
+                  "label": "From this computer",
+                  "selected": false,
+                  "value": "upload"
+                }
+              ],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "select",
+              "label": "Copy",
+              "name": "run",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "select",
+              "label": "Storage",
+              "name": "store",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "The path of the archive under the storage's root, such as backups/carrel-work-2026-08-16T031000Z.zip.age.",
+              "kind": "text",
+              "label": "File in it",
+              "name": "file",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "The job's own password. An archive that is not encrypted needs none.",
+              "kind": "password",
+              "label": "Archive password",
+              "name": "password",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    "targets": []
+  },
+  "title": "Backup",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}

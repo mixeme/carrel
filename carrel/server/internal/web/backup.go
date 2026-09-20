@@ -394,6 +394,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 	blob := s.catalogOf(sess)
 	tf, now := s.timeFor(sess), s.now()
 	page := view.BackupPage{Shell: s.buildShell(sess, "Backup")}
+	page.Rail = s.settingsRail(sess, "/app/settings/backup")
 	page.Notices = append(page.Notices, notices...)
 	runs := s.users.BackupRuns(sess.AccountID())
 	for _, job := range blob.BackupJobs {

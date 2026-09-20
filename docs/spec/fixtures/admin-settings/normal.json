@@ -1,0 +1,588 @@
+{
+  "details": null,
+  "instance": {
+    "action": "/admin/settings",
+    "actions": [
+      {
+        "enabled": true,
+        "id": "admin.settings.instance",
+        "label": "Save",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Global",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "op",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "instance"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "From 1 to 720. A new invitation, and one extended, live this long.",
+            "kind": "number",
+            "label": "Invite lifetime, h",
+            "name": "inviteTTL",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "24"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "From 1 to 168. Applies to sessions already open.",
+            "kind": "number",
+            "label": "Idle timeout, h",
+            "name": "idle",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "2"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "From 1 to 365. Applies to sessions started from now on.",
+            "kind": "number",
+            "label": "Session life, d",
+            "name": "session",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "7"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "On the sign-in screen and in the letters this instance sends.",
+            "kind": "text",
+            "label": "Instance name",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "carrel.example"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Links in letters start with it. Set with CARREL_PUBLIC_URL.",
+            "kind": "text",
+            "label": "Public address",
+            "name": "publicURL",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "the address each request comes to"
+          }
+        ]
+      }
+    ]
+  },
+  "limits": {
+    "action": "/admin/settings",
+    "actions": [
+      {
+        "enabled": true,
+        "id": "admin.settings.limits",
+        "label": "Save",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Letters from users",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "op",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "limits"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.",
+            "kind": "check",
+            "label": "Let users send letters and links from Carrel",
+            "name": "people",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "From 1 to 100. A larger file goes as a published link, shown as such before sending.",
+            "kind": "number",
+            "label": "Attachment, MB",
+            "name": "attach",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "10"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "From 1 to 100, and not less than an attachment.",
+            "kind": "number",
+            "label": "Letter, MB",
+            "name": "letter",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "25"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "From 1 to 100.",
+            "kind": "number",
+            "label": "Recipients",
+            "name": "recipients",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "20"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "From 1 to 1000, per person, per UTC day.",
+            "kind": "number",
+            "label": "Letters a day",
+            "name": "perDay",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "50"
+          }
+        ]
+      }
+    ]
+  },
+  "mail": {
+    "action": "/admin/settings/mail-test",
+    "actions": [
+      {
+        "enabled": false,
+        "id": "admin.settings.mailtest",
+        "label": "Send test",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Test",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "Send test message to",
+            "name": "to",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "admin.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/admin/invites",
+        "id": "admin.invites",
+        "label": "Add users",
+        "method": "GET"
+      },
+      {
+        "count": 1,
+        "enabled": true,
+        "href": "/admin/",
+        "id": "admin.users",
+        "label": "Users",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/settings",
+        "id": "admin.settings",
+        "label": "Settings",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/install",
+        "id": "admin.install",
+        "label": "Installation",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/dav",
+        "id": "admin.dav",
+        "label": "DAV validator",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/escrow",
+        "id": "admin.escrow",
+        "label": "Key escrow",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/audit",
+        "id": "admin.audit",
+        "label": "Audit log",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [],
+    "tags": []
+  },
+  "smtp": {
+    "action": "/admin/settings",
+    "actions": [
+      {
+        "enabled": true,
+        "id": "admin.settings.save",
+        "label": "Save",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "Mail — not configured",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Empty turns mail off: invitations and links are then handed over in person.",
+            "kind": "text",
+            "label": "Host",
+            "name": "host",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Port",
+            "name": "port",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "587"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Encryption",
+            "name": "security",
+            "options": [
+              {
+                "label": "STARTTLS",
+                "selected": true,
+                "value": "starttls"
+              },
+              {
+                "label": "TLS",
+                "selected": false,
+                "value": "tls"
+              },
+              {
+                "label": "None — a relay on this host or network",
+                "selected": false,
+                "value": "none"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Username",
+            "name": "username",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "The instance's own letters go from it, and it is the envelope sender of every letter. A person's letter never goes from their own domain: the relay vouches for this one.",
+            "kind": "email",
+            "label": "From address",
+            "name": "from",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "From name",
+            "name": "fromName",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Of people's letters. Your relay decides which of the two it will let out. The envelope sender stays the From address either way, so SPF is unaffected; DKIM and DMARC for this domain are set up on the relay, not here. Replies go to the person's confirmed address in both cases.",
+            "kind": "radio",
+            "label": "Sender address",
+            "name": "sender",
+            "options": [
+              {
+                "label": "the From address",
+                "selected": true,
+                "value": "noreply"
+              },
+              {
+                "label": "login@…",
+                "selected": false,
+                "value": "login"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "test": null,
+  "title": "Instance settings",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}

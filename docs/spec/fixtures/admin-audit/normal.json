@@ -1,0 +1,294 @@
+{
+  "bar": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/admin/audit?format=csv",
+        "icon": "i-down",
+        "id": "audit.export",
+        "label": "Export CSV",
+        "method": "GET"
+      }
+    ],
+    "compact": false,
+    "filter": "",
+    "loaded": 10,
+    "range": null,
+    "segments": [
+      {
+        "enabled": false,
+        "href": "/admin/audit",
+        "id": "audit.all",
+        "label": "All · 10",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/admin/audit?show=security",
+        "id": "audit.security",
+        "label": "Security · 2",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/audit?show=failures",
+        "id": "audit.failures",
+        "label": "Failures · 0",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": 10
+  },
+  "details": null,
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "icon": "i-back",
+        "id": "admin.back",
+        "label": "Back to app",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/admin/invites",
+        "id": "admin.invites",
+        "label": "Add users",
+        "method": "GET"
+      },
+      {
+        "count": 1,
+        "enabled": true,
+        "href": "/admin/",
+        "id": "admin.users",
+        "label": "Users",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/settings",
+        "id": "admin.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/install",
+        "id": "admin.install",
+        "label": "Installation",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/dav",
+        "id": "admin.dav",
+        "label": "DAV validator",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/escrow",
+        "id": "admin.escrow",
+        "label": "Key escrow",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/admin/audit",
+        "id": "admin.audit",
+        "label": "Audit log",
+        "method": "GET",
+        "on": true
+      }
+    ],
+    "note": "",
+    "sections": [],
+    "tags": []
+  },
+  "rows": [
+    {
+      "detail": "",
+      "what": "duplicates.link",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "note",
+      "what": "sources.select",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "task",
+      "what": "sources.select",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "event",
+      "what": "sources.select",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "contact",
+      "what": "sources.select",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "a-rad-vps",
+      "what": "connection.add",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "a-nc-home",
+      "what": "connection.add",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "name \"carrel.example\", idle 2h, session 7d, invite 24h, people's mail false, attachment 0 MB, letter 0 MB, 0 recipients, 0 a day (0 = default)",
+      "what": "settings.instance",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": ""
+    },
+    {
+      "detail": "",
+      "what": "login.ok",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "",
+      "what": "setup.first_admin",
+      "when": "10 August 2026, 17:04",
+      "who": "system",
+      "whom": "mix"
+    }
+  ],
+  "title": "Audit log",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}
