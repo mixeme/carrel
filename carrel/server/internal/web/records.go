@@ -674,7 +674,8 @@ func (s *Server) sortSegments(base string, k view.Kind, current string, keep url
 		q := keptQuery(keep)
 		q.Set("sort", o.value)
 		f := tagFilter{base: base, query: q, route: s.route}
-		out = append(out, view.Action{ID: o.id, Label: text(o.label), Href: f.href(keep.Get("tag")), Method: "GET", Enabled: o.value != current})
+		out = append(out, view.Action{ID: o.id, Label: text(o.label), Href: f.href(keep.Get("tag")),
+			Method: "GET", Enabled: o.value != current, On: o.value == current})
 	}
 	return out
 }

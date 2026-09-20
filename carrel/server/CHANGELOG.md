@@ -5,6 +5,29 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.161 — 2026-09-20
+
+fixtures-tail.md: the first findings of the comparison, closed.
+
+### Added
+
+- **The details panel answers** (C-7.2): the zone `details` had no handler
+  at all. A record's address, asked for as a fragment with that target,
+  comes back as `Details` — the name, the fields of the card, where it
+  came from, and its actions with "Open the …" first. The panel beside a
+  list is a row chosen there, not a part of the list's own answer.
+
+### Changed
+
+- The badge of a linked row says «linked ×2», as the frame does
+  (`s-contacts-1`); the sources stand beside it, so naming them twice said
+  nothing. The chosen order of a list is marked `On`.
+- The fixture harness loads the mockup set as the frames show it:
+  «Команда» read-only, «Рассылки» in the catalog but unticked, the two
+  Артём Белов linked by a decision of S-16; and it normalises the issued
+  identifiers into the names the fixtures use (`a-nc-home`, `kontakty`),
+  which is what makes those short addresses legitimate.
+
 ## v0.0.160 — 2026-09-20
 
 **Contract change (C-6.1).** Owner's decision 20.09.2026.

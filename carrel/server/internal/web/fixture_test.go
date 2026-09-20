@@ -40,30 +40,52 @@ type mockupCollection struct {
 	kinds   []view.Kind
 	comps   []string
 	file    string // under docs/visual/fixtures; empty for an empty collection
+	// readOnly and unticked are what the frames show of «Команда» and
+	// «Рассылки»: a book this account may only read, and a collection that
+	// stands in the catalog out of the combined views.
+	readOnly bool
+	unticked bool
 }
 
 // mockupSet is the table of docs/visual/fixtures/README.md.
 var mockupSet = []mockupCollection{
-	{"nextcloud · home", "kontakty", "Контакты", "#4A6B52", []view.Kind{view.KindContact}, nil, "nextcloud-home/kontakty.vcf"},
-	{"nextcloud · home", "arhiv", "Архив", "#A05A2C", []view.Kind{view.KindContact}, nil, "nextcloud-home/arhiv.vcf"},
-	{"nextcloud · home", "lichnyj", "Личный", "#4A6B52", []view.Kind{view.KindEvent}, []string{"VEVENT"}, "nextcloud-home/lichnyj.ics"},
-	{"nextcloud · home", "rabota", "Работа", "#3F6E8C", []view.Kind{view.KindEvent, view.KindTask}, []string{"VEVENT", "VTODO"}, "nextcloud-home/rabota.ics"},
-	{"nextcloud · home", "dni-rozhdeniya", "Дни рождения", "#A05A2C", []view.Kind{view.KindEvent}, []string{"VEVENT"}, "nextcloud-home/dni-rozhdeniya.ics"},
-	{"nextcloud · home", "dela", "Дела", "#4A6B52", []view.Kind{view.KindTask}, []string{"VTODO"}, "nextcloud-home/dela.ics"},
-	{"nextcloud · home", "zapisi", "Записи", "#4A6B52", []view.Kind{view.KindNote}, []string{"VJOURNAL"}, "nextcloud-home/zapisi.ics"},
-	{"nextcloud · home", "dnevnik", "Дневник", "#6B4E7A", []view.Kind{view.KindNote}, []string{"VJOURNAL"}, "nextcloud-home/dnevnik.ics"},
-	{"radicale · vps", "komanda", "Команда", "#6B4E7A", []view.Kind{view.KindContact}, nil, "radicale-vps/komanda.vcf"},
-	{"radicale · vps", "rassylki", "Рассылки", "#6B4E7A", []view.Kind{view.KindContact}, nil, ""},
-	{"radicale · vps", "proekty", "Проекты", "#6B4E7A", []view.Kind{view.KindEvent}, []string{"VEVENT"}, "radicale-vps/proekty.ics"},
-	{"radicale · vps", "dezhurstva", "Дежурства", "#8C6239", []view.Kind{view.KindEvent}, []string{"VEVENT"}, "radicale-vps/dezhurstva.ics"},
+	{account: "nextcloud · home", slug: "kontakty", name: "Контакты", colour: "#4A6B52",
+		kinds: []view.Kind{view.KindContact}, file: "nextcloud-home/kontakty.vcf"},
+	{account: "nextcloud · home", slug: "arhiv", name: "Архив", colour: "#A05A2C",
+		kinds: []view.Kind{view.KindContact}, file: "nextcloud-home/arhiv.vcf"},
+	{account: "nextcloud · home", slug: "lichnyj", name: "Личный", colour: "#4A6B52",
+		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/lichnyj.ics"},
+	{account: "nextcloud · home", slug: "rabota", name: "Работа", colour: "#3F6E8C",
+		kinds: []view.Kind{view.KindEvent, view.KindTask}, comps: []string{"VEVENT", "VTODO"}, file: "nextcloud-home/rabota.ics"},
+	{account: "nextcloud · home", slug: "dni-rozhdeniya", name: "Дни рождения", colour: "#A05A2C",
+		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/dni-rozhdeniya.ics"},
+	{account: "nextcloud · home", slug: "dela", name: "Дела", colour: "#4A6B52",
+		kinds: []view.Kind{view.KindTask}, comps: []string{"VTODO"}, file: "nextcloud-home/dela.ics"},
+	{account: "nextcloud · home", slug: "zapisi", name: "Записи", colour: "#4A6B52",
+		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/zapisi.ics"},
+	{account: "nextcloud · home", slug: "dnevnik", name: "Дневник", colour: "#6B4E7A",
+		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/dnevnik.ics"},
+	// «Команда» is a book this account may only read, and «Рассылки» stands
+	// in the catalog out of the combined views: both are what the frames show.
+	{account: "radicale · vps", slug: "komanda", name: "Команда", colour: "#6B4E7A",
+		kinds: []view.Kind{view.KindContact}, file: "radicale-vps/komanda.vcf", readOnly: true},
+	{account: "radicale · vps", slug: "rassylki", name: "Рассылки", colour: "#6B4E7A",
+		kinds: []view.Kind{view.KindContact}, unticked: true},
+	{account: "radicale · vps", slug: "proekty", name: "Проекты", colour: "#6B4E7A",
+		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "radicale-vps/proekty.ics"},
+	{account: "radicale · vps", slug: "dezhurstva", name: "Дежурства", colour: "#8C6239",
+		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "radicale-vps/dezhurstva.ics"},
 }
 
 // mockupApp is the instance of the fixtures: two connections labelled as the
 // frames label them, the collections of the set, and everything ticked.
 type mockupApp struct {
-	h     *harness
-	sess  *session.Session
-	byCol map[string]string // slug → {account}/{col} as an address holds them
+	h    *harness
+	sess *session.Session
+	// byAccount and byPath turn what Carrel issued into what the fixtures
+	// name: a-nc-home, a-rad-vps, and the last segment of each collection.
+	byAccount map[string]string
+	byPath    map[string]string
 }
 
 func mockupRoot(t *testing.T) string {
@@ -122,7 +144,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 		path := davtest.CalendarHome + col.slug + "/"
 		if len(col.kinds) == 1 && col.kinds[0] == view.KindContact {
 			path = davtest.AddressBookHome + col.slug + "/"
-			srv.AddAddressBook(carddav.AddressBook{Path: path, Name: col.name})
+			srv.AddAddressBook(carddav.AddressBook{Path: path, Name: col.name, ReadOnly: col.readOnly})
 		} else {
 			srv.AddCalendar(caldav.Calendar{Path: path, Name: col.name, SupportedComponentSet: col.comps})
 		}
@@ -161,23 +183,117 @@ func newMockupApp(t *testing.T) *mockupApp {
 			t.Fatalf("connect %s: %d %s", label, rec.Code, rec.Body.String())
 		}
 	}
-	tickAll(t, h, sess)
+	tickMockup(t, h, sess)
+	linkMockupDuplicates(t, h, sess)
 
-	app := &mockupApp{h: h, sess: sess, byCol: map[string]string{}}
+	app := &mockupApp{h: h, sess: sess, byAccount: map[string]string{}, byPath: map[string]string{}}
 	key, _ := sess.DataKey()
 	blob, _ := h.users.Catalog(sess.AccountID(), key)
+	names := map[string]string{"nextcloud · home": "a-nc-home", "radicale · vps": "a-rad-vps"}
+	seen := 0
 	for _, col := range mockupSet {
 		for _, c := range blob.Collections {
 			conn, _ := blob.Connection(c.AccountID)
-			if c.Path == paths[col.slug] && connLabelOf(conn) == col.account {
-				app.byCol[col.slug] = c.AccountID + "/" + url.PathEscape(c.Path)
+			if c.Path != paths[col.slug] || connLabelOf(conn) != col.account {
+				continue
+			}
+			app.byAccount[c.AccountID] = names[col.account]
+			app.byPath[url.PathEscape(c.Path)] = col.slug
+			seen++
+		}
+	}
+	if seen != len(mockupSet) {
+		t.Fatalf("the set did not reach the catalog: %d of %d", seen, len(mockupSet))
+	}
+	return app
+}
+
+// tickMockup ticks what the frames show ticked: everything but «Рассылки»,
+// which the rail shows in the catalog and out of the combined views.
+func tickMockup(t *testing.T, h *harness, sess *session.Session) {
+	t.Helper()
+	skip := map[string]bool{}
+	for _, col := range mockupSet {
+		if col.unticked {
+			skip[col.slug] = true
+		}
+	}
+	key, _ := sess.DataKey()
+	blob, ok := h.users.Catalog(sess.AccountID(), key)
+	if !ok {
+		t.Fatal("no catalog")
+	}
+	var picks []sealed.Selection
+	for _, c := range blob.Collections {
+		if skip[collectionSlugOf(c.Path)] {
+			continue
+		}
+		for _, k := range c.Kinds {
+			picks = append(picks, sealed.Selection{Kind: k, AccountID: c.AccountID, Path: c.Path})
+		}
+	}
+	for _, k := range []view.Kind{view.KindContact, view.KindEvent, view.KindTask, view.KindNote} {
+		if err := h.users.SetSelection(sess.AccountID(), key, k, picks); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+// collectionSlugOf is the last segment of a collection's address — how the
+// set and the fixtures name it.
+func collectionSlugOf(path string) string {
+	return strings.Trim(path[strings.LastIndex(strings.TrimSuffix(path, "/"), "/")+1:], "/")
+}
+
+// linkMockupDuplicates links the two Артём Белов the set holds in two books
+// (docs/visual/fixtures/README.md): the frames show one row with «linked ×2»
+// and both sources, and that is a decision of S-16, not a property of a file.
+func linkMockupDuplicates(t *testing.T, h *harness, sess *session.Session) {
+	t.Helper()
+	key, _ := sess.DataKey()
+	blob, _ := h.users.Catalog(sess.AccountID(), key)
+	var members []sealed.RecordRef
+	for _, c := range blob.Collections {
+		slug := collectionSlugOf(c.Path)
+		if slug != "kontakty" && slug != "komanda" {
+			continue
+		}
+		for _, uid := range mockupUIDs(t, slug) {
+			if strings.HasPrefix(uid, "c3f7") || strings.HasPrefix(uid, "d41a") {
+				members = append(members, sealed.RecordRef{AccountID: c.AccountID, Col: c.Path, UID: uid})
 			}
 		}
 	}
-	if len(app.byCol) != len(mockupSet) {
-		t.Fatalf("the set did not reach the catalog: %d of %d", len(app.byCol), len(mockupSet))
+	if len(members) != 2 {
+		t.Fatalf("the two Артём Белов are not where the set puts them: %+v", members)
 	}
-	return app
+	err := h.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", "", func(d *sealed.Duplicates) error {
+		d.Linked = append(d.Linked, sealed.LinkedGroup{ID: "g-artem", Kind: view.KindContact, Members: members})
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// mockupUIDs are the UIDs of one file of the set, in the order it holds them.
+func mockupUIDs(t *testing.T, slug string) []string {
+	t.Helper()
+	for _, col := range mockupSet {
+		if col.slug != slug || col.file == "" {
+			continue
+		}
+		body, err := os.ReadFile(filepath.Join(mockupRoot(t), filepath.FromSlash(col.file)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var out []string
+		for _, m := range uidLineRe.FindAllStringSubmatch(string(body), -1) {
+			out = append(out, strings.TrimSpace(m[1]))
+		}
+		return out
+	}
+	return nil
 }
 
 // connLabelOf is the label of a connection as the screens show it.
@@ -193,10 +309,12 @@ func connLabelOf(c sealed.Connection) string {
 func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	t.Helper()
 	s := string(body)
-	for slug, addr := range a.byCol {
-		s = strings.ReplaceAll(s, addr, "a-"+slug)
+	for id, name := range a.byAccount {
+		s = strings.ReplaceAll(s, id, name)
 	}
-	s = regexp.MustCompile(`a-[0-9A-Z]{10}`).ReplaceAllString(s, "a-account")
+	for path, slug := range a.byPath {
+		s = strings.ReplaceAll(s, path, slug)
+	}
 	s = regexp.MustCompile(`t-[0-9A-Z]{10}`).ReplaceAllString(s, "t-task")
 	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
 	var out map[string]any
@@ -263,6 +381,19 @@ func TestFixtureCombinedContacts(t *testing.T) {
 	rec := app.h.do(get("/app/contacts?task="+page.Poll.TaskID, app.sess))
 	got := app.normalise(t, rec.Body.Bytes())
 	want := loadFixture(t, "app-contacts/normal.json")
+	if out := os.Getenv("CARREL_FIXTURE_WRITE"); out != "" {
+		// The answer of the screen, normalised, for reading beside the frame
+		// while a fixture is written. It is not the fixture: one written
+		// from the answer would only agree with itself (fixtures-tail.md).
+		body, err := json.MarshalIndent(got, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(out, append(body, '\n'), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("the screen is written to %s", out)
+	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("the screen differs from its fixture (-fixture +screen):\n%s", diff)
 	}

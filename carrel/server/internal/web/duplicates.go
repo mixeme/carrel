@@ -637,7 +637,9 @@ func linkedBadge(it listed) []view.Badge {
 	if len(it.also) == 0 {
 		return nil
 	}
-	return []view.Badge{{Label: text(plural(len(it.also)+1, "source")), Role: view.BadgeLinked}}
+	// «linked ×2», as the frames say it (s-contacts-1): the sources stand
+	// beside the badge, so naming them twice says nothing.
+	return []view.Badge{{Label: text(fmt.Sprintf("linked ×%d", len(it.also)+1)), Role: view.BadgeLinked}}
 }
 
 func linkedState(it listed) view.RecordState {

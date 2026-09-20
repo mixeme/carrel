@@ -27,9 +27,48 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 		s.notFound(w, r)
 	case err != nil:
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+	case WantsFragment(r) && FragmentTarget(r) == TargetDetails:
+		// The panel beside a list (C-7.2): the row chosen there is asked
+		// for at its own address, and what comes back is the card as a
+		// panel — the same record, without the screen around it.
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetDetails, s.recordDetails(c, uid, obj), nil)
 	default:
 		s.writePage(w, r, http.StatusOK, s.withLinked(r.Context(), c, uid, obj, s.recordPage(c, uid, obj)))
 	}
+}
+
+// recordDetails is a record as the details panel of a list (C-6 Details):
+// its name, the fields the card shows, where it came from, and the actions
+// that belong to it. Nothing here is a second way to read a record: it is
+// the record's own page, cut to a panel.
+func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) view.Details {
+	d := view.Details{Title: text(recordTitle(c.spec.kind, obj)), Source: c.source()}
+	switch c.spec.kind {
+	case view.KindContact:
+		for _, f := range contactFieldsOf(obj) {
+			d.Fields = append(d.Fields, f.Field)
+		}
+	case view.KindEvent:
+		page := s.eventPage(c, uid, obj, nil)
+		d.Fields, d.Actions = page.Fields, page.Actions
+	case view.KindTask:
+		page := s.taskPage(c, uid, obj, nil)
+		d.Fields, d.Actions = page.Fields, page.Actions
+	default:
+		page := s.notePage(c, uid, obj, nil)
+		d.Fields, d.Actions = []view.Field{{Label: "Date", Value: page.Meta.Date}}, page.Meta.Actions
+		if page.Meta.Date == "" {
+			d.Fields = nil
+		}
+	}
+	if len(d.Actions) == 0 {
+		d.Actions = s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag))
+	}
+	// The way to the whole record stands first: a panel is a look, not a
+	// place to live in.
+	d.Actions = append([]view.Action{{ID: "record.open", Label: text("Open the " + c.spec.noun),
+		Href: s.route(c.recordPath(uid)), Method: "GET", Enabled: true}}, d.Actions...)
+	return d
 }
 
 // withLinked is the reading page of a record in a linked group: the card of
