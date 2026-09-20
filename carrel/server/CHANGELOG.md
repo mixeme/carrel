@@ -5,6 +5,39 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.0 — 2026-09-20
+
+Подъём версии по решению владельца: четыре хвоста закрыты.
+
+The tail plans of connections, forms, the timeline and the views are closed:
+`connections-tail.md`, `forms-tail.md`, `timeline-tail.md` and
+`views-tail.md` have no open items left. What they brought, in one place:
+
+- **Connections** (`v0.0.14x`): Test, Edit and Disconnect on a connection
+  card; editing keeps the ID and re-seals each live link with the new
+  credentials; Disconnect asks on a sheet that names what goes with it —
+  collections and ticks, published links, backup jobs, davloom devices,
+  linked duplicate groups — and the journal records the counts.
+- **Forms** (`v0.0.15x`): the field kinds a record really has — lists,
+  a birthday with or without a year, an address, a choice, a zone, a repeat
+  rule, a relation, an attendee — each with the labels the frames show,
+  and "Show N empty fields" instead of a wall of blanks.
+- **The timeline** (`S-15.4`): everything tied to one person — events,
+  tasks and notes from every connected server, matched by organiser,
+  attendee or `RELATED-TO`, with the column that says why it matched. It is
+  collected when the timeline is opened, never by opening a card.
+- **The views** (`v0.0.158`): the orders, groups, windows and switches of
+  the lists; the journal; the published calendar; the combined import.
+
+What is not closed and is not claimed: `fixtures-tail.md`. The comparison
+"the view model equals the fixture" exists and runs (C-14.2), and the first
+pair is still red — about a hundred fixtures are yet to be written from the
+frames. S-30 is not closed, and this version does not say it is.
+
+### Changed
+
+- `VERSION` — `0.1.0`.
+
 ## v0.0.162 — 2026-09-20
 
 fixtures-tail.md: один источник времени для того, что экран называет «сейчас».
