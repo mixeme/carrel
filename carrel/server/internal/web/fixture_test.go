@@ -611,3 +611,26 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 	here := app.listPath(t, "calendar", "lichnyj") + "?from=2026-08-10"
 	app.compare(t, "app-agenda/normal.json", app.h.do(get(here, app.sess)))
 }
+
+// C-14.2: the card of an event (s-agenda-2).
+func TestFixtureEventCard(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-08-10", app.sess))
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3"
+	app.compare(t, "app-event/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: one list of tasks (s-tasks-1).
+func TestFixtureTaskList(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	app.compare(t, "app-tasks/normal.json", app.h.do(get(app.listPath(t, "tasks", "dela"), app.sess)))
+}
+
+// C-14.2: one notebook (s-notes-1).
+func TestFixtureNoteList(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	app.compare(t, "app-notes/normal.json", app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess)))
+}

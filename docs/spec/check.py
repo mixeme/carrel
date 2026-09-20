@@ -158,6 +158,9 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-contacts": "/app/contacts",
     "app-contact": "/app/contacts/{account}/{col}/{uid}",
     "app-agenda": "/app/calendar/{account}/{col}",
+    "app-event": "/app/calendar/{account}/{col}/{uid}",
+    "app-tasks": "/app/tasks/{account}/{col}",
+    "app-notes": "/app/notes/{account}/{col}",
     "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
 }
 
@@ -166,6 +169,14 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # потому что кадры правятся не здесь, но печатаются каждый раз: молчаливое
 # исключение — то же расхождение, только невидимое.
 FRAME_TODO = {
+    "app-event/normal: коллекции рейла":
+        "s-agenda-2 не рисует «Дни рождения»; рейл возврата несёт все "
+        "календари своего подключения (C-6.3) — то же, что у s-contacts-6",
+    "app-tasks/normal: коллекции рейла":
+        "кадр рисует подписку «Праздники РФ», которой нет в наборе",
+    "app-notes/normal: коллекции рейла":
+        "кадр рисует тетрадь «Архив», которой нет в наборе («Архив» там — "
+        "адресная книга, не тетрадь)",
     "app-agenda/normal: коллекции рейла":
         "кадр рисует две подписки — «Праздники РФ» и «Расписание лиги», — "
         "которых нет в наборе docs/visual/fixtures; добавить их в набор или снять с кадров",

@@ -431,7 +431,7 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 func calendarFields(obj *model.Object) []view.Field {
 	var out []view.Field
 	if v := cal.Text(obj, "LOCATION"); v != "" {
-		out = append(out, view.Field{Label: "Location", Value: text(v)})
+		out = append(out, view.Field{Label: "Where", Value: text(v)})
 	}
 	if v := cal.Text(obj, "STATUS"); v != "" {
 		out = append(out, view.Field{Label: "Status", Value: text(strings.ToLower(v))})

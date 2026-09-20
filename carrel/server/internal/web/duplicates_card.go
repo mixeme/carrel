@@ -245,7 +245,7 @@ func (s *Server) linkedCalendar(ctx context.Context, c *collectionCtx, uid strin
 		keep := func(o *model.Object, fs []view.Field) []view.Field {
 			var out []view.Field
 			for _, f := range fs {
-				if f.Label == "Location" && o != place {
+				if f.Label == "Where" && o != place {
 					continue
 				}
 				out = append(out, f)
@@ -255,7 +255,7 @@ func (s *Server) linkedCalendar(ctx context.Context, c *collectionCtx, uid strin
 		base := keep(obj, own)
 		if place != obj {
 			if v := cal.Text(place, "LOCATION"); v != "" {
-				base = append(base, view.Field{Label: "Location", Value: text(v)})
+				base = append(base, view.Field{Label: "Where", Value: text(v)})
 			}
 		}
 		var more [][]view.Field

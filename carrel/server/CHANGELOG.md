@@ -5,6 +5,26 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.10 — 2026-09-20
+
+fixtures-tail.md: ещё три пары — карточка события, список задач, тетрадь.
+
+### Changed
+
+- **A place is «Where»**, on an event and on a task, as the frames write
+  it (s-agenda-2). «Location» is the name of the property; a card is read
+  by a person.
+- `app-event/normal.json`, `app-tasks/normal.json` and
+  `app-notes/normal.json` are the sixth, seventh and eighth pairs.
+
+### Notes
+
+- Four discrepancies where the frames, not the answers, are wrong are
+  listed in `check.py` and written into plan/server.md: three collections
+  the frames draw that the mockup set does not hold («Праздники РФ»
+  and «Расписание лиги» among the calendars and the task lists, a
+  notebook «Архив»), and two back rails drawn short.
+
 ## v0.1.9 — 2026-09-20
 
 fixtures-tail.md: пятая пара — агенда одного календаря.

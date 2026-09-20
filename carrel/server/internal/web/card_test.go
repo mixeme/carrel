@@ -66,3 +66,21 @@ func TestTheActionsOfACardStandInTheOrderOfTheFrame(t *testing.T) {
 		t.Errorf("the deletion is not marked: %+v", last)
 	}
 }
+
+// A place is «Where», as the frames of an event and a task write it
+// (s-agenda-2): «Location» is the name of the property, and the card is
+// read by a person, not by a parser.
+func TestAPlaceIsWhere(t *testing.T) {
+	f := calendarFixture(t, nil, "e1.ics",
+		ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260801T000000Z\nSUMMARY:Standup\nLOCATION:Room 4\nDTSTART;VALUE=DATE:20260810\nEND:VEVENT"))
+	page := decode[view.EventPage](t, f.h.do(get(f.path("calendar")+"/e1", f.sess)))
+	for _, fl := range page.Fields {
+		if fl.Label == "Location" {
+			t.Fatalf("the card says «Location»: %+v", page.Fields)
+		}
+		if fl.Label == "Where" && fl.Value == "Room 4" {
+			return
+		}
+	}
+	t.Errorf("no place among %+v", page.Fields)
+}

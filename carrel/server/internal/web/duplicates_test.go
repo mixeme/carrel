@@ -592,7 +592,7 @@ func TestLinkedEventCard(t *testing.T) {
 	}
 	found := false
 	for _, fl := range page.Fields {
-		if fl.Label == "Location" && fl.Value == "Room 4" {
+		if fl.Label == "Where" && fl.Value == "Room 4" {
 			found = true
 		}
 	}
