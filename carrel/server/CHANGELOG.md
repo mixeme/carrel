@@ -5,6 +5,34 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.1 — 2026-09-20
+
+fixtures-tail.md: меню учётной записи — то, что показывает кадр.
+
+### Added
+
+- **The account menu says who is signed in and where** (`TopBar.Signed`,
+  C-6): the login and the instance's name, as the frame's first menu row
+  shows them. Several instances of Carrel — home, work, the one on this
+  laptop — are alike on every other part of the screen.
+- **Administration stands in the menu** for an administrator, pointing at
+  `/admin/`. It was in the frame and in no answer.
+
+### Changed
+
+- The menu's first action is **Settings** (`user.settings`), not
+  «Account»: it opens the settings rail, whose first page is the account.
+  Sign out is `user.logout` and carries the line before it, as the frame
+  draws it. The old ids `account.settings` and `logout` are gone.
+
+### Notes
+
+- **Theme** and **Keyboard shortcuts** stand in the same menu in the frame
+  and are deliberately not in the view model: the theme is a setting of
+  this browser (U-11) and the keyboard sheet is shell chrome with no route
+  (U-7). The client draws them among the server's items and remembers the
+  choice itself. Written into U beside the zones of the shell.
+
 ## v0.1.0 — 2026-09-20
 
 Подъём версии по решению владельца: четыре хвоста закрыты.

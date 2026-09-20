@@ -14,9 +14,18 @@ type Shell struct {
 type TopBar struct {
 	Search   SearchBox  `json:"search"`
 	NewMenu  []MenuItem `json:"newMenu"`  // «New note» и стрелка: остальные роды, файл, письмо
+	Signed   SignedIn   `json:"signed"`   // кто вошёл и куда — первой строкой меню учётной записи
 	User     []MenuItem `json:"user"`     // меню учётной записи
 	Unlocked *When      `json:"unlocked"` // до какого времени открыта выдача учётных данных
 	Refresh  Refresh    `json:"refresh"`
+}
+
+// SignedIn — кто вошёл и на каком экземпляре. Экземпляров у человека
+// бывает несколько — домашний, рабочий, местный, — и на экране они
+// ничем больше не различаются. Это сведения, а не действие: нажать не на что.
+type SignedIn struct {
+	Login    Text `json:"login"`    // имя, под которым вошли
+	Instance Text `json:"instance"` // имя экземпляра, S-26
 }
 
 type Refresh struct {

@@ -591,9 +591,18 @@ type Shell struct {
 type TopBar struct {
     Search   SearchBox
     NewMenu  []MenuItem // «New note» и стрелка: остальные роды, файл, письмо
+    Signed   SignedIn   // кто вошёл и куда — первой строкой меню учётной записи
     User     []MenuItem // меню учётной записи
     Unlocked *When      // до какого времени открыта выдача учётных данных
     Refresh  Refresh    // круговая стрелка и «2 min ago»
+}
+
+// Кто вошёл и на каком экземпляре. Экземпляров у человека бывает
+// несколько — домашний, рабочий, местный, — и на экране они ничем
+// больше не различаются. Это сведения, а не действие: нажать не на что.
+type SignedIn struct {
+    Login    Text // имя, под которым вошли
+    Instance Text // имя экземпляра, S-26
 }
 
 type Refresh struct {

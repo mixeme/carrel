@@ -43,10 +43,7 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 				})
 			}
 		}
-		sh.Top.User = []view.MenuItem{
-			{Action: view.Action{ID: "account.settings", Label: "Account", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}},
-			{Action: view.Action{ID: "logout", Label: "Sign out", Href: s.route("/logout"), Method: "POST", Enabled: true}},
-		}
+		sh.Top.Signed, sh.Top.User = s.signedIn(sess), s.userMenu(sess)
 		if s.users.ConsumeEscrowNotice(sess.AccountID()) {
 			sh.Notices = []view.Notice{{
 				Role:  view.NoticeAlert,
@@ -62,6 +59,41 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 // there is one (C-13). A run from source has no version and no commit, and
 // then the line is the name alone — an empty version shown as one would be a
 // lie about what is running.
+// signedIn is the first line of the account menu: who is signed in and on
+// which instance. Several instances of Carrel look alike on the screen —
+// home, work, the one on this laptop — and only their names tell them apart.
+func (s *Server) signedIn(sess *session.Session) view.SignedIn {
+	in := view.SignedIn{Instance: text(s.users.Settings().InstanceName())}
+	snap := s.store.Snapshot()
+	if u := snap.UserByID(sess.AccountID()); u != nil {
+		in.Login = text(u.Login)
+	}
+	return in
+}
+
+// userMenu is the account menu of the top bar (U-6): the settings, the
+// administration for an administrator, and the way out past the line.
+// Theme and the keyboard sheet stand there too, in the frame, and are not
+// here: they have no route and nothing on the server behind them — the
+// client draws and remembers them itself (U-11).
+func (s *Server) userMenu(sess *session.Session) []view.MenuItem {
+	out := []view.MenuItem{{Action: view.Action{
+		ID: "user.settings", Label: "Settings", Icon: "i-gear",
+		Href: s.route("/app/settings/account"), Method: "GET", Enabled: true,
+	}}}
+	if s.users.IsAdmin(sess.AccountID()) {
+		out = append(out, view.MenuItem{Action: view.Action{
+			ID: "user.admin", Label: "Administration", Icon: "i-adm",
+			Href: s.route("/admin/"), Method: "GET", Enabled: true,
+		}})
+	}
+	// The line before the way out: everything above it opens something,
+	// and this one ends the session.
+	return append(out, view.MenuItem{Separator: true, Action: view.Action{
+		ID: "user.logout", Label: "Sign out", Href: s.route("/logout"), Method: "POST", Enabled: true,
+	}})
+}
+
 func (s *Server) aboutAction() view.Action {
 	label := "Carrel"
 	switch {

@@ -56,6 +56,10 @@
         "separator": true
       }
     ],
+    "signed": {
+      "login": "mix",
+      "instance": "carrel.example"
+    },
     "user": [
       {
         "id": "user.account",
