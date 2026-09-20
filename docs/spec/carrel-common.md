@@ -518,7 +518,7 @@ type Text  string // строка интерфейса или данных по�
 type When  string // дата и время: «10 August, 10:00», «весь день», «2 min ago»
 type Size  string // объём: «1.4 MB»
 type Colour string // цвет метки коллекции: готовое значение, C-10
-type Stamp string // происхождение записи: «nextcloud · Личный»
+type Stamp string // откуда запись: подпись подключения и имя коллекции, «nextcloud · home · Личный»
 
 // Действие. Кнопка, пункт меню и строка панели — одно и то же.
 type Action struct {
