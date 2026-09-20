@@ -5,6 +5,46 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.2 — 2026-09-20
+
+fixtures-tail.md: первая пара «вью-модель равна фикстуре» зелёная, и она
+сразу нашла ошибку.
+
+### Fixed
+
+- **A folded row was a race.** Two runs of the same combined list gave a
+  different record for the same linked group: `foldLinked` kept whichever
+  member arrived first, and the first to arrive is the one whose server
+  answered first. The row's address, stamp, colour and photo changed from
+  run to run. The row is now the group's **first member** (S-16), with the
+  others behind it in the group's order. No screen and no frame changed —
+  only which of two records the row is, and now it is a decision instead
+  of a race.
+
+### Changed
+
+- `docs/spec/fixtures/app-contacts/normal.json` is written from the frame
+  against the mockup set: the set's UIDs and counts, the order segments,
+  the combined import and export entries, source stamps in full, no
+  `details` and no `list.columns`.
+- The comparison is no longer behind `CARREL_FIXTURE_DIFF`:
+  `web.TestFixtureCombinedContacts` is a gate, and a screen that drifts
+  from its fixture fails the build (C-14.2, the first of them).
+- `docs/spec/check.py`, check 8, compares what a screen shows and only
+  that: which collections the rail holds, their ticks, and the dash («—»
+  in the frame is `null` in the fixture, never zero). It no longer
+  compares their order — that order is the DAV server's and Carrel keeps
+  it, while the set's comes from `davtest`, which sorts by path — nor the
+  frame's illustration numbers.
+
+### Notes
+
+- Three things the frame draws and the view model deliberately does not
+  carry, because the client has everything to derive them (C-3.1): the
+  count beside a list rubric, the subtitle «3 of 4 books · 2 accounts ·
+  312 cards», and the Print button — what to print already stands in
+  `Shell.Print`.
+
 ## v0.1.1 — 2026-09-20
 
 fixtures-tail.md: меню учётной записи — то, что показывает кадр.

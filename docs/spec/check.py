@@ -224,14 +224,31 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
     fc, fn = frame_rail(frame)
     xc, xn = fixture_rail(data)
     where = "%s/%s" % (d, state)
-    if [c[0] for c in fc] != [c[0] for c in xc]:
+    # Кадр и фикстура обязаны сойтись в том, что экран показывает, и только
+    # в этом.
+    #
+    # Не в порядке коллекций: его задаёт DAV-сервер, Carrel его сохраняет
+    # (кадры так и рисуют — «Личный, Работа, Дни рождения»), а в наборе
+    # порядок даёт davtest, который сортирует по пути. Требовать совпадения
+    # значило бы требовать от тестового сервера порядка боевого.
+    #
+    # Не в числах: README набора говорит, что 248, 51 и 13 в макете —
+    # иллюстрация, а фикстура несёт числа набора (решение 20.09.2026).
+    # Сверяется прочерк: «—» в кадре — это «не отвечала», и в фикстуре ему
+    # обязан отвечать null, а не ноль.
+    if sorted(c[0] for c in fc) != sorted(c[0] for c in xc):
         drift.append("%s: коллекции рейла: кадр %s, фикстура %s"
-                     % (where, [c[0] for c in fc], [c[0] for c in xc]))
+                     % (where, sorted(c[0] for c in fc), sorted(c[0] for c in xc)))
     elif state == "normal":
-        if fc != xc:
-            drift.append("%s: числа или флажки коллекций: кадр %s, фикстура %s" % (where, fc, xc))
-        if fn != xn:
-            drift.append("%s: навигация: кадр %s, фикстура %s" % (where, fn, xn))
+        marks = dict((c[0], (c[1] == "—", c[2])) for c in fc)
+        for lab, num, tick in xc:
+            dash, on = marks[lab]
+            if (num == "—") != dash or tick != on:
+                drift.append("%s: коллекция «%s»: кадр %s, фикстура %s"
+                             % (where, lab, ("—" if dash else "число", on), (num, tick)))
+        if [n[0] for n in fn] != [n[0] for n in xn]:
+            drift.append("%s: навигация: кадр %s, фикстура %s"
+                         % (where, [n[0] for n in fn], [n[0] for n in xn]))
 check("8. фикстура рисуется в свой кадр", drift)
 
 print()

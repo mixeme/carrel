@@ -33,10 +33,15 @@ import (
 
 // The frames stand on one day, in one zone, of one build.
 const (
-	mockupZone    = "Europe/Moscow"
-	mockupDay     = "2026-08-10 17:04"
-	mockupVersion = "0.0.1"
-	mockupCommit  = "786949a"
+	mockupZone     = "Europe/Moscow"
+	mockupDay      = "2026-08-10 17:04"
+	mockupVersion  = "0.0.1"
+	mockupCommit   = "786949a"
+	mockupInstance = "carrel.example"
+	// The frames were drawn two minutes after the poll finished: their
+	// refresh button says «2 min ago». A screen is taken at mockupSeen,
+	// the poll behind it ran at mockupDay.
+	mockupSince = 2 * time.Minute
 )
 
 func mockupNow(t *testing.T) time.Time {
@@ -202,6 +207,14 @@ func newMockupApp(t *testing.T) *mockupApp {
 	h.srv.SetBuild(mockupVersion, mockupCommit)
 	h.admin("mix", "password123")
 	sess := h.login("mix", "password123")
+	// The instance the frames sign into: the account menu names it, and
+	// «Carrel» — the name of an instance nobody named — would say nothing.
+	if rec := h.do(postForm("/admin/settings", sess, url.Values{
+		"op": {"instance"}, "name": {mockupInstance},
+		"inviteTTL": {"24"}, "idle": {"2"}, "session": {"7"},
+	})); rec.Code != 303 {
+		t.Fatalf("name the instance: %d %s", rec.Code, rec.Body.String())
+	}
 	for _, label := range []string{"nextcloud · home", "radicale · vps"} {
 		rec := h.do(postForm("/app/settings/connections", sess, url.Values{
 			"label": {label}, "server": {servers[label].URL}, "login": {"alice"}, "password": {"secret"},
@@ -294,6 +307,10 @@ func linkMockupDuplicates(t *testing.T, h *harness, sess *session.Session) {
 	if len(members) != 2 {
 		t.Fatalf("the two Артём Белов are not where the set puts them: %+v", members)
 	}
+	// The frames show the «Команда» copy — its photo, its stamp — and the
+	// folded row is the group's first member (S-16), so that copy stands
+	// first here. The order of the catalog is not a decision.
+	sort.SliceStable(members, func(i, j int) bool { return strings.HasPrefix(members[i].UID, "d41a") })
 	err := h.users.EditDuplicates(sess.AccountID(), key, "duplicates.link", "", func(d *sealed.Duplicates) error {
 		d.Linked = append(d.Linked, sealed.LinkedGroup{ID: "g-artem", Kind: view.KindContact, Members: members})
 		return nil
@@ -394,17 +411,18 @@ func keys(prefix string, v any, out *[]string) {
 }
 
 // C-14.2, the first pair: the combined address book against
-// app-contacts/normal.json. It is shown red on purpose — the fixture was
-// written from the frame and nothing has yet been made to answer it.
+// app-contacts/normal.json. It was shown red first, with the fixture written
+// from the frame and nothing yet made to answer it; it is a gate now, and a
+// screen that drifts from its fixture fails the build.
 func TestFixtureCombinedContacts(t *testing.T) {
-	if os.Getenv("CARREL_FIXTURE_DIFF") == "" {
-		t.Skip("set CARREL_FIXTURE_DIFF=1 to compare the screens with docs/spec/fixtures (C-14.2)")
-	}
 	app := newMockupApp(t)
 	page := combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	if page.Poll == nil {
 		t.Fatal("the combined book has no poll")
 	}
+	// The frame is the screen two minutes after the poll: its refresh
+	// button says «2 min ago». The poll itself keeps the day of the set.
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.h.do(get("/app/contacts?task="+page.Poll.TaskID, app.sess))
 	got := app.normalise(t, rec.Body.Bytes())
 	want := loadFixture(t, "app-contacts/normal.json")

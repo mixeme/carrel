@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -618,7 +619,46 @@ func (s *Server) foldLinked(blob sealed.Blob, k view.Kind, items []listed) []lis
 		}
 		out = append(out, it)
 	}
+	// Which member of a group the folded row shows is a decision of S-16 —
+	// the first of its members — and not a race. Until this stood here it
+	// was whichever source answered first, so the same list gave a
+	// different row, a different address and a different stamp on the next
+	// run, and no fixture could hold it.
+	for _, at := range keep {
+		out[at] = shownFirst(blob.Duplicates.Linked, k, out[at])
+	}
 	return out
+}
+
+// shownFirst puts the group's members in the order the group holds them:
+// the earliest becomes the row, the rest its others. A member the poll did
+// not bring is simply absent — the order of those that came is still the
+// group's.
+func shownFirst(linked []sealed.LinkedGroup, k view.Kind, row listed) listed {
+	if len(row.also) == 0 {
+		return row
+	}
+	all := append([]listed{row}, row.also...)
+	g, ok := dupes.LinkedOf(linked, sealed.RecordRef{
+		AccountID: row.from.conn.ID, Col: row.from.col.Path, UID: listedUID(k, row),
+	})
+	if !ok {
+		return row
+	}
+	rank := make(map[sealed.RecordRef]int, len(g.Members))
+	for i, m := range g.Members {
+		rank[m] = i
+	}
+	place := func(it listed) int {
+		if i, ok := rank[(sealed.RecordRef{AccountID: it.from.conn.ID, Col: it.from.col.Path, UID: listedUID(k, it)})]; ok {
+			return i
+		}
+		return len(g.Members)
+	}
+	sort.SliceStable(all, func(i, j int) bool { return place(all[i]) < place(all[j]) })
+	first := all[0]
+	first.also, first.prefer = all[1:], row.prefer
+	return first
 }
 
 // linkedSources are the stamps of a folded row: its own and its others'.
