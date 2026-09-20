@@ -34,3 +34,65 @@ func TestEachKindCountsItsOwn(t *testing.T) {
 		t.Errorf("the agenda bar says %q, want it to count events", got)
 	}
 }
+
+// A conflict is about the record's own properties, and it names them as the
+// record does: «FN», «NOTE», «X-EVOLUTION-FILE-AS» (s-conflict-1). A label
+// Carrel invented would be a lie about a property Carrel does not model, and
+// a person comparing two versions is looking at the file, not at a form.
+func TestAConflictNamesThePropertiesAsTheRecordDoes(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nNOTE:first note\nEND:VCARD\n")
+	rec := f.path("contacts") + "/ada"
+
+	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	f.srv.Seed(f.col+"ada.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Byron\nNOTE:server note\nEND:VCARD\n")
+	form.Set("fn", "Ada King")
+	f.h.do(postForm(rec+"/edit", f.sess, form))
+
+	page := decode[view.ConflictPage](t, f.h.do(get(rec+"/conflict", f.sess)))
+	var named []string
+	for _, r := range page.Rows {
+		named = append(named, string(r.Property))
+	}
+	if want := []string{"FN", "N"}; !equalStrings(named, want) {
+		t.Errorf("the conflict names %v, want %v", named, want)
+	}
+}
+
+// The conflict screen always says what happened, in the words of the frame
+// (s-conflict-1): a record read and then saved by someone else is not a
+// state a person is expected to infer from a table of two columns.
+func TestTheConflictScreenSaysWhatHappened(t *testing.T) {
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEND:VCARD\n")
+	rec := f.path("contacts") + "/ada"
+
+	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	f.srv.Seed(f.col+"ada.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Byron\nEND:VCARD\n")
+	form.Set("title", "Countess")
+	f.h.do(postForm(rec+"/edit", f.sess, form))
+
+	page := decode[view.ConflictPage](t, f.h.do(get(rec+"/conflict", f.sess)))
+	if len(page.Notices) != 1 {
+		t.Fatalf("notices = %+v", page.Notices)
+	}
+	n := page.Notices[0]
+	if n.Title != "Conflict" || n.Body != "Another client changed this contact while you were editing it. Nothing has been overwritten." {
+		t.Errorf("notice = %+v", n)
+	}
+}
+
+// The rail of a record screen is a way back, not a way out (C-6.3): it
+// carries the collections of the account the record lives in, and no other.
+// Every frame with «Back to list» shows exactly one account rubric —
+// s-contacts-3, s-notes-1, s-conflict-1, the whole of s-io.
+func TestTheBackRailStaysInItsAccount(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	page := decode[view.ContactPage](t, f.h.do(get(f.book(f.id, peopleBook)+"/ada-here", f.sess)))
+	var accounts []string
+	for _, sec := range page.Rail.Sections {
+		accounts = append(accounts, string(sec.Account))
+	}
+	if len(accounts) != 1 {
+		t.Fatalf("the back rail shows %v, want only the account of the record", accounts)
+	}
+}

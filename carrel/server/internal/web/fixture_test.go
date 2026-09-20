@@ -508,3 +508,46 @@ func TestFixtureCombinedContactsPartial(t *testing.T) {
 		t.Errorf("the screen differs from its fixture (-fixture +screen):\n%s", diff)
 	}
 }
+
+// C-14.2: the conflict screen (S-8). The person edits Анна Ковалёва, the
+// server moves on under them, and the write is not sent over it.
+func TestFixtureContactConflict(t *testing.T) {
+	app := newMockupApp(t)
+	const uid = "4f2b-9c31-a0e7"
+	rec := app.listPath(t, "kontakty") + "/" + uid
+	// Nobody arrives at a conflict from nowhere: the list was opened, the
+	// card after it. That is also where the counts in the rail come from.
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+
+	form := formFields(decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
+	// The other client saved a different address and a file-as line Carrel
+	// does not model; it keeps the rest of the card as the set holds it.
+	app.servers["nextcloud · home"].Seed(davtest.AddressBookHome+"kontakty/"+uid+".vcf",
+		"BEGIN:VCARD\nVERSION:3.0\nUID:"+uid+"\nN:Ковалёва;Анна;;;\nFN:Анна Ковалёва\n"+
+			"ORG:Издательство «Слово»\nTITLE:Выпускающий редактор\n"+
+			"TEL;TYPE=CELL:+7 912 445-10-88\nEMAIL;TYPE=WORK:anna.kovaleva@slovo.example\n"+
+			"BDAY:1987-03-14\nCATEGORIES:работа,издательство\n"+
+			"X-EVOLUTION-FILE-AS:Ковалёва\\, Анна\nREV:20260810T140200Z\nEND:VCARD\n")
+	form.Set("email", "anna@slovo.example")
+	form.Set("title", "Главный редактор")
+	form.Set("note", "Пишет по вторникам, отвечает в тот же день. Просила писать на рабочий адрес.")
+	if resp := app.h.do(postForm(rec+"/edit", app.sess, form)); resp.Code != 303 {
+		t.Fatalf("POST over a moved version: %d %s", resp.Code, resp.Body.String())
+	}
+
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	got := app.normalise(t, app.h.do(get(rec+"/conflict", app.sess)).Body.Bytes())
+	if out := os.Getenv("CARREL_FIXTURE_WRITE"); out != "" {
+		body, err := json.MarshalIndent(got, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(out, append(body, '\n'), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("the screen is written to %s", out)
+	}
+	if diff := cmp.Diff(loadFixture(t, "app-conflict/normal.json"), got); diff != "" {
+		t.Errorf("the screen differs from its fixture (-fixture +screen):\n%s", diff)
+	}
+}

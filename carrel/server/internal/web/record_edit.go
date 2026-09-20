@@ -1839,7 +1839,7 @@ func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string
 	}
 	s.rememberBody(c, obj)
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
-		obj: obj, uid: uid, values: vals, alarms: alarms, etag: obj.ETag, readAt: time.Now(),
+		obj: obj, uid: uid, values: vals, alarms: alarms, etag: obj.ETag, readAt: s.now(),
 	}))
 }
 
@@ -2089,7 +2089,7 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 		report.Properties = append(report.Properties, text(p))
 	}
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
-		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: time.Now(), loss: report, notices: notices,
+		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: s.now(), loss: report, notices: notices,
 	}))
 }
 
@@ -2116,7 +2116,7 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 	default:
 		values := s.emptyValues(c)
 		carried(c, r, values)
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: values, isNew: true, readAt: time.Now()}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: values, isNew: true, readAt: s.now()}))
 	}
 }
 
@@ -2196,7 +2196,7 @@ func (s *Server) getKindQuick(w http.ResponseWriter, r *http.Request, kind strin
 	}
 	values := s.emptyValues(c)
 	carried(c, r, values)
-	sheet := s.quickSheet(c, editState{values: values, isNew: true, readAt: time.Now()})
+	sheet := s.quickSheet(c, editState{values: values, isNew: true, readAt: s.now()})
 	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
 		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
 		return
@@ -2219,7 +2219,7 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 	}
 	want := s.submittedValues(c, r)
 	if r.URL.Query().Get("op") == "open" {
-		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: time.Now()}))
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
 		return
 	}
 	s.createRecord(w, r, c, want)
@@ -2304,7 +2304,7 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 // createRecord writes a new record. The full form and the quick sheet both
 // come here: two screens, one way of saving (U-6.16).
 func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collectionCtx, want formValues) {
-	st := editState{values: want, isNew: true, readAt: time.Now()}
+	st := editState{values: want, isNew: true, readAt: s.now()}
 	uid, err := model.NewUID()
 	if err != nil {
 		http.Error(w, "internal error", http.StatusInternalServerError)

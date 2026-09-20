@@ -201,7 +201,7 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		Shell: s.buildShell(c.sess, "Import"), Kind: c.spec.kind,
 		Step: view.ImportStepSource, Preview: st.preview, Report: st.report,
 	}
-	page.Rail = s.backRail(c.sess, s.catalogOf(c.sess), c.spec, s.listBack(c))
+	page.Rail = s.backRail(c.sess, s.catalogOf(c.sess), c.spec, c.conn.ID, s.listBack(c))
 	page.Notices = append(page.Notices, st.notices...)
 	page.Into = s.importTargets(c, st.dest)
 	page.Source = view.ImportSource{

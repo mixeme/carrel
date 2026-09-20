@@ -87,7 +87,7 @@ func TestRowLabelSurvivesTheConflictScreen(t *testing.T) {
 		t.Fatalf("POST over a moved version: %d %q", resp.Code, resp.Header().Get("Location"))
 	}
 	page := decode[view.ConflictPage](t, f.h.do(get(rec+"/conflict", f.sess)))
-	if len(page.Rows) != 1 || page.Rows[0].Property != "Phone" || page.Rows[0].Mine != "+44 20 1 · cell" || page.Rows[0].Theirs != "+44 20 1 · work" {
+	if len(page.Rows) != 1 || page.Rows[0].Property != "TEL" || page.Rows[0].Mine != "+44 20 1 · cell" || page.Rows[0].Theirs != "+44 20 1 · work" {
 		t.Fatalf("rows = %+v", page.Rows)
 	}
 	if resp := f.h.do(postForm(actionHref(t, page.Actions, "conflict.mine"), f.sess, url.Values{})); resp.Code != 303 {

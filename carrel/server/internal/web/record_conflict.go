@@ -137,9 +137,21 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 		return page
 	}
 	page.ServerAt = s.serverStamp(c, obj)
+	// The screen says what happened before it asks anything (s-conflict-1):
+	// two columns of values do not by themselves tell a person that their
+	// save was refused and that nothing was written.
+	page.Notices = append(page.Notices, view.Notice{
+		Role:  view.NoticeAlert,
+		Title: "Conflict",
+		Body: text("Another client changed this " + string(c.spec.kind) +
+			" while you were editing it. Nothing has been overwritten."),
+	})
 	for _, f := range conflictFields(c.spec.kind, d, theirs) {
 		page.Rows = append(page.Rows, view.ConflictRow{
-			Property: text(f.label),
+			// The record's own name for the property, not a label of ours
+			// (s-conflict-1): a conflict is read against the file, and a
+			// property Carrel does not model has no label to invent.
+			Property: text(f.prop),
 			Mine:     text(s.showValues(c, f, d.Mine[f.name], d.Mine[f.name+".type"], alarms)),
 			Theirs:   text(s.showValues(c, f, theirs[f.name], theirs[f.name+".type"], alarms)),
 			Choice:   view.ChoiceUnset,

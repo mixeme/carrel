@@ -519,9 +519,9 @@ func TestConflictScreenAndCombination(t *testing.T) {
 	// The name was changed, so N is part of that change and the screen says so
 	// (U-6.1): the card on the server carries none, and this one now would.
 	want := []view.ConflictRow{
-		{Property: "Display name", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceUnset},
-		{Property: "Name", Mine: "Ada, King", Theirs: "Empty", Choice: view.ChoiceUnset},
-		{Property: "Title", Mine: "Countess", Theirs: "Empty", Choice: view.ChoiceUnset},
+		{Property: "FN", Mine: "Ada King", Theirs: "Ada Byron", Choice: view.ChoiceUnset},
+		{Property: "N", Mine: "Ada, King", Theirs: "Empty", Choice: view.ChoiceUnset},
+		{Property: "TITLE", Mine: "Countess", Theirs: "Empty", Choice: view.ChoiceUnset},
 	}
 	if len(page.Rows) != len(want) || page.Rows[0] != want[0] || page.Rows[1] != want[1] || page.Rows[2] != want[2] {
 		t.Fatalf("rows = %+v", page.Rows)

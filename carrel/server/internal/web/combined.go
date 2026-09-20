@@ -561,9 +561,19 @@ func (s *Server) navRows(sess *session.Session, blob sealed.Blob, open string) [
 // backRail is the back rail of a record screen (C-6.3): one row out of it and
 // the same collections as the list, without the combined row, the tags and
 // the foot — what to look at is already chosen here.
-func (s *Server) backRail(sess *session.Session, blob sealed.Blob, spec kindSpec, back view.Action) view.Rail {
+func (s *Server) backRail(sess *session.Session, blob sealed.Blob, spec kindSpec, accountID string, back view.Action) view.Rail {
 	sections, _, _ := s.railSections(sess, blob, spec, nil)
-	return view.Rail{Nav: []view.NavRow{{Action: back}}, Sections: sections, About: s.aboutAction()}
+	// A way back stays where it is: the collections of the account this
+	// record lives in, and no other. Every frame that draws «Back to list»
+	// shows exactly one account rubric (s-contacts-3, s-notes-1,
+	// s-conflict-1, all of s-io); the whole catalog belongs to the list.
+	kept := sections[:0]
+	for _, sec := range sections {
+		if sec.AccountID == accountID {
+			kept = append(kept, sec)
+		}
+	}
+	return view.Rail{Nav: []view.NavRow{{Action: back}}, Sections: kept, About: s.aboutAction()}
 }
 
 // railSections are the collections of a kind by connection with their ticks

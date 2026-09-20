@@ -5,6 +5,33 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.5 — 2026-09-20
+
+fixtures-tail.md: третья пара — экран расхождения, и три находки по кадру.
+
+### Fixed
+
+- **The rail of a record screen stays in its account** (C-6.3). A way back
+  carried every account's collections, so a person in the middle of a
+  conflict was offered another server's books. Every frame that draws
+  «Back to list» shows exactly one account rubric — s-contacts-3,
+  s-notes-1, s-conflict-1, all of s-io — and now so does the answer.
+- **«Read at» comes from the clock**, like every other time a screen shows.
+  It was the wall clock of the machine, which no fixture could hold.
+
+### Changed
+
+- **A conflict names the properties as the record does**: `FN`, `TEL`,
+  `NOTE`, not «Display name» or «Phone» (s-conflict-1). Two versions are
+  compared against the file, and a property Carrel does not model has no
+  label to invent.
+- **The conflict screen says what happened** before it asks anything:
+  «Another client changed this contact while you were editing it. Nothing
+  has been overwritten.» Two columns of values do not tell a person that
+  their save was refused.
+- `docs/spec/fixtures/app-conflict/normal.json` is the set's Анна
+  Ковалёва with a real UID, after a real 412.
+
 ## v0.1.4 — 2026-09-20
 
 fixtures-tail.md: вторая пара — тот же экран с незаконченным опросом.

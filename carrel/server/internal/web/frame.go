@@ -37,7 +37,7 @@ func (s *Server) cardBack(c *collectionCtx, uid string) view.Action {
 // recordRail is built after the screen's own reads and writes: they are what
 // fills its counts.
 func (s *Server) recordRail(c *collectionCtx, back view.Action) view.Rail {
-	return s.backRail(c.sess, s.catalogOf(c.sess), c.spec, back)
+	return s.backRail(c.sess, s.catalogOf(c.sess), c.spec, c.conn.ID, back)
 }
 
 // categoriesOf are the categories of a record: CATEGORIES split on its commas.
