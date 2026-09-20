@@ -312,7 +312,11 @@ type pollOwner struct {
 	again      string
 	againLabel view.Text
 	what       string
-	found      func(n int) string
+	// polled makes the bar speak of a poll, as the frames over a list and a
+	// timeline do: «Polled 5 of 6 sources - 14 events», running or not. A
+	// search says something else: it is asked once and answers once.
+	polled bool
+	found  func(n int) string
 }
 
 func searchOwner(q string) pollOwner {
@@ -378,22 +382,27 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 	if total > 0 {
 		bar.Percent = (answered + refused + timedOut + unreachable + stopped) * 100 / total
 	}
-	if snap.Running {
+	switch {
+	case owner.polled:
+		// One sentence, running or not: the meter and the Stop button
+		// already say whether it is still going, and a bar that rewords
+		// itself under the same numbers reads as two different answers.
+		parts := []string{
+			fmt.Sprintf("Polled %d of %s", answered, plural(total, "source")),
+			owner.found(len(snap.Items)),
+		}
+		bar.Summary = text(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
+		if !snap.Running {
+			bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
+		}
+	case snap.Running:
 		bar.Summary = text(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(len(snap.Items))))
-	} else {
+	default:
 		parts := []string{
 			fmt.Sprintf("%d of %s answered", answered, plural(total, "source")),
 			owner.found(len(snap.Items)),
 		}
-		for _, c := range []struct {
-			n    int
-			what string
-		}{{refused, "refused"}, {unreachable, "unavailable"}, {timedOut, "timed out"}, {stopped, "stopped"}} {
-			if c.n > 0 {
-				parts = append(parts, fmt.Sprintf("%d %s", c.n, c.what))
-			}
-		}
-		bar.Summary = text(strings.Join(parts, " · "))
+		bar.Summary = text(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
 		bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
 	}
 	stop := view.Action{ID: "poll.stop", Label: "Stop", Href: s.route(base + "/cancel"), Method: "POST", Enabled: snap.Running}
@@ -405,6 +414,21 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 	}
 	bar.Actions = []view.Action{stop, again}
 	return bar
+}
+
+// pollTroubles names what went wrong, each kind of trouble once and only
+// when there is any: «1 unavailable».
+func pollTroubles(refused, unreachable, timedOut, stopped int) []string {
+	var out []string
+	for _, c := range []struct {
+		n    int
+		what string
+	}{{refused, "refused"}, {unreachable, "unavailable"}, {timedOut, "timed out"}, {stopped, "stopped"}} {
+		if c.n > 0 {
+			out = append(out, fmt.Sprintf("%d %s", c.n, c.what))
+		}
+	}
+	return out
 }
 
 func refusalReason(err error) string {

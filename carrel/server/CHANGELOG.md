@@ -5,6 +5,23 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.3 — 2026-09-20
+
+fixtures-tail.md: полоса опроса говорит словами кадра.
+
+### Changed
+
+- **The bar over a list says «Polled 5 of 6 sources · 14 events»**, as the
+  frames say it, running or not. It used to reword itself under the same
+  numbers — «Asking 3 sources · 1 answered · 3 records» while it ran and
+  «3 of 3 sources answered · 3 records» when it stopped — which reads as
+  two different answers; the meter and the Stop button already say whether
+  it is still going. A search keeps its own words: it is asked once and
+  answers once.
+- **Each kind counts its own.** A contact is a card, an event an event, a
+  task a task, a note a note. «Record» is the name of a type in the
+  server, not a word for the person reading a list.
+
 ## v0.1.2 — 2026-09-20
 
 fixtures-tail.md: первая пара «вью-модель равна фикстуре» зелёная, и она

@@ -200,6 +200,18 @@ var collectionNouns = map[view.Kind]string{
 	view.KindNote:    "notebook",
 }
 
+// recordNouns name the records themselves, as the frames count them: a
+// contact is a card, an event an event. A poll over a list says «Polled 5 of
+// 6 sources - 14 events», and «record» in place of the noun would be the
+// server talking about its own types.
+var recordNouns = map[view.Kind]string{
+	view.KindContact: "card",
+	view.KindEvent:   "event",
+	view.KindTask:    "task",
+	view.KindNote:    "note",
+	view.KindFile:    "file",
+}
+
 // printRange joins the parts of Print.Range that are there.
 func printRange(parts ...string) view.Text {
 	var kept []string

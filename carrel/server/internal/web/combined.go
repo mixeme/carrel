@@ -194,7 +194,8 @@ func listOwner(lt *listTask) pollOwner {
 		again:      lt.page,
 		againLabel: "Refresh",
 		what:       "list",
-		found:      func(n int) string { return plural(n, "record") },
+		polled:     true,
+		found:      func(n int) string { return plural(n, recordNouns[lt.kind]) },
 	}
 }
 

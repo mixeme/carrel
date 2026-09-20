@@ -57,6 +57,7 @@ func timelineOwner(tt *timelineTask) pollOwner {
 		again:      withQuery(tt.page, "again", "1"),
 		againLabel: "Look again",
 		what:       "timeline",
+		polled:     true,
 		found:      func(n int) string { return plural(n, "record") },
 	}
 }
