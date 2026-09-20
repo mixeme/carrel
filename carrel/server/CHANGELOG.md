@@ -5,6 +5,20 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.6 — 2026-09-20
+
+fixtures-tail.md: стенды держат день кадров.
+
+### Changed
+
+- `davtest.Server` takes a clock (`Clock`), and the fixture harness freezes
+  it on the day of the set. «Changed on the server» is the stand's word,
+  and a wall clock there moved what a fixture holds — the third thing in
+  an answer that walked on its own, after the screen's «now» and the end
+  of a poll.
+- The fixture harness compares a pair in one call (`mockupApp.compare`),
+  so a new screen is a test of four lines.
+
 ## v0.1.5 — 2026-09-20
 
 fixtures-tail.md: третья пара — экран расхождения, и три находки по кадру.

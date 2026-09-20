@@ -47,6 +47,10 @@ type Server struct {
 	// Login and Password, when Login is set, are required as HTTP Basic.
 	Login, Password string
 
+	// Clock is when the stand says an object was last modified. Nil is the
+	// wall clock; a fixture freezes it so «changed» holds tomorrow.
+	Clock func() time.Time
+
 	// Drop names properties the server silently discards on PUT, in every
 	// component, the way lossy servers do (S-7.1). Without it a PUT is kept
 	// byte for byte as sent, as Radicale and Baikal keep it; with it the object
@@ -759,10 +763,19 @@ func (s *Server) takeSent(p string) []byte {
 	return data
 }
 
+// now is the stand's own clock: when it says an object was last modified.
+// A test that freezes it gets the same answer tomorrow.
+func (s *Server) now() time.Time {
+	if s.Clock == nil {
+		return time.Now()
+	}
+	return s.Clock()
+}
+
 func (s *Server) storeLocked(p string, data []byte) string {
 	s.seq++
 	etag := fmt.Sprintf("e%d", s.seq)
-	s.objects[p] = object{data: data, etag: etag, mod: time.Now()}
+	s.objects[p] = object{data: data, etag: etag, mod: s.now()}
 	s.ctags[parent(p)]++
 	return etag
 }
@@ -788,7 +801,7 @@ func (s *Server) put(p string, data []byte, ifMatch, ifNoneMatch webdav.Conditio
 		switch {
 		case s.CreateHidesTheRecord:
 			s.seq++
-			return object{etag: fmt.Sprintf("e%d", s.seq), mod: time.Now()}, nil
+			return object{etag: fmt.Sprintf("e%d", s.seq), mod: s.now()}, nil
 		case s.CreateRewritesUID:
 			s.seq++
 			data = rewriteUID(data, fmt.Sprintf("sv25-%d", s.seq))

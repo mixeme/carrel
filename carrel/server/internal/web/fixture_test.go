@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"encoding/json"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -133,6 +134,32 @@ func (a *mockupApp) listPath(t *testing.T, slug string) string {
 	return ""
 }
 
+// compare is one pair: the answer of a screen against its fixture. With
+// CARREL_FIXTURE_WRITE it also writes the answer out, for reading beside
+// the frame while a fixture is written — never as the fixture itself.
+func (a *mockupApp) compare(t *testing.T, name string, rec *httptest.ResponseRecorder) {
+	t.Helper()
+	if rec.Code != 200 {
+		t.Fatalf("%s: %d %s", name, rec.Code, rec.Body.String())
+	}
+	got := a.normalise(t, rec.Body.Bytes())
+	if out := os.Getenv("CARREL_FIXTURE_WRITE"); out != "" {
+		body, err := json.MarshalIndent(got, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.MkdirAll(filepath.Dir(filepath.Join(out, name)), 0o700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(out, name), append(body, '\n'), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if diff := cmp.Diff(loadFixture(t, name), got); diff != "" {
+		t.Errorf("%s differs from its fixture (-fixture +screen):\n%s", name, diff)
+	}
+}
+
 func mockupRoot(t *testing.T) string {
 	t.Helper()
 	root, err := filepath.Abs(filepath.Join("..", "..", "..", "..", "docs", "visual", "fixtures"))
@@ -178,9 +205,13 @@ func newMockupApp(t *testing.T) *mockupApp {
 	t.Helper()
 	root := mockupRoot(t)
 	servers := map[string]*davtest.Server{}
+	at := mockupNow(t)
 	for _, label := range []string{"nextcloud · home", "radicale · vps"} {
 		srv := davtest.New(t)
 		srv.Login, srv.Password = "alice", "secret"
+		// The stands keep the day of the frames: «changed on the server» is
+		// theirs to say, and a wall clock there moves what a fixture holds.
+		srv.Clock = func() time.Time { return at }
 		servers[label] = srv
 	}
 	paths := map[string]string{}
