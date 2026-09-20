@@ -582,3 +582,14 @@ func TestFixtureContactConflict(t *testing.T) {
 		t.Errorf("the screen differs from its fixture (-fixture +screen):\n%s", diff)
 	}
 }
+
+// C-14.2: the card of a contact, read (s-contacts-6).
+func TestFixtureContactCard(t *testing.T) {
+	app := newMockupApp(t)
+	// The list was opened before the card: that is where the rail's counts
+	// and «read 2 min ago» come from.
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	rec := app.listPath(t, "kontakty") + "/4f2b-9c31-a0e7"
+	app.compare(t, "app-contact/normal.json", app.h.do(get(rec, app.sess)))
+}

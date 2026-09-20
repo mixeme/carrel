@@ -143,11 +143,14 @@ func (s *Server) recordActions(c *collectionCtx, uid, etag string) []view.Action
 	if c.col.ReadOnly {
 		return []view.Action{copyAction, s.publishAction(c, uid)}
 	}
+	// Edit first: it is what a person came to the record for. Publishing a
+	// secret link is rare and stands past the moving and copying; the
+	// deletion is last and marked (s-contacts-6).
 	return []view.Action{
-		s.publishAction(c, uid),
 		{ID: "record.edit", Label: text("Edit " + c.spec.noun), Href: s.route(c.recordPath(uid) + "/edit"), Method: "GET", Enabled: true},
 		{ID: "record.move", Label: "Move…", Href: s.route(move), Method: "GET", Enabled: true},
 		copyAction,
+		s.publishAction(c, uid),
 		{ID: "record.delete", Label: text("Delete " + c.spec.noun), Href: s.postQuery(c.recordPath(uid)+"/delete", url.Values{"etag": {etag}}), Method: "POST", Danger: true, Enabled: true},
 	}
 }

@@ -156,7 +156,18 @@ check("7. фикстуры разбираются", badfix)
 #     показывает прочерки во время опроса, unavailable — упавший аккаунт.
 FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут из C-5
     "app-contacts": "/app/contacts",
+    "app-contact": "/app/contacts/{account}/{col}/{uid}",
     "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
+}
+
+# FRAME_TODO — расхождения, где неверен кадр, а не фикстура. Каждое —
+# записанная задача владельца в Typecase (plan/server.md). Они не красные,
+# потому что кадры правятся не здесь, но печатаются каждый раз: молчаливое
+# исключение — то же расхождение, только невидимое.
+FRAME_TODO = {
+    "app-contact/normal: коллекции рейла":
+        "s-contacts-6 показывает одни «Контакты», s-conflict-1 — обе книги "
+        "аккаунта; рейл возврата несёт коллекции своего подключения (C-6.3)",
 }
 
 def as_kind(x):
@@ -249,7 +260,18 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
         if [n[0] for n in fn] != [n[0] for n in xn]:
             drift.append("%s: навигация: кадр %s, фикстура %s"
                          % (where, [n[0] for n in fn], [n[0] for n in xn]))
-check("8. фикстура рисуется в свой кадр", drift)
+known, red = [], []
+for d in drift:
+    head = d.split(":")[0] + ":" + d.split(":")[1] if d.count(":") > 1 else d
+    for k, why in FRAME_TODO.items():
+        if d.startswith(k):
+            known.append("%s — %s" % (k, why))
+            break
+    else:
+        red.append(d)
+check("8. фикстура рисуется в свой кадр", red)
+for k in known:
+    print("         ждёт Typecase:", k)
 
 print()
 print("ИТОГ: %d красных проверок" % len(fails))

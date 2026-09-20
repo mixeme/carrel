@@ -5,6 +5,23 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.8 — 2026-09-20
+
+fixtures-tail.md: четвёртая пара — карточка контакта.
+
+### Changed
+
+- **The actions of a record stand in the order of the frame**: Edit first,
+  then moving and copying, then publishing a secret link, and the deletion
+  last and marked. Publishing stood first, and it is not what a person
+  came to the card for.
+- `docs/spec/fixtures/app-contact/normal.json` is the fourth pair.
+- `docs/spec/check.py` keeps a named list of discrepancies where the frame
+  is wrong and the fixture right (`FRAME_TODO`). They are not red — frames
+  are not fixed here — but they are printed on every run and written into
+  plan/server.md as the owner's Typecase tasks. A silent exception is the
+  same discrepancy, only invisible.
+
 ## v0.1.7 — 2026-09-20
 
 fixtures-tail.md: карточка контакта по кадру `s-contacts-6`.

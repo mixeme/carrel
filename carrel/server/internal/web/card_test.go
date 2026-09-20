@@ -47,3 +47,22 @@ func TestTheFieldsOfACardStandInTheOrderOfTheFrame(t *testing.T) {
 		t.Errorf("fields = %v,\nwant      %v", labels, want)
 	}
 }
+
+// The first thing offered on a record is the thing most often done with it:
+// Edit, then the ways of sending and moving it, and the deletion last and
+// marked (s-contacts-6). Publishing a secret link is not what a person came
+// to the card for.
+func TestTheActionsOfACardStandInTheOrderOfTheFrame(t *testing.T) {
+	page := annaPage(t)
+	var ids []string
+	for _, a := range page.Actions {
+		ids = append(ids, a.ID)
+	}
+	want := []string{"record.edit", "record.move", "record.copy", "publish", "record.delete"}
+	if !equalStrings(ids, want) {
+		t.Errorf("actions = %v,\nwant    %v", ids, want)
+	}
+	if last := page.Actions[len(page.Actions)-1]; !last.Danger {
+		t.Errorf("the deletion is not marked: %+v", last)
+	}
+}
