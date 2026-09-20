@@ -5,6 +5,24 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.2.4 — 2026-09-21
+
+fixtures-tail.md: состояния списка одной коллекции.
+
+### Changed
+
+- Three states of `/app/contacts/{account}/{col}` beside its normal one
+  (C-14.3): `empty` — a book that holds nothing; `readonly` — a book this
+  account may only read, where «New contact» is refused with its reason
+  and the import is not offered at all; `source-error` — the stand answers
+  503 and the screen says the book is unavailable instead of showing an
+  empty list.
+
+### Notes
+
+- Nothing was wrong in the three: the states of C-8 answer as they should.
+  That is a result too — the first of the pairs to find no hole.
+
 ## v0.2.3 — 2026-09-21
 
 fixtures-tail.md: поиск говорит, где искал, и шесть пар.

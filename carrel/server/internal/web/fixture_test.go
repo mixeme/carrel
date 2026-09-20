@@ -888,3 +888,29 @@ func TestFixtureSearchAndSheets(t *testing.T) {
 	}
 	_ = anna
 }
+
+// C-14.2 and C-14.3: the states of a list of contacts beside its normal
+// one. Each is a state of the screen, not another screen.
+func TestFixtureContactsStates(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+
+	// empty: «Рассылки» holds nothing at all.
+	t.Run("empty", func(t *testing.T) {
+		app.compare(t, "app-contacts-one/empty.json",
+			app.h.do(get(app.listPath(t, "contacts", "rassylki"), app.sess)))
+	})
+	// readonly: «Команда» is a book this account may only read.
+	t.Run("readonly", func(t *testing.T) {
+		app.compare(t, "app-contacts-one/readonly.json",
+			app.h.do(get(app.listPath(t, "contacts", "komanda"), app.sess)))
+	})
+	// source-error: the stand refuses, and the screen says so instead of
+	// showing an empty list (C-8).
+	t.Run("source-error", func(t *testing.T) {
+		app.servers["nextcloud · home"].Refuse("REPORT", 503, "the server is busy")
+		defer app.servers["nextcloud · home"].Accept("REPORT")
+		app.compare(t, "app-contacts-one/source-error.json",
+			app.h.do(get(app.listPath(t, "contacts", "kontakty"), app.sess)))
+	})
+}

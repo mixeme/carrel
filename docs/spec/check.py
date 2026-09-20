@@ -156,6 +156,7 @@ check("7. фикстуры разбираются", badfix)
 #     показывает прочерки во время опроса, unavailable — упавший аккаунт.
 FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут из C-5
     "app-contacts": "/app/contacts",
+    "app-contacts-one": "/app/contacts/{account}/{col}",
     "app-contact": "/app/contacts/{account}/{col}/{uid}",
     "app-agenda": "/app/calendar/{account}/{col}",
     "app-event": "/app/calendar/{account}/{col}/{uid}",
