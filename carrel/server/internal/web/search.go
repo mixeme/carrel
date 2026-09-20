@@ -48,6 +48,7 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	}
 	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	page := view.SearchPage{Shell: s.buildShell(sess, "Search")}
+	page.Rail = s.searchRail(sess, s.catalogOf(sess))
 	if q == "" {
 		// An empty query searches nothing and is not written (S-15.3).
 		s.writePage(w, r, http.StatusOK, page)
@@ -520,6 +521,33 @@ type collectionSource struct {
 
 // searchSources are the ticked collections, one source each, in the order of
 // the ticks. A gone collection is not asked (S-6.1): the rail says gone.
+// searchRail is the rail of the search: every collection it asks, of every
+// kind, in one list (s-search-1). A search that found nothing must say what
+// it searched — an unticked collection is not asked, and a person looking
+// for a record that is in one has to see why it was not found.
+func (s *Server) searchRail(sess *session.Session, blob sealed.Blob) view.Rail {
+	rail := view.Rail{Nav: s.navRows(sess, blob, "search"), About: s.aboutAction()}
+	seen := map[string]bool{}
+	sec := view.RailSection{State: view.CollectionOK}
+	for _, pick := range blob.Selected {
+		col, ok := blob.Collection(pick.AccountID, pick.Path)
+		if !ok || col.Gone || seen[pick.AccountID+":"+pick.Path] {
+			continue
+		}
+		seen[pick.AccountID+":"+pick.Path] = true
+		sec.Rows = append(sec.Rows, view.SourceRow{
+			Label: text(collectionLabel(col)), Colour: catalogColour(col),
+			Tick: view.TickOn, ReadOnly: col.ReadOnly, State: view.CollectionOK,
+		})
+	}
+	if len(sec.Rows) == 0 {
+		return rail
+	}
+	sec.Account = text(plural(len(sec.Rows), "source"))
+	rail.Sections = []view.RailSection{sec}
+	return rail
+}
+
 func (s *Server) searchSources(blob sealed.Blob) []fanout.Source {
 	var out []fanout.Source
 	byID := map[string]*collectionSource{}

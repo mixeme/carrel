@@ -1,0 +1,45 @@
+{
+  "actions": [
+    {
+      "enabled": false,
+      "id": "collection.move.confirm",
+      "label": "Move",
+      "method": "POST",
+      "reason": "Choose a server."
+    },
+    {
+      "enabled": true,
+      "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
+      "id": "collection.copy",
+      "label": "Copy instead…",
+      "method": "GET"
+    }
+  ],
+  "copy": false,
+  "kind": "contact",
+  "subject": "Контакты · nextcloud · home",
+  "target": {
+    "chosen": "",
+    "options": [
+      {
+        "colour": "",
+        "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-nc-home",
+        "label": "nextcloud · home",
+        "last": false,
+        "readOnly": true,
+        "reason": "Already here",
+        "stamp": "nextcloud · home"
+      },
+      {
+        "colour": "",
+        "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-rad-vps",
+        "label": "radicale · vps",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "radicale · vps"
+      }
+    ]
+  },
+  "warning": ""
+}

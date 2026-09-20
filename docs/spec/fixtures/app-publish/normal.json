@@ -1,0 +1,37 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
+      "id": "publish.create",
+      "label": "Publish for 30 days",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026expires=never\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
+      "id": "publish.forever",
+      "label": "Publish without an expiry",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty",
+      "id": "publish.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "expires": "30 days, until 21 October 2026",
+  "form": {
+    "action": "",
+    "actions": [],
+    "errors": [],
+    "method": "",
+    "sets": []
+  },
+  "kind": "contact",
+  "link": "",
+  "range": null,
+  "target": "Contact «Анна Ковалёва» · nextcloud · home · Контакты"
+}

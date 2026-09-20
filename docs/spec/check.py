@@ -186,6 +186,12 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "forgot": "/forgot",
     "about": "/about",
     "app-duplicates": "/app/duplicates",
+    "app-search": "/app/search",
+    "app-collections-rename": "/app/collections/rename",
+    "app-collections-move": "/app/collections/move",
+    "app-collections-delete": "/app/collections/delete",
+    "app-publish": "/app/publish",
+    "app-password": "/app/password",
     "app-contact-timeline": "/app/contacts/{account}/{col}/{uid}/timeline",
     "app-contact-new": "/app/contacts/{account}/{col}/new",
     "app-contact-import": "/app/contacts/{account}/{col}/import",
@@ -203,7 +209,9 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # Листы (C-5, ответ «лист») своего рейла не несут: они рисуются
 # поверх экрана, и рейл в кадре — того экрана, что под ними. Сравнивать
 # тут нечего, и молчание здесь — не исключение, а род экрана.
-SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock"}
+SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
+          "app-collections-rename", "app-collections-move", "app-collections-delete",
+          "app-publish"}
 
 FRAME_TODO = {
     "app-contact-edit/normal: коллекции рейла":
@@ -217,6 +225,9 @@ FRAME_TODO = {
         "то же: кадр задач говорит «Back to tasks», остальные — «Back to list»",
     "app-task-edit/normal: навигация":
         "то же; с правки возврат ведёт на карточку, а не в список",
+    "app-search/normal: коллекции рейла":
+        "кадр ищет по шести коллекциям, среди них папка файлов «Documents», "
+        "которой в наборе нет; в наборе отмечено десять",
     "app-contact-new/normal: коллекции рейла":
         "s-notes-8 объявлен кадром адреса контакта, а рисует рейл календаря",
     "app-contact-timeline/normal: коллекции рейла":

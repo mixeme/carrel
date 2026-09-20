@@ -136,6 +136,35 @@ func (a *mockupApp) listPath(t *testing.T, segment, slug string) string {
 	return ""
 }
 
+// realAccount and realPath are what Carrel issued for a collection of the
+// set: a sheet is addressed by query, not by path, and the normaliser turns
+// the answer back into the names the fixtures use.
+func (a *mockupApp) realAccount(t *testing.T, slug string) string {
+	t.Helper()
+	key, _ := a.sess.DataKey()
+	blob, _ := a.h.users.Catalog(a.sess.AccountID(), key)
+	for _, c := range blob.Collections {
+		if collectionSlugOf(c.Path) == slug {
+			return c.AccountID
+		}
+	}
+	t.Fatalf("the set has no %q", slug)
+	return ""
+}
+
+func (a *mockupApp) realPath(t *testing.T, slug string) string {
+	t.Helper()
+	key, _ := a.sess.DataKey()
+	blob, _ := a.h.users.Catalog(a.sess.AccountID(), key)
+	for _, c := range blob.Collections {
+		if collectionSlugOf(c.Path) == slug {
+			return c.Path
+		}
+	}
+	t.Fatalf("the set has no %q", slug)
+	return ""
+}
+
 // compare is one pair: the answer of a screen against its fixture. With
 // CARREL_FIXTURE_WRITE it also writes the answer out, for reading beside
 // the frame while a fixture is written — never as the fixture itself.
@@ -824,4 +853,38 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
 		})
 	}
+}
+
+// C-14.2: the search, and the sheets a collection and a record open.
+func TestFixtureSearchAndSheets(t *testing.T) {
+	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	book := app.listPath(t, "contacts", "kontakty")
+	anna := book + "/4f2b-9c31-a0e7"
+
+	// A search asks every ticked collection and the screen is taken once
+	// they have answered, like a combined list.
+	t.Run("app-search", func(t *testing.T) {
+		first := decode[view.SearchPage](t, app.h.do(get("/app/search?q=Ковалёва", app.sess)))
+		if first.Poll.TaskID == "" {
+			t.Fatal("the search asked nobody")
+		}
+		waitPoll(t, app.h, app.sess, first.Poll.TaskID, nil)
+		app.compare(t, "app-search/normal.json", app.h.do(get("/app/search?q=Ковалёва", app.sess)))
+	})
+	for _, one := range []struct{ dir, route string }{
+		{"app-collections-rename", "/app/collections/rename?a=a-nc-home&c=kontakty"},
+		{"app-collections-move", "/app/collections/move?a=a-nc-home&c=kontakty"},
+		{"app-collections-delete", "/app/collections/delete?a=a-nc-home&c=kontakty"},
+		{"app-publish", "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7"},
+		{"app-password", "/app/password"},
+	} {
+		t.Run(one.dir, func(t *testing.T) {
+			route := strings.ReplaceAll(one.route, "a-nc-home", app.realAccount(t, "kontakty"))
+			route = strings.ReplaceAll(route, "c=kontakty", "c="+app.realPath(t, "kontakty"))
+			app.compare(t, one.dir+"/normal.json", app.h.do(get(route, app.sess)))
+		})
+	}
+	_ = anna
 }

@@ -1,0 +1,53 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+      "id": "collection.save",
+      "label": "Save",
+      "method": "POST"
+    }
+  ],
+  "address": "https://nextcloud.example/dav.php/alice/contacts/kontakty/",
+  "failure": null,
+  "form": {
+    "action": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Name",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "Контакты"
+          }
+        ]
+      }
+    ]
+  },
+  "kind": "contact",
+  "note": "Renaming is not moving: the address stays as it is, so devices, published links and backup jobs pointing here go on working. The new name is written to the server, and other clients show it at their next sync.",
+  "stamp": "nextcloud · home"
+}

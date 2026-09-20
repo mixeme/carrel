@@ -1,0 +1,476 @@
+{
+  "bar": {
+    "actions": [],
+    "compact": false,
+    "filter": "",
+    "loaded": 2,
+    "range": null,
+    "segments": [
+      {
+        "enabled": false,
+        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0",
+        "id": "search.kind",
+        "label": "All · 2",
+        "method": "GET",
+        "reason": "Shown now."
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=contact",
+        "id": "search.kind",
+        "label": "Contacts · 1",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=event",
+        "id": "search.kind",
+        "label": "Events · 1",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=task",
+        "id": "search.kind",
+        "label": "Tasks · 0",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=note",
+        "id": "search.kind",
+        "label": "Notes · 0",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026kind=file",
+        "id": "search.kind",
+        "label": "Files · 0",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": 2
+  },
+  "details": null,
+  "note": "",
+  "notices": [],
+  "poll": {
+    "actions": [
+      {
+        "enabled": false,
+        "href": "/app/search/progress/t-task/cancel",
+        "id": "poll.stop",
+        "label": "Stop",
+        "method": "POST",
+        "reason": "The search has finished."
+      },
+      {
+        "enabled": true,
+        "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0\u0026again=1",
+        "id": "poll.again",
+        "label": "Search again",
+        "method": "GET"
+      }
+    ],
+    "answeredAt": "10 August, 17:06",
+    "percent": 100,
+    "running": false,
+    "sources": [
+      {
+        "colour": "#a05a2c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Архив",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 1,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Контакты",
+        "state": "done"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Команда",
+        "state": "empty"
+      },
+      {
+        "colour": "#a05a2c",
+        "count": 1,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Дни рождения",
+        "state": "done"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Личный",
+        "state": "empty"
+      },
+      {
+        "colour": "#3f6e8c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Работа",
+        "state": "empty"
+      },
+      {
+        "colour": "#8c6239",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Дежурства",
+        "state": "empty"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Проекты",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Дела",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Записи",
+        "state": "empty"
+      }
+    ],
+    "summary": "10 of 10 sources answered · 2 found",
+    "taskID": "t-task"
+  },
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "query": "Ковалёва",
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": 6,
+        "enabled": true,
+        "href": "/app/contacts",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "10 sources",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "href": "",
+            "label": "Архив",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "href": "",
+            "label": "Контакты",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "href": "",
+            "label": "Команда",
+            "menu": [],
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "href": "",
+            "label": "Дни рождения",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "href": "",
+            "label": "Личный",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "href": "",
+            "label": "Работа",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#8c6239",
+            "count": null,
+            "href": "",
+            "label": "Дежурства",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "href": "",
+            "label": "Проекты",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "href": "",
+            "label": "Дела",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "href": "",
+            "label": "Записи",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "results": [
+    {
+      "colour": "#4a6b52",
+      "detail": "a.kovaleva@example.org",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+      "kind": "contact",
+      "stamp": "nextcloud · home · Контакты",
+      "title": "Анна Ковалёва",
+      "when": ""
+    },
+    {
+      "colour": "#a05a2c",
+      "detail": "",
+      "href": "/app/calendar/a-nc-home/dni-rozhdeniya/b604-2ae9-1f77",
+      "kind": "event",
+      "stamp": "nextcloud · home · Дни рождения",
+      "title": "День рождения — Анна Ковалёва",
+      "when": "14 March 2026"
+    }
+  ],
+  "title": "Ковалёва · Search",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [
+        {
+          "href": "/app/search?q=%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%91%D0%B2%D0%B0",
+          "outcome": "2 found",
+          "query": "Ковалёва",
+          "when": "just now"
+        }
+      ],
+      "jump": [
+        {
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+          "kind": "contact",
+          "stamp": "nextcloud · home · Контакты",
+          "title": "Анна Ковалёва"
+        }
+      ],
+      "query": "Ковалёва",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}

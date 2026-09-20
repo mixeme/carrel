@@ -1,0 +1,63 @@
+{
+  "actions": [
+    {
+      "danger": true,
+      "enabled": true,
+      "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+      "id": "collection.delete.confirm",
+      "label": "Delete on the server",
+      "method": "POST"
+    }
+  ],
+  "archive": "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new address book at a new address — not into this one, and not to this address.",
+  "export": {
+    "enabled": true,
+    "href": "/app/contacts/a-nc-home/kontakty/export",
+    "icon": "i-down",
+    "id": "collection.export",
+    "label": "Download .vcf first",
+    "method": "GET"
+  },
+  "exportNote": "4 contacts, one file, straight to you",
+  "form": {
+    "action": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Контакты",
+            "kind": "text",
+            "label": "Type the name to confirm",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "kind": "contact",
+  "references": [],
+  "subject": "Контакты · nextcloud · home",
+  "warning": "The address book and all 4 contacts in it are deleted on nextcloud · home. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+}

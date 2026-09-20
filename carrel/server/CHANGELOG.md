@@ -5,6 +5,22 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.2.3 — 2026-09-21
+
+fixtures-tail.md: поиск говорит, где искал, и шесть пар.
+
+### Added
+
+- **The rail of the search**: every collection it asks, of every kind, in
+  one list. A search that finds nothing has to say what it searched — an
+  unticked collection is not asked, and that is the whole reason a record
+  in one «is not there».
+- **The screen of the password carries the rail of the settings**, with
+  the account marked. It stands inside them in the frame and answered
+  without one.
+- Six pairs: the search, the password, and the sheets of renaming, moving
+  and deleting a collection and of publishing a link.
+
 ## v0.2.2 — 2026-09-21
 
 fixtures-tail.md: экран дубликатов говорит, где искал.

@@ -71,7 +71,9 @@ func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error)
 		pass2Err = formError(err)
 	}
 	page := view.PasswordPage{
-		Shell: s.buildShell(sess, "Change password"),
+		// The password lives under the account, and the screen stands in
+		// the settings: it carries their rail with the account marked.
+		Shell: s.withRail(s.buildShell(sess, "Change password"), s.settingsRail(sess, "/app/settings/account")),
 		Form: withSubmit(s.plainForm("/app/password", "POST", csrfField(sess),
 			view.FormRow{Name: "current", Label: "Current password", Kind: view.InputPassword, Required: true, Error: currentErr},
 			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true, Error: passErr, Hint: text("At least 8 characters.")},
