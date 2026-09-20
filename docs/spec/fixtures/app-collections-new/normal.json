@@ -1,0 +1,109 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/collections/new?kind=contact",
+      "id": "collection.create",
+      "label": "Create",
+      "method": "POST"
+    }
+  ],
+  "failure": null,
+  "form": {
+    "action": "/app/collections/new?kind=contact",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "On which server",
+            "name": "account",
+            "options": [
+              {
+                "label": "nextcloud · home",
+                "selected": true,
+                "value": "a-nc-home"
+              },
+              {
+                "label": "radicale · vps",
+                "selected": false,
+                "value": "a-rad-vps"
+              }
+            ],
+            "readOnly": false,
+            "required": true,
+            "value": "a-nc-home"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Name",
+            "name": "name",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "https://nextcloud.example/dav.php/alice/contacts/…/ — Taken from the name when left empty; yours to change. Other clients and restore by path go by the address, and it does not change later; the name they only show.",
+            "kind": "text",
+            "label": "Address",
+            "name": "address",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "kind": "contact",
+  "note": "",
+  "target": {
+    "chosen": "a-nc-home",
+    "options": [
+      {
+        "colour": "",
+        "id": "a-nc-home",
+        "label": "nextcloud · home",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": ""
+      },
+      {
+        "colour": "",
+        "id": "a-rad-vps",
+        "label": "radicale · vps",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": ""
+      }
+    ]
+  }
+}

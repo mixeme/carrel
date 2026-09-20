@@ -773,3 +773,54 @@ func TestFixtureSettingsAndAdmin(t *testing.T) {
 		})
 	}
 }
+
+// C-14.2: the screens outside the shell. A person who has not signed in
+// sees them, so they are taken without a session.
+func TestFixtureOutsideTheShell(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	for _, one := range []struct{ dir, route string }{
+		{"login", "/login"},
+		{"forgot", "/forgot"},
+		{"about", "/about"},
+	} {
+		t.Run(one.dir, func(t *testing.T) {
+			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, nil)))
+		})
+	}
+	t.Run("admin-install", func(t *testing.T) {
+		app.compare(t, "admin-install/normal.json", app.h.do(get("/admin/install", app.sess)))
+	})
+}
+
+// C-14.2: the screens of one record that are neither its card nor its form,
+// and the screens the shell opens over a list.
+func TestFixtureMoreOfTheShell(t *testing.T) {
+	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	book := app.listPath(t, "contacts", "kontakty")
+	anna := book + "/4f2b-9c31-a0e7"
+	// The timeline is a search over one person: it is gathered when the
+	// screen is opened, and the screen is taken once it has answered.
+	t.Run("app-contact-timeline", func(t *testing.T) {
+		first := decode[view.ContactTimelinePage](t, app.h.do(get(anna+"/timeline", app.sess)))
+		if first.Poll.TaskID == "" {
+			t.Fatal("the timeline gathered nothing")
+		}
+		waitPoll(t, app.h, app.sess, first.Poll.TaskID, nil)
+		app.compare(t, "app-contact-timeline/normal.json", app.h.do(get(anna+"/timeline", app.sess)))
+	})
+	for _, one := range []struct{ dir, route string }{
+		{"app-contact-new", book + "/new"},
+		{"app-contact-import", book + "/import"},
+		{"app-contact-move", anna + "/move"},
+		{"app-quick", "/app/notes/quick"},
+		{"app-collections-new", "/app/collections/new?kind=contact"},
+		{"app-settings-unlock", "/app/settings/unlock"},
+	} {
+		t.Run(one.dir, func(t *testing.T) {
+			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
+		})
+	}
+}

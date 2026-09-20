@@ -1,0 +1,599 @@
+{
+  "details": null,
+  "form": {
+    "action": "/app/contacts/a-nc-home/kontakty/new",
+    "actions": [
+      {
+        "enabled": true,
+        "id": "record.save",
+        "label": "Save",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty",
+        "id": "record.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "etag",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "readat",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1786370760"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Left empty, it is made from Given and Family. Fill it alone and it is cut the other way: the first word is the given name, the rest the family name.",
+            "kind": "text",
+            "label": "Display name",
+            "name": "fn",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Given",
+            "name": "n.given",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Family",
+            "name": "n.family",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Nickname",
+            "name": "nickname",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Organisation",
+            "name": "org",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Title",
+            "name": "title",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "--MM-DD for a birthday without a year.",
+            "kind": "date",
+            "label": "Birthday",
+            "name": "bday",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Add phone",
+            "name": "tel.new",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Phone label",
+            "name": "tel.new.type",
+            "options": [
+              {
+                "label": "No label",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "home",
+                "selected": false,
+                "value": "home"
+              },
+              {
+                "label": "work",
+                "selected": false,
+                "value": "work"
+              },
+              {
+                "label": "cell",
+                "selected": false,
+                "value": "cell"
+              },
+              {
+                "label": "voice",
+                "selected": false,
+                "value": "voice"
+              },
+              {
+                "label": "fax",
+                "selected": false,
+                "value": "fax"
+              },
+              {
+                "label": "other",
+                "selected": false,
+                "value": "other"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "Add email",
+            "name": "email.new",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Email label",
+            "name": "email.new.type",
+            "options": [
+              {
+                "label": "No label",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "home",
+                "selected": false,
+                "value": "home"
+              },
+              {
+                "label": "work",
+                "selected": false,
+                "value": "work"
+              },
+              {
+                "label": "cell",
+                "selected": false,
+                "value": "cell"
+              },
+              {
+                "label": "voice",
+                "selected": false,
+                "value": "voice"
+              },
+              {
+                "label": "fax",
+                "selected": false,
+                "value": "fax"
+              },
+              {
+                "label": "other",
+                "selected": false,
+                "value": "other"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Separated by commas.",
+            "kind": "text",
+            "label": "Categories",
+            "name": "categories",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "area",
+            "label": "Note",
+            "name": "note",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      },
+      {
+        "legend": "Addresses",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Add an address · Street",
+            "name": "adr.new.street",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "City",
+            "name": "adr.new.city",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Region",
+            "name": "adr.new.region",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Postcode",
+            "name": "adr.new.code",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Country",
+            "name": "adr.new.country",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "loss": null,
+  "notices": [],
+  "photo": {
+    "actions": [],
+    "editable": false,
+    "href": "",
+    "initials": "",
+    "note": ""
+  },
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": 1,
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "href": "/app/contacts/a-nc-home/kontakty",
+            "label": "Контакты",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "readOnly": false,
+  "title": "New contact",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  },
+  "uid": ""
+}

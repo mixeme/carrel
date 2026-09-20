@@ -181,6 +181,17 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "admin-audit": "/admin/audit",
     "admin-dav": "/admin/dav",
     "admin-escrow": "/admin/escrow",
+    "admin-install": "/admin/install",
+    "login": "/login",
+    "forgot": "/forgot",
+    "about": "/about",
+    "app-contact-timeline": "/app/contacts/{account}/{col}/{uid}/timeline",
+    "app-contact-new": "/app/contacts/{account}/{col}/new",
+    "app-contact-import": "/app/contacts/{account}/{col}/import",
+    "app-contact-move": "/app/contacts/{account}/{col}/{uid}/move",
+    "app-quick": "/app/notes/quick",
+    "app-collections-new": "/app/collections/new",
+    "app-settings-unlock": "/app/settings/unlock",
     "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
 }
 
@@ -188,6 +199,11 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # записанная задача владельца в Typecase (plan/server.md). Они не красные,
 # потому что кадры правятся не здесь, но печатаются каждый раз: молчаливое
 # исключение — то же расхождение, только невидимое.
+# Листы (C-5, ответ «лист») своего рейла не несут: они рисуются
+# поверх экрана, и рейл в кадре — того экрана, что под ними. Сравнивать
+# тут нечего, и молчание здесь — не исключение, а род экрана.
+SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock"}
+
 FRAME_TODO = {
     "app-contact-edit/normal: коллекции рейла":
         "s-contacts-3 рисует рейл возврата короче — то же, что у s-contacts-6",
@@ -200,6 +216,10 @@ FRAME_TODO = {
         "то же: кадр задач говорит «Back to tasks», остальные — «Back to list»",
     "app-task-edit/normal: навигация":
         "то же; с правки возврат ведёт на карточку, а не в список",
+    "app-contact-new/normal: коллекции рейла":
+        "s-notes-8 объявлен кадром адреса контакта, а рисует рейл календаря",
+    "app-contact-timeline/normal: коллекции рейла":
+        "s-contacts-7 — хронология человека, а рейл в кадре календарный",
     "app-event/normal: коллекции рейла":
         "s-agenda-2 не рисует «Дни рождения»; рейл возврата несёт все "
         "календари своего подключения (C-6.3) — то же, что у s-contacts-6",
@@ -304,6 +324,8 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
     # иллюстрация, а фикстура несёт числа набора (решение 20.09.2026).
     # Сверяется прочерк: «—» в кадре — это «не отвечала», и в фикстуре ему
     # обязан отвечать null, а не ноль.
+    if d in SHEETS:
+        continue
     if sorted(c[0] for c in fc) != sorted(c[0] for c in xc):
         drift.append("%s: коллекции рейла: кадр %s, фикстура %s"
                      % (where, sorted(c[0] for c in fc), sorted(c[0] for c in xc)))

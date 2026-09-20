@@ -5,6 +5,29 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.2.1 — 2026-09-21
+
+fixtures-tail.md: одиннадцать пар — вне оболочки и вокруг записи.
+
+### Changed
+
+- Eleven pairs: `/login`, `/forgot`, `/about`, `/admin/install`, the
+  timeline of a person, the new-record form, the import wizard, and the
+  sheets of moving, of a quick note, of a new collection and of the
+  unlock.
+- `check.py` does not compare the rail of a sheet. A sheet is drawn over a
+  screen and the rail in its frame is that screen's; there is nothing to
+  compare, and saying so is not an exception but the kind of the screen.
+
+### Notes
+
+- Two frames declare one screen and draw another's rail: `s-notes-8`
+  carries the address of a new contact over a calendar rail, and
+  `s-contacts-7`, the timeline of a person, likewise. Listed for Typecase.
+- The screen of the duplicates has no rail at all, and `s-dup-1` draws one
+  — the collections being compared. Its pair waits for that; written into
+  fixtures-tail.md.
+
 ## v0.2.0 — 2026-09-21
 
 fixtures-tail.md: у настроек и администрирования появился рейл, и с ним четырнадцать пар.

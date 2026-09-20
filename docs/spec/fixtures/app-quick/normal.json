@@ -1,0 +1,43 @@
+{
+  "actions": [
+    {
+      "enabled": false,
+      "href": "/app/notes/a-nc-home/dnevnik/new",
+      "id": "record.new",
+      "label": "New note",
+      "method": "GET",
+      "reason": "Choose the collection the new note goes to."
+    }
+  ],
+  "form": {
+    "action": "",
+    "actions": [],
+    "errors": [],
+    "method": "",
+    "sets": []
+  },
+  "kind": "note",
+  "target": {
+    "chosen": "",
+    "options": [
+      {
+        "colour": "#6b4e7a",
+        "id": "/app/notes/a-nc-home/dnevnik/new",
+        "label": "Дневник",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · home · Дневник"
+      },
+      {
+        "colour": "#4a6b52",
+        "id": "/app/notes/a-nc-home/zapisi/new",
+        "label": "Записи",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · home · Записи"
+      }
+    ]
+  }
+}

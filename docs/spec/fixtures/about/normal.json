@@ -1,0 +1,28 @@
+{
+  "back": {
+    "enabled": true,
+    "href": "/login",
+    "id": "about.back",
+    "label": "Back",
+    "method": "GET"
+  },
+  "commit": "786949a",
+  "lede": "One desk. Every server.",
+  "notices": [],
+  "source": {
+    "enabled": true,
+    "href": "https://carrel.dev",
+    "id": "about.source",
+    "label": "Source code",
+    "method": "GET"
+  },
+  "third": {
+    "enabled": true,
+    "href": "/about",
+    "id": "about.third",
+    "label": "Third-party notices",
+    "method": "GET"
+  },
+  "title": "About Carrel",
+  "version": "0.0.1"
+}

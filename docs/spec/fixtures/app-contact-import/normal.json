@@ -1,0 +1,301 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
+      "id": "import.choose",
+      "label": "Read the file",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty",
+      "id": "import.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "details": null,
+  "into": {
+    "chosen": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
+    "options": [
+      {
+        "colour": "#a05a2c",
+        "id": "/app/contacts/a-nc-home/kontakty/import?into=arhiv\u0026to=a-nc-home",
+        "label": "Архив",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · home · Архив"
+      },
+      {
+        "colour": "#4a6b52",
+        "id": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
+        "label": "Контакты",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "nextcloud · home · Контакты"
+      },
+      {
+        "colour": "#6b4e7a",
+        "id": "/app/contacts/a-nc-home/kontakty/import?into=komanda\u0026to=a-rad-vps",
+        "label": "Команда",
+        "last": false,
+        "readOnly": true,
+        "reason": "Read-only",
+        "stamp": "radicale · vps · Команда"
+      },
+      {
+        "colour": "#6b4e7a",
+        "id": "/app/contacts/a-nc-home/kontakty/import?into=rassylki\u0026to=a-rad-vps",
+        "label": "Рассылки",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "radicale · vps · Рассылки"
+      }
+    ]
+  },
+  "kind": "contact",
+  "notices": [],
+  "preview": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": 1,
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "href": "/app/contacts/a-nc-home/kontakty",
+            "label": "Контакты",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "report": null,
+  "source": {
+    "folder": null,
+    "kinds": [
+      ".vcf"
+    ],
+    "note": "Nothing here is overwritten. Every record in the file is created, and one whose identity the collection already holds is created under a new one."
+  },
+  "step": "source",
+  "title": "Import",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}

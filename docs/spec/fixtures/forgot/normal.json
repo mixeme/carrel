@@ -1,0 +1,54 @@
+{
+  "asked": false,
+  "form": {
+    "action": "/forgot",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/forgot",
+        "id": "forgot.submit",
+        "label": "Continue",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Login or email",
+            "name": "login",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "hasMail": false,
+  "lede": "Carrel cannot recover your encrypted data. You can wipe the account and set a new password, or ask an administrator.",
+  "notices": [],
+  "options": [],
+  "sent": false,
+  "title": "Forgotten password"
+}

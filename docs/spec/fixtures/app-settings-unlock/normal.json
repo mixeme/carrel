@@ -1,0 +1,50 @@
+{
+  "form": {
+    "action": "/app/settings/unlock",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/settings/unlock",
+        "id": "unlock.submit",
+        "label": "Show",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "purpose": "Confirm your password to reveal stored credentials, download a device profile, issue a davloom device password, change key escrow, or delete your account.",
+  "until": null,
+  "warning": "Everything revealed in this window is written to the audit log."
+}

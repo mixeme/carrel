@@ -1,0 +1,519 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/notes/quick?related=4f2b-9c31-a0e7",
+      "id": "timeline.note",
+      "label": "Write a note",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/calendar/quick?attendee=a.kovaleva%40example.org",
+      "id": "timeline.event",
+      "label": "New event",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/quick?related=4f2b-9c31-a0e7",
+      "id": "timeline.task",
+      "label": "New task",
+      "method": "GET"
+    }
+  ],
+  "bar": {
+    "actions": [],
+    "compact": false,
+    "filter": "",
+    "loaded": 1,
+    "range": null,
+    "segments": [
+      {
+        "enabled": false,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=all",
+        "id": "timeline.show.all",
+        "label": "All · 1",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=events",
+        "id": "timeline.show.events",
+        "label": "Events · 1",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=tasks",
+        "id": "timeline.show.tasks",
+        "label": "Tasks · 0",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=notes",
+        "id": "timeline.show.notes",
+        "label": "Notes · 0",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=files",
+        "id": "timeline.show.files",
+        "label": "Files · 0",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": null
+  },
+  "card": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+        "id": "timeline.card",
+        "label": "Open the card",
+        "method": "GET"
+      }
+    ],
+    "fields": [
+      {
+        "href": "",
+        "label": "Organisation",
+        "mono": false,
+        "value": "Издательство «Слово»"
+      },
+      {
+        "href": "",
+        "label": "Title",
+        "mono": false,
+        "value": "Выпускающий редактор"
+      },
+      {
+        "href": "tel:+7912445-10-88",
+        "label": "Phone · mobile",
+        "mono": false,
+        "value": "+7 912 445-10-88"
+      },
+      {
+        "href": "tel:+7495120-45-00",
+        "label": "Phone · work",
+        "mono": false,
+        "value": "+7 495 120-45-00"
+      },
+      {
+        "href": "mailto:a.kovaleva@example.org",
+        "label": "Email · work",
+        "mono": false,
+        "value": "a.kovaleva@example.org"
+      },
+      {
+        "href": "",
+        "label": "Birthday",
+        "mono": false,
+        "value": "1987-03-14"
+      },
+      {
+        "href": "",
+        "label": "Categories",
+        "mono": false,
+        "value": "работа, издательство"
+      },
+      {
+        "href": "",
+        "label": "Note",
+        "mono": false,
+        "value": "Пишет по вторникам, отвечает в тот же день."
+      }
+    ],
+    "source": {
+      "changed": "10 August 2026, 17:04",
+      "colour": "#4a6b52",
+      "lastRead": "2 min ago",
+      "objects": null,
+      "readOnly": false,
+      "stamp": "nextcloud · home · Контакты"
+    },
+    "title": "Анна Ковалёва"
+  },
+  "details": null,
+  "groups": [
+    {
+      "rows": [
+        {
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+          "kind": "event",
+          "stamp": "nextcloud · home · Личный",
+          "title": "Синк-ап по релизу",
+          "when": "10 August 2026",
+          "why": "attendee · accepted"
+        }
+      ],
+      "rubric": "August 2026"
+    }
+  ],
+  "name": "Анна Ковалёва",
+  "note": "Nothing was looked for before 10 August 2025. Widen the range if you need it.",
+  "notices": [],
+  "poll": {
+    "actions": [
+      {
+        "enabled": false,
+        "href": "/app/search/progress/t-task/cancel",
+        "id": "poll.stop",
+        "label": "Stop",
+        "method": "POST",
+        "reason": "The timeline has finished."
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?again=1",
+        "id": "poll.again",
+        "label": "Look again",
+        "method": "GET"
+      }
+    ],
+    "answeredAt": "10 August, 17:06",
+    "percent": 100,
+    "running": false,
+    "sources": [
+      {
+        "colour": "#a05a2c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Архив",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Контакты",
+        "state": "empty"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Команда",
+        "state": "empty"
+      },
+      {
+        "colour": "#a05a2c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Дни рождения",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 1,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Личный",
+        "state": "done"
+      },
+      {
+        "colour": "#3f6e8c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Работа",
+        "state": "empty"
+      },
+      {
+        "colour": "#8c6239",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Дежурства",
+        "state": "empty"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Проекты",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Дела",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Записи",
+        "state": "empty"
+      }
+    ],
+    "summary": "Polled 10 of 10 sources · 1 record",
+    "taskID": "t-task"
+  },
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+        "id": "nav.back",
+        "label": "Анна Ковалёва",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": 1,
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "href": "/app/contacts/a-nc-home/kontakty",
+            "label": "Контакты",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "range": {
+    "form": null,
+    "from": "10 August 2025",
+    "presets": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?from=2025-05-10",
+        "id": "timeline.widen",
+        "label": "Widen the range",
+        "method": "GET"
+      }
+    ],
+    "to": "10 November 2026"
+  },
+  "title": "Анна Ковалёва · Timeline",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  },
+  "uid": "4f2b-9c31-a0e7"
+}
