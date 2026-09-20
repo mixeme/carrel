@@ -17,7 +17,8 @@ func backRow(t *testing.T, rail view.Rail) view.NavRow {
 	if len(rail.Nav) != 1 || rail.Nav[0].ID != "nav.back" || rail.Nav[0].Count != nil || rail.Nav[0].On {
 		t.Fatalf("not a back rail: nav %+v", rail.Nav)
 	}
-	if rail.Tags != nil || rail.Foot != nil {
+	// Empty, not absent: an empty list goes out as [] (C-6.1).
+	if len(rail.Tags) != 0 || len(rail.Foot) != 0 {
 		t.Errorf("a back rail with tags %+v or a foot %+v", rail.Tags, rail.Foot)
 	}
 	for _, sec := range rail.Sections {

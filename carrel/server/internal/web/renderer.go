@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 )
 
 // ViewMode distinguishes a full page from a fragment (C-7.1). The client sends
@@ -84,7 +85,84 @@ func writeJSON(w http.ResponseWriter, status int, body any) error {
 	if body == nil {
 		return nil
 	}
-	return json.NewEncoder(w).Encode(body)
+	return json.NewEncoder(w).Encode(withEmptyLists(body))
+}
+
+// withEmptyLists is the rule of C-6: an empty list goes out as [], never as
+// null. In Go a list nobody appended to is nil and marshals to null, so the
+// same field would be [] on one screen and null on another by accident, and
+// every client would have to check both. null keeps one meaning — a pointer
+// that is not there: no range on this bar, no details panel, no retry.
+//
+// The answer is copied before it is filled in: a view model may share slices
+// with the session's cache, and writing into those would change what another
+// request reads.
+func withEmptyLists(body any) any {
+	v := reflect.ValueOf(body)
+	if !v.IsValid() {
+		return body
+	}
+	out := reflect.New(v.Type()).Elem()
+	out.Set(v)
+	fillEmptyLists(out)
+	return out.Interface()
+}
+
+func fillEmptyLists(v reflect.Value) {
+	switch v.Kind() {
+	case reflect.Slice:
+		if v.IsNil() {
+			if v.CanSet() {
+				v.Set(reflect.MakeSlice(v.Type(), 0, 0))
+			}
+			return
+		}
+		fresh := reflect.MakeSlice(v.Type(), v.Len(), v.Len())
+		reflect.Copy(fresh, v)
+		for i := 0; i < fresh.Len(); i++ {
+			fillEmptyLists(fresh.Index(i))
+		}
+		if v.CanSet() {
+			v.Set(fresh)
+		}
+	case reflect.Array:
+		for i := 0; i < v.Len(); i++ {
+			fillEmptyLists(v.Index(i))
+		}
+	case reflect.Struct:
+		for i := 0; i < v.NumField(); i++ {
+			if v.Type().Field(i).IsExported() {
+				fillEmptyLists(v.Field(i))
+			}
+		}
+	case reflect.Pointer:
+		if v.IsNil() {
+			return // a pointer that is not there stays null: that is its meaning
+		}
+		fresh := reflect.New(v.Type().Elem())
+		fresh.Elem().Set(v.Elem())
+		fillEmptyLists(fresh.Elem())
+		if v.CanSet() {
+			v.Set(fresh)
+		}
+	case reflect.Interface:
+		if v.IsNil() {
+			return
+		}
+		inner := reflect.New(v.Elem().Type()).Elem()
+		inner.Set(v.Elem())
+		fillEmptyLists(inner)
+		if v.CanSet() {
+			v.Set(inner)
+		}
+	case reflect.Map:
+		for _, k := range v.MapKeys() {
+			e := reflect.New(v.Type().Elem()).Elem()
+			e.Set(v.MapIndex(k))
+			fillEmptyLists(e)
+			v.SetMapIndex(k, e)
+		}
+	}
 }
 
 // WantsFragment reports whether the request asks for a fragment rather than a

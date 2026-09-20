@@ -5,6 +5,23 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.160 — 2026-09-20
+
+**Contract change (C-6.1).** Owner's decision 20.09.2026.
+
+### Changed
+
+- **An empty list goes out as `[]`, never as `null`.** In Go a list nobody
+  appended to is nil and marshals to null, so the same field came out `[]`
+  on one screen and `null` on another by accident — and every client would
+  have had to check both. The rule lives at the boundary
+  (`web.withEmptyLists`), not in each handler, so it holds for screens
+  written before it; the answer is copied first, because a view model may
+  share a slice with the session's cache. `null` keeps one meaning: a
+  pointer that is not there — no range on the bar, no details panel,
+  nothing to retry. Two guards: every page type answers no null list, and
+  neither does a real list screen.
+
 ## v0.0.159 — 2026-09-20
 
 fixtures-tail.md, step 1.

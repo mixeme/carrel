@@ -744,7 +744,7 @@ func TestUnavailableSourceIsAScreen(t *testing.T) {
 		t.Error("retry is not this source")
 	}
 	card := decode[view.ContactPage](t, f.h.do(get(list+"/ada", f.sess)))
-	if len(card.Notices) == 0 || card.Actions != nil {
+	if len(card.Notices) == 0 || len(card.Actions) != 0 {
 		t.Errorf("record page = %+v", card)
 	}
 }
