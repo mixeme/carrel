@@ -47,7 +47,7 @@ func agentLabel(ua string) string {
 // sessionRows are the account's live sessions (C-6 SessionRow), this one
 // marked and without End: signing out does that.
 func (s *Server) sessionRows(sess *session.Session) []view.SessionRow {
-	tf, now := s.timeFor(sess), time.Now()
+	tf, now := s.timeFor(sess), s.now()
 	var rows []view.SessionRow
 	for _, in := range s.sessions.SessionsOf(sess.AccountID()) {
 		row := view.SessionRow{

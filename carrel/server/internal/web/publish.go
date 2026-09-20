@@ -120,7 +120,7 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 		},
 	}
 	if kind == view.KindEvent && q.Get("uid") == "" {
-		today := dayOf(time.Now(), tf.tz)
+		today := dayOf(tf.now, tf.tz)
 		sheet.Form = s.plainForm("/app/publish", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "from", Label: "How much of it · from", Kind: view.InputDate,
@@ -280,7 +280,7 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	}
 	page := view.PublishedLinksPage{Shell: s.buildShell(sess, "Published links")}
 	blob := s.catalogOf(sess)
-	tf, now := s.timeFor(sess), time.Now()
+	tf, now := s.timeFor(sess), s.now()
 	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
 		host := l.Target.AccountID
 		if conn, ok := blob.Connection(l.Target.AccountID); ok {

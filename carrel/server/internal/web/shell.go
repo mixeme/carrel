@@ -28,7 +28,7 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 		},
 	}
 	if sess != nil {
-		now := time.Now()
+		now := s.now()
 		if until := sess.UnlockUntil(now); until != nil {
 			sh.Top.Unlocked = ptrWhen(s.timeFor(sess).formatWhen(*until, false, now))
 		}
@@ -58,9 +58,22 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 	return sh
 }
 
+// aboutAction is the rail's last line: the name, and the build behind it when
+// there is one (C-13). A run from source has no version and no commit, and
+// then the line is the name alone — an empty version shown as one would be a
+// lie about what is running.
 func (s *Server) aboutAction() view.Action {
+	label := "Carrel"
+	switch {
+	case s.version != "" && s.commit != "":
+		label += " " + s.version + " · " + s.commit
+	case s.version != "":
+		label += " " + s.version
+	case s.commit != "":
+		label += " · " + s.commit
+	}
 	return view.Action{
-		ID: "about", Label: text("Carrel"), Href: s.route("/about"), Method: "GET", Enabled: true,
+		ID: "about", Label: text(label), Href: s.route("/about"), Method: "GET", Enabled: true,
 	}
 }
 

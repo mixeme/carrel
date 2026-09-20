@@ -214,7 +214,7 @@ func printRange(parts ...string) view.Text {
 // recordPrint is the print header of a record read: its title, where it
 // lives, and when it was read.
 func (s *Server) recordPrint(c *collectionCtx, title view.Text) view.Print {
-	return view.Print{Title: title, Range: text(string(c.stamp())), Taken: c.tf.taken(time.Now())}
+	return view.Print{Title: title, Range: text(string(c.stamp())), Taken: c.tf.taken(c.tf.now)}
 }
 
 var showLabels = map[string]string{"open": "Open", "done": "Done", "all": "All"}

@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"time"
 
 	"carrel.dev/carrel/server/internal/fanout"
 	"carrel.dev/carrel/server/internal/provider/cal"
@@ -325,7 +324,7 @@ func (s *Server) chosenPart(r *http.Request, sess *session.Session, k attachKind
 		tf := s.timeFor(sess)
 		from, ok := parseDay(tf, r.FormValue("from"))
 		if !ok {
-			from = time.Now().In(tf.tz)
+			from = tf.now.In(tf.tz)
 		}
 		to, ok := parseDay(tf, r.FormValue("to"))
 		if !ok || to.Before(from) {

@@ -72,6 +72,9 @@ type Options struct {
 	// Finished runs once per round, after the last source settles, outside
 	// the task's lock.
 	Finished func(Snapshot)
+	// Now is when a round started and ended, as the screens will say it.
+	// Nil is the wall clock; a test gives a fixed one so a fixture holds.
+	Now func() time.Time
 }
 
 // SourceStatus is one source in a snapshot (C-8.1).
@@ -143,6 +146,9 @@ func Start(id string, q Query, sources []Source, opts Options) (*Task, error) {
 	}
 	if opts.Acquire != nil && !opts.Acquire() {
 		return nil, ErrBusy
+	}
+	if opts.Now == nil {
+		opts.Now = time.Now
 	}
 	t := &Task{
 		id:      id,
@@ -239,7 +245,7 @@ func (t *Task) beginRoundLocked() {
 	t.ctx, t.cancel = context.WithTimeout(context.Background(), t.opts.TotalTimeout)
 	t.round++
 	t.open = true
-	t.started = time.Now()
+	t.started = t.opts.Now()
 	t.finished = time.Time{}
 	t.running.Store(true)
 	ctx := t.ctx
@@ -372,7 +378,7 @@ func (t *Task) endRoundIfIdleLocked() (Snapshot, int, bool) {
 		return Snapshot{}, 0, false
 	}
 	t.open = false
-	t.finished = time.Now()
+	t.finished = t.opts.Now()
 	t.cancel()
 	if t.opts.Release != nil {
 		t.opts.Release()

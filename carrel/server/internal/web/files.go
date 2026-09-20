@@ -15,7 +15,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
@@ -464,7 +463,7 @@ func cloneValues(q url.Values) url.Values {
 // folderPage lays a listing out: folders first, then by the chosen order; the
 // filter keeps names that hold it; selected rows are the names ?select= gives.
 func (s *Server) folderPage(c *fileCtx, segs []string, entries []file.Entry, q url.Values, notices []view.Notice) view.FilesPage {
-	now := time.Now()
+	now := s.now()
 	title := collectionLabel(c.col)
 	if len(segs) > 0 {
 		title = segs[len(segs)-1]

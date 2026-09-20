@@ -191,6 +191,32 @@ type Server struct {
 	commit   string
 	mux      *http.ServeMux
 	proxies  []netip.Prefix // CARREL_TRUSTED_PROXIES
+	// clock is what the screens call "now": «2 min ago», the day a week
+	// starts from, the stamp under a printed page. Only the answer's own
+	// sense of now goes through it — a record's dates are the record's.
+	// Tests freeze it (SetClock) so a fixture is the same tomorrow.
+	clock func() time.Time
+}
+
+// now is the instant this answer calls "now".
+func (s *Server) now() time.Time {
+	if s.clock == nil {
+		return time.Now()
+	}
+	return s.clock()
+}
+
+// SetBuild names the version and commit the answers carry (the rail's
+// «Carrel 0.0.1 · 786949a»). Nothing but a test calls it: an instance is
+// built with them.
+func (s *Server) SetBuild(version, commit string) {
+	s.version, s.commit = version, commit
+}
+
+// SetClock freezes what the screens call "now". Nothing but a test calls
+// it: an instance reads the wall clock.
+func (s *Server) SetClock(at time.Time) {
+	s.clock = func() time.Time { return at }
 }
 
 // New builds a Server with all C-5 routes registered.

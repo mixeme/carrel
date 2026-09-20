@@ -140,7 +140,7 @@ func attachmentDay(c *collectionCtx, obj *model.Object) time.Time {
 		if at := noteTime(obj, tz); !at.IsZero() {
 			return at.In(tz)
 		}
-		return time.Now().In(tz)
+		return c.tf.now.In(tz)
 	}
 	if c.spec.kind == view.KindTask {
 		if due, err := cal.DueOf(obj, tz); err == nil && !due.Start.IsZero() {
@@ -150,7 +150,7 @@ func attachmentDay(c *collectionCtx, obj *model.Object) time.Time {
 	if tm, err := cal.TimingOf(obj, tz); err == nil && !tm.Start.IsZero() {
 		return tm.Start.In(tz)
 	}
-	return time.Now().In(tz)
+	return c.tf.now.In(tz)
 }
 
 // attachmentTitle is the title in the name: SUMMARY, or the first line of a

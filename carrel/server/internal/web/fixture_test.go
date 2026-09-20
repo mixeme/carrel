@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
@@ -29,6 +30,27 @@ import (
 // What never matches and is normalised away: the identifiers Carrel issues
 // (a-…, t-…), the CSRF of the session, and the version the binary was built
 // with. Nothing else: a fixture that needs another exception is a finding.
+
+// The frames stand on one day, in one zone, of one build.
+const (
+	mockupZone    = "Europe/Moscow"
+	mockupDay     = "2026-08-10 17:04"
+	mockupVersion = "0.0.1"
+	mockupCommit  = "786949a"
+)
+
+func mockupNow(t *testing.T) time.Time {
+	t.Helper()
+	tz, err := time.LoadLocation(mockupZone)
+	if err != nil {
+		t.Fatal(err)
+	}
+	at, err := time.ParseInLocation("2006-01-02 15:04", mockupDay, tz)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return at
+}
 
 // mockupCollection is one collection of the mockup set: where it lives, what
 // it is called, its colour, the kinds it holds and the file of its records.
@@ -172,7 +194,12 @@ func newMockupApp(t *testing.T) *mockupApp {
 
 	h := newHarness(t)
 	h.cfg.DAVSSRFAllowlist = "127.0.0.1"
+	h.cfg.Timezone = mockupZone
 	h.rebuild()
+	// The day of the frames, in their zone, and the build they were drawn
+	// against: a fixture is the same tomorrow (fixtures-tail.md).
+	h.srv.SetClock(mockupNow(t))
+	h.srv.SetBuild(mockupVersion, mockupCommit)
 	h.admin("mix", "password123")
 	sess := h.login("mix", "password123")
 	for _, label := range []string{"nextcloud · home", "radicale · vps"} {

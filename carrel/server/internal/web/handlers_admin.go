@@ -96,7 +96,7 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlash) view.AdminUsersPage {
 	snap := s.store.Snapshot()
-	now := time.Now()
+	now := s.now()
 	page := view.AdminUsersPage{
 		Shell: s.buildShell(sess, "Users"),
 		Add: []view.Action{
@@ -261,7 +261,7 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvitesFlash) view.AdminInvitesPage {
 	snap := s.store.Snapshot()
-	now := time.Now()
+	now := s.now()
 	page := view.AdminInvitesPage{
 		Shell: s.buildShell(sess, "Invites"),
 		Add: withSubmit(s.plainForm("/admin/invites", "POST",
@@ -354,7 +354,7 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	snap := s.store.Snapshot()
-	now := time.Now()
+	now := s.now()
 	show := r.URL.Query().Get("show")
 	if show != "security" && show != "failures" {
 		show = "all"

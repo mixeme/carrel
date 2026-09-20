@@ -19,6 +19,10 @@ import (
 // Monday and 24 hours). Lists show absolute times; the original zone shows
 // only where it differs.
 type timeFmt struct {
+	// now is what this answer calls "now": «2 min ago», the week it opens
+	// on, the stamp under a printed page. A record's own dates are the
+	// record's and never come from here.
+	now  time.Time
 	tz   *time.Location
 	week time.Weekday
 	h12  bool
@@ -27,7 +31,7 @@ type timeFmt struct {
 // timeFor reads the account settings of the session's person. Build it once
 // per page: it takes a snapshot of the state.
 func (s *Server) timeFor(sess *session.Session) timeFmt {
-	f := timeFmt{tz: s.tz(), week: time.Monday}
+	f := timeFmt{tz: s.tz(), week: time.Monday, now: s.now()}
 	if sess == nil {
 		return f
 	}

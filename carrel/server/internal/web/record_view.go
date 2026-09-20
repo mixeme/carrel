@@ -475,7 +475,7 @@ func (s *Server) recurrenceBlock(obj *model.Object, tf timeFmt) view.RecurrenceB
 		Raw:     text(raw),
 		Note:    "Edited as a whole series",
 	}
-	now := time.Now()
+	now := tf.now
 	times, err := cal.Expand(obj, now, now.AddDate(1, 0, 0), tz)
 	if err != nil {
 		return b
@@ -503,7 +503,7 @@ func (s *Server) recurrenceBlock(obj *model.Object, tf timeFmt) view.RecurrenceB
 
 // serverStamp is when the server version was last changed, as the record says.
 func (s *Server) serverStamp(c *collectionCtx, obj *model.Object) view.When {
-	tf, now := c.tf, time.Now()
+	tf, now := c.tf, c.tf.now
 	if c.card != nil {
 		if t, err := time.Parse("20060102T150405Z", firstValue(obj, "REV")); err == nil {
 			return tf.formatWhen(t, false, now)

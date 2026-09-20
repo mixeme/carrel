@@ -221,7 +221,7 @@ func (c *collectionCtx) source() view.SourceBlock {
 // change among its records (S-22). An agenda reads a week: it tells when, not
 // what changed in the collection — the same rule as its count.
 func (c *collectionCtx) noteRead(items []listed, whole bool) {
-	noteRead(c.sess, c.conn.ID, c.col.Path, time.Now(), items, whole)
+	noteRead(c.sess, c.conn.ID, c.col.Path, c.tf.now, items, whole)
 }
 
 func noteRead(sess *session.Session, accountID, path string, at time.Time, items []listed, whole bool) {
@@ -243,7 +243,7 @@ func readingOf(sess *session.Session, tf timeFmt, accountID, path string) (lastR
 	if !ok {
 		return "", ""
 	}
-	lastRead = tf.formatWhen(r.At, true, time.Now())
+	lastRead = tf.formatWhen(r.At, true, tf.now)
 	if !r.Changed.IsZero() {
 		changed = view.When(tf.date(r.Changed) + ", " + tf.clock(r.Changed))
 	}
@@ -713,7 +713,7 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 	c.noteRead(items, true)
 	total := len(objs)
 	page.Bar.Loaded, page.Bar.Total = len(shown), &total
-	page.Print = view.Print{Title: page.Title, Range: printRange(plural(len(shown), "card"), filter.tag), Taken: c.tf.taken(time.Now())}
+	page.Print = view.Print{Title: page.Title, Range: printRange(plural(len(shown), "card"), filter.tag), Taken: c.tf.taken(c.tf.now)}
 	return page
 }
 
@@ -798,7 +798,7 @@ func (s *Server) contactGroups(sess *session.Session, tf timeFmt, items []listed
 // weekWindow is the agenda week in the instance zone: the week of today, or
 // the one starting at from.
 func weekWindow(tf timeFmt, from string) (time.Time, time.Time) {
-	start := tf.weekStart(time.Now().In(tf.tz))
+	start := tf.weekStart(tf.now.In(tf.tz))
 	if from != "" {
 		if d, err := time.ParseInLocation("2006-01-02", from, tf.tz); err == nil {
 			start = d
@@ -825,7 +825,7 @@ func agendaWindow(tf timeFmt, q url.Values) (kind string, from, to time.Time) {
 		d, err := time.ParseInLocation("2006-01-02", strings.TrimSpace(q.Get(name)), tf.tz)
 		return d, err == nil
 	}
-	today := dayOf(time.Now(), tf.tz)
+	today := dayOf(tf.now, tf.tz)
 	switch q.Get("view") {
 	case agendaDay:
 		from = today
@@ -978,7 +978,7 @@ func (s *Server) agendaRange(sess *session.Session, tf timeFmt, base, tag, kind 
 	// Switching the window keeps where the person is: today when today is in
 	// it, else its first day.
 	anchor := from
-	if today := dayOf(time.Now(), tf.tz); !today.Before(from) && today.Before(to) {
+	if today := dayOf(tf.now, tf.tz); !today.Before(from) && today.Before(to) {
 		anchor = today
 	}
 	for _, w := range []struct{ id, label, kind string }{
@@ -1053,7 +1053,7 @@ func (s *Server) agenda(r *http.Request, c *collectionCtx) view.AgendaPage {
 	c.noteRead(items, false)
 	page.Print = view.Print{
 		Title: page.Title, Range: printRange(agendaPrint(tf, from, to), plural(page.Bar.Loaded, "event"), filter.tag),
-		Taken: tf.taken(time.Now()),
+		Taken: tf.taken(tf.now),
 	}
 	return page
 }
@@ -1225,7 +1225,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	var open, done int
 	var more []unreadable
 	by := sortOf(r, view.KindTask)
-	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items)), c.spec.segment, false, filter, time.Now(), by)
+	page.Groups, open, done, page.Bar.Loaded, more = s.taskGroups(c.tf, show, s.foldLinked(s.catalogOf(c.sess), view.KindTask, filter.keep(view.KindTask, items)), c.spec.segment, false, filter, c.tf.now, by)
 	page.Bar.Segments = append(s.taskSegments(c.listPath(), filter.tag, show, open, done),
 		s.sortSegments(c.listPath(), view.KindTask, by, r.URL.Query())...)
 	page.Notices = appendUnreadable(page.Notices, append(unreadableOf(bad), more...))
@@ -1234,7 +1234,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	c.noteRead(items, true)
 	page.Print = view.Print{
 		Title: page.Title, Range: printRange(showLabels[show], plural(page.Bar.Loaded, "task"), filter.tag),
-		Taken: c.tf.taken(time.Now()),
+		Taken: c.tf.taken(c.tf.now),
 	}
 	return page
 }
@@ -1398,7 +1398,7 @@ func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page.Rail.Tags = filter.rail(view.KindNote, items)
 	c.putIndex(indexOf(c.tf, view.KindNote, items))
 	c.noteRead(items, true)
-	page.Print = view.Print{Title: page.Title, Range: printRange(plural(page.Bar.Loaded, "note"), filter.tag), Taken: c.tf.taken(time.Now())}
+	page.Print = view.Print{Title: page.Title, Range: printRange(plural(page.Bar.Loaded, "note"), filter.tag), Taken: c.tf.taken(c.tf.now)}
 	return page
 }
 

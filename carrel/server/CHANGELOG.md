@@ -5,6 +5,31 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.162 — 2026-09-20
+
+fixtures-tail.md: один источник времени для того, что экран называет «сейчас».
+
+### Changed
+
+- **The screens take "now" from one clock.** The stamp under a printed
+  page, «2 min ago», «just now», the day an agenda opens on and the next
+  occurrences of a rule all came from `time.Now()` at the call site. They
+  now come from `timeFmt.now`, set once per answer from the server's
+  clock, and the end of a poll (`poll.answeredAt`) comes from the same
+  clock through `fanout.Options.Now`. What is not shown as "now" keeps
+  the wall clock: rate limits, session expiry, invite and link expiry,
+  request timing and the journal. A record's own dates (REV, `changed`,
+  DTSTAMP) were never in question — they are the record's.
+- **The rail names the build** (C-13): `rail.about` is «Carrel 0.0.1 ·
+  786949a» when the binary was built with a version and a commit, and the
+  name alone when it was not — a version nobody set is not shown as one.
+
+### Notes
+
+- `SetClock` and `SetBuild` on `web.Server` exist for tests: a fixture has
+  to be the same tomorrow. An instance reads the wall clock and the build
+  it was compiled with.
+
 ## v0.0.161 — 2026-09-20
 
 fixtures-tail.md: the first findings of the comparison, closed.

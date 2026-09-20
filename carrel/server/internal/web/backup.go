@@ -392,7 +392,7 @@ func (s *Server) backupPageIssued(sess *session.Session, commands, secrets map[s
 
 func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob, errs map[string]view.Text, commands, secrets map[string]string, notices ...view.Notice) view.BackupPage {
 	blob := s.catalogOf(sess)
-	tf, now := s.timeFor(sess), time.Now()
+	tf, now := s.timeFor(sess), s.now()
 	page := view.BackupPage{Shell: s.buildShell(sess, "Backup")}
 	page.Notices = append(page.Notices, notices...)
 	runs := s.users.BackupRuns(sess.AccountID())

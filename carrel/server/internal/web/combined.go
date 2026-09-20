@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/fanout"
@@ -218,7 +217,7 @@ type combinedState struct {
 }
 
 func (s *Server) readCombined(r *http.Request, sess *session.Session, blob sealed.Blob, spec kindSpec) (combinedState, error) {
-	tf, now := s.timeFor(sess), time.Now()
+	tf, now := s.timeFor(sess), s.now()
 	st := combinedState{shell: s.buildShell(sess, combinedTitles[spec.kind]), poll: &view.PollBar{}}
 	task, err := s.combinedTask(r, sess, blob, spec)
 	switch {
@@ -281,7 +280,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	var taken view.When
 	if st.snap != nil {
 		sources = plural(len(st.snap.Sources), collectionNouns[spec.kind])
-		taken = tf.taken(time.Now())
+		taken = tf.taken(tf.now)
 		if !st.snap.Running {
 			taken = tf.taken(st.snap.Finished)
 		}
@@ -337,7 +336,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		var open, done int
 		var bad []unreadable
 		by := sortOf(r, view.KindTask)
-		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, shown, spec.segment, true, filter, time.Now(), by)
+		page.Groups, open, done, page.Bar.Loaded, bad = s.taskGroups(tf, show, shown, spec.segment, true, filter, tf.now, by)
 		page.Bar.Segments = append(s.taskSegments(base, filter.tag, show, open, done),
 			s.sortSegments(base, view.KindTask, by, r.URL.Query())...)
 		page.Bar.Actions = actions

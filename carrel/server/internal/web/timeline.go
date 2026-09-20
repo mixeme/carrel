@@ -208,9 +208,9 @@ func dayOf(t time.Time, tz *time.Location) time.Time {
 
 // timelineHere is the address of the timeline over a window: the default one
 // has no from.
-func timelineHere(card string, from time.Time, tz *time.Location) string {
+func timelineHere(card string, from, now time.Time, tz *time.Location) string {
 	here := card + "/timeline"
-	if !from.Equal(dayOf(time.Now(), tz).AddDate(0, -timelineBack, 0)) {
+	if !from.Equal(dayOf(now, tz).AddDate(0, -timelineBack, 0)) {
 		here = withQuery(here, "from", from.Format("2006-01-02"))
 	}
 	return here
@@ -244,10 +244,10 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tz := s.tz()
-	from, to := timelineWindow(r, tz, time.Now())
+	from, to := timelineWindow(r, tz, s.now())
 	person := personOf(uid, obj)
 	card := c.recordPath(uid)
-	page := timelineHere(card, from, tz)
+	page := timelineHere(card, from, s.now(), tz)
 
 	var task *timelineTask
 	if r.URL.Query().Get("again") == "" {
@@ -355,7 +355,7 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 	for _, f := range contactFieldsOf(obj) {
 		page.Card.Fields = append(page.Card.Fields, f.Field)
 	}
-	here := timelineHere(card, from, tf.tz)
+	here := timelineHere(card, from, tf.now, tf.tz)
 	page.Range = view.Range{From: text(tf.date(from)), To: text(tf.date(to)), Presets: []view.Action{{
 		ID: "timeline.widen", Label: "Widen the range", Method: "GET", Enabled: true,
 		Href: s.route(card + "/timeline?from=" + from.AddDate(0, -timelineWidenBy, 0).Format("2006-01-02")),

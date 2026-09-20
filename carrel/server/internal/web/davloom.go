@@ -138,7 +138,7 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 		page.Note = "davloom is off on this instance: the administrator turns it on with CARREL_DAVLOOM_PORT. " + page.Note
 	}
 	blob := s.catalogOf(sess)
-	tf, now := s.timeFor(sess), time.Now()
+	tf, now := s.timeFor(sess), s.now()
 	devices := s.users.Devices(sess.AccountID())
 	var edited *store.ProxyDevice
 	if editing == "" {

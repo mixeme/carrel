@@ -110,7 +110,7 @@ func (s *Server) restoreBlock(sess *session.Session, blob sealed.Blob) view.Rest
 	b := view.RestoreBlock{Note: "Restoring creates: the records go into a new collection, never over what is there now. The archive is opened and shown before anything is written."}
 	var runs, stores []view.Option
 	byJob := s.users.BackupRuns(sess.AccountID())
-	tf, now := s.timeFor(sess), time.Now()
+	tf, now := s.timeFor(sess), s.now()
 	for _, job := range blob.BackupJobs {
 		for _, r := range byJob[job.ID] {
 			if r.File != "" && r.Verified {

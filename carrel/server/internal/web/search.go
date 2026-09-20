@@ -123,6 +123,7 @@ func (s *Server) searchOptions(sess *session.Session) fanout.Options {
 		Acquire:       sess.AcquireFanout,
 		Release:       sess.ReleaseFanout,
 		Finished:      func(snap fanout.Snapshot) { sess.AddHistory(historyEntry(snap)) },
+		Now:           s.now,
 	}
 }
 
@@ -328,7 +329,7 @@ func searchOwner(q string) pollOwner {
 // and count, a short reason and a retry of that source alone where it did not
 // answer, and a summary that says whether the poll is over.
 func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, owner pollOwner) view.PollBar {
-	now := time.Now()
+	now := s.now()
 	bar := view.PollBar{TaskID: snap.ID, Running: snap.Running}
 	base := "/app/search/progress/" + snap.ID
 	var answered, refused, timedOut, unreachable, stopped int
