@@ -5,6 +5,20 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.2.6 — 2026-09-21
+
+fixtures-tail.md: пустые сведённые виды и отчёт о потере.
+
+### Changed
+
+- Four states: the combined calendar, task list and notebook with nothing
+  ticked, and `app-contact-edit/loss.json` — a save the server accepted
+  without keeping three properties. The report comes back on the form
+  where the change was made, not on a screen the person has to find (C-9).
+- `check.py` keys a known frame fault by the screen, not by one of its
+  states. The same short rail in `loss` counted as a new fault, and
+  repeating the entry per state would hide a real one among copies.
+
 ## v0.2.5 — 2026-09-21
 
 fixtures-tail.md: состояния сведённого вида.

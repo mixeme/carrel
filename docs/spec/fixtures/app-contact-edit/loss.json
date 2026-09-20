@@ -1,0 +1,816 @@
+{
+  "details": null,
+  "form": {
+    "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
+    "actions": [
+      {
+        "enabled": true,
+        "id": "record.save",
+        "label": "Save",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+        "id": "record.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "etag",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "e17"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "readat",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1786370760"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Left empty, it is made from Given and Family. Fill it alone and it is cut the other way: the first word is the given name, the rest the family name.",
+            "kind": "text",
+            "label": "Display name",
+            "name": "fn",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Анна Ковалёва"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Given",
+            "name": "n.given",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Анна"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Family",
+            "name": "n.family",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Ковалёва"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Organisation",
+            "name": "org",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Издательство «Слово»"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Title",
+            "name": "title",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Главный редактор"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "--MM-DD for a birthday without a year.",
+            "kind": "date",
+            "label": "Birthday",
+            "name": "bday",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1987-03-14"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Phone · mobile",
+            "name": "tel.0",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "+7 912 445-10-88"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Phone label",
+            "name": "tel.0.type",
+            "options": [
+              {
+                "label": "No label",
+                "selected": false,
+                "value": ""
+              },
+              {
+                "label": "home",
+                "selected": false,
+                "value": "home"
+              },
+              {
+                "label": "work",
+                "selected": false,
+                "value": "work"
+              },
+              {
+                "label": "cell",
+                "selected": false,
+                "value": "cell"
+              },
+              {
+                "label": "voice",
+                "selected": false,
+                "value": "voice"
+              },
+              {
+                "label": "fax",
+                "selected": false,
+                "value": "fax"
+              },
+              {
+                "label": "other",
+                "selected": false,
+                "value": "other"
+              },
+              {
+                "label": "cell",
+                "selected": true,
+                "value": "CELL"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "CELL"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Phone · work",
+            "name": "tel.1",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "+7 495 120-45-00"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Phone label",
+            "name": "tel.1.type",
+            "options": [
+              {
+                "label": "No label",
+                "selected": false,
+                "value": ""
+              },
+              {
+                "label": "home",
+                "selected": false,
+                "value": "home"
+              },
+              {
+                "label": "work",
+                "selected": false,
+                "value": "work"
+              },
+              {
+                "label": "cell",
+                "selected": false,
+                "value": "cell"
+              },
+              {
+                "label": "voice",
+                "selected": false,
+                "value": "voice"
+              },
+              {
+                "label": "fax",
+                "selected": false,
+                "value": "fax"
+              },
+              {
+                "label": "other",
+                "selected": false,
+                "value": "other"
+              },
+              {
+                "label": "work",
+                "selected": true,
+                "value": "WORK"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "WORK"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Add phone",
+            "name": "tel.new",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Phone label",
+            "name": "tel.new.type",
+            "options": [
+              {
+                "label": "No label",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "home",
+                "selected": false,
+                "value": "home"
+              },
+              {
+                "label": "work",
+                "selected": false,
+                "value": "work"
+              },
+              {
+                "label": "cell",
+                "selected": false,
+                "value": "cell"
+              },
+              {
+                "label": "voice",
+                "selected": false,
+                "value": "voice"
+              },
+              {
+                "label": "fax",
+                "selected": false,
+                "value": "fax"
+              },
+              {
+                "label": "other",
+                "selected": false,
+                "value": "other"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "Email · work",
+            "name": "email.0",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "a.kovaleva@example.org"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Email label",
+            "name": "email.0.type",
+            "options": [
+              {
+                "label": "No label",
+                "selected": false,
+                "value": ""
+              },
+              {
+                "label": "home",
+                "selected": false,
+                "value": "home"
+              },
+              {
+                "label": "work",
+                "selected": false,
+                "value": "work"
+              },
+              {
+                "label": "cell",
+                "selected": false,
+                "value": "cell"
+              },
+              {
+                "label": "voice",
+                "selected": false,
+                "value": "voice"
+              },
+              {
+                "label": "fax",
+                "selected": false,
+                "value": "fax"
+              },
+              {
+                "label": "other",
+                "selected": false,
+                "value": "other"
+              },
+              {
+                "label": "work",
+                "selected": true,
+                "value": "WORK"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "WORK"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "email",
+            "label": "Add email",
+            "name": "email.new",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Email label",
+            "name": "email.new.type",
+            "options": [
+              {
+                "label": "No label",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "home",
+                "selected": false,
+                "value": "home"
+              },
+              {
+                "label": "work",
+                "selected": false,
+                "value": "work"
+              },
+              {
+                "label": "cell",
+                "selected": false,
+                "value": "cell"
+              },
+              {
+                "label": "voice",
+                "selected": false,
+                "value": "voice"
+              },
+              {
+                "label": "fax",
+                "selected": false,
+                "value": "fax"
+              },
+              {
+                "label": "other",
+                "selected": false,
+                "value": "other"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Separated by commas.",
+            "kind": "text",
+            "label": "Categories",
+            "name": "categories",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "работа, издательство"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "area",
+            "label": "Note",
+            "name": "note",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Пишет по вторникам, отвечает в тот же день."
+          }
+        ]
+      },
+      {
+        "legend": "Addresses",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Add an address · Street",
+            "name": "adr.new.street",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "City",
+            "name": "adr.new.city",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Region",
+            "name": "adr.new.region",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Postcode",
+            "name": "adr.new.code",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Country",
+            "name": "adr.new.country",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      },
+      {
+        "legend": "Show 1 empty field",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Nickname",
+            "name": "nickname",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "loss": {
+    "actions": [],
+    "aggregated": false,
+    "note": "The change was saved, but the server did not keep these properties. Other clients will not see them either.",
+    "properties": [
+      "X-ABLABEL",
+      "X-CARREL-UNKNOWN-FLAG",
+      "X-EVOLUTION-FILE-AS"
+    ]
+  },
+  "notices": [],
+  "photo": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e17\u0026op=upload",
+        "id": "photo.add",
+        "label": "Add",
+        "method": "POST"
+      }
+    ],
+    "editable": true,
+    "href": "",
+    "initials": "АК",
+    "note": "JPEG, PNG, GIF or WebP."
+  },
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to the card",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "href": "/app/contacts/a-nc-home/kontakty",
+            "label": "Контакты",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "readOnly": false,
+  "title": "Edit contact",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  },
+  "uid": "4f2b-9c31-a0e7"
+}

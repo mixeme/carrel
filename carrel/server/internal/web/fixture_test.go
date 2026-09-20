@@ -941,3 +941,37 @@ func TestFixtureCombinedContactsStates(t *testing.T) {
 			app.h.do(get("/app/contacts?task="+page.Poll.TaskID, app.sess)))
 	})
 }
+
+// C-14.3: a combined view of every other kind with nothing ticked, and the
+// report of what a server dropped (C-9).
+func TestFixtureMoreStates(t *testing.T) {
+	for _, one := range []struct{ dir, segment string }{
+		{"app-agenda-all", "calendar"},
+		{"app-tasks-all", "tasks"},
+		{"app-notes-all", "notes"},
+	} {
+		t.Run(one.dir, func(t *testing.T) {
+			app := newMockupApp(t)
+			if rec := app.h.do(postForm("/app/sources/"+one.segment, app.sess, url.Values{})); rec.Code != 303 {
+				t.Fatalf("untick everything: %d", rec.Code)
+			}
+			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+			app.compare(t, one.dir+"/empty.json", app.h.do(get("/app/"+one.segment, app.sess)))
+		})
+	}
+
+	// loss: the stand keeps a card the way go-vcard writes it back, so the
+	// properties it does not know are gone after a write, and C-9 says so.
+	t.Run("loss", func(t *testing.T) {
+		app := newMockupApp(t)
+		rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
+		form := formFields(decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
+		app.servers["nextcloud · home"].Drop = []string{"X-EVOLUTION-FILE-AS", "X-ABLABEL", "X-CARREL-UNKNOWN-FLAG"}
+		form.Set("title", "Главный редактор")
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		// The save went through and the form comes back with the report:
+		// what the server did not keep is said where the change was made,
+		// not on a screen the person has to go and find (C-9).
+		app.compare(t, "app-contact-edit/loss.json", app.h.do(postForm(rec+"/edit", app.sess, form)))
+	})
+}

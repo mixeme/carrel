@@ -157,6 +157,9 @@ check("7. фикстуры разбираются", badfix)
 FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут из C-5
     "app-contacts": "/app/contacts",
     "app-contacts-one": "/app/contacts/{account}/{col}",
+    "app-agenda-all": "/app/calendar/{account}/{col}",
+    "app-tasks-all": "/app/tasks/{account}/{col}",
+    "app-notes-all": "/app/notes/{account}/{col}",
     "app-contact": "/app/contacts/{account}/{col}/{uid}",
     "app-agenda": "/app/calendar/{account}/{col}",
     "app-event": "/app/calendar/{account}/{col}/{uid}",
@@ -215,36 +218,42 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
           "app-publish"}
 
 FRAME_TODO = {
-    "app-contact-edit/normal: коллекции рейла":
+    "app-contact-edit: коллекции рейла":
         "s-contacts-3 рисует рейл возврата короче — то же, что у s-contacts-6",
-    "app-event-edit/normal: коллекции рейла":
+    "app-event-edit: коллекции рейла":
         "s-agenda-3 рисует рейл возврата короче — то же, что у s-agenda-2",
-    "app-note/normal: навигация":
+    "app-note: навигация":
         "три кадра называют возврат по-разному: «Back to list» у контактов, "
         "«Combined notebook» у заметок, «Back to tasks» у задач; сервер говорит одно",
-    "app-task/normal: навигация":
+    "app-task: навигация":
         "то же: кадр задач говорит «Back to tasks», остальные — «Back to list»",
-    "app-task-edit/normal: навигация":
+    "app-task-edit: навигация":
         "то же; с правки возврат ведёт на карточку, а не в список",
-    "app-search/normal: коллекции рейла":
+    "app-search: коллекции рейла":
         "кадр ищет по шести коллекциям, среди них папка файлов «Documents», "
         "которой в наборе нет; в наборе отмечено десять",
-    "app-contact-new/normal: коллекции рейла":
+    "app-contact-new: коллекции рейла":
         "s-notes-8 объявлен кадром адреса контакта, а рисует рейл календаря",
-    "app-contact-timeline/normal: коллекции рейла":
+    "app-contact-timeline: коллекции рейла":
         "s-contacts-7 — хронология человека, а рейл в кадре календарный",
-    "app-event/normal: коллекции рейла":
+    "app-event: коллекции рейла":
         "s-agenda-2 не рисует «Дни рождения»; рейл возврата несёт все "
         "календари своего подключения (C-6.3) — то же, что у s-contacts-6",
-    "app-tasks/normal: коллекции рейла":
+    "app-tasks: коллекции рейла":
         "кадр рисует подписку «Праздники РФ», которой нет в наборе",
-    "app-notes/normal: коллекции рейла":
+    "app-notes: коллекции рейла":
         "кадр рисует тетрадь «Архив», которой нет в наборе («Архив» там — "
         "адресная книга, не тетрадь)",
-    "app-agenda/normal: коллекции рейла":
+    "app-agenda-all: коллекции рейла":
+        "та же пара подписок, которых нет в наборе",
+    "app-tasks-all: коллекции рейла":
+        "та же подписка «Праздники РФ», которой нет в наборе",
+    "app-notes-all: коллекции рейла":
+        "та же тетрадь «Архив», которой нет в наборе",
+    "app-agenda: коллекции рейла":
         "кадр рисует две подписки — «Праздники РФ» и «Расписание лиги», — "
         "которых нет в наборе docs/visual/fixtures; добавить их в набор или снять с кадров",
-    "app-contact/normal: коллекции рейла":
+    "app-contact: коллекции рейла":
         "s-contacts-6 показывает одни «Контакты», s-conflict-1 — обе книги "
         "аккаунта; рейл возврата несёт коллекции своего подключения (C-6.3)",
 }
@@ -354,9 +363,11 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
                          % (where, [n[0] for n in fn], [n[0] for n in xn]))
 known, red = [], []
 for d in drift:
-    head = d.split(":")[0] + ":" + d.split(":")[1] if d.count(":") > 1 else d
+    # Ключ — «каталог: что расходится», без состояния: кадр неверен для
+    # экрана, а не для одного из его состояний.
+    flat = re.sub(r'^([^/]+)/[^:]+:', lambda m: m.group(1) + ':', d)
     for k, why in FRAME_TODO.items():
-        if d.startswith(k):
+        if flat.startswith(k):
             known.append("%s — %s" % (k, why))
             break
     else:
