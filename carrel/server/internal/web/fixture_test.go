@@ -113,6 +113,24 @@ type mockupApp struct {
 	// name: a-nc-home, a-rad-vps, and the last segment of each collection.
 	byAccount map[string]string
 	byPath    map[string]string
+	// servers are the two stands behind the set, by the label of their
+	// connection: a state where a source is still being asked is made by
+	// holding one of them (davtest.Stall).
+	servers map[string]*davtest.Server
+}
+
+// listPath is the address of one collection of the set, as Carrel issued it.
+func (a *mockupApp) listPath(t *testing.T, slug string) string {
+	t.Helper()
+	key, _ := a.sess.DataKey()
+	blob, _ := a.h.users.Catalog(a.sess.AccountID(), key)
+	for _, c := range blob.Collections {
+		if collectionSlugOf(c.Path) == slug {
+			return "/app/contacts/" + c.AccountID + "/" + url.PathEscape(c.Path)
+		}
+	}
+	t.Fatalf("the set has no %q", slug)
+	return ""
 }
 
 func mockupRoot(t *testing.T) string {
@@ -226,7 +244,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	tickMockup(t, h, sess)
 	linkMockupDuplicates(t, h, sess)
 
-	app := &mockupApp{h: h, sess: sess, byAccount: map[string]string{}, byPath: map[string]string{}}
+	app := &mockupApp{h: h, sess: sess, servers: servers, byAccount: map[string]string{}, byPath: map[string]string{}}
 	key, _ := sess.DataKey()
 	blob, _ := h.users.Catalog(sess.AccountID(), key)
 	names := map[string]string{"nextcloud · home": "a-nc-home", "radicale · vps": "a-rad-vps"}
@@ -440,6 +458,53 @@ func TestFixtureCombinedContacts(t *testing.T) {
 		t.Logf("the screen is written to %s", out)
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("the screen differs from its fixture (-fixture +screen):\n%s", diff)
+	}
+}
+
+// C-14.2, the partial state of the same screen: the poll has not finished.
+// One book answered from what the session already held, the other two are
+// still being asked — the two stands are held open while the screen is
+// taken (davtest.Stall).
+func TestFixtureCombinedContactsPartial(t *testing.T) {
+	app := newMockupApp(t)
+	// «Контакты» is read alone first, so the combined poll finds it in the
+	// session and answers from there: that is what «from cache» means.
+	if rec := app.h.do(get(app.listPath(t, "kontakty"), app.sess)); rec.Code != 200 {
+		t.Fatalf("read the book alone: %d", rec.Code)
+	}
+	// «Команда» lives on the other stand, and that stand is held: its book
+	// is still being asked while the two of nextcloud have answered.
+	release := app.servers["radicale · vps"].Stall("REPORT")
+	defer release()
+
+	app.h.srv.SetClock(mockupNow(t))
+	first := decode[view.ContactsListPage](t, app.h.do(get("/app/contacts", app.sess)))
+	if first.Poll == nil {
+		t.Fatal("the combined book has no poll")
+	}
+	waitPoll(t, app.h, app.sess, first.Poll.TaskID, func(b view.PollBar) bool {
+		done := 0
+		for _, sp := range b.Sources {
+			if sp.State == view.SourceDone || sp.State == view.SourceEmpty {
+				done++
+			}
+		}
+		return done == 2
+	})
+	rec := app.h.do(get("/app/contacts?task="+first.Poll.TaskID, app.sess))
+	got := app.normalise(t, rec.Body.Bytes())
+	if out := os.Getenv("CARREL_FIXTURE_WRITE"); out != "" {
+		body, err := json.MarshalIndent(got, "", "  ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(out, append(body, '\n'), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("the screen is written to %s", out)
+	}
+	if diff := cmp.Diff(loadFixture(t, "app-contacts/partial.json"), got); diff != "" {
 		t.Errorf("the screen differs from its fixture (-fixture +screen):\n%s", diff)
 	}
 }

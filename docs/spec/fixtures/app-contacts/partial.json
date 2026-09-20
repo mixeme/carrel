@@ -1,21 +1,50 @@
 {
-  "title": "Contacts",
+  "title": "Combined address book",
   "top": {
     "search": {
-      "query": "",
       "action": "/app/search",
+      "query": "",
       "history": [],
       "jump": [],
       "whole": null
     },
     "newMenu": [
       {
-        "id": "new.note",
-        "label": "New note",
-        "icon": "i-quill",
+        "id": "new.contacts",
+        "label": "Contact",
+        "href": "/app/contacts/quick",
+        "method": "GET",
+        "enabled": true
+      },
+      {
+        "id": "new.calendar",
+        "label": "Event",
+        "href": "/app/calendar/quick",
+        "method": "GET",
+        "enabled": true
+      },
+      {
+        "id": "new.tasks",
+        "label": "Task",
+        "href": "/app/tasks/quick",
+        "method": "GET",
+        "enabled": true
+      },
+      {
+        "id": "new.notes",
+        "label": "Note",
         "href": "/app/notes/quick",
         "method": "GET",
         "enabled": true
+      },
+      {
+        "id": "new.upload",
+        "label": "Upload file",
+        "icon": "i-up",
+        "href": "/app/files/picker?for=upload",
+        "method": "GET",
+        "enabled": true,
+        "separator": true
       }
     ],
     "signed": {
@@ -24,9 +53,18 @@
     },
     "user": [
       {
-        "id": "user.account",
-        "label": "Account",
+        "id": "user.settings",
+        "label": "Settings",
+        "icon": "i-gear",
         "href": "/app/settings/account",
+        "method": "GET",
+        "enabled": true
+      },
+      {
+        "id": "user.admin",
+        "label": "Administration",
+        "icon": "i-adm",
+        "href": "/admin/",
         "method": "GET",
         "enabled": true
       },
@@ -44,13 +82,12 @@
       "action": {
         "id": "poll.again",
         "label": "Refresh",
-        "icon": "i-refresh",
-        "method": "POST",
-        "href": "/app/sources/contacts",
+        "href": "/app/contacts",
+        "method": "GET",
         "enabled": false,
-        "reason": "The poll is still running"
+        "reason": "The poll is still running."
       },
-      "answered": "8 min ago",
+      "answered": "",
       "running": true
     }
   },
@@ -59,44 +96,39 @@
       {
         "id": "nav.contacts",
         "label": "Contacts",
-        "icon": "i-con",
         "href": "/app/contacts",
         "method": "GET",
         "enabled": true,
-        "count": null,
-        "on": true
+        "on": true,
+        "count": null
       },
       {
         "id": "nav.calendar",
         "label": "Calendar",
-        "icon": "i-cal",
         "href": "/app/calendar",
         "method": "GET",
         "enabled": true,
-        "count": 14
+        "count": null
       },
       {
         "id": "nav.tasks",
         "label": "Tasks",
-        "icon": "i-task",
         "href": "/app/tasks",
         "method": "GET",
         "enabled": true,
-        "count": 3
+        "count": null
       },
       {
         "id": "nav.notes",
         "label": "Notes",
-        "icon": "i-note",
         "href": "/app/notes",
         "method": "GET",
         "enabled": true,
-        "count": 86
+        "count": null
       },
       {
         "id": "nav.files",
         "label": "Files",
-        "icon": "i-file",
         "href": "/app/files",
         "method": "GET",
         "enabled": true,
@@ -105,17 +137,16 @@
       {
         "id": "nav.duplicates",
         "label": "Duplicates",
-        "icon": "i-dup",
         "href": "/app/duplicates",
         "method": "GET",
         "enabled": true,
-        "count": null
+        "count": 0
       }
     ],
     "sections": [
       {
-        "account": "nextcloud · home",
-        "accountID": "a-nc-home",
+        "account": "",
+        "accountID": "",
         "state": "ok",
         "rows": [
           {
@@ -127,26 +158,115 @@
             "readOnly": false,
             "state": "ok",
             "menu": []
+          }
+        ]
+      },
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "state": "ok",
+        "rows": [
+          {
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "colour": "#a05a2c",
+            "count": 1,
+            "tick": "on",
+            "readOnly": false,
+            "state": "ok",
+            "menu": [
+              {
+                "id": "collection.rename",
+                "label": "Rename…",
+                "href": "/app/collections/rename?a=a-nc-home&c=arhiv",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "href": "/app/collections/move?a=a-nc-home&c=arhiv",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.import",
+                "label": "Import…",
+                "icon": "i-up",
+                "href": "/app/contacts/a-nc-home/arhiv/import",
+                "method": "GET",
+                "enabled": true,
+                "separator": true
+              },
+              {
+                "id": "collection.export",
+                "label": "Export",
+                "icon": "i-down",
+                "href": "/app/contacts/a-nc-home/arhiv/export",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.delete",
+                "label": "Delete…",
+                "href": "/app/collections/delete?a=a-nc-home&c=arhiv",
+                "method": "GET",
+                "danger": true,
+                "enabled": true,
+                "separator": true
+              }
+            ]
           },
           {
             "href": "/app/contacts/a-nc-home/kontakty",
             "label": "Контакты",
-            "colour": "#4A6B52",
-            "count": 248,
+            "colour": "#4a6b52",
+            "count": 4,
             "tick": "on",
             "readOnly": false,
             "state": "ok",
-            "menu": []
-          },
-          {
-            "href": "/app/contacts/a-nc-home/arhiv",
-            "label": "Архив",
-            "colour": "#A05A2C",
-            "count": null,
-            "tick": "on",
-            "readOnly": false,
-            "state": "ok",
-            "menu": []
+            "menu": [
+              {
+                "id": "collection.rename",
+                "label": "Rename…",
+                "href": "/app/collections/rename?a=a-nc-home&c=kontakty",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "href": "/app/collections/move?a=a-nc-home&c=kontakty",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.import",
+                "label": "Import…",
+                "icon": "i-up",
+                "href": "/app/contacts/a-nc-home/kontakty/import",
+                "method": "GET",
+                "enabled": true,
+                "separator": true
+              },
+              {
+                "id": "collection.export",
+                "label": "Export",
+                "icon": "i-down",
+                "href": "/app/contacts/a-nc-home/kontakty/export",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.delete",
+                "label": "Delete…",
+                "href": "/app/collections/delete?a=a-nc-home&c=kontakty",
+                "method": "GET",
+                "danger": true,
+                "enabled": true,
+                "separator": true
+              }
+            ]
           }
         ]
       },
@@ -158,65 +278,209 @@
           {
             "href": "/app/contacts/a-rad-vps/komanda",
             "label": "Команда",
-            "colour": "#6B4E7A",
+            "colour": "#6b4e7a",
             "count": null,
             "tick": "on",
             "readOnly": true,
             "state": "read-only",
-            "menu": []
+            "menu": [
+              {
+                "id": "collection.rename",
+                "label": "Rename…",
+                "href": "/app/collections/rename?a=a-rad-vps&c=komanda",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "href": "/app/collections/move?a=a-rad-vps&c=komanda",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.export",
+                "label": "Export",
+                "icon": "i-down",
+                "href": "/app/contacts/a-rad-vps/komanda/export",
+                "method": "GET",
+                "enabled": true,
+                "separator": true
+              },
+              {
+                "id": "collection.delete",
+                "label": "Delete…",
+                "href": "/app/collections/delete?a=a-rad-vps&c=komanda",
+                "method": "GET",
+                "danger": true,
+                "enabled": true,
+                "separator": true
+              }
+            ]
           },
           {
             "href": "/app/contacts/a-rad-vps/rassylki",
             "label": "Рассылки",
-            "colour": "#8C6239",
+            "colour": "#6b4e7a",
             "count": null,
             "tick": "off",
             "readOnly": false,
             "state": "ok",
-            "menu": []
+            "menu": [
+              {
+                "id": "collection.rename",
+                "label": "Rename…",
+                "href": "/app/collections/rename?a=a-rad-vps&c=rassylki",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "href": "/app/collections/move?a=a-rad-vps&c=rassylki",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.import",
+                "label": "Import…",
+                "icon": "i-up",
+                "href": "/app/contacts/a-rad-vps/rassylki/import",
+                "method": "GET",
+                "enabled": true,
+                "separator": true
+              },
+              {
+                "id": "collection.export",
+                "label": "Export",
+                "icon": "i-down",
+                "href": "/app/contacts/a-rad-vps/rassylki/export",
+                "method": "GET",
+                "enabled": true
+              },
+              {
+                "id": "collection.delete",
+                "label": "Delete…",
+                "href": "/app/collections/delete?a=a-rad-vps&c=rassylki",
+                "method": "GET",
+                "danger": true,
+                "enabled": true,
+                "separator": true
+              }
+            ]
           }
         ]
       }
     ],
-    "tags": [],
+    "tags": [
+      {
+        "label": "all",
+        "href": "/app/contacts?task=t-task",
+        "on": true
+      },
+      {
+        "label": "издательство",
+        "href": "/app/contacts?tag=%D0%B8%D0%B7%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE&task=t-task",
+        "on": false
+      },
+      {
+        "label": "работа",
+        "href": "/app/contacts?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0&task=t-task",
+        "on": false
+      }
+    ],
     "foot": [
       {
         "id": "rail.apply",
         "label": "Apply",
-        "method": "POST",
         "href": "/app/sources/contacts",
+        "method": "POST",
+        "enabled": true
+      },
+      {
+        "id": "collection.new",
+        "label": "New collection",
+        "icon": "i-plus",
+        "href": "/app/collections/new?kind=contact",
+        "method": "GET",
+        "enabled": true
+      },
+      {
+        "id": "account.connect",
+        "label": "Connect account",
+        "icon": "i-server",
+        "href": "/app/settings/connections",
+        "method": "GET",
+        "enabled": true
+      },
+      {
+        "id": "feed.subscribe",
+        "label": "Subscribe to a feed",
+        "icon": "i-link",
+        "href": "/app/settings/connections?op=feed",
+        "method": "GET",
         "enabled": true
       }
     ],
     "about": {
-      "id": "nav.about",
+      "id": "about",
       "label": "Carrel 0.0.1 · 786949a",
       "href": "/about",
       "method": "GET",
       "enabled": true
     },
-    "note": "3 of 4 books ticked"
+    "note": "3 of 4 collections ticked"
   },
   "notices": [],
   "details": null,
   "print": {
     "title": "Combined address book",
     "range": "3 books",
-    "taken": "2 September 2026, 17:06"
+    "taken": "10 August 2026, 17:04"
   },
   "bar": {
     "filter": "",
-    "loaded": 128,
-    "total": null,
+    "loaded": 5,
+    "total": 5,
     "compact": false,
-    "segments": [],
+    "segments": [
+      {
+        "id": "sort.az",
+        "label": "A–Z",
+        "href": "/app/contacts?sort=az",
+        "method": "GET",
+        "enabled": false,
+        "on": true
+      },
+      {
+        "id": "sort.changed",
+        "label": "Recently changed",
+        "href": "/app/contacts?sort=changed",
+        "method": "GET",
+        "enabled": true
+      }
+    ],
     "range": null,
     "actions": [
       {
         "id": "record.new",
         "label": "New contact",
-        "icon": "i-plus",
-        "href": "/app/contacts/a-nc-home/kontakty/new",
+        "href": "/app/contacts/a-nc-home/arhiv/new?pick=1",
+        "method": "GET",
+        "enabled": true
+      },
+      {
+        "id": "collection.import",
+        "label": "Import",
+        "href": "/app/contacts/import",
+        "method": "GET",
+        "enabled": true
+      },
+      {
+        "id": "collection.export",
+        "label": "Export",
+        "icon": "i-down",
+        "href": "/app/contacts/export",
         "method": "GET",
         "enabled": true
       }
@@ -228,14 +492,33 @@
       "rubric": "А",
       "rows": [
         {
-          "href": "/app/contacts/a-nc-home/kontakty/urn%3Auuid%3A9f2c",
-          "uid": "urn:uuid:9f2c",
-          "colour": "#4A6B52",
-          "stamp": "nextcloud · Контакты",
+          "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5",
+          "uid": "6b18-2d40-77c5",
+          "colour": "#4a6b52",
+          "stamp": "nextcloud · home · Контакты",
           "avatar": {
-            "href": "/c/a-nc-home/kontakty/urn%3Auuid%3A9f2c/photo?size=thumb",
+            "href": "",
+            "initials": "АС",
+            "colour": "#6b5c73"
+          },
+          "name": "Алексей Смирнов",
+          "phone": "+7 916 200-71-15",
+          "email": "",
+          "org": "",
+          "badges": [],
+          "sources": [],
+          "menu": [],
+          "state": "ok"
+        },
+        {
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+          "uid": "4f2b-9c31-a0e7",
+          "colour": "#4a6b52",
+          "stamp": "nextcloud · home · Контакты",
+          "avatar": {
+            "href": "",
             "initials": "АК",
-            "colour": "#D9D2BE"
+            "colour": "#736b5c"
           },
           "name": "Анна Ковалёва",
           "phone": "+7 912 445-10-88",
@@ -245,39 +528,101 @@
           "sources": [],
           "menu": [],
           "state": "ok"
+        },
+        {
+          "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
+          "uid": "c3f7-8a21-1b09",
+          "colour": "#4a6b52",
+          "stamp": "nextcloud · home · Контакты",
+          "avatar": {
+            "href": "",
+            "initials": "АБ",
+            "colour": "#6b5c73"
+          },
+          "name": "Артём Белов",
+          "phone": "+7 903 118-22-04",
+          "email": "a.belov@example.org",
+          "org": "Тензор",
+          "badges": [],
+          "sources": [],
+          "menu": [],
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "rubric": "В",
+      "rows": [
+        {
+          "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+          "uid": "e7c2-3b95-6a14",
+          "colour": "#a05a2c",
+          "stamp": "nextcloud · home · Архив",
+          "avatar": {
+            "href": "",
+            "initials": "ВЛ",
+            "colour": "#735c6b"
+          },
+          "name": "Вера Лебедева",
+          "phone": "+7 905 331-09-42",
+          "email": "vera@example.net",
+          "org": "",
+          "badges": [],
+          "sources": [],
+          "menu": [],
+          "state": "ok"
+        },
+        {
+          "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83",
+          "uid": "a90d-5512-4e83",
+          "colour": "#4a6b52",
+          "stamp": "nextcloud · home · Контакты",
+          "avatar": {
+            "href": "",
+            "initials": "ВГ",
+            "colour": "#5c736b"
+          },
+          "name": "Виктор Гончаров",
+          "phone": "",
+          "email": "v.goncharov@example.org",
+          "org": "Городская библиотека №4",
+          "badges": [],
+          "sources": [],
+          "menu": [],
+          "state": "ok"
         }
       ]
     }
   ],
   "poll": {
-    "taskID": "t-8342",
-    "summary": "1 of 3 sources answered · 128 records",
-    "answeredAt": "",
+    "taskID": "t-task",
     "running": true,
-    "percent": 33,
+    "percent": 66,
+    "summary": "Polled 2 of 3 sources · 5 cards",
+    "answeredAt": "",
     "sources": [
       {
-        "stamp": "nextcloud · Контакты",
-        "colour": "#4A6B52",
+        "stamp": "nextcloud · home · Архив",
+        "colour": "#a05a2c",
         "state": "done",
-        "count": 128,
-        "fromCache": true,
-        "message": "",
-        "retry": null
-      },
-      {
-        "stamp": "nextcloud · Контакты",
-        "colour": "#3F6E8C",
-        "state": "querying",
-        "count": null,
+        "count": 1,
         "fromCache": false,
         "message": "",
         "retry": null
       },
       {
-        "stamp": "radicale · Команда",
-        "colour": "#6B4E7A",
-        "state": "waiting",
+        "stamp": "nextcloud · home · Контакты",
+        "colour": "#4a6b52",
+        "state": "done",
+        "count": 4,
+        "fromCache": false,
+        "message": "",
+        "retry": null
+      },
+      {
+        "stamp": "radicale · vps · Команда",
+        "colour": "#6b4e7a",
+        "state": "querying",
         "count": null,
         "fromCache": false,
         "message": "",
@@ -288,9 +633,17 @@
       {
         "id": "poll.stop",
         "label": "Stop",
+        "href": "/app/search/progress/t-task/cancel",
         "method": "POST",
-        "href": "/app/search/progress/t-8342/cancel",
         "enabled": true
+      },
+      {
+        "id": "poll.again",
+        "label": "Refresh",
+        "href": "/app/contacts",
+        "method": "GET",
+        "enabled": false,
+        "reason": "The list is still running."
       }
     ]
   }

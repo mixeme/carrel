@@ -5,6 +5,20 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.1.4 — 2026-09-20
+
+fixtures-tail.md: вторая пара — тот же экран с незаконченным опросом.
+
+### Changed
+
+- `docs/spec/fixtures/app-contacts/partial.json` is the combined address
+  book while one book is still being asked (C-8): two sources done, one
+  querying, the counts of what nobody finished counting shown as dashes,
+  the refresh button disabled with a reason, and the folded row standing
+  on the member that did arrive — «Команда» has not answered, so the pair
+  shows its copy in «Контакты», without the badge. The stand is held open
+  with `davtest.Stall`, so the state is made, not waited for.
+
 ## v0.1.3 — 2026-09-20
 
 fixtures-tail.md: полоса опроса говорит словами кадра.
