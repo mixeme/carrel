@@ -55,7 +55,7 @@ func mockupNow(t *testing.T) time.Time {
 // mockupCollection is one collection of the mockup set: where it lives, what
 // it is called, its colour, the kinds it holds and the file of its records.
 type mockupCollection struct {
-	account string // "nextcloud · home" or "radicale · vps"
+	account string // "nextcloud" or "radicale"
 	slug    string // how the fixtures name it: kontakty, lichnyj, …
 	name    string
 	colour  string
@@ -71,31 +71,31 @@ type mockupCollection struct {
 
 // mockupSet is the table of docs/visual/fixtures/README.md.
 var mockupSet = []mockupCollection{
-	{account: "nextcloud · home", slug: "kontakty", name: "Контакты", colour: "#4A6B52",
+	{account: "nextcloud", slug: "kontakty", name: "Контакты", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindContact}, file: "nextcloud-home/kontakty.vcf"},
-	{account: "nextcloud · home", slug: "arhiv", name: "Архив", colour: "#A05A2C",
+	{account: "nextcloud", slug: "arhiv", name: "Архив", colour: "#A05A2C",
 		kinds: []view.Kind{view.KindContact}, file: "nextcloud-home/arhiv.vcf"},
-	{account: "nextcloud · home", slug: "lichnyj", name: "Личный", colour: "#4A6B52",
+	{account: "nextcloud", slug: "lichnyj", name: "Личный", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/lichnyj.ics"},
-	{account: "nextcloud · home", slug: "rabota", name: "Работа", colour: "#3F6E8C",
+	{account: "nextcloud", slug: "rabota", name: "Работа", colour: "#3F6E8C",
 		kinds: []view.Kind{view.KindEvent, view.KindTask}, comps: []string{"VEVENT", "VTODO"}, file: "nextcloud-home/rabota.ics"},
-	{account: "nextcloud · home", slug: "dni-rozhdeniya", name: "Дни рождения", colour: "#A05A2C",
+	{account: "nextcloud", slug: "dni-rozhdeniya", name: "Дни рождения", colour: "#A05A2C",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/dni-rozhdeniya.ics"},
-	{account: "nextcloud · home", slug: "dela", name: "Дела", colour: "#4A6B52",
+	{account: "nextcloud", slug: "dela", name: "Дела", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindTask}, comps: []string{"VTODO"}, file: "nextcloud-home/dela.ics"},
-	{account: "nextcloud · home", slug: "zapisi", name: "Записи", colour: "#4A6B52",
+	{account: "nextcloud", slug: "zapisi", name: "Записи", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/zapisi.ics"},
-	{account: "nextcloud · home", slug: "dnevnik", name: "Дневник", colour: "#6B4E7A",
+	{account: "nextcloud", slug: "dnevnik", name: "Дневник", colour: "#6B4E7A",
 		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/dnevnik.ics"},
 	// «Команда» is a book this account may only read, and «Рассылки» stands
 	// in the catalog out of the combined views: both are what the frames show.
-	{account: "radicale · vps", slug: "komanda", name: "Команда", colour: "#6B4E7A",
+	{account: "radicale", slug: "komanda", name: "Команда", colour: "#6B4E7A",
 		kinds: []view.Kind{view.KindContact}, file: "radicale-vps/komanda.vcf", readOnly: true},
-	{account: "radicale · vps", slug: "rassylki", name: "Рассылки", colour: "#6B4E7A",
+	{account: "radicale", slug: "rassylki", name: "Рассылки", colour: "#6B4E7A",
 		kinds: []view.Kind{view.KindContact}, unticked: true},
-	{account: "radicale · vps", slug: "proekty", name: "Проекты", colour: "#6B4E7A",
+	{account: "radicale", slug: "proekty", name: "Проекты", colour: "#6B4E7A",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "radicale-vps/proekty.ics"},
-	{account: "radicale · vps", slug: "dezhurstva", name: "Дежурства", colour: "#8C6239",
+	{account: "radicale", slug: "dezhurstva", name: "Дежурства", colour: "#8C6239",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "radicale-vps/dezhurstva.ics"},
 }
 
@@ -106,6 +106,9 @@ type mockupApp struct {
 	sess *session.Session
 	// byAccount and byPath turn what Carrel issued into what the fixtures
 	// name: a-nc-home, a-rad-vps, and the last segment of each collection.
+	// Those two name the machines the set runs on, which is what «home» and
+	// «vps» were for; the connection's own label is one word, as the frames
+	// stamp it (README of the set, 20.09.2026).
 	byAccount map[string]string
 	byPath    map[string]string
 }
@@ -155,7 +158,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	t.Helper()
 	root := mockupRoot(t)
 	servers := map[string]*davtest.Server{}
-	for _, label := range []string{"nextcloud · home", "radicale · vps"} {
+	for _, label := range []string{"nextcloud", "radicale"} {
 		srv := davtest.New(t)
 		srv.Login, srv.Password = "alice", "secret"
 		servers[label] = srv
@@ -202,7 +205,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	h.srv.SetBuild(mockupVersion, mockupCommit)
 	h.admin("mix", "password123")
 	sess := h.login("mix", "password123")
-	for _, label := range []string{"nextcloud · home", "radicale · vps"} {
+	for _, label := range []string{"nextcloud", "radicale"} {
 		rec := h.do(postForm("/app/settings/connections", sess, url.Values{
 			"label": {label}, "server": {servers[label].URL}, "login": {"alice"}, "password": {"secret"},
 		}))
@@ -216,7 +219,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	app := &mockupApp{h: h, sess: sess, byAccount: map[string]string{}, byPath: map[string]string{}}
 	key, _ := sess.DataKey()
 	blob, _ := h.users.Catalog(sess.AccountID(), key)
-	names := map[string]string{"nextcloud · home": "a-nc-home", "radicale · vps": "a-rad-vps"}
+	names := map[string]string{"nextcloud": "a-nc-home", "radicale": "a-rad-vps"}
 	seen := 0
 	for _, col := range mockupSet {
 		for _, c := range blob.Collections {
