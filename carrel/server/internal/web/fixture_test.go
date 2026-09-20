@@ -812,6 +812,7 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		app.compare(t, "app-contact-timeline/normal.json", app.h.do(get(anna+"/timeline", app.sess)))
 	})
 	for _, one := range []struct{ dir, route string }{
+		{"app-duplicates", "/app/duplicates?kind=contact"},
 		{"app-contact-new", book + "/new"},
 		{"app-contact-import", book + "/import"},
 		{"app-contact-move", anna + "/move"},

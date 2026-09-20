@@ -5,6 +5,22 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.2.2 — 2026-09-21
+
+fixtures-tail.md: экран дубликатов говорит, где искал.
+
+### Added
+
+- **The rail of the duplicates** (s-dup-1): the collections the comparison
+  had to work with, how many records of each this session holds, and which
+  of them it has actually read — «Sources 2 / 3». Duplicates are found
+  among what is loaded and never by asking a server (S-16), so a screen
+  that answers «no duplicates» has to say how little it looked at.
+  Collections of the kind being shown, and only ticked ones: an unticked
+  collection is never polled, and naming it a source would promise a
+  comparison that cannot happen.
+- The pair `app-duplicates/normal.json`.
+
 ## v0.2.1 — 2026-09-21
 
 fixtures-tail.md: одиннадцать пар — вне оболочки и вокруг записи.

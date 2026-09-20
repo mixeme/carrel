@@ -1,0 +1,355 @@
+{
+  "bar": {
+    "actions": [],
+    "compact": false,
+    "filter": "",
+    "loaded": 6,
+    "range": null,
+    "segments": [
+      {
+        "enabled": true,
+        "href": "/app/duplicates",
+        "id": "duplicates.kind.all",
+        "label": "All 0",
+        "method": "GET"
+      },
+      {
+        "enabled": false,
+        "href": "/app/duplicates?kind=contact",
+        "id": "duplicates.kind.contact",
+        "label": "Contacts 0",
+        "method": "GET",
+        "reason": "Shown now."
+      },
+      {
+        "enabled": true,
+        "href": "/app/duplicates?kind=event",
+        "id": "duplicates.kind.event",
+        "label": "Events 0",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/duplicates?kind=task",
+        "id": "duplicates.kind.task",
+        "label": "Tasks 0",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/duplicates?kind=note",
+        "id": "duplicates.kind.note",
+        "label": "Notes 0",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": null
+  },
+  "details": null,
+  "groups": [
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/duplicates/decide?do=unlink\u0026group=g-artem",
+          "id": "duplicates.unlink",
+          "label": "Unlink",
+          "method": "POST"
+        },
+        {
+          "danger": true,
+          "enabled": false,
+          "href": "/app/duplicates/merge?group=g-artem",
+          "id": "duplicates.merge",
+          "label": "Merge on the server",
+          "method": "GET",
+          "reason": "Команда is read-only: its record could be neither rewritten nor deleted."
+        }
+      ],
+      "choices": [],
+      "decision": "linked",
+      "id": "g-artem",
+      "kind": "contact",
+      "reasons": [
+        "same email",
+        "same phone",
+        "same name"
+      ],
+      "rows": [
+        {
+          "colour": "#6b4e7a",
+          "detail": "+7 903 118-22-04 · a.belov@example.org",
+          "href": "/app/contacts/a-rad-vps/komanda/d41a-6f30-92be",
+          "readOnly": true,
+          "stamp": "radicale · vps · Команда",
+          "title": "Артём Белов"
+        },
+        {
+          "colour": "#4a6b52",
+          "detail": "+7 903 118-22-04 · a.belov@example.org",
+          "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
+          "readOnly": false,
+          "stamp": "nextcloud · home · Контакты",
+          "title": "Артём Белов"
+        }
+      ],
+      "score": 140
+    }
+  ],
+  "notices": [
+    {
+      "actions": [],
+      "body": "Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.",
+      "details": null,
+      "role": "accent",
+      "title": ""
+    }
+  ],
+  "print": {
+    "range": "6 records compared · 60 points and above",
+    "taken": "",
+    "title": "Duplicates"
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": 6,
+        "enabled": true,
+        "href": "/app/contacts",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET",
+        "on": true
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "Sources 3 / 3",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": 1,
+            "href": "",
+            "label": "Архив",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "href": "",
+            "label": "Контакты",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": 1,
+            "href": "",
+            "label": "Команда",
+            "menu": [],
+            "readOnly": true,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "threshold": {
+    "default": 60,
+    "note": "The instance's number. Set your own to change what is offered.",
+    "value": 60,
+    "weights": [
+      {
+        "default": 80,
+        "label": "Same UID",
+        "own": false,
+        "signal": "uid",
+        "value": 80
+      },
+      {
+        "default": 60,
+        "label": "Same email",
+        "own": false,
+        "signal": "email",
+        "value": 60
+      },
+      {
+        "default": 60,
+        "label": "Same phone",
+        "own": false,
+        "signal": "phone",
+        "value": 60
+      },
+      {
+        "default": 20,
+        "label": "Same name",
+        "own": false,
+        "signal": "name",
+        "value": 20
+      },
+      {
+        "default": 10,
+        "label": "Same birthday",
+        "own": false,
+        "signal": "birthday",
+        "value": 10
+      },
+      {
+        "default": 70,
+        "label": "Same title and date (events, tasks, notes)",
+        "own": false,
+        "signal": "title-date",
+        "value": 70
+      }
+    ]
+  },
+  "title": "Duplicates",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}

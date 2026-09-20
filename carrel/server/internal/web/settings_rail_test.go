@@ -53,3 +53,28 @@ func TestTheAdministrationCarriesItsRail(t *testing.T) {
 		}
 	}
 }
+
+// The duplicates are found among what this session has already loaded, and
+// the rail says which collections those are and how many of them answered
+// (s-dup-1): a screen that compares records must say what it compared.
+func TestTheDuplicatesSayWhereTheyLooked(t *testing.T) {
+	f := newDupFixture(t)
+	f.load(t)
+	page := decode[view.DuplicatesPage](t, f.h.do(get("/app/duplicates", f.sess)))
+	if len(page.Rail.Sections) != 1 {
+		t.Fatalf("the rail says nothing about where it looked: %+v", page.Rail.Sections)
+	}
+	sec := page.Rail.Sections[0]
+	if sec.Account != "Sources 2 / 4" {
+		t.Errorf("rubric = %q, want «Sources 2 / 3»", sec.Account)
+	}
+	var loaded []string
+	for _, r := range sec.Rows {
+		if r.Tick == view.TickOn {
+			loaded = append(loaded, string(r.Label))
+		}
+	}
+	if len(loaded) != 2 {
+		t.Errorf("loaded = %v, want the two books that were opened", loaded)
+	}
+}

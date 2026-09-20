@@ -344,9 +344,63 @@ var dupSegmentLabels = map[view.Kind]string{
 	view.KindContact: "Contacts", view.KindEvent: "Events", view.KindTask: "Tasks", view.KindNote: "Notes",
 }
 
+// dupSources is the rail of the duplicates screen (s-dup-1): the
+// collections the comparison had to work with, how many records of each it
+// holds, and which of them this session has actually read. Duplicates are
+// found among what is loaded and never by asking a server (S-16), so a
+// screen that says «no duplicates» must also say how little it looked at.
+func dupSources(st dupState, only view.Kind) []view.RailSection {
+	held := map[dupes.CollectionRef]int{}
+	for _, l := range st.records {
+		held[dupes.CollectionRef{AccountID: l.rec.Ref.AccountID, Col: l.rec.Ref.Col}]++
+	}
+	sec := view.RailSection{State: view.CollectionOK}
+	loaded, live := 0, 0
+	for _, col := range st.blob.Collections {
+		if col.Gone || !holdsRecords(col) {
+			continue
+		}
+		// One kind at a time, as the screen shows them: the books of
+		// contacts are not where a duplicate event would be found. And
+		// only what is ticked: an unticked collection is never polled,
+		// so naming it a source would promise a comparison that cannot
+		// happen.
+		if only != "" && (!col.Has(only) || !isTicked(st.blob, only, col.AccountID, col.Path)) {
+			continue
+		}
+		live++
+		ref := dupes.CollectionRef{AccountID: col.AccountID, Col: col.Path}
+		row := view.SourceRow{
+			Label: text(collectionLabel(col)), Colour: catalogColour(col),
+			Tick: view.TickOff, ReadOnly: col.ReadOnly, State: view.CollectionOK,
+		}
+		if n, ok := held[ref]; ok {
+			loaded++
+			row.Tick, row.Count = view.TickOn, &n
+		}
+		sec.Rows = append(sec.Rows, row)
+	}
+	if len(sec.Rows) == 0 {
+		return nil
+	}
+	sec.Account = text(fmt.Sprintf("Sources %d / %d", loaded, live))
+	return []view.RailSection{sec}
+}
+
+// holdsRecords: a folder of files holds no records to compare.
+func holdsRecords(col sealed.Collection) bool {
+	for _, k := range dupKinds {
+		if col.Has(k) {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Kind) view.DuplicatesPage {
 	page := view.DuplicatesPage{Shell: s.buildShell(sess, "Duplicates")}
 	page.Rail = view.Rail{Nav: s.navRows(sess, st.blob, "duplicates"), About: s.aboutAction()}
+	page.Rail.Sections = dupSources(st, only)
 	all := st.groups()
 	counts := map[view.Kind]int{}
 	for _, g := range all {

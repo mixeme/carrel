@@ -185,6 +185,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "login": "/login",
     "forgot": "/forgot",
     "about": "/about",
+    "app-duplicates": "/app/duplicates",
     "app-contact-timeline": "/app/contacts/{account}/{col}/{uid}/timeline",
     "app-contact-new": "/app/contacts/{account}/{col}/new",
     "app-contact-import": "/app/contacts/{account}/{col}/import",
