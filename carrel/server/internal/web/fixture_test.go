@@ -1166,3 +1166,62 @@ func TestFixturePhotoPreview(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	app.compare(t, "app-photo-preview/normal.json", app.h.do(get(rec+"/photo-preview", app.sess)))
 }
+
+// C-14.3: the states left of the other kinds — a week with nothing in it,
+// a stand that refuses, and the conflict of a note.
+func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
+	t.Run("agenda-empty", func(t *testing.T) {
+		app := newMockupApp(t)
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		// A week of the set that holds nothing: an agenda is empty by the
+		// window it shows, not by the calendar being empty.
+		app.compare(t, "app-agenda/empty.json",
+			app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-11-02", app.sess)))
+	})
+	for _, one := range []struct{ dir, segment, slug string }{
+		{"app-tasks", "tasks", "dela"},
+		{"app-notes", "notes", "zapisi"},
+	} {
+		t.Run(one.dir+"-source-error", func(t *testing.T) {
+			app := newMockupApp(t)
+			app.servers["nextcloud · home"].Refuse("REPORT", 503, "the server is busy")
+			defer app.servers["nextcloud · home"].Accept("REPORT")
+			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+			app.compare(t, one.dir+"/source-error.json",
+				app.h.do(get(app.listPath(t, one.segment, one.slug), app.sess)))
+		})
+	}
+	t.Run("app-conflict-note", func(t *testing.T) {
+		app := newMockupApp(t)
+		rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
+		// The edit of a note answers with the document itself, not with
+		// the page around it (C-7).
+		doc := decode[view.NoteDoc](t, app.h.do(get(rec+"/edit", app.sess)))
+		save, err := url.Parse(actionHref(t, doc.Bar, "record.save"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Everything the form holds goes back, as a client sends it: a
+		// field left out is a field cleared, and the conflict would then
+		// be about a date nobody touched.
+		form := url.Values{
+			"summary":     {"Заметка со встречи 10.08 — дополнено"},
+			"description": {string(doc.Body)},
+		}
+		for _, row := range doc.Fields {
+			if row.Name != "" && row.Name != "summary" && row.Name != "description" {
+				form.Set(row.Name, string(row.Value))
+			}
+		}
+		for k, v := range save.Query() {
+			form[k] = v
+		}
+		app.servers["nextcloud · home"].Seed(davtest.CalendarHome+"zapisi/5c81-77aa-0d64.ics",
+			"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//set//EN\nBEGIN:VJOURNAL\nUID:5c81-77aa-0d64\nDTSTAMP:20260801T000000Z\nSUMMARY:Встреча 10.08\nDESCRIPTION:Правка с другого клиента\nDTSTART:20260810T080500Z\nEND:VJOURNAL\nEND:VCALENDAR\n")
+		if resp := app.h.do(postForm(save.EscapedPath(), app.sess, form)); resp.Code != 303 {
+			t.Fatalf("POST over a moved version: %d %s", resp.Code, resp.Body.String())
+		}
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		app.compare(t, "app-conflict-note/normal.json", app.h.do(get(rec+"/conflict", app.sess)))
+	})
+}

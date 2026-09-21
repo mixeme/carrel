@@ -216,6 +216,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
     "app-conflict-event": "/app/calendar/{account}/{col}/{uid}/conflict",
     "app-conflict-task": "/app/tasks/{account}/{col}/{uid}/conflict",
+    "app-conflict-note": "/app/notes/{account}/{col}/{uid}/conflict",
 }
 
 # FRAME_TODO — расхождения, где неверен кадр, а не фикстура. Каждое —
@@ -259,6 +260,8 @@ FRAME_TODO = {
     "app-conflict-event: коллекции рейла":
         "s-conflict-1 один на четыре рода и нарисован с рейлом контактов; "
         "у события рейл календарный и иным быть не может",
+    "app-conflict-note: коллекции рейла":
+        "то же: один кадр на четыре рода, рейл в нём контактный",
     "app-conflict-task: коллекции рейла":
         "то же: один кадр на четыре рода, рейл в нём контактный",
     "app-files: коллекции рейла":

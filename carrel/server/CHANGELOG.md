@@ -17,6 +17,23 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.12 — 2026-09-21
+
+fixtures-tail.md: состояния остальных родов.
+
+### Changed
+
+- Four states: a week of an agenda that holds nothing, a stand refusing to
+  a list of tasks and to a notebook, and the conflict of a note. The
+  conflict now has all four kinds behind it.
+
+### Notes
+
+- The edit of a note answers with the document rather than the page
+  around it (C-7), and its save stands in the document's own bar. That is
+  right — a note is edited in place — and it sets the note apart from the
+  other kinds, which a fixture now shows.
+
 ## v0.2.11 — 2026-09-21
 
 fixtures-tail.md: предпросмотр фотографии.

@@ -1,0 +1,283 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e17\u0026op=combine",
+      "id": "conflict.combine",
+      "label": "Write this combination",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e17\u0026op=mine",
+      "id": "conflict.mine",
+      "label": "Use only my edit",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?etag=e17\u0026op=theirs",
+      "id": "conflict.theirs",
+      "label": "Use only the server version",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/conflict?op=cancel",
+      "id": "conflict.cancel",
+      "label": "Cancel",
+      "method": "POST"
+    }
+  ],
+  "details": null,
+  "kind": "note",
+  "notices": [
+    {
+      "actions": [],
+      "body": "Another client changed this note while you were editing it. Nothing has been overwritten.",
+      "details": null,
+      "role": "alert",
+      "title": "Conflict"
+    }
+  ],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "href": "/app/notes/a-nc-home/dnevnik",
+            "label": "Дневник",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/dnevnik/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/dnevnik/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "off"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "href": "/app/notes/a-nc-home/zapisi",
+            "label": "Записи",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/zapisi/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/notes/a-nc-home/zapisi/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "readAt": "10 August, 17:04",
+  "rows": [
+    {
+      "choice": "",
+      "mine": "Заметка со встречи 10.08 — дополнено",
+      "property": "SUMMARY",
+      "theirs": "Встреча 10.08"
+    }
+  ],
+  "serverAt": "1 August, 03:00",
+  "title": "Changed elsewhere",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  },
+  "uid": "5c81-77aa-0d64"
+}
