@@ -2331,6 +2331,13 @@ func (s *Server) createRecord(w http.ResponseWriter, r *http.Request, c *collect
 	if err == nil {
 		sent.Path = path
 		err = c.create(r.Context(), path, sent)
+		// Refused because it is already there, on a write the guard had
+		// sent once before: that is this record, arriving twice.
+		// finishCreate reads the address back, so nothing is claimed that
+		// the server does not hold.
+		if landedOnTheFirstTry(err) {
+			err = nil
+		}
 	}
 	if err != nil {
 		st.notices = []view.Notice{s.writeFailure(c, "PUT", path, err)}

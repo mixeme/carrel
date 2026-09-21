@@ -133,6 +133,7 @@ type Server struct {
 	objects   map[string]object
 	refuse    map[string]refusal
 	stalls    map[string]chan struct{}
+	hangUp    map[string]bool
 	requests  []string
 	seq       int
 	dir       string // the file tree behind FileRoot
@@ -162,6 +163,7 @@ func New(t testing.TB) *Server {
 		sent:      make(map[string][]byte),
 		refuse:    make(map[string]refusal),
 		stalls:    make(map[string]chan struct{}),
+		hangUp:    make(map[string]bool),
 		dir:       t.TempDir(),
 	}
 	if err := os.MkdirAll(s.localPath(FileRoot), 0o755); err != nil {
@@ -402,7 +404,7 @@ func (s *Server) CountRequests(method, prefix string) int {
 	return n
 }
 
-func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files http.Handler) {
+func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, files http.Handler) {
 	s.mu.Lock()
 	s.requests = append(s.requests, r.Method+" "+r.URL.Path)
 	hold := s.stalls[r.Method]
@@ -1210,3 +1212,38 @@ func cutPhotoDataURI(doc []byte) []byte {
 }
 
 func (b cardBackend) DeleteAddressObject(_ context.Context, p string) error { return b.s.remove(p) }
+
+// HangUpOnce makes the next request with this method do its work and then
+// lose its connection before the answer: the fault of docs/servers.md SV-9
+// seen from the server's side. The write lands, the client sees the socket
+// close, and the guard — for a write on a connection the pool had kept —
+// sends it again, where it meets the thing the first copy made.
+//
+// Nextcloud did exactly this twice in the full live run of 21.09.2026, to a
+// PUT and to an MKCOL, and Carrel told the person nothing had been made.
+func (s *Server) HangUpOnce(method string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.hangUp[method] = true
+}
+
+func (s *Server) serve(w http.ResponseWriter, r *http.Request, cal, card, files http.Handler) {
+	s.mu.Lock()
+	hang := s.hangUp[r.Method]
+	if hang {
+		delete(s.hangUp, r.Method)
+	}
+	s.mu.Unlock()
+	if !hang {
+		s.serveInner(w, r, cal, card, files)
+		return
+	}
+	// The request is served into a recorder, so the server really does hold
+	// what it was sent; then the socket closes with nothing written back.
+	s.serveInner(httptest.NewRecorder(), r, cal, card, files)
+	if hj, ok := w.(http.Hijacker); ok {
+		if conn, _, err := hj.Hijack(); err == nil {
+			_ = conn.Close()
+		}
+	}
+}

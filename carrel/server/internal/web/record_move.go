@@ -193,7 +193,16 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 	for _, name := range []string{path.Base(obj.Path), fileStem(uid) + "-2" + c.spec.ext} {
 		dst = strings.TrimSuffix(dest.col.Path, "/") + "/" + name
 		sent.Path = dst
-		if err = dest.create(ctx, dst, sent); !dav.IsStatus(err, http.StatusPreconditionFailed) {
+		err = dest.create(ctx, dst, sent)
+		// A taken name is tried once more under another; but a refusal on a
+		// write the guard had already sent is this copy, arriving twice.
+		// Writing it again under «-2» would leave the person two records
+		// where they asked for one.
+		if landedOnTheFirstTry(err) {
+			err = nil
+			break
+		}
+		if !dav.IsStatus(err, http.StatusPreconditionFailed) {
 			break
 		}
 	}

@@ -246,3 +246,31 @@ func TestRenameWritesTheLabelNotTheAddress(t *testing.T) {
 		}
 	}
 }
+
+// A connection that dies after the server has taken the MKCOL, and before
+// the answer. The handler asks the home for its children first, so the
+// write goes out on a connection the pool had kept idle and the guard sends
+// it again (SV-9); the server, which already made the collection, answers
+// 405. Until 21.09.2026 Carrel turned that into «The server would not make
+// it» over a collection it had just made — the full live run caught it on
+// Nextcloud (SV-39).
+func TestACollectionMadeOnAConnectionThatDiedIsStillMade(t *testing.T) {
+	f := calendarFixture(t, nil)
+
+	f.srv.HangUpOnce("MKCALENDAR")
+	form := url.Values{"account": {f.id}, "name": {"Дни рождения"}, "colour": {"#6B5C73"}, "components": {"VEVENT"}}
+	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess, form))
+	path := davtest.CalendarHome + "dni-rozhdeniya/"
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("create: %d %s", rec.Code, rec.Body.String())
+	}
+	if loc := rec.Header().Get("Location"); loc != "/app/calendar/"+f.id+"/"+url.PathEscape(path) {
+		t.Fatalf("create went to %q, want the collection the server made", loc)
+	}
+	if cal, ok := f.srv.Calendar(path); !ok || cal.Name != "Дни рождения" {
+		t.Errorf("server calendar = %+v (found %v)", cal, ok)
+	}
+	if entry, ok := catalogOf(t, f).Collection(f.id, path); !ok || entry.Name != "Дни рождения" {
+		t.Errorf("catalog entry = %+v (found %v)", entry, ok)
+	}
+}

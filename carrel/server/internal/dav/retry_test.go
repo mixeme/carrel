@@ -226,3 +226,89 @@ func TestAStreamedBodyTakesAConnectionOfItsOwn(t *testing.T) {
 		t.Errorf("fresh %d, pooled %d: the stream goes on its own connection, the record through the pool", fresh.calls, pooled.calls)
 	}
 }
+
+// landedBase is the server of the fault the full live run of 21.09.2026
+// found: it reads the write, then the connection dies before the answer.
+// The guard sends the request again, and the server — which already has the
+// thing — refuses the second one on its precondition.
+type landedBase struct {
+	calls int
+	code  int
+}
+
+func (b *landedBase) RoundTrip(req *http.Request) (*http.Response, error) {
+	b.calls++
+	if trace := httptrace.ContextClientTrace(req.Context()); trace != nil && trace.GotConn != nil {
+		trace.GotConn(httptrace.GotConnInfo{Reused: true, WasIdle: true})
+	}
+	if req.Body != nil {
+		_, _ = io.ReadAll(req.Body)
+	}
+	if b.calls == 1 {
+		return nil, io.EOF
+	}
+	return &http.Response{
+		StatusCode: b.code,
+		Header:     http.Header{},
+		Body:       io.NopCloser(strings.NewReader("already there")),
+		Request:    req,
+	}, nil
+}
+
+// A write refused because the thing is already there, on a request the guard
+// had already sent once, is that write arriving twice. The data is safe
+// either way — the precondition is what makes the retry safe at all — but
+// the person was told the record had not been made, and it had.
+func TestARefusalAfterAResendSaysItWasResent(t *testing.T) {
+	for _, code := range []int{http.StatusPreconditionFailed, http.StatusMethodNotAllowed} {
+		base := &landedBase{code: code}
+		req, err := http.NewRequestWithContext(context.Background(), http.MethodPut,
+			"http://server.example/dav/new.ics", bytes.NewReader([]byte("BEGIN:VCALENDAR")))
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp, rerr := (&limitTransport{base: base}).RoundTrip(req)
+		if rerr != nil {
+			t.Fatalf("%d: %v", code, rerr)
+		}
+		if base.calls != 2 {
+			t.Fatalf("%d: %d calls, want the write sent again", code, base.calls)
+		}
+		serr := httpStatusError(resp)
+		if !IsStatus(serr, code) {
+			t.Errorf("%d: err = %v", code, serr)
+		}
+		if !WasResent(serr) {
+			t.Errorf("%d: the refusal does not say it answered a second attempt: %v", code, serr)
+		}
+	}
+}
+
+// The mark is the guard's and no one else's: a server that sends the header
+// itself is not believed.
+func TestAServerCannotClaimItsAnswerWasAResend(t *testing.T) {
+	base := &headerBase{}
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPut,
+		"http://server.example/dav/new.ics", bytes.NewReader([]byte("BEGIN:VCALENDAR")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, rerr := (&limitTransport{base: base}).RoundTrip(req)
+	if rerr != nil {
+		t.Fatal(rerr)
+	}
+	if WasResent(httpStatusError(resp)) {
+		t.Error("a header the server sent was taken for the guard's own mark")
+	}
+}
+
+type headerBase struct{}
+
+func (headerBase) RoundTrip(req *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: http.StatusPreconditionFailed,
+		Header:     http.Header{headerResent: []string{"1"}},
+		Body:       io.NopCloser(strings.NewReader("mine")),
+		Request:    req,
+	}, nil
+}

@@ -1571,3 +1571,20 @@ func noteTime(obj *model.Object, tz *time.Location) time.Time {
 	}
 	return time.Time{}
 }
+
+// landedOnTheFirstTry reports whether a refusal means the write Carrel sent
+// had already arrived. The guard re-sends a write whose answer a closed
+// connection ate (SV-9), and a server that already holds the thing refuses
+// the second copy: 405 to MKCOL of a collection that exists, 412 to a PUT
+// with If-None-Match (S-8). Both readings were «the server would not make
+// it», and the full live run of 21.09.2026 caught the lie twice on one
+// Nextcloud — a record and an address book were made and the person was
+// told they were not.
+//
+// Only the guard can set the mark, and what follows a true answer here
+// reads the address back, so this can shorten a wrong guess into a check,
+// never into a record that is not there.
+func landedOnTheFirstTry(err error) bool {
+	return dav.WasResent(err) &&
+		(dav.IsStatus(err, http.StatusMethodNotAllowed) || dav.IsStatus(err, http.StatusPreconditionFailed))
+}

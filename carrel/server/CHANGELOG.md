@@ -17,6 +17,68 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.16 — 2026-09-21
+
+Полный живой прогон: 54 зелёных, 2248 секунд, и две настоящие ошибки.
+
+### Fixed
+
+- **A write that was sent twice is not a write that failed** (SV-39). A
+  connection can die after the server has read the request and before the
+  answer comes back. The guard then sends the write again, and the server,
+  which already holds the thing, refuses the second copy: 412 to a
+  conditional PUT, 405 to an MKCOL. The data was always safe — the
+  precondition is what makes the retry safe at all — but the refusal
+  reached the person as it came. They made a calendar and read «The server
+  would not make it» about a calendar that was already standing there.
+  The guard now marks a second answer as its own, and the places that
+  create something read «it is already there» as their own write arriving
+  twice: a record, a collection, a folder, and the copy a move makes,
+  where a second write would otherwise have left two records where one was
+  asked for. A write on a connection dialled for it is still never resent,
+  and that message is unchanged.
+- **The timeline on Yandex** is tested and understood. The note in v0.2.15
+  said it could not run there because Yandex makes no address book. That
+  reason was wrong: the book cannot be *made* (SV-20) but one is already
+  there, and Carrel has written to it since 16.09.2026. The real reason is
+  SV-38 below.
+
+### Changed
+
+- The timeline runs on Yandex (`TestYandexTimeline`) and asks both halves
+  of S-15.4 on one event: the card of an attendee finds nothing, because
+  the server kept no attendee, and the card carrying the address the
+  server itself wrote into ORGANIZER finds the event and says
+  «organiser» — the only live proof of that branch there is.
+- `davtest.Server.HangUpOnce` makes a stand take a request and then lose
+  the connection before the answer, so the fault above has a sentinel that
+  goes red without it.
+- A live assertion had outlived its screen for the third time: the week of
+  an agenda is seven days with the empty ones shown, and the move run
+  still wanted one. It cost two red tests on two servers.
+
+### Notes
+
+- **SV-38**: Yandex keeps no `ATTENDEE` on an event written over CalDAV and
+  puts its own `ORGANIZER` — the mailbox — in its place.
+- **SV-39**: the dropped-connection fault above, caught three times in one
+  run on one Nextcloud.
+- Two questions that were waiting for a full run are answered.
+  `TestBaikalRecords` and `TestBaikalAttachments` are green and have not
+  failed since 17.09.2026. `TestSoGoSearch` is green too, and the timeout
+  it was watched for turned up on `TestNextcloudSearch` instead — so it
+  was never about SoGo. That one now repeats: three runs, always one
+  source of two, on the same shared-hosting Nextcloud that dropped three
+  connections and swallowed an MKCALENDAR. A source has ten seconds and
+  the collection is one this run made; ten seconds should not be there to
+  spend. Read as the state of that machine rather than a fault of
+  Carrel's, whose screen does the right thing — it names the source that
+  did not answer and offers Retry. Written down with its numbers.
+- The pool is one `dav.Client`'s, not the process's: `Guard.httpClient`
+  builds a transport per client, while the guard's own comment claimed
+  they shared one. The comment is corrected; whether to share the pool is
+  written down in `docs/plan/server.md` and not decided in passing.
+
 ## v0.2.15 — 2026-09-21
 
 Живые прогоны на Google, iCloud и Mail.ru. Решение владельца от 20.09.2026

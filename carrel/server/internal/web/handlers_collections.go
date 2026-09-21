@@ -218,7 +218,11 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	}
 	path := strings.TrimSuffix(home, "/") + "/" + segment + "/"
 	method, props, kinds := createRequest(f)
-	if err := client.MkColProps(r.Context(), method, path, props); err != nil {
+	// A refusal saying it is already there, on a request the guard had sent
+	// once before, is this MKCOL arriving twice: the collection was made.
+	// settlePath below reads the home back, so a wrong guess here ends as
+	// «it is not in the list», never as a collection that is not there.
+	if err := client.MkColProps(r.Context(), method, path, props); err != nil && !landedOnTheFirstTry(err) {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, davRefusal(createRefusal, conn, method, path, err)))
 		return
 	}

@@ -504,6 +504,11 @@ func (s *Server) postFilesMkcol(w http.ResponseWriter, r *http.Request) {
 		forgetFolder(c.sess, c.conn.ID, folder)
 		switch {
 		case err == nil:
+		// It is already here because this very request put it here: the
+		// guard sent the MKCOL twice after a connection died before the
+		// answer. The folder is made, and saying otherwise sends the
+		// person looking for a name that is taken by their own click.
+		case landedOnTheFirstTry(err):
 		case dav.IsStatus(err, http.StatusMethodNotAllowed):
 			notices = append(notices, view.Notice{Role: view.NoticeAlert, Title: text(name + " is already here"), Body: "A file or folder with this name is in this folder. Nothing was created."})
 		case dav.IsStatus(err, http.StatusConflict):

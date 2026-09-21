@@ -159,8 +159,20 @@ func runMove(t *testing.T, endpoint, user, pass string) {
 		mustHave(t, "moved event", got, "UID:"+series, "RRULE:FREQ=WEEKLY;COUNT=3", "RECURRENCE-ID:20261013T100000Z", "SUMMARY:Standup moved")
 		agenda := liveDecode[view.AgendaPage](t, "agenda at the target",
 			app.get("/app/calendar/"+connID+"/"+url.PathEscape(catalogEntry(t, blob, cols.calB).Path)+"?from=2026-10-12"))
-		if len(agenda.Notices) > 0 || len(agenda.Days) != 1 || agenda.Days[0].Rows[0].Summary != "Standup moved" {
-			t.Errorf("agenda at the target = %+v", agenda)
+		// A week is seven days and the empty ones are shown, so the moved
+		// series is looked for across the week rather than in a day of its
+		// own (C-6.3). Printing the whole page on failure printed a screen
+		// nobody could read; the rows are what the assertion is about.
+		var lines []string
+		for _, d := range agenda.Days {
+			for _, r := range d.Rows {
+				lines = append(lines, string(d.Rubric)+" · "+string(r.Summary))
+			}
+		}
+		if len(agenda.Notices) > 0 || len(agenda.Days) != 7 ||
+			strings.Join(lines, "|") != "Tuesday, 13 October · Standup moved" {
+			t.Errorf("agenda at the target: %d days, rows %v, notices %+v",
+				len(agenda.Days), lines, agenda.Notices)
 		}
 	})
 }

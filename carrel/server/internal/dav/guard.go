@@ -296,8 +296,15 @@ type limitTransport struct {
 // RoundTrip sends the request and, when a connection the pool had kept turns
 // out to be closed, sends it once more (docs/servers.md, SV-14, S-5.1). Go
 // replays only the methods it knows as safe, and PROPFIND and REPORT are not
-// among them; the pool lives in this guard, so every DAV client of the process
-// shares it and inherits the race.
+// among them, so the guard does it.
+//
+// The pool is one client's, not the process's: Guard.httpClient builds a
+// transport for every dav.Client, so the first request of a client always
+// dials and only what follows it on that client can come out of the pool
+// idle. A write that follows a read on one client — the MKCOL after the
+// PROPFIND of the home, an import, a conflict re-read — is the case this
+// rule is for. Whether the pool should be shared is a question of its own,
+// written down in docs/plan/server.md; it is not what this rule turns on.
 //
 // A read goes again whatever the pool said. A write goes again only when the
 // connection came out of the pool idle: the server had closed its side before
@@ -306,8 +313,23 @@ type limitTransport struct {
 // it. The second reason it is safe: every write Carrel sends is conditional
 // (S-8) or idempotent, so one that did land answers the retry with a failed
 // precondition instead of doubling.
+//
+// «Instead of doubling» is true of the data and was never true of what the
+// person was told. A connection can also die after the server has read the
+// request and before the answer comes back — the full live run of
+// 21.09.2026 caught it twice on one Nextcloud, a PUT answered 412 and an
+// MKCOL answered 405, both on addresses nothing had ever been written to.
+// The record and the collection were made; Carrel said «the server would
+// not make it». So the second answer is marked as what it is, and a caller
+// that created something reads «it is already there» as its own write
+// arriving twice (dav.WasResent).
 func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	resp, err, fromIdle := t.attempt(req)
+	// A server of its own accord cannot set this: whatever came in with the
+	// first answer goes, so the mark below means the guard and no one else.
+	if resp != nil {
+		resp.Header.Del(headerResent)
+	}
 	// A connection that ended before the answer says why it was not sent
 	// again. Such a failure is rare, does not repeat, and is read months later
 	// out of a log: "EOF" alone leaves the reader guessing which rule applied.
@@ -325,6 +347,12 @@ func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return resp, fmt.Errorf("%w (not sent again: the body would not rewind: %v)", err, rerr)
 	}
 	resp, second, _ := t.attempt(again)
+	if resp != nil {
+		if resp.Header == nil {
+			resp.Header = http.Header{}
+		}
+		resp.Header.Set(headerResent, "1")
+	}
 	if second != nil && idleClosed(second) {
 		return resp, fmt.Errorf("%w (sent again after a connection closed before the answer, and it ended the same way)", second)
 	}
