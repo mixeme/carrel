@@ -191,6 +191,10 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "about": "/about",
     "app-duplicates": "/app/duplicates",
     "app-search": "/app/search",
+    "app-files": "/app/files",
+    "app-files-published": "/app/files/published",
+    "app-files-picker": "/app/files/picker",
+    "invite": "/invite/{token}",
     "app-collections-rename": "/app/collections/rename",
     "app-collections-move": "/app/collections/move",
     "app-collections-delete": "/app/collections/delete",
@@ -215,7 +219,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # тут нечего, и молчание здесь — не исключение, а род экрана.
 SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
-          "app-publish"}
+          "app-publish", "app-files-picker"}
 
 FRAME_TODO = {
     "app-contact-edit: коллекции рейла":
@@ -244,6 +248,9 @@ FRAME_TODO = {
     "app-notes: коллекции рейла":
         "кадр рисует тетрадь «Архив», которой нет в наборе («Архив» там — "
         "адресная книга, не тетрадь)",
+    "app-files: коллекции рейла":
+        "кадр рисует папки «Documents» и «Files», которых нет в наборе: "
+        "в таблице docs/visual/fixtures нет ни одной файловой коллекции",
     "app-agenda-all: коллекции рейла":
         "та же пара подписок, которых нет в наборе",
     "app-tasks-all: коллекции рейла":

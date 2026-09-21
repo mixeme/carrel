@@ -1,0 +1,63 @@
+{
+  "form": {
+    "action": "/invite/invite-token",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/invite/invite-token",
+        "id": "invite.submit",
+        "label": "Create account",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Repeat password",
+            "name": "password2",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "lede": "Choose a password for your new account.",
+  "notices": [],
+  "title": "Accept invitation",
+  "valid": true
+}

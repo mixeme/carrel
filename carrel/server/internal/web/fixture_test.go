@@ -461,6 +461,10 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	}
 	s = regexp.MustCompile(`t-[0-9A-Z]{10}`).ReplaceAllString(s, "t-task")
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
+	// The secret of an invitation is issued at the moment it is made, and
+	// it stands inside an address rather than alone, so the rule for the
+	// CSRF does not reach it.
+	s = regexp.MustCompile(`/invite/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/invite/invite-token")
 	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
 	// When the run itself did something — started this session, created
 	// this account, wrote this journal line — the stamp is the wall clock's
@@ -973,5 +977,29 @@ func TestFixtureMoreStates(t *testing.T) {
 		// what the server did not keep is said where the change was made,
 		// not on a screen the person has to go and find (C-9).
 		app.compare(t, "app-contact-edit/loss.json", app.h.do(postForm(rec+"/edit", app.sess, form)))
+	})
+}
+
+// C-14.2: the files, and the link an invited person opens. The mockup set
+// holds no folder of files, so the three screens of the files stand in
+// their empty state — which is the truth of this set, not a gap in them.
+func TestFixtureFilesAndInvite(t *testing.T) {
+	app := newMockupApp(t)
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	for _, one := range []struct{ dir, state, route string }{
+		{"app-files", "empty", "/app/files"},
+		{"app-files-published", "empty", "/app/files/published"},
+		{"app-files-picker", "empty", "/app/files/picker?for=upload"},
+	} {
+		t.Run(one.dir, func(t *testing.T) {
+			app.compare(t, one.dir+"/"+one.state+".json", app.h.do(get(one.route, app.sess)))
+		})
+	}
+	t.Run("invite", func(t *testing.T) {
+		secret, err := app.h.users.CreateInvite(app.sess.AccountID(), "vera", "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		app.compare(t, "invite/normal.json", app.h.do(get("/invite/"+secret, nil)))
 	})
 }

@@ -5,6 +5,21 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.2.7 — 2026-09-21
+
+fixtures-tail.md: файлы и приглашение.
+
+### Changed
+
+- Four pairs: `/app/files`, `/app/files/published`, `/app/files/picker`
+  and the link an invited person opens. The three screens of the files
+  stand in their empty state, because the mockup set holds no folder of
+  files at all — that is the truth of this set, and the gap is written
+  into plan/server.md beside the collections the frames draw and the set
+  does not have.
+- The secret of an invitation is held steady like an issued identifier: it
+  stands inside an address, where the rule for the CSRF does not reach.
+
 ## v0.2.6 — 2026-09-21
 
 fixtures-tail.md: пустые сведённые виды и отчёт о потере.
