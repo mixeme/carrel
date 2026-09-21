@@ -61,6 +61,16 @@ figcaption b{color:var(--tc-ink);font-weight:600}
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .frames{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
 .frames > *{min-width:min(360px,100%)}
+/* Ширина кадра — классом страницы, не style=: переключатель лестницы
+   (body:has(#wN:checked) .frame) сильнее по специфичности и перекрывает их. */
+.frame.w392{width:392px}
+.frame.w768{width:768px;max-width:100%}
+.frame.w820{width:820px}
+.frame.cap430{max-width:430px}
+.frame.cap660{max-width:660px}
+.frame.cap760{max-width:760px}
+.frame.cap820{max-width:820px}
+.frame.cap900{max-width:900px}
 .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;margin:18px 0;max-width:1400px}
 .sw{display:flex;flex-direction:column;gap:6px}
 .sw .chip{height:46px;border-radius:4px;border:.5px solid var(--tc-edge)}
@@ -112,8 +122,7 @@ body:has(#w390:checked) .tc-root{width:100%}
 .mk-winbtns svg{width:11px;height:11px;stroke:var(--tc-muted);stroke-width:1.2;fill:none}
 .mk-status{height:26px;display:flex;align-items:center;gap:14px;padding:0 12px;border-top:.5px solid var(--tc-hair);
   background:var(--tc-surface);font-size:11px;color:var(--tc-dusty)}
-.mk-status__text{}
-.mk-dot{}
+/* names-without-rule: mk-status__text mk-dot */
 .mk-status__dot{width:6px;height:6px;border-radius:50%;background:var(--tc-accent);display:inline-block;margin-right:5px}
 .mk-status__dot.is-off{background:var(--tc-danger)}
 .mk-toast{width:330px;border:.5px solid var(--tc-edge);border-radius:7px;background:var(--tc-surface);padding:11px 12px;
@@ -553,7 +562,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-stat.is-error{color:var(--tc-danger)}
 .tc-card{border:.5px solid var(--tc-hair);border-radius:4px;background:var(--tc-surface);padding:12px 14px;margin-bottom:10px}
 .tc-card > .tc-rubric{margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
-.tc-rubric__aside{}
 /* Слияние: список «куда» сжимается (min-width:0), кнопка не уезжает. */
 .tc-merge{margin-left:auto;display:flex;gap:8px;align-items:center;min-width:0;flex:1 1 200px;justify-content:flex-end}
 .tc-merge .tc-in,.tc-merge .tc-field{min-width:0;flex:1 1 140px;max-width:240px}
@@ -1467,10 +1475,12 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-ul--r6.tc-ul--r6{font-size:12.5px;color:var(--tc-muted);margin-top:6px}
 .tc-usermenu--r1.tc-usermenu--r1{outline:1.5px solid var(--tc-accent);outline-offset:1px}
 .tc-dim{color:var(--tc-dusty)}
-.tc-shell,.tc-row__lead,.tc-row__due,.tc-row__date,.tc-row__size,
-.tc-head__text,.tc-docmeta__sec,.tc-queue__list,.tc-queue__name,.tc-queue__meta,
-.tc-row__file,.tc-menu__label,.tc-auth__tagline,.tc-auth__link,.tc-print__cell,
-.tc-msg__aside,.tc-stack__item,.tc-sheet__block,.tc-line__item{}
+/* names-without-rule: tc-shell tc-row__lead tc-row__due tc-row__date tc-row__size
+   tc-head__text tc-docmeta__sec tc-queue__list tc-queue__name tc-queue__meta
+   tc-row__file tc-menu__label tc-auth__tagline tc-auth__link tc-print__cell
+   tc-msg__aside tc-stack__item tc-sheet__block tc-line__item tc-rubric__aside
+   — узел назван, вида у имени нет. Пустое правило — не правило: оно проходило
+   classes-defined и уезжало в CSS библиотеки. Список читает линт. */
 </style>
 </head>
 <body>
@@ -1909,7 +1919,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <h2 id="components">6. Компоненты</h2>
 
 <h4>Кнопки и переключатели</h4>
-<div class="demo tc-root tc-root--r1" data-demo="m-btn m-seg m-split" data-check="off">
+<div class="demo tc-root tc-root--r1" data-check="off">
   <button class="tc-btn is-primary" type="button">Save</button>
   <button class="tc-btn" type="button">Import</button>
   <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button>
@@ -1925,7 +1935,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <p><b>Кнопка со стрелкой — <code>.m-split</code>, две половины одним контролом.</b> Надпись действует сразу, стрелка открывает список: «New note» создаёт заметку, стрелка спрашивает, что ещё можно завести; «New contact» в едином виде так же спрашивает, в какую книгу писать. В кадрах 7.1 и 7.4 это нарисовано одним узлом со стрелкой внутри — рисунку не нужны два поведения, а интерфейсу нужны, и то, что связывает половины в один контрол, — вещь: между ними нет промежутка, наружные углы скруглены, внутренние срезаны. Волосяной линии на стыке нет: полпикселя на заливке то появляется, то нет, и контрол, который сам не умеет держать свою черту, лучше без неё. Без обёртки половины расходятся на промежуток окружающей группы, и стрелка отрывается от своей кнопки.</p>
 
 <h4>Поля</h4>
-<div class="demo tc-root tc-root--r2" data-demo="m-box m-check m-f m-hint m-in">
+<div class="demo tc-root tc-root--r2">
   <div class="tc-field tc-field--md"><label>Display name</label><input class="tc-in" type="text" value="Анна Ковалёва" aria-label="Display name"></div>
   <div class="tc-field tc-field--sm"><label>Birthday</label><input class="tc-in is-ph" type="date" placeholder="YYYY-MM-DD" aria-label="Birthday"></div>
   <div class="tc-field tc-field--xs"><label>Start time</label><input class="tc-in is-mono" type="time" value="10:00" aria-label="Start time"></div>
@@ -1938,7 +1948,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <p><b>Поле со списком отличается от поля ввода стрелкой</b>, и рисует её система (<code>is-pick</code>) — см. <a href="#conventions">§1</a>.</p>
 
 <h4>Источник в рейле</h4>
-<div class="demo tc-root col tc-root--r3" data-demo="m-badge m-bar3 m-box m-btn m-meta m-rail-sec m-rubric m-src">
+<div class="demo tc-root col tc-root--r3">
   <div class="tc-railsec">
     <div class="tc-tickrow is-all is-on"><button class="tc-tickrow__tick is-part" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-tickrow__label">Combined calendar</span><span class="tc-tickrow__meta">169</span></div>
   </div>
@@ -1958,7 +1968,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <p>Первая строка — единый вид раздела: полоска собрана из цветов всех коллекций, флажок трёхпозиционный (отмечены все, часть, ни одной). Ниже — коллекции по аккаунтам. Квадратный флажок значит «опрашивается»; снятый источник не опрашивается вообще. Полоска — цвет с сервера. Справа моноширинным — что оттуда пришло: число записей, прочерк для неопрошенного. <b>Число — вся коллекция, а не то, что на экране:</b> диапазон агенды и фильтр списка его не двигают, загруженное считает полоса над списком. Календарь, задачи и заметки лежат в одной календарной коллекции, поэтому считается тот род, ради которого открыт раздел, — и одна коллекция в двух разделах показывает разные числа. <b>Обновляется оно дважды:</b> при входе в сессию, когда рейл рисуется впервые, и при каждом обращении к коллекции — открыли или перечитали список, сохранили, удалили или перенесли запись, нажали обновление, закончили импорт, разобрали расхождение. Отдельного похода за счётчиком нет: число приносит тот запрос, который и так был сделан. <b>Снятая коллекция не опрашивается вообще</b> — ни при входе, ни потом, и прочерк у неё не означает «ноль». Сломанный источник говорит <b>человеческим словом</b>, а код ответа стоит рядом: «password · 401», не голый «401». Слово отвечает на «что делать» — пароль не принят, сервер молчит, сети нет, — код остаётся для того, кто пойдёт разбираться дальше, и целиком живёт в подсказке строки. Retry стоит тут же. Ошибка живёт в рейле, а не поверх списка.</p>
 
 <h4>Строка списка: анатомия</h4>
-<div class="demo tc-root col tc-root--r4" data-demo="m-av m-badge m-bar3 m-group m-list m-num m-row m-row--contact m-rubric">
+<div class="demo tc-root col tc-root--r4">
   <div class="tc-list__group"><span class="tc-rubric">А</span><span class="tc-num">3</span></div>
   <div class="tc-list">
     <div class="tc-row tc-row--avatarcols">
@@ -1985,7 +1995,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 
 <h4>Высота строки: их три</h4>
 <p>Всё, что стоит в одной строке, имеет одну высоту, и выбирает её не разметка экрана, а вид строки: <b>28&nbsp;px</b> — там, где есть поля; <b>26&nbsp;px</b> — панель инструментов; <b>22&nbsp;px</b> — строка списка или таблицы, где полей нет. Поле, кнопка, переключатель, флажок — всё берёт высоту своей строки.</p>
-<div class="demo tc-root tc-root--r2" data-demo="m-box m-btn m-check m-f m-in m-seg">
+<div class="demo tc-root tc-root--r2">
   <div class="tc-field tc-field--sm"><label>Port</label><input class="tc-in is-mono" type="text" value="8765" aria-label="Port"></div>
   <div class="tc-field"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Stop the server on exit</button></div>
   <div class="tc-field"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">Remote</button><button class="tc-seg__opt" type="button">Local</button></span></div>
@@ -1995,7 +2005,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <p>Встроенная проверка: откройте файл с <code>#check</code> в адресе. Она обходит каждый ряд — форму, панель, шапку, подвал, карточку, — сравнивает центры и высоты и обводит красным то, что выбилось (центр больше чем на 1.5&nbsp;px или высота хоть на пиксель). Четыре прохода: контролы на одной линии; ячейки формы, чьи диапазоны пересекаются; сами полосы (неравный отступ, два ряда, вылет); меню внутри <code>.m-shell</code>, оставшееся в потоке. В углу — счёт; на чистом файле «Строки выровнены».</p>
 
 <h4>Шапка раздела</h4>
-<div class="demo tc-root col tc-root--r5" data-demo="m-acts m-btn m-h1 m-head m-hgroup m-htext m-photo m-sub">
+<div class="demo tc-root col tc-root--r5">
   <div class="tc-head tc-head--mid">
     <div class="tc-head__group tc-head__group--r1">
       <span class="tc-avatar--photo is-ph tc-avatar--photo--r1">АК</span>
@@ -2007,14 +2017,14 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
     <div class="tc-acts"><button class="tc-btn is-sm" type="button">Edit</button><button class="tc-btn is-sm" type="button">All records</button></div>
   </div>
 </div>
-<div class="demo tc-root tc-root--r6" data-demo="m-crumbs">
+<div class="demo tc-root tc-root--r6">
   <nav class="tc-crumbs"><a class="tc-crumbs__link" href="#">Documents</a>/<a class="tc-crumbs__link" href="#">carrel</a>/<b>attachments</b></nav>
 </div>
 <p><b>У шапки две половины, и обе — вещи.</b> Слева <code>.m-hgroup</code>: фотография и заголовки одной группой, потому что подпись принадлежит снимку, а не полосе. Внутри неё <code>.m-htext</code> — стопка из заголовка, крошек, подзаголовка и подсказки, которая должна уметь сжиматься, когда действия справа занимают своё. Справа <code>.m-acts</code>, и это слот: какие там кнопки — дело экрана, как они стоят — дело шапки. Безымянная обёртка не сверяется — см. <a href="#conventions">§1</a>.</p>
 
 <h4>Панель инструментов: одна строка</h4>
 <p>Панель управления списка — <b>полоса высотой в одну строку</b>, и таких полос три: инструменты списка, панель выделения, ход опроса. У всех трёх один отступ (7&nbsp;px сверху и снизу) и одна высота содержимого (26&nbsp;px), потому что это одна вещь, а не три похожих.</p>
-<div class="demo tc-root col tc-root--r5" data-demo="m-bar m-btn m-h1 m-head m-in m-more m-poll m-prog m-right m-seg m-sel m-sep m-sub">
+<div class="demo tc-root col tc-root--r5">
   <div class="tc-head tc-head--r1">
     <div class="tc-head__titles"><div class="tc-head__title tc-head__title--r2">attachments</div><div class="tc-head__sub">sftpgo · vps</div></div>
   </div>
@@ -2036,7 +2046,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="83%"></i></span>Polled 5 of 6 sources · 14 events<span class="tc-mono tc-push">2 min ago</span></div>
 </div>
 <p>Та же панель, когда колонка содержимого сузилась — открыли панель подробностей. Сортировка и хвост со счётчиком ушли под «⋯», действия выделения остались все до одного и потеряли только подписи:</p>
-<div class="demo tc-root col tc-root--r7" data-demo="m-bar m-btn m-h1 m-head m-in m-more m-poll m-prog m-right m-seg m-sel m-sep m-sub">
+<div class="demo tc-root col tc-root--r7">
   <div class="tc-head tc-head--r1">
     <div class="tc-head__titles"><div class="tc-head__title tc-head__title--r2">attachments</div><div class="tc-head__sub">sftpgo · vps</div></div>
   </div>
@@ -2058,7 +2068,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="83%"></i></span>Polled 5 of 6 sources<span class="tc-mono tc-push">2 min ago</span></div>
 </div>
 <p>Правило полосы — в <a href="#conventions">§1</a>. <code>.m-sep</code>, <code>.m-range</code> и <code>.m-right</code> — такие же части набора, как кнопка. Порядок отступления у каждой панели свой: в календаре первым уходит диапазон дат, в задачах — сортировка, в контактах — сортировка и хвост со счётчиком. На экране человека диапазон в полосе остаётся: подпись «Widen the range» бессмысленна, если сами поля спрятаны под «⋯».</p>
-<div class="demo tc-root tc-root--r6" data-demo="m-btn m-in m-range">
+<div class="demo tc-root tc-root--r6">
   <span class="tc-range"><input class="tc-in is-mono" type="date" value="2026-01-01"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="text" value="today"><button class="tc-btn" type="button">Show</button></span>
 </div>
 <p><b>Диапазон дат — <code>.m-range</code>:</b> два поля и стрелка между ними, иногда с кнопкой «Show». В полосе календаря и поиска он уходит под «⋯», когда колонка сужается — помечен <code>is-2nd</code>, как сортировка и счётчик. На экране человека он стоит первым, без <code>is-2nd</code> и с кнопкой Show: это тот контрол, которым отвечают на «Widen the range», и его нельзя прятать.</p>
@@ -2066,7 +2076,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <h4>Меню: что обещано кнопкой и что внутри</h4>
 <p>Кнопка со стрелкой или с «⋯» — обещание списка. Меню переполнения полосы нарисовано раскрытым в агенде (7.2): в нём лежит ровно то, что отступило на этом экране.</p>
 <p>Кнопка и список — <code>.m-drop</code> — см. <a href="#conventions">§1</a>. На полосе — <code>is-bar</code>. Оба узла показаны ниже. <b>Сверху — свой узел:</b> «⋯» строки или шапки, меню влево от кнопки. <b>Снизу — <code>is-bar</code>:</b> меню отмерено от полосы. Полоса нарисована узкой нарочно — «⋯» появляется, только когда набору не хватило ширины.</p>
-<div class="demo tc-root col tc-root--r8" data-demo="m-bar m-btn m-drop m-menu m-more m-seg">
+<div class="demo tc-root col tc-root--r8">
   <div class="tc-line tc-div--r6">
     <span class="tc-drop">
       <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
@@ -2093,7 +2103,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 </div>
 <div class="frames">
   <figure style="flex:0 1 250px">
-  <div class="frame" data-frame="components-1" data-demo="m-menu">
+  <div class="frame" data-frame="components-1">
     <div class="frame-label"><span>Строка списка · ⋯</span><span class="frag">компонент</span><i>контакт</i></div>
     <div class="tc-root tc-root--r9">
       <div class="tc-menu tc-menu--r1">
@@ -2111,7 +2121,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   </figure>
 
   <figure style="flex:0 1 250px">
-  <div class="frame" data-frame="components-2" data-demo="m-menu">
+  <div class="frame" data-frame="components-2">
     <div class="frame-label"><span>Строка списка · ⋯</span><span class="frag">компонент</span><i>событие</i></div>
     <div class="tc-root tc-root--r9">
       <div class="tc-menu tc-menu--r1">
@@ -2129,7 +2139,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   </figure>
 
   <figure style="flex:0 1 250px">
-  <div class="frame" data-frame="components-3" data-demo="m-menu">
+  <div class="frame" data-frame="components-3">
     <div class="frame-label"><span>Строка списка · ⋯</span><span class="frag">компонент</span><i>задача</i></div>
     <div class="tc-root tc-root--r9">
       <div class="tc-menu tc-menu--r1">
@@ -2147,7 +2157,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   </figure>
 
   <figure style="flex:0 1 250px">
-  <div class="frame" data-frame="components-4" data-demo="m-menu">
+  <div class="frame" data-frame="components-4">
     <div class="frame-label"><span>Строка списка · ⋯</span><span class="frag">компонент</span><i>заметка</i></div>
     <div class="tc-root tc-root--r9">
       <div class="tc-menu tc-menu--r1">
@@ -2165,7 +2175,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   </figure>
 
   <figure style="flex:0 1 250px">
-  <div class="frame" data-frame="components-5" data-demo="m-menu">
+  <div class="frame" data-frame="components-5">
     <div class="frame-label"><span>Строка списка · ⋯</span><span class="frag">компонент</span><i>файл</i></div>
     <div class="tc-root tc-root--r9">
       <div class="tc-menu tc-menu--r1">
@@ -2186,7 +2196,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 
 <div class="frames">
   <figure style="flex:0 1 300px">
-  <div class="frame" data-frame="components-6" data-demo="m-badge m-bar3 m-menu m-rubric">
+  <div class="frame" data-frame="components-6">
     <div class="frame-label"><span>«New …» в едином виде</span><span class="frag">компонент</span><i>стрелка спрашивает, куда писать</i></div>
     <div class="tc-root tc-root--r9">
       <div class="tc-menu tc-menu--r2">
@@ -2201,7 +2211,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   </figure>
 
   <figure style="flex:0 1 260px">
-  <div class="frame" data-frame="components-7" data-demo="m-menu">
+  <div class="frame" data-frame="components-7">
     <div class="frame-label"><span>«Upload» в файлах</span><span class="frag">компонент</span><i>стрелка у кнопки загрузки</i></div>
     <div class="tc-root tc-root--r9">
       <div class="tc-menu tc-menu--r3">
@@ -2214,7 +2224,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   </figure>
 
   <figure style="flex:1 1 330px">
-  <div class="frame" data-frame="components-8" data-demo="m-menu">
+  <div class="frame" data-frame="components-8">
     <div class="frame-label"><span>Шапка экрана · ⋯</span><span class="frag">компонент</span><i>файлы</i></div>
     <div class="tc-root tc-root--r9">
       <div class="tc-menu tc-menu--r4">
@@ -2234,7 +2244,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 
 <h4>Кнопка рядом с полем</h4>
 <p>Кнопка, относящаяся к полю, стоит <b>справа от него и внутри его же блока</b>, обычной высоты. Мелкая кнопка (22&nbsp;px) — только для строк списка и таблиц, где полей нет. Пара «поле + кнопка» верстается одной строкой внутри <code>.m-f</code>, а не двумя соседними ячейками формы: иначе выравнивание разъедется, как только у соседнего поля появится подсказка.</p>
-<div class="demo tc-root tc-root--r1" data-demo="m-btn m-f m-in">
+<div class="demo tc-root tc-root--r1">
   <div class="tc-field tc-field--r1"><label>On a connected server</label>
     <span class="tc-line tc-line--gap-8"><input class="tc-in is-ph tc-in--r2" type="text" placeholder="Documents · sftpgo / carrel-backup/…" aria-label="Documents · sftpgo / carrel-backup/…"><button class="tc-btn" type="button">Browse</button></span></div>
   <div class="tc-field tc-field--r2"><label>Address for the client</label>
@@ -2243,7 +2253,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 
 <h4>Выбор столбцов</h4>
 <p>Раз ширина отдана колонкам, человек должен решать, какие это колонки. Кнопка <b>Columns</b> стоит в панели управления каждого списка и каждой таблицы — контакты, задачи, заметки, файлы, пользователи, журнал.</p>
-<div class="demo tc-root tc-root--r10" data-demo="m-box m-btn m-menu m-rubric">
+<div class="demo tc-root tc-root--r10">
   <div class="tc-stack tc-stack--gap-9">
     <button class="tc-btn tc-btn--r1" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns<span class="tc-mono tc-mono--r6">5</span></button>
   </div>
@@ -2272,7 +2282,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 </table>
 
 <h4>Ход опроса, сообщения, пустое состояние</h4>
-<div class="demo tc-root col tc-root--r5" data-demo="m-btn m-empty m-msg m-poll m-prog">
+<div class="demo tc-root col tc-root--r5">
   <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="71%"></i></span>Polled 5 of 7 sources · 12 records · 1 unavailable<span class="tc-push"><button class="tc-btn is-sm" type="button">Stop</button></span></div>
   <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one.</div>
   <div class="tc-msg is-alert">baikal · office — the server replied 401. Check the saved password on the profile page.</div>
@@ -2280,7 +2290,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 </div>
 
 <h4>Таблица</h4>
-<div class="demo tc-root col tc-root--r5" data-demo="m-table">
+<div class="demo tc-root col tc-root--r5">
   <table class="tc-table">
     <thead><tr><th>Login</th><th>Role</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4">Last login</th></tr></thead>
     <tbody>
@@ -2290,38 +2300,38 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   </table>
 </div>
 <p>Заголовок — капитель, не жирный шрифт браузера. Первая и последняя колонки стоят в желобе страницы (<code>var(--tc-page-gutter)</code>), чтобы таблица совпадала с шапкой над ней. Машинная строка (адрес, путь, идентификатор) ломается в любом месте: иначе колонка не сжимается и таблица уезжает за край.</p>
-<div class="demo tc-root tc-root--r6" data-demo="m-fname">
+<div class="demo tc-root tc-root--r6">
   <span class="tc-table__file"><svg viewBox="0 0 24 24"><use href="#i-doc"/></svg><span class="tc-table__filename">release-checklist.md</span></span>
 </div>
 <p>В файлах имя — <code>.m-fname</code>: значок и подпись, размер знает ячейка.</p>
 
 <h4>Плитки и очередь загрузок</h4>
-<div class="demo tc-root tc-root--r11" data-demo="m-grid m-thumb m-tile">
+<div class="demo tc-root tc-root--r11">
   <div class="tc-grid tc-grid--r1">
     <div class="tc-tile"><div class="tc-thumb"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#i-doc"/></svg></div><span class="tc-tile__name">смета.pdf</span><span class="tc-tile__meta">412 KB</span></div>
     <div class="tc-tile is-sel"><div class="tc-thumb"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#i-img"/></svg></div><span class="tc-tile__name">фасад.jpg</span><span class="tc-tile__meta">1.8 MB</span></div>
   </div>
 </div>
-<div class="demo tc-root col tc-root--r12" data-demo="m-btn m-prog m-transfers">
+<div class="demo tc-root col tc-root--r12">
   <div class="tc-queue tc-queue--r1">
     <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--r7">12.4 MB</span><button class="tc-btn is-sm" type="button">Hide</button></div>
-    <ul>
-      <li><div class="tc-queue__row"><span>отчёт-июль.pdf</span><span>4.1 MB · done</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="100%"></i></span></li>
-      <li><div class="tc-queue__row"><span>плакат.png</span><span>8.3 MB · 62%</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="62%"></i></span></li>
+    <ul class="tc-queue__list">
+      <li><div class="tc-queue__row"><span class="tc-queue__name">отчёт-июль.pdf</span><span class="tc-queue__meta">4.1 MB · done</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="100%"></i></span></li>
+      <li><div class="tc-queue__row"><span class="tc-queue__name">плакат.png</span><span class="tc-queue__meta">8.3 MB · 62%</span></div><span class="tc-meter" data-tc-width="100%"><i class="tc-meter__bar" data-tc-width="62%"></i></span></li>
       <li><div class="tc-queue__row"><span class="tc-span--r7">release-checklist.md</span><span class="tc-span--r7">name taken</span></div>
         <div class="tc-line tc-line--gap-6 tc-div--r8"><button class="tc-btn is-sm" type="button">Keep both</button><button class="tc-btn is-sm" type="button">Replace</button><button class="tc-btn is-sm" type="button">Skip</button></div></li>
     </ul>
   </div>
 </div>
 <p>Сетка <code>.m-grid</code>, плитка <code>.m-tile</code>, превью <code>.m-thumb</code>. Выделенная плитка — рамка акцента, как выделенная строка таблицы — фон картона. Очередь загрузок <code>.m-transfers</code> — карточка в правом нижнем углу колонки содержимого, не окна и не рейла: ход, конфликт имени, Keep both / Replace / Skip. Hide сворачивает её в строку того же угла (<code>is-min</code>, кнопка Show); когда загрузок нет, угла нет. Она не список и не таблица, поэтому у неё своё имя.</p>
-<div class="demo tc-root col tc-root--r13" data-demo="m-btn m-transfers">
+<div class="demo tc-root col tc-root--r13">
   <div class="tc-queue is-min tc-queue--r2">
     <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--r7">62%</span><button class="tc-btn is-sm" type="button">Show</button></div>
   </div>
 </div>
 
 <h4>Дерево папок</h4>
-<div class="demo tc-root col tc-root--r14" data-demo="m-tree">
+<div class="demo tc-root col tc-root--r14">
   <div class="tc-tree">
     <div class="is-on tc-tree__row"><svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-file"/></svg>attachments</div>
     <div class="tc-tree__row tc-tree__row--r1"><svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-file"/></svg>2026</div>
@@ -2331,7 +2341,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <p>Единственное новое устройство, которое понадобилось «Move» в файлах — и оно же нужно запланированному экрану нового устройства. Вложенность — атрибут <code>data-depth</code>, не инлайновый стиль: CSP не пускает <code>style=</code>.</p>
 
 <h4>Документ: заголовок, текст, правка</h4>
-<div class="demo tc-root col tc-root--r15" data-demo="m-btn m-editbar m-kbd m-prose m-right m-sep m-title">
+<div class="demo tc-root col tc-root--r15">
   <div class="tc-docbar tc-docbar--r1">
     <button class="tc-btn is-primary" type="button">Save</button>
     <button class="tc-btn" type="button">Cancel</button>
@@ -2345,7 +2355,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <p><code>.m-title</code> — 27 px в теле документа, не <code>.m-h1</code> шапки раздела. <code>.m-doc</code> / <code>.m-docbody</code> / <code>.m-metacol</code> — полный экран заметки: текст и боковая колонка. <code>.m-editbar</code> — та же высота 26 px, что у полосы инструментов, только для правки. <code>.m-kbd</code> — аккорд, который обещает кнопку.</p>
 
 <h4>Шаги мастера и диагностика</h4>
-<div class="demo tc-root col tc-root--r16" data-demo="m-diag m-stat m-stats m-steps">
+<div class="demo tc-root col tc-root--r16">
   <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i aria-hidden="true" class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i aria-hidden="true" class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
   <div class="tc-stats">
     <span class="tc-stat"><b>122</b> ready</span>
@@ -2358,12 +2368,12 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <p>Три шага импорта — <code>.m-steps</code>: текущий жирный, остальные пыльные, между ними линейка. Трасса обнаружения и отчёт об ошибках — <code>.m-diag</code>, моноширинным, как данные.</p>
 
 <h4>Диалог и карточка</h4>
-<div class="demo tc-root col tc-root--r9" data-demo="m-dialog">
+<div class="demo tc-root col tc-root--r9">
   <div class="tc-dialog tc-dialog--r1">
     <p class="tc-p--r1">Центрированное полотно для форм, мастеров и диалогов выбора.</p>
   </div>
 </div>
-<div class="demo tc-root col tc-root--r17" data-demo="m-card m-rubric">
+<div class="demo tc-root col tc-root--r17">
   <div class="tc-card tc-card--r1">
     <div class="tc-rubric">Created</div>
     <div class="tc-div--r9">122</div>
@@ -2372,11 +2382,11 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <p><code>.m-dialog</code> — полотно страницы внутри оболочки: формы, мастеры, диалог выбора папки. <code>.m-card</code> — рамка с подложкой для группы полей или счётчика внутри диалога.</p>
 
 <h4>Крестик и разрушительный подвал</h4>
-<div class="demo tc-root tc-root--r18" data-demo="m-btn m-close">
+<div class="demo tc-root tc-root--r18">
   <span class="tc-span--r8">Panel title</span>
   <button class="tc-btn tc-close" title="Close the panel" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
 </div>
-<div class="demo tc-root col tc-root--r19" data-demo="m-btn m-danger-zone">
+<div class="demo tc-root col tc-root--r19">
   <div class="tc-div--r10">Card body</div>
   <div class="tc-danger tc-danger--r1"><button class="tc-btn is-danger-solid" type="button">Delete contact</button></div>
 </div>
@@ -5754,7 +5764,7 @@ Read  2 min ago</div>
 </figure>
 
 <figure>
-<div class="frame" data-frame="s-conflict-2" style="width:768px;max-width:100%" data-screen="/app/contacts/{account}/{col}/{uid}/conflict" data-part="tablet">
+<div class="frame w768" data-frame="s-conflict-2" data-screen="/app/contacts/{account}/{col}/{uid}/conflict" data-part="tablet">
   <div class="frame-label"><span>Конфликт · планшет, 768 px</span><i>768 px</i></div>
   <div class="tc-root tc-shell">
     <div class="tc-top">
@@ -8498,7 +8508,7 @@ Read  2 min ago</div>
 </div>
 
 <figure>
-<div class="frame" data-frame="s-davloom-4" style="max-width:820px">
+<div class="frame cap820" data-frame="s-davloom-4">
   <div class="frame-label"><span>Что видно по адресу прокси в браузере</span><i>GET / — единственная страница davloom</i></div>
   <div class="tc-root tc-shell">
     <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
@@ -9506,7 +9516,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
 <p>Публиковать можно пять вещей, и у каждой свой вид страницы. Хрома у всех одна и та же — логотип, метка <b>read-only</b>, кнопка скачивания и строка про срок в подвале, — потому что открывший должен с первого взгляда понять три вещи: чем ему это отдали, что редактировать нечего и когда ссылка перестанет работать. Ни рейла, ни поиска, ни кнопок создания: страница не притворяется приложением.</p>
 
 <figure>
-<div class="frame" data-frame="s-publish-6" data-screen="/p/{token}" data-part="calendar" style="max-width:900px">
+<div class="frame cap900" data-frame="s-publish-6" data-screen="/p/{token}" data-part="calendar">
   <div class="frame-label"><span>Публичная страница · календарь</span><i>/p/{token} · календарь, без входа</i></div>
   <div class="tc-root tc-shell">
     <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
@@ -9737,7 +9747,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
 </div>
 
 <figure>
-<div class="frame" data-frame="s-publish-12" data-screen="/p/{token}" data-part="folder" style="max-width:900px">
+<div class="frame cap900" data-frame="s-publish-12" data-screen="/p/{token}" data-part="folder">
   <div class="frame-label"><span>Публичная страница · папка</span><i>/p/{token} · WebDAV → листинг</i></div>
   <div class="tc-root tc-shell">
     <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
@@ -10027,7 +10037,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
 
 <div class="frames">
   <figure style="flex:1 1 100%">
-  <div class="frame" data-frame="s-mail-4" style="max-width:820px">
+  <div class="frame cap820" data-frame="s-mail-4">
     <div class="frame-label"><span>Отправить ссылку письмом</span><i>из Published links и из карточки объекта</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -10117,7 +10127,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
 <p>Системного диалога здесь быть не может: вкладывают не файл с диска, а запись из коллекции, о которой операционная система ничего не знает. Значит, это ещё один экран Carrel, и собран он из того же, из чего собраны разделы, — источники слева, список справа, поиск сверху. Ниже два из восьми: заметка, потому что на ней решается вопрос формата, и файл, потому что на нём видно, как вложение превращается в ссылку.</p>
 
 <figure>
-<div class="frame" data-frame="s-mail-5" style="max-width:900px">
+<div class="frame cap900" data-frame="s-mail-5">
   <div class="frame-label"><span>Выбрать заметку</span><span class="frag">фрагмент</span><i>лист поверх листа письма, экран целиком — выше</i></div>
   <div class="tc-root tc-root--r21">
     <div class="tc-sheet tc-sheet--r6">
@@ -10166,7 +10176,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
 </figure>
 
 <figure>
-<div class="frame" data-frame="s-mail-6" style="max-width:900px">
+<div class="frame cap900" data-frame="s-mail-6">
   <div class="frame-label"><span>Выбрать файл</span><span class="frag">фрагмент</span><i>лист поверх листа письма, экран целиком — выше</i></div>
   <div class="tc-root tc-root--r21">
     <div class="tc-sheet tc-sheet--r6">
@@ -11577,7 +11587,7 @@ The account itself stays: same login, same confirmed address. Only the password 
 
 <div class="frames">
   <div>
-  <div class="frame" data-frame="m-phone-1" style="width:392px">
+  <div class="frame w392" data-frame="m-phone-1">
     <div class="frame-label"><span>Агенда</span><i>390 px</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -11632,7 +11642,7 @@ The account itself stays: same login, same confirmed address. Only the password 
   </div>
 
   <div>
-  <div class="frame" data-frame="m-phone-2" style="width:392px">
+  <div class="frame w392" data-frame="m-phone-2">
     <div class="frame-label"><span>Выдвижной рейл источников</span><i>390 px</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -11667,7 +11677,7 @@ The account itself stays: same login, same confirmed address. Only the password 
   </div>
 
   <div>
-  <div class="frame" data-frame="m-phone-3" style="width:392px">
+  <div class="frame w392" data-frame="m-phone-3">
     <div class="frame-label"><span>Карточка события</span><i>390 px</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -11698,7 +11708,7 @@ The account itself stays: same login, same confirmed address. Only the password 
   </div>
 
   <div>
-  <div class="frame" data-frame="m-phone-4" style="width:392px">
+  <div class="frame w392" data-frame="m-phone-4">
     <div class="frame-label"><span>Контакты</span><i>390 px</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -11762,7 +11772,7 @@ The account itself stays: same login, same confirmed address. Only the password 
   </div>
 
   <div>
-  <div class="frame" data-frame="m-phone-5" style="width:392px">
+  <div class="frame w392" data-frame="m-phone-5">
     <div class="frame-label"><span>Человек целиком</span><i>390 px</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -11803,7 +11813,7 @@ The account itself stays: same login, same confirmed address. Only the password 
   </div>
 
   <div>
-  <div class="frame" data-frame="m-phone-6" style="width:392px">
+  <div class="frame w392" data-frame="m-phone-6">
     <div class="frame-label"><span>Файлы · выделение</span><i>390 px</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -11859,7 +11869,7 @@ The account itself stays: same login, same confirmed address. Only the password 
   </div>
 
   <div>
-  <div class="frame" data-frame="m-phone-7" style="width:392px">
+  <div class="frame w392" data-frame="m-phone-7">
     <div class="frame-label"><span>Заметка · чтение и правка</span><i>390 px</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -11900,7 +11910,7 @@ The account itself stays: same login, same confirmed address. Only the password 
   </div>
 
   <div>
-  <div class="frame" data-frame="m-phone-8" style="width:820px">
+  <div class="frame w820" data-frame="m-phone-8">
     <div class="frame-label"><span>Рейл из значков</span><i>820 px</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -11984,7 +11994,7 @@ The account itself stays: same login, same confirmed address. Only the password 
   </div>
 
   <div>
-  <div class="frame" data-frame="m-phone-9" style="width:820px">
+  <div class="frame w820" data-frame="m-phone-9">
     <div class="frame-label"><span>Рейл из значков · источники открыты</span><i>820 px</i></div>
     <div class="tc-root tc-shell">
       <div class="tc-top">
@@ -12070,7 +12080,7 @@ The account itself stays: same login, same confirmed address. Only the password 
 <p>Печать — заявленная возможность (U-10): список, карточка, агенда, задачи, заметки. На бумаге исчезает всё, кроме содержимого; цвет коллекции остаётся полоской, потому что на чёрно-белой печати он превращается в оттенок серого и всё равно различает источники.</p>
 
 <figure>
-<div class="frame" data-frame="m-print-1" style="max-width:760px">
+<div class="frame cap760" data-frame="m-print-1">
   <div class="frame-label"><span>Агенда на бумаге</span><i>@media print</i></div>
   <div class="tc-root tc-root--print">
     <div class="tc-print__h1">Agenda · 10 – 16 August 2026</div>
@@ -12187,7 +12197,7 @@ The account itself stays: same login, same confirmed address. Only the password 
 </figure>
 
 <figure>
-<div class="frame" data-frame="m-desktop-2" style="max-width:430px">
+<div class="frame cap430" data-frame="m-desktop-2">
   <div class="frame-label"><span>Меню пользователя в приложении</span><i>две строки, которых нет в вебе</i></div>
   <div class="tc-root tc-line tc-root--r22">
     <div class="tc-menu tc-menu--r8">
@@ -12553,7 +12563,7 @@ The account itself stays: same login, same confirmed address. Only the password 
 </div>
 
 <figure>
-<div class="frame" data-frame="m-desktop-12" style="max-width:660px">
+<div class="frame cap660" data-frame="m-desktop-12">
   <div class="frame-label"><span>Выход из учётной записи · удалять ли данные</span><i>единственное место, где спрашивают</i></div>
   <div class="tc-root tc-root--r23">
     <div class="mk-win tc-div--r119">
@@ -12582,7 +12592,7 @@ The account itself stays: same login, same confirmed address. Only the password 
 </figure>
 
 <figure>
-<div class="frame" data-frame="m-desktop-13" style="max-width:900px">
+<div class="frame cap900" data-frame="m-desktop-13">
   <div class="frame-label"><span>Настройки приложения</span><i>то, чего нет в веб-версии</i></div>
   <div class="tc-root tc-shell">
     <div class="mk-win">
@@ -12738,7 +12748,7 @@ The account itself stays: same login, same confirmed address. Only the password 
 </ul>
 
 <figure>
-<div class="frame" data-frame="m-desktop-16" style="max-width:760px">
+<div class="frame cap760" data-frame="m-desktop-16">
   <div class="frame-label"><span>Папка на бумаге</span><i>@media print · раздел «Файлы»</i></div>
   <div class="tc-root tc-root--print">
     <div class="tc-print__h1">Documents / carrel / attachments</div>

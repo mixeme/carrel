@@ -17,6 +17,42 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.14 — 2026-09-21
+
+Живые прогоны на SoGo и Yandex.
+
+### Fixed
+
+- **A rule said in another order is the same rule** (SV-35). SoGo keeps
+  `FREQ=WEEKLY;COUNT=6;BYDAY=MO;WKST=MO` where Carrel sent
+  `FREQ=WEEKLY;BYDAY=MO;WKST=MO;COUNT=6`, and the comparison after a write
+  read the value as text: every edit of a repeating event there told the
+  person the server had not kept RRULE. The series was whole and the
+  message was false. `RRULE` and `EXRULE` are now compared part by part —
+  a part missing or changed is still a loss.
+
+### Changed
+
+- The forms, Mark done, the rule of a series and Disconnect run on two
+  more live servers: `TestSoGoForms` and `TestYandexForms`, five in all.
+  A part a server will not have — Yandex makes no address book and keeps
+  no task — says so and steps aside instead of failing: a server's limit
+  is not a fault of the screen.
+
+### Notes
+
+- **SV-34**: Yandex rewrites an event. `COUNT` becomes `UNTIL`,
+  `INTERVAL=1` appears, `WKST` goes, the time moves to its own zone, and
+  `STATUS`, `CATEGORIES` and `X-CUSTOM` are not kept at all. Each is a
+  loss by S-7.1 and Carrel reports it; there is no workaround and a
+  workaround would be a lie. One consequence is worth knowing: once the
+  server has turned `COUNT` into `UNTIL`, setting «Times» without
+  clearing «Until» is refused on the field, which is right.
+- Two live assertions had outlived their screens — a conflict names
+  properties as the record does, and a week is seven days with the empty
+  ones shown. Both were changes already made and agreed; only the live
+  suite, which compiles under its own tag, had not heard.
+
 ## v0.2.13 — 2026-09-21
 
 fixtures-tail.md: потеря на формах и незаконченный опрос календаря.

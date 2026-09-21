@@ -4,6 +4,7 @@ package integration
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -37,6 +38,20 @@ func TestNextcloudForms(t *testing.T) {
 	runForms(t, endpoint, user, pass)
 }
 
+// SoGo and Yandex both give a calendar home and let a calendar be made, so
+// the forms run on them whole. Yandex refuses a new address book (SV-19):
+// the contact part says so and steps aside rather than failing, because a
+// server's limit is not a fault of the screen.
+func TestSoGoForms(t *testing.T) {
+	endpoint, user, pass := sogoConfig(t)
+	runForms(t, endpoint, user, pass)
+}
+
+func TestYandexForms(t *testing.T) {
+	endpoint, user, pass := yandexConfig(t)
+	runForms(t, endpoint, user, pass)
+}
+
 func runForms(t *testing.T, endpoint, user, pass string) {
 	ctx := context.Background()
 	g := testGuard(t)
@@ -57,7 +72,7 @@ func runForms(t *testing.T, endpoint, user, pass string) {
     <C:supported-calendar-component-set><C:comp name="VEVENT"/><C:comp name="VTODO"/><C:comp name="VJOURNAL"/></C:supported-calendar-component-set>
   </D:prop></D:set>
 </C:mkcalendar>`)
-	bookPath := makeCollection(ctx, t, client, endpoint, user, pass, "MKCOL",
+	bookPath := tryCollection(ctx, t, client, endpoint, user, pass, "MKCOL",
 		strings.TrimSuffix(res.AddressBookHome, "/")+"/"+suffix+"-book/", `<?xml version="1.0" encoding="utf-8"?>
 <D:mkcol xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
   <D:set><D:prop>
@@ -73,9 +88,14 @@ func runForms(t *testing.T, endpoint, user, pass string) {
 	key, _ := app.sess.DataKey()
 	blob, _ := app.users.Catalog(app.sess.AccountID(), key)
 	conn := blob.Connections[0]
-	cal, book := catalogEntry(t, blob, calPath), catalogEntry(t, blob, bookPath)
+	cal := catalogEntry(t, blob, calPath)
 
-	t.Run("contact", func(t *testing.T) { liveContactFields(ctx, t, app, client, conn.ID, book.Path, suffix) })
+	if bookPath == "" {
+		t.Logf("the server would not make an address book: the contact part is skipped")
+	} else {
+		book := catalogEntry(t, blob, bookPath)
+		t.Run("contact", func(t *testing.T) { liveContactFields(ctx, t, app, client, conn.ID, book.Path, suffix) })
+	}
 	t.Run("event", func(t *testing.T) { liveEventFields(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 	t.Run("task", func(t *testing.T) { liveTaskFields(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 	if cal.Has(view.KindNote) {
@@ -139,13 +159,40 @@ func liveDisconnect(t *testing.T, app *liveApp, connID, endpoint, user, pass, ca
 // the record, not a notice, an error or a loss report.
 func liveEdit[P any](t *testing.T, app *liveApp, rec string, form func(P) view.Form, set map[string]string) {
 	t.Helper()
+	if lost := liveEditDropping(t, app, rec, form, set); len(lost) > 0 {
+		t.Fatalf("save %v: the server did not keep %v", set, lost)
+	}
+}
+
+// liveEditDropping saves a form and returns what the server did not keep.
+// A server that drops a property answers with the form and the report of
+// C-9 instead of a redirect, and that is the right answer: Yandex keeps no
+// STATUS and no CATEGORIES on an event, and a test that demanded a redirect
+// there would be demanding that Carrel lie.
+func liveEditDropping[P any](t *testing.T, app *liveApp, rec string, form func(P) view.Form, set map[string]string) []string {
+	t.Helper()
 	v := liveForm(form(liveDecode[P](t, "edit "+rec, app.get(rec+"/edit"))))
 	for k, val := range set {
 		v.Set(k, val)
 	}
-	if loc := redirected(t, fmt.Sprintf("save %v", set), app.post(rec+"/edit", v)); loc != rec {
+	rr := app.post(rec+"/edit", v)
+	if rr.Code == 200 {
+		var body struct {
+			Loss *view.LossReport `json:"loss"`
+		}
+		if err := json.Unmarshal(rr.Body.Bytes(), &body); err == nil && body.Loss != nil {
+			var out []string
+			for _, p := range body.Loss.Properties {
+				out = append(out, string(p))
+			}
+			t.Logf("save %v: the server kept everything but %v", set, out)
+			return out
+		}
+	}
+	if loc := redirected(t, fmt.Sprintf("save %v", set), rr); loc != rec {
 		t.Fatalf("save %v went to %q", set, loc)
 	}
+	return nil
 }
 
 func seed(ctx context.Context, t *testing.T, client *dav.Client, file, media, body string) {
@@ -211,21 +258,74 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 		"END:VCALENDAR\n")
 	rec := "/app/calendar/" + connID + "/" + url.PathEscape(cal) + "/" + url.PathEscape(uid)
 	form := func(p view.EventEditPage) view.Form { return p.Form }
-	exceptions := []string{"EXDATE;TZID=Europe/Moscow:20260119T100000", "RECURRENCE-ID;TZID=Europe/Moscow:20260126T100000", "SUMMARY:Duty moved", "X-CUSTOM:keep-me"}
+	// What of the seed the server kept is read back before anything is
+	// edited: a line the server never accepted is not a line Carrel lost,
+	// and demanding it would make the server's limit look like a fault of
+	// the forms. Yandex takes no X-CUSTOM on an event.
+	seeded, _ := rawBody(ctx, t, client, file)
+	var exceptions []string
+	for _, line := range []string{"EXDATE;TZID=Europe/Moscow:20260119T100000",
+		"RECURRENCE-ID;TZID=Europe/Moscow:20260126T100000", "SUMMARY:Duty moved", "X-CUSTOM:keep-me"} {
+		if strings.Contains(strings.ToLower(seeded), strings.ToLower(line)) {
+			exceptions = append(exceptions, line)
+		} else {
+			t.Logf("the server did not take %q even as sent: it is not asked for again", line)
+		}
+	}
 
-	liveEdit(t, app, rec, form, map[string]string{"status": "CONFIRMED", "categories": "duty, work"})
+	// Yandex keeps no STATUS and no CATEGORIES on an event. Carrel says so
+	// and the save stands; what the server dropped is not then demanded of
+	// the file.
+	dropped := liveEditDropping(t, app, rec, form, map[string]string{"status": "CONFIRMED", "categories": "duty, work"})
 	got, _ := rawBody(ctx, t, client, file)
-	mustHave(t, "status and categories", got, append([]string{"STATUS:CONFIRMED", "CATEGORIES:duty,work",
-		"DTSTART;TZID=Europe/Moscow:20260112T100000", "RRULE:FREQ=WEEKLY;BYDAY=MO;WKST=MO;COUNT=6"}, exceptions...)...)
+	want := []string{"DTSTART;TZID=Europe/Moscow:20260112T100000"}
+	for prop, line := range map[string]string{"STATUS": "STATUS:CONFIRMED", "CATEGORIES": "CATEGORIES:duty,work"} {
+		if !contains(dropped, prop) {
+			want = append(want, line)
+		}
+	}
+	mustHave(t, "status and categories", got, append(want, exceptions...)...)
+	// Yandex rewrites a rule into one of its own liking — COUNT becomes
+	// UNTIL, INTERVAL=1 appears, WKST goes — and keeps the series the same
+	// series. A server that does that cannot be asked to spell a rule back,
+	// so the rule is checked where it is kept as written and named where it
+	// is not (docs/servers.md).
+	rewrites := !sameRule(got, "FREQ=WEEKLY", "BYDAY=MO", "WKST=MO", "COUNT=6")
+	if rewrites {
+		t.Logf("the server rewrote the rule: %q", ruleLine(got))
+	} else {
+		mustRule(t, "status and categories", got, "FREQ=WEEKLY", "BYDAY=MO", "WKST=MO", "COUNT=6")
+	}
 
-	liveEdit(t, app, rec, form, map[string]string{"repeat.interval": "2", "repeat.count": "8"})
+	// A server that rewrites the rule answers the next save with a loss
+	// report naming RRULE, and it is telling the truth: what came back is
+	// not what was sent.
+	// Until is cleared with the same save that sets Times. A server that
+	// turned COUNT into UNTIL leaves the form holding a day, and a series
+	// ends after a number of times or on a day, not both — Carrel refuses
+	// the pair on the field, which is what a person sees and answers.
+	liveEditDropping(t, app, rec, form, map[string]string{
+		"repeat.interval": "2", "repeat.count": "8", "repeat.until": "",
+	})
 	got, _ = rawBody(ctx, t, client, file)
-	mustHave(t, "repeat", got, append([]string{"RRULE:FREQ=WEEKLY;BYDAY=MO;WKST=MO;COUNT=8;INTERVAL=2"}, exceptions...)...)
+	mustHave(t, "repeat", got, exceptions...)
+	if !rewrites {
+		mustRule(t, "repeat", got, "FREQ=WEEKLY", "BYDAY=MO", "WKST=MO", "COUNT=8", "INTERVAL=2")
+	}
 
-	liveEdit(t, app, rec, form, map[string]string{"tz": "Asia/Yekaterinburg"})
+	// A server may keep the same instant in a zone of its own choosing —
+	// Yandex writes the time back in UTC and drops the VTIMEZONE. Carrel
+	// reports the difference, which is the honest answer; the file is then
+	// only asked for what the server did keep.
+	movedTimes := liveEditDropping(t, app, rec, form, map[string]string{"tz": "Asia/Yekaterinburg"})
 	got, _ = rawBody(ctx, t, client, file)
-	mustHave(t, "time zone", got, append([]string{"DTSTART;TZID=Asia/Yekaterinburg:20260112T120000",
-		"DTEND;TZID=Asia/Yekaterinburg:20260112T130000", "TZID:Asia/Yekaterinburg", "BEGIN:VTIMEZONE"}, exceptions...)...)
+	if len(movedTimes) > 0 {
+		t.Logf("the server rewrote the times (%v); it keeps them as:\n%s", movedTimes, got)
+		mustHave(t, "time zone", got, exceptions...)
+	} else {
+		mustHave(t, "time zone", got, append([]string{"DTSTART;TZID=Asia/Yekaterinburg:20260112T120000",
+			"DTEND;TZID=Asia/Yekaterinburg:20260112T130000", "TZID:Asia/Yekaterinburg", "BEGIN:VTIMEZONE"}, exceptions...)...)
+	}
 }
 
 func liveTaskFields(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, cal, suffix string) {
@@ -233,6 +333,13 @@ func liveTaskFields(ctx context.Context, t *testing.T, app *liveApp, client *dav
 	file := cal + uid + ".ics"
 	seed(ctx, t, client, file, "text/calendar; charset=utf-8", "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Other client//EN\n"+
 		"BEGIN:VTODO\nUID:"+uid+"\nDTSTAMP:20260101T000000Z\nSUMMARY:Slides\nPRIORITY:3\nDESCRIPTION:Keep me\nX-CUSTOM:keep-me\nEND:VTODO\nEND:VCALENDAR\n")
+	// A calendar that answered MKCALENDAR with VTODO in its component set
+	// may still keep no task: Yandex takes the PUT and holds nothing. There
+	// is then no record to edit, and that is the server's word, not a fault
+	// of the form.
+	if body := bodyIfThere(ctx, t, client, file); !strings.Contains(body, "BEGIN:VTODO") {
+		t.Skipf("the calendar kept no task: %q", body)
+	}
 	list := "/app/tasks/" + connID + "/" + url.PathEscape(cal)
 	rec := list + "/" + url.PathEscape(uid)
 	form := func(p view.TaskEditPage) view.Form { return p.Form }

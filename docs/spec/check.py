@@ -326,6 +326,11 @@ def frame_rail(frame):
     for a in re.finditer(r'<a[^>]*class="[^"]*tc-nav__item[^"]*"[^>]*>(.*?)</a>', frame, re.S):
         num = re.search(r'<span class="tc-num">([^<]*)</span>', a.group(1))
         lab = re.sub(r'<[^>]+>', '', re.sub(r'<span class="tc-num">.*?</span>', '', a.group(1))).strip()
+        # Строка без подписи — не строка: в кадрах так стоит пустой
+        # якорь того же класса, и считать его значило бы требовать от сервера
+        # безымянного действия.
+        if lab == "":
+            continue
         nav.append((lab, num.group(1) if num else None))
     return cols, nav
 

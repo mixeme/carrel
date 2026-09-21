@@ -80,9 +80,13 @@ func propsEqual(a, b *Object, prop string) bool {
 		return false
 	}
 	structured := isStructured(prop)
+	rule := isRule(prop)
 	for i := range av {
-		if av[i].text != bv[i].text &&
-			!(structured && withoutTrailingEmpty(av[i].text) == withoutTrailingEmpty(bv[i].text)) {
+		switch {
+		case av[i].text == bv[i].text:
+		case structured && withoutTrailingEmpty(av[i].text) == withoutTrailingEmpty(bv[i].text):
+		case rule && sameRuleParts(av[i].text, bv[i].text):
+		default:
 			return false
 		}
 		if !sameParams(av[i].params, bv[i].params) {
@@ -90,6 +94,47 @@ func propsEqual(a, b *Object, prop string) bool {
 		}
 	}
 	return true
+}
+
+// isRule names the properties whose value is a set of parts separated by
+// semicolons, in no particular order: a recurrence rule and its exception.
+func isRule(prop string) bool {
+	switch strings.ToUpper(prop) {
+	case "RRULE", "EXRULE":
+		return true
+	}
+	return false
+}
+
+// sameRuleParts reads a rule as what it is — a set of parts — rather than as
+// a line of text. SoGo returns FREQ, COUNT, BYDAY, WKST where Carrel sent
+// FREQ, BYDAY, WKST, COUNT; the rule is the same rule, and calling it a
+// dropped property would tell a person their series was lost when it was
+// not (S-7.1).
+func sameRuleParts(a, b string) bool {
+	left, right := rulePartSet(a), rulePartSet(b)
+	if len(left) != len(right) {
+		return false
+	}
+	for k, v := range left {
+		if right[k] != v {
+			return false
+		}
+	}
+	return true
+}
+
+func rulePartSet(v string) map[string]string {
+	out := map[string]string{}
+	for _, part := range strings.Split(v, ";") {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		name, val, _ := strings.Cut(part, "=")
+		out[strings.ToUpper(strings.TrimSpace(name))] = strings.TrimSpace(val)
+	}
+	return out
 }
 
 func (o *Object) propValues(prop string) []propValue {

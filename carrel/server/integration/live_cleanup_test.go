@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/xml"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 	"testing"
@@ -131,4 +132,64 @@ func hrefPathOf(href string) string {
 		return u.Path
 	}
 	return href
+}
+
+// tryCollection is makeCollection for a server that may simply refuse: it
+// returns the empty string instead of failing the test. A server that will
+// not make an address book is a fact about that server (Yandex, SV-19), and
+// the part of a suite that needs one says so and steps aside.
+func tryCollection(ctx context.Context, t *testing.T, client *dav.Client, endpoint, user, pass, method, want, body string) string {
+	t.Helper()
+	home := want[:strings.LastIndex(strings.TrimSuffix(want, "/"), "/")+1]
+	if home == "" {
+		return ""
+	}
+	before := collectionChildren(ctx, t, client, home)
+	liveTry(ctx, t, endpoint, user, pass, method, want, body)
+
+	resourceType := []xml.Name{{Space: "DAV:", Local: "resourcetype"}}
+	if _, err := client.PropFind(ctx, want, dav.DepthZero, resourceType); err == nil {
+		removeLater(t, client, want)
+		return want
+	}
+	var fresh []string
+	for p := range collectionChildren(ctx, t, client, home) {
+		if !before[p] {
+			fresh = append(fresh, p)
+		}
+	}
+	if len(fresh) != 1 {
+		t.Logf("%s %s: the server made nothing (%d new collections in %s)", method, want, len(fresh), home)
+		return ""
+	}
+	t.Logf("%s went to %s, not %s (SV-19)", method, fresh[0], want)
+	removeLater(t, client, fresh[0])
+	return fresh[0]
+}
+
+// liveTry sends what liveRequest sends and reports a refusal instead of
+// ending the test on it.
+func liveTry(ctx context.Context, t *testing.T, endpoint, user, pass, method, path, body string) {
+	t.Helper()
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		t.Fatal(err)
+	}
+	u.Path = path
+	req, err := http.NewRequestWithContext(ctx, method, u.String(), strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", `application/xml; charset="utf-8"`)
+	req.SetBasicAuth(user, pass)
+	resp, err := testGuard(t).HTTPClient().Do(req)
+	if err != nil {
+		t.Logf("%s %s: %v", method, path, err)
+		return
+	}
+	defer resp.Body.Close()
+	_, _ = io.Copy(io.Discard, resp.Body)
+	if resp.StatusCode >= 400 {
+		t.Logf("%s %s: the server answered %s", method, path, resp.Status)
+	}
 }

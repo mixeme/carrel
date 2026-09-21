@@ -326,7 +326,7 @@ func liveContacts(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 		t.Fatalf("stale edit went to %q, want the conflict screen", loc)
 	}
 	conflict := liveDecode[view.ConflictPage](t, "conflict", app.get(rec+"/conflict"))
-	if len(conflict.Rows) != 1 || conflict.Rows[0].Property != "Title" || conflict.Rows[0].Mine != "Countess" {
+	if len(conflict.Rows) != 1 || conflict.Rows[0].Property != "TITLE" || conflict.Rows[0].Mine != "Countess" {
 		t.Fatalf("conflict rows = %+v", conflict.Rows)
 	}
 	redirected(t, "combine", app.post(liveAction(t, conflict.Actions, "conflict.combine"), url.Values{}))
@@ -385,7 +385,10 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	mustHave(t, "new event", got, "UID:"+m[1], "DTSTART:20261005T093000Z", "TRIGGER:-PT15M", `SUMMARY:Live dentist\, `+suffix)
 
 	agenda := liveDecode[view.AgendaPage](t, "agenda", app.get(events+"?from=2026-10-05"))
-	if len(agenda.Notices) > 0 || len(agenda.Days) != 1 || agenda.Days[0].Rows[0].Time != "09:30" {
+	// A week is seven days, and the days nothing falls on are shown empty
+	// (views-tail.md): a gap in an agenda is a day, not a missing row.
+	if len(agenda.Notices) > 0 || len(agenda.Days) != 7 || len(agenda.Days[0].Rows) != 1 ||
+		agenda.Days[0].Rows[0].Time != "09:30" {
 		t.Fatalf("agenda = %+v", agenda)
 	}
 	event := liveDecode[view.EventPage](t, "event", app.get(loc))
@@ -433,4 +436,94 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	if _, _, err := client.Get(ctx, eventFile, nil); !dav.IsStatus(err, http.StatusNotFound) {
 		t.Errorf("after delete GET = %v, want 404", err)
 	}
+}
+
+// mustRule checks a recurrence rule by its parts. A server may keep the
+// parts in another order — SoGo writes FREQ, COUNT, BYDAY, WKST where
+// Carrel sent FREQ, BYDAY, WKST, COUNT — and the rule is the same rule.
+// Comparing the line as text would call a normalising server a fault.
+func mustRule(t *testing.T, step, got string, parts ...string) {
+	t.Helper()
+	var line string
+	for _, l := range strings.Split(strings.ReplaceAll(got, "\r\n", "\n"), "\n") {
+		if strings.HasPrefix(strings.ToUpper(l), "RRULE:") {
+			line = strings.TrimSpace(l[len("RRULE:"):])
+		}
+	}
+	if line == "" {
+		t.Errorf("%s: no RRULE in\n%s", step, got)
+		return
+	}
+	have := map[string]bool{}
+	for _, p := range strings.Split(line, ";") {
+		have[strings.ToUpper(strings.TrimSpace(p))] = true
+	}
+	for _, p := range parts {
+		if !have[strings.ToUpper(p)] {
+			t.Errorf("%s: the rule has no %q, only %q", step, p, line)
+		}
+	}
+	if len(have) != len(parts) {
+		t.Errorf("%s: the rule is %q, want exactly %v", step, line, parts)
+	}
+}
+
+// contains says whether a list names something, ignoring case: a server
+// that answers "status" and one that answers "STATUS" mean the same.
+func contains(list []string, want string) bool {
+	for _, s := range list {
+		if strings.EqualFold(s, want) {
+			return true
+		}
+	}
+	return false
+}
+
+// ruleLine is the recurrence rule of an object as the server keeps it.
+func ruleLine(got string) string {
+	var line string
+	for _, l := range strings.Split(strings.ReplaceAll(got, "\r\n", "\n"), "\n") {
+		if strings.HasPrefix(strings.ToUpper(l), "RRULE:") {
+			line = strings.TrimSpace(l[len("RRULE:"):])
+		}
+	}
+	return line
+}
+
+// sameRule says whether the kept rule is exactly these parts.
+func sameRule(got string, parts ...string) bool {
+	have := map[string]bool{}
+	for _, p := range strings.Split(ruleLine(got), ";") {
+		if p = strings.ToUpper(strings.TrimSpace(p)); p != "" {
+			have[p] = true
+		}
+	}
+	if len(have) != len(parts) {
+		return false
+	}
+	for _, p := range parts {
+		if !have[strings.ToUpper(p)] {
+			return false
+		}
+	}
+	return true
+}
+
+// bodyIfThere is rawBody for a place the server may simply not have: it
+// answers with the empty string instead of ending the test. A PUT the
+// server accepted and then kept nothing of is a fact about the server.
+func bodyIfThere(ctx context.Context, t *testing.T, c *dav.Client, path string) string {
+	t.Helper()
+	rc, _, err := c.Get(ctx, path, nil)
+	if err != nil {
+		t.Logf("GET %s: %v", path, err)
+		return ""
+	}
+	defer rc.Close()
+	b, err := io.ReadAll(rc)
+	if err != nil {
+		t.Logf("read %s: %v", path, err)
+		return ""
+	}
+	return string(b)
 }
