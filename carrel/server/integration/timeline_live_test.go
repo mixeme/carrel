@@ -35,6 +35,15 @@ func TestNextcloudTimeline(t *testing.T) {
 	runTimeline(t, endpoint, user, pass)
 }
 
+// SoGo gives both homes and makes both collections, so the timeline runs on
+// it whole. Yandex is left out on purpose: the timeline is a person's card
+// and what points at it, and Yandex keeps no address book to put the card in
+// (SV-19) — there is nothing to build a timeline around.
+func TestSoGoTimeline(t *testing.T) {
+	endpoint, user, pass := sogoConfig(t)
+	runTimeline(t, endpoint, user, pass)
+}
+
 func runTimeline(t *testing.T, endpoint, user, pass string) {
 	ctx := context.Background()
 	g := testGuard(t)
@@ -71,7 +80,7 @@ func runTimeline(t *testing.T, endpoint, user, pass string) {
 	seed(ctx, t, client, calPath+"met-"+suffix+".ics", "text/calendar; charset=utf-8",
 		"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Other client//EN\nBEGIN:VEVENT\nUID:met-"+suffix+"\nDTSTAMP:20260101T000000Z\n"+
 			"DTSTART:"+at+"\nDTEND:"+at+"\nSUMMARY:Review with the team\nATTENDEE;PARTSTAT=ACCEPTED:mailto:anna@carrel.test\nEND:VEVENT\nEND:VCALENDAR\n")
-	seed(ctx, t, client, calPath+"note-"+suffix+".ics", "text/calendar; charset=utf-8",
+	note := trySeed(ctx, t, client, calPath+"note-"+suffix+".ics", "text/calendar; charset=utf-8",
 		"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Other client//EN\nBEGIN:VJOURNAL\nUID:note-"+suffix+"\nDTSTAMP:20260101T000000Z\n"+
 			"DTSTART:"+at+"\nSUMMARY:Call notes\nRELATED-TO:"+uid+"\nEND:VJOURNAL\nEND:VCALENDAR\n")
 	seed(ctx, t, client, calPath+"said-"+suffix+".ics", "text/calendar; charset=utf-8",
@@ -127,7 +136,7 @@ func runTimeline(t *testing.T, endpoint, user, pass string) {
 	if why["Review with the team"] != "attendee · accepted" {
 		t.Errorf("the event with the card's address: %q (all: %v)", why["Review with the team"], why)
 	}
-	if why["Call notes"] != "related to this person" {
+	if note && why["Call notes"] != "related to this person" {
 		t.Errorf("the note related to the card: %q (all: %v)", why["Call notes"], why)
 	}
 	if _, found := why["Anna Kovaleva said hello"]; found {

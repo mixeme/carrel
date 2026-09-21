@@ -177,6 +177,14 @@ func isServerStamp(prop string) bool {
 	switch strings.ToUpper(prop) {
 	case "DTSTAMP", "LAST-MODIFIED", "SEQUENCE", "CREATED", "REV", "VERSION":
 		return true
+	// The bookkeeping a server writes into a record of its own accord: when
+	// an alarm was last acknowledged, which generation of it this is.
+	// Mail.ru adds X-MOZ-LASTACK on a write and drops it on the next one,
+	// and Carrel, which keeps every line it does not edit, would send it
+	// back and report it lost. It is not the person's, and a loss report
+	// full of things nobody wrote teaches people to close loss reports.
+	case "X-MOZ-LASTACK", "X-MOZ-GENERATION", "X-MOZ-SNOOZE-TIME":
+		return true
 	default:
 		return false
 	}

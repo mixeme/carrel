@@ -527,3 +527,46 @@ func bodyIfThere(ctx context.Context, t *testing.T, c *dav.Client, path string) 
 	}
 	return string(b)
 }
+
+// mustValue checks that a property carries a value, whatever parameters the
+// server hung on it. Google writes back ADR;TYPE=HOME,PREF and
+// EMAIL;TYPE=PREF where Carrel sent ADR;TYPE=home and a bare EMAIL: the
+// parameters are the server's business, the value is the person's.
+func mustValue(t *testing.T, step, got, prop, value string) {
+	t.Helper()
+	prop = strings.ToUpper(prop)
+	for _, l := range strings.Split(strings.ReplaceAll(got, "\r\n", "\n"), "\n") {
+		name, val, ok := strings.Cut(strings.TrimSpace(l), ":")
+		if !ok {
+			continue
+		}
+		name = strings.ToUpper(strings.SplitN(name, ";", 2)[0])
+		if name == prop && strings.EqualFold(strings.TrimSpace(val), value) {
+			return
+		}
+	}
+	t.Errorf("%s: no %s with %q in\n%s", step, prop, value, got)
+}
+
+// mustAddress checks that every part written into an address is still in
+// it. A server may move the parts between components — iCloud folds the box
+// and the flat into the street with newlines — and the address is the same
+// address; a person loses nothing and Carrel reports nothing.
+func mustAddress(t *testing.T, step, got string, parts ...string) {
+	t.Helper()
+	var line string
+	for _, l := range strings.Split(strings.ReplaceAll(got, "\r\n", "\n"), "\n") {
+		if strings.HasPrefix(strings.ToUpper(strings.TrimSpace(l)), "ADR") {
+			line = l
+		}
+	}
+	if line == "" {
+		t.Errorf("%s: no address in\n%s", step, got)
+		return
+	}
+	for _, p := range parts {
+		if !strings.Contains(line, p) {
+			t.Errorf("%s: the address has no %q, only %q", step, p, strings.TrimSpace(line))
+		}
+	}
+}

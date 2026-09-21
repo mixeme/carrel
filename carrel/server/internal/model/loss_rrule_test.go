@@ -53,3 +53,36 @@ func TestARuleWithAPartChangedIsALoss(t *testing.T) {
 		t.Error("a rule moved to another weekday is not reported")
 	}
 }
+
+// A server that writes its own bookkeeping into a record and drops it again
+// on the next write is not losing the person's data. Mail.ru adds
+// X-MOZ-LASTACK — when an alarm was last acknowledged — and Carrel, keeping
+// every line it does not edit, sends it back and sees it gone. Reported as
+// a loss it teaches people to ignore loss reports, which is worse than
+// saying nothing.
+func TestTheBookkeepingAServerAddsIsNotALoss(t *testing.T) {
+	sent := NewObject("/c/e.ics", `"1"`, map[string][]RawValue{
+		"UID":           {{Text: "e1"}},
+		"SUMMARY":       {{Text: "Duty"}},
+		"X-MOZ-LASTACK": {{Text: "20260112T090000Z"}},
+	})
+	got := NewObject("/c/e.ics", `"2"`, map[string][]RawValue{
+		"UID":     {{Text: "e1"}},
+		"SUMMARY": {{Text: "Duty"}},
+	})
+	if loss := CompareAfterPut("mailru", sent, got, nil); loss != nil {
+		t.Errorf("the server's own bookkeeping is reported lost: %+v", loss)
+	}
+}
+
+// A property of the person's that begins with X- is still theirs.
+func TestAnUnknownPropertyOfThePersonIsStillALoss(t *testing.T) {
+	sent := NewObject("/c/e.ics", `"1"`, map[string][]RawValue{
+		"UID":      {{Text: "e1"}},
+		"X-CUSTOM": {{Text: "keep-me"}},
+	})
+	got := NewObject("/c/e.ics", `"2"`, map[string][]RawValue{"UID": {{Text: "e1"}}})
+	if loss := CompareAfterPut("mailru", sent, got, nil); loss == nil {
+		t.Error("a property the person put there is not reported")
+	}
+}

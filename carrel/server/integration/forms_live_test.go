@@ -202,26 +202,86 @@ func seed(ctx context.Context, t *testing.T, client *dav.Client, file, media, bo
 	}
 }
 
+// trySeed is seed for a record a server may refuse to hold at all. SoGo
+// answers a VJOURNAL PUT with 404: it keeps no notes, and a run that
+// demanded one would be testing SoGo's component set, not Carrel's
+// timeline. What could not be seeded is said in the log and left out of the
+// expectations.
+func trySeed(ctx context.Context, t *testing.T, client *dav.Client, file, media, body string) bool {
+	t.Helper()
+	if _, err := client.PutCreate(ctx, file, dav.Typed(strings.NewReader(strings.ReplaceAll(body, "\n", "\r\n")), media)); err != nil {
+		t.Logf("the server does not hold %s: %v", file, err)
+		return false
+	}
+	return true
+}
+
 func liveContactFields(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, book, suffix string) {
 	uid := "vera-" + suffix
 	file := book + uid + ".vcf"
 	seed(ctx, t, client, file, "text/vcard; charset=utf-8", "BEGIN:VCARD\nVERSION:3.0\nUID:"+uid+"\nFN:Vera Lebedeva\nN:Lebedeva;Vera;;;\n"+
 		"TEL;TYPE=work:+7 912 000 00 01\nEMAIL:vera@carrel.test\nADR;TYPE=home:PO 7;Flat 2;Lenina 1;Ekaterinburg;;620000;Russia\n"+
 		"BDAY:--0412\nX-CUSTOM:keep-me\nEND:VCARD\n")
+	// A server may name the record itself and write a UID of its own over
+	// the one it was sent (SV-25). The card is then read back at the
+	// address it was written to, and the person meets the identity the
+	// server kept.
+	seeded := bodyIfThere(ctx, t, client, file)
+	if kept := uidOf(seeded); kept != "" && kept != uid {
+		t.Logf("the server named the card %q, not %q", kept, uid)
+		uid = kept
+	}
+	keeps := func(line string) bool { return strings.Contains(strings.ToLower(seeded), strings.ToLower(line)) }
 	rec := "/app/contacts/" + connID + "/" + url.PathEscape(book) + "/" + url.PathEscape(uid)
 	form := func(p view.ContactEditPage) view.Form { return p.Form }
 
-	liveEdit(t, app, rec, form, map[string]string{"nickname": "Verochka", "categories": "work, family"})
-	got, _ := rawBody(ctx, t, client, file)
-	yearless(t, "nickname and categories", got, "04", "12")
-	mustHave(t, "nickname and categories", got, "NICKNAME:Verochka", "CATEGORIES:work,family", "X-CUSTOM:keep-me",
-		"ADR;TYPE=home:PO 7;Flat 2;Lenina 1;Ekaterinburg;;620000;Russia")
+	// asked keeps only what this server took as sent and did not report
+	// dropping: what it will not hold is its own answer, said once in the
+	// log, and demanding it again would make a server's limit look like a
+	// fault of the form.
+	asked := func(lost []string, lines ...string) []string {
+		var out []string
+		for _, line := range lines {
+			prop := strings.SplitN(strings.SplitN(line, ";", 2)[0], ":", 2)[0]
+			switch {
+			case contains(lost, prop):
+				t.Logf("the server did not keep %s: it is not asked for again", prop)
+			case !keeps(prop):
+				t.Logf("the server did not take %s even as sent: it is not asked for again", prop)
+			default:
+				out = append(out, line)
+			}
+		}
+		return out
+	}
 
-	liveEdit(t, app, rec, form, map[string]string{"bday": "--04-13", "tel.0.type": "cell", "adr.0.region": "Sverdlovsk"})
+	lost := liveEditDropping(t, app, rec, form, map[string]string{"nickname": "Verochka", "categories": "work, family"})
+	got, _ := rawBody(ctx, t, client, file)
+	if !contains(lost, "BDAY") && keeps("BDAY") {
+		yearless(t, "nickname and categories", got, "04", "12")
+	}
+	mustHave(t, "nickname and categories", got, append([]string{"NICKNAME:Verochka"},
+		asked(lost, "CATEGORIES:work,family", "X-CUSTOM:keep-me")...)...)
+	// An address is not a string: iCloud moves the box and the flat into
+	// the street, joined by newlines, and keeps the same address. What
+	// must survive is what was written in it.
+	if keeps("ADR") && !contains(lost, "ADR") {
+		mustAddress(t, "nickname and categories", got, "PO 7", "Flat 2", "Lenina 1", "Ekaterinburg", "620000", "Russia")
+	}
+
+	lost = liveEditDropping(t, app, rec, form, map[string]string{"bday": "--04-13", "tel.0.type": "cell", "adr.0.region": "Sverdlovsk"})
 	got, _ = rawBody(ctx, t, client, file)
-	yearless(t, "birthday", got, "04", "13")
-	mustHave(t, "birthday, label, address", got, "TEL;TYPE=cell:+7 912 000 00 01",
-		"PO 7;Flat 2;Lenina 1;Ekaterinburg;Sverdlovsk;620000;Russia", "EMAIL:vera@carrel.test", "X-CUSTOM:keep-me")
+	if !contains(lost, "BDAY") && keeps("BDAY") {
+		yearless(t, "birthday", got, "04", "13")
+	}
+	mustHave(t, "birthday, label, address", got, asked(lost, "X-CUSTOM:keep-me")...)
+	mustValue(t, "birthday, label, address", got, "EMAIL", "vera@carrel.test")
+	if !contains(lost, "TEL") {
+		mustHave(t, "birthday, label, address", got, "TEL;TYPE=cell:+7 912 000 00 01")
+	}
+	if keeps("ADR") && !contains(lost, "ADR") {
+		mustAddress(t, "birthday, label, address", got, "PO 7", "Flat 2", "Lenina 1", "Ekaterinburg", "Sverdlovsk", "620000", "Russia")
+	}
 }
 
 // yearless checks a birthday without a year in either form a server keeps
@@ -426,4 +486,28 @@ func liveCard(t *testing.T, page view.ConnectionsPage, id string) view.Connectio
 	}
 	t.Fatalf("no card %s", id)
 	return view.ConnectionCard{}
+}
+
+// runContactFieldsInTheOnlyBook is the contact half of the forms on a server
+// that makes no collections: Google and iCloud each give one address book
+// and refuse a second (SV-19 in their own shapes), so the run uses what is
+// there and leaves the account as it found it.
+func runContactFieldsInTheOnlyBook(t *testing.T, endpoint, user, pass, who string) {
+	ctx := context.Background()
+	client := liveClient(t, endpoint, user, pass)
+	app := newLiveApp(t)
+	connID := connectLive(t, app, endpoint, user, pass)
+
+	var book sealed.Collection
+	for _, c := range liveCatalog(t, app).Collections {
+		if c.Has(view.KindContact) {
+			book = c
+			break
+		}
+	}
+	if book.Path == "" {
+		t.Skip("no address book in the catalog")
+	}
+	suffix := fmt.Sprintf("carrel-%s-%d-%d", who, os.Getpid(), time.Now().Unix()%100000)
+	liveContactFields(ctx, t, app, client, connID, book.Path, suffix)
 }

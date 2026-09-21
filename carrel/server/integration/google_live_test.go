@@ -84,3 +84,12 @@ func TestGoogleContactInTheOnlyBook(t *testing.T) {
 		t.Errorf("the card at %s shows %q, want the name that was typed", loc, card.Name)
 	}
 }
+
+// The fields the forms gained, on the only book Google gives: the same run
+// as on the servers where a book can be made, against the book that is
+// already there (owner's decision 20.09.2026). Nothing is created and
+// nothing is deleted but the card this test writes.
+func TestGoogleContactFields(t *testing.T) {
+	endpoint, user, pass := googleCardConfig(t)
+	runContactFieldsInTheOnlyBook(t, endpoint, user, pass, "google")
+}

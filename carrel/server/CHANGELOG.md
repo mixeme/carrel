@@ -17,6 +17,49 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.15 — 2026-09-21
+
+Живые прогоны на Google, iCloud и Mail.ru. Решение владельца от 20.09.2026
+закрыто: новые функции проверены на всех живых серверах, какие позволяют
+учётные записи.
+
+### Fixed
+
+- **The bookkeeping a server writes into a record is not a loss** (SV-36).
+  Mail.ru adds `X-MOZ-LASTACK` — when an alarm was last acknowledged — on
+  one write and drops it on the next. Carrel keeps every line it does not
+  edit, so it sent the line back, saw it gone, and told the person a
+  property had been lost that they had never written. `X-MOZ-LASTACK`,
+  `X-MOZ-GENERATION` and `X-MOZ-SNOOZE-TIME` are now server stamps beside
+  `DTSTAMP` and `SEQUENCE`. A property of the person's that begins with
+  `X-` is still theirs and is still reported.
+
+### Changed
+
+- Contact fields run on Google and iCloud in the one address book each
+  account has, without making a collection: `TestGoogleContactFields`,
+  `TestICloudContactFields`.
+- Mail.ru has a test of its own for the first time —
+  `TestMailruEventFields`: the fields of an event, the rule of a series
+  and the zone, in the single calendar its link points at (SV-22).
+- The timeline runs on SoGo (`TestSoGoTimeline`). A record the server will
+  not hold at all is now logged and its expectation dropped, instead of
+  failing the run: a run that demanded a note of SoGo would be testing
+  SoGo's component set, not Carrel's timeline.
+
+### Notes
+
+- **SV-36**: Mail.ru rewrites almost everything. `EXDATE`,
+  `RECURRENCE-ID` and `X-CUSTOM` are not taken even when written past
+  Carrel; `CATEGORIES` is not kept; the rule comes back reordered and
+  without `WKST`; changing the zone rewrites `DTSTART` and `DTEND`.
+  Everything but the reordering is a loss by S-7.1 and is reported.
+- **SV-37**: SoGo keeps no notes. The calendar is made with `VJOURNAL` in
+  its component set and `MKCALENDAR` succeeds, but a `PUT` of a note
+  answers 404 — not 403, not 415.
+- The timeline is not run on Yandex, and cannot be: it is built around a
+  person's card, and Yandex makes no address book (SV-19).
+
 ## v0.2.14 — 2026-09-21
 
 Живые прогоны на SoGo и Yandex.

@@ -107,3 +107,9 @@ func TestICloudContactLifecycle(t *testing.T) {
 		t.Errorf("the card is still in the book after a delete: %s", gone)
 	}
 }
+
+// The same on the only book iCloud gives.
+func TestICloudContactFields(t *testing.T) {
+	endpoint, user, pass := icloudCardConfig(t)
+	runContactFieldsInTheOnlyBook(t, endpoint, user, pass, "icloud")
+}
