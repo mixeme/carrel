@@ -190,6 +190,8 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "forgot": "/forgot",
     "about": "/about",
     "app-duplicates": "/app/duplicates",
+    "app-duplicates-merge": "/app/duplicates/merge",
+    "app-mail-compose": "/app/mail/compose",
     "app-search": "/app/search",
     "app-files": "/app/files",
     "app-files-published": "/app/files/published",
@@ -221,7 +223,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # тут нечего, и молчание здесь — не исключение, а род экрана.
 SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
-          "app-publish", "app-files-picker"}
+          "app-publish", "app-files-picker", "app-mail-compose"}
 
 FRAME_TODO = {
     "app-contact-edit: коллекции рейла":

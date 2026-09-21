@@ -17,6 +17,31 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.9 — 2026-09-21
+
+fixtures-tail.md: слияние и письмо.
+
+### Added
+
+- **The rail of the merge** (s-dup-2). By C-5 the merge is a page, not a
+  sheet, so a rail belongs to it: the collections compared, of the kind
+  being merged — the same ground as the screen it was reached from.
+
+### Changed
+
+- Two pairs: `/app/duplicates/merge` and `/app/mail/compose`. The merge is
+  taken over an undecided pair, because a linked group is a decision
+  already made and there is nothing in it to merge.
+- The digest that names a group of duplicates is held steady like an
+  issued identifier: it is made from the records in the group, and those
+  carry the identifier of a connection.
+
+### Notes
+
+- A letter needs two things, not one: a relay, and letters from people
+  allowed. A relay alone is for the instance's own letters — invitations
+  and confirmations — and without the second `/app/mail/compose` is 404.
+
 ## v0.2.8 — 2026-09-21
 
 fixtures-tail.md: первый запуск и открытая регистрация.

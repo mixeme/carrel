@@ -234,6 +234,9 @@ func gainLine(calendar bool, g dupes.Gain, from mergeMember) string {
 func (s *Server) mergePlan(sess *session.Session, mr mergeRead, choices map[string]int) (*model.Object, view.DuplicatesMergePage) {
 	page := view.DuplicatesMergePage{Shell: s.buildShell(sess, "Merge on the server"), GroupID: mr.g.id}
 	page.Rail = view.Rail{Nav: s.navRows(sess, mr.st.blob, "duplicates"), About: s.aboutAction()}
+	// The merge stands on the same ground as the screen it came from: the
+	// collections compared, of the kind being merged (s-dup-2).
+	page.Rail.Sections = dupSources(mr.st, mr.g.kind)
 	page.Notices = append(page.Notices, mr.down...)
 	back := view.Action{ID: "duplicates.merge.cancel", Label: "Cancel", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true}
 	confirm := view.Action{ID: "duplicates.merge.confirm", Label: "Write the merge and delete the rest", Method: "POST", Danger: true}

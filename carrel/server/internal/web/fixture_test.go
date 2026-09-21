@@ -465,6 +465,10 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	// it stands inside an address rather than alone, so the rule for the
 	// CSRF does not reach it.
 	s = regexp.MustCompile(`/invite/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/invite/invite-token")
+	// A group of duplicates is named by a digest of the records in it, and
+	// those carry the account identifier, which is issued.
+	s = regexp.MustCompile(`g=[0-9a-f]{32}`).ReplaceAllString(s, "g=group")
+	s = regexp.MustCompile(`"groupID": ?"[0-9a-f]{32}"`).ReplaceAllString(s, `"groupID":"group"`)
 	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
 	// When the run itself did something — started this session, created
 	// this account, wrote this journal line — the stamp is the wall clock's
@@ -1033,4 +1037,48 @@ func TestFixtureBeforeAnyone(t *testing.T) {
 		open.compare(t, "register/normal.json", open.h.do(get("/register", nil)))
 	})
 	_ = admin
+}
+
+// C-14.2: the merge of two records, the letter, and the link a forgotten
+// password leads to.
+func TestFixtureMergeLetterAndReset(t *testing.T) {
+	t.Run("app-duplicates-merge", func(t *testing.T) {
+		app := newMockupApp(t)
+		// The two Артём Белов are linked in the set, and a linked group is
+		// decided: nothing to merge. Here they are undecided again, which
+		// is the state the merge screen exists for.
+		key, _ := app.sess.DataKey()
+		err := app.h.users.EditDuplicates(app.sess.AccountID(), key, "", "", func(d *sealed.Duplicates) error {
+			d.Linked = nil
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+		page := decode[view.DuplicatesPage](t, app.h.do(get("/app/duplicates?kind=contact", app.sess)))
+		if len(page.Groups) != 1 {
+			t.Fatalf("groups = %d, want the one pair of the set", len(page.Groups))
+		}
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		app.compare(t, "app-duplicates-merge/normal.json",
+			app.h.do(get(actionOf(t, page.Groups[0], "duplicates.merge").Href, app.sess)))
+	})
+	t.Run("app-mail-compose", func(t *testing.T) {
+		app := newMockupApp(t)
+		// A letter needs a relay; the instance of the other fixtures has
+		// none, and adding one there would put «Letter» in every menu.
+		app.h.do(postForm("/admin/settings", app.sess, url.Values{
+			"host": {"127.0.0.1"}, "port": {"25"}, "security": {"none"},
+			"username": {"relay"}, "password": {"relay-password-xyz"}, "from": {"noreply@carrel.example"},
+		}))
+		// And letters from people have to be allowed: a relay alone is for
+		// the instance's own letters (S-26).
+		app.h.do(postForm("/admin/settings", app.sess, url.Values{
+			"op": {"limits"}, "people": {"on"},
+			"attach": {"10"}, "letter": {"25"}, "recipients": {"20"}, "perDay": {"100"},
+		}))
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		app.compare(t, "app-mail-compose/normal.json", app.h.do(get("/app/mail/compose", app.sess)))
+	})
 }
