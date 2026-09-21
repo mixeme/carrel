@@ -1,0 +1,635 @@
+{
+  "attach": [],
+  "details": null,
+  "done": false,
+  "form": {
+    "action": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit",
+    "actions": [
+      {
+        "enabled": true,
+        "id": "record.save",
+        "label": "Save",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31",
+        "id": "record.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e17\u0026from=edit\u0026op=attach",
+        "icon": "i-up",
+        "id": "attach.add",
+        "label": "Attach",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "etag",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "e17"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "readat",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "1786370760"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Title",
+            "name": "summary",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "Отправить документы в МФЦ ·"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "date",
+            "label": "Starts",
+            "name": "start.date",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "time",
+            "label": "Starts at",
+            "name": "start.time",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "All day",
+            "name": "start.allday",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "date",
+            "label": "Due",
+            "name": "due.date",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "2026-08-07"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "time",
+            "label": "Due at",
+            "name": "due.time",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "All day",
+            "name": "due.allday",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "on"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Done",
+            "name": "done",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Status",
+            "name": "status",
+            "options": [
+              {
+                "label": "No status",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "Needs action",
+                "selected": false,
+                "value": "NEEDS-ACTION"
+              },
+              {
+                "label": "In progress",
+                "selected": false,
+                "value": "IN-PROCESS"
+              },
+              {
+                "label": "Completed",
+                "selected": false,
+                "value": "COMPLETED"
+              },
+              {
+                "label": "Cancelled",
+                "selected": false,
+                "value": "CANCELLED"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Priority",
+            "name": "priority",
+            "options": [
+              {
+                "label": "No priority",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "High",
+                "selected": false,
+                "value": "1"
+              },
+              {
+                "label": "Medium",
+                "selected": false,
+                "value": "5"
+              },
+              {
+                "label": "Low",
+                "selected": false,
+                "value": "9"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "number",
+            "label": "Percent complete",
+            "name": "percent",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Location",
+            "name": "location",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Separated by commas.",
+            "kind": "text",
+            "label": "Categories",
+            "name": "categories",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Related to",
+            "name": "related",
+            "options": [
+              {
+                "label": "Nothing",
+                "selected": true,
+                "value": ""
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Filled, it wins over the choice above. Only the records already loaded for this collection are offered: nothing is asked of the servers.",
+            "kind": "text",
+            "label": "Or enter a UID by hand",
+            "name": "related.uid",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "area",
+            "label": "Description",
+            "name": "description",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      },
+      {
+        "legend": "Reminders",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Add a reminder",
+            "name": "reminder.new",
+            "options": [
+              {
+                "label": "No reminder",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "At the start",
+                "selected": false,
+                "value": "PT0S"
+              },
+              {
+                "label": "5 minutes before",
+                "selected": false,
+                "value": "-PT5M"
+              },
+              {
+                "label": "10 minutes before",
+                "selected": false,
+                "value": "-PT10M"
+              },
+              {
+                "label": "15 minutes before",
+                "selected": false,
+                "value": "-PT15M"
+              },
+              {
+                "label": "30 minutes before",
+                "selected": false,
+                "value": "-PT30M"
+              },
+              {
+                "label": "1 hour before",
+                "selected": false,
+                "value": "-PT1H"
+              },
+              {
+                "label": "2 hours before",
+                "selected": false,
+                "value": "-PT2H"
+              },
+              {
+                "label": "1 day before",
+                "selected": false,
+                "value": "-P1D"
+              },
+              {
+                "label": "2 days before",
+                "selected": false,
+                "value": "-P2D"
+              },
+              {
+                "label": "1 week before",
+                "selected": false,
+                "value": "-P1W"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "loss": {
+    "actions": [],
+    "aggregated": false,
+    "note": "The change was saved, but the server did not keep these properties. Other clients will not see them either.",
+    "properties": [
+      "CATEGORIES"
+    ]
+  },
+  "notices": [],
+  "percent": null,
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": ""
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to the card",
+        "method": "GET"
+      }
+    ],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "href": "/app/tasks/a-nc-home/dela",
+            "label": "Дела",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/dela/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/dela/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "href": "/app/tasks/a-nc-home/rabota",
+            "label": "Работа",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/rabota/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/a-nc-home/rabota/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "reminders": [],
+  "title": "Edit task",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  },
+  "uid": "aa10-77bc-0e31"
+}

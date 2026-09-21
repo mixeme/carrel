@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.13 — 2026-09-21
+
+fixtures-tail.md: потеря на формах и незаконченный опрос календаря.
+
+### Added
+
+- `Server.SetPatience` lifts the rate buckets for a test, beside SetClock
+  and SetBuild. A fixture run does in a second what a person does in an
+  hour, and the limits of architecture.md are not meant for it; an
+  instance keeps them.
+
+### Changed
+
+- Three states: what a server dropped from an event and from a task, and
+  the combined calendar while one of its stands is held.
+
+### Notes
+
+- The partial state of the tasks and of the notes cannot be taken on this
+  set: their collections live on one stand, so holding it holds
+  everything, and the screen then shows a moment rather than a state. The
+  state is covered by the contacts and by the calendar, whose collections
+  stand on both.
+
 ## v0.2.12 — 2026-09-21
 
 fixtures-tail.md: состояния остальных родов.

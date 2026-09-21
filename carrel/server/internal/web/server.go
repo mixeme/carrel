@@ -213,6 +213,20 @@ func (s *Server) SetBuild(version, commit string) {
 	s.version, s.commit = version, commit
 }
 
+// SetPatience lifts the rate buckets for a test that does in a second what
+// a person does in an hour. Nothing but a test calls it: the limits of
+// architecture.md are what an instance runs with, and a fixture run is not
+// the traffic they guard against.
+func (s *Server) SetPatience() {
+	s.limit = &Limiter{
+		loginAccount: newBucketMap(1 << 20),
+		loginIP:      newBucketMap(1 << 20),
+		anonIP:       newBucketMap(1 << 20),
+		session:      newBucketMap(1 << 20),
+		link:         newBucketMap(1 << 20),
+	}
+}
+
 // SetClock freezes what the screens call "now". Nothing but a test calls
 // it: an instance reads the wall clock.
 func (s *Server) SetClock(at time.Time) {

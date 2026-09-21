@@ -295,6 +295,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	// against: a fixture is the same tomorrow (fixtures-tail.md).
 	h.srv.SetClock(mockupNow(t))
 	h.srv.SetBuild(mockupVersion, mockupCommit)
+	h.srv.SetPatience()
 	h.admin("mix", "password123")
 	sess := h.login("mix", "password123")
 	// The instance the frames sign into: the account menu names it, and
@@ -1224,4 +1225,83 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 		app.compare(t, "app-conflict-note/normal.json", app.h.do(get(rec+"/conflict", app.sess)))
 	})
+}
+
+// C-14.3: what a server drops, on the forms of the other kinds, and the
+// combined views while their poll is still running.
+func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
+	for _, one := range []struct {
+		dir, segment, slug, uid string
+		drop                    []string
+	}{
+		{"app-event-edit", "calendar", "lichnyj", "8f1c-4a02-b7d3", []string{"CATEGORIES", "ORGANIZER"}},
+		{"app-task-edit", "tasks", "dela", "aa10-77bc-0e31", []string{"CATEGORIES"}},
+	} {
+		t.Run(one.dir+"-loss", func(t *testing.T) {
+			app := newMockupApp(t)
+			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
+			form := formFields(decode[view.EventEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
+			app.servers["nextcloud · home"].Drop = one.drop
+			form.Set("summary", string(form.Get("summary"))+" ·")
+			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+			app.compare(t, one.dir+"/loss.json", app.h.do(postForm(rec+"/edit", app.sess, form)))
+		})
+	}
+	// Only the calendar: its collections stand on both stands, so one can
+	// be held while the other answers. The tasks and the notes of this set
+	// live on nextcloud alone — holding it holds everything, and what the
+	// screen shows then is not a state but a moment. The partial state is
+	// covered here and by the contacts.
+	for _, one := range []struct{ dir, segment string }{
+		{"app-agenda-all", "calendar"},
+	} {
+		t.Run(one.dir+"-partial", func(t *testing.T) {
+			app := newMockupApp(t)
+			release := app.servers["radicale · vps"].Stall("REPORT")
+			defer release()
+			app.h.srv.SetClock(mockupNow(t))
+			first := app.h.do(get("/app/"+one.segment, app.sess))
+			task := taskOf(t, first)
+			if task == "" {
+				t.Skip("this kind polls nothing on the other stand")
+			}
+			// The steady point: nobody is still in the queue and at least
+			// one source is held. Everything that could answer has.
+			waitPoll(t, app.h, app.sess, task, func(b view.PollBar) bool {
+				held := false
+				for _, sp := range b.Sources {
+					switch sp.State {
+					case view.SourceWaiting:
+						return false
+					case view.SourceQuerying:
+						held = true
+					case view.SourceDone:
+						// A source that answered but has not yet given
+						// its count is still arriving: its rows would
+						// come and go between two runs.
+						if sp.Count == nil {
+							return false
+						}
+					}
+				}
+				return held
+			})
+			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+			app.compare(t, one.dir+"/partial.json", app.h.do(get("/app/"+one.segment+"?task="+task, app.sess)))
+		})
+	}
+}
+
+// taskOf digs the poll's task out of whatever list answered.
+func taskOf(t *testing.T, rec *httptest.ResponseRecorder) string {
+	t.Helper()
+	var body struct {
+		Poll *struct {
+			TaskID string `json:"taskID"`
+		} `json:"poll"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil || body.Poll == nil {
+		return ""
+	}
+	return body.Poll.TaskID
 }

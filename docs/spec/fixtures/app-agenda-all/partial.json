@@ -1,0 +1,835 @@
+{
+  "bar": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/calendar/a-nc-home/dni-rozhdeniya/new?pick=1",
+        "id": "record.new",
+        "label": "New event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/import",
+        "id": "collection.import",
+        "label": "Import",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/export",
+        "icon": "i-down",
+        "id": "collection.export",
+        "label": "Export",
+        "method": "GET"
+      }
+    ],
+    "compact": false,
+    "filter": "",
+    "loaded": 4,
+    "range": {
+      "form": {
+        "action": "/app/calendar",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/app/calendar",
+            "id": "range.show",
+            "label": "Show",
+            "method": "GET"
+          }
+        ],
+        "errors": [],
+        "method": "GET",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "view",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "range"
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "date",
+                "label": "From",
+                "name": "from",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "2026-08-10"
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "Both days are in the list.",
+                "kind": "date",
+                "label": "To",
+                "name": "to",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "2026-08-16"
+              }
+            ]
+          }
+        ]
+      },
+      "from": "10 August 2026",
+      "presets": [
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-03",
+          "id": "range.previous",
+          "label": "Previous",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar",
+          "id": "range.current",
+          "label": "Today",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-17",
+          "id": "range.next",
+          "label": "Next",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-10\u0026view=day",
+          "id": "range.day",
+          "label": "Day",
+          "method": "GET"
+        },
+        {
+          "enabled": false,
+          "href": "/app/calendar?from=2026-08-10",
+          "id": "range.week",
+          "label": "Week",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar?from=2026-08-10\u0026view=month",
+          "id": "range.month",
+          "label": "Month",
+          "method": "GET"
+        }
+      ],
+      "to": "16 August 2026"
+    },
+    "segments": [
+      {
+        "enabled": false,
+        "id": "agenda.events",
+        "label": "Events",
+        "method": "GET",
+        "on": true,
+        "reason": "The agenda always shows its events."
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar?with=tasks",
+        "id": "agenda.tasks",
+        "label": "Tasks due",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar?with=notes",
+        "id": "agenda.notes",
+        "label": "Notes",
+        "method": "GET"
+      }
+    ],
+    "selected": 0,
+    "total": null
+  },
+  "days": [
+    {
+      "rows": [
+        {
+          "badges": [],
+          "colour": "#3f6e8c",
+          "href": "/app/calendar/a-nc-home/rabota/2f04-8b71-e39a",
+          "kind": "event",
+          "location": "",
+          "menu": [],
+          "sources": [],
+          "stamp": "nextcloud · home · Работа",
+          "state": "ok",
+          "summary": "Дежурство: первая линия",
+          "time": "All day",
+          "uid": "2f04-8b71-e39a",
+          "zone": ""
+        },
+        {
+          "badges": [],
+          "colour": "#4a6b52",
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+          "kind": "event",
+          "location": "Переговорная 2",
+          "menu": [],
+          "sources": [],
+          "stamp": "nextcloud · home · Личный",
+          "state": "ok",
+          "summary": "Синк-ап по релизу",
+          "time": "10:00",
+          "uid": "8f1c-4a02-b7d3",
+          "zone": "Asia/Yekaterinburg"
+        },
+        {
+          "badges": [],
+          "colour": "#3f6e8c",
+          "href": "/app/calendar/a-nc-home/rabota/7ae3-1c48-55b0",
+          "kind": "event",
+          "location": "Jitsi",
+          "menu": [],
+          "sources": [],
+          "stamp": "nextcloud · home · Работа",
+          "state": "ok",
+          "summary": "Созвон с подрядчиком",
+          "time": "15:00",
+          "uid": "7ae3-1c48-55b0",
+          "zone": ""
+        }
+      ],
+      "rubric": "Monday, 10 August"
+    },
+    {
+      "rows": [
+        {
+          "badges": [],
+          "colour": "#4a6b52",
+          "href": "/app/calendar/a-nc-home/lichnyj/1d55-90fe-3c27",
+          "kind": "event",
+          "location": "МФЦ, Мясницкая 13",
+          "menu": [],
+          "sources": [],
+          "stamp": "nextcloud · home · Личный",
+          "state": "ok",
+          "summary": "Забрать документы",
+          "time": "18:00",
+          "uid": "1d55-90fe-3c27",
+          "zone": ""
+        }
+      ],
+      "rubric": "Tuesday, 11 August"
+    },
+    {
+      "rows": [],
+      "rubric": "Wednesday, 12 August"
+    },
+    {
+      "rows": [],
+      "rubric": "Thursday, 13 August"
+    },
+    {
+      "rows": [],
+      "rubric": "Friday, 14 August"
+    },
+    {
+      "rows": [],
+      "rubric": "Saturday, 15 August"
+    },
+    {
+      "rows": [],
+      "rubric": "Sunday, 16 August"
+    }
+  ],
+  "details": null,
+  "notices": [],
+  "poll": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/search/progress/t-task/cancel",
+        "id": "poll.stop",
+        "label": "Stop",
+        "method": "POST"
+      },
+      {
+        "enabled": false,
+        "href": "/app/calendar",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET",
+        "reason": "The list is still running."
+      }
+    ],
+    "answeredAt": "",
+    "percent": 60,
+    "running": true,
+    "sources": [
+      {
+        "colour": "#a05a2c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Дни рождения",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 2,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Личный",
+        "state": "done"
+      },
+      {
+        "colour": "#3f6e8c",
+        "count": 2,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · home · Работа",
+        "state": "done"
+      },
+      {
+        "colour": "#8c6239",
+        "count": null,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Дежурства",
+        "state": "querying"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": null,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "radicale · vps · Проекты",
+        "state": "querying"
+      }
+    ],
+    "summary": "Polled 3 of 5 sources · 4 events",
+    "taskID": "t-task"
+  },
+  "print": {
+    "range": "5 calendars · 10 August 2026 – 16 August 2026",
+    "taken": "10 August 2026, 17:06",
+    "title": "Combined calendar"
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [
+      {
+        "enabled": true,
+        "href": "/app/sources/calendar",
+        "id": "rail.apply",
+        "label": "Apply",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/collections/new?kind=event",
+        "icon": "i-plus",
+        "id": "collection.new",
+        "label": "New collection",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "account.connect",
+        "label": "Connect account",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections?op=feed",
+        "icon": "i-link",
+        "id": "feed.subscribe",
+        "label": "Subscribe to a feed",
+        "method": "GET"
+      }
+    ],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "note": "5 of 5 collections ticked",
+    "sections": [
+      {
+        "account": "",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "",
+            "count": null,
+            "href": "/app/calendar",
+            "label": "Combined calendar",
+            "menu": [],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "nextcloud · home",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": null,
+            "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
+            "label": "Дни рождения",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": null,
+            "href": "/app/calendar/a-nc-home/lichnyj",
+            "label": "Личный",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=lichnyj",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/lichnyj/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/lichnyj/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=lichnyj",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#3f6e8c",
+            "count": null,
+            "href": "/app/calendar/a-nc-home/rabota",
+            "label": "Работа",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/rabota/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-nc-home/rabota/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "radicale · vps",
+        "accountID": "a-rad-vps",
+        "rows": [
+          {
+            "colour": "#8c6239",
+            "count": null,
+            "href": "/app/calendar/a-rad-vps/dezhurstva",
+            "label": "Дежурства",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-rad-vps\u0026c=dezhurstva",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-rad-vps/dezhurstva/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-rad-vps/dezhurstva/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-rad-vps\u0026c=dezhurstva",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b4e7a",
+            "count": null,
+            "href": "/app/calendar/a-rad-vps/proekty",
+            "label": "Проекты",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-rad-vps\u0026c=proekty",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-rad-vps/proekty/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-rad-vps/proekty/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-rad-vps\u0026c=proekty",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "readOnly": false,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": [
+      {
+        "href": "/app/calendar?task=t-task",
+        "label": "all",
+        "on": true
+      },
+      {
+        "href": "/app/calendar?tag=release\u0026task=t-task",
+        "label": "release",
+        "on": false
+      },
+      {
+        "href": "/app/calendar?tag=team\u0026task=t-task",
+        "label": "team",
+        "on": false
+      }
+    ]
+  },
+  "title": "Combined calendar",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "href": "/app/calendar",
+        "id": "poll.again",
+        "label": "Refresh",
+        "method": "GET",
+        "reason": "The poll is still running."
+      },
+      "answered": "",
+      "running": true
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}
