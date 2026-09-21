@@ -5,6 +5,18 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.0.79 — 2026-09-21
+
+Copies the Typecase mockup through plan 1 steps 6–8: slips closed (Р-7–Р-12),
+narrow shell is the source (Р-3, Р-4, Р-21), lock lint on, screenshot diffs
+only the rows in Typecase `allowed-diffs.md`. Leftover `--rN` stay.
+
+### For consumers
+
+Nothing in the running server. Open
+[carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
+current mockup; fonts are in `docs/visual/fonts/`.
+
 ## v0.2.8 — 2026-09-21
 
 fixtures-tail.md: первый запуск и открытая регистрация.
