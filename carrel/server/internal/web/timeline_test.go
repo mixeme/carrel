@@ -181,3 +181,49 @@ func TestContactTimeline(t *testing.T) {
 }
 
 var _ = davtest.CalendarHome
+
+// A person can be in a record without a line of their own. SENT-BY names
+// who really sent it — the assistant who put the meeting in for someone
+// else — and DELEGATED-FROM names the one who handed participation over,
+// who is often struck from the attendee list in the same breath. Reading
+// only ORGANIZER and ATTENDEE gave both of them an empty timeline over a
+// record that names them (RFC 5545 §3.2.18, §3.2.4, §3.2.5).
+func TestTimelineFindsThePersonBehindAnotherLine(t *testing.T) {
+	now := time.Now()
+	srv := searchServer(t)
+	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	srv.Seed(searchBook+"sec.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:sec\nFN:Vera Sokolova\nEMAIL:vera@example.com\nEND:VCARD\n")
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work", SupportedComponentSet: []string{"VEVENT"}})
+	ev := func(uid, extra string, at time.Time) string {
+		return ics("BEGIN:VEVENT\nUID:" + uid + "\nDTSTAMP:20260101T000000Z\nDTSTART:" + icsDay(at) + "\nDTEND:" + icsDay(at.Add(time.Hour)) + "\n" + extra + "END:VEVENT")
+	}
+	// Sent for the boss, who is the organiser and is not Vera.
+	srv.Seed(searchWork+"s1.ics", ev("s1", "SUMMARY:Board meeting\nORGANIZER;SENT-BY=\"mailto:VERA@example.com\":mailto:boss@example.com\n", now.AddDate(0, -1, 0)))
+	// Vera gave her seat away and was struck from the list: only the line
+	// of the person who took it still names her.
+	srv.Seed(searchWork+"s2.ics", ev("s2", "SUMMARY:Standup\nATTENDEE;DELEGATED-FROM=\"mailto:vera@example.com\":mailto:pavel@example.com\n", now.AddDate(0, -2, 0)))
+	// And the other way round: Vera is on the list but handed it to Pavel.
+	srv.Seed(searchWork+"s3.ics", ev("s3", "SUMMARY:Retro\nATTENDEE;DELEGATED-TO=\"mailto:vera@example.com\":mailto:pavel@example.com\n", now.AddDate(0, -3, 0)))
+	// Someone else's delegation is not hers.
+	srv.Seed(searchWork+"s4.ics", ev("s4", "SUMMARY:Not hers\nATTENDEE;DELEGATED-FROM=\"mailto:someone@example.com\":mailto:pavel@example.com\n", now.AddDate(0, -1, 0)))
+	f := connectFixture(t, srv, searchBook, nil)
+	tickAll(t, f.h, f.sess)
+	card := f.path("contacts") + "/sec"
+
+	page := decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline", f.sess)))
+	waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+	rows := timelineRows(decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline", f.sess))))
+	want := map[string]string{
+		"Board meeting": "sent for the organiser",
+		"Standup":       "delegated this to an attendee",
+		"Retro":         "given this by an attendee",
+	}
+	for title, why := range want {
+		if r, ok := rows[title]; !ok || string(r.Why) != why {
+			t.Errorf("row %q = %+v (found %v), want why %q", title, r, ok, why)
+		}
+	}
+	if _, ok := rows["Not hers"]; ok {
+		t.Errorf("someone else's delegation is in her timeline: %v", rows)
+	}
+}

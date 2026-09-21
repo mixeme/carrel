@@ -226,21 +226,69 @@ type Attendee struct {
 	Name   string
 	Email  string
 	Status string // PARTSTAT as written
+	// SentBy is who actually sent this on the attendee's behalf, and
+	// Delegated* are the people participation passed between (RFC 5545
+	// §3.2.18, §3.2.4, §3.2.5). All of them name people who are not this
+	// attendee, and a person who is only named here is named nowhere else
+	// in the record: the one who delegated away is often removed from the
+	// list entirely.
+	SentBy        string
+	DelegatedFrom []string
+	DelegatedTo   []string
 }
 
 // Attendees lists ATTENDEE of the main component.
 func Attendees(obj *model.Object) []Attendee {
 	var out []Attendee
 	for _, v := range obj.Props()[ical.PropAttendee] {
-		addr := v.Text
-		if len(addr) >= len("mailto:") && strings.EqualFold(addr[:len("mailto:")], "mailto:") {
-			addr = addr[len("mailto:"):]
-		}
 		out = append(out, Attendee{
-			Name:   v.Params[ical.ParamCommonName],
-			Email:  addr,
-			Status: v.Params[ical.ParamParticipationStatus],
+			Name:          v.Params[ical.ParamCommonName],
+			Email:         CalAddress(v.Text),
+			Status:        v.Params[ical.ParamParticipationStatus],
+			SentBy:        CalAddress(v.Params[ical.ParamSentBy]),
+			DelegatedFrom: calAddresses(ical.ParamDelegatedFrom, v.Params),
+			DelegatedTo:   calAddresses(ical.ParamDelegatedTo, v.Params),
 		})
+	}
+	return out
+}
+
+// Organiser is who a record is organised by, and who sent it for them.
+// ORGANIZER is one per component by RFC 5545 §3.8.4.3, so the first is it.
+func Organiser(obj *model.Object) Attendee {
+	for _, v := range obj.Props()[ical.PropOrganizer] {
+		return Attendee{
+			Name:   v.Params[ical.ParamCommonName],
+			Email:  CalAddress(v.Text),
+			SentBy: CalAddress(v.Params[ical.ParamSentBy]),
+		}
+	}
+	return Attendee{}
+}
+
+// CalAddress is a CAL-ADDRESS as an address: the mailto: a calendar writes
+// and this side does not want, whatever case it came in.
+func CalAddress(v string) string {
+	v = strings.TrimSpace(v)
+	if len(v) >= len("mailto:") && strings.EqualFold(v[:len("mailto:")], "mailto:") {
+		v = v[len("mailto:"):]
+	}
+	return v
+}
+
+// calAddresses reads a parameter that holds a list of addresses. Its commas
+// are separators by definition, and model.ParamValues knows which
+// parameters those are.
+func calAddresses(name string, params map[string]string) []string {
+	joined, ok := params[name]
+	if !ok || joined == "" {
+		return nil
+	}
+	var out []string
+	for _, v := range model.ParamValues(name, joined) {
+		if a := CalAddress(v); a != "" {
+			out = append(out, a)
+		}
 	}
 	return out
 }

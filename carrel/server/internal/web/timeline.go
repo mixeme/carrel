@@ -21,9 +21,10 @@ import (
 )
 
 // The person's timeline (S-15.4): a search for one person over the ticked
-// sources. A record matches by an address of the card in ATTENDEE or
-// ORGANIZER, or by RELATED-TO the card's UID; a file by the person's name in
-// its name. It is gathered only when opened; the card's inset shows what this
+// sources. A record matches by an address of the card in ORGANIZER or
+// ATTENDEE, by an address of theirs standing behind one of those lines in
+// SENT-BY, DELEGATED-FROM or DELEGATED-TO, or by RELATED-TO the card's UID;
+// a file by the person's name in its name. It is gathered only when opened; the card's inset shows what this
 // session gathered.
 
 const (
@@ -49,6 +50,32 @@ type timelinePerson struct {
 	name   string
 	emails map[string]bool // lower case, without mailto:
 	first  string          // the first address of the card, for New event
+}
+
+// has says whether an address is this person's.
+func (p timelinePerson) has(addr string) bool {
+	return addr != "" && p.emails[strings.ToLower(addr)]
+}
+
+// throughSomeoneElse says how this person stands behind another's line, or
+// "" when they do not. The wording names the other person's part, because
+// that is what the row has to explain: «sent for the organiser» is a
+// different fact from «organiser».
+func (p timelinePerson) throughSomeoneElse(a cal.Attendee, part string) string {
+	if p.has(a.SentBy) {
+		return "sent for " + part
+	}
+	for _, d := range a.DelegatedFrom {
+		if p.has(d) {
+			return "delegated this to " + part
+		}
+	}
+	for _, d := range a.DelegatedTo {
+		if p.has(d) {
+			return "given this by " + part
+		}
+	}
+	return ""
 }
 
 func timelineOwner(tt *timelineTask) pollOwner {
@@ -130,16 +157,35 @@ func (p timelinePerson) match(k view.Kind, obj *model.Object, tz *time.Location)
 		return "", time.Time{}, false
 	}
 	why := ""
-	if org := strings.ToLower(strings.TrimPrefix(strings.TrimPrefix(firstValue(obj, "ORGANIZER"), "mailto:"), "MAILTO:")); org != "" && p.emails[org] {
+	org := cal.Organiser(obj)
+	if p.has(org.Email) {
 		why = "organiser"
 	}
 	if why == "" {
 		for _, a := range cal.Attendees(obj) {
-			if p.emails[strings.ToLower(a.Email)] {
+			if p.has(a.Email) {
 				why = "attendee"
 				if st := strings.ToLower(a.Status); st != "" && st != "needs-action" {
 					why += " · " + st
 				}
+				break
+			}
+		}
+	}
+	// A person can be in a record without being on a line of their own.
+	// SENT-BY is who really sent it — the assistant who put the meeting in
+	// for someone else — and DELEGATED-FROM names the one who handed
+	// participation over, who is often struck from the attendee list in the
+	// same breath. Reading only ORGANIZER and ATTENDEE left both of them
+	// with an empty timeline over a record that names them (RFC 5545
+	// §3.2.18, §3.2.4, §3.2.5).
+	if why == "" {
+		why = p.throughSomeoneElse(org, "the organiser")
+	}
+	if why == "" {
+		for _, a := range cal.Attendees(obj) {
+			if w := p.throughSomeoneElse(a, "an attendee"); w != "" {
+				why = w
 				break
 			}
 		}

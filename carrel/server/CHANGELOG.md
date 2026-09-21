@@ -17,6 +17,52 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.17 — 2026-09-22
+
+Два вопроса владельца, и оба оказались работой.
+
+### Fixed
+
+- **A person is looked for in every line that names them** (S-15.4). The
+  timeline read ORGANIZER, ATTENDEE and RELATED-TO, and that is not the
+  whole list. `SENT-BY` is who really sent a record — the assistant who put
+  the meeting in for someone else — and `DELEGATED-FROM` names the one who
+  handed participation over, who is often struck from the attendee list in
+  the same breath. Both of them had an empty timeline over a record that
+  names them. All three parameters are read now, and the row says which:
+  «sent for the organiser», «delegated this to an attendee», «given this by
+  an attendee». `CONTACT` is still not read and the reason is written into
+  S-15.4: it is free text, and reading it would be looking for a name in
+  the text, which this screen refuses on purpose.
+- **Two more clocks that were not the server's.** The gates went red
+  overnight — from the date changing, not from a change in the code — and
+  three fixtures came apart. The publish sheet counted its expiry from
+  `time.Now()`; it now counts from the server's clock, and «30 days, until
+  9 September 2026» matches the frame word for word. And `user.Service`
+  keeps a clock of its own that the screens' clock cannot reach: the date
+  an account was made is written into the record, not drawn. It has a
+  `SetClock` beside the server's now, and the fixture run makes the account
+  on the day the frames give it — 11 February 2026, deliberately in the
+  past. The admin table on the frames says `2026-02-11` too.
+
+### Notes
+
+- Three fixtures are rewritten with values that no longer depend on the day
+  the run happens: the publish expiry, the account's creation date, and a
+  last login that reads «2 min ago» instead of an artefact of an unfrozen
+  clock.
+- The landscape of servers is written down in `docs/plan/server.md` by
+  engine rather than by name: Stalwart, Xandikos and DAViCal are the ones
+  worth a local container, Davis is sabre/dav again and goes last, and
+  Cyrus, Open-Xchange, Zimbra and Synology are named as out of reach of a
+  container. `docs/servers.md` now says plainly that **Exchange, Microsoft
+  365 and Outlook.com speak no CalDAV at all** — so nobody waits for them.
+- Left open and written down: the timeline skips contact records
+  altogether, so a vCard `RELATED` or a group's `MEMBER` never points at
+  anyone; ORGANIZER is read only from the main component; and files are
+  still matched by the person's name, which is the very thing events are
+  not matched by.
+
 ## v0.2.16 — 2026-09-21
 
 Полный живой прогон: 54 зелёных, 2248 секунд, и две настоящие ошибки.

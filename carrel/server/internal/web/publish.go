@@ -106,7 +106,7 @@ func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, titl
 // with the times (s-publish-2).
 func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title string, where view.Stamp, q url.Values, cancel string) view.PublishSheet {
 	tf := s.timeFor(sess)
-	until := time.Now().Add(publish.DefaultTTL)
+	until := s.now().Add(publish.DefaultTTL)
 	forever := cloneValues(q)
 	forever.Set("expires", "never")
 	sheet := view.PublishSheet{
@@ -171,11 +171,11 @@ func (s *Server) madeSheet(sess *session.Session, sheet view.PublishSheet, token
 }
 
 // publishExpiry is the lifetime the form chose.
-func publishExpiry(r *http.Request) *time.Time {
+func (s *Server) publishExpiry(r *http.Request) *time.Time {
 	if r.FormValue("expires") == "never" {
 		return nil
 	}
-	t := time.Now().Add(publish.DefaultTTL)
+	t := s.now().Add(publish.DefaultTTL)
 	return &t
 }
 
@@ -232,7 +232,7 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, "/app/files/published")
 		return
 	}
-	expires := publishExpiry(r)
+	expires := s.publishExpiry(r)
 	if r.FormValue("k") == filesSpec.segment {
 		s.postPublishFile(w, r, sess, expires)
 		return

@@ -47,6 +47,16 @@ func New(st *store.Store, mgr *session.Manager, cfg *conf.Config) *Service {
 	return s
 }
 
+// SetClock freezes what this service calls "now": when an account was
+// created, when an invitation runs out, when a device was last seen.
+// Nothing but a test calls it — an instance reads the wall clock. The
+// screens have a clock of their own (web.Server.SetClock), and a fixture
+// run needs both: the date on a screen is one thing, the date in the
+// record behind it another.
+func (s *Service) SetClock(at time.Time) {
+	s.now = func() time.Time { return at }
+}
+
 var (
 	ErrPasswordShort    = errors.New("password must be at least 8 characters")
 	ErrPasswordMismatch = errors.New("passwords do not match")

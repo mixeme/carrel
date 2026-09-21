@@ -34,24 +34,30 @@ import (
 
 // The frames stand on one day, in one zone, of one build.
 const (
-	mockupZone     = "Europe/Moscow"
-	mockupDay      = "2026-08-10 17:04"
-	mockupVersion  = "0.0.1"
-	mockupCommit   = "786949a"
-	mockupInstance = "carrel.example"
+	mockupZone = "Europe/Moscow"
+	mockupDay  = "2026-08-10 17:04"
+	// The day the frames say the account was made: «mix · created 11
+	// February 2026». It is deliberately not the day of the frames —
+	// an account a person has had for a while looks like one.
+	mockupCreatedDay = "2026-02-11 09:00"
+	mockupVersion    = "0.0.1"
+	mockupCommit     = "786949a"
+	mockupInstance   = "carrel.example"
 	// The frames were drawn two minutes after the poll finished: their
 	// refresh button says «2 min ago». A screen is taken at mockupSeen,
 	// the poll behind it ran at mockupDay.
 	mockupSince = 2 * time.Minute
 )
 
-func mockupNow(t *testing.T) time.Time {
+func mockupNow(t *testing.T) time.Time { return mockupDayAt(t, mockupDay) }
+
+func mockupDayAt(t *testing.T, day string) time.Time {
 	t.Helper()
 	tz, err := time.LoadLocation(mockupZone)
 	if err != nil {
 		t.Fatal(err)
 	}
-	at, err := time.ParseInLocation("2006-01-02 15:04", mockupDay, tz)
+	at, err := time.ParseInLocation("2006-01-02 15:04", day, tz)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -294,9 +300,18 @@ func newMockupApp(t *testing.T) *mockupApp {
 	// The day of the frames, in their zone, and the build they were drawn
 	// against: a fixture is the same tomorrow (fixtures-tail.md).
 	h.srv.SetClock(mockupNow(t))
+	// The account is made below, and its own date shows on the account
+	// screen: «Account mix · created 21 September 2026». The screens' clock
+	// does not reach into the record, so the service that writes it is
+	// frozen too — otherwise the fixture is right only on the day it was
+	// taken, and the gates go red overnight.
+	h.users.SetClock(mockupDayAt(t, mockupCreatedDay))
 	h.srv.SetBuild(mockupVersion, mockupCommit)
 	h.srv.SetPatience()
 	h.admin("mix", "password123")
+	// The account is behind us; everything the run does after this happens
+	// on the day of the frames.
+	h.users.SetClock(mockupNow(t))
 	sess := h.login("mix", "password123")
 	// The instance the frames sign into: the account menu names it, and
 	// «Carrel» — the name of an instance nobody named — would say nothing.
