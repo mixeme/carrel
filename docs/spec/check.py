@@ -199,6 +199,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "invite": "/invite/{token}",
     "setup": "/setup",
     "register": "/register",
+    "forgot-token": "/forgot/{token}",
     "app-collections-rename": "/app/collections/rename",
     "app-collections-move": "/app/collections/move",
     "app-collections-delete": "/app/collections/delete",
@@ -212,6 +213,8 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-collections-new": "/app/collections/new",
     "app-settings-unlock": "/app/settings/unlock",
     "app-conflict": "/app/{kind}/{account}/{col}/{uid}/conflict",
+    "app-conflict-event": "/app/calendar/{account}/{col}/{uid}/conflict",
+    "app-conflict-task": "/app/tasks/{account}/{col}/{uid}/conflict",
 }
 
 # FRAME_TODO — расхождения, где неверен кадр, а не фикстура. Каждое —
@@ -252,6 +255,11 @@ FRAME_TODO = {
     "app-notes: коллекции рейла":
         "кадр рисует тетрадь «Архив», которой нет в наборе («Архив» там — "
         "адресная книга, не тетрадь)",
+    "app-conflict-event: коллекции рейла":
+        "s-conflict-1 один на четыре рода и нарисован с рейлом контактов; "
+        "у события рейл календарный и иным быть не может",
+    "app-conflict-task: коллекции рейла":
+        "то же: один кадр на четыре рода, рейл в нём контактный",
     "app-files: коллекции рейла":
         "кадр рисует папки «Documents» и «Files», которых нет в наборе: "
         "в таблице docs/visual/fixtures нет ни одной файловой коллекции",

@@ -465,6 +465,7 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	// it stands inside an address rather than alone, so the rule for the
 	// CSRF does not reach it.
 	s = regexp.MustCompile(`/invite/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/invite/invite-token")
+	s = regexp.MustCompile(`/forgot/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/forgot/reset-token")
 	// A group of duplicates is named by a digest of the records in it, and
 	// those carry the account identifier, which is issued.
 	s = regexp.MustCompile(`g=[0-9a-f]{32}`).ReplaceAllString(s, "g=group")
@@ -1081,4 +1082,69 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 		app.compare(t, "app-mail-compose/normal.json", app.h.do(get("/app/mail/compose", app.sess)))
 	})
+}
+
+// C-14.2: the link a reset password leads to, and the conflict of the
+// three kinds beside the contact's.
+func TestFixtureResetAndConflicts(t *testing.T) {
+	t.Run("forgot-token", func(t *testing.T) {
+		app := &mockupApp{h: newHarness(t), byAccount: map[string]string{}, byPath: map[string]string{}}
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		app.h.srv.SetBuild(mockupVersion, mockupCommit)
+		adminID := app.h.admin("mix", "password123")
+		app.h.invite(adminID, "vera", "verapass123")
+		sess := app.h.login("mix", "password123")
+		page := decode[view.AdminUsersPage](t, app.h.do(get("/admin/", sess)))
+		var target string
+		for _, r := range page.Rows {
+			if r.Login != "vera" {
+				continue
+			}
+			for _, it := range r.Menu {
+				if it.ID == "admin.user.reset" {
+					target = it.Href
+				}
+			}
+		}
+		if target == "" {
+			t.Fatal("no reset for the invited person")
+		}
+		rec := app.h.do(postForm(target, sess, url.Values{}))
+		link := resetLink(t, rec)
+		app.compare(t, "forgot-token/normal.json", app.h.do(get(link, nil)))
+	})
+}
+
+// resetLink digs the wipe link out of the answer that issued it.
+func resetLink(t *testing.T, rec *httptest.ResponseRecorder) string {
+	t.Helper()
+	m := regexp.MustCompile(`/forgot/[A-Za-z0-9_-]{43}`).FindString(rec.Body.String())
+	if m == "" {
+		t.Fatalf("no reset link in the answer: %s", rec.Body.String()[:400])
+	}
+	return m
+}
+
+// C-14.2: the conflict of an event and of a task. The screen is one for
+// every kind (C-2.1), and each is checked on its own record.
+func TestFixtureConflictsOfEveryKind(t *testing.T) {
+	for _, one := range []struct{ dir, segment, slug, uid, now, body string }{
+		{"app-conflict-event", "calendar", "lichnyj", "8f1c-4a02-b7d3", "Синк-ап по релизу и демо",
+			"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//set//EN\nBEGIN:VEVENT\nUID:8f1c-4a02-b7d3\nDTSTAMP:20260801T000000Z\nSUMMARY:Синк-ап перенесён\nDTSTART:20260810T090000Z\nDTEND:20260810T100000Z\nEND:VEVENT\nEND:VCALENDAR\n"},
+		{"app-conflict-task", "tasks", "dela", "aa10-77bc-0e31", "Отправить документы в МФЦ до пятницы",
+			"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//set//EN\nBEGIN:VTODO\nUID:aa10-77bc-0e31\nDTSTAMP:20260801T000000Z\nSUMMARY:Документы в МФЦ\nEND:VTODO\nEND:VCALENDAR\n"},
+	} {
+		t.Run(one.dir, func(t *testing.T) {
+			app := newMockupApp(t)
+			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
+			form := formFields(decode[view.EventEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
+			app.servers["nextcloud · home"].Seed(davtest.CalendarHome+one.slug+"/"+one.uid+".ics", one.body)
+			form.Set("summary", one.now)
+			if resp := app.h.do(postForm(rec+"/edit", app.sess, form)); resp.Code != 303 {
+				t.Fatalf("POST over a moved version: %d", resp.Code)
+			}
+			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+			app.compare(t, one.dir+"/normal.json", app.h.do(get(rec+"/conflict", app.sess)))
+		})
+	}
 }

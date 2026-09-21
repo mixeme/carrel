@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.10 — 2026-09-21
+
+fixtures-tail.md: сброс по ссылке и расхождения остальных родов.
+
+### Changed
+
+- Three pairs: `/forgot/{token}` and the conflict of an event and of a
+  task. The conflict is one screen for every kind (C-2.1) and answers
+  alike on all three: the property named as the record names it, both
+  versions, the same four ways out.
+- The token of a reset joins the things the comparison holds steady.
+
+### Notes
+
+- `s-conflict-1` is declared for four routes and drawn with the rail of
+  the contacts. An event's rail is the calendar's and cannot be anything
+  else, so that is one frame serving four screens rather than a fault.
+
 ## v0.2.9 — 2026-09-21
 
 fixtures-tail.md: слияние и письмо.

@@ -1,0 +1,59 @@
+{
+  "form": {
+    "action": "/forgot/reset-token",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/forgot/reset-token",
+        "id": "wipe.confirm",
+        "label": "Erase and set a new password",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Type yes to wipe encrypted data",
+            "name": "confirm",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "lede": "This destroys encrypted connections and cannot be undone.",
+  "login": "vera",
+  "notices": [],
+  "step": "confirm",
+  "title": "Reset account",
+  "warning": {
+    "actions": [],
+    "body": "Connections become unreadable and are removed. Data on remote servers is not touched.",
+    "details": null,
+    "role": "alert",
+    "title": "Encrypted data will be destroyed"
+  }
+}
