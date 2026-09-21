@@ -1148,3 +1148,21 @@ func TestFixtureConflictsOfEveryKind(t *testing.T) {
 		})
 	}
 }
+
+// C-14.2: the preview a photo is cropped in (s-contacts-5). It exists only
+// while a photo is being added, so the screen is taken right after one is.
+func TestFixturePhotoPreview(t *testing.T) {
+	app := newMockupApp(t)
+	// The lists were opened before the card, as a person opens them, and
+	// that is where the counts of the rail come from.
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
+	add := actionHref(t, decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Photo.Actions, "photo.add")
+	// The upload answers with a redirect to the preview; the screen is
+	// the page it leads to.
+	if resp := app.h.do(uploadRequest(add, app.sess, false, "anna.jpg", jpegOf(t, halvesImage(240, 180)))); resp.Code != 303 {
+		t.Fatalf("upload: %d %s", resp.Code, resp.Body.String())
+	}
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	app.compare(t, "app-photo-preview/normal.json", app.h.do(get(rec+"/photo-preview", app.sess)))
+}

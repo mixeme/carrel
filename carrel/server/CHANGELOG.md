@@ -17,6 +17,16 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.11 — 2026-09-21
+
+fixtures-tail.md: предпросмотр фотографии.
+
+### Changed
+
+- `app-photo-preview/normal.json`. The screen exists only while a photo is
+  being cropped, so it is taken right after one is added: the upload
+  answers with a redirect and the screen is the page it leads to.
+
 ## v0.2.10 — 2026-09-21
 
 fixtures-tail.md: сброс по ссылке и расхождения остальных родов.
