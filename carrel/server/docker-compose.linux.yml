@@ -9,5 +9,51 @@ services:
       - ./testdata/radicale/config:/config/config:ro
       - ./testdata/radicale/users:/config/users:ro
       - radicale-data:/data
+
+  # Stalwart: the fourth engine, and the only one on Rust. Its CalDAV and
+  # CardDAV share no ancestry with sabre/dav, Radicale or SoGo, so it is
+  # the server most likely to tell us something new.
+  #
+  # NOT YET RUN: written from the documentation on 22.09.2026 on a machine
+  # without Docker. See testdata/stalwart/README.md for what is a guess and
+  # where to look when it does not come up first time.
+  stalwart:
+    image: stalwartlabs/stalwart:v0.16
+    ports:
+      - "127.0.0.1:8088:8088"
+      - "127.0.0.1:8080:8080"
+    environment:
+      # A fixed administrator instead of the random one the first start
+      # prints, and the recovery listener on 8080 that stalwart-setup
+      # talks to. Both are here because this is a test stand on loopback,
+      # and neither belongs on a server anyone can reach.
+      STALWART_RECOVERY_ADMIN: "admin:carrel-admin"
+      STALWART_RECOVERY_MODE: "1"
+    volumes:
+      - ./testdata/stalwart/config.json:/etc/stalwart/config.json:ro
+      - stalwart-data:/var/lib/stalwart
+
+  # One shot: the domain, the account with its password, the DAV listener,
+  # and a settings reload — listeners are parsed into a snapshot at start
+  # and a saved object alone does not reach the running server.
+  stalwart-setup:
+    image: stalwartlabs/cli
+    depends_on:
+      - stalwart
+    environment:
+      STALWART_URL: "http://stalwart:8080"
+      STALWART_USER: "admin"
+      STALWART_PASSWORD: "carrel-admin"
+    volumes:
+      - ./testdata/stalwart:/work:ro
+    working_dir: /work
+    entrypoint:
+      - sh
+      - -c
+      - "stalwart-cli apply --file plan.ndjson && stalwart-cli create Action/ReloadSettings"
+    profiles:
+      - setup
+
 volumes:
   radicale-data:
+  stalwart-data:

@@ -17,6 +17,38 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.18 — 2026-09-22
+
+Stalwart: половина работы, и сказано, какая.
+
+### Added
+
+- Seven live suites for Stalwart — records, forms, collections, move,
+  search, timeline and collection delete — wired to the same `run*`
+  helpers every other server uses, with not one new line inside the
+  checks themselves. On a machine without the stand they skip, naming the
+  address and the reason.
+- A stand for it: a `stalwart` service and a one-shot `stalwart-setup` in
+  `docker-compose.linux.yml`, with `testdata/stalwart/config.json` and a
+  `plan.ndjson` that provisions a domain, an account with a password, the
+  DAV listener and the default domain.
+
+### Notes
+
+- **The stand has never been run.** It is written from Stalwart's
+  documentation on a machine with no Docker; every decision in it names
+  the page it came from, and `testdata/stalwart/README.md` lists the six
+  places most likely to need a correction on the day someone brings it
+  up. The step in `scripts/linux-gates.sh` is behind `CARREL_STALWART=1`
+  for exactly that reason: an unverified service must not be able to fail
+  anyone else's gates. Stalwart is recorded in the plan as started, not
+  as done.
+- Stalwart serves calendars at `/dav/cal`, address books at `/dav/card`,
+  files at `/dav/file` and principals at `/dav/pal`, and answers
+  `/.well-known/caldav` and `/.well-known/carddav`. The suite hands
+  discovery the root and lets it walk, the way it would meet a server
+  nobody prepared for it.
+
 ## v0.2.17 — 2026-09-22
 
 Два вопроса владельца, и оба оказались работой.

@@ -60,6 +60,23 @@ done
 CARREL_RADICALE_URL=http://127.0.0.1:5232/test/ \
   go test -tags=integration -count=1 -timeout 30m ./integration/...
 
+# Stalwart, the fourth engine. NOT YET RUN: the stand was written from the
+# documentation on a machine without Docker (testdata/stalwart/README.md).
+# It is behind a flag until someone has seen it come up, so a red stand
+# cannot fail the gates of everyone else. Run with CARREL_STALWART=1.
+if [[ "${CARREL_STALWART:-}" == "1" ]]; then
+  echo "== S-30.2: Stalwart integration =="
+  docker compose -f docker-compose.linux.yml up -d stalwart
+  for _ in $(seq 1 60); do
+    if curl -sf -o /dev/null http://127.0.0.1:8080/ 2>/dev/null; then
+      break
+    fi
+    sleep 0.5
+  done
+  docker compose -f docker-compose.linux.yml run --rm stalwart-setup
+  go test -tags=integration -count=1 -timeout 30m -run 'Stalwart' ./integration/...
+fi
+
 if [[ -n "${CARREL_SFTPGO_URL:-}" && -n "${CARREL_SFTPGO_USER:-}" && -n "${CARREL_SFTPGO_PASS:-}" ]]; then
   echo "== S-30.2: SFTPGo integration =="
   go test -tags=integration -count=1 -run 'SFTPGo' ./integration/...
