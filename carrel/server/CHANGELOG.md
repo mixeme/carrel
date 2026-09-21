@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.19 — 2026-09-22
+
+### Fixed
+
+- **Every component of a record is read, not only the main one**
+  (S-15.4). A series is one record with several components, and an
+  occurrence that was overridden carries an `ORGANIZER` and `ATTENDEE`
+  lines of its own. Someone added to a single Thursday of a weekly
+  meeting is named nowhere else in that record, so their timeline was
+  empty over a meeting they were invited to. `cal.People` now gathers
+  everyone from the main component and from every `RECURRENCE-ID`
+  sibling. A record with no document behind it — one that was built
+  rather than fetched — falls back to its main component: less than the
+  whole truth, never a lie.
+
+### Notes
+
+- This closes the last of the three timeline gaps that were mine to
+  close. The two left open are the owner's to decide: whether contact
+  records belong in a timeline at all (a vCard `RELATED`, a group's
+  `MEMBER` — they point at a person but carry no date, and the timeline
+  is ordered by time), and whether a file matching the person's name is
+  enough, given that the same reasoning is refused for events.
+
 ## v0.2.18 — 2026-09-22
 
 Stalwart: половина работы, и сказано, какая.

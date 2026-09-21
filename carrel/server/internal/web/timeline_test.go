@@ -227,3 +227,33 @@ func TestTimelineFindsThePersonBehindAnotherLine(t *testing.T) {
 		t.Errorf("someone else's delegation is in her timeline: %v", rows)
 	}
 }
+
+// A series is one record with several components, and an occurrence that
+// was overridden carries an organiser and attendees of its own. Someone
+// added to one Thursday is named nowhere else in the record, so reading
+// only the main component left them out of their own timeline (S-15.4).
+func TestTimelineReadsEveryComponentOfASeries(t *testing.T) {
+	now := time.Now()
+	srv := searchServer(t)
+	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	srv.Seed(searchBook+"guest.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:guest\nFN:Pavel Orlov\nEMAIL:pavel@example.com\nEND:VCARD\n")
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work", SupportedComponentSet: []string{"VEVENT"}})
+	at := now.AddDate(0, 0, -7)
+	// The series names someone else throughout; Pavel is on one occurrence.
+	srv.Seed(searchWork+"weekly.ics", ics(
+		"BEGIN:VEVENT\nUID:weekly\nDTSTAMP:20260101T000000Z\nDTSTART:"+icsDay(at)+"\nDTEND:"+icsDay(at.Add(time.Hour))+
+			"\nSUMMARY:Weekly sync\nRRULE:FREQ=WEEKLY;COUNT=6\nATTENDEE:mailto:someone@example.com\nEND:VEVENT\n"+
+			"BEGIN:VEVENT\nUID:weekly\nDTSTAMP:20260101T000000Z\nRECURRENCE-ID:"+icsDay(at)+
+			"\nDTSTART:"+icsDay(at)+"\nDTEND:"+icsDay(at.Add(time.Hour))+
+			"\nSUMMARY:Weekly sync\nATTENDEE;PARTSTAT=ACCEPTED:mailto:pavel@example.com\nEND:VEVENT"))
+	f := connectFixture(t, srv, searchBook, nil)
+	tickAll(t, f.h, f.sess)
+	card := f.path("contacts") + "/guest"
+
+	page := decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline", f.sess)))
+	waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+	rows := timelineRows(decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline", f.sess))))
+	if r, ok := rows["Weekly sync"]; !ok || string(r.Why) != "attendee · accepted" {
+		t.Errorf("the occurrence Pavel was added to: %+v (found %v, all %v)", r, ok, rows)
+	}
+}

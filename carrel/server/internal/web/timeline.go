@@ -24,7 +24,9 @@ import (
 // sources. A record matches by an address of the card in ORGANIZER or
 // ATTENDEE, by an address of theirs standing behind one of those lines in
 // SENT-BY, DELEGATED-FROM or DELEGATED-TO, or by RELATED-TO the card's UID;
-// a file by the person's name in its name. It is gathered only when opened; the card's inset shows what this
+// a file by the person's name in its name. Every component of a record is
+// read, not only the main one: an overridden occurrence of a series has an
+// organiser and attendees of its own. It is gathered only when opened; the card's inset shows what this
 // session gathered.
 
 const (
@@ -157,20 +159,23 @@ func (p timelinePerson) match(k view.Kind, obj *model.Object, tz *time.Location)
 		return "", time.Time{}, false
 	}
 	why := ""
-	org := cal.Organiser(obj)
-	if p.has(org.Email) {
-		why = "organiser"
-	}
-	if why == "" {
-		for _, a := range cal.Attendees(obj) {
-			if p.has(a.Email) {
-				why = "attendee"
-				if st := strings.ToLower(a.Status); st != "" && st != "needs-action" {
-					why += " · " + st
-				}
-				break
-			}
+	// Everyone the record names, in every component it has: an overridden
+	// occurrence carries its own organiser and attendees, and someone
+	// added to one Thursday of a series is named nowhere else.
+	people := cal.People(obj)
+	for _, who := range people {
+		if !p.has(who.Email) {
+			continue
 		}
+		if who.Organiser {
+			why = "organiser"
+			break
+		}
+		why = "attendee"
+		if st := strings.ToLower(who.Status); st != "" && st != "needs-action" {
+			why += " · " + st
+		}
+		break
 	}
 	// A person can be in a record without being on a line of their own.
 	// SENT-BY is who really sent it — the assistant who put the meeting in
@@ -180,11 +185,12 @@ func (p timelinePerson) match(k view.Kind, obj *model.Object, tz *time.Location)
 	// with an empty timeline over a record that names them (RFC 5545
 	// §3.2.18, §3.2.4, §3.2.5).
 	if why == "" {
-		why = p.throughSomeoneElse(org, "the organiser")
-	}
-	if why == "" {
-		for _, a := range cal.Attendees(obj) {
-			if w := p.throughSomeoneElse(a, "an attendee"); w != "" {
+		for _, who := range people {
+			part := "an attendee"
+			if who.Organiser {
+				part = "the organiser"
+			}
+			if w := p.throughSomeoneElse(who.Attendee, part); w != "" {
 				why = w
 				break
 			}

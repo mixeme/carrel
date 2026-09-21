@@ -266,6 +266,89 @@ func Organiser(obj *model.Object) Attendee {
 	return Attendee{}
 }
 
+// Person is one person a record names, and the part they have in it.
+type Person struct {
+	Attendee
+	Organiser bool
+}
+
+// People lists everyone a record names: the organiser and the attendees of
+// the main component and of every RECURRENCE-ID sibling beside it. A person
+// can belong to one occurrence only — added to a single week of a series,
+// or standing in for someone that Thursday — and reading the main component
+// alone would not find them at all (S-15.4).
+//
+// A record whose document cannot be read, or that has none because it was
+// built rather than fetched, falls back to its main component: less than
+// the truth, but never a lie.
+func People(obj *model.Object) []Person {
+	main := append(organiserOf(obj), attendeesOf(obj)...)
+	if obj == nil || !obj.IsCalendar() {
+		return main
+	}
+	doc, err := decode(obj.CalendarDoc())
+	if err != nil {
+		return main
+	}
+	root := findMain(doc)
+	if root == nil {
+		return main
+	}
+	uid := propText(root.Props, ical.PropUID)
+	out := peopleIn(root)
+	for _, child := range doc.Children {
+		if child.Name != root.Name || child.Props.Get(ical.PropRecurrenceID) == nil {
+			continue
+		}
+		if u := propText(child.Props, ical.PropUID); u != "" && u != uid {
+			continue
+		}
+		out = append(out, peopleIn(child)...)
+	}
+	return out
+}
+
+func peopleIn(c *ical.Component) []Person {
+	var out []Person
+	for _, v := range c.Props[ical.PropOrganizer] {
+		out = append(out, Person{Attendee: personOf(v), Organiser: true})
+	}
+	for _, v := range c.Props[ical.PropAttendee] {
+		out = append(out, Person{Attendee: personOf(v)})
+	}
+	return out
+}
+
+func personOf(v ical.Prop) Attendee {
+	params := map[string]string{}
+	for name, values := range v.Params {
+		params[strings.ToUpper(name)] = strings.Join(values, ",")
+	}
+	return Attendee{
+		Name:          params[ical.ParamCommonName],
+		Email:         CalAddress(v.Value),
+		Status:        params[ical.ParamParticipationStatus],
+		SentBy:        CalAddress(params[ical.ParamSentBy]),
+		DelegatedFrom: calAddresses(ical.ParamDelegatedFrom, params),
+		DelegatedTo:   calAddresses(ical.ParamDelegatedTo, params),
+	}
+}
+
+func organiserOf(obj *model.Object) []Person {
+	if o := Organiser(obj); o.Email != "" || o.SentBy != "" {
+		return []Person{{Attendee: o, Organiser: true}}
+	}
+	return nil
+}
+
+func attendeesOf(obj *model.Object) []Person {
+	var out []Person
+	for _, a := range Attendees(obj) {
+		out = append(out, Person{Attendee: a})
+	}
+	return out
+}
+
 // CalAddress is a CAL-ADDRESS as an address: the mailto: a calendar writes
 // and this side does not want, whatever case it came in.
 func CalAddress(v string) string {
