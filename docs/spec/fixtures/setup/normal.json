@@ -1,0 +1,86 @@
+{
+  "form": {
+    "action": "/setup",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/setup",
+        "id": "setup.submit",
+        "label": "Create administrator",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Login",
+            "name": "login",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "For getting back in if the password is lost. It is not confirmed yet: the account page sends the letter.",
+            "kind": "email",
+            "label": "Email (optional)",
+            "name": "email",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "At least 8 characters.",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Repeat password",
+            "name": "password2",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "lede": "This instance has no accounts yet. Choose a login and password for the first administrator.",
+  "notices": [],
+  "title": "Create administrator"
+}

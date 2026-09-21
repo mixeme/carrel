@@ -5,6 +5,23 @@ All notable changes to the Carrel server are documented here. Numbers like
 entry lists **Tagged:**. This file tells consumers what to do, not what the
 authors did.
 
+## v0.2.8 — 2026-09-21
+
+fixtures-tail.md: первый запуск и открытая регистрация.
+
+### Changed
+
+- Two pairs on an instance nobody has set up yet: `/setup` and
+  `/register`. They need an empty instance, so they are taken outside the
+  mockup set.
+
+### Notes
+
+- `/register` does not exist until a relay is configured: without one the
+  letter that confirms an address never goes, and a person who registered
+  could never sign in (S-26). The route answers 404 rather than offering a
+  form that leads nowhere — right, and now written down.
+
 ## v0.2.7 — 2026-09-21
 
 fixtures-tail.md: файлы и приглашение.

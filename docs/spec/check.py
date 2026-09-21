@@ -195,6 +195,8 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-files-published": "/app/files/published",
     "app-files-picker": "/app/files/picker",
     "invite": "/invite/{token}",
+    "setup": "/setup",
+    "register": "/register",
     "app-collections-rename": "/app/collections/rename",
     "app-collections-move": "/app/collections/move",
     "app-collections-delete": "/app/collections/delete",

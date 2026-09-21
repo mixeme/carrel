@@ -1003,3 +1003,34 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		app.compare(t, "invite/normal.json", app.h.do(get("/invite/"+secret, nil)))
 	})
 }
+
+// C-14.2: the screens of an instance nobody has set up yet, and the ones a
+// person reaches without an account. They need an empty instance, so they
+// do not use the mockup set.
+func TestFixtureBeforeAnyone(t *testing.T) {
+	fresh := &mockupApp{h: newHarness(t), byAccount: map[string]string{}, byPath: map[string]string{}}
+	fresh.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	fresh.h.srv.SetBuild(mockupVersion, mockupCommit)
+	t.Run("setup", func(t *testing.T) {
+		fresh.compare(t, "setup/normal.json", fresh.h.do(get("/setup", nil)))
+	})
+
+	open := &mockupApp{h: newHarness(t), byAccount: map[string]string{}, byPath: map[string]string{}}
+	open.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	open.h.srv.SetBuild(mockupVersion, mockupCommit)
+	admin := open.h.admin("mix", "password123")
+	sess := open.h.login("mix", "password123")
+	// Registration needs a relay: without one the letter that confirms an
+	// address never goes, and nobody who registered could sign in (S-26).
+	open.h.do(postForm("/admin/settings", sess, url.Values{
+		"host": {"127.0.0.1"}, "port": {"25"}, "security": {"none"},
+		"username": {"relay"}, "password": {"relay-password-xyz"}, "from": {"noreply@carrel.example"},
+	}))
+	if rec := open.h.do(postForm("/admin/", sess, url.Values{"action": {"selfreg"}, "selfReg": {"on"}})); rec.Code != 303 {
+		t.Fatalf("open the registration: %d %s", rec.Code, rec.Body.String())
+	}
+	t.Run("register", func(t *testing.T) {
+		open.compare(t, "register/normal.json", open.h.do(get("/register", nil)))
+	})
+	_ = admin
+}
