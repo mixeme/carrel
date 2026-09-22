@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 	"unicode"
@@ -39,6 +40,28 @@ type Guard struct {
 	maxBody     int64
 	maxRedirect int
 	resolver    ipLookup
+	tally       Tally
+}
+
+// Tally counts what the pool actually does, so a question about it is
+// settled by numbers rather than by reasoning (docs/plan/server.md, «Пул
+// соединений»). It costs four atomic adds per request and is read by a
+// test or a live run; nothing in a screen looks at it.
+type Tally struct {
+	Clients  atomic.Int64 // HTTP clients built, each with a pool of its own
+	Dialled  atomic.Int64 // connections opened
+	Requests atomic.Int64 // requests sent, first attempts only
+	Writes   atomic.Int64 // of those, requests that change something
+	FromIdle atomic.Int64 // of those writes, sent on a connection the pool had kept
+}
+
+// Counts reports the tally as plain numbers. Clients against Dialled is
+// what tells a pool that is cold too often from requests that simply run
+// at the same time: the first is worth sharing a pool over, the second is
+// not.
+func (g *Guard) Counts() (clients, dialled, requests, writes, writesFromIdle int64) {
+	return g.tally.Clients.Load(), g.tally.Dialled.Load(), g.tally.Requests.Load(),
+		g.tally.Writes.Load(), g.tally.FromIdle.Load()
 }
 
 // NewGuard builds a guard from C-12 DAV settings.
@@ -73,6 +96,7 @@ func (g *Guard) HTTPClientWithCertPin(pinnedFingerprint string) *http.Client {
 }
 
 func (g *Guard) httpClient(pinnedFingerprint string) *http.Client {
+	g.tally.Clients.Add(1)
 	transport := &http.Transport{
 		// No proxy: with one set, the dialler would connect to the proxy and
 		// the real target would never be IP-checked (architecture.md, SSRF).
@@ -95,7 +119,7 @@ func (g *Guard) httpClient(pinnedFingerprint string) *http.Client {
 	fresh := transport.Clone()
 	fresh.DisableKeepAlives = true
 	return &http.Client{
-		Transport: &limitTransport{base: transport, fresh: fresh, max: g.maxBody, request: g.request},
+		Transport: &limitTransport{base: transport, fresh: fresh, max: g.maxBody, request: g.request, tally: &g.tally},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= g.maxRedirect {
 				return fmt.Errorf("dav: too many redirects")
@@ -140,6 +164,7 @@ func (g *Guard) dialContext(ctx context.Context, network, address string) (net.C
 		permitted = true
 		conn, err := dialer.DialContext(ctx, network, net.JoinHostPort(ip.IP.String(), port))
 		if err == nil {
+			g.tally.Dialled.Add(1)
 			return conn, nil
 		}
 		lastErr = err
@@ -291,6 +316,7 @@ type limitTransport struct {
 	fresh   http.RoundTripper
 	max     int64
 	request time.Duration // CARREL_DAV_REQUEST_TIMEOUT
+	tally   *Tally        // nil outside a measurement
 }
 
 // RoundTrip sends the request and, when a connection the pool had kept turns
@@ -325,6 +351,15 @@ type limitTransport struct {
 // arriving twice (dav.WasResent).
 func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	resp, err, fromIdle := t.attempt(req)
+	if t.tally != nil {
+		t.tally.Requests.Add(1)
+		if !readOnly(req) {
+			t.tally.Writes.Add(1)
+			if fromIdle {
+				t.tally.FromIdle.Add(1)
+			}
+		}
+	}
 	// A server of its own accord cannot set this: whatever came in with the
 	// first answer goes, so the mark below means the guard and no one else.
 	if resp != nil {

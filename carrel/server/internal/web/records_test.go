@@ -832,3 +832,44 @@ func TestTasksAndNotes(t *testing.T) {
 	}
 	mustContain(t, body(t, f, "a.ics"), "STATUS:COMPLETED", "COMPLETED:", "DUE:20260110T120000Z")
 }
+
+// The pool question, answered with numbers instead of reasoning
+// (docs/plan/server.md, «Пул соединений»). Guard.httpClient builds a
+// transport for every dav.Client, so a client's first request always dials
+// and only what follows it on that same client can come off the pool. The
+// rule that a dropped write is sent again applies to the second kind only,
+// so how much that rule is worth depends entirely on the mix.
+//
+// This walks an ordinary visit — look at a list, open a card, make a
+// record, edit it, delete it — and prints what the guard did. It asserts
+// only what must not silently change: that writes happen and that the
+// counters move. The numbers are for the decision, and they are in the log.
+func TestWhatThePoolActuallyDoes(t *testing.T) {
+	f := contactsFixture(t, false,
+		"BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nEMAIL:ada@example.com\nEND:VCARD\n")
+	list := f.path("contacts")
+
+	f.h.do(get(list, f.sess))
+	f.h.do(get(list+"/ada", f.sess))
+	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(list+"/new", f.sess))).Form)
+	form.Set("fn", "Grace Hopper")
+	made := f.h.do(postForm(list+"/new", f.sess, form))
+	if made.Code != http.StatusSeeOther {
+		t.Fatalf("new: %d %s", made.Code, made.Body.String())
+	}
+	at := made.Header().Get("Location")
+	edit := formFields(decode[view.ContactEditPage](t, f.h.do(get(at+"/edit", f.sess))).Form)
+	edit.Set("fn", "Grace M. Hopper")
+	f.h.do(postForm(at+"/edit", f.sess, edit))
+	f.h.do(get(list, f.sess))
+
+	clients, dialled, requests, writes, fromIdle := f.h.srv.DAVCounts()
+	t.Logf("pool over one visit: %d clients built, %d connections dialled, %d requests, %d of them writes, %d of those off an idle connection",
+		clients, dialled, requests, writes, fromIdle)
+	if writes == 0 || requests == 0 {
+		t.Fatalf("the visit wrote nothing: %d requests, %d writes", requests, writes)
+	}
+	if dialled == 0 {
+		t.Error("no connection was counted: the tally is not wired to the dialler")
+	}
+}

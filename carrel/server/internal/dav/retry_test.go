@@ -312,3 +312,43 @@ func (headerBase) RoundTrip(req *http.Request) (*http.Response, error) {
 		Request:    req,
 	}, nil
 }
+
+// The tally answers a question about the pool with numbers instead of
+// reasoning (docs/plan/server.md, «Пул соединений»). What it must get
+// right: a dial is counted once per connection opened, not per request; a
+// read is not counted as a write; and a write that went out on a
+// connection the pool had kept is told apart from one on a connection
+// dialled for it — which is the whole point, because only the first kind
+// is ever sent again.
+func TestTheTallySeparatesWritesByTheirConnection(t *testing.T) {
+	for _, one := range []struct {
+		name                     string
+		fromIdle                 bool
+		method                   string
+		writes, fromIdleExpected int64
+	}{
+		{"a read is not a write", true, "PROPFIND", 0, 0},
+		{"a write off the pool", true, http.MethodPut, 1, 1},
+		{"a write on a fresh connection", false, http.MethodPut, 1, 0},
+	} {
+		t.Run(one.name, func(t *testing.T) {
+			g := &Guard{}
+			lt := &limitTransport{base: &flakyBase{fromIdle: one.fromIdle}, tally: &g.tally}
+			req, err := http.NewRequestWithContext(context.Background(), one.method,
+				"http://server.example/dav/", bytes.NewReader([]byte("body")))
+			if err != nil {
+				t.Fatal(err)
+			}
+			resp, err := lt.RoundTrip(req)
+			if err != nil {
+				t.Fatal(err)
+			}
+			resp.Body.Close()
+			_, _, requests, writes, fromIdle := g.Counts()
+			if requests != 1 || writes != one.writes || fromIdle != one.fromIdleExpected {
+				t.Errorf("requests %d, writes %d, from idle %d; want 1, %d, %d",
+					requests, writes, fromIdle, one.writes, one.fromIdleExpected)
+			}
+		})
+	}
+}

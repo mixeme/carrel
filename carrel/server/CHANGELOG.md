@@ -17,6 +17,46 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.20 — 2026-09-22
+
+Три решения владельца, и один замер, который перевернул мой довод.
+
+### Added
+
+- `dav.Tally` counts what the outbound guard does — clients built,
+  connections dialled, requests sent, of those the writes, and of those
+  the ones off a connection the pool had kept — behind `Guard.Counts` and
+  `web.Server.DAVCounts`. Four atomic adds per request; nothing in a
+  screen reads them. It exists so that a question about the pool is
+  settled by numbers.
+
+### Notes
+
+- **The pool, measured.** Over a live forms run: SoGo 24 clients and 24
+  connections for 79 requests, Yandex 16 and 16 for 53. One connection
+  per client, and no concurrency at all: every connection exists because
+  a handler built a fresh `dav.Client`, made about three requests on it
+  and threw it away with its pool. The argument I had made against
+  sharing — that each client would lose its ten idle connections — was
+  wrong, because there is no pool today to lose. Every live write already
+  goes out on an idle connection (7/7, 8/8, 3/3), so sharing would not
+  improve the resend rule at all; what it would save is some twenty TLS
+  handshakes per visit. The decision and the two questions left (do it
+  now, and what to set `MaxIdleConnsPerHost` to) are in
+  `docs/plan/server.md`.
+- **Files in a timeline keep matching by name**, and S-15.4 now says why
+  that is not an oversight: an event has a strict reference and a guess
+  beside it is harmful, while a file has no reference at all, so the
+  choice is not «strictly or by guess» but «by name or not at all». The
+  row names its ground — «name in the file name».
+- **Contacts stay out of the timeline**, `MEMBER` and `RELATED` with
+  them. Looking for a person in other people's cards is a search of
+  mentions, not a record of time; and «these cards are one person» is
+  already what linking duplicates is for (S-16). After three turns the
+  owner placed them where they belong: a «mentions» view entered from a
+  card — a function that has no route, no view model and no frame yet,
+  so there is nothing for the server to build until one is drawn.
+
 ## v0.2.19 — 2026-09-22
 
 ### Fixed

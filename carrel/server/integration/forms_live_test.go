@@ -52,6 +52,17 @@ func TestYandexForms(t *testing.T) {
 	runForms(t, endpoint, user, pass)
 }
 
+// poolCounts prints what the guard did over a live run, so the question of
+// a shared pool is settled by numbers on a real network rather than on a
+// stand where a connection costs nothing (docs/plan/server.md, «Пул
+// соединений»).
+func poolCounts(t *testing.T, app *liveApp, what string) {
+	t.Helper()
+	clients, dialled, requests, writes, fromIdle := app.srv.DAVCounts()
+	t.Logf("pool over %s: %d clients built, %d connections dialled, %d requests, %d of them writes, %d of those off an idle connection",
+		what, clients, dialled, requests, writes, fromIdle)
+}
+
 func runForms(t *testing.T, endpoint, user, pass string) {
 	ctx := context.Background()
 	g := testGuard(t)
@@ -106,6 +117,7 @@ func runForms(t *testing.T, endpoint, user, pass string) {
 	t.Run("connection", func(t *testing.T) { liveConnectionEdit(t, app, conn.ID, endpoint, user, pass) })
 	// Last: it takes the connection out from under the rest.
 	t.Run("disconnect", func(t *testing.T) { liveDisconnect(t, app, conn.ID, endpoint, user, pass, cal.Path) })
+	poolCounts(t, app, "a forms run")
 }
 
 // connections-tail.md: Disconnect leaves the server alone and Carrel with

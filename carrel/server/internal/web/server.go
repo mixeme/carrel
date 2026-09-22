@@ -227,6 +227,15 @@ func (s *Server) SetPatience() {
 	}
 }
 
+// DAVCounts reports what this server's outbound guard has done: connections
+// dialled, requests sent, of those the ones that write, and of those the
+// ones that went out on a connection the pool had kept. It exists to settle
+// a question about the pool with numbers (docs/plan/server.md, «Пул
+// соединений»); nothing but a measurement reads it.
+func (s *Server) DAVCounts() (clients, dialled, requests, writes, writesFromIdle int64) {
+	return s.guard.Counts()
+}
+
 // SetClock freezes what the screens call "now". Nothing but a test calls
 // it: an instance reads the wall clock.
 func (s *Server) SetClock(at time.Time) {
