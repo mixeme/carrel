@@ -412,6 +412,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-avatar{width:28px;height:28px;border-radius:3px;background:#D9D2BE;color:#4E4738;font-size:10.5px;
   display:flex;align-items:center;justify-content:center;font-weight:600;flex:none}
 .tc-avatar.is-photo{background:#8C7B6A}
+[data-tc-theme="dark"] .tc-avatar{background:#3A463D;color:#C9BFA6}
 /* метки, значки, статусы */
 .tc-tag{border:.5px solid var(--tc-hair);border-radius:2px;padding:0 5px;font-size:10.5px;color:var(--tc-muted);background:var(--tc-surface);white-space:nowrap}
 .tc-tag:has(> .tc-mark){display:inline-flex;align-items:center;gap:5px}
@@ -479,6 +480,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-tile{border:.5px solid var(--tc-hair);border-radius:4px;background:var(--tc-surface);padding:7px;display:flex;flex-direction:column;gap:6px}
 .tc-tile.is-sel{border-color:var(--tc-accent);background:var(--tc-card)}
 .tc-thumb{aspect-ratio:4/3;border-radius:3px;background:#D9D2BE;display:flex;align-items:center;justify-content:center}
+[data-tc-theme="dark"] .tc-thumb{background:#33403A}
 .tc-thumb svg{width:22px;height:22px;stroke:var(--tc-muted);stroke-width:1.2;fill:none}
 .tc-tile__name{font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tc-tile__meta{font-size:10.5px;color:var(--tc-dusty);font-family:var(--tc-font-mono)}
@@ -501,6 +503,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 /* наложение: быстрая заметка поверх любого экрана */
 .tc-overlay{position:relative;container:tcbox / inline-size;min-width:0}
 .tc-scrim{position:absolute;inset:0;background:rgba(23,33,28,.22);display:flex;align-items:flex-start;justify-content:center;padding-top:44px}
+[data-tc-theme="dark"] .tc-scrim{background:rgba(0,0,0,.42)}
 .tc-sheet{width:560px;max-width:92%;background:var(--tc-surface);border:.5px solid var(--tc-edge);border-radius:5px;display:flex;flex-direction:column;position:relative;container:tcbox / inline-size}
 .tc-sheet__head{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:.5px solid var(--tc-hair);position:relative}
 .tc-sheet__body{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
@@ -11605,6 +11608,197 @@ The account itself stays: same login, same confirmed address. Only the password 
   </div>
 </div>
 <figcaption>Тема переключается системной настройкой и вручную — в «Настройки → Appearance», там же плотность строк. Значения хранятся в <code>localStorage</code>, чтобы не заводить ради этого поле в профиле на сервере.</figcaption>
+</figure>
+
+<p><b>Тремя правилами тёмная тема не обходится.</b> Токены перекрашивают почти
+всё, но аватар и плитка залиты картоном, а затемнение — чернилами по светлой
+странице: на тёмном фоне первые два остаются бежевыми, третье пропадает.
+Поэтому у них есть правила <code>[data-tc-theme="dark"]</code>, а у правил —
+кадры, на которых они срабатывают. Эти два кадра — копии
+<a href="#m-io">накладки перетаскивания</a> и
+<a href="#s-files">плиток</a>, отличающиеся одним атрибутом на корне.</p>
+
+<figure>
+<div class="frame" data-frame="m-dark-2">
+  <div class="frame-label"><span>Контакты и накладка перетаскивания · тёмная тема</span><i>аватары и затемнение</i></div>
+  <div class="tc-root tc-shell" data-tc-theme="dark">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" value="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-overlay">
+      <div class="tc-shell__body">
+        <div class="tc-shell__rail">
+          <div class="tc-nav">
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts<span class="tc-num">312</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar<span class="tc-num">14</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes<span class="tc-num">86</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates<span class="tc-num">3</span></a>
+          </div>
+          <div class="tc-railsec">
+            <div class="tc-tickrow is-all"><button class="tc-tickrow__tick is-part" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-tickrow__label">Combined address book</span><span class="tc-tickrow__meta">312</span></div>
+          </div>
+          <div class="tc-railsec">
+            <div class="tc-rubric">nextcloud · home</div>
+            <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">248</span></div>
+            <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">51</span></div>
+          </div>
+          <div class="tc-railsec">
+            <div class="tc-rubric">radicale · vps</div>
+            <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Команда</span><span class="tc-tickrow__meta">13</span><span class="tc-badge">ro</span></div>
+          </div>
+          <div class="tc-railfoot">
+            <button class="tc-btn" title="New address book" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg></button>
+            <button class="tc-btn" title="Connect account" type="button"><svg viewBox="0 0 24 24"><use href="#i-server"/></svg></button>
+            <button class="tc-btn" title="Subscribe to a feed" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
+        </div>
+        <div class="tc-main">
+          <div class="tc-head">
+            <div class="tc-head__titles"><div class="tc-head__title"><span class="tc-mark tc-mark--h20" data-tc-colour="#4A6B52"></span>Контакты</div><div class="tc-head__sub">nextcloud · home · 248 cards</div></div>
+            <div class="tc-acts">
+              <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New contact<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+              <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Import</button>
+              <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Export</button>
+            </div>
+          </div>
+          <div class="tc-bar">
+            <label class="tc-in is-ph tc-in--h26-w220"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-ico--mr6"><use href="#i-search"/></svg><input class="tc-q" type="search" value="Filter the loaded cards" aria-label="Filter the loaded cards"></label>
+            <span class="tc-seg is-2nd"><button class="is-on tc-seg__opt" type="button">A–Z</button><button class="tc-seg__opt" type="button">Recently changed</button></span>
+            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
+            <span class="tc-bar__right is-2nd"><span class="tc-mono">248</span></span>
+          </div>
+          <div class="tc-list__group"><span class="tc-rubric">А</span><span class="tc-num">3</span></div>
+          <div class="tc-list">
+            <div class="tc-row tc-row--avatarcols">
+              <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-avatar">АК</span>
+              <span class="tc-row__title">Анна Ковалёва</span>
+              <span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 912 445-10-88</span>
+              <span class="tc-row__excerpt tc-row__detail">a.kovaleva@example.org</span>
+              <span class="tc-row__excerpt tc-row__caption">Издательство «Слово»</span>
+              <span class="tc-row__cell">nextcloud · Контакты</span>
+            </div>
+            <div class="tc-row tc-row--avatarcols">
+              <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-avatar">АС</span>
+              <span class="tc-row__title">Алексей Смирнов</span>
+              <span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 916 200-71-15</span>
+              <span class="tc-row__excerpt tc-row__detail">—</span>
+              <span class="tc-row__excerpt tc-row__caption">—</span>
+              <span class="tc-row__cell">nextcloud · Контакты</span>
+            </div>
+          </div>
+          <div class="tc-list__group"><span class="tc-rubric">В</span><span class="tc-num">2</span></div>
+          <div class="tc-list">
+            <div class="tc-row tc-row--avatarcols">
+              <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-avatar">ВГ</span>
+              <span class="tc-row__title">Виктор Гончаров</span>
+              <span class="tc-row__excerpt tc-mono tc-row__subtitle">—</span>
+              <span class="tc-row__excerpt tc-row__detail">v.goncharov@example.org</span>
+              <span class="tc-row__excerpt tc-row__caption">Городская библиотека №4</span>
+              <span class="tc-row__cell">nextcloud · Контакты</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tc-scrim tc-scrim--padt38">
+        <div class="tc-empty tc-empty--drop">
+          <svg width="20" height="20" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-up"/></svg>
+          <b class="tc-empty__lead">Drop to import</b>
+          <span class="tc-dim--t12-5">One <span class="tc-mono">.vcf</span> file into <b>Контакты · nextcloud · home</b></span>
+          <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The preview opens first: nothing is written until it has been read</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption>Аватары под затемнением: фон аватара тёмно-зелёный, а не картон,
+и сама накладка — чёрная с прозрачностью .42, а не чернила .22, которые на
+тёмном фоне не видны.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="m-dark-3">
+    <div class="frame-label"><span>Файлы плитками · тёмная тема</span><i>плитки предпросмотра</i></div>
+    <div class="tc-root tc-shell" data-tc-theme="dark">
+      <div class="tc-top">
+        <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+        <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" value="Search everything…" aria-label="Search everything…"></div>
+        <div class="tc-top__actions">
+          <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+          <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+        </div>
+      </div>
+      <div class="tc-shell__body">
+        <div class="tc-shell__rail">
+          <div class="tc-nav">
+            <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts<span class="tc-num">312</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar<span class="tc-num">14</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes<span class="tc-num">86</span></a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates<span class="tc-num">3</span></a>
+          </div>
+          <div class="tc-railsec">
+            <div class="tc-tickrow is-root"><button class="tc-tickrow__tick is-part" type="button"></button><svg viewBox="0 0 24 24"><use href="#i-file"/></svg><span class="tc-tickrow__label">Selected collections</span><span class="tc-tickrow__meta">2 of 3</span></div>
+          </div>
+          <div class="tc-railsec">
+            <div class="tc-rubric">sftpgo · vps</div>
+            <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Documents</span><span class="tc-tickrow__meta">rw</span></div>
+            <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Public</span><span class="tc-badge">ro</span></div>
+          </div>
+          <div class="tc-railsec">
+            <div class="tc-rubric">nextcloud · home</div>
+            <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Files</span><span class="tc-tickrow__meta">rw</span></div>
+          </div>
+          <div class="tc-railsec">
+            <div class="tc-rubric">Shortcuts</div>
+            <div class="tc-tree tc-tree--padx8">
+              <div class="is-on tc-tree__row"><svg><use href="#i-file"/></svg>Attachments<span class="tc-tickrow__meta tc-push tc-tickrow__meta--dusty">Documents / carrel</span></div>
+              <div class="tc-tree__row"><svg><use href="#i-link"/></svg>Published<span class="tc-tickrow__meta tc-push tc-tickrow__meta--dusty">2</span></div>
+            </div>
+          </div>
+          <div class="tc-railfoot">
+            <button class="tc-btn" title="Connect account" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg></button>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
+        </div>
+        <div class="tc-main">
+        <div class="tc-head tc-head--padb6">
+          <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t18">2026-07</div><nav class="tc-crumbs"><a class="tc-crumbs__link" href="#">Documents</a>/<a class="tc-crumbs__link" href="#">carrel</a>/<b>2026-07</b></nav></div>
+          <div class="tc-acts">
+            <span class="tc-seg"><button class="tc-seg__opt" type="button"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-menu"/></svg>List</button><button class="is-on tc-seg__opt" type="button"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-grid"/></svg>Tiles</button></span>
+          </div>
+        </div>
+        <div class="tc-bar tc-bar--sel">
+          <span class="tc-bar__count">1 selected</span><span class="tc-mono tc-mono--muted">2.8 MB</span>
+          <span class="tc-bar__sep"></span>
+          <button class="tc-btn" title="Download" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg><span class="tc-btn__label">Download</span></button>
+          <button class="tc-btn" title="Rename" type="button"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg><span class="tc-btn__label">Rename</span></button>
+          <button class="tc-btn" title="Move" type="button"><svg viewBox="0 0 24 24"><use href="#i-move"/></svg><span class="tc-btn__label">Move</span></button>
+          <button class="tc-btn is-danger-solid" title="Delete" type="button"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg><span class="tc-btn__label">Delete</span></button>
+        </div>
+        <div class="tc-grid">
+          <div class="tc-tile is-sel"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><span class="tc-tile__name">whiteboard.jpg</span><span class="tc-tile__meta">2.8 MB · 4032×3024</span></div>
+          <div class="tc-tile"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><span class="tc-tile__name">схема-1.png</span><span class="tc-tile__meta">640 KB · 1920×1080</span></div>
+          <div class="tc-tile"><div class="tc-thumb"><svg><use href="#i-img"/></svg></div><span class="tc-tile__name">схема-2.png</span><span class="tc-tile__meta">712 KB · 1920×1080</span></div>
+          <div class="tc-tile"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-doc"/></svg></div><span class="tc-tile__name">смета.pdf</span><span class="tc-tile__meta">1.2 MB</span></div>
+          <div class="tc-tile"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-file"/></svg></div><span class="tc-tile__name">архив</span><span class="tc-tile__meta">12 items</span></div>
+          <div class="tc-tile"><div class="tc-thumb tc-thumb--on-card"><svg><use href="#i-img"/></svg></div><span class="tc-tile__name">панорама.tif</span><span class="tc-tile__meta">84 MB · too large</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+<figcaption>Плитка предпросмотра — та же поверхность, что карточка, а не
+светлый картон.</figcaption>
 </figure>
 
 <h2 id="m-phone">10. Узкий экран</h2>
