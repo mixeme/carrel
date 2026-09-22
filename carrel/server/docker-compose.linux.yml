@@ -75,7 +75,64 @@ services:
     volumes:
       - xandikos-data:/data
 
+
+  # Davis: sabre/dav with a Symfony admin over it — the same engine as
+  # Baikal and Nextcloud, so it is here for completeness rather than for
+  # news. The standalone image carries Caddy, so it is one container and
+  # not the nginx-plus-FPM pair the project's own compose files use.
+  #
+  # NOT YET RUN: written from the project's documentation and its own
+  # compose examples on 22.09.2026, on a machine without Docker. See
+  # testdata/davis/README.md — and note that its DAV account is made by
+  # hand, once, in the admin screens.
+  davis:
+    image: ghcr.io/tchapi/davis-standalone:latest
+    ports:
+      - "127.0.0.1:8082:9000"
+    environment:
+      APP_ENV: "prod"
+      APP_SECRET: "carrel-stand-not-a-secret"
+      APP_TIMEZONE: "Europe/Moscow"
+      # Four slashes: an absolute path, and no quotes, so Symfony resolves it.
+      DATABASE_DRIVER: "sqlite"
+      DATABASE_URL: sqlite:////data/davis-database.db
+      # The admin screens, where the one DAV account is made by hand.
+      ADMIN_LOGIN: "admin"
+      ADMIN_PASSWORD: "carrel-admin"
+      ADMIN_AUTH_BYPASS: "false"
+      AUTH_METHOD: "Basic"
+      AUTH_REALM: "SabreDAV"
+      CALDAV_ENABLED: "true"
+      CARDDAV_ENABLED: "true"
+      # Davis's WebDAV wants directories of its own; Carrel asks this stand
+      # for calendars and contacts, and finds no file root, as it finds none
+      # on SoGo or Yandex.
+      WEBDAV_ENABLED: "false"
+    volumes:
+      - davis-data:/data
+
+  # One shot: the migrations, which Davis does not run for itself. Until
+  # they have run the database has no tables and every screen is a 500.
+  davis-setup:
+    image: ghcr.io/tchapi/davis-standalone:latest
+    depends_on:
+      - davis
+    environment:
+      APP_ENV: "prod"
+      APP_SECRET: "carrel-stand-not-a-secret"
+      DATABASE_DRIVER: "sqlite"
+      DATABASE_URL: sqlite:////data/davis-database.db
+    volumes:
+      - davis-data:/data
+    entrypoint:
+      - sh
+      - -c
+      - "bin/console doctrine:migrations:migrate --no-interaction && chown -R $$(id -u):$$(id -g) /data"
+    profiles:
+      - setup
+
 volumes:
   radicale-data:
   stalwart-data:
   xandikos-data:
+  davis-data:

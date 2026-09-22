@@ -10,7 +10,7 @@ DAV, ключах, сессиях, правах и потолках: всё, ч�
 
 | | |
 |---|---|
-| Typecase — виджеты, из которых собираются экраны | [typecase.md](typecase.md) — `L-…` |
+| Typecase — виджеты, из которых собираются экраны | спека `typecase.md` в репозитории Typecase — `L-…` |
 | Вью-модели, маршруты и фикстуры | [carrel-common.md](carrel-common.md) — `C-…` |
 | Кадры экранов — источник требований | [carrel-ui-mockups.html](../visual/carrel-ui-mockups.html) |
 | Стиль, знак, логотип | [carrel-brand-guide.html](../visual/carrel-brand-guide.html) · [carrel-icon.html](../visual/carrel-icon.html) · [carrel-logotype.html](../visual/carrel-logotype.html) · [davloom-icon.html](../visual/davloom-icon.html) |
@@ -61,7 +61,7 @@ DAV, ключах, сессиях, правах и потолках: всё, ч�
 | [Стиль](../visual/carrel-brand-guide.html) | Палитра, типографика, материал, голос, правила проектирования экрана |
 | [Знак](../visual/carrel-icon.html) · [логотип](../visual/carrel-logotype.html) · [знак режима прокси](../visual/davloom-icon.html) | Геометрия, размеры, темы, где что стоит |
 | [C-5](carrel-common.md) и [C-6](carrel-common.md) | Адреса и данные, которые на них приходят |
-| [L-4](typecase.md) | Виджеты, из которых экран собирается |
+| `L-4` (спека Typecase) | Виджеты, из которых экран собирается |
 
 Эти файлы **не пересказываются**: значения берутся оттуда ссылкой. Копия
 расходится с оригиналом, и никто этого не замечает.

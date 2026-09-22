@@ -92,6 +92,23 @@ if [[ "${CARREL_XANDIKOS:-}" == "1" ]]; then
   go test -tags=integration -count=1 -timeout 30m -run 'Xandikos' ./integration/...
 fi
 
+# Davis, sabre/dav once more. NOT YET RUN either, and its DAV account is
+# made by hand in the admin screens — the suite skips and says so when
+# CARREL_DAVIS_USER and CARREL_DAVIS_PASS are unset
+# (testdata/davis/README.md). Run with CARREL_DAVIS=1.
+if [[ "${CARREL_DAVIS:-}" == "1" ]]; then
+  echo "== S-30.2: Davis integration =="
+  docker compose -f docker-compose.linux.yml up -d davis
+  for _ in $(seq 1 60); do
+    if curl -sf -o /dev/null http://127.0.0.1:8082/ 2>/dev/null; then
+      break
+    fi
+    sleep 0.5
+  done
+  docker compose -f docker-compose.linux.yml run --rm davis-setup
+  go test -tags=integration -count=1 -timeout 30m -run 'Davis' ./integration/...
+fi
+
 if [[ -n "${CARREL_SFTPGO_URL:-}" && -n "${CARREL_SFTPGO_USER:-}" && -n "${CARREL_SFTPGO_PASS:-}" ]]; then
   echo "== S-30.2: SFTPGo integration =="
   go test -tags=integration -count=1 -run 'SFTPGo' ./integration/...

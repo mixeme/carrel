@@ -1,6 +1,6 @@
 # Архитектура и структура репозитория
 
-Закон — спеки: [typecase.md](../spec/typecase.md) (`L`), [carrel-server.md](../spec/carrel-server.md) (`S`), [carrel-common.md](../spec/carrel-common.md) (`C`). Этот файл закрывает то, чего в спеках нет: раскладка модулей, пины зависимостей, развилки, на которых Composer обычно ошибается.
+Закон — спеки: `typecase.md` (`L`, в репозитории Typecase), [carrel-server.md](../spec/carrel-server.md) (`S`), [carrel-common.md](../spec/carrel-common.md) (`C`). Этот файл закрывает то, чего в спеках нет: раскладка модулей, пины зависимостей, развилки, на которых Composer обычно ошибается.
 
 ---
 

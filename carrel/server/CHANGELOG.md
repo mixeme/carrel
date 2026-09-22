@@ -17,6 +17,44 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.24 — 2026-09-22
+
+### Added
+
+- **Davis**, sabre/dav with a Symfony admin over it — the same engine as
+  Baikal and Nextcloud, so it joins the lineup for completeness rather
+  than for news. Seven live suites, and one service: the standalone image
+  carries Caddy, so there is none of the nginx-plus-FPM pairing the
+  project's own compose files use. A one-shot runs the migrations, which
+  Davis does not run for itself — until they have, every screen is a 500.
+- Its DAV account is made **by hand, once**, and that is a finding rather
+  than a shortcut. Davis has no way to create one without its admin
+  screens: the API reads users and never writes them, the three console
+  commands do not include one, and the row cannot honestly be written
+  straight into the database — the password is a PHP `password_hash`
+  despite the column being called `digesta1`, and making a user writes
+  four entities at once. Reproducing that in SQL would be reimplementing
+  the application, to rot at its next release. So the container comes up
+  on its own and the suite takes the account from `CARREL_DAVIS_USER` and
+  `CARREL_DAVIS_PASS`, skipping with that explanation when they are unset.
+
+### Notes
+
+- Like Stalwart and Xandikos, the stand has not been run — no Docker on
+  the machine it was written on — and its step in `linux-gates.sh` is
+  behind `CARREL_DAVIS=1`.
+- **DAViCal stays unstarted, checked a second time.** Its tree does hold
+  a command line, `scripts/davical-cli`, but it is a third-party Perl
+  script with FreeBSD paths and another company's per-domain config
+  convention baked in: no use to a stand. With no official image either,
+  it would need a Containerfile of our own over the Debian package, plus
+  PostgreSQL, on top of the same by-hand account Davis needs. What to
+  decide at the machine is in the plan.
+- Four links in `docs/` pointed at `docs/spec/typecase.md`, which left
+  this tree on 10.09.2026 when Typecase moved to its own repository.
+  They now say where the spec lives instead of pointing at nothing. No
+  requirement text was touched.
+
 ## v0.2.23 — 2026-09-22
 
 ### Fixed

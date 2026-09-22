@@ -7,7 +7,7 @@
 
 | | |
 |---|---|
-| Typecase — библиотека виджетов | [typecase.md](typecase.md) — `L-…` |
+| Typecase — библиотека виджетов | спека `typecase.md` в репозитории Typecase — `L-…` |
 | Серверная половина | [carrel-server.md](carrel-server.md) — `S-…` |
 | Клиентская половина | [carrel-client.md](carrel-client.md) — `U-…` |
 | Кадры экранов | [carrel-ui-mockups.html](../visual/carrel-ui-mockups.html) |
