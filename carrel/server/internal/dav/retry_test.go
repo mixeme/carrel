@@ -83,8 +83,20 @@ func TestReadOnlyRequestIsSentAgainAfterAnIdleClose(t *testing.T) {
 
 // A write on a connection dialled for it is not sent twice: the error says
 // nothing about what the server did with the first one.
+//
+// MKCOL and MKCALENDAR stood in this list until 22.09.2026 and were taken
+// out of it, which is a loosening of a safety rule and so deserves its
+// reason in full. The rule exists because a doubled write doubles the
+// record. For an update that is real: a resent PUT under If-Match answers
+// 412 both when our own write landed and when somebody else changed the
+// record, and those two owe the person different screens. A create has no
+// such ambiguity — «it is already there» can only mean the first copy
+// landed — so nothing is risked by sending it again, and three live
+// failures in two runs were a MKCOL or a conditional PUT dropped on a
+// fresh connection with the person told nothing was made. The other half
+// of the rule is TestACreateGoesAgainEvenOnAConnectionDialledForIt.
 func TestWriteOnAFreshConnectionIsNotSentAgain(t *testing.T) {
-	for _, method := range []string{http.MethodPut, http.MethodDelete, "MKCOL", "MKCALENDAR", "MOVE", "PROPPATCH"} {
+	for _, method := range []string{http.MethodPut, http.MethodDelete, "MOVE", "PROPPATCH"} {
 		base := &flakyBase{err: io.EOF, fail: 1}
 		if _, err := roundTrip(t, base, method, bytes.NewReader([]byte("x"))); err == nil {
 			t.Errorf("%s: the error was swallowed", method)
@@ -348,7 +360,7 @@ func TestTheTallySeparatesWritesByTheirConnection(t *testing.T) {
 				t.Fatal(err)
 			}
 			resp.Body.Close()
-			_, _, requests, writes, fromIdle := g.Counts()
+			_, _, requests, writes, fromIdle, _ := g.Counts()
 			if requests != 1 || writes != one.writes || fromIdle != one.fromIdleExpected {
 				t.Errorf("requests %d, writes %d, from idle %d; want 1, %d, %d",
 					requests, writes, fromIdle, one.writes, one.fromIdleExpected)
@@ -376,7 +388,7 @@ func TestClientsOfOneGuardShareTheirConnections(t *testing.T) {
 		_, _ = io.Copy(io.Discard, resp.Body)
 		resp.Body.Close()
 	}
-	clients, dialled, requests, _, _ := g.Counts()
+	clients, dialled, requests, _, _, _ := g.Counts()
 	if clients != 4 || requests != 4 {
 		t.Fatalf("%d clients, %d requests: the test did not do what it says", clients, requests)
 	}
@@ -398,5 +410,45 @@ func TestAPinnedClientDoesNotShareAConnection(t *testing.T) {
 	}
 	if plain == pinned {
 		t.Error("a pinned client shares the transport of an unpinned one")
+	}
+}
+
+// A write on a connection dialled for it is not sent again, because a
+// doubled write would double the record — unless it cannot. A PUT under
+// If-None-Match: * and a MKCOL create or are refused, and the refusal
+// says the first copy landed; so those go again even on a fresh
+// connection. Three live failures in two runs of 22.09.2026 were exactly
+// this, on Nextcloud and OpenCloud: nothing made, and the person told so.
+func TestACreateGoesAgainEvenOnAConnectionDialledForIt(t *testing.T) {
+	for _, one := range []struct {
+		name   string
+		method string
+		header string
+		again  bool
+	}{
+		{"a create under If-None-Match", http.MethodPut, "*", true},
+		{"MKCOL", "MKCOL", "", true},
+		{"a plain write", http.MethodPut, "", false},
+		{"an update under If-Match", "PROPPATCH", "", false},
+	} {
+		t.Run(one.name, func(t *testing.T) {
+			base := &flakyBase{err: io.EOF, fail: 1, fromIdle: false}
+			req, err := http.NewRequestWithContext(context.Background(), one.method,
+				"http://server.example/dav/new", bytes.NewReader([]byte("body")))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if one.header != "" {
+				req.Header.Set("If-None-Match", one.header)
+			}
+			resp, rerr := (&limitTransport{base: base}).RoundTrip(req)
+			if resp != nil {
+				resp.Body.Close()
+			}
+			sent := base.calls == 2
+			if sent != one.again {
+				t.Errorf("%d calls (err %v), want sent again = %v", base.calls, rerr, one.again)
+			}
+		})
 	}
 }

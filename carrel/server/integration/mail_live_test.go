@@ -62,22 +62,36 @@ func TestSelfPostRelayDelivers(t *testing.T) {
 	}
 	t.Logf("relay: %s", reply)
 
-	// Each look is a connection of its own: a server may close one that
-	// only polls. A letter from a sender the receiving server has not seen
-	// is deferred at first (a soft reject, greylisting), so the wait is long.
+	// A letter from a sender the receiving server has not seen is deferred
+	// at first (a soft reject, greylisting), so the wait is long — and one
+	// connection does the whole of it. Signing in for every look, which is
+	// what this did until 22.09.2026, is ninety-odd logins in six minutes:
+	// to a mail server that is a password being guessed, and the run of
+	// that day ended with «imap: login: EOF» from a host that had had
+	// enough. The connection is only rebuilt when it actually breaks.
 	var uid string
 	var im *imapConn
-	deadline := time.Now().Add(8 * time.Minute) // inside go test's default 10 minutes
-	for uid == "" && time.Now().Before(deadline) {
+	defer func() {
 		if im != nil {
 			im.close()
 		}
-		if im, err = dialIMAP(imapHost, box, boxPass); err != nil {
-			t.Fatalf("imap: %v", err)
+	}()
+	deadline := time.Now().Add(8 * time.Minute) // inside go test's default 10 minutes
+	for uid == "" && time.Now().Before(deadline) {
+		if im == nil {
+			if im, err = dialIMAP(imapHost, box, boxPass); err != nil {
+				t.Fatalf("imap: %v", err)
+			}
 		}
 		lines, err := im.cmd("UID SEARCH SUBJECT " + quoteIMAP(token))
 		if err != nil {
-			t.Fatalf("search: %v", err)
+			// The server closed a connection that was only watching. Take
+			// that as its right, and come back on a new one.
+			t.Logf("the mailbox closed the connection (%v); opening another", err)
+			im.close()
+			im = nil
+			time.Sleep(10 * time.Second)
+			continue
 		}
 		for _, l := range lines {
 			if f := strings.Fields(l); len(f) > 2 && f[0] == "*" && f[1] == "SEARCH" {
@@ -85,10 +99,9 @@ func TestSelfPostRelayDelivers(t *testing.T) {
 			}
 		}
 		if uid == "" {
-			time.Sleep(5 * time.Second)
+			time.Sleep(10 * time.Second)
 		}
 	}
-	defer im.close()
 	if uid == "" {
 		t.Fatalf("the letter did not arrive in eight minutes (relay said %q)", reply)
 	}

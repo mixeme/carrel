@@ -232,7 +232,7 @@ func (s *Server) SetPatience() {
 // ones that went out on a connection the pool had kept. It exists to settle
 // a question about the pool with numbers (docs/plan/server.md, «Пул
 // соединений»); nothing but a measurement reads it.
-func (s *Server) DAVCounts() (clients, dialled, requests, writes, writesFromIdle int64) {
+func (s *Server) DAVCounts() (clients, dialled, requests, writes, writesFromIdle, resent int64) {
 	return s.guard.Counts()
 }
 

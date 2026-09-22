@@ -204,3 +204,38 @@ func TestResolveWellKnownFromOriginRoot(t *testing.T) {
 		t.Fatalf("final URL = %q, want redirect target /dav/", final)
 	}
 }
+
+// The pool is shared between every client of a guard since 22.09.2026,
+// and a shared pool must not become a way around the address check. It
+// does not: Go keys its connections by host and port, so a host nobody
+// has dialled yet goes through the guard's dialler like the first one
+// did — and is refused there. The test dials an allowed host first, so
+// the pool is warm when the blocked one is tried.
+func TestASharedPoolIsNoWayAroundTheAddressCheck(t *testing.T) {
+	c := testConfig()
+	c.DAVSSRFAllowlist = "127.0.0.1"
+	g := NewGuard(c)
+	allowed := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer allowed.Close()
+
+	resp, err := g.HTTPClient().Get(allowed.URL)
+	if err != nil {
+		t.Fatalf("the allowed host: %v", err)
+	}
+	resp.Body.Close()
+	if _, dialled, _, _, _, _ := g.Counts(); dialled != 1 {
+		t.Fatalf("%d connections: the pool is not warm, so the test proves nothing", dialled)
+	}
+	// "localhost" is not on the allowlist even though it resolves to the
+	// same machine, and it is a different pool key besides.
+	_, port, err := net.SplitHostPort(strings.TrimPrefix(allowed.URL, "http://"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = g.HTTPClient().Get("http://localhost:" + port + "/")
+	if !errors.Is(err, ErrSSRF) && (err == nil || !strings.Contains(err.Error(), "blocked")) {
+		t.Fatalf("a host off the allowlist was reached over the shared pool: %v", err)
+	}
+}

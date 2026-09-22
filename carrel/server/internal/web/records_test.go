@@ -863,9 +863,9 @@ func TestWhatThePoolActuallyDoes(t *testing.T) {
 	f.h.do(postForm(at+"/edit", f.sess, edit))
 	f.h.do(get(list, f.sess))
 
-	clients, dialled, requests, writes, fromIdle := f.h.srv.DAVCounts()
-	t.Logf("pool over one visit: %d clients built, %d connections dialled, %d requests, %d of them writes, %d of those off an idle connection",
-		clients, dialled, requests, writes, fromIdle)
+	clients, dialled, requests, writes, fromIdle, resent := f.h.srv.DAVCounts()
+	t.Logf("pool over one visit: %d clients built, %d connections dialled, %d requests, %d of them writes, %d of those off an idle connection, %d sent again",
+		clients, dialled, requests, writes, fromIdle, resent)
 	if writes == 0 || requests == 0 {
 		t.Fatalf("the visit wrote nothing: %d requests, %d writes", requests, writes)
 	}

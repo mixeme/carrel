@@ -60,15 +60,21 @@ type Tally struct {
 	Requests atomic.Int64 // requests sent, first attempts only
 	Writes   atomic.Int64 // of those, requests that change something
 	FromIdle atomic.Int64 // of those writes, sent on a connection the pool had kept
+	// Resent counts the requests the guard sent a second time because the
+	// connection died before the answer (SV-9). A shared pool keeps
+	// connections idle where each client used to throw its own away, so
+	// this is the number that says how much more often the race happens
+	// now — and therefore how load-bearing the SV-39 fix has become.
+	Resent atomic.Int64
 }
 
 // Counts reports the tally as plain numbers. Clients against Dialled is
 // what tells a pool that is cold too often from requests that simply run
 // at the same time: the first is worth sharing a pool over, the second is
 // not.
-func (g *Guard) Counts() (clients, dialled, requests, writes, writesFromIdle int64) {
+func (g *Guard) Counts() (clients, dialled, requests, writes, writesFromIdle, resent int64) {
 	return g.tally.Clients.Load(), g.tally.Dialled.Load(), g.tally.Requests.Load(),
-		g.tally.Writes.Load(), g.tally.FromIdle.Load()
+		g.tally.Writes.Load(), g.tally.FromIdle.Load(), g.tally.Resent.Load()
 }
 
 // NewGuard builds a guard from C-12 DAV settings.
@@ -110,11 +116,17 @@ func (g *Guard) HTTPClientWithCertPin(pinnedFingerprint string) *http.Client {
 // the transport is what turns that into a pool (docs/plan/server.md, «Пул
 // соединений»).
 //
-// Nothing about a transport belongs to one person: the dialler is the
-// guard's own, SSRF-checked, and credentials ride on each request, not on
-// the connection. The one thing that does differ is a pinned certificate
-// (F-13), so the cache is keyed by the pin and a pinned client never
-// shares a connection with an unpinned one to the same host.
+// Nothing about a transport belongs to one person. Credentials ride on
+// each request — go-webdav sets Basic on the request, not on the
+// connection, and Carrel speaks no scheme that binds to one (no Digest,
+// no NTLM), so two people on one server may share a socket safely. And
+// the address check is not weakened: Go keys its connections by host and
+// port, so a host nobody has dialled yet goes through the guard's
+// dialler like the first one did (TestASharedPoolIsNoWayAroundThe
+// AddressCheck). The one thing that does differ between clients is a
+// pinned certificate (F-13), so the cache is keyed by the pin and a
+// pinned client never shares a connection with an unpinned one to the
+// same host.
 //
 // The two limits are chosen, not derived: ten idle connections per host,
 // as the owner decided on 22.09.2026, and a hundred in all, which is ten
@@ -419,13 +431,16 @@ func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return resp, err
 	case !rewindable(req):
 		return resp, fmt.Errorf("%w (not sent again: its body cannot be produced a second time)", err)
-	case !readOnly(req) && !fromIdle:
+	case !readOnly(req) && !fromIdle && !cannotLandTwice(req):
 		return resp, fmt.Errorf("%w (not sent again: a write on a connection dialled for it, "+
 			"so what the server did with it is unknown)", err)
 	}
 	again, rerr := rewound(req)
 	if rerr != nil {
 		return resp, fmt.Errorf("%w (not sent again: the body would not rewind: %v)", err, rerr)
+	}
+	if t.tally != nil {
+		t.tally.Resent.Add(1)
 	}
 	resp, second, _ := t.attempt(again)
 	if resp != nil {
@@ -438,6 +453,35 @@ func (t *limitTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return resp, fmt.Errorf("%w (sent again after a connection closed before the answer, and it ended the same way)", second)
 	}
 	return resp, second
+}
+
+// cannotLandTwice reports whether a request is one that cannot take effect
+// twice, however many times it arrives — a request that makes something
+// under a precondition that only an absence satisfies. A PUT with
+// If-None-Match: * creates or is refused; MKCOL and MKCALENDAR make a
+// collection or are refused with 405. Either refusal means the first copy
+// landed, and since 22.09.2026 the places that create read it that way
+// (dav.WasResent, web.landedOnTheFirstTry).
+//
+// That is why such a request may be sent again even on a connection
+// dialled for it, where the ordinary rule refuses: the reason for that
+// refusal is that a doubled write would double the record, and here it
+// cannot. Three live failures in two runs were nothing but this — a
+// MKCOL or a PUT that died on a fresh connection and was left unsent
+// with the person told nothing was made.
+//
+// An update is not on this list and must not be. A PUT with If-Match
+// answers 412 both when our own write landed and when somebody else
+// changed the record, and those two need different words to the person.
+func cannotLandTwice(req *http.Request) bool {
+	switch req.Method {
+	case "MKCOL", "MKCALENDAR":
+		return true
+	case http.MethodPut:
+		return req.Header.Get("If-None-Match") == "*"
+	default:
+		return false
+	}
 }
 
 // readOnly reports whether the method only reads, so sending it again changes

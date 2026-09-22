@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -595,25 +596,47 @@ func (s *Server) openSource(id string, conn sealed.Connection, col sealed.Collec
 
 func (c *collectionSource) ID() string { return c.id }
 
+// Asks is one far request per kind the collection holds: Run walks them
+// one after another. A calendar of events, tasks and notes asks three
+// times, an address book once, and the budget follows the work
+// (fanout.Asks).
+func (c *collectionSource) Asks() int {
+	if len(c.kinds) < 1 {
+		return 1
+	}
+	return len(c.kinds)
+}
+
+// Run asks the collection for each of its kinds. The kinds go side by
+// side, each taking a slot of the fanout's ceiling around its own request
+// (fanout.Slot): a calendar of events, tasks and notes used to cost three
+// waits where an address book cost one, and the ceiling stood idle
+// meanwhile. The server is asked no harder — the same number of requests
+// may be in flight as before — and the person waits for the slowest kind
+// rather than for all of them in a row.
 func (c *collectionSource) Run(ctx context.Context, q fanout.Query) ([]fanout.Item, error) {
 	if c.broken != nil {
 		return nil, c.broken
 	}
+	found := make([][]fanout.Item, len(c.kinds))
+	errs := make([]error, len(c.kinds))
+	var wg sync.WaitGroup
+	for i, k := range c.kinds {
+		wg.Add(1)
+		go func(i int, k view.Kind) {
+			defer wg.Done()
+			found[i], errs[i] = fanout.AskingKind(c.id+" "+string(k), func() ([]fanout.Item, error) {
+				return c.askKind(ctx, k, q)
+			})
+		}(i, k)
+	}
+	wg.Wait()
+
 	var items []fanout.Item
 	var note error
-	for _, k := range c.kinds {
-		var found []fanout.Item
-		var err error
-		switch k {
-		case view.KindContact:
-			found, err = c.contacts(ctx, q)
-		case view.KindFile:
-			found, err = c.findFiles(ctx, q)
-		default:
-			found, err = c.records(ctx, k, q)
-		}
-		items = append(items, found...)
-		if err != nil {
+	for i := range c.kinds {
+		items = append(items, found[i]...)
+		if err := errs[i]; err != nil {
 			// A note on one kind does not stop the others of the collection.
 			if errors.Is(err, fanout.ErrIncomplete) {
 				note = err
@@ -623,6 +646,26 @@ func (c *collectionSource) Run(ctx context.Context, q fanout.Query) ([]fanout.It
 		}
 	}
 	return items, note
+}
+
+// askKind is one kind of the collection, under one slot of the ceiling.
+// The slot is taken around the request and given back at once: a holder
+// that waited for another slot while holding one would be a deadlock, and
+// nothing here holds while waiting.
+func (c *collectionSource) askKind(ctx context.Context, k view.Kind, q fanout.Query) ([]fanout.Item, error) {
+	release, err := fanout.Slot(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
+	switch k {
+	case view.KindContact:
+		return c.contacts(ctx, q)
+	case view.KindFile:
+		return c.findFiles(ctx, q)
+	default:
+		return c.records(ctx, k, q)
+	}
 }
 
 func (c *collectionSource) contacts(ctx context.Context, q fanout.Query) ([]fanout.Item, error) {

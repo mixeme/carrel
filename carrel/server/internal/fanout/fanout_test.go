@@ -190,29 +190,51 @@ func TestSourceTimeout(t *testing.T) {
 	}
 }
 
-func TestParallelismIsACeiling(t *testing.T) {
+// The ceiling counts far requests in flight, and a source takes a slot
+// around each one (Slot). Ten sources asking twice apiece never put more
+// than three requests on the wire at once.
+//
+// Until 22.09.2026 the ceiling counted sources instead, and the fanout
+// held a slot around the whole of a source's work. That bounded any
+// source, cooperating or not — a stronger promise than this one — but it
+// bounded the wrong thing: a collection of three kinds waited three times
+// as long as one of a single kind while the permitted concurrency stood
+// idle, and a slow source kept its slot and blocked others. The promise
+// now is narrower and true of what matters: **a source that asks must
+// take a slot for each ask.** A source that asks without one escapes the
+// ceiling, and only its author can prevent that; both of Carrel's own
+// sources go through one code path that takes it
+// (web.collectionSource.askKind).
+func TestTheCeilingCountsRequestsInFlight(t *testing.T) {
 	opts := options()
 	opts.Parallelism = 3
 	var now, peak atomic.Int32
 	var sources []Source
 	for i := 0; i < 10; i++ {
-		sources = append(sources, fake{fmt.Sprint(i), func(context.Context) ([]Item, error) {
-			n := now.Add(1)
-			for {
-				p := peak.Load()
-				if n <= p || peak.CompareAndSwap(p, n) {
-					break
+		sources = append(sources, fake{fmt.Sprint(i), func(ctx context.Context) ([]Item, error) {
+			for ask := 0; ask < 2; ask++ {
+				release, err := Slot(ctx)
+				if err != nil {
+					return nil, err
 				}
+				n := now.Add(1)
+				for {
+					p := peak.Load()
+					if n <= p || peak.CompareAndSwap(p, n) {
+						break
+					}
+				}
+				time.Sleep(10 * time.Millisecond)
+				now.Add(-1)
+				release()
 			}
-			time.Sleep(10 * time.Millisecond)
-			now.Add(-1)
 			return nil, nil
 		}})
 	}
 	task, _ := Start("t-1", Query{}, sources, opts)
 	s := wait(t, task)
 	if p := peak.Load(); p > 3 || p < 1 {
-		t.Fatalf("peak = %d, ceiling 3", p)
+		t.Fatalf("peak = %d requests at once, ceiling 3", p)
 	}
 	for id, st := range states(s) {
 		if st != view.SourceEmpty {
@@ -389,5 +411,74 @@ func TestPanickingSourceIsAnError(t *testing.T) {
 		if src.ID == "boom" && (src.Err == nil || !strings.Contains(src.Err.Error(), "malformed")) {
 			t.Errorf("boom err = %v", src.Err)
 		}
+	}
+}
+
+// A source that must ask three times gets three times the budget. Until
+// 22.09.2026 it got the budget of one, so on a server that answers every
+// request in three seconds a calendar of events, tasks and notes could
+// not be searched while an address book beside it could — and the screen
+// blamed the server for a shortage that was ours.
+type askingSource struct {
+	id    string
+	asks  int
+	each  time.Duration
+	done  chan struct{}
+	calls int
+}
+
+func (s *askingSource) ID() string { return s.id }
+func (s *askingSource) Asks() int  { return s.asks }
+
+func (s *askingSource) Run(ctx context.Context, q Query) ([]Item, error) {
+	for i := 0; i < s.asks; i++ {
+		select {
+		case <-time.After(s.each):
+			s.calls++
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+	close(s.done)
+	return []Item{{Path: "/p"}}, nil
+}
+
+func TestASourceIsGivenItsShareForEveryAsk(t *testing.T) {
+	// Three asks of 40ms each against a 50ms-per-ask budget: 120ms of work
+	// under 150ms of budget. With the old whole-source budget of 50ms it
+	// would be cut off after the first.
+	src := &askingSource{id: "s", asks: 3, each: 40 * time.Millisecond, done: make(chan struct{})}
+	task, err := Start("t", Query{}, []Source{src}, Options{
+		Parallelism:   2,
+		SourceTimeout: 50 * time.Millisecond,
+		TotalTimeout:  5 * time.Second,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-src.done:
+	case <-time.After(3 * time.Second):
+		t.Fatal("the source never finished")
+	}
+	for task.Running() {
+		time.Sleep(5 * time.Millisecond)
+	}
+	snap := task.Snapshot()
+	if len(snap.Sources) != 1 || snap.Sources[0].State != view.SourceDone {
+		t.Fatalf("source = %+v, want done", snap.Sources)
+	}
+	if src.calls != 3 {
+		t.Errorf("%d asks got through, want 3", src.calls)
+	}
+}
+
+// A source that says nothing keeps the plain budget.
+func TestASilentSourceKeepsTheOneBudget(t *testing.T) {
+	if got := budgetFor(&askingSource{asks: 1}, 10*time.Second); got != 10*time.Second {
+		t.Errorf("one ask = %v", got)
+	}
+	if got := budgetFor(&askingSource{asks: 3}, 10*time.Second); got != 30*time.Second {
+		t.Errorf("three asks = %v", got)
 	}
 }

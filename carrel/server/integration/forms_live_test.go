@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -58,9 +59,9 @@ func TestYandexForms(t *testing.T) {
 // соединений»).
 func poolCounts(t *testing.T, app *liveApp, what string) {
 	t.Helper()
-	clients, dialled, requests, writes, fromIdle := app.srv.DAVCounts()
-	t.Logf("pool over %s: %d clients built, %d connections dialled, %d requests, %d of them writes, %d of those off an idle connection",
-		what, clients, dialled, requests, writes, fromIdle)
+	clients, dialled, requests, writes, fromIdle, resent := app.srv.DAVCounts()
+	t.Logf("pool over %s: %d clients built, %d connections dialled, %d requests, %d of them writes, %d of those off an idle connection, %d sent again",
+		what, clients, dialled, requests, writes, fromIdle, resent)
 }
 
 func runForms(t *testing.T, endpoint, user, pass string) {
@@ -209,9 +210,24 @@ func liveEditDropping[P any](t *testing.T, app *liveApp, rec string, form func(P
 
 func seed(ctx context.Context, t *testing.T, client *dav.Client, file, media, body string) {
 	t.Helper()
-	if _, err := client.PutCreate(ctx, file, dav.Typed(strings.NewReader(strings.ReplaceAll(body, "\n", "\r\n")), media)); err != nil {
+	if err := putSeed(ctx, client, file, media, body); err != nil {
 		t.Fatalf("seed %s: %v", file, err)
 	}
+}
+
+// putSeed writes a record and reads «it is already there» the way the app
+// does: a conditional PUT refused on a request the guard had already sent
+// once is that write arriving twice, not a failure (SV-39). The full run
+// of 22.09.2026 hit this in the seeding itself. A shared pool keeps
+// connections idle where each client used to throw its own away, so the
+// dropped-connection race of SV-9 happens oftener now, and the helper
+// that seeds has to read a refusal as carefully as the screens do.
+func putSeed(ctx context.Context, client *dav.Client, file, media, body string) error {
+	_, err := client.PutCreate(ctx, file, dav.Typed(strings.NewReader(strings.ReplaceAll(body, "\n", "\r\n")), media))
+	if dav.WasResent(err) && dav.IsStatus(err, http.StatusPreconditionFailed) {
+		return nil
+	}
+	return err
 }
 
 // trySeed is seed for a record a server may refuse to hold at all. SoGo
@@ -221,7 +237,7 @@ func seed(ctx context.Context, t *testing.T, client *dav.Client, file, media, bo
 // expectations.
 func trySeed(ctx context.Context, t *testing.T, client *dav.Client, file, media, body string) bool {
 	t.Helper()
-	if _, err := client.PutCreate(ctx, file, dav.Typed(strings.NewReader(strings.ReplaceAll(body, "\n", "\r\n")), media)); err != nil {
+	if err := putSeed(ctx, client, file, media, body); err != nil {
 		t.Logf("the server does not hold %s: %v", file, err)
 		return false
 	}

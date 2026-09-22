@@ -17,6 +17,53 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.23 — 2026-09-22
+
+### Fixed
+
+- **A search budget that measured the wrong thing, and a ceiling that
+  counted the wrong thing.** A source had ten seconds; the work it does
+  is one far request per kind the collection holds. On a server that
+  answers every request in two to four seconds — one was measured that
+  day — a calendar of events, tasks and notes could not be searched at
+  all while an address book beside it could. The screen said «No answer
+  in time», which named the server for a shortage that was ours.
+
+  Two changes, and either alone makes things worse:
+
+  - `fanout.Asks` — a source says how many far requests it must make and
+    is given its share for each (`budgetFor`).
+  - `fanout.Slot` — the ceiling of `FanoutParallelism` now counts
+    requests in flight rather than sources, and a slot is taken around
+    one request and given straight back. The kinds of a collection go
+    side by side under the same ceiling, so the server is asked no
+    harder than before and the person waits for the slowest kind instead
+    of all of them in a row.
+
+  The budget alone was the worse half: a slow three-kind source kept its
+  slot three times longer and blocked others, which the fixture of a
+  half-answered poll caught at once — four collections loaded became
+  two.
+
+  What is no longer promised, and should be known: the ceiling used to be
+  held by the fanout whatever a source did. It is now cooperative — a
+  source must take a slot for each ask, and one that asks without a slot
+  escapes it. Both of Carrel's sources ask through one path that takes
+  it. The sentinel is renamed for what it now guards,
+  `TestTheCeilingCountsRequestsInFlight`.
+- **A panic in a part of a source no longer ends the process.** `ask`
+  guards a source with `recover`, and a panic does not cross a goroutine:
+  asking the kinds side by side would have carried the parsing of a far
+  server's answer outside the only guard there was (S-21).
+  `fanout.AskingKind` gives every kind its own.
+
+### Notes
+
+- The concurrency is checked by reading, not by the race detector: it
+  wants cgo and there is no `gcc` on this machine. What was read, and
+  the run to make on a machine that can, are written down in
+  `docs/plan/server.md`.
+
 ## v0.2.22 — 2026-09-22
 
 ### Added

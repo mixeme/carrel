@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -101,47 +102,39 @@ type timelineSource struct {
 	tz     *time.Location
 }
 
+// Run asks the collection for each of its kinds, side by side and each
+// under a slot of the fanout's ceiling, for the reason given on
+// collectionSource.Run: the same number of requests may be in flight as
+// before, and the person waits for the slowest kind instead of all of
+// them in a row.
 func (ts *timelineSource) Run(ctx context.Context, q fanout.Query) ([]fanout.Item, error) {
 	c := ts.collectionSource
 	if c.broken != nil {
 		return nil, c.broken
 	}
+	found := make([][]fanout.Item, len(c.kinds))
+	errs := make([]error, len(c.kinds))
+	var wg sync.WaitGroup
+	for i, k := range c.kinds {
+		wg.Add(1)
+		go func(i int, k view.Kind) {
+			defer wg.Done()
+			found[i], errs[i] = fanout.AskingKind(c.id+" "+string(k), func() ([]fanout.Item, error) {
+				return ts.askKind(ctx, k, q)
+			})
+		}(i, k)
+	}
+	wg.Wait()
+
 	var items []fanout.Item
 	var note error
-	for _, k := range c.kinds {
-		var found []fanout.Item
-		var err error
-		switch k {
-		case view.KindContact:
-			continue
-		case view.KindFile:
-			if ts.person.name == "" {
-				continue
-			}
-			found, err = c.findFiles(ctx, fanout.Query{Text: ts.person.name})
-			for i := range found {
-				if at := found[i].FileModified; !at.IsZero() && (at.Before(*q.From) || at.After(*q.To)) {
-					found[i] = fanout.Item{}
-				}
-			}
-		default:
-			window := fanout.Query{}
-			if k == view.KindEvent {
-				window.From, window.To = q.From, q.To
-			}
-			found, err = c.records(ctx, k, window)
-			for i := range found {
-				if _, at, ok := ts.person.match(k, found[i].Object, ts.tz); !ok || !at.IsZero() && (at.Before(*q.From) || at.After(*q.To)) {
-					found[i] = fanout.Item{}
-				}
-			}
-		}
-		for _, it := range found {
+	for i := range c.kinds {
+		for _, it := range found[i] {
 			if it.Path != "" {
 				items = append(items, it)
 			}
 		}
-		if err != nil {
+		if err := errs[i]; err != nil {
 			if errors.Is(err, fanout.ErrIncomplete) {
 				note = err
 				continue
@@ -150,6 +143,42 @@ func (ts *timelineSource) Run(ctx context.Context, q fanout.Query) ([]fanout.Ite
 		}
 	}
 	return items, note
+}
+
+// askKind is one kind of the collection under one slot. A kind this
+// screen does not read — a contact, or a file when the person has no
+// name to look for — takes no slot at all: it asks nobody.
+func (ts *timelineSource) askKind(ctx context.Context, k view.Kind, q fanout.Query) ([]fanout.Item, error) {
+	c := ts.collectionSource
+	if k == view.KindContact || (k == view.KindFile && ts.person.name == "") {
+		return nil, nil
+	}
+	release, err := fanout.Slot(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
+
+	if k == view.KindFile {
+		found, err := c.findFiles(ctx, fanout.Query{Text: ts.person.name})
+		for i := range found {
+			if at := found[i].FileModified; !at.IsZero() && (at.Before(*q.From) || at.After(*q.To)) {
+				found[i] = fanout.Item{}
+			}
+		}
+		return found, err
+	}
+	window := fanout.Query{}
+	if k == view.KindEvent {
+		window.From, window.To = q.From, q.To
+	}
+	found, err := c.records(ctx, k, window)
+	for i := range found {
+		if _, at, ok := ts.person.match(k, found[i].Object, ts.tz); !ok || !at.IsZero() && (at.Before(*q.From) || at.After(*q.To)) {
+			found[i] = fanout.Item{}
+		}
+	}
+	return found, err
 }
 
 // match says why a record points to the person and when it stands; the

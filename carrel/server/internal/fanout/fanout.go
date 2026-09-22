@@ -45,6 +45,30 @@ type Source interface {
 	Run(ctx context.Context, q Query) ([]Item, error)
 }
 
+// Asks is how many far requests a source must make to answer. A source
+// that does not say is taken to make one.
+//
+// SourceTimeout bounds a source, but the waiting is done per request, and
+// until 22.09.2026 a collection that had to ask three times got the budget
+// of one. On a server that answers every request in three seconds — one
+// was measured that day — a calendar holding events, tasks and notes could
+// not be searched at all while an address book beside it could, and the
+// screen said «No answer in time», which named the server for a shortage
+// that was ours. The person's wait is bounded by TotalTimeout, not by
+// this: sources run side by side, and a slow one holds nobody up.
+type Asks interface {
+	Asks() int
+}
+
+// budgetFor is how long a source may take: its share per request.
+func budgetFor(src Source, per time.Duration) time.Duration {
+	n := 1
+	if a, ok := src.(Asks); ok && a.Asks() > 1 {
+		n = a.Asks()
+	}
+	return per * time.Duration(n)
+}
+
 var (
 	// ErrIncomplete wraps an answer that stopped short, such as a folder walk
 	// that reached its entry ceiling. The items stay, the source counts as
@@ -265,18 +289,53 @@ func (t *Task) launchLocked(i int) {
 }
 
 func (t *Task) work(ctx context.Context, i, gen int, src Source) {
-	if err := t.sem.Acquire(ctx, 1); err != nil {
-		t.settle(ctx, nil, i, gen, nil, err)
-		return
-	}
-	defer t.sem.Release(1)
 	if !t.markQuerying(i, gen) {
 		return
 	}
-	sctx, cancel := context.WithTimeout(ctx, t.opts.SourceTimeout)
+	sctx, cancel := context.WithTimeout(ctx, budgetFor(src, t.opts.SourceTimeout))
 	defer cancel()
-	items, err := ask(sctx, src, t.query)
+	items, err := ask(withSlots(sctx, t.sem), src, t.query)
 	t.settle(ctx, sctx, i, gen, items, err)
+}
+
+// The ceiling counts far requests in flight, not sources. It used to be
+// held for the whole of a source: a source took a slot, kept it while it
+// asked its collection kind by kind, and gave it back at the end. That
+// made a calendar of three kinds three times slower than an address book
+// of one for no reason the person could see, while the permitted
+// concurrency stood idle.
+//
+// A slot is now taken around one request and given straight back, so the
+// kinds of a collection go side by side under the same ceiling — the
+// server is asked no harder than before, and the waiting is as short as
+// the ceiling allows. The rule that keeps this safe is that **nobody
+// holds a slot while waiting for one**: every holder is doing a request
+// that will end and release. Hold-and-wait is what deadlocks — four
+// sources each holding one of four slots and each wanting three more
+// would wait for ever.
+type slotKey struct{}
+
+func withSlots(ctx context.Context, sem *semaphore.Weighted) context.Context {
+	if sem == nil {
+		return ctx
+	}
+	return context.WithValue(ctx, slotKey{}, sem)
+}
+
+// Slot waits for room to make one far request and returns the release.
+// Outside a fanout, or when the round is over, it lets the caller through
+// with a release that does nothing: a source must work the same when
+// nobody is counting.
+func Slot(ctx context.Context) (release func(), err error) {
+	sem, _ := ctx.Value(slotKey{}).(*semaphore.Weighted)
+	if sem == nil {
+		return func() {}, nil
+	}
+	if err := sem.Acquire(ctx, 1); err != nil {
+		return func() {}, err
+	}
+	var once sync.Once
+	return func() { once.Do(func() { sem.Release(1) }) }, nil
 }
 
 // ask asks one source, and a panic inside it is that source's failure. The
@@ -289,6 +348,21 @@ func ask(ctx context.Context, src Source, q Query) (items []Item, err error) {
 		}
 	}()
 	return src.Run(ctx, q)
+}
+
+// AskingKind runs one part of a source and turns a panic into that part's
+// error, the way ask does for a whole source (S-21). A source that asks
+// its kinds side by side needs this: a panic does not cross a goroutine,
+// so ask's own guard would not catch one raised in a part, and a far
+// server's malformed answer would end the process and every session in
+// it.
+func AskingKind(what string, run func() ([]Item, error)) (items []Item, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			items, err = nil, fmt.Errorf("fanout: %s failed: %v", what, r)
+		}
+	}()
+	return run()
 }
 
 func (t *Task) markQuerying(i, gen int) bool {

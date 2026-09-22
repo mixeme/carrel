@@ -189,6 +189,12 @@ func sourceStates(bar view.PollBar) string {
 		if sp.Message != "" {
 			line += " (" + string(sp.Message) + ")"
 		}
+		// Two collections of one account may carry the same name, and then
+		// their stamps read alike and a failure cannot say which one went
+		// quiet. Retry knows: its address names the collection.
+		if sp.Retry != nil && sp.Retry.Href != "" {
+			line += " [" + sp.Retry.Href + "]"
+		}
 		out = append(out, line)
 	}
 	if len(out) == 0 {
