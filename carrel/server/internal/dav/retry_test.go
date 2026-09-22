@@ -6,9 +6,13 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"net/http/httptrace"
 	"strings"
 	"testing"
+	"time"
+
+	"carrel.dev/carrel/server/internal/conf"
 )
 
 // docs/servers.md, SV-14 and S-5.1: a server closes a connection the pool kept
@@ -350,5 +354,49 @@ func TestTheTallySeparatesWritesByTheirConnection(t *testing.T) {
 					requests, writes, fromIdle, one.writes, one.fromIdleExpected)
 			}
 		})
+	}
+}
+
+// The pool is the guard's. Two dav.Clients built from one guard talk to
+// the same server over one connection; before 22.09.2026 each built a
+// transport of its own and dialled again, which a live run counted as
+// twenty-four connections for twenty-four clients.
+func TestClientsOfOneGuardShareTheirConnections(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	g := NewGuard(&conf.Config{DAVSSRFAllowlist: "127.0.0.1", DAVConnectTimeout: 5 * time.Second})
+	for i := 0; i < 4; i++ {
+		resp, err := g.HTTPClient().Get(srv.URL + "/dav/")
+		if err != nil {
+			t.Fatalf("request %d: %v", i, err)
+		}
+		_, _ = io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+	}
+	clients, dialled, requests, _, _ := g.Counts()
+	if clients != 4 || requests != 4 {
+		t.Fatalf("%d clients, %d requests: the test did not do what it says", clients, requests)
+	}
+	if dialled != 1 {
+		t.Errorf("%d connections for 4 clients of one guard, want 1", dialled)
+	}
+}
+
+// A pinned certificate is the one thing a connection cannot share: two
+// clients that verify differently must not end up on the same socket
+// (F-13).
+func TestAPinnedClientDoesNotShareAConnection(t *testing.T) {
+	g := NewGuard(&conf.Config{DAVSSRFAllowlist: "127.0.0.1"})
+	plain, _ := g.transports("")
+	again, _ := g.transports("")
+	pinned, _ := g.transports("aa:bb")
+	if plain != again {
+		t.Error("two unpinned clients got different transports")
+	}
+	if plain == pinned {
+		t.Error("a pinned client shares the transport of an unpinned one")
 	}
 }

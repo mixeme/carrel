@@ -17,6 +17,39 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.21 — 2026-09-22
+
+### Changed
+
+- **The pool belongs to the guard, not to each client.** A transport was
+  built for every `dav.Client`, so every client dialled its own
+  connection, made about three requests on it and threw it away with its
+  pool — twenty-four clients and twenty-four connections over one live
+  run. `Guard.transports` now caches one transport per pinned
+  certificate and every client of that guard shares its connections.
+
+  | | Clients | Connections before | After | Run before | After |
+  |---|---|---|---|---|---|
+  | stand | 9 | 8 | **1** | — | — |
+  | SoGo | 24 | 24 | **1** | 46.3 s | **25.0 s** |
+  | Yandex | 16 | 16 | **1** | 44.5 s | **31.9 s** |
+
+  The times are single runs on a noisy network, but twenty-three TLS
+  handshakes fewer account for them without a stretch.
+
+  Nothing about a transport belongs to one person: the dialler is the
+  guard's own and SSRF-checked, and credentials ride on each request
+  rather than on the connection. The one thing that does differ is a
+  pinned certificate (F-13), so the cache is keyed by the pin and a
+  pinned client never shares a socket with an unpinned one to the same
+  host.
+
+  The limits are choices, not findings: `MaxIdleConnsPerHost` 10, as the
+  owner decided, and `MaxIdleConns` 100 — ten hosts at ten — because
+  leaving the old process-wide ten in place would have made the per-host
+  limit meaningless. Neither has been tested under load, because there
+  is no load here to test them under, and the code says so.
+
 ## v0.2.20 — 2026-09-22
 
 Три решения владельца, и один замер, который перевернул мой довод.

@@ -41,7 +41,14 @@ type Guard struct {
 	maxRedirect int
 	resolver    ipLookup
 	tally       Tally
+
+	// pool holds one transport per pinned certificate, so every dav.Client
+	// of this guard shares its connections. See transports.
+	poolMu sync.Mutex
+	pool   map[string]transportPair
 }
+
+type transportPair struct{ base, fresh http.RoundTripper }
 
 // Tally counts what the pool actually does, so a question about it is
 // settled by numbers rather than by reasoning (docs/plan/server.md, «Пул
@@ -95,8 +102,36 @@ func (g *Guard) HTTPClientWithCertPin(pinnedFingerprint string) *http.Client {
 	return g.httpClient(pinnedFingerprint)
 }
 
-func (g *Guard) httpClient(pinnedFingerprint string) *http.Client {
-	g.tally.Clients.Add(1)
+// The pool is the guard's, not each client's. A transport carries the
+// connections, and until 22.09.2026 one was built for every dav.Client:
+// a measurement over a live run counted twenty-four clients and
+// twenty-four connections for seventy-nine requests — one handshake per
+// client, a pool used for about three requests and thrown away. Sharing
+// the transport is what turns that into a pool (docs/plan/server.md, «Пул
+// соединений»).
+//
+// Nothing about a transport belongs to one person: the dialler is the
+// guard's own, SSRF-checked, and credentials ride on each request, not on
+// the connection. The one thing that does differ is a pinned certificate
+// (F-13), so the cache is keyed by the pin and a pinned client never
+// shares a connection with an unpinned one to the same host.
+//
+// The two limits are chosen, not derived: ten idle connections per host,
+// as the owner decided on 22.09.2026, and a hundred in all, which is ten
+// hosts at ten. Neither has been tested under load, because there is no
+// load to test them under; they are written down here so the next person
+// knows they are a choice.
+const (
+	poolPerHost = 10
+	poolTotal   = 100
+)
+
+func (g *Guard) transports(pinnedFingerprint string) (base, fresh http.RoundTripper) {
+	g.poolMu.Lock()
+	defer g.poolMu.Unlock()
+	if p, ok := g.pool[pinnedFingerprint]; ok {
+		return p.base, p.fresh
+	}
 	transport := &http.Transport{
 		// No proxy: with one set, the dialler would connect to the proxy and
 		// the real target would never be IP-checked (architecture.md, SSRF).
@@ -105,21 +140,32 @@ func (g *Guard) httpClient(pinnedFingerprint string) *http.Client {
 		DialTLSContext:        g.dialTLSContext(pinnedFingerprint),
 		TLSClientConfig:       &tls.Config{MinVersion: tls.VersionTLS12},
 		ForceAttemptHTTP2:     true,
-		MaxIdleConns:          10,
+		MaxIdleConns:          poolTotal,
+		MaxIdleConnsPerHost:   poolPerHost,
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 	}
-	// No http.Client.Timeout: it counts the body too and cut every file that
-	// took longer than a request (S-17). The transport keeps the deadline
-	// instead, and for a stream counts silence rather than the whole.
 	// A body that cannot be sent twice gets a connection of its own: one the
 	// pool kept may have been closed by the server a moment before, and such a
 	// request cannot be sent again (limitTransport.RoundTrip).
-	fresh := transport.Clone()
-	fresh.DisableKeepAlives = true
+	keepNone := transport.Clone()
+	keepNone.DisableKeepAlives = true
+	if g.pool == nil {
+		g.pool = map[string]transportPair{}
+	}
+	g.pool[pinnedFingerprint] = transportPair{base: transport, fresh: keepNone}
+	return transport, keepNone
+}
+
+func (g *Guard) httpClient(pinnedFingerprint string) *http.Client {
+	g.tally.Clients.Add(1)
+	base, fresh := g.transports(pinnedFingerprint)
+	// No http.Client.Timeout: it counts the body too and cut every file that
+	// took longer than a request (S-17). The transport keeps the deadline
+	// instead, and for a stream counts silence rather than the whole.
 	return &http.Client{
-		Transport: &limitTransport{base: transport, fresh: fresh, max: g.maxBody, request: g.request, tally: &g.tally},
+		Transport: &limitTransport{base: base, fresh: fresh, max: g.maxBody, request: g.request, tally: &g.tally},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= g.maxRedirect {
 				return fmt.Errorf("dav: too many redirects")
