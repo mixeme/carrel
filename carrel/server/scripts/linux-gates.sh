@@ -77,6 +77,21 @@ if [[ "${CARREL_STALWART:-}" == "1" ]]; then
   go test -tags=integration -count=1 -timeout 30m -run 'Stalwart' ./integration/...
 fi
 
+# Xandikos, the second light engine. NOT YET RUN either
+# (testdata/xandikos/README.md); behind a flag for the same reason as
+# Stalwart. Run with CARREL_XANDIKOS=1.
+if [[ "${CARREL_XANDIKOS:-}" == "1" ]]; then
+  echo "== S-30.2: Xandikos integration =="
+  docker compose -f docker-compose.linux.yml up -d xandikos
+  for _ in $(seq 1 60); do
+    if curl -sf -o /dev/null http://127.0.0.1:8081/ 2>/dev/null; then
+      break
+    fi
+    sleep 0.5
+  done
+  go test -tags=integration -count=1 -timeout 30m -run 'Xandikos' ./integration/...
+fi
+
 if [[ -n "${CARREL_SFTPGO_URL:-}" && -n "${CARREL_SFTPGO_USER:-}" && -n "${CARREL_SFTPGO_PASS:-}" ]]; then
   echo "== S-30.2: SFTPGo integration =="
   go test -tags=integration -count=1 -run 'SFTPGo' ./integration/...

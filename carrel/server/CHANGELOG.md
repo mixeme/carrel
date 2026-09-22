@@ -17,6 +17,39 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.22 — 2026-09-22
+
+### Added
+
+- **Xandikos**, the second light engine beside Radicale and sharing no
+  code with it: Python, every collection a git repository. Seven live
+  suites wired to the same `run*` helpers as every other server, and a
+  service in `docker-compose.linux.yml` that needs four environment
+  variables and nothing else — no config file, no provisioning, no
+  console commands.
+- It is worth having for one thing in particular: **Xandikos asks for no
+  credentials at all**. Carrel's connection form wants a login, because
+  an address without one is a subscription rather than an account, but
+  it takes an empty password — so this is the only server in the lineup
+  that exercises the case where nothing is asked of us. The other eight
+  all demand a password.
+
+### Notes
+
+- Like Stalwart, the stand has not been run: there is no Docker on the
+  machine it was written on. The step in `scripts/linux-gates.sh` is
+  behind `CARREL_XANDIKOS=1` for that reason. Unlike Stalwart there was
+  almost nothing to guess — the whole configuration is four environment
+  variables out of the project's own README.
+- **DAViCal is deliberately not started.** Stalwart and Xandikos have
+  official images configured by environment; DAViCal has no official
+  image, only community builds that differ widely, and bringing it up
+  wants PostgreSQL, `create-database.sh`, an administrator and a user
+  made through a web interface. That would have been a third pile of
+  guesses in a row, on an image nobody stands behind. Half an hour with
+  the machine in front of you beats half a day without it; what to
+  decide there is written in the plan.
+
 ## v0.2.21 — 2026-09-22
 
 ### Changed

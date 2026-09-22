@@ -54,6 +54,28 @@ services:
     profiles:
       - setup
 
+
+  # Xandikos: the second light engine beside Radicale, sharing no code
+  # with it — Python, every collection a git repository. It asks for no
+  # credentials; a bare instance is meant to sit behind a proxy that does
+  # the asking, and on loopback there is nothing to protect. That makes it
+  # the one server in the lineup where Carrel connects with a login and no
+  # password at all.
+  #
+  # DEFAULTS makes the first calendar and address book, without which the
+  # server starts empty and discovery has nothing to find.
+  xandikos:
+    image: ghcr.io/jelmer/xandikos:latest
+    ports:
+      - "127.0.0.1:8081:8000"
+    environment:
+      DEFAULTS: "true"
+      AUTOCREATE: "true"
+      CURRENT_USER_PRINCIPAL: "/user/"
+    volumes:
+      - xandikos-data:/data
+
 volumes:
   radicale-data:
   stalwart-data:
+  xandikos-data:
