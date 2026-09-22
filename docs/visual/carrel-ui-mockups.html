@@ -66,6 +66,12 @@ figcaption b{color:var(--tc-ink);font-weight:600}
 .frame.w392{width:392px}
 .frame.w768{width:768px;max-width:100%}
 .frame.w820{width:820px}
+.frame.cap220{max-width:220px}
+.frame.cap280{max-width:280px}
+.frame.cap340{max-width:340px}
+.frame.cap360{max-width:360px}
+.frame.cap460{max-width:460px}
+.frame.cap560{max-width:560px}
 .frame.cap430{max-width:430px}
 .frame.cap660{max-width:660px}
 .frame.cap760{max-width:760px}
@@ -79,6 +85,18 @@ figcaption b{color:var(--tc-ink);font-weight:600}
 .demo{background:var(--tc-surface);border:.5px solid var(--tc-hair);border-radius:5px;padding:18px 20px;margin:14px 0;
    display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
 .demo.col{flex-direction:column;align-items:stretch;gap:10px}
+/* Полоса образцов знака и иконки — оформление страницы, а не продукт:
+   ни один кадр её не рисует. */
+.specs{align-items:flex-end;display:flex;flex-wrap:wrap}
+.specs--gap20{gap:20px}
+.specs--gap34{gap:34px}
+.specs__item{align-items:center}
+.specs__tile--16{height:16px;border-radius:2px;overflow:hidden;border:.5px solid var(--tc-edge);display:block;width:16px}
+.specs__tile--32{height:32px;border-radius:4px;overflow:hidden;border:.5px solid var(--tc-edge);display:block;width:32px}
+.specs__tile--72{height:72px;border-radius:8px;overflow:hidden;border:.5px solid var(--tc-edge);display:block;width:72px}
+.specs__tile--32-ink{height:32px;border-radius:4px;overflow:hidden;border:.5px solid #17211C;display:block;width:32px}
+.specs__item--ml18{margin-left:18px}
+.specs__logo--38{height:15px;width:38px}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px 32px;max-width:1400px}
 .frame-label .plan{border:.5px solid var(--tc-edge);border-radius:2px;padding:0 5px;
   color:var(--tc-dusty);letter-spacing:.04em;text-transform:none;font-family:var(--tc-font-sans);font-size:10px}
@@ -164,6 +182,11 @@ body:has(#w390:checked) .tc-root{width:100%}
 .tc-root{--tc-rail:264px;--tc-side:400px;--tc-top:52px;--tc-page-gutter:20px;--tc-page-gutter-narrow:14px;
   font-family:var(--tc-font-sans);font-size:13px;line-height:1.45;color:var(--tc-ink);background:var(--tc-bg);
   container:tcbox / inline-size}
+/* Коробка кадра-компонента: то, что раньше давало правило страницы .demo.
+   Идиома та же, что у components-1…8: tc-root и варианты корня. */
+.tc-root--wrap.tc-root--wrap{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
+.tc-root--col.tc-root--col{display:flex;flex-direction:column;flex-wrap:wrap;align-items:stretch;gap:10px}
+.tc-root--pad18-20.tc-root--pad18-20{padding:18px 20px}
 .tc-root *{box-sizing:border-box}
 .tc-root p,.tc-root h1,.tc-root h2,.tc-root h3,.tc-root h4,.tc-root ul,.tc-root ol,.tc-root dl,.tc-root dd,.tc-root dt,.tc-root figure{margin:0;padding:0}
 .tc-root ul{list-style:none}
@@ -884,7 +907,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-bar__sep--h18.tc-bar__sep--h18{height:18px}
 .tc-brand--t16.tc-brand--t16{font-size:16px}
 .tc-brand__logo--h60-w150.tc-brand__logo--h60-w150{height:60px;width:150px}
-.tc-brand__logo--h15-w38.tc-brand__logo--h15-w38{height:15px;width:38px}
 .tc-brand__logo--h48-w118.tc-brand__logo--h48-w118{height:48px;width:118px}
 .tc-brand__logo--h39-w96.tc-brand__logo--h39-w96{height:39px;width:96px}
 .tc-brand__logo--h17-w44.tc-brand__logo--h17-w44{height:17px;width:44px}
@@ -959,8 +981,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-dialog__photo.tc-dialog__photo{position:relative;height:190px;border-radius:4px;overflow:hidden;flex:none;width:190px}
 .tc-dialog__photo-frame.tc-dialog__photo-frame{position:absolute;inset:22px;border:1.5px solid rgba(255,253,247,.9);border-radius:3px}
 .tc-dialog__photo-rule.tc-dialog__photo-rule{position:absolute;left:22px;right:22px;top:50%;height:.5px;background:rgba(255,253,247,.45)}
-.tc-specs.tc-specs{align-items:flex-end;display:flex;flex-wrap:wrap}
-.tc-specs--gap34.tc-specs--gap34{gap:34px}
 .tc-dialog__photo-rule-v.tc-dialog__photo-rule-v{position:absolute;top:22px;bottom:22px;left:50%;background:rgba(255,253,247,.45);width:.5px}
 .tc-dialog__side.tc-dialog__side{flex:1 1 200px}
 .tc-doc__sec.tc-doc__sec{margin-top:18px}
@@ -971,7 +991,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-side__acts.tc-side__acts{padding:12px 20px 0}
 .tc-sec__note.tc-sec__note{font-size:12px;color:var(--tc-muted)}
 .tc-main__results.tc-main__results{padding:14px 20px}
-.tc-specs--gap20.tc-specs--gap20{gap:20px}
 .tc-card__top11.tc-card__top11{margin-top:11px}
 .tc-card__acts.tc-card__acts{margin-top:12px}
 .tc-card__line.tc-card__line{font-size:13px}
@@ -982,7 +1001,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-form__col--460.tc-form__col--460{flex:1 1 460px}
 .tc-form__col--300.tc-form__col--300{flex:1 1 300px}
 .tc-card__top9.tc-card__top9{margin-top:9px}
-.tc-specs__item.tc-specs__item{align-items:center}
 .tc-form__col--280.tc-form__col--280{flex:1 1 280px}
 .tc-card__split.tc-card__split{align-items:flex-start;display:flex;flex-wrap:wrap;gap:12px}
 .tc-card__qr.tc-card__qr{border:.5px solid var(--tc-edge);border-radius:4px;flex:none;padding:8px}
@@ -993,7 +1011,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-dialog__qr.tc-dialog__qr{border:.5px solid var(--tc-edge);border-radius:4px;flex:none;padding:7px}
 .tc-dialog__qr-side.tc-dialog__qr-side{flex:1 1 180px}
 .tc-main__hero.tc-main__hero{align-items:flex-start;display:flex;flex-wrap:wrap;gap:22px;padding:34px 24px}
-.tc-specs__item--ml18.tc-specs__item--ml18{margin-left:18px}
 .tc-main__hero-side.tc-main__hero-side{min-width:0;flex:1 1 320px}
 .tc-main__hero-title.tc-main__hero-title{font-family:var(--tc-font-serif);font-size:26px}
 .tc-doc__acts.tc-doc__acts{margin-top:14px}
@@ -1301,16 +1318,12 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-root--top.tc-root--top{align-items:flex-start}
 .tc-root--gap30.tc-root--gap30{gap:30px}
 .tc-root--on-bg.tc-root--on-bg{background:var(--tc-bg)}
-.tc-root--max360.tc-root--max360{max-width:360px}
 .tc-root--pad14.tc-root--pad14{padding:14px}
-.tc-root--max280.tc-root--max280{max-width:280px}
-.tc-root--max340.tc-root--max340{max-width:340px}
 .tc-root--pad8.tc-root--pad8{padding:8px}
 .tc-root--pad16-20.tc-root--pad16-20{padding:16px 20px}
 .tc-root--gap12.tc-root--gap12{gap:12px}
 .tc-root--pad14-20.tc-root--pad14-20{padding:14px 20px}
 
-.tc-root--max220.tc-root--max220{max-width:220px}
 .tc-root--pad12-14.tc-root--pad12-14{padding:12px 14px}
 .tc-root--row.tc-root--row{display:flex;align-items:center;gap:8px}
 .tc-root--flat.tc-root--flat{overflow:hidden;padding:0}
@@ -1323,8 +1336,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 
 
 .tc-root--pad10-14.tc-root--pad10-14{padding:10px 14px}
-.tc-root--max460.tc-root--max460{max-width:460px}
-.tc-root--max560.tc-root--max560{max-width:560px}
 
 .tc-row--avatarcols--padl14-padr14.tc-row--avatarcols--padl14-padr14{padding-left:14px;padding-right:14px}
 .tc-row--excerpt--padl14-padr14.tc-row--excerpt--padl14-padr14{padding-left:14px;padding-right:14px}
@@ -1397,7 +1408,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-skel--w60pc.tc-skel--w60pc{width:60%}
 .tc-skel--w45pc.tc-skel--w45pc{width:45%}
 .tc-skel--w52pc.tc-skel--w52pc{width:52%}
-.tc-specs__tile--72.tc-specs__tile--72{height:72px;border-radius:8px;overflow:hidden;border:.5px solid var(--tc-edge);display:block;width:72px}
 .tc-dim--muted.tc-dim--muted{color:var(--tc-muted)}
 .tc-dim--t12-5.tc-dim--t12-5{font-size:12.5px}
 .tc-field__rail.tc-field__rail{height:3px;background:var(--tc-edge);border-radius:2px;position:relative;flex:1}
@@ -1409,7 +1419,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-dim--ml6.tc-dim--ml6{margin-left:6px}
 
 .tc-dim--t11-5.tc-dim--t11-5{font-size:11.5px}
-.tc-specs__tile--32.tc-specs__tile--32{height:32px;border-radius:4px;overflow:hidden;border:.5px solid var(--tc-edge);display:block;width:32px}
 .tc-dim--struck.tc-dim--struck{text-decoration:line-through}
 .tc-drop__anchor.tc-drop__anchor{position:relative}
 .tc-drop__panel.tc-drop__panel{position:absolute;top:calc(100% + 5px);left:0;z-index:2}
@@ -1420,7 +1429,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-plain.tc-plain{text-transform:none;letter-spacing:0;font-weight:400;color:var(--tc-dusty)}
 .tc-drop__panel--right.tc-drop__panel--right{position:absolute;top:calc(100% + 5px);right:0;z-index:2}
 .tc-menu__item-indent.tc-menu__item-indent{padding-left:23px}
-.tc-specs__tile--16.tc-specs__tile--16{height:16px;border-radius:2px;overflow:hidden;border:.5px solid var(--tc-edge);display:block;width:16px}
 .tc-field__swatches.tc-field__swatches{height:22px}
 .tc-field__swatch.tc-field__swatch{height:17px;border-radius:50%;width:17px}
 .tc-field__swatch--on.tc-field__swatch--on{outline:1.5px solid var(--tc-accent);outline-offset:2px}
@@ -1433,7 +1441,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-dim--start.tc-dim--start{align-self:start;padding-top:6px}
 .tc-dim--t12.tc-dim--t12{font-size:12px}
 
-.tc-specs__tile--32-ink.tc-specs__tile--32-ink{height:32px;border-radius:4px;overflow:hidden;border:.5px solid #17211C;display:block;width:32px}
 
 .tc-dim--fix.tc-dim--fix{flex:none}
 .tc-dim--slot.tc-dim--slot{display:inline-block;width:62px}
@@ -1885,7 +1892,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <p>В интерфейсе используется <a href="carrel-logotype.html">логотип-вариант&nbsp;2</a>: лампа — это последняя буква «l», а не картинка рядом со словом. Поэтому в шапке стоит одна графика, и правило клиренса из <a href="carrel-icon.html">эталона иконки</a> (§8) к ней не применяется — пара «знак + слово» этим вариантом запрещена. Отдельная иконка живёт там, где слова не помещаются: вкладка браузера, установленное приложение, ярлык.</p>
 
 <div class="demo col" style="gap:22px">
-  <div class="tc-specs tc-specs--gap34">
+  <div class="specs specs--gap34">
     <div class="tc-stack tc-stack--gap-8">
       <svg class="tc-brand__logo tc-brand__logo--h60-w150" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
       <span class="sub" style="letter-spacing:.1em">вход, setup, приглашение · 118–150 px</span>
@@ -1895,38 +1902,38 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
       <span class="sub" style="letter-spacing:.1em">верхняя панель · 56 px</span>
     </div>
     <div class="tc-stack tc-stack--gap-8">
-      <svg class="tc-brand__logo tc-brand__logo--h15-w38" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+      <svg class="tc-brand__logo specs__logo--38" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
       <span class="sub" style="letter-spacing:.1em">подвал печати · 38 px</span>
     </div>
   </div>
 
-  <div class="tc-specs tc-specs--gap20">
-    <div class="tc-stack tc-stack--gap-8 tc-specs__item">
-      <span class="tc-specs__tile--72">
+  <div class="specs specs--gap20">
+    <div class="tc-stack tc-stack--gap-8 specs__item">
+      <span class="specs__tile--72">
         <svg width="72" height="72" viewBox="0 0 96 96"><rect width="96" height="96" fill="#E8DFCB"/><path d="M18 42A30 30 0 0 1 78 42V48H18Z" fill="#4A6B52"/><path d="M42 48H54V54H51V75H66A3 3 0 0 1 69 78V81A3 3 0 0 1 66 84H30A3 3 0 0 1 27 81V78A3 3 0 0 1 30 75H45V54H42Z" fill="#17211C"/></svg>
       </span>
       <span class="sub" style="letter-spacing:.1em">PWA · 96</span>
     </div>
-    <div class="tc-stack tc-stack--gap-8 tc-specs__item">
-      <span data-tc-colour="#E8DFCB" class="tc-specs__tile--32">
+    <div class="tc-stack tc-stack--gap-8 specs__item">
+      <span data-tc-colour="#E8DFCB" class="specs__tile--32">
         <svg width="32" height="32" viewBox="0 0 32 32"><path d="M6 14A10 10 0 0 1 26 14V16H6Z" fill="#4A6B52"/><path d="M14 16H18V18H17V25H22A1 1 0 0 1 23 26V27A1 1 0 0 1 22 28H10A1 1 0 0 1 9 27V26A1 1 0 0 1 10 25H15V18H14Z" fill="#17211C"/></svg>
       </span>
       <span class="sub" style="letter-spacing:.1em">32</span>
     </div>
-    <div class="tc-stack tc-stack--gap-8 tc-specs__item">
-      <span data-tc-colour="#E8DFCB" class="tc-specs__tile--16">
+    <div class="tc-stack tc-stack--gap-8 specs__item">
+      <span data-tc-colour="#E8DFCB" class="specs__tile--16">
         <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 7A5 5 0 0 1 13 7V8H3Z" fill="#4A6B52"/><path d="M7 8H9V12H12V14H4V12H7Z" fill="#17211C"/></svg>
       </span>
       <span class="sub" style="letter-spacing:.1em">16 · вкладка</span>
     </div>
-    <div class="tc-stack tc-stack--gap-8 tc-specs__item">
-      <span data-tc-colour="#17211C" class="tc-specs__tile--32-ink">
+    <div class="tc-stack tc-stack--gap-8 specs__item">
+      <span data-tc-colour="#17211C" class="specs__tile--32-ink">
         <svg width="32" height="32" viewBox="0 0 32 32"><path d="M6 14A10 10 0 0 1 26 14V16H6Z" fill="#7FA085"/><path d="M14 16H18V18H17V25H22A1 1 0 0 1 23 26V27A1 1 0 0 1 22 28H10A1 1 0 0 1 9 27V26A1 1 0 0 1 10 25H15V18H14Z" fill="#E8DFCB"/></svg>
       </span>
       <span class="sub" style="letter-spacing:.1em">тёмная</span>
     </div>
-    <div class="tc-stack tc-stack--gap-8 tc-specs__item tc-specs__item--ml18">
-      <span data-tc-colour="#E8DFCB" class="tc-specs__tile--32">
+    <div class="tc-stack tc-stack--gap-8 specs__item specs__item--ml18">
+      <span data-tc-colour="#E8DFCB" class="specs__tile--32">
         <svg width="32" height="32" viewBox="0 0 96 96"><g fill="none" stroke="#17211C" stroke-width="4" stroke-linecap="round"><path d="M6 12C18 12 30 24 42 33"/><path d="M6 30C24 30 36 42 42 42"/><path d="M6 48H42"/><path d="M6 66C24 66 36 54 42 54"/><path d="M6 84C18 84 30 72 42 63"/></g><rect x="42" y="18" width="6" height="60" rx="1.5" fill="#17211C"/><rect x="48" y="36" width="48" height="24" fill="#4A6B52"/></svg>
       </span>
       <span class="sub" style="letter-spacing:.1em">davloom</span>
@@ -1948,7 +1955,10 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 <h2 id="components">6. Компоненты</h2>
 
 <h4>Кнопки и переключатели</h4>
-<div class="demo tc-root tc-root--on-surface" data-check="off">
+<figure>
+<div class="frame" data-frame="components-9">
+  <div class="frame-label"><span>Кнопки и переключатели</span><span class="frag">компонент</span><i>первичная, рамка, разрушительные, сегмент, сплит</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--wrap tc-root--pad18-20">
   <button class="tc-btn is-primary" type="button">Save</button>
   <button class="tc-btn" type="button">Import</button>
   <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button>
@@ -1958,13 +1968,18 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">Open 12</button><button class="tc-seg__opt" type="button">Done 48</button><button class="tc-seg__opt" type="button">All</button></span>
   <span class="tc-split"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note</button><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></span>
 </div>
+</div>
+</figure>
 <p>Первичная кнопка на экране одна. <b>Обычное действие — рамка бумаги:</b> Import, Print, Cancel, Retry, Skip, Clear selection, «⋯». Тихой кнопки нет: без рамки она неотличима от текста, и Cancel — такое же действие, как Import. <b>Разрушительных кнопок две, и разница между ними — не громкость, а последствие.</b> <b>Заливка</b> — нажатие <b>уничтожает</b>: запись, коллекцию, учётную запись, задание, депонированный ключ. <b>Рамка</b> — <b>отвязывает</b>, а вещь остаётся: «Disconnect» убирает подключение из Carrel и на чужом сервере не трогает ничего, «Unsubscribe», «Revoke», «End session» — то же самое. Тем же счётом рамка стоит у кнопки, которая только ведёт к подтверждению («Merge on the server») и у правки в форме, где есть «Cancel» («Remove photo»): там ещё ничего не произошло.</p>
 <div class="note">Правило заливки и рамки — в <a href="#conventions">§1</a>. «Disconnect» у аккаунта, а не «Remove»: рядом стоит кнопка, которая удаляет данные на чужом сервере (7.11), и две соседние кнопки со словом «удалить» и противоположными последствиями рано или поздно нажали бы не ту.</div>
 <p><b>Многоточие различает два сценария одной и той же кнопки, и больше ничего.</b> Если команда где-то срабатывает сразу, а где-то сперва спрашивает недостающие данные, знак стоит у той, которая спрашивает. <b>Если сценарий у команды один — знака нет</b>, каким бы длинным ни был лист за ней: различать нечего, а знак, стоящий подряд у всего, перестаёт что-либо значить. Поэтому его нет ни у «Move», ни у «Rename», ни у «Attach», ни у «Publish a link», ни у «Browse»: перенести, переименовать, вложить, опубликовать или выбрать файл, ничего не спросив, нельзя нигде — и предупреждать не о чем.<br><br><b>Пар в продукте две.</b> «Sign out…» в приложении спрашивает, что оставить на этом компьютере, — одинаково из меню пользователя и из настроек приложения, — а «Sign out» в меню пользователя <b>в вебе</b> заканчивает сеанс сразу (12): одни и те же слова, разные последствия, и знак разводит их до нажатия. «Delete on the server…» требует набрать имя коллекции, тогда как «Delete contact», «Delete event» и удаление файла только переспрашивают — <b>подтверждение это не данные</b>, и в том и вся разница.<br><br><b>Где два сценария различает не знак, второго указателя не нужно.</b> У «New contact» в едином виде спрашивают, в какую книгу писать, а при одной выбранной книге запись создаётся сразу — но это уже сказано стрелкой <code>.m-split</code>, и многоточие пометило бы то же самое второй раз. Так же у «Show password»: спросит она или покажет сразу, видно по значку в шапке раздела (7.11). И так же у выгрузки: «Export» в шапке раздела ведёт в мастер, а «Export .vcf» в меню строки скачивает сразу — формат в подписи и есть тот различитель, вместо которого не нужен знак.</p>
 <p><b>Кнопка со стрелкой — <code>.m-split</code>, две половины одним контролом.</b> Надпись действует сразу, стрелка открывает список: «New note» создаёт заметку, стрелка спрашивает, что ещё можно завести; «New contact» в едином виде так же спрашивает, в какую книгу писать. В кадрах 7.1 и 7.4 это нарисовано одним узлом со стрелкой внутри — рисунку не нужны два поведения, а интерфейсу нужны, и то, что связывает половины в один контрол, — вещь: между ними нет промежутка, наружные углы скруглены, внутренние срезаны. Волосяной линии на стыке нет: полпикселя на заливке то появляется, то нет, и контрол, который сам не умеет держать свою черту, лучше без неё. Без обёртки половины расходятся на промежуток окружающей группы, и стрелка отрывается от своей кнопки.</p>
 
 <h4>Поля</h4>
-<div class="demo tc-root tc-root--on-surface tc-root--top">
+<figure>
+<div class="frame" data-frame="components-10">
+  <div class="frame-label"><span>Поля</span><span class="frag">компонент</span><i>ширина по содержимому, флажки</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--top tc-root--wrap tc-root--pad18-20">
   <div class="tc-field tc-field--md"><label>Display name</label><input class="tc-in" type="text" value="Анна Ковалёва" aria-label="Display name"></div>
   <div class="tc-field tc-field--sm"><label>Birthday</label><input class="tc-in is-ph" type="date" placeholder="YYYY-MM-DD" aria-label="Birthday"></div>
   <div class="tc-field tc-field--xs"><label>Start time</label><input class="tc-in is-mono" type="time" value="10:00" aria-label="Start time"></div>
@@ -1973,11 +1988,16 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   <div class="tc-field"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>All day</button><span class="tc-field__hint">Untimed events sit on the day, not on the clock.</span></div>
   <div class="tc-field"><button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Print with photos</button></div>
 </div>
+</div>
+</figure>
 
 <p><b>Поле со списком отличается от поля ввода стрелкой</b>, и рисует её система (<code>is-pick</code>) — см. <a href="#conventions">§1</a>.</p>
 
 <h4>Источник в рейле</h4>
-<div class="demo tc-root col tc-root--on-surface tc-root--max340">
+<figure>
+<div class="frame cap340" data-frame="components-11">
+  <div class="frame-label"><span>Источник в рейле</span><span class="frag">компонент</span><i>единый вид и коллекции</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--col tc-root--pad18-20">
   <div class="tc-railsec">
     <div class="tc-tickrow is-all is-on"><button class="tc-tickrow__tick is-part" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-tickrow__label">Combined calendar</span><span class="tc-tickrow__meta">169</span></div>
   </div>
@@ -1993,11 +2013,16 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
     <div class="tc-tickrow is-ext"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#8C6239"></span><span class="tc-tickrow__label">Праздники РФ</span><span class="tc-tickrow__meta">ro</span></div>
   </div>
 </div>
+</div>
+</figure>
 <p><b>Чужие коллекции стоят своей группой внизу</b> — «Подписки», после всех аккаунтов. Они не принадлежат ни одному вашему серверу, поэтому в его группе им места нет; полоска у них штрихованная, а цвет выведен из адреса ленты, потому что сервер его не присылает. Помечены <span class="tc-badge">ro</span>: писать в них нельзя, и кнопок правки у их записей не будет. Опрашиваются они так же — флажком, и так же считаются в единый вид раздела, если отмечены.</p>
 <p>Первая строка — единый вид раздела: полоска собрана из цветов всех коллекций, флажок трёхпозиционный (отмечены все, часть, ни одной). Ниже — коллекции по аккаунтам. Квадратный флажок значит «опрашивается»; снятый источник не опрашивается вообще. Полоска — цвет с сервера. Справа моноширинным — что оттуда пришло: число записей, прочерк для неопрошенного. <b>Число — вся коллекция, а не то, что на экране:</b> диапазон агенды и фильтр списка его не двигают, загруженное считает полоса над списком. Календарь, задачи и заметки лежат в одной календарной коллекции, поэтому считается тот род, ради которого открыт раздел, — и одна коллекция в двух разделах показывает разные числа. <b>Обновляется оно дважды:</b> при входе в сессию, когда рейл рисуется впервые, и при каждом обращении к коллекции — открыли или перечитали список, сохранили, удалили или перенесли запись, нажали обновление, закончили импорт, разобрали расхождение. Отдельного похода за счётчиком нет: число приносит тот запрос, который и так был сделан. <b>Снятая коллекция не опрашивается вообще</b> — ни при входе, ни потом, и прочерк у неё не означает «ноль». Сломанный источник говорит <b>человеческим словом</b>, а код ответа стоит рядом: «password · 401», не голый «401». Слово отвечает на «что делать» — пароль не принят, сервер молчит, сети нет, — код остаётся для того, кто пойдёт разбираться дальше, и целиком живёт в подсказке строки. Retry стоит тут же. Ошибка живёт в рейле, а не поверх списка.</p>
 
 <h4>Строка списка: анатомия</h4>
-<div class="demo tc-root col tc-root--on-surface tc-root--flat">
+<figure>
+<div class="frame" data-frame="components-12">
+  <div class="frame-label"><span>Строка списка · анатомия</span><span class="frag">компонент</span><i>слоты слева направо</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--flat tc-root--col">
   <div class="tc-list__group"><span class="tc-rubric">А</span><span class="tc-num">3</span></div>
   <div class="tc-list">
     <div class="tc-row tc-row--avatarcols">
@@ -2020,21 +2045,31 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
     </div>
   </div>
 </div>
+</div>
+</figure>
 <p>Слева направо: полоска коллекции, заглушка, имя со значком связанных записей, затем колонки, которые уходят первыми при сужении — организация, телефон, почта, источник. Выделенная строка — фон «картон», без рамок и теней.</p>
 
 <h4>Высота строки: их три</h4>
 <p>Всё, что стоит в одной строке, имеет одну высоту, и выбирает её не разметка экрана, а вид строки: <b>28&nbsp;px</b> — там, где есть поля; <b>26&nbsp;px</b> — панель инструментов; <b>22&nbsp;px</b> — строка списка или таблицы, где полей нет. Поле, кнопка, переключатель, флажок — всё берёт высоту своей строки.</p>
-<div class="demo tc-root tc-root--on-surface tc-root--top">
+<figure>
+<div class="frame" data-frame="components-13">
+  <div class="frame-label"><span>Высота строки</span><span class="frag">компонент</span><i>28 px: ряд с полем</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--top tc-root--wrap tc-root--pad18-20">
   <div class="tc-field tc-field--sm"><label>Port</label><input class="tc-in is-mono" type="text" value="8765" aria-label="Port"></div>
   <div class="tc-field"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Stop the server on exit</button></div>
   <div class="tc-field"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">Remote</button><button class="tc-seg__opt" type="button">Local</button></span></div>
   <div class="tc-field"><button class="tc-btn" type="button">Browse</button></div>
 </div>
+</div>
+</figure>
 <p>Правила высоты и выравнивания — в <a href="#conventions">§1</a>. Частное к общему: <b>ряд с полем задаёт 28&nbsp;px всему ряду</b>, чем бы он ни был свёрстан, поэтому мелкая кнопка рядом с полем невозможна. Два флажка в одной ячейке — уже список, не строка. Ячейку, растянутую на всю ширину в строке, где у других есть подписи, помечают <code>is-own-line</code> — таких три.</p>
 <p>Встроенная проверка: откройте файл с <code>#check</code> в адресе. Она обходит каждый ряд — форму, панель, шапку, подвал, карточку, — сравнивает центры и высоты и обводит красным то, что выбилось (центр больше чем на 1.5&nbsp;px или высота хоть на пиксель). Четыре прохода: контролы на одной линии; ячейки формы, чьи диапазоны пересекаются; сами полосы (неравный отступ, два ряда, вылет); меню внутри <code>.m-shell</code>, оставшееся в потоке. В углу — счёт; на чистом файле «Строки выровнены».</p>
 
 <h4>Шапка раздела</h4>
-<div class="demo tc-root col tc-root--on-bg tc-root--flat">
+<figure>
+<div class="frame" data-frame="components-14">
+  <div class="frame-label"><span>Шапка раздела · человек</span><span class="frag">компонент</span><i>фотография, имя, действия</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
   <div class="tc-head tc-head--mid">
     <div class="tc-head__group tc-head__group--ai-center">
       <span class="tc-avatar--photo is-ph tc-avatar--photo--sq76-t20">АК</span>
@@ -2046,14 +2081,24 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
     <div class="tc-acts"><button class="tc-btn is-sm" type="button">Edit</button><button class="tc-btn is-sm" type="button">All records</button></div>
   </div>
 </div>
-<div class="demo tc-root tc-root--on-surface tc-root--pad10-14">
+</div>
+</figure>
+<figure>
+<div class="frame" data-frame="components-15">
+  <div class="frame-label"><span>Хлебные крошки</span><span class="frag">компонент</span><i>путь по папкам</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad10-14 tc-root--wrap">
   <nav class="tc-crumbs"><a class="tc-crumbs__link" href="#">Documents</a>/<a class="tc-crumbs__link" href="#">carrel</a>/<b>attachments</b></nav>
 </div>
+</div>
+</figure>
 <p><b>У шапки две половины, и обе — вещи.</b> Слева <code>.m-hgroup</code>: фотография и заголовки одной группой, потому что подпись принадлежит снимку, а не полосе. Внутри неё <code>.m-htext</code> — стопка из заголовка, крошек, подзаголовка и подсказки, которая должна уметь сжиматься, когда действия справа занимают своё. Справа <code>.m-acts</code>, и это слот: какие там кнопки — дело экрана, как они стоят — дело шапки. Безымянная обёртка не сверяется — см. <a href="#conventions">§1</a>.</p>
 
 <h4>Панель инструментов: одна строка</h4>
 <p>Панель управления списка — <b>полоса высотой в одну строку</b>, и таких полос три: инструменты списка, панель выделения, ход опроса. У всех трёх один отступ (7&nbsp;px сверху и снизу) и одна высота содержимого (26&nbsp;px), потому что это одна вещь, а не три похожих.</p>
-<div class="demo tc-root col tc-root--on-bg tc-root--flat">
+<figure>
+<div class="frame" data-frame="components-16">
+  <div class="frame-label"><span>Панель инструментов</span><span class="frag">компонент</span><i>выделение, одна строка</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
   <div class="tc-head tc-head--padt11">
     <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t18">attachments</div><div class="tc-head__sub">sftpgo · vps</div></div>
   </div>
@@ -2074,8 +2119,13 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   </div>
   <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="83%"></i></span>Polled 5 of 6 sources · 14 events<span class="tc-mono tc-push">2 min ago</span></div>
 </div>
+</div>
+</figure>
 <p>Та же панель, когда колонка содержимого сузилась — открыли панель подробностей. Сортировка и хвост со счётчиком ушли под «⋯», действия выделения остались все до одного и потеряли только подписи:</p>
-<div class="demo tc-root col tc-root--on-bg tc-root--flat tc-root--max460">
+<figure>
+<div class="frame cap460" data-frame="components-17">
+  <div class="frame-label"><span>Панель инструментов</span><span class="frag">компонент</span><i>460 px: бар отдаёт кнопки</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
   <div class="tc-head tc-head--padt11">
     <div class="tc-head__titles"><div class="tc-head__title tc-head__title--t18">attachments</div><div class="tc-head__sub">sftpgo · vps</div></div>
   </div>
@@ -2096,16 +2146,26 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   </div>
   <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="83%"></i></span>Polled 5 of 6 sources<span class="tc-mono tc-push">2 min ago</span></div>
 </div>
+</div>
+</figure>
 <p>Правило полосы — в <a href="#conventions">§1</a>. <code>.m-sep</code>, <code>.m-range</code> и <code>.m-right</code> — такие же части набора, как кнопка. Порядок отступления у каждой панели свой: в календаре первым уходит диапазон дат, в задачах — сортировка, в контактах — сортировка и хвост со счётчиком. На экране человека диапазон в полосе остаётся: подпись «Widen the range» бессмысленна, если сами поля спрятаны под «⋯».</p>
-<div class="demo tc-root tc-root--on-surface tc-root--pad10-14">
+<figure>
+<div class="frame" data-frame="components-18">
+  <div class="frame-label"><span>Диапазон дат</span><span class="frag">компонент</span><i>от — до, Show</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad10-14 tc-root--wrap">
   <span class="tc-range"><input class="tc-in is-mono" type="date" value="2026-01-01"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="text" value="today"><button class="tc-btn" type="button">Show</button></span>
 </div>
+</div>
+</figure>
 <p><b>Диапазон дат — <code>.m-range</code>:</b> два поля и стрелка между ними, иногда с кнопкой «Show». В полосе календаря и поиска он уходит под «⋯», когда колонка сужается — помечен <code>is-2nd</code>, как сортировка и счётчик. На экране человека он стоит первым, без <code>is-2nd</code> и с кнопкой Show: это тот контрол, которым отвечают на «Widen the range», и его нельзя прятать.</p>
 
 <h4>Меню: что обещано кнопкой и что внутри</h4>
 <p>Кнопка со стрелкой или с «⋯» — обещание списка. Меню переполнения полосы нарисовано раскрытым в агенде (7.2): в нём лежит ровно то, что отступило на этом экране.</p>
 <p>Кнопка и список — <code>.m-drop</code> — см. <a href="#conventions">§1</a>. На полосе — <code>is-bar</code>. Оба узла показаны ниже. <b>Сверху — свой узел:</b> «⋯» строки или шапки, меню влево от кнопки. <b>Снизу — <code>is-bar</code>:</b> меню отмерено от полосы. Полоса нарисована узкой нарочно — «⋯» появляется, только когда набору не хватило ширины.</p>
-<div class="demo tc-root col tc-root--on-bg tc-root--flat tc-root--max560">
+<figure>
+<div class="frame cap560" data-frame="components-19">
+  <div class="frame-label"><span>Меню</span><span class="frag">компонент</span><i>кнопка и лист</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
   <div class="tc-line tc-root__bar-row">
     <span class="tc-drop">
       <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
@@ -2130,6 +2190,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
     </div>
   </div>
 </div>
+</div>
+</figure>
 <div class="frames">
   <figure style="flex:0 1 250px">
   <div class="frame" data-frame="components-1">
@@ -2273,16 +2335,24 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 
 <h4>Кнопка рядом с полем</h4>
 <p>Кнопка, относящаяся к полю, стоит <b>справа от него и внутри его же блока</b>, обычной высоты. Мелкая кнопка (22&nbsp;px) — только для строк списка и таблиц, где полей нет. Пара «поле + кнопка» верстается одной строкой внутри <code>.m-f</code>, а не двумя соседними ячейками формы: иначе выравнивание разъедется, как только у соседнего поля появится подсказка.</p>
-<div class="demo tc-root tc-root--on-surface">
+<figure>
+<div class="frame" data-frame="components-20">
+  <div class="frame-label"><span>Кнопка рядом с полем</span><span class="frag">компонент</span><i>Browse, Copy</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--wrap tc-root--pad18-20">
   <div class="tc-field tc-field--fill300"><label>On a connected server</label>
     <span class="tc-line tc-line--gap-8"><input class="tc-in is-ph tc-in--t11-fill" type="text" placeholder="Documents · sftpgo / carrel-backup/…" aria-label="Documents · sftpgo / carrel-backup/…"><button class="tc-btn" type="button">Browse</button></span></div>
   <div class="tc-field tc-field--fill260"><label>Address for the client</label>
     <span class="tc-line tc-line--gap-8"><input class="tc-in is-mono tc-in--t11-5-fill" type="text" value="https://carrel.example/dav/"><button class="tc-btn" type="button">Copy</button></span></div>
 </div>
+</div>
+</figure>
 
 <h4>Выбор столбцов</h4>
 <p>Раз ширина отдана колонкам, человек должен решать, какие это колонки. Кнопка <b>Columns</b> стоит в панели управления каждого списка и каждой таблицы — контакты, задачи, заметки, файлы, пользователи, журнал.</p>
-<div class="demo tc-root tc-root--on-surface tc-root--top tc-root--gap30">
+<figure>
+<div class="frame" data-frame="components-21">
+  <div class="frame-label"><span>Выбор столбцов</span><span class="frag">компонент</span><i>меню со списком колонок</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--top tc-root--gap30 tc-root--wrap tc-root--pad18-20">
   <div class="tc-stack tc-stack--gap-9">
     <button class="tc-btn tc-btn--on-card" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns<span class="tc-mono tc-mono--dusty-t11">5</span></button>
   </div>
@@ -2300,6 +2370,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
     <button class="tc-menu__item tc-menu__item--accent" type="button" role="menuitem">Reset to defaults</button>
   </div>
 </div>
+</div>
+</figure>
 <p>Кнопка стоит в панели управления, рядом с сортировкой и видом. Флажок включает столбец, ручка слева меняет порядок перетаскиванием, первый столбец выключить нельзя — это то, за что запись открывают. Пояснения к макету живут здесь, а не внутри него: на самом экране такого текста не будет.</p>
 <table class="doc">
   <tr><th style="width:30%">Вопрос</th><th>Ответ</th></tr>
@@ -2311,15 +2383,23 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 </table>
 
 <h4>Ход опроса, сообщения, пустое состояние</h4>
-<div class="demo tc-root col tc-root--on-bg tc-root--flat">
+<figure>
+<div class="frame" data-frame="components-22">
+  <div class="frame-label"><span>Ход опроса и сообщения</span><span class="frag">компонент</span><i>полоса, сообщение, пустое состояние</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
   <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="71%"></i></span>Polled 5 of 7 sources · 12 records · 1 unavailable<span class="tc-push"><button class="tc-btn is-sm" type="button">Stop</button></span></div>
   <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one.</div>
   <div class="tc-msg is-alert">baikal · office — the server replied 401. Check the saved password on the profile page.</div>
   <div class="tc-empty">No contacts in this address book.<button class="tc-btn is-primary" type="button">New contact</button></div>
 </div>
+</div>
+</figure>
 
 <h4>Таблица</h4>
-<div class="demo tc-root col tc-root--on-bg tc-root--flat">
+<figure>
+<div class="frame" data-frame="components-23">
+  <div class="frame-label"><span>Таблица</span><span class="frag">компонент</span><i>колонки и роли</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--flat tc-root--col">
   <table class="tc-table">
     <thead><tr><th>Login</th><th>Role</th><th class="is-2nd tc-table__n3">Created</th><th class="tc-table__n4">Last login</th></tr></thead>
     <tbody>
@@ -2328,20 +2408,35 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
     </tbody>
   </table>
 </div>
+</div>
+</figure>
 <p>Заголовок — капитель, не жирный шрифт браузера. Первая и последняя колонки стоят в желобе страницы (<code>var(--tc-page-gutter)</code>), чтобы таблица совпадала с шапкой над ней. Машинная строка (адрес, путь, идентификатор) ломается в любом месте: иначе колонка не сжимается и таблица уезжает за край.</p>
-<div class="demo tc-root tc-root--on-surface tc-root--pad10-14">
+<figure>
+<div class="frame" data-frame="components-24">
+  <div class="frame-label"><span>Имя файла в таблице</span><span class="frag">компонент</span><i>значок 15 px</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad10-14 tc-root--wrap">
   <span class="tc-table__file"><svg viewBox="0 0 24 24"><use href="#i-doc"/></svg><span class="tc-table__filename">release-checklist.md</span></span>
 </div>
+</div>
+</figure>
 <p>В файлах имя — <code>.m-fname</code>: значок и подпись, размер знает ячейка.</p>
 
 <h4>Плитки и очередь загрузок</h4>
-<div class="demo tc-root tc-root--on-bg tc-root--top">
+<figure>
+<div class="frame" data-frame="components-25">
+  <div class="frame-label"><span>Плитки файлов</span><span class="frag">компонент</span><i>предпросмотр</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--top tc-root--wrap tc-root--pad18-20">
   <div class="tc-grid tc-grid--flush-fill-pad8">
     <div class="tc-tile"><div class="tc-thumb"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#i-doc"/></svg></div><span class="tc-tile__name">смета.pdf</span><span class="tc-tile__meta">412 KB</span></div>
     <div class="tc-tile is-sel"><div class="tc-thumb"><svg viewBox="0 0 24 24" width="22" height="22"><use href="#i-img"/></svg></div><span class="tc-tile__name">фасад.jpg</span><span class="tc-tile__meta">1.8 MB</span></div>
   </div>
 </div>
-<div class="demo tc-root col tc-root--on-bg tc-root--max360 tc-root--pad14">
+</div>
+</figure>
+<figure>
+<div class="frame cap360" data-frame="components-26">
+  <div class="frame-label"><span>Очередь загрузок</span><span class="frag">компонент</span><i>развёрнута</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
   <div class="tc-queue tc-queue--flush-full">
     <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--dusty">12.4 MB</span><button class="tc-btn is-sm" type="button">Hide</button></div>
     <ul class="tc-queue__list">
@@ -2352,25 +2447,40 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
     </ul>
   </div>
 </div>
+</div>
+</figure>
 <p>Сетка <code>.m-grid</code>, плитка <code>.m-tile</code>, превью <code>.m-thumb</code>. Выделенная плитка — рамка акцента, как выделенная строка таблицы — фон картона. Очередь загрузок <code>.m-transfers</code> — карточка в правом нижнем углу колонки содержимого, не окна и не рейла: ход, конфликт имени, Keep both / Replace / Skip. Hide сворачивает её в строку того же угла (<code>is-min</code>, кнопка Show); когда загрузок нет, угла нет. Она не список и не таблица, поэтому у неё своё имя.</p>
-<div class="demo tc-root col tc-root--on-bg tc-root--max280 tc-root--pad14">
+<figure>
+<div class="frame cap280" data-frame="components-27">
+  <div class="frame-label"><span>Очередь загрузок</span><span class="frag">компонент</span><i>свёрнута</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
   <div class="tc-queue is-min tc-queue--flush-wauto">
     <div class="tc-queue__head"><b>Uploading 2 of 3</b><span class="tc-mono tc-push tc-mono--dusty">62%</span><button class="tc-btn is-sm" type="button">Show</button></div>
   </div>
 </div>
+</div>
+</figure>
 
 <h4>Дерево папок</h4>
-<div class="demo tc-root col tc-root--on-surface tc-root--max340 tc-root--pad8">
+<figure>
+<div class="frame cap340" data-frame="components-28">
+  <div class="frame-label"><span>Дерево папок</span><span class="frag">компонент</span><i>выбор папки</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad8 tc-root--col">
   <div class="tc-tree">
     <div class="is-on tc-tree__row"><svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-file"/></svg>attachments</div>
     <div class="tc-tree__row tc-tree__row--padl1-25rem"><svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-file"/></svg>2026</div>
     <div class="tc-tree__row tc-tree__row--padl1-25rem"><svg viewBox="0 0 24 24" width="14" height="14"><use href="#i-file"/></svg>смета</div>
   </div>
 </div>
+</div>
+</figure>
 <p>Единственное новое устройство, которое понадобилось «Move» в файлах — и оно же нужно запланированному экрану нового устройства. Вложенность — атрибут <code>data-depth</code>, не инлайновый стиль: CSP не пускает <code>style=</code>.</p>
 
 <h4>Документ: заголовок, текст, правка</h4>
-<div class="demo tc-root col tc-root--on-surface tc-root--pad16-20">
+<figure>
+<div class="frame" data-frame="components-29">
+  <div class="frame-label"><span>Документ</span><span class="frag">компонент</span><i>панель, заголовок, текст</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad16-20 tc-root--col">
   <div class="tc-docbar tc-docbar--rule">
     <button class="tc-btn is-primary" type="button">Save</button>
     <button class="tc-btn" type="button">Cancel</button>
@@ -2381,10 +2491,15 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   <div class="tc-doc__title">Заметка со встречи 10.08</div>
   <div class="tc-prose">Календарь на осень: три события в «Личный», одно в «Работа». Связанные — Анна и смета.</div>
 </div>
+</div>
+</figure>
 <p><code>.m-title</code> — 27 px в теле документа, не <code>.m-h1</code> шапки раздела. <code>.m-doc</code> / <code>.m-docbody</code> / <code>.m-metacol</code> — полный экран заметки: текст и боковая колонка. <code>.m-editbar</code> — та же высота 26 px, что у полосы инструментов, только для правки. <code>.m-kbd</code> — аккорд, который обещает кнопку.</p>
 
 <h4>Шаги мастера и диагностика</h4>
-<div class="demo tc-root col tc-root--on-surface tc-root--gap12 tc-root--pad14-20">
+<figure>
+<div class="frame" data-frame="components-30">
+  <div class="frame-label"><span>Шаги мастера и диагностика</span><span class="frag">компонент</span><i>1 · 2 · 3, счёт, журнал</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--gap12 tc-root--pad14-20 tc-root--col">
   <div class="tc-steps"><span class="is-on tc-steps__item">1 · Source</span><i aria-hidden="true" class="tc-steps__rule"></i><span class="tc-steps__item">2 · Preview</span><i aria-hidden="true" class="tc-steps__rule"></i><span class="tc-steps__item">3 · Report</span></div>
   <div class="tc-stats">
     <span class="tc-stat"><b>122</b> ready</span>
@@ -2394,31 +2509,53 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   <div class="tc-diag">[discover] GET /.well-known/caldav → 200
 [principal] /principals/mix/</div>
 </div>
+</div>
+</figure>
 <p>Три шага импорта — <code>.m-steps</code>: текущий жирный, остальные пыльные, между ними линейка. Трасса обнаружения и отчёт об ошибках — <code>.m-diag</code>, моноширинным, как данные.</p>
 
 <h4>Диалог и карточка</h4>
-<div class="demo tc-root col tc-root--on-bg tc-root--pad14">
+<figure>
+<div class="frame" data-frame="components-31">
+  <div class="frame-label"><span>Диалог</span><span class="frag">компонент</span><i>центрированное полотно</i></div>
+  <div class="tc-root tc-root--on-bg tc-root--pad14 tc-root--col">
   <div class="tc-dialog tc-dialog--max420-flush">
     <p class="tc-dialog__lede">Центрированное полотно для форм, мастеров и диалогов выбора.</p>
   </div>
 </div>
-<div class="demo tc-root col tc-root--on-surface tc-root--max280 tc-root--pad14">
+</div>
+</figure>
+<figure>
+<div class="frame cap280" data-frame="components-32">
+  <div class="frame-label"><span>Карточка</span><span class="frag">компонент</span><i>рубрика и число</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad14 tc-root--col">
   <div class="tc-card tc-card--flush">
     <div class="tc-rubric">Created</div>
     <div class="tc-card__num">122</div>
   </div>
 </div>
+</div>
+</figure>
 <p><code>.m-dialog</code> — полотно страницы внутри оболочки: формы, мастеры, диалог выбора папки. <code>.m-card</code> — рамка с подложкой для группы полей или счётчика внутри диалога.</p>
 
 <h4>Крестик и разрушительный подвал</h4>
-<div class="demo tc-root tc-root--on-surface tc-root--max220 tc-root--pad12-14 tc-root--row">
+<figure>
+<div class="frame cap220" data-frame="components-33">
+  <div class="frame-label"><span>Крестик панели</span><span class="frag">компонент</span><i>в шапке</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad12-14 tc-root--row tc-root--wrap">
   <span class="tc-dim--t12">Panel title</span>
   <button class="tc-btn tc-close" title="Close the panel" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
 </div>
-<div class="demo tc-root col tc-root--on-surface tc-root--max360 tc-root--flat">
+</div>
+</figure>
+<figure>
+<div class="frame cap360" data-frame="components-34">
+  <div class="frame-label"><span>Разрушительный подвал</span><span class="frag">компонент</span><i>Delete contact</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--flat tc-root--col">
   <div class="tc-root__card-body">Card body</div>
   <div class="tc-danger tc-danger--top0-pad11-14"><button class="tc-btn is-danger-solid" type="button">Delete contact</button></div>
 </div>
+</div>
+</figure>
 <p><code>.m-close</code> — крестик закрытия: та же кнопка, что в шапке листа и в панели, стоит в ряду с другими действиями. <code>.m-danger-zone</code> — подвал карточки с разрушительным действием: отдельная полоса с волосяной линией сверху, тревожный текст рядом с кнопкой.</p>
 
 <p><b>Счёт разобранного — <code>.m-stats</code>, одна ячейка — <code>.m-stat</code>.</b> Строка над предпросмотром на всех трёх мастерах. Число полужирным; неудачи — <code>is-error</code>, тот же цвет, что у отказавшей строки предпросмотра.</p>
