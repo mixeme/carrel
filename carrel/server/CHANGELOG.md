@@ -17,6 +17,56 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.28 — 2026-09-23
+
+### Added
+
+- **Xandikos runs green, all seven suites, and stands in the ordinary row
+  of the gates** beside Radicale and Stalwart. It took six fixes on our side
+  (SV-40 to SV-44, SV-47) and taught two of the live suites to ask the server
+  about itself instead of carrying a list of names: whether it checks
+  passwords at all, and whether it has MOVE.
+
+### Fixed
+
+- **A calendar search found nothing on a server whose text-match barely
+  works** (docs/servers.md, SV-47). Xandikos matches only a whole value, and
+  only one with no space in it: «Two words» does not find «Two words». It
+  answers 207 with nothing, which is exactly what an honest miss looks like.
+  An empty calendar search is now checked against the collection itself and
+  sifted here — the owner's decision. The note that Carrel did the searching
+  goes on the screen only when the sifting found what the server did not; an
+  honest miss on a server that searched well stays silent.
+
+### Notes
+
+- **The cost of that check, and the cache that would remove it.** Every
+  calendar search that finds nothing now reads the whole component, on
+  every server. The owner pointed out that what is read once should be
+  searched from memory afterwards — and S-4.2 already prescribes exactly
+  that: a version map per collection checked against its change tag, bodies
+  kept by version. **That cache is not in the code.** The change tag is
+  collected by discovery and stored in the catalog, and never compared
+  before a read; the slot called the version map holds the index behind the
+  search box's hints; bodies are kept only for the conflict flow. Every
+  list, agenda and search reads its collections whole, every time. Building
+  S-4.2 as written is now a task in the plan, and it pays off on every
+  screen, not only on search.
+- **A password cannot be cleared through the connection form.** An empty
+  field means «leave it as it is», so an empty password cannot be said —
+  and Xandikos asks for none. Harmless there, since it takes anything, but
+  it is a gap in what the form can express, and it belongs to the frame.
+  Recorded in the plan.
+- **On a server without MOVE a moved record is held to «nothing lost», not
+  «nothing changed».** It goes over as a copy, and a copy is written: it
+  carries a stamp of its own and the writer's order of properties. The
+  suite finds out which standard applies by asking the server with one
+  probe MOVE of a scratch card.
+- The probe was written once and not called at all: the first edit script
+  failed its own anchor check and wrote nothing, the second added only the
+  function, and `go vet` does not flag an unused package-level function. The
+  live run caught it by failing on the old message.
+
 ## v0.2.27 — 2026-09-23
 
 ### Added

@@ -106,24 +106,20 @@ for _ in $(seq 1 60); do
 done
 go test -tags=integration -count=1 -timeout 30m -run 'Stalwart' ./integration/...
 
-# Xandikos, the second light engine. NOT YET RUN either
-# (testdata/xandikos/README.md); behind a flag for the same reason as
-# Stalwart. Run with CARREL_XANDIKOS=1.
-if [[ "${CARREL_XANDIKOS:-}" == "1" ]]; then
-  echo "== S-30.2: Xandikos integration =="
-  if ! (
-    docker compose -f docker-compose.linux.yml up -d xandikos
-    for _ in $(seq 1 60); do
-      if curl -sf -o /dev/null http://127.0.0.1:8081/ 2>/dev/null; then
-        break
-      fi
-      sleep 0.5
-    done
-    go test -tags=integration -count=1 -timeout 30m -run 'Xandikos' ./integration/...
-  ); then
-    echo "!! Xandikos: стенд не поднялся или набор упал; остальные ворота идут дальше"
+# Xandikos, the second light engine beside Radicale: Python, every collection
+# a git repository, and the one server in the lineup that asks for no
+# password. All seven suites went green on 23.09.2026 after five defects of
+# ours were fixed against it (docs/servers.md, SV-40 to SV-44, SV-47), so it
+# stands in the ordinary row: no flag, and a failure fails the gates.
+echo "== S-30.2: Xandikos integration =="
+docker compose -f docker-compose.linux.yml up -d xandikos
+for _ in $(seq 1 60); do
+  if curl -sf -o /dev/null http://127.0.0.1:8081/ 2>/dev/null; then
+    break
   fi
-fi
+  sleep 0.5
+done
+go test -tags=integration -count=1 -timeout 30m -run 'Xandikos' ./integration/...
 
 # Davis, sabre/dav once more. NOT YET RUN either, and its DAV account is
 # made by hand in the admin screens — the suite skips and says so when

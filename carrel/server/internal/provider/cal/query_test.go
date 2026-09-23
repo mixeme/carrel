@@ -252,3 +252,35 @@ func TestDeleteRequiresVersion(t *testing.T) {
 		t.Error("still there")
 	}
 }
+
+// docs/servers.md, SV-47: a server whose text-match finds nothing — Xandikos
+// matches only a whole value, and only one without a space — and says 207
+// with nothing, the same as an honest miss. An empty answer is checked
+// against the collection itself; what the sifting finds comes with the note
+// that Carrel did the searching.
+func TestAnEmptySearchIsCheckedAgainstTheCollection(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.CalendarTextMatchFindsNothing = true
+	srv.Seed(work+"plan.ics", vevent("plan", "20260115T100000Z", "Launch plan"))
+	srv.Seed(work+"visit.ics", vevent("visit", "20260116T100000Z", "Visit"))
+
+	objs, _, err := p.Search(t.Context(), work, "VEVENT", "launch")
+	if !errors.Is(err, ErrServerDoesNotFilter) {
+		t.Fatalf("err = %v, want the note that Carrel did the searching", err)
+	}
+	if len(objs) != 1 || UID(objs[0]) != "plan" {
+		t.Fatalf("found %+v, want the one event whose summary holds the text", objs)
+	}
+}
+
+// And on a server that searched well, a miss is a miss: one read more to be
+// sure of it, and no note on the screen — the server was right.
+func TestAnHonestMissSaysNothingMore(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.Seed(work+"visit.ics", vevent("visit", "20260116T100000Z", "Visit"))
+
+	objs, _, err := p.Search(t.Context(), work, "VEVENT", "launch")
+	if err != nil || len(objs) != 0 {
+		t.Fatalf("objs %+v, err %v; want nothing and no note", objs, err)
+	}
+}

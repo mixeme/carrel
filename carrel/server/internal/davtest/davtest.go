@@ -78,6 +78,13 @@ type Server struct {
 	// A PROPPATCH right after sets the colour and keeps it.
 	CreateDropsColour bool
 
+	// CalendarTextMatchFindsNothing answers every calendar-query that carries
+	// a text-match 207 with no responses — the same answer as for an honest
+	// miss — the way Xandikos does for any value that is not matched whole
+	// and has a space in it (docs/servers.md, SV-47). A calendar-query with
+	// no text-match is served normally.
+	CalendarTextMatchFindsNothing bool
+
 	// CreateIgnoresComponentSet makes every calendar hold every component
 	// whatever the MKCALENDAR asked for, the way Xandikos does: it drops the
 	// set at creation, refuses a PROPPATCH of it with 409 because the
@@ -469,6 +476,13 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 	if s.RefuseAllPropInAddressData && r.Method == "REPORT" && bytes.Contains(body, []byte("address-data")) &&
 		bytes.Contains(body, []byte("allprop")) {
 		http.Error(w, `{"error":{"code":400,"status":"INVALID_ARGUMENT"}}`, http.StatusBadRequest)
+		return
+	}
+	if s.CalendarTextMatchFindsNothing && r.Method == "REPORT" && bytes.Contains(body, []byte("calendar-query")) &&
+		bytes.Contains(body, []byte("text-match")) {
+		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+		w.WriteHeader(http.StatusMultiStatus)
+		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"/>`)
 		return
 	}
 	if s.BreaksOnTextMatch && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) &&

@@ -125,8 +125,19 @@ func runMove(t *testing.T, endpoint, user, pass string) {
 		// looked for by what is written in it.
 		moved, movedUID := liveRecordWhere(ctx, t, cols.client, cols.bookB, "of Ada", isAda)
 		if kept {
-			if moved != before {
-				t.Errorf("MOVE changed the card:\nbefore %s\nafter  %s", before, moved)
+			if hasMove(ctx, t, cols.client, cols.bookB) {
+				if moved != before {
+					t.Errorf("MOVE changed the card:\nbefore %s\nafter  %s", before, moved)
+				}
+			} else {
+				// No MOVE on this server, so the record went over as a copy
+				// and a copy is written: it carries a stamp of its own and
+				// the order is the writer's (docs/servers.md, SV-44). What
+				// must survive is everything the record held.
+				mustHave(t, "moved card", moved, "FN:Ada Lovelace", "N:Lovelace;Ada;;;", "X-CUSTOM:keep-me")
+				if movedUID != uid {
+					t.Errorf("the copy carries UID %s, want %s", movedUID, uid)
+				}
 			}
 		} else {
 			// The notice is only true if the identity really did change.
@@ -187,6 +198,34 @@ type moveCollections struct {
 // (docs/servers.md, SV-18), and Carrel finds a record by its UID for the same
 // reason; a test that looked it up by name would be testing an assumption no
 // standard makes.
+// hasMove asks the server whether it has MOVE at all. Xandikos answers 405 to
+// every one of them, across collections and for a rename alike, and offers no
+// COPY either (docs/servers.md, SV-44); a record still moves there, but as a
+// copy, and a copy is written and cannot be byte-for-byte what it was. Which
+// standard to hold the move to is therefore the server's answer to give, not
+// a list of server names in this suite.
+func hasMove(ctx context.Context, t *testing.T, client *dav.Client, collection string) bool {
+	t.Helper()
+	from := collection + fmt.Sprintf("carrel-move-probe-%d.vcf", os.Getpid())
+	to := collection + fmt.Sprintf("carrel-move-probe-%d-2.vcf", os.Getpid())
+	card := strings.Join([]string{"BEGIN:VCARD", "VERSION:3.0", "UID:carrel-move-probe", "FN:Probe", "END:VCARD", ""}, "\r\n")
+	if _, err := client.PutCreate(ctx, from, dav.Typed(strings.NewReader(card), "text/vcard; charset=utf-8")); err != nil {
+		t.Logf("the MOVE probe could not be seeded (%v); assuming the server has MOVE", err)
+		return true
+	}
+	err := client.Move(ctx, from, to, false)
+	if err == nil {
+		_ = client.Delete(ctx, to, "")
+		return true
+	}
+	_ = client.Delete(ctx, from, "")
+	if dav.IsStatus(err, http.StatusMethodNotAllowed) || dav.IsStatus(err, http.StatusNotImplemented) {
+		t.Logf("this server has no MOVE (%v): the move is held to «nothing lost», not «nothing changed»", err)
+		return false
+	}
+	return true
+}
+
 func liveCardByUID(ctx context.Context, t *testing.T, client *dav.Client, collection, uid string) string {
 	t.Helper()
 	body, _ := liveRecordWhere(ctx, t, client, collection, "with UID "+uid, func(b string) bool {

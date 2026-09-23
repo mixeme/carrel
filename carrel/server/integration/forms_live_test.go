@@ -528,8 +528,21 @@ func liveConnectionEdit(t *testing.T, app *liveApp, connID, endpoint, user, pass
 		}
 	}
 	blob, _ = app.users.Catalog(app.sess.AccountID(), key)
-	if len(blob.Connections) != 1 || blob.Connections[0].ID != connID || blob.Connections[0].Password != pass {
+	if len(blob.Connections) != 1 || blob.Connections[0].ID != connID {
 		t.Fatalf("after edit: %+v", blob.Connections)
+	}
+	// An empty password field means «leave it as it is» — otherwise editing a
+	// label would wipe the password. Where the right password *is* empty
+	// (Xandikos asks for none), that convention makes it unsayable: the wrong
+	// one stays, and the form offers no way to clear it. Nothing here is
+	// broken by that — the server takes anything — but the gap is real and
+	// belongs to the frame, not to this suite, so it is named rather than
+	// asserted around (docs/plan/server.md).
+	if pass != "" && blob.Connections[0].Password != pass {
+		t.Fatalf("after edit the password is %q, want the one just entered", blob.Connections[0].Password)
+	}
+	if pass == "" {
+		t.Log("the right password here is empty, and an empty field means «unchanged»: a password cannot be cleared through the form")
 	}
 	card = liveCard(t, liveDecode[view.ConnectionsPage](t, "test again", app.post(test, url.Values{})), connID)
 	if card.Trace == nil || !card.Trace.OK || card.State != view.CollectionOK {

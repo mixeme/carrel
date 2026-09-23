@@ -24,11 +24,15 @@ var (
 	// default ignores letter case in Latin only (i;ascii-casemap). The records
 	// it found come with this error.
 	ErrLatinCaseOnly = errors.New("cal: the server ignores letter case in Latin script only")
-	// ErrServerDoesNotFilter: the server answered a text-match with records
-	// that do not hold the text — it returned the collection and left the
-	// searching to whoever asked (docs/servers.md, SV-16). Carrel sifted the
-	// answer itself, and says so beside the results.
-	ErrServerDoesNotFilter = errors.New("cal: the server returned records the search did not ask for")
+	// ErrServerDoesNotFilter: the server's text-match cannot be taken at its
+	// word, and Carrel did the searching. Two ways to get here. The server
+	// answered with records that do not hold the text — it returned the
+	// collection and left the searching to whoever asked (docs/servers.md,
+	// SV-16: SoGo). Or it answered with nothing while the collection holds
+	// records that do — its filter matches almost nothing (SV-47: Xandikos).
+	// Either way the records came from Carrel's own sifting, and the screen
+	// says so beside them.
+	ErrServerDoesNotFilter = errors.New("cal: the server's text-match cannot be trusted, so Carrel searched")
 )
 
 // Unreadable is a resource the REPORT returned that could not become a record.
@@ -115,6 +119,26 @@ func (p *Provider) Search(ctx context.Context, collection, component, text strin
 			if !seen[u.Path] {
 				seen[u.Path] = true
 				bad = append(bad, u)
+			}
+		}
+	}
+	// Nothing at all is the other way a text-match can fail, and the worse
+	// one, because it looks like an answer. Xandikos matches only a whole
+	// value, and only one without a space in it — «Two words» does not find
+	// «Two words» — and says 207 with nothing, the same as an honest miss
+	// (docs/servers.md, SV-47). So an empty answer is checked against the
+	// collection itself, sifted here. A server that searched well loses
+	// nothing by it but one read, and says nothing more: the note goes on the
+	// screen only when the sifting found what the server did not.
+	// The cost is a full read of the component for every search that finds
+	// nothing, on every server. S-4.2 already says what makes that cheap — a
+	// version map checked by the collection's change tag, bodies kept by
+	// version — but that cache is not built yet: until it is, this read is
+	// paid in full each time (docs/plan/server.md).
+	if len(objs) == 0 {
+		if all, _, err := p.query(ctx, collection, component, caldav.CompFilter{Name: component}); err == nil {
+			if kept, _ := sift(all, props, text); len(kept) > 0 {
+				return kept, bad, ErrServerDoesNotFilter
 			}
 		}
 	}
