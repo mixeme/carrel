@@ -335,6 +335,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 :where(.tc-root) :where(button[role=menuitem]){width:100%}
 .tc-root .tc-q{flex:1;min-width:0;min-height:0;overflow:hidden}
 .tc-acts > .tc-drop{flex:none}
+/* действия шапки в два яруса: второй ярус — уточнение к первому (порог под фильтром) */
+.tc-acts--stack{flex-direction:column;align-items:flex-end}
 /* элементы управления */
 .tc-btn{height:26px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;border:.5px solid var(--tc-edge);
   border-radius:3px;background:var(--tc-surface);font-size:12.5px;color:var(--tc-ink);white-space:nowrap;flex:none;box-sizing:border-box;
@@ -833,6 +835,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   .tc-field,.tc-field--xs,.tc-field--sm,.tc-field--md,.tc-field--lg,.tc-field--xl,.tc-field--full{width:100%;min-width:0}
   .tc-fields{grid-template-columns:minmax(0,1fr)}
   .tc-head .tc-acts{flex:1 1 100%;justify-content:flex-start}
+  .tc-head .tc-acts--stack{align-items:flex-start}
   .tc-scrim,.tc-sheet,.tc-sheet__head,.tc-sheet__body,.tc-sheet__foot{min-width:0;max-width:100%}
   .tc-sheet{width:100%;max-width:100%;margin:0}
   .tc-sheet__head{flex-wrap:wrap}
@@ -5752,12 +5755,9 @@ Read  2 min ago</div>
       <div class="tc-main">
         <div class="tc-head">
           <div class="tc-head__titles"><div class="tc-head__title">Duplicates</div><div class="tc-head__sub">361 records compared · 4 to look at</div></div>
-          <div class="tc-acts"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 4</button><button class="tc-seg__opt" type="button">Contacts 1</button><button class="tc-seg__opt" type="button">Events 1</button><button class="tc-seg__opt" type="button">Tasks 1</button><button class="tc-seg__opt" type="button">Notes 1</button></span></div>
+          <div class="tc-acts tc-acts--stack"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 4</button><button class="tc-seg__opt" type="button">Contacts 1</button><button class="tc-seg__opt" type="button">Events 1</button><button class="tc-seg__opt" type="button">Tasks 1</button><button class="tc-seg__opt" type="button">Notes 1</button></span><div class="tc-field tc-field--inline"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="70" aria-label="Match threshold"></div></div>
         </div>
         <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
-        <div class="tc-bar">
-          <div class="tc-field tc-field--inline"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="70" aria-label="Match threshold"></div>
-        </div>
         <div data-part="results" class="tc-stack tc-stack--gap-10 tc-main__results">
 
           <div class="tc-card">
