@@ -133,8 +133,15 @@ func (p *Provider) query(ctx context.Context, collection string, q dav.CardQuery
 		// with the supported-report precondition when a filter travels.
 		// A book larger than one answer may be (CARREL_DAV_MAX_RESPONSE_BYTES)
 		// is read the same round-about way: its multigets come in parts.
+		// A filter that breaks the server is the third reason. Xandikos
+		// answers 500 to any text-match over a book holding one value with
+		// a character outside ASCII — its own UnicodeEncodeError, whatever
+		// the text asked for — while the same book without a filter hands
+		// every card over (docs/servers.md, SV-42). Left as it came, a
+		// search would simply die on any book with one accented name.
 		f, can := rs.CardReporter().(dav.CardFetcher)
-		if !can || !refusedVersion(err) && !errors.Is(err, dav.ErrResponseTooLarge) {
+		if !can || !refusedVersion(err) && !errors.Is(err, dav.ErrResponseTooLarge) &&
+			!brokeOnTheFilter(err, len(q.Matches) > 0) {
 			return nil, false, err
 		}
 		if aos, err = f.FetchCards(ctx, collection); err != nil {
@@ -172,7 +179,15 @@ func refusedVersion(err error) bool {
 	return false
 }
 
-// UID returns the UID of a contact.
+// brokeOnTheFilter reports a server that fell over on the filter rather than
+// refusing it: 500 to a report that carried one. Without a filter there is
+// nothing to have broken on and nothing to fall back from, so the refusal
+// goes to whoever asked, as it did before.
+func brokeOnTheFilter(err error, filtered bool) bool {
+	return filtered && dav.IsStatus(err, 500)
+}
+
+// UID returns the UID of a contact.// UID returns the UID of a contact.
 func UID(obj *model.Object) string {
 	if obj == nil {
 		return ""

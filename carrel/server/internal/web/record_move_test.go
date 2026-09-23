@@ -381,3 +381,31 @@ func TestMovedEventTakesItsZoneAndInstances(t *testing.T) {
 		t.Error("the original is still there")
 	}
 }
+
+// docs/servers.md, SV-44: a server with no MOVE at all — Xandikos answers
+// 405 to every one, across collections and for a rename alike, and lists
+// neither MOVE nor COPY in Allow. The record still moves: it goes over the
+// way it would to another server, and only a copy that has been read back
+// costs the original.
+func TestMoveOnAServerWithoutMoveCopiesThenDeletes(t *testing.T) {
+	f := newMoveFixture(t)
+	f.srv.Refuse("MOVE", http.StatusMethodNotAllowed, "MOVE is not allowed here")
+
+	resp := f.h.do(postConfirm(t, f, sheetFor(f, peopleBook, "ada", f.id, friendsBook, false)))
+	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != f.record(f.id, friendsBook, "ada") {
+		t.Fatalf("move: %d %q %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
+	}
+	// A copy is its own object: it is written, so it carries a fresh stamp.
+	// What must survive is everything the record held, X-CUSTOM among it.
+	moved, _, ok := f.srv.Object(friendsBook + "ada.vcf")
+	if !ok {
+		t.Fatalf("nothing in Friends: %v", f.srv.Paths(friendsBook))
+	}
+	mustContain(t, moved, "UID:ada", "FN:Ada", "X-CUSTOM:keep")
+	if _, _, ok := f.srv.Object(peopleBook + "ada.vcf"); ok {
+		t.Error("the original is still in People: the copy cost nothing and the move did not finish")
+	}
+	if n := f.srv.CountRequests(http.MethodPut, ""); n == 0 {
+		t.Error("no PUT: the record did not go over as a copy")
+	}
+}

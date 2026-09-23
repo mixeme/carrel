@@ -78,6 +78,19 @@ type Server struct {
 	// A PROPPATCH right after sets the colour and keeps it.
 	CreateDropsColour bool
 
+	// CreateIgnoresComponentSet makes every calendar hold every component
+	// whatever the MKCALENDAR asked for, the way Xandikos does: it drops the
+	// set at creation, refuses a PROPPATCH of it with 409 because the
+	// property is protected, and reports all four — and it takes a VTODO
+	// into a calendar asked to hold only events (docs/servers.md, SV-43).
+	CreateIgnoresComponentSet bool
+
+	// BreaksOnTextMatch answers 500 to an addressbook-query that carries a
+	// text-match, the way Xandikos does over a book holding one value with a
+	// character outside ASCII (docs/servers.md, SV-42). Its own crash, not a
+	// refusal: the same book without a filter hands every card over.
+	BreaksOnTextMatch bool
+
 	// DeafToMatchType answers an addressbook-query that carries a
 	// match-type 207 with no responses — the same answer as for a card that
 	// is not there — the way Xandikos does (docs/servers.md, SV-40). The
@@ -458,6 +471,11 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 		http.Error(w, `{"error":{"code":400,"status":"INVALID_ARGUMENT"}}`, http.StatusBadRequest)
 		return
 	}
+	if s.BreaksOnTextMatch && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) &&
+		bytes.Contains(body, []byte("text-match")) {
+		http.Error(w, "UnicodeEncodeError: 'ascii' codec can't encode characters", http.StatusInternalServerError)
+		return
+	}
 	if s.DeafToMatchType && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) &&
 		bytes.Contains(body, []byte("match-type")) {
 		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
@@ -687,6 +705,9 @@ func (s *Server) mkcalendar(w http.ResponseWriter, p string, body []byte) {
 	var comps []string
 	for _, c := range req.Prop.Components.Comp {
 		comps = append(comps, c.Name)
+	}
+	if s.CreateIgnoresComponentSet {
+		comps = []string{"VEVENT", "VTODO", "VJOURNAL", "VFREEBUSY"}
 	}
 	if s.CreateAssignsItsOwnAddress {
 		// docs/servers.md, SV-19: nothing is left at the address that was

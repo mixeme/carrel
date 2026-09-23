@@ -53,6 +53,18 @@ func liveProps(ctx context.Context, t *testing.T, c *dav.Client, path string, na
 	return out
 }
 
+// componentsOf reads the comp names out of a supported-calendar-component-set
+// as liveProps flattened it: the inner XML, each name in a name= attribute.
+func componentsOf(raw string) []string {
+	var out []string
+	for _, part := range strings.Split(raw, `name="`)[1:] {
+		if i := strings.Index(part, `"`); i > 0 {
+			out = append(out, part[:i])
+		}
+	}
+	return out
+}
+
 func runCollections(t *testing.T, endpoint, user, pass string) {
 	ctx := context.Background()
 	g := testGuard(t)
@@ -98,9 +110,22 @@ func runCollections(t *testing.T, endpoint, user, pass string) {
 	}
 	got := liveProps(ctx, t, client, calPath, displayName, colour, comps)
 	if got["displayname"] != name || !strings.Contains(strings.ToLower(got["calendar-color"]), "6b5c73") ||
-		!strings.Contains(got["supported-calendar-component-set"], "VEVENT") || !strings.Contains(got["supported-calendar-component-set"], "VTODO") ||
-		strings.Contains(got["supported-calendar-component-set"], "VJOURNAL") {
+		!strings.Contains(got["supported-calendar-component-set"], "VEVENT") ||
+		!strings.Contains(got["supported-calendar-component-set"], "VTODO") {
 		t.Errorf("calendar on the server = %+v", got)
+	}
+	// Whether the server narrowed the set to what was asked is the server's
+	// business — Xandikos holds every component in every calendar and cannot
+	// be told otherwise (docs/servers.md, SV-43). What is checked here is the
+	// rule of S-12.2: the catalog holds the server's answer, not the form's.
+	// A catalog narrower than the server hides records that are really there.
+	blob, _ = app.users.Catalog(app.sess.AccountID(), key)
+	entry := catalogEntry(t, blob, calPath)
+	for _, k := range discover.CalendarKinds(componentsOf(got["supported-calendar-component-set"])) {
+		if !entry.Has(k) {
+			t.Errorf("the server holds %s and the catalog does not: server %q, catalog %v",
+				k, got["supported-calendar-component-set"], entry.Kinds)
+		}
 	}
 	if agenda := liveDecode[view.AgendaPage](t, "agenda", app.get(loc)); len(agenda.Notices) > 0 {
 		t.Errorf("agenda of the new calendar: %+v", agenda.Notices)

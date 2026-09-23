@@ -1280,10 +1280,18 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 			if task == "" {
 				t.Skip("this kind polls nothing on the other stand")
 			}
-			// The steady point: nobody is still in the queue and at least
-			// one source is held. Everything that could answer has.
+			// The steady point: nobody is still in the queue, at least one
+			// source is held, and at least one has answered with its count.
+			// Everything that could answer has.
+			//
+			// «One has answered» is not a nicety. Without it the point is
+			// also reached the moment the poll starts — nobody queued yet,
+			// the held source already querying — and the screen taken then
+			// is empty, not partial. Alone the test still passed; in a full
+			// run, under load, it took that moment and the fixture rightly
+			// said no (23.09.2026).
 			waitPoll(t, app.h, app.sess, task, func(b view.PollBar) bool {
-				held := false
+				held, answered := false, false
 				for _, sp := range b.Sources {
 					switch sp.State {
 					case view.SourceWaiting:
@@ -1297,9 +1305,10 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 						if sp.Count == nil {
 							return false
 						}
+						answered = true
 					}
 				}
-				return held
+				return held && answered
 			})
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 			app.compare(t, one.dir+"/partial.json", app.h.do(get("/app/"+one.segment+"?task="+task, app.sess)))

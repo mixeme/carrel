@@ -468,7 +468,28 @@ func liveNoteFields(ctx context.Context, t *testing.T, app *liveApp, client *dav
 	mustHave(t, "note fields", got, "DTSTART;VALUE=DATE:20260111", "CATEGORIES:plans,work", "DESCRIPTION:Body", "X-CUSTOM:keep-me")
 }
 
-// connections-tail.md: the password went wrong — the card says so after
+// checksPasswords asks the server itself whether a wrong password is refused.
+// Not every server has credentials to check: Xandikos is standalone and
+// leaves that to a proxy in front, so everything it is asked succeeds. What
+// depends on a refusal is then untestable there — a fact about the server,
+// found by asking it, not by a list of server names in the suite.
+func checksPasswords(t *testing.T, endpoint, user, pass string) bool {
+	t.Helper()
+	req, err := http.NewRequest("PROPFIND", endpoint, nil)
+	if err != nil {
+		return true
+	}
+	req.Header.Set("Depth", "0")
+	req.SetBasicAuth(user, pass+"-wrong")
+	resp, err := (&http.Client{Timeout: 15 * time.Second}).Do(req)
+	if err != nil {
+		return true
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden
+}
+
+// connections-tail.md: the password went wrong// connections-tail.md: the password went wrong — the card says so after
 // Test, Edit with the right one saves under the same ID, and Test passes.
 func liveConnectionEdit(t *testing.T, app *liveApp, connID, endpoint, user, pass string) {
 	key, _ := app.sess.DataKey()
@@ -480,11 +501,22 @@ func liveConnectionEdit(t *testing.T, app *liveApp, connID, endpoint, user, pass
 	}
 	test := "/app/settings/connections?" + url.Values{"op": {"test"}, "account": {connID}}.Encode()
 	card := liveCard(t, liveDecode[view.ConnectionsPage](t, "test broken", app.post(test, url.Values{})), connID)
-	if card.Trace == nil || card.Trace.OK || card.State != view.CollectionUnavailable {
-		t.Fatalf("a wrong password tested %+v, state %q", card.Trace, card.State)
-	}
-	if liveAction(t, card.Actions, "connection.test") == "" {
-		t.Fatal("no Test again")
+	if !checksPasswords(t, endpoint, user, pass) {
+		// Xandikos checks no credentials at all: standalone, with the
+		// checking left to a proxy in front (testdata/xandikos/README.md).
+		// A wrong password cannot be told from a right one there, and
+		// saying so on the card would be Carrel inventing a refusal the
+		// server never gave. So the half of this check that needs a
+		// refusal is skipped here, by asking the server rather than by a
+		// list of names — and the Edit half below still runs.
+		t.Log("the server accepts any password: the wrong-password half cannot be checked here")
+	} else {
+		if card.Trace == nil || card.Trace.OK || card.State != view.CollectionUnavailable {
+			t.Fatalf("a wrong password tested %+v, state %q", card.Trace, card.State)
+		}
+		if liveAction(t, card.Actions, "connection.test") == "" {
+			t.Fatal("no Test again")
+		}
 	}
 	edit := "/app/settings/connections?" + url.Values{"op": {"edit"}, "account": {connID}}.Encode()
 	page := liveDecode[view.ConnectionsPage](t, "edit", app.post(edit, url.Values{

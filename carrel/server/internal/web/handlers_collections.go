@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/discover"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
@@ -235,7 +236,11 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	path = settled
 	name := s.settleName(r.Context(), client, path, f.name)
 	colour := settleColour(r.Context(), client, path, f.colour)
-	col := sealed.Collection{Path: path, Name: name, Kinds: kinds, Colour: colour, Components: f.components}
+	components := f.components
+	if f.kind != view.KindContact {
+		components, kinds = settleComponents(r.Context(), client, path, f.components)
+	}
+	col := sealed.Collection{Path: path, Name: name, Kinds: kinds, Colour: colour, Components: components}
 	if err := s.users.AddCollection(sess.AccountID(), key, conn.ID, col); err != nil {
 		// The server holds it and the catalog does not: take it back, so a
 		// failure leaves nothing behind (S-12.2).
@@ -266,7 +271,55 @@ func (s *Server) settleName(ctx context.Context, client *dav.Client, path, want 
 	return want
 }
 
-// settleColour is the colour the collection ends up with. A create carries
+// settleComponents is the component set the collection ends up holding, and
+// the kinds that follow from it. A create carries a set, but not every server
+// takes one: Xandikos drops it at MKCALENDAR, refuses a PROPPATCH of it with
+// 409 because the property is protected, and reports every calendar as
+// holding VEVENT, VTODO, VJOURNAL and VFREEBUSY — and it means it, taking a
+// VTODO into a calendar asked to hold only events (docs/servers.md, SV-43).
+// There is nothing to send again, so this reads and does not argue.
+//
+// The kinds decide which screens a collection appears on at all, so a set
+// narrower than the server's would hide records that are really there: a task
+// written into that calendar by another client would show nowhere in Carrel.
+// What the catalog keeps is therefore the server's answer, here as everywhere
+// else — discovery has always derived the kinds this way, and creation was
+// the one place that derived them from the form instead.
+func settleComponents(ctx context.Context, client *dav.Client, path string, want []string) ([]string, []view.Kind) {
+	ms, err := client.PropFind(ctx, path, dav.DepthZero, []xml.Name{propComponentSet})
+	if err != nil {
+		return want, discover.CalendarKinds(want)
+	}
+	for _, resp := range ms.Responses {
+		if raw, ok := resp.Props[propComponentSet]; ok {
+			if comps := componentNames(raw); len(comps) > 0 {
+				return comps, discover.CalendarKinds(comps)
+			}
+		}
+	}
+	return want, discover.CalendarKinds(want)
+}
+
+// componentNames reads the comp names out of a supported-calendar-component-set.
+func componentNames(raw []byte) []string {
+	var set struct {
+		Comp []struct {
+			Name string `xml:"name,attr"`
+		} `xml:"comp"`
+	}
+	if err := xml.Unmarshal(append(append([]byte(`<s xmlns="`+nsCalDAV+`">`), raw...), []byte(`</s>`)...), &set); err != nil {
+		return nil
+	}
+	out := make([]string, 0, len(set.Comp))
+	for _, c := range set.Comp {
+		if c.Name != "" {
+			out = append(out, c.Name)
+		}
+	}
+	return out
+}
+
+// settleColour is the colour the collection ends up with.// settleColour is the colour the collection ends up with. A create carries
 // one, but not every server takes it: Xandikos answers MKCALENDAR 201 and
 // names calendar-color in a 404 propstat inside the mkcalendar-response —
 // the calendar is made, the colour is not — while a PROPPATCH a moment later

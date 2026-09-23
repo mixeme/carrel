@@ -177,3 +177,34 @@ func TestFindUIDAsksForNoOptionalMatchType(t *testing.T) {
 		t.Errorf("a UID that is nowhere = %v, want ErrNotFound", err)
 	}
 }
+
+// docs/servers.md, SV-42: a server that falls over on the filter instead of
+// refusing it — Xandikos answers 500 to any text-match over a book holding
+// one value with a character outside ASCII, whatever the text asked for,
+// while the same book without a filter hands every card over. Left as it
+// came, a search would die on any book with one accented name. It is read
+// the round-about way instead, and the note says the searching was ours.
+func TestASearchSurvivesAServerThatBreaksOnTheFilter(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.BreaksOnTextMatch = true
+	srv.Seed(book+"ada.vcf", vcf("ada", "Ada Lovelace"))
+	srv.Seed(book+"rene.vcf", vcf("rene", "René Descartes"))
+
+	found, err := p.Search(t.Context(), book, "ovelace")
+	if !errors.Is(err, ErrServerDoesNotQuery) {
+		t.Fatalf("search err = %v, want the note that the searching was ours", err)
+	}
+	if len(found) != 1 || UID(found[0]) != "ada" {
+		t.Errorf("found %+v, want the one card that holds the text", found)
+	}
+	obj, err := p.FindUID(t.Context(), book, "rene")
+	if err != nil || obj == nil || UID(obj) != "rene" {
+		t.Fatalf("FindUID = %+v, err %v", obj, err)
+	}
+	// Without a filter there is nothing to have broken on: a 500 then is
+	// the answer, and it goes to whoever asked.
+	srv.Refuse("REPORT", 500, "boom")
+	if _, err := p.Query(t.Context(), book); err == nil {
+		t.Error("a whole-book read that the server answered 500 came back as success")
+	}
+}

@@ -346,7 +346,7 @@ func addressIsCollection(ctx context.Context, client *dav.Client, endpoint strin
 		return col, true
 	}
 	col.Components = componentNames(r.Props[propCompSet])
-	col.Kinds = calendarKinds(col.Components)
+	col.Kinds = CalendarKinds(col.Components)
 	if len(col.Kinds) == 0 {
 		// A calendar that named no components holds events until it says
 		// otherwise: RFC 4791 §5.2.3 makes the set optional, not empty.
@@ -441,7 +441,7 @@ func fileCollections(ctx context.Context, client *dav.Client) ([]Collection, err
 }
 
 func calendarToCollection(cal caldav.Calendar) Collection {
-	kinds := calendarKinds(cal.SupportedComponentSet)
+	kinds := CalendarKinds(cal.SupportedComponentSet)
 	return Collection{
 		Path:            cal.Path,
 		DisplayName:     cal.Name,
@@ -474,9 +474,9 @@ func CompareCollections(found, stored []Collection) Diff {
 	return d
 }
 
-// calendarKinds keeps the order event, task, note so the catalog does not
+// CalendarKinds keeps the order event, task, note so the catalog does not
 // shuffle between runs.
-func calendarKinds(components []string) []view.Kind {
+func CalendarKinds(components []string) []view.Kind {
 	seen := make(map[view.Kind]bool)
 	for _, c := range components {
 		switch strings.ToUpper(c) {

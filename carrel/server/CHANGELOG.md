@@ -17,6 +17,87 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.26 — 2026-09-23
+
+### Changed
+
+- **The catalog is a cache of the server's answer, not the person's data,
+  and S-12.2 now says so.** The address, the name, the colour, the component
+  set and the kinds derived from it belong to the server; a person may *ask*
+  for them when creating a collection, and whether the ask was taken is known
+  only from the server's reply. So each is read back after a create: where the
+  difference can be mended it is sent again on its own (the name, SV-17; the
+  colour, SV-41), and where it cannot, the catalog takes what the server holds
+  (the component set, SV-43). Written from the form instead, the difference is
+  visible to nobody but Carrel — other clients show their own, and a record
+  that lands in a collection outside our kinds appears on no screen at all.
+  The ticks, the duplicate decisions, the attachment folder and the
+  credentials are the other kind of thing: the server does not hold them, and
+  they never give way to it.
+
+### Fixed
+
+- **A search died on any address book holding one accented name**
+  (docs/servers.md, SV-42). Xandikos answers 500 to any text-match over a
+  book with a value outside ASCII — its own UnicodeEncodeError, whatever the
+  text asked for — while the same book without a filter hands every card
+  over. A filter that breaks the server is now a third reason to read a book
+  the round-about way, beside "there is no such report" (SV-23) and "the
+  report is empty though the book is full" (SV-26): the book is read without
+  a filter, the sifting is ours, and the screen says so. Narrow on purpose:
+  only a 500 to a request that carried a filter.
+- **Creating a calendar recorded the kinds the form asked for, not the ones
+  the server reports** (docs/servers.md, SV-43). On Xandikos every calendar
+  holds every component and cannot be told otherwise — the set is dropped at
+  MKCALENDAR and a PROPPATCH of it is refused 409 — so a calendar made for
+  events also takes tasks. With the form's narrower set in the catalog, a
+  task written there by another client would have shown nowhere in Carrel.
+  Discovery has always derived the kinds from the server; creation was the
+  one place that did not.
+- **A record could not be moved at all on a server without MOVE**
+  (docs/servers.md, SV-44). Xandikos answers 405 to every MOVE, across
+  collections and for a rename alike, and offers no COPY either. A 405 or 501
+  now means "no such method here", and the record goes over the way it goes
+  to another server: the copy is written and read back, the loss check runs,
+  and only a copy that is really there costs the original. A refusal about
+  *this* record — a precondition, a right, a taken name — still reaches the
+  person as a refusal.
+
+### Notes
+
+- The live suite stopped testing the server where it meant to test Carrel.
+  Whether a server checks passwords at all is now asked of the server rather
+  than assumed: Xandikos checks none, and the half of the connection check
+  that needs a refusal is skipped there with that said aloud. The component
+  set is likewise no longer required to be exactly what was asked for; what
+  is required is that the catalog agrees with the server.
+- **The unit suite ran nowhere but a developer's own machine, and had been
+  red for three weeks.** `linux-gates.sh` ran one crypt test, the image
+  build and the live suites — never `go test ./...`. So nothing caught that
+  `view`'s fixture check has failed since v0.2.1: fixtures for sixty screens
+  went in without the entry the test asks for in the same commit, and two
+  screens of sixty-two were being checked. The suite is now the gates' first
+  step, and the map holds every screen on disk. Nothing was actually adrift
+  — every fixture decodes into its view model with no unknown fields and
+  round-trips — but for three weeks nobody could have known that. One screen
+  turned out to be a fragment rather than a page (`app-note-edit` is a
+  `NoteDoc`), and now says so.
+- **A fixture comparison could take an empty screen for a partial one.**
+  The combined agenda's partial state waited for a steady point — nobody
+  queued, one source held — which is also true the instant the poll starts,
+  before anything has answered. Alone the test passed; in a full run under
+  load it took that instant and the fixture rightly refused it. The point
+  now also requires a source that has answered, which is what «partial»
+  means.
+- **The gates could be brought down by a stand behind a flag.** The Radicale
+  step deliberately runs the whole integration package — remote suites skip
+  themselves when their credentials are unset, and that is how a new one
+  never gets forgotten — but the local stands skip by *reachability*. A
+  Xandikos left up by hand therefore ran its suites inside that step, and
+  set -e ended the run before Stalwart and Davis had their turn, although
+  each has its own isolated step. The gates now start with nothing of ours
+  running.
+
 ## v0.2.25 — 2026-09-23
 
 ### Fixed

@@ -17,9 +17,76 @@ const fixtureDir = "../../../docs/spec/fixtures"
 // fixtureTypes maps a fixture screen directory (C-14.3) to the view model
 // it decodes into. Only screens with fixtures on disk need an entry; add
 // one here in the same commit as its fixtures.
+//
+// Two entries carried this check from v0.0.3 to 23.09.2026 while fixtures
+// for sixty screens went in without one, so the test was red and nobody saw
+// it: the Linux gates ran the live suites and the build, never this. They
+// run the unit suite now, and the map holds every screen on disk. A screen
+// whose fixture is a fragment rather than a whole page names the fragment:
+// app-note-edit is a NoteDoc, the editor swapped in place (C-6.9).
 var fixtureTypes = map[string]func() any{
-	"app-contacts": func() any { return &ContactsListPage{} },
-	"app-conflict": func() any { return &ConflictPage{} },
+	"about":                    func() any { return &AboutPage{} },
+	"admin-audit":              func() any { return &AdminAuditPage{} },
+	"admin-dav":                func() any { return &AdminDavPage{} },
+	"admin-escrow":             func() any { return &AdminEscrowPage{} },
+	"admin-install":            func() any { return &AdminInstallPage{} },
+	"admin-invites":            func() any { return &AdminInvitesPage{} },
+	"admin-settings":           func() any { return &AdminSettingsPage{} },
+	"admin-users":              func() any { return &AdminUsersPage{} },
+	"app-agenda":               func() any { return &AgendaPage{} },
+	"app-agenda-all":           func() any { return &AgendaPage{} },
+	"app-collections-delete":   func() any { return &CollectionDeleteSheet{} },
+	"app-collections-move":     func() any { return &CollectionMoveSheet{} },
+	"app-collections-new":      func() any { return &CollectionNewSheet{} },
+	"app-collections-rename":   func() any { return &CollectionRenameSheet{} },
+	"app-conflict":             func() any { return &ConflictPage{} },
+	"app-conflict-event":       func() any { return &ConflictPage{} },
+	"app-conflict-note":        func() any { return &ConflictPage{} },
+	"app-conflict-task":        func() any { return &ConflictPage{} },
+	"app-contact":              func() any { return &ContactPage{} },
+	"app-contact-edit":         func() any { return &ContactEditPage{} },
+	"app-contact-import":       func() any { return &ImportPage{} },
+	"app-contact-move":         func() any { return &MoveSheet{} },
+	"app-contact-new":          func() any { return &ContactEditPage{} },
+	"app-contact-timeline":     func() any { return &ContactTimelinePage{} },
+	"app-contacts":             func() any { return &ContactsListPage{} },
+	"app-contacts-one":         func() any { return &ContactsListPage{} },
+	"app-duplicates":           func() any { return &DuplicatesPage{} },
+	"app-duplicates-merge":     func() any { return &DuplicatesMergePage{} },
+	"app-event":                func() any { return &EventPage{} },
+	"app-event-edit":           func() any { return &EventEditPage{} },
+	"app-files":                func() any { return &FilesRootPage{} },
+	"app-files-picker":         func() any { return &FilePickerSheet{} },
+	"app-files-published":      func() any { return &PublishedLinksPage{} },
+	"app-mail-compose":         func() any { return &MailSheet{} },
+	"app-note":                 func() any { return &NotePage{} },
+	"app-note-edit":            func() any { return &NoteDoc{} },
+	"app-notes":                func() any { return &NotesPage{} },
+	"app-notes-all":            func() any { return &NotesPage{} },
+	"app-password":             func() any { return &PasswordPage{} },
+	"app-photo-preview":        func() any { return &PhotoPreviewPage{} },
+	"app-publish":              func() any { return &PublishSheet{} },
+	"app-quick":                func() any { return &NewSheet{} },
+	"app-search":               func() any { return &SearchPage{} },
+	"app-settings-account":     func() any { return &AccountPage{} },
+	"app-settings-appearance":  func() any { return &AppearancePage{} },
+	"app-settings-attachments": func() any { return &AttachmentsPage{} },
+	"app-settings-backup":      func() any { return &BackupPage{} },
+	"app-settings-connections": func() any { return &ConnectionsPage{} },
+	"app-settings-davloom":     func() any { return &DavloomPage{} },
+	"app-settings-devices":     func() any { return &DevicesPage{} },
+	"app-settings-escrow":      func() any { return &EscrowPage{} },
+	"app-settings-unlock":      func() any { return &UnlockSheet{} },
+	"app-task":                 func() any { return &TaskPage{} },
+	"app-task-edit":            func() any { return &TaskEditPage{} },
+	"app-tasks":                func() any { return &TasksPage{} },
+	"app-tasks-all":            func() any { return &TasksPage{} },
+	"forgot":                   func() any { return &ForgotPage{} },
+	"forgot-token":             func() any { return &ForgotWipePage{} },
+	"invite":                   func() any { return &InvitePage{} },
+	"login":                    func() any { return &LoginPage{} },
+	"register":                 func() any { return &RegisterPage{} },
+	"setup":                    func() any { return &SetupPage{} },
 }
 
 // TestFixturesDecode confirms that every existing fixture unmarshals into

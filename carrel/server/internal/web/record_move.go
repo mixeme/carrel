@@ -174,8 +174,12 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	if !copying && dest.conn.ID == c.conn.ID {
-		s.moveOnServer(w, r, c, dest, uid, obj)
-		return
+		if s.moveOnServer(w, r, c, dest, uid, obj) {
+			return
+		}
+		// The server has no MOVE (SV-44). The record goes over the same way
+		// it would to another server: the copy is written and read back
+		// first, and only a copy that is really there costs the original.
 	}
 
 	// The copy is its own object: writing it stamps it and gives it a path,
@@ -247,7 +251,13 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 
 // moveOnServer is a MOVE within one connection. The name stays; a name taken
 // there (412 with Overwrite: F) becomes {uid}-2 once.
-func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *collectionCtx, uid string, obj *model.Object) {
+// It reports whether it answered. A server with no MOVE at all — Xandikos
+// answers 405 to every one of them, across collections and for a rename
+// alike, and lists neither MOVE nor COPY in Allow (docs/servers.md, SV-44) —
+// is left to the caller, which carries the record over as a copy and deletes
+// the original once the copy has been read back. Nothing is written here
+// before that is decided, so the two paths cannot both answer.
+func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *collectionCtx, uid string, obj *model.Object) bool {
 	ctx := r.Context()
 	var dst string
 	var err error
@@ -258,8 +268,11 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 		}
 	}
 	if err != nil {
+		if noMoveHere(err) {
+			return false
+		}
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, moveFailure(c, "Nothing was moved", "MOVE", obj.Path+" → "+dst, err)))
-		return
+		return true
 	}
 	c.noteWrite(obj.Path, nil)
 	got, err := dest.find(ctx, uid)
@@ -281,10 +294,19 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 				Href: s.route(dest.listPath()), Method: "GET", Enabled: true,
 			}},
 		}))
-		return
+		return true
 	}
 	dest.noteWrite(got.Path, got)
 	s.redirect(w, r, dest.recordPath(uid))
+	return true
+}
+
+// noMoveHere reports a server that has no MOVE rather than one that refused
+// this one: 405 with the method not allowed at all, or 501. A refusal about
+// this particular record — a precondition, a right, a name — is not this, and
+// goes to the person as it did before.
+func noMoveHere(err error) bool {
+	return dav.IsStatus(err, http.StatusMethodNotAllowed) || dav.IsStatus(err, http.StatusNotImplemented)
 }
 
 func (s *Server) openThere(dest *collectionCtx, uid string, label view.Text) view.Action {

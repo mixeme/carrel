@@ -26,14 +26,14 @@ func TestDiffAddedRemoved(t *testing.T) {
 
 func TestCalendarKinds(t *testing.T) {
 	got := map[view.Kind]bool{}
-	for _, k := range calendarKinds([]string{"VEVENT", "VTODO"}) {
+	for _, k := range CalendarKinds([]string{"VEVENT", "VTODO"}) {
 		got[k] = true
 	}
 	if len(got) != 2 || !got[view.KindEvent] || !got[view.KindTask] {
 		t.Fatalf("kinds = %v, want event and task", got)
 	}
 	// A calendar that names no components serves all three (S-6).
-	if len(calendarKinds(nil)) != 3 {
-		t.Fatalf("empty component set = %v, want all three", calendarKinds(nil))
+	if len(CalendarKinds(nil)) != 3 {
+		t.Fatalf("empty component set = %v, want all three", CalendarKinds(nil))
 	}
 }

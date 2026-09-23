@@ -10,6 +10,14 @@ if [[ "$(uname -s)" != "Linux" ]]; then
   exit 1
 fi
 
+# The whole unit suite, first and unconditionally. It used to run nowhere but
+# a developer's Windows box, and on 23.09.2026 that showed: view's fixture
+# check had been red since v0.2.1 — fixtures for sixty screens were added
+# without the entry the test asks for in the same commit — and nothing caught
+# it, because nothing ran it. A gate that runs only by hand is not a gate.
+echo "== unit suite =="
+go test ./...
+
 echo "== F-10: server.key permission check =="
 go test -run '^TestLoadServerKeyRejectsPermissiveMode$' ./internal/crypt/...
 
@@ -49,6 +57,15 @@ if ! curl -sf http://127.0.0.1:18080/healthz | grep -qx ok; then
 fi
 
 echo "== S-30.2: Radicale integration =="
+# Start from nothing of ours running. This step deliberately runs the whole
+# integration package — the remote suites skip themselves when their
+# credentials are unset, and that is how a new one never gets forgotten — but
+# the local stands skip by *reachability*, not by credentials. So a Xandikos
+# left up by hand runs its suites inside this step, and set -e ends the run
+# there: on 23.09.2026 that is exactly what happened, and Stalwart and Davis
+# never got their turn although each has its own isolated step. The stands
+# behind a flag come up in their own step and nowhere else.
+docker compose -f docker-compose.linux.yml down -v 2>/dev/null || true
 docker compose -f docker-compose.linux.yml up -d radicale
 trap 'docker compose -f docker-compose.linux.yml down -v; cleanup_smoke' EXIT
 for _ in $(seq 1 30); do

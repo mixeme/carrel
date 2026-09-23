@@ -302,3 +302,32 @@ func TestACollectionMadeOnAConnectionThatDiedIsStillMade(t *testing.T) {
 		t.Errorf("catalog entry = %+v (found %v)", entry, ok)
 	}
 }
+
+// docs/servers.md, SV-43: a server that holds every component in every
+// calendar whatever the create asked for, with nothing to send again — the
+// set is protected, so a PROPPATCH of it is refused. The kinds decide which
+// screens a collection appears on, so keeping the narrower set the person
+// chose would hide records that are really there: a task written into that
+// calendar by another client would show nowhere. The catalog takes the
+// server's answer, the way discovery always has.
+func TestCreateTakesTheKindsTheServerReports(t *testing.T) {
+	f := calendarFixture(t, nil)
+	f.srv.CreateIgnoresComponentSet = true
+
+	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess,
+		url.Values{"account": {f.id}, "name": {"Trips"}, "components": {"VEVENT"}}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("create: %d %s", rec.Code, rec.Body.String())
+	}
+	path := davtest.CalendarHome + "trips/"
+	entry, ok := catalogOf(t, f).Collection(f.id, path)
+	if !ok {
+		t.Fatalf("not in the catalog: %+v", catalogOf(t, f).Collections)
+	}
+	if !entry.Has(view.KindEvent) || !entry.Has(view.KindTask) || !entry.Has(view.KindNote) {
+		t.Errorf("catalog kinds = %v, want the three the server reports", entry.Kinds)
+	}
+	if strings.Join(entry.Components, " ") != "VEVENT VTODO VJOURNAL VFREEBUSY" {
+		t.Errorf("catalog components = %v, want what the server holds", entry.Components)
+	}
+}
