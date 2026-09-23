@@ -3,11 +3,15 @@
 package integration
 
 import (
+	"fmt"
 	"net"
 	"net/url"
 	"os"
 	"testing"
 	"time"
+
+	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/provider/file"
 )
 
 // Stalwart is the fourth engine in the lineup and the only one written in
@@ -20,6 +24,12 @@ import (
 // files under /dav/file and principals under /dav/pal, and answers
 // /.well-known/caldav and /.well-known/carddav. Discovery is given the root
 // and walks from there, exactly as it does for a server nobody prepared.
+//
+// 8088 is the listener testdata/stalwart/plan.ndjson creates, and it is not
+// the one the stand starts with: Stalwart is brought up in recovery mode to
+// be provisioned through its management API, and brought up again without
+// it to serve DAV. In recovery mode this port does not exist at all
+// (docs/servers.md, SV-45).
 const (
 	stalwartDefaultURL  = "http://127.0.0.1:8088/"
 	stalwartDefaultUser = "carrel@carrel.test"
@@ -103,4 +113,27 @@ func TestStalwartTimeline(t *testing.T) {
 func TestStalwartCollectionDelete(t *testing.T) {
 	endpoint, user, pass := stalwartConfig(t)
 	runCollectionDelete(t, endpoint, user, pass)
+}
+
+// S-30.2 / S-17: plain WebDAV on the same engine that serves the calendars
+// and the address books. Stalwart, Nextcloud and Davis all offer the three
+// together; SFTPGo and OpenCloud, where files were checked until now, offer
+// files alone. A server that serves a protocol is run against it
+// (docs/servers.md, «Что сервер умеет и что мы у него проверяем»).
+func TestStalwartFiles(t *testing.T) {
+	endpoint, user, pass := stalwartConfig(t)
+	// The client sits at the origin and the root is the whole path, the way
+	// SFTPGo's does: a client rooted at the files home and a root starting
+	// with a slash do not compose.
+	client, err := dav.NewClient(testGuard(t), endpoint, user, pass, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := file.New(client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := fmt.Sprintf("/dav/file/%s/carrel-files-%d/", user, os.Getpid())
+	t.Logf("root: %s", root)
+	runFiles(t, client, p, root)
 }

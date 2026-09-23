@@ -1,4 +1,3 @@
 {"@type":"upsert","object":"Domain","matchOn":["name"],"value":{"dom":{"name":"carrel.test"}}}
-{"@type":"upsert","object":"Account","matchOn":["name"],"value":{"acct":{"@type":"User","name":"carrel","domainId":"#dom","credentials":{"pw":{"@type":"Password","secret":"carrel-pass","allowedIps":{}}},"encryptionAtRest":{"@type":"Disabled"},"memberGroupIds":{},"permissions":{"@type":"Inherit"},"quotas":{},"roles":{"@type":"User"},"aliases":{}}}}
-{"@type":"upsert","object":"NetworkListener","matchOn":["name"],"value":{"dav":{"name":"dav","bind":{"[::]:8088":true},"protocol":"http","useTls":false}}}
-{"@type":"update","object":"SystemSettings","value":{"defaultDomainId":"#dom"}}
+{"@type":"upsert","object":"Account","matchOn":["name"],"value":{"acct":{"@type":"User","name":"carrel","domainId":"#dom","credentials":{"0":{"@type":"Password","secret":"carrel-pass"}}}}}
+{"@type":"upsert","object":"NetworkListener","matchOn":["name"],"value":{"dav":{"name":"dav","bind":{"[::]:8088":true},"protocol":"http"}}}

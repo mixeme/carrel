@@ -77,33 +77,34 @@ done
 CARREL_RADICALE_URL=http://127.0.0.1:5232/test/ \
   go test -tags=integration -count=1 -timeout 30m ./integration/...
 
-# Stalwart, the fourth engine. NOT YET RUN: the stand was written from the
-# documentation on a machine without Docker (testdata/stalwart/README.md).
-# It is behind a flag until someone has seen it come up, so a red stand
-# cannot fail the gates of everyone else. Run with CARREL_STALWART=1.
-if [[ "${CARREL_STALWART:-}" == "1" ]]; then
-  echo "== S-30.2: Stalwart integration =="
-  # A stand that has never been run must not take the rest of the gates
-  # with it: its whole step is one subshell, and a failure is reported and
-  # stepped over. The flag alone was not enough — set -e killed the run on
-  # 22.09.2026, when Stalwart could not bind a port and Xandikos and Davis
-  # never got their turn.
-  if ! (
-    docker compose -f docker-compose.linux.yml up -d stalwart
-    for _ in $(seq 1 60); do
-      if curl -sf -o /dev/null http://127.0.0.1:8089/ 2>/dev/null; then
-        break
-      fi
-      sleep 0.5
-    done
-    # Two runs, not one shell: the CLI image carries no shell.
-    docker compose -f docker-compose.linux.yml run --rm stalwart-setup apply --file plan.ndjson
-    docker compose -f docker-compose.linux.yml run --rm stalwart-setup create Action/ReloadSettings
-    go test -tags=integration -count=1 -timeout 30m -run 'Stalwart' ./integration/...
-  ); then
-    echo "!! Stalwart: стенд не поднялся или набор упал; остальные ворота идут дальше"
+# Stalwart, the fourth engine and the only one on Rust. It came up on
+# 23.09.2026 and all seven suites are green, so it stands in the ordinary
+# row beside Radicale: no flag, and a failure fails the gates like any other.
+echo "== S-30.2: Stalwart integration =="
+# In recovery mode to be provisioned: that mode runs the management listener
+# and nothing else — an ordinary account authenticates on it and is then
+# refused, and even the administrator's DAV homes answer 404 (SV-46).
+CARREL_STALWART_RECOVERY=1 docker compose -f docker-compose.linux.yml up -d stalwart
+for _ in $(seq 1 90); do
+  if curl -sf -o /dev/null -u admin:carrel-admin http://127.0.0.1:8089/api/schema 2>/dev/null; then
+    break
   fi
-fi
+  sleep 1
+done
+# The plan makes the domain, the account with its password, and the DAV
+# listener. The CLI image carries no shell, so it is invoked directly.
+docker compose -f docker-compose.linux.yml run --rm stalwart-setup apply --file plan.ndjson
+# And again without recovery mode, so the listener the plan made is the one
+# that runs. compose recreates the container; the volume stays, so the
+# account and the listener are still there.
+CARREL_STALWART_RECOVERY=0 docker compose -f docker-compose.linux.yml up -d stalwart
+for _ in $(seq 1 60); do
+  if curl -sf -o /dev/null http://127.0.0.1:8088/.well-known/caldav 2>/dev/null; then
+    break
+  fi
+  sleep 1
+done
+go test -tags=integration -count=1 -timeout 30m -run 'Stalwart' ./integration/...
 
 # Xandikos, the second light engine. NOT YET RUN either
 # (testdata/xandikos/README.md); behind a flag for the same reason as

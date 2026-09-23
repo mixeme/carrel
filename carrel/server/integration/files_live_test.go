@@ -24,8 +24,16 @@ import (
 // refused with the codes the queue relies on; a folder copies with its tree.
 func TestSFTPGoFiles(t *testing.T) {
 	client, p := sftpgoClient(t)
+	runFiles(t, client, p, fmt.Sprintf("/carrel-files-%d/", os.Getpid()))
+}
+
+// runFiles is S-17 against whatever server answers: the same checks, a root
+// of the caller's choosing. It is not SFTPGo's alone — Stalwart serves
+// calendars, address books and files from one engine, which no other server
+// in the lineup does, so plain WebDAV there is worth its own run.
+func runFiles(t *testing.T, client *dav.Client, p *file.Provider, root string) {
+	t.Helper()
 	ctx := context.Background()
-	root := fmt.Sprintf("/carrel-files-%d/", os.Getpid())
 	_ = client.Delete(ctx, root, "")
 	removeLater(t, client, root)
 	if err := p.MkCol(ctx, root); err != nil {

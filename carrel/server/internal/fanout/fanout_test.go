@@ -444,10 +444,15 @@ func (s *askingSource) Run(ctx context.Context, q Query) ([]Item, error) {
 }
 
 func TestASourceIsGivenItsShareForEveryAsk(t *testing.T) {
-	// Three asks of 40ms each against a 50ms-per-ask budget: 120ms of work
-	// under 150ms of budget. With the old whole-source budget of 50ms it
-	// would be cut off after the first.
-	src := &askingSource{id: "s", asks: 3, each: 40 * time.Millisecond, done: make(chan struct{})}
+	// Four asks of 20ms each against a 50ms-per-ask budget: 80ms of work
+	// under 200ms. With the old whole-source budget of 50ms it would be cut
+	// off after the second, so the two rules still tell each other apart —
+	// but the slack is 120ms rather than the 30ms this test used to leave.
+	// Thirty was not enough: a 40ms sleep on a loaded machine overruns, the
+	// budget ends the run, Run returns before closing the channel, and the
+	// test waits three seconds for something that already gave up
+	// (a full run on 23.09.2026 caught exactly that).
+	src := &askingSource{id: "s", asks: 4, each: 20 * time.Millisecond, done: make(chan struct{})}
 	task, err := Start("t", Query{}, []Source{src}, Options{
 		Parallelism:   2,
 		SourceTimeout: 50 * time.Millisecond,
@@ -468,8 +473,8 @@ func TestASourceIsGivenItsShareForEveryAsk(t *testing.T) {
 	if len(snap.Sources) != 1 || snap.Sources[0].State != view.SourceDone {
 		t.Fatalf("source = %+v, want done", snap.Sources)
 	}
-	if src.calls != 3 {
-		t.Errorf("%d asks got through, want 3", src.calls)
+	if src.calls != 4 {
+		t.Errorf("%d asks got through, want 4", src.calls)
 	}
 }
 

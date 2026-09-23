@@ -20,10 +20,16 @@ services:
   stalwart:
     image: stalwartlabs/stalwart:v0.16
     ports:
+      # Two listeners, and they are not interchangeable. The one the plan
+      # creates (8088) serves DAV. The recovery one (8080 inside) serves the
+      # management API and **only** that: in recovery mode an ordinary
+      # account authenticates and is then refused — the server's own log
+      # says «Unauthorized access … details = authenticate» — and even the
+      # administrator's DAV homes answer 404. Found on 23.09.2026, after an
+      # afternoon of taking that refusal for a missing permission.
+      # 8080 outside is SelfPost's on this machine, so the recovery port is
+      # published as 8089.
       - "127.0.0.1:8088:8088"
-      # 8080 снаружи занят SelfPost на этой машине, и Docker отказывает в
-      # привязке (прогон 22.09.2026). Внутри контейнера слушатель настройки
-      # остаётся на 8080 — stalwart-setup ходит к нему по сети compose.
       - "127.0.0.1:8089:8080"
     environment:
       # A fixed administrator instead of the random one the first start
@@ -31,14 +37,20 @@ services:
       # talks to. Both are here because this is a test stand on loopback,
       # and neither belongs on a server anyone can reach.
       STALWART_RECOVERY_ADMIN: "admin:carrel-admin"
-      STALWART_RECOVERY_MODE: "1"
+      # Recovery mode runs the recovery listener and **nothing else**: an
+      # ordinary account authenticates on it and is then refused, and even
+      # the administrator's DAV homes answer 404. So the stand comes up in
+      # recovery mode to be provisioned through the management API, and is
+      # brought up again without it to serve DAV (23.09.2026).
+      STALWART_RECOVERY_MODE: "${CARREL_STALWART_RECOVERY:-0}"
     volumes:
       - ./testdata/stalwart/config.json:/etc/stalwart/config.json:ro
       - stalwart-data:/var/lib/stalwart
 
-  # One shot: the domain, the account with its password, the DAV listener,
-  # and a settings reload — listeners are parsed into a snapshot at start
-  # and a saved object alone does not reach the running server.
+  # The CLI: it provisions the stand from plan.ndjson, and it is also how
+  # the server is asked about itself — `describe` prints the schema and
+  # `snapshot` the canonical shape of what is there. Both answers settled
+  # more questions on 23.09.2026 than the documentation did.
   stalwart-setup:
     image: stalwartlabs/cli
     depends_on:
@@ -52,8 +64,7 @@ services:
     working_dir: /work
     # No entrypoint of our own: the image's own entrypoint is the CLI, and
     # it has no shell to wrap it in — the first live run answered
-    # `exec: "sh": executable file not found in $PATH` (22.09.2026). The
-    # gates pass the arguments instead, once per command.
+    # `exec: "sh": executable file not found in $PATH` (22.09.2026).
     profiles:
       - setup
 
@@ -123,7 +134,10 @@ services:
       # Davis's WebDAV wants directories of its own; Carrel asks this stand
       # for calendars and contacts, and finds no file root, as it finds none
       # on SoGo or Yandex.
-      WEBDAV_ENABLED: "false"
+      # Davis serves files too, and a server that serves a protocol is run
+      # against it (docs/servers.md). Its suites still wait for the account
+      # that has to be made by hand.
+      WEBDAV_ENABLED: "true"
     volumes:
       - davis-data:/data
 

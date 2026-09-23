@@ -17,6 +17,78 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.27 — 2026-09-23
+
+### Added
+
+- **Stalwart runs, and its seven live suites are green** — the fifth engine
+  in the lineup and the only one on Rust, sharing no ancestry with sabre/dav,
+  Radicale or SoGo. It stands in the ordinary row of `linux-gates.sh` beside
+  Radicale now: no flag, and a failure fails the gates like any other.
+
+### Fixed
+
+- **Discovery walked into the address `.well-known` had already given it**
+  (docs/servers.md, SV-45). The probe carries no credentials — RFC 6764 §6
+  asks it for the Location, not for the resource — but the client followed
+  the redirect to the end and judged by the final status. Stalwart sends
+  `/.well-known/caldav` to `/dav/cal`, which answers 401 to anyone who has
+  not signed in, so a perfectly good 307 became a failed step; and since
+  Stalwart's root is its web interface, answering 200 to PROPFIND, the
+  fallback to the entered address did not save it. All seven suites failed
+  at discovery. The redirect is now read, not walked into.
+- The refusal of an HTTPS-to-HTTP redirect used to be the client's, and its
+  reason reached the connection trace that way. The probe no longer lets the
+  client follow, so the probe makes that refusal itself — and still puts the
+  reason in the step's detail, which is what SV-10's test was written to
+  protect. The test was rewritten around a real downgrade rather than a
+  simulated one.
+
+### Added, later the same day
+
+- **`docs/servers.md` now carries a table of what each server offers and
+  what the live suites actually run against it.** It exists because a claim
+  of mine — that Stalwart was the only server in the lineup serving all
+  three protocols — was wrong three times over: Nextcloud and Davis serve
+  files as well, and Davis's were switched off by a flag of ours. Without
+  the table «probably covered» cannot be told from «covered», and a gap is
+  found in conversation rather than on purpose.
+- **The gap it found on its first day: files were run against no server that
+  also serves calendars and contacts.** `TestSFTPGoFiles` was written for
+  SFTPGo alone, and SFTPGo and OpenCloud serve nothing else. The checks are
+  now `runFiles`, which takes a server, and Nextcloud and Stalwart are run
+  against their files — both green. Nextcloud's is worth more than the
+  coverage: that account's own path holds a space, so every address arrives
+  percent-encoded, which is the shape that breaks a file layer building
+  addresses by hand. Davis's WebDAV is switched on and waits for the account
+  it needs by hand, like its other suites.
+
+### Notes
+
+- **A second test whose margin was the thing that failed.** The per-ask
+  budget check ran four asks' worth of work against a budget 25% larger than
+  the work; on a loaded machine a sleep overruns that, the budget ends the
+  run, and the test waits three seconds for a source that has already given
+  up. The work now sits at 40% of the budget and the two budgeting rules
+  still tell each other apart. Like the partial-screen fixture earlier
+  today, it passed alone and failed in a full run — which is the only place
+  either of them was ever going to fail.
+- **What the stand cost, and why it is written down** (SV-46 and
+  `testdata/stalwart/README.md`): recovery mode runs the management listener
+  and **nothing else** — an ordinary account authenticates on it and is then
+  refused, and even the administrator's DAV homes answer 404. Every 403 and
+  404 read as a missing permission for an hour. The stand now comes up in
+  recovery mode to be provisioned and again without it to serve DAV.
+- The shape of `Account.credentials` is not what the documentation or the
+  schema says: `describe` calls it a list, a live account returns a map, and
+  the element type cannot be described at all. Eight guesses failed. What
+  worked was making the server write the value itself —
+  `update Account <id> --field credentials/0/secret=…` — and reading back
+  what it produced. The key is the element's index as a string.
+- Also invented by me and not by Stalwart: `NetworkListener.useTls` does not
+  exist, and `SystemSettings` requires a `defaultHostname` the stand has no
+  use for. Both are out of the plan.
+
 ## v0.2.26 — 2026-09-23
 
 ### Changed

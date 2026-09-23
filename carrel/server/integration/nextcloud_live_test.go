@@ -3,8 +3,16 @@
 package integration
 
 import (
+	"context"
+	"fmt"
+	"net/url"
 	"os"
+	"strings"
 	"testing"
+
+	"carrel.dev/carrel/server/internal/dav"
+	"carrel.dev/carrel/server/internal/discover"
+	"carrel.dev/carrel/server/internal/provider/file"
 )
 
 // S-30.2 on Nextcloud. sabre/dav underneath, like Baikal, so the interest is
@@ -72,4 +80,47 @@ func TestNextcloudVCard4Edit(t *testing.T) {
 func TestNextcloudPhoto(t *testing.T) {
 	endpoint, user, pass := nextcloudConfig(t)
 	runPhoto(t, endpoint, user, pass, true)
+}
+
+// S-30.2 / S-17: plain WebDAV on the same engine that serves the calendars
+// and the address books. Until 23.09.2026 files were checked only on SFTPGo
+// and OpenCloud, which serve nothing else; Nextcloud, Stalwart and Davis all
+// offer the three together and none of them was run against its files
+// (docs/servers.md, «Что сервер умеет и что мы у него проверяем»).
+//
+// Here it is worth more than the coverage: this account's own path holds a
+// space, so every address arrives percent-encoded. A file layer that builds
+// addresses by hand breaks on exactly that.
+func TestNextcloudFiles(t *testing.T) {
+	endpoint, user, pass := nextcloudConfig(t)
+	g := testGuard(t)
+	res, trace, err := discover.Run(context.Background(), g, endpoint, user, pass, "")
+	if err != nil || res.Principal == "" {
+		t.Fatalf("discovery: %v %+v %+v", err, res, trace)
+	}
+	// Nextcloud's layout is fixed: /remote.php/dav/files/<user id>/, and the
+	// user id is the last segment of the principal — «MIX_1 for tests» here,
+	// spaces and all. The login is an email address and is not it.
+	uid := strings.Trim(res.Principal, "/")
+	uid = uid[strings.LastIndex(uid, "/")+1:]
+	// The client sits at the origin and the root is the whole path, the way
+	// SFTPGo's does. A client rooted at the files home and a root starting
+	// with a slash do not compose: the request leaves the home altogether
+	// and answers 404 with an HTML page (my own mistake, 23.09.2026).
+	origin, err := url.Parse(endpoint)
+	if err != nil {
+		t.Fatal(err)
+	}
+	origin.Path, origin.RawQuery, origin.Fragment = "/", "", ""
+	client, err := dav.NewClient(g, origin.String(), user, pass, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := file.New(client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := fmt.Sprintf("/remote.php/dav/files/%s/carrel-files-%d/", uid, os.Getpid())
+	t.Logf("root: %s", root)
+	runFiles(t, client, p, root)
 }

@@ -718,6 +718,16 @@ func sanitizeRemoteText(b []byte) string {
 }
 
 // ResolveWellKnown follows a well-known path from base and returns the final URL.
+//
+// It reads the redirect rather than walking into it. RFC 6764 §6 asks only
+// for the Location; where it points is the context path, and a server is
+// entitled to protect it. This probe carries no credentials, so walking in
+// turns a perfectly good 307 into a 401 and loses the address it had already
+// been given: Stalwart sends /.well-known/caldav to /dav/cal, which answers
+// 401 to anyone who has not signed in, and discovery called the step bad
+// (docs/servers.md, SV-45). The guard's own refusal of an HTTPS-to-HTTP
+// redirect still holds — it is checked here instead of by the client, which
+// is no longer the one following.
 func ResolveWellKnown(ctx context.Context, client *http.Client, base, wellKnown string) (string, string, error) {
 	u, err := url.Parse(base)
 	if err != nil {
@@ -731,6 +741,9 @@ func ResolveWellKnown(ctx context.Context, client *http.Client, base, wellKnown 
 	if err != nil {
 		return "", "", err
 	}
+	stop := *client
+	stop.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	client = &stop
 	resp, err := client.Do(req)
 	if err != nil {
 		// The trace says why the step failed: a redirect refused by the guard
@@ -752,9 +765,19 @@ func ResolveWellKnown(ctx context.Context, client *http.Client, base, wellKnown 
 		resp.StatusCode == http.StatusPermanentRedirect {
 		final := resp.Request.URL.String()
 		if loc := resp.Header.Get("Location"); loc != "" && resp.StatusCode/100 == 3 {
-			if lu, err := url.Parse(loc); err == nil {
-				final = resp.Request.URL.ResolveReference(lu).String()
+			lu, err := url.Parse(loc)
+			if err != nil {
+				return "", detail, fmt.Errorf("well-known %s: Location %q: %w", wellKnown, loc, err)
 			}
+			to := resp.Request.URL.ResolveReference(lu)
+			if httpsToHTTP(resp.Request.URL, to) {
+				// The reason belongs in the detail, not only in the error:
+				// the trace shows the detail, and a step that fails without
+				// saying why is the defect SV-10's test was written against.
+				reason := "dav: redirect downgrades HTTPS to HTTP"
+				return "", fmt.Sprintf("GET %s: %s", wellKnown, reason), errors.New(reason)
+			}
+			final = to.String()
 		}
 		return final, detail, nil
 	}
