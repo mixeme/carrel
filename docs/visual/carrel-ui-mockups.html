@@ -383,10 +383,11 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-in.is-mono{font-family:var(--tc-font-mono);font-size:11.5px}
 .tc-check{display:flex;align-items:center;gap:7px;font-size:12.5px}
 /* Высота строки: 28 поле, 26 панель, 22 таблица. Всё в строке берёт её. */
-.tc-field > .tc-check:only-child,.tc-field > label + .tc-check:last-child,.tc-form > .tc-check,.tc-fset > .tc-check{min-height:28px}
+.tc-field > .tc-check:only-child,.tc-field > label + .tc-check:last-child,*:has(> .tc-field > label) > .tc-field:not(.is-own-line) > .tc-check:first-child:has(+ .tc-field__hint),.tc-form > .tc-check,.tc-fset > .tc-check{min-height:28px}
 /* Форма равняется сверху, по строке подписи. Пустая строка подписи —
    только если подпись есть у соседа; одинокой кнопке она не нужна. */
 *:has(> .tc-field > label) > .tc-field:has(> .tc-check:only-child)::before,
+*:has(> .tc-field > label) > .tc-field:has(> .tc-check:first-child + .tc-field__hint)::before,
 *:has(> .tc-field > label) > .tc-field:has(> .tc-btn:only-child)::before,
 *:has(> .tc-field > label) > .tc-field:has(> .tc-seg:only-child)::before{content:"";height:16px;flex:none}
 .tc-field.is-own-line::before{display:none}
@@ -2094,7 +2095,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 </div>
 </div>
 </figure>
-<p>Правила высоты и выравнивания — в <a href="#conventions">§1</a>. Частное к общему: <b>ряд с полем задаёт 28&nbsp;px всему ряду</b>, чем бы он ни был свёрстан, поэтому мелкая кнопка рядом с полем невозможна. Два флажка в одной ячейке — уже список, не строка. Ячейку, растянутую на всю ширину в строке, где у других есть подписи, помечают <code>is-own-line</code> — таких три.</p>
+<p>Правила высоты и выравнивания — в <a href="#conventions">§1</a>. Частное к общему: <b>ряд с полем задаёт 28&nbsp;px всему ряду</b>, чем бы он ни был свёрстан, поэтому мелкая кнопка рядом с полем невозможна. Два флажка в одной ячейке — уже список, не строка. Ячейку, растянутую на всю ширину в строке, где у других есть подписи, помечают <code>is-own-line</code> — таких девять. Флажок с подсказкой под ним («All day») в таком ряду стоит на линии полей, как флажок без подсказки; тот же флажок, стоящий своей строкой, помечен <code>is-own-line</code>.</p>
 <p>Встроенная проверка: откройте файл с <code>#check</code> в адресе. Она обходит каждый ряд — форму, панель, шапку, подвал, карточку, — сравнивает центры и высоты и обводит красным то, что выбилось (центр больше чем на 1.5&nbsp;px или высота хоть на пиксель). Четыре прохода: контролы на одной линии; ячейки формы, чьи диапазоны пересекаются; сами полосы (неравный отступ, два ряда, вылет); меню внутри <code>.m-shell</code>, оставшееся в потоке. В углу — счёт; на чистом файле «Строки выровнены».</p>
 
 <h4>Шапка раздела</h4>
@@ -8146,7 +8147,7 @@ Read  2 min ago</div>
               <span class="tc-dim tc-dim--t11 tc-dim--ml6">derived from the address</span>
             </span>
             <span class="tc-field__hint">A feed sends no colour of its own: Carrel derives one, and hatches the strip so a feed is recognisable among your own collections.</span></div>
-          <div class="tc-field tc-field--w100">
+          <div class="tc-field is-own-line tc-field--w100">
             <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>This feed asks for a password</button>
             <span class="tc-field__hint">The login and password are kept the way DAV credentials are: encrypted under your key. A secret link needs no password — the secret is already in the address.</span></div>
           <div class="tc-field tc-field--w100"><label>Sections</label><span class="tc-in tc-in--tags"><span class="tc-tag">Calendar · 118</span><span class="tc-tag">Tasks · 6</span><span class="tc-tag">Notes · 2</span></span><span class="tc-field__hint">Not a choice: a feed is one file, and all three kinds of record live in it. What it carries decides where it lands, and that is visible before subscribing.</span></div>
@@ -9096,7 +9097,7 @@ Read  2 min ago</div>
 
         <div class="tc-fset">
           <div class="tc-rubric">How the archive is closed</div>
-          <div class="tc-field tc-grow"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Encrypt the archive</button>
+          <div class="tc-field is-own-line tc-grow"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Encrypt the archive</button>
             <span class="tc-field__hint">On by default. Turning it off makes sense in one case only: the copy goes where nobody but you gets in anyway — and then any archiver opens it.</span></div>
           <div class="tc-field tc-field--lg"><label>Archive password</label><input class="tc-in" type="text" value="••••••••••••" aria-label="Archive password"></div>
           <div class="tc-msg is-alert tc-grow tc-msg--flush-top2">Separate from the sign-in password: the destination may be somebody else’s hosting. Forget it and this job’s archives open for nobody, including you.</div>
@@ -10971,7 +10972,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
           </div>
           <div class="tc-fset">
             <div class="tc-rubric">Letters from users <span class="tc-badge">off</span></div>
-            <div class="tc-field tc-grow"><button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Let users send letters and links from Carrel</button>
+            <div class="tc-field is-own-line tc-grow"><button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Let users send letters and links from Carrel</button>
               <span class="tc-field__hint">Everyone signed in may send mail through this relay, from this domain. With self-registration on, that is an open sending form.</span></div>
             <div class="tc-field tc-grow"><label>Sender address</label>
               <span class="tc-seg tc-seg--start"><button class="is-on tc-seg__opt" type="button">noreply@carrel.example</button><button class="tc-seg__opt" type="button">login@carrel.example</button></span>
@@ -13023,7 +13024,7 @@ The account itself stays: same login, same confirmed address. Only the password 
               <input class="tc-in is-mono" type="text" value="chosen at every start · now 51734" aria-label="Port">
               <span class="tc-field__hint">Nothing to set here. The app asks the system for a free port on <span class="tc-mono">127.0.0.1</span>, so a busy 8080, a second copy of Carrel or someone else’s server cannot collide with it. The current number is always in the status bar — it is needed only to open the address in a browser.</span></div>
             <div class="tc-field"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Stop the server on exit</button></div>
-            <div class="tc-field tc-grow tc-field--gap7">
+            <div class="tc-field is-own-line tc-grow tc-field--gap7">
               <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Allow other devices on this network</button>
               <span class="tc-field__hint">While this is off, Carrel listens on <span class="tc-mono">127.0.0.1</span> only — from outside it does not exist. Turning it on <b>pins the port</b> and gives <span class="tc-mono">http://192.168.1.14:8765</span> for a phone and for DAVx5, and asks for a password like any other instance: an address that other devices remember cannot change at every start.</span>
             </div>
