@@ -270,6 +270,12 @@ body:has(#w390:checked) .tc-root{width:100%}
 /* Подвал рейла — ряд квадратов с title, прижат к низу колонки, как Delete в панели. */
 .tc-railfoot{margin-top:auto;padding:11px 16px;border-top:.5px solid var(--tc-hair);display:flex;flex-direction:row;flex-wrap:wrap;gap:6px;align-items:center}
 .tc-railfoot > .tc-btn{padding:0 7px;flex:none}
+/* Баннер подвала: важное состояние, которое должно быть на виду, чтобы за ним
+   не ходить в раздел. Первая строка — что сейчас, вторая — подробность. */
+.tc-railnote{flex:1 1 100%;font-size:11px;line-height:1.5}
+.tc-railnote.is-alert{color:var(--tc-danger)}
+.tc-railnote.is-off{color:var(--tc-dusty)}
+.tc-railnote .tc-mono{color:inherit}
 /* Последняя строка рейла: версия и ссылка на «о программе». C-13 (AGPL) требует видимую
    ссылку на исходники именно запущенной версии — она стоит в оболочке, а не только
    на странице без входа. Занимает всю ширину подвала, поэтому переносится под кнопки. */
@@ -1094,6 +1100,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-field--gap7.tc-field--gap7{gap:7px}
 .tc-field--max640-fill460.tc-field--max640-fill460{max-width:640px;flex:1 1 460px}
 .tc-field--gap8.tc-field--gap8{gap:8px}
+.tc-field--inline{flex-direction:row;align-items:center;gap:8px}
 .tc-field--bot12.tc-field--bot12{margin-bottom:12px}
 .tc-field--gap7-full.tc-field--gap7-full{gap:7px;width:100%}
 .tc-field--fill260.tc-field--fill260{flex:1 1 260px}
@@ -1258,7 +1265,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-mono--t11-5-dusty.tc-mono--t11-5-dusty{font-size:11.5px;color:var(--tc-dusty)}
 .tc-mono--bot9.tc-mono--bot9{margin-bottom:9px}
 .tc-mono--ls0-danger.tc-mono--ls0-danger{letter-spacing:0;color:var(--tc-danger)}
-.tc-mono--ink.tc-mono--ink{color:var(--tc-ink)}
 .tc-mono--t11-ml4.tc-mono--t11-ml4{font-size:11px;margin-left:4px}
 .tc-mono--chip.tc-mono--chip{background:var(--tc-card);border-radius:2px;padding:1px 4px}
 .tc-mono--t11-muted.tc-mono--t11-muted{font-size:11px;color:var(--tc-muted)}
@@ -1405,6 +1411,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-shell__body--minh430.tc-shell__body--minh430{min-height:430px}
 .tc-shell__rail--zone.tc-shell__rail--zone{justify-content:center;color:var(--tc-dusty);align-items:center}
 .tc-shell__rail--icons.tc-shell__rail--icons{align-items:center;padding:12px 4px}
+.tc-shell__rail--strip{width:var(--tc-rail)}
 .tc-side--zone.tc-side--zone{justify-content:center;color:var(--tc-dusty);align-items:center}
 .tc-side--drop.tc-side--drop{outline:1.5px dashed var(--tc-accent);outline-offset:-3px}
 .tc-skel--w18.tc-skel--w18{width:18px}
@@ -1455,7 +1462,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-dot--accent.tc-dot--accent{height:6px;border-radius:50%;background:var(--tc-accent);margin-right:5px;display:inline-block;width:6px}
 
 .tc-dim--danger.tc-dim--danger{color:var(--tc-danger)}
-.tc-dot--danger.tc-dot--danger{height:6px;border-radius:50%;background:var(--tc-danger);display:inline-block;width:6px}
+.tc-dot--danger.tc-dot--danger{height:6px;border-radius:50%;background:var(--tc-danger);margin-right:5px;display:inline-block;width:6px}
+.tc-dot--dusty.tc-dot--dusty{height:6px;border-radius:50%;background:var(--tc-dusty);margin-right:5px;display:inline-block;width:6px}
 
 .tc-winbtn.tc-winbtn{height:30px}
 .tc-print__num.tc-print__num{font-family:var(--tc-font-mono);white-space:nowrap}
@@ -2557,6 +2565,22 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   <div class="tc-root tc-root--on-surface tc-root--flat tc-root--col">
   <div class="tc-root__card-body">Card body</div>
   <div class="tc-danger tc-danger--top0-pad11-14"><button class="tc-btn is-danger-solid" type="button">Delete contact</button></div>
+</div>
+</div>
+</figure>
+<figure>
+<div class="frame" data-frame="components-35">
+  <div class="frame-label"><span>Баннер подвала рейла</span><span class="frag">компонент</span><i>девять состояний</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--flat tc-root--wrap">
+  <div class="tc-shell__rail tc-shell__rail--strip"><div class="tc-railfoot"><div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div></div></div>
+  <div class="tc-shell__rail tc-shell__rail--strip"><div class="tc-railfoot"><div class="tc-railnote is-off"><span class="tc-dot--dusty"></span>davloom is off<br><span class="tc-dim tc-dim--t11">No device connects until it is started.</span></div></div></div>
+  <div class="tc-shell__rail tc-shell__rail--strip"><div class="tc-railfoot"><div class="tc-railnote is-alert"><span class="tc-dot--danger"></span>davloom is not responding<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:12</span></span></div></div></div>
+  <div class="tc-shell__rail tc-shell__rail--strip"><div class="tc-railfoot"><div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div></div></div>
+  <div class="tc-shell__rail tc-shell__rail--strip"><div class="tc-railfoot"><div class="tc-railnote is-alert"><span class="tc-dot--danger"></span>No backup for 9 days<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-07 03:10</span></span></div></div></div>
+  <div class="tc-shell__rail tc-shell__rail--strip"><div class="tc-railfoot"><div class="tc-railnote"><span class="tc-dot--accent"></span>Mail is going out<br><span class="tc-dim tc-dim--t11">Last sent <span class="tc-mono">2026-08-16 09:12</span></span></div></div></div>
+  <div class="tc-shell__rail tc-shell__rail--strip"><div class="tc-railfoot"><div class="tc-railnote is-alert"><span class="tc-dot--danger"></span>SMTP not configured<br><span class="tc-dim tc-dim--t11">No mail is going out.</span></div></div></div>
+  <div class="tc-shell__rail tc-shell__rail--strip"><div class="tc-railfoot"><div class="tc-railnote"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div></div></div>
+  <div class="tc-shell__rail tc-shell__rail--strip"><div class="tc-railfoot"><div class="tc-railnote is-alert"><span class="tc-dot--danger"></span>2 checks failed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div></div></div>
 </div>
 </div>
 </figure>
@@ -5648,16 +5672,18 @@ Read  2 min ago</div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">51</span></div>
         </div>
         <div class="tc-railfoot">
-          <div class="tc-field"><label>Match threshold</label><input class="tc-in is-mono" type="text" value="70" aria-label="Match threshold"></div>
           <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main">
         <div class="tc-head">
-          <div class="tc-head__titles"><div class="tc-head__title">Duplicates</div><div class="tc-head__sub">361 records compared · 4 to look at · matching at 70 points and above</div></div>
+          <div class="tc-head__titles"><div class="tc-head__title">Duplicates</div><div class="tc-head__sub">361 records compared · 4 to look at</div></div>
           <div class="tc-acts"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 4</button><button class="tc-seg__opt" type="button">Contacts 1</button><button class="tc-seg__opt" type="button">Events 1</button><button class="tc-seg__opt" type="button">Tasks 1</button><button class="tc-seg__opt" type="button">Notes 1</button></span></div>
         </div>
         <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
+        <div class="tc-bar">
+          <div class="tc-field tc-field--inline"><label>Match threshold</label><input class="tc-in is-mono tc-in--chip" type="text" value="70" aria-label="Match threshold"></div>
+        </div>
         <div data-part="results" class="tc-stack tc-stack--gap-10 tc-main__results">
 
           <div class="tc-card">
@@ -5826,7 +5852,6 @@ Read  2 min ago</div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">51</span></div>
         </div>
         <div class="tc-railfoot">
-          <div class="tc-field"><label>Match threshold</label><input class="tc-in is-mono" type="text" value="70" aria-label="Match threshold"></div>
           <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
@@ -6630,6 +6655,11 @@ Read  2 min ago</div>
           <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
         </div>
       </div>
+      <div class="tc-railfoot">
+        <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+        <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+        <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+      </div>
     </div>
     <div class="tc-main">
       <div class="tc-head">
@@ -6703,6 +6733,11 @@ Read  2 min ago</div>
               <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
             </div>
           </div>
+          <div class="tc-railfoot">
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
         </div>
         <div class="tc-main">
           <div class="tc-head">
@@ -6766,6 +6801,11 @@ Read  2 min ago</div>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max520">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Change password</div></div></div>
@@ -6811,6 +6851,11 @@ Read  2 min ago</div>
             <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max640">
@@ -7035,6 +7080,11 @@ Read  2 min ago</div>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
       </div>
       <div class="tc-main">
         <div class="tc-head">
@@ -7196,6 +7246,11 @@ Read  2 min ago</div>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
       </div>
       <div class="tc-main"><div class="tc-dialog tc-dialog--max540">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
@@ -7242,6 +7297,11 @@ Read  2 min ago</div>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
               </div>
+            </div>
+            <div class="tc-railfoot">
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+              <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
             </div>
           </div>
           <div class="tc-main">
@@ -7309,6 +7369,11 @@ Read  2 min ago</div>
               <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
             </div>
+          </div>
+          <div class="tc-railfoot">
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
           </div>
         </div>
         <div class="tc-main">
@@ -7559,6 +7624,11 @@ Read  2 min ago</div>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
               </div>
             </div>
+            <div class="tc-railfoot">
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+              <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+            </div>
           </div>
           <div class="tc-main">
             <div class="tc-head tc-head--snug">
@@ -7649,6 +7719,11 @@ Read  2 min ago</div>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
               </div>
             </div>
+            <div class="tc-railfoot">
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+              <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+            </div>
           </div>
           <div class="tc-main">
             <div class="tc-head tc-head--snug">
@@ -7733,6 +7808,11 @@ Read  2 min ago</div>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
               </div>
+            </div>
+            <div class="tc-railfoot">
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+              <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
             </div>
           </div>
           <div class="tc-main">
@@ -7831,6 +7911,11 @@ Read  2 min ago</div>
             <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main">
@@ -8028,6 +8113,11 @@ Read  2 min ago</div>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
       </div>
       <div class="tc-main">
         <div class="tc-head">
@@ -8110,6 +8200,11 @@ Read  2 min ago</div>
             <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main">
@@ -8198,6 +8293,11 @@ Read  2 min ago</div>
               <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
             </div>
           </div>
+          <div class="tc-railfoot">
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
         </div>
         <div class="tc-main">
         <div class="tc-head">
@@ -8285,6 +8385,11 @@ Read  2 min ago</div>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
               </div>
             </div>
+            <div class="tc-railfoot">
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+              <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+            </div>
           </div>
           <div class="tc-main">
             <div class="tc-head">
@@ -8360,6 +8465,11 @@ Read  2 min ago</div>
               <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
             </div>
           </div>
+          <div class="tc-railfoot">
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
         </div>
         <div class="tc-main">
         <div class="tc-head">
@@ -8414,6 +8524,11 @@ Read  2 min ago</div>
               <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
             </div>
+          </div>
+          <div class="tc-railfoot">
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
           </div>
         </div>
         <div class="tc-main">
@@ -8479,10 +8594,10 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="tc-railfoot">
-          <span class="tc-line tc-line--gap-8">
-            <svg width="22" height="22" viewBox="0 0 96 96"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M6 12C18 12 30 24 42 33"/><path d="M6 30C24 30 36 42 42 42"/><path d="M6 48H42"/><path d="M6 66C24 66 36 54 42 54"/><path d="M6 84C18 84 30 72 42 63"/></g><rect x="42" y="18" width="6" height="60" rx="1.5" fill="currentColor"/><rect x="48" y="36" width="48" height="24" fill="#4A6B52"/></svg>
-            <span class="tc-dim tc-dim--t11">Proxy on<br>writing off</span>
-          </span>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
           <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
@@ -8589,6 +8704,11 @@ Read  2 min ago</div>
               <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
             </div>
           </div>
+          <div class="tc-railfoot">
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
         </div>
         <div class="tc-main"><div class="tc-dialog tc-dialog--max520">
         <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Add device</div><div class="tc-head__sub">An app password for one device, with its own key wrapper</div></div></div>
@@ -8647,6 +8767,11 @@ Read  2 min ago</div>
               <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
               <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
             </div>
+          </div>
+          <div class="tc-railfoot">
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
           </div>
         </div>
         <div class="tc-main"><div class="tc-dialog tc-dialog--max520">
@@ -8749,7 +8874,10 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="tc-railfoot">
-          <span class="tc-dim tc-dim--t11">Last successful copy<br><span class="tc-mono tc-mono--ink">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
           <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
@@ -8759,7 +8887,7 @@ Read  2 min ago</div>
           <div class="tc-acts"><button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New job</button><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg>Restore</button></div>
         </div>
         <table class="tc-table">
-          <thead><tr><th class="tc-table__col--tick"></th><th>Job</th><th class="tc-table__n3">What it copies</th><th class="tc-table__n4">Where to</th><th>When</th><th class="is-2nd">Keep</th><th>Last copy</th><th class="tc-table__col--time"></th></tr></thead>
+          <thead><tr><th class="tc-table__col--tick"></th><th>Job</th><th class="tc-table__n3">What it copies</th><th class="tc-table__n4">Where to</th><th>When</th><th class="is-2nd">Keep</th><th>Last backup</th><th class="tc-table__col--time"></th></tr></thead>
           <tbody>
             <tr>
               <td><button class="tc-tickrow__tick" type="button"></button></td>
@@ -8841,6 +8969,11 @@ Read  2 min ago</div>
             <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main">
@@ -8954,6 +9087,11 @@ Read  2 min ago</div>
             <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main">
@@ -9098,6 +9236,11 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
       </div>
       <div class="tc-main">
       <div class="tc-head">
@@ -9145,6 +9288,11 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main"><div class="tc-dialog">
@@ -9206,6 +9354,11 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main"><div class="tc-dialog is-wide">
@@ -9285,6 +9438,11 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             <a class="is-on tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main">
@@ -9997,6 +10155,11 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             <a class="is-on tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
           </div>
         </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
       </div>
     <div class="tc-main">
       <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Appearance</div><div class="tc-head__sub">Theme in this browser · week start and clock in the account</div></div></div>
@@ -10236,6 +10399,11 @@ https://carrel.example/api/backup/run?job=personal</textarea>
                 <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
               </div>
             </div>
+            <div class="tc-railfoot">
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+              <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+              <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+            </div>
           </div>
           <div class="tc-main">
             <div class="tc-head">
@@ -10474,6 +10642,11 @@ https://carrel.example/api/backup/run?job=personal</textarea>
               <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
             </div>
           </div>
+          <div class="tc-railfoot">
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
         </div>
         <div class="tc-main">
         <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Account</div><div class="tc-head__sub">mix · created 11 February 2026</div></div></div>
@@ -10529,6 +10702,11 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Key escrow</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-clock"/></svg>Audit log</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Mail is going out<br><span class="tc-dim tc-dim--t11">Last sent <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main">
@@ -10623,8 +10801,10 @@ https://carrel.example/api/backup/run?job=personal</textarea>
           </div>
         </div>
         <div class="tc-railfoot">
-          <div class="tc-badge is-alert">SMTP not configured</div>
-          <span class="tc-field__hint tc-field__hint--t11-dusty">Invitations by email are unavailable.</span>
+          <div class="tc-railnote is-alert"><span class="tc-dot--danger"></span>SMTP not configured<br><span class="tc-dim tc-dim--t11">No mail is going out.</span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
           <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
@@ -10686,8 +10866,10 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             </div>
           </div>
           <div class="tc-railfoot">
-            <div class="tc-badge is-alert">SMTP not configured</div>
-            <span class="tc-field__hint tc-field__hint--t11-dusty">Invitations by email are unavailable.</span>
+            <div class="tc-railnote is-alert"><span class="tc-dot--danger"></span>SMTP not configured<br><span class="tc-dim tc-dim--t11">No mail is going out.</span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
             <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
           </div>
         </div>
@@ -10764,7 +10946,10 @@ https://carrel.example/api/backup/run?job=personal</textarea>
           </div>
         </div>
         <div class="tc-railfoot">
-          <span class="tc-dim tc-dim--t11">Last check<br><span class="tc-mono tc-mono--ink">16.08.2026 09:12</span></span>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Mail is going out<br><span class="tc-dim tc-dim--t11">Last sent <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
           <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
@@ -10838,8 +11023,10 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             </div>
           </div>
           <div class="tc-railfoot">
-            <div class="tc-badge is-alert">SMTP not configured</div>
-            <span class="tc-field__hint tc-field__hint--t11-dusty">Invitations by email are unavailable.</span>
+            <div class="tc-railnote is-alert"><span class="tc-dot--danger"></span>SMTP not configured<br><span class="tc-dim tc-dim--t11">No mail is going out.</span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
             <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
           </div>
         </div>
@@ -10892,6 +11079,11 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             <a class="is-on tc-nav__item" href="#"><svg><use href="#i-shield"/></svg>Key escrow</a>
             <a class="tc-nav__item" href="#"><svg><use href="#i-clock"/></svg>Audit log</a>
           </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Mail is going out<br><span class="tc-dim tc-dim--t11">Last sent <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
         </div>
       </div>
       <div class="tc-main">
@@ -10972,8 +11164,10 @@ https://carrel.example/api/backup/run?job=personal</textarea>
             </div>
           </div>
           <div class="tc-railfoot">
-            <div class="tc-badge is-alert">SMTP not configured</div>
-            <span class="tc-field__hint tc-field__hint--t11-dusty">Invitations by email are unavailable.</span>
+            <div class="tc-railnote is-alert"><span class="tc-dot--danger"></span>SMTP not configured<br><span class="tc-dim tc-dim--t11">No mail is going out.</span></div>
+            <div class="tc-railnote"><span class="tc-dot--accent"></span>Checks passed<br><span class="tc-dim tc-dim--t11">Last check <span class="tc-mono">2026-08-16 09:12</span></span></div>
+            <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+          </div>
             <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
           </div>
         </div>
