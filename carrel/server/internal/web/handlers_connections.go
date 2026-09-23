@@ -621,16 +621,26 @@ func collectionLabel(c sealed.Collection) string {
 // tones derived from the address. An alpha channel is dropped; anything that
 // is not a hex colour counts as not sent.
 func catalogColour(c sealed.Collection) view.Colour {
-	v := strings.TrimSpace(c.Colour)
-	if strings.HasPrefix(v, "#") && isHex(v[1:]) {
-		switch len(v) {
-		case 4, 7:
-			return view.Colour(strings.ToLower(v))
-		case 9:
-			return view.Colour(strings.ToLower(v[:7]))
-		}
+	if v := hexColour(c.Colour); v != "" {
+		return view.Colour(v)
 	}
 	return collectionColour(c.Path)
+}
+
+// hexColour is a hex colour in one spelling: lower case, alpha dropped.
+// Anything else is empty — not a colour the server sent.
+func hexColour(v string) string {
+	v = strings.TrimSpace(v)
+	if !strings.HasPrefix(v, "#") || !isHex(v[1:]) {
+		return ""
+	}
+	switch len(v) {
+	case 4, 7:
+		return strings.ToLower(v)
+	case 9:
+		return strings.ToLower(v[:7])
+	}
+	return ""
 }
 
 func isHex(s string) bool {

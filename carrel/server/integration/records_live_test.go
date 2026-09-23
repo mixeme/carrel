@@ -5,6 +5,7 @@ package integration
 import (
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
@@ -238,6 +239,7 @@ func runRecords(t *testing.T, endpoint, user, pass string) {
     <D:displayname>Carrel S-11</D:displayname>
   </D:prop></D:set>
 </D:mkcol>`)
+	seedColour(ctx, t, client, calPath, "#3366CCFF")
 
 	app := newLiveApp(t)
 	redirected(t, "connect", app.post("/app/settings/connections", url.Values{
@@ -265,7 +267,40 @@ func runRecords(t *testing.T, endpoint, user, pass string) {
 	t.Run("calendar", func(t *testing.T) { liveCalendar(ctx, t, app, client, conn.ID, cal.Path, suffix) })
 }
 
-// catalogEntry finds a collection by path; the server may spell the path it
+// seedColour makes sure the calendar carries the colour this suite goes on to
+// look for. Not every server takes one at creation: Xandikos answers
+// MKCALENDAR 201 and names calendar-color in a 404 propstat of the
+// mkcalendar-response, while a PROPPATCH a moment later sets it and keeps it
+// (docs/servers.md, SV-41). What is checked below is that Carrel's catalog
+// shows the colour the server holds; whether the server took it at creation
+// is the stand's business, not the check's, and Carrel's own create settles
+// it the same way (settleColour).
+func seedColour(ctx context.Context, t *testing.T, client *dav.Client, path, colour string) {
+	t.Helper()
+	name := xml.Name{Space: "http://apple.com/ns/ical/", Local: "calendar-color"}
+	shown := func() string {
+		ms, err := client.PropFind(ctx, path, dav.DepthZero, []xml.Name{name})
+		if err != nil {
+			return ""
+		}
+		for _, r := range ms.Responses {
+			if v := strings.TrimSpace(string(r.Props[name])); v != "" {
+				return v
+			}
+		}
+		return ""
+	}
+	if shown() != "" {
+		return
+	}
+	if err := client.PropPatch(ctx, path, []dav.Prop{{Name: name, Value: dav.TextValue(colour)}}, nil); err != nil {
+		t.Logf("the create dropped calendar-color and PROPPATCH would not set it either: %v", err)
+		return
+	}
+	t.Logf("calendar-color was dropped at creation and set by PROPPATCH (SV-41); it now shows %q", shown())
+}
+
+// catalogEntry finds a collection by path;// catalogEntry finds a collection by path; the server may spell the path it
 // reports differently (a trailing slash, percent-encoding).
 func catalogEntry(t *testing.T, blob sealed.Blob, path string) sealed.Collection {
 	t.Helper()
@@ -569,4 +604,27 @@ func mustAddress(t *testing.T, step, got string, parts ...string) {
 			t.Errorf("%s: the address has no %q, only %q", step, p, strings.TrimSpace(line))
 		}
 	}
+}
+
+// noticeText renders notices with what is inside their diagnostic, which
+// is where a far server's own words are. Printing a page with %+v shows
+// Details as a pointer address — the run of 22.09.2026 against Xandikos
+// said «the server did not answer as expected» four times and never once
+// said what the server had actually answered.
+func noticeText(notices []view.Notice) string {
+	if len(notices) == 0 {
+		return "(no notices)"
+	}
+	var out []string
+	for _, n := range notices {
+		line := string(n.Role) + ": " + string(n.Title) + " — " + string(n.Body)
+		if n.Details != nil {
+			line += " | " + string(n.Details.Summary)
+			for _, l := range n.Details.Lines {
+				line += " | " + string(l)
+			}
+		}
+		out = append(out, line)
+	}
+	return strings.Join(out, "\n    ")
 }

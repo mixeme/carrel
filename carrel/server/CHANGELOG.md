@@ -17,6 +17,48 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.25 — 2026-09-23
+
+### Fixed
+
+- **A contact could not be opened on Xandikos, and the list showed it the
+  whole time** (docs/servers.md, SV-40). The list goes out without a filter;
+  `FindUID` went out with `match-type="equals"`, and Xandikos answers that
+  with 207 and no responses at all — the same answer it gives for a card
+  that is not there. Nothing on the wire says the filter was the problem, so
+  there was nothing to fall back from: the card page was a 404, and so was
+  the edit. `FindUID` now asks for the default match, a substring, and
+  checks the exact UID here, as it already did. Asking a server for a
+  narrower match than we need was gratuitous; `dav.CardMatch.Equals` stays,
+  unused, with the silence it can buy written at the field.
+- **A colour given at creation could be in the catalog and nowhere else**
+  (docs/servers.md, SV-41). Xandikos answers MKCALENDAR 201 and names
+  `calendar-color` in a 404 propstat of the `mkcalendar-response`: the
+  calendar is made, the colour is dropped. Creating a collection put the
+  colour the person typed straight into the catalog without reading it back,
+  so the swatch would have been one no other client draws — while C-10 went
+  on calling it the colour the server sent. The colour is now settled the
+  way the name (SV-17) and the address (SV-19) already were: read back, sent
+  once more on its own, read again, and what the catalog keeps is what the
+  server holds.
+
+### Notes
+
+- Both were found the first time the pinned Xandikos stand came up and the
+  live suite ran against it, and both are ours, not its. The lesson is one: **a server answering 207 with
+  nothing is indistinguishable from a server that has nothing.** RFC 6352
+  §8.6.1 asks for 403 with `supported-filter` instead; Xandikos does not
+  give it. The only defence is not to ask for what is optional when the
+  answer can be had without it.
+- The stand can now play both quirks (`davtest.Server.DeafToMatchType`,
+  `davtest.Server.CreateDropsColour`), and each has a sentinel that fails
+  when the fix is reverted.
+- Housekeeping from the first live run of the batch: Stalwart's setup is two
+  `stalwart-cli` calls rather than one `sh -c` (the image has no shell), its
+  admin port outside is 8089 because 8080 belongs to SelfPost, each
+  unverified stand's step in `linux-gates.sh` fails alone instead of taking
+  the gates with it, and Xandikos is pinned to `v0.2.12` with `user: root`.
+
 ## v0.2.24 — 2026-09-22
 
 ### Added

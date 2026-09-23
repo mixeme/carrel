@@ -32,9 +32,16 @@ type CardQuery struct {
 
 // CardMatch is one text-match in one property.
 type CardMatch struct {
-	Prop   string
-	Text   string
-	Equals bool // the whole value; otherwise a substring
+	Prop string
+	Text string
+	// Equals asks for the whole value instead of a substring. It is
+	// optional in RFC 6352 §10.5.4, and a server that lacks it need not
+	// say so: Xandikos answers 207 with no responses at all, the same
+	// answer it gives for a card that is not there, while the same filter
+	// without match-type hands the card over (docs/servers.md, SV-40).
+	// Nobody asks for it — FindUID checks the UID itself — and whoever
+	// starts should expect silence rather than a refusal.
+	Equals bool
 }
 
 // CardObject is a card as a REPORT returned it: decoded, and the text it was

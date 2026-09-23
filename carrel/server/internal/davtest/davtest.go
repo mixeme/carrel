@@ -72,6 +72,18 @@ type Server struct {
 	// while PROPFIND and addressbook-multiget hand the same book over.
 	HollowCardQuery bool
 
+	// CreateDropsColour makes the calendar without the calendar-color the
+	// MKCALENDAR carried and names it in a 404 propstat of the
+	// mkcalendar-response, the way Xandikos does (docs/servers.md, SV-41).
+	// A PROPPATCH right after sets the colour and keeps it.
+	CreateDropsColour bool
+
+	// DeafToMatchType answers an addressbook-query that carries a
+	// match-type 207 with no responses — the same answer as for a card that
+	// is not there — the way Xandikos does (docs/servers.md, SV-40). The
+	// same filter without match-type is served normally.
+	DeafToMatchType bool
+
 	// RefuseAllPropInAddressData answers 400 to a REPORT whose address-data
 	// holds an allprop element, the way Google does: RFC 6352 §10.4 does not
 	// define one there, and an empty address-data is how the whole card is
@@ -446,6 +458,13 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 		http.Error(w, `{"error":{"code":400,"status":"INVALID_ARGUMENT"}}`, http.StatusBadRequest)
 		return
 	}
+	if s.DeafToMatchType && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) &&
+		bytes.Contains(body, []byte("match-type")) {
+		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+		w.WriteHeader(http.StatusMultiStatus)
+		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"/>`)
+		return
+	}
 	if s.HollowCardQuery && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) {
 		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
 		w.WriteHeader(http.StatusMultiStatus)
@@ -678,8 +697,21 @@ func (s *Server) mkcalendar(w http.ResponseWriter, p string, body []byte) {
 		s.mu.Unlock()
 	}
 	s.AddCalendar(caldav.Calendar{Path: key, Name: req.Prop.Name, SupportedComponentSet: comps})
-	if c := strings.TrimSpace(req.Prop.Colour); c != "" {
-		s.SetColour(key, c)
+	colour := strings.TrimSpace(req.Prop.Colour)
+	if colour != "" && !s.CreateDropsColour {
+		s.SetColour(key, colour)
+	}
+	if colour != "" && s.CreateDropsColour {
+		// Made, and the colour is not: the answer says so per property,
+		// and the status is still 201.
+		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+		w.WriteHeader(http.StatusCreated)
+		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?>`+
+			`<C:mkcalendar-response xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:D="DAV:" xmlns:I="http://apple.com/ns/ical/">`+
+			`<D:propstat><D:status>HTTP/1.1 200 OK</D:status><D:prop><D:displayname/></D:prop></D:propstat>`+
+			`<D:propstat><D:status>HTTP/1.1 404 Not Found</D:status><D:prop><I:calendar-color/></D:prop></D:propstat>`+
+			`</C:mkcalendar-response>`)
+		return
 	}
 	w.WriteHeader(http.StatusCreated)
 }

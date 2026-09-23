@@ -85,6 +85,34 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 	}
 }
 
+// docs/servers.md, SV-41: a server that makes the calendar and drops the
+// colour the MKCALENDAR carried, saying so in a propstat of the answer and
+// still calling it 201. The colour is sent again on its own, and the catalog
+// keeps what the server holds — a swatch kept here alone would be one no
+// other client draws, while C-10 went on calling it the colour the server
+// sent.
+func TestCreateSettlesAColourTheServerDroppedAtCreation(t *testing.T) {
+	f := calendarFixture(t, nil)
+	f.srv.CreateDropsColour = true
+
+	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess,
+		url.Values{"account": {f.id}, "name": {"Trips"}, "colour": {"#6B5C73"}, "components": {"VEVENT"}}))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("create: %d %s", rec.Code, rec.Body.String())
+	}
+	path := davtest.CalendarHome + "trips/"
+	if n := f.srv.CountRequests("PROPPATCH", path); n != 1 {
+		t.Errorf("PROPPATCH requests = %d, want the one that sends the dropped colour again", n)
+	}
+	if c := f.srv.Colour(path); c != "#6b5c73" {
+		t.Errorf("the server holds %q, want the colour sent again after the create dropped it", c)
+	}
+	entry, ok := catalogOf(t, f).Collection(f.id, path)
+	if !ok || entry.Colour != "#6b5c73" {
+		t.Errorf("catalog colour = %q (found %v), want the one the server holds", entry.Colour, ok)
+	}
+}
+
 // docs/servers.md, SV-19: a server that answers 201 and puts the collection at
 // an address of its own, saying nothing about it. What goes into the catalog
 // is where it went, not where it was asked to go: an entry that points at

@@ -234,7 +234,8 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	}
 	path = settled
 	name := s.settleName(r.Context(), client, path, f.name)
-	col := sealed.Collection{Path: path, Name: name, Kinds: kinds, Colour: f.colour, Components: f.components}
+	colour := settleColour(r.Context(), client, path, f.colour)
+	col := sealed.Collection{Path: path, Name: name, Kinds: kinds, Colour: colour, Components: f.components}
 	if err := s.users.AddCollection(sess.AccountID(), key, conn.ID, col); err != nil {
 		// The server holds it and the catalog does not: take it back, so a
 		// failure leaves nothing behind (S-12.2).
@@ -263,6 +264,46 @@ func (s *Server) settleName(ctx context.Context, client *dav.Client, path, want 
 		return after
 	}
 	return want
+}
+
+// settleColour is the colour the collection ends up with. A create carries
+// one, but not every server takes it: Xandikos answers MKCALENDAR 201 and
+// names calendar-color in a 404 propstat inside the mkcalendar-response —
+// the calendar is made, the colour is not — while a PROPPATCH a moment later
+// sets it and keeps it (docs/servers.md, SV-41). So the colour is read back,
+// sent once more on its own when it is not there, and read again. What the
+// catalog keeps is what the server shows: a swatch held here alone is one no
+// other client would ever draw, and C-10 would go on showing it as the
+// colour «the server sent».
+func settleColour(ctx context.Context, client *dav.Client, path, want string) string {
+	if want == "" {
+		return ""
+	}
+	if liveColour(ctx, client, path) == hexColour(want) {
+		return want
+	}
+	if err := client.PropPatch(ctx, path, []dav.Prop{{Name: propCalendarColor, Value: dav.TextValue(want)}}, nil); err != nil {
+		return ""
+	}
+	if liveColour(ctx, client, path) == hexColour(want) {
+		return want
+	}
+	return ""
+}
+
+// liveColour is the collection's calendar-color as the server shows it,
+// normalised; empty when there is none or it cannot be read.
+func liveColour(ctx context.Context, client *dav.Client, path string) string {
+	ms, err := client.PropFind(ctx, path, dav.DepthZero, []xml.Name{propCalendarColor})
+	if err != nil {
+		return ""
+	}
+	for _, resp := range ms.Responses {
+		if v := hexColour(propText(resp.Props[propCalendarColor])); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // settlePath is the address the collection ends up at. A create carries one,

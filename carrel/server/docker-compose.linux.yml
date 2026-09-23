@@ -21,7 +21,10 @@ services:
     image: stalwartlabs/stalwart:v0.16
     ports:
       - "127.0.0.1:8088:8088"
-      - "127.0.0.1:8080:8080"
+      # 8080 снаружи занят SelfPost на этой машине, и Docker отказывает в
+      # привязке (прогон 22.09.2026). Внутри контейнера слушатель настройки
+      # остаётся на 8080 — stalwart-setup ходит к нему по сети compose.
+      - "127.0.0.1:8089:8080"
     environment:
       # A fixed administrator instead of the random one the first start
       # prints, and the recovery listener on 8080 that stalwart-setup
@@ -47,10 +50,10 @@ services:
     volumes:
       - ./testdata/stalwart:/work:ro
     working_dir: /work
-    entrypoint:
-      - sh
-      - -c
-      - "stalwart-cli apply --file plan.ndjson && stalwart-cli create Action/ReloadSettings"
+    # No entrypoint of our own: the image's own entrypoint is the CLI, and
+    # it has no shell to wrap it in — the first live run answered
+    # `exec: "sh": executable file not found in $PATH` (22.09.2026). The
+    # gates pass the arguments instead, once per command.
     profiles:
       - setup
 
@@ -65,7 +68,20 @@ services:
   # DEFAULTS makes the first calendar and address book, without which the
   # server starts empty and discovery has nothing to find.
   xandikos:
-    image: ghcr.io/jelmer/xandikos:latest
+    # A release, not :latest. On 22.09.2026 :latest answered every
+    # addressbook-query with 500 and an AttributeError of its own
+    # ('CardDAVFilter' object has no attribute 'add_prop_filter'); every
+    # released tag from v0.2.10 to v0.2.12 answered 207. Pinning :latest
+    # for a stand means testing against whatever is broken upstream today,
+    # and it cost an afternoon that looked like a server behaviour worth
+    # recording.
+    image: ghcr.io/jelmer/xandikos:v0.2.12
+    # The release images run as a user that cannot write a fresh named
+    # volume — they die with PermissionError on /data/user/ — while
+    # :latest can. This is a stand on loopback with a throwaway volume,
+    # so root is the cheap answer; a production deployment would give the
+    # volume the right owner instead.
+    user: "root"
     ports:
       - "127.0.0.1:8081:8000"
     environment:

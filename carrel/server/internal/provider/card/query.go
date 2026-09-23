@@ -79,11 +79,15 @@ func siftCards(objs []*model.Object, text string) []*model.Object {
 	return kept
 }
 
-// FindUID reads the contact with this UID; the exact UID is checked here as
-// well, whatever the server made of text-match.
+// FindUID reads the contact with this UID. The filter asks for a substring —
+// the default match, the one every server has — and the exact UID is checked
+// here, whatever the server made of text-match. Asking for match-type=equals
+// would be asking for something optional we do not need: Xandikos takes it and
+// answers 207 with nothing at all, for a card it hands over to the same filter
+// without it (docs/servers.md, SV-40).
 func (p *Provider) FindUID(ctx context.Context, collection, uid string) (*model.Object, error) {
 	objs, _, err := p.query(ctx, collection, dav.CardQuery{
-		Matches: []dav.CardMatch{{Prop: vcard.FieldUID, Text: uid, Equals: true}},
+		Matches: []dav.CardMatch{{Prop: vcard.FieldUID, Text: uid}},
 	})
 	if err != nil {
 		return nil, err

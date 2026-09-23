@@ -66,15 +66,26 @@ CARREL_RADICALE_URL=http://127.0.0.1:5232/test/ \
 # cannot fail the gates of everyone else. Run with CARREL_STALWART=1.
 if [[ "${CARREL_STALWART:-}" == "1" ]]; then
   echo "== S-30.2: Stalwart integration =="
-  docker compose -f docker-compose.linux.yml up -d stalwart
-  for _ in $(seq 1 60); do
-    if curl -sf -o /dev/null http://127.0.0.1:8080/ 2>/dev/null; then
-      break
-    fi
-    sleep 0.5
-  done
-  docker compose -f docker-compose.linux.yml run --rm stalwart-setup
-  go test -tags=integration -count=1 -timeout 30m -run 'Stalwart' ./integration/...
+  # A stand that has never been run must not take the rest of the gates
+  # with it: its whole step is one subshell, and a failure is reported and
+  # stepped over. The flag alone was not enough — set -e killed the run on
+  # 22.09.2026, when Stalwart could not bind a port and Xandikos and Davis
+  # never got their turn.
+  if ! (
+    docker compose -f docker-compose.linux.yml up -d stalwart
+    for _ in $(seq 1 60); do
+      if curl -sf -o /dev/null http://127.0.0.1:8089/ 2>/dev/null; then
+        break
+      fi
+      sleep 0.5
+    done
+    # Two runs, not one shell: the CLI image carries no shell.
+    docker compose -f docker-compose.linux.yml run --rm stalwart-setup apply --file plan.ndjson
+    docker compose -f docker-compose.linux.yml run --rm stalwart-setup create Action/ReloadSettings
+    go test -tags=integration -count=1 -timeout 30m -run 'Stalwart' ./integration/...
+  ); then
+    echo "!! Stalwart: стенд не поднялся или набор упал; остальные ворота идут дальше"
+  fi
 fi
 
 # Xandikos, the second light engine. NOT YET RUN either
@@ -82,14 +93,18 @@ fi
 # Stalwart. Run with CARREL_XANDIKOS=1.
 if [[ "${CARREL_XANDIKOS:-}" == "1" ]]; then
   echo "== S-30.2: Xandikos integration =="
-  docker compose -f docker-compose.linux.yml up -d xandikos
-  for _ in $(seq 1 60); do
-    if curl -sf -o /dev/null http://127.0.0.1:8081/ 2>/dev/null; then
-      break
-    fi
-    sleep 0.5
-  done
-  go test -tags=integration -count=1 -timeout 30m -run 'Xandikos' ./integration/...
+  if ! (
+    docker compose -f docker-compose.linux.yml up -d xandikos
+    for _ in $(seq 1 60); do
+      if curl -sf -o /dev/null http://127.0.0.1:8081/ 2>/dev/null; then
+        break
+      fi
+      sleep 0.5
+    done
+    go test -tags=integration -count=1 -timeout 30m -run 'Xandikos' ./integration/...
+  ); then
+    echo "!! Xandikos: стенд не поднялся или набор упал; остальные ворота идут дальше"
+  fi
 fi
 
 # Davis, sabre/dav once more. NOT YET RUN either, and its DAV account is
@@ -98,15 +113,19 @@ fi
 # (testdata/davis/README.md). Run with CARREL_DAVIS=1.
 if [[ "${CARREL_DAVIS:-}" == "1" ]]; then
   echo "== S-30.2: Davis integration =="
-  docker compose -f docker-compose.linux.yml up -d davis
-  for _ in $(seq 1 60); do
-    if curl -sf -o /dev/null http://127.0.0.1:8082/ 2>/dev/null; then
-      break
-    fi
-    sleep 0.5
-  done
-  docker compose -f docker-compose.linux.yml run --rm davis-setup
-  go test -tags=integration -count=1 -timeout 30m -run 'Davis' ./integration/...
+  if ! (
+    docker compose -f docker-compose.linux.yml up -d davis
+    for _ in $(seq 1 60); do
+      if curl -sf -o /dev/null http://127.0.0.1:8082/ 2>/dev/null; then
+        break
+      fi
+      sleep 0.5
+    done
+    docker compose -f docker-compose.linux.yml run --rm davis-setup
+    go test -tags=integration -count=1 -timeout 30m -run 'Davis' ./integration/...
+  ); then
+    echo "!! Davis: стенд не поднялся или набор упал; остальные ворота идут дальше"
+  fi
 fi
 
 if [[ -n "${CARREL_SFTPGO_URL:-}" && -n "${CARREL_SFTPGO_USER:-}" && -n "${CARREL_SFTPGO_PASS:-}" ]]; then

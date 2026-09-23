@@ -150,3 +150,30 @@ func TestAnEmptyBookIsTakenAsEmpty(t *testing.T) {
 		t.Errorf("GET requests = %d", n)
 	}
 }
+
+// docs/servers.md, SV-40: Xandikos takes match-type and answers 207 with no
+// responses at all — the same answer as for a card that is not there — while
+// the same filter without it hands the card over. Nothing on the wire says
+// the filter was the problem, so there is nothing to fall back from: a single
+// card would simply be missing, and its page a 404. FindUID therefore asks
+// for the default match, a substring, and checks the UID itself. The stand
+// answers nothing to any match-type, so this passes only while we send none.
+func TestFindUIDAsksForNoOptionalMatchType(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.DeafToMatchType = true
+	srv.Seed(book+"ada.vcf", vcf("ada", "Ada Lovelace"))
+	srv.Seed(book+"ada-2.vcf", vcf("ada-2", "Ada the Second"))
+
+	obj, err := p.FindUID(t.Context(), book, "ada")
+	if err != nil || obj == nil || UID(obj) != "ada" {
+		t.Fatalf("FindUID = %+v, err %v", obj, err)
+	}
+	// A substring filter can bring back more than was asked for: "ada" is
+	// inside "ada-2". The exact UID is ours to check, and it is.
+	if obj.PropText("FN")[0] != "Ada Lovelace" {
+		t.Errorf("FN = %q, want the card whose UID is exactly the one asked for", obj.PropText("FN")[0])
+	}
+	if _, err := p.FindUID(t.Context(), book, "zzz"); !errors.Is(err, ErrNotFound) {
+		t.Errorf("a UID that is nowhere = %v, want ErrNotFound", err)
+	}
+}
