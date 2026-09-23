@@ -208,12 +208,14 @@ body:has(#w390:checked) .tc-root{width:100%}
 /* Знак davloom — по эталону carrel/docs/visual/davloom-icon.html (v1.1), хинт 16 px:
    нити и вал — чернила, полотно — единственный акцент. Собран из частей, как логотип:
    под правилом значков fill:none вал и полотно не выжили бы. Меньше 16 px не рисуется.
-   Не отвечает — полотно цвета тревоги; остальное не перекрашивается. */
+   Не отвечает — знак на плашке тревоги; сам знак не перекрашивается: красное полотно
+   в 7×4 px не читалось. Плашка 24 px — ниже кнопок ряда (26), строка не прыгает. */
 .tc-davmark{width:16px;height:16px;flex:none}
 .tc-davmark__threads{fill:none;stroke:var(--tc-ink);stroke-width:1;stroke-linecap:round}
 .tc-davmark__beam{fill:var(--tc-ink);stroke:none}
 .tc-davmark__cloth{fill:var(--tc-accent);stroke:none}
-.tc-davmark.is-alert .tc-davmark__cloth{fill:var(--tc-danger)}
+.tc-davmark.is-alert{box-sizing:content-box;padding:3px;border:1px solid var(--tc-danger);border-radius:3px;
+  background:color-mix(in srgb,var(--tc-danger) 11%,transparent)}
 .tc-nav .tc-davmark{width:16px;height:16px;opacity:1}
 /* в подвале приложения — не кнопка: прижат вправо, чтобы не читался равным кнопкам */
 .tc-railfoot > .tc-davmark{margin-left:auto}
