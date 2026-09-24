@@ -1628,13 +1628,14 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
     <a href="#appearance"><b>7.17</b><span>Вид</span></a>
   </section>
   <section>
-    <div class="t-h">Экраны: остальное<i>7.18–7.22</i></div>
+    <div class="t-h">Экраны: остальное<i>7.18–7.23</i></div>
     <a href="#s-mail"><b>7.18</b><span>Отправка почтой</span></a>
     <a href="#s-admin"><b>7.19</b><span>Администрирование</span></a>
     <a href="#install" class="is-sub"><b>7.19.1</b><span>Проверка установки</span></a>
     <a href="#s-auth"><b>7.20</b><span>Вход и первый запуск</span></a>
     <a href="#rest"><b>7.21</b><span>Остальные экраны и полнота</span></a>
     <a href="#s-plan-small"><b>7.22</b><span>Мелкие узлы внутри кадров</span></a>
+    <a href="#mentions"><b>7.23</b><span>Упоминания — кандидат</span></a>
   </section>
   <section>
     <div class="t-h">Режимы и среды<i>8–12</i></div>
@@ -11654,6 +11655,249 @@ The account itself stays: same login, same confirmed address. Only the password 
   <tr><td>Отображаемое имя и подтверждение адреса</td><td><a href="#s-mail">7.18</a>, блоки Name и Email в учётной записи</td><td>S-26.1 — обратный адрес ставится только подтверждённый</td></tr>
 </table>
 
+<h2 id="mentions">7.23 Упоминания — кандидат</h2>
+<p><b>Функция-кандидат, в спеке её нет.</b> Раздел рисует её отдельно и ничего в остальных кадрах не меняет, пока её не примут. Разница с хронологией — в роли человека: <b>хронология — где он субъект</b> (участник, организатор), <b>упоминания — где он объект</b>: его называют в чужой карточке (<code>RELATED</code>, <code>MEMBER</code>) или через <code>@</code> в тексте записи.</p>
+<p><b>Решено 24.09.2026.</b> Упоминание — текст плюс ссылка на карточку прямо в тексте, <code>@[Анна Ковалёва](urn:uuid:…)</code>: без ссылки искать нечего, и <code>@</code> вводится ради неё. Ищем в теле заметки, описании события и задачи и в заметке карточки; файлов нет, писем у нас нет. Только явное <code>@</code>, имя без него — не упоминание. Запись, где человек и участник, и назван, стоит и в хронологии, и здесь: иначе назначение функции перестанут понимать. Вход — с карточки, рядом с хронологией. При вводе <code>@</code> в этих полях — подсказка людей из адресной книги, как у «Related to».</p>
+
+<figure>
+<div class="frame" data-frame="mentions-1">
+  <div class="frame-label"><span>Карточка · врезка упоминаний</span><span class="frag">кандидат</span><i>рядом с хронологией</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" value="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to list</a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">nextcloud</div>
+          <div class="tc-tickrow is-on"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">248</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">51</span></div>
+        </div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-head">
+          <div class="tc-head__titles tc-line tc-line--gap-14">
+            <span class="tc-avatar--photo"></span>
+            <div class="tc-head__text">
+              <div class="tc-head__title">Анна Ковалёва</div>
+              <div class="tc-head__sub">Издательство «Слово» · Выпускающий редактор</div>
+              <div class="tc-head__sub">nextcloud · Контакты</div>
+            </div>
+          </div>
+          <div class="tc-acts">
+            <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-pencil"/></svg>Edit</button>
+            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg>Send</button>
+            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-print"/></svg>Print</button>
+            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
+          </div>
+        </div>
+        <dl class="tc-fields">
+          <dt>Phone · mobile</dt><dd class="tc-mono">+7 912 445-10-88</dd>
+          <dt>Phone · work</dt><dd class="tc-mono">+7 495 120-45-00</dd>
+          <dt>Email · work</dt><dd>a.kovaleva@example.org</dd>
+          <dt>Email · second</dt><dd>anna.kovaleva@slovo.example</dd>
+          <dt>Address · work</dt><dd>Москва, Тверская 12, стр. 3</dd>
+          <dt>Birthday</dt><dd class="tc-mono">1987-03-14 <span class="tc-dim">· in 7 months</span></dd>
+          <dt>Categories</dt><dd><span class="tc-tag">работа</span> <span class="tc-tag">издательство</span></dd>
+          <dt>Note</dt><dd>Пишет по вторникам, отвечает в тот же день.</dd>
+        </dl>
+        <div class="tc-sec">
+          <div class="tc-rubric">Kept as the server sent them <button class="tc-btn is-sm" type="button">Show 3</button></div>
+          <div class="tc-field__hint">Properties Carrel does not edit are stored byte for byte and go back untouched.</div>
+        </div>
+        <div class="tc-sec">
+          <div class="tc-rubric">The same person in other books <span class="tc-badge is-linked">2</span></div>
+          <ul class="tc-stack tc-stack--gap-5 tc-sec__list">
+            <li><span class="tc-dim--accent">Анна Ковалёва</span> <span class="tc-dim">· radicale · vps · Общий</span></li>
+            <li><span class="tc-dim--accent">А. Ковалёва</span> <span class="tc-dim">· baikal · Работа</span></li>
+          </ul>
+        </div>
+        <div class="tc-sec">
+          <div class="tc-rubric">Timeline <span class="tc-mono tc-mono--ls0">11</span></div>
+          <div class="tc-list">
+            <div class="tc-row tc-row--find"><span class="tc-mark" data-tc-colour="#4A6B52"></span><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-row__lead"><use href="#i-cal"/></svg><span class="tc-row__title">Синк-ап по релизу</span><span class="tc-row__cell tc-row__detail">10 Aug · участник · приняла</span></div>
+            <div class="tc-row tc-row--find"><span class="tc-mark" data-tc-colour="#4A6B52"></span><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-row__lead"><use href="#i-note"/></svg><span class="tc-row__title">Заметка со встречи 10.08</span><span class="tc-row__cell tc-row__detail">10 Aug · упомянута в тексте</span></div>
+            <div class="tc-row tc-row--find"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-row__lead"><use href="#i-task"/></svg><span class="tc-row__title">Отправить макет Ковалёвой</span><span class="tc-row__cell tc-row__detail">08 Aug · упомянута в названии</span></div>
+          </div>
+          <div class="tc-sec__acts"><button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-all"/></svg>Open the timeline</button></div>
+        </div>
+        <div class="tc-sec">
+          <div class="tc-rubric">Mentions <span class="tc-mono tc-mono--ls0">8</span></div>
+          <div class="tc-list">
+            <div class="tc-row tc-row--find"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-row__lead"><use href="#i-con"/></svg><span class="tc-row__title">Артём Белов</span><span class="tc-row__cell tc-row__detail">names her as colleague</span></div>
+            <div class="tc-row tc-row--find"><span class="tc-mark" data-tc-colour="#4A6B52"></span><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-row__lead"><use href="#i-note"/></svg><span class="tc-row__title">Заметка со встречи 10.08</span><span class="tc-row__cell tc-row__detail">10 Aug · @ in the text</span></div>
+            <div class="tc-row tc-row--find"><span class="tc-mark" data-tc-colour="#4A6B52"></span><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" class="tc-row__lead"><use href="#i-cal"/></svg><span class="tc-row__title">Синк-ап по релизу</span><span class="tc-row__cell tc-row__detail">10 Aug · @ in the description</span></div>
+          </div>
+          <div class="tc-sec__acts"><button class="tc-btn" type="button">Open mentions</button></div>
+        </div>
+        <div class="tc-sec">
+          <div class="tc-rubric">Source</div>
+          <div class="tc-diag">Path  /dav.php/addressbooks/mix/contacts/2b7e.vcf
+Read  2 min ago · not changed on server</div>
+        </div>
+        <div class="tc-danger"><button class="tc-btn is-danger-solid" type="button"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg>Delete contact</button>Удаление уходит на сервер сразу и отменить его нечем.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Врезка устроена как у хронологии</b>: рубрика с числом, три последние записи со столбцом «почему», кнопка на свой экран. Строка «names her as colleague» — из чужой карточки, «@ in the text» — из записи. <b>Открыто:</b> у хронологии на карточке сейчас есть строки «упомянута в тексте» и «упомянута в названии» — это совпадение по имени, то есть догадка и по сути упоминание. Если функцию примут, эти строки, видимо, уходят из хронологии сюда и начинают требовать <code>@</code>.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="mentions-2">
+  <div class="frame-label"><span>Упоминания · экран</span><span class="frag">кандидат</span><i>/app/contacts/{account}/{col}/{uid}/mentions</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" value="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav">
+          <a class="is-on tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts<span class="tc-num">312</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar<span class="tc-num">14</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks<span class="tc-num">3</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes<span class="tc-num">86</span></a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates<span class="tc-num">3</span></a>
+        </div>
+        <div class="tc-nav tc-nav--top2"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to list</a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Where to look</div>
+          <div class="tc-tickrow is-all is-on"><button class="tc-tickrow__tick is-part" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-tickrow__label">All sources</span><span class="tc-tickrow__meta">8</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Команда</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">2</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Личный</span><span class="tc-tickrow__meta">1</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Дела</span><span class="tc-tickrow__meta">1</span></div>
+          <div class="tc-tickrow is-error"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-tickrow__label">Общий</span><span class="tc-tickrow__meta" title="401 Unauthorized — the saved password was refused. Open Connections to update it.">password · 401</span><button class="tc-btn is-sm" type="button">Retry</button></div>
+        </div>
+      </div>
+
+      <div class="tc-main">
+        <div class="tc-head tc-head--padb10">
+          <div class="tc-head__titles tc-head__titles--row">
+            <span class="tc-avatar tc-avatar--sq44-t15-r4">АК</span>
+            <div class="tc-head__text">
+              <div class="tc-rubric tc-rubric--bot2">Mentions</div>
+              <div class="tc-head__title">Анна Ковалёва</div>
+              <div class="tc-head__sub">Where she is named, not where she takes part · the timeline has that</div>
+            </div>
+          </div>
+          <div class="tc-acts">
+            <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>Write a note</button>
+            <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-all"/></svg>Timeline</button>
+          </div>
+        </div>
+        <div class="tc-bar">
+          <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 8</button><button class="tc-seg__opt" type="button">Cards 4</button><button class="tc-seg__opt" type="button">Events 1</button><button class="tc-seg__opt" type="button">Tasks 1</button><button class="tc-seg__opt" type="button">Notes 2</button></span>
+          <span class="tc-bar__right is-2nd"><span class="tc-mono">newest first</span></span>
+        </div>
+        <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="80%"></i></span>Looked in 6 of 7 sources by the card's link <span class="tc-mono">urn:uuid:4f2b-9c31-a0e7</span> · <span class="tc-dim--danger">baikal · Общий unavailable</span></div>
+
+        <div class="tc-list__group"><span class="tc-rubric">In other cards</span><span class="tc-num">3</span></div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--find">
+            <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mono tc-row__lead">—</span>
+            <span class="tc-row__title">Артём Белов</span><span class="tc-row__excerpt tc-row__detail">names her as colleague</span>
+            <span class="tc-row__cell tc-row__caption">contact</span><span class="tc-row__cell tc-row__source">radicale · vps · Команда</span>
+          </div>
+          <div class="tc-row tc-row--find">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">—</span>
+            <span class="tc-row__title">Пётр Ковалёв</span><span class="tc-row__excerpt tc-row__detail">names her as spouse</span>
+            <span class="tc-row__cell tc-row__caption">contact</span><span class="tc-row__cell tc-row__source">nextcloud · Контакты</span>
+          </div>
+          <div class="tc-row tc-row--find">
+            <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mono tc-row__lead">—</span>
+            <span class="tc-row__title">Редакция «Слово»</span><span class="tc-row__excerpt tc-row__detail">lists her as a member</span>
+            <span class="tc-row__cell tc-row__caption">group</span><span class="tc-row__cell tc-row__source">radicale · vps · Команда</span>
+          </div>
+        </div>
+
+        <div class="tc-list__group"><span class="tc-rubric">Named with @</span><span class="tc-num">5</span></div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--find">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10 Aug</span>
+            <span class="tc-row__title">Заметка со встречи 10.08</span><span class="tc-row__excerpt tc-row__detail">…пишет <span class="tc-dim--accent">@Анна Ковалёва</span> к вторнику черновик письма…</span>
+            <span class="tc-row__cell tc-row__caption">note</span><span class="tc-row__cell tc-row__source">nextcloud · Записи</span>
+          </div>
+          <div class="tc-row tc-row--find">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10 Aug</span>
+            <span class="tc-row__title">Синк-ап по релизу</span><span class="tc-row__excerpt tc-row__detail">…текст — <span class="tc-dim--accent">@Анна Ковалёва</span>, Виктор — миграция…</span>
+            <span class="tc-row__cell tc-row__caption">event</span><span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
+          </div>
+          <div class="tc-row tc-row--find">
+            <span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-mono tc-row__lead">8 Aug</span>
+            <span class="tc-row__title">Ответить по смете</span><span class="tc-row__excerpt tc-row__detail">…уточнить у <span class="tc-dim--accent">@Анна Ковалёва</span> курс и сроки…</span>
+            <span class="tc-row__cell tc-row__caption">task</span><span class="tc-row__cell tc-row__source">nextcloud · Дела</span>
+          </div>
+          <div class="tc-row tc-row--find">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">—</span>
+            <span class="tc-row__title">Виктор Смирнов</span><span class="tc-row__excerpt tc-row__detail">note: познакомила <span class="tc-dim--accent">@Анна Ковалёва</span> на ярмарке…</span>
+            <span class="tc-row__cell tc-row__caption">contact</span><span class="tc-row__cell tc-row__source">nextcloud · Контакты</span>
+          </div>
+          <div class="tc-row tc-row--find">
+            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">21 Jul</span>
+            <span class="tc-row__title">Про сроки по сборнику</span><span class="tc-row__excerpt tc-row__detail">…согласует <span class="tc-dim--accent">@Анна Ковалёва</span>, не редакция…</span>
+            <span class="tc-row__cell tc-row__caption">note</span><span class="tc-row__cell tc-row__source">nextcloud · Записи</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Две группы, потому что это два разных факта.</b> «In other cards» — другая карточка называет её через <code>RELATED</code> или числит в группе через <code>MEMBER</code>; строка говорит, кем называет, с точки зрения той карточки. «Named with @» — текст записи со ссылкой на её карточку; в строке фрагмент вокруг упоминания. «Синк-ап по релизу» стоит и здесь, и в хронологии: там она участница, здесь её назвали в описании. Ищем по ссылке карточки, а не по имени, поэтому полоса опроса её показывает. «Write a note» открывает заметку, где <code>@Анна Ковалёва</code> уже стоит в тексте. <b>Открыто:</b> куда ведёт строка группы (групп мы нигде не рисуем); что делать со ссылкой на UID, которого нет ни в одной книге; можно ли отсюда снять или добавить связь; маршрут и возврат — сейчас «Back to list», как у хронологии.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="mentions-3">
+  <div class="frame-label"><span>Ввод @ · подсказка людей</span><span class="frag">кандидат</span><i>тело заметки, описание события и задачи, заметка карточки</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad18-20">
+  <div class="tc-field tc-field--w100"><label>Text</label>
+  <textarea class="tc-in is-area is-focus tc-in--body-sm">Письмо пользователям пишет @Ков</textarea><div class="tc-menu tc-menu--full">
+    <button class="is-on tc-menu__item" type="button" role="menuitem"><svg><use href="#i-con"/></svg>Анна Ковалёва<span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud · Контакты</span></button>
+    <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-con"/></svg>Пётр Ковалёв<span class="tc-mono tc-push tc-mono--t10-dusty">nextcloud · Контакты</span></button>
+    <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-con"/></svg>Ковалёв Игорь<span class="tc-mono tc-push tc-mono--t10-dusty">radicale · vps · Команда</span></button>
+  </div></div>
+  </div>
+</div>
+<figcaption>Подсказка — то же меню, что у «Related to», только люди. Выбор ставит в текст <code>@Анна Ковалёва</code> и прячет рядом ссылку на её карточку. Два Ковалёва различаются книгой, из которой пришли. В продукте меню встаёт у курсора, а не под полем: неподвижная разметка кадра этого не рисует.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="mentions-4">
+  <div class="frame-label"><span>Упоминание в тексте · чтение</span><span class="frag">кандидат</span><i>и как та же строка лежит на сервере</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad18-20 tc-root--col">
+  <div class="tc-prose">Договорились заморозить ветку в среду. Письмо пользователям пишет <a class="tc-dim--accent" href="#">@Анна Ковалёва</a>, черновик к вечеру вторника.</div>
+  <div class="tc-diag">Письмо пользователям пишет @[Анна Ковалёва](urn:uuid:4f2b-9c31-a0e7), черновик к вечеру вторника.</div>
+  </div>
+</div>
+<figcaption><b>Упоминание — ссылка:</b> нажатие открывает карточку этого контакта, в любой записи, где текст читают (заметка, событие, задача, заметка карточки). В строке списка оно остаётся текстом: там ссылка — вся строка, а ссылка внутри ссылки запрещена правилом строки. Ниже — как та же строка лежит на сервере и что увидит чужой клиент: разметку <code>@[…](urn:uuid:…)</code> как есть. Это цена решения «ссылка в самом тексте», и она принята: без ссылки найти упоминание нельзя.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="mentions-5">
+  <div class="frame-label"><span>Упоминаний нет · и где не искали</span><span class="frag">кандидат</span><i>пусто — не то же, что «не знаем»</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--flat tc-root--col">
+  <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="80%"></i></span>Looked in 6 of 7 sources · <span class="tc-dim--danger">baikal · Общий unavailable</span></div>
+  <div class="tc-empty">Nobody names Анна Ковалёва in six sources. Type @ in a note, an event, a task or a card's note to name her. Общий did not answer and is not counted.</div>
+  </div>
+</div>
+<figcaption><b>Пусто — не то же, что «не знаем».</b> Шесть источников ответили и ничего не нашли; седьмой не ответил, и об этом сказано отдельно, а не растворено в нуле. <b>Открыто:</b> как быть с серверами, которые отдают vCard 3.0 и теряют <code>RELATED</code> — отличать ли «связь не поддерживается» от «связи нет».</figcaption>
+</figure>
+
 <h2 id="m-states">8. Состояния</h2>
 <p>Состояний в этом продукте больше, чем в обычном списке: источников несколько, они отвечают в разное время, часть — только для чтения, часть недоступна. Ни одно из них не должно выглядеть как поломка интерфейса.</p>
 
@@ -13420,7 +13664,7 @@ The account itself stays: same login, same confirmed address. Only the password 
 
 <h3>Сверка готового экрана с макетом</h3>
 <p>Разница в одну колонку или в один разъехавшийся флажок глазами не ловится — тем более между двумя окнами, где данные разные. Поэтому рядом с макетами лежат наборы: <a href="fixtures/README.md">docs/visual/fixtures</a> — двенадцать файлов <code>.vcf</code> и <code>.ics</code> с <b>теми самыми</b> записями, что нарисованы выше. Их загружают через «Import» в пустой экземпляр и открывают те же экраны: состав строк, группы, колонки и состояния должны совпасть.</p>
-<p>Четыре вещи набор проверяет нарочно, потому что на выдуманных данных они не воспроизводятся: встреча заведена в <code>Asia/Yekaterinburg</code> и обязана показать исходный пояс меткой; дежурство лежит в двух коллекциях разными UID и обязано стать одной строкой с «duplicate?&nbsp;×2»; Артём Белов лежит в двух книгах и до связывания обязан попасть в «Дубликаты»; у карточки Анны Ковалёвой три чужих свойства, и карточка обязана сказать «Kept as the server sent them · Show&nbsp;3». Чего набор не воспроизводит — счётчиков в рейле: 248 карточек файлом не задать, да и сам макет рисует книгу на 248 карточек пятью строками. <b>Сверяется устройство экрана, а не итог пересчёта</b>, и в README это сказано прямо, чтобы никто не гнался за числами.</p>
+<p>Четыре вещи набор проверяет нарочно, потому что на выдуманных данных они не воспроизводятся: встреча заведена в <code>Asia/Yekaterinburg</code> и обязана показать исходный пояс меткой; дежурство лежит в двух коллекциях разными UID и обязано стоять в агенде двумя строками, без пометки, а на экране дубликатов — парой; Артём Белов лежит в двух книгах и до связывания обязан попасть в «Дубликаты»; у карточки Анны Ковалёвой три чужих свойства, и карточка обязана сказать «Kept as the server sent them · Show&nbsp;3». Чего набор не воспроизводит — счётчиков в рейле: 248 карточек файлом не задать, да и сам макет рисует книгу на 248 карточек пятью строками. <b>Сверяется устройство экрана, а не итог пересчёта</b>, и в README это сказано прямо, чтобы никто не гнался за числами.</p>
 
 <p><b>Кадры адресуются машиной.</b> Индекс в <code>querySelectorAll('.mock')</code> идентичностью не является: кадров 162, и каждый дорисованный сдвигает нумерацию. Поэтому кадр, по которому собирают экран, несёт <code>data-screen</code> с маршрутом — тем же, что стоит в подписи кадра; кадр, показывающий несколько страниц сразу, перечисляет их через пробел. Кусок кадра, которым отвечает фрагмент (панель подробностей, порция списка, результаты поиска), несёт <code>data-part</code> с именем этого куска; имя может стоять на нескольких соседях, и тогда куском считаются они все по порядку. Третьего атрибута нет: состояние работ на кадрах не отмечается, потому что живёт оно в системе контроля версий (C-16). <b>Отсутствие контрола на экране законно только тогда, когда оно объявлено здесь</b>, на виду у того, кто смотрит на дизайн, — а не в списке исключений внутри теста, куда никто не заглядывает.</p>
 
