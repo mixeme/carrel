@@ -1217,7 +1217,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-in--fill.tc-in--fill{flex:1}
 .tc-in--dusty.tc-in--dusty{color:var(--tc-dusty)}
 .tc-in--t11-5.tc-in--t11-5{font-size:11.5px}
-.tc-in--t12-w190.tc-in--t12-w190{font-size:12px;width:190px}
 .tc-in--t11.tc-in--t11{font-size:11px}
 .tc-in--t11-fill.tc-in--t11-fill{font-size:11px;flex:1}
 .tc-in--key.tc-in--key{font-size:14px;letter-spacing:.04em}
@@ -1493,7 +1492,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 
 .tc-auth__tagline-lead.tc-auth__tagline-lead{font-size:16px;font-weight:600;color:var(--tc-ink);margin-bottom:4px;display:block}
 .tc-table--mx-20.tc-table--mx-20{margin:0 -20px}
-.tc-table--flush.tc-table--flush{margin:0}
 .tc-table__file--fill.tc-table__file--fill{flex:1}
 .tc-table__filename--accent.tc-table__filename--accent{color:var(--tc-accent)}
 .tc-table__filename--bare.tc-table__filename--bare{height:auto;display:inline-flex;padding:0}
@@ -8313,39 +8311,29 @@ Read  2 min ago</div>
               <div class="tc-rubric">What goes into the profile</div>
               <div class="tc-list tc-list--mx-14">
                 <div class="tc-row tc-row--slim">
-                  <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title">Личный <span class="tc-row__cell">· CalDAV</span></span><span class="tc-row__cell">nextcloud</span>
+                  <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-row__title">nextcloud · mix <span class="tc-row__cell">· Личный, Работа, Контакты</span></span><span class="tc-row__cell">CalDAV, CardDAV</span>
                 </div>
                 <div class="tc-row tc-row--slim">
-                  <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__title">Работа <span class="tc-row__cell">· CalDAV</span></span><span class="tc-row__cell">nextcloud</span>
-                </div>
-                <div class="tc-row tc-row--slim">
-                  <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title">Контакты <span class="tc-row__cell">· CardDAV</span></span><span class="tc-row__cell">nextcloud</span>
-                </div>
-                <div class="tc-row tc-row--slim">
-                  <button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-row__title">Проекты <span class="tc-row__cell">· CalDAV</span></span><span class="tc-row__cell">radicale</span>
+                  <button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-row__title">radicale · vps · mix <span class="tc-row__cell">· Проекты</span></span><span class="tc-row__cell">CalDAV</span>
                 </div>
               </div>
             </div>
             <div class="tc-msg is-alert is-row tc-msg--flush">
               <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none" class="tc-ico--top1-fix"><use href="#i-shield"/></svg>
-              <span class="tc-msg__aside"><b>The profile carries passwords in cleartext.</b> It is an ordinary file: it lands in Downloads, in a messenger, in the phone’s backup. Open it on the device and delete it. The link lives 10 minutes and opens once; nothing is written to the server’s disk, and the issue is recorded in the audit log.</span>
+              <span class="tc-msg__aside"><b>The profile carries passwords in cleartext.</b> It is an ordinary file: it lands in Downloads, in a messenger, in the phone’s backup. Open it on the device and delete it. The link opens once and lives 5 minutes, for you signed in to Carrel; nothing is written to the server’s disk, and the issue is recorded in the audit log.</span>
             </div>
           </div>
           <div class="tc-stack tc-stack--gap-12 tc-form__col--300">
             <div class="tc-card">
-              <div class="tc-rubric">Confirmation</div>
-              <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in is-focus" type="text" value="••••••••••" aria-label="Your Carrel password">
-                <span class="tc-field__hint">Asked again: the file hands out the credentials of every ticked server.</span></div>
-              <div class="tc-card__acts"><button class="tc-btn is-primary" type="button">Generate profile</button></div>
+              <div class="tc-rubric">Profile</div>
+              <span class="tc-field__hint">Issued inside the unlock window: nothing more is asked.</span>
+              <div class="tc-card__acts"><button class="tc-btn is-danger" type="button">Generate profile</button></div>
             </div>
             <div class="tc-card">
-              <div class="tc-rubric">Link ready <span class="tc-badge is-local" title="Local instance: may be unreachable from outside">local</span> <span class="tc-mono tc-mono--ls0-danger">09:41</span></div>
-              <div class="tc-line tc-line--gap-6">
-                <input class="tc-in is-mono tc-in--t11-fill" type="text" value="https://carrel.example/d/2f9c…/carrel.mobileconfig">
-                <button class="tc-btn is-sm" type="button">Copy</button>
-              </div>
+              <div class="tc-rubric">Link ready until 09:46 <span class="tc-badge is-local" title="Local instance: may be unreachable from outside">local</span></div>
+              <span class="tc-field__hint">It opens once, for you signed in to Carrel. Open it on the device, install the profile, then delete the file.</span>
               <div class="tc-line tc-line--gap-6 tc-card__top9">
-                <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Download now</button>
+                <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-down"/></svg>Download profile</button>
                 <button class="tc-btn" type="button">Revoke</button>
               </div>
             </div>
@@ -8355,7 +8343,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption>Опасность названа словами и стоит рядом с кнопкой, а не в конце страницы: профиль Apple — это файл с паролями, и человек должен узнать об этом до того, как перешлёт его себе в мессенджер. Обратный отсчёт у ссылки — не украшение: ссылка одноразовая и короткоживущая, и это единственный способ показать, что она протухнет. Выбор коллекций — те же строки с полосками, что и везде, поэтому объяснять их второй раз не нужно.</figcaption>
+<figcaption>Опасность названа словами и стоит рядом с кнопкой, а не в конце страницы: профиль Apple — это файл с паролями, и человек должен узнать об этом до того, как перешлёт его себе в мессенджер. Время у ссылки — не украшение: ссылка одноразовая, живёт пять минут и открывается только тому, кто вошёл в Carrel на этом устройстве, — копировать её некуда, поэтому и «Copy» у неё нет. Профиль выдаётся внутри общего окна разблокировки (<a href="#reveal">ниже</a>), своего поля пароля у экрана нет. <b>Выбор — по аккаунту целиком:</b> профиль берёт аккаунт, отдельную коллекцию из него не вынуть, поэтому галочка стоит у строки аккаунта, а логин — в её заголовке.</figcaption>
 </figure>
 
 <div class="frames">
@@ -8405,49 +8393,36 @@ Read  2 min ago</div>
               <div class="tc-rubric">Collections DAVx5 will see</div>
               <div class="tc-list tc-list--mx-14">
                 <div class="tc-row tc-row--slim">
-                  <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title">Личный <span class="tc-row__cell">· CalDAV</span></span><span class="tc-row__cell">nextcloud</span>
+                  <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-row__title">nextcloud · mix <span class="tc-row__cell">· Личный, Работа, Контакты</span></span><span class="tc-row__cell">CalDAV, CardDAV</span>
                 </div>
                 <div class="tc-row tc-row--slim">
-                  <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__title">Работа <span class="tc-row__cell">· CalDAV</span></span><span class="tc-row__cell">nextcloud</span>
-                </div>
-                <div class="tc-row tc-row--slim">
-                  <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title">Контакты <span class="tc-row__cell">· CardDAV</span></span><span class="tc-row__cell">nextcloud</span>
-                </div>
-                <div class="tc-row tc-row--slim">
-                  <button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-row__title">Проекты <span class="tc-row__cell">· CalDAV</span></span><span class="tc-row__cell">radicale</span>
+                  <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-row__title">radicale · vps · mix <span class="tc-row__cell">· Проекты</span></span><span class="tc-row__cell">CalDAV</span>
                 </div>
               </div>
             </div>
-            <table class="tc-table tc-table--flush">
-              <thead><tr><th></th><th>Value</th><th class="tc-table__n3 tc-table__col--num"></th></tr></thead>
-              <tbody>
-                <tr><td class="tc-mono">username</td><td class="tc-mono">mix</td><td class="tc-acts tc-table__n3"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
-                <tr><td class="tc-mono">password · nextcloud</td>
-                  <td><input class="tc-in is-mono tc-in--t12-w190" type="text" value="z3-brick-lamp-9f2"></td>
-                  <td class="tc-acts tc-table__n3"><button class="tc-btn is-sm" type="button">Copy</button><button class="tc-btn is-sm" type="button">Hide</button></td></tr>
-              </tbody>
-            </table>
+            <div class="tc-msg is-row tc-msg--flush"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
+              <span class="tc-msg__aside">Scan the code with the phone: DAVx5 opens with the address and the login filled in. The password is not in the code — type it from the connections page, inside the unlock window.</span><button class="tc-btn is-sm" type="button">Show password</button></div>
           </div>
           <div class="tc-stack tc-stack--gap-12 tc-form__col--280">
             <div class="tc-card">
-              <div class="tc-rubric">QR for DAVx5</div>
+              <div class="tc-rubric">QR for DAVx5 · nextcloud</div>
               <div class="tc-card__split">
                 <div data-tc-colour="#FFFDF7" class="tc-card__qr">
                   <svg width="104" height="104" viewBox="-1 -1 27 27" role="img" aria-label="QR"><rect x="-1" y="-1" width="27" height="27" fill="#FFFDF7"/><use href="#qr-demo"/></svg>
                 </div>
                 <div class="tc-stack tc-stack--gap-8 tc-card__qr-side">
                   <div class="tc-field tc-field--w100"><label>Link in the code</label><input class="tc-in is-mono tc-in--t11" type="text" value="davx5://mix@cloud.example.org/remote.php/dav/" aria-label="Link in the code"></div>
-                  <div class="tc-line tc-line--gap-6"><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-qr"/></svg>Larger</button><button class="tc-btn is-sm" type="button">Copy link</button></div>
+                  <div class="tc-line tc-line--gap-6"><button class="tc-btn is-sm" type="button">Open in DAVx5 · nextcloud</button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-qr"/></svg>Code for radicale · vps</button></div>
                 </div>
               </div>
-              <span class="tc-field__hint tc-field__hint--top8">The password is not in the code — DAVx5 forbids it. Type it by hand from the field on the left.</span>
+              <span class="tc-field__hint tc-field__hint--top8">One code per connection. The password is not in it — a code on a screen is seen by whoever stands behind you.</span>
             </div>
           </div>
         </div>
       </div></div>
     </div>
   </div>
-  <figcaption><b>Android показывает то же, что Apple, только без файла.</b> Коллекции с полосками, логин и пароль — иначе человек сканирует код и не знает, что именно туда приедет и какой пароль вводить. QR закрывает два самых ошибкоёмких поля (адрес и имя); пароль в код не кладут, потому что документация DAVx5 это запрещает, и поле рядом говорит это прямо. Снятая коллекция не попадёт в аккаунт DAVx5 — тот же выбор, что у профиля Apple. Код — единственная картинка во всём интерфейсе, которая не является содержимым пользователя: чёрное на «бумаге», без скруглений и логотипа внутри.</figcaption>
+  <figcaption><b>Android показывает то же, что Apple, только без файла.</b> Аккаунты с коллекциями, логин в заголовке аккаунта — иначе человек сканирует код и не знает, что именно туда приедет. QR закрывает два самых ошибкоёмких поля (адрес и имя), <b>один код — одно подключение</b>: второй открывается действием «Code for …», а «Open in DAVx5» ведёт той же ссылкой для того, кто открыл страницу прямо на телефоне. Пароль в код не кладут; он показывается на странице подключений внутри окна разблокировки — туда и ведёт «Show password». Снятый аккаунт не попадёт в DAVx5 — тот же выбор, что у профиля Apple. Код — единственная картинка во всём интерфейсе, которая не является содержимым пользователя: чёрное на «бумаге», без скруглений и логотипа внутри.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -8497,19 +8472,16 @@ Read  2 min ago</div>
                   <div class="tc-rubric">What goes into the profile</div>
                   <div class="tc-list tc-list--mx-14">
                     <div class="tc-row tc-row--slim">
-                      <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title">Личный <span class="tc-row__cell">· CalDAV</span></span><span class="tc-row__cell">nextcloud</span>
-                    </div>
-                    <div class="tc-row tc-row--slim">
-                      <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title">Контакты <span class="tc-row__cell">· CardDAV</span></span><span class="tc-row__cell">nextcloud</span>
+                      <button class="tc-tickrow__tick" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-row__title">nextcloud · mix <span class="tc-row__cell">· Личный, Работа, Контакты</span></span><span class="tc-row__cell">CalDAV, CardDAV</span>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="tc-stack tc-stack--gap-12 tc-form__col--300">
                 <div class="tc-card">
-                  <div class="tc-rubric">Confirmation</div>
-                  <div class="tc-field tc-field--w100"><label>Your Carrel password</label><input class="tc-in" type="text" value="••••••••••" aria-label="Your Carrel password"></div>
-                  <div class="tc-card__acts"><button class="tc-btn is-primary" type="button">Generate profile</button></div>
+                  <div class="tc-rubric">Profile</div>
+                  <span class="tc-field__hint">Confirm your password first: the profile hands out the credentials of every included account.</span>
+                  <div class="tc-card__acts"><button class="tc-btn is-danger" type="button">Generate profile</button></div>
                 </div>
               </div>
             </div>
@@ -8574,21 +8546,18 @@ Read  2 min ago</div>
         <table class="tc-table">
           <thead><tr><th>Collection</th><th>Type</th><th class="tc-table__n3">URL</th><th class="tc-table__n4 tc-table__col--num"></th></tr></thead>
           <tbody>
+            <tr><td colspan="4"><b>nextcloud · mix</b></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Личный</span></span></td><td class="tc-mono">CalDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/calendars/mix/personal/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#3F6E8C"></span><span class="tc-table__filename">Работа</span></span></td><td class="tc-mono">CalDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/calendars/mix/work/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Контакты</span></span></td><td class="tc-mono">CardDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/addressbooks/mix/contacts/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
-            <tr><td colspan="2" class="tc-mono">username</td><td class="tc-mono">mix</td><td class="tc-acts tc-table__n3"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
-            <tr><td colspan="2" class="tc-mono">password · nextcloud</td>
-              <td><input class="tc-in is-mono tc-in--t12-w190" type="text" value="z3-brick-lamp-9f2"></td>
-              <td class="tc-acts tc-table__n3"><button class="tc-btn is-sm" type="button">Copy</button><button class="tc-btn is-sm" type="button">Hide</button></td></tr>
           </tbody>
         </table>
         <div class="tc-msg is-row"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-          <span class="tc-msg__aside">Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book. There is no import file and none is needed.</span></div>
+          <span class="tc-msg__aside">Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book. There is no import file and none is needed.</span><button class="tc-btn is-sm" type="button">Show password</button></div>
       </div></div>
     </div>
   </div>
-  <figcaption><b>Thunderbird — отдельный экран, не «всё остальное».</b> У него нет механизма импорта, и он не монтирует диск: нужны точные URL календарей и адресных книг плюс логин и пароль. CalDAV вставляют в Calendar, CardDAV — в Address Book; WebDAV здесь нет, потому что Thunderbird его не подключает. Пароль показывается той же <a href="#reveal">механикой</a>, что везде: вопрос раз в сеанс, пять минут, журнал. Copy на каждой строке снимает опечатку в длинном пути.</figcaption>
+  <figcaption><b>Thunderbird — отдельный экран, не «всё остальное».</b> У него нет механизма импорта, и он не монтирует диск: нужны точные URL календарей и адресных книг плюс логин и пароль. Логин стоит в заголовке аккаунта, пароль — на странице подключений, куда ведёт «Show password» внутри окна разблокировки. CalDAV вставляют в Calendar, CardDAV — в Address Book; WebDAV здесь нет, потому что Thunderbird его не подключает. Пароль показывается той же <a href="#reveal">механикой</a>, что везде: вопрос раз в сеанс, пять минут, журнал. Copy на каждой строке снимает опечатку в длинном пути.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -8634,25 +8603,20 @@ Read  2 min ago</div>
         <table class="tc-table">
           <thead><tr><th>Collection</th><th>Type</th><th class="tc-table__n3">URL</th><th class="tc-table__n4 tc-table__col--num"></th></tr></thead>
           <tbody>
+            <tr><td colspan="4"><b>nextcloud · mix</b></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Личный</span></span></td><td class="tc-mono">CalDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/calendars/mix/personal/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#3F6E8C"></span><span class="tc-table__filename">Работа</span></span></td><td class="tc-mono">CalDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/calendars/mix/work/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Контакты</span></span></td><td class="tc-mono">CardDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/addressbooks/mix/contacts/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
+            <tr><td colspan="4"><b>sftpgo · vps · mix</b></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Documents</span></span></td><td class="tc-mono">WebDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">https://files.example.org/dav/Documents/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
-            <tr><td colspan="2" class="tc-mono">username</td><td class="tc-mono">mix</td><td class="tc-acts tc-table__n3"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
-            <tr><td colspan="2" class="tc-mono">password · nextcloud</td>
-              <td><input class="tc-in is-mono tc-in--t12-w190" type="text" value="z3-brick-lamp-9f2"></td>
-              <td class="tc-acts tc-table__n3"><button class="tc-btn is-sm" type="button">Copy</button><button class="tc-btn is-sm" type="button">Hide</button></td></tr>
-            <tr><td colspan="2" class="tc-mono">password · sftpgo</td>
-              <td><input class="tc-in is-mono tc-in--t12-w190" type="text" value="file-dock-4k1"></td>
-              <td class="tc-acts tc-table__n3"><button class="tc-btn is-sm" type="button">Copy</button><button class="tc-btn is-sm" type="button">Hide</button></td></tr>
           </tbody>
         </table>
         <div class="tc-msg is-row"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-          <span class="tc-msg__aside">Credentials are unlocked for five minutes — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press <b>Lock now</b>; every reveal is written to the audit log.</span></div>
+          <span class="tc-msg__aside">Credentials are unlocked for five minutes — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press <b>Lock now</b>; every reveal is written to the audit log.</span><button class="tc-btn is-sm" type="button">Show password</button></div>
       </div></div>
     </div>
   </div>
-  <figcaption><b>Файловые коллекции стоят здесь, не у Thunderbird.</b> Это адрес для «Подключить сетевой диск» в Windows, «Подключиться к серверу» в macOS и davfs в Linux. В профиль Apple WebDAV не кладут — там нет такой полезной нагрузки, — и вместо того, чтобы промолчать, строка отдаёт адрес, который сработает без профиля. Без файловой коллекции на аккаунте строки нет. Пароль — по серверу, не один на всю таблицу: nextcloud и sftpgo — разные учётки.</figcaption>
+  <figcaption><b>Файловые коллекции стоят здесь, не у Thunderbird.</b> Это адрес для «Подключить сетевой диск» в Windows, «Подключиться к серверу» в macOS и davfs в Linux. В профиль Apple WebDAV не кладут — там нет такой полезной нагрузки, — и вместо того, чтобы промолчать, строка отдаёт адрес, который сработает без профиля. Без файловой коллекции на аккаунте строки нет. Строки сгруппированы по аккаунтам, логин — в заголовке аккаунта: nextcloud и sftpgo — разные учётки. Пароли на этой странице не лежат: «Show password» ведёт на страницу подключений, где у каждого аккаунта свой.</figcaption>
   </figure>
 </div>
 
