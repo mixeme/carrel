@@ -365,7 +365,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-seg__opt{padding:0 11px;display:inline-flex;align-items:center;font-size:12.5px;color:var(--tc-muted);border-right:.5px solid var(--tc-hair)}
 .tc-seg__opt:last-child{border-right:0}
 .tc-seg__opt.is-on{background:var(--tc-card);color:var(--tc-ink);font-weight:600}
-.tc-seg__opt.is-dim{color:var(--tc-dusty);opacity:.7}
 /* Поле — одна строка; не помещающееся обрезается. Многострочное — .is-area. */
 .tc-in{height:28px;border:.5px solid var(--tc-edge);border-radius:3px;background:var(--tc-surface);padding:0 9px;
   font-size:12.5px;display:flex;align-items:center;color:var(--tc-ink);min-width:0;
@@ -683,7 +682,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   .tc-table--fit{table-layout:fixed}
   .tc-table--fit td{min-width:0}
   .tc-table--fit th:first-child{width:36%}
-  .tc-table--fit .tc-table__n3{width:118px}
   .tc-table--fit th{white-space:normal}
   .tc-table--fit .tc-table__filename{white-space:normal;overflow:visible;text-overflow:clip}
   /* --fit: break-word, не anywhere — иначе «4 calendars · 1 book» по буквам. */
@@ -1038,9 +1036,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-card__qr-side.tc-card__qr-side{flex:1 1 140px}
 .tc-main__tree.tc-main__tree{padding:10px 20px 16px}
 .tc-card__warn.tc-card__warn{font-size:11.5px;color:var(--tc-danger);margin-top:8px}
-.tc-dialog__qr-row.tc-dialog__qr-row{margin-top:4px;align-items:flex-start;display:flex;gap:16px}
-.tc-dialog__qr.tc-dialog__qr{border:.5px solid var(--tc-edge);border-radius:4px;flex:none;padding:7px}
-.tc-dialog__qr-side.tc-dialog__qr-side{flex:1 1 180px}
 .tc-main__hero.tc-main__hero{align-items:flex-start;display:flex;flex-wrap:wrap;gap:22px;padding:34px 24px}
 .tc-main__hero-side.tc-main__hero-side{min-width:0;flex:1 1 320px}
 .tc-main__hero-title.tc-main__hero-title{font-family:var(--tc-font-serif);font-size:26px}
@@ -8669,66 +8664,53 @@ Read  2 min ago</div>
             <span class="tc-line tc-line--gap-8">
               <input class="tc-in is-mono tc-in--t11-5-fill" type="text" value="https://carrel.example/dav/">
               <button class="tc-btn is-sm" type="button">Copy</button>
-              <button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-qr"/></svg>QR</button>
             </span>
             <span class="tc-field__hint">In DAVx5 choose “Login with URL and user name”: the user name is your Carrel one, the password is the device’s, not yours.</span></div>
-          <div class="tc-field tc-grow">
-            <label>What devices may do</label>
-            <span class="tc-seg tc-seg--start"><button class="is-on tc-seg__opt" type="button">Read only</button><button class="tc-seg__opt" type="button">Read and write</button></span>
-            <span class="tc-field__hint">The ceiling for every device: none of them gets more than is set here. Writing through the proxy is younger than reading and can be switched off wholesale — if a client starts damaging data, you will not be revoking devices one by one.</span>
-          </div>
         </div>
-        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke its password here — that is the only thing that stops it.</div>
-        <div class="tc-list__group"><span class="tc-rubric">Devices</span><span class="tc-num">3</span></div>
+        <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it.</div>
+        <div class="tc-list__group"><span class="tc-rubric">Devices</span><span class="tc-num">2</span></div>
         <table class="tc-table tc-table--fit">
-          <thead><tr><th>Device</th><th>What it can see</th><th class="tc-table__n3">Access</th><th class="is-2nd tc-table__n4">Created</th><th class="is-2nd">Last request</th><th class="tc-table__col--w90"></th></tr></thead>
+          <thead><tr><th>Device</th><th>What it can see</th><th class="is-2nd tc-table__n4">Created</th><th class="is-2nd">Last request</th><th class="tc-table__col--w90"></th></tr></thead>
           <tbody>
             <tr><td><span class="tc-table__file"><svg><use href="#i-device"/></svg><span class="tc-table__filename">Телефон · DAVx5</span></span></td>
               <td><span class="tc-table__wrap">
                 <span class="tc-line tc-line--gap-3">
                   <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mark" data-tc-colour="#A05A2C"></span></span>
-                <span class="tc-mono tc-mono--t11">4 calendars · 1 book</span>
-                <button class="tc-btn is-sm" type="button">Change</button></span></td>
-              <td class="tc-table__n3"><span class="tc-seg tc-seg--h22"><button class="is-on tc-seg__opt" type="button">read</button><button class="is-dim tc-seg__opt" title="Writing is off for the whole proxy" type="button">write</button></span></td>
+                <span class="tc-mono tc-mono--t11">Calendars, Address books</span>
+                <button class="tc-btn is-sm" type="button">5 collections · Change</button></span></td>
               <td class="tc-mono is-2nd tc-table__n4">2026-06-02</td><td class="tc-mono is-2nd">2026-08-15 09:31</td>
               <td class="tc-acts"><button class="tc-btn is-sm is-danger" type="button">Revoke</button></td></tr>
             <tr><td><span class="tc-table__file"><svg><use href="#i-device"/></svg><span class="tc-table__filename">Ноутбук · Thunderbird</span></span></td>
               <td><span class="tc-table__wrap">
                 <span class="tc-line tc-line--gap-3"><span class="tc-mark is-multi"></span></span>
-                <span class="tc-mono tc-mono--t11">all · 12 collections</span>
-                <button class="tc-btn is-sm" type="button">Change</button></span></td>
-              <td class="tc-table__n3"><span class="tc-seg tc-seg--h22"><button class="is-on tc-seg__opt" type="button">read</button><button class="is-dim tc-seg__opt" title="Writing is off for the whole proxy" type="button">write</button></span></td>
+                <span class="tc-mono tc-mono--t11">all kinds</span>
+                <button class="tc-btn is-sm" type="button">12 collections · Change</button></span></td>
               <td class="tc-mono is-2nd tc-table__n4">2026-06-02</td><td class="tc-mono is-2nd">2026-08-15 08:02</td>
               <td class="tc-acts"><button class="tc-btn is-sm is-danger" type="button">Revoke</button></td></tr>
-            <tr class="tc-table__row--off"><td><span class="tc-table__file"><svg><use href="#i-device"/></svg><span class="tc-table__filename">Old phone</span></span></td>
-              <td><span class="tc-table__wrap"><span class="tc-stack__item"></span><span class="tc-mono tc-mono--t11-dusty">—</span><span class="tc-stack__item"></span></span></td>
-              <td class="tc-mono tc-table__n3">revoked</td><td class="tc-mono is-2nd tc-table__n4">2026-03-14</td><td class="tc-mono is-2nd">2026-05-30 12:10</td>
-              <td class="tc-acts"><button class="tc-btn is-sm" type="button">Delete</button></td></tr>
           </tbody>
         </table>
         <div class="tc-list__group"><span class="tc-rubric">What the client sees</span></div>
         <div class="tc-main__tree">
           <div class="tc-tree tc-tree--max520">
-            <div class="tc-tree__row"><svg><use href="#i-file"/></svg><span class="tc-mono">/dav/</span> <span class="tc-push tc-dim tc-dim--t11">synthetic root</span></div>
-            <div class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-con"/></svg><span class="tc-mono">principals/mix/</span></div>
-            <div class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-cal"/></svg><span class="tc-mono">calendars/</span> <span class="tc-push tc-dim tc-dim--t11">fan-out across servers</span></div>
-            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono">nextcloud-personal/</span></div>
-            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-mono">nextcloud-work/</span></div>
-            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mono">radicale-projects/</span></div>
-            <div class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-con"/></svg><span class="tc-mono">addressbooks/</span></div>
-            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono">nextcloud-contacts/</span></div>
-            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mono">radicale-team/</span></div>
-            <div class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-file"/></svg><span class="tc-mono">files/</span> <span class="tc-push tc-dim tc-dim--t11">plain WebDAV, no synthetic levels</span></div>
-            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono">sftpgo-documents/</span></div>
-            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-mono">nextcloud-files/</span></div>
+            <div class="tc-tree__row"><svg><use href="#i-file"/></svg><span class="tc-mono">/dav/</span> <span class="tc-push tc-dim tc-dim--t11">root</span></div>
+            <div class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-con"/></svg><span class="tc-mono">principal/</span></div>
+            <div class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-cal"/></svg><span class="tc-mono">cal/</span> <span class="tc-push tc-dim tc-dim--t11">Calendars · events, tasks, notes</span></div>
+            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono">c/k4f2/%2F…%2Fpersonal%2F/</span> <span class="tc-push tc-dim tc-dim--t11">Личный</span></div>
+            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-mono">c/k4f2/%2F…%2Fwork%2F/</span> <span class="tc-push tc-dim tc-dim--t11">Работа</span></div>
+            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mono">c/r9a1/%2Fmix%2Fprojects%2F/</span> <span class="tc-push tc-dim tc-dim--t11">Проекты</span></div>
+            <div class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-con"/></svg><span class="tc-mono">card/</span> <span class="tc-push tc-dim tc-dim--t11">Address books</span></div>
+            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono">c/k4f2/%2F…%2Fcontacts%2F/</span> <span class="tc-push tc-dim tc-dim--t11">Контакты</span></div>
+            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mono">c/r9a1/%2Fmix%2Fteam%2F/</span> <span class="tc-push tc-dim tc-dim--t11">Команда</span></div>
+            <div class="tc-tree__row tc-tree__row--padl22"><svg><use href="#i-file"/></svg><span class="tc-mono">files/</span> <span class="tc-push tc-dim tc-dim--t11">Files · plain WebDAV</span></div>
+            <div class="tc-tree__row tc-tree__row--padl44"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono">c/s3c8/%2FDocuments%2F/</span> <span class="tc-push tc-dim tc-dim--t11">Documents</span></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<figcaption>Три синтетических уровня показаны так, как их увидит клиент, — потому что именно они и есть весь фокус: ниже начинается тупое проксирование, а имена коллекций собраны из аккаунта и пути, чтобы два «Личный» с разных серверов не слились. <b>Ветка <code>files/</code> есть потому, что WebDAV у нас уже есть.</b> Человек однажды дал Carrel доступ к своим данным — и задача Carrel в том, чтобы этот доступ окупился по-максимуму, а не в том, чтобы отдавать по одному протоколу за релиз. Файлы здесь ничего не стоят: провайдер уже написан, учётные данные уже есть, синтетики не требуется — только подстановка префикса в путях. На той стороне обычный WebDAV, который Windows, macOS и Linux монтируют как сетевой диск без всякого клиента. Это органичное продолжение того, что уже сделано, а не отдельная функция. <b>Главный столбец — «что устройству видно», и он второй слева.</b> Область выдачи важнее того, какие запросы клиент слал: по ней принимают решения, а по журналу запросов — разве что диагностируют. Показана она полосками коллекций и счётом, а не списком имён: четыре язычка читаются быстрее, чем «Личный, Работа, Проекты, Контакты», а полный список — в подсказке и в диалоге.<br><br><b>Список правится у выданного устройства.</b> «Change» открывает те же флажки, что при добавлении, и <b>перевыдавать пароль не нужно</b>: область принадлежит записи пароля, а не самому паролю. Убранная коллекция исчезает у клиента при следующей синхронизации — DAVx5 увидит, что её больше нет в home-set, и уберёт локально; добавленная появится там же. Это стоит написать прямо в диалоге, потому что человек, привыкший к другим сервисам, ждёт «переподключите устройство».<br><br>Время последнего запроса осталось: оно отвечает на вопрос «живо ли устройство», а подробный журнал запросов ушёл под <span class="tc-mono">⋯</span> — его читают редко и только когда что-то сломалось. Знак davloom стоит и в рейле пунктом навигации, и крупно в подвале — рядом со статусом режима: свой модуль, свой знак, лампа сюда не переезжает.
-<br><br><b>Только чтение ставится в двух местах, и это не дублирование.</b> Наверху — общий потолок: «что вообще можно устройствам». Он выключает запись сразу для всех, потому что запись через прокси моложе чтения, и если клиент начнёт портить данные, отзывать по одному — не то, что нужно в этот момент. В строке устройства — его собственные права, но не выше потолка: когда запись выключена целиком, половина переключателя погашена и подсказка говорит, где её включают. Устройству нельзя дать больше, чем разрешено прокси, и интерфейс показывает это состоянием кнопки, а не отказом после нажатия.</figcaption>
+<figcaption>Три синтетических уровня показаны так, как их увидит клиент, — потому что именно они и есть весь фокус: ниже начинается тупое проксирование, а адрес коллекции — <code>c/{account}/{col}/</code>: идентификатор подключения и путь в каталоге, не имя. Так он переживает переименование и перезапуск, два «Личный» с разных серверов не встречаются, а имя клиент берёт из <code>displayname</code> — оно стоит справа. <b>Ветка <code>files/</code> есть потому, что WebDAV у нас уже есть.</b> Человек однажды дал Carrel доступ к своим данным — и задача Carrel в том, чтобы этот доступ окупился по-максимуму, а не в том, чтобы отдавать по одному протоколу за релиз. Файлы здесь ничего не стоят: провайдер уже написан, учётные данные уже есть, синтетики не требуется — только подстановка префикса в путях. На той стороне обычный WebDAV, который Windows, macOS и Linux монтируют как сетевой диск без всякого клиента. Это органичное продолжение того, что уже сделано, а не отдельная функция. <b>Главный столбец — «что устройству видно», и он второй слева.</b> Область выдачи важнее того, какие запросы клиент слал: по ней принимают решения, а по журналу запросов — разве что диагностируют. Показана она полосками коллекций и счётом, а не списком имён: четыре язычка читаются быстрее, чем «Личный, Работа, Проекты, Контакты», а полный список — в подсказке и в диалоге.<br><br><b>Список правится у выданного устройства.</b> «Change» открывает те же флажки, что при добавлении, и <b>перевыдавать пароль не нужно</b>: область принадлежит записи пароля, а не самому паролю. Убранная коллекция исчезает у клиента при следующей синхронизации — DAVx5 увидит, что её больше нет в home-set, и уберёт локально; добавленная появится там же. Это стоит написать прямо в диалоге, потому что человек, привыкший к другим сервисам, ждёт «переподключите устройство».<br><br>Время последнего запроса осталось: оно отвечает на вопрос «живо ли устройство», а подробный журнал запросов ушёл под <span class="tc-mono">⋯</span> — его читают редко и только когда что-то сломалось. Знак davloom стоит в рейле пунктом навигации, а в подвале — баннер состояния режима: свой модуль, свой знак, лампа сюда не переезжает.
+<br><br><b>Прав на запись у устройства отдельно нет.</b> Устройство может ровно то, что человек может в своих подключениях (план S-27): отдельный «только чтение» у прокси означал бы второй набор прав поверх первого. <b>Отзыв удаляет запись</b> — строки «revoked» с кнопкой Delete нет: отозванное устройство не значит ничего, что стоило бы хранить.</figcaption>
 </figure>
 
 <div class="frames">
@@ -8773,18 +8755,24 @@ Read  2 min ago</div>
           <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" value="Телефон · DAVx5" aria-label="Name">
             <span class="tc-field__hint">For you: this is how you will know what you are revoking later.</span></div>
           <div class="tc-field tc-field--w100">
-            <label>What this device may do</label>
-            <span class="tc-seg tc-seg--start"><button class="is-on tc-seg__opt" type="button">Read only</button><button class="is-dim tc-seg__opt" type="button">Read and write</button></span>
-            <span class="tc-field__hint">Writing is unavailable: it is off for the whole proxy. It is turned on once, on the davloom page, and for every device at once.</span>
-          </div>
-          <div class="tc-field tc-field--w100">
             <label>What the device will see <span class="tc-dim">— changed later too, without re-issuing the password</span></label>
             <div class="tc-stack tc-stack--gap-2 tc-card__top2">
-              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Calendars <span class="tc-dim">· 5 collections</span></button>
-              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Address books <span class="tc-dim">· 3</span></button>
-              <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Tasks <span class="tc-dim">· VTODO · not every client understands them</span></button>
-              <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Notes <span class="tc-dim">· VJOURNAL · a different subset of clients</span></button>
-              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>WebDAV folders <span class="tc-dim">· 2 · mount as a network drive</span></button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Calendars</button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Address books</button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Tasks <span class="tc-dim">· VTODO — not every client understands them</span></button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Notes <span class="tc-dim">· VJOURNAL — a different subset of clients</span></button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>WebDAV folders <span class="tc-dim">· mount as a network drive</span></button>
+            </div>
+          </div>
+          <div class="tc-field tc-field--w100">
+            <label>Collections</label>
+            <div class="tc-stack tc-stack--gap-2 tc-card__top2">
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>nextcloud · Личный</button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>nextcloud · Работа</button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>nextcloud · Контакты</button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>radicale · vps · Проекты</button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>radicale · vps · Команда</button>
+              <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>sftpgo · vps · Documents</button>
             </div>
           </div>
         </div>
@@ -8793,7 +8781,7 @@ Read  2 min ago</div>
       </div></div></div>
     </div>
   </div>
-  <figcaption>Права выбираются здесь же, а не в отдельных настройках после создания: устройство заводят с ответом на вопрос «что ему можно». Когда запись выключена для прокси целиком, вторая половина переключателя погашена и рядом написано, где её включают, — вместо кнопки, которая молча ничего не делает. <b>Задачи и заметки — два флажка, не один:</b> это разные роды, и клиент может понимать <code>VTODO</code> и не понимать <code>VJOURNAL</code>.</figcaption>
+  <figcaption>Что устройство увидит, выбирается здесь же, а не после создания: роды и коллекции — два списка, и устройству видна коллекция, только если отмечены и она, и её род. Прав на запись здесь нет: устройство может то же, что человек в своих подключениях. <b>Задачи и заметки — два флажка, не один:</b> это разные роды, и клиент может понимать <code>VTODO</code> и не понимать <code>VJOURNAL</code>.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -8832,30 +8820,25 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="tc-main"><div class="tc-dialog tc-dialog--max520">
-        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Телефон · DAVx5</div><div class="tc-head__sub">Password created · read only · 8 collections</div></div></div>
+        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Телефон · DAVx5</div><div class="tc-head__sub">Password created · 8 collections</div></div></div>
         <div class="tc-card tc-card--edge-accent">
           <div class="tc-rubric">Device password</div>
           <div class="tc-line tc-line--gap-8 tc-card__top2">
             <input class="tc-in is-mono tc-in--key tc-in--fill" type="text" value="brick-lamp-9f2-carrel">
             <button class="tc-btn" type="button">Copy</button>
           </div>
-          <div class="tc-card__warn">Close this window and you will not see the password again.</div>
+          <div class="tc-card__warn">Shown once and stored nowhere. Close this page and you will not see it again; lose it and you revoke this device and make another.</div>
         </div>
-        <div class="tc-dialog__qr-row">
-          <div data-tc-colour="#FFFDF7" class="tc-dialog__qr">
-            <svg width="104" height="104" viewBox="-1 -1 27 27" role="img" aria-label="QR"><rect x="-1" y="-1" width="27" height="27" fill="#FFFDF7"/><use href="#qr-demo"/></svg>
-          </div>
-          <div class="tc-stack tc-stack--gap-9 tc-dialog__qr-side">
-            <div class="tc-field tc-field--w100"><label>Address</label><input class="tc-in is-mono tc-in--t11" type="text" value="https://carrel.example/dav/" aria-label="Address"></div>
-            <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-mono" type="text" value="mix" aria-label="Name"></div>
-            <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The code opens DAVx5 with the address and the user name filled in. The password is not put into it — codes get photographed, and photographs live a long time.</span>
-          </div>
+        <div class="tc-form tc-form--padl0-padr0">
+          <div class="tc-field tc-field--w100"><label>Address</label><input class="tc-in is-mono tc-in--t11" type="text" value="https://carrel.example/dav/" aria-label="Address"></div>
+          <div class="tc-field tc-field--w100"><label>User name</label><input class="tc-in is-mono" type="text" value="mix" aria-label="User name">
+            <span class="tc-field__hint">Your Carrel login; the password is the device’s, not yours.</span></div>
         </div>
-        <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="button">Done</button><button class="tc-btn" type="button">Download setup notes</button></div>
+        <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="button">Done</button></div>
       </div></div></div>
     </div>
   </div>
-  <figcaption>Единственный экран, где пароль виден. Он набран крупным моноширинным и читается вслух без ошибок — его будут вводить на телефоне вручную. Кнопка «Готово» ничего не сохраняет: пароль уже создан, закрытие окна просто убирает его с экрана.</figcaption>
+  <figcaption>Единственный экран, где пароль виден. Он набран крупным моноширинным и читается вслух без ошибок — его будут вводить на телефоне вручную. Кнопка «Готово» ничего не сохраняет: пароль уже создан, закрытие окна просто убирает его с экрана. Кода и «заметок по настройке» здесь нет: код по плану пуст, заметок нет в договоре страницы, — адрес и имя пользователя переписывают в клиент руками, как и пароль.</figcaption>
   </figure>
 </div>
 
