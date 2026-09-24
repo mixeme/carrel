@@ -19,7 +19,12 @@ fi
 # race script, and on 24.09.2026 an unformatted file went into a commit
 # unnoticed — the same lesson as the unit suite's, learned a second time.
 echo "== gofmt =="
-unformatted=$(gofmt -l .)
+# The toolchain's gofmt, not the host's. GOTOOLCHAIN=auto switches the go
+# command to the version go.mod asks for, but a bare gofmt on PATH stays the
+# host's own: go1.26.5 on this machine, which formats a multi-value return
+# of composite literals differently from 1.27 and failed the first run of
+# this step on a file untouched since v0.0.125 (24.09.2026).
+unformatted=$("$(go env GOROOT)/bin/gofmt" -l .)
 if [[ -n "$unformatted" ]]; then
   echo "not formatted:" >&2
   echo "$unformatted" >&2

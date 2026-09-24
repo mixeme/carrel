@@ -17,6 +17,19 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.32 — 2026-09-24
+
+### Fixed
+
+- **The new gofmt gate failed on its first run, over a file untouched since
+  v0.0.125.** The step called a bare `gofmt`, and on the Linux machine that
+  is the host's own, go1.26.5. `GOTOOLCHAIN=auto` switches the `go` command
+  to the 1.27 that go.mod asks for, but not a separate binary on PATH. 1.26
+  and 1.27 format a multi-value return of composite literals differently,
+  so `internal/web/photo.go`, formatted by 1.27, read as unformatted. The
+  gate now calls the toolchain's own gofmt (`$(go env GOROOT)/bin/gofmt`).
+  A formatting check has to run on the version the code is built with.
+
 ## v0.2.31 — 2026-09-24
 
 ### Fixed
