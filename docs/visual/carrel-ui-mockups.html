@@ -10867,36 +10867,37 @@ https://carrel.example/api/backup/run?job=personal</textarea>
         <div class="tc-line tc-sheet__pick">
           <div class="tc-sheet__pick-rail">
             <div class="tc-railsec">
-              <div class="tc-tickrow is-all"><button class="tc-tickrow__tick is-part" type="button"></button><span class="tc-mark is-multi"></span><span class="tc-tickrow__label">Combined calendar</span><span class="tc-tickrow__meta">14</span></div>
-            </div>
-            <div class="tc-railsec">
               <div class="tc-rubric">nextcloud</div>
-              <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Личный</span><span class="tc-tickrow__meta">7</span></div>
-              <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-tickrow__label">Работа</span><span class="tc-tickrow__meta">4</span></div>
+              <div class="tc-nav">
+              <a class="is-on tc-nav__item" href="#"><span class="tc-mark" data-tc-colour="#4A6B52"></span>Личный</a>
+              <a class="tc-nav__item" href="#"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Работа</a>
+              </div>
             </div>
             <div class="tc-railsec">
               <div class="tc-rubric">radicale · vps</div>
-              <div class="tc-tickrow"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Проекты</span><span class="tc-tickrow__meta">2</span></div>
+              <div class="tc-nav">
+              <a class="tc-nav__item" href="#"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Проекты</a>
+              </div>
             </div>
           </div>
           <div class="tc-sheet__pick-list">
             <div class="tc-form">
               <div class="tc-field tc-field--sm"><label>From</label><input class="tc-in is-mono" type="date" value="2026-08-10" aria-label="From"></div>
-              <div class="tc-field tc-field--sm"><label>To</label><input class="tc-in is-mono" type="date" value="2026-08-31" aria-label="To"></div>
-              <span class="tc-field__hint">Events of the ticked calendars between these dates, as one file.</span>
+              <div class="tc-field tc-field--sm"><label>To</label><input class="tc-in is-mono" type="date" value="2026-08-31" aria-label="To"><span class="tc-field__hint">Both days are in the file.</span></div>
+              <div class="tc-field"><button class="tc-btn" type="button">Show</button></div>
             </div>
           </div>
         </div>
       </div>
       <div class="tc-sheet__foot">
         <button class="tc-btn is-primary" type="button">Attach</button>
-        <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Личный, Работа · 10–31 August · 11 events · <span class="tc-mono">.ics</span> · 9 KB · goes as a file</span>
+        <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Calendar «Личный» · 10 August 2026 – 31 August 2026 · <span class="tc-mono">.ics</span> · 5 KB · goes as a file</span>
         <span class="tc-push"><button class="tc-btn" type="button">Cancel</button></span>
       </div>
     </div>
   </div>
 </div>
-<figcaption><b>«Calendar for a range» — тот же лист, что у заметки, но вместо списка записей — поля «с» и «по»</b>: вкладывается не одна запись, а выборка, одним <code>.ics</code>. <b>В рейле только свои календари:</b> подписка чужая, вложить её нельзя, поэтому её здесь и нет. <b>Если вложить не вышло</b>, первое действие листа становится недоступным и называет причину — своего поля для уведомления у листа нет.</figcaption>
+<figcaption><b>«Calendar for a range» — один календарь и два дня</b>: слева выбирают календарь, справа — «с» и «по», и «Show» пересчитывает строку у кнопки — файлом уйдёт или ссылкой и сколько весит — до «Attach». Оба дня входят в файл. Весь календарь целиком отдельным пунктом не вкладывается — только за период. <b>В списке только свои календари:</b> подписка чужая, вложить её нельзя, поэтому её здесь и нет. <b>Если вложить не вышло</b>, первое действие листа становится недоступным и называет причину — своего поля для уведомления у листа нет.</figcaption>
 </figure>
 
 <figure>
