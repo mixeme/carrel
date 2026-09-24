@@ -1259,7 +1259,9 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-menu--w252.tc-menu--w252{width:252px}
 .tc-menu--full.tc-menu--full{width:100%}
 .tc-menu--w290.tc-menu--w290{width:290px}
-.tc-menu--w420.tc-menu--w420{width:420px}
+.tc-menu--w420.tc-menu--w420{width:420px;max-width:100%}
+/* меню из строк с полями: длинная подпись на узком переносится, строка растёт */
+.tc-menu--fields .tc-menu__item{height:auto;min-height:28px}
 .tc-menu--w222.tc-menu--w222{width:222px}
 .tc-menu__item--danger.tc-menu__item--danger{color:var(--tc-danger)}
 .tc-menu__item--pad5-8-7.tc-menu__item--pad5-8-7{padding:5px 8px 7px}
@@ -6014,7 +6016,7 @@ Read  2 min ago</div>
   <div class="frame-label"><span>Веса признаков · меню</span><i>под кнопкой Weights, рядом с порогом</i></div>
   <div class="tc-root tc-root--on-surface tc-root--top tc-root--col tc-root--pad18-20">
   <div class="tc-field tc-field--inline"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="60" aria-label="Match threshold"><button class="tc-btn is-sm is-focus" type="button">Weights</button></div>
-  <div class="tc-menu tc-menu--w420">
+  <div class="tc-menu tc-menu--w420 tc-menu--fields">
     <button class="tc-rubric tc-menu__item tc-menu__item--pad5-8-7" type="button" role="menuitem">Points per signal<span class="tc-push tc-dim tc-dim--t10-5">instance</span></button>
     <div class="tc-menu__item">Same UID<span class="tc-push tc-dim tc-dim--t10-5">80</span><input class="tc-in is-mono tc-in--chip" type="text" value="80" aria-label="Same UID"></div>
     <div class="tc-menu__item">Same email<span class="tc-push tc-dim tc-dim--t10-5">60</span><input class="tc-in is-mono tc-in--chip" type="text" value="60" aria-label="Same email"></div>
