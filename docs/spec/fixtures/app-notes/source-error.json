@@ -57,7 +57,7 @@
       "body": "The server did not answer as expected, so nothing on this screen comes from it.",
       "details": {
         "lines": [
-          "nextcloud · home",
+          "nextcloud",
           "dav: HTTP 503: the server is busy"
         ],
         "summary": "REPORT /alice/calendars/zapisi/"
@@ -164,7 +164,7 @@
         "method": "GET"
       }
     ],
-    "note": "1 of 2 collections ticked",
+    "note": "2 of 2 collections ticked",
     "sections": [
       {
         "account": "",
@@ -178,13 +178,13 @@
             "menu": [],
             "readOnly": false,
             "state": "ok",
-            "tick": "part"
+            "tick": "on"
           }
         ],
         "state": "ok"
       },
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {
@@ -236,7 +236,7 @@
             ],
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           },
           {
             "colour": "#4a6b52",

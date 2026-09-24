@@ -128,7 +128,7 @@
           "url": "https://nextcloud.example/dav.php/alice/contacts/kontakty/"
         }
       ],
-      "title": "nextcloud · home · alice"
+      "title": "nextcloud · alice"
     },
     {
       "actions": [],
@@ -239,7 +239,7 @@
       "enabled": true,
       "href": "/app/settings/devices?account=a-nc-home\u0026op=exclude\u0026tab=apple",
       "id": "device.exclude",
-      "label": "Leave out nextcloud · home",
+      "label": "Leave out nextcloud",
       "method": "POST"
     },
     {

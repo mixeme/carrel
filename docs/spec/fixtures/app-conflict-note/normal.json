@@ -68,7 +68,7 @@
     "note": "",
     "sections": [
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {
@@ -120,7 +120,7 @@
             ],
             "readOnly": false,
             "state": "ok",
-            "tick": "off"
+            "tick": "on"
           },
           {
             "colour": "#4a6b52",

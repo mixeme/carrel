@@ -67,7 +67,7 @@ func mockupDayAt(t *testing.T, day string) time.Time {
 // mockupCollection is one collection of the mockup set: where it lives, what
 // it is called, its colour, the kinds it holds and the file of its records.
 type mockupCollection struct {
-	account string // "nextcloud · home" or "radicale · vps"
+	account string // "nextcloud" or "radicale · vps"
 	slug    string // how the fixtures name it: kontakty, lichnyj, …
 	name    string
 	colour  string
@@ -83,24 +83,25 @@ type mockupCollection struct {
 
 // mockupSet is the table of docs/visual/fixtures/README.md.
 var mockupSet = []mockupCollection{
-	{account: "nextcloud · home", slug: "kontakty", name: "Контакты", colour: "#4A6B52",
+	{account: "nextcloud", slug: "kontakty", name: "Контакты", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindContact}, file: "nextcloud-home/kontakty.vcf"},
-	{account: "nextcloud · home", slug: "arhiv", name: "Архив", colour: "#A05A2C",
+	{account: "nextcloud", slug: "arhiv", name: "Архив", colour: "#A05A2C",
 		kinds: []view.Kind{view.KindContact}, file: "nextcloud-home/arhiv.vcf"},
-	{account: "nextcloud · home", slug: "lichnyj", name: "Личный", colour: "#4A6B52",
+	{account: "nextcloud", slug: "lichnyj", name: "Личный", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/lichnyj.ics"},
-	{account: "nextcloud · home", slug: "rabota", name: "Работа", colour: "#3F6E8C",
+	{account: "nextcloud", slug: "rabota", name: "Работа", colour: "#3F6E8C",
 		kinds: []view.Kind{view.KindEvent, view.KindTask}, comps: []string{"VEVENT", "VTODO"}, file: "nextcloud-home/rabota.ics"},
-	{account: "nextcloud · home", slug: "dni-rozhdeniya", name: "Дни рождения", colour: "#A05A2C",
+	{account: "nextcloud", slug: "dni-rozhdeniya", name: "Дни рождения", colour: "#A05A2C",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/dni-rozhdeniya.ics"},
-	{account: "nextcloud · home", slug: "dela", name: "Дела", colour: "#4A6B52",
+	{account: "nextcloud", slug: "dela", name: "Дела", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindTask}, comps: []string{"VTODO"}, file: "nextcloud-home/dela.ics"},
-	{account: "nextcloud · home", slug: "zapisi", name: "Записи", colour: "#4A6B52",
+	{account: "nextcloud", slug: "zapisi", name: "Записи", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/zapisi.ics"},
-	// «Дневник» stands in the catalog with its tick off, as the
-	// frames of the notes draw it (s-notes-1, s-notes-2).
-	{account: "nextcloud · home", slug: "dnevnik", name: "Дневник", colour: "#6B4E7A",
-		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/dnevnik.ics", unticked: true},
+	// «Дневник» is ticked, as the frames of the notes draw it since the
+	// mockup of 24.09.2026: its note stands in the combined notebook and
+	// the rail counts it (s-notes-1). Until then it was drawn unticked.
+	{account: "nextcloud", slug: "dnevnik", name: "Дневник", colour: "#6B4E7A",
+		kinds: []view.Kind{view.KindNote}, comps: []string{"VJOURNAL"}, file: "nextcloud-home/dnevnik.ics"},
 	// «Команда» is a book this account may only read, and «Рассылки» stands
 	// in the catalog out of the combined views: both are what the frames show.
 	{account: "radicale · vps", slug: "komanda", name: "Команда", colour: "#6B4E7A",
@@ -253,7 +254,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	root := mockupRoot(t)
 	servers := map[string]*davtest.Server{}
 	at := mockupNow(t)
-	for _, label := range []string{"nextcloud · home", "radicale · vps"} {
+	for _, label := range []string{"nextcloud", "radicale · vps"} {
 		srv := davtest.New(t)
 		srv.Login, srv.Password = "alice", "secret"
 		// The stands keep the day of the frames: «changed on the server» is
@@ -321,7 +322,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	})); rec.Code != 303 {
 		t.Fatalf("name the instance: %d %s", rec.Code, rec.Body.String())
 	}
-	for _, label := range []string{"nextcloud · home", "radicale · vps"} {
+	for _, label := range []string{"nextcloud", "radicale · vps"} {
 		rec := h.do(postForm("/app/settings/connections", sess, url.Values{
 			"label": {label}, "server": {servers[label].URL}, "login": {"alice"}, "password": {"secret"},
 		}))
@@ -335,7 +336,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	app := &mockupApp{h: h, sess: sess, servers: servers, byAccount: map[string]string{}, byPath: map[string]string{}}
 	key, _ := sess.DataKey()
 	blob, _ := h.users.Catalog(sess.AccountID(), key)
-	names := map[string]string{"nextcloud · home": "a-nc-home", "radicale · vps": "a-rad-vps"}
+	names := map[string]string{"nextcloud": "a-nc-home", "radicale · vps": "a-rad-vps"}
 	seen := 0
 	for _, col := range mockupSet {
 		for _, c := range blob.Collections {
@@ -468,8 +469,8 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	// The stands listen on whatever port the machine had free; the frames
 	// show an address. Same kind as an issued identifier.
 	for label, name := range map[string]string{
-		"nextcloud · home": "https://nextcloud.example/dav.php",
-		"radicale · vps":   "https://radicale.example",
+		"nextcloud":      "https://nextcloud.example/dav.php",
+		"radicale · vps": "https://radicale.example",
 	} {
 		if srv := a.servers[label]; srv != nil {
 			s = strings.ReplaceAll(s, srv.URL, name)
@@ -671,7 +672,7 @@ func TestFixtureContactConflict(t *testing.T) {
 	form := formFields(decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
 	// The other client saved a different address and a file-as line Carrel
 	// does not model; it keeps the rest of the card as the set holds it.
-	app.servers["nextcloud · home"].Seed(davtest.AddressBookHome+"kontakty/"+uid+".vcf",
+	app.servers["nextcloud"].Seed(davtest.AddressBookHome+"kontakty/"+uid+".vcf",
 		"BEGIN:VCARD\nVERSION:3.0\nUID:"+uid+"\nN:Ковалёва;Анна;;;\nFN:Анна Ковалёва\n"+
 			"ORG:Издательство «Слово»\nTITLE:Выпускающий редактор\n"+
 			"TEL;TYPE=CELL:+7 912 445-10-88\nEMAIL;TYPE=WORK:anna.kovaleva@slovo.example\n"+
@@ -739,6 +740,9 @@ func TestFixtureTaskList(t *testing.T) {
 // C-14.2: one notebook (s-notes-1).
 func TestFixtureNoteList(t *testing.T) {
 	app := newMockupApp(t)
+	// Both notebooks are ticked and counted in the frame (s-notes-1): the
+	// combined notebook was opened first, as a person comes to it.
+	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	app.compare(t, "app-notes/normal.json", app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess)))
 }
@@ -757,6 +761,7 @@ func TestFixtureTaskCard(t *testing.T) {
 // C-14.2: one note, read (s-notes-2).
 func TestFixtureNoteCard(t *testing.T) {
 	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
@@ -766,7 +771,10 @@ func TestFixtureNoteCard(t *testing.T) {
 // C-14.2: the full form of a contact (s-contacts-3).
 func TestFixtureContactEdit(t *testing.T) {
 	app := newMockupApp(t)
-	app.h.do(get(app.listPath(t, "contacts", "kontakty"), app.sess))
+	// The combined book was opened before the form, as a person comes to
+	// it: that is where the counts of both books in the rail come from
+	// (s-contacts-3 draws «Архив» with its number).
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7/edit"
 	app.compare(t, "app-contact-edit/normal.json", app.h.do(get(rec, app.sess)))
@@ -933,8 +941,8 @@ func TestFixtureContactsStates(t *testing.T) {
 	// source-error: the stand refuses, and the screen says so instead of
 	// showing an empty list (C-8).
 	t.Run("source-error", func(t *testing.T) {
-		app.servers["nextcloud · home"].Refuse("REPORT", 503, "the server is busy")
-		defer app.servers["nextcloud · home"].Accept("REPORT")
+		app.servers["nextcloud"].Refuse("REPORT", 503, "the server is busy")
+		defer app.servers["nextcloud"].Accept("REPORT")
 		app.compare(t, "app-contacts-one/source-error.json",
 			app.h.do(get(app.listPath(t, "contacts", "kontakty"), app.sess)))
 	})
@@ -991,7 +999,7 @@ func TestFixtureMoreStates(t *testing.T) {
 		app := newMockupApp(t)
 		rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
 		form := formFields(decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
-		app.servers["nextcloud · home"].Drop = []string{"X-EVOLUTION-FILE-AS", "X-ABLABEL", "X-CARREL-UNKNOWN-FLAG"}
+		app.servers["nextcloud"].Drop = []string{"X-EVOLUTION-FILE-AS", "X-ABLABEL", "X-CARREL-UNKNOWN-FLAG"}
 		form.Set("title", "Главный редактор")
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 		// The save went through and the form comes back with the report:
@@ -1154,7 +1162,7 @@ func TestFixtureConflictsOfEveryKind(t *testing.T) {
 			app := newMockupApp(t)
 			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
 			form := formFields(decode[view.EventEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
-			app.servers["nextcloud · home"].Seed(davtest.CalendarHome+one.slug+"/"+one.uid+".ics", one.body)
+			app.servers["nextcloud"].Seed(davtest.CalendarHome+one.slug+"/"+one.uid+".ics", one.body)
 			form.Set("summary", one.now)
 			if resp := app.h.do(postForm(rec+"/edit", app.sess, form)); resp.Code != 303 {
 				t.Fatalf("POST over a moved version: %d", resp.Code)
@@ -1200,8 +1208,8 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 	} {
 		t.Run(one.dir+"-source-error", func(t *testing.T) {
 			app := newMockupApp(t)
-			app.servers["nextcloud · home"].Refuse("REPORT", 503, "the server is busy")
-			defer app.servers["nextcloud · home"].Accept("REPORT")
+			app.servers["nextcloud"].Refuse("REPORT", 503, "the server is busy")
+			defer app.servers["nextcloud"].Accept("REPORT")
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 			app.compare(t, one.dir+"/source-error.json",
 				app.h.do(get(app.listPath(t, one.segment, one.slug), app.sess)))
@@ -1232,7 +1240,7 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 		for k, v := range save.Query() {
 			form[k] = v
 		}
-		app.servers["nextcloud · home"].Seed(davtest.CalendarHome+"zapisi/5c81-77aa-0d64.ics",
+		app.servers["nextcloud"].Seed(davtest.CalendarHome+"zapisi/5c81-77aa-0d64.ics",
 			"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//set//EN\nBEGIN:VJOURNAL\nUID:5c81-77aa-0d64\nDTSTAMP:20260801T000000Z\nSUMMARY:Встреча 10.08\nDESCRIPTION:Правка с другого клиента\nDTSTART:20260810T080500Z\nEND:VJOURNAL\nEND:VCALENDAR\n")
 		if resp := app.h.do(postForm(save.EscapedPath(), app.sess, form)); resp.Code != 303 {
 			t.Fatalf("POST over a moved version: %d %s", resp.Code, resp.Body.String())
@@ -1256,7 +1264,7 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 			app := newMockupApp(t)
 			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
 			form := formFields(decode[view.EventEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
-			app.servers["nextcloud · home"].Drop = one.drop
+			app.servers["nextcloud"].Drop = one.drop
 			form.Set("summary", string(form.Get("summary"))+" ·")
 			app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 			app.compare(t, one.dir+"/loss.json", app.h.do(postForm(rec+"/edit", app.sess, form)))

@@ -601,12 +601,12 @@
     "note": "",
     "sections": [
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {
             "colour": "#a05a2c",
-            "count": null,
+            "count": 1,
             "href": "/app/contacts/a-nc-home/arhiv",
             "label": "Архив",
             "menu": [

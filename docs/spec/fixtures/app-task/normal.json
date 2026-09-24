@@ -76,7 +76,7 @@
   "notices": [],
   "percent": null,
   "print": {
-    "range": "nextcloud · home · Дела",
+    "range": "nextcloud · Дела",
     "taken": "10 August 2026, 17:06",
     "title": "Отправить документы в МФЦ"
   },
@@ -103,7 +103,7 @@
     "note": "",
     "sections": [
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {
@@ -223,7 +223,7 @@
     "lastRead": "2 min ago",
     "objects": null,
     "readOnly": false,
-    "stamp": "nextcloud · home · Дела"
+    "stamp": "nextcloud · Дела"
   },
   "summary": "Отправить документы в МФЦ",
   "title": "Отправить документы в МФЦ",

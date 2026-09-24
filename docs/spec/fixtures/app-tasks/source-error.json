@@ -57,7 +57,7 @@
       "body": "The server did not answer as expected, so nothing on this screen comes from it.",
       "details": {
         "lines": [
-          "nextcloud · home",
+          "nextcloud",
           "dav: HTTP 503: the server is busy"
         ],
         "summary": "REPORT /alice/calendars/dela/"
@@ -184,7 +184,7 @@
         "state": "ok"
       },
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {

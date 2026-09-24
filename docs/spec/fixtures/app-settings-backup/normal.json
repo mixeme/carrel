@@ -49,42 +49,42 @@
             "name": "src",
             "options": [
               {
-                "label": "nextcloud · home · Дела",
+                "label": "nextcloud · Дела",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/dela/"
               },
               {
-                "label": "nextcloud · home · Дневник",
+                "label": "nextcloud · Дневник",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/dnevnik/"
               },
               {
-                "label": "nextcloud · home · Дни рождения",
+                "label": "nextcloud · Дни рождения",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/dni-rozhdeniya/"
               },
               {
-                "label": "nextcloud · home · Личный",
+                "label": "nextcloud · Личный",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/lichnyj/"
               },
               {
-                "label": "nextcloud · home · Работа",
+                "label": "nextcloud · Работа",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/rabota/"
               },
               {
-                "label": "nextcloud · home · Записи",
+                "label": "nextcloud · Записи",
                 "selected": false,
                 "value": "a-nc-home|/alice/calendars/zapisi/"
               },
               {
-                "label": "nextcloud · home · Архив",
+                "label": "nextcloud · Архив",
                 "selected": false,
                 "value": "a-nc-home|/alice/contacts/arhiv/"
               },
               {
-                "label": "nextcloud · home · Контакты",
+                "label": "nextcloud · Контакты",
                 "selected": false,
                 "value": "a-nc-home|/alice/contacts/kontakty/"
               },

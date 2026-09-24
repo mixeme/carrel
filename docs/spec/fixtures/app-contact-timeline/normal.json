@@ -134,7 +134,7 @@
       "lastRead": "2 min ago",
       "objects": null,
       "readOnly": false,
-      "stamp": "nextcloud · home · Контакты"
+      "stamp": "nextcloud · Контакты"
     },
     "title": "Анна Ковалёва"
   },
@@ -145,7 +145,7 @@
         {
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
           "kind": "event",
-          "stamp": "nextcloud · home · Личный",
+          "stamp": "nextcloud · Личный",
           "title": "Синк-ап по релизу",
           "when": "10 August 2026",
           "why": "attendee · accepted"
@@ -185,7 +185,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Архив",
+        "stamp": "nextcloud · Архив",
         "state": "empty"
       },
       {
@@ -194,7 +194,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Контакты",
+        "stamp": "nextcloud · Контакты",
         "state": "empty"
       },
       {
@@ -212,7 +212,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Дни рождения",
+        "stamp": "nextcloud · Дни рождения",
         "state": "empty"
       },
       {
@@ -221,7 +221,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Личный",
+        "stamp": "nextcloud · Личный",
         "state": "done"
       },
       {
@@ -230,7 +230,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Работа",
+        "stamp": "nextcloud · Работа",
         "state": "empty"
       },
       {
@@ -257,7 +257,16 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Дела",
+        "stamp": "nextcloud · Дела",
+        "state": "empty"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Дневник",
         "state": "empty"
       },
       {
@@ -266,11 +275,11 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Записи",
+        "stamp": "nextcloud · Записи",
         "state": "empty"
       }
     ],
-    "summary": "Polled 10 of 10 sources · 1 record",
+    "summary": "Polled 11 of 11 sources · 1 record",
     "taskID": "t-task"
   },
   "print": {
@@ -300,7 +309,7 @@
     "note": "",
     "sections": [
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {

@@ -17,18 +17,18 @@
   ],
   "copy": false,
   "kind": "contact",
-  "subject": "Контакты · nextcloud · home",
+  "subject": "Контакты · nextcloud",
   "target": {
     "chosen": "",
     "options": [
       {
         "colour": "",
         "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-nc-home",
-        "label": "nextcloud · home",
+        "label": "nextcloud",
         "last": false,
         "readOnly": true,
         "reason": "Already here",
-        "stamp": "nextcloud · home"
+        "stamp": "nextcloud"
       },
       {
         "colour": "",

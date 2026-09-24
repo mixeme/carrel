@@ -354,7 +354,7 @@
       },
       "server": "https://nextcloud.example/dav.php",
       "state": "ok",
-      "title": "nextcloud · home",
+      "title": "nextcloud",
       "trace": null
     },
     {

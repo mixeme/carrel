@@ -67,7 +67,7 @@
           "org": "",
           "phone": "+7 916 200-71-15",
           "sources": [],
-          "stamp": "nextcloud · home · Контакты",
+          "stamp": "nextcloud · Контакты",
           "state": "ok",
           "uid": "6b18-2d40-77c5"
         },
@@ -86,7 +86,7 @@
           "org": "Издательство «Слово»",
           "phone": "+7 912 445-10-88",
           "sources": [],
-          "stamp": "nextcloud · home · Контакты",
+          "stamp": "nextcloud · Контакты",
           "state": "ok",
           "uid": "4f2b-9c31-a0e7"
         },
@@ -105,7 +105,7 @@
           "org": "Тензор",
           "phone": "+7 903 118-22-04",
           "sources": [],
-          "stamp": "nextcloud · home · Контакты",
+          "stamp": "nextcloud · Контакты",
           "state": "ok",
           "uid": "c3f7-8a21-1b09"
         }
@@ -129,7 +129,7 @@
           "org": "",
           "phone": "+7 905 331-09-42",
           "sources": [],
-          "stamp": "nextcloud · home · Архив",
+          "stamp": "nextcloud · Архив",
           "state": "ok",
           "uid": "e7c2-3b95-6a14"
         },
@@ -148,7 +148,7 @@
           "org": "Городская библиотека №4",
           "phone": "",
           "sources": [],
-          "stamp": "nextcloud · home · Контакты",
+          "stamp": "nextcloud · Контакты",
           "state": "ok",
           "uid": "a90d-5512-4e83"
         }
@@ -185,7 +185,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Архив",
+        "stamp": "nextcloud · Архив",
         "state": "done"
       },
       {
@@ -194,7 +194,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Контакты",
+        "stamp": "nextcloud · Контакты",
         "state": "done"
       },
       {
@@ -333,7 +333,7 @@
         "state": "ok"
       },
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {

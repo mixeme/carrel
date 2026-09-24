@@ -39,7 +39,7 @@
             "name": "account",
             "options": [
               {
-                "label": "nextcloud · home",
+                "label": "nextcloud",
                 "selected": true,
                 "value": "a-nc-home"
               },
@@ -89,7 +89,7 @@
       {
         "colour": "",
         "id": "a-nc-home",
-        "label": "nextcloud · home",
+        "label": "nextcloud",
         "last": false,
         "readOnly": false,
         "reason": "",

@@ -15,13 +15,11 @@ import (
 // screen, the category filter of a list, and the print header (C-10, U-10).
 
 // backAction is the one row of a back rail. An empty label is the way back to
-// the list of the kind.
+// the list of the kind: «Back to list» from every card, an event's too
+// (owner's decision 24.09.2026, s-agenda-2).
 func (s *Server) backAction(spec kindSpec, label, href string) view.Action {
 	if label == "" {
 		label = "Back to list"
-		if spec.kind == view.KindEvent {
-			label = "Back to calendar"
-		}
 	}
 	return view.Action{ID: "nav.back", Label: text(label), Icon: "i-back", Href: s.route(href), Method: "GET", Enabled: true}
 }

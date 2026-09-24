@@ -115,7 +115,7 @@
   "photoHref": "",
   "photoNote": "",
   "print": {
-    "range": "nextcloud · home · Контакты",
+    "range": "nextcloud · Контакты",
     "taken": "10 August 2026, 17:06",
     "title": "Анна Ковалёва"
   },
@@ -142,7 +142,7 @@
     "note": "",
     "sections": [
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {
@@ -260,7 +260,7 @@
     "lastRead": "2 min ago",
     "objects": null,
     "readOnly": false,
-    "stamp": "nextcloud · home · Контакты"
+    "stamp": "nextcloud · Контакты"
   },
   "subtitle": "Издательство «Слово» · Выпускающий редактор",
   "tags": [

@@ -61,14 +61,14 @@
         "href": "/app/calendar/a-nc-home/lichnyj",
         "icon": "i-back",
         "id": "nav.back",
-        "label": "Back to calendar",
+        "label": "Back to list",
         "method": "GET"
       }
     ],
     "note": "",
     "sections": [
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {

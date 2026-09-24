@@ -58,6 +58,6 @@
   },
   "kind": "contact",
   "references": [],
-  "subject": "Контакты · nextcloud · home",
-  "warning": "The address book and all 4 contacts in it are deleted on nextcloud · home. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
+  "subject": "Контакты · nextcloud",
+  "warning": "The address book and all 4 contacts in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
 }

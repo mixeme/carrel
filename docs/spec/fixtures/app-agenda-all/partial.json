@@ -182,7 +182,7 @@
           "location": "",
           "menu": [],
           "sources": [],
-          "stamp": "nextcloud · home · Работа",
+          "stamp": "nextcloud · Работа",
           "state": "ok",
           "summary": "Дежурство: первая линия",
           "time": "All day",
@@ -197,7 +197,7 @@
           "location": "Переговорная 2",
           "menu": [],
           "sources": [],
-          "stamp": "nextcloud · home · Личный",
+          "stamp": "nextcloud · Личный",
           "state": "ok",
           "summary": "Синк-ап по релизу",
           "time": "10:00",
@@ -212,7 +212,7 @@
           "location": "Jitsi",
           "menu": [],
           "sources": [],
-          "stamp": "nextcloud · home · Работа",
+          "stamp": "nextcloud · Работа",
           "state": "ok",
           "summary": "Созвон с подрядчиком",
           "time": "15:00",
@@ -232,7 +232,7 @@
           "location": "МФЦ, Мясницкая 13",
           "menu": [],
           "sources": [],
-          "stamp": "nextcloud · home · Личный",
+          "stamp": "nextcloud · Личный",
           "state": "ok",
           "summary": "Забрать документы",
           "time": "18:00",
@@ -293,7 +293,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Дни рождения",
+        "stamp": "nextcloud · Дни рождения",
         "state": "empty"
       },
       {
@@ -302,7 +302,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Личный",
+        "stamp": "nextcloud · Личный",
         "state": "done"
       },
       {
@@ -311,7 +311,7 @@
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · home · Работа",
+        "stamp": "nextcloud · Работа",
         "state": "done"
       },
       {
@@ -453,7 +453,7 @@
         "state": "ok"
       },
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {

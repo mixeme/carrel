@@ -161,7 +161,7 @@
         ]
       },
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "state": "ok",
         "rows": [
@@ -494,7 +494,7 @@
           "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5",
           "uid": "6b18-2d40-77c5",
           "colour": "#4a6b52",
-          "stamp": "nextcloud · home · Контакты",
+          "stamp": "nextcloud · Контакты",
           "avatar": {
             "href": "",
             "initials": "АС",
@@ -513,7 +513,7 @@
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
           "uid": "4f2b-9c31-a0e7",
           "colour": "#4a6b52",
-          "stamp": "nextcloud · home · Контакты",
+          "stamp": "nextcloud · Контакты",
           "avatar": {
             "href": "",
             "initials": "АК",
@@ -550,7 +550,7 @@
           ],
           "sources": [
             "radicale · vps · Команда",
-            "nextcloud · home · Контакты"
+            "nextcloud · Контакты"
           ],
           "menu": [],
           "state": "linked"
@@ -564,7 +564,7 @@
           "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
           "uid": "e7c2-3b95-6a14",
           "colour": "#a05a2c",
-          "stamp": "nextcloud · home · Архив",
+          "stamp": "nextcloud · Архив",
           "avatar": {
             "href": "",
             "initials": "ВЛ",
@@ -583,7 +583,7 @@
           "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83",
           "uid": "a90d-5512-4e83",
           "colour": "#4a6b52",
-          "stamp": "nextcloud · home · Контакты",
+          "stamp": "nextcloud · Контакты",
           "avatar": {
             "href": "",
             "initials": "ВГ",
@@ -609,7 +609,7 @@
     "answeredAt": "10 August, 17:04",
     "sources": [
       {
-        "stamp": "nextcloud · home · Архив",
+        "stamp": "nextcloud · Архив",
         "colour": "#a05a2c",
         "state": "done",
         "count": 1,
@@ -618,7 +618,7 @@
         "retry": null
       },
       {
-        "stamp": "nextcloud · home · Контакты",
+        "stamp": "nextcloud · Контакты",
         "colour": "#4a6b52",
         "state": "done",
         "count": 4,

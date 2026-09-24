@@ -17,6 +17,41 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.45 — 2026-09-24
+
+The fixture set follows the mockup of 24.09.2026 (docs/plan/from-typecase.md).
+
+### Changed
+
+- **«Back to list» from every card**, an event's too: «Back to calendar» is
+  gone (`s-agenda-2`).
+- **Connection labels in the fixture set are one word**: `nextcloud`, not
+  `nextcloud · home`; `radicale · vps` stays two, as the hard case. Nothing
+  in the server changes: a stamp is still the label and the collection's
+  name. Every fixture carrying the old label follows, and so does
+  `docs/visual/fixtures/README.md`.
+- **«Дневник» is ticked in the fixture set**, as `s-notes-1` now draws it:
+  its note stands in the combined notebook and the rail counts it. The
+  fixtures of the notes and of search follow.
+- The fixtures of the note list, the note card and the contact form are
+  taken after the combined view, as a person comes to them: that is where
+  the counts of every ticked collection in the rail come from
+  (`s-contacts-3` draws «Архив» with its number).
+
+### Spec and checks
+
+- `docs/spec/check.py`: the `FRAME_TODO` lines the new frames closed are
+  gone; `app-contact-new` is a sheet and has no rail of its own. What the
+  new frames still disagree on among themselves is written down, one line a
+  collection, and asked of Typecase (`docs/plan/to-typecase.md`, task 3):
+  the cards of events and notes draw «Дни рождения» and «Дневник» otherwise
+  than their lists, and put a number on calendars, which have none anywhere.
+  The check is green.
+
+### For consumers
+
+Nothing to change in the running server beyond the label of the way back.
+
 ## v0.2.44 — 2026-09-24
 
 ### Changed

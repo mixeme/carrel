@@ -127,7 +127,7 @@
   "loss": null,
   "notices": [],
   "print": {
-    "range": "nextcloud · home · Личный",
+    "range": "nextcloud · Личный",
     "taken": "10 August 2026, 17:06",
     "title": "Синк-ап по релизу"
   },
@@ -147,14 +147,14 @@
         "href": "/app/calendar/a-nc-home/lichnyj",
         "icon": "i-back",
         "id": "nav.back",
-        "label": "Back to calendar",
+        "label": "Back to list",
         "method": "GET"
       }
     ],
     "note": "",
     "sections": [
       {
-        "account": "nextcloud · home",
+        "account": "nextcloud",
         "accountID": "a-nc-home",
         "rows": [
           {
@@ -359,7 +359,7 @@
     "lastRead": "2 min ago",
     "objects": null,
     "readOnly": false,
-    "stamp": "nextcloud · home · Личный"
+    "stamp": "nextcloud · Личный"
   },
   "summary": "Синк-ап по релизу",
   "title": "Синк-ап по релизу",

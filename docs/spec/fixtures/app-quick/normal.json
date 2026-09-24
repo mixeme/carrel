@@ -27,7 +27,7 @@
         "last": false,
         "readOnly": false,
         "reason": "",
-        "stamp": "nextcloud · home · Дневник"
+        "stamp": "nextcloud · Дневник"
       },
       {
         "colour": "#4a6b52",
@@ -36,7 +36,7 @@
         "last": false,
         "readOnly": false,
         "reason": "",
-        "stamp": "nextcloud · home · Записи"
+        "stamp": "nextcloud · Записи"
       }
     ]
   }

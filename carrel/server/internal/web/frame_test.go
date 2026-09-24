@@ -205,7 +205,7 @@ func TestTagFilterOnCalendars(t *testing.T) {
 		t.Errorf("agenda print = %+v", agenda.Print)
 	}
 	event := decode[view.EventPage](t, f.h.do(get(cal+"/e", f.sess)))
-	if back := backRow(t, event.Rail); back.Label != "Back to calendar" || back.Href != cal {
+	if back := backRow(t, event.Rail); back.Label != "Back to list" || back.Href != cal {
 		t.Errorf("event back = %+v", back)
 	}
 }
