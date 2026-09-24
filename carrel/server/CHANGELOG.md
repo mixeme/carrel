@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.35 — 2026-09-24
+
+### Changed
+
+- **A search of a collection already read whole asks the server nothing but
+  its tag** (S-4.2). When a book or a calendar's component is kept and its
+  change tag has not moved, a search sifts the kept records here, through
+  the properties and with the comparison it would ask the server for: letter
+  case does not count, in any script. A changed or never-read collection is
+  searched on the server as before.
+- **The check of an empty calendar search is paid once.** A search the
+  server answers with nothing is checked by reading the component whole
+  (SV-47); that read now goes through the session cache and is kept, so the
+  next search of the same unchanged calendar is sifted from it.
+  `cal.Provider` gained `ReadWhole` for this: unset, the check reads the
+  server as before.
+
+### For consumers
+
+Nothing to change.
+
 ## v0.2.34 — 2026-09-24
 
 ### Changed

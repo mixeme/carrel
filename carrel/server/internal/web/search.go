@@ -602,10 +602,24 @@ func (s *Server) openSource(sess *session.Session, id string, conn sealed.Connec
 	} else if src.files, err = file.New(client); err != nil {
 		src.broken = err
 	}
+	if src.cal != nil {
+		src.cal.ReadWhole = src.readWhole
+	}
 	return src
 }
 
 func (c *collectionSource) ID() string { return c.id }
+
+// readWhole is the whole read a calendar search checks an empty answer
+// against (SV-47), kept like any other (S-4.2): the next search of the
+// unchanged calendar is sifted from it.
+func (c *collectionSource) readWhole(ctx context.Context, collection, component string) ([]*model.Object, error) {
+	return cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, collection, component, c.ttl, c.now(), calCodec,
+		func() ([]*model.Object, bool, error) {
+			got, unreadable, err := c.cal.Query(ctx, collection, component, nil, nil)
+			return got, len(unreadable) == 0, err
+		})
+}
 
 // Asks is one far request per kind the collection holds: Run walks them
 // one after another. A calendar of events, tasks and notes asks three
@@ -696,6 +710,10 @@ func (c *collectionSource) contacts(ctx context.Context, q fanout.Query) ([]fano
 				return got, true, err
 			})
 	default:
+		if kept, ok := keptWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, "", c.ttl, c.now(), cardCodec); ok {
+			objs = card.Sift(kept, q.Text) // the book is read and unchanged (S-4.2)
+			break
+		}
 		objs, err = c.card.Search(ctx, c.col.Path, q.Text)
 	}
 	var note error
@@ -746,6 +764,10 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 		}
 		objs, _, err = c.cal.Query(ctx, c.col.Path, component, from, to)
 	default:
+		if kept, ok := keptWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, component, c.ttl, c.now(), calCodec); ok {
+			objs = cal.Sift(kept, component, q.Text) // the calendar is read and unchanged (S-4.2)
+			break
+		}
 		objs, _, err = c.cal.Search(ctx, c.col.Path, component, q.Text)
 	}
 	var note error

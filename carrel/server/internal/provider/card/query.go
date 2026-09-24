@@ -62,6 +62,11 @@ func (p *Provider) Search(ctx context.Context, collection, text string) ([]*mode
 	return siftCards(objs, text), ErrServerDoesNotQuery
 }
 
+// Sift keeps the cards a search for text finds: the properties Search asks
+// the server about, compared the same way. It is the search of a book already
+// read whole (S-4.2).
+func Sift(objs []*model.Object, text string) []*model.Object { return siftCards(objs, text) }
+
 // siftCards keeps the cards that hold text in a property a search looks in.
 // The comparison is the one asked of the server: letter case does not count,
 // in any script.

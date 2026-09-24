@@ -15,6 +15,7 @@ import (
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/davtest"
+	"carrel.dev/carrel/server/internal/model"
 )
 
 const work = davtest.CalendarHome + "work/"
@@ -270,6 +271,30 @@ func TestAnEmptySearchIsCheckedAgainstTheCollection(t *testing.T) {
 	}
 	if len(objs) != 1 || UID(objs[0]) != "plan" {
 		t.Fatalf("found %+v, want the one event whose summary holds the text", objs)
+	}
+}
+
+// The whole read of that check is the caller's when the caller gives one
+// (ReadWhole): the web layer keeps it (S-4.2), and the check is sifted from
+// what ReadWhole answered, not from a read of its own.
+func TestTheCheckReadsThroughReadWhole(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.CalendarTextMatchFindsNothing = true
+	srv.Seed(work+"visit.ics", vevent("visit", "20260116T100000Z", "Visit"))
+	kept := vevent("plan", "20260115T100000Z", "Launch plan")
+	var asked []string
+	p.ReadWhole = func(ctx context.Context, collection, component string) ([]*model.Object, error) {
+		asked = append(asked, collection+" "+component)
+		obj, perr := Parse(collection+"plan.ics", `"kept"`, strings.NewReader(kept))
+		return []*model.Object{obj}, perr
+	}
+
+	objs, _, err := p.Search(t.Context(), work, "VEVENT", "launch")
+	if !errors.Is(err, ErrServerDoesNotFilter) || len(objs) != 1 || UID(objs[0]) != "plan" {
+		t.Fatalf("objs %+v, err %v; want the kept plan, sifted here", objs, err)
+	}
+	if len(asked) != 1 || asked[0] != work+" VEVENT" {
+		t.Errorf("ReadWhole asked %v", asked)
 	}
 }
 

@@ -20,6 +20,11 @@ type Provider struct {
 	t   dav.Transport
 	c   dav.Creator
 	now func() time.Time
+
+	// ReadWhole, when set, is how Search reads a component whole to check an
+	// empty answer (SV-47): the caller's read, which may be one it keeps
+	// (S-4.2). Unset, the component is read from the server.
+	ReadWhole func(ctx context.Context, collection, component string) ([]*model.Object, error)
 }
 
 // New wires a calendar provider.

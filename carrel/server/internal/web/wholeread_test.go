@@ -153,3 +153,63 @@ func TestRefreshReadsATaglessServerAgain(t *testing.T) {
 		t.Errorf("after Refresh = %s, want the card another client wrote", got)
 	}
 }
+
+// titles is what a finished search found, by title.
+func titles(t *testing.T, f davFixture, query string) []string {
+	t.Helper()
+	page := search(t, f.h, f.sess, query)
+	waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+	page = search(t, f.h, f.sess, query)
+	var out []string
+	for _, r := range page.Results {
+		out = append(out, string(r.Title))
+	}
+	return out
+}
+
+// A search of a book read whole and unchanged is sifted from the kept read:
+// the tag is asked, nothing else. A changed book is searched on the server.
+func TestASearchOfAKeptBookAsksNothing(t *testing.T) {
+	f := contactsFixture(t, false, vcardOf("ada", "Ada Lovelace"), vcardOf("bob", "Bob Builder"))
+	tickAll(t, f.h, f.sess)
+	keptNames(t, f)
+	reports := f.srv.CountRequests("REPORT", f.col)
+
+	if got := titles(t, f, "q=ada"); strings.Join(got, "|") != "Ada Lovelace" {
+		t.Errorf("found %v, want Ada: the sifting is the server's, letter case aside", got)
+	}
+	if n := f.srv.CountRequests("REPORT", f.col); n != reports {
+		t.Errorf("REPORTs %d → %d: a kept, unchanged book was searched on the server", reports, n)
+	}
+
+	f.srv.Seed(f.col+"ann.vcf", vcardOf("ann", "Ann Adams"))
+	if got := titles(t, f, "q=Adams"); strings.Join(got, "|") != "Ann Adams" {
+		t.Errorf("found %v after another client's write", got)
+	}
+	if n := f.srv.CountRequests("REPORT", f.col); n == reports {
+		t.Error("the book changed and its search was not asked of the server")
+	}
+}
+
+// The owner's point (23.09.2026): a calendar search that finds nothing is
+// checked by reading the calendar whole (SV-47), and that read is kept — so
+// the next search of the unchanged calendar is sifted from it and asks
+// nothing but the tag.
+func TestTheCheckOfAnEmptySearchIsPaidOnce(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"call.ics", ics("BEGIN:VEVENT\nUID:call\nDTSTAMP:20260101T000000Z\nDTSTART:20260910T150000Z\nSUMMARY:Two words\nEND:VEVENT"),
+		"other.ics", ics("BEGIN:VEVENT\nUID:other\nDTSTAMP:20260101T000000Z\nDTSTART:20260911T150000Z\nSUMMARY:Standup\nEND:VEVENT"))
+	f.srv.CalendarTextMatchFindsNothing = true
+	tickAll(t, f.h, f.sess)
+
+	if got := titles(t, f, "q=Two+words"); strings.Join(got, "|") != "Two words" {
+		t.Fatalf("found %v: the empty answer was not checked", got)
+	}
+	reports := f.srv.CountRequests("REPORT", f.col)
+	if got := titles(t, f, "q=standup"); strings.Join(got, "|") != "Standup" {
+		t.Errorf("found %v from the kept read", got)
+	}
+	if n := f.srv.CountRequests("REPORT", f.col); n != reports {
+		t.Errorf("REPORTs %d → %d: the whole read of the check was not kept", reports, n)
+	}
+}

@@ -30,6 +30,13 @@ import (
 // drops the kept reads of the collection it wrote to (noteWrite), so this
 // session never shows itself a list older than its own writes, tag or no tag.
 //
+// A search of a collection whose whole read is kept and still stands is
+// sifted from it, with the properties and the comparison the server is asked
+// for (card.Sift, cal.Sift): no REPORT. Without one the search goes to the
+// server, and a calendar search that finds nothing is checked against a whole
+// read (SV-47) that is then kept — so a second search of the same unchanged
+// calendar asks nothing but the tag.
+//
 // What is not kept: a read by window (an agenda's week) and a filtered search.
 // Both still go to the server. A read that came back with records it could not
 // parse is not kept either: the list names them, and a kept read would hide
@@ -94,13 +101,8 @@ func cachedWholeRead(ctx context.Context, sess *session.Session, t dav.Transport
 	key := wholeKeyPrefix(collection) + component
 	tag, tagErr := changeTag(ctx, t, collection)
 	if tagErr == nil {
-		if data, ok := cache.PeekETagMap(connID, key); ok {
-			var kept wholeRead
-			if json.Unmarshal(data, &kept) == nil && fresh(kept, tag, ttl, now) {
-				if objs, ok := rebuild(cache, connID, kept, codec); ok {
-					return objs, nil
-				}
-			}
+		if objs, ok := keptFor(cache, connID, key, tag, ttl, now, codec); ok {
+			return objs, nil
 		}
 	}
 	objs, keep, err := read()
@@ -120,6 +122,40 @@ func cachedWholeRead(ctx context.Context, sess *session.Session, t dav.Transport
 		cache.PutETagMap(connID, key, data)
 	}
 	return objs, nil
+}
+
+// keptWholeRead is the kept read of a collection's component when it still
+// stands, and false otherwise — with nothing read from the server but the
+// tag, and not even that when nothing is kept. A search sifts it here
+// instead of asking (S-4.2); without it, the search goes to the server.
+func keptWholeRead(ctx context.Context, sess *session.Session, t dav.Transport, connID, collection, component string,
+	ttl time.Duration, now time.Time, codec wholeCodec) ([]*model.Object, bool) {
+	if sess == nil || t == nil {
+		return nil, false
+	}
+	cache := sess.Cache()
+	key := wholeKeyPrefix(collection) + component
+	if _, ok := cache.PeekETagMap(connID, key); !ok {
+		return nil, false
+	}
+	tag, err := changeTag(ctx, t, collection)
+	if err != nil {
+		return nil, false
+	}
+	return keptFor(cache, connID, key, tag, ttl, now, codec)
+}
+
+// keptFor rebuilds the read kept under key if it stands under tag.
+func keptFor(cache *session.Cache, connID, key, tag string, ttl time.Duration, now time.Time, codec wholeCodec) ([]*model.Object, bool) {
+	data, ok := cache.PeekETagMap(connID, key)
+	if !ok {
+		return nil, false
+	}
+	var kept wholeRead
+	if json.Unmarshal(data, &kept) != nil || !fresh(kept, tag, ttl, now) {
+		return nil, false
+	}
+	return rebuild(cache, connID, kept, codec)
 }
 
 // fresh reports whether a kept read still stands: the same tag, or — where

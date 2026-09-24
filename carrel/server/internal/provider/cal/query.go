@@ -131,12 +131,11 @@ func (p *Provider) Search(ctx context.Context, collection, component, text strin
 	// nothing by it but one read, and says nothing more: the note goes on the
 	// screen only when the sifting found what the server did not.
 	// The cost is a full read of the component for every search that finds
-	// nothing, on every server. S-4.2 already says what makes that cheap — a
-	// version map checked by the collection's change tag, bodies kept by
-	// version — but that cache is not built yet: until it is, this read is
-	// paid in full each time (docs/plan/server.md).
+	// nothing. ReadWhole is how a caller pays it once: the web layer keeps the
+	// read under the collection's change tag (S-4.2), and the next search of
+	// an unchanged collection is sifted from it without asking at all.
 	if len(objs) == 0 {
-		if all, _, err := p.query(ctx, collection, component, caldav.CompFilter{Name: component}); err == nil {
+		if all, err := p.readWhole(ctx, collection, component); err == nil {
 			if kept, _ := sift(all, props, text); len(kept) > 0 {
 				return kept, bad, ErrServerDoesNotFilter
 			}
@@ -156,6 +155,28 @@ func (p *Provider) Search(ctx context.Context, collection, component, text strin
 		return objs, bad, ErrLatinCaseOnly
 	}
 	return objs, bad, nil
+}
+
+// readWhole reads a component whole: through ReadWhole when the caller gave
+// one, from the server otherwise.
+func (p *Provider) readWhole(ctx context.Context, collection, component string) ([]*model.Object, error) {
+	if p.ReadWhole != nil {
+		return p.ReadWhole(ctx, collection, component)
+	}
+	all, _, err := p.query(ctx, collection, component, caldav.CompFilter{Name: component})
+	return all, err
+}
+
+// Sift keeps the records of a component that a search for text finds: the
+// properties Search asks the server about, compared the same way. It is the
+// search of records already read whole (S-4.2).
+func Sift(objs []*model.Object, component, text string) []*model.Object {
+	props, ok := searchProps[component]
+	if !ok {
+		props = []string{ical.PropSummary}
+	}
+	kept, _ := sift(objs, props, text)
+	return kept
 }
 
 // sift keeps the records that hold text in one of props, and says whether it
