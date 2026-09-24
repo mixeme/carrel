@@ -617,9 +617,6 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-card{border:.5px solid var(--tc-hair);border-radius:4px;background:var(--tc-surface);padding:12px 14px;margin-bottom:10px}
 .tc-card > .tc-rubric{margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
 /* Слияние: список «куда» сжимается (min-width:0), кнопка не уезжает. */
-.tc-merge{margin-left:auto;display:flex;gap:8px;align-items:center;min-width:0;flex:1 1 200px;justify-content:flex-end}
-.tc-merge .tc-in,.tc-merge .tc-field{min-width:0;flex:1 1 140px;max-width:240px}
-.tc-merge .tc-btn{flex:none}
 /* Конфликт: карточка на свойство, не три колонки в ряд. */
 .tc-diff{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .tc-diff__item{border:.5px solid var(--tc-hair);border-radius:4px;background:var(--tc-surface);padding:10px 12px}
@@ -5780,13 +5777,13 @@ Read  2 min ago</div>
       <div class="tc-main">
         <div class="tc-head">
           <div class="tc-head__titles"><div class="tc-head__title">Duplicates</div><div class="tc-head__sub">361 records compared · 4 to look at</div></div>
-          <div class="tc-acts tc-acts--stack"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 4</button><button class="tc-seg__opt" type="button">Contacts 1</button><button class="tc-seg__opt" type="button">Events 1</button><button class="tc-seg__opt" type="button">Tasks 1</button><button class="tc-seg__opt" type="button">Notes 1</button></span><div class="tc-field tc-field--inline"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="70" aria-label="Match threshold"></div></div>
+          <div class="tc-acts tc-acts--stack"><span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 4</button><button class="tc-seg__opt" type="button">Contacts 1</button><button class="tc-seg__opt" type="button">Events 1</button><button class="tc-seg__opt" type="button">Tasks 1</button><button class="tc-seg__opt" type="button">Notes 1</button></span><div class="tc-field tc-field--inline"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="60" aria-label="Match threshold"><button class="tc-btn is-sm" type="button">Weights</button></div></div>
         </div>
         <div class="tc-msg is-accent">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
         <div data-part="results" class="tc-stack tc-stack--gap-10 tc-main__results">
 
           <div class="tc-card">
-            <div class="tc-rubric">Артём Белов <span class="tc-rubric__aside"><span class="tc-badge">candidate ×2</span> <span class="tc-mono tc-mono--ls0-dusty">86 points · same name, same phone</span></span></div>
+            <div class="tc-rubric">Артём Белов <span class="tc-rubric__aside"><span class="tc-badge">candidate ×2</span> <span class="tc-mono tc-mono--ls0-dusty">80 points · same phone, same name</span></span></div>
             <div class="tc-list tc-list--mx-14">
               <div class="tc-row tc-row--avatarcols tc-row--avatarcols--padl14-padr14">
                 <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-avatar">АБ</span>
@@ -5796,7 +5793,7 @@ Read  2 min ago</div>
               <div class="tc-row tc-row--avatarcols tc-row--avatarcols--padl14-padr14">
                 <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-avatar is-photo"></span>
                 <span class="tc-row__title">Белов Артём</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 903 118-22-04</span><span class="tc-row__excerpt tc-row__detail">belov@team.example</span>
-                <span class="tc-row__excerpt tc-row__caption">—</span><span class="tc-row__cell tc-row__source">radicale · vps · Команда <span class="tc-badge">ro</span></span>
+                <span class="tc-row__excerpt tc-row__caption">—</span><span class="tc-row__cell tc-row__source">radicale · vps · Команда</span>
               </div>
             </div>
             <div class="tc-line tc-line--gap-22 tc-card__top11">
@@ -5813,15 +5810,12 @@ Read  2 min ago</div>
             <div class="tc-line tc-line--gap-8 tc-card__acts">
               <button class="tc-btn is-primary" type="button">Link them</button>
               <button class="tc-btn" type="button">Not duplicates</button>
-              <span class="tc-merge">
-                <button class="tc-in is-pick" type="button">Merge into: nextcloud · Контакты</button>
-                <button class="tc-btn is-danger" type="button">Merge on the server</button>
-              </span>
+              <button class="tc-btn is-danger tc-push" type="button">Merge on the server</button>
             </div>
           </div>
 
           <div class="tc-card">
-            <div class="tc-rubric">Дежурство: первая линия <span class="tc-rubric__aside"><span class="tc-badge">candidate ×2</span> <span class="tc-mono tc-mono--ls0-dusty">80 points · same title, same start</span></span></div>
+            <div class="tc-rubric">Дежурство: первая линия <span class="tc-rubric__aside"><span class="tc-badge">candidate ×2</span> <span class="tc-mono tc-mono--ls0-dusty">70 points · same title, same start</span></span></div>
             <div class="tc-list tc-list--mx-14">
               <div class="tc-row tc-row--timecols tc-row--timecols--padl14-padr14">
                 <span class="tc-mark" data-tc-colour="#3F6E8C"></span>
@@ -5844,15 +5838,12 @@ Read  2 min ago</div>
             <div class="tc-line tc-line--gap-8 tc-card__acts">
               <button class="tc-btn is-primary" type="button">Link them</button>
               <button class="tc-btn" type="button">Not duplicates</button>
-              <span class="tc-merge">
-                <button class="tc-in is-pick" type="button">Merge into: nextcloud · Работа</button>
-                <button class="tc-btn is-danger" type="button">Merge on the server</button>
-              </span>
+              <button class="tc-btn is-danger tc-push" type="button">Merge on the server</button>
             </div>
           </div>
 
           <div class="tc-card">
-            <div class="tc-rubric">Собрать чемодан <span class="tc-rubric__aside"><span class="tc-badge">candidate ×2</span> <span class="tc-mono tc-mono--ls0-dusty">74 points · same summary, same due date</span></span></div>
+            <div class="tc-rubric">Собрать чемодан <span class="tc-rubric__aside"><span class="tc-badge">candidate ×2</span> <span class="tc-mono tc-mono--ls0-dusty">70 points · same title, same due date</span></span></div>
             <div class="tc-list tc-list--mx-14">
               <div class="tc-row tc-row--tickmarkcols tc-row--tickmarkcols--padl14-padr14">
                 <button class="tc-tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span>
@@ -5865,26 +5856,15 @@ Read  2 min ago</div>
                 <span class="tc-mono tc-row__due">12 Aug</span><span class="tc-row__cell tc-mono tc-row__progress">—</span><span class="tc-row__cell tc-row__source">radicale · vps · Личное</span>
               </div>
             </div>
-            <div class="tc-line tc-line--gap-22 tc-card__top11">
-              <div class="tc-field"><label>Due</label>
-                <div class="tc-line tc-line--gap-12"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>12 Aug 18:00</button><button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>12 Aug</button></div>
-              </div>
-              <div class="tc-field"><label>Tags</label>
-                <div class="tc-line tc-line--gap-12"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>дом</button><button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>—</button></div>
-              </div>
-            </div>
             <div class="tc-line tc-line--gap-8 tc-card__acts">
               <button class="tc-btn is-primary" type="button">Link them</button>
               <button class="tc-btn" type="button">Not duplicates</button>
-              <span class="tc-merge">
-                <button class="tc-in is-pick" type="button">Merge into: nextcloud · Дела</button>
-                <button class="tc-btn is-danger" type="button">Merge on the server</button>
-              </span>
+              <button class="tc-btn is-danger tc-push" type="button">Merge on the server</button>
             </div>
           </div>
 
           <div class="tc-card">
-            <div class="tc-rubric">Что почитать про CRDT <span class="tc-rubric__aside"><span class="tc-badge">candidate ×2</span> <span class="tc-mono tc-mono--ls0-dusty">80 points · same title, same date</span></span></div>
+            <div class="tc-rubric">Что почитать про CRDT <span class="tc-rubric__aside"><span class="tc-badge">candidate ×2</span> <span class="tc-mono tc-mono--ls0-dusty">70 points · same title, same date</span></span></div>
             <div class="tc-list tc-list--mx-14">
               <div class="tc-row tc-row--excerpt tc-row--excerpt--padl14-padr14">
                 <span class="tc-mark" data-tc-colour="#4A6B52"></span>
@@ -5898,27 +5878,69 @@ Read  2 min ago</div>
               </div>
             </div>
             <div class="tc-field__hint tc-field__hint--top8">Same title and the same date: a note copied into a second notebook. Linking keeps both; merging writes one and deletes the other.</div>
-            <div class="tc-line tc-line--gap-22 tc-card__top11">
-              <div class="tc-field"><label>Tags</label>
-                <div class="tc-line tc-line--gap-12"><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>книги</button><button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>—</button></div>
-              </div>
-            </div>
             <div class="tc-line tc-line--gap-8 tc-card__acts">
               <button class="tc-btn is-primary" type="button">Link them</button>
               <button class="tc-btn" type="button">Not duplicates</button>
-              <span class="tc-merge">
-                <button class="tc-in is-pick" type="button">Merge into: nextcloud · Записи</button>
-                <button class="tc-btn is-danger" type="button">Merge on the server</button>
-              </span>
+              <button class="tc-btn is-danger tc-push" type="button">Merge on the server</button>
             </div>
           </div>
 
+          <div class="tc-card">
+            <div class="tc-rubric">Анна Ковалёва <span class="tc-rubric__aside"><span class="tc-badge is-linked">linked ×3</span> <span class="tc-mono tc-mono--ls0-dusty">80 points · same email, same name</span></span></div>
+            <div class="tc-list tc-list--mx-14">
+              <div class="tc-row tc-row--avatarcols tc-row--avatarcols--padl14-padr14">
+                <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-avatar">АК</span>
+                <span class="tc-row__title">Анна Ковалёва</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 912 445-10-88</span><span class="tc-row__excerpt tc-row__detail">a.kovaleva@example.org</span>
+                <span class="tc-row__excerpt tc-row__caption">Издательство «Слово»</span><span class="tc-row__cell tc-row__source">nextcloud · Контакты</span>
+              </div>
+              <div class="tc-row tc-row--avatarcols tc-row--avatarcols--padl14-padr14">
+                <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-avatar is-photo"></span>
+                <span class="tc-row__title">Анна Ковалёва</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 912 445-10-88</span><span class="tc-row__excerpt tc-row__detail">a.kovaleva@example.org</span>
+                <span class="tc-row__excerpt tc-row__caption">—</span><span class="tc-row__cell tc-row__source">radicale · vps · Команда</span>
+              </div>
+              <div class="tc-row tc-row--avatarcols tc-row--avatarcols--padl14-padr14">
+                <span class="tc-mark" data-tc-colour="#9A9280"></span><span class="tc-avatar">АК</span>
+                <span class="tc-row__title">А. Ковалёва</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">—</span><span class="tc-row__excerpt tc-row__detail">a.kovaleva@example.org</span>
+                <span class="tc-row__excerpt tc-row__caption">Слово</span><span class="tc-row__cell tc-row__source">baikal · Общий <span class="tc-badge">ro</span></span>
+              </div>
+            </div>
+            <div class="tc-line tc-line--gap-22 tc-card__top11">
+              <div class="tc-field"><label>Photo</label>
+                <div class="tc-line tc-line--gap-12"><button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>nextcloud</button><button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>radicale · vps</button></div>
+              </div>
+            </div>
+            <div class="tc-line tc-line--gap-8 tc-card__acts">
+              <button class="tc-btn is-primary" type="button">Keep these values</button>
+              <button class="tc-btn" type="button">Unlink</button>
+              <button class="tc-btn is-off tc-push" type="button" disabled>Merge on the server</button>
+              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Общий is read-only: its record could be neither rewritten nor deleted.</span>
+            </div>
+          </div>
+
+          <div class="tc-card">
+            <div class="tc-rubric">Сергей Орлов <span class="tc-rubric__aside"><span class="tc-badge">not duplicates</span> <span class="tc-mono tc-mono--ls0-dusty">60 points · same phone</span></span></div>
+            <div class="tc-list tc-list--mx-14">
+              <div class="tc-row tc-row--avatarcols tc-row--avatarcols--padl14-padr14">
+                <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-avatar">СО</span>
+                <span class="tc-row__title">Сергей Орлов</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 495 120-45-00</span><span class="tc-row__excerpt tc-row__detail">s.orlov@slovo.example</span>
+                <span class="tc-row__excerpt tc-row__caption">Издательство «Слово»</span><span class="tc-row__cell tc-row__source">nextcloud · Контакты</span>
+              </div>
+              <div class="tc-row tc-row--avatarcols tc-row--avatarcols--padl14-padr14">
+                <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-avatar">МО</span>
+                <span class="tc-row__title">Мария Орлова</span><span class="tc-row__excerpt tc-mono tc-row__subtitle">+7 495 120-45-00</span><span class="tc-row__excerpt tc-row__detail">m.orlova@slovo.example</span>
+                <span class="tc-row__excerpt tc-row__caption">Издательство «Слово»</span><span class="tc-row__cell tc-row__source">radicale · vps · Команда</span>
+              </div>
+            </div>
+            <div class="tc-line tc-line--gap-8 tc-card__acts">
+              <button class="tc-btn" type="button">Offer again</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<figcaption><b>Четыре рода, одно устройство экрана.</b> Связывание ничего не пишет на серверы; слияние — отдельный шаг с подтверждением, и оно стоит у контакта, события, задачи и заметки одинаково: равенство коллекций, а пользоваться им — право человека. «Дежурство: первая линия» больше не висит хвостом: это две записи из фикстур, <code>rabota.ics</code> и <code>dezhurstva.ics</code>, разные UID, одно название и один день. Агенда показывает их двумя строками и ничем не помечает; в строку «2 sources» их свернёт только связывание здесь. Заметка попадает сюда по заголовку и дате (копия во вторую тетрадь), не по телу: одно только название было бы шумом.<br><br>Группа — карточка с линованным списком записей внутри, те же строки, что в обычном списке. Выбор значения при расхождении — набор переключателей в строку. «Merge on the server» отделена от «Link them» цветом и положением: разное по последствиям не стоит рядом и не выглядит одинаково. Список «куда слить» сжимается, стрелка поля остаётся своей колонкой.</figcaption>
+<figcaption><b>Четыре рода, одно устройство экрана.</b> Связывание ничего не пишет на серверы; слияние — отдельный шаг с подтверждением, и оно стоит у контакта, события, задачи и заметки одинаково: равенство коллекций, а пользоваться им — право человека. «Дежурство: первая линия» больше не висит хвостом: это две записи из фикстур, <code>rabota.ics</code> и <code>dezhurstva.ics</code>, разные UID, одно название и один день. Агенда показывает их двумя строками и ничем не помечает; в строку «2 sources» их свернёт только связывание здесь. Заметка попадает сюда по заголовку и дате (копия во вторую тетрадь), не по телу: одно только название было бы шумом.<br><br>Группа — карточка с линованным списком записей внутри, те же строки, что в обычном списке. Выбор значения при расхождении — набор переключателей в строку. «Merge on the server» отделена от «Link them» цветом и положением: разное по последствиям не стоит рядом и не выглядит одинаково. <b>Куда слить, здесь не выбирают</b> — это решается на экране слияния («Keep … instead»). <b>Вопросы задаются там, где значение правда надо выбрать</b>: имя, организация и фото у контакта, название и место у события, название у задачи и заметки; время записи целиком берётся у той, что остаётся, категории объединяются. <b>Очки — по весам экземпляра</b>: телефон и почта по 60, UID 80, имя 20, день рождения 10, название с датой 70; порог 60, веса — под кнопкой Weights (ниже). <b>Решённые группы стоят здесь же, после нерешённых</b>: связанная — «Keep these values», «Unlink»; «не дубликаты» — «Offer again». Группу с записью из коллекции только для чтения слить нельзя, и кнопка говорит почему.</figcaption>
 </figure>
 
 <figure>
@@ -5957,7 +5979,7 @@ Read  2 min ago</div>
       <div class="tc-main">
         <div class="tc-dialog">
           <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Merge on the server</div><div class="tc-head__sub">Артём Белов · 2 records</div></div></div>
-          <div class="tc-msg tc-msg--mr0-ml0">The kept record is rewritten with the values you chose. The other is deleted. This cannot be undone from here.</div>
+          <div class="tc-msg tc-msg--mr0-ml0"><b>One record is rewritten and 1 other deleted.</b> The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. This cannot be undone from here.</div>
           <div class="tc-card tc-card--top14">
             <div class="tc-rubric">Kept and rewritten</div>
             <div class="tc-card__line">Артём Белов <span class="tc-dim">· nextcloud · Контакты</span></div>
@@ -5976,6 +5998,7 @@ Read  2 min ago</div>
           <div class="tc-formfoot tc-formfoot--bordertop-0">
             <button class="tc-btn is-danger-solid" type="button">Write the merge and delete the rest</button>
             <button class="tc-btn" type="button">Cancel</button>
+            <button class="tc-btn tc-push" type="button">Keep Белов Артём instead</button>
           </div>
         </div>
       </div>
@@ -5983,6 +6006,201 @@ Read  2 min ago</div>
   </div>
 </div>
 <figcaption><b>Барьер здесь — список, а не кнопка.</b> Диалог называет поимённо, что останется, что будет удалено и что оставшаяся запись получит; решение принимается глазами. Предупреждение не рядит свои коллекции в «чужие серверы»: человек работает со своими данными, и ему довольно факта — одна запись будет переписана, вторая удалена, с этого экрана отменить нельзя. Кнопка с заливкой — по общему правилу раздела 6: нажатие уничтожает вторую запись. «Merge on the server», которая только открывает этот диалог, осталась в рамке. Диалог сужен до 760&nbsp;px намеренно: здесь принимают одно решение, а не работают.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-dup-3">
+  <div class="frame-label"><span>Порог и веса признаков</span><i>под кнопкой Weights</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad18-20 tc-root--col">
+  <div class="tc-field tc-field--inline"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="60" aria-label="Match threshold"></div>
+  <span class="tc-field__hint">The instance's number. Set your own to change what is offered.</span>
+  <table class="tc-table">
+    <thead><tr><th>Signal</th><th>Points</th><th class="tc-table__n3">Instance</th></tr></thead>
+    <tbody>
+      <tr><td>Same UID</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="80" aria-label="Same UID"></td><td class="tc-mono tc-table__n3">80</td></tr>
+      <tr><td>Same email</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="60" aria-label="Same email"></td><td class="tc-mono tc-table__n3">60</td></tr>
+      <tr><td>Same phone</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="60" aria-label="Same phone"></td><td class="tc-mono tc-table__n3">60</td></tr>
+      <tr><td>Same name</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="20" aria-label="Same name"></td><td class="tc-mono tc-table__n3">20</td></tr>
+      <tr><td>Same birthday <span class="tc-badge">yours</span></td><td><input class="tc-in is-mono tc-in--w52" type="text" value="20" aria-label="Same birthday"></td><td class="tc-mono tc-table__n3">10</td></tr>
+      <tr><td>Same title and date (events, tasks, notes)</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="70" aria-label="Same title and date (events, tasks, notes)"></td><td class="tc-mono tc-table__n3">70</td></tr>
+    </tbody>
+  </table>
+  <div class="tc-line tc-line--gap-8"><button class="tc-btn is-primary" type="button">Save</button><span class="tc-dim tc-dim--t11-5 tc-dim--wrap">An empty field takes the instance's number again.</span></div>
+  </div>
+</div>
+<figcaption><b>Порог и шесть весов — одна форма</b> под кнопкой Weights на экране дубликатов. У каждого признака рядом число экземпляра; своё значение помечено «yours» и хранится вместе с решениями человека. Очки пары — сумма весов её признаков: тот же телефон и то же имя дают 80, одно название с датой — 70.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-dup-4">
+  <div class="frame-label"><span>Слияние события</span><i>что уходит вместе с удаляемой серией</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" value="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav">
+          <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+          <a class="is-on tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates</a>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Sources <span class="tc-mono tc-mono--ls0">2 / 3</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">248</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Команда</span><span class="tc-tickrow__meta">13</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">51</span></div>
+        </div>
+        <div class="tc-railfoot">
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Merge on the server</div><div class="tc-head__sub">Дежурство: первая линия · 2 records</div></div></div>
+          <div class="tc-msg tc-msg--mr0-ml0"><b>One record is rewritten and 1 other deleted.</b> The kept record is rewritten with the values you chose, and only once the server has kept it are the others deleted. This cannot be undone from here.</div>
+          <div class="tc-card tc-card--top14">
+            <div class="tc-rubric">Kept and rewritten</div>
+            <div class="tc-card__line">Дежурство: первая линия <span class="tc-dim">· nextcloud · Работа</span></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-rubric">Deleted afterwards</div>
+            <div class="tc-card__line">Дежурство: первая линия <span class="tc-dim">· radicale · vps · Дежурства</span></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-rubric">The kept record gains</div>
+            <ul class="tc-stack tc-stack--gap-4 tc-card__list">
+              <li>2 reminders from the others</li>
+            </ul>
+          </div>
+          <div class="tc-card">
+            <div class="tc-rubric">Not carried over</div>
+            <ul class="tc-stack tc-stack--gap-4 tc-card__list">
+              <li>1 rewritten occurrence of Дежурство: первая линия · radicale · vps · Дежурства, which belongs to its series and goes with it</li>
+            </ul>
+          </div>
+          <div class="tc-formfoot tc-formfoot--bordertop-0">
+            <button class="tc-btn is-danger-solid" type="button">Write the merge and delete the rest</button>
+            <button class="tc-btn" type="button">Cancel</button>
+            <button class="tc-btn tc-push" type="button">Keep the radicale · vps copy instead</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>У события и задачи список длиннее, чем у контакта.</b> Остающаяся запись перенимает напоминания удаляемых — это строка «gains», — а переписанные экземпляры удаляемой серии не переносятся: они принадлежат её серии и уходят вместе с ней, и диалог называет их числом, до нажатия. Время и повторение остаются у той записи, что остаётся.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-dup-5">
+  <div class="frame-label"><span>Слияние · записано не всё</span><i>сервер отказал в удалении</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" value="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav">
+          <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+          <a class="is-on tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates</a>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Sources <span class="tc-mono tc-mono--ls0">2 / 3</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">248</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Команда</span><span class="tc-tickrow__meta">13</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">51</span></div>
+        </div>
+        <div class="tc-railfoot">
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Merge on the server</div><div class="tc-head__sub">Артём Белов · 2 records</div></div></div>
+          <div class="tc-msg is-alert tc-msg--mr0-ml0"><b>Written, but not every other record was deleted.</b> The merge was written and 0 records deleted; Белов Артём refused, and the rest were not tried. Nothing is undone.</div>
+          <div class="tc-card tc-card--top14">
+            <div class="tc-rubric">What happened</div>
+            <ul class="tc-stack tc-stack--gap-4 tc-card__list">
+              <li>Kept and rewritten: Артём Белов · nextcloud · Контакты</li>
+              <li>Still there: Белов Артём · radicale · vps · Команда</li>
+            </ul>
+          </div>
+          <div class="tc-formfoot tc-formfoot--bordertop-0">
+            <button class="tc-btn is-primary" type="button">Open the kept record</button>
+            <button class="tc-btn" type="button">Back to duplicates</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Слияние, которое не кончилось одной записью, говорит это прямо.</b> Запись переписана, а удаление второй сервер отклонил: строки «Deleted» и «Still there» называют, что где осталось, и ничего не откатывается — переписанное уже на сервере. Дальше человек решает сам: открыть оставшуюся запись или вернуться к дубликатам, где группа всё ещё стоит.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="s-dup-6">
+  <div class="frame-label"><span>Дубликаты · ничего не загружено</span><i>кэш пуст — серверов не спрашивали</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" value="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav">
+          <a class="tc-nav__item" href="#"><svg><use href="#i-con"/></svg>Contacts</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-cal"/></svg>Calendar</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-task"/></svg>Tasks</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-note"/></svg>Notes</a>
+          <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Files</a>
+          <a class="is-on tc-nav__item" href="#"><svg><use href="#i-dup"/></svg>Duplicates</a>
+        </div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Sources <span class="tc-mono tc-mono--ls0">2 / 3</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Контакты</span><span class="tc-tickrow__meta">248</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Команда</span><span class="tc-tickrow__meta">13</span></div>
+          <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">51</span></div>
+        </div>
+        <div class="tc-railfoot">
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main">
+        <div class="tc-dialog">
+          <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Duplicates</div><div class="tc-head__sub">0 records compared</div></div></div>
+          <div class="tc-msg is-accent tc-msg--mr0-ml0">Linking changes nothing on any server: the records stay where they are and are shown as one. Merging on the server is a separate, destructive step you are asked to confirm.</div>
+          <div class="tc-msg tc-msg--mr0-ml0"><b>Nothing is loaded yet.</b> Duplicates are found only among the records this session has already read, so no server was asked. Open a list or a combined view, then come back.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Пусто — потому что не смотрели, а не потому, что дублей нет.</b> Дубликаты ищутся только среди того, что сессия уже прочитала, и ни один сервер ради них не опрашивается (S-16); экран, который промолчал бы, пообещал бы «дублей нет» там, где сравнивать было не с чем.</figcaption>
 </figure>
 
 <h2 id="s-conflict">7.8 Конфликт</h2>
