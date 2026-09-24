@@ -45,7 +45,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e17"
+            "value": "e19"
           },
           {
             "error": "",
@@ -571,7 +571,7 @@
     "actions": [
       {
         "enabled": true,
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e17\u0026op=upload",
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?etag=e19\u0026op=upload",
         "id": "photo.add",
         "label": "Add",
         "method": "POST"

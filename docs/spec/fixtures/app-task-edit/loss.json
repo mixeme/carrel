@@ -20,7 +20,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e17\u0026from=edit\u0026op=attach",
+        "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e19\u0026from=edit\u0026op=attach",
         "icon": "i-up",
         "id": "attach.add",
         "label": "Attach",
@@ -55,7 +55,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e17"
+            "value": "e19"
           },
           {
             "error": "",

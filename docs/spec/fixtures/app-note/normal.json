@@ -81,7 +81,7 @@
     "actions": [
       {
         "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e14\u0026op=attach",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026op=attach",
         "icon": "i-up",
         "id": "attach.add",
         "label": "Attach",
@@ -112,7 +112,7 @@
       {
         "danger": true,
         "enabled": true,
-        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e14",
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e16",
         "id": "record.delete",
         "label": "Delete note",
         "method": "POST"

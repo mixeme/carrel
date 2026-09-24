@@ -309,7 +309,7 @@
         "method": "GET"
       }
     ],
-    "note": "0 of 5 collections ticked",
+    "note": "0 of 7 collections ticked",
     "sections": [
       {
         "account": "",
@@ -610,6 +610,71 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "Subscriptions",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "#5c6b73",
+            "count": null,
+            "detail": "",
+            "href": "/app/calendar/f-ru-holidays/feed",
+            "label": "Праздники РФ",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
+                "id": "feed.edit",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/f-ru-holidays/feed/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              }
+            ],
+            "message": "",
+            "readOnly": true,
+            "retry": null,
+            "state": "read-only",
+            "tick": "off"
+          },
+          {
+            "colour": "#5c6b73",
+            "count": null,
+            "detail": "",
+            "href": "/app/calendar/f-league/feed",
+            "label": "Расписание лиги",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=f-league\u0026c=feed",
+                "id": "feed.edit",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/f-league/feed/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              }
+            ],
+            "message": "",
+            "readOnly": true,
+            "retry": null,
+            "state": "read-only",
             "tick": "off"
           }
         ],

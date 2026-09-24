@@ -2,7 +2,7 @@
   "actions": [
     {
       "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e11\u0026op=done",
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e13\u0026op=done",
       "id": "task.done",
       "label": "Mark done",
       "method": "POST"
@@ -16,7 +16,7 @@
     },
     {
       "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e11\u0026op=attach",
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e13\u0026op=attach",
       "icon": "i-up",
       "id": "attach.add",
       "label": "Attach",
@@ -47,7 +47,7 @@
     {
       "danger": true,
       "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e11",
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e13",
       "id": "record.delete",
       "label": "Delete task",
       "method": "POST"
@@ -162,7 +162,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 0,
+            "count": 2,
             "detail": "",
             "href": "/app/tasks/a-nc-home/rabota",
             "label": "Работа",

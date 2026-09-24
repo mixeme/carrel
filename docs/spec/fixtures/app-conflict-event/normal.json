@@ -2,21 +2,21 @@
   "actions": [
     {
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e17\u0026op=combine",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e19\u0026op=combine",
       "id": "conflict.combine",
       "label": "Write this combination",
       "method": "POST"
     },
     {
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e17\u0026op=mine",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e19\u0026op=mine",
       "id": "conflict.mine",
       "label": "Use only my edit",
       "method": "POST"
     },
     {
       "enabled": true,
-      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e17\u0026op=theirs",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/conflict?etag=e19\u0026op=theirs",
       "id": "conflict.theirs",
       "label": "Use only the server version",
       "method": "POST"
@@ -123,7 +123,7 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "off"
           },
           {
             "colour": "#4a6b52",

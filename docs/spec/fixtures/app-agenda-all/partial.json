@@ -288,15 +288,6 @@
     "running": true,
     "sources": [
       {
-        "colour": "#a05a2c",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "nextcloud · Дни рождения",
-        "state": "empty"
-      },
-      {
         "colour": "#4a6b52",
         "count": 2,
         "fromCache": false,
@@ -331,9 +322,18 @@
         "retry": null,
         "stamp": "radicale · vps · Проекты",
         "state": "querying"
+      },
+      {
+        "colour": "#5c6b73",
+        "count": 3,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "feeds.example · Праздники РФ",
+        "state": "done"
       }
     ],
-    "summary": "Polled 3 of 5 sources · 4 events",
+    "summary": "Polled 3 of 5 sources · 7 events",
     "taskID": "t-task"
   },
   "print": {
@@ -433,7 +433,7 @@
         "method": "GET"
       }
     ],
-    "note": "5 of 5 collections ticked",
+    "note": "5 of 7 collections ticked",
     "sections": [
       {
         "account": "",
@@ -450,7 +450,7 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "part"
           }
         ],
         "state": "ok"
@@ -511,7 +511,7 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "off"
           },
           {
             "colour": "#4a6b52",
@@ -735,6 +735,71 @@
             "retry": null,
             "state": "ok",
             "tick": "on"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "Subscriptions",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "#5c6b73",
+            "count": null,
+            "detail": "",
+            "href": "/app/calendar/f-ru-holidays/feed",
+            "label": "Праздники РФ",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
+                "id": "feed.edit",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/f-ru-holidays/feed/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              }
+            ],
+            "message": "",
+            "readOnly": true,
+            "retry": null,
+            "state": "read-only",
+            "tick": "on"
+          },
+          {
+            "colour": "#5c6b73",
+            "count": null,
+            "detail": "",
+            "href": "/app/calendar/f-league/feed",
+            "label": "Расписание лиги",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=f-league\u0026c=feed",
+                "id": "feed.edit",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/f-league/feed/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              }
+            ],
+            "message": "",
+            "readOnly": true,
+            "retry": null,
+            "state": "read-only",
+            "tick": "off"
           }
         ],
         "state": "ok"

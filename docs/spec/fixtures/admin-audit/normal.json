@@ -12,14 +12,14 @@
     ],
     "compact": false,
     "filter": "",
-    "loaded": 10,
+    "loaded": 13,
     "range": null,
     "segments": [
       {
         "enabled": false,
         "href": "/admin/audit",
         "id": "audit.all",
-        "label": "All · 10",
+        "label": "All · 13",
         "method": "GET",
         "on": true
       },
@@ -39,7 +39,7 @@
       }
     ],
     "selected": 0,
-    "total": 10
+    "total": 13
   },
   "details": null,
   "notices": [],
@@ -130,6 +130,27 @@
     "tags": []
   },
   "rows": [
+    {
+      "detail": "f-league",
+      "what": "feed.subscribe",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "event",
+      "what": "sources.select",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "f-ru-holidays",
+      "what": "feed.subscribe",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
     {
       "detail": "",
       "what": "duplicates.link",

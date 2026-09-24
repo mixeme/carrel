@@ -74,6 +74,10 @@ type mockupCollection struct {
 	kinds   []view.Kind
 	comps   []string
 	file    string // under docs/visual/fixtures; empty for an empty collection
+	// more is a second file into the same collection: «Работа» holds the
+	// events of rabota.ics and the tasks of rabota-zadachi.ics, as the
+	// set's README loads it.
+	more string
 	// readOnly and unticked are what the frames show of «Команда» and
 	// «Рассылки»: a book this account may only read, and a collection that
 	// stands in the catalog out of the combined views.
@@ -90,9 +94,11 @@ var mockupSet = []mockupCollection{
 	{account: "nextcloud", slug: "lichnyj", name: "Личный", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/lichnyj.ics"},
 	{account: "nextcloud", slug: "rabota", name: "Работа", colour: "#3F6E8C",
-		kinds: []view.Kind{view.KindEvent, view.KindTask}, comps: []string{"VEVENT", "VTODO"}, file: "nextcloud-home/rabota.ics"},
+		kinds: []view.Kind{view.KindEvent, view.KindTask}, comps: []string{"VEVENT", "VTODO"}, file: "nextcloud-home/rabota.ics", more: "nextcloud-home/rabota-zadachi.ics"},
+	// «Дни рождения» stands with its tick off, as every calendar frame draws
+	// it and the set's README says (s-agenda-1…3).
 	{account: "nextcloud", slug: "dni-rozhdeniya", name: "Дни рождения", colour: "#A05A2C",
-		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/dni-rozhdeniya.ics"},
+		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "nextcloud-home/dni-rozhdeniya.ics", unticked: true},
 	{account: "nextcloud", slug: "dela", name: "Дела", colour: "#4A6B52",
 		kinds: []view.Kind{view.KindTask}, comps: []string{"VTODO"}, file: "nextcloud-home/dela.ics"},
 	{account: "nextcloud", slug: "zapisi", name: "Записи", colour: "#4A6B52",
@@ -127,6 +133,80 @@ type mockupApp struct {
 	// connection: a state where a source is still being asked is made by
 	// holding one of them (davtest.Stall).
 	servers map[string]*davtest.Server
+	// feeds are the two subscriptions of the set, by the address the frames
+	// give them, with the stand that serves each (mockupFeeds).
+	feeds map[string]*feedServer
+}
+
+// mockupFeed is a subscription of the set: the file it serves, the address
+// and name the frames give it, and whether the calendar ticks it.
+type mockupFeed struct {
+	file, url, name, id string
+	events              bool // ticked in the calendar; nothing else is
+	refused             bool // the saved password stopped fitting (s-settings: 401)
+}
+
+var mockupFeedSet = []mockupFeed{
+	{file: "feeds/ru-holidays.ics", url: "https://feeds.example/ru-holidays.ics", name: "Праздники РФ", id: "f-ru-holidays", events: true},
+	{file: "feeds/league-season.ics", url: "https://league.example/season.ics", name: "Расписание лиги", id: "f-league", refused: true},
+}
+
+// mockupFeeds subscribes to the two feeds of the set as a person does — the
+// form and a name — and ticks «Праздники РФ» in the
+// calendar and nowhere else, as the frames do (s-agenda-1, s-tasks-1). The
+// league's feed asks for a password, is subscribed with it, and then stops
+// taking it: the frames show it refusing.
+func mockupFeeds(t *testing.T, h *harness, sess *session.Session, root string) (map[string]*feedServer, map[string]string) {
+	t.Helper()
+	servers, ids := map[string]*feedServer{}, map[string]string{}
+	for _, one := range mockupFeedSet {
+		body, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(one.file)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		login := ""
+		if one.refused {
+			login = "mix"
+		}
+		feed := newFeedServer(t, string(body), login)
+		u, _ := url.Parse(one.url)
+		form := url.Values{"url": {feed.URL + u.Path}, "name": {one.name}}
+		if login != "" {
+			form.Set("login", login)
+			form.Set("password", "pw")
+		}
+		if rec := h.do(postForm("/app/settings/connections?op=feed.subscribe", sess, form)); rec.Code != 303 {
+			t.Fatalf("subscribe %s: %d %s", one.name, rec.Code, rec.Body.String())
+		}
+		key, _ := sess.DataKey()
+		blob, _ := h.users.Catalog(sess.AccountID(), key)
+		sub := blob.Subscriptions[len(blob.Subscriptions)-1]
+		col := sub.FeedCollection()
+		// The colour stays the one Carrel derives: a feed's colour is chosen
+		// from the palette of eight, and the frames draw these two in tones
+		// outside it (docs/plan/to-typecase.md).
+		if one.events {
+			picks := blob.Selected
+			picks = append(picks, sealed.Selection{Kind: view.KindEvent, AccountID: sub.ID, Path: col.Path})
+			var events []sealed.Selection
+			for _, p := range picks {
+				if p.Kind == view.KindEvent {
+					events = append(events, p)
+				}
+			}
+			if err := h.users.SetSelection(sess.AccountID(), key, view.KindEvent, events); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if one.refused {
+			feed.mu.Lock()
+			feed.login = "someone-else"
+			feed.mu.Unlock()
+		}
+		servers[one.url] = feed
+		ids[sub.ID] = one.id
+	}
+	return servers, ids
 }
 
 // listPath is the address of one collection of the set, as Carrel issued it.
@@ -274,14 +354,18 @@ func newMockupApp(t *testing.T) *mockupApp {
 		}
 		srv.SetColour(path, col.colour)
 		paths[col.slug] = path
-		if col.file == "" {
-			continue
+		var records []string
+		for _, file := range []string{col.file, col.more} {
+			if file == "" {
+				continue
+			}
+			data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(file)))
+			if err != nil {
+				t.Fatal(err)
+			}
+			records = append(records, splitRecords(string(data))...)
 		}
-		body, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(col.file)))
-		if err != nil {
-			t.Fatal(err)
-		}
-		for i, rec := range splitRecords(string(body)) {
+		for i, rec := range records {
 			name := "rec" + string(rune('a'+i))
 			if m := uidLineRe.FindStringSubmatch(rec); m != nil {
 				name = strings.TrimSpace(m[1])
@@ -332,8 +416,9 @@ func newMockupApp(t *testing.T) *mockupApp {
 	}
 	tickMockup(t, h, sess)
 	linkMockupDuplicates(t, h, sess)
+	feeds, feedIDs := mockupFeeds(t, h, sess, root)
 
-	app := &mockupApp{h: h, sess: sess, servers: servers, byAccount: map[string]string{}, byPath: map[string]string{}}
+	app := &mockupApp{h: h, sess: sess, servers: servers, feeds: feeds, byAccount: feedIDs, byPath: map[string]string{}}
 	key, _ := sess.DataKey()
 	blob, _ := h.users.Catalog(sess.AccountID(), key)
 	names := map[string]string{"nextcloud": "a-nc-home", "radicale · vps": "a-rad-vps"}
@@ -475,6 +560,12 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 		if srv := a.servers[label]; srv != nil {
 			s = strings.ReplaceAll(s, srv.URL, name)
 		}
+	}
+	for frame, feed := range a.feeds {
+		u, _ := url.Parse(frame)
+		s = strings.ReplaceAll(s, feed.URL, u.Scheme+"://"+u.Host)
+		// A feed's stamp is its host, and the stand's has a port of its own.
+		s = strings.ReplaceAll(s, strings.TrimPrefix(feed.URL, "http://"), u.Host)
 	}
 	s = regexp.MustCompile(`t-[0-9A-Z]{10}`).ReplaceAllString(s, "t-task")
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
@@ -733,6 +824,9 @@ func TestFixtureEventCard(t *testing.T) {
 // C-14.2: one list of tasks (s-tasks-1).
 func TestFixtureTaskList(t *testing.T) {
 	app := newMockupApp(t)
+	// Both task lists are counted in the frame (s-tasks-1): the combined
+	// list was opened first, as a person comes to it.
+	combined(t, app.h, app.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	app.compare(t, "app-tasks/normal.json", app.h.do(get(app.listPath(t, "tasks", "dela"), app.sess)))
 }

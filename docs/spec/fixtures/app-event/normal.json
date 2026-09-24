@@ -209,7 +209,7 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "off"
           },
           {
             "colour": "#4a6b52",

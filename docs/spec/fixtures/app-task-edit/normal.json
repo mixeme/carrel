@@ -20,7 +20,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e11\u0026from=edit\u0026op=attach",
+        "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e13\u0026from=edit\u0026op=attach",
         "icon": "i-up",
         "id": "attach.add",
         "label": "Attach",
@@ -55,7 +55,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e11"
+            "value": "e13"
           },
           {
             "error": "",
@@ -491,7 +491,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": 0,
+            "count": 2,
             "detail": "",
             "href": "/app/tasks/a-nc-home/rabota",
             "label": "Работа",

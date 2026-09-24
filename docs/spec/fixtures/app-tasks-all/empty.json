@@ -186,7 +186,7 @@
         "method": "GET"
       }
     ],
-    "note": "0 of 2 collections ticked",
+    "note": "0 of 3 collections ticked",
     "sections": [
       {
         "account": "",
@@ -318,6 +318,42 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "Subscriptions",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "#5c6b73",
+            "count": null,
+            "detail": "",
+            "href": "/app/tasks/f-ru-holidays/feed",
+            "label": "Праздники РФ",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
+                "id": "feed.edit",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/f-ru-holidays/feed/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              }
+            ],
+            "message": "",
+            "readOnly": true,
+            "retry": null,
+            "state": "read-only",
             "tick": "off"
           }
         ],

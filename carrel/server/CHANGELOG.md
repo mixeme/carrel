@@ -17,6 +17,47 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.48 — 2026-09-25
+
+The fixture set holds what the frames draw (docs/plan/from-typecase.md).
+
+### Changed
+
+- **Subscriptions are in the fixture set.** «Праздники РФ» and «Расписание
+  лиги» are served from `docs/visual/fixtures/feeds/` and subscribed to
+  through the form. «Праздники РФ» is ticked in the calendar and nowhere
+  else. «Расписание лиги» asks for a password and then stops taking it, as
+  `s-settings` shows. Every fixture with a calendar or task rail, the
+  connections page, the journal and search follow.
+- **«Дни рождения» are unticked in the set**, as every calendar frame
+  draws them and the set's README always said.
+- **«Работа» holds its tasks.** `rabota-zadachi.ics` was never loaded
+  into the fixture set, though the README says it goes into «Работа» beside
+  `rabota.ics`.
+- The task list's fixture is taken after the combined list, as the note and
+  contact fixtures already are, so both task lists carry their number.
+
+### Checks
+
+- `docs/spec/check.py` takes only digits on a rail row for a number: «ro»
+  beside a feed and a reason beside a failed collection stand where a
+  number would, and are not one.
+- A mistake of mine is corrected: until the subscriptions were in the set,
+  the check of the agenda's rail stopped at the list of collections and
+  never reached ticks and numbers. From that I had told Typecase that the
+  card frames disagree with the list frames on events. They do not. Task 3
+  in `docs/plan/to-typecase.md` now holds only what is true of the notes,
+  and says so; task 4 asks about the feeds' colours, which are outside the
+  palette a feed's colour is chosen from.
+- What stays red is the server's: a calendar's number in the rail. C-6.3
+  gives each calendar the count of its events, the frames draw it, and the
+  server shows a dash, because the agenda reads a week. That is a question
+  for the owner.
+
+### For consumers
+
+Nothing in the running server.
+
 ## v0.2.47 — 2026-09-25
 
 ### Changed

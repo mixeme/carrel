@@ -772,7 +772,77 @@
     "sections": [],
     "tags": []
   },
-  "subscriptions": [],
+  "subscriptions": [
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?feed=f-ru-holidays\u0026op=feed.recheck",
+          "id": "feed.recheck",
+          "label": "Check",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
+          "id": "feed.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections?feed=f-ru-holidays\u0026op=feed.unsubscribe",
+          "id": "feed.unsubscribe",
+          "label": "Unsubscribe",
+          "method": "POST"
+        }
+      ],
+      "checked": "",
+      "colour": "#5c6b73",
+      "kinds": [
+        "event",
+        "task"
+      ],
+      "stale": false,
+      "title": "Праздники РФ",
+      "url": "https://feeds.example/ru-holidays.ics"
+    },
+    {
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?feed=f-league\u0026op=feed.recheck",
+          "id": "feed.recheck",
+          "label": "Check",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/rename?a=f-league\u0026c=feed",
+          "id": "feed.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections?feed=f-league\u0026op=feed.unsubscribe",
+          "id": "feed.unsubscribe",
+          "label": "Unsubscribe",
+          "method": "POST"
+        }
+      ],
+      "checked": "",
+      "colour": "#5c6b73",
+      "kinds": [
+        "event"
+      ],
+      "stale": false,
+      "title": "Расписание лиги",
+      "url": "https://league.example/season.ics"
+    }
+  ],
   "title": "Connections",
   "top": {
     "newMenu": [

@@ -207,12 +207,39 @@
         "state": "empty"
       },
       {
-        "colour": "#a05a2c",
+        "colour": "#4a6b52",
         "count": 0,
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · Дни рождения",
+        "stamp": "nextcloud · Дела",
+        "state": "empty"
+      },
+      {
+        "colour": "#3f6e8c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Работа",
+        "state": "empty"
+      },
+      {
+        "colour": "#6b4e7a",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Дневник",
+        "state": "empty"
+      },
+      {
+        "colour": "#4a6b52",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Записи",
         "state": "empty"
       },
       {
@@ -223,15 +250,6 @@
         "retry": null,
         "stamp": "nextcloud · Личный",
         "state": "done"
-      },
-      {
-        "colour": "#3f6e8c",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "nextcloud · Работа",
-        "state": "empty"
       },
       {
         "colour": "#8c6239",
@@ -252,30 +270,12 @@
         "state": "empty"
       },
       {
-        "colour": "#4a6b52",
+        "colour": "#5c6b73",
         "count": 0,
         "fromCache": false,
         "message": "",
         "retry": null,
-        "stamp": "nextcloud · Дела",
-        "state": "empty"
-      },
-      {
-        "colour": "#6b4e7a",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "nextcloud · Дневник",
-        "state": "empty"
-      },
-      {
-        "colour": "#4a6b52",
-        "count": 0,
-        "fromCache": false,
-        "message": "",
-        "retry": null,
-        "stamp": "nextcloud · Записи",
+        "stamp": "feeds.example · Праздники РФ",
         "state": "empty"
       }
     ],
@@ -332,11 +332,11 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "part"
           },
           {
             "colour": "#a05a2c",
-            "count": 0,
+            "count": null,
             "detail": "",
             "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
             "label": "Дни рождения",
@@ -345,7 +345,7 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "off"
           },
           {
             "colour": "#4a6b52",
@@ -398,6 +398,32 @@
             "retry": null,
             "state": "ok",
             "tick": "on"
+          },
+          {
+            "colour": "#5c6b73",
+            "count": 0,
+            "detail": "",
+            "href": "/app/calendar/f-ru-holidays/feed",
+            "label": "Праздники РФ",
+            "menu": [],
+            "message": "",
+            "readOnly": true,
+            "retry": null,
+            "state": "read-only",
+            "tick": "on"
+          },
+          {
+            "colour": "#5c6b73",
+            "count": null,
+            "detail": "",
+            "href": "/app/calendar/f-league/feed",
+            "label": "Расписание лиги",
+            "menu": [],
+            "message": "",
+            "readOnly": true,
+            "retry": null,
+            "state": "read-only",
+            "tick": "off"
           }
         ],
         "state": "ok"

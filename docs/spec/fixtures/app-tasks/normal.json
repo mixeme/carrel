@@ -99,7 +99,7 @@
           "menu": [
             {
               "enabled": true,
-              "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e11\u0026from=list\u0026op=done",
+              "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e13\u0026from=list\u0026op=done",
               "id": "task.done",
               "label": "Mark done",
               "method": "POST"
@@ -134,7 +134,7 @@
           "menu": [
             {
               "enabled": true,
-              "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?done=on\u0026etag=e12\u0026from=list\u0026op=done",
+              "href": "/app/tasks/a-nc-home/dela/aa11-2d09-5f84/edit?done=on\u0026etag=e14\u0026from=list\u0026op=done",
               "id": "task.done",
               "label": "Mark done",
               "method": "POST"
@@ -169,7 +169,7 @@
           "menu": [
             {
               "enabled": true,
-              "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=on\u0026etag=e13\u0026from=list\u0026op=done",
+              "href": "/app/tasks/a-nc-home/dela/aa12-9e44-c703/edit?done=on\u0026etag=e15\u0026from=list\u0026op=done",
               "id": "task.done",
               "label": "Mark done",
               "method": "POST"
@@ -254,7 +254,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 5,
         "enabled": true,
         "href": "/app/tasks",
         "id": "nav.tasks",
@@ -287,7 +287,7 @@
         "method": "GET"
       }
     ],
-    "note": "2 of 2 collections ticked",
+    "note": "2 of 3 collections ticked",
     "sections": [
       {
         "account": "",
@@ -295,7 +295,7 @@
         "rows": [
           {
             "colour": "",
-            "count": null,
+            "count": 5,
             "detail": "",
             "href": "/app/tasks",
             "label": "Combined list",
@@ -304,7 +304,7 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "part"
           }
         ],
         "state": "ok"
@@ -369,7 +369,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 2,
             "detail": "",
             "href": "/app/tasks/a-nc-home/rabota",
             "label": "Работа",
@@ -420,6 +420,42 @@
             "retry": null,
             "state": "ok",
             "tick": "on"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "Subscriptions",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "#5c6b73",
+            "count": null,
+            "detail": "",
+            "href": "/app/tasks/f-ru-holidays/feed",
+            "label": "Праздники РФ",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
+                "id": "feed.edit",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/tasks/f-ru-holidays/feed/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              }
+            ],
+            "message": "",
+            "readOnly": true,
+            "retry": null,
+            "state": "read-only",
+            "tick": "off"
           }
         ],
         "state": "ok"

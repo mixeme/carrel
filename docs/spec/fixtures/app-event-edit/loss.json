@@ -4,7 +4,7 @@
       "actions": [
         {
           "enabled": true,
-          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e17\u0026from=edit\u0026n=0\u0026op=detach",
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e19\u0026from=edit\u0026n=0\u0026op=detach",
           "icon": "i-trash",
           "id": "attach.remove",
           "label": "Remove link, keep the file",
@@ -55,7 +55,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e17\u0026from=edit\u0026op=attach",
+        "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e19\u0026from=edit\u0026op=attach",
         "icon": "i-up",
         "id": "attach.add",
         "label": "Attach",
@@ -90,7 +90,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "e17"
+            "value": "e19"
           },
           {
             "error": "",
@@ -908,7 +908,7 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "off"
           },
           {
             "colour": "#4a6b52",
