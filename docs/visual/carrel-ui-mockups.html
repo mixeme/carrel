@@ -621,6 +621,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-stat.is-error{color:var(--tc-danger)}
 .tc-card{border:.5px solid var(--tc-hair);border-radius:4px;background:var(--tc-surface);padding:12px 14px;margin-bottom:10px}
 .tc-card > .tc-rubric{margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+/* Правая часть рубрики: части переносятся целиком, фраза внутри не рвётся и за край карточки не выходит. */
+.tc-rubric__aside{display:inline-flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-end;gap:4px 6px;white-space:nowrap;min-width:0}
 /* Слияние: список «куда» сжимается (min-width:0), кнопка не уезжает. */
 /* Конфликт: карточка на свойство, не три колонки в ряд. */
 .tc-diff{display:flex;flex-direction:column;gap:8px;margin-top:10px}
@@ -1429,7 +1431,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 /* names-without-rule: tc-shell tc-row__lead tc-row__due tc-row__date tc-row__size
    tc-head__text tc-docmeta__sec tc-queue__list tc-queue__name tc-queue__meta
    tc-row__file tc-menu__label tc-auth__tagline tc-auth__link tc-print__cell
-   tc-msg__aside tc-stack__item tc-sheet__block tc-line__item tc-rubric__aside
+   tc-msg__aside tc-stack__item tc-sheet__block tc-line__item
    tc-row__subtitle
    — узел назван, вида у имени нет. Пустое правило — не правило: оно проходило
    classes-defined и уезжало в CSS библиотеки. Список читает линт. */
@@ -3099,29 +3101,19 @@ Read  2 min ago · not changed on server</div>
         </div>
         <div class="tc-bar">
           <span class="tc-range"><input class="tc-in is-mono" type="date" value="2026-01-01"><i class="tc-range__dash">→</i><input class="tc-in is-mono" type="text" value="today"><button class="tc-btn" type="button">Show</button></span>
-          <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 27</button><button class="tc-seg__opt" type="button">Events 14</button><button class="tc-seg__opt" type="button">Tasks 3</button><button class="tc-seg__opt" type="button">Notes 6</button><button class="tc-seg__opt" type="button">Files 4</button></span>
+          <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All 24</button><button class="tc-seg__opt" type="button">Events 14</button><button class="tc-seg__opt" type="button">Tasks 2</button><button class="tc-seg__opt" type="button">Notes 4</button><button class="tc-seg__opt" type="button">Files 4</button></span>
           <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
           <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           <span class="tc-bar__right is-2nd"><span class="tc-mono">newest first</span></span>
         </div>
         <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="80%"></i></span>Polled 4 of 5 calendars · matched by <span class="tc-mono">a.kovaleva@example.org</span>, <span class="tc-mono">anna.kovaleva@slovo.example</span> and the name · <span class="tc-dim--danger">baikal · Общий unavailable</span></div>
 
-        <div class="tc-list__group"><span class="tc-rubric">August 2026</span><span class="tc-num">5</span></div>
+        <div class="tc-list__group"><span class="tc-rubric">August 2026</span><span class="tc-num">3</span></div>
         <div class="tc-list">
           <div class="tc-row tc-row--find">
             <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10 Aug</span>
             <span class="tc-row__title">Синк-ап по релизу</span><span class="tc-row__excerpt tc-row__detail">attendee · accepted</span>
             <span class="tc-row__cell tc-row__caption">event</span><span class="tc-row__cell tc-row__source">nextcloud · Личный</span>
-          </div>
-          <div class="tc-row tc-row--find">
-            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">10 Aug</span>
-            <span class="tc-row__title">Заметка со встречи 10.08</span><span class="tc-row__excerpt tc-row__detail">related to this person</span>
-            <span class="tc-row__cell tc-row__caption">note</span><span class="tc-row__cell tc-row__source">nextcloud · Записи</span>
-          </div>
-          <div class="tc-row tc-row--find is-overdue">
-            <span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-mono tc-row__lead">8 Aug</span>
-            <span class="tc-row__title">Ответить Анне по смете</span><span class="tc-row__excerpt tc-row__detail">related to this person · overdue</span>
-            <span class="tc-row__cell tc-row__caption">task</span><span class="tc-row__cell tc-row__source">nextcloud · Работа</span>
           </div>
           <div class="tc-row tc-row--find">
             <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">4 Aug</span>
@@ -3135,17 +3127,12 @@ Read  2 min ago · not changed on server</div>
           </div>
         </div>
 
-        <div class="tc-list__group"><span class="tc-rubric">July 2026</span><span class="tc-num">6</span></div>
+        <div class="tc-list__group"><span class="tc-rubric">July 2026</span><span class="tc-num">5</span></div>
         <div class="tc-list">
           <div class="tc-row tc-row--find">
             <span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mono tc-row__lead">29 Jul</span>
             <span class="tc-row__title">Ревью вёрстки сборника</span><span class="tc-row__excerpt tc-row__detail">attendee · no reply</span>
             <span class="tc-row__cell tc-row__caption">event</span><span class="tc-row__cell tc-row__source">radicale · vps · Проекты</span>
-          </div>
-          <div class="tc-row tc-row--find">
-            <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mono tc-row__lead">21 Jul</span>
-            <span class="tc-row__title">Про сроки по сборнику</span><span class="tc-row__excerpt tc-row__detail">related to this person</span>
-            <span class="tc-row__cell tc-row__caption">note</span><span class="tc-row__cell tc-row__source">nextcloud · Записи</span>
           </div>
         </div>
         <div class="tc-empty tc-empty--t12-pad12-20">Nothing was looked for before January 2026. Widen the range if you need it.</div>
@@ -3189,8 +3176,8 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Экран отвечает на «что у меня с этим человеком», а не «что за карточка».</b> Второй вопрос теперь у карточки свой (<a href="#card">выше</a>), и разделение это не потеря, а условие: список записей с диапазоном дат и столбцами и карточка с телефонами — разные поверхности, и та, что стояла в закрываемой панели, всё время проигрывала. Карточка справа осталась, но как контекст: закрыли — экран не изменил смысла. <b>Это и есть ответ на вопрос «зачем четыре раздела вместе».</b> Справа — что человек сообщил о себе: телефоны, адреса, день рождения. Слева — что о нём накопилось за год работы: встречи с его участием, задачи и заметки, связанные с ним, и файлы, приложенные к этим записям, — с трёх серверов, в одной хронологии, с полоской источника у каждой строки. Ни один отдельно взятый календарь такого не покажет, и ни один клиент, который смотрит в один сервер, тоже.
-<br><br><b>Колонка «почему совпало»</b> — обязательная, а не украшение: человек должен видеть, откуда взялась строка. «Attendee · accepted» — адрес карточки в <code>ATTENDEE</code>, «related to this person» — <code>RELATED-TO</code> на её UID, у файла — имя в имени файла. <b>Упоминаний в тексте и в заголовке здесь нет:</b> хронология — где человек участник, а где о нём пишут — это «Упоминания», отдельная функция-кандидат. Движок это знает; донести признак от поиска до строки дешевле, чем что-либо ещё на этом экране.
+<figcaption><b>Экран отвечает на «что у меня с этим человеком», а не «что за карточка».</b> Второй вопрос теперь у карточки свой (<a href="#card">выше</a>), и разделение это не потеря, а условие: список записей с диапазоном дат и столбцами и карточка с телефонами — разные поверхности, и та, что стояла в закрываемой панели, всё время проигрывала. Карточка справа осталась, но как контекст: закрыли — экран не изменил смысла. <b>Это и есть ответ на вопрос «зачем четыре раздела вместе».</b> Справа — что человек сообщил о себе: телефоны, адреса, день рождения. Слева — что о нём накопилось за год работы: встречи с его участием, задачи, где он организатор или участник, и файлы, приложенные к этим записям, — с трёх серверов, в одной хронологии, с полоской источника у каждой строки. Ни один отдельно взятый календарь такого не покажет, и ни один клиент, который смотрит в один сервер, тоже.
+<br><br><b>Колонка «почему совпало»</b> — обязательная, а не украшение: человек должен видеть, откуда взялась строка. «Attendee · accepted» — адрес карточки в <code>ATTENDEE</code>, «related to this person» — <code>RELATED-TO</code> на её UID, у файла — имя в имени файла. <b>Записей, где о человеке только пишут, здесь нет:</b> хронология — где он участник; где он упомянут в тексте или заголовке — это «Упоминания», отдельная функция-кандидат. Движок это знает; донести признак от поиска до строки дешевле, чем что-либо ещё на этом экране.
 <br><br><b>Что уже работает:</b> опрос календарей адресами и именем с карточки, события, задачи и заметки одним ответом (они лежат в календарных коллекциях), связанные записи из разных книг. <b>Что нужно добавить:</b> вкладку «Файлы» (вложения берутся из уже загруженных записей, без второго опроса), признак совпадения в строке и кнопки «заметка о ней», «встреча с ней» — они создают запись с уже подставленным участником и открытой связью.
 <br><br><b>Диапазон дат стоит в полосе первым</b>, с кнопкой Show, и не помечен <code>is-2nd</code>: при открытой панели подробностей колонка уже меньше 800&nbsp;px, и спрятанный диапазон оставлял бы «Widen the range» без контрола, которым отвечают.</figcaption>
 </figure>
@@ -3896,7 +3883,6 @@ Read  2 min ago · not changed on server</div>
           <div class="tc-rubric">nextcloud</div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Записи</span><span class="tc-tickrow__meta">64</span></div>
           <div class="tc-tickrow"><button class="tc-tickrow__tick" type="button"></button><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-tickrow__label">Дневник</span><span class="tc-tickrow__meta">22</span></div>
-          <div class="tc-tickrow is-off"><button class="tc-tickrow__tick is-off" type="button"></button><span class="tc-mark" data-tc-colour="#A05A2C"></span><span class="tc-tickrow__label">Архив</span><span class="tc-tickrow__meta">—</span></div>
         </div>
         <div class="tc-railsec">
           <div class="tc-rubric">Tags</div>
