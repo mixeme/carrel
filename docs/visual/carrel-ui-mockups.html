@@ -10693,7 +10693,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-con"/></svg>Contact</button>
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-con"/></svg>Address book</button>
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-cal"/></svg>Event</button>
-        <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-cal"/></svg>Calendar for a range</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-cal"/></svg>Calendar</button>
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-task"/></svg>Task</button>
         <button class="tc-menu__item" type="button" role="menuitem"><svg><use href="#i-note"/></svg>Note</button>
         <span class="tc-menu__sep"></span>
@@ -10878,16 +10878,16 @@ https://carrel.example/api/backup/run?job=personal</textarea>
 
 <figure>
 <div class="frame cap900" data-frame="s-mail-10">
-  <div class="frame-label"><span>Календарь за период</span><span class="frag">фрагмент</span><i>лист поверх листа письма, экран целиком — выше</i></div>
+  <div class="frame-label"><span>Календарь · весь или за даты</span><span class="frag">фрагмент</span><i>лист поверх листа письма, экран целиком — выше</i></div>
   <div class="tc-root tc-root--on-bg tc-root--pad16">
     <div class="tc-sheet tc-sheet--max100pc-full">
       <div class="tc-sheet__head">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-cal"/></svg>
-        <b class="tc-sheet__title">Attach a calendar for a range</b>
+        <b class="tc-sheet__title">Attach a calendar</b>
         <button class="tc-btn tc-close tc-push" title="Close" type="button"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
       </div>
       <div class="tc-sheet__body tc-sheet__body--pad0">
-        <div class="tc-line tc-sheet__pick">
+        <div class="tc-line tc-sheet__pick tc-sheet__pick--196">
           <div class="tc-sheet__pick-rail">
             <div class="tc-railsec">
               <div class="tc-rubric">nextcloud</div>
@@ -10905,6 +10905,8 @@ https://carrel.example/api/backup/run?job=personal</textarea>
           </div>
           <div class="tc-sheet__pick-list">
             <div class="tc-form">
+              <div class="tc-field tc-field--w100"><label>What goes in</label>
+                <span class="tc-seg tc-seg--start"><button class="tc-seg__opt" type="button">Whole calendar</button><button class="is-on tc-seg__opt" type="button">Dates</button></span></div>
               <div class="tc-field tc-field--sm"><label>From</label><input class="tc-in is-mono" type="date" value="2026-08-10" aria-label="From"></div>
               <div class="tc-field tc-field--sm"><label>To</label><input class="tc-in is-mono" type="date" value="2026-08-31" aria-label="To"><span class="tc-field__hint">Both days are in the file.</span></div>
               <div class="tc-field"><button class="tc-btn" type="button">Show</button></div>
@@ -10920,7 +10922,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
     </div>
   </div>
 </div>
-<figcaption><b>«Calendar for a range» — один календарь и два дня</b>: слева выбирают календарь, справа — «с» и «по», и «Show» пересчитывает строку у кнопки — файлом уйдёт или ссылкой и сколько весит — до «Attach». Оба дня входят в файл. Весь календарь целиком отдельным пунктом не вкладывается — только за период. <b>В списке только свои календари:</b> подписка чужая, вложить её нельзя, поэтому её здесь и нет. <b>Если вложить не вышло</b>, первое действие листа становится недоступным и называет причину — своего поля для уведомления у листа нет.</figcaption>
+<figcaption><b>«Calendar» — один календарь, целиком или за даты.</b> В меню вложений один пункт, «Calendar»; весь календарь или только часть — решается уже здесь, в листе. Слева выбирают календарь, справа — «Whole calendar» или «Dates». По умолчанию — весь: полей дат нет, строка у кнопки говорит «Calendar «Личный» · all events · .ics · 48 KB». «Dates» открывает «с» и «по» (оба дня входят в файл), и «Show» пересчитывает строку у кнопки — файлом уйдёт или ссылкой и сколько весит — до «Attach». <b>В списке только свои календари:</b> подписка чужая, вложить её нельзя, поэтому её здесь и нет. <b>Если вложить не вышло</b>, первое действие листа становится недоступным и называет причину — своего поля для уведомления у листа нет.</figcaption>
 </figure>
 
 <figure>
