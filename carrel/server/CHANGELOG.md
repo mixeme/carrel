@@ -17,6 +17,42 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.30 — 2026-09-24
+
+### Fixed
+
+- **A note or a task could drop out of a person's timeline after something
+  Carrel did to the card.** The owner caught it. Write a note and New task on
+  a person's timeline tie the new record to the card by RELATED-TO holding
+  its UID, and by nothing else. An event carries the person's address in
+  ATTENDEE as well, so events were safe. Three operations of Carrel's change
+  the UID a card is known by: a move within SoGo, which gives the card a
+  UID of its own (SV-18); a merge of duplicates, which deletes the other
+  cards (S-16); and a write to Google, which rewrites the UID (SV-25). After
+  the first two the records pointed at nothing and left the timeline without
+  a word. They are now pointed at the new UID, in the ticked collections —
+  where the timeline looks, the owner's decision — each record read whole,
+  each value keeping its parameters (RELTYPE=SIBLING is another relation
+  than a bare value, which reads as PARENT), each write conditional on the
+  version read. A merge moves the links before it deletes anything. The page
+  says how many records were pointed anew and names each one that could not
+  be, with why.
+- **A card moved within SoGo is now found under its new identity.** The
+  destination is listed before the move, so afterwards the card is the one
+  resource that was not there. The notice opens the card itself rather than
+  the collection it is somewhere in. With no new resource, or several, it
+  still opens the collection: that would be a guess.
+
+### Notes
+
+- Google is the third case and is not covered yet. A card moved into Google
+  does not finish moving today: the copy is not found by its UID, so the
+  original is kept, its links stay whole, and the person ends up with two
+  cards. That is a defect of the move's copy path, recorded in the plan with
+  the rest.
+- The rule is in S-15.4: an operation after which a card is known by another
+  UID must point everything that referred to the old one at the new.
+
 ## v0.2.29 — 2026-09-23
 
 ### Fixed

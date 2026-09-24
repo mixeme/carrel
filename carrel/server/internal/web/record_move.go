@@ -1,6 +1,8 @@
 package web
 
 import (
+	"context"
+	"encoding/xml"
 	"net/http"
 	"net/url"
 	"path"
@@ -8,6 +10,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/model"
+	"carrel.dev/carrel/server/internal/provider/card"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -259,6 +262,14 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 // before that is decided, so the two paths cannot both answer.
 func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *collectionCtx, uid string, obj *model.Object) bool {
 	ctx := r.Context()
+	// A card is the one record a server has been seen to rename on MOVE
+	// (SV-18: SoGo). What the destination held before is kept, so that a card
+	// under a new identity can be found as the one resource that was not
+	// there — and whatever pointed at its old UID pointed at it (relink.go).
+	var before map[string]bool
+	if c.card != nil {
+		before = resourcePaths(ctx, dest)
+	}
 	var dst string
 	var err error
 	for _, name := range []string{path.Base(obj.Path), fileStem(uid) + "-2" + c.spec.ext} {
@@ -284,6 +295,23 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 		// an address that no longer opens would be the worse answer.
 		obj.Path, obj.ETag = dst, ""
 		dest.noteWrite(dst, obj)
+		if moved := arrived(ctx, dest, before); moved != nil {
+			if renamed := card.UID(moved); renamed != "" {
+				rep := s.relink(ctx, c.sess, s.catalogOf(c.sess), []string{uid}, renamed)
+				n := view.Notice{
+					Role:  view.NoticeAlert,
+					Title: "Moved, but the server gave it another identity",
+					Body: text("The " + c.spec.noun + " is in " + collectionLabel(dest.col) + " with everything it held, but that server " +
+						"replaced its UID. Duplicates are matched by that identifier." + rep.sentence()),
+					Actions: []view.Action{s.openThere(dest, renamed, "Open it there")},
+				}
+				if lines := rep.lines(); len(lines) > 0 {
+					n.Details = &view.Diagnostic{Summary: "Linked records", Lines: lines}
+				}
+				s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, n))
+				return true
+			}
+		}
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: "Moved, but the server gave it another identity",
@@ -301,7 +329,50 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 	return true
 }
 
-// noMoveHere reports a server that has no MOVE rather than one that refused
+// resourcePaths are the paths of what a collection holds, or nil when it could
+// not be read — then nothing can be told apart afterwards, and nothing is
+// guessed.
+func resourcePaths(ctx context.Context, c *collectionCtx) map[string]bool {
+	ms, err := c.t.PropFind(ctx, c.col.Path, dav.DepthOne, []xml.Name{propResourceType})
+	if err != nil {
+		return nil
+	}
+	self := strings.TrimSuffix(hrefPath(c.col.Path), "/")
+	out := map[string]bool{}
+	for _, resp := range ms.Responses {
+		if p := strings.TrimSuffix(hrefPath(resp.Href), "/"); p != "" && p != self {
+			out[p] = true
+		}
+	}
+	return out
+}
+
+// arrived is the one resource the collection holds now and did not hold
+// before, read — or nil when there is none, more than one, or it cannot be
+// read. More than one means someone else wrote there at the same moment, and
+// picking one would be a guess.
+func arrived(ctx context.Context, c *collectionCtx, before map[string]bool) *model.Object {
+	if before == nil {
+		return nil
+	}
+	now := resourcePaths(ctx, c)
+	var fresh []string
+	for p := range now {
+		if !before[p] {
+			fresh = append(fresh, p)
+		}
+	}
+	if len(fresh) != 1 {
+		return nil
+	}
+	obj, err := c.fetch(ctx, fresh[0])
+	if err != nil {
+		return nil
+	}
+	return obj
+}
+
+// noMoveHere reports a server that has no MOVE// noMoveHere reports a server that has no MOVE rather than one that refused
 // this one: 405 with the method not allowed at all, or 501. A refusal about
 // this particular record — a precondition, a right, a name — is not this, and
 // goes to the person as it did before.

@@ -10,8 +10,19 @@ import (
 	"github.com/emersion/go-webdav/carddav"
 
 	"carrel.dev/carrel/server/internal/davtest"
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
+
+// hasNoticeBody reports a notice whose body holds part.
+func hasNoticeBody(notices []view.Notice, part string) bool {
+	for _, n := range notices {
+		if strings.Contains(string(n.Body), part) {
+			return true
+		}
+	}
+	return false
+}
 
 const movedCard = "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada\nX-CUSTOM:keep\nEND:VCARD\n"
 
@@ -226,16 +237,80 @@ func TestMoveWhereTheServerChangesTheUID(t *testing.T) {
 	if !hasNotice(page.Notices, "Moved, but the server gave it another identity") {
 		t.Fatalf("notices = %+v", page.Notices)
 	}
+	// The card is found under the identity the server gave it — it is the
+	// one resource the destination did not hold before — and the notice
+	// opens it there, rather than the collection it is somewhere in.
 	var opens string
 	for _, n := range page.Notices {
 		for _, a := range n.Actions {
-			if a.ID == "collection.open" {
+			if a.ID == "record.open" {
 				opens = a.Href
 			}
 		}
 	}
-	if opens != "/app/contacts/"+f.id+"/"+url.PathEscape(friendsBook) {
-		t.Errorf("the notice leads to %q, want the destination collection", opens)
+	prefix := "/app/contacts/" + f.id + "/" + url.PathEscape(friendsBook) + "/"
+	if !strings.HasPrefix(opens, prefix) || opens == prefix+"ada" {
+		t.Fatalf("the notice leads to %q, want the card under its new identity in Friends", opens)
+	}
+	if moved := decode[view.ContactPage](t, f.h.do(get(opens, f.sess))); moved.Name != "Ada" {
+		t.Errorf("the card the notice opens = %+v", moved)
+	}
+}
+
+// What pointed at the moved card points at it still. A task made from Ada's
+// timeline is tied to her by RELATED-TO holding her card's UID and by nothing
+// else; SoGo's MOVE gives the card a new UID (SV-18), and the task would drop
+// out of her timeline without a word. The link is mended in the ticked
+// collections, and a value's parameters stay with it — RELTYPE=SIBLING is
+// another relation than the bare value, which reads as PARENT.
+func TestAMovedCardKeepsWhatPointedAtIt(t *testing.T) {
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	srv.AddAddressBook(carddav.AddressBook{Path: peopleBook, Name: "People"})
+	srv.AddAddressBook(carddav.AddressBook{Path: friendsBook, Name: "Friends"})
+	tasks := davtest.CalendarHome + "tasks/"
+	srv.AddCalendar(caldav.Calendar{Path: tasks, Name: "Tasks", SupportedComponentSet: []string{"VTODO"}})
+	srv.Seed(peopleBook+"ada.vcf", movedCard)
+	todo := func(uid, related string) string {
+		return strings.Join([]string{"BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//T//EN", "BEGIN:VTODO",
+			"UID:" + uid, "DTSTAMP:20260101T000000Z", "SUMMARY:" + uid, related,
+			"END:VTODO", "END:VCALENDAR", ""}, "\r\n")
+	}
+	srv.Seed(tasks+"call.ics", todo("call", "RELATED-TO:ada"))
+	srv.Seed(tasks+"sib.ics", todo("sib", "RELATED-TO;RELTYPE=SIBLING:ada"))
+	srv.Seed(tasks+"other.ics", todo("other", "RELATED-TO:someone-else"))
+	srv.MoveRewritesUID = true
+	f := moveFixture{davFixture: connectFixture(t, srv, peopleBook, nil)}
+	key, _ := f.sess.DataKey()
+	if err := f.h.users.SetSelection(f.sess.AccountID(), key, view.KindTask,
+		[]sealed.Selection{{Kind: view.KindTask, AccountID: f.id, Path: tasks}}); err != nil {
+		t.Fatal(err)
+	}
+	otherBefore, _, _ := srv.Object(tasks + "other.ics")
+
+	page := decode[view.ContactPage](t, f.h.do(postConfirm(t, f, sheetFor(f, peopleBook, "ada", f.id, friendsBook, false))))
+	var renamed string
+	for _, n := range page.Notices {
+		for _, a := range n.Actions {
+			if a.ID == "record.open" {
+				renamed, _ = url.PathUnescape(a.Href[strings.LastIndex(a.Href, "/")+1:])
+			}
+		}
+	}
+	if renamed == "" || renamed == "ada" {
+		t.Fatalf("no new identity in the notice: %+v", page.Notices)
+	}
+	if call, _, _ := srv.Object(tasks + "call.ics"); !strings.Contains(call, "RELATED-TO:"+renamed) || strings.Contains(call, "RELATED-TO:ada") {
+		t.Errorf("the task still points at the old card:\n%s", call)
+	}
+	if sib, _, _ := srv.Object(tasks + "sib.ics"); !strings.Contains(sib, "RELATED-TO;RELTYPE=SIBLING:"+renamed) {
+		t.Errorf("the sibling link lost its relation or its target:\n%s", sib)
+	}
+	if other, _, _ := srv.Object(tasks + "other.ics"); other != otherBefore {
+		t.Errorf("a task that pointed elsewhere was written:\n%s", other)
+	}
+	if !hasNoticeBody(page.Notices, "now point at the card that stays") {
+		t.Errorf("the notice does not say the links were mended: %+v", page.Notices)
 	}
 }
 

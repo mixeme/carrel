@@ -434,6 +434,16 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	// Before anything is deleted, what pointed at the others is made to point
+	// at the kept record: a task or a note made from a person's timeline is
+	// tied to the card by its UID alone, and a deleted card's UID names
+	// nothing (relink.go). Done first so that a delete refused halfway still
+	// leaves every link on a record that exists.
+	gone := make([]string, 0, len(others))
+	for _, o := range others {
+		gone = append(gone, o.ref.UID)
+	}
+	rep := s.relink(ctx, sess, s.catalogOf(sess), gone, uid)
 	var deleted []mergeMember
 	for i, o := range others {
 		if err := o.c.remove(ctx, o.obj.Path, o.obj.ETag); err != nil {
@@ -443,6 +453,9 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 			if dav.IsStatus(err, http.StatusPreconditionFailed) {
 				n.Body = text(o.label() + " changed after it was read, so it was kept, and the rest were not tried. The merge was written; nothing is undone.")
 			}
+			if n.Details != nil {
+				n.Details.Lines = append(n.Details.Lines, rep.lines()...)
+			}
 			s.mergeResult(w, r, sess, mr, deleted, others[i:], n)
 			return
 		}
@@ -450,7 +463,21 @@ func (s *Server) postDuplicatesMerge(w http.ResponseWriter, r *http.Request) {
 		deleted = append(deleted, o)
 	}
 	s.forgetDeleted(sess, mr.g.kind, deleted)
-	s.redirect(w, r, kept.recordPath(uid))
+	if rep.nothing() {
+		s.redirect(w, r, kept.recordPath(uid))
+		return
+	}
+	// Something pointed at the records that are gone: what became of it is
+	// said here, on the kept record, rather than lost behind a redirect.
+	role := view.NoticeInfo
+	if len(rep.skipped) > 0 || len(rep.unread) > 0 {
+		role = view.NoticeAlert
+	}
+	s.writePage(w, r, http.StatusOK, s.recordPage(kept, uid, got, view.Notice{
+		Role: role, Title: "Merged",
+		Body:    text("The others were deleted." + rep.sentence()),
+		Details: &view.Diagnostic{Summary: "Linked records", Lines: rep.lines()},
+	}))
 }
 
 func (s *Server) forgetDeleted(sess *session.Session, kind view.Kind, deleted []mergeMember) {
