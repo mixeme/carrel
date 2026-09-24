@@ -174,6 +174,53 @@ func TestImportAlwaysCreates(t *testing.T) {
 	}
 }
 
+// A server that keeps a new card under an identity of its own (Google,
+// docs/servers.md, SV-25): the report names the identity the card has, not
+// the one it was sent with, and counts it among the renamed. A card the
+// server does not show at all is not reported as simply created.
+func TestImportNamesTheIdentityTheServerGave(t *testing.T) {
+	run := func(t *testing.T, f davFixture) view.ImportPage {
+		t.Helper()
+		page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
+		page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cards.vcf", []byte(importedCards))))
+		return decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))
+	}
+	t.Run("rewritten", func(t *testing.T) {
+		f := importFixture(t)
+		f.srv.CreateRewritesUID = true
+		page := run(t, f)
+		if page.Report == nil || page.Report.Created != 2 || page.Report.Renamed != 2 {
+			t.Fatalf("report = %+v", page.Report)
+		}
+		row := tableRow(t, page.Report.Rows, "Created", "Grace")
+		if !strings.Contains(string(row[2]), "Created under sv25-") || !strings.Contains(string(row[2]), "identity of its own") {
+			t.Errorf("grace row = %q", row[2])
+		}
+		if !strings.Contains(string(page.Report.Note), "2 records under a new identity") {
+			t.Errorf("note = %q", page.Report.Note)
+		}
+	})
+	t.Run("hidden", func(t *testing.T) {
+		f := importFixture(t)
+		f.srv.CreateHidesTheRecord = true
+		page := run(t, f)
+		row := tableRow(t, page.Report.Rows, "Created", "Grace")
+		if !strings.Contains(string(row[2]), "does not show it") {
+			t.Errorf("grace row = %q", row[2])
+		}
+	})
+	t.Run("honest", func(t *testing.T) {
+		f := importFixture(t)
+		page := run(t, f)
+		if row := tableRow(t, page.Report.Rows, "Created", "Grace"); string(row[2]) != "Created" {
+			t.Errorf("grace row = %q", row[2])
+		}
+		if n := f.srv.CountRequests("GET", peopleBook); n != 0 {
+			t.Errorf("%d GETs: a record found under its identity was read again", n)
+		}
+	})
+}
+
 // The draft is dropped once it is written: the report is not a second import
 // waiting to happen.
 func TestImportRunsOnce(t *testing.T) {

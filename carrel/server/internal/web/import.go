@@ -745,6 +745,7 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 	report := &view.ImportReport{Skipped: len(d.Skipped)}
 	written := view.ImportTable{Rubric: text("Created in " + collectionLabel(dest.col)), Columns: importColumns(c.spec.kind)}
 	refused := view.ImportTable{Rubric: text("Not created"), Columns: []view.Text{text("What"), text("What the server answered")}}
+	var made []importMade
 	for _, rec := range d.Records {
 		obj, err := dest.parse("", "", rec.Doc)
 		uid, renamed, note := rec.UID, false, "Created"
@@ -769,8 +770,10 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		if renamed {
 			report.Renamed++
 		}
+		made = append(made, importMade{row: len(written.Rows), uid: uid, path: obj.Path, renamed: renamed})
 		written.Rows = append(written.Rows, []view.Text{text(rec.Title), text(rec.Detail), text(note)})
 	}
+	s.importLanded(ctx, dest, report, &written, made)
 	written.Count = report.Created
 	report.Rows = append(report.Rows, written)
 	if len(refused.Rows) > 0 {
@@ -798,6 +801,52 @@ func importNote(report *view.ImportReport, refused int, source string) string {
 		parts = append(parts, fmt.Sprintf("%s refused by the server", plural(refused, "record")))
 	}
 	return strings.Join(parts, " · ") + ". Nothing there was overwritten."
+}
+
+// importMade is a record an import wrote: its row in the report, the
+// identity it was written under, and where.
+type importMade struct {
+	row     int
+	uid     string
+	path    string
+	renamed bool
+}
+
+// importLanded looks for what an import wrote, once, after the last record:
+// a server may keep a new record under an identity of its own — Google does
+// with every card (docs/servers.md, SV-25) — and the report must name the
+// identity the record has, not the one it was sent with. One whole read of
+// the destination; a read at the written address only for a record not
+// found under its identity. The row says what became of it. What had pointed
+// at the identity the record came with is left alone: an import is a copy,
+// and a record of that identity may well live on elsewhere.
+func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *view.ImportReport, written *view.ImportTable, made []importMade) {
+	if len(made) == 0 {
+		return
+	}
+	held, err := destUIDs(ctx, dest)
+	if err != nil {
+		return // the rows stand as the writes were answered
+	}
+	for _, m := range made {
+		if held[m.uid] {
+			continue
+		}
+		at, err := dest.fetch(ctx, m.path)
+		if err != nil {
+			written.Rows[m.row][2] = text("Created, but the server does not show it under this identity or at the address it was written to")
+			continue
+		}
+		theirs := uidOf(dest, at)
+		if theirs == "" || theirs == m.uid {
+			continue // there under its own identity; the listing missed it
+		}
+		written.Rows[m.row][2] = text("Created under " + theirs + ": the server gave it an identity of its own")
+		dest.noteWrite(m.path, at)
+		if !m.renamed {
+			report.Renamed++
+		}
+	}
 }
 
 // setUID gives an imported record a fresh identity, by the rules of its kind.

@@ -1297,6 +1297,15 @@ func TestFixtureLossAndPartialOfTheOtherKinds(t *testing.T) {
 					case view.SourceWaiting:
 						return false
 					case view.SourceQuerying:
+						// Held is the stalled server's; any other source
+						// still querying is on its way and would be done
+						// in one run and not in the next. With S-4.2 every
+						// source asks the change tag before its read, and
+						// the steady point that took any querying source
+						// for a held one was taken early (24.09.2026).
+						if !strings.HasPrefix(string(sp.Stamp), "radicale · vps") {
+							return false
+						}
 						held = true
 					case view.SourceDone:
 						// A source that answered but has not yet given

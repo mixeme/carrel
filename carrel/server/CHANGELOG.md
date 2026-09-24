@@ -17,6 +17,31 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.37 — 2026-09-24
+
+### Fixed
+
+- **An import's report names the identity the server gave.** Google keeps
+  every new card under a UID of its own (SV-25); the report said «Created»
+  under the UID the card was sent with, one the server does not hold. After
+  the last record the destination is now read whole once, a record not found
+  under its UID is read at the address it was written to, and its row says
+  «Created under …: the server gave it an identity of its own» and counts it
+  among the renamed. A record shown neither way says so. On a server that
+  keeps what it is sent, the cost is that one read.
+- What pointed at the UID an imported card came with is left alone: an
+  import is a copy, and a card of that UID may live on elsewhere.
+- The partial fixtures of the other kinds took any source still querying for
+  the held one, and so were taken before a source of the running stand had
+  answered. With every source now asking its change tag first, that moment
+  grew long enough to be caught in a full run. The steady point now holds
+  only the stalled stand's sources.
+- `go test -race` on v0.2.36 in `golang:1.27-bookworm`: no data race.
+
+### For consumers
+
+Nothing to change.
+
 ## v0.2.36 — 2026-09-24
 
 ### Changed

@@ -420,8 +420,13 @@ Graph, протоколы другого устройства. Самая рас
   server does not show it» со ссылкой на коллекцию, как при переносе (SV-18):
   редирект в никуда был бы худшим ответом. `Location` не читается: адрес, по
   которому писали, у Google отвечает, а личность записи — не адрес, а `UID`.
-- **Сторож.** `TestCreateWhereTheServerRewritesTheUID` и
-  `TestCreateWhereTheServerShowsNothing` на `davtest` (`CreateRewritesUID`,
+- **Импорт.** То же при импорте файла: после последней записи назначение
+  читается целиком один раз, карточка, не найденная под своим `UID`,
+  дочитывается по адресу, и строка отчёта называет `UID`, который дал сервер
+  (`web.importLanded`, с v0.2.37). До того отчёт писал «Created» под нашим.
+- **Сторож.** `TestCreateWhereTheServerRewritesTheUID`,
+  `TestCreateWhereTheServerShowsNothing` и
+  `TestImportNamesTheIdentityTheServerGave` на `davtest` (`CreateRewritesUID`,
   `CreateHidesTheRecord`); живьём — `TestGoogleContactInTheOnlyBook`, где
   страница ведёт на карточку под тем `UID`, который оставил сервер.
 
