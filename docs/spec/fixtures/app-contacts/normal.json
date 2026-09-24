@@ -82,7 +82,7 @@
       "action": {
         "id": "poll.again",
         "label": "Refresh",
-        "href": "/app/contacts",
+        "href": "/app/contacts?again=1",
         "method": "GET",
         "enabled": true
       },
@@ -648,7 +648,7 @@
       {
         "id": "poll.again",
         "label": "Refresh",
-        "href": "/app/contacts",
+        "href": "/app/contacts?again=1",
         "method": "GET",
         "enabled": true
       }

@@ -171,10 +171,10 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 	if !strings.Contains(string(page.Poll.Summary), "Polled 2 of 2 sources · 3 cards") {
 		t.Errorf("summary = %q", page.Poll.Summary)
 	}
-	if r := page.Top.Refresh; !r.Action.Enabled || r.Action.Href != "/app/contacts" || r.Answered == "" || r.Running {
+	if r := page.Top.Refresh; !r.Action.Enabled || r.Action.Href != "/app/contacts?again=1" || r.Answered == "" || r.Running {
 		t.Errorf("refresh = %+v", r)
 	}
-	if again := action(*page.Poll, "poll.again"); again.Label != "Refresh" || again.Href != "/app/contacts" {
+	if again := action(*page.Poll, "poll.again"); again.Label != "Refresh" || again.Href != "/app/contacts?again=1" {
 		t.Errorf("poll again = %+v", again)
 	}
 	if c := page.Rail.Sections[0].Rows[0]; c.Tick != view.TickOn || c.Count == nil || *c.Count != 3 {

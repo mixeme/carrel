@@ -276,7 +276,7 @@
       },
       {
         "enabled": false,
-        "href": "/app/calendar",
+        "href": "/app/calendar?again=1",
         "id": "poll.again",
         "label": "Refresh",
         "method": "GET",
@@ -784,7 +784,7 @@
     "refresh": {
       "action": {
         "enabled": false,
-        "href": "/app/calendar",
+        "href": "/app/calendar?again=1",
         "id": "poll.again",
         "label": "Refresh",
         "method": "GET",

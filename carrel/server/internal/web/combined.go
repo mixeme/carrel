@@ -136,7 +136,7 @@ func (s *Server) combinedTask(r *http.Request, sess *session.Session, blob seale
 			continue // not asked (S-6.1): its rail row says gone
 		}
 		conn, _ := blob.Connection(col.AccountID)
-		src := s.openSource(conn.ID+":"+col.Path, conn, col)
+		src := s.openSource(sess, conn.ID+":"+col.Path, conn, col)
 		src.kinds = []view.Kind{spec.kind}
 		if spec.kind == view.KindEvent {
 			// The switches of the agenda ask the same collections for what
@@ -176,6 +176,9 @@ func (s *Server) combinedTask(r *http.Request, sess *session.Session, blob seale
 	id, err := user.NewTaskID()
 	if err != nil {
 		return nil, err
+	}
+	if r.FormValue("again") != "" {
+		dropAllWholeReads(sess, blob) // Refresh: nothing kept stands in for asking (S-4.2)
 	}
 	opts := s.searchOptions(sess)
 	opts.Finished = nil // a list is not a search: no history row
@@ -240,6 +243,11 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 		if tag := strings.TrimSpace(r.URL.Query().Get("tag")); tag != "" {
 			owner.again, again = withQuery(owner.again, "tag", tag), withQuery(again, "tag", tag)
 		}
+		// And it reads the servers again (S-4.2): a plain load within the soft
+		// limit is answered from the kept reads of a server without a change
+		// tag, and Refresh is how a person asks for what is there now — the
+		// same again=1 a search and a timeline are run again by.
+		owner.again, again = withQuery(owner.again, "again", "1"), withQuery(again, "again", "1")
 		*st.poll = s.pollBar(tf, blob, snap, owner)
 		s.indexAnswered(sess, blob, spec, snap)
 		st.items = listedOf(blob, snap.Items)

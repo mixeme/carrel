@@ -171,6 +171,28 @@ func (c *Cache) InvalidateConnection(connID string) {
 	}
 }
 
+// InvalidateMapsUnder drops every version map whose key starts with prefix on
+// a connection. A write Carrel makes to a collection changes what a whole read
+// of it would find; the next read goes to the server. Bodies stay: they are
+// keyed by version, and a stale one cannot be reached (S-4.2).
+func (c *Cache) InvalidateMapsUnder(connID, prefix string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.ended {
+		return
+	}
+	start := etagKey(connID, prefix)
+	var drop []string
+	for k, e := range c.entries {
+		if strings.HasPrefix(e.key, start) {
+			drop = append(drop, k)
+		}
+	}
+	for _, k := range drop {
+		c.removeLocked(k)
+	}
+}
+
 // InvalidatePath drops cached data for one object path on a connection.
 func (c *Cache) InvalidatePath(connID, path string) {
 	c.mu.Lock()

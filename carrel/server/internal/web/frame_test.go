@@ -249,7 +249,7 @@ func TestCombinedTagFilterReadsThePoll(t *testing.T) {
 	if filtered.Print.Range != view.Text("2 books · 2 cards · "+label) {
 		t.Errorf("filtered print = %+v", filtered.Print)
 	}
-	if h := filtered.Top.Refresh.Action.Href; h != withTag("/app/contacts", label) {
+	if h := filtered.Top.Refresh.Action.Href; h != withTag("/app/contacts", label)+"&again=1" {
 		t.Errorf("refresh = %q", h)
 	}
 	if h := tagHref(t, filtered.Rail.Tags, "all"); h != "/app/contacts?task="+url.QueryEscape(task) {

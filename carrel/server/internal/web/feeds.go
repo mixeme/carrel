@@ -101,7 +101,11 @@ func (c *collectionCtx) contactsAll(ctx context.Context) ([]*model.Object, error
 	if c.feed != nil {
 		return c.feed.records(ctx, view.KindContact)
 	}
-	return c.card.Query(ctx, c.col.Path)
+	return cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, "", c.ttl, c.now(), cardCodec,
+		func() ([]*model.Object, bool, error) {
+			got, err := c.card.Query(ctx, c.col.Path)
+			return got, true, err
+		})
 }
 
 // calQuery is the records of one component of the collection or the feed.
@@ -110,6 +114,19 @@ func (c *collectionCtx) calQuery(ctx context.Context, component string, from, to
 	if c.feed != nil {
 		objs, err := c.feed.records(ctx, componentKinds[component])
 		return objs, nil, err
+	}
+	if from == nil && to == nil {
+		// A whole read, kept by the session (S-4.2, wholeread.go). What the
+		// server could not parse is named by the list, so such a read is
+		// answered as it came and not kept.
+		var unreadable []cal.Unreadable
+		objs, err := cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, component, c.ttl, c.now(), calCodec,
+			func() ([]*model.Object, bool, error) {
+				got, bad, err := c.cal.Query(ctx, c.col.Path, component, nil, nil)
+				unreadable = bad
+				return got, len(bad) == 0, err
+			})
+		return objs, unreadable, err
 	}
 	return c.cal.Query(ctx, c.col.Path, component, from, to)
 }

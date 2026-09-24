@@ -310,7 +310,7 @@ func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q
 		if pick.Kind != view.KindContact || !hasConn || !hasCol || col.Gone {
 			continue
 		}
-		src := s.openSource(conn.ID+":"+col.Path, conn, col)
+		src := s.openSource(sess, conn.ID+":"+col.Path, conn, col)
 		src.kinds = []view.Kind{view.KindContact}
 		sources = append(sources, src)
 	}

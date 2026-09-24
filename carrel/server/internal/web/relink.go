@@ -99,7 +99,7 @@ func (s *Server) relink(ctx context.Context, sess *session.Session, blob sealed.
 	if len(old) == 0 || to == "" {
 		return rep
 	}
-	for _, src := range s.searchSources(blob) {
+	for _, src := range s.searchSources(sess, blob) {
 		c := src.(*collectionSource)
 		label := collectionLabel(c.col) + " · " + connLabel(c.conn)
 		if c.broken != nil {
@@ -142,6 +142,7 @@ func (s *Server) relink(ctx context.Context, sess *session.Session, blob sealed.
 					continue
 				}
 				sess.Cache().InvalidatePath(c.conn.ID, obj.Path)
+				dropWholeReads(sess, c.conn.ID, c.col.Path)
 				rep.changed++
 			}
 		}

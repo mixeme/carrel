@@ -334,6 +334,8 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 	var task *timelineTask
 	if r.URL.Query().Get("again") == "" {
 		task = keptTimeline(c.sess, c.conn.ID, c.col.Path, uid, from)
+	} else {
+		dropAllWholeReads(c.sess, s.catalogOf(c.sess)) // what the servers hold now (S-4.2)
 	}
 	var notices []view.Notice
 	if task == nil {
@@ -355,7 +357,7 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) startTimeline(sess *session.Session, person timelinePerson, from, to time.Time) (*timelineTask, error) {
 	var sources []fanout.Source
-	for _, src := range s.searchSources(s.catalogOf(sess)) {
+	for _, src := range s.searchSources(sess, s.catalogOf(sess)) {
 		cs := src.(*collectionSource)
 		sources = append(sources, &timelineSource{collectionSource: cs, person: person, tz: s.tz()})
 	}

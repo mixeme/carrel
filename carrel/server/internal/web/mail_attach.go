@@ -190,7 +190,7 @@ func (s *Server) attachRecordRows(r *http.Request, sess *session.Session, blob s
 	if !ok || !okCol || conn.Feed || col.Gone {
 		return nil
 	}
-	src := s.openSource(conn.ID+":"+col.Path, conn, col)
+	src := s.openSource(sess, conn.ID+":"+col.Path, conn, col)
 	src.kinds = []view.Kind{k.Kind}
 	ctx, cancel := context.WithTimeout(r.Context(), s.cfg.ProgressSourceTimeout)
 	defer cancel()

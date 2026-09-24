@@ -113,6 +113,10 @@ type collectionCtx struct {
 	tf   timeFmt
 	// feed reads a subscription (S-25.2); nil for a collection of a server.
 	feed *feedReader
+	// ttl is the soft limit on a kept whole read where the server gives no
+	// change tag (S-4.2, wholeread.go), and the clock it is measured by.
+	ttl time.Duration
+	now func() time.Time
 }
 
 // openCollection checks ownership and looks the collection up in the
@@ -172,7 +176,7 @@ func (s *Server) newCollectionCtx(sess *session.Session, spec kindSpec, conn sea
 	if err != nil {
 		return nil, err
 	}
-	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: col, t: client, tf: s.timeFor(sess)}
+	c := &collectionCtx{sess: sess, spec: spec, conn: conn, col: col, t: client, tf: s.timeFor(sess), ttl: s.cfg.CacheCollectionTTL, now: s.now}
 	if conn.Feed {
 		c.feed = s.newFeedReader(conn.Server, conn.Login, conn.Password)
 	}
@@ -469,6 +473,11 @@ func (c *collectionCtx) index() []indexEntry {
 // is nil. A count once shown stays until the list is read again (C-6.3); the
 // other entries are as that read left them. Nothing loaded, nothing kept.
 func (c *collectionCtx) noteWrite(path string, obj *model.Object) {
+	// Carrel wrote here: a whole read kept of this collection is not what the
+	// server holds now. A server with a change tag would say so on the next
+	// read anyway; one without would not until the soft limit, and this
+	// session must never show itself a list older than its own write (S-4.2).
+	dropWholeReads(c.sess, c.conn.ID, c.col.Path)
 	key := c.indexKey(c.spec.component)
 	data, ok := c.sess.Cache().PeekETagMap(c.conn.ID, key)
 	if !ok {

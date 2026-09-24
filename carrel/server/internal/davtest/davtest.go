@@ -78,6 +78,11 @@ type Server struct {
 	// A PROPPATCH right after sets the colour and keeps it.
 	CreateDropsColour bool
 
+	// NoChangeTag answers a collection's change tag with 404, the way a
+	// server without getctag or sync-token does. A whole read of such a
+	// collection cannot be skipped by its tag; the soft TTL of S-4.2 applies.
+	NoChangeTag bool
+
 	// CalendarTextMatchFindsNothing answers every calendar-query that carries
 	// a text-match 207 with no responses — the same answer as for an honest
 	// miss — the way Xandikos does for any value that is not matched whole
@@ -559,6 +564,10 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 		s.homeProps(w, p)
 		return
 	}
+	if r.Method == "PROPFIND" && r.Header.Get("Depth") == "0" && s.hasCollection(p) && bytes.Contains(body, []byte("getctag")) {
+		s.collectionTag(w, p)
+		return
+	}
 	if r.Method == "PROPFIND" && r.Header.Get("Depth") == "0" && s.hasCollection(p) && bytes.Contains(body, []byte("calendar-color")) {
 		s.collectionProps(w, p)
 		return
@@ -684,6 +693,30 @@ func (s *Server) collectionProps(w http.ResponseWriter, p string) {
 	w.WriteHeader(http.StatusMultiStatus)
 	_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>`+
 		`<D:multistatus xmlns:D="DAV:" xmlns:I="http://apple.com/ns/ical/">`+b.String()+`</D:multistatus>`)
+}
+
+// collectionTag answers a depth-0 PROPFIND for a collection's change tag: the
+// question a whole read asks before it reads (S-4.2). The tag moves with every
+// write, Carrel's or a seed's. NoChangeTag answers the way a server without
+// one does: the property named, and 404.
+func (s *Server) collectionTag(w http.ResponseWriter, p string) {
+	key := collectionKey(p)
+	s.mu.Lock()
+	tag := fmt.Sprintf("ctag-%d", s.ctags[key])
+	none := s.NoChangeTag
+	s.mu.Unlock()
+	var b strings.Builder
+	b.WriteString(`<D:response><D:href>` + escape(key) + `</D:href>`)
+	if none {
+		b.WriteString(`<D:propstat><D:prop><CS:getctag/><D:sync-token/></D:prop><D:status>HTTP/1.1 404 Not Found</D:status></D:propstat>`)
+	} else {
+		b.WriteString(`<D:propstat><D:prop><CS:getctag>` + tag + `</CS:getctag></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat>`)
+	}
+	b.WriteString(`</D:response>`)
+	w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+	w.WriteHeader(http.StatusMultiStatus)
+	_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>`+
+		`<D:multistatus xmlns:D="DAV:" xmlns:CS="http://calendarserver.org/ns/">`+b.String()+`</D:multistatus>`)
 }
 
 type mkcalendarRequest struct {

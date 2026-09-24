@@ -17,6 +17,43 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.34 — 2026-09-24
+
+### Changed
+
+- **A collection read whole is kept, and read again only when it changed**
+  (S-4.2). Contact, task and note lists, the timeline, the poll and the
+  sources of a search read their collections whole; each such read is now
+  kept in the session cache — which records at which version, and the
+  bodies by path and version — under the collection's change tag. The next
+  read asks the tag first: one depth-0 PROPFIND for `getctag` or
+  `sync-token`. The same tag means no REPORT at all. Until now the tag was
+  collected by discovery and never compared, and every screen read every
+  collection whole on every load.
+- A server with no change tag gets the soft limit instead:
+  `CARREL_CACHE_COLLECTION_TTL` (60 s by default), measured from the read.
+  Within it another client's write is not seen on a plain load; a write made
+  through Carrel drops the kept reads of its collection at once, tag or no
+  tag.
+- **Refresh reads the servers again.** Refresh of a combined view — the top
+  bar's and the poll bar's `poll.again` — now carries `again=1`, the same
+  parameter a search and a timeline are run again by, and all three drop the
+  session's kept reads first: asking again means what the servers hold now,
+  within the soft limit too.
+- What is not kept: a read by window (an agenda's week), a filtered search,
+  and a read that came back with records Carrel could not parse — the list
+  names those, and a kept read would hide them. A tag that cannot be asked
+  sends the read to the server; a server that does not answer shows the
+  refusal, never what was kept.
+
+### For consumers
+
+A frame follows the href it is given, so nothing to change there; the
+fixtures of `app-contacts` and `app-agenda-all` now show Refresh as
+`/app/contacts?again=1` and `/app/calendar?again=1`. Lists of large books and calendars on servers with a
+change tag load without reading the collection again; expect one small
+PROPFIND per collection per screen instead.
+
 ## v0.2.33 — 2026-09-24
 
 ### Added

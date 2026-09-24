@@ -82,7 +82,7 @@
       "action": {
         "id": "poll.again",
         "label": "Refresh",
-        "href": "/app/contacts",
+        "href": "/app/contacts?again=1",
         "method": "GET",
         "enabled": false,
         "reason": "The poll is still running."
@@ -640,7 +640,7 @@
       {
         "id": "poll.again",
         "label": "Refresh",
-        "href": "/app/contacts",
+        "href": "/app/contacts?again=1",
         "method": "GET",
         "enabled": false,
         "reason": "The list is still running."

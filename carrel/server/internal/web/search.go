@@ -65,9 +65,11 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	var task *fanout.Task
 	if r.URL.Query().Get("again") == "" {
 		task = keptSearch(sess, q)
+	} else {
+		dropAllWholeReads(sess, blob) // what the servers hold now (S-4.2)
 	}
 	if task == nil {
-		sources := s.searchSources(blob)
+		sources := s.searchSources(sess, blob)
 		if len(sources) == 0 {
 			page.Poll.Summary = searchNoTicks
 			s.writePage(w, r, http.StatusOK, page)
@@ -518,6 +520,14 @@ type collectionSource struct {
 	broken     error       // the connection could not be opened at all
 	feed       *feedReader // a subscription: read whole and sifted here (S-25.2)
 	root       string      // where a file collection starts on its server
+	// sess, t and ttl are what a whole read needs to be kept (S-4.2,
+	// wholeread.go): the session whose cache keeps it, the transport that
+	// asks the collection's change tag, and the soft limit for a server with
+	// none with the clock it is measured by. A nil sess reads straight through.
+	sess *session.Session
+	t    dav.Transport
+	ttl  time.Duration
+	now  func() time.Time
 }
 
 // searchSources are the ticked collections, one source each, in the order of
@@ -549,7 +559,7 @@ func (s *Server) searchRail(sess *session.Session, blob sealed.Blob) view.Rail {
 	return rail
 }
 
-func (s *Server) searchSources(blob sealed.Blob) []fanout.Source {
+func (s *Server) searchSources(sess *session.Session, blob sealed.Blob) []fanout.Source {
 	var out []fanout.Source
 	byID := map[string]*collectionSource{}
 	for _, pick := range blob.Selected {
@@ -561,7 +571,7 @@ func (s *Server) searchSources(blob sealed.Blob) []fanout.Source {
 		id := conn.ID + ":" + col.Path
 		src := byID[id]
 		if src == nil {
-			src = s.openSource(id, conn, col)
+			src = s.openSource(sess, id, conn, col)
 			byID[id] = src
 			out = append(out, src)
 		}
@@ -572,8 +582,8 @@ func (s *Server) searchSources(blob sealed.Blob) []fanout.Source {
 	return out
 }
 
-func (s *Server) openSource(id string, conn sealed.Connection, col sealed.Collection) *collectionSource {
-	src := &collectionSource{id: id, conn: conn, col: col, maxEntries: s.cfg.FilesMaxEntries}
+func (s *Server) openSource(sess *session.Session, id string, conn sealed.Connection, col sealed.Collection) *collectionSource {
+	src := &collectionSource{id: id, conn: conn, col: col, maxEntries: s.cfg.FilesMaxEntries, sess: sess, ttl: s.cfg.CacheCollectionTTL, now: s.now}
 	src.root = fileRoot(conn, col)
 	if conn.Feed && !col.Has(view.KindFile) {
 		src.feed = s.newFeedReader(conn.Server, conn.Login, conn.Password)
@@ -584,6 +594,7 @@ func (s *Server) openSource(id string, conn sealed.Connection, col sealed.Collec
 		src.broken = err
 		return src
 	}
+	src.t = client
 	if src.card, err = card.New(client); err != nil {
 		src.broken = err
 	} else if src.cal, err = cal.New(client); err != nil {
@@ -677,7 +688,13 @@ func (c *collectionSource) contacts(ctx context.Context, q fanout.Query) ([]fano
 	case c.feed != nil:
 		objs, err = c.feed.search(ctx, view.KindContact, q.Text)
 	case q.Text == "":
-		objs, err = c.card.Query(ctx, c.col.Path)
+		// A whole read: kept by the session and read again only when the
+		// book changed (S-4.2, wholeread.go).
+		objs, err = cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, "", c.ttl, c.now(), cardCodec,
+			func() ([]*model.Object, bool, error) {
+				got, err := c.card.Query(ctx, c.col.Path)
+				return got, true, err
+			})
 	default:
 		objs, err = c.card.Search(ctx, c.col.Path, q.Text)
 	}
@@ -716,6 +733,16 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 			// component is read and the window is applied where the rows are
 			// placed (views-tail.md).
 			from, to = nil, nil
+		}
+		if from == nil && to == nil {
+			// A whole read: kept by the session and read again only when the
+			// collection changed (S-4.2, wholeread.go).
+			objs, err = cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, component, c.ttl, c.now(), calCodec,
+				func() ([]*model.Object, bool, error) {
+					got, unreadable, err := c.cal.Query(ctx, c.col.Path, component, nil, nil)
+					return got, len(unreadable) == 0, err
+				})
+			break
 		}
 		objs, _, err = c.cal.Query(ctx, c.col.Path, component, from, to)
 	default:
