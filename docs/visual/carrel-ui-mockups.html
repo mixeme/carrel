@@ -578,6 +578,9 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-menu__item > .tc-kbd{margin-left:auto}
 /* Разделитель меню — 1 px: полпикселя на короткой линии пропадает. */
 .tc-menu__sep{display:block;height:1px;background:var(--tc-hair);margin:4px 6px;padding:0}
+/* Меню с полями кончается кнопками: сохранить — это действие, а не пункт.
+   Пункт меню действует сразу; поля ждут кнопки. */
+.tc-menu__foot{display:flex;flex-wrap:wrap;gap:8px;padding:8px 8px 4px;margin-top:4px;border-top:1px solid var(--tc-hair)}
 /* полноэкранная заметка: чтение и правка */
 .tc-doc__layout{display:grid;grid-template-columns:minmax(0,1fr) 296px;min-height:0}
 .tc-doc__layout.is-focus{grid-template-columns:minmax(0,1fr)}
@@ -6024,13 +6027,11 @@ Read  2 min ago</div>
     <div class="tc-menu__item">Same name<span class="tc-push tc-dim tc-dim--t10-5">20</span><input class="tc-in is-mono tc-in--chip" type="text" value="20" aria-label="Same name"></div>
     <div class="tc-menu__item">Same birthday <span class="tc-badge">yours</span><span class="tc-push tc-dim tc-dim--t10-5">10</span><input class="tc-in is-mono tc-in--chip" type="text" value="20" aria-label="Same birthday"></div>
     <div class="tc-menu__item">Same title and date (events, tasks, notes)<span class="tc-push tc-dim tc-dim--t10-5">70</span><input class="tc-in is-mono tc-in--chip" type="text" value="70" aria-label="Same title and date (events, tasks, notes)"></div>
-    <span class="tc-menu__sep"></span>
-    <button class="tc-menu__item tc-menu__item--accent" type="button" role="menuitem">Save</button>
-    <button class="tc-menu__item" type="button" role="menuitem">Back to the instance's numbers</button>
+    <div class="tc-menu__foot"><button class="tc-btn is-sm is-primary" type="button">Save</button><button class="tc-btn is-sm" type="button">Back to the instance's numbers</button></div>
   </div>
   </div>
 </div>
-<figcaption><b>Веса — меню под кнопкой Weights, как выбор столбцов</b>, а не отдельный экран: это настройка того, что предлагается в списке, и живёт она у списка. Строка — признак, число экземпляра и своё число; своё помечено «yours» и хранится вместе с решениями человека. Очки пары — сумма весов её признаков: тот же телефон и то же имя дают 80, одно название с датой — 70. Пустое поле возвращает число экземпляра.</figcaption>
+<figcaption><b>Веса — меню под кнопкой Weights, как выбор столбцов</b>, а не отдельный экран: это настройка того, что предлагается в списке, и живёт она у списка. Строка — признак, число экземпляра и своё число; своё помечено «yours» и хранится вместе с решениями человека. Очки пары — сумма весов её признаков: тот же телефон и то же имя дают 80, одно название с датой — 70. Пустое поле возвращает число экземпляра. <b>Внизу — кнопки, а не пункты:</b> пункт меню действует сразу, а здесь поля ждут, пока человек нажмёт «Save».</figcaption>
 </figure>
 
 <figure>
@@ -8634,28 +8635,43 @@ Read  2 min ago</div>
               </div>
             </div>
             <div class="tc-msg is-row tc-msg--flush"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-              <span class="tc-msg__aside">Scan the code with the phone: DAVx5 opens with the address and the login filled in. The password is not in the code — type it from the connections page, inside the unlock window.</span><button class="tc-btn is-sm" type="button">Show password</button></div>
+              <span class="tc-msg__aside">One code for each ticked account. Scan it with the phone: DAVx5 opens with the address and the login filled in, and asks for the password shown under the code.</span></div>
           </div>
           <div class="tc-stack tc-stack--gap-12 tc-form__col--280">
             <div class="tc-card">
-              <div class="tc-rubric">QR for DAVx5 · nextcloud</div>
+              <div class="tc-rubric">nextcloud · mix</div>
               <div class="tc-card__split">
                 <div data-tc-colour="#FFFDF7" class="tc-card__qr">
                   <svg width="104" height="104" viewBox="-1 -1 27 27" role="img" aria-label="QR"><rect x="-1" y="-1" width="27" height="27" fill="#FFFDF7"/><use href="#qr-demo"/></svg>
                 </div>
                 <div class="tc-stack tc-stack--gap-8 tc-card__qr-side">
-                  <div class="tc-field tc-field--w100"><label>Link in the code</label><input class="tc-in is-mono tc-in--t11" type="text" value="davx5://mix@cloud.example.org/remote.php/dav/" aria-label="Link in the code"></div>
-                  <div class="tc-line tc-line--gap-6"><button class="tc-btn is-sm" type="button">Open in DAVx5 · nextcloud</button><button class="tc-btn is-sm" type="button"><svg viewBox="0 0 24 24"><use href="#i-qr"/></svg>Code for radicale · vps</button></div>
+                  <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Address and login are in the code.</span>
+                  <button class="tc-btn is-sm" type="button">Open in DAVx5</button>
                 </div>
               </div>
-              <span class="tc-field__hint tc-field__hint--top8">One code per connection. The password is not in it — a code on a screen is seen by whoever stands behind you.</span>
+              <div class="tc-field tc-field--w100 tc-card__top9"><label>Password</label>
+                <span class="tc-line tc-line--gap-6"><input class="tc-in is-mono tc-in--fill" type="text" value="z3-brick-lamp-9f2" aria-label="Password" readonly><button class="tc-btn is-sm" type="button">Copy</button></span></div>
+            </div>
+            <div class="tc-card">
+              <div class="tc-rubric">radicale · vps · mix</div>
+              <div class="tc-card__split">
+                <div data-tc-colour="#FFFDF7" class="tc-card__qr">
+                  <svg width="104" height="104" viewBox="-1 -1 27 27" role="img" aria-label="QR"><rect x="-1" y="-1" width="27" height="27" fill="#FFFDF7"/><use href="#qr-demo"/></svg>
+                </div>
+                <div class="tc-stack tc-stack--gap-8 tc-card__qr-side">
+                  <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Address and login are in the code.</span>
+                  <button class="tc-btn is-sm" type="button">Open in DAVx5</button>
+                </div>
+              </div>
+              <div class="tc-field tc-field--w100 tc-card__top9"><label>Password</label>
+                <span class="tc-line tc-line--gap-6"><input class="tc-in is-mono tc-in--fill" type="text" value="q7-otter-fern-41c" aria-label="Password" readonly><button class="tc-btn is-sm" type="button">Copy</button></span></div>
             </div>
           </div>
         </div>
       </div></div>
     </div>
   </div>
-  <figcaption><b>Android показывает то же, что Apple, только без файла.</b> Аккаунты с коллекциями, логин в заголовке аккаунта — иначе человек сканирует код и не знает, что именно туда приедет. QR закрывает два самых ошибкоёмких поля (адрес и имя), <b>один код — одно подключение</b>: второй открывается действием «Code for …», а «Open in DAVx5» ведёт той же ссылкой для того, кто открыл страницу прямо на телефоне. Пароль в код не кладут; он показывается на странице подключений внутри окна разблокировки — туда и ведёт «Show password». Снятый аккаунт не попадёт в DAVx5 — тот же выбор, что у профиля Apple. Код — единственная картинка во всём интерфейсе, которая не является содержимым пользователя: чёрное на «бумаге», без скруглений и логотипа внутри.</figcaption>
+  <figcaption><b>Android показывает то же, что Apple, только без файла.</b> Аккаунты с коллекциями, логин в заголовке аккаунта — иначе человек сканирует код и не знает, что именно туда приедет. QR закрывает два самых ошибкоёмких поля (адрес и имя). DAVx5 заводит по аккаунту на код, поэтому <b>кодов столько, сколько отмечено аккаунтов, и все видны сразу</b>: снял галочку — карточка кода ушла. «Open in DAVx5» ведёт той же ссылкой для того, кто открыл страницу прямо на телефоне. <b>Пароль стоит под своим кодом</b>, на этом же экране: в код его не кладут — код на экране видит всякий, кто стоит за спиной, — но и ходить за паролем никуда не надо. Показан он внутри окна разблокировки; пока оно закрыто, вместо пароля точки и «Show», которое открывает <a href="#reveal">тот же лист</a> и возвращает сюда. Снятый аккаунт не попадёт в DAVx5 — тот же выбор, что у профиля Apple. Код — единственная картинка во всём интерфейсе, которая не является содержимым пользователя: чёрное на «бумаге», без скруглений и логотипа внутри.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -8779,18 +8795,18 @@ Read  2 min ago</div>
         <table class="tc-table">
           <thead><tr><th>Collection</th><th>Type</th><th class="tc-table__n3">URL</th><th class="tc-table__n4 tc-table__col--num"></th></tr></thead>
           <tbody>
-            <tr><td colspan="4"><b>nextcloud · mix</b></td></tr>
+            <tr><td colspan="4"><span class="tc-line tc-line--gap-8"><b>nextcloud</b><span class="tc-dim">login</span><span class="tc-mono">mix</span><span class="tc-dim">password</span><span class="tc-mono">z3-brick-lamp-9f2</span><button class="tc-btn is-sm" type="button">Copy password</button></span></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Личный</span></span></td><td class="tc-mono">CalDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/calendars/mix/personal/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#3F6E8C"></span><span class="tc-table__filename">Работа</span></span></td><td class="tc-mono">CalDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/calendars/mix/work/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Контакты</span></span></td><td class="tc-mono">CardDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/addressbooks/mix/contacts/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
           </tbody>
         </table>
         <div class="tc-msg is-row"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-          <span class="tc-msg__aside">Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book. There is no import file and none is needed.</span><button class="tc-btn is-sm" type="button">Show password</button></div>
+          <span class="tc-msg__aside">Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. There is no import file and none is needed.</span></div>
       </div></div>
     </div>
   </div>
-  <figcaption><b>Thunderbird — отдельный экран, не «всё остальное».</b> У него нет механизма импорта, и он не монтирует диск: нужны точные URL календарей и адресных книг плюс логин и пароль. Логин стоит в заголовке аккаунта, пароль — на странице подключений, куда ведёт «Show password» внутри окна разблокировки. CalDAV вставляют в Calendar, CardDAV — в Address Book; WebDAV здесь нет, потому что Thunderbird его не подключает. Пароль показывается той же <a href="#reveal">механикой</a>, что везде: вопрос раз в сеанс, пять минут, журнал. Copy на каждой строке снимает опечатку в длинном пути.</figcaption>
+  <figcaption><b>Thunderbird — отдельный экран, не «всё остальное».</b> У него нет механизма импорта, и он не монтирует диск: нужны точные URL календарей и адресных книг плюс логин и пароль. Логин и пароль стоят в строке аккаунта, над его коллекциями, у пароля своя «Copy password»: за ним не уходят на другую страницу. CalDAV вставляют в Calendar, CardDAV — в Address Book; WebDAV здесь нет, потому что Thunderbird его не подключает. Пароль показывается той же <a href="#reveal">механикой</a>, что везде: вопрос раз в сеанс, пять минут, журнал. Copy на каждой строке снимает опечатку в длинном пути.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -8836,20 +8852,20 @@ Read  2 min ago</div>
         <table class="tc-table">
           <thead><tr><th>Collection</th><th>Type</th><th class="tc-table__n3">URL</th><th class="tc-table__n4 tc-table__col--num"></th></tr></thead>
           <tbody>
-            <tr><td colspan="4"><b>nextcloud · mix</b></td></tr>
+            <tr><td colspan="4"><span class="tc-line tc-line--gap-8"><b>nextcloud</b><span class="tc-dim">login</span><span class="tc-mono">mix</span><span class="tc-dim">password</span><span class="tc-mono">z3-brick-lamp-9f2</span><button class="tc-btn is-sm" type="button">Copy password</button></span></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Личный</span></span></td><td class="tc-mono">CalDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/calendars/mix/personal/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#3F6E8C"></span><span class="tc-table__filename">Работа</span></span></td><td class="tc-mono">CalDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/calendars/mix/work/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Контакты</span></span></td><td class="tc-mono">CardDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">…/remote.php/dav/addressbooks/mix/contacts/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
-            <tr><td colspan="4"><b>sftpgo · vps · mix</b></td></tr>
+            <tr><td colspan="4"><span class="tc-line tc-line--gap-8"><b>sftpgo · vps</b><span class="tc-dim">login</span><span class="tc-mono">mix</span><span class="tc-dim">password</span><span class="tc-mono">m2-kettle-pine-08d</span><button class="tc-btn is-sm" type="button">Copy password</button></span></td></tr>
             <tr><td><span class="tc-table__file"><span class="tc-mark tc-table__filename" data-tc-colour="#4A6B52"></span><span class="tc-table__filename">Documents</span></span></td><td class="tc-mono">WebDAV</td><td class="tc-mono tc-table__n3 tc-table__n3--t11">https://files.example.org/dav/Documents/</td><td class="tc-acts tc-table__n4"><button class="tc-btn is-sm" type="button">Copy</button></td></tr>
           </tbody>
         </table>
         <div class="tc-msg is-row"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4" fill="none"><use href="#i-shield"/></svg>
-          <span class="tc-msg__aside">Credentials are unlocked for five minutes — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press <b>Lock now</b>; every reveal is written to the audit log.</span><button class="tc-btn is-sm" type="button">Show password</button></div>
+          <span class="tc-msg__aside">Credentials are unlocked for five minutes — here and everywhere else they are handed out. Everything shown closes when the time is up or when you press <b>Lock now</b>; every reveal is written to the audit log.</span></div>
       </div></div>
     </div>
   </div>
-  <figcaption><b>Файловые коллекции стоят здесь, не у Thunderbird.</b> Это адрес для «Подключить сетевой диск» в Windows, «Подключиться к серверу» в macOS и davfs в Linux. В профиль Apple WebDAV не кладут — там нет такой полезной нагрузки, — и вместо того, чтобы промолчать, строка отдаёт адрес, который сработает без профиля. Без файловой коллекции на аккаунте строки нет. Строки сгруппированы по аккаунтам, логин — в заголовке аккаунта: nextcloud и sftpgo — разные учётки. Пароли на этой странице не лежат: «Show password» ведёт на страницу подключений, где у каждого аккаунта свой.</figcaption>
+  <figcaption><b>Файловые коллекции стоят здесь, не у Thunderbird.</b> Это адрес для «Подключить сетевой диск» в Windows, «Подключиться к серверу» в macOS и davfs в Linux. В профиль Apple WebDAV не кладут — там нет такой полезной нагрузки, — и вместо того, чтобы промолчать, строка отдаёт адрес, который сработает без профиля. Без файловой коллекции на аккаунте строки нет. Строки сгруппированы по аккаунтам, логин — в заголовке аккаунта: nextcloud и sftpgo — разные учётки. Пароль — в строке аккаунта рядом с логином, у каждого аккаунта свой; пока окно разблокировки закрыто, там точки и «Show».</figcaption>
   </figure>
 </div>
 
@@ -8908,21 +8924,23 @@ Read  2 min ago</div>
         <div class="tc-msg is-accent">Changing your Carrel password does <b>not</b> disconnect devices: each has its own key wrapper. To disconnect one, revoke it here — that is the only thing that stops it.</div>
         <div class="tc-list__group"><span class="tc-rubric">Devices</span><span class="tc-num">2</span></div>
         <table class="tc-table tc-table--fit">
-          <thead><tr><th>Device</th><th>What it can see</th><th class="is-2nd tc-table__n4">Created</th><th class="is-2nd">Last request</th><th class="tc-table__col--w90"></th></tr></thead>
+          <thead><tr><th>Device</th><th>What it can see and do</th><th class="is-2nd tc-table__n4">Created</th><th class="is-2nd">Last request</th><th class="tc-table__col--w90"></th></tr></thead>
           <tbody>
             <tr><td><span class="tc-table__file"><svg><use href="#i-device"/></svg><span class="tc-table__filename">Телефон · DAVx5</span></span></td>
               <td><span class="tc-table__wrap">
                 <span class="tc-line tc-line--gap-3">
                   <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mark" data-tc-colour="#A05A2C"></span></span>
                 <span class="tc-mono tc-mono--t11">Calendars, Address books</span>
-                <button class="tc-btn is-sm" type="button">5 collections · Change</button></span></td>
+                <button class="tc-btn is-sm" type="button">5 collections · Change</button>
+                <span class="tc-seg tc-seg--h22"><button class="tc-seg__opt" type="button">read only</button><button class="is-on tc-seg__opt" type="button">read and write</button></span></span></td>
               <td class="tc-mono is-2nd tc-table__n4">2026-06-02</td><td class="tc-mono is-2nd">2026-08-15 09:31</td>
               <td class="tc-acts"><button class="tc-btn is-sm is-danger" type="button">Revoke</button></td></tr>
             <tr><td><span class="tc-table__file"><svg><use href="#i-device"/></svg><span class="tc-table__filename">Ноутбук · Thunderbird</span></span></td>
               <td><span class="tc-table__wrap">
                 <span class="tc-line tc-line--gap-3"><span class="tc-mark is-multi"></span></span>
                 <span class="tc-mono tc-mono--t11">all kinds</span>
-                <button class="tc-btn is-sm" type="button">12 collections · Change</button></span></td>
+                <button class="tc-btn is-sm" type="button">12 collections · Change</button>
+                <span class="tc-seg tc-seg--h22"><button class="is-on tc-seg__opt" type="button">read only</button><button class="tc-seg__opt" type="button">read and write</button></span></span></td>
               <td class="tc-mono is-2nd tc-table__n4">2026-06-02</td><td class="tc-mono is-2nd">2026-08-15 08:02</td>
               <td class="tc-acts"><button class="tc-btn is-sm is-danger" type="button">Revoke</button></td></tr>
           </tbody>
@@ -8948,7 +8966,7 @@ Read  2 min ago</div>
   </div>
 </div>
 <figcaption>Три синтетических уровня показаны так, как их увидит клиент, — потому что именно они и есть весь фокус: ниже начинается тупое проксирование, а адрес коллекции — <code>c/{account}/{col}/</code>: идентификатор подключения и путь в каталоге, не имя. Так он переживает переименование и перезапуск, два «Личный» с разных серверов не встречаются, а имя клиент берёт из <code>displayname</code> — оно стоит справа. <b>Ветка <code>files/</code> есть потому, что WebDAV у нас уже есть.</b> Человек однажды дал Carrel доступ к своим данным — и задача Carrel в том, чтобы этот доступ окупился по-максимуму, а не в том, чтобы отдавать по одному протоколу за релиз. Файлы здесь ничего не стоят: провайдер уже написан, учётные данные уже есть, синтетики не требуется — только подстановка префикса в путях. На той стороне обычный WebDAV, который Windows, macOS и Linux монтируют как сетевой диск без всякого клиента. Это органичное продолжение того, что уже сделано, а не отдельная функция. <b>Главный столбец — «что устройству видно», и он второй слева.</b> Область выдачи важнее того, какие запросы клиент слал: по ней принимают решения, а по журналу запросов — разве что диагностируют. Показана она полосками коллекций и счётом, а не списком имён: четыре язычка читаются быстрее, чем «Личный, Работа, Проекты, Контакты», а полный список — в подсказке и в диалоге.<br><br><b>Список правится у выданного устройства.</b> «Change» открывает те же флажки, что при добавлении, и <b>перевыдавать пароль не нужно</b>: область принадлежит записи пароля, а не самому паролю. Убранная коллекция исчезает у клиента при следующей синхронизации — DAVx5 увидит, что её больше нет в home-set, и уберёт локально; добавленная появится там же. Это стоит написать прямо в диалоге, потому что человек, привыкший к другим сервисам, ждёт «переподключите устройство».<br><br>Время последнего запроса осталось: оно отвечает на вопрос «живо ли устройство», а подробный журнал запросов ушёл под <span class="tc-mono">⋯</span> — его читают редко и только когда что-то сломалось. Знак davloom стоит в рейле пунктом навигации, а в подвале — баннер состояния режима: свой модуль, свой знак, лампа сюда не переезжает.
-<br><br><b>Прав на запись у устройства отдельно нет.</b> Устройство может ровно то, что человек может в своих подключениях (план S-27): отдельный «только чтение» у прокси означал бы второй набор прав поверх первого. <b>Отзыв удаляет запись</b> — строки «revoked» с кнопкой Delete нет: отозванное устройство не значит ничего, что стоило бы хранить.</figcaption>
+<br><br><b>Права — у каждого устройства свои: «read only» или «read and write».</b> Переключатель стоит в строке, а не в диалоге: если клиент начал портить данные, запись у него отнимают одним нажатием, не отзывая пароль и не настраивая телефон заново. Больше, чем человек может в своих подключениях, устройство не получит и с «read and write»: коллекция, которая у подключения только для чтения, останется такой и через davloom. Общего потолка на весь прокси нет — права одного устройства не зависят от второго переключателя в другом месте. <b>Отзыв удаляет запись</b> — строки «revoked» с кнопкой Delete нет: отозванное устройство не значит ничего, что стоило бы хранить.</figcaption>
 </figure>
 
 <div class="frames">
@@ -8993,6 +9011,11 @@ Read  2 min ago</div>
           <div class="tc-field tc-field--w100"><label>Name</label><input class="tc-in is-focus" type="text" value="Телефон · DAVx5" aria-label="Name">
             <span class="tc-field__hint">For you: this is how you will know what you are revoking later.</span></div>
           <div class="tc-field tc-field--w100">
+            <label>What this device may do</label>
+            <span class="tc-seg tc-seg--start"><button class="tc-seg__opt" type="button">Read only</button><button class="is-on tc-seg__opt" type="button">Read and write</button></span>
+            <span class="tc-field__hint">Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password.</span>
+          </div>
+          <div class="tc-field tc-field--w100">
             <label>What the device will see <span class="tc-dim">— changed later too, without re-issuing the password</span></label>
             <div class="tc-stack tc-stack--gap-2 tc-card__top2">
               <button class="tc-check" type="button"><span class="tc-tickrow__tick"></span>Calendars</button>
@@ -9019,7 +9042,7 @@ Read  2 min ago</div>
       </div></div></div>
     </div>
   </div>
-  <figcaption>Что устройство увидит, выбирается здесь же, а не после создания: роды и коллекции — два списка, и устройству видна коллекция, только если отмечены и она, и её род. Прав на запись здесь нет: устройство может то же, что человек в своих подключениях. <b>Задачи и заметки — два флажка, не один:</b> это разные роды, и клиент может понимать <code>VTODO</code> и не понимать <code>VJOURNAL</code>.</figcaption>
+  <figcaption>Что устройство увидит, выбирается здесь же, а не после создания: роды и коллекции — два списка, и устройству видна коллекция, только если отмечены и она, и её род. <b>Права выбираются здесь же</b> — «Read only» или «Read and write» — и потом меняются в строке устройства без нового пароля. Больше, чем человек может в своих подключениях, устройство не получит. <b>Задачи и заметки — два флажка, не один:</b> это разные роды, и клиент может понимать <code>VTODO</code> и не понимать <code>VJOURNAL</code>.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -9058,7 +9081,7 @@ Read  2 min ago</div>
           </div>
         </div>
         <div class="tc-main"><div class="tc-dialog tc-dialog--max520">
-        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Телефон · DAVx5</div><div class="tc-head__sub">Password created · 8 collections</div></div></div>
+        <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Телефон · DAVx5</div><div class="tc-head__sub">Password created · read and write · 8 collections</div></div></div>
         <div class="tc-card tc-card--edge-accent">
           <div class="tc-rubric">Device password</div>
           <div class="tc-line tc-line--gap-8 tc-card__top2">
