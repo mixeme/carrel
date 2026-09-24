@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
@@ -92,4 +93,104 @@ func TestGoogleContactInTheOnlyBook(t *testing.T) {
 func TestGoogleContactFields(t *testing.T) {
 	endpoint, user, pass := googleCardConfig(t)
 	runContactFieldsInTheOnlyBook(t, endpoint, user, pass, "google")
+}
+
+func googleCalConfig(t *testing.T) (endpoint, user, pass string) {
+	liveCredEnv()
+	endpoint = os.Getenv("CARREL_GOOGLE_CALDAV_URL")
+	user = os.Getenv("CARREL_GOOGLE_CALDAV_USER")
+	pass = os.Getenv("CARREL_GOOGLE_CALDAV_PASS")
+	if endpoint == "" || user == "" || pass == "" {
+		t.Skip("CARREL_GOOGLE_CALDAV_* required")
+	}
+	return endpoint, user, pass
+}
+
+// An event's whole life through the pages — made, read back, edited,
+// deleted — in the calendar this account already has. A calendar cannot be
+// made here (MKCALENDAR answers 404), so the shared run, which makes its
+// own, does not fit; this is the same kind of run as for Google's contacts
+// (owner's decision 20.09.2026). Until 24.09.2026 no suite wrote a single
+// calendar record on Google at all: the coverage table in docs/servers.md
+// said so, and this closes it.
+//
+// Nothing in it may reach anyone: no attendee is ever added, or Google would
+// send an invitation. The event stands in 2031 so that it meets nothing of
+// the owner's own, and it is deleted by the test — and once more on cleanup,
+// should the test stop half way.
+func TestGoogleEventInTheExistingCalendar(t *testing.T) {
+	endpoint, user, pass := googleCalConfig(t)
+	ctx := context.Background()
+	client := liveClient(t, endpoint, user, pass)
+	app := newLiveApp(t)
+	connID := connectLive(t, app, endpoint, user, pass)
+
+	var cal sealed.Collection
+	for _, c := range liveCatalog(t, app).Collections {
+		if c.Has(view.KindEvent) && !c.ReadOnly {
+			cal = c
+			break
+		}
+	}
+	if cal.Path == "" {
+		t.Skip("no calendar this account can write in the catalog")
+	}
+	events := "/app/calendar/" + connID + "/" + url.PathEscape(cal.Path)
+	summary := "Carrel probe " + yandexSuffix("google")
+
+	form := liveForm(liveDecode[view.EventEditPage](t, "new event form", app.get(events+"/new")).Form)
+	form.Set("summary", summary)
+	form.Set("start.date", "2031-03-11")
+	form.Set("start.time", "09:30")
+	loc := redirected(t, "new event", app.post(events+"/new", form))
+	uid, _ := url.PathUnescape(loc[strings.LastIndex(loc, "/")+1:])
+	// Google keeps both the UID and the resource name of an event (SV-25
+	// notes that only a card is renamed).
+	file := cal.Path + uid + ".ics"
+	removeLater(t, client, file)
+	got, _ := rawBody(ctx, t, client, file)
+	mustHave(t, "new event", got, "UID:"+uid, "SUMMARY:"+summary, "20310311")
+	// Only an attendee of the event itself would be invited. Google writes
+	// two reminders of its own into every event (SV-25), and the e-mail one
+	// carries an ATTENDEE — the calendar's owner, whom the reminder is for —
+	// so the reminders are left out before looking.
+	if strings.Contains(withoutAlarms(got), "ATTENDEE") {
+		t.Fatalf("the event names an attendee — Google would have sent an invitation:\n%s", got)
+	}
+
+	if event := liveDecode[view.EventPage](t, "the event", app.get(loc)); string(event.Summary) != summary {
+		t.Errorf("the event page shows %q, want %q", event.Summary, summary)
+	}
+
+	form = liveForm(liveDecode[view.EventEditPage](t, "edit form", app.get(loc+"/edit")).Form)
+	form.Set("summary", summary+" moved")
+	redirected(t, "edit", app.post(loc+"/edit", form))
+	got, _ = rawBody(ctx, t, client, file)
+	mustHave(t, "edited event", got, "SUMMARY:"+summary+" moved")
+
+	event := liveDecode[view.EventPage](t, "event before delete", app.get(loc))
+	redirected(t, "delete", app.post(liveAction(t, event.Actions, "record.delete"), url.Values{}))
+	if _, _, err := client.Get(ctx, file, nil); !dav.IsStatus(err, http.StatusNotFound) {
+		t.Errorf("after delete GET %s = %v, want 404", file, err)
+	}
+}
+
+// withoutAlarms is a calendar text with its VALARM blocks taken out.
+func withoutAlarms(text string) string {
+	var out []string
+	in := false
+	for _, line := range strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n") {
+		switch strings.TrimSpace(line) {
+		case "BEGIN:VALARM":
+			in = true
+			continue
+		case "END:VALARM":
+			in = false
+			continue
+		}
+		if !in {
+			out = append(out, line)
+		}
+	}
+	return strings.Join(out, "\n")
 }

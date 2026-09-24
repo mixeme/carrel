@@ -164,13 +164,25 @@ func TestOneConnectionOfThreeDown(t *testing.T) {
 			t.Errorf("%s: %d %s", path, rec.Code, rec.Body.String())
 		}
 	}
+	// Every screen above started a poll of its own, and a session runs at
+	// most conf.MaxLiveFanouts of them at once. Alone they are done before
+	// this line; in a full run under load some are not, and the search is
+	// refused as one too many — the ceiling doing its job, not the dead
+	// connection winning. The search is asked again until it is let in: what
+	// this test holds is the answer of a search that ran (24.09.2026, a full
+	// run failed here and the test could not say why).
 	search := decode[view.SearchPage](t, f.h.do(get("/app/search?q=ada", f.sess)))
+	for wait := time.Now().Add(30 * time.Second); hasNotice(search.Notices, "Too many searches") && time.Now().Before(wait); {
+		time.Sleep(50 * time.Millisecond)
+		search = decode[view.SearchPage](t, f.h.do(get("/app/search?q=ada", f.sess)))
+	}
 	for wait := time.Now().Add(30 * time.Second); search.Poll.Running && time.Now().Before(wait); {
 		time.Sleep(50 * time.Millisecond)
 		search = decode[view.SearchPage](t, f.h.do(get("/app/search?q=ada", f.sess)))
 	}
 	if len(search.Results) == 0 {
-		t.Error("the connection that answers lost its result to the one that did not")
+		t.Errorf("the connection that answers lost its result to the one that did not; notices %+v, sources %+v",
+			search.Notices, search.Poll.Sources)
 	}
 }
 

@@ -15,8 +15,26 @@ fi
 # check had been red since v0.2.1 — fixtures for sixty screens were added
 # without the entry the test asks for in the same commit — and nothing caught
 # it, because nothing ran it. A gate that runs only by hand is not a gate.
+# Formatting and vet, before anything is run. Both lived only in the manual
+# race script, and on 24.09.2026 an unformatted file went into a commit
+# unnoticed — the same lesson as the unit suite's, learned a second time.
+echo "== gofmt =="
+unformatted=$(gofmt -l .)
+if [[ -n "$unformatted" ]]; then
+  echo "not formatted:" >&2
+  echo "$unformatted" >&2
+  exit 1
+fi
+echo "== vet =="
+go vet ./...
+go vet -tags=integration ./integration/...
+
 echo "== unit suite =="
-go test ./...
+# An explicit ceiling. go test's own default is ten minutes per package, and
+# internal/web — hundreds of tests against real HTTP stands — crossed it on
+# 24.09.2026: the run was killed mid-test, which reads as a failure and is
+# not one. How long the package takes is watched on its own (docs/plan).
+go test -timeout 30m ./...
 
 echo "== F-10: server.key permission check =="
 go test -run '^TestLoadServerKeyRejectsPermissiveMode$' ./internal/crypt/...

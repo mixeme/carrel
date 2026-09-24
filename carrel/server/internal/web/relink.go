@@ -11,8 +11,8 @@ import (
 	"carrel.dev/carrel/server/internal/fanout"
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
-	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/sealed"
+	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
 )
 

@@ -218,10 +218,30 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	if copying {
-		s.finishWrite(w, r, dest, uid, sent, dest.recordPath(uid))
+		// A copy is a record made in another collection, and read back the
+		// way a new one is: a server that rewrites the UID of what is written
+		// to it (SV-25: Google) keeps it under an identity of its own, and it
+		// is found at the address it was written to.
+		s.finishCreate(w, r, dest, uid, sent)
 		return
 	}
+	// The copy is read back by its identity; where the server gave it another
+	// (SV-25: Google), by the address it was written to, as finishCreate
+	// does. Read back only by UID, a move into Google never finished: the
+	// copy was not found, the original was kept, and the person had the
+	// card twice.
+	landed := uid
 	got, err := dest.find(ctx, uid)
+	if notFoundErr(err) {
+		if at, ferr := dest.fetch(ctx, dst); ferr == nil {
+			if made := uidOf(dest, at); made != "" && made != uid {
+				got, err, landed = at, nil, made
+				if kept, kerr := dest.find(ctx, made); kerr == nil {
+					got = kept
+				}
+			}
+		}
+	}
 	if err != nil {
 		dest.noteWrite(dst, sent)
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.keptNotice(dest, uid, "Copied, and the original kept",
@@ -229,8 +249,14 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	dest.noteWrite(got.Path, got)
-	if loss := model.CompareAfterPut(dest.conn.ID, sent, got, c.sess.Losses()); loss != nil {
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.keptNotice(dest, uid, "Copied, and the original kept",
+	// An identity the server chose is not a loss: the UID was Carrel's to
+	// give, never the person's (S-7.1).
+	compare := model.CompareAfterPut
+	if landed != uid {
+		compare = model.CompareAfterCreate
+	}
+	if loss := compare(dest.conn.ID, sent, got, c.sess.Losses()); loss != nil {
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.keptNotice(dest, landed, "Copied, and the original kept",
 			"The server of "+collectionLabel(dest.col)+" did not keep "+strings.Join(loss.Properties, ", ")+
 				". The original stays here, so nothing is lost; delete it yourself if the copy is enough.")))
 		return
@@ -239,13 +265,31 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 	switch {
 	case dav.IsStatus(err, http.StatusPreconditionFailed):
 		cur, _ := c.find(ctx, uid)
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, cur, s.keptNotice(dest, uid, "Copied, but the original changed, so it stays",
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, cur, s.keptNotice(dest, landed, "Copied, but the original changed, so it stays",
 			"The "+c.spec.noun+" changed here after Carrel read it. The copy holds the version from before; both are there now.")))
 	case err != nil:
-		n := s.keptNotice(dest, uid, "Copied, but the original could not be deleted",
+		n := s.keptNotice(dest, landed, "Copied, but the original could not be deleted",
 			"Both are there now. Delete the original yourself once the server lets you.")
 		n.Details = moveFailure(c, "", "DELETE", obj.Path, err).Details
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, n))
+	case landed != uid:
+		// Moved, under an identity the other server gave it. What pointed at
+		// the old one is pointed at the new, the way a SoGo move is mended
+		// (relink.go): otherwise a task made from this person's timeline would
+		// drop out of it without a word.
+		c.noteWrite(obj.Path, nil)
+		rep := s.relink(ctx, c.sess, s.catalogOf(c.sess), []string{uid}, landed)
+		n := view.Notice{
+			Role:  view.NoticeAlert,
+			Title: "Moved, but the server gave it another identity",
+			Body: text("The " + c.spec.noun + " is in " + collectionLabel(dest.col) + " with everything it held, but that server " +
+				"replaced its UID. Duplicates are matched by that identifier." + rep.sentence()),
+			Actions: []view.Action{s.openThere(dest, landed, "Open it there")},
+		}
+		if lines := rep.lines(); len(lines) > 0 {
+			n.Details = &view.Diagnostic{Summary: "Linked records", Lines: lines}
+		}
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, n))
 	default:
 		c.noteWrite(obj.Path, nil)
 		s.redirect(w, r, dest.recordPath(uid))

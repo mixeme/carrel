@@ -17,6 +17,76 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.31 — 2026-09-24
+
+### Fixed
+
+- **A card moved into Google did not finish moving.** Google rewrites the
+  UID of what is written to it (SV-25), and the move read its copy back by
+  the UID it had sent. The copy was not found, so the original was kept: two
+  cards, and the notice's link pointed at the old UID, which Google does not
+  know. The copy is now read back at the address it was written to, as
+  `finishCreate` reads back a new card. The move then finishes: the original
+  is deleted, and what pointed at the old UID is pointed at the one Google
+  gave (v0.2.30). With that, all three operations that change a card's UID
+  mend its links. An identity the server chose is not counted as a loss when
+  the copy is compared.
+- **A copy into Google landed on an error over a record written whole.** A
+  copy is a record made in another collection, and now goes through
+  `finishCreate`. On a server that keeps the UID nothing changes; on Google
+  the page opens the copy.
+
+### Added
+
+- **A calendar record is now run on Google.** Until today no suite had
+  written a single event there, and the coverage table said so. A calendar
+  cannot be made on Google, so the shared run does not fit.
+  `TestGoogleEventInTheExistingCalendar` takes an event through its whole
+  life in the calendar the account already has: made, read back, edited and
+  deleted, through the pages. It is set in 2031 so that it meets nothing of
+  the owner's, and no attendee is ever added, or Google would send an
+  invitation. The first run tripped over an ATTENDEE that Google itself
+  writes into its e-mail reminder, addressed to the calendar's owner. That
+  is not an invitation, and the check now looks past reminders.
+- **gofmt and vet are gates.** Both lived only in the manual race script,
+  and an unformatted import order went into v0.2.30 unnoticed. It is
+  formatted now.
+
+- **A third test that failed only in a full run, and said nothing about
+  why.** `TestOneConnectionOfThreeDown` opens seven screens, each starting
+  a poll of its own, and then searches. A session runs at most four polls at
+  once. Alone, the earlier ones are done before the search starts. Under
+  load some may still run, and then the search is refused as one too many:
+  the page's poll is a zero value, the wait ends at once, and the test
+  reads «the answering connection lost its result». That is the ceiling
+  working, not the dead connection winning. The test now waits until the
+  search is let in, and on failure names the notices and every source's
+  state. The mechanism is read from the code; it was not reproduced, so if
+  the test fails again it will at least say why.
+
+- **The unit suite takes three minutes instead of ten, and no longer runs
+  out of time.** A full run was killed at go test's ten-minute ceiling
+  mid-test, which reads as a failure and was none. Ranking the package's 337
+  tests by time showed no slow test: every one paid about a second and a
+  third up front. Every fixture makes an account and signs in, which means
+  four Argon2id derivations at the production cost of 64 MiB (256 MiB for
+  the escrow master key), all behind one process-wide semaphore. The tests
+  of `internal/web`, `internal/user` and `internal/proxy` now use the
+  cheapest parameters the store accepts. The parameters travel with every
+  stored record, so a cheap one is checked the same way, and nothing in
+  those packages tests the cost itself. `internal/crypt`'s own tests keep
+  the production values. `internal/web` alone went from 453 s to 78 s, and
+  `internal/user` from 92 s to 5 s. The gates also got an explicit 30-minute
+  ceiling, so an arbitrary default no longer decides.
+
+### Notes
+
+- **Google stays on its undocumented path for now.** That is the owner's
+  decision (24.09.2026): when Carrel has OAuth 2.0, the connection moves to
+  Google's documented addresses. Recorded in the plan.
+- Import into Google is still not covered: an imported card gets Google's
+  UID too, and a link to its old one would break.
+
 ## v0.2.30 — 2026-09-24
 
 ### Fixed
