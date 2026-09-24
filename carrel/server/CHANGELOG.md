@@ -17,6 +17,70 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.29 — 2026-09-23
+
+### Fixed
+
+- **A resource that is not there was taken for one that is**
+  (docs/servers.md, SV-48). A multistatus response carries either propstat
+  blocks or a status of its own (RFC 4918 §14.24), and Xandikos says a
+  missing event, card or anything else the second way: 207, one response,
+  404. The decoder read only propstats, so
+  such a response came out with status 0 and no properties, and `Stat` —
+  which skipped only non-zero non-2xx statuses — built an entry from the
+  href. On such a server every free name looked taken, and Carrel checks a
+  name through `Stat` before an upload precisely because some servers ignore
+  `If-None-Match`. The fix is in the decoder, so every PROPFIND reader gets
+  it, not only `Stat`.
+- **The gates could not bring Stalwart up; alone it came up fine.** Two
+  missing flags. `run stalwart-setup` without `--no-deps` brought the
+  dependency up to *its own* configuration, where recovery mode is unset and
+  so off, and recreated Stalwart out of recovery mode before the plan ran.
+  And the last `up -d` without `--force-recreate` could find nothing to
+  change, so the listener the plan had made never started: port 8088
+  published, nobody behind it. My manual run had `--force-recreate`; the
+  gates did not.
+
+### Changed
+
+- **The coverage table in `docs/servers.md` was wrong, and has been checked
+  row by row.** The owner caught Google and iCloud marked «no CalDAV». Both
+  serve it. Google's answers an app password at `google.com/calendar/dav/`
+  (SV-24). iCloud's refuses *our* Apple ID, whose calendar service is
+  switched off (SV-28): a property of the account, which I had written down
+  as a property of the server. The first edition had been filled in from
+  memory. This one is checked against `grep '^func Test' integration/`, the
+  SV entries and live probes, and says «not checked» where nothing is known.
+  That is Mail.ru's CardDAV, for one: no address for it exists in our
+  credentials, yet the first edition said «yes».
+- **Then the owner asked for the whole table to be checked against primary
+  sources, and it moved again.** Every protocol cell is now sourced from the
+  server's own documentation, which is linked under the table, and confirmed
+  by a live probe of our stand or account. Three findings. OpenCloud declares
+  CalDAV and CardDAV through an integrated Radicale since 2.3.0; the first
+  edition had «no», and on our instance it is switched off (`/caldav` answers
+  405). Mail.ru declares CardDAV (`carddav.mail.ru`) and WebDAV for its Cloud.
+  And the one that matters most: **Google documents CalDAV and CardDAV only
+  through OAuth 2.0 and says Basic gets a 401.** The addresses Carrel uses
+  with an app password (SV-24) are not in its documentation, so Carrel works
+  with Google on behaviour Google does not promise, and Carrel has no OAuth 2.0.
+  That is recorded for the owner to decide on.
+- The table now says where each check runs. Only the stands that come up on
+  the Linux machine run in the gates. Everything remote runs by hand, from
+  wherever `dev/credentials.txt` is, because that file never travels to the
+  machine. The paragraph above the lineup had said that Baikal and SFTPGo
+  run in the gates. Their steps are there, but they always skip.
+- **Xandikos does not serve files, whatever it accepts.** A probe showed a
+  plain folder taking MKCOL and a file coming back, and I put that down as a
+  capability and ran the files suite against it. The owner pointed out that
+  Xandikos promises no such thing. Its README calls it a «CardDAV/CalDAV
+  server», lists core WebDAV «except for COPY/MOVE/LOCK» and WebDAV Mount as
+  «intentionally not implemented». The suite is gone and the row is back to
+  «no». The table's protocol columns now come from what a server documents,
+  with probes only confirming it: behaviour a server never promised is not
+  something to build checks on. SV-48 stays, because a missing event or
+  card draws the same answer.
+
 ## v0.2.28 — 2026-09-23
 
 ### Added

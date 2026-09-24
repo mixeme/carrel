@@ -535,8 +535,14 @@ type xmlMultiStatus struct {
 	Responses []xmlResponse `xml:"response"`
 }
 
+// xmlResponse is one response of a multistatus. RFC 4918 §14.24 gives it
+// either propstat blocks or a status of its own — never both — and the second
+// form is how some servers say a resource is not there: Xandikos answers a
+// PROPFIND of a missing file 207 with one response whose own status is 404
+// (docs/servers.md, SV-48).
 type xmlResponse struct {
 	Href     string        `xml:"href"`
+	Status   string        `xml:"status"`
 	PropStat []xmlPropStat `xml:"propstat"`
 }
 
@@ -573,6 +579,13 @@ func decodeMultiStatus(r io.Reader) (*MultiStatus, error) {
 			for _, raw := range ps.Prop.Raw {
 				r.Props[raw.XMLName] = append([]byte(nil), raw.InnerXML...)
 			}
+		}
+		// A response with no propstat carries its status itself. Read
+		// without it, a 404 came out as status 0 with no properties, and
+		// every caller that skips only non-2xx statuses took the resource
+		// for present: a file that is not there was a file that is.
+		if len(resp.PropStat) == 0 && resp.Status != "" {
+			r.StatusCode = parseStatus(resp.Status)
 		}
 		out.Responses = append(out.Responses, r)
 	}

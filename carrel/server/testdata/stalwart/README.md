@@ -82,11 +82,18 @@ RFC 6764 §6. Без этой правки все семь наборов пад
 
 ```bash
 CARREL_STALWART_RECOVERY=1 docker compose -f docker-compose.linux.yml up -d stalwart
-docker compose -f docker-compose.linux.yml run --rm stalwart-setup apply --file plan.ndjson
-CARREL_STALWART_RECOVERY=0 docker compose -f docker-compose.linux.yml up -d stalwart
+docker compose -f docker-compose.linux.yml run --rm --no-deps stalwart-setup apply --file plan.ndjson
+CARREL_STALWART_RECOVERY=0 docker compose -f docker-compose.linux.yml up -d --force-recreate stalwart
 ```
 
-Второй заход обязателен: см. SV-46 выше. План идемпотентный — он весь из
+Второй заход обязателен: см. SV-46 выше. И оба ключа тоже. Без `--no-deps`
+compose поднимает зависимость по конфигурации **этой** команды, где режим
+восстановления не задан, и пересоздаёт Stalwart без него ещё **до** плана.
+Без `--force-recreate` последний подъём может найти, что менять нечего, и
+тогда слушатель из плана так и не стартует: порт 8088 опубликован, но внутри
+его никто не слушает. Оба случая поймали ворота 23.09.2026. По отдельности
+стенд проходил, потому что там последний подъём я делал с
+`--force-recreate`, а в ворота этот ключ не перенёс. План идемпотентный — он весь из
 `upsert`, — так что повтор ничего не ломает.
 
 ## Как спрашивать сервер, а не догадываться

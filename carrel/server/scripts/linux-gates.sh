@@ -93,11 +93,17 @@ for _ in $(seq 1 90); do
 done
 # The plan makes the domain, the account with its password, and the DAV
 # listener. The CLI image carries no shell, so it is invoked directly.
-docker compose -f docker-compose.linux.yml run --rm stalwart-setup apply --file plan.ndjson
+# --no-deps: without it compose brings the dependency up to *this* command's
+# configuration, where recovery mode is unset and so off — it recreated
+# Stalwart out of recovery mode before the plan ran (gates, 23.09.2026).
+docker compose -f docker-compose.linux.yml run --rm --no-deps stalwart-setup apply --file plan.ndjson
 # And again without recovery mode, so the listener the plan made is the one
-# that runs. compose recreates the container; the volume stays, so the
-# account and the listener are still there.
-CARREL_STALWART_RECOVERY=0 docker compose -f docker-compose.linux.yml up -d stalwart
+# that runs. --force-recreate, because a listener is read at start and
+# nothing else makes it: if the container already runs without recovery
+# mode, a plain `up -d` finds nothing to change and the plan's listener
+# never starts — port 8088 is published and nobody behind it answers. The
+# volume stays, so the account and the listener are still there.
+CARREL_STALWART_RECOVERY=0 docker compose -f docker-compose.linux.yml up -d --force-recreate stalwart
 for _ in $(seq 1 60); do
   if curl -sf -o /dev/null http://127.0.0.1:8088/.well-known/caldav 2>/dev/null; then
     break
