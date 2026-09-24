@@ -108,10 +108,9 @@ services:
   # news. The standalone image carries Caddy, so it is one container and
   # not the nginx-plus-FPM pair the project's own compose files use.
   #
-  # NOT YET RUN: written from the project's documentation and its own
-  # compose examples on 22.09.2026, on a machine without Docker. See
-  # testdata/davis/README.md — and note that its DAV account is made by
-  # hand, once, in the admin screens.
+  # First run 24.09.2026 on the Linux machine. The DAV account is made
+  # through the admin screens' own form, by a script and not by hand
+  # (testdata/davis/make-account.sh; testdata/davis/README.md).
   davis:
     image: ghcr.io/tchapi/davis-standalone:latest
     ports:
@@ -123,7 +122,7 @@ services:
       # Four slashes: an absolute path, and no quotes, so Symfony resolves it.
       DATABASE_DRIVER: "sqlite"
       DATABASE_URL: sqlite:////data/davis-database.db
-      # The admin screens, where the one DAV account is made by hand.
+      # The admin screens, whose form makes the one DAV account.
       ADMIN_LOGIN: "admin"
       ADMIN_PASSWORD: "carrel-admin"
       ADMIN_AUTH_BYPASS: "false"
@@ -131,18 +130,24 @@ services:
       AUTH_REALM: "SabreDAV"
       CALDAV_ENABLED: "true"
       CARDDAV_ENABLED: "true"
-      # Davis's WebDAV wants directories of its own; Carrel asks this stand
-      # for calendars and contacts, and finds no file root, as it finds none
-      # on SoGo or Yandex.
       # Davis serves files too, and a server that serves a protocol is run
-      # against it (docs/servers.md). Its suites still wait for the account
-      # that has to be made by hand.
+      # against it (docs/servers.md). Its WebDAV wants directories that
+      # exist and that PHP may write: without them every DAV request, the
+      # calendars' too, is a 500 — the first run found exactly that. Homes
+      # are off by default; each account gets one here, outside the public
+      # directory, as Davis's own .env advises.
       WEBDAV_ENABLED: "true"
+      WEBDAV_TMP_DIR: "/data/webdav/tmp"
+      WEBDAV_PUBLIC_DIR: "/data/webdav/public"
+      WEBDAV_HOMES_DIR: "/data/webdav/homes"
     volumes:
       - davis-data:/data
 
   # One shot: the migrations, which Davis does not run for itself. Until
   # they have run the database has no tables and every screen is a 500.
+  # Then the data belongs to www-data, which PHP runs as: the migrations
+  # run as root, and a database root made is one PHP can read and not write
+  # — «attempt to write a readonly database» on the first form (24.09.2026).
   davis-setup:
     image: ghcr.io/tchapi/davis-standalone:latest
     depends_on:
@@ -157,7 +162,7 @@ services:
     entrypoint:
       - sh
       - -c
-      - "bin/console doctrine:migrations:migrate --no-interaction && chown -R $$(id -u):$$(id -g) /data"
+      - "bin/console doctrine:migrations:migrate --no-interaction && mkdir -p /data/webdav/tmp /data/webdav/public /data/webdav/homes && chown -R www-data:www-data /data"
     profiles:
       - setup
 

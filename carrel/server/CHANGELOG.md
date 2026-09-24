@@ -17,6 +17,35 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.38 — 2026-09-24
+
+### Added
+
+- **Davis is run, and all eight suites are green** — records, forms,
+  collections, move, search, timeline, collection delete and, new here,
+  files, from `/dav/home/<login>/`. It stands in the ordinary row of
+  `linux-gates.sh`, with no flag.
+- The stand's one DAV account is made by `testdata/davis/make-account.sh`
+  through Davis's own admin form (login, «new user», CSRF token included),
+  not by hand. It does nothing when the account already answers. The suites
+  default to the account it makes, `carrel` / `carrel-pass`.
+
+### Fixed
+
+- The Davis stand itself: `davis-setup` now gives `/data` to `www-data`,
+  which PHP runs as — a database made by root was read-only to it — and
+  makes the WebDAV directories, without which every DAV request was a 500.
+- The contact forms suite never checked categories on any server: the seed
+  card had none, so the check was skipped as «not taken by the server». The
+  seed has them now; green on Davis, Radicale, Xandikos, Baikal, Nextcloud,
+  SoGo and Yandex.
+- The collections suite's seed address book has a name, as Carrel's form
+  always gives one: Davis answers a nameless one with 500 (SV-49).
+
+### For consumers
+
+Nothing to change.
+
 ## v0.2.37 — 2026-09-24
 
 ### Fixed

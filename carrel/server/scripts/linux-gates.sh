@@ -166,26 +166,22 @@ for _ in $(seq 1 60); do
 done
 go test -tags=integration -count=1 -timeout 30m -run 'Xandikos' ./integration/...
 
-# Davis, sabre/dav once more. NOT YET RUN either, and its DAV account is
-# made by hand in the admin screens — the suite skips and says so when
-# CARREL_DAVIS_USER and CARREL_DAVIS_PASS are unset
-# (testdata/davis/README.md). Run with CARREL_DAVIS=1.
-if [[ "${CARREL_DAVIS:-}" == "1" ]]; then
-  echo "== S-30.2: Davis integration =="
-  if ! (
-    docker compose -f docker-compose.linux.yml up -d davis
-    for _ in $(seq 1 60); do
-      if curl -sf -o /dev/null http://127.0.0.1:8082/ 2>/dev/null; then
-        break
-      fi
-      sleep 0.5
-    done
-    docker compose -f docker-compose.linux.yml run --rm davis-setup
-    go test -tags=integration -count=1 -timeout 30m -run 'Davis' ./integration/...
-  ); then
-    echo "!! Davis: стенд не поднялся или набор упал; остальные ворота идут дальше"
+# Davis, sabre/dav once more, and the third engine here that serves files
+# beside calendars and contacts. First run 24.09.2026: all eight suites green
+# once the stand itself was right (testdata/davis/README.md), so it stands in
+# the ordinary row: no flag, and a failure fails the gates. Its one DAV
+# account is made through its own admin form, by a script.
+echo "== S-30.2: Davis integration =="
+docker compose -f docker-compose.linux.yml up -d davis
+for _ in $(seq 1 60); do
+  if curl -sf -o /dev/null http://127.0.0.1:8082/ 2>/dev/null; then
+    break
   fi
-fi
+  sleep 0.5
+done
+docker compose -f docker-compose.linux.yml run --rm davis-setup
+bash testdata/davis/make-account.sh
+go test -tags=integration -count=1 -timeout 30m -run 'Davis' ./integration/...
 
 if [[ -n "${CARREL_SFTPGO_URL:-}" && -n "${CARREL_SFTPGO_USER:-}" && -n "${CARREL_SFTPGO_PASS:-}" ]]; then
   echo "== S-30.2: SFTPGo integration =="

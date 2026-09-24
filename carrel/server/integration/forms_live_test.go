@@ -249,7 +249,11 @@ func liveContactFields(ctx context.Context, t *testing.T, app *liveApp, client *
 	file := book + uid + ".vcf"
 	seed(ctx, t, client, file, "text/vcard; charset=utf-8", "BEGIN:VCARD\nVERSION:3.0\nUID:"+uid+"\nFN:Vera Lebedeva\nN:Lebedeva;Vera;;;\n"+
 		"TEL;TYPE=work:+7 912 000 00 01\nEMAIL:vera@carrel.test\nADR;TYPE=home:PO 7;Flat 2;Lenina 1;Ekaterinburg;;620000;Russia\n"+
-		"BDAY:--0412\nX-CUSTOM:keep-me\nEND:VCARD\n")
+		"BDAY:--0412\nCATEGORIES:seed\nX-CUSTOM:keep-me\nEND:VCARD\n")
+	// CATEGORIES is in the seed so that what the server keeps of it is seen:
+	// without it the check of categories below was skipped on every server,
+	// as a property the server «did not take» — found on Davis's first run,
+	// 24.09.2026, where the suite ran with -v and the line showed.
 	// A server may name the record itself and write a UID of its own over
 	// the one it was sent (SV-25). The card is then read back at the
 	// address it was written to, and the person meets the identity the

@@ -80,10 +80,12 @@ func runCollections(t *testing.T, endpoint, user, pass string) {
 	home := func(h string) string { return strings.TrimSuffix(h, "/") + "/" }
 
 	// Connecting needs one collection on the server; this one is made by hand.
+	// With a name, as Carrel's own form always sends one: Davis refuses an
+	// address book without it, 500 (docs/servers.md, SV-49).
 	seed := home(res.AddressBookHome) + suffix + "-seed/"
 	seed = makeCollection(ctx, t, client, endpoint, user, pass, "MKCOL", seed, `<?xml version="1.0" encoding="utf-8"?>
 <D:mkcol xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:carddav">
-  <D:set><D:prop><D:resourcetype><D:collection/><C:addressbook/></D:resourcetype></D:prop></D:set>
+  <D:set><D:prop><D:resourcetype><D:collection/><C:addressbook/></D:resourcetype><D:displayname>Seed</D:displayname></D:prop></D:set>
 </D:mkcol>`)
 
 	app := newLiveApp(t)
