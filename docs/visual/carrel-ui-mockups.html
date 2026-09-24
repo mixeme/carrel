@@ -1259,6 +1259,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-menu--w252.tc-menu--w252{width:252px}
 .tc-menu--full.tc-menu--full{width:100%}
 .tc-menu--w290.tc-menu--w290{width:290px}
+.tc-menu--w420.tc-menu--w420{width:420px}
 .tc-menu--w222.tc-menu--w222{width:222px}
 .tc-menu__item--danger.tc-menu__item--danger{color:var(--tc-danger)}
 .tc-menu__item--pad5-8-7.tc-menu__item--pad5-8-7{padding:5px 8px 7px}
@@ -6010,25 +6011,24 @@ Read  2 min ago</div>
 
 <figure>
 <div class="frame" data-frame="s-dup-3">
-  <div class="frame-label"><span>Порог и веса признаков</span><i>под кнопкой Weights</i></div>
-  <div class="tc-root tc-root--on-surface tc-root--pad18-20 tc-root--col">
-  <div class="tc-field tc-field--inline"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="60" aria-label="Match threshold"></div>
-  <span class="tc-field__hint">The instance's number. Set your own to change what is offered.</span>
-  <table class="tc-table">
-    <thead><tr><th>Signal</th><th>Points</th><th class="tc-table__n3">Instance</th></tr></thead>
-    <tbody>
-      <tr><td>Same UID</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="80" aria-label="Same UID"></td><td class="tc-mono tc-table__n3">80</td></tr>
-      <tr><td>Same email</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="60" aria-label="Same email"></td><td class="tc-mono tc-table__n3">60</td></tr>
-      <tr><td>Same phone</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="60" aria-label="Same phone"></td><td class="tc-mono tc-table__n3">60</td></tr>
-      <tr><td>Same name</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="20" aria-label="Same name"></td><td class="tc-mono tc-table__n3">20</td></tr>
-      <tr><td>Same birthday <span class="tc-badge">yours</span></td><td><input class="tc-in is-mono tc-in--w52" type="text" value="20" aria-label="Same birthday"></td><td class="tc-mono tc-table__n3">10</td></tr>
-      <tr><td>Same title and date (events, tasks, notes)</td><td><input class="tc-in is-mono tc-in--w52" type="text" value="70" aria-label="Same title and date (events, tasks, notes)"></td><td class="tc-mono tc-table__n3">70</td></tr>
-    </tbody>
-  </table>
-  <div class="tc-line tc-line--gap-8"><button class="tc-btn is-primary" type="button">Save</button><span class="tc-dim tc-dim--t11-5 tc-dim--wrap">An empty field takes the instance's number again.</span></div>
+  <div class="frame-label"><span>Веса признаков · меню</span><i>под кнопкой Weights, рядом с порогом</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--top tc-root--col tc-root--pad18-20">
+  <div class="tc-field tc-field--inline"><label>Match threshold</label><input class="tc-in is-mono tc-in--w52" type="text" value="60" aria-label="Match threshold"><button class="tc-btn is-sm is-focus" type="button">Weights</button></div>
+  <div class="tc-menu tc-menu--w420">
+    <button class="tc-rubric tc-menu__item tc-menu__item--pad5-8-7" type="button" role="menuitem">Points per signal<span class="tc-push tc-dim tc-dim--t10-5">instance</span></button>
+    <div class="tc-menu__item">Same UID<span class="tc-push tc-dim tc-dim--t10-5">80</span><input class="tc-in is-mono tc-in--chip" type="text" value="80" aria-label="Same UID"></div>
+    <div class="tc-menu__item">Same email<span class="tc-push tc-dim tc-dim--t10-5">60</span><input class="tc-in is-mono tc-in--chip" type="text" value="60" aria-label="Same email"></div>
+    <div class="tc-menu__item">Same phone<span class="tc-push tc-dim tc-dim--t10-5">60</span><input class="tc-in is-mono tc-in--chip" type="text" value="60" aria-label="Same phone"></div>
+    <div class="tc-menu__item">Same name<span class="tc-push tc-dim tc-dim--t10-5">20</span><input class="tc-in is-mono tc-in--chip" type="text" value="20" aria-label="Same name"></div>
+    <div class="tc-menu__item">Same birthday <span class="tc-badge">yours</span><span class="tc-push tc-dim tc-dim--t10-5">10</span><input class="tc-in is-mono tc-in--chip" type="text" value="20" aria-label="Same birthday"></div>
+    <div class="tc-menu__item">Same title and date (events, tasks, notes)<span class="tc-push tc-dim tc-dim--t10-5">70</span><input class="tc-in is-mono tc-in--chip" type="text" value="70" aria-label="Same title and date (events, tasks, notes)"></div>
+    <span class="tc-menu__sep"></span>
+    <button class="tc-menu__item tc-menu__item--accent" type="button" role="menuitem">Save</button>
+    <button class="tc-menu__item" type="button" role="menuitem">Back to the instance's numbers</button>
+  </div>
   </div>
 </div>
-<figcaption><b>Порог и шесть весов — одна форма</b> под кнопкой Weights на экране дубликатов. У каждого признака рядом число экземпляра; своё значение помечено «yours» и хранится вместе с решениями человека. Очки пары — сумма весов её признаков: тот же телефон и то же имя дают 80, одно название с датой — 70.</figcaption>
+<figcaption><b>Веса — меню под кнопкой Weights, как выбор столбцов</b>, а не отдельный экран: это настройка того, что предлагается в списке, и живёт она у списка. Строка — признак, число экземпляра и своё число; своё помечено «yours» и хранится вместе с решениями человека. Очки пары — сумма весов её признаков: тот же телефон и то же имя дают 80, одно название с датой — 70. Пустое поле возвращает число экземпляра.</figcaption>
 </figure>
 
 <figure>
