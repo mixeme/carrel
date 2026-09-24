@@ -187,6 +187,7 @@
           {
             "colour": "#6b4e7a",
             "count": 1,
+            "detail": "",
             "href": "/app/notes/a-nc-home/dnevnik",
             "label": "Дневник",
             "menu": [
@@ -231,13 +232,16 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           },
           {
             "colour": "#4a6b52",
             "count": 2,
+            "detail": "",
             "href": "/app/notes/a-nc-home/zapisi",
             "label": "Записи",
             "menu": [
@@ -282,7 +286,9 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           }

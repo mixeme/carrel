@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/fanout"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -510,6 +511,54 @@ func kindCount(sess *session.Session, blob sealed.Blob, spec kindSpec) *int {
 	return &sum
 }
 
+// railTrouble is what a rail row says of a collection that did not answer
+// this poll: a few words beside its name, the whole sentence on hover, and a
+// Retry of it alone. Frames have drawn it on every rail for a long time
+// («password · 401»); the contract carries it since 24.09.2026.
+type railTrouble struct {
+	message, detail string
+	retry           *view.Action
+}
+
+// troublesOf are the sources of a poll that did not answer, by source ID:
+// refused, timed out, or unreachable. Stopped is not a trouble of the
+// collection.
+func (s *Server) troublesOf(snap *fanout.Snapshot) map[string]railTrouble {
+	out := map[string]railTrouble{}
+	if snap == nil {
+		return out
+	}
+	for _, st := range snap.Sources {
+		var t railTrouble
+		switch st.State {
+		case view.SourceError:
+			t.message, t.detail = "error", refusalReason(st.Err)
+			var se *dav.StatusError
+			if errors.As(st.Err, &se) {
+				switch {
+				case se.Code == http.StatusUnauthorized:
+					t.message = "password · 401"
+					t.detail = "401 Unauthorized — the saved password was refused. Open Connections to update it."
+				case se.Code >= 500:
+					t.message = fmt.Sprintf("error · %d", se.Code)
+				default:
+					t.message = fmt.Sprintf("refused · %d", se.Code)
+				}
+			}
+		case view.SourceTimeout:
+			t.message, t.detail = "no reply", "The server did not answer in time."
+		case view.SourceUnavailable:
+			t.message, t.detail = "unreachable", "The server could not be reached."
+		default:
+			continue
+		}
+		t.retry = &view.Action{ID: "source.retry", Label: "Retry", Method: "POST", Enabled: true,
+			Href: s.route("/app/search/progress/" + snap.ID + "/retry?source=" + url.QueryEscape(st.ID))}
+		out[st.ID] = t
+	}
+	return out
+}
+
 // kindRail is the sections rail of a record kind (C-6.3): the kinds and
 // Duplicates, the combined row, the collections of the kind by connection
 // with their ticks, and the foot. A gone collection stays while it is ticked,
@@ -517,16 +566,7 @@ func kindCount(sess *session.Session, blob sealed.Blob, spec kindSpec) *int {
 // unavailable — the two are never the same state (S-21).
 func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec, snap *fanout.Snapshot) view.Rail {
 	rail := view.Rail{About: s.aboutAction(), Nav: s.navRows(sess, blob, spec.segment)}
-
-	unavailable := map[string]bool{}
-	if snap != nil {
-		for _, st := range snap.Sources {
-			if st.State == view.SourceUnavailable {
-				unavailable[st.ID] = true
-			}
-		}
-	}
-	sections, live, on := s.railSections(sess, blob, spec, unavailable)
+	sections, live, on := s.railSections(sess, blob, spec, s.troublesOf(snap), nil)
 	combined := view.SourceRow{
 		Href: s.route("/app/" + spec.segment), Label: text(combinedTitles[spec.kind]),
 		Count: kindCount(sess, blob, spec), Tick: view.TickPart, State: view.CollectionOK,
@@ -570,7 +610,7 @@ func (s *Server) navRows(sess *session.Session, blob sealed.Blob, open string) [
 // the same collections as the list, without the combined row, the tags and
 // the foot — what to look at is already chosen here.
 func (s *Server) backRail(sess *session.Session, blob sealed.Blob, spec kindSpec, accountID string, back view.Action) view.Rail {
-	sections, _, _ := s.railSections(sess, blob, spec, nil)
+	sections, _, _ := s.railSections(sess, blob, spec, nil, nil)
 	// A way back stays where it is: the collections of the account this
 	// record lives in, and no other. Every frame that draws «Back to list»
 	// shows exactly one account rubric (s-contacts-3, s-notes-1,
@@ -586,8 +626,25 @@ func (s *Server) backRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 
 // railSections are the collections of a kind by connection with their ticks
 // and counts; live counts the rows that can be opened, on the ticked ones
-// among them.
-func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kindSpec, unavailable map[string]bool) (sections []view.RailSection, live, on int) {
+// among them. troubles are the collections that did not answer the poll the
+// rail stands beside, with what to say of each. count, when given, is what a
+// ticked row counts instead of its records — a timeline counts what it found
+// of one person there.
+func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kindSpec, troubles map[string]railTrouble, count func(sourceID string) *int) (sections []view.RailSection, live, on int) {
+	trouble := func(row *view.SourceRow, id string) bool {
+		t, ok := troubles[id]
+		if ok {
+			row.State = view.CollectionUnavailable
+			row.Message, row.Detail, row.Retry = text(t.message), text(t.detail), t.retry
+		}
+		return ok
+	}
+	counted := func(accountID string, col sealed.Collection) *int {
+		if count != nil {
+			return count(accountID + ":" + col.Path)
+		}
+		return collectionCount(sess, accountID, col, spec)
+	}
 	for _, conn := range blob.Connections {
 		sec := view.RailSection{Account: text(connLabel(conn)), AccountID: conn.ID, State: view.CollectionOK}
 		down := 0
@@ -606,8 +663,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 			switch {
 			case col.Gone:
 				row.State = view.CollectionGone
-			case unavailable[conn.ID+":"+col.Path]:
-				row.State = view.CollectionUnavailable
+			case trouble(&row, conn.ID+":"+col.Path):
 				down++
 			case col.ReadOnly:
 				row.State = view.CollectionReadOnly
@@ -650,7 +706,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 				}
 				if tick {
 					on++
-					row.Count = collectionCount(sess, conn.ID, col, spec)
+					row.Count = counted(conn.ID, col)
 				}
 			}
 			sec.Rows = append(sec.Rows, row)
@@ -679,9 +735,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 		if spec.kind == view.KindFile {
 			row.Href = s.route(fileHref(f.ID, col.Path, "", nil, true))
 		}
-		if unavailable[f.ID+":"+col.Path] {
-			row.State = view.CollectionUnavailable
-		}
+		trouble(&row, f.ID+":"+col.Path)
 		row.Menu = []view.MenuItem{
 			{Action: view.Action{ID: "feed.edit", Label: "Rename…", Href: s.postQuery("/app/collections/rename", url.Values{"a": {f.ID}, "c": {col.Path}}), Method: "GET", Enabled: true}},
 		}
@@ -692,7 +746,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 		if tick {
 			row.Tick = view.TickOn
 			on++
-			row.Count = collectionCount(sess, f.ID, col, spec)
+			row.Count = counted(f.ID, col)
 		}
 		feeds.Rows = append(feeds.Rows, row)
 	}

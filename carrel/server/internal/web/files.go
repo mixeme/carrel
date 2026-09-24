@@ -366,7 +366,7 @@ func filesEmpty(s *Server, blob sealed.Blob) *view.Notice {
 // with their ticks. No counts: a folder is not a list of records.
 func (s *Server) filesRail(sess *session.Session, blob sealed.Blob) view.Rail {
 	rail := view.Rail{About: s.aboutAction(), Nav: s.navRows(sess, blob, filesSpec.segment)}
-	sections, live, on := s.railSections(sess, blob, filesSpec, nil)
+	sections, live, on := s.railSections(sess, blob, filesSpec, nil, nil)
 	root := view.SourceRow{Href: s.route("/app/files"), Label: "Selected collections", Tick: view.TickPart, State: view.CollectionOK}
 	switch on {
 	case 0:

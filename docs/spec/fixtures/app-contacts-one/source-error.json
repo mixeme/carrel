@@ -173,10 +173,13 @@
           {
             "colour": "",
             "count": null,
+            "detail": "",
             "href": "/app/contacts",
             "label": "Combined address book",
             "menu": [],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "part"
           }
@@ -190,6 +193,7 @@
           {
             "colour": "#a05a2c",
             "count": null,
+            "detail": "",
             "href": "/app/contacts/a-nc-home/arhiv",
             "label": "Архив",
             "menu": [
@@ -234,13 +238,16 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           },
           {
             "colour": "#4a6b52",
             "count": null,
+            "detail": "",
             "href": "/app/contacts/a-nc-home/kontakty",
             "label": "Контакты",
             "menu": [
@@ -285,7 +292,9 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -299,6 +308,7 @@
           {
             "colour": "#6b4e7a",
             "count": 1,
+            "detail": "",
             "href": "/app/contacts/a-rad-vps/komanda",
             "label": "Команда",
             "menu": [
@@ -335,13 +345,16 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": true,
+            "retry": null,
             "state": "read-only",
             "tick": "on"
           },
           {
             "colour": "#6b4e7a",
             "count": null,
+            "detail": "",
             "href": "/app/contacts/a-rad-vps/rassylki",
             "label": "Рассылки",
             "menu": [
@@ -386,7 +399,9 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "off"
           }

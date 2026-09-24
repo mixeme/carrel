@@ -652,6 +652,9 @@ type SourceRow struct {
     Tick     TickState // C-8
     ReadOnly bool
     State    CollectionState
+    Message  Text      // не ответила: коротко, «password · 401», «no reply»
+    Detail   Text      // и полностью, для подсказки
+    Retry    *Action   // повтор только этой коллекции
     Menu     []MenuItem
 }
 

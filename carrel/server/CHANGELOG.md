@@ -17,6 +17,27 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.46 — 2026-09-25
+
+### Added
+
+- **A rail says what did not answer, and offers Retry** — as eleven frames
+  have long drawn it and the contract had no room for. `SourceRow` gains
+  `Message` (a few words beside the name: «password · 401», «error · 503»,
+  «refused · 403», «no reply», «unreachable»), `Detail` (the whole sentence,
+  for a hover: «401 Unauthorized — the saved password was refused. Open
+  Connections to update it.») and `Retry` (`source.retry`, the poll's retry
+  of that source alone).
+- The rail of a combined view marks every source the poll could not read:
+  refused, timed out or unreachable. Until now it marked only an unreachable
+  server, and said nothing of why; a refusal left the row looking fine.
+
+### For consumers
+
+- **`view`:** `SourceRow.Message`, `SourceRow.Detail`, `SourceRow.Retry`
+  (JSON `message`, `detail`, `retry`). Additive; every fixture with a rail
+  carries them, and `app-contacts/unavailable` shows the refused book.
+
 ## v0.2.45 — 2026-09-24
 
 The fixture set follows the mockup of 24.09.2026 (docs/plan/from-typecase.md).

@@ -180,30 +180,39 @@
           {
             "colour": "#a05a2c",
             "count": 1,
+            "detail": "",
             "href": "",
             "label": "Архив",
             "menu": [],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           },
           {
             "colour": "#4a6b52",
             "count": 4,
+            "detail": "",
             "href": "",
             "label": "Контакты",
             "menu": [],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           },
           {
             "colour": "#6b4e7a",
             "count": 1,
+            "detail": "",
             "href": "",
             "label": "Команда",
             "menu": [],
+            "message": "",
             "readOnly": true,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           }

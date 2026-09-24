@@ -156,6 +156,9 @@
             "tick": "part",
             "readOnly": false,
             "state": "ok",
+            "message": "",
+            "detail": "",
+            "retry": null,
             "menu": []
           }
         ]
@@ -173,6 +176,9 @@
             "tick": "on",
             "readOnly": false,
             "state": "ok",
+            "message": "",
+            "detail": "",
+            "retry": null,
             "menu": [
               {
                 "id": "collection.rename",
@@ -224,6 +230,9 @@
             "tick": "on",
             "readOnly": false,
             "state": "ok",
+            "message": "",
+            "detail": "",
+            "retry": null,
             "menu": [
               {
                 "id": "collection.rename",
@@ -282,6 +291,9 @@
             "tick": "on",
             "readOnly": true,
             "state": "read-only",
+            "message": "",
+            "detail": "",
+            "retry": null,
             "menu": [
               {
                 "id": "collection.rename",
@@ -325,6 +337,9 @@
             "tick": "off",
             "readOnly": false,
             "state": "ok",
+            "message": "",
+            "detail": "",
+            "retry": null,
             "menu": [
               {
                 "id": "collection.rename",

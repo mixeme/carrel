@@ -83,6 +83,7 @@
           {
             "colour": "#a05a2c",
             "count": 1,
+            "detail": "",
             "href": "/app/contacts/a-nc-home/arhiv",
             "label": "Архив",
             "menu": [
@@ -127,13 +128,16 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           },
           {
             "colour": "#4a6b52",
             "count": 4,
+            "detail": "",
             "href": "/app/contacts/a-nc-home/kontakty",
             "label": "Контакты",
             "menu": [
@@ -178,7 +182,9 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           }

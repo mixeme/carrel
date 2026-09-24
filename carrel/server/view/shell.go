@@ -73,6 +73,9 @@ type SourceRow struct {
 	Tick     TickState       `json:"tick"`  // C-8
 	ReadOnly bool            `json:"readOnly"`
 	State    CollectionState `json:"state"`
+	Message  Text            `json:"message"` // не ответила: коротко, «password · 401»
+	Detail   Text            `json:"detail"`  // и полностью, для подсказки
+	Retry    *Action         `json:"retry"`   // повтор только этой коллекции
 	Menu     []MenuItem      `json:"menu"`
 }
 

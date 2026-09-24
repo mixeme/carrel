@@ -160,6 +160,7 @@
           {
             "colour": "#a05a2c",
             "count": null,
+            "detail": "",
             "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
             "label": "Дни рождения",
             "menu": [
@@ -204,13 +205,16 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           },
           {
             "colour": "#4a6b52",
             "count": null,
+            "detail": "",
             "href": "/app/calendar/a-nc-home/lichnyj",
             "label": "Личный",
             "menu": [
@@ -255,13 +259,16 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           },
           {
             "colour": "#3f6e8c",
             "count": null,
+            "detail": "",
             "href": "/app/calendar/a-nc-home/rabota",
             "label": "Работа",
             "menu": [
@@ -306,7 +313,9 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           }

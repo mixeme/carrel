@@ -173,10 +173,13 @@
           {
             "colour": "",
             "count": null,
+            "detail": "",
             "href": "/app/tasks",
             "label": "Combined list",
             "menu": [],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           }
@@ -190,6 +193,7 @@
           {
             "colour": "#4a6b52",
             "count": null,
+            "detail": "",
             "href": "/app/tasks/a-nc-home/dela",
             "label": "Дела",
             "menu": [
@@ -234,13 +238,16 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           },
           {
             "colour": "#3f6e8c",
             "count": null,
+            "detail": "",
             "href": "/app/tasks/a-nc-home/rabota",
             "label": "Работа",
             "menu": [
@@ -285,7 +292,9 @@
                 "separator": true
               }
             ],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "on"
           }

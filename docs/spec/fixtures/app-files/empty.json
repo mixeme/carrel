@@ -116,10 +116,13 @@
           {
             "colour": "",
             "count": null,
+            "detail": "",
             "href": "/app/files",
             "label": "Selected collections",
             "menu": [],
+            "message": "",
             "readOnly": false,
+            "retry": null,
             "state": "ok",
             "tick": "off"
           }
