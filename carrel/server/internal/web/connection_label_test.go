@@ -61,3 +61,67 @@ func TestConnectionLabel(t *testing.T) {
 		t.Errorf("card title = %q, want the host again (%s)", card.Title, want)
 	}
 }
+
+// Two connections never share a label (owner's decision 24.09.2026,
+// s-profile-11): the label is how sources are told apart. What is compared
+// is the label a connection acts under — without one, the server's host —
+// so a second connection to the same server without a label is refused too.
+// Letter case does not tell two stamps apart, and does not here. Edit is
+// held to the same.
+func TestATakenLabelIsRefused(t *testing.T) {
+	work := davtest.CalendarHome + "work/"
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "davpass"
+	srv.AddCalendar(caldav.Calendar{Path: work, Name: "Work"})
+	h, sess := davHarness(t)
+	connect := func(label string) view.ConnectionsPage {
+		rec := h.do(postForm("/app/settings/connections", sess, url.Values{
+			"label": {label}, "server": {srv.URL}, "login": {"alice"}, "password": {"davpass"},
+		}))
+		if rec.Code == 303 {
+			return view.ConnectionsPage{}
+		}
+		return decode[view.ConnectionsPage](t, rec)
+	}
+	key, _ := sess.DataKey()
+	count := func() int {
+		blob, _ := h.users.Catalog(sess.AccountID(), key)
+		return len(blob.Connections)
+	}
+
+	if page := connect("nextcloud"); page.Add.Action != "" || count() != 1 {
+		t.Fatalf("the first connection was not made: %+v", page.Add)
+	}
+	page := connect("Nextcloud")
+	if r := formRow(page.Add, "label"); r == nil || r.Error != "There is already a connection called “Nextcloud”. Choose another label: it is how your sources are told apart." {
+		t.Errorf("a taken label: %+v", r)
+	}
+	if count() != 1 {
+		t.Fatalf("a taken label was saved: %d connections", count())
+	}
+	if connect(""); count() != 2 {
+		t.Fatalf("the server's own host, free, was refused: %d", count())
+	}
+	page = connect("")
+	if r := formRow(page.Add, "label"); r == nil || r.Error == "" || count() != 2 {
+		t.Errorf("a second connection to the same server without a label: %+v, %d", r, count())
+	}
+
+	// Edit: the second connection may not take the first one's label.
+	blob, _ := h.users.Catalog(sess.AccountID(), key)
+	second := blob.Connections[1]
+	v := url.Values{"op": {"edit"}, "account": {second.ID}, "label": {"NEXTCLOUD"}, "server": {second.Server}, "login": {"alice"}}
+	edited := decode[view.ConnectionsPage](t, h.do(postForm("/app/settings/connections", sess, v)))
+	if r := formRow(edited.Add, "label"); r == nil || r.Error == "" {
+		t.Errorf("edit to a taken label: %+v", r)
+	}
+	blob, _ = h.users.Catalog(sess.AccountID(), key)
+	if blob.Connections[1].Label != "" {
+		t.Errorf("the taken label was saved by Edit: %q", blob.Connections[1].Label)
+	}
+	// Its own label is not taken by itself.
+	v.Set("label", "")
+	if r := formRow(decode[view.ConnectionsPage](t, h.do(postForm("/app/settings/connections", sess, v))).Add, "label"); r != nil && r.Error != "" {
+		t.Errorf("a connection's own label was refused: %+v", r)
+	}
+}

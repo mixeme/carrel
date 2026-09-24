@@ -19,7 +19,7 @@ import (
 // echoed: a failed attempt asks for it again.
 type connectionForm struct {
 	Label, Server, Login, CertFingerprint string
-	ServerErr                             view.Text
+	ServerErr, LabelErr                   view.Text
 	// Editing is the connection the form edits; empty for a new one.
 	Editing string
 }
@@ -119,6 +119,12 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
+	blob := s.catalogOf(sess)
+	if f.Label != "" && labelTaken(blob, f.Label, "") {
+		f.LabelErr = labelTakenText(f.Label)
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+		return
+	}
 	password := r.FormValue("password")
 	pin := dav.NormalizeFingerprint(f.CertFingerprint)
 
@@ -139,6 +145,13 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 	}
 	if res.FileOnly {
 		conn.FileRoot = res.BaseURL
+	}
+	if labelTaken(blob, connLabel(conn), "") {
+		// Without a label the server's host is the label, and a second
+		// connection to the same server without one is refused the same way.
+		f.LabelErr = labelTakenText(connLabel(conn))
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+		return
 	}
 	if _, err := s.users.AddConnection(sess.AccountID(), key, conn, catalogEntries(res.Collections)); err != nil {
 		http.Error(w, "could not save the connection", http.StatusInternalServerError)
@@ -222,6 +235,11 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
 		return
 	}
+	if f.Label != "" && labelTaken(blob, f.Label, conn.ID) {
+		f.LabelErr = labelTakenText(f.Label)
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+		return
+	}
 	password := r.FormValue("password")
 	if password == "" {
 		password = conn.Password
@@ -244,6 +262,11 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 	}
 	if res.FileOnly {
 		edited.FileRoot = res.BaseURL
+	}
+	if labelTaken(blob, connLabel(edited), conn.ID) {
+		f.LabelErr = labelTakenText(connLabel(edited))
+		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, f, nil))
+		return
 	}
 	if err := s.users.UpdateConnection(sess.AccountID(), key, edited); err != nil {
 		http.Error(w, "could not save the connection", http.StatusInternalServerError)
@@ -381,7 +404,7 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 	}
 	form := s.plainForm(action, "POST",
 		csrfField(sess),
-		view.FormRow{Name: "label", Label: "Label", Kind: view.InputText, Value: text(f.Label),
+		view.FormRow{Name: "label", Label: "Label", Kind: view.InputText, Value: text(f.Label), Error: f.LabelErr,
 			Hint: "Your name for this account, as the lists show it. Left empty, the server's host."},
 		view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true},
 		view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(f.Login)},
@@ -592,6 +615,24 @@ func connectionLabel(v string) string {
 
 // connLabel is what a connection is called on every screen: the person's
 // label, else its host (C-4: the account is a label, not an identifier).
+// labelTaken reports whether a connection other than except already goes by
+// label — the label it acts under, as the stamps show it: its own, or the
+// server's host when it has none (owner's decision 24.09.2026, s-profile-11).
+// Letter case does not tell two sources apart on a screen, so it does not
+// here either.
+func labelTaken(blob sealed.Blob, label, except string) bool {
+	for _, c := range blob.Connections {
+		if c.ID != except && strings.EqualFold(connLabel(c), label) {
+			return true
+		}
+	}
+	return false
+}
+
+func labelTakenText(label string) view.Text {
+	return text("There is already a connection called “" + label + "”. Choose another label: it is how your sources are told apart.")
+}
+
 func connLabel(c sealed.Connection) string {
 	if c.Label != "" {
 		return c.Label
@@ -606,13 +647,30 @@ func serverHost(raw string) string {
 	return raw
 }
 
+// collectionLabel is the name a collection goes by: the server's, else its
+// address name. Two collections of one connection under one name — Nextcloud
+// allows it — each carry their address name in brackets, «Carrel S-15
+// (carrel-s-15-2)»: it is unique within the connection, and this is the
+// label every stamp, rail row and column is made of (C-10, owner's decision
+// 24.09.2026).
 func collectionLabel(c sealed.Collection) string {
-	if c.Name != "" {
-		return c.Name
+	if c.Name == "" {
+		return addressName(c.Path)
 	}
-	p := strings.TrimSuffix(c.Path, "/")
+	if c.Twin {
+		return c.Name + " (" + addressName(c.Path) + ")"
+	}
+	return c.Name
+}
+
+// addressName is the last segment of a collection's path, decoded.
+func addressName(path string) string {
+	p := strings.TrimSuffix(path, "/")
 	if i := strings.LastIndex(p, "/"); i >= 0 {
-		return p[i+1:]
+		p = p[i+1:]
+	}
+	if d, err := url.PathUnescape(p); err == nil {
+		return d
 	}
 	return p
 }

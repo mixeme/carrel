@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.42 — 2026-09-24
+
+Labels tell sources apart (docs/plan/from-typecase.md, owner's decision
+24.09.2026).
+
+### Changed
+
+- **A taken connection label is refused** (`s-profile-11`), on Connect and on
+  Edit: the label field says «There is already a connection called “…”.
+  Choose another label: it is how your sources are told apart.», and nothing
+  is saved. What is compared is the label a connection acts under — without
+  one, the server's host — so a second connection to the same server without
+  a label is refused too. Letter case does not tell two labels apart. A
+  label typed in is checked before the server is asked; the host is checked
+  once discovery has named it.
+- **Two collections of one connection under one name** — Nextcloud allows
+  it — each carry their address name in brackets: «Carrel S-15
+  (carrel-s-15-2)». It is the collection's label, so the rail, every stamp,
+  the source column and the poll show it; others keep their names as they
+  are. Only collections that share a kind count: a calendar and an address
+  book of one name never meet in a rail. The mark is worked out when the
+  catalog is opened (`sealed.Collection.Twin`) and never stored.
+- A collection without a name is labelled by its address name decoded —
+  «Мой календарь», not `%D0%9C%D0%BE%D0%B9…`.
+
+### For consumers
+
+Nothing to change: labels and stamps are text as before (C-4, C-6.2 say
+what they carry).
+
 ## v0.2.41 — 2026-09-24
 
 The sheets follow their frames (docs/plan/from-typecase.md, 24.09.2026).

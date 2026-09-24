@@ -4,6 +4,7 @@ package sealed
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"carrel.dev/carrel/server/internal/crypt"
 	"carrel.dev/carrel/server/view"
@@ -236,6 +237,39 @@ type Collection struct {
 	Gone bool `json:"gone,omitempty"`
 	// Feed marks a subscription answered as a collection; never stored.
 	Feed bool `json:"-"`
+	// Twin marks a collection whose connection holds another under the same
+	// name — Nextcloud allows it — so that its label carries its address name
+	// too (C-10, owner's decision 24.09.2026). Worked out on Open; never
+	// stored.
+	Twin bool `json:"-"`
+}
+
+// markTwins sets Twin on every collection that shares its name with another
+// of the same connection holding a kind it holds too: two calendars called
+// alike are told apart in the same rail and the same column, while a
+// calendar and an address book of one name never meet in either. Letter case
+// does not tell two names apart on a screen, and does not here.
+func (b *Blob) markTwins() {
+	same := func(x, y Collection) bool {
+		if x.AccountID != y.AccountID || x.Name == "" || !strings.EqualFold(x.Name, y.Name) {
+			return false
+		}
+		for _, k := range x.Kinds {
+			if y.Has(k) {
+				return true
+			}
+		}
+		return false
+	}
+	for i := range b.Collections {
+		b.Collections[i].Twin = false
+		for j := range b.Collections {
+			if i != j && same(b.Collections[i], b.Collections[j]) {
+				b.Collections[i].Twin = true
+				break
+			}
+		}
+	}
 }
 
 // Has reports whether the collection holds records of kind k.
@@ -309,6 +343,7 @@ func Open(dataKey [crypt.KeyLen]byte, ciphertext []byte, login string) (Blob, er
 	if err := json.Unmarshal(plain, &out); err != nil {
 		return out, fmt.Errorf("sealed: decode blob: %w", err)
 	}
+	out.markTwins()
 	return out, nil
 }
 
