@@ -40,6 +40,9 @@ type scoped struct {
 	conn  sealed.Connection
 	col   sealed.Collection
 	kinds []view.Kind // the collection's kinds the device may see
+	// readOnly: the device may not write here — the device is read only, or
+	// the collection is for its connection.
+	readOnly bool
 }
 
 // scope is the device's collections: its ScopeCols that the catalog holds
@@ -64,7 +67,7 @@ func scope(blob sealed.Blob, d store.ProxyDevice) []scoped {
 			}
 		}
 		if len(kinds) > 0 {
-			out = append(out, scoped{conn: conn, col: col, kinds: kinds})
+			out = append(out, scoped{conn: conn, col: col, kinds: kinds, readOnly: col.ReadOnly || d.ReadOnly})
 		}
 	}
 	return out
@@ -238,7 +241,7 @@ func (s *Server) collectionResponse(sc scoped, h home, t tag) string {
 		types += "<card:addressbook/>"
 	}
 	priv := "<d:privilege><d:read/></d:privilege>"
-	if !sc.col.ReadOnly {
+	if !sc.readOnly {
 		priv += "<d:privilege><d:write/></d:privilege><d:privilege><d:write-content/></d:privilege><d:privilege><d:bind/></d:privilege><d:privilege><d:unbind/></d:privilege>"
 	}
 	extra.WriteString("<d:current-user-privilege-set>" + priv + "</d:current-user-privilege-set>")

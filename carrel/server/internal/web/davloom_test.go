@@ -93,3 +93,52 @@ func TestDavloomDevices(t *testing.T) {
 		t.Error("the revoked device is still there")
 	}
 }
+
+// Owner's decision 24.09.2026 (s-davloom-1…3): a device is read only or read
+// and write. The add form asks, read and write by default; the password's
+// legend says what was chosen; the device's row switches it without a new
+// password, the switch showing which is in force.
+func TestDavloomDeviceAccess(t *testing.T) {
+	h := newHarness(t)
+	h.cfg.DAVloomPort = 8081
+	h.rebuild()
+	h.admin("alice", "password123")
+	alice := h.login("alice", "password123")
+	key, _ := alice.DataKey()
+	h.putConnections("alice", key, "a1")
+	h.do(fragment(postForm("/app/settings/unlock", alice, url.Values{"password": {"password123"}}), "sheet"))
+
+	page := decode[view.DavloomPage](t, h.do(get("/app/settings/davloom", alice)))
+	access := profileRow(page.Add, "access")
+	if access.Kind != view.InputRadio || access.Value != "write" || len(access.Options) != 2 || access.Label != "What this device may do" {
+		t.Fatalf("access row = %+v", access)
+	}
+
+	form := url.Values{"op": {"issue"}, "name": {"Phone"}, "access": {"read"}, "kind.contact": {"on"}, "col.a1|" + seedBook: {"on"}}
+	if rec := h.do(postForm("/app/settings/davloom", alice, form)); rec.Code != 303 {
+		t.Fatalf("issue: %d %s", rec.Code, rec.Body)
+	}
+	page = decode[view.DavloomPage](t, h.do(get("/app/settings/davloom", alice)))
+	if legend := string(page.Add.Sets[0].Legend); legend != "Phone · Password created · read only · 1 collection" {
+		t.Errorf("legend = %q", legend)
+	}
+	devices := h.users.Devices(alice.AccountID())
+	if len(devices) != 1 || !devices[0].ReadOnly || !page.Devices[0].ReadOnly {
+		t.Fatalf("devices = %+v, rows %+v", devices, page.Devices)
+	}
+	if a := actionByID(page.Devices[0].Actions, "davloom.access.read"); a == nil || !a.On {
+		t.Errorf("read only is not shown in force: %+v", page.Devices[0].Actions)
+	}
+
+	rec := h.do(postForm(actionHref(t, page.Devices[0].Actions, "davloom.access.write"), alice, url.Values{}))
+	if rec.Code != 303 {
+		t.Fatalf("switch: %d", rec.Code)
+	}
+	page = decode[view.DavloomPage](t, h.do(get("/app/settings/davloom", alice)))
+	if page.Devices[0].ReadOnly || !actionByID(page.Devices[0].Actions, "davloom.access.write").On {
+		t.Errorf("after the switch: %+v", page.Devices[0])
+	}
+	if d := h.users.Devices(alice.AccountID())[0]; d.ReadOnly || string(d.WrappedKey) != string(devices[0].WrappedKey) {
+		t.Error("the switch did not take, or it made a new password")
+	}
+}

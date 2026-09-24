@@ -41,11 +41,11 @@ write»; `s-davloom-3` — в подзаголовке «Password created · rea
 collections»; `s-davloom-1` — переключатель в строке устройства, в ячейке «What
 it can see and do», меняется без нового пароля.
 
-- [ ] C-6 и план S-27: `ReadOnly` у `ProxyDevice` (store и view), поправить запись
+- [x] C-6 и план S-27: `ReadOnly` у `ProxyDevice` (store и view), поправить запись
   в `server.md`.
-- [ ] Прокси: у устройства «read only» записывающие методы (`PUT`, `DELETE`,
+- [x] Прокси: у устройства «read only» записывающие методы (`PUT`, `DELETE`,
   `MOVE`, `COPY`, `PROPPATCH`, `MKCOL`, `MKCALENDAR`) отказываются, чтение идёт.
-- [ ] `davloom.go`: поле в форме добавления и действие в строке устройства.
+- [x] `davloom.go`: поле в форме добавления и действие в строке устройства.
 
 ### Новое устройство: пароль — на этой же странице
 

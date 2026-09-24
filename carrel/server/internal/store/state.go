@@ -183,6 +183,10 @@ type ProxyDevice struct {
 	Created    time.Time     `json:"created"`
 	ScopeKinds []string      `json:"scopeKinds"`
 	ScopeCols  []DeviceScope `json:"scopeCols"`
+	// ReadOnly: the device reads and never writes, whatever its collections
+	// allow (owner's decision 24.09.2026, revisiting S-27). A collection
+	// read-only for its connection stays read-only either way.
+	ReadOnly bool `json:"readOnly,omitempty"`
 }
 
 // DeviceScope is one collection a device sees: the connection and the

@@ -55,6 +55,29 @@
           {
             "error": "",
             "extra": null,
+            "hint": "Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password.",
+            "kind": "radio",
+            "label": "What this device may do",
+            "name": "access",
+            "options": [
+              {
+                "label": "Read only",
+                "selected": false,
+                "value": "read"
+              },
+              {
+                "label": "Read and write",
+                "selected": true,
+                "value": "write"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "write"
+          },
+          {
+            "error": "",
+            "extra": null,
             "hint": "",
             "kind": "check",
             "label": "Calendars",

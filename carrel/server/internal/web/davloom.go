@@ -43,7 +43,7 @@ func (s *Server) davloomAddress() string {
 }
 
 type issuedDevice struct {
-	Name, Password string
+	Name, Password, ID string
 }
 
 func (s *Server) getSettingsDavloom(w http.ResponseWriter, r *http.Request) {
@@ -53,8 +53,11 @@ func (s *Server) getSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 	}
 	var issued *issuedDevice
 	if data := sess.Draft(session.DraftIssuedDevice); data != nil {
-		name, pw, _ := strings.Cut(string(data), "\x00")
-		issued = &issuedDevice{Name: name, Password: pw}
+		parts := strings.SplitN(string(data), "\x00", 3)
+		for len(parts) < 3 {
+			parts = append(parts, "")
+		}
+		issued = &issuedDevice{Name: parts[0], Password: parts[1], ID: parts[2]}
 		sess.SetDraft(session.DraftIssuedDevice, nil) // shown once
 	}
 	s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, issued, nil, ""))
@@ -90,12 +93,19 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		name := r.FormValue("name")
-		_, password, err := s.users.IssueDevice(r.Context(), sess.AccountID(), key, name, scopeFromForm(r))
+		id, password, err := s.users.IssueDevice(r.Context(), sess.AccountID(), key, name, scopeFromForm(r))
 		if err != nil {
 			s.writePage(w, r, http.StatusOK, s.davloomPage(r, sess, nil, err, ""))
 			return
 		}
-		sess.SetDraft(session.DraftIssuedDevice, []byte(strings.TrimSpace(name)+"\x00"+password))
+		sess.SetDraft(session.DraftIssuedDevice, []byte(strings.TrimSpace(name)+"\x00"+password+"\x00"+id))
+	case "access":
+		// Read only or read and write, in the device's row and without a new
+		// password (owner's decision 24.09.2026, s-davloom-1).
+		if err := s.users.SetDeviceAccess(sess.AccountID(), id, r.FormValue("access") == "read"); err != nil {
+			s.notFound(w, r)
+			return
+		}
 	default:
 		s.notFound(w, r)
 		return
@@ -107,7 +117,7 @@ func (s *Server) postSettingsDavloom(w http.ResponseWriter, r *http.Request) {
 // (col.{account}|{path}).
 func scopeFromForm(r *http.Request) user.DeviceScope {
 	_ = r.ParseForm()
-	var sc user.DeviceScope
+	sc := user.DeviceScope{ReadOnly: r.PostForm.Get("access") == "read"}
 	on := func(v string) bool { return v == "on" || v == "true" }
 	for _, k := range deviceKinds {
 		if on(r.PostForm.Get("kind." + string(k.kind))) {
@@ -146,7 +156,7 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 	}
 	for i := range devices {
 		d := devices[i]
-		row := view.ProxyDevice{Name: text(d.Name), Created: tf.formatWhen(d.Created, false, now)}
+		row := view.ProxyDevice{Name: text(d.Name), Created: tf.formatWhen(d.Created, false, now), ReadOnly: d.ReadOnly}
 		if seen := s.users.DeviceLastSeen(d.ID); !seen.IsZero() {
 			row.LastSeen = tf.formatWhen(seen, true, now)
 		}
@@ -156,6 +166,11 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 		row.Actions = []view.Action{
 			{ID: "davloom.scope", Label: text(plural(len(d.ScopeCols), "collection") + " · Change"), Method: "GET", Enabled: true,
 				Href: s.postQuery("/app/settings/davloom", url.Values{"edit": {d.ID}})},
+			// The device's right, a switch of two in its row (s-davloom-1).
+			{ID: "davloom.access.read", Label: "read only", Method: "POST", Enabled: true, On: d.ReadOnly,
+				Href: s.postQuery("/app/settings/davloom", url.Values{"op": {"access"}, "id": {d.ID}, "access": {"read"}})},
+			{ID: "davloom.access.write", Label: "read and write", Method: "POST", Enabled: true, On: !d.ReadOnly,
+				Href: s.postQuery("/app/settings/davloom", url.Values{"op": {"access"}, "id": {d.ID}, "access": {"write"}})},
 			{ID: "davloom.revoke", Label: "Revoke", Method: "POST", Enabled: true, Danger: true,
 				Href: s.postQuery("/app/settings/davloom", url.Values{"op": {"revoke"}, "id": {d.ID}})},
 		}
@@ -173,7 +188,17 @@ func (s *Server) davloomPage(r *http.Request, sess *session.Session, issued *iss
 func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.Blob, issued *issuedDevice, edited *store.ProxyDevice, formErr error) view.Form {
 	form := view.Form{Action: s.route("/app/settings/davloom"), Method: "POST"}
 	if issued != nil {
-		form.Sets = []view.FieldSet{{Legend: text(issued.Name + " · password created"), Rows: []view.FormRow{
+		legend := issued.Name + " · Password created"
+		for _, d := range s.users.Devices(sess.AccountID()) {
+			if d.ID == issued.ID {
+				access := "read and write"
+				if d.ReadOnly {
+					access = "read only"
+				}
+				legend += " · " + access + " · " + plural(len(d.ScopeCols), "collection")
+			}
+		}
+		form.Sets = []view.FieldSet{{Legend: text(legend), Rows: []view.FormRow{
 			{Name: "password", Label: "Device password", Kind: view.InputText, Value: text(issued.Password), ReadOnly: true,
 				Hint:  "Shown once and stored nowhere. Close this page and you will not see it again; lose it and you revoke this device and make another.",
 				Extra: &view.Action{ID: "davloom.copy", Label: "Copy", Method: "GET", Enabled: true}},
@@ -216,6 +241,16 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 		rows = append(rows, view.FormRow{Name: "op", Kind: view.InputHidden, Value: "issue"},
 			view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(name), Required: true,
 				Hint: "For you: this is how you will know what you are revoking later."})
+		access := "write"
+		if posted && r.PostForm.Get("access") == "read" {
+			access = "read"
+		}
+		rows = append(rows, view.FormRow{Name: "access", Label: "What this device may do", Kind: view.InputRadio, Value: text(access),
+			Options: []view.Option{
+				{Value: "read", Label: "Read only", Selected: access == "read"},
+				{Value: "write", Label: "Read and write", Selected: access == "write"},
+			},
+			Hint: "Read only: the device syncs, and whatever it sends back is refused. Changed later in the device’s row, without a new password."})
 	}
 	for _, k := range deviceKinds {
 		rows = append(rows, view.FormRow{Name: "kind." + string(k.kind), Label: text(k.label), Kind: view.InputCheck,

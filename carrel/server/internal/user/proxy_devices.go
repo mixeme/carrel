@@ -35,6 +35,9 @@ func NewDeviceID() (string, error) {
 type DeviceScope struct {
 	Kinds []view.Kind
 	Cols  []store.DeviceScope
+	// ReadOnly is the device's right, chosen when it is issued: read only,
+	// or read and write.
+	ReadOnly bool
 }
 
 // cleanScope keeps the collections the catalog holds, live, of a kind the
@@ -111,7 +114,7 @@ func (s *Service) IssueDevice(ctx context.Context, userID string, dataKey [crypt
 		if err != nil {
 			return nil, err
 		}
-		d := store.ProxyDevice{ID: id, Name: name, Salt: salt, WrappedKey: wrapped, Created: now, ScopeKinds: kinds, ScopeCols: cols}
+		d := store.ProxyDevice{ID: id, Name: name, Salt: salt, WrappedKey: wrapped, Created: now, ScopeKinds: kinds, ScopeCols: cols, ReadOnly: sc.ReadOnly}
 		d.SetDeviceKDF(kdf)
 		u.ProxyDevices = append(u.ProxyDevices, d)
 		return []store.AuditEntry{{When: now, Who: u.Login, What: "device.issue", Whom: id, Detail: name}}, nil
@@ -168,6 +171,32 @@ func (s *Service) SetDeviceScope(userID string, dataKey [crypt.KeyLen]byte, id s
 			if u.ProxyDevices[i].ID == id {
 				u.ProxyDevices[i].ScopeKinds, u.ProxyDevices[i].ScopeCols = kinds, cols
 				return []store.AuditEntry{{When: s.now(), Who: u.Login, What: "device.scope", Whom: id}}, nil
+			}
+		}
+		return nil, ErrNotFound
+	})
+	if err == nil {
+		s.devicesChanged(userID)
+	}
+	return err
+}
+
+// SetDeviceAccess makes a device read only or read and write, without a new
+// password: like its scope, the right belongs to the device record.
+func (s *Service) SetDeviceAccess(userID, id string, readOnly bool) error {
+	detail := "read and write"
+	if readOnly {
+		detail = "read only"
+	}
+	err := s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByID(userID)
+		if u == nil {
+			return nil, ErrNotFound
+		}
+		for i := range u.ProxyDevices {
+			if u.ProxyDevices[i].ID == id {
+				u.ProxyDevices[i].ReadOnly = readOnly
+				return []store.AuditEntry{{When: s.now(), Who: u.Login, What: "device.access", Whom: id, Detail: detail}}, nil
 			}
 		}
 		return nil, ErrNotFound

@@ -166,7 +166,8 @@ type ProxyDevice struct {
 	Created  When     `json:"created"`
 	LastSeen When     `json:"lastSeen"`
 	Scope    []Kind   `json:"scope"`
-	Actions  []Action `json:"actions"` // Revoke · Edit scope
+	ReadOnly bool     `json:"readOnly"` // право устройства: только чтение или чтение и запись
+	Actions  []Action `json:"actions"`  // Edit scope · read only | read and write (On — действующее) · Revoke
 }
 
 type BackupPage struct {

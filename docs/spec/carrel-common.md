@@ -1556,7 +1556,8 @@ type ProxyDevice struct {
     Created  When
     LastSeen When
     Scope    []Kind
-    Actions  []Action // Revoke · Edit scope
+    ReadOnly bool     // право устройства: только чтение или чтение и запись
+    Actions  []Action // Edit scope · read only | read and write (On — действующее) · Revoke
 }
 
 type BackupPage struct {

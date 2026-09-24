@@ -17,6 +17,36 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.43 — 2026-09-24
+
+### Added
+
+- **A davloom device is read only or read and write** (owner's decision
+  24.09.2026, revisiting S-27; `s-davloom-1…3`). The add form asks «What
+  this device may do: Read only | Read and write», read and write by
+  default. The password's legend says what was chosen: «Phone · Password
+  created · read only · 1 collection». The device's row switches it —
+  `davloom.access.read` / `davloom.access.write`, `On` on the one in force —
+  without a new password; the journal writes `device.access`.
+- The proxy refuses a read-only device `PUT`, `DELETE`, `MOVE`, `COPY`,
+  `PROPPATCH`, `MKCOL`, `MKCALENDAR` and `LOCK` with 403 and
+  `need-privileges`, before anything reaches the collection's server, and
+  lists its collections with the read privilege alone, so a client shows
+  them read-only. There is no ceiling on the whole proxy; a collection
+  read-only for its connection stays so for every device.
+
+### Fixed
+
+- `TestAuthenticateUnknownLoginCostsAKDF` measures the sign-in KDF at the
+  cost it ships with. With the cheap test values of v0.2.30 the KDF was lost
+  in the rest of a sign-in, and the test failed on noise in a full run.
+
+### For consumers
+
+- **`view`:** `ProxyDevice.ReadOnly` (JSON `readOnly`). Additive; the
+  fixture `app-settings-davloom` carries the new `access` row of the add
+  form.
+
 ## v0.2.42 — 2026-09-24
 
 Labels tell sources apart (docs/plan/from-typecase.md, owner's decision

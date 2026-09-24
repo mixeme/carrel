@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"bytes"
+	"html"
 	"io"
 	"log/slog"
 	"mime"
@@ -30,6 +31,15 @@ const maxRequestXML = 10 << 20
 var forwardedMethods = map[string]bool{
 	http.MethodOptions: true, http.MethodGet: true, http.MethodHead: true, http.MethodPut: true, http.MethodDelete: true,
 	"PROPFIND": true, "PROPPATCH": true, "REPORT": true, "MKCOL": true, "MOVE": true, "COPY": true, "LOCK": true, "UNLOCK": true,
+}
+
+// writeMethods change something on the collection's server. A device that is
+// read only is refused them here, before anything is sent (owner's decision
+// 24.09.2026). LOCK is among them: a lock is taken to write, and on some
+// servers it makes an empty resource.
+var writeMethods = map[string]bool{
+	http.MethodPut: true, http.MethodDelete: true, "MOVE": true, "COPY": true,
+	"PROPPATCH": true, "MKCOL": true, "MKCALENDAR": true, "LOCK": true,
 }
 
 // requestHeaders are the headers a device's request carries on: what DAV
@@ -103,6 +113,17 @@ func (s *Server) forward(w http.ResponseWriter, r *http.Request, blob sealed.Blo
 	t, ok := parseTarget(blob, d, rest)
 	if !ok {
 		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	if d.ReadOnly && writeMethods[r.Method] {
+		// RFC 3744 §7.1.1: what is missing is a privilege, and the answer
+		// says which.
+		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+		davHeaders(w)
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>`+
+			`<d:error xmlns:d="DAV:"><d:need-privileges><d:resource><d:href>`+html.EscapeString(r.URL.Path)+
+			`</d:href><d:privilege><d:write/></d:privilege></d:resource></d:need-privileges></d:error>`)
 		return
 	}
 	conn := t.sc.conn

@@ -437,9 +437,18 @@ func TestUsedAndExpiredTokensArePruned(t *testing.T) {
 	}
 }
 
+// productionLoginKDF is the sign-in KDF as it ships, read before TestMain
+// makes it cheap (package variables are set before TestMain runs). With the
+// cheap values the KDF is lost in the rest of a sign-in, and under a full
+// run's load the test below failed on noise (24.09.2026).
+var productionLoginKDF = crypt.LoginKDF
+
 // Ф2-6. An unknown login must cost the same as a wrong password: without a
 // dummy derivation the miss path skipped Argon2 and answered in microseconds.
 func TestAuthenticateUnknownLoginCostsAKDF(t *testing.T) {
+	cheap := crypt.LoginKDF
+	crypt.LoginKDF = productionLoginKDF // what is measured is the KDF (main_test.go)
+	t.Cleanup(func() { crypt.LoginKDF = cheap })
 	f := newFixture(t)
 	f.setupAdmin(t)
 	f.canLogin("nobody", "x") // warm the dummy record

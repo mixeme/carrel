@@ -156,6 +156,7 @@ type Users interface {
 	IssueDevice(ctx context.Context, userID string, dataKey [32]byte, name string, sc user.DeviceScope) (id, password string, err error)
 	RevokeDevice(userID, id string) error
 	SetDeviceScope(userID string, dataKey [32]byte, id string, sc user.DeviceScope) error
+	SetDeviceAccess(userID, id string, readOnly bool) error
 	Devices(userID string) []store.ProxyDevice
 	DeviceLastSeen(id string) time.Time
 	SetUploadFolder(viewerID string, dataKey [32]byte, folder sealed.AttachmentFolder) error
