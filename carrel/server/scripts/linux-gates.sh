@@ -41,6 +41,22 @@ echo "== unit suite =="
 # not one. How long the package takes is watched on its own (docs/plan).
 go test -timeout 30m ./...
 
+# The race detector, behind a flag: it needs cgo and a C compiler, the host
+# has neither, so it runs in golang:1.27-bookworm with a module cache volume
+# of Carrel's own, and takes about seven minutes. First run 24.09.2026: no
+# data race; one test counted on wall-clock speed and was made not to.
+if [[ "${CARREL_RACE:-}" == "1" ]]; then
+  echo "== race detector =="
+  docker run --rm \
+    -v "$(cd ../.. && pwd)":/src \
+    -v carrel-race-gomod:/go/pkg/mod \
+    -w /src/carrel/server \
+    --memory=3g \
+    -e GOTOOLCHAIN=auto \
+    golang:1.27-bookworm \
+    go test -race -count=1 -timeout 60m ./...
+fi
+
 echo "== F-10: server.key permission check =="
 go test -run '^TestLoadServerKeyRejectsPermissiveMode$' ./internal/crypt/...
 

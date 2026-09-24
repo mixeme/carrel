@@ -857,11 +857,22 @@ func TestHealthzAndAboutUnmetered(t *testing.T) {
 			t.Fatalf("about %d: %d", i, rec.Code)
 		}
 	}
-	for i := 0; i < conf.SessionRateLimit; i++ {
-		h.do(get("/app/contacts", sess))
+	// The bucket refills as it drains — conf.SessionRateLimit a minute, two
+	// tokens a second — so the first refusal comes at the limit plus what
+	// dripped in meanwhile, not at exactly the limit plus one. Under -race
+	// every request is slow enough for a token or two to drip in, and the
+	// exact count failed there (24.09.2026). What this test holds is that the
+	// bucket applies to /app at all: requests far faster than the refill
+	// meet a 429 soon after the bucket is spent.
+	refused := -1
+	for i := 0; i < conf.SessionRateLimit*2; i++ {
+		if rec := h.do(get("/app/contacts", sess)); rec.Code == http.StatusTooManyRequests {
+			refused = i
+			break
+		}
 	}
-	if rec := h.do(get("/app/contacts", sess)); rec.Code != http.StatusTooManyRequests {
-		t.Fatalf("session bucket not applied to /app: %d", rec.Code)
+	if refused < conf.SessionRateLimit {
+		t.Fatalf("session bucket not applied to /app: first refusal at request %d, want one after %d", refused, conf.SessionRateLimit)
 	}
 	if rec := h.do(get("/healthz", sess)); rec.Code != http.StatusOK {
 		t.Fatalf("healthz metered: %d", rec.Code)

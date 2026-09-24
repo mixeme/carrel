@@ -17,6 +17,26 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.33 — 2026-09-24
+
+### Added
+
+- **The race detector has been run, and finds no data race.** It needs cgo
+  and a C compiler, the Linux machine's host has neither, and nothing was
+  installed on the host: it runs in `golang:1.27-bookworm` with a module
+  cache volume of Carrel's own. It is now a step of `linux-gates.sh` behind
+  `CARREL_RACE=1`: about seven minutes, worth running now and then rather
+  than every time.
+
+### Fixed
+
+- **A test counted on how fast the machine is.** `TestHealthzAndAboutUnmetered`
+  spent the session's bucket and expected the refusal at exactly request 121.
+  The bucket refills as it drains, two tokens a second. Under the race
+  detector every request is slow enough for a token to drip in, and the
+  121st passed. The test now holds what it is for: requests far faster than
+  the refill meet a 429 soon after the bucket is spent.
+
 ## v0.2.32 — 2026-09-24
 
 ### Fixed
