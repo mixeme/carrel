@@ -379,6 +379,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   margin-top:-4px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;
   transform:rotate(45deg);opacity:.5;z-index:2;pointer-events:none}
 .tc-in.is-focus{outline:1.5px solid var(--tc-accent);outline-offset:1px;border-color:var(--tc-accent)}
+/* Поле, значение которого сервер не принял: рамка — цвет опасности, причина — подсказкой под ним. */
+.tc-in.is-error{border-color:var(--tc-danger)}
 .tc-in.is-area{height:auto;min-height:76px;align-items:flex-start;padding:7px 9px;line-height:1.5;
   white-space:pre-wrap;overflow:visible;text-overflow:clip}
 .tc-in.is-mono{font-family:var(--tc-font-mono);font-size:11.5px}
@@ -7590,6 +7592,56 @@ Read  2 min ago</div>
 <figcaption>«Test only» — та же проверка, что у администратора, без сохранения пароля.</figcaption>
 </figure>
 
+<figure>
+<div class="frame" data-frame="s-profile-11">
+  <div class="frame-label"><span>Подключение аккаунта · подпись занята</span><i>тот же диалог после Connect</i></div>
+  <div class="tc-root tc-shell">
+    <div class="tc-top">
+      <div class="tc-brand"><svg class="tc-brand__logo" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg></div>
+      <div class="tc-search" role="search"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-search"/></svg><input class="tc-q" type="search" value="Search everything…" aria-label="Search everything…"></div>
+      <div class="tc-top__actions">
+        <button class="tc-btn is-primary" type="button"><svg viewBox="0 0 24 24"><use href="#i-quill"/></svg>New note<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
+        <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg>2 min ago</button>
+        <button class="tc-usermenu" type="button">mix<svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><use href="#i-chev"/></svg></button>
+      </div>
+    </div>
+    <div class="tc-shell__body">
+      <div class="tc-shell__rail">
+        <div class="tc-nav"><a class="tc-nav__item" href="#"><svg><use href="#i-back"/></svg>Back to app</a></div>
+        <div class="tc-railsec">
+          <div class="tc-rubric">Settings</div>
+          <div class="tc-nav">
+            <a class="tc-nav__item" href="#"><svg><use href="#i-user"/></svg>Account</a>
+            <a class="is-on tc-nav__item" href="#"><svg><use href="#i-server"/></svg>Connections<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-file"/></svg>Attachments</a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-device"/></svg>New device</a>
+            <a class="tc-nav__item" href="#"><svg class="tc-davmark" viewBox="0 0 16 16" aria-hidden="true"><use href="#davloom-threads" class="tc-davmark__threads"/><use href="#davloom-beam" class="tc-davmark__beam"/><use href="#davloom-cloth" class="tc-davmark__cloth"/></svg>davloom<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-archive"/></svg>Backup<span class="tc-num">3</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-link"/></svg>Published links<span class="tc-num">2</span></a>
+            <a class="tc-nav__item" href="#"><svg><use href="#i-theme"/></svg>Appearance</a>
+          </div>
+        </div>
+        <div class="tc-railfoot">
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>davloom · running · 3 devices<br><span class="tc-dim tc-dim--t11">Last response <span class="tc-mono">2026-08-16 09:41</span></span></div>
+          <div class="tc-railnote"><span class="tc-dot--accent"></span>Backups are running<br><span class="tc-dim tc-dim--t11">Last backup <span class="tc-mono">2026-08-16 03:10</span> · <span title="The archive was read back from the destination and the checksum matched" class="tc-stack__item">verified</span></span></div>
+          <a class="tc-railfoot__about" href="#rest">Carrel <span class="tc-mono">0.0.1 · 786949a</span></a>
+        </div>
+      </div>
+      <div class="tc-main"><div class="tc-dialog tc-dialog--max540">
+      <div class="tc-head"><div class="tc-head__titles"><div class="tc-head__title">Connect account</div><div class="tc-head__sub">One connection gives calendars and address books alike.</div></div></div>
+      <div class="tc-form tc-form--padl0-padr0">
+        <div class="tc-field tc-field--md"><label>Label</label><input class="tc-in is-error is-focus" type="text" value="nextcloud" aria-label="Label"><span class="tc-field__hint tc-dim--danger">There is already a connection called “nextcloud”. Choose another label: it is how your sources are told apart.</span></div>
+        <div class="tc-field tc-field--full"><label>Server URL</label><input class="tc-in is-mono" type="text" value="https://cloud.example.org/" aria-label="Server URL"></div>
+        <div class="tc-field tc-field--md"><label>Username</label><input class="tc-in" type="text" value="mix.work" aria-label="Username"></div>
+        <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="text" value="••••••••••" aria-label="Password"></div>
+      </div>
+      <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="button">Connect</button><button class="tc-btn" type="button">Test only</button><button class="tc-btn" type="button">Cancel</button></div>
+    </div></div></div>
+  </div>
+</div>
+<figcaption><b>Двух подключений с одной подписью не бывает.</b> Подпись — первая половина штампа источника («nextcloud · Работа»), и две одинаковые сделали бы два источника неразличимыми везде: в рейле, в столбце источника, на экране опроса. Поэтому форма не угадывает замену и не дописывает номер, а отказывает и просит придумать имя: второе подключение к тому же серверу — это обычно другая учётка, и человек знает, как её назвать. Остальные поля остаются как были, пароль вводить заново не нужно. <b>Пустая подпись</b> — это адрес сервера, поэтому второе подключение к тому же серверу без подписи упирается в тот же отказ. Та же проверка — при смене подписи через «Edit».</figcaption>
+</figure>
+
 <div class="frames">
   <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-profile-3">
@@ -8932,7 +8984,7 @@ Read  2 min ago</div>
                   <span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-mark" data-tc-colour="#A05A2C"></span></span>
                 <span class="tc-mono tc-mono--t11">Calendars, Address books</span>
                 <button class="tc-btn is-sm" type="button">5 collections · Change</button>
-                <span class="tc-seg tc-seg--h22"><button class="tc-seg__opt" type="button">read only</button><button class="is-on tc-seg__opt" type="button">read and write</button></span></span></td>
+                <span class="tc-seg tc-seg--h22 tc-push"><button class="tc-seg__opt" type="button">read only</button><button class="is-on tc-seg__opt" type="button">read and write</button></span></span></td>
               <td class="tc-mono is-2nd tc-table__n4">2026-06-02</td><td class="tc-mono is-2nd">2026-08-15 09:31</td>
               <td class="tc-acts"><button class="tc-btn is-sm is-danger" type="button">Revoke</button></td></tr>
             <tr><td><span class="tc-table__file"><svg><use href="#i-device"/></svg><span class="tc-table__filename">Ноутбук · Thunderbird</span></span></td>
@@ -8940,7 +8992,7 @@ Read  2 min ago</div>
                 <span class="tc-line tc-line--gap-3"><span class="tc-mark is-multi"></span></span>
                 <span class="tc-mono tc-mono--t11">all kinds</span>
                 <button class="tc-btn is-sm" type="button">12 collections · Change</button>
-                <span class="tc-seg tc-seg--h22"><button class="is-on tc-seg__opt" type="button">read only</button><button class="tc-seg__opt" type="button">read and write</button></span></span></td>
+                <span class="tc-seg tc-seg--h22 tc-push"><button class="is-on tc-seg__opt" type="button">read only</button><button class="tc-seg__opt" type="button">read and write</button></span></span></td>
               <td class="tc-mono is-2nd tc-table__n4">2026-06-02</td><td class="tc-mono is-2nd">2026-08-15 08:02</td>
               <td class="tc-acts"><button class="tc-btn is-sm is-danger" type="button">Revoke</button></td></tr>
           </tbody>
