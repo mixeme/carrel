@@ -419,6 +419,61 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 	return out
 }
 
+// timelineRail is the rail of a person's timeline (s-contacts-7): the way
+// back to the list, and under «Where to look» the calendars it looks in.
+// Their ticks are the calendar's own — one selection for both (owner's
+// decision 24.09.2026) — so what the rail shows is where the timeline looks.
+// Each counts what it found of this person, the combined row their sum; what
+// did not answer says why, with Retry. Apply comes back here and asks again.
+func (s *Server) timelineRail(c *collectionCtx, snap *fanout.Snapshot, back string) view.Rail {
+	blob := s.catalogOf(c.sess)
+	found := map[string]int{}
+	if snap != nil {
+		for _, st := range snap.Sources {
+			if st.State == view.SourceDone || st.State == view.SourceEmpty {
+				found[st.ID] = st.Count
+			}
+		}
+	}
+	count := func(id string) *int {
+		if n, ok := found[id]; ok {
+			return &n
+		}
+		return nil
+	}
+	sections, live, on := s.railSections(c.sess, blob, recordKinds["calendar"], s.troublesOf(snap), count)
+	where := view.RailSection{Account: "Where to look", State: view.CollectionOK}
+	combined := view.SourceRow{Href: s.route("/app/calendar"), Label: text(combinedTitles[view.KindEvent]),
+		Tick: view.TickPart, State: view.CollectionOK}
+	switch on {
+	case 0:
+		combined.Tick = view.TickOff
+	case live:
+		combined.Tick = view.TickOn
+	}
+	sum, answered := 0, false
+	where.Rows = append(where.Rows, combined)
+	for _, sec := range sections {
+		for _, row := range sec.Rows {
+			row.Menu = nil // what to do with a calendar is the calendar's rail
+			if row.Count != nil {
+				sum, answered = sum+*row.Count, true
+			}
+			where.Rows = append(where.Rows, row)
+		}
+	}
+	if answered {
+		where.Rows[0].Count = &sum
+	}
+	return view.Rail{
+		Nav:      []view.NavRow{{Action: s.listBack(c)}},
+		Sections: []view.RailSection{where},
+		Foot: []view.Action{{ID: "rail.apply", Label: "Apply", Method: "POST", Enabled: true,
+			Href: s.postQuery("/app/sources/calendar", url.Values{"back": {back}})}},
+		About: s.aboutAction(),
+	}
+}
+
 var timelineShows = []struct {
 	value, label string
 	kind         view.Kind
@@ -431,7 +486,7 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 	tf := c.tf
 	card := c.recordPath(person.uid)
 	sh := s.buildShell(c.sess, person.name+" · Timeline")
-	sh.Rail = s.recordRail(c, view.Action{ID: "nav.back", Label: text(person.name), Href: s.route(card), Method: "GET", Enabled: true})
+	sh.Rail = s.timelineRail(c, nil, card+"/timeline")
 	sh.Notices = append(sh.Notices, notices...)
 	page := view.ContactTimelinePage{Shell: sh, UID: person.uid, Name: text(person.name)}
 	page.Card = view.Details{Title: text(person.name), Source: c.source(),
@@ -459,6 +514,7 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 	}
 	snap := task.Snapshot()
 	blob := s.catalogOf(c.sess)
+	page.Rail = s.timelineRail(c, &snap, card+"/timeline")
 	page.Poll = s.pollBar(tf, blob, snap, timelineOwner(task))
 	rows := s.timelineRows(tf, blob, snap, person)
 	counts := map[view.Kind]int{}

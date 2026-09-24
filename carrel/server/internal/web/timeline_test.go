@@ -257,3 +257,54 @@ func TestTimelineReadsEveryComponentOfASeries(t *testing.T) {
 		t.Errorf("the occurrence Pavel was added to: %+v (found %v, all %v)", r, ok, rows)
 	}
 }
+
+// s-contacts-7, owner's decision 24.09.2026: the timeline's rail is «Where
+// to look» — the calendars with the calendar's own ticks, each counting what
+// it found of this person, the combined row their sum — and Apply there
+// changes those ticks and comes back to the timeline, which asks again. A
+// way back is taken only to a timeline of this Carrel.
+func TestTimelineRailIsWhereItLooks(t *testing.T) {
+	now := time.Now()
+	srv := searchServer(t)
+	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	srv.Seed(searchBook+"ann.vcf", "BEGIN:VCARD\nVERSION:4.0\nUID:ann\nFN:Anna Kovaleva\nEMAIL:anna@example.com\nEND:VCARD\n")
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work", SupportedComponentSet: []string{"VEVENT"}})
+	srv.Seed(searchWork+"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260101T000000Z\nDTSTART:"+icsDay(now.AddDate(0, -1, 0))+
+		"\nSUMMARY:Review with Anna\nATTENDEE:mailto:anna@example.com\nEND:VEVENT"))
+	f := connectFixture(t, srv, searchBook, nil)
+	tickAll(t, f.h, f.sess)
+	card := f.path("contacts") + "/ann"
+
+	page := decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline", f.sess)))
+	waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+	page = decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline", f.sess)))
+	rail := page.Rail
+	if len(rail.Nav) != 1 || rail.Nav[0].Action.Label != "Back to list" || rail.Nav[0].Action.Href != f.path("contacts") {
+		t.Errorf("nav = %+v", rail.Nav)
+	}
+	if len(rail.Sections) != 1 || rail.Sections[0].Account != "Where to look" {
+		t.Fatalf("sections = %+v", rail.Sections)
+	}
+	rows := rail.Sections[0].Rows
+	if len(rows) != 2 || rows[0].Label != "Combined calendar" || rows[1].Label != "Work" || rows[1].Tick != view.TickOn {
+		t.Fatalf("rows = %+v", rows)
+	}
+	if rows[1].Count == nil || *rows[1].Count != 1 || rows[0].Count == nil || *rows[0].Count != 1 || len(rows[1].Menu) != 0 {
+		t.Errorf("counts: combined %v, Work %v", rows[0].Count, rows[1].Count)
+	}
+
+	apply := actionHref(t, rail.Foot, "rail.apply")
+	rec := f.h.do(postForm(apply, f.sess, url.Values{}))
+	if rec.Code != 303 || rec.Header().Get("Location") != card+"/timeline?again=1" {
+		t.Fatalf("apply: %d → %q, want %q", rec.Code, rec.Header().Get("Location"), card+"/timeline?again=1")
+	}
+	if got := selected(t, f.h, f.sess, view.KindEvent); len(got) != 0 {
+		t.Errorf("the calendar's own ticks did not change: %v", got)
+	}
+	for _, back := range []string{"https://evil.example/app/contacts/x/timeline", "/app/settings/connections", "/app/contacts/../settings/timeline"} {
+		rec := f.h.do(postForm("/app/sources/calendar?"+url.Values{"back": {back}}.Encode(), f.sess, url.Values{}))
+		if loc := rec.Header().Get("Location"); loc != "/app/calendar" {
+			t.Errorf("back %q led to %q", back, loc)
+		}
+	}
+}

@@ -784,6 +784,12 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not save the selection", http.StatusInternalServerError)
 		return
 	}
+	if back, ok := timelineReturn(r.FormValue("back")); ok {
+		// Apply from a timeline's rail: the same ticks, and back to the
+		// timeline, which asks its sources again.
+		s.redirect(w, r, back+"?again=1")
+		return
+	}
 	if !WantsFragment(r) {
 		s.redirect(w, r, "/app/"+spec.segment)
 		return
@@ -798,6 +804,23 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_ = s.render.Fragment(w, r, http.StatusOK, TargetRail, st.shell.Rail, []OOB{{Target: TargetPoll, Body: *st.poll}})
+}
+
+// timelineReturn is the way back an Apply may take: only to a person's
+// timeline in this Carrel — a path, no host, no query — never anywhere a
+// posted field names.
+func timelineReturn(v string) (string, bool) {
+	u, err := url.Parse(v)
+	if v == "" || err != nil || u.Scheme != "" || u.Host != "" || u.RawQuery != "" || u.Fragment != "" {
+		return "", false
+	}
+	// The escaped path: a collection's path sits in one segment, its slashes
+	// encoded, and a decoded one would lead somewhere else.
+	p := u.EscapedPath()
+	if !strings.HasPrefix(p, "/app/contacts/") || !strings.HasSuffix(p, "/timeline") || strings.Contains(p, "..") || strings.Contains(p, "//") {
+		return "", false
+	}
+	return p, true
 }
 
 // tickPicks reads ticked row hrefs back into catalog addresses. Whatever is

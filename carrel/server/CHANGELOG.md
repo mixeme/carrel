@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.47 — 2026-09-25
+
+### Changed
+
+- **A person's timeline has its own rail, «Where to look»** (`s-contacts-7`;
+  owner's decision 24.09.2026). It shows the calendars with the calendar's
+  own ticks — one selection for both, so the rail shows exactly where the
+  timeline looks. Each counts what it found of this person, and the
+  combined row sums them. A calendar that did not answer says why and
+  offers Retry, as in every rail since v0.2.46. Until now the timeline
+  showed the contacts' back rail.
+- The way out is «Back to list», to the contacts list, as the frame draws it.
+- Apply in that rail changes the calendar's ticks and comes back to the
+  timeline, which asks its sources again (`/app/sources/calendar?back=…`).
+  The way back is taken only to a timeline of this Carrel: a path under
+  `/app/contacts/` ending in `/timeline`, no host, no query. Anything else
+  goes to the calendar, as before.
+
+### For consumers
+
+Nothing new in `view`: the rail is an ordinary `Rail`. The fixture
+`app-contact-timeline` carries it.
+
 ## v0.2.46 — 2026-09-25
 
 ### Added
