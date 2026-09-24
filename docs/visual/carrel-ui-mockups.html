@@ -3408,7 +3408,7 @@ Read  2 min ago</div>
         </div>
         <div class="tc-runbar"><span class="tc-meter"><i class="tc-meter__bar" data-tc-width="83%"></i></span>Polled 5 of 6 sources · 14 events · <span class="tc-dim--danger">baikal · office unavailable</span><span class="tc-mono tc-push">from cache · 2 min ago</span></div>
 
-        <div class="tc-list__group"><span class="tc-rubric">Monday · 10 August</span><span class="tc-num">3</span></div>
+        <div class="tc-list__group"><span class="tc-rubric">Monday · 10 August</span><span class="tc-num">4</span></div>
         <div class="tc-list">
           <div class="tc-row tc-row--timecols is-on">
             <span class="tc-mark" data-tc-colour="#4A6B52"></span>
@@ -3419,12 +3419,20 @@ Read  2 min ago</div>
             <span class="tc-row__cell tc-row__source">nextcloud · home · Личный</span>
           </div>
           <div class="tc-row tc-row--timecols">
-            <span class="tc-mark" data-tc-colour="#8C6239"></span>
+            <span class="tc-mark" data-tc-colour="#3F6E8C"></span>
             <span class="tc-mono tc-row__lead">all day</span>
-            <span class="tc-row__title">Дежурство: первая линия <span class="tc-badge">duplicate? ×2</span></span>
+            <span class="tc-row__title">Дежурство: первая линия</span>
             <span class="tc-row__excerpt tc-row__detail">—</span>
             <span class="tc-row__cell tc-row__caption"><span class="tc-badge">repeats weekly</span></span>
-            <span class="tc-row__cell tc-row__source">2 sources</span>
+            <span class="tc-row__cell tc-row__source">nextcloud · home · Работа</span>
+          </div>
+          <div class="tc-row tc-row--timecols">
+            <span class="tc-mark" data-tc-colour="#8C6239"></span>
+            <span class="tc-mono tc-row__lead">all day</span>
+            <span class="tc-row__title">Дежурство: первая линия</span>
+            <span class="tc-row__excerpt tc-row__detail">—</span>
+            <span class="tc-row__cell tc-row__caption"><span class="tc-badge">repeats weekly</span></span>
+            <span class="tc-row__cell tc-row__source">radicale · vps · Дежурства</span>
           </div>
           <div class="tc-row tc-row--timecols">
             <span class="tc-mark" data-tc-colour="#3F6E8C"></span>
@@ -3510,7 +3518,7 @@ Read  2 min ago · changed on server 3 days ago</div>
 </div>
 <figcaption><b>Это и есть единый вид.</b> Открыт <b>Combined calendar</b>: события пяти коллекций с трёх серверов в одной хронологии, у каждой строки — своя полоска и своя колонка источника. Отдельный раздел «всё сразу» для этого не нужен и убран. <b>Что ещё изменилось.</b> Время — моноширинным в своей колонке, как в брендбуке. Появились колонки «место», «состояние» и «источник»: именно они оправдывают ширину. Полоска коллекции — 3&nbsp;px слева, единственное цветное пятно. Недоступный <code>baikal</code> помечен в рейле «password · 401» и кнопкой <b>Retry</b> рядом с ним — голый код без слова и без действия был тупиком. Одной строкой то же самое стоит в панели опроса — поверх списка ничего не выпадает. <b>Исходный часовой пояс</b> стоит меткой рядом со временем и только тогда, когда он отличается от общего: встреча, заведённая в другом поясе, иначе показывается «не в то время», и человек не понимает, ошибка это или так задумано. Данные для метки уже лежат в <code>DTSTART</code> с <code>TZID</code> — это S-22 — прозрачность, которая дешевле любой новой функции: данные уже получены. Карточка открывается справа, список остаётся на месте: просмотр десяти событий — десять нажатий, а не двадцать переходов. Блок <b>Source</b> — это S-22: когда коллекцию читали и когда её меняли на сервере, показывается там, где данные уже есть.
 <br><br><b>Day / Week / Month / Range</b> — четыре масштаба одной агенды, а не четыре разных экрана. День — та же лента, один день; его не хватало между неделей и произвольным диапазоном, и без него переключатель врал, что ближайший шаг от «сейчас» — неделя. Месяц собирает дни в сетку, Range оставляет поля дат, которые уже стоят рядом.
-<br><br><b>Флажки «Events / Tasks due / Notes»</b> в панели диапазона — то, что было смешанной хронологией «Everything»: задача со сроком и заметка за этот день встают в ту же ленту, к своей дате. Это единственное место, где виды записей смешиваются, и оно там, где смешивать их осмысленно — на календарной оси. Строка, за которой стоят две записи с разных серверов, помечена «duplicate? ×2»; решение принимается на экране дубликатов, здесь только предупреждение.
+<br><br><b>Флажки «Events / Tasks due / Notes»</b> в панели диапазона — то, что было смешанной хронологией «Everything»: задача со сроком и заметка за этот день встают в ту же ленту, к своей дате. Это единственное место, где виды записей смешиваются, и оно там, где смешивать их осмысленно — на календарной оси. Одно дежурство в двух календарях стоит двумя строками, каждая со своим календарём, и ничем не помечено: подозрение на дубликат не висит вопросом во время работы. Если две записи мешают, путь — экран дубликатов; если пара найдена по ошибке, она никого не отвлекает. В одну строку «2 sources» их сворачивает только связывание.
 <br><br><b>Теги стоят в рейле</b> — как у задач и заметок: фильтр по <code>CATEGORIES</code>, а не только поле Categories на карточке события.</figcaption>
 </figure>
 
@@ -5819,7 +5827,7 @@ Read  2 min ago</div>
                 <span class="tc-row__cell tc-row__source">radicale · vps · Дежурства</span>
               </div>
             </div>
-            <div class="tc-field__hint tc-field__hint--top8">The same duty in two calendars, different UIDs. Agenda already folds them into one row; here you decide whether to keep both or write one and delete the other.</div>
+            <div class="tc-field__hint tc-field__hint--top8">The same duty in two calendars, different UIDs. Agenda shows it twice; here you decide whether to keep both or write one and delete the other.</div>
             <div class="tc-line tc-line--gap-8 tc-card__acts">
               <button class="tc-btn is-primary" type="button">Link them</button>
               <button class="tc-btn" type="button">Not duplicates</button>
@@ -5897,7 +5905,7 @@ Read  2 min ago</div>
     </div>
   </div>
 </div>
-<figcaption><b>Четыре рода, одно устройство экрана.</b> Связывание ничего не пишет на серверы; слияние — отдельный шаг с подтверждением, и оно стоит у контакта, события, задачи и заметки одинаково: равенство коллекций, а пользоваться им — право человека. «Дежурство: первая линия» больше не висит хвостом: это две записи из фикстур, <code>rabota.ics</code> и <code>dezhurstva.ics</code>, разные UID, одно название и один день — то, что агенда уже сворачивает в строку «2 sources». Заметка попадает сюда по заголовку и дате (копия во вторую тетрадь), не по телу: одно только название было бы шумом.<br><br>Группа — карточка с линованным списком записей внутри, те же строки, что в обычном списке. Выбор значения при расхождении — набор переключателей в строку. «Merge on the server» отделена от «Link them» цветом и положением: разное по последствиям не стоит рядом и не выглядит одинаково. Список «куда слить» сжимается, стрелка поля остаётся своей колонкой.</figcaption>
+<figcaption><b>Четыре рода, одно устройство экрана.</b> Связывание ничего не пишет на серверы; слияние — отдельный шаг с подтверждением, и оно стоит у контакта, события, задачи и заметки одинаково: равенство коллекций, а пользоваться им — право человека. «Дежурство: первая линия» больше не висит хвостом: это две записи из фикстур, <code>rabota.ics</code> и <code>dezhurstva.ics</code>, разные UID, одно название и один день. Агенда показывает их двумя строками и ничем не помечает; в строку «2 sources» их свернёт только связывание здесь. Заметка попадает сюда по заголовку и дате (копия во вторую тетрадь), не по телу: одно только название было бы шумом.<br><br>Группа — карточка с линованным списком записей внутри, те же строки, что в обычном списке. Выбор значения при расхождении — набор переключателей в строку. «Merge on the server» отделена от «Link them» цветом и положением: разное по последствиям не стоит рядом и не выглядит одинаково. Список «куда слить» сжимается, стрелка поля остаётся своей колонкой.</figcaption>
 </figure>
 
 <figure>
