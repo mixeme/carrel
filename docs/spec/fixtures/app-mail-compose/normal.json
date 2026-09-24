@@ -23,9 +23,9 @@
     },
     {
       "enabled": true,
-      "href": "/app/mail/compose?op=attach\u0026what=range",
-      "id": "mail.attach.range",
-      "label": "Calendar for a range",
+      "href": "/app/mail/compose?op=attach\u0026what=calendar",
+      "id": "mail.attach.calendar",
+      "label": "Calendar",
       "method": "POST"
     },
     {

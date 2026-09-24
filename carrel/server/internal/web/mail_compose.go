@@ -49,7 +49,7 @@ type mailPart struct {
 	UID     string // one record
 	Path    string // a file or folder under the collection root
 	Folder  bool
-	From    string // a calendar range, 2006-01-02, both ends in it
+	From    string // a calendar's days, 2006-01-02, both ends in it; empty: the whole calendar
 	To      string
 	Format  string // "md" or "ics" for a note
 	Title   string
@@ -70,7 +70,7 @@ var attachKinds = []attachKind{
 	{"contact", "Contact", "contacts", view.KindContact},
 	{"book", "Address book", "contacts", view.KindContact},
 	{"event", "Event", "calendar", view.KindEvent},
-	{"range", "Calendar for a range", "calendar", view.KindEvent},
+	{"calendar", "Calendar", "calendar", view.KindEvent},
 	{"task", "Task", "tasks", view.KindTask},
 	{"note", "Note", "notes", view.KindNote},
 	{"file", "File", filesSpec.segment, view.KindFile},
@@ -440,7 +440,15 @@ func (s *Server) partContent(ctx context.Context, sess *session.Session, p mailP
 				return nil, err
 			}
 		}
-	case "range":
+	case "calendar":
+		if p.From == "" && p.To == "" {
+			objs, _, err := c.calQuery(ctx, "VEVENT", nil, nil) // the whole calendar
+			if err != nil {
+				return nil, err
+			}
+			writeCalendar(&buf, objs)
+			break
+		}
 		from, okFrom := parseDay(c.tf, p.From)
 		to, okTo := parseDay(c.tf, p.To)
 		if !okFrom || !okTo {

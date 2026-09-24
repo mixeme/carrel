@@ -16,19 +16,34 @@ func TestPublishCalendarOptions(t *testing.T) {
 	href := f.publishHref("calendar", searchWork, "")
 
 	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
-	for _, name := range []string{"from", "to", "download", "descriptions"} {
+	for _, name := range []string{"how", "from", "to", "lives", "download", "descriptions"} {
 		if rowNamed(t, sheet.Form, name).Name != name {
 			t.Fatalf("the sheet has no %q: %+v", name, sheet.Form)
 		}
 	}
-	if rowNamed(t, sheet.Form, "download").Value != "on" || rowNamed(t, sheet.Form, "descriptions").Value != "on" {
-		t.Errorf("the switches do not start on: %+v", sheet.Form)
+	// A date range is where it opens; the file is allowed and the text of the
+	// events is not, unless ticked (owner's decision 24.09.2026).
+	if rowNamed(t, sheet.Form, "how").Value != "range" || rowNamed(t, sheet.Form, "download").Value != "on" || rowNamed(t, sheet.Form, "descriptions").Value != "" {
+		t.Errorf("the sheet does not start as drawn: %+v", sheet.Form)
+	}
+	// The whole calendar asks for no days.
+	whole := decode[view.PublishSheet](t, f.h.do(get(href+"&how=whole", f.sess)))
+	for _, row := range whole.Form.Sets[0].Rows {
+		if row.Name == "from" || row.Name == "to" {
+			t.Errorf("the whole calendar asks for days: %+v", whole.Form)
+		}
+	}
+
+	// A range without its days is asked again, not guessed.
+	create := actionHref(t, sheet.Actions, "publish.create")
+	again := decode[view.PublishSheet](t, f.h.do(postForm(create, f.sess, url.Values{"how": {"range"}, "download": {"on"}})))
+	if again.Link != "" || rowNamed(t, again.Form, "from").Error == "" {
+		t.Errorf("a range without days made a link: %+v", again)
 	}
 
 	// The days of the link, no file, no descriptions.
-	create := actionHref(t, sheet.Actions, "publish.create")
 	made := decode[view.PublishSheet](t, f.h.do(postForm(create, f.sess, url.Values{
-		"from": {"2026-08-10"}, "to": {"2026-08-10"}, "descriptions": {""},
+		"how": {"range"}, "from": {"2026-08-10"}, "to": {"2026-08-10"},
 	})))
 	link := string(made.Link)
 	if !strings.HasPrefix(link, "/p/") {
@@ -50,7 +65,7 @@ func TestPublishCalendarOptions(t *testing.T) {
 
 	// With the file, without the descriptions.
 	made = decode[view.PublishSheet](t, f.h.do(postForm(create, f.sess, url.Values{
-		"download": {"on"}, "descriptions": {""},
+		"how": {"whole"}, "download": {"on"},
 	})))
 	link = string(made.Link)
 	if actionByID(publicPage(t, f, link).Actions, "published.download") == nil {

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
@@ -42,11 +43,11 @@ func (f davFixture) publishHref(segment, col, uid string) string {
 func publishLink(t *testing.T, f davFixture, href string, forever bool) string {
 	t.Helper()
 	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
-	id := "publish.create"
+	lives := url.Values{}
 	if forever {
-		id = "publish.forever"
+		lives.Set("lives", "never")
 	}
-	got := decode[view.PublishSheet](t, f.h.do(postForm(actionHref(t, sheet.Actions, id), f.sess, url.Values{})))
+	got := decode[view.PublishSheet](t, f.h.do(postForm(actionHref(t, sheet.Actions, "publish.create"), f.sess, lives)))
 	if !strings.HasPrefix(string(got.Link), "/p/") {
 		t.Fatalf("no link: %+v", got)
 	}
@@ -69,8 +70,16 @@ func TestPublishedBookIsReadLive(t *testing.T) {
 	f := publishFixture(t)
 	href := f.publishHref("contacts", searchBook, "")
 	sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
-	if !strings.Contains(string(sheet.Target), "People") || !strings.Contains(string(sheet.Expires), "30 days") || sheet.Link != "" {
+	// The lifetime is a field, 30 days unless changed (s-publish-1): the sheet
+	// says nothing of it before the link exists.
+	if !strings.Contains(string(sheet.Target), "People") || sheet.Expires != "" || sheet.Link != "" {
 		t.Fatalf("sheet = %+v", sheet)
+	}
+	if lives := rowNamed(t, sheet.Form, "lives"); lives.Value != "30" || len(lives.Options) != 4 || lives.Options[3].Value != "never" {
+		t.Errorf("link lives for = %+v", lives)
+	}
+	if len(sheet.Actions) != 2 || sheet.Actions[0].Label != "Create link" {
+		t.Errorf("actions = %+v", sheet.Actions)
 	}
 	if len(journaled(f, "publish.create")) != 0 {
 		t.Fatal("opening the sheet published")
@@ -199,5 +208,31 @@ func TestPublishIsOffered(t *testing.T) {
 	actionHref(t, list.Bar.Actions, "publish")
 	if rec := f.h.do(get("/app/publish?k=contacts&a=nope&c=x", f.sess)); rec.Code != http.StatusNotFound {
 		t.Errorf("a foreign target: %d", rec.Code)
+	}
+}
+
+// «Link lives for» (s-publish-1): the lifetime chosen is the lifetime made —
+// 7, 14 or 30 days, or none.
+func TestPublishLinkLivesForWhatWasChosen(t *testing.T) {
+	f := publishFixture(t)
+	now := time.Date(2026, 9, 24, 12, 0, 0, 0, time.UTC)
+	f.h.srv.SetClock(now)
+	href := f.publishHref("contacts", searchBook, "ada")
+	for _, c := range []struct {
+		lives string
+		days  int // 0: no expiry
+	}{{"7", 7}, {"14", 14}, {"30", 30}, {"never", 0}, {"", 30}} {
+		sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess)))
+		made := decode[view.PublishSheet](t, f.h.do(postForm(actionHref(t, sheet.Actions, "publish.create"), f.sess, url.Values{"lives": {c.lives}})))
+		if made.Link == "" {
+			t.Fatalf("lives %q: no link", c.lives)
+		}
+		got := f.h.users.PublishedLinks(f.sess.AccountID())[0].ExpiresAt
+		switch {
+		case c.days == 0 && got != nil:
+			t.Errorf("lives %q: expires %v, want never", c.lives, got)
+		case c.days != 0 && (got == nil || got.Sub(now) != time.Duration(c.days)*24*time.Hour):
+			t.Errorf("lives %q: expires %v, want in %d days", c.lives, got, c.days)
+		}
 	}
 }

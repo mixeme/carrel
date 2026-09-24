@@ -4,14 +4,7 @@
       "enabled": true,
       "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
       "id": "publish.create",
-      "label": "Publish for 30 days",
-      "method": "POST"
-    },
-    {
-      "enabled": true,
-      "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026expires=never\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
-      "id": "publish.forever",
-      "label": "Publish without an expiry",
+      "label": "Create link",
       "method": "POST"
     },
     {
@@ -22,13 +15,79 @@
       "method": "GET"
     }
   ],
-  "expires": "30 days, until 9 September 2026",
+  "expires": "",
   "form": {
-    "action": "",
-    "actions": [],
+    "action": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
+        "id": "publish.create",
+        "label": "Create link",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty",
+        "id": "publish.cancel",
+        "label": "Cancel",
+        "method": "GET"
+      }
+    ],
     "errors": [],
-    "method": "",
-    "sets": []
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Link lives for",
+            "name": "lives",
+            "options": [
+              {
+                "label": "7 days",
+                "selected": false,
+                "value": "7"
+              },
+              {
+                "label": "14 days",
+                "selected": false,
+                "value": "14"
+              },
+              {
+                "label": "30 days",
+                "selected": true,
+                "value": "30"
+              },
+              {
+                "label": "No expiry",
+                "selected": false,
+                "value": "never"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "30"
+          }
+        ]
+      }
+    ]
   },
   "kind": "contact",
   "link": "",

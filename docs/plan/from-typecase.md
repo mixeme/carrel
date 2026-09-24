@@ -71,11 +71,11 @@ it can see and do», меняется без нового пароля.
 умолчанию весь. «From», «To», «Both days are in the file.» и «Show» — только у
 «Dates».
 
-- [ ] `mail_compose.go`, `attachKinds`: `{"range", "Calendar for a range", …}` →
+- [x] `mail_compose.go`, `attachKinds`: `{"range", "Calendar for a range", …}` →
   «Calendar» (ключ на усмотрение сервера).
-- [ ] `mail_attach.go`: у листа календаря выбор «Whole calendar» / «Dates»; при
+- [x] `mail_attach.go`: у листа календаря выбор «Whole calendar» / «Dates»; при
   «Whole calendar» полей дат нет, в файл идут все события календаря.
-- [ ] Тест `mail_compose_test.go:293` и прочие, где упомянуто «Calendar for a range».
+- [x] Тест `mail_compose_test.go:293` и прочие, где упомянуто «Calendar for a range».
 
 ### Одноимённые коллекции и одинаковые подписи подключений
 
@@ -104,7 +104,7 @@ it can see and do», меняется без нового пароля.
 с подсказкой, чем они различаются, и кончается одной кнопкой «Attach»; строка
 у кнопки называет выбранное («1 note · .md · 4 KB · goes as a file»).
 
-- [ ] `mail_attach.go:126`: вместо двух действий «Attach as Markdown · .md» и
+- [x] `mail_attach.go:126`: вместо двух действий «Attach as Markdown · .md» и
   «Attach the source · .ics» — поле выбора формата (по умолчанию Markdown) и
   одно «Attach».
 
@@ -140,15 +140,15 @@ Notes 4; август 3, июль 5.
 «Cancel». Сейчас `publish.go:117–118` даёт две кнопки: «Publish for 30 days» и
 «Publish without an expiry».
 
-- [ ] `sheetFor`: поле «Link lives for» со сроками 7 / 14 / 30 дней и
+- [x] `sheetFor`: поле «Link lives for» со сроками 7 / 14 / 30 дней и
   **«No expiry»** (решение владельца 24.09.2026 — бессрочная остаётся, пунктом
   поля; по умолчанию 30 дней) и одно действие «Create link»; `Expires` у листа
   до создания больше не нужен — срок виден в поле. В списке выданных ссылок у
   бессрочной «No expiry», как сейчас (`s-publish-1`, строка файла).
-- [ ] **Календарь целиком или диапазон** (`s-publish-2`): переключатель «How much
+- [x] **Календарь целиком или диапазон** (`s-publish-2`): переключатель «How much
   of it: A date range | The whole calendar»; «From» и «To» — только у диапазона.
   Сейчас это два поля дат, где «пусто с обеих сторон» значит «весь календарь».
-- [ ] **«Show event descriptions» по умолчанию снят** (`s-publish-2`); сейчас
+- [x] **«Show event descriptions» по умолчанию снят** (`s-publish-2`); сейчас
   отмечен. «Allow .ics download and subscription» по умолчанию отмечен — как
   сейчас.
 

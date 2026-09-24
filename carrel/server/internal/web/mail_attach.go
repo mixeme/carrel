@@ -26,7 +26,7 @@ const attachRowsMax = 200
 // attachQuery is the sheet's address with one thing changed.
 func attachQuery(r *http.Request, set url.Values) url.Values {
 	q := url.Values{}
-	for _, k := range []string{"what", "a", "c", "f", "q", "from", "to"} {
+	for _, k := range []string{"what", "a", "c", "f", "q", "span", "from", "to", "format"} {
 		if v := r.FormValue(k); v != "" {
 			q.Set(k, v)
 		}
@@ -88,7 +88,7 @@ func (s *Server) attachSheet(r *http.Request, sess *session.Session, k attachKin
 	switch {
 	case k.Kind == view.KindFile:
 		sheet.Rows = s.attachFileRows(r, sess, k, account, colPath)
-	case k.What != "book" && k.What != "range":
+	case k.What != "book" && k.What != "calendar":
 		sheet.Rows = s.attachRecordRows(r, sess, blob, k, account, colPath)
 	}
 	cancel := view.Action{ID: "mail.attach.cancel", Label: "Cancel", Href: s.route("/app/mail/compose"), Method: "GET", Enabled: true}
@@ -101,32 +101,51 @@ func (s *Server) attachSheet(r *http.Request, sess *session.Session, k attachKin
 	parts := s.reckonLinks(append(d.Parts, part))
 	part = parts[len(parts)-1]
 	sheet.Preview = []view.MailAttachRow{attachRow(part)}
-	if k.What == "range" {
-		// The days go by the address, so the preview — file or link, and
-		// its size — follows them before Attach (owner's decision 19.09.2026).
-		sheet.Range = &view.Form{
-			Action: s.route("/app/mail/attach"), Method: "GET",
-			Sets: []view.FieldSet{{Rows: []view.FormRow{
-				{Name: "what", Kind: view.InputHidden, Value: "range"},
-				{Name: "a", Kind: view.InputHidden, Value: text(part.Account)},
-				{Name: "c", Kind: view.InputHidden, Value: text(part.Col)},
-				{Name: "from", Label: "From", Kind: view.InputDate, Value: text(part.From)},
-				{Name: "to", Label: "To", Kind: view.InputDate, Value: text(part.To), Hint: "Both days are in the file."},
-			}}},
-			Actions: []view.Action{{ID: "mail.attach.range", Label: "Show", Method: "GET", Enabled: true}},
+	switch k.What {
+	case "calendar":
+		// The whole calendar, or the days between two dates (owner's decision
+		// 24.09.2026, s-mail-10). The choice goes by the address, so the
+		// preview — file or link, and its size — follows it before Attach
+		// (19.09.2026). The days and their Show are there for Dates only.
+		rows := []view.FormRow{
+			{Name: "what", Kind: view.InputHidden, Value: "calendar"},
+			{Name: "a", Kind: view.InputHidden, Value: text(part.Account)},
+			{Name: "c", Kind: view.InputHidden, Value: text(part.Col)},
+			{Name: "span", Label: "What goes in", Kind: view.InputRadio, Value: text(spanOf(part)), Options: []view.Option{
+				{Value: "whole", Label: "Whole calendar", Selected: spanOf(part) == "whole"},
+				{Value: "dates", Label: "Dates", Selected: spanOf(part) == "dates"},
+			}},
 		}
+		var actions []view.Action
+		if spanOf(part) == "dates" {
+			rows = append(rows,
+				view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(part.From)},
+				view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(part.To), Hint: "Both days are in the file."})
+			actions = []view.Action{{ID: "mail.attach.range", Label: "Show", Method: "GET", Enabled: true}}
+		}
+		sheet.Range = &view.Form{Action: s.route("/app/mail/attach"), Method: "GET", Sets: []view.FieldSet{{Rows: rows}}, Actions: actions}
+	case "note":
+		// Markdown is what a person opens and reads; the source .ics is the
+		// faithful copy, for a client that reads VJOURNAL. One choice and one
+		// Attach, the preview naming what was chosen (owner's decision
+		// 24.09.2026, s-mail-5).
+		sheet.Format = &view.Form{Action: s.route("/app/mail/attach"), Method: "GET", Sets: []view.FieldSet{{Rows: []view.FormRow{
+			{Name: "what", Kind: view.InputHidden, Value: "note"},
+			{Name: "a", Kind: view.InputHidden, Value: text(part.Account)},
+			{Name: "c", Kind: view.InputHidden, Value: text(part.Col)},
+			{Name: "uid", Kind: view.InputHidden, Value: text(part.UID)},
+			{Name: "format", Label: "Send it as", Kind: view.InputRadio, Value: text(part.Format), Options: []view.Option{
+				{Value: "md", Label: "Markdown · .md", Selected: part.Format == "md"},
+				{Value: "ics", Label: "Source · .ics", Selected: part.Format == "ics"},
+			}, Hint: "Markdown is what a person opens and reads; it carries the text and links to attachments, not the foreign properties another client wrote. " +
+				"The source .ics is the faithful copy and needs a client that reads VJOURNAL — jtx Board, Evolution."},
+		}}}}
 	}
-	attach := func(label string, format string) view.Action {
-		q := attachQuery(r, url.Values{"uid": {r.FormValue("uid")}, "file": {r.FormValue("file")}, "format": {format}})
+	attach := func(label string) view.Action {
+		q := attachQuery(r, url.Values{"uid": {r.FormValue("uid")}, "file": {r.FormValue("file")}, "format": {part.Format}, "span": {spanOf(part)}})
 		return view.Action{ID: "mail.attach.add", Label: text(label), Href: s.postQuery("/app/mail/attach", q), Method: "POST", Enabled: true}
 	}
-	if k.What == "note" {
-		// Markdown is what a person opens and reads; the source .ics is the
-		// faithful copy, for a client that reads VJOURNAL.
-		sheet.Actions = []view.Action{attach("Attach as Markdown · .md", "md"), attach("Attach the source · .ics", "ics"), cancel}
-		return sheet
-	}
-	sheet.Actions = []view.Action{attach("Attach", ""), cancel}
+	sheet.Actions = []view.Action{attach("Attach"), cancel}
 	return sheet
 }
 
@@ -319,7 +338,13 @@ func (s *Server) chosenPart(r *http.Request, sess *session.Session, k attachKind
 	switch k.What {
 	case "book":
 		p.Title, p.Name, p.Media = "Address book «"+label+"»", collectionSlug(label)+".vcf", "text/vcard; charset=utf-8"
-	case "range":
+	case "calendar":
+		if r.FormValue("span") != "dates" {
+			// The whole calendar is what the sheet opens on (s-mail-10).
+			p.Title = "Calendar «" + label + "» · all events"
+			p.Name, p.Media = collectionSlug(label)+".ics", cal.MediaType
+			break
+		}
 		// Thirty days from today unless the address names the days.
 		tf := s.timeFor(sess)
 		from, ok := parseDay(tf, r.FormValue("from"))
@@ -360,4 +385,16 @@ func (s *Server) chosenPart(r *http.Request, sess *session.Session, k attachKind
 	}
 	p.Size = int64(len(data))
 	return p, nil
+}
+
+// spanOf is what of a calendar a part carries: "dates" when it names its
+// days, "whole" otherwise; "" for any other part.
+func spanOf(p mailPart) string {
+	switch {
+	case p.What != "calendar":
+		return ""
+	case p.From != "":
+		return "dates"
+	}
+	return "whole"
 }

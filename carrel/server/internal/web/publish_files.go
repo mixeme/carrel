@@ -92,7 +92,7 @@ func (s *Server) fileSheet(sess *session.Session, c *fileCtx, segs []string, dir
 	if len(segs) > 0 {
 		back = c.href("", segs[:len(segs)-1], true)
 	}
-	sheet := s.sheetFor(sess, view.KindFile, what, fileTitle(c, segs), c.stamp(), filePublishQuery(c, segs, dir), back)
+	sheet := s.sheetFor(sess, view.KindFile, what, fileTitle(c, segs), c.stamp(), filePublishQuery(c, segs, dir), back, "")
 	if dir {
 		sheet.Expires += text(". Whoever has the link can also mount the folder as a read-only drive.")
 	}

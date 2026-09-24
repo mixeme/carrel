@@ -17,6 +17,41 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.41 — 2026-09-24
+
+The sheets follow their frames (docs/plan/from-typecase.md, 24.09.2026).
+
+### Changed
+
+- **Attach a calendar** (`s-mail-10`): the menu item is «Calendar», not
+  «Calendar for a range», and its key `calendar`, not `range`. The sheet asks
+  «What goes in: Whole calendar | Dates» in `MailAttachSheet.Range`, whole by
+  default; From, To, «Both days are in the file.» and Show come with Dates
+  only. The whole calendar goes into the file as every event it holds.
+- **Attach a note** (`s-mail-5`): one choice, «Send it as: Markdown · .md |
+  Source · .ics», Markdown by default, with the hint the frame gives, and one
+  Attach; the preview names the choice. The two «Attach as …» actions are
+  gone.
+- **Publish** (`s-publish-1…5`): the lifetime is a field, «Link lives for» —
+  7, 14 or 30 days, or No expiry; 30 by default — and there is one «Create
+  link» beside Cancel. «Publish for 30 days» and «Publish without an expiry»
+  are gone, and `PublishSheet.Expires` is empty until the link exists.
+  `expires=never` in a post is still honoured.
+- **Publish a calendar** (`s-publish-2`): «How much of it: A date range | The
+  whole calendar», a range by default, From and To with the range only. A
+  range posted without its days brings the sheet back with the days asked
+  for, rather than a guess. «Show event descriptions» starts unticked; «Allow
+  .ics download and subscription» still starts ticked.
+
+### For consumers
+
+- **`view`:** `MailAttachSheet.Format` (`*Form`, JSON `format`) — the note's
+  choice of format; nil for every other kind. Additive.
+- The attach menu's calendar entry is `mail.attach.calendar` with
+  `what=calendar`; the publish sheet's form carries `lives` on every sheet and
+  `how` on a whole calendar's. Fixtures `app-mail-compose` and `app-publish`
+  follow.
+
 ## v0.2.40 — 2026-09-24
 
 ### Added

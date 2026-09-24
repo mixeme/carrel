@@ -91,48 +91,61 @@ func (s *Server) writeSheet(w http.ResponseWriter, r *http.Request, sheet view.P
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 
-func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, title string) view.PublishSheet {
+func (s *Server) publishSheet(sess *session.Session, c *collectionCtx, uid, title, how string) view.PublishSheet {
 	what := collectionNouns[c.spec.kind]
 	if uid != "" {
 		what = c.spec.noun
 	}
-	return s.sheetFor(sess, c.spec.kind, what, title, c.stamp(), publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid), c.listPath())
+	return s.sheetFor(sess, c.spec.kind, what, title, c.stamp(), publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid), c.listPath(), how)
 }
 
-// sheetFor is the sheet of any target: what, where, for how long, and the
-// two ways to make it — thirty days or, explicitly, no expiry. A whole
-// calendar is also asked how much of it the link shows, whether its .ics may
-// be downloaded and subscribed to, and whether the text of its events goes
-// with the times (s-publish-2).
-func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title string, where view.Stamp, q url.Values, cancel string) view.PublishSheet {
+// sheetFor is the sheet of any target: what, where, how long the link lives,
+// and one Create link (owner's decision 24.09.2026, s-publish-1…5). The
+// lifetime is a field — 7, 14 or 30 days, or no expiry, 30 by default — so
+// the sheet says nothing of it before the link exists. A whole calendar is
+// also asked how much of it the link shows — a date range, the days only
+// then, or the whole calendar — whether its .ics may be downloaded and
+// subscribed to, and whether the text of its events goes with the times,
+// off unless ticked (s-publish-2).
+func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title string, where view.Stamp, q url.Values, cancel, how string) view.PublishSheet {
 	tf := s.timeFor(sess)
-	until := s.now().Add(publish.DefaultTTL)
-	forever := cloneValues(q)
-	forever.Set("expires", "never")
+	create := view.Action{ID: "publish.create", Label: "Create link", Href: s.postQuery("/app/publish", q), Method: "POST", Enabled: true}
+	back := view.Action{ID: "publish.cancel", Label: "Cancel", Href: s.route(cancel), Method: "GET", Enabled: true}
 	sheet := view.PublishSheet{
 		Kind:    kind,
 		Target:  text(strings.ToUpper(what[:1]) + what[1:] + " «" + title + "» · " + string(where)),
-		Expires: text("30 days, until " + tf.date(until)),
-		Actions: []view.Action{
-			{ID: "publish.create", Label: "Publish for 30 days", Href: s.postQuery("/app/publish", q), Method: "POST", Enabled: true},
-			{ID: "publish.forever", Label: "Publish without an expiry", Href: s.postQuery("/app/publish", forever), Method: "POST", Enabled: true},
-			{ID: "publish.cancel", Label: "Cancel", Href: s.route(cancel), Method: "GET", Enabled: true},
-		},
+		Actions: []view.Action{create, back},
 	}
+	rows := []view.FormRow{csrfField(sess)}
 	if kind == view.KindEvent && q.Get("uid") == "" {
-		today := dayOf(tf.now, tf.tz)
-		sheet.Form = s.plainForm("/app/publish", "POST",
-			csrfField(sess),
-			view.FormRow{Name: "from", Label: "How much of it · from", Kind: view.InputDate,
-				Hint: "Empty on both sides: the whole calendar, week by week."},
-			view.FormRow{Name: "to", Label: "How much of it · to", Kind: view.InputDate,
-				Hint: text("Both days are in it. " + tf.date(today) + " is today.")},
-			view.FormRow{Name: "download", Label: "Allow .ics download and subscription", Kind: view.InputCheck, Value: "on"},
-			view.FormRow{Name: "descriptions", Label: "Show event descriptions", Kind: view.InputCheck, Value: "on"},
-		)
-		sheet.Form.Action = s.postQuery("/app/publish", q)
-		sheet.Form.Actions = sheet.Actions
+		if how != "whole" {
+			how = "range"
+		}
+		rows = append(rows, view.FormRow{Name: "how", Label: "How much of it", Kind: view.InputRadio, Value: text(how), Options: []view.Option{
+			{Value: "range", Label: "A date range", Selected: how == "range"},
+			{Value: "whole", Label: "The whole calendar", Selected: how == "whole"},
+		}})
+		if how == "range" {
+			today := dayOf(tf.now, tf.tz)
+			rows = append(rows,
+				view.FormRow{Name: "from", Label: "From", Kind: view.InputDate},
+				view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Hint: text("Both days are in it. " + tf.date(today) + " is today.")})
+		}
 	}
+	rows = append(rows, view.FormRow{Name: "lives", Label: "Link lives for", Kind: view.InputSelect, Value: "30", Options: []view.Option{
+		{Value: "7", Label: "7 days"},
+		{Value: "14", Label: "14 days"},
+		{Value: "30", Label: "30 days", Selected: true},
+		{Value: "never", Label: "No expiry"},
+	}})
+	if kind == view.KindEvent && q.Get("uid") == "" {
+		rows = append(rows,
+			view.FormRow{Name: "download", Label: "Allow .ics download and subscription", Kind: view.InputCheck, Value: "on"},
+			view.FormRow{Name: "descriptions", Label: "Show event descriptions", Kind: view.InputCheck})
+	}
+	sheet.Form = s.plainForm("/app/publish", "POST", rows...)
+	sheet.Form.Action = s.postQuery("/app/publish", q)
+	sheet.Form.Actions = sheet.Actions
 	return sheet
 }
 
@@ -170,12 +183,24 @@ func (s *Server) madeSheet(sess *session.Session, sheet view.PublishSheet, token
 	return sheet
 }
 
-// publishExpiry is the lifetime the form chose.
+// publishExpiry is the lifetime the form chose: 7, 14 or 30 days, or none.
+// A post that names none — a plain POST, an old client — gets the default.
+// «expires=never» is how the sheet asked for no expiry before «Link lives
+// for» (24.09.2026), and still means it.
 func (s *Server) publishExpiry(r *http.Request) *time.Time {
+	ttl := publish.DefaultTTL
+	switch r.FormValue("lives") {
+	case "never":
+		return nil
+	case "7":
+		ttl = 7 * 24 * time.Hour
+	case "14":
+		ttl = 14 * 24 * time.Hour
+	}
 	if r.FormValue("expires") == "never" {
 		return nil
 	}
-	t := s.now().Add(publish.DefaultTTL)
+	t := s.now().Add(ttl)
 	return &t
 }
 
@@ -209,7 +234,7 @@ func (s *Server) getPublish(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.listPath(), err)))
 		return
 	}
-	s.writeSheet(w, r, s.publishSheet(sess, c, uid, title))
+	s.writeSheet(w, r, s.publishSheet(sess, c, uid, title, r.FormValue("how")))
 }
 
 // postPublish makes the link and shows it once, or with op=revoke and id=
@@ -252,11 +277,33 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		AccountID: c.conn.ID, Kind: string(c.spec.kind), Col: c.col.Path, UID: uid, Title: title,
 	}
 	if c.spec.kind == view.KindEvent && uid == "" {
-		// The sheet of a whole calendar (s-publish-2). A form that was never
-		// shown — an old client, a plain POST — publishes as before: the
-		// whole calendar, downloadable, with its descriptions.
-		if _, shown := r.Form["descriptions"]; shown || r.FormValue("from") != "" || r.FormValue("to") != "" {
+		// The sheet of a whole calendar (s-publish-2): «how» is always sent
+		// by it. A post without it — an old client, a plain POST — publishes
+		// as before: the whole calendar, downloadable, with its descriptions.
+		switch r.FormValue("how") {
+		case "whole":
+		case "range":
 			target.From, target.To = publishWindow(r)
+			if target.From == "" {
+				// A range was chosen and its days were not given: the sheet
+				// again, with the days asked for, rather than a guess.
+				sheet := s.publishSheet(sess, c, uid, title, "range")
+				for i := range sheet.Form.Sets {
+					for j := range sheet.Form.Sets[i].Rows {
+						row := &sheet.Form.Sets[i].Rows[j]
+						switch row.Name {
+						case "from":
+							row.Value, row.Error = text(r.FormValue("from")), "Give both days, or publish the whole calendar."
+						case "to":
+							row.Value = text(r.FormValue("to"))
+						}
+					}
+				}
+				s.writeSheet(w, r, sheet)
+				return
+			}
+		}
+		if r.FormValue("how") != "" {
 			target.NoDownload = checkbox(r, "download") != "on"
 			target.HideDescriptions = checkbox(r, "descriptions") != "on"
 		}
@@ -266,7 +313,7 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not publish", http.StatusInternalServerError)
 		return
 	}
-	s.writeSheet(w, r, s.madeSheet(sess, s.publishSheet(sess, c, uid, title), token, expires))
+	s.writeSheet(w, r, s.madeSheet(sess, s.publishSheet(sess, c, uid, title, ""), token, expires))
 }
 
 // getFilesPublished lists the person's live links: what each opens, until

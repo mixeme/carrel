@@ -290,14 +290,14 @@ func TestOldLinkGoesByLetterFromPublishedLinks(t *testing.T) {
 	}
 }
 
-// «Calendar for a range» takes its days from the sheet's own fields; both
+// «Calendar» with Dates takes its days from the sheet's own fields; both
 // days are in the file, and a day outside is not.
 func TestLetterCalendarRange(t *testing.T) {
 	f := calendarFixture(t, func(h *harness) { h.cfg.MailEnabled = true },
 		"in.ics", ics("BEGIN:VEVENT\nUID:in\nDTSTAMP:20260101T000000Z\nDTSTART:20261005T100000Z\nDTEND:20261005T110000Z\nSUMMARY:Inside\nEND:VEVENT"),
 		"out.ics", ics("BEGIN:VEVENT\nUID:out\nDTSTAMP:20260101T000000Z\nDTSTART:20261020T100000Z\nDTEND:20261020T110000Z\nSUMMARY:Outside\nEND:VEVENT"))
 	relay := f.h.relayed()
-	q := url.Values{"what": {"range"}, "a": {f.id}, "c": {f.col}, "from": {"2026-10-01"}, "to": {"2026-10-10"}}
+	q := url.Values{"what": {"calendar"}, "a": {f.id}, "c": {f.col}, "span": {"dates"}, "from": {"2026-10-01"}, "to": {"2026-10-10"}}
 	sheet := attachOne(t, f, q)
 	if sheet.Range == nil || formFields(*sheet.Range).Get("from") != "2026-10-01" || formFields(*sheet.Range).Get("to") != "2026-10-10" {
 		t.Fatalf("range form = %+v", sheet.Range)
@@ -312,5 +312,75 @@ func TestLetterCalendarRange(t *testing.T) {
 	}
 	if !strings.Contains(ics, "Inside") || strings.Contains(ics, "Outside") {
 		t.Errorf("calendar:\n%s", ics)
+	}
+}
+
+// «Calendar» opens on the whole calendar (owner's decision 24.09.2026,
+// s-mail-10): no days to fill in, and every event goes into the file. The
+// days and their Show appear only once Dates is chosen.
+func TestLetterWholeCalendar(t *testing.T) {
+	f := calendarFixture(t, func(h *harness) { h.cfg.MailEnabled = true },
+		"in.ics", ics("BEGIN:VEVENT\nUID:in\nDTSTAMP:20260101T000000Z\nDTSTART:20261005T100000Z\nDTEND:20261005T110000Z\nSUMMARY:Inside\nEND:VEVENT"),
+		"far.ics", ics("BEGIN:VEVENT\nUID:far\nDTSTAMP:20260101T000000Z\nDTSTART:20300101T100000Z\nDTEND:20300101T110000Z\nSUMMARY:Far away\nEND:VEVENT"))
+	relay := f.h.relayed()
+	sheet := attachOne(t, f, url.Values{"what": {"calendar"}, "a": {f.id}, "c": {f.col}})
+	if sheet.Range == nil {
+		t.Fatal("no choice of what goes in")
+	}
+	fields := formFields(*sheet.Range)
+	if fields.Get("span") != "whole" || fields.Has("from") || fields.Has("to") || len(sheet.Range.Actions) != 0 {
+		t.Errorf("whole calendar form = %+v", sheet.Range)
+	}
+	if !strings.Contains(string(sheet.Preview[0].Title), "all events") {
+		t.Errorf("preview = %+v", sheet.Preview[0])
+	}
+	dates := decode[view.MailAttachSheet](t, f.h.do(get("/app/mail/attach?"+url.Values{"what": {"calendar"}, "a": {f.id}, "c": {f.col}, "span": {"dates"}}.Encode(), f.sess)))
+	if df := formFields(*dates.Range); df.Get("span") != "dates" || df.Get("from") == "" || df.Get("to") == "" || len(dates.Range.Actions) != 1 {
+		t.Errorf("dates form = %+v", dates.Range)
+	}
+	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"All"}, "body": {"x"}})); rec.Code != 303 {
+		t.Fatalf("send: %d %s", rec.Code, rec.Body)
+	}
+	_, files := parts(t, relay.Letters()[0])
+	var got string
+	for _, v := range files {
+		got = v
+	}
+	if !strings.Contains(got, "Inside") || !strings.Contains(got, "Far away") {
+		t.Errorf("calendar:\n%s", got)
+	}
+}
+
+// A note goes as Markdown or as its source .ics: one choice, one Attach, and
+// the preview names the choice (owner's decision 24.09.2026, s-mail-5).
+func TestLetterNoteFormat(t *testing.T) {
+	f := calendarFixture(t, func(h *harness) { h.cfg.MailEnabled = true },
+		"n.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nDTSTART;VALUE=DATE:20260110\nSUMMARY:Plans\nDESCRIPTION:Body\nEND:VJOURNAL"))
+	relay := f.h.relayed()
+	base := url.Values{"what": {"note"}, "a": {f.id}, "c": {f.col}, "uid": {"n1"}}
+	sheet := decode[view.MailAttachSheet](t, f.h.do(get("/app/mail/attach?"+base.Encode(), f.sess)))
+	if sheet.Format == nil || formFields(*sheet.Format).Get("format") != "md" {
+		t.Fatalf("format form = %+v", sheet.Format)
+	}
+	var attaches int
+	for _, a := range sheet.Actions {
+		if a.ID == "mail.attach.add" {
+			attaches++
+		}
+	}
+	if attaches != 1 || sheet.Preview[0].Format != "md" {
+		t.Errorf("actions %+v, preview %+v", sheet.Actions, sheet.Preview)
+	}
+	base.Set("format", "ics")
+	sheet = attachOne(t, f, base)
+	if sheet.Preview[0].Format != "ics" || formFields(*sheet.Format).Get("format") != "ics" {
+		t.Errorf("source chosen: preview %+v, form %+v", sheet.Preview, sheet.Format)
+	}
+	if rec := f.h.do(postForm("/app/mail/compose?op=send", f.sess, url.Values{"to": {"ann@example.org"}, "subject": {"Note"}, "body": {"x"}})); rec.Code != 303 {
+		t.Fatalf("send: %d %s", rec.Code, rec.Body)
+	}
+	_, files := parts(t, relay.Letters()[0])
+	if _, ok := files["plans.ics"]; !ok {
+		t.Errorf("files = %v", files)
 	}
 }
