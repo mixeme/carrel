@@ -1525,14 +1525,20 @@ type DevicesPage struct {
     Shell
     Tab      DeviceTab // C-8
     Accounts []DeviceAccount
-    QR       string // адрес изображения кода; пусто — вкладка его не показывает
-    Password SecretField
     Warning  Notice // что содержит профиль и куда он попадает
     Actions  []Action
 }
+// Учётные данные — у своего аккаунта, на этой же странице: за паролем на
+// «Connections» не уходят. Пароль показан внутри общего окна разблокировки
+// (S-10.7), каждый показ пишется в журнал; пока окно закрыто — Reveal «Show»,
+// открывающий тот же лист. У Apple своего поля пароля нет.
 type DeviceAccount struct {
-    Title Text
-    Rows  []DeviceRow
+    Title    Text
+    Rows     []DeviceRow
+    QR       string      // Android: код этого аккаунта, адрес изображения; пусто — кода нет
+    Login    Text        // Thunderbird, Anything else: логин в строке аккаунта
+    Password SecretField // пароль этого подключения; пусто у Apple и у аккаунта без кода
+    Actions  []Action    // Open in DAVx5 · Copy / Copy password
 }
 type DeviceRow struct {
     Label    Text

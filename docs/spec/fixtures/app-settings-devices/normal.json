@@ -1,6 +1,19 @@
 {
   "accounts": [
     {
+      "actions": [],
+      "login": "",
+      "password": {
+        "reveal": {
+          "enabled": false,
+          "id": "",
+          "label": "",
+          "method": ""
+        },
+        "shown": false,
+        "value": ""
+      },
+      "qr": "",
       "rows": [
         {
           "copy": {
@@ -118,6 +131,19 @@
       "title": "nextcloud · home · alice"
     },
     {
+      "actions": [],
+      "login": "",
+      "password": {
+        "reveal": {
+          "enabled": false,
+          "id": "",
+          "label": "",
+          "method": ""
+        },
+        "shown": false,
+        "value": ""
+      },
+      "qr": "",
       "rows": [
         {
           "copy": {
@@ -235,23 +261,11 @@
   ],
   "details": null,
   "notices": [],
-  "password": {
-    "reveal": {
-      "enabled": true,
-      "href": "/app/settings/unlock",
-      "id": "device.password",
-      "label": "Show password",
-      "method": "GET"
-    },
-    "shown": false,
-    "value": ""
-  },
   "print": {
     "range": "",
     "taken": "",
     "title": ""
   },
-  "qr": "",
   "rail": {
     "about": {
       "enabled": true,

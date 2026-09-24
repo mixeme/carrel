@@ -17,6 +17,32 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.44 — 2026-09-24
+
+### Changed
+
+- **A new device's password is on its own page** (owner's decision
+  24.09.2026; `s-plan-2`, `s-plan-4`, `s-plan-5`). Handing out the password
+  is one of the page's main jobs, and «Show password» no longer sends
+  anyone to Connections.
+  - **Android:** a card for every ticked account, all at once — its code,
+    «Open in DAVx5» and its password under the code with Copy. The one code
+    of the first account and the «Code for …» actions are gone.
+  - **Thunderbird** and **Anything else:** the login and the password in the
+    account's row above its collections, with «Copy password».
+  - The password is shown inside the one unlock window (S-10.7), and every
+    showing is journaled (`connection.password.reveal`). Outside it the
+    answer carries no password: Show opens the same sheet over this page,
+    and Copy waits for it.
+  - Apple has no password field: the profile is issued inside the window.
+
+### For consumers
+
+- **Breaking (`view`):** `DevicesPage.QR` and `DevicesPage.Password` are
+  gone. `DeviceAccount` gains `QR`, `Login`, `Password` (`SecretField`) and
+  `Actions` — `device.davx5`, `device.password.copy`. The fixture
+  `app-settings-devices` follows.
+
 ## v0.2.43 — 2026-09-24
 
 ### Added

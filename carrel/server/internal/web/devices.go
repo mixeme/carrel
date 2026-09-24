@@ -108,15 +108,19 @@ func qrImage(text string) string {
 	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(code.PNG())
 }
 
+// devicesPage is the page of one tab. Every account a tab sets up by hand
+// carries its own credentials beside it (owner's decision 24.09.2026,
+// s-plan-2, s-plan-4, s-plan-5): on Android a code, «Open in DAVx5» and the
+// password under the code for each ticked account; on Thunderbird and
+// «Anything else» the login and the password in the account's row. Nobody
+// goes to Connections for a password. The password is shown inside the one
+// unlock window (S-10.7) and every showing is journaled; outside it there
+// are dots and Show, which opens the same sheet over this page. Apple has
+// no password of its own: the profile is issued inside the window.
 func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices ...view.Notice) view.DevicesPage {
-	return s.devicesPageFor(sess, tab, "", notices...)
-}
-
-// devicesPageFor is the page with the DAVx5 code for account, or for the
-// first included account when none is named.
-func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, account string, notices ...view.Notice) view.DevicesPage {
 	blob := s.catalogOf(sess)
-	unlocked := sess.UnlockUntil(time.Now()) != nil
+	key, live := sess.DataKey()
+	unlocked := live && sess.UnlockUntil(time.Now()) != nil
 	page := view.DevicesPage{Shell: s.buildShell(sess, "Set up a new device"), Tab: tab}
 	page.Rail = s.settingsRail(sess, "/app/settings/devices")
 	page.Notices = append(page.Notices, notices...)
@@ -126,6 +130,22 @@ func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, accou
 			a.Reason = "Shown now."
 		}
 		page.Actions = append(page.Actions, a)
+	}
+	unlock := s.route("/app/settings/unlock")
+	secret := func(conn sealed.Connection) view.SecretField {
+		if unlocked {
+			if password, err := s.users.RevealConnectionPassword(sess.AccountID(), key, conn.ID); err == nil {
+				return view.SecretField{Shown: true, Value: text(password)}
+			}
+		}
+		return view.SecretField{Reveal: view.Action{ID: "device.password", Label: "Show", Href: unlock, Method: "GET", Enabled: true}}
+	}
+	copyPassword := func(label string, shown bool) view.Action {
+		a := view.Action{ID: "device.password.copy", Label: text(label), Method: "GET", Enabled: shown}
+		if !shown {
+			a.Reason = "Show the password first."
+		}
+		return a
 	}
 	profileAccounts := 0
 	for _, conn := range blob.Connections {
@@ -153,6 +173,25 @@ func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, accou
 		if dav && included {
 			profileAccounts++
 		}
+		switch tab {
+		case view.TabAndroid:
+			// One code for each ticked account: DAVx5 makes an account per
+			// code. The password is not in the code — a code on a screen is
+			// seen by whoever stands behind — but under it.
+			if cal, card := profileParts(blob, conn.ID); (cal || card) && included && davx5Link(conn) != "" {
+				link := davx5Link(conn)
+				acct.QR = qrImage(link)
+				acct.Password = secret(conn)
+				acct.Actions = []view.Action{
+					{ID: "device.davx5", Label: "Open in DAVx5", Href: link, Method: "GET", Enabled: true},
+					copyPassword("Copy", acct.Password.Shown),
+				}
+			}
+		case view.TabThunderbird, view.TabOther:
+			acct.Login = text(conn.Login)
+			acct.Password = secret(conn)
+			acct.Actions = []view.Action{copyPassword("Copy password", acct.Password.Shown)}
+		}
 		page.Accounts = append(page.Accounts, acct)
 		op, label := "exclude", "Leave out "+connLabel(conn)
 		if !included {
@@ -164,11 +203,6 @@ func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, accou
 		})
 	}
 
-	unlock := s.route("/app/settings/unlock")
-	page.Password.Reveal = view.Action{ID: "device.password", Label: "Show password", Href: unlock, Method: "GET", Enabled: true}
-	if unlocked {
-		page.Password.Reveal.Href = s.route("/app/settings/connections")
-	}
 	switch tab {
 	case view.TabApple:
 		page.Warning = view.Notice{
@@ -189,32 +223,9 @@ func (s *Server) devicesPageFor(sess *session.Session, tab view.DeviceTab, accou
 		}
 		page.Actions = append(page.Actions, gen)
 	case view.TabAndroid:
-		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "Scan the code with the phone: DAVx5 opens with the address and the login filled in. The password is not in the code — type it from the connections page, inside the unlock window."}
-		var coded []sealed.Connection
-		for _, conn := range blob.Connections {
-			if cal, card := profileParts(blob, conn.ID); (cal || card) && !blob.IsDeviceExcluded(conn.ID) && davx5Link(conn) != "" {
-				coded = append(coded, conn)
-			}
-		}
-		for i, conn := range coded {
-			if account == "" && i == 0 || conn.ID == account {
-				link := davx5Link(conn)
-				page.QR = qrImage(link)
-				page.Actions = append(page.Actions, view.Action{ID: "device.davx5", Label: text("Open in DAVx5 · " + connLabel(conn)), Href: link, Method: "GET", Enabled: true})
-				account = conn.ID
-			}
-		}
-		for _, conn := range coded {
-			if conn.ID == account {
-				continue
-			}
-			page.Actions = append(page.Actions, view.Action{
-				ID: "device.code", Label: text("Code for " + connLabel(conn)), Method: "GET", Enabled: true,
-				Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "account": {conn.ID}}),
-			})
-		}
+		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "One code for each ticked account. Scan it with the phone: DAVx5 opens with the address and the login filled in, and asks for the password shown under the code."}
 	case view.TabThunderbird:
-		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book. There is no import file and none is needed."}
+		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "Paste a CalDAV URL into Thunderbird Calendar, a CardDAV URL into Address Book, with the login and the password from the account row. There is no import file and none is needed."}
 	default:
 		page.Warning = view.Notice{Role: view.NoticeInfo, Body: "A WebDAV address is for \"Map network drive\" in Windows, \"Connect to server\" in macOS and davfs in Linux."}
 	}
@@ -227,7 +238,7 @@ func (s *Server) getSettingsDevices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Cache-Control", "no-store")
-	s.writePage(w, r, http.StatusOK, s.devicesPageFor(sess, deviceTab(r), r.URL.Query().Get("account")))
+	s.writePage(w, r, http.StatusOK, s.devicesPage(sess, deviceTab(r)))
 }
 
 // postSettingsDevices takes op=exclude or include with account=, or

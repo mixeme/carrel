@@ -219,20 +219,32 @@ func TestDeviceTabs(t *testing.T) {
 	if types["Work"] != "CalDAV" || types["People"] != "CardDAV" {
 		t.Errorf("types = %v", types)
 	}
-	if p.QR != "" {
-		t.Errorf("a code outside the Android tab: %q", p.QR)
+	for _, a := range p.Accounts {
+		if a.QR != "" {
+			t.Errorf("a code outside the Android tab: %.40q", a.QR)
+		}
 	}
 }
 
-// Android: a code per account that opens DAVx5 with the address and the
-// login — never the password — and a code for another account one link
-// away. A left-out account has no code.
+// Android: a code for each ticked account, all on the page at once — DAVx5
+// makes an account per code (owner's decision 24.09.2026, s-plan-2). Each
+// opens DAVx5 with the address and the login, never the password, and has
+// «Open in DAVx5» beside it. A left-out account has no code.
 func TestDAVx5Code(t *testing.T) {
 	f, otherID := deviceFixture(t)
 	p := devicesPage(t, f, "android")
-	img, ok := strings.CutPrefix(p.QR, "data:image/png;base64,")
+	var coded []view.DeviceAccount
+	for _, a := range p.Accounts {
+		if a.QR != "" {
+			coded = append(coded, a)
+		}
+	}
+	if len(coded) != 2 || coded[0].QR == coded[1].QR {
+		t.Fatalf("codes: %d accounts of %d", len(coded), len(p.Accounts))
+	}
+	img, ok := strings.CutPrefix(coded[0].QR, "data:image/png;base64,")
 	if !ok {
-		t.Fatalf("QR = %.60q", p.QR)
+		t.Fatalf("QR = %.60q", coded[0].QR)
 	}
 	raw, err := base64.StdEncoding.DecodeString(img)
 	if err != nil {
@@ -242,19 +254,71 @@ func TestDAVx5Code(t *testing.T) {
 	if err != nil || pic.Bounds().Dx() < 100 || pic.Bounds().Dx() != pic.Bounds().Dy() {
 		t.Fatalf("code image: %v %v", pic, err)
 	}
-	open := deviceAction(t, p.Actions, "device.davx5")
+	open := deviceAction(t, coded[0].Actions, "device.davx5")
 	u, err := url.Parse(open.Href)
 	if err != nil || u.Scheme != "caldav" || u.User.Username() != "alice" || strings.Contains(open.Href, "s3cret") {
 		t.Errorf("DAVx5 link = %q", open.Href) // the test server is plain HTTP: caldav://, not davx5://
 	}
-	other := decode[view.DevicesPage](t, f.h.do(get(deviceAction(t, p.Actions, "device.code").Href, f.sess)))
-	if other.QR == "" || other.QR == p.QR || !strings.Contains(deviceAction(t, other.Actions, "device.davx5").Href, "bob@") {
-		t.Errorf("the other account's code: %+v", other.Actions)
+	if !strings.Contains(deviceAction(t, coded[1].Actions, "device.davx5").Href, "bob@") {
+		t.Errorf("the other account's code: %+v", coded[1].Actions)
+	}
+	for _, a := range p.Actions {
+		if a.ID == "device.code" {
+			t.Errorf("a code one link away is gone: %+v", a)
+		}
 	}
 	f.h.do(postForm("/app/settings/devices?op=exclude&account="+otherID, f.sess, url.Values{}))
-	for _, a := range devicesPage(t, f, "android").Actions {
-		if a.ID == "device.code" {
-			t.Errorf("a left-out account has a code: %+v", a)
+	n := 0
+	for _, a := range devicesPage(t, f, "android").Accounts {
+		if a.QR != "" {
+			n++
 		}
+	}
+	if n != 1 {
+		t.Errorf("a left-out account keeps its code: %d codes", n)
+	}
+}
+
+// The password of each account is on the page it is needed on (owner's
+// decision 24.09.2026, s-plan-2, s-plan-4, s-plan-5): under its code on
+// Android, in its row with the login on Thunderbird and «Anything else».
+// Outside the unlock window it is not in the answer at all — Show opens the
+// sheet, and Copy waits for it; inside, it is there, and every showing is
+// journaled. Apple has no password of its own.
+func TestDevicePasswordsOnThePage(t *testing.T) {
+	f, _ := deviceFixture(t)
+	for _, tab := range []string{"android", "thunderbird", "other"} {
+		p := devicesPage(t, f, tab)
+		a := p.Accounts[0]
+		if a.Password.Shown || a.Password.Value != "" || !strings.HasSuffix(a.Password.Reveal.Href, "/app/settings/unlock") {
+			t.Errorf("%s, locked: password = %+v", tab, a.Password)
+		}
+		if c := deviceAction(t, a.Actions, "device.password.copy"); c.Enabled {
+			t.Errorf("%s, locked: copy is enabled", tab)
+		}
+		if tab != "android" && a.Login != "alice" {
+			t.Errorf("%s: login = %q", tab, a.Login)
+		}
+	}
+	for _, a := range devicesPage(t, f, "apple").Accounts {
+		if a.Password.Value != "" || a.Password.Reveal.ID != "" {
+			t.Errorf("apple has a password field: %+v", a.Password)
+		}
+	}
+
+	unlock(t, f)
+	before := auditCount(f.h, "connection.password.reveal")
+	p := devicesPage(t, f, "thunderbird")
+	var alice view.DeviceAccount
+	for _, a := range p.Accounts {
+		if a.Login == "alice" {
+			alice = a
+		}
+	}
+	if !alice.Password.Shown || alice.Password.Value != "s3cret&<pass>" || !deviceAction(t, alice.Actions, "device.password.copy").Enabled {
+		t.Errorf("unlocked: %+v", alice)
+	}
+	if got := auditCount(f.h, "connection.password.reveal") - before; got != len(p.Accounts) {
+		t.Errorf("showings journaled: %d, accounts shown: %d", got, len(p.Accounts))
 	}
 }

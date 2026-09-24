@@ -135,14 +135,16 @@ type DevicesPage struct {
 	Shell
 	Tab      DeviceTab       `json:"tab"` // C-8
 	Accounts []DeviceAccount `json:"accounts"`
-	QR       string          `json:"qr"` // адрес изображения кода; пусто — вкладка его не показывает
-	Password SecretField     `json:"password"`
 	Warning  Notice          `json:"warning"` // что содержит профиль и куда он попадает
 	Actions  []Action        `json:"actions"`
 }
 type DeviceAccount struct {
-	Title Text        `json:"title"`
-	Rows  []DeviceRow `json:"rows"`
+	Title    Text        `json:"title"`
+	Rows     []DeviceRow `json:"rows"`
+	QR       string      `json:"qr"`       // Android: код этого аккаунта, адрес изображения; пусто — кода нет
+	Login    Text        `json:"login"`    // Thunderbird, Anything else: логин в строке аккаунта
+	Password SecretField `json:"password"` // пароль этого подключения; пусто у Apple и у аккаунта без кода
+	Actions  []Action    `json:"actions"`  // Open in DAVx5 · Copy / Copy password
 }
 type DeviceRow struct {
 	Label    Text   `json:"label"`
