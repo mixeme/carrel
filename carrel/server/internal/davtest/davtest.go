@@ -90,6 +90,12 @@ type Server struct {
 	// no text-match is served normally.
 	CalendarTextMatchFindsNothing bool
 
+	// CardTextMatchFindsNothing answers every addressbook-query that carries
+	// a text-match 207 with no responses, while a query without one hands the
+	// book over — what DAViCal does to Cyrillic in another case as soon as
+	// EMAIL or TEL stands among the alternatives (docs/servers.md, SV-51).
+	CardTextMatchFindsNothing bool
+
 	// CreateIgnoresComponentSet makes every calendar hold every component
 	// whatever the MKCALENDAR asked for, the way Xandikos does: it drops the
 	// set at creation, refuses a PROPPATCH of it with 409 because the
@@ -484,6 +490,13 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 		return
 	}
 	if s.CalendarTextMatchFindsNothing && r.Method == "REPORT" && bytes.Contains(body, []byte("calendar-query")) &&
+		bytes.Contains(body, []byte("text-match")) {
+		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+		w.WriteHeader(http.StatusMultiStatus)
+		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"/>`)
+		return
+	}
+	if s.CardTextMatchFindsNothing && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) &&
 		bytes.Contains(body, []byte("text-match")) {
 		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
 		w.WriteHeader(http.StatusMultiStatus)

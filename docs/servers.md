@@ -29,11 +29,13 @@
 | Stalwart | Linux-машина, `docker-compose.linux.yml` | 0.16.23 (`stalwartlabs/stalwart:v0.16`) |
 | Xandikos | Linux-машина, `docker-compose.linux.yml` | `ghcr.io/jelmer/xandikos:v0.2.12` |
 | Davis | Linux-машина, `docker-compose.linux.yml` | `ghcr.io/tchapi/davis-standalone:latest`, образ от 06.09.2026; sabre/dav 4.7.1 |
+| DAViCal | Linux-машина, `docker-compose.linux.yml` | 1.1.12 (`fintechstudios/davical:1.1.12`, PHP 8.2.8, Apache 2.4.57), PostgreSQL 15 |
 
 В воротах на Linux-машине (`scripts/linux-gates.sh`) гоняются стенды, которые
-поднимаются там же: Radicale, Stalwart, Xandikos и Davis. Учётную запись
+поднимаются там же: Radicale, Stalwart, Xandikos, Davis и DAViCal. Учётную запись
 Davis заводит скрипт через форму его же админки
-(`testdata/davis/make-account.sh`). Всё удалённое — Baikal, SFTPGo, OpenCloud,
+(`testdata/davis/make-account.sh`), учётную запись DAViCal — так же
+(`testdata/davical/make-account.sh`). Всё удалённое — Baikal, SFTPGo, OpenCloud,
 Nextcloud, SoGo, Yandex, Mail.ru, Google, iCloud — гоняется только вручную, с
 машины, где лежит `dev/credentials.txt`: на Linux-машину он не копируется, и
 шаги SFTPGo и Baikal в воротах всегда пропускаются. Nextcloud берёт весь общий набор, как Baikal; у Google и iCloud
@@ -79,6 +81,7 @@ Linux-машину этот файл не копируется, поэтому �
 | Stalwart | да | да | да (`/dav/file/`) | общий набор, **файлы** | — | ворота |
 | Xandikos | да | да | нет: заявлен как «CardDAV/CalDAV server», WebDAV Mount «intentionally not implemented»; простые файлы он принимает, но это побочное свойство хранилища на git, и мы на него не опираемся | общий набор | — | ворота |
 | Davis | да | да | да, по флагу `WEBDAV_ENABLED` (по умолчанию выключен; у нас включён 23.09.2026, домашние каталоги в `/dav/home/`) | общий набор, **файлы** | — | ворота |
+| DAViCal | да | да (вики проекта: «CalDAV & CardDAV Server»; календари и книги в одном доме `/caldav.php/<логин>/`) | нет: WebDAV у него — доступ к тем же коллекциям, хранилища файлов нет | общий набор | — | ворота |
 | SFTPGo | нет | нет | да | файлы; CRUD папок, загрузка папки, большой файл при малой памяти, потоки `GET`, игнор `If-None-Match` | — | вручную |
 | OpenCloud | заявлен как дополнение: встроенный Radicale с версии 2.3.0, включает администратор; **у нашего экземпляра не включён** (`PROPFIND /caldav/` — 405) | так же, как CalDAV | да | файлы; вложения, уходящие из Baikal | календарь и контакты: на нашем экземпляре выключены | вручную |
 | Yandex | да (`caldav.yandex.ru`) | да; `addressbook-query` нет, книга читается окольным путём (SV-23) | заявлен Яндекс Диск (`webdav.yandex.ru`): отдельный адрес, **только в тарифах Яндекс 360**; не проверяли | жизненный цикл календаря, формы, хронология, отказ второй книги, запись в единственную книгу, создание коллекции по настоящему адресу | общий набор, файлы | вручную |
@@ -104,6 +107,10 @@ Linux-машину этот файл не копируется, поэтому �
 - Davis — [github.com/tchapi/davis](https://github.com/tchapi/davis):
   «CalDAV, CardDAV, WebDAV», флаги `CALDAV_ENABLED`, `CARDDAV_ENABLED`,
   `WEBDAV_ENABLED=false`.
+- DAViCal — [wiki.davical.org](https://wiki.davical.org/index.php?title=Main_Page):
+  «the DAViCal CalDAV & CardDAV Server»; [davical.org](https://www.davical.org/):
+  WebDAV — «backward-compatible access via WebDAV» к календарям, не
+  хранилище файлов.
 - SFTPGo — [github.com/drakkan/sftpgo](https://github.com/drakkan/sftpgo):
   «SFTP, HTTP/S, FTP/S, WebDAV».
 - OpenCloud — [Calendar and Contacts Integration with Radicale](https://docs.opencloud.eu/docs/admin/configuration/radicale-integration/):
@@ -1361,3 +1368,39 @@ Graph, протоколы другого устройства. Самая рас
 - **Проверка.** `TestDavisCollections`: затравка без имени снова дала бы
   500.
 
+### SV-50. Имя коллекции экранирует ещё раз
+
+- **Сервер.** DAViCal 1.1.12. `displayname`, присланный в `MKCALENDAR` или
+  `PROPPATCH` как `A &amp; B` (то есть «A & B»), в `PROPFIND` приходит как
+  `A &amp;amp; B`: любой клиент читает «A &amp; B». Так же `&lt;` и `&gt;`.
+  Проба 24.09.2026, первый прогон DAViCal.
+- **Carrel.** Экранирует один раз — это видно по шести другим серверам
+  линейки на том же коде и по пробе curl с тем же телом. Имя, которое
+  показывает сервер, и есть имя коллекции: каталог держит его (S-12.2), и
+  человек увидит в рейле «Поездки &amp; планы», как увидит в любом другом
+  клиенте. Раскодировать ответ за сервер Carrel не станет: это значило бы
+  додумывать, что сервер «имел в виду».
+- **Проверка.** `TestDAViCalCollections` с отметкой `escapesNamesTwice`:
+  ждёт имя в том виде, в каком его показывает сервер, и требует, чтобы
+  каталог держал именно его. У остальных серверов отметки нет, и имя
+  сверяется буква в букву.
+
+### SV-51. Поиск по книге с EMAIL или TEL теряет регистр кириллицы
+
+- **Сервер.** DAViCal 1.1.12. `addressbook-query` с `test="anyof"` и
+  несколькими `prop-filter` не находит **ничего**, если текст — кириллица
+  в другом регистре и среди свойств есть `EMAIL` или `TEL`. Даже карточку,
+  чей `FN` содержит текст: «ковал» по одному `FN` находит «Ковалёва Анна»,
+  по `FN` и `EMAIL` — ничего, по `FN` и `ORG` — находит. В том же регистре
+  («Ковал») и латиницей в другом регистре ищется правильно. Ответ — 207 без
+  ответов, то есть неотличим от честного промаха. Проба 24.09.2026.
+- **Что делает Carrel.** То же, что с календарями (SV-47): пустой ответ
+  поиска по книге перепроверяется чтением книги целиком и отсевом у себя.
+  Нашлось — находки идут с пометкой `card.ErrServerMissed`, и источник
+  говорит, что книгу просеял Carrel. Не нашлось — честный промах, экран
+  молчит. Чтение идёт через кэш сессии (S-4.2): следующий поиск по
+  неизменной книге просеивается из хранимого.
+- **Проверка.** `card.TestAnEmptyCardSearchIsCheckedAgainstTheBook`,
+  `card.TestAnHonestCardMissSaysNothingMore`,
+  `card.TestTheCardCheckReadsThroughReadWhole` на `davtest`
+  (`CardTextMatchFindsNothing`); живьём — `TestDAViCalSearch`.

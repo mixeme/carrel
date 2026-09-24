@@ -22,6 +22,10 @@ var (
 	// (docs/servers.md, SV-23). The records are good; the note travels with
 	// them so the screen can say who did the searching.
 	ErrServerDoesNotQuery = errors.New("card: the server has no addressbook-query, so Carrel searched its answer")
+	// ErrServerMissed: the server's search found nothing, and the book read
+	// whole and sifted here found cards that hold the text (docs/servers.md,
+	// SV-51). The records are good; the note says who found them.
+	ErrServerMissed = errors.New("card: the server's search found nothing, and Carrel's own sifting of the book did")
 )
 
 type cardReporting interface {
@@ -54,8 +58,25 @@ func (p *Provider) Search(ctx context.Context, collection, text string) ([]*mode
 		q.Matches = append(q.Matches, dav.CardMatch{Prop: name, Text: text})
 	}
 	objs, fetched, err := p.query(ctx, collection, q)
-	if err != nil || !fetched {
+	if err != nil {
 		return objs, err
+	}
+	if !fetched {
+		// Nothing is the answer a text-match cannot be told from an honest
+		// miss by. DAViCal answers a search for Cyrillic in another case with
+		// nothing as soon as EMAIL or TEL stands among the alternatives, even
+		// for a card whose FN holds the text (SV-51). So an empty answer is
+		// checked against the book itself, as a calendar's is (SV-47); the
+		// read is the caller's to keep (ReadWhole), and a server that
+		// searched well loses one read and says nothing more.
+		if len(objs) == 0 {
+			if all, err := p.readWhole(ctx, collection); err == nil {
+				if kept := siftCards(all, text); len(kept) > 0 {
+					return kept, ErrServerMissed
+				}
+			}
+		}
+		return objs, nil
 	}
 	// Read in the round-about way: no filter travelled with it, so the
 	// searching is ours and the note says so beside the results (S-15).
@@ -66,6 +87,15 @@ func (p *Provider) Search(ctx context.Context, collection, text string) ([]*mode
 // the server about, compared the same way. It is the search of a book already
 // read whole (S-4.2).
 func Sift(objs []*model.Object, text string) []*model.Object { return siftCards(objs, text) }
+
+// readWhole reads the book whole: through ReadWhole when the caller gave one,
+// from the server otherwise.
+func (p *Provider) readWhole(ctx context.Context, collection string) ([]*model.Object, error) {
+	if p.ReadWhole != nil {
+		return p.ReadWhole(ctx, collection)
+	}
+	return p.Query(ctx, collection)
+}
 
 // siftCards keeps the cards that hold text in a property a search looks in.
 // The comparison is the one asked of the server: letter case does not count,

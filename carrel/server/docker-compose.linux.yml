@@ -166,8 +166,37 @@ services:
     profiles:
       - setup
 
+  # DAViCal: PHP over PostgreSQL, old and still deployed, and not sabre/dav.
+  # The project ships no image; fintechstudios/davical is built on the
+  # official php:apache image, tagged by DAViCal release — 1.1.12 is the
+  # last one (March 2023). It creates the database and the DAViCal admin
+  # itself when RUN_MIGRATIONS_AT_STARTUP is set, with a PostgreSQL
+  # superuser to do it with (testdata/davical/README.md).
+  davical-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "carrel-postgres"
+    volumes:
+      - davical-db:/var/lib/postgresql/data
+
+  davical:
+    image: fintechstudios/davical:1.1.12
+    ports:
+      - "127.0.0.1:8083:80"
+    depends_on:
+      - davical-db
+    environment:
+      PGHOST: "davical-db"
+      PGPASSWORD: "carrel-davical-app"
+      RUN_MIGRATIONS_AT_STARTUP: "true"
+      ROOT_PGUSER: "postgres"
+      ROOT_PGPASSWORD: "carrel-postgres"
+      DAVICAL_ADMIN_PASS: "carrel-admin"
+
 volumes:
   radicale-data:
   stalwart-data:
   xandikos-data:
   davis-data:
+  davical-db:

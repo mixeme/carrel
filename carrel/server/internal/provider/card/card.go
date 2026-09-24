@@ -29,6 +29,11 @@ type Provider struct {
 	t   dav.Transport
 	c   dav.Creator
 	now func() time.Time
+
+	// ReadWhole, when set, is how Search reads the book whole to check an
+	// empty answer: the caller's read, which may be one it keeps (S-4.2).
+	// Unset, the book is read from the server.
+	ReadWhole func(ctx context.Context, collection string) ([]*model.Object, error)
 }
 
 // New wires a card provider.

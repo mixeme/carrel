@@ -17,6 +17,40 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.40 — 2026-09-24
+
+### Added
+
+- **DAViCal is run, and all seven suites are green** — records, forms,
+  collections, move, search, timeline, collection delete. It stands in the
+  ordinary row of `linux-gates.sh`. The stand is `fintechstudios/davical:1.1.12`
+  (the last DAViCal release) over PostgreSQL 15; the image makes the database
+  and the DAViCal admin itself. The suites run as an ordinary principal, not
+  as the admin, made by `testdata/davical/make-account.sh` through DAViCal's
+  own admin form.
+
+### Changed
+
+- **An empty address-book search is checked against the book** (SV-51), as a
+  calendar's already is (SV-47). DAViCal answers a search for Cyrillic in
+  another case with nothing whenever EMAIL or TEL stands among the
+  alternatives, even for a card whose FN holds the text. The book is read
+  whole — through the session cache, so once per change — and sifted here;
+  what that finds comes with a note on the source («the server's search
+  found nothing here, so Carrel sifted the address book itself»). An honest
+  miss still says nothing. `card.Provider` gained `ReadWhole`, and
+  `card.ErrServerMissed` names the case.
+
+### Known
+
+- DAViCal escapes a collection's name once more on the way out (SV-50):
+  «Поездки & планы» comes back, to every client, as «Поездки &amp; планы».
+  The catalog holds what the server shows, as everywhere (S-12.2).
+
+### For consumers
+
+Nothing to change.
+
 ## v0.2.39 — 2026-09-24
 
 ### Changed

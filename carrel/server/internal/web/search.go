@@ -605,10 +605,23 @@ func (s *Server) openSource(sess *session.Session, id string, conn sealed.Connec
 	if src.cal != nil {
 		src.cal.ReadWhole = src.readWhole
 	}
+	if src.card != nil {
+		src.card.ReadWhole = src.readBook
+	}
 	return src
 }
 
 func (c *collectionSource) ID() string { return c.id }
+
+// readBook is the whole read a card search checks an empty answer against
+// (SV-51), kept like any other (S-4.2).
+func (c *collectionSource) readBook(ctx context.Context, collection string) ([]*model.Object, error) {
+	return cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, collection, "", c.ttl, c.now(), cardCodec,
+		func() ([]*model.Object, bool, error) {
+			got, err := c.card.Query(ctx, collection)
+			return got, true, err
+		})
+}
 
 // readWhole is the whole read a calendar search checks an empty answer
 // against (SV-47), kept like any other (S-4.2): the next search of the
@@ -722,6 +735,10 @@ func (c *collectionSource) contacts(ctx context.Context, q fanout.Query) ([]fano
 		// addressbook-query at all (docs/servers.md, SV-23). The records are
 		// good and the searching was ours, which is what the source says.
 		note = fmt.Errorf("%w: this server does not search its address books, so Carrel sifted its answer", fanout.ErrIncomplete)
+		err = nil
+	}
+	if errors.Is(err, card.ErrServerMissed) {
+		note = fmt.Errorf("%w: the server's search found nothing here, so Carrel sifted the address book itself", fanout.ErrIncomplete)
 		err = nil
 	}
 	if err != nil {

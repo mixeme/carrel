@@ -183,6 +183,22 @@ docker compose -f docker-compose.linux.yml run --rm davis-setup
 bash testdata/davis/make-account.sh
 go test -tags=integration -count=1 -timeout 30m -run 'Davis' ./integration/...
 
+# DAViCal: PHP over PostgreSQL and not sabre/dav, an engine of its own. First
+# run 24.09.2026: all seven suites green once two findings of its own were
+# answered (docs/servers.md, SV-50, SV-51), so it stands in the ordinary row.
+# The image makes its database and its admin at start; the one account the
+# suites use is an ordinary principal, made through its admin form.
+echo "== S-30.2: DAViCal integration =="
+docker compose -f docker-compose.linux.yml up -d davical-db davical
+for _ in $(seq 1 120); do
+  if curl -sf -o /dev/null http://127.0.0.1:8083/ 2>/dev/null; then
+    break
+  fi
+  sleep 1
+done
+bash testdata/davical/make-account.sh
+go test -tags=integration -count=1 -timeout 30m -run 'DAViCal' ./integration/...
+
 if [[ -n "${CARREL_SFTPGO_URL:-}" && -n "${CARREL_SFTPGO_USER:-}" && -n "${CARREL_SFTPGO_PASS:-}" ]]; then
   echo "== S-30.2: SFTPGo integration =="
   go test -tags=integration -count=1 -run 'SFTPGo' ./integration/...

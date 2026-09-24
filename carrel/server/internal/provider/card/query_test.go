@@ -1,7 +1,9 @@
 package card
 
 import (
+	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -10,6 +12,7 @@ import (
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/davtest"
+	"carrel.dev/carrel/server/internal/model"
 )
 
 const book = davtest.AddressBookHome + "people/"
@@ -206,5 +209,50 @@ func TestASearchSurvivesAServerThatBreaksOnTheFilter(t *testing.T) {
 	srv.Refuse("REPORT", 500, "boom")
 	if _, err := p.Query(t.Context(), book); err == nil {
 		t.Error("a whole-book read that the server answered 500 came back as success")
+	}
+}
+
+// docs/servers.md, SV-51: DAViCal answers a card search with nothing where a
+// card holds the text. The empty answer is checked against the book read
+// whole, and what the sifting finds comes with the note that it was Carrel's.
+func TestAnEmptyCardSearchIsCheckedAgainstTheBook(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.CardTextMatchFindsNothing = true
+	srv.Seed(book+"anna.vcf", vcf("anna", "Ковалёва Анна"))
+	srv.Seed(book+"bob.vcf", vcf("bob", "Bob Builder"))
+
+	objs, err := p.Search(t.Context(), book, "ковал")
+	if !errors.Is(err, ErrServerMissed) {
+		t.Fatalf("err = %v, want the note that Carrel found it", err)
+	}
+	if len(objs) != 1 || UID(objs[0]) != "anna" {
+		t.Fatalf("found %+v, want Anna", objs)
+	}
+}
+
+// A miss the book confirms is a miss: nothing, and no note.
+func TestAnHonestCardMissSaysNothingMore(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.Seed(book+"bob.vcf", vcf("bob", "Bob Builder"))
+	objs, err := p.Search(t.Context(), book, "ковал")
+	if err != nil || len(objs) != 0 {
+		t.Fatalf("objs %+v, err %v; want nothing and no note", objs, err)
+	}
+}
+
+// The check reads through ReadWhole when the caller gives one: the web layer
+// keeps that read (S-4.2).
+func TestTheCardCheckReadsThroughReadWhole(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.CardTextMatchFindsNothing = true
+	asked := 0
+	p.ReadWhole = func(ctx context.Context, collection string) ([]*model.Object, error) {
+		asked++
+		obj, err := Parse(collection+"anna.vcf", `"kept"`, strings.NewReader(vcf("anna", "Ковалёва Анна")))
+		return []*model.Object{obj}, err
+	}
+	objs, err := p.Search(t.Context(), book, "ковал")
+	if !errors.Is(err, ErrServerMissed) || len(objs) != 1 || asked != 1 {
+		t.Fatalf("objs %+v, err %v, asked %d", objs, err, asked)
 	}
 }

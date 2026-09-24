@@ -65,7 +65,24 @@ func componentsOf(raw string) []string {
 	return out
 }
 
-func runCollections(t *testing.T, endpoint, user, pass string) {
+// escapesNamesTwice is a server that escapes a collection's displayname once
+// more on the way out: sent «A &amp; B», it answers «A &amp;amp; B», so every
+// client reads «A &amp; B» (docs/servers.md, SV-50: DAViCal). What the server
+// shows is the name, and the catalog must hold that (S-12.2); Carrel's own
+// escaping is held to the letter by every other server in the lineup.
+type collectionsQuirk int
+
+const escapesNamesTwice collectionsQuirk = 1
+
+func runCollections(t *testing.T, endpoint, user, pass string, quirks ...collectionsQuirk) {
+	shown := func(name string) string {
+		for _, q := range quirks {
+			if q == escapesNamesTwice {
+				return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;").Replace(name)
+			}
+		}
+		return name
+	}
 	ctx := context.Background()
 	g := testGuard(t)
 	client, err := dav.NewClient(g, endpoint, user, pass, "")
@@ -111,7 +128,7 @@ func runCollections(t *testing.T, endpoint, user, pass string) {
 		t.Fatalf("new calendar went to %q, want %q", loc, calPath)
 	}
 	got := liveProps(ctx, t, client, calPath, displayName, colour, comps)
-	if got["displayname"] != name || !strings.Contains(strings.ToLower(got["calendar-color"]), "6b5c73") ||
+	if got["displayname"] != shown(name) || !strings.Contains(strings.ToLower(got["calendar-color"]), "6b5c73") ||
 		!strings.Contains(got["supported-calendar-component-set"], "VEVENT") ||
 		!strings.Contains(got["supported-calendar-component-set"], "VTODO") {
 		t.Errorf("calendar on the server = %+v", got)
@@ -123,6 +140,9 @@ func runCollections(t *testing.T, endpoint, user, pass string) {
 	// A catalog narrower than the server hides records that are really there.
 	blob, _ = app.users.Catalog(app.sess.AccountID(), key)
 	entry := catalogEntry(t, blob, calPath)
+	if entry.Name != got["displayname"] {
+		t.Errorf("the catalog names the calendar %q, the server %q", entry.Name, got["displayname"])
+	}
 	for _, k := range discover.CalendarKinds(componentsOf(got["supported-calendar-component-set"])) {
 		if !entry.Has(k) {
 			t.Errorf("the server holds %s and the catalog does not: server %q, catalog %v",
@@ -136,7 +156,7 @@ func runCollections(t *testing.T, endpoint, user, pass string) {
 	redirected(t, "rename", app.post("/app/collections/rename?"+url.Values{"a": {conn.ID}, "c": {calPath}}.Encode(),
 		url.Values{"name": {name + " renamed"}, "colour": {"#5c736b"}}))
 	got = liveProps(ctx, t, client, calPath, displayName, colour)
-	if got["displayname"] != name+" renamed" || !strings.Contains(strings.ToLower(got["calendar-color"]), "5c736b") {
+	if got["displayname"] != shown(name+" renamed") || !strings.Contains(strings.ToLower(got["calendar-color"]), "5c736b") {
 		t.Errorf("after rename = %+v", got)
 	}
 
