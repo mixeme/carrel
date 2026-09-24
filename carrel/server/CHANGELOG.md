@@ -17,6 +17,29 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.39 — 2026-09-24
+
+### Changed
+
+- **Links inside an imported file travel with it** (S-19, owner's decision).
+  A record of the file that names another of the file by UID —
+  `RELATED-TO` in a calendar; `RELATED`, `MEMBER` or
+  `X-ADDRESSBOOKSERVER-MEMBER` on a card, bare or as `urn:uuid:` — names it
+  under the identity it ends up with. Every identity is settled before the
+  first write, so a record renamed by Carrel because its UID was taken is
+  followed at once. Where the server gives its own UIDs (Google, SV-25), the
+  records holding such links are written once more after the import, with
+  If-Match. The row of each such record says so, and says why when that
+  second write was refused.
+- Records already on the servers that name an imported record's former UID
+  are not touched: where a UID in a file came from is not known.
+- A link to a UID the file does not hold goes as it came. Of several records
+  of a file under one UID the first keeps it, and links lead to it.
+
+### For consumers
+
+Nothing to change.
+
 ## v0.2.38 — 2026-09-24
 
 ### Added

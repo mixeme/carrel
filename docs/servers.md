@@ -426,6 +426,9 @@ Graph, протоколы другого устройства. Самая рас
   читается целиком один раз, карточка, не найденная под своим `UID`,
   дочитывается по адресу, и строка отчёта называет `UID`, который дал сервер
   (`web.importLanded`, с v0.2.37). До того отчёт писал «Created» под нашим.
+  Ссылки между записями файла (`MEMBER`, `RELATED`) после этого
+  переписываются на `UID` сервера, записи поправляются по If-Match
+  (`web.followTheirs`, с v0.2.39, S-19).
 - **Сторож.** `TestCreateWhereTheServerRewritesTheUID`,
   `TestCreateWhereTheServerShowsNothing` и
   `TestImportNamesTheIdentityTheServerGave` на `davtest` (`CreateRewritesUID`,

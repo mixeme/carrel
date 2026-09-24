@@ -745,16 +745,27 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 	report := &view.ImportReport{Skipped: len(d.Skipped)}
 	written := view.ImportTable{Rubric: text("Created in " + collectionLabel(dest.col)), Columns: importColumns(c.spec.kind)}
 	refused := view.ImportTable{Rubric: text("Not created"), Columns: []view.Text{text("What"), text("What the server answered")}}
+	// Every identity is settled before the first write, so that a record
+	// linking to another of the file names the identity that one will have
+	// (S-19): links inside the file travel with it.
+	uids, errs, moved := planImportUIDs(d.Records, taken)
+	props := linkProps(dest)
 	var made []importMade
-	for _, rec := range d.Records {
+	for i, rec := range d.Records {
 		obj, err := dest.parse("", "", rec.Doc)
-		uid, renamed, note := rec.UID, false, "Created"
-		if err == nil && (taken[uid] || uid == "") {
-			var fresh string
-			if fresh, err = model.NewUID(); err == nil {
-				if obj, err = setUID(dest, obj, fresh); err == nil {
-					uid, renamed = fresh, true
-					note = "Created under " + fresh + ": the collection already held the identity of this record"
+		if err == nil {
+			err = errs[i]
+		}
+		uid, renamed, note := uids[i], uids[i] != rec.UID, "Created"
+		if err == nil && renamed {
+			if obj, err = setUID(dest, obj, uid); err == nil {
+				note = "Created under " + uid + ": the collection already held the identity of this record"
+			}
+		}
+		if err == nil {
+			if p, ok := linkPatch(obj, props, moved); ok {
+				if err = p.Apply(obj); err == nil {
+					note += ". Its links to records of this file follow their new identities"
 				}
 			}
 		}
@@ -765,12 +776,11 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 			refused.Rows = append(refused.Rows, []view.Text{text(rec.Title), text(err.Error())})
 			continue
 		}
-		taken[uid] = true
 		report.Created++
 		if renamed {
 			report.Renamed++
 		}
-		made = append(made, importMade{row: len(written.Rows), uid: uid, path: obj.Path, renamed: renamed})
+		made = append(made, importMade{row: len(written.Rows), uid: uid, path: obj.Path, renamed: renamed, obj: obj})
 		written.Rows = append(written.Rows, []view.Text{text(rec.Title), text(rec.Detail), text(note)})
 	}
 	s.importLanded(ctx, dest, report, &written, made)
@@ -810,6 +820,7 @@ type importMade struct {
 	uid     string
 	path    string
 	renamed bool
+	obj     *model.Object // as it was sent: its links name the file's identities
 }
 
 // importLanded looks for what an import wrote, once, after the last record:
@@ -817,9 +828,10 @@ type importMade struct {
 // with every card (docs/servers.md, SV-25) — and the report must name the
 // identity the record has, not the one it was sent with. One whole read of
 // the destination; a read at the written address only for a record not
-// found under its identity. The row says what became of it. What had pointed
-// at the identity the record came with is left alone: an import is a copy,
-// and a record of that identity may well live on elsewhere.
+// found under its identity. The row says what became of it. Links inside the
+// import follow the identities the server gave (followTheirs); what already
+// pointed at the identity a record came with is left alone: an import is a
+// copy, and a record of that identity may well live on elsewhere (S-19).
 func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *view.ImportReport, written *view.ImportTable, made []importMade) {
 	if len(made) == 0 {
 		return
@@ -828,6 +840,7 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 	if err != nil {
 		return // the rows stand as the writes were answered
 	}
+	gave := map[string]string{} // written under → held under
 	for _, m := range made {
 		if held[m.uid] {
 			continue
@@ -842,11 +855,13 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 			continue // there under its own identity; the listing missed it
 		}
 		written.Rows[m.row][2] = text("Created under " + theirs + ": the server gave it an identity of its own")
+		gave[m.uid] = theirs
 		dest.noteWrite(m.path, at)
 		if !m.renamed {
 			report.Renamed++
 		}
 	}
+	followTheirs(ctx, dest, written.Rows, made, gave)
 }
 
 // setUID gives an imported record a fresh identity, by the rules of its kind.
