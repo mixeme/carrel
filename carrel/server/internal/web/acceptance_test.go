@@ -91,6 +91,13 @@ func TestLeavingThePollLeavesNothingRunning(t *testing.T) {
 	if _, err := resp.Body.Read(buf); err != nil {
 		t.Fatalf("stream: %v", err)
 	}
+	// The page goes only once the far request is out: leaving cancels the
+	// task, and a task cancelled before its source asked anything leaves
+	// nothing to cut — the test would pass or fail on which goroutine ran
+	// first. It failed so on the Linux gates, 24.09.2026: 0 started, 0 cut.
+	for wait := time.Now().Add(5 * time.Second); hang.started.Load() == 0 && time.Now().Before(wait); {
+		time.Sleep(5 * time.Millisecond)
+	}
 	cancel()
 	resp.Body.Close()
 	http.DefaultClient.CloseIdleConnections()

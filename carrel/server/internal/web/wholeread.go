@@ -37,8 +37,13 @@ import (
 // read (SV-47) that is then kept — so a second search of the same unchanged
 // calendar asks nothing but the tag.
 //
-// What is not kept: a read by window (an agenda's week) and a filtered search.
-// Both still go to the server. A read that came back with records it could not
+// A read by window — an agenda's week — is kept too, under its window
+// (windowKey): what falls in the window is the server's answer, kept as it
+// came, and never cut here from a whole read. Going back to a week seen
+// before costs the tag.
+//
+// What is not kept: a filtered search, which goes to the server when the
+// collection is not kept whole. A read that came back with records it could not
 // parse is not kept either: the list names them, and a kept read would hide
 // them.
 //
@@ -77,6 +82,19 @@ type wholeItem struct {
 // wholeKeyPrefix is the start of every kept read of one collection; with the
 // component it is the key of one (the empty component is an address book's).
 func wholeKeyPrefix(collection string) string { return wholeKeyRoot + collection + "\x00" }
+
+// windowKey names a component read by window among the kept reads of its
+// collection: the component, then the window's two ends. A window with one
+// end open keeps it open.
+func windowKey(component string, from, to *time.Time) string {
+	end := func(t *time.Time) string {
+		if t == nil {
+			return ""
+		}
+		return t.UTC().Format(time.RFC3339)
+	}
+	return component + "\x00" + end(from) + "/" + end(to)
+}
 
 // wholeKeyRoot starts the key of every kept read of every collection.
 const wholeKeyRoot = "whole\x00"

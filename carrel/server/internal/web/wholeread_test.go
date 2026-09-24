@@ -213,3 +213,47 @@ func TestTheCheckOfAnEmptySearchIsPaidOnce(t *testing.T) {
 		t.Errorf("REPORTs %d → %d: the whole read of the check was not kept", reports, n)
 	}
 }
+
+// weekSummaries is what an agenda week shows, by summary.
+func weekSummaries(t *testing.T, f davFixture, from string) []string {
+	t.Helper()
+	page := decode[view.AgendaPage](t, f.h.do(get(f.path("calendar")+"?from="+from, f.sess)))
+	var out []string
+	for _, d := range page.Days {
+		for _, r := range d.Rows {
+			out = append(out, string(r.Summary))
+		}
+	}
+	return out
+}
+
+// An agenda's week is kept under its window: what falls in it is the server's
+// answer as it came. Going back to a week seen before asks the tag; another
+// week is its own read; a change is read again.
+func TestAWeekSeenBeforeIsNotReadAgain(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"a.ics", ics("BEGIN:VEVENT\nUID:a\nDTSTAMP:20260101T000000Z\nDTSTART:20260908T100000Z\nSUMMARY:First week\nEND:VEVENT"),
+		"b.ics", ics("BEGIN:VEVENT\nUID:b\nDTSTAMP:20260101T000000Z\nDTSTART:20260915T100000Z\nSUMMARY:Second week\nEND:VEVENT"))
+	if got := weekSummaries(t, f, "2026-09-07"); strings.Join(got, "|") != "First week" {
+		t.Fatalf("first week = %v", got)
+	}
+	reports := f.srv.CountRequests("REPORT", f.col)
+	if got := weekSummaries(t, f, "2026-09-14"); strings.Join(got, "|") != "Second week" {
+		t.Errorf("second week = %v", got)
+	}
+	if n := f.srv.CountRequests("REPORT", f.col); n == reports {
+		t.Error("another week was answered from the first one's read")
+	}
+	reports = f.srv.CountRequests("REPORT", f.col)
+	if got := weekSummaries(t, f, "2026-09-07"); strings.Join(got, "|") != "First week" {
+		t.Errorf("first week again = %v", got)
+	}
+	if n := f.srv.CountRequests("REPORT", f.col); n != reports {
+		t.Errorf("REPORTs %d → %d: a week seen before was read again", reports, n)
+	}
+
+	f.srv.Seed(f.col+"c.ics", ics("BEGIN:VEVENT\nUID:c\nDTSTAMP:20260101T000000Z\nDTSTART:20260909T100000Z\nSUMMARY:Added elsewhere\nEND:VEVENT"))
+	if got := weekSummaries(t, f, "2026-09-07"); strings.Join(got, "|") != "First week|Added elsewhere" {
+		t.Errorf("first week after another client's write = %v", got)
+	}
+}

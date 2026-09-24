@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.36 — 2026-09-24
+
+### Changed
+
+- **A week seen before is not read again** (S-4.2). A calendar read by
+  window — an agenda's week, a month, a range — is kept under that window
+  and its collection's change tag, the server's answer as it came: going
+  back to a week costs one PROPFIND for the tag. Another window is its own
+  read, and a change to the calendar reads every window again. The week is
+  not cut here out of a whole read: what falls in a window stays the
+  server's judgement.
+
+### Fixed
+
+- `TestLeavingThePollLeavesNothingRunning` passed or failed on which
+  goroutine ran first: leaving the page cancels the task, and a task
+  cancelled before its source asked anything left nothing to cut (twice in a
+  hundred runs on the Linux machine). The test now leaves once the far
+  request is out; a hundred runs there, none failed.
+
+### For consumers
+
+Nothing to change.
+
 ## v0.2.35 — 2026-09-24
 
 ### Changed

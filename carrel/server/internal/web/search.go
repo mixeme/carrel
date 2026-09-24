@@ -762,7 +762,12 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 				})
 			break
 		}
-		objs, _, err = c.cal.Query(ctx, c.col.Path, component, from, to)
+		// A read by window, kept under the window (S-4.2).
+		objs, err = cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, windowKey(component, from, to), c.ttl, c.now(), calCodec,
+			func() ([]*model.Object, bool, error) {
+				got, unreadable, err := c.cal.Query(ctx, c.col.Path, component, from, to)
+				return got, len(unreadable) == 0, err
+			})
 	default:
 		if kept, ok := keptWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, component, c.ttl, c.now(), calCodec); ok {
 			objs = cal.Sift(kept, component, q.Text) // the calendar is read and unchanged (S-4.2)

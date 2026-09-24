@@ -128,7 +128,17 @@ func (c *collectionCtx) calQuery(ctx context.Context, component string, from, to
 			})
 		return objs, unreadable, err
 	}
-	return c.cal.Query(ctx, c.col.Path, component, from, to)
+	// A read by window — an agenda's week — is kept the same way, under the
+	// window: what falls in it is the server's answer, kept as it came, not
+	// cut here from a whole read (S-4.2, «раскрытые повторы по диапазону»).
+	var unreadable []cal.Unreadable
+	objs, err := cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, windowKey(component, from, to), c.ttl, c.now(), calCodec,
+		func() ([]*model.Object, bool, error) {
+			got, bad, err := c.cal.Query(ctx, c.col.Path, component, from, to)
+			unreadable = bad
+			return got, len(bad) == 0, err
+		})
+	return objs, unreadable, err
 }
 
 // feedRoute reports whether a request may open a feed: to read it — the list,
