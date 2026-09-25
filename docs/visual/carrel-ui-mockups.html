@@ -444,7 +444,10 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-row.is-on{background:var(--tc-card)}
 .tc-row .tc-mark{width:3px;height:22px;border-radius:1px}
 .tc-row .tc-row__title{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Значок и имя файла — одна строка: .tc-root svg{display:block} иначе ставит значок над именем. */
+.tc-row__name{display:flex;align-items:center;gap:7px;min-width:0}
 .tc-row__name svg{width:15px;height:15px;flex:none;stroke:var(--tc-muted);stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tc-row__file{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tc-row__title.is-strong{font-weight:600}
 .tc-row .tc-row__excerpt{font-size:12px;color:var(--tc-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tc-row .tc-row__cell{font-size:11.5px;color:var(--tc-dusty);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -836,6 +839,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
   .tc-btn,.tc-in,.tc-seg{height:38px}
   .tc-bar .tc-btn,.tc-docbar .tc-btn,.tc-head .tc-acts .tc-btn,.tc-formfoot .tc-btn,
   .tc-queue__head .tc-btn:not(.is-sm),.tc-sheet__head .tc-btn,
+  .tc-form .tc-btn:not(.is-sm),.tc-fset .tc-btn:not(.is-sm),.tc-field .tc-btn:not(.is-sm),
   .tc-bar .tc-in,.tc-docbar .tc-in,.tc-head .tc-acts .tc-in,.tc-sheet__head .tc-in,
   .tc-bar .tc-seg,.tc-docbar .tc-seg,.tc-head .tc-acts .tc-seg{height:38px}
   .tc-seg,.tc-bar > .tc-in,.tc-in{overflow:visible}
@@ -1442,7 +1446,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-dim.tc-dim{color:var(--tc-dusty)}
 /* names-without-rule: tc-shell tc-row__lead tc-row__due tc-row__date tc-row__size
    tc-head__text tc-docmeta__sec tc-queue__list tc-queue__name tc-queue__meta
-   tc-row__file tc-menu__label tc-auth__tagline tc-auth__link tc-print__cell
+   tc-menu__label tc-auth__tagline tc-auth__link tc-print__cell
    tc-msg__aside tc-stack__item tc-sheet__block tc-line__item
    tc-row__subtitle
    — узел назван, вида у имени нет. Пустое правило — не правило: оно проходило
