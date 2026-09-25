@@ -425,7 +425,7 @@ func (c *collectionCtx) putIndex(entries []indexEntry) {
 
 // sessionIndex is every list this session has loaded, of every collection
 // of the catalog. A RELATED-TO whose target is not in this collection still
-// has a title when the target's own list was opened (views-tail.md); the
+// has a title when the target's own list was opened (review Р-12); the
 // link, though, stays inside the collection — the address of a record is
 // its collection's (S-11).
 func (s *Server) sessionIndex(sess *session.Session, blob sealed.Blob) map[string]indexEntry {
@@ -653,7 +653,7 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-// listSort is the order a list is shown in (views-tail.md, s-contacts-1,
+// listSort is the order a list is shown in (review Р-12, s-contacts-1,
 // s-tasks-1, s-notes-1): the server sorts and groups, the client neither
 // sorts nor reckons (C-3.1). The first of each kind is its default.
 type listSort struct{ id, label, value string }
@@ -816,7 +816,7 @@ func weekWindow(tf timeFmt, from string) (time.Time, time.Time) {
 	return start, start.AddDate(0, 0, 7)
 }
 
-// The windows of the agenda (views-tail.md, s-agenda-1). It stays a list in
+// The windows of the agenda (review Р-12, s-agenda-1). It stays a list in
 // every one of them: Day, Week and Month are how much of it is shown, not a
 // grid (U-6).
 const (

@@ -98,7 +98,7 @@ func (s *Server) combinedQuery(r *http.Request, tf timeFmt, spec kindSpec) (fano
 	}
 	kind, from, to := agendaWindow(tf, r.URL.Query())
 	// The window of the screen is the window asked of the servers: a month
-	// shown is a month read (views-tail.md).
+	// shown is a month read (review Р-12).
 	q := url.Values{}
 	if kind != agendaWeek {
 		q.Set("view", kind)
@@ -144,7 +144,7 @@ func (s *Server) combinedTask(r *http.Request, sess *session.Session, blob seale
 		src.kinds = []view.Kind{spec.kind}
 		if spec.kind == view.KindEvent {
 			// The switches of the agenda ask the same collections for what
-			// they turned on (views-tail.md). Their window is applied when
+			// they turned on (review Р-12). Their window is applied when
 			// the rows are placed: DUE and a journal's DTSTART are not what
 			// a server filters by time-range.
 			for _, k := range []view.Kind{view.KindTask, view.KindNote} {

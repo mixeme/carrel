@@ -10,7 +10,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// connections-tail.md, Label: the account is a label, not an identifier
+// review Р-9, Label: the account is a label, not an identifier
 // (C-4), and until now it was always the host. The label names the card and
 // every "account · collection" stamp; Edit changes it; empty, the host.
 func TestConnectionLabel(t *testing.T) {

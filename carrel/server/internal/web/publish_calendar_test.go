@@ -8,7 +8,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// views-tail.md (s-publish-2): a published calendar is asked how much of it
+// review Р-12 (s-publish-2): a published calendar is asked how much of it
 // the link shows, whether its .ics may be downloaded and subscribed to, and
 // whether the text of its events goes with the times.
 func TestPublishCalendarOptions(t *testing.T) {

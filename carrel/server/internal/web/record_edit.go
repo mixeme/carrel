@@ -1868,7 +1868,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		s.postDetach(w, r, c, uid)
 		return
 	case op == "done" && c.spec.kind == view.KindTask:
-		// Mark done (forms-tail.md): the Done box alone, the rest of the
+		// Mark done (review Р-10): the Done box alone, the rest of the
 		// record as the server holds it; below, want is have with it. A
 		// client may post the action's query as its body: an attachment
 		// never comes that way, so only then is the body read for op.

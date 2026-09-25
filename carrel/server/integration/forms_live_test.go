@@ -20,7 +20,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// S-30.2 for forms-tail.md and connections-tail.md: the fields the forms
+// S-30.2 for reviews Р-10 and Р-9: the fields the forms
 // gained, Mark done and a series' rule, on servers people connect — each
 // change writes its line and the rest of the object comes back as it was;
 // and a connection whose password went wrong is tested, edited and answers
@@ -121,7 +121,7 @@ func runForms(t *testing.T, endpoint, user, pass string) {
 	poolCounts(t, app, "a forms run")
 }
 
-// connections-tail.md: Disconnect leaves the server alone and Carrel with
+// review Р-9: Disconnect leaves the server alone and Carrel with
 // nothing of the connection; connecting again finds the collections anew,
 // without the ticks, and the links made before are dead.
 func liveDisconnect(t *testing.T, app *liveApp, connID, endpoint, user, pass, calPath string) {
@@ -493,7 +493,7 @@ func checksPasswords(t *testing.T, endpoint, user, pass string) bool {
 	return resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden
 }
 
-// connections-tail.md: the password went wrong// connections-tail.md: the password went wrong — the card says so after
+// review Р-9: the password went wrong — the card says so after
 // Test, Edit with the right one saves under the same ID, and Test passes.
 func liveConnectionEdit(t *testing.T, app *liveApp, connID, endpoint, user, pass string) {
 	key, _ := app.sess.DataKey()

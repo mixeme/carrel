@@ -15,7 +15,7 @@ type detailsFragment struct {
 // C-7.2: the panel beside a list is the zone "details", and nothing
 // answered it. The row chosen on a list is asked for at its own address
 // with that target, and comes back as the card cut to a panel — found by
-// the first fixture comparison (fixtures-tail.md).
+// the first fixture comparison (review Р-13).
 func TestRecordAnswersTheDetailsPanel(t *testing.T) {
 	f := contactsFixture(t, false,
 		"BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada Lovelace\nORG:Analytical Engines\nEMAIL:ada@example.com\nEND:VCARD\n")

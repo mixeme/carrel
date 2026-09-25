@@ -9,7 +9,7 @@ import (
 )
 
 // The password was changed on the server, or the server moved: the
-// connection was dead for good (connections-tail.md). Edit keeps its ID
+// connection was dead for good (review Р-9). Edit keeps its ID
 // (C-4.1), and every live link of it reads with the new credentials — the
 // envelope of each is sealed again, or the public page goes on knocking with
 // the old password.

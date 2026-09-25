@@ -17,6 +17,24 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.51 — 2026-09-25
+
+Nothing in the running server. The development documents are compressed and
+split by purpose:
+
+- [docs/architecture.md](../../docs/architecture.md) — how the server is
+  built: modules, dependencies with the pins of `go.mod`, closed forks,
+  terms and limits.
+- [docs/development.md](../../docs/development.md) — how the work is done:
+  rules, gates, live servers, the development machine, fixtures, lessons.
+- [docs/security.md](../../docs/security.md) — security forks, the Fable
+  audits, what is not revisited and what is accepted as it is, and what has
+  landed since the last audit.
+- `docs/plan/` keeps only plans: `server.md` (open and done, 2351 lines →
+  80), `reviews.md` (Opus), and the exchange with Typecase. The tails of the
+  pre-S-30 review and `review-server.md` are gone; code comments name the
+  review finding (Р-9…Р-13) instead of the file.
+
 ## v0.2.50 — 2026-09-25
 
 ### Added

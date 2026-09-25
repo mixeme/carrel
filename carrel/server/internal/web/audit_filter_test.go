@@ -8,7 +8,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// views-tail.md (s-admin-7): the journal is read with filters — All ·
+// review Р-12 (s-admin-7): the journal is read with filters — All ·
 // Security · Failures — and handed over as CSV. The filter of the screen is
 // the filter of the file.
 func TestAuditFiltersAndExport(t *testing.T) {

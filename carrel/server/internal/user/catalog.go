@@ -157,7 +157,7 @@ type Disconnected struct {
 }
 
 // RemoveConnection takes a connection out of Carrel whole, in one edit of the
-// blob and the state (connections-tail.md): its catalog, ticks, last-used
+// blob and the state (review Р-9): its catalog, ticks, last-used
 // places, linked duplicates, device exclusion, attachment and upload folders,
 // the sources of copy jobs and its published links with their envelopes;
 // davloom devices stop seeing its collections. Nothing on the server is

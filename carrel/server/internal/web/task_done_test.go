@@ -17,7 +17,7 @@ func menuAction(items []view.MenuItem, id string) *view.Action {
 	return nil
 }
 
-// forms-tail.md, Mark done: beside Edit on the task card (s-tasks-2) and on
+// review Р-10, Mark done: beside Edit on the task card (s-tasks-2) and on
 // a row of the list (s-tasks-1), the three properties the Done box writes.
 // No address of its own: a POST to the record's edit with done and the
 // version, the rest of the record as it is; 412 is the conflict screen.

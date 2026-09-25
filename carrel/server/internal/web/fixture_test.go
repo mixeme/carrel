@@ -542,7 +542,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	h.cfg.Timezone = mockupZone
 	h.rebuild()
 	// The day of the frames, in their zone, and the build they were drawn
-	// against: a fixture is the same tomorrow (fixtures-tail.md).
+	// against: a fixture is the same tomorrow (review Р-13).
 	h.srv.SetClock(mockupNow(t))
 	// The account is made below, and its own date shows on the account
 	// screen: «Account mix · created 21 September 2026». The screens' clock
@@ -861,7 +861,7 @@ func TestFixtureCombinedContacts(t *testing.T) {
 	if out := os.Getenv("CARREL_FIXTURE_WRITE"); out != "" {
 		// The answer of the screen, normalised, for reading beside the frame
 		// while a fixture is written. It is not the fixture: one written
-		// from the answer would only agree with itself (fixtures-tail.md).
+		// from the answer would only agree with itself (review Р-13).
 		body, err := json.MarshalIndent(got, "", "  ")
 		if err != nil {
 			t.Fatal(err)

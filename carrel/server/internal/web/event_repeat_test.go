@@ -7,7 +7,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// forms-tail.md, "Повторение правится целиком" (S-11): the simple fields
+// review Р-10, "Повторение правится целиком" (S-11): the simple fields
 // build RRULE and keep the parts they do not show; Advanced RRULE, when
 // changed, wins; EXDATE, RDATE and overriding instances stay untouched.
 func TestEventRepeats(t *testing.T) {

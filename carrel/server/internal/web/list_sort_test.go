@@ -42,7 +42,7 @@ func sortHref(t *testing.T, bar view.ListBar, id string) string {
 	return ""
 }
 
-// views-tail.md (s-contacts-1, s-notes-1): the order of a list is the
+// review Р-12 (s-contacts-1, s-notes-1): the order of a list is the
 // server's — the client neither sorts nor reckons (C-3.1). A–Z groups by
 // letter; Recently changed is one list, newest change first.
 func TestContactAndNoteOrders(t *testing.T) {
@@ -100,7 +100,7 @@ func TestContactAndNoteOrders(t *testing.T) {
 	}
 }
 
-// views-tail.md (s-tasks-1): tasks are grouped by their due date — Overdue,
+// review Р-12 (s-tasks-1): tasks are grouped by their due date — Overdue,
 // This week, Later, No due date — and the other orders are one list.
 func TestTaskGroupsAndOrders(t *testing.T) {
 	now := time.Now()
@@ -138,7 +138,7 @@ func TestTaskGroupsAndOrders(t *testing.T) {
 	}
 }
 
-// views-tail.md (s-auth-4): the first administrator may leave an address,
+// review Р-12 (s-auth-4): the first administrator may leave an address,
 // so getting back in later is possible at all. It is not confirmed here —
 // nothing was sent to it.
 func TestSetupTakesAnOptionalEmail(t *testing.T) {
@@ -160,7 +160,7 @@ func TestSetupTakesAnOptionalEmail(t *testing.T) {
 	}
 }
 
-// views-tail.md: a RELATED-TO whose target lives in another collection was
+// review Р-12: a RELATED-TO whose target lives in another collection was
 // a bare UID. It has the target's title when some list of this session
 // holds it; the link stays inside the collection (S-11).
 func TestRelatedTitleFromAnotherLoadedList(t *testing.T) {
@@ -184,7 +184,7 @@ func TestRelatedTitleFromAnotherLoadedList(t *testing.T) {
 	}
 }
 
-// views-tail.md (s-contacts-1): the combined view has Import and Export
+// review Р-12 (s-contacts-1): the combined view has Import and Export
 // too, and each asks which collection — there is more than one, and the
 // server does not guess (S-14).
 func TestCombinedImportAndExportAsk(t *testing.T) {

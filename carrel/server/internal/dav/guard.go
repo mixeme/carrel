@@ -146,7 +146,7 @@ func (g *Guard) transports(pinnedFingerprint string) (base, fresh http.RoundTrip
 	}
 	transport := &http.Transport{
 		// No proxy: with one set, the dialler would connect to the proxy and
-		// the real target would never be IP-checked (architecture.md, SSRF).
+		// the real target would never be IP-checked (security.md, SSRF).
 		Proxy:                 nil,
 		DialContext:           g.dialContext,
 		DialTLSContext:        g.dialTLSContext(pinnedFingerprint),

@@ -19,7 +19,7 @@ func docRow(t *testing.T, d view.NoteDoc, name string) view.FormRow {
 	return view.FormRow{}
 }
 
-// forms-tail.md, note (s-notes-4): Date and Time — the journal's DTSTART —,
+// review Р-10, note (s-notes-4): Date and Time — the journal's DTSTART —,
 // Tags and Related to beside the text. NoteDoc carried the title and the body
 // only; its Fields carry the rest (C-6). A date without a time is a day.
 func TestNoteDateTagsRelated(t *testing.T) {

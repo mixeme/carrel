@@ -10,7 +10,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// Disconnect (connections-tail.md): a connection leaves Carrel, and on its
+// Disconnect (review Р-9): a connection leaves Carrel, and on its
 // server nothing is touched. The sheet is the brother of the collection's
 // delete sheet (s-profile-9) — what exactly goes, named before it goes —
 // without an export or an archive: there is nothing to save from deletion.

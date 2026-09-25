@@ -13,7 +13,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// connections-tail.md: a connection could be made and never taken out. The
+// review Р-9: a connection could be made and never taken out. The
 // card has Disconnect, and it opens the sheet of "what exactly goes" — the
 // brother of the collection's delete sheet (s-profile-9), without an export
 // or an archive: nothing is deleted on the server. Confirmed, the connection

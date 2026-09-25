@@ -111,7 +111,7 @@ func (s *Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, page)
 		return
 	}
-	// A new SID on every login (architecture.md): whatever session the
+	// A new SID on every login (security.md): whatever session the
 	// browser presented ends here, so the old cookie value opens nothing.
 	if old, ok := s.sessionFrom(r); ok {
 		s.sessions.End(old.ID())

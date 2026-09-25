@@ -7,7 +7,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// forms-tail.md: a task showed a start, a status, a priority, a place,
+// review Р-10: a task showed a start, a status, a priority, a place,
 // categories and what it relates to (s-tasks-3), and the form changed none
 // of them. Status moves COMPLETED with it, as the Done box does; priority is
 // a choice that keeps another client's number; Related to is picked from

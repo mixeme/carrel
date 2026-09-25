@@ -7,7 +7,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// forms-tail.md: an event showed its status and categories (s-agenda-3) and
+// review Р-10: an event showed its status and categories (s-agenda-3) and
 // the form could change neither. Status is a choice of RFC 5545 §3.8.1.11
 // for an event, and a value another client wrote stays a choice; categories
 // are one comma field, each written as a TEXT item. One change, one line.
@@ -73,7 +73,7 @@ func TestEventStatusAndCategories(t *testing.T) {
 	}
 }
 
-// forms-tail.md, "Пояс события": the zone the event was sent in is shown as
+// review Р-10, "Пояс события": the zone the event was sent in is shown as
 // such ("as sent") and kept by every save that does not change it. Another
 // zone rewrites DTSTART and DTEND at the same instants in that zone and
 // brings its VTIMEZONE; UTC writes Z and no TZID. The form's own times stay

@@ -7,7 +7,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// forms-tail.md, "Show N empty fields" (s-contacts-3): the optional fields a
+// review Р-10, "Show N empty fields" (s-contacts-3): the optional fields a
 // card does not fill come in a field set of their own, its legend saying
 // how many; the client folds it. Filled ones stay where they are, and a new
 // contact shows them all.

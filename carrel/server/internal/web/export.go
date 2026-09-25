@@ -233,7 +233,7 @@ func (s *Server) emptyListPage(c *collectionCtx, notices ...view.Notice) any {
 }
 
 // exportNote hands over one note as Markdown, the format of the notebook
-// export (S-19), named after its title (forms-tail.md, Export Markdown).
+// export (S-19), named after its title (review Р-10, Export Markdown).
 func (s *Server) exportNote(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
 	obj, err := c.find(r.Context(), uid)
 	switch {

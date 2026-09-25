@@ -36,7 +36,7 @@ func agendaTitles(p view.AgendaPage) string {
 	return strings.Join(out, ",")
 }
 
-// views-tail.md (s-agenda-1): the agenda is a list, and Day, Week and Month
+// review Р-12 (s-agenda-1): the agenda is a list, and Day, Week and Month
 // are how much of it is shown — with a range of one's own beside them. Every
 // day of the window stands, the empty ones included: a day with nothing in
 // it says so instead of being skipped.
@@ -108,7 +108,7 @@ func TestAgendaWindows(t *testing.T) {
 	}
 }
 
-// views-tail.md (s-agenda-1, U-6): tasks due and notes stand on the same
+// review Р-12 (s-agenda-1, U-6): tasks due and notes stand on the same
 // line of days, each behind its own switch; events are always there.
 func TestAgendaTasksAndNotesOnTheLine(t *testing.T) {
 	tz := time.UTC

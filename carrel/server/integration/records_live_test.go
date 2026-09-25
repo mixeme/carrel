@@ -421,7 +421,7 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 
 	agenda := liveDecode[view.AgendaPage](t, "agenda", app.get(events+"?from=2026-10-05"))
 	// A week is seven days, and the days nothing falls on are shown empty
-	// (views-tail.md): a gap in an agenda is a day, not a missing row.
+	// (review Р-12): a gap in an agenda is a day, not a missing row.
 	if len(agenda.Notices) > 0 || len(agenda.Days) != 7 || len(agenda.Days[0].Rows) != 1 ||
 		agenda.Days[0].Rows[0].Time != "09:30" {
 		t.Fatalf("agenda = %+v", agenda)

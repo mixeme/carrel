@@ -8,7 +8,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// forms-tail.md: Send on the contact card (s-contacts-6) puts the card into
+// review Р-10: Send on the contact card (s-contacts-6) puts the card into
 // a letter — the attach sheet already writes a record (S-26.2) — and opens
 // the letter; without mail on the instance there is no Send.
 func TestSendAContactFromItsCard(t *testing.T) {
@@ -93,7 +93,7 @@ func TestExportOneNoteAsMarkdown(t *testing.T) {
 	}
 }
 
-// views-tail.md, owner's decision 19.09.2026: the note has no sheet of its
+// review Р-12, owner's decision 19.09.2026: the note has no sheet of its
 // own (C-2.1, equality of collections), and "nowhere to write" (s-notes-6)
 // is the common sheet's too: no collection of the kind to write to, and the
 // sheet says so with the way out, not a 404.

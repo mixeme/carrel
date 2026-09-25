@@ -10,7 +10,7 @@ import (
 )
 
 // A connection made by mistake left the rail, the search and every poll only
-// with the account (connections-tail.md). Disconnect takes it out whole —
+// with the account (review Р-9). Disconnect takes it out whole —
 // everything the blob and the state bind to its ID — and the neighbouring
 // connection keeps all of its own.
 func TestRemoveConnectionTakesEverythingOfIt(t *testing.T) {

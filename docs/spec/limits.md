@@ -7,7 +7,7 @@
 **Обновлять при изменении** `carrel/server/internal/conf/limits.go`,
 `carrel/server/internal/conf/conf.go` (блок `defaults()`), жёстко зашитых
 констант в пакетах и таблицы «Сроки и лимиты» в
-[architecture.md](../plan/architecture.md).
+[architecture.md](../architecture.md).
 
 ## Как устроена конфигурация
 
@@ -16,7 +16,7 @@
 | **Продуктовые** | `internal/conf/limits.go` | Только изменением кода. Не `CARREL_*`, не экран «Лимиты» |
 | **C-12** | `internal/conf/conf.go`, `{CARREL_DATA_DIR}/settings.env`, env `CARREL_*` | Файл настроек; env перекрывает файл. Полная таблица — [carrel-common.md](carrel-common.md) § C-12 |
 | **Зашитые** | HTTP-транспорт, крипто, хранилище, rate limiter и т.д. | Только код |
-| **Запланированные** | [architecture.md](../plan/architecture.md), [server.md](../plan/server.md) | Ещё не реализованы или не подключены |
+| **Запланированные** | [architecture.md](../architecture.md), [server.md](../plan/server.md) | Ещё не реализованы или не подключены |
 
 **Легенда статуса:** ✅ работает в коде · ⚠️ объявлено, но обработчик ещё не использует · 📋 только в спеке/плане
 

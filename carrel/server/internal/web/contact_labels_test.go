@@ -8,7 +8,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// forms-tail.md: a phone or an address row showed its label ("work",
+// review Р-10: a phone or an address row showed its label ("work",
 // "cell") and its address, but neither could be changed (s-contacts-3). The
 // label is a choice of the usual ones plus what the row already has; an
 // address is five parts, and the two parts no field offers (PO box,

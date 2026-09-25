@@ -769,7 +769,7 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 			// A task is placed by DUE and a note by its DTSTART; a server's
 			// time-range filter answers for neither reliably, so the whole
 			// component is read and the window is applied where the rows are
-			// placed (views-tail.md).
+			// placed (review Р-12).
 			from, to = nil, nil
 		}
 		if from == nil && to == nil {

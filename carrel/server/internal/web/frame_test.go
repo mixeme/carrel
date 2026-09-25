@@ -193,7 +193,7 @@ func TestTagFilterOnCalendars(t *testing.T) {
 
 	cal := f.path("calendar")
 	agenda := decode[view.AgendaPage](t, f.h.do(get(cal+"?from=2026-09-07&tag=home", f.sess)))
-	// Seven days: the filter cuts the rows, not the days (views-tail.md).
+	// Seven days: the filter cuts the rows, not the days (review Р-12).
 	if agenda.Bar.Loaded != 1 || len(agenda.Days) != 7 || agenda.Days[1].Rows[0].Summary != "Plumber" {
 		t.Fatalf("agenda = %+v", agenda.Days)
 	}

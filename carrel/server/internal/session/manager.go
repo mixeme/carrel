@@ -54,7 +54,7 @@ func NewManager(cfg *conf.Config) *Manager {
 	}
 }
 
-// Create starts a session after login. A new SID is issued (architecture.md).
+// Create starts a session after login. A new SID is issued (security.md).
 func (m *Manager) Create(accountID, login string, dataKey [crypt.KeyLen]byte) (*Session, error) {
 	now := time.Now()
 	s, err := newSession(m, accountID, login, dataKey, now)

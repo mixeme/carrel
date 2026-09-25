@@ -253,7 +253,7 @@ func TestCombinedAgendaTasksAndNotesMerge(t *testing.T) {
 			events = append(events, string(r.Summary)+" · "+strings.SplitN(string(r.Stamp), " · ", 2)[1])
 		}
 	}
-	// Seven days: the empty ones stand too (views-tail.md, s-agenda-1).
+	// Seven days: the empty ones stand too (review Р-12, s-agenda-1).
 	if strings.Join(events, ", ") != "Gym · Home, Standup · Work, Dinner · Home" || len(agenda.Days) != 7 {
 		t.Fatalf("agenda = %v (%d days)", events, len(agenda.Days))
 	}

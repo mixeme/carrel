@@ -8,7 +8,7 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// forms-tail.md: the card showed a nickname, a birthday and categories that
+// review Р-10: the card showed a nickname, a birthday and categories that
 // the form did not let anyone change (s-contacts-3). Each is a field now, and
 // changing one writes that one line (S-7): the rest of the card, its
 // parameters and what no field offers stay byte for byte. The card starts
