@@ -8,6 +8,7 @@ import (
 	"github.com/emersion/go-webdav/carddav"
 
 	"carrel.dev/carrel/server/internal/davtest"
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -45,5 +46,33 @@ func TestTwinCollectionsCarryTheirAddressName(t *testing.T) {
 	}
 	if len(stamps) != 1 || !strings.HasSuffix(stamps[0], " · Carrel S-15 (carrel-s-15-2)") {
 		t.Errorf("stamps = %v", stamps)
+	}
+}
+
+// s-files-6: the root of the files names what a storage is chosen for — the
+// «Purpose» column. The contract carried it and nothing filled it.
+func TestFilesRootNamesTheAttachmentsStorage(t *testing.T) {
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	srv.AddCalendar(caldav.Calendar{Path: davtest.CalendarHome + "work/", Name: "Work"})
+	docs := davtest.FileRoot + "docs/"
+	other := davtest.FileRoot + "other/"
+	srv.SeedFolder(docs)
+	srv.SeedFolder(other)
+	f := connectFixture(t, srv, davtest.CalendarHome+"work/", nil)
+	tickAll(t, f.h, f.sess,
+		sealed.Collection{AccountID: f.id, Path: docs, Name: "Docs", Kinds: []view.Kind{view.KindFile}},
+		sealed.Collection{AccountID: f.id, Path: other, Name: "Other", Kinds: []view.Kind{view.KindFile}})
+	key, _ := f.sess.DataKey()
+	if err := f.h.users.SetAttachmentFolder(f.sess.AccountID(), key, sealed.AttachmentFolder{AccountID: f.id, Path: docs, Folder: []string{"carrel"}}); err != nil {
+		t.Fatal(err)
+	}
+	page := decode[view.FilesRootPage](t, f.h.do(get("/app/files", f.sess)))
+	purpose := map[string]string{}
+	for _, c := range page.Collections {
+		purpose[string(c.Label)] = string(c.Purpose)
+	}
+	if purpose["Docs"] != "attachments" || purpose["Other"] != "" {
+		t.Errorf("purpose = %v", purpose)
 	}
 }

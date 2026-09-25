@@ -1404,6 +1404,7 @@ type PublishedRow struct {
     Created  When
     Expires  Text
     LastSeen When
+    Opens    int      // сколько раз открыли: так видно, что ссылка ушла дальше, чем думали
     Actions  []Action // Revoke
 }
 ```

@@ -54,7 +54,7 @@
     "total": 1
   },
   "details": null,
-  "note": "",
+  "note": "Files are searched by name only. Carrel does not look inside files, so “nothing found” does not mean the files do not contain it.",
   "notices": [],
   "poll": {
     "actions": [
@@ -169,6 +169,21 @@
         "state": "empty"
       },
       {
+        "colour": "#9a9280",
+        "count": null,
+        "fromCache": false,
+        "message": "The server answered 401 Unauthorized.",
+        "retry": {
+          "enabled": true,
+          "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
+          "id": "source.retry",
+          "label": "Retry",
+          "method": "POST"
+        },
+        "stamp": "baikal · Общий",
+        "state": "error"
+      },
+      {
         "colour": "#5c6b73",
         "count": 0,
         "fromCache": false,
@@ -176,9 +191,27 @@
         "retry": null,
         "stamp": "feeds.example · Праздники РФ",
         "state": "empty"
+      },
+      {
+        "colour": "#67735c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Files",
+        "state": "empty"
+      },
+      {
+        "colour": "#6b5c73",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "sftpgo · vps · Documents",
+        "state": "empty"
       }
     ],
-    "summary": "11 of 11 sources answered · 1 found",
+    "summary": "13 of 14 sources answered · 1 found · 1 refused",
     "taskID": "t-task"
   },
   "print": {
@@ -206,7 +239,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": null,
         "enabled": true,
         "href": "/app/calendar",
         "id": "nav.calendar",
@@ -249,7 +282,7 @@
     "note": "",
     "sections": [
       {
-        "account": "11 sources",
+        "account": "14 sources",
         "accountID": "",
         "rows": [
           {
@@ -383,6 +416,19 @@
             "tick": "on"
           },
           {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "",
+            "href": "",
+            "label": "Общий",
+            "menu": [],
+            "message": "",
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
             "colour": "#5c6b73",
             "count": null,
             "detail": "",
@@ -391,6 +437,32 @@
             "menu": [],
             "message": "",
             "readOnly": true,
+            "retry": null,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#67735c",
+            "count": null,
+            "detail": "",
+            "href": "",
+            "label": "Files",
+            "menu": [],
+            "message": "",
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#6b5c73",
+            "count": null,
+            "detail": "",
+            "href": "",
+            "label": "Documents",
+            "menu": [],
+            "message": "",
+            "readOnly": false,
             "retry": null,
             "state": "ok",
             "tick": "on"

@@ -203,6 +203,38 @@
         }
       ],
       "title": "radicale · vps · alice"
+    },
+    {
+      "actions": [],
+      "login": "",
+      "password": {
+        "reveal": {
+          "enabled": false,
+          "id": "",
+          "label": "",
+          "method": ""
+        },
+        "shown": false,
+        "value": ""
+      },
+      "qr": "",
+      "rows": [
+        {
+          "copy": {
+            "enabled": true,
+            "href": "https://baikal.example/dav.php/alice/calendars/obshchij/",
+            "id": "device.copy",
+            "label": "Copy",
+            "method": "GET"
+          },
+          "included": true,
+          "kind": "event",
+          "label": "Общий",
+          "type": "CalDAV",
+          "url": "https://baikal.example/dav.php/alice/calendars/obshchij/"
+        }
+      ],
+      "title": "baikal · alice"
     }
   ],
   "actions": [
@@ -250,6 +282,13 @@
       "method": "POST"
     },
     {
+      "enabled": true,
+      "href": "/app/settings/devices?account=a-baikal\u0026op=exclude\u0026tab=apple",
+      "id": "device.exclude",
+      "label": "Leave out baikal",
+      "method": "POST"
+    },
+    {
       "danger": true,
       "enabled": true,
       "href": "/app/settings/unlock",
@@ -294,7 +333,7 @@
         "method": "GET"
       },
       {
-        "count": 2,
+        "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
         "id": "settings.connections",
@@ -335,7 +374,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/app/files/published",
         "id": "settings.published",

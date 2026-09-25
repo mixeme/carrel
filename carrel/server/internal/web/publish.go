@@ -316,6 +316,34 @@ func (s *Server) postPublish(w http.ResponseWriter, r *http.Request) {
 	s.writeSheet(w, r, s.madeSheet(sess, s.publishSheet(sess, c, uid, title, ""), token, expires))
 }
 
+// publishedTitle is what a link opens: a calendar given out for some days
+// says which, «Личный · 10–31 August» (s-publish-1) — two links to one
+// calendar are told apart by them.
+func publishedTitle(t user.PublishTarget) string {
+	if t.From == "" || t.To == "" {
+		return t.Title
+	}
+	return t.Title + " · " + dayRange(t.From, t.To)
+}
+
+// dayRange writes two days, as the sheet took them, the short way: «10–31
+// August», «28 July – 3 August», and the years only when they differ.
+func dayRange(from, to string) string {
+	f, errFrom := time.Parse("2006-01-02", from)
+	t, errTo := time.Parse("2006-01-02", to)
+	switch {
+	case errFrom != nil || errTo != nil:
+		return from + " – " + to
+	case f.Equal(t):
+		return f.Format("2 January")
+	case f.Year() != t.Year():
+		return f.Format("2 January 2006") + " – " + t.Format("2 January 2006")
+	case f.Month() != t.Month():
+		return f.Format("2 January") + " – " + t.Format("2 January")
+	}
+	return f.Format("2") + "–" + t.Format("2 January")
+}
+
 // getFilesPublished lists the person's live links: what each opens, until
 // when, when it was last opened, the link itself from the blob with Copy
 // and, with mail on, Send this link — and Revoke. A link made before links
@@ -325,7 +353,9 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	page := view.PublishedLinksPage{Shell: s.buildShell(sess, "Published links")}
+	// The frame stands it in the settings rail (s-publish-1): the list is
+	// reached from the files as well, but it is the person's, not a folder's.
+	page := view.PublishedLinksPage{Shell: s.withRail(s.buildShell(sess, "Published links"), s.settingsRail(sess, "/app/files/published"))}
 	blob := s.catalogOf(sess)
 	tf, now := s.timeFor(sess), s.now()
 	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
@@ -338,7 +368,7 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 			label = collectionLabel(col)
 		}
 		row := view.PublishedRow{
-			Title: text(l.Target.Title), Kind: view.Kind(l.Target.Kind), Stamp: stamp(host, label),
+			Title: text(publishedTitle(l.Target)), Kind: view.Kind(l.Target.Kind), Stamp: stamp(host, label),
 			Created: tf.formatWhen(l.CreatedAt, true, now), Expires: "No expiry",
 			Actions: []view.Action{{ID: "publish.revoke", Label: "Revoke", Method: "POST", Danger: true, Enabled: true,
 				Href: s.postQuery("/app/publish", url.Values{"op": {"revoke"}, "id": {l.ID}})}},
@@ -359,6 +389,7 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		if l.LastSeen != nil {
 			row.LastSeen = tf.formatWhen(*l.LastSeen, true, now)
 		}
+		row.Opens = l.Opens
 		page.Rows = append(page.Rows, row)
 	}
 	s.writePage(w, r, http.StatusOK, page)

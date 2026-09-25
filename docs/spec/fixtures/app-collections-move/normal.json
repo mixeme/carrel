@@ -38,6 +38,24 @@
         "readOnly": false,
         "reason": "",
         "stamp": "radicale · vps"
+      },
+      {
+        "colour": "",
+        "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-baikal",
+        "label": "baikal",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": "baikal"
+      },
+      {
+        "colour": "",
+        "id": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026to=a-sftp-vps",
+        "label": "sftpgo · vps",
+        "last": false,
+        "readOnly": true,
+        "reason": "Files only",
+        "stamp": "sftpgo · vps"
       }
     ]
   },

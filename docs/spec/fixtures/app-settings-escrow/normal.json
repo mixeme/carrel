@@ -36,7 +36,7 @@
         "method": "GET"
       },
       {
-        "count": 2,
+        "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
         "id": "settings.connections",
@@ -76,7 +76,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/app/files/published",
         "id": "settings.published",

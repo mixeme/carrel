@@ -96,6 +96,10 @@ type PublishedLink struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"` // nil: no expiry, chosen explicitly
 	LastSeen  *time.Time `json:"lastSeen,omitempty"`
+	// Opens is how many times the link was opened, as of the last time
+	// LastSeen was written: the one way to see that a link went further than
+	// it was meant to (s-publish-1). The opens since are in memory.
+	Opens int `json:"opens,omitempty"`
 	// Envelope holds the connection's address and credentials, sealed again
 	// under the server key and bound to Hash (crypt.SealLink).
 	Envelope []byte `json:"envelope"`

@@ -12,14 +12,14 @@
     ],
     "compact": false,
     "filter": "",
-    "loaded": 13,
+    "loaded": 19,
     "range": null,
     "segments": [
       {
         "enabled": false,
         "href": "/admin/audit",
         "id": "audit.all",
-        "label": "All · 13",
+        "label": "All · 19",
         "method": "GET",
         "on": true
       },
@@ -27,7 +27,7 @@
         "enabled": true,
         "href": "/admin/audit?show=security",
         "id": "audit.security",
-        "label": "Security · 2",
+        "label": "Security · 4",
         "method": "GET"
       },
       {
@@ -39,7 +39,7 @@
       }
     ],
     "selected": 0,
-    "total": 13
+    "total": 19
   },
   "details": null,
   "notices": [],
@@ -131,6 +131,41 @@
   },
   "rows": [
     {
+      "detail": "file a-sftp-vps",
+      "what": "publish.create",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "event a-nc-home",
+      "what": "publish.create",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "a-sftp-vps",
+      "what": "attachments.folder",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "file",
+      "what": "sources.select",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "a-sftp-vps",
+      "what": "connection.add",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
       "detail": "f-league",
       "what": "feed.subscribe",
       "when": "10 August 2026, 17:04",
@@ -182,6 +217,13 @@
     {
       "detail": "contact",
       "what": "sources.select",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": "mix"
+    },
+    {
+      "detail": "a-baikal",
+      "what": "connection.add",
       "when": "10 August 2026, 17:04",
       "who": "mix",
       "whom": "mix"

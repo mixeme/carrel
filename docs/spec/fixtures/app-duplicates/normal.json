@@ -130,7 +130,7 @@
         "method": "GET"
       },
       {
-        "count": 6,
+        "count": null,
         "enabled": true,
         "href": "/app/calendar",
         "id": "nav.calendar",

@@ -47,6 +47,11 @@
                 "label": "radicale · vps",
                 "selected": false,
                 "value": "a-rad-vps"
+              },
+              {
+                "label": "baikal",
+                "selected": false,
+                "value": "a-baikal"
               }
             ],
             "readOnly": false,
@@ -82,7 +87,7 @@
     ]
   },
   "kind": "contact",
-  "note": "",
+  "note": "3 of 4 servers are listed: only a server that holds address books can take a new one.",
   "target": {
     "chosen": "a-nc-home",
     "options": [
@@ -102,6 +107,24 @@
         "last": false,
         "readOnly": false,
         "reason": "",
+        "stamp": ""
+      },
+      {
+        "colour": "",
+        "id": "a-baikal",
+        "label": "baikal",
+        "last": false,
+        "readOnly": false,
+        "reason": "",
+        "stamp": ""
+      },
+      {
+        "colour": "",
+        "id": "a-sftp-vps",
+        "label": "sftpgo · vps",
+        "last": false,
+        "readOnly": true,
+        "reason": "Files only",
         "stamp": ""
       }
     ]

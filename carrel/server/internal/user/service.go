@@ -28,6 +28,8 @@ type Service struct {
 	// use; startup does not pay for it.
 	// seen is the last request of each davloom device, in memory (S-27).
 	seen deviceSeen
+	// opens are the opens of published links not yet written (linkOpens).
+	opens linkOpens
 
 	dummyOnce sync.Once
 	dummySalt []byte

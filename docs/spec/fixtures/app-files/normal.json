@@ -1,0 +1,300 @@
+{
+  "collections": [
+    {
+      "colour": "#67735c",
+      "href": "/app/files/a-nc-home/Files/",
+      "label": "Files",
+      "purpose": "",
+      "readOnly": false,
+      "stamp": "nextcloud · Files",
+      "state": "ok"
+    },
+    {
+      "colour": "#6b5c73",
+      "href": "/app/files/a-sftp-vps/Documents/",
+      "label": "Documents",
+      "purpose": "attachments",
+      "readOnly": false,
+      "stamp": "sftpgo · vps · Documents",
+      "state": "ok"
+    }
+  ],
+  "details": null,
+  "empty": null,
+  "notices": [],
+  "print": {
+    "range": "",
+    "taken": "",
+    "title": "Files"
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [
+      {
+        "enabled": true,
+        "href": "/app/sources/files",
+        "id": "rail.apply",
+        "label": "Apply",
+        "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "icon": "i-server",
+        "id": "account.connect",
+        "label": "Connect account",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections?kind=folder\u0026op=feed",
+        "icon": "i-link",
+        "id": "feed.subscribe",
+        "label": "Subscribe to a folder",
+        "method": "GET"
+      }
+    ],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      }
+    ],
+    "note": "2 of 3 storages ticked",
+    "sections": [
+      {
+        "account": "",
+        "accountID": "",
+        "rows": [
+          {
+            "colour": "",
+            "count": null,
+            "detail": "",
+            "href": "/app/files",
+            "label": "Selected collections",
+            "menu": [],
+            "message": "",
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "part"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#67735c",
+            "count": null,
+            "detail": "",
+            "href": "/app/files/a-nc-home/Files/",
+            "label": "Files",
+            "menu": [],
+            "message": "",
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "sftpgo · vps",
+        "accountID": "a-sftp-vps",
+        "rows": [
+          {
+            "colour": "#6b5c73",
+            "count": null,
+            "detail": "",
+            "href": "/app/files/a-sftp-vps/Documents/",
+            "label": "Documents",
+            "menu": [],
+            "message": "",
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#735c6b",
+            "count": null,
+            "detail": "",
+            "href": "/app/files/a-sftp-vps/Public/",
+            "label": "Public",
+            "menu": [],
+            "message": "",
+            "readOnly": true,
+            "retry": null,
+            "state": "read-only",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "tags": []
+  },
+  "shortcuts": [
+    {
+      "enabled": true,
+      "href": "/app/settings/attachments",
+      "icon": "i-file",
+      "id": "files.attachments",
+      "label": "Attachments",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files/published",
+      "icon": "i-link",
+      "id": "files.published",
+      "label": "Published",
+      "method": "GET"
+    }
+  ],
+  "title": "Files",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  }
+}

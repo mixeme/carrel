@@ -1,8 +1,60 @@
 {
   "details": null,
   "folder": {
-    "chosen": "",
-    "nodes": []
+    "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "nodes": [
+      {
+        "children": [],
+        "expanded": false,
+        "id": "/app/files/a-nc-home/Files/",
+        "label": "Files",
+        "readOnly": false,
+        "stamp": "nextcloud · Files"
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "expanded": false,
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+                    "label": "2026-07",
+                    "readOnly": false,
+                    "stamp": ""
+                  }
+                ],
+                "expanded": true,
+                "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+                "label": "attachments",
+                "readOnly": false,
+                "stamp": ""
+              }
+            ],
+            "expanded": true,
+            "id": "/app/files/a-sftp-vps/Documents/carrel/",
+            "label": "carrel",
+            "readOnly": false,
+            "stamp": ""
+          }
+        ],
+        "expanded": true,
+        "id": "/app/files/a-sftp-vps/Documents/",
+        "label": "Documents",
+        "readOnly": false,
+        "stamp": "sftpgo · vps · Documents"
+      },
+      {
+        "children": [],
+        "expanded": false,
+        "id": "/app/files/a-sftp-vps/Public/",
+        "label": "Public",
+        "readOnly": true,
+        "stamp": "sftpgo · vps · Public"
+      }
+    ]
   },
   "form": {
     "action": "/app/settings/attachments",
@@ -12,6 +64,14 @@
         "id": "attachments.save",
         "label": "Save",
         "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+        "icon": "i-file",
+        "id": "attachments.open",
+        "label": "Open in Files",
+        "method": "GET"
       }
     ],
     "errors": [],
@@ -139,6 +199,18 @@
             "readOnly": true,
             "required": false,
             "value": "2 MB"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "baikal · Общий",
+            "name": "limit.a-baikal./alice/calendars/obshchij/",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2 MB"
           }
         ]
       },
@@ -167,7 +239,7 @@
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": ""
+            "value": "/app/files/a-sftp-vps/Documents/carrel/attachments/"
           },
           {
             "error": "",
@@ -237,7 +309,7 @@
         "method": "GET"
       },
       {
-        "count": 2,
+        "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
         "id": "settings.connections",
@@ -278,7 +350,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/app/files/published",
         "id": "settings.published",

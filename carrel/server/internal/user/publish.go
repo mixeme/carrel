@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"carrel.dev/carrel/server/internal/crypt"
@@ -34,6 +35,7 @@ type PublishedLink struct {
 	CreatedAt time.Time
 	ExpiresAt *time.Time
 	LastSeen  *time.Time
+	Opens     int // how many times it was opened: stored, and since in memory
 }
 
 // OpenLink is a live link opened for a reader without a session.
@@ -45,6 +47,39 @@ type OpenLink struct {
 
 // lastSeenEvery keeps a busy link from rewriting the state on every view.
 const lastSeenEvery = time.Hour
+
+// linkOpens counts the opens of each link since its count was last written
+// with LastSeen, by the link's ID. Written with LastSeen, not on every open:
+// a busy link does not rewrite the state each time. What a restart loses is
+// at most an hour of opens of a link.
+type linkOpens struct {
+	mu sync.Mutex
+	n  map[string]int
+}
+
+func (o *linkOpens) add(id string) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if o.n == nil {
+		o.n = map[string]int{}
+	}
+	o.n[id]++
+}
+
+// take returns the opens not yet written and forgets them.
+func (o *linkOpens) take(id string) int {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	n := o.n[id]
+	delete(o.n, id)
+	return n
+}
+
+func (o *linkOpens) peek(id string) int {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	return o.n[id]
+}
 
 // Publish makes a link to target, living until expires (nil: no expiry,
 // chosen explicitly). conn is the target's connection as the owner's blob
@@ -114,6 +149,12 @@ func (s *Service) Publish(viewerID string, dataKey [crypt.KeyLen]byte, conn seal
 // answer; every live link is compared, in constant time each, so a miss
 // costs what a hit costs.
 func (s *Service) OpenPublished(token string) (OpenLink, bool) {
+	return s.openPublished(token, true)
+}
+
+// openPublished opens a link; count says whether this is an open of it —
+// a reader's request — or only a check that it lives.
+func (s *Service) openPublished(token string, count bool) (OpenLink, bool) {
 	hash, err := hashToken(token)
 	if err != nil {
 		return OpenLink{}, false
@@ -142,11 +183,18 @@ func (s *Service) OpenPublished(token string) (OpenLink, bool) {
 	if err != nil {
 		return OpenLink{}, false
 	}
+	if !count {
+		return OpenLink{ID: publish.ID(found.Hash), Target: targetOf(*found)}, true
+	}
+	id := publish.ID(found.Hash)
+	s.opens.add(id)
 	if found.LastSeen == nil || now.Sub(*found.LastSeen) >= lastSeenEvery {
+		opens := s.opens.take(id)
 		_ = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 			for i := range st.Published {
 				if verifyHash(st.Published[i].Hash, hash) {
 					st.Published[i].LastSeen = &now
+					st.Published[i].Opens += opens
 				}
 			}
 			return nil, nil
@@ -161,7 +209,7 @@ func (s *Service) OpenPublished(token string) (OpenLink, bool) {
 
 // PublicLinkValid reports whether a token opens a live link.
 func (s *Service) PublicLinkValid(_ context.Context, token string) bool {
-	_, ok := s.OpenPublished(token)
+	_, ok := s.openPublished(token, false)
 	return ok
 }
 
@@ -175,7 +223,9 @@ func (s *Service) PublishedLinks(viewerID string) []PublishedLink {
 		if l.UserID != viewerID || publish.Expired(l.ExpiresAt, now) {
 			continue
 		}
-		out = append(out, PublishedLink{ID: publish.ID(l.Hash), Target: targetOf(l), CreatedAt: l.CreatedAt, ExpiresAt: l.ExpiresAt, LastSeen: l.LastSeen})
+		id := publish.ID(l.Hash)
+		out = append(out, PublishedLink{ID: id, Target: targetOf(l), CreatedAt: l.CreatedAt, ExpiresAt: l.ExpiresAt, LastSeen: l.LastSeen,
+			Opens: l.Opens + s.opens.peek(id)})
 	}
 	return out
 }

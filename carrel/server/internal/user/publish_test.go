@@ -61,3 +61,38 @@ func TestPublishedLinkLifetime(t *testing.T) {
 		t.Error("a disabled account's link opened")
 	}
 }
+
+// s-publish-1: the list counts every open of a link — the written ones and
+// those since, in memory — and a check that a link lives is not an open.
+func TestPublishedLinkCountsOpens(t *testing.T) {
+	f := newFixture(t)
+	id := f.setupAdmin(t)
+	_, key, _, _ := f.svc.Authenticate(context.Background(), "admin", "password123")
+	conn := sealed.Connection{ID: "a1", Server: "https://dav.example.org/", Login: "ann", Password: "pw"}
+	token, err := f.svc.Publish(id, key, conn, PublishTarget{AccountID: "a1", Kind: "contact", Col: "/book/", Title: "Book"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	opens := func() (listed, stored int) {
+		ls := f.svc.PublishedLinks(id)
+		if len(ls) != 1 {
+			t.Fatalf("links = %d", len(ls))
+		}
+		return ls[0].Opens, f.st.Snapshot().Published[0].Opens
+	}
+	if n, _ := opens(); n != 0 {
+		t.Errorf("a new link shows %d opens", n)
+	}
+	for i := 0; i < 3; i++ {
+		f.svc.OpenPublished(token)
+	}
+	f.svc.PublicLinkValid(context.Background(), token)
+	if n, stored := opens(); n != 3 || stored != 1 {
+		t.Errorf("after three opens and a check: listed %d, stored %d; want 3 and the first", n, stored)
+	}
+	f.advance(lastSeenEvery)
+	f.svc.OpenPublished(token)
+	if n, stored := opens(); n != 4 || stored != 4 {
+		t.Errorf("after the hour: listed %d, stored %d; want 4 and 4", n, stored)
+	}
+}

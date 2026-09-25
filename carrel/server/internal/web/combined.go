@@ -536,11 +536,14 @@ func countEvents(ctx context.Context, sess *session.Session, p *cal.Provider, ac
 // and a dash while any of them has none.
 func kindCount(sess *session.Session, blob sealed.Blob, spec kindSpec) *int {
 	sum := 0
+	down := lastPoll(sess, spec.kind)
 	for _, col := range ticked(blob, spec.kind) {
 		// A feed is someone else's and has no number of its own (the frames
 		// draw «ro» in its place), so the section's sum is of the person's
-		// own collections.
-		if col.Gone || col.Feed {
+		// own collections. One that did not answer the last poll says why
+		// in its own row, and the sum is of the ones that did (s-agenda-1:
+		// «Общий» refuses, and the calendar still counts 14).
+		if col.Gone || col.Feed || lastPollRefused(down, col) {
 			continue
 		}
 		n := collectionCount(sess, col.AccountID, col, spec)
@@ -550,6 +553,37 @@ func kindCount(sess *session.Session, blob sealed.Blob, spec kindSpec) *int {
 		sum += *n
 	}
 	return &sum
+}
+
+// lastPoll is the last poll of a kind this session ran — a combined view's —
+// or nil. A screen that asks one collection only still shows, in its rail,
+// what that poll could not read: the session knows it, and a row that looked
+// fine until the combined view was opened again would be a lie.
+func lastPoll(sess *session.Session, k view.Kind) *fanout.Snapshot {
+	var last *listTask
+	for _, t := range sess.Tasks() {
+		if lt, ok := t.(*listTask); ok && lt.kind == k {
+			last = lt
+		}
+	}
+	if last == nil {
+		return nil
+	}
+	snap := last.Snapshot()
+	return &snap
+}
+
+// lastPollRefused reports whether a collection did not answer the poll.
+func lastPollRefused(snap *fanout.Snapshot, col sealed.Collection) bool {
+	if snap == nil {
+		return false
+	}
+	for _, st := range snap.Sources {
+		if st.ID == col.AccountID+":"+col.Path {
+			return st.State == view.SourceError || st.State == view.SourceTimeout || st.State == view.SourceUnavailable
+		}
+	}
+	return false
 }
 
 // railTrouble is what a rail row says of a collection that did not answer
@@ -607,6 +641,9 @@ func (s *Server) troublesOf(snap *fanout.Snapshot) map[string]railTrouble {
 // unavailable — the two are never the same state (S-21).
 func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec, snap *fanout.Snapshot) view.Rail {
 	rail := view.Rail{About: s.aboutAction(), Nav: s.navRows(sess, blob, spec.segment)}
+	if snap == nil {
+		snap = lastPoll(sess, spec.kind) // one collection's page: what the last poll could not read
+	}
 	sections, live, on := s.railSections(sess, blob, spec, s.troublesOf(snap), nil)
 	combined := view.SourceRow{
 		Href: s.route("/app/" + spec.segment), Label: text(combinedTitles[spec.kind]),

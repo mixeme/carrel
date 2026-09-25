@@ -342,7 +342,7 @@
         "method": "GET"
       }
     ],
-    "note": "5 of 7 collections ticked",
+    "note": "6 of 8 collections ticked",
     "sections": [
       {
         "account": "",
@@ -647,6 +647,73 @@
           }
         ],
         "state": "ok"
+      },
+      {
+        "account": "baikal",
+        "accountID": "a-baikal",
+        "rows": [
+          {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "401 Unauthorized — the saved password was refused. Open Connections to update it.",
+            "href": "/app/calendar/a-baikal/obshchij",
+            "label": "Общий",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-baikal\u0026c=obshchij",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-baikal\u0026c=obshchij",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-baikal/obshchij/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-baikal/obshchij/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-baikal\u0026c=obshchij",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "message": "password · 401",
+            "readOnly": false,
+            "retry": {
+              "enabled": true,
+              "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
+              "id": "source.retry",
+              "label": "Retry",
+              "method": "POST"
+            },
+            "state": "unavailable",
+            "tick": "on"
+          }
+        ],
+        "state": "unavailable"
       },
       {
         "account": "Subscriptions",

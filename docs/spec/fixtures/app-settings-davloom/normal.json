@@ -236,6 +236,18 @@
             "extra": null,
             "hint": "",
             "kind": "check",
+            "label": "nextcloud · Files",
+            "name": "col.a-nc-home|/alice/files/Files/",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "true"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
             "label": "radicale · vps · Дежурства",
             "name": "col.a-rad-vps|/alice/calendars/dezhurstva/",
             "options": [],
@@ -274,6 +286,42 @@
             "kind": "check",
             "label": "radicale · vps · Рассылки",
             "name": "col.a-rad-vps|/alice/contacts/rassylki/",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "true"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "baikal · Общий",
+            "name": "col.a-baikal|/alice/calendars/obshchij/",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "true"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "sftpgo · vps · Documents",
+            "name": "col.a-sftp-vps|/alice/files/Documents/",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "true"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "sftpgo · vps · Public",
+            "name": "col.a-sftp-vps|/alice/files/Public/",
             "options": [],
             "readOnly": false,
             "required": false,
@@ -322,7 +370,7 @@
         "method": "GET"
       },
       {
-        "count": 2,
+        "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
         "id": "settings.connections",
@@ -363,7 +411,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/app/files/published",
         "id": "settings.published",

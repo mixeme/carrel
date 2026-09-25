@@ -270,6 +270,21 @@
         "state": "empty"
       },
       {
+        "colour": "#9a9280",
+        "count": null,
+        "fromCache": false,
+        "message": "The server answered 401 Unauthorized.",
+        "retry": {
+          "enabled": true,
+          "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
+          "id": "source.retry",
+          "label": "Retry",
+          "method": "POST"
+        },
+        "stamp": "baikal · Общий",
+        "state": "error"
+      },
+      {
         "colour": "#5c6b73",
         "count": 0,
         "fromCache": false,
@@ -277,9 +292,27 @@
         "retry": null,
         "stamp": "feeds.example · Праздники РФ",
         "state": "empty"
+      },
+      {
+        "colour": "#67735c",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "nextcloud · Files",
+        "state": "empty"
+      },
+      {
+        "colour": "#6b5c73",
+        "count": 0,
+        "fromCache": false,
+        "message": "",
+        "retry": null,
+        "stamp": "sftpgo · vps · Documents",
+        "state": "empty"
       }
     ],
-    "summary": "Polled 11 of 11 sources · 1 record",
+    "summary": "Polled 13 of 14 sources · 1 record · 1 refused",
     "taskID": "t-task"
   },
   "print": {
@@ -397,6 +430,25 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "401 Unauthorized — the saved password was refused. Open Connections to update it.",
+            "href": "/app/calendar/a-baikal/obshchij",
+            "label": "Общий",
+            "menu": [],
+            "message": "password · 401",
+            "readOnly": false,
+            "retry": {
+              "enabled": true,
+              "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
+              "id": "source.retry",
+              "label": "Retry",
+              "method": "POST"
+            },
+            "state": "unavailable",
             "tick": "on"
           },
           {

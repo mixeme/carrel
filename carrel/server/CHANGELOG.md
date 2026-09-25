@@ -17,6 +17,45 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.50 — 2026-09-25
+
+### Added
+
+- **Published links count their opens** (`s-publish-1`, column «Opens»):
+  `PublishedRow.Opens` (C-6). A secret link is given to people outside, and
+  the one way to see it went further than meant is that it is opened. Every
+  open counts; a check that a link lives does not. The count is written
+  with «Last opened», at most once an hour; the opens since are held in
+  memory and shown, and a restart loses at most that hour's.
+- **A calendar link given out for some days says which** in the list:
+  «Личный · 10–31 August».
+- **The files root names the storage attachments go to** (`Purpose:
+  "attachments"`).
+
+### Changed
+
+- **The list of published links stands in the settings rail**, as the frame
+  draws it, with «Published links» on.
+- **A collection's own page shows what the last combined poll could not
+  read** in its rail, with Retry: a row that looked fine until the combined
+  view was opened again would say the wrong thing.
+- **The section's number counts the collections that answered**: one that
+  refused says why in its own row and does not take the sum to a dash.
+
+### Fixture set
+
+- File collections «Documents» and «Public» on `sftpgo · vps` and «Files» on
+  `nextcloud`, the attachments folder, `baikal · Общий` refusing with 401,
+  and the two links of `s-publish-1`. The screens of the files and of the
+  published links are taken on data, not in their empty state:
+  `app-files/empty.json`, `app-files-picker/empty.json` and
+  `app-files-published/empty.json` gave way to `normal.json`.
+- `docs/visual/fixtures/README.md` says how to load them by hand.
+
+### For consumers
+
+Show `opens` beside «Last opened»; an empty `lastSeen` is «never opened».
+
 ## v0.2.49 — 2026-09-25
 
 ### Fixed

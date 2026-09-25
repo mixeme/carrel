@@ -338,6 +338,19 @@
           "objects": null,
           "path": "/alice/contacts/kontakty/",
           "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#67735c",
+          "kinds": [
+            "file"
+          ],
+          "label": "Files",
+          "lastRead": "",
+          "menu": [],
+          "objects": null,
+          "path": "/alice/files/Files/",
+          "readOnly": false
         }
       ],
       "login": "alice",
@@ -564,6 +577,181 @@
       "state": "ok",
       "title": "radicale · vps",
       "trace": null
+    },
+    {
+      "accountID": "a-baikal",
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-baikal\u0026op=test",
+          "id": "connection.test",
+          "label": "Test",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-baikal\u0026op=edit",
+          "id": "connection.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections/disconnect?account=a-baikal",
+          "id": "connection.disconnect",
+          "label": "Disconnect",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-baikal\u0026op=rediscover",
+          "id": "connection.rediscover",
+          "label": "Look for changes",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/new?a=a-baikal",
+          "icon": "i-plus",
+          "id": "collection.new",
+          "label": "New collection",
+          "method": "GET"
+        }
+      ],
+      "collections": [
+        {
+          "changed": "",
+          "colour": "#9a9280",
+          "kinds": [
+            "event"
+          ],
+          "label": "Общий",
+          "lastRead": "",
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-baikal\u0026c=obshchij",
+              "id": "collection.rename",
+              "label": "Rename…",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-baikal\u0026c=obshchij",
+              "id": "collection.move",
+              "label": "Move to another server…",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-baikal\u0026c=obshchij",
+              "id": "collection.delete",
+              "label": "Delete…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
+          "objects": null,
+          "path": "/alice/calendars/obshchij/",
+          "readOnly": false
+        }
+      ],
+      "login": "alice",
+      "password": {
+        "reveal": {
+          "enabled": true,
+          "href": "/app/settings/unlock",
+          "id": "connection.password",
+          "label": "Show password",
+          "method": "GET"
+        },
+        "shown": false,
+        "value": ""
+      },
+      "server": "https://baikal.example/dav.php",
+      "state": "ok",
+      "title": "baikal",
+      "trace": null
+    },
+    {
+      "accountID": "a-sftp-vps",
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-sftp-vps\u0026op=test",
+          "id": "connection.test",
+          "label": "Test",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-sftp-vps\u0026op=edit",
+          "id": "connection.edit",
+          "label": "Edit",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/settings/connections/disconnect?account=a-sftp-vps",
+          "id": "connection.disconnect",
+          "label": "Disconnect",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/connections?account=a-sftp-vps\u0026op=rediscover",
+          "id": "connection.rediscover",
+          "label": "Look for changes",
+          "method": "POST"
+        }
+      ],
+      "collections": [
+        {
+          "changed": "",
+          "colour": "#6b5c73",
+          "kinds": [
+            "file"
+          ],
+          "label": "Documents",
+          "lastRead": "",
+          "menu": [],
+          "objects": null,
+          "path": "/alice/files/Documents/",
+          "readOnly": false
+        },
+        {
+          "changed": "",
+          "colour": "#735c6b",
+          "kinds": [
+            "file"
+          ],
+          "label": "Public",
+          "lastRead": "",
+          "menu": [],
+          "objects": null,
+          "path": "/alice/files/Public/",
+          "readOnly": true
+        }
+      ],
+      "login": "alice",
+      "password": {
+        "reveal": {
+          "enabled": true,
+          "href": "/app/settings/unlock",
+          "id": "connection.password",
+          "label": "Show password",
+          "method": "GET"
+        },
+        "shown": false,
+        "value": ""
+      },
+      "server": "https://files.example.org/dav",
+      "state": "ok",
+      "title": "sftpgo · vps",
+      "trace": null
     }
   ],
   "actions": [
@@ -711,7 +899,7 @@
         "method": "GET"
       },
       {
-        "count": 2,
+        "count": 4,
         "enabled": true,
         "href": "/app/settings/connections",
         "id": "settings.connections",
@@ -752,7 +940,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 2,
         "enabled": true,
         "href": "/app/files/published",
         "id": "settings.published",

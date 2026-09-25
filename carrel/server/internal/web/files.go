@@ -327,6 +327,12 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 		if !col.Gone {
 			row.Href = s.route(fileHref(conn.ID, col.Path, "", nil, true))
 		}
+		// What the storage is chosen for: the column the frame names
+		// «Purpose» (s-files-6). The contract has carried it all along and
+		// nothing filled it.
+		if a := blob.Attachments; a != nil && a.AccountID == col.AccountID && a.Path == col.Path {
+			row.Purpose = "attachments"
+		}
 		page.Collections = append(page.Collections, row)
 	}
 	page.Shortcuts = []view.Action{

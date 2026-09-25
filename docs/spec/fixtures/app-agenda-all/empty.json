@@ -309,7 +309,7 @@
         "method": "GET"
       }
     ],
-    "note": "0 of 7 collections ticked",
+    "note": "0 of 8 collections ticked",
     "sections": [
       {
         "account": "",
@@ -600,6 +600,67 @@
                 "danger": true,
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-rad-vps\u0026c=proekty",
+                "id": "collection.delete",
+                "label": "Delete…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "message": "",
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "off"
+          }
+        ],
+        "state": "ok"
+      },
+      {
+        "account": "baikal",
+        "accountID": "a-baikal",
+        "rows": [
+          {
+            "colour": "#9a9280",
+            "count": null,
+            "detail": "",
+            "href": "/app/calendar/a-baikal/obshchij",
+            "label": "Общий",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-baikal\u0026c=obshchij",
+                "id": "collection.rename",
+                "label": "Rename…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-baikal\u0026c=obshchij",
+                "id": "collection.move",
+                "label": "Move to another server…",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-baikal/obshchij/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import…",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/calendar/a-baikal/obshchij/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-baikal\u0026c=obshchij",
                 "id": "collection.delete",
                 "label": "Delete…",
                 "method": "GET",

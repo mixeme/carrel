@@ -1,27 +1,10 @@
 {
-  "collections": [],
   "details": null,
-  "empty": {
-    "actions": [
-      {
-        "enabled": true,
-        "href": "/app/settings/connections",
-        "icon": "i-server",
-        "id": "account.connect",
-        "label": "Connect account",
-        "method": "GET"
-      }
-    ],
-    "body": "Files come from a WebDAV storage. Connect one, then tick its folders in the rail.",
-    "details": null,
-    "role": "info",
-    "title": "No file storage is connected"
-  },
   "notices": [],
   "print": {
     "range": "",
     "taken": "",
-    "title": "Files"
+    "title": ""
   },
   "rail": {
     "about": {
@@ -31,126 +14,144 @@
       "label": "Carrel 0.0.1 · 786949a",
       "method": "GET"
     },
-    "foot": [
-      {
-        "enabled": true,
-        "href": "/app/sources/files",
-        "id": "rail.apply",
-        "label": "Apply",
-        "method": "POST"
-      },
-      {
-        "enabled": true,
-        "href": "/app/settings/connections",
-        "icon": "i-server",
-        "id": "account.connect",
-        "label": "Connect account",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/settings/connections?kind=folder\u0026op=feed",
-        "icon": "i-link",
-        "id": "feed.subscribe",
-        "label": "Subscribe to a folder",
-        "method": "GET"
-      }
-    ],
+    "foot": [],
     "nav": [
       {
         "count": null,
         "enabled": true,
         "href": "/app/contacts",
-        "id": "nav.contacts",
-        "label": "Contacts",
+        "icon": "i-back",
+        "id": "settings.back",
+        "label": "Back to app",
         "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
-        "href": "/app/calendar",
-        "id": "nav.calendar",
-        "label": "Calendar",
+        "href": "/app/settings/account",
+        "id": "settings.account",
+        "label": "Account",
+        "method": "GET"
+      },
+      {
+        "count": 4,
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "id": "settings.connections",
+        "label": "Connections",
         "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
-        "href": "/app/tasks",
-        "id": "nav.tasks",
-        "label": "Tasks",
+        "href": "/app/settings/attachments",
+        "id": "settings.attachments",
+        "label": "Attachments",
         "method": "GET"
       },
       {
         "count": null,
         "enabled": true,
-        "href": "/app/notes",
-        "id": "nav.notes",
-        "label": "Notes",
+        "href": "/app/settings/devices",
+        "id": "settings.devices",
+        "label": "New device",
         "method": "GET"
-      },
-      {
-        "count": null,
-        "enabled": true,
-        "href": "/app/files",
-        "id": "nav.files",
-        "label": "Files",
-        "method": "GET",
-        "on": true
       },
       {
         "count": 0,
         "enabled": true,
-        "href": "/app/duplicates",
-        "id": "nav.duplicates",
-        "label": "Duplicates",
+        "href": "/app/settings/davloom",
+        "id": "settings.davloom",
+        "label": "davloom",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/settings/backup",
+        "id": "settings.backup",
+        "label": "Backup",
+        "method": "GET"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "id": "settings.published",
+        "label": "Published links",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/settings/appearance",
+        "id": "settings.appearance",
+        "label": "Appearance",
         "method": "GET"
       }
     ],
-    "note": "0 of 0 storages ticked",
-    "sections": [
-      {
-        "account": "",
-        "accountID": "",
-        "rows": [
-          {
-            "colour": "",
-            "count": null,
-            "detail": "",
-            "href": "/app/files",
-            "label": "Selected collections",
-            "menu": [],
-            "message": "",
-            "readOnly": false,
-            "retry": null,
-            "state": "ok",
-            "tick": "off"
-          }
-        ],
-        "state": "ok"
-      }
-    ],
+    "note": "",
+    "sections": [],
     "tags": []
   },
-  "shortcuts": [
+  "rows": [
     {
-      "enabled": true,
-      "href": "/app/settings/attachments",
-      "icon": "i-file",
-      "id": "files.attachments",
-      "label": "Attachments",
-      "method": "GET"
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/p/link-smeta-token",
+          "id": "publish.copy",
+          "label": "Copy",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/publish?id=link-smeta\u0026op=revoke",
+          "id": "publish.revoke",
+          "label": "Revoke",
+          "method": "POST"
+        }
+      ],
+      "created": "6 hours ago",
+      "expires": "No expiry",
+      "kind": "file",
+      "lastSeen": "",
+      "link": "/p/link-smeta-token",
+      "opens": 0,
+      "stamp": "sftpgo · vps · Documents",
+      "title": "смета-подрядчик.pdf"
     },
     {
-      "enabled": true,
-      "href": "/app/files/published",
-      "icon": "i-link",
-      "id": "files.published",
-      "label": "Published",
-      "method": "GET"
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/p/link-lichnyj-token",
+          "id": "publish.copy",
+          "label": "Copy",
+          "method": "GET"
+        },
+        {
+          "danger": true,
+          "enabled": true,
+          "href": "/app/publish?id=link-lichnyj\u0026op=revoke",
+          "id": "publish.revoke",
+          "label": "Revoke",
+          "method": "POST"
+        }
+      ],
+      "created": "21 hours ago",
+      "expires": "8 September 2026",
+      "kind": "event",
+      "lastSeen": "8 hours ago",
+      "link": "/p/link-lichnyj-token",
+      "opens": 12,
+      "stamp": "nextcloud · Личный",
+      "title": "Личный · 10–31 August"
     }
   ],
-  "title": "Files",
+  "title": "Published links",
   "top": {
     "newMenu": [
       {

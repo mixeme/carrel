@@ -19,6 +19,7 @@ import (
 	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -118,6 +119,12 @@ var mockupSet = []mockupCollection{
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "radicale-vps/proekty.ics"},
 	{account: "radicale · vps", slug: "dezhurstva", name: "Дежурства", colour: "#8C6239",
 		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}, file: "radicale-vps/dezhurstva.ics"},
+	// «Общий» is a calendar on a third server whose saved password has
+	// stopped fitting: every calendar frame draws it refusing, «password ·
+	// 401», with Retry (s-agenda-1…3). It is connected, ticked, and then the
+	// stand refuses (mockupRefused).
+	{account: "baikal", slug: "obshchij", name: "Общий", colour: "#9A9280",
+		kinds: []view.Kind{view.KindEvent}, comps: []string{"VEVENT"}},
 }
 
 // mockupApp is the instance of the fixtures: two connections labelled as the
@@ -149,6 +156,158 @@ type mockupFeed struct {
 var mockupFeedSet = []mockupFeed{
 	{file: "feeds/ru-holidays.ics", url: "https://feeds.example/ru-holidays.ics", name: "Праздники РФ", id: "f-ru-holidays", events: true},
 	{file: "feeds/league-season.ics", url: "https://league.example/season.ics", name: "Расписание лиги", id: "f-league", refused: true},
+}
+
+// mockupFileCols are the file collections of the set, as the frames of the
+// files draw them (s-files-1…6): «Documents» and «Public» on a file server of
+// their own, «Files» beside nextcloud's calendars. «Public» is read-only and
+// unticked — «2 of 3».
+var mockupFileCols = []struct {
+	account, slug, name, local string
+	readOnly, unticked         bool
+}{
+	{account: "sftpgo · vps", slug: "Documents", name: "Documents", local: "sftpgo-vps/Documents"},
+	{account: "sftpgo · vps", slug: "Public", name: "Public", local: "sftpgo-vps/Public", readOnly: true, unticked: true},
+	{account: "nextcloud", slug: "Files", name: "Files", local: "nextcloud-home/Files"},
+}
+
+// mockupFiles puts the file collections of the set in the catalog and their
+// files on the stands, ticks the two the frames tick, and makes
+// «Documents / carrel / attachments» the folder attachments go to. The file
+// server is connected straight through the service: the stands speak CalDAV,
+// and discovery would not take one for a file-only server; the README says
+// how a person loads the same by hand.
+func mockupFiles(t *testing.T, h *harness, sess *session.Session, root string, servers map[string]*davtest.Server) (map[string]string, map[string]string) {
+	t.Helper()
+	sftp := davtest.New(t)
+	sftp.Login, sftp.Password = "alice", "secret"
+	servers["sftpgo · vps"] = sftp
+	key, _ := sess.DataKey()
+	blob, _ := h.users.Catalog(sess.AccountID(), key)
+	ids := map[string]string{}
+	for _, c := range blob.Connections {
+		ids[connLabelOf(c)] = c.ID
+	}
+	paths := map[string]string{}
+	var sftpCols []sealed.Collection
+	for _, fc := range mockupFileCols {
+		srv := servers[fc.account]
+		path := davtest.FileRoot + fc.slug + "/"
+		paths[fc.slug] = path
+		srv.SeedFolder(path)
+		dir := filepath.Join(root, filepath.FromSlash(fc.local))
+		err := filepath.WalkDir(dir, func(p string, d os.DirEntry, err error) error {
+			if err != nil || p == dir {
+				return err
+			}
+			rel, _ := filepath.Rel(dir, p)
+			target := path + filepath.ToSlash(rel)
+			if d.IsDir() {
+				srv.SeedFolder(target + "/")
+				return nil
+			}
+			data, err := os.ReadFile(p)
+			if err != nil {
+				return err
+			}
+			srv.SeedFile(target, string(data))
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		col := sealed.Collection{Path: path, Name: fc.name, Kinds: []view.Kind{view.KindFile}, ReadOnly: fc.readOnly}
+		if fc.account == "sftpgo · vps" {
+			sftpCols = append(sftpCols, col)
+			continue
+		}
+		col.AccountID = ids[fc.account]
+		blob.Collections = append(blob.Collections, col)
+	}
+	sealedBlob, err := sealed.Seal(key, blob, sess.Login())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		st.UserByID(sess.AccountID()).SealedBlob = sealedBlob
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	sftpID, err := h.users.AddConnection(sess.AccountID(), key, sealed.Connection{
+		Label: "sftpgo · vps", Server: sftp.URL, Login: "alice", Password: "secret", FileRoot: sftp.URL,
+	}, sftpCols)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids["sftpgo · vps"] = sftpID
+
+	var picks []sealed.Selection
+	for _, fc := range mockupFileCols {
+		if !fc.unticked {
+			picks = append(picks, sealed.Selection{Kind: view.KindFile, AccountID: ids[fc.account], Path: paths[fc.slug]})
+		}
+	}
+	if err := h.users.SetSelection(sess.AccountID(), key, view.KindFile, picks); err != nil {
+		t.Fatal(err)
+	}
+	if err := h.users.SetAttachmentFolder(sess.AccountID(), key, sealed.AttachmentFolder{
+		AccountID: sftpID, Path: paths["Documents"], Folder: []string{"carrel", "attachments"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	return ids, paths
+}
+
+// mockupPublished gives out the two links of the frames (s-publish-1) as a
+// person does, through the sheet: «Личный» for 10–31 August, made the day
+// before the set's day and opened a dozen times since, and
+// «смета-подрядчик.pdf» without an expiry, never opened. The frames date
+// them after the set's day; here they are before it (to-typecase, task 6).
+//
+// The token and the identifier of a link are issued when it is made; what
+// it returns names them for the fixtures.
+func mockupPublished(t *testing.T, h *harness, sess *session.Session, ids, paths map[string]string) map[string]string {
+	t.Helper()
+	at := func(day string) {
+		h.srv.SetClock(mockupDayAt(t, day))
+		h.users.SetClock(mockupDayAt(t, day))
+	}
+	give := func(q url.Values) string {
+		rec := h.do(postForm("/app/publish", sess, q))
+		if rec.Code != 200 {
+			t.Fatalf("publish %v: %d %s", q, rec.Code, rec.Body.String())
+		}
+		link := string(decode[view.PublishSheet](t, rec).Link)
+		if link == "" {
+			t.Fatalf("publish %v: no link", q)
+		}
+		return strings.TrimPrefix(link[strings.Index(link, "/p/"):], "/p/")
+	}
+	names := map[string]string{}
+	at("2026-08-09 19:20")
+	calendar := give(url.Values{
+		"k": {"calendar"}, "a": {ids["nextcloud"]}, "c": {davtest.CalendarHome + "lichnyj/"},
+		"how": {"range"}, "from": {"2026-08-10"}, "to": {"2026-08-31"}, "download": {"on"},
+	})
+	at("2026-08-10 08:41")
+	for i := 0; i < 12; i++ {
+		if rec := h.do(get("/p/"+calendar, nil)); rec.Code != 200 {
+			t.Fatalf("open the calendar's link: %d %s", rec.Code, rec.Body.String())
+		}
+	}
+	at("2026-08-10 11:05")
+	file := give(url.Values{
+		"k": {"files"}, "a": {ids["sftpgo · vps"]}, "c": {paths["Documents"]},
+		"f": {"carrel/attachments/смета-подрядчик.pdf"}, "lives": {"never"},
+	})
+	h.srv.SetClock(mockupNow(t))
+	h.users.SetClock(mockupNow(t))
+	names[calendar], names[file] = "link-lichnyj-token", "link-smeta-token"
+	for _, l := range h.users.PublishedLinks(sess.AccountID()) {
+		names[l.ID] = "link-" + map[string]string{"event": "lichnyj", "file": "smeta"}[l.Target.Kind]
+	}
+	return names
 }
 
 // mockupFeeds subscribes to the two feeds of the set as a person does — the
@@ -334,7 +493,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	root := mockupRoot(t)
 	servers := map[string]*davtest.Server{}
 	at := mockupNow(t)
-	for _, label := range []string{"nextcloud", "radicale · vps"} {
+	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
 		srv := davtest.New(t)
 		srv.Login, srv.Password = "alice", "secret"
 		// The stands keep the day of the frames: «changed on the server» is
@@ -406,7 +565,7 @@ func newMockupApp(t *testing.T) *mockupApp {
 	})); rec.Code != 303 {
 		t.Fatalf("name the instance: %d %s", rec.Code, rec.Body.String())
 	}
-	for _, label := range []string{"nextcloud", "radicale · vps"} {
+	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
 		rec := h.do(postForm("/app/settings/connections", sess, url.Values{
 			"label": {label}, "server": {servers[label].URL}, "login": {"alice"}, "password": {"secret"},
 		}))
@@ -415,13 +574,25 @@ func newMockupApp(t *testing.T) *mockupApp {
 		}
 	}
 	tickMockup(t, h, sess)
+	// The password of «baikal» stops fitting once it is connected and
+	// ticked: what the frames show of it is the refusal.
+	servers["baikal"].Refuse("REPORT", 401, "")
 	linkMockupDuplicates(t, h, sess)
 	feeds, feedIDs := mockupFeeds(t, h, sess, root)
+	fileIDs, filePaths := mockupFiles(t, h, sess, root, servers)
+	links := mockupPublished(t, h, sess, fileIDs, filePaths)
 
 	app := &mockupApp{h: h, sess: sess, servers: servers, feeds: feeds, byAccount: feedIDs, byPath: map[string]string{}}
+	app.byAccount[fileIDs["sftpgo · vps"]] = "a-sftp-vps"
+	for issued, name := range links {
+		app.byAccount[issued] = name
+	}
+	for slug, path := range filePaths {
+		app.byPath[url.PathEscape(path)] = slug
+	}
 	key, _ := sess.DataKey()
 	blob, _ := h.users.Catalog(sess.AccountID(), key)
-	names := map[string]string{"nextcloud": "a-nc-home", "radicale · vps": "a-rad-vps"}
+	names := map[string]string{"nextcloud": "a-nc-home", "radicale · vps": "a-rad-vps", "baikal": "a-baikal"}
 	seen := 0
 	for _, col := range mockupSet {
 		for _, c := range blob.Collections {
@@ -556,6 +727,8 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	for label, name := range map[string]string{
 		"nextcloud":      "https://nextcloud.example/dav.php",
 		"radicale · vps": "https://radicale.example",
+		"sftpgo · vps":   "https://files.example.org/dav",
+		"baikal":         "https://baikal.example/dav.php",
 	} {
 		if srv := a.servers[label]; srv != nil {
 			s = strings.ReplaceAll(s, srv.URL, name)
@@ -1108,16 +1281,15 @@ func TestFixtureMoreStates(t *testing.T) {
 	})
 }
 
-// C-14.2: the files, and the link an invited person opens. The mockup set
-// holds no folder of files, so the three screens of the files stand in
-// their empty state — which is the truth of this set, not a gap in them.
+// C-14.2: the files, the links given out, and the link an invited person
+// opens.
 func TestFixtureFilesAndInvite(t *testing.T) {
 	app := newMockupApp(t)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	for _, one := range []struct{ dir, state, route string }{
-		{"app-files", "empty", "/app/files"},
-		{"app-files-published", "empty", "/app/files/published"},
-		{"app-files-picker", "empty", "/app/files/picker?for=upload"},
+		{"app-files", "normal", "/app/files"},
+		{"app-files-published", "normal", "/app/files/published"},
+		{"app-files-picker", "normal", "/app/files/picker?for=upload"},
 	} {
 		t.Run(one.dir, func(t *testing.T) {
 			app.compare(t, one.dir+"/"+one.state+".json", app.h.do(get(one.route, app.sess)))

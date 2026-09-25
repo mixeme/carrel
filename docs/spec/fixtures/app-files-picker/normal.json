@@ -1,0 +1,82 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/files/a-sftp-vps/Documents/upload/carrel/attachments/",
+      "id": "files.picker.upload",
+      "label": "Upload here",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files/picker?for=upload",
+      "id": "files.picker.choose",
+      "label": "Choose this folder",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/files",
+      "id": "files.picker.cancel",
+      "label": "Cancel",
+      "method": "GET"
+    }
+  ],
+  "purpose": "Upload files: where to put them. The folder is the attachment folder from Settings → Attachments unless you choose another here; the next upload from this menu goes where you chose last. A name already taken is refused, not overwritten.",
+  "tree": {
+    "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+    "nodes": [
+      {
+        "children": [],
+        "expanded": false,
+        "id": "/app/files/a-nc-home/Files/",
+        "label": "Files",
+        "readOnly": false,
+        "stamp": "nextcloud · Files"
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "expanded": false,
+                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
+                    "label": "2026-07",
+                    "readOnly": false,
+                    "stamp": ""
+                  }
+                ],
+                "expanded": true,
+                "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+                "label": "attachments",
+                "readOnly": false,
+                "stamp": ""
+              }
+            ],
+            "expanded": true,
+            "id": "/app/files/a-sftp-vps/Documents/carrel/",
+            "label": "carrel",
+            "readOnly": false,
+            "stamp": ""
+          }
+        ],
+        "expanded": true,
+        "id": "/app/files/a-sftp-vps/Documents/",
+        "label": "Documents",
+        "readOnly": false,
+        "stamp": "sftpgo · vps · Documents"
+      },
+      {
+        "children": [],
+        "expanded": false,
+        "id": "/app/files/a-sftp-vps/Public/",
+        "label": "Public",
+        "readOnly": true,
+        "stamp": "sftpgo · vps · Public"
+      }
+    ]
+  }
+}

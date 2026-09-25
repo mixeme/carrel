@@ -264,7 +264,7 @@
     ],
     "nav": [
       {
-        "count": null,
+        "count": 5,
         "enabled": true,
         "href": "/app/contacts",
         "id": "nav.contacts",
@@ -321,7 +321,7 @@
         "rows": [
           {
             "colour": "",
-            "count": null,
+            "count": 5,
             "detail": "",
             "href": "/app/contacts",
             "label": "Combined address book",

@@ -97,5 +97,6 @@ type PublishedRow struct {
 	Created  When     `json:"created"`
 	Expires  Text     `json:"expires"`
 	LastSeen When     `json:"lastSeen"`
+	Opens    int      `json:"opens"`
 	Actions  []Action `json:"actions"` // Revoke
 }
