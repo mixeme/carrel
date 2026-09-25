@@ -579,6 +579,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-drop:not(.is-bar) > .tc-menu.is-pop{margin-top:4px;font-weight:400;text-align:left}
 /* Рубрика внутри меню: говорит, откуда взялся набор строк. */
 .tc-menu > .tc-rubric{padding:4px 8px 6px}
+/* Поиск в длинном списке — поле во всю ширину меню, над строками. */
+.tc-menu > .tc-in{display:block;width:100%;margin-bottom:4px}
 .tc-menu__item{display:flex;align-items:center;gap:9px;height:28px;padding:0 8px;border-radius:3px;font-size:12.5px}
 .tc-menu__item.is-on{background:var(--tc-card)}
 .tc-menu__item > svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;opacity:.75}
@@ -2721,7 +2723,7 @@ Read  2 min ago</div>
   <div class="frame" data-frame="s-contacts-9">
     <div class="frame-label"><span>New contact · стрелка</span><span class="frag">меню</span><i>куда писать</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <div class="tc-menu">
+      <div class="tc-menu tc-menu--w290">
         <span class="tc-rubric">Write into</span>
         <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>Контакты<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></button>
         <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>Архив</button>
@@ -2872,6 +2874,38 @@ Read  2 min ago</div>
 </div>
 <figcaption>Телефоны и почта — повторяющиеся строки с кнопкой «Add», а не заранее насыпанные пустые поля. Кадрирование фотографии — отдельный слой с перетаскиванием; числа остаются запасным путём на клавиатуре (и единственным на узком экране, где U-9 просит центральный кроп). Формат даты — плейсхолдер пустого поля; набранное значение само его показывает. ETag из шапки убран — человеку с ним делать нечего; конфликт сам покажет, что разошлось.</figcaption>
 </figure>
+
+<div class="frames">
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-contacts-12">
+    <div class="frame-label"><span>Подпись телефона</span><span class="frag">список</span><i>поле Label</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">mobile</button>
+        <button class="tc-menu__item" type="button" role="menuitem">work</button>
+        <button class="tc-menu__item" type="button" role="menuitem">home</button>
+        <button class="tc-menu__item" type="button" role="menuitem">main</button>
+        <button class="tc-menu__item" type="button" role="menuitem">fax</button>
+        <button class="tc-menu__item" type="button" role="menuitem">other</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Подписи — типы vCard: другой клиент покажет их своими словами, а не нашим текстом.</figcaption>
+  </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-contacts-13">
+    <div class="frame-label"><span>Подпись почты</span><span class="frag">список</span><i>поле Label</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">work</button>
+        <button class="tc-menu__item" type="button" role="menuitem">home</button>
+        <button class="tc-menu__item" type="button" role="menuitem">other</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>У почты типов меньше, чем у телефона: vCard различает только рабочую, домашнюю и прочую.</figcaption>
+  </figure>
+</div>
 
 <figure>
 <div class="frame" data-frame="s-contacts-4" data-screen="/app/contacts/{account}/{col}/{uid}/edit" data-part="no-photo">
@@ -3438,7 +3472,7 @@ Read  2 min ago</div>
           </ul>
         </div>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach</button></div>
+          <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li>release-checklist.md <span class="tc-dim">text/markdown · 3 KB</span> <span class="tc-badge">in the event</span></li>
           </ul>
@@ -3671,6 +3705,76 @@ SEQUENCE  2</div>
 
 <div class="frames">
   <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-agenda-7">
+    <div class="frame-label"><span>Статус события</span><span class="frag">список</span><i>поле Status</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="tc-menu__item" type="button" role="menuitem">No status</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">Tentative</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">Confirmed</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Cancelled</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Три статуса iCalendar и «без статуса»: у большинства событий его нет вовсе, и это не то же самое, что Confirmed.</figcaption>
+  </figure>
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-agenda-8">
+    <div class="frame-label"><span>Часовой пояс события</span><span class="frag">список</span><i>поле Time zone</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <input class="tc-in" type="search" placeholder="Find a zone" aria-label="Find a zone">
+        <span class="tc-rubric">As sent</span>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">Europe/Moscow</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">Asia/Yekaterinburg</button>
+        <button class="tc-menu__item" type="button" role="menuitem">UTC</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">Floating — the same clock time anywhere</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Поясов сотни, поэтому сверху поиск. Первым стоит пояс, с которым событие пришло, — его и оставляют чаще всего; «плавающее» время — отдельная строка, потому что это не пояс, а его отсутствие.</figcaption>
+  </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-agenda-9">
+    <div class="frame-label"><span>Напоминание</span><span class="frag">список</span><i>поле First</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="tc-menu__item" type="button" role="menuitem">At the time</button>
+        <button class="tc-menu__item" type="button" role="menuitem">5 minutes before</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">10 minutes before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">30 minutes before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">1 hour before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">1 day before</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">No reminder</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Шаги, которыми напоминания задают почти все клиенты. Своё число минут приходит с сервера как есть и встаёт в этот список строкой.</figcaption>
+  </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-agenda-10">
+    <div class="frame-label"><span>Повторение</span><span class="frag">список</span><i>поле Frequency</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="tc-menu__item" type="button" role="menuitem">Does not repeat</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">Daily</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">Weekly</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Monthly</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Yearly</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Частота; всё тоньше — дни недели, «до» и «сколько раз» — рядом полями, а редкие правила — в Advanced RRULE.</figcaption>
+  </figure>
+</div>
+
+<div class="frames">
+  <figure style="flex:0 1 250px">
   <div class="frame" data-frame="s-agenda-6">
     <div class="frame-label"><span>Attach · стрелка</span><span class="frag">меню</span><i>вложение</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
@@ -3680,7 +3784,7 @@ SEQUENCE  2</div>
       </div>
     </div>
   </div>
-  <figcaption>Кнопка берёт файл с этого компьютера — это частый случай. Стрелка добавляет второй: файл, который уже лежит в Files, выбирается тем же деревом, что при переносе.</figcaption>
+  <figcaption>Кнопка берёт файл с этого компьютера — это частый случай. Стрелка добавляет второй: файл, который уже лежит в Files, выбирается тем же деревом, что при переносе. Стрелка у Attach одна везде — в форме, на карточке и в правке заметки.</figcaption>
   </figure>
 </div>
 
@@ -3799,7 +3903,7 @@ SEQUENCE  2</div>
         <div class="tc-sec"><div class="tc-rubric">Description</div><div class="tc-prose tc-prose--t13">Зарядки, переходник, распечатать посадочный.</div></div>
         <div class="tc-sec"><div class="tc-rubric">Related</div><ul class="tc-sec__list"><li><span class="tc-dim--accent">Поездка в Казань</span> <span class="tc-dim">· event</span></li></ul></div>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach</button></div>
+          <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li>посадочный-казань.pdf <span class="tc-dim">application/pdf · 128 KB</span> <span class="tc-badge">in the task</span></li>
           </ul>
@@ -3832,7 +3936,7 @@ SEQUENCE  2</div>
   <div class="frame" data-frame="s-tasks-5">
     <div class="frame-label"><span>New task · стрелка</span><span class="frag">меню</span><i>куда писать</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <div class="tc-menu">
+      <div class="tc-menu tc-menu--w290">
         <span class="tc-rubric">Write into</span>
         <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>Дела<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></button>
         <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>Работа</button>
@@ -3979,7 +4083,7 @@ Read  2 min ago · not changed on server</div>
           <div class="tc-fset">
             <div class="tc-rubric">Progress</div>
             <div class="tc-field tc-field--sm"><label>Status</label><button class="tc-in is-pick" type="button">Needs action</button></div>
-            <div class="tc-field tc-field--xs"><label>Priority</label><button class="tc-in is-pick" type="button">1</button></div>
+            <div class="tc-field tc-field--sm"><label>Priority</label><button class="tc-in is-pick" type="button">High · 1</button></div>
             <div class="tc-field tc-field--sm"><label>Percent complete</label><input class="tc-in is-mono" type="text" value="0" aria-label="Percent complete"></div>
           </div>
           <div class="tc-fset">
@@ -4017,6 +4121,38 @@ Read  2 min ago · not changed on server</div>
 
 <div class="frames">
   <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-tasks-8">
+    <div class="frame-label"><span>Статус задачи</span><span class="frag">список</span><i>поле Status</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">Needs action</button>
+        <button class="tc-menu__item" type="button" role="menuitem">In process</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Completed</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Cancelled</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Четыре статуса iCalendar для задачи. Completed ставит и флажок в строке списка, а снятие флажка возвращает Needs action.</figcaption>
+  </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-tasks-9">
+    <div class="frame-label"><span>Приоритет</span><span class="frag">список</span><i>поле Priority</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="tc-menu__item" type="button" role="menuitem">No priority</button>
+        <span class="tc-menu__sep"></span>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">High · 1</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Medium · 5</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Low · 9</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>В iCalendar приоритет — число от 1 до 9. Словами — три ступени, и число рядом, потому что в карточке и у других клиентов видно именно его.</figcaption>
+  </figure>
+</div>
+
+<div class="frames">
+  <figure style="flex:0 1 250px">
   <div class="frame" data-frame="s-tasks-7">
     <div class="frame-label"><span>Attach · стрелка</span><span class="frag">меню</span><i>вложение</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
@@ -4026,7 +4162,7 @@ Read  2 min ago · not changed on server</div>
       </div>
     </div>
   </div>
-  <figcaption>Кнопка берёт файл с этого компьютера — это частый случай. Стрелка добавляет второй: файл, который уже лежит в Files, выбирается тем же деревом, что при переносе.</figcaption>
+  <figcaption>Кнопка берёт файл с этого компьютера — это частый случай. Стрелка добавляет второй: файл, который уже лежит в Files, выбирается тем же деревом, что при переносе. Стрелка у Attach одна везде — в форме, на карточке и в правке заметки.</figcaption>
   </figure>
 </div>
 
@@ -4135,7 +4271,7 @@ Read  2 min ago · not changed on server</div>
           <div class="tc-field tc-field--md"><label>Tags</label><input class="tc-in" type="text" value="встречи, релиз" aria-label="Tags"></div>
         </div>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach</button></div>
+          <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li>2026-08-10-sync-board.png <span class="tc-dim">image/png · 412 KB</span> <span class="tc-badge">in the note</span></li>
             <li>запись-встречи.m4a <span class="tc-dim">audio/mp4 · 24 MB</span> <span class="tc-badge">Documents / carrel</span></li>
@@ -4175,7 +4311,7 @@ Read  2 min ago · not changed on server</div>
   <div class="frame" data-frame="s-notes-13">
     <div class="frame-label"><span>New note · стрелка</span><span class="frag">меню</span><i>куда писать</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
-      <div class="tc-menu">
+      <div class="tc-menu tc-menu--w290">
         <span class="tc-rubric">Write into</span>
         <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>Записи<span class="tc-mono tc-push tc-mono--t10-dusty">last used</span></button>
         <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>Дневник</button>
@@ -4260,7 +4396,7 @@ Read  2 min ago · not changed on server</div>
               </div>
             </div>
             <div class="tc-docmeta__sec">
-              <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach</button></div>
+              <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></div>
               <div class="tc-line__text">2026-08-10-sync-board.png <span class="tc-dim">· 412 KB</span> <span class="tc-badge">in the note</span></div>
               <div class="tc-line__text">запись-встречи.m4a <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span></div>
             </div>
@@ -4373,7 +4509,7 @@ Read  2 min ago</div>
               </div>
             </div>
             <div class="tc-docmeta__sec">
-              <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach</button></div>
+              <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></div>
               <div class="tc-line__text">2026-08-10-sync-board.png <span class="tc-dim">· 412 KB</span> <span class="tc-badge">in the note</span></div>
               <div class="tc-line__text">запись-встречи.m4a <span class="tc-dim">· 24 MB</span> <span class="tc-badge">Documents / carrel</span></div>
             </div>
@@ -4417,7 +4553,7 @@ Read  2 min ago</div>
           <button class="tc-btn" type="button">• list</button>
           <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-task"/></svg>task</button>
           <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></button>
-          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach</button>
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg>Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button>
           <button class="tc-btn tc-bar__more" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button>
           <span class="tc-bar__right">
             <button class="tc-check" type="button"><span class="tc-tickrow__tick is-off"></span>Auto-save</button>
@@ -4471,6 +4607,21 @@ Read  2 min ago</div>
 </div>
   <figcaption><b>Правка.</b> Ради этого режим и делался: поле заголовка, поле текста и все поля под ним занимают всю ширину, а не колонку в 72&nbsp;ch. «Notebook», «Tags» и «Related to» растягиваются пропорционально, «Date» и «Time» остаются по содержимому — растянутое поле даты не становится полезнее, а растянутое поле тегов становится. <b>Рейл и боковая колонка убраны нарочно, а верхняя панель остаётся:</b> <b>Focus</b> прячет то, что отвлекает от текста, а не то, чем из текста выходят, — поиск, «New note» и меню пользователя стоят на месте, и <kbd class="tc-kbd" style="font-family:var(--tc-font-mono)">Esc</kbd> возвращает рейл обратно. Это единственный экран раздела 7 без рейла, и он без него по замыслу. Кнопки разметки вставляют обычные символы Markdown в текст — они помогают тем, кто синтаксис не помнит, и ничего не добавляют к тому, что уходит на сервер. Поля «когда» и «теги» стоят под текстом, а не над ним: сначала пишут, потом раскладывают. <b>«Связано с» — не поле для UID.</b> Человека не просят вписать <code>9e31-40b7-c012</code>. Поиск по мере набора: те же источники, что уже опрашиваются, показываются событиями, задачами, заметками и контактами; выбранное становится значком, который убирается крестиком. Ввод UID руками оставлен последним пунктом списка — для того, кто знает, что вводит. <b>Автосохранение — галочка, выключенная по умолчанию.</b> Сохранение заметки — запись на чужой сервер, и делать её незаметно нельзя; галочка — явное согласие писать по мере набора. Пока она снята, черновик живёт в этом окне до «Save». При уходе со страницы с несохранённым текстом браузер спросит.</figcaption>
 </figure>
+
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-notes-15">
+    <div class="frame-label"><span>Тетрадь</span><span class="frag">список</span><i>поле Notebook</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
+</div>
 
 <h3>Быстрая заметка с любого экрана</h3>
 <p>«Записать, пока не забыл» — действие, у которого не должно быть маршрута. Поэтому оно стоит в верхней панели, одинаково на всех экранах, и открывается не переходом на страницу, а листом поверх того, чем человек занят: список, календарь или карточка остаются на месте, и после сохранения он возвращается ровно туда, где был.</p>
@@ -4781,6 +4932,19 @@ Read  2 min ago</div>
   </div>
   <figcaption><b>Три поля, а не карточка.</b> Лист держит то, без чего контакта нет, — имя, — и две вещи, ради которых его чаще всего заводят на ходу: телефон и почту. Остальное человек допишет в полной форме, куда и ведёт «Open the card»: набранное переезжает туда заполненным, а записывается по-прежнему только по «Save» — до него на сервере ничего нет. <b>Книга стоит в шапке</b>, потому что вопрос «куда» у человека с четырьмя адресными книгами возникает раньше, чем «как назовём»; выбранная запоминается.<br><br><b>Display name режется слева направо:</b> первое слово — Given, всё после него — Family. «Пётр Ковалёв» даёт Петра в Given и Ковалёва в Family; «Ковалёв Пётр» перепутает поля, и подсказка это говорит, а не оставляет «split from the display name» без порядка.</figcaption>
   </figure>
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-notes-16">
+    <div class="frame-label"><span>Адресная книга</span><span class="frag">список</span><i>куда ляжет контакт</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
 
   <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-notes-9">
@@ -4876,6 +5040,40 @@ Read  2 min ago</div>
   </div>
   <figcaption><b>Событие — это заголовок, время и напоминание.</b> Дата и время стоят по содержимому и не растягиваются: растянутое поле даты не становится полезнее (то же правило, что в 7.3). «All day» гасит время, а не прячет его — исчезающие поля читаются как поломка. Напоминание стоит здесь, а не на карточке: встречу заводят, чтобы о ней напомнили, и откладывать это на второй экран значит потерять его. Календарь в шапке: у человека их семь, и промахнуться колонкой значит завести встречу в чужом расписании.</figcaption>
   </figure>
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-notes-17">
+    <div class="frame-label"><span>Календарь</span><span class="frag">список</span><i>куда ляжет событие</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-notes-18">
+    <div class="frame-label"><span>Напоминание</span><span class="frag">список</span><i>поле Remind</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="tc-menu__item" type="button" role="menuitem">At the time</button>
+        <button class="tc-menu__item" type="button" role="menuitem">5 minutes before</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">10 minutes before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">30 minutes before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">1 hour before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">1 day before</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">No reminder</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Тот же список, что в форме события.</figcaption>
+  </figure>
 
   <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-notes-10">
@@ -4958,6 +5156,18 @@ Read  2 min ago</div>
     </div>
   </div>
   <figcaption><b>Срок можно не ставить.</b> Задача без срока — обычная задача, и лист об этом говорит прямо, а не встречает пустым обязательным полем. Список в шапке — тот же выбор «куда», что у заметки и контакта.</figcaption>
+  </figure>
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-notes-19">
+    <div class="frame-label"><span>Список задач</span><span class="frag">список</span><i>куда ляжет задача</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -6706,7 +6916,7 @@ Read  2 min ago</div>
           <dt>Where</dt><dd>Переговорная 2</dd>
         </dl>
         <div class="tc-sec">
-          <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach</button></div>
+          <div class="tc-rubric">Attachments <button class="tc-btn is-sm" type="button">Attach<svg viewBox="0 0 24 24"><use href="#i-chev"/></svg></button></div>
           <ul class="tc-stack tc-stack--gap-6 tc-sec__list">
             <li>release-checklist.md <span class="tc-dim">text/markdown · 3 KB</span> <span class="tc-badge">in the event</span></li>
           </ul>
@@ -6779,6 +6989,24 @@ Read  2 min ago</div>
 <figcaption>Первый шаг мастера — общий у контактов, событий и задач: одна коллекция, один файл. Меняются слово в заголовке и принимаемое расширение. У заметок источника два, и шаг у них свой, следующий. <b>«Into» стоит и здесь, и на предпросмотре</b> — одно поле, показанное там, где решение принимают, и там, где появляется повод его пересмотреть.</figcaption>
 </figure>
 
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-io-10">
+    <div class="frame-label"><span>Куда импортировать · контакты</span><span class="frag">список</span><i>поле Into</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Контакты</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Архив</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Команда<span class="tc-badge tc-push">ro</span></button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">New address book</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять. Последняя строка заводит новую книгу прямо отсюда.</figcaption>
+  </figure>
+</div>
+
 <figure>
 <div class="frame" data-frame="s-io-4" data-screen="/app/notes/{account}/{col}/import" data-part="source">
   <div class="frame-label"><span>Импорт заметок · шаг 1 из 3, источник</span><i>/app/notes/{account}/{col}/import</i></div>
@@ -6836,6 +7064,23 @@ Read  2 min ago</div>
 </div>
 <figcaption>Единственный род записей, у которого источника два, — потому и шаг у него свой. Второй легко не заметить: заметки можно взять прямо с того WebDAV, что уже подключён, — без скачивания и загрузки обратно. Оба ведут в один и тот же предпросмотр, нарисованный ниже, и запускает его каждый сам: «Preview file» у файла, «Preview folder» у папки.<br><br>Первым на шаге стоит не источник, а <b>назначение</b>: «Into» — то же поле, что на предпросмотре контактов, и по той же причине.<br><br><b>Рейл здесь — выход, не назначение.</b> Подсвечена тетрадь, из которой открыли мастер; нажатие на «Дневник» бросает мастер и открывает ту тетрадь. Куда лягут заметки — только поле Into. Дерево в карточке WebDAV — то же, что в «Move» и в быстрой загрузке: папку выбирают кликом, путь руками не набирают, отдельного диалога операционной системы нет — это уже подключённый сервер, не диск компьютера.</figcaption>
 </figure>
+
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-io-11">
+    <div class="frame-label"><span>Куда импортировать · заметки</span><span class="frag">список</span><i>поле Into</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">New notebook</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
+</div>
 
 <h3 id="io-preview">Шаг 2 · предпросмотр, четыре таблицы</h3>
 <p>Ниже — тот самый шаг, ради которого раздел переписан: четыре кадра вместо одного. Общее у них всё, кроме таблицы и счёта: шаги, шапка с файлом, поле «Into», сообщение «импорт всегда создаёт». Отличается то, что читают, — и отличается настолько, что подписи «то же самое, только колонки другие» не хватает.</p>
@@ -6951,6 +7196,27 @@ Read  2 min ago</div>
 <figcaption>Тот же мастер и другая таблица. У события смотрят <b>на срок</b>, а не на имя, поэтому вторая колонка — «When», и в ней три разных вида срока: повторение правилом, многодневное «весь день» и время в чужом поясе. Ломается событие тоже по-своему: без <code>DTEND</code> и <code>DURATION</code> неизвестно, сколько оно длится. И главная строка — четвёртая: <b>в одном <code>.ics</code> приходят и события, и задачи</b>, а календарная коллекция объявлена набором компонентов и берёт только события. Молча выбросить задачу нельзя — она посчитана в «skipped» и названа в таблице, вместе с тем, куда её нести.</figcaption>
 </figure>
 
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-io-12">
+    <div class="frame-label"><span>Куда импортировать · события</span><span class="frag">список</span><i>поле Into</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">New calendar</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
+</div>
+
 <figure>
 <div class="frame" data-frame="s-io-7" data-screen="/app/tasks/{account}/{col}/import">
   <div class="frame-label"><span>Импорт задач · шаг 2 из 3, предпросмотр</span><i>/app/tasks/{account}/{col}/import</i></div>
@@ -7007,6 +7273,23 @@ Read  2 min ago</div>
 </div>
 <figcaption>Расширение то же, <code>.ics</code>, и таблица всё равно другая: у задачи смотрят <b>на срок и на состояние</b>, а не на длительность. Отсюда «Due» вместо «When», прочерк как законное значение — задача без даты остаётся задачей, — и доля выполненного в результате. Четвёртая строка — зеркало календарной: событие, пришедшее в список задач, пропущено с тем же объяснением и той же подсказкой, куда его нести. Ровно из-за этой пары строк один кадр «календарь и задачи, у них похоже» был бы ложью: похожи они всем, кроме того, ради чего экран открывают.</figcaption>
 </figure>
+
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-io-13">
+    <div class="frame-label"><span>Куда импортировать · задачи</span><span class="frag">список</span><i>поле Into</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Дела</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">New task list</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
+</div>
 
 <figure>
 <div class="frame" data-frame="s-io-8" data-screen="/app/notes/{account}/{col}/import">
@@ -8076,6 +8359,18 @@ Read  2 min ago</div>
   </div>
   <figcaption><b>На кадре видно, из какой двери лист вышел:</b> нажата <b>New calendar</b> внизу рейла, и за скримом остался тот самый календарь, к списку которого прибавится новая коллекция. Вторая дверь — <b>New collection</b> в карточке аккаунта в настройках (7.11) — открывает этот же лист; отличается только экран за ним, и поле «On which server» тогда уже заполнено.<br><br>Первое поле — сервер, а не имя: коллекция всегда чья-то, и у человека с тремя аккаунтами вопрос «где» стоит раньше вопроса «как назвать». Не отвечающий сервер в списке не показан, и сказано почему, — вместо строки, выбор которой кончится ошибкой через десять секунд.<br><br><b>Адрес показан и правится.</b> Он кажется техничной мелочью, но именно по нему коллекцию находит восстановление из архива (7.15, «matched by path») и по нему же её знают уже настроенные клиенты; имя — только подпись. Автоматически он выводится из названия, поэтому в обычном случае поле не трогают.<br><br><b>«Что внутрь» — не украшение.</b> Задачи и заметки лежат в календарных коллекциях, и <code>supported-calendar-component-set</code> решает, куда новая коллекция попадёт в интерфейсе. Большинство серверов фиксирует набор при создании и потом не меняет — значит, это единственный момент, когда вопрос вообще можно задать, и промолчать здесь означает решить за человека молча.</figcaption>
   </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-profile-13">
+    <div class="frame-label"><span>На каком сервере</span><span class="frag">список</span><i>поле On which server</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">nextcloud</button>
+        <button class="tc-menu__item" type="button" role="menuitem">radicale · vps</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Только серверы, которые сейчас отвечают: baikal молчит, и завести на нём нечего — об этом говорит подсказка под полем.</figcaption>
+  </figure>
 
   <figure style="flex:1 1 100%">
   <div class="frame" data-frame="s-profile-6">
@@ -8729,6 +9024,35 @@ Read  2 min ago</div>
 </div>
 <figcaption><b>Вложение — обычный файл в обычной папке на вашем сервере</b>, а не запись в базе Carrel. Отсюда и вид экрана: коллекция, путь, и сразу под ними адрес целиком — тот, который можно подмонтировать сетевым диском и открыть без Carrel. Подпапка по месяцам — не украшение: плоская папка на десять тысяч файлов кладёт листинг у половины серверов DAV. <b>Мелкое вложение в папку не идёт вовсе.</b> До 2&nbsp;МБ файл ложится внутрь самой записи — двоичным <code>ATTACH</code>, — и запись едет целиком: телефон, у которого подключён один лишь календарь, получает вложение вместе с событием — без второго адреса, второго пароля и прав на файловый сервер. Дальше двух мегабайт так делать нельзя: запись пересылается целиком при каждой правке, и тридцать мегабайт base64 внутри <code>.ics</code> ломают синхронизацию всем клиентам коллекции, а не одному Carrel. Поэтому большое уходит в папку, а в записи остаётся ссылка. <b>Своего потолка на файл у Carrel по-прежнему нет:</b> в папке место чужое, и размер решает тот сервер; два мегабайта — не квота, а граница между двумя способами хранить.<br><br><b>«Смена папки ничего не переносит»</b> — единственная строка, которую этот экран обязан сказать вслух. Запись хранит путь к файлу; переложить файлы значило бы переписать чужие записи на чужом сервере пачкой, а этого Carrel не делает нигде.</figcaption>
 </figure>
+
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="attachments-2">
+    <div class="frame-label"><span>Куда складывать вложения</span><span class="frag">список</span><i>поле Collection</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Files</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>sftpgo · vps · Documents</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>sftpgo · vps · Public files<span class="tc-badge tc-push">ro</span></button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="attachments-3">
+    <div class="frame-label"><span>Как называть файл</span><span class="frag">список</span><i>поле Written as</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">Date, then the original name</button>
+        <button class="tc-menu__item" type="button" role="menuitem">The original name</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Record title, then the original name</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Дата впереди держит папку в порядке появления; имя записи — когда файлы ищут по тому, к чему они приложены.</figcaption>
+  </figure>
+</div>
 
 <h2 id="s-plan">7.13 Настройки · новое устройство</h2>
 <p>Дальше четыре запланированных экрана настроек: новое устройство, davloom, резервная копия, публикация. Вид (7.17) построен и стоит после них — последний пункт рейла, не хвост плана. Построено или нет, говорит метка на кадре.</p>
@@ -9593,6 +9917,22 @@ Read  2 min ago</div>
 <figcaption>Файловые коллекции в списке источников — по правилу равенства коллекций (<a href="#parity">2.1</a>), и рядом с каждой показан прошлый объём: два гигабайта и два мегабайта требуют разных решений о частоте и месте. Задачи и заметки отдельными строками не выбираются — они лежат в календарных коллекциях, и об этом сказано прямо, а не оставлено на догадку. Способ доставки — не настройка «куда положить файл», а выбор из трёх: на сервер, себе в браузер, и то и другое; у «себе» нет ни папки, ни срока хранения, ни расписания, потому что некому отдавать файл в три часа ночи. Источники выбираются тем же компонентом, что и везде: аккаунт с трёхпозиционным флажком, под ним коллекции с полосками. Ничего нового учить не нужно — это тот же рейл, только развёрнутый в сетку. <b>Шифрование архива — флажок, а не данность:</b> по умолчанию включено, но копия на диск, к которому и так никто, кроме вас, не подходит, вполне может лежать открытой — и тогда её распакует любой архиватор, без Carrel. Правило записано в S-24.2: включено по умолчанию, выключается осознанно, и там же сказано, чем это оборачивается вместе с сохранённым триггер-паролем (S-24.4).<br><br><b>Наружу отдаётся строка, а не пароль.</b> Тот, кто включил внешний триггер, пришёл не за секретом: ему нужно, чтобы копия снималась в три часа ночи, а для этого нужна строка в crontab на машине с часами. Пароль в ней уже стоит, поэтому отдельным полем он не нужен — собрать команду по документации человек может и сам, но это работа, которую мы умеем сделать за него, и делаем. Пароль сам по себе убран под раскрывашку внизу карточки: он нужен тому, кто дёргает API руками, и таких меньшинство — <a href="#trigger-secret">но им он нужен по-настоящему</a>, вместе с остальными эндпоинтами.<br><br><b>Строка одна и без переносов.</b> crontab не понимает продолжения по обратному слэшу, и красиво разложенная на четыре строки команда сломается ровно у того, кто ей поверил; перенос на экране делает браузер, а «Copy the line» кладёт в буфер одну строку. Время стоит внутри неё, а не полем на этой странице: расписание живёт на той машине, и два места, где оно якобы задаётся, разъехались бы в первый же месяц. Часов у Carrel нет не по недосмотру — планировщик внутри означал бы пароль, сохранённый на диске рядом с обёрткой ключа, то есть ровно ту уступку, которой S-2 избегает.<br><br><b>Пароль появляется по нажатию и виден один раз</b> — сразу, не дожидаясь сохранения задания: иначе человек сохраняет задание и остаётся с флажком, за которым ничего не видно. Токен выдаётся <b>на задание</b>, а не на аккаунт: машина, которая запускает рабочую копию по расписанию, не должна уметь запускать личную.</figcaption>
 </figure>
 
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-backup-9">
+    <div class="frame-label"><span>Куда класть архив</span><span class="frag">список</span><i>поле Collection</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Files</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>sftpgo · vps · Documents</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>sftpgo · vps · Public files<span class="tc-badge tc-push">ro</span></button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
+</div>
+
 <figure>
 <div class="frame" data-frame="s-backup-3">
   <div class="frame-label"><span>Резервная копия · задание, что и куда</span><i>тот же редактор, назначение Both</i></div>
@@ -10074,6 +10414,21 @@ https://carrel.example/api/backup/run?job=personal</textarea>
     </div>
   </div>
   <figcaption><b>Этот лист и есть создание публикации календаря.</b> Открывается из «Publish a link» в меню строки, карточки или коллекции, поверх того календаря, который выбран; другого входа нет. Шапка называет, что уходит по ссылке, — спрашивать «что публикуют» незачем. Диапазон и весь календарь — единственный настоящий выбор этого вида: две разные ссылки на один объект. <b>Срок — полем «Link lives for»:</b> 7, 14 или 30 дней, по умолчанию 30, и «No expiry» — ссылка без срока, которую закрывает только «Revoke»; в списке выданных ссылок у неё так и написано.</figcaption>
+  </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-publish-14">
+    <div class="frame-label"><span>Срок ссылки</span><span class="frag">список</span><i>поле Link lives for</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="tc-menu__item" type="button" role="menuitem">7 days</button>
+        <button class="tc-menu__item" type="button" role="menuitem">14 days</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">30 days</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">No expiry</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Один список во всех листах публикации. «No expiry» — под чертой: такую ссылку закрывает только Revoke.</figcaption>
   </figure>
 
 <figure style="flex:1 1 100%">
@@ -10751,7 +11106,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
           <div class="tc-rubric">Dates and times</div>
           <div class="tc-field tc-field--md"><label>Week starts on</label><button class="tc-in is-pick" type="button">Monday</button></div>
           <div class="tc-field tc-field--md"><label>Time</label><button class="tc-in is-pick" type="button">24-hour</button></div>
-          <div class="tc-field tc-field--lg"><label>Time zone</label><button class="tc-in is-pick" type="button">Europe/Moscow <span class="tc-dim tc-dim--ml6">this instance</span></button></div>
+          <div class="tc-field tc-field--lg"><label>Time zone</label><input class="tc-in" type="text" value="Europe/Moscow · this instance" aria-label="Time zone" readonly></div>
           <div class="tc-field tc-grow"><span class="tc-field__hint">Week start and 12/24-hour clock live in the account: time is assembled on the server, so another browser sees the same. Time zone is one per instance, set by the administrator — an event shown in two zones to two people is a source of mistakes, not a convenience.</span></div>
         </div>
       </div>
@@ -10760,6 +11115,34 @@ https://carrel.example/api/backup/run?job=personal</textarea>
 </div>
 <figcaption>Последний пункт рейла. <b>Два места хранения, и они не смешиваются.</b> Тема, плотность и колонки списка — этот браузер, <code>localStorage</code>: заводить поле на сервере ради переключателя темы значит писать в базу при каждом клике. Первый день недели и 12/24 часа — <b>аккаунт</b>: время собирается на сервере, и другой браузер должен увидеть те же часы. Часовой пояс — одно на экземпляр, его ставит администратор. Подзаголовок не говорит «Kept in this browser» про весь экран: для часов это неверно.</figcaption>
 </figure>
+
+<div class="frames">
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="appearance-2">
+    <div class="frame-label"><span>Начало недели</span><span class="frag">список</span><i>поле Week starts on</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">Monday</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Sunday</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Saturday</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Три дня, с которых неделю начинают в разных странах.</figcaption>
+  </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="appearance-3">
+    <div class="frame-label"><span>Формат времени</span><span class="frag">список</span><i>поле Time</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">24-hour</button>
+        <button class="tc-menu__item" type="button" role="menuitem">12-hour</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Часовой пояс рядом не выбирается: он один на экземпляр, его задаёт администратор.</figcaption>
+  </figure>
+</div>
 
 
 <h2 id="s-mail">7.18 Отправка почтой</h2>
@@ -11375,6 +11758,21 @@ https://carrel.example/api/backup/run?job=personal</textarea>
 <figcaption>Во всех трёх карточках роль стоит первой: она определяет, что человек сможет делать, и выбирается раньше, чем ему придумывают логин. Три способа — три карточки в ряд, а не три формы в столбик под общим заголовком: они равноправны, и выбор между ними — это выбор ситуации, а не настройки. Ссылка-приглашение появляется в той же карточке, где её создали, с кнопкой копирования. Неудачная отправка письма названа кодом ответа сервера, а не словом «ошибка».</figcaption>
 </figure>
 
+<div class="frames">
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-admin-8">
+    <div class="frame-label"><span>Роль</span><span class="frag">список</span><i>поле Role</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">User</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Administrator</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Две роли. Администратор, кроме своих данных, заводит пользователей и настраивает экземпляр.</figcaption>
+  </figure>
+</div>
+
 <figure>
 <div class="frame" data-frame="s-admin-2" data-screen="/admin/">
   <div class="frame-label"><span>Администрирование · пользователи</span><i>/admin/</i></div>
@@ -11518,6 +11916,23 @@ https://carrel.example/api/backup/run?job=personal</textarea>
   </div>
   <figcaption>Две формы становятся двумя блоками одной формы с рубрикаторами. Пароль SMTP стоит здесь же, рядом с узлом и портом: это один релей, а не отдельный экран. Порт — 96&nbsp;px, а не во всю ширину. «Letters from users» — отдельный блок под Mail: сначала завести релей, потом решать, пускать ли жильцов писать через него. Проверка сервера DAV уехала на свою страницу — она про чужой сервер, а не про настройки этого. <b>Проба письма — своя форма</b> со своей кнопкой: она ничего не сохраняет, и «Save» остальных блоков её не задевает; пока почта не настроена, кнопка выключена и говорит почему. <b>Public address</b> только читается: его задаёт <code>CARREL_PUBLIC_URL</code>, и от него строятся ссылки в письмах.</figcaption>
   </figure>
+
+<div class="frames">
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-admin-9">
+    <div class="frame-label"><span>Шифрование почты</span><span class="frag">список</span><i>поле Encryption</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">STARTTLS</button>
+        <button class="tc-menu__item" type="button" role="menuitem">TLS</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">None</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>STARTTLS на 587 и TLS на 465 — обычные пары; «None» под чертой, потому что пароль тогда уходит открытым.</figcaption>
+  </figure>
+</div>
 
 <h3 id="install">Проверка установки</h3>
 <p>Carrel почти всегда стоит за чужим обратным прокси, и почти все жалобы «у меня не работает» — это прокси: срезанные заголовки, буферизация потока, короткий таймаут, потолок размера тела. Разбираться в этом по логам должен уметь администратор, а не пользователь, — но сначала кто-то должен сказать, что именно сломано.</p>
@@ -11791,6 +12206,28 @@ https://carrel.example/api/backup/run?job=personal</textarea>
   </div>
   <figcaption>Журнал — таблица во всю ширину; действие и подробности моноширинным, потому что это данные, а не текст. Неудачный вход — единственная тревожная строка.</figcaption>
   </figure>
+
+<div class="frames">
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-admin-10">
+    <div class="frame-label"><span>Действие</span><span class="frag">список</span><i>фильтр журнала</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">All actions</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">login</button>
+        <button class="tc-menu__item" type="button" role="menuitem">login_failed</button>
+        <button class="tc-menu__item" type="button" role="menuitem">logout</button>
+        <button class="tc-menu__item" type="button" role="menuitem">user_create</button>
+        <button class="tc-menu__item" type="button" role="menuitem">user_delete</button>
+        <button class="tc-menu__item" type="button" role="menuitem">settings_update</button>
+        <button class="tc-menu__item" type="button" role="menuitem">escrow_recover</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Имена действий — те же, что в столбце Action, чтобы строку журнала можно было найти по тому, что в ней написано.</figcaption>
+  </figure>
+</div>
 
 
 <h2 id="s-auth">7.20 Вход и первый запуск</h2>
@@ -13913,6 +14350,18 @@ Read  2 min ago · not changed on server</div>
   </div>
   <figcaption>Та же форма из одного поля, что и в вебе (7.4), но как отдельное окно ОС: вызывается глобальной клавишей или из трея, поверх любой программы, ничего не разворачивает и закрывается само. Если сервер недоступен, окно не теряет текст: оно скажет об этом и оставит заметку в себе до следующей попытки — единственное место, где приложение временно держит содержимое, и держит его в памяти, а не на диске.</figcaption>
   </figure>
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="m-desktop-17">
+    <div class="frame-label"><span>Тетрадь</span><span class="frag">список</span><i>куда ляжет заметка</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Записи</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>nextcloud · Дневник</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
 
   <figure style="flex:1 1 380px">
   <div class="frame" data-frame="m-desktop-10">
@@ -13945,6 +14394,40 @@ Read  2 min ago · not changed on server</div>
   </div>
   <figcaption><b>Тот же лист, что открывает «New note» и его меню</b> (<a href="#newsheets">7.4.1</a>), — поля те же, «куда» на том же месте, сохранение то же. Второй вёрстки для встречи из трея нет: окно ОС держит тот же лист, а не свою копию его полей. Отличий от кадра слева ровно два, и оба следуют из рода записи: значок и то, что у встречи полей шесть, а не одно. <b>Главное окно не разворачивается</b> — иначе пункт в трее становится длинной дорогой к той же кнопке в шапке.</figcaption>
   </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="m-desktop-18">
+    <div class="frame-label"><span>Напоминание</span><span class="frag">список</span><i>поле Remind</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="tc-menu__item" type="button" role="menuitem">At the time</button>
+        <button class="tc-menu__item" type="button" role="menuitem">5 minutes before</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">10 minutes before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">30 minutes before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">1 hour before</button>
+        <button class="tc-menu__item" type="button" role="menuitem">1 day before</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">No reminder</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Тот же список, что в форме события.</figcaption>
+  </figure>
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="m-desktop-19">
+    <div class="frame-label"><span>Календарь</span><span class="frag">список</span><i>куда ляжет встреча</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="is-on tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#4A6B52"></span>nextcloud · Личный</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#3F6E8C"></span>nextcloud · Работа</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#A05A2C"></span>nextcloud · Дни рождения</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#6B4E7A"></span>radicale · vps · Проекты</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#8C6239"></span>radicale · vps · Дежурства</button>
+        <button class="tc-menu__item" type="button" role="menuitem"><span class="tc-mark" data-tc-colour="#9A9280"></span>baikal · Общий</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Списком — только то, куда можно писать; коллекция только для чтения видна со значком ro и не выбирается, чтобы было понятно, почему её нельзя взять.</figcaption>
+  </figure>
 
   <figure style="flex:1 1 380px">
   <div class="frame" data-frame="m-desktop-11">
@@ -13970,6 +14453,24 @@ Read  2 min ago · not changed on server</div>
     </div>
   </div>
   <figcaption>Флажок «показывать название на заблокированном экране» выключен по умолчанию: уведомление читают посторонние, а в названии встречи бывает больше, чем стоит показывать. Коллекции выбираются те же и тем же компонентом — напоминать обо всех подряд означает, что напоминания перестанут читать.</figcaption>
+  </figure>
+  <figure style="flex:0 1 300px">
+  <div class="frame" data-frame="m-desktop-20">
+    <div class="frame-label"><span>Когда напоминать</span><span class="frag">список</span><i>поле Remind me</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w290">
+        <button class="tc-menu__item" type="button" role="menuitem">Only as set in the event</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">At the time · and as set in the event</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">10 minutes · and as set in the event</button>
+        <button class="tc-menu__item" type="button" role="menuitem">30 minutes · and as set in the event</button>
+        <button class="tc-menu__item" type="button" role="menuitem">1 hour · and as set in the event</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">Never</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Своё напоминание приложения добавляется к тем, что стоят в событии, и не заменяет их — поэтому «and as set in the event» в каждой строке.</figcaption>
   </figure>
 </div>
 
@@ -14061,6 +14562,34 @@ Read  2 min ago · not changed on server</div>
 </div>
 <figcaption>Здесь только то, чего в вебе не бывает: кем и к какому экземпляру подключено окно, автозапуск, глобальная клавиша, папка загрузок, сертификат, обновления.<br><br><b>Имя и адрес стоят одним полем, и кнопка выхода — за ним.</b> Раньше «Sign out…» висела у строки адреса, а «Signed in as mix» шла следующим полем: выйти предлагали <b>раньше, чем называли, чей это сеанс</b>, да и заканчивает эта кнопка не адрес, а учётную запись. Теперь строка читается тем же порядком, что в заголовке окна и в вопросе при выходе, — <span class="tc-mono">mix · carrel.example</span>, — и кнопка стоит после обоих её слов. Флажка «открывать на мониторе, где указатель» здесь больше нет: это было не решение человека, а поведение окна, и его место — в правиле, а не в списке настроек. Правило простое: вызванная клавишей заметка появляется там, где сейчас указатель, потому что клавишу нажимают не глядя; главное окно возвращается туда, где его оставили, потому что его ищут глазами. Всё, что относится к учётной записи и коллекциям, осталось внутри интерфейса и не продублировано — иначе через полгода два места настроек начнут расходиться. Флажок про самоподписанный сертификат намеренно не «отключить проверку»: он запоминает отпечаток одного сервера и появляется только тогда, когда проблема уже случилась.</figcaption>
 </figure>
+
+<div class="frames">
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="m-desktop-21">
+    <div class="frame-label"><span>Чем открывать файлы</span><span class="frag">список</span><i>поле Open files with</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">default application</button>
+        <button class="tc-menu__item" type="button" role="menuitem">Ask each time</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>Программа по умолчанию — та, что назначена в системе; «Ask each time» показывает системный выбор программы.</figcaption>
+  </figure>
+  <figure style="flex:0 1 250px">
+  <div class="frame" data-frame="m-desktop-22">
+    <div class="frame-label"><span>Прокси</span><span class="frag">список</span><i>поле Proxy</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">system</button>
+        <button class="tc-menu__item" type="button" role="menuitem">none</button>
+        <button class="tc-menu__item" type="button" role="menuitem">manual</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>«manual» раскрывает под полем адрес и порт; отдельного листа для этого нет.</figcaption>
+  </figure>
+</div>
 
 <h3 id="upd">Обновление</h3>
 <p>Веб-версию обновляет тот, кто её запустил, и она обновляется вся сразу. У приложения так не выйдет: оно живёт на чужом компьютере, у него своя версия, и рядом с ним — либо сервер внутри него самого, либо чужой сервер, который оно обновить не может. Отсюда два экрана, а не один.</p>
