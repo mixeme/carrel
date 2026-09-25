@@ -237,7 +237,9 @@ func (s *Server) importPage(c *collectionCtx, st importState) view.ImportPage {
 		default:
 			run.Href = s.importHref(c, "run", st.dest.conn.ID, st.dest.col.Path)
 		}
-		page.Actions = []view.Action{run, {ID: "import.cancel", Label: "Choose another file",
+		// The file waits in the session: leaving drops it, so Cancel is a
+		// POST here and not the way back of the first step.
+		page.Actions = []view.Action{run, {ID: "import.cancel", Label: "Cancel",
 			Href: s.importHref(c, "cancel", "", ""), Method: "POST", Enabled: true}}
 	default:
 		to, into := targetOf(st.dest)
@@ -371,7 +373,7 @@ func (s *Server) postKindImport(w http.ResponseWriter, r *http.Request, kind str
 	switch q.Get("op") {
 	case "cancel":
 		clearImportDraft(c)
-		s.writePage(w, r, http.StatusOK, s.importPage(c, importState{dest: dest}))
+		s.redirect(w, r, c.listPath())
 	case "run":
 		s.runImport(w, r, c, dest)
 	case "folder":

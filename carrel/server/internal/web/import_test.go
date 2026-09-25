@@ -241,6 +241,35 @@ func TestImportRunsOnce(t *testing.T) {
 	}
 }
 
+// The preview holds a file in the session, so its Cancel is the server's: it
+// drops the file and leaves for the collection, as the frame draws it. The
+// next import there starts from the choice of a file, not from the old one.
+func TestImportCancelDropsTheFile(t *testing.T) {
+	f := importFixture(t)
+	page := decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "cards.vcf", []byte(importedCards))))
+	var cancel view.Action
+	for _, a := range page.Actions {
+		if a.ID == "import.cancel" {
+			cancel = a
+		}
+	}
+	if cancel.Label != "Cancel" || cancel.Method != "POST" {
+		t.Fatalf("preview cancel = %+v", cancel)
+	}
+	rec := f.h.do(postForm(cancel.Href, f.sess, url.Values{}))
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != f.path("contacts") {
+		t.Fatalf("cancel: %d %s", rec.Code, rec.Header().Get("Location"))
+	}
+	page = decode[view.ImportPage](t, f.h.do(get(f.path("contacts")+"/import", f.sess)))
+	if page.Step != view.ImportStepSource {
+		t.Fatalf("the cancelled file came back: step = %q", page.Step)
+	}
+	if paths := f.srv.Paths(peopleBook); len(paths) != 1 {
+		t.Fatalf("People holds %v", paths)
+	}
+}
+
 // S-19: a record of another kind in the same file is skipped and named, with
 // where it belongs. Nothing goes missing in silence.
 func TestImportNamesWhatItDoesNotWrite(t *testing.T) {

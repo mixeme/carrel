@@ -17,6 +17,18 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.53 — 2026-09-25
+
+The import preview's `import.cancel` is now **Cancel**, not «Choose another
+file»: the `POST` drops the file held in the session and answers `303` to the
+collection's list. Before, leaving the preview any other way kept the file,
+and the next import into that collection opened on it again.
+
+C-7.2 now says whose a sheet's Cancel is: the client's when closing asks
+nothing of the server, and then `Actions` may not carry it; the server's —
+a `POST` in `Actions` — when there is something to drop. A page always
+carries its Cancel.
+
 ## v0.2.52 — 2026-09-25
 
 Nothing in the running server. The Linux stands no longer follow `latest`:
