@@ -630,6 +630,9 @@ func (c *collectionSource) readWhole(ctx context.Context, collection, component 
 	return cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, collection, component, c.ttl, c.now(), calCodec,
 		func() ([]*model.Object, bool, error) {
 			got, unreadable, err := c.cal.Query(ctx, collection, component, nil, nil)
+			if err == nil && component == "VEVENT" {
+				putCount(c.sess, c.conn.ID, collection, component, len(got)+len(unreadable))
+			}
 			return got, len(unreadable) == 0, err
 		})
 }
@@ -775,6 +778,9 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 			objs, err = cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, component, c.ttl, c.now(), calCodec,
 				func() ([]*model.Object, bool, error) {
 					got, unreadable, err := c.cal.Query(ctx, c.col.Path, component, nil, nil)
+					if err == nil && component == "VEVENT" {
+						putCount(c.sess, c.conn.ID, c.col.Path, component, len(got)+len(unreadable))
+					}
 					return got, len(unreadable) == 0, err
 				})
 			break
@@ -783,6 +789,9 @@ func (c *collectionSource) records(ctx context.Context, k view.Kind, q fanout.Qu
 		objs, err = cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, c.col.Path, windowKey(component, from, to), c.ttl, c.now(), calCodec,
 			func() ([]*model.Object, bool, error) {
 				got, unreadable, err := c.cal.Query(ctx, c.col.Path, component, from, to)
+				if err == nil && component == "VEVENT" {
+					countEvents(ctx, c.sess, c.cal, c.conn.ID, c.col.Path) // the rail's number (C-6.3)
+				}
 				return got, len(unreadable) == 0, err
 			})
 	default:

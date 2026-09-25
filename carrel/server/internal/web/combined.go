@@ -1,16 +1,19 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/fanout"
+	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
@@ -475,12 +478,23 @@ func (s *Server) indexAnswered(sess *session.Session, blob sealed.Blob, spec kin
 	}
 }
 
-// collectionCount is the rail's number for one ticked collection (C-6.3): the
-// records of the kind the session last read of the whole collection. The
-// agenda reads a week, so events have no number, a dash rather than a guess.
+// collectionCount is the rail's number for one ticked collection (C-6.3): how
+// many records of the kind the whole collection holds, as the session last
+// learnt it — from a list read whole, or, for a calendar's events, from the
+// count every visit to it takes (putCount). Until 25.09.2026 events had no
+// number, because the agenda reads a week; C-6.3 always asked for the
+// collection's, and the frames draw it.
 func collectionCount(sess *session.Session, accountID string, col sealed.Collection, spec kindSpec) *int {
 	if spec.kind == view.KindEvent {
-		return nil
+		data, ok := sess.Cache().PeekETagMap(accountID, countKey(col.Path, spec.component))
+		if !ok {
+			return nil
+		}
+		n, err := strconv.Atoi(string(data))
+		if err != nil {
+			return nil
+		}
+		return &n
 	}
 	data, ok := sess.Cache().PeekETagMap(accountID, col.Path+"\x00"+spec.component)
 	if !ok {
@@ -494,12 +508,39 @@ func collectionCount(sess *session.Session, accountID string, col sealed.Collect
 	return &n
 }
 
+// countKey names the number a collection's component was last counted at.
+func countKey(path, component string) string { return "count\x00" + path + "\x00" + component }
+
+// putCount keeps the number a visit to a collection learnt of it.
+func putCount(sess *session.Session, accountID, path, component string, n int) {
+	if sess == nil {
+		return
+	}
+	sess.Cache().PutETagMap(accountID, countKey(path, component), []byte(strconv.Itoa(n)))
+}
+
+// countEvents learns how many events a calendar holds, bodies unread
+// (cal.Provider.Count), in the visit that read one week of it. A server that
+// cannot count leaves the number as it was: shown once, it does not vanish
+// (C-6.3).
+func countEvents(ctx context.Context, sess *session.Session, p *cal.Provider, accountID, path string) {
+	if sess == nil || p == nil {
+		return
+	}
+	if n, err := p.Count(ctx, path, "VEVENT"); err == nil {
+		putCount(sess, accountID, path, "VEVENT", n)
+	}
+}
+
 // kindCount is the number of a section: the sum of its ticked collections,
 // and a dash while any of them has none.
 func kindCount(sess *session.Session, blob sealed.Blob, spec kindSpec) *int {
 	sum := 0
 	for _, col := range ticked(blob, spec.kind) {
-		if col.Gone {
+		// A feed is someone else's and has no number of its own (the frames
+		// draw «ro» in its place), so the section's sum is of the person's
+		// own collections.
+		if col.Gone || col.Feed {
 			continue
 		}
 		n := collectionCount(sess, col.AccountID, col, spec)
@@ -746,7 +787,12 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 		if tick {
 			row.Tick = view.TickOn
 			on++
-			row.Count = counted(f.ID, col)
+			// A feed has no number of its own — «ro» stands in its place in
+			// the frames. What a screen counts itself (a timeline's finds)
+			// it still shows.
+			if count != nil {
+				row.Count = count(f.ID + ":" + col.Path)
+			}
 		}
 		feeds.Rows = append(feeds.Rows, row)
 	}

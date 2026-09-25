@@ -17,6 +17,38 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.49 — 2026-09-25
+
+### Fixed
+
+- **A calendar has its number in the rail**, as C-6.3 has always said: how
+  many events the whole calendar holds, not how many the week shows, and not
+  its tasks or notes. The server showed a dash, on the ground that the
+  agenda reads a week. That was a departure from the spec that nobody had
+  caught, and the frames draw the number.
+  - The visit that reads a week of a calendar also asks it for its events'
+    addresses and versions, without bodies, and counts them
+    (`dav.CalCounter`, `cal.Provider.Count`).
+  - A whole read of the events counts them at no cost.
+  - A week taken from the cache under an unchanged tag asks nothing more:
+    the number has not changed either.
+  - The section's number and the combined row sum the calendars, as for
+    every other kind.
+- **A feed has no number in the rail.** «ro» stands in its place in the
+  frames, and the section's sum is of the person's own collections. A feed
+  ticked in a combined view used to take the section's number to a dash.
+
+### Checks
+
+- The fixtures of the agenda and of an event are taken after the combined
+  calendar, as a person comes to them. `docs/spec/check.py` is green: no
+  frame disagrees with its fixture.
+
+### For consumers
+
+Nothing new in `view`: `SourceRow.Count` and `NavRow.Count` carry numbers
+for calendars where they carried `null`.
+
 ## v0.2.48 — 2026-09-25
 
 The fixture set holds what the frames draw (docs/plan/from-typecase.md).

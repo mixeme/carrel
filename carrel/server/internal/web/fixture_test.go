@@ -807,6 +807,9 @@ func TestFixtureContactCard(t *testing.T) {
 // C-14.2: one calendar as an agenda (s-agenda-1).
 func TestFixtureCalendarAgenda(t *testing.T) {
 	app := newMockupApp(t)
+	// Every ticked calendar carries its number in the frame (s-agenda-1): the
+	// combined calendar was opened first, as a person comes to it.
+	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	here := app.listPath(t, "calendar", "lichnyj") + "?from=2026-08-10"
 	app.compare(t, "app-agenda/normal.json", app.h.do(get(here, app.sess)))
@@ -815,6 +818,7 @@ func TestFixtureCalendarAgenda(t *testing.T) {
 // C-14.2: the card of an event (s-agenda-2).
 func TestFixtureEventCard(t *testing.T) {
 	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-08-10", app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3"
@@ -877,6 +881,7 @@ func TestFixtureContactEdit(t *testing.T) {
 // C-14.2: the form of an event (s-agenda-3).
 func TestFixtureEventEdit(t *testing.T) {
 	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
 	app.h.do(get(app.listPath(t, "calendar", "lichnyj")+"?from=2026-08-10", app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "calendar", "lichnyj") + "/8f1c-4a02-b7d3/edit"

@@ -301,7 +301,7 @@
         "method": "GET"
       },
       {
-        "count": null,
+        "count": 6,
         "enabled": true,
         "href": "/app/calendar",
         "id": "nav.calendar",
@@ -334,7 +334,7 @@
         "method": "GET"
       },
       {
-        "count": 0,
+        "count": 1,
         "enabled": true,
         "href": "/app/duplicates",
         "id": "nav.duplicates",
@@ -350,7 +350,7 @@
         "rows": [
           {
             "colour": "",
-            "count": null,
+            "count": 6,
             "detail": "",
             "href": "/app/calendar",
             "label": "Combined calendar",
@@ -424,7 +424,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 2,
             "detail": "",
             "href": "/app/calendar/a-nc-home/lichnyj",
             "label": "Личный",
@@ -478,7 +478,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 2,
             "detail": "",
             "href": "/app/calendar/a-nc-home/rabota",
             "label": "Работа",
@@ -539,7 +539,7 @@
         "rows": [
           {
             "colour": "#8c6239",
-            "count": null,
+            "count": 1,
             "detail": "",
             "href": "/app/calendar/a-rad-vps/dezhurstva",
             "label": "Дежурства",
@@ -593,7 +593,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": null,
+            "count": 1,
             "detail": "",
             "href": "/app/calendar/a-rad-vps/proekty",
             "label": "Проекты",

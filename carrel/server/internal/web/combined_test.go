@@ -260,8 +260,16 @@ func TestCombinedAgendaTasksAndNotesMerge(t *testing.T) {
 	if agenda.Bar.Range == nil || actionHref(t, agenda.Bar.Range.Presets, "range.next") != "/app/calendar?from=2026-09-14" {
 		t.Errorf("range = %+v", agenda.Bar.Range)
 	}
-	if agenda.Rail.Sections[0].Rows[0].Count != nil {
-		t.Error("the agenda reads a week, yet the rail counts the whole calendar")
+	// C-6.3: a calendar's number is its events, all of them — not the week
+	// shown, and not its tasks or notes. The week reads three; the calendars
+	// hold four («Next month» is outside it).
+	if n := agenda.Rail.Sections[0].Rows[0].Count; n == nil || *n != 4 {
+		t.Errorf("the combined row counts %v, want the four events of both calendars", n)
+	}
+	_, homeRow := railRow(t, agenda.Rail, "Home")
+	_, workRow := railRow(t, agenda.Rail, "Work")
+	if homeRow.Count == nil || *homeRow.Count != 3 || workRow.Count == nil || *workRow.Count != 1 {
+		t.Errorf("rows count Home %v, Work %v; want 3 and 1", homeRow.Count, workRow.Count)
 	}
 
 	tasks := combined(t, f.h, f.sess, "/app/tasks", func(p view.TasksPage) *view.PollBar { return p.Poll })

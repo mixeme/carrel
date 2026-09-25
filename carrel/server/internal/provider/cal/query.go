@@ -196,6 +196,20 @@ func sift(objs []*model.Object, props []string, text string) ([]*model.Object, b
 	return kept, len(kept) != len(objs)
 }
 
+// Count is how many records of a component the calendar holds, read without
+// their bodies (dav.CalCounter): the rail's number of a calendar (C-6.3).
+func (p *Provider) Count(ctx context.Context, collection, component string) (int, error) {
+	rs, ok := p.t.(calReporting)
+	if !ok {
+		return 0, ErrNoReporter
+	}
+	c, ok := rs.CalReporter().(dav.CalCounter)
+	if !ok {
+		return 0, ErrNoReporter
+	}
+	return c.CountCalendar(ctx, collection, component)
+}
+
 func (p *Provider) searcher() dav.CalSearcher {
 	rs, ok := p.t.(calReporting)
 	if !ok {

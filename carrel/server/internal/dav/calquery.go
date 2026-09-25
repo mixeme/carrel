@@ -40,6 +40,54 @@ func (c calReports) QueryCalendar(ctx context.Context, calendar string, q *calda
 	return calendarObjects(ms), nil
 }
 
+// CalCounter counts the resources of one component in a calendar without
+// reading them: a calendar-query that asks for the version alone. A rail's
+// number is the whole collection's (C-6.3), and a screen that read only a
+// week learns it this way, in the same visit.
+type CalCounter interface {
+	CountCalendar(ctx context.Context, calendar, component string) (int, error)
+}
+
+// CountCalendar is a calendar-query REPORT of Depth 1 for getetag only, with
+// the component's comp-filter: an href and a version a resource, no body.
+func (c calReports) CountCalendar(ctx context.Context, calendar, component string) (int, error) {
+	d := newXMLDoc()
+	d.token(xml.StartElement{Name: calName("calendar-query")})
+	d.open("prop")
+	d.text(xml.Name{Space: "DAV:", Local: "getetag"}, "")
+	d.close("prop")
+	d.token(xml.StartElement{Name: calName("filter")})
+	if err := compFilter(d, caldav.CompFilter{Name: ical.CompCalendar, Comps: []caldav.CompFilter{{Name: component}}}); err != nil {
+		return 0, err
+	}
+	d.token(xml.EndElement{Name: calName("filter")})
+	d.token(xml.EndElement{Name: calName("calendar-query")})
+	body, err := d.bytes()
+	if err != nil {
+		return 0, err
+	}
+	req, err := http.NewRequestWithContext(ctx, "REPORT", c.resolve(calendar), bytes.NewReader(body))
+	if err != nil {
+		return 0, err
+	}
+	req.Header.Set("Content-Type", `application/xml; charset="utf-8"`)
+	req.Header.Set("Depth", "1")
+	ms, err := c.doMultiStatus(req)
+	if err != nil {
+		return 0, err
+	}
+	self := strings.TrimSuffix(cardHrefPath(calendar), "/")
+	n := 0
+	for _, r := range ms.Responses {
+		p := cardHrefPath(r.Href)
+		if r.StatusCode/100 != 2 || p == "" || strings.HasSuffix(p, "/") || strings.TrimSuffix(p, "/") == self {
+			continue
+		}
+		n++
+	}
+	return n, nil
+}
+
 // calendarObjects reads the resources of a calendar REPORT answer.
 func calendarObjects(ms *MultiStatus) []caldav.CalendarObject {
 	var out []caldav.CalendarObject

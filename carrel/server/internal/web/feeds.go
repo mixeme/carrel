@@ -124,6 +124,9 @@ func (c *collectionCtx) calQuery(ctx context.Context, component string, from, to
 			func() ([]*model.Object, bool, error) {
 				got, bad, err := c.cal.Query(ctx, c.col.Path, component, nil, nil)
 				unreadable = bad
+				if err == nil && component == "VEVENT" {
+					putCount(c.sess, c.conn.ID, c.col.Path, component, len(got)+len(bad))
+				}
 				return got, len(bad) == 0, err
 			})
 		return objs, unreadable, err
@@ -136,6 +139,9 @@ func (c *collectionCtx) calQuery(ctx context.Context, component string, from, to
 		func() ([]*model.Object, bool, error) {
 			got, bad, err := c.cal.Query(ctx, c.col.Path, component, from, to)
 			unreadable = bad
+			if err == nil && component == "VEVENT" {
+				countEvents(ctx, c.sess, c.cal, c.conn.ID, c.col.Path) // the rail's number (C-6.3)
+			}
 			return got, len(bad) == 0, err
 		})
 	return objs, unreadable, err
