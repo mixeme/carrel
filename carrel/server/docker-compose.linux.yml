@@ -52,7 +52,7 @@ services:
   # `snapshot` the canonical shape of what is there. Both answers settled
   # more questions on 23.09.2026 than the documentation did.
   stalwart-setup:
-    image: stalwartlabs/cli
+    image: stalwartlabs/cli:1.0.12
     depends_on:
       - stalwart
     environment:
@@ -112,7 +112,7 @@ services:
   # through the admin screens' own form, by a script and not by hand
   # (testdata/davis/make-account.sh; testdata/davis/README.md).
   davis:
-    image: ghcr.io/tchapi/davis-standalone:latest
+    image: ghcr.io/tchapi/davis-standalone:5.4.4
     ports:
       - "127.0.0.1:8082:9000"
     environment:
@@ -149,7 +149,7 @@ services:
   # run as root, and a database root made is one PHP can read and not write
   # — «attempt to write a readonly database» on the first form (24.09.2026).
   davis-setup:
-    image: ghcr.io/tchapi/davis-standalone:latest
+    image: ghcr.io/tchapi/davis-standalone:5.4.4
     depends_on:
       - davis
     environment:

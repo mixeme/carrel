@@ -17,6 +17,13 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.52 — 2026-09-25
+
+Nothing in the running server. The Linux stands no longer follow `latest`:
+`docker-compose.linux.yml` pins `ghcr.io/tchapi/davis-standalone:5.4.4` and
+`stalwartlabs/cli:1.0.12`, the images the live suite last passed against.
+Bump them on purpose, with a gates run.
+
 ## v0.2.51 — 2026-09-25
 
 Nothing in the running server. The development documents are compressed and
