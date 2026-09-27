@@ -179,7 +179,7 @@ func (s *Server) newMenu(sess *session.Session) []view.MenuItem {
 	out = append(out, view.MenuItem{Separator: true, Action: view.Action{
 		ID: "new.upload", Label: "Upload file", Icon: "i-up", Href: s.postQuery("/app/files/picker", url.Values{"for": {"upload"}}), Method: "GET", Enabled: true,
 	}})
-	if s.mailOn() {
+	if s.canSendLetters(sess) {
 		out = append(out, view.MenuItem{Action: view.Action{
 			ID: "new.letter", Label: "Letter", Icon: "i-mail", Href: s.route("/app/mail/compose"), Method: "GET", Enabled: true,
 		}})

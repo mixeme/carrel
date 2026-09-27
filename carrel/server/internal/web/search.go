@@ -213,12 +213,8 @@ func (s *Server) fillResults(page *view.SearchPage, sess *session.Session, blob 
 
 // findRow is one result in the look of its kind, with its origin (C-10).
 func (s *Server) findRow(tf timeFmt, blob sealed.Blob, it fanout.Item) view.FindRow {
-	col, found := blob.Collection(it.AccountID, it.Col)
-	if !found {
-		col = sealed.Collection{AccountID: it.AccountID, Path: it.Col}
-	}
-	conn, _ := blob.Connection(it.AccountID)
-	row := view.FindRow{Kind: it.Kind, Colour: catalogColour(col), Stamp: stamp(connLabel(conn), collectionLabel(col))}
+	st, colour := sourceOrigin(blob, it.AccountID, it.Col)
+	row := view.FindRow{Kind: it.Kind, Colour: colour, Stamp: st}
 	o := it.Object
 	switch it.Kind {
 	case view.KindFile:
@@ -343,14 +339,10 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 	var answered, refused, timedOut, unreachable, stopped int
 	for _, st := range snap.Sources {
 		account, path, _ := strings.Cut(st.ID, ":")
-		col, found := blob.Collection(account, path)
-		if !found {
-			col = sealed.Collection{AccountID: account, Path: path}
-		}
-		conn, _ := blob.Connection(account)
+		origin, colour := sourceOrigin(blob, account, path)
 		sp := view.SourceProgress{
-			Stamp:     stamp(connLabel(conn), collectionLabel(col)),
-			Colour:    catalogColour(col),
+			Stamp:     origin,
+			Colour:    colour,
 			State:     st.State,
 			FromCache: st.FromCache,
 			Message:   text(sentence(st.Note)),
@@ -559,8 +551,34 @@ func (s *Server) searchRail(sess *session.Session, blob sealed.Blob) view.Rail {
 	return rail
 }
 
+// sourceOrigin is the stamp and colour of a source's rows and of its line in
+// the poll bar (C-10): the one place that turns a source's account and path
+// into how it is shown, so a source of another kind is named here too.
+func sourceOrigin(blob sealed.Blob, account, path string) (view.Stamp, view.Colour) {
+	col, found := blob.Collection(account, path)
+	if !found {
+		col = sealed.Collection{AccountID: account, Path: path}
+	}
+	conn, _ := blob.Connection(account)
+	return stamp(connLabel(conn), collectionLabel(col)), catalogColour(col)
+}
+
+// searchSources are the sources a search asks: the ticked collections today.
+// A source of another kind (a mailbox's folder, carrel-mailbox.md M-6) joins
+// here, beside them; code that needs a DAV collection asks tickedCollections
+// and never asserts a source's type.
 func (s *Server) searchSources(sess *session.Session, blob sealed.Blob) []fanout.Source {
 	var out []fanout.Source
+	for _, c := range s.tickedCollections(sess, blob) {
+		out = append(out, c)
+	}
+	return out
+}
+
+// tickedCollections opens one source per ticked collection, with the kinds it
+// is ticked for.
+func (s *Server) tickedCollections(sess *session.Session, blob sealed.Blob) []*collectionSource {
+	var out []*collectionSource
 	byID := map[string]*collectionSource{}
 	for _, pick := range blob.Selected {
 		conn, hasConn := blob.Connection(pick.AccountID)

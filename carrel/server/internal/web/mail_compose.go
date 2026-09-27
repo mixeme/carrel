@@ -107,11 +107,19 @@ func (s *Server) linkToken(sess *session.Session, id string) string {
 	return s.users.LinkOf(sess.AccountID(), key, id)
 }
 
-// mailOn reports whether people may send letters here at all: the instance
-// lets them and there is a relay. Off, the sheet is not there — sharing a
-// link by hand still is.
-func (s *Server) mailOn() bool {
+// relayOn reports whether the instance's relay sends people's letters (S-26):
+// the instance lets them and there is a relay. What depends on the relay
+// itself — the Reply-To a letter carries — asks this.
+func (s *Server) relayOn() bool {
 	return s.mailPolicy().People && s.mailConfigured()
+}
+
+// canSendLetters reports whether this person can send a letter at all. Off,
+// the sheet is not there — sharing a link by hand still is. Only the relay
+// sends today; a mailbox that sends (carrel-mailbox.md M-7) is the second way,
+// and every place that offers a letter asks this, not the relay.
+func (s *Server) canSendLetters(sess *session.Session) bool {
+	return s.relayOn()
 }
 
 func (s *Server) writeMailSheet(w http.ResponseWriter, r *http.Request, sheet any) {
@@ -133,7 +141,7 @@ func (s *Server) getMailCompose(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if !s.mailOn() {
+	if !s.canSendLetters(sess) {
 		s.notFound(w, r)
 		return
 	}
@@ -153,7 +161,7 @@ func (s *Server) postMailCompose(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if !s.mailOn() {
+	if !s.canSendLetters(sess) {
 		s.notFound(w, r)
 		return
 	}
@@ -358,9 +366,8 @@ func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q
 			continue
 		}
 		account, path, _ := strings.Cut(st.ID, ":")
-		conn, _ := blob.Connection(account)
-		col, _ := blob.Collection(account, path)
-		notAsked = append(notAsked, stamp(connLabel(conn), collectionLabel(col)))
+		origin, _ := sourceOrigin(blob, account, path)
+		notAsked = append(notAsked, origin)
 	}
 	return out, notAsked
 }

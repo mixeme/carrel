@@ -121,14 +121,14 @@ func runCollections(t *testing.T, endpoint, user, pass string, quirks ...collect
 	name := "Поездки & планы " + suffix
 	calPath := home(res.CalendarHome) + "poezdki-plany-" + suffix + "/"
 	loc := redirected(t, "new calendar", app.post("/app/collections/new?kind=event", url.Values{
-		"account": {conn.ID}, "name": {name}, "colour": {"#6b5c73"}, "components": {"VEVENT", "VTODO"},
+		"account": {conn.ID}, "name": {name}, "colour": {"#6b4e7a"}, "components": {"VEVENT", "VTODO"},
 	}))
 	t.Cleanup(func() { _ = client.Delete(context.Background(), calPath, "") })
 	if loc != "/app/calendar/"+conn.ID+"/"+url.PathEscape(calPath) {
 		t.Fatalf("new calendar went to %q, want %q", loc, calPath)
 	}
 	got := liveProps(ctx, t, client, calPath, displayName, colour, comps)
-	if got["displayname"] != shown(name) || !strings.Contains(strings.ToLower(got["calendar-color"]), "6b5c73") ||
+	if got["displayname"] != shown(name) || !strings.Contains(strings.ToLower(got["calendar-color"]), "6b4e7a") ||
 		!strings.Contains(got["supported-calendar-component-set"], "VEVENT") ||
 		!strings.Contains(got["supported-calendar-component-set"], "VTODO") {
 		t.Errorf("calendar on the server = %+v", got)
@@ -154,9 +154,9 @@ func runCollections(t *testing.T, endpoint, user, pass string, quirks ...collect
 	}
 
 	redirected(t, "rename", app.post("/app/collections/rename?"+url.Values{"a": {conn.ID}, "c": {calPath}}.Encode(),
-		url.Values{"name": {name + " renamed"}, "colour": {"#5c736b"}}))
+		url.Values{"name": {name + " renamed"}, "colour": {"#3f6e8c"}}))
 	got = liveProps(ctx, t, client, calPath, displayName, colour)
-	if got["displayname"] != shown(name+" renamed") || !strings.Contains(strings.ToLower(got["calendar-color"]), "5c736b") {
+	if got["displayname"] != shown(name+" renamed") || !strings.Contains(strings.ToLower(got["calendar-color"]), "3f6e8c") {
 		t.Errorf("after rename = %+v", got)
 	}
 

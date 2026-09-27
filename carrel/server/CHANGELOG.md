@@ -17,6 +17,28 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.54 — 2026-09-28
+
+### Changed
+
+- **The collection palette is the mockup's six tones** (`s-profile-7`):
+  `#4a6b52`, `#3f6e8c`, `#6b4e7a`, `#a05a2c`, `#8c6239`, `#9a9280`, in that
+  order. The collection sheets offer them. A collection without a server
+  colour and a contact's avatar get one of them from the hash of the path or
+  UID. Colours Carrel wrote to servers before are the servers' now and stay
+  as they are. On the rename sheet, a colour outside the six shows no swatch
+  chosen, as any foreign colour did before.
+- Sending a letter over TLS (port 465) gives up when the request does. Before,
+  a relay that took the connection and never finished the handshake held the
+  page for 15 seconds.
+
+### For consumers
+
+Nothing to change: `Colour` values are still `#rrggbb`.
+Internally, the core no longer assumes that every connection is a DAV
+server, so the mailbox (`docs/spec/carrel-mailbox.md`) can slot in later.
+See «Почта — подготовка» in `docs/architecture.md`.
+
 ## v0.2.53 — 2026-09-25
 
 The import preview's `import.cancel` is now **Cancel**, not «Choose another

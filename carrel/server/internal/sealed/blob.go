@@ -290,6 +290,14 @@ type Selection struct {
 	Path      string    `json:"path"`
 }
 
+// ConnectionCount is the number of connections S-3 counts: the servers
+// today. A mailbox is a connection too (carrel-mailbox.md M-3) and is counted
+// here when it comes, so every screen that shows the number asks this.
+// Subscriptions are not connections and are not counted.
+func (b Blob) ConnectionCount() int {
+	return len(b.Connections)
+}
+
 // Connection returns the connection with id.
 func (b Blob) Connection(id string) (Connection, bool) {
 	for _, c := range b.Connections {

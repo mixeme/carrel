@@ -103,7 +103,7 @@ func TestYandexCalendarLifecycle(t *testing.T) {
 	}
 
 	redirected(t, "rename", app.post("/app/collections/rename?"+url.Values{"a": {connID}, "c": {placed.Path}}.Encode(),
-		url.Values{"name": {name + " renamed"}, "colour": {"#5c736b"}}))
+		url.Values{"name": {name + " renamed"}, "colour": {"#3f6e8c"}}))
 	if got := liveProps(ctx, t, client, placed.Path, displayName); got["displayname"] != name+" renamed" {
 		t.Errorf("after the rename = %+v", got)
 	}

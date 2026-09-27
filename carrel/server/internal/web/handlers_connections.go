@@ -619,7 +619,8 @@ func connectionLabel(v string) string {
 // label — the label it acts under, as the stamps show it: its own, or the
 // server's host when it has none (owner's decision 24.09.2026, s-profile-11).
 // Letter case does not tell two sources apart on a screen, so it does not
-// here either.
+// here either. A mailbox's label keeps the same rule in the same namespace
+// (carrel-mailbox.md M-3): its stamps stand beside the servers' in search.
 func labelTaken(blob sealed.Blob, label, except string) bool {
 	for _, c := range blob.Connections {
 		if c.ID != except && strings.EqualFold(connLabel(c), label) {

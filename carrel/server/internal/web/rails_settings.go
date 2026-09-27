@@ -27,7 +27,7 @@ func (s *Server) settingsRail(sess *session.Session, open string) view.Rail {
 		count            *int
 	}{
 		{"settings.account", "Account", "/app/settings/account", nil},
-		{"settings.connections", "Connections", "/app/settings/connections", count(len(blob.Connections))},
+		{"settings.connections", "Connections", "/app/settings/connections", count(blob.ConnectionCount())},
 		{"settings.attachments", "Attachments", "/app/settings/attachments", nil},
 		{"settings.devices", "New device", "/app/settings/devices", nil},
 		{"settings.davloom", "davloom", "/app/settings/davloom", count(len(s.users.Devices(sess.AccountID())))},

@@ -30,7 +30,7 @@ var workTask = ics("BEGIN:VTODO\nUID:report\nDTSTAMP:20260101T000000Z\nSUMMARY:W
 func newColMoveFixture(t *testing.T) colMoveFixture {
 	t.Helper()
 	f := calendarFixture(t, nil, "standup.ics", workSeries, "report.ics", workTask)
-	f.srv.SetColour(f.col, "#6b5c73")
+	f.srv.SetColour(f.col, "#6b4e7a")
 	other := davtest.New(t)
 	other.Login, other.Password = "bob", "other"
 	other.AddCalendar(caldav.Calendar{Path: davtest.CalendarHome + "home/", Name: "Home"})
@@ -150,7 +150,7 @@ func TestCollectionMoveCopiesThenDeletes(t *testing.T) {
 		t.Fatalf("move: %d %q %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
 	}
 	cal, ok := f.other.Calendar(newPath)
-	if !ok || cal.Name != "Work" || f.other.Colour(newPath) != "#6b5c73" {
+	if !ok || cal.Name != "Work" || f.other.Colour(newPath) != "#6b4e7a" {
 		t.Errorf("new calendar = %+v colour %q", cal, f.other.Colour(newPath))
 	}
 	series, _, ok := f.other.Object(newPath + "standup.ics")

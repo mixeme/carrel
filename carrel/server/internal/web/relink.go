@@ -99,8 +99,7 @@ func (s *Server) relink(ctx context.Context, sess *session.Session, blob sealed.
 	if len(old) == 0 || to == "" {
 		return rep
 	}
-	for _, src := range s.searchSources(sess, blob) {
-		c := src.(*collectionSource)
+	for _, c := range s.tickedCollections(sess, blob) {
 		label := collectionLabel(c.col) + " · " + connLabel(c.conn)
 		if c.broken != nil {
 			rep.unread = append(rep.unread, label+" — "+c.broken.Error())

@@ -112,8 +112,50 @@ func Addresses(list []string) ([]string, error) {
 
 // Build writes the letter: headers without anything internal — no paths, no
 // collections, no server of the sender's — a plain-text body, and the
-// attachments as parts of their own.
+// attachments as parts of their own. The From is the relay's (relayFrom).
 func Build(relay Relay, m Message, now time.Time) ([]byte, error) {
+	from, err := relayFrom(relay, m)
+	if err != nil {
+		return nil, err
+	}
+	return write(from, m, now)
+}
+
+// relayFrom is the From of a letter the relay sends (S-26.1): the instance's
+// address with the person's name "via" the instance's, or the person's login
+// on the instance's domain. A letter from a person's own mailbox
+// (carrel-mailbox.md M-7) has a From of its own and passes it to write.
+func relayFrom(relay Relay, m Message) (mail.Address, error) {
+	name, err := clean(relay.FromName)
+	if err != nil {
+		return mail.Address{}, err
+	}
+	if sender, err := clean(m.Sender); err != nil {
+		return mail.Address{}, err
+	} else if sender != "" {
+		if name == "" {
+			name = "Carrel"
+		}
+		name = sender + " (via " + name + ")"
+	}
+	from := mail.Address{Name: name, Address: relay.From}
+	if m.FromLogin != "" {
+		domain := domainOf(relay.From)
+		own, err := mail.ParseAddress(m.FromLogin + "@" + domain)
+		if err != nil || strings.ContainsAny(m.FromLogin, "@<>\r\n") {
+			return mail.Address{}, fmt.Errorf("mail: the login %q is not an address on %s", m.FromLogin, domain)
+		}
+		from = mail.Address{Name: strings.TrimSpace(m.Sender), Address: own.Address}
+	}
+	return from, nil
+}
+
+func domainOf(address string) string {
+	return address[strings.LastIndex(address, "@")+1:]
+}
+
+// write writes a letter from from; its Message-ID is on the From's domain.
+func write(from mail.Address, m Message, now time.Time) ([]byte, error) {
 	to, err := Addresses(m.To)
 	if err != nil {
 		return nil, err
@@ -125,27 +167,7 @@ func Build(relay Relay, m Message, now time.Time) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	name, err := clean(relay.FromName)
-	if err != nil {
-		return nil, err
-	}
-	if sender, err := clean(m.Sender); err != nil {
-		return nil, err
-	} else if sender != "" {
-		if name == "" {
-			name = "Carrel"
-		}
-		name = sender + " (via " + name + ")"
-	}
-	from := mail.Address{Name: name, Address: relay.From}
-	domain := relay.From[strings.LastIndex(relay.From, "@")+1:]
-	if m.FromLogin != "" {
-		own, err := mail.ParseAddress(m.FromLogin + "@" + domain)
-		if err != nil || strings.ContainsAny(m.FromLogin, "@<>\r\n") {
-			return nil, fmt.Errorf("mail: the login %q is not an address on %s", m.FromLogin, domain)
-		}
-		from = mail.Address{Name: strings.TrimSpace(m.Sender), Address: own.Address}
-	}
+	domain := domainOf(from.Address)
 	id := make([]byte, 12)
 	if _, err := rand.Read(id); err != nil {
 		return nil, err
@@ -216,13 +238,30 @@ func Send(ctx context.Context, relay Relay, to []string, data []byte) (string, e
 	if !relay.Configured() {
 		return "", errors.New("mail: SMTP is not configured")
 	}
-	addr := net.JoinHostPort(relay.Host, strconv.Itoa(relay.Port))
+	return submit(ctx, submission{
+		host: relay.Host, port: relay.Port, security: relay.Security,
+		username: relay.Username, password: relay.Password, envelope: relay.From,
+	}, to, data)
+}
+
+// submission is one outgoing server and the envelope sender a letter goes
+// under: the relay's today, a mailbox's SMTP (carrel-mailbox.md M-7) with its
+// own address later.
+type submission struct {
+	host, security     string
+	port               int
+	username, password string
+	envelope           string
+}
+
+func submit(ctx context.Context, sub submission, to []string, data []byte) (string, error) {
+	addr := net.JoinHostPort(sub.host, strconv.Itoa(sub.port))
 	d := net.Dialer{Timeout: 15 * time.Second}
 	var conn net.Conn
 	var err error
-	tlsConf := &tls.Config{ServerName: relay.Host, MinVersion: tls.VersionTLS12}
-	if relay.Security == TLS {
-		conn, err = tls.DialWithDialer(&d, "tcp", addr, tlsConf)
+	tlsConf := &tls.Config{ServerName: sub.host, MinVersion: tls.VersionTLS12}
+	if sub.security == TLS {
+		conn, err = (&tls.Dialer{NetDialer: &d, Config: tlsConf}).DialContext(ctx, "tcp", addr)
 	} else {
 		conn, err = d.DialContext(ctx, "tcp", addr)
 	}
@@ -234,16 +273,16 @@ func Send(ctx context.Context, relay Relay, to []string, data []byte) (string, e
 	} else {
 		_ = conn.SetDeadline(time.Now().Add(60 * time.Second))
 	}
-	c, err := smtp.NewClient(conn, relay.Host)
+	c, err := smtp.NewClient(conn, sub.host)
 	if err != nil {
 		conn.Close()
 		return "", err
 	}
 	defer c.Close()
-	if err := c.Hello(relay.From[strings.LastIndex(relay.From, "@")+1:]); err != nil {
+	if err := c.Hello(domainOf(sub.envelope)); err != nil {
 		return "", err
 	}
-	if relay.Security == StartTLS {
+	if sub.security == StartTLS {
 		if ok, _ := c.Extension("STARTTLS"); !ok {
 			return "", errors.New("mail: the relay does not offer STARTTLS")
 		}
@@ -251,12 +290,12 @@ func Send(ctx context.Context, relay Relay, to []string, data []byte) (string, e
 			return "", err
 		}
 	}
-	if relay.Username != "" {
-		if err := c.Auth(smtp.PlainAuth("", relay.Username, relay.Password, relay.Host)); err != nil {
+	if sub.username != "" {
+		if err := c.Auth(smtp.PlainAuth("", sub.username, sub.password, sub.host)); err != nil {
 			return "", err
 		}
 	}
-	if err := c.Mail(relay.From); err != nil {
+	if err := c.Mail(sub.envelope); err != nil {
 		return "", err
 	}
 	for _, rcpt := range to {

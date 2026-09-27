@@ -47,7 +47,7 @@ func (s *Server) getMailAttach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	k, ok := attachKindOf(r.FormValue("what"))
-	if !ok || !s.mailOn() {
+	if !ok || !s.canSendLetters(sess) {
 		s.notFound(w, r)
 		return
 	}
@@ -61,7 +61,7 @@ func (s *Server) postMailAttach(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	k, ok := attachKindOf(r.FormValue("what"))
-	if !ok || !s.mailOn() {
+	if !ok || !s.canSendLetters(sess) {
 		s.notFound(w, r)
 		return
 	}

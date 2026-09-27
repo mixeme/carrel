@@ -174,7 +174,7 @@ func (s *Server) madeSheet(sess *session.Session, sheet view.PublishSheet, token
 		{ID: "publish.open", Label: "Open the link", Href: link, Method: "GET", Enabled: true},
 		{ID: "publish.list", Label: "All published links", Href: s.route("/app/files/published"), Method: "GET", Enabled: true},
 	}
-	if s.mailOn() {
+	if s.canSendLetters(sess) {
 		if id := user.LinkID(token); id != "" {
 			sheet.Actions = append(sheet.Actions, view.Action{ID: "publish.mail", Label: "Send by letter", Method: "POST", Enabled: true,
 				Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {id}})})
@@ -380,7 +380,7 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 			link := s.route("/p/" + token)
 			row.Link = text(link)
 			more := []view.Action{{ID: "publish.copy", Label: "Copy", Href: link, Method: "GET", Enabled: true}}
-			if s.mailOn() {
+			if s.canSendLetters(sess) {
 				more = append(more, view.Action{ID: "publish.mail", Label: "Send this link", Method: "POST", Enabled: true,
 					Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {l.ID}})})
 			}

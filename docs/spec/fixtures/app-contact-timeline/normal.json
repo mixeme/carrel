@@ -285,7 +285,7 @@
         "state": "error"
       },
       {
-        "colour": "#5c6b73",
+        "colour": "#8c6239",
         "count": 0,
         "fromCache": false,
         "message": "",
@@ -294,7 +294,7 @@
         "state": "empty"
       },
       {
-        "colour": "#67735c",
+        "colour": "#9a9280",
         "count": 0,
         "fromCache": false,
         "message": "",
@@ -303,7 +303,7 @@
         "state": "empty"
       },
       {
-        "colour": "#6b5c73",
+        "colour": "#a05a2c",
         "count": 0,
         "fromCache": false,
         "message": "",
@@ -452,7 +452,7 @@
             "tick": "on"
           },
           {
-            "colour": "#5c6b73",
+            "colour": "#8c6239",
             "count": 0,
             "detail": "",
             "href": "/app/calendar/f-ru-holidays/feed",
@@ -465,7 +465,7 @@
             "tick": "on"
           },
           {
-            "colour": "#5c6b73",
+            "colour": "#6b4e7a",
             "count": null,
             "detail": "",
             "href": "/app/calendar/f-league/feed",

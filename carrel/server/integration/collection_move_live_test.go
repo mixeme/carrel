@@ -37,7 +37,7 @@ func TestRadicaleBaikalCollectionMove(t *testing.T) {
 <C:mkcalendar xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:I="http://apple.com/ns/ical/">
   <D:set><D:prop>
     <D:displayname>Carrel S-12.3</D:displayname>
-    <I:calendar-color>#6b5c73</I:calendar-color>
+    <I:calendar-color>#6b4e7a</I:calendar-color>
     <C:supported-calendar-component-set><C:comp name="VEVENT"/><C:comp name="VTODO"/></C:supported-calendar-component-set>
   </D:prop></D:set>
 </C:mkcalendar>`)
@@ -85,7 +85,7 @@ func TestRadicaleBaikalCollectionMove(t *testing.T) {
 	got, _ = rawBody(ctx, t, bClient, newCal+task+".ics")
 	mustHave(t, "moved task", got, "UID:"+task, "X-CUSTOM:keep-me")
 	props := liveProps(ctx, t, bClient, newCal, displayNameProp, calendarColourProp)
-	if props["displayname"] != "Carrel S-12.3" || !strings.Contains(strings.ToLower(props["calendar-color"]), "6b5c73") {
+	if props["displayname"] != "Carrel S-12.3" || !strings.Contains(strings.ToLower(props["calendar-color"]), "6b4e7a") {
 		t.Errorf("the calendar on Baikal = %+v", props)
 	}
 	if _, err := rClient.PropFind(ctx, calPath, dav.DepthZero, []xml.Name{displayNameProp}); !dav.IsStatus(err, http.StatusNotFound) {

@@ -46,14 +46,14 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 	if strings.Join(selected, " ") != "VTODO" {
 		t.Errorf("components selected = %v, want the kind the sheet was opened for", selected)
 	}
-	if n := len(rowNamed(t, sheet.Form, "colour").Options); n != 8 {
-		t.Errorf("palette = %d tones, want 8", n)
+	if n := len(rowNamed(t, sheet.Form, "colour").Options); n != 6 {
+		t.Errorf("palette = %d tones, want the six of C-10", n)
 	}
 	if hint := string(rowNamed(t, sheet.Form, "address").Hint); !strings.Contains(hint, davtest.CalendarHome) {
 		t.Errorf("address hint = %q, want the home it goes into", hint)
 	}
 
-	form := url.Values{"account": {f.id}, "name": {"Дни рождения"}, "colour": {"#6B5C73"}, "components": {"VTODO", "VEVENT"}}
+	form := url.Values{"account": {f.id}, "name": {"Дни рождения"}, "colour": {"#6B4E7A"}, "components": {"VTODO", "VEVENT"}}
 	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess, form))
 	path := davtest.CalendarHome + "dni-rozhdeniya/"
 	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/app/calendar/"+f.id+"/"+url.PathEscape(path) {
@@ -63,11 +63,11 @@ func TestNewCalendarTakesItsAddressFromTheName(t *testing.T) {
 	if !ok || cal.Name != "Дни рождения" || strings.Join(cal.SupportedComponentSet, " ") != "VEVENT VTODO" {
 		t.Errorf("server calendar = %+v (found %v)", cal, ok)
 	}
-	if c := f.srv.Colour(path); c != "#6b5c73" {
+	if c := f.srv.Colour(path); c != "#6b4e7a" {
 		t.Errorf("calendar-color = %q", c)
 	}
 	entry, ok := catalogOf(t, f).Collection(f.id, path)
-	if !ok || entry.Name != "Дни рождения" || entry.Colour != "#6b5c73" || !entry.Has(view.KindEvent) || !entry.Has(view.KindTask) || entry.Has(view.KindNote) {
+	if !ok || entry.Name != "Дни рождения" || entry.Colour != "#6b4e7a" || !entry.Has(view.KindEvent) || !entry.Has(view.KindTask) || entry.Has(view.KindNote) {
 		t.Errorf("catalog entry = %+v (found %v)", entry, ok)
 	}
 	if what, detail := lastAudit(f.h); what != "collection.create" || detail != f.id {
@@ -96,7 +96,7 @@ func TestCreateSettlesAColourTheServerDroppedAtCreation(t *testing.T) {
 	f.srv.CreateDropsColour = true
 
 	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess,
-		url.Values{"account": {f.id}, "name": {"Trips"}, "colour": {"#6B5C73"}, "components": {"VEVENT"}}))
+		url.Values{"account": {f.id}, "name": {"Trips"}, "colour": {"#6B4E7A"}, "components": {"VEVENT"}}))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("create: %d %s", rec.Code, rec.Body.String())
 	}
@@ -104,11 +104,11 @@ func TestCreateSettlesAColourTheServerDroppedAtCreation(t *testing.T) {
 	if n := f.srv.CountRequests("PROPPATCH", path); n != 1 {
 		t.Errorf("PROPPATCH requests = %d, want the one that sends the dropped colour again", n)
 	}
-	if c := f.srv.Colour(path); c != "#6b5c73" {
+	if c := f.srv.Colour(path); c != "#6b4e7a" {
 		t.Errorf("the server holds %q, want the colour sent again after the create dropped it", c)
 	}
 	entry, ok := catalogOf(t, f).Collection(f.id, path)
-	if !ok || entry.Colour != "#6b5c73" {
+	if !ok || entry.Colour != "#6b4e7a" {
 		t.Errorf("catalog colour = %q (found %v), want the one the server holds", entry.Colour, ok)
 	}
 }
@@ -242,14 +242,14 @@ func TestRenameWritesTheLabelNotTheAddress(t *testing.T) {
 	}
 
 	u, _ := url.Parse(href)
-	rec := f.h.do(postForm(u.Path+"?"+u.RawQuery, f.sess, url.Values{"name": {"Office"}, "colour": {"#5c736b"}}))
+	rec := f.h.do(postForm(u.Path+"?"+u.RawQuery, f.sess, url.Values{"name": {"Office"}, "colour": {"#3f6e8c"}}))
 	if rec.Code != http.StatusSeeOther {
 		t.Fatalf("rename: %d %s", rec.Code, rec.Body.String())
 	}
-	if cal, _ := f.srv.Calendar(f.col); cal.Name != "Office" || f.srv.Colour(f.col) != "#5c736b" {
+	if cal, _ := f.srv.Calendar(f.col); cal.Name != "Office" || f.srv.Colour(f.col) != "#3f6e8c" {
 		t.Errorf("server = %q %q", cal.Name, f.srv.Colour(f.col))
 	}
-	if entry, ok := catalogOf(t, f).Collection(f.id, f.col); !ok || entry.Name != "Office" || entry.Colour != "#5c736b" {
+	if entry, ok := catalogOf(t, f).Collection(f.id, f.col); !ok || entry.Name != "Office" || entry.Colour != "#3f6e8c" {
 		t.Errorf("catalog = %+v (found %v)", entry, ok)
 	}
 	if n := f.srv.CountRequests("MOVE", ""); n != 0 {
@@ -286,7 +286,7 @@ func TestACollectionMadeOnAConnectionThatDiedIsStillMade(t *testing.T) {
 	f := calendarFixture(t, nil)
 
 	f.srv.HangUpOnce("MKCALENDAR")
-	form := url.Values{"account": {f.id}, "name": {"Дни рождения"}, "colour": {"#6B5C73"}, "components": {"VEVENT"}}
+	form := url.Values{"account": {f.id}, "name": {"Дни рождения"}, "colour": {"#6B4E7A"}, "components": {"VEVENT"}}
 	rec := f.h.do(postForm("/app/collections/new?kind=event", f.sess, form))
 	path := davtest.CalendarHome + "dni-rozhdeniya/"
 	if rec.Code != http.StatusSeeOther {

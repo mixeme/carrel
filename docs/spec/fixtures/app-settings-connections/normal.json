@@ -341,7 +341,7 @@
         },
         {
           "changed": "",
-          "colour": "#67735c",
+          "colour": "#9a9280",
           "kinds": [
             "file"
           ],
@@ -711,7 +711,7 @@
       "collections": [
         {
           "changed": "",
-          "colour": "#6b5c73",
+          "colour": "#a05a2c",
           "kinds": [
             "file"
           ],
@@ -724,7 +724,7 @@
         },
         {
           "changed": "",
-          "colour": "#735c6b",
+          "colour": "#a05a2c",
           "kinds": [
             "file"
           ],
@@ -987,7 +987,7 @@
         }
       ],
       "checked": "",
-      "colour": "#5c6b73",
+      "colour": "#8c6239",
       "kinds": [
         "event",
         "task"
@@ -1022,7 +1022,7 @@
         }
       ],
       "checked": "",
-      "colour": "#5c6b73",
+      "colour": "#6b4e7a",
       "kinds": [
         "event"
       ],

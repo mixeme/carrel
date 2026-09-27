@@ -61,7 +61,7 @@ func (s *Service) AddConnection(viewerID string, dataKey [crypt.KeyLen]byte, con
 			return nil, err
 		}
 		u.SealedBlob = sealedBlob
-		u.ConnCount = len(blob.Connections)
+		u.ConnCount = blob.ConnectionCount()
 		return []store.AuditEntry{{
 			When: now, Who: u.Login, What: "connection.add", Whom: u.Login, Detail: id,
 		}}, nil
@@ -275,7 +275,7 @@ func (s *Service) RemoveConnection(viewerID string, dataKey [crypt.KeyLen]byte, 
 			return nil, err
 		}
 		u.SealedBlob = sealedBlob
-		u.ConnCount = len(blob.Connections)
+		u.ConnCount = blob.ConnectionCount()
 		return []store.AuditEntry{{
 			When: now, Who: u.Login, What: "connection.remove", Whom: u.Login,
 			Detail: fmt.Sprintf("%s collections %d links %d jobs %d devices %d", accountID, res.Collections, res.Links, res.Jobs, res.Devices),

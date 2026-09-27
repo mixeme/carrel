@@ -27,11 +27,11 @@ func formatSize(n int64) view.Size {
 	return view.Size(fmt.Sprintf("%.1f %s", val, suffix))
 }
 
-// collectionPalette is the eight muted tones from architecture.md: the colour
+// collectionPalette is the mockup's six tones (s-profile-7, C-10): the colour
 // derived from an address, and the only colours the collection sheets offer.
+// Lower case, as hexColour writes what a server sent.
 var collectionPalette = []view.Colour{
-	"#5c6b73", "#6b5c73", "#736b5c", "#5c736b",
-	"#6b735c", "#735c6b", "#5c6773", "#67735c",
+	"#4a6b52", "#3f6e8c", "#6b4e7a", "#a05a2c", "#8c6239", "#9a9280",
 }
 
 func collectionColour(path string) view.Colour {

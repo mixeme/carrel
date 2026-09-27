@@ -694,7 +694,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 	}
 }
 
-// paletteRow offers the eight tones of C-10, not an arbitrary colour.
+// paletteRow offers the six tones of C-10, not an arbitrary colour.
 func paletteRow(chosen string, errText view.Text, hint string) view.FormRow {
 	row := view.FormRow{Name: "colour", Label: "Colour", Kind: view.InputRadio, Value: text(chosen), Error: errText, Hint: text(hint)}
 	for _, c := range collectionPalette {

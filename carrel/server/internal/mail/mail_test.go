@@ -3,7 +3,9 @@ package mail_test
 import (
 	"context"
 	"mime"
+	"net"
 	"net/mail"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -121,5 +123,38 @@ func TestRelayRefusals(t *testing.T) {
 	}
 	if _, err := cmail.Send(context.Background(), cmail.Relay{}, nil, nil); err == nil {
 		t.Error("an unconfigured relay sent")
+	}
+}
+
+// A relay on port 465 that takes the connection and never answers the TLS
+// handshake: Send gives up when the caller's context does, not after a
+// dialer's own quarter of a minute. The page that sends a letter waits on it.
+func TestSendOverTLSHonoursTheContext(t *testing.T) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
+	go func() {
+		for {
+			c, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			defer c.Close() // held open, silent
+		}
+	}()
+	host, port, _ := net.SplitHostPort(ln.Addr().String())
+	p, _ := strconv.Atoi(port)
+	relay := cmail.Relay{Host: host, Port: p, Security: cmail.TLS, From: "carrel@example.org"}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	defer cancel()
+	start := time.Now()
+	if _, err := cmail.Send(ctx, relay, []string{"a@example.org"}, []byte("x")); err == nil {
+		t.Fatal("a relay that never answers was taken as sent")
+	}
+	if took := time.Since(start); took > 3*time.Second {
+		t.Errorf("Send took %v with a context of 300ms", took)
 	}
 }

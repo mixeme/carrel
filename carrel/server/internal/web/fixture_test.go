@@ -149,13 +149,14 @@ type mockupApp struct {
 // and name the frames give it, and whether the calendar ticks it.
 type mockupFeed struct {
 	file, url, name, id string
-	events              bool // ticked in the calendar; nothing else is
-	refused             bool // the saved password stopped fitting (s-settings: 401)
+	colour              string // the ribbon's tone in the frames, chosen from the palette
+	events              bool   // ticked in the calendar; nothing else is
+	refused             bool   // the saved password stopped fitting (s-settings: 401)
 }
 
 var mockupFeedSet = []mockupFeed{
-	{file: "feeds/ru-holidays.ics", url: "https://feeds.example/ru-holidays.ics", name: "Праздники РФ", id: "f-ru-holidays", events: true},
-	{file: "feeds/league-season.ics", url: "https://league.example/season.ics", name: "Расписание лиги", id: "f-league", refused: true},
+	{file: "feeds/ru-holidays.ics", url: "https://feeds.example/ru-holidays.ics", name: "Праздники РФ", id: "f-ru-holidays", colour: "#8C6239", events: true},
+	{file: "feeds/league-season.ics", url: "https://league.example/season.ics", name: "Расписание лиги", id: "f-league", colour: "#6B4E7A", refused: true},
 }
 
 // mockupFileCols are the file collections of the set, as the frames of the
@@ -341,9 +342,12 @@ func mockupFeeds(t *testing.T, h *harness, sess *session.Session, root string) (
 		blob, _ := h.users.Catalog(sess.AccountID(), key)
 		sub := blob.Subscriptions[len(blob.Subscriptions)-1]
 		col := sub.FeedCollection()
-		// The colour stays the one Carrel derives: a feed's colour is chosen
-		// from the palette of eight, and the frames draw these two in tones
-		// outside it (docs/plan/to-typecase.md).
+		// The ribbon's tone is chosen as a person chooses it, in «Rename and
+		// colour»: the frames draw these two in tones of the palette.
+		rename := "/app/collections/rename?" + url.Values{"a": {sub.ID}, "c": {col.Path}}.Encode()
+		if rec := h.do(postForm(rename, sess, url.Values{"name": {one.name}, "colour": {one.colour}})); rec.Code != 303 {
+			t.Fatalf("colour %s: %d %s", one.name, rec.Code, rec.Body.String())
+		}
 		if one.events {
 			picks := blob.Selected
 			picks = append(picks, sealed.Selection{Kind: view.KindEvent, AccountID: sub.ID, Path: col.Path})

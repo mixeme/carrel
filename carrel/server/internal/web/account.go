@@ -195,7 +195,7 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 			}(),
 		})
 	}
-	if s.mailOn() {
+	if s.relayOn() {
 		ls := s.senderOf(u)
 		page.Mail = view.Form{Sets: []view.FieldSet{{Legend: "Letters you send", Rows: []view.FormRow{
 			{Name: "from", Label: "Sent as", Kind: view.InputText, Value: text(ls.From), ReadOnly: true,

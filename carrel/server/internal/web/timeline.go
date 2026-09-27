@@ -357,8 +357,7 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) startTimeline(sess *session.Session, person timelinePerson, from, to time.Time) (*timelineTask, error) {
 	var sources []fanout.Source
-	for _, src := range s.searchSources(sess, s.catalogOf(sess)) {
-		cs := src.(*collectionSource)
+	for _, cs := range s.tickedCollections(sess, s.catalogOf(sess)) {
 		sources = append(sources, &timelineSource{collectionSource: cs, person: person, tz: s.tz()})
 	}
 	id, err := user.NewTaskID()

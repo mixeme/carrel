@@ -252,7 +252,7 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 		page.PhotoNote = externalPhotoNote
 	}
 	page.Actions = s.recordActions(c, uid, obj.ETag)
-	if s.mailOn() && c.feed == nil {
+	if s.canSendLetters(c.sess) && c.feed == nil {
 		// Send (s-contacts-6): the card goes into a letter by the attach
 		// sheet's own POST, and the letter opens (S-26.2).
 		page.Actions = append(page.Actions, view.Action{ID: "record.send", Label: "Send", Icon: "i-mail", Method: "POST", Enabled: true,
