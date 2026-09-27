@@ -230,22 +230,25 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
           "app-collections-rename", "app-collections-move", "app-collections-delete",
           "app-publish", "app-files-picker", "app-mail-compose", "app-contact-new"}
 
-FRAME_TODO = {
-    "app-note: коллекция «Дневник»":
-        "s-notes-2 рисует «Дневник» снятым, s-notes-1 — отмеченным, с числом (to-typecase, задача 3)",
-    "app-search: коллекции рейла":
-        "кадр рисует семь коллекций, в наборе отмечено больше: кадр нарисован "
-        "с другим выбором (to-typecase, задача 5)",
-    "app-contact-timeline: коллекции рейла":
-        "кадр рисует часть календарей: нет отмеченных «Дежурства», снятых «Дни рождения» и "
-        "лент; сервер показывает все календари с их отметками (to-typecase, задача 5)",
-    "app-conflict-event: коллекции рейла":
-        "s-conflict-1 один на четыре рода и нарисован с рейлом контактов; "
-        "у события рейл календарный и иным быть не может",
-    "app-conflict-note: коллекции рейла":
-        "то же: один кадр на четыре рода, рейл в нём контактный",
-    "app-conflict-task: коллекции рейла":
-        "то же: один кадр на четыре рода, рейл в нём контактный",
+FRAME_TODO = {}
+
+# Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
+# записка в from-typecase.md. Закрылось на сервере — строка уходит.
+SERVER_TODO = {
+    "app-note-edit: коллекции рейла":
+        "правка заметки — в оболочке с рейлом тетрадей, s-notes-20 (from-typecase, записка 9)",
+    "app-contact-timeline: коллекция «Праздники РФ»":
+        "лента в рейле хронологии — «ro», как в агенде, а не число (from-typecase, записка 15)",
+    "app-contact-timeline: навигация":
+        "хронология — с навигацией разделов, как другие экраны раздела (from-typecase, записка 15)",
+    "app-search: коллекция":
+        "у источника поиска — число находок, «Sources 14 / 14» (from-typecase, записка 15)",
+    "app-conflict-event: коллекция":
+        "рейл конфликта — с числами коллекций, как у контакта (from-typecase, записка 15)",
+    "app-conflict-note: коллекция":
+        "то же у заметки (from-typecase, записка 15)",
+    "app-conflict-task: коллекция":
+        "то же у задачи (from-typecase, записка 15)",
 }
 
 def as_kind(x):
@@ -368,15 +371,16 @@ for d in drift:
     # Ключ — «каталог: что расходится», без состояния: кадр неверен для
     # экрана, а не для одного из его состояний.
     flat = re.sub(r'^([^/]+)/[^:]+:', lambda m: m.group(1) + ':', d)
-    for k, why in FRAME_TODO.items():
-        if flat.startswith(k):
-            known.append("%s — %s" % (k, why))
+    for who, todo in (("Typecase", FRAME_TODO), ("сервер", SERVER_TODO)):
+        hit = [k for k in todo if flat.startswith(k)]
+        if hit:
+            known.append("ждёт %s: %s — %s" % (who, hit[0], todo[hit[0]]))
             break
     else:
         red.append(d)
 check("8. фикстура рисуется в свой кадр", red)
-for k in known:
-    print("         ждёт Typecase:", k)
+for k in sorted(set(known)):
+    print("         " + k)
 
 print()
 print("ИТОГ: %d красных проверок" % len(fails))
