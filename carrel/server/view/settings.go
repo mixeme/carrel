@@ -25,9 +25,12 @@ type FormRow struct {
 	Required bool      `json:"required"`
 }
 type Option struct {
-	Value    string `json:"value"`
-	Label    Text   `json:"label"`
-	Selected bool   `json:"selected"`
+	Value     string `json:"value"`
+	Label     Text   `json:"label"`
+	Selected  bool   `json:"selected"`
+	Separator bool   `json:"separator,omitempty"` // черта перед вариантом, как у MenuItem
+	Disabled  bool   `json:"disabled,omitempty"`  // виден, но не выбирается
+	Reason    Text   `json:"reason,omitempty"`    // почему не выбирается; пусто у доступного
 }
 type FieldError struct {
 	Name    string `json:"name"`
@@ -286,8 +289,9 @@ type AdminEscrowPage struct {
 
 type AdminAuditPage struct {
 	Shell
-	Bar  ListBar    `json:"bar"`
-	Rows []AuditRow `json:"rows"`
+	Bar    ListBar    `json:"bar"`
+	Filter Form       `json:"filter"` // выбор действия (s-admin-10): GET, уходит при выборе
+	Rows   []AuditRow `json:"rows"`
 }
 type AuditRow struct {
 	When   When `json:"when"`

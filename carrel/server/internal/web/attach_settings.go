@@ -21,7 +21,24 @@ import (
 type attachForm struct {
 	chosen *fileCtx // the folder the tree shows chosen
 	sub    string   // a folder to make inside it on first use
+	names  string   // how files are named: sealed.AttachNames…
 	errors map[string]string
+}
+
+// attachNamesOf is how the person names attachments; by date until chosen.
+func attachNamesOf(blob sealed.Blob) string {
+	if blob.AttachNames == "" {
+		return sealed.AttachNamesDated
+	}
+	return blob.AttachNames
+}
+
+// attachNames is the list of «Written as» (attachments-3), with the name each
+// choice makes of report.pdf attached to «Sync-up» of 10 August.
+var attachNames = []struct{ value, label, example string }{
+	{sealed.AttachNamesDated, "Date, then the original name", "2026-08-10 report.pdf"},
+	{sealed.AttachNamesOriginal, "The original name", "report.pdf"},
+	{sealed.AttachNamesTitled, "Record title, then the original name", "Sync-up - report.pdf"},
 }
 
 func (s *Server) getSettingsAttachments(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +47,7 @@ func (s *Server) getSettingsAttachments(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	blob := s.catalogOf(sess)
-	f := attachForm{chosen: s.savedFolder(sess, blob)}
+	f := attachForm{chosen: s.savedFolder(sess, blob), names: attachNamesOf(blob)}
 	if to := r.URL.Query().Get("to"); to != "" {
 		f.chosen, _ = s.folderAddress(sess, to)
 	}
@@ -38,14 +55,21 @@ func (s *Server) getSettingsAttachments(w http.ResponseWriter, r *http.Request) 
 }
 
 // postSettingsAttachments stores the folder: the one chosen in the tree, and
-// inside it the folders typed, made when the first attachment goes there.
+// inside it the folders typed, made when the first attachment goes there; and
+// how the files are named. Nothing is stored unless all of it is right.
 func (s *Server) postSettingsAttachments(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
 		return
 	}
 	blob := s.catalogOf(sess)
-	f := attachForm{sub: strings.TrimSpace(r.FormValue("sub")), errors: map[string]string{}}
+	f := attachForm{sub: strings.TrimSpace(r.FormValue("sub")), names: r.FormValue("name"), errors: map[string]string{}}
+	if f.names == "" {
+		f.names = sealed.AttachNamesDated // a form sent without the field
+	}
+	if !slices.ContainsFunc(attachNames, func(n struct{ value, label, example string }) bool { return n.value == f.names }) {
+		f.errors["name"] = "Choose one of the ways shown."
+	}
 	dest, ok := s.folderAddress(sess, r.FormValue("to"))
 	switch {
 	case !ok:
@@ -72,6 +96,9 @@ func (s *Server) postSettingsAttachments(w http.ResponseWriter, r *http.Request)
 	if len(f.errors) == 0 {
 		key, _ := sess.DataKey()
 		err := s.users.SetAttachmentFolder(sess.AccountID(), key, sealed.AttachmentFolder{AccountID: dest.conn.ID, Path: dest.col.Path, Folder: segs})
+		if err == nil {
+			err = s.users.SetAttachmentNames(sess.AccountID(), key, f.names)
+		}
 		if err == nil {
 			s.redirect(w, r, "/app/settings/attachments")
 			return
@@ -111,11 +138,14 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 		{Name: "sub", Label: "New folder inside", Kind: view.InputText, Value: text(f.sub), Error: text(f.errors["sub"]),
 			Hint: "Optional, such as carrel/attachments. Made when the first attachment goes there; it stays an ordinary folder, readable without Carrel."},
 	}}
-	name := view.FieldSet{Legend: "File name", Rows: []view.FormRow{
-		{Name: "name", Label: "Written as", Kind: view.InputText, ReadOnly: true,
-			Value: "The date of the record, its title, then the file's own name",
-			Hint:  "2026-08-10 Sync-up - report.pdf. A name already taken is never overwritten: a number is added."},
-	}}
+	written := view.FormRow{Name: "name", Label: "Written as", Kind: view.InputSelect, Value: text(f.names), Error: text(f.errors["name"])}
+	for _, n := range attachNames {
+		written.Options = append(written.Options, view.Option{Value: n.value, Label: text(n.label), Selected: n.value == f.names})
+		if n.value == f.names {
+			written.Hint = text(n.example + ". A name already taken is never overwritten: a number is added.")
+		}
+	}
+	name := view.FieldSet{Legend: "File name", Rows: []view.FormRow{written}}
 	page.Folder = *tree
 	page.Form = view.Form{
 		Action: s.route("/app/settings/attachments"), Method: "POST", Sets: []view.FieldSet{small, folder, name},

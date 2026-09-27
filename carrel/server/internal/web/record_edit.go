@@ -61,7 +61,7 @@ const (
 	// "UTC" or "floating". The form's times stay in the instance zone (C-10).
 	fieldZone
 	// fieldRepeat is RRULE, edited as a whole series (S-11): Frequency,
-	// Every, On, Until, Times, and the rule itself. See repeatValues.
+	// Every, On, Until, Count, and the rule itself. See repeatValues.
 	fieldRepeat
 	// fieldRelated is the first RELATED-TO: picked from the records this
 	// session has loaded for the collection, or typed as a UID (S-11).
@@ -88,10 +88,23 @@ type editField struct {
 	timeOptional bool
 	choices      []fieldOption
 	hint         string // shown under the field, when the rule needs saying
+	// set is the rubric the field stands in on the full form (s-tasks-3,
+	// s-agenda-3): FieldSet.Legend; empty is the head of the form.
+	set string
+	// timeLabel names the time input of a fieldTime; label names its date.
+	timeLabel string
+	// blank is what an absent property reads as in a fieldChoice: a task
+	// without STATUS needs action. The form shows it, and a save that leaves
+	// it so writes nothing (S-7).
+	blank string
 }
 
-// fieldOption is one value a fieldChoice offers.
-type fieldOption struct{ value, label string }
+// fieldOption is one value a fieldChoice offers; sep draws a line before it,
+// where the list frame beside the screen draws one.
+type fieldOption struct {
+	value, label string
+	sep          bool
+}
 
 // zoneChoices are the zones the form offers besides the one the event came
 // in, UTC and the instance's own.
@@ -132,10 +145,11 @@ func zoneOf(cur []model.RawValue) string {
 func zoneOptions(held, selected, instance string) []view.Option {
 	label := func(z string) string {
 		if z == "floating" {
-			return "Floating — the same clock time everywhere"
+			return "Floating — the same clock time anywhere"
 		}
 		return z
 	}
+	// The zone it came in stands first, and a line under it (s-agenda-8).
 	opts := []view.Option{{Value: held, Label: text(label(held) + " · as sent"), Selected: selected == held}}
 	seen := map[string]bool{held: true}
 	for _, z := range append([]string{"UTC", instance}, zoneChoices...) {
@@ -143,7 +157,7 @@ func zoneOptions(held, selected, instance string) []view.Option {
 			continue
 		}
 		seen[z] = true
-		opts = append(opts, view.Option{Value: z, Label: text(label(z)), Selected: z == selected})
+		opts = append(opts, view.Option{Value: z, Label: text(label(z)), Selected: z == selected, Separator: len(opts) == 1})
 	}
 	return opts
 }
@@ -201,6 +215,9 @@ func carriedQuery(r *http.Request) string {
 
 // timeLabel names the time input of a time field.
 func timeLabel(f editField) string {
+	if f.timeLabel != "" {
+		return f.timeLabel
+	}
 	if f.timeOptional {
 		return "Time"
 	}
@@ -366,7 +383,7 @@ func repeatRule(want, have []string, allDay bool, tz *time.Location) (string, er
 		}
 		if want[repCount] != have[repCount] {
 			if n, err := strconv.Atoi(want[repCount]); want[repCount] != "" && (err != nil || n < 1) {
-				return "", errors.New("Times is a number of 1 or more.")
+				return "", errors.New("Count is a number of 1 or more.")
 			}
 			r = r.set("COUNT", want[repCount])
 		}
@@ -421,7 +438,7 @@ func repeatFields(v []string) []view.Field {
 	case v[repUntil] != "":
 		out = append(out, view.Field{Label: "Until", Value: text(v[repUntil])})
 	case v[repCount] != "":
-		out = append(out, view.Field{Label: "Times", Value: text(v[repCount])})
+		out = append(out, view.Field{Label: "Count", Value: text(v[repCount])})
 	}
 	return out
 }
@@ -429,7 +446,8 @@ func repeatFields(v []string) []view.Field {
 // repeatSet is the Repeats field set of the event form.
 func repeatSet(f editField, vals []string, errText view.Text) view.FieldSet {
 	v := append(append([]string(nil), vals...), make([]string, 6)...)[:6]
-	freqs := []view.Option{{Value: "", Label: "Does not repeat"}, {Value: "DAILY", Label: "Daily"}, {Value: "WEEKLY", Label: "Weekly"},
+	// The list of s-agenda-10: a line under «Does not repeat».
+	freqs := []view.Option{{Value: "", Label: "Does not repeat"}, {Value: "DAILY", Label: "Daily", Separator: true}, {Value: "WEEKLY", Label: "Weekly"},
 		{Value: "MONTHLY", Label: "Monthly"}, {Value: "YEARLY", Label: "Yearly"}}
 	seen := false
 	for i := range freqs {
@@ -443,37 +461,60 @@ func repeatSet(f editField, vals []string, errText view.Text) view.FieldSet {
 		{Name: f.name + ".freq", Label: "Frequency", Kind: view.InputSelect, Value: text(v[repFreq]), Options: freqs, Error: errText},
 		{Name: f.name + ".interval", Label: "Every", Kind: view.InputNumber, Value: text(v[repInterval])},
 	}}
+	// On is one row of the days, MO to SU, as the frame draws it: each day
+	// ticked goes as a value of repeat.on.
 	on := map[string]bool{}
 	for _, d := range strings.Split(v[repOn], ",") {
 		on[d] = true
 	}
+	days := view.FormRow{Name: f.name + ".on", Label: "On", Kind: view.InputCheck}
 	for _, d := range repeatDays {
-		val := ""
-		if on[d.code] {
-			val = "on"
-		}
-		set.Rows = append(set.Rows, view.FormRow{Name: f.name + ".on." + d.code, Label: text("On " + d.label), Kind: view.InputCheck, Value: text(val)})
+		days.Options = append(days.Options, view.Option{Value: d.code, Label: text(d.code), Selected: on[d.code]})
 	}
-	set.Rows = append(set.Rows,
+	set.Rows = append(set.Rows, days,
 		view.FormRow{Name: f.name + ".until", Label: "Until", Kind: view.InputDate, Value: text(v[repUntil])},
-		view.FormRow{Name: f.name + ".count", Label: "Times", Kind: view.InputNumber, Value: text(v[repCount]), Hint: "Until or Times, not both."},
+		view.FormRow{Name: f.name + ".count", Label: "Count", Kind: view.InputNumber, Value: text(v[repCount]), Hint: "Until or Count, not both."},
 		view.FormRow{Name: f.name + ".rule", Label: "Advanced RRULE", Kind: view.InputText, Value: text(v[repRule]),
 			Hint: "Changed here, the rule is written as typed and wins over the fields above. Exceptions and moved instances are not edited: the series is edited as a whole."},
 	)
 	return set
 }
 
-// taskStatuses are the STATUS values of a task (RFC 5545 §3.8.1.11).
-var taskStatuses = []fieldOption{{"", "No status"}, {"NEEDS-ACTION", "Needs action"}, {"IN-PROCESS", "In progress"},
-	{"COMPLETED", "Completed"}, {"CANCELLED", "Cancelled"}}
+// The lists below are the list frames beside their screens (from-typecase
+// note 6), in their order, with their lines.
+
+// taskStatuses are the STATUS values of a task (RFC 5545 §3.8.1.11,
+// s-tasks-8). There is no «no status»: a task without one needs action.
+var taskStatuses = []fieldOption{{value: "NEEDS-ACTION", label: "Needs action"}, {value: "IN-PROCESS", label: "In process"},
+	{value: "COMPLETED", label: "Completed"}, {value: "CANCELLED", label: "Cancelled"}}
 
 // priorities are PRIORITY as three steps (RFC 5545 §3.8.1.9: 1 is the
-// highest, 9 the lowest); another number stays a choice.
-var priorities = []fieldOption{{"", "No priority"}, {"1", "High"}, {"5", "Medium"}, {"9", "Low"}}
+// highest, 9 the lowest), each with its number, which the card and other
+// clients show (s-tasks-9); another number stays a choice.
+var priorities = []fieldOption{{value: "", label: "No priority"}, {value: "1", label: "High · 1", sep: true},
+	{value: "5", label: "Medium · 5"}, {value: "9", label: "Low · 9"}}
 
-// eventStatuses are the STATUS values of an event (RFC 5545 §3.8.1.11).
-var eventStatuses = []fieldOption{{"", "No status"}, {"TENTATIVE", "Tentative"}, {"CONFIRMED", "Confirmed"}, {"CANCELLED", "Cancelled"}}
+// eventStatuses are the STATUS values of an event (RFC 5545 §3.8.1.11,
+// s-agenda-7). Most events carry none, and that is not Confirmed.
+var eventStatuses = []fieldOption{{value: "", label: "No status"}, {value: "TENTATIVE", label: "Tentative", sep: true},
+	{value: "CONFIRMED", label: "Confirmed"}, {value: "CANCELLED", label: "Cancelled"}}
 
+// statusLabel is a STATUS as its list names it; a value no list offers is
+// shown as written.
+func statusLabel(v string) string {
+	for _, c := range append(append([]fieldOption(nil), taskStatuses...), eventStatuses...) {
+		if c.value != "" && strings.EqualFold(c.value, v) {
+			return c.label
+		}
+	}
+	return strings.ToLower(v)
+}
+
+// editFields are the fields of each form in the order of its frame: the task
+// and the event are laid out in rubrics (set), s-tasks-3 and s-agenda-3.
+// What a frame does not draw and the owner kept — the task's start time, its
+// all-day boxes, Done and reminders — stands in the rubric it belongs to
+// (to-typecase task 13).
 var editFields = map[view.Kind][]editField{
 	view.KindContact: {
 		{name: "fn", label: "Display name", prop: "FN", typ: fieldText,
@@ -488,36 +529,36 @@ var editFields = map[view.Kind][]editField{
 			hint: "--MM-DD for a birthday without a year."},
 		{name: "tel", label: "Phone", prop: "TEL", typ: fieldMulti, typed: true},
 		{name: "email", label: "Email", prop: "EMAIL", typ: fieldMulti, typed: true},
-		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress},
+		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress, set: "Addresses"},
 		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, optional: true, hint: "Separated by commas."},
 		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea, optional: true},
 	},
 	view.KindEvent: {
-		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
-		{name: "start", label: "Starts", prop: "DTSTART", typ: fieldTime, required: true, allDay: true},
-		{name: "end", label: "Ends", prop: "DTEND", typ: fieldTime},
-		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone},
-		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat},
-		{name: "attendee", label: "Attendee", prop: "ATTENDEE", typ: fieldAttendee},
+		{name: "summary", label: "Summary", prop: "SUMMARY", typ: fieldText},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: eventStatuses},
 		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
-		{name: "reminder", label: "Reminders", typ: fieldReminders},
+		{name: "attendee", label: "Attendee", prop: "ATTENDEE", typ: fieldAttendee},
+		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, required: true, allDay: true, set: "When"},
+		{name: "end", label: "End date", timeLabel: "End time", prop: "DTEND", typ: fieldTime, set: "When"},
+		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone, set: "When"},
+		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders"},
+		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat, set: "Repeats"},
 	},
 	view.KindTask: {
-		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
-		{name: "start", label: "Starts", prop: "DTSTART", typ: fieldTime, allDay: true},
-		{name: "due", label: "Due", prop: "DUE", typ: fieldTime, allDay: true},
-		{name: "done", label: "Done", prop: "STATUS", typ: fieldDone},
-		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: taskStatuses},
-		{name: "priority", label: "Priority", prop: "PRIORITY", typ: fieldChoice, choices: priorities},
-		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent},
-		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
-		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
-		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated},
+		{name: "summary", label: "Summary", prop: "SUMMARY", typ: fieldText},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
-		{name: "reminder", label: "Reminders", typ: fieldReminders},
+		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, allDay: true, set: "When"},
+		{name: "due", label: "Due date", timeLabel: "Due time", prop: "DUE", typ: fieldTime, allDay: true, set: "When"},
+		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: taskStatuses, blank: "NEEDS-ACTION", set: "Progress"},
+		{name: "priority", label: "Priority", prop: "PRIORITY", typ: fieldChoice, choices: priorities, set: "Progress"},
+		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent, set: "Progress"},
+		{name: "done", label: "Done", prop: "STATUS", typ: fieldDone, set: "Progress"},
+		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders"},
+		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText, set: "Other"},
+		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas.", set: "Other"},
+		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
 	},
 	view.KindNote: {
 		{name: "summary", label: "Title", prop: "SUMMARY", typ: fieldText},
@@ -551,9 +592,16 @@ func quickFields(k view.Kind) []editField {
 	return out
 }
 
-// rowLabels are the labels a phone or an address row is offered (TYPE). A
-// label another client wrote is offered too, so keeping it is a choice.
-var rowLabels = []string{"home", "work", "cell", "voice", "fax", "other"}
+// rowLabels are the labels a phone or an e-mail row is offered (TYPE), the
+// lists of s-contacts-12 and s-contacts-13: vCard types, which another client
+// names in its own words. «mobile» is TYPE=cell and «main» TYPE=main, as other
+// clients write them. A label another client wrote is offered too, so keeping
+// it is a choice.
+var rowLabels = map[string][]fieldOption{
+	"TEL": {{value: "cell", label: "mobile"}, {value: "work", label: "work"}, {value: "home", label: "home"},
+		{value: "main", label: "main"}, {value: "fax", label: "fax"}, {value: "other", label: "other"}},
+	"EMAIL": {{value: "work", label: "work"}, {value: "home", label: "home"}, {value: "other", label: "other"}},
+}
 
 // addressParts are the inputs of an address row: ADR components 2 to 6
 // (RFC 6350 §6.3.1).
@@ -576,9 +624,12 @@ func addressRowParts(row string) [5]string {
 	return out
 }
 
-// reminderPresets are the triggers the form offers. A trigger another client
-// wrote is offered too, so keeping it is always a choice.
-var reminderPresets = []string{"PT0S", "-PT5M", "-PT10M", "-PT15M", "-PT30M", "-PT1H", "-PT2H", "-P1D", "-P2D", "-P1W"}
+// reminderPresets are the triggers the form offers, the steps of s-agenda-9.
+// A trigger another client wrote is offered too, so keeping it is always a
+// choice.
+var reminderPresets = []fieldOption{{value: "PT0S", label: "At the time"}, {value: "-PT5M", label: "5 minutes before"},
+	{value: "-PT10M", label: "10 minutes before"}, {value: "-PT30M", label: "30 minutes before"},
+	{value: "-PT1H", label: "1 hour before"}, {value: "-P1D", label: "1 day before"}}
 
 func first(v []string) string {
 	if len(v) == 0 {
@@ -640,7 +691,11 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 		case fieldText, fieldArea:
 			vals[f.name] = []string{c.text(obj, f.prop)}
 		case fieldChoice:
-			vals[f.name] = []string{strings.TrimSpace(firstValue(obj, f.prop))}
+			v := strings.TrimSpace(firstValue(obj, f.prop))
+			if v == "" {
+				v = f.blank
+			}
+			vals[f.name] = []string{v}
 		case fieldZone:
 			vals[f.name] = []string{zoneOf(props[f.prop])}
 		case fieldRepeat:
@@ -743,6 +798,8 @@ func (s *Server) emptyValues(c *collectionCtx) formValues {
 			vals[f.name] = []string{"", ""}
 		case fieldRepeat:
 			vals[f.name] = repeatValues("", nil)
+		case fieldChoice:
+			vals[f.name] = []string{f.blank}
 		default:
 			vals[f.name] = []string{""}
 		}
@@ -796,14 +853,15 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 			}
 			vals[f.name] = []string{v}
 		case fieldRepeat:
+			freq := strings.TrimSpace(r.FormValue(f.name + ".freq")) // parses the form
 			var on []string
 			for _, d := range repeatDays {
-				if checkbox(r, f.name+".on."+d.code) == "on" {
+				if slices.Contains(r.Form[f.name+".on"], d.code) {
 					on = append(on, d.code)
 				}
 			}
 			vals[f.name] = []string{
-				strings.TrimSpace(r.FormValue(f.name + ".freq")), strings.TrimSpace(r.FormValue(f.name + ".interval")),
+				freq, strings.TrimSpace(r.FormValue(f.name + ".interval")),
 				strings.Join(on, ","), strings.TrimSpace(r.FormValue(f.name + ".until")),
 				strings.TrimSpace(r.FormValue(f.name + ".count")), strings.TrimSpace(r.FormValue(f.name + ".rule")),
 			}
@@ -944,11 +1002,19 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], rule, false)...)
 		case fieldChoice:
-			v := first(w)
-			if v == first(h) {
+			// An absent property and its blank are one state (S-7): a task
+			// without STATUS saved with Needs action gains none.
+			v, held := first(w), first(h)
+			if v == "" {
+				v = f.blank
+			}
+			if held == "" {
+				held = f.blank
+			}
+			if v == held {
 				continue
 			}
-			if !offered(f.choices, v, first(h)) {
+			if !offered(f.choices, v, held) {
 				ch.errors[f.name] = "Choose a " + strings.ToLower(f.label) + " from the list."
 				continue
 			}
@@ -1013,7 +1079,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				allDay = startRow[2] == "on"
 			}
 			if f.required && row[0] == "" {
-				ch.errors[f.name] = f.label + " needs a date."
+				ch.errors[f.name] = f.label + " is required."
 				continue
 			}
 			at, err := rowTime(row, allDay, tz)
@@ -1080,7 +1146,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			}
 			allowed := make(map[string]bool)
 			for _, p := range reminderPresets {
-				allowed[p] = true
+				allowed[p.value] = true
 			}
 			for _, a := range cur {
 				allowed[a.Trigger] = true
@@ -1394,7 +1460,7 @@ func choiceOptions(choices []fieldOption, selected, held string) []view.Option {
 	var opts []view.Option
 	seen := false
 	for _, c := range choices {
-		opts = append(opts, view.Option{Value: c.value, Label: text(c.label), Selected: c.value == selected})
+		opts = append(opts, view.Option{Value: c.value, Label: text(c.label), Selected: c.value == selected, Separator: c.sep})
 		seen = seen || c.value == held
 	}
 	if held != "" && !seen {
@@ -1413,14 +1479,19 @@ func sameLabels(a, b []string) bool {
 	return true
 }
 
-// labelOptions are rowLabels, "no label", and the row's own label when it
-// is none of them.
-func labelOptions(selected string) []view.Option {
-	opts := []view.Option{{Value: "", Label: "No label", Selected: selected == ""}}
+// labelOptions are the rowLabels of prop and the row's own label when it is
+// none of them. A label is matched whatever its case, and a matched one keeps
+// the value as the card holds it, so a save that leaves it changes nothing:
+// TYPE=CELL is «mobile», offered once. A row without a label selects none.
+func labelOptions(prop, selected string) []view.Option {
+	var opts []view.Option
 	seen := selected == ""
-	for _, l := range rowLabels {
-		opts = append(opts, view.Option{Value: l, Label: text(l), Selected: l == selected})
-		seen = seen || l == selected
+	for _, l := range rowLabels[prop] {
+		o := view.Option{Value: l.value, Label: text(l.label)}
+		if selected != "" && strings.EqualFold(l.value, selected) {
+			o.Value, o.Selected, seen = selected, true, true
+		}
+		opts = append(opts, o)
 	}
 	if !seen {
 		opts = append(opts, view.Option{Value: selected, Label: text(strings.ToLower(strings.ReplaceAll(selected, ",", ", "))), Selected: true})
@@ -1651,38 +1722,50 @@ func (s *Server) recordForm(c *collectionCtx, st editState) view.Form {
 // screens cannot drift apart.
 func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField) view.Form {
 	tf := c.tf
-	main := view.FieldSet{Rows: []view.FormRow{
+	// The head of the form comes first; each rubric stands where its first
+	// field does (editFields).
+	sets := []view.FieldSet{{Rows: []view.FormRow{
 		csrfField(c.sess),
 		{Name: "etag", Kind: view.InputHidden, Value: text(st.etag)},
 		{Name: "readat", Kind: view.InputHidden, Value: text(strconv.FormatInt(st.readAt.Unix(), 10))},
-	}}
+	}}}
 	var props map[string][]model.RawValue
 	if st.obj != nil {
 		props = st.obj.Props()
 	}
-	var sets, extra []view.FieldSet
-	var reminders *view.FieldSet
 	var empty []view.FormRow
 	full := len(fields) == len(editFields[c.spec.kind])
 	for _, f := range fields {
 		vals, errText := st.values[f.name], text(st.errors[f.name])
 		hide := f.optional && full && st.obj != nil && strings.TrimSpace(first(vals)) == "" && errText == ""
-		before := len(main.Rows)
+		// The quick sheet is too small for rubrics: its few fields stand
+		// together, and only the reminders keep their own set (U-6.16).
+		legend := f.set
+		if !full && f.typ != fieldReminders {
+			legend = ""
+		}
+		at := slices.IndexFunc(sets, func(fs view.FieldSet) bool { return string(fs.Legend) == legend })
+		if at < 0 {
+			at = len(sets)
+			sets = append(sets, view.FieldSet{Legend: text(legend)})
+		}
+		set := &sets[at]
+		before := len(set.Rows)
 		switch f.typ {
 		case fieldText:
-			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required})
 		case fieldArea:
-			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
 		case fieldList:
-			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
 		case fieldRepeat:
-			extra = append(extra, repeatSet(f, vals, errText))
+			set.Rows = append(set.Rows, repeatSet(f, vals, errText).Rows...)
 		case fieldAttendee:
 			if v := first(vals); v != "" {
-				main.Rows = append(main.Rows, view.FormRow{Name: f.name, Kind: view.InputHidden, Value: text(v), Error: errText})
+				set.Rows = append(set.Rows, view.FormRow{Name: f.name, Kind: view.InputHidden, Value: text(v), Error: errText})
 			}
 		case fieldRelated:
-			main.Rows = append(main.Rows,
+			set.Rows = append(set.Rows,
 				view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
 					Options: relatedOptions(c.index(), st.uid, first(vals)), Error: errText},
 				view.FormRow{Name: f.name + ".uid", Label: "Or enter a UID by hand", Kind: view.InputText,
@@ -1692,14 +1775,14 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			if held == "" {
 				continue // a day has no zone; a new event is written in UTC
 			}
-			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
 				Options: zoneOptions(held, first(vals), s.tz().String()), Error: errText})
 		case fieldChoice:
 			var held string
 			if st.obj != nil {
 				held = strings.TrimSpace(firstValue(st.obj, f.prop))
 			}
-			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
 				Options: choiceOptions(f.choices, first(vals), held), Error: errText})
 		case fieldBirthday:
 			// A date input cannot hold a day without a year: such a value is
@@ -1708,10 +1791,10 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			if strings.HasPrefix(first(vals), "--") {
 				kind = view.InputText
 			}
-			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: kind, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: kind, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
 		case fieldName:
 			row := pair(vals)
-			main.Rows = append(main.Rows,
+			set.Rows = append(set.Rows,
 				view.FormRow{Name: f.name + ".given", Label: "Given", Kind: view.InputText, Value: text(row[0]), Error: errText},
 				view.FormRow{Name: f.name + ".family", Label: "Family", Kind: view.InputText, Value: text(row[1])})
 		case fieldMulti:
@@ -1729,18 +1812,17 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				if i == 0 {
 					row.Error = errText
 				}
-				main.Rows = append(main.Rows, row)
+				set.Rows = append(set.Rows, row)
 				if f.typed {
 					label := first(st.values[f.name+".type"][min(i, len(st.values[f.name+".type"])):])
 					name := fmt.Sprintf("%s.%d.type", f.name, i)
 					if i == len(vals)-1 {
 						name = f.name + ".new.type"
 					}
-					main.Rows = append(main.Rows, view.FormRow{Name: name, Label: text(f.label + " label"), Kind: view.InputSelect, Value: text(label), Options: labelOptions(label)})
+					set.Rows = append(set.Rows, view.FormRow{Name: name, Label: text(f.label + " label"), Kind: view.InputSelect, Value: text(label), Options: labelOptions(f.prop, label)})
 				}
 			}
 		case fieldAddress:
-			set := view.FieldSet{Legend: "Addresses"}
 			for i, v := range vals {
 				prefix, label := fmt.Sprintf("%s.%d", f.name, i), f.label
 				if i == len(vals)-1 {
@@ -1758,36 +1840,37 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 					set.Rows = append(set.Rows, row)
 				}
 			}
-			extra = append(extra, set)
 		case fieldTime:
 			row := triple(vals)
-			main.Rows = append(main.Rows,
+			// The all-day box leads its field, as in s-agenda-3.
+			if f.allDay {
+				set.Rows = append(set.Rows, view.FormRow{Name: f.name + ".allday", Label: "All day", Kind: view.InputCheck, Value: text(row[2])})
+			}
+			set.Rows = append(set.Rows,
 				view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required},
 				view.FormRow{Name: f.name + ".time", Label: text(timeLabel(f)), Kind: view.InputTime, Value: text(row[1])})
-			if f.allDay {
-				main.Rows = append(main.Rows, view.FormRow{Name: f.name + ".allday", Label: "All day", Kind: view.InputCheck, Value: text(row[2])})
-			}
 		case fieldDone:
-			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck, Value: text(first(vals))})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck, Value: text(first(vals))})
 		case fieldPercent:
-			main.Rows = append(main.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputNumber, Value: text(first(vals)), Error: errText})
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputNumber, Value: text(first(vals)), Error: errText})
 		case fieldReminders:
-			set := view.FieldSet{Legend: text(f.label)}
+			// The first reminder, then the others, then a row that adds one
+			// (s-agenda-3: First, Add reminder); without any, the adding row
+			// is the first.
 			for i, v := range vals {
 				row := view.FormRow{Name: fmt.Sprintf("reminder.%d", i), Label: "Reminder", Kind: view.InputSelect, Value: text(v), Options: reminderOptions(v, st.alarms, i, tf)}
 				if i == len(vals)-1 {
-					row.Name, row.Label = "reminder.new", "Add a reminder"
+					row.Name, row.Label = "reminder.new", "Add reminder"
 				}
 				if i == 0 {
-					row.Error = errText
+					row.Label, row.Error = "First", errText
 				}
 				set.Rows = append(set.Rows, row)
 			}
-			reminders = &set
 		}
 		if hide {
-			empty = append(empty, main.Rows[before:]...)
-			main.Rows = main.Rows[:before]
+			empty = append(empty, set.Rows[before:]...)
+			set.Rows = set.Rows[:before]
 		}
 	}
 	if len(empty) > 0 {
@@ -1795,12 +1878,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		if len(empty) == 1 {
 			legend = "Show 1 empty field"
 		}
-		extra = append(extra, view.FieldSet{Legend: text(legend), Rows: empty})
-	}
-	sets = append(sets, main)
-	sets = append(sets, extra...)
-	if reminders != nil {
-		sets = append(sets, *reminders)
+		sets = append(sets, view.FieldSet{Legend: text(legend), Rows: empty})
 	}
 	form := view.Form{
 		Action: s.route(s.editAction(c, st)), Method: "POST", Sets: sets,
@@ -1817,12 +1895,15 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 	return form
 }
 
+// reminderOptions are the steps of s-agenda-9, a reminder another client
+// wrote after them when it is none of the steps, and «No reminder» under a
+// line.
 func reminderOptions(selected string, alarms []cal.Alarm, row int, tf timeFmt) []view.Option {
-	opts := []view.Option{{Value: "", Label: "No reminder", Selected: selected == ""}}
+	var opts []view.Option
 	seen := false
 	for _, p := range reminderPresets {
-		opts = append(opts, view.Option{Value: p, Label: text(tf.reminder(cal.NewAlarm(p))), Selected: p == selected})
-		seen = seen || p == selected
+		opts = append(opts, view.Option{Value: p.value, Label: text(p.label), Selected: p.value == selected})
+		seen = seen || p.value == selected
 	}
 	if selected != "" && !seen {
 		label := selected
@@ -1831,7 +1912,7 @@ func reminderOptions(selected string, alarms []cal.Alarm, row int, tf timeFmt) [
 		}
 		opts = append(opts, view.Option{Value: selected, Label: text(label), Selected: true})
 	}
-	return opts
+	return append(opts, view.Option{Value: "", Label: "No reminder", Selected: selected == "", Separator: true})
 }
 
 func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string) {

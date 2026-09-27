@@ -136,7 +136,17 @@ func liveForm(f view.Form) url.Values {
 	out := url.Values{}
 	for _, set := range f.Sets {
 		for _, row := range set.Rows {
-			if row.Name != "_csrf" {
+			switch {
+			case row.Name == "_csrf":
+			case row.Kind == view.InputCheck && len(row.Options) > 0:
+				// Several ticks under one name: each one ticked is a value.
+				out.Del(row.Name)
+				for _, o := range row.Options {
+					if o.Selected {
+						out.Add(row.Name, o.Value)
+					}
+				}
+			default:
 				out.Set(row.Name, string(row.Value))
 			}
 		}
@@ -409,7 +419,7 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	form.Set("summary", "Live dentist, "+suffix)
 	form.Set("start.date", "2026-10-05")
 	form.Set("start.time", "09:30")
-	form.Set("reminder.new", "-PT15M")
+	form.Set("reminder.new", "-PT10M")
 	loc := redirected(t, "new event", app.post(events+"/new", form))
 	m := regexp.MustCompile(`/([0-9a-f]{32})$`).FindStringSubmatch(loc)
 	if m == nil {
@@ -417,7 +427,7 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	}
 	eventFile := cal + m[1] + ".ics"
 	got, _ := rawBody(ctx, t, client, eventFile)
-	mustHave(t, "new event", got, "UID:"+m[1], "DTSTART:20261005T093000Z", "TRIGGER:-PT15M", `SUMMARY:Live dentist\, `+suffix)
+	mustHave(t, "new event", got, "UID:"+m[1], "DTSTART:20261005T093000Z", "TRIGGER:-PT10M", `SUMMARY:Live dentist\, `+suffix)
 
 	agenda := liveDecode[view.AgendaPage](t, "agenda", app.get(events+"?from=2026-10-05"))
 	// A week is seven days, and the days nothing falls on are shown empty
@@ -427,7 +437,7 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 		t.Fatalf("agenda = %+v", agenda)
 	}
 	event := liveDecode[view.EventPage](t, "event", app.get(loc))
-	if len(event.Reminders) != 1 || event.Reminders[0].Label != "15 minutes before" {
+	if len(event.Reminders) != 1 || event.Reminders[0].Label != "10 minutes before" {
 		t.Errorf("reminders = %+v", event.Reminders)
 	}
 

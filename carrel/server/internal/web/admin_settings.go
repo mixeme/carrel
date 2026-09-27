@@ -192,7 +192,7 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		security = cmail.StartTLS
 	}
 	option := func(v, label string) view.Option {
-		return view.Option{Value: v, Label: text(label), Selected: security == v}
+		return view.Option{Value: v, Label: text(label), Selected: security == v, Separator: v == cmail.None}
 	}
 	var pwHint view.Text
 	if cur.Password != "" {
@@ -209,9 +209,11 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 			{Name: "host", Label: "Host", Kind: view.InputText, Value: text(shown.Host),
 				Hint: "Empty turns mail off: invitations and links are then handed over in person."},
 			{Name: "port", Label: "Port", Kind: view.InputNumber, Value: text(port)},
+			// The list of s-admin-9: None under a line, what it is for in the
+			// hint.
 			{Name: "security", Label: "Encryption", Kind: view.InputSelect, Options: []view.Option{
-				option(cmail.StartTLS, "STARTTLS"), option(cmail.TLS, "TLS"), option(cmail.None, "None — a relay on this host or network"),
-			}},
+				option(cmail.StartTLS, "STARTTLS"), option(cmail.TLS, "TLS"), option(cmail.None, "None"),
+			}, Hint: "STARTTLS on 587 and TLS on 465 are the usual pairs. None only for a relay on this host or network: the password then goes unencrypted."},
 			{Name: "username", Label: "Username", Kind: view.InputText, Value: text(shown.Username)},
 			{Name: "password", Label: "Password", Kind: view.InputPassword, Hint: pwHint},
 			{Name: "from", Label: "From address", Kind: view.InputEmail, Value: text(shown.From),

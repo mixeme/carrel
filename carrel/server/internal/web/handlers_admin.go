@@ -6,6 +6,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -359,7 +360,10 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	if show != "security" && show != "failures" {
 		show = "all"
 	}
-	keep := func(what string) bool {
+	// The action is the code the journal writes (s-admin-10): login.ok,
+	// login.fail, … — the same the Action column shows.
+	action := r.URL.Query().Get("action")
+	inShow := func(what string) bool {
 		switch show {
 		case "security":
 			return auditIsSecurity(what)
@@ -367,6 +371,9 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 			return auditIsFailure(what)
 		}
 		return true
+	}
+	keep := func(what string) bool {
+		return inShow(what) && (action == "" || what == action)
 	}
 	var all, security, failures int
 	for _, e := range snap.Audit {
@@ -401,6 +408,7 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	page.Bar.Loaded = len(page.Rows)
 	total := all
 	page.Bar.Total = &total
+	page.Filter = s.auditActionFilter(sess, snap.Audit, show, action, inShow)
 	for _, seg := range []struct {
 		id, label, value string
 		n                int
@@ -413,6 +421,9 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 		if seg.value != "all" {
 			q.Set("show", seg.value)
 		}
+		if action != "" {
+			q.Set("action", action)
+		}
 		page.Bar.Segments = append(page.Bar.Segments, view.Action{
 			ID: seg.id, Label: text(fmt.Sprintf("%s · %d", seg.label, seg.n)), Method: "GET",
 			Enabled: seg.value != show, On: seg.value == show, Href: s.postQuery("/admin/audit", q),
@@ -422,9 +433,41 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	if show != "all" {
 		csv.Set("show", show)
 	}
+	if action != "" {
+		csv.Set("action", action)
+	}
 	page.Bar.Actions = []view.Action{{ID: "audit.export", Label: "Export CSV", Icon: "i-down", Method: "GET", Enabled: true,
 		Href: s.postQuery("/admin/audit", csv)}}
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// auditActionFilter is the choice of an action (s-admin-7, s-admin-10): All
+// actions, a line, then the actions of the lines the chosen segment shows, in
+// the order of their names. A chosen action the segment does not show stays
+// in the list, so the choice is never lost from sight.
+func (s *Server) auditActionFilter(sess *session.Session, entries []store.AuditEntry, show, action string, inShow func(string) bool) view.Form {
+	seen := map[string]bool{}
+	var codes []string
+	for _, e := range entries {
+		if inShow(e.What) && !seen[e.What] {
+			seen[e.What] = true
+			codes = append(codes, e.What)
+		}
+	}
+	if action != "" && !seen[action] {
+		codes = append(codes, action)
+	}
+	slices.Sort(codes)
+	row := view.FormRow{Name: "action", Label: "Action", Kind: view.InputSelect, Value: text(action),
+		Options: []view.Option{{Value: "", Label: "All actions", Selected: action == ""}}}
+	for i, code := range codes {
+		row.Options = append(row.Options, view.Option{Value: code, Label: text(code), Selected: code == action, Separator: i == 0})
+	}
+	rows := []view.FormRow{row}
+	if show != "all" {
+		rows = append(rows, view.FormRow{Name: "show", Kind: view.InputHidden, Value: text(show)})
+	}
+	return view.Form{Action: s.route("/admin/audit"), Method: "GET", Sets: []view.FieldSet{{Rows: rows}}}
 }
 
 // writeAuditCSV hands over what the screen shows, oldest first, as the

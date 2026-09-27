@@ -98,7 +98,17 @@ func formFields(f view.Form) url.Values {
 	out := url.Values{}
 	for _, set := range f.Sets {
 		for _, row := range set.Rows {
-			if row.Name != "_csrf" {
+			switch {
+			case row.Name == "_csrf":
+			case row.Kind == view.InputCheck && len(row.Options) > 0:
+				// Several ticks under one name: each one ticked is a value.
+				out.Del(row.Name)
+				for _, o := range row.Options {
+					if o.Selected {
+						out.Add(row.Name, o.Value)
+					}
+				}
+			default:
 				out.Set(row.Name, string(row.Value))
 			}
 		}

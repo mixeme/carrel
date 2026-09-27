@@ -392,7 +392,7 @@ func liveEventFields(ctx context.Context, t *testing.T, app *liveApp, client *da
 	// A server that rewrites the rule answers the next save with a loss
 	// report naming RRULE, and it is telling the truth: what came back is
 	// not what was sent.
-	// Until is cleared with the same save that sets Times. A server that
+	// Until is cleared with the same save that sets Count. A server that
 	// turned COUNT into UNTIL leaves the form holding a day, and a series
 	// ends after a number of times or on a day, not both — Carrel refuses
 	// the pair on the field, which is what a person sees and answers.

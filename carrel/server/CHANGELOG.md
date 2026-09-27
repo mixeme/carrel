@@ -17,6 +17,83 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.56 — 2026-09-28
+
+The task and event forms are laid out in the mockup's rubrics, and every
+select field offers the list its list frame draws (from-typecase notes 3, 6
+and 7).
+
+### Added
+
+- **`Option.Separator`, `Option.Disabled`, `Option.Reason`** (C-6.8): a line
+  before a choice, and a choice that is shown and cannot be taken, with why.
+  An `InputCheck` row with `Options` is several ticks under one name: each
+  selected option is posted as a value of that name. A select with no option
+  selected is empty and posts empty.
+- **`TargetPicker.New`** (C-6.6): the last line of the import wizard's
+  «Into», under a line — New address book, New calendar, New task list or New
+  notebook (`import.collection.new`). It opens `/app/collections/new?kind=…&back=…`;
+  creating the collection there redirects back into the wizard with it chosen
+  (`?to=…&into=…`), the file already taken recounted against it. `back` is
+  honoured only for an import wizard of the same kind.
+- **`AdminAuditPage.Filter`**: a GET form with one select, `action` — All
+  actions, a line, then the action codes the chosen segment shows
+  (`login.ok`, `login.fail`, …). `/admin/audit?action=` filters the journal;
+  the segments and Export CSV keep it.
+- **Settings → Attachments, «Written as»** is a choice now (`name`: `dated`,
+  `original`, `titled`): «Date, then the original name» (default,
+  `2026-08-10 report.pdf`), «The original name» (`report.pdf`), «Record
+  title, then the original name» (`Sync-up - report.pdf`). Stored per person;
+  a taken name still gets a number. **The default changed:** large
+  attachments are no longer named with the record's title unless the person
+  chooses it.
+
+### Changed
+
+- **Task form** (`TaskEditPage.Form`): sets `""` (Summary, Description),
+  `When` (All day, Start date, Start time, All day, Due date, Due time),
+  `Progress` (Status, Priority, Percent complete, Done), `Reminders`, `Other`
+  (Location, Categories, Related to). Field names are unchanged; labels are
+  the frame's: Title → Summary, Starts → Start date, Due → Due date, … at →
+  … time.
+- **Event form** (`EventEditPage.Form`): `""` (Summary, Location, Status,
+  Categories, Description), `When` (All day, Start date, Start time, End
+  date, End time, Time zone), `Reminders`, `Repeats`. **`repeat.on` is one
+  row** of `Options` MO…SU posted as repeated `repeat.on` values; the seven
+  `repeat.on.MO`… checkboxes are gone. Times → Count (also in
+  `Recurrence.Fields`).
+- **Reminder rows**: the first is labelled First, the adding row Add
+  reminder. Offered: At the time, 5, 10, 30 minutes, 1 hour, 1 day before,
+  a line, No reminder. The 15-minute, 2-hour, 2-day and 1-week steps are
+  gone as choices; a reminder already holding one stays offered.
+- **Task status**: Needs action, In process, Completed, Cancelled — no «No
+  status». A task without STATUS shows Needs action, and saving it untouched
+  writes no STATUS (S-7).
+- **Priority**: No priority, a line, High · 1, Medium · 5, Low · 9. **Event
+  status** and **Frequency** gain a line under their first choice. **Time
+  zone**: «Floating — the same clock time anywhere», a line under the zone
+  as sent.
+- **Phone and e-mail labels** are separate lists: mobile (`TYPE=cell`), work,
+  home, main (`TYPE=main`), fax, other; work, home, other. No «No label»: a
+  row without a label selects nothing. A label is matched whatever its case
+  and keeps the value as the card holds it (`CELL` stays `CELL`), so
+  `TYPE=CELL` no longer shows twice.
+- **Mail encryption**: STARTTLS, TLS, a line, None; what None is for moved
+  to the field's hint. **Link lives for**: a line before No expiry.
+- **Backup «Collection»**: a read-only file collection is listed, disabled,
+  with the reason.
+- The event and task cards show STATUS as its list names it («Confirmed»,
+  not «confirmed»).
+
+### For consumers
+
+Regenerated fixtures: `admin-audit`, `admin-settings`, `app-collections-move`,
+`app-collections-new`, `app-contact-edit` (normal, loss), `app-contact-import`,
+`app-contact-move`, `app-contact-new`, `app-event`, `app-event-edit` (normal,
+loss), `app-publish`, `app-quick`, `app-settings-attachments`,
+`app-settings-backup`, `app-task-edit` (normal, loss). Every `TargetPicker`
+now carries `new` (null where there is none).
+
 ## v0.2.55 — 2026-09-28
 
 What stands on a record and what is under its «⋯» is now data, as the

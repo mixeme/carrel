@@ -21,6 +21,9 @@ func TestEventRepeats(t *testing.T) {
 		form := formFields(decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
 		for k, v := range set {
 			form.Set(k, v)
+			if k == "repeat.on" { // the days ticked, one value each
+				form[k] = strings.Split(v, ",")
+			}
 		}
 		if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != 303 {
 			t.Fatalf("POST %v: %d %s", set, resp.Code, resp.Body.String())
@@ -31,8 +34,7 @@ func TestEventRepeats(t *testing.T) {
 
 	page := decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess)))
 	form := formFields(page.Form)
-	if form.Get("repeat.freq") != "WEEKLY" || form.Get("repeat.interval") != "1" || form.Get("repeat.on.TH") != "on" ||
-		form.Get("repeat.on.MO") != "" || form.Get("repeat.count") != "5" || form.Get("repeat.until") != "" ||
+	if form.Get("repeat.freq") != "WEEKLY" || form.Get("repeat.interval") != "1" || strings.Join(form["repeat.on"], ",") != "TH" || form.Get("repeat.count") != "5" || form.Get("repeat.until") != "" ||
 		form.Get("repeat.rule") != "FREQ=WEEKLY;BYDAY=TH;WKST=MO;COUNT=5" {
 		t.Fatalf("form = %v", form)
 	}
@@ -45,7 +47,7 @@ func TestEventRepeats(t *testing.T) {
 	mustContain(t, got, kept...)
 
 	// Every two weeks on Tuesday and Thursday, ten times: WKST stays.
-	got = save(map[string]string{"repeat.interval": "2", "repeat.on.TU": "on", "repeat.count": "10"})
+	got = save(map[string]string{"repeat.interval": "2", "repeat.on": "TU,TH", "repeat.count": "10"})
 	mustContain(t, got, "RRULE:FREQ=WEEKLY;BYDAY=TU,TH;WKST=MO;COUNT=10;INTERVAL=2")
 	mustContain(t, got, kept...)
 

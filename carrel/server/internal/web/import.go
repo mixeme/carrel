@@ -137,11 +137,21 @@ func (s *Server) importTarget(c *collectionCtx, to, into string) *collectionCtx 
 	return c
 }
 
+// newCollectionLabels are the last lines of «Into» (s-io-10…13).
+var newCollectionLabels = map[view.Kind]view.Text{
+	view.KindContact: "New address book", view.KindEvent: "New calendar",
+	view.KindTask: "New task list", view.KindNote: "New notebook",
+}
+
 // importTargets are every collection of the kind, the read-only ones shown
 // and closed with the reason (S-19: the destination is chosen, and the rail
-// only says where the wizard was opened).
+// only says where the wizard was opened); under a line, a new collection of
+// the kind, made on its sheet, which brings the wizard back with it chosen.
 func (s *Server) importTargets(c *collectionCtx, dest *collectionCtx) view.TargetPicker {
-	picker := view.TargetPicker{}
+	picker := view.TargetPicker{New: &view.Action{
+		ID: "import.collection.new", Label: newCollectionLabels[c.spec.kind], Icon: "i-plus", Method: "GET", Enabled: true,
+		Href: s.postQuery("/app/collections/new", url.Values{"kind": {string(c.spec.kind)}, "back": {c.listPath() + "/import"}}),
+	}}
 	for _, conn := range s.catalogOf(c.sess).Connections {
 		for _, col := range s.catalogOf(c.sess).CollectionsOf(conn.ID) {
 			if col.Gone || !col.Has(c.spec.kind) {

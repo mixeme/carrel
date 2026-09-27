@@ -570,6 +570,21 @@ func (s *Service) SetAttachmentFolder(viewerID string, dataKey [crypt.KeyLen]byt
 	})
 }
 
+// SetAttachmentNames stores how large attachments are named (S-20). No
+// journal: a way of naming files is a preference of a form, like the upload
+// folder, and moves nothing already written.
+func (s *Service) SetAttachmentNames(viewerID string, dataKey [crypt.KeyLen]byte, names string) error {
+	switch names {
+	case "", sealed.AttachNamesDated, sealed.AttachNamesOriginal, sealed.AttachNamesTitled:
+	default:
+		return ErrNotFound
+	}
+	return s.editBlob(viewerID, dataKey, nil, func(blob *sealed.Blob) error {
+		blob.AttachNames = names
+		return nil
+	})
+}
+
 // SetUploadFolder remembers where "Upload file" puts files. No journal: a
 // folder chosen for the next upload is a hint of a form, not an event.
 func (s *Service) SetUploadFolder(viewerID string, dataKey [crypt.KeyLen]byte, folder sealed.AttachmentFolder) error {

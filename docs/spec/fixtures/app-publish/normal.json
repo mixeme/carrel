@@ -78,6 +78,7 @@
               {
                 "label": "No expiry",
                 "selected": false,
+                "separator": true,
                 "value": "never"
               }
             ],

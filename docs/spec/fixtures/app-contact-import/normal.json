@@ -18,6 +18,14 @@
   "details": null,
   "into": {
     "chosen": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
+    "new": {
+      "enabled": true,
+      "href": "/app/collections/new?back=%2Fapp%2Fcontacts%2Fa-nc-home%2F%252Falice%252Fcontacts%252Fkontakty%252F%2Fimport\u0026kind=contact",
+      "icon": "i-plus",
+      "id": "import.collection.new",
+      "label": "New address book",
+      "method": "GET"
+    },
     "options": [
       {
         "colour": "#a05a2c",

@@ -74,10 +74,12 @@ func attachHref(account, colPath string, segs []string) string {
 	return b.String()
 }
 
-// File names of large attachments: "2026-08-10 Sync-up - report.pdf", readable
-// in the folder without Carrel. The title is cut to attachTitleRunes and
-// attachTitleBytes, the whole name to attachNameBytes: many servers and file
-// systems take no more than 255 bytes. The extension is never cut.
+// File names of large attachments, as the person chose them (S-20,
+// attachments-3): "2026-08-10 report.pdf" by default, "report.pdf", or
+// "Sync-up - report.pdf" — readable in the folder without Carrel. The title is
+// cut to attachTitleRunes and attachTitleBytes, the whole name to
+// attachNameBytes: many servers and file systems take no more than 255 bytes.
+// The extension is never cut.
 const (
 	attachTitleRunes = 60
 	attachTitleBytes = 120
@@ -85,7 +87,7 @@ const (
 	attachExtBytes   = 16
 )
 
-func attachmentFileName(day time.Time, title, original string) string {
+func attachmentFileName(names string, day time.Time, title, original string) string {
 	original = cleanFileName(original)
 	ext := path.Ext(original)
 	if ext == original || len(ext) > attachExtBytes || strings.Contains(ext, " ") {
@@ -95,9 +97,16 @@ func attachmentFileName(day time.Time, title, original string) string {
 	if stem == "" {
 		stem = "attachment"
 	}
-	head := day.Format("2006-01-02") + " "
-	if title = cutName(cleanFileName(title), attachTitleRunes, attachTitleBytes); title != "" {
-		head += title + " - "
+	var head string
+	switch names {
+	case sealed.AttachNamesOriginal:
+	case sealed.AttachNamesTitled:
+		// A record without a title gives the file's own name alone.
+		if title = cutName(cleanFileName(title), attachTitleRunes, attachTitleBytes); title != "" {
+			head = title + " - "
+		}
+	default:
+		head = day.Format("2006-01-02") + " "
 	}
 	return head + cutName(stem, -1, attachNameBytes-len(head)-len(ext)) + ext
 }
@@ -505,7 +514,7 @@ func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *mod
 	} else if err != nil {
 		return failed("PROPFIND", folder, err)
 	}
-	base := attachmentFileName(attachmentDay(c, obj), attachmentTitle(c, obj), name)
+	base := attachmentFileName(s.catalogOf(c.sess).AttachNames, attachmentDay(c, obj), attachmentTitle(c, obj), name)
 	for n := 1; n <= attachNameTries; n++ {
 		candidate := base
 		if n > 1 {

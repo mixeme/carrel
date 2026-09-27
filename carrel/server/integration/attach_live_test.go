@@ -191,8 +191,10 @@ func runAttachments(t *testing.T, endpoint, user, pass, sEndpoint, sUser, sPass 
 	if to == "" {
 		t.Fatalf("no storage of the file server in the tree: %+v", settings.Folder.Nodes)
 	}
+	// Named by the record's title (attachments-3): the title of this run
+	// makes the name, so a folder of another run is never in the way.
 	redirected(t, "choose the folder", app.post("/app/settings/attachments", url.Values{
-		"to": {to}, "sub": {sub},
+		"to": {to}, "sub": {sub}, "name": {"titled"},
 	}))
 	// What the folder is, is what the catalog now holds: the storage the tree
 	// node named, and the folder under its root — which is not always the root
@@ -233,7 +235,7 @@ func runAttachments(t *testing.T, endpoint, user, pass, sEndpoint, sUser, sPass 
 	big := bytes.Repeat([]byte("carrel-attachment-"), 150000) // 2 700 000 bytes
 	redirected(t, "attach a large file", app.attach(liveAction(t, page.Actions, "attach.add"), "report.pdf", big))
 
-	want := "2026-08-10 Синк-ап " + suffix + " - report.pdf"
+	want := "Синк-ап " + suffix + " - report.pdf"
 	if e, err := files.Stat(ctx, folder+want); err != nil || e.Size != int64(len(big)) {
 		t.Fatalf("the folder holds %v (%v)", liveNames(ctx, t, files, folder), err)
 	}
@@ -256,7 +258,7 @@ func runAttachments(t *testing.T, endpoint, user, pass, sEndpoint, sUser, sPass 
 	// has to be another large file — a small one would go into the record and
 	// never reach the folder.
 	redirected(t, "attach it again", app.attach(liveAction(t, page.Actions, "attach.add"), "report.pdf", big))
-	second := "2026-08-10 Синк-ап " + suffix + " - report-2.pdf"
+	second := "Синк-ап " + suffix + " - report-2.pdf"
 	if _, err := files.Stat(ctx, folder+second); err != nil {
 		t.Errorf("no second file beside the first: %v (%v)", liveNames(ctx, t, files, folder), err)
 	}

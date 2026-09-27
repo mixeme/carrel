@@ -503,7 +503,7 @@ func calendarFields(obj *model.Object) []view.Field {
 		out = append(out, view.Field{Label: "Where", Value: text(v)})
 	}
 	if v := cal.Text(obj, "STATUS"); v != "" {
-		out = append(out, view.Field{Label: "Status", Value: text(strings.ToLower(v))})
+		out = append(out, view.Field{Label: "Status", Value: text(statusLabel(v))})
 	}
 	for _, v := range obj.Props()["ORGANIZER"] {
 		who := v.Params["CN"]

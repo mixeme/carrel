@@ -152,14 +152,9 @@
             "name": "tel.0.type",
             "options": [
               {
-                "label": "No label",
-                "selected": false,
-                "value": ""
-              },
-              {
-                "label": "home",
-                "selected": false,
-                "value": "home"
+                "label": "mobile",
+                "selected": true,
+                "value": "CELL"
               },
               {
                 "label": "work",
@@ -167,14 +162,14 @@
                 "value": "work"
               },
               {
-                "label": "cell",
+                "label": "home",
                 "selected": false,
-                "value": "cell"
+                "value": "home"
               },
               {
-                "label": "voice",
+                "label": "main",
                 "selected": false,
-                "value": "voice"
+                "value": "main"
               },
               {
                 "label": "fax",
@@ -185,11 +180,6 @@
                 "label": "other",
                 "selected": false,
                 "value": "other"
-              },
-              {
-                "label": "cell",
-                "selected": true,
-                "value": "CELL"
               }
             ],
             "readOnly": false,
@@ -217,9 +207,14 @@
             "name": "tel.1.type",
             "options": [
               {
-                "label": "No label",
+                "label": "mobile",
                 "selected": false,
-                "value": ""
+                "value": "cell"
+              },
+              {
+                "label": "work",
+                "selected": true,
+                "value": "WORK"
               },
               {
                 "label": "home",
@@ -227,19 +222,9 @@
                 "value": "home"
               },
               {
-                "label": "work",
+                "label": "main",
                 "selected": false,
-                "value": "work"
-              },
-              {
-                "label": "cell",
-                "selected": false,
-                "value": "cell"
-              },
-              {
-                "label": "voice",
-                "selected": false,
-                "value": "voice"
+                "value": "main"
               },
               {
                 "label": "fax",
@@ -250,11 +235,6 @@
                 "label": "other",
                 "selected": false,
                 "value": "other"
-              },
-              {
-                "label": "work",
-                "selected": true,
-                "value": "WORK"
               }
             ],
             "readOnly": false,
@@ -282,14 +262,9 @@
             "name": "tel.new.type",
             "options": [
               {
-                "label": "No label",
-                "selected": true,
-                "value": ""
-              },
-              {
-                "label": "home",
+                "label": "mobile",
                 "selected": false,
-                "value": "home"
+                "value": "cell"
               },
               {
                 "label": "work",
@@ -297,14 +272,14 @@
                 "value": "work"
               },
               {
-                "label": "cell",
+                "label": "home",
                 "selected": false,
-                "value": "cell"
+                "value": "home"
               },
               {
-                "label": "voice",
+                "label": "main",
                 "selected": false,
-                "value": "voice"
+                "value": "main"
               },
               {
                 "label": "fax",
@@ -342,9 +317,9 @@
             "name": "email.0.type",
             "options": [
               {
-                "label": "No label",
-                "selected": false,
-                "value": ""
+                "label": "work",
+                "selected": true,
+                "value": "WORK"
               },
               {
                 "label": "home",
@@ -352,34 +327,9 @@
                 "value": "home"
               },
               {
-                "label": "work",
-                "selected": false,
-                "value": "work"
-              },
-              {
-                "label": "cell",
-                "selected": false,
-                "value": "cell"
-              },
-              {
-                "label": "voice",
-                "selected": false,
-                "value": "voice"
-              },
-              {
-                "label": "fax",
-                "selected": false,
-                "value": "fax"
-              },
-              {
                 "label": "other",
                 "selected": false,
                 "value": "other"
-              },
-              {
-                "label": "work",
-                "selected": true,
-                "value": "WORK"
               }
             ],
             "readOnly": false,
@@ -407,34 +357,14 @@
             "name": "email.new.type",
             "options": [
               {
-                "label": "No label",
-                "selected": true,
-                "value": ""
-              },
-              {
-                "label": "home",
-                "selected": false,
-                "value": "home"
-              },
-              {
                 "label": "work",
                 "selected": false,
                 "value": "work"
               },
               {
-                "label": "cell",
+                "label": "home",
                 "selected": false,
-                "value": "cell"
-              },
-              {
-                "label": "voice",
-                "selected": false,
-                "value": "voice"
-              },
-              {
-                "label": "fax",
-                "selected": false,
-                "value": "fax"
+                "value": "home"
               },
               {
                 "label": "other",

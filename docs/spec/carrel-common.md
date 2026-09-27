@@ -434,7 +434,7 @@ Combined list, Combined notebook. Вью-модель у него та же, ч�
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/app/collections/new` | GET, POST | вход | лист | `CollectionNewSheet` |
+| `/app/collections/new` | GET, POST | вход | лист; `?back=` — мастер импорта, куда вернуться с новой коллекцией (S-19) | `CollectionNewSheet` |
 | `/app/collections/rename` | GET, POST | вход | лист | `CollectionRenameSheet` |
 | `/app/collections/move` | GET, POST | вход | лист | `CollectionMoveSheet` |
 | `/app/collections/delete` | GET, POST | вход | лист | `CollectionDeleteSheet` |
@@ -470,7 +470,7 @@ Combined list, Combined notebook. Вью-модель у него та же, ч�
 | `/admin/settings` | GET, POST | админ | страница | `AdminSettingsPage` |
 | `/admin/settings/mail-test` | POST | админ | фрагмент | `MailTestResult` |
 | `/admin/escrow` | GET, POST | админ | страница | `AdminEscrowPage` |
-| `/admin/audit` | GET | админ | страница, файл (`?format=csv`) | `AdminAuditPage` |
+| `/admin/audit` | GET | админ | страница, файл (`?format=csv`); `?show=`, `?action=` — фильтры | `AdminAuditPage` |
 | `/admin/dav` | GET, POST | админ | страница | `AdminDavPage` |
 | `/admin/install` | GET, POST | админ | страница | `AdminInstallPage` |
 
@@ -1200,6 +1200,7 @@ type MergeRow struct { Property Text; Options []Text; Chosen int; Union bool }
 type TargetPicker struct { // «куда» в шапке листа
     Options []TargetOption
     Chosen  string
+    New     *Action // строка под чертой: новая коллекция прямо отсюда (s-io-10…13); nil — её нет
 }
 type TargetOption struct {
     ID       string
@@ -1442,7 +1443,19 @@ type FormRow struct {
     ReadOnly bool
     Required bool
 }
-type Option struct { Value string; Label Text; Selected bool }
+// Вариант списка — в порядке кадра списка рядом с экраном. Separator — черта
+// перед ним, как у MenuItem; Disabled — виден и не выбирается, Reason — почему
+// («Read-only»). Ни один вариант не Selected — поле пусто и уходит пустым.
+// У InputCheck с Options — несколько отметок сразу: каждая Selected уходит
+// своим значением под одним Name (дни повторения, состав коллекции).
+type Option struct {
+    Value     string
+    Label     Text
+    Selected  bool
+    Separator bool
+    Disabled  bool
+    Reason    Text
+}
 type FieldError struct { Name string; Message Text }
 
 type AccountPage struct {
@@ -1685,7 +1698,12 @@ type AdminEscrowPage struct {
     History  []AuditRow
 }
 
-type AdminAuditPage struct { Shell; Bar ListBar; Rows []AuditRow }
+type AdminAuditPage struct {
+    Shell
+    Bar    ListBar
+    Filter Form // выбор действия (s-admin-10): GET /admin/audit?action=…, уходит при выборе
+    Rows   []AuditRow
+}
 type AuditRow struct { When When; Who Text; What Text; Whom Text; Detail Text }
 
 type AdminDavPage struct {

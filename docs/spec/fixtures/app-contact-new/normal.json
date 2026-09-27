@@ -164,14 +164,9 @@
             "name": "tel.new.type",
             "options": [
               {
-                "label": "No label",
-                "selected": true,
-                "value": ""
-              },
-              {
-                "label": "home",
+                "label": "mobile",
                 "selected": false,
-                "value": "home"
+                "value": "cell"
               },
               {
                 "label": "work",
@@ -179,14 +174,14 @@
                 "value": "work"
               },
               {
-                "label": "cell",
+                "label": "home",
                 "selected": false,
-                "value": "cell"
+                "value": "home"
               },
               {
-                "label": "voice",
+                "label": "main",
                 "selected": false,
-                "value": "voice"
+                "value": "main"
               },
               {
                 "label": "fax",
@@ -224,34 +219,14 @@
             "name": "email.new.type",
             "options": [
               {
-                "label": "No label",
-                "selected": true,
-                "value": ""
-              },
-              {
-                "label": "home",
-                "selected": false,
-                "value": "home"
-              },
-              {
                 "label": "work",
                 "selected": false,
                 "value": "work"
               },
               {
-                "label": "cell",
+                "label": "home",
                 "selected": false,
-                "value": "cell"
-              },
-              {
-                "label": "voice",
-                "selected": false,
-                "value": "voice"
-              },
-              {
-                "label": "fax",
-                "selected": false,
-                "value": "fax"
+                "value": "home"
               },
               {
                 "label": "other",

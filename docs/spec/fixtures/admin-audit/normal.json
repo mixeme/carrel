@@ -367,5 +367,87 @@
         "separator": true
       }
     ]
+  },
+  "filter": {
+    "action": "/admin/audit",
+    "actions": [],
+    "errors": [],
+    "method": "GET",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "Action",
+            "name": "action",
+            "options": [
+              {
+                "label": "All actions",
+                "selected": true,
+                "value": ""
+              },
+              {
+                "label": "attachments.folder",
+                "selected": false,
+                "separator": true,
+                "value": "attachments.folder"
+              },
+              {
+                "label": "connection.add",
+                "selected": false,
+                "value": "connection.add"
+              },
+              {
+                "label": "duplicates.link",
+                "selected": false,
+                "value": "duplicates.link"
+              },
+              {
+                "label": "feed.edit",
+                "selected": false,
+                "value": "feed.edit"
+              },
+              {
+                "label": "feed.subscribe",
+                "selected": false,
+                "value": "feed.subscribe"
+              },
+              {
+                "label": "login.ok",
+                "selected": false,
+                "value": "login.ok"
+              },
+              {
+                "label": "publish.create",
+                "selected": false,
+                "value": "publish.create"
+              },
+              {
+                "label": "settings.instance",
+                "selected": false,
+                "value": "settings.instance"
+              },
+              {
+                "label": "setup.first_admin",
+                "selected": false,
+                "value": "setup.first_admin"
+              },
+              {
+                "label": "sources.select",
+                "selected": false,
+                "value": "sources.select"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      }
+    ]
   }
 }

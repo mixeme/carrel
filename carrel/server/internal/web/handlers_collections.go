@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dav"
@@ -50,7 +51,21 @@ type collectionForm struct {
 	colour     string
 	components []string
 	address    string
-	errs       map[string]view.Text
+	// back is the import wizard the sheet was opened from (S-19): the new
+	// collection goes back into it, chosen. Empty for any other way in.
+	back string
+	errs map[string]view.Text
+}
+
+// importBack is the address of an import wizard of this kind, the only place
+// a new collection is sent back to; anything else is no way back.
+var importBack = regexp.MustCompile(`^/app/(contacts|calendar|tasks|notes)/[^/?#]+/[^/?#]+/import$`)
+
+func collectionBack(v string, k view.Kind) string {
+	if m := importBack.FindStringSubmatch(v); m != nil && m[1] == segmentOf(k) {
+		return v
+	}
+	return ""
 }
 
 func newCollectionKind(v string) (k view.Kind, choice, ok bool) {
@@ -124,6 +139,9 @@ func (s *Server) getCollectionNew(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
+	if !f.kindChoice {
+		f.back = collectionBack(q.Get("back"), f.kind)
+	}
 	if f.kindChoice {
 		conn, known := blob.Connection(f.account)
 		if !known && len(blob.Connections) > 0 {
@@ -153,6 +171,9 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		s.notFound(w, r)
 		return
+	}
+	if !f.kindChoice {
+		f.back = collectionBack(r.URL.Query().Get("back"), f.kind)
 	}
 	if f.kindChoice {
 		if f.kind, _, ok = newCollectionKind(r.PostFormValue("kind")); !ok || f.kind == "" {
@@ -246,6 +267,10 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 		// failure leaves nothing behind (S-12.2).
 		_ = client.Delete(context.WithoutCancel(r.Context()), path, "")
 		http.Error(w, "could not save the collection", http.StatusInternalServerError)
+		return
+	}
+	if f.back != "" {
+		s.redirect(w, r, f.back+"?"+url.Values{"to": {conn.ID}, "into": {path}}.Encode())
 		return
 	}
 	s.redirect(w, r, "/app/"+segmentOf(kinds[0])+"/"+conn.ID+"/"+url.PathEscape(path))
@@ -526,7 +551,11 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 
 	action := "/app/collections/new"
 	if !f.kindChoice {
-		action += "?kind=" + string(f.kind)
+		q := url.Values{"kind": {string(f.kind)}}
+		if f.back != "" {
+			q.Set("back", f.back)
+		}
+		action += "?" + q.Encode()
 	}
 	errs := f.errs
 	rows := []view.FormRow{csrfField(sess)}

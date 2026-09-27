@@ -117,6 +117,7 @@ type MergeRow struct {
 type TargetPicker struct {
 	Options []TargetOption `json:"options"`
 	Chosen  string         `json:"chosen"`
+	New     *Action        `json:"new"` // строка под чертой: новая коллекция прямо отсюда (s-io-10…13)
 }
 type TargetOption struct {
 	ID       string `json:"id"`

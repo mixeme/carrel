@@ -470,8 +470,14 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 			v := selValue(conn.ID, col.Path)
 			label := text(string(stamp(connLabel(conn), collectionLabel(col))))
 			srcOpts = append(srcOpts, view.Option{Value: v, Label: label, Selected: chosen[v]})
-			if col.Has(view.KindFile) && !col.ReadOnly {
-				destOpts = append(destOpts, view.Option{Value: v, Label: label, Selected: v == selValue(job.DestAccount, job.DestPath)})
+			// A read-only file collection is shown and cannot be taken
+			// (s-backup-9).
+			if col.Has(view.KindFile) {
+				o := view.Option{Value: v, Label: label, Selected: v == selValue(job.DestAccount, job.DestPath) && !col.ReadOnly}
+				if col.ReadOnly {
+					o.Disabled, o.Reason = true, "Read-only"
+				}
+				destOpts = append(destOpts, o)
 			}
 		}
 	}

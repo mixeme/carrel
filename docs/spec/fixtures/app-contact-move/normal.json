@@ -19,6 +19,7 @@
   "kind": "contact",
   "target": {
     "chosen": "",
+    "new": null,
     "options": [
       {
         "colour": "#a05a2c",

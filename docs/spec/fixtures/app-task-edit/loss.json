@@ -84,7 +84,7 @@
             "extra": null,
             "hint": "",
             "kind": "text",
-            "label": "Title",
+            "label": "Summary",
             "name": "summary",
             "options": [],
             "readOnly": false,
@@ -95,26 +95,19 @@
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "date",
-            "label": "Starts",
-            "name": "start.date",
+            "kind": "area",
+            "label": "Description",
+            "name": "description",
             "options": [],
             "readOnly": false,
             "required": false,
             "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "time",
-            "label": "Starts at",
-            "name": "start.time",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
+          }
+        ]
+      },
+      {
+        "legend": "When",
+        "rows": [
           {
             "error": "",
             "extra": null,
@@ -132,20 +125,20 @@
             "extra": null,
             "hint": "",
             "kind": "date",
-            "label": "Due",
-            "name": "due.date",
+            "label": "Start date",
+            "name": "start.date",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "2026-08-07"
+            "value": ""
           },
           {
             "error": "",
             "extra": null,
             "hint": "",
             "kind": "time",
-            "label": "Due at",
-            "name": "due.time",
+            "label": "Start time",
+            "name": "start.time",
             "options": [],
             "readOnly": false,
             "required": false,
@@ -167,14 +160,31 @@
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "check",
-            "label": "Done",
-            "name": "done",
+            "kind": "date",
+            "label": "Due date",
+            "name": "due.date",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "2026-08-07"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "time",
+            "label": "Due time",
+            "name": "due.time",
             "options": [],
             "readOnly": false,
             "required": false,
             "value": ""
-          },
+          }
+        ]
+      },
+      {
+        "legend": "Progress",
+        "rows": [
           {
             "error": "",
             "extra": null,
@@ -184,17 +194,12 @@
             "name": "status",
             "options": [
               {
-                "label": "No status",
-                "selected": true,
-                "value": ""
-              },
-              {
                 "label": "Needs action",
-                "selected": false,
+                "selected": true,
                 "value": "NEEDS-ACTION"
               },
               {
-                "label": "In progress",
+                "label": "In process",
                 "selected": false,
                 "value": "IN-PROCESS"
               },
@@ -211,7 +216,7 @@
             ],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "NEEDS-ACTION"
           },
           {
             "error": "",
@@ -227,17 +232,18 @@
                 "value": ""
               },
               {
-                "label": "High",
+                "label": "High · 1",
                 "selected": false,
+                "separator": true,
                 "value": "1"
               },
               {
-                "label": "Medium",
+                "label": "Medium · 5",
                 "selected": false,
                 "value": "5"
               },
               {
-                "label": "Low",
+                "label": "Low · 9",
                 "selected": false,
                 "value": "9"
               }
@@ -258,6 +264,77 @@
             "required": false,
             "value": ""
           },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Done",
+            "name": "done",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      },
+      {
+        "legend": "Reminders",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "select",
+            "label": "First",
+            "name": "reminder.new",
+            "options": [
+              {
+                "label": "At the time",
+                "selected": false,
+                "value": "PT0S"
+              },
+              {
+                "label": "5 minutes before",
+                "selected": false,
+                "value": "-PT5M"
+              },
+              {
+                "label": "10 minutes before",
+                "selected": false,
+                "value": "-PT10M"
+              },
+              {
+                "label": "30 minutes before",
+                "selected": false,
+                "value": "-PT30M"
+              },
+              {
+                "label": "1 hour before",
+                "selected": false,
+                "value": "-PT1H"
+              },
+              {
+                "label": "1 day before",
+                "selected": false,
+                "value": "-P1D"
+              },
+              {
+                "label": "No reminder",
+                "selected": true,
+                "separator": true,
+                "value": ""
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          }
+        ]
+      },
+      {
+        "legend": "Other",
+        "rows": [
           {
             "error": "",
             "extra": null,
@@ -308,91 +385,6 @@
             "label": "Or enter a UID by hand",
             "name": "related.uid",
             "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "area",
-            "label": "Description",
-            "name": "description",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          }
-        ]
-      },
-      {
-        "legend": "Reminders",
-        "rows": [
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "select",
-            "label": "Add a reminder",
-            "name": "reminder.new",
-            "options": [
-              {
-                "label": "No reminder",
-                "selected": true,
-                "value": ""
-              },
-              {
-                "label": "At the start",
-                "selected": false,
-                "value": "PT0S"
-              },
-              {
-                "label": "5 minutes before",
-                "selected": false,
-                "value": "-PT5M"
-              },
-              {
-                "label": "10 minutes before",
-                "selected": false,
-                "value": "-PT10M"
-              },
-              {
-                "label": "15 minutes before",
-                "selected": false,
-                "value": "-PT15M"
-              },
-              {
-                "label": "30 minutes before",
-                "selected": false,
-                "value": "-PT30M"
-              },
-              {
-                "label": "1 hour before",
-                "selected": false,
-                "value": "-PT1H"
-              },
-              {
-                "label": "2 hours before",
-                "selected": false,
-                "value": "-PT2H"
-              },
-              {
-                "label": "1 day before",
-                "selected": false,
-                "value": "-P1D"
-              },
-              {
-                "label": "2 days before",
-                "selected": false,
-                "value": "-P2D"
-              },
-              {
-                "label": "1 week before",
-                "selected": false,
-                "value": "-P1W"
-              }
-            ],
             "readOnly": false,
             "required": false,
             "value": ""

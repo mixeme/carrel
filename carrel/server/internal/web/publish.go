@@ -141,7 +141,7 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 		{Value: "7", Label: "7 days"},
 		{Value: "14", Label: "14 days"},
 		{Value: "30", Label: "30 days", Selected: true},
-		{Value: "never", Label: "No expiry"},
+		{Value: "never", Label: "No expiry", Separator: true}, // s-publish-14: only Revoke closes it
 	}})
 	if kind == view.KindEvent && q.Get("uid") == "" {
 		rows = append(rows,

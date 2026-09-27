@@ -261,14 +261,30 @@
           {
             "error": "",
             "extra": null,
-            "hint": "2026-08-10 Sync-up - report.pdf. A name already taken is never overwritten: a number is added.",
-            "kind": "text",
+            "hint": "2026-08-10 report.pdf. A name already taken is never overwritten: a number is added.",
+            "kind": "select",
             "label": "Written as",
             "name": "name",
-            "options": [],
-            "readOnly": true,
+            "options": [
+              {
+                "label": "Date, then the original name",
+                "selected": true,
+                "value": "dated"
+              },
+              {
+                "label": "The original name",
+                "selected": false,
+                "value": "original"
+              },
+              {
+                "label": "Record title, then the original name",
+                "selected": false,
+                "value": "titled"
+              }
+            ],
+            "readOnly": false,
             "required": false,
-            "value": "The date of the record, its title, then the file's own name"
+            "value": "dated"
           }
         ]
       }

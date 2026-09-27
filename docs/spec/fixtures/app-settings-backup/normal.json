@@ -178,6 +178,13 @@
                 "label": "sftpgo · vps · Documents",
                 "selected": false,
                 "value": "a-sftp-vps|/alice/files/Documents/"
+              },
+              {
+                "disabled": true,
+                "label": "sftpgo · vps · Public",
+                "reason": "Read-only",
+                "selected": false,
+                "value": "a-sftp-vps|/alice/files/Public/"
               }
             ],
             "readOnly": false,

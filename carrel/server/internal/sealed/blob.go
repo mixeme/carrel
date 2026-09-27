@@ -20,6 +20,10 @@ type Blob struct {
 	Selected    []Selection  `json:"selected,omitempty"`
 	// Attachments is the folder chosen once in settings (S-20); nil until then.
 	Attachments *AttachmentFolder `json:"attachments,omitempty"`
+	// AttachNames is how a large attachment is named in that folder
+	// (S-20, attachments-3): AttachNames…; empty is by date, as a blob
+	// written before this field reads.
+	AttachNames string `json:"attachNames,omitempty"`
 	// LastUsed is where a record of each kind was last created, one entry per
 	// kind. The quick sheet opened from the shell has no collection to go by
 	// and starts there (U-6.16). Empty until the first record is made, and a
@@ -191,6 +195,15 @@ func (b Blob) LastFor(k view.Kind) (Selection, bool) {
 	}
 	return Selection{}, false
 }
+
+// How a large attachment is named in the folder (S-20): the date of the
+// record, then the file's own name; the file's own name alone; the record's
+// title, then the file's own name.
+const (
+	AttachNamesDated    = "dated"
+	AttachNamesOriginal = "original"
+	AttachNamesTitled   = "titled"
+)
 
 // AttachmentFolder is where an attachment too large for its record goes: a
 // folder of a file collection, bound to the collection address (S-6.1).

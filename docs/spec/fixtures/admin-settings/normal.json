@@ -394,7 +394,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "",
+            "hint": "STARTTLS on 587 and TLS on 465 are the usual pairs. None only for a relay on this host or network: the password then goes unencrypted.",
             "kind": "select",
             "label": "Encryption",
             "name": "security",
@@ -410,9 +410,10 @@
                 "value": "tls"
               },
               {
-                "label": "None — a relay on this host or network",
+                "label": "None",
                 "selected": false,
-                "value": "none"
+                "value": "none",
+                "separator": true
               }
             ],
             "readOnly": false,
