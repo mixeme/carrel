@@ -174,11 +174,11 @@ func TestPublishedLinkLimits(t *testing.T) {
 	}
 }
 
-// Publish is in a row's menu and in a folder's bar.
+// Publish is in a row's menu, a folder's too; the bar over a folder draws
+// none (s-files-1).
 func TestFilesOfferPublish(t *testing.T) {
 	f := pubDocs(t)
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
-	actionHref(t, page.Bar.Actions, "publish")
 	for _, r := range page.Rows {
 		if r.Name == "share" {
 			actionHref(t, menuActions(r.Menu), "publish")

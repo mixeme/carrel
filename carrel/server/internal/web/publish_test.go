@@ -201,8 +201,8 @@ func TestPublishedSourceDown(t *testing.T) {
 func TestPublishIsOffered(t *testing.T) {
 	f := publishFixture(t)
 	card := decode[view.ContactPage](t, f.h.do(get(f.path("contacts")+"/ada", f.sess)))
-	if actionHref(t, card.Actions, "publish") != f.publishHref("contacts", searchBook, "ada") {
-		t.Errorf("record actions = %+v", card.Actions)
+	if actionHref(t, menuActions(card.Menu), "publish") != f.publishHref("contacts", searchBook, "ada") {
+		t.Errorf("record menu = %+v", card.Menu)
 	}
 	list := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
 	actionHref(t, list.Bar.Actions, "publish")

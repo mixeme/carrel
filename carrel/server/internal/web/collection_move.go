@@ -84,7 +84,7 @@ func (s *Server) collectionMoveItem(blob sealed.Blob, conn sealed.Connection, co
 		return view.MenuItem{}, false
 	}
 	return view.MenuItem{Action: view.Action{
-		ID: "collection.move", Label: "Move to another server…",
+		ID: "collection.move", Label: "Move to another server",
 		Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", false)),
 		Method: "GET", Enabled: true,
 	}}, true
@@ -114,11 +114,11 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 	sheet.Target.Options, _ = s.collectionMoveTargets(blob, conn, col, copying)
 	dest, known := blob.Connection(to)
 	confirm := view.Action{ID: "collection.move.confirm", Label: "Move", Method: "POST", Enabled: true}
-	other := view.Action{ID: "collection.copy", Label: "Copy instead…", Method: "GET", Enabled: true,
+	other := view.Action{ID: "collection.copy", Label: "Copy instead", Method: "GET", Enabled: true,
 		Href: s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, to, true))}
 	if copying {
 		confirm.ID, confirm.Label = "collection.copy.confirm", "Copy"
-		other = view.Action{ID: "collection.move", Label: "Move instead…", Method: "GET", Enabled: true,
+		other = view.Action{ID: "collection.move", Label: "Move instead", Method: "GET", Enabled: true,
 			Href: s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, to, false))}
 	}
 	if reason := collectionMoveBlock(conn, col, dest, known, copying); reason != "" {

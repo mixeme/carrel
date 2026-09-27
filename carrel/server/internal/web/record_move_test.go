@@ -104,8 +104,8 @@ func TestMoveSheetSaysBeforeItStarts(t *testing.T) {
 	ada := f.record(f.id, peopleBook, "ada")
 
 	page := decode[view.ContactPage](t, f.h.do(get(ada, f.sess)))
-	moveHref := actionHref(t, page.Actions, "record.move")
-	if copyHref := actionHref(t, page.Actions, "record.copy"); copyHref != ada+"/move?copy=1" {
+	moveHref := actionHref(t, menuActions(page.Menu), "record.move")
+	if copyHref := actionHref(t, menuActions(page.Menu), "record.copy"); copyHref != ada+"/move?copy=1" {
 		t.Errorf("copy = %q", copyHref)
 	}
 
@@ -390,9 +390,10 @@ func TestReadOnlyAndMove(t *testing.T) {
 	old := f.record(f.id, archiveBook, "old")
 
 	card := decode[view.ContactPage](t, f.h.do(get(old, f.sess)))
-	// Copy and Publish only: both read, neither writes here (S-18, S-25).
-	if len(card.Actions) != 2 || card.Actions[0].ID != "record.copy" || card.Actions[1].ID != "publish" {
-		t.Errorf("read-only actions = %+v", card.Actions)
+	// Copy, Export and Publish only: they read, none writes here (S-18,
+	// S-19, S-25).
+	if got := ids(menuActions(card.Menu)); len(card.Actions) != 0 || !equalStrings(got, []string{"record.copy", "record.export", "publish"}) {
+		t.Errorf("read-only actions = %v, menu = %v", ids(card.Actions), got)
 	}
 	for _, req := range []*http.Request{
 		get(old+"/move", f.sess),

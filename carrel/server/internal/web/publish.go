@@ -38,10 +38,15 @@ func publishQuery(segment, account, col, uid string) url.Values {
 }
 
 // publishAction opens the sheet for a collection or, with a UID, a record.
+// «Publish a link», without the ellipsis: it has one scenario (the mockup's
+// rule, §6).
 func (s *Server) publishAction(c *collectionCtx, uid string) view.Action {
-	label := "Publish…"
-	return view.Action{ID: "publish", Label: text(label), Icon: "i-link", Method: "GET", Enabled: true,
-		Href: s.postQuery("/app/publish", publishQuery(c.spec.segment, c.conn.ID, c.col.Path, uid))}
+	return s.publishActionAt(c.origin(), c.spec.segment, uid)
+}
+
+func (s *Server) publishActionAt(o origin, segment, uid string) view.Action {
+	return view.Action{ID: "publish", Label: "Publish a link", Icon: "i-link", Method: "GET", Enabled: true,
+		Href: s.postQuery("/app/publish", publishQuery(segment, o.conn.ID, o.col.Path, uid))}
 }
 
 // publishTarget reads what the request names and checks it is the person's.

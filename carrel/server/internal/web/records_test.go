@@ -280,7 +280,7 @@ func TestEventPageRelatedRemindersAttendees(t *testing.T) {
 		t.Errorf("attendees = %+v", ev.Attendees)
 	}
 	if !strings.Contains(string(ev.Recurrence.Raw), "FREQ=WEEKLY") || ev.Recurrence.Summary != "Weekly on Thursday, 5 times" ||
-		ev.Recurrence.Note != "Edited as a whole series" {
+		ev.Recurrence.Note != view.Text(frameSeriesLine(t)) {
 		t.Errorf("recurrence = %+v", ev.Recurrence)
 	}
 	if len(ev.Fields) == 0 || ev.Fields[0].Value != "Thursday, 15 January 2026, 10:00 – 11:00" {
@@ -754,8 +754,8 @@ func TestReadOnlyCollectionHasNoEditing(t *testing.T) {
 	list := f.path("contacts")
 
 	card := decode[view.ContactPage](t, f.h.do(get(list+"/ada", f.sess)))
-	if !card.ReadOnly || len(card.Actions) != 2 || card.Actions[0].ID != "record.copy" || card.Actions[1].ID != "publish" {
-		t.Errorf("card = %+v", card)
+	if got := ids(menuActions(card.Menu)); !card.ReadOnly || len(card.Actions) != 0 || !equalStrings(got, []string{"record.copy", "record.export", "publish"}) {
+		t.Errorf("card: read-only %v, actions %v, menu %v", card.ReadOnly, ids(card.Actions), got)
 	}
 	// New is closed with its reason and the wizard that would write here is
 	// not offered at all; Export and Publish are, because reading is what

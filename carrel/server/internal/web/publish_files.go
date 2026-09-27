@@ -58,9 +58,9 @@ func filePublishQuery(c *fileCtx, segs []string, dir bool) url.Values {
 
 func (s *Server) filePublishAction(c *fileCtx, segs []string, dir bool) view.Action {
 	if c.col.Feed {
-		return view.Action{ID: "publish", Label: "Publish…", Icon: "i-link", Method: "GET", Reason: "Somebody else's folder is not published onwards."}
+		return view.Action{ID: "publish", Label: "Publish a link", Icon: "i-link", Method: "GET", Reason: "Somebody else's folder is not published onwards."}
 	}
-	return view.Action{ID: "publish", Label: "Publish…", Icon: "i-link", Method: "GET", Enabled: true,
+	return view.Action{ID: "publish", Label: "Publish a link", Icon: "i-link", Method: "GET", Enabled: true,
 		Href: s.postQuery("/app/publish", filePublishQuery(c, segs, dir))}
 }
 

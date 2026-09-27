@@ -387,7 +387,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/import` | GET | вход | страница | `ImportPage` — вход из сведённого вида: мастер спрашивает «Into» |
 | `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage` |
 | `/app/{kind}/export` | GET | вход | лист | `ExportSheet` — вход из сведённого вида: из какой коллекции |
-| `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — |
+| `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — ; с `?uid=` — одна запись (S-19) |
 | `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NoteDoc` |
 | `/app/{kind}/{account}/{col}/new/quick` | GET, POST | вход | лист, редирект | `NewSheet`; POST сохраняет запись, «Open the card» переносит набранное в `/new` телом запроса |
 | `/app/{kind}/quick` | GET | вход | лист | `NewSheet` — вход из шапки: на последней использованной коллекции рода, а пока её нет — только выбор «куда» |
@@ -662,7 +662,8 @@ type Details struct {
     Title   Text
     Fields  []Field
     Source  SourceBlock
-    Actions []Action // повтор того, что есть в панели над списком, не замена
+    Actions []Action   // кнопки на виду; удаление — Danger, клиент ставит его внизу панели
+    Menu    []MenuItem // «⋯» панели, в порядке кадра (s-contacts-8, s-agenda-4, s-tasks-4, s-notes-12)
 }
 
 type Field struct {
@@ -844,6 +845,7 @@ type TaskRow struct {
     Tags      []Tag
     Badges    []Badge  // «2 источника» у связанной задачи
     Sources   []Stamp  // источники связанной группы
+    Tick      *Action  // отметка выполнения в строке (task.done); nil — только чтение
     Menu      []MenuItem
     State     RecordState
 }
@@ -899,7 +901,8 @@ type ContactPage struct {
     Timeline  []TimelineRow // врезка: несколько последних, не вся хронология
     More      Action        // «Open the timeline» — ведёт на /timeline
     Source    SourceBlock
-    Actions   []Action
+    Actions   []Action   // на виду: Edit, Send; удаление — Danger, внизу карточки
+    Menu      []MenuItem // «⋯»: Move, Copy, Export .vcf, Publish a link (s-contacts-10)
     ReadOnly  bool
 }
 
@@ -971,8 +974,9 @@ type EventPage struct { // чтение: то, что открывается п�
     Linked    []Field // та же встреча в других календарях (S-16)
     Source    SourceBlock
     Loss      *LossReport
-    Actions   []Action // правка, перенос, копия, печать, письмо, удаление
-    ReadOnly  bool     // чужая коллекция: правки нет вовсе, а не заблокированная форма
+    Actions   []Action   // на виду: Edit, Attach, New task; удаление — Danger, внизу
+    Menu      []MenuItem // «⋯»: Move, Copy, Export .ics, Publish a link (s-agenda-5)
+    ReadOnly  bool       // чужая коллекция: правки нет вовсе, а не заблокированная форма
 }
 
 type EventEditPage struct { // правка: та же запись формой
@@ -984,13 +988,15 @@ type EventEditPage struct { // правка: та же запись формой
     Attendees []AttendeeRow
     Attach    []AttachRow
     Loss      *LossReport
+    Delete    *Action // внизу формы (s-agenda-3); nil — у новой записи
+    DeleteNote Text   // строка под удалением: у серии «Series is edited and deleted whole.»
 }
 
 type RecurrenceBlock struct {
     Summary Text   // человеческое описание правила
     Raw     Text   // сырое правило для тех, кто его читает
     Fields  []Field
-    Note    Text   // «правится серия целиком»
+    Note    Text   // «Series is edited and deleted whole.» — под удалением карточки; на правке пусто, строка в DeleteNote
 }
 
 type ReminderRow struct { Label Text; Fields []Field; Remove Action }
@@ -1019,7 +1025,8 @@ type TaskPage struct { // чтение
     Linked    []Field // та же задача в других списках (S-16)
     Source    SourceBlock
     Loss      *LossReport
-    Actions   []Action
+    Actions   []Action   // на виду: Edit, Mark done, Attach; удаление — Danger, внизу
+    Menu      []MenuItem // «⋯»: Move, Copy, Export .ics, Publish a link (s-tasks-6)
     ReadOnly  bool
 }
 
@@ -1032,6 +1039,8 @@ type TaskEditPage struct { // правка
     Reminders []ReminderRow
     Attach    []AttachRow
     Loss      *LossReport
+    Delete    *Action // внизу формы (s-tasks-3); nil — у новой записи
+    DeleteNote Text   // строка под удалением
 }
 
 type NotePage struct {
@@ -1060,7 +1069,8 @@ type NoteMeta struct {
     Related []TimelineRow
     Linked  []Field // та же заметка в других тетрадях (S-16)
     Attach  []AttachRow
-    Actions []Action
+    Actions []Action   // колонка: Attach, удаление
+    Menu    []MenuItem // «⋯» над текстом: Move, Copy, Publish a link (s-notes-14)
 }
 
 type ConflictPage struct {
@@ -1882,6 +1892,18 @@ Markdown и отдаёт дерево; собирает из него узлы �
 `Action.ID` — устойчивое имя, одно и то же в кадре, в проверке и в журнале:
 `record.save`, `record.delete`, `source.retry`, `poll.again`, `link.revoke`,
 `device.profile`, `backup.run`. Подпись меняется, имя — нет.
+
+**Что на виду и что под «⋯» — данные** (записка из Typecase 1, 28.09.2026).
+У карточки, панели подробностей и страницы заметки два поля: `Actions` —
+кнопки на виду, `Menu` — содержимое «⋯» в порядке кадра, `MenuItem.Separator`
+— черта перед пунктом. Удаление остаётся действием в `Actions` с `Danger`, и
+клиент ставит его внизу; только в «⋯» панели заметки оно последний пункт за
+чертой (s-notes-12). Меню записи — `record.move` Move, `record.copy` Copy,
+`record.export` «Export .vcf / .ics / .md», `publish` «Publish a link»; меню
+строки списка (components-1…4) — ещё `record.open` Open и `record.edit` Edit
+перед ними и `record.delete` за чертой. У коллекции только для чтения нет Edit,
+Move и удаления, у подписки — ещё и Publish a link. Отметка задачи в строке —
+не пункт меню, а `TaskRow.Tick`.
 
 ---
 

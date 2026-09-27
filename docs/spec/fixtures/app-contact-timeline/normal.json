@@ -76,6 +76,22 @@
         "id": "timeline.card",
         "label": "Open the card",
         "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
+        "id": "record.edit",
+        "label": "Edit",
+        "method": "GET"
+      },
+      {
+        "danger": true,
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e1",
+        "icon": "i-trash",
+        "id": "record.delete",
+        "label": "Delete contact",
+        "method": "POST"
       }
     ],
     "fields": [
@@ -136,7 +152,41 @@
       "readOnly": false,
       "stamp": "nextcloud · Контакты"
     },
-    "title": "Анна Ковалёва"
+    "title": "Анна Ковалёва",
+    "menu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move",
+        "icon": "i-move",
+        "id": "record.move",
+        "label": "Move",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?copy=1",
+        "icon": "i-dup",
+        "id": "record.copy",
+        "label": "Copy",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/export?uid=4f2b-9c31-a0e7",
+        "icon": "i-down",
+        "id": "record.export",
+        "label": "Export .vcf",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7",
+        "icon": "i-link",
+        "id": "publish",
+        "label": "Publish a link",
+        "method": "GET"
+      }
+    ]
   },
   "details": null,
   "groups": [

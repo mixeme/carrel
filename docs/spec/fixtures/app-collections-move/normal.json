@@ -11,7 +11,7 @@
       "enabled": true,
       "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
       "id": "collection.copy",
-      "label": "Copy instead…",
+      "label": "Copy instead",
       "method": "GET"
     }
   ],

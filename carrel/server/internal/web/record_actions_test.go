@@ -74,9 +74,9 @@ func TestExportOneNoteAsMarkdown(t *testing.T) {
 		"n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nSUMMARY:Plan\nDESCRIPTION:First line\\n\\n- item\nEND:VJOURNAL"),
 		"n2.ics", ics("BEGIN:VJOURNAL\nUID:n2\nDTSTAMP:20260101T000000Z\nSUMMARY:Other\nDESCRIPTION:Not this one\nEND:VJOURNAL"))
 	page := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/n1", f.sess)))
-	act := actionByID(page.Meta.Actions, "note.export")
+	act := actionByID(page.Doc.Bar, "note.export")
 	if act == nil || act.Method != "GET" {
-		t.Fatalf("note actions = %+v, want Export Markdown", page.Meta.Actions)
+		t.Fatalf("note bar = %+v, want Export Markdown", page.Doc.Bar)
 	}
 	u, _ := url.Parse(act.Href)
 	resp := f.h.do(get(u.RequestURI(), f.sess))

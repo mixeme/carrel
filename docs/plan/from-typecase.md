@@ -13,21 +13,6 @@
 Записки от 25.09.2026 (макет `fb6f453`, `b1f537e` и следующий за ними).
 Макет в вопросах вида первичен; ниже — где сервер с ним сейчас расходится.
 
-1. **Меню «⋯» и стрелки раскрыты у своих экранов** — отдельными кадрами
-   сразу за экраном (`s-contacts-8`…`-11`, `s-agenda-4`…`-6`, `s-tasks-4`…`-7`,
-   `s-notes-12`…`-14`, `s-files-7`…`-10`, `s-profile-12`). Сверить наборы:
-   - **⋯ карточки** (контакт, событие, задача) — Move, Copy, Export
-     `.vcf`/`.ics`, Publish a link; Edit и прочие кнопки стоят снаружи,
-     удаление — внизу карточки. У карточки задачи в панели списка «⋯» теперь
-     есть, как у контакта и события.
-   - **⋯ заметки в панели** — Open full screen, Move, Copy, Export `.md`,
-     Publish a link, Delete note; **на весь экран** — Move, Copy, Publish a link.
-   - **Подпись пункта — «Publish a link»**, без многоточия (правило многоточия,
-     §6). Сервер пишет «Publish…».
-2. **Форма правки: одна пара Save/Cancel — в шапке.** Внизу только удаление
-   (`Delete event`, `Delete task` со своей строкой пояснения) или, у контакта,
-   строка «Properties Carrel does not know are kept unchanged». Удаление,
-   значит, есть и на странице правки события и задачи.
 3. **Правка задачи (`s-tasks-3`) — рубриками**, как «When» у события: Summary,
    Description, затем When (Start date, Due date, Due time), Progress (Status,
    Priority, Percent complete), Other (Location, Categories, Related to),

@@ -55,14 +55,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -70,7 +70,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -92,14 +92,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -107,7 +107,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -129,14 +129,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -144,7 +144,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -166,14 +166,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=lichnyj",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -181,7 +181,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=lichnyj",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -204,14 +204,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -219,7 +219,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -241,14 +241,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -256,7 +256,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -278,14 +278,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -293,7 +293,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -315,14 +315,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -330,7 +330,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -425,14 +425,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-rad-vps\u0026c=dezhurstva",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -440,7 +440,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=dezhurstva",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -462,14 +462,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-rad-vps\u0026c=proekty",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -477,7 +477,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=proekty",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -499,14 +499,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-rad-vps\u0026c=komanda",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=komanda",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -514,7 +514,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=komanda",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -536,14 +536,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-rad-vps\u0026c=rassylki",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=rassylki",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -551,7 +551,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=rassylki",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }
@@ -633,14 +633,14 @@
               "enabled": true,
               "href": "/app/collections/rename?a=a-baikal\u0026c=obshchij",
               "id": "collection.rename",
-              "label": "Rename…",
+              "label": "Rename and colour",
               "method": "GET"
             },
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-baikal\u0026c=obshchij",
               "id": "collection.move",
-              "label": "Move to another server…",
+              "label": "Move to another server",
               "method": "GET"
             },
             {
@@ -648,7 +648,7 @@
               "enabled": true,
               "href": "/app/collections/delete?a=a-baikal\u0026c=obshchij",
               "id": "collection.delete",
-              "label": "Delete…",
+              "label": "Delete on the server…",
               "method": "GET",
               "separator": true
             }

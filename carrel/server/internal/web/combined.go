@@ -760,7 +760,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 				live++
 				row.Href = s.route(origin{conn: conn, col: col}.listPath(spec.segment))
 				row.Menu = []view.MenuItem{{Action: view.Action{
-					ID: "collection.rename", Label: "Rename…",
+					ID: "collection.rename", Label: "Rename",
 					Href:   s.postQuery("/app/collections/rename", url.Values{"a": {conn.ID}, "c": {col.Path}}),
 					Method: "GET", Enabled: true,
 				}}}
@@ -773,7 +773,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 				list := origin{conn: conn, col: col}.listPath(spec.segment)
 				if !col.ReadOnly {
 					row.Menu = append(row.Menu, view.MenuItem{Separator: true, Action: view.Action{
-						ID: "collection.import", Label: "Import…", Icon: "i-up",
+						ID: "collection.import", Label: "Import", Icon: "i-up",
 						Href: s.route(list + "/import"), Method: "GET", Enabled: true}})
 				}
 				row.Menu = append(row.Menu, view.MenuItem{Separator: col.ReadOnly, Action: view.Action{
@@ -815,7 +815,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 		}
 		trouble(&row, f.ID+":"+col.Path)
 		row.Menu = []view.MenuItem{
-			{Action: view.Action{ID: "feed.edit", Label: "Rename…", Href: s.postQuery("/app/collections/rename", url.Values{"a": {f.ID}, "c": {col.Path}}), Method: "GET", Enabled: true}},
+			{Action: view.Action{ID: "feed.edit", Label: "Rename", Href: s.postQuery("/app/collections/rename", url.Values{"a": {f.ID}, "c": {col.Path}}), Method: "GET", Enabled: true}},
 		}
 		if spec.kind != view.KindFile {
 			row.Menu = append(row.Menu, view.MenuItem{Action: view.Action{ID: "collection.export", Label: "Export", Icon: "i-down", Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment) + "/export"), Method: "GET", Enabled: true}})

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -38,37 +39,55 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 }
 
 // recordDetails is a record as the details panel of a list (C-6 Details):
-// its name, the fields the card shows, where it came from, and the actions
-// that belong to it. Nothing here is a second way to read a record: it is
-// the record's own page, cut to a panel.
+// its name, the fields the card shows, where it came from, and what is done
+// with it — the buttons the panel frames draw (s-contacts-1, s-agenda-1,
+// s-tasks-1, s-notes-1) and the rest under «⋯» (s-contacts-8, s-agenda-4,
+// s-tasks-4, s-notes-12). Nothing here is a second way to read a record: it
+// is the record's own page, cut to a panel.
 func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) view.Details {
 	d := view.Details{Title: text(recordTitle(c.spec.kind, obj)), Source: c.source()}
+	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
+	attach := s.attachOf(c, uid, obj.ETag)
+	d.Menu = ops.menu
 	switch c.spec.kind {
 	case view.KindContact:
 		for _, f := range contactFieldsOf(obj) {
 			d.Fields = append(d.Fields, f.Field)
 		}
+		// All records: the person's timeline, beside Edit (s-contacts-1).
+		d.Actions = shown(ops.edit, &view.Action{ID: "contact.timeline", Label: "All records",
+			Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}, ops.del)
 	case view.KindEvent:
-		page := s.eventPage(c, uid, obj, nil)
-		d.Fields, d.Actions = page.Fields, page.Actions
+		d.Fields = s.eventPage(c, uid, obj, nil).Fields
+		d.Actions = shown(ops.edit, attach, ops.del)
 	case view.KindTask:
-		page := s.taskPage(c, uid, obj, nil)
-		d.Fields, d.Actions = page.Fields, page.Actions
+		d.Fields = s.taskPage(c, uid, obj, nil).Fields
+		d.Actions = shown(ops.edit, attach, ops.del)
 	default:
 		page := s.notePage(c, uid, obj, nil)
-		d.Fields, d.Actions = []view.Field{{Label: "Date", Value: page.Meta.Date}}, page.Meta.Actions
-		if page.Meta.Date == "" {
-			d.Fields = nil
+		if page.Meta.Date != "" {
+			d.Fields = []view.Field{{Label: "Date", Value: page.Meta.Date}}
+		}
+		// The page of the note is a bare icon beside Edit; the deletion is
+		// the last item of the menu (s-notes-12), not the foot of the panel.
+		d.Actions = shown(ops.edit, &view.Action{ID: "record.open", Label: "Open the note page", Icon: "i-expand",
+			Href: s.route(c.recordPath(uid)), Method: "GET", Enabled: true}, attach)
+		if ops.del != nil {
+			d.Menu = append(slices.Clone(ops.menu), view.MenuItem{Separator: true, Action: *ops.del})
 		}
 	}
-	if len(d.Actions) == 0 {
-		d.Actions = s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag))
-	}
-	// The way to the whole record stands first: a panel is a look, not a
-	// place to live in.
-	d.Actions = append([]view.Action{{ID: "record.open", Label: text("Open the " + c.spec.noun),
-		Href: s.route(c.recordPath(uid)), Method: "GET", Enabled: true}}, d.Actions...)
 	return d
+}
+
+// shown is the buttons that exist, in their order.
+func shown(actions ...*view.Action) []view.Action {
+	out := []view.Action{}
+	for _, a := range actions {
+		if a != nil {
+			out = append(out, *a)
+		}
+	}
+	return out
 }
 
 // withLinked is the reading page of a record in a linked group: the card of
@@ -131,28 +150,66 @@ func (s *Server) recordShell(c *collectionCtx, title string, notices []view.Noti
 	return sh
 }
 
-// recordActions: a read-only collection has no edit at all, not a locked form.
-// What stays is a copy: it writes elsewhere and leaves this record as it is
-// (S-18).
-func (s *Server) recordActions(c *collectionCtx, uid, etag string) []view.Action {
-	move := c.recordPath(uid) + "/move"
-	copyAction := view.Action{ID: "record.copy", Label: "Copy…", Href: s.postQuery(move, url.Values{"copy": {"1"}}), Method: "GET", Enabled: true}
-	if c.feed != nil {
-		return []view.Action{copyAction}
+// recordOps is what can be done with one record, split the way the frames
+// split it (from-typecase note 1): Open, Edit and the deletion stand on their
+// own; Move, Copy, Export and Publish a link are the «⋯» (s-contacts-10,
+// components-1…4). A read-only collection has no edit at all, not a locked
+// form: Edit, Move and the deletion are nil there, and what stays is a copy —
+// it writes elsewhere and leaves this record as it is (S-18) —, the file and
+// the link. A subscription is not published onwards: it is someone else's.
+type recordOps struct {
+	open, edit, del *view.Action
+	menu            []view.MenuItem
+}
+
+// kindIcons are the icons of the four kinds: Open in a row's menu is the
+// kind's (components-1…4).
+var kindIcons = map[view.Kind]string{view.KindContact: "i-con", view.KindEvent: "i-cal", view.KindTask: "i-task", view.KindNote: "i-note"}
+
+func (s *Server) recordOps(o origin, spec kindSpec, uid, etag string) recordOps {
+	rec := o.recordPath(spec.segment, uid)
+	move := rec + "/move"
+	ops := recordOps{open: &view.Action{ID: "record.open", Label: "Open", Icon: kindIcons[spec.kind], Href: s.route(rec), Method: "GET", Enabled: true}}
+	if !o.col.ReadOnly && !o.conn.Feed {
+		ops.edit = &view.Action{ID: "record.edit", Label: "Edit", Href: s.route(rec + "/edit"), Method: "GET", Enabled: true}
+		ops.del = &view.Action{ID: "record.delete", Label: text("Delete " + spec.noun), Icon: "i-trash",
+			Href: s.postQuery(rec+"/delete", url.Values{"etag": {etag}}), Method: "POST", Danger: true, Enabled: true}
+		ops.menu = append(ops.menu, view.MenuItem{Action: view.Action{ID: "record.move", Label: "Move", Icon: "i-move", Href: s.route(move), Method: "GET", Enabled: true}})
 	}
-	if c.col.ReadOnly {
-		return []view.Action{copyAction, s.publishAction(c, uid)}
+	ops.menu = append(ops.menu,
+		view.MenuItem{Action: view.Action{ID: "record.copy", Label: "Copy", Icon: "i-dup", Href: s.postQuery(move, url.Values{"copy": {"1"}}), Method: "GET", Enabled: true}},
+		view.MenuItem{Action: s.recordExportAction(o, spec, uid)})
+	if !o.conn.Feed {
+		ops.menu = append(ops.menu, view.MenuItem{Action: s.publishActionAt(o, spec.segment, uid)})
 	}
-	// Edit first: it is what a person came to the record for. Publishing a
-	// secret link is rare and stands past the moving and copying; the
-	// deletion is last and marked (s-contacts-6).
-	return []view.Action{
-		{ID: "record.edit", Label: text("Edit " + c.spec.noun), Href: s.route(c.recordPath(uid) + "/edit"), Method: "GET", Enabled: true},
-		{ID: "record.move", Label: "Move…", Href: s.route(move), Method: "GET", Enabled: true},
-		copyAction,
-		s.publishAction(c, uid),
-		{ID: "record.delete", Label: text("Delete " + c.spec.noun), Href: s.postQuery(c.recordPath(uid)+"/delete", url.Values{"etag": {etag}}), Method: "POST", Danger: true, Enabled: true},
+	return ops
+}
+
+// rowMenu is the «⋯» of a row in a list (components-1…4): open, edit, the
+// card's menu, and the deletion last behind a line.
+func (ops recordOps) rowMenu() []view.MenuItem {
+	out := []view.MenuItem{{Action: *ops.open}}
+	if ops.edit != nil {
+		edit := *ops.edit
+		edit.Icon = "i-pencil"
+		out = append(out, view.MenuItem{Action: edit})
 	}
+	out = append(out, ops.menu...)
+	if ops.del != nil {
+		out = append(out, view.MenuItem{Separator: true, Action: *ops.del})
+	}
+	return out
+}
+
+// menuWithout is the menu with one item left out.
+func menuWithout(menu []view.MenuItem, id string) []view.MenuItem {
+	out := []view.MenuItem{}
+	for _, it := range menu {
+		if it.ID != id {
+			out = append(out, it)
+		}
+	}
+	return out
 }
 
 type displayField struct {
@@ -251,13 +308,17 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 	if photoOf(obj) == linkedPhoto {
 		page.PhotoNote = externalPhotoNote
 	}
-	page.Actions = s.recordActions(c, uid, obj.ETag)
+	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
+	var send *view.Action
 	if s.canSendLetters(c.sess) && c.feed == nil {
 		// Send (s-contacts-6): the card goes into a letter by the attach
 		// sheet's own POST, and the letter opens (S-26.2).
-		page.Actions = append(page.Actions, view.Action{ID: "record.send", Label: "Send", Icon: "i-mail", Method: "POST", Enabled: true,
-			Href: s.postQuery("/app/mail/attach", url.Values{"what": {"contact"}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}})})
+		send = &view.Action{ID: "record.send", Label: "Send", Icon: "i-mail", Method: "POST", Enabled: true,
+			Href: s.postQuery("/app/mail/attach", url.Values{"what": {"contact"}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}})}
 	}
+	// Edit and Send stand in the head, the deletion at the foot; the rest is
+	// the «⋯» (s-contacts-6, s-contacts-10). Print is the client's.
+	page.Actions, page.Menu = shown(ops.edit, send, ops.del), ops.menu
 	return page
 }
 
@@ -347,13 +408,17 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 	}
 	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Related = s.relatedRows(c, obj)
-	page.Actions = s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag))
+	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
+	var task *view.Action
 	if c.feed == nil && !c.col.ReadOnly && c.col.Has(view.KindTask) {
 		// New task (s-agenda-2): the quick sheet of a task in this calendar,
 		// related to the event.
-		page.Actions = append(page.Actions, view.Action{ID: "event.task", Label: "New task", Icon: "i-plus", Method: "GET", Enabled: true,
-			Href: s.postQuery(c.origin().listPath(segmentOf(view.KindTask))+"/new/quick", url.Values{"related": {uid}})})
+		task = &view.Action{ID: "event.task", Label: "New task", Icon: "i-plus", Method: "GET", Enabled: true,
+			Href: s.postQuery(c.origin().listPath(segmentOf(view.KindTask))+"/new/quick", url.Values{"related": {uid}})}
 	}
+	// Edit and New task in the head, Attach in its block, the deletion at the
+	// foot; the rest is the «⋯» (s-agenda-2, s-agenda-5).
+	page.Actions, page.Menu = shown(ops.edit, s.attachOf(c, uid, obj.ETag), task, ops.del), ops.menu
 	return page
 }
 
@@ -388,10 +453,15 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Reminders = reminderRows(alarms, tf)
 	page.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Related = s.relatedRows(c, obj)
-	page.Actions = s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag))
+	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
+	var done *view.Action
 	if c.feed == nil && !c.col.ReadOnly {
-		page.Actions = append([]view.Action{s.doneAction(c.recordPath(uid)+"/edit", obj.ETag, page.Done, "")}, page.Actions...)
+		a := s.doneAction(c.recordPath(uid)+"/edit", obj.ETag, page.Done, "")
+		done = &a
 	}
+	// Edit and Mark done in the head, Attach in its block, the deletion at
+	// the foot; the rest is the «⋯» (s-tasks-2, s-tasks-6).
+	page.Actions, page.Menu = shown(ops.edit, done, s.attachOf(c, uid, obj.ETag), ops.del), ops.menu
 	return page
 }
 
@@ -408,20 +478,19 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 	page.Shell.Title = text(title)
 	page.Print = s.recordPrint(c, text(title))
 	page.Doc.Title, page.Doc.Body, page.Doc.Rendered = text(title), text(body), cal.RenderMarkdown(body)
-	// Edit sits in the document bar; the rest belong to the note, beside it.
-	for _, a := range s.withAttach(c, uid, obj.ETag, s.recordActions(c, uid, obj.ETag)) {
-		if a.ID == "record.edit" {
-			page.Doc.Bar = append(page.Doc.Bar, a)
-		} else {
-			page.Meta.Actions = append(page.Meta.Actions, a)
-		}
-	}
+	// Edit and Export Markdown sit in the bar over the text, Attach and the
+	// deletion in the column beside it; what the bar has no room for is its
+	// «⋯» (s-notes-2, s-notes-14). Print and Source are the client's: the
+	// source is Doc.Body.
+	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
+	page.Doc.Bar = shown(ops.edit, &view.Action{ID: "note.export", Label: "Export Markdown", Icon: "i-down", Method: "GET", Enabled: true,
+		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})})
+	page.Meta.Actions = shown(s.attachOf(c, uid, obj.ETag), ops.del)
+	page.Meta.Menu = menuWithout(ops.menu, "record.export")
 	if at := noteTime(obj, tz); !at.IsZero() {
 		page.Meta.Date = text(tf.date(at))
 	}
 	page.Meta.Tags = s.recordTags(c, obj)
-	page.Meta.Actions = append(page.Meta.Actions, view.Action{ID: "note.export", Label: "Export Markdown", Icon: "i-down", Method: "GET", Enabled: true,
-		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})})
 	page.Meta.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Meta.Related = s.relatedRows(c, obj)
 	return page
@@ -526,6 +595,10 @@ func partstatLabel(v string) string {
 	}
 }
 
+// seriesNote is the line under the deletion of a series (s-agenda-2,
+// s-agenda-3): what is edited and deleted is the whole series.
+const seriesNote = "Series is edited and deleted whole."
+
 // recurrenceBlock: the rule in words (C-10, here in web), the raw rule, the
 // next instants, and the plain statement that the series is edited whole.
 func (s *Server) recurrenceBlock(obj *model.Object, tf timeFmt) view.RecurrenceBlock {
@@ -534,7 +607,7 @@ func (s *Server) recurrenceBlock(obj *model.Object, tf timeFmt) view.RecurrenceB
 	b := view.RecurrenceBlock{
 		Summary: text(tf.recurrence(raw)),
 		Raw:     text(raw),
-		Note:    "Edited as a whole series",
+		Note:    seriesNote,
 	}
 	now := tf.now
 	times, err := cal.Expand(obj, now, now.AddDate(1, 0, 0), tz)

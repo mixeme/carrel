@@ -6,7 +6,7 @@
         "enabled": true,
         "href": "/app/settings/unlock",
         "id": "davloom.issue",
-        "label": "Create password…",
+        "label": "Create password",
         "method": "GET"
       }
     ],

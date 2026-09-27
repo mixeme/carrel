@@ -18,7 +18,9 @@ import (
 // S-19: an export has no screen. It is a menu item that hands over a file,
 // written to the response as the records arrive (S-9.3) — no temporary file
 // on the way. A calendar takes the week the agenda shows when the address
-// names one; everything else is the collection whole.
+// names one; everything else is the collection whole. ?uid= names one record
+// of any kind: the item «Export .vcf» of a record's menu hands over that
+// record alone, named after it.
 
 // exportFormat is what one kind of record is handed over as.
 type exportFormat struct {
@@ -37,6 +39,14 @@ var exportFormats = map[view.Kind]exportFormat{
 // when the screen has one.
 func (s *Server) exportHref(c *collectionCtx, q url.Values) string {
 	return s.postQuery(c.listPath()+"/export", q)
+}
+
+// recordExportAction is «Export .vcf», «.ics» or «.md» in the menu of one
+// record: the format is named in the item, and it hands the file over at
+// once (the mockup's rule of the ellipsis, §6).
+func (s *Server) recordExportAction(o origin, spec kindSpec, uid string) view.Action {
+	return view.Action{ID: "record.export", Label: text("Export " + exportFormats[spec.kind].ext), Icon: "i-down", Method: "GET", Enabled: true,
+		Href: s.postQuery(o.listPath(spec.segment)+"/export", url.Values{"uid": {uid}})}
 }
 
 func (s *Server) exportAction(c *collectionCtx, q url.Values) view.Action {
@@ -115,8 +125,8 @@ func (s *Server) getKindExport(w http.ResponseWriter, r *http.Request, kind stri
 	if !ok {
 		return
 	}
-	if uid := r.FormValue("uid"); uid != "" && c.spec.kind == view.KindNote {
-		s.exportNote(w, r, c, uid)
+	if uid := r.FormValue("uid"); uid != "" {
+		s.exportRecord(w, r, c, uid)
 		return
 	}
 	whole := exportWhole(c, r)
@@ -232,9 +242,10 @@ func (s *Server) emptyListPage(c *collectionCtx, notices ...view.Notice) any {
 	}
 }
 
-// exportNote hands over one note as Markdown, the format of the notebook
-// export (S-19), named after its title (review Р-10, Export Markdown).
-func (s *Server) exportNote(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
+// exportRecord hands over one record in the format of its kind's export
+// (S-19), named after its title (review Р-10, Export Markdown): a card as
+// vCard, an event or a task as a calendar of one, a note as Markdown.
+func (s *Server) exportRecord(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
 	obj, err := c.find(r.Context(), uid)
 	switch {
 	case notFoundErr(err):
@@ -244,10 +255,10 @@ func (s *Server) exportNote(w http.ResponseWriter, r *http.Request, c *collectio
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 		return
 	}
-	f := exportFormats[view.KindNote]
+	f := exportFormats[c.spec.kind]
 	h := w.Header()
 	h.Set("Content-Type", f.media)
-	name := collectionSlug(noteTitle(cal.Text(obj, "SUMMARY"), cal.Description(obj))) + f.ext
+	name := collectionSlug(recordTitle(c.spec.kind, obj)) + f.ext
 	if v := mime.FormatMediaType("attachment", map[string]string{"filename": name}); v != "" {
 		h.Set("Content-Disposition", v)
 	} else {
@@ -257,5 +268,5 @@ func (s *Server) exportNote(w http.ResponseWriter, r *http.Request, c *collectio
 	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
 	h.Set("Cache-Control", "private, no-store")
 	w.WriteHeader(http.StatusOK)
-	_ = cal.NoteMarkdown(w, obj)
+	writeExport(w, c, []*model.Object{obj})
 }

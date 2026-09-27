@@ -13,7 +13,7 @@
         "href": "/app/calendar/a-nc-home/lichnyj/import",
         "icon": "i-up",
         "id": "collection.import",
-        "label": "Import…",
+        "label": "Import",
         "method": "GET"
       },
       {
@@ -29,7 +29,7 @@
         "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar",
         "icon": "i-link",
         "id": "publish",
-        "label": "Publish…",
+        "label": "Publish a link",
         "method": "GET"
       }
     ],
@@ -189,7 +189,66 @@
           "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
           "kind": "event",
           "location": "Переговорная 2",
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+              "icon": "i-cal",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/export?uid=8f1c-4a02-b7d3",
+              "icon": "i-down",
+              "id": "record.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/delete?etag=e6",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete event",
+              "method": "POST",
+              "separator": true
+            }
+          ],
           "sources": [],
           "stamp": "",
           "state": "ok",
@@ -363,14 +422,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -378,7 +437,7 @@
                 "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -395,7 +454,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -417,14 +476,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=lichnyj",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -432,7 +491,7 @@
                 "href": "/app/calendar/a-nc-home/lichnyj/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -449,7 +508,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=lichnyj",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -471,14 +530,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -486,7 +545,7 @@
                 "href": "/app/calendar/a-nc-home/rabota/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -503,7 +562,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -532,14 +591,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-rad-vps\u0026c=dezhurstva",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -547,7 +606,7 @@
                 "href": "/app/calendar/a-rad-vps/dezhurstva/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -564,7 +623,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-rad-vps\u0026c=dezhurstva",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -586,14 +645,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-rad-vps\u0026c=proekty",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -601,7 +660,7 @@
                 "href": "/app/calendar/a-rad-vps/proekty/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -618,7 +677,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-rad-vps\u0026c=proekty",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -647,14 +706,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-baikal\u0026c=obshchij",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-baikal\u0026c=obshchij",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -662,7 +721,7 @@
                 "href": "/app/calendar/a-baikal/obshchij/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -679,7 +738,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-baikal\u0026c=obshchij",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -708,7 +767,7 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=f-ru-holidays\u0026c=feed",
                 "id": "feed.edit",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
@@ -737,7 +796,7 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=f-league\u0026c=feed",
                 "id": "feed.edit",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {

@@ -96,6 +96,7 @@ type TaskRow struct {
 	Tags    []Tag       `json:"tags"`
 	Badges  []Badge     `json:"badges"`  // «2 источника» у связанной задачи
 	Sources []Stamp     `json:"sources"` // источники связанной группы
+	Tick    *Action     `json:"tick"`    // отметка выполнения в строке; nil — только чтение
 	Menu    []MenuItem  `json:"menu"`
 	State   RecordState `json:"state"`
 }

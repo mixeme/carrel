@@ -281,7 +281,7 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 	case sess.UnlockUntil(time.Now()) == nil:
 		// The fourth place of the one unlock sheet (S-10.7): a password that
 		// opens the data key is handed out only after the person's own.
-		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password…", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}}
+		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}}
 	default:
 		form.Actions = []view.Action{{ID: "davloom.issue", Label: "Create password", Method: "POST", Enabled: true}}
 	}

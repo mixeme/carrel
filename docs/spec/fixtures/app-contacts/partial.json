@@ -183,21 +183,21 @@
             "menu": [
               {
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "href": "/app/collections/rename?a=a-nc-home&c=arhiv",
                 "method": "GET",
                 "enabled": true
               },
               {
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "href": "/app/collections/move?a=a-nc-home&c=arhiv",
                 "method": "GET",
                 "enabled": true
               },
               {
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "icon": "i-up",
                 "href": "/app/contacts/a-nc-home/arhiv/import",
                 "method": "GET",
@@ -214,7 +214,7 @@
               },
               {
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "href": "/app/collections/delete?a=a-nc-home&c=arhiv",
                 "method": "GET",
                 "danger": true,
@@ -237,21 +237,21 @@
             "menu": [
               {
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "href": "/app/collections/rename?a=a-nc-home&c=kontakty",
                 "method": "GET",
                 "enabled": true
               },
               {
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "href": "/app/collections/move?a=a-nc-home&c=kontakty",
                 "method": "GET",
                 "enabled": true
               },
               {
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "icon": "i-up",
                 "href": "/app/contacts/a-nc-home/kontakty/import",
                 "method": "GET",
@@ -268,7 +268,7 @@
               },
               {
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "href": "/app/collections/delete?a=a-nc-home&c=kontakty",
                 "method": "GET",
                 "danger": true,
@@ -298,14 +298,14 @@
             "menu": [
               {
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "href": "/app/collections/rename?a=a-rad-vps&c=komanda",
                 "method": "GET",
                 "enabled": true
               },
               {
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "href": "/app/collections/move?a=a-rad-vps&c=komanda",
                 "method": "GET",
                 "enabled": true
@@ -321,7 +321,7 @@
               },
               {
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "href": "/app/collections/delete?a=a-rad-vps&c=komanda",
                 "method": "GET",
                 "danger": true,
@@ -344,21 +344,21 @@
             "menu": [
               {
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "href": "/app/collections/rename?a=a-rad-vps&c=rassylki",
                 "method": "GET",
                 "enabled": true
               },
               {
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "href": "/app/collections/move?a=a-rad-vps&c=rassylki",
                 "method": "GET",
                 "enabled": true
               },
               {
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "icon": "i-up",
                 "href": "/app/contacts/a-rad-vps/rassylki/import",
                 "method": "GET",
@@ -375,7 +375,7 @@
               },
               {
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "href": "/app/collections/delete?a=a-rad-vps&c=rassylki",
                 "method": "GET",
                 "danger": true,
@@ -522,7 +522,66 @@
           "org": "",
           "badges": [],
           "sources": [],
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5",
+              "icon": "i-con",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/export?uid=6b18-2d40-77c5",
+              "icon": "i-down",
+              "id": "record.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=6b18-2d40-77c5",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/6b18-2d40-77c5/delete?etag=e2",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete contact",
+              "method": "POST",
+              "separator": true
+            }
+          ],
           "state": "ok"
         },
         {
@@ -541,7 +600,66 @@
           "org": "Издательство «Слово»",
           "badges": [],
           "sources": [],
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
+              "icon": "i-con",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/export?uid=4f2b-9c31-a0e7",
+              "icon": "i-down",
+              "id": "record.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e1",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete contact",
+              "method": "POST",
+              "separator": true
+            }
+          ],
           "state": "ok"
         },
         {
@@ -560,7 +678,66 @@
           "org": "Тензор",
           "badges": [],
           "sources": [],
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
+              "icon": "i-con",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/export?uid=c3f7-8a21-1b09",
+              "icon": "i-down",
+              "id": "record.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=c3f7-8a21-1b09",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09/delete?etag=e4",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete contact",
+              "method": "POST",
+              "separator": true
+            }
+          ],
           "state": "ok"
         }
       ]
@@ -584,7 +761,66 @@
           "org": "",
           "badges": [],
           "sources": [],
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14",
+              "icon": "i-con",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/arhiv/export?uid=e7c2-3b95-6a14",
+              "icon": "i-down",
+              "id": "record.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home&c=arhiv&k=contacts&uid=e7c2-3b95-6a14",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/arhiv/e7c2-3b95-6a14/delete?etag=e5",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete contact",
+              "method": "POST",
+              "separator": true
+            }
+          ],
           "state": "ok"
         },
         {
@@ -603,7 +839,66 @@
           "org": "Городская библиотека №4",
           "badges": [],
           "sources": [],
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83",
+              "icon": "i-con",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/export?uid=a90d-5512-4e83",
+              "icon": "i-down",
+              "id": "record.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=a90d-5512-4e83",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83/delete?etag=e3",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete contact",
+              "method": "POST",
+              "separator": true
+            }
+          ],
           "state": "ok"
         }
       ]

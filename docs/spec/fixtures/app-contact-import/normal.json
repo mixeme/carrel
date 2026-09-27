@@ -102,14 +102,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -117,7 +117,7 @@
                 "href": "/app/contacts/a-nc-home/arhiv/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -134,7 +134,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -156,14 +156,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -171,7 +171,7 @@
                 "href": "/app/contacts/a-nc-home/kontakty/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -188,7 +188,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }

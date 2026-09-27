@@ -488,8 +488,12 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 	sh.Rail = s.timelineRail(c, nil, card+"/timeline")
 	sh.Notices = append(sh.Notices, notices...)
 	page := view.ContactTimelinePage{Shell: sh, UID: person.uid, Name: text(person.name)}
-	page.Card = view.Details{Title: text(person.name), Source: c.source(),
-		Actions: []view.Action{{ID: "timeline.card", Label: "Open the card", Href: s.route(card), Method: "GET", Enabled: true}}}
+	// The card in the panel: Open the card and Edit on view, the deletion at
+	// its foot, the rest under «⋯» — the menu of the card itself
+	// (s-contacts-7, s-contacts-11).
+	ops := s.recordOps(c.origin(), c.spec, person.uid, obj.ETag)
+	page.Card = view.Details{Title: text(person.name), Source: c.source(), Menu: ops.menu,
+		Actions: shown(&view.Action{ID: "timeline.card", Label: "Open the card", Href: s.route(card), Method: "GET", Enabled: true}, ops.edit, ops.del)}
 	for _, f := range contactFieldsOf(obj) {
 		page.Card.Fields = append(page.Card.Fields, f.Field)
 	}

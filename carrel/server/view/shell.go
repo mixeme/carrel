@@ -83,7 +83,8 @@ type Details struct {
 	Title   Text        `json:"title"`
 	Fields  []Field     `json:"fields"`
 	Source  SourceBlock `json:"source"`
-	Actions []Action    `json:"actions"` // повтор того, что есть в панели над списком, не замена
+	Actions []Action    `json:"actions"` // кнопки на виду; удаление — Danger, внизу панели
+	Menu    []MenuItem  `json:"menu"`    // «⋯» панели, в порядке кадра
 }
 
 type Field struct {

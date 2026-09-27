@@ -593,33 +593,42 @@ func writeAction(c *fileCtx, a view.Action) view.Action {
 	return a
 }
 
-// fileMenu is the menu of one row: download for a file, then rename, move,
-// copy and delete. Copying out of a read-only storage is allowed.
+// fileMenu is the menu of one row (s-files-9, s-files-10): open, download
+// for a file, then rename, move, copy, publish and, behind a line, delete.
+// Opening and downloading are two intents (components-5): Open is the file's
+// address, its folder with it selected. Copying out of a read-only storage
+// is allowed. A folder as an archive is not offered yet (docs/plan/server.md).
 func (s *Server) fileMenu(c *fileCtx, segs []string, e file.Entry) []view.MenuItem {
-	var menu []view.MenuItem
+	at := append(slices.Clone(segs), e.Name)
+	open := view.Action{ID: "file.open", Label: "Open", Icon: "i-doc", Href: s.route(c.href("", at, false)), Method: "GET", Enabled: true}
+	if e.Dir {
+		open.Icon, open.Href = "i-file", s.route(c.href("", at, true))
+	}
+	menu := []view.MenuItem{{Action: open}}
 	if !e.Dir {
 		menu = append(menu, view.MenuItem{Action: view.Action{
 			ID: "file.download", Label: "Download", Icon: "i-down", Method: "GET", Enabled: true,
-			Href: s.route(c.href("download", append(slices.Clone(segs), e.Name), false)),
+			Href: s.route(c.href("download", at, false)),
 		}})
 	}
 	menu = append(menu,
-		view.MenuItem{Action: writeAction(c, view.Action{ID: "file.rename", Label: "Rename…", Icon: "i-pencil", Href: s.opHref(c, segs, view.FileRename, e.Name), Method: "POST", Enabled: true})},
-		view.MenuItem{Action: writeAction(c, view.Action{ID: "file.move", Label: "Move…", Icon: "i-move", Href: s.opHref(c, segs, view.FileMove, e.Name), Method: "POST", Enabled: true})},
-		view.MenuItem{Action: view.Action{ID: "file.copy", Label: "Copy…", Icon: "i-dup", Href: s.opHref(c, segs, view.FileCopy, e.Name), Method: "POST", Enabled: true}},
-		view.MenuItem{Action: s.filePublishAction(c, append(slices.Clone(segs), e.Name), e.Dir)},
-		view.MenuItem{Separator: true, Action: writeAction(c, view.Action{ID: "file.delete", Label: "Delete…", Icon: "i-trash", Href: s.opHref(c, segs, view.FileDelete, e.Name), Method: "POST", Danger: true, Enabled: true})},
+		view.MenuItem{Action: writeAction(c, view.Action{ID: "file.rename", Label: "Rename", Icon: "i-pencil", Href: s.opHref(c, segs, view.FileRename, e.Name), Method: "POST", Enabled: true})},
+		view.MenuItem{Action: writeAction(c, view.Action{ID: "file.move", Label: "Move", Icon: "i-move", Href: s.opHref(c, segs, view.FileMove, e.Name), Method: "POST", Enabled: true})},
+		view.MenuItem{Action: view.Action{ID: "file.copy", Label: "Copy", Icon: "i-dup", Href: s.opHref(c, segs, view.FileCopy, e.Name), Method: "POST", Enabled: true}},
+		view.MenuItem{Action: s.filePublishAction(c, at, e.Dir)},
+		view.MenuItem{Separator: true, Action: writeAction(c, view.Action{ID: "file.delete", Label: "Delete", Icon: "i-trash", Href: s.opHref(c, segs, view.FileDelete, e.Name), Method: "POST", Danger: true, Enabled: true})},
 	)
 	return menu
 }
 
 // folderActions are the bar's operations: Upload and New folder, and over a
-// selection Download (one file), Rename (one), Move, Copy and Delete.
+// selection Download (one file), Rename (one), Move, Copy and Delete. The bar
+// publishes nothing (s-files-1): a folder is published from its row in the
+// folder above.
 func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry) []view.Action {
 	actions := []view.Action{
 		writeAction(c, view.Action{ID: "file.upload", Label: "Upload", Icon: "i-up", Href: s.route(c.href("upload", segs, true)), Method: "POST", Enabled: true}),
 		writeAction(c, view.Action{ID: "folder.new", Label: "New folder", Icon: "i-plus", Href: s.route(c.href("mkcol", segs, true)), Method: "POST", Enabled: true}),
-		s.filePublishAction(c, segs, true),
 	}
 	if len(picked) == 0 {
 		return actions

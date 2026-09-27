@@ -2,17 +2,17 @@
   "actions": [
     {
       "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit",
+      "id": "record.edit",
+      "label": "Edit",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
       "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?done=on\u0026etag=e13\u0026op=done",
       "id": "task.done",
       "label": "Mark done",
       "method": "POST"
-    },
-    {
-      "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit",
-      "id": "record.edit",
-      "label": "Edit task",
-      "method": "GET"
     },
     {
       "enabled": true,
@@ -23,31 +23,10 @@
       "method": "POST"
     },
     {
-      "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/move",
-      "id": "record.move",
-      "label": "Move…",
-      "method": "GET"
-    },
-    {
-      "enabled": true,
-      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/move?copy=1",
-      "id": "record.copy",
-      "label": "Copy…",
-      "method": "GET"
-    },
-    {
-      "enabled": true,
-      "href": "/app/publish?a=a-nc-home\u0026c=dela\u0026k=tasks\u0026uid=aa10-77bc-0e31",
-      "icon": "i-link",
-      "id": "publish",
-      "label": "Publish…",
-      "method": "GET"
-    },
-    {
       "danger": true,
       "enabled": true,
       "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/delete?etag=e13",
+      "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete task",
       "method": "POST"
@@ -73,6 +52,40 @@
   ],
   "linked": [],
   "loss": null,
+  "menu": [
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/move",
+      "icon": "i-move",
+      "id": "record.move",
+      "label": "Move",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/move?copy=1",
+      "icon": "i-dup",
+      "id": "record.copy",
+      "label": "Copy",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/tasks/a-nc-home/dela/export?uid=aa10-77bc-0e31",
+      "icon": "i-down",
+      "id": "record.export",
+      "label": "Export .ics",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/publish?a=a-nc-home\u0026c=dela\u0026k=tasks\u0026uid=aa10-77bc-0e31",
+      "icon": "i-link",
+      "id": "publish",
+      "label": "Publish a link",
+      "method": "GET"
+    }
+  ],
   "notices": [],
   "percent": null,
   "print": {
@@ -117,14 +130,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -132,7 +145,7 @@
                 "href": "/app/tasks/a-nc-home/dela/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -149,7 +162,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -171,14 +184,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -186,7 +199,7 @@
                 "href": "/app/tasks/a-nc-home/rabota/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -203,7 +216,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }

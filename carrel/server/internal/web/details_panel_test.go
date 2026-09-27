@@ -39,15 +39,13 @@ func TestRecordAnswersTheDetailsPanel(t *testing.T) {
 	if d.Source.Stamp == "" {
 		t.Errorf("the panel does not say where the record came from: %+v", d.Source)
 	}
-	open := actionByID(d.Actions, "record.open")
-	if open == nil || open.Href != rec {
-		t.Fatalf("actions = %+v, want the way to the whole record first", d.Actions)
+	// Edit first, as the panel frames draw it (s-contacts-1); the row itself
+	// opens the whole record, and no button of the panel repeats it.
+	if len(d.Actions) == 0 || d.Actions[0].ID != "record.edit" || d.Actions[0].Href != rec+"/edit" {
+		t.Errorf("actions = %+v, want Edit first", d.Actions)
 	}
-	if d.Actions[0].ID != "record.open" {
-		t.Errorf("the first action is %q", d.Actions[0].ID)
-	}
-	if actionByID(d.Actions, "record.edit") == nil {
-		t.Errorf("the panel offers no edit: %+v", d.Actions)
+	if actionByID(d.Actions, "record.open") != nil {
+		t.Errorf("the panel draws no Open: %+v", d.Actions)
 	}
 
 	// An event's panel carries the fields of its card.

@@ -786,6 +786,7 @@ func (s *Server) contactGroups(sess *session.Session, tf timeFmt, items []listed
 			}
 		}
 		row.Badges, row.Sources = linkedBadge(it), linkedSources(it)
+		row.Menu = s.recordOps(it.from, recordKinds[segment], uid, it.obj.ETag).rowMenu()
 		row.Avatar.Href = avatars[i]
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
@@ -1112,6 +1113,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 				Time:    text(tf.timeLabel(at, false)),
 				Summary: text(titleOr(cal.Text(it.pick("SUMMARY"), "SUMMARY"), untitledOf(it.kind))),
 				State:   linkedState(it.listed),
+				Menu:    s.recordOps(it.from, recordKinds[segmentOf(it.kind)], uid, o.ETag).rowMenu(),
 			}
 			if it.kind == view.KindTask {
 				row.Badges = append(row.Badges, view.Badge{Label: "Due", Role: view.BadgeNeutral})
@@ -1140,6 +1142,9 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 			bad = append(bad, u)
 			continue
 		}
+		// Every occurrence is the one record: the series is edited and
+		// deleted whole.
+		menu := s.recordOps(it.from, recordKinds[segment], uid, o.ETag).rowMenu()
 		for _, at := range instants {
 			if at.Before(from) || !at.Before(to) {
 				continue
@@ -1155,6 +1160,7 @@ func (s *Server) agendaDays(tf timeFmt, items []kinded, from, to time.Time, segm
 				State:    linkedState(it.listed),
 				Badges:   linkedBadge(it.listed),
 				Sources:  linkedSources(it.listed),
+				Menu:     menu,
 			}}
 			if mark {
 				occ.row.Stamp, occ.row.Colour = it.from.stamp(), catalogColour(it.from.col)
@@ -1289,12 +1295,16 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
 		}
+		row.Menu = s.recordOps(it.from, recordKinds[segment], uid, o.ETag).rowMenu()
 		if !it.from.col.ReadOnly && !it.from.conn.Feed {
+			// The box of the row is its own control, not an item of the
+			// menu (components-3).
 			from := "list"
 			if mark {
 				from = "all"
 			}
-			row.Menu = append(row.Menu, view.MenuItem{Action: s.doneAction(it.from.recordPath(segment, uid)+"/edit", o.ETag, isDone, from)})
+			tick := s.doneAction(it.from.recordPath(segment, uid)+"/edit", o.ETag, isDone, from)
+			row.Tick = &tick
 		}
 		if !due.Start.IsZero() {
 			row.Due = text(tf.timeOrDate(due))
@@ -1429,6 +1439,7 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 			Href: s.route(it.from.recordPath(segment, uid)), UID: uid, Title: text(title), Excerpt: text(noteExcerpt(body, title)),
 			Tags: filter.tags(categoriesOf(view.KindNote, o)), State: linkedState(it),
 			Badges: linkedBadge(it), Sources: linkedSources(it),
+			Menu: s.recordOps(it.from, recordKinds[segment], uid, o.ETag).rowMenu(),
 		}
 		if mark {
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)

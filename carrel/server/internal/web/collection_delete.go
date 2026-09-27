@@ -35,7 +35,7 @@ func (s *Server) collectionDeleteItem(conn sealed.Connection, col sealed.Collect
 		return view.MenuItem{}, false
 	}
 	return view.MenuItem{Separator: true, Action: view.Action{
-		ID: "collection.delete", Label: "Delete…",
+		ID: "collection.delete", Label: "Delete on the server…",
 		Href:   s.postQuery("/app/collections/delete", collectionDeleteQuery(conn, col)),
 		Method: "GET", Danger: true, Enabled: true,
 	}}, true

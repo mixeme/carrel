@@ -287,13 +287,14 @@ func (s *Server) detachAction(c *collectionCtx, uid, etag, from string, a cal.At
 	return act
 }
 
-// withAttach puts Attach after Edit in the actions of a writable record.
-func (s *Server) withAttach(c *collectionCtx, uid, etag string, actions []view.Action) []view.Action {
-	if c.col.ReadOnly || c.cal == nil {
-		return actions
+// attachOf is Attach of a writable record, or none: a contact holds no
+// files, and a read-only collection is not written.
+func (s *Server) attachOf(c *collectionCtx, uid, etag string) *view.Action {
+	if c.col.ReadOnly || c.feed != nil || c.cal == nil {
+		return nil
 	}
-	at := slices.IndexFunc(actions, func(a view.Action) bool { return a.ID == "record.edit" }) + 1
-	return slices.Insert(actions, at, s.attachAction(c, uid, etag, ""))
+	a := s.attachAction(c, uid, etag, "")
+	return &a
 }
 
 // Writing.

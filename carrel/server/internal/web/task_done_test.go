@@ -44,9 +44,9 @@ func TestMarkDoneFromTheCardAndTheRow(t *testing.T) {
 	if len(tasks.Groups) == 0 || len(tasks.Groups[0].Rows) != 1 {
 		t.Fatalf("groups = %+v", tasks.Groups)
 	}
-	undo := menuAction(tasks.Groups[0].Rows[0].Menu, "task.done")
-	if undo == nil || undo.Label != "Mark not done" {
-		t.Fatalf("row menu = %+v, want Mark not done", tasks.Groups[0].Rows[0].Menu)
+	undo := tasks.Groups[0].Rows[0].Tick
+	if undo == nil || undo.ID != "task.done" || undo.Label != "Mark not done" {
+		t.Fatalf("row tick = %+v, want Mark not done", undo)
 	}
 	resp = f.h.do(postHref(f, undo.Href))
 	if resp.Code != 303 || !strings.HasPrefix(resp.Header().Get("Location"), list) || resp.Header().Get("Location") == rec {

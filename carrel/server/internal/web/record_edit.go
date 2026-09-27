@@ -1558,17 +1558,29 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 	if attaching && c.spec.kind != view.KindNote {
 		form.Actions = append(form.Actions, s.attachAction(c, st.uid, st.etag, "edit"))
 	}
+	// The foot of the form of a record that exists is its deletion, with
+	// the line the frame writes under it (from-typecase note 2: s-agenda-3,
+	// s-tasks-3); Save and Cancel stay one pair, in the form.
+	var del *view.Action
+	if st.obj != nil && !st.isNew && !c.col.ReadOnly {
+		del = s.recordOps(c.origin(), c.spec, st.uid, st.etag).del
+	}
 	switch c.spec.kind {
 	case view.KindContact:
 		page := view.ContactEditPage{Shell: sh, UID: st.uid, Form: form, Loss: st.loss, ReadOnly: c.col.ReadOnly}
 		page.Photo = s.photoBlock(c, st)
 		return page
 	case view.KindEvent:
-		page := view.EventEditPage{Shell: sh, UID: st.uid, Form: form, Reminders: reminderRows(st.alarms, tf), Loss: st.loss}
+		page := view.EventEditPage{Shell: sh, UID: st.uid, Form: form, Reminders: reminderRows(st.alarms, tf), Loss: st.loss, Delete: del}
 		if st.obj != nil {
 			if cal.HasRecurrence(st.obj) {
 				page.Recurrence = s.recurrenceBlock(st.obj, tf)
 				page.Recurrence.Fields = append(repeatFields(repeatValues(cal.RawRRULE(st.obj), tf.tz)), page.Recurrence.Fields...)
+				// The line stands under Delete here, and once.
+				page.Recurrence.Note = ""
+				if del != nil {
+					page.DeleteNote = seriesNote
+				}
 			}
 			for _, a := range cal.Attendees(st.obj) {
 				page.Attendees = append(page.Attendees, view.AttendeeRow{Name: text(a.Name), Email: text(a.Email), Status: text(partstatLabel(a.Status))})
@@ -1577,7 +1589,10 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		}
 		return page
 	case view.KindTask:
-		page := view.TaskEditPage{Shell: sh, UID: st.uid, Form: form, Done: first(st.values["done"]) == "on", Reminders: reminderRows(st.alarms, tf), Loss: st.loss}
+		page := view.TaskEditPage{Shell: sh, UID: st.uid, Form: form, Done: first(st.values["done"]) == "on", Reminders: reminderRows(st.alarms, tf), Loss: st.loss, Delete: del}
+		if del != nil {
+			page.DeleteNote = taskDeleteNote
+		}
 		if st.obj != nil {
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
 		}
@@ -1614,6 +1629,10 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		return doc
 	}
 }
+
+// taskDeleteNote is the line under Delete task (s-tasks-3). The frame writes
+// it in Russian; this is the same in English (to-typecase task 8).
+const taskDeleteNote = "Deleting goes to the server at once, and nothing can undo it."
 
 func (s *Server) cancelAction(c *collectionCtx, st editState) view.Action {
 	href := c.recordPath(st.uid)

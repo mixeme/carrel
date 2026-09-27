@@ -13,7 +13,7 @@
         "href": "/app/notes/a-nc-home/zapisi/import",
         "icon": "i-up",
         "id": "collection.import",
-        "label": "Import…",
+        "label": "Import",
         "method": "GET"
       },
       {
@@ -29,7 +29,7 @@
         "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes",
         "icon": "i-link",
         "id": "publish",
-        "label": "Publish…",
+        "label": "Publish a link",
         "method": "GET"
       }
     ],
@@ -74,7 +74,66 @@
           "date": "10 August 2026",
           "excerpt": "Договорились заморозить ветку в среду.",
           "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=5c81-77aa-0d64",
+              "icon": "i-down",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=5c81-77aa-0d64",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/delete?etag=e16",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true
+            }
+          ],
           "sources": [],
           "stamp": "",
           "state": "ok",
@@ -99,7 +158,66 @@
           "date": "8 August 2026",
           "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",
           "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
+              "icon": "i-note",
+              "id": "record.open",
+              "label": "Open",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/edit",
+              "icon": "i-pencil",
+              "id": "record.edit",
+              "label": "Edit",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/move",
+              "icon": "i-move",
+              "id": "record.move",
+              "label": "Move",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/move?copy=1",
+              "icon": "i-dup",
+              "id": "record.copy",
+              "label": "Copy",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?uid=6d92-13ef-b408",
+              "icon": "i-down",
+              "id": "record.export",
+              "label": "Export .md",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes\u0026uid=6d92-13ef-b408",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408/delete?etag=e17",
+              "icon": "i-trash",
+              "id": "record.delete",
+              "label": "Delete note",
+              "method": "POST",
+              "separator": true
+            }
+          ],
           "sources": [],
           "stamp": "",
           "state": "ok",
@@ -253,14 +371,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -268,7 +386,7 @@
                 "href": "/app/notes/a-nc-home/dnevnik/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -285,7 +403,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -307,14 +425,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -322,7 +440,7 @@
                 "href": "/app/notes/a-nc-home/zapisi/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -339,7 +457,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }

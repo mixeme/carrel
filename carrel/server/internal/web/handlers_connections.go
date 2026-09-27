@@ -484,7 +484,7 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 		row.LastRead, row.Changed = readingOf(sess, tf, c.ID, col.Path)
 		if !col.Has(view.KindFile) {
 			row.Menu = []view.MenuItem{{Action: view.Action{
-				ID: "collection.rename", Label: "Rename…",
+				ID: "collection.rename", Label: "Rename and colour",
 				Href:   s.postQuery("/app/collections/rename", url.Values{"a": {c.ID}, "c": {col.Path}}),
 				Method: "GET", Enabled: true,
 			}}}

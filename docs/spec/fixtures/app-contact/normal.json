@@ -4,35 +4,14 @@
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
       "id": "record.edit",
-      "label": "Edit contact",
-      "method": "GET"
-    },
-    {
-      "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move",
-      "id": "record.move",
-      "label": "Move…",
-      "method": "GET"
-    },
-    {
-      "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?copy=1",
-      "id": "record.copy",
-      "label": "Copy…",
-      "method": "GET"
-    },
-    {
-      "enabled": true,
-      "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
-      "icon": "i-link",
-      "id": "publish",
-      "label": "Publish…",
+      "label": "Edit",
       "method": "GET"
     },
     {
       "danger": true,
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e1",
+      "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete contact",
       "method": "POST"
@@ -103,6 +82,40 @@
       "value": "Ковалёва, Анна"
     }
   ],
+  "menu": [
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move",
+      "icon": "i-move",
+      "id": "record.move",
+      "label": "Move",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?copy=1",
+      "icon": "i-dup",
+      "id": "record.copy",
+      "label": "Copy",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/export?uid=4f2b-9c31-a0e7",
+      "icon": "i-down",
+      "id": "record.export",
+      "label": "Export .vcf",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
+      "icon": "i-link",
+      "id": "publish",
+      "label": "Publish a link",
+      "method": "GET"
+    }
+  ],
   "more": {
     "enabled": true,
     "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
@@ -156,14 +169,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -171,7 +184,7 @@
                 "href": "/app/contacts/a-nc-home/arhiv/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -188,7 +201,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -210,14 +223,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -225,7 +238,7 @@
                 "href": "/app/contacts/a-nc-home/kontakty/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -242,7 +255,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }

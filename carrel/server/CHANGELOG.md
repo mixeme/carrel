@@ -17,6 +17,71 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.55 — 2026-09-28
+
+What stands on a record and what is under its «⋯» is now data, as the
+mockup's frames draw it (from-typecase notes 1 and 2).
+
+### Changed
+
+- **`Menu []MenuItem` beside `Actions`** on `ContactPage`, `EventPage`,
+  `TaskPage`, `NoteMeta` and `Details` (the list panel and the timeline's
+  card). `Actions` are the buttons shown; `Menu` is the «⋯» in frame order,
+  `Separator` marking a line before an item. Move (`record.move`), Copy
+  (`record.copy`) and Publish a link (`publish`) left `Actions` for `Menu`,
+  and a new item `record.export` joined them.
+  - Contact card: `Actions` Edit, Send (when mail can be sent), Delete
+    contact; `Menu` Move, Copy, Export .vcf, Publish a link.
+  - Event card: Edit, Attach, New task, Delete event; task card: Edit, Mark
+    done, Attach, Delete task. `Menu` Move, Copy, Export .ics, Publish a link.
+  - Note page: `Doc.Bar` Edit, Export Markdown (moved from `Meta.Actions`);
+    `Meta.Actions` Attach, Delete note; `Meta.Menu` Move, Copy, Publish a link.
+  - Panels: contact — Edit, All records (`contact.timeline`, the timeline),
+    Delete; event and task — Edit, Attach, Delete; note — Edit, Open the note
+    page (`record.open`, icon `i-expand`), Attach, and the deletion as the
+    last menu item behind a line. The panels of a contact, an event and a
+    task no longer carry «Open the …»: the row opens the record. The note
+    panel had no Edit at all — it has now.
+  - Timeline card: Open the card, Edit, Delete contact, and the card's menu.
+  - Read-only: no Edit, Move or Delete; a subscription has no Publish a link.
+- **Row menus of the lists** (`ContactRow`, `AgendaRow`, `TaskRow`,
+  `NoteRow` `.Menu`, components-1…4): Open, Edit, Move, Copy, Export …,
+  Publish a link, then Delete behind a line; icons as in the frames. They
+  were empty (a task row held only Mark done).
+- **`TaskRow.Tick *Action`**: the row's done box (`task.done`). It is no
+  longer an item of the row's menu. `nil` on a read-only row.
+- **File rows** (`s-files-9`, `s-files-10`): Open first (`file.open` — the
+  file's address, its folder with it selected; a folder's own address), then
+  Download (files), Rename, Move, Copy, Publish a link, Delete. The bar over
+  a folder no longer carries `publish`: a folder is published from its row.
+- **Delete on the edit page** (`s-agenda-3`, `s-tasks-3`):
+  `EventEditPage` and `TaskEditPage` gained `Delete *Action` (`record.delete`,
+  `Danger`, `POST` with the version) and `DeleteNote Text`, the line under it:
+  «Series is edited and deleted whole.» for a series, «Deleting goes to the
+  server at once, and nothing can undo it.» for a task. On the edit page
+  `Recurrence.Note` is empty, so the line stands once.
+- **Labels follow the mockup's ellipsis rule** (§6): only «Delete on the
+  server…» keeps it. Now «Edit» (not «Edit contact»), «Move», «Copy»,
+  «Publish a link», «Rename», «Import», «Move to another server», «Copy
+  instead», «Move instead», «Delete account», «Create password»; a file's
+  «Delete». The collection's delete is «Delete on the server…», the
+  connections page's rename «Rename and colour». `RecurrenceBlock.Note` reads
+  «Series is edited and deleted whole.».
+
+### Fixed
+
+- **Export of one record** (S-19): `…/export?uid=` hands over that record
+  alone, named after it, for every kind. Before, only a note did; a contact,
+  an event or a task silently came back as the whole collection. An unknown
+  UID is 404.
+
+### For consumers
+
+Read the buttons from `Actions` and the «⋯» from `Menu`; put a `Danger`
+action at the foot. Take the row's done box from `TaskRow.Tick`. Render the
+edit page's `Delete` and `DeleteNote` at the foot of the form. Match actions
+by `ID`, not by label: labels lost their «…» and nouns.
+
 ## v0.2.54 — 2026-09-28
 
 ### Changed

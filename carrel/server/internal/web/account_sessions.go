@@ -72,7 +72,10 @@ func (s *Server) deleteAction(sess *session.Session) view.Action {
 	a := view.Action{ID: "account.delete", Label: "Delete account", Danger: true, Enabled: true,
 		Reason: "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it."}
 	if sess.UnlockUntil(time.Now()) == nil {
-		a.Label, a.Method, a.Href = "Delete account…", "GET", s.route("/app/settings/unlock")
+		// No ellipsis: that the password is asked first is told by the
+		// unlock state in the top bar, as with Show password (§6 of the
+		// mockup).
+		a.Method, a.Href = "GET", s.route("/app/settings/unlock")
 		return a
 	}
 	a.Method, a.Href = "POST", s.postQuery("/app/settings/account", url.Values{"op": {"delete"}})

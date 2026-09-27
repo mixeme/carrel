@@ -13,7 +13,7 @@
         "href": "/app/notes/a-nc-home/zapisi/import",
         "icon": "i-up",
         "id": "collection.import",
-        "label": "Import…",
+        "label": "Import",
         "method": "GET"
       },
       {
@@ -29,7 +29,7 @@
         "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes",
         "icon": "i-link",
         "id": "publish",
-        "label": "Publish…",
+        "label": "Publish a link",
         "method": "GET"
       }
     ],
@@ -201,14 +201,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -216,7 +216,7 @@
                 "href": "/app/notes/a-nc-home/dnevnik/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -233,7 +233,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }
@@ -255,14 +255,14 @@
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
                 "id": "collection.rename",
-                "label": "Rename…",
+                "label": "Rename",
                 "method": "GET"
               },
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
                 "id": "collection.move",
-                "label": "Move to another server…",
+                "label": "Move to another server",
                 "method": "GET"
               },
               {
@@ -270,7 +270,7 @@
                 "href": "/app/notes/a-nc-home/zapisi/import",
                 "icon": "i-up",
                 "id": "collection.import",
-                "label": "Import…",
+                "label": "Import",
                 "method": "GET",
                 "separator": true
               },
@@ -287,7 +287,7 @@
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
                 "id": "collection.delete",
-                "label": "Delete…",
+                "label": "Delete on the server…",
                 "method": "GET",
                 "separator": true
               }

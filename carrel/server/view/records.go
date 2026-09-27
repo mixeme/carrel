@@ -18,7 +18,8 @@ type ContactPage struct {
 	Timeline  []TimelineRow `json:"timeline"` // врезка: несколько последних, не вся хронология
 	More      Action        `json:"more"`     // «Open the timeline» — ведёт на /timeline
 	Source    SourceBlock   `json:"source"`
-	Actions   []Action      `json:"actions"`
+	Actions   []Action      `json:"actions"` // кнопки на виду; удаление — Danger, клиент ставит его внизу
+	Menu      []MenuItem    `json:"menu"`    // «⋯»: Move, Copy, Export .vcf, Publish a link
 	ReadOnly  bool          `json:"readOnly"`
 }
 
@@ -96,7 +97,8 @@ type EventPage struct {
 	Linked     []Field         `json:"linked"` // та же встреча в других календарях (S-16)
 	Source     SourceBlock     `json:"source"`
 	Loss       *LossReport     `json:"loss"`
-	Actions    []Action        `json:"actions"`  // правка, перенос, копия, печать, письмо, удаление
+	Actions    []Action        `json:"actions"`  // на виду: правка, вложение, новая задача, удаление
+	Menu       []MenuItem      `json:"menu"`     // «⋯»: Move, Copy, Export .ics, Publish a link
 	ReadOnly   bool            `json:"readOnly"` // чужая коллекция: правки нет вовсе, а не заблокированная форма
 }
 
@@ -110,13 +112,15 @@ type EventEditPage struct {
 	Attendees  []AttendeeRow   `json:"attendees"`
 	Attach     []AttachRow     `json:"attach"`
 	Loss       *LossReport     `json:"loss"`
+	Delete     *Action         `json:"delete"`     // внизу формы; nil — у новой записи
+	DeleteNote Text            `json:"deleteNote"` // строка под удалением: «Series is edited and deleted whole.»
 }
 
 type RecurrenceBlock struct {
 	Summary Text    `json:"summary"` // человеческое описание правила
 	Raw     Text    `json:"raw"`     // сырое правило для тех, кто его читает
 	Fields  []Field `json:"fields"`
-	Note    Text    `json:"note"` // «правится серия целиком»
+	Note    Text    `json:"note"` // «Series is edited and deleted whole.»; на правке — пусто, строка в DeleteNote
 }
 
 type ReminderRow struct {
@@ -154,20 +158,23 @@ type TaskPage struct {
 	Linked    []Field       `json:"linked"` // та же задача в других списках (S-16)
 	Source    SourceBlock   `json:"source"`
 	Loss      *LossReport   `json:"loss"`
-	Actions   []Action      `json:"actions"`
+	Actions   []Action      `json:"actions"` // на виду: правка, отметка, вложение, удаление
+	Menu      []MenuItem    `json:"menu"`    // «⋯»: Move, Copy, Export .ics, Publish a link
 	ReadOnly  bool          `json:"readOnly"`
 }
 
 // TaskEditPage — правка.
 type TaskEditPage struct {
 	Shell
-	UID       string        `json:"uid"`
-	Form      Form          `json:"form"`
-	Done      bool          `json:"done"`
-	Percent   *int          `json:"percent"`
-	Reminders []ReminderRow `json:"reminders"`
-	Attach    []AttachRow   `json:"attach"`
-	Loss      *LossReport   `json:"loss"`
+	UID        string        `json:"uid"`
+	Form       Form          `json:"form"`
+	Done       bool          `json:"done"`
+	Percent    *int          `json:"percent"`
+	Reminders  []ReminderRow `json:"reminders"`
+	Attach     []AttachRow   `json:"attach"`
+	Loss       *LossReport   `json:"loss"`
+	Delete     *Action       `json:"delete"`     // внизу формы; nil — у новой записи
+	DeleteNote Text          `json:"deleteNote"` // строка под удалением
 }
 
 type NotePage struct {
@@ -199,7 +206,8 @@ type NoteMeta struct {
 	Related []TimelineRow `json:"related"`
 	Linked  []Field       `json:"linked"` // та же заметка в других тетрадях (S-16)
 	Attach  []AttachRow   `json:"attach"`
-	Actions []Action      `json:"actions"`
+	Actions []Action      `json:"actions"` // колонка: вложение, удаление
+	Menu    []MenuItem    `json:"menu"`    // «⋯» над текстом: Move, Copy, Publish a link
 }
 
 type ConflictPage struct {
