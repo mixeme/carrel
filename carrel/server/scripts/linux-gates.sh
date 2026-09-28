@@ -45,6 +45,10 @@ go test -timeout 30m ./...
 # has neither, so it runs in golang:1.27-bookworm with a module cache volume
 # of Carrel's own, and takes about seven minutes. First run 24.09.2026: no
 # data race; one test counted on wall-clock speed and was made not to.
+# One package at a time and one test at a time: under the detector every
+# harness pays Argon2 at 64 MiB several times over, and on 28.09.2026
+# internal/web in parallel was killed at the 3 GB limit on a 4 GB host;
+# serially it passes (about five minutes for web alone).
 if [[ "${CARREL_RACE:-}" == "1" ]]; then
   echo "== race detector =="
   docker run --rm \
@@ -54,7 +58,7 @@ if [[ "${CARREL_RACE:-}" == "1" ]]; then
     --memory=3g \
     -e GOTOOLCHAIN=auto \
     golang:1.27-bookworm \
-    go test -race -count=1 -timeout 60m ./...
+    go test -race -count=1 -p 1 -parallel 1 -timeout 120m ./...
 fi
 
 echo "== F-10: server.key permission check =="

@@ -59,8 +59,9 @@
 - **Linux-ворота** — `scripts/linux-gates.sh` на машине разработки: F-10
   (права `server.key`), образ S-28 (`--read-only`, `--cap-drop=ALL`), живой
   набор против Radicale, Stalwart, Xandikos, Davis, DAViCal; `CARREL_RACE=1` —
-  `go test -race` в `golang:1.27` (пакет `user` — `-p 1 -parallel 1`: Argon2
-  съедает память).
+  `go test -race` в `golang:1.27` по одному пакету и по одному тесту
+  (`-p 1 -parallel 1`): под детектором Argon2 каждого стенда съедает память, и
+  `internal/web` параллельно убивается на пределе 3 ГБ (28.09.2026).
 - **Живой набор** — `go test -tags=integration ./integration/`, **вывод в
   файл**, фильтровать уже из него. Нет сервера — набор пропускается с адресом
   и причиной; сервер ответил не так — падает. Наборы общие (`runRecords`,

@@ -78,5 +78,12 @@ func TestBaikalBigBook(t *testing.T) {
 	}
 	if rows != n || len(page.Notices) > 0 {
 		t.Errorf("rows %d of %d, notices %+v", rows, n, page.Notices)
+		// The notice's diagnostic is a pointer: print what it says, or the
+		// failure names an address and not the reason.
+		for _, nt := range page.Notices {
+			if nt.Details != nil {
+				t.Logf("details of %q: %+v", nt.Title, *nt.Details)
+			}
+		}
 	}
 }

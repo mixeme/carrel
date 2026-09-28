@@ -310,7 +310,9 @@ func uidOf(body string) string {
 // redirected to when the server kept the identity of the record, and "" when
 // the server gave it one of its own (SV-18) and Carrel said so instead of
 // redirecting to an address that opens nothing. wantOpen is the collection the
-// notice has to lead into, since that is all the person has left to follow.
+// notice leads into: since v0.2.30 the notice opens the record there under the
+// identity the server gave it («Open it there», record.open), not the address
+// it had.
 func liveLanded(t *testing.T, step string, rec *httptest.ResponseRecorder, wantOpen string) string {
 	t.Helper()
 	if rec.Code == http.StatusSeeOther {
@@ -322,15 +324,15 @@ func liveLanded(t *testing.T, step string, rec *httptest.ResponseRecorder, wantO
 	}
 	for _, n := range page.Notices {
 		for _, a := range n.Actions {
-			if a.ID == "collection.open" {
-				if a.Href != wantOpen {
-					t.Errorf("%s: the notice leads to %q, want %q", step, a.Href, wantOpen)
+			if a.ID == "record.open" {
+				if !strings.HasPrefix(a.Href, wantOpen+"/") {
+					t.Errorf("%s: the notice leads to %q, want a record in %q", step, a.Href, wantOpen)
 				}
 				return ""
 			}
 		}
 	}
-	t.Fatalf("%s: the notice offers no way into the collection: %+v", step, page.Notices)
+	t.Fatalf("%s: the notice offers no way to the moved record: %+v", step, page.Notices)
 	return ""
 }
 
