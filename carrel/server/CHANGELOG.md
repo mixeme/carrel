@@ -17,6 +17,53 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.62 — 2026-09-28
+
+Attach has an arrow everywhere a file is attached to a record (from-typecase
+note 4): «From this computer», as the button, and «From Files» — the tree of
+Files choosing a file that lies there already, written by the attachment
+rule of S-20. Upload of a folder has the same arrow: Files and Folder.
+
+### Added
+
+- **`Action.arrow`** (new, omitted when empty) — the arrow of a split
+  button (`.m-split`): the items of its menu, `MenuItem` like any menu. The
+  action itself is what the button does; the first item repeats it (same
+  `id`, `href`, `method`, the frame's label).
+- **Attach** (`attach.add`) on the card, the panel, the form of an event or a
+  task and the note's page and edit carries `arrow` (s-agenda-6,
+  s-tasks-7): **«From this computer»** (`attach.add`, `i-up`) and **«From
+  Files»** (`attach.files`, `i-file`, GET `/app/files/picker?for=attach&k=&a=&c=&uid=&etag=[&from=edit]`).
+- **Upload** of a folder (`file.upload`, `FilesPage.bar`) carries `arrow`
+  (s-files-8): **«Files»** (`file.upload`, `i-doc`) and **«Folder»**
+  (`file.upload.folder`, `i-file`) — both the same upload POST; which dialog
+  of the system opens is the client's.
+- **`/app/files/picker?for=attach`** — `FilePickerSheet` choosing a file: the
+  same tree, the files of every opened folder after its folders
+  (**`FileTreeNode.file`**, new, omitted when false; the `id` is the file's
+  address, without «/»). `&to=<id>` opens a folder or chooses a file; the
+  tree starts at the attachment folder. A read-only storage is a source like
+  any other (no `readOnly` on its nodes); subscribed folders are not shown;
+  no New folder. Actions: **Attach** (`files.picker.attach`, off with
+  «Choose a file in the tree.» until a file is chosen) and **Cancel** (back
+  to the record, or its edit with `from=edit`).
+- **`?op=attachfile&file=<address>&etag=…`** on
+  `/app/{calendar,tasks,notes}/{account}/{col}/{uid}/edit` (POST) — attaches
+  that file with If-Match of the version shown, and answers as the upload
+  attach does (303 to the record, or the record with a notice). Up to the
+  inline limit (2 MB, or the collection's smaller `max-resource-size`) the
+  file is read and written into the record exactly as an uploaded one;
+  larger, it is **not copied** — the record links to it where it lies, the
+  same link form (its address on its WebDAV server) a large upload gets in
+  the attachment folder. A file gone meanwhile: «Nothing was attached: the
+  file is no longer there».
+
+### For consumers
+
+Draw the arrow from `arrow` where it is present, and nothing where it is
+absent. «From Files» opens a sheet like the upload picker; open or choose a
+node by requesting the sheet's address with `&to=` set to its `id`.
+
 ## v0.2.61 — 2026-09-28
 
 Move and copy are a sheet as their frames draw it (from-typecase note 12),

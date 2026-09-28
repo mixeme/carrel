@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"slices"
@@ -16,14 +17,20 @@ import (
 // calendar there is no folder open, and putting a file in the first
 // collection at hand is not allowed — it is somebody's server. The folder
 // is the one chosen here last, else the attachment folder; the tree shows
-// it in its place, read-only storage visible and closed.
+// it in its place, read-only storage visible and closed. From Files of
+// Attach opens the same tree to choose a file (for=attach, below).
 
 func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
 		return
 	}
-	if r.FormValue("for") != "upload" {
+	switch r.FormValue("for") {
+	case "upload":
+	case "attach":
+		s.getAttachPicker(w, r, sess)
+		return
+	default:
 		s.notFound(w, r)
 		return
 	}
@@ -32,6 +39,62 @@ func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 		chosen, _ = s.folderAddress(sess, to)
 	}
 	s.writeMailSheet(w, r, s.uploadPicker(r, sess, chosen, ""))
+}
+
+// getAttachPicker is From Files of Attach (s-agenda-6, s-tasks-7): the same
+// tree, choosing a file for a record — k, a, c and uid name it, etag and
+// from travel on to its edit op. ?to= opens a folder or chooses a file; the
+// tree starts at the attachment folder. Attach posts ?op=attachfile to the
+// record, which answers as an upload does. Only a record Attach is offered
+// on opens it: a writable calendar collection of the person's.
+func (s *Server) getAttachPicker(w http.ResponseWriter, r *http.Request, sess *session.Session) {
+	q := r.URL.Query()
+	spec, known := recordKinds[q.Get("k")]
+	account, col, uid := q.Get("a"), q.Get("c"), q.Get("uid")
+	if !known || spec.component == "" || account == "" || col == "" || uid == "" {
+		s.notFound(w, r)
+		return
+	}
+	if !s.checkOwnership(w, r, sess, account, col, uid) {
+		return
+	}
+	c, ok := s.collectionOf(sess, spec, account, col)
+	if !ok || c.col.ReadOnly || c.feed != nil || c.cal == nil {
+		s.notFound(w, r)
+		return
+	}
+	blob := s.catalogOf(sess)
+	var at *fileCtx
+	name := ""
+	switch to := q.Get("to"); {
+	case to == "":
+		at = s.savedFolder(sess, blob)
+	default:
+		if fc, dir, ok := s.fileAddress(sess, to); ok && dir {
+			at = fc
+		} else if ok && len(fc.segs) > 0 {
+			at, name = fc.at(fc.segs[:len(fc.segs)-1]), fc.segs[len(fc.segs)-1]
+		}
+	}
+	if at != nil && at.col.Feed {
+		at, name = nil, ""
+	}
+	etag, from := q.Get("etag"), q.Get("from")
+	sheet := view.FilePickerSheet{
+		Purpose: text(fmt.Sprintf("Attach a file that is in Files already. Up to %s it is written into the record, as a file from this computer is; a larger one stays where it lies, and the record keeps a link to it.", sizeText(attachLimit(c.col)))),
+		Tree:    *s.sourceTree(r.Context(), blob, at, name),
+	}
+	attach := view.Action{ID: "files.picker.attach", Label: "Attach", Icon: "i-up", Method: "POST"}
+	if name == "" {
+		attach.Reason = "Choose a file in the tree."
+	} else {
+		op := s.opQuery("attachfile", etag, from)
+		op.Set("file", sheet.Tree.Chosen)
+		attach.Enabled, attach.Href = true, s.postQuery(c.recordPath(uid)+"/edit", op)
+	}
+	sheet.Actions = []view.Action{attach,
+		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route(attachBack(c, uid, from))}}
+	s.writeMailSheet(w, r, sheet)
 }
 
 // postFilesPicker takes the folder chosen in the tree and remembers it for

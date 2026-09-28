@@ -8,6 +8,24 @@
       "method": "GET"
     },
     {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026op=attach",
+          "icon": "i-up",
+          "id": "attach.add",
+          "label": "From this computer",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?a=a-nc-home\u0026c=lichnyj\u0026etag=e6\u0026for=attach\u0026k=calendar\u0026uid=8f1c-4a02-b7d3",
+          "icon": "i-file",
+          "id": "attach.files",
+          "label": "From Files",
+          "method": "GET"
+        }
+      ],
       "enabled": true,
       "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3/edit?etag=e6\u0026op=attach",
       "icon": "i-up",

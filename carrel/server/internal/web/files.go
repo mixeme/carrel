@@ -658,8 +658,16 @@ func (s *Server) fileMenu(c *fileCtx, segs []string, e file.Entry) []view.MenuIt
 // publishes nothing (s-files-1): a folder is published from its row in the
 // folder above.
 func (s *Server) folderActions(c *fileCtx, segs []string, picked []file.Entry) []view.Action {
+	// Upload has an arrow (s-files-8): Files, which the button is, and
+	// Folder — the same POST, a folder arriving as files with their paths;
+	// only the dialog of the system differs, and that is the client's.
+	upload := writeAction(c, view.Action{ID: "file.upload", Label: "Upload", Icon: "i-up", Href: s.route(c.href("upload", segs, true)), Method: "POST", Enabled: true})
+	files, folder := upload, upload
+	files.Label, files.Icon = "Files", "i-doc"
+	folder.ID, folder.Label, folder.Icon = "file.upload.folder", "Folder", "i-file"
+	upload.Arrow = []view.MenuItem{{Action: files}, {Action: folder}}
 	actions := []view.Action{
-		writeAction(c, view.Action{ID: "file.upload", Label: "Upload", Icon: "i-up", Href: s.route(c.href("upload", segs, true)), Method: "POST", Enabled: true}),
+		upload,
 		writeAction(c, view.Action{ID: "folder.new", Label: "New folder", Icon: "i-plus", Href: s.route(c.href("mkcol", segs, true)), Method: "POST", Enabled: true}),
 	}
 	if len(picked) == 0 {

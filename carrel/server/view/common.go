@@ -21,6 +21,9 @@ type Action struct {
 	Enabled bool   `json:"enabled"`
 	On      bool   `json:"on,omitempty"`     // включённый переключатель: флажок ленты, сегмент «сейчас показано»
 	Reason  Text   `json:"reason,omitempty"` // почему выключено; пусто, если включено
+	// Arrow — стрелка кнопки (.m-split): пункты её меню; сама кнопка — то,
+	// что делается без стрелки. Пусто — кнопка без стрелки
+	Arrow []MenuItem `json:"arrow,omitempty"`
 }
 
 type MenuItem struct {

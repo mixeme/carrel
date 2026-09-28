@@ -2096,6 +2096,9 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	case op == "attach" && c.cal != nil:
 		s.postAttach(w, r, c, uid)
 		return
+	case op == "attachfile" && c.cal != nil:
+		s.postAttachFile(w, r, c, uid)
+		return
 	case op == "detach" && c.cal != nil:
 		s.postDetach(w, r, c, uid)
 		return

@@ -97,6 +97,24 @@
   "meta": {
     "actions": [
       {
+        "arrow": [
+          {
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026op=attach",
+            "icon": "i-up",
+            "id": "attach.add",
+            "label": "From this computer",
+            "method": "POST"
+          },
+          {
+            "enabled": true,
+            "href": "/app/files/picker?a=a-nc-home\u0026c=zapisi\u0026etag=e16\u0026for=attach\u0026k=notes\u0026uid=5c81-77aa-0d64",
+            "icon": "i-file",
+            "id": "attach.files",
+            "label": "From Files",
+            "method": "GET"
+          }
+        ],
         "enabled": true,
         "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64/edit?etag=e16\u0026op=attach",
         "icon": "i-up",

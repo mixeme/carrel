@@ -18,6 +18,7 @@ import (
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/provider/file"
+	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
@@ -633,27 +634,39 @@ func (s *Server) destination(c *fileCtx, q url.Values) (*fileCtx, bool) {
 // folderAddress is the folder a href of the files section names — a node of
 // the tree (C-6.7) — in a live file collection of the catalog.
 func (s *Server) folderAddress(sess *session.Session, href string) (*fileCtx, bool) {
+	dest, dir, ok := s.fileAddress(sess, href)
+	if !ok || !dir {
+		return nil, false
+	}
+	return dest, true
+}
+
+// fileAddress is the file or the folder a href of the files section names,
+// in a live file collection of the catalog; dir says which.
+func (s *Server) fileAddress(sess *session.Session, href string) (*fileCtx, bool, bool) {
 	u, err := url.Parse(href)
 	if err != nil || href == "" {
-		return nil, false
+		return nil, false, false
 	}
 	escaped := u.EscapedPath()
 	if s.basePath != "" {
 		rest, ok := strings.CutPrefix(escaped, s.basePath)
 		if !ok {
-			return nil, false
+			return nil, false, false
 		}
 		escaped = rest
 	}
 	account, col, segs, dir, ok := parseFileAddress(escaped, "")
-	if !ok || !dir {
-		return nil, false
-	}
-	dest, ok := s.fileCollection(sess, account, col)
 	if !ok {
-		return nil, false
+		return nil, false, false
 	}
-	return dest.at(segs), true
+	at, ok := s.fileCollection(sess, account, col)
+	if !ok {
+		return nil, false, false
+	}
+	at = at.at(segs)
+	at.dir = dir
+	return at, dir, true
 }
 
 // intoItself reports whether a folder would go under itself on its own
@@ -772,30 +785,46 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 // collection of the catalog as a root, read-only ones shown and marked, and
 // the folders on the way to the chosen one opened, one PROPFIND a level.
 func (s *Server) fileTree(ctx context.Context, c *fileCtx, chosen *fileCtx) *view.FileTree {
+	return s.tree(ctx, c.blob, chosen, "", false)
+}
+
+// sourceTree is the tree a file is chosen from (From Files of Attach): the
+// same roots and folders, and the files of every folder opened after its
+// folders. A read-only storage is a source like any other, so nothing in it
+// is closed; a subscribed folder is no source (postAttachFile) and is not
+// shown. name is the file chosen in the folder at, "" when none is.
+func (s *Server) sourceTree(ctx context.Context, blob sealed.Blob, at *fileCtx, name string) *view.FileTree {
+	return s.tree(ctx, blob, at, name, true)
+}
+
+func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, name string, files bool) *view.FileTree {
 	tree := &view.FileTree{}
-	for _, col := range c.blob.Collections {
-		conn, ok := c.blob.Connection(col.AccountID)
-		if !ok || col.Gone || !col.Has(view.KindFile) {
+	for _, col := range blob.Collections {
+		conn, ok := blob.Connection(col.AccountID)
+		if !ok || col.Gone || !col.Has(view.KindFile) || (files && col.Feed) {
 			continue
 		}
 		node := view.FileTreeNode{
 			ID:       s.route(fileHref(conn.ID, col.Path, "", nil, true)),
 			Label:    collectionLabel(col),
 			Stamp:    stamp(connLabel(conn), collectionLabel(col)),
-			ReadOnly: col.ReadOnly,
+			ReadOnly: col.ReadOnly && !files,
 		}
 		if chosen != nil && chosen.conn.ID == conn.ID && chosen.col.Path == col.Path {
-			node.Expanded, node.Children = true, s.treeLevel(ctx, chosen, nil)
+			node.Expanded, node.Children = true, s.treeLevel(ctx, chosen, nil, files)
 		}
 		tree.Nodes = append(tree.Nodes, node)
 	}
-	if chosen != nil {
+	switch {
+	case chosen != nil && name != "":
+		tree.Chosen = s.route(chosen.href("", append(slices.Clone(chosen.segs), name), false))
+	case chosen != nil:
 		tree.Chosen = s.route(chosen.href("", chosen.segs, true))
 	}
 	return tree
 }
 
-func (s *Server) treeLevel(ctx context.Context, dest *fileCtx, at []string) []view.FileTreeNode {
+func (s *Server) treeLevel(ctx context.Context, dest *fileCtx, at []string, files bool) []view.FileTreeNode {
 	folder, err := dest.path(at, true)
 	if err != nil {
 		return nil
@@ -804,24 +833,35 @@ func (s *Server) treeLevel(ctx context.Context, dest *fileCtx, at []string) []vi
 	if err != nil {
 		return nil
 	}
-	var dirs []string
+	var dirs, names []string
 	for _, e := range entries {
-		if e.Dir {
+		switch {
+		case e.Dir:
 			dirs = append(dirs, e.Name)
+		case files:
+			names = append(names, e.Name)
 		}
 	}
-	slices.SortFunc(dirs, func(a, b string) int { return strings.Compare(strings.ToLower(a), strings.ToLower(b)) })
+	byName := func(a, b string) int { return strings.Compare(strings.ToLower(a), strings.ToLower(b)) }
+	slices.SortFunc(dirs, byName)
+	slices.SortFunc(names, byName)
 	if len(dirs) > s.cfg.FilesMaxEntries {
 		dirs = dirs[:s.cfg.FilesMaxEntries]
+	}
+	if room := s.cfg.FilesMaxEntries - len(dirs); len(names) > room {
+		names = names[:room]
 	}
 	var out []view.FileTreeNode
 	for _, name := range dirs {
 		segs := append(slices.Clone(at), name)
-		node := view.FileTreeNode{ID: s.route(dest.href("", segs, true)), Label: name, ReadOnly: dest.col.ReadOnly}
+		node := view.FileTreeNode{ID: s.route(dest.href("", segs, true)), Label: name, ReadOnly: dest.col.ReadOnly && !files}
 		if len(dest.segs) > len(at) && dest.segs[len(at)] == name {
-			node.Expanded, node.Children = true, s.treeLevel(ctx, dest, segs)
+			node.Expanded, node.Children = true, s.treeLevel(ctx, dest, segs, files)
 		}
 		out = append(out, node)
+	}
+	for _, name := range names {
+		out = append(out, view.FileTreeNode{ID: s.route(dest.href("", append(slices.Clone(at), name), false)), Label: name, File: true})
 	}
 	return out
 }

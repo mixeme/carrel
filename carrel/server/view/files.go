@@ -71,10 +71,13 @@ type FileTreeNode struct {
 	ReadOnly bool           `json:"readOnly"`
 	Children []FileTreeNode `json:"children"`
 	Expanded bool           `json:"expanded"`
+	// File — узел-файл дерева, из которого выбирают файл (From Files у
+	// Attach); у дерева папок таких узлов нет
+	File bool `json:"file,omitempty"`
 }
 
 type FilePickerSheet struct {
-	Purpose Text     `json:"purpose"` // зачем выбирают: папка вложений, назначение копии
+	Purpose Text     `json:"purpose"` // зачем выбирают: папка вложений, назначение копии, файл для вложения
 	Tree    FileTree `json:"tree"`
 	Actions []Action `json:"actions"`
 }

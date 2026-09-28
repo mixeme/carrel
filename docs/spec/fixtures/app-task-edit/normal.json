@@ -29,6 +29,24 @@
         "method": "GET"
       },
       {
+        "arrow": [
+          {
+            "enabled": true,
+            "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e13\u0026from=edit\u0026op=attach",
+            "icon": "i-up",
+            "id": "attach.add",
+            "label": "From this computer",
+            "method": "POST"
+          },
+          {
+            "enabled": true,
+            "href": "/app/files/picker?a=a-nc-home\u0026c=dela\u0026etag=e13\u0026for=attach\u0026from=edit\u0026k=tasks\u0026uid=aa10-77bc-0e31",
+            "icon": "i-file",
+            "id": "attach.files",
+            "label": "From Files",
+            "method": "GET"
+          }
+        ],
         "enabled": true,
         "href": "/app/tasks/a-nc-home/dela/aa10-77bc-0e31/edit?etag=e13\u0026from=edit\u0026op=attach",
         "icon": "i-up",

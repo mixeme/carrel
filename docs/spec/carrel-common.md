@@ -377,7 +377,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже |
 | `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage` |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение |
-| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20) |
+| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage` |
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage` |
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
@@ -423,7 +423,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue` |
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | фрагмент | `FilesPage` |
 | `/app/files/{account}/{col}/op/{path…}` | POST | вход | фрагмент, лист | `FileOpSheet` |
-| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet` |
+| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload` — папка загрузки из меню создания; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл |
 | `/app/files/published` | GET | вход | страница | `PublishedLinksPage` |
 | `/app/attach/{account}/{col}/{path…}` | GET | вход | поток | — |
 
@@ -541,7 +541,14 @@ type Action struct {
     Enabled bool
     On      bool    // включено: открытый раздел рейла, выбранный сегмент, включённый флажок ленты
     Reason  Text    // почему выключено; пусто, если включено
+    Arrow   []MenuItem // стрелка кнопки (.m-split): пункты её меню; пусто — без стрелки
 }
+// Кнопка со стрелкой — одно действие: само Action — то, что делает кнопка,
+// Arrow — меню стрелки в порядке кадра. Первый пункт повторяет кнопку (тот же
+// ID, адрес и метод, подпись кадра), остальные — другие пути к тому же:
+// Attach — «From this computer» и «From Files» (s-agenda-6, s-tasks-7),
+// Upload полосы файлов — «Files» и «Folder» (s-files-8; оба — та же
+// загрузка, разнится только диалог системы, `file.upload.folder`).
 // Недоступное действие показывается выключенным и с причиной; доступное
 // причины не несёт — пояснение у работающей кнопки — строка, которую рисует
 // кадр (DeleteNote, DangerNote, Note), а не Reason (записки 11 и 17 Typecase,
@@ -1465,16 +1472,21 @@ type NameClash struct { Name Text; Options []Action } // Skip · Keep both · Ov
 // name заводит папку в выбранной и отвечает тем же листом, где выбрана новая;
 // выбранная только для чтения — выключена с причиной. У дерева страницы nil.
 type FileTree struct { Nodes []FileTreeNode; Chosen string; New *Action }
+// Дерево, из которого выбирают файл (From Files у Attach), показывает и
+// файлы: File — узел-файл, он выбирается и не раскрывается; ID — его адрес в
+// разделе файлов без «/» в конце. ReadOnly — узел недоступен для этой цели:
+// у дерева-источника его нет, читать можно и из хранилища только для чтения.
 type FileTreeNode struct {
     ID, Label string
     Stamp     Stamp
     ReadOnly  bool
     Children  []FileTreeNode
     Expanded  bool
+    File      bool
 }
 
 type FilePickerSheet struct {
-    Purpose Text // зачем выбирают: папка вложений, назначение копии
+    Purpose Text // зачем выбирают: папка вложений, назначение копии, файл для вложения
     Tree    FileTree
     Actions []Action
 }

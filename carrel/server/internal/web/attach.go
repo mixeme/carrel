@@ -32,9 +32,11 @@ import (
 // goes to the attachment folder chosen once in settings, named after the date
 // and title of the record and its own name, and the record keeps a link. An
 // attachment another client wrote stays as it was stored, whatever its size.
+// A file chosen in Files (From Files) follows the same rule, except that a
+// large one is not copied: the record links to it where it lies.
 // Attaching and removing are writes of their own on the edit address
-// (?op=attach, ?op=detach) with If-Match of the version the page showed, the
-// way a contact photo is (S-13); no new route. A file is opened through
+// (?op=attach, ?op=attachfile, ?op=detach) with If-Match of the version the
+// page showed, the way a contact photo is (S-13). A file is opened through
 // /app/attach/: an inline one from its record, a link only into a file
 // collection of the catalog; any other link is shown and never fetched.
 
@@ -279,9 +281,23 @@ func (s *Server) opQuery(op, etag, from string) url.Values {
 	return q
 }
 
-// attachAction adds a file to the record: a multipart POST with the file.
+// attachAction adds a file to the record: the button is a multipart POST of
+// a file from this computer. Its arrow (s-agenda-6, s-tasks-7) holds that
+// again and From Files — the tree of Files choosing a file that lies there
+// already (/app/files/picker?for=attach), written by the same rule.
 func (s *Server) attachAction(c *collectionCtx, uid, etag, from string) view.Action {
-	return view.Action{ID: "attach.add", Label: "Attach", Icon: "i-up", Href: s.postQuery(c.recordPath(uid)+"/edit", s.opQuery("attach", etag, from)), Method: "POST", Enabled: true}
+	a := view.Action{ID: "attach.add", Label: "Attach", Icon: "i-up", Href: s.postQuery(c.recordPath(uid)+"/edit", s.opQuery("attach", etag, from)), Method: "POST", Enabled: true}
+	here := a
+	here.Label = "From this computer"
+	q := url.Values{"for": {"attach"}, "k": {c.spec.segment}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}, "etag": {etag}}
+	if from != "" {
+		q.Set("from", from)
+	}
+	a.Arrow = []view.MenuItem{
+		{Action: here},
+		{Action: view.Action{ID: "attach.files", Label: "From Files", Icon: "i-file", Href: s.postQuery("/app/files/picker", q), Method: "GET", Enabled: true}},
+	}
+	return a
 }
 
 // detachAction takes one attachment off the record. A link goes and its file
@@ -344,10 +360,10 @@ func firstFile(r *http.Request) (*multipart.Part, error) {
 	}
 }
 
-// postAttach writes one file into the record or, when the finished object
-// would be larger than the limit, into the attachment folder with a link in
-// the record. A file put in the folder for a write the server then refuses is
-// taken away again: nothing points at it.
+// postAttach writes one file from this computer into the record or, when
+// the finished object would be larger than the limit, into the attachment
+// folder with a link in the record. A file put in the folder for a write the
+// server then refuses is taken away again: nothing points at it.
 func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
 	ctx := r.Context()
 	q := r.URL.Query()
@@ -376,50 +392,162 @@ func (s *Server) postAttach(w http.ResponseWriter, r *http.Request, c *collectio
 	if mediaType == "application/octet-stream" {
 		mediaType = fileType(name, "")
 	}
-	limit := attachLimit(c.col)
-	head, err := io.ReadAll(io.LimitReader(part, limit+1))
+	head, err := io.ReadAll(io.LimitReader(part, attachLimit(c.col)+1))
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
 			Role: view.NoticeAlert, Title: "The upload broke off", Body: "Nothing was attached. Send the file again.",
 		}))
 		return
 	}
+	// A file that ended inside what was read travels in the record. Past it,
+	// the only length this path can know is the one the page sent in front
+	// of the files (S-17.1).
+	sent, placed, notice := s.attached(ctx, c, obj, attachFile{
+		name: name, mediaType: mediaType, head: head, rest: part, size: declaredSize(r, name),
+	})
+	s.writeAttached(w, r, c, uid, obj, etag, back, sent, placed, notice)
+}
 
-	var sent *model.Object
-	if int64(len(head)) <= limit {
-		sent = s.inlineTrial(c, obj, name, mediaType, head, limit)
+// attachFile is a file on its way into a record: its name and type, and
+// what was read of it — at most one byte past the limit; nil when its size
+// said it could not fit. An upload has the rest of its body; a file that
+// lies in Files already has link, its address as another client opens it.
+type attachFile struct {
+	name, mediaType string
+	head            []byte
+	rest            io.Reader // an upload past head; nil for a file of Files
+	size            int64     // the length when known, else -1
+	link            string    // where a file of Files lies; "" for an upload
+}
+
+// attached is the record with the file in it, by the one rule of S-20
+// whatever the file came from: inside when the finished object stays within
+// the limit, else a link — to where a file of Files lies, or to the copy of
+// an upload put first into the attachment folder. placed is that copy, taken
+// back when the write is refused; a notice says why nothing was done.
+func (s *Server) attached(ctx context.Context, c *collectionCtx, obj *model.Object, in attachFile) (*model.Object, *placedFile, *view.Notice) {
+	limit := attachLimit(c.col)
+	if in.head != nil && int64(len(in.head)) <= limit {
+		if sent := s.inlineTrial(c, obj, in.name, in.mediaType, in.head, limit); sent != nil {
+			return sent, nil, nil
+		}
 	}
+	uri, size := in.link, in.size
 	var placed *placedFile
-	if sent == nil {
-		// A file that ended inside what was read never gets here — it travels
-		// in the record. So the only length this path can know is the one the
-		// page sent in front of the files (S-17.1).
-		size := declaredSize(r, name)
+	if uri == "" {
 		var notice *view.Notice
-		placed, notice = s.placeAttachment(ctx, c, obj, name, mediaType, io.MultiReader(bytes.NewReader(head), part), limit, size)
+		placed, notice = s.placeAttachment(ctx, c, obj, in.name, in.mediaType, io.MultiReader(bytes.NewReader(in.head), in.rest), limit, in.size)
 		if notice != nil {
-			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, *notice))
-			return
+			return nil, nil, notice
 		}
-		if sent, err = patched(obj, cal.AttachLink(obj, placed.uri, name, mediaType, placed.size)); err != nil {
+		uri, size = placed.uri, placed.size
+	}
+	sent, err := patched(obj, cal.AttachLink(obj, uri, in.name, in.mediaType, size))
+	if err != nil {
+		if placed != nil {
 			placed.remove(ctx)
-			s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, attachFailure(s.writeFailure(c, "PUT", obj.Path, err))))
+		}
+		n := attachFailure(s.writeFailure(c, "PUT", obj.Path, err))
+		return nil, nil, &n
+	}
+	return sent, placed, nil
+}
+
+// postAttachFile attaches a file that lies in Files already (From Files):
+// ?file= names it by its address in the files section. It is read only when
+// its size lets it fit in the record, and never more than one byte past the
+// limit; a larger one is linked where it lies, and nothing is copied. The
+// storage may be read-only — it is only read. A subscribed folder is no
+// source: a link to its file would carry someone's secret address.
+func (s *Server) postAttachFile(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string) {
+	ctx := r.Context()
+	q := r.URL.Query()
+	etag, back := strings.TrimSpace(q.Get("etag")), attachBack(c, uid, q.Get("from"))
+	src, dir, chosen := s.fileAddress(c.sess, q.Get("file"))
+	obj, err := c.find(ctx, uid)
+	notChosen := view.Notice{Role: view.NoticeAlert, Title: "No file was chosen", Body: "Choose the file to attach in Files and try again."}
+	switch {
+	case notFoundErr(err):
+		s.notFound(w, r)
+		return
+	case err != nil:
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
+		return
+	case !chosen || dir || src.col.Feed || len(src.segs) == 0:
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, notChosen))
+		return
+	case !sameVersion(etag, obj.ETag):
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, changedNotice("nothing was attached")))
+		return
+	}
+	p, err := src.path(src.segs, false)
+	if err != nil {
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, notChosen))
+		return
+	}
+	failed := func(method string, err error) {
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, s.fileFailure(src, "Nothing was attached", method, p, err)))
+	}
+	e, err := src.files.Stat(ctx, p)
+	switch {
+	case file.NotFound(err):
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+			Role: view.NoticeAlert, Title: "Nothing was attached: the file is no longer there",
+			Body: "It was moved or deleted after the tree was read. Choose it again.",
+		}))
+		return
+	case err != nil:
+		failed("PROPFIND", err)
+		return
+	case e.Dir:
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, notChosen))
+		return
+	}
+	name := src.segs[len(src.segs)-1]
+	in := attachFile{name: name, mediaType: fileType(name, e.Type), size: e.Size, link: fileURI(src.conn.Server, p)}
+	if limit := attachLimit(c.col); e.Size <= limit {
+		body, _, err := src.files.Get(ctx, p, nil)
+		if err != nil {
+			failed("GET", err)
 			return
 		}
+		in.head, err = io.ReadAll(io.LimitReader(body, limit+1))
+		_ = body.Close()
+		if err != nil {
+			failed("GET", err)
+			return
+		}
+		if int64(len(in.head)) > limit {
+			// The server said less than it holds: the length is not known.
+			in.size = -1
+		}
+	}
+	sent, placed, notice := s.attached(ctx, c, obj, in)
+	s.writeAttached(w, r, c, uid, obj, etag, back, sent, placed, notice)
+}
+
+// writeAttached writes the record an attachment made, with If-Match of the
+// version the page showed, and answers where the page came from. A refusal
+// takes back a file put into the attachment folder for it.
+func (s *Server) writeAttached(w http.ResponseWriter, r *http.Request, c *collectionCtx, uid string, obj *model.Object, etag, back string, sent *model.Object, placed *placedFile, notice *view.Notice) {
+	ctx := r.Context()
+	if notice != nil {
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, *notice))
+		return
 	}
 	sent.ETag = etag
 	if err := c.update(ctx, sent); err != nil {
 		if placed != nil {
 			placed.remove(ctx)
 		}
-		notice := attachFailure(s.writeFailure(c, "PUT", obj.Path, err))
+		n := attachFailure(s.writeFailure(c, "PUT", obj.Path, err))
 		if dav.IsStatus(err, http.StatusPreconditionFailed) {
-			notice = changedNotice(nothing)
+			n = changedNotice("nothing was attached")
 		}
 		if current, ferr := c.find(ctx, uid); ferr == nil {
 			obj = current
 		}
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, notice))
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, n))
 		return
 	}
 	s.finishWrite(w, r, c, uid, sent, back)
