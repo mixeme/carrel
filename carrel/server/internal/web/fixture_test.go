@@ -773,18 +773,19 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 		// A feed's stamp is its host, and the stand's has a port of its own.
 		s = strings.ReplaceAll(s, strings.TrimPrefix(feed.URL, "http://"), u.Host)
 	}
-	s = regexp.MustCompile(`t-[0-9A-Z]{10}`).ReplaceAllString(s, "t-task")
-	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
 	// The secret of an invitation is issued at the moment it is made, and
 	// it stands inside an address rather than alone, so the rule for the
-	// CSRF does not reach it.
+	// CSRF does not reach it. Secrets go first and whole: a random one can
+	// hold a run that looks like an identifier below.
 	s = regexp.MustCompile(`/invite/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/invite/invite-token")
 	s = regexp.MustCompile(`/forgot/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/forgot/reset-token")
+	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
+	s = regexp.MustCompile(`t-[0-9A-Z]{10}`).ReplaceAllString(s, "t-task")
+	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
 	// A group of duplicates is named by a digest of the records in it, and
 	// those carry the account identifier, which is issued.
 	s = regexp.MustCompile(`g=[0-9a-f]{32}`).ReplaceAllString(s, "g=group")
 	s = regexp.MustCompile(`"groupID": ?"[0-9a-f]{32}"`).ReplaceAllString(s, `"groupID":"group"`)
-	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
 	// When the run itself did something — started this session, created
 	// this account, wrote this journal line — the stamp is the wall clock's
 	// and cannot be frozen: a session begun on the day of the frames would
@@ -1676,4 +1677,19 @@ func taskOf(t *testing.T, rec *httptest.ResponseRecorder) string {
 		return ""
 	}
 	return body.Poll.TaskID
+}
+
+// An issued secret is random, and a run of it can look like an identifier
+// (u-…, t-…). The secrets are folded first, whole, or a token that happens to
+// hold such a run is shortened by the identifier's rule and no longer
+// recognised: the fixture then shows the token itself, one run in many.
+func TestNormaliseFoldsASecretBeforeItsInsides(t *testing.T) {
+	a := &mockupApp{}
+	token := "KvG1XJ8VuA0K4PAqez53u-ABCDEFGHJKiuu-9xLZMQ"
+	token += strings.Repeat("x", 43-len(token))
+	body := `{"csrf":"` + token + `","invite":"/invite/` + token + `","task":"t-ABCDEFGHJK"}`
+	got := a.normalise(t, []byte(body))
+	if got["csrf"] != "csrf" || got["invite"] != "/invite/invite-token" || got["task"] != "t-task" {
+		t.Errorf("normalised = %v", got)
+	}
 }
