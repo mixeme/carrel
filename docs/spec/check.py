@@ -80,10 +80,6 @@ for name, text in [("common", common), ("server", server), ("client", client)]:
             # Рубеж, не говорящий, что в него не входит, — рубеж, о котором спорят.
             if name == "common" and "в рубеж **не входит**" in row:
                 continue
-            # Карта кадров (U-5.4) обязана назвать классы, которые браузерному
-            # продукту не принадлежат, — иначе карта неполна и 3b не проходит.
-            if name == "client" and "Не принадлежит браузерному продукту" in row:
-                continue
             leak.append("%s:%d: %s" % (name, line, row[:70]))
 check("5. в четырёх файлах нет настольного приложения", sorted(set(leak)))
 
