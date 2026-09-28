@@ -38,12 +38,13 @@
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": ""
+            "value": "",
+            "placeholder": "a-z 0-9 . _ -"
           },
           {
             "error": "",
             "extra": null,
-            "hint": "For getting back in if the password is lost. It is not confirmed yet: the account page sends the letter.",
+            "hint": "",
             "kind": "email",
             "label": "Email",
             "name": "email",
@@ -51,12 +52,13 @@
             "readOnly": false,
             "required": false,
             "value": "",
-            "labelAside": "(optional)"
+            "labelAside": "(optional)",
+            "placeholder": "—"
           },
           {
             "error": "",
             "extra": null,
-            "hint": "At least 8 characters.",
+            "hint": "",
             "kind": "password",
             "label": "Password",
             "name": "password",
@@ -81,7 +83,15 @@
       }
     ]
   },
-  "lede": "This instance has no accounts yet. Choose a login and password for the first administrator.",
-  "notices": [],
-  "title": "Create administrator"
+  "lede": "The account you create here is the first one, and it can manage everyone else.",
+  "notices": [
+    {
+      "actions": [],
+      "body": "Your password is the only key to your own data. Nobody — including this server — can recover it for you.",
+      "details": null,
+      "role": "alert",
+      "title": ""
+    }
+  ],
+  "title": "Set up Carrel"
 }

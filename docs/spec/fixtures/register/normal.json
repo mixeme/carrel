@@ -63,13 +63,40 @@
             "readOnly": false,
             "required": true,
             "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "password",
+            "label": "Repeat password",
+            "name": "password2",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
           }
         ]
       }
     ]
   },
-  "lede": "Registration is open on this instance.",
-  "notices": [],
+  "lede": "A confirmation link will be sent to the address you give; the account cannot be used until you open it.",
+  "notices": [
+    {
+      "actions": [],
+      "body": "Your password is the only key to your own data. Nobody — including this server — can recover it for you.",
+      "details": null,
+      "role": "alert",
+      "title": ""
+    }
+  ],
   "sent": false,
-  "title": "Create account"
+  "title": "Create an account",
+  "signIn": {
+    "enabled": true,
+    "href": "/login",
+    "id": "register.login",
+    "label": "Already have an account? Sign in",
+    "method": "GET"
+  }
 }

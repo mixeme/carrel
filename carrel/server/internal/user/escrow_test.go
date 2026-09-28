@@ -138,12 +138,11 @@ func TestForgotEscrowRequiresAdminWhenDeposited(t *testing.T) {
 	if err := svc.CompleteInvite(ctx, secret, "bobpass1234"); err != nil {
 		t.Fatal(err)
 	}
-	_, _, asked, _, err := svc.ForgotRequest(ctx, "bob")
-	if err != nil {
-		t.Fatal(err)
+	if _, hasMail, canAsk := svc.ForgotLookup("bob"); !hasMail || !canAsk {
+		t.Fatalf("deposited account: hasMail=%v canAsk=%v, want the administrator offered on /forgot", hasMail, canAsk)
 	}
-	if !asked {
-		t.Fatal("deposited account should ask administrator on /forgot")
+	if asked, err := svc.ForgotAsk(ctx, "bob"); err != nil || !asked {
+		t.Fatalf("ForgotAsk = %v, %v", asked, err)
 	}
 }
 

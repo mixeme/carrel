@@ -122,10 +122,13 @@ type EscrowWithdrawSheet struct {
 	Actions []Action `json:"actions"` // Withdraw my deposited key · Cancel
 }
 
+// PasswordPage — смена пароля (account-3), обычная и вынужденная.
 type PasswordPage struct {
 	Shell
-	Form    Form   `json:"form"`
-	Warning Notice `json:"warning"`
+	Form    Form    `json:"form"`
+	Warning Notice  `json:"warning"` // вынужденная: вход по временному паролю
+	Note    Text    `json:"note"`    // строка под полями: ключ тот же, меняется обёртка
+	Back    *Action `json:"back"`    // «Back to settings»; nil при вынужденной — идти некуда
 }
 
 type UnlockSheet struct {
@@ -244,13 +247,7 @@ type ProxyDevice struct {
 
 type BackupPage struct {
 	Shell
-	Subtitle Text `json:"subtitle"` // на странице задания: «Job · last copy 2 days ago»; пусто на списке
-	// Local — экземпляр локальный: адрес в строке внешнего запуска отвечает
-	// только изнутри своей сети (значок «local» у отметки «On a clock of
-	// your own», s-backup-2). Признак экземпляра, не задания: объявленного
-	// адреса снаружи нет (CARREL_PUBLIC_URL) или он — имя либо адрес
-	// частной сети
-	Local      bool         `json:"local"`
+	Subtitle   Text         `json:"subtitle"` // на странице задания: «Job · last copy 2 days ago»; пусто на списке
 	Jobs       []BackupJob  `json:"jobs"`
 	Add        Form         `json:"add"`        // новое задание; на странице задания (s-backup-2) — оно само
 	Delete     *Action      `json:"delete"`     // внизу страницы задания; nil — на списке и у нового
@@ -269,6 +266,10 @@ type BackupJob struct {
 	// Gitea» в рубрике When (s-backup-2): On — внешний запуск включён;
 	// снятая выключает его, отдельного выключателя нет
 	Clock Action `json:"clock"`
+	// ClockHint — подсказка под отметкой Clock, и у снятой тоже: цена
+	// включения — ключ задания хранится под ключом сервера (s-backup-2,
+	// S-24.4)
+	ClockHint Text `json:"clockHint"`
 	// Trigger — карточка строки внешнего запуска; nil, пока он выключен:
 	// показывать и обновлять нечего (решение владельца, записка 19)
 	Trigger *TriggerBlock `json:"trigger"`

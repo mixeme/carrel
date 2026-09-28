@@ -49,7 +49,8 @@
     ],
     "signed": {
       "login": "mix",
-      "instance": "carrel.example"
+      "instance": "carrel.example",
+      "local": true
     },
     "user": [
       {

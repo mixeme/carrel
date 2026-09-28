@@ -26,6 +26,12 @@ type TopBar struct {
 type SignedIn struct {
 	Login    Text `json:"login"`    // имя, под которым вошли
 	Instance Text `json:"instance"` // имя экземпляра, S-26
+	// Local — экземпляр локальный: адреса, которые он выдаёт, отвечают только
+	// изнутри своей сети (значок «local» у davloom, выданных ссылок, ссылки
+	// устройства и отметки «On a clock of your own» — s-davloom-1,
+	// s-publish-1, s-plan-1, s-backup-2). Объявленного адреса снаружи
+	// (CARREL_PUBLIC_URL) нет или он — имя либо адрес частной сети
+	Local bool `json:"local"`
 }
 
 type Refresh struct {

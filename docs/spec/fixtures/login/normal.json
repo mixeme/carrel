@@ -1,11 +1,4 @@
 {
-  "about": {
-    "enabled": true,
-    "href": "/about",
-    "id": "login.about",
-    "label": "About",
-    "method": "GET"
-  },
   "forgot": {
     "enabled": true,
     "href": "/forgot",
@@ -72,5 +65,7 @@
   },
   "lede": "One desk. Every server.",
   "notices": [],
-  "title": "Sign in to carrel.example"
+  "title": "Sign in to carrel.example",
+  "register": null,
+  "tagline": "Calendars, contacts, tasks, notes and files — one place."
 }

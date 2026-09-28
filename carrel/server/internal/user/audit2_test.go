@@ -264,9 +264,12 @@ func TestForgotWipeTwoSteps(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	tok, sent, asked, hasMail, err := f.svc.ForgotRequest(context.Background(), "ADMIN@example.com")
-	if err != nil || !sent || asked || !hasMail {
-		t.Fatalf("ForgotRequest = sent=%v asked=%v hasMail=%v err=%v", sent, asked, hasMail, err)
+	if login, hasMail, canAsk := f.svc.ForgotLookup("ADMIN@example.com"); login != "admin" || !hasMail || canAsk {
+		t.Fatalf("ForgotLookup = %q hasMail=%v canAsk=%v", login, hasMail, canAsk)
+	}
+	tok, err := f.svc.ForgotRequest(context.Background(), "ADMIN@example.com")
+	if err != nil || tok == "" {
+		t.Fatalf("ForgotRequest = %q, %v", tok, err)
 	}
 	if login, step, ok := f.svc.ForgotWipeState(context.Background(), tok); !ok || login != "admin" || step != "confirm" {
 		t.Fatalf("state before wipe = %q %q %v", login, step, ok)
@@ -308,7 +311,7 @@ func TestForgotLinkExpires(t *testing.T) {
 	f := newFixture(t)
 	f.setupAdmin(t)
 	f.confirmEmailOf(t, "admin", "admin@example.com")
-	tok, _, _, _, err := f.svc.ForgotRequest(context.Background(), "admin")
+	tok, err := f.svc.ForgotRequest(context.Background(), "admin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -332,7 +335,7 @@ func TestSetPasswordBurnsOtherWipeTokens(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	mail, _, _, _, err := f.svc.ForgotRequest(context.Background(), "admin")
+	mail, err := f.svc.ForgotRequest(context.Background(), "admin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -386,9 +389,12 @@ func TestForgotRefusesDisabledAccount(t *testing.T) {
 	if err := f.svc.DisableUser(adminID, bobID); err != nil {
 		t.Fatal(err)
 	}
-	tok, sent, asked, hasMail, err := f.svc.ForgotRequest(context.Background(), "bob")
-	if err != nil || tok != "" || sent || asked || hasMail {
-		t.Fatalf("disabled account got a wipe token: sent=%v asked=%v hasMail=%v", sent, asked, hasMail)
+	if _, hasMail, canAsk := f.svc.ForgotLookup("bob"); hasMail || canAsk {
+		t.Fatalf("disabled account offered help: hasMail=%v canAsk=%v", hasMail, canAsk)
+	}
+	tok, err := f.svc.ForgotRequest(context.Background(), "bob")
+	if err != nil || tok != "" {
+		t.Fatalf("disabled account got a wipe token: %q %v", tok, err)
 	}
 	if len(f.st.Snapshot().Tokens) != 0 {
 		t.Fatal("token stored for a disabled account")
@@ -399,9 +405,12 @@ func TestForgotUnknownAndUnconfirmedLookAlike(t *testing.T) {
 	f := newFixture(t)
 	f.setupAdmin(t) // no email at all
 	for _, who := range []string{"admin", "nobody", "nobody@example.com"} {
-		tok, sent, asked, hasMail, err := f.svc.ForgotRequest(context.Background(), who)
-		if err != nil || tok != "" || sent || asked || hasMail {
-			t.Fatalf("%q: sent=%v asked=%v hasMail=%v err=%v", who, sent, asked, hasMail, err)
+		if login, hasMail, canAsk := f.svc.ForgotLookup(who); login != "" || hasMail || canAsk {
+			t.Fatalf("%q: login=%q hasMail=%v canAsk=%v", who, login, hasMail, canAsk)
+		}
+		tok, err := f.svc.ForgotRequest(context.Background(), who)
+		if err != nil || tok != "" {
+			t.Fatalf("%q: token=%q err=%v", who, tok, err)
 		}
 	}
 }
@@ -412,11 +421,11 @@ func TestUsedAndExpiredTokensArePruned(t *testing.T) {
 	f := newFixture(t)
 	f.setupAdmin(t)
 	f.confirmEmailOf(t, "admin", "admin@example.com")
-	if _, _, _, _, err := f.svc.ForgotRequest(context.Background(), "admin"); err != nil {
+	if _, err := f.svc.ForgotRequest(context.Background(), "admin"); err != nil {
 		t.Fatal(err)
 	}
 	f.advance(conf.ForgotLinkTTL + time.Second)
-	live, _, _, _, err := f.svc.ForgotRequest(context.Background(), "admin")
+	live, err := f.svc.ForgotRequest(context.Background(), "admin")
 	if err != nil {
 		t.Fatal(err)
 	}

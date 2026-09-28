@@ -46,9 +46,16 @@
     ]
   },
   "hasMail": false,
-  "lede": "Carrel cannot recover your encrypted data. You can wipe the account and set a new password, or ask an administrator.",
+  "lede": "Enter the login or the confirmed email of the account. There is no way to set a new password and keep the data stored here: the encryption key is derived from the password, and the server never has that key.",
   "notices": [],
   "options": [],
   "sent": false,
-  "title": "Forgotten password"
+  "title": "Forgotten your password?",
+  "back": {
+    "enabled": true,
+    "href": "/login",
+    "id": "forgot.back",
+    "label": "Back to sign in",
+    "method": "GET"
+  }
 }

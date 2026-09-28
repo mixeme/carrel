@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -279,5 +280,57 @@ func TestCollectionDeleteSheetIsTheFrame(t *testing.T) {
 	}
 	if string(sheet.Archive) != archive {
 		t.Errorf("archive = %q,\nthe frame %q", sheet.Archive, archive)
+	}
+}
+
+// s-profile-9's caption (from-typecase note 22) gives the lines of the other
+// cases in the server's words: the archive line of a collection no job copies
+// and of one no job has copied whole yet, one device, a job whose copies are
+// written into the collection.
+func TestCollectionDeleteSheetCaptionCases(t *testing.T) {
+	frame := mockupFrame(t, "s-profile-9")
+	_, caption, _ := strings.Cut(frame, "<figcaption>")
+	_, cases, _ := strings.Cut(caption, "Строка архива — по делу")
+	cases, _, _ = strings.Cut(cases, "Download .ics first")
+	var said []string
+	for _, m := range regexp.MustCompile(`«((?:[^«»]|«[^«»]*»)*)»`).FindAllStringSubmatch(cases, -1) {
+		said = append(said, frameText(m[1]))
+	}
+	if len(said) != 4 || !strings.HasSuffix(said[1], "…") || !strings.Contains(said[3], "«…»") {
+		t.Fatalf("s-profile-9 caption cases = %q: read it again", said)
+	}
+	noArchive, notWhole, oneDevice, writesHere := said[0], strings.TrimSuffix(said[1], "…"), said[2], said[3]
+
+	f := calendarFixture(t, nil, "standup.ics", workSeries)
+	sheet := func() view.CollectionDeleteSheet {
+		return decode[view.CollectionDeleteSheet](t, f.h.do(get(colDeleteHref(f), f.sess)))
+	}
+	if got := string(sheet().Archive); got != noArchive {
+		t.Errorf("no job copies it: archive = %q,\nthe caption %q", got, noArchive)
+	}
+
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		b.BackupJobs = append(b.BackupJobs,
+			sealed.BackupJob{ID: "j-1", Name: "Личное", Sources: []sealed.Selection{{Kind: view.KindEvent, AccountID: f.id, Path: f.col}}},
+			sealed.BackupJob{ID: "j-2", Name: "Сюда", DestAccount: f.id, DestPath: f.col})
+	})
+	if err := f.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByID(f.sess.AccountID())
+		u.ProxyDevices = append(u.ProxyDevices, store.ProxyDevice{ID: "d-1", Name: "Phone",
+			ScopeKinds: []string{string(view.KindEvent)}, ScopeCols: []store.DeviceScope{{AccountID: f.id, Path: f.col}}})
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	got := sheet()
+	if !strings.HasPrefix(string(got.Archive), notWhole) {
+		t.Errorf("a job copies it, none whole yet: archive = %q,\nthe caption %q…", got.Archive, notWhole)
+	}
+	refs := texts(got.References)
+	if want := strings.Replace(writesHere, "«…»", "«Сюда»", 1); !slices.Contains(refs, want) {
+		t.Errorf("references = %q, want %q", refs, want)
+	}
+	if !slices.Contains(refs, oneDevice) {
+		t.Errorf("references = %q, want %q", refs, oneDevice)
 	}
 }

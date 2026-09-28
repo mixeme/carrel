@@ -59,6 +59,10 @@ func triggerCommand(base string, job sealed.BackupJob, secret string) string {
 // and, cleared, off: there is no switch of its own (to-typecase task 18a).
 const triggerClock = "On a clock of your own — cron, GoSentry, a job in Gitea"
 
+// triggerPrice is the hint under the tick, ticked or not: what turning the
+// trigger on costs is said before it is turned on (s-backup-2, S-24.4).
+const triggerPrice = "Turning it on stores this job's data key under the server's key — less protection, for convenience: the job can then read without you signed in."
+
 // triggerTick is the job's tick «On a clock of your own» (s-backup-2):
 // ticked, it issues the trigger — through the password sheet outside the
 // unlock window, since it hands out the job's reading — and cleared, it
@@ -94,11 +98,9 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 	if issued[job.ID] != "" {
 		b.Command = text(issued[job.ID])
 		b.Password.Shown = true
-		// What turning it on cost is said here, the first thing after the
-		// tick: with no card for an off trigger there is no place before it
-		// (to-typecase task 36; S-24.4 names it a loss of protection).
-		b.Note = "Visible only now. Your data key for this job is now kept under the server's key — a loss of protection, for convenience: the job can read without you signed in. " +
-			"Every use is logged; Regenerate replaces the secret, and every line already handed out stops working."
+		// What turning it on cost is said under the tick (triggerPrice), not
+		// a second time here.
+		b.Note = "Visible only now. Every use is logged; Regenerate replaces the secret, and every line already handed out stops working."
 	} else {
 		b.Note = "The external trigger is on. The secret was shown once; Regenerate issues a new one and the old lines stop working."
 	}

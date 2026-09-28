@@ -7,7 +7,8 @@
         "href": "/forgot/reset-token",
         "id": "wipe.confirm",
         "label": "Erase and set a new password",
-        "method": "POST"
+        "method": "POST",
+        "danger": true
       }
     ],
     "errors": [],
@@ -27,33 +28,21 @@
             "readOnly": false,
             "required": false,
             "value": "csrf"
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Type yes to wipe encrypted data",
-            "name": "confirm",
-            "options": [],
-            "readOnly": false,
-            "required": true,
-            "value": ""
           }
         ]
       }
     ]
   },
-  "lede": "This destroys encrypted connections and cannot be undone.",
+  "lede": "This is not a password recovery. The key to your data comes from the password you forgot, so nothing stored under it can be read again — by you, by us, by anyone.\n\nConfirming erases what Carrel keeps for vera: saved connections and their passwords, subscriptions, tags and the settings of this desk. Address books, calendars, tasks and notes on the servers are not touched — you connect to them again afterwards.\n\nThe account itself stays: same login, same confirmed address. Only the password is new, and you set it on the next screen.",
   "login": "vera",
   "notices": [],
   "step": "confirm",
-  "title": "Reset account",
-  "warning": {
-    "actions": [],
-    "body": "Connections become unreadable and are removed. Data on remote servers is not touched.",
-    "details": null,
-    "role": "alert",
-    "title": "Encrypted data will be destroyed"
+  "title": "Erase everything and start again?",
+  "cancel": {
+    "enabled": true,
+    "href": "/login",
+    "id": "wipe.cancel",
+    "label": "Cancel",
+    "method": "GET"
   }
 }

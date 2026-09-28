@@ -347,6 +347,7 @@
     },
     "signed": {
       "instance": "carrel.example",
+      "local": true,
       "login": "mix"
     },
     "unlocked": null,

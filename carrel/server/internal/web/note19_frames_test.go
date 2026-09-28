@@ -150,22 +150,47 @@ func TestInvitePageIsTheFrame(t *testing.T) {
 			t.Errorf("%s: actions %q, want %q", what, got, submit)
 		}
 	}
-	lede = strings.Replace(lede, "mix", "alice", 1)
+	// The line under the title by the kind of invitation is the caption's
+	// (from-typecase note 22): a link, a login named before, no record of
+	// who invited — without the first sentence.
+	_, caption, _ := strings.Cut(frame, "<figcaption>")
+	var kinds []string
+	for _, m := range regexp.MustCompile(`«([^«»]*)»`).FindAllStringSubmatch(caption, -1) {
+		kinds = append(kinds, frameText(m[1]))
+	}
+	if len(kinds) != 2 || !strings.HasPrefix(kinds[0], "mix invited you. ") || !strings.HasPrefix(kinds[1], "mix invited you. ") ||
+		!strings.Contains(caption, "без записи, кто пригласил, — без первой фразы") {
+		t.Fatalf("s-auth-12 caption lines = %q: read the frame again", kinds)
+	}
+	byAlice := func(s string) string { return strings.Replace(s, "mix", "alice", 1) }
+	lede = byAlice(lede)
 
 	letter := secretOf("send", "anna@example.org")
 	check("a letter", decode[view.InvitePage](t, h.do(get("/invite/"+letter, nil))), lede,
 		[]row{{"Login", "", false}, {"Email", "anna@example.org", true}, {"Password", "", false}, {"Repeat password", "", false}})
 
 	link := secretOf("link", "")
-	check("a link", decode[view.InvitePage](t, h.do(get("/invite/"+link, nil))), "alice invited you. Choose a login and a password.",
+	check("a link", decode[view.InvitePage](t, h.do(get("/invite/"+link, nil))), byAlice(kinds[0]),
 		[]row{{"Login", "", false}, {"Password", "", false}, {"Repeat password", "", false}})
 
 	named, err := h.users.CreateInvite(adminID, "vera", "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	check("a login named", decode[view.InvitePage](t, h.do(get("/invite/"+named, nil))), "alice invited you. Choose a password; the login is the one the invitation names.",
+	check("a login named", decode[view.InvitePage](t, h.do(get("/invite/"+named, nil))), byAlice(kinds[1]),
 		[]row{{"Login", "vera", true}, {"Password", "", false}, {"Repeat password", "", false}})
+
+	// An invitation without a record of who made it has no first sentence.
+	if err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		for i := range st.Invites {
+			st.Invites[i].By = ""
+		}
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	check("a link, nobody named", decode[view.InvitePage](t, h.do(get("/invite/"+link, nil))), strings.TrimPrefix(kinds[0], "mix invited you. "),
+		[]row{{"Login", "", false}, {"Password", "", false}, {"Repeat password", "", false}})
 
 	// The login is refused at its field in the words of s-admin-19.
 	taken := decode[view.InvitePage](t, h.do(h.anonPostForm("/invite/"+link, "/invite/"+link,
@@ -175,16 +200,27 @@ func TestInvitePageIsTheFrame(t *testing.T) {
 	}
 }
 
-// from-typecase note 19, task 31: «local» beside «On a clock of your own»
-// (s-backup-2) is the instance's, not the tick's — the address in the line
-// answers only from inside its own network. It comes with the page: on when
-// no outside address is declared (CARREL_PUBLIC_URL — the line is built
-// from where the browser came) or the declared one is a name or an address
-// of a private network; off for a public one.
-func TestLocalInstanceIsThePagesAndNotTheTicks(t *testing.T) {
+// from-typecase notes 19 and 22: «local» is the instance's, not a screen's —
+// the addresses it hands out answer only from inside its own network. It
+// stands beside «On a clock of your own» (s-backup-2), in the heads of
+// davloom (s-davloom-1) and of the published links (s-publish-1), and on the
+// card of a device's link (s-plan-1); the shell carries it for all of them.
+// On when no outside address is declared (CARREL_PUBLIC_URL — the line is
+// built from where the browser came) or the declared one is a name or an
+// address of a private network; off for a public one.
+func TestLocalInstanceIsTheShells(t *testing.T) {
+	badge := regexp.MustCompile(`<span class="tc-badge is-local"[^>]*>local</span>`)
 	tick := regexp.MustCompile(`(?s)<button class="tc-check"[^>]*>(?:<span[^>]*></span>)?On a clock of your own(.*?)</button>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
-	if tick == nil || !regexp.MustCompile(`<span class="tc-badge is-local"[^>]*>local</span>`).MatchString(tick[1]) {
+	if tick == nil || !badge.MatchString(tick[1]) {
 		t.Fatalf("s-backup-2 draws no «local» at the tick: read the frame again")
+	}
+	routes := map[string]string{"s-davloom-1": "/app/settings/davloom", "s-publish-1": "/app/files/published",
+		"s-plan-1": "/app/settings/devices", "s-backup-2": "/app/settings/backup"}
+	for id := range routes {
+		frame, _, _ := strings.Cut(mockupFrame(t, id), "<figcaption")
+		if !badge.MatchString(frame) {
+			t.Fatalf("%s draws no «local»: read the frame again", id)
+		}
 	}
 	f := backupFixture(t)
 	saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
@@ -196,13 +232,44 @@ func TestLocalInstanceIsThePagesAndNotTheTicks(t *testing.T) {
 		{"https://[fd00::5]", true}, {"http://100.101.5.2", true}, {"https://carrel.example.org", false}, {"https://203.0.113.9", false},
 	} {
 		f.h.cfg.PublicURL = c.public
-		page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-		if page.Local != c.local {
-			t.Errorf("CARREL_PUBLIC_URL %q: local = %v, want %v", c.public, page.Local, c.local)
+		for id, route := range routes {
+			page := decode[struct {
+				Top view.TopBar `json:"top"`
+			}](t, f.h.do(get(route, f.sess)))
+			if page.Top.Signed.Local != c.local {
+				t.Errorf("%s (%s), CARREL_PUBLIC_URL %q: local = %v, want %v", route, id, c.public, page.Top.Signed.Local, c.local)
+			}
 		}
-		if tb := page.Jobs[0].Trigger; tb != nil {
+		if tb := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))).Jobs[0].Trigger; tb != nil {
 			t.Errorf("the trigger is off, and its card is sent: %+v", tb)
 		}
+	}
+	raw := decode[map[string]any](t, f.h.do(get("/app/settings/backup", f.sess)))
+	if _, ok := raw["local"]; ok {
+		t.Error("the backup page still carries «local» of its own")
+	}
+}
+
+// from-typecase note 22: what turning the external trigger on costs is said
+// under «On a clock of your own», ticked or not (s-backup-2, S-24.4) — and
+// so not a second time in the card of the line.
+func TestClockTickSaysItsPrice(t *testing.T) {
+	m := regexp.MustCompile(`(?s)On a clock of your own.*?</button>\s*<span class="tc-field__hint">(.*?)</span>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
+	if m == nil {
+		t.Fatal("s-backup-2 draws no hint under «On a clock of your own»: read the frame again")
+	}
+	hint := frameText(m[1])
+	f := backupFixture(t)
+	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
+	if got := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))).Jobs[0]; string(got.ClockHint) != hint || got.Clock.On {
+		t.Errorf("unticked: hint = %q, want (s-backup-2) %q", got.ClockHint, hint)
+	}
+	_, tb := issueTrigger(t, f, job)
+	if strings.Contains(string(tb.Note), "server's key") {
+		t.Errorf("the card says the price again: %q", tb.Note)
+	}
+	if got := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))).Jobs[0]; string(got.ClockHint) != hint || !got.Clock.On {
+		t.Errorf("ticked: hint = %q, want (s-backup-2) %q", got.ClockHint, hint)
 	}
 }
 

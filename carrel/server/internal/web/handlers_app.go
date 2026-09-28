@@ -77,11 +77,18 @@ func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error)
 		Shell: s.withRail(s.buildShell(sess, "Change password"), s.settingsRail(sess, "/app/settings/account")),
 		Form: withSubmit(s.plainForm("/app/password", "POST", csrfField(sess),
 			view.FormRow{Name: "current", Label: "Current password", Kind: view.InputPassword, Required: true, Error: currentErr},
-			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true, Error: passErr, Hint: text("At least 8 characters.")},
+			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true, Error: passErr},
 			view.FormRow{Name: "password2", Label: "Repeat new password", Kind: view.InputPassword, Required: true, Error: pass2Err},
 		), "password.save", "Change password"),
+		// What the change does is said under the fields, where the fear of
+		// losing the connections comes up (account-3).
+		Note: "Your data stays encrypted under the same key; only the wrapping changes. Saved connections keep working.",
+		Back: &view.Action{ID: "password.back", Label: "Back to settings", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true},
 	}
+	// After a temporary password there is nowhere to go before the change:
+	// the red line on top, and no way back (account-3).
 	if mustChange {
+		page.Back = nil
 		page.Warning = view.Notice{
 			Role: view.NoticeAlert,
 			Body: text("You are signed in with a temporary password. Choose a new one before continuing."),

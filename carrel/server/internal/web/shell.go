@@ -62,8 +62,10 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 // signedIn is the first line of the account menu: who is signed in and on
 // which instance. Several instances of Carrel look alike on the screen —
 // home, work, the one on this laptop — and only their names tell them apart.
+// Whether the instance is local goes with its name: the badge «local» it
+// puts beside the addresses it hands out (from-typecase note 22).
 func (s *Server) signedIn(sess *session.Session) view.SignedIn {
-	in := view.SignedIn{Instance: text(s.users.Settings().InstanceName())}
+	in := view.SignedIn{Instance: text(s.users.Settings().InstanceName()), Local: s.instanceLocal()}
 	snap := s.store.Snapshot()
 	if u := snap.UserByID(sess.AccountID()); u != nil {
 		in.Login = text(u.Login)

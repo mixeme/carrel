@@ -17,6 +17,94 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.75 — 2026-09-28
+
+Copies the Typecase mockup of note 22 (Typecase `8764758`) and brings the
+pages outside the shell to their frames (U-6.14): sign-in, setup,
+registration, the invitation, forgotten password and its link, the confirmed
+address, «about», and the password change.
+
+### Added
+
+- **`SignedIn.local`** (`top.signed.local` of every page in the shell) — the
+  instance is local: the addresses it hands out answer only from inside its
+  own network. The badge «local» stands at davloom (s-davloom-1), the
+  published links (s-publish-1), a device's link (s-plan-1) and «On a clock
+  of your own» (s-backup-2).
+- **`BackupJob.clockHint`** — under «On a clock of your own», ticked or not:
+  «Turning it on stores this job's data key under the server's key — less
+  protection, for convenience: the job can then read without you signed
+  in.» (S-24.4).
+- **`LoginPage.tagline`, `AboutPage.tagline`** — the second line of the
+  tagline, after `lede`: «Calendars, contacts, tasks, notes and files — one
+  place.»
+- **`LoginPage.register`** — «Create an account», only while registration is
+  open; null when it is closed.
+- **`RegisterPage.signIn`** — «Already have an account? Sign in» at the form,
+  «Back to sign in» after it went. The form asks **Repeat password**; a
+  pair that differs registers nobody and is said at the repeat.
+- **`ForgotPage.back`** — «Back to sign in» in every state;
+  **`ForgotPage.options`** are cards (`ForgotOption`: `title`, `body`,
+  `form` of one button that carries `op` and the login as typed).
+- **`ForgotWipePage.cancel`** — «Cancel» of the first step, to sign-in.
+- **`AboutPage.licence`** — the AGPL line.
+- **`PasswordPage.note`** — the line under the fields: «Your data stays
+  encrypted under the same key; only the wrapping changes. Saved connections
+  keep working.»; **`PasswordPage.back`** — «Back to settings», null after a
+  temporary password: there is nowhere to go before the change.
+
+### Changed
+
+- **`/forgot` answers a login or an address with what can be done**
+  (s-auth-6) — «Wipe the account» with «Send a confirmation letter», and
+  «Ask the administrator» only for an account that deposited its key — and
+  does it on the option's button: `op=wipe` sends the letter («Check your
+  inbox», s-auth-8), `op=ask` records the request as the journal line
+  `user.forgot.ask` («The administrator has been asked», s-auth-9). Before,
+  the first post sent the letter at once, and an account that deposited its
+  key was only «asked», with nothing recorded and no wipe offered. Nothing
+  to do — an unknown login, an unconfirmed address, a disabled account — is
+  «We cannot help from here» (s-auth-7). The page names the account by what
+  was typed, never by a login found for an address.
+- **The first step of `/forgot/{token}`** is its button (s-auth-10): there
+  is no word to type. «Erase and set a new password» is `danger`; opening
+  the link still wipes nothing. The second step's fields are Password and
+  Repeat password with the password warning over them (`notices`); a
+  refusal is said at its field, not at the hidden CSRF row.
+- **The texts of the pages outside the shell are the frames'**: «Set up
+  Carrel» with the warning, the login's sample «a-z 0-9 . _ -» and the dash
+  of the optional address (`placeholder`); «Create an account» with its line
+  and the warning; «Check your email» with the address the letter went to;
+  «Forgotten your password?», «What we can do», «We cannot help from here»,
+  «Check your inbox», «The administrator has been asked»; «Erase everything
+  and start again?», «Set a new password»; «Email address» — «Address
+  confirmed. You can sign in now.»; «Carrel» on «about» with «Third-party
+  licences».
+- **«About»'s button** — «Back to sign in» without a session; from the
+  shell «Back» to the page of the shell one came from (the `Referer` of
+  this origin under `/app`, else the first screen).
+- **The trigger card's note** no longer says what turning it on cost: the
+  hint under the tick says it.
+
+### Removed
+
+- **`BackupPage.local`** — now `top.signed.local`.
+- **`LoginPage.about`** — no frame draws it; «about» is reached from the
+  rail's foot.
+- **`ForgotWipePage.warning`** — the second step's warning is in `notices`,
+  the first step's words are its `lede`.
+- **Hints no frame draws**: «At least 8 characters.» at setup's and the
+  password change's new password, and the line under setup's address.
+- **The field «Type yes to wipe encrypted data»** of `/forgot/{token}`.
+
+### For consumers
+
+- Every page in the shell carries `top.signed.local`; the fixtures of 7.20,
+  7.21 and the backup, the password change and every shell page changed
+  with it.
+- A client that posted `confirm=yes` to `/forgot/{token}` still works: the
+  field is ignored.
+
 ## v0.2.74 — 2026-09-28
 
 ### Fixed

@@ -47,7 +47,9 @@ type Users interface {
 	// layer; the request layer never puts it in a response.
 	Register(ctx context.Context, login, email, password string) (token string, err error)
 
-	ForgotRequest(ctx context.Context, loginOrEmail string) (token string, sent, asked, hasMail bool, err error)
+	ForgotLookup(loginOrEmail string) (login string, hasMail, canAsk bool)
+	ForgotRequest(ctx context.Context, loginOrEmail string) (token string, err error)
+	ForgotAsk(ctx context.Context, loginOrEmail string) (asked bool, err error)
 	ForgotWipeState(ctx context.Context, token string) (login string, step string, valid bool)
 	ForgotConfirmWipe(ctx context.Context, token string) error
 	ForgotSetPassword(ctx context.Context, token, password string) error

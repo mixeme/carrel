@@ -393,7 +393,7 @@ func (s *Server) backupPageIssued(sess *session.Session, commands, secrets map[s
 func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob, errs map[string]view.Text, commands, secrets map[string]string, notices ...view.Notice) view.BackupPage {
 	blob := s.catalogOf(sess)
 	tf, now := s.timeFor(sess), s.now()
-	page := view.BackupPage{Shell: s.buildShell(sess, "Backup"), Local: s.instanceLocal()}
+	page := view.BackupPage{Shell: s.buildShell(sess, "Backup")}
 	page.Rail = s.settingsRail(sess, "/app/settings/backup")
 	page.Notices = append(page.Notices, notices...)
 	runs := s.users.BackupRuns(sess.AccountID())
@@ -424,7 +424,7 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 			}
 			row.Runs = append(row.Runs, run)
 		}
-		row.Clock = s.triggerTick(sess, job, commands)
+		row.Clock, row.ClockHint = s.triggerTick(sess, job, commands), triggerPrice
 		row.Trigger = s.triggerBlock(sess, job, commands)
 		if row.Trigger != nil && secrets[job.ID] != "" {
 			row.Trigger.Password.Value = text(secrets[job.ID])

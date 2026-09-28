@@ -632,7 +632,8 @@ func TestInviteFormErrorsAreNot404(t *testing.T) {
 }
 
 // The two-step wipe through HTTP, then the dead token answers exactly like
-// a token that never existed (S-9.5).
+// a token that never existed (S-9.5). Opening the link wipes nothing: the
+// erasure is its page's button (s-auth-10).
 func TestForgotWipeRouteAndDeadTokensAlike(t *testing.T) {
 	h := newHarness(t)
 	h.admin("alice", "password123")
@@ -644,15 +645,21 @@ func TestForgotWipeRouteAndDeadTokensAlike(t *testing.T) {
 	if rec := h.do(get(link, nil)); rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"step":"confirm"`) {
 		t.Fatalf("GET link: %d %s", rec.Code, rec.Body.String())
 	}
-	if rec := h.do(h.anonPostForm(link, link, url.Values{"confirm": {"no"}})); !strings.Contains(rec.Body.String(), "Confirmation is required") {
-		t.Fatalf("confirm=no: %s", rec.Body.String())
+	if _, _, _, ok := h.users.Authenticate(context.Background(), "alice", "password123"); !ok {
+		t.Fatal("opening the link wiped")
+	}
+	// Without the form's token nothing is erased.
+	bare := httptest.NewRequest(http.MethodPost, link, strings.NewReader(""))
+	bare.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if rec := h.do(bare); rec.Code == http.StatusOK {
+		t.Fatalf("a post without the form's token: %d %s", rec.Code, rec.Body.String())
 	}
 	if _, _, _, ok := h.users.Authenticate(context.Background(), "alice", "password123"); !ok {
-		t.Fatal("wiped without confirmation")
+		t.Fatal("wiped by a post without the form's token")
 	}
-	rec := h.do(h.anonPostForm(link, link, url.Values{"confirm": {"yes"}}))
+	rec := h.do(h.anonPostForm(link, link, url.Values{}))
 	if rec.Code != http.StatusOK || !strings.Contains(rec.Body.String(), `"step":"password"`) {
-		t.Fatalf("confirm=yes: %d %s", rec.Code, rec.Body.String())
+		t.Fatalf("erase: %d %s", rec.Code, rec.Body.String())
 	}
 	if _, ok := h.mgr.Get(sess.ID()); ok {
 		t.Fatal("session alive after wipe")
@@ -829,7 +836,7 @@ func TestForgotDoesNotClaimMailSent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rec := h.do(h.anonPostForm("/forgot", "/forgot", url.Values{"login": {"alice"}}))
+	rec := h.do(h.anonPostForm("/forgot", "/forgot", url.Values{"op": {"wipe"}, "login": {"alice"}}))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("forgot: status = %d", rec.Code)
 	}
@@ -922,8 +929,8 @@ func TestAdminRoutesNeedAdminRole(t *testing.T) {
 }
 
 // A failed sign-in answers with the same page, links and all: its "Forgotten
-// your password?" and "About" pointed at the root and missed an instance under
-// a base path.
+// your password?" pointed at the root and missed an instance under a base
+// path.
 func TestFailedSignInKeepsTheBasePath(t *testing.T) {
 	h := newHarness(t)
 	h.admin("alice", "password123")
@@ -933,8 +940,8 @@ func TestFailedSignInKeepsTheBasePath(t *testing.T) {
 		"login": {"alice"}, "password": {"wrong-password"},
 	}))
 	page := decode[view.LoginPage](t, rec)
-	if page.Forgot.Href != "/carrel/forgot" || page.About.Href != "/carrel/about" {
-		t.Errorf("forgot %q, about %q", page.Forgot.Href, page.About.Href)
+	if page.Forgot.Href != "/carrel/forgot" {
+		t.Errorf("forgot %q", page.Forgot.Href)
 	}
 	if len(page.Form.Actions) == 0 || page.Form.Actions[0].Label != "Sign in" || page.Form.Actions[0].Href != "/carrel/login" {
 		t.Errorf("actions = %+v", page.Form.Actions)

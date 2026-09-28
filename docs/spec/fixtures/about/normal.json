@@ -3,7 +3,7 @@
     "enabled": true,
     "href": "/login",
     "id": "about.back",
-    "label": "Back",
+    "label": "Back to sign in",
     "method": "GET"
   },
   "commit": "786949a",
@@ -20,9 +20,11 @@
     "enabled": true,
     "href": "/about",
     "id": "about.third",
-    "label": "Third-party notices",
+    "label": "Third-party licences",
     "method": "GET"
   },
-  "title": "About Carrel",
-  "version": "0.0.1"
+  "title": "Carrel",
+  "version": "0.0.1",
+  "licence": "AGPL-3.0-or-later: if you run a modified version for others, you must make the source available to them.",
+  "tagline": "Calendars, contacts, tasks, notes and files — one place."
 }

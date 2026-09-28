@@ -632,6 +632,7 @@ type TopBar struct {
 type SignedIn struct {
     Login    Text // имя, под которым вошли
     Instance Text // имя экземпляра, S-26
+    Local    bool // экземпляр локальный: выданные им адреса отвечают только изнутри его сети — значок «local» у davloom (s-davloom-1), выданных ссылок (s-publish-1), ссылки устройства (s-plan-1) и отметки «On a clock of your own» (s-backup-2); объявленного адреса снаружи (CARREL_PUBLIC_URL) нет или он — имя либо адрес частной сети. Признак экземпляра, не экрана
 }
 
 type Refresh struct {
@@ -1749,7 +1750,13 @@ type EscrowWithdrawSheet struct {
     Actions []Action // Withdraw my deposited key · Cancel
 }
 
-type PasswordPage struct { Shell; Form Form; Warning Notice }
+type PasswordPage struct { // account-3: обычная смена и вынужденная
+    Shell
+    Form    Form
+    Warning Notice  // вынужденная — вход по временному паролю: красная строка наверху
+    Note    Text    // строка под полями: ключ тот же, меняется обёртка, подключения работают
+    Back    *Action // «Back to settings»; nil при вынужденной — до смены идти некуда
+}
 
 type UnlockSheet struct {
     Purpose Text  // ради чего спрашивают пароль
@@ -1890,7 +1897,6 @@ type ProxyDevice struct {
 type BackupPage struct {
     Shell
     Subtitle   Text    // на странице задания: «Job · last copy 2 days ago» (s-backup-2), Title — имя задания; пусто на списке
-    Local      bool    // экземпляр локальный — значок «local» у отметки «On a clock of your own» (s-backup-2): адрес в строке запуска отвечает только изнутри сети; объявленного адреса снаружи (CARREL_PUBLIC_URL) нет или он — имя либо адрес частной сети
     Jobs       []BackupJob
     Add        Form    // новое задание; на странице задания (?job=, s-backup-2) — оно само: Save · Cancel · Run now
     Delete     *Action // внизу страницы задания; nil — на списке и у нового
@@ -1905,7 +1911,8 @@ type BackupJob struct {
     Encrypted   bool
     LastRun     When
     LastState   OpState
-    Clock       Action        // отметка «On a clock of your own — cron, GoSentry, a job in Gitea» в рубрике When (s-backup-2): On — внешний запуск включён; снятая выключает его, отдельного выключателя нет
+    Clock       Action        // отметка «On a clock of your own — cron, GoSentry, a job in Gitea» в рубрике When (s-backup-2): On — внешний запуск включён; снятая выключает его, отдельного выключателя нет; «local» рядом — SignedIn.Local
+    ClockHint   Text          // подсказка под отметкой, и у снятой тоже: цена включения — ключ задания под ключом сервера (S-24.4)
     Trigger     *TriggerBlock // карточка строки внешнего запуска; nil, пока он выключен: показывать и обновлять нечего
     Runs        []BackupRun
     Actions     []Action // Run · Edit (s-backup-1); Run задания «Download» — поток архива
@@ -2081,48 +2088,64 @@ type InstallRow struct {
 
 ```go
 type Plain struct { // общая часть страниц без оболочки
-    Title   Text
-    Lede    Text
-    Notices []Notice
+    Title   Text     // заголовок карточки и документа; у входа кадр его не рисует (на его месте знак) — он остаётся заголовком документа
+    Lede    Text     // строка под заголовком; у входа и «о программе» — первая строка теглайна
+    Notices []Notice // над полями: предупреждение о пароле (s-auth-2, -4, -11, -12)
 }
 
-type LoginPage struct {
+// Ссылки и кнопки, уводящие со страницы (GET), — поля страницы, а не
+// Form.Actions: форма несёт только то, что отправляет.
+type LoginPage struct { // s-auth-1
     Plain
-    Form   Form
-    Forgot Action // ведёт на /forgot и обещает только то, что там есть
-    About  Action
+    Tagline  Text    // вторая строка теглайна, после Lede
+    Form     Form    // Login, Password; Sign in
+    Register *Action // «Create an account» — только пока регистрация открыта; nil — закрыта: закрытый экземпляр форму не рекламирует
+    Forgot   Action  // ведёт на /forgot и обещает только то, что там есть
 }
-type SetupPage   struct { Plain; Form Form }
-type RegisterPage struct { Plain; Form Form; Sent bool }
+type SetupPage   struct { Plain; Form Form } // s-auth-4: у Login образец «a-z 0-9 . _ -», у Email — «(optional)» и «—»
+type RegisterPage struct { // s-auth-2, после отправки s-auth-3
+    Plain
+    Form   Form   // Login, Email, Password, Repeat password; после отправки пуста
+    Sent   bool
+    SignIn Action // «Already have an account? Sign in» у формы, «Back to sign in» после отправки
+}
 type InvitePage   struct { Plain; Form Form; Valid bool }
 type ConfirmEmailPage struct { Plain; OK bool; Next Action }
-type ForgotPage struct {
+type ForgotPage struct { // s-auth-5 … s-auth-9
     Plain
-    Form    Form
-    Options []Action // разрушительная очистка или запрос администратору
-    HasMail bool     // подтверждённого адреса нет — помочь нельзя, и так и сказано
-    Sent    bool
-    Asked   bool
+    Form    Form           // логин или почта (s-auth-5); в остальных состояниях пуста
+    Options []ForgotOption // s-auth-6: разрушительная очистка и — только при депонированном ключе — запрос администратору
+    HasMail bool           // подтверждённого адреса нет — помочь нельзя, и так и сказано (s-auth-7)
+    Sent    bool           // s-auth-8
+    Asked   bool           // s-auth-9
+    Back    Action         // «Back to sign in», во всех состояниях
+}
+type ForgotOption struct { // карточка варианта (s-auth-6)
+    Title Text
+    Body  Text
+    Form  Form // одна кнопка; скрытые op (wipe | ask) и логин, как его ввели
 }
 type WipeStep string
 const (
     WipeConfirm  WipeStep = "confirm"  // очистка ещё не сделана, предупреждение на экране
     WipePassword WipeStep = "password" // очищено, тем же токеном задают новый пароль
 )
-type ForgotWipePage struct {
-    Plain
-    Step    WipeStep
-    Login   Text   // логин остаётся прежним и показывается, а не спрашивается
-    Form    Form   // подтверждение на первом шаге, пароль и повтор на втором
-    Warning Notice // на первом шаге называет последствие, на втором — цену пароля
+type ForgotWipePage struct { // s-auth-10, s-auth-11
+    Plain            // на втором шаге Notices — предупреждение о пароле
+    Step   WipeStep
+    Login  Text    // логин остаётся прежним и показывается, а не спрашивается
+    Form   Form    // на первом шаге — одна кнопка очистки (Danger), на втором — пароль и повтор
+    Cancel *Action // «Cancel» первого шага — на вход; nil на втором
 }
-type AboutPage struct {
+type AboutPage struct { // rest-3: Title «Carrel», Lede — первая строка теглайна
     Plain
+    Tagline Text   // вторая строка теглайна
     Version Text
     Commit  Text
+    Licence Text   // строка лицензии: изменённую версию для других — с исходниками
     Source  Action // видимая ссылка на исходники запущенной версии
-    Third   Action
-    Back    Action
+    Third   Action // «Third-party licences»
+    Back    Action // без сеанса «Back to sign in»; из оболочки — туда, где были
 }
 
 type PublishedPage struct {

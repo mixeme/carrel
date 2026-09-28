@@ -447,46 +447,88 @@ func (s *Service) ConfirmEmail(ctx context.Context, token string) bool {
 	return ok && err == nil
 }
 
-// ForgotRequest answers /forgot (S-10.4). It returns the wipe token for the
-// mail layer when a link was issued. Unknown login, unconfirmed address, and
-// a disabled account all come back with nothing: none of them can be helped
-// from the sign-in screen, and none is confirmed to exist.
-func (s *Service) ForgotRequest(ctx context.Context, loginOrEmail string) (token string, sent, asked, hasMail bool, err error) {
+// forgotUser is the account /forgot can help (S-10.4): found by its login
+// or its address, not disabled, with a confirmed address. Unknown login,
+// unconfirmed address and a disabled account all come back nil: none of
+// them can be helped from the sign-in screen, and none is told apart.
+func forgotUser(snap *store.State, loginOrEmail string) *store.User {
 	loginOrEmail = strings.TrimSpace(loginOrEmail)
-	snap := s.st.Snapshot()
-	var u *store.User
 	for i := range snap.Users {
 		x := &snap.Users[i]
 		if strings.EqualFold(x.Login, loginOrEmail) || (x.Email != "" && strings.EqualFold(x.Email, loginOrEmail)) {
-			u = x
-			break
+			if x.Disabled || x.Email == "" || !x.EmailConfirmed {
+				return nil
+			}
+			return x
 		}
 	}
-	if u == nil || u.Disabled || u.Email == "" || !u.EmailConfirmed {
-		return "", false, false, false, nil
+	return nil
+}
+
+// ForgotLookup is the first answer of /forgot (s-auth-6, s-auth-7): whether
+// the account has a confirmed address — the wipe by letter is offered —,
+// and whether the administrator can be asked instead: escrow is on and the
+// account deposited its key. It changes nothing.
+func (s *Service) ForgotLookup(loginOrEmail string) (login string, hasMail, canAsk bool) {
+	snap := s.st.Snapshot()
+	u := forgotUser(&snap, loginOrEmail)
+	if u == nil {
+		return "", false, false
 	}
-	if snap.Settings.EscrowEnabled && store.UserDeposited(u) {
-		return "", false, true, true, nil
+	return u.Login, true, snap.Settings.EscrowEnabled && store.UserDeposited(u)
+}
+
+// ForgotRequest issues the wipe link of /forgot (S-10.4) and returns its
+// token for the mail layer; "" when the account cannot be helped
+// (forgotUser).
+func (s *Service) ForgotRequest(ctx context.Context, loginOrEmail string) (token string, err error) {
+	if snap := s.st.Snapshot(); forgotUser(&snap, loginOrEmail) == nil {
+		return "", nil
 	}
 	raw, hash, err := newSecret()
 	if err != nil {
-		return "", false, false, true, err
+		return "", err
 	}
 	now := s.now()
+	issued := false
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := forgotUser(st, loginOrEmail)
+		if u == nil {
+			return nil, nil
+		}
 		pruneTokens(st, now)
 		st.Tokens = append(st.Tokens, store.SecretToken{
 			Kind: tokenForgotWipe, Hash: hash, UserID: u.ID, Step: string(view.WipeConfirm),
 			CreatedAt: now, ExpiresAt: now.Add(conf.ForgotLinkTTL),
 		})
+		issued = true
 		return []store.AuditEntry{{
 			When: now, Who: u.Login, What: "user.forgot.request", Whom: u.Login,
 		}}, nil
 	})
-	if err != nil {
-		return "", false, false, true, err
+	if err != nil || !issued {
+		return "", err
 	}
-	return raw, true, false, true, nil
+	return raw, nil
+}
+
+// ForgotAsk records that the person asked the administrator to recover the
+// account (s-auth-9): only where that can help — escrow is on and the
+// account deposited its key. The administrator still needs the master
+// password (S-10.5); the request is a line of the journal, not a recovery.
+func (s *Service) ForgotAsk(ctx context.Context, loginOrEmail string) (asked bool, err error) {
+	now := s.now()
+	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := forgotUser(st, loginOrEmail)
+		if u == nil || !st.Settings.EscrowEnabled || !store.UserDeposited(u) {
+			return nil, nil
+		}
+		asked = true
+		return []store.AuditEntry{{
+			When: now, Who: u.Login, What: "user.forgot.ask", Whom: u.Login,
+		}}, nil
+	})
+	return asked && err == nil, err
 }
 
 func isWipeToken(t *store.SecretToken) bool {

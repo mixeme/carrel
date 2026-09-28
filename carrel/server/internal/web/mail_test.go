@@ -203,6 +203,10 @@ func TestForgotLinkIsMailedToTheConfirmedAddress(t *testing.T) {
 	relay := h.relayed()
 
 	page := decode[view.ForgotPage](t, h.do(h.anonPostForm("/forgot", "/forgot", url.Values{"login": {"bob"}})))
+	if len(page.Options) != 1 || page.Sent || len(relay.Letters()) != 0 {
+		t.Fatalf("options = %+v: the letter goes when it is asked for", page)
+	}
+	page = decode[view.ForgotPage](t, h.do(h.anonPostForm("/forgot", "/forgot", formFields(page.Options[0].Form))))
 	if !page.Sent {
 		t.Fatalf("page = %+v", page)
 	}

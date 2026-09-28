@@ -40,6 +40,29 @@ func frameList(t *testing.T, id string) []string {
 	return out
 }
 
+// frameForeign splits a label list that draws, under a line, the label
+// another client wrote (s-contacts-12, -13, -22; from-typecase notes 20 and
+// 22): the list any row is offered, and that label, as it is. The frame
+// draws the list of a row whose card holds it.
+func frameForeign(t *testing.T, id string) (own []string, foreign string) {
+	t.Helper()
+	list := frameList(t, id)
+	last := list[len(list)-1]
+	if !strings.HasPrefix(last, "— ") {
+		t.Fatalf("%s = %q, no label under a line: read it again", id, list)
+	}
+	return list[:len(list)-1], strings.TrimPrefix(last, "— ")
+}
+
+// sameOwnList is sameList for a row without a label of another client's:
+// the frame's list without the one under the line.
+func sameOwnList(t *testing.T, what string, got []view.Option, frame string) {
+	t.Helper()
+	if want, _ := frameForeign(t, frame); !equalStrings(serverList(got), want) {
+		t.Errorf("%s = %q,\nwant (%s without the foreign label) %q", what, serverList(got), frame, want)
+	}
+}
+
 // serverList is a list the server sent, written the way frameList writes one.
 func serverList(opts []view.Option) []string {
 	out := []string{}
@@ -143,7 +166,7 @@ func TestContactLabelListsAreTheFrames(t *testing.T) {
 		"TEL;TYPE=CELL:+1 555 0100\nTEL:+1 555 0101\nTEL;TYPE=WORK:+1 555 0102\nEMAIL;TYPE=INTERNET:ann@example.org\nEND:VCARD\n")
 	page := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/ann/edit", f.sess)))
 	phone := rowNamed(t, page.Form, "tel.0.type")
-	sameList(t, "phone label", phone.Options, "s-contacts-12")
+	sameOwnList(t, "phone label", phone.Options, "s-contacts-12")
 	if sel := selectedOf(phone.Options); len(sel) != 1 || sel[0] != "CELL" {
 		t.Errorf("TYPE=CELL selects %q, want mobile keeping the value", sel)
 	}
@@ -153,8 +176,8 @@ func TestContactLabelListsAreTheFrames(t *testing.T) {
 	if sel := selectedOf(rowNamed(t, page.Form, "tel.2.type").Options); len(sel) != 1 || sel[0] != "WORK" {
 		t.Errorf("TYPE=WORK selects %q", sel)
 	}
-	sameList(t, "new phone label", addRow(t, page.Form, "tel").Template[0].Options, "s-contacts-12")
-	sameList(t, "email label", addRow(t, page.Form, "email").Template[0].Options, "s-contacts-13")
+	sameOwnList(t, "new phone label", addRow(t, page.Form, "tel").Template[0].Options, "s-contacts-12")
+	sameOwnList(t, "email label", addRow(t, page.Form, "email").Template[0].Options, "s-contacts-13")
 	// INTERNET is no label (TestTypeValuesThatAreNoLabel): nothing is
 	// chosen, and the save below keeps it.
 	if sel := selectedOf(rowNamed(t, page.Form, "email.0.type").Options); len(sel) != 0 {
@@ -212,6 +235,34 @@ func TestAddressLabelListIsTheFrame(t *testing.T) {
 	if got := serverList(addRow(t, page.Form, "adr").Template[0].Options); !equalStrings(got, frame[:len(frame)-1]) {
 		t.Errorf("new address label = %q, want (s-contacts-22) %q", got, frame[:len(frame)-1])
 	}
+}
+
+// A phone and an e-mail are labelled as an address is (from-typecase note
+// 22): under a line, the label another client wrote, as it is — «iPhone» of
+// s-contacts-12, «Личная» of s-contacts-13 —, chosen, not recased, and kept
+// by a save that leaves it alone. A new row is not offered it.
+func TestForeignPhoneAndEmailLabelsAreTheFrames(t *testing.T) {
+	_, phone := frameForeign(t, "s-contacts-12")
+	_, mail := frameForeign(t, "s-contacts-13")
+	f := bookFixture(t, nil, "BEGIN:VCARD\nVERSION:3.0\nUID:ann\nFN:Ann\n"+
+		"TEL;TYPE="+phone+":+1 555 0100\nEMAIL;TYPE="+mail+",INTERNET:ann@example.org\nEND:VCARD\n")
+	page := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/ann/edit", f.sess)))
+	for _, c := range []struct{ row, frame, label string }{{"tel.0.type", "s-contacts-12", phone}, {"email.0.type", "s-contacts-13", mail}} {
+		row := rowNamed(t, page.Form, c.row)
+		sameList(t, c.row, row.Options, c.frame)
+		if sel := selectedOf(row.Options); len(sel) != 1 || sel[0] != c.label {
+			t.Errorf("%s: TYPE=%s selects %q", c.row, c.label, sel)
+		}
+	}
+	sameOwnList(t, "new phone label", addRow(t, page.Form, "tel").Template[0].Options, "s-contacts-12")
+	sameOwnList(t, "new email label", addRow(t, page.Form, "email").Template[0].Options, "s-contacts-13")
+
+	form := formFields(page.Form)
+	form.Set("fn", "Ann B")
+	if resp := f.h.do(postForm(f.path("contacts")+"/ann/edit", f.sess, form)); resp.Code != 303 {
+		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
+	}
+	mustContain(t, typeLists(body(t, f, "ann.vcf")), "TEL;TYPE="+phone+":+1 555 0100", "EMAIL;TYPE="+mail+",INTERNET:ann@example.org")
 }
 
 // A TYPE value that is not a label — INTERNET, the vCard 3 default of an

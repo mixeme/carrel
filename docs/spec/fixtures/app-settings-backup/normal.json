@@ -283,7 +283,6 @@
   "deleteNote": "",
   "details": null,
   "jobs": [],
-  "local": true,
   "notices": [],
   "print": {
     "range": "",
@@ -581,6 +580,7 @@
     },
     "signed": {
       "instance": "carrel.example",
+      "local": true,
       "login": "mix"
     },
     "unlocked": null,

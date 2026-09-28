@@ -110,7 +110,7 @@ func TestContactFormIsTheFramesRubrics(t *testing.T) {
 		t.Errorf("Add phone adds %q %q %+v", names, labels, phone.Template)
 	}
 	if len(phone.Template) > 0 {
-		sameList(t, "added phone label", phone.Template[0].Options, "s-contacts-12")
+		sameOwnList(t, "added phone label", phone.Template[0].Options, "s-contacts-12")
 	}
 
 	// An address row is its label, picked from a list as a phone's is, then
@@ -444,6 +444,14 @@ func TestQuickTaskSheetIsTheFrame(t *testing.T) {
 		if string(sheet.Note) != line {
 			t.Errorf("%s quick sheet line = %q, want (%s) %q", k.kind, sheet.Note, k.frame, line)
 		}
+	}
+	// The note's sheet has no fields, only the body, and no line under them
+	// (s-notes-5, from-typecase note 22).
+	if frameSheetLine.MatchString(mockupFrame(t, "s-notes-5")) {
+		t.Fatal("s-notes-5 draws a line under the body: read it again")
+	}
+	if note := decode[view.NewSheet](t, c.h.do(get(c.path("notes")+"/new/quick", c.sess))); note.Note != "" {
+		t.Errorf("note quick sheet line = %q; s-notes-5 draws none", note.Note)
 	}
 	quick := c.path("tasks") + "/new/quick"
 	tasks := decode[view.NewSheet](t, c.h.do(get(quick, c.sess)))

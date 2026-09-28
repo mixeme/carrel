@@ -44,7 +44,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "At least 8 characters.",
+            "hint": "",
             "kind": "password",
             "label": "New password",
             "name": "password",
@@ -233,7 +233,8 @@
     },
     "signed": {
       "instance": "carrel.example",
-      "login": "mix"
+      "login": "mix",
+      "local": true
     },
     "unlocked": null,
     "user": [
@@ -269,5 +270,13 @@
     "details": null,
     "role": "",
     "title": ""
-  }
+  },
+  "back": {
+    "enabled": true,
+    "href": "/app/settings/account",
+    "id": "password.back",
+    "label": "Back to settings",
+    "method": "GET"
+  },
+  "note": "Your data stays encrypted under the same key; only the wrapping changes. Saved connections keep working."
 }
