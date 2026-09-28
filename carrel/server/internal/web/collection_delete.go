@@ -5,13 +5,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
+	"time"
 
 	"golang.org/x/text/unicode/norm"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -99,8 +103,7 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 		// person's published links (S-25), copy jobs (S-24) and davloom
 		// devices whose scope names it (S-27).
 		References: s.collectionReferences(sess, conn, col),
-		Archive: text("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new " +
-			noun + " at a new address — not into this one, and not to this address."),
+		Archive:    s.collectionArchive(sess, conn, col),
 		Form: s.plainForm(action, "POST",
 			csrfField(sess),
 			// The name is the field's sample (s-profile-9, s-profile-19).
@@ -116,7 +119,6 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 	}
 	if col.Has(view.KindFile) {
 		// A folder is not exported: it is downloaded in Files (s-profile-12).
-		sheet.Archive = text("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the files back into a new folder at a new address — not into this one.")
 		sheet.Export = &view.Action{ID: "collection.open", Label: "Open in Files", Icon: "i-file",
 			Href: s.route(fileHref(conn.ID, col.Path, "", nil, true)), Method: "GET", Enabled: true}
 		sheet.ExportNote = "Download what you need from it there first."
@@ -210,8 +212,9 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/app/settings/connections")
 }
 
-// collectionReferences names every published link, copy job and davloom
-// device of the person that names the collection.
+// collectionReferences is what of the person points at the collection: the
+// attachment folder, the published links and the davloom devices counted, the
+// copy jobs by name (s-profile-9, s-profile-19).
 func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connection, col sealed.Collection) []view.Text {
 	refs := []view.Text{}
 	blob := s.catalogOf(sess)
@@ -219,10 +222,16 @@ func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connect
 	if a := blob.Attachments; a != nil && a.AccountID == conn.ID && a.Path == col.Path {
 		refs = append(refs, "Attachments — the attachment folder is in it; new attachments will have nowhere to go")
 	}
+	// Links and devices are counted, a job is named (s-profile-9): a line
+	// for each link and device is longer than it helps.
+	links := 0
 	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
 		if l.Target.AccountID == conn.ID && l.Target.Col == col.Path {
-			refs = append(refs, text("Published link «"+l.Target.Title+"» — it stops opening"))
+			links++
 		}
+	}
+	if links > 0 {
+		refs = append(refs, text(plural(links, "published link")+" — answers “not found” from that moment"))
 	}
 	what := "collection"
 	if col.Has(view.KindFile) {
@@ -239,13 +248,51 @@ func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connect
 			refs = append(refs, text("Backup job «"+j.Name+"» — its copies are written here"))
 		}
 	}
+	devices := 0
 	for _, d := range s.users.Devices(sess.AccountID()) {
-		for _, c := range d.ScopeCols {
-			if c.AccountID == conn.ID && c.Path == col.Path {
-				refs = append(refs, text("davloom device «"+d.Name+"» — the collection leaves it at its next sync"))
-				break
-			}
+		if slices.ContainsFunc(d.ScopeCols, func(c store.DeviceScope) bool { return c.AccountID == conn.ID && c.Path == col.Path }) {
+			devices++
 		}
 	}
+	switch {
+	case devices == 1:
+		refs = append(refs, "1 device through davloom — it disappears for it at the next sync")
+	case devices > 1:
+		refs = append(refs, text(fmt.Sprintf("%d devices through davloom — it disappears for them at the next sync", devices)))
+	}
 	return refs
+}
+
+// collectionArchive is the archive line (s-profile-9, s-profile-19): when a
+// backup job of Carrel last made a whole archive of the collection, and that
+// a restore brings it back into a new one, not to this address.
+func (s *Server) collectionArchive(sess *session.Session, conn sealed.Connection, col sealed.Collection) view.Text {
+	what, into := "records", "collection"
+	if col.Has(view.KindFile) {
+		what, into = "files", "folder"
+	}
+	var last time.Time
+	copied := false
+	runs := s.users.BackupRuns(sess.AccountID())
+	for _, j := range s.catalogOf(sess).BackupJobs {
+		if !slices.ContainsFunc(j.Sources, func(src sealed.Selection) bool { return src.AccountID == conn.ID && src.Path == col.Path }) {
+			continue
+		}
+		copied = true
+		if at := user.LastWholeRun(runs[j.ID]); at.After(last) {
+			last = at
+		}
+	}
+	restore := fmt.Sprintf("Restoring brings the %s back into a new %s — not into this one, and not to this address.", what, into)
+	switch {
+	case !last.IsZero():
+		return text("Last time it was in an archive: " + last.In(s.timeFor(sess).tz).Format("2006-01-02") + ". " + restore)
+	case copied:
+		return text("A backup job copies it, but none has finished whole yet, so there is no archive of it here. " + restore)
+	}
+	if col.Has(view.KindFile) {
+		return "No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the files back into a new folder at a new address — not into this one."
+	}
+	return text("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the records back into a new " +
+		collectionNoun(col) + " at a new address — not into this one, and not to this address.")
 }

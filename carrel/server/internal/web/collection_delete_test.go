@@ -3,13 +3,18 @@ package web_test
 import (
 	"net/http"
 	"net/url"
+	"regexp"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/emersion/go-webdav/caldav"
 
 	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/internal/sealed"
+	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -180,5 +185,99 @@ func TestCollectionDeleteAlreadyGone(t *testing.T) {
 	}
 	if _, ok := catalogOf(t, f).Collection(f.id, f.col); ok {
 		t.Error("the catalog still holds it")
+	}
+}
+
+var (
+	frameArchiveMsg = regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush">(.*?)</div>`)
+	frameArchiveDay = regexp.MustCompile(`: (\d{4}-\d\d-\d\d)\.`)
+)
+
+// pointers are what s-profile-9 or s-profile-19 says points at the
+// collection, and the archive line under them.
+func pointers(t *testing.T, id string) (refs []string, archive string) {
+	t.Helper()
+	frame := mockupFrame(t, id)
+	for _, m := range frameRefItem.FindAllStringSubmatch(frame, -1) {
+		refs = append(refs, frameText(m[1]))
+	}
+	return refs, frameOne(t, frameArchiveMsg, frame, "archive line")[1]
+}
+
+// lastArchived writes a whole run of the job, finished on day.
+func lastArchived(t *testing.T, f davFixture, job, day string) {
+	t.Helper()
+	at, err := time.Parse("2006-01-02 15:04", day+" 12:00")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		st.Backups = append(st.Backups, store.BackupState{JobID: job, UserID: f.sess.AccountID(),
+			Runs: []store.BackupRun{{ID: "r-1", Started: at.Add(-time.Minute), Finished: &at, State: user.RunDone, Mode: sealed.BackupToDownload}}})
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// s-profile-9 (from-typecase note 20): what points at the collection is
+// counted by kind — «1 published link», «3 devices through davloom» — and a
+// backup job is named; the archive line says when it was last in an archive
+// and that a restore brings the records into a new collection. The server is
+// named by its connection, as in the head.
+func TestCollectionDeleteSheetIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "s-profile-9")
+	subject := frameOne(t, frameSheetSub, frame, "subject")[1]
+	warning := frameOne(t, frameSheetMsg, frame, "message")[1]
+	refs, archive := pointers(t, "s-profile-9")
+	if len(refs) != 3 {
+		t.Fatalf("s-profile-9 references %q: read it again", refs)
+	}
+	links := regexp.MustCompile(`^(\d+) published links? — `).FindStringSubmatch(refs[0])
+	devices := regexp.MustCompile(`^(\d+) devices through davloom — `).FindStringSubmatch(refs[len(refs)-1])
+	day := frameArchiveDay.FindStringSubmatch(archive)
+	if links == nil || devices == nil || day == nil ||
+		!strings.Contains(warning, "deleted on "+strings.Split(subject, " · ")[0]+".") {
+		t.Fatalf("s-profile-9 references %q, archive %q, head %q, warning %q: read it again", refs, archive, subject, warning)
+	}
+	job := regexp.MustCompile(`«([^»]+)»`).FindStringSubmatch(refs[1])
+	nLinks, _ := strconv.Atoi(links[1])
+	nDevices, _ := strconv.Atoi(devices[1])
+
+	f := calendarFixture(t, nil, "standup.ics", workSeries)
+	key, _ := f.sess.DataKey()
+	conn, _ := catalogOf(t, f).Connection(f.id)
+	for i := range nLinks {
+		if _, err := f.h.users.Publish(f.sess.AccountID(), key, conn,
+			user.PublishTarget{AccountID: f.id, Kind: "calendar", Col: f.col, Title: "Work " + strconv.Itoa(i)}, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		b.BackupJobs = append(b.BackupJobs, sealed.BackupJob{ID: "j-1", Name: job[1],
+			Sources: []sealed.Selection{{Kind: view.KindEvent, AccountID: f.id, Path: f.col}}})
+	})
+	lastArchived(t, f, "j-1", day[1])
+	if err := f.h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByID(f.sess.AccountID())
+		for i := range nDevices {
+			u.ProxyDevices = append(u.ProxyDevices, store.ProxyDevice{ID: "d-" + strconv.Itoa(i), Name: "Phone " + strconv.Itoa(i),
+				ScopeKinds: []string{string(view.KindEvent)}, ScopeCols: []store.DeviceScope{{AccountID: f.id, Path: f.col}}})
+		}
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(get(colDeleteHref(f), f.sess)))
+	host := strings.Split(string(sheet.Subject), " · ")[0]
+	if !strings.Contains(string(sheet.Warning), "deleted on "+host+".") {
+		t.Errorf("head %q, warning %q: the server named as in the head", sheet.Subject, sheet.Warning)
+	}
+	if !equalStrings(texts(sheet.References), refs) {
+		t.Errorf("references = %q,\nthe frame    %q", sheet.References, refs)
+	}
+	if string(sheet.Archive) != archive {
+		t.Errorf("archive = %q,\nthe frame %q", sheet.Archive, archive)
 	}
 }

@@ -12,7 +12,7 @@ import (
 // S-27.2: a device password is issued after the unlock sheet and shown
 // once; it opens the same data key as the sign-in password; changing the
 // sign-in password leaves it working; revoking stops it; an empty scope is
-// refused; the delete sheet of a collection names the devices that see it.
+// refused; the delete sheet of a collection counts the devices that see it.
 func TestDavloomDevices(t *testing.T) {
 	h := newHarness(t)
 	h.cfg.DAVloomPort = 8081
@@ -78,7 +78,7 @@ func TestDavloomDevices(t *testing.T) {
 	}
 
 	sheet := decode[view.CollectionDeleteSheet](t, h.do(get("/app/collections/delete?"+url.Values{"a": {"a1"}, "c": {seedBook}}.Encode(), alice)))
-	if len(sheet.References) != 1 || !strings.Contains(string(sheet.References[0]), "Телефон · DAVx5") {
+	if len(sheet.References) != 1 || !strings.HasPrefix(string(sheet.References[0]), "1 device through davloom — ") {
 		t.Errorf("references = %v", sheet.References)
 	}
 

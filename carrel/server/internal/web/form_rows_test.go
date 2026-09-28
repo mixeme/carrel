@@ -426,6 +426,56 @@ func TestQuickSheetRowsAreTheFrames(t *testing.T) {
 	}
 }
 
+var frameSheetLine = regexp.MustCompile(`(?s)</div>\s*<span class="tc-dim[^"]*tc-dim--wrap">(.*?)</span>\s*</div>\s*<div class="tc-sheet__foot">`)
+
+// The quick sheets say their line under the fields (s-notes-8, s-notes-9,
+// s-notes-10). The task's has no All day (from-typecase note 20, owner's
+// decision): a due date without a time is due the whole day, no date is no
+// due at all, and the date and the time show the frame's samples.
+func TestQuickTaskSheetIsTheFrame(t *testing.T) {
+	c := calendarFixture(t, nil)
+	for _, k := range []struct{ kind, frame string }{{"contacts", "s-notes-8"}, {"calendar", "s-notes-9"}, {"tasks", "s-notes-10"}} {
+		f := c
+		if k.kind == "contacts" {
+			f = contactsFixture(t, false)
+		}
+		line := frameOne(t, frameSheetLine, mockupFrame(t, k.frame), "line under the fields")[1]
+		sheet := decode[view.NewSheet](t, f.h.do(get(f.path(k.kind)+"/new/quick", f.sess)))
+		if string(sheet.Note) != line {
+			t.Errorf("%s quick sheet line = %q, want (%s) %q", k.kind, sheet.Note, k.frame, line)
+		}
+	}
+	quick := c.path("tasks") + "/new/quick"
+	tasks := decode[view.NewSheet](t, c.h.do(get(quick, c.sess)))
+	if got, want := sheetFields(tasks.Form), frameSheetFields(t, "s-notes-10"); !equalStrings(got, want) {
+		t.Errorf("task quick sheet = %q, want (s-notes-10) %q", got, want)
+	}
+	saved := func(set map[string]string) string {
+		t.Helper()
+		before := c.srv.Paths(c.col)
+		form := formFields(tasks.Form)
+		for k, v := range set {
+			form.Set(k, v)
+		}
+		if resp := c.h.do(postForm(quick, c.sess, form)); resp.Code != http.StatusSeeOther {
+			t.Fatalf("save %v: %d %s", set, resp.Code, resp.Body.String())
+		}
+		for _, p := range c.srv.Paths(c.col) {
+			if !slices.Contains(before, p) {
+				b, _, _ := c.srv.Object(p)
+				return unfolded(b)
+			}
+		}
+		t.Fatalf("save %v made nothing", set)
+		return ""
+	}
+	mustContain(t, saved(map[string]string{"summary": "Documents", "due.date": "2026-08-11"}), "DUE;VALUE=DATE:20260811")
+	mustContain(t, saved(map[string]string{"summary": "Call", "due.date": "2026-08-11", "due.time": "18:00"}), "DUE:20260811T180000Z")
+	if b := saved(map[string]string{"summary": "Someday"}); strings.Contains(b, "DUE") || strings.Contains(b, "DTSTART") {
+		t.Errorf("a task with no due date got one:\n%s", b)
+	}
+}
+
 var frameZoneItem = regexp.MustCompile(`(?s)<input[^>]*placeholder="([^"]*)"|<span class="tc-rubric">(.*?)</span>|<span class="tc-menu__sep"></span>|<button class="[^"]*tc-menu__item[^"]*"[^>]*>(.*?)</button>`)
 
 // zoneMenu is the zone list as s-agenda-8 draws it: «find: » the search,

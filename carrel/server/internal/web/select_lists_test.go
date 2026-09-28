@@ -155,9 +155,10 @@ func TestContactLabelListsAreTheFrames(t *testing.T) {
 	}
 	sameList(t, "new phone label", addRow(t, page.Form, "tel").Template[0].Options, "s-contacts-12")
 	sameList(t, "email label", addRow(t, page.Form, "email").Template[0].Options, "s-contacts-13")
-	held := rowNamed(t, page.Form, "email.0.type").Options
-	if last := held[len(held)-1]; last.Value != "INTERNET" || !last.Selected {
-		t.Errorf("email labels = %+v, want another client's INTERNET kept as a choice", held)
+	// INTERNET is no label (TestTypeValuesThatAreNoLabel): nothing is
+	// chosen, and the save below keeps it.
+	if sel := selectedOf(rowNamed(t, page.Form, "email.0.type").Options); len(sel) != 0 {
+		t.Errorf("TYPE=INTERNET selects %q", sel)
 	}
 
 	// Saved untouched, nothing of the labels changes.
@@ -183,6 +184,128 @@ func TestContactLabelListsAreTheFrames(t *testing.T) {
 		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
 	}
 	mustContain(t, body(t, f, "ann.vcf"), "TEL;TYPE=main:+1 555 0101", "TEL;TYPE=cell:+1 555 0103")
+}
+
+// An address is labelled from s-contacts-22 (from-typecase note 20): home,
+// work, other, and under a line the label another client wrote, as it is —
+// not turned into a type, not lost, not recased.
+func TestAddressLabelListIsTheFrame(t *testing.T) {
+	frame := frameList(t, "s-contacts-22")
+	foreign := strings.TrimPrefix(frame[len(frame)-1], "— ")
+	if foreign == frame[len(frame)-1] {
+		t.Fatalf("s-contacts-22 = %q, no label under a line: read it again", frame)
+	}
+	f := bookFixture(t, nil, "BEGIN:VCARD\nVERSION:3.0\nUID:ann\nFN:Ann\n"+
+		"ADR;TYPE="+foreign+":;;Lesnaya 5;Tver;;;\nADR;TYPE=Dacha:;;Lake 1;Tver;;;\nADR;TYPE=WORK:;;Main 2;Tver;;;\nEND:VCARD\n")
+	page := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/ann/edit", f.sess)))
+	held := rowNamed(t, page.Form, "adr.0.type").Options
+	sameList(t, "address label", held, "s-contacts-22")
+	if sel := selectedOf(held); len(sel) != 1 || sel[0] != foreign {
+		t.Errorf("TYPE=%s selects %q", foreign, sel)
+	}
+	if got := serverList(rowNamed(t, page.Form, "adr.1.type").Options); got[len(got)-1] != "— Dacha" {
+		t.Errorf("another client's label = %q, want it as it is under a line", got)
+	}
+	if sel := selectedOf(rowNamed(t, page.Form, "adr.2.type").Options); len(sel) != 1 || sel[0] != "WORK" {
+		t.Errorf("TYPE=WORK selects %q", sel)
+	}
+	if got := serverList(addRow(t, page.Form, "adr").Template[0].Options); !equalStrings(got, frame[:len(frame)-1]) {
+		t.Errorf("new address label = %q, want (s-contacts-22) %q", got, frame[:len(frame)-1])
+	}
+}
+
+// A TYPE value that is not a label — INTERNET, the vCard 3 default of an
+// e-mail, VOICE of a phone, PREF, X400, the postal kinds of an address — is
+// no label: it is not offered as another client's, the label beside it is
+// chosen (WORK,PREF is work), and it stays in the card whatever the save,
+// a label changed beside it included (S-7).
+func TestTypeValuesThatAreNoLabel(t *testing.T) {
+	f := bookFixture(t, nil, "BEGIN:VCARD\nVERSION:3.0\nUID:ann\nFN:Ann\n"+
+		"TEL;TYPE=VOICE:+1 555 0100\nTEL;TYPE=WORK,PREF:+1 555 0101\nTEL;TYPE=CELL,VOICE:+1 555 0102\n"+
+		"EMAIL;TYPE=INTERNET:ann@example.org\nEMAIL;TYPE=INTERNET,X400:ann@example.net\n"+
+		"ADR;TYPE=dom,postal:;;Main 2;Tver;;;\nEND:VCARD\n")
+	page := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/ann/edit", f.sess)))
+	for _, c := range []struct {
+		row, frame string
+		chosen     []string
+	}{
+		{"tel.0.type", "s-contacts-12", nil},
+		{"tel.1.type", "s-contacts-12", []string{"work"}},
+		{"tel.2.type", "s-contacts-12", []string{"mobile"}},
+		{"email.0.type", "s-contacts-13", nil},
+		{"email.1.type", "s-contacts-13", nil},
+		{"adr.0.type", "s-contacts-22", nil},
+	} {
+		row := rowNamed(t, page.Form, c.row)
+		want := frameList(t, c.frame)
+		if strings.HasPrefix(want[len(want)-1], "— ") {
+			want = want[:len(want)-1] // s-contacts-22 draws a foreign label too
+		}
+		if got := serverList(row.Options); !equalStrings(got, want) {
+			t.Errorf("%s = %q, want (%s) %q with no foreign label", c.row, got, c.frame, want)
+		}
+		var chosen []string
+		for _, o := range row.Options {
+			if o.Selected {
+				chosen = append(chosen, string(o.Label))
+			}
+		}
+		if !equalStrings(chosen, c.chosen) && !(len(chosen) == 0 && len(c.chosen) == 0) {
+			t.Errorf("%s chooses %q, want %q", c.row, chosen, c.chosen)
+		}
+	}
+
+	// Saved as a browser posts it — each list its chosen value, or nothing —
+	// the card keeps every TYPE.
+	form := formFields(page.Form)
+	for _, set := range page.Form.Sets {
+		for _, r := range set.Rows {
+			if strings.HasSuffix(r.Name, ".type") {
+				form.Set(r.Name, first(selectedOf(r.Options)))
+			}
+		}
+	}
+	form.Set("fn", "Ann B")
+	before := body(t, f, "ann.vcf")
+	if resp := f.h.do(postForm(f.path("contacts")+"/ann/edit", f.sess, form)); resp.Code != 303 {
+		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
+	}
+	// TYPE=a,b and TYPE=a;TYPE=b are one parameter (RFC 6350 §5.6); the
+	// card's writer uses the second.
+	after := typeLists(body(t, f, "ann.vcf"))
+	for _, line := range []string{"TEL;TYPE=VOICE:+1 555 0100", "TEL;TYPE=WORK,PREF:+1 555 0101", "TEL;TYPE=CELL,VOICE:+1 555 0102",
+		"EMAIL;TYPE=INTERNET:ann@example.org", "EMAIL;TYPE=INTERNET,X400:ann@example.net", "ADR;TYPE=dom,postal:;;Main 2;Tver;;;"} {
+		if strings.Contains(before, line) && !strings.Contains(after, line) {
+			t.Errorf("%q changed:\n%s", line, after)
+		}
+	}
+
+	// A label chosen beside them replaces the label, not what is no label.
+	page = decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/ann/edit", f.sess)))
+	form = formFields(page.Form)
+	form.Set("tel.1.type", optionValue(t, rowNamed(t, page.Form, "tel.1.type").Options, "home"))
+	form.Set("email.0.type", optionValue(t, rowNamed(t, page.Form, "email.0.type").Options, "work"))
+	if resp := f.h.do(postForm(f.path("contacts")+"/ann/edit", f.sess, form)); resp.Code != 303 {
+		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
+	}
+	mustContain(t, typeLists(body(t, f, "ann.vcf")), "TEL;TYPE=home,PREF:+1 555 0101", "EMAIL;TYPE=work,INTERNET:ann@example.org")
+}
+
+var repeatedType = regexp.MustCompile(`(;TYPE=[^;:]*);TYPE=`)
+
+// typeLists writes a TYPE given several times as one list.
+func typeLists(card string) string {
+	for repeatedType.MatchString(card) {
+		card = repeatedType.ReplaceAllString(card, "$1,")
+	}
+	return card
+}
+
+func first(v []string) string {
+	if len(v) == 0 {
+		return ""
+	}
+	return v[0]
 }
 
 func optionValue(t *testing.T, opts []view.Option, label string) string {

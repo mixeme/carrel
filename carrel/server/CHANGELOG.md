@@ -17,6 +17,48 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.72 — 2026-09-28
+
+Copies the Typecase mockup (server note 20, to-typecase task 35): the
+address label list, the quick task sheet without All day, and what the
+delete sheet says points at a collection and when it was last archived.
+
+### Added
+
+- **`NewSheet.note`** — the line under the quick sheet's fields: «No time
+  means the whole day. A task with no due date is a task all the same — both
+  may stay empty.» (s-notes-10), and the contact's and the event's
+  (s-notes-8, s-notes-9). Omitted when the sheet has no fields.
+
+### Changed
+
+- **The quick task sheet** (s-notes-10) is Summary, Due date and Due time,
+  with the samples «YYYY-MM-DD» and «--:--» in `placeholder`; it has no All
+  day. A due date without a time is due the whole day (`DUE;VALUE=DATE`), no
+  date is no due at all, and nothing is refused (owner's decision). The full
+  form keeps its All day (s-tasks-3).
+- **A label another client wrote** — of an address (s-contacts-22), a phone
+  or an e-mail — stands last under a line (`separator`), as it is: before it
+  had no line and was shown lowercased. A `TYPE` value that is no label —
+  `INTERNET`, `X400`, `VOICE`, `PREF`, `MSG`, `DOM`, `INTL`, `POSTAL`,
+  `PARCEL` — is not offered as one: `WORK,PREF` chooses work, `INTERNET`
+  alone chooses nothing (the row's `value` is the chosen label, or empty).
+  Such values stay in the card: a save that leaves the label keeps the
+  `TYPE` as it was, and a label chosen anew replaces only the label
+  (`WORK,PREF` made home is `home,PREF`). Before, `INTERNET` was offered as
+  another client's label, and a label chosen on `WORK,PREF` dropped `PREF`.
+- **`CollectionDeleteSheet.references`** count the published links and the
+  davloom devices — «1 published link — answers “not found” from that
+  moment», «3 devices through davloom — it disappears for them at the next
+  sync» — and name a backup job, as before (s-profile-9). Before, a line
+  named each link and each device.
+- **`CollectionDeleteSheet.archive`** says when a backup job that copies the
+  collection or the folder last finished whole: «Last time it was in an
+  archive: 2026-08-14. Restoring brings the records back into a new
+  collection — not into this one, and not to this address.» («files»,
+  «folder» for a folder, s-profile-19). A job that copies it and has not
+  finished whole yet is said so; with no job the line is as before.
+
 ## v0.2.71 — 2026-09-28
 
 Copies the Typecase mockup (server note 19). This part — the connections

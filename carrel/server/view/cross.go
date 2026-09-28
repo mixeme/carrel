@@ -137,7 +137,11 @@ type NewSheet struct {
 	Target TargetPicker `json:"target"`
 	// Form holds the few fields without which the record does not exist
 	// (U-6.16). Empty when the sheet only asks where the record goes.
-	Form    Form     `json:"form"`
+	Form Form `json:"form"`
+	// Строка под полями: что лист не спрашивает и почему — «No time means
+	// the whole day…» у задачи (s-notes-10), у контакта и события —
+	// s-notes-8, s-notes-9; пусто, когда полей нет
+	Note    Text     `json:"note,omitempty"`
 	Actions []Action `json:"actions"`
 }
 
@@ -185,7 +189,7 @@ type CollectionDeleteSheet struct {
 	Kind       Kind     `json:"kind"`
 	Subject    Text     `json:"subject"`
 	Warning    Text     `json:"warning"`    // что именно исчезнет и что копии у Carrel нет
-	References []Text   `json:"references"` // что на неё ссылается: ссылки, задания, устройства
+	References []Text   `json:"references"` // что на неё ссылается: ссылки и устройства счётом, задания по имени
 	Archive    Text     `json:"archive"`    // когда попадала в архив и чего восстановление не сделает
 	Export     *Action  `json:"export"`     // «сначала скачать»; nil — экспортировать нечем
 	ExportNote Text     `json:"exportNote"`

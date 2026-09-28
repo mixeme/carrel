@@ -1296,7 +1296,13 @@ type TargetOption struct {
     Last     bool // последний использованный
 }
 
-type NewSheet struct { Kind Kind; Target TargetPicker; Form Form; Actions []Action }
+type NewSheet struct {
+    Kind    Kind
+    Target  TargetPicker
+    Form    Form
+    Note    Text // строка под полями: «No time means the whole day…» у задачи (s-notes-10), у контакта и события — s-notes-8, s-notes-9; пусто, когда полей нет
+    Actions []Action
+}
 
 // Лист переноса и копии записи (s-contacts-2): Title — «Move contact»,
 // «Copy event»; Subject — что и откуда, «Анна Ковалёва · from nextcloud ·
@@ -1388,7 +1394,7 @@ type CollectionDeleteSheet struct {
     Kind       Kind
     Subject    Text
     Warning    Text    // что именно исчезнет и что копии у Carrel нет
-    References []Text  // что на неё ссылается: ссылки, задания, устройства
+    References []Text  // что на неё ссылается: ссылки и устройства счётом, задания по имени
     Archive    Text    // когда попадала в архив и чего восстановление не сделает
     Export     *Action // «сначала скачать»; nil — экспортировать нечем
     ExportNote Text

@@ -162,12 +162,20 @@ func TestFolderDeleteSheetIsTheFrame(t *testing.T) {
 		t.Fatalf("s-profile-19 field %q, warning %q, references %q: read it again", field, warning, refs)
 	}
 	job := regexp.MustCompile(`«([^»]+)»`).FindStringSubmatch(refs[1])
+	// The archive line is the collection's (from-typecase note 20): the job
+	// that copies the folder has made an archive of it.
+	_, archive := pointers(t, "s-profile-19")
+	day := frameArchiveDay.FindStringSubmatch(archive)
+	if day == nil {
+		t.Fatalf("s-profile-19 archive %q: read it again", archive)
+	}
 	f, id, docs := storageFolder(t)
 	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
 		b.Attachments = &sealed.AttachmentFolder{AccountID: id, Path: docs, Folder: []string{"carrel"}}
 		b.BackupJobs = append(b.BackupJobs, sealed.BackupJob{ID: "j-1", Name: job[1],
 			Sources: []sealed.Selection{{Kind: view.KindFile, AccountID: id, Path: docs}}})
 	})
+	lastArchived(t, f, "j-1", day[1])
 	page := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
 	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(get(menuHref(t, connectionRow(t, page, id, docs).Menu, "collection.delete"), f.sess)))
 	if sheet.Subject != "vps · Docs" {
@@ -180,6 +188,9 @@ func TestFolderDeleteSheetIsTheFrame(t *testing.T) {
 	}
 	if !equalStrings(texts(sheet.References), refs) {
 		t.Errorf("references = %q, the frame %q", sheet.References, refs)
+	}
+	if string(sheet.Archive) != archive {
+		t.Errorf("archive = %q,\nthe frame %q", sheet.Archive, archive)
 	}
 	if sheet.Export == nil || string(sheet.Export.Label) != open[1] || string(sheet.ExportNote) != open[2] {
 		t.Errorf("export %+v %q, the frame %q %q", sheet.Export, sheet.ExportNote, open[1], open[2])

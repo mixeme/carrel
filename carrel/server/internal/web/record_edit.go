@@ -120,8 +120,10 @@ type editField struct {
 	// on the day of the start, or on the next when it is earlier (s-notes-9).
 	quickNoDate bool
 	// quickSample is the sample in the empty row of the quick sheet: «+7 …»,
-	// «name@example.org» (s-notes-8).
-	quickSample string
+	// «name@example.org» (s-notes-8); of a time, its date's, and
+	// quickTimeSample its time's: «YYYY-MM-DD», «--:--» (s-notes-10).
+	quickSample     string
+	quickTimeSample string
 }
 
 // fieldOption is one value a fieldChoice offers; sep draws a line before it,
@@ -652,7 +654,8 @@ var editFields = map[view.Kind][]editField{
 		{name: "summary", label: "Summary", prop: "SUMMARY", typ: fieldText},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
 		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, taskDay: true, set: "When"},
-		{name: "due", label: "Due date", timeLabel: "Due time", prop: "DUE", typ: fieldTime, taskDay: true, set: "When"},
+		{name: "due", label: "Due date", timeLabel: "Due time", prop: "DUE", typ: fieldTime, taskDay: true, set: "When",
+			quickSample: "YYYY-MM-DD", quickTimeSample: "--:--"},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: taskStatuses, blank: "NEEDS-ACTION", set: "Progress"},
 		{name: "priority", label: "Priority", prop: "PRIORITY", typ: fieldChoice, choices: priorities, set: "Progress"},
 		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent, set: "Progress"},
@@ -680,6 +683,14 @@ var quickFieldNames = map[view.Kind][]string{
 	view.KindEvent:   {"summary", "start", "end", "reminder"},
 	view.KindTask:    {"summary", "due"},
 	view.KindNote:    {"description"},
+}
+
+// quickNotes are the lines under the quick sheet's fields: what it does not
+// ask and why (s-notes-8, s-notes-9, s-notes-10).
+var quickNotes = map[view.Kind]view.Text{
+	view.KindContact: "The first word is Given, the rest Family — «Пётр Ковалёв», not «Ковалёв Пётр». Everything else is filled in on the card.",
+	view.KindEvent:   "Repeats, guests and more live on the card. A reminder is set here because that is why most events are created.",
+	view.KindTask:    "No time means the whole day. A task with no due date is a task all the same — both may stay empty.",
 }
 
 func quickFields(k view.Kind) []editField {
@@ -1084,6 +1095,11 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	props := obj.Props()
 	escape := c.spec.kind != view.KindContact
 	fillNames(c.spec.kind, have, want)
+	for _, f := range editFields[c.spec.kind] {
+		if f.typed {
+			want[f.name+".type"] = keptLabels(f.prop, want[f.name+".type"], have[f.name+".type"])
+		}
+	}
 	startRow := triple(want["start"])
 	startChanged := !sameRows(want["start"], have["start"])
 	// A new zone rewrites both times at the instants the form names, even
@@ -1707,24 +1723,87 @@ func sameLabels(a, b []string) bool {
 	return true
 }
 
+// notLabels are TYPE values that say something other than a label: the
+// vCard 3 default of an e-mail (INTERNET) and of a phone (VOICE), X400, the
+// preference (PREF), a phone that takes messages (MSG), and the postal kinds
+// of an address (DOM, INTL, POSTAL, PARCEL). They are no label — not
+// offered as another client's — and stay in the card as they are (S-7).
+var notLabels = map[string]bool{
+	"internet": true, "x400": true, "pref": true, "voice": true, "msg": true,
+	"dom": true, "intl": true, "postal": true, "parcel": true,
+}
+
+// typeParts splits a TYPE into the parts that are a label and the rest.
+func typeParts(raw string) (labels, rest []string) {
+	for _, p := range strings.Split(raw, ",") {
+		switch p = strings.TrimSpace(p); {
+		case p == "":
+		case notLabels[strings.ToLower(p)]:
+			rest = append(rest, p)
+		default:
+			labels = append(labels, p)
+		}
+	}
+	return labels, rest
+}
+
+// shownLabel is the label a TYPE shows as chosen: its first part that is one
+// of the rowLabels of prop, as the card writes it — WORK,PREF is WORK, «work»
+// — else its label parts as they are, another client's, else none.
+func shownLabel(prop, raw string) (value string, known bool) {
+	labels, _ := typeParts(raw)
+	for _, p := range labels {
+		for _, l := range rowLabels[prop] {
+			if strings.EqualFold(l.value, p) {
+				return p, true
+			}
+		}
+	}
+	return strings.Join(labels, ","), false
+}
+
 // labelOptions are the rowLabels of prop and the row's own label when it is
 // none of them. A label is matched whatever its case, and a matched one keeps
-// the value as the card holds it, so a save that leaves it changes nothing:
-// TYPE=CELL is «mobile», offered once. A row without a label selects none.
+// the value as the card holds it: TYPE=CELL is «mobile», offered once. A row
+// without a label — none, or only what is no label (notLabels) — selects
+// none. Another client's label stands under a line as it is
+// (s-contacts-22): not turned into a type, not lost.
 func labelOptions(prop, selected string) []view.Option {
 	var opts []view.Option
-	seen := selected == ""
+	chosen, known := shownLabel(prop, selected)
 	for _, l := range rowLabels[prop] {
 		o := view.Option{Value: l.value, Label: text(l.label)}
-		if selected != "" && strings.EqualFold(l.value, selected) {
-			o.Value, o.Selected, seen = selected, true, true
+		if known && strings.EqualFold(l.value, chosen) {
+			o.Value, o.Selected = chosen, true
 		}
 		opts = append(opts, o)
 	}
-	if !seen {
-		opts = append(opts, view.Option{Value: selected, Label: text(strings.ToLower(strings.ReplaceAll(selected, ",", ", "))), Selected: true})
+	if !known && chosen != "" {
+		opts = append(opts, view.Option{Value: chosen, Label: text(chosen), Selected: true, Separator: true})
 	}
 	return opts
+}
+
+// keptLabels are the labels a save writes: a row whose chosen label is the
+// one it showed keeps its TYPE exactly as the card holds it, and a label
+// chosen anew replaces only the label, keeping what is no label beside it
+// (WORK,PREF made home is home,PREF). have are the TYPEs of the rows the
+// form had, want the labels posted.
+func keptLabels(prop string, want, have []string) []string {
+	out := slices.Clone(want)
+	for i := range min(len(want), len(have)) {
+		shown, _ := shownLabel(prop, have[i])
+		if strings.EqualFold(want[i], have[i]) || strings.EqualFold(strings.TrimSpace(want[i]), shown) {
+			out[i] = have[i]
+			continue
+		}
+		_, rest := typeParts(have[i])
+		if l := strings.TrimSpace(want[i]); l != "" {
+			rest = append([]string{l}, rest...)
+		}
+		out[i] = strings.Join(rest, ",")
+	}
+	return out
 }
 
 // timeOps writes a date or date-time in the form it had: a TZID stays with
@@ -2204,7 +2283,9 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			if f.allDay && full {
 				set.Rows = append(set.Rows, view.FormRow{Name: f.name + ".allday", Label: "All day", Kind: view.InputCheck, Value: text(row[2])})
 			}
-			if f.taskDay && !slices.ContainsFunc(set.Rows, func(r view.FormRow) bool { return r.Name == taskDayBox }) {
+			// The quick sheet has no box of a task: a date without a time
+			// is the whole day (s-notes-10, quickTaskDay).
+			if f.taskDay && full && !slices.ContainsFunc(set.Rows, func(r view.FormRow) bool { return r.Name == taskDayBox }) {
 				set.Rows = append(set.Rows, view.FormRow{Name: taskDayBox, Label: "All day", Kind: view.InputCheck, Value: text(first(st.values[taskDayBox]))})
 			}
 			date := view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required}
@@ -2222,6 +2303,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				if f.quickTime != "" {
 					clock.Label = text(f.quickTime)
 				}
+				date.Placeholder, clock.Placeholder = text(f.quickSample), text(f.quickTimeSample)
 				set.Rows = append(set.Rows, date, clock)
 			}
 			if f.allDay && !full {
@@ -2336,7 +2418,8 @@ func shownRows(vals []string, full bool) []string {
 // labelRow is the Label of a phone or an e-mail row (s-contacts-12, -13),
 // before its value.
 func labelRow(f editField, name, label string) view.FormRow {
-	return view.FormRow{Name: name + ".type", Label: "Label", Kind: view.InputSelect, Value: text(label), Options: labelOptions(f.prop, label)}
+	shown, _ := shownLabel(f.prop, label)
+	return view.FormRow{Name: name + ".type", Label: "Label", Kind: view.InputSelect, Value: text(shown), Options: labelOptions(f.prop, label)}
 }
 
 // removedKey carries the rows Remove took out without scripts (C-6.8
@@ -2702,7 +2785,7 @@ func doneBack(c *collectionCtx, uid, from string) string {
 func changedValues(fields []editField, base, want formValues) formValues {
 	out := formValues{}
 	for _, f := range fields {
-		labelled := f.typed && !sameLabels(want[f.name+".type"], base[f.name+".type"])
+		labelled := f.typed && !sameLabels(keptLabels(f.prop, want[f.name+".type"], base[f.name+".type"]), base[f.name+".type"])
 		if !sameRows(want[f.name], base[f.name]) || labelled {
 			out[f.name] = want[f.name]
 			if f.typed {
@@ -2928,6 +3011,7 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 	}
 	want := s.submittedValues(c, r)
 	quickDays(c.spec.kind, want)
+	quickTaskDay(c.spec.kind, want)
 	if r.URL.Query().Get("op") == "open" {
 		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
 		return
@@ -2958,6 +3042,27 @@ func quickDays(kind view.Kind, vals formValues) {
 	}
 }
 
+// quickTaskDay is the task's box the quick sheet does not draw (s-notes-10,
+// owner's decision 28.09.2026): a due date without a time is due the whole
+// day. No date is no due at all, and a date with a time is that moment.
+func quickTaskDay(kind view.Kind, vals formValues) {
+	if kind != view.KindTask {
+		return
+	}
+	due := triple(vals["due"])
+	day := ""
+	if due[0] != "" && due[1] == "" {
+		day = "on"
+	}
+	vals[taskDayBox] = []string{day}
+	for _, f := range editFields[kind] {
+		if row := triple(vals[f.name]); f.taskDay && row[0] != "" {
+			row[2] = day
+			vals[f.name] = row[:]
+		}
+	}
+}
+
 // quickSheet is the collection picker of newSheet with a form under it. The
 // fields are the full form's own, by name (quickFields), and the form posts to
 // the sheet's address; "Open the card" posts to the same address with op=open,
@@ -2981,6 +3086,7 @@ func (s *Server) quickSheet(c *collectionCtx, st editState) view.NewSheet {
 		s.cancelAction(c, st),
 	}
 	sheet.Form = form
+	sheet.Note = quickNotes[c.spec.kind]
 	return sheet
 }
 
