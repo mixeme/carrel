@@ -4,3 +4,6 @@
 
 # Байт-код скриптов сборки эталонов из docs/visual/tools.
 __pycache__/
+
+# Worktrees of Claude Code sessions (git worktree add under .claude/)
+/.claude/worktrees/

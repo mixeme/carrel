@@ -14,13 +14,15 @@
 
 Монорепозиторий. Сервер — `carrel/server/`, `module carrel.dev/carrel/server`,
 AGPL-3.0-or-later; не корень репозитория и не корневой `server/`. Typecase
-(`carrel.dev/typecase`, MIT) с 10.09.2026 живёт в своём репозитории. Будущий
-клиент — **отдельный модуль** `carrel.dev/carrel/client` в `carrel/client/`
+(`carrel.dev/typecase`, MIT) с 10.09.2026 живёт в своём репозитории. Клиент —
+**отдельный модуль** `carrel.dev/carrel/client` в `carrel/client/`
 (решение владельца 28.09.2026): импортирует `carrel.dev/carrel/server/view`,
-открытый пакет отрисовки сервера и Typecase; `internal/*` ему недоступны.
-Сервер импортирует клиент только из `cmd/carrel` — через него же, и только
-там, в граф сервера входит Typecase. Typecase подключается меткой выпуска;
-пока меток нет, клиент её не подключает.
+открытый пакет отрисовки сервера `carrel.dev/carrel/server/render` и
+Typecase; `internal/*` ему недоступны. Сервер импортирует клиент только из
+`cmd/carrel` — через него же, и только там, в граф сервера входит Typecase.
+Typecase подключается меткой выпуска; пока меток нет, клиент её не
+подключает. Пока клиент не печатает HTML, `cmd/carrel` его не подключает и
+сервер отвечает `render.JSONRenderer`.
 
 `VERSION` в корне — версия продукта. `THIRD_PARTY.md` — в том модуле, куда
 добавили зависимость, тем же коммитом.
@@ -29,15 +31,21 @@ AGPL-3.0-or-later; не корень репозитория и не корнев
 carrel/server/
   cmd/carrel/ cmd/carrel-wipe/
   view/                  C-6, C-8, C-9; JSON-теги = фикстуры
+  render/                C-7.1–C-7.3: Renderer, заголовки, цели, OOB, JSONRenderer
   internal/conf crypt store session sealed
   internal/dav discover model
   internal/provider/{card,cal,file}
   internal/photo fanout dupes web user mail backup publish proxy
   integration/           живой набор, -tags=integration
   testdata/ scripts/ Dockerfile docker-compose.linux.yml
+carrel/client/           module carrel.dev/carrel/client; require server (replace ../server)
+  zone/                  зона вью-модели страницы по цели C-7.2
+  screens/               экраны: только вызовы виджетов (U-5.2); пока пуст
+  guard_test.go          защиты U-15.2: импорты, строки, файлы, реестры
+  testdata/              нарочно испорченные образцы — укусы защит
 ```
 
-Зависимости только вниз: `web` → `view`, `session`, `store`, `fanout`,
+Зависимости только вниз: `web` → `view`, `render`, `session`, `store`, `fanout`,
 провайдеры → `model`, `dav` → страж, `discover`; `store` и `session` → `crypt`.
 Транспорт не знает календарь, модель не знает запрос, провайдер не знает
 разметку. Страницы собирает `web`; `fanout`, `dupes`, `photo`, `backup`,
@@ -46,9 +54,11 @@ carrel/server/
 `[]view.Block`, `card.Foreign` → `[]view.Field`. Общего `internal/provider`
 нет: интерфейс источника — в `internal/fanout`.
 
-**Пока нет клиента** страницы, фрагменты и листы отвечают JSON вью-модели
-(`Renderer` в `internal/web`, сейчас `JSONRenderer`). Потоки, файлы, SSE, DAV,
-редиректы, `/healthz` — настоящие.
+**Пока клиент не печатает HTML** страницы, фрагменты и листы отвечают JSON
+вью-модели (`render.Renderer`, сейчас `render.JSONRenderer`). Потоки, файлы,
+SSE, DAV, редиректы, `/healthz` — настоящие. `render` знает только контракт
+C-7.1–C-7.3 — ни разметки, ни имён виджетов; `view` и `render` — всё, что
+клиент видит у сервера.
 
 
 ---

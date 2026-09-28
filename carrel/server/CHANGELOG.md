@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.73 — 2026-09-28
+
+The render contract is open: `carrel.dev/carrel/server/render` (client plan,
+stage 1). Nothing changes on the wire — every answer, header and fixture is
+the same byte for byte.
+
+### Added
+
+- **Package `render`** — what `internal/web` answers through, now importable
+  by the client module: the `Renderer` interface, `OOB` and the fragment
+  envelope `FragmentPayload`, the header names `Carrel-View` and
+  `Carrel-Target` with the view values `page` and `fragment` (C-7.1), the
+  eight target names of C-7.2 and `Targets()` in their order, `WantsFragment`,
+  `FragmentTarget`, and `JSONRenderer`, which the server keeps answering
+  with until the client draws HTML.
+
+### For consumers
+
+Implement `render.Renderer` to draw the server's answers; a fragment comes
+with the whole view model of the page and the target it asks for — which
+part of the model that target is, C-7.2 now says («Где зона во
+вью-модели»). `web.New` takes a `render.Renderer`; `web.JSONRenderer` is
+`render.JSONRenderer`.
+
 ## v0.2.72 — 2026-09-28
 
 Copies the Typecase mockup (server note 20, to-typecase task 35): the

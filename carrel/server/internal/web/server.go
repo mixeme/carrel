@@ -15,6 +15,7 @@ import (
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -204,7 +205,7 @@ type Server struct {
 	store    *store.Store
 	sessions *session.Manager
 	users    Users
-	render   Renderer
+	render   render.Renderer
 	limit    *Limiter
 	guard    *dav.Guard // every outbound DAV request of this server (S-5.1)
 	probes   probes     // self-requests of a running installation check (S-28.1)
@@ -264,9 +265,9 @@ func (s *Server) SetClock(at time.Time) {
 }
 
 // New builds a Server with all C-5 routes registered.
-func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, render Renderer, version, commit string) *Server {
-	if render == nil {
-		render = JSONRenderer{}
+func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, rd render.Renderer, version, commit string) *Server {
+	if rd == nil {
+		rd = render.JSONRenderer{}
 	}
 	s := &Server{
 		cfg:      cfg,
@@ -274,7 +275,7 @@ func New(cfg *conf.Config, st *store.Store, mgr *session.Manager, users Users, r
 		store:    st,
 		sessions: mgr,
 		users:    users,
-		render:   render,
+		render:   rd,
 		limit:    NewLimiter(),
 		guard:    dav.NewGuard(cfg),
 		version:  version,

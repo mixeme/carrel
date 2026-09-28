@@ -12,6 +12,7 @@ import (
 	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -29,11 +30,11 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 		s.notFound(w, r)
 	case err != nil:
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
-	case WantsFragment(r) && FragmentTarget(r) == TargetDetails:
+	case render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetDetails:
 		// The panel beside a list (C-7.2): the row chosen there is asked
 		// for at its own address, and what comes back is the card as a
 		// panel — the same record, without the screen around it.
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetDetails, s.recordDetails(c, uid, obj), nil)
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetDetails, s.recordDetails(c, uid, obj), nil)
 	default:
 		s.writePage(w, r, http.StatusOK, s.withLinked(r.Context(), c, uid, obj, s.recordPage(c, uid, obj)))
 	}

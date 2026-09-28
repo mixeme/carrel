@@ -11,6 +11,7 @@ import (
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -131,8 +132,8 @@ func (s *Server) postAdminMailTest(w http.ResponseWriter, r *http.Request) {
 			result.OK, result.Reply = true, text(reply)
 		}
 	}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetMain, result, nil)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetMain, result, nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, s.adminSettingsPage(sess, settingsFlash{testTo: to, test: &result}))

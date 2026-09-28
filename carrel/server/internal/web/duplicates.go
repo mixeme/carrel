@@ -18,6 +18,7 @@ import (
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -607,7 +608,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not save the decision", http.StatusInternalServerError)
 		return
 	}
-	if !WantsFragment(r) {
+	if !render.WantsFragment(r) {
 		s.redirect(w, r, "/app/duplicates")
 		return
 	}
@@ -622,7 +623,7 @@ func (s *Server) postDuplicatesDecide(w http.ResponseWriter, r *http.Request) {
 	if notice != nil {
 		notices = append(notices, *notice)
 	}
-	_ = s.render.Fragment(w, r, http.StatusOK, TargetMain, out, []OOB{{Target: TargetNotices, Body: notices}})
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetMain, out, []render.OOB{{Target: render.TargetNotices, Body: notices}})
 }
 
 // decided is the group a decision left: a link is the linked group that

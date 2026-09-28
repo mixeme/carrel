@@ -22,6 +22,7 @@ import (
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -123,8 +124,8 @@ func (s *Server) canSendLetters(sess *session.Session) bool {
 }
 
 func (s *Server) writeMailSheet(w http.ResponseWriter, r *http.Request, sheet any) {
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, sheet)

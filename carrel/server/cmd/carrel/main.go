@@ -26,6 +26,7 @@ import (
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/internal/web"
+	"carrel.dev/carrel/server/render"
 )
 
 // version and commit are set by -ldflags at build time (C-13: the About
@@ -90,7 +91,7 @@ func serve(ctx context.Context, cfg *conf.Config) error {
 	defer stopPurge()
 
 	users := user.New(st, mgr, cfg)
-	srv := web.New(cfg, st, mgr, users, web.JSONRenderer{}, version, commit)
+	srv := web.New(cfg, st, mgr, users, render.JSONRenderer{}, version, commit)
 
 	addr := net.JoinHostPort(cfg.Bind, strconv.Itoa(cfg.Port))
 	servers := []*http.Server{{

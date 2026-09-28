@@ -17,6 +17,7 @@ import (
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -874,12 +875,12 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, back+"?again=1")
 		return
 	}
-	if !WantsFragment(r) {
+	if !render.WantsFragment(r) {
 		s.redirect(w, r, "/app/"+spec.segment)
 		return
 	}
 	if spec.kind == view.KindFile {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetRail, s.filesRail(sess, s.catalogOf(sess), nil), nil)
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetRail, s.filesRail(sess, s.catalogOf(sess), nil), nil)
 		return
 	}
 	st, err := s.readCombined(r, sess, s.catalogOf(sess), spec)
@@ -887,7 +888,7 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "could not start the list", http.StatusInternalServerError)
 		return
 	}
-	_ = s.render.Fragment(w, r, http.StatusOK, TargetRail, st.shell.Rail, []OOB{{Target: TargetPoll, Body: *st.poll}})
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetRail, st.shell.Rail, []render.OOB{{Target: render.TargetPoll, Body: *st.poll}})
 }
 
 // timelineReturn is the way back an Apply may take: only to a person's

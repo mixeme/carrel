@@ -8,6 +8,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -79,8 +80,8 @@ func (s *Server) postSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 // depositRefused answers the deposit sheet with its error: the sheet again
 // when it was asked as one, the escrow page with it otherwise.
 func (s *Server) depositRefused(w http.ResponseWriter, r *http.Request, sess *session.Session, errText string) {
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.depositSheet(sess, text(errText)), nil)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.depositSheet(sess, text(errText)), nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, s.buildEscrowPage(sess, errText))
@@ -99,8 +100,8 @@ func (s *Server) getEscrowDeposit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sheet := s.depositSheet(sess, "")
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, sheet)
@@ -132,8 +133,8 @@ func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 			{ID: "escrow.withdraw.cancel", Label: "Cancel", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true},
 		},
 	}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, sheet)

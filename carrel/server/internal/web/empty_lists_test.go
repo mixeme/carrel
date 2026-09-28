@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"carrel.dev/carrel/server/internal/web"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -74,7 +74,7 @@ func TestEmptyListsGoOutAsLists(t *testing.T) {
 	}
 	for _, page := range pages {
 		rec := httptest.NewRecorder()
-		if err := (web.JSONRenderer{}).JSON(rec, 200, page); err != nil {
+		if err := (render.JSONRenderer{}).JSON(rec, 200, page); err != nil {
 			t.Fatalf("%T: %v", page, err)
 		}
 		var raw any

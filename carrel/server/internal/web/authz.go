@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/render"
 )
 
 func (s *Server) requireLogin(w http.ResponseWriter, r *http.Request) (*session.Session, bool) {
 	sess, ok := s.sessionFrom(r)
 	if !ok {
-		if WantsFragment(r) {
+		if render.WantsFragment(r) {
 			s.notFound(w, r)
 			return nil, false
 		}

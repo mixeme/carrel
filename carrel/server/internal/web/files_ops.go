@@ -21,6 +21,7 @@ import (
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -462,7 +463,7 @@ func uploadType(part *multipart.Part, name string) string {
 // plain form: its address after a success, the page with what went wrong
 // otherwise.
 func (s *Server) answerUpload(w http.ResponseWriter, r *http.Request, c *fileCtx, notices ...view.Notice) {
-	if WantsFragment(r) {
+	if render.WantsFragment(r) {
 		q := s.transferQueue(c.sess)
 		if q == nil {
 			q = &view.TransferQueue{}
@@ -470,7 +471,7 @@ func (s *Server) answerUpload(w http.ResponseWriter, r *http.Request, c *fileCtx
 		for _, n := range notices {
 			q.Note = text(strings.TrimPrefix(string(q.Note)+" · "+string(n.Title)+". "+string(n.Body), " · "))
 		}
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetQueue, q, nil)
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetQueue, q, nil)
 		return
 	}
 	if len(notices) == 0 {
@@ -495,11 +496,11 @@ func (s *Server) postFilesMkcol(w http.ResponseWriter, r *http.Request) {
 	if n := s.makeFolder(r.Context(), c, strings.TrimSpace(r.FormValue("name"))); n != nil {
 		notices = append(notices, *n)
 	}
-	if len(notices) == 0 && !WantsFragment(r) {
+	if len(notices) == 0 && !render.WantsFragment(r) {
 		s.redirect(w, r, c.href("", c.segs, true))
 		return
 	}
-	s.writeFolder(w, r, c, c.segs, "", url.Values{}, TargetMain, notices...)
+	s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain, notices...)
 }
 
 // makeFolder is MKCOL of name in the folder c is at: nil when the folder is
@@ -585,7 +586,7 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	case err != nil:
-		s.writeFolder(w, r, c, c.segs, "", url.Values{}, TargetMain)
+		s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain)
 		return
 	}
 	var items []file.Entry
@@ -600,7 +601,7 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if len(missing) > 0 {
-		s.writeFolder(w, r, c, c.segs, "", url.Values{}, TargetMain, view.Notice{
+		s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain, view.Notice{
 			Role:  view.NoticeAlert,
 			Title: "Nothing was done",
 			Body:  text("No longer in this folder: " + strings.Join(missing, ", ") + "."),
@@ -625,8 +626,8 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		if failure != nil {
 			keepTyped(sheet.Target, name)
 		}
-		if WantsFragment(r) {
-			_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		if render.WantsFragment(r) {
+			_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 			return
 		}
 		s.writePage(w, r, http.StatusOK, sheet)
@@ -994,11 +995,11 @@ func (s *Server) runOp(w http.ResponseWriter, r *http.Request, c *fileCtx, op vi
 		}
 	}
 	forgetFolder(c.sess, c.conn.ID, folder)
-	if len(notices) == 0 && !WantsFragment(r) {
+	if len(notices) == 0 && !render.WantsFragment(r) {
 		s.redirect(w, r, c.href("", c.segs, true))
 		return
 	}
-	s.writeFolder(w, r, c, c.segs, "", url.Values{}, TargetMain, notices...)
+	s.writeFolder(w, r, c, c.segs, "", url.Values{}, render.TargetMain, notices...)
 }
 
 // startItem moves, copies or renames one member of c's folder to name in
@@ -1184,11 +1185,11 @@ func (s *Server) answerTransfer(w http.ResponseWriter, r *http.Request, c *fileC
 		s.answerUpload(w, r, c)
 		return
 	}
-	if !WantsFragment(r) {
+	if !render.WantsFragment(r) {
 		s.redirect(w, r, c.href("", c.segs, true))
 		return
 	}
-	_ = s.render.Fragment(w, r, http.StatusOK, TargetQueue, s.transferQueue(c.sess), nil)
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetQueue, s.transferQueue(c.sess), nil)
 }
 
 // freeName is the first name with a number the folder does not hold, read
