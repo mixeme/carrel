@@ -427,12 +427,13 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 	return out
 }
 
-// timelineRail is the rail of a person's timeline (s-contacts-7): the way
-// back to the list, and under «Where to look» the calendars it looks in.
-// Their ticks are the calendar's own — one selection for both (owner's
-// decision 24.09.2026) — so what the rail shows is where the timeline looks.
-// Each counts what it found of this person, the combined row their sum; what
-// did not answer says why, with Retry. Apply comes back here and asks again.
+// timelineRail is the rail of a person's timeline (s-contacts-7): the
+// sections and the way back to the list, and under «Where to look» the
+// calendars it looks in. Their ticks are the calendar's own — one selection
+// for both (owner's decision 24.09.2026) — so what the rail shows is where
+// the timeline looks. Each counts what it found of this person, the combined
+// row their sum; a feed shows «ro» and is not in the sum; what did not answer
+// says why, with Retry. Apply comes back here and asks again.
 func (s *Server) timelineRail(c *collectionCtx, snap *fanout.Snapshot, back string) view.Rail {
 	blob := s.catalogOf(c.sess)
 	found := map[string]int{}
@@ -473,8 +474,11 @@ func (s *Server) timelineRail(c *collectionCtx, snap *fanout.Snapshot, back stri
 	if answered {
 		where.Rows[0].Count = &sum
 	}
+	// The sections in full, as on every screen of the section, and the way
+	// back after them in a group of its own (s-contacts-7): a timeline is a
+	// list of records, not one record, so the rail keeps both.
 	return view.Rail{
-		Nav:      []view.NavRow{{Action: s.listBack(c)}},
+		Nav:      append(s.navRows(c.sess, blob, "contacts"), view.NavRow{Action: s.listBack(c)}),
 		Sections: []view.RailSection{where},
 		Foot: []view.Action{{ID: "rail.apply", Label: "Apply", Method: "POST", Enabled: true,
 			Href: s.postQuery("/app/sources/calendar", url.Values{"back": {back}})}},

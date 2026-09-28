@@ -49,7 +49,9 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	}
 	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	page := view.SearchPage{Shell: s.buildShell(sess, "Search")}
-	page.Rail = s.searchRail(sess, s.catalogOf(sess))
+	// The rail without numbers until there is a search to count them from;
+	// the page with one gets its rail from it below.
+	page.Rail = s.searchRail(sess, s.catalogOf(sess), nil)
 	if q == "" {
 		// An empty query searches nothing and is not written (S-15.3).
 		s.writePage(w, r, http.StatusOK, page)
@@ -93,7 +95,9 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 		}
 		sess.KeepTask(task)
 	}
-	s.fillResults(&page, sess, blob, task.Snapshot(), r)
+	snap := task.Snapshot()
+	s.fillResults(&page, sess, blob, snap, r)
+	page.Rail = s.searchRail(sess, blob, &snap)
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -518,31 +522,65 @@ type collectionSource struct {
 	now  func() time.Time
 }
 
-// searchSources are the ticked collections, one source each, in the order of
-// the ticks. A gone collection is not asked (S-6.1): the rail says gone.
 // searchRail is the rail of the search: every collection it asks, of every
-// kind, in one list (s-search-1). A search that found nothing must say what
+// kind, in one list (s-find-1). A search that found nothing must say what
 // it searched — an unticked collection is not asked, and a person looking
 // for a record that is in one has to see why it was not found.
-func (s *Server) searchRail(sess *session.Session, blob sealed.Blob) view.Rail {
+//
+// snap is the search on the screen, nil without a query. Each source then
+// counts its finds — a feed too: here the number is what was found in it,
+// not what it holds — and one that did not answer says why, with a Retry
+// of it alone, as in every rail. The numbers are those of the page's render:
+// the stream of the poll moves the poll bar only (C-7.3).
+//
+// The rubric is «Sources a / b»: a sources asked of b ticked. A ticked
+// collection that is gone is not asked (S-6.1) and stays in the list,
+// marked gone. That one did not answer is the poll bar's to say, and
+// s-find-1 draws «14 / 14» beside a source with no reply.
+func (s *Server) searchRail(sess *session.Session, blob sealed.Blob, snap *fanout.Snapshot) view.Rail {
 	rail := view.Rail{Nav: s.navRows(sess, blob, "search"), About: s.aboutAction()}
+	found := map[string]int{}
+	if snap != nil {
+		for _, st := range snap.Sources {
+			if st.State == view.SourceDone || st.State == view.SourceEmpty {
+				found[st.ID] = st.Count
+			}
+		}
+	}
+	troubles := s.troublesOf(snap)
 	seen := map[string]bool{}
 	sec := view.RailSection{State: view.CollectionOK}
+	asked := 0
 	for _, pick := range blob.Selected {
+		id := pick.AccountID + ":" + pick.Path
 		col, ok := blob.Collection(pick.AccountID, pick.Path)
-		if !ok || col.Gone || seen[pick.AccountID+":"+pick.Path] {
-			continue
+		if _, conn := blob.Connection(pick.AccountID); !ok || !conn || !col.Has(pick.Kind) || seen[id] {
+			continue // what tickedCollections would not ask either
 		}
-		seen[pick.AccountID+":"+pick.Path] = true
-		sec.Rows = append(sec.Rows, view.SourceRow{
+		seen[id] = true
+		row := view.SourceRow{
 			Label: text(collectionLabel(col)), Colour: catalogColour(col),
 			Tick: view.TickOn, ReadOnly: col.ReadOnly, State: view.CollectionOK,
-		})
+		}
+		if col.Gone {
+			row.State = view.CollectionGone
+			sec.Rows = append(sec.Rows, row)
+			continue
+		}
+		asked++
+		if n, ok := found[id]; ok {
+			row.Count = &n
+		}
+		if t, ok := troubles[id]; ok {
+			row.State = view.CollectionUnavailable
+			row.Message, row.Detail, row.Retry = text(t.message), text(t.detail), t.retry
+		}
+		sec.Rows = append(sec.Rows, row)
 	}
 	if len(sec.Rows) == 0 {
 		return rail
 	}
-	sec.Account = text(plural(len(sec.Rows), "source"))
+	sec.Account = text(fmt.Sprintf("Sources %d / %d", asked, len(sec.Rows)))
 	rail.Sections = []view.RailSection{sec}
 	return rail
 }

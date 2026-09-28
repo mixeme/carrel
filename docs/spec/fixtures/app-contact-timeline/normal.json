@@ -400,6 +400,55 @@
     ],
     "nav": [
       {
+        "count": 6,
+        "enabled": true,
+        "href": "/app/contacts",
+        "id": "nav.contacts",
+        "label": "Contacts",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/calendar",
+        "id": "nav.calendar",
+        "label": "Calendar",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/tasks",
+        "id": "nav.tasks",
+        "label": "Tasks",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/notes",
+        "id": "nav.notes",
+        "label": "Notes",
+        "method": "GET"
+      },
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files",
+        "id": "nav.files",
+        "label": "Files",
+        "method": "GET"
+      },
+      {
+        "count": 0,
+        "enabled": true,
+        "href": "/app/duplicates",
+        "id": "nav.duplicates",
+        "label": "Duplicates",
+        "method": "GET"
+      },
+      {
         "count": null,
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty",
@@ -514,7 +563,7 @@
           },
           {
             "colour": "#8c6239",
-            "count": 0,
+            "count": null,
             "detail": "",
             "href": "/app/calendar/f-ru-holidays/feed",
             "label": "Праздники РФ",

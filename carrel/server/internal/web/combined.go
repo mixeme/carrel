@@ -707,7 +707,7 @@ func (s *Server) backRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 // among them. troubles are the collections that did not answer the poll the
 // rail stands beside, with what to say of each. count, when given, is what a
 // ticked row counts instead of its records — a timeline counts what it found
-// of one person there.
+// of one person there. A feed counts nothing either way.
 func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kindSpec, troubles map[string]railTrouble, count func(sourceID string) *int) (sections []view.RailSection, live, on int) {
 	trouble := func(row *view.SourceRow, id string) bool {
 		t, ok := troubles[id]
@@ -824,12 +824,9 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 		if tick {
 			row.Tick = view.TickOn
 			on++
-			// A feed has no number of its own — «ro» stands in its place in
-			// the frames. What a screen counts itself (a timeline's finds)
-			// it still shows.
-			if count != nil {
-				row.Count = count(f.ID + ":" + col.Path)
-			}
+			// A feed has no number, not even what a timeline found in it:
+			// «ro» stands in its place in every frame (C-6.3, s-agenda-1,
+			// s-contacts-7), and it is not in the section's sum.
 		}
 		feeds.Rows = append(feeds.Rows, row)
 	}

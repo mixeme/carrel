@@ -74,7 +74,7 @@
         "rows": [
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 3,
             "detail": "",
             "href": "/app/tasks/a-nc-home/dela",
             "label": "Дела",
@@ -128,7 +128,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 2,
             "detail": "",
             "href": "/app/tasks/a-nc-home/rabota",
             "label": "Работа",

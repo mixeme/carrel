@@ -1417,6 +1417,22 @@ func TestFixtureResetAndConflicts(t *testing.T) {
 	})
 }
 
+// openList opens a combined list of the set and waits for its poll, as a
+// person looking at it would.
+func openList(t *testing.T, app *mockupApp, path string) {
+	t.Helper()
+	switch {
+	case strings.HasPrefix(path, "/app/calendar"):
+		combined(t, app.h, app.sess, path, func(p view.AgendaPage) *view.PollBar { return p.Poll })
+	case strings.HasPrefix(path, "/app/tasks"):
+		combined(t, app.h, app.sess, path, func(p view.TasksPage) *view.PollBar { return p.Poll })
+	case strings.HasPrefix(path, "/app/notes"):
+		combined(t, app.h, app.sess, path, func(p view.NotesPage) *view.PollBar { return p.Poll })
+	default:
+		combined(t, app.h, app.sess, path, contactsPoll)
+	}
+}
+
 // resetLink digs the wipe link out of the answer that issued it.
 func resetLink(t *testing.T, rec *httptest.ResponseRecorder) string {
 	t.Helper()
@@ -1430,14 +1446,18 @@ func resetLink(t *testing.T, rec *httptest.ResponseRecorder) string {
 // C-14.2: the conflict of an event and of a task. The screen is one for
 // every kind (C-2.1), and each is checked on its own record.
 func TestFixtureConflictsOfEveryKind(t *testing.T) {
-	for _, one := range []struct{ dir, segment, slug, uid, now, body string }{
-		{"app-conflict-event", "calendar", "lichnyj", "8f1c-4a02-b7d3", "Синк-ап по релизу и демо",
+	for _, one := range []struct{ dir, segment, list, slug, uid, now, body string }{
+		{"app-conflict-event", "calendar", "/app/calendar?from=2026-08-10", "lichnyj", "8f1c-4a02-b7d3", "Синк-ап по релизу и демо",
 			"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//set//EN\nBEGIN:VEVENT\nUID:8f1c-4a02-b7d3\nDTSTAMP:20260801T000000Z\nSUMMARY:Синк-ап перенесён\nDTSTART:20260810T090000Z\nDTEND:20260810T100000Z\nEND:VEVENT\nEND:VCALENDAR\n"},
-		{"app-conflict-task", "tasks", "dela", "aa10-77bc-0e31", "Отправить документы в МФЦ до пятницы",
+		{"app-conflict-task", "tasks", "/app/tasks", "dela", "aa10-77bc-0e31", "Отправить документы в МФЦ до пятницы",
 			"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//set//EN\nBEGIN:VTODO\nUID:aa10-77bc-0e31\nDTSTAMP:20260801T000000Z\nSUMMARY:Документы в МФЦ\nEND:VTODO\nEND:VCALENDAR\n"},
 	} {
 		t.Run(one.dir, func(t *testing.T) {
 			app := newMockupApp(t)
+			// Nobody arrives at a conflict from nowhere: the list was
+			// opened first, and that is where the counts of the rail come
+			// from (s-conflict-3, s-conflict-4), as for a contact.
+			openList(t, app, one.list)
 			rec := app.listPath(t, one.segment, one.slug) + "/" + one.uid
 			form := formFields(decode[view.EventEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
 			app.servers["nextcloud"].Seed(davtest.CalendarHome+one.slug+"/"+one.uid+".ics", one.body)
@@ -1495,6 +1515,7 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 	}
 	t.Run("app-conflict-note", func(t *testing.T) {
 		app := newMockupApp(t)
+		openList(t, app, "/app/notes") // the counts of s-conflict-5, as above
 		rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
 		// The edit of a note is its page (s-notes-20); the form is its
 		// document.

@@ -74,7 +74,7 @@
         "rows": [
           {
             "colour": "#6b4e7a",
-            "count": null,
+            "count": 1,
             "detail": "",
             "href": "/app/notes/a-nc-home/dnevnik",
             "label": "Дневник",
@@ -128,7 +128,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 2,
             "detail": "",
             "href": "/app/notes/a-nc-home/zapisi",
             "label": "Записи",

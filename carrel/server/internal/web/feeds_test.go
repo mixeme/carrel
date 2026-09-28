@@ -245,4 +245,9 @@ func TestSearchSiftsAFeed(t *testing.T) {
 	if sp.State != view.SourceDone || sp.Count == nil || *sp.Count != 1 {
 		t.Errorf("feed source = %+v", sp)
 	}
+	// In the search's rail a feed counts what was found in it (s-find-1):
+	// «ro» stands only where the number would be what it holds.
+	if _, row := railRow(t, search(t, f.h, f.sess, "q=KNOWLEDGE").Rail, "Праздники"); row.Count == nil || *row.Count != 1 {
+		t.Errorf("feed in the search's rail = %+v", row)
+	}
 }

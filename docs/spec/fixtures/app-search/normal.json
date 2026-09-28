@@ -283,12 +283,12 @@
     "note": "",
     "sections": [
       {
-        "account": "14 sources",
+        "account": "Sources 14 / 14",
         "accountID": "",
         "rows": [
           {
             "colour": "#a05a2c",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Архив",
@@ -301,7 +301,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 1,
             "detail": "",
             "href": "",
             "label": "Контакты",
@@ -314,7 +314,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Команда",
@@ -327,7 +327,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Дела",
@@ -340,7 +340,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Работа",
@@ -353,7 +353,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Дневник",
@@ -366,7 +366,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Записи",
@@ -379,7 +379,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Личный",
@@ -392,7 +392,7 @@
           },
           {
             "colour": "#8c6239",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Дежурства",
@@ -405,7 +405,7 @@
           },
           {
             "colour": "#6b4e7a",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Проекты",
@@ -419,19 +419,25 @@
           {
             "colour": "#9a9280",
             "count": null,
-            "detail": "",
+            "detail": "401 Unauthorized — the saved password was refused. Open Connections to update it.",
             "href": "",
             "label": "Общий",
             "menu": [],
-            "message": "",
+            "message": "password · 401",
             "readOnly": false,
-            "retry": null,
-            "state": "ok",
+            "retry": {
+              "enabled": true,
+              "href": "/app/search/progress/t-task/retry?source=a-baikal%3Aobshchij",
+              "id": "source.retry",
+              "label": "Retry",
+              "method": "POST"
+            },
+            "state": "unavailable",
             "tick": "on"
           },
           {
             "colour": "#8c6239",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Праздники РФ",
@@ -444,7 +450,7 @@
           },
           {
             "colour": "#9a9280",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Files",
@@ -457,7 +463,7 @@
           },
           {
             "colour": "#a05a2c",
-            "count": null,
+            "count": 0,
             "detail": "",
             "href": "",
             "label": "Documents",

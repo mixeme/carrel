@@ -310,7 +310,12 @@ func TestTimelineRailIsWhereItLooks(t *testing.T) {
 	waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
 	page = decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline", f.sess)))
 	rail := page.Rail
-	if len(rail.Nav) != 1 || rail.Nav[0].Action.Label != "Back to list" || rail.Nav[0].Action.Href != f.path("contacts") {
+	// The sections come first (TestTimelineRailHasTheSectionsAndNoFeedNumber);
+	// the way back is the last row.
+	if len(rail.Nav) == 0 {
+		t.Fatal("no nav")
+	}
+	if back := rail.Nav[len(rail.Nav)-1]; back.Action.Label != "Back to list" || back.Action.Href != f.path("contacts") {
 		t.Errorf("nav = %+v", rail.Nav)
 	}
 	if len(rail.Sections) != 1 || rail.Sections[0].Account != "Where to look" {

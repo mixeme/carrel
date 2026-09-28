@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.59 — 2026-09-28
+
+Rails: numbers and navigation (from-typecase note 15). No view model
+changes shape; the values in three rails do.
+
+### Changed
+
+- **Search** (`GET /app/search`, s-find-1) — the rail is built from the
+  search on the screen. Each source row's `count` is what that source found
+  (a feed's too: here it is its finds); one that did not answer has
+  `state` `unavailable`, `message` («no reply», «password · 401»…),
+  `detail` and `retry` (`source.retry`, the same POST as the poll bar's).
+  Without a query, or while a source is still asked, `count` is `null`.
+  The section's `account` is **«Sources a / b»** — a sources asked of b
+  ticked (was «14 sources»); a ticked collection that is gone is listed with
+  `state` `gone`, no count, and is not in a. The numbers are as of the page;
+  the poll stream still moves only the poll bar.
+- **Timeline** (`GET /app/contacts/{account}/{col}/{uid}/timeline`,
+  s-contacts-7) — `rail.nav` is the six section rows with their counts
+  (`nav.contacts` `on`), then «Back to list» (`nav.back`, `i-back`), which
+  the client draws as a group of its own (C-6.3). Was «Back to list» alone.
+  A feed row's `count` is now `null` («ro»), as in the agenda, and the
+  combined row's sum leaves feeds out.
+- **Conflict** of an event, a task and a note: nothing changed in the
+  server; their fixtures now come after the list was opened, as a person
+  arrives, and carry the collections' counts like the contact's.
+
 ## v0.2.58 — 2026-09-28
 
 The panel beside a list is for reading, and the edit of a note is on the

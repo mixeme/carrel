@@ -128,7 +128,7 @@
           },
           {
             "colour": "#4a6b52",
-            "count": null,
+            "count": 2,
             "detail": "",
             "href": "/app/calendar/a-nc-home/lichnyj",
             "label": "Личный",
@@ -182,7 +182,7 @@
           },
           {
             "colour": "#3f6e8c",
-            "count": null,
+            "count": 2,
             "detail": "",
             "href": "/app/calendar/a-nc-home/rabota",
             "label": "Работа",
