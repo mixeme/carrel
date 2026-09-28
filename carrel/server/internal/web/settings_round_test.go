@@ -117,8 +117,9 @@ func TestConnectAccountIsInTheHead(t *testing.T) {
 	if dialog.Add == nil || actionByID(dialog.Add.Actions, "connection.add") == nil {
 		t.Fatalf("%s opens no dialog: %+v", connect.Href, dialog.Add)
 	}
-	if string(dialog.Title) != head[1] || string(dialog.Subtitle) != head[2] {
-		t.Errorf("dialog head = %q · %q, the frame %q · %q", dialog.Title, dialog.Subtitle, head[1], head[2])
+	// The dialog stands over the page, with a head of its own (s-profile-16).
+	if string(dialog.DialogTitle) != head[1] || string(dialog.DialogSubtitle) != head[2] {
+		t.Errorf("dialog head = %q · %q, the frame %q · %q", dialog.DialogTitle, dialog.DialogSubtitle, head[1], head[2])
 	}
 	rail := decode[struct {
 		Rail view.Rail `json:"rail"`

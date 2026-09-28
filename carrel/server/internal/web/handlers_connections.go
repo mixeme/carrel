@@ -404,11 +404,14 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 	page := view.ConnectionsPage{
 		Shell: s.withRail(s.buildShell(sess, "Connections"), s.settingsRail(sess, "/app/settings/connections")),
 	}
+	// The dialog stands over the page, and the page under it is as it is:
+	// the dialog has a head of its own (s-profile-2, s-profile-16).
 	if f.Open || f != (connectionForm{}) {
 		add := s.connectionForm(sess, f)
 		page.Add = &add
-		if f.Editing == "" {
-			page.Title, page.Subtitle = "Connect account", "One connection gives calendars and address books alike."
+		page.DialogTitle, page.DialogSubtitle = "Connect account", "One connection gives calendars and address books alike."
+		if f.Editing != "" {
+			page.DialogTitle = "Edit connection"
 		}
 	}
 	if key, live := sess.DataKey(); live {
@@ -424,10 +427,12 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 			for _, f := range blob.Subscriptions {
 				page.Subscriptions = append(page.Subscriptions, s.subscriptionCard(sess, tf, f))
 			}
-			if page.Add == nil {
-				page.Subtitle = text(fmt.Sprintf("Signed in as %s · %s · %s · %s", sess.Login(),
-					plural(len(blob.Connections), "server"), plural(cols, "collection"), plural(len(blob.Subscriptions), "subscription")))
-			}
+			// The DAV servers are the cards, the subscriptions apart; the
+			// collections are the rows of those cards, unticked ones too, and
+			// a server not answering now counts what it had at its last
+			// answer (s-profile-1).
+			page.Subtitle = text(fmt.Sprintf("Signed in as %s · %s · %s · %s", sess.Login(),
+				plural(len(blob.Connections), "server"), plural(cols, "collection"), plural(len(blob.Subscriptions), "subscription")))
 			page.Actions = append(page.Actions,
 				view.Action{ID: "connection.add", Label: "Connect account", Icon: "i-plus", Href: s.connectHref(), Method: "GET", Enabled: true},
 				view.Action{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link",
@@ -470,7 +475,7 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 		password,
 		view.FormRow{Name: "noPassword", Label: "The server asks no password", Kind: view.InputCheck, Value: text(boolStr(f.NoPassword)),
 			Disables: "password"},
-		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint SHA-256 · optional", Kind: view.InputText, Value: text(f.CertFingerprint),
+		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint", LabelAside: "SHA-256 · optional", Kind: view.InputText, Value: text(f.CertFingerprint),
 			Placeholder: "only for a certificate the system does not trust"},
 	)
 	if f.Editing != "" {

@@ -32,11 +32,14 @@ func issueTrigger(t *testing.T, f davFixture, job sealed.BackupJob) (string, vie
 	unlock(t, f)
 	page := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=trigger&job="+job.ID, f.sess, url.Values{})))
 	tb := page.Jobs[0].Trigger
+	if tb == nil {
+		t.Fatal("no trigger card after the trigger was issued")
+	}
 	m := secretIn.FindStringSubmatch(string(tb.Command))
 	if m == nil || !tb.Password.Shown || string(tb.Password.Value) != m[1] {
 		t.Fatalf("trigger = %+v", tb)
 	}
-	return m[1], tb
+	return m[1], *tb
 }
 
 // S-24.4: the trigger is issued only inside the unlock window and shown once;
@@ -58,7 +61,7 @@ func TestExternalTriggerRunsWithoutASession(t *testing.T) {
 		t.Error("the state holds the secret")
 	}
 	again := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if again.Jobs[0].Trigger.Command != "" || again.Jobs[0].Trigger.Password.Shown {
+	if again.Jobs[0].Trigger == nil || again.Jobs[0].Trigger.Command != "" || again.Jobs[0].Trigger.Password.Shown {
 		t.Error("the secret is shown again")
 	}
 
@@ -132,7 +135,7 @@ func TestExternalTriggerDownloadAndBoth(t *testing.T) {
 	both := saveJob(t, f, jobForm(f, sealed.BackupToBoth, "8", "pw"))
 	page := decode[view.BackupPage](t, f.h.do(postForm("/app/settings/backup?op=trigger&job="+both.ID, f.sess, url.Values{})))
 	for _, j := range page.Jobs {
-		if j.Name == "Рабочее" && strings.Contains(string(j.Trigger.Command), "#!/bin/sh") {
+		if j.Name == "Рабочее" && j.Trigger != nil && strings.Contains(string(j.Trigger.Command), "#!/bin/sh") {
 			if !strings.Contains(string(j.Trigger.Command), "until [") {
 				t.Errorf("script = %q", j.Trigger.Command)
 			}

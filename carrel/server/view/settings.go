@@ -13,16 +13,20 @@ type FieldSet struct {
 	Rows   []FormRow `json:"rows"`
 }
 type FormRow struct {
-	Name     string    `json:"name"`
-	Label    Text      `json:"label"`
-	Kind     InputKind `json:"kind"` // C-8
-	Value    Text      `json:"value"`
-	Options  []Option  `json:"options"`
-	Hint     Text      `json:"hint"`
-	Error    Text      `json:"error"`
-	Extra    *Action   `json:"extra"` // кнопка, принадлежащая полю
-	ReadOnly bool      `json:"readOnly"`
-	Required bool      `json:"required"`
+	Name  string `json:"name"`
+	Label Text   `json:"label"`
+	// Приглушённая часть подписи, после неё: «(optional)» у «Email»
+	// (s-admin-1, s-auth-4), «SHA-256 · optional» у «Certificate
+	// fingerprint» (s-profile-2); у прочих пусто
+	LabelAside Text      `json:"labelAside,omitempty"`
+	Kind       InputKind `json:"kind"` // C-8
+	Value      Text      `json:"value"`
+	Options    []Option  `json:"options"`
+	Hint       Text      `json:"hint"`
+	Error      Text      `json:"error"`
+	Extra      *Action   `json:"extra"` // кнопка, принадлежащая полю
+	ReadOnly   bool      `json:"readOnly"`
+	Required   bool      `json:"required"`
 	// Образец в пустом поле, как его рисует кадр: «DD.MM.YYYY» у дня
 	// рождения (s-contacts-4); у прочих полей пусто
 	Placeholder Text `json:"placeholder,omitempty"`
@@ -132,16 +136,21 @@ type UnlockSheet struct {
 
 type ConnectionsPage struct {
 	Shell
-	// Subtitle — строка под заголовком: на списке «Signed in as mix · 3
-	// servers · 12 collections · 2 subscriptions» (s-profile-1), в диалоге
-	// подключения — его строка (s-profile-2)
+	// Subtitle — строка под заголовком: «Signed in as mix · 3 servers · 12
+	// collections · 2 subscriptions» (s-profile-1); та же и под диалогом
 	Subtitle      Text               `json:"subtitle"`
 	Accounts      []ConnectionCard   `json:"accounts"`
 	Subscriptions []SubscriptionCard `json:"subscriptions"`
 	// Add — диалог подключения, его правка или подписка; nil — на списке:
 	// диалог открывает Connect account в Actions (s-profile-1, s-profile-2)
-	Add     *Form    `json:"add"`
-	Actions []Action `json:"actions"` // Connect account · Subscribe to a feed
+	Add *Form `json:"add"`
+	// Шапка диалога поверх страницы — страница под ним как есть: «Connect
+	// account» (s-profile-2), «Edit connection» (s-profile-16) и строка «One
+	// connection gives calendars and address books alike.»; пусто — диалога
+	// нет или это подписка
+	DialogTitle    Text     `json:"dialogTitle"`
+	DialogSubtitle Text     `json:"dialogSubtitle"`
+	Actions        []Action `json:"actions"` // Connect account · Subscribe to a feed
 }
 type ConnectionCard struct {
 	AccountID   string           `json:"accountID"`
@@ -234,7 +243,13 @@ type ProxyDevice struct {
 
 type BackupPage struct {
 	Shell
-	Subtitle   Text         `json:"subtitle"` // на странице задания: «Job · last copy 2 days ago»; пусто на списке
+	Subtitle Text `json:"subtitle"` // на странице задания: «Job · last copy 2 days ago»; пусто на списке
+	// Local — экземпляр локальный: адрес в строке внешнего запуска отвечает
+	// только изнутри своей сети (значок «local» у отметки «On a clock of
+	// your own», s-backup-2). Признак экземпляра, не задания: объявленного
+	// адреса снаружи нет (CARREL_PUBLIC_URL) или он — имя либо адрес
+	// частной сети
+	Local      bool         `json:"local"`
 	Jobs       []BackupJob  `json:"jobs"`
 	Add        Form         `json:"add"`        // новое задание; на странице задания (s-backup-2) — оно само
 	Delete     *Action      `json:"delete"`     // внизу страницы задания; nil — на списке и у нового
@@ -242,22 +257,27 @@ type BackupPage struct {
 	Restore    RestoreBlock `json:"restore"`
 }
 type BackupJob struct {
-	Name        Text         `json:"name"`
-	Sources     []Stamp      `json:"sources"`
-	Destination Text         `json:"destination"`
-	Keep        int          `json:"keep"`
-	Encrypted   bool         `json:"encrypted"`
-	LastRun     When         `json:"lastRun"`
-	LastState   OpState      `json:"lastState"`
-	Trigger     TriggerBlock `json:"trigger"`
-	Runs        []BackupRun  `json:"runs"`
-	Actions     []Action     `json:"actions"` // Run · Edit (s-backup-1)
+	Name        Text    `json:"name"`
+	Sources     []Stamp `json:"sources"`
+	Destination Text    `json:"destination"`
+	Keep        int     `json:"keep"`
+	Encrypted   bool    `json:"encrypted"`
+	LastRun     When    `json:"lastRun"`
+	LastState   OpState `json:"lastState"`
+	// Clock — отметка «On a clock of your own — cron, GoSentry, a job in
+	// Gitea» в рубрике When (s-backup-2): On — внешний запуск включён;
+	// снятая выключает его, отдельного выключателя нет
+	Clock Action `json:"clock"`
+	// Trigger — карточка строки внешнего запуска; nil, пока он выключен:
+	// показывать и обновлять нечего (решение владельца, записка 19)
+	Trigger *TriggerBlock `json:"trigger"`
+	Runs    []BackupRun   `json:"runs"`
+	Actions []Action      `json:"actions"` // Run · Edit (s-backup-1)
 }
 type TriggerBlock struct {
 	Command  Text        `json:"command"` // готовая строка или скрипт, собранный под назначение
 	Password SecretField `json:"password"`
 	Note     Text        `json:"note"`
-	Clock    Action      `json:"clock"` // отметка «On a clock of your own — cron, GoSentry, a job in Gitea» (s-backup-2): On — внешний запуск включён; снятая выключает его, отдельного выключателя нет
 }
 type BackupRun struct {
 	ID       Text    `json:"id"`
@@ -304,10 +324,10 @@ type AdminUserRow struct {
 // потерь через Key escrow — подсказкой у пароля.
 type PasswordResetSheet struct {
 	Title   Text            `json:"title"`   // «Reset a password»
-	Form    Form            `json:"form"`    // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password, confirm — логин того, кого сбрасывают, набранный для подтверждения
-	Warning Text            `json:"warning"` // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются
-	Issued  *IssuedPassword `json:"issued"`  // временный пароль — один раз, в ответе на сброс; nil — нет
-	Actions []Action        `json:"actions"` // Reset password (danger) · Cancel
+	Form    Form            `json:"form"`    // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password, confirm — «Type the login to confirm», последней строкой (s-admin-13, s-admin-20); в ответе на сброс пуста
+	Warning Text            `json:"warning"` // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются; в ответе на сброс пусто
+	Issued  *IssuedPassword `json:"issued"`  // временный пароль — один раз, в ответе на сброс (s-admin-14); nil — нет
+	Actions []Action        `json:"actions"` // Reset password (danger) · Cancel; в ответе на сброс пусто — подвал листа держит Issued.Done
 }
 
 // AdminInvitesPage — «Add users» (s-admin-1): три способа завести человека
@@ -335,20 +355,26 @@ type AddUserCard struct {
 }
 
 // IssuedPassword — пароль, показанный администратору один раз: ни в
-// состоянии, ни в журнале его нет.
+// состоянии, ни в журнале его нет. Карточка «Temporary password · visible
+// only now» (s-admin-14, s-admin-17): сообщение, логин и пароль строкой,
+// Copy и строка рядом, Done.
 type IssuedPassword struct {
 	Login    Text   `json:"login"`
 	Password Text   `json:"password"`
 	Copy     Action `json:"copy"`
+	Message  Text   `json:"message"` // «The password of anna is reset.» (s-admin-14), «The user viktor is created. Hand this over; …» (s-admin-17); Login в нём — жирным
+	Note     Text   `json:"note"`    // строка рядом с Copy: «Hand it over yourself; they choose their own at the next sign-in.»; пусто — нет
+	Done     Action `json:"done"`    // Done: у листа сброса — в подвале листа, у карточки Create user — рядом с Copy
 }
 
+// InviteRow — ожидающее приглашение (s-admin-1). Логина у него нет: его
+// выбирает приглашённый.
 type InviteRow struct {
-	Login    Text       `json:"login"` // пусто — логин выберет приглашённый (s-admin-1 «—»)
-	Address  Text       `json:"address"`
+	Address  Text       `json:"address"`  // первая колонка: адрес письма; «—» у ссылки
 	Link     Text       `json:"link"`     // видна всегда, независимо от отправки
 	Delivery Text       `json:"delivery"` // «link» или «email»: как приглашение передано
 	Status   Text       `json:"status"`   // «pending»: в списке только действующие
-	Sent     Text       `json:"sent"`     // «sent», «failed — 550 mailbox unavailable» (ответ реле), «SMTP not configured»
+	Sent     Text       `json:"sent"`     // «sent», «failed — 550 mailbox unavailable» (ответ реле), «SMTP not configured»; «—» у ссылки
 	Expires  When       `json:"expires"`
 	Actions  []Action   `json:"actions"` // Resend (у приглашения письмом) · Copy link
 	Menu     []MenuItem `json:"menu"`    // «⋯»: Extend, черта, Revoke

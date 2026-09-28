@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/netip"
 	"net/url"
 	"strings"
 	"time"
@@ -58,51 +59,87 @@ func triggerCommand(base string, job sealed.BackupJob, secret string) string {
 // and, cleared, off: there is no switch of its own (to-typecase task 18a).
 const triggerClock = "On a clock of your own — cron, GoSentry, a job in Gitea"
 
-// triggerBlock is the job's trigger card: its tick, and the command and the
-// secret when they have just been issued, otherwise whether it is on and how
-// to renew it.
-func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issued map[string]string) view.TriggerBlock {
+// triggerTick is the job's tick «On a clock of your own» (s-backup-2):
+// ticked, it issues the trigger — through the password sheet outside the
+// unlock window, since it hands out the job's reading — and cleared, it
+// turns the trigger off: the lines handed out stop. Clearing issues
+// nothing and asks for no password.
+func (s *Server) triggerTick(sess *session.Session, job sealed.BackupJob, issued map[string]string) view.Action {
 	q := func(op string) string {
 		return s.postQuery("/app/settings/backup", url.Values{"op": {op}, "job": {job.ID}})
 	}
-	on := s.users.BackupTriggerOn(sess.AccountID(), job.ID)
-	b := view.TriggerBlock{
-		Password: view.SecretField{Reveal: view.Action{ID: "backup.trigger", Label: "Regenerate", Href: q("trigger"), Method: "POST", Enabled: true}},
-		Clock:    view.Action{ID: "backup.trigger.clock", Label: triggerClock, Href: q("trigger"), Method: "POST", Enabled: true},
-	}
+	tick := view.Action{ID: "backup.trigger.clock", Label: triggerClock, Href: q("trigger"), Method: "POST", Enabled: true}
 	switch {
-	case issued[job.ID] != "":
+	case s.users.BackupTriggerOn(sess.AccountID(), job.ID) || issued[job.ID] != "":
+		tick.On, tick.Href = true, q("trigger-off")
+	case sess.UnlockUntil(time.Now()) == nil:
+		tick.Method, tick.Href = "GET", s.route("/app/settings/unlock")
+	}
+	return tick
+}
+
+// triggerBlock is the job's card of the line: the command and the secret
+// when they have just been issued, otherwise that it is on and how to renew
+// it. While the trigger is off there is nothing to show or renew, and no
+// card (owner's decision, from-typecase note 19).
+func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issued map[string]string) *view.TriggerBlock {
+	on := s.users.BackupTriggerOn(sess.AccountID(), job.ID)
+	if !on && issued[job.ID] == "" {
+		return nil
+	}
+	b := &view.TriggerBlock{
+		Password: view.SecretField{Reveal: view.Action{ID: "backup.trigger", Label: "Regenerate", Method: "POST", Enabled: true,
+			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"trigger"}, "job": {job.ID}})}},
+	}
+	if issued[job.ID] != "" {
 		b.Command = text(issued[job.ID])
 		b.Password.Shown = true
 		b.Note = "Visible only now. Every use is logged; Regenerate replaces the secret, and every line already handed out stops working."
-	case on:
+	} else {
 		b.Note = "The external trigger is on. The secret was shown once; Regenerate issues a new one and the old lines stop working."
-	default:
-		b.Password.Reveal.Href, b.Password.Reveal.Enabled = "", false
-		b.Password.Reveal.Reason = "The external trigger is off: there is no line to renew."
-		b.Note = "A script outside can start this job. Turning it on stores your data key for this job under the server's key — a loss of protection, for convenience: the job can then read without you signed in."
 	}
-	if on || issued[job.ID] != "" {
-		// Cleared, the tick turns the trigger off: the lines handed out stop.
-		b.Clock.On, b.Clock.Href = true, q("trigger-off")
-	}
-	// Outside the unlock window what issues a secret opens the password
-	// sheet; what it is for is said in the note, not as a reason of a
-	// working button (C-6.2). Clearing the tick issues nothing.
+	// Outside the unlock window Regenerate opens the password sheet; what
+	// it is for is said in the note, not as a reason of a working button
+	// (C-6.2).
 	if sess.UnlockUntil(time.Now()) == nil {
-		if b.Password.Reveal.Enabled {
-			b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.route("/app/settings/unlock")
-		}
-		if !b.Clock.On {
-			b.Clock.Method, b.Clock.Href = "GET", s.route("/app/settings/unlock")
-		}
+		b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.route("/app/settings/unlock")
 		b.Note = "Confirm your password first: the trigger hands out this job's reading. " + b.Note
 	}
-	if (on || issued[job.ID] != "") && !job.Encrypted {
+	if !job.Encrypted {
 		b.Note += " This job's archive is not encrypted: whoever holds the secret can take your data in the clear."
 	}
 	return b
 }
+
+// instanceLocal is whether the addresses this instance hands out answer
+// only from inside its own network (the badge «local», s-backup-2): no
+// outside address is declared — the line is built from where the browser
+// came — or the declared one is a local name or an address of a private
+// network, a loopback, a link-local or a shared (CGNAT) one.
+func (s *Server) instanceLocal() bool {
+	u, err := url.Parse(strings.TrimSpace(s.cfg.PublicURL))
+	if err != nil || u.Hostname() == "" {
+		return true
+	}
+	host := strings.ToLower(strings.TrimSuffix(u.Hostname(), "."))
+	if ip, err := netip.ParseAddr(host); err == nil {
+		ip = ip.Unmap()
+		return ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsUnspecified() || sharedAddressSpace.Contains(ip)
+	}
+	if !strings.Contains(host, ".") {
+		return true
+	}
+	for _, suffix := range []string{".localhost", ".local", ".lan", ".home", ".internal", ".intranet", ".corp", ".home.arpa", ".test"} {
+		if strings.HasSuffix("."+host, suffix) {
+			return true
+		}
+	}
+	return false
+}
+
+// sharedAddressSpace is 100.64.0.0/10 (RFC 6598): carrier-grade NAT and the
+// overlay networks that borrow it — reachable only from inside.
+var sharedAddressSpace = netip.MustParsePrefix("100.64.0.0/10")
 
 // enableTrigger issues the job's trigger, inside the unlock window only, and
 // shows the page with the command and the secret, once.

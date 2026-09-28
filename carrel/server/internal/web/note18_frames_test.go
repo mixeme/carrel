@@ -372,13 +372,14 @@ func TestNoPasswordCardIsTheFrame(t *testing.T) {
 // field; s-profile-2, -11, -14, -16: Certificate fingerprint is the optional
 // field under the password, in the frame's words.
 func TestNoPasswordEditAndFingerprintAreTheFrames(t *testing.T) {
-	type drawn struct{ label, placeholder string }
+	type drawn struct{ label, aside, placeholder string }
 	fingerprint := func(id string) drawn {
 		m := regexp.MustCompile(`(?s)<label>(Certificate fingerprint.*?)</label><input [^>]*placeholder="([^"]*)"`).FindStringSubmatch(mockupFrame(t, id))
 		if m == nil {
 			t.Fatalf("%s draws no Certificate fingerprint: read it again", id)
 		}
-		return drawn{frameInline(m[1]), m[2]}
+		label, aside := splitLabel(m[1])
+		return drawn{label, aside, m[2]}
 	}
 	want := fingerprint("s-profile-16")
 	for _, id := range []string{"s-profile-2", "s-profile-11", "s-profile-14"} {
@@ -401,7 +402,7 @@ func TestNoPasswordEditAndFingerprintAreTheFrames(t *testing.T) {
 			if r.Name != "certFingerprint" {
 				continue
 			}
-			if string(r.Label) != want.label || string(r.Placeholder) != want.placeholder || r.Required || i == 0 || rows[i-1].Disables != "password" {
+			if string(r.Label) != want.label || string(r.LabelAside) != want.aside || string(r.Placeholder) != want.placeholder || r.Required || i == 0 || rows[i-1].Disables != "password" {
 				t.Errorf("%s: fingerprint = %+v after %+v, the frame %+v", href, r, rows[i-1], want)
 			}
 		}

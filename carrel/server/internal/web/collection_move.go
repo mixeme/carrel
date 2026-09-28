@@ -90,17 +90,23 @@ func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, c
 	if _, eligible := s.collectionMoveTargets(blob, conn, col, false); eligible == 0 {
 		return nil
 	}
+	copying := view.MenuItem{Action: view.Action{
+		ID: "collection.copy", Label: "Copy to another server", Icon: "i-dup",
+		Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", true)),
+		Method: "GET", Enabled: true,
+	}}
+	if col.Has(view.KindFile) && storageRoot(conn, col) {
+		// The whole storage is not deleted from here, so it is not moved
+		// either: it goes elsewhere only as a copy (s-profile-17).
+		return []view.MenuItem{copying}
+	}
 	return []view.MenuItem{
 		{Action: view.Action{
 			ID: "collection.move", Label: "Move to another server", Icon: "i-move",
 			Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", false)),
 			Method: "GET", Enabled: true,
 		}},
-		{Action: view.Action{
-			ID: "collection.copy", Label: "Copy to another server", Icon: "i-dup",
-			Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", true)),
-			Method: "GET", Enabled: true,
-		}},
+		copying,
 	}
 }
 

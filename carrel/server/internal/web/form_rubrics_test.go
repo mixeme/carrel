@@ -58,7 +58,7 @@ func serverForm(f view.Form, kept ...string) []string {
 	for _, set := range f.Sets {
 		for _, row := range set.Rows {
 			item := string(set.Legend) + " / " + string(row.Label)
-			if row.Kind == view.InputHidden || strings.Contains(strings.Join(kept, "\n"), item) {
+			if row.Kind == view.InputHidden || row.Kind == view.InputRemove || strings.Contains(strings.Join(kept, "\n"), item) {
 				continue
 			}
 			out = append(out, item)
@@ -93,7 +93,8 @@ func TestEventFormIsTheFramesRubrics(t *testing.T) {
 		"e1.ics", ics("BEGIN:VEVENT\nUID:e1\nDTSTAMP:20260101T000000Z\nDTSTART;TZID=Europe/Moscow:20260810T100000\n"+
 			"DTEND;TZID=Europe/Moscow:20260810T110000\nSUMMARY:Sync-up\nLOCATION:Room 2\nSTATUS:CONFIRMED\n"+
 			"RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20261228T235959Z\n"+
-			"BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-PT10M\nDESCRIPTION:x\nEND:VALARM\nEND:VEVENT"))
+			"BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-PT10M\nDESCRIPTION:x\nEND:VALARM\n"+
+			"BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-P1D\nDESCRIPTION:x\nEND:VALARM\nEND:VEVENT"))
 	page := decode[view.EventEditPage](t, f.h.do(get(f.path("calendar")+"/e1/edit", f.sess)))
 	if got, want := serverForm(page.Form), frameForm(t, "s-agenda-3"); !equalStrings(got, want) {
 		t.Errorf("event form =\n%q,\nwant (s-agenda-3)\n%q", got, want)

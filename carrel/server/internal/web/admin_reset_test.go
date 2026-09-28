@@ -17,6 +17,8 @@ var (
 	frameSheetTitle = regexp.MustCompile(`(?s)<b class="tc-sheet__title">(.*?)</b>`)
 	frameSheetHint  = regexp.MustCompile(`(?s)<span class="tc-field__hint">(.*?)</span>`)
 	frameSheetFoot  = regexp.MustCompile(`(?s)<div class="tc-sheet__foot">(.*?)</div>`)
+	frameErrHint    = regexp.MustCompile(`(?s)<span class="tc-field__hint tc-dim--danger">(.*?)</span>`)
+	frameIssuedMsg  = regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush[^"]*">(.*?)</div>`)
 )
 
 // from-typecase note 18, to-typecase task 16: «Reset a password» stands in
@@ -62,9 +64,7 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 	var fields, frameFields []string
 	for _, set := range sheet.Form.Sets {
 		for _, row := range set.Rows {
-			// The login typed to confirm is the owner's (28.09.2026) and not
-			// drawn in s-admin-13 yet: TestResetAsksTheLoginTyped holds it.
-			if row.Kind != view.InputHidden && row.Name != "confirm" {
+			if row.Kind != view.InputHidden {
 				fields = append(fields, string(row.Label))
 			}
 		}
@@ -115,10 +115,11 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 		t.Errorf("?target= chooses %q", sel)
 	}
 
-	// Refused: a password too short says so at its field, and nothing moved.
+	// Refused: a password too short says so at its field in the words of
+	// s-admin-16, and nothing moved.
 	short := decode[view.PasswordResetSheet](t, h.do(postForm(sheet.Form.Action, alice, url.Values{"target": {bobID}, "password": {"short"}, "confirm": {"bob"}})))
-	if rowNamed(t, short.Form, "password").Error == "" || short.Issued != nil {
-		t.Errorf("a short password: %+v", short)
+	if got, want := string(rowNamed(t, short.Form, "password").Error), frameText(frameErrHint.FindStringSubmatch(mockupFrame(t, "s-admin-16"))[1]); got != want || short.Issued != nil {
+		t.Errorf("a short password: %q, want %q (s-admin-16); issued %+v", got, want, short.Issued)
 	}
 	if id, _, _, _ := h.users.Authenticate(context.Background(), "bob", "bobpass123"); id != bobID {
 		t.Fatal("a refused reset changed the password")
@@ -127,6 +128,18 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 	done := decode[view.PasswordResetSheet](t, h.do(postForm(sheet.Form.Action, alice, url.Values{"target": {bobID}, "password": {"tide-oven-4c1-lamp"}, "confirm": {"bob"}})))
 	if done.Issued == nil || done.Issued.Login != "bob" || done.Issued.Password != "tide-oven-4c1-lamp" {
 		t.Fatalf("issued = %+v", done.Issued)
+	}
+	// s-admin-14: the answer is the password once — the message naming
+	// whose, the card with Copy and its line, and Done in the foot; no form
+	// and no warning any more.
+	answer := mockupFrame(t, "s-admin-14")
+	wantMsg := strings.Replace(frameText(frameIssuedMsg.FindStringSubmatch(answer)[1]), "anna", "bob", 1)
+	if got := done.Issued; string(got.Message) != wantMsg || string(got.Note) != frameText(frameFootDim.FindStringSubmatch(answer)[1]) ||
+		got.Copy.Label != "Copy" || got.Done.Label != "Done" || got.Done.Href != "/admin/" || !got.Done.Enabled {
+		t.Errorf("issued = %+v, want (s-admin-14) %q, %q, Copy and Done", got, wantMsg, frameText(frameFootDim.FindStringSubmatch(answer)[1]))
+	}
+	if len(done.Form.Sets) != 0 || done.Warning != "" || len(done.Actions) != 0 {
+		t.Errorf("the answer still carries the form %+v, the warning %q, the actions %+v", done.Form.Sets, done.Warning, done.Actions)
 	}
 	if id, _, _, _ := h.users.Authenticate(context.Background(), "bob", "tide-oven-4c1-lamp"); id != bobID {
 		t.Error("the temporary password does not open the account")
@@ -157,8 +170,9 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 
 // A reset destroys what the person had (S-10.4), so the sheet asks their
 // login typed, as a collection's deletion asks its name (owner's decision
-// 28.09.2026): a person chosen by a slip of the list is not wiped. The frame
-// s-admin-13 does not draw the field yet (to-typecase).
+// 28.09.2026): a person chosen by a slip of the list is not wiped. The line
+// is s-admin-13's last; a login that is not the one chosen is refused at it
+// in the words of s-admin-20, naming the login awaited.
 func TestResetAsksTheLoginTyped(t *testing.T) {
 	h := newHarness(t)
 	adminID := h.admin("alice", "password123")
@@ -169,11 +183,15 @@ func TestResetAsksTheLoginTyped(t *testing.T) {
 	if !confirm.Required || confirm.Kind != view.InputText || confirm.Value != "" {
 		t.Errorf("confirm row = %+v", confirm)
 	}
+	refusal := frameText(frameErrHint.FindStringSubmatch(mockupFrame(t, "s-admin-20"))[1])
+	if !strings.Contains(refusal, "anna") {
+		t.Fatalf("s-admin-20 = %q: read the frame again", refusal)
+	}
 	for _, typed := range []string{"", "Bob", "carol"} {
 		got := decode[view.PasswordResetSheet](t, h.do(postForm(sheet.Form.Action, alice,
 			url.Values{"target": {bobID}, "password": {"tide-oven-4c1-lamp"}, "confirm": {typed}})))
-		if rowNamed(t, got.Form, "confirm").Error == "" || got.Issued != nil {
-			t.Errorf("typed %q: %+v", typed, got)
+		if e := string(rowNamed(t, got.Form, "confirm").Error); e != strings.Replace(refusal, "anna", "bob", 1) || got.Issued != nil {
+			t.Errorf("typed %q: %q, issued %+v", typed, e, got.Issued)
 		}
 		if id, _, _, _ := h.users.Authenticate(context.Background(), "bob", "bobpass123"); id != bobID {
 			t.Fatalf("typed %q reset the password", typed)

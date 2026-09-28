@@ -66,10 +66,11 @@ func (s *Server) collectionExport(conn sealed.Connection, col sealed.Collection)
 		Href: s.postQuery(list, q), Method: "GET", Enabled: true}
 }
 
-// recordNoun names what the collection holds: its one kind, or records.
+// recordNoun names what the collection holds: its one kind, or records; a
+// folder holds files (s-profile-19).
 func recordNoun(col sealed.Collection) string {
 	if col.Has(view.KindFile) {
-		return "item"
+		return "file"
 	}
 	if len(col.Kinds) == 1 {
 		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
@@ -89,8 +90,9 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 	}
 	action := "/app/collections/delete?" + collectionDeleteQuery(conn, col).Encode()
 	sheet := view.CollectionDeleteSheet{
-		Kind:    col.Kinds[0],
-		Subject: text(label + " · " + host),
+		Kind: col.Kinds[0],
+		// The server, then the collection (s-profile-9, s-profile-19).
+		Subject: text(host + " · " + label),
 		Warning: text(fmt.Sprintf("The %s and %s are deleted on %s. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.",
 			noun, what, host)),
 		// What else points at it and stops working with it (S-12.4): the
@@ -101,8 +103,9 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 			noun + " at a new address — not into this one, and not to this address."),
 		Form: s.plainForm(action, "POST",
 			csrfField(sess),
+			// The name is the field's sample (s-profile-9, s-profile-19).
 			view.FormRow{Name: "name", Label: "Type the name to confirm", Kind: view.InputText, Value: text(typed),
-				Hint: text(label), Error: errText, Required: true},
+				Placeholder: text(label), Error: errText, Required: true},
 		),
 		Actions: []view.Action{{ID: "collection.delete.confirm", Label: "Delete on the server", Href: s.route(action), Method: "POST", Danger: true, Enabled: true}},
 	}
@@ -211,16 +214,24 @@ func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 // device of the person that names the collection.
 func (s *Server) collectionReferences(sess *session.Session, conn sealed.Connection, col sealed.Collection) []view.Text {
 	refs := []view.Text{}
+	blob := s.catalogOf(sess)
+	// The attachment folder in a folder of a storage (s-profile-19).
+	if a := blob.Attachments; a != nil && a.AccountID == conn.ID && a.Path == col.Path {
+		refs = append(refs, "Attachments — the attachment folder is in it; new attachments will have nowhere to go")
+	}
 	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
 		if l.Target.AccountID == conn.ID && l.Target.Col == col.Path {
 			refs = append(refs, text("Published link «"+l.Target.Title+"» — it stops opening"))
 		}
 	}
-	blob := s.catalogOf(sess)
+	what := "collection"
+	if col.Has(view.KindFile) {
+		what = "folder"
+	}
 	for _, j := range blob.BackupJobs {
 		for _, src := range j.Sources {
 			if src.AccountID == conn.ID && src.Path == col.Path {
-				refs = append(refs, text("Backup job «"+j.Name+"» — it copies the others and says this one is gone"))
+				refs = append(refs, text("Backup job «"+j.Name+"» — copies this "+what+"; it will run one short and say so"))
 				break
 			}
 		}

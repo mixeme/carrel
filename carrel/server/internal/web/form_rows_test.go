@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"html"
 	"net/http"
 	"regexp"
 	"slices"
@@ -48,7 +49,7 @@ func shownForm(f view.Form) (fields, adds []string) {
 		for _, row := range set.Rows {
 			item := string(set.Legend) + " / " + string(row.Label)
 			switch {
-			case row.Kind == view.InputHidden:
+			case row.Kind == view.InputHidden, row.Kind == view.InputRemove:
 			case row.Kind == view.InputAdd:
 				adds = append(adds, item)
 			case !slices.Contains(fields, item):
@@ -69,15 +70,18 @@ func headOf(items []string) []string {
 	return out
 }
 
-// s-contacts-3: the head (Display name … Birthday), then Phone numbers and
-// Email addresses — each row a Label and a Number or an Address, and a button
-// that adds one —, then Other. s-contacts-4: a card without a nickname or a
-// birthday still shows both in the head.
+// s-contacts-3: the head (Display name … Birthday), then Phone numbers,
+// Email addresses and Addresses — each row a Label and a Number, an Address
+// or the five parts of an address, and a button that adds one —, then Other.
+// s-contacts-4: a card without a nickname or a birthday still shows both in
+// the head. The empty fields fold into «Show N empty fields» at the end, and
+// a card without addresses folds «Add address» there too (to-typecase 28).
 func TestContactFormIsTheFramesRubrics(t *testing.T) {
 	f := bookFixture(t, nil,
 		"BEGIN:VCARD\nVERSION:3.0\nUID:anna\nFN:Анна Ковалёва\nN:Ковалёва;Анна;;;\nORG:Издательство «Слово»\n"+
 			"TITLE:Выпускающий редактор\nBDAY:1987-03-14\nTEL;TYPE=CELL:+7 912 445-10-88\nTEL;TYPE=WORK:+7 495 120-45-00\n"+
-			"EMAIL;TYPE=WORK:a.kovaleva@example.org\nCATEGORIES:работа,издательство\nNOTE:Пишет по вторникам.\nEND:VCARD\n",
+			"EMAIL;TYPE=WORK:a.kovaleva@example.org\nADR;TYPE=home:;;ул. Тверская 12;Москва;;123001;Россия\n"+
+			"CATEGORIES:работа,издательство\nNOTE:Пишет по вторникам.\nEND:VCARD\n",
 		"BEGIN:VCARD\nVERSION:3.0\nUID:bare\nFN:Анна Ковалёва\nN:Ковалёва;Анна;;;\nORG:Издательство «Слово»\n"+
 			"TITLE:Выпускающий редактор\nTEL;TYPE=CELL:+7 912 445-10-88\nEND:VCARD\n")
 	page := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/anna/edit", f.sess)))
@@ -101,17 +105,119 @@ func TestContactFormIsTheFramesRubrics(t *testing.T) {
 	for _, r := range phone.Template {
 		names, labels = append(names, r.Name), append(labels, string(r.Label))
 	}
-	if !equalStrings(names, []string{"tel.{n}.type", "tel.{n}"}) || !equalStrings(labels, []string{"Label", "Number"}) {
-		t.Errorf("Add phone adds %q %q", names, labels)
+	if !equalStrings(names, []string{"tel.{n}.type", "tel.{n}", "remove"}) || !equalStrings(labels, []string{"Label", "Number", "Remove"}) ||
+		phone.Template[2].Kind != view.InputRemove || phone.Template[2].Value != "tel.{n}" {
+		t.Errorf("Add phone adds %q %q %+v", names, labels, phone.Template)
 	}
-	if len(phone.Template) == 2 {
+	if len(phone.Template) > 0 {
 		sameList(t, "added phone label", phone.Template[0].Options, "s-contacts-12")
+	}
+
+	// An address row is its label, picked from a list as a phone's is, then
+	// the five parts.
+	if label := rowNamed(t, page.Form, "adr.0.type"); label.Kind != view.InputSelect || selectedOf(label.Options)[0] != "home" {
+		t.Errorf("the address's label = %+v", label)
+	}
+	for _, part := range []string{"adr.0.street", "adr.0.city", "adr.0.region", "adr.0.code", "adr.0.country"} {
+		rowNamed(t, page.Form, part)
 	}
 
 	bare := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/bare/edit", f.sess)))
 	got, _ := shownForm(bare.Form)
 	if want := headOf(frameForm(t, "s-contacts-4")); !equalStrings(headOf(got), want) {
 		t.Errorf("head of a card without a nickname and a birthday = %q, want (s-contacts-4) %q", headOf(got), want)
+	}
+	// The fold is the last thing of the form, after every rubric, and counts
+	// the fields folded: the address (its button), Tags and Note.
+	show := regexp.MustCompile(`<button class="tc-btn" type="button">(Show \d+ empty fields)</button>`).FindStringSubmatch(mockupFrame(t, "s-contacts-3"))
+	if show == nil {
+		t.Fatal("s-contacts-3 draws no «Show N empty fields»: read it again")
+	}
+	fold := bare.Form.Sets[len(bare.Form.Sets)-1]
+	var folded []string
+	for _, r := range fold.Rows {
+		folded = append(folded, string(r.Label))
+	}
+	if want := regexp.MustCompile(`\d+`).ReplaceAllString(show[1], "3"); string(fold.Legend) != want ||
+		!equalStrings(folded, []string{"Add address", "Tags", "Note"}) || fold.Rows[0].Kind != view.InputAdd {
+		t.Errorf("fold = %q %q, want %q with Add address, Tags, Note", fold.Legend, folded, want)
+	}
+}
+
+// s-contacts-3: every row of a phone, an e-mail and an address has its
+// Remove. Without scripts it posts the form with remove=<row>: the form comes
+// back without the row and nothing is written (C-6.8); Save then takes out
+// exactly that value, and the rows after it keep their own parameters (S-7).
+func TestRemoveIsOnEveryRow(t *testing.T) {
+	frame := mockupFrame(t, "s-contacts-3")
+	want := map[string]int{}
+	for _, m := range regexp.MustCompile(`(?s)<div class="tc-fset">\s*<div class="tc-rubric">([^<]+)</div>(.*?)\n\s*</div>\n`).FindAllStringSubmatch(frame, -1) {
+		if n := strings.Count(m[2], `<button class="tc-btn is-danger" type="button">Remove</button>`); n > 0 {
+			want[m[1]] = n
+		}
+	}
+	if want["Phone numbers"] != 2 || want["Email addresses"] != 1 || want["Addresses"] != 1 || len(want) != 3 {
+		t.Fatalf("s-contacts-3 Remove buttons = %v: read it again", want)
+	}
+	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:4.0\nUID:ada\nFN:Ada\n"+
+		"TEL;TYPE=cell:+1 555 0100\nTEL;TYPE=work;PREF=1:+1 555 0101\nEMAIL;TYPE=work:ada@example.org\n"+
+		"ADR;TYPE=home:;;1 Main St;London;;N1;UK\nEND:VCARD\n")
+	edit := f.path("contacts") + "/ada/edit"
+	page := decode[view.ContactEditPage](t, f.h.do(get(edit, f.sess)))
+	got := map[string]int{}
+	var removes []string
+	for _, set := range page.Form.Sets {
+		for i, row := range set.Rows {
+			if row.Kind != view.InputRemove {
+				continue
+			}
+			got[string(set.Legend)]++
+			removes = append(removes, string(row.Value))
+			if row.Name != "remove" || row.Label != "Remove" || i == 0 || !strings.HasPrefix(set.Rows[i-1].Name, string(row.Value)) {
+				t.Errorf("Remove %+v does not close its row", row)
+			}
+		}
+	}
+	if len(got) != len(want) || got["Phone numbers"] != 2 || got["Email addresses"] != 1 || got["Addresses"] != 1 {
+		t.Errorf("Remove per rubric = %v, the frame %v", got, want)
+	}
+	if !equalStrings(removes, []string{"tel.0", "tel.1", "email.0", "adr.0"}) {
+		t.Errorf("Remove rows = %q", removes)
+	}
+
+	puts := f.srv.CountRequests("PUT", f.col)
+	form := formFields(page.Form)
+	form.Set("remove", "tel.0")
+	less := decode[view.ContactEditPage](t, f.h.do(postForm(edit, f.sess, form)))
+	if n := f.srv.CountRequests("PUT", f.col) - puts; n != 0 {
+		t.Errorf("removing a row wrote %d record(s)", n)
+	}
+	for _, set := range less.Form.Sets {
+		for _, row := range set.Rows {
+			if strings.HasPrefix(row.Name, "tel.0") && row.Kind != view.InputHidden || row.Kind == view.InputRemove && row.Value == "tel.0" {
+				t.Errorf("the removed row is drawn: %+v", row)
+			}
+		}
+	}
+	if v := rowNamed(t, less.Form, "tel.1").Value; v != "+1 555 0101" {
+		t.Errorf("tel.1 = %q after removing tel.0", v)
+	}
+	// A second press, on the address, keeps the first.
+	form = formFields(less.Form)
+	form.Set("remove", "adr.0")
+	less = decode[view.ContactEditPage](t, f.h.do(postForm(edit, f.sess, form)))
+	if hasRow(less.Form, "adr.0.street") && rowNamed(t, less.Form, "adr.0.street").Kind != view.InputHidden {
+		t.Error("the removed address is drawn")
+	}
+	form = formFields(less.Form)
+	form.Del("remove")
+	if resp := f.h.do(postForm(edit, f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
+	}
+	card := body(t, f, "ada.vcf")
+	mustContain(t, card, "TEL;PREF=1;TYPE=work:+1 555 0101", "EMAIL;TYPE=work:ada@example.org")
+	if strings.Contains(card, "0100") || strings.Contains(card, "ADR") {
+		t.Errorf("the removed rows are still there:\n%s", card)
 	}
 }
 
@@ -219,27 +325,52 @@ func TestAddPhoneIsAButton(t *testing.T) {
 
 var (
 	frameSheetLabel = regexp.MustCompile(`<label>([^<]*)</label>`)
+	frameSheetField = regexp.MustCompile(`<label>([^<]*)</label>(?:<input(?:[^>]*?placeholder="([^"]*)")?[^>]*>|<button class="tc-check"[^>]*>(.*?)</button>)?`)
 	framePickLabel  = regexp.MustCompile(`<label>([^<]*)</label><button class="tc-in is-pick"`)
 )
 
-// The quick sheets hold one row of a repeating field, without its label and
-// without a button: Phone and Email (s-notes-8), Remind (s-notes-9).
-func TestQuickSheetRowsAreTheFrames(t *testing.T) {
-	f := contactsFixture(t, false)
-	sheet := decode[view.NewSheet](t, f.h.do(get(f.path("contacts")+"/new/quick", f.sess)))
-	var want []string
-	for _, m := range frameSheetLabel.FindAllStringSubmatch(mockupFrame(t, "s-notes-8"), -1) {
-		want = append(want, frameText(m[1]))
+// sheetFields are the fields of a quick sheet, «label [placeholder]»: the
+// frame's, and the server's. A box labelled with a blank is named by its
+// text (s-notes-9: All day).
+func frameSheetFields(t *testing.T, id string) []string {
+	t.Helper()
+	var out []string
+	for _, m := range frameSheetField.FindAllStringSubmatch(mockupFrame(t, id), -1) {
+		label := frameText(m[1])
+		if label == "" {
+			label = frameText(m[3])
+		}
+		out = append(out, label+" ["+html.UnescapeString(m[2])+"]")
 	}
-	got := []string{}
-	for _, set := range sheet.Form.Sets {
+	return out
+}
+
+func sheetFields(f view.Form) []string {
+	out := []string{}
+	for _, set := range f.Sets {
 		for _, row := range set.Rows {
 			if row.Kind != view.InputHidden {
-				got = append(got, string(row.Label))
+				ph := string(row.Placeholder)
+				if row.Kind == view.InputSelect {
+					ph = "" // a list's placeholder is its search (C-6.8)
+				}
+				out = append(out, string(row.Label)+" ["+ph+"]")
 			}
 		}
 	}
-	if !equalStrings(got, want) {
+	return out
+}
+
+// The quick sheets hold one row of a repeating field, without its label and
+// without a button: Phone and Email (s-notes-8), Remind (s-notes-9). They
+// are labelled their own way — Title, Date, Start, End, then All day — and an
+// empty Phone and Email show the frame's samples (to-typecase 28). The
+// event's sheet has one Date: the end is on its day, or on the next when it
+// is earlier than the start.
+func TestQuickSheetRowsAreTheFrames(t *testing.T) {
+	f := contactsFixture(t, false)
+	sheet := decode[view.NewSheet](t, f.h.do(get(f.path("contacts")+"/new/quick", f.sess)))
+	if got, want := sheetFields(sheet.Form), frameSheetFields(t, "s-notes-8"); !equalStrings(got, want) {
 		t.Errorf("contact quick sheet = %q, want (s-notes-8) %q", got, want)
 	}
 	form := formFields(sheet.Form)
@@ -251,12 +382,41 @@ func TestQuickSheetRowsAreTheFrames(t *testing.T) {
 	}
 
 	c := calendarFixture(t, nil)
-	events := decode[view.NewSheet](t, c.h.do(get(c.path("calendar")+"/new/quick", c.sess)))
+	quick := c.path("calendar") + "/new/quick"
+	events := decode[view.NewSheet](t, c.h.do(get(quick, c.sess)))
+	if got, want := sheetFields(events.Form), frameSheetFields(t, "s-notes-9"); !equalStrings(got, want) {
+		t.Errorf("event quick sheet = %q, want (s-notes-9) %q", got, want)
+	}
 	remind := framePickLabel.FindStringSubmatch(mockupFrame(t, "s-notes-9"))
 	row := rowNamed(t, events.Form, "reminder.0")
 	if remind == nil || string(row.Label) != frameText(remind[1]) {
 		t.Errorf("the quick sheet's reminder = %q, want (s-notes-9) %q", row.Label, remind)
 	}
+	saved := func(set map[string]string) string {
+		t.Helper()
+		before := c.srv.Paths(c.col)
+		form := formFields(events.Form)
+		for k, v := range set {
+			form.Set(k, v)
+		}
+		if resp := c.h.do(postForm(quick, c.sess, form)); resp.Code != http.StatusSeeOther {
+			t.Fatalf("save %v: %d %s", set, resp.Code, resp.Body.String())
+		}
+		for _, p := range c.srv.Paths(c.col) {
+			if !slices.Contains(before, p) {
+				b, _, _ := c.srv.Object(p)
+				return unfolded(b)
+			}
+		}
+		t.Fatalf("save %v made nothing", set)
+		return ""
+	}
+	mustContain(t, saved(map[string]string{"summary": "Documents", "start.date": "2026-08-11", "start.time": "18:00", "end.time": "18:40"}),
+		"DTSTART:20260811T180000Z", "DTEND:20260811T184000Z")
+	mustContain(t, saved(map[string]string{"summary": "Night", "start.date": "2026-08-11", "start.time": "23:00", "end.time": "01:00"}),
+		"DTSTART:20260811T230000Z", "DTEND:20260812T010000Z")
+	mustContain(t, saved(map[string]string{"summary": "Day", "start.date": "2026-08-11", "start.allday": "on"}),
+		"DTSTART;VALUE=DATE:20260811")
 	for _, set := range events.Form.Sets {
 		for _, r := range set.Rows {
 			if r.Kind == view.InputAdd {

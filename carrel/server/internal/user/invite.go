@@ -49,23 +49,29 @@ func (s *Service) InviteValid(ctx context.Context, token string) bool {
 	return false
 }
 
-// InviteLogin is the login a live invitation names, and whether the token
-// is one: "" for an invitation of s-admin-1, whose person chooses the login
-// with the password.
-func (s *Service) InviteLogin(ctx context.Context, token string) (login string, valid bool) {
+// InviteFor is what a live invitation says of itself, and whether the token
+// is one.
+func (s *Service) InviteFor(ctx context.Context, token string) (inv OpenInvite, valid bool) {
 	hash, err := hashToken(token)
 	if err != nil {
-		return "", false
+		return OpenInvite{}, false
 	}
 	snap := s.st.Snapshot()
 	now := s.now()
 	for i := range snap.Invites {
-		inv := &snap.Invites[i]
-		if inviteLive(inv, now) && verifyHash(inv.SecretHash, hash) {
-			return inv.Login, true
+		in := &snap.Invites[i]
+		if inviteLive(in, now) && verifyHash(in.SecretHash, hash) {
+			return OpenInvite{Login: in.Login, Email: in.Email, By: in.By}, true
 		}
 	}
-	return "", false
+	return OpenInvite{}, false
+}
+
+// OpenInvite is what the page of an invitation shows (s-auth-12): the
+// login it names (made before v0.2.68; empty — the person chooses one), the
+// address it went to by letter (empty for a link), and who made it.
+type OpenInvite struct {
+	Login, Email, By string
 }
 
 // CompleteInvite accepts an invitation that names its login.
@@ -222,7 +228,7 @@ func (s *Service) createInvite(actorID, login, email string, role store.Role) (s
 			return nil, err
 		}
 		st.Invites = append(st.Invites, store.Invite{
-			ID: inviteID, Login: login, Email: email, Role: role,
+			ID: inviteID, Login: login, Email: email, Role: role, By: actorLogin(st, actorID),
 			SecretHash: hash, Secret: raw, CreatedAt: now, ExpiresAt: now.Add(inviteTTL(st)),
 		})
 		if login != "" {

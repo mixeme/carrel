@@ -168,7 +168,7 @@ func (s *Server) getAdminReset(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	s.writeResetSheet(w, r, s.resetSheet(sess, r.URL.Query().Get("target"), s.users.SuggestPassword(), nil, nil))
+	s.writeResetSheet(w, r, s.resetSheet(sess, r.URL.Query().Get("target"), s.users.SuggestPassword(), nil))
 }
 
 // postAdminReset resets the chosen person's password to the temporary one
@@ -183,14 +183,14 @@ func (s *Server) postAdminReset(w http.ResponseWriter, r *http.Request) {
 	snap := s.store.Snapshot()
 	u := snap.UserByID(target)
 	if why := resetRefusal(sess, u); why != "" {
-		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, map[string]view.Text{"target": why}, nil))
+		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, map[string]view.Text{"target": why}))
 		return
 	}
 	// The login typed is the confirmation (owner's decision 28.09.2026): a
 	// reset destroys what the person had, and a slip of the list must not.
 	if strings.TrimSpace(r.FormValue("confirm")) != u.Login {
 		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp,
-			map[string]view.Text{"confirm": text("Type " + u.Login + " to confirm whose password is reset.")}, nil))
+			map[string]view.Text{"confirm": text("Type " + u.Login + " to confirm whose password is reset.")}))
 		return
 	}
 	if err := s.users.AdminResetPassword(r.Context(), sess.AccountID(), target, temp); err != nil {
@@ -198,17 +198,24 @@ func (s *Server) postAdminReset(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, user.ErrPasswordShort) {
 			field = "password"
 		}
-		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, map[string]view.Text{field: formError(err)}, nil))
+		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, map[string]view.Text{field: formError(err)}))
 		return
 	}
-	// Shown this once: the answer to the POST, not a page to come back to.
-	// The form is empty again, with a new password to offer.
-	issued := &view.IssuedPassword{
-		Login:    text(u.Login),
-		Password: text(temp),
-		Copy:     view.Action{ID: "admin.reset.copy", Label: "Copy", Method: "GET", Enabled: true},
-	}
-	s.writeResetSheet(w, r, s.resetSheet(sess, "", s.users.SuggestPassword(), nil, issued))
+	// Shown this once (s-admin-14): the answer to the POST, not a page to
+	// come back to — the message, the password with Copy, and Done; the
+	// form and the warning have done their work.
+	s.writeResetSheet(w, r, view.PasswordResetSheet{
+		Title: "Reset a password",
+		Issued: &view.IssuedPassword{
+			Login:    text(u.Login),
+			Password: text(temp),
+			Copy:     view.Action{ID: "admin.reset.copy", Label: "Copy", Method: "GET", Enabled: true},
+			Message:  text("The password of " + u.Login + " is reset."),
+			Note:     "Hand it over yourself; they choose their own at the next sign-in.",
+			Done:     view.Action{ID: "admin.reset.done", Label: "Done", Href: s.route("/admin/"), Method: "GET", Enabled: true},
+		},
+		Actions: []view.Action{},
+	})
 }
 
 // resetRefusal is why a person is not reset here: nobody, oneself — whose
@@ -228,7 +235,7 @@ func resetRefusal(sess *session.Session, u *store.User) view.Text {
 // resetSheet is s-admin-13: Whose — the people of the list by login and
 // role, those who cannot be reset here off with the reason — the warning,
 // the temporary password, Reset password and Cancel.
-func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map[string]view.Text, issued *view.IssuedPassword) view.PasswordResetSheet {
+func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map[string]view.Text) view.PasswordResetSheet {
 	snap := s.store.Snapshot()
 	var people []view.Option
 	for i := range snap.Users {
@@ -254,7 +261,6 @@ func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map
 		Title:   "Reset a password",
 		Form:    form,
 		Warning: resetWarning,
-		Issued:  issued,
 		Actions: []view.Action{
 			{ID: "admin.reset.run", Label: "Reset password", Href: form.Action, Method: "POST", Danger: true, Enabled: true},
 			{ID: "admin.reset.cancel", Label: "Cancel", Href: s.route("/admin/"), Method: "GET", Enabled: true},
@@ -351,13 +357,16 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 			}
 			break
 		}
-		// Shown this once: the answer to the POST, not a page to come back
-		// to. The form is empty again, with a new password to offer.
+		// Shown this once (s-admin-17): the answer to the POST, not a page
+		// to come back to. The form is empty again, with a new password to
+		// offer.
 		flash.typed = url.Values{}
 		flash.issued = &view.IssuedPassword{
 			Login:    text(login),
 			Password: text(password),
 			Copy:     view.Action{ID: "admin.user.password.copy", Label: "Copy", Method: "GET", Enabled: true},
+			Message:  text("The user " + login + " is created. Hand this over; until they change it, you can sign in as them."),
+			Done:     view.Action{ID: "admin.user.password.done", Label: "Done", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
 		}
 	case "selfreg":
 		enabled := r.FormValue("selfReg") == "on" || r.FormValue("selfReg") == "true"
@@ -476,7 +485,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 		{Name: "action", Kind: view.InputHidden, Value: "user"},
 		roleRow(typed.Get("role")),
 		{Name: "login", Label: "Login", Kind: view.InputText, Required: true, Value: text(typed.Get("login"))},
-		{Name: "email", Label: "Email (optional)", Kind: view.InputEmail, Value: text(typed.Get("email")), Placeholder: "—"},
+		{Name: "email", Label: "Email", LabelAside: "(optional)", Kind: view.InputEmail, Value: text(typed.Get("email")), Placeholder: "—"},
 		temp,
 	}
 	for i := range rows {
@@ -523,8 +532,9 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 			continue
 		}
 		row := view.InviteRow{
-			Login:   text(inv.Login),
-			Address: text(inv.Email),
+			// The first column is the address: the person chooses the
+			// login, and a link has no address yet (s-admin-1).
+			Address: "—",
 			// Delivery and Status are columns of s-admin-1: how it was
 			// handed over, and pending — the list holds live ones only.
 			Delivery: "link",
@@ -546,7 +556,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash
 		// for one that went by letter — a new secret, the old link dies —
 		// and Copy link.
 		if inv.Email != "" {
-			row.Delivery = "email"
+			row.Address, row.Delivery = text(inv.Email), "email"
 			resend := view.Action{ID: "admin.invite.resend", Label: "Resend", Method: "POST", Enabled: true,
 				Href: s.postQuery("/admin/invites", url.Values{"action": {"resend"}, "invite": {inv.ID}})}
 			if !mail {
@@ -572,12 +582,12 @@ func inviteLive(inv *store.Invite, now time.Time) bool {
 }
 
 // inviteSentStatus is how the invitation's letter went (C-6: "sent",
-// "failed — " and the relay's reply, "SMTP not configured"); nothing for an
-// invitation without an address — its link is handed over.
+// "failed — " and the relay's reply, "SMTP not configured"); «—» for an
+// invitation without an address — its link is handed over (s-admin-1).
 func inviteSentStatus(inv *store.Invite, configured bool) view.Text {
 	switch {
 	case inv.Email == "":
-		return ""
+		return "—"
 	case inv.Mailed == "sent":
 		return text("sent")
 	case inv.Mailed == "failed" && inv.MailReply != "":

@@ -89,9 +89,9 @@ func neighbourLabels(rail view.Rail) (labels []string, on string) {
 
 // from-typecase notes 9 and 18, s-notes-2 and s-notes-20: the rail of a
 // note's page, read and edited, lists its neighbours in the order of the
-// notebook's list and marks the open one. The frames open the newest note of
-// «Записи» (s-notes-1 lists it first): nothing stands before it, and after it
-// as many as the rail shows on either side of a note inside the list. The
+// notebook's list and marks the open one. The frames open a note inside the
+// list and draw as many before it as after it — one on each side (s-notes-2,
+// s-notes-3, s-notes-20); the newest has nothing before it. The
 // neighbours are all of the open notebook — a note of another one, however
 // close its day, is not among them. They come from the list the session
 // holds: a notebook not loaded has none, and nothing is asked for them.
@@ -109,17 +109,19 @@ func TestNotePageRailHasNeighbours(t *testing.T) {
 
 	_ = f.h.do(get(list, f.sess))
 	_ = f.h.do(get(f.notebook(f.diary), f.sess))
-	before, after := frameNeighbours(t, "s-notes-20")
-	if b, a := frameNeighbours(t, "s-notes-2"); b != before || a != after {
-		t.Fatalf("s-notes-2 and s-notes-20 draw different neighbours: read the frames again")
+	span, after := frameNeighbours(t, "s-notes-20")
+	for _, id := range []string{"s-notes-2", "s-notes-3"} {
+		if b, a := frameNeighbours(t, id); b != span || a != after {
+			t.Fatalf("%s and s-notes-20 draw different neighbours: read the frames again", id)
+		}
 	}
-	if before != 0 || after < 1 {
-		t.Fatalf("s-notes-20 draws %d before and %d after the newest note: read the frame again", before, after)
+	if span < 1 || after != span {
+		t.Fatalf("s-notes-20 draws %d before and %d after the open note: read the frame again", span, after)
 	}
 	newest := []string{"Fourth", "Third", "Second", "First"}
-	for _, open := range []struct{ uid, title string }{{"n4", "Fourth"}, {"n3", "Third"}} {
+	for _, open := range []struct{ uid, title string }{{"n4", "Fourth"}, {"n3", "Third"}, {"n1", "First"}} {
 		at := slices.Index(newest, open.title)
-		want := newest[max(0, at-after):min(len(newest), at+after+1)]
+		want := newest[max(0, at-span):min(len(newest), at+span+1)]
 		rec := list + "/" + open.uid
 		for _, one := range []struct {
 			what string

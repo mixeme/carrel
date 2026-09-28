@@ -164,9 +164,9 @@ type CollectionNewSheet struct {
 
 type CollectionRenameSheet struct {
 	Kind    Kind     `json:"kind"`
-	Stamp   Stamp    `json:"stamp"`   // имя сервера; пусто у подписки — у неё имя местное
+	Stamp   Stamp    `json:"stamp"`   // имя сервера; у папки хранилища — сервер и папка, «sftpgo · vps · Documents» (s-profile-18); пусто у подписки — у неё имя местное
 	Form    Form     `json:"form"`    // имя и цвет одним листом: оба уходят одним запросом
-	Address Text     `json:"address"` // показан и не правится (S-12.2)
+	Address Text     `json:"address"` // показан и не правится (S-12.2); пусто у папки хранилища: её имя и есть адрес
 	Note    Text     `json:"note"`    // «переименование — не перенос»: адрес остаётся прежним
 	Failure *Notice  `json:"failure"` // отказ сервера; форма хранит введённое
 	Actions []Action `json:"actions"`

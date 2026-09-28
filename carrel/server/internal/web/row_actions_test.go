@@ -226,7 +226,9 @@ func TestBackupRowsAndJobPageAreTheFrame(t *testing.T) {
 // The external trigger is turned on and off by its own tick, «On a clock of
 // your own» (s-backup-2, to-typecase task 18a) — there is no separate
 // switch, and none on the row; a job that is off is not started by it
-// either.
+// either. The tick is the job's; the card of the line is there only while
+// the trigger is on (owner's decision, note 19): off, nothing to show or
+// renew, and no card is sent.
 func TestTriggerIsTurnedOffByItsTick(t *testing.T) {
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
@@ -242,8 +244,14 @@ func TestTriggerIsTurnedOffByItsTick(t *testing.T) {
 		if a := actionByID(page.Jobs[0].Actions, "backup.trigger.off"); a != nil {
 			t.Errorf("the row turns the trigger off: %+v", a)
 		}
-		sayWhy(t, "trigger", page.Jobs[0].Trigger.Password.Reveal, page.Jobs[0].Trigger.Clock)
-		return page.Jobs[0].Trigger.Clock
+		c := page.Jobs[0].Clock
+		sayWhy(t, "trigger", c)
+		if tb := page.Jobs[0].Trigger; (tb != nil) != c.On {
+			t.Errorf("the tick is on %v, the card %+v", c.On, tb)
+		} else if tb != nil {
+			sayWhy(t, "trigger", tb.Password.Reveal)
+		}
+		return c
 	}
 	if c := clock(); c.Label != view.Text(label) || c.On || !c.Enabled {
 		t.Fatalf("clock before = %+v, want %q unticked", c, label)
@@ -293,22 +301,23 @@ func TestInviteRowIsTheFrame(t *testing.T) {
 		}
 	}
 	page := decode[view.AdminInvitesPage](t, h.do(get("/admin/invites", alice)))
-	// Neither names a login: the person chooses it (the frame's «—»). The
-	// link typed beside an address goes as a link.
+	// Neither names a login: the person chooses it, and the first column is
+	// the address — the letter's, or the frame's «—» for a link. The
+	// address typed beside a link goes as a link.
+	if head := regexp.MustCompile(`(?s)<thead><tr><th[^>]*>(.*?)</th>`).FindStringSubmatch(mockupFrame(t, "s-admin-1")); head == nil || head[1] != "Address" {
+		t.Fatalf("s-admin-1 heads its first column %q: read the frame again", head)
+	}
 	rows := map[string]view.InviteRow{}
 	for _, r := range page.Rows {
-		if r.Login != "" {
-			t.Errorf("row login = %q, want none", r.Login)
-		}
-		rows[map[bool]string{true: "anna", false: "link"}[r.Address != ""]] = r
+		rows[map[bool]string{true: "anna", false: "link"}[r.Delivery == "email"]] = r
 	}
 	frame := frameRows(t, "s-admin-1")
 	cells := frameCells(t, "s-admin-1")
 	for i, login := range []string{"link", "anna"} {
 		row := rows[login]
-		// Delivery and Status are the frame's columns, in its words.
-		if string(row.Delivery) != cells[i][1] || string(row.Status) != cells[i][2] {
-			t.Errorf("%s delivery, status = %q, %q, want %q, %q (s-admin-1)", login, row.Delivery, row.Status, cells[i][1], cells[i][2])
+		// Address, Delivery and Status are the frame's columns, in its words.
+		if string(row.Address) != cells[i][0] || string(row.Delivery) != cells[i][1] || string(row.Status) != cells[i][2] {
+			t.Errorf("%s address, delivery, status = %q, %q, %q, want %q, %q, %q (s-admin-1)", login, row.Address, row.Delivery, row.Status, cells[i][0], cells[i][1], cells[i][2])
 		}
 		if got := labels(row.Actions); !equalStrings(got, frame[i]) {
 			t.Errorf("%s actions = %q, want %q", login, got, frame[i])
@@ -322,6 +331,9 @@ func TestInviteRowIsTheFrame(t *testing.T) {
 	}
 	if sent := string(rows["anna"].Sent); !strings.HasPrefix(sent, "failed — 550 ") {
 		t.Errorf("mail column = %q, want the relay's reply", sent)
+	}
+	if sent := string(rows["link"].Sent); sent != cells[0][3] {
+		t.Errorf("a link's mail column = %q, want the frame's %q", sent, cells[0][3])
 	}
 	if menu := rows["anna"].Menu; len(menu) == 0 || menu[len(menu)-1].ID != "admin.invite.revoke" || !menu[len(menu)-1].Danger {
 		t.Errorf("menu = %+v, want Revoke last, marked", menu)

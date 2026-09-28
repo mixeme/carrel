@@ -208,6 +208,18 @@
             "error": "",
             "extra": null,
             "hint": "",
+            "kind": "remove",
+            "label": "Remove",
+            "name": "remove",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "tel.0"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "select",
             "label": "Label",
             "name": "tel.1.type",
@@ -258,6 +270,18 @@
             "readOnly": false,
             "required": false,
             "value": "+7 495 120-45-00"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "remove",
+            "label": "Remove",
+            "name": "remove",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "tel.1"
           },
           {
             "error": "",
@@ -324,6 +348,18 @@
                 "readOnly": false,
                 "required": false,
                 "value": ""
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "remove",
+                "label": "Remove",
+                "name": "remove",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "tel.{n}"
               }
             ],
             "value": "tel"
@@ -377,6 +413,18 @@
             "error": "",
             "extra": null,
             "hint": "",
+            "kind": "remove",
+            "label": "Remove",
+            "name": "remove",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "email.0"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
             "kind": "add",
             "label": "Add email",
             "name": "add",
@@ -423,6 +471,18 @@
                 "readOnly": false,
                 "required": false,
                 "value": ""
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "remove",
+                "label": "Remove",
+                "name": "remove",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "email.{n}"
               }
             ],
             "value": "email"
@@ -437,7 +497,7 @@
             "extra": null,
             "hint": "Separated by commas.",
             "kind": "text",
-            "label": "Categories",
+            "label": "Tags",
             "name": "categories",
             "options": [],
             "readOnly": false,
@@ -472,6 +532,34 @@
             "readOnly": false,
             "required": false,
             "template": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "select",
+                "label": "Label",
+                "name": "adr.{n}.type",
+                "options": [
+                  {
+                    "label": "home",
+                    "selected": false,
+                    "value": "home"
+                  },
+                  {
+                    "label": "work",
+                    "selected": false,
+                    "value": "work"
+                  },
+                  {
+                    "label": "other",
+                    "selected": false,
+                    "value": "other"
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
               {
                 "error": "",
                 "extra": null,
@@ -531,6 +619,18 @@
                 "readOnly": false,
                 "required": false,
                 "value": ""
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "remove",
+                "label": "Remove",
+                "name": "remove",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "adr.{n}"
               }
             ],
             "value": "adr"

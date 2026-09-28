@@ -37,7 +37,11 @@ func TestContactRowLabelsAndAddresses(t *testing.T) {
 		form.Get("adr.0.code") != "SW1Y 4JH" || form.Get("adr.0.country") != "UK" || form.Get("adr.0.region") != "" {
 		t.Errorf("address = %v", form)
 	}
-	if add := addRow(t, edit.Form, "adr"); len(add.Template) != 5 || add.Template[0].Name != "adr.{n}.street" {
+	if form.Get("adr.0.type") != "home" {
+		t.Errorf("the address's label = %q", form.Get("adr.0.type"))
+	}
+	if add := addRow(t, edit.Form, "adr"); len(add.Template) != 7 || add.Template[0].Name != "adr.{n}.type" ||
+		add.Template[1].Name != "adr.{n}.street" || add.Template[6].Kind != view.InputRemove {
 		t.Errorf("Add address = %+v", add)
 	}
 
@@ -62,6 +66,10 @@ func TestContactRowLabelsAndAddresses(t *testing.T) {
 
 	got = save(map[string]string{"adr.0.region": "Westminster"})
 	mustContain(t, got, "ADR;TYPE=home:PO 7;Flat 2;12 St James's Square;London;Westminster;SW1Y 4JH;UK")
+
+	// The label is picked as a phone's is (s-contacts-3), and only it moves.
+	got = save(map[string]string{"adr.0.type": "work"})
+	mustContain(t, got, "ADR;TYPE=work:PO 7;Flat 2;12 St James's Square;London;Westminster;SW1Y 4JH;UK")
 
 	// A new address comes without PO box and extended parts; a semicolon
 	// typed in a part is dropped, or it would shift every part after it.

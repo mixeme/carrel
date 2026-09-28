@@ -163,6 +163,11 @@ const (
 	// row it adds; without scripts it posts the form with Name=Value, and
 	// the form comes back with one more row, nothing written.
 	InputAdd InputKind = "add"
+	// InputRemove is Remove at the end of one row of a repeating field: a
+	// phone, an e-mail, an address (s-contacts-3). Value names the row
+	// («tel.1»); without scripts it posts the form with Name=Value, and the
+	// form comes back without the row, nothing written.
+	InputRemove InputKind = "remove"
 )
 
 type DeviceTab string

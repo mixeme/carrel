@@ -43,11 +43,12 @@
           {
             "error": "",
             "extra": null,
-            "hint": "Контакты",
+            "hint": "",
             "kind": "text",
             "label": "Type the name to confirm",
             "name": "name",
             "options": [],
+            "placeholder": "Контакты",
             "readOnly": false,
             "required": true,
             "value": ""
@@ -58,6 +59,6 @@
   },
   "kind": "contact",
   "references": [],
-  "subject": "Контакты · nextcloud",
+  "subject": "nextcloud · Контакты",
   "warning": "The address book and all 4 contacts in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with."
 }

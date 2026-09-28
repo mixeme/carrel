@@ -195,7 +195,7 @@
             "extra": null,
             "hint": "Separated by commas.",
             "kind": "text",
-            "label": "Categories",
+            "label": "Tags",
             "name": "categories",
             "options": [],
             "readOnly": false,

@@ -37,7 +37,7 @@ type Users interface {
 	InviteValid(ctx context.Context, token string) (valid bool)
 	// InviteLogin is the login a live invitation names ("" — the person
 	// chooses it) and whether the token is one.
-	InviteLogin(ctx context.Context, token string) (login string, valid bool)
+	InviteFor(ctx context.Context, token string) (inv user.OpenInvite, valid bool)
 	CompleteInvite(ctx context.Context, token, password string) error
 	AcceptInvite(ctx context.Context, token, login, password string) error
 

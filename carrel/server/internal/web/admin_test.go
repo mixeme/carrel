@@ -199,7 +199,7 @@ func TestPostAdminInvitesCreate(t *testing.T) {
 	found := false
 	for _, row := range page.Rows {
 		// A link goes as a link: the address typed beside it is not kept.
-		if row.Link == text(link) && row.Address == "" {
+		if row.Link == text(link) && row.Address == "—" && row.Delivery == "link" {
 			found = true
 		}
 	}

@@ -108,10 +108,20 @@ type editField struct {
 	// (C-6.8 InputAdd): the form draws no empty row beforehand
 	// (s-contacts-3).
 	add string
-	// quick is the label of the one row a repeating field has on the quick
-	// sheet, which draws neither its label list nor the button: Phone and
-	// Email (s-notes-8), Remind (s-notes-9).
+	// quick is the label a field has on the quick sheet where it differs
+	// from the full form's (s-notes-8, s-notes-9): Title; a time's date,
+	// Date; the one row of a repeating field, which draws neither its label
+	// list nor the button — Phone, Email, Remind.
 	quick string
+	// quickTime labels the time of a fieldTime on the quick sheet: Start,
+	// End (s-notes-9).
+	quickTime string
+	// quickNoDate: the quick sheet draws no date of this time — the end is
+	// on the day of the start, or on the next when it is earlier (s-notes-9).
+	quickNoDate bool
+	// quickSample is the sample in the empty row of the quick sheet: «+7 …»,
+	// «name@example.org» (s-notes-8).
+	quickSample string
 }
 
 // fieldOption is one value a fieldChoice offers; sep draws a line before it,
@@ -589,23 +599,24 @@ var editFields = map[view.Kind][]editField{
 		{name: "title", label: "Title", prop: "TITLE", typ: fieldText, optional: true},
 		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday,
 			hint: "Type it: 14.03.1987, or 14.03 without the year."},
-		{name: "tel", label: "Number", prop: "TEL", typ: fieldMulti, typed: true, set: "Phone numbers", add: "Add phone", quick: "Phone"},
-		{name: "email", label: "Address", prop: "EMAIL", typ: fieldMulti, typed: true, set: "Email addresses", add: "Add email", quick: "Email"},
-		// The frames draw no address (to-typecase task 28): a rubric of
-		// its own after the e-mail, folded away when the card has none.
-		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress, set: "Addresses", optional: true, add: "Add address"},
-		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, optional: true, hint: "Separated by commas.", set: "Other"},
+		{name: "tel", label: "Number", prop: "TEL", typ: fieldMulti, typed: true, set: "Phone numbers", add: "Add phone", quick: "Phone", quickSample: "+7 …"},
+		{name: "email", label: "Address", prop: "EMAIL", typ: fieldMulti, typed: true, set: "Email addresses", add: "Add email", quick: "Email", quickSample: "name@example.org"},
+		// Addresses after the e-mail (s-contacts-3), folded away with their
+		// button when the card has none.
+		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress, typed: true, set: "Addresses", optional: true, add: "Add address"},
+		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, optional: true, hint: "Separated by commas.", set: "Other"},
 		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea, optional: true, set: "Other"},
 	},
 	view.KindEvent: {
-		{name: "summary", label: "Summary", prop: "SUMMARY", typ: fieldText},
+		{name: "summary", label: "Summary", prop: "SUMMARY", typ: fieldText, quick: "Title"},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: eventStatuses},
-		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
+		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas."},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
 		{name: "attendee", label: "Attendee", prop: "ATTENDEE", typ: fieldAttendee},
-		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, required: true, allDay: true, set: "When"},
-		{name: "end", label: "End date", timeLabel: "End time", prop: "DTEND", typ: fieldTime, set: "When"},
+		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, required: true, allDay: true, set: "When",
+			quick: "Date", quickTime: "Start"},
+		{name: "end", label: "End date", timeLabel: "End time", prop: "DTEND", typ: fieldTime, set: "When", quickTime: "End", quickNoDate: true},
 		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone, set: "When"},
 		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders", add: "Add reminder", quick: "Remind"},
 		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat, set: "Repeats"},
@@ -621,7 +632,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "done", label: "Done", prop: "STATUS", typ: fieldDone, set: "Progress"},
 		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders", add: "Add reminder", quick: "Remind"},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText, set: "Other"},
-		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas.", set: "Other"},
+		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas.", set: "Other"},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
 	},
 	view.KindNote: {
@@ -656,15 +667,17 @@ func quickFields(k view.Kind) []editField {
 	return out
 }
 
-// rowLabels are the labels a phone or an e-mail row is offered (TYPE), the
-// lists of s-contacts-12 and s-contacts-13: vCard types, which another client
-// names in its own words. «mobile» is TYPE=cell and «main» TYPE=main, as other
+// rowLabels are the labels a phone, an e-mail or an address row is offered
+// (TYPE), the lists of s-contacts-12 and s-contacts-13 and «home, work…» of an
+// address (s-contacts-3): vCard types, which another client names in its own
+// words. «mobile» is TYPE=cell and «main» TYPE=main, as other
 // clients write them. A label another client wrote is offered too, so keeping
 // it is a choice.
 var rowLabels = map[string][]fieldOption{
 	"TEL": {{value: "cell", label: "mobile"}, {value: "work", label: "work"}, {value: "home", label: "home"},
 		{value: "main", label: "main"}, {value: "fax", label: "fax"}, {value: "other", label: "other"}},
 	"EMAIL": {{value: "work", label: "work"}, {value: "home", label: "home"}, {value: "other", label: "other"}},
+	"ADR":   {{value: "home", label: "home"}, {value: "work", label: "work"}, {value: "other", label: "other"}},
 }
 
 // addressParts are the inputs of an address row: ADR components 2 to 6
@@ -790,15 +803,17 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 				vals[f.name+".type"] = append(labels, "")
 			}
 		case fieldAddress:
-			var rows []string
+			var rows, labels []string
 			for _, v := range props[f.prop] {
 				p := strings.SplitN(v.Text, ";", 7)
 				for len(p) < 7 {
 					p = append(p, "")
 				}
 				rows = append(rows, addressRow(p[2:]))
+				labels = append(labels, v.Params["TYPE"])
 			}
 			vals[f.name] = append(rows, "")
+			vals[f.name+".type"] = append(labels, "")
 		case fieldTime:
 			tm, err := cal.TimingOf(obj, tz)
 			if f.prop == "DUE" {
@@ -982,15 +997,17 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 				}
 				return addressRow(parts)
 			}
-			var rows []string
+			var rows, labels []string
 			for i := 0; ; i++ {
 				prefix := fmt.Sprintf("%s.%d", f.name, i)
 				if _, ok := r.Form[prefix+".street"]; !ok {
 					break
 				}
 				rows = append(rows, part(prefix))
+				labels = append(labels, strings.TrimSpace(r.FormValue(prefix+".type")))
 			}
 			vals[f.name] = append(rows, "")
+			vals[f.name+".type"] = append(labels, "")
 		case fieldTime:
 			row := []string{strings.TrimSpace(r.FormValue(f.name + ".date")), strings.TrimSpace(r.FormValue(f.name + ".time")), ""}
 			if f.allDay {
@@ -1009,6 +1026,9 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 		case fieldDone:
 			vals[f.name] = []string{checkbox(r, f.name)}
 		}
+	}
+	for _, name := range r.Form[removedKey] {
+		removeRow(c.spec.kind, vals, name)
 	}
 	return vals
 }
@@ -1074,7 +1094,8 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			}
 			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], w, labels)...)
 		case fieldAddress:
-			if sameRows(w, h) {
+			labels := want[f.name+".type"]
+			if sameRows(w, h) && sameLabels(labels, have[f.name+".type"]) {
 				continue
 			}
 			cur := props[f.prop]
@@ -1092,7 +1113,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				}
 				rows[i] = strings.Join(full, ";")
 			}
-			ch.ops = append(ch.ops, multiOps(f.prop, cur, rows, nil)...)
+			ch.ops = append(ch.ops, multiOps(f.prop, cur, rows, labels)...)
 		case fieldList:
 			items := listItems(first(w))
 			if sameRows(items, listItems(first(h))) {
@@ -1979,10 +2000,22 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		props = st.obj.Props()
 	}
 	var empty []view.FormRow
+	folded := 0
 	full := len(fields) == len(editFields[c.spec.kind])
+	removed := st.values[removedKey]
+	for _, name := range removed {
+		// Rows Remove took out without scripts (C-6.8 InputRemove), named
+		// again with every post until Save.
+		sets[0].Rows = append(sets[0].Rows, view.FormRow{Name: removedKey, Kind: view.InputHidden, Value: text(name)})
+	}
+	// quickDay is the all-day box of the quick sheet, which stands after
+	// the last of its times (s-notes-9).
+	var quickDay *view.FormRow
 	for _, f := range fields {
 		vals, errText := st.values[f.name], text(st.errors[f.name])
-		hide := f.optional && full && st.obj != nil && strings.TrimSpace(first(vals)) == "" && errText == ""
+		blank := !slices.ContainsFunc(vals, func(v string) bool { return strings.TrimSpace(v) != "" }) &&
+			!slices.ContainsFunc(removed, func(n string) bool { return strings.HasPrefix(n, f.name+".") })
+		hide := f.optional && full && st.obj != nil && blank && errText == ""
 		// The quick sheet is too small for rubrics: its few fields stand
 		// together, and only the reminders keep their own set (U-6.16).
 		legend := f.set
@@ -1998,7 +2031,11 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		before := len(set.Rows)
 		switch f.typ {
 		case fieldText:
-			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required})
+			label := f.label
+			if !full && f.quick != "" {
+				label = f.quick
+			}
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(label), Kind: view.InputText, Value: text(first(vals)), Hint: text(f.hint), Error: errText, Required: f.required})
 		case fieldArea:
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputArea, Value: text(first(vals)), Error: errText})
 		case fieldList:
@@ -2051,9 +2088,13 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			labels := st.values[f.name+".type"]
 			for i, v := range rows {
 				name := fmt.Sprintf("%s.%d", f.name, i)
+				if slices.Contains(removed, name) {
+					set.Rows = append(set.Rows, removedRows(f, name)...)
+					continue
+				}
 				row := view.FormRow{Name: name, Label: text(f.label), Kind: kind, Value: text(v)}
 				if !full {
-					row.Label = text(f.quick)
+					row.Label, row.Placeholder = text(f.quick), text(f.quickSample)
 				} else if f.typed {
 					label := first(labels[min(i, len(labels)):])
 					set.Rows = append(set.Rows, labelRow(f, name, label))
@@ -2062,46 +2103,77 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 					row.Error = errText
 				}
 				set.Rows = append(set.Rows, row)
+				if full {
+					set.Rows = append(set.Rows, removeButton(name))
+				}
 			}
 			if full {
 				tpl := view.FormRow{Name: f.name + ".{n}", Label: text(f.label), Kind: kind}
-				add := addButton(f, tpl)
+				add := addButton(f, tpl, removeButton(f.name+".{n}"))
 				if f.typed {
-					add.Template = []view.FormRow{labelRow(f, f.name+".{n}", ""), tpl}
+					add.Template = []view.FormRow{labelRow(f, f.name+".{n}", ""), tpl, removeButton(f.name + ".{n}")}
 				}
 				set.Rows = append(set.Rows, add)
 			}
 		case fieldAddress:
+			// Each row is its label, picked as a phone's is, the five parts
+			// and Remove (s-contacts-3).
+			labels := st.values[f.name+".type"]
 			for i, v := range shownRows(vals, full) {
 				prefix := fmt.Sprintf("%s.%d", f.name, i)
+				if slices.Contains(removed, prefix) {
+					set.Rows = append(set.Rows, removedRows(f, prefix)...)
+					continue
+				}
+				label := labelRow(f, prefix, first(labels[min(i, len(labels)):]))
+				if i == 0 {
+					label.Error = errText
+				}
+				set.Rows = append(set.Rows, label)
 				parts := addressRowParts(v)
 				for j, row := range addressRows(prefix) {
 					row.Value = text(parts[j])
-					if j == 0 {
-						if i < len(props[f.prop]) {
-							// The label the address has, which no field
-							// offers: «Street · home».
-							row.Label = text(typedLabel(string(row.Label), props[f.prop][i].Params))
-						}
-						row.Error = errText
-					}
 					set.Rows = append(set.Rows, row)
 				}
+				set.Rows = append(set.Rows, removeButton(prefix))
 			}
-			set.Rows = append(set.Rows, addButton(f, addressRows(f.name+".{n}")...))
+			tpl := append([]view.FormRow{labelRow(f, f.name+".{n}", "")}, addressRows(f.name+".{n}")...)
+			set.Rows = append(set.Rows, addButton(f, append(tpl, removeButton(f.name+".{n}"))...))
 		case fieldTime:
 			row := triple(vals)
 			// The all-day box leads its field, as in s-agenda-3; a task's
-			// one box leads the first of its times (s-tasks-3).
-			if f.allDay {
+			// one box leads the first of its times (s-tasks-3). The quick
+			// sheet has it after the times (s-notes-9), and its own labels.
+			if f.allDay && full {
 				set.Rows = append(set.Rows, view.FormRow{Name: f.name + ".allday", Label: "All day", Kind: view.InputCheck, Value: text(row[2])})
 			}
 			if f.taskDay && !slices.ContainsFunc(set.Rows, func(r view.FormRow) bool { return r.Name == taskDayBox }) {
 				set.Rows = append(set.Rows, view.FormRow{Name: taskDayBox, Label: "All day", Kind: view.InputCheck, Value: text(first(st.values[taskDayBox]))})
 			}
-			set.Rows = append(set.Rows,
-				view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required},
-				view.FormRow{Name: f.name + ".time", Label: text(timeLabel(f)), Kind: view.InputTime, Value: text(row[1])})
+			date := view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required}
+			clock := view.FormRow{Name: f.name + ".time", Label: text(timeLabel(f)), Kind: view.InputTime, Value: text(row[1])}
+			switch {
+			case full:
+				set.Rows = append(set.Rows, date, clock)
+			case f.quickNoDate:
+				clock.Label, clock.Error = text(f.quickTime), errText
+				set.Rows = append(set.Rows, clock)
+			default:
+				if f.quick != "" {
+					date.Label = text(f.quick)
+				}
+				if f.quickTime != "" {
+					clock.Label = text(f.quickTime)
+				}
+				set.Rows = append(set.Rows, date, clock)
+			}
+			if f.allDay && !full {
+				quickDay = &view.FormRow{Name: f.name + ".allday", Label: "All day", Kind: view.InputCheck, Value: text(row[2])}
+			}
+			if f.quickNoDate && quickDay != nil {
+				set.Rows = append(set.Rows, *quickDay)
+				quickDay = nil
+			}
 		case fieldDone:
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputCheck, Value: text(first(vals))})
 		case fieldPercent:
@@ -2132,14 +2204,20 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		if hide {
 			empty = append(empty, set.Rows[before:]...)
 			set.Rows = set.Rows[:before]
+			folded++
 		}
 	}
+	if quickDay != nil {
+		sets[0].Rows = append(sets[0].Rows, *quickDay)
+	}
 	// A rubric whose fields all went into the fold is not drawn: a card
-	// without categories and a note has no Other.
+	// without categories and a note has no Other. The fold is the last
+	// thing of the form, after every rubric, and counts the fields in it: a
+	// card without addresses folds «Add address» too (s-contacts-3).
 	sets = append(sets[:1], slices.DeleteFunc(sets[1:], func(fs view.FieldSet) bool { return len(fs.Rows) == 0 })...)
 	if len(empty) > 0 {
-		legend := fmt.Sprintf("Show %d empty fields", len(empty))
-		if len(empty) == 1 {
+		legend := fmt.Sprintf("Show %d empty fields", folded)
+		if folded == 1 {
 			legend = "Show 1 empty field"
 		}
 		sets = append(sets, view.FieldSet{Legend: text(legend), Rows: empty})
@@ -2202,6 +2280,60 @@ func shownRows(vals []string, full bool) []string {
 // before its value.
 func labelRow(f editField, name, label string) view.FormRow {
 	return view.FormRow{Name: name + ".type", Label: "Label", Kind: view.InputSelect, Value: text(label), Options: labelOptions(f.prop, label)}
+}
+
+// removedKey carries the rows Remove took out without scripts (C-6.8
+// InputRemove): each names one, «tel.0», and goes back with every post until
+// Save. The row itself travels empty and hidden under its number, so the
+// rows after it keep theirs, and Save takes out exactly its value (S-7).
+const removedKey = "removed"
+
+// removeButton is Remove at the end of the row name (s-contacts-3).
+func removeButton(name string) view.FormRow {
+	return view.FormRow{Name: "remove", Label: "Remove", Kind: view.InputRemove, Value: text(name)}
+}
+
+// removedRows are the inputs of a removed row, empty and hidden.
+func removedRows(f editField, name string) []view.FormRow {
+	var names []string
+	if f.typed {
+		names = append(names, name+".type")
+	}
+	if f.typ == fieldAddress {
+		for _, p := range addressParts {
+			names = append(names, name+"."+p.name)
+		}
+	} else {
+		names = append(names, name)
+	}
+	rows := make([]view.FormRow, 0, len(names))
+	for _, n := range names {
+		rows = append(rows, view.FormRow{Name: n, Kind: view.InputHidden})
+	}
+	return rows
+}
+
+// removeRow empties the row name of a repeating field of the kind — a
+// phone, an e-mail, an address — and names it among the removed. A name no
+// such row has changes nothing.
+func removeRow(kind view.Kind, values formValues, name string) {
+	field, num, ok := strings.Cut(name, ".")
+	i, err := strconv.Atoi(num)
+	if !ok || err != nil || i < 0 || strconv.Itoa(i) != num {
+		return
+	}
+	for _, f := range editFields[kind] {
+		if f.name != field || !f.typed || i >= len(values[f.name])-1 {
+			continue
+		}
+		values[f.name][i] = ""
+		if labels := values[f.name+".type"]; i < len(labels) {
+			labels[i] = ""
+		}
+		if !slices.Contains(values[removedKey], name) {
+			values[removedKey] = append(values[removedKey], name)
+		}
+	}
 }
 
 // addressRows are the five inputs of an address row under prefix.
@@ -2350,6 +2482,13 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		// «Add …» pressed without scripts (C-6.8 InputAdd): the form as
 		// typed, one row more, and nothing written.
 		addedRow(c.spec.kind, st.values, add)
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
+	if remove := r.FormValue("remove"); remove != "" && !markDone {
+		// Remove without scripts (C-6.8 InputRemove): the form as typed,
+		// that row out of it, and nothing written.
+		removeRow(c.spec.kind, st.values, remove)
 		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
 		return
 	}
@@ -2731,11 +2870,35 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 		return
 	}
 	want := s.submittedValues(c, r)
+	quickDays(c.spec.kind, want)
 	if r.URL.Query().Get("op") == "open" {
 		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
 		return
 	}
 	s.createRecord(w, r, c, want)
+}
+
+// quickDays gives a time the quick sheet draws without its date the day of
+// the time before it (s-notes-9: one Date, then Start and End): the same day,
+// or the next when the clock is earlier than the one before.
+func quickDays(kind view.Kind, vals formValues) {
+	var prev [3]string
+	for _, f := range editFields[kind] {
+		if f.typ != fieldTime {
+			continue
+		}
+		row := triple(vals[f.name])
+		if f.quickNoDate && row[0] == "" && row[1] != "" && prev[0] != "" {
+			row[0] = prev[0]
+			if prev[1] != "" && row[1] < prev[1] {
+				if d, err := time.Parse("2006-01-02", prev[0]); err == nil {
+					row[0] = d.AddDate(0, 0, 1).Format("2006-01-02")
+				}
+			}
+			vals[f.name] = row[:]
+		}
+		prev = row
+	}
 }
 
 // quickSheet is the collection picker of newSheet with a form under it. The
@@ -2816,6 +2979,11 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		// «Add …» without scripts: the form back with one row more, and no
 		// record until Save (C-6.8 InputAdd).
 		addedRow(c.spec.kind, want, add)
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
+		return
+	}
+	if remove := r.FormValue("remove"); remove != "" {
+		removeRow(c.spec.kind, want, remove)
 		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
 		return
 	}

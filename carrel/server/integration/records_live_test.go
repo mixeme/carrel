@@ -138,8 +138,12 @@ func liveForm(f view.Form) url.Values {
 		for _, row := range set.Rows {
 			switch {
 			case row.Name == "_csrf":
-			case row.Kind == view.InputAdd:
-				// A button that adds a row is posted only when pressed.
+			case row.Kind == view.InputAdd, row.Kind == view.InputRemove:
+				// A button that adds or removes a row is posted only when
+				// pressed.
+			case row.Name == "removed":
+				// Each row Remove took out is named once (C-6.8).
+				out.Add(row.Name, string(row.Value))
 			case row.Kind == view.InputCheck && len(row.Options) > 0:
 				// Several ticks under one name: each one ticked is a value.
 				out.Del(row.Name)

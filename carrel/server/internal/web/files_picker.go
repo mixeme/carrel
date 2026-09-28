@@ -130,7 +130,7 @@ func (s *Server) attachmentsPicker(r *http.Request, sess *session.Session) view.
 	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "GET"}
 	switch {
 	case chosen == nil:
-		choose.Reason = "Choose a folder in the tree first."
+		choose.Reason = "Choose a folder in the tree." // attachments-4
 	case chosen.col.ReadOnly:
 		choose.Reason = text(readOnlyReason)
 	default:

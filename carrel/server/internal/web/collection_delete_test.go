@@ -45,7 +45,8 @@ func TestCollectionDeleteSheetSaysWhatGoes(t *testing.T) {
 	}
 
 	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(get(colDeleteHref(f), f.sess)))
-	if sheet.Kind != view.KindEvent || !strings.HasPrefix(string(sheet.Subject), "Work · ") {
+	// The server, then the collection: «nextcloud · Дни рождения» (s-profile-9).
+	if sheet.Kind != view.KindEvent || !strings.HasSuffix(string(sheet.Subject), " · Work") {
 		t.Errorf("sheet = %+v", sheet)
 	}
 	if w := string(sheet.Warning); !strings.Contains(w, "all 2 records") || !strings.Contains(w, "Carrel holds no copy") {

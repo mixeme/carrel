@@ -70,7 +70,10 @@ func readFrameCards(t *testing.T) []frameCard {
 		if m := frameCardPick.FindStringSubmatch(p); m != nil {
 			c.role = frameText(m[1])
 		}
-		c.labels = frameAll(frameLabel, p, 1)
+		for _, m := range frameLabel.FindAllStringSubmatch(p, -1) {
+			label, _ := splitLabel(m[1])
+			c.labels = append(c.labels, label)
+		}
 		c.checks = frameAll(frameCardCheck, p, 1)
 		c.buttons = frameAll(frameCardBtn, p, 1)
 		out = append(out, c)
@@ -309,6 +312,14 @@ func TestTemporaryPasswordMakesTheAccount(t *testing.T) {
 	if issued == nil || issued.Login != "viktor" || issued.Password != temp || issued.Copy.Label != "Copy" {
 		t.Fatalf("issued = %+v, want viktor's password once", issued)
 	}
+	// s-admin-17: in the card, as after a reset — the message naming whom,
+	// Copy and Done beside it, no line of its own.
+	created := mockupFrame(t, "s-admin-17")
+	msg := frameText(regexp.MustCompile(`(?s)<div class="tc-msg tc-msg--flush[^"]*">(.*?)</div>`).FindStringSubmatch(created)[1])
+	if !strings.Contains(msg, "viktor") || issued.Message != view.Text(msg) || issued.Note != "" ||
+		issued.Done.Label != "Done" || issued.Done.Href != "/admin/invites" || !issued.Done.Enabled {
+		t.Errorf("issued = %+v, want (s-admin-17) %q with Done", issued, msg)
+	}
 	if next := rowValue(page.Temporary.Form, "password"); next == temp || next == "" {
 		t.Errorf("the form offers %q again for the next person", next)
 	}
@@ -336,18 +347,33 @@ func TestTemporaryPasswordMakesTheAccount(t *testing.T) {
 	if !made {
 		t.Error("no user.create line in the journal")
 	}
+	// The refusals of s-admin-19 stand at their fields, in its words.
+	refused := map[string]string{}
+	for _, m := range regexp.MustCompile(`(?s)<label>(\w+)[^<]*(?:<span[^>]*>[^<]*</span>)?</label><input[^>]*is-error[^>]*><span class="tc-field__hint tc-dim--danger">(.*?)</span>`).FindAllStringSubmatch(mockupFrame(t, "s-admin-19"), -1) {
+		refused[m[1]] = frameText(m[2])
+	}
+	if len(refused) != 3 {
+		t.Fatalf("s-admin-19 refuses %q: read the frame again", refused)
+	}
 	// The login is taken now; the answer says so on the field.
 	rec = h.do(postForm("/admin/invites?action=user", alice, form))
 	again := decode[view.AdminInvitesPage](t, rec)
-	if row := rowByName(again.Temporary.Form, "login"); row == nil || row.Error == "" || again.Temporary.Issued != nil {
-		t.Errorf("second viktor: %+v", again.Temporary)
+	if row := rowByName(again.Temporary.Form, "login"); row == nil || string(row.Error) != refused["Login"] || again.Temporary.Issued != nil {
+		t.Errorf("second viktor: %+v, want %q", row, refused["Login"])
+	}
+	// Not an address.
+	form.Set("login", "irina")
+	form.Set("email", "irina at example")
+	bad := decode[view.AdminInvitesPage](t, h.do(postForm("/admin/invites?action=user", alice, form)))
+	if row := rowByName(bad.Temporary.Form, "email"); row == nil || string(row.Error) != refused["Email"] {
+		t.Errorf("not an address: %+v, want %q", row, refused["Email"])
 	}
 	// Too short a password is refused on its field.
-	form.Set("login", "irina")
+	form.Set("email", "")
 	form.Set("password", "short")
 	short := decode[view.AdminInvitesPage](t, h.do(postForm("/admin/invites?action=user", alice, form)))
-	if row := rowByName(short.Temporary.Form, "password"); row == nil || row.Error == "" {
-		t.Errorf("short password: %+v", short.Temporary.Form)
+	if row := rowByName(short.Temporary.Form, "password"); row == nil || string(row.Error) != refused["Temporary"] {
+		t.Errorf("short password: %+v, want %q", row, refused["Temporary"])
 	}
 	if snap := h.st.Snapshot(); snap.UserByLogin("irina") != nil {
 		t.Error("irina made with a short password")
@@ -407,6 +433,10 @@ func TestAdminEscrowIsTheFrame(t *testing.T) {
 		if !found {
 			t.Errorf("%s: no hint %q", legend, hints[i])
 		}
+	}
+	// Policy has a Save of its own (s-admin-6), not a tick that saves.
+	if want := frameAll(frameFieldBt, frameBlock(t, frame, "Policy"), 1); !equalStrings(labels(page.Form.Actions), want) {
+		t.Errorf("policy actions = %q, want (s-admin-6) %q", labels(page.Form.Actions), want)
 	}
 	var recoverLabels []string
 	for _, row := range page.Recover.Sets[0].Rows {

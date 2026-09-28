@@ -165,7 +165,7 @@ func (s SMTPSettings) Configured() bool {
 type Invite struct {
 	ID string `json:"id"`
 	// Login is the account the invitation is for; empty — the invited
-	// person chooses it with the password (s-admin-1, s-auth-2). Named
+	// person chooses it with the password (s-admin-1, s-auth-12). Named
 	// only by invitations made before v0.2.68.
 	Login string `json:"login"`
 	Email string `json:"email,omitempty"`
@@ -185,6 +185,9 @@ type Invite struct {
 	// «550 mailbox unavailable» (s-admin-1 names a failure by it); empty
 	// once a letter went.
 	MailReply string `json:"mailReply,omitempty"`
+	// By is the login of the administrator who made it: «mix invited
+	// you.» (s-auth-12). Empty for invitations made before v0.2.71.
+	By string `json:"by,omitempty"`
 }
 
 // ProxyDevice is one davloom device: its wrapper and what it may see.

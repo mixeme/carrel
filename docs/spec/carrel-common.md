@@ -1361,9 +1361,9 @@ type CollectionNewSheet struct {
 
 type CollectionRenameSheet struct {
     Kind    Kind
-    Stamp   Stamp   // имя сервера; пусто у подписки — у неё имя местное
+    Stamp   Stamp   // имя сервера; у папки хранилища — сервер и папка, «sftpgo · vps · Documents» (s-profile-18); пусто у подписки — у неё имя местное
     Form    Form    // имя и цвет одним листом: оба уходят одним запросом
-    Address Text    // показан и не правится (S-12.2)
+    Address Text    // показан и не правится (S-12.2); пусто у папки хранилища: её имя и есть адрес
     Note    Text    // «переименование — не перенос»: адрес остаётся прежним
     Failure *Notice // отказ сервера; форма хранит введённое
     Actions []Action
@@ -1600,6 +1600,7 @@ type FieldSet struct { Legend Text; Rows []FormRow }
 type FormRow struct {
     Name     string
     Label    Text
+    LabelAside Text    // приглушённая часть подписи, после неё: «(optional)» у «Email» (s-admin-1, s-auth-4), «SHA-256 · optional» у «Certificate fingerprint» (s-profile-2); у прочих пусто
     Kind     InputKind // C-8
     Value    Text
     Options  []Option
@@ -1625,12 +1626,20 @@ type FormRow struct {
 // под ними кнопка InputAdd: Label — её подпись («Add phone», «Add reminder»),
 // Name — «add», Value — имя поля («tel»). Пустых строк заранее форма не
 // несёт (s-contacts-3). Нажатие вставляет перед кнопкой строки Template,
-// заменив «{n}» в их Name наименьшим числом, под которым строки этого поля в
-// форме ещё нет; номера идут подряд, строки из формы не вынимаются. Remove у
-// строки — забота клиента: он опустошает строку, а опустевшая строка при
-// сохранении уходит из записи. Без скриптов кнопка отправляет форму с
-// add=<поле> на Form.Action; ответ — та же форма с тем, что набрано, и одной
-// пустой строкой больше, ничего не записано (C-7).
+// заменив «{n}» в их Name и Value наименьшим числом, под которым строки
+// этого поля в форме ещё нет; номера идут подряд, строки из формы не
+// вынимаются. Без скриптов кнопка отправляет форму с add=<поле> на
+// Form.Action; ответ — та же форма с тем, что набрано, и одной пустой
+// строкой больше, ничего не записано (C-7).
+// Строку телефона, почты и адреса закрывает InputRemove (s-contacts-3):
+// Label «Remove», Name «remove», Value — имя строки («tel.1», «adr.0»);
+// Template кнопки Add несёт его тоже. Со сценариями нажатие опустошает поля
+// строки и прячет их, не вынимая из формы; опустевшая строка при сохранении
+// уходит из записи, ровно её значение, строки после неё свои параметры
+// сохраняют (S-7). Без сценариев кнопка отправляет форму с remove=<строка>;
+// ответ — та же форма без этой строки, ничего не записано: её поля едут
+// скрытыми и пустыми под прежними номерами, а скрытое «removed» с её именем
+// называет её снова с каждой отправкой до Save.
 // Отметка с Disables — общее правило, не особенность одной формы. Сервер
 // присылает ReadOnly названного поля по текущему значению отметки; клиент,
 // когда отметку ставят и снимают, переключает ReadOnly того поля сам, без
@@ -1743,15 +1752,23 @@ type UnlockSheet struct {
 
 type ConnectionsPage struct {
     Shell
-    // На списке — «Signed in as mix · 3 servers · 12 collections · 2
-    // subscriptions» (s-profile-1); в диалоге подключения — его строка,
-    // Title тогда «Connect account» (s-profile-2)
+    // «Signed in as mix · 3 servers · 12 collections · 2 subscriptions»
+    // (s-profile-1), и под диалогом тоже: серверы — карточки DAV-серверов
+    // (подписки не в счёте), коллекции — строки коллекций и папок в этих
+    // карточках, снятые тоже; у сервера, который сейчас не отвечает, —
+    // сколько было при последнем ответе
     Subtitle      Text
     Accounts      []ConnectionCard
     Subscriptions []SubscriptionCard
     // Диалог подключения (`?op=add`, s-profile-2), его правка (`?op=edit`)
     // или подписка (`?op=feed`); nil на списке: список формы не несёт
     Add           *Form
+    // Шапка диалога поверх страницы; страница под ним — как есть, со своими
+    // Title и Subtitle: «Connect account» (s-profile-2), «Edit connection»
+    // (s-profile-16), строка «One connection gives calendars and address
+    // books alike.»; пусто — диалога нет или это подписка
+    DialogTitle    Text
+    DialogSubtitle Text
     Actions       []Action // Connect account (→ `?op=add`) · Subscribe to a feed
 }
 type ConnectionCard struct {
@@ -1865,6 +1882,7 @@ type ProxyDevice struct {
 type BackupPage struct {
     Shell
     Subtitle   Text    // на странице задания: «Job · last copy 2 days ago» (s-backup-2), Title — имя задания; пусто на списке
+    Local      bool    // экземпляр локальный — значок «local» у отметки «On a clock of your own» (s-backup-2): адрес в строке запуска отвечает только изнутри сети; объявленного адреса снаружи (CARREL_PUBLIC_URL) нет или он — имя либо адрес частной сети
     Jobs       []BackupJob
     Add        Form    // новое задание; на странице задания (?job=, s-backup-2) — оно само: Save · Cancel · Run now
     Delete     *Action // внизу страницы задания; nil — на списке и у нового
@@ -1879,7 +1897,8 @@ type BackupJob struct {
     Encrypted   bool
     LastRun     When
     LastState   OpState
-    Trigger     TriggerBlock
+    Clock       Action        // отметка «On a clock of your own — cron, GoSentry, a job in Gitea» в рубрике When (s-backup-2): On — внешний запуск включён; снятая выключает его, отдельного выключателя нет
+    Trigger     *TriggerBlock // карточка строки внешнего запуска; nil, пока он выключен: показывать и обновлять нечего
     Runs        []BackupRun
     Actions     []Action // Run · Edit (s-backup-1); Run задания «Download» — поток архива
 }
@@ -1887,7 +1906,6 @@ type TriggerBlock struct {
     Command  Text // готовая строка или скрипт, собранный под назначение
     Password SecretField
     Note     Text
-    Clock    Action // отметка «On a clock of your own — cron, GoSentry, a job in Gitea» (s-backup-2): On — внешний запуск включён; снятая выключает его, отдельного выключателя нет
 }
 type BackupRun struct { ID Text; Started When; State OpState; Size Size; Download *Action }
 type RestoreBlock struct {
@@ -1927,10 +1945,10 @@ type AdminUserRow struct {
 // потерь через Key escrow — подсказкой у пароля.
 type PasswordResetSheet struct {
     Title   Text            // «Reset a password»
-    Form    Form            // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password, confirm — логин того, кого сбрасывают, набранный для подтверждения
-    Warning Text            // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются
-    Issued  *IssuedPassword // временный пароль — один раз, в ответе на сброс; nil — нет
-    Actions []Action        // Reset password (danger) · Cancel
+    Form    Form            // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password, confirm — «Type the login to confirm», последней строкой (s-admin-13, s-admin-20); в ответе на сброс пуста
+    Warning Text            // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются; в ответе на сброс пусто
+    Issued  *IssuedPassword // временный пароль — один раз, в ответе на сброс (s-admin-14); nil — нет
+    Actions []Action        // Reset password (danger) · Cancel; в ответе на сброс пусто — подвал листа держит Issued.Done
 }
 
 // «Add users» (s-admin-1): три способа завести человека карточками в ряд,
@@ -1956,18 +1974,22 @@ type AddUserCard struct {
     Issued  *IssuedPassword // временный пароль — один раз, в ответе на Create user; nil — нет
 }
 // Пароль, показанный администратору один раз: ни в состоянии, ни в журнале его нет.
+// Карточка «Temporary password · visible only now» (s-admin-14, s-admin-17).
 type IssuedPassword struct {
     Login    Text
     Password Text
     Copy     Action
+    Message  Text   // «The password of anna is reset.» (s-admin-14), «The user viktor is created. Hand this over; …» (s-admin-17); Login в нём — жирным
+    Note     Text   // строка рядом с Copy: «Hand it over yourself; they choose their own at the next sign-in.»; пусто — нет
+    Done     Action // Done: у листа сброса — в подвале листа, у карточки Create user — рядом с Copy
 }
+// Ожидающее приглашение (s-admin-1). Логина у него нет: его выбирает приглашённый.
 type InviteRow struct {
-    Login    Text // пусто — логин выберет приглашённый (s-admin-1 «—»)
-    Address  Text
+    Address  Text // первая колонка: адрес письма; «—» у ссылки
     Link     Text // видна всегда, независимо от отправки
     Delivery Text // «link» или «email»: как приглашение передано (s-admin-1)
     Status   Text // «pending»: в списке только действующие
-    Sent     Text // «sent», «failed — 550 mailbox unavailable» (ответ реле), «SMTP not configured»
+    Sent     Text // «sent», «failed — 550 mailbox unavailable» (ответ реле), «SMTP not configured»; «—» у ссылки
     Expires  When
     Actions  []Action   // Resend (у приглашения письмом) · Copy link (s-admin-1)
     Menu     []MenuItem // «⋯»: Extend, черта, Revoke (s-admin-11)
@@ -2376,7 +2398,8 @@ const ( InputText InputKind = "text"; InputPassword = "password"; InputEmail = "
         InputHidden = "hidden" // значение, которое форма несёт и никто не заполняет:
                                // _csrf, версия, на которой прочитана форма, шаг формы.
                                // Не показывается, подписи не имеет
-        InputAdd = "add" ) // кнопка, добавляющая строку повторяющегося поля (C-6.8)
+        InputAdd = "add"       // кнопка, добавляющая строку повторяющегося поля (C-6.8)
+        InputRemove = "remove" ) // Remove в конце строки повторяющегося поля (C-6.8)
 
 type DeviceTab string
 const ( TabApple DeviceTab = "apple"; TabAndroid = "android"

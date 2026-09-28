@@ -1266,6 +1266,8 @@
   ],
   "add": null,
   "details": null,
+  "dialogSubtitle": "",
+  "dialogTitle": "",
   "notices": [],
   "print": {
     "range": "",

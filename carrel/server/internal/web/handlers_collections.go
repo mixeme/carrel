@@ -662,10 +662,16 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 			server.Hint = text(strings.Replace(string(server.Hint), "until it does", "until they do", 1))
 		}
 	}
-	rows = append(rows, server,
-		view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(f.name), Required: true, Error: errs["name"]})
+	// Nothing to choose is no field (s-profile-21): the sheet's message says
+	// why, and Create is off with it.
+	if len(eligible) > 0 {
+		rows = append(rows, server)
+	}
+	rows = append(rows, view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(f.name), Required: true, Error: errs["name"]})
 	if f.kind == view.KindFile {
-		// A folder's name is its address: there is nothing else to ask.
+		// A folder's name is its address: there is nothing else to ask
+		// (s-profile-20), and the line under the name says so.
+		rows[len(rows)-1].Hint = "A folder's name is its address: there is nothing else to ask."
 		sheet.Form = s.plainForm(action, "POST", rows...)
 		sheet.Form.Action = s.route(action)
 		create := view.Action{ID: "collection.create", Label: "Create", Href: s.route(action), Method: "POST", Enabled: chosen.ID != ""}
@@ -816,11 +822,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 	}
 	note := "Renaming is not moving: the address stays as it is, so devices, published links and backup jobs pointing here go on working. " +
 		"The new name is written to the server, and other clients show it at their next sync."
-	if col.Has(view.KindFile) {
-		// A folder's name is its address (S-12.1): renaming it moves it.
-		note = "A folder's name is its address: renaming it moves it on the server. Devices, published links and backup jobs pointing at the old address will see it vanish; the files inside stay as they are."
-	}
-	return view.CollectionRenameSheet{
+	sheet := view.CollectionRenameSheet{
 		Kind:    col.Kinds[0],
 		Stamp:   view.Stamp(connLabel(conn)),
 		Form:    s.plainForm(action, "POST", rows...),
@@ -829,6 +831,17 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		Failure: failure,
 		Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Enabled: true}},
 	}
+	if col.Has(view.KindFile) {
+		// A folder's name is its address (S-12.1): renaming it moves it, and
+		// there is no address to show beside the name (s-profile-18). The
+		// head names the storage and the folder; the button says what it
+		// does.
+		sheet.Stamp = view.Stamp(connLabel(conn) + " · " + collectionLabel(col))
+		sheet.Address = ""
+		sheet.Note = "A folder's name is its address: renaming it moves it on the server. Devices, published links and backup jobs pointing at the old address will see it vanish; the files inside stay as they are."
+		sheet.Actions[0].Label = "Rename"
+	}
+	return sheet
 }
 
 // paletteRow offers the six tones of C-10, not an arbitrary colour.

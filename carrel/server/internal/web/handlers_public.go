@@ -23,10 +23,20 @@ func formError(err error) view.Text {
 		user.ErrEscrowNotConfigured, user.ErrEscrowConfigured, user.ErrNotDeposited, user.ErrEscrowDisabled,
 	} {
 		if errors.Is(err, known) {
-			return text(known.Error())
+			return text(refusal(known.Error()))
 		}
 	}
 	return text("Something went wrong. Try again.")
+}
+
+// refusal is an error said at a field or over a page: capitalised and
+// ended with a full stop, «Login is already taken.» (s-admin-19). Go keeps
+// its error strings lower-case and bare.
+func refusal(s string) string {
+	if s = sentence(s); s != "" && !strings.HasSuffix(s, ".") {
+		s += "."
+	}
+	return s
 }
 
 // passwordPair validates a new password and its repeat the way every
@@ -162,7 +172,7 @@ func (s *Server) getSetup(w http.ResponseWriter, r *http.Request) {
 		},
 		Form: withSubmit(s.anonPlainForm(w, r, "/setup", "POST",
 			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
-			view.FormRow{Name: "email", Label: "Email (optional)", Kind: view.InputEmail,
+			view.FormRow{Name: "email", Label: "Email", LabelAside: "(optional)", Kind: view.InputEmail,
 				Hint: text("For getting back in if the password is lost. It is not confirmed yet: the account page sends the letter.")},
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Hint: text("At least 8 characters.")},
 			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
@@ -188,7 +198,7 @@ func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
 			Plain: view.Plain{Title: text("Create administrator"), Lede: text("This instance has no accounts yet.")},
 			Form: withSubmit(s.anonPlainForm(w, r, "/setup", "POST",
 				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true},
-				view.FormRow{Name: "email", Label: "Email (optional)", Kind: view.InputEmail, Value: text(r.FormValue("email"))},
+				view.FormRow{Name: "email", Label: "Email", LabelAside: "(optional)", Kind: view.InputEmail, Value: text(r.FormValue("email"))},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: text("Passwords do not match.")},
 				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 			), "setup.submit", "Create administrator"),
@@ -201,7 +211,7 @@ func (s *Server) postSetup(w http.ResponseWriter, r *http.Request) {
 			Plain: view.Plain{Title: text("Create administrator"), Lede: text("This instance has no accounts yet.")},
 			Form: withSubmit(s.anonPlainForm(w, r, "/setup", "POST",
 				view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Error: formError(err)},
-				view.FormRow{Name: "email", Label: "Email (optional)", Kind: view.InputEmail, Value: text(r.FormValue("email"))},
+				view.FormRow{Name: "email", Label: "Email", LabelAside: "(optional)", Kind: view.InputEmail, Value: text(r.FormValue("email"))},
 				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 			), "setup.submit", "Create administrator"),
@@ -282,39 +292,54 @@ func (s *Server) getInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := r.PathValue("token")
-	named, valid := s.users.InviteLogin(r.Context(), token)
+	inv, valid := s.users.InviteFor(r.Context(), token)
 	if !valid {
 		s.tokenNotFound(w, r, start)
 		return
 	}
-	s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, named, "", nil, nil))
+	s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, "", nil, nil))
 }
 
-// invitePage is the form an invited person fills (s-auth-2 serves
-// /invite/{token} too): the login first — typed, or the one an invitation
-// made before v0.2.68 names, read-only — then the password twice.
-func (s *Server) invitePage(w http.ResponseWriter, r *http.Request, token, named, typed string, loginErr, passErr error) view.InvitePage {
-	lede := "Choose a login and a password for your new account."
+// invitePage is the form an invited person fills (s-auth-12): what Carrel
+// does not know yet — the login and the password. The address of a letter
+// is known and shown, not changed; a link has none, it is set later in the
+// account. An invitation made before v0.2.68 names its login, shown the
+// same way. The warning is the registration's (s-auth-2).
+func (s *Server) invitePage(w http.ResponseWriter, r *http.Request, token string, inv user.OpenInvite, typed string, loginErr, passErr error) view.InvitePage {
+	lede := "Choose a login and a password."
 	login := view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true, Value: text(typed)}
-	if named != "" {
-		lede = "Choose a password for your new account."
-		login.Value, login.ReadOnly = text(named), true
+	rows := []view.FormRow{login}
+	switch {
+	case inv.Login != "":
+		lede = "Choose a password; the login is the one the invitation names."
+		rows[0].Value, rows[0].ReadOnly, rows[0].Required = text(inv.Login), true, false
+	case inv.Email != "":
+		lede = "Choose a login and a password; the address is the one the invitation went to."
+	}
+	if inv.Email != "" {
+		rows = append(rows, view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail, Value: text(inv.Email), ReadOnly: true})
+	}
+	if inv.By != "" {
+		lede = inv.By + " invited you. " + lede
 	}
 	if loginErr != nil {
-		login.Error = formError(loginErr)
+		rows[0].Error = formError(loginErr)
 	}
 	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true}
 	if passErr != nil {
 		password.Error = formError(passErr)
 	}
+	rows = append(rows, password,
+		view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true})
 	return view.InvitePage{
-		Plain: view.Plain{Title: text("Accept invitation"), Lede: text(lede)},
+		Plain: view.Plain{
+			Title: text("Join " + s.users.Settings().InstanceName()),
+			Lede:  text(lede),
+			Notices: []view.Notice{{Role: view.NoticeAlert,
+				Body: "Your password is the only key to your own data. Nobody — including this server — can recover it for you."}},
+		},
 		Valid: true,
-		Form: withSubmit(s.anonPlainForm(w, r, "/invite/"+token, "POST",
-			login,
-			password,
-			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
-		), "invite.submit", "Create account"),
+		Form:  withSubmit(s.anonPlainForm(w, r, "/invite/"+token, "POST", rows...), "invite.submit", "Create account"),
 	}
 }
 
@@ -325,14 +350,14 @@ func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := r.PathValue("token")
-	named, valid := s.users.InviteLogin(r.Context(), token)
+	inv, valid := s.users.InviteFor(r.Context(), token)
 	if !valid {
 		s.tokenNotFound(w, r, start)
 		return
 	}
 	typed := strings.TrimSpace(r.FormValue("login"))
 	if err := passwordPair(r.FormValue("password"), r.FormValue("password2")); err != nil {
-		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, named, typed, nil, err))
+		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, typed, nil, err))
 		return
 	}
 	// A login the person chose and cannot have is said on its field: the
@@ -343,8 +368,8 @@ func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case err == nil:
 		s.redirect(w, r, "/login")
-	case named == "" && (errors.Is(err, user.ErrLoginTaken) || errors.Is(err, user.ErrLoginEmpty)):
-		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, named, typed, err, nil))
+	case inv.Login == "" && (errors.Is(err, user.ErrLoginTaken) || errors.Is(err, user.ErrLoginEmpty)):
+		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, inv, typed, err, nil))
 	default:
 		s.tokenNotFound(w, r, start)
 	}

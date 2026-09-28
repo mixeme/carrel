@@ -17,6 +17,75 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.71 — 2026-09-28
+
+Copies the Typecase mockup (server note 19). This part — the connections
+and the forms (to-typecase tasks 26 and 28): editing a connection is a
+dialog over the page, the whole storage goes elsewhere only as a copy, the
+sheets of a storage's folder, and a new collection when no server of its
+kind answers; the address rows of a card with their label and Remove on
+every row of a phone, an e-mail and an address, and the quick sheets
+labelled their own way. A table in a note (task 27) stays `table` as it is:
+its «Wrap / One line» is the client's.
+
+### Added
+
+- **`InputRemove`** (`"remove"`, C-8): Remove at the end of each row of a
+  phone, an e-mail and an address (s-contacts-3) — `name` «remove», `label`
+  «Remove», `value` the row («tel.1», «adr.0»). The `template` of «Add …»
+  carries it too, `value` «tel.{n}»: «{n}» is now replaced in `value` as in
+  `name`. With scripts the client empties the row's fields and hides them,
+  leaving them in the form; an emptied row goes on Save. Without scripts it
+  posts the form with `remove=<row>`, and the answer is the same form
+  without the row and nothing written: its fields travel hidden and empty
+  under their numbers, and a hidden `removed` names it with every post until
+  Save, which takes out exactly its value — the rows after it keep their
+  parameters (S-7).
+- **`ConnectionsPage.dialogTitle`** and **`dialogSubtitle`** — the head of
+  the dialog over the page: «Connect account» (s-profile-2), «Edit
+  connection» (s-profile-16), and «One connection gives calendars and
+  address books alike.»; empty on the list and on a subscription.
+
+### Changed
+
+- **The page under a connection dialog is as it is** (s-profile-16):
+  `title` stays «Connections» and `subtitle` the list's line in the dialogs
+  of Connect account and of Edit — before, Connect account put its own head
+  there and Edit had none.
+- **An address row of a card** is `adr.N.type` — Label, picked from home,
+  work, other (and a label another client wrote), written as `TYPE` — then
+  Street, City, Region, Postcode, Country and Remove (s-contacts-3). The
+  first part is no longer labelled «Street · home».
+- **«Tags»** is the label of `categories` on the forms of a contact, an
+  event and a task (s-contacts-3, s-agenda-3, s-tasks-3).
+- **«Show N empty fields»** counts the fields folded — a card without
+  addresses folds its «Add address» there, as one — and stays the last set
+  of the form.
+- **The quick sheet of an event** (s-notes-9) is Title, Date, Start, End,
+  All day, Remind: the end has no date of its own and is on the start's day,
+  or on the next when it is earlier than the start. Phone and Email of the
+  contact's sheet carry the samples «+7 …» and «name@example.org»
+  (`placeholder`, s-notes-8).
+- **The whole storage** (s-profile-17) has no «Move to another server»:
+  Rename and Delete on the server… are off with «This is the whole storage,
+  not a folder in it.», and it goes elsewhere only as a copy.
+- **Renaming a storage's folder** (s-profile-18): `stamp` names the storage
+  and the folder, «vps · Docs»; `address` is empty — a folder's name is its
+  address; the button is «Rename».
+- **Deleting a collection** (s-profile-9, s-profile-19): `subject` is the
+  server, then the collection, «nextcloud · Дни рождения»; the name to type
+  is the field's `placeholder`, not its `hint`. A folder holds «files», and
+  among what points at it stands «Attachments — the attachment folder is in
+  it; new attachments will have nowhere to go»; a backup job reads «Backup
+  job «…» — copies this collection (folder); it will run one short and say
+  so».
+- **New folder** (s-profile-20): the name has the hint «A folder's name is
+  its address: there is nothing else to ask.»
+- **No server of the kind answers** (s-profile-21): the sheet has no «On
+  which server» field; `note` says why and Create is off with it.
+- **Browse of the attachment folder** (attachments-4): «Choose this folder»
+  is off with «Choose a folder in the tree.» until a folder is chosen.
+
 ## v0.2.70 — 2026-09-28
 
 ### Changed
