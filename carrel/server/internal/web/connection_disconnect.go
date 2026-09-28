@@ -7,6 +7,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -46,8 +47,8 @@ func (s *Server) getConnectionDisconnect(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	sheet := s.disconnectSheet(sess, blob, conn)
-	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, sheet)

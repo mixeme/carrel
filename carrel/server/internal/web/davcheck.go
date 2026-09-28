@@ -8,6 +8,7 @@ import (
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -45,12 +46,12 @@ func (s *Server) postSettingsConnectionsTest(w http.ResponseWriter, r *http.Requ
 	if _, ok := s.requireLogin(w, r); !ok {
 		return
 	}
-	if !WantsFragment(r) {
+	if !render.WantsFragment(r) {
 		s.notFound(w, r)
 		return
 	}
 	_, trace := s.traceOf(r)
-	_ = s.render.Fragment(w, r, http.StatusOK, TargetMain, *trace, nil)
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetMain, *trace, nil)
 }
 
 func (s *Server) getAdminDav(w http.ResponseWriter, r *http.Request) {

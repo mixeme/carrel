@@ -20,6 +20,7 @@ import (
 	"carrel.dev/carrel/server/internal/provider/cal"
 	"carrel.dev/carrel/server/internal/provider/card"
 	"carrel.dev/carrel/server/internal/sealed"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -2818,8 +2819,8 @@ func (s *Server) getKindNew(w http.ResponseWriter, r *http.Request, kind string)
 	}
 	pick := r.URL.Query().Get("pick") != ""
 	switch {
-	case WantsFragment(r) && FragmentTarget(r) == TargetSheet:
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.newSheet(c, pick), nil)
+	case render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet:
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.newSheet(c, pick), nil)
 	case pick:
 		s.writePage(w, r, http.StatusOK, s.newSheet(c, true))
 	default:
@@ -2869,8 +2870,8 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 			for i := range sheet.Target.Options {
 				sheet.Target.Options[i].ID += carriedQuery(r)
 			}
-			if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
-				_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+			if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
+				_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 				return
 			}
 			s.writePage(w, r, http.StatusOK, sheet)
@@ -2884,8 +2885,8 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 		{ID: "connection.add", Label: "Connect account", Href: s.connectHref(), Method: "GET", Enabled: true},
 		{ID: "record.cancel", Label: "Cancel", Href: s.route("/app/" + kind), Method: "GET", Enabled: true},
 	}}
-	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, sheet)
@@ -2906,8 +2907,8 @@ func (s *Server) getKindQuick(w http.ResponseWriter, r *http.Request, kind strin
 	values := s.emptyValues(c)
 	carried(c, r, values)
 	sheet := s.quickSheet(c, editState{values: values, isNew: true, readAt: s.now()})
-	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+	if render.WantsFragment(r) && render.FragmentTarget(r) == render.TargetSheet {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, sheet)

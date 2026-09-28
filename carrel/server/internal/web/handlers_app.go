@@ -9,6 +9,7 @@ import (
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -163,8 +164,8 @@ func (s *Server) getSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.unlockSheet(sess, ""), nil)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, ""), nil)
 		return
 	}
 	// Without scripts a sheet is a page of its own (U-8): "Show password" is
@@ -182,7 +183,7 @@ func (s *Server) postSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if !WantsFragment(r) {
+	if !render.WantsFragment(r) {
 		s.notFound(w, r)
 		return
 	}
@@ -193,11 +194,11 @@ func (s *Server) postSettingsUnlock(w http.ResponseWriter, r *http.Request) {
 	}
 	if !s.users.Unlock(r.Context(), sess.AccountID(), r.FormValue("password")) {
 		constantTimeDelay(start, 300*time.Millisecond)
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.unlockSheet(sess, text("Password is wrong.")), nil)
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, text("Password is wrong.")), nil)
 		return
 	}
 	sess.SetUnlockUntil(time.Now().Add(s.cfg.UnlockTTL))
 	top := s.buildShell(sess, "").Top
-	extra := []OOB{{Target: TargetTopbar, Body: top}}
-	_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.unlockSheet(sess, ""), extra)
+	extra := []render.OOB{{Target: render.TargetTopbar, Body: top}}
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, s.unlockSheet(sess, ""), extra)
 }

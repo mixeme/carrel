@@ -26,6 +26,7 @@ import (
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/internal/web"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -83,7 +84,7 @@ func newLiveApp(t *testing.T) *liveApp {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &liveApp{t: t, srv: web.New(cfg, st, mgr, users, web.JSONRenderer{}, "live", "live"), st: st, users: users, sess: sess}
+	return &liveApp{t: t, srv: web.New(cfg, st, mgr, users, render.JSONRenderer{}, "live", "live"), st: st, users: users, sess: sess}
 }
 
 func (a *liveApp) get(path string) *httptest.ResponseRecorder {

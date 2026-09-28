@@ -26,6 +26,7 @@ import (
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -973,11 +974,11 @@ func (s *Server) getSearchProgressSSE(w http.ResponseWriter, r *http.Request) {
 		changed := task.Changed()
 		snap := task.Snapshot()
 		bar := s.pollBar(tf, blob, snap, owner)
-		if err := s.render.Event(w, "poll", TargetPoll, bar); err != nil {
+		if err := s.render.Event(w, "poll", render.TargetPoll, bar); err != nil {
 			return
 		}
 		if !snap.Running {
-			_ = s.render.Event(w, "poll-finished", TargetPoll, bar)
+			_ = s.render.Event(w, "poll-finished", render.TargetPoll, bar)
 			_ = rc.Flush()
 			return
 		}
@@ -1005,11 +1006,11 @@ func (s *Server) getSearchProgressPoll(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if !WantsFragment(r) {
+	if !render.WantsFragment(r) {
 		s.notFound(w, r)
 		return
 	}
-	_ = s.render.Fragment(w, r, http.StatusOK, TargetPoll, s.pollBar(s.timeFor(sess), s.catalogOf(sess), task.Snapshot(), owner), nil)
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetPoll, s.pollBar(s.timeFor(sess), s.catalogOf(sess), task.Snapshot(), owner), nil)
 }
 
 // postSearchProgressRetry asks one source again and nobody else (S-15.1).
@@ -1040,7 +1041,7 @@ func (s *Server) postSearchProgressCancel(w http.ResponseWriter, r *http.Request
 // answerPollAction answers a button of the poll bar: the bar as a fragment,
 // or the page of the task again for a plain form.
 func (s *Server) answerPollAction(w http.ResponseWriter, r *http.Request, sess *session.Session, task *fanout.Task, owner pollOwner, source string, err error) {
-	if !WantsFragment(r) {
+	if !render.WantsFragment(r) {
 		s.redirect(w, r, owner.page)
 		return
 	}
@@ -1053,5 +1054,5 @@ func (s *Server) answerPollAction(w http.ResponseWriter, r *http.Request, sess *
 			}
 		}
 	}
-	_ = s.render.Fragment(w, r, http.StatusOK, TargetPoll, bar, nil)
+	_ = s.render.Fragment(w, r, http.StatusOK, render.TargetPoll, bar, nil)
 }

@@ -19,6 +19,7 @@ import (
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/internal/web"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -59,7 +60,7 @@ func newHarness(t *testing.T) *harness {
 
 // rebuild recreates the Server so a changed cfg (trusted proxies) applies.
 func (h *harness) rebuild() {
-	h.srv = web.New(h.cfg, h.st, h.mgr, h.users, web.JSONRenderer{}, "test", "test")
+	h.srv = web.New(h.cfg, h.st, h.mgr, h.users, render.JSONRenderer{}, "test", "test")
 }
 
 func (h *harness) admin(login, password string) string {

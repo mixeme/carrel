@@ -1,4 +1,14 @@
-package web
+// Package render is the open contract between the request layer and whatever
+// draws its answers: the Renderer the server calls with a view model, the
+// header names and view values of C-7.1, the target names of C-7.2, the
+// out-of-band updates of C-7.3, and the JSON renderer the server answers with
+// until the client (carrel.dev/carrel/client) supplies HTML.
+//
+// It is a package of the server module, not of internal/, so that the client
+// module can implement Renderer and name the targets without reaching into
+// the server's internals (docs/architecture.md, «Модули»). It knows no markup:
+// no HTML, no CSS, no widget names.
+package render
 
 import (
 	"encoding/json"
@@ -28,6 +38,12 @@ const (
 	TargetSheet   = "sheet"
 	TargetTopbar  = "topbar"
 )
+
+// Targets is every target of C-7.2, in the order of its table. The list is
+// closed: the client does not invent targets, the server does not add them.
+func Targets() []string {
+	return []string{TargetMain, TargetRail, TargetDetails, TargetNotices, TargetPoll, TargetQueue, TargetSheet, TargetTopbar}
+}
 
 // Renderer writes view models to the response. JSONRenderer is used until a
 // client supplies HTML (architecture.md).

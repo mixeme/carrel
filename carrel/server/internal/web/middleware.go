@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/render"
 )
 
 type handler func(*Server, http.ResponseWriter, *http.Request)
@@ -138,8 +139,8 @@ func needsCSRF(r *http.Request) bool {
 }
 
 func (s *Server) writePage(w http.ResponseWriter, r *http.Request, status int, body any) {
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, status, FragmentTarget(r), body, nil)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, status, render.FragmentTarget(r), body, nil)
 		return
 	}
 	_ = s.render.Page(w, r, status, body)

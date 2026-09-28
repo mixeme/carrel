@@ -17,6 +17,7 @@ import (
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/user"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -85,8 +86,8 @@ func recordTitle(k view.Kind, obj *model.Object) string {
 }
 
 func (s *Server) writeSheet(w http.ResponseWriter, r *http.Request, sheet view.PublishSheet) {
-	if WantsFragment(r) {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+	if render.WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, render.TargetSheet, sheet, nil)
 		return
 	}
 	s.writePage(w, r, http.StatusOK, sheet)

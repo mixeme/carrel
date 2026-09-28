@@ -22,6 +22,7 @@ import (
 	"carrel.dev/carrel/server/internal/provider/file"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
+	"carrel.dev/carrel/server/render"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -488,7 +489,7 @@ func (s *Server) writeFolder(w http.ResponseWriter, r *http.Request, c *fileCtx,
 		q.Add("select", pick)
 	}
 	page := s.folderPage(c, segs, entries, q, notices)
-	if target != "" && WantsFragment(r) {
+	if target != "" && render.WantsFragment(r) {
 		_ = s.render.Fragment(w, r, http.StatusOK, target, page, nil)
 		return
 	}
