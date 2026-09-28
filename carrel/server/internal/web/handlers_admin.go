@@ -186,6 +186,13 @@ func (s *Server) postAdminReset(w http.ResponseWriter, r *http.Request) {
 		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, map[string]view.Text{"target": why}, nil))
 		return
 	}
+	// The login typed is the confirmation (owner's decision 28.09.2026): a
+	// reset destroys what the person had, and a slip of the list must not.
+	if strings.TrimSpace(r.FormValue("confirm")) != u.Login {
+		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp,
+			map[string]view.Text{"confirm": text("Type " + u.Login + " to confirm whose password is reset.")}, nil))
+		return
+	}
 	if err := s.users.AdminResetPassword(r.Context(), sess.AccountID(), target, temp); err != nil {
 		field := "target"
 		if errors.Is(err, user.ErrPasswordShort) {
@@ -240,6 +247,8 @@ func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map
 		view.FormRow{Name: "target", Label: "Whose", Kind: view.InputSelect, Options: people, Required: true, Error: errs["target"]},
 		view.FormRow{Name: "password", Label: "Temporary password", Kind: view.InputText, Required: true, Value: text(temp),
 			Hint: resetHint, Error: errs["password"]},
+		view.FormRow{Name: "confirm", Label: "Type the login to confirm", Kind: view.InputText, Required: true,
+			Error: errs["confirm"]},
 	)
 	return view.PasswordResetSheet{
 		Title:   "Reset a password",

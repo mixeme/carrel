@@ -1246,7 +1246,7 @@ Typecase; экран их не закрывает своей разметкой 
 | `/app/settings/escrow/deposit` | `UnlockSheet` | Лист депонирования поверх учётной записи (account-2): пароль, одно действие |
 | `/app/settings/escrow/withdraw` | `EscrowWithdrawSheet` | Лист отзыва ключа: что перестанет работать, подтверждение, Cancel клиента |
 | `/app/settings/connections/disconnect` | `ConnectionRemoveSheet` | Лист «что именно уйдёт», как у удаления коллекции |
-| `/admin/reset` | `PasswordResetSheet` | Лист «Reset a password» из шапки списка людей (s-admin-13): Whose, что уничтожается (`Warning`, до кнопки), Temporary password с подсказкой про Key escrow; Reset password — опасное действие. Ответ на сброс — тот же лист с `Issued`: логин, пароль, Copy — один раз |
+| `/admin/reset` | `PasswordResetSheet` | Лист «Reset a password» из шапки списка людей (s-admin-13): Whose, что уничтожается (`Warning`, до кнопки), Temporary password с подсказкой про Key escrow, логин набором для подтверждения (`confirm`); Reset password — опасное действие. Ответ на сброс — тот же лист с `Issued`: логин, пароль, Copy — один раз |
 | `/app/mail/attach` | `MailAttachSheet` | Лист выбора вложения письма поверх листа письма |
 
 **Фрагменты** заменяют свою зону (C-7.2) и своего экрана не имеют:

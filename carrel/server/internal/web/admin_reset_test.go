@@ -62,7 +62,9 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 	var fields, frameFields []string
 	for _, set := range sheet.Form.Sets {
 		for _, row := range set.Rows {
-			if row.Kind != view.InputHidden {
+			// The login typed to confirm is the owner's (28.09.2026) and not
+			// drawn in s-admin-13 yet: TestResetAsksTheLoginTyped holds it.
+			if row.Kind != view.InputHidden && row.Name != "confirm" {
 				fields = append(fields, string(row.Label))
 			}
 		}
@@ -114,7 +116,7 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 	}
 
 	// Refused: a password too short says so at its field, and nothing moved.
-	short := decode[view.PasswordResetSheet](t, h.do(postForm(sheet.Form.Action, alice, url.Values{"target": {bobID}, "password": {"short"}})))
+	short := decode[view.PasswordResetSheet](t, h.do(postForm(sheet.Form.Action, alice, url.Values{"target": {bobID}, "password": {"short"}, "confirm": {"bob"}})))
 	if rowNamed(t, short.Form, "password").Error == "" || short.Issued != nil {
 		t.Errorf("a short password: %+v", short)
 	}
@@ -122,7 +124,7 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 		t.Fatal("a refused reset changed the password")
 	}
 
-	done := decode[view.PasswordResetSheet](t, h.do(postForm(sheet.Form.Action, alice, url.Values{"target": {bobID}, "password": {"tide-oven-4c1-lamp"}})))
+	done := decode[view.PasswordResetSheet](t, h.do(postForm(sheet.Form.Action, alice, url.Values{"target": {bobID}, "password": {"tide-oven-4c1-lamp"}, "confirm": {"bob"}})))
 	if done.Issued == nil || done.Issued.Login != "bob" || done.Issued.Password != "tide-oven-4c1-lamp" {
 		t.Fatalf("issued = %+v", done.Issued)
 	}
@@ -150,5 +152,36 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 	again := decode[view.PasswordResetSheet](t, h.do(get(actionHref(t, page.Add, "admin.reset"), alice)))
 	if again.Issued != nil {
 		t.Errorf("the password is shown twice: %+v", again.Issued)
+	}
+}
+
+// A reset destroys what the person had (S-10.4), so the sheet asks their
+// login typed, as a collection's deletion asks its name (owner's decision
+// 28.09.2026): a person chosen by a slip of the list is not wiped. The frame
+// s-admin-13 does not draw the field yet (to-typecase).
+func TestResetAsksTheLoginTyped(t *testing.T) {
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	bobID := h.invite(adminID, "bob", "bobpass123")
+	alice := h.login("alice", "password123")
+	sheet := decode[view.PasswordResetSheet](t, h.do(get("/admin/reset?target="+bobID, alice)))
+	confirm := rowNamed(t, sheet.Form, "confirm")
+	if !confirm.Required || confirm.Kind != view.InputText || confirm.Value != "" {
+		t.Errorf("confirm row = %+v", confirm)
+	}
+	for _, typed := range []string{"", "Bob", "carol"} {
+		got := decode[view.PasswordResetSheet](t, h.do(postForm(sheet.Form.Action, alice,
+			url.Values{"target": {bobID}, "password": {"tide-oven-4c1-lamp"}, "confirm": {typed}})))
+		if rowNamed(t, got.Form, "confirm").Error == "" || got.Issued != nil {
+			t.Errorf("typed %q: %+v", typed, got)
+		}
+		if id, _, _, _ := h.users.Authenticate(context.Background(), "bob", "bobpass123"); id != bobID {
+			t.Fatalf("typed %q reset the password", typed)
+		}
+	}
+	done := decode[view.PasswordResetSheet](t, h.do(postForm(sheet.Form.Action, alice,
+		url.Values{"target": {bobID}, "password": {"tide-oven-4c1-lamp"}, "confirm": {" bob "}})))
+	if done.Issued == nil {
+		t.Fatalf("the login typed did not reset: %+v", done)
 	}
 }

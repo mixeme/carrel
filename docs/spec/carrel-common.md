@@ -1927,7 +1927,7 @@ type AdminUserRow struct {
 // потерь через Key escrow — подсказкой у пароля.
 type PasswordResetSheet struct {
     Title   Text            // «Reset a password»
-    Form    Form            // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password
+    Form    Form            // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password, confirm — логин того, кого сбрасывают, набранный для подтверждения
     Warning Text            // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются
     Issued  *IssuedPassword // временный пароль — один раз, в ответе на сброс; nil — нет
     Actions []Action        // Reset password (danger) · Cancel

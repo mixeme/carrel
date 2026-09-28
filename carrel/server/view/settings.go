@@ -304,7 +304,7 @@ type AdminUserRow struct {
 // потерь через Key escrow — подсказкой у пароля.
 type PasswordResetSheet struct {
 	Title   Text            `json:"title"`   // «Reset a password»
-	Form    Form            `json:"form"`    // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password
+	Form    Form            `json:"form"`    // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password, confirm — логин того, кого сбрасывают, набранный для подтверждения
 	Warning Text            `json:"warning"` // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются
 	Issued  *IssuedPassword `json:"issued"`  // временный пароль — один раз, в ответе на сброс; nil — нет
 	Actions []Action        `json:"actions"` // Reset password (danger) · Cancel

@@ -17,6 +17,17 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.70 — 2026-09-28
+
+### Changed
+
+- **Reset a password asks the login typed.** `PasswordResetSheet.Form`
+  gains a required `confirm` row, «Type the login to confirm». A POST whose
+  `confirm` is not the chosen person's login changes nothing and returns the
+  sheet with the error on `confirm`. Spaces around it do not count. This is
+  the owner's decision of 28.09.2026: a reset wipes the account, as deleting a
+  collection does, and asks for the same confirmation.
+
 ## v0.2.69 — 2026-09-28
 
 Copies the Typecase mockup 0.7.2 (server note 18). This part — what the
