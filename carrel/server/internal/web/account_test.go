@@ -127,14 +127,14 @@ func TestInvitationConfirmsOnlyAMailedAddress(t *testing.T) {
 	}
 
 	h.relayed()
-	h.do(postForm("/admin/invites", alice, url.Values{"action": {"create"}, "login": {"dan"}, "email": {"dan@example.org"}}))
+	h.do(postForm("/admin/invites?action=send", alice, url.Values{"email": {"dan@example.org"}}))
 	snap = h.st.Snapshot()
 	for _, inv := range snap.Invites {
-		if inv.Login == "dan" {
+		if inv.Email == "dan@example.org" {
 			secret = inv.Secret
 		}
 	}
-	if err := h.users.CompleteInvite(t.Context(), secret, "danpass1234"); err != nil {
+	if err := h.users.AcceptInvite(t.Context(), secret, "dan", "danpass1234"); err != nil {
 		t.Fatal(err)
 	}
 	snap = h.st.Snapshot()

@@ -35,7 +35,11 @@ type Users interface {
 	RegisterOpen() bool
 
 	InviteValid(ctx context.Context, token string) (valid bool)
+	// InviteLogin is the login a live invitation names ("" — the person
+	// chooses it) and whether the token is one.
+	InviteLogin(ctx context.Context, token string) (login string, valid bool)
 	CompleteInvite(ctx context.Context, token, password string) error
+	AcceptInvite(ctx context.Context, token, login, password string) error
 
 	ConfirmEmail(ctx context.Context, token string) (ok bool)
 	// Register and ForgotRequest return the raw link token for the mail
@@ -137,6 +141,14 @@ type Users interface {
 	ChangePassword(ctx context.Context, accountID, exceptSID, current, newPW, newPW2 string) error
 
 	CreateInvite(actorID, login, email string) (secret string, err error)
+	// Invite, ResendInvite and CreateUser are the ways of s-admin-1: an
+	// invitation with its role and no login, a new secret for one that went
+	// by letter, the temporary password. SuggestPassword is what a form
+	// offers for a temporary password; nothing keeps it.
+	Invite(actorID, email string, role store.Role) (secret string, err error)
+	ResendInvite(actorID, inviteID string) (secret, email string, err error)
+	CreateUser(ctx context.Context, actorID, login, email, password string, role store.Role) error
+	SuggestPassword() string
 	RevokeInvite(actorID, inviteID string) error
 	ExtendInvite(actorID, inviteID string) error
 	DisableUser(actorID, targetID string) error
@@ -180,7 +192,7 @@ type Users interface {
 	ChangeEscrowMaster(ctx context.Context, actorID, current, newPW, newPW2 string) error
 	DepositEscrow(accountID string, dataKey [32]byte) error
 	WithdrawEscrow(accountID string) error
-	RecoverEscrow(ctx context.Context, actorID, login, masterPassword string) (tempPassword string, err error)
+	RecoverEscrow(ctx context.Context, actorID, login, masterPassword, temp string) (tempPassword string, err error)
 	ConsumeEscrowNotice(accountID string) bool
 	EscrowEnabled() bool
 }

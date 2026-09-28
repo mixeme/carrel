@@ -478,7 +478,7 @@ Typecase): рейл с соседними заметками и колонка �
 |---|---|---|---|---|
 | `/admin/` | GET, POST | админ | страница | `AdminUsersPage` |
 | `/admin/role` | GET | админ | лист | `UserRoleSheet` — «Set role»; сохраняет `POST /admin/?action=role` |
-| `/admin/invites` | GET, POST | админ | страница | `AdminInvitesPage` |
+| `/admin/invites` | GET, POST | админ | страница | `AdminInvitesPage`; `?invite=` — ссылку этого приглашения показывает карточка Invitation. POST `action=` `link`, `send`, `user` (временный пароль: ответ — страница с `Issued`, не переход), `selfreg`, `resend`, `extend`, `revoke` |
 | `/admin/settings` | GET, POST | админ | страница | `AdminSettingsPage` |
 | `/admin/settings/mail-test` | POST | админ | фрагмент | `MailTestResult` |
 | `/admin/escrow` | GET, POST | админ | страница | `AdminEscrowPage` |
@@ -1867,9 +1867,8 @@ type AppearancePage struct {
 
 type AdminUsersPage struct {
     Shell
-    Rows    []AdminUserRow
-    Add     []Action
-    SelfReg Form
+    Rows []AdminUserRow
+    Add  []Action // Add user — на «Add users» (s-admin-2)
 }
 type AdminUserRow struct {
     Login     Text
@@ -1888,9 +1887,36 @@ type UserRoleSheet struct {
     Form  Form // role: User, Administrator; Save · Cancel
 }
 
-type AdminInvitesPage struct { Shell; Rows []InviteRow; Add Form }
-type InviteRow struct {
+// «Add users» (s-admin-1): три способа завести человека карточками в ряд,
+// равноправные, и действующие приглашения под ними. Роль (список s-admin-8)
+// выбирается первой в обеих карточках, где она есть.
+type AdminInvitesPage struct {
+    Shell
+    Subtitle  Text        // «Three ways, for three situations. There is no global mode: any of them works.»
+    Invite    AddUserCard // Invitation: Role, Or send to; Create link · Send invitation (без почты выключена с причиной)
+    Temporary AddUserCard // Temporary password: Role, Login, Email (optional), Temporary password (предложен сервером); Create user
+    SelfReg   AddUserCard // Self-registration: Publish the registration form; Save (без почты и закрытой — выключена с причиной)
+    Rows      []InviteRow
+}
+type AddUserCard struct {
+    Title   Text            // «Invitation», «Temporary password», «Self-registration»
+    Aside   Text            // обычным шрифтом за заголовком: «chooses their own password»; пусто — нет
+    Badge   *Badge          // «hand to hand» (alert), «open»; nil — значка нет
+    Lede    Text            // строка под заголовком; пусто — нет
+    Warning *Notice         // «Until the user changes this password, you can sign in as them.»; nil — нет
+    Form    Form
+    Link    Text            // ссылка строкой с Copy: только что созданное приглашение, адрес открытой регистрации; пусто — строки нет
+    Copy    *Action         // Copy у Link; nil, когда Link пуст
+    Issued  *IssuedPassword // временный пароль — один раз, в ответе на Create user; nil — нет
+}
+// Пароль, показанный администратору один раз: ни в состоянии, ни в журнале его нет.
+type IssuedPassword struct {
     Login    Text
+    Password Text
+    Copy     Action
+}
+type InviteRow struct {
+    Login    Text // пусто — логин выберет приглашённый (s-admin-1 «—»)
     Address  Text
     Link     Text // видна всегда, независимо от отправки
     Delivery Text // «link» или «email»: как приглашение передано (s-admin-1)
@@ -1920,14 +1946,24 @@ type EscrowRecoveryResult struct {
 
 type AdminEscrowPage struct {
     Shell
+    Subtitle Text // «4 of 6 accounts open with the master password»; пусто, пока схема не включена
     Enabled  bool
-    Warning  Notice
-    Form     Form
-    Master   Form
-    Covered  []AdminUserRow
-    Recover  Form
+    Warning  Notice // текст продукта дословно, без заголовка (s-admin-6)
+    Form     Form   // Policy: New accounts are covered и подсказка; до включения — мастер-пароль и Turn on key escrow
+    Master   Form   // Master password: Current, New, Repeat и подсказка; Change
+    Opens    int    // число у «Whom the master password opens»: депонировавшие
+    Covered  []EscrowCoverRow
+    Recover  Form   // Recover an account: Account, Master password, Temporary password for the user (предложен сервером) и подсказка; Recover (Danger)
     Result   *EscrowRecoveryResult
     History  []AuditRow
+}
+// Строка «Whom the master password opens» (s-admin-6): каждая учётная
+// запись списка пользователей, депонировала она или нет.
+type EscrowCoverRow struct {
+    Login        Text
+    Covered      bool // копия депонирована
+    Deposited    When // «2026-03-02» или «not deposited»
+    LastRecovery When // «never», «2026-08-14 18:40» или «—» у недепонировавшей
 }
 
 type AdminAuditPage struct {

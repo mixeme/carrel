@@ -264,18 +264,21 @@ func TestInviteRowIsTheFrame(t *testing.T) {
 	alice := h.login("alice", "password123")
 	relay := h.relayed()
 	relay.Refuse = "anna@example.org"
-	for _, v := range []url.Values{
-		{"action": {"create"}, "login": {"link"}},
-		{"action": {"create"}, "login": {"anna"}, "email": {"anna@example.org"}},
-	} {
-		if rec := h.do(postForm("/admin/invites", alice, v)); rec.Code != http.StatusSeeOther {
-			t.Fatalf("create %v: %d %s", v, rec.Code, rec.Body)
+	for _, action := range []string{"link", "send"} {
+		v := url.Values{"email": {"anna@example.org"}}
+		if rec := h.do(postForm("/admin/invites?action="+action, alice, v)); rec.Code != http.StatusSeeOther {
+			t.Fatalf("create %s: %d %s", action, rec.Code, rec.Body)
 		}
 	}
 	page := decode[view.AdminInvitesPage](t, h.do(get("/admin/invites", alice)))
+	// Neither names a login: the person chooses it (the frame's «—»). The
+	// link typed beside an address goes as a link.
 	rows := map[string]view.InviteRow{}
 	for _, r := range page.Rows {
-		rows[string(r.Login)] = r
+		if r.Login != "" {
+			t.Errorf("row login = %q, want none", r.Login)
+		}
+		rows[map[bool]string{true: "anna", false: "link"}[r.Address != ""]] = r
 	}
 	frame := frameRows(t, "s-admin-1")
 	cells := frameCells(t, "s-admin-1")

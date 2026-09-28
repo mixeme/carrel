@@ -146,10 +146,16 @@ func (s *Server) sendInviteMail(r *http.Request, login, email, token string) boo
 	if email == "" || !s.mailConfigured() {
 		return false
 	}
-	body := s.letter(r, fmt.Sprintf("You are invited to %s at %s, as %s.\n\n"+
-		"Open this link to choose your password:\n%s\n\n"+
+	// An invitation of s-admin-1 names no login: the person chooses it.
+	invited := fmt.Sprintf("You are invited to %s at %s.\n\nOpen this link to choose your login and password:",
+		s.users.Settings().InstanceName(), s.publicOrigin(r))
+	if login != "" {
+		invited = fmt.Sprintf("You are invited to %s at %s, as %s.\n\nOpen this link to choose your password:",
+			s.users.Settings().InstanceName(), s.publicOrigin(r), login)
+	}
+	body := s.letter(r, fmt.Sprintf("%s\n%s\n\n"+
 		"The link works until %s and only once. If you did not expect this letter, do nothing.",
-		s.users.Settings().InstanceName(), s.publicOrigin(r), login, s.absURL(r, "/invite/"+token), time.Now().Add(s.users.InviteTTL()).UTC().Format("2006-01-02 15:04 UTC")))
+		invited, s.absURL(r, "/invite/"+token), time.Now().Add(s.users.InviteTTL()).UTC().Format("2006-01-02 15:04 UTC")))
 	_, err := s.sendSystemMail(r.Context(), email, "An invitation to Carrel", body)
 	_ = s.users.MarkInviteMailed(token, err == nil, cmail.Reply(err))
 	return err == nil

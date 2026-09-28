@@ -6,6 +6,7 @@ import (
 	"encoding/base32"
 	"errors"
 	"fmt"
+	"strings"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/crypt"
@@ -169,8 +170,16 @@ func (s *Service) WithdrawEscrow(accountID string) error {
 }
 
 // RecoverEscrow opens a deposited key and re-wraps it under a temporary
-// password. Master password is derived and wiped in this call only (S-10.5).
-func (s *Service) RecoverEscrow(ctx context.Context, actorID, login, masterPassword string) (tempPassword string, err error) {
+// password: the one the administrator typed (s-admin-6 «Temporary password
+// for the user»), or a new one when the field was left empty. The first
+// sign-in asks the person for a password of their own. Master password is
+// derived and wiped in this call only (S-10.5).
+func (s *Service) RecoverEscrow(ctx context.Context, actorID, login, masterPassword, temp string) (tempPassword string, err error) {
+	if temp != "" {
+		if err := validatePassword(temp); err != nil {
+			return "", err
+		}
+	}
 	login = normalizeLogin(login)
 	snap := s.st.Snapshot()
 	if !store.EscrowActive(&snap) {
@@ -193,10 +202,11 @@ func (s *Service) RecoverEscrow(ctx context.Context, actorID, login, masterPassw
 	if err != nil {
 		return "", ErrNotFound
 	}
-	temp, err := newTempPassword()
-	if err != nil {
-		crypt.Wipe(dataKey[:])
-		return "", err
+	if temp == "" {
+		if temp, err = newTempPassword(); err != nil {
+			crypt.Wipe(dataKey[:])
+			return "", err
+		}
 	}
 	now := s.now()
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
@@ -249,15 +259,17 @@ func (s *Service) EscrowEnabled() bool {
 	return store.EscrowActive(&snap)
 }
 
+// newTempPassword is a temporary password to hand over: 100 random bits
+// in five groups of four, lowercase, to read out and type — «k7qp-x2mn-…».
 func newTempPassword() (string, error) {
 	var b [15]byte
 	if _, err := rand.Read(b[:]); err != nil {
 		return "", err
 	}
-	enc := base32.StdEncoding.WithPadding(base32.NoPadding)
-	s := enc.EncodeToString(b[:])
-	if len(s) < conf.MinPasswordLen {
-		return s + "-extra", nil
+	enc := strings.ToLower(base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(b[:]))[:20]
+	groups := make([]string, 0, 5)
+	for i := 0; i < len(enc); i += 4 {
+		groups = append(groups, enc[i:i+4])
 	}
-	return s[:20], nil
+	return strings.Join(groups, "-"), nil
 }

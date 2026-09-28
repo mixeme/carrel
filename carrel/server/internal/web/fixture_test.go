@@ -796,6 +796,9 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`/invite/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/invite/invite-token")
 	s = regexp.MustCompile(`/forgot/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/forgot/reset-token")
 	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
+	// A temporary password a form offers (s-admin-1, s-admin-6) is made for
+	// each answer.
+	s = regexp.MustCompile(`"[a-z2-7]{4}(?:-[a-z2-7]{4}){4}"`).ReplaceAllString(s, `"temp-password"`)
 	s = regexp.MustCompile(`t-[0-9A-Z]{10}`).ReplaceAllString(s, "t-task")
 	s = regexp.MustCompile(`plan=r-[0-9A-Z]{10}`).ReplaceAllString(s, "plan=r-plan")
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
@@ -1378,7 +1381,8 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		})
 	}
 	t.Run("invite", func(t *testing.T) {
-		secret, err := app.h.users.CreateInvite(app.sess.AccountID(), "vera", "")
+		// The invitation of s-admin-1: no login, the person chooses it.
+		secret, err := app.h.users.Invite(app.sess.AccountID(), "", store.RoleUser)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1408,7 +1412,7 @@ func TestFixtureBeforeAnyone(t *testing.T) {
 		"host": {"127.0.0.1"}, "port": {"25"}, "security": {"none"},
 		"username": {"relay"}, "password": {"relay-password-xyz"}, "from": {"noreply@carrel.example"},
 	}))
-	if rec := open.h.do(postForm("/admin/", sess, url.Values{"action": {"selfreg"}, "selfReg": {"on"}})); rec.Code != 303 {
+	if rec := open.h.do(postForm("/admin/invites", sess, url.Values{"action": {"selfreg"}, "selfReg": {"on"}})); rec.Code != 303 {
 		t.Fatalf("open the registration: %d %s", rec.Code, rec.Body.String())
 	}
 	t.Run("register", func(t *testing.T) {

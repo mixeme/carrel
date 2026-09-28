@@ -1,5 +1,12 @@
 {
-  "covered": [],
+  "covered": [
+    {
+      "covered": false,
+      "deposited": "not deposited",
+      "lastRecovery": "—",
+      "login": "mix"
+    }
+  ],
   "details": null,
   "enabled": true,
   "form": {
@@ -17,7 +24,7 @@
     "method": "POST",
     "sets": [
       {
-        "legend": "",
+        "legend": "Policy",
         "rows": [
           {
             "error": "",
@@ -46,7 +53,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "",
+            "hint": "Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision.",
             "kind": "check",
             "label": "New accounts are covered",
             "name": "coverNew",
@@ -75,7 +82,7 @@
     "method": "POST",
     "sets": [
       {
-        "legend": "",
+        "legend": "Master password",
         "rows": [
           {
             "error": "",
@@ -116,7 +123,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "Only the recovery private key is re-encrypted. Deposited copies are untouched.",
+            "hint": "",
             "kind": "password",
             "label": "New",
             "name": "master",
@@ -128,7 +135,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "",
+            "hint": "Only the recovery private key is re-encrypted. The deposited copies are untouched, so nobody has to opt in again.",
             "kind": "password",
             "label": "Repeat",
             "name": "master2",
@@ -238,14 +245,15 @@
         "href": "/admin/escrow",
         "id": "escrow.recover",
         "label": "Recover",
-        "method": "POST"
+        "method": "POST",
+        "danger": true
       }
     ],
     "errors": [],
     "method": "POST",
     "sets": [
       {
-        "legend": "",
+        "legend": "Recover an account",
         "rows": [
           {
             "error": "",
@@ -294,6 +302,18 @@
             "readOnly": false,
             "required": true,
             "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion.",
+            "kind": "text",
+            "label": "Temporary password for the user",
+            "name": "temp",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "temp-password"
           }
         ]
       }
@@ -392,9 +412,11 @@
   },
   "warning": {
     "actions": [],
-    "body": "Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user's saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and mailed to them.",
+    "body": "Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and mailed to them.",
     "details": null,
     "role": "alert",
-    "title": "Administrative access to saved credentials"
-  }
+    "title": ""
+  },
+  "opens": 0,
+  "subtitle": "0 of 1 account open with the master password"
 }

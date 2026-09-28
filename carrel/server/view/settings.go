@@ -279,9 +279,8 @@ type AppearancePage struct {
 
 type AdminUsersPage struct {
 	Shell
-	Rows    []AdminUserRow `json:"rows"`
-	Add     []Action       `json:"add"`
-	SelfReg Form           `json:"selfReg"`
+	Rows []AdminUserRow `json:"rows"`
+	Add  []Action       `json:"add"` // Add user — на «Add users» (s-admin-2)
 }
 type AdminUserRow struct {
 	Login     Text       `json:"login"`
@@ -301,13 +300,40 @@ type UserRoleSheet struct {
 	Form  Form `json:"form"` // role: User, Administrator; Save · Cancel
 }
 
+// AdminInvitesPage — «Add users» (s-admin-1): три способа завести человека
+// карточками в ряд, равноправные, и действующие приглашения под ними.
 type AdminInvitesPage struct {
 	Shell
-	Rows []InviteRow `json:"rows"`
-	Add  Form        `json:"add"`
+	Subtitle  Text        `json:"subtitle"`  // «Three ways, for three situations. There is no global mode: any of them works.»
+	Invite    AddUserCard `json:"invite"`    // Invitation: Role; Create link · Or send to, Send invitation
+	Temporary AddUserCard `json:"temporary"` // Temporary password: Role, Login, Email (optional), Temporary password; Create user
+	SelfReg   AddUserCard `json:"selfReg"`   // Self-registration: Publish the registration form; Save
+	Rows      []InviteRow `json:"rows"`
 }
+
+// AddUserCard — одна карточка «Add users» (s-admin-1).
+type AddUserCard struct {
+	Title   Text            `json:"title"`   // «Invitation», «Temporary password», «Self-registration»
+	Aside   Text            `json:"aside"`   // обычным шрифтом за заголовком: «chooses their own password»; пусто — нет
+	Badge   *Badge          `json:"badge"`   // «hand to hand» (alert), «open»; nil — значка нет
+	Lede    Text            `json:"lede"`    // строка под заголовком; пусто — нет
+	Warning *Notice         `json:"warning"` // «Until the user changes this password, you can sign in as them.»; nil — нет
+	Form    Form            `json:"form"`
+	Link    Text            `json:"link"`   // ссылка строкой с Copy: только что созданное приглашение, адрес открытой регистрации; пусто — строки нет
+	Copy    *Action         `json:"copy"`   // Copy у Link; nil, когда Link пуст
+	Issued  *IssuedPassword `json:"issued"` // временный пароль — один раз, в ответе на Create user; nil — нет
+}
+
+// IssuedPassword — пароль, показанный администратору один раз: ни в
+// состоянии, ни в журнале его нет.
+type IssuedPassword struct {
+	Login    Text   `json:"login"`
+	Password Text   `json:"password"`
+	Copy     Action `json:"copy"`
+}
+
 type InviteRow struct {
-	Login    Text       `json:"login"`
+	Login    Text       `json:"login"` // пусто — логин выберет приглашённый (s-admin-1 «—»)
 	Address  Text       `json:"address"`
 	Link     Text       `json:"link"`     // видна всегда, независимо от отправки
 	Delivery Text       `json:"delivery"` // «link» или «email»: как приглашение передано
@@ -342,14 +368,25 @@ type EscrowRecoveryResult struct {
 
 type AdminEscrowPage struct {
 	Shell
-	Enabled bool                  `json:"enabled"`
-	Warning Notice                `json:"warning"`
-	Form    Form                  `json:"form"`
-	Master  Form                  `json:"master"`
-	Covered []AdminUserRow        `json:"covered"`
-	Recover Form                  `json:"recover"`
-	Result  *EscrowRecoveryResult `json:"result"`
-	History []AuditRow            `json:"history"`
+	Subtitle Text                  `json:"subtitle"` // «4 of 6 accounts open with the master password»; пусто, пока схема не включена
+	Enabled  bool                  `json:"enabled"`
+	Warning  Notice                `json:"warning"`
+	Form     Form                  `json:"form"`   // Policy: New accounts are covered; до включения — мастер-пароль и Turn on key escrow
+	Master   Form                  `json:"master"` // Current, New, Repeat; Change
+	Opens    int                   `json:"opens"`  // число у «Whom the master password opens»: депонировавшие
+	Covered  []EscrowCoverRow      `json:"covered"`
+	Recover  Form                  `json:"recover"` // Account, Master password, Temporary password for the user; Recover
+	Result   *EscrowRecoveryResult `json:"result"`
+	History  []AuditRow            `json:"history"`
+}
+
+// EscrowCoverRow — строка «Whom the master password opens» (s-admin-6):
+// каждая учётная запись списка пользователей, депонировала она или нет.
+type EscrowCoverRow struct {
+	Login        Text `json:"login"`
+	Covered      bool `json:"covered"`      // копия депонирована
+	Deposited    When `json:"deposited"`    // «2026-03-02» или «not deposited»
+	LastRecovery When `json:"lastRecovery"` // «never», «2026-08-14 18:40» или «—» у недепонировавшей
 }
 
 type AdminAuditPage struct {

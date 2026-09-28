@@ -17,6 +17,81 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.68 — 2026-09-28
+
+The owner's deferred round, part 5 — administration: «Add users» is the
+three cards of s-admin-1 — an invitation with its role and no login, a
+temporary password, self-registration — and Key escrow says whom the master
+password opens and takes the temporary password of a recovery (s-admin-6).
+
+### Added
+
+- **`AdminInvitesPage`** is three cards, `invite`, `temporary` and
+  `selfReg` (`AddUserCard`: `title`, `aside`, `badge`, `lede`, `warning`,
+  `form`, `link` with `copy`, `issued`), under `subtitle`, and `rows` as
+  before. The page is titled «Add users», as its rail row.
+  - **Invitation** («chooses their own password»): `role` (the list of
+    s-admin-8, User chosen) and «Or send to»; «Create link»
+    (`admin.invite.create`, `POST /admin/invites?action=link`) and «Send
+    invitation» (`admin.invite.send`, `?action=send`, off with the reason
+    without SMTP, and refused by the server then) — two buttons of one form, each with its href. The answer
+    goes to `/admin/invites?invite=<id>`, where the card holds the new link
+    in `link` with «Copy» (`admin.invite.copy`). **An invitation names no
+    login:** the person chooses it on `/invite/{token}`, which now asks
+    Login, Password, Repeat password (s-auth-2); a login taken meanwhile is
+    said on its field and the link lives on. The row's `login` is empty
+    until then (the frame's «—»). The role goes with the invitation and is
+    the account's when it is accepted. Invitations made before name their
+    login: the form shows it read-only, as a user.
+  - **Temporary password** («hand to hand», the warning «Until the user
+    changes this password, you can sign in as them.»): Role, Login, «Email
+    (optional)», «Temporary password» — offered by the server, five groups
+    of four characters, and the administrator may type another; «Create
+    user» (`admin.user.create`, `action=user`). The account is made at once
+    with the role and must change the password at the first sign-in
+    (`/app/password`, as after an escrow recovery); an address typed here
+    waits unconfirmed. The answer is the page itself, not a redirect, with
+    `temporary.issued` — login, password, «Copy» — this once; the password
+    is kept nowhere and journaled nowhere (`user.create`, `detail`
+    `role=admin` or `role=user`).
+  - **Self-registration** moved here from the Users page: the check
+    «Publish the registration form», «Save» (`admin.selfreg.save`,
+    `action=selfreg`), the badge «open» and the address `/register` with
+    «Copy» while open. It cannot be turned on without SMTP: Save is off
+    with the reason, and the server refuses it too.
+- **`AdminEscrowPage.subtitle`** «N of M accounts open with the master
+  password», **`opens`** (N), and **`covered`** now every account of the
+  Users list as `EscrowCoverRow` — `login`, `covered`, `deposited` (the day,
+  or «not deposited»), `lastRecovery` («never», the day and time «2026-08-14
+  18:40», or «—» for one not deposited).
+- **Recover takes the temporary password**: the row «Temporary password for
+  the user» (`temp`), offered by the server; what is typed there is what
+  the key is re-wrapped under (at least 8 characters), left empty the
+  server makes one. The user must change it at the first sign-in, as
+  before.
+- **Resend** of an invitation is `action=resend&invite=<id>`: the same
+  invitation gets a new secret and a new term, the letter goes again, the
+  link sent before stops working (`user.invite.resend`). It used to be a new
+  invitation for the login.
+
+### Changed
+
+- **`AdminUsersPage.selfReg` is gone** (it is the third card of «Add
+  users»); `add` is «Add user» with `i-plus` (s-admin-2).
+- **The Key escrow forms** carry their rubrics as the legend of their set —
+  Policy, Master password, Recover an account — and the frame's hints: at
+  «New accounts are covered» «Turning coverage off leaves copies already
+  taken alone: deleting one is its owner’s decision.», at Repeat «Only the
+  recovery private key is re-encrypted. The deposited copies are untouched,
+  so nobody has to opt in again.», at the temporary password the recovery's.
+  Recover is `danger`. The warning is the product's text alone, without a
+  title.
+- **`user.invite.create`** and **`user.invite.complete`** carry `detail`
+  `role=user` or `role=admin`; an invitation without a login has no `whom`
+  until it is accepted.
+- The letter of an invitation without a login asks to choose «your login
+  and password».
+
 ## v0.2.67 — 2026-09-28
 
 The owner's deferred round, part 3 — forms: the contact form in the rubrics

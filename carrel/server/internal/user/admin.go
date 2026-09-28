@@ -159,6 +159,11 @@ func (s *Service) AdminResetPassword(_ context.Context, actorID, targetID string
 // SetSelfRegEnabled toggles open registration on the instance.
 func (s *Service) SetSelfRegEnabled(actorID string, enabled bool) error {
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		// s-admin-1: «Cannot be turned on until mail works.» — nobody who
+		// registered could confirm the address.
+		if enabled && !st.Settings.SelfRegEnabled && !st.Settings.SMTP.Configured() {
+			return nil, ErrSelfRegNeedsMail
+		}
 		st.Settings.SelfRegEnabled = enabled
 		detail := "off"
 		if enabled {

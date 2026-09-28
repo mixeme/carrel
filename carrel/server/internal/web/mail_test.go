@@ -164,14 +164,14 @@ func TestInvitationIsMailed(t *testing.T) {
 	relay.Refuse = "carol@example.org"
 
 	for _, who := range []string{"bob", "carol"} {
-		if rec := h.do(postForm("/admin/invites", alice, url.Values{"action": {"create"}, "login": {who}, "email": {who + "@example.org"}})); rec.Code >= 400 {
+		if rec := h.do(postForm("/admin/invites?action=send", alice, url.Values{"email": {who + "@example.org"}})); rec.Code >= 400 {
 			t.Fatalf("invite %s: %d", who, rec.Code)
 		}
 	}
 	snap := h.st.Snapshot()
 	var secret string
 	for _, inv := range snap.Invites {
-		if inv.Login == "bob" {
+		if inv.Email == "bob@example.org" {
 			secret = inv.Secret
 		}
 	}
@@ -186,9 +186,9 @@ func TestInvitationIsMailed(t *testing.T) {
 	page := decode[view.AdminInvitesPage](t, h.do(get("/admin/invites", alice)))
 	sent := map[string]string{}
 	for _, row := range page.Rows {
-		sent[string(row.Login)] = string(row.Sent)
+		sent[string(row.Address)] = string(row.Sent)
 	}
-	if sent["bob"] != "sent" || sent["carol"] != "failed — 550 no such mailbox" {
+	if sent["bob@example.org"] != "sent" || sent["carol@example.org"] != "failed — 550 no such mailbox" {
 		t.Errorf("sent = %v", sent)
 	}
 }

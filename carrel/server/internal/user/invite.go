@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
+	cmail "carrel.dev/carrel/server/internal/mail"
 	"carrel.dev/carrel/server/internal/store"
 	"carrel.dev/carrel/server/view"
 )
@@ -48,7 +49,36 @@ func (s *Service) InviteValid(ctx context.Context, token string) bool {
 	return false
 }
 
+// InviteLogin is the login a live invitation names, and whether the token
+// is one: "" for an invitation of s-admin-1, whose person chooses the login
+// with the password.
+func (s *Service) InviteLogin(ctx context.Context, token string) (login string, valid bool) {
+	hash, err := hashToken(token)
+	if err != nil {
+		return "", false
+	}
+	snap := s.st.Snapshot()
+	now := s.now()
+	for i := range snap.Invites {
+		inv := &snap.Invites[i]
+		if inviteLive(inv, now) && verifyHash(inv.SecretHash, hash) {
+			return inv.Login, true
+		}
+	}
+	return "", false
+}
+
+// CompleteInvite accepts an invitation that names its login.
 func (s *Service) CompleteInvite(ctx context.Context, token, password string) error {
+	return s.AcceptInvite(ctx, token, "", password)
+}
+
+// AcceptInvite sets the invited person's password and makes the account
+// with the invitation's role (s-admin-8). An invitation naming no login
+// takes the one the person chose; a login taken meanwhile — by an account,
+// or by another invitation still waiting for it — answers ErrLoginTaken and
+// leaves the invitation alive.
+func (s *Service) AcceptInvite(ctx context.Context, token, login, password string) error {
 	if err := validatePassword(password); err != nil {
 		return err
 	}
@@ -56,6 +86,7 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 	if err != nil {
 		return ErrNotFound
 	}
+	login = normalizeLogin(login)
 	now := s.now()
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		var inv *store.Invite
@@ -68,20 +99,32 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 		if inv == nil {
 			return nil, ErrNotFound
 		}
-		u := st.UserByLogin(inv.Login)
+		name := inv.Login
+		if name == "" {
+			if login == "" {
+				return nil, ErrLoginEmpty
+			}
+			if st.UserByLogin(login) != nil || hasLiveInvite(st, login, now) {
+				return nil, ErrLoginTaken
+			}
+			name = login
+		}
+		u := st.UserByLogin(name)
 		if u != nil && len(u.LoginHash) > 0 {
 			return nil, ErrLoginTaken
 		}
+		role := inviteRole(inv)
 		if u == nil {
 			id, err := NewUserID()
 			if err != nil {
 				return nil, err
 			}
 			st.Users = append(st.Users, store.User{
-				ID: id, Login: inv.Login, Email: inv.Email, Role: store.RoleUser, CreatedAt: now,
+				ID: id, Login: name, Email: inv.Email, Role: role, CreatedAt: now,
 			})
-			u = st.UserByLogin(inv.Login)
+			u = st.UserByLogin(name)
 		}
+		u.Role = role
 		applyEscrowCoverage(st, u)
 		if err := store.ApplyPassword(ctx, u, u.Login, password, st, now); err != nil {
 			return nil, err
@@ -99,35 +142,79 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 		if u.Email != "" && !u.EmailConfirmed {
 			u.Email, u.PendingEmail = "", u.Email
 		}
+		inv.Login = name
 		inv.Used = true
 		burnWipeTokens(st, u.ID)
 		pruneTokens(st, now)
 		return []store.AuditEntry{{
-			When: now, Who: u.Login, What: "user.invite.complete", Whom: u.Login,
+			When: now, Who: u.Login, What: "user.invite.complete", Whom: u.Login, Detail: roleDetail(role),
 		}}, nil
 	})
 }
 
-// CreateInvite adds an invitation and returns the raw secret for the link.
-// A second invitation for the same login replaces the secret: the earlier
-// link stops working (S-10.3, "отправить повторно с заменой секрета").
+// inviteRole is the role an invitation gives: a user unless it says
+// otherwise (invitations before v0.2.68 said nothing).
+func inviteRole(inv *store.Invite) store.Role {
+	if inv.Role == store.RoleAdmin {
+		return store.RoleAdmin
+	}
+	return store.RoleUser
+}
+
+// roleDetail is the role in the journal's words: a value of the event
+// dictionary, never a field of the request.
+func roleDetail(role store.Role) string {
+	if role == store.RoleAdmin {
+		return "role=admin"
+	}
+	return "role=user"
+}
+
+// CreateInvite adds an invitation for a named login, a user, and returns
+// the raw secret for the link. A second invitation for the same login
+// replaces the secret: the earlier link stops working (S-10.3). The panel
+// makes invitations without a login (Invite); this one serves the tests and
+// the invitations made before v0.2.68 are of its kind.
 func (s *Service) CreateInvite(actorID, login, email string) (secret string, err error) {
 	login = normalizeLogin(login)
 	if login == "" {
 		return "", ErrNotFound
 	}
+	return s.createInvite(actorID, login, email, store.RoleUser)
+}
+
+// Invite is the invitation of s-admin-1: the role chosen first, no login —
+// the person chooses it with the password — and an address when it goes by
+// letter.
+func (s *Service) Invite(actorID, email string, role store.Role) (secret string, err error) {
+	if role != store.RoleAdmin && role != store.RoleUser {
+		return "", ErrNotFound
+	}
+	if email = strings.TrimSpace(email); email != "" {
+		addrs, err := cmail.Addresses([]string{email})
+		if err != nil || len(addrs) != 1 {
+			return "", ErrBadAddress
+		}
+		email = addrs[0]
+	}
+	return s.createInvite(actorID, "", email, role)
+}
+
+func (s *Service) createInvite(actorID, login, email string, role store.Role) (secret string, err error) {
 	raw, hash, err := newSecret()
 	if err != nil {
 		return "", err
 	}
 	now := s.now()
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
-		if u := st.UserByLogin(login); u != nil && len(u.LoginHash) > 0 {
-			return nil, ErrLoginTaken
-		}
-		for i := range st.Invites {
-			if st.Invites[i].Login == login && inviteLive(&st.Invites[i], now) {
-				st.Invites[i].Revoked = true
+		if login != "" {
+			if u := st.UserByLogin(login); u != nil && len(u.LoginHash) > 0 {
+				return nil, ErrLoginTaken
+			}
+			for i := range st.Invites {
+				if st.Invites[i].Login == login && inviteLive(&st.Invites[i], now) {
+					st.Invites[i].Revoked = true
+				}
 			}
 		}
 		inviteID, err := NewInviteID()
@@ -135,29 +222,117 @@ func (s *Service) CreateInvite(actorID, login, email string) (secret string, err
 			return nil, err
 		}
 		st.Invites = append(st.Invites, store.Invite{
-			ID: inviteID, Login: login, Email: email,
+			ID: inviteID, Login: login, Email: email, Role: role,
 			SecretHash: hash, Secret: raw, CreatedAt: now, ExpiresAt: now.Add(inviteTTL(st)),
 		})
-		if st.UserByLogin(login) == nil {
-			userID, err := NewUserID()
-			if err != nil {
-				return nil, err
+		if login != "" {
+			if st.UserByLogin(login) == nil {
+				userID, err := NewUserID()
+				if err != nil {
+					return nil, err
+				}
+				st.Users = append(st.Users, store.User{
+					ID: userID, Login: login, Email: email, Role: role, CreatedAt: now,
+				})
 			}
-			st.Users = append(st.Users, store.User{
-				ID: userID, Login: login, Email: email, Role: store.RoleUser, CreatedAt: now,
-			})
-		}
-		if u := st.UserByLogin(login); u != nil {
-			applyEscrowCoverage(st, u)
+			applyEscrowCoverage(st, st.UserByLogin(login))
 		}
 		return []store.AuditEntry{{
-			When: now, Who: actorLogin(st, actorID), What: "user.invite.create", Whom: login,
+			When: now, Who: actorLogin(st, actorID), What: "user.invite.create", Whom: login, Detail: roleDetail(role),
 		}}, nil
 	})
 	if err != nil {
 		return "", err
 	}
 	return raw, nil
+}
+
+// ResendInvite gives a live invitation by letter a new secret and a new
+// term (S-10.3, «отправить повторно с заменой секрета»): the link sent
+// before stops working. It returns the secret and the address for the mail
+// layer.
+func (s *Service) ResendInvite(actorID, inviteID string) (secret, email string, err error) {
+	raw, hash, err := newSecret()
+	if err != nil {
+		return "", "", err
+	}
+	now := s.now()
+	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		inv := inviteByID(st, inviteID)
+		if inv == nil || !inviteLive(inv, now) || inv.Email == "" {
+			return nil, ErrNotFound
+		}
+		inv.SecretHash, inv.Secret = hash, raw
+		inv.ExpiresAt = now.Add(inviteTTL(st))
+		inv.Mailed, inv.MailReply = "", ""
+		email = inv.Email
+		return []store.AuditEntry{{
+			When: now, Who: actorLogin(st, actorID), What: "user.invite.resend", Whom: inv.Login,
+		}}, nil
+	})
+	if err != nil {
+		return "", "", err
+	}
+	return raw, email, nil
+}
+
+// CreateUser is the temporary password of s-admin-1 (S-10.2): the account
+// is made at once with the role, and the first sign-in asks for a new
+// password — until then the administrator who handed this one over can sign
+// in as the person, and the card says so. The password goes into the key
+// derivation and nowhere else: not into the state, not into the journal.
+// An address typed here is the administrator's word and waits unconfirmed.
+func (s *Service) CreateUser(ctx context.Context, actorID, login, email, password string, role store.Role) error {
+	if role != store.RoleAdmin && role != store.RoleUser {
+		return ErrNotFound
+	}
+	login = normalizeLogin(login)
+	if login == "" {
+		return ErrLoginEmpty
+	}
+	if err := validatePassword(password); err != nil {
+		return err
+	}
+	if email = strings.TrimSpace(email); email != "" {
+		addrs, err := cmail.Addresses([]string{email})
+		if err != nil || len(addrs) != 1 {
+			return ErrBadAddress
+		}
+		email = addrs[0]
+	}
+	now := s.now()
+	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		if st.UserByLogin(login) != nil || hasLiveInvite(st, login, now) {
+			return nil, ErrLoginTaken
+		}
+		id, err := NewUserID()
+		if err != nil {
+			return nil, err
+		}
+		st.Users = append(st.Users, store.User{
+			ID: id, Login: login, Role: role, CreatedAt: now, PendingEmail: email,
+		})
+		u := st.UserByLogin(login)
+		applyEscrowCoverage(st, u)
+		if err := store.ApplyPassword(ctx, u, login, password, st, now); err != nil {
+			return nil, err
+		}
+		u.MustChangePassword = true
+		burnWipeTokens(st, u.ID)
+		return []store.AuditEntry{{
+			When: now, Who: actorLogin(st, actorID), What: "user.create", Whom: login, Detail: roleDetail(role),
+		}}, nil
+	})
+}
+
+// SuggestPassword is a temporary password a form offers (s-admin-1,
+// s-admin-6): made here, kept nowhere.
+func (s *Service) SuggestPassword() string {
+	pw, err := newTempPassword()
+	if err != nil {
+		return ""
+	}
+	return pw
 }
 
 // Register creates an unconfirmed account and returns the confirmation

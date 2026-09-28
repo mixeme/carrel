@@ -163,9 +163,15 @@ func (s SMTPSettings) Configured() bool {
 
 // Invite is a pending account invitation (S-10.2).
 type Invite struct {
-	ID         string    `json:"id"`
-	Login      string    `json:"login"`
-	Email      string    `json:"email,omitempty"`
+	ID string `json:"id"`
+	// Login is the account the invitation is for; empty — the invited
+	// person chooses it with the password (s-admin-1, s-auth-2). Named
+	// only by invitations made before v0.2.68.
+	Login string `json:"login"`
+	Email string `json:"email,omitempty"`
+	// Role is what the account becomes when the invitation is accepted
+	// (s-admin-8); empty is a user.
+	Role       Role      `json:"role,omitempty"`
 	SecretHash []byte    `json:"secretHash"`
 	Secret     string    `json:"secret,omitempty"` // raw token; lives only inside encrypted state.enc for the admin panel link (S-10.3)
 	CreatedAt  time.Time `json:"createdAt"`

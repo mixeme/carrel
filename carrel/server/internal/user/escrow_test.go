@@ -98,7 +98,7 @@ func TestEscrowRecoverRewrapsDataKey(t *testing.T) {
 	if err := svc.CompleteInvite(ctx, secret, "bobpass1234"); err != nil {
 		t.Fatal(err)
 	}
-	temp, err := svc.RecoverEscrow(ctx, adminID, "bob", master)
+	temp, err := svc.RecoverEscrow(ctx, adminID, "bob", master, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func TestEscrowRecoverBurnsWipeTokens(t *testing.T) {
 		t.Fatal(err)
 	}
 	token := strings.TrimPrefix(link, "/forgot/")
-	if _, err := svc.RecoverEscrow(ctx, adminID, "bob", master); err != nil {
+	if _, err := svc.RecoverEscrow(ctx, adminID, "bob", master, ""); err != nil {
 		t.Fatal(err)
 	}
 	if _, _, valid := svc.ForgotWipeState(ctx, token); valid {

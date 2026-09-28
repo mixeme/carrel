@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
@@ -17,6 +18,7 @@ import (
 func formError(err error) view.Text {
 	for _, known := range []error{
 		user.ErrPasswordShort, user.ErrPasswordMismatch, user.ErrLoginTaken, user.ErrLastAdmin, user.ErrLoginConfirm,
+		user.ErrLoginEmpty, user.ErrSelfRegNeedsMail, user.ErrBadAddress,
 		user.ErrMasterPasswordShort, user.ErrMasterPasswordMismatch,
 		user.ErrEscrowNotConfigured, user.ErrEscrowConfigured, user.ErrNotDeposited, user.ErrEscrowDisabled,
 	} {
@@ -280,20 +282,40 @@ func (s *Server) getInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := r.PathValue("token")
-	valid := s.users.InviteValid(r.Context(), token)
+	named, valid := s.users.InviteLogin(r.Context(), token)
 	if !valid {
 		s.tokenNotFound(w, r, start)
 		return
 	}
-	page := view.InvitePage{
-		Plain: view.Plain{Title: text("Accept invitation"), Lede: text("Choose a password for your new account.")},
+	s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, named, "", nil, nil))
+}
+
+// invitePage is the form an invited person fills (s-auth-2 serves
+// /invite/{token} too): the login first — typed, or the one an invitation
+// made before v0.2.68 names, read-only — then the password twice.
+func (s *Server) invitePage(w http.ResponseWriter, r *http.Request, token, named, typed string, loginErr, passErr error) view.InvitePage {
+	lede := "Choose a login and a password for your new account."
+	login := view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true, Value: text(typed)}
+	if named != "" {
+		lede = "Choose a password for your new account."
+		login.Value, login.ReadOnly = text(named), true
+	}
+	if loginErr != nil {
+		login.Error = formError(loginErr)
+	}
+	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true}
+	if passErr != nil {
+		password.Error = formError(passErr)
+	}
+	return view.InvitePage{
+		Plain: view.Plain{Title: text("Accept invitation"), Lede: text(lede)},
 		Valid: true,
 		Form: withSubmit(s.anonPlainForm(w, r, "/invite/"+token, "POST",
-			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
+			login,
+			password,
 			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
 		), "invite.submit", "Create account"),
 	}
-	s.writePage(w, r, http.StatusOK, page)
 }
 
 func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
@@ -303,30 +325,29 @@ func (s *Server) postInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token := r.PathValue("token")
-	if !s.users.InviteValid(r.Context(), token) {
+	named, valid := s.users.InviteLogin(r.Context(), token)
+	if !valid {
 		s.tokenNotFound(w, r, start)
 		return
 	}
+	typed := strings.TrimSpace(r.FormValue("login"))
 	if err := passwordPair(r.FormValue("password"), r.FormValue("password2")); err != nil {
-		page := view.InvitePage{
-			Plain: view.Plain{Title: text("Accept invitation"), Lede: text("Choose a password.")},
-			Valid: true,
-			Form: withSubmit(s.anonPlainForm(w, r, "/invite/"+token, "POST",
-				view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: formError(err)},
-				view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
-			), "invite.submit", "Create account"),
-		}
-		s.writePage(w, r, http.StatusOK, page)
+		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, named, typed, nil, err))
 		return
 	}
-	// Whatever else goes wrong (the login got taken meanwhile, the token
-	// died between GET and POST) answers like a dead token: the form has
-	// nothing more to say to someone holding an invalid secret.
-	if err := s.users.CompleteInvite(r.Context(), token, r.FormValue("password")); err != nil {
+	// A login the person chose and cannot have is said on its field: the
+	// invitation lives on. Whatever else goes wrong (the token died between
+	// GET and POST) answers like a dead token: the form has nothing more to
+	// say to someone holding an invalid secret.
+	err := s.users.AcceptInvite(r.Context(), token, typed, r.FormValue("password"))
+	switch {
+	case err == nil:
+		s.redirect(w, r, "/login")
+	case named == "" && (errors.Is(err, user.ErrLoginTaken) || errors.Is(err, user.ErrLoginEmpty)):
+		s.writePage(w, r, http.StatusOK, s.invitePage(w, r, token, named, typed, err, nil))
+	default:
 		s.tokenNotFound(w, r, start)
-		return
 	}
-	s.redirect(w, r, "/login")
 }
 
 func (s *Server) getConfirmEmail(w http.ResponseWriter, r *http.Request) {

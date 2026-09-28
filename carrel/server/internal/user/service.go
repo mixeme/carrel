@@ -63,6 +63,8 @@ var (
 	ErrPasswordShort    = errors.New("password must be at least 8 characters")
 	ErrPasswordMismatch = errors.New("passwords do not match")
 	ErrLoginTaken       = errors.New("login is already taken")
+	ErrLoginEmpty       = errors.New("choose a login")
+	ErrSelfRegNeedsMail = errors.New("mail is not set up: nobody who registers could confirm the address")
 	ErrLastAdmin        = errors.New("cannot remove the last administrator")
 	ErrLoginConfirm     = errors.New("type the login to confirm deletion")
 	ErrNotFound         = errors.New("not found")

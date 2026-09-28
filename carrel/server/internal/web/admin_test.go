@@ -172,15 +172,15 @@ func TestPostAdminInvitesCreate(t *testing.T) {
 	adminID := h.admin("alice", "password123")
 	alice := h.login("alice", "password123")
 
-	form := url.Values{"action": {"create"}, "login": {"carol"}, "email": {"carol@example.com"}}
-	rec := h.do(postForm("/admin/invites", alice, form))
+	form := url.Values{"email": {"carol@example.com"}}
+	rec := h.do(postForm("/admin/invites?action=link", alice, form))
 	if rec.Code != 303 {
 		t.Fatalf("POST create invite: %d, want redirect", rec.Code)
 	}
 	snap := h.st.Snapshot()
 	var link string
 	for _, inv := range snap.Invites {
-		if inv.Login == "carol" && inv.Secret != "" {
+		if inv.Secret != "" {
 			link = "/invite/" + inv.Secret
 			break
 		}
@@ -198,7 +198,8 @@ func TestPostAdminInvitesCreate(t *testing.T) {
 	}
 	found := false
 	for _, row := range page.Rows {
-		if row.Login == "carol" && row.Link != "" {
+		// A link goes as a link: the address typed beside it is not kept.
+		if row.Link == text(link) && row.Address == "" {
 			found = true
 		}
 	}
@@ -305,14 +306,15 @@ func TestAdminInviteActionsNameTheInvite(t *testing.T) {
 	h := newHarness(t)
 	adminID := h.admin("alice", "password123")
 	alice := h.login("alice", "password123")
-	form := url.Values{"action": {"create"}, "login": {"carol"}, "email": {"carol@example.com"}}
-	if rec := h.do(postForm("/admin/invites", alice, form)); rec.Code != 303 {
+	h.relayed()
+	form := url.Values{"email": {"carol@example.com"}}
+	if rec := h.do(postForm("/admin/invites?action=send", alice, form)); rec.Code != 303 {
 		t.Fatalf("create invite: %d", rec.Code)
 	}
 	snap := h.st.Snapshot()
 	var invID, secret string
 	for _, inv := range snap.Invites {
-		if inv.Login == "carol" {
+		if inv.Email == "carol@example.com" {
 			invID, secret = inv.ID, inv.Secret
 			break
 		}
@@ -328,7 +330,7 @@ func TestAdminInviteActionsNameTheInvite(t *testing.T) {
 	}
 	var extend, revoke, resend string
 	for _, row := range page.Rows {
-		if row.Login != "carol" {
+		if row.Address != "carol@example.com" {
 			continue
 		}
 		for _, a := range append(row.Actions, menuActions(row.Menu)...) {
@@ -357,8 +359,7 @@ func TestAdminInviteActionsNameTheInvite(t *testing.T) {
 	mustQuery(revoke, "action", "revoke")
 	mustQuery(revoke, "invite", invID)
 	mustQuery(resend, "action", "resend")
-	mustQuery(resend, "login", "carol")
-	mustQuery(resend, "email", "carol@example.com")
+	mustQuery(resend, "invite", invID)
 
 	if rec := h.do(postForm(extend, alice, url.Values{})); rec.Code != 303 {
 		t.Fatalf("POST extend href: %d", rec.Code)
@@ -366,23 +367,19 @@ func TestAdminInviteActionsNameTheInvite(t *testing.T) {
 	if !h.users.InviteValid(context.Background(), secret) {
 		t.Fatal("extend via href broke the secret")
 	}
+	// Resend replaces the secret (S-10.3): the link sent before dies, the
+	// invitation lives on with a new one.
+	if rec := h.do(postForm(resend, alice, url.Values{})); rec.Code != 303 {
+		t.Fatalf("POST resend href: %d %s", rec.Code, rec.Body)
+	}
+	if h.users.InviteValid(context.Background(), secret) {
+		t.Fatal("the old link still works after Resend")
+	}
+	snap = h.st.Snapshot()
+	for _, inv := range snap.Invites {
+		if inv.ID == invID && (inv.Secret == secret || !h.users.InviteValid(context.Background(), inv.Secret)) {
+			t.Fatalf("after Resend: %+v", inv)
+		}
+	}
 	_ = adminID
-}
-
-func TestGetAdminEscrowCoveredOmitsUncovered(t *testing.T) {
-	h := newHarness(t)
-	const master = "sixteen-char-pass!"
-	h.enableEscrow("alice", "password123", master)
-	alice := h.login("alice", "password123")
-	snap := h.st.Snapshot()
-	h.invite(snap.UserByLogin("alice").ID, "bob", "bobpass123")
-
-	rec := h.do(get("/admin/escrow", alice))
-	var page view.AdminEscrowPage
-	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
-		t.Fatal(err)
-	}
-	if len(page.Covered) != 1 || page.Covered[0].Login != "bob" || !page.Covered[0].Escrowed {
-		t.Fatalf("covered = %+v, want only deposited bob", page.Covered)
-	}
 }

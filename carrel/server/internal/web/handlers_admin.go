@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/csv"
+	"errors"
 	"mime"
 	"net/http"
 	"net/url"
@@ -11,6 +12,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/internal/user"
 	"carrel.dev/carrel/server/view"
 )
 
@@ -80,9 +82,6 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 			flash.wipeLink = s.route("/forgot/" + token)
 			flash.errText = "The letter with the recovery link could not be sent. Hand the link over in person."
 		}
-	case "selfreg":
-		enabled := r.FormValue("selfReg") == "on" || r.FormValue("selfReg") == "true"
-		err = s.users.SetSelfRegEnabled(actorID, enabled)
 	default:
 		flash.errText = "Unknown action."
 	}
@@ -102,17 +101,12 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 	page := view.AdminUsersPage{
 		Shell: s.withRail(s.buildShell(sess, "Users"), s.adminRail(sess, "/admin/")),
 		Add: []view.Action{
-			{ID: "admin.invite", Label: "Invite", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
+			// s-admin-2: «Add user» leads to the three ways of s-admin-1.
+			{ID: "admin.invite", Label: "Add user", Icon: "i-plus", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
 		},
-		SelfReg: withSubmit(s.plainForm("/admin/", "POST",
-			csrfField(sess),
-			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("selfreg")},
-			view.FormRow{Name: "selfReg", Label: "Open registration", Kind: view.InputCheck,
-				Value: text(boolStr(snap.Settings.SelfRegEnabled))},
-		), "admin.selfreg.save", "Save"),
 	}
 	if flash.errText != "" {
-		page.SelfReg.Sets[0].Rows[len(page.SelfReg.Sets[0].Rows)-1].Error = text(flash.errText)
+		page.Shell.Notices = append(page.Shell.Notices, view.Notice{Role: view.NoticeAlert, Body: text(flash.errText)})
 	}
 	if flash.wipeLink != "" {
 		page.Shell.Notices = append(page.Shell.Notices, view.Notice{
@@ -226,8 +220,17 @@ func (s *Server) getAdminUserRole(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, sheet)
 }
 
+// adminInvitesFlash is what one answer of «Add users» says besides the
+// page: an error on the field it belongs to, what was typed, and the
+// temporary password just set — shown this once.
 type adminInvitesFlash struct {
-	errText string
+	errText    string // not a field's: a notice over the page
+	inviteErr  view.Text
+	userErr    view.Text
+	userField  string // the temporary form's row the error stands on
+	selfRegErr view.Text
+	typed      url.Values
+	issued     *view.IssuedPassword
 }
 
 func (s *Server) getAdminInvites(w http.ResponseWriter, r *http.Request) {
@@ -235,26 +238,91 @@ func (s *Server) getAdminInvites(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	page := s.buildAdminInvitesPage(sess, adminInvitesFlash{})
+	page := s.buildAdminInvitesPage(sess, r.URL.Query().Get("invite"), adminInvitesFlash{})
 	s.writePage(w, r, http.StatusOK, page)
 }
 
+// postAdminInvites is every way of s-admin-1: an invitation by link or by
+// letter, the temporary password, self-registration, and what a pending
+// invitation's row does.
 func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {
 		return
 	}
 	actorID := sess.AccountID()
-	action := r.FormValue("action")
-	var flash adminInvitesFlash
+	flash := adminInvitesFlash{typed: url.Values{}}
+	for _, k := range []string{"role", "login", "email"} {
+		flash.typed.Set(k, r.FormValue(k))
+	}
 	var err error
-	switch action {
-	case "create", "resend":
-		login := r.FormValue("login")
-		email := r.FormValue("email")
+	switch action := r.FormValue("action"); action {
+	case "link", "send":
+		// The role is chosen first; a letter needs its address, a link
+		// none — any typed beside it is not sent.
+		email := ""
+		if action == "send" {
+			// The button is off without a relay; the server does not take
+			// it either — an invitation by letter that cannot go is a link.
+			if !s.mailConfigured() {
+				flash.inviteErr = "SMTP is not configured: no letter can go."
+				break
+			}
+			if email = strings.TrimSpace(r.FormValue("email")); email == "" {
+				flash.inviteErr = text(user.ErrBadAddress.Error())
+				break
+			}
+		}
 		var secret string
-		secret, err = s.users.CreateInvite(actorID, login, email)
-		if err == nil && secret != "" {
+		if secret, err = s.users.Invite(actorID, email, formRole(r)); err != nil {
+			flash.inviteErr = formError(err)
+			break
+		}
+		if email != "" {
+			_ = s.sendInviteMail(r, "", email, secret)
+		}
+		// The link stands in the card that made it (s-admin-1).
+		s.redirect(w, r, "/admin/invites?"+url.Values{"invite": {s.inviteIDBySecret(secret)}}.Encode())
+		return
+	case "user":
+		password := r.FormValue("password")
+		login := normalizeLogin(r.FormValue("login"))
+		err = s.users.CreateUser(r.Context(), actorID, login, r.FormValue("email"), password, formRole(r))
+		if err != nil {
+			flash.userErr = formError(err)
+			switch {
+			case errors.Is(err, user.ErrPasswordShort):
+				flash.userField = "password"
+			case errors.Is(err, user.ErrBadAddress):
+				flash.userField = "email"
+			default:
+				flash.userField = "login"
+			}
+			break
+		}
+		// Shown this once: the answer to the POST, not a page to come back
+		// to. The form is empty again, with a new password to offer.
+		flash.typed = url.Values{}
+		flash.issued = &view.IssuedPassword{
+			Login:    text(login),
+			Password: text(password),
+			Copy:     view.Action{ID: "admin.user.password.copy", Label: "Copy", Method: "GET", Enabled: true},
+		}
+	case "selfreg":
+		enabled := r.FormValue("selfReg") == "on" || r.FormValue("selfReg") == "true"
+		if err = s.users.SetSelfRegEnabled(actorID, enabled); err != nil {
+			flash.selfRegErr = formError(err)
+		}
+	case "resend":
+		var secret, email string
+		if secret, email, err = s.users.ResendInvite(actorID, r.FormValue("invite")); err == nil {
+			login := ""
+			snap := s.store.Snapshot()
+			for i := range snap.Invites {
+				if snap.Invites[i].ID == r.FormValue("invite") {
+					login = snap.Invites[i].Login
+				}
+			}
 			_ = s.sendInviteMail(r, login, email, secret)
 		}
 	case "revoke":
@@ -262,42 +330,141 @@ func (s *Server) postAdminInvites(w http.ResponseWriter, r *http.Request) {
 	case "extend":
 		err = s.users.ExtendInvite(actorID, r.FormValue("invite"))
 	default:
-		if action == "" && r.FormValue("login") != "" {
-			var secret string
-			secret, err = s.users.CreateInvite(actorID, r.FormValue("login"), r.FormValue("email"))
-			if err == nil && secret != "" {
-				_ = s.sendInviteMail(r, r.FormValue("login"), r.FormValue("email"), secret)
-			}
-		} else {
-			flash.errText = "Unknown action."
-		}
+		flash.errText = "Unknown action."
 	}
-	if err != nil {
+	if err != nil && flash.inviteErr == "" && flash.userErr == "" && flash.selfRegErr == "" {
 		flash.errText = string(formError(err))
 	}
-	if flash.errText == "" {
+	if flash.errText == "" && flash.inviteErr == "" && flash.userErr == "" && flash.selfRegErr == "" && flash.issued == nil {
 		s.redirect(w, r, "/admin/invites")
 		return
 	}
-	page := s.buildAdminInvitesPage(sess, flash)
+	page := s.buildAdminInvitesPage(sess, "", flash)
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvitesFlash) view.AdminInvitesPage {
+// formRole is the role a form chose (s-admin-8); anything else is a user.
+func formRole(r *http.Request) store.Role {
+	if r.FormValue("role") == string(store.RoleAdmin) {
+		return store.RoleAdmin
+	}
+	return store.RoleUser
+}
+
+// inviteIDBySecret names the invitation a secret was just issued for.
+func (s *Server) inviteIDBySecret(secret string) string {
+	snap := s.store.Snapshot()
+	for i := range snap.Invites {
+		if snap.Invites[i].Secret == secret {
+			return snap.Invites[i].ID
+		}
+	}
+	return ""
+}
+
+// roleRow is the Role field of s-admin-1: the list of s-admin-8, User
+// unless another was chosen.
+func roleRow(chosen string) view.FormRow {
+	var opts []view.Option
+	for _, role := range []store.Role{store.RoleUser, store.RoleAdmin} {
+		opts = append(opts, view.Option{Value: string(role), Label: roleLabels[role],
+			Selected: string(role) == chosen || (chosen != string(store.RoleAdmin) && role == store.RoleUser)})
+	}
+	return view.FormRow{Name: "role", Label: "Role", Kind: view.InputSelect, Options: opts, Required: true}
+}
+
+func (s *Server) buildAdminInvitesPage(sess *session.Session, made string, flash adminInvitesFlash) view.AdminInvitesPage {
 	snap := s.store.Snapshot()
 	now := s.now()
+	mail := s.mailConfigured()
+	typed := flash.typed
+	if typed == nil {
+		typed = url.Values{}
+	}
 	page := view.AdminInvitesPage{
-		Shell: s.withRail(s.buildShell(sess, "Invites"), s.adminRail(sess, "/admin/invites")),
-		Add: withSubmit(s.plainForm("/admin/invites", "POST",
-			csrfField(sess),
-			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("create")},
-			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Required: true},
-			view.FormRow{Name: "email", Label: "Email", Kind: view.InputEmail},
-		), "admin.invite.create", "Create link"),
+		Shell:    s.withRail(s.buildShell(sess, "Add users"), s.adminRail(sess, "/admin/invites")),
+		Subtitle: "Three ways, for three situations. There is no global mode: any of them works.",
 	}
 	if flash.errText != "" {
-		page.Add.Sets[0].Rows[len(page.Add.Sets[0].Rows)-1].Error = text(flash.errText)
+		page.Shell.Notices = append(page.Shell.Notices, view.Notice{Role: view.NoticeAlert, Body: text(flash.errText)})
 	}
+
+	// Invitation: the person chooses their own password — and login.
+	send := view.Action{ID: "admin.invite.send", Label: "Send invitation", Method: "POST", Enabled: true,
+		Href: s.postQuery("/admin/invites", url.Values{"action": {"send"}})}
+	if !mail {
+		send.Enabled, send.Reason = false, "SMTP is not configured: no letter can go."
+	}
+	invite := s.plainForm("/admin/invites?action=link", "POST",
+		csrfField(sess),
+		roleRow(typed.Get("role")),
+		view.FormRow{Name: "email", Label: "Or send to", Kind: view.InputEmail, Value: text(typed.Get("email")),
+			Placeholder: "anna@example.org", Error: flash.inviteErr},
+	)
+	invite.Actions = []view.Action{
+		{ID: "admin.invite.create", Label: "Create link", Method: "POST", Enabled: true,
+			Href: s.postQuery("/admin/invites", url.Values{"action": {"link"}})},
+		send,
+	}
+	page.Invite = view.AddUserCard{Title: "Invitation", Aside: "chooses their own password", Form: invite}
+	if made != "" {
+		for i := range snap.Invites {
+			inv := &snap.Invites[i]
+			if inv.ID == made && inviteLive(inv, now) && inv.Secret != "" {
+				page.Invite.Link = text(s.route("/invite/" + inv.Secret))
+				page.Invite.Copy = &view.Action{ID: "admin.invite.copy", Label: "Copy", Href: string(page.Invite.Link), Method: "GET", Enabled: true}
+			}
+		}
+	}
+
+	// Temporary password: handed over in person, and said so.
+	temp := view.FormRow{Name: "password", Label: "Temporary password", Kind: view.InputText, Required: true,
+		Value: text(s.users.SuggestPassword())}
+	rows := []view.FormRow{
+		csrfField(sess),
+		{Name: "action", Kind: view.InputHidden, Value: "user"},
+		roleRow(typed.Get("role")),
+		{Name: "login", Label: "Login", Kind: view.InputText, Required: true, Value: text(typed.Get("login"))},
+		{Name: "email", Label: "Email (optional)", Kind: view.InputEmail, Value: text(typed.Get("email")), Placeholder: "—"},
+		temp,
+	}
+	for i := range rows {
+		if flash.userErr != "" && rows[i].Name == flash.userField {
+			rows[i].Error = flash.userErr
+		}
+	}
+	page.Temporary = view.AddUserCard{
+		Title: "Temporary password",
+		Badge: &view.Badge{Label: "hand to hand", Role: view.BadgeAlert},
+		Warning: &view.Notice{Role: view.NoticeAlert,
+			Body: "Until the user changes this password, you can sign in as them."},
+		Form:   withSubmit(s.plainForm("/admin/invites", "POST", rows...), "admin.user.create", "Create user"),
+		Issued: flash.issued,
+	}
+
+	// Self-registration: a public form, only while mail works.
+	save := view.Action{ID: "admin.selfreg.save", Label: "Save", Href: s.route("/admin/invites"), Method: "POST", Enabled: true}
+	if !snap.Settings.SelfRegEnabled && !mail {
+		save.Enabled, save.Reason = false, "Mail is not set up: nobody who registers could confirm the address."
+	}
+	selfReg := s.plainForm("/admin/invites", "POST",
+		csrfField(sess),
+		view.FormRow{Name: "action", Kind: view.InputHidden, Value: "selfreg"},
+		view.FormRow{Name: "selfReg", Label: "Publish the registration form", Kind: view.InputCheck,
+			Value: text(boolStr(snap.Settings.SelfRegEnabled)), Error: flash.selfRegErr},
+	)
+	selfReg.Actions = []view.Action{save}
+	page.SelfReg = view.AddUserCard{
+		Title: "Self-registration",
+		Lede:  "A visitor creates an account and confirms the address by email. Cannot be turned on until mail works.",
+		Form:  selfReg,
+	}
+	if snap.Settings.SelfRegEnabled {
+		page.SelfReg.Badge = &view.Badge{Label: "open", Role: view.BadgeNeutral}
+		page.SelfReg.Link = text(s.route("/register"))
+		page.SelfReg.Copy = &view.Action{ID: "admin.selfreg.copy", Label: "Copy", Href: string(page.SelfReg.Link), Method: "GET", Enabled: true}
+	}
+
 	tf := s.timeFor(sess)
 	for i := range snap.Invites {
 		inv := &snap.Invites[i]
@@ -311,7 +478,7 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvites
 			// handed over, and pending — the list holds live ones only.
 			Delivery: "link",
 			Status:   "pending",
-			Sent:     inviteSentStatus(inv, s.mailConfigured()),
+			Sent:     inviteSentStatus(inv, mail),
 			Expires:  tf.formatWhen(inv.ExpiresAt, false, now),
 			// The rare rest is under «⋯» (s-admin-11): Extend when the
 			// person did not make it in time, Revoke under the line.
@@ -325,12 +492,13 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvites
 			},
 		}
 		// On the row what an invitation is opened for (s-admin-1): Resend
-		// for one that went by letter, and Copy link.
+		// for one that went by letter — a new secret, the old link dies —
+		// and Copy link.
 		if inv.Email != "" {
 			row.Delivery = "email"
 			resend := view.Action{ID: "admin.invite.resend", Label: "Resend", Method: "POST", Enabled: true,
-				Href: s.postQuery("/admin/invites", url.Values{"action": {"resend"}, "login": {inv.Login}, "email": {inv.Email}})}
-			if !s.mailConfigured() {
+				Href: s.postQuery("/admin/invites", url.Values{"action": {"resend"}, "invite": {inv.ID}})}
+			if !mail {
 				resend.Enabled, resend.Reason = false, "SMTP is not configured: no letter can go."
 			}
 			row.Actions = append(row.Actions, resend)

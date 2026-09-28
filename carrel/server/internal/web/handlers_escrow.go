@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -260,7 +261,7 @@ func (s *Server) postAdminEscrow(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "too many requests", http.StatusTooManyRequests)
 			return
 		}
-		temp, err := s.users.RecoverEscrow(ctx, sess.AccountID(), login, r.FormValue("master"))
+		temp, err := s.users.RecoverEscrow(ctx, sess.AccountID(), login, r.FormValue("master"), r.FormValue("temp"))
 		if err != nil {
 			flash.recoverErr = string(formError(err))
 		} else {
@@ -306,20 +307,28 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 	page := view.AdminEscrowPage{
 		Shell:   s.withRail(s.buildShell(sess, "Key escrow"), s.adminRail(sess, "/admin/escrow")),
 		Enabled: enabled,
+		// s-admin-6 writes it as it stands in the product, without a title.
 		Warning: view.Notice{
-			Role:  view.NoticeAlert,
-			Title: text("Administrative access to saved credentials"),
-			Body:  text("Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user's saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and mailed to them."),
+			Role: view.NoticeAlert,
+			Body: text("Key escrow is not a key backup. It is a way in: an administrator holding the master password can decrypt a covered user’s saved DAV credentials, and through them their contacts and calendars. Every covered user is told so in their profile, and every recovery is logged and mailed to them."),
 		},
-		Result: flash.result,
+		Result:  flash.result,
+		Covered: []view.EscrowCoverRow{},
+	}
+	legend := func(f *view.Form, name view.Text) {
+		if len(f.Sets) > 0 {
+			f.Sets[0].Legend = name
+		}
 	}
 	if enabled {
 		page.Form = withSubmit(s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("policy")},
 			view.FormRow{Name: "coverNew", Label: "New accounts are covered", Kind: view.InputCheck,
-				Value: text(boolStr(snap.Settings.EscrowCoverNewUsers))},
+				Value: text(boolStr(snap.Settings.EscrowCoverNewUsers)),
+				Hint:  "Turning coverage off leaves copies already taken alone: deleting one is its owner’s decision."},
 		), "escrow.policy.save", "Save")
+		legend(&page.Form, "Policy")
 		if flash.formErr != "" {
 			page.Form.Sets[0].Rows[len(page.Form.Sets[0].Rows)-1].Error = text(flash.formErr)
 		}
@@ -327,19 +336,27 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("master")},
 			view.FormRow{Name: "current", Label: "Current", Kind: view.InputPassword, Required: true},
-			view.FormRow{Name: "master", Label: "New", Kind: view.InputPassword, Required: true,
-				Hint: text("Only the recovery private key is re-encrypted. Deposited copies are untouched.")},
-			view.FormRow{Name: "master2", Label: "Repeat", Kind: view.InputPassword, Required: true},
+			view.FormRow{Name: "master", Label: "New", Kind: view.InputPassword, Required: true},
+			view.FormRow{Name: "master2", Label: "Repeat", Kind: view.InputPassword, Required: true,
+				Hint: "Only the recovery private key is re-encrypted. The deposited copies are untouched, so nobody has to opt in again."},
 		), "escrow.master.change", "Change")
+		legend(&page.Master, "Master password")
 		if flash.masterErr != "" {
 			page.Master.Sets[0].Rows[len(page.Master.Sets[0].Rows)-1].Error = text(flash.masterErr)
 		}
+		// The temporary password is offered, and the administrator may type
+		// another: it is what they hand over (s-admin-6).
 		page.Recover = withSubmit(s.plainForm("/admin/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: text("recover")},
 			view.FormRow{Name: "login", Label: "Account", Kind: view.InputText, Required: true},
 			view.FormRow{Name: "master", Label: "Master password", Kind: view.InputPassword, Required: true},
+			view.FormRow{Name: "temp", Label: "Temporary password for the user", Kind: view.InputText, Required: true,
+				Value: text(s.users.SuggestPassword()),
+				Hint:  "Connections survive a recovery: the deposited key is opened with the master password and re-wrapped under a temporary one. The user is mailed about it — always, not at the administrator’s discretion."},
 		), "escrow.recover", "Recover")
+		page.Recover.Actions[0].Danger = true
+		legend(&page.Recover, "Recover an account")
 		if flash.recoverErr != "" {
 			page.Recover.Sets[0].Rows[len(page.Recover.Sets[0].Rows)-1].Error = text(flash.recoverErr)
 		}
@@ -354,24 +371,34 @@ func (s *Server) buildAdminEscrowPage(sess *session.Session, flash adminEscrowFl
 		if flash.formErr != "" {
 			page.Form.Sets[0].Rows[len(page.Form.Sets[0].Rows)-1].Error = text(flash.formErr)
 		}
+		return page
 	}
+	// Whom the master password opens: every account of the Users list,
+	// the ones it does not open too — an administrator need not be covered
+	// by their own scheme, and that is to be seen (s-admin-6).
 	tf := s.timeFor(sess)
 	for _, u := range snap.Users {
-		if u.Disabled || !store.UserDeposited(&u) {
+		if len(u.LoginHash) == 0 && u.Disabled {
 			continue
 		}
-		row := view.AdminUserRow{
-			Login:    text(u.Login),
-			Escrowed: true,
-		}
-		if u.EscrowDepositedAt != nil {
-			row.Created = tf.formatWhen(*u.EscrowDepositedAt, false, time.Now())
-		}
-		if u.EscrowLastRecovery != nil {
-			row.LastLogin = tf.formatWhen(*u.EscrowLastRecovery, false, time.Now())
+		row := view.EscrowCoverRow{Login: text(u.Login), Deposited: "not deposited", LastRecovery: "—"}
+		if store.UserDeposited(&u) {
+			page.Opens++
+			row.Covered, row.Deposited, row.LastRecovery = true, "", "never"
+			if u.EscrowDepositedAt != nil {
+				row.Deposited = view.When(tf.dayKey(*u.EscrowDepositedAt))
+			}
+			if u.EscrowLastRecovery != nil {
+				row.LastRecovery = view.When(tf.dayKey(*u.EscrowLastRecovery) + " " + tf.clock(*u.EscrowLastRecovery))
+			}
 		}
 		page.Covered = append(page.Covered, row)
 	}
+	accounts := "accounts"
+	if len(page.Covered) == 1 {
+		accounts = "account"
+	}
+	page.Subtitle = text(fmt.Sprintf("%d of %d %s open with the master password", page.Opens, len(page.Covered), accounts))
 	return page
 }
 
