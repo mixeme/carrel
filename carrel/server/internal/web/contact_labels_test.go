@@ -37,7 +37,9 @@ func TestContactRowLabelsAndAddresses(t *testing.T) {
 		form.Get("adr.0.code") != "SW1Y 4JH" || form.Get("adr.0.country") != "UK" || form.Get("adr.0.region") != "" {
 		t.Errorf("address = %v", form)
 	}
-	rowNamed(t, edit.Form, "adr.new.street")
+	if add := addRow(t, edit.Form, "adr"); len(add.Template) != 5 || add.Template[0].Name != "adr.{n}.street" {
+		t.Errorf("Add address = %+v", add)
+	}
 
 	save := func(set map[string]string) string {
 		t.Helper()
@@ -63,7 +65,7 @@ func TestContactRowLabelsAndAddresses(t *testing.T) {
 
 	// A new address comes without PO box and extended parts; a semicolon
 	// typed in a part is dropped, or it would shift every part after it.
-	got = save(map[string]string{"adr.new.street": "1 Lab; Lane", "adr.new.city": "Oxford"})
+	got = save(map[string]string{"adr.1.street": "1 Lab; Lane", "adr.1.city": "Oxford"})
 	mustContain(t, got, "ADR:;;1 Lab Lane;Oxford;;;")
 
 	// An address emptied of every part goes.

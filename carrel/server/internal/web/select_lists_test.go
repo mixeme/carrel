@@ -115,9 +115,7 @@ func TestEventListsAreTheFrames(t *testing.T) {
 	floating := strings.TrimPrefix(zones[len(zones)-1], "— ")
 	offered := false
 	for _, o := range rowNamed(t, page.Form, "tz").Options {
-		// The zone held is marked «as sent» until the list has its heading
-		// (server.md, «Открыто»).
-		offered = offered || (o.Value == "floating" && strings.HasPrefix(string(o.Label), floating))
+		offered = offered || (o.Value == "floating" && string(o.Label) == floating)
 	}
 	if !offered {
 		t.Errorf("zones = %+v, want %q for a floating event", rowNamed(t, page.Form, "tz").Options, floating)
@@ -155,8 +153,8 @@ func TestContactLabelListsAreTheFrames(t *testing.T) {
 	if sel := selectedOf(rowNamed(t, page.Form, "tel.2.type").Options); len(sel) != 1 || sel[0] != "WORK" {
 		t.Errorf("TYPE=WORK selects %q", sel)
 	}
-	sameList(t, "new phone label", rowNamed(t, page.Form, "tel.new.type").Options, "s-contacts-12")
-	sameList(t, "email label", rowNamed(t, page.Form, "email.new.type").Options, "s-contacts-13")
+	sameList(t, "new phone label", addRow(t, page.Form, "tel").Template[0].Options, "s-contacts-12")
+	sameList(t, "email label", addRow(t, page.Form, "email").Template[0].Options, "s-contacts-13")
 	held := rowNamed(t, page.Form, "email.0.type").Options
 	if last := held[len(held)-1]; last.Value != "INTERNET" || !last.Selected {
 		t.Errorf("email labels = %+v, want another client's INTERNET kept as a choice", held)
@@ -179,8 +177,8 @@ func TestContactLabelListsAreTheFrames(t *testing.T) {
 	// «mobile» and «main» are written the way other clients write them.
 	form = formFields(decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/ann/edit", f.sess))).Form)
 	form.Set("tel.1.type", optionValue(t, rowNamed(t, page.Form, "tel.1.type").Options, "main"))
-	form.Set("tel.new", "+1 555 0103")
-	form.Set("tel.new.type", optionValue(t, rowNamed(t, page.Form, "tel.new.type").Options, "mobile"))
+	form.Set("tel.3", "+1 555 0103")
+	form.Set("tel.3.type", optionValue(t, addRow(t, page.Form, "tel").Template[0].Options, "mobile"))
 	if resp := f.h.do(postForm(f.path("contacts")+"/ann/edit", f.sess, form)); resp.Code != 303 {
 		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
 	}

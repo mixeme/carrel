@@ -13,6 +13,10 @@ import (
 	"sync"
 	"syscall"
 	"time"
+	// The zone database goes in the binary: the image has no
+	// /usr/share/zoneinfo, and the instance zone (C-10) and the zones an
+	// event may be moved to (s-agenda-8) must load there too.
+	_ "time/tzdata"
 
 	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/crypt"

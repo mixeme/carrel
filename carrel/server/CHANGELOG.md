@@ -17,6 +17,64 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.67 — 2026-09-28
+
+The owner's deferred round, part 3 — forms: the contact form in the rubrics
+of s-contacts-3, «Add phone» and «Add reminder» as buttons that add a row,
+and the time zone of an event as the whole list of s-agenda-8.
+
+### Added
+
+- **`InputAdd`** (C-6.8, C-8, `kind: "add"`): a button under the rows of a
+  repeating field — the phones, e-mails and addresses of a card, the
+  reminders of an event and a task. `label` is its text («Add phone»,
+  «Add email», «Add address», «Add reminder»), `name` is `add`, `value` the
+  field (`tel`), and **`FormRow.template`** the empty rows one press adds,
+  with `{n}` in their names for the lowest number no row of the field has
+  yet (`tel.{n}.type`, `tel.{n}`). Without scripts the button posts the
+  form with `add=<field>` to its action; the answer is the same form as
+  typed with one empty row more, nothing written — and no record yet on a
+  new form (C-7). The form no longer carries an empty row in advance
+  (s-contacts-3: «not empty fields poured in beforehand»).
+- **`Option.group`** (C-6.8): a heading before the option — «As sent» in
+  the time zone list. Omitted when empty.
+- **The time zone of an event is every zone** (s-agenda-8): the zone it came
+  in first under «As sent», a line, the 489 Area/Location names of Go's
+  zone database and UTC in alphabetical order, a line and «Floating — the
+  same clock time anywhere», always last; an event that came floating has
+  Floating under «As sent» and not again. The row's `placeholder` is «Find
+  a zone», the text of the search over its options. Choosing Floating drops
+  `TZID` and writes the clock time as the instance zone shows it (S-11); a
+  zone outside the list is refused as before. The list is
+  `internal/web/zones.txt`, written by `zones_gen.go` (`go generate`) from
+  `$GOROOT/lib/time/zoneinfo.zip`; the row is about 35 KB of JSON, 5 KB
+  gzipped. The binary now embeds the zone database (`time/tzdata`): the
+  image has no `/usr/share/zoneinfo`, and without it every zone but UTC
+  failed to load there, the instance zone included.
+
+### Changed
+
+- **The contact form in the rubrics of s-contacts-3.** The head — Display
+  name, Given, Family, Nickname, Organisation, Title, Birthday; Nickname
+  and Birthday stand there empty too (s-contacts-4) —, then **Phone
+  numbers** and **Email addresses**, each row a `Label` select
+  (`tel.N.type`, the list of s-contacts-12 and -13) and then `Number` or
+  `Address` (`tel.N`, `email.N`), and «Add phone», «Add email»; then
+  **Addresses** (five parts, the first labelled «Street» with the
+  address's type, «Add address»; the frames draw none — to-typecase task
+  28); then **Other**: Categories and Note. Empty Organisation, Title,
+  addresses, Categories and Note fold into «Show N empty fields»; a rubric
+  whose fields all folded is not sent. The field names are those of
+  before, less the `.new` rows: `tel.new`, `email.new`, `adr.new.*` and
+  `reminder.new` are no longer read — a row added is `name.N`, the next
+  number.
+- **Reminders**: the rows the record has (the first is «First», the others
+  «Reminder»), then «Add reminder»; a record without reminders has the
+  button only.
+- **The quick sheets** hold one row of such a field, without its label list
+  and without the button: «Phone» and «Email» on the contact's
+  (s-notes-8), «Remind» on the event's (s-notes-9).
+
 ## v0.2.66 — 2026-09-28
 
 The owner's deferred round, part 2: a folder of one's own downloads as a zip

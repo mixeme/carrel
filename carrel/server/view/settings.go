@@ -31,6 +31,11 @@ type FormRow struct {
 	// по текущему значению отметки, дальше клиент переключает его сам; у
 	// прочих полей пусто
 	Disables string `json:"disables,omitempty"`
+	// У InputAdd — строки, которые добавляет одно нажатие, пустые; «{n}» в
+	// их Name клиент заменяет наименьшим числом, под которым строки этого
+	// поля в форме ещё нет (s-contacts-3 «Add phone», s-agenda-3 «Add
+	// reminder»); у прочих пусто
+	Template []FormRow `json:"template,omitempty"`
 }
 type Option struct {
 	Value     string `json:"value"`
@@ -40,6 +45,7 @@ type Option struct {
 	Disabled  bool   `json:"disabled,omitempty"`  // виден, но не выбирается
 	Reason    Text   `json:"reason,omitempty"`    // почему не выбирается; пусто у доступного
 	Colour    Colour `json:"colour,omitempty"`    // метка варианта-коллекции (s-notes-15); у прочих пусто
+	Group     Text   `json:"group,omitempty"`     // рубрика перед вариантом: «As sent» (s-agenda-8); у прочих пусто
 }
 type FieldError struct {
 	Name    string `json:"name"`

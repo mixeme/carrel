@@ -138,6 +138,8 @@ func liveForm(f view.Form) url.Values {
 		for _, row := range set.Rows {
 			switch {
 			case row.Name == "_csrf":
+			case row.Kind == view.InputAdd:
+				// A button that adds a row is posted only when pressed.
 			case row.Kind == view.InputCheck && len(row.Options) > 0:
 				// Several ticks under one name: each one ticked is a value.
 				out.Del(row.Name)
@@ -419,7 +421,7 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	form.Set("summary", "Live dentist, "+suffix)
 	form.Set("start.date", "2026-10-05")
 	form.Set("start.time", "09:30")
-	form.Set("reminder.new", "-PT10M")
+	form.Set("reminder.0", "-PT10M")
 	loc := redirected(t, "new event", app.post(events+"/new", form))
 	m := regexp.MustCompile(`/([0-9a-f]{32})$`).FindStringSubmatch(loc)
 	if m == nil {

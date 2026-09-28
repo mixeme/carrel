@@ -99,6 +99,14 @@ type editField struct {
 	// without STATUS needs action. The form shows it, and a save that leaves
 	// it so writes nothing (S-7).
 	blank string
+	// add is the button under the rows of a repeating field, «Add phone»
+	// (C-6.8 InputAdd): the form draws no empty row beforehand
+	// (s-contacts-3).
+	add string
+	// quick is the label of the one row a repeating field has on the quick
+	// sheet, which draws neither its label list nor the button: Phone and
+	// Email (s-notes-8), Remind (s-notes-9).
+	quick string
 }
 
 // fieldOption is one value a fieldChoice offers; sep draws a line before it,
@@ -106,22 +114,6 @@ type editField struct {
 type fieldOption struct {
 	value, label string
 	sep          bool
-}
-
-// zoneChoices are the zones the form offers besides the one the event came
-// in, UTC and the instance's own.
-var zoneChoices = []string{
-	"Europe/London", "Europe/Dublin", "Europe/Lisbon", "Europe/Paris", "Europe/Berlin", "Europe/Madrid", "Europe/Rome",
-	"Europe/Amsterdam", "Europe/Stockholm", "Europe/Warsaw", "Europe/Prague", "Europe/Vienna", "Europe/Athens",
-	"Europe/Helsinki", "Europe/Kyiv", "Europe/Istanbul", "Europe/Minsk", "Europe/Moscow", "Europe/Samara",
-	"Asia/Yekaterinburg", "Asia/Omsk", "Asia/Novosibirsk", "Asia/Krasnoyarsk", "Asia/Irkutsk", "Asia/Yakutsk",
-	"Asia/Vladivostok", "Asia/Magadan", "Asia/Kamchatka", "Asia/Tbilisi", "Asia/Yerevan", "Asia/Baku",
-	"Asia/Almaty", "Asia/Tashkent", "Asia/Dubai", "Asia/Kolkata", "Asia/Bangkok", "Asia/Shanghai", "Asia/Singapore",
-	"Asia/Tokyo", "Asia/Seoul", "Australia/Perth", "Australia/Sydney", "Pacific/Auckland",
-	"America/St_Johns", "America/Halifax", "America/New_York", "America/Chicago", "America/Denver",
-	"America/Phoenix", "America/Los_Angeles", "America/Anchorage", "Pacific/Honolulu",
-	"America/Mexico_City", "America/Bogota", "America/Sao_Paulo", "America/Argentina/Buenos_Aires",
-	"Africa/Cairo", "Africa/Johannesburg", "Africa/Lagos", "Africa/Nairobi",
 }
 
 // zoneOf is the zone a DTSTART is written in: its TZID, "UTC", "floating",
@@ -142,35 +134,41 @@ func zoneOf(cur []model.RawValue) string {
 	return "floating"
 }
 
-// zoneOptions are the zone the event came in, marked so, then UTC, the
-// instance zone and zoneChoices.
-func zoneOptions(held, selected, instance string) []view.Option {
-	label := func(z string) string {
+// floatingLabel is the choice that is not a zone but its absence: the same
+// clock time anywhere (s-agenda-8). Chosen, it drops TZID (S-11).
+const floatingLabel = "Floating — the same clock time anywhere"
+
+// zoneOptions are the list of s-agenda-8: the zone the event came in under
+// the heading As sent, a line, every zone of zoneNames, a line and Floating,
+// always last — once, when the event came floating.
+func zoneOptions(held, selected string) []view.Option {
+	label := func(z string) view.Text {
 		if z == "floating" {
-			return "Floating — the same clock time anywhere"
+			return floatingLabel
 		}
-		return z
+		return text(z)
 	}
-	// The zone it came in stands first, and a line under it (s-agenda-8).
-	opts := []view.Option{{Value: held, Label: text(label(held) + " · as sent"), Selected: selected == held}}
-	seen := map[string]bool{held: true}
-	for _, z := range append([]string{"UTC", instance}, zoneChoices...) {
-		if seen[z] {
-			continue
+	opts := make([]view.Option, 0, len(zoneNames)+2)
+	opts = append(opts, view.Option{Value: held, Label: label(held), Selected: selected == held, Group: "As sent"})
+	for _, z := range zoneNames {
+		if z != held {
+			opts = append(opts, view.Option{Value: z, Label: text(z), Selected: z == selected, Separator: len(opts) == 1})
 		}
-		seen[z] = true
-		opts = append(opts, view.Option{Value: z, Label: text(label(z)), Selected: z == selected, Separator: len(opts) == 1})
+	}
+	if held != "floating" {
+		opts = append(opts, view.Option{Value: "floating", Label: floatingLabel, Selected: selected == "floating", Separator: true})
 	}
 	return opts
 }
 
-// zoneOffered reports whether a zone may be chosen: the one held, or one the
-// list offers and the zone database knows.
-func zoneOffered(z, held, instance string) (*time.Location, bool) {
-	if z == held {
+// zoneOffered reports whether a zone may be chosen: the one held, Floating,
+// or one of zoneNames the zone database knows. The location is nil for the
+// held zone and for Floating.
+func zoneOffered(z, held string) (*time.Location, bool) {
+	if z == held || z == "floating" {
 		return nil, true
 	}
-	if z != "UTC" && z != instance && !slices.Contains(zoneChoices, z) {
+	if _, found := slices.BinarySearch(zoneNames, z); !found {
 		return nil, false
 	}
 	loc, err := time.LoadLocation(z)
@@ -522,18 +520,22 @@ var editFields = map[view.Kind][]editField{
 		{name: "fn", label: "Display name", prop: "FN", typ: fieldText,
 			hint: "Left empty, it is made from Given and Family. Fill it alone and it is cut the other way: the first word is the given name, the rest the family name."},
 		{name: "n", label: "Name", prop: "N", typ: fieldName},
-		{name: "nickname", label: "Nickname", prop: "NICKNAME", typ: fieldText, optional: true},
+		// The nickname and the birthday stand in the head empty too
+		// (s-contacts-3, s-contacts-4).
+		{name: "nickname", label: "Nickname", prop: "NICKNAME", typ: fieldText},
 		// Who the person is, then where they work and when they were born,
-		// then how to reach them: the order of s-contacts-3.
+		// then how to reach them, then the rest: the order of s-contacts-3.
 		{name: "org", label: "Organisation", prop: "ORG", typ: fieldText, optional: true},
 		{name: "title", label: "Title", prop: "TITLE", typ: fieldText, optional: true},
-		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday, optional: true,
+		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday,
 			hint: "Type it: 14.03.1987, or 14.03 without the year."},
-		{name: "tel", label: "Phone", prop: "TEL", typ: fieldMulti, typed: true},
-		{name: "email", label: "Email", prop: "EMAIL", typ: fieldMulti, typed: true},
-		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress, set: "Addresses"},
-		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, optional: true, hint: "Separated by commas."},
-		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea, optional: true},
+		{name: "tel", label: "Number", prop: "TEL", typ: fieldMulti, typed: true, set: "Phone numbers", add: "Add phone", quick: "Phone"},
+		{name: "email", label: "Address", prop: "EMAIL", typ: fieldMulti, typed: true, set: "Email addresses", add: "Add email", quick: "Email"},
+		// The frames draw no address (to-typecase task 28): a rubric of
+		// its own after the e-mail, folded away when the card has none.
+		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress, set: "Addresses", optional: true, add: "Add address"},
+		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, optional: true, hint: "Separated by commas.", set: "Other"},
+		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea, optional: true, set: "Other"},
 	},
 	view.KindEvent: {
 		{name: "summary", label: "Summary", prop: "SUMMARY", typ: fieldText},
@@ -545,7 +547,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, required: true, allDay: true, set: "When"},
 		{name: "end", label: "End date", timeLabel: "End time", prop: "DTEND", typ: fieldTime, set: "When"},
 		{name: "tz", label: "Time zone", prop: "DTSTART", typ: fieldZone, set: "When"},
-		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders"},
+		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders", add: "Add reminder", quick: "Remind"},
 		{name: "repeat", label: "Repeats", prop: "RRULE", typ: fieldRepeat, set: "Repeats"},
 	},
 	view.KindTask: {
@@ -557,7 +559,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "priority", label: "Priority", prop: "PRIORITY", typ: fieldChoice, choices: priorities, set: "Progress"},
 		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent, set: "Progress"},
 		{name: "done", label: "Done", prop: "STATUS", typ: fieldDone, set: "Progress"},
-		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders"},
+		{name: "reminder", label: "Reminders", typ: fieldReminders, set: "Reminders", add: "Add reminder", quick: "Remind"},
 		{name: "location", label: "Location", prop: "LOCATION", typ: fieldText, set: "Other"},
 		{name: "categories", label: "Categories", prop: "CATEGORIES", typ: fieldList, hint: "Separated by commas.", set: "Other"},
 		{name: "related", label: "Related to", prop: "RELATED-TO", typ: fieldRelated, set: "Other"},
@@ -816,7 +818,9 @@ func checkbox(r *http.Request, name string) string {
 	return ""
 }
 
-// indexedRows reads name.0, name.1, … and name.new.
+// indexedRows reads name.0, name.1, … as far as they go, and ends them with
+// the empty slot the values of a repeating field end with. A row added by
+// «Add …» (C-6.8 InputAdd) takes the next number, so it is read here too.
 func indexedRows(r *http.Request, name string) []string {
 	var rows []string
 	for i := 0; ; i++ {
@@ -826,7 +830,7 @@ func indexedRows(r *http.Request, name string) []string {
 		}
 		rows = append(rows, strings.TrimSpace(r.FormValue(key)))
 	}
-	return append(rows, strings.TrimSpace(r.FormValue(name+".new")))
+	return append(rows, "")
 }
 
 func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
@@ -846,7 +850,7 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 				for i := 0; i < len(vals[f.name])-1; i++ {
 					labels = append(labels, strings.TrimSpace(r.FormValue(fmt.Sprintf("%s.%d.type", f.name, i))))
 				}
-				vals[f.name+".type"] = append(labels, strings.TrimSpace(r.FormValue(f.name+".new.type")))
+				vals[f.name+".type"] = append(labels, "")
 			}
 		case fieldRelated:
 			v := strings.TrimSpace(r.FormValue(f.name + ".uid"))
@@ -883,7 +887,7 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 				}
 				rows = append(rows, part(prefix))
 			}
-			vals[f.name] = append(rows, part(f.name+".new"))
+			vals[f.name] = append(rows, "")
 		case fieldTime:
 			row := []string{strings.TrimSpace(r.FormValue(f.name + ".date")), strings.TrimSpace(r.FormValue(f.name + ".time")), ""}
 			if f.allDay {
@@ -926,7 +930,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	// when neither row changed.
 	var zone string
 	if held := first(have["tz"]); held != "" && first(want["tz"]) != held && startRow[2] != "on" {
-		loc, ok := zoneOffered(first(want["tz"]), held, tz.String())
+		loc, ok := zoneOffered(first(want["tz"]), held)
 		if !ok {
 			ch.errors["tz"] = "Choose a time zone from the list."
 		} else {
@@ -1898,7 +1902,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				continue // a day has no zone; a new event is written in UTC
 			}
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
-				Options: zoneOptions(held, first(vals), s.tz().String()), Error: errText})
+				Options: zoneOptions(held, first(vals)), Placeholder: "Find a zone", Error: errText})
 		case fieldChoice:
 			var held string
 			if st.obj != nil {
@@ -1917,48 +1921,55 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				view.FormRow{Name: f.name + ".given", Label: "Given", Kind: view.InputText, Value: text(row[0]), Error: errText},
 				view.FormRow{Name: f.name + ".family", Label: "Family", Kind: view.InputText, Value: text(row[1])})
 		case fieldMulti:
+			// Each row is its Label, then the value (s-contacts-3); the rows
+			// the record has, then the button that adds one. The quick sheet
+			// has one row, bare (s-notes-8).
 			kind := view.InputText
 			if f.prop == "EMAIL" {
 				kind = view.InputEmail
 			}
-			for i, v := range vals {
-				row := view.FormRow{Name: fmt.Sprintf("%s.%d", f.name, i), Label: text(f.label), Kind: kind, Value: text(v)}
-				if i == len(vals)-1 {
-					row.Name, row.Label = f.name+".new", text("Add "+strings.ToLower(f.label))
-				} else if i < len(props[f.prop]) {
-					row.Label = text(typedLabel(f.label, props[f.prop][i].Params))
+			rows := shownRows(vals, full)
+			labels := st.values[f.name+".type"]
+			for i, v := range rows {
+				name := fmt.Sprintf("%s.%d", f.name, i)
+				row := view.FormRow{Name: name, Label: text(f.label), Kind: kind, Value: text(v)}
+				if !full {
+					row.Label = text(f.quick)
+				} else if f.typed {
+					label := first(labels[min(i, len(labels)):])
+					set.Rows = append(set.Rows, labelRow(f, name, label))
 				}
 				if i == 0 {
 					row.Error = errText
 				}
 				set.Rows = append(set.Rows, row)
+			}
+			if full {
+				tpl := view.FormRow{Name: f.name + ".{n}", Label: text(f.label), Kind: kind}
+				add := addButton(f, tpl)
 				if f.typed {
-					label := first(st.values[f.name+".type"][min(i, len(st.values[f.name+".type"])):])
-					name := fmt.Sprintf("%s.%d.type", f.name, i)
-					if i == len(vals)-1 {
-						name = f.name + ".new.type"
-					}
-					set.Rows = append(set.Rows, view.FormRow{Name: name, Label: text(f.label + " label"), Kind: view.InputSelect, Value: text(label), Options: labelOptions(f.prop, label)})
+					add.Template = []view.FormRow{labelRow(f, f.name+".{n}", ""), tpl}
 				}
+				set.Rows = append(set.Rows, add)
 			}
 		case fieldAddress:
-			for i, v := range vals {
-				prefix, label := fmt.Sprintf("%s.%d", f.name, i), f.label
-				if i == len(vals)-1 {
-					prefix, label = f.name+".new", "Add an address"
-				} else if i < len(props[f.prop]) {
-					label = typedLabel(f.label, props[f.prop][i].Params)
-				}
+			for i, v := range shownRows(vals, full) {
+				prefix := fmt.Sprintf("%s.%d", f.name, i)
 				parts := addressRowParts(v)
-				for j, p := range addressParts {
-					row := view.FormRow{Name: prefix + "." + p.name, Label: text(p.label), Kind: view.InputText, Value: text(parts[j])}
+				for j, row := range addressRows(prefix) {
+					row.Value = text(parts[j])
 					if j == 0 {
-						row.Label = text(label + " · " + p.label)
+						if i < len(props[f.prop]) {
+							// The label the address has, which no field
+							// offers: «Street · home».
+							row.Label = text(typedLabel(string(row.Label), props[f.prop][i].Params))
+						}
 						row.Error = errText
 					}
 					set.Rows = append(set.Rows, row)
 				}
 			}
+			set.Rows = append(set.Rows, addButton(f, addressRows(f.name+".{n}")...))
 		case fieldTime:
 			row := triple(vals)
 			// The all-day box leads its field, as in s-agenda-3.
@@ -1973,18 +1984,26 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		case fieldPercent:
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputNumber, Value: text(first(vals)), Error: errText})
 		case fieldReminders:
-			// The first reminder, then the others, then a row that adds one
-			// (s-agenda-3: First, Add reminder); without any, the adding row
-			// is the first.
-			for i, v := range vals {
-				row := view.FormRow{Name: fmt.Sprintf("reminder.%d", i), Label: "Reminder", Kind: view.InputSelect, Value: text(v), Options: reminderOptions(v, st.alarms, i, tf)}
-				if i == len(vals)-1 {
-					row.Name, row.Label = "reminder.new", "Add reminder"
+			// The first reminder, then the others, then the button that adds
+			// one (s-agenda-3: First, Add reminder). The quick sheet has one
+			// row and no button (s-notes-9: Remind).
+			rows := shownRows(vals, full)
+			for i, v := range rows {
+				row := view.FormRow{Name: fmt.Sprintf("%s.%d", f.name, i), Label: text(reminderLabel(i)), Kind: view.InputSelect, Value: text(v), Options: reminderOptions(v, st.alarms, i, tf)}
+				if !full {
+					row.Label = text(f.quick)
 				}
 				if i == 0 {
-					row.Label, row.Error = "First", errText
+					row.Error = errText
 				}
 				set.Rows = append(set.Rows, row)
+			}
+			if full {
+				add := addButton(f, view.FormRow{Name: f.name + ".{n}", Label: text(reminderLabel(len(rows))), Kind: view.InputSelect, Options: reminderOptions("", nil, -1, tf)})
+				if len(rows) == 0 {
+					add.Error = errText
+				}
+				set.Rows = append(set.Rows, add)
 			}
 		}
 		if hide {
@@ -1992,6 +2011,9 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			set.Rows = set.Rows[:before]
 		}
 	}
+	// A rubric whose fields all went into the fold is not drawn: a card
+	// without categories and a note has no Other.
+	sets = append(sets[:1], slices.DeleteFunc(sets[1:], func(fs view.FieldSet) bool { return len(fs.Rows) == 0 })...)
 	if len(empty) > 0 {
 		legend := fmt.Sprintf("Show %d empty fields", len(empty))
 		if len(empty) == 1 {
@@ -2032,6 +2054,65 @@ func reminderOptions(selected string, alarms []cal.Alarm, row int, tf timeFmt) [
 		opts = append(opts, view.Option{Value: selected, Label: text(label), Selected: true})
 	}
 	return append(opts, view.Option{Value: "", Label: "No reminder", Selected: selected == "", Separator: true})
+}
+
+// reminderLabel names the reminder row i: the first is First (s-agenda-3).
+func reminderLabel(i int) string {
+	if i == 0 {
+		return "First"
+	}
+	return "Reminder"
+}
+
+// shownRows are the rows a repeating field draws: its values without the
+// empty slot they end with. The quick sheet draws one row even when the
+// record has none (s-notes-8, s-notes-9).
+func shownRows(vals []string, full bool) []string {
+	rows := vals[:max(len(vals)-1, 0)]
+	if !full && len(rows) == 0 {
+		rows = []string{""}
+	}
+	return rows
+}
+
+// labelRow is the Label of a phone or an e-mail row (s-contacts-12, -13),
+// before its value.
+func labelRow(f editField, name, label string) view.FormRow {
+	return view.FormRow{Name: name + ".type", Label: "Label", Kind: view.InputSelect, Value: text(label), Options: labelOptions(f.prop, label)}
+}
+
+// addressRows are the five inputs of an address row under prefix.
+func addressRows(prefix string) []view.FormRow {
+	rows := make([]view.FormRow, 0, len(addressParts))
+	for _, p := range addressParts {
+		rows = append(rows, view.FormRow{Name: prefix + "." + p.name, Label: text(p.label), Kind: view.InputText})
+	}
+	return rows
+}
+
+// addButton is «Add …» of a repeating field (C-6.8 InputAdd): the rows one
+// press adds, and without scripts the form posted with add=<field>.
+func addButton(f editField, template ...view.FormRow) view.FormRow {
+	return view.FormRow{Name: "add", Label: text(f.add), Kind: view.InputAdd, Value: text(f.name), Template: template}
+}
+
+// addedRow gives the repeating field name one more empty row, as the path
+// without scripts asks (C-7): the form comes back with it, nothing written.
+// A name no repeating field of the kind has adds nothing.
+func addedRow(kind view.Kind, values formValues, name string) {
+	for _, f := range editFields[kind] {
+		if f.name != name || f.add == "" {
+			continue
+		}
+		grow := func(key string) {
+			v := values[key]
+			values[key] = append(v[:max(len(v)-1, 0):max(len(v)-1, 0)], "", "")
+		}
+		grow(f.name)
+		if f.typed {
+			grow(f.name + ".type")
+		}
+	}
 }
 
 func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string) {
@@ -2142,6 +2223,13 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	st.obj, st.alarms = obj, alarms
 	st.linked = s.noteLinked(r.Context(), c, uid, obj)
 	markDone := r.URL.Query().Get("op") == "done" || r.URL.Query().Get("op") == "" && r.FormValue("op") == "done"
+	if add := r.FormValue("add"); add != "" && !markDone {
+		// «Add …» pressed without scripts (C-6.8 InputAdd): the form as
+		// typed, one row more, and nothing written.
+		addedRow(c.spec.kind, st.values, add)
+		s.writePage(w, r, http.StatusOK, s.editPage(c, st))
+		return
+	}
 	if markDone {
 		want = formValues{}
 		for k, v := range have {
@@ -2600,7 +2688,15 @@ func (s *Server) postKindNew(w http.ResponseWriter, r *http.Request, kind string
 		s.notFound(w, r)
 		return
 	}
-	s.createRecord(w, r, c, s.submittedValues(c, r))
+	want := s.submittedValues(c, r)
+	if add := r.FormValue("add"); add != "" {
+		// «Add …» without scripts: the form back with one row more, and no
+		// record until Save (C-6.8 InputAdd).
+		addedRow(c.spec.kind, want, add)
+		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
+		return
+	}
+	s.createRecord(w, r, c, want)
 }
 
 // createRecord writes a new record. The full form and the quick sheet both

@@ -1580,12 +1580,28 @@ type FormRow struct {
     ReadOnly bool
     Required bool
     // Образец в пустом поле, как его рисует кадр: «DD.MM.YYYY» у дня рождения
-    // (s-contacts-4); у прочих полей пусто
+    // (s-contacts-4); у выбора — образец в строке поиска над вариантами,
+    // «Find a zone» (s-agenda-8): поиск есть, когда образец есть; у прочих
+    // полей пусто
     Placeholder Text
     // У отметки — Name поля, которое она выключает, пока стоит (s-profile-14:
     // «The server asks no password» выключает Password); у прочих пусто
     Disables string
+    // У InputAdd — строки, которые добавляет одно нажатие, пустые, в порядке
+    // кадра; у прочих пусто
+    Template []FormRow
 }
+// Повторяющееся поле — телефоны, почта, адреса карточки, напоминания — это
+// строки с номером в Name («tel.0.type», «tel.0», «tel.1.type», «tel.1») и
+// под ними кнопка InputAdd: Label — её подпись («Add phone», «Add reminder»),
+// Name — «add», Value — имя поля («tel»). Пустых строк заранее форма не
+// несёт (s-contacts-3). Нажатие вставляет перед кнопкой строки Template,
+// заменив «{n}» в их Name наименьшим числом, под которым строки этого поля в
+// форме ещё нет; номера идут подряд, строки из формы не вынимаются. Remove у
+// строки — забота клиента: он опустошает строку, а опустевшая строка при
+// сохранении уходит из записи. Без скриптов кнопка отправляет форму с
+// add=<поле> на Form.Action; ответ — та же форма с тем, что набрано, и одной
+// пустой строкой больше, ничего не записано (C-7).
 // Отметка с Disables — общее правило, не особенность одной формы. Сервер
 // присылает ReadOnly названного поля по текущему значению отметки; клиент,
 // когда отметку ставят и снимают, переключает ReadOnly того поля сам, без
@@ -1596,6 +1612,8 @@ type FormRow struct {
 // («Read-only»). Ни один вариант не Selected — поле пусто и уходит пустым.
 // У InputCheck с Options — несколько отметок сразу: каждая Selected уходит
 // своим значением под одним Name (дни повторения, состав коллекции).
+// Group — рубрика, которая стоит перед вариантом и до следующей рубрики или
+// черты: пояс, с которым событие пришло, под «As sent» (s-agenda-8).
 type Option struct {
     Value     string
     Label     Text
@@ -1604,6 +1622,7 @@ type Option struct {
     Disabled  bool
     Reason    Text
     Colour    Colour // метка варианта-коллекции: тетрадь заметки (s-notes-15); у прочих пусто
+    Group     Text   // рубрика перед вариантом, «As sent» (s-agenda-8); у прочих пусто
 }
 type FieldError struct { Name string; Message Text }
 
@@ -2270,9 +2289,10 @@ type InputKind string
 const ( InputText InputKind = "text"; InputPassword = "password"; InputEmail = "email"
         InputURL = "url"; InputDate = "date"; InputTime = "time"; InputNumber = "number"
         InputSelect = "select"; InputCheck = "check"; InputRadio = "radio"; InputArea = "area"
-        InputHidden = "hidden" ) // значение, которое форма несёт и никто не заполняет:
-                                 // _csrf, версия, на которой прочитана форма, шаг формы.
-                                 // Не показывается, подписи не имеет
+        InputHidden = "hidden" // значение, которое форма несёт и никто не заполняет:
+                               // _csrf, версия, на которой прочитана форма, шаг формы.
+                               // Не показывается, подписи не имеет
+        InputAdd = "add" ) // кнопка, добавляющая строку повторяющегося поля (C-6.8)
 
 type DeviceTab string
 const ( TabApple DeviceTab = "apple"; TabAndroid = "android"

@@ -87,7 +87,8 @@ func TestAPlaceIsWhere(t *testing.T) {
 
 // The form of a contact asks in the order of the frame (s-contacts-3): who
 // the person is, then where they work and when they were born, then how to
-// reach them, and last what is written about them.
+// reach them, and last what is written about them. The nickname stands in
+// the head empty too (s-contacts-4).
 func TestTheContactFormAsksInTheOrderOfTheFrame(t *testing.T) {
 	f := contactsFixture(t, false, annaCard)
 	page := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/anna/edit", f.sess)))
@@ -101,7 +102,7 @@ func TestTheContactFormAsksInTheOrderOfTheFrame(t *testing.T) {
 			}
 		}
 	}
-	want := []string{"fn", "n.given", "n.family", "org", "title", "bday"}
+	want := []string{"fn", "n.given", "n.family", "nickname", "org", "title", "bday"}
 	if len(names) < len(want) || !equalStrings(names[:len(want)], want) {
 		t.Errorf("the form asks %v,\nand should open with %v", names, want)
 	}

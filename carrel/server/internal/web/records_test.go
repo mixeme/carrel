@@ -100,6 +100,8 @@ func formFields(f view.Form) url.Values {
 		for _, row := range set.Rows {
 			switch {
 			case row.Name == "_csrf":
+			case row.Kind == view.InputAdd:
+				// A button that adds a row is posted only when pressed.
 			case row.Kind == view.InputCheck && len(row.Options) > 0:
 				// Several ticks under one name: each one ticked is a value.
 				out.Del(row.Name)
@@ -413,7 +415,7 @@ func TestQuickSheetSavesOnlyOnSave(t *testing.T) {
 	if len(sheet.Form.Sets) == 0 {
 		t.Fatalf("the sheet carries no form: %+v", sheet)
 	}
-	for _, name := range []string{"fn", "tel.new", "email.new"} {
+	for _, name := range []string{"fn", "tel.0", "email.0"} {
 		rowNamed(t, sheet.Form, name)
 	}
 	// "Open the card" carries its own address, so the browser posts the same
@@ -582,7 +584,7 @@ func TestRemindersKeepUntouchedAlarms(t *testing.T) {
 
 	form = editForm()
 	form.Set("reminder.0", "")
-	form.Set("reminder.new", "-PT1H")
+	form.Set("reminder.1", "-PT1H")
 	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
 		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())
 	}
@@ -593,7 +595,7 @@ func TestRemindersKeepUntouchedAlarms(t *testing.T) {
 	}
 
 	form = editForm()
-	form.Set("reminder.new", "-PT3H")
+	form.Set("reminder.1", "-PT3H")
 	page := decode[view.EventEditPage](t, f.h.do(postForm(rec+"/edit", f.sess, form)))
 	if len(page.Form.Errors) == 0 || page.Form.Errors[0].Name != "reminder" {
 		t.Errorf("errors = %+v", page.Form.Errors)
@@ -640,7 +642,7 @@ func TestNewEventIsSkeletonPlusPatch(t *testing.T) {
 	form.Set("summary", "Dentist")
 	form.Set("start.date", "2026-03-02")
 	form.Set("start.time", "09:30")
-	form.Set("reminder.new", "-PT1H")
+	form.Set("reminder.0", "-PT1H")
 	resp := f.h.do(postForm(events+"/new", f.sess, form))
 	if resp.Code != http.StatusSeeOther {
 		t.Fatalf("POST: %d %s", resp.Code, resp.Body.String())

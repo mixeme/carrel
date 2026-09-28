@@ -100,6 +100,18 @@
             "extra": null,
             "hint": "",
             "kind": "text",
+            "label": "Nickname",
+            "name": "nickname",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
             "label": "Organisation",
             "name": "org",
             "options": [],
@@ -131,25 +143,18 @@
             "readOnly": false,
             "required": false,
             "value": "14.03.1987"
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Phone · mobile",
-            "name": "tel.0",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "+7 912 445-10-88"
-          },
+          }
+        ]
+      },
+      {
+        "legend": "Phone numbers",
+        "rows": [
           {
             "error": "",
             "extra": null,
             "hint": "",
             "kind": "select",
-            "label": "Phone label",
+            "label": "Label",
             "name": "tel.0.type",
             "options": [
               {
@@ -192,19 +197,19 @@
             "extra": null,
             "hint": "",
             "kind": "text",
-            "label": "Phone · work",
-            "name": "tel.1",
+            "label": "Number",
+            "name": "tel.0",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "+7 495 120-45-00"
+            "value": "+7 912 445-10-88"
           },
           {
             "error": "",
             "extra": null,
             "hint": "",
             "kind": "select",
-            "label": "Phone label",
+            "label": "Label",
             "name": "tel.1.type",
             "options": [
               {
@@ -247,74 +252,93 @@
             "extra": null,
             "hint": "",
             "kind": "text",
-            "label": "Add phone",
-            "name": "tel.new",
+            "label": "Number",
+            "name": "tel.1",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "+7 495 120-45-00"
           },
           {
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "select",
-            "label": "Phone label",
-            "name": "tel.new.type",
-            "options": [
+            "kind": "add",
+            "label": "Add phone",
+            "name": "add",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "template": [
               {
-                "label": "mobile",
-                "selected": false,
-                "value": "cell"
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "select",
+                "label": "Label",
+                "name": "tel.{n}.type",
+                "options": [
+                  {
+                    "label": "mobile",
+                    "selected": false,
+                    "value": "cell"
+                  },
+                  {
+                    "label": "work",
+                    "selected": false,
+                    "value": "work"
+                  },
+                  {
+                    "label": "home",
+                    "selected": false,
+                    "value": "home"
+                  },
+                  {
+                    "label": "main",
+                    "selected": false,
+                    "value": "main"
+                  },
+                  {
+                    "label": "fax",
+                    "selected": false,
+                    "value": "fax"
+                  },
+                  {
+                    "label": "other",
+                    "selected": false,
+                    "value": "other"
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
+                "value": ""
               },
               {
-                "label": "work",
-                "selected": false,
-                "value": "work"
-              },
-              {
-                "label": "home",
-                "selected": false,
-                "value": "home"
-              },
-              {
-                "label": "main",
-                "selected": false,
-                "value": "main"
-              },
-              {
-                "label": "fax",
-                "selected": false,
-                "value": "fax"
-              },
-              {
-                "label": "other",
-                "selected": false,
-                "value": "other"
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Number",
+                "name": "tel.{n}",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
               }
             ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "email",
-            "label": "Email · work",
-            "name": "email.0",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "a.kovaleva@example.org"
-          },
+            "value": "tel"
+          }
+        ]
+      },
+      {
+        "legend": "Email addresses",
+        "rows": [
           {
             "error": "",
             "extra": null,
             "hint": "",
             "kind": "select",
-            "label": "Email label",
+            "label": "Label",
             "name": "email.0.type",
             "options": [
               {
@@ -342,41 +366,72 @@
             "extra": null,
             "hint": "",
             "kind": "email",
-            "label": "Add email",
-            "name": "email.new",
+            "label": "Address",
+            "name": "email.0",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "a.kovaleva@example.org"
           },
           {
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "select",
-            "label": "Email label",
-            "name": "email.new.type",
-            "options": [
-              {
-                "label": "work",
-                "selected": false,
-                "value": "work"
-              },
-              {
-                "label": "home",
-                "selected": false,
-                "value": "home"
-              },
-              {
-                "label": "other",
-                "selected": false,
-                "value": "other"
-              }
-            ],
+            "kind": "add",
+            "label": "Add email",
+            "name": "add",
+            "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
-          },
+            "template": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "select",
+                "label": "Label",
+                "name": "email.{n}.type",
+                "options": [
+                  {
+                    "label": "work",
+                    "selected": false,
+                    "value": "work"
+                  },
+                  {
+                    "label": "home",
+                    "selected": false,
+                    "value": "home"
+                  },
+                  {
+                    "label": "other",
+                    "selected": false,
+                    "value": "other"
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "email",
+                "label": "Address",
+                "name": "email.{n}",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              }
+            ],
+            "value": "email"
+          }
+        ]
+      },
+      {
+        "legend": "Other",
+        "rows": [
           {
             "error": "",
             "extra": null,
@@ -404,84 +459,81 @@
         ]
       },
       {
-        "legend": "Addresses",
-        "rows": [
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Add an address · Street",
-            "name": "adr.new.street",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "City",
-            "name": "adr.new.city",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Region",
-            "name": "adr.new.region",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Postcode",
-            "name": "adr.new.code",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Country",
-            "name": "adr.new.country",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          }
-        ]
-      },
-      {
         "legend": "Show 1 empty field",
         "rows": [
           {
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "text",
-            "label": "Nickname",
-            "name": "nickname",
+            "kind": "add",
+            "label": "Add address",
+            "name": "add",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "template": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Street",
+                "name": "adr.{n}.street",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "City",
+                "name": "adr.{n}.city",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Region",
+                "name": "adr.{n}.region",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Postcode",
+                "name": "adr.{n}.code",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "text",
+                "label": "Country",
+                "name": "adr.{n}.country",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": ""
+              }
+            ],
+            "value": "adr"
           }
         ]
       }

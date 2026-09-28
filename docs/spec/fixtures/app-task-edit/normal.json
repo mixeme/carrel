@@ -303,50 +303,64 @@
             "error": "",
             "extra": null,
             "hint": "",
-            "kind": "select",
-            "label": "First",
-            "name": "reminder.new",
-            "options": [
+            "kind": "add",
+            "label": "Add reminder",
+            "name": "add",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "template": [
               {
-                "label": "At the time",
-                "selected": false,
-                "value": "PT0S"
-              },
-              {
-                "label": "5 minutes before",
-                "selected": false,
-                "value": "-PT5M"
-              },
-              {
-                "label": "10 minutes before",
-                "selected": false,
-                "value": "-PT10M"
-              },
-              {
-                "label": "30 minutes before",
-                "selected": false,
-                "value": "-PT30M"
-              },
-              {
-                "label": "1 hour before",
-                "selected": false,
-                "value": "-PT1H"
-              },
-              {
-                "label": "1 day before",
-                "selected": false,
-                "value": "-P1D"
-              },
-              {
-                "label": "No reminder",
-                "selected": true,
-                "separator": true,
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "select",
+                "label": "First",
+                "name": "reminder.{n}",
+                "options": [
+                  {
+                    "label": "At the time",
+                    "selected": false,
+                    "value": "PT0S"
+                  },
+                  {
+                    "label": "5 minutes before",
+                    "selected": false,
+                    "value": "-PT5M"
+                  },
+                  {
+                    "label": "10 minutes before",
+                    "selected": false,
+                    "value": "-PT10M"
+                  },
+                  {
+                    "label": "30 minutes before",
+                    "selected": false,
+                    "value": "-PT30M"
+                  },
+                  {
+                    "label": "1 hour before",
+                    "selected": false,
+                    "value": "-PT1H"
+                  },
+                  {
+                    "label": "1 day before",
+                    "selected": false,
+                    "value": "-P1D"
+                  },
+                  {
+                    "label": "No reminder",
+                    "selected": true,
+                    "separator": true,
+                    "value": ""
+                  }
+                ],
+                "readOnly": false,
+                "required": false,
                 "value": ""
               }
             ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
+            "value": "reminder"
           }
         ]
       },

@@ -74,7 +74,7 @@ func TestEventStatusAndCategories(t *testing.T) {
 }
 
 // review Р-10, "Пояс события": the zone the event was sent in is shown as
-// such ("as sent") and kept by every save that does not change it. Another
+// such (under «As sent», s-agenda-8) and kept by every save that does not change it. Another
 // zone rewrites DTSTART and DTEND at the same instants in that zone and
 // brings its VTIMEZONE; UTC writes Z and no TZID. The form's own times stay
 // in the instance zone (C-10).
@@ -97,7 +97,7 @@ func TestEventTimeZone(t *testing.T) {
 	page := decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess)))
 	zone := rowNamed(t, page.Form, "tz")
 	if zone.Value != "Europe/Moscow" || len(zone.Options) < 3 || zone.Options[0].Value != "Europe/Moscow" ||
-		zone.Options[0].Label != "Europe/Moscow · as sent" || !zone.Options[0].Selected {
+		zone.Options[0].Label != "Europe/Moscow" || zone.Options[0].Group != "As sent" || !zone.Options[0].Selected {
 		t.Fatalf("zone row = %+v", zone)
 	}
 	if form := formFields(page.Form); form.Get("start.time") != "07:00" {

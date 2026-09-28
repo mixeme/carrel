@@ -158,6 +158,11 @@ const (
 	// token, the version a form was read at, the step it stands for. It is
 	// never shown and has no label.
 	InputHidden InputKind = "hidden"
+	// InputAdd is a button that adds a row to a repeating field: «Add
+	// phone» (s-contacts-3), «Add reminder» (s-agenda-3). Template is the
+	// row it adds; without scripts it posts the form with Name=Value, and
+	// the form comes back with one more row, nothing written.
+	InputAdd InputKind = "add"
 )
 
 type DeviceTab string

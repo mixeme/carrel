@@ -225,7 +225,7 @@ func TestSeveralReplacedGoToTheDefaultAddress(t *testing.T) {
 	resp := s.save(t, func(f url.Values) {
 		f.Set("email.0", "ada@new.example")
 		f.Set("email.1", "")
-		f.Set("email.new", "ada@second.example")
+		f.Set("email.2", "ada@second.example")
 	})
 	sheet := decode[view.RewriteSheet](t, s.h.do(get(resp.Header.Get("Location"), s.sess)))
 	var pairs []string

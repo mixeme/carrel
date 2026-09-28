@@ -74,7 +74,7 @@ func TestTaskFormIsTheFramesRubrics(t *testing.T) {
 	// What the frame does not draw and the owner kept (to-typecase task 13):
 	// the start time, the all-day boxes, Done and the reminders; and the UID
 	// typed by hand under Related to.
-	kept := []string{"When / Start time", "When / All day", "Progress / Done", "Reminders / First", "Other / Or enter a UID by hand"}
+	kept := []string{"When / Start time", "When / All day", "Progress / Done", "Reminders / Add reminder", "Other / Or enter a UID by hand"}
 	if got, want := serverForm(page.Form, kept...), frameForm(t, "s-tasks-3"); !equalStrings(got, want) {
 		t.Errorf("task form =\n%q,\nwant (s-tasks-3)\n%q", got, want)
 	}
