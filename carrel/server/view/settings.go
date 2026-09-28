@@ -39,12 +39,13 @@ type FieldError struct {
 
 type AccountPage struct {
 	Shell
-	Profile  Form         `json:"profile"` // логин, отображаемое имя, адрес и его подтверждение
-	Mail     Form         `json:"mail"`    // обратный адрес и что уйдёт в письме
-	Escrow   EscrowStatus `json:"escrow"`
-	Sessions []SessionRow `json:"sessions"`
-	Actions  []Action     `json:"actions"`
-	Danger   []Action     `json:"danger"`
+	Profile    Form         `json:"profile"` // логин, отображаемое имя, адрес и его подтверждение
+	Mail       Form         `json:"mail"`    // обратный адрес и что уйдёт в письме
+	Escrow     EscrowStatus `json:"escrow"`
+	Sessions   []SessionRow `json:"sessions"`
+	Actions    []Action     `json:"actions"`
+	Danger     []Action     `json:"danger"`
+	DangerNote Text         `json:"dangerNote"` // строка у Delete account: что удаляется и что остаётся
 }
 type SessionRow struct {
 	Agent    Text   `json:"agent"`
@@ -140,6 +141,7 @@ type DevicesPage struct {
 	Accounts []DeviceAccount `json:"accounts"`
 	Warning  Notice          `json:"warning"` // что содержит профиль и куда он попадает
 	Actions  []Action        `json:"actions"`
+	Note     Text            `json:"note"` // строка над Generate profile: как его выдадут; пусто вне Apple
 }
 type DeviceAccount struct {
 	Title    Text        `json:"title"`
@@ -177,9 +179,12 @@ type ProxyDevice struct {
 
 type BackupPage struct {
 	Shell
-	Jobs    []BackupJob  `json:"jobs"`
-	Add     Form         `json:"add"`
-	Restore RestoreBlock `json:"restore"`
+	Subtitle   Text         `json:"subtitle"` // на странице задания: «Job · last copy 2 days ago»; пусто на списке
+	Jobs       []BackupJob  `json:"jobs"`
+	Add        Form         `json:"add"`        // новое задание; на странице задания (s-backup-2) — оно само
+	Delete     *Action      `json:"delete"`     // внизу страницы задания; nil — на списке и у нового
+	DeleteNote Text         `json:"deleteNote"` // строка у удаления: копии остаются, удаляется расписание
+	Restore    RestoreBlock `json:"restore"`
 }
 type BackupJob struct {
 	Name        Text         `json:"name"`
@@ -191,12 +196,13 @@ type BackupJob struct {
 	LastState   OpState      `json:"lastState"`
 	Trigger     TriggerBlock `json:"trigger"`
 	Runs        []BackupRun  `json:"runs"`
-	Actions     []Action     `json:"actions"`
+	Actions     []Action     `json:"actions"` // Run · Edit (s-backup-1)
 }
 type TriggerBlock struct {
 	Command  Text        `json:"command"` // готовая строка или скрипт, собранный под назначение
 	Password SecretField `json:"password"`
 	Note     Text        `json:"note"`
+	Off      *Action     `json:"off"` // выключить внешний запуск; nil — он не включён
 }
 type BackupRun struct {
 	ID       Text    `json:"id"`
@@ -229,14 +235,20 @@ type AdminUsersPage struct {
 }
 type AdminUserRow struct {
 	Login     Text       `json:"login"`
-	Role      Text       `json:"role"`
+	Role      Text       `json:"role"` // «User», «Administrator» — слова списка s-admin-8
 	Created   When       `json:"created"`
 	LastLogin When       `json:"lastLogin"`
 	Accounts  int        `json:"accounts"` // число, не сами подключения
 	Sessions  int        `json:"sessions"`
 	Disabled  bool       `json:"disabled"`
 	Escrowed  bool       `json:"escrowed"`
-	Menu      []MenuItem `json:"menu"`
+	Menu      []MenuItem `json:"menu"` // только «⋯» (s-admin-12)
+}
+
+// UserRoleSheet — «Set role» строки пользователя: список ролей s-admin-8.
+type UserRoleSheet struct {
+	Login Text `json:"login"`
+	Form  Form `json:"form"` // role: User, Administrator; Save · Cancel
 }
 
 type AdminInvitesPage struct {
@@ -245,12 +257,15 @@ type AdminInvitesPage struct {
 	Add  Form        `json:"add"`
 }
 type InviteRow struct {
-	Login   Text     `json:"login"`
-	Address Text     `json:"address"`
-	Link    Text     `json:"link"` // видна всегда, независимо от отправки
-	Sent    Text     `json:"sent"` // «отправлено», «ошибка», «SMTP не настроен»
-	Expires When     `json:"expires"`
-	Actions []Action `json:"actions"`
+	Login    Text       `json:"login"`
+	Address  Text       `json:"address"`
+	Link     Text       `json:"link"`     // видна всегда, независимо от отправки
+	Delivery Text       `json:"delivery"` // «link» или «email»: как приглашение передано
+	Status   Text       `json:"status"`   // «pending»: в списке только действующие
+	Sent     Text       `json:"sent"`     // «sent», «failed — 550 mailbox unavailable» (ответ реле), «SMTP not configured»
+	Expires  When       `json:"expires"`
+	Actions  []Action   `json:"actions"` // Resend (у приглашения письмом) · Copy link
+	Menu     []MenuItem `json:"menu"`    // «⋯»: Extend, черта, Revoke
 }
 
 type AdminSettingsPage struct {

@@ -466,6 +466,7 @@ Combined list, Combined notebook. Вью-модель у него та же, ч�
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/admin/` | GET, POST | админ | страница | `AdminUsersPage` |
+| `/admin/role` | GET | админ | лист | `UserRoleSheet` — «Set role»; сохраняет `POST /admin/?action=role` |
 | `/admin/invites` | GET, POST | админ | страница | `AdminInvitesPage` |
 | `/admin/settings` | GET, POST | админ | страница | `AdminSettingsPage` |
 | `/admin/settings/mail-test` | POST | админ | фрагмент | `MailTestResult` |
@@ -534,6 +535,14 @@ type Action struct {
     On      bool    // включено: открытый раздел рейла, выбранный сегмент, включённый флажок ленты
     Reason  Text    // почему выключено; пусто, если включено
 }
+// Недоступное действие показывается выключенным и с причиной; доступное
+// причины не несёт — пояснение у работающей кнопки — строка, которую рисует
+// кадр (DeleteNote, DangerNote, Note), а не Reason (записки 11 и 17 Typecase,
+// решение владельца). Выключенного без причины не бывает. Сегмент, вкладка
+// или окно, показанные сейчас, — On и Enabled: показать их ещё раз безвредно,
+// и «показано сейчас» — не причина выключать. Счёт в подписи сегмента — там,
+// где его пишет кадр, через пробел: «Open 12», «All 24»; кадр без счёта —
+// подпись без него. Сторож — view.TestFixtureActionsSayWhyTheyAreOff.
 
 type MenuItem struct {
     Action
@@ -828,7 +837,7 @@ type AgendaRow struct {
 
 type TasksPage struct {
     Shell
-    Bar   ListBar // сегменты Open / Done / All со счётом
+    Bar   ListBar // сегменты «Open 12», «Done 48», «All 60» (s-tasks-1)
     Groups []TaskGroup
     Poll  *PollBar
 }
@@ -913,7 +922,7 @@ type ContactTimelinePage struct {
     Name    Text
     Card    Details // карточка стоит в панели как контекст экрана, а не как выделение
     Bar     ListBar
-    Range   Range   // «Widen the range» — в Presets
+    Range   Range   // окно на полосе: From, To и Show в Form; Presets пуст — «Widen the range» отвечают им
     Poll    PollBar // хронология — поиск по одному человеку (S-15.4)
     Groups  []TimelineGroup
     Note    Text    // «Nothing was looked for before …»
@@ -1416,7 +1425,7 @@ type PublishedRow struct {
     Expires  Text
     LastSeen When
     Opens    int      // сколько раз открыли: так видно, что ссылка ушла дальше, чем думали
-    Actions  []Action // Revoke
+    Actions  []Action // Copy · Send (с почтой) · Revoke (s-publish-1)
 }
 ```
 
@@ -1466,6 +1475,7 @@ type AccountPage struct {
     Sessions  []SessionRow
     Actions   []Action
     Danger    []Action
+    DangerNote Text // строка у Delete account: что удаляется и что остаётся (account-1)
 }
 type SessionRow struct {
     Agent    Text
@@ -1562,6 +1572,7 @@ type DevicesPage struct {
     Accounts []DeviceAccount
     Warning  Notice // что содержит профиль и куда он попадает
     Actions  []Action
+    Note     Text   // строка над Generate profile: как его выдадут (s-plan-1, s-plan-3); пусто вне Apple
 }
 // Учётные данные — у своего аккаунта, на этой же странице: за паролем на
 // «Connections» не уходят. Пароль показан внутри общего окна разблокировки
@@ -1603,9 +1614,12 @@ type ProxyDevice struct {
 
 type BackupPage struct {
     Shell
-    Jobs    []BackupJob
-    Add     Form
-    Restore RestoreBlock
+    Subtitle   Text    // на странице задания: «Job · last copy 2 days ago» (s-backup-2), Title — имя задания; пусто на списке
+    Jobs       []BackupJob
+    Add        Form    // новое задание; на странице задания (?job=, s-backup-2) — оно само: Save · Cancel · Run now
+    Delete     *Action // внизу страницы задания; nil — на списке и у нового
+    DeleteNote Text    // строка у удаления: копии остаются, удаляется расписание
+    Restore    RestoreBlock
 }
 type BackupJob struct {
     Name        Text
@@ -1617,12 +1631,13 @@ type BackupJob struct {
     LastState   OpState
     Trigger     TriggerBlock
     Runs        []BackupRun
-    Actions     []Action
+    Actions     []Action // Run · Edit (s-backup-1); Run задания «Download» — поток архива
 }
 type TriggerBlock struct {
     Command  Text // готовая строка или скрипт, собранный под назначение
     Password SecretField
     Note     Text
+    Off      *Action // выключить внешний запуск; nil — он не включён
 }
 type BackupRun struct { ID Text; Started When; State OpState; Size Size; Download *Action }
 type RestoreBlock struct {
@@ -1649,14 +1664,19 @@ type AdminUsersPage struct {
 }
 type AdminUserRow struct {
     Login     Text
-    Role      Text
+    Role      Text // «User», «Administrator» — слова списка s-admin-8
     Created   When
     LastLogin When
     Accounts  int // число, не сами подключения
     Sessions  int
     Disabled  bool
     Escrowed  bool
-    Menu      []MenuItem
+    Menu      []MenuItem // только «⋯» (s-admin-12): Set role, Kill sessions, Disable | Enable, Reset password, черта, Delete
+}
+// UserRoleSheet — «Set role» строки пользователя: список ролей s-admin-8.
+type UserRoleSheet struct {
+    Login Text
+    Form  Form // role: User, Administrator; Save · Cancel
 }
 
 type AdminInvitesPage struct { Shell; Rows []InviteRow; Add Form }
@@ -1664,9 +1684,12 @@ type InviteRow struct {
     Login    Text
     Address  Text
     Link     Text // видна всегда, независимо от отправки
-    Sent     Text // «отправлено», «ошибка», «SMTP не настроен»
+    Delivery Text // «link» или «email»: как приглашение передано (s-admin-1)
+    Status   Text // «pending»: в списке только действующие
+    Sent     Text // «sent», «failed — 550 mailbox unavailable» (ответ реле), «SMTP not configured»
     Expires  When
-    Actions  []Action
+    Actions  []Action   // Resend (у приглашения письмом) · Copy link (s-admin-1)
+    Menu     []MenuItem // «⋯»: Extend, черта, Revoke (s-admin-11)
 }
 
 type AdminSettingsPage struct {

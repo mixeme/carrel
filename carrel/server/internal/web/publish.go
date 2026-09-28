@@ -349,10 +349,12 @@ func dayRange(from, to string) string {
 	return f.Format("2") + "–" + t.Format("2 January")
 }
 
-// getFilesPublished lists the person's live links: what each opens, until
-// when, when it was last opened, the link itself from the blob with Copy
-// and, with mail on, Send this link — and Revoke. A link made before links
-// were kept has no link to show.
+// getFilesPublished lists the person's live links (s-publish-1): what each
+// opens, when it was made and until when, when it was last opened — the
+// days absolute, a link nobody opened says so in words — and on the row
+// Copy, Send (with mail on, 7.18 of the mockup) and Revoke. A link made
+// before links were kept has no link to show: Copy and Send are there,
+// switched off, with the reason.
 func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -363,6 +365,7 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 	page := view.PublishedLinksPage{Shell: s.withRail(s.buildShell(sess, "Published links"), s.settingsRail(sess, "/app/files/published"))}
 	blob := s.catalogOf(sess)
 	tf, now := s.timeFor(sess), s.now()
+	mail := s.canSendLetters(sess)
 	for _, l := range s.users.PublishedLinks(sess.AccountID()) {
 		host := l.Target.AccountID
 		if conn, ok := blob.Connection(l.Target.AccountID); ok {
@@ -374,27 +377,31 @@ func (s *Server) getFilesPublished(w http.ResponseWriter, r *http.Request) {
 		}
 		row := view.PublishedRow{
 			Title: text(publishedTitle(l.Target)), Kind: view.Kind(l.Target.Kind), Stamp: stamp(host, label),
-			Created: tf.formatWhen(l.CreatedAt, true, now), Expires: "No expiry",
-			Actions: []view.Action{{ID: "publish.revoke", Label: "Revoke", Method: "POST", Danger: true, Enabled: true,
-				Href: s.postQuery("/app/publish", url.Values{"op": {"revoke"}, "id": {l.ID}})}},
+			Created: view.When(tf.date(l.CreatedAt)), Expires: "No expiry", LastSeen: "never opened", Opens: l.Opens,
 		}
 		if l.ExpiresAt != nil {
 			row.Expires = text(tf.date(*l.ExpiresAt))
 		}
+		if l.LastSeen != nil {
+			row.LastSeen = tf.formatWhen(*l.LastSeen, false, now)
+		}
+		copyLink := view.Action{ID: "publish.copy", Label: "Copy", Method: "GET", Enabled: true}
+		send := view.Action{ID: "publish.mail", Label: "Send", Method: "POST", Enabled: true,
+			Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {l.ID}})}
 		if token := blob.Links[l.ID]; token != "" {
 			link := s.route("/p/" + token)
-			row.Link = text(link)
-			more := []view.Action{{ID: "publish.copy", Label: "Copy", Href: link, Method: "GET", Enabled: true}}
-			if s.canSendLetters(sess) {
-				more = append(more, view.Action{ID: "publish.mail", Label: "Send this link", Method: "POST", Enabled: true,
-					Href: s.postQuery("/app/mail/compose", url.Values{"op": {"link"}, "id": {l.ID}})})
-			}
-			row.Actions = append(more, row.Actions...)
+			row.Link, copyLink.Href = text(link), link
+		} else {
+			const kept = "This link was made before links were kept: it cannot be shown again. Revoke it and publish anew."
+			copyLink.Enabled, copyLink.Reason = false, kept
+			send.Enabled, send.Href, send.Reason = false, "", kept
 		}
-		if l.LastSeen != nil {
-			row.LastSeen = tf.formatWhen(*l.LastSeen, true, now)
+		row.Actions = append(row.Actions, copyLink)
+		if mail {
+			row.Actions = append(row.Actions, send)
 		}
-		row.Opens = l.Opens
+		row.Actions = append(row.Actions, view.Action{ID: "publish.revoke", Label: "Revoke", Method: "POST", Danger: true, Enabled: true,
+			Href: s.postQuery("/app/publish", url.Values{"op": {"revoke"}, "id": {l.ID}})})
 		page.Rows = append(page.Rows, row)
 	}
 	s.writePage(w, r, http.StatusOK, page)

@@ -140,6 +140,7 @@ type Users interface {
 	RevokeInvite(actorID, inviteID string) error
 	ExtendInvite(actorID, inviteID string) error
 	DisableUser(actorID, targetID string) error
+	EnableUser(actorID, targetID string) error
 	DeleteUser(actorID, targetID, loginConfirm string) error
 	SetUserRole(actorID, targetID string, role store.Role) error
 	EndUserSessions(actorID, targetID string) error
@@ -149,7 +150,7 @@ type Users interface {
 	// S-26: the relay and the letters' bookkeeping.
 	SMTP() store.SMTPSettings
 	SetSMTP(actorID string, in store.SMTPSettings) error
-	MarkInviteMailed(secret string, sent bool) error
+	MarkInviteMailed(secret string, sent bool, reply string) error
 	ConfirmedAddress(loginOrEmail string) string
 	SetDisplayName(userID, name string) error
 	RequestEmail(userID, email string) (token string, err error)

@@ -64,6 +64,15 @@ func (s *Server) openTrigger(w http.ResponseWriter, r *http.Request) (triggerJob
 	return triggerJob{userID: userID, blob: blob, job: job}, true
 }
 
+// jobIsOff answers a start of a job whose «Job is on» is unticked: it runs
+// from the screen only (s-backup-2).
+func jobIsOff(w http.ResponseWriter, t triggerJob) bool {
+	if t.job.Off {
+		plain(w, http.StatusConflict, "this job is off: tick «Job is on» on its page")
+	}
+	return t.job.Off
+}
+
 func plain(w http.ResponseWriter, code int, body string) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
@@ -76,6 +85,9 @@ func plain(w http.ResponseWriter, code int, body string) {
 func (s *Server) postBackupRun(w http.ResponseWriter, r *http.Request) {
 	t, ok := s.openTrigger(w, r)
 	if !ok {
+		return
+	}
+	if jobIsOff(w, t) {
 		return
 	}
 	if t.job.Mode == sealed.BackupToDownload {
@@ -177,6 +189,9 @@ func (s *Server) getBackupDownload(w http.ResponseWriter, r *http.Request) {
 func (s *Server) getBackupDownloadLegacy(w http.ResponseWriter, r *http.Request) {
 	t, ok := s.openTrigger(w, r)
 	if !ok {
+		return
+	}
+	if jobIsOff(w, t) {
 		return
 	}
 	if t.job.Mode == sealed.BackupToWebDAV {

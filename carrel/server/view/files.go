@@ -98,5 +98,5 @@ type PublishedRow struct {
 	Expires  Text     `json:"expires"`
 	LastSeen When     `json:"lastSeen"`
 	Opens    int      `json:"opens"`
-	Actions  []Action `json:"actions"` // Revoke
+	Actions  []Action `json:"actions"` // Copy · Send (с почтой) · Revoke (s-publish-1)
 }

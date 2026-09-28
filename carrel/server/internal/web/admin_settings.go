@@ -238,6 +238,9 @@ func (s *Server) adminSettingsPage(sess *session.Session, flash settingsFlash) v
 		}}},
 		Actions: []view.Action{{ID: "admin.settings.mailtest", Label: "Send test", Method: "POST", Enabled: cur.Configured()}},
 	}
+	if !cur.Configured() {
+		page.Mail.Actions[0].Reason = "Set the relay up and save it first."
+	}
 
 	people := s.mailPolicy().People
 	if flash.set != nil && flash.set.PeopleMail != nil {

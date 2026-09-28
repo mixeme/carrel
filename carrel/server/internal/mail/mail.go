@@ -21,6 +21,7 @@ import (
 	"net"
 	"net/mail"
 	"net/smtp"
+	"net/textproto"
 	"strconv"
 	"strings"
 	"time"
@@ -242,6 +243,21 @@ func Send(ctx context.Context, relay Relay, to []string, data []byte) (string, e
 		host: relay.Host, port: relay.Port, security: relay.Security,
 		username: relay.Username, password: relay.Password, envelope: relay.From,
 	}, to, data)
+}
+
+// Reply is what the relay answered to a letter that did not go, as the
+// relay wrote it — «550 mailbox unavailable» — and, when no reply came, the
+// error itself. net/textproto quotes the text of a reply; a screen that
+// names a failure by its reply (s-admin-1) shows it unquoted, on one line.
+func Reply(err error) string {
+	if err == nil {
+		return ""
+	}
+	var tp *textproto.Error
+	if errors.As(err, &tp) {
+		return strings.Join(strings.Fields(fmt.Sprintf("%03d %s", tp.Code, tp.Msg)), " ")
+	}
+	return strings.Join(strings.Fields(err.Error()), " ")
 }
 
 // submission is one outgoing server and the envelope sender a letter goes

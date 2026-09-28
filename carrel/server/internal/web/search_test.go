@@ -193,9 +193,11 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 	if !strings.Contains(string(page.Note), "by name") {
 		t.Errorf("note = %q", page.Note)
 	}
-	if page.Bar.Total == nil || *page.Bar.Total != 7 || len(page.Bar.Segments) != 6 || page.Bar.Segments[5].Label != "Files · 2" {
+	if page.Bar.Total == nil || *page.Bar.Total != 7 || len(page.Bar.Segments) != 6 {
 		t.Errorf("bar = %+v", page.Bar)
 	}
+	// s-find-1 writes the kinds without counts.
+	sameSegments(t, "search", page.Bar.Segments, "s-find-1", 0)
 	if h := page.Top.Search.History; len(h) != 1 || h[0].Query != "Ada" || h[0].Outcome != "7 found" || h[0].Href != "/app/search?q=Ada" || h[0].When == "" {
 		t.Errorf("history = %+v", h)
 	}

@@ -31,7 +31,7 @@ type ContactTimelinePage struct {
 	Name    Text            `json:"name"`
 	Card    Details         `json:"card"` // карточка стоит в панели как контекст экрана, а не как выделение
 	Bar     ListBar         `json:"bar"`
-	Range   Range           `json:"range"` // «Widen the range» — в Presets
+	Range   Range           `json:"range"` // окно на полосе: From, To и Show в Form; «Widen the range» отвечают им
 	Poll    PollBar         `json:"poll"`  // хронология — поиск по одному человеку (S-15.4)
 	Groups  []TimelineGroup `json:"groups"`
 	Note    Text            `json:"note"` // «Nothing was looked for before …»

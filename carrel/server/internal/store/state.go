@@ -175,6 +175,10 @@ type Invite struct {
 	// Mailed is how the last letter went: "sent", "failed", or empty when
 	// none was tried (no address, or no relay).
 	Mailed string `json:"mailed,omitempty"`
+	// MailReply is what the relay answered to a letter that did not go,
+	// «550 mailbox unavailable» (s-admin-1 names a failure by it); empty
+	// once a letter went.
+	MailReply string `json:"mailReply,omitempty"`
 }
 
 // ProxyDevice is one davloom device: its wrapper and what it may see.

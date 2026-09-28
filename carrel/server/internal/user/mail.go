@@ -77,17 +77,18 @@ func (s *Service) SetSMTP(actorID string, in store.SMTPSettings) error {
 	})
 }
 
-// MarkInviteMailed records how the invitation's letter went.
-func (s *Service) MarkInviteMailed(secret string, sent bool) error {
+// MarkInviteMailed records how the invitation's letter went and, when it did
+// not, what the relay answered.
+func (s *Service) MarkInviteMailed(secret string, sent bool, reply string) error {
 	if secret == "" {
 		return errors.New("user: no invitation")
 	}
 	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		for i := range st.Invites {
 			if st.Invites[i].Secret == secret {
-				st.Invites[i].Mailed = "failed"
+				st.Invites[i].Mailed, st.Invites[i].MailReply = "failed", reply
 				if sent {
-					st.Invites[i].Mailed = "sent"
+					st.Invites[i].Mailed, st.Invites[i].MailReply = "sent", ""
 				}
 			}
 		}

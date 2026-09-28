@@ -460,6 +460,21 @@ func (s *Service) DisableUser(actorID, targetID string) error {
 	})
 }
 
+// EnableUser lets a disabled account sign in again (S-10.6, s-admin-12):
+// its data was kept, so nothing else changes.
+func (s *Service) EnableUser(actorID, targetID string) error {
+	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByID(targetID)
+		if u == nil {
+			return nil, ErrNotFound
+		}
+		u.Disabled = false
+		return []store.AuditEntry{{
+			When: s.now(), Who: actorLogin(st, actorID), What: "user.enable", Whom: u.Login,
+		}}, nil
+	})
+}
+
 // actorLogin names the acting account in the journal. An unknown actor is
 // recorded as "admin" so the entry still says who could have done it.
 func actorLogin(st *store.State, actorID string) string {

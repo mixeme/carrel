@@ -151,6 +151,6 @@ func (s *Server) sendInviteMail(r *http.Request, login, email, token string) boo
 		"The link works until %s and only once. If you did not expect this letter, do nothing.",
 		s.users.Settings().InstanceName(), s.publicOrigin(r), login, s.absURL(r, "/invite/"+token), time.Now().Add(s.users.InviteTTL()).UTC().Format("2006-01-02 15:04 UTC")))
 	_, err := s.sendSystemMail(r.Context(), email, "An invitation to Carrel", body)
-	_ = s.users.MarkInviteMailed(token, err == nil)
+	_ = s.users.MarkInviteMailed(token, err == nil, cmail.Reply(err))
 	return err == nil
 }

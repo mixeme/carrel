@@ -114,10 +114,10 @@
           "method": "POST"
         }
       ],
-      "created": "6 hours ago",
+      "created": "10 August 2026",
       "expires": "No expiry",
       "kind": "file",
-      "lastSeen": "",
+      "lastSeen": "never opened",
       "link": "/p/link-smeta-token",
       "opens": 0,
       "stamp": "sftpgo · vps · Documents",
@@ -141,10 +141,10 @@
           "method": "POST"
         }
       ],
-      "created": "21 hours ago",
+      "created": "9 August 2026",
       "expires": "8 September 2026",
       "kind": "event",
-      "lastSeen": "8 hours ago",
+      "lastSeen": "10 August 2026, 17:04",
       "link": "/p/link-lichnyj-token",
       "opens": 12,
       "stamp": "nextcloud · Личный",

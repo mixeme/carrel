@@ -432,14 +432,10 @@ func (s *Server) photoPreviewPage(c *collectionCtx, uid string, d photoDraft, no
 		Rotate:  d.Crop.Rotate,
 	}
 	for _, deg := range []int{0, 90, 180, 270} {
-		a := view.Action{
-			ID: "photo.rotate." + strconv.Itoa(deg), Label: text(strconv.Itoa(deg) + "°"), Method: "POST", Enabled: d.Crop.Rotate != deg,
+		page.Actions = append(page.Actions, view.Action{
+			ID: "photo.rotate." + strconv.Itoa(deg), Label: text(strconv.Itoa(deg) + "°"), Method: "POST", Enabled: true, On: d.Crop.Rotate == deg,
 			Href: s.postQuery(here, url.Values{"op": {"frame"}, "rotate": {strconv.Itoa(deg)}}),
-		}
-		if !a.Enabled {
-			a.Reason = "Shown now."
-		}
-		page.Actions = append(page.Actions, a)
+		})
 	}
 	page.Actions = append(page.Actions,
 		view.Action{ID: "photo.save", Label: "Save photo", Href: s.postQuery(here, url.Values{"op": {"save"}}), Method: "POST", Enabled: true},

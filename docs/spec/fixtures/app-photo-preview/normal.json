@@ -1,12 +1,12 @@
 {
   "actions": [
     {
-      "enabled": false,
+      "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/photo-preview?op=frame\u0026rotate=0",
       "id": "photo.rotate.0",
       "label": "0°",
       "method": "POST",
-      "reason": "Shown now."
+      "on": true
     },
     {
       "enabled": true,

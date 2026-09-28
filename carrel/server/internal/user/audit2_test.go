@@ -575,3 +575,44 @@ func putConnection(t *testing.T, f *fixture, login, password, connID string) [32
 	}
 	return key
 }
+
+// S-10.6, s-admin-12: a disabled account is enabled again from its row; the
+// person signs in with the password they had, and the journal says who let
+// them back.
+func TestEnableUserLetsThemBackIn(t *testing.T) {
+	f := newFixture(t)
+	adminID := f.setupAdmin(t)
+	secret, err := f.svc.CreateInvite(adminID, "bob", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.svc.CompleteInvite(context.Background(), secret, "bobpass123"); err != nil {
+		t.Fatal(err)
+	}
+	bobID := f.idOf(t, "bob")
+	if err := f.svc.DisableUser(adminID, bobID); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, _, ok := f.svc.Authenticate(context.Background(), "bob", "bobpass123"); ok {
+		t.Fatal("a disabled account signed in")
+	}
+	if err := f.svc.EnableUser(adminID, bobID); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, _, ok := f.svc.Authenticate(context.Background(), "bob", "bobpass123"); !ok {
+		t.Fatal("enabled, bob cannot sign in")
+	}
+	snap := f.st.Snapshot()
+	var last store.AuditEntry
+	for _, e := range snap.Audit {
+		if e.What == "user.enable" {
+			last = e
+		}
+	}
+	if last.Who != "admin" || last.Whom != "bob" {
+		t.Errorf("journal = %+v", snap.Audit)
+	}
+	if err := f.svc.EnableUser(adminID, "u-nobody"); err != ErrNotFound {
+		t.Errorf("unknown account: %v", err)
+	}
+}

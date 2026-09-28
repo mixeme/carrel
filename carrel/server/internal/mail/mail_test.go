@@ -113,6 +113,10 @@ func TestRelayRefusals(t *testing.T) {
 	r.Username, r.Password = "carrel", "pw"
 	if _, err := cmail.Send(context.Background(), r, []string{"nobody@example.org"}, data); err == nil {
 		t.Error("a refused mailbox is not an error")
+	} else if got := cmail.Reply(err); got != "550 no such mailbox" {
+		// s-admin-1 names a failed invitation by the relay's reply, as the
+		// relay wrote it: code and text, no quoting of Go's.
+		t.Errorf("reply = %q", got)
 	}
 	if _, err := cmail.Send(context.Background(), r, []string{"a@example.org"}, data); err != nil {
 		t.Errorf("with the password: %v", err)

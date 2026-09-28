@@ -815,9 +815,11 @@ func TestTasksAndNotes(t *testing.T) {
 		segments = append(segments, string(s.Label))
 	}
 	// The orders of the list stand beside the segments (review Р-12).
-	if strings.Join(segments, ",") != "Open · 1,Done · 1,All · 2,By due,By priority,Recently changed" {
+	if strings.Join(segments, ",") != "Open 1,Done 1,All 2,By due,By priority,Recently changed" {
 		t.Errorf("segments = %v", segments)
 	}
+	sameSegments(t, "tasks", segmentsOf(open.Bar.Segments, "tasks."), "s-tasks-1", 0)
+	sameSegments(t, "task orders", segmentsOf(open.Bar.Segments, "sort."), "s-tasks-1", 1)
 	done := decode[view.TasksPage](t, f.h.do(get(tasks+"?show=done", f.sess)))
 	if len(done.Groups) != 1 || !done.Groups[0].Rows[0].Done || done.Groups[0].Rows[0].Summary != "Old" {
 		t.Errorf("done tasks = %+v", done.Groups)

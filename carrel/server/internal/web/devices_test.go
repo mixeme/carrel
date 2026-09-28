@@ -71,8 +71,10 @@ func TestProfileNeedsTheUnlockWindow(t *testing.T) {
 	f, _ := deviceFixture(t)
 	p := devicesPage(t, f, "apple")
 	gen := deviceAction(t, p.Actions, "device.profile")
-	if gen.Method != "GET" || gen.Href != "/app/settings/unlock" || gen.Reason == "" {
-		t.Errorf("locked generate = %+v", gen)
+	// Why it asks is the line above the button (s-plan-3), not a reason
+	// of a button that works (C-6.2).
+	if gen.Method != "GET" || gen.Href != "/app/settings/unlock" || gen.Reason != "" || !strings.HasPrefix(string(p.Note), "Confirm your password first") {
+		t.Errorf("locked generate = %+v, note %q", gen, p.Note)
 	}
 	if p.Warning.Role != view.NoticeAlert || !strings.Contains(string(p.Warning.Title), "passwords") {
 		t.Errorf("warning = %+v", p.Warning)

@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/csv"
-	"fmt"
 	"mime"
 	"net/http"
 	"net/url"
@@ -44,6 +43,8 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 	switch action {
 	case "disable":
 		err = s.users.DisableUser(actorID, target)
+	case "enable":
+		err = s.users.EnableUser(actorID, target)
 	case "delete":
 		err = s.users.DeleteUser(actorID, target, r.FormValue("login"))
 	case "role":
@@ -138,69 +139,91 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 		if len(u.LoginHash) == 0 && u.Disabled {
 			continue
 		}
+		// The frame writes the role by its word and both days absolute
+		// (s-admin-2, C-10).
 		row := view.AdminUserRow{
 			Login:    text(u.Login),
-			Role:     text(string(u.Role)),
-			Created:  tf.formatWhen(u.CreatedAt, false, now),
+			Role:     roleLabels[u.Role],
+			Created:  view.When(tf.date(u.CreatedAt)),
 			Accounts: u.ConnCount,
 			Sessions: s.sessions.LiveCount(u.ID),
 			Disabled: u.Disabled,
 			Escrowed: store.UserDeposited(&u),
-			Menu:     s.adminUserMenu(sess, snap, &u),
+			Menu:     s.adminUserMenu(snap, &u),
 		}
 		if u.LastLogin != nil {
-			row.LastLogin = tf.formatWhen(*u.LastLogin, true, now)
+			row.LastLogin = tf.formatWhen(*u.LastLogin, false, now)
 		}
 		page.Rows = append(page.Rows, row)
 	}
 	return page
 }
 
-func (s *Server) adminUserMenu(sess *session.Session, snap store.State, u *store.User) []view.MenuItem {
+// roleLabels are the roles by the words of the list of s-admin-8.
+var roleLabels = map[store.Role]view.Text{store.RoleUser: "User", store.RoleAdmin: "Administrator"}
+
+// adminUserMenu is the «⋯» of a person's row (s-admin-12): nothing on the
+// row itself — the actions are equal, none is the main one. What cannot be
+// done to this person is there, off, with the reason (C-6.2). Reset
+// password stays last above the line until the head's «Reset a password»
+// has its person picker drawn (to-typecase task 16).
+func (s *Server) adminUserMenu(snap store.State, u *store.User) []view.MenuItem {
 	lastAdmin := u.Role == store.RoleAdmin && store.AdminCount(&snap) <= 1 && !u.Disabled
-	menu := []view.MenuItem{
-		{Action: view.Action{
-			ID: "admin.user.sessions", Label: "End sessions",
-			Href:   s.postQuery("/admin/", url.Values{"action": {"sessions"}, "target": {u.ID}}),
-			Method: "POST", Enabled: s.sessions.LiveCount(u.ID) > 0,
-		}},
+	op := func(action string) string {
+		return s.postQuery("/admin/", url.Values{"action": {action}, "target": {u.ID}})
 	}
-	if !u.Disabled {
-		menu = append(menu, view.MenuItem{Action: view.Action{
-			ID: "admin.user.disable", Label: "Disable",
-			Href:   s.postQuery("/admin/", url.Values{"action": {"disable"}, "target": {u.ID}}),
-			Method: "POST", Enabled: !lastAdmin, Reason: text("Cannot disable the last administrator."),
-		}})
+	off := func(a view.Action, when bool, reason view.Text) view.Action {
+		if when {
+			a.Enabled, a.Reason = false, reason
+		}
+		return a
 	}
-	if u.Role == store.RoleUser {
-		menu = append(menu, view.MenuItem{Action: view.Action{
-			ID: "admin.user.role", Label: "Make administrator",
-			Href:   s.postQuery("/admin/", url.Values{"action": {"role"}, "target": {u.ID}, "role": {"admin"}}),
-			Method: "POST", Enabled: true,
-		}})
-	} else if !lastAdmin {
-		menu = append(menu, view.MenuItem{Action: view.Action{
-			ID: "admin.user.role", Label: "Make user",
-			Href:   s.postQuery("/admin/", url.Values{"action": {"role"}, "target": {u.ID}, "role": {"user"}}),
-			Method: "POST", Enabled: true,
-		}})
+	role := off(view.Action{ID: "admin.user.role", Label: "Set role", Method: "GET", Enabled: true,
+		Href: s.postQuery("/admin/role", url.Values{"target": {u.ID}})},
+		lastAdmin, "The last administrator cannot become a user.")
+	sessions := off(view.Action{ID: "admin.user.sessions", Label: "Kill sessions", Href: op("sessions"), Method: "POST", Enabled: true},
+		s.sessions.LiveCount(u.ID) == 0, "No live sessions.")
+	toggle := off(view.Action{ID: "admin.user.disable", Label: "Disable", Href: op("disable"), Method: "POST", Enabled: true},
+		lastAdmin, "Cannot disable the last administrator.")
+	if u.Disabled {
+		toggle = view.Action{ID: "admin.user.enable", Label: "Enable", Href: op("enable"), Method: "POST", Enabled: true}
 	}
-	menu = append(menu,
-		view.MenuItem{Separator: true, Action: view.Action{
-			ID: "admin.user.reset", Label: "Reset password",
-			Href:   s.postQuery("/admin/", url.Values{"action": {"reset"}, "target": {u.ID}}),
-			Method: "POST", Enabled: !u.Disabled, Danger: true,
-			Reason: text("Destroys encrypted connections. Issues the same wipe link as /forgot."),
-		}},
-		view.MenuItem{Action: view.Action{
-			ID: "admin.user.delete", Label: "Delete",
-			Href:   s.postQuery("/admin/", url.Values{"action": {"delete"}, "target": {u.ID}}),
-			Method: "POST", Enabled: !lastAdmin, Danger: true,
-			Reason: text("Type the login to confirm. Cannot delete the last administrator."),
-		}},
-	)
-	_ = sess
-	return menu
+	reset := off(view.Action{ID: "admin.user.reset", Label: "Reset password", Href: op("reset"), Method: "POST", Danger: true, Enabled: true},
+		u.Disabled, "Enable the account first: a disabled account gets no reset.")
+	del := off(view.Action{ID: "admin.user.delete", Label: "Delete", Icon: "i-trash", Href: op("delete"), Method: "POST", Danger: true, Enabled: true},
+		lastAdmin, "Cannot delete the last administrator.")
+	return []view.MenuItem{{Action: role}, {Action: sessions}, {Action: toggle}, {Action: reset}, {Separator: true, Action: del}}
+}
+
+// getAdminUserRole is the sheet «Set role» opens: the roles of s-admin-8,
+// the person's own chosen. The last administrator has none to choose.
+func (s *Server) getAdminUserRole(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireAdmin(w, r)
+	if !ok {
+		return
+	}
+	snap := s.store.Snapshot()
+	u := snap.UserByID(r.URL.Query().Get("target"))
+	if u == nil || (len(u.LoginHash) == 0 && u.Disabled) {
+		s.notFound(w, r)
+		return
+	}
+	var opts []view.Option
+	for _, role := range []store.Role{store.RoleUser, store.RoleAdmin} {
+		opts = append(opts, view.Option{Value: string(role), Label: roleLabels[role], Selected: u.Role == role})
+	}
+	form := withSubmit(s.plainForm("/admin/?"+url.Values{"action": {"role"}, "target": {u.ID}}.Encode(), "POST",
+		csrfField(sess),
+		view.FormRow{Name: "role", Label: "Role", Kind: view.InputSelect, Options: opts, Required: true},
+	), "admin.user.role.save", "Save",
+		view.Action{ID: "admin.user.role.cancel", Label: "Cancel", Href: s.route("/admin/"), Method: "GET", Enabled: true})
+	sheet := view.UserRoleSheet{Login: text(u.Login), Form: form}
+	w.Header().Set("Cache-Control", "no-store")
+	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		return
+	}
+	s.writePage(w, r, http.StatusOK, sheet)
 }
 
 type adminInvitesFlash struct {
@@ -284,23 +307,42 @@ func (s *Server) buildAdminInvitesPage(sess *session.Session, flash adminInvites
 		row := view.InviteRow{
 			Login:   text(inv.Login),
 			Address: text(inv.Email),
-			Sent:    inviteSentStatus(inv, s.mailConfigured()),
-			Expires: tf.formatWhen(inv.ExpiresAt, false, now),
-			Actions: []view.Action{
-				{ID: "admin.invite.extend", Label: "Extend",
+			// Delivery and Status are columns of s-admin-1: how it was
+			// handed over, and pending — the list holds live ones only.
+			Delivery: "link",
+			Status:   "pending",
+			Sent:     inviteSentStatus(inv, s.mailConfigured()),
+			Expires:  tf.formatWhen(inv.ExpiresAt, false, now),
+			// The rare rest is under «⋯» (s-admin-11): Extend when the
+			// person did not make it in time, Revoke under the line.
+			Menu: []view.MenuItem{
+				{Action: view.Action{ID: "admin.invite.extend", Label: "Extend",
 					Href:   s.postQuery("/admin/invites", url.Values{"action": {"extend"}, "invite": {inv.ID}}),
-					Method: "POST", Enabled: true},
-				{ID: "admin.invite.revoke", Label: "Revoke",
+					Method: "POST", Enabled: true}},
+				{Separator: true, Action: view.Action{ID: "admin.invite.revoke", Label: "Revoke",
 					Href:   s.postQuery("/admin/invites", url.Values{"action": {"revoke"}, "invite": {inv.ID}}),
-					Method: "POST", Enabled: true, Danger: true},
-				{ID: "admin.invite.resend", Label: "Send again",
-					Href:   s.postQuery("/admin/invites", url.Values{"action": {"resend"}, "login": {inv.Login}, "email": {inv.Email}}),
-					Method: "POST", Enabled: true},
+					Method: "POST", Enabled: true, Danger: true}},
 			},
 		}
+		// On the row what an invitation is opened for (s-admin-1): Resend
+		// for one that went by letter, and Copy link.
+		if inv.Email != "" {
+			row.Delivery = "email"
+			resend := view.Action{ID: "admin.invite.resend", Label: "Resend", Method: "POST", Enabled: true,
+				Href: s.postQuery("/admin/invites", url.Values{"action": {"resend"}, "login": {inv.Login}, "email": {inv.Email}})}
+			if !s.mailConfigured() {
+				resend.Enabled, resend.Reason = false, "SMTP is not configured: no letter can go."
+			}
+			row.Actions = append(row.Actions, resend)
+		}
+		copyLink := view.Action{ID: "admin.invite.copy", Label: "Copy link", Method: "GET", Enabled: true}
 		if inv.Secret != "" {
 			row.Link = text(s.route("/invite/" + inv.Secret))
+			copyLink.Href = string(row.Link)
+		} else {
+			copyLink.Enabled, copyLink.Reason = false, "This invitation was made before links were kept. Resend it or make a new one."
 		}
+		row.Actions = append(row.Actions, copyLink)
 		page.Rows = append(page.Rows, row)
 	}
 	return page
@@ -311,14 +353,18 @@ func inviteLive(inv *store.Invite, now time.Time) bool {
 }
 
 // inviteSentStatus is how the invitation's letter went (C-6: "sent",
-// "failed", "SMTP not configured"); nothing for an invitation without an
-// address — its link is handed over.
+// "failed — " and the relay's reply, "SMTP not configured"); nothing for an
+// invitation without an address — its link is handed over.
 func inviteSentStatus(inv *store.Invite, configured bool) view.Text {
 	switch {
 	case inv.Email == "":
 		return ""
 	case inv.Mailed == "sent":
 		return text("sent")
+	case inv.Mailed == "failed" && inv.MailReply != "":
+		// A failure is named by the relay's reply, not by the word alone
+		// (s-admin-1): «failed — 550 mailbox unavailable».
+		return text("failed — " + inv.MailReply)
 	case inv.Mailed == "failed":
 		return text("failed")
 	case !configured:
@@ -375,16 +421,6 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	keep := func(what string) bool {
 		return inShow(what) && (action == "" || what == action)
 	}
-	var all, security, failures int
-	for _, e := range snap.Audit {
-		all++
-		if auditIsSecurity(e.What) {
-			security++
-		}
-		if auditIsFailure(e.What) {
-			failures++
-		}
-	}
 	if r.URL.Query().Get("format") == "csv" {
 		s.writeAuditCSV(w, snap.Audit, keep)
 		return
@@ -406,16 +442,14 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	page.Bar.Loaded = len(page.Rows)
-	total := all
+	total := len(snap.Audit)
 	page.Bar.Total = &total
 	page.Filter = s.auditActionFilter(sess, snap.Audit, show, action, inShow)
-	for _, seg := range []struct {
-		id, label, value string
-		n                int
-	}{
-		{"audit.all", "All", "all", all},
-		{"audit.security", "Security", "security", security},
-		{"audit.failures", "Failures", "failures", failures},
+	// s-admin-7 writes the segments without counts.
+	for _, seg := range []struct{ id, label, value string }{
+		{"audit.all", "All", "all"},
+		{"audit.security", "Security", "security"},
+		{"audit.failures", "Failures", "failures"},
 	} {
 		q := url.Values{}
 		if seg.value != "all" {
@@ -425,8 +459,8 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 			q.Set("action", action)
 		}
 		page.Bar.Segments = append(page.Bar.Segments, view.Action{
-			ID: seg.id, Label: text(fmt.Sprintf("%s · %d", seg.label, seg.n)), Method: "GET",
-			Enabled: seg.value != show, On: seg.value == show, Href: s.postQuery("/admin/audit", q),
+			ID: seg.id, Label: text(seg.label), Method: "GET",
+			Enabled: true, On: seg.value == show, Href: s.postQuery("/admin/audit", q),
 		})
 	}
 	csv := url.Values{"format": {"csv"}}

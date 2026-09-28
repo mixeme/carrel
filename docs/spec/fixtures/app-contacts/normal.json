@@ -463,7 +463,7 @@
         "label": "A–Z",
         "href": "/app/contacts?sort=az",
         "method": "GET",
-        "enabled": false,
+        "enabled": true,
         "on": true
       },
       {

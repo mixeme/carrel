@@ -30,38 +30,39 @@
     "range": null,
     "segments": [
       {
-        "enabled": false,
+        "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=all",
         "id": "timeline.show.all",
-        "label": "All · 1",
-        "method": "GET"
+        "label": "All 1",
+        "method": "GET",
+        "on": true
       },
       {
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=events",
         "id": "timeline.show.events",
-        "label": "Events · 1",
+        "label": "Events 1",
         "method": "GET"
       },
       {
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=tasks",
         "id": "timeline.show.tasks",
-        "label": "Tasks · 0",
+        "label": "Tasks 0",
         "method": "GET"
       },
       {
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=notes",
         "id": "timeline.show.notes",
-        "label": "Notes · 0",
+        "label": "Notes 0",
         "method": "GET"
       },
       {
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?show=files",
         "id": "timeline.show.files",
-        "label": "Files · 0",
+        "label": "Files 0",
         "method": "GET"
       }
     ],
@@ -534,17 +535,53 @@
     "tags": []
   },
   "range": {
-    "form": null,
+    "form": {
+      "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+          "id": "range.show",
+          "label": "Show",
+          "method": "GET"
+        }
+      ],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "date",
+              "label": "From",
+              "name": "from",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "2025-08-10"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "Both days are in the timeline.",
+              "kind": "date",
+              "label": "To",
+              "name": "to",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "2026-11-10"
+            }
+          ]
+        }
+      ]
+    },
     "from": "10 August 2025",
-    "presets": [
-      {
-        "enabled": true,
-        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?from=2025-05-10",
-        "id": "timeline.widen",
-        "label": "Widen the range",
-        "method": "GET"
-      }
-    ],
+    "presets": [],
     "to": "10 November 2026"
   },
   "title": "Анна Ковалёва · Timeline",

@@ -30,7 +30,7 @@
     "range": null,
     "segments": [
       {
-        "enabled": false,
+        "enabled": true,
         "href": "/app/contacts?sort=az",
         "id": "sort.az",
         "label": "A–Z",

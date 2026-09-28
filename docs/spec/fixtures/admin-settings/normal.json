@@ -215,7 +215,8 @@
         "enabled": false,
         "id": "admin.settings.mailtest",
         "label": "Send test",
-        "method": "POST"
+        "method": "POST",
+        "reason": "Set the relay up and save it first."
       }
     ],
     "errors": [],

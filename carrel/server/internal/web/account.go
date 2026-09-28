@@ -214,5 +214,6 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 			Href: s.postQuery("/app/settings/account", map[string][]string{"op": {"end-others"}})})
 	}
 	page.Danger = []view.Action{s.deleteAction(sess)}
+	page.DangerNote = "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it."
 	return page
 }

@@ -33,7 +33,6 @@ import (
 const (
 	timelineBack      = 12 // months before today the window starts
 	timelineAhead     = 3  // months after today it ends
-	timelineWidenBy   = 3  // months "Widen the range" moves the start back
 	timelineInsetRows = 3
 	timelineUndated   = "Without a date"
 )
@@ -42,7 +41,7 @@ const (
 type timelineTask struct {
 	*fanout.Task
 	account, col, uid string
-	from              time.Time
+	from, last        time.Time
 	page              string
 	person            timelinePerson
 }
@@ -272,15 +271,20 @@ func personOf(uid string, obj *model.Object) timelinePerson {
 	return p
 }
 
-// timelineWindow is the window of the address: from ?from=, else twelve
-// months back; to three months ahead of today, whatever from says.
-func timelineWindow(r *http.Request, tz *time.Location, now time.Time) (from, to time.Time) {
+// timelineWindow is the window of the address, its first and its last day:
+// from ?from=, else twelve months back; to ?to=, else three months ahead of
+// today. The range on the strip sets both (s-contacts-7); a last day before
+// the first is not a window, and the default stands.
+func timelineWindow(r *http.Request, tz *time.Location, now time.Time) (from, last time.Time) {
 	today := dayOf(now, tz)
-	from = today.AddDate(0, -timelineBack, 0)
+	from, last = today.AddDate(0, -timelineBack, 0), today.AddDate(0, timelineAhead, 0)
 	if v, err := time.ParseInLocation("2006-01-02", r.URL.Query().Get("from"), tz); err == nil && v.Before(today) {
 		from = v
 	}
-	return from, today.AddDate(0, timelineAhead, 0)
+	if v, err := time.ParseInLocation("2006-01-02", r.URL.Query().Get("to"), tz); err == nil && !v.Before(from) {
+		last = v
+	}
+	return from, last
 }
 
 func dayOf(t time.Time, tz *time.Location) time.Time {
@@ -289,21 +293,24 @@ func dayOf(t time.Time, tz *time.Location) time.Time {
 }
 
 // timelineHere is the address of the timeline over a window: the default one
-// has no from.
-func timelineHere(card string, from, now time.Time, tz *time.Location) string {
+// has neither from nor to.
+func timelineHere(card string, from, last, now time.Time, tz *time.Location) string {
 	here := card + "/timeline"
 	if !from.Equal(dayOf(now, tz).AddDate(0, -timelineBack, 0)) {
 		here = withQuery(here, "from", from.Format("2006-01-02"))
+	}
+	if !last.Equal(dayOf(now, tz).AddDate(0, timelineAhead, 0)) {
+		here = withQuery(here, "to", last.Format("2006-01-02"))
 	}
 	return here
 }
 
 // keptTimeline is this session's newest timeline of the person over the
 // window; any window when from is zero (the card's inset).
-func keptTimeline(sess *session.Session, account, col, uid string, from time.Time) *timelineTask {
+func keptTimeline(sess *session.Session, account, col, uid string, from, last time.Time) *timelineTask {
 	for _, t := range sess.Tasks() {
 		if tt, ok := t.(*timelineTask); ok && tt.account == account && tt.col == col && tt.uid == uid &&
-			(from.IsZero() || tt.from.Equal(from)) {
+			(from.IsZero() || tt.from.Equal(from) && tt.last.Equal(last)) {
 			return tt
 		}
 	}
@@ -326,23 +333,25 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tz := s.tz()
-	from, to := timelineWindow(r, tz, s.now())
+	from, last := timelineWindow(r, tz, s.now())
 	person := personOf(uid, obj)
 	card := c.recordPath(uid)
-	page := timelineHere(card, from, s.now(), tz)
+	page := timelineHere(card, from, last, s.now(), tz)
 
 	var task *timelineTask
 	if r.URL.Query().Get("again") == "" {
-		task = keptTimeline(c.sess, c.conn.ID, c.col.Path, uid, from)
+		task = keptTimeline(c.sess, c.conn.ID, c.col.Path, uid, from, last)
 	} else {
 		dropAllWholeReads(c.sess, s.catalogOf(c.sess)) // what the servers hold now (S-4.2)
 	}
 	var notices []view.Notice
 	if task == nil {
-		task, err = s.startTimeline(c.sess, person, from, to)
+		// The last day is in the window: the servers are asked up to the
+		// midnight after it.
+		task, err = s.startTimeline(c.sess, person, from, last.AddDate(0, 0, 1))
 		switch {
 		case err == nil:
-			task.account, task.col, task.uid, task.from, task.page = c.conn.ID, c.col.Path, uid, from, page
+			task.account, task.col, task.uid, task.from, task.last, task.page = c.conn.ID, c.col.Path, uid, from, last, page
 			c.sess.KeepTask(task)
 		case errors.Is(err, fanout.ErrBusy):
 			notices = append(notices, view.Notice{Role: view.NoticeAlert, Title: "Too many searches",
@@ -352,7 +361,7 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	s.writePage(w, r, http.StatusOK, s.timelinePage(c, obj, person, task, from, to, r.URL.Query().Get("show"), notices))
+	s.writePage(w, r, http.StatusOK, s.timelinePage(c, obj, person, task, from, last, r.URL.Query().Get("show"), notices))
 }
 
 func (s *Server) startTimeline(sess *session.Session, person timelinePerson, from, to time.Time) (*timelineTask, error) {
@@ -481,7 +490,7 @@ var timelineShows = []struct {
 	{"notes", "Notes", view.KindNote}, {"files", "Files", view.KindFile},
 }
 
-func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timelinePerson, task *timelineTask, from, to time.Time, show string, notices []view.Notice) view.ContactTimelinePage {
+func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timelinePerson, task *timelineTask, from, last time.Time, show string, notices []view.Notice) view.ContactTimelinePage {
 	tf := c.tf
 	card := c.recordPath(person.uid)
 	sh := s.buildShell(c.sess, person.name+" · Timeline")
@@ -497,11 +506,17 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 	for _, f := range contactFieldsOf(obj) {
 		page.Card.Fields = append(page.Card.Fields, f.Field)
 	}
-	here := timelineHere(card, from, tf.now, tf.tz)
-	page.Range = view.Range{From: text(tf.date(from)), To: text(tf.date(to)), Presets: []view.Action{{
-		ID: "timeline.widen", Label: "Widen the range", Method: "GET", Enabled: true,
-		Href: s.route(card + "/timeline?from=" + from.AddDate(0, -timelineWidenBy, 0).Format("2006-01-02")),
-	}}}
+	here := timelineHere(card, from, last, tf.now, tf.tz)
+	// The range stays on the strip (s-contacts-7, s-contacts-14): the two
+	// days of the window and Show. «Widen the range» in the note is
+	// answered with it — there is no button of that name.
+	form := s.plainForm(card+"/timeline", "GET",
+		view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02"))},
+		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(last.Format("2006-01-02")),
+			Hint: "Both days are in the timeline."},
+	)
+	form.Actions = []view.Action{{ID: "range.show", Label: "Show", Href: s.route(card + "/timeline"), Method: "GET", Enabled: true}}
+	page.Range = view.Range{From: text(tf.date(from)), To: text(tf.date(last)), Presets: []view.Action{}, Form: &form}
 	page.Note = text("Nothing was looked for before " + tf.date(from) + ". Widen the range if you need it.")
 	q := url.Values{"related": {person.uid}}
 	page.Actions = []view.Action{
@@ -536,8 +551,10 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 			n = counts[sh.kind]
 		}
 		href := withQuery(here, "show", sh.value)
-		page.Bar.Segments = append(page.Bar.Segments, view.Action{ID: "timeline.show." + sh.value, Label: text(fmt.Sprintf("%s · %d", sh.label, n)),
-			Href: s.route(href), Method: "GET", Enabled: sh.value != current.value})
+		// «All 24» as the frame writes it; the one shown now is on and
+		// stays a choice — a ticked item under «⋯» of a narrow strip.
+		page.Bar.Segments = append(page.Bar.Segments, view.Action{ID: "timeline.show." + sh.value, Label: text(fmt.Sprintf("%s %d", sh.label, n)),
+			Href: s.route(href), Method: "GET", Enabled: true, On: sh.value == current.value})
 	}
 	for _, r := range rows {
 		if current.kind != "" && r.row.Kind != current.kind {
@@ -560,7 +577,7 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 // timelineInset is the card's inset: the newest rows of the timeline this
 // session gathered for the person, nothing when it gathered none (S-15.4).
 func (s *Server) timelineInset(c *collectionCtx, uid string, obj *model.Object) []view.TimelineRow {
-	task := keptTimeline(c.sess, c.conn.ID, c.col.Path, uid, time.Time{})
+	task := keptTimeline(c.sess, c.conn.ID, c.col.Path, uid, time.Time{}, time.Time{})
 	if task == nil {
 		return nil
 	}

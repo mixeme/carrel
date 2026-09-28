@@ -22,8 +22,7 @@
       "href": "/app/settings/unlock",
       "id": "account.delete",
       "label": "Delete account",
-      "method": "GET",
-      "reason": "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it."
+      "method": "GET"
     }
   ],
   "details": null,
@@ -310,5 +309,6 @@
         "separator": true
       }
     ]
-  }
+  },
+  "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it."
 }

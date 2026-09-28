@@ -81,6 +81,10 @@ type BackupJob struct {
 	// OnSignInDays runs the job at sign-in when its last whole copy is older
 	// than that many days; 0 is never. Carrel keeps no clock of its own.
 	OnSignInDays int `json:"onSignInDays,omitempty"`
+	// Off is «Job is on» unticked (s-backup-2): the job runs from the screen
+	// only — not at sign-in, not from outside. Zero is on, as every job
+	// made before the switch.
+	Off bool `json:"off,omitempty"`
 }
 
 // BackupJob returns the job with id.

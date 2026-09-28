@@ -99,17 +99,25 @@
   "rows": [
     {
       "accounts": 4,
-      "created": "10 August 2026, 17:04",
+      "created": "11 February 2026",
       "disabled": false,
       "escrowed": false,
-      "lastLogin": "2 min ago",
+      "lastLogin": "10 August 2026, 17:04",
       "login": "mix",
       "menu": [
+        {
+          "enabled": false,
+          "href": "/admin/role?target=u-mix",
+          "id": "admin.user.role",
+          "label": "Set role",
+          "method": "GET",
+          "reason": "The last administrator cannot become a user."
+        },
         {
           "enabled": true,
           "href": "/admin/?action=sessions\u0026target=u-mix",
           "id": "admin.user.sessions",
-          "label": "End sessions",
+          "label": "Kill sessions",
           "method": "POST"
         },
         {
@@ -126,21 +134,21 @@
           "href": "/admin/?action=reset\u0026target=u-mix",
           "id": "admin.user.reset",
           "label": "Reset password",
-          "method": "POST",
-          "reason": "Destroys encrypted connections. Issues the same wipe link as /forgot.",
-          "separator": true
+          "method": "POST"
         },
         {
           "danger": true,
           "enabled": false,
           "href": "/admin/?action=delete\u0026target=u-mix",
+          "icon": "i-trash",
           "id": "admin.user.delete",
           "label": "Delete",
           "method": "POST",
-          "reason": "Type the login to confirm. Cannot delete the last administrator."
+          "reason": "Cannot delete the last administrator.",
+          "separator": true
         }
       ],
-      "role": "admin",
+      "role": "Administrator",
       "sessions": 1
     }
   ],

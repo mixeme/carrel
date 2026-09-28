@@ -17,6 +17,95 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.57 — 2026-09-28
+
+Row actions follow how often they are needed (from-typecase notes 5, 8, 11,
+17): the frequent ones on the row, the rare ones under «⋯». An action that
+cannot be taken is sent switched off with its `Reason`; one that can carries
+no `Reason` — the explanation beside a working button moved to a field of
+its page (C-6.2). No action is switched off without a reason, and the
+segment, tab or preset shown now is `on` **and enabled** everywhere.
+
+### Added
+
+- **`BackupPage.Delete`, `BackupPage.DeleteNote`**: on the job's page
+  (`/app/settings/backup?job=ID`, s-backup-2) the deletion at its foot and the
+  line beside it; `null` and empty on the list and for a new job. The job's
+  form (`Add`) there carries Save, Cancel (`backup.cancel`) and Run now
+  (`backup.run`).
+- **«Job is on»** — form row `on` (check, value `1`) after Name. A job saved
+  without it is off: it runs from the screen only, not at sign-in; the
+  external trigger answers 409 «this job is off». Jobs saved before stay on.
+- **`TriggerBlock.Off`**: «Turn the external trigger off» on the trigger card;
+  `null` while the trigger is not on.
+- **`InviteRow.Menu`**: Extend, a line, Revoke (s-admin-11).
+- **`InviteRow.Delivery`** («link», «email») and **`InviteRow.Status`**
+  («pending»): the columns of s-admin-1.
+- **`BackupPage.Subtitle`**: on a job's page «Job · last copy 2 days ago»
+  (or «Job · no copy yet»), with the job's name as `title`; empty on the
+  list.
+- **`GET /admin/role?target=ID`** → **`UserRoleSheet`** (`login`, `form`): the
+  Role select — User (`user`), Administrator (`admin`) — with Save and
+  Cancel; it posts to `/admin/?action=role&target=ID`.
+- **`POST /admin/?action=enable&target=ID`** enables a disabled account;
+  journal `user.enable`.
+- **`AccountPage.DangerNote`**, **`DevicesPage.Note`**: the lines the frames
+  draw beside Delete account and above Generate profile.
+- Timeline: **`Range.Form`** — From, To (`?from=`, `?to=`, both days in) and
+  Show (`range.show`).
+
+### Changed
+
+- **Published links** (s-publish-1): row actions Copy, Send, Revoke; Send is
+  labelled «Send» (was «Send this link») and is there when mail is on.
+  `created` is the day («9 August 2026»), `lastSeen` absolute or «never
+  opened». A link from before links were kept has Copy and Send switched off
+  with the reason.
+- **Backup job row** (s-backup-1): `actions` are Run and Edit only. Run of a
+  «Download» job is `GET …?op=download&job=ID` (streams the archive); of the
+  others `POST …?op=run`. `backup.download`, `backup.trigger.off` and
+  `backup.delete` left the row. Outside the unlock window the trigger's
+  reveal button has no `reason`; the note says «Confirm your password
+  first: …».
+- **Invite row** (s-admin-1): `actions` are Resend (`admin.invite.resend`,
+  only for an invitation by letter; off without SMTP) and Copy link
+  (`admin.invite.copy`, GET, `href` = the link). «Send again» is gone. A
+  failed letter's `sent` is «failed — » and the relay's reply («failed — 550
+  mailbox unavailable»).
+- **User row** (s-admin-12): `menu` is Set role (`admin.user.role`, GET the
+  sheet), Kill sessions, Disable or Enable (`admin.user.enable`), Reset
+  password, a line, Delete (`i-trash`). «Make administrator», «Make user» and
+  «End sessions» are gone. For the last administrator Set role, Disable and
+  Delete are sent off with the reason; Kill sessions is off with no live
+  session. `role` is «User» or «Administrator»; `created` is the day,
+  `lastLogin` absolute.
+- **Contact timeline** (s-contacts-7): segments read «All 24» (was «All ·
+  24»). `Range.Presets` is empty — «Widen the range» is answered with the
+  range form.
+- **The one shown now is `on` and `enabled`, with no reason** — was switched
+  off (some with «Shown now.»): list orders (A–Z, Newest, By due…), task
+  segments, search kinds, audit segments, duplicates kinds, the agenda's
+  Day/Week/Month, the device tabs, the files view options, the photo
+  rotation, the timeline segments.
+- **Segment counts as the frames write them**: task segments «Open 12»,
+  «Done 48», «All 60» (were «Open · 12»…); search kinds and audit segments
+  carry no count (were «All · 7», «Security · 4»…).
+- **Admin settings**: «Send test» switched off carries its reason.
+- `account.delete` and `device.profile` carry no `reason`.
+
+### For consumers
+
+Regenerated fixtures: `admin-audit`, `admin-settings`, `admin-users`,
+`app-agenda` (normal, empty), `app-agenda-all` (empty, partial),
+`app-contact-timeline`, `app-contacts` (normal, empty, partial,
+unavailable), `app-contacts-one` (empty, readonly), `app-duplicates`,
+`app-files-published`, `app-notes`, `app-notes-all`, `app-photo-preview`,
+`app-search`, `app-settings-account`, `app-settings-backup`,
+`app-settings-devices`, `app-tasks`, `app-tasks-all`. Mark the shown
+segment by `on`, not by `enabled`. Show a switched-off action with its reason; read
+explanations from `deleteNote`, `dangerNote` and `note`, never from the
+`reason` of an action that works.
+
 ## v0.2.56 — 2026-09-28
 
 The task and event forms are laid out in the mockup's rubrics, and every

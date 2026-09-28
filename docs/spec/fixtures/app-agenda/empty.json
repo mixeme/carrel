@@ -137,11 +137,12 @@
           "method": "GET"
         },
         {
-          "enabled": false,
+          "enabled": true,
           "href": "/app/calendar/a-nc-home/lichnyj?from=2026-11-02",
           "id": "range.week",
           "label": "Week",
-          "method": "GET"
+          "method": "GET",
+          "on": true
         },
         {
           "enabled": true,

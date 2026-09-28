@@ -675,7 +675,7 @@ func sortOf(r *http.Request, k view.Kind) string {
 	return listSorts[k][0].value
 }
 
-// sortSegments are the orders of the kind, the current one closed. They keep
+// sortSegments are the orders of the kind, the current one on. They keep
 // the category filter and the task segment of the address.
 func (s *Server) sortSegments(base string, k view.Kind, current string, keep url.Values) []view.Action {
 	var out []view.Action
@@ -684,7 +684,7 @@ func (s *Server) sortSegments(base string, k view.Kind, current string, keep url
 		q.Set("sort", o.value)
 		f := tagFilter{base: base, query: q, route: s.route}
 		out = append(out, view.Action{ID: o.id, Label: text(o.label), Href: f.href(keep.Get("tag")),
-			Method: "GET", Enabled: o.value != current, On: o.value == current})
+			Method: "GET", Enabled: true, On: o.value == current})
 	}
 	return out
 }
@@ -994,8 +994,8 @@ func (s *Server) agendaRange(sess *session.Session, tf timeFmt, base, tag, kind 
 	for _, w := range []struct{ id, label, kind string }{
 		{"range.day", "Day", agendaDay}, {"range.week", "Week", agendaWeek}, {"range.month", "Month", agendaMonth},
 	} {
-		rng.Presets = append(rng.Presets, view.Action{ID: w.id, Label: text(w.label), Method: "GET", Enabled: w.kind != kind,
-			Href: window(w.kind, anchor)})
+		rng.Presets = append(rng.Presets, view.Action{ID: w.id, Label: text(w.label), Method: "GET", Enabled: true,
+			On: w.kind == kind, Href: window(w.kind, anchor)})
 	}
 	form := s.plainForm(base, "GET",
 		csrfField(sess),
@@ -1382,15 +1382,12 @@ func dueRubric(due time.Time, done bool, now time.Time) string {
 }
 
 // taskSegments switch between open, done and all, and keep the category
-// filter.
+// filter: «Open 12», «Done 48», «All 60», as s-tasks-1 writes them. The one
+// shown now is on and stays a choice (C-6.2).
 func (s *Server) taskSegments(base, tag, show string, open, done int) []view.Action {
 	segment := func(id, label, value string, n int) view.Action {
 		f := tagFilter{base: base, query: url.Values{"show": {value}}, route: s.route}
-		a := view.Action{ID: id, Label: text(fmt.Sprintf("%s · %d", label, n)), Href: f.href(tag), Method: "GET", Enabled: show != value}
-		if show == value {
-			a.Reason = "Shown now."
-		}
-		return a
+		return view.Action{ID: id, Label: text(fmt.Sprintf("%s %d", label, n)), Href: f.href(tag), Method: "GET", Enabled: true, On: show == value}
 	}
 	return []view.Action{
 		segment("tasks.open", "Open", "open", open),

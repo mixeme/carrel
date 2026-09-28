@@ -53,7 +53,7 @@ func saveJob(t *testing.T, f davFixture, form url.Values) sealed.BackupJob {
 func jobForm(f davFixture, mode, keep, password string) url.Values {
 	v := url.Values{
 		"name": {"Рабочее"}, "src": {sel(f, searchBook), sel(f, searchWork), sel(f, filesDocs)},
-		"mode": {mode}, "dest": {sel(f, filesDocs)}, "folder": {"backups/work"}, "keep": {keep},
+		"mode": {mode}, "dest": {sel(f, filesDocs)}, "folder": {"backups/work"}, "keep": {keep}, "on": {"1"},
 	}
 	if password != "" {
 		v.Set("encrypted", "1")

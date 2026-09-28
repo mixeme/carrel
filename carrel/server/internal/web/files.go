@@ -559,11 +559,7 @@ func (s *Server) folderPage(c *fileCtx, segs []string, entries []file.Entry, q u
 	option := func(id, label, key, value, current string) view.Action {
 		v := cloneValues(q)
 		v.Set(key, value)
-		a := view.Action{ID: id, Label: text(label), Href: s.route(here + "?" + v.Encode()), Method: "GET", Enabled: value != current}
-		if !a.Enabled {
-			a.Reason = "Shown now."
-		}
-		return a
+		return view.Action{ID: id, Label: text(label), Href: s.route(here + "?" + v.Encode()), Method: "GET", Enabled: true, On: value == current}
 	}
 	page.Bar.Segments = []view.Action{
 		option("files.view.list", "List", "view", string(view.FileList), string(page.View)),

@@ -165,9 +165,7 @@ func (s *Server) fillResults(page *view.SearchPage, sess *session.Session, blob 
 	kind := view.Kind(r.URL.Query().Get("kind"))
 	filter := strings.TrimSpace(r.URL.Query().Get("filter"))
 	needle := strings.ToLower(filter)
-	counts := map[view.Kind]int{}
 	for _, it := range snap.Items {
-		counts[it.Kind]++
 		if kind != "" && it.Kind != kind {
 			continue
 		}
@@ -179,7 +177,7 @@ func (s *Server) fillResults(page *view.SearchPage, sess *session.Session, blob 
 	}
 	total := len(snap.Items)
 	page.Bar = view.ListBar{Filter: text(filter), Loaded: len(page.Results), Total: &total}
-	segment := func(k view.Kind, label string, n int) view.Action {
+	segment := func(k view.Kind, label string) view.Action {
 		href := searchHref(q)
 		if k != "" {
 			href += "&kind=" + url.QueryEscape(string(k))
@@ -187,19 +185,17 @@ func (s *Server) fillResults(page *view.SearchPage, sess *session.Session, blob 
 		if filter != "" {
 			href += "&filter=" + url.QueryEscape(filter)
 		}
-		a := view.Action{ID: "search.kind", Label: text(fmt.Sprintf("%s · %d", label, n)), Href: s.route(href), Method: "GET", Enabled: k != kind}
-		if k == kind {
-			a.Reason = "Shown now."
-		}
-		return a
+		// s-find-1 writes the kinds without counts; the one shown now is
+		// on and stays a choice (C-6.2).
+		return view.Action{ID: "search.kind", Label: text(label), Href: s.route(href), Method: "GET", Enabled: true, On: k == kind}
 	}
 	page.Bar.Segments = []view.Action{
-		segment("", "All", total),
-		segment(view.KindContact, "Contacts", counts[view.KindContact]),
-		segment(view.KindEvent, "Events", counts[view.KindEvent]),
-		segment(view.KindTask, "Tasks", counts[view.KindTask]),
-		segment(view.KindNote, "Notes", counts[view.KindNote]),
-		segment(view.KindFile, "Files", counts[view.KindFile]),
+		segment("", "All"),
+		segment(view.KindContact, "Contacts"),
+		segment(view.KindEvent, "Events"),
+		segment(view.KindTask, "Tasks"),
+		segment(view.KindNote, "Notes"),
+		segment(view.KindFile, "Files"),
 	}
 	page.Poll = s.pollBar(tf, blob, snap, searchOwner(q))
 	for _, st := range snap.Sources {

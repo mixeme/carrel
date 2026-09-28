@@ -16,10 +16,10 @@
     "range": null,
     "segments": [
       {
-        "enabled": false,
+        "enabled": true,
         "href": "/admin/audit",
         "id": "audit.all",
-        "label": "All · 21",
+        "label": "All",
         "method": "GET",
         "on": true
       },
@@ -27,14 +27,14 @@
         "enabled": true,
         "href": "/admin/audit?show=security",
         "id": "audit.security",
-        "label": "Security · 4",
+        "label": "Security",
         "method": "GET"
       },
       {
         "enabled": true,
         "href": "/admin/audit?show=failures",
         "id": "audit.failures",
-        "label": "Failures · 0",
+        "label": "Failures",
         "method": "GET"
       }
     ],

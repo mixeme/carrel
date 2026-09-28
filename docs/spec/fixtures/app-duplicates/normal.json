@@ -14,12 +14,12 @@
         "method": "GET"
       },
       {
-        "enabled": false,
+        "enabled": true,
         "href": "/app/duplicates?kind=contact",
         "id": "duplicates.kind.contact",
         "label": "Contacts 0",
         "method": "GET",
-        "reason": "Shown now."
+        "on": true
       },
       {
         "enabled": true,

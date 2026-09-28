@@ -25,9 +25,10 @@ func TestAuditFiltersAndExport(t *testing.T) {
 	if all == nil || security == nil || failures == nil {
 		t.Fatalf("segments = %+v", page.Bar.Segments)
 	}
-	if !all.On || all.Enabled {
-		t.Errorf("All = %+v, want the one shown", all)
+	if !all.On || !all.Enabled {
+		t.Errorf("All = %+v, want the one shown, still a choice", all)
 	}
+	sameSegments(t, "audit", page.Bar.Segments, "s-admin-7", 0)
 	if len(page.Rows) == 0 {
 		t.Fatal("the journal is empty")
 	}

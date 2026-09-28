@@ -125,11 +125,9 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 	page.Rail = s.settingsRail(sess, "/app/settings/devices")
 	page.Notices = append(page.Notices, notices...)
 	for _, t := range deviceTabs {
-		a := view.Action{ID: "device.tab." + string(t), Label: text(deviceTabLabels[t]), Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(t)}}), Method: "GET", Enabled: t != tab}
-		if t == tab {
-			a.Reason = "Shown now."
-		}
-		page.Actions = append(page.Actions, a)
+		// The tab shown now is on and stays a choice (C-6.2).
+		page.Actions = append(page.Actions, view.Action{ID: "device.tab." + string(t), Label: text(deviceTabLabels[t]),
+			Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(t)}}), Method: "GET", Enabled: true, On: t == tab})
 	}
 	unlock := s.route("/app/settings/unlock")
 	secret := func(conn sealed.Connection) view.SecretField {
@@ -214,12 +212,16 @@ func (s *Server) devicesPage(sess *session.Session, tab view.DeviceTab, notices 
 		}
 		gen := view.Action{ID: "device.profile", Label: "Generate profile", Method: "POST", Danger: true, Enabled: true,
 			Href: s.postQuery("/app/settings/devices", url.Values{"tab": {string(tab)}, "op": {"profile"}})}
+		// The line above the button says how it is issued (s-plan-1,
+		// s-plan-3); a working button carries no reason (C-6.2).
 		switch {
 		case profileAccounts == 0:
 			gen.Enabled, gen.Reason = false, "No included account has calendars or address books."
 		case !unlocked:
 			gen.Method, gen.Href = "GET", unlock
-			gen.Reason = "Confirm your password first: the profile hands out the credentials of every included account."
+			page.Note = "Confirm your password first: the profile hands out the credentials of every included account."
+		default:
+			page.Note = "Issued inside the unlock window: nothing more is asked."
 		}
 		page.Actions = append(page.Actions, gen)
 	case view.TabAndroid:

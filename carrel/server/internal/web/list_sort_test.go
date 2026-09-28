@@ -56,6 +56,7 @@ func TestContactAndNoteOrders(t *testing.T) {
 	if got := segmentLabels(page.Bar); got != "A–Z|Recently changed" {
 		t.Fatalf("segments = %q", got)
 	}
+	sameSegments(t, "contact orders", page.Bar.Segments, "s-contacts-1", 0)
 	if names := listNames(page); names != "Ada Lovelace,Bob Builder,Cat Stevens" {
 		t.Errorf("A–Z = %q", names)
 	}
@@ -78,6 +79,7 @@ func TestContactAndNoteOrders(t *testing.T) {
 	if got := segmentLabels(np.Bar); got != "Newest|Oldest|Title" {
 		t.Fatalf("note segments = %q", got)
 	}
+	sameSegments(t, "note orders", np.Bar.Segments, "s-notes-1", 0)
 	titles := func(p view.NotesPage) string {
 		var out []string
 		for _, g := range p.Groups {

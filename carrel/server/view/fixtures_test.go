@@ -3,8 +3,10 @@ package view
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -152,5 +154,68 @@ func TestFixturesDecode(t *testing.T) {
 	}
 	if found == 0 {
 		t.Fatal("no fixture files found under " + fixtureDir)
+	}
+}
+
+// C-6.2 (from-typecase notes 11 and 17): an action that cannot be taken is
+// shown, switched off, with its reason; one that can carries no reason — an
+// explanation beside a working button is a note the frame draws, not a
+// Reason. The segment, tab or preset shown now is On and can be taken
+// again: being shown is no reason to switch it off. Every fixture is walked,
+// as its view model, for every Action in it.
+func TestFixtureActionsSayWhyTheyAreOff(t *testing.T) {
+	screens, err := os.ReadDir(fixtureDir)
+	if err != nil {
+		t.Fatalf("read fixture dir: %v", err)
+	}
+	actionType := reflect.TypeOf(Action{})
+	for _, screen := range screens {
+		newModel, ok := fixtureTypes[screen.Name()]
+		if !screen.IsDir() || !ok {
+			continue
+		}
+		states, _ := filepath.Glob(filepath.Join(fixtureDir, screen.Name(), "*.json"))
+		for _, path := range states {
+			raw, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			model := newModel()
+			if err := json.Unmarshal(raw, model); err != nil {
+				t.Fatalf("%s: %v", path, err)
+			}
+			var walk func(v reflect.Value, at string)
+			walk = func(v reflect.Value, at string) {
+				switch v.Kind() {
+				case reflect.Pointer, reflect.Interface:
+					if !v.IsNil() {
+						walk(v.Elem(), at)
+					}
+				case reflect.Slice, reflect.Array:
+					for i := 0; i < v.Len(); i++ {
+						walk(v.Index(i), fmt.Sprintf("%s[%d]", at, i))
+					}
+				case reflect.Struct:
+					if v.Type() == actionType {
+						a := v.Interface().(Action)
+						switch {
+						case a.ID == "":
+							// an empty place: no action at all
+						case a.Enabled && a.Reason != "":
+							t.Errorf("%s %s: %s «%s» can be taken and carries a reason %q", screen.Name(), at, a.ID, a.Label, a.Reason)
+						case !a.Enabled && a.Reason == "":
+							t.Errorf("%s %s: %s «%s» is off without a reason", screen.Name(), at, a.ID, a.Label)
+						case a.Reason == "Shown now.":
+							t.Errorf("%s %s: %s «%s» is switched off for being shown: it is On and enabled", screen.Name(), at, a.ID, a.Label)
+						}
+						return
+					}
+					for i := 0; i < v.NumField(); i++ {
+						walk(v.Field(i), at+"."+v.Type().Field(i).Name)
+					}
+				}
+			}
+			walk(reflect.ValueOf(model), filepath.Base(path))
+		}
 	}
 }

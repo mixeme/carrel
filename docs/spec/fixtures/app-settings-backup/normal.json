@@ -43,6 +43,24 @@
           {
             "error": "",
             "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "Job is on",
+            "name": "on",
+            "options": [
+              {
+                "label": "Job is on",
+                "selected": true,
+                "value": "1"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": "1"
+          },
+          {
+            "error": "",
+            "extra": null,
             "hint": "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them.",
             "kind": "check",
             "label": "What to copy",
@@ -261,6 +279,8 @@
       }
     ]
   },
+  "delete": null,
+  "deleteNote": "",
   "details": null,
   "jobs": [],
   "notices": [],
@@ -497,6 +517,7 @@
     },
     "targets": []
   },
+  "subtitle": "",
   "title": "Backup",
   "top": {
     "newMenu": [

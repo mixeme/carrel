@@ -68,9 +68,9 @@ func (s *Server) sessionRows(sess *session.Session) []view.SessionRow {
 
 // deleteAction is the danger zone (owner's decision 19.09.2026): outside
 // the unlock window it opens the password sheet; inside it, it deletes.
+// What it deletes is the line beside it, AccountPage.DangerNote (account-1).
 func (s *Server) deleteAction(sess *session.Session) view.Action {
-	a := view.Action{ID: "account.delete", Label: "Delete account", Danger: true, Enabled: true,
-		Reason: "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it."}
+	a := view.Action{ID: "account.delete", Label: "Delete account", Danger: true, Enabled: true}
 	if sess.UnlockUntil(time.Now()) == nil {
 		// No ellipsis: that the password is asked first is told by the
 		// unlock state in the top bar, as with Show password (§6 of the

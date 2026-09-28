@@ -344,7 +344,7 @@ func (s *Server) backupOnSignIn(sess *session.Session) {
 	blob := s.catalogOf(sess)
 	runs := s.users.BackupRuns(sess.AccountID())
 	for _, job := range blob.BackupJobs {
-		if job.OnSignInDays <= 0 || job.Mode == sealed.BackupToDownload {
+		if job.Off || job.OnSignInDays <= 0 || job.Mode == sealed.BackupToDownload {
 			continue
 		}
 		last := user.LastWholeRun(runs[job.ID])
@@ -428,21 +428,11 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 		if secrets[job.ID] != "" {
 			row.Trigger.Password.Value = text(secrets[job.ID])
 		}
-		q := func(op string) url.Values { return url.Values{"op": {op}, "job": {job.ID}} }
-		if s.users.BackupTriggerOn(sess.AccountID(), job.ID) {
-			row.Actions = append(row.Actions, view.Action{ID: "backup.trigger.off", Label: "Turn the external trigger off", Href: s.postQuery("/app/settings/backup", q("trigger-off")), Method: "POST", Enabled: true})
-		}
-		if job.Mode != sealed.BackupToDownload {
-			row.Actions = append(row.Actions, view.Action{ID: "backup.run", Label: "Run", Href: s.postQuery("/app/settings/backup", q("run")), Method: "POST", Enabled: true})
-		}
-		if job.Mode != sealed.BackupToWebDAV {
-			row.Actions = append(row.Actions, view.Action{ID: "backup.download", Label: "Download a copy", Icon: "i-down", Href: s.postQuery("/app/settings/backup", q("download")), Method: "GET", Enabled: true})
-		}
-		row.Actions = append(row.Actions,
-			view.Action{ID: "backup.edit", Label: "Edit", Href: s.postQuery("/app/settings/backup", url.Values{"job": {job.ID}}), Method: "GET", Enabled: true},
-			view.Action{ID: "backup.delete", Label: "Delete job", Href: s.postQuery("/app/settings/backup", q("delete")), Method: "POST", Danger: true, Enabled: true,
-				Reason: "Archives already made stay where they are: the job is deleted, not the copies."},
-		)
+		// The row is what a job is opened for, Run and Edit (s-backup-1);
+		// the trigger is turned off on its card and the job deleted on its
+		// page (s-backup-2).
+		row.Actions = []view.Action{s.backupRunAction(job, "Run"),
+			{ID: "backup.edit", Label: "Edit", Href: s.postQuery("/app/settings/backup", url.Values{"job": {job.ID}}), Method: "GET", Enabled: true}}
 		page.Jobs = append(page.Jobs, row)
 	}
 	job := sealed.BackupJob{Mode: sealed.BackupToWebDAV, Keep: 8, Encrypted: true}
@@ -450,8 +440,39 @@ func (s *Server) backupPageWith(sess *session.Session, editing *sealed.BackupJob
 		job = *editing
 	}
 	page.Add = s.backupForm(sess, blob, job, errs)
+	if saved, ok := blob.BackupJob(job.ID); ok && job.ID != "" {
+		// The job's page is headed by its name and its last copy
+		// (s-backup-2: «Job · last copy 2 days ago»).
+		page.Title, page.Subtitle = text(saved.Name), "Job · no copy yet"
+		if r := runs[job.ID]; len(r) > 0 {
+			page.Subtitle = "Job · last copy " + text(tf.ago(r[0].Started, now))
+		}
+	}
+	// The job's own page (s-backup-2): Cancel and Run now beside Save, the
+	// deletion at its foot with what it does not delete.
+	if saved, ok := blob.BackupJob(job.ID); ok && job.ID != "" {
+		page.Add.Actions = append(page.Add.Actions,
+			view.Action{ID: "backup.cancel", Label: "Cancel", Href: s.route("/app/settings/backup"), Method: "GET", Enabled: true},
+			s.backupRunAction(saved, "Run now"))
+		page.Delete = &view.Action{ID: "backup.delete", Label: "Delete job", Method: "POST", Danger: true, Enabled: true,
+			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"delete"}, "job": {job.ID}})}
+		page.DeleteNote = "Archives already made stay where they are: the schedule is deleted, not the copies."
+	}
 	page.Restore = s.restoreBlock(sess, blob)
 	return page
+}
+
+// backupRunAction starts the job from the screen. A job that writes to
+// WebDAV runs in the background; one that downloads streams its archive in
+// this request, so its Run is the download (s-backup-1 draws Run on every
+// job).
+func (s *Server) backupRunAction(job sealed.BackupJob, label view.Text) view.Action {
+	if job.Mode == sealed.BackupToDownload {
+		return view.Action{ID: "backup.run", Label: label, Method: "GET", Enabled: true,
+			Href: s.postQuery("/app/settings/backup", url.Values{"op": {"download"}, "job": {job.ID}})}
+	}
+	return view.Action{ID: "backup.run", Label: label, Method: "POST", Enabled: true,
+		Href: s.postQuery("/app/settings/backup", url.Values{"op": {"run"}, "job": {job.ID}})}
 }
 
 func selValue(accountID, path string) string { return accountID + "|" + path }
@@ -486,9 +507,12 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 		{Value: sealed.BackupToDownload, Label: "Download", Selected: job.Mode == sealed.BackupToDownload},
 		{Value: sealed.BackupToBoth, Label: "Both", Selected: job.Mode == sealed.BackupToBoth},
 	}
-	encrypted := ""
+	encrypted, on := "", ""
 	if job.Encrypted {
 		encrypted = "1"
+	}
+	if !job.Off {
+		on = "1"
 	}
 	passwordHint := view.Text("Separate from the sign-in password: the destination may be somebody else's hosting. Forget it and this job's archives open for nobody, including you.")
 	if job.Password != "" {
@@ -501,6 +525,8 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 	return withSubmit(s.plainForm(action, "POST",
 		csrfField(sess),
 		view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(job.Name), Required: true, Error: errs["name"]},
+		view.FormRow{Name: "on", Label: "Job is on", Kind: view.InputCheck, Value: text(on),
+			Options: []view.Option{{Value: "1", Label: "Job is on", Selected: !job.Off}}},
 		view.FormRow{Name: "src", Label: "What to copy", Kind: view.InputCheck, Options: srcOpts, Error: errs["src"],
 			Hint: "A file collection is copied as files. Tasks and notes live inside calendar collections and are copied with them."},
 		view.FormRow{Name: "mode", Label: "Where to", Kind: view.InputRadio, Options: modes},
@@ -562,6 +588,7 @@ func (s *Server) jobFromForm(r *http.Request, blob sealed.Blob, job sealed.Backu
 	}
 	job.Keep = keep
 	job.Encrypted = r.PostFormValue("encrypted") != ""
+	job.Off = r.PostFormValue("on") == ""
 	if pw := r.PostFormValue("password"); pw != "" {
 		job.Password = pw
 	}

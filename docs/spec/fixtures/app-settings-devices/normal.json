@@ -239,12 +239,12 @@
   ],
   "actions": [
     {
-      "enabled": false,
+      "enabled": true,
       "href": "/app/settings/devices?tab=apple",
       "id": "device.tab.apple",
       "label": "Apple",
       "method": "GET",
-      "reason": "Shown now."
+      "on": true
     },
     {
       "enabled": true,
@@ -294,11 +294,11 @@
       "href": "/app/settings/unlock",
       "id": "device.profile",
       "label": "Generate profile",
-      "method": "GET",
-      "reason": "Confirm your password first: the profile hands out the credentials of every included account."
+      "method": "GET"
     }
   ],
   "details": null,
+  "note": "Confirm your password first: the profile hands out the credentials of every included account.",
   "notices": [],
   "print": {
     "range": "",

@@ -1,7 +1,9 @@
 package web_test
 
 import (
+	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -97,12 +99,22 @@ func TestContactTimeline(t *testing.T) {
 	if !strings.Contains(string(page.Note), "Nothing was looked for before") {
 		t.Errorf("note = %q", page.Note)
 	}
-	var segments []string
+	// The segments are the frame's (s-contacts-7), the count after a space
+	// as the frame writes it; the one shown now is on and stays a choice —
+	// under «⋯» of a narrow strip it is a ticked item (s-contacts-14).
+	sameSegments(t, "timeline", page.Bar.Segments, "s-contacts-7", 0)
+	var segments, names []string
 	for _, a := range page.Bar.Segments {
 		segments = append(segments, string(a.Label))
+		if a.On != (a.ID == "timeline.show.all") || !a.Enabled || a.Reason != "" {
+			t.Errorf("segment %+v: only All is on, and every one can be taken", a)
+		}
 	}
-	if strings.Join(segments, "|") != "All · 5|Events · 2|Tasks · 1|Notes · 1|Files · 1" {
-		t.Errorf("segments = %v", segments)
+	for _, m := range regexp.MustCompile(`tc-seg__opt" type="button">(\w+) \d+<`).FindAllStringSubmatch(mockupFrame(t, "s-contacts-7"), -1) {
+		names = append(names, m[1])
+	}
+	if want := fmt.Sprintf("%s 5|%s 2|%s 1|%s 1|%s 1", names[0], names[1], names[2], names[3], names[4]); len(names) != 5 || strings.Join(segments, "|") != want {
+		t.Errorf("segments = %v, want %s", segments, want)
 	}
 	events := decode[view.ContactTimelinePage](t, f.h.do(get(card+"/timeline?show=events", f.sess)))
 	if n := len(timelineRows(events)); n != 2 {
@@ -115,22 +127,41 @@ func TestContactTimeline(t *testing.T) {
 		t.Error("the inset stays empty after the timeline was opened")
 	}
 
-	// Widen the range: three months further back, the old meeting joins.
-	var widen *view.Action
-	for i := range page.Range.Presets {
-		if page.Range.Presets[i].ID == "timeline.widen" {
-			widen = &page.Range.Presets[i]
+	// The range stays on the strip (s-contacts-7, s-contacts-14): From and
+	// To hold the window, Show asks again; «Widen the range» is answered
+	// with it, so there is no button of that name.
+	if len(page.Range.Presets) != 0 || page.Range.Form == nil {
+		t.Fatalf("range = %+v, want the form and no presets", page.Range)
+	}
+	values := map[string]string{}
+	for _, set := range page.Range.Form.Sets {
+		for _, r := range set.Rows {
+			values[r.Name] = string(r.Value)
 		}
 	}
-	if widen == nil {
-		t.Fatalf("presets = %+v", page.Range.Presets)
+	utc := now.UTC()
+	today := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC)
+	if values["from"] != today.AddDate(-1, 0, 0).Format("2006-01-02") || values["to"] != today.AddDate(0, 3, 0).Format("2006-01-02") {
+		t.Errorf("range form = %v, want 12 months back to 3 ahead", values)
 	}
-	u, _ := url.Parse(widen.Href)
-	wide := decode[view.ContactTimelinePage](t, f.h.do(get(u.RequestURI(), f.sess)))
+	show := actionByID(page.Range.Form.Actions, "range.show")
+	if show == nil || show.Label != "Show" || show.Method != "GET" {
+		t.Fatalf("form actions = %+v", page.Range.Form.Actions)
+	}
+	widened := page.Range.Form.Action + "?" + url.Values{"from": {today.AddDate(0, -15, 0).Format("2006-01-02")}, "to": {values["to"]}}.Encode()
+	wide := decode[view.ContactTimelinePage](t, f.h.do(get(widened, f.sess)))
 	waitPoll(t, f.h, f.sess, wide.Poll.TaskID, nil)
-	wide = decode[view.ContactTimelinePage](t, f.h.do(get(u.RequestURI(), f.sess)))
+	wide = decode[view.ContactTimelinePage](t, f.h.do(get(widened, f.sess)))
 	if _, ok := timelineRows(wide)["Old meeting"]; !ok {
-		t.Errorf("widened by three months, the meeting 14 months back is missing: %+v", wide.Groups)
+		t.Errorf("fifteen months back, the meeting 14 months back is missing: %+v", wide.Groups)
+	}
+	// To is the end of the window: a month ahead leaves out what is later.
+	near := page.Range.Form.Action + "?" + url.Values{"to": {today.AddDate(0, 0, 7).Format("2006-01-02")}}.Encode()
+	short := decode[view.ContactTimelinePage](t, f.h.do(get(near, f.sess)))
+	waitPoll(t, f.h, f.sess, short.Poll.TaskID, nil)
+	short = decode[view.ContactTimelinePage](t, f.h.do(get(near, f.sess)))
+	if _, ok := timelineRows(short)["Planning ahead"]; ok || string(short.Range.To) != today.AddDate(0, 0, 7).Format("2 January 2006") {
+		t.Errorf("to a week ahead: rows %v, range %+v", timelineRows(short), short.Range)
 	}
 
 	// Creating from here relates to the person.
@@ -166,7 +197,7 @@ func TestContactTimeline(t *testing.T) {
 	form.Set("summary", "Coffee with Anna")
 	form.Set("start.date", now.AddDate(0, 0, 7).Format("2006-01-02"))
 	form.Set("start.time", "10:00")
-	u, _ = url.Parse(sheet.Form.Action)
+	u, _ := url.Parse(sheet.Form.Action)
 	if resp := f.h.do(postForm(u.EscapedPath(), f.sess, form)); resp.Code != 303 {
 		t.Fatalf("save event: %d %s", resp.Code, resp.Body.String())
 	}

@@ -132,7 +132,7 @@ func TestForgotEscrowRequiresAdminWhenDeposited(t *testing.T) {
 		t.Fatal(err)
 	}
 	// The invitation went by letter, so it proved the address.
-	if err := svc.MarkInviteMailed(secret, true); err != nil {
+	if err := svc.MarkInviteMailed(secret, true, ""); err != nil {
 		t.Fatal(err)
 	}
 	if err := svc.CompleteInvite(ctx, secret, "bobpass1234"); err != nil {

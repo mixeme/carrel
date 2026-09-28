@@ -77,9 +77,15 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 	default:
 		b.Note = "A script outside can start this job. Turning it on stores your data key for this job under the server's key — a loss of protection, for convenience: the job can then read without you signed in."
 	}
+	if on {
+		b.Off = &view.Action{ID: "backup.trigger.off", Label: "Turn the external trigger off", Href: q("trigger-off"), Method: "POST", Enabled: true}
+	}
+	// Outside the unlock window the button opens the password sheet; what
+	// it is for is said in the note, not as a reason of a working button
+	// (C-6.2).
 	if sess.UnlockUntil(time.Now()) == nil {
 		b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.route("/app/settings/unlock")
-		b.Password.Reveal.Reason = "Confirm your password first: the trigger hands out this job's reading."
+		b.Note = "Confirm your password first: the trigger hands out this job's reading. " + b.Note
 	}
 	if (on || issued[job.ID] != "") && !job.Encrypted {
 		b.Note += " This job's archive is not encrypted: whoever holds the secret can take your data in the clear."

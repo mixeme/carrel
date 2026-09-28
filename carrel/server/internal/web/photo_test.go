@@ -293,7 +293,7 @@ func TestPhotoUploadFrameAndSave(t *testing.T) {
 		t.Fatalf("turn: %d %s", resp.Code, resp.Body.String())
 	}
 	page = decode[view.PhotoPreviewPage](t, f.h.do(get(rec+"/photo-preview", f.sess)))
-	if page.Rotate != 90 || hasAction(page.Actions, "photo.rotate.90") && actionEnabled(page.Actions, "photo.rotate.90") {
+	if a := actionByID(page.Actions, "photo.rotate.90"); page.Rotate != 90 || a == nil || !a.On || !a.Enabled {
 		t.Errorf("after the turn: rotate %d, actions %+v", page.Rotate, page.Actions)
 	}
 	_, img = fetchImage(t, f, page.Href)

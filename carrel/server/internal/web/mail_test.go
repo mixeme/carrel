@@ -188,7 +188,7 @@ func TestInvitationIsMailed(t *testing.T) {
 	for _, row := range page.Rows {
 		sent[string(row.Login)] = string(row.Sent)
 	}
-	if sent["bob"] != "sent" || sent["carol"] != "failed" {
+	if sent["bob"] != "sent" || sent["carol"] != "failed — 550 no such mailbox" {
 		t.Errorf("sent = %v", sent)
 	}
 }

@@ -330,7 +330,7 @@ func TestAdminInviteActionsNameTheInvite(t *testing.T) {
 		if row.Login != "carol" {
 			continue
 		}
-		for _, a := range row.Actions {
+		for _, a := range append(row.Actions, menuActions(row.Menu)...) {
 			switch a.ID {
 			case "admin.invite.extend":
 				extend = a.Href

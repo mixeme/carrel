@@ -152,6 +152,18 @@ func (f timeFmt) formatWhen(t time.Time, relative bool, now time.Time) view.When
 	return view.When(t.In(f.tz).Format("2 January") + ", " + f.clock(t))
 }
 
+// ago is a past moment the way a head says it: «just now», «5 min ago»,
+// «2 hours ago», «2 days ago» up to a month, then the day.
+func (f timeFmt) ago(t, now time.Time) string {
+	if d := now.Sub(t); d >= 24*time.Hour {
+		if days := int(d / (24 * time.Hour)); days < 31 {
+			return plural(days, "day") + " ago"
+		}
+		return f.date(t)
+	}
+	return string(f.formatWhen(t, true, now))
+}
+
 func plural(n int, unit string) string {
 	if n == 1 {
 		return "1 " + unit

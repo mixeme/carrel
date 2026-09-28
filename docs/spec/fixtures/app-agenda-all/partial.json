@@ -128,11 +128,12 @@
           "method": "GET"
         },
         {
-          "enabled": false,
+          "enabled": true,
           "href": "/app/calendar?from=2026-08-10",
           "id": "range.week",
           "label": "Week",
-          "method": "GET"
+          "method": "GET",
+          "on": true
         },
         {
           "enabled": true,

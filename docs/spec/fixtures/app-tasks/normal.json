@@ -39,29 +39,29 @@
     "range": null,
     "segments": [
       {
-        "enabled": false,
+        "enabled": true,
         "href": "/app/tasks/a-nc-home/dela?show=open",
         "id": "tasks.open",
-        "label": "Open · 3",
+        "label": "Open 3",
         "method": "GET",
-        "reason": "Shown now."
+        "on": true
       },
       {
         "enabled": true,
         "href": "/app/tasks/a-nc-home/dela?show=done",
         "id": "tasks.done",
-        "label": "Done · 0",
+        "label": "Done 0",
         "method": "GET"
       },
       {
         "enabled": true,
         "href": "/app/tasks/a-nc-home/dela?show=all",
         "id": "tasks.all",
-        "label": "All · 3",
+        "label": "All 3",
         "method": "GET"
       },
       {
-        "enabled": false,
+        "enabled": true,
         "href": "/app/tasks/a-nc-home/dela?sort=due",
         "id": "sort.due",
         "label": "By due",
