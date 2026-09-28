@@ -25,7 +25,11 @@ func (s *Server) traceOf(r *http.Request) (*discover.Result, *view.DiagnosticTra
 			Detail: "Enter the full address, starting with https:// or http://."}}}
 	}
 	pin := dav.NormalizeFingerprint(strings.TrimSpace(r.FormValue("certFingerprint")))
-	res, trace, err := discover.Run(r.Context(), s.guard, server, strings.TrimSpace(r.FormValue("login")), r.FormValue("password"), pin)
+	password := r.FormValue("password")
+	if noPasswordMark(r) {
+		password = "" // the field is off under the mark (s-profile-14)
+	}
+	res, trace, err := discover.Run(r.Context(), s.guard, server, strings.TrimSpace(r.FormValue("login")), password, pin)
 	if trace == nil {
 		trace = &view.DiagnosticTrace{}
 	}

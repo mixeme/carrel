@@ -70,6 +70,19 @@ func TestUpdateConnectionKeepsTheIDAndResealsItsLinks(t *testing.T) {
 		t.Errorf("password = %q after an edit with it empty, want the stored one", got.Password)
 	}
 
+	// «The server asks no password» (s-profile-14) is said by the mark, not by
+	// emptiness: it clears the stored password, whatever came beside it, and
+	// the link reads with none.
+	edited.Password, edited.NoPassword = "typed-left-over", true
+	must(f.svc.UpdateConnection(id, key, edited))
+	blob, _ = f.svc.Catalog(id, key)
+	if got, _ := blob.Connection(conn.ID); got.Password != "" || !got.NoPassword {
+		t.Errorf("connection = %+v after an edit with the mark, want no password", got)
+	}
+	if open, ok := f.svc.OpenPublished(link); !ok || open.Conn.Password != "" {
+		t.Errorf("the link reads with %q, want no password", open.Conn.Password)
+	}
+
 	found := false
 	for _, e := range f.st.Snapshot().Audit {
 		if e.What == "connection.edit" {

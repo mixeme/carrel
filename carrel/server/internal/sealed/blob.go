@@ -233,6 +233,10 @@ type Connection struct {
 	// FileRoot is the entered address when the server named no principal:
 	// that address is the file collection (S-6).
 	FileRoot string `json:"fileRoot,omitempty"`
+	// NoPassword says the server asks no password (s-profile-14): the
+	// password is empty and stays empty. An empty password field cannot say
+	// it — empty means «unchanged» on edit.
+	NoPassword bool `json:"noPassword,omitempty"`
 	// Feed marks a subscription answered as a connection; never stored.
 	Feed bool `json:"-"`
 }

@@ -16,12 +16,21 @@ import (
 )
 
 // connectionForm is what the Add form shows back. The password is never
-// echoed: a failed attempt asks for it again.
+// echoed: a failed attempt asks for it again. NoPassword is the mark «The
+// server asks no password» (s-profile-14), echoed as it was sent.
 type connectionForm struct {
 	Label, Server, Login, CertFingerprint string
 	ServerErr, LabelErr                   view.Text
+	NoPassword                            bool
 	// Editing is the connection the form edits; empty for a new one.
 	Editing string
+}
+
+// noPasswordMark reads the mark «The server asks no password». While it is
+// on, the password field is off and its value is not read.
+func noPasswordMark(r *http.Request) bool {
+	v := r.FormValue("noPassword")
+	return v == "on" || v == "true"
 }
 
 // getSettingsConnections shows the connections; ?reveal={account} fills that
@@ -40,7 +49,10 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 			s.notFound(w, r)
 			return
 		}
-		f = connectionForm{Label: conn.Label, Server: conn.Server, Login: conn.Login, CertFingerprint: conn.CertFingerprint, Editing: conn.ID}
+		// A connection stored with an empty password asks none, whether it was
+		// said by the mark or before the mark existed.
+		f = connectionForm{Label: conn.Label, Server: conn.Server, Login: conn.Login, CertFingerprint: conn.CertFingerprint,
+			NoPassword: conn.NoPassword || conn.Password == "", Editing: conn.ID}
 	}
 	page := s.connectionsPage(sess, f, nil)
 	if r.URL.Query().Get("op") == "feed" {
@@ -98,6 +110,7 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 		Server:          strings.TrimSpace(r.FormValue("server")),
 		Login:           strings.TrimSpace(r.FormValue("login")),
 		CertFingerprint: strings.TrimSpace(r.FormValue("certFingerprint")),
+		NoPassword:      noPasswordMark(r),
 	}
 	if !validServerURL(f.Server) {
 		f.ServerErr = text("Enter the full address, starting with https:// or http://.")
@@ -126,6 +139,9 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	password := r.FormValue("password")
+	if f.NoPassword {
+		password = ""
+	}
 	pin := dav.NormalizeFingerprint(f.CertFingerprint)
 
 	res, trace, err := discover.Run(r.Context(), s.guard, f.Server, f.Login, password, pin)
@@ -139,6 +155,7 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 		Server:          res.BaseURL,
 		Login:           f.Login,
 		Password:        password,
+		NoPassword:      f.NoPassword,
 		CertFingerprint: pin,
 		CalendarHome:    res.CalendarHome,
 		AddressBookHome: res.AddressBookHome,
@@ -203,10 +220,12 @@ func (s *Server) rediscover(w http.ResponseWriter, r *http.Request, apply bool) 
 
 // editConnection saves a connection's new address, login, password or
 // fingerprint under the same ID (C-4.1), and only after discovery answers
-// with them: a failed run changes nothing and gives the form back. An empty
-// password is the stored one. The catalog is not replaced: what discovery
-// finds is compared with it and offered, as re-discovery does (S-6.1), so a
-// collection at the same path keeps its ticks and its links.
+// with them: a failed run changes nothing and gives the form back. The mark
+// «The server asks no password» clears the stored password (s-profile-14);
+// without it an empty password is the stored one. The catalog is not
+// replaced: what discovery finds is compared with it and offered, as
+// re-discovery does (S-6.1), so a collection at the same path keeps its ticks
+// and its links.
 func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -228,6 +247,7 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 		Server:          strings.TrimSpace(r.FormValue("server")),
 		Login:           strings.TrimSpace(r.FormValue("login")),
 		CertFingerprint: strings.TrimSpace(r.FormValue("certFingerprint")),
+		NoPassword:      noPasswordMark(r),
 		Editing:         conn.ID,
 	}
 	if !validServerURL(f.Server) {
@@ -241,7 +261,10 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	password := r.FormValue("password")
-	if password == "" {
+	switch {
+	case f.NoPassword:
+		password = ""
+	case password == "":
 		password = conn.Password
 	}
 	pin := dav.NormalizeFingerprint(f.CertFingerprint)
@@ -256,6 +279,7 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 		Server:          res.BaseURL,
 		Login:           f.Login,
 		Password:        password,
+		NoPassword:      f.NoPassword,
 		CertFingerprint: pin,
 		CalendarHome:    res.CalendarHome,
 		AddressBookHome: res.AddressBookHome,
@@ -393,9 +417,12 @@ func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice
 }
 
 // connectionForm is Add, or Edit of one connection: the same fields, the
-// address and login filled, the password empty and kept when left so.
+// address and login filled, the password empty and kept when left so. The
+// mark «The server asks no password» stands right after it and turns it off
+// (s-profile-14): an empty active field means «unchanged», so «no password»
+// cannot be said by emptiness.
 func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Form {
-	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword}
+	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, ReadOnly: f.NoPassword}
 	action, id, label := "/app/settings/connections", "connection.add", "Connect"
 	if f.Editing != "" {
 		password.Hint = "Leave it empty to keep the stored one."
@@ -404,11 +431,13 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 	}
 	form := s.plainForm(action, "POST",
 		csrfField(sess),
-		view.FormRow{Name: "label", Label: "Label", Kind: view.InputText, Value: text(f.Label), Error: f.LabelErr,
-			Hint: "Your name for this account, as the lists show it. Left empty, the server's host."},
-		view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true},
-		view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(f.Login)},
+		view.FormRow{Name: "label", Label: "Label", Kind: view.InputText, Value: text(f.Label), Error: f.LabelErr, Placeholder: "optional"},
+		view.FormRow{Name: "server", Label: "Server URL", Kind: view.InputURL, Value: text(f.Server), Error: f.ServerErr, Required: true,
+			Hint: ".well-known is tried first, then the URL exactly as typed."},
+		view.FormRow{Name: "login", Label: "Username", Kind: view.InputText, Value: text(f.Login)},
 		password,
+		view.FormRow{Name: "noPassword", Label: "The server asks no password", Kind: view.InputCheck, Value: text(boolStr(f.NoPassword)),
+			Disables: "password"},
 		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint (SHA-256)", Kind: view.InputText, Value: text(f.CertFingerprint)},
 	)
 	if f.Editing != "" {
@@ -416,8 +445,11 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 		return withSubmit(form, id, label,
 			view.Action{ID: "connection.edit.cancel", Label: "Cancel", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true})
 	}
+	// The dialog is the content of main, not a sheet over the screen: the
+	// client has nothing to close it with, so its Cancel is here (C-7.2).
 	return withSubmit(form, id, label,
-		view.Action{ID: "connection.test", Label: "Test only", Href: s.route("/app/settings/connections/test"), Method: "POST", Enabled: true})
+		view.Action{ID: "connection.test", Label: "Test only", Href: s.route("/app/settings/connections/test"), Method: "POST", Enabled: true},
+		view.Action{ID: "connection.add.cancel", Label: "Cancel", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true})
 }
 
 // connectionCard never carries the password. Outside the unlock window Show
@@ -425,7 +457,11 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 // request is what releases and journals it (S-10.7).
 func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.Blob, c sealed.Connection, unlocked bool) view.ConnectionCard {
 	reveal := view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}
-	if unlocked {
+	switch {
+	case c.NoPassword || c.Password == "":
+		// Nothing to release: the button stays, off, and says why (U-6.0).
+		reveal.Enabled, reveal.Reason = false, "The server asks no password"
+	case unlocked:
 		reveal.Href = s.postQuery("/app/settings/connections", url.Values{"reveal": {c.ID}})
 	}
 	card := view.ConnectionCard{
@@ -509,6 +545,9 @@ func (s *Server) revealPassword(sess *session.Session, page *view.ConnectionsPag
 	for i := range page.Accounts {
 		if page.Accounts[i].AccountID != id {
 			continue
+		}
+		if !page.Accounts[i].Password.Reveal.Enabled {
+			return false // no password to release, and nothing to journal
 		}
 		password, err := s.users.RevealConnectionPassword(sess.AccountID(), key, id)
 		if err != nil {

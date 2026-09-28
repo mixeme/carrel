@@ -26,6 +26,11 @@ type FormRow struct {
 	// Образец в пустом поле, как его рисует кадр: «DD.MM.YYYY» у дня
 	// рождения (s-contacts-4); у прочих полей пусто
 	Placeholder Text `json:"placeholder,omitempty"`
+	// У отметки — Name поля, которое она выключает, пока стоит: «The server
+	// asks no password» и Password (s-profile-14). ReadOnly того поля приходит
+	// по текущему значению отметки, дальше клиент переключает его сам; у
+	// прочих полей пусто
+	Disables string `json:"disables,omitempty"`
 }
 type Option struct {
 	Value     string `json:"value"`

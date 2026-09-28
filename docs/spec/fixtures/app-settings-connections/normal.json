@@ -871,6 +871,13 @@
         "id": "connection.test",
         "label": "Test only",
         "method": "POST"
+      },
+      {
+        "enabled": true,
+        "href": "/app/settings/connections",
+        "id": "connection.add.cancel",
+        "label": "Cancel",
+        "method": "GET"
       }
     ],
     "errors": [],
@@ -894,11 +901,12 @@
           {
             "error": "",
             "extra": null,
-            "hint": "Your name for this account, as the lists show it. Left empty, the server's host.",
+            "hint": "",
             "kind": "text",
             "label": "Label",
             "name": "label",
             "options": [],
+            "placeholder": "optional",
             "readOnly": false,
             "required": false,
             "value": ""
@@ -906,7 +914,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "",
+            "hint": ".well-known is tried first, then the URL exactly as typed.",
             "kind": "url",
             "label": "Server URL",
             "name": "server",
@@ -920,7 +928,7 @@
             "extra": null,
             "hint": "",
             "kind": "text",
-            "label": "Login",
+            "label": "Username",
             "name": "login",
             "options": [],
             "readOnly": false,
@@ -934,6 +942,19 @@
             "kind": "password",
             "label": "Password",
             "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "disables": "password",
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "check",
+            "label": "The server asks no password",
+            "name": "noPassword",
             "options": [],
             "readOnly": false,
             "required": false,

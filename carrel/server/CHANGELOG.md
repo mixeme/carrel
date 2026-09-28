@@ -17,6 +17,54 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.63 — 2026-09-28
+
+A server that asks no password is said by a check in the connection form
+(from-typecase note 16, s-profile-14): «The server asks no password» right
+after Password turns the password field off. An empty active field still
+means «unchanged» on edit, so the mark is what clears a stored password.
+
+### Added
+
+- **`FormRow.disables`** (new, omitted when empty) — on a check, the `name`
+  of the row it turns off while ticked (C-6.8, a general rule). The server
+  sends that row's `readOnly` for the check's current value; the client
+  toggles it itself as the check is ticked and unticked. The row stays in
+  place; its value is not read while the check is on.
+- **Connection form** (`ConnectionsPage.add`, Add and Edit): a check row
+  **`noPassword`** «The server asks no password» (`kind` `check`, `value`
+  `true` or empty, `disables` `password`) right after Password. Ticked,
+  Password comes `readOnly`. The edit form comes ticked for a connection
+  whose stored password is empty.
+- **The mark is kept with the connection.** Connect with it stores no
+  password whatever the field held; Save with it clears the stored password,
+  and the published links of the connection are sealed again with the empty
+  one. Without it, an empty field keeps the stored password and a typed one
+  replaces it, as before. «Test only» (`/app/settings/connections/test`)
+  reads no password under the mark; a failed Connect or Save gives the form
+  back with the mark as sent. The journal line is the same
+  `connection.edit`: the connection and the number of links.
+
+### Changed
+
+- **Username**, not Login, labels the login row of the connection form
+  (s-profile-2, -11, -14); the field name stays `login`.
+- **The Connect account dialog is the frame's** (s-profile-14): Label has the
+  `placeholder` «optional» and no hint; Server URL has the hint «.well-known
+  is tried first, then the URL exactly as typed.»; the Add form's actions
+  are Connect, Test only and **Cancel** (`connection.add.cancel`, GET
+  `/app/settings/connections`). The dialog is the content of main, not a
+  sheet, so its Cancel is the server's (C-7.2), as the edit form's already
+  was.
+- **Show password** (`connection.password`) on the card of a connection
+  without a password comes off, with the reason «The server asks no
+  password»; `?reveal=` releases nothing for it and journals nothing.
+
+### For consumers
+
+Send `noPassword=true` (or `on`) with the form when the check is ticked. For
+any check with `disables`, turn the named row off while it is ticked.
+
 ## v0.2.62 — 2026-09-28
 
 Attach has an arrow everywhere a file is attached to a record (from-typecase

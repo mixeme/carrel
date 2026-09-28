@@ -38,6 +38,9 @@ func (s *Service) AddConnection(viewerID string, dataKey [crypt.KeyLen]byte, con
 		return "", err
 	}
 	conn.ID = id
+	if conn.NoPassword {
+		conn.Password = ""
+	}
 	now := s.now()
 	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
 		u := st.UserByID(viewerID)
@@ -294,8 +297,9 @@ func (s *Service) RemoveConnection(viewerID string, dataKey [crypt.KeyLen]byte, 
 // address or with its new credentials: the server, login, password, the
 // accepted fingerprint and the homes. The ID stays (C-4.1) and with it the
 // catalog, the ticks and everything bound to them; the catalog is reconciled
-// by ApplyRediscovery, as the person confirms it (S-6.1). An empty password
-// keeps the stored one. Every published link of the connection gets its
+// by ApplyRediscovery, as the person confirms it (S-6.1). NoPassword clears
+// the stored password — the server asks none (s-profile-14); without it an
+// empty password keeps the stored one. Every published link of the connection gets its
 // envelope sealed again with the new credentials in the same edit, or the
 // public page would go on reading with the old ones. The journal names the
 // connection and the number of links, not the address.
@@ -319,7 +323,10 @@ func (s *Service) UpdateConnection(viewerID string, dataKey [crypt.KeyLen]byte, 
 		if stored == nil {
 			return nil, ErrNotFound
 		}
-		if conn.Password == "" {
+		switch {
+		case conn.NoPassword:
+			conn.Password = ""
+		case conn.Password == "":
 			conn.Password = stored.Password
 		}
 		conn.Feed = false
