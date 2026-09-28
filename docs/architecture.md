@@ -15,9 +15,12 @@
 Монорепозиторий. Сервер — `carrel/server/`, `module carrel.dev/carrel/server`,
 AGPL-3.0-or-later; не корень репозитория и не корневой `server/`. Typecase
 (`carrel.dev/typecase`, MIT) с 10.09.2026 живёт в своём репозитории. Будущий
-клиент — `carrel/client/`: импортирует `carrel.dev/carrel/server/view` и
-Typecase; `internal/*` ему недоступны, и Typecase импортирует только
-`cmd/carrel`, не `internal`.
+клиент — **отдельный модуль** `carrel.dev/carrel/client` в `carrel/client/`
+(решение владельца 28.09.2026): импортирует `carrel.dev/carrel/server/view`,
+открытый пакет отрисовки сервера и Typecase; `internal/*` ему недоступны.
+Сервер импортирует клиент только из `cmd/carrel` — через него же, и только
+там, в граф сервера входит Typecase. Typecase подключается меткой выпуска;
+пока меток нет, клиент её не подключает.
 
 `VERSION` в корне — версия продукта. `THIRD_PARTY.md` — в том модуле, куда
 добавили зависимость, тем же коммитом.
