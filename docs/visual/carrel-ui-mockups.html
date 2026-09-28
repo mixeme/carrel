@@ -3073,6 +3073,22 @@ Read  2 min ago</div>
   </div>
   <figcaption>У почты типов меньше, чем у телефона: vCard различает только рабочую, домашнюю и прочую.</figcaption>
   </figure>
+
+<figure style="flex:0 1 250px">
+  <div class="frame" data-frame="s-contacts-22">
+    <div class="frame-label"><span>Подпись адреса</span><span class="frag">список</span><i>поле Label</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <div class="tc-menu tc-menu--w212">
+        <button class="is-on tc-menu__item" type="button" role="menuitem">home</button>
+        <button class="tc-menu__item" type="button" role="menuitem">work</button>
+        <button class="tc-menu__item" type="button" role="menuitem">other</button>
+        <span class="tc-menu__sep"></span>
+        <button class="tc-menu__item" type="button" role="menuitem">дача</button>
+      </div>
+    </div>
+  </div>
+  <figcaption>У адреса — типы vCard home, work, other. Подпись, которую написал другой клиент, стоит под чертой как есть: её не переводят в тип и не теряют.</figcaption>
+  </figure>
 </div>
 
 <figure>
@@ -5870,7 +5886,7 @@ Read  2 min ago</div>
                 <div class="tc-field tc-field--fix130"><label>Due date</label><input class="tc-in is-mono is-ph" type="date" placeholder="YYYY-MM-DD" aria-label="Due date"></div>
                 <div class="tc-field tc-field--fix96"><label>Due time</label><input class="tc-in is-mono is-ph" type="text" placeholder="--:--" aria-label="Due time"></div>
               </div>
-              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">A task with no due date is a task all the same — the field may stay empty.</span>
+              <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">No time means the whole day. A task with no due date is a task all the same — both may stay empty.</span>
             </div>
             <div class="tc-sheet__foot">
               <button class="tc-btn is-primary" type="button">Save task</button>
@@ -5883,7 +5899,7 @@ Read  2 min ago</div>
       </div>
     </div>
   </div>
-  <figcaption><b>Срок можно не ставить.</b> Задача без срока — обычная задача, и лист об этом говорит прямо, а не встречает пустым обязательным полем. Список в шапке — тот же выбор «куда», что у заметки и контакта.</figcaption>
+  <figcaption><b>Срок можно не ставить, а время — тем более:</b> дата без времени — срок на весь день, флажка All day на быстром листе нет (решение владельца), он есть в полной правке. <b>Срок можно не ставить.</b> Задача без срока — обычная задача, и лист об этом говорит прямо, а не встречает пустым обязательным полем. Список в шапке — тот же выбор «куда», что у заметки и контакта.</figcaption>
   </figure>
   <figure style="flex:0 1 300px">
   <div class="frame" data-frame="s-notes-19">
@@ -9550,7 +9566,7 @@ Read  2 min ago</div>
         <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">sftpgo · vps · Documents</span>
         </div>
         <div class="tc-sheet__body">
-          <div class="tc-msg is-alert tc-msg--flush">The folder and all <b>412</b> files in it are deleted on <span class="tc-mono">files.example.org</span>. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
+          <div class="tc-msg is-alert tc-msg--flush">The folder and all <b>412</b> files in it are deleted on sftpgo · vps. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
           <div class="tc-sheet__block">
             <div class="tc-rubric tc-rubric--bot7">What is pointing at it now</div>
             <div class="tc-stack tc-stack--gap-6 tc-line__text">
@@ -9558,6 +9574,7 @@ Read  2 min ago</div>
               <span class="tc-stack__item"><b>Backup job «Личное на домашний диск»</b> <span class="tc-dim">— copies this folder; it will run one short and say so</span></span>
             </div>
           </div>
+          <div class="tc-msg tc-msg--flush">Last time it was in an archive: <span class="tc-mono">2026-08-14</span>. Restoring brings the files back into a <b>new</b> folder — not into this one, and not to this address.</div>
           <div class="tc-line tc-line--gap-8">
             <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-file"/></svg>Open in Files</button>
             <span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Download what you need from it there first.</span>
@@ -9568,7 +9585,7 @@ Read  2 min ago</div>
       </div>
     </div>
   </div>
-  <figcaption>Как удаление коллекции: что исчезнет, что на неё смотрит, набор имени. Вместо «Download .ics first» — «Open in Files»: папку скачивают там, файлами или архивом.</figcaption>
+  <figcaption>Как удаление коллекции: что исчезнет, что на неё смотрит, набор имени. Вместо «Download .ics first» — «Open in Files»: папку скачивают там, файлами или архивом. Строка архива — как у коллекции: задание копирования на папку смотрит.</figcaption>
   </figure>
 
 <figure style="flex:1 1 330px">
@@ -10262,7 +10279,7 @@ Read  2 min ago</div>
               <span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Дни рождения</span>
             </div>
             <div class="tc-sheet__body">
-              <div class="tc-msg is-alert tc-msg--flush">The calendar and all <b>51</b> events in it are deleted on <span class="tc-mono">cloud.example.org</span>. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
+              <div class="tc-msg is-alert tc-msg--flush">The calendar and all <b>51</b> events in it are deleted on nextcloud. Carrel holds no copy — it reads and writes, it does not store — so there is nothing here to undo it with.</div>
               <div class="tc-sheet__block">
                 <div class="tc-rubric tc-rubric--bot7">What is pointing at it now</div>
                 <div class="tc-stack tc-stack--gap-6 tc-line__text">
