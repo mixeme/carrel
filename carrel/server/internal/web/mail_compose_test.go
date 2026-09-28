@@ -384,3 +384,20 @@ func TestLetterNoteFormat(t *testing.T) {
 		t.Errorf("files = %v", files)
 	}
 }
+
+// A recipient's label is the label the card shows (S-11): a TYPE that is no
+// label — INTERNET, the vCard 3 default of every address — is not one, and
+// «WORK,INTERNET» is work.
+func TestRecipientLabelIsTheCardsLabel(t *testing.T) {
+	f, _ := letterFixture(t)
+	f.srv.Seed(searchBook+"grace.vcf", "BEGIN:VCARD\nVERSION:3.0\nUID:grace\nFN:Grace Hopper\n"+
+		"EMAIL;TYPE=INTERNET:grace@example.org\nEMAIL;TYPE=WORK,INTERNET:grace@navy.example\nEND:VCARD\n")
+	sheet := decode[view.MailSheet](t, f.h.do(get("/app/mail/compose?q=grace", f.sess)))
+	got := map[string]string{}
+	for _, r := range sheet.Suggest {
+		got[string(r.Address)] = string(r.Label)
+	}
+	if got["grace@example.org"] != "" || got["grace@navy.example"] != "work" {
+		t.Errorf("labels = %v", got)
+	}
+}

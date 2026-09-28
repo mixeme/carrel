@@ -358,7 +358,10 @@ func (s *Server) suggestRecipients(ctx context.Context, sess *session.Session, q
 				continue
 			}
 			seen[strings.ToLower(addr)] = true
-			out = append(out, view.Recipient{Address: text(addr), Name: text(name), Label: text(strings.ToLower(v.Params["TYPE"]))})
+			// The label the card shows (S-11), not the raw TYPE: INTERNET and
+			// the like are no label.
+			label, _ := shownLabel("EMAIL", v.Params["TYPE"])
+			out = append(out, view.Recipient{Address: text(addr), Name: text(name), Label: text(strings.ToLower(label))})
 		}
 	}
 	var notAsked []view.Stamp

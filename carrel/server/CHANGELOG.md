@@ -17,6 +17,15 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.74 — 2026-09-28
+
+### Fixed
+
+- A letter's recipient suggestions label each address the way the card labels
+  it. Before, the label was the raw TYPE lower-cased, so a vCard 3 address
+  showed «internet», and «WORK,INTERNET» showed «work,internet». Now the first
+  is unlabelled and the second is «work».
+
 ## v0.2.73 — 2026-09-28
 
 The render contract is open: `carrel.dev/carrel/server/render` (client plan,
