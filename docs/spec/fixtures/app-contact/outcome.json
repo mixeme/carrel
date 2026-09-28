@@ -1,0 +1,413 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
+      "id": "record.edit",
+      "label": "Edit",
+      "method": "GET"
+    },
+    {
+      "danger": true,
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e19",
+      "icon": "i-trash",
+      "id": "record.delete",
+      "label": "Delete contact",
+      "method": "POST"
+    }
+  ],
+  "avatar": {
+    "colour": "#8c6239",
+    "href": "",
+    "initials": "АК"
+  },
+  "books": [],
+  "details": null,
+  "fields": [
+    {
+      "href": "tel:+7912445-10-88",
+      "label": "Phone · mobile",
+      "mono": false,
+      "value": "+7 912 445-10-88"
+    },
+    {
+      "href": "tel:+7495120-45-00",
+      "label": "Phone · work",
+      "mono": false,
+      "value": "+7 495 120-45-00"
+    },
+    {
+      "href": "mailto:a.kovaleva@slovo.example",
+      "label": "Email · work",
+      "mono": false,
+      "value": "a.kovaleva@slovo.example"
+    },
+    {
+      "href": "",
+      "label": "Birthday",
+      "mono": false,
+      "value": "1987-03-14"
+    },
+    {
+      "href": "",
+      "label": "Categories",
+      "mono": false,
+      "value": "работа, издательство"
+    },
+    {
+      "href": "",
+      "label": "Note",
+      "mono": false,
+      "value": "Пишет по вторникам, отвечает в тот же день."
+    }
+  ],
+  "foreign": [
+    {
+      "href": "",
+      "label": "X-ABLABEL",
+      "mono": true,
+      "value": "издательство"
+    },
+    {
+      "href": "",
+      "label": "X-CARREL-UNKNOWN-FLAG",
+      "mono": true,
+      "value": "1"
+    },
+    {
+      "href": "",
+      "label": "X-EVOLUTION-FILE-AS",
+      "mono": true,
+      "value": "Ковалёва, Анна"
+    }
+  ],
+  "menu": [
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move",
+      "icon": "i-move",
+      "id": "record.move",
+      "label": "Move",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?copy=1",
+      "icon": "i-dup",
+      "id": "record.copy",
+      "label": "Copy",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/export?uid=4f2b-9c31-a0e7",
+      "icon": "i-down",
+      "id": "record.export",
+      "label": "Export .vcf",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts\u0026uid=4f2b-9c31-a0e7",
+      "icon": "i-link",
+      "id": "publish",
+      "label": "Publish a link",
+      "method": "GET"
+    }
+  ],
+  "more": {
+    "enabled": true,
+    "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+    "id": "contact.timeline",
+    "label": "Open the timeline",
+    "method": "GET"
+  },
+  "name": "Анна Ковалёва",
+  "notices": [
+    {
+      "actions": [],
+      "body": "Общий · baikal could not be read, and what it holds keeps the old address.",
+      "details": null,
+      "role": "alert",
+      "title": "Rewritten in 1 of 1 records."
+    }
+  ],
+  "photoHref": "",
+  "photoNote": "",
+  "print": {
+    "range": "nextcloud · Контакты",
+    "taken": "10 August 2026, 17:06",
+    "title": "Анна Ковалёва"
+  },
+  "rail": {
+    "about": {
+      "enabled": true,
+      "href": "/about",
+      "id": "about",
+      "label": "Carrel 0.0.1 · 786949a",
+      "method": "GET"
+    },
+    "foot": [],
+    "nav": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty",
+        "icon": "i-back",
+        "id": "nav.back",
+        "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [],
+    "note": "",
+    "sections": [
+      {
+        "account": "nextcloud",
+        "accountID": "a-nc-home",
+        "rows": [
+          {
+            "colour": "#a05a2c",
+            "count": 1,
+            "detail": "",
+            "href": "/app/contacts/a-nc-home/arhiv",
+            "label": "Архив",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/arhiv/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "message": "",
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "on"
+          },
+          {
+            "colour": "#4a6b52",
+            "count": 4,
+            "detail": "",
+            "href": "/app/contacts/a-nc-home/kontakty",
+            "label": "Контакты",
+            "menu": [
+              {
+                "enabled": true,
+                "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.rename",
+                "label": "Rename",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.move",
+                "label": "Move to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/import",
+                "icon": "i-up",
+                "id": "collection.import",
+                "label": "Import",
+                "method": "GET",
+                "separator": true
+              },
+              {
+                "enabled": true,
+                "href": "/app/contacts/a-nc-home/kontakty/export",
+                "icon": "i-down",
+                "id": "collection.export",
+                "label": "Export",
+                "method": "GET"
+              },
+              {
+                "danger": true,
+                "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
+                "separator": true
+              }
+            ],
+            "message": "",
+            "readOnly": false,
+            "retry": null,
+            "state": "ok",
+            "tick": "on"
+          }
+        ],
+        "state": "ok"
+      }
+    ],
+    "shortcuts": [],
+    "tags": []
+  },
+  "readOnly": false,
+  "source": {
+    "changed": "10 August 2026, 17:04",
+    "colour": "#4a6b52",
+    "lastRead": "2 min ago",
+    "objects": null,
+    "readOnly": false,
+    "stamp": "nextcloud · Контакты"
+  },
+  "subtitle": "Издательство «Слово» · Выпускающий редактор",
+  "tags": [
+    {
+      "href": "/app/contacts/a-nc-home/kontakty?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0",
+      "label": "работа",
+      "on": false
+    },
+    {
+      "href": "/app/contacts/a-nc-home/kontakty?tag=%D0%B8%D0%B7%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE",
+      "label": "издательство",
+      "on": false
+    }
+  ],
+  "timeline": [],
+  "title": "Анна Ковалёва",
+  "top": {
+    "newMenu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/quick",
+        "id": "new.contacts",
+        "label": "Contact",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/calendar/quick",
+        "id": "new.calendar",
+        "label": "Event",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/tasks/quick",
+        "id": "new.tasks",
+        "label": "Task",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/quick",
+        "id": "new.notes",
+        "label": "Note",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/files/picker?for=upload",
+        "icon": "i-up",
+        "id": "new.upload",
+        "label": "Upload file",
+        "method": "GET",
+        "separator": true
+      }
+    ],
+    "refresh": {
+      "action": {
+        "enabled": false,
+        "id": "",
+        "label": "",
+        "method": ""
+      },
+      "answered": "",
+      "running": false
+    },
+    "search": {
+      "action": "/app/search",
+      "history": [],
+      "jump": [],
+      "query": "",
+      "whole": null
+    },
+    "signed": {
+      "instance": "carrel.example",
+      "login": "mix"
+    },
+    "unlocked": null,
+    "user": [
+      {
+        "enabled": true,
+        "href": "/app/settings/account",
+        "icon": "i-gear",
+        "id": "user.settings",
+        "label": "Settings",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/admin/",
+        "icon": "i-adm",
+        "id": "user.admin",
+        "label": "Administration",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/logout",
+        "id": "user.logout",
+        "label": "Sign out",
+        "method": "POST",
+        "separator": true
+      }
+    ]
+  },
+  "uid": "4f2b-9c31-a0e7"
+}

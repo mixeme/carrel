@@ -330,8 +330,13 @@ func TestEditContactWritesOnlyWhatChanged(t *testing.T) {
 	form.Set("fn", "Ada King")
 	form.Set("email.0", "ada@new.example")
 	resp := f.h.do(postForm(rec+"/edit", f.sess, form))
-	if resp.Code != http.StatusSeeOther || resp.Header().Get("Location") != rec {
+	// An address replaced is asked about (S-15.4); nothing names it here,
+	// so the question comes back to the card at once.
+	if resp.Code != http.StatusSeeOther || !strings.HasPrefix(resp.Header().Get("Location"), rec+"/rewrite?plan=") {
 		t.Fatalf("POST: %d %s %s", resp.Code, resp.Header().Get("Location"), resp.Body.String())
+	}
+	if next := f.h.do(get(resp.Header().Get("Location"), f.sess)); next.Code != http.StatusSeeOther || next.Header().Get("Location") != rec {
+		t.Fatalf("the question with nothing to ask: %d %s", next.Code, next.Header().Get("Location"))
 	}
 	got := body(t, f, "ada.vcf")
 	mustContain(t, got, "FN:Ada King", "EMAIL;TYPE=work:ada@new.example", "EMAIL:second@example.com", "TEL:+44 20 1", "X-CUSTOM:keep", "UID:ada")

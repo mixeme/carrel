@@ -78,6 +78,7 @@ func reportServer(t *testing.T, s liveServer) {
 	t.Logf("base      %s", res.BaseURL)
 	t.Logf("principal %s", res.Principal)
 	t.Logf("homes     calendar=%q addressbook=%q fileOnly=%v", res.CalendarHome, res.AddressBookHome, res.FileOnly)
+	t.Logf("schedules %q addresses=%q", res.Scheduling, res.Addresses)
 	if len(res.Collections) == 0 {
 		t.Log("collections: none")
 		return

@@ -24,7 +24,22 @@ type Result struct {
 	AddressBookHome string
 	Collections     []Collection
 	FileOnly        bool
+	// Scheduling is whether the principal announced a schedule-outbox-URL
+	// (RFC 6638): SchedulingYes, SchedulingNo, or SchedulingUnknown when
+	// there is no principal to ask or it did not answer (S-6, S-15.4).
+	Scheduling string
+	// Addresses are the person's own calendar addresses as the principal
+	// named them (calendar-user-address-set): mailto: ones only, lower-cased,
+	// without the scheme.
+	Addresses []string
 }
+
+// What a principal said about scheduling.
+const (
+	SchedulingUnknown = ""
+	SchedulingYes     = "yes"
+	SchedulingNo      = "no"
+)
 
 // Diff is the proposed change set for re-discovery (S-6.1).
 type Diff struct {

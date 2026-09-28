@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"carrel.dev/carrel/server/internal/sealed"
@@ -45,7 +46,7 @@ func TestUpdateConnectionKeepsTheIDAndResealsItsLinks(t *testing.T) {
 	if !ok {
 		t.Fatal("the connection lost its ID")
 	}
-	if got != edited {
+	if !reflect.DeepEqual(got, edited) {
 		t.Errorf("connection = %+v, want %+v", got, edited)
 	}
 	if len(blob.Connections) != 2 || len(blob.Selected) != 1 || len(blob.CollectionsOf(conn.ID)) != 1 {

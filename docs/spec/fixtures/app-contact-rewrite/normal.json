@@ -1,0 +1,68 @@
+{
+  "actions": [
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/rewrite?plan=r-plan",
+      "id": "contact.rewrite.confirm",
+      "label": "Rewrite 1 record",
+      "method": "POST"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/rewrite?op=leave\u0026plan=r-plan",
+      "id": "contact.rewrite.leave",
+      "label": "Leave as is",
+      "method": "POST"
+    }
+  ],
+  "effects": [
+    {
+      "href": "",
+      "label": "1 record on servers that schedule",
+      "mono": false,
+      "value": "the server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees"
+    }
+  ],
+  "form": {
+    "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/rewrite?plan=r-plan",
+    "actions": [],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          }
+        ]
+      }
+    ]
+  },
+  "kept": [
+    {
+      "href": "",
+      "label": "Общий · baikal",
+      "mono": false,
+      "value": "could not be read: the server answered 401 Unauthorized. What it holds keeps the old address."
+    }
+  ],
+  "pairs": [
+    {
+      "from": "a.kovaleva@example.org",
+      "note": "1 event or task names the old one; it drops out of the person’s timeline",
+      "to": "a.kovaleva@slovo.example"
+    }
+  ],
+  "subject": "Анна Ковалёва · saved",
+  "title": "Rewrite the address in their records?"
+}

@@ -35,8 +35,45 @@ func Expand(obj *model.Object, from, to time.Time, loc *time.Location) ([]time.T
 		loc = time.UTC
 	}
 
+	set, err := seriesOf(comp, loc)
+	if err != nil {
+		return nil, err
+	}
+	if set == nil {
+		start, ok := startOf(comp, loc)
+		if !ok {
+			return nil, nil
+		}
+		if !start.Before(from) && !start.After(to) {
+			return []time.Time{start.UTC()}, nil
+		}
+		return nil, nil
+	}
+
+	raw := set.Between(from, to, true)
+	out := make([]time.Time, len(raw))
+	for i, t := range raw {
+		out[i] = t.UTC()
+	}
+	return out, nil
+}
+
+// startOf is DTSTART of a component, false without one.
+func startOf(comp *ical.Component, loc *time.Location) (time.Time, bool) {
+	p := comp.Props.Get(ical.PropDateTimeStart)
+	if p == nil {
+		return time.Time{}, false
+	}
+	start, err := propTime(p, loc)
+	return start, err == nil
+}
+
+// seriesOf is the recurrence set of a component — RRULE, RDATE and EXDATE
+// from its DTSTART — or nil when it neither repeats nor names extra dates.
+func seriesOf(comp *ical.Component, loc *time.Location) (*rrule.Set, error) {
 	var start time.Time
 	if p := comp.Props.Get(ical.PropDateTimeStart); p != nil {
+		var err error
 		if start, err = propTime(p, loc); err != nil {
 			return nil, err
 		}
@@ -76,23 +113,10 @@ func Expand(obj *model.Object, from, to time.Time, loc *time.Location) ([]time.T
 		set.RDate(rd)
 		hasRDate = true
 	}
-
 	if !hasRule && !hasRDate {
-		if start.IsZero() {
-			return nil, nil
-		}
-		if !start.Before(from) && !start.After(to) {
-			return []time.Time{start.UTC()}, nil
-		}
 		return nil, nil
 	}
-
-	raw := set.Between(from, to, true)
-	out := make([]time.Time, len(raw))
-	for i, t := range raw {
-		out[i] = t.UTC()
-	}
-	return out, nil
+	return set, nil
 }
 
 func loadMain(obj *model.Object) (*ical.Component, error) {

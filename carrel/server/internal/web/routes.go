@@ -58,6 +58,8 @@ func (s *Server) registerRoutes() {
 	registerKindRoutes(s, "notes")
 
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/timeline", (*Server).getContactTimeline)
+	s.handle("GET /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).getContactRewrite)
+	s.handle("POST /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).postContactRewrite)
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/photo-preview", (*Server).getPhotoPreview)
 	s.handle("POST /app/contacts/{account}/{col}/{uid}/photo-preview", (*Server).postPhotoPreview)
 	s.handle("GET /c/{account}/{col}/{uid}/photo", (*Server).getContactPhoto)

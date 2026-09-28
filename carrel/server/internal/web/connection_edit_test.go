@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/emersion/go-webdav/caldav"
@@ -71,7 +72,7 @@ func TestEditConnectionAfterPasswordAndAddressChange(t *testing.T) {
 	if noticeTitled(page.Shell.Notices, "Could not connect") == nil {
 		t.Errorf("notices = %+v, want the failure with its trace", page.Shell.Notices)
 	}
-	if got := catalogOf(t, f).Connections[0]; got != before {
+	if got := catalogOf(t, f).Connections[0]; !reflect.DeepEqual(got, before) {
 		t.Error("a failed edit changed the connection")
 	}
 	if formRow(page.Add, "login") == nil || actionByID(page.Add.Actions, "connection.edit.save") == nil {

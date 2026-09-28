@@ -159,6 +159,8 @@ func (s *Server) addConnection(w http.ResponseWriter, r *http.Request) {
 		CertFingerprint: pin,
 		CalendarHome:    res.CalendarHome,
 		AddressBookHome: res.AddressBookHome,
+		Scheduling:      res.Scheduling,
+		Addresses:       res.Addresses,
 	}
 	if res.FileOnly {
 		conn.FileRoot = res.BaseURL
@@ -210,7 +212,8 @@ func (s *Server) rediscover(w http.ResponseWriter, r *http.Request, apply bool) 
 		s.writePage(w, r, http.StatusOK, s.connectionsPage(sess, connectionForm{}, s.rediscoveryNotice(blob, conn, res.Collections)))
 		return
 	}
-	proposal := user.Rediscovery{Found: catalogEntries(res.Collections), Add: r.Form["add"], Gone: r.Form["gone"]}
+	proposal := user.Rediscovery{Found: catalogEntries(res.Collections), Add: r.Form["add"], Gone: r.Form["gone"],
+		Scheduling: res.Scheduling, Addresses: res.Addresses}
 	if err := s.users.ApplyRediscovery(sess.AccountID(), key, conn.ID, proposal); err != nil {
 		http.Error(w, "could not save the catalog", http.StatusInternalServerError)
 		return
@@ -283,6 +286,8 @@ func (s *Server) editConnection(w http.ResponseWriter, r *http.Request) {
 		CertFingerprint: pin,
 		CalendarHome:    res.CalendarHome,
 		AddressBookHome: res.AddressBookHome,
+		Scheduling:      res.Scheduling,
+		Addresses:       res.Addresses,
 	}
 	if res.FileOnly {
 		edited.FileRoot = res.BaseURL

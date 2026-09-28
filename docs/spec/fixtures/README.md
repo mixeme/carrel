@@ -26,7 +26,7 @@ spec/fixtures/<screen>/<state>.json
 | `/p/{token}` | `p-token` |
 
 `<state>` — из таблицы C-14.3: `normal`, `empty`, `readonly`, `source-error`,
-`partial`, `long`, `conflict`, `narrow`, `loss`, `unavailable`.
+`partial`, `long`, `conflict`, `narrow`, `loss`, `unavailable`, `outcome`.
 
 ## Имена полей
 

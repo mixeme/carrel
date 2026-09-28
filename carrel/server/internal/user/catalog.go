@@ -82,6 +82,10 @@ type Rediscovery struct {
 	Found []sealed.Collection
 	Add   []string
 	Gone  []string
+	// Scheduling and Addresses are what the principal said this time
+	// (S-15.4); they replace what the connection held.
+	Scheduling string
+	Addresses  []string
 }
 
 // ApplyRediscovery writes a re-discovery the person confirmed. Only what they
@@ -90,8 +94,8 @@ type Rediscovery struct {
 // gone if discovery still misses it. A gone entry keeps its place and its
 // ticks, so the selection names it gone instead of dropping it; if its path
 // comes back and is applied, it is the same entry again. Every entry discovery
-// found takes the name, colour, rights and change tag the server gives now.
-// The journal names the connection and the counts, not the paths.
+// found takes the name, colour, rights and change tag the server gives now,
+// and the connection what its principal says of scheduling. The journal names the connection and the counts, not the paths.
 func (s *Service) ApplyRediscovery(viewerID string, dataKey [crypt.KeyLen]byte, accountID string, rd Rediscovery) error {
 	offeredAdd, offeredGone := pathSet(rd.Add), pathSet(rd.Gone)
 	now := s.now()
@@ -106,6 +110,12 @@ func (s *Service) ApplyRediscovery(viewerID string, dataKey [crypt.KeyLen]byte, 
 		}
 		if _, ok := blob.Connection(accountID); !ok {
 			return nil, ErrNotFound
+		}
+		for i := range blob.Connections {
+			if blob.Connections[i].ID == accountID {
+				blob.Connections[i].Scheduling = rd.Scheduling
+				blob.Connections[i].Addresses = rd.Addresses
+			}
 		}
 		found := make(map[string]sealed.Collection, len(rd.Found))
 		for _, c := range rd.Found {

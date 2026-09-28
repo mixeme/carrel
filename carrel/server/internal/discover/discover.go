@@ -21,6 +21,7 @@ const (
 	stepHomeSet     = "home-set"
 	stepCollections = "collections"
 	stepProperties  = "properties"
+	stepScheduling  = "scheduling"
 )
 
 // Properties go-webdav does not read: colour, the change tag, and — for address
@@ -45,6 +46,12 @@ var (
 	propResourceType = xml.Name{Space: "DAV:", Local: "resourcetype"}
 	propDisplayName  = xml.Name{Space: "DAV:", Local: "displayname"}
 	propCompSet      = xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "supported-calendar-component-set"}
+
+	// Asked of the principal (RFC 6638 §2.1, §2.4.1): a server that schedules
+	// has an outbox, and may send letters when an attendee is changed; the
+	// address set says which addresses are the person's own (S-15.4).
+	propScheduleOutbox = xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "schedule-outbox-URL"}
+	propUserAddresses  = xml.Name{Space: "urn:ietf:params:xml:ns:caldav", Local: "calendar-user-address-set"}
 )
 
 // Run discovers collections at endpoint (S-6). Trace records every step.
@@ -130,6 +137,7 @@ func Run(ctx context.Context, g *dav.Guard, endpoint, username, password, certPi
 	add(stepPrincipal, principal, true)
 
 	res := &Result{BaseURL: endpoint, Principal: principal}
+	res.Scheduling, res.Addresses = scheduling(ctx, client, principal, add)
 	var all []Collection
 	calHome, err := client.CalDAV().FindCalendarHomeSet(ctx, principal)
 	if err != nil {
@@ -228,6 +236,77 @@ func withHomeProps(ctx context.Context, client *dav.Client, home, label string, 
 	}
 	add(stepProperties, note, true)
 	return kept
+}
+
+// scheduling asks the principal, in one depth-0 PROPFIND, whether it has a
+// schedule-outbox-URL and which calendar addresses are the person's. A
+// refusal is not a failure of the run: nothing else depends on it, and the
+// answer stays unknown — which the rewrite sheet says as it is (S-15.4).
+func scheduling(ctx context.Context, client *dav.Client, principal string, add func(string, string, bool)) (string, []string) {
+	ms, err := client.PropFind(ctx, principal, dav.DepthZero, []xml.Name{propScheduleOutbox, propUserAddresses})
+	if err != nil {
+		add(stepScheduling, "not answered: "+formatErr(err), false)
+		return SchedulingUnknown, nil
+	}
+	var r *dav.Response
+	for i := range ms.Responses {
+		if hrefKey(ms.Responses[i].Href) == hrefKey(principal) || len(ms.Responses) == 1 {
+			r = &ms.Responses[i]
+		}
+	}
+	if r == nil {
+		add(stepScheduling, "not answered: the principal is not in the reply", false)
+		return SchedulingUnknown, nil
+	}
+	var addresses []string
+	for _, h := range hrefs(r.Props[propUserAddresses]) {
+		if len(h) > len("mailto:") && strings.EqualFold(h[:len("mailto:")], "mailto:") {
+			addresses = append(addresses, strings.ToLower(strings.TrimSpace(h[len("mailto:"):])))
+		}
+	}
+	if len(hrefs(r.Props[propScheduleOutbox])) == 0 {
+		add(stepScheduling, "no schedule-outbox-URL: the server does not schedule", true)
+		return SchedulingNo, addresses
+	}
+	add(stepScheduling, fmt.Sprintf("schedule-outbox-URL announced; %d own address(es)", len(addresses)), true)
+	return SchedulingYes, addresses
+}
+
+// hrefs reads the DAV:href values out of a property's inner XML, by local
+// name: every server picks its own prefixes.
+func hrefs(inner []byte) []string {
+	if len(strings.TrimSpace(string(inner))) == 0 {
+		return nil
+	}
+	dec := xml.NewDecoder(strings.NewReader("<set>" + string(inner) + "</set>"))
+	dec.Strict = false
+	var out []string
+	in := false
+	var cur strings.Builder
+	for {
+		tok, err := dec.Token()
+		if err != nil {
+			return out
+		}
+		switch el := tok.(type) {
+		case xml.StartElement:
+			if el.Name.Local == "href" {
+				in = true
+				cur.Reset()
+			}
+		case xml.CharData:
+			if in {
+				cur.Write(el)
+			}
+		case xml.EndElement:
+			if el.Name.Local == "href" && in {
+				in = false
+				if v := strings.TrimSpace(cur.String()); v != "" {
+					out = append(out, v)
+				}
+			}
+		}
+	}
 }
 
 // writable reads a current-user-privilege-set. Known is false when the server

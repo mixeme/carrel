@@ -28,6 +28,10 @@ const (
 	// DraftIssuedDevice is a davloom device password just issued (S-27.2):
 	// the next GET of the page shows it once and clears it.
 	DraftIssuedDevice
+	// DraftRewrite is the rewrite of a replaced address a saved card asks
+	// about (S-15.4): the pairs, and once scanned, the records it would
+	// write with the version each was read at.
+	DraftRewrite
 	numDraftSlots
 )
 

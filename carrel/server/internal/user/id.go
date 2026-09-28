@@ -41,6 +41,13 @@ func NewTransferID() (string, error) {
 	return newEntityID("q-")
 }
 
+// NewPlanID names a plan a session holds between a question and its answer
+// — the rewrite of a replaced address (S-15.4): r- + 10 Crockford chars from
+// 6 random bytes. A plan answers in its own session only.
+func NewPlanID() (string, error) {
+	return newEntityID("r-")
+}
+
 // NewAccountID returns a connection ID: a- + 10 Crockford chars from 6 random bytes.
 func NewAccountID() (string, error) {
 	return newEntityID("a-")

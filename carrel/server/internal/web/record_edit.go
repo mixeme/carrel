@@ -2184,6 +2184,8 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		}
 	}
 
+	// The patch is applied to the record read: what it held is taken first.
+	wasEmails := cardEmails(obj)
 	sent, err := c.apply(obj, ch)
 	if err != nil {
 		st.notices = []view.Notice{s.writeFailure(c, "PUT", obj.Path, err)}
@@ -2214,6 +2216,21 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	if moving {
 		s.saveAndMove(w, r, c, s.notebookTarget(c, st.notebook), uid, sent, back)
 		return
+	}
+	// An address replaced on a card is asked about before the card is shown
+	// again (S-15.4): records that named the old one drop out of the
+	// person's timeline. What the save lost comes first, as always, and the
+	// question is then not asked.
+	if c.spec.kind == view.KindContact {
+		if sheet, token := s.offerRewrite(c, uid, wasEmails, sent); sheet != "" {
+			s.finishWriteWith(w, r, c, uid, sent, sheet, func(loss *model.Loss, _ *model.Object) ([]view.Action, []view.Notice) {
+				if loss != nil {
+					dropRewritePlan(c.sess, token)
+				}
+				return nil, nil
+			})
+			return
+		}
 	}
 	s.finishWrite(w, r, c, uid, sent, back)
 }

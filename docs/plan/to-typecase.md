@@ -17,7 +17,8 @@
 из записок 8, 11 и 17 (действия строк), 19 — из записки 9 (панель и правка
 заметки), 20 — из записки 15 (числа рейлов), 21 — из записки 10 (учётная
 запись), 22 — из записок 12 и 13 (перенос листом, мелочи), 23 — из
-записки 4 (From Files), 24 — из записки 16 (сервер без пароля).
+записки 4 (From Files), 24 и 25 — из записки 16 (сервер без пароля,
+переписать адрес).
 
 ---
 
@@ -390,5 +391,49 @@ C-6.8), поле пароля приходит `readOnly`, пока отметк
 - **Certificate fingerprint (SHA-256)** — поле, которое сервер шлёт в форме
   подключения (F-13), в диалогах `s-profile-2`, `-11`, `-14` не нарисовано.
   Нарисовать или сказать, где оно живёт.
+
+**Что нужно.** Кадры или ответы по пунктам.
+
+## 25. Переписать адрес: чего кадры не рисуют
+
+**Откуда.** 28.09.2026, записка 16. Сервер (`v0.2.64`) после сохранения
+карточки, где адрес заменён, отвечает листом `RewriteSheet` на
+`/app/contacts/{account}/{col}/{uid}/rewrite?plan=…` (`s-contacts-15`), а
+ответ на него — карточкой с итогом (`s-contacts-16`). По дороге:
+
+- **У кадров нет `data-screen`.** Адрес листа кадру не назван, и проверка 8
+  держит его в `FRAME_TODO`. Назвать адрес на `s-contacts-15`. Лист там
+  нарисован поверх списка контактов, а появляется он после Save на правке
+  карточки: нарисовать поверх того экрана, откуда он приходит.
+- **Род.** Кадр пишет «her records», «she drops out of their timeline», «as
+  if she had been invited at it». Пола человека сервер не знает и пишет без
+  рода: «Rewrite the address in their records?», «… name the old one; they
+  drop out of the person’s timeline», «will show the new address, as if the
+  person had been invited at it». Дать кадру слова без рода.
+- **Единственное число** не нарисовано: «1 event or task names the old one;
+  it drops out of the person’s timeline», «1 record in Shared» — «read-only;
+  it keeps the old address», «Rewrite 1 record», итог «1 record in Shared is
+  read-only and keeps the old address.» Подтвердить.
+- **Пара без записей** (заменено несколько, старый адрес нигде не стоит):
+  «no events or tasks name the old one». Подтвердить.
+- **Непрочитанная коллекция.** Отмеченная коллекция, которая не ответила,
+  стоит в «What will not change»: «Общий · baikal» — «could not be read: the
+  server answered 401 Unauthorized. What it holds keeps the old address.»; в
+  итоге — «Общий · baikal could not be read, and what it holds keeps the old
+  address.», и сообщение — предупреждение. Не нарисовано.
+- **Переписывать нечего** (всё только для чтения или не прочиталось): «Rewrite
+  0 records» выключена с причиной «Nothing here can be rewritten: every record
+  that names the old address is read-only or could not be read.» Не
+  нарисовано.
+- **Прочие причины в итоге.** Кадр рисует отказ организатора. Сервер пишет
+  ещё ««…» was not written: it changed after Carrel read it.», ««…» was
+  refused: the server answered 403 Forbidden.»; что сервер не сохранил при
+  переписывании — в подробностях сообщения «Not kept by the server». Итог
+  без отказов — сообщение `info`. Нарисовать или подтвердить.
+- **Не отмеченные коллекции** не просматриваются. Итог связывания
+  (`relink`) говорит это отдельной строкой; этот лист молчит, как кадр.
+  Сказать, нужна ли строка.
+- **Рубрики** «The address», «What rewriting can set off», «What will not
+  change» — постоянные подписи клиента, сервер их не шлёт. Подтвердить.
 
 **Что нужно.** Кадры или ответы по пунктам.

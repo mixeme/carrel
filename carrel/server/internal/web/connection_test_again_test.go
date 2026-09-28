@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/emersion/go-webdav/caldav"
@@ -80,7 +81,7 @@ func TestSavedConnectionIsTestedAndTestedAgain(t *testing.T) {
 	}
 
 	after := catalogOf(t, f)
-	if len(after.Connections) != 1 || after.Connections[0] != before.Connections[0] || len(after.Collections) != len(before.Collections) {
+	if len(after.Connections) != 1 || !reflect.DeepEqual(after.Connections[0], before.Connections[0]) || len(after.Collections) != len(before.Collections) {
 		t.Error("a check changed the catalog")
 	}
 	if n := len(f.h.st.Snapshot().Audit); n != journal {

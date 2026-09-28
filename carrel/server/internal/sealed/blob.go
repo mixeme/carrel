@@ -237,6 +237,16 @@ type Connection struct {
 	// password is empty and stays empty. An empty password field cannot say
 	// it — empty means «unchanged» on edit.
 	NoPassword bool `json:"noPassword,omitempty"`
+	// Scheduling is what discovery learned of the principal (RFC 6638):
+	// "yes" when it announced a schedule-outbox-URL, "no" when it answered
+	// without one, "" when there is no principal or it was never asked — a
+	// connection made before the question stays unknown until it is edited
+	// or discovered again (S-15.4).
+	Scheduling string `json:"scheduling,omitempty"`
+	// Addresses are the person's own calendar addresses on this server
+	// (calendar-user-address-set), lower-cased and without mailto:. A
+	// meeting organised at one of them is the person's own.
+	Addresses []string `json:"addresses,omitempty"`
 	// Feed marks a subscription answered as a connection; never stored.
 	Feed bool `json:"-"`
 }

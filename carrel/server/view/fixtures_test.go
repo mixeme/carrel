@@ -51,6 +51,7 @@ var fixtureTypes = map[string]func() any{
 	"app-contact-import":       func() any { return &ImportPage{} },
 	"app-contact-move":         func() any { return &MoveSheet{} },
 	"app-contact-new":          func() any { return &ContactEditPage{} },
+	"app-contact-rewrite":      func() any { return &RewriteSheet{} },
 	"app-contact-timeline":     func() any { return &ContactTimelinePage{} },
 	"app-contacts":             func() any { return &ContactsListPage{} },
 	"app-contacts-one":         func() any { return &ContactsListPage{} },

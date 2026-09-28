@@ -166,6 +166,17 @@ type Server struct {
 	// through vobject: cut at its comma, with ';' escaped — the image is gone.
 	CutPhotoDataURI bool
 
+	// ScheduleOutbox is the principal's schedule-outbox-URL, the mark of a
+	// server that schedules (RFC 6638 §2.1): Nextcloud, Baikal, SoGo,
+	// Yandex and Google announce one. Empty, the principal answers the
+	// property 404, as Radicale and Xandikos do.
+	ScheduleOutbox string
+
+	// UserAddresses are the principal's calendar-user-address-set, as the
+	// server writes them: mailto: addresses and, often, the principal's
+	// own path beside them (RFC 6638 §2.4.1).
+	UserAddresses []string
+
 	mu        sync.Mutex
 	sent      map[string][]byte // the body of the PUT being handled, by path
 	calendars map[string]caldav.Calendar
@@ -573,6 +584,10 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 		}
 	}
 
+	if r.Method == "PROPFIND" && p == Principal && bytes.Contains(body, []byte("schedule-outbox-URL")) {
+		s.principalProps(w)
+		return
+	}
 	if r.Method == "PROPFIND" && (p == CalendarHome || p == AddressBookHome) && bytes.Contains(body, []byte("getctag")) {
 		s.homeProps(w, p)
 		return
@@ -631,6 +646,40 @@ func (s *Server) deletePrecondition(w http.ResponseWriter, r *http.Request) bool
 		return false
 	}
 	return true
+}
+
+// principalProps answers the depth-0 PROPFIND of the principal for the two
+// properties of RFC 6638 go-webdav's server does not know: what it announces
+// is in the 200 propstat, what it does not in the 404 one.
+func (s *Server) principalProps(w http.ResponseWriter) {
+	var found, missing strings.Builder
+	if s.ScheduleOutbox != "" {
+		found.WriteString(`<C:schedule-outbox-URL><D:href>` + escape(s.ScheduleOutbox) + `</D:href></C:schedule-outbox-URL>`)
+	} else {
+		missing.WriteString(`<C:schedule-outbox-URL/>`)
+	}
+	if len(s.UserAddresses) > 0 {
+		found.WriteString(`<C:calendar-user-address-set>`)
+		for _, a := range s.UserAddresses {
+			found.WriteString(`<D:href>` + escape(a) + `</D:href>`)
+		}
+		found.WriteString(`</C:calendar-user-address-set>`)
+	} else {
+		missing.WriteString(`<C:calendar-user-address-set/>`)
+	}
+	var b strings.Builder
+	b.WriteString(`<D:response><D:href>` + Principal + `</D:href>`)
+	if found.Len() > 0 {
+		b.WriteString(`<D:propstat><D:prop>` + found.String() + `</D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat>`)
+	}
+	if missing.Len() > 0 {
+		b.WriteString(`<D:propstat><D:prop>` + missing.String() + `</D:prop><D:status>HTTP/1.1 404 Not Found</D:status></D:propstat>`)
+	}
+	b.WriteString(`</D:response>`)
+	w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
+	w.WriteHeader(http.StatusMultiStatus)
+	_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?>`+
+		`<D:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">`+b.String()+`</D:multistatus>`)
 }
 
 // homeProps answers the depth-1 PROPFIND for calendar-color and getctag that
@@ -1068,8 +1117,15 @@ func calendarObject(p string, o object) (*caldav.CalendarObject, error) {
 	if err != nil {
 		return nil, err
 	}
+	// go-webdav serves the object as go-ical writes it back, not as stored:
+	// a folded line comes out whole. The length it announces is of what it
+	// serves, or a client reading the declared length meets an early end.
+	var served bytes.Buffer
+	if err := ical.NewEncoder(&served).Encode(data); err != nil {
+		return nil, err
+	}
 	return &caldav.CalendarObject{
-		Path: p, ETag: o.etag, ModTime: o.mod, ContentLength: int64(len(o.data)), Data: data,
+		Path: p, ETag: o.etag, ModTime: o.mod, ContentLength: int64(served.Len()), Data: data,
 	}, nil
 }
 
@@ -1248,8 +1304,13 @@ func addressObject(p string, o object) (*carddav.AddressObject, error) {
 	if err != nil {
 		return nil, err
 	}
+	// As with a calendar object: the length of what go-vcard writes back.
+	var served bytes.Buffer
+	if err := vcard.NewEncoder(&served).Encode(card); err != nil {
+		return nil, err
+	}
 	return &carddav.AddressObject{
-		Path: p, ETag: o.etag, ModTime: o.mod, ContentLength: int64(len(o.data)), Card: card,
+		Path: p, ETag: o.etag, ModTime: o.mod, ContentLength: int64(served.Len()), Card: card,
 	}, nil
 }
 

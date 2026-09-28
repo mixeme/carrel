@@ -17,6 +17,69 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.64 — 2026-09-28
+
+An address replaced on a card is asked about (from-typecase note 16,
+s-contacts-15, S-15.4): the events and tasks that named the old one would
+drop out of the person's timeline, and rewriting an attendee is an act in
+somebody's schedule, so the save goes to a sheet that names what rewriting
+can set off before anything is written. The answer says on the card what
+came of it (s-contacts-16).
+
+### Added
+
+- **`RewriteSheet`** and **`RewritePair`** (C-6) on
+  **`/app/contacts/{account}/{col}/{uid}/rewrite?plan=…`** (GET, POST;
+  C-5.4). `title` «Rewrite the address in their records?», `subject` «Анна
+  Ковалёва · saved»; `pairs` — `from`, `to`, `note` («4 events and tasks
+  name the old one; they drop out of the person’s timeline»); `effects` and
+  `kept` — `Field` rows, `label` bold and `value` after the dash: «N records
+  on servers that schedule», «N records on <server>» (the server did not say
+  whether it schedules), «N meetings organised by others», «Past meetings»;
+  «N records in <collection>» read-only, and a ticked collection that could
+  not be read. `form` carries the plan and the CSRF; `actions` —
+  `contact.rewrite.confirm` «Rewrite N records» (off with a reason when
+  nothing can be written) and `contact.rewrite.leave` «Leave as is» (POST
+  with `op=leave`). The rubrics «The address», «What rewriting can set off»,
+  «What will not change» are the client's.
+- **The save of a card** whose addresses changed answers 303 to that sheet
+  instead of the card when an address was replaced: one removed and one
+  added is that pair; otherwise every removed address goes to the card's
+  default one (`PREF=1`, else `TYPE=pref`, else the first). Removals alone
+  ask nothing. A loss report comes first, and then the sheet is not offered.
+  The sheet with nothing to rewrite anywhere, and a plan that is gone or
+  spent, is a 303 to the card.
+- **Rewrite** reads every record of the plan again, writes it only at the
+  version the sheet was drawn from, replaces the address in `ORGANIZER`,
+  `ATTENDEE`, `SENT-BY`, `DELEGATED-FROM`, `DELEGATED-TO` of every component
+  of the record (overridden occurrences too), keeps every other parameter
+  and the scheme as written, puts it with If-Match and reads it back. The
+  answer is the card (`ContactPage`) with a notice: `title` «Rewritten in 11
+  of 12 records.», `body` naming each record not written and why («its
+  organiser’s server does not take changes to attendees», «it changed after
+  Carrel read it», the server's own refusal), the read-only ones by
+  collection and the collections not read; `alert` when anything was not
+  written, `info` otherwise. The journal has `contact.rewrite` with the
+  counts only.
+- **Discovery asks the principal** for `schedule-outbox-URL` and
+  `calendar-user-address-set` (RFC 6638) — the trace has a step
+  `scheduling`. The answer is kept with the connection when it is added,
+  edited or re-discovery is applied; a connection made before this stays
+  «unknown» until then.
+- **Fixture state `outcome`** (C-14.3): `app-contact/outcome.json`; and
+  `app-contact-rewrite/normal.json`.
+
+### Changed
+
+- The stand `davtest` announces the length of what it serves for a record,
+  not of what it stored: a folded record was cut short on GET.
+
+### For consumers
+
+After Save of a contact, follow the redirect: it may be the sheet. Draw its
+three rubrics, skip an empty one, and send `form` to the href of the button
+pressed.
+
 ## v0.2.63 — 2026-09-28
 
 A server that asks no password is said by a check in the connection form

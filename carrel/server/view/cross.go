@@ -204,6 +204,25 @@ type ConnectionRemoveSheet struct {
 	Actions    []Action `json:"actions"`    // Disconnect · Cancel
 }
 
+// RewriteSheet — «переписать адрес в записях?» после сохранения карточки, где
+// адрес заменён (s-contacts-15, S-15.4). Вопрос называет последствия до
+// нажатия: рубрики «The address», «What rewriting can set off» и «What will
+// not change» — постоянные подписи клиента, строки под ними — данные.
+type RewriteSheet struct {
+	Title   Text          `json:"title"`   // «Rewrite the address in their records?»
+	Subject Text          `json:"subject"` // «Анна Ковалёва · saved»
+	Pairs   []RewritePair `json:"pairs"`   // какой адрес на какой и сколько записей называют старый
+	Effects []Field       `json:"effects"` // Label — «9 records on servers that schedule», Value — что это может вызвать
+	Kept    []Field       `json:"kept"`    // Label — «2 records in Shared», Value — «read-only; they keep the old address»
+	Form    Form          `json:"form"`    // план в адресе и CSRF
+	Actions []Action      `json:"actions"` // Rewrite N records · Leave as is
+}
+type RewritePair struct {
+	From Text `json:"from"`
+	To   Text `json:"to"`
+	Note Text `json:"note"` // «14 events and tasks name the old one; …»
+}
+
 // ExportSheet — «из какой коллекции отдать»: вход в экспорт из сведённого
 // вида, где коллекция не одна.
 type ExportSheet struct {

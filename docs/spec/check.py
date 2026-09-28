@@ -129,7 +129,7 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable"}
+states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -210,6 +210,7 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "app-contact-new": "/app/contacts/{account}/{col}/new",
     "app-contact-import": "/app/contacts/{account}/{col}/import",
     "app-contact-move": "/app/contacts/{account}/{col}/{uid}/move",
+    "app-contact-rewrite": "/app/contacts/{account}/{col}/{uid}/rewrite",
     "app-quick": "/app/notes/quick",
     "app-collections-new": "/app/collections/new",
     "app-settings-unlock": "/app/settings/unlock",
@@ -228,9 +229,14 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
 # тут нечего, и молчание здесь — не исключение, а род экрана.
 SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-unlock",
           "app-collections-rename", "app-collections-move", "app-collections-delete",
-          "app-publish", "app-files-picker", "app-mail-compose", "app-contact-new"}
+          "app-publish", "app-files-picker", "app-mail-compose", "app-contact-new",
+          "app-contact-rewrite"}
 
-FRAME_TODO = {}
+FRAME_TODO = {
+    # s-contacts-15 рисует лист, но без data-screen: адрес листа кадру не
+    # назван.
+    "app-contact-rewrite: нет кадра": "to-typecase.md, задача 25",
+}
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
 # записка в from-typecase.md. Закрылось на сервере — строка уходит.

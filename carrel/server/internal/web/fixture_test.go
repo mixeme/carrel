@@ -505,6 +505,12 @@ func newMockupApp(t *testing.T) *mockupApp {
 		srv.Clock = func() time.Time { return at }
 		servers[label] = srv
 	}
+	// Nextcloud and Baikal schedule (RFC 6638), Radicale does not; mix's
+	// own address is the one the frames sign with (s-contacts-15).
+	for _, label := range []string{"nextcloud", "baikal"} {
+		servers[label].ScheduleOutbox = davtest.Principal + "outbox/"
+		servers[label].UserAddresses = []string{"mailto:mix@example.org", davtest.Principal}
+	}
 	paths := map[string]string{}
 	for _, col := range mockupSet {
 		srv := servers[col.account]
@@ -781,6 +787,7 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 	s = regexp.MustCompile(`/forgot/[A-Za-z0-9_-]{43}`).ReplaceAllString(s, "/forgot/reset-token")
 	s = regexp.MustCompile(`"[A-Za-z0-9_-]{43}"`).ReplaceAllString(s, `"csrf"`)
 	s = regexp.MustCompile(`t-[0-9A-Z]{10}`).ReplaceAllString(s, "t-task")
+	s = regexp.MustCompile(`plan=r-[0-9A-Z]{10}`).ReplaceAllString(s, "plan=r-plan")
 	s = regexp.MustCompile(`u-[0-9A-Z]{10}`).ReplaceAllString(s, "u-mix")
 	// A group of duplicates is named by a digest of the records in it, and
 	// those carry the account identifier, which is issued.
@@ -1009,6 +1016,28 @@ func TestFixtureContactCard(t *testing.T) {
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
 	app.compare(t, "app-contact/normal.json", app.h.do(get(rec, app.sess)))
+}
+
+// C-14.2: Anna's address replaced on her card — the sheet asks whether to
+// rewrite it where she is named (s-contacts-15), and the card says what
+// came of it (s-contacts-16). Her one meeting is in «Личный» on nextcloud,
+// which schedules; «Общий» on baikal does not answer and is named.
+func TestFixtureContactRewrite(t *testing.T) {
+	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
+	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
+	form := formFields(decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)
+	form.Set("email.0", "a.kovaleva@slovo.example")
+	saved := app.h.do(postForm(rec+"/edit", app.sess, form))
+	sheet := saved.Header().Get("Location")
+	if saved.Code != 303 || !strings.HasPrefix(sheet, rec+"/rewrite?plan=") {
+		t.Fatalf("save: %d %q", saved.Code, sheet)
+	}
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+	got := app.h.do(get(sheet, app.sess))
+	app.compare(t, "app-contact-rewrite/normal.json", got)
+	confirm := decode[view.RewriteSheet](t, got).Actions[0]
+	app.compare(t, "app-contact/outcome.json", app.h.do(postForm(confirm.Href, app.sess, url.Values{})))
 }
 
 // C-14.2: one calendar as an agenda (s-agenda-1).
