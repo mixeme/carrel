@@ -423,7 +423,7 @@ Typecase): рейл с соседними заметками и колонка �
 |---|---|---|---|---|
 | `/app/files` | GET | вход | страница | `FilesRootPage` |
 | `/app/files/{account}/{col}/{path…}` | GET | вход | страница | `FilesPage` |
-| `/app/files/{account}/{col}/download/{path…}` | GET | вход | поток | — |
+| `/app/files/{account}/{col}/download/{path…}` | GET | вход | поток; адрес папки (`…/`) с `?zip=1` — папка архивом zip (S-17.5) | — |
 | `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue` |
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | фрагмент | `FilesPage` |
 | `/app/files/{account}/{col}/op/{path…}` | POST | вход | фрагмент, лист | `FileOpSheet` |
@@ -2027,17 +2027,25 @@ type PublishedFolder struct {
 }
 
 // Разобранная разметка: заголовки, списки, задачи с отметкой, выделение,
-// ссылки, код.
+// ссылки, код, цитаты, таблицы.
 // Сырой HTML исходника экранируется и блоком не становится.
 type Block struct {
     Kind     BlockKind // C-8
     Level    int
     Text     Text
     Href     string
-    Checked  bool // задача отмечена; только у BlockTask
+    Checked  bool      // задача отмечена; только у BlockTask
+    Header   bool      // строка заголовка таблицы; только у BlockRow
+    Align    CellAlign // C-8; только у BlockCell, пусто — не задано
     Children []Block
 }
 ```
+
+Таблица Markdown (GFM) — `table`, в `Children` её строки `row` по порядку;
+первая — строка заголовка, `Header`. В строке — ячейки `cell`, их текст несут
+`Text` или `Children` так же, как у абзаца (выделение, ссылка, код внутри), а
+`Align` — выравнивание столбца из строки-разделителя. Ячейки строки идут по
+столбцам; недостающая ячейка — пустая `cell`, не пропуск.
 
 **Почему разметка приходит блоками, а не готовым HTML.** Правило C-3.1 не знает
 исключений: строка с готовой разметкой во вью-модели — это дыра, через которую
@@ -2123,7 +2131,7 @@ Markdown и отдаёт дерево; собирает из него узлы �
 ### C-7.5 Имена действий
 
 `Action.ID` — устойчивое имя, одно и то же в кадре, в проверке и в журнале:
-`record.save`, `record.delete`, `source.retry`, `poll.again`, `link.revoke`,
+`record.save`, `record.delete`, `source.retry`, `poll.again`, `publish.revoke`,
 `device.profile`, `backup.run`. Подпись меняется, имя — нет.
 
 **Что на виду и что под «⋯» — данные** (записка из Typecase 1, 28.09.2026).
@@ -2136,7 +2144,12 @@ Markdown и отдаёт дерево; собирает из него узлы �
 строки списка (components-1…4) — ещё `record.open` Open и `record.edit` Edit
 перед ними и `record.delete` за чертой. У коллекции только для чтения нет Edit,
 Move и удаления, у подписки — ещё и Publish a link. Отметка задачи в строке —
-не пункт меню, а `TaskRow.Tick`.
+не пункт меню, а `TaskRow.Tick`. Меню строки файла (s-files-9) — `file.open`
+Open, `file.download` Download, `file.rename`, `file.move`, `file.copy`,
+`publish` и за чертой `file.delete`; у папки (s-files-10) вместо Download —
+`file.download.zip` «Download as .zip», папка архивом (S-17.5). В хранилище
+только для чтения переименование, перенос и удаление выключены с причиной,
+скачивание и копия — нет.
 
 ---
 
@@ -2275,7 +2288,11 @@ const ( PreviewNone PreviewKind = "none"; PreviewImage = "image"
 type BlockKind string
 const ( BlockPara BlockKind = "para"; BlockHeading = "heading"; BlockList = "list"
         BlockItem = "item"; BlockTask = "task"; BlockCode = "code"; BlockQuote = "quote"
-        BlockLink = "link"; BlockEmph = "emph"; BlockStrong = "strong" )
+        BlockLink = "link"; BlockEmph = "emph"; BlockStrong = "strong"
+        BlockTable = "table"; BlockRow = "row"; BlockCell = "cell" )
+
+type CellAlign string
+const ( AlignLeft CellAlign = "left"; AlignCenter = "center"; AlignRight = "right" )
 ```
 
 `CheckUnknown` — серый флажок проверки установки: то, что снаружи не измерить.

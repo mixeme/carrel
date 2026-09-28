@@ -188,3 +188,67 @@ func TestEnumValuesMatchSpec(t *testing.T) {
 		}
 	}
 }
+
+// actionName is how C-7.5 writes an action's id in backticks: lower-case
+// words joined by dots. Field names (`Action.ID`, `Menu`) are capitalised.
+var actionName = regexp.MustCompile("`([a-z][a-z0-9]*(?:[.][a-z0-9-]+)*)`")
+
+// TestSpecActionIDsExist: every action id C-7.5 names is one the server
+// gives — carried by a fixture, or written as a string in internal/web.
+// The two sides come from different places: the spec's words, and what the
+// fixtures and the code hold. link.revoke stood in C-7.5 long after the
+// server named it publish.revoke; renames of ids (record.*, publish,
+// attach.*, collection.*) turn this red when the spec is left behind.
+func TestSpecActionIDsExist(t *testing.T) {
+	src, err := os.ReadFile(specFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	spec := strings.ReplaceAll(string(src), "\r\n", "\n")
+	_, section, ok := strings.Cut(spec, "\n### C-7.5 ")
+	if !ok {
+		t.Fatal("no C-7.5 in the spec")
+	}
+	if end := strings.Index(section, "\n---"); end >= 0 {
+		section = section[:end]
+	}
+	named := map[string]bool{}
+	for _, m := range actionName.FindAllStringSubmatch(section, -1) {
+		named[m[1]] = true
+	}
+	if len(named) < 5 {
+		t.Fatalf("C-7.5 names %d action ids: the section was not read", len(named))
+	}
+
+	known := map[string]bool{}
+	eachFixtureAction(t, func(_, _ string, a Action) { known[a.ID] = true })
+	const web = "../internal/web"
+	entries, err := os.ReadDir(web)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fset := token.NewFileSet()
+	for _, e := range entries {
+		name := e.Name()
+		if e.IsDir() || !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+		f, err := parser.ParseFile(fset, web+"/"+name, nil, 0)
+		if err != nil {
+			t.Fatalf("parse %s: %v", name, err)
+		}
+		ast.Inspect(f, func(n ast.Node) bool {
+			if lit, ok := n.(*ast.BasicLit); ok && lit.Kind == token.STRING {
+				if v, err := strconv.Unquote(lit.Value); err == nil {
+					known[v] = true
+				}
+			}
+			return true
+		})
+	}
+	for id := range named {
+		if !known[id] {
+			t.Errorf("C-7.5 names the action %q, which no fixture carries and internal/web does not write", id)
+		}
+	}
+}

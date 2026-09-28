@@ -200,4 +200,17 @@ const (
 	BlockLink    BlockKind = "link"
 	BlockEmph    BlockKind = "emph"
 	BlockStrong  BlockKind = "strong"
+	BlockTable   BlockKind = "table" // таблица; Children — строки
+	BlockRow     BlockKind = "row"   // строка таблицы; Children — ячейки, Header — строка заголовка
+	BlockCell    BlockKind = "cell"  // ячейка; текст — как у абзаца, Text или Children
+)
+
+// CellAlign — выравнивание столбца таблицы в разметке («:--», «:-:», «--:»).
+// Пусто — не задано.
+type CellAlign string
+
+const (
+	AlignLeft   CellAlign = "left"
+	AlignCenter CellAlign = "center"
+	AlignRight  CellAlign = "right"
 )

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"archive/zip"
 	"context"
 	"encoding/json"
 	"errors"
@@ -626,23 +627,22 @@ func writeAction(c *fileCtx, a view.Action) view.Action {
 }
 
 // fileMenu is the menu of one row (s-files-9, s-files-10): open, download
-// for a file, then rename, move, copy, publish and, behind a line, delete.
+// — a folder «as .zip» — then rename, move, copy, publish and, behind a line, delete.
 // Opening and downloading are two intents (components-5): Open is the file's
-// address, its folder with it selected. Copying out of a read-only storage
-// is allowed. A folder as an archive is not offered yet (docs/plan/server.md).
+// address, its folder with it selected. A folder downloads as a zip.
+// Downloading and copying out of a read-only storage are allowed.
 func (s *Server) fileMenu(c *fileCtx, segs []string, e file.Entry) []view.MenuItem {
 	at := append(slices.Clone(segs), e.Name)
 	open := view.Action{ID: "file.open", Label: "Open", Icon: "i-doc", Href: s.route(c.href("", at, false)), Method: "GET", Enabled: true}
 	if e.Dir {
 		open.Icon, open.Href = "i-file", s.route(c.href("", at, true))
 	}
-	menu := []view.MenuItem{{Action: open}}
-	if !e.Dir {
-		menu = append(menu, view.MenuItem{Action: view.Action{
-			ID: "file.download", Label: "Download", Icon: "i-down", Method: "GET", Enabled: true,
-			Href: s.route(c.href("download", at, false)),
-		}})
+	download := view.Action{ID: "file.download", Label: "Download", Icon: "i-down", Method: "GET", Enabled: true, Href: s.route(c.href("download", at, false))}
+	if e.Dir {
+		download.ID, download.Label = "file.download.zip", "Download as .zip"
+		download.Href = s.postQuery(c.href("download", at, true), url.Values{"zip": {"1"}})
 	}
+	menu := []view.MenuItem{{Action: open}, {Action: download}}
 	menu = append(menu,
 		view.MenuItem{Action: writeAction(c, view.Action{ID: "file.rename", Label: "Rename", Icon: "i-pencil", Href: s.opHref(c, segs, view.FileRename, e.Name), Method: "POST", Enabled: true})},
 		view.MenuItem{Action: writeAction(c, view.Action{ID: "file.move", Label: "Move", Icon: "i-move", Href: s.opHref(c, segs, view.FileMove, e.Name), Method: "POST", Enabled: true})},
@@ -705,6 +705,10 @@ func (s *Server) getFilesDownload(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if c.dir && r.URL.Query().Get("zip") != "" {
+		s.downloadFolder(w, r, c)
+		return
+	}
 	if c.dir {
 		// A folder address after download/ is the folder "download" at the root
 		// of the collection: C-5.5 gives that segment to this route.
@@ -725,6 +729,30 @@ func (s *Server) getFilesDownload(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 	default:
 		s.writeFolder(w, r, c, c.segs[:len(c.segs)-1], "", url.Values{}, "", s.fileFailure(c, name+" could not be downloaded", "GET", p, err))
+	}
+}
+
+// downloadFolder is «Download as .zip» of a folder's row (s-files-10): the
+// folder, download/{path…}/?zip=1, as a zip written while it is read. It only
+// reads, so a read-only storage gives it too. A folder that is not there is
+// 404; a server that refuses to list it leaves the person on the folder
+// above with the reason, like a file that could not be downloaded.
+func (s *Server) downloadFolder(w http.ResponseWriter, r *http.Request, c *fileCtx) {
+	p, err := c.path(c.segs, true)
+	if err != nil {
+		s.notFound(w, r)
+		return
+	}
+	name := c.col.Name
+	if len(c.segs) > 0 {
+		name = c.segs[len(c.segs)-1]
+	}
+	switch err := s.sendZip(w, r, c, p, name); {
+	case err == nil:
+	case file.NotFound(err) || len(c.segs) == 0:
+		s.notFound(w, r)
+	default:
+		s.writeFolder(w, r, c, c.segs[:len(c.segs)-1], "", url.Values{}, "", s.fileFailure(c, name+" could not be downloaded", "PROPFIND", p, err))
 	}
 }
 
@@ -778,6 +806,68 @@ func (s *Server) sendFile(w http.ResponseWriter, r *http.Request, c *fileCtx, p,
 	}
 	w.WriteHeader(status)
 	_, _ = io.Copy(w, d.Body)
+	return nil
+}
+
+// sendZip streams the folder at p as a zip named name.zip, written while it
+// is read: the files one at a time from the server into the response, the
+// names relative to the folder (S-17.5). The folder is read first, and an
+// error is the server's refusal to list it, before anything was written to
+// w. At most CARREL_FILES_MAX_ENTRIES entries go in, like a folder's page; a
+// break in the middle — the ceiling, a file that does not open — leaves a
+// zip without its directory: a reader sees a broken archive, never one that
+// silently lacks files. A private folder and a published one share it.
+func (s *Server) sendZip(w http.ResponseWriter, r *http.Request, c *fileCtx, p, name string) error {
+	ctx := r.Context()
+	top, err := c.files.List(ctx, p)
+	if err != nil {
+		return err
+	}
+	h := w.Header()
+	h.Set("Content-Type", "application/zip")
+	if v := mime.FormatMediaType("attachment", map[string]string{"filename": name + ".zip"}); v != "" {
+		h.Set("Content-Disposition", v)
+	}
+	h.Set("X-Content-Type-Options", "nosniff")
+	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
+	h.Set("Cache-Control", "private, no-cache")
+	zw := zip.NewWriter(w)
+	count := 0
+	var walk func(entries []file.Entry, prefix string) bool
+	walk = func(entries []file.Entry, prefix string) bool {
+		for _, e := range entries {
+			if count >= s.cfg.FilesMaxEntries {
+				return false
+			}
+			count++
+			if e.Dir {
+				if _, err := zw.Create(prefix + e.Name + "/"); err != nil {
+					return false
+				}
+				inner, err := c.files.List(ctx, e.Path)
+				if err != nil || !walk(inner, prefix+e.Name+"/") {
+					return false
+				}
+				continue
+			}
+			d, err := c.files.Open(ctx, e.Path, nil)
+			if err != nil {
+				return false
+			}
+			f, err := zw.CreateHeader(&zip.FileHeader{Name: prefix + e.Name, Method: zip.Deflate, Modified: e.Modified})
+			if err == nil {
+				_, err = io.Copy(f, d.Body)
+			}
+			d.Body.Close()
+			if err != nil {
+				return false
+			}
+		}
+		return true
+	}
+	if walk(top, "") {
+		_ = zw.Close()
+	}
 	return nil
 }
 

@@ -17,6 +17,62 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.66 — 2026-09-28
+
+The owner's deferred round, part 2: a folder of one's own downloads as a zip
+from its row (s-files-10), a note's Markdown tables arrive as tables, and
+C-7.5 names the action ids the server gives.
+
+### Added
+
+- **«Download as .zip»** (`file.download.zip`, icon `i-down`, GET) in the
+  row menu of a folder, second after Open, where a file has Download
+  (s-files-10). It is enabled on a read-only storage too. Its href is the
+  folder's address under `download/` with `?zip=1`:
+  `GET /app/files/{account}/{col}/download/{path…}/?zip=1` answers
+  `application/zip`, an attachment named `{folder}.zip` in a sandbox, the
+  names inside relative to the folder. The archive is written while the
+  folder is read; at most `CARREL_FILES_MAX_ENTRIES` entries (files and
+  folders, all levels) go in, and past that — or when a file does not open
+  midway — the archive ends without its directory, so it reads as broken
+  rather than whole with files missing. The same holds for a published
+  folder's zip. A missing folder is 404; a listing the server refuses
+  answers the folder above with the notice «{folder} could not be
+  downloaded». Without `?zip=1` a folder address after `download/` is still
+  the folder named `download` (S-17.5, C-5.5).
+- **Tables in a note** (C-6.9, C-8). A GFM table in the rendered text of a
+  note (`NoteDoc.rendered` of its page and its public page,
+  `Details.rendered` of its panel) is a block `table` whose `children` are
+  rows `row`, the first with `header: true`; a row's `children` are cells
+  `cell`, one per column (a short row is padded with empty cells), their
+  text in `text` or in `children` as a paragraph's (`strong`, `emph`,
+  `link`, `code`). A cell may carry `align`: `left`, `center` or `right`,
+  from the delimiter row; absent when the column sets none. `header` and
+  `align` are omitted when false or empty, so no other block changes. Raw
+  HTML in a cell stays escaped text. Before, a table arrived as one
+  paragraph with its pipes.
+
+### Fixed
+
+- A backslash escape in a note's Markdown reached the rendered text as
+  written: «a \* b» arrived as `a \* b`, «\|» in a table cell with its
+  backslash. Every text block now carries the mark itself (`a * b`, `|`);
+  code spans and code blocks keep their backslashes, and raw HTML is still
+  escaped text.
+
+### Changed
+
+- C-7.5 names `publish.revoke`, the id the list of published links carries,
+  where it said `link.revoke`, and lists the row menu of a file and a
+  folder. Nothing in the running server changes.
+
+### For consumers
+
+Show «Download as .zip» in a folder's «⋯» as a plain link: it downloads,
+nothing to post. Draw `table`, `row` and `cell` blocks as a table, the row
+with `header` as its head, `align` as the column's alignment; no frame
+draws one yet (to-typecase task 27).
+
 ## v0.2.65 — 2026-09-28
 
 The owner's deferred round, part 1 — settings and connections, each brought

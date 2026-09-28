@@ -1,9 +1,11 @@
 package web_test
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"image"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -275,6 +277,75 @@ func TestDownload(t *testing.T) {
 	folder := decode[view.FilesPage](t, f.h.do(get(f.at("download", ""), f.sess)))
 	if folder.Title != "download" || len(folder.Rows) != 1 {
 		t.Errorf("folder named download = %q %+v", folder.Title, folder.Rows)
+	}
+}
+
+// s-files-10, S-17.5: a folder of one's own downloads from its row as a zip
+// written while it is read, on a read-only storage too, its names relative
+// to the folder. The ceiling is the published folder's,
+// CARREL_FILES_MAX_ENTRIES, said the same way: past it the archive has no
+// directory, never one that silently lacks files. Without ?zip=1 a folder
+// address after download/ is still the folder of that name (TestDownload).
+func TestFolderDownloadsAsZip(t *testing.T) {
+	f := filesFixture(t, true)
+	f.srv.SeedFile(filesDocs+"sub/deep.md", "deep")
+	f.srv.SeedFile(filesDocs+"sub/more/leaf.txt", "leaf")
+	f.srv.SeedFile(filesDocs+"outside.txt", "not in the archive")
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		for i := range b.Collections {
+			if b.Collections[i].Path == filesDocs {
+				b.Collections[i].ReadOnly = true
+			}
+		}
+	})
+	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
+	a := menuAction(fileRow(t, page, "sub").Menu, "file.download.zip")
+	want := f.at("download", "sub", "") + "?zip=1"
+	if a == nil || !a.Enabled || a.Reason != "" || a.Method != "GET" || a.Href != want {
+		t.Fatalf("Download as .zip = %+v, want GET %s", a, want)
+	}
+	if b := menuAction(fileRow(t, page, "outside.txt").Menu, "file.download.zip"); b != nil {
+		t.Errorf("a file offers an archive: %+v", b)
+	}
+
+	rec := f.h.do(get(a.Href, f.sess))
+	h := rec.Header()
+	if rec.Code != http.StatusOK || h.Get("Content-Type") != "application/zip" || h.Get("Content-Disposition") != `attachment; filename=sub.zip` ||
+		h.Get("Content-Security-Policy") != "sandbox; default-src 'none'" || h.Get("X-Content-Type-Options") != "nosniff" {
+		t.Fatalf("zip: %d %v", rec.Code, h)
+	}
+	zr, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	names := map[string]string{}
+	for _, zf := range zr.File {
+		rc, _ := zf.Open()
+		b, _ := io.ReadAll(rc)
+		rc.Close()
+		names[zf.Name] = string(b)
+	}
+	if len(names) != 3 || names["deep.md"] != "deep" || names["more/leaf.txt"] != "leaf" {
+		t.Errorf("zip holds %v", names)
+	}
+
+	if rec := f.h.do(get(f.at("download", "none", "")+"?zip=1", f.sess)); rec.Code != http.StatusNotFound {
+		t.Errorf("a missing folder: %d", rec.Code)
+	}
+
+	f.h.cfg.FilesMaxEntries = 2
+	cut := f.h.do(get(a.Href, f.sess))
+	if _, err := zip.NewReader(bytes.NewReader(cut.Body.Bytes()), int64(cut.Body.Len())); cut.Code != http.StatusOK || err == nil {
+		t.Errorf("an archive past the ceiling: %d, reads as whole (%v)", cut.Code, err)
+	}
+
+	f.srv.Refuse("PROPFIND", http.StatusForbidden, "")
+	refused := f.h.do(get(a.Href, f.sess))
+	if ct := refused.Header().Get("Content-Type"); strings.Contains(ct, "zip") {
+		t.Fatalf("a refused listing answered %d %s", refused.Code, ct)
+	}
+	if page := decode[view.FilesPage](t, refused); !hasNotice(page.Notices, "sub could not be downloaded") {
+		t.Errorf("a refused listing: %+v", page.Notices)
 	}
 }
 

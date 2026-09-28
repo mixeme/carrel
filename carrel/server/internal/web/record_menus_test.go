@@ -225,8 +225,7 @@ func TestFileRowMenusAreTheFrames(t *testing.T) {
 	f.srv.SeedFile(filesDocs+"sub/deep.md", "x")
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
 	sameMenu(t, "file row", fileRow(t, page, "report.pdf").Menu, "s-files-9")
-	// A folder as an archive waits (docs/plan/server.md).
-	sameMenu(t, "folder row", fileRow(t, page, "sub").Menu, "s-files-10", "Download as .zip [i-down]")
+	sameMenu(t, "folder row", fileRow(t, page, "sub").Menu, "s-files-10")
 	if a := menuAction(fileRow(t, page, "report.pdf").Menu, "file.open"); a == nil || a.Href != f.at("", "report.pdf") {
 		t.Errorf("Open of a file = %+v, want its address in the folder", a)
 	}

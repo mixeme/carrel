@@ -166,6 +166,24 @@ func TestFixturesDecode(t *testing.T) {
 // again: being shown is no reason to switch it off. Every fixture is walked,
 // as its view model, for every Action in it.
 func TestFixtureActionsSayWhyTheyAreOff(t *testing.T) {
+	eachFixtureAction(t, func(screen, at string, a Action) {
+		switch {
+		case a.ID == "":
+			// an empty place: no action at all
+		case a.Enabled && a.Reason != "":
+			t.Errorf("%s %s: %s «%s» can be taken and carries a reason %q", screen, at, a.ID, a.Label, a.Reason)
+		case !a.Enabled && a.Reason == "":
+			t.Errorf("%s %s: %s «%s» is off without a reason", screen, at, a.ID, a.Label)
+		case a.Reason == "Shown now.":
+			t.Errorf("%s %s: %s «%s» is switched off for being shown: it is On and enabled", screen, at, a.ID, a.Label)
+		}
+	})
+}
+
+// eachFixtureAction calls fn for every Action in every fixture on disk,
+// each walked as its view model; at is the field path to it.
+func eachFixtureAction(t *testing.T, fn func(screen, at string, a Action)) {
+	t.Helper()
 	screens, err := os.ReadDir(fixtureDir)
 	if err != nil {
 		t.Fatalf("read fixture dir: %v", err)
@@ -200,16 +218,9 @@ func TestFixtureActionsSayWhyTheyAreOff(t *testing.T) {
 				case reflect.Struct:
 					if v.Type() == actionType {
 						a := v.Interface().(Action)
-						switch {
-						case a.ID == "":
-							// an empty place: no action at all
-						case a.Enabled && a.Reason != "":
-							t.Errorf("%s %s: %s «%s» can be taken and carries a reason %q", screen.Name(), at, a.ID, a.Label, a.Reason)
-						case !a.Enabled && a.Reason == "":
-							t.Errorf("%s %s: %s «%s» is off without a reason", screen.Name(), at, a.ID, a.Label)
-						case a.Reason == "Shown now.":
-							t.Errorf("%s %s: %s «%s» is switched off for being shown: it is On and enabled", screen.Name(), at, a.ID, a.Label)
-						}
+						fn(screen.Name(), at, a)
+						// The items of an arrow are actions too.
+						walk(v.FieldByName("Arrow"), at+".Arrow")
 						return
 					}
 					for i := 0; i < v.NumField(); i++ {

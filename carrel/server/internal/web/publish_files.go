@@ -1,10 +1,7 @@
 package web
 
 import (
-	"archive/zip"
-	"io"
 	"log/slog"
-	"mime"
 	"net/http"
 	"net/url"
 	"slices"
@@ -307,60 +304,12 @@ func (s *Server) publishedFilesDownload(w http.ResponseWriter, r *http.Request, 
 		s.tokenNotFound(w, r, start)
 		return
 	}
-	ctx := r.Context()
-	if _, err := c.files.List(ctx, p); err != nil {
-		s.notFound(w, r)
-		return
-	}
 	name := link.Target.Title
 	if len(more) > 0 {
 		name = more[len(more)-1]
 	}
-	h := w.Header()
-	h.Set("Content-Type", "application/zip")
-	if v := mime.FormatMediaType("attachment", map[string]string{"filename": name + ".zip"}); v != "" {
-		h.Set("Content-Disposition", v)
-	}
-	h.Set("X-Content-Type-Options", "nosniff")
-	h.Set("Content-Security-Policy", "sandbox; default-src 'none'")
-	zw := zip.NewWriter(w)
-	count := 0
-	var walk func(folder, prefix string) bool
-	walk = func(folder, prefix string) bool {
-		entries, err := c.files.List(ctx, folder)
-		if err != nil {
-			return false
-		}
-		for _, e := range entries {
-			if count >= s.cfg.FilesMaxEntries {
-				return false
-			}
-			count++
-			if e.Dir {
-				if _, err := zw.Create(prefix + e.Name + "/"); err != nil || !walk(e.Path, prefix+e.Name+"/") {
-					return false
-				}
-				continue
-			}
-			d, err := c.files.Open(ctx, e.Path, nil)
-			if err != nil {
-				return false
-			}
-			f, err := zw.CreateHeader(&zip.FileHeader{Name: prefix + e.Name, Method: zip.Deflate, Modified: e.Modified})
-			if err == nil {
-				_, err = io.Copy(f, d.Body)
-			}
-			d.Body.Close()
-			if err != nil {
-				return false
-			}
-		}
-		return true
-	}
-	// A break in the middle leaves a zip without its directory: a reader sees
-	// a broken archive, never one that silently lacks files.
-	if walk(p, "") {
-		_ = zw.Close()
+	if err := s.sendZip(w, r, c, p, name); err != nil {
+		s.notFound(w, r)
 	}
 }
 

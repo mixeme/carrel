@@ -266,6 +266,96 @@ func TestRenderMarkdownTaskItems(t *testing.T) {
 	}
 }
 
+// s-notes-2 promises tables among what a note's Markdown shows: a GFM table
+// is a table of rows, the first the header, its cells with their inline
+// marks and their alignment; raw HTML in a cell stays escaped text.
+func TestRenderMarkdownTables(t *testing.T) {
+	blocks := RenderMarkdown("| Item | Cost |\n|:--|--:|\n| **Rent** | 900 |\n| [Lamp](https://example.com) <b>x</b> | |")
+	if len(blocks) != 1 || blocks[0].Kind != view.BlockTable || len(blocks[0].Children) != 3 {
+		t.Fatalf("blocks = %+v", blocks)
+	}
+	rows := blocks[0].Children
+	for i, r := range rows {
+		if r.Kind != view.BlockRow || r.Header != (i == 0) || len(r.Children) != 2 {
+			t.Fatalf("row %d = %+v", i, r)
+		}
+		for j, c := range r.Children {
+			want := []view.CellAlign{view.AlignLeft, view.AlignRight}[j]
+			if c.Kind != view.BlockCell || c.Align != want {
+				t.Errorf("row %d cell %d = %+v, want a cell aligned %q", i, j, c, want)
+			}
+		}
+	}
+	if head := rows[0].Children; string(head[0].Text) != "Item" || string(head[1].Text) != "Cost" {
+		t.Errorf("header = %+v", head)
+	}
+	if rent := rows[1].Children[0]; len(rent.Children) != 1 || rent.Children[0].Kind != view.BlockStrong || string(rent.Children[0].Text) != "Rent" {
+		t.Errorf("a strong cell = %+v", rent)
+	}
+	if cost := rows[1].Children[1]; string(cost.Text) != "900" || len(cost.Children) != 0 {
+		t.Errorf("a plain cell = %+v", cost)
+	}
+	lamp := rows[2].Children[0]
+	if len(lamp.Children) < 2 || lamp.Children[0].Kind != view.BlockLink || lamp.Children[0].Href != "https://example.com" {
+		t.Fatalf("a cell with a link = %+v", lamp)
+	}
+	for _, k := range lamp.Children {
+		if strings.Contains(string(k.Text), "<b>") {
+			t.Errorf("raw html in a cell: %+v", k)
+		}
+	}
+	if empty := rows[2].Children[1]; empty.Text != "" || len(empty.Children) != 0 {
+		t.Errorf("an empty cell = %+v", empty)
+	}
+	// Not a table without its delimiter row: a paragraph with the pipes.
+	if b := RenderMarkdown("a | b"); len(b) != 1 || b[0].Kind != view.BlockPara || string(b[0].Text) != "a | b" {
+		t.Errorf("a line with pipes = %+v", b)
+	}
+}
+
+// A backslash escape is Markdown's way to write a mark as itself: «\*»
+// shows «*», and «\|» in a table cell a pipe, in every kind of block. Code,
+// fenced or inline, keeps its backslashes as written; raw HTML stays
+// escaped text.
+func TestRenderMarkdownBackslashEscapes(t *testing.T) {
+	var texts []string
+	var collect func(bs []view.Block)
+	collect = func(bs []view.Block) {
+		for _, b := range bs {
+			if b.Text != "" {
+				texts = append(texts, string(b.Kind)+":"+string(b.Text))
+			}
+			collect(b.Children)
+		}
+	}
+	for src, want := range map[string]string{
+		"a \\* b":                        "para:a * b",
+		"# a \\# b":                      "heading:a # b",
+		"- a \\_ b":                      "item:a _ b",
+		"- [ ] a \\[ b":                  "task:a [ b",
+		"> a \\> b":                      "para:a > b",
+		"**a \\* b**":                    "strong:a * b",
+		"*a \\_ b*":                      "emph:a _ b",
+		"[a \\] b](https://example.com)": "link:a ] b",
+		"| h |\n|---|\n| a \\| b |":      "cell:a | b",
+		"`a \\* b`":                      "code:a \\* b",
+		"```\na \\* b\n```":              "code:a \\* b\n",
+		"x <b a=\"\\*\">":                "para:&lt;b a=&#34;\\*&#34;&gt;",
+	} {
+		texts = nil
+		collect(RenderMarkdown(src))
+		found := false
+		for _, s := range texts {
+			if s == want {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("%q: texts %q, want %q among them", src, texts, want)
+		}
+	}
+}
+
 func TestNoteDescriptionIsMarkdown(t *testing.T) {
 	data, err := os.ReadFile("testdata/note.ics")
 	if err != nil {

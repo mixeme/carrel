@@ -9,19 +9,21 @@ import (
 	"github.com/yuin/goldmark/extension"
 	extast "github.com/yuin/goldmark/extension/ast"
 	gtext "github.com/yuin/goldmark/text"
+	"github.com/yuin/goldmark/util"
 
 	"carrel.dev/carrel/server/view"
 )
 
 // RenderMarkdown parses note Markdown into view blocks (C-6.9). A task item
 // («- [ ]», «- [x]») is a task with its tick (s-notes-1, s-notes-2), the way
-// jtx Board and people write them.
+// jtx Board and people write them; a GFM table is a table of rows and cells
+// (s-notes-2 lists tables among what a note shows).
 func RenderMarkdown(src string) []view.Block {
 	if src == "" {
 		return nil
 	}
 	srcBytes := []byte(src)
-	md := goldmark.New(goldmark.WithExtensions(extension.TaskList))
+	md := goldmark.New(goldmark.WithExtensions(extension.TaskList, extension.Table))
 	reader := gtext.NewReader(srcBytes)
 	doc := md.Parser().Parse(reader)
 	var out []view.Block
@@ -81,12 +83,36 @@ func blockFromNode(n ast.Node, src []byte) view.Block {
 			return item
 		}
 		return view.Block{Kind: kind, Checked: checked, Children: kids}
+	case extast.KindTable:
+		var rows []view.Block
+		for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+			rows = append(rows, blockFromNode(c, src))
+		}
+		return view.Block{Kind: view.BlockTable, Children: rows}
+	case extast.KindTableHeader, extast.KindTableRow:
+		var cells []view.Block
+		for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+			cells = append(cells, blockFromNode(c, src))
+		}
+		return view.Block{Kind: view.BlockRow, Header: n.Kind() == extast.KindTableHeader, Children: cells}
+	case extast.KindTableCell:
+		b := withInlines(view.BlockCell, n, src)
+		b.Align = cellAlign[n.(*extast.TableCell).Alignment]
+		return b
 	default:
 		if s := textContent(n, src); s != "" {
 			return view.Block{Kind: view.BlockPara, Text: view.Text(s)}
 		}
 		return view.Block{Kind: view.BlockPara}
 	}
+}
+
+// cellAlign is a column's alignment from the table's delimiter row; a
+// column without one has none.
+var cellAlign = map[extast.Alignment]view.CellAlign{
+	extast.AlignLeft:   view.AlignLeft,
+	extast.AlignCenter: view.AlignCenter,
+	extast.AlignRight:  view.AlignRight,
 }
 
 // taskOf reports a list item that opens with a tick, and whether it is
@@ -129,7 +155,7 @@ func inlines(n ast.Node, src []byte) []view.Block {
 		switch c.Kind() {
 		case ast.KindText:
 			t := c.(*ast.Text)
-			text.Write(t.Segment.Value(src))
+			text.Write(textValue(t, src))
 			if t.HardLineBreak() || t.SoftLineBreak() {
 				text.WriteByte('\n')
 			}
@@ -190,7 +216,7 @@ func textContent(n ast.Node, src []byte) string {
 	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
 		switch c.Kind() {
 		case ast.KindText:
-			buf.Write(c.(*ast.Text).Segment.Value(src))
+			buf.Write(textValue(c.(*ast.Text), src))
 		case ast.KindString:
 			buf.Write(c.(*ast.String).Value)
 		default:
@@ -198,4 +224,15 @@ func textContent(n ast.Node, src []byte) string {
 		}
 	}
 	return buf.String()
+}
+
+// textValue is what a text shows: a backslash escape («\*», «\|» in a
+// table cell) is the mark itself, as goldmark's own renderer writes it. The
+// text of a code span is raw and keeps its backslashes as written.
+func textValue(t *ast.Text, src []byte) []byte {
+	v := t.Segment.Value(src)
+	if t.IsRaw() {
+		return v
+	}
+	return util.UnescapePunctuations(v)
 }

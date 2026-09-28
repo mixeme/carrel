@@ -96,13 +96,16 @@ type PublishedFolder struct {
 	DAV    Text      `json:"dav"` // тот же секрет монтируется как диск
 }
 
-// Block — разобранная разметка: заголовки, списки, выделение, ссылки, код.
+// Block — разобранная разметка: заголовки, списки, задачи с отметкой,
+// выделение, ссылки, код, цитаты, таблицы.
 // Сырой HTML исходника экранируется и блоком не становится.
 type Block struct {
 	Kind     BlockKind `json:"kind"`
 	Level    int       `json:"level"`
 	Text     Text      `json:"text"`
 	Href     string    `json:"href"`
-	Checked  bool      `json:"checked"` // задача отмечена; только у BlockTask
+	Checked  bool      `json:"checked"`          // задача отмечена; только у BlockTask
+	Header   bool      `json:"header,omitempty"` // строка заголовка таблицы; только у BlockRow
+	Align    CellAlign `json:"align,omitempty"`  // выравнивание столбца; только у BlockCell, пусто — не задано
 	Children []Block   `json:"children"`
 }
