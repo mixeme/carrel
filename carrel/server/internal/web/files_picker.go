@@ -42,7 +42,7 @@ func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 	if to := r.FormValue("to"); to != "" {
 		chosen, _ = s.folderAddress(sess, to)
 	}
-	s.writeMailSheet(w, r, s.uploadPicker(r, sess, chosen, ""))
+	s.writeMailSheet(w, r, s.uploadPicker(r, sess, chosen, nil))
 }
 
 // getAttachPicker is From Files of Attach (s-agenda-6, s-tasks-7): the same
@@ -156,32 +156,31 @@ func (s *Server) postFilesPicker(w http.ResponseWriter, r *http.Request) {
 	dest, ok := s.folderAddress(sess, r.FormValue("to"))
 	switch {
 	case !ok:
-		s.writeMailSheet(w, r, s.uploadPicker(r, sess, nil, "Choose a folder of a file collection in the tree."))
+		s.writeMailSheet(w, r, s.uploadPicker(r, sess, nil, &view.Notice{Role: view.NoticeAlert, Body: "Choose a folder of a file collection in the tree."}))
 		return
 	case dest.col.ReadOnly:
-		s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, readOnlyReason+" Choose a folder you can write to."))
+		s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, &view.Notice{Role: view.NoticeAlert, Body: readOnlyReason + " Choose a folder you can write to."}))
 		return
 	}
 	// New folder of the tree (s-notes-11): made in the chosen folder and
 	// chosen in its turn; remembered, like any folder, by Choose this folder.
 	if r.FormValue("mkcol") != "" {
+		// A refusal stands under the line of the name, which stays open
+		// with what was typed, as in the move sheet; the sheet's own line
+		// stays (s-files-19).
 		name := strings.TrimSpace(r.PostFormValue("name"))
 		if n := s.makeFolder(r.Context(), dest, name); n != nil {
-			msg := string(n.Body)
-			if n.Title != "" {
-				msg = string(n.Title) + ". " + msg
-			}
-			sheet := s.uploadPicker(r, sess, dest, msg)
+			sheet := s.uploadPicker(r, sess, dest, n)
 			keepTyped(&sheet.Tree, name)
 			s.writeMailSheet(w, r, sheet)
 			return
 		}
-		s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest.at(append(slices.Clone(dest.segs), name)), ""))
+		s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest.at(append(slices.Clone(dest.segs), name)), nil))
 		return
 	}
 	key, _ := sess.DataKey()
 	_ = s.users.SetUploadFolder(sess.AccountID(), key, sealed.AttachmentFolder{AccountID: dest.conn.ID, Path: dest.col.Path, Folder: dest.segs})
-	s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, ""))
+	s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, nil))
 }
 
 // uploadFolder is where the menu's upload goes: the folder chosen here
@@ -197,16 +196,17 @@ func (s *Server) uploadFolder(sess *session.Session, blob sealed.Blob) *fileCtx 
 	return s.savedFolder(sess, blob)
 }
 
-func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fileCtx, errText string) view.FilePickerSheet {
+// uploadPicker is «Upload files» (s-notes-11): the tree with New folder,
+// the line saying where the folder comes from, and a refusal, when there is
+// one, beside it — never in its place (s-files-19).
+func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fileCtx, failure *view.Notice) view.FilePickerSheet {
 	blob := s.catalogOf(sess)
-	purpose := "Upload files: where to put them. The folder is the attachment folder from Settings → Attachments unless you choose another here; the next upload from this menu goes where you chose last. A name already taken is refused, not overwritten."
+	const purpose = "The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here. " +
+		"Change it here and the next upload from this menu goes to the new one."
 	if chosen == nil {
 		chosen = s.uploadFolder(sess, blob)
 	}
-	sheet := view.FilePickerSheet{Title: "Upload files", Purpose: text(purpose), Tree: *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen)}
-	if errText != "" {
-		sheet.Purpose = text(errText)
-	}
+	sheet := view.FilePickerSheet{Title: "Upload files", Purpose: purpose, Tree: *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen), Failure: failure}
 	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "POST", Enabled: true,
 		Href: s.postQuery("/app/files/picker", url.Values{"for": {"upload"}})}
 	upload := view.Action{ID: "files.picker.upload", Label: "Upload here", Method: "POST"}

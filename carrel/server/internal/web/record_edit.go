@@ -176,6 +176,29 @@ func zoneOptions(held, selected string) []view.Option {
 	return opts
 }
 
+// newZoneOptions are the zones a new event offers: every zone of zoneNames
+// with the instance zone chosen (C-10), a line and Floating, last. Nothing
+// came «As sent».
+func newZoneOptions(selected string) []view.Option {
+	opts := make([]view.Option, 0, len(zoneNames)+1)
+	for _, z := range zoneNames {
+		opts = append(opts, view.Option{Value: z, Label: text(z), Selected: z == selected})
+	}
+	return append(opts, view.Option{Value: "floating", Label: floatingLabel, Selected: selected == "floating", Separator: true})
+}
+
+// instanceZone is the zone a new event is written in unless another is
+// chosen: the instance's (C-10), by its name in the list; one that has no
+// name there — the system's own, unnamed — is written in UTC, the same
+// instant.
+func (s *Server) instanceZone() string {
+	name := s.tz().String()
+	if _, found := slices.BinarySearch(zoneNames, name); found {
+		return name
+	}
+	return "UTC"
+}
+
 // zoneOffered reports whether a zone may be chosen: the one held, Floating,
 // or one of zoneNames the zone database knows. The location is nil for the
 // held zone and for Floating.
@@ -245,13 +268,15 @@ var relatedKinds = map[view.Kind]int{view.KindEvent: 0, view.KindTask: 1, view.K
 
 // relatedOptions are the list of Related to (s-tasks-10): the records this
 // session has loaded, of every collection of the catalog — events, tasks and
-// notes, each with its collection's mark and «kind · day» — newest first,
-// and last, after a line, «By UID…», the value typed by hand under the same
-// name. The record itself is not offered. The one related now is chosen; one
-// outside the loaded lists stands first under its own UID (a card a
-// timeline wrote a note for, under its name). No «Nothing»: an empty field
-// is no relation. Nothing is asked of the servers.
-func (s *Server) relatedOptions(c *collectionCtx, self, selected string) []view.Option {
+// notes, each with its collection's mark and «kind · day», the day the short
+// way of a list — newest first, and last, after a line, «By UID…», the value
+// typed by hand under the same name, with the line under it (s-tasks-11).
+// The record itself is not offered. The one related now is chosen; one
+// outside the loaded lists stands first: a card a timeline wrote a note for
+// as its name and «contact», anything else as its UID — and unloaded says
+// so. No «Nothing»: an empty field is no relation. Nothing is asked of the
+// servers.
+func (s *Server) relatedOptions(c *collectionCtx, self, selected string) (opts []view.Option, unloaded bool) {
 	blob := s.catalogOf(c.sess)
 	type loaded struct {
 		indexEntry
@@ -304,21 +329,23 @@ func (s *Server) relatedOptions(c *collectionCtx, self, selected string) []view.
 	option := func(l loaded) view.Option {
 		meta := string(l.Kind)
 		if l.At != 0 {
-			meta += " · " + c.tf.dayOfYear(time.Unix(l.At, 0))
+			meta += " · " + c.tf.shortDay(time.Unix(l.At, 0))
 		}
 		return view.Option{Value: l.UID, Label: text(l.Title), Colour: l.colour, Meta: text(meta), Selected: l.UID == selected}
 	}
-	var opts []view.Option
 	switch {
 	case current != nil:
-		opts = append(opts, option(*current))
+		// A card is its name and «contact», one pill (s-tasks-11).
+		opts = append(opts, view.Option{Value: current.UID, Label: text(current.Title + " · contact"), Colour: current.colour, Selected: true})
 	case selected != "" && !seen[selected]:
 		opts = append(opts, view.Option{Value: selected, Label: text(selected), Selected: true})
+		unloaded = true
 	}
 	for _, l := range list {
 		opts = append(opts, option(l))
 	}
-	return append(opts, view.Option{Label: "By UID…", Separator: true, Typed: true})
+	return append(opts, view.Option{Label: "By UID…", Separator: true, Typed: true,
+		Hint: "By UID: a record that is not among the loaded ones."}), unloaded
 }
 
 // repeatDays are the days of On, in the order the form shows them.
@@ -923,6 +950,10 @@ func (s *Server) emptyValues(c *collectionCtx) formValues {
 			vals[f.name] = repeatValues("", nil)
 		case fieldChoice:
 			vals[f.name] = []string{f.blank}
+		case fieldZone:
+			// A new event is written in the instance zone unless another is
+			// chosen (from-typecase note 19).
+			vals[f.name] = []string{s.instanceZone()}
 		default:
 			vals[f.name] = []string{""}
 		}
@@ -1056,14 +1087,25 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 	startRow := triple(want["start"])
 	startChanged := !sameRows(want["start"], have["start"])
 	// A new zone rewrites both times at the instants the form names, even
-	// when neither row changed.
+	// when neither row changed. A new event is written in the zone chosen
+	// — the instance's unless another was (the quick sheet chooses none) —
+	// the same way (from-typecase note 19).
 	var zone string
-	if held := first(have["tz"]); held != "" && first(want["tz"]) != held && startRow[2] != "on" {
-		loc, ok := zoneOffered(first(want["tz"]), held)
-		if !ok {
+	held, chosen := first(have["tz"]), first(want["tz"])
+	fresh := hasField(c.spec.kind, "tz") && len(props["DTSTART"]) == 0
+	if fresh {
+		held = ""
+		if chosen == "" {
+			chosen = s.instanceZone()
+		}
+	}
+	if (fresh || (held != "" && chosen != held)) && startRow[2] != "on" {
+		loc, ok := zoneOffered(chosen, held)
+		switch {
+		case !ok || chosen == "":
 			ch.errors["tz"] = "Choose a time zone from the list."
-		} else {
-			zone = first(want["tz"])
+		default:
+			zone = chosen
 			if loc != nil && zone != "UTC" {
 				ch.zone = loc
 			}
@@ -2049,16 +2091,31 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		case fieldRelated:
 			// One field (s-tasks-10): picked from what the session has
 			// loaded, or typed after «By UID…» — the same name either way.
-			set.Rows = append(set.Rows,
-				view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
-					Options: s.relatedOptions(c, st.uid, first(vals)), Error: errText})
-		case fieldZone:
-			held := zoneOf(props[f.prop])
-			if held == "" {
-				continue // a day has no zone; a new event is written in UTC
+			opts, unloaded := s.relatedOptions(c, st.uid, first(vals))
+			row := view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
+				Options: opts, Placeholder: "UID of the record", Error: errText}
+			if unloaded {
+				row.Hint = "A record that is not loaded here: its UID."
 			}
-			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
-				Options: zoneOptions(held, first(vals)), Placeholder: "Find a zone", Error: errText})
+			set.Rows = append(set.Rows, row)
+		case fieldZone:
+			held, chosen := zoneOf(props[f.prop]), first(vals)
+			switch {
+			case st.obj == nil:
+				// A new event: the instance zone chosen — also when the
+				// quick sheet, which draws no zone, opens the card — and the
+				// list without «As sent» (from-typecase note 19).
+				if chosen == "" {
+					chosen = s.instanceZone()
+				}
+				set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(chosen),
+					Options: newZoneOptions(chosen), Placeholder: "Find a zone", Error: errText})
+			case held != "":
+				set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(chosen),
+					Options: zoneOptions(held, chosen), Placeholder: "Find a zone", Error: errText})
+			default:
+				// A day has no zone.
+			}
 		case fieldChoice:
 			var held string
 			if st.obj != nil {

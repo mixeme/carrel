@@ -105,6 +105,13 @@ func TestLeavingThePollLeavesNothingRunning(t *testing.T) {
 	if n := goroutinesSettle(t, base+2, 20*time.Second); n > base+2 {
 		t.Errorf("goroutines: %d before, %d after the page went and the poll ended", base, n)
 	}
+	// The count of goroutines is the process's: it may fall to the mark
+	// while the far server's handler has yet to see its connection go (a
+	// goroutine of another test ended meanwhile). What is asserted is that
+	// every far request is cut, so the test waits for that, not for a time.
+	for wait := time.Now().Add(20 * time.Second); hang.cut.Load() != hang.started.Load() && time.Now().Before(wait); {
+		time.Sleep(20 * time.Millisecond)
+	}
 	if hang.started.Load() == 0 || hang.cut.Load() != hang.started.Load() {
 		t.Errorf("far requests: %d started, %d cut", hang.started.Load(), hang.cut.Load())
 	}
@@ -129,7 +136,7 @@ func TestLeavingThePollLeavesNothingRunning(t *testing.T) {
 		t.Fatal("the second search did not ask the slow server")
 	}
 	h.do(asPoll(postForm("/app/search/progress/"+page.Poll.TaskID+"/cancel", sess, url.Values{})))
-	deadline := time.Now().Add(5 * time.Second)
+	deadline := time.Now().Add(20 * time.Second)
 	for hang.cut.Load() == before && time.Now().Before(deadline) {
 		time.Sleep(20 * time.Millisecond)
 	}

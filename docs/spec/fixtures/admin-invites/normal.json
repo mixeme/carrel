@@ -424,13 +424,14 @@
               "extra": null,
               "hint": "",
               "kind": "email",
-              "label": "Email (optional)",
+              "label": "Email",
               "name": "email",
               "options": [],
               "placeholder": "—",
               "readOnly": false,
               "required": false,
-              "value": ""
+              "value": "",
+              "labelAside": "(optional)"
             },
             {
               "error": "",

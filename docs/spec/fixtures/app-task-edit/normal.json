@@ -389,21 +389,21 @@
               {
                 "colour": "#3f6e8c",
                 "label": "Дописать раздел про кэш",
-                "meta": "task · 14 August",
+                "meta": "task · 14 Aug",
                 "selected": false,
                 "value": "bb21-0fa8-3d66"
               },
               {
                 "colour": "#4a6b52",
                 "label": "Собрать чемодан",
-                "meta": "task · 12 August",
+                "meta": "task · 12 Aug",
                 "selected": false,
                 "value": "aa11-2d09-5f84"
               },
               {
                 "colour": "#3f6e8c",
                 "label": "Ответить подрядчику по смете",
-                "meta": "task · 8 August",
+                "meta": "task · 8 Aug",
                 "selected": false,
                 "value": "bb20-4c17-8a52"
               },
@@ -415,6 +415,7 @@
                 "value": "aa12-9e44-c703"
               },
               {
+                "hint": "By UID: a record that is not among the loaded ones.",
                 "label": "By UID…",
                 "selected": false,
                 "separator": true,
@@ -422,6 +423,7 @@
                 "value": ""
               }
             ],
+            "placeholder": "UID of the record",
             "readOnly": false,
             "required": false,
             "value": ""

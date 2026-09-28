@@ -1,19 +1,25 @@
 package web_test
 
 import (
+	"net/http"
+	"net/url"
 	"regexp"
 	"slices"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/emersion/go-webdav/caldav"
+	"github.com/emersion/go-webdav/carddav"
+
 	"carrel.dev/carrel/server/view"
 )
 
 var (
-	frameRelMenu = regexp.MustCompile(`(?s)<label>Related to</label>.*?<div class="tc-menu is-pop[^"]*">(.*?)</div>`)
-	frameRelItem = regexp.MustCompile(`(?s)(<span class="tc-menu__sep"></span>\s*)?<button class="tc-menu__item[^"]*" type="button" role="menuitem">(.*?)</button>`)
-	frameRelMeta = regexp.MustCompile(`(?s)<span class="tc-push[^"]*">(.*?)</span>`)
+	frameShortDay = regexp.MustCompile(`^\d{1,2} [A-Z][a-z]{2}$`)
+	frameRelMenu  = regexp.MustCompile(`(?s)<label>Related to</label>.*?<div class="tc-menu is-pop[^"]*">(.*?)</div>`)
+	frameRelItem  = regexp.MustCompile(`(?s)(<span class="tc-menu__sep"></span>\s*)?<button class="tc-menu__item[^"]*" type="button" role="menuitem">(.*?)</button>`)
+	frameRelMeta  = regexp.MustCompile(`(?s)<span class="tc-push[^"]*">(.*?)</span>`)
 )
 
 type frameRelated struct {
@@ -60,6 +66,11 @@ func TestRelatedToIsTheFramesList(t *testing.T) {
 			t.Fatalf("s-tasks-10: a record %+v without a mark or «kind · day»: read the frame again", r)
 		}
 		kinds[kind] = true
+		// A list says the day the short way, as the columns of a row do
+		// (C-10): «12 Aug»; the record says it in full.
+		if _, day, _ := strings.Cut(r.meta, " · "); !frameShortDay.MatchString(day) {
+			t.Fatalf("s-tasks-10: the day %q is not «12 Aug»: read the frame again", day)
+		}
 	}
 	if !byUID.sep || byUID.mark || byUID.meta != "" || len(kinds) != 3 {
 		t.Fatalf("s-tasks-10: the last item %+v, kinds %v: read the frame again", byUID, kinds)
@@ -83,9 +94,9 @@ func TestRelatedToIsTheFramesList(t *testing.T) {
 	}
 	type want struct{ label, meta, col string }
 	wants := []want{
-		{"Trip", "event · 5 January", "diary"}, {"Pack", "task · 5 January", "diary"},
-		{"Fourth", "note · 4 January", "notes"}, {"Third", "note · 3 January", "notes"},
-		{"Second", "note · 2 January", "notes"}, {"First", "note · 1 January", "notes"},
+		{"Trip", "event · 5 Jan", "diary"}, {"Pack", "task · 5 Jan", "diary"},
+		{"Fourth", "note · 4 Jan", "notes"}, {"Third", "note · 3 Jan", "notes"},
+		{"Second", "note · 2 Jan", "notes"}, {"First", "note · 1 Jan", "notes"},
 	}
 	check := func(what string, row view.FormRow, wants []want, selected string) {
 		t.Helper()
@@ -126,7 +137,7 @@ func TestRelatedToIsTheFramesList(t *testing.T) {
 		}
 	}
 	noteWants := slices.Clone(wants[:3])
-	noteWants = append(noteWants, want{"Tickets", "task · 3 January", "diary"}, wants[4], wants[5])
+	noteWants = append(noteWants, want{"Tickets", "task · 3 Jan", "diary"}, wants[4], wants[5])
 	check("note", docRow(t, note, "related"), noteWants, "")
 
 	save := func(value string) string {
@@ -154,5 +165,105 @@ func TestRelatedToIsTheFramesList(t *testing.T) {
 	}
 	if got := save(""); strings.Contains(got, "RELATED-TO") {
 		t.Errorf("an emptied field kept its line:\n%s", got)
+	}
+}
+
+// from-typecase note 19, s-tasks-11: Related to holds one relation — the
+// first RELATED-TO; the others stay as they are. A record not among the
+// loaded ones is a pill with its UID and the frame's line under it; a card
+// (a note a timeline wrote for a person) is its name and «contact». «By
+// UID…» opens a line for the UID in place of the field: its sample and its
+// line are the frame's.
+func TestRelatedToOutsideTheLoadedIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "s-tasks-11")
+	type drawn struct{ pill, hint, placeholder string }
+	var fields []drawn
+	for _, m := range regexp.MustCompile(`(?s)<label>Related to</label>(.*?)</div>`).FindAllStringSubmatch(frame, -1) {
+		var d drawn
+		if p := regexp.MustCompile(`(?s)<span class="tc-tag tc-tag--pill">(.*?)</span>`).FindStringSubmatch(m[1]); p != nil {
+			d.pill = frameText(p[1])
+		}
+		if h := frameAnyHint.FindStringSubmatch(m[1]); h != nil {
+			d.hint = frameText(h[1])
+		}
+		if ph := regexp.MustCompile(`placeholder="([^"]*)"`).FindStringSubmatch(m[1]); ph != nil {
+			d.placeholder = ph[1]
+		}
+		fields = append(fields, d)
+	}
+	if len(fields) != 3 || fields[0].hint == "" || !strings.HasSuffix(fields[1].pill, " · contact") || fields[1].hint != "" ||
+		fields[2].pill != "" || fields[2].placeholder == "" || fields[2].hint == "" {
+		t.Fatalf("s-tasks-11 = %+v: read the frame again", fields)
+	}
+
+	srv := searchServer(t)
+	srv.AddAddressBook(carddav.AddressBook{Path: searchBook, Name: "People"})
+	srv.Seed(searchBook+"anna.vcf", "BEGIN:VCARD\nVERSION:3.0\nUID:anna\nFN:Анна Ковалёва\nN:Ковалёва;Анна;;;\nEND:VCARD")
+	srv.AddCalendar(caldav.Calendar{Path: searchWork, Name: "Work", SupportedComponentSet: []string{"VTODO"}})
+	srv.Seed(searchWork+"far.ics", ics("BEGIN:VTODO\nUID:far\nDTSTAMP:20260101T000000Z\nSUMMARY:Far\nRELATED-TO:7c1e-40aa-b913\nRELATED-TO:second\nEND:VTODO"))
+	srv.Seed(searchWork+"card.ics", ics("BEGIN:VTODO\nUID:card\nDTSTAMP:20260101T000000Z\nSUMMARY:Call\nRELATED-TO:anna\nEND:VTODO"))
+	f := connectFixture(t, srv, searchWork, nil)
+	_ = f.h.do(get("/app/contacts/"+f.id+"/"+url.PathEscape(searchBook), f.sess))
+	_ = f.h.do(get(f.path("tasks")+"?show=all", f.sess))
+	related := func(uid string) view.FormRow {
+		t.Helper()
+		return rowNamed(t, decode[view.TaskEditPage](t, f.h.do(get(f.path("tasks")+"/"+uid+"/edit", f.sess))).Form, "related")
+	}
+
+	far := related("far")
+	if chosen := far.Options[0]; string(far.Value) != "7c1e-40aa-b913" || !chosen.Selected || string(chosen.Label) != "7c1e-40aa-b913" ||
+		string(far.Hint) != fields[0].hint {
+		t.Errorf("a record not loaded = %q %+v, hint %q; want the pill «7c1e-40aa-b913» and %q", far.Value, chosen, far.Hint, fields[0].hint)
+	}
+	card := related("card")
+	if chosen := card.Options[0]; !chosen.Selected || string(chosen.Label) != "Анна Ковалёва · contact" || chosen.Meta != "" || card.Hint != "" {
+		t.Errorf("a card = %+v, hint %q; want the pill %q", chosen, card.Hint, "Анна Ковалёва · contact")
+	}
+	for what, row := range map[string]view.FormRow{"far": far, "card": card} {
+		typed := row.Options[len(row.Options)-1]
+		if !typed.Typed || string(typed.Hint) != fields[2].hint || string(row.Placeholder) != fields[2].placeholder {
+			t.Errorf("%s: «By UID…» = %+v, sample %q; want the line %q with %q", what, typed, row.Placeholder, fields[2].placeholder, fields[2].hint)
+		}
+	}
+
+	// One relation: the field is the first RELATED-TO, the others stay.
+	form := formFields(decode[view.TaskEditPage](t, f.h.do(get(f.path("tasks")+"/far/edit", f.sess))).Form)
+	form.Set("related", "card")
+	if rec := f.h.do(postForm(f.path("tasks")+"/far/edit", f.sess, form)); rec.Code != http.StatusSeeOther {
+		t.Fatalf("save: %d %s", rec.Code, rec.Body)
+	}
+	b, _, _ := srv.Object(searchWork + "far.ics")
+	if got := unfolded(b); !strings.Contains(got, "RELATED-TO:card") || !strings.Contains(got, "RELATED-TO:second") || strings.Contains(got, "7c1e") {
+		t.Errorf("saved:\n%s", got)
+	}
+}
+
+// from-typecase note 19, s-notes-2: a related record in the column of a
+// note is its title, its kind and its day the short way of a list — «event
+// · 10 Aug» — and a record without a day only its kind.
+func TestRelatedRowsSayTheDayShort(t *testing.T) {
+	item := regexp.MustCompile(`(?s)<span class="tc-stack__item"><span class="tc-dim--accent">(.*?)</span> <span class="tc-dim">· (.*?)</span></span>`)
+	var days []string
+	for _, m := range item.FindAllStringSubmatch(frameBlock(t, mockupFrame(t, "s-notes-2"), "Related"), -1) {
+		_, day, _ := strings.Cut(frameText(m[2]), " · ")
+		days = append(days, day)
+	}
+	if len(days) != 2 || !frameShortDay.MatchString(days[0]) || days[1] != "" {
+		t.Fatalf("s-notes-2 relates %q: read the frame again", days)
+	}
+	f := newNoteShelf(t)
+	f.h.srv.SetClock(time.Date(2026, 1, 10, 12, 0, 0, 0, time.UTC))
+	f.srv.Seed(f.col+"rel.ics", ics("BEGIN:VJOURNAL\nUID:rel\nDTSTAMP:20260101T000000Z\nDTSTART:20260105T090000Z\n"+
+		"SUMMARY:Rel\nRELATED-TO:n2\nRELATED-TO:t0\nEND:VJOURNAL"))
+	f.srv.Seed(f.col+"t0.ics", ics("BEGIN:VTODO\nUID:t0\nDTSTAMP:20260101T000000Z\nSUMMARY:Undated\nEND:VTODO"))
+	_ = f.h.do(get(f.path("notes"), f.sess))
+	_ = f.h.do(get(strings.Replace(f.path("notes"), "/app/notes/", "/app/tasks/", 1)+"?show=all", f.sess))
+	page := decode[view.NotePage](t, f.h.do(get(f.path("notes")+"/rel", f.sess)))
+	got := map[string]string{}
+	for _, r := range page.Meta.Related {
+		got[string(r.Title)] = string(r.When)
+	}
+	if got["Second"] != "2 Jan" || got["Undated"] != "" || len(got) != 2 {
+		t.Errorf("related = %+v, want Second on «2 Jan» and Undated without a day", page.Meta.Related)
 	}
 }

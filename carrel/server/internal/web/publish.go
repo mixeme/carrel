@@ -505,19 +505,27 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 }
 
 // publicRecord fills the page with one record — its own fields, nothing that
-// leads back into the owner's Carrel.
+// leads back into the owner's Carrel. The line under the title of an event
+// is when and where (s-publish-16); no other lede — the badge «read-only»
+// says what the page is.
 func (s *Server) publicRecord(c *collectionCtx, obj *model.Object, page *view.PublishedPage) {
 	tf := c.tf
-	page.Title = text(recordTitle(c.spec.kind, obj))
+	page.Title, page.Lede = text(recordTitle(c.spec.kind, obj)), ""
 	switch c.spec.kind {
 	case view.KindContact:
 		for _, f := range contactFieldsOf(obj) {
 			page.Fields = append(page.Fields, f.Field)
 		}
 	case view.KindEvent:
+		var head []string
 		if tm, err := cal.TimingOf(obj, tf.tz); err == nil && !tm.Start.IsZero() {
 			page.Fields = append(page.Fields, view.Field{Label: "When", Value: text(tf.when(tm))})
+			head = append(head, tf.when(tm))
 		}
+		if where := strings.TrimSpace(cal.Text(obj, "LOCATION")); where != "" {
+			head = append(head, where)
+		}
+		page.Lede = text(strings.Join(head, " · "))
 		page.Fields = append(page.Fields, calendarFields(obj)...)
 		page.Body = text(cal.Description(obj))
 	case view.KindTask:
@@ -594,7 +602,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 		for _, o := range objs {
 			row := view.TaskRow{UID: cal.UID(o), Done: taskDone(o), Summary: text(recordTitle(view.KindTask, o)), Percent: percentOf(o), State: view.RecordOK}
 			if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
-				row.Due = text(tf.timeOrDate(due))
+				row.Due = text(tf.shortDue(due))
 			}
 			page.Tasks = append(page.Tasks, row)
 		}
@@ -610,7 +618,7 @@ func (s *Server) publicCollection(r *http.Request, c *collectionCtx, link user.O
 			title := noteTitle(cal.Text(o, "SUMMARY"), body)
 			row := view.NoteRow{UID: cal.UID(o), Title: text(title), Excerpt: text(noteExcerpt(body, title)), State: view.RecordOK}
 			if at := noteTime(o, tf.tz); !at.IsZero() {
-				row.Date = text(tf.date(at))
+				row.Date = text(tf.shortDay(at))
 			}
 			page.Notes = append(page.Notes, row)
 		}

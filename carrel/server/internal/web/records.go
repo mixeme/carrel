@@ -1310,7 +1310,7 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 			row.Tick = &tick
 		}
 		if !due.Start.IsZero() {
-			row.Due = text(tf.timeOrDate(due))
+			row.Due = text(tf.shortDue(due))
 			row.Overdue = !isDone && due.Start.Before(now)
 		}
 		rows = append(rows, item{row: row, due: due.Start, priority: priorityOf(o), changed: changedAt(o, tf.tz), order: it.from.listPath(segment)})
@@ -1445,7 +1445,7 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 			row.Stamp, row.Colour = it.from.stamp(), catalogColour(it.from.col)
 		}
 		if !at.IsZero() {
-			row.Date = text(tf.date(at))
+			row.Date = text(tf.shortDay(at))
 		}
 		rows = append(rows, item{row: row, at: at, order: it.from.listPath(segment)})
 	}

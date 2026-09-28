@@ -22,7 +22,7 @@
       "method": "GET"
     }
   ],
-  "purpose": "Upload files: where to put them. The folder is the attachment folder from Settings → Attachments unless you choose another here; the next upload from this menu goes where you chose last. A name already taken is refused, not overwritten.",
+  "purpose": "The folder is the attachment folder from Settings → Attachments, named once and remembered — unless you make a new one here. Change it here and the next upload from this menu goes to the new one.",
   "tree": {
     "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
     "nodes": [
@@ -140,5 +140,6 @@
     }
   },
   "subject": "",
-  "title": "Upload files"
+  "title": "Upload files",
+  "failure": null
 }

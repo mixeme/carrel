@@ -45,12 +45,13 @@
             "extra": null,
             "hint": "For getting back in if the password is lost. It is not confirmed yet: the account page sends the letter.",
             "kind": "email",
-            "label": "Email (optional)",
+            "label": "Email",
             "name": "email",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "",
+            "labelAside": "(optional)"
           },
           {
             "error": "",

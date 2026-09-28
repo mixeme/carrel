@@ -110,7 +110,7 @@
       {
         "error": "",
         "extra": null,
-        "hint": "",
+        "hint": "A record that is not loaded here: its UID.",
         "kind": "select",
         "label": "Related to",
         "name": "related",
@@ -123,18 +123,19 @@
           {
             "colour": "#4a6b52",
             "label": "Что почитать про CRDT",
-            "meta": "note · 8 August",
+            "meta": "note · 8 Aug",
             "selected": false,
             "value": "6d92-13ef-b408"
           },
           {
             "colour": "#6b4e7a",
             "label": "Про дорогу до дачи",
-            "meta": "note · 3 August",
+            "meta": "note · 3 Aug",
             "selected": false,
             "value": "7f03-5b26-cc19"
           },
           {
+            "hint": "By UID: a record that is not among the loaded ones.",
             "label": "By UID…",
             "selected": false,
             "separator": true,
@@ -142,6 +143,7 @@
             "value": ""
           }
         ],
+        "placeholder": "UID of the record",
         "readOnly": false,
         "required": false,
         "value": "8f1c-4a02-b7d3"

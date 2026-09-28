@@ -65,6 +65,26 @@ func (f timeFmt) dayOfYear(t time.Time) string {
 	return f.date(t)
 }
 
+// shortDay is a day in a list (C-10): the columns of a row and the list of
+// a field say it the short way, «12 Aug» (s-tasks-10), with the year only
+// when it is not this year's, «12 Aug 2025»; the record itself says it in
+// full.
+func (f timeFmt) shortDay(t time.Time) string {
+	if t.In(f.tz).Year() == f.now.In(f.tz).Year() {
+		return t.In(f.tz).Format("2 Jan")
+	}
+	return t.In(f.tz).Format("2 Jan 2006")
+}
+
+// shortDue is a due date in a row's column: the short day, and the time
+// after it when there is one, «12 Aug 18:00» (s-tasks-1).
+func (f timeFmt) shortDue(tm cal.Timing) string {
+	if tm.AllDay {
+		return f.shortDay(tm.Start)
+	}
+	return f.shortDay(tm.Start) + " " + f.clock(tm.Start)
+}
+
 // sentAt is when a letter went: the clock alone today («11:42», account-9),
 // the day and the clock before. The phrase is how a sentence says it: «at
 // 11:42», «on 12 February at 11:42».

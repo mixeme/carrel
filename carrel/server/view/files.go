@@ -94,8 +94,12 @@ type FileTreeNode struct {
 type FilePickerSheet struct {
 	Title   Text     `json:"title"`   // «Upload files» (s-notes-11), «Attach from Files» (s-files-16)
 	Subject Text     `json:"subject"` // для чего: «to «Собрать чемодан»»; пусто — строки нет
-	Purpose Text     `json:"purpose"` // зачем выбирают: папка вложений, назначение копии, файл для вложения
+	Purpose Text     `json:"purpose"` // зачем выбирают: папка вложений, назначение копии, файл для вложения; остаётся и при отказе
 	Tree    FileTree `json:"tree"`
+	// Failure — отказ: New folder не завёл папку (под строкой имени, как
+	// FileOpSheet.Failure, s-files-19) или папку нельзя выбрать; nil — отказа
+	// не было
+	Failure *Notice  `json:"failure"`
 	Actions []Action `json:"actions"`
 }
 

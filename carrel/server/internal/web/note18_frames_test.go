@@ -528,7 +528,9 @@ func TestNothingToRewriteIsTheFrame(t *testing.T) {
 	})
 	resp := s.save(t, func(f url.Values) { f.Set("email.0", "ada@new.example") })
 	sheet := decode[view.RewriteSheet](t, s.h.do(get(resp.Header.Get("Location"), s.sess)))
-	if want := strings.Replace(fr.pairs[0][1], n[1]+" ", "2 ", 1); len(sheet.Pairs) != 1 || string(sheet.Pairs[0].Note) != want {
+	// Only what was read is counted: the two records of Shared, not the
+	// collection that did not answer (from-typecase note 19).
+	if want := fr.pairs[0][1]; n[1] != "2" || len(sheet.Pairs) != 1 || string(sheet.Pairs[0].Note) != want {
 		t.Errorf("pair = %+v, want %q", sheet.Pairs, want)
 	}
 	if len(sheet.Effects) != 0 || len(sheet.Kept) != 2 {

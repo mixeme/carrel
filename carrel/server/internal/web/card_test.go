@@ -42,7 +42,7 @@ func TestTheFieldsOfACardStandInTheOrderOfTheFrame(t *testing.T) {
 	for _, f := range page.Fields {
 		labels = append(labels, string(f.Label))
 	}
-	want := []string{"Phone · mobile", "Phone · work", "Email · work", "Birthday", "Categories", "Note"}
+	want := []string{"Phone · mobile", "Phone · work", "Email · work", "Birthday", "Tags", "Note"}
 	if !equalStrings(labels, want) {
 		t.Errorf("fields = %v,\nwant      %v", labels, want)
 	}

@@ -387,6 +387,7 @@
             "name": "related",
             "options": [
               {
+                "hint": "By UID: a record that is not among the loaded ones.",
                 "label": "By UID…",
                 "selected": false,
                 "separator": true,
@@ -394,6 +395,7 @@
                 "value": ""
               }
             ],
+            "placeholder": "UID of the record",
             "readOnly": false,
             "required": false,
             "value": ""

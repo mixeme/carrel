@@ -51,7 +51,8 @@ type Option struct {
 	Colour    Colour `json:"colour,omitempty"`    // метка варианта-коллекции (s-notes-15); у прочих пусто
 	Group     Text   `json:"group,omitempty"`     // рубрика перед вариантом: «As sent» (s-agenda-8); у прочих пусто
 	Meta      Text   `json:"meta,omitempty"`      // подпись справа: род и день записи, «event · 12 August» (s-tasks-10); у прочих пусто
-	Typed     bool   `json:"typed,omitempty"`     // «By UID…» (s-tasks-10): выбор открывает строку, где значение набирают руками под тем же Name; Value пуст
+	Typed     bool   `json:"typed,omitempty"`     // «By UID…» (s-tasks-10): выбор открывает строку, где значение набирают руками под тем же Name; Value пуст; образец строки — Placeholder поля
+	Hint      Text   `json:"hint,omitempty"`      // у Typed — строка под строкой набора: «By UID: a record that is not among the loaded ones.» (s-tasks-11); у прочих пусто
 }
 type FieldError struct {
 	Name    string `json:"name"`

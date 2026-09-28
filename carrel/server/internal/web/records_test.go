@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 	_ "time/tzdata"
 
 	"github.com/emersion/go-webdav/caldav"
@@ -812,13 +813,16 @@ func TestTasksAndNotes(t *testing.T) {
 			"DESCRIPTION:# Ideas\\n\\nFirst **bold** line\nEND:VJOURNAL"),
 	)
 	tasks, notes := f.path("tasks"), f.path("notes")
+	// A row says its day the short way of a list, without the year of
+	// this year (C-10).
+	f.h.srv.SetClock(time.Date(2026, 1, 20, 9, 0, 0, 0, time.UTC))
 
 	open := decode[view.TasksPage](t, f.h.do(get(tasks, f.sess)))
 	if len(open.Groups) != 1 || len(open.Groups[0].Rows) != 1 {
 		t.Fatalf("open tasks = %+v", open.Groups)
 	}
 	row := open.Groups[0].Rows[0]
-	if row.Summary != "Write report" || row.Done || !row.Overdue || row.Due != "10 January 2026, 12:00" {
+	if row.Summary != "Write report" || row.Done || !row.Overdue || row.Due != "10 Jan 12:00" {
 		t.Errorf("row = %+v", row)
 	}
 	var segments []string
@@ -838,7 +842,7 @@ func TestTasksAndNotes(t *testing.T) {
 
 	list := decode[view.NotesPage](t, f.h.do(get(notes, f.sess)))
 	if len(list.Groups) != 1 || list.Groups[0].Rows[0].Title != "Ideas" ||
-		list.Groups[0].Rows[0].Excerpt != "First **bold** line" || list.Groups[0].Rows[0].Date != "5 January 2026" {
+		list.Groups[0].Rows[0].Excerpt != "First **bold** line" || list.Groups[0].Rows[0].Date != "5 Jan" {
 		t.Errorf("notes = %+v", list.Groups)
 	}
 	note := decode[view.NotePage](t, f.h.do(get(notes+"/note-1", f.sess)))

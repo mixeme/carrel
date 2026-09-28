@@ -1,0 +1,494 @@
+package web_test
+
+import (
+	"net/http"
+	"net/url"
+	"regexp"
+	"slices"
+	"strings"
+	"testing"
+	"time"
+
+	"carrel.dev/carrel/server/internal/sealed"
+	"carrel.dev/carrel/server/internal/store"
+	"carrel.dev/carrel/server/view"
+)
+
+// from-typecase note 19: the frames of the administration, the reset, the
+// note, Related to, the account, the move and From Files, read as they are
+// drawn now.
+
+var frameLabelMuted = regexp.MustCompile(`(?s)^(.*?)\s*<span class="tc-dim">(.*?)</span>\s*$`)
+
+// splitLabel is a field's label as the frame draws it: the label, and the
+// muted part after it («Email» and «(optional)»), each as it reads.
+func splitLabel(label string) (main, aside string) {
+	if m := frameLabelMuted.FindStringSubmatch(label); m != nil {
+		return frameText(m[1]), frameText(m[2])
+	}
+	return frameText(label), ""
+}
+
+// frameMutedLabel is the label of a frame that has a muted part and begins
+// with main.
+func frameMutedLabel(t *testing.T, id, main string) (string, string) {
+	t.Helper()
+	for _, m := range frameLabel.FindAllStringSubmatch(mockupFrame(t, id), -1) {
+		if l, aside := splitLabel(m[1]); l == main && aside != "" {
+			return l, aside
+		}
+	}
+	t.Fatalf("%s draws no %q with a muted part: read the frame again", id, main)
+	return "", ""
+}
+
+// from-typecase note 19, task 33: a label with a muted part is data — the
+// part travels apart from the label (FormRow.LabelAside), wherever the
+// frames draw one: «Email» «(optional)» of the temporary password
+// (s-admin-1, s-admin-19) and of the first administrator (s-auth-4),
+// «Certificate fingerprint» «SHA-256 · optional» of a connection
+// (s-profile-2, -11, -14, -16).
+func TestMutedPartOfALabelIsData(t *testing.T) {
+	h := newHarness(t)
+	setup := decode[view.SetupPage](t, h.do(get("/setup", nil)))
+	label, aside := frameMutedLabel(t, "s-auth-4", "Email")
+	if row := rowNamed(t, setup.Form, "email"); string(row.Label) != label || string(row.LabelAside) != aside {
+		t.Errorf("setup email = %q + %q, want (s-auth-4) %q + %q", row.Label, row.LabelAside, label, aside)
+	}
+
+	h.admin("alice", "password123")
+	alice := h.login("alice", "password123")
+	page := decode[view.AdminInvitesPage](t, h.do(get("/admin/invites", alice)))
+	for _, id := range []string{"s-admin-1", "s-admin-19"} {
+		label, aside := frameMutedLabel(t, id, "Email")
+		if row := rowNamed(t, page.Temporary.Form, "email"); string(row.Label) != label || string(row.LabelAside) != aside {
+			t.Errorf("temporary password email = %q + %q, want (%s) %q + %q", row.Label, row.LabelAside, id, label, aside)
+		}
+	}
+
+	label, aside = frameMutedLabel(t, "s-profile-2", "Certificate fingerprint")
+	add := decode[view.ConnectionsPage](t, h.do(get("/app/settings/connections?"+url.Values{"op": {"add"}}.Encode(), alice)))
+	if add.Add == nil {
+		t.Fatal("no Connect account form")
+	}
+	if row := rowNamed(t, *add.Add, "certFingerprint"); string(row.Label) != label || string(row.LabelAside) != aside {
+		t.Errorf("fingerprint = %q + %q, want (s-profile-2) %q + %q", row.Label, row.LabelAside, label, aside)
+	}
+	for _, r := range add.Add.Sets {
+		for _, row := range r.Rows {
+			if strings.Contains(string(row.Label), "optional") {
+				t.Errorf("%s: the label %q still carries its muted part", row.Name, row.Label)
+			}
+		}
+	}
+}
+
+// from-typecase note 19, task 30: /invite/{token} is s-auth-12, not the
+// registration of s-auth-2 — «Join» and the instance, who invited, the
+// warning over the fields, then Login, the address of a letter as a field
+// that does not change, Password and Repeat password, Create account. A
+// link has no address field; an invitation that named its login shows it
+// the same way, off. A refusal at Login is said in the words of s-admin-19.
+func TestInvitePageIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "s-auth-12")
+	title := frameText(regexp.MustCompile(`(?s)<div class="tc-head__title[^"]*">(.*?)</div>`).FindStringSubmatch(frame)[1])
+	lede := frameText(regexp.MustCompile(`(?s)<div class="tc-head__sub[^"]*">(.*?)</div>`).FindStringSubmatch(frame)[1])
+	warning := frameText(frameCardAlert.FindStringSubmatch(frame)[1])
+	fields := regexp.MustCompile(`<label>([^<]*)</label><input class="tc-in[^"]*" type="text" value="([^"]*)" aria-label="[^"]*"( disabled)?>`).FindAllStringSubmatch(frame, -1)
+	submit := frameText(regexp.MustCompile(`(?s)<div class="tc-formfoot[^"]*"><button class="tc-btn is-primary"[^>]*>(.*?)</button>`).FindStringSubmatch(frame)[1])
+	if title != "Join carrel.example" || !strings.HasPrefix(lede, "mix invited you.") || len(fields) != 4 || fields[1][1] != "Email" || fields[1][3] == "" {
+		t.Fatalf("s-auth-12 = %q, %q, %q: read the frame again", title, lede, fields)
+	}
+
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	if err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		st.Settings.Name = "carrel.example"
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	h.relayed()
+	alice := h.login("alice", "password123")
+	secretOf := func(action, email string) string {
+		t.Helper()
+		before := len(h.st.Snapshot().Invites)
+		if rec := h.do(postForm("/admin/invites?action="+action, alice, url.Values{"email": {email}})); rec.Code != http.StatusSeeOther {
+			t.Fatalf("invite by %s: %d %s", action, rec.Code, rec.Body)
+		}
+		snap := h.st.Snapshot()
+		if len(snap.Invites) != before+1 {
+			t.Fatalf("invitations = %+v", snap.Invites)
+		}
+		return snap.Invites[before].Secret
+	}
+	type row struct {
+		label, value string
+		off          bool
+	}
+	rows := func(p view.InvitePage) []row {
+		var out []row
+		for _, set := range p.Form.Sets {
+			for _, r := range set.Rows {
+				if r.Kind != view.InputHidden {
+					out = append(out, row{string(r.Label), string(r.Value), r.ReadOnly})
+				}
+			}
+		}
+		return out
+	}
+	check := func(what string, p view.InvitePage, wantLede string, want []row) {
+		t.Helper()
+		if string(p.Title) != title || string(p.Lede) != wantLede || len(p.Notices) != 1 ||
+			p.Notices[0].Role != view.NoticeAlert || string(p.Notices[0].Body) != warning || p.Notices[0].Title != "" {
+			t.Errorf("%s: head %q, %q, %+v; want %q, %q and the warning %q", what, p.Title, p.Lede, p.Notices, title, wantLede, warning)
+		}
+		if got := rows(p); len(got) != len(want) || !slices.Equal(got, want) {
+			t.Errorf("%s: fields %+v, want %+v", what, got, want)
+		}
+		if got := labels(p.Form.Actions); !equalStrings(got, []string{submit}) {
+			t.Errorf("%s: actions %q, want %q", what, got, submit)
+		}
+	}
+	lede = strings.Replace(lede, "mix", "alice", 1)
+
+	letter := secretOf("send", "anna@example.org")
+	check("a letter", decode[view.InvitePage](t, h.do(get("/invite/"+letter, nil))), lede,
+		[]row{{"Login", "", false}, {"Email", "anna@example.org", true}, {"Password", "", false}, {"Repeat password", "", false}})
+
+	link := secretOf("link", "")
+	check("a link", decode[view.InvitePage](t, h.do(get("/invite/"+link, nil))), "alice invited you. Choose a login and a password.",
+		[]row{{"Login", "", false}, {"Password", "", false}, {"Repeat password", "", false}})
+
+	named, err := h.users.CreateInvite(adminID, "vera", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	check("a login named", decode[view.InvitePage](t, h.do(get("/invite/"+named, nil))), "alice invited you. Choose a password; the login is the one the invitation names.",
+		[]row{{"Login", "vera", true}, {"Password", "", false}, {"Repeat password", "", false}})
+
+	// The login is refused at its field in the words of s-admin-19.
+	taken := decode[view.InvitePage](t, h.do(h.anonPostForm("/invite/"+link, "/invite/"+link,
+		url.Values{"login": {"alice"}, "password": {"verapass123"}, "password2": {"verapass123"}})))
+	if r := rowNamed(t, taken.Form, "login"); r.Error != "Login is already taken." {
+		t.Errorf("a login taken: %+v", r)
+	}
+}
+
+// from-typecase note 19, task 31: «local» beside «On a clock of your own»
+// (s-backup-2) is the instance's, not the tick's — the address in the line
+// answers only from inside its own network. It comes with the page: on when
+// no outside address is declared (CARREL_PUBLIC_URL — the line is built
+// from where the browser came) or the declared one is a name or an address
+// of a private network; off for a public one.
+func TestLocalInstanceIsThePagesAndNotTheTicks(t *testing.T) {
+	tick := regexp.MustCompile(`(?s)<button class="tc-check"[^>]*>(?:<span[^>]*></span>)?On a clock of your own(.*?)</button>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
+	if tick == nil || !regexp.MustCompile(`<span class="tc-badge is-local"[^>]*>local</span>`).MatchString(tick[1]) {
+		t.Fatalf("s-backup-2 draws no «local» at the tick: read the frame again")
+	}
+	f := backupFixture(t)
+	saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
+	for _, c := range []struct {
+		public string
+		local  bool
+	}{
+		{"", true}, {"http://192.168.1.20:8080", true}, {"https://carrel.lan", true}, {"http://localhost:8080", true},
+		{"https://[fd00::5]", true}, {"http://100.101.5.2", true}, {"https://carrel.example.org", false}, {"https://203.0.113.9", false},
+	} {
+		f.h.cfg.PublicURL = c.public
+		page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
+		if page.Local != c.local {
+			t.Errorf("CARREL_PUBLIC_URL %q: local = %v, want %v", c.public, page.Local, c.local)
+		}
+		if tb := page.Jobs[0].Trigger; tb != nil {
+			t.Errorf("the trigger is off, and its card is sent: %+v", tb)
+		}
+	}
+}
+
+// from-typecase note 19, task 31: the head of the task list is the head of
+// every kind — New task, Import, Export (s-tasks-1) — and Print, which is
+// the client's.
+func TestTaskListHeadIsTheFrame(t *testing.T) {
+	var want []string
+	for _, b := range headButtons(t, "s-tasks-1") {
+		if label, _, _ := strings.Cut(b, " ["); label != "Print" {
+			want = append(want, label)
+		}
+	}
+	f := calendarFixture(t, nil)
+	page := decode[struct {
+		Bar view.ListBar `json:"bar"`
+	}](t, f.h.do(get(f.path("tasks"), f.sess)))
+	if got := labels(page.Bar.Actions); !equalStrings(got, want) {
+		t.Errorf("head = %q, want (s-tasks-1) %q", got, want)
+	}
+}
+
+// from-typecase note 19, task 32 (owner's decision): the categories are
+// «Tags» everywhere — the full cards of an event, a contact and a task
+// (s-agenda-2, s-contacts-6, s-tasks-2) as the panels and the forms.
+func TestFullCardsLabelTheCategoriesTags(t *testing.T) {
+	tagTerm := regexp.MustCompile(`<dt>([^<]*)</dt><dd><span class="tc-tag">`)
+	term := ""
+	for _, id := range []string{"s-agenda-2", "s-contacts-6", "s-tasks-2"} {
+		m := tagTerm.FindStringSubmatch(mockupFrame(t, id))
+		if m == nil || (term != "" && m[1] != term) {
+			t.Fatalf("%s labels its tags %q, another %q: read the frames again", id, m, term)
+		}
+		term = m[1]
+	}
+	labelOf := func(fields []view.Field) []string {
+		var out []string
+		for _, f := range fields {
+			if f.Label == view.Text(term) || f.Label == "Categories" {
+				out = append(out, string(f.Label))
+			}
+		}
+		return out
+	}
+	card := annaPage(t)
+	if got := labelOf(card.Fields); !equalStrings(got, []string{term}) {
+		t.Errorf("contact: %q, want (s-contacts-6) %q", got, term)
+	}
+	f := calendarFixture(t, nil,
+		"e.ics", ics("BEGIN:VEVENT\nUID:e\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nSUMMARY:Review\nCATEGORIES:work\nEND:VEVENT"),
+		"t.ics", ics("BEGIN:VTODO\nUID:t\nDTSTAMP:20260101T000000Z\nSUMMARY:Pack\nCATEGORIES:home\nEND:VTODO"))
+	event := decode[view.EventPage](t, f.h.do(get(f.path("calendar")+"/e", f.sess)))
+	if got := labelOf(event.Fields); !equalStrings(got, []string{term}) {
+		t.Errorf("event: %q, want (s-agenda-2) %q", got, term)
+	}
+	task := decode[view.TaskPage](t, f.h.do(get(f.path("tasks")+"/t", f.sess)))
+	if got := labelOf(task.Fields); !equalStrings(got, []string{term}) {
+		t.Errorf("task: %q, want (s-tasks-2) %q", got, term)
+	}
+}
+
+// C-10 as the frames draw it (from-typecase note 19): a list says a day the
+// short way — the columns of a row, «12 Aug» and «12 Aug 18:00» of a task
+// (s-tasks-1), «10 Aug» of a note (s-notes-1) — with the year only when it
+// is not this year's; the record itself says it in full.
+func TestRowColumnsSayTheDayShort(t *testing.T) {
+	short := regexp.MustCompile(`^\d{1,2} [A-Z][a-z]{2}( \d{2}:\d{2})?$`)
+	for _, c := range []struct{ id, class string }{{"s-tasks-1", "tc-row__due"}, {"s-notes-1", "tc-row__date"}} {
+		cells := regexp.MustCompile(`<span class="[^"]*`+c.class+`">([^<]*)</span>`).FindAllStringSubmatch(mockupFrame(t, c.id), -1)
+		if len(cells) == 0 {
+			t.Fatalf("%s has no %s: read the frame again", c.id, c.class)
+		}
+		for _, m := range cells {
+			if m[1] != "—" && !short.MatchString(m[1]) {
+				t.Fatalf("%s writes a day %q: read the frame again", c.id, m[1])
+			}
+		}
+	}
+	f := calendarFixture(t, nil,
+		"d.ics", ics("BEGIN:VTODO\nUID:d\nDTSTAMP:20260101T000000Z\nSUMMARY:Day\nDUE;VALUE=DATE:20260812\nEND:VTODO"),
+		"h.ics", ics("BEGIN:VTODO\nUID:h\nDTSTAMP:20260101T000000Z\nSUMMARY:Hour\nDUE:20260812T180000Z\nEND:VTODO"),
+		"y.ics", ics("BEGIN:VTODO\nUID:y\nDTSTAMP:20260101T000000Z\nSUMMARY:Year\nDUE;VALUE=DATE:20250812\nEND:VTODO"),
+		"n.ics", ics("BEGIN:VJOURNAL\nUID:n\nDTSTAMP:20260101T000000Z\nDTSTART:20260810T110500Z\nSUMMARY:Note\nEND:VJOURNAL"))
+	f.h.srv.SetClock(time.Date(2026, 8, 10, 12, 0, 0, 0, time.UTC))
+	tasks := decode[view.TasksPage](t, f.h.do(get(f.path("tasks")+"?show=all", f.sess)))
+	due := map[string]string{}
+	for _, g := range tasks.Groups {
+		for _, r := range g.Rows {
+			due[string(r.Summary)] = string(r.Due)
+		}
+	}
+	if due["Day"] != "12 Aug" || due["Hour"] != "12 Aug 18:00" || due["Year"] != "12 Aug 2025" {
+		t.Errorf("due = %q", due)
+	}
+	notes := decode[view.NotesPage](t, f.h.do(get(f.path("notes"), f.sess)))
+	if len(notes.Groups) != 1 || len(notes.Groups[0].Rows) != 1 || notes.Groups[0].Rows[0].Date != "10 Aug" {
+		t.Errorf("notes = %+v", notes.Groups)
+	}
+}
+
+// from-typecase note 19, account-14: with the scheme off the page of Key
+// escrow is its title and one line — no subtitle, no rubric, no button.
+func TestEscrowPageWithTheSchemeOffIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "account-14")
+	line := frameText(regexp.MustCompile(`(?s)<div class="tc-msg">(.*?)</div>`).FindStringSubmatch(frame)[1])
+	if strings.Contains(frame, "tc-head__sub") || strings.Contains(frame, "tc-rubric") || strings.Contains(frame, "<button") || line == "" {
+		t.Fatalf("account-14 draws more than a line: read the frame again")
+	}
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	h.invite(adminID, "bob", "bobpass123")
+	bob := h.login("bob", "bobpass123")
+	page := decode[view.EscrowPage](t, h.do(get("/app/settings/escrow", bob)))
+	if page.Title != "Key escrow" || page.Subtitle != "" || page.Rubric != "" || page.Confirm != nil ||
+		string(page.Status.Note) != line || len(page.Status.Actions) != 0 || page.Status.Badge != nil {
+		t.Errorf("escrow off = %+v, want (account-14) %q alone", page, line)
+	}
+}
+
+// from-typecase note 19, task 33, s-files-16: in From Files a read-only
+// storage is a source like any — not dimmed and without the badge a target
+// of a move gets: nothing is written into it.
+func TestFromFilesReadOnlyStorageIsASource(t *testing.T) {
+	frame := mockupFrame(t, "s-files-16")
+	row := regexp.MustCompile(`<div class="([^"]*)">(?:<svg>.*?</svg>)?Public <span class="([^"]*)">([^<]*)</span></div>`).FindStringSubmatch(frame)
+	if row == nil || strings.Contains(row[1], "op-55") || strings.Contains(row[2], "tc-badge") {
+		t.Fatalf("s-files-16 draws Public as %q: read the frame again", row)
+	}
+	f := attachFixture(t, 1024, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
+	f.srv.SeedFile(attachFiles+"notes.txt", "small file")
+	editBlob(t, f.h, f.sess, func(b *sealed.Blob) {
+		for i := range b.Collections {
+			if b.Collections[i].Path == attachFiles {
+				b.Collections[i].ReadOnly = true
+			}
+		}
+	})
+	href := menuAction(actionByID(eventAt(t, f, "e1").Actions, "attach.add").Arrow, "attach.files").Href
+	sheet := decode[view.FilePickerSheet](t, f.h.do(get(href+"&to="+url.QueryEscape("/app/files/"+f.id+"/"+url.PathEscape(attachFiles)+"/"), f.sess)))
+	if len(sheet.Tree.Nodes) == 0 {
+		t.Fatal("no tree")
+	}
+	for _, n := range sheet.Tree.Nodes {
+		if n.ReadOnly {
+			t.Errorf("%s: a source marked read-only", n.Label)
+		}
+	}
+}
+
+// from-typecase note 19, task 33, s-files-19: in the upload sheet a refusal
+// of New folder stands where it stands in the move sheet — under the line of
+// the name, which stays open with what was typed — and the sheet's own line
+// stays in its place: the words of s-notes-11.
+func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "s-files-19")
+	refusal := frameOne(t, frameAlertMsg, frame, "refusal")[1]
+	stays := frameText(frameFootDim.FindStringSubmatch(frame)[1])
+	purpose := frameText(frameFootDim.FindStringSubmatch(mockupFrame(t, "s-notes-11"))[1])
+	m := regexp.MustCompile(`«([^»]+)» in (\S+) already`).FindStringSubmatch(refusal)
+	if m == nil || !strings.HasPrefix(purpose, stays) {
+		t.Fatalf("s-files-19 refuses %q under %q, s-notes-11 says %q: read the frames again", refusal, stays, purpose)
+	}
+	typed, in := m[1], m[2]
+
+	f := filesFixture(t, true)
+	f.srv.SeedFolder(filesDocs + in + "/" + typed + "/")
+	at := f.at("", in, "")
+	sheet := decode[view.FilePickerSheet](t, f.h.do(get("/app/files/picker?"+url.Values{"for": {"upload"}, "to": {at}}.Encode(), f.sess)))
+	if string(sheet.Purpose) != purpose || sheet.Failure != nil {
+		t.Errorf("purpose %q, failure %+v; want the frame's %q and none", sheet.Purpose, sheet.Failure, purpose)
+	}
+	taken := decode[view.FilePickerSheet](t, f.h.do(postForm(sheet.Tree.Name.Action, f.sess, url.Values{"name": {typed}})))
+	if taken.Failure == nil || taken.Failure.Role != view.NoticeAlert || taken.Failure.Title != "" || string(taken.Failure.Body) != refusal {
+		t.Errorf("refusal = %+v, want (s-files-19) %q", taken.Failure, refusal)
+	}
+	if string(taken.Purpose) != purpose {
+		t.Errorf("the sheet's line became %q", taken.Purpose)
+	}
+	if taken.Tree.Name == nil || string(visibleRows(*taken.Tree.Name)[0].Value) != typed {
+		t.Errorf("after the refusal the line is %+v, want it open with %q", taken.Tree.Name, typed)
+	}
+	// The other refusals — a name that cannot be one — stand on the same
+	// place in the server's words, the line open.
+	bad := decode[view.FilePickerSheet](t, f.h.do(postForm(sheet.Tree.Name.Action, f.sess, url.Values{"name": {".."}})))
+	if bad.Failure == nil || bad.Failure.Role != view.NoticeAlert || string(bad.Purpose) != purpose ||
+		bad.Tree.Name == nil || string(visibleRows(*bad.Tree.Name)[0].Value) != ".." {
+		t.Errorf("a name that is none: failure %+v, purpose %q, line %+v", bad.Failure, bad.Purpose, bad.Tree.Name)
+	}
+}
+
+// from-typecase note 19, task 33, s-publish-16: under the title of one
+// published record — when and where, «Monday, 10 August 2026, 10:00 – 11:00
+// · Переговорная 2», the record's own full day; no lede besides, the badge
+// «read-only» says it.
+func TestPublicRecordHeadIsTheFrame(t *testing.T) {
+	sub := frameText(frameOne(t, regexp.MustCompile(`(?s)<div class="tc-head__sub">(.*?)</div>`), mockupFrame(t, "s-publish-16"), "line under the title")[1])
+	when, where, ok := strings.Cut(sub, " · ")
+	if !ok || !regexp.MustCompile(`^[A-Z][a-z]+day, \d{1,2} [A-Z][a-z]+ \d{4}, \d{2}:\d{2} – \d{2}:\d{2}$`).MatchString(when) || where == "" {
+		t.Fatalf("s-publish-16 = %q: read the frame again", sub)
+	}
+	f := publishFixture(t)
+	page := publicPage(t, f, publishLink(t, f, f.publishHref("calendar", searchWork, "e1"), false))
+	if page.Lede != "Monday, 10 August 2026, 09:00 · Room 4" || !page.ReadOnly {
+		t.Errorf("lede = %q, read-only %v; want «Monday, 10 August 2026, 09:00 · Room 4» as the frame writes it", page.Lede, page.ReadOnly)
+	}
+}
+
+// from-typecase note 19 (owner's decision): the Time zone row stands on
+// every event with a time — a new one too. The new-event form offers the
+// list of the edit form with the instance zone chosen, and writes the
+// chosen zone as the edit form does when a person changes it: TZID and its
+// VTIMEZONE; Floating writes a floating time. A weekly event made at 10:00
+// in a zone with summer time stays at 10:00 after the clocks change. The
+// quick sheet draws no zone (s-notes-9) and writes in the instance zone.
+func TestNewEventIsWrittenInItsZone(t *testing.T) {
+	f := calendarFixture(t, func(h *harness) { h.cfg.Timezone = "Europe/Berlin" })
+	list := f.path("calendar")
+	page := decode[view.EventEditPage](t, f.h.do(get(list+"/new", f.sess)))
+	zone := rowNamed(t, page.Form, "tz")
+	if zone.Value != "Europe/Berlin" || zone.Kind != view.InputSelect || zone.Label != "Time zone" || zone.Placeholder == "" ||
+		selectedOf(zone.Options)[0] != "Europe/Berlin" || zone.Options[len(zone.Options)-1].Value != "floating" {
+		t.Fatalf("new event's zone = %+v", zone)
+	}
+	for _, o := range zone.Options {
+		if o.Group != "" {
+			t.Errorf("a new event came in no zone, and the list says one: %+v", o)
+		}
+	}
+	create := func(set map[string]string) string {
+		t.Helper()
+		form := formFields(decode[view.EventEditPage](t, f.h.do(get(list+"/new", f.sess))).Form)
+		for k, v := range set {
+			form.Set(k, v)
+		}
+		rec := f.h.do(postForm(list+"/new", f.sess, form))
+		if rec.Code != http.StatusSeeOther {
+			t.Fatalf("create %v: %d %s", set, rec.Code, rec.Body.String())
+		}
+		loc := rec.Header().Get("Location")
+		return loc[strings.LastIndex(loc, "/")+1:]
+	}
+	weekly := create(map[string]string{"summary": "Standup", "start.date": "2026-03-16", "start.time": "10:00",
+		"end.date": "2026-03-16", "end.time": "10:30", "repeat.freq": "WEEKLY", "repeat.interval": "1"})
+	got := body(t, f, weekly+".ics")
+	mustContain(t, got, "DTSTART;TZID=Europe/Berlin:20260316T100000", "DTEND;TZID=Europe/Berlin:20260316T103000",
+		"BEGIN:VTIMEZONE", "TZID:Europe/Berlin", "RRULE:FREQ=WEEKLY")
+	// After the clocks went forward on 29 March: still 10:00 in Berlin.
+	agenda := decode[view.AgendaPage](t, f.h.do(get(list+"?from=2026-04-06", f.sess)))
+	times := []string{}
+	for _, d := range agenda.Days {
+		for _, r := range d.Rows {
+			if r.UID == weekly {
+				times = append(times, string(r.Time))
+			}
+		}
+	}
+	if len(times) != 1 || times[0] != "10:00" {
+		t.Errorf("the week after the change shows it at %q, want 10:00", times)
+	}
+
+	floating := create(map[string]string{"summary": "Anywhere", "start.date": "2026-03-16", "start.time": "10:00", "tz": "floating"})
+	got = body(t, f, floating+".ics")
+	mustContain(t, got, "DTSTART:20260316T100000")
+	if strings.Contains(got, "TZID") || strings.Contains(got, "T100000Z") {
+		t.Errorf("a floating event:\n%s", got)
+	}
+	utc := create(map[string]string{"summary": "Zulu", "start.date": "2026-03-16", "start.time": "10:00", "tz": "UTC"})
+	mustContain(t, body(t, f, utc+".ics"), "DTSTART:20260316T090000Z")
+
+	// The quick sheet: no zone row, the instance zone written.
+	quick := decode[view.NewSheet](t, f.h.do(get(list+"/new/quick", f.sess)))
+	for _, set := range quick.Form.Sets {
+		for _, r := range set.Rows {
+			if r.Name == "tz" {
+				t.Errorf("the quick sheet draws a zone: %+v", r)
+			}
+		}
+	}
+	qform := formFields(quick.Form)
+	qform.Set("summary", "Quick")
+	qform.Set("start.date", "2026-03-16")
+	qform.Set("start.time", "10:00")
+	rec := f.h.do(postForm(list+"/new/quick", f.sess, qform))
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("quick: %d %s", rec.Code, rec.Body.String())
+	}
+	loc := rec.Header().Get("Location")
+	mustContain(t, body(t, f, loc[strings.LastIndex(loc, "/")+1:]+".ics"), "DTSTART;TZID=Europe/Berlin:20260316T100000", "BEGIN:VTIMEZONE")
+}

@@ -233,7 +233,7 @@ func (s *Server) findRow(tf timeFmt, blob sealed.Blob, it fanout.Item) view.Find
 		row.Title = text(titleOr(cal.Text(o, "SUMMARY"), "Untitled event"))
 		row.Detail = text(cal.Text(o, "LOCATION"))
 		if tm, err := cal.TimingOf(o, tf.tz); err == nil && !tm.Start.IsZero() {
-			row.When = text(tf.timeOrDate(tm))
+			row.When = text(tf.shortDue(tm))
 		}
 	case view.KindTask:
 		row.Title = text(titleOr(cal.Text(o, "SUMMARY"), "Untitled task"))
@@ -241,14 +241,14 @@ func (s *Server) findRow(tf timeFmt, blob sealed.Blob, it fanout.Item) view.Find
 			row.Detail = "Done"
 		}
 		if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
-			row.When = text(tf.timeOrDate(due))
+			row.When = text(tf.shortDue(due))
 		}
 	case view.KindNote:
 		body := cal.Description(o)
 		title := noteTitle(cal.Text(o, "SUMMARY"), body)
 		row.Title, row.Detail = text(title), text(noteExcerpt(body, title))
 		if at := noteTime(o, tf.tz); !at.IsZero() {
-			row.When = text(tf.date(at))
+			row.When = text(tf.shortDay(at))
 		}
 	}
 	row.Href = s.route("/app/" + segmentOf(it.Kind) + "/" + it.AccountID + "/" + url.PathEscape(it.Col) + "/" + url.PathEscape(it.UID))

@@ -94,7 +94,11 @@ func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issue
 	if issued[job.ID] != "" {
 		b.Command = text(issued[job.ID])
 		b.Password.Shown = true
-		b.Note = "Visible only now. Every use is logged; Regenerate replaces the secret, and every line already handed out stops working."
+		// What turning it on cost is said here, the first thing after the
+		// tick: with no card for an off trigger there is no place before it
+		// (to-typecase task 36; S-24.4 names it a loss of protection).
+		b.Note = "Visible only now. Your data key for this job is now kept under the server's key — a loss of protection, for convenience: the job can read without you signed in. " +
+			"Every use is logged; Regenerate replaces the secret, and every line already handed out stops working."
 	} else {
 		b.Note = "The external trigger is on. The secret was shown once; Regenerate issues a new one and the old lines stop working."
 	}

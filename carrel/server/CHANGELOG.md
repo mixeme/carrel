@@ -28,6 +28,16 @@ every row of a phone, an e-mail and an address, and the quick sheets
 labelled their own way. A table in a note (task 27) stays `table` as it is:
 its «Wrap / One line» is the client's.
 
+The second part — administration, the reset, the note and the account, the
+move and From Files (to-typecase tasks 30–34): an invitation's page of its
+own and its address in the list, the password once after Create user and
+after a reset, the refusals at their fields as sentences, the trigger card
+only while the trigger is on and «local» as the instance's, «Tags» on every
+card, Related to outside what is loaded, the day of a list the short way
+(C-10), a muted part of a label as data, the upload sheet's refusal beside
+its line, the head of one published event — and a new event written in the
+zone of its own Time zone row.
+
 ### Added
 
 - **`InputRemove`** (`"remove"`, C-8): Remove at the end of each row of a
@@ -45,6 +55,22 @@ its «Wrap / One line» is the client's.
   the dialog over the page: «Connect account» (s-profile-2), «Edit
   connection» (s-profile-16), and «One connection gives calendars and
   address books alike.»; empty on the list and on a subscription.
+- **`FormRow.labelAside`** — the muted part after a label: «(optional)» of
+  «Email» (s-admin-1, s-auth-4), «SHA-256 · optional» of «Certificate
+  fingerprint» (s-profile-2). The labels lose it.
+- **`IssuedPassword.message`, `note`, `done`** — the card of a password
+  shown once (s-admin-14, s-admin-17): «The password of anna is reset.»,
+  «The user viktor is created. Hand this over; …», the line beside Copy,
+  and Done.
+- **`BackupPage.local`** — the instance answers only inside its network: no
+  outside address is declared (`CARREL_PUBLIC_URL`) or it is a local name
+  or a private, loopback, link-local or shared address. The badge «local»
+  beside the tick (s-backup-2).
+- **`Option.hint`** — under the line «By UID…» opens: «By UID: a record
+  that is not among the loaded ones.»; its sample is the field's
+  `placeholder`, «UID of the record» (s-tasks-11).
+- **`FilePickerSheet.failure`** — a refusal of the sheet, New folder's
+  under the line of the name (s-files-19).
 
 ### Changed
 
@@ -85,6 +111,51 @@ its «Wrap / One line» is the client's.
   which server» field; `note` says why and Create is off with it.
 - **Browse of the attachment folder** (attachments-4): «Choose this folder»
   is off with «Choose a folder in the tree.» until a folder is chosen.
+- **A pending invitation has no login** (s-admin-1): `InviteRow.Login` is
+  gone; `Address` is the first column — the letter's address, «—» for a
+  link — and `Sent` of a link is «—».
+- **`/invite/{token}` is s-auth-12**, not the registration: `Title` «Join»
+  and the instance's name, `Lede` who invited — «mix invited you. Choose a
+  login and a password; the address is the one the invitation went to.» —
+  the password warning in `Notices`, then Login, the letter's address as a
+  read-only Email (no field for a link), Password, Repeat password. An
+  invitation made before v0.2.68 shows its login read-only. The state keeps
+  who made an invitation (`by`); older ones name nobody.
+- **Refusals are sentences**: every error a form names starts with a capital
+  and ends with a full stop — «Login is already taken.», «Password must be
+  at least 8 characters.» (s-admin-19, s-admin-16).
+- **The answer to a reset** (s-admin-14) is the sheet with `Issued` only:
+  no form, no warning, no actions — Done is `Issued.Done`.
+- **The trigger card is sent only while the trigger is on**
+  (`BackupJob.Trigger` is `*TriggerBlock`, null when off; owner's decision).
+  The tick «On a clock of your own» moved from `TriggerBlock.Clock` to
+  `BackupJob.Clock`. What turning it on costs — the job's key kept under
+  the server's — is said in the card's note once the trigger is issued; an
+  off trigger has no place to say it before (to-typecase task 36).
+- **«Tags»** labels the categories of the full cards of a contact, an
+  event and a task, as of the panels and the forms (s-contacts-6,
+  s-agenda-2, s-tasks-2; owner's decision).
+- **A day in a list is short** (C-10): «12 Aug», «12 Aug 18:00», the year
+  only when it is not this year's — the due of a task row, the day of a
+  note row, the rows of search, `Meta` of Related to and `When` of a
+  related record (s-tasks-1, s-notes-1, s-tasks-10, s-notes-2). A record
+  says it in full.
+- **Related to** (s-tasks-11): a card is one pill «Анна Ковалёва ·
+  contact» (`Label`, no `Meta`); a record not loaded is its UID with the
+  field's `Hint` «A record that is not loaded here: its UID.».
+- **The upload sheet** keeps its line — now the words of s-notes-11, «The
+  folder is the attachment folder from Settings → Attachments, named once
+  and remembered — unless you make a new one here. …» — and a refusal
+  stands in `Failure`, not in its place (s-files-19).
+- **One published event** (s-publish-16): `Lede` is when and where,
+  «Monday, 10 August 2026, 10:00 – 11:00 · Переговорная 2»; the other
+  records have none — the read-only badge says it.
+- **A new event is written in its zone**: the new-event form has the Time
+  zone row — the list without «As sent», the instance zone chosen — and
+  writes `TZID` with its `VTIMEZONE` as the edit form does; UTC writes `Z`,
+  Floating a floating time. The quick sheet draws no zone and writes the
+  instance's. Before, a new event was written in UTC, and a weekly one
+  moved by an hour at the change of summer time.
 
 ## v0.2.70 — 2026-09-28
 

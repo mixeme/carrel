@@ -283,6 +283,7 @@
   "deleteNote": "",
   "details": null,
   "jobs": [],
+  "local": true,
   "notices": [],
   "print": {
     "range": "",

@@ -129,7 +129,7 @@ func panelFields(own, more []view.Field) []view.Field {
 		at++
 	}
 	for _, f := range append(append(slices.Clone(own[:at]), more...), own[at:]...) {
-		if f.Label != "Categories" {
+		if f.Label != "Tags" {
 			out = append(out, f)
 		}
 	}
@@ -308,7 +308,7 @@ var contactFields = []displayField{
 	{prop: "LANG", label: "Language"},
 	{prop: "TZ", label: "Time zone"},
 	{prop: "GEO", label: "Location"},
-	{prop: "CATEGORIES", label: "Categories", shape: listShown},
+	{prop: "CATEGORIES", label: "Tags", shape: listShown},
 	{prop: "NOTE", label: "Note"},
 }
 
@@ -584,7 +584,9 @@ func calendarFields(obj *model.Object) []view.Field {
 		out = append(out, view.Field{Label: "Link", Value: text(v), Href: webHref(v)})
 	}
 	if tags := cal.TextList(obj, "CATEGORIES"); len(tags) > 0 {
-		out = append(out, view.Field{Label: "Categories", Value: text(strings.Join(tags, ", "))})
+		// «Tags» on every card, as in the panels and the forms (s-agenda-2,
+		// s-tasks-2; owner's decision, from-typecase note 19).
+		out = append(out, view.Field{Label: "Tags", Value: text(strings.Join(tags, ", "))})
 	}
 	return out
 }
@@ -608,10 +610,18 @@ func (s *Server) relatedRows(c *collectionCtx, obj *model.Object) []view.Timelin
 	for _, e := range index {
 		byUID[e.UID] = e
 	}
+	// The day the short way of a list, «10 Aug» (s-notes-2, C-10); a
+	// record without one says only its kind.
+	day := func(e indexEntry) view.Text {
+		if e.At == 0 {
+			return ""
+		}
+		return text(c.tf.shortDay(time.Unix(e.At, 0)))
+	}
 	var rows []view.TimelineRow
 	for _, target := range cal.RelatedTo(obj) {
 		if e, ok := byUID[target]; ok && target != uid {
-			rows = append(rows, view.TimelineRow{Href: s.route(c.kindRecordPath(e.Kind, target)), Kind: e.Kind, Title: text(e.Title), Why: "Related to"})
+			rows = append(rows, view.TimelineRow{Href: s.route(c.kindRecordPath(e.Kind, target)), Kind: e.Kind, When: day(e), Title: text(e.Title), Why: "Related to"})
 			continue
 		}
 		// The target is in another collection, or in none this session has
@@ -619,7 +629,7 @@ func (s *Server) relatedRows(c *collectionCtx, obj *model.Object) []view.Timelin
 		// itself when nothing does. No link either way — a record is opened
 		// at its own collection's address (S-11).
 		if e, ok := s.sessionIndex(c.sess, s.catalogOf(c.sess))[target]; ok && e.Title != "" {
-			rows = append(rows, view.TimelineRow{Kind: e.Kind, Title: text(e.Title), Why: "Related to · in another collection"})
+			rows = append(rows, view.TimelineRow{Kind: e.Kind, When: day(e), Title: text(e.Title), Why: "Related to · in another collection"})
 			continue
 		}
 		rows = append(rows, view.TimelineRow{Title: text(target), Why: "Not in the lists loaded for this collection"})
@@ -630,7 +640,7 @@ func (s *Server) relatedRows(c *collectionCtx, obj *model.Object) []view.Timelin
 		}
 		for _, target := range e.Related {
 			if target == uid {
-				rows = append(rows, view.TimelineRow{Href: s.route(c.kindRecordPath(e.Kind, e.UID)), Kind: e.Kind, Title: text(e.Title), Why: "Refers to this"})
+				rows = append(rows, view.TimelineRow{Href: s.route(c.kindRecordPath(e.Kind, e.UID)), Kind: e.Kind, When: day(e), Title: text(e.Title), Why: "Refers to this"})
 				break
 			}
 		}

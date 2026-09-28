@@ -68,8 +68,16 @@
       }
     ]
   },
-  "lede": "Choose a login and a password for your new account.",
-  "notices": [],
-  "title": "Accept invitation",
+  "lede": "mix invited you. Choose a login and a password.",
+  "notices": [
+    {
+      "actions": [],
+      "body": "Your password is the only key to your own data. Nobody — including this server — can recover it for you.",
+      "details": null,
+      "role": "alert",
+      "title": ""
+    }
+  ],
+  "title": "Join carrel.example",
   "valid": true
 }
