@@ -429,7 +429,8 @@
     ],
     "note": "",
     "sections": [],
-    "tags": []
+    "tags": [],
+    "neighbours": []
   },
   "title": "DAV proxy",
   "top": {

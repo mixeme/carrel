@@ -456,7 +456,7 @@ func liveNoteFields(ctx context.Context, t *testing.T, app *liveApp, client *dav
 	seed(ctx, t, client, file, "text/calendar; charset=utf-8", "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Other client//EN\n"+
 		"BEGIN:VJOURNAL\nUID:"+uid+"\nDTSTAMP:20260101T000000Z\nDTSTART;VALUE=DATE:20260110\nSUMMARY:Plan\nDESCRIPTION:Body\nX-CUSTOM:keep-me\nEND:VJOURNAL\nEND:VCALENDAR\n")
 	rec := "/app/notes/" + connID + "/" + url.PathEscape(cal) + "/" + url.PathEscape(uid)
-	d := liveDecode[view.NoteDoc](t, "note edit", app.get(rec+"/edit"))
+	d := liveDecode[view.NotePage](t, "note edit", app.get(rec+"/edit")).Doc
 	v := url.Values{"summary": {string(d.Title)}, "description": {string(d.Body)}}
 	for _, r := range d.Fields {
 		v.Set(r.Name, string(r.Value))

@@ -158,6 +158,14 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, s.unavailableNotice(c, c.recordPath(uid), err)))
 		return
 	}
+	s.moveRecord(w, r, c, dest, uid, obj, copying, nothing)
+}
+
+// moveRecord moves or copies obj, the record read at uid, to dest. nothing
+// is the title of every answer where the record stayed: «Nothing was moved»
+// from the sheet, «Saved, but not moved» after a note's edit.
+func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *collectionCtx, uid string, obj *model.Object, copying bool, nothing string) {
+	ctx := r.Context()
 	if reason := recordMoveBlock(c, dest, copying); reason != "" {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{Role: view.NoticeAlert, Title: text(nothing), Body: text(reason)}))
 		return
@@ -177,7 +185,7 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	if !copying && dest.conn.ID == c.conn.ID {
-		if s.moveOnServer(w, r, c, dest, uid, obj) {
+		if s.moveOnServer(w, r, c, dest, uid, obj, nothing) {
 			return
 		}
 		// The server has no MOVE (SV-44). The record goes over the same way
@@ -304,7 +312,7 @@ func (s *Server) postKindMove(w http.ResponseWriter, r *http.Request, kind strin
 // is left to the caller, which carries the record over as a copy and deletes
 // the original once the copy has been read back. Nothing is written here
 // before that is decided, so the two paths cannot both answer.
-func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *collectionCtx, uid string, obj *model.Object) bool {
+func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *collectionCtx, uid string, obj *model.Object, nothing string) bool {
 	ctx := r.Context()
 	// A card is the one record a server has been seen to rename on MOVE
 	// (SV-18: SoGo). What the destination held before is kept, so that a card
@@ -326,7 +334,7 @@ func (s *Server) moveOnServer(w http.ResponseWriter, r *http.Request, c, dest *c
 		if noMoveHere(err) {
 			return false
 		}
-		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, moveFailure(c, "Nothing was moved", "MOVE", obj.Path+" → "+dst, err)))
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, moveFailure(c, nothing, "MOVE", obj.Path+" → "+dst, err)))
 		return true
 	}
 	c.noteWrite(obj.Path, nil)

@@ -1076,9 +1076,12 @@ func TestFixtureTaskEdit(t *testing.T) {
 	app.compare(t, "app-task-edit/normal.json", app.h.do(get(rec, app.sess)))
 }
 
-// C-14.2: a note in edit (s-notes-3).
+// C-14.2: a note in edit (s-notes-20). The notebook was listed first, as a
+// person comes to the note: that is where its neighbours in the rail come
+// from.
 func TestFixtureNoteEdit(t *testing.T) {
 	app := newMockupApp(t)
+	combined(t, app.h, app.sess, "/app/notes", func(p view.NotesPage) *view.PollBar { return p.Poll })
 	app.h.do(get(app.listPath(t, "notes", "zapisi"), app.sess))
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64/edit"
@@ -1493,9 +1496,9 @@ func TestFixtureStatesOfTheOtherKinds(t *testing.T) {
 	t.Run("app-conflict-note", func(t *testing.T) {
 		app := newMockupApp(t)
 		rec := app.listPath(t, "notes", "zapisi") + "/5c81-77aa-0d64"
-		// The edit of a note answers with the document itself, not with
-		// the page around it (C-7).
-		doc := decode[view.NoteDoc](t, app.h.do(get(rec+"/edit", app.sess)))
+		// The edit of a note is its page (s-notes-20); the form is its
+		// document.
+		doc := decode[view.NotePage](t, app.h.do(get(rec+"/edit", app.sess))).Doc
 		save, err := url.Parse(actionHref(t, doc.Bar, "record.save"))
 		if err != nil {
 			t.Fatal(err)

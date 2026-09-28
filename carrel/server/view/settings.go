@@ -31,6 +31,7 @@ type Option struct {
 	Separator bool   `json:"separator,omitempty"` // черта перед вариантом, как у MenuItem
 	Disabled  bool   `json:"disabled,omitempty"`  // виден, но не выбирается
 	Reason    Text   `json:"reason,omitempty"`    // почему не выбирается; пусто у доступного
+	Colour    Colour `json:"colour,omitempty"`    // метка варианта-коллекции (s-notes-15); у прочих пусто
 }
 type FieldError struct {
 	Name    string `json:"name"`

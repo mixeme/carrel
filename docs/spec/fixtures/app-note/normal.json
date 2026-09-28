@@ -21,10 +21,12 @@
     "body": "Договорились заморозить ветку в среду.\n\nПисьмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт.\n\n## Что делаем\n\n- [ ] проверить changelog\n- [x] попросить у Артёма скриншоты\n\n## Отложено до следующего спринта\n\nПеренос старых вложений в новую папку — Виктор посмотрит, сколько их вообще.",
     "dirty": false,
     "fields": [],
+    "foreign": [],
     "mode": "reading",
     "readOnly": false,
     "rendered": [
       {
+        "checked": false,
         "children": [],
         "href": "",
         "kind": "para",
@@ -32,6 +34,7 @@
         "text": "Договорились заморозить ветку в среду."
       },
       {
+        "checked": false,
         "children": [],
         "href": "",
         "kind": "para",
@@ -39,6 +42,7 @@
         "text": "Письмо пользователям пишет Анна, черновик к вечеру вторника. Виктор проверяет миграцию на копии базы — если не успевает, переносим на следующий спринт."
       },
       {
+        "checked": false,
         "children": [],
         "href": "",
         "kind": "heading",
@@ -46,20 +50,23 @@
         "text": "Что делаем"
       },
       {
+        "checked": false,
         "children": [
           {
+            "checked": false,
             "children": [],
             "href": "",
-            "kind": "item",
+            "kind": "task",
             "level": 0,
-            "text": "[ ] проверить changelog"
+            "text": "проверить changelog"
           },
           {
+            "checked": true,
             "children": [],
             "href": "",
-            "kind": "item",
+            "kind": "task",
             "level": 0,
-            "text": "[x] попросить у Артёма скриншоты"
+            "text": "попросить у Артёма скриншоты"
           }
         ],
         "href": "",
@@ -68,6 +75,7 @@
         "text": ""
       },
       {
+        "checked": false,
         "children": [],
         "href": "",
         "kind": "heading",
@@ -75,6 +83,7 @@
         "text": "Отложено до следующего спринта"
       },
       {
+        "checked": false,
         "children": [],
         "href": "",
         "kind": "para",
@@ -106,7 +115,7 @@
       }
     ],
     "attach": [],
-    "date": "10 August 2026",
+    "date": "10 August 2026, 11:05",
     "linked": [],
     "menu": [
       {
@@ -180,6 +189,25 @@
         "icon": "i-back",
         "id": "nav.back",
         "label": "Back to list",
+        "method": "GET"
+      }
+    ],
+    "neighbours": [
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/5c81-77aa-0d64",
+        "icon": "i-note",
+        "id": "nav.neighbour",
+        "label": "Заметка со встречи 10.08",
+        "method": "GET",
+        "on": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/notes/a-nc-home/zapisi/6d92-13ef-b408",
+        "icon": "i-note",
+        "id": "nav.neighbour",
+        "label": "Что почитать про CRDT",
         "method": "GET"
       }
     ],

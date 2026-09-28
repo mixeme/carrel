@@ -6,18 +6,22 @@ import (
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/extension"
+	extast "github.com/yuin/goldmark/extension/ast"
 	gtext "github.com/yuin/goldmark/text"
 
 	"carrel.dev/carrel/server/view"
 )
 
-// RenderMarkdown parses note Markdown into view blocks (C-6.9).
+// RenderMarkdown parses note Markdown into view blocks (C-6.9). A task item
+// («- [ ]», «- [x]») is a task with its tick (s-notes-1, s-notes-2), the way
+// jtx Board and people write them.
 func RenderMarkdown(src string) []view.Block {
 	if src == "" {
 		return nil
 	}
 	srcBytes := []byte(src)
-	md := goldmark.New()
+	md := goldmark.New(goldmark.WithExtensions(extension.TaskList))
 	reader := gtext.NewReader(srcBytes)
 	doc := md.Parser().Parse(reader)
 	var out []view.Block
@@ -66,18 +70,38 @@ func blockFromNode(n ast.Node, src []byte) view.Block {
 		for c := n.FirstChild(); c != nil; c = c.NextSibling() {
 			kids = append(kids, blockFromNode(c, src))
 		}
+		kind := view.BlockItem
+		checked, task := taskOf(n)
+		if task {
+			kind = view.BlockTask
+		}
 		if len(kids) == 1 && kids[0].Kind == view.BlockPara {
 			item := kids[0]
-			item.Kind = view.BlockItem
+			item.Kind, item.Checked = kind, checked
 			return item
 		}
-		return view.Block{Kind: view.BlockItem, Children: kids}
+		return view.Block{Kind: kind, Checked: checked, Children: kids}
 	default:
 		if s := textContent(n, src); s != "" {
 			return view.Block{Kind: view.BlockPara, Text: view.Text(s)}
 		}
 		return view.Block{Kind: view.BlockPara}
 	}
+}
+
+// taskOf reports a list item that opens with a tick, and whether it is
+// ticked. The tick is the first inline of the item's first block; the text
+// after it is the item's text.
+func taskOf(item ast.Node) (checked, task bool) {
+	first := item.FirstChild()
+	if first == nil {
+		return false, false
+	}
+	box, ok := first.FirstChild().(*extast.TaskCheckBox)
+	if !ok {
+		return false, false
+	}
+	return box.IsChecked, true
 }
 
 func withInlines(kind view.BlockKind, n ast.Node, src []byte) view.Block {

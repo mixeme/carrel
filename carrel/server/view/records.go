@@ -195,13 +195,17 @@ type NoteDoc struct {
 	Bar      []Action `json:"bar"`      // панель правки; отступает по рангу (L-4)
 	Dirty    bool     `json:"dirty"`
 	ReadOnly bool     `json:"readOnly"`
-	// Fields — поля правки вне текста: дата и время, теги, связь. Только в
-	// режиме правки; уходят тем же сохранением, что заголовок и тело.
+	// Fields — поля правки вне текста: тетрадь, дата и время, теги, связь
+	// (s-notes-20). Только в режиме правки; уходят тем же сохранением, что
+	// заголовок и тело.
 	Fields []FormRow `json:"fields"`
+	// Foreign — свойства, которых Carrel не знает: хранятся как есть и не
+	// правятся. Только в режиме правки — строка под текстом (s-notes-20).
+	Foreign []Field `json:"foreign"`
 }
 
 type NoteMeta struct {
-	Date    Text          `json:"date"`
+	Date    Text          `json:"date"` // день и время, когда оно у заметки есть (s-notes-2)
 	Tags    []Tag         `json:"tags"`
 	Related []TimelineRow `json:"related"`
 	Linked  []Field       `json:"linked"` // та же заметка в других тетрадях (S-16)

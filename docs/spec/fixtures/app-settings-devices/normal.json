@@ -390,6 +390,7 @@
         "method": "GET"
       }
     ],
+    "neighbours": [],
     "note": "",
     "sections": [],
     "tags": []

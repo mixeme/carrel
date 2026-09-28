@@ -377,7 +377,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже |
 | `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage` |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение |
-| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NoteDoc` |
+| `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20) |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage` |
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage` |
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
@@ -388,7 +388,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/{kind}/{account}/{col}/import` | GET, POST | вход | страница | `ImportPage` |
 | `/app/{kind}/export` | GET | вход | лист | `ExportSheet` — вход из сведённого вида: из какой коллекции |
 | `/app/{kind}/{account}/{col}/export` | GET | вход | файл | — ; с `?uid=` — одна запись (S-19) |
-| `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NoteDoc` |
+| `/app/{kind}/{account}/{col}/new` | GET, POST | вход | страница, редирект | полная форма создания рода: `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` |
 | `/app/{kind}/{account}/{col}/new/quick` | GET, POST | вход | лист, редирект | `NewSheet`; POST сохраняет запись, «Open the card» переносит набранное в `/new` телом запроса |
 | `/app/{kind}/quick` | GET | вход | лист | `NewSheet` — вход из шапки: на последней использованной коллекции рода, а пока её нет — только выбор «куда» |
 
@@ -403,10 +403,12 @@ Combined list, Combined notebook. Вью-модель у него та же, ч�
 папки верхнего уровня.
 
 **Правка и просмотр — два адреса у всех четырёх родов.** `/{uid}` показывает
-запись, `/{uid}/edit` её правит; правило одно и исключений не знает (C-6.5). У
-заметки переход в правку идёт фрагментом, чтобы страница не мигала, но **адрес у
-правки свой**: на несохранённую правку можно дать ссылку, а пришедший по ссылке
-на `/{uid}` попадает в чтение.
+запись, `/{uid}/edit` её правит; правило одно и исключений не знает (C-6.5).
+Правка заметки — **её страница** (`NotePage`, s-notes-20, записка 9 из
+Typecase): рейл с соседними заметками и колонка справа остаются, меняется
+колонка текста. Клиент может просить её фрагментом, чтобы страница не мигала, —
+ответ тот же `NotePage`, как у правки других родов (C-7.1); на несохранённую
+правку можно дать ссылку, а пришедший по ссылке на `/{uid}` попадает в чтение.
 
 **Экспорт экрана не имеет.** Это пункт меню, отдающий файл; предпросмотра и
 шагов у него нет.
@@ -633,6 +635,9 @@ type SearchBox struct {
 type Rail struct {
     Nav      []NavRow  // разделы; первым списком, над коллекциями
     Sections []RailSection
+    // Соседние заметки тетради на странице заметки — чтение и правка
+    // (s-notes-2, s-notes-20), под рубрикой «Neighbours»; On — открытая.
+    Neighbours []Action
     Tags     []Tag     // фильтр по категориям; у файлов пуст
     Foot     []Action  // New collection, Connect account, Subscribe to a feed;
                        // сюда же встаёт Apply там, где выбор применяется не сразу
@@ -667,12 +672,25 @@ type SourceRow struct {
     Menu     []MenuItem
 }
 
+// Панель у списка — запись для чтения (s-contacts-1, s-agenda-1, s-tasks-1,
+// s-notes-1). Блоки — те же типы, что у страницы записи; пустой блок панель
+// не рисует.
 type Details struct {
-    Title   Text
-    Fields  []Field
-    Source  SourceBlock
-    Actions []Action   // кнопки на виду; удаление — Danger, клиент ставит его внизу панели
-    Menu    []MenuItem // «⋯» панели, в порядке кадра (s-contacts-8, s-agenda-4, s-tasks-4, s-notes-12)
+    Title      Text
+    Subtitle   Text          // под заголовком: «nextcloud · Записи», у заметки — и дата со временем
+    Avatar     *Avatar       // контакт: фото или инициалы; у других родов nil
+    Fields     []Field
+    Tags       []Tag         // категории записи; в Fields их нет
+    Body       Text          // описание события и задачи, как есть
+    Rendered   []Block       // текст заметки, разобранный (C-6.9): абзацы, задачи с отметками
+    Attendees  []AttendeeRow // участники события, только чтение
+    Attach     []AttachRow
+    Related    []TimelineRow
+    Foreign    []Field       // контакт: «Kept as the server sent them»
+    Source     SourceBlock
+    Actions    []Action   // кнопки на виду; удаление — Danger, клиент ставит его внизу панели
+    Menu       []MenuItem // «⋯» панели, в порядке кадра (s-contacts-8, s-agenda-4, s-tasks-4, s-notes-12)
+    DeleteNote Text       // строка у удаления: у серии «Series is edited and deleted whole.»
 }
 
 type Field struct {
@@ -702,7 +720,7 @@ type Print struct { // колонтитул распечатки, C-10
 | Вид | `Nav` | `Sections` | `Tags`, `Foot` | Где |
 |---|---|---|---|---|
 | **Разделы** | Пять родов и `Duplicates`, со счётом; первой строкой `Sections` — «все коллекции этого рода» | Коллекции по подключениям | Есть | Списки, единый вид, листы поверх них |
-| **Возврат** | Одна строка: «Back to list», «Back to calendar», «Back to the card» | Те же коллекции | Пусто | Карточка, правка, импорт, расхождение версий |
+| **Возврат** | Одна строка: «Back to list», «Back to calendar», «Back to the card» | Те же коллекции | Пусто | Карточка, правка, импорт, расхождение версий; у страницы заметки, чтения и правки, ещё `Neighbours` |
 | **Настройки** | «Back to app» и пункты настроек со счётом | Пусто | Пусто | Настройки и администрирование |
 
 **Почему возврат, а не разделы.** Экран записи открывают из списка и в список
@@ -711,6 +729,12 @@ type Print struct { // колонтитул распечатки, C-10
 деваются: до них два нажатия вместо одного, и это верный размен для экрана, где
 человек занят одной записью. Строка единого вида в этих двух видах не стоит: она
 принадлежит выбору «что смотреть», а он уже сделан.
+
+**Соседние заметки** (`Neighbours`, s-notes-2, s-notes-20) — чтобы листать
+тетрадь, не возвращаясь к списку: открытая заметка и по одной с каждой стороны,
+как рисуют кадры, в порядке списка тетради по умолчанию (новые сверху, затем по
+заголовку); открытая — `On`. Берутся из списка, который сеанс уже загрузил, —
+ни одного запроса ради рейла; тетрадь не открывали — список пуст, и рубрики нет.
 
 **Разделы стоят в рейле, а не в шапке.** Так нарисовано во всех кадрах, и
 причина не в месте на экране: раздел и отмеченные в нём коллекции — **одно
@@ -1061,7 +1085,7 @@ type NotePage struct {
     Loss   *LossReport
 }
 
-type NoteDoc struct { // фрагмент: чтение или правка
+type NoteDoc struct { // колонка текста страницы заметки: чтение или правка
     Mode     NoteMode // C-8
     Title    Text
     Body     Text     // исходный текст, не HTML
@@ -1069,11 +1093,15 @@ type NoteDoc struct { // фрагмент: чтение или правка
     Bar      []Action // панель правки; отступает по рангу (L-4)
     Dirty    bool
     ReadOnly bool
-    Fields   []FormRow // правка: дата и время, теги, связь; уходят с тем же сохранением
+    Fields   []FormRow // правка: тетрадь, дата и время, теги, связь; уходят с тем же сохранением
+    Foreign  []Field   // правка: свойства, которых Carrel не знает, — строка под текстом (s-notes-20)
 }
 
+// Колонка справа. В правке Tags и Related пусты — они поля под заголовком
+// (NoteDoc.Fields), и два места для одного значения заставили бы гадать;
+// Date — тоже поле. Остаются Attach, Linked, Actions (Attach, удаление).
 type NoteMeta struct {
-    Date    Text
+    Date    Text // день и время, когда оно у заметки есть: «10 August 2026, 11:05» (s-notes-2)
     Tags    []Tag
     Related []TimelineRow
     Linked  []Field // та же заметка в других тетрадях (S-16)
@@ -1464,6 +1492,7 @@ type Option struct {
     Separator bool
     Disabled  bool
     Reason    Text
+    Colour    Colour // метка варианта-коллекции: тетрадь заметки (s-notes-15); у прочих пусто
 }
 type FieldError struct { Name string; Message Text }
 
@@ -1836,13 +1865,15 @@ type PublishedFolder struct {
     DAV    Text // тот же секрет монтируется как диск
 }
 
-// Разобранная разметка: заголовки, списки, выделение, ссылки, код.
+// Разобранная разметка: заголовки, списки, задачи с отметкой, выделение,
+// ссылки, код.
 // Сырой HTML исходника экранируется и блоком не становится.
 type Block struct {
     Kind     BlockKind // C-8
     Level    int
     Text     Text
     Href     string
+    Checked  bool // задача отмечена; только у BlockTask
     Children []Block
 }
 ```
@@ -2078,7 +2109,7 @@ const ( PreviewNone PreviewKind = "none"; PreviewImage = "image"
 
 type BlockKind string
 const ( BlockPara BlockKind = "para"; BlockHeading = "heading"; BlockList = "list"
-        BlockItem = "item"; BlockCode = "code"; BlockQuote = "quote"
+        BlockItem = "item"; BlockTask = "task"; BlockCode = "code"; BlockQuote = "quote"
         BlockLink = "link"; BlockEmph = "emph"; BlockStrong = "strong" )
 ```
 

@@ -17,6 +17,61 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.58 — 2026-09-28
+
+The panel beside a list is for reading, and the edit of a note is on the
+note's page (from-typecase note 9): the panel carries what each kind's panel
+frame draws, and `/edit` of a note answers the whole page with its shell.
+
+### Added
+
+- **`Details`** (the panel, C-6.3) — `subtitle` (where the record lies; a
+  note's also when it was written: «nextcloud · Записи · 10 August 2026,
+  11:05»), `avatar` (a contact's photo or initials; `null` for the other
+  kinds), `tags` (the record's categories — they are no longer a
+  «Categories» field), `body` (an event's or a task's description, as text),
+  `rendered` (a note's text as blocks), `attendees`, `attach`, `related`
+  (the record page's rows), `foreign` (a contact's «Kept as the server sent
+  them»), `deleteNote` (under the deletion of a series: «Series is edited and
+  deleted whole.»). An event's panel fields gain **Reminders** and
+  **Repeats** under When; a task's gain **Complete** («40%»). A note's panel
+  has no Date field: the date is in `subtitle`.
+- **`Rail.neighbours`** — on a note's page, read and edited: the open note
+  and one on each side, in the notebook's list order (newest first, then by
+  title), `on` on the open one, `icon` `i-note`, id `nav.neighbour`. Taken
+  from the list the session loaded; `[]` when the notebook was never listed.
+  Every page's rail has the key.
+- **`BlockTask`** (`"task"`) and **`Block.checked`**: a Markdown task item
+  («- [ ] …», «- [x] …») is a task block, its text without the box. Before,
+  it was an `item` whose text began with «[ ] ».
+- **`NoteDoc.foreign`** — in edit, the note's properties Carrel does not know
+  (`X-JTX-COLOR`…): name, value, `mono`; they are kept as they are.
+- **Notebook** — the first of `NoteDoc.fields` in a note's edit (`notebook`,
+  select): every notebook, its value the notebook's list address, `colour`
+  on each option; a read-only one is `disabled` with `reason` «Read-only».
+  Saving with another notebook saves the edit, then moves the note there
+  (S-18) and redirects to it. When it cannot move, the edit is saved, the
+  note stays, and the answer is its page with the notice «Saved, but not
+  moved»; a save that lost properties shows the loss report first, with the
+  same notice (its column keeps `linked`). A save refused by version keeps
+  the Notebook with the rest of the edit: the conflict screen says «Not moved
+  yet» (info) and where to; «Use only my edit» and «Write this combination»
+  write, then move the note — they are enabled for the move alone too;
+  «Use only the server version» and Cancel leave it where it is.
+- **`Option.colour`** — the mark of an option that is a collection; omitted
+  elsewhere.
+
+### Changed
+
+- **`GET /app/notes/{account}/{col}/{uid}/edit`** and **`…/new`** answer a
+  **`NotePage`** (was a bare `NoteDoc`), as a page and as a fragment alike:
+  `doc` in `editing` mode, rail «Back to list» (was «Back to the card») with
+  the notebooks and the neighbours, `meta` with `attach`, `linked`,
+  `actions` (Attach, Delete note) and no `tags`, `related` or `date` — they
+  are fields now. Read the form from `.doc`.
+- **`NoteMeta.date`** on a note's reading page is the day and the time when
+  the note has one («10 August 2026, 11:05», s-notes-2); was the day only.
+
 ## v0.2.57 — 2026-09-28
 
 Row actions follow how often they are needed (from-typecase notes 5, 8, 11,

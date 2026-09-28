@@ -444,7 +444,8 @@
       "method": "GET",
       "enabled": true
     },
-    "note": "3 of 4 collections ticked"
+    "note": "3 of 4 collections ticked",
+    "neighbours": []
   },
   "notices": [],
   "details": null,

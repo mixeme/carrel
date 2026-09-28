@@ -26,11 +26,16 @@ type editDraft struct {
 	ETag    string     `json:"etag"`
 	ReadAt  time.Time  `json:"readAt"`
 	Mine    formValues `json:"mine"`
+	// Notebook is the notebook a note's edit chose other than its own
+	// (s-notes-20): part of the edit, so the move waits with it and happens
+	// once the person's edit is written (S-18).
+	Notebook string `json:"notebook,omitempty"`
 }
 
-func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine formValues) {
+func (s *Server) saveDraft(c *collectionCtx, uid, etag string, readAt time.Time, mine formValues, notebook string) {
 	data, err := json.Marshal(editDraft{
 		Kind: c.spec.kind, Account: c.conn.ID, Col: c.col.Path, UID: uid, ETag: etag, ReadAt: readAt, Mine: mine,
+		Notebook: notebook,
 	})
 	if err == nil {
 		c.sess.SetDraft(session.DraftRejectedEdit, data)
@@ -160,14 +165,28 @@ func (s *Server) conflictPage(c *collectionCtx, d editDraft, obj *model.Object, 
 	op := func(name string) string {
 		return s.postQuery(path, url.Values{"op": {name}, "etag": {obj.ETag}})
 	}
-	writable := len(page.Rows) > 0
+	// A note's edit that also chose another notebook: the move is part of
+	// the edit and waits with it (S-18 says where a record goes before it
+	// goes). Writing the person's edit moves it; the server version and
+	// Cancel leave it where it is.
+	moving := d.Notebook != "" && d.Notebook != c.listPath()
+	if moving {
+		where := d.Notebook
+		if dest := s.notebookTarget(c, d.Notebook); dest != nil {
+			where = string(dest.stamp())
+		}
+		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: "Not moved yet",
+			Body: text("Your edit also moves this " + c.spec.noun + " to " + where + ". Writing your edit or this combination moves it; " +
+				"«Use only the server version» and Cancel leave it where it is.")})
+	}
+	writable := len(page.Rows) > 0 || moving
 	page.Actions = []view.Action{
 		{ID: "conflict.combine", Label: "Write this combination", Href: op("combine"), Method: "POST", Enabled: writable},
 		{ID: "conflict.mine", Label: "Use only my edit", Href: op("mine"), Method: "POST", Enabled: writable},
 		{ID: "conflict.theirs", Label: "Use only the server version", Href: op("theirs"), Method: "POST", Enabled: true},
 		cancel,
 	}
-	if !writable {
+	if !writable && !moving {
 		page.Actions[0].Reason, page.Actions[1].Reason = "The server version already has your change.", "The server version already has your change."
 		page.Notices = append(page.Notices, view.Notice{Role: view.NoticeInfo, Title: "Nothing differs", Body: "The server version already holds everything you changed."})
 	}
@@ -269,8 +288,13 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		}}))
 		return
 	}
+	moving := d.Notebook != "" && d.Notebook != c.listPath()
 	if len(ch.ops) == 0 && !ch.alarmsChanged {
 		clearDraft(c)
+		if moving {
+			s.moveRecord(w, r, c, s.notebookTarget(c, d.Notebook), uid, obj, false, "Nothing was moved")
+			return
+		}
 		s.redirect(w, r, c.recordPath(uid))
 		return
 	}
@@ -288,5 +312,9 @@ func (s *Server) postKindConflict(w http.ResponseWriter, r *http.Request, kind s
 		return
 	}
 	clearDraft(c)
+	if moving {
+		s.saveAndMove(w, r, c, s.notebookTarget(c, d.Notebook), uid, sent, c.recordPath(uid))
+		return
+	}
 	s.finishWrite(w, r, c, uid, sent, c.recordPath(uid))
 }

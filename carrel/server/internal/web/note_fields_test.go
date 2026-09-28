@@ -21,7 +21,8 @@ func docRow(t *testing.T, d view.NoteDoc, name string) view.FormRow {
 
 // review Р-10, note (s-notes-4): Date and Time — the journal's DTSTART —,
 // Tags and Related to beside the text. NoteDoc carried the title and the body
-// only; its Fields carry the rest (C-6). A date without a time is a day.
+// only; its Fields carry the rest (C-6). A date without a time is a day. The
+// edit is the note's page (s-notes-20); the form is its Doc.
 func TestNoteDateTagsRelated(t *testing.T) {
 	f := calendarFixture(t, nil,
 		"n1.ics", ics("BEGIN:VJOURNAL\nUID:n1\nDTSTAMP:20260101T000000Z\nDTSTART;VALUE=DATE:20260110\nSUMMARY:Plan\nDESCRIPTION:Body\nCATEGORIES:work\nX-KEEP:yes\nEND:VJOURNAL"),
@@ -31,7 +32,7 @@ func TestNoteDateTagsRelated(t *testing.T) {
 	_ = f.h.do(get(list, f.sess)) // the session loads the notebook
 	edit := func() view.NoteDoc {
 		t.Helper()
-		return decode[view.NoteDoc](t, f.h.do(get(rec+"/edit", f.sess)))
+		return decode[view.NotePage](t, f.h.do(get(rec+"/edit", f.sess))).Doc
 	}
 	save := func(set map[string]string) string {
 		t.Helper()

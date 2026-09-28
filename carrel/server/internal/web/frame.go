@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/url"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -36,6 +37,40 @@ func (s *Server) cardBack(c *collectionCtx, uid string) view.Action {
 // fills its counts.
 func (s *Server) recordRail(c *collectionCtx, back view.Action) view.Rail {
 	return s.backRail(c.sess, s.catalogOf(c.sess), c.spec, c.conn.ID, back)
+}
+
+// neighbourSpan is how many notes the rail of a note's page shows on each
+// side of the open one: the frames draw one before and one after (s-notes-2,
+// s-notes-20). Opening a neighbour moves the window.
+const neighbourSpan = 1
+
+// noteNeighbours are the notes around uid in its notebook, in the order the
+// notebook's list shows by default — newest first, then by title — with the
+// open one on. They come from the list this session loaded: a notebook never
+// listed, or a note not in its list, has none, and nothing is asked for them.
+func (s *Server) noteNeighbours(c *collectionCtx, uid string) []view.Action {
+	var notes []indexEntry
+	for _, e := range c.index() {
+		if e.Kind == view.KindNote {
+			notes = append(notes, e)
+		}
+	}
+	sort.SliceStable(notes, func(i, j int) bool {
+		if notes[i].At != notes[j].At {
+			return notes[i].At > notes[j].At
+		}
+		return notes[i].Title < notes[j].Title
+	})
+	at := slices.IndexFunc(notes, func(e indexEntry) bool { return e.UID == uid })
+	if at < 0 {
+		return nil
+	}
+	var out []view.Action
+	for _, e := range notes[max(0, at-neighbourSpan):min(len(notes), at+neighbourSpan+1)] {
+		out = append(out, view.Action{ID: "nav.neighbour", Label: text(e.Title), Icon: "i-note",
+			Href: s.route(c.recordPath(e.UID)), Method: "GET", Enabled: true, On: e.UID == uid})
+	}
+	return out
 }
 
 // categoriesOf are the categories of a record: CATEGORIES split on its commas.

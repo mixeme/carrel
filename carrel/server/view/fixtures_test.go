@@ -24,8 +24,9 @@ const fixtureDir = "../../../docs/spec/fixtures"
 // for sixty screens went in without one, so the test was red and nobody saw
 // it: the Linux gates ran the live suites and the build, never this. They
 // run the unit suite now, and the map holds every screen on disk. A screen
-// whose fixture is a fragment rather than a whole page names the fragment:
-// app-note-edit is a NoteDoc, the editor swapped in place (C-6.9).
+// whose fixture is a fragment rather than a whole page would name the
+// fragment; app-note-edit was one, a bare NoteDoc, until the edit of a note
+// became its page (s-notes-20, from-typecase note 9).
 var fixtureTypes = map[string]func() any{
 	"about":                    func() any { return &AboutPage{} },
 	"admin-audit":              func() any { return &AdminAuditPage{} },
@@ -62,7 +63,7 @@ var fixtureTypes = map[string]func() any{
 	"app-files-published":      func() any { return &PublishedLinksPage{} },
 	"app-mail-compose":         func() any { return &MailSheet{} },
 	"app-note":                 func() any { return &NotePage{} },
-	"app-note-edit":            func() any { return &NoteDoc{} },
+	"app-note-edit":            func() any { return &NotePage{} },
 	"app-notes":                func() any { return &NotesPage{} },
 	"app-notes-all":            func() any { return &NotesPage{} },
 	"app-password":             func() any { return &PasswordPage{} },

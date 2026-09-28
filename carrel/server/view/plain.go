@@ -103,5 +103,6 @@ type Block struct {
 	Level    int       `json:"level"`
 	Text     Text      `json:"text"`
 	Href     string    `json:"href"`
+	Checked  bool      `json:"checked"` // задача отмечена; только у BlockTask
 	Children []Block   `json:"children"`
 }

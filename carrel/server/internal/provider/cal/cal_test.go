@@ -241,6 +241,31 @@ func TestRenderMarkdownCodeFence(t *testing.T) {
 	}
 }
 
+// from-typecase note 9, s-notes-1 and s-notes-2: a task item of a note is a
+// task with its tick, not an item whose text begins with «[ ] ». Tight and
+// loose lists alike; an item that is no task stays an item.
+func TestRenderMarkdownTaskItems(t *testing.T) {
+	for _, src := range []string{
+		"- [ ] check the changelog\n- [x] ask for screenshots\n- plain",
+		"- [ ] check the changelog\n\n- [x] ask for screenshots\n\n- plain",
+	} {
+		blocks := RenderMarkdown(src)
+		if len(blocks) != 1 || blocks[0].Kind != view.BlockList || len(blocks[0].Children) != 3 {
+			t.Fatalf("%q: blocks = %+v", src, blocks)
+		}
+		items := blocks[0].Children
+		if items[0].Kind != view.BlockTask || items[0].Checked || string(items[0].Text) != "check the changelog" {
+			t.Errorf("%q: first = %+v", src, items[0])
+		}
+		if items[1].Kind != view.BlockTask || !items[1].Checked || string(items[1].Text) != "ask for screenshots" {
+			t.Errorf("%q: second = %+v", src, items[1])
+		}
+		if items[2].Kind != view.BlockItem || items[2].Checked || string(items[2].Text) != "plain" {
+			t.Errorf("%q: third = %+v", src, items[2])
+		}
+	}
+}
+
 func TestNoteDescriptionIsMarkdown(t *testing.T) {
 	data, err := os.ReadFile("testdata/note.ics")
 	if err != nil {

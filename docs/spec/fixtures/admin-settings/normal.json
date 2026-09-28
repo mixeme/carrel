@@ -338,7 +338,8 @@
     ],
     "note": "",
     "sections": [],
-    "tags": []
+    "tags": [],
+    "neighbours": []
   },
   "smtp": {
     "action": "/admin/settings",

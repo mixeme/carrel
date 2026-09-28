@@ -187,7 +187,17 @@
         "label": "Publish a link",
         "method": "GET"
       }
-    ]
+    ],
+    "attach": [],
+    "attendees": [],
+    "avatar": null,
+    "body": "",
+    "deleteNote": "",
+    "foreign": [],
+    "related": [],
+    "rendered": [],
+    "subtitle": "",
+    "tags": []
   },
   "details": null,
   "groups": [
@@ -532,7 +542,8 @@
         "state": "ok"
       }
     ],
-    "tags": []
+    "tags": [],
+    "neighbours": []
   },
   "range": {
     "form": {

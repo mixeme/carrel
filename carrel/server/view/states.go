@@ -184,6 +184,7 @@ const (
 	BlockHeading BlockKind = "heading"
 	BlockList    BlockKind = "list"
 	BlockItem    BlockKind = "item"
+	BlockTask    BlockKind = "task" // пункт-задача «- [ ]»; отметка — Block.Checked
 	BlockCode    BlockKind = "code"
 	BlockQuote   BlockKind = "quote"
 	BlockLink    BlockKind = "link"

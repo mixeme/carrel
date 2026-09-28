@@ -342,14 +342,17 @@ func notFoundErr(err error) bool {
 // are what the record is compared by and Detail the line that tells two
 // members apart on the duplicates screen, both taken when the list was read.
 type indexEntry struct {
-	UID     string     `json:"uid"`
-	Path    string     `json:"path"`
-	ETag    string     `json:"etag"`
-	Kind    view.Kind  `json:"kind"`
-	Title   string     `json:"title"`
-	Related []string   `json:"related,omitempty"`
-	Detail  string     `json:"detail,omitempty"`
-	Keys    dupes.Keys `json:"keys,omitzero"`
+	UID     string    `json:"uid"`
+	Path    string    `json:"path"`
+	ETag    string    `json:"etag"`
+	Kind    view.Kind `json:"kind"`
+	Title   string    `json:"title"`
+	Related []string  `json:"related,omitempty"`
+	Detail  string    `json:"detail,omitempty"`
+	// At is when a note was written, Unix seconds: the order of the
+	// notebook's list, which its neighbours follow (s-notes-20).
+	At   int64      `json:"at,omitempty"`
+	Keys dupes.Keys `json:"keys,omitzero"`
 	// Fields are the single-valued properties a row shows, as the record
 	// holds them: what the duplicates screen asks about when members
 	// disagree, without reading a record again. PHOTO is a digest.
@@ -380,7 +383,7 @@ func indexOf(tf timeFmt, k view.Kind, items []listed) []indexEntry {
 		default:
 			e.UID, e.Title, e.Related = cal.UID(o), noteTitle(cal.Text(o, "SUMMARY"), cal.Description(o)), cal.RelatedTo(o)
 			if at := noteTime(o, tf.tz); !at.IsZero() {
-				e.Detail = tf.date(at)
+				e.Detail, e.At = tf.date(at), at.Unix()
 			}
 		}
 		out = append(out, e)

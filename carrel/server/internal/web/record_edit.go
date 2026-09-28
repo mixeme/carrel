@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -1597,6 +1598,12 @@ type editState struct {
 	isNew   bool
 	loss    *view.LossReport
 	notices []view.Notice
+	// notebook is the Notebook a note's edit chose (s-notes-20): the list
+	// address of the notebook; empty is its own.
+	notebook string
+	// linked is the same note in other notebooks (S-16), for the column of
+	// its edit.
+	linked []view.Field
 }
 
 func (s *Server) editAction(c *collectionCtx, st editState) string {
@@ -1614,7 +1621,9 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 	}
 	sh := s.buildShell(c.sess, title)
 	back := s.cardBack(c, st.uid)
-	if st.isNew {
+	if st.isNew || c.spec.kind == view.KindNote {
+		// A note is edited on its page (s-notes-20): the way out is the
+		// notebook's list, as from its reading.
 		back = s.listBack(c)
 	}
 	sh.Rail = s.recordRail(c, back)
@@ -1672,33 +1681,99 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		}
 		return page
 	default:
-		body := first(st.values["description"])
-		doc := view.NoteDoc{
-			Mode: view.NoteEditing, Title: text(first(st.values["summary"])), Body: text(body),
-			Rendered: cal.RenderMarkdown(body), ReadOnly: c.col.ReadOnly,
-			Bar: []view.Action{
-				{ID: "record.save", Label: "Save", Href: s.postQuery(s.editAction(c, st), url.Values{"etag": {st.etag}, "readat": {strconv.FormatInt(st.readAt.Unix(), 10)}}), Method: "POST", Enabled: true},
-				s.cancelAction(c, st),
-			},
-		}
-		if attaching {
-			doc.Bar = append(doc.Bar, s.attachAction(c, st.uid, st.etag, "edit"))
-		}
-		// The title and the body are the document; the version travels in
-		// the address of Save. The rest of the form is Fields (C-6).
-		for _, set := range form.Sets {
-			for _, row := range set.Rows {
-				if row.Kind != view.InputHidden && row.Name != "summary" && row.Name != "description" {
-					doc.Fields = append(doc.Fields, row)
-				}
+		return s.noteEditPage(c, st, sh, form, attaching, del)
+	}
+}
+
+// noteEditPage is the page of a note in edit (s-notes-20, from-typecase note
+// 9): the shell stays — «Back to list», the notebooks and the neighbours —,
+// and so does the column beside the text, less Tags and Related, which are
+// fields under the title now: attachments, the same note in other notebooks,
+// the source and the deletion. The text column is the form: title, Notebook,
+// Date, Time, Tags, Related to, the text, and the properties Carrel does not
+// know under it. Focus (s-notes-4) is this page without the rail and the
+// column — the client's.
+func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, form view.Form, attaching bool, del *view.Action) view.NotePage {
+	body := first(st.values["description"])
+	page := view.NotePage{Shell: sh, UID: st.uid, Source: c.source(), Loss: st.loss}
+	page.Doc = view.NoteDoc{
+		Mode: view.NoteEditing, Title: text(first(st.values["summary"])), Body: text(body),
+		Rendered: cal.RenderMarkdown(body), ReadOnly: c.col.ReadOnly,
+		Bar: []view.Action{
+			{ID: "record.save", Label: "Save", Href: s.postQuery(s.editAction(c, st), url.Values{"etag": {st.etag}, "readat": {strconv.FormatInt(st.readAt.Unix(), 10)}}), Method: "POST", Enabled: true},
+			s.cancelAction(c, st),
+		},
+	}
+	var attach *view.Action
+	if attaching {
+		a := s.attachAction(c, st.uid, st.etag, "edit")
+		attach = &a
+		page.Doc.Bar = append(page.Doc.Bar, a)
+	}
+	exists := st.obj != nil && !st.isNew
+	if exists {
+		// Where the note lies is chosen here too: saving into another
+		// notebook moves it there (S-18).
+		page.Doc.Fields = append(page.Doc.Fields, s.notebookRow(c, st.notebook))
+	}
+	// The title and the body are the document; the version travels in
+	// the address of Save. The rest of the form is Fields (C-6).
+	for _, set := range form.Sets {
+		for _, row := range set.Rows {
+			if row.Kind != view.InputHidden && row.Name != "summary" && row.Name != "description" {
+				page.Doc.Fields = append(page.Doc.Fields, row)
 			}
 		}
-		// NoteDoc has no shell: a loss or a notice needs the page around it.
-		if st.loss != nil || len(sh.Notices) > 0 {
-			return view.NotePage{Shell: sh, UID: st.uid, Doc: doc, Source: c.source(), Loss: st.loss}
-		}
-		return doc
 	}
+	if exists {
+		page.Rail.Neighbours = s.noteNeighbours(c, st.uid)
+		page.Doc.Foreign = cal.NoteForeign(st.obj)
+		page.Meta.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
+		page.Meta.Linked = st.linked
+		page.Meta.Actions = shown(attach, del)
+	}
+	return page
+}
+
+// notebookRow is the Notebook of a note's edit (s-notes-20, s-notes-15):
+// every live notebook, the note's own chosen until another is; one that
+// cannot be written is shown closed with the reason. A value is the
+// notebook's list address.
+func (s *Server) notebookRow(c *collectionCtx, chosen string) view.FormRow {
+	if chosen == "" {
+		chosen = c.listPath()
+	}
+	row := view.FormRow{Name: "notebook", Label: "Notebook", Kind: view.InputSelect, Value: text(chosen)}
+	blob := s.catalogOf(c.sess)
+	for _, conn := range blob.Connections {
+		for _, col := range blob.CollectionsOf(conn.ID) {
+			if col.Gone || !col.Has(c.spec.kind) {
+				continue
+			}
+			o := origin{conn: conn, col: col}
+			at := o.listPath(c.spec.segment)
+			opt := view.Option{Value: at, Label: view.Text(o.stamp()), Colour: catalogColour(col), Selected: at == chosen}
+			if col.ReadOnly || conn.Feed {
+				opt.Disabled, opt.Reason = true, "Read-only"
+			}
+			row.Options = append(row.Options, opt)
+		}
+	}
+	return row
+}
+
+// notebookTarget is the notebook a note's edit chose, or nil when the value
+// names none the catalog holds for notes.
+func (s *Server) notebookTarget(c *collectionCtx, value string) *collectionCtx {
+	blob := s.catalogOf(c.sess)
+	for _, conn := range blob.Connections {
+		for _, col := range blob.CollectionsOf(conn.ID) {
+			if (origin{conn: conn, col: col}).listPath(c.spec.segment) == value {
+				return s.moveTarget(c, conn.ID, col.Path)
+			}
+		}
+	}
+	return nil
 }
 
 // taskDeleteNote is the line under Delete task (s-tasks-3). The frame writes
@@ -1942,7 +2017,20 @@ func (s *Server) getKindEdit(w http.ResponseWriter, r *http.Request, kind string
 	s.rememberBody(c, obj)
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
 		obj: obj, uid: uid, values: vals, alarms: alarms, etag: obj.ETag, readAt: s.now(),
+		linked: s.noteLinked(r.Context(), c, uid, obj),
 	}))
+}
+
+// noteLinked is the same note in other notebooks (S-16) — the column of its
+// edit keeps it (s-notes-20). Other kinds show it on the card only.
+func (s *Server) noteLinked(ctx context.Context, c *collectionCtx, uid string, obj *model.Object) []view.Field {
+	if c.spec.kind != view.KindNote {
+		return nil
+	}
+	if _, _, rows, ok := s.linkedCalendar(ctx, c, uid, obj); ok {
+		return rows
+	}
+	return nil
 }
 
 // postKindEdit writes a patch with If-Match of the version the form was read
@@ -1981,6 +2069,13 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	readAt := unixForm(r.FormValue("readat"))
 	want := s.submittedValues(c, r)
 	st := editState{uid: uid, values: want, etag: etag, readAt: readAt}
+	// A note's Notebook other than its own: the edit is saved, then the
+	// note moves there (s-notes-20, S-18).
+	moving := false
+	if c.spec.kind == view.KindNote {
+		st.notebook = strings.TrimSpace(r.FormValue("notebook"))
+		moving = st.notebook != "" && st.notebook != c.listPath()
+	}
 
 	obj, err := c.find(r.Context(), uid)
 	switch {
@@ -1998,6 +2093,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	st.obj, st.alarms = obj, alarms
+	st.linked = s.noteLinked(r.Context(), c, uid, obj)
 	markDone := r.URL.Query().Get("op") == "done" || r.URL.Query().Get("op") == "" && r.FormValue("op") == "done"
 	if markDone {
 		want = formValues{}
@@ -2024,6 +2120,10 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		return
 	}
 	if len(ch.ops) == 0 && !ch.alarmsChanged {
+		if moving {
+			s.moveRecord(w, r, c, s.notebookTarget(c, st.notebook), uid, obj, false, "Nothing was moved")
+			return
+		}
 		s.redirect(w, r, c.recordPath(uid))
 		return
 	}
@@ -2052,7 +2152,7 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 		// or a display name renamed elsewhere would put an N in the draft
 		// nobody typed.
 		fillNames(c.spec.kind, base, typed)
-		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed))
+		s.saveDraft(c, uid, etag, readAt, changedValues(editFields[c.spec.kind], base, typed), st.notebook)
 		s.redirect(w, r, c.recordPath(uid)+"/conflict")
 		return
 	case err != nil:
@@ -2064,7 +2164,42 @@ func (s *Server) postKindEdit(w http.ResponseWriter, r *http.Request, kind strin
 	if markDone {
 		back = doneBack(c, uid, r.FormValue("from"))
 	}
+	if moving {
+		s.saveAndMove(w, r, c, s.notebookTarget(c, st.notebook), uid, sent, back)
+		return
+	}
 	s.finishWrite(w, r, c, uid, sent, back)
+}
+
+// notMoved is the title of every answer where a note's edit was saved and
+// the note stayed in its notebook.
+const notMoved = "Saved, but not moved"
+
+// saveAndMove finishes a note's edit that chose another notebook: the edit
+// is on the server already, and the note moves by the rules of S-18. What
+// the save lost is reported first, and the note stays where it is until that
+// has been seen; a move that fails leaves it there too. Either way the
+// answer says the edit was saved and the note was not moved.
+func (s *Server) saveAndMove(w http.ResponseWriter, r *http.Request, c *collectionCtx, dest *collectionCtx, uid string, sent *model.Object, back string) {
+	got, err := c.find(r.Context(), uid)
+	if err != nil {
+		sent.ETag = ""
+		c.noteWrite(sent.Path, sent)
+		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, nil, view.Notice{Role: view.NoticeAlert, Title: notMoved,
+			Body: text("The " + c.spec.noun + " could not be read back after saving, so it stayed where it was. Move it from its menu.")}))
+		return
+	}
+	// Asked without the session's tally: the report below asks again, and
+	// counts it then.
+	if model.CompareAfterPut(c.conn.ID, sent, got, nil) != nil {
+		s.reportWrite(w, r, c, sent, back, written{uid: uid, got: got}, func(*model.Loss, *model.Object) ([]view.Action, []view.Notice) {
+			return nil, []view.Notice{{Role: view.NoticeAlert, Title: notMoved,
+				Body: text("The server did not keep everything this edit wrote, so the " + c.spec.noun + " stayed where it was. Move it from its menu once you have looked.")}}
+		})
+		return
+	}
+	c.noteWrite(got.Path, got)
+	s.moveRecord(w, r, c, dest, uid, got, false, notMoved)
 }
 
 // doneAction is Mark done or Mark not done of a task, at the version etag.
@@ -2192,6 +2327,7 @@ func (s *Server) reportWrite(w http.ResponseWriter, r *http.Request, c *collecti
 	}
 	s.writePage(w, r, http.StatusOK, s.editPage(c, editState{
 		obj: got, uid: uid, values: vals, alarms: alarms, etag: got.ETag, readAt: s.now(), loss: report, notices: notices,
+		linked: s.noteLinked(r.Context(), c, uid, got),
 	}))
 }
 

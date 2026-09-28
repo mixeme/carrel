@@ -45,8 +45,12 @@ type SearchBox struct {
 type Rail struct {
 	Nav      []NavRow      `json:"nav"` // разделы; первым списком, над коллекциями
 	Sections []RailSection `json:"sections"`
-	Tags     []Tag         `json:"tags"` // фильтр по категориям; у файлов пуст
-	Foot     []Action      `json:"foot"` // New collection, Connect account, Subscribe to a feed;
+	// Neighbours — соседние заметки тетради на странице заметки, чтение и
+	// правка (s-notes-2, s-notes-20), в порядке списка тетради; On — открытая.
+	// Берутся из списка, уже загруженного сеансом: не загружен — пусто.
+	Neighbours []Action `json:"neighbours"`
+	Tags       []Tag    `json:"tags"` // фильтр по категориям; у файлов пуст
+	Foot       []Action `json:"foot"` // New collection, Connect account, Subscribe to a feed;
 	// сюда же встаёт Apply там, где выбор применяется не сразу
 	// (без сценариев и на узком экране — U-8, U-9)
 	About Action `json:"about"` // название, версия и коммит сборки — последней строкой (C-13)
@@ -79,12 +83,25 @@ type SourceRow struct {
 	Menu     []MenuItem      `json:"menu"`
 }
 
+// Details — панель у списка: запись для чтения, как её рисуют кадры панелей
+// (s-contacts-1, s-agenda-1, s-tasks-1, s-notes-1). Типы блоков — те же, что
+// у страницы записи.
 type Details struct {
-	Title   Text        `json:"title"`
-	Fields  []Field     `json:"fields"`
-	Source  SourceBlock `json:"source"`
-	Actions []Action    `json:"actions"` // кнопки на виду; удаление — Danger, внизу панели
-	Menu    []MenuItem  `json:"menu"`    // «⋯» панели, в порядке кадра
+	Title      Text          `json:"title"`
+	Subtitle   Text          `json:"subtitle"` // под заголовком: откуда запись, у заметки — и когда
+	Avatar     *Avatar       `json:"avatar"`   // контакт: фото или инициалы; у других родов nil
+	Fields     []Field       `json:"fields"`
+	Tags       []Tag         `json:"tags"`      // категории записи; в Fields их нет
+	Body       Text          `json:"body"`      // описание события и задачи, как есть
+	Rendered   []Block       `json:"rendered"`  // текст заметки, разобранный (C-6.9)
+	Attendees  []AttendeeRow `json:"attendees"` // участники события, только чтение
+	Attach     []AttachRow   `json:"attach"`
+	Related    []TimelineRow `json:"related"`
+	Foreign    []Field       `json:"foreign"` // контакт: чужие свойства, как их прислал сервер
+	Source     SourceBlock   `json:"source"`
+	Actions    []Action      `json:"actions"`    // кнопки на виду; удаление — Danger, внизу панели
+	Menu       []MenuItem    `json:"menu"`       // «⋯» панели, в порядке кадра
+	DeleteNote Text          `json:"deleteNote"` // строка у удаления: у серии «Series is edited and deleted whole.»
 }
 
 type Field struct {

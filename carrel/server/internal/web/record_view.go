@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -44,30 +45,70 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 // s-tasks-1, s-notes-1) and the rest under «⋯» (s-contacts-8, s-agenda-4,
 // s-tasks-4, s-notes-12). Nothing here is a second way to read a record: it
 // is the record's own page, cut to a panel.
+//
+// The panel is for reading, for every kind alike (from-typecase note 9): the
+// blocks its frame draws, of the same types the record's page uses — the
+// text of a note rendered, the description of an event or a task,
+// attendees, attachments, related records, a contact's foreign properties.
+// The categories are Tags, never a field too.
 func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) view.Details {
 	d := view.Details{Title: text(recordTitle(c.spec.kind, obj)), Source: c.source()}
+	d.Subtitle = view.Text(d.Source.Stamp)
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
 	attach := s.attachOf(c, uid, obj.ETag)
 	d.Menu = ops.menu
+	d.Tags = s.recordTags(c, obj)
 	switch c.spec.kind {
 	case view.KindContact:
 		for _, f := range contactFieldsOf(obj) {
-			d.Fields = append(d.Fields, f.Field)
+			if f.prop != "CATEGORIES" {
+				d.Fields = append(d.Fields, f.Field)
+			}
 		}
+		av := avatarFor(uid, contactName(obj))
+		av.Href, _ = s.cardPhoto(c, uid, obj)
+		d.Avatar = &av
+		d.Foreign = card.Foreign(obj)
 		// All records: the person's timeline, beside Edit (s-contacts-1).
 		d.Actions = shown(ops.edit, &view.Action{ID: "contact.timeline", Label: "All records",
 			Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}, ops.del)
 	case view.KindEvent:
-		d.Fields = s.eventPage(c, uid, obj, nil).Fields
+		page := s.eventPage(c, uid, obj, nil)
+		// Reminders and Repeats stand in the field list, under When
+		// (s-agenda-1): the panel has no room for their blocks.
+		var more []view.Field
+		if len(page.Reminders) > 0 {
+			var labels []string
+			for _, r := range page.Reminders {
+				labels = append(labels, string(r.Label))
+			}
+			more = append(more, view.Field{Label: "Reminders", Value: text(strings.Join(labels, ", "))})
+		}
+		if page.Recurrence.Summary != "" {
+			more = append(more, view.Field{Label: "Repeats", Value: page.Recurrence.Summary})
+		}
+		d.Fields = panelFields(page.Fields, more)
+		d.Body, d.Attendees, d.Attach, d.Related = page.Body, page.Attendees, page.Attach, page.Related
 		d.Actions = shown(ops.edit, attach, ops.del)
+		if ops.del != nil && cal.HasRecurrence(obj) {
+			d.DeleteNote = seriesNote
+		}
 	case view.KindTask:
-		d.Fields = s.taskPage(c, uid, obj, nil).Fields
+		page := s.taskPage(c, uid, obj, nil)
+		d.Fields = panelFields(page.Fields, nil)
+		if page.Percent != nil {
+			d.Fields = append(d.Fields, view.Field{Label: "Complete", Value: text(strconv.Itoa(*page.Percent) + "%")})
+		}
+		d.Body, d.Attach, d.Related = page.Body, page.Attach, page.Related
 		d.Actions = shown(ops.edit, attach, ops.del)
 	default:
 		page := s.notePage(c, uid, obj, nil)
-		if page.Meta.Date != "" {
-			d.Fields = []view.Field{{Label: "Date", Value: page.Meta.Date}}
+		// Where the note lies and when it was written, in one line under
+		// its title (s-notes-1); no field repeats the date.
+		if when := noteWhen(obj, c.tf); when != "" {
+			d.Subtitle += text(" · " + when)
 		}
+		d.Rendered, d.Attach, d.Related = page.Doc.Rendered, page.Meta.Attach, page.Meta.Related
 		// The page of the note is a bare icon beside Edit; the deletion is
 		// the last item of the menu (s-notes-12), not the foot of the panel.
 		d.Actions = shown(ops.edit, &view.Action{ID: "record.open", Label: "Open the note page", Icon: "i-expand",
@@ -77,6 +118,34 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 		}
 	}
 	return d
+}
+
+// panelFields are the fields of a record's page for its panel: more stands
+// under When and its original zone, and the categories leave for Tags.
+func panelFields(own, more []view.Field) []view.Field {
+	var out []view.Field
+	at := 0
+	for at < len(own) && (own[at].Label == "When" || own[at].Label == "Original time zone") {
+		at++
+	}
+	for _, f := range append(append(slices.Clone(own[:at]), more...), own[at:]...) {
+		if f.Label != "Categories" {
+			out = append(out, f)
+		}
+	}
+	return out
+}
+
+// noteWhen is when a note was written: its day, and the time when it has
+// one.
+func noteWhen(obj *model.Object, tf timeFmt) string {
+	if tm, err := cal.TimingOf(obj, tf.tz); err == nil && !tm.Start.IsZero() {
+		return tf.timeOrDate(tm)
+	}
+	if at := noteTime(obj, tf.tz); !at.IsZero() {
+		return tf.date(at)
+	}
+	return ""
 }
 
 // shown is the buttons that exist, in their order.
@@ -472,11 +541,11 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 		return page
 	}
 	tf := c.tf
-	tz := tf.tz
 	body := cal.Description(obj)
 	title := noteTitle(cal.Text(obj, "SUMMARY"), body)
 	page.Shell.Title = text(title)
 	page.Print = s.recordPrint(c, text(title))
+	page.Rail.Neighbours = s.noteNeighbours(c, uid)
 	page.Doc.Title, page.Doc.Body, page.Doc.Rendered = text(title), text(body), cal.RenderMarkdown(body)
 	// Edit and Export Markdown sit in the bar over the text, Attach and the
 	// deletion in the column beside it; what the bar has no room for is its
@@ -487,9 +556,8 @@ func (s *Server) notePage(c *collectionCtx, uid string, obj *model.Object, notic
 		Href: s.postQuery(c.listPath()+"/export", url.Values{"uid": {uid}})})
 	page.Meta.Actions = shown(s.attachOf(c, uid, obj.ETag), ops.del)
 	page.Meta.Menu = menuWithout(ops.menu, "record.export")
-	if at := noteTime(obj, tz); !at.IsZero() {
-		page.Meta.Date = text(tf.date(at))
-	}
+	// The day, and the time when the note has one (s-notes-2).
+	page.Meta.Date = text(noteWhen(obj, tf))
 	page.Meta.Tags = s.recordTags(c, obj)
 	page.Meta.Attach = s.attachRows(c, uid, obj, obj.ETag, "")
 	page.Meta.Related = s.relatedRows(c, obj)
