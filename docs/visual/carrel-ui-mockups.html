@@ -340,7 +340,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-range{display:flex;align-items:center;gap:8px;flex:none}
 .tc-range__dash{font-style:normal;color:var(--tc-dusty)}
 /* native controls: zero specificity */
-:where(.tc-root) :where(button,input,textarea){margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;line-height:inherit;letter-spacing:inherit;text-align:inherit;text-transform:inherit;min-width:0;min-height:0}
+:where(.tc-root) :where(button,input,textarea,select,form){margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;line-height:inherit;letter-spacing:inherit;text-align:inherit;text-transform:inherit;min-width:0;min-height:0}
 :where(.tc-root) :where(button){cursor:pointer;appearance:none}
 :where(.tc-root) :where(input[type=search]){appearance:none;-webkit-appearance:none}
 :where(.tc-root) :where(input[type=search])::-webkit-search-decoration,
@@ -349,7 +349,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 :where(.tc-root) :where(input[type=search])::-webkit-search-results-decoration{display:none;appearance:none}
 :where(.tc-root) ::placeholder{color:inherit;opacity:1}
 :where(.tc-root) :where(textarea){field-sizing:content;resize:none}
-:where(.tc-root) :where(button[role=menuitem]){width:100%}
+:where(.tc-root) :where(button[role=menuitem],a[role=menuitem]){width:100%}
 .tc-root .tc-q{flex:1;min-width:0;min-height:0;overflow:hidden}
 .tc-acts > .tc-drop{flex:none}
 /* действия шапки в два яруса: второй ярус — уточнение к первому (порог под фильтром) */
@@ -363,6 +363,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-btn.is-danger{color:var(--tc-danger);border-color:var(--tc-edge)}
 /* Недоступная кнопка остаётся своего цвета и бледнеет: по цвету видно, что она сделала бы. */
 .tc-btn:disabled{opacity:.45;cursor:default}
+/* Кнопка-ссылка — та же кнопка: адрес вместо действия. Недоступная — без адреса. */
+a.tc-btn[aria-disabled=true]{opacity:.45;cursor:default}
 /* Заливка — уничтожение; рамка — отвязать. Подпись на заливке — --tc-surface:
    в тёмной теме белое на --tc-danger даёт 3.9, бумага — 5.5. */
 .tc-btn.is-danger-solid{background:var(--tc-danger);border-color:var(--tc-danger);color:var(--tc-surface)}
@@ -382,6 +384,10 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-seg__opt{padding:0 11px;display:inline-flex;align-items:center;font-size:12.5px;color:var(--tc-muted);border-right:.5px solid var(--tc-hair)}
 .tc-seg__opt:last-child{border-right:0}
 .tc-seg__opt.is-on{background:var(--tc-card);color:var(--tc-ink);font-weight:600}
+/* Сегмент на радиокнопках: выбранный — тот, чья кнопка отмечена. */
+label.tc-seg__opt{position:relative;cursor:pointer}
+.tc-seg__opt:has(> .tc-seg__box:checked){background:var(--tc-card);color:var(--tc-ink);font-weight:600}
+.tc-seg__opt:has(> .tc-seg__box:focus-visible){outline:1.5px solid var(--tc-accent);outline-offset:-2px}
 /* Поле — одна строка; не помещающееся обрезается. Многострочное — .is-area. */
 .tc-in{height:28px;border:.5px solid var(--tc-edge);border-radius:3px;background:var(--tc-surface);padding:0 9px;
   font-size:12.5px;display:flex;align-items:center;color:var(--tc-ink);min-width:0;
@@ -395,6 +401,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-in.is-pick::after{content:"";position:absolute;right:9px;top:50%;width:6px;height:6px;
   margin-top:-4px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;
   transform:rotate(45deg);opacity:.5;z-index:2;pointer-events:none}
+/* Выбор списком браузера: та же стрелка, нарисованная фоном, — у select нет ::before и ::after. */
+select.tc-in.is-pick{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,color-mix(in srgb,currentColor 50%,transparent) 50%),linear-gradient(135deg,color-mix(in srgb,currentColor 50%,transparent) 50%,transparent 50%);background-position:calc(100% - 13px) 50%,calc(100% - 9px) 50%;background-size:4px 4px;background-repeat:no-repeat}
 .tc-in.is-focus{outline:1.5px solid var(--tc-accent);outline-offset:1px;border-color:var(--tc-accent)}
 /* Поле, значение которого сервер не принял: рамка — цвет опасности, причина — подсказкой под ним. */
 .tc-in.is-error{border-color:var(--tc-danger)}
@@ -434,6 +442,11 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-table td .tc-btn{height:22px}
 .tc-check .tc-tickrow__tick{width:12px;height:12px;border-radius:2px;background:var(--tc-ink);flex:none}
 .tc-check .tc-tickrow__tick.is-off{background:transparent;border:.5px solid var(--tc-edge)}
+/* Отметка с настоящим флажком: флажок невидим, квадрат рисует его состояние — и без сценариев. */
+label.tc-check{position:relative;cursor:pointer}
+.tc-check__box,.tc-seg__box{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.tc-check__box:not(:checked) + .tc-tickrow__tick{background:transparent;border:.5px solid var(--tc-edge)}
+.tc-check__box:focus-visible + .tc-tickrow__tick{outline:1.5px solid var(--tc-accent);outline-offset:1px}
 /* поля формы: ширина по содержимому, не 100% */
 .tc-form{display:flex;flex-wrap:wrap;gap:13px 16px;padding:14px var(--tc-page-gutter);align-items:flex-start}
 .tc-form.is-tight{padding-top:4px}
@@ -462,6 +475,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-row{display:grid;align-items:center;gap:12px;padding-left:var(--tc-page-gutter);padding-right:var(--tc-page-gutter);
   min-height:38px;border-bottom:.5px solid var(--tc-hair)}
 .tc-row.is-on{background:var(--tc-card)}
+/* Плотные строки (Compact rows, решение 28.09.2026): 30 px вместо 38; на телефоне плотность молчит. */
+.tc-list.is-compact .tc-row{min-height:30px}
 .tc-row .tc-mark{width:3px;height:22px;border-radius:1px}
 .tc-row .tc-row__title{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Значок и имя файла — одна строка: .tc-root svg{display:block} иначе ставит значок над именем. */
@@ -489,6 +504,9 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-avatar{width:28px;height:28px;border-radius:3px;background:#D9D2BE;color:#4E4738;font-size:10.5px;
   display:flex;align-items:center;justify-content:center;font-weight:600;flex:none}
 .tc-avatar.is-photo{background:#8C7B6A}
+/* Картинка на месте фотографии: заполняет место, обрезаясь по нему; пока не пришла — видно место. */
+.tc-avatar__img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.tc-avatar:has(> .tc-avatar__img),.tc-avatar--photo:has(> .tc-avatar__img){overflow:hidden;padding:0}
 [data-tc-theme="dark"] .tc-avatar{background:#3A463D;color:#C9BFA6}
 /* метки, значки, статусы */
 .tc-tag{border:.5px solid var(--tc-hair);border-radius:2px;padding:0 5px;font-size:10.5px;color:var(--tc-muted);background:var(--tc-surface);white-space:nowrap}
@@ -564,6 +582,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-thumb{aspect-ratio:4/3;border-radius:3px;background:#D9D2BE;display:flex;align-items:center;justify-content:center}
 [data-tc-theme="dark"] .tc-thumb{background:#33403A}
 .tc-thumb svg{width:22px;height:22px;stroke:var(--tc-muted);stroke-width:1.2;fill:none}
+.tc-thumb:has(> .tc-thumb__img){overflow:hidden}
+.tc-thumb__img{display:block;width:100%;height:100%;object-fit:cover}
 .tc-tile__name{font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tc-tile__meta{font-size:10.5px;color:var(--tc-dusty);font-family:var(--tc-font-mono)}
 .tc-queue{width:330px;margin:14px var(--tc-page-gutter) 16px auto;border:.5px solid var(--tc-edge);border-radius:4px;background:var(--tc-surface)}
@@ -585,6 +605,9 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 /* наложение: быстрая заметка поверх любого экрана */
 .tc-overlay{position:relative;container:tcbox / inline-size;min-width:0}
 /* Затемнение — слой над всей страницей, открытые меню (6) и поднятые кнопки ящика (1) тоже под ним. */
+/* Лист открывается и по адресу (#id) — без сценариев: ссылка на него, крестик — ссылка «#». */
+.tc-scrim[hidden]{display:none}
+.tc-scrim[hidden]:target{display:flex}
 .tc-scrim{position:absolute;inset:0;z-index:7;background:rgba(23,33,28,.22);display:flex;align-items:flex-start;justify-content:center;padding-top:44px}
 [data-tc-theme="dark"] .tc-scrim{background:rgba(0,0,0,.42)}
 .tc-sheet{width:560px;max-width:92%;background:var(--tc-surface);border:.5px solid var(--tc-edge);border-radius:5px;display:flex;flex-direction:column;position:relative;container:tcbox / inline-size}
@@ -630,6 +653,8 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
    и три коробки в одном столбце получают три разные ширины. */
 .tc-doc .tc-prose{max-width:none}
 .tc-doc .tc-in{max-width:none;width:100%}
+/* Форма POST без полей — для кнопок вне формы (атрибут form): её не видно. */
+.tc-post{display:none}
 .tc-doc__table{margin:14px 0 4px}
 .tc-doc__tablebar{display:none;justify-content:flex-end;margin-bottom:6px}
 .tc-doc__scroll{overflow-x:auto;scrollbar-width:thin}
@@ -905,8 +930,13 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 @container tcbox (max-width:460px){
   .tc-top .tc-btn:has(> svg:only-child){width:38px;padding:0;font-size:0;gap:0}
 }
+/* Поле под пальцем — 16 px: при меньшем кегле телефон увеличивает страницу, когда встают в поле (решение 28.09.2026). */
+@media (pointer:coarse){
+  .tc-in,.tc-q{font-size:16px}
+}
 @container style(--tc-shell-mode: drawer){
   .tc-row{min-height:52px;gap:10px}
+  .tc-list.is-compact .tc-row{min-height:52px}
   .tc-nav--bottom{display:flex;border-top:.5px solid var(--tc-rule);background:var(--tc-surface);margin-top:auto}
   .tc-nav--bottom .tc-nav__item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:auto;padding:7px 0 9px;font-size:9.5px;color:var(--tc-dusty);border-radius:0}
   .tc-nav--bottom .tc-nav__item.is-on{color:var(--tc-accent);background:transparent;font-weight:400}
@@ -1070,6 +1100,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-form__cols.tc-form__cols{align-content:flex-start;flex:1 1 420px;gap:13px 16px}
 .tc-dialog__split.tc-dialog__split{align-items:flex-start;display:flex;flex-wrap:wrap;gap:18px}
 .tc-dialog__photo.tc-dialog__photo{position:relative;height:190px;border-radius:4px;overflow:hidden;flex:none;width:190px}
+.tc-dialog__photo-img.tc-dialog__photo-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .tc-dialog__photo-frame.tc-dialog__photo-frame{position:absolute;inset:22px;border:1.5px solid rgba(255,253,247,.9);border-radius:3px}
 .tc-dialog__photo-rule.tc-dialog__photo-rule{position:absolute;left:22px;right:22px;top:50%;height:.5px;background:rgba(255,253,247,.45)}
 .tc-dialog__photo-rule-v.tc-dialog__photo-rule-v{position:absolute;top:22px;bottom:22px;left:50%;background:rgba(255,253,247,.45);width:.5px}
@@ -1096,6 +1127,7 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 .tc-card__top9.tc-card__top9{margin-top:9px}
 .tc-card__split.tc-card__split{align-items:flex-start;display:flex;flex-wrap:wrap;gap:12px}
 .tc-card__qr.tc-card__qr{border:.5px solid var(--tc-edge);border-radius:4px;flex:none;padding:8px}
+.tc-card__qr-img.tc-card__qr-img{display:block;width:104px;height:104px;image-rendering:pixelated}
 .tc-card__qr-side.tc-card__qr-side{flex:1 1 140px}
 .tc-main__tree.tc-main__tree{padding:10px 20px 16px}
 .tc-card__warn.tc-card__warn{font-size:11.5px;color:var(--tc-danger);margin-top:8px}
@@ -2616,6 +2648,108 @@ a.tc-railfoot__about{flex:1 1 100%;font-size:11px;line-height:1.5;color:var(--tc
 </div>
 </div>
 </figure>
+<h4>Формы и ссылки</h4>
+<p>Смысл HTML — данные виджета: адрес, метод, имя и значение. Каждая его форма нарисована здесь один раз, и выглядит так же, как кнопка, поле и строка без него; экранные кадры его не повторяют (решение 28.09.2026, задача сервера 29).</p>
+<figure>
+<div class="frame" data-frame="components-37">
+  <div class="frame-label"><span>Кнопка-ссылка и отправка извне</span><span class="frag">компонент</span><i>a.tc-btn, button[form], form.tc-post</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--wrap tc-root--pad18-20">
+  <button class="tc-btn" type="button">Import</button>
+  <a class="tc-btn" href="/app/contacts/nextcloud/kontakty/import">Import</a>
+  <a class="tc-btn is-primary" href="/app/contacts/nextcloud/kontakty/new"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>New contact</a>
+  <a class="tc-btn" title="Nothing to export: the list is empty." aria-disabled="true">Export</a>
+  <button class="tc-btn is-danger" type="submit" form="post-disconnect">Disconnect</button>
+  <form class="tc-post" id="post-disconnect" action="/app/settings/connections/nextcloud/disconnect" method="post"><input type="hidden" name="csrf" value="7f3a91de"></form>
+  <form class="tc-post" id="post-import" action="/app/contacts/nextcloud/kontakty/import" method="post" enctype="multipart/form-data"><input type="hidden" name="csrf" value="7f3a91de"><input type="file" name="file" aria-label="File"></form>
+  </div>
+</div>
+<figcaption><b>Ссылка выглядит как кнопка</b> — первые две неотличимы: одна действует сценарием, другая ведёт по адресу. Недоступная ссылка — без адреса, с причиной в подсказке. <b>Кнопка вне формы</b> отправляет пустую форму по её имени (атрибут <code>form</code>): форма POST с полем CSRF стоит где угодно на странице и не видна, а кнопке не нужна обёртка. Форма с файловым полем — та, которую отправляет бросок файла на список (лист «Drop to import», <code>data-tc-drop</code>).</figcaption>
+</figure>
+<figure>
+<div class="frame" data-frame="components-38">
+  <div class="frame-label"><span>Форма с адресом</span><span class="frag">компонент</span><i>form.tc-form, select, радио, флажки</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad18-20">
+  <form class="tc-form tc-form--pad0" action="/app/settings/account" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+    <div class="tc-field tc-field--md"><label>Display name</label><input class="tc-in" type="text" name="display" value="Mix" aria-label="Display name"></div>
+    <div class="tc-field tc-field--sm"><label>Week starts on</label><select class="tc-in is-pick" name="week" aria-label="Week starts on"><option value="mon" selected>Monday</option><option value="sun">Sunday</option><option value="sat" disabled>Saturday</option></select></div>
+    <div class="tc-field"><label>Theme</label><span class="tc-seg" role="radiogroup" data-tc-theme-switch><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="auto" checked>Auto</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="light">Light</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="dark">Dark</label></span></div>
+    <div class="tc-field is-own-line tc-grow tc-field--gap7"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="compact" value="1" checked><span class="tc-tickrow__tick"></span>Compact rows</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="mono" value="1"><span class="tc-tickrow__tick"></span>Monospaced dates</label></div>
+    <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password" disabled></div>
+    <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="nopass" value="1" checked data-tc-disables="password"><span class="tc-tickrow__tick"></span>The server asks no password</label></div>
+    <div class="tc-fset">
+      <div class="tc-rubric">Phone numbers</div>
+      <div class="tc-field tc-field--md"><label>Number</label><input class="tc-in is-mono" type="text" name="tel.0" value="+7 912 445-10-88" aria-label="Number"></div>
+      <template id="tpl-tel"><div class="tc-field tc-field--md"><label>Number</label><input class="tc-in is-mono" type="text" name="tel.{n}" aria-label="Number"></div></template>
+      <div class="tc-grow"></div>
+      <button class="tc-btn is-sm" type="submit" name="add" value="tel" data-tc-add="tpl-tel"><svg viewBox="0 0 24 24"><use href="#i-plus"/></svg>Add phone</button>
+    </div>
+    <div class="tc-field"><button class="tc-btn is-primary" type="submit" name="op" value="save">Save</button></div>
+  </form>
+  </div>
+</div>
+<figcaption><b>Форма — настоящая</b>: адрес, метод и скрытое поле CSRF. Выбор — <code>select</code> браузера с той же стрелкой; выключенный вариант виден, но не выбирается. Сегмент — радиокнопки, отметка — флажок: оба невидимы, а рисует их состояние CSS, поэтому переключаются и без сценариев. Кнопка отправки несёт имя и значение — какое действие нажато. Отметка может выключать поле формы по его имени (<code>data-tc-disables</code>): стоит — поле выключено и не уходит; сценарий библиотеки переключает его на месте, без сценария — сервер при ответе. Сегмент темы (<code>data-tc-theme-switch</code>) пишет выбор в этот браузер: Auto — как в системе. <b>«Add phone»</b> — кнопка отправки «ещё строка»: без сценария сервер отвечает формой с ещё одной пустой строкой; сценарий добавляет строку на месте по шаблону (<code>template</code>), заменяя <code>{n}</code> в имени наименьшим свободным числом.</figcaption>
+</figure>
+<figure>
+<div class="frame" data-frame="components-39">
+  <div class="frame-label"><span>Строка, пункт, узел — ссылкой</span><span class="frag">компонент</span><i>a.tc-row, a.tc-menu__item, a.tc-tree__row</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--pad18-20">
+  <div class="tc-list">
+    <a class="tc-row tc-row--excerpt" href="/app/notes/nextcloud/zapisi/9e31"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title">Заметка со встречи 10.08</span><span class="tc-row__excerpt">Договорились заморозить ветку в среду…</span><span class="tc-row__cell tc-row__tags"><span class="tc-tag">встречи</span></span><span class="tc-mono tc-row__date">10 Aug</span><span class="tc-row__cell tc-row__source">nextcloud · Записи</span></a>
+  </div>
+  <div class="tc-menu tc-menu--w212">
+    <a class="tc-menu__item" href="/app/collections/rename?c=lichny" role="menuitem"><svg><use href="#i-pencil"/></svg>Rename and colour</a>
+    <a class="tc-menu__item" href="/app/publish?c=lichny" role="menuitem"><svg><use href="#i-link"/></svg>Publish a link</a>
+  </div>
+  <div class="tc-tree">
+    <a class="tc-tree__row" href="/app/files/sftpgo/documents"><svg><use href="#i-file"/></svg>Documents</a>
+    <a class="is-on tc-tree__row tc-tree__row--padl22" href="/app/files/sftpgo/documents/carrel"><svg><use href="#i-file"/></svg>carrel</a>
+  </div>
+  </div>
+</div>
+<figcaption>Строка списка, пункт меню и узел дерева, ведущие на адрес, — ссылки, и выглядят как прежде. Строка с кнопкой внутри (отметка задачи) ссылкой не бывает: ссылка на заголовке.</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="components-40">
+  <div class="frame-label"><span>Изображения</span><span class="frag">компонент</span><i>аватар, миниатюра, фото поля, код устройства, кадрирование</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--top tc-root--wrap tc-root--pad18-20">
+  <span class="tc-avatar is-photo"><img class="tc-avatar__img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%238C7B6A'/%3E%3Ccircle cx='20' cy='16' r='7' fill='%23E8DFCB'/%3E%3Cpath d='M6 40c2-9 8-13 14-13s12 4 14 13z' fill='%23E8DFCB'/%3E%3C/svg%3E" alt=""></span>
+  <span class="tc-avatar is-photo tc-avatar--sq44-t15-r4"><img class="tc-avatar__img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%238C7B6A'/%3E%3Ccircle cx='20' cy='16' r='7' fill='%23E8DFCB'/%3E%3Cpath d='M6 40c2-9 8-13 14-13s12 4 14 13z' fill='%23E8DFCB'/%3E%3C/svg%3E" alt=""></span>
+  <div class="tc-grid tc-grid--flush-fill-pad8"><div class="tc-tile"><div class="tc-thumb"><img class="tc-thumb__img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 30'%3E%3Crect width='40' height='30' fill='%239FB4C7'/%3E%3Crect x='6' y='10' width='28' height='20' fill='%23C9B79C'/%3E%3Crect x='10' y='14' width='6' height='6' fill='%23556B7D'/%3E%3Crect x='24' y='14' width='6' height='6' fill='%23556B7D'/%3E%3C/svg%3E" alt="фасад.jpg"></div><span class="tc-tile__name">фасад.jpg</span><span class="tc-tile__meta">1.8 MB</span></div></div>
+  <div class="tc-field tc-field--fixauto"><span class="tc-field__label">Photo</span><div class="tc-field__photo-row"><span class="tc-avatar--photo"><img class="tc-avatar__img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%238C7B6A'/%3E%3Ccircle cx='20' cy='16' r='7' fill='%23E8DFCB'/%3E%3Cpath d='M6 40c2-9 8-13 14-13s12 4 14 13z' fill='%23E8DFCB'/%3E%3C/svg%3E" alt=""></span><div class="tc-stack tc-stack--gap-6 tc-field__photo-side"><button class="tc-btn" type="button">Replace</button></div></div></div>
+  <div class="tc-card">
+    <div class="tc-rubric">nextcloud · mix</div>
+    <div class="tc-card__split"><div data-tc-colour="#FFFDF7" class="tc-card__qr"><img class="tc-card__qr-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-1 -1 23 23'%3E%3Crect x='-1' y='-1' width='23' height='23' fill='%23FFFDF7'/%3E%3Crect x='0' y='0' width='1' height='1'/%3E%3Crect x='1' y='0' width='1' height='1'/%3E%3Crect x='2' y='0' width='1' height='1'/%3E%3Crect x='3' y='0' width='1' height='1'/%3E%3Crect x='4' y='0' width='1' height='1'/%3E%3Crect x='5' y='0' width='1' height='1'/%3E%3Crect x='6' y='0' width='1' height='1'/%3E%3Crect x='9' y='0' width='1' height='1'/%3E%3Crect x='12' y='0' width='1' height='1'/%3E%3Crect x='14' y='0' width='1' height='1'/%3E%3Crect x='15' y='0' width='1' height='1'/%3E%3Crect x='16' y='0' width='1' height='1'/%3E%3Crect x='17' y='0' width='1' height='1'/%3E%3Crect x='18' y='0' width='1' height='1'/%3E%3Crect x='19' y='0' width='1' height='1'/%3E%3Crect x='20' y='0' width='1' height='1'/%3E%3Crect x='0' y='1' width='1' height='1'/%3E%3Crect x='1' y='1' width='1' height='1'/%3E%3Crect x='2' y='1' width='1' height='1'/%3E%3Crect x='3' y='1' width='1' height='1'/%3E%3Crect x='4' y='1' width='1' height='1'/%3E%3Crect x='5' y='1' width='1' height='1'/%3E%3Crect x='6' y='1' width='1' height='1'/%3E%3Crect x='7' y='1' width='1' height='1'/%3E%3Crect x='10' y='1' width='1' height='1'/%3E%3Crect x='13' y='1' width='1' height='1'/%3E%3Crect x='14' y='1' width='1' height='1'/%3E%3Crect x='15' y='1' width='1' height='1'/%3E%3Crect x='16' y='1' width='1' height='1'/%3E%3Crect x='17' y='1' width='1' height='1'/%3E%3Crect x='18' y='1' width='1' height='1'/%3E%3Crect x='19' y='1' width='1' height='1'/%3E%3Crect x='20' y='1' width='1' height='1'/%3E%3Crect x='0' y='2' width='1' height='1'/%3E%3Crect x='1' y='2' width='1' height='1'/%3E%3Crect x='2' y='2' width='1' height='1'/%3E%3Crect x='3' y='2' width='1' height='1'/%3E%3Crect x='4' y='2' width='1' height='1'/%3E%3Crect x='5' y='2' width='1' height='1'/%3E%3Crect x='6' y='2' width='1' height='1'/%3E%3Crect x='14' y='2' width='1' height='1'/%3E%3Crect x='15' y='2' width='1' height='1'/%3E%3Crect x='16' y='2' width='1' height='1'/%3E%3Crect x='17' y='2' width='1' height='1'/%3E%3Crect x='18' y='2' width='1' height='1'/%3E%3Crect x='19' y='2' width='1' height='1'/%3E%3Crect x='20' y='2' width='1' height='1'/%3E%3Crect x='0' y='3' width='1' height='1'/%3E%3Crect x='1' y='3' width='1' height='1'/%3E%3Crect x='2' y='3' width='1' height='1'/%3E%3Crect x='3' y='3' width='1' height='1'/%3E%3Crect x='4' y='3' width='1' height='1'/%3E%3Crect x='5' y='3' width='1' height='1'/%3E%3Crect x='6' y='3' width='1' height='1'/%3E%3Crect x='9' y='3' width='1' height='1'/%3E%3Crect x='12' y='3' width='1' height='1'/%3E%3Crect x='14' y='3' width='1' height='1'/%3E%3Crect x='15' y='3' width='1' height='1'/%3E%3Crect x='16' y='3' width='1' height='1'/%3E%3Crect x='17' y='3' width='1' height='1'/%3E%3Crect x='18' y='3' width='1' height='1'/%3E%3Crect x='19' y='3' width='1' height='1'/%3E%3Crect x='20' y='3' width='1' height='1'/%3E%3Crect x='0' y='4' width='1' height='1'/%3E%3Crect x='1' y='4' width='1' height='1'/%3E%3Crect x='2' y='4' width='1' height='1'/%3E%3Crect x='3' y='4' width='1' height='1'/%3E%3Crect x='4' y='4' width='1' height='1'/%3E%3Crect x='5' y='4' width='1' height='1'/%3E%3Crect x='6' y='4' width='1' height='1'/%3E%3Crect x='7' y='4' width='1' height='1'/%3E%3Crect x='10' y='4' width='1' height='1'/%3E%3Crect x='13' y='4' width='1' height='1'/%3E%3Crect x='14' y='4' width='1' height='1'/%3E%3Crect x='15' y='4' width='1' height='1'/%3E%3Crect x='16' y='4' width='1' height='1'/%3E%3Crect x='17' y='4' width='1' height='1'/%3E%3Crect x='18' y='4' width='1' height='1'/%3E%3Crect x='19' y='4' width='1' height='1'/%3E%3Crect x='20' y='4' width='1' height='1'/%3E%3Crect x='0' y='5' width='1' height='1'/%3E%3Crect x='1' y='5' width='1' height='1'/%3E%3Crect x='2' y='5' width='1' height='1'/%3E%3Crect x='3' y='5' width='1' height='1'/%3E%3Crect x='4' y='5' width='1' height='1'/%3E%3Crect x='5' y='5' width='1' height='1'/%3E%3Crect x='6' y='5' width='1' height='1'/%3E%3Crect x='14' y='5' width='1' height='1'/%3E%3Crect x='15' y='5' width='1' height='1'/%3E%3Crect x='16' y='5' width='1' height='1'/%3E%3Crect x='17' y='5' width='1' height='1'/%3E%3Crect x='18' y='5' width='1' height='1'/%3E%3Crect x='19' y='5' width='1' height='1'/%3E%3Crect x='20' y='5' width='1' height='1'/%3E%3Crect x='0' y='6' width='1' height='1'/%3E%3Crect x='1' y='6' width='1' height='1'/%3E%3Crect x='2' y='6' width='1' height='1'/%3E%3Crect x='3' y='6' width='1' height='1'/%3E%3Crect x='4' y='6' width='1' height='1'/%3E%3Crect x='5' y='6' width='1' height='1'/%3E%3Crect x='6' y='6' width='1' height='1'/%3E%3Crect x='9' y='6' width='1' height='1'/%3E%3Crect x='12' y='6' width='1' height='1'/%3E%3Crect x='14' y='6' width='1' height='1'/%3E%3Crect x='15' y='6' width='1' height='1'/%3E%3Crect x='16' y='6' width='1' height='1'/%3E%3Crect x='17' y='6' width='1' height='1'/%3E%3Crect x='18' y='6' width='1' height='1'/%3E%3Crect x='19' y='6' width='1' height='1'/%3E%3Crect x='20' y='6' width='1' height='1'/%3E%3Crect x='1' y='7' width='1' height='1'/%3E%3Crect x='4' y='7' width='1' height='1'/%3E%3Crect x='7' y='7' width='1' height='1'/%3E%3Crect x='10' y='7' width='1' height='1'/%3E%3Crect x='13' y='7' width='1' height='1'/%3E%3Crect x='16' y='7' width='1' height='1'/%3E%3Crect x='19' y='7' width='1' height='1'/%3E%3Crect x='0' y='9' width='1' height='1'/%3E%3Crect x='3' y='9' width='1' height='1'/%3E%3Crect x='6' y='9' width='1' height='1'/%3E%3Crect x='9' y='9' width='1' height='1'/%3E%3Crect x='12' y='9' width='1' height='1'/%3E%3Crect x='15' y='9' width='1' height='1'/%3E%3Crect x='18' y='9' width='1' height='1'/%3E%3Crect x='1' y='10' width='1' height='1'/%3E%3Crect x='4' y='10' width='1' height='1'/%3E%3Crect x='7' y='10' width='1' height='1'/%3E%3Crect x='10' y='10' width='1' height='1'/%3E%3Crect x='13' y='10' width='1' height='1'/%3E%3Crect x='16' y='10' width='1' height='1'/%3E%3Crect x='19' y='10' width='1' height='1'/%3E%3Crect x='0' y='12' width='1' height='1'/%3E%3Crect x='3' y='12' width='1' height='1'/%3E%3Crect x='6' y='12' width='1' height='1'/%3E%3Crect x='9' y='12' width='1' height='1'/%3E%3Crect x='12' y='12' width='1' height='1'/%3E%3Crect x='15' y='12' width='1' height='1'/%3E%3Crect x='18' y='12' width='1' height='1'/%3E%3Crect x='1' y='13' width='1' height='1'/%3E%3Crect x='4' y='13' width='1' height='1'/%3E%3Crect x='7' y='13' width='1' height='1'/%3E%3Crect x='10' y='13' width='1' height='1'/%3E%3Crect x='13' y='13' width='1' height='1'/%3E%3Crect x='16' y='13' width='1' height='1'/%3E%3Crect x='19' y='13' width='1' height='1'/%3E%3Crect x='0' y='14' width='1' height='1'/%3E%3Crect x='1' y='14' width='1' height='1'/%3E%3Crect x='2' y='14' width='1' height='1'/%3E%3Crect x='3' y='14' width='1' height='1'/%3E%3Crect x='4' y='14' width='1' height='1'/%3E%3Crect x='5' y='14' width='1' height='1'/%3E%3Crect x='6' y='14' width='1' height='1'/%3E%3Crect x='0' y='15' width='1' height='1'/%3E%3Crect x='1' y='15' width='1' height='1'/%3E%3Crect x='2' y='15' width='1' height='1'/%3E%3Crect x='3' y='15' width='1' height='1'/%3E%3Crect x='4' y='15' width='1' height='1'/%3E%3Crect x='5' y='15' width='1' height='1'/%3E%3Crect x='6' y='15' width='1' height='1'/%3E%3Crect x='9' y='15' width='1' height='1'/%3E%3Crect x='12' y='15' width='1' height='1'/%3E%3Crect x='15' y='15' width='1' height='1'/%3E%3Crect x='18' y='15' width='1' height='1'/%3E%3Crect x='0' y='16' width='1' height='1'/%3E%3Crect x='1' y='16' width='1' height='1'/%3E%3Crect x='2' y='16' width='1' height='1'/%3E%3Crect x='3' y='16' width='1' height='1'/%3E%3Crect x='4' y='16' width='1' height='1'/%3E%3Crect x='5' y='16' width='1' height='1'/%3E%3Crect x='6' y='16' width='1' height='1'/%3E%3Crect x='7' y='16' width='1' height='1'/%3E%3Crect x='10' y='16' width='1' height='1'/%3E%3Crect x='13' y='16' width='1' height='1'/%3E%3Crect x='16' y='16' width='1' height='1'/%3E%3Crect x='19' y='16' width='1' height='1'/%3E%3Crect x='0' y='17' width='1' height='1'/%3E%3Crect x='1' y='17' width='1' height='1'/%3E%3Crect x='2' y='17' width='1' height='1'/%3E%3Crect x='3' y='17' width='1' height='1'/%3E%3Crect x='4' y='17' width='1' height='1'/%3E%3Crect x='5' y='17' width='1' height='1'/%3E%3Crect x='6' y='17' width='1' height='1'/%3E%3Crect x='0' y='18' width='1' height='1'/%3E%3Crect x='1' y='18' width='1' height='1'/%3E%3Crect x='2' y='18' width='1' height='1'/%3E%3Crect x='3' y='18' width='1' height='1'/%3E%3Crect x='4' y='18' width='1' height='1'/%3E%3Crect x='5' y='18' width='1' height='1'/%3E%3Crect x='6' y='18' width='1' height='1'/%3E%3Crect x='9' y='18' width='1' height='1'/%3E%3Crect x='12' y='18' width='1' height='1'/%3E%3Crect x='15' y='18' width='1' height='1'/%3E%3Crect x='18' y='18' width='1' height='1'/%3E%3Crect x='0' y='19' width='1' height='1'/%3E%3Crect x='1' y='19' width='1' height='1'/%3E%3Crect x='2' y='19' width='1' height='1'/%3E%3Crect x='3' y='19' width='1' height='1'/%3E%3Crect x='4' y='19' width='1' height='1'/%3E%3Crect x='5' y='19' width='1' height='1'/%3E%3Crect x='6' y='19' width='1' height='1'/%3E%3Crect x='7' y='19' width='1' height='1'/%3E%3Crect x='10' y='19' width='1' height='1'/%3E%3Crect x='13' y='19' width='1' height='1'/%3E%3Crect x='16' y='19' width='1' height='1'/%3E%3Crect x='19' y='19' width='1' height='1'/%3E%3Crect x='0' y='20' width='1' height='1'/%3E%3Crect x='1' y='20' width='1' height='1'/%3E%3Crect x='2' y='20' width='1' height='1'/%3E%3Crect x='3' y='20' width='1' height='1'/%3E%3Crect x='4' y='20' width='1' height='1'/%3E%3Crect x='5' y='20' width='1' height='1'/%3E%3Crect x='6' y='20' width='1' height='1'/%3E%3C/svg%3E" width="104" height="104" alt="QR"></div><div class="tc-stack tc-stack--gap-8 tc-card__qr-side"><span class="tc-dim tc-dim--t11-5 tc-dim--wrap">Address and login are in the code.</span></div></div>
+  </div>
+  <div class="tc-dialog tc-dialog--max520">
+    <div class="tc-dialog__split"><div data-tc-colour="#8C7B6A" class="tc-dialog__photo"><img class="tc-dialog__photo-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%238C7B6A'/%3E%3Ccircle cx='20' cy='16' r='7' fill='%23E8DFCB'/%3E%3Cpath d='M6 40c2-9 8-13 14-13s12 4 14 13z' fill='%23E8DFCB'/%3E%3C/svg%3E" alt=""><div class="tc-dialog__photo-frame"></div><div class="tc-dialog__photo-rule"></div><div class="tc-dialog__photo-rule-v"></div></div><div class="tc-stack tc-stack--gap-10 tc-dialog__side"><span class="tc-dim--muted tc-dim--t12-5">Drag the photo to choose the frame. The box is what other clients will see.</span></div></div>
+  </div>
+  </div>
+</div>
+<figcaption><b>Картинка стоит на месте, которое кадры рисуют цветом</b>, и заполняет его, обрезаясь по краям (object-fit: cover): аватар строки и карточки, миниатюра файла, фотография в поле контакта, кадрирование, код устройства. Пока картинки нет или она не пришла — видно место, как на всех остальных кадрах. Аватар — без подписи для чтеца: имя стоит рядом; у миниатюры — имя файла; код — «QR».</figcaption>
+</figure>
+
+<figure>
+<div class="frame" data-frame="components-41">
+  <div class="frame-label"><span>Плотные строки и лист по адресу</span><span class="frag">компонент</span><i>tc-list.is-compact, .tc-scrim:target</i></div>
+  <div class="tc-root tc-root--on-surface tc-root--top tc-root--pad18-20">
+  <div class="tc-list is-compact">
+    <div class="tc-row tc-row--excerpt"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title">Заметка со встречи 10.08</span><span class="tc-row__excerpt">Договорились заморозить ветку в среду…</span><span class="tc-row__cell tc-row__tags"><span class="tc-tag">встречи</span></span><span class="tc-mono tc-row__date">10 Aug</span><span class="tc-row__cell tc-row__source">nextcloud · Записи</span></div>
+    <div class="tc-row tc-row--excerpt"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title">Что почитать про CRDT</span><span class="tc-row__excerpt">Договорились заморозить ветку в среду…</span><span class="tc-row__cell tc-row__tags"><span class="tc-tag">встречи</span></span><span class="tc-mono tc-row__date">10 Aug</span><span class="tc-row__cell tc-row__source">nextcloud · Записи</span></div>
+  </div>
+  <div class="tc-bar"><a class="tc-btn" href="#sources-demo"><svg viewBox="0 0 24 24"><use href="#i-cal"/></svg>Sources</a></div>
+  <div class="tc-scrim" id="sources-demo" hidden>
+      <div class="tc-sheet">
+        <div class="tc-sheet__head"><b class="tc-sheet__title">Sources</b><a class="tc-btn tc-close" href="#" title="Close" aria-label="Close"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></a></div>
+        <div class="tc-sheet__body"><span class="tc-dim tc-dim--t11-5 tc-dim--wrap">The rail’s sources, on a narrow screen.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<figcaption><b>Плотные строки</b> — отметка «Compact rows» у списка: строка 30 px вместо 38, остальное как есть; на телефоне плотность молчит — строка под палец. <b>Лист, который открывается по адресу:</b> кнопка — ссылка на <code>#id</code> листа, крестик — ссылка «#», и без сценариев лист открывается и закрывается адресом. Так на узком экране открываются источники рейла (U-8). Со сценарием то же нажатие открывает лист на месте, как раньше.</figcaption>
+</figure>
+
+
 <p><code>.m-close</code> — крестик закрытия: та же кнопка, что в шапке листа и в панели, стоит в ряду с другими действиями. <code>.m-danger-zone</code> — подвал карточки с разрушительным действием: отдельная полоса с волосяной линией сверху, тревожный текст рядом с кнопкой.</p>
 
 <p><b>Счёт разобранного — <code>.m-stats</code>, одна ячейка — <code>.m-stat</code>.</b> Строка над предпросмотром на всех трёх мастерах. Число полужирным; неудачи — <code>is-error</code>, тот же цвет, что у отказавшей строки предпросмотра.</p>
@@ -7937,7 +8071,7 @@ Read  2 min ago</div>
           </div>
         </div>
       </div>
-      <div class="tc-scrim tc-scrim--padt38">
+      <div class="tc-scrim tc-scrim--padt38" data-tc-drop="post-import">
         <div class="tc-empty tc-empty--drop">
           <svg width="20" height="20" viewBox="0 0 24 24" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" class="tc-ico--accent"><use href="#i-up"/></svg>
           <b class="tc-empty__lead">Drop to import</b>
