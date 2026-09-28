@@ -1,13 +1,18 @@
 // Package screens is where the screens of the Carrel client go: one screen
 // per address of C-5, drawn by the frame of docs/visual/carrel-ui-mockups.html
-// (U-6). It is empty until Typecase is connected by a release tag (U-5.1).
+// (U-6). Typecase is connected by a replace onto the neighbouring clone
+// (U-5.1, docs/plan/client.md); the screens built are listed in All
+// (screens.go), each with its route and its frame.
 //
 // The rules a screen is written by, and what checks them (U-15.2):
 //
 //   - U-5.1. A screen starts with the draft cmd/frame2go of Typecase prints
 //     for its frame, committed as printed, alone; the second commit puts the
 //     view model's data where the frame's data was. The difference between
-//     the two is all the author's work.
+//     the two is all the author's work. The guard of kinship prints the draft
+//     again and holds the screen's skeleton against it; the frame comparison
+//     holds the screen, drawn on every fixture of its route, against its
+//     frame (carrel.dev/carrel/client/guard, screens_test.go).
 //   - U-5.2. A screen is calls of Typecase widgets with the view model's data
 //     in their fields, and nothing else: no markup, no style, no script, no
 //     name of the library's space written by hand. The guards of

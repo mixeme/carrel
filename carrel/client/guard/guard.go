@@ -1,7 +1,10 @@
 // Package guard holds the guards of U-15.2 that read the client's sources:
 // what the packages of screens import, what the string constants of the
 // module hold, which files lie in it, and whether the marks in code and the
-// rows of the registries of U-5.5 and U-5.7 answer each other.
+// rows of the registries of U-5.5 and U-5.7 answer each other. Beside them:
+// the kinship of a screen with its draft (kin.go) and the addresses of C-5
+// built or waiting (addresses.go); the frame comparison, which needs
+// Typecase's package shape, is a test (screens_test.go).
 //
 // They are tripwires, not the wall. The wall is the compiler (U-15.2, 1):
 // the slots of Typecase's widgets are closed, and markup of the client's own
@@ -62,8 +65,9 @@ const (
 // (U-15.2, 2), with why:
 //
 //   - carrel.dev/carrel/server/view — what a screen shows;
-//   - carrel.dev/typecase/widget — how it is shown; allowed now, imported
-//     when Typecase is connected by a release tag (U-5.1);
+//   - carrel.dev/typecase/widget — how it is shown (U-5.1); Typecase's
+//     other packages — shape, cmd/frame2go — are for the checks, not for a
+//     screen;
 //   - strconv — a number of the view model into a widget's text;
 //   - slices — ordering and choosing among the view model's rows.
 //
@@ -287,9 +291,10 @@ var Registries = []Registry{
 	{Section: "### U-5.7 ", Mark: specificMark, Columns: []string{"#", "Экран", "Что", "Почему не в Typecase", "Решение"}},
 }
 
-// row is a row of a registry: its number and its line in the spec.
+// row is a row of a registry: its number, its line in the spec and its cells.
 type row struct {
 	num, line int
+	cells     []string
 }
 
 // readRegistry finds the table of reg in its section of spec — the table
@@ -353,7 +358,7 @@ func readRegistry(spec []byte, specName string, reg Registry) ([]row, []Finding)
 			if decision == "" || decision == "—" || decision == "-" {
 				out = append(out, Finding{Path: specName, Line: j + 1, Rule: RuleRegistry, What: at + ": no owner's decision"})
 			}
-			rows = append(rows, row{num: n, line: j + 1})
+			rows = append(rows, row{num: n, line: j + 1, cells: cells})
 		}
 		return rows, out
 	}

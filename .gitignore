@@ -7,3 +7,7 @@ __pycache__/
 
 # Worktrees of Claude Code sessions (git worktree add under .claude/)
 /.claude/worktrees/
+
+# Черновики frame2go, которые проверка родства (carrel/client/guard) печатает
+# и собирает на время прогона; остаются только от прерванного прогона.
+/carrel/client/guard/testdata/draft-*/

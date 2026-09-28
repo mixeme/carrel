@@ -12,7 +12,7 @@ import (
 // The client module, its screens and the client spec, from carrel/client/guard.
 const (
 	module     = ".."
-	screens    = "../screens"
+	screensDir = "../screens"
 	clientSpec = "../../../docs/spec/carrel-client.md"
 )
 
@@ -79,7 +79,7 @@ func bite(t *testing.T, fs []guard.Finding, want []string) {
 // --- The real module: every guard green. ---
 
 func TestScreensImportOnlyWhatIsAllowed(t *testing.T) {
-	green(t, "imports", must(t)(guard.Imports(screens)))
+	green(t, "imports", must(t)(guard.Imports(screensDir)))
 }
 
 func TestNoMarkupInStrings(t *testing.T) {
