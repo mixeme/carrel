@@ -12,7 +12,7 @@
     ],
     "compact": false,
     "filter": "",
-    "loaded": 21,
+    "loaded": 22,
     "range": null,
     "segments": [
       {
@@ -39,7 +39,7 @@
       }
     ],
     "selected": 0,
-    "total": 21
+    "total": 22
   },
   "details": null,
   "notices": [],
@@ -258,6 +258,13 @@
       "whom": "mix"
     },
     {
+      "detail": "new accounts covered",
+      "what": "escrow.enable",
+      "when": "10 August 2026, 17:04",
+      "who": "mix",
+      "whom": ""
+    },
+    {
       "detail": "name \"carrel.example\", idle 2h, session 7d, invite 24h, people's mail false, attachment 0 MB, letter 0 MB, 0 recipients, 0 a day (0 = default)",
       "what": "settings.instance",
       "when": "10 August 2026, 17:04",
@@ -406,6 +413,11 @@
                 "label": "duplicates.link",
                 "selected": false,
                 "value": "duplicates.link"
+              },
+              {
+                "label": "escrow.enable",
+                "selected": false,
+                "value": "escrow.enable"
               },
               {
                 "label": "feed.edit",

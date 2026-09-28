@@ -258,6 +258,9 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	mailSent := token != "" && s.sendConfirmMail(r, r.FormValue("login"), r.FormValue("email"), token)
+	if mailSent {
+		_ = s.users.ConfirmMailed(token)
+	}
 	page := view.RegisterPage{
 		Plain: view.Plain{Title: text("Create account")},
 	}

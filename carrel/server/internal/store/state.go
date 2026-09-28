@@ -222,6 +222,9 @@ type SecretToken struct {
 	CreatedAt time.Time `json:"createdAt"`
 	ExpiresAt time.Time `json:"expiresAt"`
 	Used      bool      `json:"used,omitempty"`
+	// MailedAt is when the relay took the letter carrying this link; nil
+	// while no letter went. Only an email-confirmation token has it.
+	MailedAt *time.Time `json:"mailedAt,omitempty"`
 }
 
 // User is one account on the instance. ConnectionCount is stored outside the
@@ -235,6 +238,10 @@ type User struct {
 
 	Email          string `json:"email,omitempty"`
 	EmailConfirmed bool   `json:"emailConfirmed,omitempty"`
+	// EmailConfirmedAt is when Email was proven (the link opened, an
+	// invitation by letter completed). Nil on an address confirmed before
+	// v0.2.60: the day was not written then.
+	EmailConfirmedAt *time.Time `json:"emailConfirmedAt,omitempty"`
 	// PendingEmail is a new address waiting for its link; Email stays in use
 	// until then.
 	PendingEmail string `json:"pendingEmail,omitempty"`

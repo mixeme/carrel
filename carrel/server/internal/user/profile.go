@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"carrel.dev/carrel/server/internal/conf"
 	cmail "carrel.dev/carrel/server/internal/mail"
@@ -98,4 +99,48 @@ func (s *Service) EmailToConfirm(userID string) string {
 		return u.Email
 	}
 	return ""
+}
+
+// ConfirmMailed records that the letter carrying this confirmation link went:
+// the relay took it. A link the relay refused, or one never sent, has no
+// such record, and the account page does not say a letter went (account-9).
+func (s *Service) ConfirmMailed(token string) error {
+	hash, err := hashToken(token)
+	if err != nil {
+		return err
+	}
+	now := s.now()
+	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		for i := range st.Tokens {
+			t := &st.Tokens[i]
+			if t.Kind == tokenEmailConfirm && !t.Used && now.Before(t.ExpiresAt) && verifyHash(t.Hash, hash) {
+				t.MailedAt = &now
+				return nil, nil
+			}
+		}
+		return nil, ErrNotFound
+	})
+}
+
+// ConfirmationSent is the letter with a live confirmation link for userID:
+// where it went and when. ok is false once the link is used or has burnt
+// (conf.EmailConfirmTTL), and when no letter went at all.
+func (s *Service) ConfirmationSent(userID string) (to string, at time.Time, ok bool) {
+	now := s.now()
+	snap := s.st.Snapshot()
+	u := snap.UserByID(userID)
+	if u == nil {
+		return "", time.Time{}, false
+	}
+	for _, t := range snap.Tokens {
+		if t.Kind != tokenEmailConfirm || t.UserID != userID || t.Used || !now.Before(t.ExpiresAt) || t.MailedAt == nil {
+			continue
+		}
+		to = t.Email
+		if to == "" {
+			to = u.Email
+		}
+		return to, *t.MailedAt, true
+	}
+	return "", time.Time{}, false
 }

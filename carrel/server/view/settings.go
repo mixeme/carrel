@@ -40,13 +40,28 @@ type FieldError struct {
 
 type AccountPage struct {
 	Shell
-	Profile    Form         `json:"profile"` // логин, отображаемое имя, адрес и его подтверждение
-	Mail       Form         `json:"mail"`    // обратный адрес и что уйдёт в письме
-	Escrow     EscrowStatus `json:"escrow"`
-	Sessions   []SessionRow `json:"sessions"`
-	Actions    []Action     `json:"actions"`
-	Danger     []Action     `json:"danger"`
-	DangerNote Text         `json:"dangerNote"` // строка у Delete account: что удаляется и что остаётся
+	Subtitle     Text         `json:"subtitle"`     // под заголовком: «mix · created 11 February 2026» (account-1)
+	Profile      Form         `json:"profile"`      // рубрики Name и Email: Display name, Address с Change
+	Email        EmailStatus  `json:"email"`        // под полем Address: значок или сообщение с кнопкой
+	PasswordNote Text         `json:"passwordNote"` // строка у Change password: что перевязывается
+	Escrow       EscrowStatus `json:"escrow"`
+	Sessions     []SessionRow `json:"sessions"`
+	Actions      []Action     `json:"actions"`
+	Danger       []Action     `json:"danger"`
+	DangerNote   Text         `json:"dangerNote"` // строка у Delete account: что удаляется и что остаётся
+}
+
+// EmailStatus — состояние адреса под полем Address (account-8, s-mail-9,
+// account-9, account-1). Badge — у подтверждённого и у ожидающей смены,
+// Message — у неподтверждённого: последствие и одна кнопка в Actions.
+type EmailStatus struct {
+	State       EmailState `json:"state"`       // C-8
+	Badge       *Badge     `json:"badge"`       // «confirmed 14 February», «pending: new@example.org»; nil — значка нет
+	ConfirmedAt When       `json:"confirmedAt"` // день подтверждения; пусто — подтверждён до v0.2.60, дня нет
+	Pending     Text       `json:"pending"`     // новый адрес, ждущий ссылки
+	SentTo      Text       `json:"sentTo"`      // куда ушло письмо со ссылкой, пока ссылка жива
+	SentAt      When       `json:"sentAt"`      // когда оно ушло: «11:42»
+	Message     *Notice    `json:"message"`     // последствие неподтверждённого адреса; nil — его нет
 }
 type SessionRow struct {
 	Agent    Text   `json:"agent"`
@@ -57,19 +72,31 @@ type SessionRow struct {
 	End      Action `json:"end"`
 }
 type EscrowStatus struct {
-	Active   bool     `json:"active"`
-	Covered  bool     `json:"covered"`
-	By       Text     `json:"by"`
-	LastUsed When     `json:"lastUsed"`
-	Note     Text     `json:"note"` // честная формулировка последствия, не «резервная копия ключей»
-	Actions  []Action `json:"actions"`
+	Active       bool     `json:"active"`
+	Covered      bool     `json:"covered"`
+	By           Text     `json:"by"`
+	Badge        *Badge   `json:"badge"`        // у рубрики: «deposited 2026-03-02» (account-7); nil — копии нет
+	Deposited    When     `json:"deposited"`    // «2026-03-02»; пусто — копии нет
+	LastRecovery When     `json:"lastRecovery"` // «never» или день последнего восстановления
+	Note         Text     `json:"note"`         // честная формулировка последствия, не «резервная копия ключей»
+	ActionNote   Text     `json:"actionNote"`   // строка у кнопки отзыва: чем он кончится (account-4)
+	Actions      []Action `json:"actions"`
 }
 
 type EscrowPage struct {
 	Shell
-	Status  EscrowStatus `json:"status"`
-	Confirm *UnlockSheet `json:"confirm"` // лист подтверждения перед депонированием
-	History []AuditRow   `json:"history"`
+	Subtitle Text         `json:"subtitle"` // «A copy of your key on this server» (account-4)
+	Status   EscrowStatus `json:"status"`
+	Confirm  *UnlockSheet `json:"confirm"` // лист подтверждения перед депонированием
+	History  []AuditRow   `json:"history"`
+}
+
+// EscrowWithdrawSheet — лист перед отзывом депонированного ключа: копия
+// уничтожается, и восстановить учётную запись больше некому.
+type EscrowWithdrawSheet struct {
+	Warning Text     `json:"warning"`
+	Form    Form     `json:"form"`    // скрытое action=withdraw и CSRF
+	Actions []Action `json:"actions"` // Withdraw my deposited key · Cancel
 }
 
 type PasswordPage struct {

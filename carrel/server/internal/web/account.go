@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/mail"
+	"net/url"
 	"strings"
 	"time"
 
@@ -99,31 +100,21 @@ func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, "/login")
 		return
 	case "confirm":
-		to := s.users.EmailToConfirm(id)
-		if to == "" {
-			break
+		// Send confirmation, Send again (s-mail-9, account-9): a fresh link
+		// for the address waiting. That it went is said by the Email block;
+		// only a letter that did not go is a notice.
+		if to := s.users.EmailToConfirm(id); to != "" {
+			flash.notice, _ = s.confirmationSent(r, sess, to)
 		}
-		flash.notice, _ = s.confirmationSent(r, sess, to)
+	case "email":
+		// Change beside the address: the address alone, the name untouched.
+		s.changeAddress(r, sess, &flash)
 	default:
 		if err := s.users.SetDisplayName(id, r.FormValue("name")); err != nil {
 			flash.nameErr = err.Error()
 			break
 		}
-		email := strings.TrimSpace(r.FormValue("email"))
-		snap := s.store.Snapshot()
-		u := snap.UserByID(id)
-		if u == nil || email == "" || strings.EqualFold(email, u.Email) && (u.EmailConfirmed || u.PendingEmail == "") ||
-			strings.EqualFold(email, u.PendingEmail) {
-			break
-		}
-		notice, err := s.confirmationSent(r, sess, email)
-		switch {
-		case errors.Is(err, user.ErrBadAddress):
-			flash.emailErr = err.Error()
-		case err != nil:
-			flash.emailErr = string(formError(err))
-		}
-		flash.notice = notice
+		s.changeAddress(r, sess, &flash)
 	}
 	if flash.nameErr != "" || flash.emailErr != "" || flash.notice != nil {
 		s.writePage(w, r, http.StatusOK, s.accountPage(sess, flash))
@@ -132,16 +123,37 @@ func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/app/settings/account")
 }
 
-// confirmationSent issues a fresh link for to and mails it; the notice says
-// whether it went.
+// changeAddress asks to confirm the address typed in the form, unless it is
+// the one in use and confirmed or the one already waiting.
+func (s *Server) changeAddress(r *http.Request, sess *session.Session, flash *accountFlash) {
+	email := strings.TrimSpace(r.FormValue("email"))
+	snap := s.store.Snapshot()
+	u := snap.UserByID(sess.AccountID())
+	if u == nil || email == "" || strings.EqualFold(email, u.Email) && (u.EmailConfirmed || u.PendingEmail == "") ||
+		strings.EqualFold(email, u.PendingEmail) {
+		return
+	}
+	notice, err := s.confirmationSent(r, sess, email)
+	switch {
+	case errors.Is(err, user.ErrBadAddress):
+		flash.emailErr = err.Error()
+	case err != nil:
+		flash.emailErr = string(formError(err))
+	}
+	flash.notice = notice
+}
+
+// confirmationSent issues a fresh link for to and mails it. A letter the
+// relay took is written down with its time (account-9) and needs no notice:
+// the Email block says where it went. One that did not go is a notice.
 func (s *Server) confirmationSent(r *http.Request, sess *session.Session, to string) (*view.Notice, error) {
 	token, err := s.users.RequestEmail(sess.AccountID(), to)
 	if err != nil || token == "" {
 		return nil, err
 	}
 	if s.sendConfirmMail(r, sess.Login(), to, token) {
-		return &view.Notice{Role: view.NoticeInfo, Title: text("A confirmation link went to " + to),
-			Body: "The address is used once you open the link. Until then the one before stays."}, nil
+		_ = s.users.ConfirmMailed(token)
+		return nil, nil
 	}
 	return &view.Notice{Role: view.NoticeAlert, Title: "The confirmation letter could not be sent",
 		Body: "Mail is not available on this instance now. Ask an administrator; the address waits unconfirmed."}, nil
@@ -159,54 +171,38 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 		return page
 	}
 	tf := s.timeFor(sess)
-	var status view.Text
-	switch {
-	case u.PendingEmail != "":
-		status = text("pending: " + u.PendingEmail)
-	case u.Email != "" && u.EmailConfirmed:
-		status = "confirmed"
-	case u.Email != "":
-		status = "not confirmed"
-	}
-	emailHint := view.Text("Used for service notices, and as Reply-To on letters you send.")
-	if status != "" {
-		emailHint = status + ". " + emailHint
+	// account-1: the login and the day stand under the title, not as a row.
+	page.Subtitle = text(u.Login + " · created " + tf.date(u.CreatedAt))
+	// The address in use, or — invited by a link, nothing in use yet — the
+	// one being confirmed: the field is never empty while an address waits.
+	address := u.Email
+	if address == "" {
+		address = u.PendingEmail
 	}
 	page.Profile = view.Form{
 		Action: s.route("/app/settings/account"), Method: "POST",
-		Sets: []view.FieldSet{{Legend: text("Account " + u.Login + " · created " + tf.date(u.CreatedAt)), Rows: []view.FormRow{
-			csrfField(sess),
-			{Name: "login", Label: "Login", Kind: view.InputText, Value: text(u.Login), ReadOnly: true},
-			{Name: "name", Label: "Display name", Kind: view.InputText, Value: text(u.DisplayName), Error: text(flash.nameErr),
-				Hint: "Shown as the sender and used as the signature in letters you send. Blank means your login."},
-			{Name: "email", Label: "Email", Kind: view.InputEmail, Value: text(u.Email), Error: text(flash.emailErr), Hint: emailHint},
-		}}},
+		Sets: []view.FieldSet{
+			{Legend: "Name", Rows: []view.FormRow{
+				csrfField(sess),
+				{Name: "name", Label: "Display name", Kind: view.InputText, Value: text(u.DisplayName), Error: text(flash.nameErr),
+					Hint: "Shown as the sender and used as the signature in letters you send. Blank means your login."},
+			}},
+			{Legend: "Email", Rows: []view.FormRow{
+				{Name: "email", Label: "Address", Kind: view.InputEmail, Value: text(address), Error: text(flash.emailErr),
+					Hint: "Used for service notices, and as Reply-To on letters you send.",
+					Extra: &view.Action{ID: "account.email.change", Label: "Change", Method: "POST", Enabled: true,
+						Href: s.postQuery("/app/settings/account", url.Values{"op": {"email"}})}},
+			}},
+		},
+		// The frames draw no Save under Display name (to-typecase task 21):
+		// until they do, the name is saved by the form's own button.
 		Actions: []view.Action{{ID: "account.save", Label: "Save", Method: "POST", Enabled: true}},
 	}
-	if s.users.EmailToConfirm(u.ID) != "" {
-		page.Profile.Actions = append(page.Profile.Actions, view.Action{
-			ID: "account.confirm", Label: "Send confirmation", Method: "POST", Enabled: s.mailConfigured(),
-			Href: s.postQuery("/app/settings/account", map[string][]string{"op": {"confirm"}}),
-			Reason: func() view.Text {
-				if s.mailConfigured() {
-					return ""
-				}
-				return "Mail is not configured on this instance."
-			}(),
-		})
-	}
-	if s.relayOn() {
-		ls := s.senderOf(u)
-		page.Mail = view.Form{Sets: []view.FieldSet{{Legend: "Letters you send", Rows: []view.FormRow{
-			{Name: "from", Label: "Sent as", Kind: view.InputText, Value: text(ls.From), ReadOnly: true,
-				Hint: "The administrator chose the form of the address; the name is yours."},
-			{Name: "replyTo", Label: "Replies go to", Kind: view.InputText, Value: text(ls.ReplyTo), ReadOnly: true,
-				Hint: ls.replyNote()},
-		}}}}
-	}
+	page.Email = s.emailStatus(u, tf)
+	page.PasswordNote = "Changing your password re-wraps your data key only; saved connections stay readable."
+	page.Escrow = s.escrowStatus(sess, u, true)
 	page.Actions = []view.Action{
 		{ID: "account.password", Label: "Change password", Href: s.route("/app/password"), Method: "GET", Enabled: true},
-		{ID: "account.escrow", Label: "Key escrow", Href: s.route("/app/settings/escrow"), Method: "GET", Enabled: true},
 	}
 	page.Sessions = s.sessionRows(sess)
 	if len(page.Sessions) > 1 {
@@ -216,4 +212,67 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 	page.Danger = []view.Action{s.deleteAction(sess)}
 	page.DangerNote = "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it."
 	return page
+}
+
+// emailStatus is the Email block under the address (account-8, account-1,
+// s-mail-9, account-9). «Sent» is a letter the relay took whose link still
+// lives: once it burns or is used, the block falls back to «not sent» or to
+// «confirmed». An address confirmed before the day was written down
+// (v0.2.60) says «confirmed» without one.
+func (s *Server) emailStatus(u *store.User, tf timeFmt) view.EmailStatus {
+	st := view.EmailStatus{State: view.EmailNone}
+	to := s.users.EmailToConfirm(u.ID)
+	var sentPhrase string
+	if sentTo, at, ok := s.users.ConfirmationSent(u.ID); ok && strings.EqualFold(sentTo, to) {
+		st.SentTo = text(sentTo)
+		st.SentAt, sentPhrase = tf.sentAt(at)
+	}
+	if u.Email != "" && u.EmailConfirmed {
+		st.State = view.EmailConfirmed
+		label := "confirmed"
+		if u.EmailConfirmedAt != nil {
+			st.ConfirmedAt = view.When(tf.dayOfYear(*u.EmailConfirmedAt))
+			label += " " + string(st.ConfirmedAt)
+		}
+		st.Badge = &view.Badge{Label: text(label), Role: view.BadgeLinked}
+		if u.PendingEmail != "" {
+			// The confirmed address stays in use, so replies still come
+			// back: a badge, not a warning (account-1).
+			st.State, st.Pending = view.EmailPending, text(u.PendingEmail)
+			st.Badge = &view.Badge{Label: text("pending: " + u.PendingEmail), Role: view.BadgeNeutral}
+			if st.SentTo == "" {
+				// No letter with a live link went to the new address: without
+				// a way to send it again the change could not be finished.
+				// The frame draws the badge alone (to-typecase task 21).
+				send := s.confirmAction("Send again")
+				st.Message = &view.Notice{Role: view.NoticeAlert, Actions: []view.Action{send},
+					Body: text("No link has gone to " + u.PendingEmail + ": until one is opened, " + u.Email + " stays in use.")}
+			}
+		}
+		return st
+	}
+	if to == "" {
+		return st
+	}
+	send := s.confirmAction("Send confirmation")
+	// The message says the consequence, not the status (s-mail-9).
+	body := "Nobody can reply to letters you send: until this address is confirmed, they go out without a reply address and say so at the foot."
+	st.State = view.EmailUnconfirmed
+	if st.SentTo != "" {
+		st.State, send.Label = view.EmailSent, "Send again"
+		body = "Nobody can reply to letters you send until you open the link we sent to " + string(st.SentTo) + " " + sentPhrase + "."
+	}
+	st.Message = &view.Notice{Role: view.NoticeAlert, Body: text(body), Actions: []view.Action{send}}
+	return st
+}
+
+// confirmAction sends a fresh link for the address waiting; off with a
+// reason when the instance has no mail.
+func (s *Server) confirmAction(label view.Text) view.Action {
+	a := view.Action{ID: "account.confirm", Label: label, Method: "POST", Enabled: s.mailConfigured(),
+		Href: s.postQuery("/app/settings/account", url.Values{"op": {"confirm"}})}
+	if !a.Enabled {
+		a.Reason = "Mail is not configured on this instance."
+	}
+	return a
 }

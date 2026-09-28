@@ -89,6 +89,8 @@ func (s *Server) registerRoutes() {
 	s.handle("POST /app/settings/account", (*Server).postSettingsAccount)
 	s.handle("GET /app/settings/escrow", (*Server).getSettingsEscrow)
 	s.handle("POST /app/settings/escrow", (*Server).postSettingsEscrow)
+	s.handle("GET /app/settings/escrow/deposit", (*Server).getEscrowDeposit)
+	s.handle("GET /app/settings/escrow/withdraw", (*Server).getEscrowWithdraw)
 	s.handle("GET /app/settings/connections", (*Server).getSettingsConnections)
 	s.handle("POST /app/settings/connections", (*Server).postSettingsConnections)
 	s.handle("POST /app/settings/connections/test", (*Server).postSettingsConnectionsTest)

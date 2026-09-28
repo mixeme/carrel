@@ -93,6 +93,9 @@ func (s *Service) CompleteInvite(ctx context.Context, token, password string) er
 		// An unproven address waits as pending — in Email it would lock the
 		// person out: sign-in refuses an unconfirmed Email (registration).
 		u.EmailConfirmed = u.Email != "" && inv.Mailed == "sent"
+		if u.EmailConfirmed {
+			u.EmailConfirmedAt = &now
+		}
 		if u.Email != "" && !u.EmailConfirmed {
 			u.Email, u.PendingEmail = "", u.Email
 		}
@@ -208,7 +211,7 @@ func (s *Service) Register(ctx context.Context, login, email, password string) (
 		if err := store.ApplyPassword(ctx, u, login, password, st, now); err != nil {
 			return nil, err
 		}
-		u.EmailConfirmed = false
+		u.EmailConfirmed, u.EmailConfirmedAt = false, nil
 		burnWipeTokens(st, u.ID)
 		st.Tokens = append(st.Tokens, store.SecretToken{
 			Kind: tokenEmailConfirm, Hash: hash, UserID: u.ID,
@@ -250,7 +253,7 @@ func (s *Service) ConfirmEmail(ctx context.Context, token string) bool {
 				}
 				u.Email, u.PendingEmail = t.Email, ""
 			}
-			u.EmailConfirmed = true
+			u.EmailConfirmed, u.EmailConfirmedAt = true, &now
 			t.Used = true
 			ok = true
 			pruneTokens(st, now)

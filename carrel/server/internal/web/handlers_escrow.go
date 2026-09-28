@@ -26,6 +26,11 @@ func (s *Server) getSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, page)
 }
 
+// postSettingsEscrow deposits or withdraws. The deposit sheet (account-2)
+// carries the password: it opens the same unlock window as every release
+// of a secret (S-10.7), under the same buckets, and deposits at once.
+// Without a password the window has to be open already. Withdrawal asks no
+// password — it releases nothing — and comes from its own sheet.
 func (s *Server) postSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -34,9 +39,21 @@ func (s *Server) postSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 	action := r.FormValue("action")
 	switch action {
 	case "deposit":
+		if password := r.FormValue("password"); password != "" {
+			start := time.Now()
+			if !s.limit.allowLogin(sess.Login(), s.clientIP(r), start) {
+				http.Error(w, "too many requests", http.StatusTooManyRequests)
+				return
+			}
+			if !s.users.Unlock(r.Context(), sess.AccountID(), password) {
+				constantTimeDelay(start, 300*time.Millisecond)
+				s.depositRefused(w, r, sess, "Password is wrong.")
+				return
+			}
+			sess.SetUnlockUntil(time.Now().Add(s.cfg.UnlockTTL))
+		}
 		if sess.UnlockUntil(time.Now()) == nil {
-			page := s.buildEscrowPage(sess, "Confirm your password first.")
-			s.writePage(w, r, http.StatusOK, page)
+			s.depositRefused(w, r, sess, "Confirm your password first.")
 			return
 		}
 		key, ok := sess.DataKey()
@@ -45,8 +62,7 @@ func (s *Server) postSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err := s.users.DepositEscrow(sess.AccountID(), key); err != nil {
-			page := s.buildEscrowPage(sess, string(formError(err)))
-			s.writePage(w, r, http.StatusOK, page)
+			s.depositRefused(w, r, sess, string(formError(err)))
 			return
 		}
 	case "withdraw":
@@ -59,43 +75,145 @@ func (s *Server) postSettingsEscrow(w http.ResponseWriter, r *http.Request) {
 	s.redirect(w, r, "/app/settings/escrow")
 }
 
+// depositRefused answers the deposit sheet with its error: the sheet again
+// when it was asked as one, the escrow page with it otherwise.
+func (s *Server) depositRefused(w http.ResponseWriter, r *http.Request, sess *session.Session, errText string) {
+	if WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, s.depositSheet(sess, text(errText)), nil)
+		return
+	}
+	s.writePage(w, r, http.StatusOK, s.buildEscrowPage(sess, errText))
+}
+
+// getEscrowDeposit is «Deposit my key» over Account (account-2): what
+// happens, and who is pressing.
+func (s *Server) getEscrowDeposit(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	snap := s.store.Snapshot()
+	if u := snap.UserByID(sess.AccountID()); u == nil || !store.EscrowActive(&snap) || store.UserDeposited(u) {
+		s.notFound(w, r)
+		return
+	}
+	sheet := s.depositSheet(sess, "")
+	if WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		return
+	}
+	s.writePage(w, r, http.StatusOK, sheet)
+}
+
+// getEscrowWithdraw is the sheet before the deposited copy is destroyed
+// (account-7): nothing is taken away until its button.
+func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireLogin(w, r)
+	if !ok {
+		return
+	}
+	snap := s.store.Snapshot()
+	if u := snap.UserByID(sess.AccountID()); u == nil || !store.UserDeposited(u) {
+		s.notFound(w, r)
+		return
+	}
+	sheet := view.EscrowWithdrawSheet{
+		Warning: escrowWithdrawNote,
+		Form: s.plainForm("/app/settings/escrow", "POST", csrfField(sess),
+			view.FormRow{Name: "action", Kind: view.InputHidden, Value: "withdraw"}),
+		Actions: []view.Action{
+			{ID: "escrow.withdraw", Label: "Withdraw my deposited key", Method: "POST", Danger: true, Enabled: true,
+				Href: s.postQuery("/app/settings/escrow", url.Values{"action": {"withdraw"}})},
+			{ID: "escrow.withdraw.cancel", Label: "Cancel", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true},
+		},
+	}
+	if WantsFragment(r) {
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
+		return
+	}
+	s.writePage(w, r, http.StatusOK, sheet)
+}
+
+// escrowWithdrawNote is the line beside the withdraw button (account-4) and
+// the warning of its sheet.
+const escrowWithdrawNote view.Text = "After withdrawal nobody can recover this account, including you."
+
+// depositSheet is the unlock sheet with the deposit's purpose and button
+// (account-2): the password it asks opens the one window of S-10.7.
+func (s *Server) depositSheet(sess *session.Session, errText view.Text) view.UnlockSheet {
+	sheet := view.UnlockSheet{
+		Purpose: "Deposit my key",
+		Warning: "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.",
+		Form: withSubmit(s.plainForm("/app/settings/escrow", "POST",
+			csrfField(sess),
+			view.FormRow{Name: "action", Kind: view.InputHidden, Value: "deposit"},
+			view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: errText,
+				Hint: "Asked because the key is being handed over, not just looked at. Same unlock as showing a saved password."},
+		), "escrow.deposit", "Deposit my key",
+			view.Action{ID: "escrow.deposit.cancel", Label: "Cancel", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}),
+	}
+	if until := sess.UnlockUntil(time.Now()); until != nil {
+		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, time.Now()))
+	}
+	return sheet
+}
+
+// escrowStatus is Key escrow as the person sees it: on the account page in
+// the words of account-1 and account-7, on its own page in those of
+// account-4. The deposit and the last recovery are two values, not one.
+func (s *Server) escrowStatus(sess *session.Session, u *store.User, onAccount bool) view.EscrowStatus {
+	snap := s.store.Snapshot()
+	active := store.EscrowActive(&snap)
+	status := view.EscrowStatus{Active: active, Note: "Key escrow is disabled on this instance.", Actions: []view.Action{}}
+	if u != nil && store.UserDeposited(u) {
+		tf := s.timeFor(sess)
+		status.Covered = true
+		status.By = "administrator with master password"
+		if u.EscrowDepositedAt != nil {
+			status.Deposited = view.When(tf.dayKey(*u.EscrowDepositedAt))
+			status.Badge = &view.Badge{Label: text("deposited " + string(status.Deposited)), Role: view.BadgeAlert}
+		}
+		status.LastRecovery = "never"
+		if u.EscrowLastRecovery != nil {
+			status.LastRecovery = view.When(tf.dayKey(*u.EscrowLastRecovery))
+		}
+		status.Note = "A copy of your data key is deposited on this server. An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars."
+		if onAccount {
+			status.Note = "A copy of your data key is deposited on this server. If you lose your password, an administrator who holds the escrow master password can recover the account — and, with it, can read the DAV credentials you save here."
+		}
+		status.ActionNote = escrowWithdrawNote
+		status.Actions = []view.Action{{
+			ID: "escrow.withdraw", Label: "Withdraw my deposited key", Danger: true,
+			Href: s.route("/app/settings/escrow/withdraw"), Method: "GET", Enabled: true,
+		}}
+		return status
+	}
+	if !active {
+		return status
+	}
+	status.Note = "An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars. This is not backup."
+	if onAccount {
+		status.Note = "No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at."
+	}
+	status.Actions = []view.Action{{
+		ID: "escrow.deposit", Label: "Deposit my key",
+		Href: s.route("/app/settings/escrow/deposit"), Method: "GET", Enabled: true,
+	}}
+	return status
+}
+
 func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.EscrowPage {
 	snap := s.store.Snapshot()
 	u := snap.UserByID(sess.AccountID())
-	active := store.EscrowActive(&snap)
-	status := view.EscrowStatus{
-		Active: active,
-		Note:   text("Key escrow is disabled on this instance."),
-	}
-	if active {
-		status.Note = text("An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars. This is not backup.")
-	}
-	if u != nil && store.UserDeposited(u) {
-		status.Covered = true
-		status.By = text("administrator with master password")
-		if u.EscrowDepositedAt != nil {
-			status.LastUsed = s.timeFor(sess).formatWhen(*u.EscrowDepositedAt, false, time.Now())
-		}
-		status.Actions = []view.Action{{
-			ID: "escrow.withdraw", Label: "Withdraw my deposited key",
-			Href:   s.postQuery("/app/settings/escrow", url.Values{"action": {"withdraw"}}),
-			Method: "POST", Enabled: true,
-		}}
-	} else if active {
-		status.Actions = []view.Action{{
-			ID: "escrow.deposit", Label: "Deposit my key",
-			Href:   s.postQuery("/app/settings/escrow", url.Values{"action": {"deposit"}}),
-			Method: "POST", Enabled: sess.UnlockUntil(time.Now()) != nil,
-		}}
-	}
 	page := view.EscrowPage{
 		Shell:  s.withRail(s.buildShell(sess, "Key escrow"), s.settingsRail(sess, "/app/settings/escrow")),
-		Status: status,
+		Status: s.escrowStatus(sess, u, false),
 	}
-	if active && u != nil && !store.UserDeposited(u) {
-		sheet := s.unlockSheet(sess, text(errText))
-		sheet.Purpose = text("Confirm your password to deposit your data key.")
-		sheet.Warning = text("An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts and calendars. Ending sessions does not undo this.")
+	if u != nil && store.UserDeposited(u) {
+		page.Subtitle = "A copy of your key on this server"
+	}
+	if store.EscrowActive(&snap) && u != nil && !store.UserDeposited(u) {
+		sheet := s.depositSheet(sess, text(errText))
 		page.Confirm = &sheet
 	}
 	return page

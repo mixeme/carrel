@@ -447,6 +447,8 @@ Typecase): рейл с соседними заметками и колонка �
 |---|---|---|---|---|
 | `/app/settings/account` | GET, POST | вход | страница | `AccountPage` |
 | `/app/settings/escrow` | GET, POST | вход | страница | `EscrowPage` |
+| `/app/settings/escrow/deposit` | GET | вход | лист | `UnlockSheet` |
+| `/app/settings/escrow/withdraw` | GET | вход | лист | `EscrowWithdrawSheet` |
 | `/app/settings/connections` | GET, POST | вход | страница | `ConnectionsPage` |
 | `/app/settings/connections/test` | POST | вход | фрагмент | `DiagnosticTrace` |
 | `/app/settings/connections/disconnect` | GET, POST | вход | лист | `ConnectionRemoveSheet` |
@@ -461,7 +463,10 @@ Typecase): рейл с соседними заметками и колонка �
 `unlock` — общий лист подтверждения пароля, открывающий выдачу учётных данных
 везде на назначенный срок. Он один на все места, где секрет выходит наружу:
 показ пароля подключения, сборка профиля устройства, депонирование ключа. Двух
-таймеров и двух разных листов не бывает.
+таймеров и двух разных листов не бывает. `escrow/deposit` — тот же `UnlockSheet`
+со своей целью и кнопкой (account-2): пароль из него открывает то же окно и
+сразу депонирует. `escrow/withdraw` пароля не спрашивает — отзыв ничего не
+выдаёт, — но без листа не идёт: копия уничтожается.
 
 ### C-5.8 Администрирование
 
@@ -1502,15 +1507,36 @@ type Option struct {
 }
 type FieldError struct { Name string; Message Text }
 
+// Страница учётной записи рубриками кадра account-1: Name, Email, Password,
+// Sessions, Key escrow, Delete account. Логина строкой нет — он в Subtitle;
+// обратного адреса и формы отправителя нет — они на листе письма (s-mail-1).
 type AccountPage struct {
     Shell
-    Profile   Form   // логин, отображаемое имя, адрес и его подтверждение
-    Mail      Form   // обратный адрес и что уйдёт в письме
-    Escrow    EscrowStatus
-    Sessions  []SessionRow
-    Actions   []Action
-    Danger    []Action
-    DangerNote Text // строка у Delete account: что удаляется и что остаётся (account-1)
+    Subtitle     Text        // «mix · created 11 February 2026»
+    Profile      Form        // рубрики Name и Email: Display name, Address с Change (Extra)
+    Email        EmailStatus // под полем Address: значок или сообщение с кнопкой
+    PasswordNote Text        // строка у Change password: перевязывается только обёртка ключа
+    Escrow       EscrowStatus
+    Sessions     []SessionRow
+    Actions      []Action
+    Danger       []Action
+    DangerNote   Text // строка у Delete account: что удаляется и что остаётся (account-1)
+}
+// Четыре состояния адреса (C-8): confirmed — значок «confirmed 14 February»
+// (account-8; у подтверждённого до v0.2.60 дня нет — «confirmed»); pending —
+// подтверждённый в ходу, новый ждёт ссылки: значок «pending: …» (account-1),
+// а если живого ушедшего письма нет — и сообщение с Send again;
+// unconfirmed — письма со ссылкой нет или ссылка сгорела: сообщение о
+// последствии и Send confirmation (s-mail-9); sent — ссылка жива: куда и когда
+// ушло письмо, Send again (account-9). none — адреса нет.
+type EmailStatus struct {
+    State       EmailState
+    Badge       *Badge
+    ConfirmedAt When   // день подтверждения; пусто — дня нет
+    Pending     Text   // новый адрес, ждущий ссылки
+    SentTo      Text   // куда ушло письмо со ссылкой, пока ссылка жива
+    SentAt      When   // когда: «11:42»
+    Message     *Notice // последствие; одна кнопка в Actions; nil — сообщения нет
 }
 type SessionRow struct {
     Agent    Text
@@ -1521,19 +1547,30 @@ type SessionRow struct {
     End      Action
 }
 type EscrowStatus struct {
-    Active   bool
-    Covered  bool
-    By       Text
-    LastUsed When
-    Note     Text // честная формулировка последствия, не «резервная копия ключей»
-    Actions  []Action
+    Active       bool
+    Covered      bool
+    By           Text
+    Badge        *Badge // у рубрики: «deposited 2026-03-02», роль alert (account-7)
+    Deposited    When   // «2026-03-02»; пусто — копии нет
+    LastRecovery When   // «never» или день последнего восстановления (account-4)
+    Note         Text   // честная формулировка последствия, не «резервная копия ключей»
+    ActionNote   Text   // у кнопки отзыва: «After withdrawal nobody can recover this account, including you.»
+    Actions      []Action // Deposit my key — лист депонирования; Withdraw my deposited key — лист отзыва
 }
 
 type EscrowPage struct {
     Shell
-    Status  EscrowStatus
-    Confirm *UnlockSheet // лист подтверждения перед депонированием
-    History []AuditRow
+    Subtitle Text // «A copy of your key on this server»
+    Status   EscrowStatus
+    Confirm  *UnlockSheet // лист подтверждения перед депонированием
+    History  []AuditRow
+}
+
+// Лист перед отзывом депонированного ключа: копия уничтожается.
+type EscrowWithdrawSheet struct {
+    Warning Text
+    Form    Form     // скрытое action=withdraw и CSRF
+    Actions []Action // Withdraw my deposited key · Cancel
 }
 
 type PasswordPage struct { Shell; Form Form; Warning Notice }
@@ -2086,6 +2123,10 @@ const ( NoteReading NoteMode = "reading"; NoteEditing = "editing" )
 
 type FileView string
 const ( FileList FileView = "list"; FileTiles = "tiles" )
+
+type EmailState string
+const ( EmailNone EmailState = "none"; EmailConfirmed = "confirmed"; EmailPending = "pending"
+        EmailUnconfirmed = "unconfirmed"; EmailSent = "sent" )
 
 type NoticeRole string
 const ( NoticeInfo NoticeRole = "info"; NoticeAccent = "accent"; NoticeAlert = "alert" )

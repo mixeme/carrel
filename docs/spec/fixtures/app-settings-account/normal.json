@@ -6,13 +6,6 @@
       "id": "account.password",
       "label": "Change password",
       "method": "GET"
-    },
-    {
-      "enabled": true,
-      "href": "/app/settings/escrow",
-      "id": "account.escrow",
-      "label": "Key escrow",
-      "method": "GET"
     }
   ],
   "danger": [
@@ -27,19 +20,23 @@
   ],
   "details": null,
   "escrow": {
-    "actions": [],
-    "active": false,
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/settings/escrow/deposit",
+        "id": "escrow.deposit",
+        "label": "Deposit my key",
+        "method": "GET"
+      }
+    ],
+    "active": true,
     "by": "",
     "covered": false,
-    "lastUsed": "",
-    "note": ""
-  },
-  "mail": {
-    "action": "",
-    "actions": [],
-    "errors": [],
-    "method": "",
-    "sets": []
+    "note": "No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at.",
+    "actionNote": "",
+    "badge": null,
+    "deposited": "",
+    "lastRecovery": ""
   },
   "notices": [],
   "print": {
@@ -61,7 +58,7 @@
     "method": "POST",
     "sets": [
       {
-        "legend": "Account mix · created 11 February 2026",
+        "legend": "Name",
         "rows": [
           {
             "error": "",
@@ -78,18 +75,6 @@
           {
             "error": "",
             "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Login",
-            "name": "login",
-            "options": [],
-            "readOnly": true,
-            "required": false,
-            "value": "mix"
-          },
-          {
-            "error": "",
-            "extra": null,
             "hint": "Shown as the sender and used as the signature in letters you send. Blank means your login.",
             "kind": "text",
             "label": "Display name",
@@ -97,19 +82,30 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
-          },
+            "value": "Михаил Енученко"
+          }
+        ]
+      },
+      {
+        "legend": "Email",
+        "rows": [
           {
             "error": "",
-            "extra": null,
+            "extra": {
+              "enabled": true,
+              "href": "/app/settings/account?op=email",
+              "id": "account.email.change",
+              "label": "Change",
+              "method": "POST"
+            },
             "hint": "Used for service notices, and as Reply-To on letters you send.",
             "kind": "email",
-            "label": "Email",
+            "label": "Address",
             "name": "email",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "mix@example.org"
           }
         ]
       }
@@ -311,5 +307,19 @@
       }
     ]
   },
-  "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it."
+  "dangerNote": "Deletes the account and the saved connections. Data on the DAV servers stays: Carrel never touches it.",
+  "email": {
+    "badge": {
+      "label": "pending: new@example.org",
+      "role": "neutral"
+    },
+    "confirmedAt": "14 February",
+    "message": null,
+    "pending": "new@example.org",
+    "sentAt": "11:42",
+    "sentTo": "new@example.org",
+    "state": "pending"
+  },
+  "passwordNote": "Changing your password re-wraps your data key only; saved connections stay readable.",
+  "subtitle": "mix · created 11 February 2026"
 }

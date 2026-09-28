@@ -32,12 +32,16 @@ func TestAccountNameAndAddressConfirmedByLink(t *testing.T) {
 	relay := h.relayed()
 	bob := h.login("bob", "bobpass123")
 
-	page := decode[view.AccountPage](t, h.do(postForm("/app/settings/account", bob, url.Values{"name": {"Боб Строитель"}, "email": {"new@example.org"}})))
-	if len(page.Notices) != 1 || !strings.Contains(string(page.Notices[0].Title), "new@example.org") {
-		t.Fatalf("notices = %+v", page.Notices)
+	if rec := h.do(postForm("/app/settings/account", bob, url.Values{"name": {"Боб Строитель"}, "email": {"new@example.org"}})); rec.Code != 303 {
+		t.Fatalf("save: %d %s", rec.Code, rec.Body)
 	}
-	if row := profileRow(page.Profile, "email"); row.Value != "bob@example.org" || !strings.Contains(string(row.Hint), "pending: new@example.org") {
-		t.Errorf("email row = %+v", row)
+	page := decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
+	if page.Email.SentTo != "new@example.org" {
+		t.Errorf("the letter that went is not written down: %+v", page.Email)
+	}
+	if row := profileRow(page.Profile, "email"); row.Value != "bob@example.org" || page.Email.State != view.EmailPending ||
+		page.Email.Badge == nil || page.Email.Badge.Label != "pending: new@example.org" {
+		t.Errorf("email row = %+v, status = %+v", row, page.Email)
 	}
 	if row := profileRow(page.Profile, "name"); row.Value != "Боб Строитель" {
 		t.Errorf("name row = %+v", row)
@@ -64,9 +68,10 @@ func TestAccountNameAndAddressConfirmedByLink(t *testing.T) {
 	}
 }
 
-// Without a confirmed address the page says replies cannot come back, and
-// the From shows the form the administrator chose.
-func TestAccountSaysWhereRepliesGo(t *testing.T) {
+// Without a confirmed address the letter says replies cannot come back, and
+// the From shows the form the administrator chose. The account page no
+// longer draws it (account-1): the letter's sheet does (s-mail-1).
+func TestLetterSaysWhereRepliesGo(t *testing.T) {
 	h := newHarness(t)
 	adminID := h.admin("alice", "password123")
 	h.invite(adminID, "bob", "bobpass123")
@@ -75,12 +80,12 @@ func TestAccountSaysWhereRepliesGo(t *testing.T) {
 	h.rebuild()
 	bob := h.login("bob", "bobpass123")
 
-	page := decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
-	if row := profileRow(page.Mail, "replyTo"); row.Value != "" || !strings.Contains(string(row.Hint), "no reply address") {
-		t.Errorf("replyTo = %+v", row)
+	sheet := decode[view.MailSheet](t, h.do(get("/app/mail/compose", bob)))
+	if sheet.ReplyTo != "" || !strings.Contains(string(sheet.ReplyNote), "no reply address") {
+		t.Errorf("replyTo = %q, note %q", sheet.ReplyTo, sheet.ReplyNote)
 	}
-	if row := profileRow(page.Mail, "from"); row.Value != "bob (via Carrel) <noreply@carrel.example>" {
-		t.Errorf("from = %q", row.Value)
+	if sheet.From != "bob (via Carrel) <noreply@carrel.example>" {
+		t.Errorf("from = %q", sheet.From)
 	}
 
 	h.confirmAddress("bob", "bob@example.org")
@@ -92,12 +97,12 @@ func TestAccountSaysWhereRepliesGo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
-	if row := profileRow(page.Mail, "from"); row.Value != "Боб <bob@carrel.example>" {
-		t.Errorf("from = %q", row.Value)
+	sheet = decode[view.MailSheet](t, h.do(get("/app/mail/compose", bob)))
+	if sheet.From != "Боб <bob@carrel.example>" {
+		t.Errorf("from = %q", sheet.From)
 	}
-	if row := profileRow(page.Mail, "replyTo"); row.Value != "bob@example.org" {
-		t.Errorf("replyTo = %+v", row)
+	if sheet.ReplyTo != "bob@example.org" {
+		t.Errorf("replyTo = %q", sheet.ReplyTo)
 	}
 }
 

@@ -112,6 +112,16 @@ const (
 	FileTiles FileView = "tiles"
 )
 
+type EmailState string
+
+const (
+	EmailNone        EmailState = "none"
+	EmailConfirmed   EmailState = "confirmed"
+	EmailPending     EmailState = "pending"
+	EmailUnconfirmed EmailState = "unconfirmed"
+	EmailSent        EmailState = "sent"
+)
+
 type NoticeRole string
 
 const (

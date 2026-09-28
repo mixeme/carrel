@@ -1,5 +1,73 @@
 {
-  "confirm": null,
+  "confirm": {
+    "form": {
+      "action": "/app/settings/escrow",
+      "actions": [
+        {
+          "enabled": true,
+          "href": "/app/settings/escrow",
+          "id": "escrow.deposit",
+          "label": "Deposit my key",
+          "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/settings/account",
+          "id": "escrow.deposit.cancel",
+          "label": "Cancel",
+          "method": "GET"
+        }
+      ],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "action",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "deposit"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "Asked because the key is being handed over, not just looked at. Same unlock as showing a saved password.",
+              "kind": "password",
+              "label": "Your Carrel password",
+              "name": "password",
+              "options": [],
+              "readOnly": false,
+              "required": true,
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
+    "purpose": "Deposit my key",
+    "until": null,
+    "warning": "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account."
+  },
   "details": null,
   "history": [],
   "notices": [],
@@ -98,12 +166,23 @@
     "neighbours": []
   },
   "status": {
-    "actions": [],
-    "active": false,
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/settings/escrow/deposit",
+        "id": "escrow.deposit",
+        "label": "Deposit my key",
+        "method": "GET"
+      }
+    ],
+    "active": true,
     "by": "",
     "covered": false,
-    "lastUsed": "",
-    "note": "Key escrow is disabled on this instance."
+    "note": "An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars. This is not backup.",
+    "actionNote": "",
+    "badge": null,
+    "deposited": "",
+    "lastRecovery": ""
   },
   "title": "Key escrow",
   "top": {
@@ -194,5 +273,6 @@
         "separator": true
       }
     ]
-  }
+  },
+  "subtitle": ""
 }

@@ -56,6 +56,25 @@ func (f timeFmt) date(t time.Time) string {
 	return t.In(f.tz).Format("2 January 2006")
 }
 
+// dayOfYear is a day without its year when it is this year's: «14
+// February» (account-8), «14 February 2025» otherwise.
+func (f timeFmt) dayOfYear(t time.Time) string {
+	if t.In(f.tz).Year() == f.now.In(f.tz).Year() {
+		return t.In(f.tz).Format("2 January")
+	}
+	return f.date(t)
+}
+
+// sentAt is when a letter went: the clock alone today («11:42», account-9),
+// the day and the clock before. The phrase is how a sentence says it: «at
+// 11:42», «on 12 February at 11:42».
+func (f timeFmt) sentAt(t time.Time) (view.When, string) {
+	if f.dayKey(t) == f.dayKey(f.now) {
+		return view.When(f.clock(t)), "at " + f.clock(t)
+	}
+	return view.When(f.dayOfYear(t) + ", " + f.clock(t)), "on " + f.dayOfYear(t) + " at " + f.clock(t)
+}
+
 func (f timeFmt) dayRubric(t time.Time) string {
 	return t.In(f.tz).Format("Monday, 2 January")
 }

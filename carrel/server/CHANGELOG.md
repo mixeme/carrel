@@ -17,6 +17,77 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.60 — 2026-09-28
+
+The account page as its frames draw it (from-typecase note 10): the Email
+block says the address's state, and Key escrow lives on the page, with a
+sheet each way.
+
+### Changed
+
+- **`AccountPage`** (`GET /app/settings/account`, account-1) — `subtitle`
+  «mix · created 11 February 2026» takes the place of the form's legend and
+  of the read-only **Login row, which is gone**. `profile.sets` are the
+  frame's rubrics: **Name** (Display name) and **Email** — the field is
+  labelled **«Address»** (was «Email») and carries `extra` **Change**
+  (`account.email.change`, POST `?op=email`: the address alone, the name
+  untouched). The field shows the address in use or, invited by a link with
+  nothing in use yet, the one being confirmed (was empty). The hint no longer
+  carries the state. **`mail`** («Letters you send»: Sent as, Replies go to)
+  **is removed**: the letter's sheet (`MailSheet.from`, `replyTo`) says it.
+  `actions` lose **Key escrow** (`account.escrow`): the frame has no such
+  button; escrow is on the page. New `passwordNote` beside Change password.
+- **`EmailStatus`** (`AccountPage.email`, new): `state` (C-8 `EmailState`:
+  `confirmed`, `pending`, `unconfirmed`, `sent`, `none`), `badge`
+  («confirmed 14 February», `linked`; «pending: new@example.org»,
+  `neutral`), `confirmedAt`, `pending`, `sentTo`, `sentAt` («11:42»), and
+  `message` — a `Notice` (`alert`, no title) saying the consequence, with
+  one action in `actions`: **Send confirmation** (s-mail-9) or **Send again**
+  (account-9, «…until you open the link we sent to mix@example.org at
+  11:42.»), id `account.confirm`, off with a reason when mail is not set up.
+  «Sent» lasts while the link lives (48 h); an address confirmed before this
+  version has no day and says «confirmed». A pending change with no live
+  letter (the relay refused it, or its link burnt) carries a `message` too:
+  «No link has gone to new@example.org: until one is opened,
+  mix@example.org stays in use.» with **Send again**; with a live letter it
+  is the badge alone (account-1).
+- **Send confirmation** — a letter the relay took answers with a redirect
+  (was a page with an info notice); a refused one still answers with the
+  alert notice. Saving a new address likewise.
+- **`EscrowStatus`** — `lastUsed` (which held the deposit's date) is
+  replaced by **`deposited`** («2026-03-02») and **`lastRecovery`**
+  («never» or the day); new `badge` («deposited 2026-03-02», `alert`) and
+  `actionNote` («After withdrawal nobody can recover this account, including
+  you.»). It is now filled on the account page too (was always empty there),
+  in the words of account-1 and account-7; the escrow page's are account-4's.
+  `EscrowPage.subtitle` «A copy of your key on this server» when deposited.
+- **Deposit my key** (`escrow.deposit`) is GET
+  **`/app/settings/escrow/deposit`** — an `UnlockSheet` over Account
+  (account-2): purpose «Deposit my key», «Your Carrel password», buttons
+  Deposit my key and Cancel. Its POST (`/app/settings/escrow`,
+  `action=deposit`) takes `password`, opens the same unlock window under the
+  same buckets and deposits; without it, only inside an open window.
+  `EscrowPage.confirm` is the same sheet. Was a POST enabled only inside the
+  window.
+- **Withdraw my deposited key** (`escrow.withdraw`) is GET
+  **`/app/settings/escrow/withdraw`** — new **`EscrowWithdrawSheet`**
+  (`warning`, `form`, `actions`: Withdraw my deposited key — the old POST
+  `action=withdraw` — and Cancel). The page's button no longer withdraws.
+
+### Fixtures
+
+- The fixture instance is the frames': key escrow on (account-1, s-admin-6)
+  and people's letters from their login on the instance's domain (s-mail-1).
+  `admin-escrow`, `app-settings-escrow`, `app-settings-account`,
+  `app-mail-compose` (`from` «Михаил Енученко <mix@carrel.example>»,
+  `replyTo` mix@example.org) and `admin-audit` (`escrow.enable`) re-taken.
+
+### Store
+
+- `User.emailConfirmedAt` — set when an address is confirmed (the link, an
+  invitation by letter). `SecretToken.mailedAt` — set on a confirmation link
+  when the relay took its letter. Both absent on older records.
+
 ## v0.2.59 — 2026-09-28
 
 Rails: numbers and navigation (from-typecase note 15). No view model

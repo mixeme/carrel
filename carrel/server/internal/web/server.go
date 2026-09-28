@@ -155,6 +155,10 @@ type Users interface {
 	SetDisplayName(userID, name string) error
 	RequestEmail(userID, email string) (token string, err error)
 	EmailToConfirm(userID string) string
+	// ConfirmMailed records that the letter with a confirmation link went;
+	// ConfirmationSent is that letter while its link lives (account-9).
+	ConfirmMailed(token string) error
+	ConfirmationSent(userID string) (to string, at time.Time, ok bool)
 	LettersLeft(userID string, perDay int) int
 	Journal(actorID, what, detail string)
 	IssueDevice(ctx context.Context, userID string, dataKey [32]byte, name string, sc user.DeviceScope) (id, password string, err error)

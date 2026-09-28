@@ -557,6 +557,25 @@ func newMockupApp(t *testing.T) *mockupApp {
 	h.srv.SetBuild(mockupVersion, mockupCommit)
 	h.srv.SetPatience()
 	h.admin("mix", "password123")
+	// account-1 and s-mail-1: the name mix signs with, the address confirmed
+	// on 14 February, and a new one waiting for the link that went to it
+	// that morning. Written straight into the record: the journal of the
+	// frames (admin-audit) has none of it, and nobody opens that link.
+	confirmed := mockupDayAt(t, "2026-02-14 11:42")
+	mailed := mockupDayAt(t, "2026-08-10 11:42")
+	if err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByLogin("mix")
+		u.DisplayName = "Михаил Енученко"
+		u.Email, u.EmailConfirmed, u.EmailConfirmedAt = "mix@example.org", true, &confirmed
+		u.PendingEmail = "new@example.org"
+		st.Tokens = append(st.Tokens, store.SecretToken{
+			Kind: "email_confirm", Hash: make([]byte, 32), UserID: u.ID, Email: u.PendingEmail,
+			CreatedAt: mailed, ExpiresAt: mailed.Add(48 * time.Hour), MailedAt: &mailed,
+		})
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 	// The account is behind us; everything the run does after this happens
 	// on the day of the frames.
 	h.users.SetClock(mockupNow(t))
@@ -568,6 +587,13 @@ func newMockupApp(t *testing.T) *mockupApp {
 		"inviteTTL": {"24"}, "idle": {"2"}, "session": {"7"},
 	})); rec.Code != 303 {
 		t.Fatalf("name the instance: %d %s", rec.Code, rec.Body.String())
+	}
+	// Key escrow is on, as account-1 (Deposit my key) and s-admin-6 draw
+	// it; mix was made before it, so no copy is taken.
+	if rec := h.do(postForm("/admin/escrow", sess, url.Values{
+		"action": {"enable"}, "master": {"sixteen-char-pass!"}, "master2": {"sixteen-char-pass!"},
+	})); rec.Code != 303 {
+		t.Fatalf("turn escrow on: %d %s", rec.Code, rec.Body.String())
 	}
 	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
 		rec := h.do(postForm("/app/settings/connections", sess, url.Values{
@@ -1374,6 +1400,9 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 		app.h.do(postForm("/admin/settings", app.sess, url.Values{
 			"host": {"127.0.0.1"}, "port": {"25"}, "security": {"none"},
 			"username": {"relay"}, "password": {"relay-password-xyz"}, "from": {"noreply@carrel.example"},
+			// s-mail-1: «from mix@carrel.example» — the login on the
+			// instance's domain.
+			"sender": {"login"},
 		}))
 		// And letters from people have to be allowed: a relay alone is for
 		// the instance's own letters (S-26).

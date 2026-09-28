@@ -70,15 +70,16 @@ func TestEscrowWithdrawActionCarriesAction(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
 		t.Fatal(err)
 	}
-	href := ""
-	for _, a := range page.Status.Actions {
-		if a.ID == "escrow.withdraw" {
-			href = a.Href
-		}
+	// The page's button opens the sheet; the sheet's carries the action.
+	open := actionHref(t, page.Status.Actions, "escrow.withdraw")
+	var sheet view.EscrowWithdrawSheet
+	if err := json.Unmarshal(h.do(get(open, bob)).Body.Bytes(), &sheet); err != nil {
+		t.Fatal(err)
 	}
-	if href == "" {
-		t.Fatal("withdraw action missing")
+	if snap := h.st.Snapshot(); !store.UserDeposited(snap.UserByLogin("bob")) {
+		t.Fatal("opening the sheet withdrew the key")
 	}
+	href := actionHref(t, sheet.Actions, "escrow.withdraw")
 	u, err := url.Parse(href)
 	if err != nil || u.Query().Get("action") != "withdraw" {
 		t.Fatalf("withdraw href = %q, want action=withdraw", href)
