@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# The gates of docs/plan/server.md, in one command, on any machine:
+# The gates of docs/plan/server.md and of the client module, in one command,
+# on any machine:
 #
 #   carrel/server/scripts/gates.sh          run them
 #   carrel/server/scripts/gates.sh --fix    format what gofmt would change, then run them
@@ -91,6 +92,10 @@ step "go vet -tags=integration" go vet -tags=integration ./integration/
 # development machine, more under load). The parameters are the product's and
 # are not lowered for tests.
 step "go test" go test -timeout 30m ./...
+# The client module (carrel/client): its zones and the guards of U-15.2. The
+# gofmt gate above already covers its files.
+step "client go vet" go -C ../client vet ./...
+step "client go test" go -C ../client test ./...
 step "docs/spec/check.py" specGate
 
 if (( ${#failed[@]} )); then
