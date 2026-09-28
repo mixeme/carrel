@@ -9,7 +9,6 @@
     "label": "Delete task",
     "method": "POST"
   },
-  "deleteNote": "Deleting goes to the server at once, and nothing can undo it.",
   "details": null,
   "done": false,
   "form": {
@@ -132,11 +131,11 @@
             "hint": "",
             "kind": "check",
             "label": "All day",
-            "name": "start.allday",
+            "name": "allday",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "on"
           },
           {
             "error": "",
@@ -161,18 +160,6 @@
             "readOnly": false,
             "required": false,
             "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "All day",
-            "name": "due.allday",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "on"
           },
           {
             "error": "",
@@ -400,33 +387,41 @@
             "name": "related",
             "options": [
               {
-                "label": "Nothing",
-                "selected": true,
-                "value": ""
+                "colour": "#3f6e8c",
+                "label": "Дописать раздел про кэш",
+                "meta": "task · 14 August",
+                "selected": false,
+                "value": "bb21-0fa8-3d66"
               },
               {
-                "label": "Собрать чемодан · task",
+                "colour": "#4a6b52",
+                "label": "Собрать чемодан",
+                "meta": "task · 12 August",
                 "selected": false,
                 "value": "aa11-2d09-5f84"
               },
               {
-                "label": "Продлить страховку · task",
+                "colour": "#3f6e8c",
+                "label": "Ответить подрядчику по смете",
+                "meta": "task · 8 August",
+                "selected": false,
+                "value": "bb20-4c17-8a52"
+              },
+              {
+                "colour": "#4a6b52",
+                "label": "Продлить страховку",
+                "meta": "task",
                 "selected": false,
                 "value": "aa12-9e44-c703"
+              },
+              {
+                "label": "By UID…",
+                "selected": false,
+                "separator": true,
+                "typed": true,
+                "value": ""
               }
             ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "Filled, it wins over the choice above. Only the records already loaded for this collection are offered: nothing is asked of the servers.",
-            "kind": "text",
-            "label": "Or enter a UID by hand",
-            "name": "related.uid",
-            "options": [],
             "readOnly": false,
             "required": false,
             "value": ""

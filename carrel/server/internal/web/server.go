@@ -156,7 +156,7 @@ type Users interface {
 	DeleteUser(actorID, targetID, loginConfirm string) error
 	SetUserRole(actorID, targetID string, role store.Role) error
 	EndUserSessions(actorID, targetID string) error
-	AdminResetPassword(ctx context.Context, actorID, targetID string) (token string, mailed, escrowAsk, handLink bool, err error)
+	AdminResetPassword(ctx context.Context, actorID, targetID, temp string) error
 	SetSelfRegEnabled(actorID string, enabled bool) error
 
 	// S-26: the relay and the letters' bookkeeping.

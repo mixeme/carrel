@@ -525,7 +525,19 @@ func (s *Server) makeFolder(ctx context.Context, c *fileCtx, name string) *view.
 	// person looking for a name that is taken by their own click.
 	case landedOnTheFirstTry(err):
 	case dav.IsStatus(err, http.StatusMethodNotAllowed):
-		return &view.Notice{Role: view.NoticeAlert, Title: text(name + " is already here"), Body: "A file or folder with this name is in this folder. Nothing was created."}
+		// The name is taken (s-files-13): said in one line, naming the
+		// folder it is taken in, and whether a file or a folder holds it.
+		what := "folder"
+		if entries, lerr := c.files.List(ctx, folder); lerr == nil {
+			if i := slices.IndexFunc(entries, func(e file.Entry) bool { return e.Name == name }); i >= 0 && !entries[i].Dir {
+				what = "file"
+			}
+		}
+		in := collectionLabel(c.col)
+		if len(c.segs) > 0 {
+			in = c.segs[len(c.segs)-1]
+		}
+		return &view.Notice{Role: view.NoticeAlert, Body: text("There is a " + what + " called «" + name + "» in " + in + " already. Choose another name.")}
 	case dav.IsStatus(err, http.StatusConflict):
 		return &view.Notice{Role: view.NoticeAlert, Title: "This folder is no longer there", Body: "The server has no folder to create it in. Nothing was created."}
 	default:
@@ -599,10 +611,10 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		// New folder of the tree: MKCOL into the chosen folder, then the
 		// same sheet with the new one chosen (s-files-4).
 		var failure *view.Notice
+		name := strings.TrimSpace(r.PostFormValue("name"))
 		if q.Get("mkcol") != "" && (op == view.FileMove || op == view.FileCopy) {
 			q.Del("mkcol")
 			if dest, ok := s.destination(c, q); ok {
-				name := strings.TrimSpace(r.PostFormValue("name"))
 				if failure = s.makeFolder(r.Context(), dest, name); failure == nil {
 					q.Set("to", s.route(dest.href("", append(slices.Clone(dest.segs), name), true)))
 				}
@@ -610,6 +622,9 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		}
 		sheet := s.opSheet(r, c, op, items, q)
 		sheet.Failure = failure
+		if failure != nil {
+			keepTyped(sheet.Target, name)
+		}
 		if WantsFragment(r) {
 			_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
 			return
@@ -702,22 +717,43 @@ func moveBlock(c *fileCtx, op view.FileOp, items []file.Entry, dest *fileCtx) st
 
 var fileOpVerbs = map[view.FileOp]string{view.FileMove: "Move", view.FileCopy: "Copy", view.FileRename: "Rename", view.FileDelete: "Delete"}
 
-// newFolderAction is New folder of a tree (s-files-4, s-notes-11): a POST
-// of the field "name" to address with q, which makes the folder in dest, the
-// chosen one, and answers the sheet with it chosen. Closed with the reason
-// where nothing can be made.
-func (s *Server) newFolderAction(dest *fileCtx, address string, q url.Values) *view.Action {
+// newFolder is New folder of a tree (s-files-4, s-notes-11) and the line it
+// opens over the tree (s-files-13): a POST of the field "name" to address
+// with q, which makes the folder in dest, the chosen one, and answers the
+// sheet with it chosen; back is the line's Cancel — the same sheet, the line
+// closed. New is closed with the reason where nothing can be made, and there
+// is no line then.
+func (s *Server) newFolder(tree *view.FileTree, dest *fileCtx, address string, q url.Values, back view.Action) {
 	a := &view.Action{ID: "files.tree.new", Label: "New folder", Icon: "i-plus", Method: "POST"}
+	tree.New, tree.Name = a, nil
 	switch {
 	case dest == nil:
 		a.Reason = "Choose a folder in the tree first."
+		return
 	case dest.col.ReadOnly:
 		a.Reason = readOnlyReason
-	default:
-		q.Set("to", s.route(dest.href("", dest.segs, true)))
-		a.Enabled, a.Href = true, s.postQuery(address, q)
+		return
 	}
-	return a
+	q.Set("to", s.route(dest.href("", dest.segs, true)))
+	a.Enabled, a.Href = true, s.postQuery(address, q)
+	back.ID, back.Label, back.Enabled = "files.tree.new.cancel", "Cancel", true
+	tree.Name = &view.Form{Action: a.Href, Method: "POST",
+		Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(dest.sess),
+			{Name: "name", Label: "Name of the new folder", Kind: view.InputText, Required: true}}}},
+		Actions: []view.Action{{ID: "files.tree.new.create", Label: "Create", Href: a.Href, Method: "POST", Enabled: true}, back}}
+}
+
+// keepTyped opens the line of New folder again with the name a refusal
+// turned down (s-files-13).
+func keepTyped(tree *view.FileTree, name string) {
+	if tree == nil || tree.Name == nil {
+		return
+	}
+	for i, r := range tree.Name.Sets[0].Rows {
+		if r.Name == "name" {
+			tree.Name.Sets[0].Rows[i].Value = text(name)
+		}
+	}
 }
 
 // opSheet says what an operation will do before it runs: the names, where they
@@ -757,7 +793,12 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 			dest = nil
 		}
 		sheet.Target = s.fileTree(r.Context(), c, dest)
-		sheet.Target.New = s.newFolderAction(dest, c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "mkcol": {"1"}})
+		back := url.Values{"op": {string(op)}, "item": names}
+		if dest != nil {
+			back.Set("to", s.route(dest.href("", dest.segs, true)))
+		}
+		s.newFolder(sheet.Target, dest, c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "mkcol": {"1"}},
+			view.Action{Href: s.postQuery(c.href("op", c.segs, true), back), Method: "POST"})
 		if reason := moveBlock(c, op, items, dest); reason != "" {
 			confirm.Enabled, confirm.Reason = false, text(reason)
 		} else {
@@ -785,19 +826,21 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 // collection of the catalog as a root, read-only ones shown and marked, and
 // the folders on the way to the chosen one opened, one PROPFIND a level.
 func (s *Server) fileTree(ctx context.Context, c *fileCtx, chosen *fileCtx) *view.FileTree {
-	return s.tree(ctx, c.blob, chosen, "", false)
+	return s.tree(ctx, c.blob, chosen, "", false, 0)
 }
 
 // sourceTree is the tree a file is chosen from (From Files of Attach): the
 // same roots and folders, and the files of every folder opened after its
 // folders. A read-only storage is a source like any other, so nothing in it
 // is closed; a subscribed folder is no source (postAttachFile) and is not
-// shown. name is the file chosen in the folder at, "" when none is.
-func (s *Server) sourceTree(ctx context.Context, blob sealed.Blob, at *fileCtx, name string) *view.FileTree {
-	return s.tree(ctx, blob, at, name, true)
+// shown. name is the file chosen in the folder at, "" when none is. Each
+// file says its size and, by limit — the most a record holds inside (S-20)
+// — whether it would go inside the record or as a link (s-files-16).
+func (s *Server) sourceTree(ctx context.Context, blob sealed.Blob, at *fileCtx, name string, limit int64) *view.FileTree {
+	return s.tree(ctx, blob, at, name, true, limit)
 }
 
-func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, name string, files bool) *view.FileTree {
+func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, name string, files bool, limit int64) *view.FileTree {
 	tree := &view.FileTree{}
 	for _, col := range blob.Collections {
 		conn, ok := blob.Connection(col.AccountID)
@@ -811,7 +854,7 @@ func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, na
 			ReadOnly: col.ReadOnly && !files,
 		}
 		if chosen != nil && chosen.conn.ID == conn.ID && chosen.col.Path == col.Path {
-			node.Expanded, node.Children = true, s.treeLevel(ctx, chosen, nil, files)
+			node.Expanded, node.Children = true, s.treeLevel(ctx, chosen, nil, files, limit)
 		}
 		tree.Nodes = append(tree.Nodes, node)
 	}
@@ -824,7 +867,7 @@ func (s *Server) tree(ctx context.Context, blob sealed.Blob, chosen *fileCtx, na
 	return tree
 }
 
-func (s *Server) treeLevel(ctx context.Context, dest *fileCtx, at []string, files bool) []view.FileTreeNode {
+func (s *Server) treeLevel(ctx context.Context, dest *fileCtx, at []string, files bool, limit int64) []view.FileTreeNode {
 	folder, err := dest.path(at, true)
 	if err != nil {
 		return nil
@@ -834,12 +877,14 @@ func (s *Server) treeLevel(ctx context.Context, dest *fileCtx, at []string, file
 		return nil
 	}
 	var dirs, names []string
+	sizes := map[string]int64{}
 	for _, e := range entries {
 		switch {
 		case e.Dir:
 			dirs = append(dirs, e.Name)
 		case files:
 			names = append(names, e.Name)
+			sizes[e.Name] = e.Size
 		}
 	}
 	byName := func(a, b string) int { return strings.Compare(strings.ToLower(a), strings.ToLower(b)) }
@@ -856,12 +901,22 @@ func (s *Server) treeLevel(ctx context.Context, dest *fileCtx, at []string, file
 		segs := append(slices.Clone(at), name)
 		node := view.FileTreeNode{ID: s.route(dest.href("", segs, true)), Label: name, ReadOnly: dest.col.ReadOnly && !files}
 		if len(dest.segs) > len(at) && dest.segs[len(at)] == name {
-			node.Expanded, node.Children = true, s.treeLevel(ctx, dest, segs, files)
+			node.Expanded, node.Children = true, s.treeLevel(ctx, dest, segs, files, limit)
 		}
 		out = append(out, node)
 	}
 	for _, name := range names {
-		out = append(out, view.FileTreeNode{ID: s.route(dest.href("", append(slices.Clone(at), name), false)), Label: name, File: true})
+		node := view.FileTreeNode{ID: s.route(dest.href("", append(slices.Clone(at), name), false)), Label: name, File: true}
+		// What Attach would do with it (s-files-16): up to the limit it goes
+		// inside the record, a larger one as a link. A size the server did
+		// not say is not guessed.
+		if n := sizes[name]; n >= 0 {
+			node.Size, node.Lands = formatSize(n), "inside"
+			if n > limit {
+				node.Lands = "link"
+			}
+		}
+		out = append(out, node)
 	}
 	return out
 }

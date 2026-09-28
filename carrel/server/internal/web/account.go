@@ -71,8 +71,9 @@ func (s *Server) getSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	s.writePage(w, r, http.StatusOK, s.accountPage(sess, accountFlash{}))
 }
 
-// postSettingsAccount saves the name and asks to confirm a new address, or
-// with op=confirm sends the link for the address waiting again.
+// postSettingsAccount saves the name (op=name, Save beside it) or asks to
+// confirm a new address (op=email, Change beside it) — both without an op —
+// or with op=confirm sends the link for the address waiting again.
 func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -107,8 +108,14 @@ func (s *Server) postSettingsAccount(w http.ResponseWriter, r *http.Request) {
 			flash.notice, _ = s.confirmationSent(r, sess, to)
 		}
 	case "email":
-		// Change beside the address: the address alone, the name untouched.
+		// Change beside the address: the field is edited in place and Change
+		// sends it — the address alone, the name untouched (account-1).
 		s.changeAddress(r, sess, &flash)
+	case "name":
+		// Save beside Display name: the name alone, the address untouched.
+		if err := s.users.SetDisplayName(id, r.FormValue("name")); err != nil {
+			flash.nameErr = err.Error()
+		}
 	default:
 		if err := s.users.SetDisplayName(id, r.FormValue("name")); err != nil {
 			flash.nameErr = err.Error()
@@ -185,7 +192,9 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 			{Legend: "Name", Rows: []view.FormRow{
 				csrfField(sess),
 				{Name: "name", Label: "Display name", Kind: view.InputText, Value: text(u.DisplayName), Error: text(flash.nameErr),
-					Hint: "Shown as the sender and used as the signature in letters you send. Blank means your login."},
+					Hint: "Shown as the sender and used as the signature in letters you send. Blank means your login.",
+					Extra: &view.Action{ID: "account.name.save", Label: "Save", Method: "POST", Enabled: true,
+						Href: s.postQuery("/app/settings/account", url.Values{"op": {"name"}})}},
 			}},
 			{Legend: "Email", Rows: []view.FormRow{
 				{Name: "email", Label: "Address", Kind: view.InputEmail, Value: text(address), Error: text(flash.emailErr),
@@ -194,9 +203,11 @@ func (s *Server) accountPage(sess *session.Session, flash accountFlash) view.Acc
 						Href: s.postQuery("/app/settings/account", url.Values{"op": {"email"}})}},
 			}},
 		},
-		// The frames draw no Save under Display name (to-typecase task 21):
-		// until they do, the name is saved by the form's own button.
-		Actions: []view.Action{{ID: "account.save", Label: "Save", Method: "POST", Enabled: true}},
+		// Each field is saved by its own button (account-1): Save beside
+		// Display name, Change beside the address. The form has none; sent
+		// without a button (Enter), it saves the name and asks to confirm a
+		// changed address, as both buttons would.
+		Actions: []view.Action{},
 	}
 	page.Email = s.emailStatus(u, tf)
 	page.PasswordNote = "Changing your password re-wraps your data key only; saved connections stay readable."

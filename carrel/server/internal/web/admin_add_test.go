@@ -187,10 +187,10 @@ func TestAddUsersIsTheFrame(t *testing.T) {
 	if pw := rowValue(page.Temporary.Form, "password"); len(pw) < 8 {
 		t.Errorf("suggested temporary password = %q", pw)
 	}
-	// The Users page leads here with the frame's «Add user»; the
-	// registration switch is no longer there.
+	// The Users page leads here with the frame's «Add user», first in its
+	// head; the registration switch is no longer there.
 	users := decode[view.AdminUsersPage](t, h.do(get("/admin/", alice)))
-	if len(users.Add) != 1 || users.Add[0].Label != "Add user" || users.Add[0].Href != "/admin/invites" {
+	if len(users.Add) == 0 || users.Add[0].Label != "Add user" || users.Add[0].Href != "/admin/invites" {
 		t.Errorf("users head = %+v, want Add user to /admin/invites (s-admin-2)", users.Add)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
@@ -38,7 +39,7 @@ func newNoteShelf(t *testing.T) noteShelf {
 		uid := "n" + string(rune('1'+i))
 		srv.Seed(notes+uid+".ics", ics("BEGIN:VJOURNAL\nUID:"+uid+"\nDTSTAMP:20260101T000000Z\n"+
 			"DTSTART:2026010"+string(rune('1'+i))+"T090000Z\nSUMMARY:"+title+"\nDESCRIPTION:Text of "+title+"\n"+
-			"CATEGORIES:work\nX-JTX-COLOR:-16711936\nX-OTHER:kept\nEND:VJOURNAL"))
+			"CATEGORIES:work\nX-JTX-COLOR:-16711936\nX-JTX-PINNED:1\nX-OTHER:kept\nEND:VJOURNAL"))
 	}
 	return noteShelf{davFixture: connectFixture(t, srv, notes, nil), diary: diary, shared: shared}
 }
@@ -51,6 +52,7 @@ var (
 	frameFieldLabel = regexp.MustCompile(`<div class="tc-field[^"]*">\s*<label>([^<]+)</label>`)
 	frameTreeRow    = regexp.MustCompile(`<div class="([^"]*)tc-tree__row">(.*?)</div>`)
 	frameNavItem    = regexp.MustCompile(`(?s)<a class="[^"]*tc-nav__item[^"]*"[^>]*>(.*?)</a>`)
+	frameDocNote    = regexp.MustCompile(`(?s)<div class="tc-doc__note">(.*?)</div>`)
 )
 
 // frameNeighbours is how many neighbours the frame's rail draws before and
@@ -85,44 +87,57 @@ func neighbourLabels(rail view.Rail) (labels []string, on string) {
 	return labels, on
 }
 
-// from-typecase note 9, s-notes-2 and s-notes-20: the rail of a note's page,
-// read and edited, lists its neighbours in the order of the notebook's list —
-// as many before and after the open one as the frame draws — and marks the
-// open one. They come from the list the session holds: a notebook not
-// loaded has none, and nothing is asked for them.
+// from-typecase notes 9 and 18, s-notes-2 and s-notes-20: the rail of a
+// note's page, read and edited, lists its neighbours in the order of the
+// notebook's list and marks the open one. The frames open the newest note of
+// «Записи» (s-notes-1 lists it first): nothing stands before it, and after it
+// as many as the rail shows on either side of a note inside the list. The
+// neighbours are all of the open notebook — a note of another one, however
+// close its day, is not among them. They come from the list the session
+// holds: a notebook not loaded has none, and nothing is asked for them.
 func TestNotePageRailHasNeighbours(t *testing.T) {
 	f := newNoteShelf(t)
 	list := f.path("notes")
-	rec := list + "/n3" // Third: the list shows Fourth, Third, Second, First
+	// Diary holds a note between Third and Fourth.
+	f.srv.Seed(f.diary+"d1.ics", ics("BEGIN:VJOURNAL\nUID:d1\nDTSTAMP:20260101T000000Z\n"+
+		"DTSTART:20260103T120000Z\nSUMMARY:Elsewhere\nEND:VJOURNAL"))
 
-	cold := decode[view.NotePage](t, f.h.do(get(rec, f.sess)))
+	cold := decode[view.NotePage](t, f.h.do(get(list+"/n3", f.sess)))
 	if len(cold.Rail.Neighbours) != 0 {
 		t.Errorf("neighbours of a notebook never loaded = %+v", cold.Rail.Neighbours)
 	}
 
 	_ = f.h.do(get(list, f.sess))
+	_ = f.h.do(get(f.notebook(f.diary), f.sess))
 	before, after := frameNeighbours(t, "s-notes-20")
+	if b, a := frameNeighbours(t, "s-notes-2"); b != before || a != after {
+		t.Fatalf("s-notes-2 and s-notes-20 draw different neighbours: read the frames again")
+	}
+	if before != 0 || after < 1 {
+		t.Fatalf("s-notes-20 draws %d before and %d after the newest note: read the frame again", before, after)
+	}
 	newest := []string{"Fourth", "Third", "Second", "First"}
-	want := newest[max(0, 1-before):min(len(newest), 1+after+1)]
-	for _, one := range []struct {
-		what string
-		rail view.Rail
-	}{
-		{"reading", decode[view.NotePage](t, f.h.do(get(rec, f.sess))).Rail},
-		{"editing", decode[view.NotePage](t, f.h.do(get(rec+"/edit", f.sess))).Rail},
-	} {
-		got, on := neighbourLabels(one.rail)
-		if !equalStrings(got, want) || on != "Third" {
-			t.Errorf("%s: neighbours = %q (on %q), want %q (on Third)", one.what, got, on, want)
-		}
-		for _, a := range one.rail.Neighbours {
-			if a.Href == "" || a.Icon != "i-note" {
-				t.Errorf("%s: neighbour %+v opens nothing or has no icon", one.what, a)
+	for _, open := range []struct{ uid, title string }{{"n4", "Fourth"}, {"n3", "Third"}} {
+		at := slices.Index(newest, open.title)
+		want := newest[max(0, at-after):min(len(newest), at+after+1)]
+		rec := list + "/" + open.uid
+		for _, one := range []struct {
+			what string
+			rail view.Rail
+		}{
+			{"reading", decode[view.NotePage](t, f.h.do(get(rec, f.sess))).Rail},
+			{"editing", decode[view.NotePage](t, f.h.do(get(rec+"/edit", f.sess))).Rail},
+		} {
+			got, on := neighbourLabels(one.rail)
+			if !equalStrings(got, want) || on != open.title {
+				t.Errorf("%s %s: neighbours = %q (on %q), want %q", one.what, open.title, got, on, want)
+			}
+			for _, a := range one.rail.Neighbours {
+				if a.Href == "" || a.Icon != "i-note" {
+					t.Errorf("%s: neighbour %+v opens nothing or has no icon", one.what, a)
+				}
 			}
 		}
-	}
-	if b, _ := frameNeighbours(t, "s-notes-2"); b != before {
-		t.Errorf("s-notes-2 and s-notes-20 draw different neighbours: read the frames again")
 	}
 }
 
@@ -166,11 +181,7 @@ func TestNoteEditIsThePage(t *testing.T) {
 			want = append(want, m[1])
 		}
 		for _, r := range p.Doc.Fields {
-			// The UID typed by hand is the server's way to Related to beyond
-			// the loaded lists (server.md, «Открыто»): a part of that field.
-			if r.Name != "related.uid" {
-				got = append(got, string(r.Label))
-			}
+			got = append(got, string(r.Label))
 		}
 		if !equalStrings(got, want) {
 			t.Errorf("%s: fields = %q, want the frame's %q", req.what, got, want)
@@ -184,12 +195,10 @@ func TestNoteEditIsThePage(t *testing.T) {
 		if p.Source.Stamp == "" {
 			t.Errorf("%s: no source", req.what)
 		}
-		var foreign []string
-		for _, fl := range p.Doc.Foreign {
-			foreign = append(foreign, string(fl.Label))
-		}
-		if !strings.Contains(frame, "X-JTX-COLOR") || !equalStrings(foreign, []string{"X-JTX-COLOR", "X-OTHER"}) {
-			t.Errorf("%s: properties Carrel does not know = %q", req.what, foreign)
+		// The shelf's notes carry three properties Carrel does not know, as
+		// the frame's does: the line under the text is the frame's, ready.
+		if m := frameDocNote.FindStringSubmatch(frame); m == nil || string(p.Doc.Foreign) != frameText(m[1]) {
+			t.Errorf("%s: the line of properties Carrel does not know = %q, the frame draws %v", req.what, p.Doc.Foreign, m)
 		}
 	}
 }

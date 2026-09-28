@@ -244,7 +244,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "2026-08-10 report.pdf. A name already taken is never overwritten: a counter is added, and the queue says so.",
+            "hint": "2026-08-10 sync-board.png. A name already taken is never overwritten: a counter is added.",
             "kind": "select",
             "label": "Written as",
             "name": "name",

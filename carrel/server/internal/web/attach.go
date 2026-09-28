@@ -465,7 +465,7 @@ func (s *Server) postAttachFile(w http.ResponseWriter, r *http.Request, c *colle
 	etag, back := strings.TrimSpace(q.Get("etag")), attachBack(c, uid, q.Get("from"))
 	src, dir, chosen := s.fileAddress(c.sess, q.Get("file"))
 	obj, err := c.find(ctx, uid)
-	notChosen := view.Notice{Role: view.NoticeAlert, Title: "No file was chosen", Body: "Choose the file to attach in Files and try again."}
+	notChosen := view.Notice{Role: view.NoticeAlert, Title: "No file was chosen.", Body: "Choose the file to attach in Files and try again."}
 	switch {
 	case notFoundErr(err):
 		s.notFound(w, r)
@@ -492,7 +492,7 @@ func (s *Server) postAttachFile(w http.ResponseWriter, r *http.Request, c *colle
 	switch {
 	case file.NotFound(err):
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
-			Role: view.NoticeAlert, Title: "Nothing was attached: the file is no longer there",
+			Role: view.NoticeAlert, Title: "Nothing was attached: the file is no longer there.",
 			Body: "It was moved or deleted after the tree was read. Choose it again.",
 		}))
 		return

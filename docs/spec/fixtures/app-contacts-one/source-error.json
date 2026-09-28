@@ -23,14 +23,6 @@
         "id": "collection.export",
         "label": "Export",
         "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts",
-        "icon": "i-link",
-        "id": "publish",
-        "label": "Publish a link",
-        "method": "GET"
       }
     ],
     "compact": false,

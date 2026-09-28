@@ -7,6 +7,13 @@
       "id": "admin.invite",
       "label": "Add user",
       "method": "GET"
+    },
+    {
+      "enabled": true,
+      "href": "/admin/reset",
+      "id": "admin.reset",
+      "label": "Reset a password",
+      "method": "GET"
     }
   ],
   "details": null,
@@ -110,11 +117,11 @@
       "menu": [
         {
           "enabled": false,
-          "href": "/admin/role?target=u-mix",
+          "href": "/admin/?action=role\u0026role=user\u0026target=u-mix",
           "id": "admin.user.role",
-          "label": "Set role",
-          "method": "GET",
-          "reason": "The last administrator cannot become a user."
+          "label": "Make user",
+          "method": "POST",
+          "reason": "Someone has to stay an administrator."
         },
         {
           "enabled": true,
@@ -130,14 +137,6 @@
           "label": "Disable",
           "method": "POST",
           "reason": "Cannot disable the last administrator."
-        },
-        {
-          "danger": true,
-          "enabled": true,
-          "href": "/admin/?action=reset\u0026target=u-mix",
-          "id": "admin.user.reset",
-          "label": "Reset password",
-          "method": "POST"
         },
         {
           "danger": true,

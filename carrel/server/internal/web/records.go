@@ -349,8 +349,10 @@ type indexEntry struct {
 	Title   string    `json:"title"`
 	Related []string  `json:"related,omitempty"`
 	Detail  string    `json:"detail,omitempty"`
-	// At is when a note was written, Unix seconds: the order of the
-	// notebook's list, which its neighbours follow (s-notes-20).
+	// At is the record's day, Unix seconds: when an event starts, when a
+	// task is due, when a note was written. A note's is the order of the
+	// notebook's list, which its neighbours follow (s-notes-20); every
+	// kind's orders the list of Related to and names its day (s-tasks-10).
 	At   int64      `json:"at,omitempty"`
 	Keys dupes.Keys `json:"keys,omitzero"`
 	// Fields are the single-valued properties a row shows, as the record
@@ -373,12 +375,12 @@ func indexOf(tf timeFmt, k view.Kind, items []listed) []indexEntry {
 		case view.KindEvent:
 			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled event"), cal.RelatedTo(o)
 			if tm, err := cal.TimingOf(o, tf.tz); err == nil && !tm.Start.IsZero() {
-				e.Detail = tf.timeOrDate(tm)
+				e.Detail, e.At = tf.timeOrDate(tm), tm.Start.Unix()
 			}
 		case view.KindTask:
 			e.UID, e.Title, e.Related = cal.UID(o), titleOr(cal.Text(o, "SUMMARY"), "Untitled task"), cal.RelatedTo(o)
 			if due, err := cal.DueOf(o, tf.tz); err == nil && !due.Start.IsZero() {
-				e.Detail = "Due " + tf.timeOrDate(due)
+				e.Detail, e.At = "Due "+tf.timeOrDate(due), due.Start.Unix()
 			}
 		default:
 			e.UID, e.Title, e.Related = cal.UID(o), noteTitle(cal.Text(o, "SUMMARY"), cal.Description(o)), cal.RelatedTo(o)
@@ -602,17 +604,15 @@ func (s *Server) newRecordAction(c *collectionCtx) view.Action {
 // listActions are the operations of one collection's list (S-19): a new
 // record, the wizard that brings a file in, and the file it hands over. A
 // read-only collection is not offered the wizard — nothing here would write
-// it — and is handed over like any other: reading is what it allows.
+// it — and is handed over like any other: reading is what it allows. The
+// collection is published from its menu in Connections, not from here
+// (owner's decision, to-typecase task 12; s-contacts-1, s-agenda-1).
 func (s *Server) listActions(c *collectionCtx, export url.Values) []view.Action {
 	out := []view.Action{s.newRecordAction(c)}
 	if !c.col.ReadOnly {
 		out = append(out, s.importAction(c))
 	}
-	out = append(out, s.exportAction(c, export))
-	if c.feed != nil {
-		return out // a subscription is not published onwards: it is someone else's
-	}
-	return append(out, s.publishAction(c, ""))
+	return append(out, s.exportAction(c, export))
 }
 
 func retryPath(c *collectionCtx, r *http.Request) string {

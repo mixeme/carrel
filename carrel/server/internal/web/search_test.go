@@ -3,6 +3,7 @@ package web_test
 import (
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -430,6 +431,16 @@ func TestSearchStopAndCeiling(t *testing.T) {
 	}
 	if h := search(t, f.h, f.sess, "q=Ada").Top.Search.History; len(h) != 1 || h[0].Outcome != "1 found" {
 		t.Errorf("history = %+v", h)
+	}
+	// s-find-1: the rail's row of a source that did not answer says so in
+	// the frame's words — the search has no list read before to fall back
+	// on (from-typecase note 18).
+	noReply := regexp.MustCompile(`<span class="tc-tickrow__meta" title="([^"]*)">(no reply)</span>`).FindStringSubmatch(mockupFrame(t, "s-find-1"))
+	if noReply == nil {
+		t.Fatal("s-find-1 draws no «no reply»: read the frame again")
+	}
+	if _, docs := railRow(t, search(t, f.h, f.sess, "q=Ada").Rail, "Docs"); string(docs.Message) != noReply[2] || string(docs.Detail) != frameText(noReply[1]) {
+		t.Errorf("Docs in the rail = %q «%s», the frame draws %q «%s»", docs.Message, docs.Detail, noReply[2], frameText(noReply[1]))
 	}
 }
 

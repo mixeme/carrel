@@ -23,14 +23,6 @@
         "id": "collection.export",
         "label": "Export",
         "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/publish?a=a-rad-vps\u0026c=rassylki\u0026k=contacts",
-        "icon": "i-link",
-        "id": "publish",
-        "label": "Publish a link",
-        "method": "GET"
       }
     ],
     "compact": false,

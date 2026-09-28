@@ -18,7 +18,7 @@
   "effects": [
     {
       "href": "",
-      "label": "1 record on servers that schedule",
+      "label": "1 record on a server that schedules",
       "mono": false,
       "value": "the server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees"
     }
@@ -56,6 +56,7 @@
       "value": "could not be read: the server answered 401 Unauthorized. What it holds keeps the old address."
     }
   ],
+  "note": "Collections that are not ticked were not looked in.",
   "pairs": [
     {
       "from": "a.kovaleva@example.org",

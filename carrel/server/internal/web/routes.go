@@ -115,9 +115,10 @@ func (s *Server) registerRoutes() {
 	// C-5.8
 	s.handle("GET /admin/", (*Server).getAdminUsers)
 	s.handle("POST /admin/", (*Server).postAdminUsers)
-	s.handle("GET /admin/role", (*Server).getAdminUserRole)
 	s.handle("GET /admin/invites", (*Server).getAdminInvites)
 	s.handle("POST /admin/invites", (*Server).postAdminInvites)
+	s.handle("GET /admin/reset", (*Server).getAdminReset)
+	s.handle("POST /admin/reset", (*Server).postAdminReset)
 	s.handle("GET /admin/settings", (*Server).getAdminSettings)
 	s.handle("POST /admin/settings", (*Server).postAdminSettings)
 	s.handle("POST /admin/settings/mail-test", (*Server).postAdminMailTest)

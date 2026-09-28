@@ -409,10 +409,10 @@ func (s *Server) filesRail(sess *session.Session, blob sealed.Blob, open *fileCt
 
 // filesShortcuts are the rubric Shortcuts of the rail (s-files-1, s-files-6):
 // the attachment folder with where it lies, and the published links with
-// their count. Without an attachment folder the row leads to where it is
-// chosen.
+// their count. Without an attachment folder the row stays, says «not set»
+// and leads to where it is chosen (s-files-18).
 func (s *Server) filesShortcuts(sess *session.Session, blob sealed.Blob, open string) []view.Shortcut {
-	attach := view.Shortcut{Action: view.Action{ID: "files.attachments", Label: "Attachments", Icon: "i-file", Href: s.route("/app/settings/attachments"), Method: "GET", Enabled: true}}
+	attach := view.Shortcut{Action: view.Action{ID: "files.attachments", Label: "Attachments", Icon: "i-file", Href: s.route("/app/settings/attachments"), Method: "GET", Enabled: true}, Place: "not set"}
 	if fc := s.savedFolder(sess, blob); fc != nil {
 		attach.Href = s.route(fc.href("", fc.segs, true))
 		place := []string{collectionLabel(fc.col)}
@@ -517,6 +517,12 @@ func (s *Server) folderPage(c *fileCtx, segs []string, entries []file.Entry, q u
 	page.Notices = append(page.Notices, notices...)
 	page.Top.Refresh = view.Refresh{Action: view.Action{ID: "folder.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route(here), Method: "GET", Enabled: true}}
 
+	// The line under the title: whose storage this is and, on a read-only
+	// one, the one reason Upload and New folder stand off (s-files-15).
+	page.Subtitle = text(connLabel(c.conn))
+	if c.col.ReadOnly {
+		page.Subtitle += " · read-only: nothing can be uploaded or made here"
+	}
 	page.Crumbs = []view.Crumb{{Label: text(collectionLabel(c.col)), Href: s.route(c.href("", nil, true))}}
 	for i, seg := range segs {
 		page.Crumbs = append(page.Crumbs, view.Crumb{Label: text(seg), Href: s.route(c.href("", segs[:i+1], true))})

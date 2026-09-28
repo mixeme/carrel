@@ -196,16 +196,37 @@ func TestPublishedSourceDown(t *testing.T) {
 	}
 }
 
-// Publishing is reading: a record page and a list offer it, a read-only
-// collection too.
+// Publishing is reading: a record page offers it, a read-only collection
+// too. A collection is published from its menu in Connections only (owner's
+// decision, to-typecase task 12): the head of its list draws New, Import,
+// Export and Print (s-contacts-1, s-agenda-1) — Print is the client's.
 func TestPublishIsOffered(t *testing.T) {
 	f := publishFixture(t)
 	card := decode[view.ContactPage](t, f.h.do(get(f.path("contacts")+"/ada", f.sess)))
 	if actionHref(t, menuActions(card.Menu), "publish") != f.publishHref("contacts", searchBook, "ada") {
 		t.Errorf("record menu = %+v", card.Menu)
 	}
+	head := func(frame string) []string {
+		acts := mockupFrame(t, frame)
+		acts = acts[strings.Index(acts, `class="tc-head"`):]
+		acts = acts[strings.Index(acts, `class="tc-acts"`):]
+		acts = acts[:strings.Index(acts, `</div>`)]
+		out := []string{}
+		for _, m := range frameButton.FindAllStringSubmatch(acts, -1) {
+			if label := frameText(m[1]); label != "Print" {
+				out = append(out, label)
+			}
+		}
+		return out
+	}
 	list := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
-	actionHref(t, list.Bar.Actions, "publish")
+	if got, want := labels(list.Bar.Actions), head("s-contacts-1"); !equalStrings(got, want) {
+		t.Errorf("contacts head = %q, want (s-contacts-1) %q", got, want)
+	}
+	agenda := decode[view.AgendaPage](t, f.h.do(get("/app/calendar/"+f.id+"/"+url.PathEscape(searchWork), f.sess)))
+	if got, want := labels(agenda.Bar.Actions), head("s-agenda-1"); !equalStrings(got, want) {
+		t.Errorf("agenda head = %q, want (s-agenda-1) %q", got, want)
+	}
 	if rec := f.h.do(get("/app/publish?k=contacts&a=nope&c=x", f.sess)); rec.Code != http.StatusNotFound {
 		t.Errorf("a foreign target: %d", rec.Code)
 	}

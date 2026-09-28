@@ -107,7 +107,8 @@ func (s *Server) getEscrowDeposit(w http.ResponseWriter, r *http.Request) {
 }
 
 // getEscrowWithdraw is the sheet before the deposited copy is destroyed
-// (account-7): nothing is taken away until its button.
+// (account-7 opens it, account-11 draws it): nothing is taken away until its
+// button.
 func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -119,7 +120,10 @@ func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sheet := view.EscrowWithdrawSheet{
-		Warning: escrowWithdrawNote,
+		// What is pressed is what happens: the title is the button
+		// (account-11), and the one warning says what will be no more.
+		Title:   "Withdraw my deposited key",
+		Warning: escrowWithdrawNote + " The copy of your data key on this server is destroyed; your records and connections stay as they are.",
 		Form: s.plainForm("/app/settings/escrow", "POST", csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: "withdraw"}),
 		Actions: []view.Action{
@@ -136,7 +140,7 @@ func (s *Server) getEscrowWithdraw(w http.ResponseWriter, r *http.Request) {
 }
 
 // escrowWithdrawNote is the line beside the withdraw button (account-4) and
-// the warning of its sheet.
+// the first sentence of its sheet's warning (account-11).
 const escrowWithdrawNote view.Text = "After withdrawal nobody can recover this account, including you."
 
 // depositSheet is the unlock sheet with the deposit's purpose and button
@@ -192,7 +196,9 @@ func (s *Server) escrowStatus(sess *session.Session, u *store.User, onAccount bo
 	if !active {
 		return status
 	}
-	status.Note = "An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars. This is not backup."
+	// The escrow page says what a deposit gives and what it costs before
+	// its button (account-12).
+	status.Note = "A deposited copy lets an administrator who holds the escrow master password recover this account if you lose your password — and, with it, read the DAV credentials you save here. You can withdraw it at any time."
 	if onAccount {
 		status.Note = "No copy of your data key is deposited. Nobody but you can decrypt your data — and if you lose your password, it cannot be recovered by anyone. Depositing asks for your Carrel password first: it is the same unlock that shows a saved password, and for the same reason — the key is being handed over, not just looked at."
 	}
@@ -214,6 +220,7 @@ func (s *Server) buildEscrowPage(sess *session.Session, errText string) view.Esc
 		page.Subtitle = "A copy of your key on this server"
 	}
 	if store.EscrowActive(&snap) && u != nil && !store.UserDeposited(u) {
+		page.Subtitle, page.Rubric = "No copy of your data key is deposited", "What a deposit does"
 		sheet := s.depositSheet(sess, text(errText))
 		page.Confirm = &sheet
 	}

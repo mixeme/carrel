@@ -9,7 +9,6 @@
     "label": "Delete task",
     "method": "POST"
   },
-  "deleteNote": "Deleting goes to the server at once, and nothing can undo it.",
   "details": null,
   "done": false,
   "form": {
@@ -132,11 +131,11 @@
             "hint": "",
             "kind": "check",
             "label": "All day",
-            "name": "start.allday",
+            "name": "allday",
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "on"
           },
           {
             "error": "",
@@ -161,18 +160,6 @@
             "readOnly": false,
             "required": false,
             "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "All day",
-            "name": "due.allday",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "on"
           },
           {
             "error": "",
@@ -400,23 +387,13 @@
             "name": "related",
             "options": [
               {
-                "label": "Nothing",
-                "selected": true,
+                "label": "By UID…",
+                "selected": false,
+                "separator": true,
+                "typed": true,
                 "value": ""
               }
             ],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "Filled, it wins over the choice above. Only the records already loaded for this collection are offered: nothing is asked of the servers.",
-            "kind": "text",
-            "label": "Or enter a UID by hand",
-            "name": "related.uid",
-            "options": [],
             "readOnly": false,
             "required": false,
             "value": ""

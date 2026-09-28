@@ -166,15 +166,14 @@ type TaskPage struct {
 // TaskEditPage — правка.
 type TaskEditPage struct {
 	Shell
-	UID        string        `json:"uid"`
-	Form       Form          `json:"form"`
-	Done       bool          `json:"done"`
-	Percent    *int          `json:"percent"`
-	Reminders  []ReminderRow `json:"reminders"`
-	Attach     []AttachRow   `json:"attach"`
-	Loss       *LossReport   `json:"loss"`
-	Delete     *Action       `json:"delete"`     // внизу формы; nil — у новой записи
-	DeleteNote Text          `json:"deleteNote"` // строка под удалением
+	UID       string        `json:"uid"`
+	Form      Form          `json:"form"`
+	Done      bool          `json:"done"`
+	Percent   *int          `json:"percent"`
+	Reminders []ReminderRow `json:"reminders"`
+	Attach    []AttachRow   `json:"attach"`
+	Loss      *LossReport   `json:"loss"`
+	Delete    *Action       `json:"delete"` // внизу формы, одна кнопка без строки под ней; nil — у новой записи
 }
 
 type NotePage struct {
@@ -199,9 +198,12 @@ type NoteDoc struct {
 	// (s-notes-20). Только в режиме правки; уходят тем же сохранением, что
 	// заголовок и тело.
 	Fields []FormRow `json:"fields"`
-	// Foreign — свойства, которых Carrel не знает: хранятся как есть и не
-	// правятся. Только в режиме правки — строка под текстом (s-notes-20).
-	Foreign []Field `json:"foreign"`
+	// Foreign — строка под текстом правки о свойствах, которых Carrel не
+	// знает: первое по имени и сколько ещё, готовой фразой — «Properties
+	// Carrel does not know — X-JTX-COLOR and two more — are kept unchanged
+	// and not shown here.» (s-notes-20). Хранятся они как есть. Пусто —
+	// таких нет или режим чтения.
+	Foreign Text `json:"foreign"`
 }
 
 type NoteMeta struct {

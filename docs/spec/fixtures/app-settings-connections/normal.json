@@ -1,6 +1,7 @@
 {
   "accounts": [
     {
+      "access": "",
       "accountID": "a-nc-home",
       "actions": [
         {
@@ -630,6 +631,7 @@
       "trace": null
     },
     {
+      "access": "",
       "accountID": "a-rad-vps",
       "actions": [
         {
@@ -946,6 +948,7 @@
       "trace": null
     },
     {
+      "access": "",
       "accountID": "a-baikal",
       "actions": [
         {
@@ -1070,6 +1073,7 @@
       "trace": null
     },
     {
+      "access": "",
       "accountID": "a-sftp-vps",
       "actions": [
         {

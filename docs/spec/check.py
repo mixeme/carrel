@@ -228,11 +228,7 @@ SHEETS = {"app-contact-move", "app-quick", "app-collections-new", "app-settings-
           "app-publish", "app-files-picker", "app-mail-compose", "app-contact-new",
           "app-contact-rewrite"}
 
-FRAME_TODO = {
-    # s-contacts-15 рисует лист, но без data-screen: адрес листа кадру не
-    # назван.
-    "app-contact-rewrite: нет кадра": "to-typecase.md, задача 25",
-}
+FRAME_TODO = {}
 
 # Расхождения, где кадр прав, а сервер ещё нет (макет первичен): каждое —
 # записка в from-typecase.md. Закрылось на сервере — строка уходит.

@@ -436,7 +436,7 @@ func liveTaskFields(ctx context.Context, t *testing.T, app *liveApp, client *dav
 	rec := list + "/" + url.PathEscape(uid)
 	form := func(p view.TaskEditPage) view.Form { return p.Form }
 
-	liveEdit(t, app, rec, form, map[string]string{"start.date": "2026-02-01", "start.allday": "on", "location": "Room 4", "status": "IN-PROCESS"})
+	liveEdit(t, app, rec, form, map[string]string{"start.date": "2026-02-01", "allday": "on", "location": "Room 4", "status": "IN-PROCESS"})
 	got, _ := rawBody(ctx, t, client, file)
 	mustHave(t, "task fields", got, "DTSTART;VALUE=DATE:20260201", "LOCATION:Room 4", "STATUS:IN-PROCESS", "PRIORITY:3", "X-CUSTOM:keep-me")
 

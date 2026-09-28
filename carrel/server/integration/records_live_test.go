@@ -465,7 +465,7 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	form = liveForm(liveDecode[view.TaskEditPage](t, "new task form", app.get(tasks+"/new")).Form)
 	form.Set("summary", "Live task")
 	form.Set("due.date", "2026-10-07")
-	form.Set("due.allday", "on")
+	form.Set("allday", "on")
 	taskLoc := redirected(t, "new task", app.post(tasks+"/new", form))
 	form = liveForm(liveDecode[view.TaskEditPage](t, "task edit", app.get(taskLoc+"/edit")).Form)
 	form.Set("done", "on")

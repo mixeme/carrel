@@ -3,9 +3,7 @@ package user
 import (
 	"context"
 
-	"carrel.dev/carrel/server/internal/conf"
 	"carrel.dev/carrel/server/internal/store"
-	"carrel.dev/carrel/server/view"
 )
 
 func inviteByID(st *store.State, id string) *store.Invite {
@@ -119,41 +117,44 @@ func (s *Service) EndUserSessions(actorID, targetID string) error {
 	})
 }
 
-// AdminResetPassword issues the same wipe token as /forgot (S-10.4, S-10.6).
-// Confirmed email: token goes to the mail layer. No email: the raw token is
-// returned for the administrator to pass on. Deposited escrow: no wipe token.
-func (s *Service) AdminResetPassword(_ context.Context, actorID, targetID string) (token string, mailed, escrowAsk, handLink bool, err error) {
-	snap := s.st.Snapshot()
-	u := snap.UserByID(targetID)
-	if u == nil || u.Disabled {
-		return "", false, false, false, ErrNotFound
-	}
-	if snap.Settings.EscrowEnabled && store.UserDeposited(u) {
-		return "", false, true, false, nil
-	}
-	hasMail := u.Email != "" && u.EmailConfirmed
-	raw, hash, err := newSecret()
-	if err != nil {
-		return "", false, false, false, err
+// AdminResetPassword is «Reset a password» (s-admin-13, S-10.6): the
+// account is wiped as by the two steps of /forgot — the connections sealed
+// with the old password, the published links, the external triggers and the
+// devices go — and opens with the temporary password the administrator typed,
+// which the person changes at the next sign-in. Every wipe token of the
+// person burns (Ф2-4), every session ends. The password goes into the key
+// derivation and nowhere else: not into the state, not into the journal
+// (user.reset). A disabled account and the administrator's own are not reset
+// here.
+func (s *Service) AdminResetPassword(ctx context.Context, actorID, targetID, temp string) error {
+	if err := validatePassword(temp); err != nil {
+		return err
 	}
 	now := s.now()
-	err = s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+	var wiped string
+	defer func() {
+		if wiped != "" {
+			s.devicesChanged(wiped)
+		}
+	}()
+	return s.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		u := st.UserByID(targetID)
+		if u == nil || u.Disabled || u.ID == actorID {
+			return nil, ErrNotFound
+		}
+		store.WipeAccount(st, u)
+		if err := store.ApplyPassword(ctx, u, u.Login, temp, st, now); err != nil {
+			return nil, err
+		}
+		u.MustChangePassword = true
+		burnWipeTokens(st, u.ID)
 		pruneTokens(st, now)
-		st.Tokens = append(st.Tokens, store.SecretToken{
-			Kind: tokenForgotWipe, Hash: hash, UserID: u.ID, Step: string(view.WipeConfirm),
-			CreatedAt: now, ExpiresAt: now.Add(conf.ForgotLinkTTL),
-		})
+		s.mgr.EndAccount(u.ID)
+		wiped = u.ID
 		return []store.AuditEntry{{
-			When: now, Who: actorLogin(st, actorID), What: "user.reset.request", Whom: u.Login,
+			When: now, Who: actorLogin(st, actorID), What: "user.reset", Whom: u.Login,
 		}}, nil
 	})
-	if err != nil {
-		return "", false, false, false, err
-	}
-	if hasMail {
-		return raw, false, false, false, nil
-	}
-	return raw, false, false, true, nil
 }
 
 // SetSelfRegEnabled toggles open registration on the instance.

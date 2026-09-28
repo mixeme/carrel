@@ -17,9 +17,7 @@ import (
 )
 
 type adminUsersFlash struct {
-	errText   string
-	wipeLink  string
-	escrowAsk bool
+	errText string
 }
 
 func (s *Server) getAdminUsers(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +34,6 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	ctx := r.Context()
 	actorID := sess.AccountID()
 	target := r.FormValue("target")
 	action := r.FormValue("action")
@@ -50,6 +47,8 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 	case "delete":
 		err = s.users.DeleteUser(actorID, target, r.FormValue("login"))
 	case "role":
+		// The toggle of s-admin-12 names the role it gives: pressing it
+		// twice does not turn it back.
 		role := store.RoleUser
 		if r.FormValue("role") == string(store.RoleAdmin) {
 			role = store.RoleAdmin
@@ -57,37 +56,12 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 		err = s.users.SetUserRole(actorID, target, role)
 	case "sessions":
 		err = s.users.EndUserSessions(actorID, target)
-	case "reset":
-		token, _, escrowAsk, handLink, resetErr := s.users.AdminResetPassword(ctx, actorID, target)
-		if resetErr != nil {
-			err = resetErr
-			break
-		}
-		if escrowAsk {
-			flash.escrowAsk = true
-			break
-		}
-		if handLink {
-			flash.wipeLink = s.route("/forgot/" + token)
-			break
-		}
-		login := ""
-		snap := s.store.Snapshot()
-		if u := snap.UserByID(target); u != nil {
-			login = u.Login
-		}
-		if token != "" && !s.sendForgotWipeMail(r, login, token) {
-			// The letter did not go: the administrator hands the link over,
-			// as for an account without an address.
-			flash.wipeLink = s.route("/forgot/" + token)
-			flash.errText = "The letter with the recovery link could not be sent. Hand the link over in person."
-		}
 	default:
 		flash.errText = "Unknown action."
 	}
 	if err != nil {
 		flash.errText = string(formError(err))
-	} else if flash.errText == "" && !flash.escrowAsk && flash.wipeLink == "" {
+	} else if flash.errText == "" {
 		s.redirect(w, r, "/admin/")
 		return
 	}
@@ -101,32 +75,14 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 	page := view.AdminUsersPage{
 		Shell: s.withRail(s.buildShell(sess, "Users"), s.adminRail(sess, "/admin/")),
 		Add: []view.Action{
-			// s-admin-2: «Add user» leads to the three ways of s-admin-1.
+			// s-admin-2: «Add user» leads to the three ways of s-admin-1;
+			// «Reset a password» opens the sheet of s-admin-13.
 			{ID: "admin.invite", Label: "Add user", Icon: "i-plus", Href: s.route("/admin/invites"), Method: "GET", Enabled: true},
+			{ID: "admin.reset", Label: "Reset a password", Href: s.route("/admin/reset"), Method: "GET", Enabled: true},
 		},
 	}
 	if flash.errText != "" {
 		page.Shell.Notices = append(page.Shell.Notices, view.Notice{Role: view.NoticeAlert, Body: text(flash.errText)})
-	}
-	if flash.wipeLink != "" {
-		page.Shell.Notices = append(page.Shell.Notices, view.Notice{
-			Role:  view.NoticeAlert,
-			Title: text("One-time recovery link"),
-			Body:  text("Pass this link to the account owner in person. It destroys encrypted connections and cannot be undone."),
-			Actions: []view.Action{{
-				ID: "admin.reset.link", Label: text(flash.wipeLink), Href: flash.wipeLink, Method: "GET", Enabled: true,
-			}},
-		})
-	}
-	if flash.escrowAsk {
-		page.Shell.Notices = append(page.Shell.Notices, view.Notice{
-			Role:  view.NoticeAlert,
-			Title: text("Key escrow covers this account"),
-			Body:  text("Password reset would destroy encrypted data. Use key escrow recovery instead."),
-			Actions: []view.Action{{
-				ID: "admin.escrow", Label: "Key escrow", Href: s.route("/admin/escrow"), Method: "GET", Enabled: true,
-			}},
-		})
 	}
 	tf := s.timeFor(sess)
 	for _, u := range snap.Users {
@@ -157,14 +113,19 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 var roleLabels = map[store.Role]view.Text{store.RoleUser: "User", store.RoleAdmin: "Administrator"}
 
 // adminUserMenu is the «⋯» of a person's row (s-admin-12): nothing on the
-// row itself — the actions are equal, none is the main one. What cannot be
-// done to this person is there, off, with the reason (C-6.2). Reset
-// password stays last above the line until the head's «Reset a password»
-// has its person picker drawn (to-typecase task 16).
+// row itself — the actions are equal, none is the main one. There are two
+// roles, so the role is one item that turns it over: Make administrator,
+// Make user. What cannot be done to this person is there, off, with the
+// reason (C-6.2). A password is reset from the head of the list
+// (s-admin-13), not here.
 func (s *Server) adminUserMenu(snap store.State, u *store.User) []view.MenuItem {
 	lastAdmin := u.Role == store.RoleAdmin && store.AdminCount(&snap) <= 1 && !u.Disabled
-	op := func(action string) string {
-		return s.postQuery("/admin/", url.Values{"action": {action}, "target": {u.ID}})
+	op := func(action string, more ...string) string {
+		q := url.Values{"action": {action}, "target": {u.ID}}
+		for i := 0; i+1 < len(more); i += 2 {
+			q.Set(more[i], more[i+1])
+		}
+		return s.postQuery("/admin/", q)
 	}
 	off := func(a view.Action, when bool, reason view.Text) view.Action {
 		if when {
@@ -172,9 +133,11 @@ func (s *Server) adminUserMenu(snap store.State, u *store.User) []view.MenuItem 
 		}
 		return a
 	}
-	role := off(view.Action{ID: "admin.user.role", Label: "Set role", Method: "GET", Enabled: true,
-		Href: s.postQuery("/admin/role", url.Values{"target": {u.ID}})},
-		lastAdmin, "The last administrator cannot become a user.")
+	role := view.Action{ID: "admin.user.role", Label: "Make administrator", Href: op("role", "role", string(store.RoleAdmin)), Method: "POST", Enabled: true}
+	if u.Role == store.RoleAdmin {
+		role = off(view.Action{ID: "admin.user.role", Label: "Make user", Href: op("role", "role", string(store.RoleUser)), Method: "POST", Enabled: true},
+			lastAdmin, "Someone has to stay an administrator.")
+	}
 	sessions := off(view.Action{ID: "admin.user.sessions", Label: "Kill sessions", Href: op("sessions"), Method: "POST", Enabled: true},
 		s.sessions.LiveCount(u.ID) == 0, "No live sessions.")
 	toggle := off(view.Action{ID: "admin.user.disable", Label: "Disable", Href: op("disable"), Method: "POST", Enabled: true},
@@ -182,36 +145,115 @@ func (s *Server) adminUserMenu(snap store.State, u *store.User) []view.MenuItem 
 	if u.Disabled {
 		toggle = view.Action{ID: "admin.user.enable", Label: "Enable", Href: op("enable"), Method: "POST", Enabled: true}
 	}
-	reset := off(view.Action{ID: "admin.user.reset", Label: "Reset password", Href: op("reset"), Method: "POST", Danger: true, Enabled: true},
-		u.Disabled, "Enable the account first: a disabled account gets no reset.")
 	del := off(view.Action{ID: "admin.user.delete", Label: "Delete", Icon: "i-trash", Href: op("delete"), Method: "POST", Danger: true, Enabled: true},
 		lastAdmin, "Cannot delete the last administrator.")
-	return []view.MenuItem{{Action: role}, {Action: sessions}, {Action: toggle}, {Action: reset}, {Separator: true, Action: del}}
+	return []view.MenuItem{{Action: role}, {Action: sessions}, {Action: toggle}, {Separator: true, Action: del}}
 }
 
-// getAdminUserRole is the sheet «Set role» opens: the roles of s-admin-8,
-// the person's own chosen. The last administrator has none to choose.
-func (s *Server) getAdminUserRole(w http.ResponseWriter, r *http.Request) {
+// resetWarning is what a reset destroys, said before the button (S-10.6):
+// the wipe of S-10.4, whole.
+const resetWarning = "The passwords this person saved for DAV servers are sealed with their own password, and a reset destroys them: " +
+	"every account they connected has to be connected again, and their published links, devices and external backup triggers stop. " +
+	"Their records on the servers stay as they are."
+
+// resetHint is the hint under the temporary password (s-admin-13): who hands
+// it over, and the way that destroys nothing.
+const resetHint = "Hand it over yourself; they choose their own at the next sign-in. " +
+	"If their key is deposited, recover the account in Key escrow instead: nothing is destroyed then."
+
+// getAdminReset is the sheet «Reset a password» opens from the head of the
+// people's list (s-admin-13); ?target= chooses the person.
+func (s *Server) getAdminReset(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireAdmin(w, r)
 	if !ok {
 		return
 	}
-	snap := s.store.Snapshot()
-	u := snap.UserByID(r.URL.Query().Get("target"))
-	if u == nil || (len(u.LoginHash) == 0 && u.Disabled) {
-		s.notFound(w, r)
+	s.writeResetSheet(w, r, s.resetSheet(sess, r.URL.Query().Get("target"), s.users.SuggestPassword(), nil, nil))
+}
+
+// postAdminReset resets the chosen person's password to the temporary one
+// typed, and shows it this once; a refusal stands at its field and changes
+// nothing.
+func (s *Server) postAdminReset(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.requireAdmin(w, r)
+	if !ok {
 		return
 	}
-	var opts []view.Option
-	for _, role := range []store.Role{store.RoleUser, store.RoleAdmin} {
-		opts = append(opts, view.Option{Value: string(role), Label: roleLabels[role], Selected: u.Role == role})
+	target, temp := r.FormValue("target"), r.FormValue("password")
+	snap := s.store.Snapshot()
+	u := snap.UserByID(target)
+	if why := resetRefusal(sess, u); why != "" {
+		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, map[string]view.Text{"target": why}, nil))
+		return
 	}
-	form := withSubmit(s.plainForm("/admin/?"+url.Values{"action": {"role"}, "target": {u.ID}}.Encode(), "POST",
+	if err := s.users.AdminResetPassword(r.Context(), sess.AccountID(), target, temp); err != nil {
+		field := "target"
+		if errors.Is(err, user.ErrPasswordShort) {
+			field = "password"
+		}
+		s.writeResetSheet(w, r, s.resetSheet(sess, target, temp, map[string]view.Text{field: formError(err)}, nil))
+		return
+	}
+	// Shown this once: the answer to the POST, not a page to come back to.
+	// The form is empty again, with a new password to offer.
+	issued := &view.IssuedPassword{
+		Login:    text(u.Login),
+		Password: text(temp),
+		Copy:     view.Action{ID: "admin.reset.copy", Label: "Copy", Method: "GET", Enabled: true},
+	}
+	s.writeResetSheet(w, r, s.resetSheet(sess, "", s.users.SuggestPassword(), nil, issued))
+}
+
+// resetRefusal is why a person is not reset here: nobody, oneself — whose
+// password is changed in their own account — or a disabled account.
+func resetRefusal(sess *session.Session, u *store.User) view.Text {
+	switch {
+	case u == nil || (len(u.LoginHash) == 0 && u.Disabled):
+		return "Choose whose password to reset."
+	case u.ID == sess.AccountID():
+		return "Your own password is changed in your account settings."
+	case u.Disabled:
+		return "Enable the account first: a disabled account gets no reset."
+	}
+	return ""
+}
+
+// resetSheet is s-admin-13: Whose — the people of the list by login and
+// role, those who cannot be reset here off with the reason — the warning,
+// the temporary password, Reset password and Cancel.
+func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map[string]view.Text, issued *view.IssuedPassword) view.PasswordResetSheet {
+	snap := s.store.Snapshot()
+	var people []view.Option
+	for i := range snap.Users {
+		u := &snap.Users[i]
+		if len(u.LoginHash) == 0 && u.Disabled {
+			continue
+		}
+		o := view.Option{Value: u.ID, Label: text(u.Login + " · " + string(roleLabels[u.Role])), Selected: u.ID == target}
+		if why := resetRefusal(sess, u); why != "" {
+			o.Disabled, o.Reason, o.Selected = true, why, false
+		}
+		people = append(people, o)
+	}
+	form := s.plainForm("/admin/reset", "POST",
 		csrfField(sess),
-		view.FormRow{Name: "role", Label: "Role", Kind: view.InputSelect, Options: opts, Required: true},
-	), "admin.user.role.save", "Save",
-		view.Action{ID: "admin.user.role.cancel", Label: "Cancel", Href: s.route("/admin/"), Method: "GET", Enabled: true})
-	sheet := view.UserRoleSheet{Login: text(u.Login), Form: form}
+		view.FormRow{Name: "target", Label: "Whose", Kind: view.InputSelect, Options: people, Required: true, Error: errs["target"]},
+		view.FormRow{Name: "password", Label: "Temporary password", Kind: view.InputText, Required: true, Value: text(temp),
+			Hint: resetHint, Error: errs["password"]},
+	)
+	return view.PasswordResetSheet{
+		Title:   "Reset a password",
+		Form:    form,
+		Warning: resetWarning,
+		Issued:  issued,
+		Actions: []view.Action{
+			{ID: "admin.reset.run", Label: "Reset password", Href: form.Action, Method: "POST", Danger: true, Enabled: true},
+			{ID: "admin.reset.cancel", Label: "Cancel", Href: s.route("/admin/"), Method: "GET", Enabled: true},
+		},
+	}
+}
+
+func (s *Server) writeResetSheet(w http.ResponseWriter, r *http.Request, sheet view.PasswordResetSheet) {
 	w.Header().Set("Cache-Control", "no-store")
 	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
 		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)

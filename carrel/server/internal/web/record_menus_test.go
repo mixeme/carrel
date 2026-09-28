@@ -234,6 +234,14 @@ func TestFileRowMenusAreTheFrames(t *testing.T) {
 	if a := actionByID(page.Bar.Actions, "publish"); a != nil {
 		t.Errorf("the folder bar publishes: %+v", a)
 	}
+	// The head of Files is Upload and New folder; its «⋯» (s-files-7) holds
+	// Print alone, and that is the client's: no Import, no Export.
+	if want := []string{"Print [i-print]"}; !equalStrings(frameMenu(t, "s-files-7"), want) {
+		t.Fatalf("s-files-7 = %q, want %q: read the frame again", frameMenu(t, "s-files-7"), want)
+	}
+	if got := ids(page.Bar.Actions); !equalStrings(got, []string{"file.upload", "folder.new"}) {
+		t.Errorf("files head = %q, want Upload and New folder only", got)
+	}
 }
 
 // S-19: Export in the menu of one record hands over that record, named
@@ -316,9 +324,17 @@ func TestDeleteOnTheEditPage(t *testing.T) {
 		t.Errorf("a single event: delete %+v, line %q", once.Delete, once.DeleteNote)
 	}
 
+	// Under Delete task no line (to-typecase task 8): deleting is one button.
+	if line := regexp.MustCompile(`>Delete task</button>([^<]*)<`).FindStringSubmatch(mockupFrame(t, "s-tasks-3")); line == nil || strings.TrimSpace(line[1]) != "" {
+		t.Fatalf("s-tasks-3 under Delete task: %q — read the frame again", line)
+	}
 	task := decode[view.TaskEditPage](t, f.h.do(get(f.path("tasks")+"/t1/edit", f.sess)))
-	if task.Delete == nil || task.Delete.Label != "Delete task" || !task.Delete.Danger || task.DeleteNote == "" {
-		t.Fatalf("task edit delete = %+v, line %q", task.Delete, task.DeleteNote)
+	if task.Delete == nil || task.Delete.Label != "Delete task" || !task.Delete.Danger {
+		t.Fatalf("task edit delete = %+v", task.Delete)
+	}
+	raw := decode[map[string]any](t, f.h.do(get(f.path("tasks")+"/t1/edit", f.sess)))
+	if line, ok := raw["deleteNote"]; ok {
+		t.Errorf("task edit sends a line under Delete: %q", line)
 	}
 	if resp := f.h.do(postHref(f, task.Delete.Href)); resp.Code != 303 || resp.Header().Get("Location") != f.path("tasks") {
 		t.Fatalf("delete from the edit page: %d %q", resp.Code, resp.Header().Get("Location"))

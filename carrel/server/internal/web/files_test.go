@@ -586,8 +586,15 @@ func TestNewFolder(t *testing.T) {
 	}
 	taken := decode[view.FilesPage](t, f.h.do(postForm(f.at("mkcol"), f.sess, url.Values{"name": {"old"}})))
 	bad := decode[view.FilesPage](t, f.h.do(postForm(f.at("mkcol"), f.sess, url.Values{"name": {".."}})))
-	if !hasNotice(taken.Notices, "old is already here") || !hasNotice(bad.Notices, "Nothing was created") {
+	// A taken name is one line, as s-files-13 draws it, and says whether a
+	// file or a folder holds it.
+	if !hasNoticeBody(taken.Notices, "There is a folder called «old» in Docs already. Choose another name.") || !hasNotice(bad.Notices, "Nothing was created") {
 		t.Errorf("taken %+v, bad %+v", taken.Notices, bad.Notices)
+	}
+	f.srv.SeedFile(filesDocs+"old/x.txt", "x")
+	file := decode[view.FilesPage](t, f.h.do(postForm(f.at("mkcol", "old", ""), f.sess, url.Values{"name": {"x.txt"}})))
+	if !hasNoticeBody(file.Notices, "There is a file called «x.txt» in old already. Choose another name.") {
+		t.Errorf("a file's name: %+v", file.Notices)
 	}
 }
 

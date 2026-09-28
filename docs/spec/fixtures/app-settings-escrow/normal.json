@@ -179,7 +179,7 @@
     "active": true,
     "by": "",
     "covered": false,
-    "note": "An administrator who holds the escrow master password can decrypt the DAV credentials you save here, and through them your contacts and calendars. This is not backup.",
+    "note": "A deposited copy lets an administrator who holds the escrow master password recover this account if you lose your password — and, with it, read the DAV credentials you save here. You can withdraw it at any time.",
     "actionNote": "",
     "badge": null,
     "deposited": "",
@@ -275,5 +275,6 @@
       }
     ]
   },
-  "subtitle": ""
+  "subtitle": "No copy of your data key is deposited",
+  "rubric": "What a deposit does"
 }

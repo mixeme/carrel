@@ -223,21 +223,40 @@ func TestBackupRowsAndJobPageAreTheFrame(t *testing.T) {
 	}
 }
 
-// The external trigger is turned off on the job's trigger card, not on the
-// row; a job that is off is not started by it either.
-func TestTriggerOffIsOnTheJobPage(t *testing.T) {
+// The external trigger is turned on and off by its own tick, «On a clock of
+// your own» (s-backup-2, to-typecase task 18a) — there is no separate
+// switch, and none on the row; a job that is off is not started by it
+// either.
+func TestTriggerIsTurnedOffByItsTick(t *testing.T) {
 	f := backupFixture(t)
 	job := saveJob(t, f, jobForm(f, sealed.BackupToWebDAV, "8", "pw"))
+	tick := regexp.MustCompile(`(?s)<button class="tc-check"[^>]*>(?:<span[^>]*></span>)?(On a clock of your own.*?)</button>`).FindStringSubmatch(mockupFrame(t, "s-backup-2"))
+	if tick == nil {
+		t.Fatal("s-backup-2 draws no «On a clock of your own»: read the frame again")
+	}
+	// The badge «local» is the instance's, not the tick's; «cron» is set in
+	// mono and followed by its comma.
+	label := strings.ReplaceAll(frameText(regexp.MustCompile(`(?s)<span class="tc-badge[^"]*"[^>]*>.*?</span>`).ReplaceAllString(tick[1], "")), " ,", ",")
+	clock := func() view.Action {
+		page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
+		if a := actionByID(page.Jobs[0].Actions, "backup.trigger.off"); a != nil {
+			t.Errorf("the row turns the trigger off: %+v", a)
+		}
+		sayWhy(t, "trigger", page.Jobs[0].Trigger.Password.Reveal, page.Jobs[0].Trigger.Clock)
+		return page.Jobs[0].Trigger.Clock
+	}
+	if c := clock(); c.Label != view.Text(label) || c.On || !c.Enabled {
+		t.Fatalf("clock before = %+v, want %q unticked", c, label)
+	}
 	secret, _ := issueTrigger(t, f, job)
-	page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess)))
-	if a := actionByID(page.Jobs[0].Actions, "backup.trigger.off"); a != nil {
-		t.Errorf("the row turns the trigger off: %+v", a)
+	on := clock()
+	if !on.On || !on.Enabled || on.Method != http.MethodPost {
+		t.Fatalf("clock on = %+v", on)
 	}
-	off := page.Jobs[0].Trigger.Off
-	if off == nil || !off.Enabled || off.Method != http.MethodPost {
-		t.Fatalf("trigger off = %+v", off)
+	raw := decode[map[string]any](t, f.h.do(get("/app/settings/backup", f.sess)))
+	if trig := raw["jobs"].([]any)[0].(map[string]any)["trigger"].(map[string]any); trig["off"] != nil {
+		t.Errorf("the trigger card still has a switch of its own: %v", trig["off"])
 	}
-	sayWhy(t, "trigger", page.Jobs[0].Trigger.Password.Reveal)
 
 	v := jobForm(f, sealed.BackupToWebDAV, "8", "pw")
 	v.Del("on")
@@ -247,11 +266,14 @@ func TestTriggerOffIsOnTheJobPage(t *testing.T) {
 	if rec := f.h.do(script(http.MethodPost, "/api/backup/run?job="+job.ID, secret)); rec.Code != http.StatusConflict || !strings.Contains(rec.Body.String(), "off") {
 		t.Errorf("a job that is off started from outside: %d %q", rec.Code, rec.Body.String())
 	}
-	if rec := f.h.do(postForm(off.Href, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
-		t.Fatalf("trigger off: %d", rec.Code)
+	if rec := f.h.do(postForm(on.Href, f.sess, url.Values{})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("untick: %d", rec.Code)
 	}
-	if page := decode[view.BackupPage](t, f.h.do(get("/app/settings/backup", f.sess))); page.Jobs[0].Trigger.Off != nil {
-		t.Errorf("the trigger is off and still offers to turn off")
+	if rec := f.h.do(script(http.MethodGet, "/api/backup/status", secret)); rec.Code != http.StatusNotFound {
+		t.Errorf("a secret unticked still works: %d", rec.Code)
+	}
+	if c := clock(); c.On {
+		t.Errorf("unticked, the clock is still on: %+v", c)
 	}
 }
 
@@ -306,10 +328,11 @@ func TestInviteRowIsTheFrame(t *testing.T) {
 	}
 }
 
-// s-admin-12, s-admin-2: a person's row has only «⋯» — Set role, Kill
-// sessions, Disable (Enable for one disabled), and Delete under the line;
-// Reset password stays last above the line until the head's person picker
-// is drawn (to-typecase task). The role is the word of s-admin-8.
+// s-admin-12, s-admin-2: a person's row has only «⋯» — the role as one
+// toggle (Make administrator, Make user), Kill sessions, Disable (Enable for
+// one disabled), and Delete under the line. There is no sheet of roles and
+// no reset in the row: the password is reset from the head (s-admin-13).
+// The role is the word of s-admin-8.
 func TestUserMenuIsTheFrame(t *testing.T) {
 	h := newHarness(t)
 	adminID := h.admin("alice", "password123")
@@ -325,21 +348,8 @@ func TestUserMenuIsTheFrame(t *testing.T) {
 		}
 		return out
 	}
-	withoutReset := func(menu []view.MenuItem) []view.MenuItem {
-		out := []view.MenuItem{}
-		for i, it := range menu {
-			if it.ID == "admin.user.reset" {
-				if i+1 >= len(menu) || !menu[i+1].Separator {
-					t.Errorf("Reset password is not last above the line: %v", serverMenu(menu))
-				}
-				continue
-			}
-			out = append(out, it)
-		}
-		return out
-	}
 	rows := users()
-	sameMenu(t, "bob", withoutReset(rows["bob"].Menu), "s-admin-12")
+	sameMenu(t, "bob", rows["bob"].Menu, "s-admin-12")
 	head := mockupFrame(t, "s-admin-2")
 	for login, role := range map[string]string{"alice": "Administrator", "bob": "User"} {
 		if string(rows[login].Role) != role || !strings.Contains(head, "<td>"+role+"</td>") {
@@ -356,41 +366,50 @@ func TestUserMenuIsTheFrame(t *testing.T) {
 		return view.Action{}
 	}
 	// The last administrator can be neither demoted, disabled nor deleted:
-	// the items are there, off, with the reason.
+	// the items are there, off, with the reason; the role's is the
+	// figcaption's.
 	for _, id := range []string{"admin.user.role", "admin.user.disable", "admin.user.delete"} {
 		if a := item(rows["alice"], id); a.Enabled {
 			t.Errorf("last admin: %s is on", id)
 		}
 	}
+	if a := item(rows["alice"], "admin.user.role"); a.Label != "Make user" || a.Reason != "Someone has to stay an administrator." {
+		t.Errorf("last admin's role = %+v", a)
+	}
 	// Bob has not signed in: nothing to kill.
 	if a := item(rows["bob"], "admin.user.sessions"); a.Enabled || a.Label != "Kill sessions" {
 		t.Errorf("bob's sessions = %+v", a)
 	}
+	if rec := h.do(get("/admin/role?target="+bobID, alice)); strings.Contains(rec.Body.String(), "admin.user.role.save") {
+		t.Errorf("GET /admin/role still answers with the sheet of roles: %d", rec.Code)
+	}
 
-	// Set role opens the list of s-admin-8; its choice is saved.
-	sheet := decode[view.UserRoleSheet](t, h.do(get(item(rows["bob"], "admin.user.role").Href, alice)))
-	var role *view.FormRow
-	for _, set := range sheet.Form.Sets {
-		for i := range set.Rows {
-			if set.Rows[i].Name == "role" {
-				role = &set.Rows[i]
-			}
-		}
+	// The toggle is the role's one move: Bob becomes an administrator, his
+	// item says Make user, and Alice is no longer the last one.
+	toggle := item(rows["bob"], "admin.user.role")
+	if toggle.Method != http.MethodPost {
+		t.Fatalf("Make administrator = %+v", toggle)
 	}
-	if role == nil || sheet.Login != "bob" {
-		t.Fatalf("role sheet = %+v", sheet)
-	}
-	sameList(t, "role", role.Options, "s-admin-8")
-	if got := selectedOf(role.Options); !equalStrings(got, []string{"user"}) {
-		t.Errorf("chosen role = %v", got)
-	}
-	if rec := h.do(postForm(sheet.Form.Action, alice, url.Values{"role": {"admin"}})); rec.Code != http.StatusSeeOther {
-		t.Fatalf("set role: %d %s", rec.Code, rec.Body)
+	if rec := h.do(postForm(toggle.Href, alice, url.Values{})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("make administrator: %d %s", rec.Code, rec.Body)
 	}
 	if st := h.st.Snapshot(); st.UserByID(bobID) == nil || st.UserByID(bobID).Role != "admin" {
-		u := st.UserByID(bobID)
-		t.Fatalf("bob = %+v", u)
+		t.Fatalf("bob = %+v", st.UserByID(bobID))
 	}
+	rows = users()
+	if a := item(rows["bob"], "admin.user.role"); a.Label != "Make user" || !a.Enabled {
+		t.Errorf("bob's role after = %+v", a)
+	}
+	if a := item(rows["alice"], "admin.user.role"); a.Label != "Make user" || !a.Enabled {
+		t.Errorf("alice's role with two admins = %+v", a)
+	}
+	if rec := h.do(postForm(item(rows["bob"], "admin.user.role").Href, alice, url.Values{})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("make user: %d", rec.Code)
+	}
+	if st := h.st.Snapshot(); st.UserByID(bobID).Role != "user" {
+		t.Fatalf("bob after Make user = %+v", st.UserByID(bobID))
+	}
+	rows = users()
 
 	// Disable, then Enable in its place.
 	if rec := h.do(postForm(item(rows["bob"], "admin.user.disable").Href, alice, url.Values{})); rec.Code != http.StatusSeeOther {
@@ -403,7 +422,7 @@ func TestUserMenuIsTheFrame(t *testing.T) {
 			want[i] = "Enable []" // the figcaption: «У отключённого вместо Disable — Enable»
 		}
 	}
-	if got := serverMenu(withoutReset(rows["bob"].Menu)); !equalStrings(got, want) {
+	if got := serverMenu(rows["bob"].Menu); !equalStrings(got, want) {
 		t.Errorf("disabled bob «⋯» = %q, want %q", got, want)
 	}
 	enable := item(rows["bob"], "admin.user.enable")

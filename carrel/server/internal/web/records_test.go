@@ -775,10 +775,10 @@ func TestReadOnlyCollectionHasNoEditing(t *testing.T) {
 		t.Errorf("card: read-only %v, actions %v, menu %v", card.ReadOnly, ids(card.Actions), got)
 	}
 	// New is closed with its reason and the wizard that would write here is
-	// not offered at all; Export and Publish are, because reading is what
-	// read-only allows.
+	// not offered at all; Export is, because reading is what read-only
+	// allows (the collection is published from Connections).
 	page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
-	if len(page.Bar.Actions) != 3 || page.Bar.Actions[2].ID != "publish" || page.Bar.Actions[0].Enabled || page.Bar.Actions[0].Reason == "" {
+	if len(page.Bar.Actions) != 2 || page.Bar.Actions[0].Enabled || page.Bar.Actions[0].Reason == "" {
 		t.Errorf("new action = %+v", page.Bar.Actions)
 	}
 	if page.Bar.Actions[1].ID != "collection.export" {

@@ -116,46 +116,38 @@
         "name": "related",
         "options": [
           {
-            "label": "Nothing",
-            "selected": false,
-            "value": ""
-          },
-          {
-            "label": "8f1c-4a02-b7d3 · not in the lists loaded for this collection",
+            "label": "8f1c-4a02-b7d3",
             "selected": true,
             "value": "8f1c-4a02-b7d3"
           },
           {
-            "label": "Что почитать про CRDT · note",
+            "colour": "#4a6b52",
+            "label": "Что почитать про CRDT",
+            "meta": "note · 8 August",
             "selected": false,
             "value": "6d92-13ef-b408"
+          },
+          {
+            "colour": "#6b4e7a",
+            "label": "Про дорогу до дачи",
+            "meta": "note · 3 August",
+            "selected": false,
+            "value": "7f03-5b26-cc19"
+          },
+          {
+            "label": "By UID…",
+            "selected": false,
+            "separator": true,
+            "typed": true,
+            "value": ""
           }
         ],
         "readOnly": false,
         "required": false,
         "value": "8f1c-4a02-b7d3"
-      },
-      {
-        "error": "",
-        "extra": null,
-        "hint": "Filled, it wins over the choice above. Only the records already loaded for this collection are offered: nothing is asked of the servers.",
-        "kind": "text",
-        "label": "Or enter a UID by hand",
-        "name": "related.uid",
-        "options": [],
-        "readOnly": false,
-        "required": false,
-        "value": ""
       }
     ],
-    "foreign": [
-      {
-        "href": "",
-        "label": "X-JTX-COLOR",
-        "mono": true,
-        "value": "#4A6B52"
-      }
-    ],
+    "foreign": "A property Carrel does not know — X-JTX-COLOR — is kept unchanged and not shown here.",
     "mode": "editing",
     "readOnly": false,
     "rendered": [

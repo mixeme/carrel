@@ -400,20 +400,32 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 		Pairs:   []view.RewritePair{},
 		Effects: []view.Field{},
 		Kept:    []view.Field{},
+		// Only the ticked collections were read, as relink reads them
+		// (owner's decision, s-contacts-19).
+		Note: "Collections that are not ticked were not looked in.",
 	}
 	for _, pr := range p.Pairs {
-		n := 0
+		n, writable := 0, 0
 		for _, r := range p.Records {
 			if slices.Contains(r.Names, strings.ToLower(pr.From)) {
 				n++
+				if !r.ReadOnly {
+					writable++
+				}
 			}
 		}
+		// What they lose is said where rewriting can mend it; where none can
+		// be written the pair only counts them (s-contacts-20).
 		note := "no events or tasks name the old one"
 		switch {
-		case n == 1:
+		case n == 1 && writable > 0:
 			note = "1 event or task names the old one; it drops out of the person’s timeline"
-		case n > 1:
+		case n == 1:
+			note = "1 event or task names the old one"
+		case n > 1 && writable > 0:
 			note = fmt.Sprintf("%d events and tasks name the old one; they drop out of the person’s timeline", n)
+		case n > 1:
+			note = fmt.Sprintf("%d events and tasks name the old one", n)
 		}
 		sheet.Pairs = append(sheet.Pairs, view.RewritePair{From: text(pr.From), To: text(pr.To), Note: text(note)})
 	}
@@ -440,7 +452,11 @@ func (s *Server) rewriteSheet(c *collectionCtx, p *rewritePlan) view.RewriteShee
 		past = past || r.Past
 	}
 	if scheduling > 0 {
-		sheet.Effects = append(sheet.Effects, view.Field{Label: text(plural(scheduling, "record") + " on servers that schedule"),
+		where := " on servers that schedule"
+		if scheduling == 1 {
+			where = " on a server that schedules" // s-contacts-19
+		}
+		sheet.Effects = append(sheet.Effects, view.Field{Label: text(plural(scheduling, "record") + where),
 			Value: "the server may send a cancellation to the old address, an invitation to the new one and an update to the other attendees"})
 	}
 	for _, server := range unknown {
@@ -508,7 +524,12 @@ type rewriteOutcome struct {
 }
 
 func (o rewriteOutcome) notice(p *rewritePlan) view.Notice {
-	n := view.Notice{Role: view.NoticeInfo, Title: text(fmt.Sprintf("Rewritten in %d of %d records.", o.written, p.writable()))}
+	// Every writable record written counts them alone (s-contacts-21); a
+	// shortfall says of how many.
+	n := view.Notice{Role: view.NoticeInfo, Title: text("Rewritten in " + plural(o.written, "record") + ".")}
+	if o.written != p.writable() {
+		n.Title = text(fmt.Sprintf("Rewritten in %d of %s.", o.written, plural(p.writable(), "record")))
+	}
 	parts := append([]string(nil), o.refused...)
 	for _, g := range p.kept() {
 		if g.n == 1 {

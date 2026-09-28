@@ -17,6 +17,186 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.69 — 2026-09-28
+
+Copies the Typecase mockup 0.7.2 (server note 18). This part — what the
+frames removed and what became a toggle: a collection is published from
+Connections only, deleting a task is one button, a task has one «All day»,
+the role is one item, a password is reset from a sheet in the head of the
+people's list with a temporary password, and the external trigger is
+turned off by its own tick. Then the note, the rails and the account: the
+list of Related to, the line of a note's unknown properties said by the
+server, Save beside Display name, the escrow page without a copy and the
+withdraw sheet as drawn. Last, the sheets of move and copy, From Files, a
+server that asks no password and the rewrite of an address (to-typecase
+tasks 22–25).
+
+### Added
+
+- **«Reset a password»** in the head of the Users page (`AdminUsersPage.add`,
+  `admin.reset`, s-admin-2) opens **`PasswordResetSheet`** (s-admin-13,
+  `GET /admin/reset`, `?target=` chooses the person): `title` «Reset a
+  password»; `form` with **Whose** (`target`: the people of the list as
+  «anna · User»; oneself — «Your own password is changed in your account
+  settings.» — and a disabled account are there, off, with the reason) and
+  **Temporary password** (`password`, offered by the server as on «Add
+  users», with the hint «Hand it over yourself; they choose their own at
+  the next sign-in. If their key is deposited, recover the account in Key
+  escrow instead: nothing is destroyed then.»); `warning` — what the reset
+  destroys, before the button; `actions` «Reset password»
+  (`admin.reset.run`, danger, `POST /admin/reset`) and «Cancel». The reset
+  is the wipe of `/forgot` whole — the connections, the published links,
+  the external backup triggers and the devices go, the records on the
+  servers stay — and the account opens at once with the temporary password,
+  which must be changed at the next sign-in. Every wipe link of the person
+  dies, every session ends. The answer is the sheet with `issued` — login,
+  password, «Copy» (`admin.reset.copy`) — this once; the password is kept
+  nowhere and journaled nowhere (`user.reset`, by whom, for whom). A
+  refusal stands at its field and changes nothing.
+- **`TriggerBlock.clock`** — the tick «On a clock of your own — cron,
+  GoSentry, a job in Gitea» (`backup.trigger.clock`, s-backup-2): `on` while
+  the external trigger is on, and then it posts `op=trigger-off`; unticked
+  it issues the secret (`op=trigger`; outside the unlock window it leads to
+  the password sheet).
+- **`allday`** — the task's one «All day» (s-tasks-3), leading When.
+- **`Option.meta`** and **`Option.typed`** — the list of **Related to**
+  (s-tasks-10, the task's and the note's form): the records the session has
+  loaded, of every collection of the catalog — events, tasks and notes, each
+  with its collection's `colour` and `meta` «event · 12 August» (an event's
+  start, a task's due, a note's day) — newest first, the record itself left
+  out; last, after a line, «By UID…» (`typed`, empty `value`): the UID is
+  typed by hand under the same name, `related`. A relation outside what is
+  loaded stands first under its UID, chosen; to a card, under its name. No
+  server is asked.
+- **Save beside Display name** (`FormRow.extra` of `name`,
+  `account.name.save`, `POST /app/settings/account?op=name`, account-1): it
+  saves the name alone, as Change beside the address sends the address
+  alone (`op=email` — the field is edited in place).
+- **`EscrowWithdrawSheet.title`** «Withdraw my deposited key» (account-11).
+- **`EscrowPage.rubric`** «What a deposit does» over the words of the page
+  without a copy (account-12).
+- **`FileTree.name`** — the line New folder opens over the tree (s-files-13):
+  the field `name` «Name of the new folder», «Create»
+  (`files.tree.new.create`, posting to `New.href`) and «Cancel»
+  (`files.tree.new.cancel`, the same sheet with the line closed). A refusal
+  stands under it and the line comes back with the name typed; the upload
+  picker's tree has the same line.
+- **`FilePickerSheet.title`** and **`.subject`**: «Attach from Files», «to
+  «Sync-up»» (s-files-16); «Upload files» (s-notes-11); «Attachment folder»
+  on Browse.
+- **`FileTreeNode.size`** and **`.lands`** — a file of the From Files tree
+  says its size and «inside» or «link», what Attach would do with it by the
+  rule of an upload (s-files-16). A size the server did not say is not
+  guessed.
+- **`FilesPage.subtitle`** — the line under a folder's title: the storage's
+  connection, and on a read-only storage «… · read-only: nothing can be
+  uploaded or made here», the one reason Upload and New folder stand off
+  (s-files-15).
+- **`ConnectionCard.access`** — «no password» in the address line of a
+  connection whose server asks none (s-profile-15).
+- **`RewriteSheet.note`** — «Collections that are not ticked were not looked
+  in.» under the blocks (owner's decision, s-contacts-19).
+
+### Changed
+
+- **The task form is the rubrics of s-tasks-3 whole**: When — All day, Start
+  date, Start time, Due date, Due time; Progress — Status, Priority, Percent
+  complete, Done last; Reminders — First, Add reminder; Other. **One «All
+  day» for the whole task** (owner's decision, to-typecase task 13): ticked,
+  the start and the due are both written as days (`VALUE=DATE`) and both
+  times go; cleared, both are times again. It shows the start, or the due
+  without a start. A save that leaves it alone changes the kind of neither
+  time — another client's task whose start is a day and whose due a time is
+  written as it was (S-7). The two boxes `start.allday` and `due.allday` are
+  gone.
+- **The role is one item of the row's «⋯»** (owner's decision, s-admin-12):
+  «Make administrator» for a user, «Make user» for an administrator
+  (`admin.user.role`, `POST /admin/?action=role&role=admin|user` — the role
+  it gives, so pressing twice does not turn it back). For the last
+  administrator it is off with the reason «Someone has to stay an
+  administrator.»
+- **`TriggerBlock.password.reveal`** is «Regenerate» only; while the
+  trigger is off it is off with the reason «The external trigger is off:
+  there is no line to renew.» The tick turns the trigger on.
+- **`NoteDoc.foreign` is a `Text`**, the line under the text of a note's
+  edit ready (s-notes-20): «Properties Carrel does not know — X-JTX-COLOR
+  and two more — are kept unchanged and not shown here.», with one «A
+  property Carrel does not know — X-JTX-COLOR — is kept unchanged and not
+  shown here.»; empty when there are none. It was the list of the
+  properties, which the client had to count.
+- **The escrow page without a copy** (account-12): `subtitle` «No copy of
+  your data key is deposited», the note «A deposited copy lets an
+  administrator who holds the escrow master password recover this account
+  if you lose your password — and, with it, read the DAV credentials you
+  save here. You can withdraw it at any time.»
+- **The withdraw sheet's warning** (account-11) adds «The copy of your data
+  key on this server is destroyed; your records and connections stay as
+  they are.» to the line beside the button.
+- **The hint of «Written as»** (attachments-1): the example is
+  «2026-08-10 sync-board.png», and it ends «…a counter is added.» — the
+  queue saying so is the queue's.
+- **A taken folder name is one line** (s-files-13), in the tree and on the
+  bar alike: «There is a folder called «2026-07» in carrel already. Choose
+  another name.» — «a file called» when a file holds it, «in» the folder it
+  was to be made in. It was «2026-07 is already here» with a second
+  sentence.
+- **Attachments without a folder** says «not set» on the right of the
+  shortcut (`Shortcut.place`, s-files-18) and leads, as before, to Settings →
+  Attachments.
+- **From Files' refusals** end with a full stop, as s-files-17 draws them:
+  «No file was chosen.», «Nothing was attached: the file is no longer
+  there.»
+- **`ConnectionCard.password` is a pointer**, nil where the server asks no
+  password: the card has no Show password at all (s-profile-15), where it
+  had it off with a reason. The edit of such a connection has no «Leave it
+  empty to keep the stored one.» at the field the mark turned off
+  (s-profile-16).
+- **Certificate fingerprint** (owner's decision; s-profile-2, -11, -14, -16):
+  the label «Certificate fingerprint SHA-256 · optional», the placeholder
+  «only for a certificate the system does not trust»; it stays the field
+  under the password and its mark.
+- **The rewrite sheet in the singular and with nothing to rewrite**:
+  «1 record on a server that schedules» (s-contacts-19); where no record
+  that names the old address can be written, the pair only counts them —
+  «3 events and tasks name the old one», without what they lose
+  (s-contacts-20). The outcome without a shortfall counts alone:
+  «Rewritten in 12 records.» (s-contacts-21); «10 of 12» stays for a
+  shortfall.
+- `docs/spec/fixtures`: `admin-users`, `app-task-edit` (both), and the list
+  heads of `app-agenda`, `app-contacts-one`, `app-notes`, `app-tasks`;
+  `app-note`, `app-note-edit`, `app-settings-account`,
+  `app-settings-attachments`, `app-settings-escrow`; then `app-files-picker`
+  (title, the New folder line), `app-settings-connections` (`access`),
+  `app-contact-rewrite` (the singular, the note), `app-contact/outcome`.
+- Confirmed against the new frames, unchanged: the copy sheets of files and
+  of a record (s-files-11, s-contacts-17), the message of a move to another
+  storage (s-files-12), «Move 1 item», New folder off on the root of Files
+  (s-files-6), Back to defaults off (s-dup-7), the birthday refusal
+  (s-contacts-18), «Download .ics» on the public page of one event
+  (s-publish-16); a read-only storage is a source in From Files, and the row
+  of a link attachment writes no path.
+
+### Removed
+
+- **«Publish a link» in the head of a collection's list** (owner's
+  decision, to-typecase task 12; s-contacts-1, s-agenda-1 draw New, Import,
+  Export, Print). A collection is published from its menu in Connections;
+  a record, a file and a folder from their own «⋯» as before. The head of
+  Files sends Upload and New folder, and its «⋯» (s-files-7) is Print —
+  the client's.
+- **`TaskEditPage.deleteNote`**: no line under «Delete task» (to-typecase
+  task 8). The series line of an event (`EventEditPage.deleteNote`, «Series
+  is edited and deleted whole.») stays: s-agenda-3 draws it.
+- **`UserRoleSheet`** and **`GET /admin/role`**: there is no sheet of roles.
+- **«Reset password» in the row's «⋯»**, and `POST /admin/?action=reset`:
+  the administrator's reset no longer issues a wipe link or a letter.
+- **`TriggerBlock.off`** («Turn the external trigger off»): the tick is
+  the switch.
+- **«Nothing» in the list of Related to** — an empty field is no relation —
+  and **the field `related.uid`** («Or enter a UID by hand»): «By UID…»
+  types into `related` itself.
+- **`account.save`**, the Save of the account form: each field has its own.
+
 ## v0.2.68 — 2026-09-28
 
 The owner's deferred round, part 5 — administration: «Add users» is the

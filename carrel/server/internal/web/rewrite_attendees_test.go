@@ -133,7 +133,7 @@ func TestReplacingAnAddressOffersToRewriteIt(t *testing.T) {
 	if n == nil {
 		t.Fatalf("notices = %+v", page.Notices)
 	}
-	if n.Title != "Rewritten in 3 of 3 records." || n.Role != view.NoticeInfo ||
+	if n.Title != "Rewritten in 3 records." || n.Role != view.NoticeInfo ||
 		n.Body != "1 record in Shared is read-only and keeps the old address." {
 		t.Errorf("outcome = %+v", *n)
 	}

@@ -1468,8 +1468,8 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 	})
 }
 
-// C-14.2: the link a reset password leads to, and the conflict of the
-// three kinds beside the contact's.
+// C-14.2: the two steps a wipe link leads to, and the conflict of the three
+// kinds beside the contact's.
 func TestFixtureResetAndConflicts(t *testing.T) {
 	t.Run("forgot-token", func(t *testing.T) {
 		app := &mockupApp{h: newHarness(t), byAccount: map[string]string{}, byPath: map[string]string{}}
@@ -1477,24 +1477,12 @@ func TestFixtureResetAndConflicts(t *testing.T) {
 		app.h.srv.SetBuild(mockupVersion, mockupCommit)
 		adminID := app.h.admin("mix", "password123")
 		app.h.invite(adminID, "vera", "verapass123")
-		sess := app.h.login("mix", "password123")
-		page := decode[view.AdminUsersPage](t, app.h.do(get("/admin/", sess)))
-		var target string
-		for _, r := range page.Rows {
-			if r.Login != "vera" {
-				continue
-			}
-			for _, it := range r.Menu {
-				if it.ID == "admin.user.reset" {
-					target = it.Href
-				}
-			}
+		// The administrator's reset no longer issues a link (s-admin-13):
+		// the two steps are reached from the console, as S-10.4 has them.
+		link, err := app.h.users.IssueConsoleWipeLink("vera")
+		if err != nil {
+			t.Fatal(err)
 		}
-		if target == "" {
-			t.Fatal("no reset for the invited person")
-		}
-		rec := app.h.do(postForm(target, sess, url.Values{}))
-		link := resetLink(t, rec)
 		app.compare(t, "forgot-token/normal.json", app.h.do(get(link, nil)))
 	})
 }
@@ -1516,15 +1504,6 @@ func openList(t *testing.T, app *mockupApp, path string) {
 }
 
 // resetLink digs the wipe link out of the answer that issued it.
-func resetLink(t *testing.T, rec *httptest.ResponseRecorder) string {
-	t.Helper()
-	m := regexp.MustCompile(`/forgot/[A-Za-z0-9_-]{43}`).FindString(rec.Body.String())
-	if m == "" {
-		t.Fatalf("no reset link in the answer: %s", rec.Body.String()[:400])
-	}
-	return m
-}
-
 // C-14.2: the conflict of an event and of a task. The screen is one for
 // every kind (C-2.1), and each is checked on its own record.
 func TestFixtureConflictsOfEveryKind(t *testing.T) {

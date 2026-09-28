@@ -160,6 +160,21 @@ func TestTimelineRailHasTheSectionsAndNoFeedNumber(t *testing.T) {
 	if feeds == 0 {
 		t.Fatal("s-contacts-7 draws no feed: read the frame again")
 	}
+	// The combined row is the sum of the calendars' numbers — the feeds'
+	// «ro» are not numbers (from-typecase note 18: 9 + 7 + 4 + 0 = 20).
+	var sum, combined int
+	for i, r := range frameTicks(frame) {
+		n, err := strconv.Atoi(r.meta)
+		switch {
+		case i == 0:
+			combined = n
+		case err == nil && !r.feed:
+			sum += n
+		}
+	}
+	if combined == 0 || combined != sum {
+		t.Fatalf("s-contacts-7: the combined row %d, the calendars sum to %d: read the frame again", combined, sum)
+	}
 
 	now := time.Now()
 	srv := searchServer(t)

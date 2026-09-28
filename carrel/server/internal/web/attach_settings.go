@@ -57,11 +57,12 @@ func attachNamesOf(blob sealed.Blob) string {
 }
 
 // attachNames is the list of «Written as» (attachments-3), with the name each
-// choice makes of report.pdf attached to «Sync-up» of 10 August.
+// choice makes of sync-board.png attached to «Sync-up» of 10 August
+// (attachments-1 draws the first).
 var attachNames = []struct{ value, label, example string }{
-	{sealed.AttachNamesDated, "Date, then the original name", "2026-08-10 report.pdf"},
-	{sealed.AttachNamesOriginal, "The original name", "report.pdf"},
-	{sealed.AttachNamesTitled, "Record title, then the original name", "Sync-up - report.pdf"},
+	{sealed.AttachNamesDated, "Date, then the original name", "2026-08-10 sync-board.png"},
+	{sealed.AttachNamesOriginal, "The original name", "sync-board.png"},
+	{sealed.AttachNamesTitled, "Record title, then the original name", "Sync-up - sync-board.png"},
 }
 
 func (s *Server) getSettingsAttachments(w http.ResponseWriter, r *http.Request) {
@@ -248,7 +249,7 @@ func (s *Server) attachmentsPage(ctx context.Context, sess *session.Session, blo
 	for _, n := range attachNames {
 		written.Options = append(written.Options, view.Option{Value: n.value, Label: text(n.label), Selected: n.value == f.names})
 		if n.value == f.names {
-			written.Hint = text(n.example + ". A name already taken is never overwritten: a counter is added, and the queue says so.")
+			written.Hint = text(n.example + ". A name already taken is never overwritten: a counter is added.")
 		}
 	}
 	name := view.FieldSet{Legend: "File name", Rows: []view.FormRow{written}}

@@ -46,6 +46,8 @@ type Option struct {
 	Reason    Text   `json:"reason,omitempty"`    // почему не выбирается; пусто у доступного
 	Colour    Colour `json:"colour,omitempty"`    // метка варианта-коллекции (s-notes-15); у прочих пусто
 	Group     Text   `json:"group,omitempty"`     // рубрика перед вариантом: «As sent» (s-agenda-8); у прочих пусто
+	Meta      Text   `json:"meta,omitempty"`      // подпись справа: род и день записи, «event · 12 August» (s-tasks-10); у прочих пусто
+	Typed     bool   `json:"typed,omitempty"`     // «By UID…» (s-tasks-10): выбор открывает строку, где значение набирают руками под тем же Name; Value пуст
 }
 type FieldError struct {
 	Name    string `json:"name"`
@@ -99,7 +101,8 @@ type EscrowStatus struct {
 
 type EscrowPage struct {
 	Shell
-	Subtitle Text         `json:"subtitle"` // «A copy of your key on this server» (account-4)
+	Subtitle Text         `json:"subtitle"` // «A copy of your key on this server» (account-4), «No copy of your data key is deposited» (account-12)
+	Rubric   Text         `json:"rubric"`   // над словами без копии: «What a deposit does» (account-12); с копией и при выключенной схеме пусто
 	Status   EscrowStatus `json:"status"`
 	Confirm  *UnlockSheet `json:"confirm"` // лист подтверждения перед депонированием
 	History  []AuditRow   `json:"history"`
@@ -108,7 +111,8 @@ type EscrowPage struct {
 // EscrowWithdrawSheet — лист перед отзывом депонированного ключа: копия
 // уничтожается, и восстановить учётную запись больше некому.
 type EscrowWithdrawSheet struct {
-	Warning Text     `json:"warning"`
+	Title   Text     `json:"title"`   // «Withdraw my deposited key» — то, что нажимают (account-11)
+	Warning Text     `json:"warning"` // что кончается и что остаётся
 	Form    Form     `json:"form"`    // скрытое action=withdraw и CSRF
 	Actions []Action `json:"actions"` // Withdraw my deposited key · Cancel
 }
@@ -144,7 +148,8 @@ type ConnectionCard struct {
 	Title       Text             `json:"title"`
 	Server      Text             `json:"server"`
 	Login       Text             `json:"login"`
-	Password    SecretField      `json:"password"`
+	Password    *SecretField     `json:"password"` // Show password; nil у сервера без пароля (s-profile-15)
+	Access      Text             `json:"access"`   // «no password» в строке адреса (s-profile-15); у прочих пусто
 	State       CollectionState  `json:"state"`
 	Collections []CollectionRow  `json:"collections"`
 	Trace       *DiagnosticTrace `json:"trace"`   // след последней проверки
@@ -252,7 +257,7 @@ type TriggerBlock struct {
 	Command  Text        `json:"command"` // готовая строка или скрипт, собранный под назначение
 	Password SecretField `json:"password"`
 	Note     Text        `json:"note"`
-	Off      *Action     `json:"off"` // выключить внешний запуск; nil — он не включён
+	Clock    Action      `json:"clock"` // отметка «On a clock of your own — cron, GoSentry, a job in Gitea» (s-backup-2): On — внешний запуск включён; снятая выключает его, отдельного выключателя нет
 }
 type BackupRun struct {
 	ID       Text    `json:"id"`
@@ -280,7 +285,7 @@ type AppearancePage struct {
 type AdminUsersPage struct {
 	Shell
 	Rows []AdminUserRow `json:"rows"`
-	Add  []Action       `json:"add"` // Add user — на «Add users» (s-admin-2)
+	Add  []Action       `json:"add"` // шапка (s-admin-2): Add user — на «Add users», Reset a password — лист PasswordResetSheet
 }
 type AdminUserRow struct {
 	Login     Text       `json:"login"`
@@ -294,10 +299,15 @@ type AdminUserRow struct {
 	Menu      []MenuItem `json:"menu"` // только «⋯» (s-admin-12)
 }
 
-// UserRoleSheet — «Set role» строки пользователя: список ролей s-admin-8.
-type UserRoleSheet struct {
-	Login Text `json:"login"`
-	Form  Form `json:"form"` // role: User, Administrator; Save · Cancel
+// PasswordResetSheet — «Reset a password» из шапки списка людей (s-admin-13):
+// кого сбрасывают, что при этом уничтожается, временный пароль и путь без
+// потерь через Key escrow — подсказкой у пароля.
+type PasswordResetSheet struct {
+	Title   Text            `json:"title"`   // «Reset a password»
+	Form    Form            `json:"form"`    // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password
+	Warning Text            `json:"warning"` // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются
+	Issued  *IssuedPassword `json:"issued"`  // временный пароль — один раз, в ответе на сброс; nil — нет
+	Actions []Action        `json:"actions"` // Reset password (danger) · Cancel
 }
 
 // AdminInvitesPage — «Add users» (s-admin-1): три способа завести человека

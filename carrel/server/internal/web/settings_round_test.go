@@ -524,7 +524,7 @@ var (
 // attachments-1: under the file name, «In this folder now» — Files (count
 // and size), Oldest, Path (the folder's whole address, to mount without
 // Carrel) — and what Carrel does not do with them; the message under the
-// form is the frame's; the hint of «Written as» ends as the frame's does, and
+// form is the frame's; the hint of «Written as» is the frame's, example and all, and
 // the queue does say it: a name taken in the folder is a row of the files
 // queue naming what the file was written as.
 func TestAttachmentsInThisFolderNowIsTheFrame(t *testing.T) {
@@ -539,7 +539,6 @@ func TestAttachmentsInThisFolderNowIsTheFrame(t *testing.T) {
 	for _, m := range frameDT.FindAllStringSubmatch(now[1], -1) {
 		labels = append(labels, m[1])
 	}
-	_, tail, _ := strings.Cut(frameText(written[1]), ". ")
 
 	f := attachFixture(t, 1024, []string{"carrel"}, "e1.ics", attachEvent("e1", "Sync-up", ""))
 	f.h.srv.SetClock(time.Date(2026, 8, 16, 9, 41, 0, 0, time.UTC))
@@ -578,8 +577,10 @@ func TestAttachmentsInThisFolderNowIsTheFrame(t *testing.T) {
 	if string(page.Note) != frameText(msg[1]) {
 		t.Errorf("note = %q, the frame %q", page.Note, frameText(msg[1]))
 	}
-	if h := string(rowNamed(t, page.Form, "name").Hint); !strings.HasSuffix(h, ". "+tail) {
-		t.Errorf("Written as hint = %q, want it to end %q", h, tail)
+	// The example is set in mono inside the hint: its closing tag is not a
+	// word break.
+	if h, want := string(rowNamed(t, page.Form, "name").Hint), frameText(strings.ReplaceAll(written[1], "</span>", "")); h != want {
+		t.Errorf("Written as hint = %q, the frame %q", h, want)
 	}
 
 	for range 2 {

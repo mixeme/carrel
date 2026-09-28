@@ -20,18 +20,19 @@ import (
 // frame, not written beside it.
 
 var (
-	frameHeadSub = regexp.MustCompile(`(?s)<div class="tc-head__sub">(.*?)</div>`)
-	frameRubric  = regexp.MustCompile(`(?s)<div class="tc-rubric">(.*?)</div>`)
-	frameHint    = regexp.MustCompile(`(?s)<span class="tc-field__hint">(.*?)</span>\s*(?:</div>|<span class="tc-line">|<div class="tc-msg)`)
-	frameLabel   = regexp.MustCompile(`(?s)<label>(.*?)</label>`)
-	frameMsg     = regexp.MustCompile(`(?s)<div class="tc-msg is-(\w+)[^"]*">(.*?)(?:<button[^>]*>(.*?)</button>)?</div>`)
-	frameBadge   = regexp.MustCompile(`(?s)<span class="tc-badge(?: is-(\w+))?">(.*?)</span>`)
-	frameChange  = regexp.MustCompile(`(?s)<input class="tc-in tc-in--fill" type="text" value="([^"]*)"><button class="tc-btn" type="button">(.*?)</button>`)
-	frameFieldBt = regexp.MustCompile(`(?s)<div class="tc-field"><button class="tc-btn[^"]*" type="button">(.*?)</button></div>`)
-	framePair    = regexp.MustCompile(`(?s)<dt>(.*?)</dt><dd[^>]*>(.*?)</dd>`)
-	frameFootDim = regexp.MustCompile(`(?s)<span class="tc-dim[^"]*tc-dim--wrap">(.*?)</span>`)
-	frameSheetT  = regexp.MustCompile(`(?s)<b class="tc-sheet__title">(.*?)</b>`)
-	frameSheetF  = regexp.MustCompile(`(?s)<div class="tc-sheet__foot">(.*?)</div>`)
+	frameHeadSub  = regexp.MustCompile(`(?s)<div class="tc-head__sub">(.*?)</div>`)
+	frameRubric   = regexp.MustCompile(`(?s)<div class="tc-rubric">(.*?)</div>`)
+	frameHint     = regexp.MustCompile(`(?s)<span class="tc-field__hint">(.*?)</span>\s*(?:</div>|<span class="tc-line">|<div class="tc-msg)`)
+	frameLabel    = regexp.MustCompile(`(?s)<label>(.*?)</label>`)
+	frameMsg      = regexp.MustCompile(`(?s)<div class="tc-msg is-(\w+)[^"]*">(.*?)(?:<button[^>]*>(.*?)</button>)?</div>`)
+	frameBadge    = regexp.MustCompile(`(?s)<span class="tc-badge(?: is-(\w+))?">(.*?)</span>`)
+	frameChange   = regexp.MustCompile(`(?s)<input class="tc-in tc-in--fill" type="text" value="([^"]*)"><button class="tc-btn" type="button">(.*?)</button>`)
+	frameNameSave = regexp.MustCompile(`(?s)<input class="tc-in tc-in--fill" type="text" value="[^"]*" aria-label="Display name"><button class="tc-btn" type="button">(.*?)</button>`)
+	frameFieldBt  = regexp.MustCompile(`(?s)<div class="tc-field"><button class="tc-btn[^"]*" type="button">(.*?)</button></div>`)
+	framePair     = regexp.MustCompile(`(?s)<dt>(.*?)</dt><dd[^>]*>(.*?)</dd>`)
+	frameFootDim  = regexp.MustCompile(`(?s)<span class="tc-dim[^"]*tc-dim--wrap">(.*?)</span>`)
+	frameSheetT   = regexp.MustCompile(`(?s)<b class="tc-sheet__title">(.*?)</b>`)
+	frameSheetF   = regexp.MustCompile(`(?s)<div class="tc-sheet__foot">(.*?)</div>`)
 )
 
 func frameAll(re *regexp.Regexp, s string, group int) []string {
@@ -79,7 +80,9 @@ func readFrameEmail(t *testing.T, id string) frameEmail {
 		f.badgeRole, f.badge = m[1], frameText(m[2])
 	}
 	if m := frameMsg.FindStringSubmatch(block); m != nil {
-		f.msgRole, f.msg, f.button = m[1], frameText(m[2]), frameText(m[3])
+		// An address is set in mono inside the sentence: its closing tag is
+		// not a word break («new@example.org: until…», account-10).
+		f.msgRole, f.msg, f.button = m[1], frameText(strings.ReplaceAll(m[2], "</span>", "")), frameText(m[3])
 	}
 	if f.label == "" || f.value == "" || f.hint == "" {
 		t.Fatalf("%s: the Email block did not read: %+v", id, f)
@@ -201,6 +204,18 @@ func TestAccountEmailBlockIsTheFrames(t *testing.T) {
 	if name := profileRow(page.Profile, "name"); string(name.Label) != frameText(frameLabel.FindStringSubmatch(frameBlock(t, frame, "Name"))[1]) {
 		t.Errorf("name label = %q", name.Label)
 	}
+	// Save stands beside Display name, as Change beside the address; the
+	// form has no button of its own.
+	nameSave := frameNameSave.FindStringSubmatch(frameBlock(t, frame, "Name"))
+	if nameSave == nil {
+		t.Fatal("account-1 draws no button beside Display name: read the frame again")
+	}
+	if name := profileRow(page.Profile, "name"); name.Extra == nil || string(name.Extra.Label) != frameText(nameSave[1]) || name.Extra.Method != "POST" {
+		t.Errorf("the name's button = %+v, the frame draws %q", name.Extra, frameText(nameSave[1]))
+	}
+	if len(page.Profile.Actions) != 0 {
+		t.Errorf("form buttons %v the frame does not draw", labels(page.Profile.Actions))
+	}
 	var keys map[string]json.RawMessage
 	if err := json.Unmarshal(raw.Body.Bytes(), &keys); err != nil {
 		t.Fatal(err)
@@ -224,12 +239,19 @@ func TestAccountEmailBlockIsTheFrames(t *testing.T) {
 	checkEmailBlock(t, "s-mail-9", decode[view.AccountPage](t, h.do(get("/app/settings/account", mix))), view.EmailUnconfirmed)
 	h.relayed()
 
-	// account-9: the letter went at 11:42 — to where, when, Send again.
-	setDay(t, h, "2026-02-14 11:42")
+	// account-9: the letter went on 12 February at 11:42 and the page is
+	// read the day after, while the link lives — to where, when, Send
+	// again. Sent the same day, the block says the clock alone.
+	setDay(t, h, "2026-02-12 11:42")
 	h.do(postForm(actionHref(t, page.Email.Message.Actions, "account.confirm"), mix, url.Values{}))
+	if today := decode[view.AccountPage](t, h.do(get("/app/settings/account", mix))); today.Email.SentAt != "11:42" ||
+		today.Email.Message == nil || !strings.HasSuffix(string(today.Email.Message.Body), " at 11:42.") {
+		t.Errorf("sent today = %q, %+v", today.Email.SentAt, today.Email.Message)
+	}
+	setDay(t, h, "2026-02-13 09:00")
 	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", mix)))
 	checkEmailBlock(t, "account-9", page, view.EmailSent)
-	if page.Email.SentTo != "mix@example.org" || page.Email.SentAt != "11:42" {
+	if page.Email.SentTo != "mix@example.org" || page.Email.SentAt != "12 February, 11:42" {
 		t.Errorf("sent = %q at %q", page.Email.SentTo, page.Email.SentAt)
 	}
 
@@ -261,8 +283,22 @@ func TestAccountEmailBlockIsTheFrames(t *testing.T) {
 		t.Errorf("confirmed at = %q", page.Email.ConfirmedAt)
 	}
 
-	// account-1: a new address waits, the confirmed one stays in use.
-	h.do(postForm("/app/settings/account", mix, url.Values{"name": {""}, "email": {"new@example.org"}}))
+	// account-10: a change whose letter the relay refused — nothing to
+	// open, the old address stays in use, and Send again.
+	refusing = h.relayed()
+	refusing.Refuse = "new@example.org"
+	h.do(postForm(actionHref(t, []view.Action{*profileRow(page.Profile, "email").Extra}, "account.email.change"), mix,
+		url.Values{"name": {""}, "email": {"new@example.org"}}))
+	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", mix)))
+	checkEmailBlock(t, "account-10", page, view.EmailPending)
+	if page.Email.Message == nil {
+		t.FailNow()
+	}
+
+	// account-1: a new address waits, its letter gone; the confirmed one
+	// stays in use.
+	h.relayed()
+	h.do(postForm(actionHref(t, page.Email.Message.Actions, "account.confirm"), mix, url.Values{}))
 	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", mix)))
 	checkEmailBlock(t, "account-1", page, view.EmailPending)
 	if page.Email.Pending != "new@example.org" {
@@ -336,6 +372,24 @@ func TestAccountEscrowIsTheFrames(t *testing.T) {
 		if a.ID == "account.escrow" {
 			t.Error("a Key escrow button the frame does not draw")
 		}
+	}
+
+	// account-12: the escrow page without a copy — what a deposit does,
+	// before the button.
+	none := mockupFrame(t, "account-12")
+	np := decode[view.EscrowPage](t, h.do(get("/app/settings/escrow", mix)))
+	if m := frameHeadSub.FindStringSubmatch(none); m == nil || string(np.Subtitle) != frameText(m[1]) {
+		t.Errorf("escrow subtitle without a copy = %q, the frame draws %v", np.Subtitle, m)
+	}
+	if m := frameRubric.FindStringSubmatch(none); m == nil || string(np.Rubric) != frameText(m[1]) {
+		t.Errorf("escrow rubric without a copy = %q, the frame draws %v", np.Rubric, m)
+	}
+	if m := frameAll(frameHint, none, 1); len(m) != 1 || string(np.Status.Note) != m[0] {
+		t.Errorf("escrow note without a copy = %q, the frame draws %v", np.Status.Note, m)
+	}
+	if m := frameFieldBt.FindStringSubmatch(none); m == nil || len(np.Status.Actions) != 1 ||
+		string(np.Status.Actions[0].Label) != frameText(m[1]) || np.Status.Actions[0].Href != page.Escrow.Actions[0].Href {
+		t.Errorf("escrow page actions without a copy = %+v, the frame draws %v", np.Status.Actions, m)
 	}
 
 	// account-2: the sheet over Account.
@@ -414,14 +468,30 @@ func TestAccountEscrowIsTheFrames(t *testing.T) {
 	if len(ep.Status.Actions) != 1 || ep.Status.Actions[0].Method != "GET" {
 		t.Fatalf("escrow page actions = %+v", ep.Status.Actions)
 	}
+	if ep.Rubric != "" {
+		t.Errorf("a rubric %q the frame does not draw over the deposited copy", ep.Rubric)
+	}
 
-	// Withdraw opens a sheet; only its button takes the copy away.
+	// account-11: Withdraw opens a sheet; only its button takes the copy
+	// away.
+	wFrame := mockupFrame(t, "account-11")
+	wPart := wFrame[strings.Index(wFrame, `<div class="tc-sheet `):]
 	ws := decode[view.EscrowWithdrawSheet](t, h.do(get(ep.Status.Actions[0].Href, mix)))
 	if snap := h.st.Snapshot(); !store.UserDeposited(snap.UserByLogin("mix")) {
 		t.Fatal("opening the sheet withdrew the key")
 	}
-	if ws.Warning != ep.Status.ActionNote || strings.Join(labels(ws.Actions), "|") != "Withdraw my deposited key|Cancel" {
-		t.Errorf("withdraw sheet = %+v", ws)
+	if m := frameSheetT.FindStringSubmatch(wPart); m == nil || string(ws.Title) != frameText(m[1]) {
+		t.Errorf("withdraw sheet title = %q, the frame draws %v", ws.Title, m)
+	}
+	if m := frameMsg.FindStringSubmatch(wPart); m == nil || string(ws.Warning) != frameText(m[2]) || m[1] != "alert" {
+		t.Errorf("withdraw sheet warning = %q, the frame draws %v", ws.Warning, m)
+	}
+	var wFoot []string
+	for _, b := range frameButton.FindAllStringSubmatch(frameSheetF.FindStringSubmatch(wPart)[1], -1) {
+		wFoot = append(wFoot, frameText(b[1]))
+	}
+	if strings.Join(labels(ws.Actions), "|") != strings.Join(wFoot, "|") || !ws.Actions[0].Danger {
+		t.Errorf("withdraw sheet buttons = %v, the frame draws %v", labels(ws.Actions), wFoot)
 	}
 	rec = h.do(postForm(actionHref(t, ws.Actions, "escrow.withdraw"), mix, formFields(ws.Form)))
 	if rec.Code != 303 {
@@ -429,6 +499,23 @@ func TestAccountEscrowIsTheFrames(t *testing.T) {
 	}
 	if snap := h.st.Snapshot(); store.UserDeposited(snap.UserByLogin("mix")) {
 		t.Fatal("still deposited after the sheet's button")
+	}
+}
+
+// account-13: the scheme is off — the block stays and says so, without a
+// badge and without a button.
+func TestAccountEscrowOffIsTheFrame(t *testing.T) {
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	h.invite(adminID, "bob", "bobpass123")
+	bob := h.login("bob", "bobpass123")
+	want := readFrameEscrow(t, "account-13")
+	if want.hint == "" || want.badge != "" || want.button != "" {
+		t.Fatalf("account-13 reads otherwise: %+v", want)
+	}
+	page := decode[view.AccountPage](t, h.do(get("/app/settings/account", bob)))
+	if e := page.Escrow; e.Active || string(e.Note) != want.hint || e.Badge != nil || len(e.Actions) != 0 {
+		t.Errorf("escrow off = %+v, the frame draws %q alone", e, want.hint)
 	}
 }
 

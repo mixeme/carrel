@@ -17,12 +17,17 @@ type FileCollectionRow struct {
 
 type FilesPage struct {
 	Shell
-	Crumbs []Crumb        `json:"crumbs"`
-	Bar    ListBar        `json:"bar"`
-	View   FileView       `json:"view"` // список или плитки
-	Rows   []FileRow      `json:"rows"`
-	Queue  *TransferQueue `json:"queue"`
-	Tree   *FileTree      `json:"tree"` // дерево выбора; на странице раздела nil
+	// Subtitle — строка под заголовком папки: подключение хранилища, у
+	// хранилища только для чтения с тем, почему Upload и New folder
+	// выключены: «sftpgo · vps · read-only: nothing can be uploaded or made
+	// here» (s-files-15)
+	Subtitle Text           `json:"subtitle"`
+	Crumbs   []Crumb        `json:"crumbs"`
+	Bar      ListBar        `json:"bar"`
+	View     FileView       `json:"view"` // список или плитки
+	Rows     []FileRow      `json:"rows"`
+	Queue    *TransferQueue `json:"queue"`
+	Tree     *FileTree      `json:"tree"` // дерево выбора; на странице раздела nil
 }
 type Crumb struct {
 	Label Text   `json:"label"`
@@ -63,6 +68,11 @@ type FileTree struct {
 	// New — «New folder» в рубрике дерева (s-files-4, s-notes-11): папка
 	// заводится в выбранной и сразу выбирается; nil — дерево без неё
 	New *Action `json:"new"`
+	// Name — строка имени над деревом, которую открывает New (s-files-13):
+	// поле name «Name of the new folder», Create и Cancel; Action — New.Href.
+	// После отказа строка приходит с набранным, отказ — под ней. nil — у
+	// дерева нет New или она выключена
+	Name *Form `json:"name"`
 }
 type FileTreeNode struct {
 	ID       string         `json:"id"`
@@ -74,9 +84,16 @@ type FileTreeNode struct {
 	// File — узел-файл дерева, из которого выбирают файл (From Files у
 	// Attach); у дерева папок таких узлов нет
 	File bool `json:"file,omitempty"`
+	// Size и Lands — у узла-файла дерева From Files (s-files-16): размер и
+	// «inside» — ляжет в запись — или «link» — запись сошлётся на него, по
+	// правилу вложения (S-20); у прочих узлов пусто
+	Size  Size `json:"size,omitempty"`
+	Lands Text `json:"lands,omitempty"`
 }
 
 type FilePickerSheet struct {
+	Title   Text     `json:"title"`   // «Upload files» (s-notes-11), «Attach from Files» (s-files-16)
+	Subject Text     `json:"subject"` // для чего: «to «Собрать чемодан»»; пусто — строки нет
 	Purpose Text     `json:"purpose"` // зачем выбирают: папка вложений, назначение копии, файл для вложения
 	Tree    FileTree `json:"tree"`
 	Actions []Action `json:"actions"`

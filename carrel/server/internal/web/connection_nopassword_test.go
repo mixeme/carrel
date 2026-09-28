@@ -215,12 +215,12 @@ func TestConnectWithoutPassword(t *testing.T) {
 		t.Errorf("edit form: check %q, password read-only %v — want it ticked and the field off", check.Value, password.ReadOnly)
 	}
 
-	// No password to show: the card says why instead of releasing nothing
-	// into the journal.
+	// No password to show: the card has no Show password and says «no
+	// password» instead of releasing nothing into the journal (s-profile-15).
 	page = decode[view.ConnectionsPage](t, h.do(get("/app/settings/connections", sess)))
 	card := cardOf(t, page, id)
-	if card.Password.Reveal.Enabled || card.Password.Reveal.Reason == "" {
-		t.Errorf("reveal = %+v, want it off with the reason", card.Password.Reveal)
+	if card.Password != nil || card.Access == "" {
+		t.Errorf("password = %+v, access %q; want no Show password and the line saying so", card.Password, card.Access)
 	}
 
 	// Test only reads no password under the mark either.

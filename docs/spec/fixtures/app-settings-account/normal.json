@@ -46,14 +46,7 @@
   },
   "profile": {
     "action": "/app/settings/account",
-    "actions": [
-      {
-        "enabled": true,
-        "id": "account.save",
-        "label": "Save",
-        "method": "POST"
-      }
-    ],
+    "actions": [],
     "errors": [],
     "method": "POST",
     "sets": [
@@ -74,7 +67,13 @@
           },
           {
             "error": "",
-            "extra": null,
+            "extra": {
+              "enabled": true,
+              "href": "/app/settings/account?op=name",
+              "id": "account.name.save",
+              "label": "Save",
+              "method": "POST"
+            },
             "hint": "Shown as the sender and used as the signature in letters you send. Blank means your login.",
             "kind": "text",
             "label": "Display name",

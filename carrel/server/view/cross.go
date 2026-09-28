@@ -214,6 +214,7 @@ type RewriteSheet struct {
 	Pairs   []RewritePair `json:"pairs"`   // какой адрес на какой и сколько записей называют старый
 	Effects []Field       `json:"effects"` // Label — «9 records on servers that schedule», Value — что это может вызвать
 	Kept    []Field       `json:"kept"`    // Label — «2 records in Shared», Value — «read-only; they keep the old address»
+	Note    Text          `json:"note"`    // строка под блоками: «Collections that are not ticked were not looked in.» (s-contacts-19)
 	Form    Form          `json:"form"`    // план в адресе и CSRF
 	Actions []Action      `json:"actions"` // Rewrite N records · Leave as is
 }

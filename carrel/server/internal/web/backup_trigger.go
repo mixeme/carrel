@@ -54,37 +54,48 @@ func triggerCommand(base string, job sealed.BackupJob, secret string) string {
 	}
 }
 
-// triggerBlock is the job's trigger card: the command and the secret when
-// they have just been issued, otherwise whether it is on and how to renew or
-// turn it off.
+// triggerClock is the tick of s-backup-2 that turns the external trigger on
+// and, cleared, off: there is no switch of its own (to-typecase task 18a).
+const triggerClock = "On a clock of your own — cron, GoSentry, a job in Gitea"
+
+// triggerBlock is the job's trigger card: its tick, and the command and the
+// secret when they have just been issued, otherwise whether it is on and how
+// to renew it.
 func (s *Server) triggerBlock(sess *session.Session, job sealed.BackupJob, issued map[string]string) view.TriggerBlock {
 	q := func(op string) string {
 		return s.postQuery("/app/settings/backup", url.Values{"op": {op}, "job": {job.ID}})
 	}
-	b := view.TriggerBlock{Password: view.SecretField{Reveal: view.Action{
-		ID: "backup.trigger", Label: "Turn the external trigger on", Href: q("trigger"), Method: "POST", Enabled: true,
-	}}}
 	on := s.users.BackupTriggerOn(sess.AccountID(), job.ID)
+	b := view.TriggerBlock{
+		Password: view.SecretField{Reveal: view.Action{ID: "backup.trigger", Label: "Regenerate", Href: q("trigger"), Method: "POST", Enabled: true}},
+		Clock:    view.Action{ID: "backup.trigger.clock", Label: triggerClock, Href: q("trigger"), Method: "POST", Enabled: true},
+	}
 	switch {
 	case issued[job.ID] != "":
 		b.Command = text(issued[job.ID])
 		b.Password.Shown = true
-		b.Password.Reveal.Label = "Regenerate"
 		b.Note = "Visible only now. Every use is logged; Regenerate replaces the secret, and every line already handed out stops working."
 	case on:
-		b.Password.Reveal.Label = "Regenerate"
 		b.Note = "The external trigger is on. The secret was shown once; Regenerate issues a new one and the old lines stop working."
 	default:
+		b.Password.Reveal.Href, b.Password.Reveal.Enabled = "", false
+		b.Password.Reveal.Reason = "The external trigger is off: there is no line to renew."
 		b.Note = "A script outside can start this job. Turning it on stores your data key for this job under the server's key — a loss of protection, for convenience: the job can then read without you signed in."
 	}
-	if on {
-		b.Off = &view.Action{ID: "backup.trigger.off", Label: "Turn the external trigger off", Href: q("trigger-off"), Method: "POST", Enabled: true}
+	if on || issued[job.ID] != "" {
+		// Cleared, the tick turns the trigger off: the lines handed out stop.
+		b.Clock.On, b.Clock.Href = true, q("trigger-off")
 	}
-	// Outside the unlock window the button opens the password sheet; what
-	// it is for is said in the note, not as a reason of a working button
-	// (C-6.2).
+	// Outside the unlock window what issues a secret opens the password
+	// sheet; what it is for is said in the note, not as a reason of a
+	// working button (C-6.2). Clearing the tick issues nothing.
 	if sess.UnlockUntil(time.Now()) == nil {
-		b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.route("/app/settings/unlock")
+		if b.Password.Reveal.Enabled {
+			b.Password.Reveal.Method, b.Password.Reveal.Href = "GET", s.route("/app/settings/unlock")
+		}
+		if !b.Clock.On {
+			b.Clock.Method, b.Clock.Href = "GET", s.route("/app/settings/unlock")
+		}
 		b.Note = "Confirm your password first: the trigger hands out this job's reading. " + b.Note
 	}
 	if (on || issued[job.ID] != "") && !job.Encrypted {

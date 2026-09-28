@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -66,7 +67,8 @@ const (
 	// Every, On, Until, Count, and the rule itself. See repeatValues.
 	fieldRepeat
 	// fieldRelated is the first RELATED-TO: picked from the records this
-	// session has loaded for the collection, or typed as a UID (S-11).
+	// session has loaded, or typed as a UID after «By UID…» (S-11,
+	// s-tasks-10).
 	fieldRelated
 	// fieldAttendee adds one ATTENDEE to a new event: the person a timeline
 	// creates it for (S-15.4). It shows nothing of what the event holds —
@@ -81,7 +83,10 @@ type editField struct {
 	typ      fieldType
 	required bool
 	allDay   bool // fieldTime: the field has its own all-day box
-	typed    bool // fieldMulti: each row has its label, the TYPE parameter
+	// taskDay: fieldTime of a task, whose times share one all-day box,
+	// «allday», standing before the first of them (s-tasks-3).
+	taskDay bool
+	typed   bool // fieldMulti: each row has its label, the TYPE parameter
 	// optional fields a record leaves empty go into a set of their own on
 	// its full form, "Show N empty fields"; the client folds it.
 	optional bool
@@ -224,31 +229,86 @@ func timeLabel(f editField) string {
 	return f.label + " at"
 }
 
-// relatedOptions are "nothing", the record related now, and every record of
-// the loaded lists of this collection but the record itself.
-func relatedOptions(index []indexEntry, self, selected string) []view.Option {
-	opts := []view.Option{{Value: "", Label: "Nothing", Selected: selected == ""}}
+// relatedKinds order the list of Related to where two records share a
+// moment: the order of the frame (s-tasks-10).
+var relatedKinds = map[view.Kind]int{view.KindEvent: 0, view.KindTask: 1, view.KindNote: 2}
+
+// relatedOptions are the list of Related to (s-tasks-10): the records this
+// session has loaded, of every collection of the catalog — events, tasks and
+// notes, each with its collection's mark and «kind · day» — newest first,
+// and last, after a line, «By UID…», the value typed by hand under the same
+// name. The record itself is not offered. The one related now is chosen; one
+// outside the loaded lists stands first under its own UID (a card a
+// timeline wrote a note for, under its name). No «Nothing»: an empty field
+// is no relation. Nothing is asked of the servers.
+func (s *Server) relatedOptions(c *collectionCtx, self, selected string) []view.Option {
+	blob := s.catalogOf(c.sess)
+	type loaded struct {
+		indexEntry
+		colour view.Colour
+	}
+	var list []loaded
+	var current *loaded
 	seen := map[string]bool{self: true, "": true}
-	title := map[string]string{}
-	for _, e := range index {
-		title[e.UID] = e.Title
-	}
-	if selected != "" && selected != self {
-		label := selected + " · not in the lists loaded for this collection"
-		if t, ok := title[selected]; ok {
-			label = t
-		}
-		opts = append(opts, view.Option{Value: selected, Label: text(label), Selected: true})
-		seen[selected] = true
-	}
-	for _, e := range index {
-		if seen[e.UID] {
+	for _, col := range blob.Collections {
+		if col.Gone {
 			continue
 		}
-		seen[e.UID] = true
-		opts = append(opts, view.Option{Value: e.UID, Label: text(e.Title + " · " + string(e.Kind))})
+		for _, comp := range []string{"VEVENT", "VTODO", "VJOURNAL", ""} {
+			data, ok := c.sess.Cache().PeekETagMap(col.AccountID, col.Path+"\x00"+comp)
+			if !ok {
+				continue
+			}
+			var part []indexEntry
+			if json.Unmarshal(data, &part) != nil {
+				continue
+			}
+			for _, e := range part {
+				if seen[e.UID] {
+					continue
+				}
+				seen[e.UID] = true
+				l := loaded{e, catalogColour(col)}
+				switch {
+				case e.Kind != view.KindContact:
+					list = append(list, l)
+				case e.UID == selected:
+					current = &l
+				}
+			}
+		}
 	}
-	return opts
+	sort.SliceStable(list, func(i, j int) bool {
+		a, b := list[i], list[j]
+		if (a.At == 0) != (b.At == 0) {
+			return a.At != 0
+		}
+		if a.At != b.At {
+			return a.At > b.At
+		}
+		if relatedKinds[a.Kind] != relatedKinds[b.Kind] {
+			return relatedKinds[a.Kind] < relatedKinds[b.Kind]
+		}
+		return a.Title < b.Title
+	})
+	option := func(l loaded) view.Option {
+		meta := string(l.Kind)
+		if l.At != 0 {
+			meta += " · " + c.tf.dayOfYear(time.Unix(l.At, 0))
+		}
+		return view.Option{Value: l.UID, Label: text(l.Title), Colour: l.colour, Meta: text(meta), Selected: l.UID == selected}
+	}
+	var opts []view.Option
+	switch {
+	case current != nil:
+		opts = append(opts, option(*current))
+	case selected != "" && !seen[selected]:
+		opts = append(opts, view.Option{Value: selected, Label: text(selected), Selected: true})
+	}
+	for _, l := range list {
+		opts = append(opts, option(l))
+	}
+	return append(opts, view.Option{Label: "By UID…", Separator: true, Typed: true})
 }
 
 // repeatDays are the days of On, in the order the form shows them.
@@ -553,8 +613,8 @@ var editFields = map[view.Kind][]editField{
 	view.KindTask: {
 		{name: "summary", label: "Summary", prop: "SUMMARY", typ: fieldText},
 		{name: "description", label: "Description", prop: "DESCRIPTION", typ: fieldArea},
-		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, allDay: true, set: "When"},
-		{name: "due", label: "Due date", timeLabel: "Due time", prop: "DUE", typ: fieldTime, allDay: true, set: "When"},
+		{name: "start", label: "Start date", timeLabel: "Start time", prop: "DTSTART", typ: fieldTime, taskDay: true, set: "When"},
+		{name: "due", label: "Due date", timeLabel: "Due time", prop: "DUE", typ: fieldTime, taskDay: true, set: "When"},
 		{name: "status", label: "Status", prop: "STATUS", typ: fieldChoice, choices: taskStatuses, blank: "NEEDS-ACTION", set: "Progress"},
 		{name: "priority", label: "Priority", prop: "PRIORITY", typ: fieldChoice, choices: priorities, set: "Progress"},
 		{name: "percent", label: "Percent complete", prop: "PERCENT-COMPLETE", typ: fieldPercent, set: "Progress"},
@@ -767,7 +827,51 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			vals[f.name] = append(rows, "")
 		}
 	}
+	if c.spec.kind == view.KindTask {
+		vals[taskDayBox] = []string{taskDayOf(vals)}
+	}
 	return vals, alarms, nil
+}
+
+// taskDayBox is the name of a task's one «All day» (s-tasks-3).
+const taskDayBox = "allday"
+
+// taskDayOf is what a task's one box shows: whether its start is a day, or,
+// without a start, its due.
+func taskDayOf(vals formValues) string {
+	for _, f := range editFields[view.KindTask] {
+		if row := triple(vals[f.name]); f.taskDay && row[0] != "" {
+			return row[2]
+		}
+	}
+	return ""
+}
+
+// oneTaskDay is a task's one box against its two times (S-7). Ticked or
+// cleared, it is what both times become. Left as the form showed it, each
+// time keeps its own kind: another client's task whose start is a day and
+// whose due a time is not rewritten by a save that did not touch the box.
+// have is the version the change is measured against.
+func oneTaskDay(have, want formValues) {
+	box, ok := want[taskDayBox]
+	if !ok {
+		return
+	}
+	for _, f := range editFields[view.KindTask] {
+		if !f.taskDay {
+			continue
+		}
+		w, h := triple(want[f.name]), triple(have[f.name])
+		switch {
+		case w[0] == "":
+			w[2] = ""
+		case first(box) == taskDayOf(have) && h[0] != "":
+			w[2] = h[2]
+		default:
+			w[2] = first(box)
+		}
+		want[f.name] = w[:]
+	}
 }
 
 func timeRow(f editField, tm cal.Timing, tz *time.Location) []string {
@@ -786,7 +890,7 @@ func timeRow(f editField, tm cal.Timing, tz *time.Location) []string {
 	if !tm.AllDay {
 		row[1] = at.In(tz).Format("15:04")
 	}
-	if tm.AllDay && (f.allDay || f.timeOptional) {
+	if tm.AllDay && (f.allDay || f.taskDay || f.timeOptional) {
 		row[2] = "on"
 	}
 	return row
@@ -807,6 +911,9 @@ func (s *Server) emptyValues(c *collectionCtx) formValues {
 		default:
 			vals[f.name] = []string{""}
 		}
+	}
+	if c.spec.kind == view.KindTask {
+		vals[taskDayBox] = []string{""}
 	}
 	return vals
 }
@@ -853,11 +960,7 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 				vals[f.name+".type"] = append(labels, "")
 			}
 		case fieldRelated:
-			v := strings.TrimSpace(r.FormValue(f.name + ".uid"))
-			if v == "" {
-				v = strings.TrimSpace(r.FormValue(f.name))
-			}
-			vals[f.name] = []string{v}
+			vals[f.name] = []string{strings.TrimSpace(r.FormValue(f.name))}
 		case fieldRepeat:
 			freq := strings.TrimSpace(r.FormValue(f.name + ".freq")) // parses the form
 			var on []string
@@ -892,6 +995,12 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 			row := []string{strings.TrimSpace(r.FormValue(f.name + ".date")), strings.TrimSpace(r.FormValue(f.name + ".time")), ""}
 			if f.allDay {
 				row[2] = checkbox(r, f.name+".allday")
+			}
+			if f.taskDay {
+				vals[taskDayBox] = []string{checkbox(r, taskDayBox)}
+				if row[0] != "" {
+					row[2] = first(vals[taskDayBox])
+				}
 			}
 			if f.timeOptional && row[0] != "" && row[1] == "" {
 				row[2] = "on"
@@ -1189,8 +1298,12 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 // other in, and both directions happen before the fields are walked — so what
 // reaches the server is what the screen would show, and whoever filled one
 // side is never told the other is missing. One switch, so the two cannot undo
-// each other's work. have is the version the change is measured against.
+// each other's work. A task's one «All day» is laid on its two times here
+// too (oneTaskDay). have is the version the change is measured against.
 func fillNames(kind view.Kind, have, want formValues) {
+	if kind == view.KindTask {
+		oneTaskDay(have, want)
+	}
 	if kind == view.KindContact {
 		fn := strings.TrimSpace(first(want["fn"]))
 		n := pair(want["n"])
@@ -1721,9 +1834,6 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 		return page
 	case view.KindTask:
 		page := view.TaskEditPage{Shell: sh, UID: st.uid, Form: form, Done: first(st.values["done"]) == "on", Reminders: reminderRows(st.alarms, tf), Loss: st.loss, Delete: del}
-		if del != nil {
-			page.DeleteNote = taskDeleteNote
-		}
 		if st.obj != nil {
 			page.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
 		}
@@ -1778,12 +1888,25 @@ func (s *Server) noteEditPage(c *collectionCtx, st editState, sh view.Shell, for
 	}
 	if exists {
 		page.Rail.Neighbours = s.noteNeighbours(c, st.uid)
-		page.Doc.Foreign = cal.NoteForeign(st.obj)
+		page.Doc.Foreign = foreignLine(cal.NoteForeign(st.obj))
 		page.Meta.Attach = s.attachRows(c, st.uid, st.obj, st.etag, "edit")
 		page.Meta.Linked = st.linked
 		page.Meta.Actions = shown(attach, del)
 	}
 	return page
+}
+
+// foreignLine is the line under the text of a note's edit (s-notes-20): the
+// first property Carrel does not know and how many more, said by the server
+// — the client counts nothing. Nothing unknown, no line.
+func foreignLine(names []string) view.Text {
+	switch len(names) {
+	case 0:
+		return ""
+	case 1:
+		return text("A property Carrel does not know — " + names[0] + " — is kept unchanged and not shown here.")
+	}
+	return text("Properties Carrel does not know — " + names[0] + " and " + countWord(len(names)-1) + " more — are kept unchanged and not shown here.")
 }
 
 // notebookRow is the Notebook of a note's edit (s-notes-20, s-notes-15):
@@ -1826,10 +1949,6 @@ func (s *Server) notebookTarget(c *collectionCtx, value string) *collectionCtx {
 	}
 	return nil
 }
-
-// taskDeleteNote is the line under Delete task (s-tasks-3). The frame writes
-// it in Russian; this is the same in English (to-typecase task 8).
-const taskDeleteNote = "Deleting goes to the server at once, and nothing can undo it."
 
 func (s *Server) cancelAction(c *collectionCtx, st editState) view.Action {
 	href := c.recordPath(st.uid)
@@ -1891,11 +2010,11 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 				set.Rows = append(set.Rows, view.FormRow{Name: f.name, Kind: view.InputHidden, Value: text(v), Error: errText})
 			}
 		case fieldRelated:
+			// One field (s-tasks-10): picked from what the session has
+			// loaded, or typed after «By UID…» — the same name either way.
 			set.Rows = append(set.Rows,
 				view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
-					Options: relatedOptions(c.index(), st.uid, first(vals)), Error: errText},
-				view.FormRow{Name: f.name + ".uid", Label: "Or enter a UID by hand", Kind: view.InputText,
-					Hint: "Filled, it wins over the choice above. Only the records already loaded for this collection are offered: nothing is asked of the servers."})
+					Options: s.relatedOptions(c, st.uid, first(vals)), Error: errText})
 		case fieldZone:
 			held := zoneOf(props[f.prop])
 			if held == "" {
@@ -1972,9 +2091,13 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			set.Rows = append(set.Rows, addButton(f, addressRows(f.name+".{n}")...))
 		case fieldTime:
 			row := triple(vals)
-			// The all-day box leads its field, as in s-agenda-3.
+			// The all-day box leads its field, as in s-agenda-3; a task's
+			// one box leads the first of its times (s-tasks-3).
 			if f.allDay {
 				set.Rows = append(set.Rows, view.FormRow{Name: f.name + ".allday", Label: "All day", Kind: view.InputCheck, Value: text(row[2])})
+			}
+			if f.taskDay && !slices.ContainsFunc(set.Rows, func(r view.FormRow) bool { return r.Name == taskDayBox }) {
+				set.Rows = append(set.Rows, view.FormRow{Name: taskDayBox, Label: "All day", Kind: view.InputCheck, Value: text(first(st.values[taskDayBox]))})
 			}
 			set.Rows = append(set.Rows,
 				view.FormRow{Name: f.name + ".date", Label: text(f.label), Kind: view.InputDate, Value: text(row[0]), Error: errText, Required: f.required},

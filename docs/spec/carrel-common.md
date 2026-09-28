@@ -476,8 +476,8 @@ Typecase): рейл с соседними заметками и колонка �
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/admin/` | GET, POST | админ | страница | `AdminUsersPage` |
-| `/admin/role` | GET | админ | лист | `UserRoleSheet` — «Set role»; сохраняет `POST /admin/?action=role` |
+| `/admin/` | GET, POST | админ | страница | `AdminUsersPage`; POST `action=` `role` (с `role=admin` или `user` — пункт-переключатель s-admin-12), `sessions`, `disable`, `enable`, `delete` |
+| `/admin/reset` | GET, POST | админ | лист | `PasswordResetSheet` — «Reset a password» из шапки (s-admin-13); `?target=` выбирает человека. POST (`target`, `password`) сбрасывает: ответ — лист с `Issued`, не переход; отказ — у своего поля |
 | `/admin/invites` | GET, POST | админ | страница | `AdminInvitesPage`; `?invite=` — ссылку этого приглашения показывает карточка Invitation. POST `action=` `link`, `send`, `user` (временный пароль: ответ — страница с `Issued`, не переход), `selfreg`, `resend`, `extend`, `revoke` |
 | `/admin/settings` | GET, POST | админ | страница | `AdminSettingsPage` |
 | `/admin/settings/mail-test` | POST | админ | фрагмент | `MailTestResult` |
@@ -673,8 +673,9 @@ type NavRow struct {
 }
 
 // Строка рубрики Shortcuts: место и справа то, что о нём сказано в кадре.
-// Attachments ведёт в папку вложений (не выбрана — в настройки вложений),
-// Place — где она лежит: хранилище и папки над ней, «Documents / carrel»;
+// Attachments ведёт в папку вложений (не выбрана — в настройки вложений, и
+// Place тогда «not set», s-files-18), Place — где она лежит: хранилище и
+// папки над ней, «Documents / carrel»;
 // On — эта папка открыта. Published ведёт в /app/files/published, Count —
 // сколько ссылок выдал человек, то же число, что у Published links настроек.
 type Shortcut struct {
@@ -1110,8 +1111,7 @@ type TaskEditPage struct { // правка
     Reminders []ReminderRow
     Attach    []AttachRow
     Loss      *LossReport
-    Delete    *Action // внизу формы (s-tasks-3); nil — у новой записи
-    DeleteNote Text   // строка под удалением
+    Delete    *Action // внизу формы (s-tasks-3), одна кнопка без строки под ней; nil — у новой записи
 }
 
 type NotePage struct {
@@ -1132,7 +1132,12 @@ type NoteDoc struct { // колонка текста страницы замет
     Dirty    bool
     ReadOnly bool
     Fields   []FormRow // правка: тетрадь, дата и время, теги, связь; уходят с тем же сохранением
-    Foreign  []Field   // правка: свойства, которых Carrel не знает, — строка под текстом (s-notes-20)
+    // Правка: строка под текстом о свойствах, которых Carrel не знает, —
+    // первое по имени и сколько ещё словом, готовой фразой сервера:
+    // «Properties Carrel does not know — X-JTX-COLOR and two more — are kept
+    // unchanged and not shown here.» (s-notes-20); у одного — «A property …
+    // — X-JTX-COLOR — is kept…». Пусто — таких нет. Клиент ничего не считает
+    Foreign  Text
 }
 
 // Колонка справа. В правке Tags и Related пусты — они поля под заголовком
@@ -1314,21 +1319,26 @@ type MoveSheet struct {
 // задачах отмеченных коллекций, где человек назван. Рубрики «The address»,
 // «What rewriting can set off», «What will not change» — постоянные подписи
 // клиента; строки под ними — данные, пустой раздел не рисуется. Pairs — пары
-// «старый → новый», Note — сколько записей называют старый. Effects —
-// Label «9 records on servers that schedule», «2 records on baikal» (сервер
-// не сказал, умеет ли планирование), «3 meetings organised by others»,
-// «Past meetings» (без числа), Value — что это может вызвать. Kept — записи в
-// коллекциях только для чтения и коллекции, которые не прочитались. Title и
-// строки о человеке — без рода: сервер пола не знает. Actions — «Rewrite N
+// «старый → новый», Note — сколько записей называют старый и, если хоть
+// одну из них можно переписать, что они выпадают из хронологии
+// (s-contacts-20 — без этого). Effects — Label «9 records on servers that
+// schedule», «1 record on a server that schedules» (s-contacts-19), «2
+// records on baikal» (сервер не сказал, умеет ли планирование), «3 meetings
+// organised by others», «Past meetings» (без числа), Value — что это может
+// вызвать. Kept — записи в коллекциях только для чтения и коллекции, которые
+// не прочитались. Note листа — строка под разделами: «Collections that are
+// not ticked were not looked in.» (решение владельца, s-contacts-19). Title
+// и строки о человеке — без рода: сервер пола не знает. Actions — «Rewrite N
 // records» (N — сколько записей будет переписано; ноль — выключена с
-// причиной) и «Leave as is»; обе отправляют Form, «Leave as is» — с
-// `op=leave` в адресе.
+// причиной, которую клиент ставит сообщением над ней, s-contacts-20) и
+// «Leave as is»; обе отправляют Form, «Leave as is» — с `op=leave` в адресе.
 type RewriteSheet struct {
     Title   Text
     Subject Text
     Pairs   []RewritePair
     Effects []Field
     Kept    []Field
+    Note    Text
     Form    Form
     Actions []Action
 }
@@ -1467,8 +1477,12 @@ type FileCollectionRow struct {
     State    CollectionState
 }
 
+// Subtitle — строка под заголовком: подключение хранилища, у хранилища
+// только для чтения — и почему Upload и New folder выключены: «sftpgo · vps
+// · read-only: nothing can be uploaded or made here» (s-files-15).
 type FilesPage struct {
     Shell
+    Subtitle Text
     Crumbs  []Crumb
     Bar     ListBar
     View    FileView // список или плитки
@@ -1504,11 +1518,19 @@ type NameClash struct { Name Text; Options []Action } // Skip · Keep both · Ov
 // New — «New folder» в рубрике дерева (s-files-4, s-notes-11): POST поля
 // name заводит папку в выбранной и отвечает тем же листом, где выбрана новая;
 // выбранная только для чтения — выключена с причиной. У дерева страницы nil.
-type FileTree struct { Nodes []FileTreeNode; Chosen string; New *Action }
+// Name — строка имени, которую New открывает над деревом (s-files-13): поле
+// name «Name of the new folder», «Create» (Form.Action — New.Href) и Cancel —
+// тот же лист, строка закрыта. Отказ стоит под строкой одной фразой — «There
+// is a folder called «2026-07» in carrel already. Choose another name.», —
+// и строка приходит открытой, с набранным. nil — New нет или она выключена.
+type FileTree struct { Nodes []FileTreeNode; Chosen string; New *Action; Name *Form }
 // Дерево, из которого выбирают файл (From Files у Attach), показывает и
 // файлы: File — узел-файл, он выбирается и не раскрывается; ID — его адрес в
 // разделе файлов без «/» в конце. ReadOnly — узел недоступен для этой цели:
 // у дерева-источника его нет, читать можно и из хранилища только для чтения.
+// Size и Lands — у узла-файла (s-files-16): размер и «inside» — файл ляжет в
+// запись — или «link» — запись сошлётся на него (правило S-20); размер,
+// которого сервер не сказал, не угадывается, и обоих тогда нет.
 type FileTreeNode struct {
     ID, Label string
     Stamp     Stamp
@@ -1516,9 +1538,16 @@ type FileTreeNode struct {
     Children  []FileTreeNode
     Expanded  bool
     File      bool
+    Size      Size
+    Lands     Text
 }
 
+// Title — «Upload files» (s-notes-11), «Attach from Files» (s-files-16),
+// «Attachment folder» у Browse; Subject — для чего: «to «Собрать чемодан»»
+// у From Files, у прочих пусто.
 type FilePickerSheet struct {
+    Title   Text
+    Subject Text
     Purpose Text // зачем выбирают: папка вложений, назначение копии, файл для вложения
     Tree    FileTree
     Actions []Action
@@ -1614,6 +1643,11 @@ type FormRow struct {
 // своим значением под одним Name (дни повторения, состав коллекции).
 // Group — рубрика, которая стоит перед вариантом и до следующей рубрики или
 // черты: пояс, с которым событие пришло, под «As sent» (s-agenda-8).
+// Meta — подпись справа от варианта: род и день записи в списке Related to,
+// «event · 12 August» (s-tasks-10). Typed — вариант «By UID…» (s-tasks-10):
+// его выбор открывает строку, где значение набирают руками, под тем же Name
+// поля; Value у него пуст, и выбранным он не приходит. Выбранное из списка и
+// набранное — одно значение одного поля (UID), сервер их не различает.
 type Option struct {
     Value     string
     Label     Text
@@ -1623,6 +1657,8 @@ type Option struct {
     Reason    Text
     Colour    Colour // метка варианта-коллекции: тетрадь заметки (s-notes-15); у прочих пусто
     Group     Text   // рубрика перед вариантом, «As sent» (s-agenda-8); у прочих пусто
+    Meta      Text   // подпись справа: «event · 12 August» (s-tasks-10); у прочих пусто
+    Typed     bool   // «By UID…»: значение набирают руками (s-tasks-10)
 }
 type FieldError struct { Name string; Message Text }
 
@@ -1632,7 +1668,7 @@ type FieldError struct { Name string; Message Text }
 type AccountPage struct {
     Shell
     Subtitle     Text        // «mix · created 11 February 2026»
-    Profile      Form        // рубрики Name и Email: Display name, Address с Change (Extra)
+    Profile      Form        // рубрики Name и Email: Display name с Save, Address с Change (оба — Extra); своих кнопок у формы нет
     Email        EmailStatus // под полем Address: значок или сообщение с кнопкой
     PasswordNote Text        // строка у Change password: перевязывается только обёртка ключа
     Escrow       EscrowStatus
@@ -1654,7 +1690,7 @@ type EmailStatus struct {
     ConfirmedAt When   // день подтверждения; пусто — дня нет
     Pending     Text   // новый адрес, ждущий ссылки
     SentTo      Text   // куда ушло письмо со ссылкой, пока ссылка жива
-    SentAt      When   // когда: «11:42»
+    SentAt      When   // когда: «11:42» сегодня, «12 February, 11:42» раньше (account-9)
     Message     *Notice // последствие; одна кнопка в Actions; nil — сообщения нет
 }
 type SessionRow struct {
@@ -1679,14 +1715,18 @@ type EscrowStatus struct {
 
 type EscrowPage struct {
     Shell
-    Subtitle Text // «A copy of your key on this server»
+    Subtitle Text // «A copy of your key on this server» (account-4), «No copy of your data key is deposited» (account-12)
+    Rubric   Text // над словами без копии: «What a deposit does» (account-12); с копией и при выключенной схеме пусто
     Status   EscrowStatus
     Confirm  *UnlockSheet // лист подтверждения перед депонированием
     History  []AuditRow
 }
 
-// Лист перед отзывом депонированного ключа: копия уничтожается.
+// Лист перед отзывом депонированного ключа (account-11): копия уничтожается.
+// Заголовок — то, что нажимают; одно предупреждение — чего больше не будет и
+// что остаётся.
 type EscrowWithdrawSheet struct {
+    Title   Text // «Withdraw my deposited key»
     Warning Text
     Form    Form     // скрытое action=withdraw и CSRF
     Actions []Action // Withdraw my deposited key · Cancel
@@ -1719,7 +1759,8 @@ type ConnectionCard struct {
     Title       Text
     Server      Text
     Login       Text
-    Password    SecretField
+    Password    *SecretField // Show password; nil у сервера, который пароля не спрашивает (s-profile-15)
+    Access      Text         // «no password» в строке адреса у такого сервера; у прочих пусто
     State       CollectionState
     Collections []CollectionRow
     Trace       *DiagnosticTrace // след последней проверки
@@ -1846,7 +1887,7 @@ type TriggerBlock struct {
     Command  Text // готовая строка или скрипт, собранный под назначение
     Password SecretField
     Note     Text
-    Off      *Action // выключить внешний запуск; nil — он не включён
+    Clock    Action // отметка «On a clock of your own — cron, GoSentry, a job in Gitea» (s-backup-2): On — внешний запуск включён; снятая выключает его, отдельного выключателя нет
 }
 type BackupRun struct { ID Text; Started When; State OpState; Size Size; Download *Action }
 type RestoreBlock struct {
@@ -1868,7 +1909,7 @@ type AppearancePage struct {
 type AdminUsersPage struct {
     Shell
     Rows []AdminUserRow
-    Add  []Action // Add user — на «Add users» (s-admin-2)
+    Add  []Action // шапка (s-admin-2): Add user — на «Add users»; Reset a password — лист PasswordResetSheet
 }
 type AdminUserRow struct {
     Login     Text
@@ -1879,12 +1920,17 @@ type AdminUserRow struct {
     Sessions  int
     Disabled  bool
     Escrowed  bool
-    Menu      []MenuItem // только «⋯» (s-admin-12): Set role, Kill sessions, Disable | Enable, Reset password, черта, Delete
+    Menu      []MenuItem // только «⋯» (s-admin-12): Make administrator | Make user, Kill sessions, Disable | Enable, черта, Delete
 }
-// UserRoleSheet — «Set role» строки пользователя: список ролей s-admin-8.
-type UserRoleSheet struct {
-    Login Text
-    Form  Form // role: User, Administrator; Save · Cancel
+// PasswordResetSheet — «Reset a password» из шапки списка людей (s-admin-13):
+// кого сбрасывают, что при этом уничтожается, временный пароль и путь без
+// потерь через Key escrow — подсказкой у пароля.
+type PasswordResetSheet struct {
+    Title   Text            // «Reset a password»
+    Form    Form            // target — Whose («anna · User»; сам администратор и отключённые — выключены с причиной), password — Temporary password
+    Warning Text            // что уничтожается: сохранённые пароли DAV-серверов и всё, что ими открывалось; записи на серверах остаются
+    Issued  *IssuedPassword // временный пароль — один раз, в ответе на сброс; nil — нет
+    Actions []Action        // Reset password (danger) · Cancel
 }
 
 // «Add users» (s-admin-1): три способа завести человека карточками в ряд,

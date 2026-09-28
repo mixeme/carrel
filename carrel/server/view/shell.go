@@ -69,7 +69,7 @@ type NavRow struct {
 // в кадре — где лежит папка вложений или сколько выдано ссылок.
 type Shortcut struct {
 	Action      // On — это место открыто
-	Place  Text `json:"place"` // где лежит: «Documents / carrel»; у Published пусто
+	Place  Text `json:"place"` // где лежит: «Documents / carrel», без папки вложений «not set» (s-files-18); у Published пусто
 	Count  *int `json:"count"` // у Published — выданные ссылки; nil — счёта у строки нет
 }
 

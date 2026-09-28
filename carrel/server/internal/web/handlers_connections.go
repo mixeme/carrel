@@ -453,7 +453,11 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 	password := view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, ReadOnly: f.NoPassword}
 	action, id, label := "/app/settings/connections", "connection.add", "Connect"
 	if f.Editing != "" {
-		password.Hint = "Leave it empty to keep the stored one."
+		// Beside a field the mark turned off there is nothing kept to keep
+		// (s-profile-16).
+		if !f.NoPassword {
+			password.Hint = "Leave it empty to keep the stored one."
+		}
 		action = s.postQuery("/app/settings/connections", url.Values{"op": {"edit"}, "account": {f.Editing}})
 		id, label = "connection.edit.save", "Save"
 	}
@@ -466,7 +470,8 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 		password,
 		view.FormRow{Name: "noPassword", Label: "The server asks no password", Kind: view.InputCheck, Value: text(boolStr(f.NoPassword)),
 			Disables: "password"},
-		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint (SHA-256)", Kind: view.InputText, Value: text(f.CertFingerprint)},
+		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint SHA-256 · optional", Kind: view.InputText, Value: text(f.CertFingerprint),
+			Placeholder: "only for a certificate the system does not trust"},
 	)
 	if f.Editing != "" {
 		form.Action = action
@@ -484,20 +489,11 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 // password opens the sheet; inside it asks for this card's password, and that
 // request is what releases and journals it (S-10.7).
 func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.Blob, c sealed.Connection, unlocked bool) view.ConnectionCard {
-	reveal := view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}
-	switch {
-	case c.NoPassword || c.Password == "":
-		// Nothing to release: the button stays, off, and says why (U-6.0).
-		reveal.Enabled, reveal.Reason = false, "The server asks no password"
-	case unlocked:
-		reveal.Href = s.postQuery("/app/settings/connections", url.Values{"reveal": {c.ID}})
-	}
 	card := view.ConnectionCard{
 		AccountID: c.ID,
 		Title:     text(connLabel(c)),
 		Server:    text(c.Server),
 		Login:     text(c.Login),
-		Password:  view.SecretField{Reveal: reveal},
 		State:     view.CollectionOK,
 		Actions: []view.Action{{
 			ID: "connection.test", Label: "Test",
@@ -516,6 +512,17 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			Href:   s.postQuery("/app/settings/connections", url.Values{"op": {"rediscover"}, "account": {c.ID}}),
 			Method: "POST", Enabled: true,
 		}},
+	}
+	// Nothing to release from a server that asks no password: the address
+	// line says «no password» and there is no Show password (s-profile-15).
+	if c.NoPassword || c.Password == "" {
+		card.Access = "no password"
+	} else {
+		reveal := view.Action{ID: "connection.password", Label: "Show password", Href: s.route("/app/settings/unlock"), Method: "GET", Enabled: true}
+		if unlocked {
+			reveal.Href = s.postQuery("/app/settings/connections", url.Values{"reveal": {c.ID}})
+		}
+		card.Password = &view.SecretField{Reveal: reveal}
 	}
 	if trace := sess.CheckOf(c.ID); trace != nil {
 		card.Trace = trace
@@ -607,14 +614,14 @@ func (s *Server) revealPassword(sess *session.Session, page *view.ConnectionsPag
 		if page.Accounts[i].AccountID != id {
 			continue
 		}
-		if !page.Accounts[i].Password.Reveal.Enabled {
+		if page.Accounts[i].Password == nil || !page.Accounts[i].Password.Reveal.Enabled {
 			return false // no password to release, and nothing to journal
 		}
 		password, err := s.users.RevealConnectionPassword(sess.AccountID(), key, id)
 		if err != nil {
 			return false
 		}
-		page.Accounts[i].Password = view.SecretField{
+		page.Accounts[i].Password = &view.SecretField{
 			Shown:  true,
 			Value:  text(password),
 			Reveal: view.Action{ID: "connection.password", Label: "Hide password", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
