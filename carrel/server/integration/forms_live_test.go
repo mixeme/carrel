@@ -301,7 +301,7 @@ func liveContactFields(ctx context.Context, t *testing.T, app *liveApp, client *
 		mustAddress(t, "nickname and categories", got, "PO 7", "Flat 2", "Lenina 1", "Ekaterinburg", "620000", "Russia")
 	}
 
-	lost = liveEditDropping(t, app, rec, form, map[string]string{"bday": "--04-13", "tel.0.type": "cell", "adr.0.region": "Sverdlovsk"})
+	lost = liveEditDropping(t, app, rec, form, map[string]string{"bday": "13.04", "tel.0.type": "cell", "adr.0.region": "Sverdlovsk"})
 	got, _ = rawBody(ctx, t, client, file)
 	if !contains(lost, "BDAY") && keeps("BDAY") {
 		yearless(t, "birthday", got, "04", "13")

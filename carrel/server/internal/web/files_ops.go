@@ -490,38 +490,48 @@ func (s *Server) postFilesMkcol(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	name := strings.TrimSpace(r.FormValue("name"))
-	folder, _ := c.path(c.segs, true)
 	var notices []view.Notice
-	switch {
-	case c.col.ReadOnly:
-		notices = append(notices, readOnlyNotice)
-	case file.CheckName(name) != nil:
-		notices = append(notices, view.Notice{Role: view.NoticeAlert, Title: "Nothing was created", Body: "A folder name cannot be empty, “.” or “..”, and cannot hold “/” or “\\”."})
-	default:
-		p, _ := c.path(append(slices.Clone(c.segs), name), true)
-		err := c.files.MkCol(r.Context(), p)
-		forgetFolder(c.sess, c.conn.ID, folder)
-		switch {
-		case err == nil:
-		// It is already here because this very request put it here: the
-		// guard sent the MKCOL twice after a connection died before the
-		// answer. The folder is made, and saying otherwise sends the
-		// person looking for a name that is taken by their own click.
-		case landedOnTheFirstTry(err):
-		case dav.IsStatus(err, http.StatusMethodNotAllowed):
-			notices = append(notices, view.Notice{Role: view.NoticeAlert, Title: text(name + " is already here"), Body: "A file or folder with this name is in this folder. Nothing was created."})
-		case dav.IsStatus(err, http.StatusConflict):
-			notices = append(notices, view.Notice{Role: view.NoticeAlert, Title: "This folder is no longer there", Body: "The server has no folder to create it in. Nothing was created."})
-		default:
-			notices = append(notices, s.fileFailure(c, "The folder was not created", "MKCOL", p, err))
-		}
+	if n := s.makeFolder(r.Context(), c, strings.TrimSpace(r.FormValue("name"))); n != nil {
+		notices = append(notices, *n)
 	}
 	if len(notices) == 0 && !WantsFragment(r) {
 		s.redirect(w, r, c.href("", c.segs, true))
 		return
 	}
 	s.writeFolder(w, r, c, c.segs, "", url.Values{}, TargetMain, notices...)
+}
+
+// makeFolder is MKCOL of name in the folder c is at: nil when the folder is
+// made, else why not. New folder of the bar and New folder of a tree (the
+// move sheet, the upload picker) are this one step.
+func (s *Server) makeFolder(ctx context.Context, c *fileCtx, name string) *view.Notice {
+	switch {
+	case c.col.ReadOnly:
+		n := readOnlyNotice
+		return &n
+	case file.CheckName(name) != nil:
+		return &view.Notice{Role: view.NoticeAlert, Title: "Nothing was created", Body: "A folder name cannot be empty, “.” or “..”, and cannot hold “/” or “\\”."}
+	}
+	folder, _ := c.path(c.segs, true)
+	p, _ := c.path(append(slices.Clone(c.segs), name), true)
+	err := c.files.MkCol(ctx, p)
+	forgetFolder(c.sess, c.conn.ID, folder)
+	switch {
+	case err == nil:
+	// It is already here because this very request put it here: the
+	// guard sent the MKCOL twice after a connection died before the
+	// answer. The folder is made, and saying otherwise sends the
+	// person looking for a name that is taken by their own click.
+	case landedOnTheFirstTry(err):
+	case dav.IsStatus(err, http.StatusMethodNotAllowed):
+		return &view.Notice{Role: view.NoticeAlert, Title: text(name + " is already here"), Body: "A file or folder with this name is in this folder. Nothing was created."}
+	case dav.IsStatus(err, http.StatusConflict):
+		return &view.Notice{Role: view.NoticeAlert, Title: "This folder is no longer there", Body: "The server has no folder to create it in. Nothing was created."}
+	default:
+		n := s.fileFailure(c, "The folder was not created", "MKCOL", p, err)
+		return &n
+	}
+	return nil
 }
 
 // Operations (C-5.5): rename, move, copy and delete over names of one folder,
@@ -585,7 +595,20 @@ func (s *Server) postFilesOp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if q.Get("go") == "" {
+		// New folder of the tree: MKCOL into the chosen folder, then the
+		// same sheet with the new one chosen (s-files-4).
+		var failure *view.Notice
+		if q.Get("mkcol") != "" && (op == view.FileMove || op == view.FileCopy) {
+			q.Del("mkcol")
+			if dest, ok := s.destination(c, q); ok {
+				name := strings.TrimSpace(r.PostFormValue("name"))
+				if failure = s.makeFolder(r.Context(), dest, name); failure == nil {
+					q.Set("to", s.route(dest.href("", append(slices.Clone(dest.segs), name), true)))
+				}
+			}
+		}
 		sheet := s.opSheet(r, c, op, items, q)
+		sheet.Failure = failure
 		if WantsFragment(r) {
 			_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
 			return
@@ -664,10 +687,34 @@ func moveBlock(c *fileCtx, op view.FileOp, items []file.Entry, dest *fileCtx) st
 	return ""
 }
 
+var fileOpVerbs = map[view.FileOp]string{view.FileMove: "Move", view.FileCopy: "Copy", view.FileRename: "Rename", view.FileDelete: "Delete"}
+
+// newFolderAction is New folder of a tree (s-files-4, s-notes-11): a POST
+// of the field "name" to address with q, which makes the folder in dest, the
+// chosen one, and answers the sheet with it chosen. Closed with the reason
+// where nothing can be made.
+func (s *Server) newFolderAction(dest *fileCtx, address string, q url.Values) *view.Action {
+	a := &view.Action{ID: "files.tree.new", Label: "New folder", Icon: "i-plus", Method: "POST"}
+	switch {
+	case dest == nil:
+		a.Reason = "Choose a folder in the tree first."
+	case dest.col.ReadOnly:
+		a.Reason = readOnlyReason
+	default:
+		q.Set("to", s.route(dest.href("", dest.segs, true)))
+		a.Enabled, a.Href = true, s.postQuery(address, q)
+	}
+	return a
+}
+
 // opSheet says what an operation will do before it runs: the names, where they
 // go, and — between storages — that files travel through Carrel (S-17.1).
 func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []file.Entry, q url.Values) view.FileOpSheet {
-	sheet := view.FileOpSheet{Op: op}
+	sheet := view.FileOpSheet{Op: op, Title: text(fileOpVerbs[op] + " " + plural(len(items), "item"))}
+	if op == view.FileRename {
+		sheet.Title = "Rename"
+	}
+	sheet.Subject = text("from " + strings.Join(append([]string{collectionLabel(c.col)}, c.segs...), " / "))
 	names := make([]string, len(items))
 	for i, e := range items {
 		names[i] = e.Name
@@ -697,16 +744,21 @@ func (s *Server) opSheet(r *http.Request, c *fileCtx, op view.FileOp, items []fi
 			dest = nil
 		}
 		sheet.Target = s.fileTree(r.Context(), c, dest)
+		sheet.Target.New = s.newFolderAction(dest, c.href("op", c.segs, true), url.Values{"op": {string(op)}, "item": names, "mkcol": {"1"}})
 		if reason := moveBlock(c, op, items, dest); reason != "" {
 			confirm.Enabled, confirm.Reason = false, text(reason)
 		} else {
 			run.Set("to", s.route(dest.href("", dest.segs, true)))
 		}
-		if dest != nil && dest.conn.ID != c.conn.ID {
-			sheet.Warning = "This goes to another storage: Carrel downloads each file and uploads it there, one at a time."
-			if op == view.FileMove {
-				sheet.Warning = "This goes to another storage, so nothing moves on a server: Carrel downloads each file and uploads it there, and deletes the original only once its copy is complete."
-			}
+		// The message stands on the sheet (s-files-4): what the operation
+		// will cost, said before it starts.
+		switch {
+		case op == view.FileCopy:
+			sheet.Warning = "A copy travels through Carrel even inside one server: each file is downloaded and uploaded again, one at a time."
+		case dest != nil && dest.conn.ID != c.conn.ID:
+			sheet.Warning = "This goes to another storage, so nothing moves on a server: Carrel downloads each file and uploads it there, and deletes the original only once its copy is complete."
+		default:
+			sheet.Warning = "Inside one server this is MOVE: instant, no traffic. To another storage the file has to be downloaded and uploaded again — Carrel says so before it starts, not after."
 		}
 	}
 	if confirm.Enabled {

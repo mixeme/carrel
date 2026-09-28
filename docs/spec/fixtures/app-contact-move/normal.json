@@ -17,6 +17,7 @@
   ],
   "copy": false,
   "kind": "contact",
+  "subject": "Анна Ковалёва · from nextcloud · Контакты",
   "target": {
     "chosen": "",
     "new": null,
@@ -36,7 +37,7 @@
         "label": "Контакты",
         "last": false,
         "readOnly": true,
-        "reason": "Already here",
+        "reason": "already there",
         "stamp": "nextcloud · Контакты"
       },
       {
@@ -45,7 +46,7 @@
         "label": "Команда",
         "last": false,
         "readOnly": true,
-        "reason": "Read-only",
+        "reason": "read-only",
         "stamp": "radicale · vps · Команда"
       },
       {
@@ -59,5 +60,6 @@
       }
     ]
   },
-  "warning": ""
+  "title": "Move contact",
+  "warning": "Inside one server this is MOVE: instant, no traffic. To another address book the card is copied and then deleted — Carrel says so before it starts, not after."
 }

@@ -1,0 +1,257 @@
+package web_test
+
+import (
+	"fmt"
+	"html"
+	"net/url"
+	"regexp"
+	"strconv"
+	"strings"
+	"testing"
+
+	"carrel.dev/carrel/server/view"
+)
+
+// From-typecase note 12: move and copy are a sheet — over the selected files
+// with the tree of every storage (s-files-4), over a record with the list of
+// its kind's collections (s-contacts-2). Every string compared below is cut
+// out of the frame.
+
+var (
+	frameSheetSub  = regexp.MustCompile(`(?s)<b class="tc-sheet__title">.*?</b>\s*<span class="tc-push tc-dim[^"]*">(.*?)</span>`)
+	frameSheetMsg  = regexp.MustCompile(`(?s)<div class="tc-sheet__body">.*?<div class="tc-msg[^"]*">(.*?)</div>`)
+	frameSheetMain = regexp.MustCompile(`(?s)<div class="tc-sheet__foot"><button class="tc-btn is-primary"[^>]*>(.*?)</button>`)
+	frameTreeNew   = regexp.MustCompile(`(?s)<div class="tc-rubric">([^<]*?)\s*<button class="tc-btn is-sm"[^>]*>(.*?)</button></div>\s*<div class="tc-tree">`)
+	frameClosedRow = regexp.MustCompile(`(?s)<div class="tc-tree__row tc-tree__row--op-55">(?:<span class="tc-mark"[^>]*></span>|<svg>.*?</svg>)?([^<]*?)\s*<span class="[^"]*">(.*?)</span></div>`)
+)
+
+// frameInline is a piece of a frame as it reads: inline tags go without a
+// space of their own («<code>MOVE</code>:» is «MOVE:»).
+func frameInline(s string) string {
+	return strings.Join(strings.Fields(html.UnescapeString(frameTag.ReplaceAllString(s, ""))), " ")
+}
+
+func frameOne(t *testing.T, re *regexp.Regexp, frame, what string) []string {
+	t.Helper()
+	m := re.FindStringSubmatch(frame)
+	if m == nil {
+		t.Fatalf("the frame draws no %s: read it again", what)
+	}
+	for i := range m {
+		m[i] = frameInline(m[i])
+	}
+	return m
+}
+
+// s-files-4: «Move 3 items» from a folder, the tree with New folder in its
+// rubric, the standing message, «Move here»; Copy is the same sheet with
+// «Copy here».
+func TestFileMoveSheetIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "s-files-4")
+	title := frameOne(t, frameSheetT, frame, "title")[1]
+	from := frameOne(t, frameSheetSub, frame, "from line")[1]
+	msg := frameOne(t, frameSheetMsg, frame, "message")[1]
+	confirm := frameOne(t, frameSheetMain, frame, "main button")[1]
+	newFolder := frameOne(t, frameTreeNew, frame, "button in the tree's rubric")[2]
+
+	count := regexp.MustCompile(`^Move (\d+) items$`).FindStringSubmatch(title)
+	path, ok := strings.CutPrefix(from, "from ")
+	if count == nil || !ok {
+		t.Fatalf("title %q, from %q: the frame changed, read it again", title, from)
+	}
+	n, _ := strconv.Atoi(count[1])
+	// «Documents / carrel / attachments»: the storage, then the folders.
+	segs := strings.Split(path, " / ")[1:]
+
+	f := filesFixture(t, true)
+	names := make([]string, n)
+	for i := range names {
+		names[i] = fmt.Sprintf("f%d.txt", i)
+		f.srv.SeedFile(filesDocs+strings.Join(segs, "/")+"/"+names[i], "x")
+	}
+	f.srv.SeedFolder(filesDocs + "2026-07/")
+	op := func(verb string) string {
+		return f.at("op", append(append([]string{}, segs...), "")...) + "?" + url.Values{"op": {verb}, "item": names}.Encode()
+	}
+	there := f.at("", "2026-07", "")
+
+	sheet := opSheet(t, f, op("move"), url.Values{"to": {there}})
+	if string(sheet.Title) != title {
+		t.Errorf("title = %q, the frame %q", sheet.Title, title)
+	}
+	if want := "from Docs / " + strings.Join(segs, " / "); string(sheet.Subject) != want {
+		t.Errorf("subject = %q, want %q", sheet.Subject, want)
+	}
+	if string(sheet.Warning) != msg {
+		t.Errorf("message = %q\nthe frame %q", sheet.Warning, msg)
+	}
+	if sheet.Actions[0].Label != view.Text(confirm) || !sheet.Actions[0].Enabled {
+		t.Errorf("confirm = %+v, the frame %q", sheet.Actions[0], confirm)
+	}
+	if sheet.Target == nil || sheet.Target.New == nil || sheet.Target.New.Label != view.Text(newFolder) || !sheet.Target.New.Enabled {
+		t.Fatalf("the tree has no %q: %+v", newFolder, sheet.Target)
+	}
+
+	// New folder makes the folder in the chosen one, and the sheet comes
+	// back with it chosen.
+	made := opSheet(t, f, sheet.Target.New.Href, url.Values{"name": {"2026-08"}})
+	if want := f.at("", "2026-07", "2026-08", ""); made.Target == nil || made.Target.Chosen != want || made.Failure != nil {
+		t.Fatalf("after New folder: chosen %+v, failure %+v", made.Target, made.Failure)
+	}
+	if row := fileRow(t, decode[view.FilesPage](t, f.h.do(get(there, f.sess))), "2026-08"); !row.IsDir {
+		t.Errorf("no folder made: %+v", row)
+	}
+	if string(made.Title) != title || !made.Actions[0].Enabled {
+		t.Errorf("the sheet did not come back whole: %+v", made)
+	}
+	taken := opSheet(t, f, sheet.Target.New.Href, url.Values{"name": {"2026-08"}})
+	if taken.Failure == nil || taken.Target.Chosen != there {
+		t.Errorf("a taken name: failure %+v, chosen %q", taken.Failure, taken.Target.Chosen)
+	}
+
+	cp := opSheet(t, f, op("copy"), url.Values{"to": {there}})
+	if want := "Copy " + strings.TrimPrefix(title, "Move "); string(cp.Title) != want || cp.Actions[0].Label != "Copy here" {
+		t.Errorf("copy: title %q, confirm %+v", cp.Title, cp.Actions[0])
+	}
+}
+
+// The upload picker draws the same tree with the same New folder
+// (s-notes-11, «Where to put it»).
+func TestUploadPickerMakesAFolder(t *testing.T) {
+	newFolder := frameOne(t, frameTreeNew, mockupFrame(t, "s-notes-11"), "button in the tree's rubric")[2]
+	f := filesFixture(t, true)
+	f.srv.SeedFolder(filesDocs + "carrel/")
+	carrel := f.at("", "carrel", "")
+	sheet := decode[view.FilePickerSheet](t, f.h.do(get("/app/files/picker?"+url.Values{"for": {"upload"}, "to": {carrel}}.Encode(), f.sess)))
+	if sheet.Tree.New == nil || sheet.Tree.New.Label != view.Text(newFolder) || !sheet.Tree.New.Enabled {
+		t.Fatalf("the picker has no %q: %+v", newFolder, sheet.Tree)
+	}
+	made := decode[view.FilePickerSheet](t, f.h.do(postForm(sheet.Tree.New.Href, f.sess, url.Values{"name": {"2026-08"}})))
+	if want := f.at("", "carrel", "2026-08", ""); made.Tree.Chosen != want {
+		t.Fatalf("after New folder the chosen is %q, want %q", made.Tree.Chosen, want)
+	}
+	if !fileRow(t, decode[view.FilesPage](t, f.h.do(get(carrel, f.sess))), "2026-08").IsDir {
+		t.Error("no folder made")
+	}
+}
+
+// s-contacts-2: «Move contact», what and from where, the current book
+// «already there», a read-only one «read-only», the standing message and
+// «Move here».
+func TestRecordMoveSheetIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "s-contacts-2")
+	title := frameOne(t, frameSheetT, frame, "title")[1]
+	subject := frameOne(t, frameSheetSub, frame, "subject")[1]
+	msg := frameOne(t, frameSheetMsg, frame, "message")[1]
+	confirm := frameOne(t, frameSheetMain, frame, "main button")[1]
+	closed := frameClosedRow.FindAllStringSubmatch(frame, -1)
+	if len(closed) != 2 {
+		t.Fatalf("the frame closes %d books, not the current and the read-only one: read it again", len(closed))
+	}
+	here, readOnly := frameInline(closed[0][2]), frameInline(closed[1][2])
+	// The last sentence of the message tells the reader of the mockup what
+	// Copy looks like; on the sheet itself it says nothing (to-typecase 22).
+	msg, _, _ = strings.Cut(msg, " Copy is this same sheet")
+	name, _, ok := strings.Cut(subject, " · from ")
+	if !ok || name == "" || !strings.HasPrefix(title, "Move ") {
+		t.Fatalf("subject %q, title %q: the frame changed, read it again", subject, title)
+	}
+
+	f := newMoveFixture(t)
+	ada := f.record(f.id, peopleBook, "ada")
+	sheet := decode[view.MoveSheet](t, f.h.do(get(ada+"/move", f.sess)))
+	if string(sheet.Title) != title {
+		t.Errorf("title = %q, the frame %q", sheet.Title, title)
+	}
+	people := moveOption(t, sheet, "People")
+	if want := "Ada · from " + string(people.Stamp); string(sheet.Subject) != want {
+		t.Errorf("subject = %q, want %q", sheet.Subject, want)
+	}
+	if !people.ReadOnly || string(people.Reason) != here {
+		t.Errorf("the current book = %+v, the frame %q", people, here)
+	}
+	if o := moveOption(t, sheet, "Archive"); !o.ReadOnly || string(o.Reason) != readOnly {
+		t.Errorf("the read-only book = %+v, the frame %q", o, readOnly)
+	}
+
+	chosen := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Friends").ID, f.sess)))
+	if string(chosen.Warning) != msg {
+		t.Errorf("message = %q\nthe frame %q", chosen.Warning, msg)
+	}
+	if c := confirmOf(t, chosen); c.Label != view.Text(confirm) || !c.Enabled {
+		t.Errorf("confirm = %+v, the frame %q", c, confirm)
+	}
+	cp := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Friends").ID+"&copy=1", f.sess)))
+	if cp.Title != "Copy contact" || confirmOf(t, cp).Label != "Copy here" {
+		t.Errorf("copy: title %q, confirm %+v", cp.Title, confirmOf(t, cp))
+	}
+}
+
+// s-profile-8: moving a collection is the same kind of sheet — the server it
+// goes to, the current one «already there», the one chosen saying what it
+// takes, the message counting the records, «Move here». The row menu of
+// s-profile-1 has both Move and Copy to another server.
+func TestCollectionMoveSheetIsTheFrame(t *testing.T) {
+	frame := mockupFrame(t, "s-profile-8")
+	subject := frameOne(t, frameSheetSub, frame, "subject")[1]
+	msg := frameOne(t, frameSheetMsg, frame, "message")[1]
+	confirm := frameOne(t, frameSheetMain, frame, "main button")[1]
+	here := frameOne(t, frameClosedRow, frame, "the current server")[2]
+	holds := frameOne(t, regexp.MustCompile(`(?s)<div class="is-on tc-tree__row">(?:<svg>.*?</svg>)?[^<]*<span class="[^"]*">(.*?)</span>`), frame, "the chosen server")[1]
+	host, _, ok := strings.Cut(subject, " · ")
+	count := regexp.MustCompile(`all (\d+) events`).FindStringSubmatch(msg)
+	if !ok || count == nil || !strings.Contains(msg, "on "+host+".") {
+		t.Fatalf("subject %q, message %q: the frame changed, read it again", subject, msg)
+	}
+	// As on the record's sheet, the last sentence speaks to the reader of the
+	// mockup (to-typecase 22).
+	msg, _, _ = strings.Cut(msg, " Copy is this sheet")
+	menu := mockupFrame(t, "s-profile-1")
+	var items []string
+	for _, l := range []string{"Move to another server", "Copy to another server"} {
+		if regexp.MustCompile(`role="menuitem">(?:<svg>.*?</svg>)?` + l + `</button>`).MatchString(menu) {
+			items = append(items, l)
+		}
+	}
+	if len(items) != 2 {
+		t.Fatalf("s-profile-1 menu = %v: read it again", items)
+	}
+
+	f := newColMoveFixture(t)
+	f.srv.Seed(f.col+"retro.ics", ics("BEGIN:VEVENT\nUID:retro\nDTSTAMP:20260101T000000Z\nDTSTART:20261007T100000Z\nSUMMARY:Retro\nEND:VEVENT"))
+	f.h.do(get(f.path("calendar"), f.sess)) // the visit that learns the count
+	page := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
+	row := connectionRow(t, page, f.id, f.col)
+	var got []string
+	for _, m := range row.Menu {
+		if strings.HasSuffix(string(m.Label), "another server") {
+			got = append(got, string(m.Label))
+		}
+	}
+	if !equalStrings(got, items) {
+		t.Errorf("menu = %v, the frame %v", got, items)
+	}
+	sheet := decode[view.CollectionMoveSheet](t, f.h.do(get(menuHref(t, row.Menu, "collection.move"), f.sess)))
+	src := sheet.Target.Options[0]
+	if want := string(src.Label) + " · Work"; string(sheet.Subject) != want {
+		t.Errorf("subject = %q, want %q (the frame %q)", sheet.Subject, want, subject)
+	}
+	if !src.ReadOnly || string(src.Reason) != here {
+		t.Errorf("the current server = %+v, the frame %q", src, here)
+	}
+	chosen := decode[view.CollectionMoveSheet](t, f.h.do(get(sheet.Target.Options[1].ID, f.sess)))
+	if o := chosen.Target.Options[1]; o.ReadOnly || string(o.Stamp) != holds {
+		t.Errorf("the chosen server = %+v, the frame %q", o, holds)
+	}
+	want := strings.ReplaceAll(strings.Replace(msg, "all "+count[1]+" events", "all 2 events", 1), "on "+host+".", "on "+string(src.Label)+".")
+	if string(chosen.Warning) != want {
+		t.Errorf("message = %q\nwant      %q", chosen.Warning, want)
+	}
+	if len(chosen.Actions) != 1 || chosen.Actions[0].Label != view.Text(confirm) || !chosen.Actions[0].Enabled {
+		t.Errorf("actions = %+v, the frame %q and Cancel", chosen.Actions, confirm)
+	}
+	cp := decode[view.CollectionMoveSheet](t, f.h.do(get(menuHref(t, row.Menu, "collection.copy"), f.sess)))
+	if !cp.Copy || len(cp.Actions) != 1 || cp.Actions[0].Label != "Copy here" {
+		t.Errorf("copy = %+v", cp)
+	}
+}

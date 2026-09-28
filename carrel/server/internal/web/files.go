@@ -307,7 +307,7 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 	}
 	blob := s.catalogOf(sess)
 	page := view.FilesRootPage{Shell: s.buildShell(sess, "Files")}
-	page.Rail = s.filesRail(sess, blob)
+	page.Rail = s.filesRail(sess, blob, nil)
 	page.Print = view.Print{Title: page.Title}
 	for _, col := range ticked(blob, view.KindFile) {
 		conn, _ := blob.Connection(col.AccountID)
@@ -334,10 +334,6 @@ func (s *Server) getFilesRoot(w http.ResponseWriter, r *http.Request) {
 			row.Purpose = "attachments"
 		}
 		page.Collections = append(page.Collections, row)
-	}
-	page.Shortcuts = []view.Action{
-		{ID: "files.attachments", Label: "Attachments", Icon: "i-file", Href: s.route("/app/settings/attachments"), Method: "GET", Enabled: true},
-		{ID: "files.published", Label: "Published", Icon: "i-link", Href: s.route("/app/files/published"), Method: "GET", Enabled: true},
 	}
 	if len(page.Collections) == 0 {
 		page.Empty = filesEmpty(s, blob)
@@ -369,8 +365,9 @@ func filesEmpty(s *Server, blob sealed.Blob) *view.Notice {
 
 // filesRail is the rail of the section (C-6.3): the sections, the root row
 // whose ticks are what the root shows, and the file collections by connection
-// with their ticks. No counts: a folder is not a list of records.
-func (s *Server) filesRail(sess *session.Session, blob sealed.Blob) view.Rail {
+// with their ticks. No counts: a folder is not a list of records. open is the
+// folder shown, nil on the root.
+func (s *Server) filesRail(sess *session.Session, blob sealed.Blob, open *fileCtx) view.Rail {
 	rail := view.Rail{About: s.aboutAction(), Nav: s.navRows(sess, blob, filesSpec.segment)}
 	sections, live, on := s.railSections(sess, blob, filesSpec, nil, nil)
 	root := view.SourceRow{Href: s.route("/app/files"), Label: "Selected collections", Tick: view.TickPart, State: view.CollectionOK}
@@ -381,13 +378,52 @@ func (s *Server) filesRail(sess *session.Session, blob sealed.Blob) view.Rail {
 		root.Tick = view.TickOn
 	}
 	rail.Sections = append([]view.RailSection{{State: view.CollectionOK, Rows: []view.SourceRow{root}}}, sections...)
+	// The foot of s-files-1: New folder where a folder is open, Connect
+	// account, Subscribe to a feed — somebody's folder is such a feed, and
+	// the form opens for a folder. Apply is the rail's submit without
+	// scripts (C-6.3) and is not drawn.
+	folder := view.Action{ID: "rail.folder.new", Label: "New folder", Icon: "i-plus", Method: "POST"}
+	openHref := ""
+	switch {
+	case open == nil:
+		folder.Reason = "Open a folder to make one in it."
+	case open.col.ReadOnly:
+		folder.Reason = readOnlyReason
+	default:
+		folder.Enabled, folder.Href = true, s.route(open.href("mkcol", open.segs, true))
+	}
+	if open != nil {
+		openHref = s.route(open.href("", open.segs, true))
+	}
 	rail.Foot = []view.Action{
 		{ID: "rail.apply", Label: "Apply", Href: s.route("/app/sources/files"), Method: "POST", Enabled: true},
+		folder,
 		{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
-		{ID: "feed.subscribe", Label: "Subscribe to a folder", Icon: "i-link", Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}, "kind": {"folder"}}), Method: "GET", Enabled: true},
+		{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link", Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}, "kind": {"folder"}}), Method: "GET", Enabled: true},
 	}
 	rail.Note = text(fmt.Sprintf("%d of %s ticked", on, plural(live, "storage")))
+	rail.Shortcuts = s.filesShortcuts(sess, blob, openHref)
 	return rail
+}
+
+// filesShortcuts are the rubric Shortcuts of the rail (s-files-1, s-files-6):
+// the attachment folder with where it lies, and the published links with
+// their count. Without an attachment folder the row leads to where it is
+// chosen.
+func (s *Server) filesShortcuts(sess *session.Session, blob sealed.Blob, open string) []view.Shortcut {
+	attach := view.Shortcut{Action: view.Action{ID: "files.attachments", Label: "Attachments", Icon: "i-file", Href: s.route("/app/settings/attachments"), Method: "GET", Enabled: true}}
+	if fc := s.savedFolder(sess, blob); fc != nil {
+		attach.Href = s.route(fc.href("", fc.segs, true))
+		place := []string{collectionLabel(fc.col)}
+		if len(fc.segs) > 1 {
+			place = append(place, fc.segs[:len(fc.segs)-1]...)
+		}
+		attach.Place = text(strings.Join(place, " / "))
+		attach.On = open != "" && attach.Href == open
+	}
+	links := len(s.users.PublishedLinks(sess.AccountID()))
+	published := view.Shortcut{Action: view.Action{ID: "files.published", Label: "Published", Icon: "i-link", Href: s.route("/app/files/published"), Method: "GET", Enabled: true}, Count: &links}
+	return []view.Shortcut{attach, published}
 }
 
 // A folder (C-6.7).
@@ -475,9 +511,9 @@ func (s *Server) folderPage(c *fileCtx, segs []string, entries []file.Entry, q u
 		title = segs[len(segs)-1]
 	}
 	page := view.FilesPage{Shell: s.buildShell(c.sess, title), View: view.FileList}
-	page.Rail = s.filesRail(c.sess, c.blob)
-	page.Notices = append(page.Notices, notices...)
 	here := c.href("", segs, true)
+	page.Rail = s.filesRail(c.sess, c.blob, c.at(segs))
+	page.Notices = append(page.Notices, notices...)
 	page.Top.Refresh = view.Refresh{Action: view.Action{ID: "folder.refresh", Label: "Refresh", Icon: "i-refresh", Href: s.route(here), Method: "GET", Enabled: true}}
 
 	page.Crumbs = []view.Crumb{{Label: text(collectionLabel(c.col)), Href: s.route(c.href("", nil, true))}}

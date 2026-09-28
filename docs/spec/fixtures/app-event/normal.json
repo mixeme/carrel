@@ -194,6 +194,13 @@
               },
               {
                 "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
                 "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
                 "icon": "i-up",
                 "id": "collection.import",
@@ -244,6 +251,13 @@
                 "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
                 "id": "collection.move",
                 "label": "Move to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
                 "method": "GET"
               },
               {
@@ -302,6 +316,13 @@
               },
               {
                 "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
                 "href": "/app/calendar/a-nc-home/rabota/import",
                 "icon": "i-up",
                 "id": "collection.import",
@@ -337,6 +358,7 @@
         "state": "ok"
       }
     ],
+    "shortcuts": [],
     "tags": []
   },
   "readOnly": false,

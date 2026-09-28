@@ -20,7 +20,7 @@
     "chosen": "/app/contacts/a-nc-home/kontakty/import?into=kontakty\u0026to=a-nc-home",
     "new": {
       "enabled": true,
-      "href": "/app/collections/new?back=%2Fapp%2Fcontacts%2Fa-nc-home%2F%252Falice%252Fcontacts%252Fkontakty%252F%2Fimport\u0026kind=contact",
+      "href": "/app/collections/new?back=%2Fapp%2Fcontacts%2Fa-nc-home%2Fkontakty%2Fimport\u0026kind=contact",
       "icon": "i-plus",
       "id": "import.collection.new",
       "label": "New address book",
@@ -123,6 +123,13 @@
               },
               {
                 "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
                 "href": "/app/contacts/a-nc-home/arhiv/import",
                 "icon": "i-up",
                 "id": "collection.import",
@@ -177,6 +184,13 @@
               },
               {
                 "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
                 "href": "/app/contacts/a-nc-home/kontakty/import",
                 "icon": "i-up",
                 "id": "collection.import",
@@ -212,6 +226,7 @@
         "state": "ok"
       }
     ],
+    "shortcuts": [],
     "tags": []
   },
   "report": null,

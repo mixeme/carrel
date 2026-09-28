@@ -44,6 +44,14 @@
         "method": "POST"
       },
       {
+        "enabled": false,
+        "icon": "i-plus",
+        "id": "rail.folder.new",
+        "label": "New folder",
+        "method": "POST",
+        "reason": "Open a folder to make one in it."
+      },
+      {
         "enabled": true,
         "href": "/app/settings/connections",
         "icon": "i-server",
@@ -56,7 +64,7 @@
         "href": "/app/settings/connections?kind=folder\u0026op=feed",
         "icon": "i-link",
         "id": "feed.subscribe",
-        "label": "Subscribe to a folder",
+        "label": "Subscribe to a feed",
         "method": "GET"
       }
     ],
@@ -188,26 +196,30 @@
         "state": "ok"
       }
     ],
+    "shortcuts": [
+      {
+        "count": null,
+        "enabled": true,
+        "href": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
+        "icon": "i-file",
+        "id": "files.attachments",
+        "label": "Attachments",
+        "method": "GET",
+        "place": "Documents / carrel"
+      },
+      {
+        "count": 2,
+        "enabled": true,
+        "href": "/app/files/published",
+        "icon": "i-link",
+        "id": "files.published",
+        "label": "Published",
+        "method": "GET",
+        "place": ""
+      }
+    ],
     "tags": []
   },
-  "shortcuts": [
-    {
-      "enabled": true,
-      "href": "/app/settings/attachments",
-      "icon": "i-file",
-      "id": "files.attachments",
-      "label": "Attachments",
-      "method": "GET"
-    },
-    {
-      "enabled": true,
-      "href": "/app/files/published",
-      "icon": "i-link",
-      "id": "files.published",
-      "label": "Published",
-      "method": "GET"
-    }
-  ],
   "title": "Files",
   "top": {
     "newMenu": [

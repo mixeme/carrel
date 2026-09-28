@@ -3,6 +3,8 @@ package web
 import (
 	"net/http"
 	"net/url"
+	"slices"
+	"strings"
 
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -52,6 +54,17 @@ func (s *Server) postFilesPicker(w http.ResponseWriter, r *http.Request) {
 		s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, readOnlyReason+" Choose a folder you can write to."))
 		return
 	}
+	// New folder of the tree (s-notes-11): made in the chosen folder and
+	// chosen in its turn; remembered, like any folder, by Choose this folder.
+	if r.FormValue("mkcol") != "" {
+		name := strings.TrimSpace(r.PostFormValue("name"))
+		if n := s.makeFolder(r.Context(), dest, name); n != nil {
+			s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, string(n.Title)+". "+string(n.Body)))
+			return
+		}
+		s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest.at(append(slices.Clone(dest.segs), name)), ""))
+		return
+	}
 	key, _ := sess.DataKey()
 	_ = s.users.SetUploadFolder(sess.AccountID(), key, sealed.AttachmentFolder{AccountID: dest.conn.ID, Path: dest.col.Path, Folder: dest.segs})
 	s.writeMailSheet(w, r, s.uploadPicker(r, sess, dest, ""))
@@ -91,6 +104,7 @@ func (s *Server) uploadPicker(r *http.Request, sess *session.Session, chosen *fi
 	default:
 		upload.Enabled, upload.Href = true, s.route(chosen.href("upload", chosen.segs, true))
 	}
+	sheet.Tree.New = s.newFolderAction(chosen, "/app/files/picker", url.Values{"for": {"upload"}, "mkcol": {"1"}})
 	sheet.Actions = []view.Action{upload, choose,
 		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route("/app/files")}}
 	return sheet

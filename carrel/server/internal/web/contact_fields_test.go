@@ -25,7 +25,7 @@ func TestContactNicknameBirthdayCategories(t *testing.T) {
 
 	edit := decode[view.ContactEditPage](t, f.h.do(get(ada+"/edit", f.sess)))
 	form := formFields(edit.Form)
-	if form.Get("nickname") != "Ada" || form.Get("bday") != "1815-12-10" || form.Get("categories") != "work" {
+	if form.Get("nickname") != "Ada" || form.Get("bday") != "10.12.1815" || form.Get("categories") != "work" {
 		t.Fatalf("form = %v", form)
 	}
 	save := func(rec string, set map[string]string) {
@@ -59,7 +59,7 @@ func TestContactNicknameBirthdayCategories(t *testing.T) {
 	save(ada, map[string]string{"nickname": "The Enchantress"})
 	unchanged("ada.vcf", "NICKNAME:The Enchantress", "BDAY;VALUE=date:18151210", "CATEGORIES:work", "TEL:+44 20 1", "X-CUSTOM:keep", "FN:Ada Lovelace")
 
-	save(ada, map[string]string{"bday": "1815-12-11"})
+	save(ada, map[string]string{"bday": "11.12.1815"})
 	unchanged("ada.vcf", "BDAY;VALUE=date:18151211", "NICKNAME:The Enchantress", "CATEGORIES:work")
 
 	save(ada, map[string]string{"categories": "work, maths , poetry,"})
@@ -72,16 +72,17 @@ func TestContactNicknameBirthdayCategories(t *testing.T) {
 		t.Errorf("emptied fields left their lines:\n%s", got)
 	}
 
-	// A birthday without a year is read as --MM-DD and written the way it
-	// came: untouched when another field changes, basic when changed.
+	// A birthday without a year is read as DD.MM (s-contacts-3) and written
+	// the way it came: untouched when another field changes, basic when
+	// changed.
 	bob := f.path("contacts") + "/bob"
 	form = formFields(decode[view.ContactEditPage](t, f.h.do(get(bob+"/edit", f.sess))).Form)
-	if form.Get("bday") != "--04-12" {
-		t.Errorf("a birthday without a year reads %q, want --04-12", form.Get("bday"))
+	if form.Get("bday") != "12.04" {
+		t.Errorf("a birthday without a year reads %q, want 12.04", form.Get("bday"))
 	}
 	save(bob, map[string]string{"nickname": "B"})
 	unchanged("bob.vcf", "BDAY:--0412")
-	save(bob, map[string]string{"bday": "--04-13"})
+	save(bob, map[string]string{"bday": "13.04"})
 	unchanged("bob.vcf", "BDAY:--0413")
 
 	// What is not a date is refused and nothing is written.
@@ -106,8 +107,8 @@ func TestAppleBirthdayWithoutAYear(t *testing.T) {
 	f := contactsFixture(t, false, "BEGIN:VCARD\nVERSION:3.0\nUID:vera\nFN:Vera\nBDAY;X-APPLE-OMIT-YEAR=1604:1604-04-12\nEND:VCARD\n")
 	rec := f.path("contacts") + "/vera"
 	form := formFields(decode[view.ContactEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
-	if form.Get("bday") != "--04-12" {
-		t.Fatalf("bday shown %q, want --04-12", form.Get("bday"))
+	if form.Get("bday") != "12.04" {
+		t.Fatalf("bday shown %q, want 12.04", form.Get("bday"))
 	}
 	shown := false
 	for _, fl := range decode[view.ContactPage](t, f.h.do(get(rec, f.sess))).Fields {
@@ -125,8 +126,8 @@ func TestAppleBirthdayWithoutAYear(t *testing.T) {
 		}
 		return body(t, f, "vera.vcf")
 	}
-	mustContain(t, save("--04-13"), "BDAY;X-APPLE-OMIT-YEAR=1604:1604-04-13")
-	got := save("1990-04-13")
+	mustContain(t, save("13.04"), "BDAY;X-APPLE-OMIT-YEAR=1604:1604-04-13")
+	got := save("13.04.1990")
 	mustContain(t, got, "BDAY:1990-04-13")
 	if strings.Contains(got, "X-APPLE-OMIT-YEAR") {
 		t.Errorf("a full date kept the marker that hides its year:\n%s", got)

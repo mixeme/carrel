@@ -511,6 +511,13 @@
               },
               {
                 "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
                 "href": "/app/calendar/a-nc-home/dni-rozhdeniya/import",
                 "icon": "i-up",
                 "id": "collection.import",
@@ -565,6 +572,13 @@
               },
               {
                 "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
                 "href": "/app/calendar/a-nc-home/lichnyj/import",
                 "icon": "i-up",
                 "id": "collection.import",
@@ -615,6 +629,13 @@
                 "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
                 "id": "collection.move",
                 "label": "Move to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
                 "method": "GET"
               },
               {
@@ -680,6 +701,13 @@
               },
               {
                 "enabled": true,
+                "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
                 "href": "/app/calendar/a-rad-vps/dezhurstva/import",
                 "icon": "i-up",
                 "id": "collection.import",
@@ -730,6 +758,13 @@
                 "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty",
                 "id": "collection.move",
                 "label": "Move to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
                 "method": "GET"
               },
               {
@@ -791,6 +826,13 @@
                 "href": "/app/collections/move?a=a-baikal\u0026c=obshchij",
                 "id": "collection.move",
                 "label": "Move to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
+                "href": "/app/collections/move?a=a-baikal\u0026c=obshchij\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
                 "method": "GET"
               },
               {
@@ -901,6 +943,7 @@
         "state": "ok"
       }
     ],
+    "shortcuts": [],
     "tags": [
       {
         "href": "/app/calendar/a-nc-home/lichnyj?from=2026-08-10",

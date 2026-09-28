@@ -53,19 +53,21 @@ func collectionMoveQuery(conn sealed.Connection, col sealed.Collection, to strin
 func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool) (opts []view.TargetOption, eligible int) {
 	kind := col.Kinds[0]
 	for _, c := range blob.Connections {
+		// Beside a server the sheet says what it takes, or why not
+		// (s-profile-8): «calendars», «already there», «files only».
 		opt := view.TargetOption{
 			ID:    s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, c.ID, copying)),
 			Label: text(connLabel(c)),
-			Stamp: view.Stamp(connLabel(c)),
 		}
 		switch {
 		case c.ID == conn.ID:
-			opt.ReadOnly, opt.Reason = true, "Already here"
+			opt.ReadOnly, opt.Reason = true, "already there"
 		case homeFor(c, kind) == "" && c.FileRoot != "":
-			opt.ReadOnly, opt.Reason = true, "Files only"
+			opt.ReadOnly, opt.Reason = true, "files only"
 		case homeFor(c, kind) == "":
-			opt.ReadOnly, opt.Reason = true, text("No "+collectionNoun(col)+"s on this server")
+			opt.ReadOnly, opt.Reason = true, text("no "+collectionNoun(col)+"s")
 		default:
+			opt.Stamp = view.Stamp(collectionNoun(col) + "s")
 			eligible++
 		}
 		opts = append(opts, opt)
@@ -73,21 +75,29 @@ func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection,
 	return opts, eligible
 }
 
-// collectionMoveItem is the menu item of a collection row, or none: files move
-// as a tree (S-17), and with no other connection that holds the kind there is
-// nowhere to go (S-12.3).
-func (s *Server) collectionMoveItem(blob sealed.Blob, conn sealed.Connection, col sealed.Collection) (view.MenuItem, bool) {
+// collectionMoveItems are the menu items of a collection row — Move and
+// Copy to another server (s-profile-1) — or none: files move as a tree
+// (S-17), and with no other connection that holds the kind there is nowhere
+// to go (S-12.3).
+func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, col sealed.Collection) []view.MenuItem {
 	if col.Gone || len(col.Kinds) == 0 || col.Has(view.KindFile) {
-		return view.MenuItem{}, false
+		return nil
 	}
 	if _, eligible := s.collectionMoveTargets(blob, conn, col, false); eligible == 0 {
-		return view.MenuItem{}, false
+		return nil
 	}
-	return view.MenuItem{Action: view.Action{
-		ID: "collection.move", Label: "Move to another server",
-		Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", false)),
-		Method: "GET", Enabled: true,
-	}}, true
+	return []view.MenuItem{
+		{Action: view.Action{
+			ID: "collection.move", Label: "Move to another server",
+			Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", false)),
+			Method: "GET", Enabled: true,
+		}},
+		{Action: view.Action{
+			ID: "collection.copy", Label: "Copy to another server",
+			Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", true)),
+			Method: "GET", Enabled: true,
+		}},
+	}
 }
 
 // collectionMoveBlock is why the move or copy to dest cannot start, or "".
@@ -108,33 +118,42 @@ func collectionMoveBlock(conn sealed.Connection, col sealed.Collection, dest sea
 
 // collectionMoveSheet says what will happen before it starts (S-12.3): where
 // it goes, that the address changes, and when the original is deleted.
-func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, to string) view.CollectionMoveSheet {
-	noun, label := collectionNoun(col), collectionLabel(col)
-	sheet := view.CollectionMoveSheet{Kind: col.Kinds[0], Copy: copying, Subject: text(label + " · " + connLabel(conn))}
+// count is the records the collection holds as the session last learnt it,
+// nil when it does not know.
+func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool, to string, count *int) view.CollectionMoveSheet {
+	noun, label, here := collectionNoun(col), collectionLabel(col), connLabel(conn)
+	sheet := view.CollectionMoveSheet{Kind: col.Kinds[0], Copy: copying, Subject: text(here + " · " + label)}
 	sheet.Target.Options, _ = s.collectionMoveTargets(blob, conn, col, copying)
 	dest, known := blob.Connection(to)
-	confirm := view.Action{ID: "collection.move.confirm", Label: "Move", Method: "POST", Enabled: true}
-	other := view.Action{ID: "collection.copy", Label: "Copy instead", Method: "GET", Enabled: true,
-		Href: s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, to, true))}
+	confirm := view.Action{ID: "collection.move.confirm", Label: "Move here", Method: "POST", Enabled: true}
 	if copying {
-		confirm.ID, confirm.Label = "collection.copy.confirm", "Copy"
-		other = view.Action{ID: "collection.move", Label: "Move instead", Method: "GET", Enabled: true,
-			Href: s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, to, false))}
+		confirm.ID, confirm.Label = "collection.copy.confirm", "Copy here"
 	}
 	if reason := collectionMoveBlock(conn, col, dest, known, copying); reason != "" {
 		confirm.Enabled, confirm.Reason = false, text(reason)
 	} else {
 		chosen := s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, dest.ID, copying))
 		sheet.Target.Chosen, confirm.Href = chosen, chosen
-		host := connLabel(dest)
+		// The words of s-profile-8: what is made, how much goes, and what
+		// becomes of this one.
+		// What the collection is for names what it holds: a calendar that
+		// takes tasks too still copies «events» (its count is of events).
+		unit := recordNoun(col)
+		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
+			unit = spec.noun
+		}
+		records := "all its " + unit + "s"
+		if count != nil && *count > 0 {
+			records = "all " + plural(*count, unit)
+		}
 		if copying {
-			sheet.Warning = text(fmt.Sprintf("Carrel makes %s on %s with the same name, colour and contents, and copies every record there one at a time. The %s here stays as it is.", label, host, noun))
+			sheet.Warning = text(fmt.Sprintf("Carrel creates a %s there and copies %s; this one on %s stays as it is.", noun, records, here))
 		} else {
-			sheet.Warning = text(fmt.Sprintf("Carrel makes %s on %s with the same name, colour and contents, copies every record there one at a time and reads them back, "+
-				"and deletes the %s here only if every record arrived whole. The address changes: devices, published links and backup jobs pointing at the old one will see it disappear.", label, host, noun))
+			sheet.Warning = text(fmt.Sprintf("Carrel creates a %s there, copies %s, then deletes this one on %s. "+
+				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path.", noun, records, here))
 		}
 	}
-	sheet.Actions = []view.Action{confirm, other}
+	sheet.Actions = []view.Action{confirm}
 	return sheet
 }
 
@@ -144,12 +163,16 @@ func (s *Server) getCollectionMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	blob := s.catalogOf(sess)
-	if _, ok := s.collectionMoveItem(blob, conn, col); !ok {
+	if s.collectionMoveItems(blob, conn, col) == nil {
 		s.notFound(w, r)
 		return
 	}
 	q := r.URL.Query()
-	s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, q.Get("copy") != "", q.Get("to")))
+	var count *int
+	if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
+		count = collectionCount(sess, conn.ID, col, spec)
+	}
+	s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, q.Get("copy") != "", q.Get("to"), count))
 }
 
 // postCollectionMove runs a confirmed move or copy. What happens is on the
@@ -161,14 +184,18 @@ func (s *Server) postCollectionMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	blob := s.catalogOf(sess)
-	if _, ok := s.collectionMoveItem(blob, conn, col); !ok {
+	if s.collectionMoveItems(blob, conn, col) == nil {
 		s.notFound(w, r)
 		return
 	}
 	copying, to := r.FormValue("copy") != "", r.FormValue("to")
 	dest, known := blob.Connection(to)
 	if collectionMoveBlock(conn, col, dest, known, copying) != "" {
-		s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, copying, to))
+		var count *int
+		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
+			count = collectionCount(sess, conn.ID, col, spec)
+		}
+		s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, copying, to, count))
 		return
 	}
 	m := &collectionMove{s: s, sess: sess, key: key, conn: conn, col: col, dest: dest, copying: copying}

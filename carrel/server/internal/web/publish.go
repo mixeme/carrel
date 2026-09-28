@@ -479,7 +479,9 @@ func (s *Server) getPublished(w http.ResponseWriter, r *http.Request) {
 		Plain:    view.Plain{Title: text(link.Target.Title), Lede: "Read-only. Published from Carrel."},
 		Kind:     c.spec.kind,
 		ReadOnly: true,
-		Actions:  []view.Action{{ID: "published.download", Label: "Download", Icon: "i-down", Href: s.route("/p/" + token + "/download"), Method: "GET", Enabled: true}},
+		// The button names the file it gives (s-publish-6, -7, -8): a note
+		// goes as Markdown, never as its raw iCalendar.
+		Actions: []view.Action{{ID: "published.download", Label: text("Download " + exportFormats[c.spec.kind].ext), Icon: "i-down", Href: s.route("/p/" + token + "/download"), Method: "GET", Enabled: true}},
 	}
 	if link.Target.NoDownload {
 		// The link was made without the file: the page stays, the .ics and

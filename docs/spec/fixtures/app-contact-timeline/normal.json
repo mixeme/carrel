@@ -392,7 +392,7 @@
     "foot": [
       {
         "enabled": true,
-        "href": "/app/sources/calendar?back=%2Fapp%2Fcontacts%2Fa-nc-home%2F%252Falice%252Fcontacts%252Fkontakty%252F%2F4f2b-9c31-a0e7%2Ftimeline",
+        "href": "/app/sources/calendar?back=%2Fapp%2Fcontacts%2Fa-nc-home%2Fkontakty%2F4f2b-9c31-a0e7%2Ftimeline",
         "id": "rail.apply",
         "label": "Apply",
         "method": "POST"
@@ -592,7 +592,8 @@
       }
     ],
     "tags": [],
-    "neighbours": []
+    "neighbours": [],
+    "shortcuts": []
   },
   "range": {
     "form": {

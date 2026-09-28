@@ -23,6 +23,9 @@ type FormRow struct {
 	Extra    *Action   `json:"extra"` // кнопка, принадлежащая полю
 	ReadOnly bool      `json:"readOnly"`
 	Required bool      `json:"required"`
+	// Образец в пустом поле, как его рисует кадр: «DD.MM.YYYY» у дня
+	// рождения (s-contacts-4); у прочих полей пусто
+	Placeholder Text `json:"placeholder,omitempty"`
 }
 type Option struct {
 	Value     string `json:"value"`

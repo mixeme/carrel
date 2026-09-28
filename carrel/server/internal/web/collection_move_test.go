@@ -105,21 +105,21 @@ func TestCollectionMoveSheetSaysBeforeItStarts(t *testing.T) {
 	page = decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
 	row := connectionRow(t, page, f.id, f.col)
 	sheet := decode[view.CollectionMoveSheet](t, f.h.do(get(menuHref(t, row.Menu, "collection.move"), f.sess)))
-	if sheet.Kind != view.KindEvent || sheet.Copy || len(sheet.Target.Options) != 2 || !strings.HasPrefix(string(sheet.Subject), "Work · ") {
+	if sheet.Kind != view.KindEvent || sheet.Copy || len(sheet.Target.Options) != 2 || !strings.HasSuffix(string(sheet.Subject), " · Work") {
 		t.Fatalf("sheet = %+v", sheet)
 	}
-	if o := sheet.Target.Options[0]; !o.ReadOnly || o.Reason != "Already here" {
+	if o := sheet.Target.Options[0]; !o.ReadOnly || o.Reason != "already there" {
 		t.Errorf("current connection = %+v", o)
 	}
 	if c := sheet.Actions[0]; c.Enabled || c.Reason == "" || sheet.Warning != "" {
 		t.Errorf("nothing chosen: confirm %+v, warning %q", c, sheet.Warning)
 	}
 	chosen := decode[view.CollectionMoveSheet](t, f.h.do(get(sheet.Target.Options[1].ID, f.sess)))
-	if !chosen.Actions[0].Enabled || !strings.Contains(string(chosen.Warning), "address changes") || chosen.Target.Chosen != sheet.Target.Options[1].ID {
+	if !chosen.Actions[0].Enabled || !strings.Contains(string(chosen.Warning), "old address") || chosen.Target.Chosen != sheet.Target.Options[1].ID {
 		t.Errorf("chosen = %+v", chosen)
 	}
-	copySheet := decode[view.CollectionMoveSheet](t, f.h.do(get(actionHref(t, chosen.Actions, "collection.copy"), f.sess)))
-	if !copySheet.Copy || copySheet.Actions[0].ID != "collection.copy.confirm" || strings.Contains(string(copySheet.Warning), "address changes") {
+	copySheet := decode[view.CollectionMoveSheet](t, f.h.do(get(colSheetHref(f.davFixture, f.otherID, true), f.sess)))
+	if !copySheet.Copy || copySheet.Actions[0].ID != "collection.copy.confirm" || strings.Contains(string(copySheet.Warning), "deletes") {
 		t.Errorf("copy sheet = %+v", copySheet)
 	}
 

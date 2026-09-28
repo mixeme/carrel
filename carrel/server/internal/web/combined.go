@@ -764,9 +764,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 					Href:   s.postQuery("/app/collections/rename", url.Values{"a": {conn.ID}, "c": {col.Path}}),
 					Method: "GET", Enabled: true,
 				}}}
-				if item, ok := s.collectionMoveItem(blob, conn, col); ok {
-					row.Menu = append(row.Menu, item)
-				}
+				row.Menu = append(row.Menu, s.collectionMoveItems(blob, conn, col)...)
 				// The wizard and the file it hands over are one click from the
 				// rail as well as from the list (S-19). A read-only collection
 				// is handed over and not written into.
@@ -875,7 +873,7 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if spec.kind == view.KindFile {
-		_ = s.render.Fragment(w, r, http.StatusOK, TargetRail, s.filesRail(sess, s.catalogOf(sess)), nil)
+		_ = s.render.Fragment(w, r, http.StatusOK, TargetRail, s.filesRail(sess, s.catalogOf(sess), nil), nil)
 		return
 	}
 	st, err := s.readCombined(r, sess, s.catalogOf(sess), spec)

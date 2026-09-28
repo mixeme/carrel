@@ -644,7 +644,12 @@ type Rail struct {
     // (s-notes-2, s-notes-20), под рубрикой «Neighbours»; On — открытая.
     Neighbours []Action
     Tags     []Tag     // фильтр по категориям; у файлов пуст
+    // Рубрика «Shortcuts» рейла файлов (s-files-1, s-files-6), на каждом
+    // экране файлов: Attachments и Published; у прочих разделов пусто
+    Shortcuts []Shortcut
     Foot     []Action  // New collection, Connect account, Subscribe to a feed;
+                       // у файлов New folder (в открытой папке), Connect
+                       // account, Subscribe to a feed (s-files-1);
                        // сюда же встаёт Apply там, где выбор применяется не сразу
                        // (без сценариев и на узком экране — U-8, U-9)
     About    Action    // название, версия и коммит сборки — последней строкой (C-13)
@@ -654,6 +659,17 @@ type Rail struct {
 type NavRow struct {
     Action // On — открытый раздел; на выдаче поиска не отмечен ни один
     Count  *int // nil — счёт этому разделу не считается: прочерк, не ноль
+}
+
+// Строка рубрики Shortcuts: место и справа то, что о нём сказано в кадре.
+// Attachments ведёт в папку вложений (не выбрана — в настройки вложений),
+// Place — где она лежит: хранилище и папки над ней, «Documents / carrel»;
+// On — эта папка открыта. Published ведёт в /app/files/published, Count —
+// сколько ссылок выдал человек, то же число, что у Published links настроек.
+type Shortcut struct {
+    Action
+    Place Text // где лежит; у Published пусто
+    Count *int // у Published — выданные ссылки; nil — счёта у строки нет
 }
 
 type RailSection struct {
@@ -1223,6 +1239,10 @@ type ThresholdControl struct {
     Default int
     Note    Text
     Weights []WeightControl // очки каждого признака; своё у человека, иначе экземпляра
+    // Кнопки под весами (s-dup-3): Save отправляет поля weight.<Signal> как
+    // они стоят; Back to defaults — все пустыми, то есть веса экземпляра.
+    // Своих весов нет — Back to defaults выключена с причиной.
+    WeightActions []Action
 }
 
 // Очки признака дубликата (S-16). Signal — имя поля формы weight.<Signal>;
@@ -1232,7 +1252,7 @@ type WeightControl struct {
     Label   Text
     Value   int
     Default int
-    Own     bool // значение человека, а не экземпляра
+    Own     bool // значение человека, а не экземпляра: пометка «changed» (s-dup-3)
 }
 
 type DuplicatesMergePage struct {
@@ -1262,11 +1282,19 @@ type TargetOption struct {
 
 type NewSheet struct { Kind Kind; Target TargetPicker; Form Form; Actions []Action }
 
+// Лист переноса и копии записи (s-contacts-2): Title — «Move contact»,
+// «Copy event»; Subject — что и откуда, «Анна Ковалёва · from nextcloud ·
+// Контакты» (запись не прочиталась — одно «from …»). Текущая коллекция
+// недоступна с причиной «already there», только для чтения — «read-only».
+// Warning стоит на листе всегда: на одном сервере перенос — MOVE, на другой
+// аккаунт — копия и удаление исходника, у копии — что исходник остаётся.
 type MoveSheet struct {
     Kind    Kind
     Copy    bool
+    Title   Text
+    Subject Text
     Target  TargetPicker
-    Warning Text // на другой аккаунт — копия и удаление исходника, сказано до начала
+    Warning Text
     Actions []Action
 }
 
@@ -1291,12 +1319,18 @@ type CollectionRenameSheet struct {
     Actions []Action
 }
 
+// Лист переноса коллекции (s-profile-8): у подключения справа — что оно
+// примет (Stamp «calendars») или почему нет (Reason «already there», «files
+// only», «no calendars»). Warning — когда цель выбрана: что заводится, сколько
+// записей уходит (число — как его знает сеанс) и что станет с этой. Actions —
+// одна кнопка, «Move here» или «Copy here»; Cancel — забота клиента (C-7.2).
+// В меню строки коллекции — Move и Copy to another server (s-profile-1).
 type CollectionMoveSheet struct {
     Kind    Kind
     Copy    bool         // тот же лист с другой кнопкой; исходная остаётся
-    Subject Text         // что переносят: «Дни рождения · nextcloud»
+    Subject Text         // что переносят: «nextcloud · Дни рождения»
     Target  TargetPicker // цель — подключение, а не коллекция (S-12.3)
-    Warning Text         // завести там, перенести записи, удалить здесь — до начала
+    Warning Text
     Actions []Action
 }
 
@@ -1381,7 +1415,6 @@ type MailAttachSheet struct {
 type FilesRootPage struct {
     Shell
     Collections []FileCollectionRow
-    Shortcuts   []Action // Attachments, Published
     Empty       *Notice  // ни одной папки: почему пусто и что сделать
 }
 type FileCollectionRow struct {
@@ -1428,7 +1461,10 @@ type TransferRow struct {
     Actions  []Action
 }
 type NameClash struct { Name Text; Options []Action } // Skip · Keep both · Overwrite this one
-type FileTree struct { Nodes []FileTreeNode; Chosen string }
+// New — «New folder» в рубрике дерева (s-files-4, s-notes-11): POST поля
+// name заводит папку в выбранной и отвечает тем же листом, где выбрана новая;
+// выбранная только для чтения — выключена с причиной. У дерева страницы nil.
+type FileTree struct { Nodes []FileTreeNode; Chosen string; New *Action }
 type FileTreeNode struct {
     ID, Label string
     Stamp     Stamp
@@ -1443,11 +1479,19 @@ type FilePickerSheet struct {
     Actions []Action
 }
 
+// Лист операции над выделенными (s-files-4): Title — «Move 3 items»,
+// Subject — «from Documents / carrel / attachments». Warning у переноса и
+// копии стоит на листе всегда: на одном сервере перенос — MOVE, в другое
+// хранилище — скачивание и загрузка, и это сказано до начала. Failure — New
+// folder не завёл папку; nil — отказа не было.
 type FileOpSheet struct {
     Op      FileOp // C-8
+    Title   Text
+    Subject Text
     Items   []Text
     Target  *FileTree
-    Warning Text // между хранилищами — скачивание и загрузка, сказано до начала
+    Warning Text
+    Failure *Notice
     Actions []Action
 }
 
@@ -1490,6 +1534,9 @@ type FormRow struct {
     Extra    *Action // кнопка, принадлежащая полю
     ReadOnly bool
     Required bool
+    // Образец в пустом поле, как его рисует кадр: «DD.MM.YYYY» у дня рождения
+    // (s-contacts-4); у прочих полей пусто
+    Placeholder Text
 }
 // Вариант списка — в порядке кадра списка рядом с экраном. Separator — черта
 // перед ним, как у MenuItem; Disabled — виден и не выбирается, Reason — почему

@@ -133,8 +133,8 @@ func TestFilesRootFollowsTheTicks(t *testing.T) {
 	if docs.Href != f.at("") || docs.Label != "Docs" || !strings.HasSuffix(string(docs.Stamp), " · Docs") || docs.State != view.CollectionOK {
 		t.Errorf("row = %+v", docs)
 	}
-	if len(root.Shortcuts) != 2 || root.Shortcuts[0].ID != "files.attachments" || root.Shortcuts[1].Href != "/app/files/published" {
-		t.Errorf("shortcuts = %+v", root.Shortcuts)
+	if sc := root.Rail.Shortcuts; len(sc) != 2 || sc[0].ID != "files.attachments" || sc[1].Href != "/app/files/published" {
+		t.Errorf("shortcuts = %+v", sc)
 	}
 	var filesOn bool
 	for _, n := range root.Rail.Nav {
@@ -583,8 +583,9 @@ func TestFileOperationsOnOneServer(t *testing.T) {
 	}
 
 	moveB := opSheet(t, f, rowMenu(t, fileRow(t, page, "b.txt"), "file.move"), url.Values{"to": {f.at("", "sub", "")}})
-	if moveB.Warning != "" {
-		t.Errorf("a move inside one server warned: %q", moveB.Warning)
+	// Inside one server the sheet says only what it always says: a MOVE.
+	if !strings.HasPrefix(string(moveB.Warning), "Inside one server this is MOVE") {
+		t.Errorf("a move inside one server warned of something else: %q", moveB.Warning)
 	}
 	moves, puts := f.srv.CountRequests("MOVE", filesDocs), f.srv.CountRequests("PUT", filesDocs)
 	f.h.do(postForm(confirmHref(t, moveB), f.sess, url.Values{}))
@@ -650,7 +651,7 @@ func TestMoveBetweenStorages(t *testing.T) {
 
 	page := decode[view.FilesPage](t, f.h.do(get(f.at(""), f.sess)))
 	sheet := opSheet(t, f, rowMenu(t, fileRow(t, page, "a.txt"), "file.move"), url.Values{"to": {farRoot}})
-	if !strings.Contains(string(sheet.Warning), "another storage") || len(sheet.Target.Nodes) != 2 {
+	if !strings.HasPrefix(string(sheet.Warning), "This goes to another storage") || len(sheet.Target.Nodes) != 2 {
 		t.Fatalf("sheet = %+v", sheet)
 	}
 	f.h.do(postForm(confirmHref(t, sheet), f.sess, url.Values{}))

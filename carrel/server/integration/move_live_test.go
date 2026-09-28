@@ -54,7 +54,7 @@ func TestRadicaleBaikalMove(t *testing.T) {
 	to := catalogEntry(t, blob, bai.bookA)
 	src := "/app/contacts/" + radID + "/" + url.PathEscape(from.Path) + "/" + url.PathEscape(uid)
 	sheet := liveDecode[view.MoveSheet](t, "contact sheet", app.get(src+"/move?"+url.Values{"to": {baiID}, "into": {to.Path}}.Encode()))
-	if sheet.Warning == "" {
+	if !strings.Contains(string(sheet.Warning), "another account") {
 		t.Errorf("a move to another account must say so before it starts: %+v", sheet)
 	}
 	loc := redirected(t, "contact to Baikal", app.post(liveAction(t, sheet.Actions, "record.move.confirm"), url.Values{}))
@@ -106,8 +106,9 @@ func runMove(t *testing.T, endpoint, user, pass string) {
 		intoB := "/app/contacts/" + connID + "/" + url.PathEscape(catalogEntry(t, blob, cols.bookB).Path)
 
 		sheet := liveDecode[view.MoveSheet](t, "move sheet", app.get(moveURL("contacts", cols.bookA, uid, cols.bookB, false)))
-		if sheet.Warning != "" {
-			t.Errorf("a move on one account warned: %q", sheet.Warning)
+		// On one account the sheet says only what it always says: a MOVE.
+		if !strings.HasPrefix(string(sheet.Warning), "Inside one server this is MOVE") {
+			t.Errorf("a move on one account warned of something else: %q", sheet.Warning)
 		}
 		// A server may give the moved record an identity of its own (SoGo does:
 		// docs/servers.md, SV-18). Then the move is done and said out loud, and

@@ -50,7 +50,10 @@ type Rail struct {
 	// Берутся из списка, уже загруженного сеансом: не загружен — пусто.
 	Neighbours []Action `json:"neighbours"`
 	Tags       []Tag    `json:"tags"` // фильтр по категориям; у файлов пуст
-	Foot       []Action `json:"foot"` // New collection, Connect account, Subscribe to a feed;
+	// Shortcuts — рубрика «Shortcuts» рейла файлов (s-files-1, s-files-6):
+	// Attachments и Published на каждом экране файлов; у прочих разделов пусто
+	Shortcuts []Shortcut `json:"shortcuts"`
+	Foot      []Action   `json:"foot"` // New collection, Connect account, Subscribe to a feed;
 	// сюда же встаёт Apply там, где выбор применяется не сразу
 	// (без сценариев и на узком экране — U-8, U-9)
 	About Action `json:"about"` // название, версия и коммит сборки — последней строкой (C-13)
@@ -60,6 +63,14 @@ type Rail struct {
 type NavRow struct {
 	Action      // On — открытый раздел; на выдаче поиска не отмечен ни один
 	Count  *int `json:"count"` // nil — счёт этому разделу не считается: прочерк, не ноль
+}
+
+// Shortcut — строка рубрики Shortcuts: место и справа то, что о нём сказано
+// в кадре — где лежит папка вложений или сколько выдано ссылок.
+type Shortcut struct {
+	Action      // On — это место открыто
+	Place  Text `json:"place"` // где лежит: «Documents / carrel»; у Published пусто
+	Count  *int `json:"count"` // у Published — выданные ссылки; nil — счёта у строки нет
 }
 
 type RailSection struct {

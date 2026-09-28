@@ -488,9 +488,7 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 				Href:   s.postQuery("/app/collections/rename", url.Values{"a": {c.ID}, "c": {col.Path}}),
 				Method: "GET", Enabled: true,
 			}}}
-			if item, ok := s.collectionMoveItem(blob, c, col); ok {
-				row.Menu = append(row.Menu, item)
-			}
+			row.Menu = append(row.Menu, s.collectionMoveItems(blob, c, col)...)
 			if item, ok := s.collectionDeleteItem(c, col); ok {
 				row.Menu = append(row.Menu, item)
 			}

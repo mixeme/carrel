@@ -59,14 +59,33 @@ func moveQuery(copying bool, account, col string) url.Values {
 	return q
 }
 
+// moveCollectionNouns name what a record of a kind lives in, as the message
+// of the move sheet says it (s-contacts-2).
+var moveCollectionNouns = map[view.Kind]string{
+	view.KindContact: "address book",
+	view.KindEvent:   "calendar",
+	view.KindTask:    "task list",
+	view.KindNote:    "notebook",
+}
+
 // moveSheet says where the record can go before anything happens: every live
 // collection of the kind, the current and read-only ones shown and closed
-// with the reason, and — to another connection — that a move is a copy and a
-// delete (S-18). An option's ID is the sheet with that option chosen.
-func (s *Server) moveSheet(c *collectionCtx, uid string, copying bool, dest *collectionCtx) view.MoveSheet {
+// with the reason, and what the move will do — on one server a MOVE, to
+// another connection a copy and a delete (S-18). An option's ID is the sheet
+// with that option chosen. title is the record's, "" when it could not be
+// read.
+func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, dest *collectionCtx) view.MoveSheet {
 	address := c.recordPath(uid) + "/move"
 	blob := s.catalogOf(c.sess)
-	sheet := view.MoveSheet{Kind: c.spec.kind, Copy: copying}
+	verb := "Move "
+	if copying {
+		verb = "Copy "
+	}
+	from := "from " + string(origin{conn: c.conn, col: c.col}.stamp())
+	if title != "" {
+		from = title + " · " + from
+	}
+	sheet := view.MoveSheet{Kind: c.spec.kind, Copy: copying, Title: text(verb + c.spec.noun), Subject: text(from)}
 	for _, conn := range blob.Connections {
 		for _, col := range blob.CollectionsOf(conn.ID) {
 			if col.Gone || !col.Has(c.spec.kind) {
@@ -79,9 +98,9 @@ func (s *Server) moveSheet(c *collectionCtx, uid string, copying bool, dest *col
 			}
 			switch {
 			case conn.ID == c.conn.ID && col.Path == c.col.Path:
-				opt.ReadOnly, opt.Reason = true, "Already here"
+				opt.ReadOnly, opt.Reason = true, "already there"
 			case col.ReadOnly:
-				opt.ReadOnly, opt.Reason = true, "Read-only"
+				opt.ReadOnly, opt.Reason = true, "read-only"
 			}
 			sheet.Target.Options = append(sheet.Target.Options, opt)
 		}
@@ -97,9 +116,16 @@ func (s *Server) moveSheet(c *collectionCtx, uid string, copying bool, dest *col
 		sheet.Target.Chosen = s.postQuery(address, chosen)
 		confirm.Href = s.postQuery(address, chosen)
 	}
-	if dest != nil && dest.conn.ID != c.conn.ID && !copying {
+	record, where := recordNouns[c.spec.kind], moveCollectionNouns[c.spec.kind]
+	switch {
+	case copying:
+		sheet.Warning = text("A copy is written into the chosen " + where + " whole, with the same UID; the " + record + " here stays as it is.")
+	case dest != nil && dest.conn.ID != c.conn.ID:
 		sheet.Warning = text("This goes to another account, so nothing moves on a server: Carrel reads the " + c.spec.noun +
 			" whole, writes it there, reads it back, and deletes the original only if the copy kept everything.")
+	default:
+		sheet.Warning = text("Inside one server this is MOVE: instant, no traffic. To another " + where + " the " + record +
+			" is copied and then deleted — Carrel says so before it starts, not after.")
 	}
 	cancel := view.Action{ID: "record.move.cancel", Label: "Cancel", Href: s.route(c.recordPath(uid)), Method: "GET", Enabled: true}
 	sheet.Actions = []view.Action{confirm, cancel}
@@ -119,7 +145,14 @@ func (s *Server) getKindMove(w http.ResponseWriter, r *http.Request, kind string
 		s.notFound(w, r)
 		return
 	}
-	sheet := s.moveSheet(c, r.PathValue("uid"), copying, s.moveTarget(c, q.Get("to"), q.Get("into")))
+	uid := r.PathValue("uid")
+	// The head names the record (s-contacts-2); a record that cannot be read
+	// now is still offered the sheet, named by where it lives.
+	title := ""
+	if obj, err := c.find(r.Context(), uid); err == nil {
+		title = recordTitle(c.spec.kind, obj)
+	}
+	sheet := s.moveSheet(c, uid, title, copying, s.moveTarget(c, q.Get("to"), q.Get("into")))
 	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {
 		_ = s.render.Fragment(w, r, http.StatusOK, TargetSheet, sheet, nil)
 		return

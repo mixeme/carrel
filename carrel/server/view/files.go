@@ -3,8 +3,7 @@ package view
 type FilesRootPage struct {
 	Shell
 	Collections []FileCollectionRow `json:"collections"`
-	Shortcuts   []Action            `json:"shortcuts"` // Attachments, Published
-	Empty       *Notice             `json:"empty"`     // ни одной папки: почему пусто и что сделать
+	Empty       *Notice             `json:"empty"` // ни одной папки: почему пусто и что сделать
 }
 type FileCollectionRow struct {
 	Href     string          `json:"href"`
@@ -61,6 +60,9 @@ type NameClash struct {
 type FileTree struct {
 	Nodes  []FileTreeNode `json:"nodes"`
 	Chosen string         `json:"chosen"`
+	// New — «New folder» в рубрике дерева (s-files-4, s-notes-11): папка
+	// заводится в выбранной и сразу выбирается; nil — дерево без неё
+	New *Action `json:"new"`
 }
 type FileTreeNode struct {
 	ID       string         `json:"id"`
@@ -78,10 +80,13 @@ type FilePickerSheet struct {
 }
 
 type FileOpSheet struct {
-	Op      FileOp    `json:"op"` // C-8
+	Op      FileOp    `json:"op"`      // C-8
+	Title   Text      `json:"title"`   // «Move 3 items» (s-files-4)
+	Subject Text      `json:"subject"` // откуда: «from Documents / carrel / attachments»
 	Items   []Text    `json:"items"`
 	Target  *FileTree `json:"target"`
-	Warning Text      `json:"warning"` // между хранилищами — скачивание и загрузка, сказано до начала
+	Warning Text      `json:"warning"` // что сделает перенос: на одном сервере MOVE, между хранилищами — скачивание и загрузка
+	Failure *Notice   `json:"failure"` // New folder не завёл папку; nil — отказа не было
 	Actions []Action  `json:"actions"`
 }
 

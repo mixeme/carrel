@@ -17,6 +17,102 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.61 — 2026-09-28
+
+Move and copy are a sheet as their frames draw it (from-typecase note 12),
+and the small things of note 13: the birthday typed as text, buttons under
+the duplicate weights, the public download named by its file, Shortcuts in
+the files rail.
+
+### Changed
+
+- **`FileOpSheet`** (POST `/app/files/{account}/{col}/op/…`, s-files-4) —
+  new `title` («Move 3 items», «Copy 3 items», «Delete 1 item», «Rename»)
+  and `subject` («from Documents / carrel / attachments»). `warning` of a
+  move or a copy **stands on the sheet always** (was only across storages):
+  inside one server «Inside one server this is MOVE: instant, no traffic. To
+  another storage the file has to be downloaded and uploaded again — Carrel
+  says so before it starts, not after.»; to another storage the old move
+  text; a copy «A copy travels through Carrel even inside one server: …».
+  New `failure` (`Notice`) — New folder did not make the folder.
+- **`FileTree.new`** (new) — **New folder** in the tree's rubric
+  (`files.tree.new`, POST, field `name`): makes the folder in the chosen one
+  and answers the same sheet with the new folder chosen; off with a reason
+  when the chosen folder is read-only. On the move/copy sheet it posts to the
+  same `op` address with `mkcol=1`; on the upload picker (`FilePickerSheet`,
+  s-notes-11) to `/app/files/picker?for=upload&mkcol=1` — the new folder is
+  chosen, not yet remembered (Choose this folder remembers it). `null` on
+  trees without it (`AttachmentsPage.folder`).
+- **`MoveSheet`** (`/app/{kind}/…/{uid}/move`, s-contacts-2) — new `title`
+  («Move contact», «Copy event») and `subject` («Анна Ковалёва · from
+  nextcloud · Контакты»; only «from …» when the record cannot be read). The
+  current collection's reason is **«already there»** (was «Already here»),
+  a read-only one's **«read-only»** (was «Read-only»). `warning` stands on
+  the sheet always: on one server «Inside one server this is MOVE: instant,
+  no traffic. To another address book the card is copied and then deleted —
+  Carrel says so before it starts, not after.» (calendar / event, task list /
+  task, notebook / note); to another account the old text; a copy says the
+  original stays. Opening the sheet reads the record once, for its name.
+- **Birthday** of the contact form (`bday`, s-contacts-3, s-contacts-4) —
+  `kind` **`text`** (was `date`), `value` **`14.03.1987`** or **`14.03`**
+  without a year (was `1987-03-14`, `--03-14`), hint «Type it: 14.03.1987, or
+  14.03 without the year.», new `placeholder` «DD.MM.YYYY». The POST takes
+  DD.MM.YYYY and DD.MM, and still YYYY-MM-DD and --MM-DD; BDAY is written
+  as before. A day that does not exist: «Type the date as 14.03.1987, or
+  14.03 without the year.»
+- **`FormRow.placeholder`** (new, omitted when empty) — the sample in an
+  empty field; only the birthday has one.
+- **`ThresholdControl.weightActions`** (new, s-dup-3) — **Save**
+  (`duplicates.weights.save`, POST `/app/duplicates/decide?do=weights`, the
+  `weight.<Signal>` fields as they stand) and **Back to defaults**
+  (`duplicates.weights.defaults`, every `weight.<Signal>` empty; off with
+  «Every weight is the default already.» while none is the person's own).
+  `WeightControl.own` is what the frame marks «changed».
+- **Public page download** (`PublishedPage.actions`, `published.download`,
+  s-publish-6, -7, -8) — labelled by its file: **«Download .ics»**,
+  **«Download .vcf»**, **«Download .md»** (was «Download»). Files and
+  folders keep «Download» and «Download folder».
+- **`Rail.shortcuts`** (new, `Shortcut`: an action with `place` and
+  `count`) — the rubric **Shortcuts** of the files rail on every files screen
+  (root, folder, the rail fragment; s-files-1, s-files-6): **Attachments**
+  leads into the attachment folder (was Settings → Attachments; there still
+  while none is chosen), `place` «Documents / carrel», `on` in that folder;
+  **Published** with `count` — the person's links. Empty elsewhere.
+  **`FilesRootPage.shortcuts` is removed.**
+- **Files rail foot** (s-files-1) — **New folder** (`rail.folder.new`, POST to
+  the open folder's `mkcol`; off with «Open a folder to make one in it.» on
+  the root and the rail fragment, with the read-only reason in a read-only
+  storage), Connect account, and **«Subscribe to a feed»** (was «Subscribe to
+  a folder»; still opens the form for a folder). `rail.apply` stays: it is
+  the rail's submit without scripts (C-6.3), and no frame draws it.
+- **`CollectionMoveSheet`** (`/app/collections/move`, s-profile-8) —
+  `subject` is «nextcloud · Дни рождения» (was «Дни рождения · nextcloud»).
+  Options: reasons **«already there»**, **«files only»**, **«no calendars»**
+  (were «Already here», «Files only», «No calendars on this server»); an
+  eligible server's `stamp` is what it takes, «calendars» / «address books»
+  (was the server's name again). `warning` for a chosen server: «Carrel
+  creates a calendar there, copies all 51 events, then deletes this one on
+  nextcloud. Devices, published links and backup jobs pointing at the old
+  address will see it vanish — same as Delete, except the records live on.
+  This is not renaming the path.» (the count as the session knows it, else
+  «all its events»); a copy: «Carrel creates a calendar there and copies all
+  51 events; this one on nextcloud stays as it is.» `actions` is the one
+  button **«Move here»** / **«Copy here»** (was «Move» / «Copy» and «Copy
+  instead» / «Move instead»).
+- **Collection menus** (connections and rail rows) — **«Copy to another
+  server»** (`collection.copy`, the sheet with `copy=1`) after «Move to
+  another server» (s-profile-1).
+
+### Fixtures
+
+- Every screen's rail carries `shortcuts` (`[]`; the files root the two
+  rows). `app-files-picker` has `tree.new`, `app-settings-attachments`
+  `folder.new: null`; `app-contact-move`, `app-contact-edit`,
+  `app-contact-new`, `app-duplicates`, `app-files` (rail foot),
+  `app-collections-move` and every fixture whose rail or connections list
+  has a collection menu (Copy to another server) re-taken. The fixture test
+  normalises a collection path escaped as a query value too.
+
 ## v0.2.60 — 2026-09-28
 
 The account page as its frames draw it (from-typecase note 10): the Email

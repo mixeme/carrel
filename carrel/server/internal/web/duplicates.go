@@ -433,12 +433,26 @@ func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Ki
 	page.Bar.Loaded = st.compared
 	page.Threshold = view.ThresholdControl{Value: st.threshold, Default: s.cfg.DuplicatesThreshold}
 	mine := s.dupWeights(st.blob)
+	// Save sends the fields as they stand; Back to defaults sends every one
+	// empty, which is the instance's weight again (s-dup-3).
+	defaults := url.Values{"do": {"weights"}}
+	owned := false
 	for _, sig := range dupes.Signals {
 		_, own := st.blob.Duplicates.Weights[string(sig)]
+		owned = owned || own
+		defaults.Set("weight."+string(sig), "")
 		page.Threshold.Weights = append(page.Threshold.Weights, view.WeightControl{
 			Signal: string(sig), Label: text(signalLabels[sig]), Value: dupes.Weight(mine, sig),
 			Default: dupes.Weight(s.cfg.DuplicatesWeights, sig), Own: own,
 		})
+	}
+	reset := view.Action{ID: "duplicates.weights.defaults", Label: "Back to defaults", Href: s.postQuery("/app/duplicates/decide", defaults), Method: "POST", Enabled: owned}
+	if !owned {
+		reset.Href, reset.Reason = "", "Every weight is the default already."
+	}
+	page.Threshold.WeightActions = []view.Action{
+		{ID: "duplicates.weights.save", Label: "Save", Href: s.postQuery("/app/duplicates/decide", url.Values{"do": {"weights"}}), Method: "POST", Enabled: true},
+		reset,
 	}
 	if st.blob.Duplicates.Threshold > 0 {
 		page.Threshold.Note = text(fmt.Sprintf("Your own number, kept with your decisions. The instance uses %d.", s.cfg.DuplicatesThreshold))

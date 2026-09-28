@@ -750,6 +750,9 @@ func (a *mockupApp) normalise(t *testing.T, body []byte) map[string]any {
 		s = strings.ReplaceAll(s, id, name)
 	}
 	for path, slug := range a.byPath {
+		// A folder's address as a query value (New folder of a tree: to=)
+		// carries the escaped path escaped once more.
+		s = strings.ReplaceAll(s, url.QueryEscape(path), slug)
 		s = strings.ReplaceAll(s, path, slug)
 	}
 	// The stands listen on whatever port the machine had free; the frames

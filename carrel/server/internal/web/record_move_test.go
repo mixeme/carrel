@@ -113,7 +113,7 @@ func TestMoveSheetSaysBeforeItStarts(t *testing.T) {
 	if len(sheet.Target.Options) != 4 || sheet.Copy || sheet.Kind != view.KindContact {
 		t.Fatalf("sheet = %+v", sheet)
 	}
-	for label, reason := range map[string]string{"People": "Already here", "Archive": "Read-only", "Friends": "", "Work": ""} {
+	for label, reason := range map[string]string{"People": "already there", "Archive": "read-only", "Friends": "", "Work": ""} {
 		o := moveOption(t, sheet, label)
 		if o.ReadOnly != (reason != "") || string(o.Reason) != reason {
 			t.Errorf("%s: readOnly %v reason %q", label, o.ReadOnly, o.Reason)
@@ -125,16 +125,17 @@ func TestMoveSheetSaysBeforeItStarts(t *testing.T) {
 
 	friends := moveOption(t, sheet, "Friends").ID
 	chosen := decode[view.MoveSheet](t, f.h.do(get(friends, f.sess)))
-	if c := confirmOf(t, chosen); !c.Enabled || c.Method != "POST" || chosen.Target.Chosen != friends || chosen.Warning != "" {
+	// On one account the message is the sheet's standing one: a MOVE.
+	if c := confirmOf(t, chosen); !c.Enabled || c.Method != "POST" || chosen.Target.Chosen != friends || strings.Contains(string(chosen.Warning), "another account") {
 		t.Errorf("same account: confirm %+v chosen %q warning %q", c, chosen.Target.Chosen, chosen.Warning)
 	}
 
 	work := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Work").ID, f.sess)))
-	if work.Warning == "" || !confirmOf(t, work).Enabled {
+	if !strings.Contains(string(work.Warning), "another account") || !confirmOf(t, work).Enabled {
 		t.Errorf("another account must be named before the move: %+v", work)
 	}
 	copySheet := decode[view.MoveSheet](t, f.h.do(get(moveOption(t, sheet, "Work").ID+"&copy=1", f.sess)))
-	if !copySheet.Copy || copySheet.Warning != "" || confirmOf(t, copySheet).ID != "record.copy.confirm" {
+	if !copySheet.Copy || strings.Contains(string(copySheet.Warning), "delete") || confirmOf(t, copySheet).ID != "record.copy.confirm" {
 		t.Errorf("copy to another account: %+v", copySheet)
 	}
 

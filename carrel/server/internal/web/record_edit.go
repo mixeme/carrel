@@ -49,8 +49,9 @@ const (
 	// fieldList is a text list typed with commas between items: CATEGORIES,
 	// one line on the way out, the items' parameters kept.
 	fieldList
-	// fieldBirthday is BDAY: a date, or --MM-DD without a year, written back
-	// in the form it came in (basic or extended).
+	// fieldBirthday is BDAY: typed as DD.MM.YYYY, or DD.MM without a year
+	// (s-contacts-3), written back in the form it came in (basic or
+	// extended).
 	fieldBirthday
 	// fieldAddress is ADR as five inputs a row: street, city, region,
 	// postcode, country. PO box and extended are kept as they were.
@@ -527,7 +528,7 @@ var editFields = map[view.Kind][]editField{
 		{name: "org", label: "Organisation", prop: "ORG", typ: fieldText, optional: true},
 		{name: "title", label: "Title", prop: "TITLE", typ: fieldText, optional: true},
 		{name: "bday", label: "Birthday", prop: "BDAY", typ: fieldBirthday, optional: true,
-			hint: "--MM-DD for a birthday without a year."},
+			hint: "Type it: 14.03.1987, or 14.03 without the year."},
 		{name: "tel", label: "Phone", prop: "TEL", typ: fieldMulti, typed: true},
 		{name: "email", label: "Email", prop: "EMAIL", typ: fieldMulti, typed: true},
 		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress, set: "Addresses"},
@@ -712,7 +713,7 @@ func (s *Server) currentValues(c *collectionCtx, obj *model.Object) (formValues,
 			if cur := props[f.prop]; len(cur) > 0 {
 				params = cur[0].Params
 			}
-			vals[f.name] = []string{birthdayShown(c.text(obj, f.prop), params)}
+			vals[f.name] = []string{birthdayTyped(c.text(obj, f.prop), params)}
 		case fieldName:
 			p := nameParts(c.text(obj, f.prop))
 			vals[f.name] = []string{p[1], p[0]}
@@ -1054,7 +1055,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			ch.ops = append(ch.ops, multiOps(f.prop, props[f.prop], rows, nil)...)
 		case fieldBirthday:
 			v := first(w)
-			if v == first(h) {
+			if v == first(h) || sameBirthday(v, first(h)) {
 				continue
 			}
 			written, err := birthdayWritten(v, props[f.prop], firstValue(obj, "VERSION"))
@@ -1063,7 +1064,7 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 				continue
 			}
 			ch.ops = append(ch.ops, textOps(f.prop, props[f.prop], written, false)...)
-			if written != "" && !strings.HasPrefix(v, "--") && len(props[f.prop]) > 0 && props[f.prop][0].Params[appleOmitYear] != "" {
+			if _, yearless, _ := birthdayDigits(v); written != "" && !yearless && len(props[f.prop]) > 0 && props[f.prop][0].Params[appleOmitYear] != "" {
 				// A full date: the marker would hide the year typed.
 				ch.ops = append(ch.ops, model.RemoveParam{Prop: f.prop, Index: 0, Param: appleOmitYear})
 			}
@@ -1287,6 +1288,65 @@ func birthdayShown(raw string, params map[string]string) string {
 	return raw
 }
 
+// birthdayTyped is BDAY as the form holds it: typed text, DD.MM.YYYY or DD.MM
+// without a year (s-contacts-3). What is not a date is shown as it is.
+func birthdayTyped(raw string, params map[string]string) string {
+	shown := birthdayShown(raw, params)
+	digits, yearless, ok := birthdayDigits(shown)
+	switch {
+	case !ok:
+		return shown
+	case yearless:
+		return digits[2:] + "." + digits[:2]
+	}
+	return digits[6:] + "." + digits[4:6] + "." + digits[:4]
+}
+
+// sameBirthday reports two typings of one day: 14.03.1987 and 1987-03-14.
+func sameBirthday(a, b string) bool {
+	da, ya, oka := birthdayDigits(a)
+	db, yb, okb := birthdayDigits(b)
+	return oka && okb && da == db && ya == yb
+}
+
+// birthdayDigits reads a typed birthday: DD.MM.YYYY or DD.MM, as the form
+// asks, and YYYY-MM-DD or --MM-DD, as vCard writes and the form showed
+// before. The answer is YYYYMMDD, or MMDD without a year, of a day that
+// exists — 29 February without a year does.
+func birthdayDigits(typed string) (digits string, yearless, ok bool) {
+	v := strings.TrimSpace(typed)
+	if parts := strings.Split(strings.TrimSuffix(v, "."), "."); len(parts) == 2 || len(parts) == 3 {
+		pad := func(s string) string {
+			if len(s) == 1 {
+				return "0" + s
+			}
+			return s
+		}
+		day, month := pad(parts[0]), pad(parts[1])
+		digits, yearless = month+day, true
+		if len(parts) == 3 {
+			if len(parts[2]) != 4 {
+				return "", false, false
+			}
+			digits, yearless = parts[2]+month+day, false
+		}
+	} else {
+		yearless = strings.HasPrefix(v, "--")
+		digits = strings.ReplaceAll(strings.TrimPrefix(v, "--"), "-", "")
+	}
+	want, check := 8, digits
+	if yearless {
+		want, check = 4, "2000"+digits
+	}
+	if len(digits) != want || !isDigits(digits) {
+		return "", false, false
+	}
+	if _, err := time.Parse("20060102", check); err != nil {
+		return "", false, false
+	}
+	return digits, yearless, true
+}
+
 // appleOmitYear marks the year of BDAY as a placeholder: Apple writes a day
 // without a year so, and Baikal and Nextcloud (sabre) store --MMDD that way.
 const appleOmitYear = "X-APPLE-OMIT-YEAR"
@@ -1298,22 +1358,9 @@ func birthdayWritten(typed string, cur []model.RawValue, version string) (string
 	if typed == "" {
 		return "", nil
 	}
-	yearless := strings.HasPrefix(typed, "--")
-	digits := strings.ReplaceAll(strings.TrimPrefix(typed, "--"), "-", "")
-	layout, want := "20060102", 8
-	if yearless {
-		layout, want = "0102", 4
-	}
-	check := digits
-	if yearless {
-		check = "2000" + digits // 29 February is a birthday too
-		layout = "20060102"
-	}
-	if len(digits) != want || !isDigits(digits) {
-		return "", errors.New("Enter the date as YYYY-MM-DD, or --MM-DD without a year.")
-	}
-	if _, err := time.Parse(layout, check); err != nil {
-		return "", errors.New("Enter the date as YYYY-MM-DD, or --MM-DD without a year.")
+	digits, yearless, ok := birthdayDigits(typed)
+	if !ok {
+		return "", errors.New("Type the date as 14.03.1987, or 14.03 without the year.")
 	}
 	extended := strings.TrimSpace(version) == "3.0"
 	if len(cur) > 0 {
@@ -1337,7 +1384,7 @@ func birthdayWritten(typed string, cur []model.RawValue, version string) (string
 			// Written the way the card holds such a day: the marker's year.
 			out = cur[0].Params[appleOmitYear] + strings.TrimPrefix(out, "--")
 			if extended {
-				out = cur[0].Params[appleOmitYear] + "-" + strings.TrimPrefix(strings.TrimPrefix(typed, "--"), "-")
+				out = cur[0].Params[appleOmitYear] + "-" + digits[:2] + "-" + digits[2:]
 			}
 		}
 	}
@@ -1860,13 +1907,10 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputSelect, Value: text(first(vals)),
 				Options: choiceOptions(f.choices, first(vals), held), Error: errText})
 		case fieldBirthday:
-			// A date input cannot hold a day without a year: such a value is
-			// shown as text, as it is.
-			kind := view.InputDate
-			if strings.HasPrefix(first(vals), "--") {
-				kind = view.InputText
-			}
-			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: kind, Value: text(first(vals)), Hint: text(f.hint), Error: errText})
+			// Typed, not picked (s-contacts-3): a date input cannot hold a
+			// day without a year, and the day is quicker typed than found.
+			set.Rows = append(set.Rows, view.FormRow{Name: f.name, Label: text(f.label), Kind: view.InputText, Value: text(first(vals)),
+				Placeholder: "DD.MM.YYYY", Hint: text(f.hint), Error: errText})
 		case fieldName:
 			row := pair(vals)
 			set.Rows = append(set.Rows,

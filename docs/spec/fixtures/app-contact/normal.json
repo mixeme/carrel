@@ -182,6 +182,13 @@
               },
               {
                 "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
                 "href": "/app/contacts/a-nc-home/arhiv/import",
                 "icon": "i-up",
                 "id": "collection.import",
@@ -236,6 +243,13 @@
               },
               {
                 "enabled": true,
+                "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "method": "GET"
+              },
+              {
+                "enabled": true,
                 "href": "/app/contacts/a-nc-home/kontakty/import",
                 "icon": "i-up",
                 "id": "collection.import",
@@ -271,6 +285,7 @@
         "state": "ok"
       }
     ],
+    "shortcuts": [],
     "tags": []
   },
   "readOnly": false,

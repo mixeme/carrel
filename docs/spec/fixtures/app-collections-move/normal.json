@@ -3,21 +3,14 @@
     {
       "enabled": false,
       "id": "collection.move.confirm",
-      "label": "Move",
+      "label": "Move here",
       "method": "POST",
       "reason": "Choose a server."
-    },
-    {
-      "enabled": true,
-      "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
-      "id": "collection.copy",
-      "label": "Copy instead",
-      "method": "GET"
     }
   ],
   "copy": false,
   "kind": "contact",
-  "subject": "Контакты · nextcloud",
+  "subject": "nextcloud · Контакты",
   "target": {
     "chosen": "",
     "new": null,
@@ -28,8 +21,8 @@
         "label": "nextcloud",
         "last": false,
         "readOnly": true,
-        "reason": "Already here",
-        "stamp": "nextcloud"
+        "reason": "already there",
+        "stamp": ""
       },
       {
         "colour": "",
@@ -38,7 +31,7 @@
         "last": false,
         "readOnly": false,
         "reason": "",
-        "stamp": "radicale · vps"
+        "stamp": "address books"
       },
       {
         "colour": "",
@@ -47,7 +40,7 @@
         "last": false,
         "readOnly": false,
         "reason": "",
-        "stamp": "baikal"
+        "stamp": "address books"
       },
       {
         "colour": "",
@@ -55,8 +48,8 @@
         "label": "sftpgo · vps",
         "last": false,
         "readOnly": true,
-        "reason": "Files only",
-        "stamp": "sftpgo · vps"
+        "reason": "files only",
+        "stamp": ""
       }
     ]
   },

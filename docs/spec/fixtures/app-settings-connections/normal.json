@@ -66,6 +66,13 @@
               "method": "GET"
             },
             {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=dela\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
@@ -100,6 +107,13 @@
               "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
               "id": "collection.move",
               "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
               "method": "GET"
             },
             {
@@ -140,6 +154,13 @@
               "method": "GET"
             },
             {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
@@ -174,6 +195,13 @@
               "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
               "id": "collection.move",
               "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
               "method": "GET"
             },
             {
@@ -215,6 +243,13 @@
               "method": "GET"
             },
             {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
@@ -249,6 +284,13 @@
               "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
               "id": "collection.move",
               "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
               "method": "GET"
             },
             {
@@ -289,6 +331,13 @@
               "method": "GET"
             },
             {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
@@ -323,6 +372,13 @@
               "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
               "id": "collection.move",
               "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
               "method": "GET"
             },
             {
@@ -436,6 +492,13 @@
               "method": "GET"
             },
             {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=dezhurstva",
@@ -470,6 +533,13 @@
               "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty",
               "id": "collection.move",
               "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
               "method": "GET"
             },
             {
@@ -510,6 +580,13 @@
               "method": "GET"
             },
             {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026c=komanda\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=komanda",
@@ -544,6 +621,13 @@
               "href": "/app/collections/move?a=a-rad-vps\u0026c=rassylki",
               "id": "collection.move",
               "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-rad-vps\u0026c=rassylki\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
               "method": "GET"
             },
             {
@@ -641,6 +725,13 @@
               "href": "/app/collections/move?a=a-baikal\u0026c=obshchij",
               "id": "collection.move",
               "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-baikal\u0026c=obshchij\u0026copy=1",
+              "id": "collection.copy",
+              "label": "Copy to another server",
               "method": "GET"
             },
             {
@@ -959,6 +1050,7 @@
     "neighbours": [],
     "note": "",
     "sections": [],
+    "shortcuts": [],
     "tags": []
   },
   "subscriptions": [

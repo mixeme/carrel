@@ -86,6 +86,9 @@ type ThresholdControl struct {
 	Default int             `json:"default"`
 	Note    Text            `json:"note"`
 	Weights []WeightControl `json:"weights"` // очки каждого признака; своё у человека, иначе экземпляра
+	// Кнопки под весами (s-dup-3): Save отправляет поля weight.<Signal>,
+	// Back to defaults — все пустыми
+	WeightActions []Action `json:"weightActions"`
 }
 
 // WeightControl — очки одного признака дубликата (S-16). Signal — имя поля
@@ -95,7 +98,7 @@ type WeightControl struct {
 	Label   Text   `json:"label"`
 	Value   int    `json:"value"`
 	Default int    `json:"default"`
-	Own     bool   `json:"own"` // значение человека, а не экземпляра
+	Own     bool   `json:"own"` // значение человека, а не экземпляра: пометка «changed»
 }
 
 type DuplicatesMergePage struct {
@@ -141,8 +144,10 @@ type NewSheet struct {
 type MoveSheet struct {
 	Kind    Kind         `json:"kind"`
 	Copy    bool         `json:"copy"`
+	Title   Text         `json:"title"`   // «Move contact», «Copy event» (s-contacts-2)
+	Subject Text         `json:"subject"` // что и откуда: «Анна Ковалёва · from nextcloud · Контакты»
 	Target  TargetPicker `json:"target"`
-	Warning Text         `json:"warning"` // на другой аккаунт — копия и удаление исходника, сказано до начала
+	Warning Text         `json:"warning"` // что сделает перенос: на одном сервере MOVE, на другой аккаунт — копия и удаление исходника
 	Actions []Action     `json:"actions"`
 }
 

@@ -195,6 +195,13 @@
                 "enabled": true
               },
               {
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "href": "/app/collections/move?a=a-nc-home&c=arhiv&copy=1",
+                "method": "GET",
+                "enabled": true
+              },
+              {
                 "id": "collection.import",
                 "label": "Import",
                 "icon": "i-up",
@@ -206,18 +213,18 @@
               {
                 "id": "collection.export",
                 "label": "Export",
-                "icon": "i-down",
                 "href": "/app/contacts/a-nc-home/arhiv/export",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-down"
               },
               {
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "href": "/app/collections/delete?a=a-nc-home&c=arhiv",
-                "method": "GET",
                 "danger": true,
                 "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home&c=arhiv",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
                 "separator": true
               }
             ]
@@ -249,6 +256,13 @@
                 "enabled": true
               },
               {
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "href": "/app/collections/move?a=a-nc-home&c=kontakty&copy=1",
+                "method": "GET",
+                "enabled": true
+              },
+              {
                 "id": "collection.import",
                 "label": "Import",
                 "icon": "i-up",
@@ -260,18 +274,18 @@
               {
                 "id": "collection.export",
                 "label": "Export",
-                "icon": "i-down",
                 "href": "/app/contacts/a-nc-home/kontakty/export",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-down"
               },
               {
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "href": "/app/collections/delete?a=a-nc-home&c=kontakty",
-                "method": "GET",
                 "danger": true,
                 "enabled": true,
+                "href": "/app/collections/delete?a=a-nc-home&c=kontakty",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
                 "separator": true
               }
             ]
@@ -310,21 +324,28 @@
                 "enabled": true
               },
               {
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "href": "/app/collections/move?a=a-rad-vps&c=komanda&copy=1",
+                "method": "GET",
+                "enabled": true
+              },
+              {
                 "id": "collection.export",
                 "label": "Export",
-                "icon": "i-down",
                 "href": "/app/contacts/a-rad-vps/komanda/export",
                 "method": "GET",
                 "enabled": true,
-                "separator": true
+                "separator": true,
+                "icon": "i-down"
               },
               {
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "href": "/app/collections/delete?a=a-rad-vps&c=komanda",
-                "method": "GET",
                 "danger": true,
                 "enabled": true,
+                "href": "/app/collections/delete?a=a-rad-vps&c=komanda",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
                 "separator": true
               }
             ]
@@ -356,6 +377,13 @@
                 "enabled": true
               },
               {
+                "id": "collection.copy",
+                "label": "Copy to another server",
+                "href": "/app/collections/move?a=a-rad-vps&c=rassylki&copy=1",
+                "method": "GET",
+                "enabled": true
+              },
+              {
                 "id": "collection.import",
                 "label": "Import",
                 "icon": "i-up",
@@ -367,18 +395,18 @@
               {
                 "id": "collection.export",
                 "label": "Export",
-                "icon": "i-down",
                 "href": "/app/contacts/a-rad-vps/rassylki/export",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-down"
               },
               {
-                "id": "collection.delete",
-                "label": "Delete on the server…",
-                "href": "/app/collections/delete?a=a-rad-vps&c=rassylki",
-                "method": "GET",
                 "danger": true,
                 "enabled": true,
+                "href": "/app/collections/delete?a=a-rad-vps&c=rassylki",
+                "id": "collection.delete",
+                "label": "Delete on the server…",
+                "method": "GET",
                 "separator": true
               }
             ]
@@ -444,7 +472,8 @@
       "enabled": true
     },
     "note": "3 of 4 collections ticked",
-    "neighbours": []
+    "neighbours": [],
+    "shortcuts": []
   },
   "notices": [],
   "details": null,

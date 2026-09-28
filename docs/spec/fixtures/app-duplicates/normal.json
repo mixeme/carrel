@@ -221,12 +221,29 @@
         "state": "ok"
       }
     ],
+    "shortcuts": [],
     "tags": []
   },
   "threshold": {
     "default": 60,
     "note": "The instance's number. Set your own to change what is offered.",
     "value": 60,
+    "weightActions": [
+      {
+        "enabled": true,
+        "href": "/app/duplicates/decide?do=weights",
+        "id": "duplicates.weights.save",
+        "label": "Save",
+        "method": "POST"
+      },
+      {
+        "enabled": false,
+        "id": "duplicates.weights.defaults",
+        "label": "Back to defaults",
+        "method": "POST",
+        "reason": "Every weight is the default already."
+      }
+    ],
     "weights": [
       {
         "default": 80,
