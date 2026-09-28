@@ -24,6 +24,9 @@ type connectionForm struct {
 	NoPassword                            bool
 	// Editing is the connection the form edits; empty for a new one.
 	Editing string
+	// Open asks for the dialog without anything typed yet: Connect account
+	// (s-profile-2). A form with anything in it is the dialog anyway.
+	Open bool
 }
 
 // noPasswordMark reads the mark «The server asks no password». While it is
@@ -41,6 +44,7 @@ func (s *Server) getSettingsConnections(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	f := connectionForm{Server: r.FormValue("server"), CertFingerprint: r.FormValue("certFingerprint")}
+	f.Open = r.URL.Query().Get("op") == "add"
 	if r.URL.Query().Get("op") == "edit" {
 		key, live := sess.DataKey()
 		blob, opened := s.users.Catalog(sess.AccountID(), key)
@@ -392,23 +396,42 @@ func (s *Server) rediscoveryNotice(blob sealed.Blob, conn sealed.Connection, fou
 	}
 }
 
+// connectionsPage is the list of connections (s-profile-1), or the dialog
+// that adds or edits one when f holds anything (s-profile-2): the dialog is
+// a state of its own, opened by Connect account, and the list carries no
+// form.
 func (s *Server) connectionsPage(sess *session.Session, f connectionForm, notice *view.Notice) view.ConnectionsPage {
 	page := view.ConnectionsPage{
 		Shell: s.withRail(s.buildShell(sess, "Connections"), s.settingsRail(sess, "/app/settings/connections")),
-		Add:   s.connectionForm(sess, f),
+	}
+	if f.Open || f != (connectionForm{}) {
+		add := s.connectionForm(sess, f)
+		page.Add = &add
+		if f.Editing == "" {
+			page.Title, page.Subtitle = "Connect account", "One connection gives calendars and address books alike."
+		}
 	}
 	if key, live := sess.DataKey(); live {
 		if blob, ok := s.users.Catalog(sess.AccountID(), key); ok {
 			unlocked := sess.UnlockUntil(time.Now()) != nil
 			tf := s.timeFor(sess)
+			cols := 0
 			for _, c := range blob.Connections {
-				page.Accounts = append(page.Accounts, s.connectionCard(sess, tf, blob, c, unlocked))
+				card := s.connectionCard(sess, tf, blob, c, unlocked)
+				cols += len(card.Collections)
+				page.Accounts = append(page.Accounts, card)
 			}
 			for _, f := range blob.Subscriptions {
 				page.Subscriptions = append(page.Subscriptions, s.subscriptionCard(sess, tf, f))
 			}
-			page.Actions = append(page.Actions, view.Action{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link",
-				Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}}), Method: "GET", Enabled: true})
+			if page.Add == nil {
+				page.Subtitle = text(fmt.Sprintf("Signed in as %s · %s · %s · %s", sess.Login(),
+					plural(len(blob.Connections), "server"), plural(cols, "collection"), plural(len(blob.Subscriptions), "subscription")))
+			}
+			page.Actions = append(page.Actions,
+				view.Action{ID: "connection.add", Label: "Connect account", Icon: "i-plus", Href: s.connectHref(), Method: "GET", Enabled: true},
+				view.Action{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link",
+					Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}}), Method: "GET", Enabled: true})
 			if n, ok := goneNotice(blob); ok {
 				page.Shell.Notices = append(page.Shell.Notices, n)
 			}
@@ -511,6 +534,15 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			Method: "GET", Enabled: true,
 		})
 	}
+	// A plain file storage makes folders (s-profile-1): the same sheet, for
+	// a folder beside its folders (S-12.1).
+	if c.FileRoot != "" {
+		card.Actions = append(card.Actions, view.Action{
+			ID: "folder.new", Label: "New folder", Icon: "i-plus",
+			Href:   s.postQuery("/app/collections/new", url.Values{"a": {c.ID}, "kind": {string(view.KindFile)}}),
+			Method: "GET", Enabled: true,
+		})
+	}
 	for _, col := range blob.CollectionsOf(c.ID) {
 		if col.Gone {
 			continue // named by goneNotice: a row has no state to carry it
@@ -523,20 +555,44 @@ func (s *Server) connectionCard(sess *session.Session, tf timeFmt, blob sealed.B
 			ReadOnly: col.ReadOnly,
 		}
 		row.LastRead, row.Changed = readingOf(sess, tf, c.ID, col.Path)
-		if !col.Has(view.KindFile) {
-			row.Menu = []view.MenuItem{{Action: view.Action{
-				ID: "collection.rename", Label: "Rename and colour",
-				Href:   s.postQuery("/app/collections/rename", url.Values{"a": {c.ID}, "c": {col.Path}}),
-				Method: "GET", Enabled: true,
-			}}}
-			row.Menu = append(row.Menu, s.collectionMoveItems(blob, c, col)...)
-			if item, ok := s.collectionDeleteItem(c, col); ok {
-				row.Menu = append(row.Menu, item)
-			}
-		}
+		row.Menu = s.collectionRowMenu(blob, c, col)
 		card.Collections = append(card.Collections, row)
 	}
 	return card
+}
+
+// collectionRowMenu is the «⋯» of a collection in its connection's card. A
+// calendar or an address book (s-profile-1): Rename and colour, Move and Copy
+// to another server, Export .ics or .vcf — the collection whole, as the
+// delete sheet hands it over — Publish a link, and under a line Delete on
+// the server…. A folder of a file storage (s-profile-12) is the same without
+// the export: a folder is downloaded in Files.
+func (s *Server) collectionRowMenu(blob sealed.Blob, c sealed.Connection, col sealed.Collection) []view.MenuItem {
+	if col.Gone || len(col.Kinds) == 0 {
+		return nil
+	}
+	rename := view.Action{ID: "collection.rename", Label: "Rename and colour", Icon: "i-pencil",
+		Href: s.postQuery("/app/collections/rename", url.Values{"a": {c.ID}, "c": {col.Path}}), Method: "GET", Enabled: true}
+	if col.Has(view.KindFile) {
+		rename.Label = "Rename"
+		if storageRoot(c, col) {
+			rename.Enabled, rename.Href, rename.Reason = false, "", storageRootReason
+		}
+	}
+	menu := []view.MenuItem{{Action: rename}}
+	menu = append(menu, s.collectionMoveItems(blob, c, col)...)
+	if col.Has(view.KindFile) {
+		menu = append(menu, view.MenuItem{Action: view.Action{ID: "publish", Label: "Publish a link", Icon: "i-link", Method: "GET", Enabled: true,
+			Href: s.postQuery("/app/publish", url.Values{"k": {filesSpec.segment}, "a": {c.ID}, "c": {col.Path}, "f": {""}, "dir": {"1"}})}})
+	} else {
+		export := s.collectionExport(c, col)
+		menu = append(menu, view.MenuItem{Action: export},
+			view.MenuItem{Action: s.publishActionAt(origin{conn: c, col: col}, segmentOf(col.Kinds[0]), "")})
+	}
+	if item, ok := s.collectionDeleteItem(c, col); ok {
+		menu = append(menu, item)
+	}
+	return menu
 }
 
 // revealPassword fills one card's password: only inside this session's unlock
@@ -612,6 +668,16 @@ func catalogEntries(found []discover.Collection) []sealed.Collection {
 // and an earlier bad well-known probe is routine — and carries every step.
 // nothing says what did not happen: a new connection is not saved, an
 // existing one is not changed.
+// connectHref opens the dialog Connect account (s-profile-2): the head of
+// the connections and the foot of every rail go there.
+func (s *Server) connectHref() string {
+	return s.postQuery("/app/settings/connections", url.Values{"op": {"add"}})
+}
+
+func (s *Server) connectAction() view.Action {
+	return view.Action{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.connectHref(), Method: "GET", Enabled: true}
+}
+
 func discoveryFailure(trace *view.DiagnosticTrace, err error, nothing string) *view.Notice {
 	n := &view.Notice{
 		Role:  view.NoticeAlert,

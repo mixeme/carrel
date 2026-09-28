@@ -53,7 +53,7 @@
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections",
+        "href": "/app/settings/connections?op=add",
         "icon": "i-server",
         "id": "account.connect",
         "label": "Connect account",

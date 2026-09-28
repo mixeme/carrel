@@ -427,7 +427,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue` |
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | фрагмент | `FilesPage` |
 | `/app/files/{account}/{col}/op/{path…}` | POST | вход | фрагмент, лист | `FileOpSheet` |
-| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload` — папка загрузки из меню создания; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл |
+| `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload` — папка загрузки из меню создания; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=` |
 | `/app/files/published` | GET | вход | страница | `PublishedLinksPage` |
 | `/app/attach/{account}/{col}/{path…}` | GET | вход | поток | — |
 
@@ -440,7 +440,7 @@ Typecase): рейл с соседними заметками и колонка �
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/app/collections/new` | GET, POST | вход | лист; `?back=` — мастер импорта, куда вернуться с новой коллекцией (S-19) | `CollectionNewSheet` |
+| `/app/collections/new` | GET, POST | вход | лист; `?back=` — мастер импорта, куда вернуться с новой коллекцией (S-19); `?kind=file&a=` — New folder хранилища (S-12.1) | `CollectionNewSheet` |
 | `/app/collections/rename` | GET, POST | вход | лист | `CollectionRenameSheet` |
 | `/app/collections/move` | GET, POST | вход | лист | `CollectionMoveSheet` |
 | `/app/collections/delete` | GET, POST | вход | лист | `CollectionDeleteSheet` |
@@ -453,7 +453,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/settings/escrow` | GET, POST | вход | страница | `EscrowPage` |
 | `/app/settings/escrow/deposit` | GET | вход | лист | `UnlockSheet` |
 | `/app/settings/escrow/withdraw` | GET | вход | лист | `EscrowWithdrawSheet` |
-| `/app/settings/connections` | GET, POST | вход | страница | `ConnectionsPage` |
+| `/app/settings/connections` | GET, POST | вход | страница | `ConnectionsPage`; `?op=add` — диалог Connect account |
 | `/app/settings/connections/test` | POST | вход | фрагмент | `DiagnosticTrace` |
 | `/app/settings/connections/disconnect` | GET, POST | вход | лист | `ConnectionRemoveSheet` |
 | `/app/settings/attachments` | GET, POST | вход | страница | `AttachmentsPage` |
@@ -1684,10 +1684,16 @@ type UnlockSheet struct {
 
 type ConnectionsPage struct {
     Shell
+    // На списке — «Signed in as mix · 3 servers · 12 collections · 2
+    // subscriptions» (s-profile-1); в диалоге подключения — его строка,
+    // Title тогда «Connect account» (s-profile-2)
+    Subtitle      Text
     Accounts      []ConnectionCard
     Subscriptions []SubscriptionCard
-    Add           Form
-    Actions       []Action
+    // Диалог подключения (`?op=add`, s-profile-2), его правка (`?op=edit`)
+    // или подписка (`?op=feed`); nil на списке: список формы не несёт
+    Add           *Form
+    Actions       []Action // Connect account (→ `?op=add`) · Subscribe to a feed
 }
 type ConnectionCard struct {
     AccountID   string
@@ -1724,7 +1730,12 @@ type CollectionRow struct {
     LastRead When
     Changed  When
     Objects  *int
-    Menu     []MenuItem // Rename · Delete · Move
+    // Календарь, книга (s-profile-1): Rename and colour · Move to another
+    // server · Copy to another server · Export .ics|.vcf · Publish a link ·
+    // черта · Delete on the server…; папка хранилища (s-profile-12) — то же
+    // без Export, Rename вместо Rename and colour; у хранилища целиком
+    // Rename и Delete выключены с причиной
+    Menu     []MenuItem
 }
 type SubscriptionCard struct {
     Title    Text
@@ -1736,7 +1747,14 @@ type SubscriptionCard struct {
     Actions  []Action // Check · Edit · Unsubscribe
 }
 
-type AttachmentsPage struct { Shell; Form Form; Folder FileTree; Note Text }
+// Form (attachments-1): набор «Folder» — Collection (список файловых
+// коллекций, `acc|path`; только для чтения — Disabled с причиной,
+// attachments-2), Folder in it (путь в ней, Extra — Browse: лист
+// `/app/files/picker?for=attachments`), A subfolder per month (отметка);
+// «File name» — Written as; у сохранённой папки — «In this folder now»:
+// Files, Oldest, Path только для чтения. Дерева на странице нет: его
+// открывает Browse
+type AttachmentsPage struct { Shell; Form Form; Note Text }
 
 type DevicesPage struct {
     Shell

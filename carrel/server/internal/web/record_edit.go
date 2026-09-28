@@ -2474,7 +2474,7 @@ func (s *Server) getKindQuickEntry(w http.ResponseWriter, r *http.Request, kind 
 	// record. The sheet says so by having no target, and offers the way out
 	// instead of an empty choice (U-6.16).
 	sheet := view.NewSheet{Kind: spec.kind, Actions: []view.Action{
-		{ID: "connection.add", Label: "Connect account", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		{ID: "connection.add", Label: "Connect account", Href: s.connectHref(), Method: "GET", Enabled: true},
 		{ID: "record.cancel", Label: "Cancel", Href: s.route("/app/" + kind), Method: "GET", Enabled: true},
 	}}
 	if WantsFragment(r) && FragmentTarget(r) == TargetSheet {

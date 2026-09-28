@@ -17,6 +17,117 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.65 — 2026-09-28
+
+The owner's deferred round, part 1 — settings and connections, each brought
+to its frame: Connect account in the head of the connections (s-profile-1)
+opening the dialog as a state of its own (s-profile-2); the «⋯» of
+collections (s-profile-1) and of the folders of a file storage
+(s-profile-12); the rail foot naming what it makes; «On which server» with
+only the servers that answer (s-profile-5, s-profile-13); and the folder for
+attachments as a collection, a folder in it and a subfolder per month
+(attachments-1, attachments-2).
+
+### Changed
+
+- **`ConnectionsPage.add` is `*Form`** (C-6): `null` on the list, which no
+  longer carries a form. `GET /app/settings/connections?op=add` is the
+  dialog Connect account: `add` is the form, `title` «Connect account»,
+  `subtitle` «One connection gives calendars and address books alike.» Edit
+  (`?op=edit`), the subscribe form (`?op=feed`) and every refused Connect,
+  Save or Test only come with `add` as before.
+- **`ConnectionsPage.actions`** is Connect account (`connection.add`, icon
+  `i-plus`, GET `?op=add`) and Subscribe to a feed. New
+  **`ConnectionsPage.subtitle`**: on the list «Signed in as mix · 4 servers
+  · 16 collections · 2 subscriptions».
+- **Connect account at the foot of every rail** (`account.connect`) and on
+  the quick sheet with nowhere to write (`connection.add`) go to `?op=add`.
+- **The rail foot of a kind** names what it makes: `collection.new` is «New
+  address book», «New calendar», «New list», «New notebook».
+- **`CollectionRow.menu`** of a calendar or an address book: Rename and
+  colour (`i-pencil`), Move to another server (`i-move`), Copy to another
+  server (`i-dup`), **Export .ics** or **Export .vcf** (`collection.export`,
+  `i-down` — the collection whole, `…/export?whole=1` for a calendar, as the
+  delete sheet hands it over), **Publish a link** (`publish`, the sheet of
+  S-25), and under a line Delete on the server… (`i-trash`). The same icons
+  on the rows of the kind rails.
+- **The new-collection sheet** lists in «On which server» only the servers
+  that answer as far as the session knows: the last check of the connection
+  (Test, Look for changes, Edit) if there was one, else the last polls — a
+  connection none of whose collections answered and one refused, timed out
+  or was unreachable is left out. The row's `hint` says so: «Two of three
+  are listed: baikal is not answering, and until it does there is nothing to
+  create there.» In `target.options` such a server is `readOnly` with the
+  reason «not answering». `note` is no longer «3 of 4 servers are listed…»;
+  it is set only when nothing can be made.
+- **`AttachmentsPage`** has no `folder` tree any more (C-6). The set
+  «Folder» of its form is **`collection`** (select of the file collections,
+  `value` `account|path`, `colour`; a read-only one `disabled` with the
+  reason «Read-only»; a subscribed folder is not listed), **`folder`**
+  «Folder in it» (text, `/carrel/attachments`, `extra` — Browse), and
+  **`monthly`** «A subfolder per month» (check, `true` or empty; the hint
+  names last month and this). POST takes those three and `name`; `to` and
+  `sub` are gone. `GET /app/settings/attachments?to=<folder href>` fills
+  collection and folder from a folder of the tree.
+- **Attachments: the hint of «Written as»** ends as the frame's, «A name
+  already taken is never overwritten: a counter is added, and the queue says
+  so.»; the page's `note` is the frame's message, «Changing the folder moves
+  nothing. …».
+
+### Added
+
+- **Folders of a file storage in the connections** (S-12.1, s-profile-12):
+  `menu` Rename (`collection.rename`), Move and Copy to another server,
+  Publish a link (`/app/publish?k=files&…&dir=1`), Delete on the server….
+  `/app/collections/rename`, `/move`, `/delete` open for a folder:
+  - rename is `MOVE` beside it, never over a taken name; the catalog entry
+    takes the new address, and the ticks, the attachment folder and the
+    upload folder follow it. The sheet has Name only.
+  - delete is the typed-name sheet of S-12.4 with **Open in Files**
+    (`collection.open`) where a calendar offers its download.
+  - move and copy go to a connection that holds folders: a folder of the
+    same name is made beside its folders (a taken one gets `-2`), the tree
+    is copied a file at a time through Carrel (S-17.1), a copy that stops is
+    taken back, and the original is deleted only after the copy is whole.
+    Another server without folders is «no file storage».
+  - the storage itself — the address the connection was made with — has
+    Rename and Delete off with the reason «This is the whole storage, not a
+    folder in it.»; Move of it says it can be copied, not moved.
+- **New folder** in the head of a plain file storage's card (`folder.new`,
+  `i-plus`, s-profile-1): `GET /app/collections/new?a=<account>&kind=file`
+  — the new-collection sheet with `kind` `file`, «On which server» and
+  Name only. POST makes the folder beside the storage's folders (`MKCOL`),
+  a taken name is an error of `name`, and the answer is 303 to the new
+  folder in Files; the catalog holds it as a file collection.
+- **«In this folder now»** (attachments-1): a fourth set of the attachments
+  form, present once a folder is stored — read-only rows `now.files`
+  «Files» («5 · 782 B»), `now.oldest` «Oldest» (`2026-07-01`, the day the
+  oldest file changed), `now.path` «Path» (the folder's whole address), with
+  the frame's hint. Month subfolders count as the folder.
+- **A counter added to an attachment's name is said in the queue**: a done
+  row of the files queue (`FilesPage.queue`) named as the file was written,
+  its note «… was taken, so a counter was added».
+- **`/app/files/picker?for=attachments[&to=]`** (GET): Browse of the
+  attachment folder — the tree at the folder; «Choose this folder»
+  (`files.picker.choose`, GET) goes to `/app/settings/attachments?to=…`.
+- **A subfolder per month** is stored with the attachment folder: a large
+  attachment goes into `2026-08` inside it — the month its dated name
+  carries — made on first use.
+
+### Fixed
+
+- The last poll of a kind (the rail of one collection, «On which server»)
+  was the oldest poll the session kept: a server that answered again still
+  read as refusing there.
+
+### For consumers
+
+Draw the connections list without a form, and the dialog when `add` is
+present: `title` and `subtitle` are its head. Draw `hint` under «On which
+server». On Settings → Attachments, draw Collection as a list with the
+colour marks, Browse beside Folder in it, and post `collection`, `folder`,
+`monthly`, `name`.
+
 ## v0.2.64 — 2026-09-28
 
 An address replaced on a card is asked about (from-typecase note 16,

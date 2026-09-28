@@ -54,6 +54,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=dela",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -61,6 +62,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=dela",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -68,14 +70,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=dela\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/tasks/a-nc-home/dela/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=dela\u0026k=tasks",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=dela",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -98,6 +118,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -105,6 +126,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -112,14 +134,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/dnevnik/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=dnevnik\u0026k=notes",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -142,6 +182,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=dni-rozhdeniya",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -149,6 +190,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -156,14 +198,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=dni-rozhdeniya\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/dni-rozhdeniya/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=dni-rozhdeniya\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=dni-rozhdeniya",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -186,6 +246,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=lichnyj",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -193,6 +254,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -200,14 +262,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=lichnyj\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/lichnyj/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=lichnyj\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=lichnyj",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -231,6 +311,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=rabota",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -238,6 +319,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=rabota",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -245,14 +327,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=rabota\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-nc-home/rabota/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=rabota\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=rabota",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -275,6 +375,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -282,6 +383,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -289,14 +391,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/notes/a-nc-home/zapisi/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=zapisi\u0026k=notes",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -319,6 +439,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -326,6 +447,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -333,14 +455,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/arhiv/export",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=arhiv\u0026k=contacts",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -363,6 +503,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -370,6 +511,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -377,14 +519,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-nc-home/kontakty/export",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=kontakty\u0026k=contacts",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -403,7 +563,50 @@
           ],
           "label": "Files",
           "lastRead": "",
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-nc-home\u0026c=Files",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=Files",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-nc-home\u0026c=Files\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-nc-home\u0026c=Files\u0026dir=1\u0026f=\u0026k=files",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-nc-home\u0026c=Files",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
           "objects": null,
           "path": "/alice/files/Files/",
           "readOnly": false
@@ -480,6 +683,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-rad-vps\u0026c=dezhurstva",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -487,6 +691,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -494,14 +699,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=dezhurstva\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/dezhurstva/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=dezhurstva\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=dezhurstva",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -524,6 +747,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-rad-vps\u0026c=proekty",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -531,6 +755,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -538,14 +763,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=proekty\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-rad-vps/proekty/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=proekty\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=proekty",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -568,6 +811,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-rad-vps\u0026c=komanda",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -575,6 +819,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=komanda",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -582,14 +827,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=komanda\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-rad-vps/komanda/export",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=komanda\u0026k=contacts",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=komanda",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -612,6 +875,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-rad-vps\u0026c=rassylki",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -619,6 +883,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=rassylki",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -626,14 +891,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-rad-vps\u0026c=rassylki\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/contacts/a-rad-vps/rassylki/export",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .vcf",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-rad-vps\u0026c=rassylki\u0026k=contacts",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-rad-vps\u0026c=rassylki",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -716,6 +999,7 @@
             {
               "enabled": true,
               "href": "/app/collections/rename?a=a-baikal\u0026c=obshchij",
+              "icon": "i-pencil",
               "id": "collection.rename",
               "label": "Rename and colour",
               "method": "GET"
@@ -723,6 +1007,7 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-baikal\u0026c=obshchij",
+              "icon": "i-move",
               "id": "collection.move",
               "label": "Move to another server",
               "method": "GET"
@@ -730,14 +1015,32 @@
             {
               "enabled": true,
               "href": "/app/collections/move?a=a-baikal\u0026c=obshchij\u0026copy=1",
+              "icon": "i-dup",
               "id": "collection.copy",
               "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/calendar/a-baikal/obshchij/export?whole=1",
+              "icon": "i-down",
+              "id": "collection.export",
+              "label": "Export .ics",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-baikal\u0026c=obshchij\u0026k=calendar",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
               "method": "GET"
             },
             {
               "danger": true,
               "enabled": true,
               "href": "/app/collections/delete?a=a-baikal\u0026c=obshchij",
+              "icon": "i-trash",
               "id": "collection.delete",
               "label": "Delete on the server…",
               "method": "GET",
@@ -797,6 +1100,14 @@
           "id": "connection.rediscover",
           "label": "Look for changes",
           "method": "POST"
+        },
+        {
+          "enabled": true,
+          "href": "/app/collections/new?a=a-sftp-vps\u0026kind=file",
+          "icon": "i-plus",
+          "id": "folder.new",
+          "label": "New folder",
+          "method": "GET"
         }
       ],
       "collections": [
@@ -808,7 +1119,50 @@
           ],
           "label": "Documents",
           "lastRead": "",
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-sftp-vps\u0026c=Documents",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-sftp-vps\u0026c=Documents",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-sftp-vps\u0026c=Documents\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-sftp-vps\u0026c=Documents\u0026dir=1\u0026f=\u0026k=files",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-sftp-vps\u0026c=Documents",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
           "objects": null,
           "path": "/alice/files/Documents/",
           "readOnly": false
@@ -821,7 +1175,50 @@
           ],
           "label": "Public",
           "lastRead": "",
-          "menu": [],
+          "menu": [
+            {
+              "enabled": true,
+              "href": "/app/collections/rename?a=a-sftp-vps\u0026c=Public",
+              "icon": "i-pencil",
+              "id": "collection.rename",
+              "label": "Rename",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-sftp-vps\u0026c=Public",
+              "icon": "i-move",
+              "id": "collection.move",
+              "label": "Move to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/collections/move?a=a-sftp-vps\u0026c=Public\u0026copy=1",
+              "icon": "i-dup",
+              "id": "collection.copy",
+              "label": "Copy to another server",
+              "method": "GET"
+            },
+            {
+              "enabled": true,
+              "href": "/app/publish?a=a-sftp-vps\u0026c=Public\u0026dir=1\u0026f=\u0026k=files",
+              "icon": "i-link",
+              "id": "publish",
+              "label": "Publish a link",
+              "method": "GET"
+            },
+            {
+              "danger": true,
+              "enabled": true,
+              "href": "/app/collections/delete?a=a-sftp-vps\u0026c=Public",
+              "icon": "i-trash",
+              "id": "collection.delete",
+              "label": "Delete on the server…",
+              "method": "GET",
+              "separator": true
+            }
+          ],
           "objects": null,
           "path": "/alice/files/Public/",
           "readOnly": true
@@ -848,6 +1245,14 @@
   "actions": [
     {
       "enabled": true,
+      "href": "/app/settings/connections?op=add",
+      "icon": "i-plus",
+      "id": "connection.add",
+      "label": "Connect account",
+      "method": "GET"
+    },
+    {
+      "enabled": true,
       "href": "/app/settings/connections?op=feed",
       "icon": "i-link",
       "id": "feed.subscribe",
@@ -855,127 +1260,7 @@
       "method": "GET"
     }
   ],
-  "add": {
-    "action": "/app/settings/connections",
-    "actions": [
-      {
-        "enabled": true,
-        "href": "/app/settings/connections",
-        "id": "connection.add",
-        "label": "Connect",
-        "method": "POST"
-      },
-      {
-        "enabled": true,
-        "href": "/app/settings/connections/test",
-        "id": "connection.test",
-        "label": "Test only",
-        "method": "POST"
-      },
-      {
-        "enabled": true,
-        "href": "/app/settings/connections",
-        "id": "connection.add.cancel",
-        "label": "Cancel",
-        "method": "GET"
-      }
-    ],
-    "errors": [],
-    "method": "POST",
-    "sets": [
-      {
-        "legend": "",
-        "rows": [
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "hidden",
-            "label": "",
-            "name": "_csrf",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": "csrf"
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Label",
-            "name": "label",
-            "options": [],
-            "placeholder": "optional",
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": ".well-known is tried first, then the URL exactly as typed.",
-            "kind": "url",
-            "label": "Server URL",
-            "name": "server",
-            "options": [],
-            "readOnly": false,
-            "required": true,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Username",
-            "name": "login",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "password",
-            "label": "Password",
-            "name": "password",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "disables": "password",
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "check",
-            "label": "The server asks no password",
-            "name": "noPassword",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          },
-          {
-            "error": "",
-            "extra": null,
-            "hint": "",
-            "kind": "text",
-            "label": "Certificate fingerprint (SHA-256)",
-            "name": "certFingerprint",
-            "options": [],
-            "readOnly": false,
-            "required": false,
-            "value": ""
-          }
-        ]
-      }
-    ]
-  },
+  "add": null,
   "details": null,
   "notices": [],
   "print": {
@@ -1145,6 +1430,7 @@
       "url": "https://league.example/season.ics"
     }
   ],
+  "subtitle": "Signed in as mix · 4 servers · 16 collections · 2 subscriptions",
   "title": "Connections",
   "top": {
     "newMenu": [

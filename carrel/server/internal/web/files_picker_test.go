@@ -23,7 +23,7 @@ func TestUploadFromTheMenuAsksWhere(t *testing.T) {
 	}
 
 	carrel := "/app/files/" + f.id + "/" + url.PathEscape(filesDocs) + "/carrel/"
-	if rec := f.h.do(postForm("/app/settings/attachments", f.sess, url.Values{"to": {carrel}})); rec.Code != 303 {
+	if rec := f.h.do(postForm("/app/settings/attachments", f.sess, attachAt(t, carrel))); rec.Code != 303 {
 		t.Fatalf("attachment folder: %d %s", rec.Code, rec.Body)
 	}
 	sheet = decode[view.FilePickerSheet](t, f.h.do(get("/app/files/picker?for=upload", f.sess)))

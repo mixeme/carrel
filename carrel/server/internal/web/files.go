@@ -358,7 +358,7 @@ func filesEmpty(s *Server, blob sealed.Blob) *view.Notice {
 		Title: "No file storage is connected",
 		Body:  "Files come from a WebDAV storage. Connect one, then tick its folders in the rail.",
 		Actions: []view.Action{
-			{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+			s.connectAction(),
 		},
 	}
 }
@@ -398,7 +398,7 @@ func (s *Server) filesRail(sess *session.Session, blob sealed.Blob, open *fileCt
 	rail.Foot = []view.Action{
 		{ID: "rail.apply", Label: "Apply", Href: s.route("/app/sources/files"), Method: "POST", Enabled: true},
 		folder,
-		{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		s.connectAction(),
 		{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link", Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}, "kind": {"folder"}}), Method: "GET", Enabled: true},
 	}
 	rail.Note = text(fmt.Sprintf("%d of %s ticked", on, plural(live, "storage")))

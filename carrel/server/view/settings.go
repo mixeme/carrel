@@ -122,10 +122,16 @@ type UnlockSheet struct {
 
 type ConnectionsPage struct {
 	Shell
+	// Subtitle — строка под заголовком: на списке «Signed in as mix · 3
+	// servers · 12 collections · 2 subscriptions» (s-profile-1), в диалоге
+	// подключения — его строка (s-profile-2)
+	Subtitle      Text               `json:"subtitle"`
 	Accounts      []ConnectionCard   `json:"accounts"`
 	Subscriptions []SubscriptionCard `json:"subscriptions"`
-	Add           Form               `json:"add"`
-	Actions       []Action           `json:"actions"`
+	// Add — диалог подключения, его правка или подписка; nil — на списке:
+	// диалог открывает Connect account в Actions (s-profile-1, s-profile-2)
+	Add     *Form    `json:"add"`
+	Actions []Action `json:"actions"` // Connect account · Subscribe to a feed
 }
 type ConnectionCard struct {
 	AccountID   string           `json:"accountID"`
@@ -164,11 +170,13 @@ type SubscriptionCard struct {
 	Actions []Action `json:"actions"` // Check · Edit · Unsubscribe
 }
 
+// AttachmentsPage — Settings → Attachments (attachments-1): коллекция
+// списком, папка в ней с Browse (дерево — FilePickerSheet ?for=attachments),
+// подпапка по месяцам, имя файла; всё — поля Form
 type AttachmentsPage struct {
 	Shell
-	Form   Form     `json:"form"`
-	Folder FileTree `json:"folder"`
-	Note   Text     `json:"note"`
+	Form Form `json:"form"`
+	Note Text `json:"note"`
 }
 
 type DevicesPage struct {

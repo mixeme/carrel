@@ -560,10 +560,14 @@ func kindCount(sess *session.Session, blob sealed.Blob, spec kindSpec) *int {
 // what that poll could not read: the session knows it, and a row that looked
 // fine until the combined view was opened again would be a lie.
 func lastPoll(sess *session.Session, k view.Kind) *fanout.Snapshot {
+	// The session keeps its tasks newest first: the first of the kind is the
+	// last poll. Until v0.2.65 the loop kept the oldest instead, and a server
+	// that had answered again still read as refusing.
 	var last *listTask
 	for _, t := range sess.Tasks() {
 		if lt, ok := t.(*listTask); ok && lt.kind == k {
 			last = lt
+			break
 		}
 	}
 	if last == nil {
@@ -658,8 +662,10 @@ func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 	rail.Sections = append([]view.RailSection{{State: view.CollectionOK, Rows: []view.SourceRow{combined}}}, sections...)
 	rail.Foot = []view.Action{
 		{ID: "rail.apply", Label: "Apply", Href: s.route("/app/sources/" + spec.segment), Method: "POST", Enabled: true},
-		{ID: "collection.new", Label: "New collection", Icon: "i-plus", Href: s.postQuery("/app/collections/new", url.Values{"kind": {string(spec.kind)}}), Method: "GET", Enabled: true},
-		{ID: "account.connect", Label: "Connect account", Icon: "i-server", Href: s.route("/app/settings/connections"), Method: "GET", Enabled: true},
+		// The foot names what it makes (s-contacts-1, s-agenda-1, s-tasks-1,
+		// s-notes-1): «New calendar», not «New collection».
+		{ID: "collection.new", Label: text("New " + newCollectionTitle(spec.kind)), Icon: "i-plus", Href: s.postQuery("/app/collections/new", url.Values{"kind": {string(spec.kind)}}), Method: "GET", Enabled: true},
+		s.connectAction(),
 		{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link", Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}}), Method: "GET", Enabled: true},
 	}
 	rail.Note = text(fmt.Sprintf("%d of %s ticked", on, plural(live, "collection")))
@@ -760,7 +766,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 				live++
 				row.Href = s.route(origin{conn: conn, col: col}.listPath(spec.segment))
 				row.Menu = []view.MenuItem{{Action: view.Action{
-					ID: "collection.rename", Label: "Rename",
+					ID: "collection.rename", Label: "Rename", Icon: "i-pencil",
 					Href:   s.postQuery("/app/collections/rename", url.Values{"a": {conn.ID}, "c": {col.Path}}),
 					Method: "GET", Enabled: true,
 				}}}

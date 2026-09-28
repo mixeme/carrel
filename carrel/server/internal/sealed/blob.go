@@ -215,6 +215,11 @@ type AttachmentFolder struct {
 	AccountID string   `json:"accountID"`
 	Path      string   `json:"path"`             // the file collection
 	Folder    []string `json:"folder,omitempty"` // segments under its root; created on first use
+	// Monthly puts each attachment in a subfolder of its month, «2026-08»,
+	// made on first use (attachments-1); the month is the one the file's
+	// dated name carries. Off, the folder is flat. Only the attachment folder
+	// reads it.
+	Monthly bool `json:"monthly,omitempty"`
 }
 
 // Connection stores DAV credentials, the homes discovery found, and an

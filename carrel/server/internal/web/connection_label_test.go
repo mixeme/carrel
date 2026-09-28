@@ -36,13 +36,14 @@ func TestConnectionLabel(t *testing.T) {
 	if card.Title != "nextcloud home" {
 		t.Errorf("card title = %q", card.Title)
 	}
-	if r := formRow(page.Add, "label"); r == nil || r.Value != "" {
+	page = decode[view.ConnectionsPage](t, h.do(get("/app/settings/connections?op=add", sess)))
+	if r := formRow(*page.Add, "label"); r == nil || r.Value != "" {
 		t.Errorf("add form label row = %+v", r)
 	}
 
 	edit := actionByID(card.Actions, "connection.edit")
 	u, _ := url.Parse(edit.Href)
-	form := decode[view.ConnectionsPage](t, h.do(get(u.RequestURI(), sess))).Add
+	form := *decode[view.ConnectionsPage](t, h.do(get(u.RequestURI(), sess))).Add
 	if r := formRow(form, "label"); r == nil || r.Value != "nextcloud home" {
 		t.Errorf("edit form label = %+v", r)
 	}
@@ -89,11 +90,11 @@ func TestATakenLabelIsRefused(t *testing.T) {
 		return len(blob.Connections)
 	}
 
-	if page := connect("nextcloud"); page.Add.Action != "" || count() != 1 {
+	if page := connect("nextcloud"); page.Add != nil || count() != 1 {
 		t.Fatalf("the first connection was not made: %+v", page.Add)
 	}
 	page := connect("Nextcloud")
-	if r := formRow(page.Add, "label"); r == nil || r.Error != "There is already a connection called “Nextcloud”. Choose another label: it is how your sources are told apart." {
+	if r := formRow(*page.Add, "label"); r == nil || r.Error != "There is already a connection called “Nextcloud”. Choose another label: it is how your sources are told apart." {
 		t.Errorf("a taken label: %+v", r)
 	}
 	if count() != 1 {
@@ -103,7 +104,7 @@ func TestATakenLabelIsRefused(t *testing.T) {
 		t.Fatalf("the server's own host, free, was refused: %d", count())
 	}
 	page = connect("")
-	if r := formRow(page.Add, "label"); r == nil || r.Error == "" || count() != 2 {
+	if r := formRow(*page.Add, "label"); r == nil || r.Error == "" || count() != 2 {
 		t.Errorf("a second connection to the same server without a label: %+v, %d", r, count())
 	}
 
@@ -112,7 +113,7 @@ func TestATakenLabelIsRefused(t *testing.T) {
 	second := blob.Connections[1]
 	v := url.Values{"op": {"edit"}, "account": {second.ID}, "label": {"NEXTCLOUD"}, "server": {second.Server}, "login": {"alice"}}
 	edited := decode[view.ConnectionsPage](t, h.do(postForm("/app/settings/connections", sess, v)))
-	if r := formRow(edited.Add, "label"); r == nil || r.Error == "" {
+	if r := formRow(*edited.Add, "label"); r == nil || r.Error == "" {
 		t.Errorf("edit to a taken label: %+v", r)
 	}
 	blob, _ = h.users.Catalog(sess.AccountID(), key)
@@ -121,7 +122,9 @@ func TestATakenLabelIsRefused(t *testing.T) {
 	}
 	// Its own label is not taken by itself.
 	v.Set("label", "")
-	if r := formRow(decode[view.ConnectionsPage](t, h.do(postForm("/app/settings/connections", sess, v))).Add, "label"); r != nil && r.Error != "" {
-		t.Errorf("a connection's own label was refused: %+v", r)
+	if add := decode[view.ConnectionsPage](t, h.do(postForm("/app/settings/connections", sess, v))).Add; add != nil {
+		if r := formRow(*add, "label"); r != nil && r.Error != "" {
+			t.Errorf("a connection's own label was refused: %+v", r)
+		}
 	}
 }

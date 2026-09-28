@@ -259,6 +259,14 @@ func (s *Server) SeedFile(p, body string) {
 	}
 }
 
+// SetModified sets when a file under FileRoot was last changed, as the
+// server reports it (getlastmodified).
+func (s *Server) SetModified(p string, at time.Time) {
+	if err := os.Chtimes(s.localPath(p), at, at); err != nil {
+		panic(err)
+	}
+}
+
 // File returns a file under FileRoot as the server holds it.
 func (s *Server) File(p string) (string, bool) {
 	data, err := os.ReadFile(s.localPath(p))

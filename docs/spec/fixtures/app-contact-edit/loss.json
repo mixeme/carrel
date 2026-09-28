@@ -555,6 +555,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
                 "method": "GET"
@@ -562,6 +563,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
                 "method": "GET"
@@ -569,6 +571,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=arhiv\u0026copy=1",
+                "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
                 "method": "GET"
@@ -594,6 +597,7 @@
                 "danger": true,
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=arhiv",
+                "icon": "i-trash",
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
@@ -616,6 +620,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=kontakty",
+                "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
                 "method": "GET"
@@ -623,6 +628,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty",
+                "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
                 "method": "GET"
@@ -630,6 +636,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=kontakty\u0026copy=1",
+                "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
                 "method": "GET"
@@ -655,6 +662,7 @@
                 "danger": true,
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=kontakty",
+                "icon": "i-trash",
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",

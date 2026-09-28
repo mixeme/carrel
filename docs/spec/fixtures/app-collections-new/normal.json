@@ -2,7 +2,7 @@
   "actions": [
     {
       "enabled": true,
-      "href": "/app/collections/new?kind=contact",
+      "href": "/app/collections/new?kind=event",
       "id": "collection.create",
       "label": "Create",
       "method": "POST"
@@ -10,7 +10,7 @@
   ],
   "failure": null,
   "form": {
-    "action": "/app/collections/new?kind=contact",
+    "action": "/app/collections/new?kind=event",
     "actions": [],
     "errors": [],
     "method": "POST",
@@ -33,7 +33,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "",
+            "hint": "Two of three are listed: baikal is not answering, and until it does there is nothing to create there.",
             "kind": "select",
             "label": "On which server",
             "name": "account",
@@ -47,11 +47,6 @@
                 "label": "radicale · vps",
                 "selected": false,
                 "value": "a-rad-vps"
-              },
-              {
-                "label": "baikal",
-                "selected": false,
-                "value": "a-baikal"
               }
             ],
             "readOnly": false,
@@ -73,7 +68,78 @@
           {
             "error": "",
             "extra": null,
-            "hint": "https://nextcloud.example/dav.php/alice/contacts/…/ — Taken from the name when left empty; yours to change. Other clients and restore by path go by the address, and it does not change later; the name they only show.",
+            "hint": "Written to the server as calendar-color: other clients show the same one. Left unchosen, the colour follows from the address.",
+            "kind": "radio",
+            "label": "Colour",
+            "name": "colour",
+            "options": [
+              {
+                "label": "#4a6b52",
+                "selected": false,
+                "value": "#4a6b52"
+              },
+              {
+                "label": "#3f6e8c",
+                "selected": false,
+                "value": "#3f6e8c"
+              },
+              {
+                "label": "#6b4e7a",
+                "selected": false,
+                "value": "#6b4e7a"
+              },
+              {
+                "label": "#a05a2c",
+                "selected": false,
+                "value": "#a05a2c"
+              },
+              {
+                "label": "#8c6239",
+                "selected": false,
+                "value": "#8c6239"
+              },
+              {
+                "label": "#9a9280",
+                "selected": false,
+                "value": "#9a9280"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Most servers settle this when the collection is made and do not change it afterwards. The collection appears under Calendar, Tasks or Notes by what it holds, not by where it was made.",
+            "kind": "check",
+            "label": "What goes in it",
+            "name": "components",
+            "options": [
+              {
+                "label": "Events",
+                "selected": true,
+                "value": "VEVENT"
+              },
+              {
+                "label": "Tasks",
+                "selected": false,
+                "value": "VTODO"
+              },
+              {
+                "label": "Notes",
+                "selected": false,
+                "value": "VJOURNAL"
+              }
+            ],
+            "readOnly": false,
+            "required": false,
+            "value": ""
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "https://nextcloud.example/dav.php/alice/calendars/…/ — Taken from the name when left empty; yours to change. Other clients and restore by path go by the address, and it does not change later; the name they only show.",
             "kind": "text",
             "label": "Address",
             "name": "address",
@@ -86,8 +152,8 @@
       }
     ]
   },
-  "kind": "contact",
-  "note": "3 of 4 servers are listed: only a server that holds address books can take a new one.",
+  "kind": "event",
+  "note": "",
   "target": {
     "chosen": "a-nc-home",
     "options": [
@@ -114,8 +180,8 @@
         "id": "a-baikal",
         "label": "baikal",
         "last": false,
-        "readOnly": false,
-        "reason": "",
+        "readOnly": true,
+        "reason": "not answering",
         "stamp": ""
       },
       {

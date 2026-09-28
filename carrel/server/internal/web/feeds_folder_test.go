@@ -29,7 +29,7 @@ func TestAddressWithoutLoginIsSubscribedTo(t *testing.T) {
 		if page.Add.Action != "/app/settings/connections?op=feed.subscribe&kind=folder" != !folder {
 			t.Errorf("%s: form = %q", addr, page.Add.Action)
 		}
-		if got := formFields(page.Add).Get("url"); got != addr {
+		if got := formFields(*page.Add).Get("url"); got != addr {
 			t.Errorf("%s: the form lost the address: %q", addr, got)
 		}
 	}

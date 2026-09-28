@@ -167,7 +167,10 @@ a counter is added, and the queue says so»: дата через дефис, и 
 очереди вложений нет. Подсказка сервера показывает пример выбранного способа.
 
 **Что нужно.** Пример в подсказке — как пишет сервер (или сказать, что дефис
-нужен, — тогда сервер сменит разделитель); убрать «the queue says so».
+нужен, — тогда сервер сменит разделитель). «The queue says so» сервер с
+`v0.2.65` выполняет: занятое имя — сделанная строка очереди файлов
+(«2026-08-10 report-2.pdf: 2026-08-10 report.pdf was taken, so a counter was
+added»); подсказка у сервера — кадровая.
 
 ## 16. «Reset a password» в шапке пользователей: выбор человека
 
@@ -435,5 +438,49 @@ C-6.8), поле пароля приходит `readOnly`, пока отметк
   Сказать, нужна ли строка.
 - **Рубрики** «The address», «What rewriting can set off», «What will not
   change» — постоянные подписи клиента, сервер их не шлёт. Подтвердить.
+
+**Что нужно.** Кадры или ответы по пунктам.
+
+## 26. Настройки и подключения: чего кадры не рисуют
+
+**Откуда.** 28.09.2026, отложенный заход владельца, часть 1. Сервер
+(`v0.2.65`): Connect account в шапке подключений открывает диалог
+(`?op=add`), «⋯» коллекций и папок хранилищ по `s-profile-1` и
+`s-profile-12`, «On which server» только из отвечающих (`s-profile-5`),
+вложения — Collection списком, Folder in it с Browse, подпапка по месяцам
+(`attachments-1`, `-2`). По дороге:
+
+- **Шапка правки подключения** не нарисована. Сервер: заголовок остаётся
+  «Connections», строки под ним нет. Нарисовать.
+- **Хранилище целиком** (подключение, чья единственная коллекция — сам
+  адрес): Rename и Delete on the server… выключены с причиной «This is the
+  whole storage, not a folder in it.», перенос предлагает только копию.
+  Нарисовать или подтвердить.
+- **Листы папки хранилища** не нарисованы. Переименование: одно поле Name,
+  строка «A folder's name is its address: renaming it moves it on the
+  server. Devices, published links and backup jobs pointing at the old
+  address will see it vanish; the files inside stay as they are.» Удаление:
+  вместо «Download .ics first» — «Open in Files» и «Download what you need
+  from it there first.». Перенос: «Carrel creates a folder there, copies
+  everything in it — each file downloaded and uploaded again — then deletes
+  this one on sftpgo · vps. …», у сервера без папок — «no file storage».
+- **Лист New folder** (кнопка в шапке карточки хранилища) не нарисован.
+  Сервер: лист новой коллекции рода `file` — «On which server» и Name, без
+  цвета, состава и адреса (имя папки и есть адрес). Нарисовать.
+- **«In this folder now» пустой папки**: ещё не заведённая — Files «0»,
+  Oldest «—»; непрочитанная — «—» у обоих. Подтвердить.
+- **Browse у папки вложений** — лист с деревом (`FilePickerSheet`): строка
+  «Where large attachments go: a folder of a file collection you can write
+  to. Carrel makes it on first use.», «Choose this folder» (выключена с
+  причиной, пока не выбрана папка или хранилище только для чтения) и
+  Cancel. Не нарисован.
+- **Не отвечает ни один сервер** рода: в «On which server» пусто, строка
+  листа «No server that holds calendars is answering now: baikal. Until one
+  does, there is nothing to create there.», Create выключена с ней. Не
+  отвечают два — «One of three is listed: baikal, radicale · vps are not
+  answering, and until they do …». Подтвердить.
+- **Подзаголовок списка** считает коллекции карточек серверов: у набора
+  фикстур «4 servers · 16 collections», у кадра «3 servers · 12 collections»
+  при тех же карточках. Сказать, что считает кадр.
 
 **Что нужно.** Кадры или ответы по пунктам.

@@ -146,7 +146,7 @@ func TestAddConnectionFailureSavesNothing(t *testing.T) {
 	if !strings.Contains(string(failure.Body), "principal") {
 		t.Errorf("body = %q, want the step that failed", failure.Body)
 	}
-	if got := rowNamed(t, page.Add, "server").Value; got != text(srv.URL) {
+	if got := rowNamed(t, *page.Add, "server").Value; got != text(srv.URL) {
 		t.Errorf("server field = %q, want what was entered", got)
 	}
 
@@ -168,7 +168,7 @@ func TestAddConnectionRejectsAddressWithoutScheme(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
 		t.Fatal(err)
 	}
-	if row := rowNamed(t, page.Add, "server"); row.Error == "" {
+	if row := rowNamed(t, *page.Add, "server"); row.Error == "" {
 		t.Errorf("server row = %+v, want an error", row)
 	}
 }

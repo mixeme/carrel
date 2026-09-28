@@ -263,12 +263,12 @@
         "href": "/app/collections/new?kind=note",
         "icon": "i-plus",
         "id": "collection.new",
-        "label": "New collection",
+        "label": "New notebook",
         "method": "GET"
       },
       {
         "enabled": true,
-        "href": "/app/settings/connections",
+        "href": "/app/settings/connections?op=add",
         "icon": "i-server",
         "id": "account.connect",
         "label": "Connect account",
@@ -371,6 +371,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=dnevnik",
+                "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
                 "method": "GET"
@@ -378,6 +379,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik",
+                "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
                 "method": "GET"
@@ -385,6 +387,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=dnevnik\u0026copy=1",
+                "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
                 "method": "GET"
@@ -410,6 +413,7 @@
                 "danger": true,
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=dnevnik",
+                "icon": "i-trash",
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
@@ -432,6 +436,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/rename?a=a-nc-home\u0026c=zapisi",
+                "icon": "i-pencil",
                 "id": "collection.rename",
                 "label": "Rename",
                 "method": "GET"
@@ -439,6 +444,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi",
+                "icon": "i-move",
                 "id": "collection.move",
                 "label": "Move to another server",
                 "method": "GET"
@@ -446,6 +452,7 @@
               {
                 "enabled": true,
                 "href": "/app/collections/move?a=a-nc-home\u0026c=zapisi\u0026copy=1",
+                "icon": "i-dup",
                 "id": "collection.copy",
                 "label": "Copy to another server",
                 "method": "GET"
@@ -471,6 +478,7 @@
                 "danger": true,
                 "enabled": true,
                 "href": "/app/collections/delete?a=a-nc-home\u0026c=zapisi",
+                "icon": "i-trash",
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",

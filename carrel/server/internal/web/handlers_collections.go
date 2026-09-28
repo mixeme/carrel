@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"carrel.dev/carrel/server/internal/dav"
 	"carrel.dev/carrel/server/internal/discover"
+	"carrel.dev/carrel/server/internal/provider/file"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/view"
@@ -72,7 +74,7 @@ func newCollectionKind(v string) (k view.Kind, choice, ok bool) {
 	switch view.Kind(v) {
 	case "":
 		return view.KindEvent, true, true
-	case view.KindContact, view.KindEvent, view.KindTask, view.KindNote:
+	case view.KindContact, view.KindEvent, view.KindTask, view.KindNote, view.KindFile:
 		return view.Kind(v), false, true
 	}
 	return "", false, false
@@ -86,8 +88,23 @@ func newCollectionTitle(k view.Kind) string {
 		return "list"
 	case view.KindNote:
 		return "notebook"
+	case view.KindFile:
+		return "folder"
 	}
 	return "calendar"
+}
+
+// newHome is where a new collection of kind k is made on c: a folder beside
+// the folders of a plain file storage (s-profile-1, S-12.1), anything else in
+// the home-set discovery found.
+func newHome(blob sealed.Blob, c sealed.Connection, k view.Kind) string {
+	if k == view.KindFile {
+		if c.FileRoot == "" {
+			return ""
+		}
+		return fileHome(blob, c)
+	}
+	return homeFor(c, k)
 }
 
 // homeFor is where a collection of this kind is made on the connection: the
@@ -184,7 +201,7 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	f.name = strings.TrimSpace(r.PostFormValue("name"))
 	f.colour = strings.ToLower(strings.TrimSpace(r.PostFormValue("colour")))
 	f.address = strings.TrimSpace(r.PostFormValue("address"))
-	if f.kind != view.KindContact {
+	if f.kind != view.KindContact && f.kind != view.KindFile {
 		for _, p := range calendarParts {
 			for _, c := range r.PostForm["components"] {
 				if c == p.component {
@@ -203,19 +220,25 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	conn, known := blob.Connection(f.account)
 	home := ""
 	if known {
-		home = homeFor(conn, f.kind)
+		home = newHome(blob, conn, f.kind)
 	}
 	if home == "" {
 		f.errs["account"] = text(fmt.Sprintf("Choose a server that holds %ss.", newCollectionTitle(f.kind)))
 	}
 	if f.name == "" {
 		f.errs["name"] = text("Give it a name.")
+	} else if f.kind == view.KindFile && file.CheckName(f.name) != nil {
+		f.errs["name"] = text("A folder's name cannot be “.” or “..”, and cannot hold “/” or “\\”.")
 	}
 	if p := addressProblem(f.address); p != "" {
 		f.errs["address"] = text(p)
 	}
 	if len(f.errs) > 0 {
 		s.writePage(w, r, http.StatusOK, s.collectionNewSheet(sess, blob, f, nil))
+		return
+	}
+	if f.kind == view.KindFile {
+		s.createFolder(w, r, sess, key, blob, f, conn, home)
 		return
 	}
 
@@ -515,14 +538,62 @@ func hrefPath(href string) string {
 	return href
 }
 
+// silentNow reports whether the session knows the connection does not answer
+// right now (s-profile-5, s-profile-13): its last check in this session
+// failed, or — with no check — every collection of it the last polls asked
+// refused, timed out or could not be reached, and none answered. Nothing is
+// sent to find out: what the session has not heard of is taken as answering,
+// and a refusal is shown when it happens (S-12.2).
+func silentNow(sess *session.Session, conn sealed.Connection) bool {
+	if trace := sess.CheckOf(conn.ID); trace != nil {
+		return !trace.OK
+	}
+	failed, answered := false, false
+	for _, k := range []view.Kind{view.KindContact, view.KindEvent, view.KindTask, view.KindNote} {
+		snap := lastPoll(sess, k)
+		if snap == nil {
+			continue
+		}
+		for _, st := range snap.Sources {
+			if !strings.HasPrefix(st.ID, conn.ID+":") {
+				continue
+			}
+			switch st.State {
+			case view.SourceError, view.SourceTimeout, view.SourceUnavailable:
+				failed = true
+			case view.SourceDone, view.SourceEmpty:
+				answered = true
+			}
+		}
+	}
+	return failed && !answered
+}
+
+// countWord is a small count as the frames write it in a sentence: «Two of
+// three are listed» (s-profile-5).
+func countWord(n int) string {
+	words := []string{"none", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
+	if n >= 0 && n < len(words) {
+		return words[n]
+	}
+	return strconv.Itoa(n)
+}
+
 func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f collectionForm, failure *view.Notice) view.CollectionNewSheet {
 	noun := newCollectionTitle(f.kind)
 	sheet := view.CollectionNewSheet{Kind: f.kind, Failure: failure}
 	var eligible []sealed.Connection
+	var holding int
+	var silent []string
 	for _, c := range blob.Connections {
 		opt := view.TargetOption{ID: c.ID, Label: text(connLabel(c))}
 		switch {
-		case homeFor(c, f.kind) != "":
+		case newHome(blob, c, f.kind) != "" && silentNow(sess, c):
+			holding++
+			silent = append(silent, connLabel(c))
+			opt.ReadOnly, opt.Reason = true, "not answering"
+		case newHome(blob, c, f.kind) != "":
+			holding++
 			eligible = append(eligible, c)
 		case c.FileRoot != "":
 			opt.ReadOnly, opt.Reason = true, text("Files only")
@@ -542,11 +613,11 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	}
 	sheet.Target.Chosen = chosen.ID
 	switch {
-	case len(eligible) == 0:
+	case holding == 0:
 		sheet.Note = text(fmt.Sprintf("No connected server holds %ss. Connect one that does first.", noun))
-	case len(eligible) < len(blob.Connections):
-		sheet.Note = text(fmt.Sprintf("%d of %d servers are listed: only a server that holds %ss can take a new one.",
-			len(eligible), len(blob.Connections), noun))
+	case len(eligible) == 0:
+		sheet.Note = text(fmt.Sprintf("No server that holds %ss is answering now: %s. Until one does, there is nothing to create there.",
+			noun, strings.Join(silent, ", ")))
 	}
 
 	action := "/app/collections/new"
@@ -573,8 +644,37 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	for _, c := range eligible {
 		server.Options = append(server.Options, view.Option{Value: c.ID, Label: text(connLabel(c)), Selected: c.ID == chosen.ID})
 	}
+	// A server that is not answering is left out of the list, and the hint
+	// says so (s-profile-5): a row whose choice would end in an error ten
+	// seconds later is no choice.
+	if len(silent) > 0 && len(eligible) > 0 {
+		verb, who := "are", strings.Join(silent, ", ")+" are"
+		if len(eligible) == 1 {
+			verb = "is"
+		}
+		if len(silent) == 1 {
+			who = silent[0] + " is"
+		}
+		listed := countWord(len(eligible))
+		server.Hint = text(fmt.Sprintf("%s of %s %s listed: %s not answering, and until it does there is nothing to create there.",
+			strings.ToUpper(listed[:1])+listed[1:], countWord(holding), verb, who))
+		if len(silent) > 1 {
+			server.Hint = text(strings.Replace(string(server.Hint), "until it does", "until they do", 1))
+		}
+	}
 	rows = append(rows, server,
 		view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(f.name), Required: true, Error: errs["name"]})
+	if f.kind == view.KindFile {
+		// A folder's name is its address: there is nothing else to ask.
+		sheet.Form = s.plainForm(action, "POST", rows...)
+		sheet.Form.Action = s.route(action)
+		create := view.Action{ID: "collection.create", Label: "Create", Href: s.route(action), Method: "POST", Enabled: chosen.ID != ""}
+		if !create.Enabled {
+			create.Reason = sheet.Note
+		}
+		sheet.Actions = []view.Action{create}
+		return sheet
+	}
 	if f.kind != view.KindContact {
 		rows = append(rows, paletteRow(f.colour, errs["colour"],
 			"Written to the server as calendar-color: other clients show the same one. Left unchosen, the colour follows from the address."))
@@ -605,12 +705,11 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 	return sheet
 }
 
-// openCollectionSheet finds the collection a rename sheet is about: ?a is the
-// connection, ?c the collection address. Gone, foreign and file collections
-// answer 404; folders are renamed by S-17, not here.
-// openCollectionSheet opens the catalog entry a sheet names. A subscription
-// opens only for renaming: moving and deleting are things of a server, and a
-// feed is nobody's collection here (S-25.2).
+// openCollectionSheet opens the catalog entry a sheet names: ?a is the
+// connection, ?c the collection address. Gone and foreign ones answer 404. A
+// folder of a file storage opens like a calendar (S-12.1, s-profile-12). A
+// subscription opens only for renaming: moving and deleting are things of a
+// server, and a feed is nobody's collection here (S-25.2).
 func (s *Server) openCollectionSheet(w http.ResponseWriter, r *http.Request) (*session.Session, [32]byte, sealed.Connection, sealed.Collection, bool) {
 	sess, key, blob, ok := s.openCatalog(w, r)
 	if !ok {
@@ -619,7 +718,7 @@ func (s *Server) openCollectionSheet(w http.ResponseWriter, r *http.Request) (*s
 	q := r.URL.Query()
 	conn, hasConn := blob.Connection(q.Get("a"))
 	col, hasCol := blob.Collection(q.Get("a"), q.Get("c"))
-	if !hasConn || !hasCol || col.Gone || len(col.Kinds) == 0 || (col.Has(view.KindFile) && !col.Feed) ||
+	if !hasConn || !hasCol || col.Gone || len(col.Kinds) == 0 ||
 		(col.Feed && !strings.HasSuffix(r.URL.Path, "/rename")) {
 		s.notFound(w, r)
 		return nil, key, sealed.Connection{}, sealed.Collection{}, false
@@ -670,6 +769,10 @@ func (s *Server) postCollectionRename(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, "/app/settings/connections")
 		return
 	}
+	if col.Has(view.KindFile) {
+		s.renameFileCollection(w, r, sess, key, conn, col, name)
+		return
+	}
 	props := []dav.Prop{{Name: propDisplayName, Value: dav.TextValue(name)}}
 	if colour != "" {
 		props = append(props, dav.Prop{Name: propCalendarColor, Value: dav.TextValue(colour)})
@@ -696,7 +799,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		csrfField(sess),
 		{Name: "name", Label: "Name", Kind: view.InputText, Value: text(name), Required: true, Error: errs["name"]},
 	}
-	if !col.Has(view.KindContact) {
+	if !col.Has(view.KindContact) && !col.Has(view.KindFile) {
 		rows = append(rows, paletteRow(colour, errs["colour"], "Written to the server as calendar-color. Left unchosen, the colour stays as it is."))
 	}
 	if conn.Feed {
@@ -711,13 +814,18 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Enabled: true}},
 		}
 	}
+	note := "Renaming is not moving: the address stays as it is, so devices, published links and backup jobs pointing here go on working. " +
+		"The new name is written to the server, and other clients show it at their next sync."
+	if col.Has(view.KindFile) {
+		// A folder's name is its address (S-12.1): renaming it moves it.
+		note = "A folder's name is its address: renaming it moves it on the server. Devices, published links and backup jobs pointing at the old address will see it vanish; the files inside stay as they are."
+	}
 	return view.CollectionRenameSheet{
 		Kind:    col.Kinds[0],
 		Stamp:   view.Stamp(connLabel(conn)),
 		Form:    s.plainForm(action, "POST", rows...),
 		Address: text(serverOrigin(conn.Server) + col.Path),
-		Note: text("Renaming is not moving: the address stays as it is, so devices, published links and backup jobs pointing here go on working. " +
-			"The new name is written to the server, and other clients show it at their next sync."),
+		Note:    text(note),
 		Failure: failure,
 		Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Enabled: true}},
 	}

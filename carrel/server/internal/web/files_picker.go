@@ -18,7 +18,8 @@ import (
 // collection at hand is not allowed — it is somebody's server. The folder
 // is the one chosen here last, else the attachment folder; the tree shows
 // it in its place, read-only storage visible and closed. From Files of
-// Attach opens the same tree to choose a file (for=attach, below).
+// Attach opens the same tree to choose a file (for=attach, below), and
+// Browse of Settings → Attachments to choose the folder (for=attachments).
 
 func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
@@ -29,6 +30,9 @@ func (s *Server) getFilesPicker(w http.ResponseWriter, r *http.Request) {
 	case "upload":
 	case "attach":
 		s.getAttachPicker(w, r, sess)
+		return
+	case "attachments":
+		s.writeMailSheet(w, r, s.attachmentsPicker(r, sess))
 		return
 	default:
 		s.notFound(w, r)
@@ -95,6 +99,40 @@ func (s *Server) getAttachPicker(w http.ResponseWriter, r *http.Request, sess *s
 	sheet.Actions = []view.Action{attach,
 		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route(attachBack(c, uid, from))}}
 	s.writeMailSheet(w, r, sheet)
+}
+
+// attachmentsPicker is Browse of Settings → Attachments (attachments-1): the
+// tree at the folder of the form, ?to= choosing another; «Choose this
+// folder» goes back to the settings with it, where Save stores it. A
+// read-only storage is shown and not chosen.
+func (s *Server) attachmentsPicker(r *http.Request, sess *session.Session) view.FilePickerSheet {
+	blob := s.catalogOf(sess)
+	var chosen *fileCtx
+	if to := r.FormValue("to"); to != "" {
+		chosen, _ = s.folderAddress(sess, to)
+	} else {
+		chosen = s.savedFolder(sess, blob)
+	}
+	if chosen != nil && chosen.col.Feed {
+		chosen = nil
+	}
+	sheet := view.FilePickerSheet{
+		Purpose: "Where large attachments go: a folder of a file collection you can write to. Carrel makes it on first use.",
+		Tree:    *s.fileTree(r.Context(), &fileCtx{blob: blob}, chosen),
+	}
+	choose := view.Action{ID: "files.picker.choose", Label: "Choose this folder", Method: "GET"}
+	switch {
+	case chosen == nil:
+		choose.Reason = "Choose a folder in the tree first."
+	case chosen.col.ReadOnly:
+		choose.Reason = text(readOnlyReason)
+	default:
+		choose.Enabled = true
+		choose.Href = s.postQuery("/app/settings/attachments", url.Values{"to": {sheet.Tree.Chosen}})
+	}
+	sheet.Actions = []view.Action{choose,
+		{ID: "files.picker.cancel", Label: "Cancel", Method: "GET", Enabled: true, Href: s.route("/app/settings/attachments")}}
+	return sheet
 }
 
 // postFilesPicker takes the folder chosen in the tree and remembers it for

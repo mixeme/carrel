@@ -440,9 +440,11 @@ func (s *Service) AddCollection(viewerID string, dataKey [crypt.KeyLen]byte, acc
 // PlaceMovedCollection puts a collection made on another connection by a move
 // or a copy into the catalog in one edit (S-12.3). A move carries the ticks of
 // the old entry to the new one and takes the old entry out with its ticks: the
-// server no longer holds it, and it is not gone by re-discovery. A copy is a
-// new collection and gets no tick (S-6.1). The journal names the connections,
-// not the addresses.
+// server no longer holds it, and it is not gone by re-discovery. A folder that
+// moved — to another storage, or renamed in its own (S-12.1) — takes the
+// attachment folder and the upload folder along when they were in it. A copy
+// is a new collection and gets no tick (S-6.1). The journal names the
+// connections, not the addresses.
 func (s *Service) PlaceMovedCollection(viewerID string, dataKey [crypt.KeyLen]byte, fromAccount, fromPath, toAccount string, col sealed.Collection, move bool) error {
 	col.AccountID, col.Gone = toAccount, false
 	what := "collection.copy"
@@ -482,6 +484,11 @@ func (s *Service) PlaceMovedCollection(viewerID string, dataKey [crypt.KeyLen]by
 			ticks = append(ticks, t)
 		}
 		blob.Selected = ticks
+		for _, af := range []*sealed.AttachmentFolder{blob.Attachments, blob.UploadTo} {
+			if af != nil && af.AccountID == fromAccount && af.Path == fromPath {
+				af.AccountID, af.Path = toAccount, col.Path
+			}
+		}
 		blob.Collections = append(blob.Collections[:src], blob.Collections[src+1:]...)
 		return nil
 	})

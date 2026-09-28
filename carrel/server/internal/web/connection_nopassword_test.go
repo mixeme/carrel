@@ -69,8 +69,8 @@ func TestConnectFormNoPasswordCheckIsTheFrames(t *testing.T) {
 		t.Fatalf("frame: ticked %v, password disabled %v — the reading of the frame is off", frame.ticked, frame.disabled)
 	}
 	h, sess := davHarness(t)
-	page := decode[view.ConnectionsPage](t, h.do(get("/app/settings/connections", sess)))
-	rows := visibleRows(page.Add)
+	page := decode[view.ConnectionsPage](t, h.do(get("/app/settings/connections?op=add", sess)))
+	rows := visibleRows(*page.Add)
 	// The frame's fields come in its order; rows it does not draw may sit
 	// between them.
 	i := 0
@@ -142,8 +142,8 @@ func TestConnectDialogFieldsAndFootAreTheFrames(t *testing.T) {
 	}
 
 	h, sess := davHarness(t)
-	page := decode[view.ConnectionsPage](t, h.do(get("/app/settings/connections", sess)))
-	for _, r := range visibleRows(page.Add) {
+	page := decode[view.ConnectionsPage](t, h.do(get("/app/settings/connections?op=add", sess)))
+	for _, r := range visibleRows(*page.Add) {
 		d, ok := fields[string(r.Label)]
 		if !ok {
 			continue
@@ -210,7 +210,7 @@ func TestConnectWithoutPassword(t *testing.T) {
 	id := blob.Connections[0].ID
 
 	page := decode[view.ConnectionsPage](t, h.do(get("/app/settings/connections?"+url.Values{"op": {"edit"}, "account": {id}}.Encode(), sess)))
-	check, password := checkRow(t, page.Add)
+	check, password := checkRow(t, *page.Add)
 	if check.Value == "" || !password.ReadOnly {
 		t.Errorf("edit form: check %q, password read-only %v — want it ticked and the field off", check.Value, password.ReadOnly)
 	}
@@ -237,7 +237,7 @@ func TestConnectWithoutPassword(t *testing.T) {
 	if noticeTitled(page.Shell.Notices, "Could not connect") == nil {
 		t.Fatalf("notices = %+v, want the failure", page.Shell.Notices)
 	}
-	check, password = checkRow(t, page.Add)
+	check, password = checkRow(t, *page.Add)
 	if check.Value == "" || !password.ReadOnly {
 		t.Errorf("failed connect: check %q, password read-only %v — want the mark echoed", check.Value, password.ReadOnly)
 	}
@@ -274,7 +274,7 @@ func TestEditClearsThePasswordWithTheMark(t *testing.T) {
 	if got := catalogOf(t, f).Connections[0]; got.Password != "stored-secret-7" || got.NoPassword {
 		t.Fatalf("a failed edit changed the connection: %+v", got)
 	}
-	check, password := checkRow(t, page.Add)
+	check, password := checkRow(t, *page.Add)
 	if check.Value != "" || password.ReadOnly {
 		t.Errorf("failed edit without the mark: check %q, password read-only %v", check.Value, password.ReadOnly)
 	}

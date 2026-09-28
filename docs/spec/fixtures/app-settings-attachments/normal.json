@@ -1,62 +1,5 @@
 {
   "details": null,
-  "folder": {
-    "chosen": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
-    "nodes": [
-      {
-        "children": [],
-        "expanded": false,
-        "id": "/app/files/a-nc-home/Files/",
-        "label": "Files",
-        "readOnly": false,
-        "stamp": "nextcloud · Files"
-      },
-      {
-        "children": [
-          {
-            "children": [
-              {
-                "children": [
-                  {
-                    "children": [],
-                    "expanded": false,
-                    "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/2026-07/",
-                    "label": "2026-07",
-                    "readOnly": false,
-                    "stamp": ""
-                  }
-                ],
-                "expanded": true,
-                "id": "/app/files/a-sftp-vps/Documents/carrel/attachments/",
-                "label": "attachments",
-                "readOnly": false,
-                "stamp": ""
-              }
-            ],
-            "expanded": true,
-            "id": "/app/files/a-sftp-vps/Documents/carrel/",
-            "label": "carrel",
-            "readOnly": false,
-            "stamp": ""
-          }
-        ],
-        "expanded": true,
-        "id": "/app/files/a-sftp-vps/Documents/",
-        "label": "Documents",
-        "readOnly": false,
-        "stamp": "sftpgo · vps · Documents"
-      },
-      {
-        "children": [],
-        "expanded": false,
-        "id": "/app/files/a-sftp-vps/Public/",
-        "label": "Public",
-        "readOnly": true,
-        "stamp": "sftpgo · vps · Public"
-      }
-    ],
-    "new": null
-  },
   "form": {
     "action": "/app/settings/attachments",
     "actions": [
@@ -233,22 +176,61 @@
           {
             "error": "",
             "extra": null,
-            "hint": "Any folder of a file collection you can write to, chosen in the tree.",
-            "kind": "text",
-            "label": "Folder",
-            "name": "to",
-            "options": [],
+            "hint": "Any file collection you can write to.",
+            "kind": "select",
+            "label": "Collection",
+            "name": "collection",
+            "options": [
+              {
+                "colour": "#9a9280",
+                "label": "nextcloud · Files",
+                "selected": false,
+                "value": "a-nc-home|/alice/files/Files/"
+              },
+              {
+                "colour": "#a05a2c",
+                "label": "sftpgo · vps · Documents",
+                "selected": true,
+                "value": "a-sftp-vps|/alice/files/Documents/"
+              },
+              {
+                "colour": "#a05a2c",
+                "disabled": true,
+                "label": "sftpgo · vps · Public",
+                "reason": "Read-only",
+                "selected": false,
+                "value": "a-sftp-vps|/alice/files/Public/"
+              }
+            ],
             "readOnly": false,
             "required": true,
-            "value": "/app/files/a-sftp-vps/Documents/carrel/attachments/"
+            "value": "a-sftp-vps|/alice/files/Documents/"
+          },
+          {
+            "error": "",
+            "extra": {
+              "enabled": true,
+              "href": "/app/files/picker?for=attachments&to=%2Fapp%2Ffiles%2Fa-sftp-vps%2FDocuments%2Fcarrel%2Fattachments%2F",
+              "id": "attachments.browse",
+              "label": "Browse",
+              "method": "GET"
+            },
+            "hint": "Created on first use. It stays an ordinary folder: openable in Files, mountable as a network drive, readable without Carrel.",
+            "kind": "text",
+            "label": "Folder in it",
+            "name": "folder",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "/carrel/attachments"
           },
           {
             "error": "",
             "extra": null,
-            "hint": "Optional, such as carrel/attachments. Made when the first attachment goes there; it stays an ordinary folder, readable without Carrel.",
-            "kind": "text",
-            "label": "New folder inside",
-            "name": "sub",
+            "hint": "2026-07, 2026-08. Off means one flat folder — fine for a hundred files, not for ten thousand.",
+            "kind": "check",
+            "label": "A subfolder per month",
+            "name": "monthly",
             "options": [],
             "readOnly": false,
             "required": false,
@@ -262,7 +244,7 @@
           {
             "error": "",
             "extra": null,
-            "hint": "2026-08-10 report.pdf. A name already taken is never overwritten: a number is added.",
+            "hint": "2026-08-10 report.pdf. A name already taken is never overwritten: a counter is added, and the queue says so.",
             "kind": "select",
             "label": "Written as",
             "name": "name",
@@ -288,10 +270,51 @@
             "value": "dated"
           }
         ]
+      },
+      {
+        "legend": "In this folder now",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Files",
+            "name": "now.files",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "5 · 782 B"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Oldest",
+            "name": "now.oldest",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "2026-07-01"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "Carrel keeps no index of what points at these files. Nothing here deletes them: an attachment is removed from the record it hangs on, in that record.",
+            "kind": "text",
+            "label": "Path",
+            "name": "now.path",
+            "options": [],
+            "readOnly": true,
+            "required": false,
+            "value": "https://files.example.org/dav/alice/files/Documents/carrel/attachments/"
+          }
+        ]
       }
     ]
   },
-  "note": "Removing an attachment from a record does not delete its file: another record may point at it, and Carrel keeps no index of what does. Changing the folder moves nothing: records already written keep their links, and only new attachments go to the new place.",
+  "note": "Changing the folder moves nothing. Records already written carry the old path and keep working; only new attachments go to the new place.",
   "notices": [],
   "print": {
     "range": "",

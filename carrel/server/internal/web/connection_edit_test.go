@@ -43,13 +43,13 @@ func TestEditConnectionAfterPasswordAndAddressChange(t *testing.T) {
 	}
 	u, _ := url.Parse(edit.Href)
 	page := decode[view.ConnectionsPage](t, f.h.do(get(u.RequestURI(), f.sess)))
-	if r := formRow(page.Add, "server"); r == nil || string(r.Value) != catalogOf(t, f).Connections[0].Server {
+	if r := formRow(*page.Add, "server"); r == nil || string(r.Value) != catalogOf(t, f).Connections[0].Server {
 		t.Errorf("server row = %+v, want the stored address", r)
 	}
-	if r := formRow(page.Add, "login"); r == nil || r.Value != "alice" {
+	if r := formRow(*page.Add, "login"); r == nil || r.Value != "alice" {
 		t.Errorf("login row = %+v", r)
 	}
-	if r := formRow(page.Add, "password"); r == nil || r.Value != "" || r.Hint == "" {
+	if r := formRow(*page.Add, "password"); r == nil || r.Value != "" || r.Hint == "" {
 		t.Errorf("password row = %+v, want it empty with a hint that empty keeps it", r)
 	}
 	save := actionByID(page.Add.Actions, "connection.edit.save")
@@ -75,7 +75,7 @@ func TestEditConnectionAfterPasswordAndAddressChange(t *testing.T) {
 	if got := catalogOf(t, f).Connections[0]; !reflect.DeepEqual(got, before) {
 		t.Error("a failed edit changed the connection")
 	}
-	if formRow(page.Add, "login") == nil || actionByID(page.Add.Actions, "connection.edit.save") == nil {
+	if formRow(*page.Add, "login") == nil || actionByID(page.Add.Actions, "connection.edit.save") == nil {
 		t.Error("a failed edit does not give the edit form back")
 	}
 

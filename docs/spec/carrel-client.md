@@ -903,6 +903,13 @@ Typecase (`L`) подключается **точной версией** и об�
 - **Вью-модель.** `ConnectionsPage`.
 - **Виджеты.** `tc-card` на подключение, `tc-list` + `tc-tickrow` (коллекции),
   `tc-diag` (след), `tc-form` (добавление и подписка), `tc-btn`, `tc-menu`.
+- **Шапка** (s-profile-1): Connect account и Subscribe to a feed —
+  `Actions`, под заголовком — `Subtitle`. Список формы не несёт: Connect
+  account открывает **диалог** (`?op=add`, s-profile-2) — отдельное
+  состояние страницы: `Add` приходит, `Title` «Connect account», `Subtitle`
+  — строка диалога, вместо списка в main стоит форма. Туда же ведёт Connect
+  account в подвале каждого рейла. «⋯» строки коллекции — `CollectionRow.Menu`
+  (s-profile-1; у папки хранилища — s-profile-12).
 - **Контролы.** Проверить и проверить снова, править, показать пароль, завести
   коллекцию, отключить подключение (`/app/settings/connections/disconnect` —
   лист «что именно уйдёт», как у удаления коллекции); подписка на чужую ленту.
@@ -919,7 +926,12 @@ Typecase (`L`) подключается **точной версией** и об�
 #### `/app/settings/attachments` — вложения
 
 - **Вью-модель.** `AttachmentsPage`.
-- **Виджеты.** `tc-form`, `tc-fset`, `tc-fields`, `tc-tree`, `tc-btn`.
+- **Виджеты.** `tc-form`, `tc-fset`, `tc-fields`, `tc-tree` (в листе Browse),
+  `tc-btn`.
+- **Контролы** (attachments-1): Collection — список файловых коллекций
+  (attachments-2, только для чтения — с пометкой и не выбирается), Folder in
+  it с Browse (`FormRow.Extra`: лист `FilePickerSheet` с деревом, «Choose this
+  folder» возвращает на страницу с выбранной папкой), A subfolder per month.
 - **Особое.** Папка выбирается **один раз** и больше не спрашивается. Сказано,
   что удаление вложения из записи не удаляет файл. **Порог 2 МБ показан, но не
   правится** (S-20): набор только для чтения говорит, что до порога вложение

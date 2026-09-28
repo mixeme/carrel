@@ -30,8 +30,11 @@ import (
 var propGetETag = xml.Name{Space: "DAV:", Local: "getetag"}
 
 func collectionNoun(col sealed.Collection) string {
-	if col.Has(view.KindContact) {
+	switch {
+	case col.Has(view.KindContact):
 		return "address book"
+	case col.Has(view.KindFile):
+		return "folder"
 	}
 	return "calendar"
 }
@@ -51,7 +54,6 @@ func collectionMoveQuery(conn sealed.Connection, col sealed.Collection, to strin
 // cannot hold the kind shown and closed with the reason; eligible counts the
 // others.
 func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, copying bool) (opts []view.TargetOption, eligible int) {
-	kind := col.Kinds[0]
 	for _, c := range blob.Connections {
 		// Beside a server the sheet says what it takes, or why not
 		// (s-profile-8): «calendars», «already there», «files only».
@@ -62,9 +64,11 @@ func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection,
 		switch {
 		case c.ID == conn.ID:
 			opt.ReadOnly, opt.Reason = true, "already there"
-		case homeFor(c, kind) == "" && c.FileRoot != "":
+		case col.Has(view.KindFile) && collectionHome(blob, c, col) == "":
+			opt.ReadOnly, opt.Reason = true, "no file storage"
+		case collectionHome(blob, c, col) == "" && c.FileRoot != "":
 			opt.ReadOnly, opt.Reason = true, "files only"
-		case homeFor(c, kind) == "":
+		case collectionHome(blob, c, col) == "":
 			opt.ReadOnly, opt.Reason = true, text("no "+collectionNoun(col)+"s")
 		default:
 			opt.Stamp = view.Stamp(collectionNoun(col) + "s")
@@ -76,11 +80,11 @@ func (s *Server) collectionMoveTargets(blob sealed.Blob, conn sealed.Connection,
 }
 
 // collectionMoveItems are the menu items of a collection row — Move and
-// Copy to another server (s-profile-1) — or none: files move as a tree
-// (S-17), and with no other connection that holds the kind there is nowhere
-// to go (S-12.3).
+// Copy to another server (s-profile-1, s-profile-12) — or none: with no other
+// connection that holds the kind there is nowhere to go (S-12.3). A folder
+// goes to another file storage as a tree (S-12.1).
 func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, col sealed.Collection) []view.MenuItem {
-	if col.Gone || len(col.Kinds) == 0 || col.Has(view.KindFile) {
+	if col.Gone || col.Feed || len(col.Kinds) == 0 {
 		return nil
 	}
 	if _, eligible := s.collectionMoveTargets(blob, conn, col, false); eligible == 0 {
@@ -88,12 +92,12 @@ func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, c
 	}
 	return []view.MenuItem{
 		{Action: view.Action{
-			ID: "collection.move", Label: "Move to another server",
+			ID: "collection.move", Label: "Move to another server", Icon: "i-move",
 			Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", false)),
 			Method: "GET", Enabled: true,
 		}},
 		{Action: view.Action{
-			ID: "collection.copy", Label: "Copy to another server",
+			ID: "collection.copy", Label: "Copy to another server", Icon: "i-dup",
 			Href:   s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, "", true)),
 			Method: "GET", Enabled: true,
 		}},
@@ -101,17 +105,21 @@ func (s *Server) collectionMoveItems(blob sealed.Blob, conn sealed.Connection, c
 }
 
 // collectionMoveBlock is why the move or copy to dest cannot start, or "".
-func collectionMoveBlock(conn sealed.Connection, col sealed.Collection, dest sealed.Connection, known, copying bool) string {
+func collectionMoveBlock(blob sealed.Blob, conn sealed.Connection, col sealed.Collection, dest sealed.Connection, known, copying bool) string {
 	noun := collectionNoun(col)
 	switch {
 	case !known:
 		return "Choose a server."
 	case dest.ID == conn.ID:
 		return "The " + noun + " is already on this server."
-	case homeFor(dest, col.Kinds[0]) == "":
+	case col.Has(view.KindFile) && collectionHome(blob, dest, col) == "":
+		return "That server is no file storage."
+	case collectionHome(blob, dest, col) == "":
 		return "That server holds no " + noun + "s."
 	case !copying && col.ReadOnly:
 		return "This " + noun + " is read-only here, so it could not be deleted after the move. It can be copied."
+	case !copying && col.Has(view.KindFile) && storageRoot(conn, col):
+		return storageRootReason + " It can be copied, not moved."
 	}
 	return ""
 }
@@ -129,7 +137,7 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 	if copying {
 		confirm.ID, confirm.Label = "collection.copy.confirm", "Copy here"
 	}
-	if reason := collectionMoveBlock(conn, col, dest, known, copying); reason != "" {
+	if reason := collectionMoveBlock(blob, conn, col, dest, known, copying); reason != "" {
 		confirm.Enabled, confirm.Reason = false, text(reason)
 	} else {
 		chosen := s.postQuery("/app/collections/move", collectionMoveQuery(conn, col, dest.ID, copying))
@@ -146,9 +154,16 @@ func (s *Server) collectionMoveSheet(blob sealed.Blob, conn sealed.Connection, c
 		if count != nil && *count > 0 {
 			records = "all " + plural(*count, unit)
 		}
-		if copying {
+		switch {
+		case col.Has(view.KindFile) && copying:
+			// S-17.1: between storages every file travels through Carrel.
+			sheet.Warning = text(fmt.Sprintf("Carrel creates a folder there and copies everything in it, each file downloaded and uploaded again; this one on %s stays as it is.", here))
+		case col.Has(view.KindFile):
+			sheet.Warning = text(fmt.Sprintf("Carrel creates a folder there, copies everything in it — each file downloaded and uploaded again — then deletes this one on %s. "+
+				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the files live on.", here))
+		case copying:
 			sheet.Warning = text(fmt.Sprintf("Carrel creates a %s there and copies %s; this one on %s stays as it is.", noun, records, here))
-		} else {
+		default:
 			sheet.Warning = text(fmt.Sprintf("Carrel creates a %s there, copies %s, then deletes this one on %s. "+
 				"Devices, published links and backup jobs pointing at the old address will see it vanish — same as Delete, except the records live on. This is not renaming the path.", noun, records, here))
 		}
@@ -190,7 +205,7 @@ func (s *Server) postCollectionMove(w http.ResponseWriter, r *http.Request) {
 	}
 	copying, to := r.FormValue("copy") != "", r.FormValue("to")
 	dest, known := blob.Connection(to)
-	if collectionMoveBlock(conn, col, dest, known, copying) != "" {
+	if collectionMoveBlock(blob, conn, col, dest, known, copying) != "" {
 		var count *int
 		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
 			count = collectionCount(sess, conn.ID, col, spec)
@@ -198,8 +213,14 @@ func (s *Server) postCollectionMove(w http.ResponseWriter, r *http.Request) {
 		s.writePage(w, r, http.StatusOK, s.collectionMoveSheet(blob, conn, col, copying, to, count))
 		return
 	}
-	m := &collectionMove{s: s, sess: sess, key: key, conn: conn, col: col, dest: dest, copying: copying}
-	done, notice := m.run(r.Context())
+	m := &collectionMove{s: s, sess: sess, key: key, conn: conn, col: col, dest: dest, copying: copying, home: collectionHome(blob, dest, col)}
+	var done string
+	var notice *view.Notice
+	if col.Has(view.KindFile) {
+		done, notice = m.runFiles(r.Context())
+	} else {
+		done, notice = m.run(r.Context())
+	}
 	if notice == nil {
 		s.redirect(w, r, done)
 		return
@@ -216,6 +237,7 @@ type collectionMove struct {
 	col     sealed.Collection
 	dest    sealed.Connection
 	copying bool
+	home    string // where the new collection is made on dest
 
 	src, dst *collectionCtx
 	placed   sealed.Collection // the new collection as the catalog will hold it
@@ -235,6 +257,9 @@ func (m *collectionMove) title() string {
 }
 
 func (m *collectionMove) newAddress() string {
+	if m.placed.Has(view.KindFile) {
+		return fileHref(m.dest.ID, m.placed.Path, "", nil, true)
+	}
 	return "/app/" + segmentOf(m.placed.Kinds[0]) + "/" + m.dest.ID + "/" + url.PathEscape(m.placed.Path)
 }
 
@@ -271,7 +296,7 @@ func (m *collectionMove) run(ctx context.Context) (string, *view.Notice) {
 	}
 
 	// The new collection: the same last segment when it is free there.
-	home := homeFor(m.dest, m.col.Kinds[0])
+	home := m.home
 	client, err := dav.NewClient(m.s.guard, m.dest.Server, m.dest.Login, m.dest.Password, m.dest.CertFingerprint)
 	var taken map[string]bool
 	if err == nil {

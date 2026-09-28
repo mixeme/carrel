@@ -185,21 +185,24 @@
                 "label": "Rename",
                 "href": "/app/collections/rename?a=a-nc-home&c=arhiv",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-pencil"
               },
               {
                 "id": "collection.move",
                 "label": "Move to another server",
                 "href": "/app/collections/move?a=a-nc-home&c=arhiv",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-move"
               },
               {
                 "id": "collection.copy",
                 "label": "Copy to another server",
                 "href": "/app/collections/move?a=a-nc-home&c=arhiv&copy=1",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-dup"
               },
               {
                 "id": "collection.import",
@@ -225,7 +228,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "icon": "i-trash"
               }
             ]
           },
@@ -246,21 +250,24 @@
                 "label": "Rename",
                 "href": "/app/collections/rename?a=a-nc-home&c=kontakty",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-pencil"
               },
               {
                 "id": "collection.move",
                 "label": "Move to another server",
                 "href": "/app/collections/move?a=a-nc-home&c=kontakty",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-move"
               },
               {
                 "id": "collection.copy",
                 "label": "Copy to another server",
                 "href": "/app/collections/move?a=a-nc-home&c=kontakty&copy=1",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-dup"
               },
               {
                 "id": "collection.import",
@@ -286,7 +293,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "icon": "i-trash"
               }
             ]
           }
@@ -314,21 +322,24 @@
                 "label": "Rename",
                 "href": "/app/collections/rename?a=a-rad-vps&c=komanda",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-pencil"
               },
               {
                 "id": "collection.move",
                 "label": "Move to another server",
                 "href": "/app/collections/move?a=a-rad-vps&c=komanda",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-move"
               },
               {
                 "id": "collection.copy",
                 "label": "Copy to another server",
                 "href": "/app/collections/move?a=a-rad-vps&c=komanda&copy=1",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-dup"
               },
               {
                 "id": "collection.export",
@@ -346,7 +357,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "icon": "i-trash"
               }
             ]
           },
@@ -367,21 +379,24 @@
                 "label": "Rename",
                 "href": "/app/collections/rename?a=a-rad-vps&c=rassylki",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-pencil"
               },
               {
                 "id": "collection.move",
                 "label": "Move to another server",
                 "href": "/app/collections/move?a=a-rad-vps&c=rassylki",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-move"
               },
               {
                 "id": "collection.copy",
                 "label": "Copy to another server",
                 "href": "/app/collections/move?a=a-rad-vps&c=rassylki&copy=1",
                 "method": "GET",
-                "enabled": true
+                "enabled": true,
+                "icon": "i-dup"
               },
               {
                 "id": "collection.import",
@@ -407,7 +422,8 @@
                 "id": "collection.delete",
                 "label": "Delete on the server…",
                 "method": "GET",
-                "separator": true
+                "separator": true,
+                "icon": "i-trash"
               }
             ]
           }
@@ -441,7 +457,7 @@
       },
       {
         "id": "collection.new",
-        "label": "New collection",
+        "label": "New address book",
         "icon": "i-plus",
         "href": "/app/collections/new?kind=contact",
         "method": "GET",
@@ -451,7 +467,7 @@
         "id": "account.connect",
         "label": "Connect account",
         "icon": "i-server",
-        "href": "/app/settings/connections",
+        "href": "/app/settings/connections?op=add",
         "method": "GET",
         "enabled": true
       },

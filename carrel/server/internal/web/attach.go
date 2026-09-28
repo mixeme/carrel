@@ -628,6 +628,12 @@ func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *mod
 		n := s.fileFailure(fc, "Nothing was attached", method, p, err)
 		return nil, &n
 	}
+	day := attachmentDay(c, obj)
+	if af := s.catalogOf(c.sess).Attachments; af != nil && af.Monthly {
+		// A subfolder per month (attachments-1): the month the dated name
+		// carries, made on first use like the folder itself.
+		fc = fc.at(append(slices.Clone(fc.segs), day.Format("2006-01")))
+	}
 	folder, err := fc.path(fc.segs, true)
 	if err != nil {
 		return refuse("the folder for attachments cannot be used", "Choose another folder in Settings → Attachments.")
@@ -642,7 +648,7 @@ func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *mod
 	} else if err != nil {
 		return failed("PROPFIND", folder, err)
 	}
-	base := attachmentFileName(s.catalogOf(c.sess).AttachNames, attachmentDay(c, obj), attachmentTitle(c, obj), name)
+	base := attachmentFileName(s.catalogOf(c.sess).AttachNames, day, attachmentTitle(c, obj), name)
 	for n := 1; n <= attachNameTries; n++ {
 		candidate := base
 		if n > 1 {
@@ -672,6 +678,15 @@ func (s *Server) placeAttachment(ctx context.Context, c *collectionCtx, obj *mod
 					"The page did not send one. Turn scripts on, or attach a file small enough to travel inside the record.")
 			}
 			return failed("PUT", target, err)
+		}
+		if n > 1 {
+			// A name already taken got a counter, and the queue says so
+			// (attachments-1): a row of the files queue, done, naming what the
+			// file was written as.
+			if t, err := newTransfer("upload", fc, candidate); err == nil {
+				t.state, t.size, t.note = view.OpDone, counted.n, base+" was taken, so a counter was added"
+				c.sess.KeepTransfer(t)
+			}
 		}
 		return &placedFile{files: fc, path: target, uri: fileURI(fc.conn.Server, target), size: counted.n, etag: etag}, nil
 	}

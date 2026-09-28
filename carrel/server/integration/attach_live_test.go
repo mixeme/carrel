@@ -74,16 +74,8 @@ func TestBaikalOpenCloudAttachments(t *testing.T) {
 
 	sub := suffix + "-attach"
 	settings := liveDecode[view.AttachmentsPage](t, "attachment settings", app.get("/app/settings/attachments"))
-	to := ""
-	for _, node := range settings.Folder.Nodes {
-		if strings.HasPrefix(node.ID, "/app/files/"+sID+"/") {
-			to = node.ID
-		}
-	}
-	if to == "" {
-		t.Fatalf("no space of the file server in the tree: %+v", settings.Folder.Nodes)
-	}
-	redirected(t, "choose the folder", app.post("/app/settings/attachments", url.Values{"to": {to}, "sub": {sub}}))
+	to := liveAttachCollection(t, settings, sID)
+	redirected(t, "choose the folder", app.post("/app/settings/attachments", url.Values{"collection": {to}, "folder": {sub}}))
 	af := liveCatalog(t, app).Attachments
 	if af == nil {
 		t.Fatal("the folder was not stored")
@@ -178,27 +170,19 @@ func runAttachments(t *testing.T, endpoint, user, pass, sEndpoint, sUser, sPass 
 	cal := catalogEntry(t, blob, calPath)
 	record := "/app/calendar/" + calID + "/" + url.PathEscape(cal.Path) + "/" + uid
 
-	// The folder is chosen the way a person chooses it: a node of the tree on
-	// the settings page, and a folder to make inside it on first use.
+	// The folder is chosen the way a person chooses it: a collection of the
+	// list on the settings page, and a folder in it made on first use.
 	sub := suffix + "-attach"
 	settings := liveDecode[view.AttachmentsPage](t, "attachment settings", app.get("/app/settings/attachments"))
-	to := ""
-	for _, node := range settings.Folder.Nodes {
-		if strings.HasPrefix(node.ID, "/app/files/"+sID+"/") {
-			to = node.ID
-		}
-	}
-	if to == "" {
-		t.Fatalf("no storage of the file server in the tree: %+v", settings.Folder.Nodes)
-	}
+	to := liveAttachCollection(t, settings, sID)
 	// Named by the record's title (attachments-3): the title of this run
 	// makes the name, so a folder of another run is never in the way.
 	redirected(t, "choose the folder", app.post("/app/settings/attachments", url.Values{
-		"to": {to}, "sub": {sub}, "name": {"titled"},
+		"collection": {to}, "folder": {sub}, "name": {"titled"},
 	}))
-	// What the folder is, is what the catalog now holds: the storage the tree
-	// node named, and the folder under its root — which is not always the root
-	// of the server.
+	// What the folder is, is what the catalog now holds: the storage chosen,
+	// and the folder under its root — which is not always the root of the
+	// server.
 	af := liveCatalog(t, app).Attachments
 	if af == nil || af.AccountID != sID || strings.Join(af.Folder, "/") != sub {
 		t.Fatalf("the folder was not stored: %+v", af)
@@ -353,4 +337,27 @@ func head(s string) string {
 		return s[:400] + "…"
 	}
 	return s
+}
+
+// liveAttachCollection is the value of a file collection of the connection
+// that can be written to, as the list «Collection» of the attachment
+// settings offers it (attachments-2).
+func liveAttachCollection(t *testing.T, page view.AttachmentsPage, account string) string {
+	t.Helper()
+	var offered []view.Option
+	for _, set := range page.Form.Sets {
+		for _, row := range set.Rows {
+			if row.Name != "collection" {
+				continue
+			}
+			offered = row.Options
+			for _, o := range row.Options {
+				if strings.HasPrefix(o.Value, account+"|") && !o.Disabled {
+					return o.Value
+				}
+			}
+		}
+	}
+	t.Fatalf("no storage of the file server in Collection: %+v", offered)
+	return ""
 }

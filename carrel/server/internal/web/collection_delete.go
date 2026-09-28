@@ -19,8 +19,8 @@ import (
 // everything in it. The sheet says before anything is sent what points at it,
 // that Carrel keeps no copy, and what a restore would not do; it offers the
 // export first; and it takes the name typed as the confirmation, since what is
-// destroyed cannot be listed. Files are not deleted here: a file collection is
-// the root of a storage, and its folders go through op (S-17).
+// destroyed cannot be listed. A folder of a file storage is deleted the same
+// way (s-profile-12); the storage itself is not.
 
 func collectionDeleteQuery(conn sealed.Connection, col sealed.Collection) url.Values {
 	return url.Values{"a": {conn.ID}, "c": {col.Path}}
@@ -31,18 +31,46 @@ func collectionDeleteQuery(conn sealed.Connection, col sealed.Collection) url.Va
 // row: the right to delete lives on the home, not on the collection, and a
 // refusal is shown when it happens (S-12.2).
 func (s *Server) collectionDeleteItem(conn sealed.Connection, col sealed.Collection) (view.MenuItem, bool) {
-	if col.Gone || len(col.Kinds) == 0 || col.Has(view.KindFile) {
+	if col.Gone || col.Feed || len(col.Kinds) == 0 {
 		return view.MenuItem{}, false
 	}
-	return view.MenuItem{Separator: true, Action: view.Action{
-		ID: "collection.delete", Label: "Delete on the server…",
+	item := view.MenuItem{Separator: true, Action: view.Action{
+		ID: "collection.delete", Label: "Delete on the server…", Icon: "i-trash",
 		Href:   s.postQuery("/app/collections/delete", collectionDeleteQuery(conn, col)),
 		Method: "GET", Danger: true, Enabled: true,
-	}}, true
+	}}
+	if col.Has(view.KindFile) && storageRoot(conn, col) {
+		item.Enabled, item.Href, item.Reason = false, "", storageRootReason
+	}
+	return item, true
+}
+
+// collectionExportExt is what a collection is handed over as whole.
+func collectionExportExt(col sealed.Collection) string {
+	if col.Has(view.KindContact) {
+		return ".vcf"
+	}
+	return ".ics"
+}
+
+// collectionExport hands the collection over whole (S-19): an address book
+// as .vcf, a calendar as .ics with every component it holds, so a task in a
+// calendar of events is not left out.
+func (s *Server) collectionExport(conn sealed.Connection, col sealed.Collection) view.Action {
+	list := origin{conn: conn, col: col}.listPath(segmentOf(col.Kinds[0])) + "/export"
+	q := url.Values{}
+	if !col.Has(view.KindContact) {
+		q.Set("whole", "1")
+	}
+	return view.Action{ID: "collection.export", Label: text("Export " + collectionExportExt(col)), Icon: "i-down",
+		Href: s.postQuery(list, q), Method: "GET", Enabled: true}
 }
 
 // recordNoun names what the collection holds: its one kind, or records.
 func recordNoun(col sealed.Collection) string {
+	if col.Has(view.KindFile) {
+		return "item"
+	}
 	if len(col.Kinds) == 1 {
 		if spec, ok := recordKinds[segmentOf(col.Kinds[0])]; ok {
 			return spec.noun
@@ -83,15 +111,17 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 		sheet.ExportNote = "There is nothing in it to download."
 		return sheet
 	}
-	// The same stream as S-19. A calendar goes with every component it holds.
-	list := origin{conn: conn, col: col}.listPath(segmentOf(col.Kinds[0])) + "/export"
-	ext, q := ".vcf", url.Values{}
-	if !col.Has(view.KindContact) {
-		ext = ".ics"
-		q.Set("whole", "1")
+	if col.Has(view.KindFile) {
+		// A folder is not exported: it is downloaded in Files (s-profile-12).
+		sheet.Archive = text("No backup job of Carrel copies it, so there is no archive of it here. A restore from any archive brings the files back into a new folder at a new address — not into this one.")
+		sheet.Export = &view.Action{ID: "collection.open", Label: "Open in Files", Icon: "i-file",
+			Href: s.route(fileHref(conn.ID, col.Path, "", nil, true)), Method: "GET", Enabled: true}
+		sheet.ExportNote = "Download what you need from it there first."
+		return sheet
 	}
-	sheet.Export = &view.Action{ID: "collection.export", Label: text("Download " + ext + " first"), Icon: "i-down",
-		Href: s.postQuery(list, q), Method: "GET", Enabled: true}
+	export := s.collectionExport(conn, col)
+	export.Label = text("Download " + collectionExportExt(col) + " first")
+	sheet.Export = &export
 	if count > 0 {
 		sheet.ExportNote = text(plural(count, recordNoun(col)) + ", one file, straight to you")
 	} else {
@@ -124,6 +154,10 @@ func (s *Server) getCollectionDelete(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if item, ok := s.collectionDeleteItem(conn, col); !ok || !item.Enabled {
+		s.notFound(w, r)
+		return
+	}
 	count := s.countMembers(r.Context(), conn, col)
 	s.writePage(w, r, http.StatusOK, s.collectionDeleteSheet(sess, conn, col, count, "", ""))
 }
@@ -134,6 +168,10 @@ func (s *Server) getCollectionDelete(w http.ResponseWriter, r *http.Request) {
 func (s *Server) postCollectionDelete(w http.ResponseWriter, r *http.Request) {
 	sess, key, conn, col, ok := s.openCollectionSheet(w, r)
 	if !ok {
+		return
+	}
+	if item, ok := s.collectionDeleteItem(conn, col); !ok || !item.Enabled {
+		s.notFound(w, r)
 		return
 	}
 	label := collectionLabel(col)

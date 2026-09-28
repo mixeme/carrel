@@ -264,8 +264,6 @@ func TestAttachmentNamesAreChosen(t *testing.T) {
 	} {
 		label := c.label
 		form := formFields(page.Form)
-		form.Set("to", page.Folder.Nodes[0].ID)
-		form.Set("sub", "carrel")
 		form.Set("name", optionValue(t, name.Options, label))
 		if resp := f.h.do(postForm("/app/settings/attachments", f.sess, form)); resp.Code != 303 {
 			t.Fatalf("save %s: %d %s", label, resp.Code, resp.Body.String())
@@ -280,7 +278,6 @@ func TestAttachmentNamesAreChosen(t *testing.T) {
 		}
 	}
 	form := formFields(page.Form)
-	form.Set("to", page.Folder.Nodes[0].ID)
 	form.Set("name", "whatever")
 	if again := decode[view.AttachmentsPage](t, f.h.do(postForm("/app/settings/attachments", f.sess, form))); len(again.Form.Errors) == 0 {
 		t.Error("a name the list does not offer was taken")

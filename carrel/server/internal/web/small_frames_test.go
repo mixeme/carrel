@@ -196,7 +196,7 @@ func TestFilesRailShortcutsAreTheFrame(t *testing.T) {
 	segs := append(place[1:], strings.ToLower(attach))
 	folder := f.at("", append(append([]string{}, segs...), "")...)
 	f.srv.SeedFolder(filesDocs + strings.Join(segs, "/") + "/")
-	if rec := f.h.do(postForm("/app/settings/attachments", f.sess, url.Values{"to": {folder}})); rec.Code != http.StatusSeeOther {
+	if rec := f.h.do(postForm("/app/settings/attachments", f.sess, attachAt(t, folder))); rec.Code != http.StatusSeeOther {
 		t.Fatalf("attachment folder: %d %s", rec.Code, rec.Body)
 	}
 	publishLink(t, f, f.publishHref("contacts", searchBook, ""), false)

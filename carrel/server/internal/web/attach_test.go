@@ -408,15 +408,16 @@ func TestReadOnlyCollectionHasNoAttaching(t *testing.T) {
 	}
 }
 
-// The folder is chosen once, in the one tree of the product, and the boundary
-// is shown beside it and not editable (U-6.12).
+// The folder is chosen once — a file collection, the folder in it — and the
+// boundary is shown beside it and not editable (U-6.12).
 func TestAttachmentsSettingsChooseTheFolder(t *testing.T) {
 	f := attachFixture(t, 0, nil)
 	page := decode[view.AttachmentsPage](t, f.h.do(get("/app/settings/attachments", f.sess)))
-	if len(page.Folder.Nodes) != 1 || page.Folder.Nodes[0].Label != "Docs" {
-		t.Fatalf("tree = %+v", page.Folder)
+	cols := rowNamed(t, page.Form, "collection").Options
+	if len(cols) != 1 || !strings.HasSuffix(string(cols[0].Label), " · Docs") {
+		t.Fatalf("collections = %+v", cols)
 	}
-	if !strings.Contains(string(page.Note), "does not delete its file") {
+	if !strings.Contains(string(page.Note), "moves nothing") {
 		t.Errorf("note = %q", page.Note)
 	}
 	limits := page.Form.Sets[0]
@@ -424,8 +425,8 @@ func TestAttachmentsSettingsChooseTheFolder(t *testing.T) {
 		t.Errorf("the boundary is shown and not editable: %+v", limits.Rows[0])
 	}
 
-	to := page.Folder.Nodes[0].ID
-	if resp := f.h.do(postForm("/app/settings/attachments", f.sess, url.Values{"to": {to}, "sub": {"carrel/attachments"}})); resp.Code != http.StatusSeeOther {
+	to := cols[0].Value
+	if resp := f.h.do(postForm("/app/settings/attachments", f.sess, url.Values{"collection": {to}, "folder": {"carrel/attachments"}})); resp.Code != http.StatusSeeOther {
 		t.Fatalf("save: %d %s", resp.Code, resp.Body.String())
 	}
 	af := catalogOf(t, f).Attachments
@@ -433,7 +434,7 @@ func TestAttachmentsSettingsChooseTheFolder(t *testing.T) {
 		t.Fatalf("stored = %+v", af)
 	}
 
-	for _, bad := range []url.Values{{"to": {to}, "sub": {".."}}, {"to": {""}}} {
+	for _, bad := range []url.Values{{"collection": {to}, "folder": {".."}}, {"collection": {""}}} {
 		page = decode[view.AttachmentsPage](t, f.h.do(postForm("/app/settings/attachments", f.sess, bad)))
 		if len(page.Form.Errors) == 0 {
 			t.Errorf("%v was taken", bad)

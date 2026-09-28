@@ -32,7 +32,7 @@ type feedForm struct {
 	Folder bool
 }
 
-func (s *Server) feedForm(sess *session.Session, f feedForm) view.Form {
+func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 	q := func(op string) string {
 		v := url.Values{"op": {op}}
 		if f.Folder {
@@ -63,7 +63,7 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) view.Form {
 		{ID: "feed.check", Label: "Check the address", Href: q("feed.check"), Method: "POST", Enabled: true},
 		{ID: "feed.subscribe", Label: "Subscribe", Href: q("feed.subscribe"), Method: "POST", Enabled: true},
 	}
-	return form
+	return &form
 }
 
 // probeFolder lists a shared folder once: how many entries, how fast.

@@ -212,6 +212,16 @@ func mockupFiles(t *testing.T, h *harness, sess *session.Session, root string, s
 				return err
 			}
 			srv.SeedFile(target, string(data))
+			// When a file changed is part of what the screens show («Oldest»
+			// of attachments-1): the day its name begins with, else the set's
+			// day — never the day the set is loaded.
+			at := mockupNow(t)
+			if len(d.Name()) >= 10 {
+				if day, err := time.ParseInLocation("2006-01-02", d.Name()[:10], at.Location()); err == nil {
+					at = day.Add(12 * time.Hour)
+				}
+			}
+			srv.SetModified(target, at)
 			return nil
 		})
 		if err != nil {
@@ -1217,13 +1227,19 @@ func TestFixtureMoreOfTheShell(t *testing.T) {
 		{"app-contact-import", book + "/import"},
 		{"app-contact-move", anna + "/move"},
 		{"app-quick", "/app/notes/quick"},
-		{"app-collections-new", "/app/collections/new?kind=contact"},
 		{"app-settings-unlock", "/app/settings/unlock"},
 	} {
 		t.Run(one.dir, func(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, app.sess)))
 		})
 	}
+	// New calendar from the rail of the calendar (s-profile-5): the calendar
+	// has been read, «baikal» refused it, and the sheet leaves it out with
+	// the hint under «On which server».
+	t.Run("app-collections-new", func(t *testing.T) {
+		combined(t, app.h, app.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
+		app.compare(t, "app-collections-new/normal.json", app.h.do(get("/app/collections/new?kind=event", app.sess)))
+	})
 }
 
 // C-14.2: the search, and the sheets a collection and a record open.
