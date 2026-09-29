@@ -246,16 +246,23 @@ func frameFindings(l lib, all []screens.Screen) []string {
 				out = append(out, fmt.Sprintf("%s on %s: %v", at, fx, err))
 				continue
 			}
-			html := root.Render()
-			if err := l.shape.Check(scr.Frame, html); err != nil {
-				out = append(out, fmt.Sprintf("%s on %s: %v", at, fx, err))
-			}
-			for _, m := range classAttr.FindAllStringSubmatch(html, -1) {
-				for _, c := range strings.Fields(m[1]) {
-					if !l.classes[c] {
-						out = append(out, fmt.Sprintf("%s on %s: class %q is not a class of Typecase's CSS", at, fx, c))
-					}
-				}
+			out = append(out, htmlFindings(l, scr.Frame, at+" on "+fx, root.Render())...)
+		}
+	}
+	return out
+}
+
+// htmlFindings holds a screen's printed HTML against its frame: the frame's
+// make-up (shape.Check) and no class Typecase's CSS does not have.
+func htmlFindings(l lib, frame, at, html string) []string {
+	var out []string
+	if err := l.shape.Check(frame, html); err != nil {
+		out = append(out, fmt.Sprintf("%s: %v", at, err))
+	}
+	for _, m := range classAttr.FindAllStringSubmatch(html, -1) {
+		for _, c := range strings.Fields(m[1]) {
+			if !l.classes[c] {
+				out = append(out, fmt.Sprintf("%s: class %q is not a class of Typecase's CSS", at, c))
 			}
 		}
 	}
@@ -388,7 +395,7 @@ func signIn(spoil func(*w.Page)) screens.Screen {
 							w.Form{Items: fields, Variant: w.FormColumnFlush},
 							w.Button{Label: "Sign in", Kind: w.ButtonPrimary},
 						},
-						Links: []string{string(p.Forgot.Label)},
+						Links: []w.Link{{Text: string(p.Forgot.Label)}},
 					},
 				},
 				Variant: w.DialogNarrow,
@@ -400,11 +407,6 @@ func signIn(spoil func(*w.Page)) screens.Screen {
 		},
 	}
 }
-
-// printed is a page printed already: a sample of what no widget prints.
-type printed string
-
-func (p printed) Render() string { return string(p) }
 
 // The spoiled samples.
 var (
@@ -448,14 +450,15 @@ func TestFrameComparisonBite(t *testing.T) {
 			t.Logf("%s: %s", name, found[0])
 		}
 	}
-	// A class that is not the library's. No widget prints one, so the sample
-	// is a printed page with a class put in by hand.
-	own := signIn(nil)
-	good := own.Draw
-	own.Draw = func(model any) screens.Root {
-		return printed(strings.Replace(good(model).Render(), `class="tc-auth__stack"`, `class="tc-auth__stack tc-mine"`, 1))
+	// A class that is not the library's. No widget prints one, and a screen
+	// draws a root of the library, so the sample is the page printed and a
+	// class put in by hand.
+	root, err := draw(signIn(nil), l.fixtures("/login")[0])
+	if err != nil {
+		t.Fatal(err)
 	}
-	found := frameFindings(l, []screens.Screen{own})
+	own := strings.Replace(root.Render(), `class="tc-auth__stack"`, `class="tc-auth__stack tc-mine"`, 1)
+	found := htmlFindings(l, "s-auth-1", "own class", own)
 	if !slices.ContainsFunc(found, func(f string) bool { return strings.HasSuffix(f, `class "tc-mine" is not a class of Typecase's CSS`) }) {
 		t.Errorf("a class of the screen's own stayed out of the findings: %q", found)
 	}
