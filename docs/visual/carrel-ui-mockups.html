@@ -3258,14 +3258,14 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Подпись телефона</span><span class="frag">список</span><i>поле Label</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w212">
-        <button class="is-on tc-menu__item" type="button" role="menuitem">mobile</button>
+        <button class="tc-menu__item" type="button" role="menuitem">mobile</button>
         <button class="tc-menu__item" type="button" role="menuitem">work</button>
         <button class="tc-menu__item" type="button" role="menuitem">home</button>
         <button class="tc-menu__item" type="button" role="menuitem">main</button>
         <button class="tc-menu__item" type="button" role="menuitem">fax</button>
         <button class="tc-menu__item" type="button" role="menuitem">other</button>
         <span class="tc-menu__sep"></span>
-        <button class="tc-menu__item" type="button" role="menuitem">iPhone</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">iPhone</button>
       </div>
     </div>
   </div>
@@ -3276,11 +3276,11 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Подпись почты</span><span class="frag">список</span><i>поле Label</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w212">
-        <button class="is-on tc-menu__item" type="button" role="menuitem">work</button>
+        <button class="tc-menu__item" type="button" role="menuitem">work</button>
         <button class="tc-menu__item" type="button" role="menuitem">home</button>
         <button class="tc-menu__item" type="button" role="menuitem">other</button>
         <span class="tc-menu__sep"></span>
-        <button class="tc-menu__item" type="button" role="menuitem">Личная</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">Личная</button>
       </div>
     </div>
   </div>
@@ -3292,15 +3292,15 @@ Read  2 min ago</div>
     <div class="frame-label"><span>Подпись адреса</span><span class="frag">список</span><i>поле Label</i></div>
     <div class="tc-root tc-root--on-bg tc-root--pad14">
       <div class="tc-menu tc-menu--w212">
-        <button class="is-on tc-menu__item" type="button" role="menuitem">home</button>
+        <button class="tc-menu__item" type="button" role="menuitem">home</button>
         <button class="tc-menu__item" type="button" role="menuitem">work</button>
         <button class="tc-menu__item" type="button" role="menuitem">other</button>
         <span class="tc-menu__sep"></span>
-        <button class="tc-menu__item" type="button" role="menuitem">дача</button>
+        <button class="is-on tc-menu__item" type="button" role="menuitem">дача</button>
       </div>
     </div>
   </div>
-  <figcaption>У адреса — типы vCard home, work, other. Подпись, которую написал другой клиент, стоит под чертой как есть: её не переводят в тип и не теряют.</figcaption>
+  <figcaption>У адреса — типы vCard home, work, other. Подпись, которую написал другой клиент, стоит под чертой как есть: её не переводят в тип и не теряют. Предлагается она только строке, у которой она своя, — и там она выбрана.</figcaption>
   </figure>
 
 <figure style="flex:1 1 100%">
@@ -12266,7 +12266,7 @@ https://carrel.example/api/backup/run?job=personal</textarea>
         </div>
         <div class="tc-scrim tc-scrim--padt26">
           <div class="tc-sheet">
-            <div class="tc-sheet__head"><b class="tc-sheet__title">Publish a calendar</b><span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Личный</span></div>
+            <div class="tc-sheet__head"><b class="tc-sheet__title">Publish a calendar</b><span class="tc-badge is-local" title="Local instance: the link will not open from outside your network">local</span><span class="tc-push tc-dim tc-dim--t11-5 tc-dim--wrap">nextcloud · Личный</span></div>
             <div class="tc-sheet__body">
               <div class="tc-field tc-field--w100"><label>How much of it</label>
                 <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">A date range</button><button class="tc-seg__opt" type="button">The whole calendar</button></span></div>
@@ -14385,7 +14385,7 @@ Sending again with the same login and address, while the account is unconfirmed,
             </div>
             <div class="tc-card tc-card--pad12-14">
               <div class="tc-card__term">Ask the administrator</div>
-              <div class="tc-prose tc-prose--muted-flush-bot10">This account deposited its encryption key. The administrator can recover it with the instance master password, and your data is kept. Shown only when deposit is on for this account.</div>
+              <div class="tc-prose tc-prose--muted-flush-bot10">This account deposited its encryption key. The administrator can recover it with the instance master password, and your data is kept.</div>
               <button class="tc-btn" type="button">Ask the administrator</button>
             </div>
           </div>
@@ -14394,7 +14394,7 @@ Sending again with the same login and address, while the account is unconfirmed,
       </div>
     </div>
   </div>
-  <figcaption>Два действия, не три: сброса с сохранением данных нет. «Ask the administrator» на экране только если ключ этого аккаунта депонирован.</figcaption>
+  <figcaption>Карточка «Ask the administrator» стоит, только когда у учётной записи депонирован ключ. Два действия, не три: сброса с сохранением данных нет. «Ask the administrator» на экране только если ключ этого аккаунта депонирован.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -14456,9 +14456,9 @@ If you deposited the encryption key, ask the administrator in person. Otherwise 
           <div class="tc-head__title tc-head__title--bot8">Erase everything and start again?</div>
           <div class="tc-prose tc-prose--muted">This is not a password recovery. The key to your data comes from the password you forgot, so nothing stored under it can be read again — by you, by us, by anyone.
 
-Confirming erases what Carrel keeps for <b>mix</b>: saved connections and their passwords, subscriptions, tags and the settings of this desk. Address books, calendars, tasks and notes on the servers are not touched — you connect to them again afterwards.
+Confirming erases what Carrel keeps encrypted for <b>mix</b>: saved connections and their passwords, subscriptions, published links, devices, external backup triggers and the deposited copy of the key. Address books, calendars, tasks and notes on the servers are not touched — you connect to them again afterwards.
 
-The account itself stays: same login, same confirmed address. Only the password is new, and you set it on the next screen.</div>
+The account itself stays: same login, role and confirmed address, the same first day of the week and clock. Only the password is new, and you set it on the next screen.</div>
           <div class="tc-formfoot tc-formfoot--padl0-padr0">
             <button class="tc-btn is-danger-solid" type="button">Erase and set a new password</button>
             <button class="tc-btn" type="button">Cancel</button>
@@ -14467,7 +14467,7 @@ The account itself stays: same login, same confirmed address. Only the password 
       </div>
     </div>
   </div>
-  <figcaption>Первая из двух страниц по одной ссылке из одного письма. <b>Учётная запись не удаляется — она пустеет.</b> Это тот же человек, а не новый: логин, подтверждённый адрес, роль и участие в депонировании остаются его. Поэтому маршрут работает и на закрытом экземпляре, где регистрация выключена: заводить никого не надо. Кнопка названа тем, что делает, и окрашена как разрушающее действие.</figcaption>
+  <figcaption>Первая из двух страниц по одной ссылке из одного письма. <b>Учётная запись не удаляется — она пустеет.</b> Это тот же человек, а не новый: логин, подтверждённый адрес, роль, первый день недели и 12/24 остаются его; стирается зашифрованное — подключения, ссылки, устройства, внешние запуски и депонированная копия ключа (S-10.4). Поэтому маршрут работает и на закрытом экземпляре, где регистрация выключена: заводить никого не надо. Кнопка названа тем, что делает, и окрашена как разрушающее действие.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">
@@ -14499,22 +14499,22 @@ The account itself stays: same login, same confirmed address. Only the password 
 
 <div class="frames">
   <figure style="flex:1 1 100%">
-  <div class="frame" data-frame="rest-1" data-screen="/invite/{token}" data-part="invalid">
-    <div class="frame-label"><span>Ссылка-приглашение больше не работает</span><i>/invite/{token}</i></div>
+  <div class="frame" data-frame="rest-1" data-screen="/invite/{token} /forgot/{token} /confirm-email/{token} /p/{token}" data-part="invalid">
+    <div class="frame-label"><span>Ссылка больше не работает</span><i>любая мёртвая ссылка-секрет</i></div>
     <div class="tc-root">
       <div class="tc-auth">
         <div class="tc-dialog is-narrow tc-dialog--padt0-padb0">
           <div class="tc-line tc-dialog__logo--wide">
             <svg class="tc-brand__logo tc-brand__logo--h48-w118" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
           </div>
-          <div class="tc-head__title tc-head__title--bot6">Invitation</div>
-          <div class="tc-prose tc-prose--muted">This invitation link is not valid. It may have expired, already been used, or been revoked.</div>
+          <div class="tc-head__title tc-head__title--bot6">This link does not work</div>
+          <div class="tc-prose tc-prose--muted">It may have expired, been used already, or been withdrawn. Ask whoever sent it for a new one.</div>
           <div class="tc-formfoot tc-formfoot--padl0-padr0"><button class="tc-btn is-primary" type="button">Sign in</button></div>
         </div>
       </div>
     </div>
   </div>
-  <figcaption>Страница не говорит, что именно случилось со ссылкой: истекла, уже использована или отозвана — снаружи это неразличимо, и различать не надо. Дверь одна, и она ведёт на вход: человеку с мёртвой ссылкой некуда идти, кроме как к тому, кто её выдал. Годная ссылка сюда не попадает — она открывает форму регистрации из 7.20.</figcaption>
+  <figcaption><b>Одна страница на любую мёртвую ссылку-секрет</b> — приглашение, сброс пароля, подтверждение адреса, публикация: те же слова, тот же ответ и та же задержка, так что по ответу не отличить, что это была за ссылка и была ли она вообще (аудит сервера №3). Что именно случилось — истекла, использована, отозвана — страница не говорит: снаружи это неразличимо, и различать не нужно. Дверь одна — на вход.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">

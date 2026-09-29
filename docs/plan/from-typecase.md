@@ -90,6 +90,29 @@ U-9, U-12, U-15.1) и план клиента.
      Клиенту — тот же принцип на своих экранах: `shape.Check` плюс проверка,
      что поля смысла заполнены.
 
+Записка 24 от 29.09.2026 (Typecase `b64895e`, `eb0822f`, задачи 40–44).
+Копия макета — побайтно та же, что в Typecase.
+
+24. **Что сделать серверу.**
+   - `s-auth-6`: последняя фраза карточки «Ask the administrator» ушла в
+     подпись — на странице её нет. Письмо не ушло (`/register`, `/forgot`,
+     вариант очистки) — тот же кадр, строка сервера сообщением-тревогой.
+   - **Одна страница на любую мёртвую ссылку-секрет** (`rest-1`, теперь
+     `/invite/{token}`, `/forgot/{token}`, `/confirm-email/{token}`,
+     `/p/{token}`): «This link does not work» — «It may have expired, been used
+     already, or been withdrawn. Ask whoever sent it for a new one.», одна
+     кнопка Sign in. Отдельной страницы приглашения нет — ответ по-прежнему
+     одинаков для всех (аудит №3).
+   - Значок «local» — и в шапке листа публикации (`s-publish-2`); листу без
+     оболочки признак нужен в данных листа.
+   - Чужая подпись предлагается только своей строке и там выбрана
+     (`s-contacts-12`, `-13`, `-22`) — как делает сервер.
+   - Очистка по ссылке (`s-auth-10`): «Confirming erases what Carrel keeps
+     encrypted for mix: saved connections and their passwords, subscriptions,
+     published links, devices, external backup triggers and the deposited
+     copy of the key.» и «The account itself stays: same login, role and
+     confirmed address, the same first day of the week and clock.»
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
