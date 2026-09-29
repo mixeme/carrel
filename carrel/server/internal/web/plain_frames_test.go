@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"context"
+	"encoding/json"
 	"html"
 	"net/http"
 	"net/url"
@@ -262,18 +263,7 @@ func TestForgotPagesAreTheFrames(t *testing.T) {
 		t.Fatal(err)
 	}
 	relay := h.relayed()
-	page := func(p view.ForgotPage) authPage {
-		var cards []string
-		for _, o := range p.Options {
-			button := ""
-			if len(o.Form.Actions) == 1 {
-				button = string(o.Form.Actions[0].Label)
-			}
-			cards = append(cards, said(o.Title)+" | "+said(o.Body)+" | "+button)
-		}
-		return authPage{Title: said(p.Title), Prose: said(p.Lede), Fields: shownFields(p.Form),
-			Buttons: append(labels(p.Form.Actions), string(p.Back.Label)), Cards: cards}
-	}
+	page := forgotShown
 
 	start := decode[view.ForgotPage](t, h.do(get("/forgot", nil)))
 	sameAuth(t, "forgot", "s-auth-5", page(start))
@@ -281,13 +271,12 @@ func TestForgotPagesAreTheFrames(t *testing.T) {
 		t.Errorf("back = %+v", start.Back)
 	}
 
-	// The card of the administrator says, in the frame, when it is shown —
-	// a remark to the reader, not a word of the page (to-typecase task 40).
+	// Both cards in the frame's words: when the second is shown is the
+	// caption's, not the card's (to-typecase task 40).
 	options := authFrame(t, "s-auth-6")
-	if len(options.Cards) != 2 || !strings.HasSuffix(strings.Split(options.Cards[1], " | ")[1], " Shown only when deposit is on for this account.") {
+	if len(options.Cards) != 2 {
 		t.Fatalf("s-auth-6 cards = %q: read the frame again", options.Cards)
 	}
-	options.Cards[1] = strings.Replace(options.Cards[1], " Shown only when deposit is on for this account.", "", 1)
 	deposited := decode[view.ForgotPage](t, h.do(h.anonPostForm("/forgot", "/forgot", url.Values{"login": {"mix"}})))
 	sameAuthAs(t, "what we can do", "s-auth-6", page(deposited), options)
 	if !deposited.HasMail || deposited.Sent || deposited.Asked {
@@ -337,6 +326,56 @@ func TestForgotPagesAreTheFrames(t *testing.T) {
 	}
 }
 
+// forgotShown is a state of /forgot written the way authFrame reads one.
+func forgotShown(p view.ForgotPage) authPage {
+	var cards []string
+	for _, o := range p.Options {
+		button := ""
+		if len(o.Form.Actions) == 1 {
+			button = string(o.Form.Actions[0].Label)
+		}
+		cards = append(cards, said(o.Title)+" | "+said(o.Body)+" | "+button)
+	}
+	return authPage{Title: said(p.Title), Prose: said(p.Lede), Alert: alertOf(p.Plain), Fields: shownFields(p.Form),
+		Buttons: append(labels(p.Form.Actions), string(p.Back.Label)), Cards: cards}
+}
+
+// from-typecase note 24: a letter that did not go is the frame the person
+// was on, the server's line over it as an alert — the options of /forgot
+// (s-auth-6), still there to try again or to ask; after /register the page
+// of its letter (s-auth-3) with the line in place of the address, one door
+// back. Nothing claims a letter went.
+func TestLetterThatDidNotGoIsAnAlert(t *testing.T) {
+	h := newHarness(t)
+	const master = "sixteen-char-pass!"
+	h.enableEscrow("alice", "password123", master)
+	snap := h.st.Snapshot()
+	h.invite(snap.UserByLogin("alice").ID, "mix", "mixpass123")
+	h.confirmAddress("mix", "mix@example.org")
+	relay := h.relayed()
+	relay.Refuse = "mix@example.org"
+
+	options := decode[view.ForgotPage](t, h.do(h.anonPostForm("/forgot", "/forgot", url.Values{"login": {"mix"}})))
+	failed := decode[view.ForgotPage](t, h.do(h.anonPostForm("/forgot", options.Options[0].Form.Action, formFields(options.Options[0].Form))))
+	want := authFrame(t, "s-auth-6")
+	got := forgotShown(failed)
+	if got.Alert == "" || failed.Sent || !failed.HasMail {
+		t.Fatalf("the letter did not go: %+v", failed)
+	}
+	want.Alert = got.Alert
+	sameAuthAs(t, "the letter did not go", "s-auth-6", got, want)
+
+	openRegistration(t, h)
+	h.relayed().Refuse = "v@example.org"
+	reg := decode[view.RegisterPage](t, h.do(h.anonPostForm("/register", "/register",
+		url.Values{"login": {"viktor"}, "email": {"v@example.org"}, "password": {"password123"}, "password2": {"password123"}})))
+	sent := authFrame(t, "s-auth-3")
+	if alertOf(reg.Plain) == "" || reg.Lede != "" || reg.Sent || len(reg.Form.Sets) != 0 ||
+		reg.SignIn.Label != view.Text(sent.Buttons[0]) || reg.SignIn.Href != "/login" {
+		t.Errorf("registration, the letter did not go: %+v", reg)
+	}
+}
+
 // s-auth-10 and s-auth-11: one link, two pages. The erasure is named and
 // its button says what it does — no word to type (the frame draws none) —
 // and Cancel leads back; then the same form as an invitation's, the
@@ -381,6 +420,55 @@ func TestConfirmEmailPageIsTheFrame(t *testing.T) {
 	}
 	page := decode[view.ConfirmEmailPage](t, h.do(get("/confirm-email/"+token, nil)))
 	sameAuth(t, "confirmed", "rest-2", authPage{Title: said(page.Title), Prose: said(page.Lede), Buttons: []string{string(page.Next.Label)}})
+}
+
+// rest-1 (from-typecase note 24): one page answers any dead secret link —
+// an invitation, a wipe link, an address confirmation, a publication —
+// «This link does not work», why it may be, one door to sign in. The
+// answer is the same whatever the link was and whether it ever was: the
+// status, the headers and the body (audit №3, C-11, S-9.5).
+func TestDeadLinkPageIsTheFrame(t *testing.T) {
+	h := newHarness(t)
+	adminID := h.admin("alice", "password123")
+	used, err := h.users.CreateInvite(adminID, "bob", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rec := h.do(h.anonPostForm("/invite/"+used, "/invite/"+used, url.Values{"password": {"bobpass123"}, "password2": {"bobpass123"}})); rec.Code != http.StatusSeeOther {
+		t.Fatalf("accept: %d %s", rec.Code, rec.Body.String())
+	}
+	want := authFrame(t, "rest-1")
+	never := strings.Repeat("A", 43)
+	var first *http.Response
+	var body string
+	for _, req := range []*http.Request{
+		get("/invite/"+never, nil), get("/invite/"+used, nil), get("/invite/not-a-token", nil),
+		get("/forgot/"+never, nil), get("/confirm-email/"+never, nil), get("/p/"+never, nil),
+		h.anonPostForm("/login", "/invite/"+never, url.Values{"password": {"x"}}),
+		h.anonPostForm("/login", "/forgot/"+never, url.Values{}),
+	} {
+		rec := h.do(req)
+		var page view.DeadLinkPage
+		if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+			t.Fatalf("%s %s: %d %q", req.Method, req.URL.Path, rec.Code, rec.Body.String())
+		}
+		sameAuthAs(t, req.Method+" "+req.URL.Path, "rest-1", authPage{Title: said(page.Title), Prose: said(page.Lede),
+			Buttons: []string{string(page.SignIn.Label)}}, want)
+		if page.SignIn.Href != "/login" || page.SignIn.Method != http.MethodGet || !page.SignIn.Enabled {
+			t.Errorf("%s: sign in = %+v", req.URL.Path, page.SignIn)
+		}
+		res := rec.Result()
+		if first == nil {
+			first, body = res, rec.Body.String()
+			if res.StatusCode != http.StatusNotFound {
+				t.Errorf("a dead link answers %d", res.StatusCode)
+			}
+			continue
+		}
+		if res.StatusCode != first.StatusCode || rec.Body.String() != body || !reflect.DeepEqual(res.Header, first.Header) {
+			t.Errorf("%s %s differs: %d %v %q", req.Method, req.URL.Path, res.StatusCode, res.Header, rec.Body.String())
+		}
+	}
 }
 
 // rest-3: «Carrel», the version and the build, the tagline in two lines,

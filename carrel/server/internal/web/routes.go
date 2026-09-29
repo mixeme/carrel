@@ -57,6 +57,12 @@ func (s *Server) registerRoutes() {
 	registerKindRoutes(s, "tasks")
 	registerKindRoutes(s, "notes")
 
+	// The Columns menu of a list (S-9.6): only the sections that have it.
+	for segment := range listColumns {
+		s.handle("POST /app/"+segment+"/columns", combinedColumnsHandler(segment))
+		s.handle("POST /app/"+segment+"/{account}/{col}/columns", collectionColumnsHandler(segment))
+	}
+
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/timeline", (*Server).getContactTimeline)
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).getContactRewrite)
 	s.handle("POST /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).postContactRewrite)

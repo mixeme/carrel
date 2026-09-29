@@ -353,7 +353,10 @@ func (s *Server) postRegister(w http.ResponseWriter, r *http.Request) {
 			"Sending again with the same login and address, while the account is unconfirmed, simply replaces the letter and the password.")
 		page.Sent = true
 	} else {
-		page.Lede = "Your account was created, but the confirmation email could not be sent. Ask an administrator."
+		// The letter did not go: the page of the letter (s-auth-3) says so in
+		// an alert and claims nothing went (from-typecase note 24).
+		page.Notices = []view.Notice{{Role: view.NoticeAlert,
+			Body: "Your account was created, but the confirmation email could not be sent. Ask an administrator."}}
 	}
 	s.writePage(w, r, http.StatusOK, page)
 }
@@ -543,7 +546,12 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 		case s.sendForgotWipeMail(r, typed, token):
 			page.Title, page.Lede, page.Sent, page.HasMail = "Check your inbox", forgotSent, true, true
 		default:
-			page.Title, page.Lede, page.HasMail = "Forgotten your password?", "A recovery link was prepared but could not be emailed. Ask an administrator.", true
+			// The letter did not go: the options again (s-auth-6), to try
+			// once more or to ask, the server's line over them as an alert
+			// (from-typecase note 24).
+			s.forgotOptions(w, r, &page, typed)
+			page.Notices = []view.Notice{{Role: view.NoticeAlert,
+				Body: "A recovery link was prepared but could not be emailed. Ask an administrator."}}
 		}
 	case "ask":
 		asked, err := s.users.ForgotAsk(r.Context(), typed)
@@ -554,19 +562,28 @@ func (s *Server) postForgot(w http.ResponseWriter, r *http.Request) {
 			page.Title, page.Lede, page.Asked, page.HasMail = "The administrator has been asked", forgotAsked, true, true
 		}
 	default:
-		if _, hasMail, canAsk := s.users.ForgotLookup(typed); hasMail {
-			page.Title = "What we can do"
-			page.Lede = text("Account " + typed + " has a confirmed email. A silent password reset does not exist: " +
-				"a new password would be a new key, and everything stored under the old one would be lost anyway.")
-			page.HasMail = true
-			page.Options = []view.ForgotOption{s.forgotOption(w, r, typed, "wipe", "Wipe the account", forgotWipeBody, "Send a confirmation letter")}
-			if canAsk {
-				page.Options = append(page.Options, s.forgotOption(w, r, typed, "ask", "Ask the administrator", forgotAskBody, "Ask the administrator"))
-			}
-		}
+		s.forgotOptions(w, r, &page, typed)
 	}
 	constantTimeDelay(start, 300*time.Millisecond)
 	s.writePage(w, r, http.StatusOK, page)
+}
+
+// forgotOptions makes page s-auth-6 for what was typed when its account has
+// a confirmed address: the wipe by letter, and asking the administrator
+// where the account deposited its key. Otherwise page stays as it is.
+func (s *Server) forgotOptions(w http.ResponseWriter, r *http.Request, page *view.ForgotPage, typed string) {
+	_, hasMail, canAsk := s.users.ForgotLookup(typed)
+	if !hasMail {
+		return
+	}
+	page.Title = "What we can do"
+	page.Lede = text("Account " + typed + " has a confirmed email. A silent password reset does not exist: " +
+		"a new password would be a new key, and everything stored under the old one would be lost anyway.")
+	page.HasMail = true
+	page.Options = []view.ForgotOption{s.forgotOption(w, r, typed, "wipe", "Wipe the account", forgotWipeBody, "Send a confirmation letter")}
+	if canAsk {
+		page.Options = append(page.Options, s.forgotOption(w, r, typed, "ask", "Ask the administrator", forgotAskBody, "Ask the administrator"))
+	}
 }
 
 // forgotOption is a card of s-auth-6: what it does, and a form of one
@@ -651,9 +668,11 @@ func (s *Server) forgotWipePage(w http.ResponseWriter, r *http.Request, token, l
 		page.Title = "Erase everything and start again?"
 		page.Lede = text("This is not a password recovery. The key to your data comes from the password you forgot, " +
 			"so nothing stored under it can be read again — by you, by us, by anyone.\n\n" +
-			"Confirming erases what Carrel keeps for " + login + ": saved connections and their passwords, subscriptions, tags and the settings of this desk. " +
+			"Confirming erases what Carrel keeps encrypted for " + login + ": saved connections and their passwords, subscriptions, " +
+			"published links, devices, external backup triggers and the deposited copy of the key. " +
 			"Address books, calendars, tasks and notes on the servers are not touched — you connect to them again afterwards.\n\n" +
-			"The account itself stays: same login, same confirmed address. Only the password is new, and you set it on the next screen.")
+			"The account itself stays: same login, role and confirmed address, the same first day of the week and clock. " +
+			"Only the password is new, and you set it on the next screen.")
 		page.Form = withSubmit(s.anonPlainForm(w, r, "/forgot/"+token, "POST"), "wipe.confirm", "Erase and set a new password")
 		page.Form.Actions[0].Danger = true
 		page.Cancel = &view.Action{ID: "wipe.cancel", Label: "Cancel", Href: s.route("/login"), Method: "GET", Enabled: true}

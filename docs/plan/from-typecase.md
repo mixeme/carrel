@@ -57,61 +57,15 @@ U-9, U-12, U-15.1) и план клиента.
 
 Записка 22 (Typecase `8764758`, задачи 36 и 37) сделана в `v0.2.75`; вопросы к кадрам — задачи 40–43 в [to-typecase.md](to-typecase.md).
 
-Записка 23 от 29.09.2026 (Typecase 0.9.0 и 0.10.0, задачи 29 — выбор
-столбцов, 38 и 39). Копия макета — побайтно та же, что в Typecase.
+Записка 23 (Typecase 0.9.0 и 0.10.0, задачи 29, 38, 39): серверная часть —
+выбор столбцов — сделана в `v0.2.76`; столбцы остальных списков — задача 45 в
+[to-typecase.md](to-typecase.md).
+Клиенту из неё — `ColumnRow` и меню Columns формой (`Menu.Action`, `Hidden`,
+`MenuItem.Name`, `Value`, `Fixed`), корень страницы `page` и смысл у всего
+нажимаемого (`TestEveryControlHasMeaning`): полный текст — записка 23 в
+`86e42e6`; строка уходит, когда клиент это возьмёт.
 
-23. **Что есть в библиотеке для клиента.**
-   - **Выбор столбцов** (задача 29, решение владельца — целиком): строка своих
-     столбцов `ColumnRow` (`Column`, `ColumnCell`) — набор и порядок
-     человека, ширина и ступень, на которой столбец уходит на узком экране, —
-     рода столбца. Меню Columns — форма (`Menu.Action`, `Hidden`;
-     `MenuItem.Name`, `Value`, `Fixed`): отмеченные пункты уходят в своём
-     порядке; без сценария — отметки и Apply, со сценарием пункт тянут за
-     ручку или Alt+↑/↓ (`components-42`, `s-contacts-23`, `-24`). Серверу:
-     принимать `col` в порядке прихода, `default` — сброс.
-   - **Корень страницы** (задача 38): пакет `page` — `Document{Title, Lang,
-     Assets, Root, Forms}` печатает голову (тема и стили подключением, ничего
-     встроенного: `script-src 'self'; style-src 'self'` держится), спрятанный
-     спрайт, корень библиотеки (`widget.Root` — закрытый интерфейс: оболочка,
-     страница, наложение) и формы `PostForm`; `page.Static()` отдаёт файлы
-     библиотеки из бинарника, `page.At(base)` — их адреса. Место для
-     `PostForm` — `Document.Forms`.
-   - **Смысл у всего нажимаемого** (задача 39): `Form.ID` — «Sign in» вне
-     формы отправляет её по имени (`Button.Form`), Enter в поле — тоже;
-     `AuthStack.Links` — `[]Link` с адресами (ломающее); `Send` у всех галок
-     — кнопка отправки, действующая сразу (источник рейла, выбор карточки),
-     или флажок формы до действия (строки таблицы); `Tick.Send` — задача
-     сделана без сценария; `Search.Action`, `Filter.Action`, `Query.Name`;
-     `UserMenu.Href` — учётная запись без сценария; `DocRelated.Href`,
-     `DocFile.Href`, `Span.Href`. Заголовок меню — строка, не кнопка.
-     **Проверка:** `TestEveryControlHasMeaning` (Typecase `internal/refs`)
-     заполняет поля смысла у всех эталонных записей и называет каждую кнопку,
-     ссылку, «ссылку по виду», галку и поле без смысла с кадром — пусто.
-     Клиенту — тот же принцип на своих экранах: `shape.Check` плюс проверка,
-     что поля смысла заполнены.
-
-Записка 24 от 29.09.2026 (Typecase `b64895e`, `eb0822f`, задачи 40–44).
-Копия макета — побайтно та же, что в Typecase.
-
-24. **Что сделать серверу.**
-   - `s-auth-6`: последняя фраза карточки «Ask the administrator» ушла в
-     подпись — на странице её нет. Письмо не ушло (`/register`, `/forgot`,
-     вариант очистки) — тот же кадр, строка сервера сообщением-тревогой.
-   - **Одна страница на любую мёртвую ссылку-секрет** (`rest-1`, теперь
-     `/invite/{token}`, `/forgot/{token}`, `/confirm-email/{token}`,
-     `/p/{token}`): «This link does not work» — «It may have expired, been used
-     already, or been withdrawn. Ask whoever sent it for a new one.», одна
-     кнопка Sign in. Отдельной страницы приглашения нет — ответ по-прежнему
-     одинаков для всех (аудит №3).
-   - Значок «local» — и в шапке листа публикации (`s-publish-2`); листу без
-     оболочки признак нужен в данных листа.
-   - Чужая подпись предлагается только своей строке и там выбрана
-     (`s-contacts-12`, `-13`, `-22`) — как делает сервер.
-   - Очистка по ссылке (`s-auth-10`): «Confirming erases what Carrel keeps
-     encrypted for mix: saved connections and their passwords, subscriptions,
-     published links, devices, external backup triggers and the deposited
-     copy of the key.» и «The account itself stays: same login, role and
-     confirmed address, the same first day of the week and clock.»
+Записка 24 (Typecase `b64895e`, `eb0822f`, задачи 40–44) сделана в `v0.2.76`.
 
 ## Для сведения — сервер не трогает
 

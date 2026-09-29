@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"net/url"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -85,5 +86,27 @@ func TestPublishCalendarOptions(t *testing.T) {
 	page = publicPage(t, f, string(made.Link))
 	if actionByID(page.Actions, "published.download") == nil || page.Range == nil || len(page.Range.Presets) == 0 {
 		t.Errorf("a publish without the form lost something: %+v", page.Actions)
+	}
+}
+
+// from-typecase note 24: the publish sheet (s-publish-2) says «local» in
+// its head as the published links do (s-publish-1). A sheet has no shell,
+// so it carries the instance's flag itself — the same as SignedIn.Local.
+func TestPublishSheetSaysLocal(t *testing.T) {
+	badge := regexp.MustCompile(`<div class="tc-sheet__head">[^
+]*?<span class="tc-badge is-local"[^>]*>local</span>`)
+	if !badge.MatchString(mockupFrame(t, "s-publish-2")) {
+		t.Fatal("s-publish-2 draws no «local» in the sheet's head: read the frame again")
+	}
+	f := publishFixture(t)
+	href := f.publishHref("calendar", searchWork, "")
+	for _, c := range []struct {
+		public string
+		local  bool
+	}{{"", true}, {"https://carrel.lan", true}, {"https://carrel.example.org", false}} {
+		f.h.cfg.PublicURL = c.public
+		if sheet := decode[view.PublishSheet](t, f.h.do(get(href, f.sess))); sheet.Local != c.local {
+			t.Errorf("CARREL_PUBLIC_URL %q: local = %v, want %v", c.public, sheet.Local, c.local)
+		}
 	}
 }

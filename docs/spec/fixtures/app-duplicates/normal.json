@@ -1,6 +1,7 @@
 {
   "bar": {
     "actions": [],
+    "columns": null,
     "compact": false,
     "filter": "",
     "loaded": 6,

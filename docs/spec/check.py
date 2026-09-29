@@ -196,6 +196,10 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     "setup": "/setup",
     "register": "/register",
     "forgot-token": "/forgot/{token}",
+    # Мёртвый секрет своего адреса не имеет: один ответ на все адреса с
+    # токеном. Кадр rest-1 — часть (data-part), и сверяется он с кадром
+    # приглашения — оба без рейла, так что проверке 8 сравнивать нечего.
+    "dead-link": "/invite/{token}",
     "app-collections-rename": "/app/collections/rename",
     "app-collections-move": "/app/collections/move",
     "app-collections-delete": "/app/collections/delete",

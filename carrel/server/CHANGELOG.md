@@ -17,6 +17,67 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.76 — 2026-09-29
+
+Notes 23 (the choice of columns — whole, the owner's decision) and 24 of
+Typecase (`86e42e6`, `b64895e`, `eb0822f`): the Columns menu of the
+contacts lists is a form the server keeps for this browser, and one page
+answers any dead secret link.
+
+### Added
+
+- **`ListBar.columns`** (`Columns`: `label`, `form`, `items` of
+  `ColumnItem` — `id`, `label`, `on`, `fixed`, `aside`) — the Columns menu
+  (components-42) of `/app/contacts` and `/app/contacts/{account}/{col}`;
+  null on every other list. The items stand in their order: the columns
+  shown, then the others; until the person chooses, the order and the ticks
+  of components-21 — Name («always», `fixed`), Phone, Email, Organisation,
+  Birthday, Tags, Changed, Source, the last three before Source off.
+- **`POST /app/contacts/columns`, `POST
+  /app/contacts/{account}/{col}/columns`** — the menu's form: `col`, the
+  ticked columns in the order they come; `col=default` resets. The answer
+  is a redirect to the list with its query; the choice is kept by this
+  browser in the cookie `carrel_cols_contacts` (a year, HttpOnly, SameSite
+  Lax), common to the combined book and every book (S-9.6).
+- **`ContactRow.birthday`, `.tags`, `.changed`** — the columns the menu
+  offers beside phone, e-mail and organisation: «14.03.1987», «02.11» without
+  a year; the card's categories as tags that filter the list; the day of
+  the last change the short way, «12 Aug» (s-contacts-23, -24).
+- **`DeadLinkPage`** (`title`, `lede`, `signIn`) — «This link does not
+  work» — «It may have expired, been used already, or been withdrawn. Ask
+  whoever sent it for a new one.», one button Sign in (rest-1). Fixture
+  `dead-link/normal.json`.
+- **`PublishSheet.local`** — «local» in the head of the publish sheet
+  (s-publish-2), the same flag as `top.signed.local`.
+
+### Changed
+
+- **A dead secret link answers with `DeadLinkPage`, status 404** — an
+  invitation, a wipe link, an address confirmation, a publication, used,
+  revoked, expired or never issued, GET or POST; the backup trigger's
+  `/api/backup/` too. Before, the answer was the plain text «404 page not
+  found». It is still one answer: the same status, headers, body and delay
+  whatever the link was (audit №3); the anonymous bucket is unchanged.
+- **A letter that did not go is an alert** (`notices`, role alert, the
+  server's line as its body): the options of `/forgot` again after
+  «Send a confirmation letter» (s-auth-6), to try once more or to ask;
+  after registration the page of its letter with one door back (s-auth-3).
+  Before, `/forgot` said it as the lede of another page and registration as
+  its lede.
+- **The erase page's words** (s-auth-10): «Confirming erases what Carrel
+  keeps encrypted for mix: saved connections and their passwords,
+  subscriptions, published links, devices, external backup triggers and the
+  deposited copy of the key.» and «The account itself stays: same login,
+  role and confirmed address, the same first day of the week and clock.» —
+  what the wipe did already.
+
+### For consumers
+
+- Every list's `bar` carries `columns` (null but on the contacts); the
+  fixtures of the lists, the timeline, the search, the duplicates and the
+  journal changed with it, the contacts' rows with the three columns.
+- A client that shows a dead link reads the 404's body as `DeadLinkPage`.
+
 ## v0.2.75 — 2026-09-28
 
 Copies the Typecase mockup of note 22 (Typecase `8764758`) and brings the

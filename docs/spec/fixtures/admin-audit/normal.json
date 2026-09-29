@@ -39,7 +39,8 @@
       }
     ],
     "selected": 0,
-    "total": 22
+    "total": 22,
+    "columns": null
   },
   "details": null,
   "notices": [],

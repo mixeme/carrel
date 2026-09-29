@@ -546,7 +546,101 @@
         "enabled": true
       }
     ],
-    "selected": 0
+    "selected": 0,
+    "columns": {
+      "form": {
+        "action": "/app/contacts/columns?task=t-task",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/app/contacts/columns?task=t-task",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST"
+          },
+          {
+            "enabled": true,
+            "href": "/app/contacts/columns?task=t-task",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ]
+          }
+        ]
+      },
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "name",
+          "label": "Name",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "phone",
+          "label": "Phone",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "email",
+          "label": "Email",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "org",
+          "label": "Organisation",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "birthday",
+          "label": "Birthday",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "source",
+          "label": "Source",
+          "on": true
+        }
+      ],
+      "label": "Columns"
+    }
   },
   "groups": [
     {
@@ -628,7 +722,10 @@
               "separator": true
             }
           ],
-          "state": "ok"
+          "state": "ok",
+          "birthday": "",
+          "changed": "31 Jul",
+          "tags": []
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
@@ -706,7 +803,21 @@
               "separator": true
             }
           ],
-          "state": "ok"
+          "state": "ok",
+          "birthday": "14.03.1987",
+          "changed": "14 Aug",
+          "tags": [
+            {
+              "href": "/app/contacts?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0&task=t-task",
+              "label": "работа",
+              "on": false
+            },
+            {
+              "href": "/app/contacts?tag=%D0%B8%D0%B7%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE&task=t-task",
+              "label": "издательство",
+              "on": false
+            }
+          ]
         },
         {
           "href": "/app/contacts/a-rad-vps/komanda/d41a-6f30-92be",
@@ -766,7 +877,10 @@
               "method": "GET"
             }
           ],
-          "state": "linked"
+          "state": "linked",
+          "birthday": "",
+          "changed": "10 Aug",
+          "tags": []
         }
       ]
     },
@@ -849,7 +963,10 @@
               "separator": true
             }
           ],
-          "state": "ok"
+          "state": "ok",
+          "birthday": "",
+          "changed": "18 Feb 2024",
+          "tags": []
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83",
@@ -927,7 +1044,10 @@
               "separator": true
             }
           ],
-          "state": "ok"
+          "state": "ok",
+          "birthday": "",
+          "changed": "5 Aug",
+          "tags": []
         }
       ]
     }

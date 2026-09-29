@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
@@ -430,7 +431,14 @@ func (a *mockupApp) realPath(t *testing.T, slug string) string {
 // the frame while a fixture is written — never as the fixture itself.
 func (a *mockupApp) compare(t *testing.T, name string, rec *httptest.ResponseRecorder) {
 	t.Helper()
-	if rec.Code != 200 {
+	a.compareAt(t, name, rec, 200)
+}
+
+// compareAt is compare for an answer whose status is not 200: the dead
+// link's 404 (rest-1).
+func (a *mockupApp) compareAt(t *testing.T, name string, rec *httptest.ResponseRecorder, status int) {
+	t.Helper()
+	if rec.Code != status {
 		t.Fatalf("%s: %d %s", name, rec.Code, rec.Body.String())
 	}
 	got := a.normalise(t, rec.Body.Bytes())
@@ -1388,6 +1396,14 @@ func TestFixtureFilesAndInvite(t *testing.T) {
 		}
 		app.compare(t, "invite/normal.json", app.h.do(get("/invite/"+secret, nil)))
 	})
+}
+
+// C-14.2: the one page of every dead secret link (rest-1). What the link
+// was is not in it, so one fixture stands for all of them.
+func TestFixtureDeadLink(t *testing.T) {
+	app := &mockupApp{h: newHarness(t), byAccount: map[string]string{}, byPath: map[string]string{}}
+	app.h.admin("mix", "password123")
+	app.compareAt(t, "dead-link/normal.json", app.h.do(get("/invite/"+strings.Repeat("A", 43), nil)), http.StatusNotFound)
 }
 
 // C-14.2: the screens of an instance nobody has set up yet, and the ones a

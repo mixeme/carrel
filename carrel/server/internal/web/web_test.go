@@ -547,7 +547,18 @@ func TestUnlockRequiresPassword(t *testing.T) {
 	if strings.Contains(rec.Body.String(), `"unlocked"`) && !strings.Contains(rec.Body.String(), `"unlocked":null`) {
 		t.Fatalf("top bar unlocked after a wrong password: %s", rec.Body.String())
 	}
-	if h.do(get("/app/contacts", sess)).Body.String() != h.do(get("/app/contacts", other)).Body.String() {
+	// The shell's top bar is what an unlock changes; the page itself differs
+	// between two sessions anyway — its forms carry each session's _csrf.
+	top := func(s *session.Session) string {
+		var p struct {
+			Top json.RawMessage `json:"top"`
+		}
+		if err := json.Unmarshal(h.do(get("/app/contacts", s)).Body.Bytes(), &p); err != nil || len(p.Top) == 0 {
+			t.Fatalf("top: %v", err)
+		}
+		return string(p.Top)
+	}
+	if top(sess) != top(other) {
 		t.Fatal("wrong password changed the shell")
 	}
 	rec = h.do(postForm("/app/settings/unlock", sess, url.Values{"password": {"wrongpassword"}}))

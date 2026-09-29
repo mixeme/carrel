@@ -46,6 +46,15 @@ type ConfirmEmailPage struct {
 	Next Action `json:"next"`
 }
 
+// DeadLinkPage — мёртвая ссылка-секрет (rest-1): одна страница на
+// /invite/, /forgot/, /confirm-email/ и /p/ — те же слова, тот же код, те
+// же заголовки и та же задержка, что бы это ни была за ссылка и была ли она
+// вообще (C-11).
+type DeadLinkPage struct {
+	Plain
+	SignIn Action `json:"signIn"` // «Sign in» — единственная дверь
+}
+
 // ForgotPage — /forgot: логин или почта (s-auth-5), варианты (s-auth-6),
 // помочь нечем (s-auth-7), письмо отправлено (s-auth-8), администратор
 // спрошен (s-auth-9).

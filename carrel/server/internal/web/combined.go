@@ -317,10 +317,11 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	case view.KindContact:
 		page := view.ContactsListPage{Shell: st.shell, Poll: st.poll}
 		by := sortOf(r, view.KindContact)
-		page.Groups = s.contactGroups(sess, tf, shown, spec.segment, true, by)
+		page.Groups = s.contactGroups(sess, tf, shown, spec.segment, true, by, filter)
 		total := len(st.items)
 		page.Bar = view.ListBar{Loaded: len(shown), Total: &total, Actions: actions,
-			Segments: s.sortSegments(base, view.KindContact, by, r.URL.Query())}
+			Segments: s.sortSegments(base, view.KindContact, by, r.URL.Query()),
+			Columns:  s.columnsMenu(r, csrfField(sess), spec.segment, base)}
 		page.Print = header(counted(len(shown), "card"))
 		return page, nil
 	case view.KindEvent:

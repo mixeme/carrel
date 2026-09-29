@@ -116,6 +116,7 @@ func (s *Server) sheetFor(sess *session.Session, kind view.Kind, what, title str
 	sheet := view.PublishSheet{
 		Kind:    kind,
 		Target:  text(strings.ToUpper(what[:1]) + what[1:] + " «" + title + "» · " + string(where)),
+		Local:   s.instanceLocal(),
 		Actions: []view.Action{create, back},
 	}
 	rows := []view.FormRow{csrfField(sess)}

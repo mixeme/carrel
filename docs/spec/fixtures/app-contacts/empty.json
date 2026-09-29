@@ -24,6 +24,100 @@
         "method": "GET"
       }
     ],
+    "columns": {
+      "form": {
+        "action": "/app/contacts/columns",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/app/contacts/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST"
+          },
+          {
+            "enabled": true,
+            "href": "/app/contacts/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ]
+          }
+        ]
+      },
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "name",
+          "label": "Name",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "phone",
+          "label": "Phone",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "email",
+          "label": "Email",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "org",
+          "label": "Organisation",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "birthday",
+          "label": "Birthday",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "source",
+          "label": "Source",
+          "on": true
+        }
+      ],
+      "label": "Columns"
+    },
     "compact": false,
     "filter": "",
     "loaded": 0,

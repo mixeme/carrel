@@ -41,9 +41,9 @@ func frameList(t *testing.T, id string) []string {
 }
 
 // frameForeign splits a label list that draws, under a line, the label
-// another client wrote (s-contacts-12, -13, -22; from-typecase notes 20 and
-// 22): the list any row is offered, and that label, as it is. The frame
-// draws the list of a row whose card holds it.
+// another client wrote (s-contacts-12, -13, -22; from-typecase notes 20, 22
+// and 24): the list any row is offered, and that label, as it is. The frame
+// draws the list of the row whose label it is, and there it is chosen.
 func frameForeign(t *testing.T, id string) (own []string, foreign string) {
 	t.Helper()
 	list := frameList(t, id)
@@ -51,7 +51,23 @@ func frameForeign(t *testing.T, id string) (own []string, foreign string) {
 	if !strings.HasPrefix(last, "— ") {
 		t.Fatalf("%s = %q, no label under a line: read it again", id, list)
 	}
-	return list[:len(list)-1], strings.TrimPrefix(last, "— ")
+	foreign = strings.TrimPrefix(last, "— ")
+	if chosen := frameChosen(t, id); chosen != foreign {
+		t.Fatalf("%s chooses %q, not the label under the line %q: read it again", id, chosen, foreign)
+	}
+	return list[:len(list)-1], foreign
+}
+
+var frameChosenItem = regexp.MustCompile(`<button class="(?:[^"]* )?is-on [^"]*tc-menu__item[^"]*"[^>]*role="menuitem"[^>]*>(.*?)</button>`)
+
+// frameChosen is the item a frame draws chosen in an open list.
+func frameChosen(t *testing.T, id string) string {
+	t.Helper()
+	m := frameChosenItem.FindAllStringSubmatch(mockupFrame(t, id), -1)
+	if len(m) != 1 {
+		t.Fatalf("%s chooses %d items: read it again", id, len(m))
+	}
+	return frameText(m[0][1])
 }
 
 // sameOwnList is sameList for a row without a label of another client's:
@@ -214,10 +230,7 @@ func TestContactLabelListsAreTheFrames(t *testing.T) {
 // not turned into a type, not lost, not recased.
 func TestAddressLabelListIsTheFrame(t *testing.T) {
 	frame := frameList(t, "s-contacts-22")
-	foreign := strings.TrimPrefix(frame[len(frame)-1], "— ")
-	if foreign == frame[len(frame)-1] {
-		t.Fatalf("s-contacts-22 = %q, no label under a line: read it again", frame)
-	}
+	_, foreign := frameForeign(t, "s-contacts-22")
 	f := bookFixture(t, nil, "BEGIN:VCARD\nVERSION:3.0\nUID:ann\nFN:Ann\n"+
 		"ADR;TYPE="+foreign+":;;Lesnaya 5;Tver;;;\nADR;TYPE=Dacha:;;Lake 1;Tver;;;\nADR;TYPE=WORK:;;Main 2;Tver;;;\nEND:VCARD\n")
 	page := decode[view.ContactEditPage](t, f.h.do(get(f.path("contacts")+"/ann/edit", f.sess)))

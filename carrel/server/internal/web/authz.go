@@ -7,6 +7,7 @@ import (
 
 	"carrel.dev/carrel/server/internal/session"
 	"carrel.dev/carrel/server/render"
+	"carrel.dev/carrel/server/view"
 )
 
 func (s *Server) requireLogin(w http.ResponseWriter, r *http.Request) (*session.Session, bool) {
@@ -71,9 +72,21 @@ func (s *Server) rejectPathTraversal(w http.ResponseWriter, r *http.Request, pat
 	return true
 }
 
-// tokenNotFound responds uniformly for invalid, revoked, or expired secrets
-// (S-9.5, S-10.7) with constant minimum delay.
+// tokenNotFound responds uniformly for invalid, used, revoked, or expired
+// secrets (S-9.5, S-10.7, C-11) with constant minimum delay: one page,
+// «This link does not work» (rest-1), 404 — «not found» is true of a link
+// that never was, and it is the only thing the answer may say. Nothing in
+// it depends on the route or the secret: the words, the door and the
+// headers are the same for /invite/, /forgot/, /confirm-email/ and /p/
+// (their no-referrer is set by the path's family, not by the secret), and
+// for the backup trigger's /api/backup/ as well.
 func (s *Server) tokenNotFound(w http.ResponseWriter, r *http.Request, start time.Time) {
 	constantTimeDelay(start, 200*time.Millisecond)
-	s.notFound(w, r)
+	s.writePage(w, r, http.StatusNotFound, view.DeadLinkPage{
+		Plain: view.Plain{
+			Title: "This link does not work",
+			Lede:  "It may have expired, been used already, or been withdrawn. Ask whoever sent it for a new one.",
+		},
+		SignIn: view.Action{ID: "deadlink.login", Label: "Sign in", Href: s.route("/login"), Method: "GET", Enabled: true},
+	})
 }

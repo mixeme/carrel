@@ -24,6 +24,7 @@
         "method": "GET"
       }
     ],
+    "columns": null,
     "compact": false,
     "filter": "",
     "loaded": 0,

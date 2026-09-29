@@ -12,6 +12,31 @@ type ListBar struct {
 	Range    *Range   `json:"range"`    // диапазон дат там, где он есть
 	Actions  []Action `json:"actions"`  // операции над выделенным
 	Selected int      `json:"selected"`
+	// Columns — кнопка Columns полосы и её меню-форма (components-42); nil —
+	// у списка выбора столбцов нет
+	Columns *Columns `json:"columns"`
+}
+
+// Columns — выбор столбцов списка (components-21, components-42, S-9.6).
+// Меню — форма: отмеченные пункты уходят полем col в том порядке, в каком
+// стоят, и порядок пунктов — порядок столбцов. Выбор помнит этот браузер
+// (U-12).
+type Columns struct {
+	Label Text `json:"label"` // «Columns»: кнопка полосы и заголовок меню
+	// Form — POST {адрес списка}/columns с запросом списка; скрытый _csrf;
+	// Actions — Apply и «Reset to defaults», который отправляет col=default
+	Form Form `json:"form"`
+	// Items — пункты меню: показанные столбцы в их порядке, за ними снятые
+	// в порядке по умолчанию; пока человек не выбирал — все в порядке по
+	// умолчанию (components-21)
+	Items []ColumnItem `json:"items"`
+}
+type ColumnItem struct {
+	ID    string `json:"id"` // значение col: name, phone, email, org, birthday, tags, changed, source
+	Label Text   `json:"label"`
+	On    bool   `json:"on"`              // отмечен: столбец показан
+	Fixed bool   `json:"fixed"`           // стоит всегда первым, отметку не снять (Name)
+	Aside Text   `json:"aside,omitempty"` // приглушённое после подписи: «always» у Fixed
 }
 
 type Range struct {
@@ -32,19 +57,25 @@ type ContactGroup struct {
 	Rows   []ContactRow `json:"rows"`
 }
 type ContactRow struct {
-	Href    string      `json:"href"`
-	UID     string      `json:"uid"`
-	Colour  Colour      `json:"colour"`
-	Stamp   Stamp       `json:"stamp"`
-	Avatar  Avatar      `json:"avatar"`
-	Name    Text        `json:"name"`
-	Phone   Text        `json:"phone"`
-	Email   Text        `json:"email"`
-	Org     Text        `json:"org"`
-	Badges  []Badge     `json:"badges"`  // «2 источника» у свёрнутого дубликата
-	Sources []Stamp     `json:"sources"` // раскрытые источники свёрнутой группы
-	Menu    []MenuItem  `json:"menu"`
-	State   RecordState `json:"state"`
+	Href   string `json:"href"`
+	UID    string `json:"uid"`
+	Colour Colour `json:"colour"`
+	Stamp  Stamp  `json:"stamp"`
+	Avatar Avatar `json:"avatar"`
+	Name   Text   `json:"name"`
+	Phone  Text   `json:"phone"`
+	Email  Text   `json:"email"`
+	Org    Text   `json:"org"`
+	// Столбцы, которые человек может выбрать (s-contacts-23, -24):
+	// день рождения «14.03.1987», без года «02.11»; категории карточки;
+	// день последней правки коротко, «12 Aug» (C-10)
+	Birthday Text        `json:"birthday"`
+	Tags     []Tag       `json:"tags"`
+	Changed  Text        `json:"changed"`
+	Badges   []Badge     `json:"badges"`  // «2 источника» у свёрнутого дубликата
+	Sources  []Stamp     `json:"sources"` // раскрытые источники свёрнутой группы
+	Menu     []MenuItem  `json:"menu"`
+	State    RecordState `json:"state"`
 }
 
 type AgendaPage struct {

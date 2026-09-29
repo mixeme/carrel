@@ -48,4 +48,8 @@ const (
 	// (S-17.3). Past it the oldest row that asks nothing goes, then the oldest
 	// question with the upload it holds.
 	TransferQueueLen = 50
+	// ColumnsChoiceAge is how long a browser keeps the columns a person
+	// chose for a list (S-9.6): a standing preference of this browser,
+	// renewed by every choice.
+	ColumnsChoiceAge = 365 * 24 * time.Hour
 )

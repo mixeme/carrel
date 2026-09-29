@@ -67,7 +67,8 @@
       }
     ],
     "selected": 0,
-    "total": null
+    "total": null,
+    "columns": null
   },
   "card": {
     "actions": [

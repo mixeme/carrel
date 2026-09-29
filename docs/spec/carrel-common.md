@@ -326,10 +326,10 @@ spec/fixtures/<screen>/<state>.json
 | `/logout` | POST | вход | редирект | — |
 | `/setup` | GET, POST | — | страница | `SetupPage` |
 | `/register` | GET, POST | — | страница | `RegisterPage` |
-| `/invite/{token}` | GET, POST | токен | страница | `InvitePage` |
-| `/confirm-email/{token}` | GET | токен | страница | `ConfirmEmailPage` |
+| `/invite/{token}` | GET, POST | токен | страница | `InvitePage`; мёртвый секрет — `DeadLinkPage` |
+| `/confirm-email/{token}` | GET | токен | страница | `ConfirmEmailPage`; мёртвый секрет — `DeadLinkPage` |
 | `/forgot` | GET, POST | — | страница | `ForgotPage` |
-| `/forgot/{token}` | GET, POST | токен | страница | `ForgotWipePage` |
+| `/forgot/{token}` | GET, POST | токен | страница | `ForgotWipePage`; мёртвый секрет — `DeadLinkPage` |
 | `/about` | GET | — | страница | `AboutPage` |
 | `/healthz` | GET | — | текст | — |
 
@@ -337,7 +337,7 @@ spec/fixtures/<screen>/<state>.json
 
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
-| `/p/{token}` | GET | токен | страница | `PublishedPage` |
+| `/p/{token}` | GET | токен | страница | `PublishedPage`; мёртвый секрет — `DeadLinkPage` |
 | `/p/{token}/download` | GET | токен | файл, поток | — |
 | `/p/{token}/file/{path…}` | GET | токен | поток | — |
 | `/p/{token}/dav/{path…}` | DAV-методы | токен | DAV | — |
@@ -345,6 +345,12 @@ spec/fixtures/<screen>/<state>.json
 | `/api/backup/status` | GET | токен | текст | — |
 | `/api/backup/{id}/download` | GET | токен | поток | — |
 | `/api/backup/download` | GET | токен | поток | — |
+
+**Мёртвый секрет** — неверный, использованный, отозванный, истёкший или
+никогда не бывший — у всех адресов C-5.1 и C-5.2 с токеном, кроме DAV,
+получает один ответ: `DeadLinkPage` (rest-1) с кодом 404. Тем же ответом
+отвечает и внешний триггер копии. Слова, дверь, заголовки и задержка от рода
+ссылки не зависят (C-11).
 
 ### C-5.3 Сквозное в оболочке
 
@@ -379,6 +385,7 @@ spec/fixtures/<screen>/<state>.json
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже |
 | `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage` |
+| `/app/contacts/columns`, `/app/contacts/{account}/{col}/columns` | POST | вход | редирект | — ; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage` |
@@ -632,7 +639,7 @@ type TopBar struct {
 type SignedIn struct {
     Login    Text // имя, под которым вошли
     Instance Text // имя экземпляра, S-26
-    Local    bool // экземпляр локальный: выданные им адреса отвечают только изнутри его сети — значок «local» у davloom (s-davloom-1), выданных ссылок (s-publish-1), ссылки устройства (s-plan-1) и отметки «On a clock of your own» (s-backup-2); объявленного адреса снаружи (CARREL_PUBLIC_URL) нет или он — имя либо адрес частной сети. Признак экземпляра, не экрана
+    Local    bool // экземпляр локальный: выданные им адреса отвечают только изнутри его сети — значок «local» у davloom (s-davloom-1), выданных ссылок (s-publish-1), ссылки устройства (s-plan-1) и отметки «On a clock of your own» (s-backup-2), а у листа публикации — PublishSheet.Local; объявленного адреса снаружи (CARREL_PUBLIC_URL) нет или он — имя либо адрес частной сети. Признак экземпляра, не экрана
 }
 
 type Refresh struct {
@@ -847,6 +854,23 @@ type ListBar struct {
     Range    *Range   // диапазон дат там, где он есть
     Actions  []Action // операции над выделенным
     Selected int
+    Columns  *Columns // кнопка Columns и её меню-форма (components-42); nil — у списка выбора столбцов нет
+}
+
+// Выбор столбцов (components-21, components-42; S-9.6). Меню — форма:
+// отмеченные пункты уходят полем col в том порядке, в каком стоят, — порядок
+// пунктов и есть порядок столбцов. Выбор помнит этот браузер (U-12).
+type Columns struct {
+    Label Text         // «Columns»: кнопка полосы и заголовок меню
+    Form  Form         // POST {адрес списка}/columns с запросом списка; скрытый _csrf; Actions — Apply и «Reset to defaults» (columns.default: отправляет col=default)
+    Items []ColumnItem // показанные столбцы в их порядке, за ними снятые в порядке по умолчанию; пока человек не выбирал — все в порядке по умолчанию (components-21)
+}
+type ColumnItem struct {
+    ID    string // значение col и столбец строки: name, phone, email, org, birthday, tags, changed, source
+    Label Text
+    On    bool   // отмечен: столбец показан
+    Fixed bool   // стоит всегда первым, отметку не снять (Name); в форму не уходит
+    Aside Text   // приглушённое после подписи: «always» у Fixed
 }
 
 type Range struct {
@@ -871,6 +895,9 @@ type ContactRow struct {
     Phone     Text
     Email     Text
     Org       Text
+    Birthday  Text     // «14.03.1987», без года «02.11» (s-contacts-23)
+    Tags      []Tag    // категории карточки (s-contacts-23)
+    Changed   Text     // день последней правки коротко, «12 Aug» (s-contacts-24, C-10)
     Badges    []Badge  // «2 источника» у свёрнутого дубликата
     Sources   []Stamp  // раскрытые источники свёрнутой группы
     Menu      []MenuItem
@@ -944,6 +971,15 @@ type NoteRow struct {
     State     RecordState
 }
 ```
+
+**Столбцы строки контакта.** Строка несёт все столбцы, какие предлагает меню
+Columns, в любом выборе; какие из них и в каком порядке рисовать — говорит
+`ListBar.Columns`. Столбец — поле строки: `name` — `Name`, `phone` — `Phone`,
+`email` — `Email`, `org` — `Org`, `birthday` — `Birthday`, `tags` — `Tags`,
+`changed` — `Changed`, `source` — `Stamp`. `Stamp` есть только в едином виде:
+у одной коллекции источник один, и столбца у неё нет, даже отмеченного.
+Меню пока есть только у списка контактов: столбцы остальных списков кадрами
+не нарисованы.
 
 ### C-6.5 Карточки записей
 
@@ -1427,6 +1463,7 @@ type ImportReport struct { Created, Skipped, Renamed int; Rows []ImportTable; No
 type PublishSheet struct {
     Kind    Kind
     Target  Text     // что публикуется — написано в шапке, не переспрашивается
+    Local   bool     // значок «local» в шапке (s-publish-2): тот же признак, что SignedIn.Local, — у листа оболочки нет, и он несёт его сам
     Range   *Range   // только у календаря
     Form    Form     // сколько показывать, разрешить ли .ics, показывать ли описания
     Expires Text
@@ -2111,6 +2148,10 @@ type RegisterPage struct { // s-auth-2, после отправки s-auth-3
 }
 type InvitePage   struct { Plain; Form Form; Valid bool }
 type ConfirmEmailPage struct { Plain; OK bool; Next Action }
+type DeadLinkPage struct { // rest-1: мёртвая ссылка-секрет — /invite/, /forgot/, /confirm-email/, /p/
+    Plain         // «This link does not work» и почему так бывает; одни слова на все роды ссылок
+    SignIn Action // «Sign in» — единственная дверь
+}
 type ForgotPage struct { // s-auth-5 … s-auth-9
     Plain
     Form    Form           // логин или почта (s-auth-5); в остальных состояниях пуста
@@ -2572,7 +2613,7 @@ type LossReport struct { // сервер принял запись, но что-
 | Куки только для HTTP, ограниченные по источнику; смена идентификатора при входе | Не читает и не пишет секретов в браузере |
 | Потолок тела запроса до того, как что-то его прочитало | Не обходит форму загрузки своими средствами |
 | Проверка исходящих адресов, включая после каждого редиректа | Не показывает и не открывает чужие адреса напрямую: чужая картинка и чужое вложение идут через сервер |
-| Сравнение токенов за постоянное время; одинаковый ответ на «нет», «отозвано» и «истекло» | Не показывает, какой из трёх случаев наступил |
+| Сравнение токенов за постоянное время; одинаковый ответ на «нет», «использовано», «отозвано» и «истекло» — одна страница `DeadLinkPage` (rest-1) с кодом 404, теми же заголовками и той же задержкой у всех родов ссылок | Не показывает, какой из случаев наступил и что это была за ссылка |
 | Секреты не попадают в журнал ни на каком уровне | Не кладёт секрет в адрес: он утечёт в историю, закладку и заголовок перехода |
 | Пароль подключения выдаётся только после подтверждения (C-5.7) | Показывает его только тем листом, что описан, и не хранит нигде |
 

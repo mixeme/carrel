@@ -709,6 +709,7 @@ func changedAt(obj *model.Object, tz *time.Location) time.Time {
 func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsListPage {
 	page := view.ContactsListPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = s.listActions(c, nil)
+	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath())
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, err := c.contactsAll(r.Context())
 	if err != nil {
@@ -718,7 +719,7 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 	items := c.listed(objs)
 	shown := s.foldLinked(s.catalogOf(c.sess), view.KindContact, filter.keep(view.KindContact, items))
 	by := sortOf(r, view.KindContact)
-	page.Groups = s.contactGroups(c.sess, c.tf, shown, c.spec.segment, false, by)
+	page.Groups = s.contactGroups(c.sess, c.tf, shown, c.spec.segment, false, by, filter)
 	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindContact, by, r.URL.Query())
 	page.Rail.Tags = filter.rail(view.KindContact, items)
 	c.putIndex(indexOf(c.tf, view.KindContact, items))
@@ -732,7 +733,9 @@ func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsLi
 // contactGroups sorts contacts by name under letter rubrics; "#" gathers
 // everything that does not start with a letter, last. mark puts the origin on
 // every row. A row's avatar is its photo's thumbnail when there is one to show.
-func (s *Server) contactGroups(sess *session.Session, tf timeFmt, items []listed, segment string, mark bool, by string) []view.ContactGroup {
+// A row carries every column the Columns menu offers (s-contacts-23, -24):
+// its tags lead to the list filtered by them.
+func (s *Server) contactGroups(sess *session.Session, tf timeFmt, items []listed, segment string, mark bool, by string, filter tagFilter) []view.ContactGroup {
 	avatars := s.listAvatars(sess, items)
 	names := make([]string, len(items))
 	changed := make([]time.Time, len(items))
@@ -773,7 +776,14 @@ func (s *Server) contactGroups(sess *session.Session, tf timeFmt, items []listed
 			Phone:  text(firstValue(it.obj, "TEL")),
 			Email:  text(firstValue(it.obj, "EMAIL")),
 			Org:    text(structured(firstValue(it.pick("ORG"), "ORG"))),
+			Tags:   filter.tags(categoriesOf(view.KindContact, it.obj)),
 			State:  linkedState(it),
+		}
+		if bday := it.pick("BDAY").Props()["BDAY"]; len(bday) > 0 {
+			row.Birthday = text(birthdayTyped(bday[0].Text, bday[0].Params))
+		}
+		if day := changed[i]; !day.IsZero() {
+			row.Changed = text(tf.shortDay(day))
 		}
 		// A linked row shows the fields of the whole group: what the row
 		// lacks comes from the others (S-16).
@@ -786,6 +796,9 @@ func (s *Server) contactGroups(sess *session.Session, tf timeFmt, items []listed
 			}
 			if row.Org == "" {
 				row.Org = text(structured(firstValue(o.obj, "ORG")))
+			}
+			if bday := o.obj.Props()["BDAY"]; row.Birthday == "" && len(bday) > 0 {
+				row.Birthday = text(birthdayTyped(bday[0].Text, bday[0].Params))
 			}
 		}
 		row.Badges, row.Sources = linkedBadge(it), linkedSources(it)

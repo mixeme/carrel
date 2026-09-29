@@ -92,6 +92,7 @@
   },
   "kind": "contact",
   "link": "",
+  "local": true,
   "range": null,
   "target": "Contact «Анна Ковалёва» · nextcloud · Контакты"
 }
