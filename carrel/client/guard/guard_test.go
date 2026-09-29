@@ -98,11 +98,13 @@ func TestRegistriesAndMarksAnswerEachOther(t *testing.T) {
 
 func TestImportsBite(t *testing.T) {
 	bite(t, must(t)(guard.Imports("testdata/imports/bad/screens")), []string{
+		"calendar/calendar.go:5: import",  // another screen: only the registry imports one
 		"contacts/contacts.go:6: import",  // embed
 		"contacts/contacts.go:7: import",  // fmt
 		"contacts/contacts.go:8: import",  // html/template
 		"contacts/contacts.go:9: import",  // strings
 		"contacts/contacts.go:11: import", // another package of the client
+		"screens.go:6: import",            // the registry: not a screen's package
 	})
 	green(t, "good imports", must(t)(guard.Imports("testdata/imports/good/screens")))
 }

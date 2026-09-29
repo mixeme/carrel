@@ -79,13 +79,20 @@ const (
 // screen that only calls widgets; add one when a real screen needs it, in
 // its own commit, with its reason here. Another package of the client,
 // screens/… included, is not allowed either: what two screens share is
-// common, and common is Typecase's (U-5.7).
+// common, and common is Typecase's (U-5.7). The one exception is the
+// registry's import of a screen (ScreensPath).
 var AllowedImports = []string{
 	"carrel.dev/carrel/server/view",
 	"carrel.dev/typecase/widget",
 	"slices",
 	"strconv",
 }
+
+// ScreensPath is the import path of the screens: the registry (the files of
+// package screens itself) imports the package of each screen below it, to
+// list it in All — and only the registry: a screen that imports another
+// screen shares with it, and what screens share is common (U-5.7).
+const ScreensPath = "carrel.dev/carrel/client/screens/"
 
 // SpecificMark is how code marks a row of the registry of screen specifics,
 // and WaitMark a row of the list «ждёт библиотеку».
@@ -152,7 +159,8 @@ func lines(src []byte) []string {
 }
 
 // Imports checks every Go file under screens (the screens/ directory of the
-// client) against AllowedImports.
+// client) against AllowedImports; a file of the registry — right in screens/
+// — may import a screen's package too, one level below (ScreensPath).
 func Imports(screens string) ([]Finding, error) {
 	var out []Finding
 	err := walkGo(screens, nil, func(rel string, src []byte) error {
@@ -168,7 +176,8 @@ func Imports(screens string) ([]Finding, error) {
 				return err
 			}
 			line := fset.Position(spec.Pos()).Line
-			if slices.Contains(AllowedImports, path) || excused(ls, line) {
+			registry := !strings.Contains(rel, "/") && strings.HasPrefix(path, ScreensPath) && !strings.Contains(strings.TrimPrefix(path, ScreensPath), "/")
+			if slices.Contains(AllowedImports, path) || registry || excused(ls, line) {
 				continue
 			}
 			out = append(out, Finding{Path: rel, Line: line, Rule: RuleImport, What: fmt.Sprintf("%q is not a package a screen imports", path)})

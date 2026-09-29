@@ -4,6 +4,54 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.0.3 — 2026-09-29
+
+Typecase 0.10.0 gives the sign-in page its meaning, and the client checks it
+on every screen. The sign-in screen is built from its view model with that
+meaning, but the frame comparison does not take its link yet (Typecase's
+`shape` lags 0.10.0): the screen waits on the branch `client/s-auth-1`, its
+draft is here (docs/plan/client.md, «Что блокирует»).
+
+### Changed
+
+- **Typecase `ab79062`** (0.10.0 and Carrel's tasks 40–44 after it; the
+  neighbour's tree clean). `AuthStack.Links` are `[]widget.Link`: the
+  guards' sample of the sign-in page prints its links without an address,
+  as the frame draws them.
+- **A screen draws a root of the library**: `screens.Root` is
+  `widget.Root`, Typecase's closed interface — a shell, a page, an overlay
+  (U-15.2, 1). The bite of a class of the screen's own is held on the page
+  printed.
+- **The registry imports the screens**: a file right in `screens/` may
+  import a screen's package one level below; a screen importing another
+  screen stays red (`guard.ScreensPath`).
+- **`screens.Screen.Title`** — the document's title from the view model.
+
+### Added
+
+- **Meaning** (U-8, U-15.2; `guard.Meaning`, Typecase's
+  `TestEveryControlHasMeaning` turned to the client's screens): each
+  screen's tree of widget values, drawn on every fixture of its route, is
+  held against a table of the contract by widget type — a link has its
+  `Href`; a button leads (`Href`), submits a form by name (`Form`), submits
+  its form (`Submit` in a `Form` with `Action`), adds a row (`Adds`), opens
+  a sheet (`Opens`) or is disabled; a field has its `Name` and stands in a
+  form that sends; a tick box sends (`Send`); a search and a filter are forms
+  (`Action`); the form a button names is on the page. A widget with a field
+  of meaning (`Href`, `Action`, `To`, `Form` as text, `Send`) the table does
+  not know is a finding: the table grows with the screens. Bites: the
+  sample of the sign-in page without meaning (the button, the link and the
+  fields named), the rules on trees.
+- **The draft of the sign-in page** (`screens/login`, frame `s-auth-1`):
+  `go tool frame2go -self` as printed, a commit of its own (U-5.1).
+- **`document`** — the page a screen stands in: Typecase's `page.Document`
+  around the screen's root, the title from the view model, `lang="en"`,
+  the library's files under the base path at `/static/tc` (`Assets`), and
+  `Files` serving them (`page.Static`). No markup of its own (the guard of
+  the module's strings); `TestDocument` — the page's head and root, nothing
+  inline a strict content policy refuses; `TestFiles`. Not wired into
+  `cmd/carrel` yet.
+
 ## v0.0.2 — 2026-09-28
 
 Typecase is connected, and the guards of stage 2 that need it are built. The

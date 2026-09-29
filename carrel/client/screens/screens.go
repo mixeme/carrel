@@ -16,6 +16,10 @@ type Screen struct {
 	Model func() any
 	// Draw draws the screen from a view model Model made.
 	Draw func(model any) Root
+	// Title is the document's title, from a view model Model made: the
+	// model's Title, which a page outside the shell draws as the mark, not as
+	// words (U-6.14).
+	Title func(model any) string
 }
 
 // Root is what a screen draws: one of Typecase's roots — a shell, a page
