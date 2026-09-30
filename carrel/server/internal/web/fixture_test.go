@@ -1196,6 +1196,10 @@ func TestFixtureContactEdit(t *testing.T) {
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7/edit"
+	// Without a photograph: Add (s-contacts-4, the part «no-photo»).
+	app.compare(t, "app-contact-edit/no-photo.json", app.h.do(get(rec, app.sess)))
+	// With one: Replace, Crop, Remove (s-contacts-3).
+	mockupAnnaPhoto(t, app)
 	app.compare(t, "app-contact-edit/normal.json", app.h.do(get(rec, app.sess)))
 }
 

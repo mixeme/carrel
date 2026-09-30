@@ -622,8 +622,9 @@ func statusLabel(v string) string {
 // (to-typecase task 13).
 var editFields = map[view.Kind][]editField{
 	view.KindContact: {
-		{name: "fn", label: "Display name", prop: "FN", typ: fieldText,
-			hint: "Left empty, it is made from Given and Family. Fill it alone and it is cut the other way: the first word is the given name, the rest the family name."},
+		// No hint under it (s-contacts-3): the order Display name is cut in is
+		// said on the quick sheet (NewSheet.Note, s-notes-8).
+		{name: "fn", label: "Display name", prop: "FN", typ: fieldText},
 		{name: "n", label: "Name", prop: "N", typ: fieldName},
 		// The nickname and the birthday stand in the head empty too
 		// (s-contacts-3, s-contacts-4).
@@ -639,7 +640,7 @@ var editFields = map[view.Kind][]editField{
 		// Addresses after the e-mail (s-contacts-3), folded away with their
 		// button when the card has none.
 		{name: "adr", label: "Address", prop: "ADR", typ: fieldAddress, typed: true, set: "Addresses", optional: true, add: "Add address"},
-		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, optional: true, hint: "Separated by commas.", set: "Other"},
+		{name: "categories", label: "Tags", prop: "CATEGORIES", typ: fieldList, optional: true, set: "Other"},
 		{name: "note", label: "Note", prop: "NOTE", typ: fieldArea, optional: true, set: "Other"},
 	},
 	view.KindEvent: {
@@ -1996,7 +1997,12 @@ func (s *Server) editPage(c *collectionCtx, st editState) any {
 	}
 	switch c.spec.kind {
 	case view.KindContact:
-		page := view.ContactEditPage{Shell: sh, UID: st.uid, Form: form, Loss: st.loss, ReadOnly: c.col.ReadOnly}
+		// The head: the person and the book (s-contacts-3).
+		name := strings.TrimSpace(first(st.values["fn"]))
+		if st.isNew || name == "" {
+			name = "New contact"
+		}
+		page := view.ContactEditPage{Shell: sh, UID: st.uid, Name: text(name), Subtitle: view.Text(c.stamp()), Form: form, Loss: st.loss, ReadOnly: c.col.ReadOnly}
 		page.Photo = s.photoBlock(c, st)
 		return page
 	case view.KindEvent:
@@ -2402,7 +2408,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 		if folded == 1 {
 			legend = "Show 1 empty field"
 		}
-		sets = append(sets, view.FieldSet{Legend: text(legend), Rows: empty})
+		sets = append(sets, view.FieldSet{Legend: text(legend), Folded: true, Rows: empty})
 	}
 	form := view.Form{
 		Action: s.route(s.editAction(c, st)), Method: "POST", Sets: sets,

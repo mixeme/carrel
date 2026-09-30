@@ -1153,6 +1153,8 @@ type TimelineRow struct {
 type ContactEditPage struct {
     Shell
     UID      string
+    Name     Text // заголовок: имя человека, у новой — «New contact» (s-contacts-3)
+    Subtitle Text // книга: «nextcloud · Контакты»
     Form     Form
     Photo    PhotoBlock
     Loss     *LossReport // C-9
@@ -1749,7 +1751,9 @@ type Form struct { // общая форма: поля, ошибки, кнопк�
     Errors  []FieldError
     Actions []Action
 }
-type FieldSet struct { Legend Text; Rows []FormRow }
+// Folded — набор свёрнут: его Legend — кнопка, раскрывающая строки («Show 6
+// empty fields», s-contacts-3); без сценариев — details/summary
+type FieldSet struct { Legend Text; Folded bool; Rows []FormRow }
 type FormRow struct {
     Name     string
     Label    Text
@@ -2911,6 +2915,7 @@ type LossReport struct { // сервер принял запись, но что-
 | `wipe-sent` | Письмо со ссылкой стирания ушло | Забытый пароль (s-auth-8) |
 | `asked` | Просьба к администратору записана | Забытый пароль с депонированным ключом (s-auth-9) |
 | `password` | Второй шаг ссылки: учётная запись стёрта, новый пароль | Ссылка стирания (s-auth-11) |
+| `no-photo` | Карточка без фотографии: на месте Replace, Crop, Remove — Add и форматы | Правка контакта (кадр s-contacts-4, часть `no-photo`; `normal` — с фотографией, s-contacts-3) |
 | `link` | Приглашение ссылкой: адреса нет, и поля адреса нет; строка под заголовком — из подписи кадра | Приглашение (`normal` — письмом, кадр s-auth-12; у приглашения ссылкой своего кадра нет — подпись s-auth-12, строки в `STATE_FRAME` нет) |
 
 Шаги страниц вне оболочки (`sent` … `password`) названы по `data-part` своего

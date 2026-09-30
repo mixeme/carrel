@@ -403,6 +403,8 @@ func (s *Server) photoBlock(c *collectionCtx, st editState) view.PhotoBlock {
 		if _, _, ok := s.photoFrom(context.Background(), c.sess, o, uid, st.obj, photoThumb); ok {
 			b.Href = s.photoHref(o, uid, st.obj.ETag, photoFull)
 			b.Actions = []view.Action{step("photo.replace", "Replace", "upload", false), step("photo.crop", "Crop", "crop", false), step("photo.remove", "Remove", "remove", true)}
+			// What was done to it on the way in (S-13, s-contacts-3).
+			b.Note = "EXIF orientation applied, metadata stripped."
 			break
 		}
 		b.Note = "The photo in this card is not a JPEG, PNG, GIF or WebP image Carrel can show."

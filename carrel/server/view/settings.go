@@ -9,7 +9,10 @@ type Form struct {
 	Actions []Action     `json:"actions"`
 }
 type FieldSet struct {
-	Legend Text      `json:"legend"`
+	Legend Text `json:"legend"`
+	// Folded — набор свёрнут: Legend — кнопка, раскрывающая строки («Show 6
+	// empty fields», s-contacts-3)
+	Folded bool      `json:"folded,omitempty"`
 	Rows   []FormRow `json:"rows"`
 }
 type FormRow struct {

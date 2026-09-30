@@ -126,7 +126,7 @@ check("6b. названные правила введены заголовком
 
 # 7. Фикстуры разбираются и лежат по правилам имён
 states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome","refused",
-          "sent","options","no-mail","wipe-sent","asked","password","link"}
+          "sent","options","no-mail","wipe-sent","asked","password","link","no-photo"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -263,6 +263,9 @@ STATE_FRAME = {
     # (без data-screen: у маршрута карточки кадр — s-contacts-6).
     "app-contact/outcome": "s-contacts-16",
 }
+# Без строки: app-contact-edit/no-photo рисует s-contacts-4 (часть no-photo), но
+# рейл кадра — одна книга «Контакты», у набора их две; сверяется с кадром
+# маршрута s-contacts-3, чей рейл — набор. Вопрос к кадрам, как у states-4.
 
 def frame_by_id(fid):
     m = re.search(r'<div class="frame" data-frame="%s"[^>]*>' % re.escape(fid), mock)

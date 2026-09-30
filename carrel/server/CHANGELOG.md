@@ -17,6 +17,33 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.89 — 2026-10-01
+
+The form of a contact as the frames draw it (the client's scan of the
+contacts section, group Д).
+
+### Added
+
+- **`ContactEditPage.name`** (the person; «New contact» for a new one) and
+  **`.subtitle`** (the book) — the form's head (s-contacts-3).
+- **`FieldSet.folded`** — the set is folded under its legend: «Show N empty
+  fields», the last of the form.
+- **Fixture state `no-photo`** (C-14.3): `app-contact-edit/no-photo` — the
+  form without a photograph, Add and the formats (s-contacts-4);
+  `app-contact-edit/normal` now has Анна's photograph: Replace, Crop,
+  Remove, «EXIF orientation applied, metadata stripped.» (s-contacts-3).
+
+### Changed
+
+- **No hints under Display name and Tags** of the contact's form (the frame
+  draws none); the order Display name is cut in is said on the quick sheet.
+- A kept photograph's `PhotoBlock.note` says what was done to it (S-13).
+
+### For consumers
+
+Fixtures regenerated: `app-contact-edit/normal`, `/loss`, `/no-photo` (new),
+`app-contact-new/normal`.
+
 ## v0.2.88 — 2026-10-01
 
 A person's timeline as the frame draws it (the client's scan of the

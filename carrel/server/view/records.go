@@ -65,6 +65,8 @@ type TimelineRow struct {
 type ContactEditPage struct {
 	Shell
 	UID      string      `json:"uid"`
+	Name     Text        `json:"name"`     // заголовок: имя человека, у новой — «New contact»
+	Subtitle Text        `json:"subtitle"` // книга: «nextcloud · Контакты»
 	Form     Form        `json:"form"`
 	Photo    PhotoBlock  `json:"photo"`
 	Loss     *LossReport `json:"loss"` // C-9
