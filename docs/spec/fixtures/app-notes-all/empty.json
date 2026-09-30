@@ -4,6 +4,7 @@
       {
         "enabled": true,
         "href": "/app/notes/a-nc-home/dnevnik/new?pick=1",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New note",
         "method": "GET",
@@ -12,6 +13,7 @@
       {
         "enabled": true,
         "href": "/app/notes/import",
+        "icon": "i-up",
         "id": "collection.import",
         "label": "Import",
         "method": "GET"
@@ -67,6 +69,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -108,8 +111,9 @@
       ],
       "label": "Columns"
     },
-    "compact": false,
+    "compact": null,
     "filter": "",
+    "filterForm": null,
     "loaded": 0,
     "range": null,
     "segments": [

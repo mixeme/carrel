@@ -4,10 +4,16 @@ package view
 // строки «на всё» не заводится.
 
 type ListBar struct {
-	Filter   Text     `json:"filter"` // фильтр по уже загруженному, без второго опроса
-	Loaded   int      `json:"loaded"`
-	Total    *int     `json:"total"`
-	Compact  bool     `json:"compact"`
+	Filter Text `json:"filter"` // фильтр по уже загруженному, без второго опроса
+	// FilterForm — фильтр без сценариев: GET на адрес списка, поле filter и
+	// скрытые поля запроса (task, sort, tag); nil — у списка фильтра нет
+	FilterForm *Form `json:"filterForm"`
+	Loaded     int   `json:"loaded"`
+	Total      *int  `json:"total"`
+	// Compact — «Compact rows» (s-contacts-1): On — строки плотные; ведёт на
+	// тот же список с compact=1 или 0 (кука раздела, S-9.6); nil —
+	// переключателя нет
+	Compact  *Action  `json:"compact"`
 	Segments []Action `json:"segments"` // Open / Done / All; All / Contacts / Events / …
 	Range    *Range   `json:"range"`    // диапазон дат там, где он есть
 	Actions  []Action `json:"actions"`  // операции над выделенным
@@ -22,7 +28,8 @@ type ListBar struct {
 // стоят, и порядок пунктов — порядок столбцов. Выбор помнит этот браузер
 // (U-12).
 type Columns struct {
-	Label Text `json:"label"` // «Columns»: кнопка полосы и заголовок меню
+	Label Text   `json:"label"` // «Columns»: кнопка полосы и заголовок меню
+	Icon  string `json:"icon"`  // значок кнопки, i-cols
 	// Form — POST {адрес списка}/columns с запросом списка; скрытый _csrf;
 	// Actions — Apply и «Reset to defaults», который отправляет col=default
 	Form Form `json:"form"`
@@ -48,12 +55,19 @@ type Range struct {
 
 type ContactsListPage struct {
 	Shell
-	Bar    ListBar        `json:"bar"`
-	Groups []ContactGroup `json:"groups"`
-	Poll   *PollBar       `json:"poll"` // единый вид; nil — одна коллекция
+	// Subtitle — под заголовком: «3 of 4 books · 2 accounts · 312 cards»,
+	// «nextcloud · 248 cards», «radicale · vps · the server granted no write
+	// access» (s-contacts-1, s-io-1, states-4)
+	Subtitle Text           `json:"subtitle"`
+	ReadOnly bool           `json:"readOnly"` // книга только для чтения: метка у заголовка (states-4)
+	Bar      ListBar        `json:"bar"`
+	Groups   []ContactGroup `json:"groups"`
+	Poll     *PollBar       `json:"poll"`  // единый вид; nil — одна коллекция или ничего не отмечено
+	Empty    *Notice        `json:"empty"` // показать нечего: почему и что сделать, с кнопкой; nil — строки есть
 }
 type ContactGroup struct {
 	Rubric Text         `json:"rubric"`
+	Count  int          `json:"count"` // сколько карточек в группе
 	Rows   []ContactRow `json:"rows"`
 }
 type ContactRow struct {
@@ -76,6 +90,7 @@ type ContactRow struct {
 	Sources  []Stamp     `json:"sources"` // раскрытые источники свёрнутой группы
 	Menu     []MenuItem  `json:"menu"`
 	State    RecordState `json:"state"`
+	On       bool        `json:"on"` // строка открыта в панели подробностей (is-on)
 }
 
 type AgendaPage struct {

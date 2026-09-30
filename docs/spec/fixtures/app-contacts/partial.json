@@ -577,7 +577,13 @@
     "filter": "",
     "loaded": 5,
     "total": 5,
-    "compact": false,
+    "compact": {
+      "enabled": true,
+      "href": "/app/contacts?compact=1&task=t-task",
+      "id": "list.compact",
+      "label": "Compact rows",
+      "method": "GET"
+    },
     "segments": [
       {
         "id": "sort.az",
@@ -600,17 +606,49 @@
       {
         "id": "record.new",
         "label": "New contact",
-        "href": "/app/contacts/a-nc-home/arhiv/new?pick=1",
+        "href": "/app/contacts/a-nc-home/kontakty/new",
         "method": "GET",
         "enabled": true,
-        "primary": true
+        "primary": true,
+        "arrow": [
+          {
+            "colour": "#a05a2c",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/arhiv/new",
+            "id": "record.new",
+            "label": "Архив",
+            "method": "GET"
+          },
+          {
+            "aside": "last used",
+            "colour": "#4a6b52",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/kontakty/new",
+            "id": "record.new",
+            "label": "Контакты",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "colour": "#6b4e7a",
+            "enabled": false,
+            "href": "/app/contacts/a-rad-vps/komanda/new",
+            "id": "record.new",
+            "label": "Команда",
+            "method": "GET",
+            "readOnly": true,
+            "reason": "Read-only"
+          }
+        ],
+        "icon": "i-plus"
       },
       {
         "id": "collection.import",
         "label": "Import",
         "href": "/app/contacts/import",
         "method": "GET",
-        "enabled": true
+        "enabled": true,
+        "icon": "i-up"
       },
       {
         "id": "collection.export",
@@ -619,6 +657,14 @@
         "href": "/app/contacts/export",
         "method": "GET",
         "enabled": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "selected": 0,
@@ -715,7 +761,45 @@
           "on": true
         }
       ],
-      "label": "Columns"
+      "label": "Columns",
+      "icon": "i-cols"
+    },
+    "filterForm": {
+      "action": "/app/contacts",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "task",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "t-task"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ]
+        }
+      ]
     }
   },
   "groups": [
@@ -801,7 +885,8 @@
           "state": "ok",
           "birthday": "",
           "changed": "31 Jul",
-          "tags": []
+          "tags": [],
+          "on": false
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
@@ -893,7 +978,8 @@
               "label": "издательство",
               "on": false
             }
-          ]
+          ],
+          "on": false
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/c3f7-8a21-1b09",
@@ -974,9 +1060,11 @@
           "state": "ok",
           "birthday": "",
           "changed": "12 Jun",
-          "tags": []
+          "tags": [],
+          "on": false
         }
-      ]
+      ],
+      "count": 3
     },
     {
       "rubric": "В",
@@ -1060,7 +1148,8 @@
           "state": "ok",
           "birthday": "",
           "changed": "18 Feb 2024",
-          "tags": []
+          "tags": [],
+          "on": false
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83",
@@ -1141,9 +1230,11 @@
           "state": "ok",
           "birthday": "",
           "changed": "5 Aug",
-          "tags": []
+          "tags": [],
+          "on": false
         }
-      ]
+      ],
+      "count": 2
     }
   ],
   "poll": {
@@ -1198,5 +1289,8 @@
         "reason": "The list is still running."
       }
     ]
-  }
+  },
+  "empty": null,
+  "readOnly": false,
+  "subtitle": "3 of 4 books · 2 accounts"
 }

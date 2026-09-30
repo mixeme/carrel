@@ -4,6 +4,7 @@
       {
         "enabled": true,
         "href": "/app/tasks/a-nc-home/dela/new",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New task",
         "method": "GET",
@@ -68,6 +69,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -115,8 +117,9 @@
       ],
       "label": "Columns"
     },
-    "compact": false,
+    "compact": null,
     "filter": "",
+    "filterForm": null,
     "loaded": 3,
     "range": null,
     "segments": [

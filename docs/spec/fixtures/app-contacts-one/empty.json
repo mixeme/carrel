@@ -4,6 +4,7 @@
       {
         "enabled": true,
         "href": "/app/contacts/a-rad-vps/rassylki/new",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New contact",
         "method": "GET",
@@ -23,6 +24,14 @@
         "icon": "i-down",
         "id": "collection.export",
         "label": "Export",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-rad-vps/rassylki?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
         "method": "GET"
       }
     ],
@@ -68,6 +77,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -115,8 +125,39 @@
       ],
       "label": "Columns"
     },
-    "compact": false,
+    "compact": {
+      "enabled": true,
+      "href": "/app/contacts/a-rad-vps/rassylki?compact=1",
+      "id": "list.compact",
+      "label": "Compact rows",
+      "method": "GET"
+    },
     "filter": "",
+    "filterForm": {
+      "action": "/app/contacts/a-rad-vps/rassylki",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
     "loaded": 0,
     "range": null,
     "segments": [
@@ -140,6 +181,31 @@
     "total": 0
   },
   "details": null,
+  "empty": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-rad-vps/rassylki/new",
+        "icon": "i-plus",
+        "id": "record.new",
+        "label": "New contact",
+        "method": "GET",
+        "primary": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-rad-vps/rassylki/import",
+        "icon": "i-up",
+        "id": "collection.import",
+        "label": "Import",
+        "method": "GET"
+      }
+    ],
+    "body": "Add a contact, or import a file of them.",
+    "details": null,
+    "role": "info",
+    "title": "This book is empty"
+  },
   "groups": [],
   "notices": [],
   "poll": null,
@@ -581,6 +647,8 @@
       ]
     }
   },
+  "readOnly": false,
+  "subtitle": "radicale · vps · 0 cards",
   "title": "Рассылки",
   "top": {
     "new": {

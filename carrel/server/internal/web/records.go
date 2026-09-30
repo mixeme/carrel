@@ -623,7 +623,7 @@ func (s *Server) writeFailure(c *collectionCtx, method, path string, err error) 
 
 func (s *Server) newRecordAction(c *collectionCtx) view.Action {
 	a := view.Action{
-		ID: "record.new", Label: text("New " + c.spec.noun),
+		ID: "record.new", Label: text("New " + c.spec.noun), Icon: "i-plus",
 		Href: s.route(c.listPath() + "/new"), Method: "GET", Primary: true, Enabled: !c.col.ReadOnly,
 	}
 	if c.col.ReadOnly {
@@ -657,6 +657,12 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	c, ok := s.openCollection(w, r, kind, false)
 	if !ok {
 		return
+	}
+	if c.spec.kind == view.KindContact {
+		if s.compactChoice(w, r, c.spec.segment, c.listPath()) {
+			return
+		}
+		r = withoutOpen(r)
 	}
 	// The rail is built after the list: the list is what fills its counts.
 	// The list leaves the tags of what it read in the shell's rail.
@@ -762,19 +768,29 @@ func changedAt(obj *model.Object, tz *time.Location) time.Time {
 }
 
 func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsListPage {
-	page := view.ContactsListPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
-	page.Bar.Actions = s.listActions(c, nil)
+	page := view.ContactsListPage{Shell: s.buildShell(c.sess, collectionLabel(c.col)), ReadOnly: c.col.ReadOnly}
+	page.Bar.Actions = append(s.listActions(c, nil), s.printAction(c.listPath()))
 	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
+	sift := strings.TrimSpace(r.URL.Query().Get("filter"))
+	page.Bar.Filter, page.Bar.FilterForm = text(sift), s.listFilter(c.listPath(), r.URL.Query(), sift)
+	page.Bar.Compact = s.compactAction(r, c.spec.segment, c.listPath())
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, err := c.contactsAll(r.Context())
 	if err != nil {
+		page.Subtitle = text(bookSubtitle(c, 0, false))
 		page.Notices = append(page.Notices, s.unavailableNotice(c, retryPath(c, r), err))
 		return page
 	}
+	page.Subtitle = text(bookSubtitle(c, len(objs), true))
 	items := c.listed(objs)
-	shown := s.foldLinked(s.catalogOf(c.sess), view.KindContact, filter.keep(view.KindContact, items))
+	shown := filterContacts(s.foldLinked(s.catalogOf(c.sess), view.KindContact, filter.keep(view.KindContact, items)), sift)
 	by := sortOf(r, view.KindContact)
 	page.Groups = s.contactGroups(c.sess, c.tf, shown, c.spec.segment, false, by, filter)
+	countGroups(page.Groups)
+	page.Details = s.openInPanel(r, c.sess, c.listPath(), shown, page.Groups)
+	if len(objs) == 0 {
+		page.Empty = bookEmpty(c, page.Bar.Actions)
+	}
 	page.Bar.Segments = s.sortSegments(c.listPath(), view.KindContact, by, r.URL.Query())
 	page.Rail.Tags = filter.rail(view.KindContact, items)
 	c.putIndex(indexOf(c.tf, view.KindContact, items))

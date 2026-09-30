@@ -2,8 +2,9 @@
   "bar": {
     "actions": [],
     "columns": null,
-    "compact": false,
+    "compact": null,
     "filter": "",
+    "filterForm": null,
     "loaded": 6,
     "range": null,
     "segments": [

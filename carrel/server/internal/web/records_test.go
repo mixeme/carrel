@@ -783,7 +783,7 @@ func TestReadOnlyCollectionHasNoEditing(t *testing.T) {
 	// not offered at all; Export is, because reading is what read-only
 	// allows (the collection is published from Connections).
 	page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
-	if len(page.Bar.Actions) != 2 || page.Bar.Actions[0].Enabled || page.Bar.Actions[0].Reason == "" {
+	if len(page.Bar.Actions) != 3 || page.Bar.Actions[0].Enabled || page.Bar.Actions[0].Reason == "" || page.Bar.Actions[2].ID != "list.print" {
 		t.Errorf("new action = %+v", page.Bar.Actions)
 	}
 	if page.Bar.Actions[1].ID != "collection.export" {

@@ -132,9 +132,11 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 
 	asked := len(srv.Requests()) + len(other.Requests())
 	empty := decode[view.ContactsListPage](t, f.h.do(get("/app/contacts", f.sess)))
-	if empty.Poll == nil || empty.Poll.TaskID != "" || !strings.Contains(string(empty.Poll.Summary), "No collections are ticked") ||
+	// Nothing ticked: no poll, and the list says why, with the button that
+	// ticks every book (U-6.0).
+	if empty.Poll != nil || empty.Empty == nil || actionByID(empty.Empty.Actions, "rail.tick.all") == nil ||
 		len(empty.Groups) != 0 || empty.Title != "Combined address book" {
-		t.Fatalf("nothing ticked = %+v, poll %+v", empty.Groups, empty.Poll)
+		t.Fatalf("nothing ticked = %+v, poll %+v, empty %+v", empty.Groups, empty.Poll, empty.Empty)
 	}
 	if len(srv.Requests())+len(other.Requests()) != asked {
 		t.Error("an empty selection asked a server")
@@ -210,7 +212,7 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 	if got := selected(t, f.h, f.sess, view.KindContact); len(got) != 0 {
 		t.Errorf("an empty form left ticks: %v", got)
 	}
-	if after := decode[view.ContactsListPage](t, f.h.do(get("/app/contacts", f.sess))); len(after.Groups) != 0 || after.Poll.TaskID != "" {
+	if after := decode[view.ContactsListPage](t, f.h.do(get("/app/contacts", f.sess))); len(after.Groups) != 0 || after.Poll != nil {
 		t.Errorf("unticked everything, still shown: %+v", after.Groups)
 	}
 	// Files tick their root (S-17.2), not a combined view, and leave the ticks of

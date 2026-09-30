@@ -212,7 +212,7 @@ func (s *Server) columnsMenu(r *http.Request, csrf view.FormRow, segment, action
 		}
 		return it
 	}
-	menu := &view.Columns{Label: "Columns", Form: form}
+	menu := &view.Columns{Label: "Columns", Icon: "i-cols", Form: form}
 	shown, chosen := columnsShown(r, segment, query, single)
 	if !chosen {
 		for _, c := range cols {

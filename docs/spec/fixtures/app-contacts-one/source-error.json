@@ -4,6 +4,7 @@
       {
         "enabled": true,
         "href": "/app/contacts/a-nc-home/kontakty/new",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New contact",
         "method": "GET",
@@ -23,6 +24,14 @@
         "icon": "i-down",
         "id": "collection.export",
         "label": "Export",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
         "method": "GET"
       }
     ],
@@ -68,6 +77,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -115,8 +125,39 @@
       ],
       "label": "Columns"
     },
-    "compact": false,
+    "compact": {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty?compact=1",
+      "id": "list.compact",
+      "label": "Compact rows",
+      "method": "GET"
+    },
     "filter": "",
+    "filterForm": {
+      "action": "/app/contacts/a-nc-home/kontakty",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
     "loaded": 0,
     "range": null,
     "segments": [],
@@ -124,6 +165,7 @@
     "total": null
   },
   "details": null,
+  "empty": null,
   "groups": [],
   "notices": [
     {
@@ -587,6 +629,8 @@
       ]
     }
   },
+  "readOnly": false,
+  "subtitle": "nextcloud",
   "title": "Контакты",
   "top": {
     "new": {

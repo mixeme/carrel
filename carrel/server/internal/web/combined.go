@@ -82,6 +82,12 @@ func (s *Server) getKindRoot(w http.ResponseWriter, r *http.Request, segment str
 		s.notFound(w, r)
 		return
 	}
+	if spec.kind == view.KindContact {
+		if s.compactChoice(w, r, segment, "/app/"+segment) {
+			return
+		}
+		r = withoutOpen(r)
+	}
 	page, err := s.combinedPage(r, sess, s.catalogOf(sess), spec)
 	if err != nil {
 		http.Error(w, "could not start the list", http.StatusInternalServerError)
@@ -332,11 +338,31 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 	case view.KindContact:
 		page := view.ContactsListPage{Shell: st.shell, Poll: st.poll}
 		by := sortOf(r, view.KindContact)
-		page.Groups = s.contactGroups(sess, tf, shown, spec.segment, true, by, filter)
+		sift := strings.TrimSpace(r.URL.Query().Get("filter"))
+		kept := filterContacts(shown, sift)
+		page.Groups = s.contactGroups(sess, tf, kept, spec.segment, true, by, filter)
+		countGroups(page.Groups)
+		page.Details = s.openInPanel(r, sess, base, kept, page.Groups)
 		total := len(st.items)
-		page.Bar = view.ListBar{Loaded: len(shown), Total: &total, Actions: actions,
+		page.Bar = view.ListBar{Filter: text(sift), Loaded: len(kept), Total: &total, Actions: append(actions, s.printAction(base)),
+			FilterForm: s.listFilter(base, query, sift), Compact: s.compactAction(r, spec.segment, base),
 			Segments: s.sortSegments(base, view.KindContact, by, r.URL.Query()),
 			Columns:  columns()}
+		page.Subtitle = text(combinedSubtitle(page.Rail, spec, st.snap != nil && !st.snap.Running))
+		switch {
+		case st.task == nil && len(page.Notices) == 0:
+			// Nothing ticked: no poll, and the list says why (U-6.0).
+			page.Poll, page.Empty = nil, s.nothingTicked(spec)
+		case st.snap != nil && !st.snap.Running && total == 0:
+			page.Empty = &view.Notice{Role: view.NoticeInfo, Title: "The ticked books are empty",
+				Body: "Add a contact, or import a file of them.", Actions: []view.Action{}}
+			for _, a := range actions {
+				if a.ID == "record.new" || a.ID == "collection.import" {
+					a.Arrow = nil
+					page.Empty.Actions = append(page.Empty.Actions, a)
+				}
+			}
+		}
 		page.Print = header(counted(len(shown), "card"))
 		return page, nil
 	case view.KindEvent:
@@ -397,7 +423,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 // import opens on the first writable collection with its "Into" picker; the
 // export opens a sheet of the collections to hand over.
 func (s *Server) combinedIOActions(blob sealed.Blob, spec kindSpec) []view.Action {
-	imp := view.Action{ID: "collection.import", Label: "Import", Method: "GET",
+	imp := view.Action{ID: "collection.import", Label: "Import", Icon: "i-up", Method: "GET",
 		Href: s.route("/app/" + spec.segment + "/import")}
 	exp := view.Action{ID: "collection.export", Label: "Export", Icon: "i-down", Method: "GET",
 		Href: s.route("/app/" + spec.segment + "/export")}
@@ -421,13 +447,15 @@ func (s *Server) combinedIOActions(blob sealed.Blob, spec kindSpec) []view.Actio
 }
 
 func (s *Server) combinedNewAction(blob sealed.Blob, spec kindSpec) view.Action {
-	a := view.Action{ID: "record.new", Label: text("New " + spec.noun), Method: "GET", Primary: true}
+	a := view.Action{ID: "record.new", Label: text("New " + spec.noun), Icon: "i-plus", Method: "GET", Primary: true}
 	for _, col := range blob.Collections {
 		conn, ok := blob.Connection(col.AccountID)
 		if !ok || col.Gone || col.ReadOnly || !col.Has(spec.kind) {
 			continue
 		}
 		a.Href, a.Enabled = s.route(origin{conn: conn, col: col}.listPath(spec.segment)+"/new?pick=1"), true
+		// In a combined view New asks where, by its arrow (s-contacts-9).
+		s.whereTo(blob, spec, &a)
 		return a
 	}
 	a.Reason = text("No collection of this kind takes new records.")
@@ -902,7 +930,7 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	picks := s.tickPicks(spec, r.PostForm["tick"])
-	if v := r.PostForm.Get("toggle"); v != "" {
+	if v := r.FormValue("toggle"); v != "" {
 		picks = s.toggled(s.catalogOf(sess), spec, v)
 	}
 	err := s.users.SetSelection(sess.AccountID(), key, spec.kind, picks)

@@ -4,6 +4,7 @@
       {
         "enabled": true,
         "href": "/app/calendar/a-nc-home/lichnyj/new",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New event",
         "method": "GET",
@@ -27,8 +28,9 @@
       }
     ],
     "columns": null,
-    "compact": false,
+    "compact": null,
     "filter": "",
+    "filterForm": null,
     "loaded": 1,
     "range": {
       "form": {

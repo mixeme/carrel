@@ -4,6 +4,7 @@
       {
         "enabled": true,
         "href": "/app/calendar/a-nc-home/dni-rozhdeniya/new?pick=1",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New event",
         "method": "GET",
@@ -12,6 +13,7 @@
       {
         "enabled": true,
         "href": "/app/calendar/import",
+        "icon": "i-up",
         "id": "collection.import",
         "label": "Import",
         "method": "GET"
@@ -26,8 +28,9 @@
       }
     ],
     "columns": null,
-    "compact": false,
+    "compact": null,
     "filter": "",
+    "filterForm": null,
     "loaded": 0,
     "range": {
       "form": {

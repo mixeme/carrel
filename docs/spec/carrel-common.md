@@ -365,7 +365,7 @@ spec/fixtures/<screen>/<state>.json
 | `/app/duplicates` | GET | вход | страница | `DuplicatesPage` |
 | `/app/duplicates/decide` | POST | вход | фрагмент | `DuplicateGroup` |
 | `/app/duplicates/merge` | GET, POST | вход | страница | `DuplicatesMergePage` |
-| `/app/sources/{kind}` | POST | вход | фрагмент | `Rail` |
+| `/app/sources/{kind}` | POST | вход | фрагмент, редирект | `Rail`; форма рейла (`Rail.Ticks`): `toggle` — одна строка, `tick` — весь выбор, `back` — страница раздела, куда вернуться без сценариев |
 | `/app/publish` | GET, POST | вход | лист | `PublishSheet` |
 | `/app/mail/compose` | GET, POST | вход | лист | `MailSheet` |
 | `/app/mail/attach` | GET, POST | вход | лист | `MailAttachSheet` |
@@ -384,9 +384,9 @@ spec/fixtures/<screen>/<state>.json
 | Маршрут | Метод | Доступ | Ответ | Вью-модель |
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже |
-| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage` |
+| `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage`; у контактов (и у `/app/contacts`): `?print=1` — тот же список для печати (U-10), `?open={адрес строки}` — с панелью этой записи, `?filter=` — фильтр без сценариев, `?compact=1` или `0` — «Compact rows», запоминается кукой и отвечает редиректом без метки (S-9.6) |
 | `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
-| `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение |
+| `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение; `?print=1` — та же карточка для печати (U-10) |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage` |
 | `/app/contacts/{account}/{col}/{uid}/timeline/columns` | POST | вход | редирект | — ; меню Columns хронологии (s-contacts-25), как у списков (S-9.6) |
@@ -594,7 +594,13 @@ type Action struct {
 
 type MenuItem struct {
     Action
-    Separator bool // черта перед пунктом
+    Separator bool   // черта перед пунктом
+    // Пункт «куда»: коллекция стрелки New в едином виде (s-contacts-9) —
+    // её метка, приглушённое справа («last used») и «только для чтения»:
+    // такой пункт выключен с причиной, клиент ставит у него «ro»
+    Colour    Colour
+    Aside     Text
+    ReadOnly  bool
 }
 
 type Badge struct {
@@ -623,6 +629,7 @@ type Tag struct {
 }
 
 type SourceBlock struct { // «откуда запись и что с ней на сервере»
+    UID      Text     // идентификатор записи — строка UID источника в панели (s-contacts-1, -7)
     Stamp    Stamp
     Colour   Colour
     ReadOnly bool
@@ -776,6 +783,7 @@ type Details struct {
     Actions    []Action   // кнопки на виду; удаление — Danger, клиент ставит его внизу панели
     Menu       []MenuItem // «⋯» панели, в порядке кадра (s-contacts-8, s-agenda-4, s-tasks-4, s-notes-12)
     DeleteNote Text       // строка у удаления: у серии «Series is edited and deleted whole.»
+    Close      string     // крестик без сценариев: тот же список без панели; пусто — панель пришла фрагментом (C-7.2)
 }
 
 type Field struct {
@@ -891,9 +899,15 @@ type Print struct { // колонтитул распечатки, C-10
 ```go
 type ListBar struct {
     Filter   Text     // фильтр по уже загруженному, без второго опроса
+    // Фильтр без сценариев — форма GET на адрес списка: поле filter и скрытые
+    // поля запроса (task, sort, tag); nil — у списка фильтра нет. Со сценариями
+    // клиент просеивает загруженное сам
+    FilterForm *Form
     Loaded   int
     Total    *int
-    Compact  bool
+    // «Compact rows» (s-contacts-1): On — строки плотные; ведёт на тот же список
+    // с compact=1 или 0, выбор помнит кука раздела (S-9.6); nil — переключателя нет
+    Compact  *Action
     Segments []Action // Open / Done / All; All / Contacts / Events / …
     Range    *Range   // диапазон дат там, где он есть
     Actions  []Action // операции над выделенным
@@ -906,6 +920,7 @@ type ListBar struct {
 // пунктов и есть порядок столбцов. Выбор помнит этот браузер (U-12).
 type Columns struct {
     Label Text         // «Columns»: кнопка полосы и заголовок меню
+    Icon  string       // значок кнопки, i-cols
     Form  Form         // POST {адрес списка}/columns с запросом списка; скрытый _csrf; Actions — Apply и «Reset to defaults» (columns.default: отправляет col=default)
     Items []ColumnItem // показанные столбцы в их порядке, за ними снятые в порядке по умолчанию; пока человек не выбирал — все в порядке по умолчанию (components-21)
 }
@@ -925,11 +940,18 @@ type Range struct {
 
 type ContactsListPage struct {
     Shell
-    Bar    ListBar
-    Groups []ContactGroup
-    Poll   *PollBar // единый вид; nil — одна коллекция
+    // Под заголовком: единый вид — «3 of 4 books · 2 accounts · 312 cards»
+    // (число карточек — когда опрос закончен); одна книга — «nextcloud · 248
+    // cards» (s-io-1), книга только для чтения — «radicale · vps · the server
+    // granted no write access» (states-4)
+    Subtitle Text
+    ReadOnly bool     // книга только для чтения: у заголовка метка «read-only» (states-4)
+    Bar      ListBar  // Actions: New contact (i-plus; в едином виде со стрелкой «куда», s-contacts-9), Import (i-up), Export (i-down), Print (i-print, ?print=1)
+    Groups   []ContactGroup
+    Poll     *PollBar // единый вид; nil — одна коллекция или ничего не отмечено
+    Empty    *Notice  // показать нечего: почему и что сделать, с кнопкой (U-6.0); nil — строки есть
 }
-type ContactGroup struct { Rubric Text; Rows []ContactRow }
+type ContactGroup struct { Rubric Text; Count int; Rows []ContactRow } // Count — сколько карточек в группе
 type ContactRow struct {
     Href, UID string
     Colour    Colour
@@ -946,6 +968,7 @@ type ContactRow struct {
     Sources   []Stamp  // раскрытые источники свёрнутой группы
     Menu      []MenuItem
     State     RecordState
+    On        bool     // строка открыта в панели подробностей (is-on)
 }
 
 type AgendaPage struct {
@@ -1039,6 +1062,21 @@ type NoteRow struct {
 контактов, задач или заметок источник один и назван в заголовке, пункта
 Source в её меню нет, и `Stamp` в её строках пуст. У хронологии источник
 свой у каждой строки, и Source в её меню есть всегда.
+
+**Панель у списка без сценариев** (s-contacts-1): список контактов с
+`?open={адрес строки}` приходит с панелью этой записи в `Shell.Details`, её
+строка — `On`, `Details.Close` — тот же список без `open`. Со сценариями
+панель — фрагмент по адресу записи (C-7.2), и `Close` пуст.
+
+**Полоса опроса стоит, пока есть что сказать.** Клиент рисует `PollBar`, пока
+опрос идёт (`Running`) или когда источник не ответил (состояние не `done` и
+не `empty`); законченный чистый опрос полосы не рисует — его время
+названо у обновления (`Refresh.Answered`, s-contacts-1). «Loading more…» под
+списком стоит, пока опрос идёт: строки источников, которые ещё отвечают,
+придут следом. Сервер отдаёт список целиком; страниц у него нет.
+
+**Пустая ячейка** — прочерк «—» (s-contacts-1): неизменное слово экрана
+(U-1.3); у строки пусто.
 
 ### C-6.5 Карточки записей
 

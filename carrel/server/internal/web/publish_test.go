@@ -206,6 +206,8 @@ func TestPublishIsOffered(t *testing.T) {
 	if actionHref(t, menuActions(card.Menu), "publish") != f.publishHref("contacts", searchBook, "ada") {
 		t.Errorf("record menu = %+v", card.Menu)
 	}
+	// Print of a list is the list with print=1 (the client's plan, decision
+	// 4): the contacts carry it, the agenda not yet.
 	head := func(frame string) []string {
 		acts := mockupFrame(t, frame)
 		acts = acts[strings.Index(acts, `class="tc-head"`):]
@@ -213,7 +215,7 @@ func TestPublishIsOffered(t *testing.T) {
 		acts = acts[:strings.Index(acts, `</div>`)]
 		out := []string{}
 		for _, m := range frameButton.FindAllStringSubmatch(acts, -1) {
-			if label := frameText(m[1]); label != "Print" {
+			if label := frameText(m[1]); label != "Print" || frame == "s-contacts-1" {
 				out = append(out, label)
 			}
 		}

@@ -2,8 +2,39 @@
   "bar": {
     "actions": [
       {
+        "arrow": [
+          {
+            "colour": "#a05a2c",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/arhiv/new",
+            "id": "record.new",
+            "label": "Архив",
+            "method": "GET"
+          },
+          {
+            "aside": "last used",
+            "colour": "#4a6b52",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/kontakty/new",
+            "id": "record.new",
+            "label": "Контакты",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "colour": "#6b4e7a",
+            "enabled": false,
+            "href": "/app/contacts/a-rad-vps/komanda/new",
+            "id": "record.new",
+            "label": "Команда",
+            "method": "GET",
+            "readOnly": true,
+            "reason": "Read-only"
+          }
+        ],
         "enabled": true,
-        "href": "/app/contacts/a-nc-home/arhiv/new?pick=1",
+        "href": "/app/contacts/a-nc-home/kontakty/new",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New contact",
         "method": "GET",
@@ -12,6 +43,7 @@
       {
         "enabled": true,
         "href": "/app/contacts/import",
+        "icon": "i-up",
         "id": "collection.import",
         "label": "Import",
         "method": "GET"
@@ -22,6 +54,14 @@
         "icon": "i-down",
         "id": "collection.export",
         "label": "Export",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
         "method": "GET"
       }
     ],
@@ -67,6 +107,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -120,8 +161,51 @@
       ],
       "label": "Columns"
     },
-    "compact": false,
+    "compact": {
+      "enabled": true,
+      "href": "/app/contacts?compact=1\u0026task=t-task",
+      "id": "list.compact",
+      "label": "Compact rows",
+      "method": "GET"
+    },
     "filter": "",
+    "filterForm": {
+      "action": "/app/contacts",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "task",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "t-task"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
     "loaded": 5,
     "range": null,
     "segments": [
@@ -145,8 +229,10 @@
     "total": 5
   },
   "details": null,
+  "empty": null,
   "groups": [
     {
+      "count": 3,
       "rows": [
         {
           "avatar": {
@@ -221,6 +307,7 @@
             }
           ],
           "name": "Алексей Смирнов",
+          "on": false,
           "org": "",
           "phone": "+7 916 200-71-15",
           "sources": [],
@@ -302,6 +389,7 @@
             }
           ],
           "name": "Анна Ковалёва",
+          "on": false,
           "org": "Издательство «Слово»",
           "phone": "+7 912 445-10-88",
           "sources": [],
@@ -394,6 +482,7 @@
             }
           ],
           "name": "Артём Белов",
+          "on": false,
           "org": "Тензор",
           "phone": "+7 903 118-22-04",
           "sources": [],
@@ -406,6 +495,7 @@
       "rubric": "А"
     },
     {
+      "count": 2,
       "rows": [
         {
           "avatar": {
@@ -480,6 +570,7 @@
             }
           ],
           "name": "Вера Лебедева",
+          "on": false,
           "org": "",
           "phone": "+7 905 331-09-42",
           "sources": [],
@@ -561,6 +652,7 @@
             }
           ],
           "name": "Виктор Гончаров",
+          "on": false,
           "org": "Городская библиотека №4",
           "phone": "",
           "sources": [],
@@ -1093,6 +1185,8 @@
       ]
     }
   },
+  "readOnly": false,
+  "subtitle": "3 of 4 books · 2 accounts · 5 cards",
   "title": "Combined address book",
   "top": {
     "new": {

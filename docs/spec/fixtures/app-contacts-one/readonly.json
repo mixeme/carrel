@@ -4,6 +4,7 @@
       {
         "enabled": false,
         "href": "/app/contacts/a-rad-vps/komanda/new",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New contact",
         "method": "GET",
@@ -16,6 +17,14 @@
         "icon": "i-down",
         "id": "collection.export",
         "label": "Export",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-rad-vps/komanda?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
         "method": "GET"
       }
     ],
@@ -61,6 +70,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -108,8 +118,39 @@
       ],
       "label": "Columns"
     },
-    "compact": false,
+    "compact": {
+      "enabled": true,
+      "href": "/app/contacts/a-rad-vps/komanda?compact=1",
+      "id": "list.compact",
+      "label": "Compact rows",
+      "method": "GET"
+    },
     "filter": "",
+    "filterForm": {
+      "action": "/app/contacts/a-rad-vps/komanda",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ]
+        }
+      ]
+    },
     "loaded": 1,
     "range": null,
     "segments": [
@@ -133,8 +174,10 @@
     "total": 1
   },
   "details": null,
+  "empty": null,
   "groups": [
     {
+      "count": 1,
       "rows": [
         {
           "avatar": {
@@ -183,6 +226,7 @@
             }
           ],
           "name": "Артём Белов",
+          "on": false,
           "org": "Тензор",
           "phone": "+7 903 118-22-04",
           "sources": [],
@@ -635,6 +679,8 @@
       ]
     }
   },
+  "readOnly": true,
+  "subtitle": "radicale · vps · the server granted no write access",
   "title": "Команда",
   "top": {
     "new": {

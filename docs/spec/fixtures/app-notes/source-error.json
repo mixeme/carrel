@@ -4,6 +4,7 @@
       {
         "enabled": true,
         "href": "/app/notes/a-nc-home/zapisi/new",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New note",
         "method": "GET",
@@ -68,6 +69,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -103,8 +105,9 @@
       ],
       "label": "Columns"
     },
-    "compact": false,
+    "compact": null,
     "filter": "",
+    "filterForm": null,
     "loaded": 0,
     "range": null,
     "segments": [],

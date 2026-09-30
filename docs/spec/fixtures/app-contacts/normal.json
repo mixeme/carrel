@@ -566,7 +566,166 @@
     }
   },
   "notices": [],
-  "details": null,
+  "details": {
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
+        "id": "record.edit",
+        "label": "Edit",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+        "id": "contact.timeline",
+        "label": "All records",
+        "method": "GET"
+      },
+      {
+        "danger": true,
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e1",
+        "icon": "i-trash",
+        "id": "record.delete",
+        "label": "Delete contact",
+        "method": "POST"
+      }
+    ],
+    "attach": [],
+    "attendees": [],
+    "avatar": {
+      "colour": "#8c6239",
+      "href": "",
+      "initials": "АК"
+    },
+    "body": "",
+    "close": "/app/contacts?task=t-task",
+    "deleteNote": "",
+    "fields": [
+      {
+        "href": "",
+        "label": "Organisation",
+        "mono": false,
+        "value": "Издательство «Слово»"
+      },
+      {
+        "href": "",
+        "label": "Title",
+        "mono": false,
+        "value": "Выпускающий редактор"
+      },
+      {
+        "href": "tel:+7912445-10-88",
+        "label": "Phone · mobile",
+        "mono": false,
+        "value": "+7 912 445-10-88"
+      },
+      {
+        "href": "tel:+7495120-45-00",
+        "label": "Phone · work",
+        "mono": false,
+        "value": "+7 495 120-45-00"
+      },
+      {
+        "href": "mailto:a.kovaleva@example.org",
+        "label": "Email · work",
+        "mono": false,
+        "value": "a.kovaleva@example.org"
+      },
+      {
+        "href": "",
+        "label": "Birthday",
+        "mono": false,
+        "value": "1987-03-14"
+      },
+      {
+        "href": "",
+        "label": "Note",
+        "mono": false,
+        "value": "Пишет по вторникам, отвечает в тот же день."
+      }
+    ],
+    "foreign": [
+      {
+        "href": "",
+        "label": "X-ABLABEL",
+        "mono": true,
+        "value": "издательство"
+      },
+      {
+        "href": "",
+        "label": "X-CARREL-UNKNOWN-FLAG",
+        "mono": true,
+        "value": "1"
+      },
+      {
+        "href": "",
+        "label": "X-EVOLUTION-FILE-AS",
+        "mono": true,
+        "value": "Ковалёва, Анна"
+      }
+    ],
+    "menu": [
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move",
+        "icon": "i-move",
+        "id": "record.move",
+        "label": "Move",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/move?copy=1",
+        "icon": "i-dup",
+        "id": "record.copy",
+        "label": "Copy",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts/a-nc-home/kontakty/export?uid=4f2b-9c31-a0e7",
+        "icon": "i-down",
+        "id": "record.export",
+        "label": "Export .vcf",
+        "method": "GET"
+      },
+      {
+        "enabled": true,
+        "href": "/app/publish?a=a-nc-home&c=kontakty&k=contacts&uid=4f2b-9c31-a0e7",
+        "icon": "i-link",
+        "id": "publish",
+        "label": "Publish a link",
+        "method": "GET"
+      }
+    ],
+    "related": [],
+    "rendered": [],
+    "source": {
+      "changed": "10 August 2026, 17:04",
+      "colour": "#4a6b52",
+      "lastRead": "2 min ago",
+      "objects": null,
+      "readOnly": false,
+      "stamp": "nextcloud · Контакты",
+      "uid": "4f2b-9c31-a0e7"
+    },
+    "subtitle": "nextcloud · Контакты",
+    "tags": [
+      {
+        "href": "/app/contacts/a-nc-home/kontakty?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0",
+        "label": "работа",
+        "on": false
+      },
+      {
+        "href": "/app/contacts/a-nc-home/kontakty?tag=%D0%B8%D0%B7%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE",
+        "label": "издательство",
+        "on": false
+      }
+    ],
+    "title": "Анна Ковалёва"
+  },
   "print": {
     "title": "Combined address book",
     "range": "3 books · 5 cards",
@@ -576,7 +735,13 @@
     "filter": "",
     "loaded": 5,
     "total": 6,
-    "compact": false,
+    "compact": {
+      "enabled": true,
+      "href": "/app/contacts?compact=1&task=t-task",
+      "id": "list.compact",
+      "label": "Compact rows",
+      "method": "GET"
+    },
     "segments": [
       {
         "id": "sort.az",
@@ -599,17 +764,49 @@
       {
         "id": "record.new",
         "label": "New contact",
-        "href": "/app/contacts/a-nc-home/arhiv/new?pick=1",
+        "href": "/app/contacts/a-nc-home/kontakty/new",
         "method": "GET",
         "enabled": true,
-        "primary": true
+        "primary": true,
+        "arrow": [
+          {
+            "colour": "#a05a2c",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/arhiv/new",
+            "id": "record.new",
+            "label": "Архив",
+            "method": "GET"
+          },
+          {
+            "aside": "last used",
+            "colour": "#4a6b52",
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/kontakty/new",
+            "id": "record.new",
+            "label": "Контакты",
+            "method": "GET",
+            "on": true
+          },
+          {
+            "colour": "#6b4e7a",
+            "enabled": false,
+            "href": "/app/contacts/a-rad-vps/komanda/new",
+            "id": "record.new",
+            "label": "Команда",
+            "method": "GET",
+            "readOnly": true,
+            "reason": "Read-only"
+          }
+        ],
+        "icon": "i-plus"
       },
       {
         "id": "collection.import",
         "label": "Import",
         "href": "/app/contacts/import",
         "method": "GET",
-        "enabled": true
+        "enabled": true,
+        "icon": "i-up"
       },
       {
         "id": "collection.export",
@@ -618,6 +815,14 @@
         "href": "/app/contacts/export",
         "method": "GET",
         "enabled": true
+      },
+      {
+        "enabled": true,
+        "href": "/app/contacts?print=1",
+        "icon": "i-print",
+        "id": "list.print",
+        "label": "Print",
+        "method": "GET"
       }
     ],
     "selected": 0,
@@ -714,7 +919,45 @@
           "on": true
         }
       ],
-      "label": "Columns"
+      "label": "Columns",
+      "icon": "i-cols"
+    },
+    "filterForm": {
+      "action": "/app/contacts",
+      "actions": [],
+      "errors": [],
+      "method": "GET",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "task",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "t-task"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "text",
+              "label": "Filter",
+              "name": "filter",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": ""
+            }
+          ]
+        }
+      ]
     }
   },
   "groups": [
@@ -800,7 +1043,8 @@
           "state": "ok",
           "birthday": "",
           "changed": "31 Jul",
-          "tags": []
+          "tags": [],
+          "on": false
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7",
@@ -892,7 +1136,8 @@
               "label": "издательство",
               "on": false
             }
-          ]
+          ],
+          "on": true
         },
         {
           "href": "/app/contacts/a-rad-vps/komanda/d41a-6f30-92be",
@@ -955,9 +1200,11 @@
           "state": "linked",
           "birthday": "",
           "changed": "10 Aug",
-          "tags": []
+          "tags": [],
+          "on": false
         }
-      ]
+      ],
+      "count": 3
     },
     {
       "rubric": "В",
@@ -1041,7 +1288,8 @@
           "state": "ok",
           "birthday": "",
           "changed": "18 Feb 2024",
-          "tags": []
+          "tags": [],
+          "on": false
         },
         {
           "href": "/app/contacts/a-nc-home/kontakty/a90d-5512-4e83",
@@ -1122,9 +1370,11 @@
           "state": "ok",
           "birthday": "",
           "changed": "5 Aug",
-          "tags": []
+          "tags": [],
+          "on": false
         }
-      ]
+      ],
+      "count": 2
     }
   ],
   "poll": {
@@ -1179,5 +1429,8 @@
         "enabled": true
       }
     ]
-  }
+  },
+  "empty": null,
+  "readOnly": false,
+  "subtitle": "3 of 4 books · 2 accounts · 6 cards"
 }

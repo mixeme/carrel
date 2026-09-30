@@ -4,6 +4,7 @@
       {
         "enabled": true,
         "href": "/app/tasks/a-nc-home/dela/new?pick=1",
+        "icon": "i-plus",
         "id": "record.new",
         "label": "New task",
         "method": "GET",
@@ -12,6 +13,7 @@
       {
         "enabled": true,
         "href": "/app/tasks/import",
+        "icon": "i-up",
         "id": "collection.import",
         "label": "Import",
         "method": "GET"
@@ -67,6 +69,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -120,8 +123,9 @@
       ],
       "label": "Columns"
     },
-    "compact": false,
+    "compact": null,
     "filter": "",
+    "filterForm": null,
     "loaded": 0,
     "range": null,
     "segments": [

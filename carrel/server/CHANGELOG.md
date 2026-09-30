@@ -17,6 +17,54 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.86 — 2026-10-01
+
+The list of contacts as the frames draw it (the client's scan of the
+contacts section, group Б).
+
+### Added
+
+- **`ContactsListPage.subtitle`** — «3 of 4 books · 2 accounts · 312 cards»
+  (s-contacts-1; the cards once the poll is over), «nextcloud · 248 cards»
+  (s-io-1), «radicale · vps · the server granted no write access»
+  (states-4); **`.readOnly`** for the mark by the title.
+- **`ContactsListPage.empty`** — what a list with nothing to show says, with
+  its button (U-6.0): nothing ticked — «Tick every book» (and `poll` is
+  `null`); an empty book or empty ticked books — New contact and Import.
+- **New's arrow in every combined view** (s-contacts-9): the ticked
+  collections of the view, each `record.new` into it; `MenuItem.colour`,
+  `.aside` («last used» — the button writes there), `.readOnly` (closed with
+  its reason; the client draws «ro»).
+- **Print** of a list of contacts: `list.print`, `i-print`, the list with
+  `?print=1` (C-5.4, U-10).
+- **The panel without scripts**: `?open={a row's href}` on a list of
+  contacts answers with `Shell.details` of that card, the row `on`
+  (`ContactRow.on`), `Details.close` — the list without the panel.
+  `SourceBlock.uid` — the panel's «UID …».
+- **`ContactGroup.count`**, **`Columns.icon`** (`i-cols`).
+- **`ListBar.filterForm`** — the filter without scripts: GET to the list with
+  `filter` and the kept `task`, `sort`, `tag`; the server keeps the cards
+  whose name, phone, address or organisation holds it.
+- **«Compact rows»**: `ListBar.compact` is an action now (`On`; a link with
+  `compact=1` or `0`); the choice is this browser's, cookie
+  `carrel_compact_contacts` (S-9.6).
+- **Icons** of New (`i-plus`) and Import (`i-up`) in every list's head.
+
+### Changed
+
+- **`ListBar.compact`** was a bool nobody set; it is `null` where a list has
+  no switch.
+- The rail's form takes `toggle` from the query too: the empty list's button
+  is a plain POST.
+
+### For consumers
+
+The run bar of a poll stands while the poll runs or a source did not
+answer; «Loading more…» while the poll runs (C-6.4). An empty cell is the
+screen's «—». Fixtures regenerated: every list (icons, `columns.icon`,
+`compact`), `app-contacts/normal` with Анна in the panel, the states of the
+contacts lists with `subtitle` and `empty`.
+
 ## v0.2.85 — 2026-10-01
 
 The shell as the frames draw it (the client's scan of the contacts section,

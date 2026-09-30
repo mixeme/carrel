@@ -54,6 +54,7 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 // The categories are Tags, never a field too.
 func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) view.Details {
 	d := view.Details{Title: text(recordTitle(c.spec.kind, obj)), Source: c.source()}
+	d.Source.UID = text(uid) // «UID …» of the panel's source (s-contacts-1)
 	d.Subtitle = view.Text(d.Source.Stamp)
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
 	attach := s.attachOf(c, uid, obj.ETag)

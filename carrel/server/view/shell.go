@@ -141,6 +141,9 @@ type Details struct {
 	Actions    []Action      `json:"actions"`    // кнопки на виду; удаление — Danger, внизу панели
 	Menu       []MenuItem    `json:"menu"`       // «⋯» панели, в порядке кадра
 	DeleteNote Text          `json:"deleteNote"` // строка у удаления: у серии «Series is edited and deleted whole.»
+	// Close — крестик без сценариев: тот же список без панели; пусто —
+	// панель пришла фрагментом (C-7.2)
+	Close string `json:"close"`
 }
 
 type Field struct {

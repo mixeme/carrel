@@ -61,6 +61,7 @@
           }
         ]
       },
+      "icon": "i-cols",
       "items": [
         {
           "aside": "always",
@@ -114,8 +115,9 @@
       ],
       "label": "Columns"
     },
-    "compact": false,
+    "compact": null,
     "filter": "",
+    "filterForm": null,
     "loaded": 1,
     "range": null,
     "segments": [],

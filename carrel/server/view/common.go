@@ -42,6 +42,12 @@ type Action struct {
 type MenuItem struct {
 	Action
 	Separator bool `json:"separator,omitempty"` // черта перед пунктом
+	// Пункт «куда» стрелки New в едином виде (s-contacts-9): метка
+	// коллекции, приглушённое справа («last used») и «только для чтения» —
+	// такой пункт выключен с причиной, клиент ставит у него «ro»
+	Colour   Colour `json:"colour,omitempty"`
+	Aside    Text   `json:"aside,omitempty"`
+	ReadOnly bool   `json:"readOnly,omitempty"`
 }
 
 type Badge struct {
@@ -71,6 +77,7 @@ type Tag struct {
 
 // SourceBlock — «откуда запись и что с ней на сервере».
 type SourceBlock struct {
+	UID      Text   `json:"uid"` // идентификатор записи: строка UID источника в панели (s-contacts-1, -7)
 	Stamp    Stamp  `json:"stamp"`
 	Colour   Colour `json:"colour"`
 	ReadOnly bool   `json:"readOnly"`

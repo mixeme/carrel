@@ -10,7 +10,7 @@
         "method": "GET"
       }
     ],
-    "compact": false,
+    "compact": null,
     "filter": "",
     "loaded": 22,
     "range": null,
@@ -115,8 +115,10 @@
           "on": true
         }
       ],
-      "label": "Columns"
-    }
+      "label": "Columns",
+      "icon": "i-cols"
+    },
+    "filterForm": null
   },
   "details": null,
   "notices": [],

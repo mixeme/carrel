@@ -444,7 +444,8 @@
     "lastRead": "2 min ago",
     "objects": null,
     "readOnly": false,
-    "stamp": "nextcloud · Личный"
+    "stamp": "nextcloud · Личный",
+    "uid": ""
   },
   "summary": "Синк-ап по релизу",
   "title": "Синк-ап по релизу",

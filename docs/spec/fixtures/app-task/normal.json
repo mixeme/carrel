@@ -292,7 +292,8 @@
     "lastRead": "2 min ago",
     "objects": null,
     "readOnly": false,
-    "stamp": "nextcloud · Дела"
+    "stamp": "nextcloud · Дела",
+    "uid": ""
   },
   "summary": "Отправить документы в МФЦ",
   "title": "Отправить документы в МФЦ",

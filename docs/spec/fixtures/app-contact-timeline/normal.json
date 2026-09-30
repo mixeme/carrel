@@ -25,7 +25,7 @@
   ],
   "bar": {
     "actions": [],
-    "compact": false,
+    "compact": null,
     "filter": "",
     "loaded": 1,
     "range": null,
@@ -138,8 +138,10 @@
           "on": true
         }
       ],
-      "label": "Columns"
-    }
+      "label": "Columns",
+      "icon": "i-cols"
+    },
+    "filterForm": null
   },
   "card": {
     "actions": [
@@ -223,7 +225,8 @@
       "lastRead": "2 min ago",
       "objects": null,
       "readOnly": false,
-      "stamp": "nextcloud · Контакты"
+      "stamp": "nextcloud · Контакты",
+      "uid": ""
     },
     "title": "Анна Ковалёва",
     "menu": [
@@ -269,7 +272,8 @@
     "related": [],
     "rendered": [],
     "subtitle": "",
-    "tags": []
+    "tags": [],
+    "close": ""
   },
   "details": null,
   "groups": [

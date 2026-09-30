@@ -648,6 +648,20 @@ func newMockupApp(t *testing.T) *mockupApp {
 		}
 	}
 	tickMockup(t, h, sess)
+	// «Контакты» is where a contact was last made: New contact's arrow says
+	// «last used» by it (s-contacts-9).
+	for _, c := range func() []sealed.Collection {
+		key, _ := sess.DataKey()
+		b, _ := h.users.Catalog(sess.AccountID(), key)
+		return b.Collections
+	}() {
+		if collectionSlugOf(c.Path) == "kontakty" {
+			key, _ := sess.DataKey()
+			if err := h.users.SetLastUsed(sess.AccountID(), key, sealed.Selection{Kind: view.KindContact, AccountID: c.AccountID, Path: c.Path}); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
 	// The password of «baikal» stops fitting once it is connected and
 	// ticked: what the frames show of it is the refusal.
 	servers["baikal"].Refuse("REPORT", 401, "")
@@ -937,7 +951,16 @@ func TestFixtureCombinedContacts(t *testing.T) {
 	// The frame is the screen two minutes after the poll: its refresh
 	// button says «2 min ago». The poll itself keeps the day of the set.
 	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
-	rec := app.h.do(get("/app/contacts?task="+page.Poll.TaskID, app.sess))
+	// Анна is open in the panel, as the frame draws her (s-contacts-1).
+	open := ""
+	for _, g := range page.Groups {
+		for _, r := range g.Rows {
+			if r.Name == "Анна Ковалёва" {
+				open = r.Href
+			}
+		}
+	}
+	rec := app.h.do(get("/app/contacts?task="+page.Poll.TaskID+"&open="+url.QueryEscape(open), app.sess))
 	got := app.normalise(t, rec.Body.Bytes())
 	want := loadFixture(t, "app-contacts/normal.json")
 	if out := os.Getenv("CARREL_FIXTURE_WRITE"); out != "" {
