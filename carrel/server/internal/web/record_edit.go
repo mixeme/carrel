@@ -123,6 +123,7 @@ type editField struct {
 	quickTime string
 	// quickNoDate: the quick sheet draws no date of this time — the end is
 	// on the day of the start, or on the next when it is earlier (s-notes-9).
+	// The full form reads its time typed without a date the same way (S-11).
 	quickNoDate bool
 	// quickSample is the sample in the empty row of the quick sheet: «+7 …»,
 	// «name@example.org» (s-notes-8); of a time, its date's, and
@@ -1092,6 +1093,7 @@ func (s *Server) submittedValues(c *collectionCtx, r *http.Request) formValues {
 	for _, name := range r.Form[removedKey] {
 		removeRow(c.spec.kind, vals, name)
 	}
+	sameDayEnds(c.spec.kind, vals)
 	return vals
 }
 
@@ -3051,7 +3053,6 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 		return
 	}
 	want := s.submittedValues(c, r)
-	quickDays(c.spec.kind, want)
 	quickTaskDay(c.spec.kind, want)
 	if r.URL.Query().Get("op") == "open" {
 		s.writePage(w, r, http.StatusOK, s.editPage(c, editState{values: want, isNew: true, readAt: s.now()}))
@@ -3060,10 +3061,13 @@ func (s *Server) postKindQuick(w http.ResponseWriter, r *http.Request, kind stri
 	s.createRecord(w, r, c, want)
 }
 
-// quickDays gives a time the quick sheet draws without its date the day of
+// sameDayEnds gives a time the quick sheet draws without its date the day of
 // the time before it (s-notes-9: one Date, then Start and End): the same day,
-// or the next when the clock is earlier than the one before.
-func quickDays(kind view.Kind, vals formValues) {
+// or the next when the clock is earlier than the one before. The full form
+// draws the End date, and an End time typed with that date left empty is read
+// by the same rule (S-11): before, the time was dropped and the event ended as
+// it began.
+func sameDayEnds(kind view.Kind, vals formValues) {
 	var prev [3]string
 	for _, f := range editFields[kind] {
 		if f.typ != fieldTime {

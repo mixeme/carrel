@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/emersion/go-webdav/caldav"
+
 	"carrel.dev/carrel/server/internal/davtest"
 	"carrel.dev/carrel/server/view"
 )
@@ -186,4 +188,81 @@ func noticeWords(n view.Notice) string {
 		}
 	}
 	return strings.Join(parts, " ")
+}
+
+// docs/servers.md, SV-55: iCloud keeps one resource per UID across the whole
+// account, and a PUT of a record whose UID lies in another calendar is 412
+// under any name. «Copy here» inside such an account gives the copy a UID of
+// its own (owner's decision 30.09.2026): for other apps it is another record,
+// and the page says so with a link to the copy. The session remembers the
+// server, so the next copy there is not sent with the old UID first, and the
+// sheet says so before it starts.
+func TestACopyGetsAUIDOfItsOwnWhereTheAccountHoldsOneRecordPerUID(t *testing.T) {
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	work, home := davtest.CalendarHome+"work/", davtest.CalendarHome+"home/"
+	srv.AddCalendar(caldav.Calendar{Path: work, Name: "Work"})
+	srv.AddCalendar(caldav.Calendar{Path: home, Name: "Home"})
+	srv.Seed(work+"meet.ics", ics("BEGIN:VEVENT\nUID:meet\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nDTEND:20260115T110000Z\nSUMMARY:Review\nX-CUSTOM:keep\nEND:VEVENT"))
+	srv.Seed(work+"call.ics", ics("BEGIN:VEVENT\nUID:call\nDTSTAMP:20260101T000000Z\nDTSTART:20260116T100000Z\nDTEND:20260116T110000Z\nSUMMARY:Call\nEND:VEVENT"))
+	srv.OneUIDPerAccount = true
+	f := connectFixture(t, srv, work, nil)
+	original, _, _ := srv.Object(work + "meet.ics")
+
+	sheetOf := func(uid string) view.MoveSheet {
+		t.Helper()
+		q := url.Values{"copy": {"1"}, "to": {f.id}, "into": {home}}
+		return decode[view.MoveSheet](t, f.h.do(get(f.path("calendar")+"/"+uid+"/move?"+q.Encode(), f.sess)))
+	}
+	copyOf := func(uid, summary string) string {
+		t.Helper()
+		page := decode[view.EventPage](t, f.h.do(postForm(confirmOf(t, sheetOf(uid)).Href, f.sess, url.Values{})))
+		var opens string
+		for _, n := range page.Notices {
+			if string(n.Title) != "Copied, with a UID of its own" {
+				continue
+			}
+			for _, a := range n.Actions {
+				if a.ID == "record.open" {
+					opens = a.Href
+				}
+			}
+		}
+		prefix := "/app/calendar/" + f.id + "/" + url.PathEscape(home) + "/"
+		if !strings.HasPrefix(opens, prefix) || opens == prefix+uid {
+			t.Fatalf("copy of %s: the notice leads to %q, want the copy under a UID of its own in Home; notices %+v", uid, opens, page.Notices)
+		}
+		if got := decode[view.EventPage](t, f.h.do(get(opens, f.sess))); string(got.Summary) != summary {
+			t.Errorf("the copy the notice opens = %q, notices %+v", got.Summary, got.Notices)
+		}
+		return strings.TrimPrefix(opens, prefix)
+	}
+
+	fresh := copyOf("meet", "Review")
+	taken := srv.UIDsTaken()
+	if taken == 0 {
+		t.Fatal("the stand refused nothing: the guard does not look at what it names")
+	}
+	paths := srv.Paths(home)
+	if len(paths) != 1 {
+		t.Fatalf("Home holds %v, want the one copy", paths)
+	}
+	copied, _, _ := srv.Object(paths[0])
+	mustContain(t, unfolded(copied), "UID:"+fresh, "SUMMARY:Review", "X-CUSTOM:keep")
+	if strings.Contains(copied, "UID:meet") {
+		t.Errorf("the copy kept the UID the account holds already:\n%s", copied)
+	}
+	if got, _, _ := srv.Object(work + "meet.ics"); got != original {
+		t.Error("the original changed")
+	}
+
+	// The account is known now: the sheet says it before the start, and the
+	// next copy goes out with its own UID at once.
+	if w := string(sheetOf("call").Warning); !strings.Contains(w, "a UID of its own") {
+		t.Errorf("sheet warning = %q, want it to say the copy gets a UID of its own", w)
+	}
+	copyOf("call", "Call")
+	if n := srv.UIDsTaken(); n != taken {
+		t.Errorf("PUTs refused = %d after the first %d: the account is not remembered", n, taken)
+	}
 }

@@ -119,6 +119,9 @@ func (s *Server) moveSheet(c *collectionCtx, uid, title string, copying bool, de
 	}
 	record, where := recordNouns[c.spec.kind], moveCollectionNouns[c.spec.kind]
 	switch {
+	case copying && dest != nil && knownOneUIDPerAccount(c, dest):
+		sheet.Warning = text("A copy is written into the chosen " + where + " whole, with a UID of its own: this server holds one record per UID across the account, " +
+			"so for other apps the copy is another " + record + ". The " + record + " here stays as it is.")
 	case copying:
 		sheet.Warning = text("A copy is written into the chosen " + where + " whole, with the same UID; the " + record + " here stays as it is.")
 	case dest != nil && dest.conn.ID != c.conn.ID:
@@ -238,9 +241,22 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
+	// A copy inside an account that holds one record per UID across all its
+	// collections (SV-55: iCloud) cannot carry the UID the original holds, so
+	// it gets one of its own. Such an account is known once the session has
+	// seen it refuse; until then the copy goes with its UID, as everywhere.
+	fresh := ""
+	names := []string{path.Base(obj.Path), fileStem(uid) + "-2" + c.spec.ext}
+	if copying && knownOneUIDPerAccount(c, dest) {
+		if sent, fresh, err = withOwnUID(dest, sent); err != nil {
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+		names = []string{fileStem(fresh) + c.spec.ext}
+	}
 	var dst string
-	for _, name := range []string{path.Base(obj.Path), fileStem(uid) + "-2" + c.spec.ext} {
-		dst = strings.TrimSuffix(dest.col.Path, "/") + "/" + name
+	for i := 0; i < len(names); i++ {
+		dst = strings.TrimSuffix(dest.col.Path, "/") + "/" + names[i]
 		sent.Path = dst
 		err = dest.create(ctx, dst, sent)
 		// A taken name is tried once more under another; but a refusal on a
@@ -254,9 +270,24 @@ func (s *Server) moveRecord(w http.ResponseWriter, r *http.Request, c, dest *col
 		if !dav.IsStatus(err, http.StatusPreconditionFailed) {
 			break
 		}
+		// 412 on a name nothing holds is not about the name: the account
+		// holds this UID in another collection (SV-55). A server that says
+		// 412 for a taken name goes on to «-2» as before.
+		if copying && fresh == "" && i == 0 && nameIsFree(ctx, dest, dst) {
+			c.sess.NoteRefusal(dest.conn.ID, "", refusedSameUID)
+			if sent, fresh, err = withOwnUID(dest, sent); err != nil {
+				http.Error(w, "internal error", http.StatusInternalServerError)
+				return
+			}
+			names = []string{names[0], fileStem(fresh) + c.spec.ext}
+		}
 	}
 	if err != nil {
 		s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, moveFailure(dest, nothing, "PUT", dst, err)))
+		return
+	}
+	if fresh != "" {
+		s.copiedWithOwnUID(w, r, c, dest, uid, obj, fresh, sent)
 		return
 	}
 	if copying {
@@ -458,7 +489,57 @@ func arrived(ctx context.Context, c *collectionCtx, before map[string]bool) *mod
 	return obj
 }
 
-// noMoveHere reports a server that has no MOVE// noMoveHere reports a server that has no MOVE rather than one that refused
+// refusedSameUID is what the session keeps of an account that holds one
+// record per UID across all its collections (docs/servers.md, SV-55), with
+// the whole account for its collection.
+const refusedSameUID = "uid-account-wide"
+
+// knownOneUIDPerAccount reports a copy within one connection whose account
+// the session has seen refuse a UID it holds elsewhere: the original's UID is
+// held there by the original itself.
+func knownOneUIDPerAccount(c, dest *collectionCtx) bool {
+	return c.sess != nil && dest.conn.ID == c.conn.ID && c.sess.Refused(dest.conn.ID, "", refusedSameUID)
+}
+
+// nameIsFree reports that nothing answers at p.
+func nameIsFree(ctx context.Context, dest *collectionCtx, p string) bool {
+	_, err := dest.fetch(ctx, p)
+	return notFoundErr(err) || dav.IsStatus(err, http.StatusNotFound)
+}
+
+// withOwnUID is the copy about to be written, under a fresh UID.
+func withOwnUID(dest *collectionCtx, sent *model.Object) (*model.Object, string, error) {
+	fresh, err := model.NewUID()
+	if err != nil {
+		return nil, "", err
+	}
+	got, err := setUID(dest, sent, fresh)
+	return got, fresh, err
+}
+
+// copiedWithOwnUID answers a copy written under a UID of its own (SV-55):
+// the original's page, saying what was done, with the copy one link away —
+// the way a move that came out under another identity is told (SV-18). What
+// pointed at the original points at it still: the original stays.
+func (s *Server) copiedWithOwnUID(w http.ResponseWriter, r *http.Request, c, dest *collectionCtx, uid string, obj *model.Object, fresh string, sent *model.Object) {
+	body := "The server holds one record per UID across the whole account, so the copy in " + collectionLabel(dest.col) +
+		" has a UID of its own. For other apps it is another " + c.spec.noun + ", not this one twice; duplicates are matched by that identifier."
+	got, err := dest.find(r.Context(), fresh)
+	if err != nil {
+		dest.noteWrite(sent.Path, sent)
+	} else {
+		dest.noteWrite(got.Path, got)
+		if loss := model.CompareAfterPut(dest.conn.ID, sent, got, c.sess.Losses()); loss != nil {
+			body += " That server did not keep " + strings.Join(loss.Properties, ", ") + " in the copy; the original still holds it."
+		}
+	}
+	s.writePage(w, r, http.StatusOK, s.recordPage(c, uid, obj, view.Notice{
+		Role: view.NoticeAlert, Title: "Copied, with a UID of its own", Body: text(body),
+		Actions: []view.Action{s.openThere(dest, fresh, "Open it there")},
+	}))
+}
+
+// noMoveHere reports a server that has no MOVE rather than one that refused
 // this one: 405 with the method not allowed at all, or 501. A refusal about
 // this particular record — a precondition, a right, a name — is not this, and
 // goes to the person as it did before.

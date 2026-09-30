@@ -1,6 +1,8 @@
 package web_test
 
 import (
+	"net/http"
+	"slices"
 	"strings"
 	"testing"
 
@@ -120,4 +122,54 @@ func TestEventTimeZone(t *testing.T) {
 	if len(bad.Form.Errors) == 0 || bad.Form.Errors[0].Name != "tz" {
 		t.Errorf("errors = %+v, want tz refused", bad.Form.Errors)
 	}
+}
+
+// S-11: an End time with no End date is the start's day, and an End time
+// earlier than the start's the next day — the quick sheet's rule, on the
+// full form too (lead's decision 30.09.2026). Until then the time was
+// dropped and the event ended as it began.
+func TestAnEndTimeWithoutADateTakesTheStartsDay(t *testing.T) {
+	f := calendarFixture(t, nil,
+		"meet.ics", ics("BEGIN:VEVENT\nUID:meet\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nDTEND:20260115T110000Z\nSUMMARY:Review\nEND:VEVENT"))
+	made := func(what string, set map[string]string) string {
+		t.Helper()
+		before := f.srv.Paths(f.col)
+		route := f.path("calendar") + "/new"
+		form := formFields(decode[view.EventEditPage](t, f.h.do(get(route, f.sess))).Form)
+		for k, v := range set {
+			form.Set(k, v)
+		}
+		if resp := f.h.do(postForm(route, f.sess, form)); resp.Code != http.StatusSeeOther {
+			t.Fatalf("%s: %d %s", what, resp.Code, resp.Body.String())
+		}
+		for _, p := range f.srv.Paths(f.col) {
+			if !slices.Contains(before, p) {
+				b, _, _ := f.srv.Object(p)
+				return unfolded(b)
+			}
+		}
+		t.Fatalf("%s made nothing", what)
+		return ""
+	}
+	ends := func(what, doc, want string) {
+		t.Helper()
+		if end := lineOf(doc, "DTEND"); !strings.Contains(end, want) {
+			t.Errorf("%s: %q, want the end at %s\n%s", what, end, want, doc)
+		}
+	}
+
+	ends("later the same day", made("later", map[string]string{
+		"summary": "Call", "start.date": "2031-03-11", "start.time": "09:30", "end.date": "", "end.time": "10:45"}), "20310311T104500")
+	ends("earlier: the next day", made("overnight", map[string]string{
+		"summary": "Night shift", "start.date": "2031-03-11", "start.time": "22:00", "end.date": "", "end.time": "06:00"}), "20310312T060000")
+
+	// An edit that clears the End date and keeps a time: the start's day.
+	rec := f.path("calendar") + "/meet"
+	form := formFields(decode[view.EventEditPage](t, f.h.do(get(rec+"/edit", f.sess))).Form)
+	form.Set("end.date", "")
+	form.Set("end.time", "12:00")
+	if resp := f.h.do(postForm(rec+"/edit", f.sess, form)); resp.Code != http.StatusSeeOther {
+		t.Fatalf("edit: %d %s", resp.Code, resp.Body.String())
+	}
+	ends("edit", body(t, f, "meet.ics"), "20260115T120000")
 }

@@ -279,8 +279,8 @@ func icloudEventCalendars(t *testing.T, app *liveApp) []sealed.Collection {
 
 // S-18 on iCloud, between the two event calendars the account came with: a
 // series with an override moves from one to the other by MOVE, then is copied
-// back — the copy waits for SV-55: iCloud keeps one resource per UID in the
-// whole account. It stands in October 2031 so that it meets nothing of the owner's,
+// back under a UID of its own: iCloud keeps one resource per UID in the whole
+// account (SV-55). It stands in October 2031 so that it meets nothing of the owner's,
 // and everything it leaves is taken away — both addresses, whatever happened.
 func TestICloudMove(t *testing.T) {
 	endpoint, user, pass := icloudCalConfig(t)
@@ -331,17 +331,40 @@ func TestICloudMove(t *testing.T) {
 		t.Errorf("agenda at the target: rows %v, notices %s", lines, noticeText(agenda.Notices))
 	}
 
+	// docs/servers.md, SV-55: iCloud holds one resource per UID in the whole
+	// account, so the copy is written under a UID of its own, and the page
+	// says so with the copy one link away.
 	t.Run("copy back", func(t *testing.T) {
-		if os.Getenv("CARREL_ICLOUD_SV55") == "" {
-			t.Skip("docs/servers.md, SV-55: iCloud holds one resource per UID in the whole account, and a copy keeps " +
-				"its UID, so PUT of the copy answers 412 — CARREL_ICLOUD_SV55=1 runs this anyway")
-		}
 		sheet := liveDecode[view.MoveSheet](t, "copy sheet", app.get(moveURL(into.Path, from.Path, true)))
-		redirected(t, "copy back", app.post(liveAction(t, sheet.Actions, "record.copy.confirm"), url.Values{}))
-		copied := liveCardByUID(ctx, t, client, from.Path, series)
-		mustHave(t, "copy", copied, "RRULE:FREQ=WEEKLY;COUNT=3", "SUMMARY:Standup moved")
+		page := liveDecode[view.EventPage](t, "copy back", app.post(liveAction(t, sheet.Actions, "record.copy.confirm"), url.Values{}))
+		var opens string
+		for _, n := range page.Notices {
+			if string(n.Title) == "Copied, with a UID of its own" {
+				opens = liveAction(t, n.Actions, "record.open")
+			}
+		}
+		prefix := "/app/calendar/" + connID + "/" + url.PathEscape(from.Path) + "/"
+		if !strings.HasPrefix(opens, prefix) {
+			t.Fatalf("copy back: the page says %s, links %q", noticeText(page.Notices), opens)
+		}
+		fresh, _ := url.PathUnescape(strings.TrimPrefix(opens, prefix))
+		removeLater(t, client, from.Path+fresh+".ics")
+		if fresh == series {
+			t.Fatalf("the copy kept the UID %s", series)
+		}
+		copied := liveCardByUID(ctx, t, client, from.Path, fresh)
+		mustHave(t, "copy", copied, "RRULE:FREQ=WEEKLY;COUNT=3", "RECURRENCE-ID:20311014T100000Z", "SUMMARY:Standup moved")
+		if opened := liveDecode[view.EventPage](t, "the copy", app.get(opens)); !strings.HasPrefix(string(opened.Summary), "Standup") {
+			t.Errorf("the copy the notice opens = %q, notices %s", opened.Summary, noticeText(opened.Notices))
+		}
 		// A copy leaves the original where it was.
 		liveCardByUID(ctx, t, client, into.Path, series)
+
+		// The account is known now: the next copy's sheet says so first.
+		again := liveDecode[view.MoveSheet](t, "copy sheet again", app.get(moveURL(into.Path, from.Path, true)))
+		if !strings.Contains(string(again.Warning), "a UID of its own") {
+			t.Errorf("the second copy sheet warned %q", again.Warning)
+		}
 	})
 }
 

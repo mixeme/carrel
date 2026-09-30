@@ -121,6 +121,13 @@ type Server struct {
 	// 5545 §3.6.1 allows one.
 	RefuseEventWithoutEnd bool
 
+	// OneUIDPerAccount answers 412 with an empty body to a PUT of a calendar
+	// object whose UID another resource of the account holds, in any
+	// calendar and under any name, the way iCloud does (docs/servers.md,
+	// SV-55). A PUT to the resource that holds the UID is an update and is
+	// served.
+	OneUIDPerAccount bool
+
 	// BreaksOnTextMatch answers 500 to an addressbook-query that carries a
 	// text-match, the way Xandikos does over a book holding one value with a
 	// character outside ASCII (docs/servers.md, SV-42). Its own crash, not a
@@ -211,7 +218,9 @@ type Server struct {
 	// uidMatchesRefused counts the calendar-queries RefuseUIDTextMatch
 	// answered 412.
 	uidMatchesRefused int
-	dir               string // the file tree behind FileRoot
+	// uidsTaken counts the PUTs OneUIDPerAccount answered 412.
+	uidsTaken int
+	dir       string // the file tree behind FileRoot
 }
 
 type refusal struct {
@@ -483,6 +492,45 @@ func (s *Server) UIDMatchesRefused() int {
 	return s.uidMatchesRefused
 }
 
+// UIDsTaken is how many PUTs OneUIDPerAccount has refused so far.
+func (s *Server) UIDsTaken() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.uidsTaken
+}
+
+// uidHeldElsewhere reports a calendar body whose UID another resource under
+// the calendar home holds (SV-55).
+func (s *Server) uidHeldElsewhere(p string, body []byte) bool {
+	uid := calendarUID(body)
+	if uid == "" {
+		return false
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for at, o := range s.objects {
+		if at != p && strings.HasPrefix(at, CalendarHome) && calendarUID(o.data) == uid {
+			return true
+		}
+	}
+	return false
+}
+
+// calendarUID is the UID of the first component of a calendar body that has
+// one, or "".
+func calendarUID(body []byte) string {
+	cal, err := ical.NewDecoder(bytes.NewReader(body)).Decode()
+	if err != nil {
+		return ""
+	}
+	for _, c := range cal.Children {
+		if prop := c.Props.Get(ical.PropUID); prop != nil && prop.Value != "" {
+			return prop.Value
+		}
+	}
+	return ""
+}
+
 // CountRequests counts requests with the method whose path has the prefix.
 func (s *Server) CountRequests(method, prefix string) int {
 	var n int
@@ -561,6 +609,13 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 	}
 	if s.RefuseEventWithoutEnd && r.Method == http.MethodPut && strings.HasPrefix(p, CalendarHome) && eventWithoutEnd(body) {
 		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if s.OneUIDPerAccount && r.Method == http.MethodPut && strings.HasPrefix(p, CalendarHome) && s.uidHeldElsewhere(p, body) {
+		s.mu.Lock()
+		s.uidsTaken++
+		s.mu.Unlock()
+		w.WriteHeader(http.StatusPreconditionFailed)
 		return
 	}
 	if s.BreaksOnTextMatch && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) &&

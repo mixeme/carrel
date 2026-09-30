@@ -17,6 +17,37 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.81 — 2026-09-30
+
+A copy of a record within one iCloud account is written (docs/servers.md,
+SV-55), and an End time typed without an End date is kept (S-11).
+
+### Changed
+
+- **A copy gets a UID of its own where the account holds one record per
+  UID** (SV-55, S-18; owner's decision). iCloud answers PUT of a record
+  whose UID another calendar of the account holds 412 under any name, and
+  «Copy here» ended in «Nothing was copied». A 412 on a name nothing
+  answers at is now read as «the UID is taken»: the copy is written once
+  more under a fresh UID, and the original's page says so — `alert`
+  notice «Copied, with a UID of its own», for other apps another record,
+  and `record.open` «Open it there» to the copy. The session remembers the
+  account: the next copy within the same connection goes with a fresh UID
+  at once, and its sheet's `warning` says so before it starts. A server
+  that answers 412 for a taken name goes on to `{uid}-2` as before; moves
+  are unchanged.
+- **End time without End date** (S-11, s-agenda-3): the full form reads
+  it by the quick sheet's rule — the start's day, or the next day when it
+  is earlier than the start's time. Before, the time was dropped and the
+  event ended as it began. An edit that clears the End date and keeps a
+  time reads the same way.
+
+### For consumers
+
+The copy's answer on such an account is `200` with the original's record
+page and the notice above instead of a `303` to the copy. Nothing else in
+the contract changed.
+
 ## v0.2.80 — 2026-09-30
 
 Three iCloud calendar quirks answered (docs/servers.md, SV-52, SV-53,
