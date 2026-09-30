@@ -139,8 +139,13 @@ var contract = map[string]rule{
 		}
 		return "a button with nothing to follow or send (Href, Form, Submit in a form, Adds, Opens)"
 	},
-	"Close":    needs("Href"),
-	"Link":     needs("Href"),
+	"Close": needs("Href"),
+	"Link":  needs("Href"),
+	// Words in a face (tc-dim--…): with Href a link — «Already have an
+	// account? Sign in» (s-auth-2), an action of the model drawn as words
+	// (bind.Span) —, without it words nobody presses, as a Text is. Neither
+	// needs more; whether the words lead somewhere is the model's.
+	"Span":     func(control) string { return "" },
 	"NavItem":  needs("Href"),
 	"UserMenu": needs("Href"),
 	"Input":    field,

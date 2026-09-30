@@ -105,20 +105,21 @@ func TestMeaningRules(t *testing.T) {
 		tree any
 		want []string // parts of the findings, one each; none — green
 	}{
-		"all with meaning":          {login(named, submit, forgot), nil},
-		"a disabled button":         {login(named, w.Button{Label: "Sign in", State: w.ButtonDisabled}), nil},
-		"a disabled field":          {login(w.Input{Disabled: true}, submit), nil},
-		"a button that is a link":   {login(named, w.Button{Label: "Back", Href: "/login"}), nil},
-		"a submit inside the form":  {w.Form{Action: "/x", Items: []w.FormPart{w.Field{Parts: []w.FieldPart{named, w.Button{Submit: true}}}}}, nil},
-		"a PostForm named":          {w.Form{Items: []w.FormPart{w.Field{Parts: []w.FieldPart{w.Button{Form: "post"}}}}}, nil},
-		"a button without meaning":  {login(named, w.Button{Label: "Sign in"}), []string{"Items[1](Button): a button with nothing"}},
-		"a submit in no form":       {w.Form{Items: []w.FormPart{w.Field{Parts: []w.FieldPart{w.Button{Submit: true}}}}}, []string{"(Button): a submit button outside a form"}},
-		"a form nobody has":         {login(named, w.Button{Label: "Sign in", Form: "logon"}), []string{`(Button): submits form "logon", which is not on the page`}},
-		"a form without Action":     {auth(w.AuthStack{Items: []w.AuthStackPart{w.Form{ID: "login", Items: []w.FormPart{w.Field{Parts: []w.FieldPart{named}}}}, submit}}), []string{"(Input): a field outside a form", `(Button): submits form "login", which is not on the page`}},
-		"a link without Href":       {login(named, submit, w.Link{Text: "Forgotten your password?"}), []string{"Links[0](Link): no Href"}},
-		"a field without Name":      {login(w.Input{}, submit), []string{"(Input): a field without Name"}},
-		"a cross without Href":      {w.Close{Label: "Close"}, []string{"Close: no Href"}},
-		"a control the guard lacks": {w.List{Rows: []w.ListRow{w.TimeRow{}}}, []string{"(TimeRow): TimeRow carries meaning the guard's contract does not know"}},
+		"all with meaning":           {login(named, submit, forgot), nil},
+		"a disabled button":          {login(named, w.Button{Label: "Sign in", State: w.ButtonDisabled}), nil},
+		"a disabled field":           {login(w.Input{Disabled: true}, submit), nil},
+		"a button that is a link":    {login(named, w.Button{Label: "Back", Href: "/login"}), nil},
+		"a submit inside the form":   {w.Form{Action: "/x", Items: []w.FormPart{w.Field{Parts: []w.FieldPart{named, w.Button{Submit: true}}}}}, nil},
+		"a PostForm named":           {w.Form{Items: []w.FormPart{w.Field{Parts: []w.FieldPart{w.Button{Form: "post"}}}}}, nil},
+		"words, and words that lead": {w.FormFoot{Items: []w.FormFootPart{w.Span{Text: "or"}, w.Span{Text: "Sign in", Href: "/login"}}}, nil},
+		"a button without meaning":   {login(named, w.Button{Label: "Sign in"}), []string{"Items[1](Button): a button with nothing"}},
+		"a submit in no form":        {w.Form{Items: []w.FormPart{w.Field{Parts: []w.FieldPart{w.Button{Submit: true}}}}}, []string{"(Button): a submit button outside a form"}},
+		"a form nobody has":          {login(named, w.Button{Label: "Sign in", Form: "logon"}), []string{`(Button): submits form "logon", which is not on the page`}},
+		"a form without Action":      {auth(w.AuthStack{Items: []w.AuthStackPart{w.Form{ID: "login", Items: []w.FormPart{w.Field{Parts: []w.FieldPart{named}}}}, submit}}), []string{"(Input): a field outside a form", `(Button): submits form "login", which is not on the page`}},
+		"a link without Href":        {login(named, submit, w.Link{Text: "Forgotten your password?"}), []string{"Links[0](Link): no Href"}},
+		"a field without Name":       {login(w.Input{}, submit), []string{"(Input): a field without Name"}},
+		"a cross without Href":       {w.Close{Label: "Close"}, []string{"Close: no Href"}},
+		"a control the guard lacks":  {w.List{Rows: []w.ListRow{w.TimeRow{}}}, []string{"(TimeRow): TimeRow carries meaning the guard's contract does not know"}},
 	} {
 		found := guard.Meaning(c.tree, "post")
 		if len(found) != len(c.want) {

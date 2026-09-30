@@ -6,6 +6,7 @@ import (
 	"carrel.dev/carrel/client/screens/deadlink"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
+	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/server/view"
 	"carrel.dev/typecase/widget"
 )
@@ -73,6 +74,12 @@ var All = []Screen{
 		Frames: []string{"rest-2"},
 		Draw:   func(model any) Root { return confirm.Screen(model.(*view.ConfirmEmailPage)) },
 		Title:  func(model any) string { return string(model.(*view.ConfirmEmailPage).Title) },
+	},
+	{
+		Model:  func() any { return new(view.RegisterPage) },
+		Frames: []string{"s-auth-2", "s-auth-3"},
+		Draw:   func(model any) Root { return register.Screen(model.(*view.RegisterPage)) },
+		Title:  func(model any) string { return string(model.(*view.RegisterPage).Title) },
 	},
 	{
 		Model:  func() any { return new(view.DeadLinkPage) },
