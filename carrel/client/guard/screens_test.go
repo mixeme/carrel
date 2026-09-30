@@ -34,13 +34,14 @@ const (
 )
 
 // lib is what the checks read once: the mockup of Carrel and of Typecase,
-// the mockup parsed by shape, the classes of Typecase's CSS, the map of
-// fixtures to routes of check.py.
+// the mockup parsed by shape, the classes of Typecase's CSS, the maps of
+// check.py — fixtures to routes, states to their frames.
 type lib struct {
 	mock, tcMock string
 	shape        *shape.Mockup
 	classes      map[string]bool
 	routes       map[string]string // fixture directory → route of C-5
+	states       map[string]string // «directory/state» → the frame the state draws
 }
 
 var (
@@ -95,7 +96,18 @@ func loadLib() (lib, error) {
 	} else {
 		return l, fmt.Errorf("Typecase's CSS has no list names-without-rule")
 	}
-	if l.routes, err = fixtureRoutes(); err != nil {
+	raw, err = os.ReadFile(checkPy)
+	if err != nil {
+		return l, err
+	}
+	py := strings.ReplaceAll(string(raw), "\r\n", "\n")
+	if l.routes, err = pyMap(py, "FIXTURE_SCREEN"); err != nil {
+		return l, err
+	}
+	if len(l.routes) == 0 {
+		return l, fmt.Errorf("check.py: FIXTURE_SCREEN is empty")
+	}
+	if l.states, err = pyMap(py, "STATE_FRAME"); err != nil {
 		return l, err
 	}
 	return l, nil
@@ -113,28 +125,48 @@ func typecaseDir() (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-// fixtureRoutes reads FIXTURE_SCREEN of docs/spec/check.py — the one map of
-// fixture directories to the routes of C-5.
-func fixtureRoutes() (map[string]string, error) {
-	raw, err := os.ReadFile(checkPy)
-	if err != nil {
-		return nil, err
-	}
-	text := strings.ReplaceAll(string(raw), "\r\n", "\n")
-	i := strings.Index(text, "\nFIXTURE_SCREEN = {")
+// pyMap reads the map name of docs/spec/check.py, a dict of strings to
+// strings: FIXTURE_SCREEN — fixture directories to the routes of C-5 —, and
+// STATE_FRAME — states of a fixture («login/refused») to the frame that draws
+// them when it is not the route's (s-auth-13). The two are check.py's, and
+// the client reads them, not a copy of them.
+func pyMap(py, name string) (map[string]string, error) {
+	i := strings.Index(py, "\n"+name+" = {")
 	if i < 0 {
-		return nil, fmt.Errorf("check.py: no FIXTURE_SCREEN")
+		return nil, fmt.Errorf("check.py: no %s", name)
 	}
-	j := strings.Index(text[i:], "\n}")
-	if j < 0 {
-		return nil, fmt.Errorf("check.py: FIXTURE_SCREEN does not end")
+	// The dict ends at the first «}» outside a string and a comment (a
+	// route has braces of its own: «/invite/{token}»); what it holds is read
+	// without its comments.
+	var dict strings.Builder
+	quoted, comment, ended := false, false, false
+	for _, c := range py[i+len(name)+5:] {
+		switch {
+		case comment:
+			comment = c != '\n'
+		case quoted:
+			quoted = c != '"'
+		case c == '"':
+			quoted = true
+		case c == '#':
+			comment = true
+			continue
+		case c == '}':
+			ended = true
+		}
+		if ended {
+			break
+		}
+		if !comment {
+			dict.WriteRune(c)
+		}
+	}
+	if !ended {
+		return nil, fmt.Errorf("check.py: %s does not end", name)
 	}
 	out := map[string]string{}
-	for _, m := range regexp.MustCompile(`"([^"]+)":\s*"([^"]+)"`).FindAllStringSubmatch(text[i:i+j], -1) {
+	for _, m := range regexp.MustCompile(`"([^"]+)":\s*"([^"]+)"`).FindAllStringSubmatch(dict.String(), -1) {
 		out[m[1]] = m[2]
-	}
-	if len(out) == 0 {
-		return nil, fmt.Errorf("check.py: FIXTURE_SCREEN is empty")
 	}
 	return out, nil
 }
@@ -220,10 +252,34 @@ func draw(scr screens.Screen, path string) (screens.Root, error) {
 
 var classAttr = regexp.MustCompile(`class="([^"]*)"`)
 
+// frameOf is the frame a fixture of the screen is held against: the frame
+// STATE_FRAME of check.py gives the fixture's state — the refused sign-in,
+// login/refused, is s-auth-13 —, else the screen's.
+func (l lib) frameOf(scr screens.Screen, path string) string {
+	key := filepath.Base(filepath.Dir(path)) + "/" + strings.TrimSuffix(filepath.Base(path), ".json")
+	if f, ok := l.states[key]; ok {
+		return f
+	}
+	return scr.Frame
+}
+
+// namesRoute tells whether the frame's data-screen names the route: a state's
+// frame is a part of the route's screen.
+func namesRoute(mock, frame, route string) bool {
+	m := frameDiv.FindStringSubmatch(frameBlock(mock, frame))
+	if m == nil {
+		return false
+	}
+	ds := dataScreen.FindStringSubmatch(m[1])
+	return ds != nil && slices.Contains(strings.Fields(ds[1]), route)
+}
+
 // frameFindings is the frame comparison (U-15.2, 4; U-15.1) of each screen:
-// its frame is the route's frame, the frame is the same in both copies of
-// the mockup, and on every fixture of its route the screen has the frame's
-// make-up (shape.Check) and no class Typecase's CSS does not have.
+// its frame is the route's frame, and on every fixture of its route the
+// screen has the make-up of the fixture's frame (shape.Check) — the route's,
+// or its state's by STATE_FRAME, a frame of the same route — and no class
+// Typecase's CSS does not have. Each frame held is the same in both copies
+// of the mockup.
 func frameFindings(l lib, all []screens.Screen) []string {
 	var out []string
 	for _, scr := range all {
@@ -232,21 +288,38 @@ func frameFindings(l lib, all []screens.Screen) []string {
 			out = append(out, fmt.Sprintf("%s: the route's frame is %q", at, canon))
 			continue
 		}
-		if a, b := frameBlock(l.mock, scr.Frame), frameBlock(l.tcMock, scr.Frame); a == "" || a != b {
-			out = append(out, at+": the frame differs between the mockup of Carrel and of Typecase")
+		copies := map[string]bool{}
+		sameCopies := func(frame string) {
+			if copies[frame] {
+				return
+			}
+			copies[frame] = true
+			if a, b := frameBlock(l.mock, frame), frameBlock(l.tcMock, frame); a == "" || a != b {
+				out = append(out, fmt.Sprintf("%s: frame %s differs between the mockup of Carrel and of Typecase", at, frame))
+			}
 		}
+		sameCopies(scr.Frame)
 		states := l.fixtures(scr.Route)
 		if len(states) == 0 {
 			out = append(out, at+": no fixture in FIXTURE_SCREEN of check.py")
 		}
 		for _, path := range states {
 			fx := filepath.Base(filepath.Dir(path)) + "/" + filepath.Base(path)
+			frame := l.frameOf(scr, path)
+			if frame != scr.Frame {
+				if !namesRoute(l.mock, frame, scr.Route) {
+					out = append(out, fmt.Sprintf("%s on %s: the state's frame %s does not name the route", at, fx, frame))
+					continue
+				}
+				sameCopies(frame)
+				fx += " (" + frame + ")"
+			}
 			root, err := draw(scr, path)
 			if err != nil {
 				out = append(out, fmt.Sprintf("%s on %s: %v", at, fx, err))
 				continue
 			}
-			out = append(out, htmlFindings(l, scr.Frame, at+" on "+fx, root.Render())...)
+			out = append(out, htmlFindings(l, frame, at+" on "+fx, root.Render())...)
 		}
 	}
 	return out
@@ -270,29 +343,41 @@ func htmlFindings(l lib, frame, at, html string) []string {
 }
 
 // kinFindings is the kinship with the draft (U-15.2, 3): the screen drawn
-// on each normal fixture of its route against the draft of its frame.
+// on each normal fixture of its route against the draft of its frame, and on
+// each fixture whose state has a frame of its own (STATE_FRAME) against the
+// draft of that frame — a state's frame has its draft too.
 func kinFindings(l lib, drafts map[string]*guard.Node, all []screens.Screen) []string {
 	var out []string
 	for _, scr := range all {
 		at := scr.Route + " (" + scr.Frame + ")"
-		d, ok := drafts[scr.Frame]
-		if !ok || d == nil {
+		if d, ok := drafts[scr.Frame]; !ok || d == nil {
 			out = append(out, at+": no draft")
 			continue
 		}
 		normal := 0
 		for _, path := range l.fixtures(scr.Route) {
-			if filepath.Base(path) != "normal.json" {
+			fx := filepath.Base(filepath.Dir(path))
+			frame := l.frameOf(scr, path)
+			switch {
+			case frame != scr.Frame:
+				fx += "/" + filepath.Base(path) + " (" + frame + ")"
+			case filepath.Base(path) == "normal.json":
+				normal++
+			default:
 				continue
 			}
-			normal++
+			d, ok := drafts[frame]
+			if !ok || d == nil {
+				out = append(out, fmt.Sprintf("%s on %s: no draft", at, fx))
+				continue
+			}
 			root, err := draw(scr, path)
 			if err != nil {
 				out = append(out, fmt.Sprintf("%s: %v", at, err))
 				continue
 			}
 			if err := guard.Kin(d, guard.Skeleton(root)); err != nil {
-				out = append(out, fmt.Sprintf("%s on %s: %v", at, filepath.Base(filepath.Dir(path)), err))
+				out = append(out, fmt.Sprintf("%s on %s: %v", at, fx, err))
 			}
 		}
 		if normal == 0 {
@@ -302,19 +387,27 @@ func kinFindings(l lib, drafts map[string]*guard.Node, all []screens.Screen) []s
 	return out
 }
 
-func frames(all []screens.Screen) []string {
+// frames are the frames the screens are held against: each screen's, and
+// the frames of its fixtures' states.
+func frames(l lib, all []screens.Screen) []string {
 	var out []string
+	add := func(f string) {
+		if !slices.Contains(out, f) {
+			out = append(out, f)
+		}
+	}
 	for _, s := range all {
-		if !slices.Contains(out, s.Frame) {
-			out = append(out, s.Frame)
+		add(s.Frame)
+		for _, path := range l.fixtures(s.Route) {
+			add(l.frameOf(s, path))
 		}
 	}
 	return out
 }
 
-func drafts(t *testing.T, all []screens.Screen) map[string]*guard.Node {
+func drafts(t *testing.T, l lib, all []screens.Screen) map[string]*guard.Node {
 	t.Helper()
-	d, err := guard.Drafts(module, frames(all))
+	d, err := guard.Drafts(module, frames(l, all))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -335,7 +428,8 @@ func TestScreensMatchTheirFrames(t *testing.T) {
 }
 
 func TestScreensAreKinOfTheirDrafts(t *testing.T) {
-	none(t, "kinship", kinFindings(load(t), drafts(t, screens.All), screens.All))
+	l := load(t)
+	none(t, "kinship", kinFindings(l, drafts(t, l, screens.All), screens.All))
 }
 
 func TestAddressesBuiltOrWaiting(t *testing.T) {
@@ -379,11 +473,11 @@ func signIn(spoil func(*w.Page)) screens.Screen {
 					if r.Kind == view.InputHidden {
 						continue
 					}
-					fields = append(fields, w.Field{
-						Label: string(r.Label),
-						Parts: []w.FieldPart{w.Input{Name: r.Name, Value: string(r.Value), Label: string(r.Label), Focus: len(fields) == 0}},
-						Width: w.FieldW100,
-					})
+					parts := []w.FieldPart{w.Input{Name: r.Name, Value: string(r.Value), Label: string(r.Label), Focus: r.Focus, Error: r.Error != ""}}
+					if r.Error != "" {
+						parts = append(parts, w.FieldHint{Parts: []w.Inline{w.Text(r.Error)}, Variant: w.HintDanger})
+					}
+					fields = append(fields, w.Field{Label: string(r.Label), Parts: parts, Width: w.FieldW100})
 				}
 			}
 			page := w.Page{Items: []w.PagePart{w.Auth{Dialog: w.Dialog{
@@ -438,7 +532,45 @@ var (
 		auth.Dialog.Items[2] = a
 		p.Items[0] = auth
 	})
+	// The refused state drawn as the empty sign-in: no reason under the
+	// field, which is not marked. On s-auth-1 alone it is green.
+	noReason = signIn(func(p *w.Page) {
+		hints(p, func(f *w.Field) {
+			in := f.Parts[0].(w.Input)
+			in.Error = false
+			f.Parts = []w.FieldPart{in}
+		})
+	})
+	// The reason in another hint than the state's frame draws: the kinship
+	// with the draft of s-auth-1 never sees it, the normal fixture has no
+	// reason.
+	plainReason = signIn(func(p *w.Page) {
+		hints(p, func(f *w.Field) {
+			h := f.Parts[1].(w.FieldHint)
+			h.Variant = w.HintPlain
+			f.Parts[1] = h
+		})
+	})
 )
+
+// hints changes each field of the sample's form that says a reason.
+func hints(p *w.Page, change func(*w.Field)) {
+	auth := p.Items[0].(w.Auth)
+	a := auth.Dialog.Items[2].(w.AuthStack)
+	form := a.Items[0].(w.Form)
+	items := slices.Clone(form.Items)
+	for i, it := range items {
+		if f := it.(w.Field); len(f.Parts) > 1 {
+			change(&f)
+			items[i] = f
+		}
+	}
+	form.Items = items
+	a.Items = slices.Clone(a.Items)
+	a.Items[0] = form
+	auth.Dialog.Items[2] = a
+	p.Items[0] = auth
+}
 
 func TestFrameComparisonBite(t *testing.T) {
 	l := load(t)
@@ -477,14 +609,43 @@ func TestFrameComparisonBite(t *testing.T) {
 	if found := frameFindings(l, []screens.Screen{wrong}); len(found) == 0 {
 		t.Error("a screen naming another frame than its route's stayed green")
 	}
+	// A state is held against its own frame (STATE_FRAME of check.py): the
+	// refused sign-in drawn as the empty one is red, on login/refused only.
+	refused := frameFindings(l, []screens.Screen{noReason})
+	if len(refused) == 0 {
+		t.Error("the refused state drawn as the empty sign-in stayed green")
+	}
+	for _, f := range refused {
+		if !strings.Contains(f, "login/refused.json (s-auth-13)") {
+			t.Errorf("a finding not of the refused state: %s", f)
+		}
+	}
+	// A state's frame is a frame of the route.
+	elsewhere := l
+	elsewhere.states = map[string]string{"login/refused": "s-auth-2"}
+	if found := frameFindings(elsewhere, []screens.Screen{signIn(nil)}); !slices.ContainsFunc(found, func(f string) bool { return strings.Contains(f, "does not name the route") }) {
+		t.Errorf("a state's frame of another route stayed out of the findings: %q", found)
+	}
+	// The two copies of the mockup part on a state's frame.
+	partedState := l
+	partedState.tcMock = strings.Replace(l.tcMock, `Login or password is wrong.</span>`, `Wrong.</span>`, 1)
+	if partedState.tcMock == l.tcMock {
+		t.Fatal("the sample of parted copies changed nothing: s-auth-13 moved")
+	}
+	if found := frameFindings(partedState, []screens.Screen{signIn(nil)}); !slices.ContainsFunc(found, func(f string) bool { return strings.Contains(f, "frame s-auth-13 differs") }) {
+		t.Errorf("a state's frame that differs between the copies stayed out of the findings: %q", found)
+	}
 }
 
 func TestKinshipBite(t *testing.T) {
 	l := load(t)
-	all := []screens.Screen{signIn(nil), wrapped, otherVariant, otherWidget}
-	d := drafts(t, all)
+	all := []screens.Screen{signIn(nil), wrapped, otherVariant, otherWidget, plainReason}
+	d := drafts(t, l, all)
+	if d["s-auth-13"] == nil {
+		t.Error("no draft of the refused state's frame s-auth-13")
+	}
 	none(t, "the good sample", kinFindings(l, d, []screens.Screen{signIn(nil)}))
-	for name, s := range map[string]screens.Screen{"wrapped": wrapped, "other variant": otherVariant, "no button": otherWidget} {
+	for name, s := range map[string]screens.Screen{"wrapped": wrapped, "other variant": otherVariant, "no button": otherWidget, "the reason in another hint": plainReason} {
 		if found := kinFindings(l, d, []screens.Screen{s}); len(found) == 0 {
 			t.Errorf("%s: kinship stayed green", name)
 		} else {
