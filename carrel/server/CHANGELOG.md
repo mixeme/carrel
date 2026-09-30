@@ -17,6 +17,21 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.83 — 2026-10-01
+
+Two dead fields leave the contract.
+
+### Removed
+
+- **`InvitePage.valid` and `ConfirmEmailPage.ok`.** Both have been true in
+  every answer since v0.2.76: a dead secret answers with its own page
+  (`DeadLinkPage`, rest-1), never with these pages marked invalid.
+
+### For consumers
+
+Stop reading the two fields. Fixtures regenerated: `invite/normal`,
+`invite/link`, `confirm-email/normal`.
+
 ## v0.2.82 — 2026-10-01
 
 Columns in every list that draws them (from-typecase note 25, the owner's

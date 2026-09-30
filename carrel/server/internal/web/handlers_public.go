@@ -418,8 +418,7 @@ func (s *Server) invitePage(w http.ResponseWriter, r *http.Request, token string
 			Lede:    line(lede),
 			Notices: passwordNotice(),
 		},
-		Valid: true,
-		Form:  focused(withPrimary(s.anonPlainForm(w, r, "/invite/"+token, "POST", rows...), "invite.submit", "Create account"), "login"),
+		Form: focused(withPrimary(s.anonPlainForm(w, r, "/invite/"+token, "POST", rows...), "invite.submit", "Create account"), "login"),
 	}
 }
 
@@ -470,7 +469,6 @@ func (s *Server) getConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	page := view.ConfirmEmailPage{
 		Plain: view.Plain{Title: "Email address", Lede: line("Address confirmed. You can sign in now.")},
-		OK:    true,
 		Next:  view.Action{ID: "confirm.login", Label: "Sign in", Href: s.route("/login"), Method: "GET", Primary: true, Enabled: true},
 	}
 	s.writePage(w, r, http.StatusOK, page)

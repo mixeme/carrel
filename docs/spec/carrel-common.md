@@ -2208,8 +2208,8 @@ type RegisterPage struct { // s-auth-2, после отправки s-auth-3
     Sent   bool
     SignIn Action // «Already have an account? Sign in» у формы, «Back to sign in» после отправки
 }
-type InvitePage   struct { Plain; Form Form; Valid bool }
-type ConfirmEmailPage struct { Plain; OK bool; Next Action }
+type InvitePage   struct { Plain; Form Form }
+type ConfirmEmailPage struct { Plain; Next Action }
 type DeadLinkPage struct { // rest-1: мёртвая ссылка-секрет — /invite/, /forgot/, /confirm-email/, /p/
     Plain         // «This link does not work» и почему так бывает; одни слова на все роды ссылок
     SignIn Action // «Sign in» — единственная дверь

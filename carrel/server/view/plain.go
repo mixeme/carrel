@@ -38,12 +38,10 @@ type RegisterPage struct {
 }
 type InvitePage struct {
 	Plain
-	Form  Form `json:"form"`
-	Valid bool `json:"valid"`
+	Form Form `json:"form"`
 }
 type ConfirmEmailPage struct {
 	Plain
-	OK   bool   `json:"ok"`
 	Next Action `json:"next"`
 }
 
