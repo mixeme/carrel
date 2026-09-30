@@ -1,6 +1,7 @@
 package screens
 
 import (
+	"carrel.dev/carrel/client/screens/about"
 	"carrel.dev/carrel/client/screens/login"
 	"carrel.dev/carrel/server/view"
 	"carrel.dev/typecase/widget"
@@ -41,5 +42,12 @@ var All = []Screen{
 		Model: func() any { return new(view.LoginPage) },
 		Draw:  func(model any) Root { return login.Screen(model.(*view.LoginPage)) },
 		Title: func(model any) string { return string(model.(*view.LoginPage).Title) },
+	},
+	{
+		Route: "/about",
+		Frame: "rest-3",
+		Model: func() any { return new(view.AboutPage) },
+		Draw:  func(model any) Root { return about.Screen(model.(*view.AboutPage)) },
+		Title: func(model any) string { return string(model.(*view.AboutPage).Title) },
 	},
 }
