@@ -1,21 +1,29 @@
-// Drafted by frame2go from frame «Адрес подтверждён» (rest-2) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package confirm is the page of an address confirmed, /confirm-email/{token},
+// drawn by frame «Адрес подтверждён» (rest-2) of the mockup — the route has
+// no frame of a whole screen, its state confirmed is this part: the draft
+// frame2go printed for it, with the frame's data become the view model's
+// (U-5.1, U-6.14).
+package confirm
 
-import w "carrel.dev/typecase/widget"
+import (
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
 
-// Rest2 is frame «Адрес подтверждён» (rest-2).
-func Rest2() interface{ Render() string } {
+// Screen draws the page of an address confirmed from its view model: the
+// mark, the page's name (Title), what happened (Lede) and one door on — «Sign
+// in» (Next). A dead link is not this page: it is DeadLinkPage's, so the page
+// is only ever the confirmed one (OK).
+func Screen(p *view.ConfirmEmailPage) w.Page {
 	return w.Page{
 		Items: []w.PagePart{
 			w.Auth{
 				Dialog: w.Dialog{
 					Items: []w.DialogPart{
 						w.DialogLogo{Logo: w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63", Size: w.Logo48}, Wide: true},
-						w.DialogTitle{Text: "Email address", Gap: w.DialogTitleGap6},
-						w.Prose{Parts: []w.Inline{w.Text("Address confirmed. You can sign in now.")}, Variant: w.ProseMuted},
-						w.FormFoot{Items: []w.FormFootPart{w.Button{Label: "Sign in", Kind: w.ButtonPrimary}}, Variant: w.FormFootFlush},
+						w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap6},
+						w.Prose{Parts: []w.Inline{w.Text(p.Lede)}, Variant: w.ProseMuted},
+						w.FormFoot{Items: []w.FormFootPart{w.Button{Label: string(p.Next.Label), Kind: w.ButtonPrimary, Href: p.Next.Href}}, Variant: w.FormFootFlush},
 					},
 					Variant: w.DialogNarrow,
 				},

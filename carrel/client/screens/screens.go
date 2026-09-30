@@ -2,6 +2,7 @@ package screens
 
 import (
 	"carrel.dev/carrel/client/screens/about"
+	"carrel.dev/carrel/client/screens/confirm"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
 	"carrel.dev/carrel/server/view"
@@ -59,5 +60,11 @@ var All = []Screen{
 		Frames: []string{"s-auth-12"},
 		Draw:   func(model any) Root { return invite.Screen(model.(*view.InvitePage)) },
 		Title:  func(model any) string { return string(model.(*view.InvitePage).Title) },
+	},
+	{
+		Model:  func() any { return new(view.ConfirmEmailPage) },
+		Frames: []string{"rest-2"},
+		Draw:   func(model any) Root { return confirm.Screen(model.(*view.ConfirmEmailPage)) },
+		Title:  func(model any) string { return string(model.(*view.ConfirmEmailPage).Title) },
 	},
 }
