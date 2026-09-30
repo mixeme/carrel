@@ -60,9 +60,8 @@ is in docs/plan/client.md, for the server's next round.
   section goes.
 - **Typecase `ef80fb4`** (only `docs/roadmap.md` edited in the neighbour's
   tree; the same code, CSS and mockup as `d13f50c`). By the end of the
-  work the neighbour moved to `7f726e6`, whose mockup the copy of Carrel
-  does not have yet: the comparison of the copies is red on `rest-3` until
-  it lands.
+  work the neighbour moved to `7f726e6`; its mockup came to Carrel with
+  `eb234e8`, and the gates are green on it (Typecase `1664ee1`, clean).
 
 ## v0.0.5 — 2026-09-30
 
