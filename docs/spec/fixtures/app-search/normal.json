@@ -213,7 +213,11 @@
         "state": "empty"
       }
     ],
-    "summary": "13 of 14 sources answered · 1 found · 1 refused",
+    "summary": [
+      {
+        "text": "13 of 14 sources answered · 1 found · 1 refused"
+      }
+    ],
     "taskID": "t-task"
   },
   "print": {

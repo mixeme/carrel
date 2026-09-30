@@ -722,7 +722,11 @@
         "state": "error"
       }
     ],
-    "summary": "Polled 2 of 3 sources · 5 cards · 1 refused",
+    "summary": [
+      {
+        "text": "Polled 2 of 3 sources · 5 cards · 1 refused"
+      }
+    ],
     "taskID": "t-task"
   },
   "print": {

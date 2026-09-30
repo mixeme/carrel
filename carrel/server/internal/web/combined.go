@@ -245,7 +245,7 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 	case err != nil:
 		return st, err
 	case task == nil:
-		st.poll.Summary = combinedNoTicks
+		st.poll.Summary = line(combinedNoTicks)
 	default:
 		snap := task.Snapshot()
 		st.task, st.snap = task, &snap

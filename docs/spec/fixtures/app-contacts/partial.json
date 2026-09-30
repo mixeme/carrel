@@ -1241,7 +1241,11 @@
     "taskID": "t-task",
     "running": true,
     "percent": 66,
-    "summary": "Polled 2 of 3 sources · 5 cards",
+    "summary": [
+      {
+        "text": "Polled 2 of 3 sources · 5 cards"
+      }
+    ],
     "answeredAt": "",
     "sources": [
       {

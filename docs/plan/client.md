@@ -244,22 +244,30 @@
 - **D1.** Шапка: аватар 44, рубрика «Timeline», подзаголовок «Издательство
   «Слово» · Выпускающий редактор» и бейдж «in 2 books» — у страницы только
   `Name`; `Card.Subtitle` пуст, `Card.Avatar` = null.
+  **Закрыт `v0.2.88`:** `Card.Avatar` — аватар шапки и фото панели; `ContactTimelinePage.Subtitle`; «in 2 books» — `ContactTimelinePage.Linked` (`Badge`, `linked`); рубрика «Timeline» — слово экрана.
 - **D2.** `Actions` без значков (`quill`, `cal`, `task`); Print нет.
+  **Закрыт `v0.2.88`:** значки `i-quill`, `i-cal`, `i-task`; Print — `timeline.print`, `?print=1`.
 - **D3.** Строки `Range.Form` несут `Hint` «Both days are in the timeline.»,
   кадр его не рисует.
+  **Закрыт `v0.2.88`:** подсказки у To нет.
 - **D4.** Columns на полосе — `Bar.Columns` = null, а кадр рисует кнопку
   (меню — `s-contacts-25`, `-26`).
+  **Закрыт `v0.2.82`** (записка 25): `Bar.Columns` у хронологии.
 - **D5.** «newest first» справа на полосе — поля нет.
+  **Снят:** «newest first» — неизменное слово экрана (U-1.3, раздел Е): порядок один и не переключается (подпись `s-contacts-14`).
 - **D6.** Полоса опроса: кадр — «matched by» с адресами моноширинно и
   недоступный источник красным; `Poll.Summary` — одна строка без кусков
   (просится `Runs`, как `Lede`).
+  **Закрыт `v0.2.88`:** `PollBar.Summary` — `Runs` у всех опросов (фраза без выделений — один кусок); у хронологии «Polled N of M sources · matched by ‹mono›адреса‹/mono› and the name · ‹danger›baikal · Общий unavailable‹/danger›»; C-8 `RunDanger`. В `bind` клиента — перевод `RunDanger` в `Span{FaceDanger}` с тестом.
 - **D7.** Группы месяцев без счёта (как L5); у `TimelineRow` нет цвета
   метки (как C8); `When` длинный («10 August 2026»), кадр — «10 Aug»; род
   строки — перечисление `Kind`, а кадр пишет слово («event», «file»).
+  **Закрыт `v0.2.88`:** `TimelineGroup.Count`; цвет — `TimelineRow.Colour` (`v0.2.87`); день коротко — `v0.2.82`; род — значение `Kind` (C-8) и есть слово столбца («event», «task», «file»), записано в C-6.5.
 - **D8.** Карточка в панели (`Card`, `Details`): рубрика «Card»; фото
   большое при `Avatar` = null; Organisation и Title есть в фикстуре, а
   панель кадра их не рисует; «The same person in other books» с пояснением
   — у `Details` нет `Books`; источник — как L8.
+  **Закрыт `v0.2.88`:** `Card.Avatar`; Organisation и Title из полей панели убраны (они в шапке); `Details.Books` — другие книги (пояснение под ними — слово экрана); `Card.Source.UID`; рубрика «Card» — слово экрана; категории и день рождения — как у карточки (`v0.2.87`).
 
 ### Д. Правка (`ContactEditPage`, `s-contacts-3`, `s-contacts-4`)
 

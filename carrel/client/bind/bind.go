@@ -24,7 +24,8 @@ import (
 
 // Inlines is a sentence of the model in its pieces, each in its face (C-6.2
 // Runs): a piece marked mono is monospaced (a login, an address), strong is
-// bold (a name), the rest plain text. The sentence is never cut or set again
+// bold (a name), danger an alarm (a source that did not answer), the rest
+// plain text. The sentence is never cut or set again
 // from the server's words.
 func Inlines(r view.Runs) []w.Inline {
 	out := make([]w.Inline, 0, len(r))
@@ -34,6 +35,8 @@ func Inlines(r view.Runs) []w.Inline {
 			out = append(out, w.Mono{Text: string(p.Text)})
 		case view.RunStrong:
 			out = append(out, w.Strong(p.Text))
+		case view.RunDanger:
+			out = append(out, w.Span{Face: w.FaceDanger, Text: string(p.Text)})
 		default:
 			out = append(out, w.Text(p.Text))
 		}

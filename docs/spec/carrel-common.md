@@ -1124,27 +1124,30 @@ type ContactTimelinePage struct {
     Shell
     UID     string
     Name    Text
-    Card    Details // карточка стоит в панели как контекст экрана, а не как выделение
+    Subtitle Text   // под именем: где и кем, как у карточки — «Издательство «Слово» · Выпускающий редактор»
+    Linked  *Badge  // «in 2 books» (BadgeLinked) у человека в нескольких книгах; nil — в одной
+    Card    Details // карточка стоит в панели как контекст экрана, а не как выделение; Avatar — и аватар шапки
     Bar     ListBar
     Range   Range   // окно на полосе: From, To и Show в Form; Presets пуст — «Widen the range» отвечают им
     Poll    PollBar // хронология — поиск по одному человеку (S-15.4)
     Groups  []TimelineGroup
     Note    Text    // «Nothing was looked for before …»
-    Actions []Action
+    Actions []Action // Write a note (i-quill), New event (i-cal), New task (i-task), Print (i-print, ?print=1)
 }
 
-// Группа хронологии — месяц; записи без даты — последней группой.
-type TimelineGroup struct { Rubric Text; Rows []TimelineRow }
+// Группа хронологии — месяц; записи без даты — последней группой. Count —
+// сколько в ней записей.
+type TimelineGroup struct { Rubric Text; Count int; Rows []TimelineRow }
 
 // Хронология человека: события, задачи, заметки и файлы, где он упомянут.
 type TimelineRow struct {
     Href    string
     Colour  Colour // метка коллекции записи
-    Kind    Kind
+    Kind    Kind   // C-8; значение и есть слово столбца Kind — «event», «task», «file» (s-contacts-7)
     When    Text // день списка коротко, «10 Aug» (s-contacts-7, -26; C-10)
     Title   Text
     Stamp   Stamp
-    Why     Text // «участник · приняла», «упомянута в тексте» — колонка обязательна, за названием, в меню Columns не входит
+    Why     Text // «attendee · accepted», «organiser · done», «attached to «…»» — колонка обязательна, за названием, в меню Columns не входит
 }
 
 type ContactEditPage struct {
@@ -1345,7 +1348,7 @@ type JumpRow struct { Href string; Kind Kind; Title Text; Stamp Stamp }
 
 type PollBar struct {
     TaskID      string
-    Summary     Text // «Опрошено 5 из 7 · 12 записей · 1 недоступен»
+    Summary     Runs // «Polled 5 of 7 · 12 records · 1 refused» кусками: у хронологии адреса моноширинно, не ответивший — тревогой (s-contacts-7)
     AnsweredAt  When // когда собрана показанная выдача
     Running     bool
     Percent     int
@@ -2648,7 +2651,8 @@ const ( AlignLeft CellAlign = "left"; AlignCenter = "center"; AlignRight = "righ
 
 // Выделение куска фразы (Run): слова те же, что у Field.Mono и BlockStrong
 type RunMark string
-const ( RunPlain RunMark = ""; RunMono = "mono"; RunStrong = "strong" )
+const ( RunPlain RunMark = ""; RunMono = "mono"; RunStrong = "strong"
+        RunDanger = "danger" ) // тревога: источник, который не ответил (tc-dim--danger, s-contacts-7)
 ```
 
 `CheckUnknown` — серый флажок проверки установки: то, что снаружи не измерить.

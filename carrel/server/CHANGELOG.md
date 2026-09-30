@@ -17,6 +17,37 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.88 — 2026-10-01
+
+A person's timeline as the frame draws it (the client's scan of the
+contacts section, group Г).
+
+### Added
+
+- **`ContactTimelinePage.subtitle`** (where and as what) and **`.linked`**
+  («in 2 books», `linked`; `null` for one book).
+- **`Card.avatar`** — the head's avatar and the panel's photograph;
+  **`Card.books`** — the other books; **`Card.source.uid`**.
+- **Icons** of Write a note (`i-quill`), New event (`i-cal`), New task
+  (`i-task`) and **Print** (`timeline.print`, `i-print`, `?print=1`).
+- **`TimelineGroup.count`**.
+- **`RunMark` `danger`** (C-8): a source that did not answer, as an alarm.
+
+### Changed
+
+- **`PollBar.summary` is `Runs`** everywhere: a sentence without marks is one
+  piece. A timeline's is in pieces — «Polled 13 of 14 sources · matched by
+  ‹mono›a.kovaleva@example.org‹/mono› and the name · ‹danger›baikal · Общий
+  unavailable‹/danger›» (s-contacts-7).
+- The timeline's card has no Organisation and Title rows (the head says
+  them); its tags lead to the filter and its birthday has `aside`.
+- The range's To has no hint (the frame draws none).
+
+### For consumers
+
+Read `poll.summary` as pieces (C-6.2). Fixtures regenerated: every fixture
+with a poll, `app-contact-timeline/normal`.
+
 ## v0.2.87 — 2026-10-01
 
 The card of a contact as the frames draw it (the client's scan of the

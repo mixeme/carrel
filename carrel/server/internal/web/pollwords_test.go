@@ -18,7 +18,7 @@ func TestThePollOverAListSpeaksTheWordsOfTheFrame(t *testing.T) {
 	tickRail(t, f.h, f.sess, "contacts", f.path("contacts"))
 
 	page := combined(t, f.h, f.sess, "/app/contacts", contactsPoll)
-	if got := string(page.Poll.Summary); got != "Polled 1 of 1 source · 2 cards" {
+	if got := saidRuns(page.Poll.Summary); got != "Polled 1 of 1 source · 2 cards" {
 		t.Errorf("the list bar says %q", got)
 	}
 }
@@ -30,7 +30,7 @@ func TestEachKindCountsItsOwn(t *testing.T) {
 	tickRail(t, f.h, f.sess, "calendar", f.path("calendar"))
 
 	page := combined(t, f.h, f.sess, "/app/calendar?from=2026-08-10", func(p view.AgendaPage) *view.PollBar { return p.Poll })
-	if got := string(page.Poll.Summary); !strings.HasSuffix(got, "· 1 event") {
+	if got := saidRuns(page.Poll.Summary); !strings.HasSuffix(got, "· 1 event") {
 		t.Errorf("the agenda bar says %q, want it to count events", got)
 	}
 }

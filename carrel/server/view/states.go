@@ -234,4 +234,5 @@ const (
 	RunPlain  RunMark = ""
 	RunMono   RunMark = "mono"   // tc-mono: логин, адрес, путь
 	RunStrong RunMark = "strong" // <b>: имя в фразе
+	RunDanger RunMark = "danger" // тревога: источник, который не ответил (s-contacts-7)
 )

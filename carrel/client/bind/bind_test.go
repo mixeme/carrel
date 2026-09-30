@@ -20,6 +20,8 @@ func TestInlines(t *testing.T) {
 	r := view.Runs{{Text: "The account "}, {Text: "mix", Mark: view.RunMono}, {Text: " of "}, {Text: "Anna", Mark: view.RunStrong}, {Text: "."}}
 	same(t, "the pieces in their faces", bind.Inlines(r), []w.Inline{w.Text("The account "), w.Mono{Text: "mix"}, w.Text(" of "), w.Strong("Anna"), w.Text(".")})
 	same(t, "no pieces", bind.Inlines(nil), []w.Inline{})
+	alarm := view.Runs{{Text: "Polled 5 of 6 · "}, {Text: "baikal · Общий unavailable", Mark: view.RunDanger}}
+	same(t, "an alarm", bind.Inlines(alarm), []w.Inline{w.Text("Polled 5 of 6 · "), w.Span{Face: w.FaceDanger, Text: "baikal · Общий unavailable"}})
 	same(t, "the words", bind.Words(r), "The account mix of Anna.")
 	same(t, "no words", bind.Words(nil), "")
 }

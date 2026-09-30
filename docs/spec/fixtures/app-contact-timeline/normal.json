@@ -6,20 +6,31 @@
       "id": "timeline.note",
       "label": "Write a note",
       "method": "GET",
-      "primary": true
+      "primary": true,
+      "icon": "i-quill"
     },
     {
       "enabled": true,
       "href": "/app/calendar/quick?attendee=a.kovaleva%40example.org",
       "id": "timeline.event",
       "label": "New event",
-      "method": "GET"
+      "method": "GET",
+      "icon": "i-cal"
     },
     {
       "enabled": true,
       "href": "/app/tasks/quick?related=4f2b-9c31-a0e7",
       "id": "timeline.task",
       "label": "New task",
+      "method": "GET",
+      "icon": "i-task"
+    },
+    {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline?print=1",
+      "icon": "i-print",
+      "id": "timeline.print",
+      "label": "Print",
       "method": "GET"
     }
   ],
@@ -171,18 +182,6 @@
     ],
     "fields": [
       {
-        "href": "",
-        "label": "Organisation",
-        "mono": false,
-        "value": "Издательство «Слово»"
-      },
-      {
-        "href": "",
-        "label": "Title",
-        "mono": false,
-        "value": "Выпускающий редактор"
-      },
-      {
         "href": "tel:+7912445-10-88",
         "label": "Phone · mobile",
         "mono": true,
@@ -204,7 +203,8 @@
         "href": "",
         "label": "Birthday",
         "mono": true,
-        "value": "1987-03-14"
+        "value": "1987-03-14",
+        "aside": "in 7 months"
       },
       {
         "href": "",
@@ -213,12 +213,12 @@
         "value": "",
         "tags": [
           {
-            "href": "",
+            "href": "/app/contacts/a-nc-home/kontakty?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0",
             "label": "работа",
             "on": false
           },
           {
-            "href": "",
+            "href": "/app/contacts/a-nc-home/kontakty?tag=%D0%B8%D0%B7%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE",
             "label": "издательство",
             "on": false
           }
@@ -238,7 +238,7 @@
       "objects": null,
       "readOnly": false,
       "stamp": "nextcloud · Контакты",
-      "uid": "",
+      "uid": "4f2b-9c31-a0e7",
       "compared": "",
       "path": ""
     },
@@ -279,7 +279,11 @@
     ],
     "attach": [],
     "attendees": [],
-    "avatar": null,
+    "avatar": {
+      "colour": "#8c6239",
+      "href": "",
+      "initials": "АК"
+    },
     "body": "",
     "deleteNote": "",
     "foreign": [],
@@ -304,7 +308,8 @@
           "colour": "#4a6b52"
         }
       ],
-      "rubric": "August 2026"
+      "rubric": "August 2026",
+      "count": 1
     }
   ],
   "name": "Анна Ковалёва",
@@ -465,7 +470,25 @@
         "state": "empty"
       }
     ],
-    "summary": "Polled 13 of 14 sources · 1 record · 1 refused",
+    "summary": [
+      {
+        "text": "Polled 13 of 14 sources · matched by "
+      },
+      {
+        "mark": "mono",
+        "text": "a.kovaleva@example.org"
+      },
+      {
+        "text": " and the name"
+      },
+      {
+        "text": " · "
+      },
+      {
+        "mark": "danger",
+        "text": "baikal · Общий unavailable"
+      }
+    ],
     "taskID": "t-task"
   },
   "print": {
@@ -776,7 +799,7 @@
             {
               "error": "",
               "extra": null,
-              "hint": "Both days are in the timeline.",
+              "hint": "",
               "kind": "date",
               "label": "To",
               "name": "to",
@@ -909,5 +932,7 @@
     },
     "userHref": "/app/settings/account"
   },
-  "uid": "4f2b-9c31-a0e7"
+  "uid": "4f2b-9c31-a0e7",
+  "linked": null,
+  "subtitle": "Издательство «Слово» · Выпускающий редактор"
 }

@@ -154,7 +154,7 @@ func TestSearchAcrossTickedSources(t *testing.T) {
 			t.Errorf("%s = %+v", name, sp)
 		}
 	}
-	if bar.Percent != 100 || bar.AnsweredAt == "" || !strings.Contains(string(bar.Summary), "3 of 3 sources answered · 7 found") {
+	if bar.Percent != 100 || bar.AnsweredAt == "" || !strings.Contains(saidRuns(bar.Summary), "3 of 3 sources answered · 7 found") {
 		t.Errorf("bar = %+v", bar)
 	}
 	if action(bar, "poll.stop").Enabled || !action(bar, "poll.again").Enabled {
@@ -372,7 +372,7 @@ func TestSearchRefusalRetriesOneSource(t *testing.T) {
 	if work.State != view.SourceError || work.Retry == nil || work.Count != nil || !strings.Contains(string(work.Message), "403") {
 		t.Fatalf("work = %+v", work)
 	}
-	if !strings.Contains(string(bar.Summary), "1 of 2 sources answered · 1 found · 1 refused") {
+	if !strings.Contains(saidRuns(bar.Summary), "1 of 2 sources answered · 1 found · 1 refused") {
 		t.Errorf("summary = %q", bar.Summary)
 	}
 	if h := search(t, f.h, f.sess, "q=Ada"); len(h.Results) != 1 || h.Top.Search.History[0].Outcome != "1 found" {
@@ -416,7 +416,7 @@ func TestSearchStopAndCeiling(t *testing.T) {
 	}
 	stop := decode[pollFragment](t, f.h.do(asPoll(postForm(action(bar, "poll.stop").Href, f.sess, url.Values{})))).Body
 	docs := sourceNamed(t, stop, "Docs")
-	if stop.Running || docs.State != view.SourceCancelled || docs.Retry == nil || !strings.Contains(string(stop.Summary), "1 stopped") {
+	if stop.Running || docs.State != view.SourceCancelled || docs.Retry == nil || !strings.Contains(saidRuns(stop.Summary), "1 stopped") {
 		t.Fatalf("after stop: %+v", stop)
 	}
 	kept := search(t, f.h, f.sess, "q=Ada")
@@ -426,7 +426,7 @@ func TestSearchStopAndCeiling(t *testing.T) {
 
 	again := search(t, f.h, f.sess, "q=Ada&again=1")
 	bar = waitPoll(t, f.h, f.sess, again.Poll.TaskID, nil)
-	if sourceNamed(t, bar, "Docs").State != view.SourceTimeout || !strings.Contains(string(bar.Summary), "1 timed out") {
+	if sourceNamed(t, bar, "Docs").State != view.SourceTimeout || !strings.Contains(saidRuns(bar.Summary), "1 timed out") {
 		t.Fatalf("after the ceiling: %+v", bar)
 	}
 	if h := search(t, f.h, f.sess, "q=Ada").Top.Search.History; len(h) != 1 || h[0].Outcome != "1 found" {
@@ -453,7 +453,7 @@ func TestSearchStartsOnlyWithTextTicksAndASlot(t *testing.T) {
 	if page := search(t, f.h, f.sess, "q=%20%20"); page.Poll.TaskID != "" || page.Query != "" {
 		t.Errorf("an empty query started %+v", page.Poll)
 	}
-	if page := search(t, f.h, f.sess, "q=Ada"); page.Poll.TaskID != "" || !strings.Contains(string(page.Poll.Summary), "No collections are ticked") {
+	if page := search(t, f.h, f.sess, "q=Ada"); page.Poll.TaskID != "" || !strings.Contains(saidRuns(page.Poll.Summary), "No collections are ticked") {
 		t.Errorf("no ticks: %+v", page.Poll)
 	}
 	tickAll(t, f.h, f.sess)

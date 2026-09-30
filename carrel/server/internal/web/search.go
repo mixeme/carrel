@@ -74,7 +74,7 @@ func (s *Server) getSearch(w http.ResponseWriter, r *http.Request) {
 	if task == nil {
 		sources := s.searchSources(sess, blob)
 		if len(sources) == 0 {
-			page.Poll.Summary = searchNoTicks
+			page.Poll.Summary = line(searchNoTicks)
 			s.writePage(w, r, http.StatusOK, page)
 			return
 		}
@@ -318,6 +318,10 @@ type pollOwner struct {
 	// search says something else: it is asked once and answers once.
 	polled bool
 	found  func(n int) string
+	// matched are the addresses a person's timeline is looked for by: its
+	// bar says them, in mono, and names a source that did not answer as an
+	// alarm instead of counting it (s-contacts-7).
+	matched []string
 }
 
 func searchOwner(q string) pollOwner {
@@ -388,18 +392,21 @@ func (s *Server) pollBar(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot, own
 			fmt.Sprintf("Polled %d of %s", answered, plural(total, "source")),
 			owner.found(len(snap.Items)),
 		}
-		bar.Summary = text(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
+		bar.Summary = line(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
+		if owner.matched != nil {
+			bar.Summary = matchedSummary(answered, total, owner.matched, bar.Sources)
+		}
 		if !snap.Running {
 			bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
 		}
 	case snap.Running:
-		bar.Summary = text(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(len(snap.Items))))
+		bar.Summary = line(fmt.Sprintf("Asking %s · %d answered · %s", plural(total, "source"), answered, owner.found(len(snap.Items))))
 	default:
 		parts := []string{
 			fmt.Sprintf("%d of %s answered", answered, plural(total, "source")),
 			owner.found(len(snap.Items)),
 		}
-		bar.Summary = text(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
+		bar.Summary = line(strings.Join(append(parts, pollTroubles(refused, unreachable, timedOut, stopped)...), " · "))
 		bar.AnsweredAt = tf.formatWhen(snap.Finished, false, now)
 	}
 	stop := view.Action{ID: "poll.stop", Label: "Stop", Href: s.route(base + "/cancel"), Method: "POST", Enabled: snap.Running}

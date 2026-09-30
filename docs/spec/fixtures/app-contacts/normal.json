@@ -1392,7 +1392,11 @@
     "taskID": "t-task",
     "running": false,
     "percent": 100,
-    "summary": "Polled 3 of 3 sources · 6 cards",
+    "summary": [
+      {
+        "text": "Polled 3 of 3 sources · 6 cards"
+      }
+    ],
     "answeredAt": "10 August, 17:04",
     "sources": [
       {

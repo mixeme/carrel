@@ -186,7 +186,11 @@
     "percent": 0,
     "running": false,
     "sources": [],
-    "summary": "No collections are ticked, so there is nothing to show. Tick collections in the rail.",
+    "summary": [
+      {
+        "text": "No collections are ticked, so there is nothing to show. Tick collections in the rail."
+      }
+    ],
     "taskID": ""
   },
   "print": {

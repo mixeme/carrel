@@ -52,6 +52,8 @@ type timelinePerson struct {
 	name   string
 	emails map[string]bool // lower case, without mailto:
 	first  string          // the first address of the card, for New event
+	// addresses are the card's addresses in its order, as the bar says them
+	addresses []string
 }
 
 // has says whether an address is this person's.
@@ -88,6 +90,7 @@ func timelineOwner(tt *timelineTask) pollOwner {
 		what:       "timeline",
 		polled:     true,
 		found:      func(n int) string { return plural(n, "record") },
+		matched:    append([]string{}, tt.person.addresses...),
 	}
 }
 
@@ -262,6 +265,9 @@ func personOf(uid string, obj *model.Object) timelinePerson {
 	p := timelinePerson{uid: uid, name: contactName(obj), emails: map[string]bool{}}
 	for _, e := range obj.PropText("EMAIL") {
 		if e = strings.ToLower(strings.TrimSpace(e)); e != "" {
+			if !p.emails[e] {
+				p.addresses = append(p.addresses, e)
+			}
 			p.emails[e] = true
 			if p.first == "" {
 				p.first = e
@@ -361,7 +367,7 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	tl := s.timelinePage(c, obj, person, task, from, last, r.URL.Query().Get("show"), notices)
+	tl := s.timelinePage(r.Context(), c, obj, person, task, from, last, r.URL.Query().Get("show"), notices)
 	// Columns (s-contacts-25): Title, Date, Kind, Source; why a record is
 	// here stands after its title always and is not a column (s-contacts-26).
 	tl.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), "timeline", card+"/timeline/columns", r.URL.Query(), false)
@@ -502,21 +508,37 @@ var timelineShows = []struct {
 	{"notes", "Notes", view.KindNote}, {"files", "Files", view.KindFile},
 }
 
-func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timelinePerson, task *timelineTask, from, last time.Time, show string, notices []view.Notice) view.ContactTimelinePage {
+func (s *Server) timelinePage(ctx context.Context, c *collectionCtx, obj *model.Object, person timelinePerson, task *timelineTask, from, last time.Time, show string, notices []view.Notice) view.ContactTimelinePage {
 	tf := c.tf
 	card := c.recordPath(person.uid)
 	sh := s.buildShell(c.sess, person.name+" · Timeline")
 	sh.Rail = s.timelineRail(c, nil, card+"/timeline")
 	sh.Notices = append(sh.Notices, notices...)
-	page := view.ContactTimelinePage{Shell: sh, UID: person.uid, Name: text(person.name)}
+	page := view.ContactTimelinePage{Shell: sh, UID: person.uid, Name: text(person.name), Subtitle: text(contactSubtitle(obj))}
 	// The card in the panel: Open the card and Edit on view, the deletion at
 	// its foot, the rest under «⋯» — the menu of the card itself
 	// (s-contacts-7, s-contacts-11).
 	ops := s.recordOps(c.origin(), c.spec, person.uid, obj.ETag)
 	page.Card = view.Details{Title: text(person.name), Source: c.source(), Menu: ops.menu,
 		Actions: shown(&view.Action{ID: "timeline.card", Label: "Open the card", Href: s.route(card), Method: "GET", Enabled: true}, ops.edit, ops.del)}
+	page.Card.Source.UID = text(person.uid)
+	// The avatar of the head and the photograph of the panel (s-contacts-7).
+	av := avatarFor(person.uid, person.name)
+	av.Href, _ = s.cardPhoto(c, person.uid, obj)
+	page.Card.Avatar = &av
 	for _, f := range contactFieldsOf(obj) {
-		page.Card.Fields = append(page.Card.Fields, f.Field)
+		// Where the person works and as what is the head's line, not the
+		// panel's (s-contacts-7).
+		if f.prop != "ORG" && f.prop != "TITLE" {
+			page.Card.Fields = append(page.Card.Fields, f.Field)
+		}
+	}
+	page.Card.Fields = withBirthdayAside(withTagLinks(page.Card.Fields, s.recordTags(c, obj)), c.tf)
+	// A person in more than one book: «in 2 books» by the head, the others
+	// in the panel (s-contacts-7, S-16).
+	if lc, ok := s.linkedOf(ctx, c, person.uid); ok {
+		page.Linked = &view.Badge{Label: text(fmt.Sprintf("in %d books", len(lc.others)+1)), Role: view.BadgeLinked}
+		page.Card.Books = s.memberRows(lc, obj, differs(contactDiffers))
 	}
 	here := timelineHere(card, from, last, tf.now, tf.tz)
 	// The range stays on the strip (s-contacts-7, s-contacts-14): the two
@@ -524,17 +546,17 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 	// answered with it — there is no button of that name.
 	form := s.plainForm(card+"/timeline", "GET",
 		view.FormRow{Name: "from", Label: "From", Kind: view.InputDate, Value: text(from.Format("2006-01-02")), Mono: true},
-		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(last.Format("2006-01-02")), Mono: true,
-			Hint: "Both days are in the timeline."},
+		view.FormRow{Name: "to", Label: "To", Kind: view.InputDate, Value: text(last.Format("2006-01-02")), Mono: true},
 	)
 	form.Actions = []view.Action{{ID: "range.show", Label: "Show", Href: s.route(card + "/timeline"), Method: "GET", Enabled: true}}
 	page.Range = view.Range{From: text(tf.date(from)), To: text(tf.date(last)), Presets: []view.Action{}, Form: &form}
 	page.Note = text("Nothing was looked for before " + tf.date(from) + ". Widen the range if you need it.")
 	q := url.Values{"related": {person.uid}}
 	page.Actions = []view.Action{
-		{ID: "timeline.note", Label: "Write a note", Href: s.postQuery("/app/notes/quick", q), Method: "GET", Primary: true, Enabled: true},
-		{ID: "timeline.event", Label: "New event", Href: s.postQuery("/app/calendar/quick", url.Values{"attendee": {person.first}}), Method: "GET", Enabled: person.first != ""},
-		{ID: "timeline.task", Label: "New task", Href: s.postQuery("/app/tasks/quick", q), Method: "GET", Enabled: true},
+		{ID: "timeline.note", Label: "Write a note", Icon: "i-quill", Href: s.postQuery("/app/notes/quick", q), Method: "GET", Primary: true, Enabled: true},
+		{ID: "timeline.event", Label: "New event", Icon: "i-cal", Href: s.postQuery("/app/calendar/quick", url.Values{"attendee": {person.first}}), Method: "GET", Enabled: person.first != ""},
+		{ID: "timeline.task", Label: "New task", Icon: "i-task", Href: s.postQuery("/app/tasks/quick", q), Method: "GET", Enabled: true},
+		{ID: "timeline.print", Label: "Print", Icon: "i-print", Href: s.route(card + "/timeline?print=1"), Method: "GET", Enabled: true},
 	}
 	if person.first == "" {
 		page.Actions[1].Reason = "The card has no address to invite."
@@ -581,6 +603,7 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 		}
 		g := &page.Groups[len(page.Groups)-1]
 		g.Rows = append(g.Rows, r.row)
+		g.Count = len(g.Rows)
 	}
 	page.Bar.Loaded = len(rows)
 	return page
@@ -605,4 +628,38 @@ func (s *Server) timelineInset(c *collectionCtx, uid string, obj *model.Object) 
 	}
 	n := len(rows)
 	return out, &n
+}
+
+// matchedSummary is the bar of a person's timeline in pieces (s-contacts-7):
+// how many sources answered, what the records were matched by — the card's
+// addresses in mono, and the name, which files are looked for by — and each
+// source that did not answer, as an alarm.
+func matchedSummary(answered, total int, addresses []string, sources []view.SourceProgress) view.Runs {
+	out := view.Runs{{Text: text(fmt.Sprintf("Polled %d of %s · matched by ", answered, plural(total, "source")))}}
+	for i, a := range addresses {
+		if i > 0 {
+			out = append(out, view.Run{Text: ", "})
+		}
+		out = append(out, view.Run{Text: text(a), Mark: view.RunMono})
+	}
+	if len(addresses) > 0 {
+		out = append(out, view.Run{Text: " and the name"})
+	} else {
+		out = append(out, view.Run{Text: "the name"})
+	}
+	for _, sp := range sources {
+		why := ""
+		switch sp.State {
+		case view.SourceError, view.SourceUnavailable:
+			why = "unavailable"
+		case view.SourceTimeout:
+			why = "did not answer in time"
+		case view.SourceCancelled:
+			why = "stopped"
+		default:
+			continue
+		}
+		out = append(out, view.Run{Text: " · "}, view.Run{Text: text(string(sp.Stamp) + " " + why), Mark: view.RunDanger})
+	}
+	return out
 }

@@ -34,7 +34,7 @@ type JumpRow struct {
 
 type PollBar struct {
 	TaskID     string           `json:"taskID"`
-	Summary    Text             `json:"summary"`    // «Опрошено 5 из 7 · 12 записей · 1 недоступен»
+	Summary    Runs             `json:"summary"`    // «Polled 5 of 7 · 12 records · 1 refused» кусками (s-contacts-7)
 	AnsweredAt When             `json:"answeredAt"` // когда собрана показанная выдача
 	Running    bool             `json:"running"`
 	Percent    int              `json:"percent"`

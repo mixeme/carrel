@@ -634,7 +634,11 @@
         "state": "done"
       }
     ],
-    "summary": "Polled 3 of 6 sources · 7 events · 1 refused",
+    "summary": [
+      {
+        "text": "Polled 3 of 6 sources · 7 events · 1 refused"
+      }
+    ],
     "taskID": "t-task"
   },
   "print": {
