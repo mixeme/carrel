@@ -266,3 +266,65 @@ func TestACopyGetsAUIDOfItsOwnWhereTheAccountHoldsOneRecordPerUID(t *testing.T) 
 		t.Errorf("PUTs refused = %d after the first %d: the account is not remembered", n, taken)
 	}
 }
+
+// docs/servers.md, SV-55, the import: a file whose record carries a UID
+// another calendar of the same iCloud account holds is refused 412 under any
+// name. The owner's rule for a copy (30.09.2026) holds for an import too: the
+// record is written with a UID of its own, the report's row says why, and a
+// record of the same file that points at it follows it there.
+func TestAnImportGetsAUIDOfItsOwnWhereTheAccountHoldsOneRecordPerUID(t *testing.T) {
+	srv := davtest.New(t)
+	srv.Login, srv.Password = "alice", "secret"
+	work, home := davtest.CalendarHome+"work/", davtest.CalendarHome+"home/"
+	srv.AddCalendar(caldav.Calendar{Path: work, Name: "Work"})
+	srv.AddCalendar(caldav.Calendar{Path: home, Name: "Home"})
+	srv.Seed(work+"meet.ics", ics("BEGIN:VEVENT\nUID:meet\nDTSTAMP:20260101T000000Z\nDTSTART:20260115T100000Z\nDTEND:20260115T110000Z\nSUMMARY:Review\nEND:VEVENT"))
+	srv.OneUIDPerAccount = true
+	f := connectFixture(t, srv, work, nil)
+
+	file := "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Other//Other//EN\r\n" +
+		"BEGIN:VEVENT\r\nUID:meet\r\nDTSTAMP:20260101T000000Z\r\nDTSTART:20260115T100000Z\r\nDTEND:20260115T110000Z\r\nSUMMARY:Review\r\nEND:VEVENT\r\n" +
+		"BEGIN:VEVENT\r\nUID:after\r\nDTSTAMP:20260101T000000Z\r\nDTSTART:20260116T100000Z\r\nDTEND:20260116T110000Z\r\nSUMMARY:Follow-up\r\nRELATED-TO:meet\r\nEND:VEVENT\r\n" +
+		"END:VCALENDAR\r\n"
+	into := "/app/calendar/" + f.id + "/" + url.PathEscape(home) + "/import"
+	page := decode[view.ImportPage](t, f.h.do(get(into, f.sess)))
+	page = decode[view.ImportPage](t, f.h.do(importRequest(actionHref(t, page.Actions, "import.choose"), f.sess, false, "work.ics", []byte(file))))
+	page = decode[view.ImportPage](t, f.h.do(postForm(actionHref(t, page.Actions, "import.run"), f.sess, url.Values{})))
+	if page.Report == nil {
+		t.Fatalf("no report: %+v", page.Notices)
+	}
+	if srv.UIDsTaken() == 0 {
+		t.Fatal("the stand refused nothing: the guard does not look at what it names")
+	}
+	if page.Report.Created != 2 || page.Report.Renamed != 1 {
+		t.Fatalf("report = %+v", page.Report)
+	}
+	row := tableRow(t, page.Report.Rows, "Created", "Review")
+	if !strings.Contains(string(row[2]), "one record per UID across the account") {
+		t.Errorf("the row of the record written under a UID of its own = %q", row[2])
+	}
+	paths := srv.Paths(home)
+	if len(paths) != 2 {
+		t.Fatalf("Home holds %v, want both records", paths)
+	}
+	var review, after string
+	for _, p := range paths {
+		body, _, _ := srv.Object(p)
+		switch {
+		case strings.Contains(body, "SUMMARY:Review"):
+			review = body
+		case strings.Contains(body, "SUMMARY:Follow-up"):
+			after = body
+		}
+	}
+	if review == "" || strings.Contains(review, "UID:meet") {
+		t.Fatalf("the imported Review kept the UID the account holds:\n%s", review)
+	}
+	fresh := strings.TrimSpace(strings.SplitN(strings.SplitN(unfolded(review), "UID:", 2)[1], "\n", 2)[0])
+	if !strings.Contains(unfolded(after), "RELATED-TO:"+fresh) {
+		t.Errorf("the follow-up still points at the UID the import could not keep (want %s):\n%s", fresh, after)
+	}
+	if got, _, _ := srv.Object(work + "meet.ics"); !strings.Contains(got, "UID:meet") {
+		t.Error("the event in Work changed")
+	}
+}

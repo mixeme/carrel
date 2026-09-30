@@ -785,6 +785,22 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		if err == nil {
 			err = s.createImported(ctx, dest, obj, uid)
 		}
+		was := ""
+		if err != nil && dav.IsStatus(err, http.StatusPreconditionFailed) && nameIsFree(ctx, dest, importName(dest, uid)) {
+			// 412 on a name nothing holds is not about the name: the account
+			// holds this UID in another of its collections (SV-55, iCloud).
+			// The owner's rule for a copy holds here: a UID of its own, and
+			// what of this file points at the record follows it.
+			dest.sess.NoteRefusal(dest.conn.ID, "", refusedSameUID)
+			var fresh string
+			if obj, fresh, err = withOwnUID(dest, obj); err == nil {
+				if err = s.createImported(ctx, dest, obj, fresh); err == nil {
+					was, moved[uid] = uid, fresh
+					uid, renamed = fresh, true
+					note = "Created under " + fresh + ": this server holds one record per UID across the account, and another of its collections holds this one"
+				}
+			}
+		}
 		if err != nil {
 			refused.Rows = append(refused.Rows, []view.Text{text(rec.Title), text(err.Error())})
 			continue
@@ -793,7 +809,7 @@ func (s *Server) runImport(w http.ResponseWriter, r *http.Request, c *collection
 		if renamed {
 			report.Renamed++
 		}
-		made = append(made, importMade{row: len(written.Rows), uid: uid, path: obj.Path, renamed: renamed, obj: obj})
+		made = append(made, importMade{row: len(written.Rows), uid: uid, was: was, path: obj.Path, renamed: renamed, obj: obj})
 		written.Rows = append(written.Rows, []view.Text{text(rec.Title), text(rec.Detail), text(note)})
 	}
 	s.importLanded(ctx, dest, report, &written, made)
@@ -829,8 +845,11 @@ func importNote(report *view.ImportReport, refused int, source string) string {
 // importMade is a record an import wrote: its row in the report, the
 // identity it was written under, and where.
 type importMade struct {
-	row     int
-	uid     string
+	row int
+	uid string
+	// was is the identity the record came with when its server refused it
+	// for the UID alone (SV-55), and it was written under uid instead
+	was     string
 	path    string
 	renamed bool
 	obj     *model.Object // as it was sent: its links name the file's identities
@@ -855,6 +874,9 @@ func (s *Server) importLanded(ctx context.Context, dest *collectionCtx, report *
 	}
 	gave := map[string]string{} // written under → held under
 	for _, m := range made {
+		if m.was != "" {
+			gave[m.was] = m.uid // what was written before it names it still
+		}
 		if held[m.uid] {
 			continue
 		}
@@ -890,8 +912,8 @@ func setUID(c *collectionCtx, obj *model.Object, uid string) (*model.Object, err
 // becomes {uid}-2 once, as a move does.
 func (s *Server) createImported(ctx context.Context, dest *collectionCtx, obj *model.Object, uid string) error {
 	var err error
-	for _, name := range []string{fileStem(uid) + dest.spec.ext, fileStem(uid) + "-2" + dest.spec.ext} {
-		dst := strings.TrimSuffix(dest.col.Path, "/") + "/" + name
+	second := strings.TrimSuffix(dest.col.Path, "/") + "/" + fileStem(uid) + "-2" + dest.spec.ext
+	for _, dst := range []string{importName(dest, uid), second} {
 		obj.Path = dst
 		if err = dest.create(ctx, dst, obj); err == nil {
 			dest.noteWrite(dst, obj)
@@ -902,6 +924,11 @@ func (s *Server) createImported(ctx context.Context, dest *collectionCtx, obj *m
 		}
 	}
 	return err
+}
+
+// importName is where a record of this identity is written first.
+func importName(dest *collectionCtx, uid string) string {
+	return strings.TrimSuffix(dest.col.Path, "/") + "/" + fileStem(uid) + dest.spec.ext
 }
 
 // errTooManyRecords is a file over the ceiling of one import (C-12). Half a

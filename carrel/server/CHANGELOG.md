@@ -17,6 +17,30 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.84 — 2026-10-01
+
+An import into an iCloud calendar writes the records whose UID another
+calendar of the same account holds (docs/servers.md, SV-55).
+
+### Changed
+
+- **A record of an import gets a UID of its own where the account holds
+  one record per UID** (SV-55, S-19; the owner's rule for a copy,
+  30.09.2026). iCloud answers PUT of a record whose UID another calendar of
+  the account holds 412 under any name, and such a record ended under «Not
+  created» with the 412. A 412 on a name nothing answers at is now read as
+  «the UID is taken»: the record is written once more under a fresh UID, its
+  row says «Created under …: this server holds one record per UID across
+  the account, and another of its collections holds this one», and it
+  counts among «under a new identity». Records of the same file that point
+  at it (`RELATED-TO`) follow it: those not yet written at once, those
+  written before it by an edit after the last. The session remembers the
+  account, as a copy does.
+
+### For consumers
+
+Nothing in the contract changed: the report's rows and counts say it.
+
 ## v0.2.83 — 2026-10-01
 
 Two dead fields leave the contract.
