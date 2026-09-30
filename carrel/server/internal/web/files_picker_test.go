@@ -47,12 +47,12 @@ func TestUploadFromTheMenuAsksWhere(t *testing.T) {
 
 	page := decode[view.AccountPage](t, f.h.do(get("/app/settings/account", f.sess)))
 	found := false
-	for _, m := range page.Top.NewMenu {
+	for _, m := range page.Top.New.Arrow {
 		if m.ID == "new.upload" && m.Separator && strings.Contains(m.Href, "/app/files/picker?for=upload") {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("menu = %+v", page.Top.NewMenu)
+		t.Errorf("menu = %+v", page.Top.New.Arrow)
 	}
 }

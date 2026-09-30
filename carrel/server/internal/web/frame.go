@@ -36,7 +36,9 @@ func (s *Server) cardBack(c *collectionCtx, uid string) view.Action {
 // recordRail is built after the screen's own reads and writes: they are what
 // fills its counts.
 func (s *Server) recordRail(c *collectionCtx, back view.Action) view.Rail {
-	return s.backRail(c.sess, s.catalogOf(c.sess), c.spec, c.conn.ID, back)
+	rail := s.backRail(c.sess, s.catalogOf(c.sess), c.spec, c.conn.ID, back)
+	markOpen(rail.Sections, s.route(c.listPath()))
+	return rail
 }
 
 // neighbourSpan is how many notes the rail of a note's page shows on each

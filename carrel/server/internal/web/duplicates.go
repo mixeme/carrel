@@ -400,7 +400,7 @@ func holdsRecords(col sealed.Collection) bool {
 
 func (s *Server) duplicatesPage(sess *session.Session, st dupState, only view.Kind) view.DuplicatesPage {
 	page := view.DuplicatesPage{Shell: s.buildShell(sess, "Duplicates")}
-	page.Rail = view.Rail{Nav: s.navRows(sess, st.blob, "duplicates"), About: s.aboutAction()}
+	page.Rail = view.Rail{Nav: s.navRows(sess, st.blob, "duplicates"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
 	page.Rail.Sections = dupSources(st, only)
 	all := st.groups()
 	counts := map[view.Kind]int{}

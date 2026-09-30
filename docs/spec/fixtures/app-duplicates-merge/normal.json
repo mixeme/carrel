@@ -29,8 +29,9 @@
       "enabled": true,
       "href": "/about",
       "id": "about",
-      "label": "Carrel 0.0.1 · 786949a",
-      "method": "GET"
+      "label": "Carrel",
+      "method": "GET",
+      "build": "0.0.1 · 786949a"
     },
     "foot": [],
     "nav": [
@@ -40,7 +41,8 @@
         "href": "/app/contacts",
         "id": "nav.contacts",
         "label": "Contacts",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-con"
       },
       {
         "count": null,
@@ -48,7 +50,8 @@
         "href": "/app/calendar",
         "id": "nav.calendar",
         "label": "Calendar",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-cal"
       },
       {
         "count": null,
@@ -56,7 +59,8 @@
         "href": "/app/tasks",
         "id": "nav.tasks",
         "label": "Tasks",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-task"
       },
       {
         "count": null,
@@ -64,7 +68,8 @@
         "href": "/app/notes",
         "id": "nav.notes",
         "label": "Notes",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-note"
       },
       {
         "count": null,
@@ -72,7 +77,8 @@
         "href": "/app/files",
         "id": "nav.files",
         "label": "Files",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-file"
       },
       {
         "count": 1,
@@ -81,7 +87,8 @@
         "id": "nav.duplicates",
         "label": "Duplicates",
         "method": "GET",
-        "on": true
+        "on": true,
+        "icon": "i-dup"
       }
     ],
     "note": "",
@@ -101,7 +108,9 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "on",
+            "feed": false,
+            "on": false
           },
           {
             "colour": "#4a6b52",
@@ -114,7 +123,9 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "on",
+            "feed": false,
+            "on": false
           },
           {
             "colour": "#6b4e7a",
@@ -127,7 +138,9 @@
             "readOnly": true,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "on",
+            "feed": false,
+            "on": false
           }
         ],
         "state": "ok"
@@ -135,7 +148,9 @@
     ],
     "tags": [],
     "neighbours": [],
-    "shortcuts": []
+    "shortcuts": [],
+    "davloom": "davloom · running · 0 devices",
+    "ticks": null
   },
   "rows": [],
   "target": {
@@ -148,45 +163,6 @@
   },
   "title": "Merge on the server",
   "top": {
-    "newMenu": [
-      {
-        "enabled": true,
-        "href": "/app/contacts/quick",
-        "id": "new.contacts",
-        "label": "Contact",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/quick",
-        "id": "new.calendar",
-        "label": "Event",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/tasks/quick",
-        "id": "new.tasks",
-        "label": "Task",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/notes/quick",
-        "id": "new.notes",
-        "label": "Note",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/files/picker?for=upload",
-        "icon": "i-up",
-        "id": "new.upload",
-        "label": "Upload file",
-        "method": "GET",
-        "separator": true
-      }
-    ],
     "refresh": {
       "action": {
         "enabled": false,
@@ -235,7 +211,70 @@
         "method": "POST",
         "separator": true
       }
-    ]
+    ],
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true
+    },
+    "userHref": "/app/settings/account"
   },
   "warning": {
     "actions": [],

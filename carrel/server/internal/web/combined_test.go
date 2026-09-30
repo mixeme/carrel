@@ -146,7 +146,9 @@ func TestCombinedContactsFollowTheTicks(t *testing.T) {
 	if people.Tick != view.TickOff || people.Href != f.path("contacts") || people.Count != nil {
 		t.Errorf("people row = %+v", people)
 	}
-	actionHref(t, empty.Rail.Foot, "rail.apply")
+	if ticks := empty.Rail.Ticks; ticks == nil || ticks.Action != "/app/sources/contacts" || ticks.Method != "POST" {
+		t.Errorf("the rail's form = %+v", ticks)
+	}
 
 	tickRail(t, f.h, f.sess, "calendar", "/app/calendar/"+f.id+"/"+url.PathEscape(searchWork))
 	tickRail(t, f.h, f.sess, "contacts", people.Href, teamPath, "/app/contacts/a-foreign0001/x", f.path("calendar"))

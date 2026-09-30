@@ -370,7 +370,7 @@ func filesEmpty(s *Server, blob sealed.Blob) *view.Notice {
 // with their ticks. No counts: a folder is not a list of records. open is the
 // folder shown, nil on the root.
 func (s *Server) filesRail(sess *session.Session, blob sealed.Blob, open *fileCtx) view.Rail {
-	rail := view.Rail{About: s.aboutAction(), Nav: s.navRows(sess, blob, filesSpec.segment)}
+	rail := view.Rail{About: s.aboutAction(), Davloom: s.davloomMark(sess), Nav: s.navRows(sess, blob, filesSpec.segment)}
 	sections, live, on := s.railSections(sess, blob, filesSpec, nil, nil)
 	root := view.SourceRow{Href: s.route("/app/files"), Label: "Selected collections", Tick: view.TickPart, State: view.CollectionOK}
 	switch on {
@@ -394,11 +394,13 @@ func (s *Server) filesRail(sess *session.Session, blob sealed.Blob, open *fileCt
 	default:
 		folder.Enabled, folder.Href = true, s.route(open.href("mkcol", open.segs, true))
 	}
+	back := "/app/files"
 	if open != nil {
-		openHref = s.route(open.href("", open.segs, true))
+		back = open.href("", open.segs, true)
+		openHref = s.route(back)
 	}
+	rail.Ticks = s.ticksForm(sess, "files", back)
 	rail.Foot = []view.Action{
-		{ID: "rail.apply", Label: "Apply", Href: s.route("/app/sources/files"), Method: "POST", Enabled: true},
 		folder,
 		s.connectAction(),
 		{ID: "feed.subscribe", Label: "Subscribe to a feed", Icon: "i-link", Href: s.postQuery("/app/settings/connections", url.Values{"op": {"feed"}, "kind": {"folder"}}), Method: "GET", Enabled: true},

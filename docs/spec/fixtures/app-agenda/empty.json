@@ -292,20 +292,15 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
-      "label": "Carrel 0.0.1 · 786949a",
+      "label": "Carrel",
       "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [
-      {
-        "enabled": true,
-        "href": "/app/sources/calendar",
-        "id": "rail.apply",
-        "label": "Apply",
-        "method": "POST"
-      },
       {
         "enabled": true,
         "href": "/app/collections/new?kind=event",
@@ -336,6 +331,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/contacts",
+        "icon": "i-con",
         "id": "nav.contacts",
         "label": "Contacts",
         "method": "GET"
@@ -344,6 +340,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/calendar",
+        "icon": "i-cal",
         "id": "nav.calendar",
         "label": "Calendar",
         "method": "GET",
@@ -353,6 +350,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/tasks",
+        "icon": "i-task",
         "id": "nav.tasks",
         "label": "Tasks",
         "method": "GET"
@@ -361,6 +359,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/notes",
+        "icon": "i-note",
         "id": "nav.notes",
         "label": "Notes",
         "method": "GET"
@@ -369,6 +368,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/files",
+        "icon": "i-file",
         "id": "nav.files",
         "label": "Files",
         "method": "GET"
@@ -377,6 +377,7 @@
         "count": 0,
         "enabled": true,
         "href": "/app/duplicates",
+        "icon": "i-dup",
         "id": "nav.duplicates",
         "label": "Duplicates",
         "method": "GET"
@@ -393,10 +394,12 @@
             "colour": "",
             "count": null,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar",
             "label": "Combined calendar",
             "menu": [],
             "message": "",
+            "on": false,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -413,6 +416,7 @@
             "colour": "#a05a2c",
             "count": null,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-nc-home/dni-rozhdeniya",
             "label": "Дни рождения",
             "menu": [
@@ -469,6 +473,7 @@
               }
             ],
             "message": "",
+            "on": false,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -478,6 +483,7 @@
             "colour": "#4a6b52",
             "count": 2,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-nc-home/lichnyj",
             "label": "Личный",
             "menu": [
@@ -534,6 +540,7 @@
               }
             ],
             "message": "",
+            "on": true,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -543,6 +550,7 @@
             "colour": "#3f6e8c",
             "count": null,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-nc-home/rabota",
             "label": "Работа",
             "menu": [
@@ -599,6 +607,7 @@
               }
             ],
             "message": "",
+            "on": false,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -615,6 +624,7 @@
             "colour": "#8c6239",
             "count": null,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-rad-vps/dezhurstva",
             "label": "Дежурства",
             "menu": [
@@ -671,6 +681,7 @@
               }
             ],
             "message": "",
+            "on": false,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -680,6 +691,7 @@
             "colour": "#6b4e7a",
             "count": null,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-rad-vps/proekty",
             "label": "Проекты",
             "menu": [
@@ -736,6 +748,7 @@
               }
             ],
             "message": "",
+            "on": false,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -752,6 +765,7 @@
             "colour": "#9a9280",
             "count": null,
             "detail": "",
+            "feed": false,
             "href": "/app/calendar/a-baikal/obshchij",
             "label": "Общий",
             "menu": [
@@ -808,6 +822,7 @@
               }
             ],
             "message": "",
+            "on": false,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -824,6 +839,7 @@
             "colour": "#8c6239",
             "count": null,
             "detail": "",
+            "feed": true,
             "href": "/app/calendar/f-ru-holidays/feed",
             "label": "Праздники РФ",
             "menu": [
@@ -844,6 +860,7 @@
               }
             ],
             "message": "",
+            "on": false,
             "readOnly": true,
             "retry": null,
             "state": "read-only",
@@ -853,6 +870,7 @@
             "colour": "#6b4e7a",
             "count": null,
             "detail": "",
+            "feed": true,
             "href": "/app/calendar/f-league/feed",
             "label": "Расписание лиги",
             "menu": [
@@ -873,6 +891,7 @@
               }
             ],
             "message": "",
+            "on": false,
             "readOnly": true,
             "retry": null,
             "state": "read-only",
@@ -899,49 +918,109 @@
         "label": "team",
         "on": false
       }
-    ]
+    ],
+    "ticks": {
+      "action": "/app/sources/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "back",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "/app/calendar/a-nc-home/lichnyj"
+            }
+          ]
+        }
+      ]
+    }
   },
   "title": "Личный",
   "top": {
-    "newMenu": [
-      {
-        "enabled": true,
-        "href": "/app/contacts/quick",
-        "id": "new.contacts",
-        "label": "Contact",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/quick",
-        "id": "new.calendar",
-        "label": "Event",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/tasks/quick",
-        "id": "new.tasks",
-        "label": "Task",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/notes/quick",
-        "id": "new.notes",
-        "label": "Note",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/files/picker?for=upload",
-        "icon": "i-up",
-        "id": "new.upload",
-        "label": "Upload file",
-        "method": "GET",
-        "separator": true
-      }
-    ],
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true
+    },
     "refresh": {
       "action": {
         "enabled": false,
@@ -990,6 +1069,7 @@
         "method": "POST",
         "separator": true
       }
-    ]
+    ],
+    "userHref": "/app/settings/account"
   }
 }

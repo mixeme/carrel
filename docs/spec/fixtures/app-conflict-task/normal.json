@@ -48,12 +48,14 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
-      "label": "Carrel 0.0.1 · 786949a",
+      "label": "Carrel",
       "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
@@ -77,6 +79,7 @@
             "colour": "#4a6b52",
             "count": 3,
             "detail": "",
+            "feed": false,
             "href": "/app/tasks/a-nc-home/dela",
             "label": "Дела",
             "menu": [
@@ -133,6 +136,7 @@
               }
             ],
             "message": "",
+            "on": true,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -142,6 +146,7 @@
             "colour": "#3f6e8c",
             "count": 2,
             "detail": "",
+            "feed": false,
             "href": "/app/tasks/a-nc-home/rabota",
             "label": "Работа",
             "menu": [
@@ -198,6 +203,7 @@
               }
             ],
             "message": "",
+            "on": false,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -208,7 +214,8 @@
       }
     ],
     "shortcuts": [],
-    "tags": []
+    "tags": [],
+    "ticks": null
   },
   "readAt": "10 August, 17:04",
   "rows": [
@@ -222,45 +229,68 @@
   "serverAt": "1 August, 03:00",
   "title": "Changed elsewhere",
   "top": {
-    "newMenu": [
-      {
-        "enabled": true,
-        "href": "/app/contacts/quick",
-        "id": "new.contacts",
-        "label": "Contact",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/quick",
-        "id": "new.calendar",
-        "label": "Event",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/tasks/quick",
-        "id": "new.tasks",
-        "label": "Task",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/notes/quick",
-        "id": "new.notes",
-        "label": "Note",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/files/picker?for=upload",
-        "icon": "i-up",
-        "id": "new.upload",
-        "label": "Upload file",
-        "method": "GET",
-        "separator": true
-      }
-    ],
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true
+    },
     "refresh": {
       "action": {
         "enabled": false,
@@ -309,7 +339,8 @@
         "method": "POST",
         "separator": true
       }
-    ]
+    ],
+    "userHref": "/app/settings/account"
   },
   "uid": "aa10-77bc-0e31"
 }

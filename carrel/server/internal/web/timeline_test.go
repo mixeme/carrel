@@ -329,8 +329,14 @@ func TestTimelineRailIsWhereItLooks(t *testing.T) {
 		t.Errorf("counts: combined %v, Work %v", rows[0].Count, rows[1].Count)
 	}
 
-	apply := actionHref(t, rail.Foot, "rail.apply")
-	rec := f.h.do(postForm(apply, f.sess, url.Values{}))
+	if rail.Ticks == nil {
+		t.Fatal("the rail has no form for its ticks")
+	}
+	sent := url.Values{}
+	for _, r := range rail.Ticks.Sets[0].Rows {
+		sent.Set(r.Name, string(r.Value))
+	}
+	rec := f.h.do(postForm(rail.Ticks.Action, f.sess, sent))
 	if rec.Code != 303 || rec.Header().Get("Location") != card+"/timeline?again=1" {
 		t.Fatalf("apply: %d → %q, want %q", rec.Code, rec.Header().Get("Location"), card+"/timeline?again=1")
 	}
@@ -338,7 +344,7 @@ func TestTimelineRailIsWhereItLooks(t *testing.T) {
 		t.Errorf("the calendar's own ticks did not change: %v", got)
 	}
 	for _, back := range []string{"https://evil.example/app/contacts/x/timeline", "/app/settings/connections", "/app/contacts/../settings/timeline"} {
-		rec := f.h.do(postForm("/app/sources/calendar?"+url.Values{"back": {back}}.Encode(), f.sess, url.Values{}))
+		rec := f.h.do(postForm("/app/sources/calendar", f.sess, url.Values{"back": {back}}))
 		if loc := rec.Header().Get("Location"); loc != "/app/calendar" {
 			t.Errorf("back %q led to %q", back, loc)
 		}

@@ -8,45 +8,6 @@
       "jump": [],
       "whole": null
     },
-    "newMenu": [
-      {
-        "id": "new.contacts",
-        "label": "Contact",
-        "href": "/app/contacts/quick",
-        "method": "GET",
-        "enabled": true
-      },
-      {
-        "id": "new.calendar",
-        "label": "Event",
-        "href": "/app/calendar/quick",
-        "method": "GET",
-        "enabled": true
-      },
-      {
-        "id": "new.tasks",
-        "label": "Task",
-        "href": "/app/tasks/quick",
-        "method": "GET",
-        "enabled": true
-      },
-      {
-        "id": "new.notes",
-        "label": "Note",
-        "href": "/app/notes/quick",
-        "method": "GET",
-        "enabled": true
-      },
-      {
-        "id": "new.upload",
-        "label": "Upload file",
-        "icon": "i-up",
-        "href": "/app/files/picker?for=upload",
-        "method": "GET",
-        "enabled": true,
-        "separator": true
-      }
-    ],
     "signed": {
       "login": "mix",
       "instance": "carrel.example",
@@ -85,11 +46,75 @@
         "label": "Refresh",
         "href": "/app/contacts?again=1",
         "method": "GET",
-        "enabled": true
+        "enabled": true,
+        "icon": "i-refresh"
       },
       "answered": "2 min ago",
       "running": false
-    }
+    },
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true
+    },
+    "userHref": "/app/settings/account"
   },
   "rail": {
     "nav": [
@@ -100,7 +125,8 @@
         "method": "GET",
         "enabled": true,
         "on": true,
-        "count": 6
+        "count": 6,
+        "icon": "i-con"
       },
       {
         "id": "nav.calendar",
@@ -108,7 +134,8 @@
         "href": "/app/calendar",
         "method": "GET",
         "enabled": true,
-        "count": null
+        "count": null,
+        "icon": "i-cal"
       },
       {
         "id": "nav.tasks",
@@ -116,7 +143,8 @@
         "href": "/app/tasks",
         "method": "GET",
         "enabled": true,
-        "count": null
+        "count": null,
+        "icon": "i-task"
       },
       {
         "id": "nav.notes",
@@ -124,7 +152,8 @@
         "href": "/app/notes",
         "method": "GET",
         "enabled": true,
-        "count": null
+        "count": null,
+        "icon": "i-note"
       },
       {
         "id": "nav.files",
@@ -132,7 +161,8 @@
         "href": "/app/files",
         "method": "GET",
         "enabled": true,
-        "count": null
+        "count": null,
+        "icon": "i-file"
       },
       {
         "id": "nav.duplicates",
@@ -140,7 +170,8 @@
         "href": "/app/duplicates",
         "method": "GET",
         "enabled": true,
-        "count": 0
+        "count": 0,
+        "icon": "i-dup"
       }
     ],
     "sections": [
@@ -160,7 +191,9 @@
             "message": "",
             "detail": "",
             "retry": null,
-            "menu": []
+            "menu": [],
+            "feed": false,
+            "on": true
           }
         ]
       },
@@ -232,7 +265,9 @@
                 "separator": true,
                 "icon": "i-trash"
               }
-            ]
+            ],
+            "feed": false,
+            "on": false
           },
           {
             "href": "/app/contacts/a-nc-home/kontakty",
@@ -297,7 +332,9 @@
                 "separator": true,
                 "icon": "i-trash"
               }
-            ]
+            ],
+            "feed": false,
+            "on": false
           }
         ]
       },
@@ -361,7 +398,9 @@
                 "separator": true,
                 "icon": "i-trash"
               }
-            ]
+            ],
+            "feed": false,
+            "on": false
           },
           {
             "href": "/app/contacts/a-rad-vps/rassylki",
@@ -426,7 +465,9 @@
                 "separator": true,
                 "icon": "i-trash"
               }
-            ]
+            ],
+            "feed": false,
+            "on": false
           }
         ]
       }
@@ -450,19 +491,12 @@
     ],
     "foot": [
       {
-        "id": "rail.apply",
-        "label": "Apply",
-        "href": "/app/sources/contacts",
-        "method": "POST",
-        "enabled": true
-      },
-      {
         "id": "collection.new",
         "label": "New address book",
-        "icon": "i-plus",
         "href": "/app/collections/new?kind=contact",
         "method": "GET",
-        "enabled": true
+        "enabled": true,
+        "icon": "i-plus"
       },
       {
         "id": "account.connect",
@@ -483,14 +517,53 @@
     ],
     "about": {
       "id": "about",
-      "label": "Carrel 0.0.1 · 786949a",
+      "label": "Carrel",
       "href": "/about",
       "method": "GET",
-      "enabled": true
+      "enabled": true,
+      "build": "0.0.1 · 786949a"
     },
     "note": "3 of 4 collections ticked",
     "neighbours": [],
-    "shortcuts": []
+    "shortcuts": [],
+    "davloom": "davloom · running · 0 devices",
+    "ticks": {
+      "action": "/app/sources/contacts",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "back",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "/app/contacts"
+            }
+          ]
+        }
+      ]
+    }
   },
   "notices": [],
   "details": null,

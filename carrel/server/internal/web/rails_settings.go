@@ -18,7 +18,7 @@ import (
 // and every frame beside it). open is the route of the screen showing.
 func (s *Server) settingsRail(sess *session.Session, open string) view.Rail {
 	blob := s.catalogOf(sess)
-	rail := view.Rail{About: s.aboutAction(), Nav: []view.NavRow{
+	rail := view.Rail{About: s.aboutAction(), Davloom: s.davloomMark(sess), Nav: []view.NavRow{
 		{Action: view.Action{ID: "settings.back", Label: "Back to app", Icon: "i-back",
 			Href: s.route("/app/contacts"), Method: "GET", Enabled: true}},
 	}}
@@ -62,7 +62,7 @@ func (s *Server) adminRail(sess *session.Session, open string) view.Rail {
 		}
 		people++
 	}
-	rail := view.Rail{About: s.aboutAction(), Nav: []view.NavRow{
+	rail := view.Rail{About: s.aboutAction(), Davloom: s.davloomMark(sess), Nav: []view.NavRow{
 		{Action: view.Action{ID: "admin.back", Label: "Back to app", Icon: "i-back",
 			Href: s.route("/app/contacts"), Method: "GET", Enabled: true}},
 	}}

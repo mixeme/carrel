@@ -114,18 +114,21 @@
   },
   "rail": {
     "about": {
+      "build": "0.0.1 · 786949a",
       "enabled": true,
       "href": "/about",
       "id": "about",
-      "label": "Carrel 0.0.1 · 786949a",
+      "label": "Carrel",
       "method": "GET"
     },
+    "davloom": "davloom · running · 0 devices",
     "foot": [],
     "nav": [
       {
         "count": 6,
         "enabled": true,
         "href": "/app/contacts",
+        "icon": "i-con",
         "id": "nav.contacts",
         "label": "Contacts",
         "method": "GET"
@@ -134,6 +137,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/calendar",
+        "icon": "i-cal",
         "id": "nav.calendar",
         "label": "Calendar",
         "method": "GET"
@@ -142,6 +146,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/tasks",
+        "icon": "i-task",
         "id": "nav.tasks",
         "label": "Tasks",
         "method": "GET"
@@ -150,6 +155,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/notes",
+        "icon": "i-note",
         "id": "nav.notes",
         "label": "Notes",
         "method": "GET"
@@ -158,6 +164,7 @@
         "count": null,
         "enabled": true,
         "href": "/app/files",
+        "icon": "i-file",
         "id": "nav.files",
         "label": "Files",
         "method": "GET"
@@ -166,6 +173,7 @@
         "count": 0,
         "enabled": true,
         "href": "/app/duplicates",
+        "icon": "i-dup",
         "id": "nav.duplicates",
         "label": "Duplicates",
         "method": "GET",
@@ -183,10 +191,12 @@
             "colour": "#a05a2c",
             "count": 1,
             "detail": "",
+            "feed": false,
             "href": "",
             "label": "Архив",
             "menu": [],
             "message": "",
+            "on": false,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -196,10 +206,12 @@
             "colour": "#4a6b52",
             "count": 4,
             "detail": "",
+            "feed": false,
             "href": "",
             "label": "Контакты",
             "menu": [],
             "message": "",
+            "on": false,
             "readOnly": false,
             "retry": null,
             "state": "ok",
@@ -209,10 +221,12 @@
             "colour": "#6b4e7a",
             "count": 1,
             "detail": "",
+            "feed": false,
             "href": "",
             "label": "Команда",
             "menu": [],
             "message": "",
+            "on": false,
             "readOnly": true,
             "retry": null,
             "state": "ok",
@@ -223,7 +237,8 @@
       }
     ],
     "shortcuts": [],
-    "tags": []
+    "tags": [],
+    "ticks": null
   },
   "threshold": {
     "default": 60,
@@ -293,45 +308,68 @@
   },
   "title": "Duplicates",
   "top": {
-    "newMenu": [
-      {
-        "enabled": true,
-        "href": "/app/contacts/quick",
-        "id": "new.contacts",
-        "label": "Contact",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/quick",
-        "id": "new.calendar",
-        "label": "Event",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/tasks/quick",
-        "id": "new.tasks",
-        "label": "Task",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/notes/quick",
-        "id": "new.notes",
-        "label": "Note",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/files/picker?for=upload",
-        "icon": "i-up",
-        "id": "new.upload",
-        "label": "Upload file",
-        "method": "GET",
-        "separator": true
-      }
-    ],
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true
+    },
     "refresh": {
       "action": {
         "enabled": false,
@@ -380,6 +418,7 @@
         "method": "POST",
         "separator": true
       }
-    ]
+    ],
+    "userHref": "/app/settings/account"
   }
 }

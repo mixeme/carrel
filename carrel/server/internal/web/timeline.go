@@ -478,15 +478,19 @@ func (s *Server) timelineRail(c *collectionCtx, snap *fanout.Snapshot, back stri
 	if answered {
 		where.Rows[0].Count = &sum
 	}
+	// The timeline looks where the calendar's ticks say: the combined row is
+	// the one open (s-contacts-7).
+	where.Rows[0].On = true
 	// The sections in full, as on every screen of the section, and the way
 	// back after them in a group of its own (s-contacts-7): a timeline is a
 	// list of records, not one record, so the rail keeps both.
 	return view.Rail{
 		Nav:      append(s.navRows(c.sess, blob, "contacts"), view.NavRow{Action: s.listBack(c)}),
 		Sections: []view.RailSection{where},
-		Foot: []view.Action{{ID: "rail.apply", Label: "Apply", Method: "POST", Enabled: true,
-			Href: s.postQuery("/app/sources/calendar", url.Values{"back": {back}})}},
-		About: s.aboutAction(),
+		Foot:     []view.Action{},
+		Ticks:    s.ticksForm(c.sess, "calendar", back),
+		About:    s.aboutAction(),
+		Davloom:  s.davloomMark(c.sess),
 	}
 }
 

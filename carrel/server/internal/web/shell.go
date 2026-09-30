@@ -19,12 +19,13 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 				Jump:    nil,
 				Whole:   nil,
 			},
-			NewMenu: s.newMenu(sess),
+			New:     s.newAction(sess),
 			User:    nil,
 			Refresh: view.Refresh{},
 		},
 		Rail: view.Rail{
-			About: s.aboutAction(),
+			About:   s.aboutAction(),
+			Davloom: s.davloomMark(sess),
 		},
 	}
 	if sess != nil {
@@ -44,6 +45,9 @@ func (s *Server) buildShell(sess *session.Session, title string) view.Shell {
 			}
 		}
 		sh.Top.Signed, sh.Top.User = s.signedIn(sess), s.userMenu(sess)
+		// Without scripts the account button is a link to the account's
+		// page (Typecase UserMenu.Href): its menu is there, in the rail.
+		sh.Top.UserHref = s.route("/app/settings/account")
 		if s.users.ConsumeEscrowNotice(sess.AccountID()) {
 			sh.Notices = []view.Notice{{
 				Role:  view.NoticeAlert,
@@ -96,19 +100,30 @@ func (s *Server) userMenu(sess *session.Session) []view.MenuItem {
 	}})
 }
 
-func (s *Server) aboutAction() view.Action {
-	label := "Carrel"
+func (s *Server) aboutAction() view.RailAbout {
+	build := s.version
 	switch {
 	case s.version != "" && s.commit != "":
-		label += " " + s.version + " · " + s.commit
-	case s.version != "":
-		label += " " + s.version
+		build += " · " + s.commit
 	case s.commit != "":
-		label += " · " + s.commit
+		build = s.commit
 	}
-	return view.Action{
-		ID: "about", Label: text(label), Href: s.route("/about"), Method: "GET", Enabled: true,
+	// The name and the build apart: the frame sets the build in mono
+	// (s-contacts-1), and a client does not cut a line of the server's.
+	return view.RailAbout{Action: view.Action{
+		ID: "about", Label: "Carrel", Href: s.route("/about"), Method: "GET", Enabled: true,
+	}, Build: text(build)}
+}
+
+// davloomMark is what the davloom mark at the rail's foot says (components-36):
+// that the mode runs and how many devices this person has given out. Off,
+// there is no mark. «Not responding» has no state here: davloom is a second
+// listener of this process (S-27.1), and its failure stops Carrel.
+func (s *Server) davloomMark(sess *session.Session) view.Text {
+	if s.cfg.DAVloomPort == 0 || sess == nil {
+		return ""
 	}
+	return text("davloom · running · " + plural(len(s.users.Devices(sess.AccountID())), "device"))
 }
 
 func (s *Server) tz() *time.Location {
@@ -148,33 +163,27 @@ func (s *Server) anonPlainForm(w http.ResponseWriter, r *http.Request, action, m
 	return s.plainForm(action, method, all...)
 }
 
-// newMenu is the create menu of the top bar: one item per kind, each opening
-// the quick sheet from the shell (U-6.16). The sheet itself decides where the
-// record goes — the collection the last one was created in, or a question when
-// there is none — so the menu does not need to know about collections.
-func (s *Server) newMenu(sess *session.Session) []view.MenuItem {
+// newAction is «New note» of the top bar and its arrow (s-notes-7): the
+// button makes a note — the most frequent thing and the reason to come back —
+// and the arrow is everything else that can be made, in the order of the
+// sections in the rail, the note that the button already makes first. Each
+// opens the quick sheet from the shell (U-6.16). The sheet itself decides
+// where the record goes — the collection the last one was created in, or a
+// question when there is none — so the menu does not need to know about
+// collections.
+func (s *Server) newAction(sess *session.Session) view.Action {
 	if sess == nil {
-		return nil
+		return view.Action{}
 	}
-	kinds := []struct {
-		segment string
-		label   string
-	}{
-		{"contacts", "Contact"},
-		{"calendar", "Event"},
-		{"tasks", "Task"},
-		{"notes", "Note"},
+	item := func(segment, label, icon string) view.Action {
+		return view.Action{ID: "new." + segment, Label: text(label), Icon: icon,
+			Href: s.route("/app/" + segment + "/quick"), Method: "GET", Enabled: true}
 	}
-	out := make([]view.MenuItem, 0, len(kinds))
-	for _, k := range kinds {
-		out = append(out, view.MenuItem{Action: view.Action{
-			ID:      "new." + k.segment,
-			Label:   text(k.label),
-			Href:    s.route("/app/" + k.segment + "/quick"),
-			Method:  "GET",
-			Enabled: true,
-		}})
-	}
+	button := item("notes", "New note", "i-quill")
+	button.Primary = true
+	note := item("notes", "Note", "i-quill")
+	out := []view.MenuItem{{Action: note}, {Separator: true, Action: item("contacts", "Contact", "i-con")},
+		{Action: item("calendar", "Event", "i-cal")}, {Action: item("tasks", "Task", "i-task")}}
 	// A file and a letter create nothing in a collection of records, so they
 	// stand last, past the line (U-6.4). The upload asks where on its sheet;
 	// without mail on the instance the letter is not offered.
@@ -182,11 +191,12 @@ func (s *Server) newMenu(sess *session.Session) []view.MenuItem {
 		ID: "new.upload", Label: "Upload file", Icon: "i-up", Href: s.postQuery("/app/files/picker", url.Values{"for": {"upload"}}), Method: "GET", Enabled: true,
 	}})
 	if s.canSendLetters(sess) {
-		out = append(out, view.MenuItem{Action: view.Action{
+		out = append(out, view.MenuItem{Separator: true, Action: view.Action{
 			ID: "new.letter", Label: "Letter", Icon: "i-mail", Href: s.route("/app/mail/compose"), Method: "GET", Enabled: true,
 		}})
 	}
-	return out
+	button.Arrow = out
+	return button
 }
 
 // focused puts the caret (FormRow.Focus, one per form) where the frames

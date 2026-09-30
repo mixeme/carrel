@@ -33,8 +33,8 @@ func TestTheRailNamesTheBuild(t *testing.T) {
 	f.h.srv.SetBuild("0.0.1", "786949a")
 
 	page := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
-	if got := string(page.Rail.About.Label); got != "Carrel 0.0.1 · 786949a" {
-		t.Errorf("rail.about.label %q, want the build", got)
+	if got := string(page.Rail.About.Label) + " " + string(page.Rail.About.Build); got != "Carrel 0.0.1 · 786949a" {
+		t.Errorf("rail.about %q, want the name and the build", got)
 	}
 }
 
@@ -45,8 +45,8 @@ func TestWithoutABuildTheRailSaysTheNameAlone(t *testing.T) {
 	f.h.srv.SetBuild("", "")
 
 	page := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
-	if got := string(page.Rail.About.Label); got != "Carrel" {
-		t.Errorf("rail.about.label %q, want %q", got, "Carrel")
+	if got := string(page.Rail.About.Label); got != "Carrel" || page.Rail.About.Build != "" {
+		t.Errorf("rail.about %q %q, want %q alone", got, page.Rail.About.Build, "Carrel")
 	}
 }
 

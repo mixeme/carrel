@@ -256,7 +256,7 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 		*st.poll = s.pollBar(tf, blob, snap, owner)
 		s.indexAnswered(sess, blob, spec, snap)
 		st.items = listedOf(blob, snap.Items)
-		refresh := view.Action{ID: "poll.again", Label: "Refresh", Href: s.route(again), Method: "GET", Enabled: !snap.Running}
+		refresh := view.Action{ID: "poll.again", Label: "Refresh", Icon: "i-refresh", Href: s.route(again), Method: "GET", Enabled: !snap.Running}
 		if snap.Running {
 			refresh.Reason = "The poll is still running."
 		}
@@ -265,7 +265,7 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 			st.shell.Top.Refresh.Answered = tf.formatWhen(snap.Finished, true, now)
 		}
 	}
-	st.shell.Rail = s.kindRail(sess, blob, spec, st.snap)
+	st.shell.Rail = s.kindRail(sess, blob, spec, st.snap, "/app/"+spec.segment)
 	return st, nil
 }
 
@@ -661,9 +661,10 @@ func (s *Server) troublesOf(snap *fanout.Snapshot) map[string]railTrouble {
 // Duplicates, the combined row, the collections of the kind by connection
 // with their ticks, and the foot. A gone collection stays while it is ticked,
 // marked gone and not asked; one whose server did not answer this poll is
-// unavailable — the two are never the same state (S-21).
-func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec, snap *fanout.Snapshot) view.Rail {
-	rail := view.Rail{About: s.aboutAction(), Nav: s.navRows(sess, blob, spec.segment)}
+// unavailable — the two are never the same state (S-21). open is the list
+// on the screen, its row marked open, and where a tick comes back to.
+func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec, snap *fanout.Snapshot, open string) view.Rail {
+	rail := view.Rail{About: s.aboutAction(), Davloom: s.davloomMark(sess), Nav: s.navRows(sess, blob, spec.segment)}
 	if snap == nil {
 		snap = lastPoll(sess, spec.kind) // one collection's page: what the last poll could not read
 	}
@@ -679,8 +680,9 @@ func (s *Server) kindRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 		combined.Tick = view.TickOn
 	}
 	rail.Sections = append([]view.RailSection{{State: view.CollectionOK, Rows: []view.SourceRow{combined}}}, sections...)
+	markOpen(rail.Sections, s.route(open))
+	rail.Ticks = s.ticksForm(sess, spec.segment, open)
 	rail.Foot = []view.Action{
-		{ID: "rail.apply", Label: "Apply", Href: s.route("/app/sources/" + spec.segment), Method: "POST", Enabled: true},
 		// The foot names what it makes (s-contacts-1, s-agenda-1, s-tasks-1,
 		// s-notes-1): «New calendar», not «New collection».
 		{ID: "collection.new", Label: text("New " + newCollectionTitle(spec.kind)), Icon: "i-plus", Href: s.postQuery("/app/collections/new", url.Values{"kind": {string(spec.kind)}}), Method: "GET", Enabled: true},
@@ -696,14 +698,14 @@ func (s *Server) navRows(sess *session.Session, blob sealed.Blob, open string) [
 	var nav []view.NavRow
 	for _, seg := range []string{"contacts", "calendar", "tasks", "notes"} {
 		nav = append(nav, view.NavRow{
-			Action: view.Action{ID: "nav." + seg, Label: text(kindTitle(seg)), Href: s.route("/app/" + seg), Method: "GET", Enabled: true, On: seg == open},
+			Action: view.Action{ID: "nav." + seg, Label: text(kindTitle(seg)), Icon: kindIcons[recordKinds[seg].kind], Href: s.route("/app/" + seg), Method: "GET", Enabled: true, On: seg == open},
 			Count:  kindCount(sess, blob, recordKinds[seg]),
 		})
 	}
 	return append(nav,
-		view.NavRow{Action: view.Action{ID: "nav.files", Label: "Files", Href: s.route("/app/files"), Method: "GET", Enabled: true, On: open == filesSpec.segment}},
+		view.NavRow{Action: view.Action{ID: "nav.files", Label: "Files", Icon: "i-file", Href: s.route("/app/files"), Method: "GET", Enabled: true, On: open == filesSpec.segment}},
 		view.NavRow{
-			Action: view.Action{ID: "nav.duplicates", Label: "Duplicates", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true, On: open == "duplicates"},
+			Action: view.Action{ID: "nav.duplicates", Label: "Duplicates", Icon: "i-dup", Href: s.route("/app/duplicates"), Method: "GET", Enabled: true, On: open == "duplicates"},
 			Count:  s.duplicateCount(sess),
 		},
 	)
@@ -724,7 +726,25 @@ func (s *Server) backRail(sess *session.Session, blob sealed.Blob, spec kindSpec
 			kept = append(kept, sec)
 		}
 	}
-	return view.Rail{Nav: []view.NavRow{{Action: back}}, Sections: kept, About: s.aboutAction()}
+	return view.Rail{Nav: []view.NavRow{{Action: back}}, Sections: kept, About: s.aboutAction(), Davloom: s.davloomMark(sess)}
+}
+
+// markOpen marks the row of the collection open on the screen (s-contacts-1:
+// the combined row; s-contacts-6: the book of the record).
+func markOpen(sections []view.RailSection, href string) {
+	for i := range sections {
+		for j := range sections[i].Rows {
+			sections[i].Rows[j].On = sections[i].Rows[j].Href == href
+		}
+	}
+}
+
+// ticksForm is the rail's form (U-8): every tick is a submit button of it and
+// sends toggle with its row's address; back is where the answer leads.
+func (s *Server) ticksForm(sess *session.Session, segment, back string) *view.Form {
+	f := s.plainForm("/app/sources/"+segment, "POST", csrfField(sess),
+		view.FormRow{Name: "back", Kind: view.InputHidden, Value: text(back)})
+	return &f
 }
 
 // railSections are the collections of a kind by connection with their ticks
@@ -830,7 +850,7 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 		}
 		tick := isTicked(blob, spec.kind, f.ID, col.Path)
 		row := view.SourceRow{
-			Label: text(collectionLabel(col)), Colour: catalogColour(col), Tick: view.TickOff, ReadOnly: true,
+			Label: text(collectionLabel(col)), Colour: catalogColour(col), Tick: view.TickOff, ReadOnly: true, Feed: true,
 			State: view.CollectionReadOnly, Href: s.route(origin{conn: conn, col: col}.listPath(spec.segment)),
 		}
 		if spec.kind == view.KindFile {
@@ -859,11 +879,14 @@ func (s *Server) railSections(sess *session.Session, blob sealed.Blob, spec kind
 	return sections, live, on
 }
 
-// postSources writes the ticks of one kind (S-14). The rail is a form, and it
-// sends the whole selection of that kind: the href of every ticked row, as
-// the rail gave it. Other kinds keep their ticks. The answer is the rail and
-// the poll of the new selection (C-7.3); a plain form goes back to the
-// combined view.
+// postSources writes the ticks of one kind (S-14). The rail is a form
+// (Rail.Ticks), and a tick is its submit button: toggle names one row by its
+// href, and that collection is flipped — the combined row ticks every one,
+// or, all ticked, takes them all off (U-8). Without toggle the form sends the
+// whole selection of that kind: the href of every ticked row, as the rail
+// gave it. Other kinds keep their ticks. The answer is the rail and the poll
+// of the new selection (C-7.3); a plain form goes back where back says — a
+// page of this Carrel — or to the combined view.
 func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 	sess, ok := s.requireLogin(w, r)
 	if !ok {
@@ -878,7 +901,11 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	err := s.users.SetSelection(sess.AccountID(), key, spec.kind, s.tickPicks(spec, r.PostForm["tick"]))
+	picks := s.tickPicks(spec, r.PostForm["tick"])
+	if v := r.PostForm.Get("toggle"); v != "" {
+		picks = s.toggled(s.catalogOf(sess), spec, v)
+	}
+	err := s.users.SetSelection(sess.AccountID(), key, spec.kind, picks)
 	if errors.Is(err, user.ErrNotFound) {
 		s.notFound(w, r)
 		return
@@ -894,6 +921,10 @@ func (s *Server) postSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !render.WantsFragment(r) {
+		if back, ok := pageReturn(r.FormValue("back"), spec.segment); ok {
+			s.redirect(w, r, back)
+			return
+		}
 		s.redirect(w, r, "/app/"+spec.segment)
 		return
 	}
@@ -924,6 +955,73 @@ func timelineReturn(v string) (string, bool) {
 		return "", false
 	}
 	return p, true
+}
+
+// pageReturn is the way back a tick of the rail may take without scripts: a
+// page of this Carrel in the section of the ticks — a path under
+// /app/{segment}, no host, no query — never anywhere a posted field names.
+func pageReturn(v, segment string) (string, bool) {
+	u, err := url.Parse(v)
+	if v == "" || err != nil || u.Scheme != "" || u.Host != "" || u.RawQuery != "" || u.Fragment != "" {
+		return "", false
+	}
+	p := u.EscapedPath()
+	if (p != "/app/"+segment && !strings.HasPrefix(p, "/app/"+segment+"/")) || strings.Contains(p, "..") || strings.Contains(p, "//") {
+		return "", false
+	}
+	return p, true
+}
+
+// toggled is the selection of a kind with the row href names flipped. The
+// combined row (the kind's root) ticks every live collection of the kind,
+// or, when every one is ticked, none.
+func (s *Server) toggled(blob sealed.Blob, spec kindSpec, href string) []sealed.Selection {
+	var now []sealed.Selection
+	for _, p := range blob.Selected {
+		if p.Kind == spec.kind {
+			now = append(now, p)
+		}
+	}
+	h, _, _ := strings.Cut(href, "?")
+	if strings.TrimSuffix(h, "/") == s.route("/app/"+spec.segment) {
+		var all []sealed.Selection
+		for _, col := range blob.Collections {
+			if col.Gone || !col.Has(spec.kind) {
+				continue
+			}
+			if _, ok := blob.Connection(col.AccountID); ok {
+				all = append(all, sealed.Selection{Kind: spec.kind, AccountID: col.AccountID, Path: col.Path})
+			}
+		}
+		for _, f := range blob.Subscriptions {
+			if col := f.FeedCollection(); col.Has(spec.kind) {
+				all = append(all, sealed.Selection{Kind: spec.kind, AccountID: f.ID, Path: col.Path})
+			}
+		}
+		for _, p := range all {
+			if !isTicked(blob, spec.kind, p.AccountID, p.Path) {
+				return all
+			}
+		}
+		return nil
+	}
+	one := s.tickPicks(spec, []string{href})
+	if len(one) != 1 {
+		return now
+	}
+	out := now[:0:0]
+	flipped := false
+	for _, p := range now {
+		if p.AccountID == one[0].AccountID && p.Path == one[0].Path {
+			flipped = true
+			continue
+		}
+		out = append(out, p)
+	}
+	if !flipped {
+		out = append(out, one[0])
+	}
+	return out
 }
 
 // tickPicks reads ticked row hrefs back into catalog addresses. Whatever is

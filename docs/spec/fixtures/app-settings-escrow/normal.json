@@ -83,8 +83,9 @@
       "enabled": true,
       "href": "/about",
       "id": "about",
-      "label": "Carrel 0.0.1 · 786949a",
-      "method": "GET"
+      "label": "Carrel",
+      "method": "GET",
+      "build": "0.0.1 · 786949a"
     },
     "foot": [],
     "nav": [
@@ -166,7 +167,9 @@
     "sections": [],
     "tags": [],
     "neighbours": [],
-    "shortcuts": []
+    "shortcuts": [],
+    "davloom": "davloom · running · 0 devices",
+    "ticks": null
   },
   "status": {
     "actions": [
@@ -189,45 +192,6 @@
   },
   "title": "Key escrow",
   "top": {
-    "newMenu": [
-      {
-        "enabled": true,
-        "href": "/app/contacts/quick",
-        "id": "new.contacts",
-        "label": "Contact",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/quick",
-        "id": "new.calendar",
-        "label": "Event",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/tasks/quick",
-        "id": "new.tasks",
-        "label": "Task",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/notes/quick",
-        "id": "new.notes",
-        "label": "Note",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/files/picker?for=upload",
-        "icon": "i-up",
-        "id": "new.upload",
-        "label": "Upload file",
-        "method": "GET",
-        "separator": true
-      }
-    ],
     "refresh": {
       "action": {
         "enabled": false,
@@ -276,7 +240,70 @@
         "method": "POST",
         "separator": true
       }
-    ]
+    ],
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true
+    },
+    "userHref": "/app/settings/account"
   },
   "subtitle": "No copy of your data key is deposited",
   "rubric": "What a deposit does"

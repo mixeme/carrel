@@ -12,12 +12,18 @@ type Shell struct {
 }
 
 type TopBar struct {
-	Search   SearchBox  `json:"search"`
-	NewMenu  []MenuItem `json:"newMenu"`  // «New note» и стрелка: остальные роды, файл, письмо
-	Signed   SignedIn   `json:"signed"`   // кто вошёл и куда — первой строкой меню учётной записи
-	User     []MenuItem `json:"user"`     // меню учётной записи
-	Unlocked *When      `json:"unlocked"` // до какого времени открыта выдача учётных данных
-	Refresh  Refresh    `json:"refresh"`
+	Search SearchBox `json:"search"`
+	// New — «New note», основная кнопка со значком i-quill, и её стрелка
+	// (s-notes-7): Note, повторяющий кнопку, за чертой Contact, Event, Task,
+	// за чертой Upload file, за чертой Letter — когда письмо можно отправить
+	New    Action     `json:"new"`
+	Signed SignedIn   `json:"signed"` // кто вошёл и куда — первой строкой меню учётной записи
+	User   []MenuItem `json:"user"`   // меню учётной записи
+	// UserHref — куда ведёт кнопка учётной записи без сценариев: страница
+	// учётной записи
+	UserHref string  `json:"userHref"`
+	Unlocked *When   `json:"unlocked"` // до какого времени открыта выдача учётных данных
+	Refresh  Refresh `json:"refresh"`
 }
 
 // SignedIn — кто вошёл и на каком экземпляре. Экземпляров у человека
@@ -49,7 +55,7 @@ type SearchBox struct {
 }
 
 type Rail struct {
-	Nav      []NavRow      `json:"nav"` // разделы; первым списком, над коллекциями
+	Nav      []NavRow      `json:"nav"` // разделы со значками; первым списком, над коллекциями
 	Sections []RailSection `json:"sections"`
 	// Neighbours — соседние заметки тетради на странице заметки, чтение и
 	// правка (s-notes-2, s-notes-20), в порядке списка тетради; On — открытая.
@@ -59,11 +65,25 @@ type Rail struct {
 	// Shortcuts — рубрика «Shortcuts» рейла файлов (s-files-1, s-files-6):
 	// Attachments и Published на каждом экране файлов; у прочих разделов пусто
 	Shortcuts []Shortcut `json:"shortcuts"`
-	Foot      []Action   `json:"foot"` // New collection, Connect account, Subscribe to a feed;
-	// сюда же встаёт Apply там, где выбор применяется не сразу
-	// (без сценариев и на узком экране — U-8, U-9)
-	About Action `json:"about"` // название, версия и коммит сборки — последней строкой (C-13)
-	Note  Text   `json:"note"`  // строка состояния под списком
+	Foot      []Action   `json:"foot"` // New collection, Connect account, Subscribe to a feed
+	// Ticks — форма отметок (U-8): POST /app/sources/{kind}, скрытые _csrf и
+	// back — экран, куда вернуться. Галка строки — кнопка отправки этой
+	// формы: поле toggle, значение — SourceRow.Href. Сервер переключает одну
+	// эту коллекцию; строка единого вида отмечает все, а все отмеченные —
+	// снимает. nil — отметки рейла ничего не шлют: рейл возврата, настройки
+	Ticks *Form     `json:"ticks"`
+	About RailAbout `json:"about"` // название и сборка — последней строкой (C-13)
+	// Davloom — подпись знака davloom в подвале (components-36): «davloom ·
+	// running · 3 devices»; пусто — режим выключен
+	Davloom Text `json:"davloom"`
+	Note    Text `json:"note"` // строка состояния под списком
+}
+
+// RailAbout — последняя строка рейла: название и сборка порознь, сборка
+// моноширинно (s-contacts-1). Ведёт на /about.
+type RailAbout struct {
+	Action      // Label — название, «Carrel»
+	Build  Text `json:"build"` // «0.0.1 · 786949a»; пусто у сборки из исходников
 }
 
 type NavRow struct {
@@ -93,6 +113,8 @@ type SourceRow struct {
 	Count    *int            `json:"count"` // nil — коллекция снята или ещё не отвечала: прочерк, не ноль
 	Tick     TickState       `json:"tick"`  // C-8
 	ReadOnly bool            `json:"readOnly"`
+	On       bool            `json:"on"`   // открытая: её список на экране или запись из неё (is-on)
+	Feed     bool            `json:"feed"` // подписка — лента, прочитанная снаружи (is-ext)
 	State    CollectionState `json:"state"`
 	Message  Text            `json:"message"` // не ответила: коротко, «password · 401»
 	Detail   Text            `json:"detail"`  // и полностью, для подсказки

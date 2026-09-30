@@ -248,7 +248,7 @@ func TestNoLetterWithoutMail(t *testing.T) {
 		t.Errorf("compose: %d", rec.Code)
 	}
 	page := decode[view.AccountPage](t, h.do(get("/app/settings/account", alice)))
-	for _, m := range page.Top.NewMenu {
+	for _, m := range page.Top.New.Arrow {
 		if m.ID == "new.letter" {
 			t.Error("the menu offers a letter")
 		}
@@ -256,8 +256,8 @@ func TestNoLetterWithoutMail(t *testing.T) {
 	h.cfg.MailEnabled = true
 	h.rebuild()
 	page = decode[view.AccountPage](t, h.do(get("/app/settings/account", alice)))
-	n := len(page.Top.NewMenu)
-	if last, upload := page.Top.NewMenu[n-1], page.Top.NewMenu[n-2]; last.ID != "new.letter" || upload.ID != "new.upload" || !upload.Separator {
+	n := len(page.Top.New.Arrow)
+	if last, upload := page.Top.New.Arrow[n-1], page.Top.New.Arrow[n-2]; last.ID != "new.letter" || upload.ID != "new.upload" || !upload.Separator {
 		t.Errorf("last items = %+v %+v", upload, last)
 	}
 }

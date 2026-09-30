@@ -160,7 +160,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "true"
           },
           {
             "error": "",
@@ -211,7 +211,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "50",
+            "value": "100",
             "mono": true
           }
         ]
@@ -222,11 +222,10 @@
     "action": "/admin/settings/mail-test",
     "actions": [
       {
-        "enabled": false,
+        "enabled": true,
         "id": "admin.settings.mailtest",
         "label": "Send test",
-        "method": "POST",
-        "reason": "Set the relay up and save it first."
+        "method": "POST"
       }
     ],
     "errors": [],
@@ -274,8 +273,9 @@
       "enabled": true,
       "href": "/about",
       "id": "about",
-      "label": "Carrel 0.0.1 · 786949a",
-      "method": "GET"
+      "label": "Carrel",
+      "method": "GET",
+      "build": "0.0.1 · 786949a"
     },
     "foot": [],
     "nav": [
@@ -350,7 +350,9 @@
     "sections": [],
     "tags": [],
     "neighbours": [],
-    "shortcuts": []
+    "shortcuts": [],
+    "davloom": "davloom · running · 0 devices",
+    "ticks": null
   },
   "smtp": {
     "action": "/admin/settings",
@@ -367,7 +369,7 @@
     "method": "POST",
     "sets": [
       {
-        "legend": "Mail — not configured",
+        "legend": "Mail",
         "rows": [
           {
             "error": "",
@@ -391,7 +393,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "",
+            "value": "127.0.0.1",
             "mono": true
           },
           {
@@ -404,7 +406,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": "587",
+            "value": "25",
             "mono": true
           },
           {
@@ -417,7 +419,7 @@
             "options": [
               {
                 "label": "STARTTLS",
-                "selected": true,
+                "selected": false,
                 "value": "starttls"
               },
               {
@@ -427,7 +429,7 @@
               },
               {
                 "label": "None",
-                "selected": false,
+                "selected": true,
                 "value": "none",
                 "separator": true
               }
@@ -446,12 +448,12 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "relay"
           },
           {
             "error": "",
             "extra": null,
-            "hint": "",
+            "hint": "Leave blank to keep the current one.",
             "kind": "password",
             "label": "Password",
             "name": "password",
@@ -470,7 +472,7 @@
             "options": [],
             "readOnly": false,
             "required": false,
-            "value": ""
+            "value": "noreply@carrel.example"
           },
           {
             "error": "",
@@ -493,13 +495,13 @@
             "name": "sender",
             "options": [
               {
-                "label": "the From address",
-                "selected": true,
+                "label": "noreply@carrel.example",
+                "selected": false,
                 "value": "noreply"
               },
               {
-                "label": "login@…",
-                "selected": false,
+                "label": "login@carrel.example",
+                "selected": true,
                 "value": "login"
               }
             ],
@@ -514,45 +516,6 @@
   "test": null,
   "title": "Instance settings",
   "top": {
-    "newMenu": [
-      {
-        "enabled": true,
-        "href": "/app/contacts/quick",
-        "id": "new.contacts",
-        "label": "Contact",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/quick",
-        "id": "new.calendar",
-        "label": "Event",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/tasks/quick",
-        "id": "new.tasks",
-        "label": "Task",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/notes/quick",
-        "id": "new.notes",
-        "label": "Note",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/files/picker?for=upload",
-        "icon": "i-up",
-        "id": "new.upload",
-        "label": "Upload file",
-        "method": "GET",
-        "separator": true
-      }
-    ],
     "refresh": {
       "action": {
         "enabled": false,
@@ -601,6 +564,69 @@
         "method": "POST",
         "separator": true
       }
-    ]
+    ],
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true
+    },
+    "userHref": "/app/settings/account"
   }
 }

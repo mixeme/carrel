@@ -458,18 +458,11 @@
       "enabled": true,
       "href": "/about",
       "id": "about",
-      "label": "Carrel 0.0.1 · 786949a",
-      "method": "GET"
+      "label": "Carrel",
+      "method": "GET",
+      "build": "0.0.1 · 786949a"
     },
-    "foot": [
-      {
-        "enabled": true,
-        "href": "/app/sources/calendar?back=%2Fapp%2Fcontacts%2Fa-nc-home%2Fkontakty%2F4f2b-9c31-a0e7%2Ftimeline",
-        "id": "rail.apply",
-        "label": "Apply",
-        "method": "POST"
-      }
-    ],
+    "foot": [],
     "nav": [
       {
         "count": 6,
@@ -478,7 +471,8 @@
         "id": "nav.contacts",
         "label": "Contacts",
         "method": "GET",
-        "on": true
+        "on": true,
+        "icon": "i-con"
       },
       {
         "count": null,
@@ -486,7 +480,8 @@
         "href": "/app/calendar",
         "id": "nav.calendar",
         "label": "Calendar",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-cal"
       },
       {
         "count": null,
@@ -494,7 +489,8 @@
         "href": "/app/tasks",
         "id": "nav.tasks",
         "label": "Tasks",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-task"
       },
       {
         "count": null,
@@ -502,7 +498,8 @@
         "href": "/app/notes",
         "id": "nav.notes",
         "label": "Notes",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-note"
       },
       {
         "count": null,
@@ -510,7 +507,8 @@
         "href": "/app/files",
         "id": "nav.files",
         "label": "Files",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-file"
       },
       {
         "count": 0,
@@ -518,7 +516,8 @@
         "href": "/app/duplicates",
         "id": "nav.duplicates",
         "label": "Duplicates",
-        "method": "GET"
+        "method": "GET",
+        "icon": "i-dup"
       },
       {
         "count": null,
@@ -547,7 +546,9 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "part"
+            "tick": "part",
+            "feed": false,
+            "on": true
           },
           {
             "colour": "#a05a2c",
@@ -560,7 +561,9 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "off"
+            "tick": "off",
+            "feed": false,
+            "on": false
           },
           {
             "colour": "#4a6b52",
@@ -573,7 +576,9 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "on",
+            "feed": false,
+            "on": false
           },
           {
             "colour": "#3f6e8c",
@@ -586,7 +591,9 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "on",
+            "feed": false,
+            "on": false
           },
           {
             "colour": "#8c6239",
@@ -599,7 +606,9 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "on",
+            "feed": false,
+            "on": false
           },
           {
             "colour": "#6b4e7a",
@@ -612,7 +621,9 @@
             "readOnly": false,
             "retry": null,
             "state": "ok",
-            "tick": "on"
+            "tick": "on",
+            "feed": false,
+            "on": false
           },
           {
             "colour": "#9a9280",
@@ -631,7 +642,9 @@
               "method": "POST"
             },
             "state": "unavailable",
-            "tick": "on"
+            "tick": "on",
+            "feed": false,
+            "on": false
           },
           {
             "colour": "#8c6239",
@@ -644,7 +657,9 @@
             "readOnly": true,
             "retry": null,
             "state": "read-only",
-            "tick": "on"
+            "tick": "on",
+            "feed": true,
+            "on": false
           },
           {
             "colour": "#6b4e7a",
@@ -657,7 +672,9 @@
             "readOnly": true,
             "retry": null,
             "state": "read-only",
-            "tick": "off"
+            "tick": "off",
+            "feed": true,
+            "on": false
           }
         ],
         "state": "ok"
@@ -665,7 +682,45 @@
     ],
     "tags": [],
     "neighbours": [],
-    "shortcuts": []
+    "shortcuts": [],
+    "davloom": "davloom · running · 0 devices",
+    "ticks": {
+      "action": "/app/sources/calendar",
+      "actions": [],
+      "errors": [],
+      "method": "POST",
+      "sets": [
+        {
+          "legend": "",
+          "rows": [
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "_csrf",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "csrf"
+            },
+            {
+              "error": "",
+              "extra": null,
+              "hint": "",
+              "kind": "hidden",
+              "label": "",
+              "name": "back",
+              "options": [],
+              "readOnly": false,
+              "required": false,
+              "value": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline"
+            }
+          ]
+        }
+      ]
+    }
   },
   "range": {
     "form": {
@@ -721,45 +776,6 @@
   },
   "title": "Анна Ковалёва · Timeline",
   "top": {
-    "newMenu": [
-      {
-        "enabled": true,
-        "href": "/app/contacts/quick",
-        "id": "new.contacts",
-        "label": "Contact",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/calendar/quick",
-        "id": "new.calendar",
-        "label": "Event",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/tasks/quick",
-        "id": "new.tasks",
-        "label": "Task",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/notes/quick",
-        "id": "new.notes",
-        "label": "Note",
-        "method": "GET"
-      },
-      {
-        "enabled": true,
-        "href": "/app/files/picker?for=upload",
-        "icon": "i-up",
-        "id": "new.upload",
-        "label": "Upload file",
-        "method": "GET",
-        "separator": true
-      }
-    ],
     "refresh": {
       "action": {
         "enabled": false,
@@ -808,7 +824,70 @@
         "method": "POST",
         "separator": true
       }
-    ]
+    ],
+    "new": {
+      "arrow": [
+        {
+          "enabled": true,
+          "href": "/app/notes/quick",
+          "icon": "i-quill",
+          "id": "new.notes",
+          "label": "Note",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/contacts/quick",
+          "icon": "i-con",
+          "id": "new.contacts",
+          "label": "Contact",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/calendar/quick",
+          "icon": "i-cal",
+          "id": "new.calendar",
+          "label": "Event",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/tasks/quick",
+          "icon": "i-task",
+          "id": "new.tasks",
+          "label": "Task",
+          "method": "GET"
+        },
+        {
+          "enabled": true,
+          "href": "/app/files/picker?for=upload",
+          "icon": "i-up",
+          "id": "new.upload",
+          "label": "Upload file",
+          "method": "GET",
+          "separator": true
+        },
+        {
+          "enabled": true,
+          "href": "/app/mail/compose",
+          "icon": "i-mail",
+          "id": "new.letter",
+          "label": "Letter",
+          "method": "GET",
+          "separator": true
+        }
+      ],
+      "enabled": true,
+      "href": "/app/notes/quick",
+      "icon": "i-quill",
+      "id": "new.notes",
+      "label": "New note",
+      "method": "GET",
+      "primary": true
+    },
+    "userHref": "/app/settings/account"
   },
   "uid": "4f2b-9c31-a0e7"
 }

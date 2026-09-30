@@ -539,7 +539,7 @@ type collectionSource struct {
 // marked gone. That one did not answer is the poll bar's to say, and
 // s-find-1 draws «14 / 14» beside a source with no reply.
 func (s *Server) searchRail(sess *session.Session, blob sealed.Blob, snap *fanout.Snapshot) view.Rail {
-	rail := view.Rail{Nav: s.navRows(sess, blob, "search"), About: s.aboutAction()}
+	rail := view.Rail{Nav: s.navRows(sess, blob, "search"), About: s.aboutAction(), Davloom: s.davloomMark(sess)}
 	found := map[string]int{}
 	if snap != nil {
 		for _, st := range snap.Sources {

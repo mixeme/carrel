@@ -228,7 +228,7 @@ func exportFileName(c *collectionCtx, ext string) string {
 // that hands over a file answers when it could not read one (S-21).
 func (s *Server) emptyListPage(c *collectionCtx, notices ...view.Notice) any {
 	shell := s.buildShell(c.sess, collectionLabel(c.col))
-	shell.Rail = s.kindRail(c.sess, s.catalogOf(c.sess), c.spec, nil)
+	shell.Rail = s.kindRail(c.sess, s.catalogOf(c.sess), c.spec, nil, c.listPath())
 	shell.Notices = append(shell.Notices, notices...)
 	switch c.spec.kind {
 	case view.KindContact:

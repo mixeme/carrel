@@ -371,7 +371,7 @@ func TestQuickSheetFromTheShellRemembersWhereRecordsGo(t *testing.T) {
 	entry := "/app/contacts/quick"
 
 	page := decode[view.ContactsListPage](t, f.h.do(get(f.path("contacts"), f.sess)))
-	if href := actionHref(t, menuActions(page.Top.NewMenu), "new.contacts"); href != entry {
+	if href := actionHref(t, menuActions(page.Top.New.Arrow), "new.contacts"); href != entry {
 		t.Errorf("the create menu points at %q, want %q", href, entry)
 	}
 

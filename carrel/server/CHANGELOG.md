@@ -17,6 +17,54 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.85 — 2026-10-01
+
+The shell as the frames draw it (the client's scan of the contacts section,
+30.09.2026, group А): «New note» with its arrow, icons, the account
+button's way without scripts, the open collection and feeds in the rail,
+the name and the build apart, the davloom mark, and ticks that send
+themselves.
+
+### Added
+
+- **`TopBar.new`** — «New note», primary, icon `i-quill`, and its arrow as
+  s-notes-7 draws it: Note (the button again), past a line Contact, Event,
+  Task, past a line Upload file, past a line Letter where a letter can go.
+- **`TopBar.userHref`** — where the account button leads without scripts:
+  `/app/settings/account`.
+- **`Rail.ticks`** — the rail's form: POST `/app/sources/{kind}` with
+  `_csrf` and `back`. A tick is a submit button of it and sends `toggle`
+  with its row's `href`; the server flips that one collection — the
+  combined row ticks every one, or takes them all off when all are ticked —
+  and leads back to `back` (a page of the section). `nil` on back rails and
+  in the settings. The whole selection as `tick` values still works.
+- **`Rail.davloom`** — the words of the davloom mark at the rail's foot,
+  «davloom · running · 3 devices»; empty while the mode is off.
+- **`SourceRow.on`** (the open collection: the combined row on a combined
+  view, the book of a list or of a record, «Combined calendar» on a
+  timeline) and **`SourceRow.feed`** (a subscription, drawn as a feed).
+- **Icons**: every section of `Rail.nav` (`i-con`, `i-cal`, `i-task`,
+  `i-note`, `i-file`, `i-dup`), `Refresh.action` (`i-refresh`).
+
+### Changed
+
+- **`Rail.about` is `RailAbout`**: `label` «Carrel» and `build` «0.0.1 ·
+  786949a» apart (the frame sets the build in mono).
+- **Apply left the rail's foot** (`rail.apply`): the frames draw none; the
+  ticks send themselves.
+
+### Removed
+
+- **`TopBar.newMenu`** — it is `TopBar.new.arrow` now.
+
+### For consumers
+
+Read `top.new` instead of `top.newMenu`, `rail.about.build` beside its
+label, and send a tick through `rail.ticks`. The fixture set now has a relay
+with letters from people allowed and davloom on, as the frames draw them:
+«Letter» in the arrow, Send on a card, enabled mail buttons in the
+administration. Every fixture of the shell is regenerated.
+
 ## v0.2.84 — 2026-10-01
 
 An import into an iCloud calendar writes the records whose UID another

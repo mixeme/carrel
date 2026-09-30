@@ -569,6 +569,8 @@ func newMockupApp(t *testing.T) *mockupApp {
 	h := newHarness(t)
 	h.cfg.DAVSSRFAllowlist = "127.0.0.1"
 	h.cfg.Timezone = mockupZone
+	// davloom runs, as the rail's foot of every list frame says (components-36).
+	h.cfg.DAVloomPort = 8081
 	h.rebuild()
 	// The day of the frames, in their zone, and the build they were drawn
 	// against: a fixture is the same tomorrow (review Р-13).
@@ -619,6 +621,23 @@ func newMockupApp(t *testing.T) *mockupApp {
 		"action": {"enable"}, "master": {"sixteen-char-pass!"}, "master2": {"sixteen-char-pass!"},
 	})); rec.Code != 303 {
 		t.Fatalf("turn escrow on: %d %s", rec.Code, rec.Body.String())
+	}
+	// A relay, and letters from people allowed: the frames offer a letter —
+	// «Letter» under the arrow of New note (s-notes-7), Send on a card
+	// (s-contacts-6), s-mail-1 «from mix@carrel.example», the login on the
+	// instance's domain. Written straight into the record after the
+	// instance's settings: the journal of the frames (admin-audit) has none
+	// of it.
+	if err := h.st.Mutate(func(st *store.State) ([]store.AuditEntry, error) {
+		st.Settings.SMTP = store.SMTPSettings{Host: "127.0.0.1", Port: 25, Security: "none", Username: "relay",
+			Password: "relay-password-xyz", From: "noreply@carrel.example", Sender: "login"}
+		people := true
+		st.Settings.PeopleMail = &people
+		st.Settings.MailMaxAttachMB, st.Settings.MailMaxMessageMB = 10, 25
+		st.Settings.MailMaxRecipients, st.Settings.MailMaxPerDay = 20, 100
+		return nil, nil
+	}); err != nil {
+		t.Fatal(err)
 	}
 	for _, label := range []string{"nextcloud", "radicale · vps", "baikal"} {
 		rec := h.do(postForm("/app/settings/connections", sess, url.Values{
@@ -1479,22 +1498,9 @@ func TestFixtureMergeLetterAndReset(t *testing.T) {
 			app.h.do(get(actionOf(t, page.Groups[0], "duplicates.merge").Href, app.sess)))
 	})
 	t.Run("app-mail-compose", func(t *testing.T) {
+		// The instance of the set has a relay and lets people send
+		// (newMockupApp).
 		app := newMockupApp(t)
-		// A letter needs a relay; the instance of the other fixtures has
-		// none, and adding one there would put «Letter» in every menu.
-		app.h.do(postForm("/admin/settings", app.sess, url.Values{
-			"host": {"127.0.0.1"}, "port": {"25"}, "security": {"none"},
-			"username": {"relay"}, "password": {"relay-password-xyz"}, "from": {"noreply@carrel.example"},
-			// s-mail-1: «from mix@carrel.example» — the login on the
-			// instance's domain.
-			"sender": {"login"},
-		}))
-		// And letters from people have to be allowed: a relay alone is for
-		// the instance's own letters (S-26).
-		app.h.do(postForm("/admin/settings", app.sess, url.Values{
-			"op": {"limits"}, "people": {"on"},
-			"attach": {"10"}, "letter": {"25"}, "recipients": {"20"}, "perDay": {"100"},
-		}))
 		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 		app.compare(t, "app-mail-compose/normal.json", app.h.do(get("/app/mail/compose", app.sess)))
 	})

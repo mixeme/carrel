@@ -661,7 +661,7 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	// The rail is built after the list: the list is what fills its counts.
 	// The list leaves the tags of what it read in the shell's rail.
 	rail := func(tags []view.Tag) view.Rail {
-		rl := s.kindRail(c.sess, s.catalogOf(c.sess), c.spec, nil)
+		rl := s.kindRail(c.sess, s.catalogOf(c.sess), c.spec, nil, c.listPath())
 		rl.Tags = tags
 		return rl
 	}
