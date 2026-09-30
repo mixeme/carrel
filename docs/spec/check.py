@@ -125,7 +125,7 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome"}
+states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome","refused"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -238,6 +238,17 @@ FRAME_TODO = {}
 # записка в from-typecase.md. Закрылось на сервере — строка уходит.
 SERVER_TODO = {}
 
+# Состояние, которое рисует свой кадр маршрута — часть (data-part), а не
+# кадр экрана целиком: отказ входа — s-auth-13, не s-auth-1.
+STATE_FRAME = {"login/refused": "s-auth-13"}
+
+def frame_by_id(fid):
+    m = re.search(r'<div class="frame" data-frame="%s"[^>]*>' % re.escape(fid), mock)
+    if not m:
+        return None
+    nxt = mock.find('<div class="frame"', m.end())
+    return mock[m.end():nxt if nxt > 0 else len(mock)]
+
 def as_kind(x):
     """Кадр рода пишет свой маршрут, карта — шаблон: сводим к шаблону."""
     return re.sub(r'/app/(contacts|calendar|tasks|notes)/', '/app/{kind}/', x)
@@ -315,9 +326,10 @@ for p in sorted(glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json"))):
     if d not in FIXTURE_SCREEN:
         drift.append("%s: каталог не назван в FIXTURE_SCREEN — неизвестно, какой кадр сверять" % d)
         continue
-    frame = canon_frame(FIXTURE_SCREEN[d])
+    key = "%s/%s" % (d, state)
+    frame = frame_by_id(STATE_FRAME[key]) if key in STATE_FRAME else canon_frame(FIXTURE_SCREEN[d])
     if frame is None:
-        drift.append("%s: нет кадра для %s" % (d, FIXTURE_SCREEN[d]))
+        drift.append("%s: нет кадра для %s" % (key, STATE_FRAME.get(key, FIXTURE_SCREEN[d])))
         continue
     try:
         data = json.load(io.open(p, encoding="utf-8"))

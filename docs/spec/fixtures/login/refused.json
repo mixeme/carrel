@@ -1,0 +1,72 @@
+{
+  "forgot": {
+    "enabled": true,
+    "href": "/forgot",
+    "id": "login.forgot",
+    "label": "Forgotten your password?",
+    "method": "GET"
+  },
+  "form": {
+    "action": "/login",
+    "actions": [
+      {
+        "enabled": true,
+        "href": "/login",
+        "id": "login.submit",
+        "label": "Sign in",
+        "method": "POST"
+      }
+    ],
+    "errors": [],
+    "method": "POST",
+    "sets": [
+      {
+        "legend": "",
+        "rows": [
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "hidden",
+            "label": "",
+            "name": "_csrf",
+            "options": [],
+            "readOnly": false,
+            "required": false,
+            "value": "csrf"
+          },
+          {
+            "error": "",
+            "extra": null,
+            "hint": "",
+            "kind": "text",
+            "label": "Login",
+            "name": "login",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": "mix"
+          },
+          {
+            "error": "Login or password is wrong.",
+            "extra": null,
+            "focus": true,
+            "hint": "",
+            "kind": "password",
+            "label": "Password",
+            "name": "password",
+            "options": [],
+            "readOnly": false,
+            "required": true,
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "lede": "One desk. Every server.",
+  "notices": [],
+  "register": null,
+  "tagline": "Calendars, contacts, tasks, notes and files — one place.",
+  "title": "Sign in to carrel.example"
+}

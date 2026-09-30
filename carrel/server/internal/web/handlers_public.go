@@ -143,8 +143,11 @@ func (s *Server) getLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 // loginPage is the sign-in form (s-auth-1), empty or back with what was
-// typed and why it failed. The sign stands in place of the title, which
-// stays the document's; under it the tagline. Under Sign in, the links:
+// typed and why it failed (s-auth-13): the login stays, the password field
+// comes back empty with the reason at it — one for a wrong login and a
+// wrong password — and the caret moves from Login to it. The sign stands
+// in place of the title, which stays the document's; under it the tagline.
+// Under Sign in, the links:
 // «Create an account» only while registration is open — a closed instance
 // does not advertise a form that refuses everyone —, then «Forgotten your
 // password?». Every link goes through the base path.
@@ -153,8 +156,8 @@ func (s *Server) loginPage(w http.ResponseWriter, r *http.Request, login string,
 		Plain:   view.Plain{Title: text(s.signInTitle()), Lede: taglineLead},
 		Tagline: taglineText,
 		Form: withSubmit(s.anonPlainForm(w, r, "/login", "POST",
-			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true},
-			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: errText},
+			view.FormRow{Name: "login", Label: "Login", Kind: view.InputText, Value: text(login), Required: true, Focus: errText == ""},
+			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: errText, Focus: errText != ""},
 		), "login.submit", "Sign in"),
 		Forgot: view.Action{ID: "login.forgot", Label: "Forgotten your password?", Href: s.route("/forgot"), Method: "GET", Enabled: true},
 	}

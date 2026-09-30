@@ -40,6 +40,10 @@ type FormRow struct {
 	// поля в форме ещё нет (s-contacts-3 «Add phone», s-agenda-3 «Add
 	// reminder»); у прочих пусто
 	Template []FormRow `json:"template,omitempty"`
+	// Поле, в котором стоит курсор, когда страница пришла; одно на форму:
+	// Login у входа (s-auth-1), Password после отказа (s-auth-13); у прочих
+	// false
+	Focus bool `json:"focus,omitempty"`
 }
 type Option struct {
 	Value     string `json:"value"`

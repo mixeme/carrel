@@ -17,6 +17,34 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.77 — 2026-09-30
+
+The mockup of Typecase `784599e` (tasks 46 and 47): the sign-in refused
+has its frame, s-auth-13, and the sign-in page says where the caret stands.
+
+### Added
+
+- **`FormRow.focus`** (omitted when false) — the field the caret stands in
+  when the page arrives, one per form: Login on the empty sign-in page
+  (s-auth-1), Password after a refusal (s-auth-13). No other form sets it
+  yet.
+- **Fixture state `refused`** (C-14.3) — a form sent back with a refusal:
+  what was typed in place, the reason at its field, the caret in it.
+  `login/refused.json` draws into s-auth-13.
+
+### Changed
+
+- Nothing in what a refused sign-in answers but the focus: the same page,
+  status 200, the login back in its field, the password empty with «Login
+  or password is wrong.» at it — the same for an unknown login, a wrong
+  password and a disabled account (S-9.5, S-29.1). Now written down in
+  S-9.5 and drawn by s-auth-13.
+
+### For consumers
+
+- A client puts the caret in the field with `focus`; `login/normal.json`
+  carries it on Login.
+
 ## v0.2.76 — 2026-09-29
 
 Notes 23 (the choice of columns — whole, the owner's decision) and 24 of

@@ -27,7 +27,8 @@ spec/fixtures/<screen>/<state>.json
 | мёртвый секрет любого адреса с токеном (rest-1, C-5.2) | `dead-link` |
 
 `<state>` — из таблицы C-14.3: `normal`, `empty`, `readonly`, `source-error`,
-`partial`, `long`, `conflict`, `narrow`, `loss`, `unavailable`, `outcome`.
+`partial`, `long`, `conflict`, `narrow`, `loss`, `unavailable`, `outcome`,
+`refused`.
 
 ## Имена полей
 

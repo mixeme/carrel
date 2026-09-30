@@ -271,6 +271,7 @@ body[data-tc-root]{margin:0;background:var(--tc-bg);color:var(--tc-ink);font-fam
 /* Галка-флажок формы (выбор до действия): состояние — :checked, частичный выбор — класс. */
 input.tc-tickrow__tick{appearance:none;margin:0;cursor:pointer}
 input.tc-tickrow__tick:not(:checked):not(.is-part){background:transparent;border:.5px solid var(--tc-edge)}
+input.tc-tickrow__tick.tc-tickrow__tick:checked{background:var(--tc-ink);border:0}
 /* Полоска коллекции знает свой размер сама. */
 .tc-mark{display:inline-block;vertical-align:middle;width:3px;height:14px;border-radius:1px;flex:none}
 .tc-tickrow .tc-mark{width:3px;height:14px;border-radius:1px}
@@ -451,6 +452,7 @@ select.tc-in.is-pick{appearance:none;cursor:pointer;background-image:linear-grad
 label.tc-check{position:relative;cursor:pointer}
 .tc-check__box,.tc-seg__box{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
 .tc-check__box:not(:checked) ~ .tc-tickrow__tick{background:transparent;border:.5px solid var(--tc-edge)}
+.tc-check__box:checked ~ .tc-tickrow__tick.tc-tickrow__tick{background:var(--tc-ink);border:0}
 .tc-check__box:focus-visible ~ .tc-tickrow__tick{outline:1.5px solid var(--tc-accent);outline-offset:1px}
 /* поля формы: ширина по содержимому, не 100% */
 .tc-form{display:flex;flex-wrap:wrap;gap:13px 16px;padding:14px var(--tc-page-gutter);align-items:flex-start}
@@ -2458,9 +2460,9 @@ label.tc-menu__item{position:relative;cursor:pointer}
     <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="birthday" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Birthday</label>
     <label class="tc-menu__item is-drag" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="tags" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Tags</label>
     <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="source" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Source</label>
-    <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="phone"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Phone</label>
-    <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="org"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Organisation</label>
-    <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="changed"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Changed</label>
+    <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="phone"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Phone</label>
+    <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="org"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Organisation</label>
+    <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="changed"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Changed</label>
     <div class="tc-menu__foot"><button class="tc-btn is-sm is-primary" type="submit">Apply</button><button class="tc-btn is-sm" type="submit" name="col" value="default">Reset to defaults</button></div>
   </form>
   </div>
@@ -2478,7 +2480,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   <div class="tc-railsec">
     <div class="tc-tickrow"><button class="tc-tickrow__tick" type="submit" form="post-sources" name="src" value="nextcloud/lichny" aria-label="Личный" aria-pressed="true"></button><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-tickrow__label">Личный</span><span class="tc-tickrow__meta">128</span></div>
   </div>
-  <table class="tc-table"><tbody><tr><td><input class="tc-tickrow__tick" type="checkbox" name="pick" value="a.pdf" aria-label="Pick" checked></td><td>смета.pdf</td></tr><tr><td><input class="tc-tickrow__tick" type="checkbox" name="pick" value="b.pdf" aria-label="Pick"></td><td>договор.pdf</td></tr></tbody></table>
+  <table class="tc-table"><tbody><tr><td><input class="tc-tickrow__tick" type="checkbox" name="pick" value="a.pdf" aria-label="Pick" checked></td><td>смета.pdf</td></tr><tr><td><input class="tc-tickrow__tick is-off" type="checkbox" name="pick" value="b.pdf" aria-label="Pick"></td><td>договор.pdf</td></tr></tbody></table>
   <button class="tc-tick" type="submit" form="post-done" name="done" value="aa10" aria-label="Отправить документы в МФЦ" aria-pressed="false"></button>
   <a class="tc-dim--accent tc-dim--t12" href="/login">Already have an account? Sign in</a>
   <div class="tc-dialog tc-dialog--max440-padt0-padb0">
@@ -2748,7 +2750,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
     <div class="tc-field tc-field--md"><label>Display name</label><input class="tc-in" type="text" name="display" value="Mix" aria-label="Display name"></div>
     <div class="tc-field tc-field--sm"><label>Week starts on</label><select class="tc-in is-pick" name="week" aria-label="Week starts on"><option value="mon" selected>Monday</option><option value="sun">Sunday</option><option value="sat" disabled>Saturday</option></select></div>
     <div class="tc-field"><label>Theme</label><span class="tc-seg" role="radiogroup" data-tc-theme-switch><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="auto" checked>Auto</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="light">Light</label><label class="tc-seg__opt"><input class="tc-seg__box" type="radio" name="theme" value="dark">Dark</label></span></div>
-    <div class="tc-field is-own-line tc-grow tc-field--gap7"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="compact" value="1" checked><span class="tc-tickrow__tick"></span>Compact rows</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="mono" value="1"><span class="tc-tickrow__tick"></span>Monospaced dates</label></div>
+    <div class="tc-field is-own-line tc-grow tc-field--gap7"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="compact" value="1" checked><span class="tc-tickrow__tick"></span>Compact rows</label><label class="tc-check"><input class="tc-check__box" type="checkbox" name="mono" value="1"><span class="tc-tickrow__tick is-off"></span>Monospaced dates</label></div>
     <div class="tc-field tc-field--md"><label>Password</label><input class="tc-in" type="password" name="password" aria-label="Password" disabled></div>
     <div class="tc-field is-own-line tc-grow"><label class="tc-check"><input class="tc-check__box" type="checkbox" name="nopass" value="1" checked data-tc-disables="password"><span class="tc-tickrow__tick"></span>The server asks no password</label></div>
     <div class="tc-fset">
@@ -14255,6 +14257,37 @@ password  4c1-tide-oven</div>
     </div>
   </div>
   <figcaption>Знак вместо заголовка «Sign in», под знаком — теглайн. <b>Мест, где он стоит, ровно два — здесь и на «о программе» (7.21):</b> в верхней панели рядом со знаком слогана нет (§5.1), потому что там он читался бы каждый рабочий день и перестал бы что-либо значить. На входе человек либо видит Carrel впервые, либо возвращается к нему после перерыва — и одна строка «One desk. Every server.» отвечает на вопрос, к чему он подключается, раньше, чем он введёт логин. Формулировка каноническая, из <a href="carrel-brand-guide.html">визуального стиля</a> и C-1; в коде это <code>Tagline1</code> и <code>Tagline2</code>, те же две строки, что уходят в <code>/about</code>, в манифест и в мета-описание. Второй строкой — перечисление, потому что первая строка сама по себе не говорит, что именно лежит на этом столе.<br><br>Ссылка на регистрацию есть только тогда, когда форма действительно открыта: закрытый экземпляр отвечает 404, а не рекламирует форму, которая всё отклонит. «Forgotten your password?» ведёт на <code>/forgot</code>: сброса пароля с сохранением данных нет, потому что ключ шифрования выводится из пароля. Поля, кнопка и две ссылки стоят в одной стопке: вертикальный зазор везде 13&nbsp;px, тот же, что между полями. Ссылки рядом, не по краям карточки.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-auth-13" data-screen="/login" data-part="wrong">
+    <div class="frame-label"><span>Вход · неверный пароль</span><i>/login</i></div>
+    <div class="tc-root">
+      <div class="tc-auth">
+        <div class="tc-dialog is-narrow tc-dialog--padt0-padb0">
+          <div class="tc-line tc-dialog__logo">
+            <svg class="tc-brand__logo tc-brand__logo--h60-w150" viewBox="4.79 -31.36 291.08 116.63" role="img" aria-label="Carrel"><use href="#logo-word" class="tc-logo__word"/><use href="#logo-shade" class="tc-logo__shade"/></svg>
+          </div>
+          <div class="tc-auth__tagline tc-auth__tagline--mid">
+            <strong class="tc-auth__tagline-lead">One desk. Every server.</strong>
+            Calendars, contacts, tasks, notes and files — one place.
+          </div>
+          <div class="tc-auth__stack">
+          <div class="tc-form tc-form--col tc-form--pad0">
+            <div class="tc-field tc-field--w100"><label>Login</label><input class="tc-in" type="text" value="mix" aria-label="Login"></div>
+            <div class="tc-field tc-field--w100"><label>Password</label><input class="tc-in is-error is-focus" type="text" aria-label="Password"><span class="tc-field__hint tc-dim--danger">Login or password is wrong.</span></div>
+          </div>
+          <button class="tc-btn is-primary" type="button">Sign in</button>
+          <div class="tc-auth__links">
+            <span class="tc-auth__link">Create an account</span>
+            <span class="tc-auth__link">Forgotten your password?</span>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Неверный логин или пароль: та же страница, логин остаётся набранным, поле пароля пустое и в фокусе, причина — у него, одна на оба случая: какой из двух неверен, страница не говорит.</figcaption>
   </figure>
 
   <figure style="flex:1 1 100%">

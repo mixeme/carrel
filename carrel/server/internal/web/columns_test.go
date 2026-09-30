@@ -27,7 +27,8 @@ type frameColumn struct {
 
 var (
 	frameColumnButton = regexp.MustCompile(`<button class="tc-menu__item" type="button" role="menuitem"><svg[^>]*><use href="#i-drag"/></svg><span class="tc-tickrow__tick( is-off)?"></span>([^<]*)(?:<span class="tc-push[^"]*">([^<]*)</span>)?</button>`)
-	frameColumnCheck  = regexp.MustCompile(`<label class="tc-menu__item[^"]*" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="([^"]+)"( checked)?( disabled)?><svg[^>]*><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>([^<]*)(?:<span class="tc-push[^"]*">([^<]*)</span>)?</label>`)
+	frameColumnCheck  = regexp.MustCompile(`<label class="tc-menu__item[^"]*" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="([^"]+)"( checked)?( disabled)?><svg[^>]*><use href="#i-drag"/></svg><span class="tc-tickrow__tick( is-off)?"></span>([^<]*)(?:<span class="tc-push[^"]*">([^<]*)</span>)?</label>`)
+	frameColumnLabel  = regexp.MustCompile(`<label class="tc-menu__item[^"]*" role="menuitem">`)
 	frameColumnsForm  = regexp.MustCompile(`<form class="tc-menu" action="([^"]+)" method="post">`)
 	frameColumnsFoot  = regexp.MustCompile(`<button class="tc-btn[^"]*" type="submit"( name="col" value="default")?>([^<]*)</button>`)
 	frameColumnsHead  = regexp.MustCompile(`<div class="tc-rubric tc-menu__item[^"]*" role="presentation">([^<]*)</div>`)
@@ -64,7 +65,15 @@ func frameColumnsMenu(t *testing.T) (head, action string, items []frameColumn, f
 		action = m[1]
 	}
 	for _, m := range frameColumnCheck.FindAllStringSubmatch(frame, -1) {
-		items = append(items, frameColumn{ID: m[1], Label: frameText(m[4]), Aside: frameText(m[5]), On: m[2] != "", Fixed: m[3] != ""})
+		if (m[2] != "") == (m[4] != "") {
+			t.Fatalf("components-42: %q is checked %v, its tick off %v: read the frame again", m[1], m[2] != "", m[4] != "")
+		}
+		items = append(items, frameColumn{ID: m[1], Label: frameText(m[5]), Aside: frameText(m[6]), On: m[2] != "", Fixed: m[3] != ""})
+	}
+	// Every item is read or the reading stops: an item the pattern missed
+	// would leave the menu shorter than drawn, and the server's longer.
+	if n := len(frameColumnLabel.FindAllString(frame, -1)); n != len(items) {
+		t.Fatalf("components-42: %d items drawn, %d read: read the frame again", n, len(items))
 	}
 	for _, m := range frameColumnsFoot.FindAllStringSubmatch(frame, -1) {
 		b := frameText(m[2])

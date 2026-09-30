@@ -187,8 +187,94 @@ func TestLoginPageIsTheFrame(t *testing.T) {
 	if open.Register == nil || open.Register.Href != "/register" || open.Register.Method != http.MethodGet || !open.Register.Enabled {
 		t.Errorf("register = %+v", open.Register)
 	}
-	failed := decode[view.LoginPage](t, h.do(h.anonPostForm("/login", "/login", url.Values{"login": {"mix"}, "password": {"wrong-one"}})))
-	sameAuth(t, "a failed sign-in", "s-auth-1", page(failed))
+	// The caret: in Login on the empty page. What stands in the fields of
+	// s-auth-1 is typed, not sent, so only the focus is read from it.
+	caret := func(in []authInput) []authInput {
+		out := make([]authInput, len(in))
+		for i, f := range in {
+			out[i] = authInput{Label: f.Label, Focus: f.Focus}
+		}
+		return out
+	}
+	if got, want := caret(shownInputs(open.Form)), caret(authInputs(t, "s-auth-1")); !reflect.DeepEqual(got, want) {
+		t.Errorf("sign-in fields = %+v, want (s-auth-1) %+v", got, want)
+	}
+}
+
+// s-auth-13: a wrong login or a wrong password is the same page — the login
+// stays typed, the password field is empty and in focus, and the reason is
+// at it, one for both: which of the two was wrong the page does not tell.
+// No notice over the fields.
+func TestSignInRefusedIsTheFrame(t *testing.T) {
+	h := newHarness(t)
+	h.admin("mix", "password123")
+	openRegistration(t, h)
+	page := func(p view.LoginPage) authPage {
+		links := []string{}
+		if p.Register != nil {
+			links = append(links, string(p.Register.Label))
+		}
+		return authPage{Lead: said(p.Lede), Tagline: said(p.Tagline), Alert: alertOf(p.Plain), Fields: shownFields(p.Form),
+			Buttons: labels(p.Form.Actions), Links: append(links, string(p.Forgot.Label))}
+	}
+	wrongPassword := decode[view.LoginPage](t, h.do(h.anonPostForm("/login", "/login", url.Values{"login": {"mix"}, "password": {"wrong-one"}})))
+	sameAuth(t, "a wrong password", "s-auth-13", page(wrongPassword))
+	if len(wrongPassword.Notices) != 0 {
+		t.Errorf("notices %+v: s-auth-13 draws none, the reason is at the field", wrongPassword.Notices)
+	}
+	want := authInputs(t, "s-auth-13")
+	if got := shownInputs(wrongPassword.Form); !reflect.DeepEqual(got, want) {
+		t.Errorf("fields of a wrong password = %+v,\nwant (s-auth-13) %+v", got, want)
+	}
+
+	// A login nobody has: the same page, the same reason, with what was
+	// typed back in Login.
+	nobody := decode[view.LoginPage](t, h.do(h.anonPostForm("/login", "/login", url.Values{"login": {"nobody"}, "password": {"wrong-one"}})))
+	sameAuth(t, "an unknown login", "s-auth-13", page(nobody))
+	want[0].Value = "nobody"
+	if got := shownInputs(nobody.Form); !reflect.DeepEqual(got, want) {
+		t.Errorf("fields of an unknown login = %+v,\nwant %+v", got, want)
+	}
+}
+
+// authInput is a field as it arrives: its label, what stands in it, whether
+// the caret is in it, and the reason at it.
+type authInput struct {
+	Label, Value, Error string
+	Focus               bool
+}
+
+var authInputRe = regexp.MustCompile(`(?s)<div class="tc-field[^"]*"><label>(.*?)</label><input class="tc-in([^"]*)" type="text"(?: value="([^"]*)")?[^>]*>(?:<span class="tc-field__hint tc-dim--danger">(.*?)</span>)?`)
+
+// authInputs reads the fields of a frame outside the shell: «is-focus» is
+// the caret, the danger hint under a field is its reason.
+func authInputs(t *testing.T, id string) []authInput {
+	t.Helper()
+	frame, _, _ := strings.Cut(mockupFrame(t, id), "<figcaption")
+	var out []authInput
+	for _, m := range authInputRe.FindAllStringSubmatch(frame, -1) {
+		out = append(out, authInput{Label: frameText(m[1]), Value: html.UnescapeString(m[3]),
+			Error: frameText(m[4]), Focus: strings.Contains(" "+m[2]+" ", " is-focus ")})
+	}
+	if len(out) == 0 {
+		t.Fatalf("%s: no fields read", id)
+	}
+	return out
+}
+
+// shownInputs are the fields of a form written the way authInputs reads
+// them.
+func shownInputs(f view.Form) []authInput {
+	var out []authInput
+	for _, set := range f.Sets {
+		for _, r := range set.Rows {
+			if r.Kind == view.InputHidden {
+				continue
+			}
+			out = append(out, authInput{Label: string(r.Label), Value: string(r.Value), Error: said(r.Error), Focus: r.Focus})
+		}
+	}
+	return out
 }
 
 // s-auth-2 and s-auth-3: the form with the warning over the fields and

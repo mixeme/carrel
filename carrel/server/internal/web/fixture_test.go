@@ -1209,6 +1209,11 @@ func TestFixtureOutsideTheShell(t *testing.T) {
 			app.compare(t, one.dir+"/normal.json", app.h.do(get(one.route, nil)))
 		})
 	}
+	// refused: the sign-in with a wrong password (s-auth-13) — the login
+	// back in its field, the password empty and in focus, the reason at it.
+	t.Run("login-refused", func(t *testing.T) {
+		app.compare(t, "login/refused.json", app.h.do(app.h.anonPostForm("/login", "/login", url.Values{"login": {"mix"}, "password": {"wrong-one"}})))
+	})
 	t.Run("admin-install", func(t *testing.T) {
 		app.compare(t, "admin-install/normal.json", app.h.do(get("/admin/install", app.sess)))
 	})
