@@ -400,7 +400,7 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 		o.conn, _ = blob.Connection(it.AccountID)
 		o.col, _ = blob.Collection(it.AccountID, it.Col)
 		o.conn.ID, o.col.Path = it.AccountID, it.Col
-		row := view.TimelineRow{Kind: it.Kind, Stamp: o.stamp()}
+		row := view.TimelineRow{Kind: it.Kind, Stamp: o.stamp(), Colour: catalogColour(o.col)}
 		var at time.Time
 		if it.Kind == view.KindFile {
 			row.Title, row.Href, row.Why = text(it.FileName), s.route(foundFileHref(it)), "name in the file name"
@@ -587,18 +587,22 @@ func (s *Server) timelinePage(c *collectionCtx, obj *model.Object, person timeli
 }
 
 // timelineInset is the card's inset: the newest rows of the timeline this
-// session gathered for the person, nothing when it gathered none (S-15.4).
-func (s *Server) timelineInset(c *collectionCtx, uid string, obj *model.Object) []view.TimelineRow {
+// session gathered for the person and how many it found in all — the number
+// in the inset's rubric (s-contacts-6); nothing when it gathered none
+// (S-15.4).
+func (s *Server) timelineInset(c *collectionCtx, uid string, obj *model.Object) ([]view.TimelineRow, *int) {
 	task := keptTimeline(c.sess, c.conn.ID, c.col.Path, uid, time.Time{}, time.Time{})
 	if task == nil {
-		return nil
+		return nil, nil
 	}
 	var out []view.TimelineRow
-	for _, r := range s.timelineRows(c.tf, s.catalogOf(c.sess), task.Snapshot(), personOf(uid, obj)) {
+	rows := s.timelineRows(c.tf, s.catalogOf(c.sess), task.Snapshot(), personOf(uid, obj))
+	for _, r := range rows {
 		if len(out) == timelineInsetRows {
 			break
 		}
 		out = append(out, r.row)
 	}
-	return out
+	n := len(rows)
+	return out, &n
 }

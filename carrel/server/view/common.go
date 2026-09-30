@@ -77,7 +77,12 @@ type Tag struct {
 
 // SourceBlock — «откуда запись и что с ней на сервере».
 type SourceBlock struct {
-	UID      Text   `json:"uid"` // идентификатор записи: строка UID источника в панели (s-contacts-1, -7)
+	UID  Text `json:"uid"`  // идентификатор записи: строка UID источника в панели (s-contacts-1, -7)
+	Path Text `json:"path"` // путь записи на её сервере: строка Path источника карточки (s-contacts-6)
+	// Compared — после Read: «not changed on server» (версия на сервере та
+	// же, что в прочитанном списке) или «changed on server since»; пусто —
+	// списка не читали
+	Compared Text   `json:"compared"`
 	Stamp    Stamp  `json:"stamp"`
 	Colour   Colour `json:"colour"`
 	ReadOnly bool   `json:"readOnly"`

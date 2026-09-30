@@ -133,13 +133,15 @@ func mergeFields(own []view.Field, others [][]view.Field) []view.Field {
 func (s *Server) memberRows(lc linkedCard, own *model.Object, differ func(a, b *model.Object) []string) []view.Field {
 	var out []view.Field
 	for _, m := range lc.others {
-		row := view.Field{Label: text(string(m.c.stamp())), Href: s.route(m.c.recordPath(m.ref.UID))}
+		row := view.Field{Label: text(string(m.c.stamp())), Href: s.route(m.c.recordPath(m.ref.UID)), Colour: catalogColour(m.c.col)}
 		switch {
 		case m.obj == nil:
 			row.Value = "The server did not answer; the record stays linked"
 		default:
 			if d := differ(own, m.obj); len(d) > 0 {
-				row.Value = text(strings.Join(d, ", ") + " differ")
+				// «Phone, email differ», capital first (s-contacts-6).
+				why := strings.Join(d, ", ") + " differ"
+				row.Value = text(strings.ToUpper(why[:1]) + why[1:])
 			} else {
 				row.Value = "Holds the same"
 			}
@@ -227,7 +229,7 @@ func (s *Server) linkedContact(ctx context.Context, c *collectionCtx, uid string
 	for _, o := range lc.answered() {
 		more = append(more, fieldsOf(o))
 	}
-	page.Fields = mergeFields(fieldsOf(obj), more)
+	page.Fields = withBirthdayAside(withTagLinks(mergeFields(fieldsOf(obj), more), s.recordTags(c, obj)), c.tf)
 	page.Books = s.memberRows(lc, obj, differs(contactDiffers))
 }
 

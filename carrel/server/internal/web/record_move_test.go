@@ -393,7 +393,7 @@ func TestReadOnlyAndMove(t *testing.T) {
 	card := decode[view.ContactPage](t, f.h.do(get(old, f.sess)))
 	// Copy, Export and Publish only: they read, none writes here (S-18,
 	// S-19, S-25).
-	if got := ids(menuActions(card.Menu)); len(card.Actions) != 0 || !equalStrings(got, []string{"record.copy", "record.export", "publish"}) {
+	if got := ids(menuActions(card.Menu)); !equalStrings(ids(card.Actions), []string{"record.print"}) || !equalStrings(got, []string{"record.copy", "record.export", "publish"}) {
 		t.Errorf("read-only actions = %v, menu = %v", ids(card.Actions), got)
 	}
 	for _, req := range []*http.Request{

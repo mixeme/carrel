@@ -259,6 +259,9 @@ STATE_FRAME = {
     # Мёртвая ссылка отвечает на четырёх маршрутах секрета; FIXTURE_SCREEN
     # ставит её к приглашению, а рисуется она своим кадром.
     "dead-link/normal": "rest-1",
+    # Итог листа «переписать адрес» на карточке рисует свой кадр, s-contacts-16
+    # (без data-screen: у маршрута карточки кадр — s-contacts-6).
+    "app-contact/outcome": "s-contacts-16",
 }
 
 def frame_by_id(fid):

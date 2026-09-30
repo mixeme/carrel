@@ -216,8 +216,8 @@ func TestContactsListAndCard(t *testing.T) {
 	if email == nil || email.Value != "ada@example.com" || email.Href != "mailto:ada@example.com" {
 		t.Errorf("fields = %+v", card.Fields)
 	}
-	if len(card.Tags) != 2 || len(card.Foreign) != 1 || card.Foreign[0].Label != "X-CUSTOM" {
-		t.Errorf("tags %+v, foreign %+v", card.Tags, card.Foreign)
+	if len(fieldTags(card.Fields)) != 2 || len(card.Foreign) != 1 || card.Foreign[0].Label != "X-CUSTOM" {
+		t.Errorf("tags %+v, foreign %+v", fieldTags(card.Fields), card.Foreign)
 	}
 	if !strings.Contains(actionHref(t, card.Actions, "record.delete"), "etag=") {
 		t.Error("delete does not carry the version it was shown at")
@@ -776,7 +776,7 @@ func TestReadOnlyCollectionHasNoEditing(t *testing.T) {
 	list := f.path("contacts")
 
 	card := decode[view.ContactPage](t, f.h.do(get(list+"/ada", f.sess)))
-	if got := ids(menuActions(card.Menu)); !card.ReadOnly || len(card.Actions) != 0 || !equalStrings(got, []string{"record.copy", "record.export", "publish"}) {
+	if got := ids(menuActions(card.Menu)); !card.ReadOnly || !equalStrings(ids(card.Actions), []string{"record.print"}) || !equalStrings(got, []string{"record.copy", "record.export", "publish"}) {
 		t.Errorf("card: read-only %v, actions %v, menu %v", card.ReadOnly, ids(card.Actions), got)
 	}
 	// New is closed with its reason and the wizard that would write here is

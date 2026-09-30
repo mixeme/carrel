@@ -479,8 +479,9 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
   Export .vcf, Publish a link, за чертой Delete contact. Панель подробностей —
   `Details`, карточка для чтения (s-contacts-1): аватар, имя и `Subtitle`,
   на виду Edit и All records (хронология человека), «⋯» — `Menu`; поля,
-  категории (`Tags`, рубрика «Tags» — у панели любого рода одна), «Kept as
-  the server sent them» (`Foreign`), источник;
+  среди них категории — строка «Tags» с метками (`Field.Tags`, у панели
+  любого рода одна), «Kept as the server sent them» (`Foreign`, свёрнуты,
+  кнопка — `ForeignShow`), источник (`Source.UID`);
   удаление внизу панели (s-contacts-8). Строка в панели — `ContactRow.On`;
   без сценариев панель приходит с `?open=` и закрывается ссылкой
   `Details.Close` (C-6.4).
@@ -498,9 +499,15 @@ Typecase (`frame2go -self`) — в 0.8.0; выбор столбцов — в 0.9
 - **Виджеты.** `tc-head`, `tc-avatar`, `tc-fields`, `tc-sec`, `tc-tag`,
   `tc-badge`, `tc-list` + `tc-row--find` (`LinkedRow`, врезка хронологии), `tc-diag` (источник).
 - **Контролы.** На виду — `Actions`: Edit, Send (когда письмо можно
-  отправить), удаление внизу карточки; печать — клиентская. Под «⋯» — `Menu`:
+  отправить), Print (`?print=1`), удаление внизу карточки. Под «⋯» — `Menu`:
   Move, Copy, Export .vcf, Publish a link (s-contacts-6, s-contacts-10).
-  Переход к хронологии человека — `More`.
+  Переход к хронологии человека — `More`; число в рубрике врезки —
+  `TimelineCount`. Поля: телефоны и день рождения моноширинно
+  (`Field.Mono`), у дня рождения — `Field.Aside` («in 7 months»), категории —
+  строка «Tags» между Birthday и Note (`Field.Tags`). «Kept as the server
+  sent them» свёрнуто, кнопка — `ForeignShow` («Show 3»). Другие книги —
+  `Books`: метка книги (`Field.Colour`), ссылка, чем разнится. Источник —
+  `Source.Path` и `Source.Compared` («not changed on server»).
 - **Особое.** Здесь стоит **вся карточка**: телефоны и адреса с их метками,
   фотография, день рождения, категории, тот же человек в других книгах. Чужие
   свойства показываются как есть, отдельным блоком, и к правке не предлагаются.

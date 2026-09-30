@@ -618,13 +618,13 @@
       {
         "href": "tel:+7912445-10-88",
         "label": "Phone · mobile",
-        "mono": false,
+        "mono": true,
         "value": "+7 912 445-10-88"
       },
       {
         "href": "tel:+7495120-45-00",
         "label": "Phone · work",
-        "mono": false,
+        "mono": true,
         "value": "+7 495 120-45-00"
       },
       {
@@ -636,8 +636,27 @@
       {
         "href": "",
         "label": "Birthday",
+        "mono": true,
+        "value": "1987-03-14",
+        "aside": "in 7 months"
+      },
+      {
+        "href": "",
+        "label": "Tags",
         "mono": false,
-        "value": "1987-03-14"
+        "value": "",
+        "tags": [
+          {
+            "href": "/app/contacts/a-nc-home/kontakty?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0",
+            "label": "работа",
+            "on": false
+          },
+          {
+            "href": "/app/contacts/a-nc-home/kontakty?tag=%D0%B8%D0%B7%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE",
+            "label": "издательство",
+            "on": false
+          }
+        ]
       },
       {
         "href": "",
@@ -709,22 +728,14 @@
       "objects": null,
       "readOnly": false,
       "stamp": "nextcloud · Контакты",
-      "uid": "4f2b-9c31-a0e7"
+      "uid": "4f2b-9c31-a0e7",
+      "compared": "",
+      "path": ""
     },
     "subtitle": "nextcloud · Контакты",
-    "tags": [
-      {
-        "href": "/app/contacts/a-nc-home/kontakty?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0",
-        "label": "работа",
-        "on": false
-      },
-      {
-        "href": "/app/contacts/a-nc-home/kontakty?tag=%D0%B8%D0%B7%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE",
-        "label": "издательство",
-        "on": false
-      }
-    ],
-    "title": "Анна Ковалёва"
+    "title": "Анна Ковалёва",
+    "books": [],
+    "foreignShow": "Show 3"
   },
   "print": {
     "title": "Combined address book",

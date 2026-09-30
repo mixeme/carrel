@@ -630,6 +630,8 @@ type Tag struct {
 
 type SourceBlock struct { // «откуда запись и что с ней на сервере»
     UID      Text     // идентификатор записи — строка UID источника в панели (s-contacts-1, -7)
+    Path     Text     // путь записи на её сервере — строка Path источника карточки (s-contacts-6)
+    Compared Text     // после Read: «not changed on server» — версия на сервере та же, что в прочитанном списке; «changed on server since» — другая; пусто — списка не читали
     Stamp    Stamp
     Colour   Colour
     ReadOnly bool
@@ -771,14 +773,15 @@ type Details struct {
     Title      Text
     Subtitle   Text          // под заголовком: «nextcloud · Записи», у заметки — и дата со временем
     Avatar     *Avatar       // контакт: фото или инициалы; у других родов nil
-    Fields     []Field
-    Tags       []Tag         // категории записи; в Fields их нет
+    Fields     []Field       // категории — строкой «Tags» с Field.Tags там, где её рисует кадр
     Body       Text          // описание события и задачи, как есть
     Rendered   []Block       // текст заметки, разобранный (C-6.9): абзацы, задачи с отметками
     Attendees  []AttendeeRow // участники события, только чтение
     Attach     []AttachRow
     Related    []TimelineRow
     Foreign    []Field       // контакт: «Kept as the server sent them»
+    ForeignShow Text         // «Show 3» — кнопка, раскрывающая Foreign; пусто — чужих свойств нет
+    Books      []Field       // контакт: «The same person in other books» (s-contacts-7) — как у ContactPage
     Source     SourceBlock
     Actions    []Action   // кнопки на виду; удаление — Danger, клиент ставит его внизу панели
     Menu       []MenuItem // «⋯» панели, в порядке кадра (s-contacts-8, s-agenda-4, s-tasks-4, s-notes-12)
@@ -787,10 +790,13 @@ type Details struct {
 }
 
 type Field struct {
-    Label Text
-    Value Text
-    Href  string
-    Mono  bool // путь, идентификатор, диагностика
+    Label  Text
+    Value  Text
+    Href   string
+    Mono   bool   // путь, идентификатор, диагностика; у контакта — телефоны и день рождения (s-contacts-6)
+    Aside  Text   // приглушённо после значения: «in 7 months» у дня рождения (s-contacts-6)
+    Tags   []Tag  // строка категорий — метками, Value пуст (s-contacts-6, панели всех родов)
+    Colour Colour // метка коллекции у строки другой книги или календаря (Books, Linked; s-contacts-6)
 }
 
 type Print struct { // колонтитул распечатки, C-10
@@ -1100,14 +1106,15 @@ type ContactPage struct {
     Avatar    Avatar
     PhotoHref string   // пусто — фотографии нет
     PhotoNote Text     // «внешняя ссылка, правка недоступна»
-    Fields    []Field
-    Tags      []Tag
+    Fields    []Field  // категории — строкой «Tags» между Birthday и Note (Field.Tags); у дня рождения Aside
     Foreign   []Field  // чужие свойства, показанные как есть
-    Books     []Field  // тот же человек в других книгах
+    ForeignShow Text   // «Show 3» — кнопка, раскрывающая Foreign (свёрнуты); пусто — их нет
+    Books     []Field  // тот же человек в других книгах: Label — книга, Value — чем разнится, Href, Colour
     Timeline  []TimelineRow // врезка: несколько последних, не вся хронология
-    More      Action        // «Open the timeline» — ведёт на /timeline
+    TimelineCount *int      // сколько всего нашла хронология этой сессии — число в рубрике; nil — её не открывали
+    More      Action        // «Open the timeline» (i-all) — ведёт на /timeline
     Source    SourceBlock
-    Actions   []Action   // на виду: Edit, Send; удаление — Danger, внизу карточки
+    Actions   []Action   // на виду: Edit (i-pencil), Send (i-mail), Print (i-print, ?print=1); удаление — Danger, внизу карточки
     Menu      []MenuItem // «⋯»: Move, Copy, Export .vcf, Publish a link (s-contacts-10)
     ReadOnly  bool
 }
@@ -1132,6 +1139,7 @@ type TimelineGroup struct { Rubric Text; Rows []TimelineRow }
 // Хронология человека: события, задачи, заметки и файлы, где он упомянут.
 type TimelineRow struct {
     Href    string
+    Colour  Colour // метка коллекции записи
     Kind    Kind
     When    Text // день списка коротко, «10 Aug» (s-contacts-7, -26; C-10)
     Title   Text

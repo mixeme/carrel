@@ -1071,14 +1071,34 @@ func TestFixtureContactConflict(t *testing.T) {
 	}
 }
 
-// C-14.2: the card of a contact, read (s-contacts-6).
+// mockupAnnaPhoto gives Анна Ковалёва the photograph the frames of her card
+// and its form draw (s-contacts-6, -16, -3); the list and the timeline draw
+// her initials (s-contacts-1, -7), and their fixtures are taken without it.
+// It is put on the stand before anything is read: the version read is the
+// version shown.
+func mockupAnnaPhoto(t *testing.T, app *mockupApp) {
+	t.Helper()
+	path := davtest.AddressBookHome + "kontakty/4f2b-9c31-a0e7.vcf"
+	body, _, ok := app.servers["nextcloud"].Object(path)
+	if !ok {
+		t.Fatal("Анна is not on the stand")
+	}
+	photo := "PHOTO;ENCODING=b;TYPE=JPEG:" + b64(jpegOf(t, halvesImage(120, 120))) + "\n"
+	app.servers["nextcloud"].Seed(path, strings.Replace(strings.ReplaceAll(body, "\r\n", "\n"), "REV:", photo+"REV:", 1))
+}
+
+// C-14.2: the card of a contact, read (s-contacts-6): with her photograph,
+// and with the timeline this session gathered in its inset (S-15.4).
 func TestFixtureContactCard(t *testing.T) {
 	app := newMockupApp(t)
+	mockupAnnaPhoto(t, app)
 	// The list was opened before the card: that is where the rail's counts
 	// and «read 2 min ago» come from.
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
-	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
+	tl := decode[view.ContactTimelinePage](t, app.h.do(get(rec+"/timeline", app.sess)))
+	waitPoll(t, app.h, app.sess, tl.Poll.TaskID, func(b view.PollBar) bool { return !b.Running })
+	app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
 	app.compare(t, "app-contact/normal.json", app.h.do(get(rec, app.sess)))
 }
 
@@ -1088,6 +1108,7 @@ func TestFixtureContactCard(t *testing.T) {
 // which schedules; «Общий» on baikal does not answer and is named.
 func TestFixtureContactRewrite(t *testing.T) {
 	app := newMockupApp(t)
+	mockupAnnaPhoto(t, app)
 	combined(t, app.h, app.sess, "/app/contacts", contactsPoll)
 	rec := app.listPath(t, "contacts", "kontakty") + "/4f2b-9c31-a0e7"
 	form := formFields(decode[view.ContactEditPage](t, app.h.do(get(rec+"/edit", app.sess))).Form)

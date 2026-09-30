@@ -55,23 +55,16 @@ func TestPanelsReadAsTheirFrames(t *testing.T) {
 		}
 		for _, m := range framePanelTerm.FindAllStringSubmatch(panel, -1) {
 			term := strings.TrimSpace(m[1])
-			if term == "Tags" || term == "Categories" {
-				if len(d.Tags) == 0 {
-					t.Errorf("%s: no tags: %+v", frame, d)
-				}
-				continue
-			}
 			found := false
 			for _, f := range d.Fields {
 				found = found || string(f.Label) == term
+				// The row of tags carries them as tags, not as a line.
+				if term == "Tags" && f.Label == "Tags" && (len(f.Tags) == 0 || f.Value != "") {
+					t.Errorf("%s: the row of tags = %+v", frame, f)
+				}
 			}
 			if !found {
 				t.Errorf("%s: no field %q in %+v", frame, term, d.Fields)
-			}
-		}
-		for _, f := range d.Fields {
-			if f.Label == "Categories" || f.Label == "Tags" {
-				t.Errorf("%s: the tags are Tags, not a field too: %+v", frame, f)
 			}
 		}
 		if !strings.HasPrefix(string(d.Subtitle), string(d.Source.Stamp)) || d.Source.Stamp == "" {

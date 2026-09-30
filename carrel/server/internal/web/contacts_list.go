@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"carrel.dev/carrel/server/internal/conf"
+	"carrel.dev/carrel/server/internal/model"
 	"carrel.dev/carrel/server/internal/provider/card"
 	"carrel.dev/carrel/server/internal/sealed"
 	"carrel.dev/carrel/server/internal/session"
@@ -257,4 +258,21 @@ func (s *Server) whereTo(blob sealed.Blob, spec kindSpec, button *view.Action) {
 		items = append(items, it)
 	}
 	button.Arrow = items
+}
+
+// compared says whether the record on its server is the version the list of
+// this session read (s-contacts-6, «Read 2 min ago · not changed on
+// server»): the ETag just read against the one the index holds. Nothing is
+// said when the list was not read.
+func (s *Server) compared(c *collectionCtx, uid string, obj *model.Object) view.Text {
+	for _, e := range c.index() {
+		if e.UID != uid {
+			continue
+		}
+		if e.ETag == obj.ETag {
+			return "not changed on server"
+		}
+		return "changed on server since"
+	}
+	return ""
 }

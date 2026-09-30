@@ -51,7 +51,7 @@ func (s *Server) getKindRecord(w http.ResponseWriter, r *http.Request, kind stri
 // blocks its frame draws, of the same types the record's page uses — the
 // text of a note rendered, the description of an event or a task,
 // attendees, attachments, related records, a contact's foreign properties.
-// The categories are Tags, never a field too.
+// The categories are the row «Tags» of its fields, where the frame draws it.
 func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) view.Details {
 	d := view.Details{Title: text(recordTitle(c.spec.kind, obj)), Source: c.source()}
 	d.Source.UID = text(uid) // «UID …» of the panel's source (s-contacts-1)
@@ -59,18 +59,16 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 	ops := s.recordOps(c.origin(), c.spec, uid, obj.ETag)
 	attach := s.attachOf(c, uid, obj.ETag)
 	d.Menu = ops.menu
-	d.Tags = s.recordTags(c, obj)
 	switch c.spec.kind {
 	case view.KindContact:
 		for _, f := range contactFieldsOf(obj) {
-			if f.prop != "CATEGORIES" {
-				d.Fields = append(d.Fields, f.Field)
-			}
+			d.Fields = append(d.Fields, f.Field)
 		}
+		d.Fields = withBirthdayAside(withTagLinks(d.Fields, s.recordTags(c, obj)), c.tf)
 		av := avatarFor(uid, contactName(obj))
 		av.Href, _ = s.cardPhoto(c, uid, obj)
 		d.Avatar = &av
-		d.Foreign = card.Foreign(obj)
+		d.Foreign, d.ForeignShow = card.Foreign(obj), foreignShow(card.Foreign(obj))
 		// All records: the person's timeline, beside Edit (s-contacts-1).
 		d.Actions = shown(ops.edit, &view.Action{ID: "contact.timeline", Label: "All records",
 			Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}, ops.del)
@@ -111,6 +109,7 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 			d.Subtitle += text(" · " + when)
 		}
 		d.Rendered, d.Attach, d.Related = page.Doc.Rendered, page.Meta.Attach, page.Meta.Related
+		d.Fields = tagsField(s.recordTags(c, obj))
 		// The page of the note is a bare icon beside Edit; the deletion is
 		// the last item of the menu (s-notes-12), not the foot of the panel.
 		d.Actions = shown(ops.edit, &view.Action{ID: "record.open", Label: "Open the note page", Icon: "i-expand",
@@ -123,19 +122,22 @@ func (s *Server) recordDetails(c *collectionCtx, uid string, obj *model.Object) 
 }
 
 // panelFields are the fields of a record's page for its panel: more stands
-// under When and its original zone, and the categories leave for Tags.
+// under When and its original zone.
 func panelFields(own, more []view.Field) []view.Field {
-	var out []view.Field
 	at := 0
 	for at < len(own) && (own[at].Label == "When" || own[at].Label == "Original time zone") {
 		at++
 	}
-	for _, f := range append(append(slices.Clone(own[:at]), more...), own[at:]...) {
-		if f.Label != "Tags" {
-			out = append(out, f)
-		}
+	return append(append(slices.Clone(own[:at]), more...), own[at:]...)
+}
+
+// foreignShow is the button that opens the kept properties, with their
+// count: «Show 3» (s-contacts-1, -6); none when there are none.
+func foreignShow(foreign []view.Field) view.Text {
+	if len(foreign) == 0 {
+		return ""
 	}
-	return out
+	return text("Show " + strconv.Itoa(len(foreign)))
 }
 
 // noteWhen is when a note was written: its day, and the time when it has
@@ -383,12 +385,14 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 		}
 		page.Fields = append(page.Fields, f.Field)
 	}
-	page.Tags = s.recordTags(c, obj)
+	page.Fields = withBirthdayAside(withTagLinks(page.Fields, s.recordTags(c, obj)), c.tf)
 	page.Foreign = card.Foreign(obj)
+	page.ForeignShow = foreignShow(page.Foreign)
 	// The inset shows the timeline this session gathered; opening the card
 	// gathers nothing (S-15.4). The way to it is always there.
-	page.Timeline = s.timelineInset(c, uid, obj)
-	page.More = view.Action{ID: "contact.timeline", Label: "Open the timeline", Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}
+	page.Timeline, page.TimelineCount = s.timelineInset(c, uid, obj)
+	page.More = view.Action{ID: "contact.timeline", Label: "Open the timeline", Icon: "i-all", Href: s.route(c.recordPath(uid) + "/timeline"), Method: "GET", Enabled: true}
+	page.Source.Path, page.Source.Compared = text(obj.Path), s.compared(c, uid, obj)
 	if photoOf(obj) == linkedPhoto {
 		page.PhotoNote = externalPhotoNote
 	}
@@ -400,9 +404,15 @@ func (s *Server) contactPage(c *collectionCtx, uid string, obj *model.Object, no
 		send = &view.Action{ID: "record.send", Label: "Send", Icon: "i-mail", Method: "POST", Enabled: true,
 			Href: s.postQuery("/app/mail/attach", url.Values{"what": {"contact"}, "a": {c.conn.ID}, "c": {c.col.Path}, "uid": {uid}})}
 	}
-	// Edit and Send stand in the head, the deletion at the foot; the rest is
-	// the «⋯» (s-contacts-6, s-contacts-10). Print is the client's.
-	page.Actions, page.Menu = shown(primary(ops.edit), send, ops.del), ops.menu
+	// Edit, Send and Print stand in the head, the deletion at the foot; the
+	// rest is the «⋯» (s-contacts-6, s-contacts-10). Print is the card with
+	// print=1 (the client's plan, decision 4).
+	edit := primary(ops.edit)
+	if edit != nil {
+		edit.Icon = "i-pencil"
+	}
+	print := &view.Action{ID: "record.print", Label: "Print", Icon: "i-print", Href: s.route(c.recordPath(uid) + "?print=1"), Method: "GET", Enabled: true}
+	page.Actions, page.Menu = shown(edit, send, print, ops.del), ops.menu
 	return page
 }
 
@@ -445,6 +455,15 @@ func contactFieldsOf(obj *model.Object) []propField {
 	var out []propField
 	props := obj.Props()
 	for _, f := range contactFields {
+		if f.prop == "CATEGORIES" {
+			// One row of tags, where the frames draw it: between Birthday and
+			// Note (s-contacts-1, -6, -7). A page with links puts the list's
+			// filter on them (withTagLinks).
+			if tags := plainTags(categoriesOf(view.KindContact, obj)); len(tags) > 0 {
+				out = append(out, propField{Field: view.Field{Label: "Tags", Tags: tags}, prop: f.prop})
+			}
+			continue
+		}
 		for _, v := range props[f.prop] {
 			field := view.Field{Label: text(typedLabel(f.label, v.Params)), Value: text(v.Text)}
 			if f.shape != nil {
@@ -456,6 +475,9 @@ func contactFieldsOf(obj *model.Object) []propField {
 			if f.href != nil {
 				field.Href = f.href(v.Text)
 			}
+			// A number and a day are read digit by digit: the frames set
+			// them in mono (s-contacts-1, -6, -7).
+			field.Mono = f.prop == "TEL" || f.prop == "BDAY"
 			out = append(out, propField{Field: field, prop: f.prop})
 		}
 	}
@@ -480,7 +502,7 @@ func (s *Server) eventPage(c *collectionCtx, uid string, obj *model.Object, noti
 			page.Fields = append(page.Fields, view.Field{Label: "Original time zone", Value: text(z)})
 		}
 	}
-	page.Fields = append(page.Fields, calendarFields(obj)...)
+	page.Fields = withTagLinks(append(page.Fields, calendarFields(obj)...), s.recordTags(c, obj))
 	page.Body = text(cal.Description(obj))
 	if cal.HasRecurrence(obj) {
 		page.Recurrence = s.recurrenceBlock(obj, tf)
@@ -530,7 +552,7 @@ func (s *Server) taskPage(c *collectionCtx, uid string, obj *model.Object, notic
 	if p := firstValue(obj, "PRIORITY"); p != "" && p != "0" {
 		page.Fields = append(page.Fields, view.Field{Label: "Priority", Value: text(p)})
 	}
-	page.Fields = append(page.Fields, calendarFields(obj)...)
+	page.Fields = withTagLinks(append(page.Fields, calendarFields(obj)...), s.recordTags(c, obj))
 	page.Body = text(cal.Description(obj))
 	page.Done, page.Percent = taskDone(obj), percentOf(obj)
 	alarms, _ := cal.Alarms(obj)
@@ -598,12 +620,9 @@ func calendarFields(obj *model.Object) []view.Field {
 	if v := firstValue(obj, "URL"); v != "" {
 		out = append(out, view.Field{Label: "Link", Value: text(v), Href: webHref(v)})
 	}
-	if tags := cal.TextList(obj, "CATEGORIES"); len(tags) > 0 {
-		// «Tags» on every card, as in the panels and the forms (s-agenda-2,
-		// s-tasks-2; owner's decision, from-typecase note 19).
-		out = append(out, view.Field{Label: "Tags", Value: text(strings.Join(tags, ", "))})
-	}
-	return out
+	// «Tags» on every card, as in the panels and the forms (s-agenda-2,
+	// s-tasks-2; owner's decision, from-typecase note 19): one row of tags.
+	return append(out, tagsField(plainTags(cal.TextList(obj, "CATEGORIES")))...)
 }
 
 func readNotice(path string, err error) view.Notice {
@@ -636,7 +655,7 @@ func (s *Server) relatedRows(c *collectionCtx, obj *model.Object) []view.Timelin
 	var rows []view.TimelineRow
 	for _, target := range cal.RelatedTo(obj) {
 		if e, ok := byUID[target]; ok && target != uid {
-			rows = append(rows, view.TimelineRow{Href: s.route(c.kindRecordPath(e.Kind, target)), Kind: e.Kind, When: day(e), Title: text(e.Title), Why: "Related to"})
+			rows = append(rows, view.TimelineRow{Colour: catalogColour(c.col), Href: s.route(c.kindRecordPath(e.Kind, target)), Kind: e.Kind, When: day(e), Title: text(e.Title), Why: "Related to"})
 			continue
 		}
 		// The target is in another collection, or in none this session has
@@ -655,7 +674,7 @@ func (s *Server) relatedRows(c *collectionCtx, obj *model.Object) []view.Timelin
 		}
 		for _, target := range e.Related {
 			if target == uid {
-				rows = append(rows, view.TimelineRow{Href: s.route(c.kindRecordPath(e.Kind, e.UID)), Kind: e.Kind, When: day(e), Title: text(e.Title), Why: "Refers to this"})
+				rows = append(rows, view.TimelineRow{Colour: catalogColour(c.col), Href: s.route(c.kindRecordPath(e.Kind, e.UID)), Kind: e.Kind, When: day(e), Title: text(e.Title), Why: "Refers to this"})
 				break
 			}
 		}

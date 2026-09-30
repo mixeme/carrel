@@ -5,22 +5,25 @@ package view
 
 type ContactPage struct {
 	Shell
-	UID       string        `json:"uid"`
-	Name      Text          `json:"name"`
-	Subtitle  Text          `json:"subtitle"` // «Издательство «Слово» · Выпускающий редактор» — где и кем
-	Avatar    Avatar        `json:"avatar"`
-	PhotoHref string        `json:"photoHref"` // пусто — фотографии нет
-	PhotoNote Text          `json:"photoNote"` // «внешняя ссылка, правка недоступна»
-	Fields    []Field       `json:"fields"`
-	Tags      []Tag         `json:"tags"`
-	Foreign   []Field       `json:"foreign"`  // чужие свойства, показанные как есть
-	Books     []Field       `json:"books"`    // тот же человек в других книгах
-	Timeline  []TimelineRow `json:"timeline"` // врезка: несколько последних, не вся хронология
-	More      Action        `json:"more"`     // «Open the timeline» — ведёт на /timeline
-	Source    SourceBlock   `json:"source"`
-	Actions   []Action      `json:"actions"` // кнопки на виду; удаление — Danger, клиент ставит его внизу
-	Menu      []MenuItem    `json:"menu"`    // «⋯»: Move, Copy, Export .vcf, Publish a link
-	ReadOnly  bool          `json:"readOnly"`
+	UID       string  `json:"uid"`
+	Name      Text    `json:"name"`
+	Subtitle  Text    `json:"subtitle"` // «Издательство «Слово» · Выпускающий редактор» — где и кем
+	Avatar    Avatar  `json:"avatar"`
+	PhotoHref string  `json:"photoHref"` // пусто — фотографии нет
+	PhotoNote Text    `json:"photoNote"` // «внешняя ссылка, правка недоступна»
+	Fields    []Field `json:"fields"`    // категории — строкой «Tags» между Birthday и Note
+	Foreign   []Field `json:"foreign"`   // чужие свойства, показанные как есть
+	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign; пусто — их нет
+	ForeignShow Text          `json:"foreignShow"`
+	Books       []Field       `json:"books"`    // тот же человек в других книгах: книга, чем разнится, ссылка, цвет
+	Timeline    []TimelineRow `json:"timeline"` // врезка: несколько последних, не вся хронология
+	// TimelineCount — сколько всего нашла хронология этой сессии; nil — её не открывали
+	TimelineCount *int        `json:"timelineCount"`
+	More          Action      `json:"more"` // «Open the timeline» — ведёт на /timeline
+	Source        SourceBlock `json:"source"`
+	Actions       []Action    `json:"actions"` // кнопки на виду; удаление — Danger, клиент ставит его внизу
+	Menu          []MenuItem  `json:"menu"`    // «⋯»: Move, Copy, Export .vcf, Publish a link
+	ReadOnly      bool        `json:"readOnly"`
 }
 
 // ContactTimelinePage — лента человека: свой экран, потому что это список
@@ -47,12 +50,13 @@ type TimelineGroup struct {
 // TimelineRow — хронология человека: события, задачи, заметки и файлы, где
 // он упомянут.
 type TimelineRow struct {
-	Href  string `json:"href"`
-	Kind  Kind   `json:"kind"`
-	When  Text   `json:"when"`
-	Title Text   `json:"title"`
-	Stamp Stamp  `json:"stamp"`
-	Why   Text   `json:"why"` // «участник · приняла», «упомянута в тексте» — колонка обязательна
+	Href   string `json:"href"`
+	Colour Colour `json:"colour"` // метка коллекции записи
+	Kind   Kind   `json:"kind"`
+	When   Text   `json:"when"`
+	Title  Text   `json:"title"`
+	Stamp  Stamp  `json:"stamp"`
+	Why    Text   `json:"why"` // «участник · приняла», «упомянута в тексте» — колонка обязательна
 }
 
 type ContactEditPage struct {

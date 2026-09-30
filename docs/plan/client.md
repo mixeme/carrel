@@ -204,29 +204,40 @@
 
 - **C1.** `Actions`: у Edit нет значка (`i-pencil`); Send (`i-mail`) и Print
   (`i-print`) кадра в модели нет.
+  **Закрыт `v0.2.87`:** Edit — `i-pencil`; Send (`i-mail`) — у экземпляра с отправкой (набор фикстур с релеем с `v0.2.85`); Print — `record.print`, `i-print`, карточка с `?print=1`.
 - **C2.** `Field.Mono` = false у телефонов и дня рождения — кадр рисует их
   моноширинно (в панели и хронологии — так же).
+  **Закрыт `v0.2.87`:** `Field.Mono` у телефонов и дня рождения — на карточке, в панели и в карточке хронологии.
 - **C3.** Категории дважды: строкой «работа, издательство» в `Fields` и
   списком `Tags`; кадр — одна строка полей с метками между Birthday и Note
   (у `Details` хронологии — так же).
+  **Закрыт `v0.2.87`:** категории — одна строка полей «Tags» с метками (`Field.Tags`, `Value` пуст) там, где её рисует кадр: у контакта между Birthday и Note, у других родов последней; `ContactPage.Tags` и `Details.Tags` сняты.
 - **C4.** `Field.Href` (`tel:`, `mailto:`) — кадр ссылок не рисует, и
   `FieldsItem` ссылки не берёт (X5): решить, ссылка это или нет.
+  **Снят:** ссылка у значения поля остаётся (`Field.Href`); рисует её Typecase — задача 52 (X5).
 - **C5.** «Kept as the server sent them» кадр рисует свёрнутым: «Show 3» и
   строка-пояснение — ни действия, ни слов в модели (в панели списка — так
   же).
+  **Закрыт `v0.2.87`:** `ContactPage.ForeignShow` и `Details.ForeignShow` — «Show 3»; строка-пояснение под рубрикой — неизменное слово экрана (U-1.3).
 - **C6.** У дня рождения «· in 7 months» — поля нет.
+  **Закрыт `v0.2.87`:** `Field.Aside` у дня рождения — «in 7 months» («in N days», «tomorrow», «today»).
 - **C7.** «The same person in other books»: `Books` в фикстуре пуст, а у
   `Field` нет цвета книги и причины («Phone, email differ», «The server did
   not answer…»); счёта в рубрике нет.
+  **Закрыт `v0.2.87`:** строка книги — `Field` с `Colour`, `Label` (книга), `Href`, `Value` («Phone, email differ», с заглавной, или «The server did not answer…»); счёт в рубрике — число строк `Books` (список приходит целиком). В наборе Анна ни с кем не связана — `Books` у её карточки пуст; связан Артём Белов (Команда, Контакты).
 - **C8.** Врезка хронологии: `Timeline` в фикстуре пуст (в кадре три строки
   и счёт 11 в рубрике); у `TimelineRow` нет цвета метки; «Open the
   timeline» (`More`) без значка (`i-all`).
+  **Закрыт `v0.2.87`:** `TimelineRow.Colour`; `ContactPage.TimelineCount` — сколько нашла хронология сеанса (число в рубрике); `More` — `i-all`; `app-contact/normal` снята после открытой хронологии — врезка с её строкой.
 - **C9.** Источник «Path /dav.php/… · Read 2 min ago · not changed on
   server» — у `SourceBlock` нет пути и состояния «не менялась на сервере».
+  **Закрыт `v0.2.87`:** `SourceBlock.Path` и `SourceBlock.Compared` — «not changed on server» / «changed on server since» по метке версии в индексе прочитанного списка.
 - **C10.** Кадр — карточка с фотографией, фикстура — без (`PhotoHref` ""),
   фикстуры с фото нет.
+  **Закрыт `v0.2.87`:** у Анны в фикстурах карточки (`normal`, `outcome`) — фотография, как кадры `s-contacts-6`, `-16`; список и хронология — без неё, как `s-contacts-1`, `-7`.
 - **C11.** `app-contact/outcome` (итог листа «переписать», `s-contacts-16`)
   без строки `STATE_FRAME`; у `s-contacts-16` нет `data-screen`.
+  **Закрыт `v0.2.87`:** строка `STATE_FRAME` `app-contact/outcome` → `s-contacts-16`.
 
 ### Г. Хронология (`ContactTimelinePage`, `s-contacts-7`)
 

@@ -118,7 +118,19 @@
       "href": "",
       "label": "Tags",
       "mono": false,
-      "value": "release, team"
+      "tags": [
+        {
+          "href": "/app/calendar/a-nc-home/lichnyj?tag=release",
+          "label": "release",
+          "on": false
+        },
+        {
+          "href": "/app/calendar/a-nc-home/lichnyj?tag=team",
+          "label": "team",
+          "on": false
+        }
+      ],
+      "value": ""
     }
   ],
   "linked": [],
@@ -429,6 +441,7 @@
   },
   "related": [
     {
+      "colour": "",
       "href": "",
       "kind": "",
       "stamp": "",
@@ -441,8 +454,10 @@
   "source": {
     "changed": "",
     "colour": "#4a6b52",
+    "compared": "",
     "lastRead": "2 min ago",
     "objects": null,
+    "path": "",
     "readOnly": false,
     "stamp": "nextcloud · Личный",
     "uid": ""

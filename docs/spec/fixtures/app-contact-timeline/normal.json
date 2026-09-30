@@ -185,13 +185,13 @@
       {
         "href": "tel:+7912445-10-88",
         "label": "Phone · mobile",
-        "mono": false,
+        "mono": true,
         "value": "+7 912 445-10-88"
       },
       {
         "href": "tel:+7495120-45-00",
         "label": "Phone · work",
-        "mono": false,
+        "mono": true,
         "value": "+7 495 120-45-00"
       },
       {
@@ -203,14 +203,26 @@
       {
         "href": "",
         "label": "Birthday",
-        "mono": false,
+        "mono": true,
         "value": "1987-03-14"
       },
       {
         "href": "",
         "label": "Tags",
         "mono": false,
-        "value": "работа, издательство"
+        "value": "",
+        "tags": [
+          {
+            "href": "",
+            "label": "работа",
+            "on": false
+          },
+          {
+            "href": "",
+            "label": "издательство",
+            "on": false
+          }
+        ]
       },
       {
         "href": "",
@@ -226,7 +238,9 @@
       "objects": null,
       "readOnly": false,
       "stamp": "nextcloud · Контакты",
-      "uid": ""
+      "uid": "",
+      "compared": "",
+      "path": ""
     },
     "title": "Анна Ковалёва",
     "menu": [
@@ -272,8 +286,9 @@
     "related": [],
     "rendered": [],
     "subtitle": "",
-    "tags": [],
-    "close": ""
+    "close": "",
+    "books": [],
+    "foreignShow": ""
   },
   "details": null,
   "groups": [
@@ -285,7 +300,8 @@
           "stamp": "nextcloud · Личный",
           "title": "Синк-ап по релизу",
           "when": "10 Aug",
-          "why": "attendee · accepted"
+          "why": "attendee · accepted",
+          "colour": "#4a6b52"
         }
       ],
       "rubric": "August 2026"

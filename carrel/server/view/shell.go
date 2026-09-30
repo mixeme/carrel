@@ -126,21 +126,23 @@ type SourceRow struct {
 // (s-contacts-1, s-agenda-1, s-tasks-1, s-notes-1). Типы блоков — те же, что
 // у страницы записи.
 type Details struct {
-	Title      Text          `json:"title"`
-	Subtitle   Text          `json:"subtitle"` // под заголовком: откуда запись, у заметки — и когда
-	Avatar     *Avatar       `json:"avatar"`   // контакт: фото или инициалы; у других родов nil
-	Fields     []Field       `json:"fields"`
-	Tags       []Tag         `json:"tags"`      // категории записи; в Fields их нет
-	Body       Text          `json:"body"`      // описание события и задачи, как есть
-	Rendered   []Block       `json:"rendered"`  // текст заметки, разобранный (C-6.9)
-	Attendees  []AttendeeRow `json:"attendees"` // участники события, только чтение
-	Attach     []AttachRow   `json:"attach"`
-	Related    []TimelineRow `json:"related"`
-	Foreign    []Field       `json:"foreign"` // контакт: чужие свойства, как их прислал сервер
-	Source     SourceBlock   `json:"source"`
-	Actions    []Action      `json:"actions"`    // кнопки на виду; удаление — Danger, внизу панели
-	Menu       []MenuItem    `json:"menu"`       // «⋯» панели, в порядке кадра
-	DeleteNote Text          `json:"deleteNote"` // строка у удаления: у серии «Series is edited and deleted whole.»
+	Title     Text          `json:"title"`
+	Subtitle  Text          `json:"subtitle"`  // под заголовком: откуда запись, у заметки — и когда
+	Avatar    *Avatar       `json:"avatar"`    // контакт: фото или инициалы; у других родов nil
+	Fields    []Field       `json:"fields"`    // категории — строкой «Tags» с Field.Tags
+	Body      Text          `json:"body"`      // описание события и задачи, как есть
+	Rendered  []Block       `json:"rendered"`  // текст заметки, разобранный (C-6.9)
+	Attendees []AttendeeRow `json:"attendees"` // участники события, только чтение
+	Attach    []AttachRow   `json:"attach"`
+	Related   []TimelineRow `json:"related"`
+	Foreign   []Field       `json:"foreign"` // контакт: чужие свойства, как их прислал сервер
+	// ForeignShow — «Show 3», кнопка, раскрывающая Foreign; пусто — их нет
+	ForeignShow Text        `json:"foreignShow"`
+	Books       []Field     `json:"books"` // контакт: тот же человек в других книгах (s-contacts-7)
+	Source      SourceBlock `json:"source"`
+	Actions     []Action    `json:"actions"`    // кнопки на виду; удаление — Danger, внизу панели
+	Menu        []MenuItem  `json:"menu"`       // «⋯» панели, в порядке кадра
+	DeleteNote  Text        `json:"deleteNote"` // строка у удаления: у серии «Series is edited and deleted whole.»
 	// Close — крестик без сценариев: тот же список без панели; пусто —
 	// панель пришла фрагментом (C-7.2)
 	Close string `json:"close"`
@@ -150,7 +152,13 @@ type Field struct {
 	Label Text   `json:"label"`
 	Value Text   `json:"value"`
 	Href  string `json:"href"`
-	Mono  bool   `json:"mono"` // путь, идентификатор, диагностика
+	Mono  bool   `json:"mono"` // путь, идентификатор, диагностика; у контакта — телефоны и день рождения
+	// Aside — приглушённо после значения: «in 7 months» у дня рождения
+	Aside Text `json:"aside,omitempty"`
+	// Tags — строка категорий метками; Value пуст
+	Tags []Tag `json:"tags,omitempty"`
+	// Colour — метка коллекции у строки другой книги или календаря (Books, Linked)
+	Colour Colour `json:"colour,omitempty"`
 }
 
 // Print — колонтитул распечатки, C-10.

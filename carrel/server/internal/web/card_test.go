@@ -54,7 +54,7 @@ func TestTheFieldsOfACardStandInTheOrderOfTheFrame(t *testing.T) {
 // (s-contacts-10) — not what a person came to the card for.
 func TestTheActionsOfACardStandInTheOrderOfTheFrame(t *testing.T) {
 	page := annaPage(t)
-	want := []string{"record.edit", "record.delete"}
+	want := []string{"record.edit", "record.print", "record.delete"}
 	if got := ids(page.Actions); !equalStrings(got, want) {
 		t.Errorf("actions = %v,\nwant    %v", got, want)
 	}

@@ -117,7 +117,7 @@ func TestContactMenusAreTheFrames(t *testing.T) {
 
 	page := decode[view.ContactPage](t, f.h.do(get(card, f.sess)))
 	sameMenu(t, "card", page.Menu, "s-contacts-10")
-	if got := ids(page.Actions); !equalStrings(got, []string{"record.edit", "record.delete"}) {
+	if got := ids(page.Actions); !equalStrings(got, []string{"record.edit", "record.print", "record.delete"}) {
 		t.Errorf("card actions = %v", got)
 	}
 	drawn(t, "card", page.Actions, "s-contacts-6")

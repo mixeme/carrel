@@ -3,6 +3,7 @@
     {
       "enabled": true,
       "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/edit",
+      "icon": "i-pencil",
       "id": "record.edit",
       "label": "Edit",
       "method": "GET",
@@ -17,9 +18,17 @@
       "method": "POST"
     },
     {
+      "enabled": true,
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7?print=1",
+      "icon": "i-print",
+      "id": "record.print",
+      "label": "Print",
+      "method": "GET"
+    },
+    {
       "danger": true,
       "enabled": true,
-      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e1",
+      "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/delete?etag=e19",
       "icon": "i-trash",
       "id": "record.delete",
       "label": "Delete contact",
@@ -28,7 +37,7 @@
   ],
   "avatar": {
     "colour": "#8c6239",
-    "href": "",
+    "href": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?size=thumb\u0026v=e19",
     "initials": "АК"
   },
   "books": [],
@@ -37,13 +46,13 @@
     {
       "href": "tel:+7912445-10-88",
       "label": "Phone · mobile",
-      "mono": false,
+      "mono": true,
       "value": "+7 912 445-10-88"
     },
     {
       "href": "tel:+7495120-45-00",
       "label": "Phone · work",
-      "mono": false,
+      "mono": true,
       "value": "+7 495 120-45-00"
     },
     {
@@ -53,16 +62,29 @@
       "value": "a.kovaleva@example.org"
     },
     {
+      "aside": "in 7 months",
       "href": "",
       "label": "Birthday",
-      "mono": false,
+      "mono": true,
       "value": "1987-03-14"
     },
     {
       "href": "",
       "label": "Tags",
       "mono": false,
-      "value": "работа, издательство"
+      "tags": [
+        {
+          "href": "/app/contacts/a-nc-home/kontakty?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0",
+          "label": "работа",
+          "on": false
+        },
+        {
+          "href": "/app/contacts/a-nc-home/kontakty?tag=%D0%B8%D0%B7%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE",
+          "label": "издательство",
+          "on": false
+        }
+      ],
+      "value": ""
     },
     {
       "href": "",
@@ -91,6 +113,7 @@
       "value": "Ковалёва, Анна"
     }
   ],
+  "foreignShow": "Show 3",
   "menu": [
     {
       "enabled": true,
@@ -128,13 +151,14 @@
   "more": {
     "enabled": true,
     "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline",
+    "icon": "i-all",
     "id": "contact.timeline",
     "label": "Open the timeline",
     "method": "GET"
   },
   "name": "Анна Ковалёва",
   "notices": [],
-  "photoHref": "",
+  "photoHref": "/c/a-nc-home/kontakty/4f2b-9c31-a0e7/photo?v=e19",
   "photoNote": "",
   "print": {
     "range": "nextcloud · Контакты",
@@ -316,26 +340,27 @@
   "source": {
     "changed": "10 August 2026, 17:04",
     "colour": "#4a6b52",
+    "compared": "not changed on server",
     "lastRead": "2 min ago",
     "objects": null,
+    "path": "/alice/contacts/kontakty/4f2b-9c31-a0e7.vcf",
     "readOnly": false,
     "stamp": "nextcloud · Контакты",
     "uid": ""
   },
   "subtitle": "Издательство «Слово» · Выпускающий редактор",
-  "tags": [
+  "timeline": [
     {
-      "href": "/app/contacts/a-nc-home/kontakty?tag=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0",
-      "label": "работа",
-      "on": false
-    },
-    {
-      "href": "/app/contacts/a-nc-home/kontakty?tag=%D0%B8%D0%B7%D0%B4%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE",
-      "label": "издательство",
-      "on": false
+      "colour": "#4a6b52",
+      "href": "/app/calendar/a-nc-home/lichnyj/8f1c-4a02-b7d3",
+      "kind": "event",
+      "stamp": "nextcloud · Личный",
+      "title": "Синк-ап по релизу",
+      "when": "10 Aug",
+      "why": "attendee · accepted"
     }
   ],
-  "timeline": [],
+  "timelineCount": 1,
   "title": "Анна Ковалёва",
   "top": {
     "new": {

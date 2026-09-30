@@ -17,6 +17,45 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.87 — 2026-10-01
+
+The card of a contact as the frames draw it (the client's scan of the
+contacts section, group В).
+
+### Added
+
+- **Print on the card** (`record.print`, `i-print`, the card with
+  `?print=1`); Edit has `i-pencil`.
+- **`Field.aside`** — dim after a value: «in 7 months» by a birthday.
+  **`Field.tags`** — the row «Tags» of a record's fields carries its tags
+  (`value` empty). **`Field.colour`** — the mark of the book or calendar of
+  a linked member's row (`ContactPage.books`, `*Page.linked`).
+- **`ContactPage.foreignShow`**, **`Details.foreignShow`** — «Show 3», the
+  button that opens the kept properties.
+- **`ContactPage.timelineCount`** — how many records the timeline of this
+  session found (the number in the inset's rubric); `more` has `i-all`.
+- **`TimelineRow.colour`** — the mark of the record's collection.
+- **`SourceBlock.path`** (the record's path on its server),
+  **`SourceBlock.compared`** («not changed on server», «changed on server
+  since» — against the version the list of this session read).
+- **`Details.books`** for the timeline's card (filled in v0.2.88).
+
+### Changed
+
+- **Categories are a row of the fields** where the frames draw them: a
+  contact's between Birthday and Note, the last row of an event's, a task's
+  and a note's panel and card. `ContactPage.tags` and `Details.tags` are
+  gone.
+- **Phones and a birthday are `mono`** on the card and in the panels.
+- A linked member's row says why capital first: «Phone, email differ».
+
+### For consumers
+
+Read the tags from the field «Tags». Fixtures regenerated: the card with
+Анна's photograph and the timeline's inset (`app-contact/normal`,
+`outcome`), the panels and cards of every kind (tags), `app-contacts/normal`
+(its panel). `check.py` draws `app-contact/outcome` into `s-contacts-16`.
+
 ## v0.2.86 — 2026-10-01
 
 The list of contacts as the frames draw it (the client's scan of the

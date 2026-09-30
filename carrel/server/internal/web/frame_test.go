@@ -144,9 +144,19 @@ func TestTagFilterOnContacts(t *testing.T) {
 	}
 
 	card := decode[view.ContactPage](t, f.h.do(get(list+"/ada", f.sess)))
-	if tagLine(card.Tags) != "math, poetry" || tagHref(t, card.Tags, "poetry") != list+"?tag=poetry" {
-		t.Errorf("card tags = %+v", card.Tags)
+	if tags := fieldTags(card.Fields); tagLine(tags) != "math, poetry" || tagHref(t, tags, "poetry") != list+"?tag=poetry" {
+		t.Errorf("card tags = %+v", tags)
 	}
+}
+
+// fieldTags are the tags of the row «Tags» of a record's fields.
+func fieldTags(fields []view.Field) []view.Tag {
+	for _, f := range fields {
+		if f.Label == "Tags" {
+			return f.Tags
+		}
+	}
+	return nil
 }
 
 // The filter on tasks, notes and the agenda: rows' categories link to it, and

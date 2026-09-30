@@ -468,8 +468,10 @@
   "source": {
     "changed": "10 August 2026, 17:04",
     "colour": "#4a6b52",
+    "compared": "",
     "lastRead": "2 min ago",
     "objects": null,
+    "path": "",
     "readOnly": false,
     "stamp": "nextcloud · Записи",
     "uid": ""
