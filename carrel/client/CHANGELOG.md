@@ -4,77 +4,65 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
-## v0.2.57 — 2026-09-28
+## v0.0.6 — 2026-09-30
 
-Row actions follow how often they are needed (from-typecase notes 5, 8, 11,
-17): the frequent ones on the row, the rare ones under «⋯». An action that
-cannot be taken is sent switched off with its `Reason`; one that can carries
-no `Reason` — the explanation beside a working button moved to a field of
-its page (C-6.2).
+Every page outside the shell is on `main`. The types of the contract become
+widgets in one package, `bind` (the owner's decision), and the screens call
+it beside the widgets. Before the shell, the contacts section was scanned
+in one pass for what its fixtures lack against its frames: the list of gaps
+is in docs/plan/client.md, for the server's next round.
 
 ### Added
 
-- **`BackupPage.Delete`, `BackupPage.DeleteNote`**: on the job's page
-  (`/app/settings/backup?job=ID`, s-backup-2) the deletion at its foot and the
-  line beside it; `null` and empty on the list and for a new job. The job's
-  form (`Add`) there carries Save, Cancel (`backup.cancel`) and Run now
-  (`backup.run`).
-- **«Job is on»** — form row `on` (check, value `1`) after Name. A job saved
-  without it is off: it runs from the screen only, not at sign-in; the
-  external trigger answers 409 «this job is off». Jobs saved before stay on.
-- **`TriggerBlock.Off`**: «Turn the external trigger off» on the trigger card;
-  `null` while the trigger is not on.
-- **`InviteRow.Menu`**: Extend, a line, Revoke (s-admin-11).
-- **`GET /admin/role?target=ID`** → **`UserRoleSheet`** (`login`, `form`): the
-  Role select — User (`user`), Administrator (`admin`) — with Save and
-  Cancel; it posts to `/admin/?action=role&target=ID`.
-- **`POST /admin/?action=enable&target=ID`** enables a disabled account;
-  journal `user.enable`.
-- **`AccountPage.DangerNote`**, **`DevicesPage.Note`**: the lines the frames
-  draw beside Delete account and above Generate profile.
-- Timeline: **`Range.Form`** — From, To (`?from=`, `?to=`, both days in) and
-  Show (`range.show`).
+- **`bind`**: `Runs` into running text (`Inlines`; `Words` for a tagline),
+  `Action` into a button that means what it does (`Button`: GET — `Href`,
+  POST — the `Form` it submits; primary by `Primary`, destructive by
+  `Danger`; switched off with its `Reason` and no address), a link (`Link`),
+  words that lead (`Span`), an icon without its prefix (`Icon`, «i-down» →
+  «down», U-4); `Form` into a form that sends (`Form`, `Hidden`, `Rows`) or
+  a `PostForm`; `FormRow` into a field (`Field`, `Control`, `Input`, `Pick`,
+  `Options`, `Area`, `Hint`: name, kind, value, pattern, monospaced, cursor,
+  switched off when `ReadOnly`, required, the muted part of the label, the
+  reason or the hint under it); `Notice` into a message (`Msg`, `Tone`).
+  No markup, no words of its own, no variant the frame decides; a test for
+  each translation.
+- **Guards of `bind`**: the screens may import it (`AllowedImports`); it
+  imports only what a screen may, not itself nor another package of the
+  client (`BindImports`); no string constant in it holds a word, but the
+  methods of HTTP and the icon's prefix (`Words`). Bites on
+  `guard/testdata/bind`.
+- **The page's forms** (`Screen.Forms`): the PostForms a page prints at its
+  end, from the same view model; `document.Of` puts them in
+  `Document.Forms`, and the meaning guard holds the buttons against them and
+  each form (bite: a form with no address, two forms of one name).
+- **Registration** (`/register`, `s-auth-2`, sent `s-auth-3`) from
+  `RegisterPage`; **the first run** (`/setup`, `s-auth-4`) from `SetupPage`
+  — Login monospaced with its pattern, «(optional)» after Email; **the
+  forgotten password** (`/forgot`, `s-auth-5` … `s-auth-9`) from
+  `ForgotPage` — the options as cards whose buttons submit the page's
+  PostForms; **the link of the forgotten password** (`/forgot/{token}`,
+  `s-auth-10`, `s-auth-11`) from `ForgotWipePage` — the destructive
+  confirmation through a PostForm, then the new password. Each is its
+  drafts unchanged, then the screen.
+- **The meaning table knows `Span`**: words, with an address or without.
+- **The batch scan of the contacts section** — docs/plan/client.md,
+  «Раздел контактов: пробелы контракта»: 54 gaps of the contract (the shell
+  10, the list 16, the card 11, the timeline 8, the edit 9), the frame's
+  words without a field (one decision), 6 for Typecase and the guards.
 
 ### Changed
 
-- **Published links** (s-publish-1): row actions Copy, Send, Revoke; Send is
-  labelled «Send» (was «Send this link») and is there when mail is on.
-  `created` is the day («9 August 2026»), `lastSeen` absolute or «never
-  opened». A link from before links were kept has Copy and Send switched off
-  with the reason.
-- **Backup job row** (s-backup-1): `actions` are Run and Edit only. Run of a
-  «Download» job is `GET …?op=download&job=ID` (streams the archive); of the
-  others `POST …?op=run`. `backup.download`, `backup.trigger.off` and
-  `backup.delete` left the row. Outside the unlock window the trigger's
-  reveal button has no `reason`; the note says «Confirm your password
-  first: …».
-- **Invite row** (s-admin-1): `actions` are Resend (`admin.invite.resend`,
-  only for an invitation by letter; off without SMTP) and Copy link
-  (`admin.invite.copy`, GET, `href` = the link). «Send again» is gone. A
-  failed letter's `sent` is «failed — » and the relay's reply («failed — 550
-  mailbox unavailable»).
-- **User row** (s-admin-12): `menu` is Set role (`admin.user.role`, GET the
-  sheet), Kill sessions, Disable or Enable (`admin.user.enable`), Reset
-  password, a line, Delete (`i-trash`). «Make administrator», «Make user» and
-  «End sessions» are gone. For the last administrator Set role, Disable and
-  Delete are sent off with the reason; Kill sessions is off with no live
-  session. `role` is «User» or «Administrator»; `created` is the day,
-  `lastLogin` absolute.
-- **Contact timeline** (s-contacts-7): segments read «All 24» (was «All ·
-  24»); the one shown is `on` and `enabled`. `Range.Presets` is empty —
-  «Widen the range» is answered with the range form.
-- **Agenda**: the current Day/Week/Month preset is `on`.
-- **Admin settings**: «Send test» switched off carries its reason.
-- `account.delete` and `device.profile` carry no `reason`.
-
-### For consumers
-
-Regenerated fixtures: `admin-settings`, `admin-users`, `app-agenda` (normal,
-empty), `app-agenda-all` (empty, partial), `app-contact-timeline`,
-`app-files-published`, `app-settings-account`, `app-settings-backup`,
-`app-settings-devices`. Show a switched-off action with its reason; read
-explanations from `deleteNote`, `dangerNote` and `note`, never from the
-`reason` of an action that works.
+- **The five screens on `main` use `bind`** and lose their own helpers
+  (`lede`, `lead`, `tone`); the invitation and the sign-in draw the form's
+  button primary by `Action.Primary`, not every button.
+- **Spec**: U-5.7 and U-15.2, 2 — the owner's decision about `bind`; U-5.1
+  and U-5.5 — the batch scan before each section. The plan says how a
+  section goes.
+- **Typecase `ef80fb4`** (only `docs/roadmap.md` edited in the neighbour's
+  tree; the same code, CSS and mockup as `d13f50c`). By the end of the
+  work the neighbour moved to `7f726e6`, whose mockup the copy of Carrel
+  does not have yet: the comparison of the copies is red on `rest-3` until
+  it lands.
 
 ## v0.0.5 — 2026-09-30
 
