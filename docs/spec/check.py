@@ -256,6 +256,9 @@ STATE_FRAME = {
     "forgot/asked": "s-auth-9",
     "forgot-token/password": "s-auth-11",
     "confirm-email/normal": "rest-2",
+    # Мёртвая ссылка отвечает на четырёх маршрутах секрета; FIXTURE_SCREEN
+    # ставит её к приглашению, а рисуется она своим кадром.
+    "dead-link/normal": "rest-1",
 }
 
 def frame_by_id(fid):
