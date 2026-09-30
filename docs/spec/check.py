@@ -319,7 +319,10 @@ def frame_rail(frame):
     nav = []
     for a in re.finditer(r'<a[^>]*class="[^"]*tc-nav__item[^"]*"[^>]*>(.*?)</a>', frame, re.S):
         num = re.search(r'<span class="tc-num">([^<]*)</span>', a.group(1))
-        lab = re.sub(r'<[^>]+>', '', re.sub(r'<span class="tc-num">.*?</span>', '', a.group(1))).strip()
+        # У возврата две подписи: полная — рейла, короткая — нижней панели
+        # телефона (NavItem.Short); сервер шлёт полную, сверяется она.
+        body = re.sub(r'<span class="tc-nav__short">.*?</span>', '', a.group(1))
+        lab = re.sub(r'<[^>]+>', '', re.sub(r'<span class="tc-num">.*?</span>', '', body)).strip()
         # Строка без подписи — не строка: в кадрах так стоит пустой
         # якорь того же класса, и считать его значило бы требовать от сервера
         # безымянного действия.
