@@ -91,11 +91,14 @@ step "go vet -tags=integration" go vet -tags=integration ./integration/
 # deriving a login key with Argon2id as the product does (11 minutes on the
 # development machine, more under load). The parameters are the product's and
 # are not lowered for tests.
-step "go test" go test -timeout 30m ./...
+# -count=1: never a cached result. Tests read the mockup and the fixtures from
+# docs/, and on 30.09.2026 a new mockup copy left TestColumnsAreTheFrames
+# «(cached) ok» while it was red: a gate that did not run is not green.
+step "go test" go test -count=1 -timeout 30m ./...
 # The client module (carrel/client): its zones and the guards of U-15.2. The
 # gofmt gate above already covers its files.
 step "client go vet" go -C ../client vet ./...
-step "client go test" go -C ../client test ./...
+step "client go test" go -C ../client test -count=1 ./...
 step "docs/spec/check.py" specGate
 
 if (( ${#failed[@]} )); then
