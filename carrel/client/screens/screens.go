@@ -1,6 +1,10 @@
 package screens
 
-import "carrel.dev/typecase/widget"
+import (
+	"carrel.dev/carrel/client/screens/login"
+	"carrel.dev/carrel/server/view"
+	"carrel.dev/typecase/widget"
+)
 
 // Screen is one screen of the client: the address of C-5 it draws, the frame
 // it is drawn by, and how it is drawn from its view model.
@@ -30,4 +34,12 @@ type Root = widget.Root
 // All are the screens of the client, one per address of C-5 built. An
 // address of C-5 is either here or in the list «ждёт библиотеку» of U-5.5,
 // not both (U-15.2, 5).
-var All = []Screen{}
+var All = []Screen{
+	{
+		Route: "/login",
+		Frame: "s-auth-1",
+		Model: func() any { return new(view.LoginPage) },
+		Draw:  func(model any) Root { return login.Screen(model.(*view.LoginPage)) },
+		Title: func(model any) string { return string(model.(*view.LoginPage).Title) },
+	},
+}
