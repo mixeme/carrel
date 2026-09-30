@@ -1,26 +1,31 @@
-// Drafted by frame2go from frame «Ссылка больше не работает» (rest-1) of the Typecase mockup: the
-// frame's widgets and its data, top to bottom. The data is the frame's; it
-// is to become the application's (docs/guide/screen.md).
-package draft
+// Package deadlink is the page of a dead secret link — any of
+// /invite/{token}, /forgot/{token}, /confirm-email/{token}, /p/{token} whose
+// secret is wrong, used, withdrawn, expired or never was — drawn by frame
+// «Ссылка больше не работает» (rest-1) of the mockup: the draft frame2go
+// printed for it, with the frame's data become the view model's (U-5.1,
+// U-6.14).
+package deadlink
 
-import w "carrel.dev/typecase/widget"
+import (
+	"carrel.dev/carrel/server/view"
+	w "carrel.dev/typecase/widget"
+)
 
-// Rest1 is frame «Ссылка больше не работает» (rest-1).
-func Rest1() interface{ Render() string } {
+// Screen draws the page of a dead link from its view model: the mark, «This
+// link does not work» (Title), why that happens (Lede) and the one door —
+// «Sign in» (SignIn). One page for every kind of link: what the link was, and
+// whether it ever was, the page does not say (C-11), and neither does the
+// model.
+func Screen(p *view.DeadLinkPage) w.Page {
 	return w.Page{
 		Items: []w.PagePart{
 			w.Auth{
 				Dialog: w.Dialog{
 					Items: []w.DialogPart{
 						w.DialogLogo{Logo: w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63", Size: w.Logo48}, Wide: true},
-						w.DialogTitle{Text: "This link does not work", Gap: w.DialogTitleGap6},
-						w.Prose{
-							Parts: []w.Inline{
-								w.Text("It may have expired, been used already, or been withdrawn. Ask whoever sent it for a new one."),
-							},
-							Variant: w.ProseMuted,
-						},
-						w.FormFoot{Items: []w.FormFootPart{w.Button{Label: "Sign in", Kind: w.ButtonPrimary}}, Variant: w.FormFootFlush},
+						w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap6},
+						w.Prose{Parts: []w.Inline{w.Text(p.Lede)}, Variant: w.ProseMuted},
+						w.FormFoot{Items: []w.FormFootPart{w.Button{Label: string(p.SignIn.Label), Kind: w.ButtonPrimary, Href: p.SignIn.Href}}, Variant: w.FormFootFlush},
 					},
 					Variant: w.DialogNarrow,
 				},

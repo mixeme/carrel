@@ -3,6 +3,7 @@ package screens
 import (
 	"carrel.dev/carrel/client/screens/about"
 	"carrel.dev/carrel/client/screens/confirm"
+	"carrel.dev/carrel/client/screens/deadlink"
 	"carrel.dev/carrel/client/screens/invite"
 	"carrel.dev/carrel/client/screens/login"
 	"carrel.dev/carrel/server/view"
@@ -66,5 +67,11 @@ var All = []Screen{
 		Frames: []string{"rest-2"},
 		Draw:   func(model any) Root { return confirm.Screen(model.(*view.ConfirmEmailPage)) },
 		Title:  func(model any) string { return string(model.(*view.ConfirmEmailPage).Title) },
+	},
+	{
+		Model:  func() any { return new(view.DeadLinkPage) },
+		Frames: []string{"rest-1"},
+		Draw:   func(model any) Root { return deadlink.Screen(model.(*view.DeadLinkPage)) },
+		Title:  func(model any) string { return string(model.(*view.DeadLinkPage).Title) },
 	},
 }
