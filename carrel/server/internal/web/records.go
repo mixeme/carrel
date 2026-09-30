@@ -188,7 +188,38 @@ func (s *Server) newCollectionCtx(sess *session.Session, spec kindSpec, conn sea
 	if err != nil {
 		return nil, err
 	}
+	if c.cal != nil && sess != nil && !conn.Feed {
+		// A server that will not filter by UID is asked once per session
+		// (docs/servers.md, SV-54), and the record is then found in a read
+		// the session keeps (S-4.2).
+		c.cal.Refusals = sessionRefusals{sess: sess, connID: conn.ID}
+		c.cal.ReadWhole = c.readWhole
+	}
 	return c, nil
+}
+
+// sessionRefusals is cal.Refusals kept by the session, per connection.
+type sessionRefusals struct {
+	sess   *session.Session
+	connID string
+}
+
+func (r sessionRefusals) Refused(collection, what string) bool {
+	return r.sess.Refused(r.connID, collection, what)
+}
+
+func (r sessionRefusals) NoteRefused(collection, what string) {
+	r.sess.NoteRefusal(r.connID, collection, what)
+}
+
+// readWhole is a component read whole, kept like any whole read (S-4.2): what
+// a lookup the server would not filter by UID looks in (SV-54).
+func (c *collectionCtx) readWhole(ctx context.Context, collection, component string) ([]*model.Object, error) {
+	return cachedWholeRead(ctx, c.sess, c.t, c.conn.ID, collection, component, c.ttl, c.now(), calCodec,
+		func() ([]*model.Object, bool, error) {
+			got, bad, err := c.cal.Query(ctx, collection, component, nil, nil)
+			return got, len(bad) == 0, err
+		})
 }
 
 func (c *collectionCtx) origin() origin { return origin{conn: c.conn, col: c.col} }
@@ -634,6 +665,14 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 		rl.Tags = tags
 		return rl
 	}
+	// A calendar the server made without some of what was asked says so on
+	// its lists (docs/servers.md, SV-52).
+	notices := func(own []view.Notice) []view.Notice {
+		if n := droppedNotice(c.sess, c.conn.ID, c.col); n != nil {
+			return append([]view.Notice{*n}, own...)
+		}
+		return own
+	}
 	var page any
 	switch c.spec.kind {
 	case view.KindContact:
@@ -643,14 +682,17 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	case view.KindEvent:
 		p := s.agenda(r, c)
 		p.Rail = rail(p.Rail.Tags)
+		p.Notices = notices(p.Notices)
 		page = p
 	case view.KindTask:
 		p := s.tasksList(r, c)
 		p.Rail = rail(p.Rail.Tags)
+		p.Notices = notices(p.Notices)
 		page = p
 	default:
 		p := s.notesList(r, c)
 		p.Rail = rail(p.Rail.Tags)
+		p.Notices = notices(p.Notices)
 		page = p
 	}
 	s.writePage(w, r, http.StatusOK, page)

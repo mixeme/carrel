@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -283,6 +284,15 @@ func (s *Server) postCollectionNew(w http.ResponseWriter, r *http.Request) {
 	components := f.components
 	if f.kind != view.KindContact {
 		components, kinds = settleComponents(r.Context(), client, path, f.components)
+		// docs/servers.md, SV-52: iCloud answers 201 and keeps the first
+		// component of the set, without a word. What it did not take is
+		// kept for the session and said on the calendar (droppedNotice);
+		// another calendar for it is the person's to make, not Carrel's.
+		for _, c := range f.components {
+			if !slices.Contains(components, c) {
+				sess.NoteRefusal(conn.ID, path, refusedComponent(c))
+			}
+		}
 	}
 	col := sealed.Collection{Path: path, Name: name, Kinds: kinds, Colour: colour, Components: components}
 	if err := s.users.AddCollection(sess.AccountID(), key, conn.ID, col); err != nil {
@@ -346,6 +356,55 @@ func settleComponents(ctx context.Context, client *dav.Client, path string, want
 		}
 	}
 	return want, discover.CalendarKinds(want)
+}
+
+// refusedComponent names, among the session's refusals, a component the
+// server did not take into a calendar made here (SV-52).
+func refusedComponent(component string) string { return "create:" + component }
+
+// droppedNotice is what the calendar says when the server made it without
+// some of what was asked for: iCloud keeps the first component of the set and
+// says nothing of the rest (docs/servers.md, SV-52). The catalog already holds
+// what the server kept (settleComponents); this says what it did not, and
+// where those records go instead. Nil when the server took everything.
+func droppedNotice(sess *session.Session, connID string, col sealed.Collection) *view.Notice {
+	if sess == nil {
+		return nil
+	}
+	var dropped, kept []string
+	for _, p := range calendarParts {
+		switch {
+		case sess.Refused(connID, col.Path, refusedComponent(p.component)):
+			dropped = append(dropped, strings.ToLower(p.label))
+		case slices.Contains(col.Components, p.component):
+			kept = append(kept, strings.ToLower(p.label))
+		}
+	}
+	if len(dropped) == 0 {
+		return nil
+	}
+	body := "The server made «" + collectionLabel(col) + "»"
+	if len(kept) > 0 {
+		body += " for " + wordList(kept) + " only"
+	}
+	body += " and said nothing of the " + wordList(dropped) + " you asked for. " +
+		upperFirst(wordList(dropped)) + " need another calendar: make one for them on this server or another."
+	return &view.Notice{Role: view.NoticeInfo, Title: text("The server did not take " + wordList(dropped)), Body: text(body)}
+}
+
+// wordList joins words the way a sentence does: «tasks and notes».
+func wordList(words []string) string {
+	if len(words) < 2 {
+		return strings.Join(words, "")
+	}
+	return strings.Join(words[:len(words)-1], ", ") + " and " + words[len(words)-1]
+}
+
+func upperFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }
 
 // componentNames reads the comp names out of a supported-calendar-component-set.

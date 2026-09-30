@@ -425,8 +425,7 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 // liveCalendarIn is liveCalendar with the events and the tasks in calendars
 // of their own. iCloud keeps one component per calendar whatever MKCALENDAR
 // asks for (docs/servers.md, SV-52), so there the two halves cannot share one.
-// newEvent adds fields to the form of the new event: iCloud refuses an event
-// without an end (SV-53), and until Carrel writes one there, the run names it.
+// newEvent adds fields to the form of the new event.
 func liveCalendarIn(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, cal, taskCal, suffix string, newEvent map[string]string) {
 	events := "/app/calendar/" + connID + "/" + url.PathEscape(cal)
 	tasks := "/app/tasks/" + connID + "/" + url.PathEscape(taskCal)

@@ -134,25 +134,21 @@ func TestICloudRecords(t *testing.T) {
 	if ev.Colour == "" {
 		t.Errorf("calendar-color set at creation did not reach the catalog: %+v", ev)
 	}
-	// The new event is given an end: iCloud answers 404 to an event without
-	// one (SV-53), and TestICloudEventWithoutAnEnd holds that case.
-	icloudOpensRecords(t)
-	liveCalendarIn(ctx, t, app, client, connID, ev.Path, tk.Path, suffix, map[string]string{"end.date": "2026-10-05", "end.time": "10:00"})
+	// The new event is given no end: iCloud answers 404 to an event without
+	// one, and Carrel writes the end out (SV-53).
+	liveCalendarIn(ctx, t, app, client, connID, ev.Path, tk.Path, suffix, nil)
 }
 
 // docs/servers.md, SV-53: iCloud answers PUT of a VEVENT that has DTSTART and
 // neither DTEND nor DURATION with 404 Not Found and an empty body — timed and
-// all-day alike — although RFC 5545 §3.6.1 allows it. Carrel's new-event form
-// writes no end when none is typed, so the first event a person makes on
-// iCloud without an end is refused with «The server refused the change …
-// 404». The same event with DTEND equal to DTSTART (timed) or the next day
-// (all-day) is taken with 201 — the same event by RFC 5545 §3.6.1.
+// all-day alike — although RFC 5545 §3.6.1 allows it. Until v0.2.80 Carrel's
+// new-event form wrote no end when none was typed, and the first event a
+// person made on iCloud without one was refused with «The server refused the
+// change … 404». Carrel now writes the end out — DTEND equal to DTSTART for a
+// time, the next day for a date — the same event by RFC 5545 §3.6.1, and
+// iCloud takes it with 201.
 func TestICloudEventWithoutAnEnd(t *testing.T) {
 	endpoint, user, pass := icloudCalConfig(t)
-	if os.Getenv("CARREL_ICLOUD_SV53") == "" {
-		t.Skip("docs/servers.md, SV-53: iCloud refuses an event without an end (PUT 404) and Carrel writes none; " +
-			"the workaround is pending — CARREL_ICLOUD_SV53=1 runs this anyway")
-	}
 	ctx := context.Background()
 	client := liveClient(t, endpoint, user, pass)
 	app := newLiveApp(t)
@@ -175,7 +171,11 @@ func TestICloudEventWithoutAnEnd(t *testing.T) {
 		uid, _ := url.PathUnescape(loc[strings.LastIndex(loc, "/")+1:])
 		removeLater(t, client, cals[0].Path+uid+".ics")
 		got, _ := rawBody(ctx, t, client, cals[0].Path+uid+".ics")
-		mustHave(t, "new event without an end", got, "UID:"+uid, "20310313")
+		want := []string{"UID:" + uid, "DTSTART:20310313T093000Z", "DTEND:20310313T093000Z"}
+		if allDay {
+			want = []string{"UID:" + uid, "DTSTART;VALUE=DATE:20310313", "DTEND;VALUE=DATE:20310314"}
+		}
+		mustHave(t, "new event without an end", got, want...)
 	}
 }
 
@@ -195,11 +195,9 @@ func TestICloudForms(t *testing.T) {
 	ev, tk := catalogEntry(t, blob, cal), catalogEntry(t, blob, taskCal)
 
 	t.Run("event", func(t *testing.T) {
-		icloudOpensRecords(t)
 		liveEventFields(ctx, t, app, client, connID, ev.Path, suffix)
 	})
 	t.Run("task", func(t *testing.T) {
-		icloudOpensRecords(t)
 		liveTaskFields(ctx, t, app, client, connID, tk.Path, suffix)
 	})
 	t.Run("connection", func(t *testing.T) { liveConnectionEdit(t, app, connID, endpoint, user, pass) })
@@ -246,8 +244,12 @@ func TestICloudCollections(t *testing.T) {
 	if len(entry.Kinds) != len(held) {
 		t.Errorf("the catalog holds %v, the server %v: a kind the server does not hold is a promise nobody keeps", entry.Kinds, held)
 	}
-	if agenda := liveDecode[view.AgendaPage](t, "agenda", app.get(loc)); len(agenda.Notices) > 0 {
-		t.Errorf("agenda of the new calendar: %s", noticeText(agenda.Notices))
+	// What the server did not take is said on the calendar (SV-52): iCloud
+	// keeps the first component, so the tasks are named, the events not.
+	agenda := liveDecode[view.AgendaPage](t, "agenda", app.get(loc))
+	if len(agenda.Notices) != 1 || !strings.Contains(string(agenda.Notices[0].Title), "tasks") ||
+		strings.Contains(string(agenda.Notices[0].Title), "events") || !strings.Contains(string(agenda.Notices[0].Body), "another calendar") {
+		t.Errorf("agenda of the new calendar: %s; want the one notice that the server did not take tasks", noticeText(agenda.Notices))
 	}
 
 	redirected(t, "rename", app.post("/app/collections/rename?"+url.Values{"a": {connID}, "c": {calPath}}.Encode(),
@@ -277,11 +279,11 @@ func icloudEventCalendars(t *testing.T, app *liveApp) []sealed.Collection {
 
 // S-18 on iCloud, between the two event calendars the account came with: a
 // series with an override moves from one to the other by MOVE, then is copied
-// back. It stands in October 2031 so that it meets nothing of the owner's,
+// back — the copy waits for SV-55: iCloud keeps one resource per UID in the
+// whole account. It stands in October 2031 so that it meets nothing of the owner's,
 // and everything it leaves is taken away — both addresses, whatever happened.
 func TestICloudMove(t *testing.T) {
 	endpoint, user, pass := icloudCalConfig(t)
-	icloudOpensRecords(t)
 	ctx := context.Background()
 	client := liveClient(t, endpoint, user, pass)
 	app := newLiveApp(t)
@@ -329,12 +331,18 @@ func TestICloudMove(t *testing.T) {
 		t.Errorf("agenda at the target: rows %v, notices %s", lines, noticeText(agenda.Notices))
 	}
 
-	sheet = liveDecode[view.MoveSheet](t, "copy sheet", app.get(moveURL(into.Path, from.Path, true)))
-	redirected(t, "copy back", app.post(liveAction(t, sheet.Actions, "record.copy.confirm"), url.Values{}))
-	copied := liveCardByUID(ctx, t, client, from.Path, series)
-	mustHave(t, "copy", copied, "RRULE:FREQ=WEEKLY;COUNT=3", "SUMMARY:Standup moved")
-	// A copy leaves the original where it was.
-	liveCardByUID(ctx, t, client, into.Path, series)
+	t.Run("copy back", func(t *testing.T) {
+		if os.Getenv("CARREL_ICLOUD_SV55") == "" {
+			t.Skip("docs/servers.md, SV-55: iCloud holds one resource per UID in the whole account, and a copy keeps " +
+				"its UID, so PUT of the copy answers 412 — CARREL_ICLOUD_SV55=1 runs this anyway")
+		}
+		sheet := liveDecode[view.MoveSheet](t, "copy sheet", app.get(moveURL(into.Path, from.Path, true)))
+		redirected(t, "copy back", app.post(liveAction(t, sheet.Actions, "record.copy.confirm"), url.Values{}))
+		copied := liveCardByUID(ctx, t, client, from.Path, series)
+		mustHave(t, "copy", copied, "RRULE:FREQ=WEEKLY;COUNT=3", "SUMMARY:Standup moved")
+		// A copy leaves the original where it was.
+		liveCardByUID(ctx, t, client, into.Path, series)
+	})
 }
 
 // icloudBook is the only address book of the contacts connection.
@@ -498,7 +506,7 @@ func TestICloudInTheExistingCalendars(t *testing.T) {
 		form.Set("summary", summary)
 		form.Set("start.date", "2031-03-11")
 		form.Set("start.time", "09:30")
-		// Without an end iCloud answers 404 (SV-53).
+		// An end of its own; one without is TestICloudEventWithoutAnEnd (SV-53).
 		form.Set("end.date", "2031-03-11")
 		form.Set("end.time", "10:00")
 		loc := redirected(t, "new event", app.post(events+"/new", form))
@@ -507,7 +515,6 @@ func TestICloudInTheExistingCalendars(t *testing.T) {
 		removeLater(t, client, file)
 		got, _ := rawBody(ctx, t, client, file)
 		mustHave(t, "new event", got, "UID:"+uid, "SUMMARY:"+summary, "20310311")
-		icloudOpensRecords(t)
 		if event := liveDecode[view.EventPage](t, "the event", app.get(loc)); string(event.Summary) != summary {
 			t.Errorf("the event page shows %q, want %q", event.Summary, summary)
 		}
@@ -535,7 +542,6 @@ func TestICloudInTheExistingCalendars(t *testing.T) {
 		removeLater(t, client, file)
 		got, _ := rawBody(ctx, t, client, file)
 		mustHave(t, "new task", got, "UID:"+uid, "SUMMARY:"+summary, "DUE;VALUE=DATE:20310312")
-		icloudOpensRecords(t)
 		if task := liveDecode[view.TaskPage](t, "the task", app.get(loc)); string(task.Summary) != summary {
 			t.Errorf("the task page shows %q, want %q", task.Summary, summary)
 		}
@@ -548,19 +554,4 @@ func TestICloudInTheExistingCalendars(t *testing.T) {
 			t.Errorf("after delete GET %s = %v, want 404", file, err)
 		}
 	})
-}
-
-// icloudOpensRecords skips what needs a record page on iCloud until SV-54 is
-// answered. Carrel finds a record by a calendar-query with a text-match on
-// UID, and iCloud answers every such query 412 Precondition Failed with an
-// empty body: no event and no task opens, is edited, moved or deleted
-// through the pages — «<calendar> is unavailable … REPORT … 412». The create
-// itself works (a PUT), so the tests that make a record check it on the
-// server first and stop here. CARREL_ICLOUD_SV54=1 runs them anyway.
-func icloudOpensRecords(t *testing.T) {
-	t.Helper()
-	if os.Getenv("CARREL_ICLOUD_SV54") == "" {
-		t.Skip("docs/servers.md, SV-54: iCloud answers a calendar-query with a UID text-match 412, so Carrel opens no record there; " +
-			"the workaround is pending — CARREL_ICLOUD_SV54=1 runs this anyway")
-	}
 }

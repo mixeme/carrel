@@ -1292,6 +1292,15 @@ func (s *Server) buildChange(c *collectionCtx, obj *model.Object, cur []cal.Alar
 			if f.name == "end" {
 				allDay = startRow[2] == "on"
 			}
+			if f.name == "end" && c.spec.kind == view.KindEvent && endless(row, startRow, props) {
+				// An event without an end lasts no time at all, or the one
+				// day of its date (RFC 5545 §3.6.1), and iCloud refuses it
+				// with 404 (docs/servers.md, SV-53). So the end is written
+				// out: the start itself, and for a date the day after it
+				// (shift below). The same event, on every server.
+				row = startRow
+				w = row[:]
+			}
 			if f.required && row[0] == "" {
 				ch.errors[f.name] = f.label + " is required."
 				continue
@@ -1423,6 +1432,18 @@ func fillNames(kind view.Kind, have, want formValues) {
 			want["n"] = []string{given, family}
 		}
 	}
+}
+
+// endless reports an event the form would write without an end, when the end
+// is the person's to give: a new event, or one whose end is being cleared. An
+// event another client wrote without an end, and edited here in something
+// else, stays as it came (S-7); one with DURATION keeps it. A start the form
+// cannot read gets its own error, and no end is made of it.
+func endless(end, start [3]string, props map[string][]model.RawValue) bool {
+	if end[0] != "" || start[0] == "" || (start[2] != "on" && start[1] == "") || len(props["DURATION"]) > 0 {
+		return false
+	}
+	return len(props["DTSTART"]) == 0 || len(props["DTEND"]) > 0
 }
 
 // rowTime is the instant a time row names, for validation. An empty row is

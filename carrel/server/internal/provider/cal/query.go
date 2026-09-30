@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"net/url"
 	"strings"
 	"time"
 
@@ -231,17 +232,82 @@ func refusedCollation(err error) bool {
 	return false
 }
 
+// RefusedUIDMatch names, in Refusals, a collection whose server refuses a
+// calendar-query with a text-match on UID (docs/servers.md, SV-54).
+const RefusedUIDMatch = "uid-text-match"
+
 // FindUID reads the record with this UID. CalDAV text-match is a substring
 // test, so the exact UID is checked here.
+//
+// iCloud answers a text-match on UID 412 with an empty body — every time,
+// whatever the UID — while the same collection is listed without a filter,
+// multigets and GETs (docs/servers.md, SV-54). A refusal of the filter is
+// therefore not the end of the lookup: the record is looked for without it
+// (findUnfiltered), and the refusal is remembered for the collection
+// (Refusals), so the next lookup does not ask the filter again.
 func (p *Provider) FindUID(ctx context.Context, collection, component, uid string) (*model.Object, error) {
+	if p.Refusals != nil && p.Refusals.Refused(collection, RefusedUIDMatch) {
+		return p.findUnfiltered(ctx, collection, component, uid)
+	}
 	filter := caldav.CompFilter{
 		Name:  component,
 		Props: []caldav.PropFilter{{Name: ical.PropUID, TextMatch: &caldav.TextMatch{Text: uid}}},
 	}
 	objs, bad, err := p.query(ctx, collection, component, filter)
+	if refusedFilter(err) {
+		if p.Refusals != nil {
+			p.Refusals.NoteRefused(collection, RefusedUIDMatch)
+		}
+		return p.findUnfiltered(ctx, collection, component, uid)
+	}
 	if err != nil {
 		return nil, err
 	}
+	return pickUID(objs, bad, uid)
+}
+
+// refusedFilter reports a server that will not take the filter of a
+// calendar-query: iCloud's 412 with nothing said (SV-54), and the refusals
+// RFC 4791 and the servers seen give a REPORT they do not support.
+func refusedFilter(err error) bool {
+	for _, code := range []int{400, 403, 412, 501} {
+		if dav.IsStatus(err, code) {
+			return true
+		}
+	}
+	return false
+}
+
+// findUnfiltered looks for a record without asking the server to filter.
+// First at the name Carrel gives its own records, <UID>.ics — one GET, and
+// the record another client named its own way is not there. Then in the
+// component read whole (ReadWhole when the caller keeps such reads, S-4.2),
+// with the UID compared here, as a book is searched where the server has no
+// addressbook-query (SV-23).
+func (p *Provider) findUnfiltered(ctx context.Context, collection, component, uid string) (*model.Object, error) {
+	if !strings.ContainsAny(uid, "/\\") {
+		named := strings.TrimSuffix(collection, "/") + "/" + url.PathEscape(uid) + ".ics"
+		if obj, err := p.Get(ctx, named); err == nil && obj.MainComponent() == component && UID(obj) == uid {
+			return obj, nil
+		}
+	}
+	if p.ReadWhole != nil {
+		objs, err := p.ReadWhole(ctx, collection, component)
+		if err != nil {
+			return nil, err
+		}
+		return pickUID(objs, nil, uid)
+	}
+	objs, bad, err := p.query(ctx, collection, component, caldav.CompFilter{Name: component})
+	if err != nil {
+		return nil, err
+	}
+	return pickUID(objs, bad, uid)
+}
+
+// pickUID is the record with exactly this UID among those read, or the reason
+// the one that holds it could not be read.
+func pickUID(objs []*model.Object, bad []Unreadable, uid string) (*model.Object, error) {
 	for _, o := range objs {
 		if UID(o) == uid {
 			return o, nil

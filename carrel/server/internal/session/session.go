@@ -18,7 +18,8 @@ import (
 // One session serves several requests at once, so everything that changes
 // after Create is behind mu: the deadlines, the drafts, the history, the loss
 // registry, the live-fanout count, the kept tasks, the transfer queue, the
-// readings of collections and the last checks of connections.
+// readings of collections, the refusals of servers and the last checks of
+// connections.
 // Cache has its own lock.
 // No method calls into a task that locks while mu is held: a task takes mu
 // through AcquireFanout and ReleaseFanout under its own lock.
@@ -42,6 +43,7 @@ type Session struct {
 	transfers  []Transfer
 	unlockAt   time.Time
 	readings   map[string]Reading               // by connection and collection path (S-22)
+	refusals   map[string]bool                  // what a server refused in a collection (refusals.go)
 	checks     map[string]*view.DiagnosticTrace // last check of each connection (C-6)
 	agent      string                           // the browser, as the account page names it
 	address    string                           // the client address at sign-in
@@ -374,6 +376,7 @@ func (s *Session) end() {
 	s.transfers = nil
 	s.unlockAt = time.Time{}
 	s.readings = nil
+	s.refusals = nil
 	s.mu.Unlock()
 
 	for _, t := range tasks {

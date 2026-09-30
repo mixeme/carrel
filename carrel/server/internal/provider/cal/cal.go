@@ -25,6 +25,19 @@ type Provider struct {
 	// empty answer (SV-47): the caller's read, which may be one it keeps
 	// (S-4.2). Unset, the component is read from the server.
 	ReadWhole func(ctx context.Context, collection, component string) ([]*model.Object, error)
+
+	// Refusals, when set, is the caller's memory of what a server refused
+	// in a collection (the session's): a lookup that was refused once goes
+	// the round-about way straight away the next time (SV-54). Unset, every
+	// lookup asks first.
+	Refusals Refusals
+}
+
+// Refusals remembers, per collection, requests a server refused that have a
+// round-about way: what names the request (RefusedUIDMatch).
+type Refusals interface {
+	Refused(collection, what string) bool
+	NoteRefused(collection, what string)
 }
 
 // New wires a calendar provider.

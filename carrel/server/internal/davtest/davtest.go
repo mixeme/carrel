@@ -103,6 +103,24 @@ type Server struct {
 	// into a calendar asked to hold only events (docs/servers.md, SV-43).
 	CreateIgnoresComponentSet bool
 
+	// CreateKeepsFirstComponent makes a calendar hold only the first
+	// component of the set the MKCALENDAR asked for, answering 201 and
+	// saying nothing of the rest, and answers 500 to a set of VJOURNAL alone
+	// — the way iCloud does (docs/servers.md, SV-52).
+	CreateKeepsFirstComponent bool
+
+	// RefuseUIDTextMatch answers 412 with an empty body to a calendar-query
+	// that carries a text-match on UID, the way iCloud does (docs/servers.md,
+	// SV-54). A calendar-query without one, a multiget and a GET are served
+	// normally.
+	RefuseUIDTextMatch bool
+
+	// RefuseEventWithoutEnd answers 404 with an empty body to a PUT of a
+	// VEVENT that has DTSTART and neither DTEND nor DURATION, timed or
+	// all-day, the way iCloud does (docs/servers.md, SV-53), although RFC
+	// 5545 §3.6.1 allows one.
+	RefuseEventWithoutEnd bool
+
 	// BreaksOnTextMatch answers 500 to an addressbook-query that carries a
 	// text-match, the way Xandikos does over a book holding one value with a
 	// character outside ASCII (docs/servers.md, SV-42). Its own crash, not a
@@ -190,7 +208,10 @@ type Server struct {
 	hangUp    map[string]bool
 	requests  []string
 	seq       int
-	dir       string // the file tree behind FileRoot
+	// uidMatchesRefused counts the calendar-queries RefuseUIDTextMatch
+	// answered 412.
+	uidMatchesRefused int
+	dir               string // the file tree behind FileRoot
 }
 
 type refusal struct {
@@ -454,6 +475,14 @@ func (s *Server) Requests() []string {
 	return append([]string(nil), s.requests...)
 }
 
+// UIDMatchesRefused is how many calendar-queries with a text-match on UID
+// RefuseUIDTextMatch has refused so far.
+func (s *Server) UIDMatchesRefused() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.uidMatchesRefused
+}
+
 // CountRequests counts requests with the method whose path has the prefix.
 func (s *Server) CountRequests(method, prefix string) int {
 	var n int
@@ -520,6 +549,18 @@ func (s *Server) serveInner(w http.ResponseWriter, r *http.Request, cal, card, f
 		w.Header().Set("Content-Type", `application/xml; charset="utf-8"`)
 		w.WriteHeader(http.StatusMultiStatus)
 		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="UTF-8"?><D:multistatus xmlns:D="DAV:"/>`)
+		return
+	}
+	if s.RefuseUIDTextMatch && r.Method == "REPORT" && bytes.Contains(body, []byte("calendar-query")) &&
+		bytes.Contains(body, []byte("text-match")) && bytes.Contains(body, []byte(`name="UID"`)) {
+		s.mu.Lock()
+		s.uidMatchesRefused++
+		s.mu.Unlock()
+		w.WriteHeader(http.StatusPreconditionFailed)
+		return
+	}
+	if s.RefuseEventWithoutEnd && r.Method == http.MethodPut && strings.HasPrefix(p, CalendarHome) && eventWithoutEnd(body) {
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	if s.BreaksOnTextMatch && r.Method == "REPORT" && bytes.Contains(body, []byte("addressbook-query")) &&
@@ -826,6 +867,15 @@ func (s *Server) mkcalendar(w http.ResponseWriter, p string, body []byte) {
 	if s.CreateIgnoresComponentSet {
 		comps = []string{"VEVENT", "VTODO", "VJOURNAL", "VFREEBUSY"}
 	}
+	if s.CreateKeepsFirstComponent && len(comps) > 0 {
+		// docs/servers.md, SV-52: notes are not kept at all, and of any
+		// other set only the first component is, without a word.
+		if len(comps) == 1 && comps[0] == "VJOURNAL" {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		comps = comps[:1]
+	}
 	if s.CreateAssignsItsOwnAddress {
 		// docs/servers.md, SV-19: nothing is left at the address that was
 		// asked for; the calendar is at one the server picked itself.
@@ -852,6 +902,22 @@ func (s *Server) mkcalendar(w http.ResponseWriter, p string, body []byte) {
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+}
+
+// eventWithoutEnd reports a calendar body holding a VEVENT with DTSTART and
+// neither DTEND nor DURATION (docs/servers.md, SV-53).
+func eventWithoutEnd(body []byte) bool {
+	cal, err := ical.NewDecoder(bytes.NewReader(body)).Decode()
+	if err != nil {
+		return false
+	}
+	for _, c := range cal.Children {
+		if c.Name == ical.CompEvent && c.Props.Get(ical.PropDateTimeStart) != nil &&
+			c.Props.Get(ical.PropDateTimeEnd) == nil && c.Props.Get(ical.PropDuration) == nil {
+			return true
+		}
+	}
+	return false
 }
 
 type propertyUpdate struct {

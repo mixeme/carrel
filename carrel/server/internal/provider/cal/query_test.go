@@ -172,6 +172,65 @@ func TestFindUIDIsExact(t *testing.T) {
 	}
 }
 
+// refusalMemory is a caller's memory of refusals, as the session keeps it.
+type refusalMemory map[string]bool
+
+func (m refusalMemory) Refused(collection, what string) bool { return m[collection+" "+what] }
+func (m refusalMemory) NoteRefused(collection, what string)  { m[collection+" "+what] = true }
+
+// docs/servers.md, SV-54: iCloud answers a calendar-query with a text-match
+// on UID 412 and an empty body, so no record opened there at all. A record
+// is then looked for without the filter: at the name Carrel gives its own
+// records, <UID>.ics, and failing that in the component read whole, the UID
+// compared here. The refusal is remembered for the collection, and the next
+// look goes there straight away.
+func TestAUIDTheServerWillNotFilterIsFoundWithoutTheFilter(t *testing.T) {
+	p, srv := davProvider(t)
+	srv.RefuseUIDTextMatch = true
+	srv.Seed(work+"ours.ics", vevent("ours", "20260115T100000Z", "Made here"))
+	srv.Seed(work+"a-name-of-their-own.ics", vevent("theirs", "20260116T100000Z", "Made elsewhere"))
+	mem := refusalMemory{}
+	p.Refusals = mem
+
+	obj, err := p.FindUID(t.Context(), work, "VEVENT", "ours")
+	if err != nil || Text(obj, "SUMMARY") != "Made here" || obj.Path != work+"ours.ics" || obj.ETag == "" {
+		t.Fatalf("FindUID(ours) = %+v, %v", obj, err)
+	}
+	if !mem.Refused(work, RefusedUIDMatch) {
+		t.Fatalf("the refusal is not remembered: %v", mem)
+	}
+	reports := srv.CountRequests("REPORT", work)
+
+	obj, err = p.FindUID(t.Context(), work, "VEVENT", "theirs")
+	if err != nil || Text(obj, "SUMMARY") != "Made elsewhere" || obj.Path != work+"a-name-of-their-own.ics" {
+		t.Fatalf("FindUID(theirs) = %+v, %v", obj, err)
+	}
+	if n := srv.CountRequests("REPORT", work) - reports; n != 1 {
+		t.Errorf("REPORT requests for a remembered refusal = %d, want the one listing, no filter asked again", n)
+	}
+	reports = srv.CountRequests("REPORT", work)
+	if _, err := p.FindUID(t.Context(), work, "VEVENT", "ours"); err != nil {
+		t.Fatal(err)
+	}
+	if n := srv.CountRequests("REPORT", work) - reports; n != 0 {
+		t.Errorf("REPORT requests for a record at its own name = %d, want none", n)
+	}
+	if _, err := p.FindUID(t.Context(), work, "VEVENT", "our"); !errors.Is(err, ErrNotFound) {
+		t.Errorf("FindUID(our) = %v, want ErrNotFound: the UID is compared whole", err)
+	}
+	if _, err := p.FindUID(t.Context(), work, "VTODO", "ours"); !errors.Is(err, ErrNotFound) {
+		t.Errorf("FindUID of an event as a task = %v, want ErrNotFound", err)
+	}
+
+	// Without a memory the lookup still succeeds; it asks the filter first.
+	q, srv2 := davProvider(t)
+	srv2.RefuseUIDTextMatch = true
+	srv2.Seed(work+"x.ics", vevent("theirs", "20260116T100000Z", "Made elsewhere"))
+	if obj, err := q.FindUID(t.Context(), work, "VEVENT", "theirs"); err != nil || obj.Path != work+"x.ics" {
+		t.Errorf("FindUID without a memory = %+v, %v", obj, err)
+	}
+}
+
 // S-15.2: a search does not count letter case, in any script. The REPORT names
 // i;unicode-casemap; CalDAV's default ignores case in Latin only.
 func TestSearchIgnoresCaseInEveryScript(t *testing.T) {

@@ -17,6 +17,52 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.80 — 2026-09-30
+
+Three iCloud calendar quirks answered (docs/servers.md, SV-52, SV-53,
+SV-54): records open there, events without an end are saved, and a
+calendar the server made without some of what was asked says so.
+
+### Changed
+
+- **A record is found without the UID filter where the server refuses
+  it** (SV-54). iCloud answers a `calendar-query` with a `text-match` on
+  UID 412 with an empty body, and no event or task opened there — card,
+  edit, Mark done, move, delete. A 400, 403, 412 or 501 to that filter now
+  sends the lookup round: `GET <collection>/<UID>.ics`, then the component
+  read whole through the session's cache (S-4.2) with the UID compared
+  here. The session remembers the refusal per collection and asks the
+  filter no more.
+- **An event is always written with an end** (SV-53, S-11). iCloud answers
+  PUT of a `VEVENT` without `DTEND` and `DURATION` 404. When the person
+  gives no end, `DTEND` is the start itself for a time and the next day
+  (`VALUE=DATE`) for a date — the same event by RFC 5545 §3.6.1 — on the
+  full form, the quick sheet and an edit that clears the end. An event
+  another client wrote without an end keeps having none when edited in
+  something else.
+
+### Added
+
+- **A notice on a calendar the server made without some of what was
+  asked** (SV-52). iCloud keeps the first component of an `MKCALENDAR`
+  set and says nothing of the rest. The agenda, tasks and notes lists of
+  that calendar now lead with an `info` notice: «The server did not take
+  tasks» — what it kept, and that tasks need another calendar. No second
+  calendar is made on the person's behalf. No frame draws this notice yet
+  (plan/to-typecase.md, task 53).
+
+### For consumers
+
+`Shell.notices` of a calendar's list may carry this `info` notice for the
+rest of the session after the calendar was created. Nothing else in the
+contract changed.
+
+### Not yet included
+
+- **Copying a record within one iCloud account** (SV-55): iCloud holds one
+  resource per UID in the whole account and answers PUT of the copy 412.
+  «Copy here» says «Nothing was copied» with the 412; moving works.
+
 ## v0.2.79 — 2026-09-30
 
 What the client stopped on (plan/client.md, «Что блокирует»), decided by
