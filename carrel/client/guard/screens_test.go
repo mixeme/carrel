@@ -7,12 +7,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"slices"
 	"strings"
 	"sync"
 	"testing"
 
+	"carrel.dev/carrel/client/fixtures"
 	"carrel.dev/carrel/client/guard"
 	"carrel.dev/carrel/client/screens"
 	"carrel.dev/carrel/server/view"
@@ -219,12 +221,30 @@ func frameBlock(mock, id string) string {
 	return mock[start : at+end]
 }
 
-// fixtures are the state files of every fixture directory check.py maps to
-// the route, sorted.
-func (l lib) fixtures(route string) []string {
+// modelName is the name of a screen's view model: the key of the registry.
+func modelName(scr screens.Screen) string {
+	return typeName(scr.Model())
+}
+
+// typeName is the name of the type a view model points to.
+func typeName(model any) string {
+	return reflect.TypeOf(model).Elem().Name()
+}
+
+// label names a screen in a finding: its view model and its frames.
+func label(scr screens.Screen) string {
+	return modelName(scr) + " (" + strings.Join(scr.Frames, ", ") + ")"
+}
+
+// fixtures are the state files of every fixture directory whose view model
+// (fixtures.Models) is the screen's, sorted: a screen is a screen of a view
+// model, so the dead link's fixture on the route of the invitation
+// (FIXTURE_SCREEN) is the dead link's, not the invitation's.
+func (l lib) fixtures(scr screens.Screen) []string {
+	name := modelName(scr)
 	var out []string
-	for dir, r := range l.routes {
-		if r != route {
+	for dir, model := range fixtures.Models {
+		if typeName(model()) != name {
 			continue
 		}
 		states, _ := filepath.Glob(filepath.Join(fixtureDir, dir, "*.json"))
@@ -252,15 +272,24 @@ func draw(scr screens.Screen, path string) (screens.Root, error) {
 
 var classAttr = regexp.MustCompile(`class="([^"]*)"`)
 
-// frameOf is the frame a fixture of the screen is held against: the frame
-// STATE_FRAME of check.py gives the fixture's state — the refused sign-in,
-// login/refused, is s-auth-13 —, else the screen's.
-func (l lib) frameOf(scr screens.Screen, path string) string {
-	key := filepath.Base(filepath.Dir(path)) + "/" + strings.TrimSuffix(filepath.Base(path), ".json")
-	if f, ok := l.states[key]; ok {
+// key is a fixture's state as check.py names it: «login/refused».
+func key(path string) string {
+	return filepath.Base(filepath.Dir(path)) + "/" + strings.TrimSuffix(filepath.Base(path), ".json")
+}
+
+// frameOf is the frame a fixture is held against, as check.py's check 8
+// finds it: the frame STATE_FRAME gives the fixture's state — the refused
+// sign-in, login/refused, is s-auth-13 —, else the frame of the fixture's
+// route (FIXTURE_SCREEN, canonFrame). "" — check.py gives the fixture no
+// frame.
+func (l lib) frameOf(path string) string {
+	if f, ok := l.states[key(path)]; ok {
 		return f
 	}
-	return scr.Frame
+	if route, ok := l.routes[filepath.Base(filepath.Dir(path))]; ok {
+		return canonFrame(l.mock, route)
+	}
+	return ""
 }
 
 // namesRoute tells whether the frame's data-screen names the route: a state's
@@ -275,19 +304,15 @@ func namesRoute(mock, frame, route string) bool {
 }
 
 // frameFindings is the frame comparison (U-15.2, 4; U-15.1) of each screen:
-// its frame is the route's frame, and on every fixture of its route the
-// screen has the make-up of the fixture's frame (shape.Check) — the route's,
-// or its state's by STATE_FRAME, a frame of the same route — and no class
-// Typecase's CSS does not have. Each frame held is the same in both copies
-// of the mockup.
+// on every fixture of its view model the screen has the make-up of the
+// fixture's frame (shape.Check) — the frame check.py gives it, a frame of
+// the fixture's route, one the screen names — and no class Typecase's CSS
+// does not have. Each frame the screen names is drawn by a fixture, and is
+// the same in both copies of the mockup.
 func frameFindings(l lib, all []screens.Screen) []string {
 	var out []string
 	for _, scr := range all {
-		at := scr.Route + " (" + scr.Frame + ")"
-		if canon := canonFrame(l.mock, scr.Route); canon != scr.Frame {
-			out = append(out, fmt.Sprintf("%s: the route's frame is %q", at, canon))
-			continue
-		}
+		at := label(scr)
 		copies := map[string]bool{}
 		sameCopies := func(frame string) {
 			if copies[frame] {
@@ -298,28 +323,44 @@ func frameFindings(l lib, all []screens.Screen) []string {
 				out = append(out, fmt.Sprintf("%s: frame %s differs between the mockup of Carrel and of Typecase", at, frame))
 			}
 		}
-		sameCopies(scr.Frame)
-		states := l.fixtures(scr.Route)
+		states := l.fixtures(scr)
 		if len(states) == 0 {
-			out = append(out, at+": no fixture in FIXTURE_SCREEN of check.py")
+			out = append(out, at+": no fixture of its view model")
 		}
+		drawn := map[string]bool{}
 		for _, path := range states {
 			fx := filepath.Base(filepath.Dir(path)) + "/" + filepath.Base(path)
-			frame := l.frameOf(scr, path)
-			if frame != scr.Frame {
-				if !namesRoute(l.mock, frame, scr.Route) {
-					out = append(out, fmt.Sprintf("%s on %s: the state's frame %s does not name the route", at, fx, frame))
-					continue
-				}
-				sameCopies(frame)
-				fx += " (" + frame + ")"
+			route, ok := l.routes[filepath.Base(filepath.Dir(path))]
+			if !ok {
+				out = append(out, fmt.Sprintf("%s on %s: no route in FIXTURE_SCREEN of check.py", at, fx))
+				continue
 			}
+			frame := l.frameOf(path)
+			switch {
+			case frame == "":
+				out = append(out, fmt.Sprintf("%s on %s: no frame of the route %s", at, fx, route))
+				continue
+			case frame != canonFrame(l.mock, route) && !namesRoute(l.mock, frame, route):
+				out = append(out, fmt.Sprintf("%s on %s: the state's frame %s does not name the route %s", at, fx, frame, route))
+				continue
+			case !slices.Contains(scr.Frames, frame):
+				out = append(out, fmt.Sprintf("%s on %s: drawn by %s (check.py), which the screen does not name", at, fx, frame))
+				continue
+			}
+			drawn[frame] = true
+			sameCopies(frame)
+			fx += " (" + frame + ")"
 			root, err := draw(scr, path)
 			if err != nil {
 				out = append(out, fmt.Sprintf("%s on %s: %v", at, fx, err))
 				continue
 			}
 			out = append(out, htmlFindings(l, frame, at+" on "+fx, root.Render())...)
+		}
+		for _, f := range scr.Frames {
+			if !drawn[f] {
+				out = append(out, fmt.Sprintf("%s: no fixture of its view model is drawn by %s", at, f))
+			}
 		}
 	}
 	return out
@@ -343,29 +384,28 @@ func htmlFindings(l lib, frame, at, html string) []string {
 }
 
 // kinFindings is the kinship with the draft (U-15.2, 3): the screen drawn
-// on each normal fixture of its route against the draft of its frame, and on
-// each fixture whose state has a frame of its own (STATE_FRAME) against the
-// draft of that frame — a state's frame has its draft too.
+// on each normal fixture of its view model, and on each fixture whose state
+// has a frame of its own (STATE_FRAME), against the draft of that fixture's
+// frame — each frame the screen names has its draft.
 func kinFindings(l lib, drafts map[string]*guard.Node, all []screens.Screen) []string {
 	var out []string
 	for _, scr := range all {
-		at := scr.Route + " (" + scr.Frame + ")"
-		if d, ok := drafts[scr.Frame]; !ok || d == nil {
-			out = append(out, at+": no draft")
-			continue
+		at := label(scr)
+		for _, f := range scr.Frames {
+			if d, ok := drafts[f]; !ok || d == nil {
+				out = append(out, fmt.Sprintf("%s: no draft of %s", at, f))
+			}
 		}
 		normal := 0
-		for _, path := range l.fixtures(scr.Route) {
-			fx := filepath.Base(filepath.Dir(path))
-			frame := l.frameOf(scr, path)
-			switch {
-			case frame != scr.Frame:
-				fx += "/" + filepath.Base(path) + " (" + frame + ")"
-			case filepath.Base(path) == "normal.json":
+		for _, path := range l.fixtures(scr) {
+			_, state := l.states[key(path)]
+			if filepath.Base(path) == "normal.json" {
 				normal++
-			default:
+			} else if !state {
 				continue
 			}
+			frame := l.frameOf(path)
+			fx := filepath.Base(filepath.Dir(path)) + "/" + filepath.Base(path) + " (" + frame + ")"
 			d, ok := drafts[frame]
 			if !ok || d == nil {
 				out = append(out, fmt.Sprintf("%s on %s: no draft", at, fx))
@@ -387,19 +427,21 @@ func kinFindings(l lib, drafts map[string]*guard.Node, all []screens.Screen) []s
 	return out
 }
 
-// frames are the frames the screens are held against: each screen's, and
-// the frames of its fixtures' states.
+// frames are the frames the screens are held against: those each screen
+// names, and the frames of its fixtures.
 func frames(l lib, all []screens.Screen) []string {
 	var out []string
 	add := func(f string) {
-		if !slices.Contains(out, f) {
+		if f != "" && !slices.Contains(out, f) {
 			out = append(out, f)
 		}
 	}
 	for _, s := range all {
-		add(s.Frame)
-		for _, path := range l.fixtures(s.Route) {
-			add(l.frameOf(s, path))
+		for _, f := range s.Frames {
+			add(f)
+		}
+		for _, path := range l.fixtures(s) {
+			add(l.frameOf(path))
 		}
 	}
 	return out
@@ -435,7 +477,7 @@ func TestScreensAreKinOfTheirDrafts(t *testing.T) {
 func TestAddressesBuiltOrWaiting(t *testing.T) {
 	var built []string
 	for _, s := range screens.All {
-		built = append(built, s.Route)
+		built = append(built, modelName(s))
 	}
 	found, left, err := guard.CheckAddresses(commonSpec, clientSpec, built)
 	if err != nil {
@@ -453,6 +495,30 @@ func TestAddressesBuiltOrWaiting(t *testing.T) {
 	}
 }
 
+// A screen's fixtures are its view model's: the dead link's fixture stands
+// on the invitation's route in FIXTURE_SCREEN, and is the dead link's.
+func TestFixturesAreTheViewModels(t *testing.T) {
+	l := load(t)
+	names := func(model func() any) []string {
+		var out []string
+		for _, p := range l.fixtures(screens.Screen{Model: model}) {
+			out = append(out, key(p))
+		}
+		return out
+	}
+	if got := names(func() any { return new(view.DeadLinkPage) }); !slices.Equal(got, []string{"dead-link/normal"}) {
+		t.Errorf("the dead link's fixtures: %q", got)
+	}
+	for _, k := range names(func() any { return new(view.InvitePage) }) {
+		if !strings.HasPrefix(k, "invite/") {
+			t.Errorf("the invitation's fixtures hold %s", k)
+		}
+	}
+	if l.routes["dead-link"] != l.routes["invite"] {
+		t.Errorf("the sample moved: FIXTURE_SCREEN puts dead-link on %q, invite on %q", l.routes["dead-link"], l.routes["invite"])
+	}
+}
+
 // --- The bites: samples of the sign-in page (s-auth-1). They are not
 // screens of the client — they draw the frame, not the meaning of the page —
 // only trees to hold the guards against. ---
@@ -462,9 +528,8 @@ func TestAddressesBuiltOrWaiting(t *testing.T) {
 // spoil changes the tree the way a bite needs.
 func signIn(spoil func(*w.Page)) screens.Screen {
 	return screens.Screen{
-		Route: "/login",
-		Frame: "s-auth-1",
-		Model: func() any { return new(view.LoginPage) },
+		Frames: []string{"s-auth-1", "s-auth-13"},
+		Model:  func() any { return new(view.LoginPage) },
 		Draw: func(model any) screens.Root {
 			p := model.(*view.LoginPage)
 			var fields []w.FormPart
@@ -585,7 +650,7 @@ func TestFrameComparisonBite(t *testing.T) {
 	// A class that is not the library's. No widget prints one, and a screen
 	// draws a root of the library, so the sample is the page printed and a
 	// class put in by hand.
-	root, err := draw(signIn(nil), l.fixtures("/login")[0])
+	root, err := draw(signIn(nil), l.fixtures(signIn(nil))[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -603,11 +668,35 @@ func TestFrameComparisonBite(t *testing.T) {
 	if found := frameFindings(parted, []screens.Screen{signIn(nil)}); len(found) == 0 {
 		t.Error("a frame that differs between the copies of the mockup stayed green")
 	}
-	// The route's frame is the one the screen names.
+	// The frames are those check.py gives the fixtures of the view model:
+	// another frame than the route's is red twice — the fixture drawn by a
+	// frame the screen does not name, a frame named and drawn by nothing —,
+	// and a state's frame left out is red on the state.
+	has := func(found []string, parts ...string) bool {
+		return slices.ContainsFunc(found, func(f string) bool {
+			for _, p := range parts {
+				if !strings.Contains(f, p) {
+					return false
+				}
+			}
+			return true
+		})
+	}
 	wrong := signIn(nil)
-	wrong.Frame = "s-auth-2"
-	if found := frameFindings(l, []screens.Screen{wrong}); len(found) == 0 {
-		t.Error("a screen naming another frame than its route's stayed green")
+	wrong.Frames = []string{"s-auth-2", "s-auth-13"}
+	if found := frameFindings(l, []screens.Screen{wrong}); !has(found, "login/normal.json: drawn by s-auth-1") || !has(found, "is drawn by s-auth-2") {
+		t.Errorf("a screen naming another frame than its route's: %q", found)
+	}
+	short := signIn(nil)
+	short.Frames = []string{"s-auth-1"}
+	if found := frameFindings(l, []screens.Screen{short}); !has(found, "login/refused.json: drawn by s-auth-13") {
+		t.Errorf("a screen leaving out its state's frame: %q", found)
+	}
+	// A view model with no fixture is held against nothing, and says so.
+	bare := signIn(nil)
+	bare.Model = func() any { return new(view.PasswordResetSheet) }
+	if found := frameFindings(l, []screens.Screen{bare}); !has(found, "PasswordResetSheet", "no fixture of its view model") {
+		t.Errorf("a screen of a view model without fixtures: %q", found)
 	}
 	// A state is held against its own frame (STATE_FRAME of check.py): the
 	// refused sign-in drawn as the empty one is red, on login/refused only.
@@ -687,18 +776,23 @@ func TestKinRules(t *testing.T) {
 
 func TestAddressesBite(t *testing.T) {
 	found, left, err := guard.CheckAddresses("testdata/addresses/common.md", "testdata/addresses/client.md",
-		[]string{"/login", "/app/contacts/{account}/{col}", "/nowhere", "/login", "/setup"})
+		[]string{"LoginPage", "ContactsListPage", "NowherePage", "LoginPage", "SetupPage", "InvitePage", "PasswordResetSheet"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	bite(t, found, []string{
-		"client.md:10: address", // U-5.5 #1 names /setup, which is built too
+		"client.md:10: address", // U-5.5 #1 names /setup, built by SetupPage
 		"client.md:11: address", // U-5.5 #2 names no address of C-5
 		"client.md:12: address", // U-5.5 #3 names no address at all
-		"common.md:0: address",  // /nowhere is not in C-5
-		"common.md:0: address",  // /login built twice
+		"client.md:14: address", // U-5.5 #5 names /admin/reset, built: `Issued` is no view model
+		"common.md:0: address",  // NowherePage: no page or sheet of C-5 answers with it
+		"common.md:0: address",  // LoginPage built twice
+		"common.md:17: address", // /app/nothing: a page with no view model
 	})
-	if want := []string{"/about", "/app/{kind}/{account}/{col}/{uid}"}; !slices.Equal(left, want) {
+	// /invite/{token} waits for DeadLinkPage, the answer to a dead secret;
+	// /app/{kind} answers as the row below, which waits for AgendaPage —
+	// and is itself waiting in U-5.5 #4, by one of its kinds.
+	if want := []string{"/invite/{token}", "/about", "/app/{kind}", "/app/{kind}/{account}/{col}/{uid}", "/app/nothing"}; !slices.Equal(left, want) {
 		t.Errorf("left %q, want %q", left, want)
 	}
 }

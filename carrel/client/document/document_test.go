@@ -1,6 +1,7 @@
 package document_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -14,7 +15,6 @@ import (
 
 // sample is a screen of one message, its title from its model.
 var sample = screens.Screen{
-	Route: "/sample",
 	Model: func() any { return new(string) },
 	Draw: func(model any) screens.Root {
 		return w.Page{Items: []w.PagePart{w.Msg{Parts: []w.MsgPart{w.Text(*model.(*string))}}}}
@@ -62,10 +62,10 @@ func TestDocument(t *testing.T) {
 	}
 	for _, scr := range screens.All {
 		if scr.Title == nil {
-			t.Errorf("%s: the screen has no Title", scr.Route)
+			t.Errorf("%T: the screen has no Title", scr.Model())
 			continue
 		}
-		check(t, scr.Route, scr, scr.Model(), "")
+		check(t, fmt.Sprintf("%T", scr.Model()), scr, scr.Model(), "")
 	}
 }
 

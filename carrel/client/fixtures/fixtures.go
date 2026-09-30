@@ -1,0 +1,81 @@
+// Package fixtures names the view model of each fixture directory of
+// docs/spec/fixtures (C-14.3), as the server's view/fixtures_test.go does —
+// a test file of another module, which cannot be imported. The checks of
+// the client decode a fixture into its model by this map: the zones
+// (carrel.dev/carrel/client/zone) and the screens, which are screens of a
+// view model (carrel.dev/carrel/client/screens), so a screen's fixtures are
+// those of its model. zone.TestEveryFixtureHasItsZones fails on a directory
+// on disk that is not here, so a new fixture cannot slip past either.
+package fixtures
+
+import "carrel.dev/carrel/server/view"
+
+// Models is the view model of each fixture directory: a new one, for a
+// fixture of the directory to decode into.
+var Models = map[string]func() any{
+	"about":                    func() any { return &view.AboutPage{} },
+	"admin-audit":              func() any { return &view.AdminAuditPage{} },
+	"admin-dav":                func() any { return &view.AdminDavPage{} },
+	"admin-escrow":             func() any { return &view.AdminEscrowPage{} },
+	"admin-install":            func() any { return &view.AdminInstallPage{} },
+	"admin-invites":            func() any { return &view.AdminInvitesPage{} },
+	"admin-settings":           func() any { return &view.AdminSettingsPage{} },
+	"admin-users":              func() any { return &view.AdminUsersPage{} },
+	"app-agenda":               func() any { return &view.AgendaPage{} },
+	"app-agenda-all":           func() any { return &view.AgendaPage{} },
+	"app-collections-delete":   func() any { return &view.CollectionDeleteSheet{} },
+	"app-collections-move":     func() any { return &view.CollectionMoveSheet{} },
+	"app-collections-new":      func() any { return &view.CollectionNewSheet{} },
+	"app-collections-rename":   func() any { return &view.CollectionRenameSheet{} },
+	"app-conflict":             func() any { return &view.ConflictPage{} },
+	"app-conflict-event":       func() any { return &view.ConflictPage{} },
+	"app-conflict-note":        func() any { return &view.ConflictPage{} },
+	"app-conflict-task":        func() any { return &view.ConflictPage{} },
+	"app-contact":              func() any { return &view.ContactPage{} },
+	"app-contact-edit":         func() any { return &view.ContactEditPage{} },
+	"app-contact-import":       func() any { return &view.ImportPage{} },
+	"app-contact-move":         func() any { return &view.MoveSheet{} },
+	"app-contact-new":          func() any { return &view.ContactEditPage{} },
+	"app-contact-rewrite":      func() any { return &view.RewriteSheet{} },
+	"app-contact-timeline":     func() any { return &view.ContactTimelinePage{} },
+	"app-contacts":             func() any { return &view.ContactsListPage{} },
+	"app-contacts-one":         func() any { return &view.ContactsListPage{} },
+	"app-duplicates":           func() any { return &view.DuplicatesPage{} },
+	"app-duplicates-merge":     func() any { return &view.DuplicatesMergePage{} },
+	"app-event":                func() any { return &view.EventPage{} },
+	"app-event-edit":           func() any { return &view.EventEditPage{} },
+	"app-files":                func() any { return &view.FilesRootPage{} },
+	"app-files-picker":         func() any { return &view.FilePickerSheet{} },
+	"app-files-published":      func() any { return &view.PublishedLinksPage{} },
+	"app-mail-compose":         func() any { return &view.MailSheet{} },
+	"app-note":                 func() any { return &view.NotePage{} },
+	"app-note-edit":            func() any { return &view.NotePage{} },
+	"app-notes":                func() any { return &view.NotesPage{} },
+	"app-notes-all":            func() any { return &view.NotesPage{} },
+	"app-password":             func() any { return &view.PasswordPage{} },
+	"app-photo-preview":        func() any { return &view.PhotoPreviewPage{} },
+	"app-publish":              func() any { return &view.PublishSheet{} },
+	"app-quick":                func() any { return &view.NewSheet{} },
+	"app-search":               func() any { return &view.SearchPage{} },
+	"app-settings-account":     func() any { return &view.AccountPage{} },
+	"app-settings-appearance":  func() any { return &view.AppearancePage{} },
+	"app-settings-attachments": func() any { return &view.AttachmentsPage{} },
+	"app-settings-backup":      func() any { return &view.BackupPage{} },
+	"app-settings-connections": func() any { return &view.ConnectionsPage{} },
+	"app-settings-davloom":     func() any { return &view.DavloomPage{} },
+	"app-settings-devices":     func() any { return &view.DevicesPage{} },
+	"app-settings-escrow":      func() any { return &view.EscrowPage{} },
+	"app-settings-unlock":      func() any { return &view.UnlockSheet{} },
+	"app-task":                 func() any { return &view.TaskPage{} },
+	"app-task-edit":            func() any { return &view.TaskEditPage{} },
+	"app-tasks":                func() any { return &view.TasksPage{} },
+	"app-tasks-all":            func() any { return &view.TasksPage{} },
+	"forgot":                   func() any { return &view.ForgotPage{} },
+	"forgot-token":             func() any { return &view.ForgotWipePage{} },
+	"dead-link":                func() any { return &view.DeadLinkPage{} },
+	"confirm-email":            func() any { return &view.ConfirmEmailPage{} },
+	"invite":                   func() any { return &view.InvitePage{} },
+	"login":                    func() any { return &view.LoginPage{} },
+	"register":                 func() any { return &view.RegisterPage{} },
+	"setup":                    func() any { return &view.SetupPage{} },
+}

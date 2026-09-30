@@ -13,12 +13,12 @@ import (
 )
 
 // meaningFindings is the meaning guard (U-8, U-15.2) on each screen, drawn on
-// every fixture of its route.
+// every fixture of its view model.
 func meaningFindings(l lib, all []screens.Screen) []string {
 	var out []string
 	for _, scr := range all {
-		at := scr.Route + " (" + scr.Frame + ")"
-		for _, path := range l.fixtures(scr.Route) {
+		at := label(scr)
+		for _, path := range l.fixtures(scr) {
 			root, err := draw(scr, path)
 			if err != nil {
 				out = append(out, fmt.Sprintf("%s: %v", at, err))
