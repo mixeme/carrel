@@ -11,7 +11,8 @@ import (
 
 // S-6, S-15.4: discovery asks the principal whether it schedules. The plan
 // of 24.09.2026 names what each server says: Nextcloud, Baikal, SoGo, Yandex
-// and Google announce a schedule-outbox-URL; Mail.ru hands out a calendar's
+// and Google announce a schedule-outbox-URL, and so does iCloud since its
+// calendars answer (30.09.2026); Mail.ru hands out a calendar's
 // own address and has no principal to ask, so it stays unknown; Radicale
 // does not implement RFC 6638. A server whose answer differs from this
 // list fails: the rewrite sheet would promise letters that never come, or
@@ -24,6 +25,7 @@ func TestLiveSchedulingIsKnown(t *testing.T) {
 		"sogo-calendar": discover.SchedulingYes,
 		"yandex-caldav": discover.SchedulingYes,
 		"google-caldav": discover.SchedulingYes,
+		"icloud-caldav": discover.SchedulingYes,
 		"mailru":        discover.SchedulingUnknown,
 		"radicale":      discover.SchedulingNo,
 	}

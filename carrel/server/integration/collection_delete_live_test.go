@@ -119,8 +119,13 @@ func liveDeleteByName(ctx context.Context, t *testing.T, app *liveApp, client *d
 	var hint view.Text
 	for _, set := range sheet.Form.Sets {
 		for _, row := range set.Rows {
+			// The name is the field's sample since 28.09.2026
+			// (s-profile-9, s-profile-19); before that it was the hint.
 			if row.Name == "name" {
-				hint = row.Hint
+				hint = row.Placeholder
+				if hint == "" {
+					hint = row.Hint
+				}
 			}
 		}
 	}

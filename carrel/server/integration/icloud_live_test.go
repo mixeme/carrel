@@ -14,11 +14,19 @@ import (
 	"carrel.dev/carrel/server/view"
 )
 
-// S-30.2 on iCloud. Contacts answer at contacts.icloud.com and the calendar
-// host refuses these credentials outright (docs/servers.md, SV-28), so the set
-// is contacts only. The shared harness does not fit either: the account has one
-// address book and MKCOL of a second answers 403, so what the server allows is
-// tested in the book that is there.
+// S-30.2 on iCloud. Two connections, one per protocol, as with Google:
+// contacts answer at contacts.icloud.com and calendars at caldav.icloud.com,
+// and neither host has the other's home. Until 30.09.2026 the calendar host
+// refused these credentials outright (docs/servers.md, SV-28); now it answers.
+//
+// The shared harness does not fit either half. Every runX walks one endpoint
+// to both homes and makes an address book beside the calendar; here each host
+// has one home, and the contacts host has one book and answers MKCOL of a
+// second with 403, so the contacts are tested in the book that is there. The
+// calendar host does make calendars, but one component each whatever
+// MKCALENDAR asks for (SV-52), so events and tasks get calendars of their own
+// and the calendar halves of the shared runs are called with both. The
+// calendar tests are in icloud_calendar_live_test.go.
 
 func icloudCardConfig(t *testing.T) (endpoint, user, pass string) {
 	liveCredEnv()

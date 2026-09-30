@@ -581,5 +581,9 @@ func runContactFieldsInTheOnlyBook(t *testing.T, endpoint, user, pass, who strin
 		t.Skip("no address book in the catalog")
 	}
 	suffix := fmt.Sprintf("carrel-%s-%d-%d", who, os.Getpid(), time.Now().Unix()%100000)
+	// The book outlives the run, so the card the run seeds is taken away by
+	// name. Until 30.09.2026 it was not, and nine «Vera Lebedeva» cards of
+	// earlier runs sat in the iCloud book.
+	removeLater(t, client, book.Path+"vera-"+suffix+".vcf")
 	liveContactFields(ctx, t, app, client, connID, book.Path, suffix)
 }

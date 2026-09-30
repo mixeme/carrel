@@ -419,14 +419,26 @@ func liveAppleCard(ctx context.Context, t *testing.T, app *liveApp, client *dav.
 }
 
 func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, cal, suffix string) {
+	liveCalendarIn(ctx, t, app, client, connID, cal, cal, suffix, nil)
+}
+
+// liveCalendarIn is liveCalendar with the events and the tasks in calendars
+// of their own. iCloud keeps one component per calendar whatever MKCALENDAR
+// asks for (docs/servers.md, SV-52), so there the two halves cannot share one.
+// newEvent adds fields to the form of the new event: iCloud refuses an event
+// without an end (SV-53), and until Carrel writes one there, the run names it.
+func liveCalendarIn(ctx context.Context, t *testing.T, app *liveApp, client *dav.Client, connID, cal, taskCal, suffix string, newEvent map[string]string) {
 	events := "/app/calendar/" + connID + "/" + url.PathEscape(cal)
-	tasks := "/app/tasks/" + connID + "/" + url.PathEscape(cal)
+	tasks := "/app/tasks/" + connID + "/" + url.PathEscape(taskCal)
 
 	form := liveForm(liveDecode[view.EventEditPage](t, "new event form", app.get(events+"/new")).Form)
 	form.Set("summary", "Live dentist, "+suffix)
 	form.Set("start.date", "2026-10-05")
 	form.Set("start.time", "09:30")
 	form.Set("reminder.0", "-PT10M")
+	for k, v := range newEvent {
+		form.Set(k, v)
+	}
 	loc := redirected(t, "new event", app.post(events+"/new", form))
 	m := regexp.MustCompile(`/([0-9a-f]{32})$`).FindStringSubmatch(loc)
 	if m == nil {
@@ -475,7 +487,7 @@ func liveCalendar(ctx context.Context, t *testing.T, app *liveApp, client *dav.C
 	form = liveForm(liveDecode[view.TaskEditPage](t, "task edit", app.get(taskLoc+"/edit")).Form)
 	form.Set("done", "on")
 	redirected(t, "task done", app.post(taskLoc+"/edit", form))
-	taskFile := cal + taskLoc[strings.LastIndex(taskLoc, "/")+1:] + ".ics"
+	taskFile := taskCal + taskLoc[strings.LastIndex(taskLoc, "/")+1:] + ".ics"
 	got, _ = rawBody(ctx, t, client, taskFile)
 	mustHave(t, "task done", got, "STATUS:COMPLETED", "COMPLETED:", "DUE;VALUE=DATE:20261007")
 	list := liveDecode[view.TasksPage](t, "done tasks", app.get(tasks+"?show=done"))

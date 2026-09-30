@@ -124,46 +124,7 @@ func runSearch(t *testing.T, endpoint, user, pass string) {
 
 	find := func(q string) []string {
 		t.Helper()
-		href := "/app/search?q=" + url.QueryEscape(q)
-		page := liveDecode[view.SearchPage](t, "search "+q, app.get(href))
-		if page.Poll.TaskID == "" {
-			t.Fatalf("search %q started nothing: %+v %+v", q, page.Poll, page.Notices)
-		}
-		deadline := time.Now().Add(60 * time.Second)
-		for {
-			bar := liveDecode[struct {
-				Body view.PollBar `json:"body"`
-			}](t, "poll "+q, app.getFragment("/app/search/progress/"+page.Poll.TaskID+"/poll")).Body
-			if !bar.Running {
-				var bad []string
-				for _, sp := range bar.Sources {
-					if sp.State != view.SourceDone && sp.State != view.SourceEmpty {
-						bad = append(bad, fmt.Sprintf("%s is %s: %s", sp.Stamp, sp.State, sp.Message))
-					}
-				}
-				if len(bad) > 0 {
-					// Every source, not the first bad one: a search that ends
-					// wrong is rare and does not repeat, so the whole answer
-					// goes into the log while it is here.
-					t.Fatalf("search %q ended with %s; all sources: %s", q, strings.Join(bad, "; "), sourceStates(bar))
-				}
-				break
-			}
-			if time.Now().After(deadline) {
-				t.Fatalf("search %q still running after 60s at %d%%: %s; summary %q",
-					q, bar.Percent, sourceStates(bar), bar.Summary)
-			}
-			// Not faster than that: the session's own bucket is 120 requests a
-			// minute (architecture.md), and four searches polled every 50 ms
-			// spend it before the servers have answered.
-			time.Sleep(400 * time.Millisecond)
-		}
-		var titles []string
-		for _, row := range liveDecode[view.SearchPage](t, "result "+q, app.get(href)).Results {
-			titles = append(titles, string(row.Title))
-		}
-		sort.Strings(titles)
-		return titles
+		return liveSearch(t, app, q)
 	}
 
 	if got := strings.Join(find("launch"), "|"); got != "Launch plan|Visit" {
@@ -178,6 +139,52 @@ func runSearch(t *testing.T, endpoint, user, pass string) {
 	if got := strings.Join(find("ковал"), "|"); got != "Встреча с Ковалёвой|Ковалёва Анна" {
 		t.Errorf("ковал (Cyrillic, other case) = %q", got)
 	}
+}
+
+// liveSearch runs a search through the pages, waits for its poll to settle and
+// answers with the titles found, sorted. Every source must end done or empty.
+func liveSearch(t *testing.T, app *liveApp, q string) []string {
+	t.Helper()
+	href := "/app/search?q=" + url.QueryEscape(q)
+	page := liveDecode[view.SearchPage](t, "search "+q, app.get(href))
+	if page.Poll.TaskID == "" {
+		t.Fatalf("search %q started nothing: %+v %+v", q, page.Poll, page.Notices)
+	}
+	deadline := time.Now().Add(60 * time.Second)
+	for {
+		bar := liveDecode[struct {
+			Body view.PollBar `json:"body"`
+		}](t, "poll "+q, app.getFragment("/app/search/progress/"+page.Poll.TaskID+"/poll")).Body
+		if !bar.Running {
+			var bad []string
+			for _, sp := range bar.Sources {
+				if sp.State != view.SourceDone && sp.State != view.SourceEmpty {
+					bad = append(bad, fmt.Sprintf("%s is %s: %s", sp.Stamp, sp.State, sp.Message))
+				}
+			}
+			if len(bad) > 0 {
+				// Every source, not the first bad one: a search that ends
+				// wrong is rare and does not repeat, so the whole answer
+				// goes into the log while it is here.
+				t.Fatalf("search %q ended with %s; all sources: %s", q, strings.Join(bad, "; "), sourceStates(bar))
+			}
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("search %q still running after 60s at %d%%: %s; summary %q",
+				q, bar.Percent, sourceStates(bar), bar.Summary)
+		}
+		// Not faster than that: the session's own bucket is 120 requests a
+		// minute (architecture.md), and four searches polled every 50 ms
+		// spend it before the servers have answered.
+		time.Sleep(400 * time.Millisecond)
+	}
+	var titles []string
+	for _, row := range liveDecode[view.SearchPage](t, "result "+q, app.get(href)).Results {
+		titles = append(titles, string(row.Title))
+	}
+	sort.Strings(titles)
+	return titles
 }
 
 // sourceStates is every source of a poll bar with its state and message: what

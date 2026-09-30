@@ -55,11 +55,16 @@ func liveProps(ctx context.Context, t *testing.T, c *dav.Client, path string, na
 
 // componentsOf reads the comp names out of a supported-calendar-component-set
 // as liveProps flattened it: the inner XML, each name in a name= attribute.
+// XML quotes an attribute either way, and iCloud writes name='VEVENT': read
+// by double quotes alone, its set came out empty, and an empty set means
+// every kind.
 func componentsOf(raw string) []string {
 	var out []string
-	for _, part := range strings.Split(raw, `name="`)[1:] {
-		if i := strings.Index(part, `"`); i > 0 {
-			out = append(out, part[:i])
+	for _, q := range []string{`"`, `'`} {
+		for _, part := range strings.Split(raw, `name=`+q)[1:] {
+			if i := strings.Index(part, q); i > 0 {
+				out = append(out, part[:i])
+			}
 		}
 	}
 	return out
