@@ -46,4 +46,3 @@ func Auth1() interface{ Render() string } {
 		},
 	}
 }
-
