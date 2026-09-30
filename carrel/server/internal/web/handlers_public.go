@@ -248,7 +248,7 @@ func (s *Server) setupPage(w http.ResponseWriter, r *http.Request, login, email 
 			Lede:    "The account you create here is the first one, and it can manage everyone else.",
 			Notices: passwordNotice(),
 		},
-		Form: withSubmit(s.anonPlainForm(w, r, "/setup", "POST", rows...), "setup.submit", "Create administrator"),
+		Form: focused(withSubmit(s.anonPlainForm(w, r, "/setup", "POST", rows...), "setup.submit", "Create administrator"), "login"),
 	}
 }
 
@@ -312,7 +312,7 @@ func (s *Server) registerPage(w http.ResponseWriter, r *http.Request, login, ema
 			Lede:    "A confirmation link will be sent to the address you give; the account cannot be used until you open it.",
 			Notices: passwordNotice(),
 		},
-		Form:   withSubmit(s.anonPlainForm(w, r, "/register", "POST", rows...), "register.submit", "Create account"),
+		Form:   focused(withSubmit(s.anonPlainForm(w, r, "/register", "POST", rows...), "register.submit", "Create account"), "login"),
 		SignIn: view.Action{ID: "register.login", Label: "Already have an account? Sign in", Href: s.route("/login"), Method: "GET", Enabled: true},
 	}
 }
@@ -419,7 +419,7 @@ func (s *Server) invitePage(w http.ResponseWriter, r *http.Request, token string
 			Notices: passwordNotice(),
 		},
 		Valid: true,
-		Form:  withSubmit(s.anonPlainForm(w, r, "/invite/"+token, "POST", rows...), "invite.submit", "Create account"),
+		Form:  focused(withSubmit(s.anonPlainForm(w, r, "/invite/"+token, "POST", rows...), "invite.submit", "Create account"), "login"),
 	}
 }
 
@@ -490,9 +490,9 @@ func (s *Server) getForgot(w http.ResponseWriter, r *http.Request) {
 			Lede: "Enter the login or the confirmed email of the account. There is no way to set a new password and keep the data stored here: " +
 				"the encryption key is derived from the password, and the server never has that key.",
 		},
-		Form: withSubmit(s.anonPlainForm(w, r, "/forgot", "POST",
+		Form: focused(withSubmit(s.anonPlainForm(w, r, "/forgot", "POST",
 			view.FormRow{Name: "login", Label: "Login or email", Kind: view.InputText, Required: true},
-		), "forgot.submit", "Continue"),
+		), "forgot.submit", "Continue"), "login"),
 		Back: s.backToSignIn("forgot.back"),
 	}
 	s.writePage(w, r, http.StatusOK, page)
@@ -647,6 +647,7 @@ func (s *Server) postForgotWipe(w http.ResponseWriter, r *http.Request) {
 		if err := passwordPair(r.FormValue("password"), r.FormValue("password2")); err != nil {
 			page := s.forgotWipePage(w, r, token, login, step)
 			passwordError(page.Form.Sets[0].Rows[1:], err)
+			page.Form = focused(page.Form, "password")
 			s.writePage(w, r, http.StatusOK, page)
 			return
 		}
@@ -684,10 +685,10 @@ func (s *Server) forgotWipePage(w http.ResponseWriter, r *http.Request, token, l
 		page.Title = "Set a new password"
 		page.Lede = text("The account " + login + " is empty. Nothing was kept.")
 		page.Notices = passwordNotice()
-		page.Form = withSubmit(s.anonPlainForm(w, r, "/forgot/"+token, "POST",
+		page.Form = focused(withSubmit(s.anonPlainForm(w, r, "/forgot/"+token, "POST",
 			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true},
 			view.FormRow{Name: "password2", Label: "Repeat password", Kind: view.InputPassword, Required: true},
-		), "wipe.password", "Set the password and sign in")
+		), "wipe.password", "Set the password and sign in"), "password")
 	}
 	return page
 }

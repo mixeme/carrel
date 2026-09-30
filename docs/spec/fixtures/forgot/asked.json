@@ -1,0 +1,23 @@
+{
+  "asked": true,
+  "back": {
+    "enabled": true,
+    "href": "/login",
+    "id": "forgot.back",
+    "label": "Back to sign in",
+    "method": "GET"
+  },
+  "form": {
+    "action": "",
+    "actions": [],
+    "errors": [],
+    "method": "",
+    "sets": []
+  },
+  "hasMail": true,
+  "lede": "A recovery request is recorded for this account. The administrator still has to use the instance master password. Until then, the sign-in screen will not accept a new password.",
+  "notices": [],
+  "options": [],
+  "sent": false,
+  "title": "The administrator has been asked"
+}

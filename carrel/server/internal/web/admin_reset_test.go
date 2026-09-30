@@ -75,6 +75,7 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 	if !equalStrings(fields, frameFields) {
 		t.Errorf("fields = %q, want (s-admin-13) %q", fields, frameFields)
 	}
+	sameCaret(t, "s-admin-13", "reset", sheet.Form)
 	temp := rowNamed(t, sheet.Form, "password")
 	if len(temp.Value) < 12 || string(temp.Hint) != frameText(frameSheetHint.FindStringSubmatch(frame)[1]) {
 		t.Errorf("Temporary password = %q, hint %q", temp.Value, temp.Hint)
@@ -121,6 +122,7 @@ func TestResetPasswordSheetIsTheFrame(t *testing.T) {
 	if got, want := string(rowNamed(t, short.Form, "password").Error), frameText(frameErrHint.FindStringSubmatch(mockupFrame(t, "s-admin-16"))[1]); got != want || short.Issued != nil {
 		t.Errorf("a short password: %q, want %q (s-admin-16); issued %+v", got, want, short.Issued)
 	}
+	sameCaret(t, "s-admin-16", "a short password", short.Form)
 	if id, _, _, _ := h.users.Authenticate(context.Background(), "bob", "bobpass123"); id != bobID {
 		t.Fatal("a refused reset changed the password")
 	}
@@ -193,6 +195,7 @@ func TestResetAsksTheLoginTyped(t *testing.T) {
 		if e := string(rowNamed(t, got.Form, "confirm").Error); e != strings.Replace(refusal, "anna", "bob", 1) || got.Issued != nil {
 			t.Errorf("typed %q: %q, issued %+v", typed, e, got.Issued)
 		}
+		sameCaret(t, "s-admin-20", "typed "+typed, got.Form)
 		if id, _, _, _ := h.users.Authenticate(context.Background(), "bob", "bobpass123"); id != bobID {
 			t.Fatalf("typed %q reset the password", typed)
 		}

@@ -17,6 +17,54 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.78 — 2026-09-30
+
+The mockup of Typecase `f86a3f0` (frames of chapters 8–12 renamed, owner's
+decision): the caret stands where the frames draw it in every form the
+server builds, and the steps of the pages outside the shell that have
+frames of their own have fixtures.
+
+### Added
+
+- **Fixtures of the steps outside the shell** (C-14.3, named by the
+  frame's `data-part`, drawn into it by `STATE_FRAME` of `check.py`):
+  `register/sent.json` (s-auth-3), `forgot/options.json` (s-auth-6),
+  `forgot/no-mail.json` (s-auth-7), `forgot/wipe-sent.json` (s-auth-8),
+  `forgot/asked.json` (s-auth-9), `forgot-token/password.json`
+  (s-auth-11). New states `sent`, `options`, `no-mail`, `wipe-sent`,
+  `asked`, `password`.
+- **`confirm-email/normal.json`** — `/confirm-email/{token}` answered with
+  the address confirmed (rest-2). The route has no whole-screen frame, so
+  its `normal` is held against rest-2 by `STATE_FRAME`; its dead token is
+  the shared `dead-link`.
+
+### Changed
+
+- **`FormRow.focus`** is set on every form a frame draws with a caret, when
+  the form is shown: the first field that came back with a reason, else the
+  frame's field — Login of registration, setup and invitation (s-auth-2,
+  -4, -12; after a login the invitation names, Password), Login or email
+  (s-auth-5), Password of the wipe's second step (s-auth-11), New password
+  (account-3), the password of the unlock and deposit sheets (s-plan-3,
+  account-2), Server URL (s-profile-2), Feed address (s-profile-10), Name of
+  a new or renamed collection or folder, of a device and a backup job,
+  the name or login typed to confirm (s-profile-9, -19, s-admin-13), the
+  new folder's name (s-files-13), the first field of a record's form and of
+  a quick sheet — a note's text on its quick sheet (s-notes-5).
+- The unlock sheet's field is **«Your Carrel password»** (s-plan-3,
+  s-profile-3), not «Password».
+
+### For consumers
+
+- Put the caret in the field with `focus` whenever the form is shown —
+  also a sheet, a dialog or a panel opened over the page. In a note's edit
+  it is in the text (`NoteDoc.body`, s-notes-20), in a letter in To
+  (s-mail-1): neither is a form row.
+- Fixtures that gained `focus`: the edit and new forms of records, their
+  `loss` states, `app-quick`, the collection sheets, `app-files-picker`,
+  `app-password`, `app-settings-backup`, `-davloom`, `-escrow`, `-unlock`,
+  `forgot`, `invite`, `register`, `setup`.
+
 ## v0.2.77 — 2026-09-30
 
 The mockup of Typecase `784599e` (tasks 46 and 47): the sign-in refused

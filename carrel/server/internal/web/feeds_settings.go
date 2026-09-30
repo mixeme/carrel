@@ -59,6 +59,7 @@ func (s *Server) feedForm(sess *session.Session, f feedForm) *view.Form {
 			Hint: "A shared link sometimes has a password of its own. That is the link's, not an account on that server: an account is connected, not subscribed to."},
 		view.FormRow{Name: "password", Label: "Password of the link", Kind: view.InputPassword},
 	)
+	form = focused(form, "url")
 	form.Actions = []view.Action{
 		{ID: "feed.check", Label: "Check the address", Href: q("feed.check"), Method: "POST", Enabled: true},
 		{ID: "feed.subscribe", Label: "Subscribe", Href: q("feed.subscribe"), Method: "POST", Enabled: true},

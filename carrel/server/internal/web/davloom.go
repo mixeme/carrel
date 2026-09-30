@@ -274,6 +274,7 @@ func (s *Server) deviceForm(r *http.Request, sess *session.Session, blob sealed.
 		form.Errors = []view.FieldError{{Name: "scope", Message: text(formErr.Error())}}
 	}
 	form.Sets = []view.FieldSet{{Legend: legend, Rows: rows}}
+	form = focused(form, "name")
 	switch {
 	case edited != nil:
 		form.Actions = []view.Action{{ID: "davloom.scope.save", Label: "Save", Method: "POST", Enabled: true},

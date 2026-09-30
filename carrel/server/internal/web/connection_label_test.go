@@ -94,6 +94,7 @@ func TestATakenLabelIsRefused(t *testing.T) {
 		t.Fatalf("the first connection was not made: %+v", page.Add)
 	}
 	page := connect("Nextcloud")
+	sameCaret(t, "s-profile-11", "a taken label", *page.Add)
 	if r := formRow(*page.Add, "label"); r == nil || r.Error != "There is already a connection called “Nextcloud”. Choose another label: it is how your sources are told apart." {
 		t.Errorf("a taken label: %+v", r)
 	}

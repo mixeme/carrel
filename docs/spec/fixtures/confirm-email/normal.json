@@ -1,0 +1,13 @@
+{
+  "lede": "Address confirmed. You can sign in now.",
+  "next": {
+    "enabled": true,
+    "href": "/login",
+    "id": "confirm.login",
+    "label": "Sign in",
+    "method": "GET"
+  },
+  "notices": [],
+  "ok": true,
+  "title": "Email address"
+}

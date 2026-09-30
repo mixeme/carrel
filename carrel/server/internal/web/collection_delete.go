@@ -104,12 +104,12 @@ func (s *Server) collectionDeleteSheet(sess *session.Session, conn sealed.Connec
 		// devices whose scope names it (S-27).
 		References: s.collectionReferences(sess, conn, col),
 		Archive:    s.collectionArchive(sess, conn, col),
-		Form: s.plainForm(action, "POST",
+		Form: focused(s.plainForm(action, "POST",
 			csrfField(sess),
 			// The name is the field's sample (s-profile-9, s-profile-19).
 			view.FormRow{Name: "name", Label: "Type the name to confirm", Kind: view.InputText, Value: text(typed),
 				Placeholder: text(label), Error: errText, Required: true},
-		),
+		), "name"),
 		Actions: []view.Action{{ID: "collection.delete.confirm", Label: "Delete on the server", Href: s.route(action), Method: "POST", Danger: true, Enabled: true}},
 	}
 	if count == 0 {

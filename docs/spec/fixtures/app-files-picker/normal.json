@@ -132,7 +132,8 @@
               "options": [],
               "readOnly": false,
               "required": true,
-              "value": ""
+              "value": "",
+              "focus": true
             }
           ]
         }

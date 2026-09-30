@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -1505,6 +1506,68 @@ func TestFixtureResetAndConflicts(t *testing.T) {
 			t.Fatal(err)
 		}
 		app.compare(t, "forgot-token/normal.json", app.h.do(get(link, nil)))
+	})
+}
+
+// C-14.3: the steps of the pages outside the shell that have frames of their
+// own (STATE_FRAME of check.py): the letter of a registration gone
+// (s-auth-3), the four answers of /forgot (s-auth-6 to s-auth-9), the new
+// password after a wipe (s-auth-11), and the address confirmed (rest-2), in
+// the frames' data: mix, v@example.org. Each needs an instance of its own.
+func TestFixtureStepsOutsideTheShell(t *testing.T) {
+	fresh := func(t *testing.T) *mockupApp {
+		app := &mockupApp{h: newHarness(t), byAccount: map[string]string{}, byPath: map[string]string{}}
+		app.h.srv.SetClock(mockupNow(t).Add(mockupSince))
+		app.h.srv.SetBuild(mockupVersion, mockupCommit)
+		return app
+	}
+	t.Run("register-sent", func(t *testing.T) {
+		app := fresh(t)
+		app.h.admin("mix", "password123")
+		openRegistration(t, app.h)
+		app.compare(t, "register/sent.json", app.h.do(app.h.anonPostForm("/register", "/register",
+			url.Values{"login": {"viktor"}, "email": {"v@example.org"}, "password": {"password123"}, "password2": {"password123"}})))
+	})
+	t.Run("forgot", func(t *testing.T) {
+		app := fresh(t)
+		// mix has a confirmed address and deposited the key: both options.
+		app.h.enableEscrow("alice", "password123", "sixteen-char-pass!")
+		snap := app.h.st.Snapshot()
+		app.h.invite(snap.UserByLogin("alice").ID, "mix", "mixpass123")
+		app.h.confirmAddress("mix", "mix@example.org")
+		app.h.relayed()
+		ask := func(form url.Values) *httptest.ResponseRecorder {
+			return app.h.do(app.h.anonPostForm("/forgot", "/forgot", form))
+		}
+		options := ask(url.Values{"login": {"mix"}})
+		app.compare(t, "forgot/options.json", options)
+		page := decode[view.ForgotPage](t, options)
+		if len(page.Options) != 2 {
+			t.Fatalf("options = %+v, want the wipe and the administrator", page.Options)
+		}
+		app.compare(t, "forgot/no-mail.json", ask(url.Values{"login": {"nobody"}}))
+		app.compare(t, "forgot/wipe-sent.json", ask(formFields(page.Options[0].Form)))
+		app.compare(t, "forgot/asked.json", ask(formFields(page.Options[1].Form)))
+	})
+	t.Run("forgot-token-password", func(t *testing.T) {
+		app := fresh(t)
+		app.h.admin("mix", "password123")
+		link, err := app.h.users.IssueConsoleWipeLink("mix")
+		if err != nil {
+			t.Fatal(err)
+		}
+		confirm := decode[view.ForgotWipePage](t, app.h.do(get(link, nil)))
+		app.compare(t, "forgot-token/password.json", app.h.do(app.h.anonPostForm(link, link, formFields(confirm.Form))))
+	})
+	t.Run("confirm-email", func(t *testing.T) {
+		app := fresh(t)
+		app.h.admin("mix", "password123")
+		openRegistration(t, app.h)
+		token, err := app.h.users.Register(context.Background(), "viktor", "v@example.org", "password123")
+		if err != nil {
+			t.Fatal(err)
+		}
+		app.compare(t, "confirm-email/normal.json", app.h.do(get("/confirm-email/"+token, nil)))
 	})
 }
 

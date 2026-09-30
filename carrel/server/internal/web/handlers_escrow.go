@@ -150,13 +150,13 @@ func (s *Server) depositSheet(sess *session.Session, errText view.Text) view.Unl
 	sheet := view.UnlockSheet{
 		Purpose: "Deposit my key",
 		Warning: "An administrator who holds the escrow master password will be able to decrypt the DAV credentials you save here, and through them your contacts, calendars, tasks, notes and files. Ending sessions does not undo this. You can withdraw the copy later from Account.",
-		Form: withSubmit(s.plainForm("/app/settings/escrow", "POST",
+		Form: focused(withSubmit(s.plainForm("/app/settings/escrow", "POST",
 			csrfField(sess),
 			view.FormRow{Name: "action", Kind: view.InputHidden, Value: "deposit"},
 			view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: errText,
 				Hint: "Asked because the key is being handed over, not just looked at. Same unlock as showing a saved password."},
 		), "escrow.deposit", "Deposit my key",
-			view.Action{ID: "escrow.deposit.cancel", Label: "Cancel", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}),
+			view.Action{ID: "escrow.deposit.cancel", Label: "Cancel", Href: s.route("/app/settings/account"), Method: "GET", Enabled: true}), "password"),
 	}
 	if until := sess.UnlockUntil(time.Now()); until != nil {
 		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, time.Now()))

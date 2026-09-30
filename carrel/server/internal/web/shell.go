@@ -189,6 +189,42 @@ func (s *Server) newMenu(sess *session.Session) []view.MenuItem {
 	return out
 }
 
+// focused puts the caret (FormRow.Focus, one per form) where the frames
+// draw it when the form is shown: in the first field that came back with a
+// reason (s-auth-13, s-contacts-18, s-profile-11, s-admin-16, s-admin-20),
+// else in the field named name — or, when that one does not change (a login
+// the invitation names), in the first after it that does. A form without
+// that field and without a reason has no caret.
+func focused(f view.Form, name string) view.Form {
+	type at struct{ set, row int }
+	var reason, named, next *at
+	for i := range f.Sets {
+		for j := range f.Sets[i].Rows {
+			r := &f.Sets[i].Rows[j]
+			r.Focus = false
+			if r.Kind == view.InputHidden {
+				continue
+			}
+			switch {
+			case reason == nil && r.Error != "":
+				reason = &at{i, j}
+			case named == nil && r.Name == name:
+				named = &at{i, j}
+			}
+			if named != nil && next == nil && !r.ReadOnly && r.Kind != view.InputAdd && r.Kind != view.InputRemove {
+				next = &at{i, j}
+			}
+		}
+	}
+	for _, p := range []*at{reason, next} {
+		if p != nil {
+			f.Sets[p.set].Rows[p.row].Focus = true
+			return f
+		}
+	}
+	return f
+}
+
 // withSubmit gives a form the button that sends it, and any others after it.
 // The words on a button are the server's (C-3.1): a client that has to guess
 // "Submit" is guessing the product.

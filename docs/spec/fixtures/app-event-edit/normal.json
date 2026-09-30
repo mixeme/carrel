@@ -135,6 +135,7 @@
           {
             "error": "",
             "extra": null,
+            "focus": true,
             "hint": "",
             "kind": "text",
             "label": "Summary",

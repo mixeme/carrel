@@ -99,6 +99,7 @@ func TestNewFolderLineIsTheFrame(t *testing.T) {
 	if tree == nil || tree.New == nil || !tree.New.Enabled || tree.Name == nil {
 		t.Fatalf("tree = %+v, want New folder with its line", tree)
 	}
+	sameCaret(t, "s-files-13", "new folder", *tree.Name)
 	row := visibleRows(*tree.Name)
 	if len(row) != 1 || row[0].Name != "name" || string(row[0].Label) != label || row[0].Value != "" {
 		t.Errorf("the line's field = %+v, the frame %q", row, label)
@@ -117,6 +118,8 @@ func TestNewFolderLineIsTheFrame(t *testing.T) {
 	}
 	if taken.Target == nil || taken.Target.Name == nil || string(visibleRows(*taken.Target.Name)[0].Value) != typed {
 		t.Errorf("after the refusal the line is %+v, want it open with %q", taken.Target, typed)
+	} else {
+		sameCaret(t, "s-files-13", "new folder refused", *taken.Target.Name)
 	}
 }
 

@@ -62,6 +62,7 @@
           {
             "error": "",
             "extra": null,
+            "focus": true,
             "hint": "Left empty, it is made from Given and Family. Fill it alone and it is cut the other way: the first word is the given name, the rest the family name.",
             "kind": "text",
             "label": "Display name",

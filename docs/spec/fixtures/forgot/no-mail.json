@@ -1,0 +1,23 @@
+{
+  "asked": false,
+  "back": {
+    "enabled": true,
+    "href": "/login",
+    "id": "forgot.back",
+    "label": "Back to sign in",
+    "method": "GET"
+  },
+  "form": {
+    "action": "",
+    "actions": [],
+    "errors": [],
+    "method": "",
+    "sets": []
+  },
+  "hasMail": false,
+  "lede": "This login has no confirmed email — an address that was entered but never confirmed does not count. There is no letter we can send, and there is no password reset that would keep your data.\n\nIf you deposited the encryption key, ask the administrator in person. Otherwise this account cannot be recovered from the sign-in screen.",
+  "notices": [],
+  "options": [],
+  "sent": false,
+  "title": "We cannot help from here"
+}

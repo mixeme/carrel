@@ -43,6 +43,7 @@
           {
             "error": "",
             "extra": null,
+            "focus": true,
             "hint": "",
             "kind": "text",
             "label": "Type the name to confirm",

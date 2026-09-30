@@ -742,6 +742,7 @@ func (s *Server) newFolder(tree *view.FileTree, dest *fileCtx, address string, q
 		Sets: []view.FieldSet{{Rows: []view.FormRow{csrfField(dest.sess),
 			{Name: "name", Label: "Name of the new folder", Kind: view.InputText, Required: true}}}},
 		Actions: []view.Action{{ID: "files.tree.new.create", Label: "Create", Href: a.Href, Method: "POST", Enabled: true}, back}}
+	*tree.Name = focused(*tree.Name, "name")
 }
 
 // keepTyped opens the line of New folder again with the name a refusal

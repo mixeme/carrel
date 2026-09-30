@@ -478,6 +478,8 @@ func (s *Server) connectionForm(sess *session.Session, f connectionForm) view.Fo
 		view.FormRow{Name: "certFingerprint", Label: "Certificate fingerprint", LabelAside: "SHA-256 · optional", Kind: view.InputText, Value: text(f.CertFingerprint),
 			Placeholder: "only for a certificate the system does not trust"},
 	)
+	// The caret is in Server URL: Label is optional (s-profile-2).
+	form = focused(form, "server")
 	if f.Editing != "" {
 		form.Action = action
 		return withSubmit(form, id, label,

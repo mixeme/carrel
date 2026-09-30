@@ -523,7 +523,7 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 	if job.ID != "" {
 		action += "&job=" + url.QueryEscape(job.ID)
 	}
-	return withSubmit(s.plainForm(action, "POST",
+	return focused(withSubmit(s.plainForm(action, "POST",
 		csrfField(sess),
 		view.FormRow{Name: "name", Label: "Name", Kind: view.InputText, Value: text(job.Name), Required: true, Error: errs["name"]},
 		view.FormRow{Name: "on", Label: "Job is on", Kind: view.InputCheck, Value: text(on),
@@ -542,7 +542,7 @@ func (s *Server) backupForm(sess *session.Session, blob sealed.Blob, job sealed.
 		view.FormRow{Name: "password", Label: "Archive password", Kind: view.InputPassword, Error: errs["password"], Hint: passwordHint},
 		view.FormRow{Name: "signin", Label: "On sign-in, if the last copy is older than (days)", Kind: view.InputNumber,
 			Value: text(strconv.Itoa(job.OnSignInDays)), Hint: "0 is never. Carrel keeps no clock of its own."},
-	), "backup.save", "Save")
+	), "backup.save", "Save"), "name")
 }
 
 // jobFromForm reads the editor into job, and what is wrong with it.

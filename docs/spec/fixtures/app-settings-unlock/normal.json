@@ -33,12 +33,13 @@
             "extra": null,
             "hint": "",
             "kind": "password",
-            "label": "Password",
+            "label": "Your Carrel password",
             "name": "password",
             "options": [],
             "readOnly": false,
             "required": true,
-            "value": ""
+            "value": "",
+            "focus": true
           }
         ]
       }

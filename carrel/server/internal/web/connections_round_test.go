@@ -123,6 +123,7 @@ func TestFolderRenameSheetIsTheFrame(t *testing.T) {
 	f, id, docs := storageFolder(t)
 	page := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
 	sheet := decode[view.CollectionRenameSheet](t, f.h.do(get(menuHref(t, connectionRow(t, page, id, docs).Menu, "collection.rename"), f.sess)))
+	sameCaret(t, "s-profile-18", "folder rename", sheet.Form)
 	if sheet.Stamp != "vps · Docs" {
 		t.Errorf("head = %q, the frame %q (the storage · the folder)", sheet.Stamp, subject)
 	}
@@ -178,6 +179,7 @@ func TestFolderDeleteSheetIsTheFrame(t *testing.T) {
 	lastArchived(t, f, "j-1", day[1])
 	page := decode[view.ConnectionsPage](t, f.h.do(get("/app/settings/connections", f.sess)))
 	sheet := decode[view.CollectionDeleteSheet](t, f.h.do(get(menuHref(t, connectionRow(t, page, id, docs).Menu, "collection.delete"), f.sess)))
+	sameCaret(t, "s-profile-19", "folder delete", sheet.Form)
 	if sheet.Subject != "vps · Docs" {
 		t.Errorf("head = %q, the frame %q (the storage · the folder)", sheet.Subject, subject)
 	}
@@ -228,6 +230,7 @@ func TestNewFolderSheetIsTheFrame(t *testing.T) {
 			got = append(got, string(r.Label))
 		}
 	}
+	sameCaret(t, "s-profile-20", "new folder", sheet.Form)
 	if !equalStrings(got, []string{"On which server", "Name"}) {
 		t.Errorf("fields = %q", got)
 	}

@@ -125,7 +125,8 @@ undefined = sorted(p for p, files in seen.items()
 check("6b. названные правила введены заголовком", undefined)
 
 # 7. Фикстуры разбираются и лежат по правилам имён
-states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome","refused"}
+states = {"normal","empty","readonly","source-error","partial","long","conflict","narrow","loss","unavailable","outcome","refused",
+          "sent","options","no-mail","wipe-sent","asked","password"}
 badfix = []
 for p in glob.glob(os.path.join(SPEC, "fixtures", "*", "*.json")):
     st = os.path.splitext(os.path.basename(p))[0]
@@ -200,6 +201,11 @@ FIXTURE_SCREEN = {           # каталог фикстуры -> маршрут
     # токеном. Кадр rest-1 — часть (data-part), и сверяется он с кадром
     # приглашения — оба без рейла, так что проверке 8 сравнивать нечего.
     "dead-link": "/invite/{token}",
+    # Подтверждение адреса — свой адрес C-5, но кадра экрана у него нет: оба
+    # его кадра — части (rest-1 invalid, rest-2 confirmed). Мёртвый токен —
+    # фикстура dead-link; normal — подтверждённый адрес, и он сверяется с
+    # rest-2 по STATE_FRAME.
+    "confirm-email": "/confirm-email/{token}",
     "app-collections-rename": "/app/collections/rename",
     "app-collections-move": "/app/collections/move",
     "app-collections-delete": "/app/collections/delete",
@@ -239,8 +245,18 @@ FRAME_TODO = {}
 SERVER_TODO = {}
 
 # Состояние, которое рисует свой кадр маршрута — часть (data-part), а не
-# кадр экрана целиком: отказ входа — s-auth-13, не s-auth-1.
-STATE_FRAME = {"login/refused": "s-auth-13"}
+# кадр экрана целиком: отказ входа — s-auth-13, не s-auth-1. Шаги страниц
+# вне оболочки названы по data-part своего кадра (C-14.3).
+STATE_FRAME = {
+    "login/refused": "s-auth-13",
+    "register/sent": "s-auth-3",
+    "forgot/options": "s-auth-6",
+    "forgot/no-mail": "s-auth-7",
+    "forgot/wipe-sent": "s-auth-8",
+    "forgot/asked": "s-auth-9",
+    "forgot-token/password": "s-auth-11",
+    "confirm-email/normal": "rest-2",
+}
 
 def frame_by_id(fid):
     m = re.search(r'<div class="frame" data-frame="%s"[^>]*>' % re.escape(fid), mock)

@@ -694,6 +694,18 @@ var quickNotes = map[view.Kind]view.Text{
 	view.KindTask:    "No time means the whole day. A task with no due date is a task all the same — both may stay empty.",
 }
 
+// caretField is the field of a record's form the caret stands in when it is
+// shown, full or quick: the name of a contact (s-contacts-3, s-notes-8), the
+// summary of an event and a task (s-agenda-3, s-notes-9, s-tasks-3,
+// s-notes-10), a note's text (s-notes-5, s-notes-20). A field that came back
+// with a reason takes it instead (s-contacts-18).
+var caretField = map[view.Kind]string{
+	view.KindContact: "fn",
+	view.KindEvent:   "summary",
+	view.KindTask:    "summary",
+	view.KindNote:    "description",
+}
+
 func quickFields(k view.Kind) []editField {
 	var out []editField
 	for _, name := range quickFieldNames[k] {
@@ -2374,7 +2386,7 @@ func (s *Server) recordFormOf(c *collectionCtx, st editState, fields []editField
 	for _, name := range names {
 		form.Errors = append(form.Errors, view.FieldError{Name: name, Message: text(st.errors[name])})
 	}
-	return form
+	return focused(form, caretField[c.spec.kind])
 }
 
 // reminderOptions are the steps of s-agenda-9, a reminder another client

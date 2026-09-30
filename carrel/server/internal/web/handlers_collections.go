@@ -672,7 +672,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		// A folder's name is its address: there is nothing else to ask
 		// (s-profile-20), and the line under the name says so.
 		rows[len(rows)-1].Hint = "A folder's name is its address: there is nothing else to ask."
-		sheet.Form = s.plainForm(action, "POST", rows...)
+		sheet.Form = focused(s.plainForm(action, "POST", rows...), "name")
 		sheet.Form.Action = s.route(action)
 		create := view.Action{ID: "collection.create", Label: "Create", Href: s.route(action), Method: "POST", Enabled: chosen.ID != ""}
 		if !create.Enabled {
@@ -701,7 +701,7 @@ func (s *Server) collectionNewSheet(sess *session.Session, blob sealed.Blob, f c
 		address.Hint = text(serverOrigin(chosen.Server) + strings.TrimSuffix(home, "/") + "/…/ — " + string(address.Hint))
 	}
 	rows = append(rows, address)
-	sheet.Form = s.plainForm(action, "POST", rows...)
+	sheet.Form = focused(s.plainForm(action, "POST", rows...), "name")
 
 	create := view.Action{ID: "collection.create", Label: "Create", Href: s.route(action), Method: "POST", Enabled: chosen.ID != ""}
 	if !create.Enabled {
@@ -814,7 +814,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 		}
 		return view.CollectionRenameSheet{
 			Kind:    col.Kinds[0],
-			Form:    s.plainForm(action, "POST", rows...),
+			Form:    focused(s.plainForm(action, "POST", rows...), "name"),
 			Address: text(conn.Server),
 			Note:    "The name is yours: it stays in Carrel and is never sent to the feed.",
 			Actions: []view.Action{{ID: "collection.save", Label: "Save", Href: s.route(action), Method: "POST", Enabled: true}},
@@ -825,7 +825,7 @@ func (s *Server) collectionRenameSheet(sess *session.Session, conn sealed.Connec
 	sheet := view.CollectionRenameSheet{
 		Kind:    col.Kinds[0],
 		Stamp:   view.Stamp(connLabel(conn)),
-		Form:    s.plainForm(action, "POST", rows...),
+		Form:    focused(s.plainForm(action, "POST", rows...), "name"),
 		Address: text(serverOrigin(conn.Server) + col.Path),
 		Note:    text(note),
 		Failure: failure,

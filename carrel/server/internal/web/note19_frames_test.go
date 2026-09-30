@@ -445,6 +445,11 @@ func TestUploadSheetNewFolderRefusalIsTheFrame(t *testing.T) {
 	if taken.Failure == nil || taken.Failure.Role != view.NoticeAlert || taken.Failure.Title != "" || string(taken.Failure.Body) != refusal {
 		t.Errorf("refusal = %+v, want (s-files-19) %q", taken.Failure, refusal)
 	}
+	if taken.Tree.Name != nil {
+		sameCaret(t, "s-files-19", "new folder refused", *taken.Tree.Name)
+	} else {
+		t.Errorf("the refusal closed the line of the name: %+v", taken.Tree)
+	}
 	if string(taken.Purpose) != purpose {
 		t.Errorf("the sheet's line became %q", taken.Purpose)
 	}

@@ -1,0 +1,146 @@
+{
+  "asked": false,
+  "back": {
+    "enabled": true,
+    "href": "/login",
+    "id": "forgot.back",
+    "label": "Back to sign in",
+    "method": "GET"
+  },
+  "form": {
+    "action": "",
+    "actions": [],
+    "errors": [],
+    "method": "",
+    "sets": []
+  },
+  "hasMail": true,
+  "lede": "Account mix has a confirmed email. A silent password reset does not exist: a new password would be a new key, and everything stored under the old one would be lost anyway.",
+  "notices": [],
+  "options": [
+    {
+      "body": "We send a letter to the confirmed address. The link in it is not a reset: after you confirm, everything stored here is erased — connections become unreadable and are deleted — and the same link then lets you set a new password. Address books, calendars, tasks and notes on the servers stay where they are.",
+      "form": {
+        "action": "/forgot",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/forgot",
+            "id": "forgot.wipe",
+            "label": "Send a confirmation letter",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "op",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "wipe"
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "login",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "mix"
+              }
+            ]
+          }
+        ]
+      },
+      "title": "Wipe the account"
+    },
+    {
+      "body": "This account deposited its encryption key. The administrator can recover it with the instance master password, and your data is kept.",
+      "form": {
+        "action": "/forgot",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/forgot",
+            "id": "forgot.ask",
+            "label": "Ask the administrator",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "op",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "ask"
+              },
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "login",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "mix"
+              }
+            ]
+          }
+        ]
+      },
+      "title": "Ask the administrator"
+    }
+  ],
+  "sent": false,
+  "title": "What we can do"
+}

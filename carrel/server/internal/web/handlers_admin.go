@@ -258,6 +258,9 @@ func (s *Server) resetSheet(sess *session.Session, target, temp string, errs map
 		view.FormRow{Name: "confirm", Label: "Type the login to confirm", Kind: view.InputText, Required: true,
 			Error: errs["confirm"]},
 	)
+	// The caret is in the login typed to confirm, the one field left to
+	// fill (s-admin-13).
+	form = focused(form, "confirm")
 	return view.PasswordResetSheet{
 		Title:   "Reset a password",
 		Form:    form,

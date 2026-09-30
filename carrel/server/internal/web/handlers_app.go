@@ -75,11 +75,13 @@ func (s *Server) passwordPage(sess *session.Session, mustChange bool, err error)
 		// The password lives under the account, and the screen stands in
 		// the settings: it carries their rail with the account marked.
 		Shell: s.withRail(s.buildShell(sess, "Change password"), s.settingsRail(sess, "/app/settings/account")),
-		Form: withSubmit(s.plainForm("/app/password", "POST", csrfField(sess),
+		// The caret is in New password, not in the field before it
+		// (account-3).
+		Form: focused(withSubmit(s.plainForm("/app/password", "POST", csrfField(sess),
 			view.FormRow{Name: "current", Label: "Current password", Kind: view.InputPassword, Required: true, Error: currentErr},
 			view.FormRow{Name: "password", Label: "New password", Kind: view.InputPassword, Required: true, Error: passErr},
 			view.FormRow{Name: "password2", Label: "Repeat new password", Kind: view.InputPassword, Required: true, Error: pass2Err},
-		), "password.save", "Change password"),
+		), "password.save", "Change password"), "password"),
 		// What the change does is said under the fields, where the fear of
 		// losing the connections comes up (account-3).
 		Note: "Your data stays encrypted under the same key; only the wrapping changes. Saved connections keep working.",
@@ -155,10 +157,11 @@ func (s *Server) unlockSheet(sess *session.Session, errText view.Text) view.Unlo
 	sheet := view.UnlockSheet{
 		Purpose: text("Confirm your password to reveal stored credentials, download a device profile, issue a davloom device password, change key escrow, or delete your account."),
 		Warning: text("Everything revealed in this window is written to the audit log."),
-		Form: withSubmit(s.plainForm("/app/settings/unlock", "POST",
+		// The person's own password, not the server's (s-plan-3, s-profile-3).
+		Form: focused(withSubmit(s.plainForm("/app/settings/unlock", "POST",
 			csrfField(sess),
-			view.FormRow{Name: "password", Label: "Password", Kind: view.InputPassword, Required: true, Error: errText},
-		), "unlock.submit", "Show"),
+			view.FormRow{Name: "password", Label: "Your Carrel password", Kind: view.InputPassword, Required: true, Error: errText},
+		), "unlock.submit", "Show"), "password"),
 	}
 	if until := sess.UnlockUntil(time.Now()); until != nil {
 		sheet.Until = ptrWhen(s.timeFor(sess).formatWhen(*until, false, time.Now()))

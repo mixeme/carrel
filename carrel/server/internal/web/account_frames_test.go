@@ -404,6 +404,7 @@ func TestAccountEscrowIsTheFrames(t *testing.T) {
 		t.Errorf("sheet warning = %q", sheet.Warning)
 	}
 	pw := profileRow(sheet.Form, "password")
+	sameCaret(t, "account-2", "deposit", sheet.Form)
 	if m := frameLabel.FindStringSubmatch(sheetPart); m == nil || string(pw.Label) != frameText(m[1]) || pw.Kind != view.InputPassword {
 		t.Errorf("password row = %+v", pw)
 	}

@@ -39,7 +39,8 @@
             "readOnly": false,
             "required": true,
             "value": "",
-            "placeholder": "a-z 0-9 . _ -"
+            "placeholder": "a-z 0-9 . _ -",
+            "focus": true
           },
           {
             "error": "",
