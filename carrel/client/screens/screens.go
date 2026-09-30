@@ -9,6 +9,7 @@ import (
 	"carrel.dev/carrel/client/screens/login"
 	"carrel.dev/carrel/client/screens/register"
 	"carrel.dev/carrel/client/screens/setup"
+	"carrel.dev/carrel/client/screens/wipe"
 	"carrel.dev/carrel/server/view"
 	"carrel.dev/typecase/widget"
 )
@@ -95,6 +96,13 @@ var All = []Screen{
 		Draw:   func(model any) Root { return forgot.Screen(model.(*view.ForgotPage)) },
 		Title:  func(model any) string { return string(model.(*view.ForgotPage).Title) },
 		Forms:  func(model any) []widget.PostForm { return forgot.Forms(model.(*view.ForgotPage)) },
+	},
+	{
+		Model:  func() any { return new(view.ForgotWipePage) },
+		Frames: []string{"s-auth-10", "s-auth-11"},
+		Draw:   func(model any) Root { return wipe.Screen(model.(*view.ForgotWipePage)) },
+		Title:  func(model any) string { return string(model.(*view.ForgotWipePage).Title) },
+		Forms:  func(model any) []widget.PostForm { return wipe.Forms(model.(*view.ForgotWipePage)) },
 	},
 	{
 		Model:  func() any { return new(view.DeadLinkPage) },
