@@ -269,18 +269,20 @@ func Strings(root string, skip ...string) ([]Finding, error) {
 // word is a letter of any script: a string that holds one holds words.
 var word = regexp.MustCompile(`\pL`)
 
-// methods are the values of Action.Method (C-6.2): words of HTTP, not of the
-// interface, which bind compares an action's method with.
-var methods = []string{"GET", "POST"}
+// protocol are the strings of the contract that are no words of the
+// interface: the values of Action.Method (C-6.2), which bind compares an
+// action's method with, and the prefix of an icon's name (U-4, «i-down»),
+// which it takes off for the widget.
+var protocol = []string{"GET", "POST", "i-"}
 
 // Words names every string or rune constant holding a letter in a Go file
 // under dir — the bind/ directory of the client. bind hands a widget only the
 // view model's words and none of its own (U-5.7): a label, a title, a join
 // of its own would be the client writing the interface beside the server
 // (U-1.3). What is not a word — a space between a title and a body — is not
-// a finding, and neither is a method of HTTP (methods); the other guards of
-// strings (Strings) hold them as they hold the whole module. No mark excuses
-// a finding here.
+// a finding, and neither is a string of the protocol (protocol); the other
+// guards of strings (Strings) hold them as they hold the whole module. No
+// mark excuses a finding here.
 func Words(dir string) ([]Finding, error) {
 	var out []Finding
 	err := walkGo(dir, nil, func(rel string, src []byte) error {
@@ -302,7 +304,7 @@ func Words(dir string) ([]Finding, error) {
 			if err != nil {
 				value = lit.Value
 			}
-			if word.MatchString(value) && !slices.Contains(methods, value) {
+			if word.MatchString(value) && !slices.Contains(protocol, value) {
 				out = append(out, Finding{Path: rel, Line: fset.Position(lit.Pos()).Line, Rule: RuleWord, What: "words of its own: " + lit.Value})
 			}
 			return true

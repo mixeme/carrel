@@ -73,7 +73,7 @@ func Kind(a view.Action) w.ButtonKind {
 // why (Reason), and leads nowhere. The label, the icon and the kind are the
 // action's.
 func Button(a view.Action, form string) w.Button {
-	b := w.Button{Label: string(a.Label), Icon: w.Icon(a.Icon), Kind: Kind(a)}
+	b := w.Button{Label: string(a.Label), Icon: Icon(a.Icon), Kind: Kind(a)}
 	switch {
 	case !a.Enabled:
 		b.State = w.ButtonDisabled
@@ -84,6 +84,20 @@ func Button(a view.Action, form string) w.Button {
 		b.Href = a.Href
 	}
 	return b
+}
+
+// iconPrefix is what the contract's icon names start with (U-4: «i-down»),
+// the id of the symbol in the sprite; the widget takes the name without it.
+const iconPrefix = "i-"
+
+// Icon is an icon of the contract (Action.Icon, «i-down») as the widget's
+// name of it («down»): the same symbol of the sprite (U-4). A name without the
+// prefix is taken as it is; none is none.
+func Icon(name string) w.Icon {
+	if len(name) > len(iconPrefix) && name[:len(iconPrefix)] == iconPrefix {
+		name = name[len(iconPrefix):]
+	}
+	return w.Icon(name)
 }
 
 // Link is an action that goes somewhere, as a link of running text: its

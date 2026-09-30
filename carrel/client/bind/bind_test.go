@@ -60,7 +60,7 @@ func TestButton(t *testing.T) {
 			w.Button{Label: "Erase", Kind: w.ButtonDangerSolid, Form: "wipe.confirm"},
 		},
 		"with an icon": {
-			view.Action{Label: "New contact", Icon: "plus", Href: "/app/contacts/new", Method: "GET", Primary: true, Enabled: true}, "",
+			view.Action{Label: "New contact", Icon: "i-plus", Href: "/app/contacts/new", Method: "GET", Primary: true, Enabled: true}, "",
 			w.Button{Label: "New contact", Icon: "plus", Kind: w.ButtonPrimary, Href: "/app/contacts/new"},
 		},
 		"switched off says why and leads nowhere": {
@@ -69,6 +69,12 @@ func TestButton(t *testing.T) {
 		},
 	} {
 		same(t, name, bind.Button(c.a, c.form), c.want)
+	}
+}
+
+func TestIcon(t *testing.T) {
+	for name, want := range map[string]w.Icon{"i-down": "down", "i-gear": "gear", "down": "down", "": "", "i-": "i-"} {
+		same(t, name, bind.Icon(name), want)
 	}
 }
 
