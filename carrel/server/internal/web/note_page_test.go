@@ -52,7 +52,11 @@ var (
 	frameFieldLabel = regexp.MustCompile(`<div class="tc-field[^"]*">\s*<label>([^<]+)</label>`)
 	frameTreeRow    = regexp.MustCompile(`<div class="([^"]*)tc-tree__row">(.*?)</div>`)
 	frameNavItem    = regexp.MustCompile(`(?s)<a class="[^"]*tc-nav__item[^"]*"[^>]*>(.*?)</a>`)
-	frameDocNote    = regexp.MustCompile(`(?s)<div class="tc-doc__note">(.*?)</div>`)
+	// frameNavShort is the short label a nav item carries for the phone's
+	// bottom panel («Back», from-typecase note 27); the rail's is the full
+	// one beside it.
+	frameNavShort = regexp.MustCompile(`<span class="tc-nav__short">[^<]*</span>`)
+	frameDocNote  = regexp.MustCompile(`(?s)<div class="tc-doc__note">(.*?)</div>`)
 )
 
 // frameNeighbours is how many neighbours the frame's rail draws before and
@@ -172,8 +176,8 @@ func TestNoteEditIsThePage(t *testing.T) {
 			t.Fatalf("%s: doc = %+v", req.what, p.Doc)
 		}
 		nav := frameNavItem.FindStringSubmatch(frame)
-		if nav == nil || len(p.Rail.Nav) != 1 || string(p.Rail.Nav[0].Label) != frameText(nav[1]) {
-			t.Errorf("%s: nav = %+v, want the frame's %q", req.what, p.Rail.Nav, frameText(nav[1]))
+		if nav == nil || len(p.Rail.Nav) != 1 || string(p.Rail.Nav[0].Label) != frameText(frameNavShort.ReplaceAllString(nav[1], "")) {
+			t.Errorf("%s: nav = %+v, want the frame's %q", req.what, p.Rail.Nav, frameText(frameNavShort.ReplaceAllString(nav[1], "")))
 		}
 		if len(p.Rail.Sections) == 0 {
 			t.Errorf("%s: the rail has no notebooks", req.what)

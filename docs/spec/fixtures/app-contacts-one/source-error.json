@@ -111,12 +111,6 @@
           "id": "changed",
           "label": "Changed",
           "on": false
-        },
-        {
-          "fixed": false,
-          "id": "source",
-          "label": "Source",
-          "on": true
         }
       ],
       "label": "Columns"

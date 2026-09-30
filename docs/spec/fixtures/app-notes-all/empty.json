@@ -25,7 +25,89 @@
         "method": "GET"
       }
     ],
-    "columns": null,
+    "columns": {
+      "form": {
+        "action": "/app/notes/columns",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/app/notes/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "enabled": true,
+            "href": "/app/notes/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ]
+          }
+        ]
+      },
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "excerpt",
+          "label": "Excerpt",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "date",
+          "label": "Date",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "source",
+          "label": "Source",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
     "compact": false,
     "filter": "",
     "loaded": 0,

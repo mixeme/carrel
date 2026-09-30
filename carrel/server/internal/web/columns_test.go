@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -57,7 +58,15 @@ func frameDefaultColumns(t *testing.T) []frameColumn {
 // one that resets).
 func frameColumnsMenu(t *testing.T) (head, action string, items []frameColumn, foot []string) {
 	t.Helper()
-	frame, _, _ := strings.Cut(mockupFrame(t, "components-42"), "<figcaption")
+	return frameColumnsMenuOf(t, "components-42")
+}
+
+// frameColumnsMenuOf is the Columns form a frame draws: components-42 and
+// the menus of note 25 (s-tasks-12, s-notes-23, s-files-20, s-admin-21,
+// s-admin-23, s-contacts-25).
+func frameColumnsMenuOf(t *testing.T, id string) (head, action string, items []frameColumn, foot []string) {
+	t.Helper()
+	frame, _, _ := strings.Cut(mockupFrame(t, id), "<figcaption")
 	if m := frameColumnsHead.FindStringSubmatch(frame); m != nil {
 		head = frameText(m[1])
 	}
@@ -66,14 +75,14 @@ func frameColumnsMenu(t *testing.T) (head, action string, items []frameColumn, f
 	}
 	for _, m := range frameColumnCheck.FindAllStringSubmatch(frame, -1) {
 		if (m[2] != "") == (m[4] != "") {
-			t.Fatalf("components-42: %q is checked %v, its tick off %v: read the frame again", m[1], m[2] != "", m[4] != "")
+			t.Fatalf("%s: %q is checked %v, its tick off %v: read the frame again", id, m[1], m[2] != "", m[4] != "")
 		}
 		items = append(items, frameColumn{ID: m[1], Label: frameText(m[5]), Aside: frameText(m[6]), On: m[2] != "", Fixed: m[3] != ""})
 	}
 	// Every item is read or the reading stops: an item the pattern missed
 	// would leave the menu shorter than drawn, and the server's longer.
 	if n := len(frameColumnLabel.FindAllString(frame, -1)); n != len(items) {
-		t.Fatalf("components-42: %d items drawn, %d read: read the frame again", n, len(items))
+		t.Fatalf("%s: %d items drawn, %d read: read the frame again", id, n, len(items))
 	}
 	for _, m := range frameColumnsFoot.FindAllStringSubmatch(frame, -1) {
 		b := frameText(m[2])
@@ -83,7 +92,7 @@ func frameColumnsMenu(t *testing.T) (head, action string, items []frameColumn, f
 		foot = append(foot, b)
 	}
 	if head == "" || !strings.HasSuffix(action, "/columns") || len(items) < 2 || len(foot) != 2 {
-		t.Fatalf("components-42: %q %q %+v %q: read the frame again", head, action, items, foot)
+		t.Fatalf("%s: %q %q %+v %q: read the frame again", id, head, action, items, foot)
 	}
 	return head, action, items, foot
 }
@@ -222,22 +231,36 @@ func TestColumnsAreTheFrames(t *testing.T) {
 	f := bookFixture(t, nil, cards...)
 	f.h.srv.SetClock(time.Date(2026, 8, 20, 12, 0, 0, 0, time.UTC))
 	list := f.path("contacts")
+	tickRail(t, f.h, f.sess, "contacts", list)
+	const all = "/app/contacts"
 
 	// Until the person chooses: the menu of components-21, in its order;
-	// the form of components-42 — its heading, its address beside the
-	// list's, Apply and the reset.
+	// the form of components-42 — its heading, its address, Apply and the
+	// reset. components-42 is the combined view's form (note 25): one book
+	// names its source in its head, and its menu has no Source.
 	head, action, chosen, foot := frameColumnsMenu(t)
-	page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
-	cols := page.Bar.Columns
+	withoutSource := func(cols []frameColumn) []frameColumn {
+		out := []frameColumn{}
+		for _, c := range cols {
+			if c.Label != "Source" && c.ID != "source" {
+				out = append(out, c)
+			}
+		}
+		return out
+	}
+	unnamed := func(c *view.Columns) []frameColumn {
+		out := shownColumns(c)
+		for i := range out {
+			out[i].ID = ""
+		}
+		return out
+	}
+	cols := combined(t, f.h, f.sess, all, contactsPoll).Bar.Columns
 	if cols == nil {
-		t.Fatal("the contacts list has no Columns")
+		t.Fatal("the combined contacts have no Columns")
 	}
 	sameMarks(t, "components-42", "columns", cols.Form)
-	def := shownColumns(cols)
-	for i := range def {
-		def[i].ID = ""
-	}
-	sameColumns(t, "the columns by default", def, frameDefaultColumns(t))
+	sameColumns(t, "the columns by default", unnamed(cols), frameDefaultColumns(t))
 	var buttons []string
 	for _, a := range cols.Form.Actions {
 		b := string(a.Label)
@@ -246,11 +269,19 @@ func TestColumnsAreTheFrames(t *testing.T) {
 		}
 		buttons = append(buttons, b)
 	}
-	if string(cols.Label) != head || cols.Form.Method != http.MethodPost || cols.Form.Action != list+"/columns" ||
+	// The poll's task rides in the address, so that the answer reads the
+	// same poll (S-9.6).
+	address, _, _ := strings.Cut(cols.Form.Action, "?")
+	if string(cols.Label) != head || cols.Form.Method != http.MethodPost || address != action ||
 		strings.Join(buttons, " | ") != strings.Join(foot, " | ") {
 		t.Errorf("columns: label %q, form %s %s, buttons %q; want (components-42) %q, POST %s, %q",
-			cols.Label, cols.Form.Method, cols.Form.Action, buttons, head, strings.TrimSuffix(action, "/columns")+"…/columns", foot)
+			cols.Label, cols.Form.Method, cols.Form.Action, buttons, head, action, foot)
 	}
+	page := decode[view.ContactsListPage](t, f.h.do(get(list, f.sess)))
+	if page.Bar.Columns == nil || page.Bar.Columns.Form.Action != list+"/columns" {
+		t.Fatalf("one book's columns = %+v", page.Bar.Columns)
+	}
+	sameColumns(t, "one book's columns by default", unnamed(page.Bar.Columns), withoutSource(frameDefaultColumns(t)))
 
 	// The rows carry every column the menu offers, in the frames' words.
 	for _, g := range page.Groups {
@@ -282,16 +313,17 @@ func TestColumnsAreTheFrames(t *testing.T) {
 
 	// A choice: what components-42 ticks, in its order — Name stays off
 	// the form, it is always first. The list comes back with it, and the
-	// menu is components-42's; the columns on are s-contacts-23's.
-	post := func(cols []string, cookies []*http.Cookie) *http.Response {
+	// menu is components-42's; the columns on are s-contacts-23's. One
+	// book shows the same without Source.
+	post := func(from string, cols []string, cookies []*http.Cookie) *http.Response {
 		t.Helper()
 		form := url.Values{"col": cols}
-		req := postForm(list+"/columns?sort=changed", f.sess, form)
+		req := postForm(from+"/columns?sort=az", f.sess, form)
 		for _, c := range cookies {
 			req.AddCookie(c)
 		}
 		rec := f.h.do(req)
-		if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != list+"?sort=changed" {
+		if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != from+"?sort=az" {
 			t.Fatalf("post %q: %d %q %s", cols, rec.Code, rec.Header().Get("Location"), rec.Body.String())
 		}
 		return rec.Result()
@@ -302,7 +334,13 @@ func TestColumnsAreTheFrames(t *testing.T) {
 		for _, c := range cookies {
 			req.AddCookie(c)
 		}
-		return decode[view.ContactsListPage](t, f.h.do(req))
+		page := decode[view.ContactsListPage](t, f.h.do(req))
+		if page.Poll != nil && page.Poll.TaskID != "" {
+			// A combined view polls; the poll is let finish, so that the
+			// next one is not refused for too many at once.
+			waitPoll(t, f.h, f.sess, page.Poll.TaskID, nil)
+		}
+		return page
 	}
 	var ticked []string
 	for _, it := range chosen {
@@ -310,54 +348,55 @@ func TestColumnsAreTheFrames(t *testing.T) {
 			ticked = append(ticked, it.ID)
 		}
 	}
-	res := post(ticked, nil)
+	res := post(all, ticked, nil)
 	kept := res.Cookies()
-	if len(kept) != 1 || kept[0].MaxAge <= 0 || !kept[0].HttpOnly || kept[0].SameSite != http.SameSiteLaxMode {
+	if len(kept) != 1 || kept[0].Name != "carrel_cols_contacts" || kept[0].MaxAge <= 0 || !kept[0].HttpOnly || kept[0].SameSite != http.SameSiteLaxMode {
 		t.Fatalf("the choice is kept as %+v", kept)
 	}
-	after := with(list+"?sort=changed", kept)
+	after := with(all+"?sort=az", kept)
 	sameColumns(t, "the columns chosen", shownColumns(after.Bar.Columns), chosen)
 	if got := columnsOn(after.Bar.Columns); strings.Join(got, " ") != strings.Join(order23, " ") {
 		t.Errorf("columns on = %q, want (s-contacts-23) %q", got, order23)
 	}
-	if after.Bar.Columns.Form.Action != list+"/columns?sort=changed" {
+	// The form keeps the list's query, and names the poll the list read.
+	if address, query, _ := strings.Cut(after.Bar.Columns.Form.Action, "?"); address != all+"/columns" ||
+		!strings.Contains("&"+query+"&", "&sort=az&") || !strings.Contains(query, "task=") {
 		t.Errorf("the form loses the list's address: %q", after.Bar.Columns.Form.Action)
 	}
+	sameColumns(t, "one book's columns chosen", shownColumns(with(list, kept).Bar.Columns), withoutSource(chosen))
 
 	// Another: s-contacts-24's. Unknown columns and a second Name are not
 	// columns.
-	res = post(append([]string{"name", "bogus"}, append(order24[1:], order24[1])...), kept)
+	res = post(all, append([]string{"name", "bogus"}, append(order24[1:], order24[1])...), kept)
 	kept = res.Cookies()
-	if got := columnsOn(with(list, kept).Bar.Columns); strings.Join(got, " ") != strings.Join(order24, " ") {
+	if got := columnsOn(with(all, kept).Bar.Columns); strings.Join(got, " ") != strings.Join(order24, " ") {
 		t.Errorf("columns on = %q, want (s-contacts-24) %q", got, order24)
 	}
 
+	// A choice made in one book, whose menu has no Source, leaves Source
+	// where the combined view had it.
+	res = post(list, []string{"email", "phone"}, kept)
+	if got := columnsOn(with(all, res.Cookies()).Bar.Columns); strings.Join(got, " ") != "name email phone source" {
+		t.Errorf("after a choice in one book, the combined view shows %q, want name email phone source", got)
+	}
+
 	// Reset: the cookie goes, and the menu is components-21's again.
-	res = post([]string{"default"}, kept)
+	res = post(all, []string{"default"}, kept)
 	gone := res.Cookies()
 	if len(gone) != 1 || gone[0].MaxAge >= 0 {
 		t.Fatalf("reset keeps %+v", gone)
 	}
-	reset := shownColumns(with(list, nil).Bar.Columns)
-	for i := range reset {
-		reset[i].ID = ""
-	}
-	sameColumns(t, "the columns after reset", reset, frameDefaultColumns(t))
+	sameColumns(t, "the columns after reset", unnamed(with(all, nil).Bar.Columns), frameDefaultColumns(t))
 
 	// What another browser sent, or an old one, is no choice: the default.
-	junk := shownColumns(with(list, []*http.Cookie{{Name: kept[0].Name, Value: "x.y.z"}}).Bar.Columns)
-	for i := range junk {
-		junk[i].ID = ""
-	}
-	sameColumns(t, "a cookie of nothing known", junk, frameDefaultColumns(t))
-	if got := columnsOn(with(list, []*http.Cookie{{Name: kept[0].Name, Value: "email.name.email"}}).Bar.Columns); strings.Join(got, " ") != "name email" {
+	sameColumns(t, "a cookie of nothing known", unnamed(with(all, []*http.Cookie{{Name: kept[0].Name, Value: "x.y.z"}}).Bar.Columns), frameDefaultColumns(t))
+	if got := columnsOn(with(all, []*http.Cookie{{Name: kept[0].Name, Value: "email.name.email"}}).Bar.Columns); strings.Join(got, " ") != "name email" {
 		t.Errorf("name first, once: %q", got)
 	}
 
-	// The combined book has the same menu, at its own address.
-	tickRail(t, f.h, f.sess, "contacts", list)
-	all := combined(t, f.h, f.sess, "/app/contacts", contactsPoll)
-	if all.Bar.Columns == nil || !strings.HasPrefix(all.Bar.Columns.Form.Action, "/app/contacts/columns") {
-		t.Errorf("combined columns = %+v", all.Bar.Columns)
+	// Sorting follows the columns: «Recently changed» shows Changed, which
+	// the default does not.
+	if got := columnsOn(with(list+"?sort=changed", nil).Bar.Columns); !slices.Contains(got, "changed") {
+		t.Errorf("sorted by Recently changed, the columns on are %q: Changed is not among them", got)
 	}
 }

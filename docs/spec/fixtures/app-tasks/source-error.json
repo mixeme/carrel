@@ -26,7 +26,95 @@
         "method": "GET"
       }
     ],
-    "columns": null,
+    "columns": {
+      "form": {
+        "action": "/app/tasks/a-nc-home/dela/columns",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/app/tasks/a-nc-home/dela/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "enabled": true,
+            "href": "/app/tasks/a-nc-home/dela/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ]
+          }
+        ]
+      },
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "due",
+          "label": "Due",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "complete",
+          "label": "Complete",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "priority",
+          "label": "Priority",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "status",
+          "label": "Status",
+          "on": false
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
     "compact": false,
     "filter": "",
     "loaded": 0,

@@ -361,7 +361,11 @@ func (s *Server) getContactTimeline(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	s.writePage(w, r, http.StatusOK, s.timelinePage(c, obj, person, task, from, last, r.URL.Query().Get("show"), notices))
+	tl := s.timelinePage(c, obj, person, task, from, last, r.URL.Query().Get("show"), notices)
+	// Columns (s-contacts-25): Title, Date, Kind, Source; why a record is
+	// here stands after its title always and is not a column (s-contacts-26).
+	tl.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), "timeline", card+"/timeline/columns", r.URL.Query(), false)
+	s.writePage(w, r, http.StatusOK, tl)
 }
 
 func (s *Server) startTimeline(sess *session.Session, person timelinePerson, from, to time.Time) (*timelineTask, error) {
@@ -410,7 +414,7 @@ func (s *Server) timelineRows(tf timeFmt, blob sealed.Blob, snap fanout.Snapshot
 			row.Href = s.route(o.recordPath(segmentOf(it.Kind), it.UID))
 		}
 		if !at.IsZero() {
-			row.When = text(tf.date(at))
+			row.When = text(tf.shortDay(at)) // a list's day, «10 Aug» (s-contacts-7, -26; C-10)
 		}
 		out = append(out, timelineRow{row: row, at: at})
 	}

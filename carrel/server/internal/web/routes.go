@@ -57,11 +57,13 @@ func (s *Server) registerRoutes() {
 	registerKindRoutes(s, "tasks")
 	registerKindRoutes(s, "notes")
 
-	// The Columns menu of a list (S-9.6): only the sections that have it.
-	for segment := range listColumns {
+	// The Columns menu of a list (S-9.6): the sections of records, a
+	// person's timeline; files, users and the audit log below.
+	for _, segment := range recordSections {
 		s.handle("POST /app/"+segment+"/columns", combinedColumnsHandler(segment))
 		s.handle("POST /app/"+segment+"/{account}/{col}/columns", collectionColumnsHandler(segment))
 	}
+	s.handle("POST /app/contacts/{account}/{col}/{uid}/timeline/columns", (*Server).postTimelineColumns)
 
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/timeline", (*Server).getContactTimeline)
 	s.handle("GET /app/contacts/{account}/{col}/{uid}/rewrite", (*Server).getContactRewrite)
@@ -77,6 +79,7 @@ func (s *Server) registerRoutes() {
 	s.handle("POST /app/files/{account}/{col}/upload/{path...}", (*Server).postFilesUpload)
 	s.handle("POST /app/files/{account}/{col}/mkcol/{path...}", (*Server).postFilesMkcol)
 	s.handle("POST /app/files/{account}/{col}/op/{path...}", (*Server).postFilesOp)
+	s.handle("POST /app/files/{account}/{col}/columns/{path...}", (*Server).postFilesColumns)
 	s.handle("GET /app/files/picker", (*Server).getFilesPicker)
 	s.handle("POST /app/files/picker", (*Server).postFilesPicker)
 	s.handle("GET /app/files/published", (*Server).getFilesPublished)
@@ -131,6 +134,8 @@ func (s *Server) registerRoutes() {
 	s.handle("GET /admin/escrow", (*Server).getAdminEscrow)
 	s.handle("POST /admin/escrow", (*Server).postAdminEscrow)
 	s.handle("GET /admin/audit", (*Server).getAdminAudit)
+	s.handle("POST /admin/audit/columns", (*Server).postAuditColumns)
+	s.handle("POST /admin/columns", (*Server).postAdminColumns)
 	s.handle("GET /admin/dav", (*Server).getAdminDav)
 	s.handle("POST /admin/dav", (*Server).postAdminDav)
 	s.handle("GET /admin/install", (*Server).getAdminInstall)

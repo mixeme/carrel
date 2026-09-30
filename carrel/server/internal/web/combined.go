@@ -272,9 +272,24 @@ func (s *Server) readCombined(r *http.Request, sess *session.Session, blob seale
 // combinedPage is /app/{kind}: the rows of the kind from every answered
 // source, merged by the kind's natural key, never grouped by source.
 func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob sealed.Blob, spec kindSpec) (any, error) {
+	// A list put back in its default order because its column went says so
+	// (note 25); the mark leaves the address before anything reads it.
+	sorted := unsortedNotice(r, spec.segment)
 	st, err := s.readCombined(r, sess, blob, spec)
 	if err != nil {
 		return nil, err
+	}
+	if sorted != nil {
+		st.shell.Notices = append(st.shell.Notices, *sorted)
+	}
+	// The form of Columns names the poll too, so that the list it comes back
+	// to reads the records already polled.
+	columns := func() *view.Columns {
+		q := r.URL.Query()
+		if st.task != nil {
+			q.Set("task", st.task.ID())
+		}
+		return s.columnsMenu(r, csrfField(sess), spec.segment, "/app/"+spec.segment+"/columns", q, false)
 	}
 	tf, base := s.timeFor(sess), "/app/"+spec.segment
 	actions := append([]view.Action{s.combinedNewAction(blob, spec)}, s.combinedIOActions(blob, spec)...)
@@ -321,7 +336,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		total := len(st.items)
 		page.Bar = view.ListBar{Loaded: len(shown), Total: &total, Actions: actions,
 			Segments: s.sortSegments(base, view.KindContact, by, r.URL.Query()),
-			Columns:  s.columnsMenu(r, csrfField(sess), spec.segment, base)}
+			Columns:  columns()}
 		page.Print = header(counted(len(shown), "card"))
 		return page, nil
 	case view.KindEvent:
@@ -355,6 +370,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Bar.Segments = append(s.taskSegments(base, filter.tag, show, open, done),
 			s.sortSegments(base, view.KindTask, by, r.URL.Query())...)
 		page.Bar.Actions = actions
+		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
 		page.Print = header(showLabels[show], counted(page.Bar.Loaded, "task"))
 		return page, nil
@@ -365,6 +381,7 @@ func (s *Server) combinedPage(r *http.Request, sess *session.Session, blob seale
 		page.Groups, page.Bar.Loaded, bad = s.noteGroups(tf, shown, spec.segment, true, filter, by)
 		page.Bar.Segments = s.sortSegments(base, view.KindNote, by, r.URL.Query())
 		page.Bar.Actions = actions
+		page.Bar.Columns = columns()
 		page.Notices = appendUnreadable(page.Notices, bad)
 		page.Print = header(counted(page.Bar.Loaded, "note"))
 		return page, nil

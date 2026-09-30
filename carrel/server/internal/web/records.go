@@ -666,8 +666,13 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 		return rl
 	}
 	// A calendar the server made without some of what was asked says so on
-	// its lists (docs/servers.md, SV-52).
+	// its lists (docs/servers.md, SV-52); a list put back in its default
+	// order because its column went says that (note 25, s-tasks-13).
+	sorted := unsortedNotice(r, c.spec.segment)
 	notices := func(own []view.Notice) []view.Notice {
+		if sorted != nil {
+			own = append(own, *sorted)
+		}
 		if n := droppedNotice(c.sess, c.conn.ID, c.col); n != nil {
 			return append([]view.Notice{*n}, own...)
 		}
@@ -678,6 +683,7 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 	case view.KindContact:
 		p := s.contactsList(r, c)
 		p.Rail = rail(p.Rail.Tags)
+		p.Notices = notices(p.Notices)
 		page = p
 	case view.KindEvent:
 		p := s.agenda(r, c)
@@ -699,14 +705,21 @@ func (s *Server) getKindList(w http.ResponseWriter, r *http.Request, kind string
 }
 
 // listSort is the order a list is shown in (review Р-12, s-contacts-1,
-// s-tasks-1, s-notes-1): the server sorts and groups, the client neither
-// sorts nor reckons (C-3.1). The first of each kind is its default.
-type listSort struct{ id, label, value string }
+// s-tasks-1, s-notes-1, s-files-1): the server sorts and groups, the client
+// neither sorts nor reckons (C-3.1). The first of each kind is its default.
+// column is the column of the Columns menu the order sorts by: choosing the
+// order shows it, and taking it away puts the list back in its default
+// order (note 25, s-tasks-13).
+type listSort struct{ id, label, value, column string }
 
 var listSorts = map[view.Kind][]listSort{
-	view.KindContact: {{"sort.az", "A–Z", "az"}, {"sort.changed", "Recently changed", "changed"}},
-	view.KindNote:    {{"sort.newest", "Newest", "newest"}, {"sort.oldest", "Oldest", "oldest"}, {"sort.title", "Title", "title"}},
-	view.KindTask:    {{"sort.due", "By due", "due"}, {"sort.priority", "By priority", "priority"}, {"sort.changed", "Recently changed", "changed"}},
+	view.KindContact: {{"sort.az", "A–Z", "az", "name"}, {"sort.changed", "Recently changed", "changed", "changed"}},
+	view.KindNote: {{"sort.newest", "Newest", "newest", "date"}, {"sort.oldest", "Oldest", "oldest", "date"},
+		{"sort.title", "Title", "title", "title"}},
+	view.KindTask: {{"sort.due", "By due", "due", "due"}, {"sort.priority", "By priority", "priority", "priority"},
+		{"sort.changed", "Recently changed", "changed", "changed"}},
+	view.KindFile: {{"files.sort.name", "Name", "name", "name"}, {"files.sort.size", "Size", "size", "size"},
+		{"files.sort.changed", "Changed", "changed", "changed"}},
 }
 
 // sortOf is the order the address asks for, or the kind's default.
@@ -751,7 +764,7 @@ func changedAt(obj *model.Object, tz *time.Location) time.Time {
 func (s *Server) contactsList(r *http.Request, c *collectionCtx) view.ContactsListPage {
 	page := view.ContactsListPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = s.listActions(c, nil)
-	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath())
+	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, err := c.contactsAll(r.Context())
 	if err != nil {
@@ -1288,6 +1301,7 @@ func (s *Server) tasksList(r *http.Request, c *collectionCtx) view.TasksPage {
 	show := taskShow(r)
 	page := view.TasksPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = s.listActions(c, nil)
+	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, bad, err := c.calQuery(r.Context(), c.spec.component, nil, nil)
 	if err != nil {
@@ -1368,7 +1382,21 @@ func (s *Server) taskGroups(tf timeFmt, show string, items []listed, segment str
 			row.Due = text(tf.shortDue(due))
 			row.Overdue = !isDone && due.Start.Before(now)
 		}
-		rows = append(rows, item{row: row, due: due.Start, priority: priorityOf(o), changed: changedAt(o, tf.tz), order: it.from.listPath(segment)})
+		// The columns the menu adds (s-tasks-12, -13): the priority by its
+		// number, the status by the word of its list — a task without one
+		// needs action — and the last change with its time.
+		if p := priorityOf(o); p <= 9 {
+			row.Priority = text(strconv.Itoa(p))
+		}
+		row.Status = text(statusLabel(firstValue(o, "STATUS")))
+		if strings.TrimSpace(firstValue(o, "STATUS")) == "" {
+			row.Status = text(taskStatuses[0].label)
+		}
+		changed := changedAt(o, tf.tz)
+		if !changed.IsZero() {
+			row.Changed = text(tf.shortStamp(changed))
+		}
+		rows = append(rows, item{row: row, due: due.Start, priority: priorityOf(o), changed: changed, order: it.from.listPath(segment)})
 	}
 	sort.SliceStable(rows, func(i, j int) bool {
 		a, b := rows[i], rows[j]
@@ -1457,6 +1485,7 @@ func (s *Server) taskSegments(base, tag, show string, open, done int) []view.Act
 func (s *Server) notesList(r *http.Request, c *collectionCtx) view.NotesPage {
 	page := view.NotesPage{Shell: s.buildShell(c.sess, collectionLabel(c.col))}
 	page.Bar.Actions = s.listActions(c, nil)
+	page.Bar.Columns = s.columnsMenu(r, csrfField(c.sess), c.spec.segment, c.listPath()+"/columns", r.URL.Query(), true)
 	filter := s.tagFilter(c.listPath(), r.URL.Query())
 	objs, bad, err := c.calQuery(r.Context(), c.spec.component, nil, nil)
 	if err != nil {
@@ -1501,6 +1530,9 @@ func (s *Server) noteGroups(tf timeFmt, items []listed, segment string, mark boo
 		}
 		if !at.IsZero() {
 			row.Date = text(tf.shortDay(at))
+		}
+		if changed := changedAt(o, tf.tz); !changed.IsZero() {
+			row.Changed = text(tf.shortStamp(changed))
 		}
 		rows = append(rows, item{row: row, at: at, order: it.from.listPath(segment)})
 	}

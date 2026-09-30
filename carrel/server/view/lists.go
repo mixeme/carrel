@@ -12,8 +12,8 @@ type ListBar struct {
 	Range    *Range   `json:"range"`    // диапазон дат там, где он есть
 	Actions  []Action `json:"actions"`  // операции над выделенным
 	Selected int      `json:"selected"`
-	// Columns — кнопка Columns полосы и её меню-форма (components-42); nil —
-	// у списка выбора столбцов нет
+	// Columns — кнопка Columns полосы и её меню-форма (components-42 и
+	// меню записки 25); nil — у списка выбора столбцов нет
 	Columns *Columns `json:"columns"`
 }
 
@@ -32,10 +32,10 @@ type Columns struct {
 	Items []ColumnItem `json:"items"`
 }
 type ColumnItem struct {
-	ID    string `json:"id"` // значение col: name, phone, email, org, birthday, tags, changed, source
+	ID    string `json:"id"` // значение col и столбец строки (C-6.4): name, phone, email, org, birthday, tags, changed, source; title, due, complete, priority, status, excerpt, date, kind; size, type; login, role, created, last-login, dav, sessions, escrow, address; when, action, actor, target, detail
 	Label Text   `json:"label"`
 	On    bool   `json:"on"`              // отмечен: столбец показан
-	Fixed bool   `json:"fixed"`           // стоит всегда первым, отметку не снять (Name)
+	Fixed bool   `json:"fixed"`           // стоит всегда первым, отметку не снять (Name, Title, Login, When)
 	Aside Text   `json:"aside,omitempty"` // приглушённое после подписи: «always» у Fixed
 }
 
@@ -115,21 +115,27 @@ type TaskGroup struct {
 	Rows   []TaskRow `json:"rows"`
 }
 type TaskRow struct {
-	Href    string      `json:"href"`
-	UID     string      `json:"uid"`
-	Colour  Colour      `json:"colour"`
-	Stamp   Stamp       `json:"stamp"`
-	Done    bool        `json:"done"`
-	Summary Text        `json:"summary"`
-	Due     Text        `json:"due"`
-	Overdue bool        `json:"overdue"`
-	Percent *int        `json:"percent"`
-	Tags    []Tag       `json:"tags"`
-	Badges  []Badge     `json:"badges"`  // «2 источника» у связанной задачи
-	Sources []Stamp     `json:"sources"` // источники связанной группы
-	Tick    *Action     `json:"tick"`    // отметка выполнения в строке; nil — только чтение
-	Menu    []MenuItem  `json:"menu"`
-	State   RecordState `json:"state"`
+	Href    string `json:"href"`
+	UID     string `json:"uid"`
+	Colour  Colour `json:"colour"`
+	Stamp   Stamp  `json:"stamp"`
+	Done    bool   `json:"done"`
+	Summary Text   `json:"summary"`
+	Due     Text   `json:"due"`
+	Overdue bool   `json:"overdue"`
+	Percent *int   `json:"percent"`
+	Tags    []Tag  `json:"tags"`
+	// Столбцы, которые человек может выбрать (s-tasks-12, -13): приоритет
+	// числом, «5»; статус словом списка, «In process» (без STATUS — «Needs
+	// action»); последняя правка коротко с временем, «10 Aug 11:02» (C-10)
+	Priority Text        `json:"priority"`
+	Status   Text        `json:"status"`
+	Changed  Text        `json:"changed"`
+	Badges   []Badge     `json:"badges"`  // «2 источника» у связанной задачи
+	Sources  []Stamp     `json:"sources"` // источники связанной группы
+	Tick     *Action     `json:"tick"`    // отметка выполнения в строке; nil — только чтение
+	Menu     []MenuItem  `json:"menu"`
+	State    RecordState `json:"state"`
 }
 
 type NotesPage struct {
@@ -151,6 +157,7 @@ type NoteRow struct {
 	Excerpt Text        `json:"excerpt"`
 	Date    Text        `json:"date"`
 	Tags    []Tag       `json:"tags"`
+	Changed Text        `json:"changed"` // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
 	Badges  []Badge     `json:"badges"`  // «2 источника» у связанной заметки
 	Sources []Stamp     `json:"sources"` // источники связанной группы
 	Menu    []MenuItem  `json:"menu"`

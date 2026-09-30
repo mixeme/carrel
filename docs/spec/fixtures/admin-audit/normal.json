@@ -40,7 +40,83 @@
     ],
     "selected": 0,
     "total": 22,
-    "columns": null
+    "columns": {
+      "form": {
+        "action": "/admin/audit/columns",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/admin/audit/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "enabled": true,
+            "href": "/admin/audit/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ]
+          }
+        ]
+      },
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "when",
+          "label": "When",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "action",
+          "label": "Action",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "actor",
+          "label": "Actor",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "target",
+          "label": "Target",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "detail",
+          "label": "Detail",
+          "on": true
+        }
+      ],
+      "label": "Columns"
+    }
   },
   "details": null,
   "notices": [],

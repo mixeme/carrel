@@ -17,6 +17,111 @@
       "method": "GET"
     }
   ],
+  "bar": {
+    "actions": [],
+    "columns": {
+      "form": {
+        "action": "/admin/columns",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/admin/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "enabled": true,
+            "href": "/admin/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ]
+          }
+        ]
+      },
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "login",
+          "label": "Login",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "role",
+          "label": "Role",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "created",
+          "label": "Created",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "last-login",
+          "label": "Last login",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "dav",
+          "label": "DAV",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "sessions",
+          "label": "Sessions",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "escrow",
+          "label": "Escrow",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "address",
+          "label": "Address",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
+    "compact": false,
+    "filter": "",
+    "loaded": 1,
+    "range": null,
+    "segments": [],
+    "selected": 0,
+    "total": 1
+  },
   "details": null,
   "notices": [],
   "print": {
@@ -110,6 +215,7 @@
   "rows": [
     {
       "accounts": 4,
+      "address": "mix@example.org",
       "created": "11 February 2026",
       "disabled": false,
       "escrowed": false,

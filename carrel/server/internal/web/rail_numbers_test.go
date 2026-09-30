@@ -58,7 +58,8 @@ func frameTicks(frame string) []frameTick {
 func frameNav(frame string) []string {
 	var out []string
 	for _, m := range frameNavItem.FindAllStringSubmatch(frame, -1) {
-		if lab := strings.TrimSpace(frameTags.ReplaceAllString(frameNavNum.ReplaceAllString(m[1], ""), "")); lab != "" {
+		item := frameNavShort.ReplaceAllString(m[1], "")
+		if lab := strings.TrimSpace(frameTags.ReplaceAllString(frameNavNum.ReplaceAllString(item, ""), "")); lab != "" {
 			out = append(out, lab)
 		}
 	}

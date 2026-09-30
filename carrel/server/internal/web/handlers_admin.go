@@ -26,7 +26,7 @@ func (s *Server) getAdminUsers(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	page := s.buildAdminUsersPage(sess, adminUsersFlash{})
+	page := s.buildAdminUsersPage(r, sess, adminUsersFlash{})
 	s.writePage(w, r, http.StatusOK, page)
 }
 
@@ -66,11 +66,11 @@ func (s *Server) postAdminUsers(w http.ResponseWriter, r *http.Request) {
 		s.redirect(w, r, "/admin/")
 		return
 	}
-	page := s.buildAdminUsersPage(sess, flash)
+	page := s.buildAdminUsersPage(r, sess, flash)
 	s.writePage(w, r, http.StatusOK, page)
 }
 
-func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlash) view.AdminUsersPage {
+func (s *Server) buildAdminUsersPage(r *http.Request, sess *session.Session, flash adminUsersFlash) view.AdminUsersPage {
 	snap := s.store.Snapshot()
 	now := s.now()
 	page := view.AdminUsersPage{
@@ -105,8 +105,18 @@ func (s *Server) buildAdminUsersPage(sess *session.Session, flash adminUsersFlas
 		if u.LastLogin != nil {
 			row.LastLogin = tf.formatWhen(*u.LastLogin, false, now)
 		}
+		// Address is the confirmed address; one waiting for its link is
+		// not the account's yet (s-admin-22).
+		if u.EmailConfirmed {
+			row.Address = text(u.Email)
+		}
 		page.Rows = append(page.Rows, row)
 	}
+	// The bar of s-admin-2: Columns (s-admin-21). The list has no query of
+	// its own; a POST's action is not one to come back to.
+	total := len(page.Rows)
+	page.Bar = view.ListBar{Loaded: total, Total: &total,
+		Columns: s.columnsMenu(r, csrfField(sess), "users", "/admin/columns", nil, false)}
 	return page
 }
 
@@ -705,6 +715,9 @@ func (s *Server) getAdminAudit(w http.ResponseWriter, r *http.Request) {
 	}
 	page.Bar.Actions = []view.Action{{ID: "audit.export", Label: "Export CSV", Icon: "i-down", Method: "GET", Enabled: true,
 		Href: s.postQuery("/admin/audit", csv)}}
+	// Columns (s-admin-23), in the bar of s-admin-7 too; Export CSV hands
+	// over every column whatever is shown.
+	page.Bar.Columns = s.columnsMenu(r, csrfField(sess), "audit", "/admin/audit/columns", r.URL.Query(), false)
 	s.writePage(w, r, http.StatusOK, page)
 }
 

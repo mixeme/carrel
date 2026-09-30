@@ -488,7 +488,7 @@ func (s *Server) writeFolder(w http.ResponseWriter, r *http.Request, c *fileCtx,
 		q = cloneValues(q)
 		q.Add("select", pick)
 	}
-	page := s.folderPage(c, segs, entries, q, notices)
+	page := s.folderPage(r, c, segs, entries, q, notices)
 	if target != "" && render.WantsFragment(r) {
 		_ = s.render.Fragment(w, r, http.StatusOK, target, page, nil)
 		return
@@ -506,8 +506,14 @@ func cloneValues(q url.Values) url.Values {
 
 // folderPage lays a listing out: folders first, then by the chosen order; the
 // filter keeps names that hold it; selected rows are the names ?select= gives.
-func (s *Server) folderPage(c *fileCtx, segs []string, entries []file.Entry, q url.Values, notices []view.Notice) view.FilesPage {
+func (s *Server) folderPage(r *http.Request, c *fileCtx, segs []string, entries []file.Entry, q url.Values, notices []view.Notice) view.FilesPage {
 	now := s.now()
+	// A folder put back in its default order because its column went says
+	// so (note 25); the mark leaves the query the page's links are made of.
+	q = cloneValues(q)
+	if n := unsortedNoticeOf(q, "files"); n != nil {
+		notices = append(notices, *n)
+	}
 	title := collectionLabel(c.col)
 	if len(segs) > 0 {
 		title = segs[len(segs)-1]
@@ -533,9 +539,9 @@ func (s *Server) folderPage(c *fileCtx, segs []string, entries []file.Entry, q u
 	if q.Get("view") == string(view.FileTiles) {
 		page.View = view.FileTiles
 	}
-	order := q.Get("sort")
-	if order != "size" && order != "changed" {
-		order = "name"
+	order := listSorts[view.KindFile][0].value
+	if sortColumn("files", q.Get("sort")) != "" {
+		order = q.Get("sort")
 	}
 	filter := strings.TrimSpace(q.Get("filter"))
 	needle := strings.ToLower(filter)
@@ -599,7 +605,8 @@ func (s *Server) folderPage(c *fileCtx, segs []string, entries []file.Entry, q u
 	}
 
 	total := len(entries)
-	page.Bar = view.ListBar{Filter: text(filter), Loaded: len(page.Rows), Total: &total, Selected: len(picked)}
+	page.Bar = view.ListBar{Filter: text(filter), Loaded: len(page.Rows), Total: &total, Selected: len(picked),
+		Columns: s.columnsMenu(r, csrfField(c.sess), "files", c.href("columns", segs, true), q, false)}
 	option := func(id, label, key, value, current string) view.Action {
 		v := cloneValues(q)
 		v.Set(key, value)
@@ -608,9 +615,9 @@ func (s *Server) folderPage(c *fileCtx, segs []string, entries []file.Entry, q u
 	page.Bar.Segments = []view.Action{
 		option("files.view.list", "List", "view", string(view.FileList), string(page.View)),
 		option("files.view.tiles", "Tiles", "view", string(view.FileTiles), string(page.View)),
-		option("files.sort.name", "Name", "sort", "name", order),
-		option("files.sort.size", "Size", "sort", "size", order),
-		option("files.sort.changed", "Changed", "sort", "changed", order),
+	}
+	for _, o := range listSorts[view.KindFile] {
+		page.Bar.Segments = append(page.Bar.Segments, option(o.id, o.label, "sort", o.value, order))
 	}
 	page.Bar.Actions = s.folderActions(c, segs, picked)
 	page.Queue = s.transferQueue(c.sess)

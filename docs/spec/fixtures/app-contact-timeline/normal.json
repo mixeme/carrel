@@ -69,7 +69,77 @@
     ],
     "selected": 0,
     "total": null,
-    "columns": null
+    "columns": {
+      "form": {
+        "action": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "enabled": true,
+            "href": "/app/contacts/a-nc-home/kontakty/4f2b-9c31-a0e7/timeline/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ]
+          }
+        ]
+      },
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "date",
+          "label": "Date",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "kind",
+          "label": "Kind",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "source",
+          "label": "Source",
+          "on": true
+        }
+      ],
+      "label": "Columns"
+    }
   },
   "card": {
     "actions": [
@@ -210,7 +280,7 @@
           "kind": "event",
           "stamp": "nextcloud · Личный",
           "title": "Синк-ап по релизу",
-          "when": "10 August 2026",
+          "when": "10 Aug",
           "why": "attendee · accepted"
         }
       ],

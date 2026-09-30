@@ -76,6 +76,12 @@ func (f timeFmt) shortDay(t time.Time) string {
 	return t.In(f.tz).Format("2 Jan 2006")
 }
 
+// shortStamp is a moment in a row's column: the short day and the time,
+// «10 Aug 11:02» — when a record last changed (s-tasks-13, s-notes-24).
+func (f timeFmt) shortStamp(t time.Time) string {
+	return f.shortDay(t) + " " + f.clock(t)
+}
+
 // shortDue is a due date in a row's column: the short day, and the time
 // after it when there is one, «12 Aug 18:00» (s-tasks-1).
 func (f timeFmt) shortDue(tm cal.Timing) string {

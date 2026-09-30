@@ -17,6 +17,54 @@ Nothing in the running server. Open
 [carrel-ui-mockups.html](../../docs/visual/carrel-ui-mockups.html) for the
 current mockup; fonts are in `docs/visual/fonts/`.
 
+## v0.2.82 — 2026-10-01
+
+Columns in every list that draws them (from-typecase note 25, the owner's
+decisions of 29–30.09.2026): tasks, notes, files, users, the audit log and a
+person's timeline; Source only in a combined view; sorting follows the
+columns.
+
+### Added
+
+- **`ListBar.columns` on the lists of tasks (s-tasks-12), notes
+  (s-notes-23), files (s-files-20), a person's timeline (s-contacts-25),
+  users (s-admin-21) and the audit log (s-admin-23, also in the bar of
+  s-admin-7).** The same form as the contacts': `col` in order to
+  `…/columns` (`/app/tasks/columns`, `/app/notes/…/columns`,
+  `/app/files/{account}/{col}/columns/{path…}`,
+  `…/{uid}/timeline/columns`, `/admin/columns`, `/admin/audit/columns`),
+  `col=default` resets, a cookie per section (`carrel_cols_tasks`,
+  `_notes`, `_files`, `_timeline`, `_users`, `_audit`; S-9.6). The
+  administration's forms are an administrator's.
+- **Row fields for every column the menus offer** (C-6.4 maps columns to
+  fields): `TaskRow.priority` («5»), `.status` («In process»; «Needs action»
+  without STATUS), `.changed` («10 Aug 11:02»); `NoteRow.changed`;
+  `AdminUserRow.address` — the confirmed address, empty without one
+  (s-admin-22); `AdminUsersPage.bar`, holding Columns for now.
+- **Sorting follows the columns** (s-tasks-13). A sort shows its column
+  («Recently changed» — Changed, «By priority» — Priority, «Newest» and
+  «Oldest» — Date, files' «Size» — Size). A choice that takes away the
+  column the list is sorted by leads to the list without `sort` and with
+  `unsorted=<the order>`, and the list says so: `info` notice «Back to the
+  default order». The mark leaves the address; no link of the page carries
+  it.
+
+### Changed
+
+- **Source only in a combined view's menu.** One collection of contacts,
+  tasks or notes names its source in its head, so its menu has no Source
+  item (components-42 is now the combined contacts' form). A choice made in
+  one collection keeps Source where the section's choice had it.
+- **A timeline row's `when` is a list's day**, «10 Aug» (s-contacts-7, -26;
+  C-10), no longer «10 August 2026».
+
+### For consumers
+
+Draw the columns a list's `bar.columns` ticks, in the order of its items;
+the rows carry every column in any choice. Fixtures regenerated:
+`admin-audit`, `admin-users`, `app-contact-timeline`, `app-contacts-one`,
+`app-notes`, `app-notes-all`, `app-tasks`, `app-tasks-all`.
+
 ## v0.2.81 — 2026-09-30
 
 A copy of a record within one iCloud account is written (docs/servers.md,

@@ -26,7 +26,83 @@
         "method": "GET"
       }
     ],
-    "columns": null,
+    "columns": {
+      "form": {
+        "action": "/app/notes/a-nc-home/zapisi/columns",
+        "actions": [
+          {
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/columns",
+            "id": "columns.apply",
+            "label": "Apply",
+            "method": "POST",
+            "primary": true
+          },
+          {
+            "enabled": true,
+            "href": "/app/notes/a-nc-home/zapisi/columns",
+            "id": "columns.default",
+            "label": "Reset to defaults",
+            "method": "POST"
+          }
+        ],
+        "errors": [],
+        "method": "POST",
+        "sets": [
+          {
+            "legend": "",
+            "rows": [
+              {
+                "error": "",
+                "extra": null,
+                "hint": "",
+                "kind": "hidden",
+                "label": "",
+                "name": "_csrf",
+                "options": [],
+                "readOnly": false,
+                "required": false,
+                "value": "csrf"
+              }
+            ]
+          }
+        ]
+      },
+      "items": [
+        {
+          "aside": "always",
+          "fixed": true,
+          "id": "title",
+          "label": "Title",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "excerpt",
+          "label": "Excerpt",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "tags",
+          "label": "Tags",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "date",
+          "label": "Date",
+          "on": true
+        },
+        {
+          "fixed": false,
+          "id": "changed",
+          "label": "Changed",
+          "on": false
+        }
+      ],
+      "label": "Columns"
+    },
     "compact": false,
     "filter": "",
     "loaded": 2,
@@ -64,6 +140,7 @@
       "rows": [
         {
           "badges": [],
+          "changed": "10 Aug 11:05",
           "colour": "",
           "date": "10 Aug",
           "excerpt": "Договорились заморозить ветку в среду.",
@@ -148,6 +225,7 @@
         },
         {
           "badges": [],
+          "changed": "8 Aug 22:00",
           "colour": "",
           "date": "8 Aug",
           "excerpt": "Кляйн, глава 5; статья Шапиро 2011; демка automerge — посмотреть, как они решают конфликт двух правок одного поля.",

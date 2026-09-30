@@ -316,6 +316,7 @@ type AppearancePage struct {
 
 type AdminUsersPage struct {
 	Shell
+	Bar  ListBar        `json:"bar"` // полоса s-admin-2: пока только Columns (s-admin-21)
 	Rows []AdminUserRow `json:"rows"`
 	Add  []Action       `json:"add"` // шапка (s-admin-2): Add user — на «Add users», Reset a password — лист PasswordResetSheet
 }
@@ -328,7 +329,8 @@ type AdminUserRow struct {
 	Sessions  int        `json:"sessions"`
 	Disabled  bool       `json:"disabled"`
 	Escrowed  bool       `json:"escrowed"`
-	Menu      []MenuItem `json:"menu"` // только «⋯» (s-admin-12)
+	Address   Text       `json:"address"` // подтверждённый адрес; пусто — его нет (s-admin-22)
+	Menu      []MenuItem `json:"menu"`    // только «⋯» (s-admin-12)
 }
 
 // PasswordResetSheet — «Reset a password» из шапки списка людей (s-admin-13):

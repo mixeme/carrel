@@ -385,10 +385,11 @@ spec/fixtures/<screen>/<state>.json
 |---|---|---|---|---|
 | `/app/{kind}` | GET | вход | страница | те же, что строкой ниже |
 | `/app/{kind}/{account}/{col}` | GET | вход | страница | `ContactsListPage`, `AgendaPage`, `TasksPage`, `NotesPage` |
-| `/app/contacts/columns`, `/app/contacts/{account}/{col}/columns` | POST | вход | редирект | — ; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом (S-9.6) |
+| `/app/{kind}/columns`, `/app/{kind}/{account}/{col}/columns` | POST | вход | редирект | — ; `{kind}` — `contacts`, `tasks`, `notes`; меню Columns (`ListBar.Columns`): `col` — отмеченные столбцы в их порядке, `col=default` — сброс; ответ — список, с которого пришли, с его запросом; снятый столбец сортировки — без `sort`, с `unsorted=` (S-9.6) |
 | `/app/{kind}/{account}/{col}/{uid}` | GET | вход | страница | `ContactPage`, `EventPage`, `TaskPage`, `NotePage` — чтение |
 | `/app/{kind}/{account}/{col}/{uid}/edit` | GET, POST | вход | страница, редирект | `ContactEditPage`, `EventEditPage`, `TaskEditPage`, `NotePage` — правка (s-notes-20); у события, задачи и заметки POST с `?op=` — вложения (S-20): `attach` — файл с этого компьютера (multipart), `attachfile&file=` — файл из Files по его адресу в разделе файлов, `detach&n=` — снять; у всех `etag` показанной версии |
 | `/app/contacts/{account}/{col}/{uid}/timeline` | GET | вход | страница | `ContactTimelinePage` |
+| `/app/contacts/{account}/{col}/{uid}/timeline/columns` | POST | вход | редирект | — ; меню Columns хронологии (s-contacts-25), как у списков (S-9.6) |
 | `/app/contacts/{account}/{col}/{uid}/photo-preview` | GET, POST | вход | страница | `PhotoPreviewPage` |
 | `/c/{account}/{col}/{uid}/photo` | GET | вход | поток | — |
 | `/app/{kind}/{account}/{col}/{uid}/conflict` | GET, POST | вход | страница | `ConflictPage` |
@@ -434,6 +435,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/app/files/{account}/{col}/upload/{path…}` | POST | вход | фрагмент | `TransferQueue` |
 | `/app/files/{account}/{col}/mkcol/{path…}` | POST | вход | фрагмент | `FilesPage` |
 | `/app/files/{account}/{col}/op/{path…}` | POST | вход | фрагмент, лист | `FileOpSheet` |
+| `/app/files/{account}/{col}/columns/{path…}` | POST | вход | редирект | — ; меню Columns папки (s-files-20); ответ — папка `{path…}` с её запросом (S-9.6) |
 | `/app/files/picker` | GET, POST | вход | лист | `FilePickerSheet`; `?for=upload` — папка загрузки из меню создания; `?for=attach&k=&a=&c=&uid=&etag=[&from=]` (GET) — файл для вложения записи (From Files у Attach), `&to=` открывает папку или выбирает файл; `?for=attachments[&to=]` (GET) — Browse папки вложений, «Choose this folder» ведёт на `/app/settings/attachments?to=` |
 | `/app/files/published` | GET | вход | страница | `PublishedLinksPage` |
 | `/app/attach/{account}/{col}/{path…}` | GET | вход | поток | — |
@@ -490,6 +492,7 @@ Typecase): рейл с соседними заметками и колонка �
 | `/admin/settings/mail-test` | POST | админ | фрагмент | `MailTestResult` |
 | `/admin/escrow` | GET, POST | админ | страница | `AdminEscrowPage` |
 | `/admin/audit` | GET | админ | страница, файл (`?format=csv`); `?show=`, `?action=` — фильтры | `AdminAuditPage` |
+| `/admin/columns`, `/admin/audit/columns` | POST | админ | редирект | — ; меню Columns пользователей (s-admin-21) и журнала (s-admin-23), как у списков (S-9.6) |
 | `/admin/dav` | GET, POST | админ | страница | `AdminDavPage` |
 | `/admin/install` | GET, POST | админ | страница | `AdminInstallPage` |
 
@@ -886,10 +889,10 @@ type Columns struct {
     Items []ColumnItem // показанные столбцы в их порядке, за ними снятые в порядке по умолчанию; пока человек не выбирал — все в порядке по умолчанию (components-21)
 }
 type ColumnItem struct {
-    ID    string // значение col и столбец строки: name, phone, email, org, birthday, tags, changed, source
+    ID    string // значение col и столбец строки — карта столбцов к полям строк ниже
     Label Text
     On    bool   // отмечен: столбец показан
-    Fixed bool   // стоит всегда первым, отметку не снять (Name); в форму не уходит
+    Fixed bool   // стоит всегда первым, отметку не снять (Name, Title, Login, When); в форму не уходит
     Aside Text   // приглушённое после подписи: «always» у Fixed
 }
 
@@ -963,6 +966,9 @@ type TaskRow struct {
     Overdue   bool
     Percent   *int
     Tags      []Tag
+    Priority  Text     // приоритет числом, «5»; пусто — нет (s-tasks-13)
+    Status    Text     // статус словом списка, «In process»; без STATUS — «Needs action» (s-tasks-13)
+    Changed   Text     // последняя правка коротко с временем, «10 Aug 11:02» (s-tasks-13, C-10)
     Badges    []Badge  // «2 источника» у связанной задачи
     Sources   []Stamp  // источники связанной группы
     Tick      *Action  // отметка выполнения в строке (task.done); nil — только чтение
@@ -985,6 +991,7 @@ type NoteRow struct {
     Excerpt   Text
     Date      Text
     Tags      []Tag
+    Changed   Text     // последняя правка коротко с временем, «10 Aug 11:05» (s-notes-24, C-10)
     Badges    []Badge  // «2 источника» у связанной заметки
     Sources   []Stamp  // источники связанной группы
     Menu      []MenuItem
@@ -992,14 +999,25 @@ type NoteRow struct {
 }
 ```
 
-**Столбцы строки контакта.** Строка несёт все столбцы, какие предлагает меню
-Columns, в любом выборе; какие из них и в каком порядке рисовать — говорит
-`ListBar.Columns`. Столбец — поле строки: `name` — `Name`, `phone` — `Phone`,
-`email` — `Email`, `org` — `Org`, `birthday` — `Birthday`, `tags` — `Tags`,
-`changed` — `Changed`, `source` — `Stamp`. `Stamp` есть только в едином виде:
-у одной коллекции источник один, и столбца у неё нет, даже отмеченного.
-Меню пока есть только у списка контактов: столбцы остальных списков кадрами
-не нарисованы.
+**Столбцы строк** (записки 23 и 25). Строка несёт все столбцы, какие
+предлагает меню Columns, в любом выборе; какие из них и в каком порядке
+рисовать — говорит `ListBar.Columns`: отмеченные пункты `Items` в их
+порядке. Столбец — поле строки:
+
+| Список, меню | Столбцы (`ColumnItem.ID`) и поля строки |
+|---|---|
+| контакты (components-21, -42) | `name` — `Name`, `phone` — `Phone`, `email` — `Email`, `org` — `Org`, `birthday` — `Birthday`, `tags` — `Tags`, `changed` — `Changed`, `source` — `Stamp` |
+| задачи (s-tasks-12, -13) | `title` — `Summary`, `tags` — `Tags`, `due` — `Due` (тревожным — только срок, `Overdue`), `complete` — `Percent` (`70%`), `source` — `Stamp`, `priority` — `Priority`, `status` — `Status`, `changed` — `Changed`; галка дела `Tick` стоит перед меткой в любом наборе |
+| заметки (s-notes-23, -24) | `title` — `Title`, `excerpt` — `Excerpt`, `tags` — `Tags`, `date` — `Date`, `source` — `Stamp`, `changed` — `Changed` |
+| файлы (s-files-20) | `name` — `Name`, `size` — `Size`, `type` — `Type`, `changed` — `Modified` (`FileRow`, C-6.7) |
+| хронология (s-contacts-25, -26) | `title` — `Title`, за ним всегда `Why` (в меню не входит), `date` — `When`, `kind` — `Kind`, `source` — `Stamp` (`TimelineRow`, C-6.5) |
+| пользователи (s-admin-21, -22) | `login` — `Login`, `role` — `Role`, `created` — `Created`, `last-login` — `LastLogin`, `dav` — `Accounts`, `sessions` — `Sessions`, `escrow` — `Escrowed`, `address` — `Address`; «⋯» в меню не входит (`AdminUserRow`, C-6.8) |
+| журнал (s-admin-23, s-admin-7) | `when` — `When`, `action` — `What`, `actor` — `Who`, `target` — `Whom`, `detail` — `Detail` (`AuditRow`, C-6.8); Export CSV — все столбцы |
+
+**Source — только в меню единого вида** (записка 25): у одной коллекции
+контактов, задач или заметок источник один и назван в заголовке, пункта
+Source в её меню нет, и `Stamp` в её строках пуст. У хронологии источник
+свой у каждой строки, и Source в её меню есть всегда.
 
 ### C-6.5 Карточки записей
 
@@ -1056,10 +1074,10 @@ type TimelineGroup struct { Rubric Text; Rows []TimelineRow }
 type TimelineRow struct {
     Href    string
     Kind    Kind
-    When    Text
+    When    Text // день списка коротко, «10 Aug» (s-contacts-7, -26; C-10)
     Title   Text
     Stamp   Stamp
-    Why     Text // «участник · приняла», «упомянута в тексте» — колонка обязательна
+    Why     Text // «участник · приняла», «упомянута в тексте» — колонка обязательна, за названием, в меню Columns не входит
 }
 
 type ContactEditPage struct {
@@ -2020,6 +2038,7 @@ type AppearancePage struct {
 
 type AdminUsersPage struct {
     Shell
+    Bar  ListBar // полоса s-admin-2: пока только Columns (s-admin-21)
     Rows []AdminUserRow
     Add  []Action // шапка (s-admin-2): Add user — на «Add users»; Reset a password — лист PasswordResetSheet
 }
@@ -2032,6 +2051,7 @@ type AdminUserRow struct {
     Sessions  int
     Disabled  bool
     Escrowed  bool
+    Address   Text // подтверждённый адрес; пусто — его нет, прочерк (s-admin-22)
     Menu      []MenuItem // только «⋯» (s-admin-12): Make administrator | Make user, Kill sessions, Disable | Enable, черта, Delete
 }
 // PasswordResetSheet — «Reset a password» из шапки списка людей (s-admin-13):
