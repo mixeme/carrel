@@ -4,6 +4,56 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.0.5 — 2026-09-30
+
+A screen is the screen of a view model: the renderer will pick it by the
+type of the body the server hands it. The page about the program, the
+invitation and the confirmed address join the sign-in page on `main`. The
+dead link is built and waits on the branch `client/rest-1` for one line of
+`STATE_FRAME`; the registration, the first run and the forgotten password
+wait on the contract — a piece of a sentence the frame marks, a field drawn
+monospaced (docs/plan/client.md, «Что блокирует»).
+
+### Changed
+
+- **The registry is by view model** (`screens.All`): an entry is a screen of
+  a view model (`Model`) with the frames it draws (`Frames`), no route. A
+  screen's fixtures are those of its view model — the map of fixture
+  directories to view models moved from the zones' test to the package
+  `fixtures`, which both read —, so the dead link's fixture on the route of
+  the invitation is the dead link's. Each fixture is held against the frame
+  `check.py`'s check 8 gives it (`STATE_FRAME`, else its route's frame),
+  which the screen must name, and each frame named is drawn by a fixture.
+  Bites: another frame than the route's, a state's frame left out, a view
+  model without fixtures.
+- **An address is built by its view models** (`guard.CheckAddresses`, U-15.2,
+  5): an address of C-5 is built when every view model its row answers with
+  has a screen — the page's own and, on a secret link, `DeadLinkPage`; «те
+  же, что строкой ниже» is the row below. Red always: a view model no page
+  or sheet of C-5 answers with, one built twice, an address built and
+  waiting, a page or sheet row with no view model. Bites for each, and for
+  what a cell quotes that is no view model (`Issued`).
+- **Typecase `f86a3f0`**, as in v0.0.4; the mockup copy of Carrel is now the
+  same as Typecase's. The neighbour's tree became dirty during the work
+  (Typecase's task 45); the drafts below are the files the clean `f86a3f0`
+  prints.
+
+### Added
+
+- **The page about the program** (`/about`, `rest-3`) from `AboutPage`, the
+  screen of the branch `client/rest-3` over its draft; the branch is gone.
+- **The invitation** (`/invite/{token}`, `s-auth-12`) from `InvitePage`:
+  draft, then screen — the title and who invited, the warning over the
+  fields, the form's rows with the cursor where `FormRow.Focus` says, the
+  address of an invitation by letter switched off (`ReadOnly`), a login taken
+  marked and said under its field, «Create account» submitting the form by
+  name.
+- **The confirmed address** (`/confirm-email/{token}`, `rest-2`) from
+  `ConfirmEmailPage`: draft, then screen — the mark, the title, what
+  happened, «Sign in».
+- **The draft of the dead link** (`rest-1`); its screen from `DeadLinkPage`
+  is on the branch `client/rest-1`, red only in the frame of its fixture.
+
 ## v0.0.4 — 2026-09-30
 
 The sign-in page is the first screen on `main`, with its refusal. The other
