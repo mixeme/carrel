@@ -4,6 +4,47 @@ All notable changes to the Carrel client are documented here. Numbers like
 `v0.0.N` name steps in this file only — they are not git tags unless an
 entry lists **Tagged:**. The plan is [docs/plan/client.md](../../docs/plan/client.md).
 
+## v0.0.4 — 2026-09-30
+
+The sign-in page is the first screen on `main`, with its refusal. The other
+pages outside the shell wait: their frames put the cursor in a field the
+server does not name yet, their states other than the normal one have no
+fixture, and the dead link has no address of its own (docs/plan/client.md,
+«Что блокирует»). The page about the program is built and waits on the
+branch `client/rest-3` for the copy of the mockup.
+
+### Changed
+
+- **Typecase `f86a3f0`** (`784599e` and the roadmap after it; the
+  neighbour's tree clean). `shape` compares an element with classes by its
+  classes, so a link with an address is no difference from the frame's
+  `span`; the draft ends its file with one newline, as gofmt wants.
+- **A state is held against its own frame** (`guard/screens_test.go`):
+  `STATE_FRAME` of `docs/spec/check.py` — the map its check 8 uses — gives
+  the frame of a fixture's state (`login/refused` → `s-auth-13`). The frame
+  comparison holds that fixture against the state's frame, which must name
+  the route in its `data-screen` and be the same in both copies of the
+  mockup; kinship holds it against the draft of the state's frame. Both
+  maps of `check.py` are read by one reader. Bites: the refusal drawn as
+  the empty sign-in (red on `login/refused` only), a state's frame of
+  another route, copies parted on `s-auth-13`, the reason in another hint.
+
+### Added
+
+- **The draft of the sign-in page again** (`screens/login`, `s-auth-1`),
+  printed by the current Typecase, a commit of its own.
+- **The sign-in page** (`/login`, `s-auth-1`; the refusal `s-auth-13`) from
+  `LoginPage`: the mark, the tagline (`Lede`, `Tagline`), the form with its
+  `Action`, `Method`, hidden fields (CSRF) and fields by `Name`; «Sign in»
+  submits the form by name; «Create an account» while `Register`, and
+  «Forgotten your password?», with addresses. The cursor is where
+  `FormRow.Focus` says; a field with an error is marked and says the reason
+  under itself. In `screens.All`, every guard green on both fixtures.
+- **The draft of the page about the program** (`screens/about`, `rest-3`),
+  a commit of its own. The screen from `AboutPage` is on the branch
+  `client/rest-3`: every guard green but one — the frame differs between
+  the two copies of the mockup, as the prose after it changed in Typecase.
+
 ## v0.0.3 — 2026-09-29
 
 Typecase 0.10.0 gives the sign-in page its meaning, and the client checks it
