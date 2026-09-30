@@ -509,6 +509,15 @@ label.tc-check{position:relative;cursor:pointer}
 .tc-row--cols > .tc-col--tags{flex:.8 1 100px;min-width:0}
 .tc-row--cols > .tc-col--changed{width:96px}
 .tc-row--cols > .tc-col--source{width:140px}
+.tc-row--cols > .tc-col--due{width:96px}
+.tc-row--cols > :is(.tc-col--complete,.tc-col--priority){width:48px}
+.tc-row--cols > .tc-col--status{width:112px}
+.tc-row--cols > .tc-col--excerpt{flex:1.6 1 160px;min-width:0}
+.tc-row--cols > .tc-col--date{width:62px}
+.tc-row--cols > .tc-col--detail{flex:1 1 120px;min-width:0}
+.tc-row--cols > .tc-col--kind{width:56px}
+/* Просрочен срок, а не всё дело: остальные числа строки своего цвета. */
+.tc-row--cols.is-overdue > .tc-row__cell{color:var(--tc-dusty)}
 .tc-row--timecols{grid-template-columns:3px 62px minmax(168px,2fr) minmax(110px,1fr) 96px 140px}
 .tc-row--tickmarkcols{grid-template-columns:14px 3px minmax(178px,2fr) minmax(90px,auto) 84px 44px 140px}
 .tc-row--excerpt{grid-template-columns:3px minmax(118px,1.2fr) minmax(170px,2fr) minmax(70px,auto) 80px 140px}
@@ -786,7 +795,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-bar:has(.is-2nd) .tc-bar__more + .tc-menu{display:block}
   /* Тяжёлая таблица — .tc-table--wide: целиком ей нужно около 790, поэтому is-2nd уходит с 800, а не с 700. */
   .tc-table--wide th.is-2nd,.tc-table--wide td.is-2nd{display:none}
-  .tc-row--cols > :is(.tc-col--org,.tc-col--birthday,.tc-col--tags,.tc-col--changed){display:none}
+  .tc-row--cols > :is(.tc-col--org,.tc-col--birthday,.tc-col--tags,.tc-col--changed,.tc-col--complete,.tc-col--priority){display:none}
   .tc-row--avatarcols{grid-template-columns:3px 28px minmax(100px,1.4fr) 130px minmax(120px,1fr) 140px}
   .tc-row--avatarcols .tc-row__caption{display:none}
   .tc-row--timecols{grid-template-columns:3px 60px minmax(116px,2fr) 88px 140px}
@@ -819,7 +828,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-row{padding-left:12px;padding-right:12px}
   /* Тесная шапка: набор кнопок переносится, а не выдавливает панель. */
   .tc-head .tc-acts{flex:0 1 auto;min-width:0}
-  .tc-row--cols > .tc-col--email{display:none}
+  .tc-row--cols > :is(.tc-col--email,.tc-col--status,.tc-col--excerpt){display:none}
   .tc-row--cols > .tc-col--phone{width:118px}
   .tc-row--avatarcols{grid-template-columns:3px 28px minmax(100px,1.6fr) 118px 130px}
   .tc-row--avatarcols .tc-row__detail{display:none}
@@ -835,7 +844,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   .tc-row--tickcols .tc-row__time{display:none}
 }
 @container tcbox (max-width:460px){
-  .tc-row--cols > .tc-col--source{display:none}
+  .tc-row--cols > :is(.tc-col--source,.tc-col--kind){display:none}
   .tc-row--avatarcols{grid-template-columns:3px 28px minmax(0,1fr) 118px}
   .tc-row--avatarcols .tc-row__source{display:none}
   .tc-row--timecols{grid-template-columns:3px 50px minmax(0,1fr)}
@@ -2424,7 +2433,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
 </figure>
 
 <h4>Выбор столбцов</h4>
-<p>Раз ширина отдана колонкам, человек должен решать, какие это колонки. Кнопка <b>Columns</b> стоит в панели управления каждого списка и каждой таблицы — контакты, задачи, заметки, файлы, пользователи, журнал.</p>
+<p>Раз ширина отдана колонкам, человек должен решать, какие это колонки. Кнопка <b>Columns</b> стоит в панели управления каждого списка и каждой таблицы — контакты, задачи, заметки, файлы, пользователи, журнал, хронология человека. Что в меню у каждого — кадры «Columns» разделов.</p>
 <figure>
 <div class="frame" data-frame="components-21">
   <div class="frame-label"><span>Выбор столбцов</span><span class="frag">компонент</span><i>меню со списком колонок</i></div>
@@ -2453,7 +2462,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
 <div class="frame" data-frame="components-42">
   <div class="frame-label"><span>Выбор столбцов · форма</span><span class="frag">компонент</span><i>Columns без сценария и со сценарием</i></div>
   <div class="tc-root tc-root--on-surface tc-root--top tc-root--pad18-20">
-  <form class="tc-menu" action="/app/contacts/nextcloud/kontakty/columns" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+  <form class="tc-menu" action="/app/contacts/columns" method="post"><input type="hidden" name="csrf" value="7f3a91de">
     <div class="tc-rubric tc-menu__item tc-menu__item--pad5-8-7" role="presentation">Columns</div>
     <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="name" checked disabled><svg class="tc-ico--op-35"><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Name<span class="tc-push tc-dim tc-dim--t10-5">always</span></label>
     <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="email" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Email</label>
@@ -2467,7 +2476,7 @@ label.tc-menu__item{position:relative;cursor:pointer}
   </form>
   </div>
 </div>
-<figcaption><b>Меню столбцов — форма.</b> Пункт — флажок: отмечен — столбец показан; Name стоит всегда. <b>Порядок пунктов — порядок столбцов</b>: форма отправляет отмеченные в том порядке, в каком они стоят. Без сценария меняются отметки, и «Apply» их отправляет; со сценарием пункт тянут за ручку, или Alt+↑ / Alt+↓ на пункте, и порядок уходит тем же «Apply»; пункт, который тянут, бледнеет (Tags). «Reset to defaults» — отправка с одним значением default.</figcaption>
+<figcaption><b>Меню столбцов — форма.</b> Пункт — флажок: отмечен — столбец показан; Name стоит всегда. <b>Порядок пунктов — порядок столбцов</b>: форма отправляет отмеченные в том порядке, в каком они стоят. Без сценария меняются отметки, и «Apply» их отправляет; со сценарием пункт тянут за ручку, или Alt+↑ / Alt+↓ на пункте, и порядок уходит тем же «Apply»; пункт, который тянут, бледнеет (Tags). «Reset to defaults» — отправка с одним значением default. Меню — единого вида: у одной книги пункта Source нет, её источник назван в заголовке.</figcaption>
 </figure>
 
 <figure>
@@ -2501,10 +2510,10 @@ label.tc-menu__item{position:relative;cursor:pointer}
 <p>Кнопка стоит в панели управления, рядом с сортировкой и видом. Флажок включает столбец, ручка слева меняет порядок перетаскиванием, первый столбец выключить нельзя — это то, за что запись открывают. Пояснения к макету живут здесь, а не внутри него: на самом экране такого текста не будет.</p>
 <table class="doc">
   <tr><th style="width:30%">Вопрос</th><th>Ответ</th></tr>
-  <tr><td>Что происходит при сужении окна</td><td>Правила ширины (раздел 3) продолжают убирать столбцы, начиная с последнего включённого. Выбор человека — это <b>что показывать, когда место есть</b>, а не запрет прятать</td></tr>
-  <tr><td>Где хранится</td><td>По разделу и по человеку, в <code>localStorage</code>. Заводить ради этого поле на сервере и писать в него при каждом клике незачем</td></tr>
+  <tr><td>Что происходит при сужении окна</td><td>Столбец уходит на своей ступени, и её задаёт род столбца: даты и источник держат ширину до 460&nbsp;px, почта и начало текста уходят с 620, организация, теги и числа — с 800. Выбор человека — это <b>что показывать, когда место есть</b>, а не запрет прятать</td></tr>
+  <tr><td>Где хранится</td><td>В куке этого браузера, своей у каждого раздела; её ставит сервер, получив форму меню. Ни сценария, ни поля в учётной записи</td></tr>
   <tr><td>Что печатается</td><td>Тот же набор. Распечатка должна совпадать с тем, что человек видел, — иначе она не его список, а чей-то другой</td></tr>
-  <tr><td>Что с сортировкой</td><td>Сортировать можно по включённому столбцу; выключение столбца, по которому отсортировано, возвращает сортировку по умолчанию и говорит об этом</td></tr>
+  <tr><td>Что с сортировкой</td><td>Сортировка идёт за столбцами: сортируют по показанному столбцу, и выбор сортировки показывает её столбец («Recently changed» — Changed). Снятие столбца, по которому отсортировано, возвращает сортировку по умолчанию и говорит об этом</td></tr>
   <tr><td>Набор по умолчанию</td><td>Тот, что нарисован в макетах разделов. «Reset to defaults» возвращает именно его</td></tr>
 </table>
 
@@ -4033,6 +4042,39 @@ Read  2 min ago</div>
 <br><br><b>Диапазон дат стоит в полосе первым</b>, с кнопкой Show, и не помечен <code>is-2nd</code>: при открытой панели подробностей колонка уже меньше 800&nbsp;px, и спрятанный диапазон оставлял бы «Widen the range» без контрола, которым отвечают.</figcaption>
 </figure>
 
+<figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-contacts-25">
+    <div class="frame-label"><span>Хронология · Columns</span><span class="frag">меню</span><i>меню полосы хронологии</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-menu" action="/app/contacts/nextcloud/kontakty/4f2b-9c31-a0e7/timeline/columns" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-rubric tc-menu__item tc-menu__item--pad5-8-7" role="presentation">Columns</div>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="title" checked disabled><svg class="tc-ico--op-35"><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Title<span class="tc-push tc-dim tc-dim--t10-5">always</span></label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="date" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Date</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="kind" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Kind</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="source" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Source</label>
+        <div class="tc-menu__foot"><button class="tc-btn is-sm is-primary" type="submit">Apply</button><button class="tc-btn is-sm" type="submit" name="col" value="default">Reset to defaults</button></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Title стоит всегда, и с ним — <b>почему запись здесь</b> («attendee · accepted», «attached to …»): эта колонка обязательна, в меню её нет. Kind — событие, задача, заметка или файл.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-contacts-26">
+    <div class="frame-label"><span>Хронология · свои столбцы</span><span class="frag">фрагмент</span><i>список после «Columns»</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-list">
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title tc-col--name">Синк-ап по релизу</span><span class="tc-row__excerpt tc-col--detail">attendee · accepted</span><span class="tc-row__cell tc-col--kind">event</span><span class="tc-row__cell tc-col--source">nextcloud · Личный</span><span class="tc-row__cell tc-mono tc-col--date">10 Aug</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title tc-col--name">2026-08-04-обложка.pdf</span><span class="tc-row__excerpt tc-col--detail">attached to «Согласовать обложку»</span><span class="tc-row__cell tc-col--kind">file</span><span class="tc-row__cell tc-col--source">sftpgo · vps · Documents</span><span class="tc-row__cell tc-mono tc-col--date">4 Aug</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__title tc-col--name">Согласовать обложку</span><span class="tc-row__excerpt tc-col--detail">organiser · done</span><span class="tc-row__cell tc-col--kind">task</span><span class="tc-row__cell tc-col--source">nextcloud · Работа</span><span class="tc-row__cell tc-mono tc-col--date">4 Aug</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Title, Kind, Source, Date: дата перенесена в конец. Причина стоит за названием в любом порядке столбцов. Kind и Source уходят с 460 px.</figcaption>
+  </figure>
+
 <div class="frames">
   <figure style="flex:0 1 250px">
   <div class="frame" data-frame="s-contacts-14">
@@ -4703,6 +4745,49 @@ SEQUENCE  2</div>
 <figcaption><b>Attachments у задачи</b> — <code>ATTACH</code> в модели есть; блок тот же, что у события и заметки. Активный фильтр — сегментный переключатель с числами. Просроченное вынесено в свою группу и окрашено <code>--tc-danger</code>. Флажок выполнения — квадрат 13&nbsp;px. <b>Связанная задача — одна строка</b>: «linked ×2» у названия, в столбце источника — сколько их, оба штампа в подсказке; в карточке — блок «The same task in other lists».</figcaption>
 </figure>
 
+<figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-tasks-12">
+    <div class="frame-label"><span>Задачи · Columns</span><span class="frag">меню</span><i>меню полосы списка задач</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-menu" action="/app/tasks/columns" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-rubric tc-menu__item tc-menu__item--pad5-8-7" role="presentation">Columns</div>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="title" checked disabled><svg class="tc-ico--op-35"><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Title<span class="tc-push tc-dim tc-dim--t10-5">always</span></label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="tags" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Tags</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="due" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Due</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="complete" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Complete</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="source" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Source</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="priority"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Priority</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="status"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Status</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="changed"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Changed</label>
+        <div class="tc-menu__foot"><button class="tc-btn is-sm is-primary" type="submit">Apply</button><button class="tc-btn is-sm" type="submit" name="col" value="default">Reset to defaults</button></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Отмечено то, что стоит в списке задач по умолчанию, в том же порядке; Priority, Status и Changed добавляют. Title стоит всегда — за него дело открывают. <b>Source — только в едином виде</b> («Combined list»): у одного списка источник один и назван в заголовке, и пункта Source в его меню нет.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-tasks-13">
+    <div class="frame-label"><span>Задачи · свои столбцы</span><span class="frag">фрагмент</span><i>один список, «Recently changed»</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-bar">
+          <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">Open 12</button><button class="tc-seg__opt" type="button">Done 48</button><button class="tc-seg__opt" type="button">All 60</button></span>
+          <span class="tc-seg"><button class="tc-seg__opt" type="button">By due</button><button class="tc-seg__opt" type="button">By priority</button><button class="is-on tc-seg__opt" type="button">Recently changed</button></span>
+          <button class="tc-btn" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg>Columns</button>
+        </div>
+        <div class="tc-list">
+          <div class="tc-row tc-row--cols"><button class="tc-tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__title tc-col--name">Дописать раздел про кэш</span><span class="tc-mono tc-col--due">14 Aug</span><span class="tc-row__cell tc-mono tc-col--complete">70%</span><span class="tc-row__cell tc-mono tc-col--priority">5</span><span class="tc-row__cell tc-col--status">In process</span><span class="tc-row__cell tc-mono tc-col--changed">10 Aug 11:02</span></div>
+          <div class="tc-row tc-row--cols is-overdue"><button class="tc-tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__title tc-col--name">Ответить подрядчику по смете</span><span class="tc-mono tc-col--due">8 Aug</span><span class="tc-row__cell tc-mono tc-col--complete">40%</span><span class="tc-row__cell tc-mono tc-col--priority">1</span><span class="tc-row__cell tc-col--status">In process</span><span class="tc-row__cell tc-mono tc-col--changed">9 Aug 18:40</span></div>
+          <div class="tc-row tc-row--cols"><button class="tc-tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__title tc-col--name">Обновить зависимости</span><span class="tc-mono tc-col--due">—</span><span class="tc-row__cell tc-mono tc-col--complete">—</span><span class="tc-row__cell tc-mono tc-col--priority">—</span><span class="tc-row__cell tc-col--status">Needs action</span><span class="tc-row__cell tc-mono tc-col--changed">8 Aug 09:15</span></div>
+          <div class="tc-row tc-row--cols"><button class="tc-tick" type="button"></button><span class="tc-mark" data-tc-colour="#3F6E8C"></span><span class="tc-row__title tc-col--name">Свести отчёт по тестам</span><span class="tc-mono tc-col--due">20 Aug</span><span class="tc-row__cell tc-mono tc-col--complete">10%</span><span class="tc-row__cell tc-mono tc-col--priority">5</span><span class="tc-row__cell tc-col--status">In process</span><span class="tc-row__cell tc-mono tc-col--changed">6 Aug 16:30</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Один список («Работа»), столбцы Title, Due, Complete, Priority, Status, Changed: Tags снят, Priority, Status и Changed добавлены; Source в одном списке не бывает. <b>Сортировка идёт за столбцами</b>: сортируют по показанному столбцу, и выбор «Recently changed» показывает Changed, «By priority» — Priority. Снять столбец, по которому отсортировано, — список вернётся к сортировке по умолчанию. Галка дела стоит перед меткой в любом наборе; просроченный срок — тревожным цветом. На узкой ширине Complete, Priority и Changed уходят с 800 px, Status — с 620.</figcaption>
+  </figure>
+
 <div class="frames">
   <figure style="flex:0 1 250px">
   <div class="frame" data-frame="s-tasks-4">
@@ -5130,6 +5215,41 @@ Read  2 min ago · not changed on server</div>
 </div>
 <figcaption><b>Панель — просмотр, как у остальных родов.</b> Текст в ней оформлен — абзацы, задачи с отметками, — а не показан сырым Markdown, и случайное нажатие ничего в нём не меняет. <b>Edit</b> открывает правку на странице заметки (кадр «Заметка · правка»), значок рядом — ту же страницу для чтения; <kbd class="tc-kbd">Enter</kbd> в списке делает то же. Ширина общая, 400&nbsp;px: абзац помещается, длинный текст читают на странице. Список слева при этом остаётся колоночным: заголовок, выдержка, теги, дата, источник. Выдержка — отдельная колонка, а не вторая строка: так видно больше заметок за один взгляд. <b>Связанная заметка — одна строка</b> с «linked ×2» и числом источников; оба штампа — в подсказке.</figcaption>
 </figure>
+
+<figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-notes-23">
+    <div class="frame-label"><span>Заметки · Columns</span><span class="frag">меню</span><i>меню полосы заметок</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-menu" action="/app/notes/columns" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-rubric tc-menu__item tc-menu__item--pad5-8-7" role="presentation">Columns</div>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="title" checked disabled><svg class="tc-ico--op-35"><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Title<span class="tc-push tc-dim tc-dim--t10-5">always</span></label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="excerpt" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Excerpt</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="tags" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Tags</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="date" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Date</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="source" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Source</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="changed"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Changed</label>
+        <div class="tc-menu__foot"><button class="tc-btn is-sm is-primary" type="submit">Apply</button><button class="tc-btn is-sm" type="submit" name="col" value="default">Reset to defaults</button></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Набор списка заметок по умолчанию — заголовок, начало текста, теги, дата, источник. Changed — когда заметку правили последний раз; Date — её собственная дата. Source — только в едином виде.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-notes-24">
+    <div class="frame-label"><span>Заметки · свои столбцы</span><span class="frag">фрагмент</span><i>единый вид после «Columns»</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <div class="tc-list">
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title tc-col--name">Заметка со встречи 10.08</span><span class="tc-row__excerpt tc-col--excerpt">Договорились заморозить ветку в среду; письмо пользователям пишет Анна…</span><span class="tc-row__cell tc-mono tc-col--date">10 Aug</span><span class="tc-row__cell tc-mono tc-col--changed">10 Aug 11:05</span><span class="tc-row__cell tc-col--source">nextcloud · Записи</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#4A6B52"></span><span class="tc-row__title tc-col--name">Что почитать про CRDT</span><span class="tc-row__excerpt tc-col--excerpt">Кляйн, глава 5; статья Шапиро 2011; демка automerge…</span><span class="tc-row__cell tc-mono tc-col--date">8 Aug</span><span class="tc-row__cell tc-mono tc-col--changed">9 Aug 21:40</span><span class="tc-row__cell tc-col--source">nextcloud · Записи</span></div>
+          <div class="tc-row tc-row--cols"><span class="tc-mark" data-tc-colour="#6B4E7A"></span><span class="tc-row__title tc-col--name">Про дорогу до дачи</span><span class="tc-row__excerpt tc-col--excerpt">Съезд после заправки, потом грунтовка два километра…</span><span class="tc-row__cell tc-mono tc-col--date">3 Aug</span><span class="tc-row__cell tc-mono tc-col--changed">3 Aug 19:12</span><span class="tc-row__cell tc-col--source">nextcloud · Дневник</span></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Title, Excerpt, Date, Changed, Source: Tags сняты, Changed добавлен. Начало текста тянется и уходит с 620 px, даты — постоянной ширины.</figcaption>
+  </figure>
 
 <div class="frames">
   <figure style="flex:0 1 250px">
@@ -6406,6 +6526,23 @@ Read  2 min ago</div>
 </div>
 <figcaption><b>Два ярлыка в рейле — не «умные папки», а два ответа на вопрос «где это лежало».</b> <b>Attachments</b> — та самая папка, которую выбрали один раз в настройках вложений: Carrel складывает туда вложения заметок и событий, не поместившиеся в саму запись (<a href="#attachments">7.12</a>), и знает её адрес, поэтому ярлык просто открывает её, где бы она ни была. Если папка ещё не выбрана, ярлык ведёт на страницу, где её выбирают. <b>Published</b> — файлы и папки с действующей секретной ссылкой: список известен Carrel из его же токенов, ходить за ним на сервер не нужно. Ярлыка «недавние» здесь нет намеренно: WebDAV не умеет спрашивать «что изменилось», и такой список пришлось бы собирать обходом всего дерева на каждый заход.<br><br><b>Из таблицы получился менеджер.</b> Колонка флажков и выделение строки; у каждой строки — скачивание и меню; операции над одним файлом собраны справа, а не разбросаны по формам внизу страницы. Хлебные крошки стали навигацией, а не подписью. Тип файла несёт иконку тонкой линией — единственное место в редизайне, где иконки появляются в содержимом, а не в хроме: в файловом списке тип узнаётся быстрее по значку, чем по строке <code>image/png</code>, и колонка типа при этом остаётся. Панель свойств честно говорит то, чего Carrel не знает: указателя ссылок на файл у него нет, и удаление ничего не проверяет.</figcaption>
 </figure>
+
+<figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-files-20">
+    <div class="frame-label"><span>Файлы · Columns</span><span class="frag">меню</span><i>меню полосы файлов</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-menu" action="/app/files/sftpgo/documents/columns" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-rubric tc-menu__item tc-menu__item--pad5-8-7" role="presentation">Columns</div>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="name" checked disabled><svg class="tc-ico--op-35"><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Name<span class="tc-push tc-dim tc-dim--t10-5">always</span></label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="size" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Size</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="type" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Type</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="changed" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Changed</label>
+        <div class="tc-menu__foot"><button class="tc-btn is-sm is-primary" type="submit">Apply</button><button class="tc-btn is-sm" type="submit" name="col" value="default">Reset to defaults</button></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Всё, что знает о файле WebDAV, в таблице уже стоит; добавить нечего, меню убирает столбцы и меняет их порядок. Снятый столбец уходит из таблицы целиком — и заголовок, и ячейки; сортировка «Name / Size / Changed» — по показанным.</figcaption>
+  </figure>
 
 <div class="frames">
   <figure style="flex:0 1 250px">
@@ -13732,6 +13869,49 @@ password  9f2-brick-lamp</div>
 <figcaption>Удаление подтверждается в диалоге. <b>Сброс пароля — лист из шапки</b> (кадры ниже): администратор задаёт временный пароль и передаёт его сам, человек меняет его при следующем входе (S-10.6); что сброс уничтожает, лист называет до нажатия, а в журнале остаётся, кто сброс затеял. <b>Add users</b> стоит перед <b>Users</b>: список существующих открывают, чтобы посмотреть или поправить, а приходят в раздел чаще всего затем, чтобы кого-то завести. В таблице — данные, а не форма подтверждения в каждой строке: когда создан, когда входил, сколько подключений, покрыт ли депонированием.</figcaption>
 </figure>
 
+<figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-admin-21">
+    <div class="frame-label"><span>Пользователи · Columns</span><span class="frag">меню</span><i>меню полосы пользователей</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-menu" action="/admin/columns" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-rubric tc-menu__item tc-menu__item--pad5-8-7" role="presentation">Columns</div>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="login" checked disabled><svg class="tc-ico--op-35"><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Login<span class="tc-push tc-dim tc-dim--t10-5">always</span></label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="role" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Role</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="created" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Created</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="last-login" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Last login</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="dav" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>DAV</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="sessions" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Sessions</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="escrow" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Escrow</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="address"><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick is-off"></span>Address</label>
+        <div class="tc-menu__foot"><button class="tc-btn is-sm is-primary" type="submit">Apply</button><button class="tc-btn is-sm" type="submit" name="col" value="default">Reset to defaults</button></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Address — подтверждённый адрес учётной записи; по умолчанию его нет, чтобы таблица помещалась.</figcaption>
+  </figure>
+
+<figure style="flex:1 1 100%">
+  <div class="frame" data-frame="s-admin-22">
+    <div class="frame-label"><span>Пользователи · свои столбцы</span><span class="frag">фрагмент</span><i>таблица после «Columns»</i></div>
+    <div class="tc-root tc-shell">
+      <div class="tc-shell__body tc-shell__body--no-rail"><div class="tc-main">
+        <table class="tc-table">
+          <thead><tr><th>Login</th><th>Address</th><th>Role</th><th class="tc-table__n4">Last login</th><th>Escrow</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="tc-table__name">mix</td><td>mix@example.org</td><td>Administrator</td><td class="tc-mono tc-table__n4">2026-08-15 09:20</td><td>—</td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr><td>anna</td><td>anna@example.org</td><td>User</td><td class="tc-mono tc-table__n4">2026-08-14 18:02</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+            <tr class="tc-table__row--off"><td>viktor <span class="tc-badge">disabled</span></td><td>—</td><td>User</td><td class="tc-mono tc-table__n4">2026-06-30 11:41</td><td><span class="tc-badge">deposited</span></td>
+              <td class="tc-acts"><button class="tc-btn is-sm tc-btn--padx3" title="More" type="button"><svg viewBox="0 0 24 24"><use href="#i-dots"/></svg></button></td></tr>
+          </tbody>
+        </table>
+      </div></div>
+    </div>
+  </div>
+  <figcaption>Login, Address, Role, Last login, Escrow: Created, DAV и Sessions сняты, Address добавлен вторым. Без подтверждённого адреса — прочерк. Столбец действий «⋯» в меню не входит: он у таблицы всегда.</figcaption>
+  </figure>
+
 <div class="frames">
   <figure style="flex:0 1 250px">
   <div class="frame" data-frame="s-admin-12">
@@ -14188,6 +14368,7 @@ password  4c1-tide-oven</div>
           <button class="tc-in is-ph is-pick tc-in--h26-w190" type="button">All actions</button>
           <input class="tc-in is-mono tc-in--h26-w120" type="date" value="2026-08-01">
           <span class="tc-seg"><button class="is-on tc-seg__opt" type="button">All</button><button class="tc-seg__opt" type="button">Security</button><button class="tc-seg__opt" type="button">Failures</button></span>
+          <button class="tc-btn" title="Columns" type="button"><svg viewBox="0 0 24 24"><use href="#i-cols"/></svg><span class="tc-btn__label">Columns</span></button>
         </div>
         <table class="tc-table">
           <thead><tr><th>When</th><th>Action</th><th class="tc-table__n3">Actor</th><th class="tc-table__n4">Target</th><th>Detail</th></tr></thead>
@@ -14202,6 +14383,24 @@ password  4c1-tide-oven</div>
     </div>
   </div>
   <figcaption>Журнал — таблица во всю ширину; действие и подробности моноширинным, потому что это данные, а не текст. Неудачный вход — единственная тревожная строка.</figcaption>
+  </figure>
+
+<figure style="flex:0 1 300px">
+  <div class="frame" data-frame="s-admin-23">
+    <div class="frame-label"><span>Журнал · Columns</span><span class="frag">меню</span><i>меню полосы журнала</i></div>
+    <div class="tc-root tc-root--on-bg tc-root--pad14">
+      <form class="tc-menu" action="/admin/audit/columns" method="post"><input type="hidden" name="csrf" value="7f3a91de">
+        <div class="tc-rubric tc-menu__item tc-menu__item--pad5-8-7" role="presentation">Columns</div>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="when" checked disabled><svg class="tc-ico--op-35"><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>When<span class="tc-push tc-dim tc-dim--t10-5">always</span></label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="action" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Action</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="actor" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Actor</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="target" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Target</label>
+        <label class="tc-menu__item" role="menuitem"><input class="tc-check__box" type="checkbox" name="col" value="detail" checked><svg><use href="#i-drag"/></svg><span class="tc-tickrow__tick"></span>Detail</label>
+        <div class="tc-menu__foot"><button class="tc-btn is-sm is-primary" type="submit">Apply</button><button class="tc-btn is-sm" type="submit" name="col" value="default">Reset to defaults</button></div>
+      </form>
+    </div>
+  </div>
+  <figcaption>Журнал показывает всё, что пишет; меню убирает столбцы и меняет порядок. When стоит всегда: без времени запись журнала не читается. Export CSV выгружает все столбцы, какие бы ни были показаны.</figcaption>
   </figure>
 
 <div class="frames">

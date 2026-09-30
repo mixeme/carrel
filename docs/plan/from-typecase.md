@@ -86,6 +86,46 @@ U-9, U-12, U-15.1) и план клиента.
 `s-io-2` ссылаются на `#phone`, мёртвая ссылка `#m-io` ведёт на 7.9. Кадр
 `rest-3` в копии теперь тот же, что в Typecase.
 
+Записка 25 от 30.09.2026 (Typecase `9591fc1`, задача 45). Копия макета —
+побайтно та же, что в Typecase.
+
+25. **Columns у всех списков** (решения владельца 29–30.09 по картинке меню).
+   Пункт — подпись и значение `col`; «always» — стоит всегда; отмеченное —
+   набор по умолчанию в его порядке; остальное добавляют.
+   - Задачи (`s-tasks-12`, форма на `/app/tasks/columns`): Title `title`
+     always; Tags `tags`, Due `due`, Complete `complete`, Source `source`;
+     добавляют Priority `priority`, Status `status`, Changed `changed`.
+   - Заметки (`s-notes-23`): Title `title` always; Excerpt `excerpt`, Tags
+     `tags`, Date `date`, Source `source`; добавляют Changed `changed`.
+   - Файлы (`s-files-20`): Name `name` always; Size `size`, Type `type`,
+     Changed `changed`. Добавить нечего.
+   - Пользователи (`s-admin-21`, `/admin/columns`): Login `login` always;
+     Role `role`, Created `created`, Last login `last-login`, DAV `dav`,
+     Sessions `sessions`, Escrow `escrow`; добавляют Address `address` —
+     подтверждённый адрес, без него прочерк (`s-admin-22`). Столбец «⋯» в
+     меню не входит.
+   - Журнал (`s-admin-23`, `/admin/audit/columns`; кнопка теперь и в полосе
+     `s-admin-7`): When `when` always; Action `action`, Actor `actor`, Target
+     `target`, Detail `detail`. Export CSV — все столбцы.
+   - Хронология человека (`s-contacts-25`, `…/{uid}/timeline/columns`):
+     Title `title` always; Date `date`, Kind `kind`, Source `source`. Почему
+     запись здесь («attendee · accepted») стоит за названием всегда и в меню
+     не входит (`s-contacts-26` — дата в конце).
+   - **Source — только в меню единого вида**: у одной коллекции источник
+     назван в заголовке, пункта нет (и у контактов: `components-42` — теперь
+     форма единого вида, `/app/contacts/columns`).
+   - **Сортировка идёт за столбцами**: сортируют по показанному столбцу;
+     выбор сортировки показывает её столбец («Recently changed» — Changed,
+     «By priority» — Priority, `s-tasks-13`); снятие столбца, по которому
+     отсортировано, — сортировка по умолчанию, и об этом сказано.
+   - Правила под «Выбор столбцов» (`components-21`): выбор — кука сервера на
+     раздел, без сценария; столбец уходит на узкой ширине на ступени своего
+     рода.
+   - Клиенту: `Column` — новые роды `ColumnDue`, `ColumnComplete`,
+     `ColumnPriority`, `ColumnStatus`, `ColumnExcerpt`, `ColumnDate`,
+     `ColumnDetail`, `ColumnKind`; `ColumnRow.Tick` (галка дела перед меткой)
+     и `ColumnRow.Overdue` (тревожным — только срок).
+
 ## Для сведения — сервер не трогает
 
 - **Подсказки «кандидат в дубликаты» в списках нет** (решение 24.09.2026):
