@@ -59,6 +59,7 @@ const (
 	RuleString   = "string"
 	RuleFile     = "file"
 	RuleRegistry = "registry"
+	RuleWord     = "word"
 )
 
 // AllowedImports are the only packages a package under screens/ imports
@@ -68,6 +69,9 @@ const (
 //   - carrel.dev/typecase/widget — how it is shown (U-5.1); Typecase's
 //     other packages — shape, cmd/frame2go — are for the checks, not for a
 //     screen;
+//   - carrel.dev/carrel/client/bind — a type of the contract into its
+//     widget (U-5.7, the owner's decision of 30.09.2026): the one package of
+//     the client a screen imports, itself held to BindImports and Words;
 //   - strconv — a number of the view model into a widget's text;
 //   - slices — ordering and choosing among the view model's rows.
 //
@@ -79,14 +83,19 @@ const (
 // screen that only calls widgets; add one when a real screen needs it, in
 // its own commit, with its reason here. Another package of the client,
 // screens/… included, is not allowed either: what two screens share is
-// common, and common is Typecase's (U-5.7). The one exception is the
+// common, and common is Typecase's (U-5.7). The exceptions are bind and the
 // registry's import of a screen (ScreensPath).
 var AllowedImports = []string{
+	BindPath,
 	"carrel.dev/carrel/server/view",
 	"carrel.dev/typecase/widget",
 	"slices",
 	"strconv",
 }
+
+// BindPath is the import path of the package that translates the types of
+// the contract into widgets (U-5.7).
+const BindPath = "carrel.dev/carrel/client/bind"
 
 // ScreensPath is the import path of the screens: the registry (the files of
 // package screens itself) imports the package of each screen below it, to
@@ -162,8 +171,23 @@ func lines(src []byte) []string {
 // client) against AllowedImports; a file of the registry — right in screens/
 // — may import a screen's package too, one level below (ScreensPath).
 func Imports(screens string) ([]Finding, error) {
+	return imports(screens, AllowedImports, true)
+}
+
+// BindImports checks every Go file under dir (the bind/ directory of the
+// client) against AllowedImports without bind itself: bind translates the
+// contract's types into widgets with what a screen has, and imports no other
+// package of the client — no screen, no zone — and nothing a screen may not.
+func BindImports(dir string) ([]Finding, error) {
+	allowed := slices.DeleteFunc(slices.Clone(AllowedImports), func(p string) bool { return p == BindPath })
+	return imports(dir, allowed, false)
+}
+
+// imports holds the imports of every Go file under dir to allowed; with
+// registry, a file right in dir may import a screen's package (ScreensPath).
+func imports(dir string, allowed []string, registry bool) ([]Finding, error) {
 	var out []Finding
-	err := walkGo(screens, nil, func(rel string, src []byte) error {
+	err := walkGo(dir, nil, func(rel string, src []byte) error {
 		fset := token.NewFileSet()
 		f, err := parser.ParseFile(fset, rel, src, parser.ImportsOnly|parser.ParseComments)
 		if err != nil {
@@ -176,8 +200,8 @@ func Imports(screens string) ([]Finding, error) {
 				return err
 			}
 			line := fset.Position(spec.Pos()).Line
-			registry := !strings.Contains(rel, "/") && strings.HasPrefix(path, ScreensPath) && !strings.Contains(strings.TrimPrefix(path, ScreensPath), "/")
-			if slices.Contains(AllowedImports, path) || registry || excused(ls, line) {
+			screen := registry && !strings.Contains(rel, "/") && strings.HasPrefix(path, ScreensPath) && !strings.Contains(strings.TrimPrefix(path, ScreensPath), "/")
+			if slices.Contains(allowed, path) || screen || excused(ls, line) {
 				continue
 			}
 			out = append(out, Finding{Path: rel, Line: line, Rule: RuleImport, What: fmt.Sprintf("%q is not a package a screen imports", path)})
@@ -234,6 +258,52 @@ func Strings(root string, skip ...string) ([]Finding, error) {
 				if bad.re.MatchString(value) {
 					out = append(out, Finding{Path: rel, Line: line, Rule: RuleString, What: fmt.Sprintf("%s in %s", bad.what, lit.Value)})
 				}
+			}
+			return true
+		})
+		return nil
+	})
+	return out, err
+}
+
+// word is a letter of any script: a string that holds one holds words.
+var word = regexp.MustCompile(`\pL`)
+
+// methods are the values of Action.Method (C-6.2): words of HTTP, not of the
+// interface, which bind compares an action's method with.
+var methods = []string{"GET", "POST"}
+
+// Words names every string or rune constant holding a letter in a Go file
+// under dir — the bind/ directory of the client. bind hands a widget only the
+// view model's words and none of its own (U-5.7): a label, a title, a join
+// of its own would be the client writing the interface beside the server
+// (U-1.3). What is not a word — a space between a title and a body — is not
+// a finding, and neither is a method of HTTP (methods); the other guards of
+// strings (Strings) hold them as they hold the whole module. No mark excuses
+// a finding here.
+func Words(dir string) ([]Finding, error) {
+	var out []Finding
+	err := walkGo(dir, nil, func(rel string, src []byte) error {
+		fset := token.NewFileSet()
+		f, err := parser.ParseFile(fset, rel, src, 0)
+		if err != nil {
+			return err
+		}
+		paths := map[*ast.BasicLit]bool{}
+		for _, spec := range f.Imports {
+			paths[spec.Path] = true
+		}
+		ast.Inspect(f, func(n ast.Node) bool {
+			lit, ok := n.(*ast.BasicLit)
+			if !ok || paths[lit] || (lit.Kind != token.STRING && lit.Kind != token.CHAR) {
+				return true
+			}
+			value, err := strconv.Unquote(lit.Value)
+			if err != nil {
+				value = lit.Value
+			}
+			if word.MatchString(value) && !slices.Contains(methods, value) {
+				out = append(out, Finding{Path: rel, Line: fset.Position(lit.Pos()).Line, Rule: RuleWord, What: "words of its own: " + lit.Value})
 			}
 			return true
 		})

@@ -37,12 +37,17 @@ func Assets(base string) page.Assets { return page.At(base + Static) }
 func Files() http.Handler { return http.StripPrefix(Static, page.Static()) }
 
 // Of is the document of a screen drawn from its view model, for an instance
-// served at base.
+// served at base: the screen's root, and at the page's end the forms its
+// buttons outside a form submit (Screen.Forms).
 func Of(scr screens.Screen, model any, base string) page.Document {
-	return page.Document{
+	doc := page.Document{
 		Title:  scr.Title(model),
 		Lang:   Lang,
 		Assets: Assets(base),
 		Root:   scr.Draw(model),
 	}
+	if scr.Forms != nil {
+		doc.Forms = scr.Forms(model)
+	}
+	return doc
 }

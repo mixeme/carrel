@@ -22,6 +22,19 @@ var sample = screens.Screen{
 	Title: func(model any) string { return *model.(*string) },
 }
 
+// posting is the sample with a button outside a form, and the form it
+// submits at the page's end.
+var posting = screens.Screen{
+	Model: sample.Model,
+	Draw: func(model any) screens.Root {
+		return w.Page{Items: []w.PagePart{w.Msg{Parts: []w.MsgPart{w.Button{Label: *model.(*string), Form: "wipe"}}}}}
+	},
+	Title: sample.Title,
+	Forms: func(model any) []w.PostForm {
+		return []w.PostForm{{ID: "wipe", Action: "/forgot", Fields: []w.Hidden{{Name: "_csrf", Value: "x"}}}}
+	},
+}
+
 // inline is what the content policy of C-11 refuses: a script or a style
 // written into the page, a handler in an attribute.
 var inline = regexp.MustCompile(`<script(\s[^>]*)?>[^<]|<script>|<style|\sstyle=|\son[a-z]+=`)
@@ -59,6 +72,16 @@ func TestDocument(t *testing.T) {
 	}
 	if !strings.Contains(html, "<title>Contacts &lt;&amp;&gt;</title>") {
 		t.Error("the title is not the model's, escaped")
+	}
+	// The forms of the screen are printed after its root.
+	html, err = document.Of(posting, &title, "").Render()
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := posting.Draw(&title).Render()
+	form := posting.Forms(&title)[0].Render()
+	if i, j := strings.Index(html, root), strings.Index(html, form); i < 0 || j < i+len(root) {
+		t.Errorf("the page does not print the screen's form after its root:\n%s", html)
 	}
 	for _, scr := range screens.All {
 		if scr.Title == nil {

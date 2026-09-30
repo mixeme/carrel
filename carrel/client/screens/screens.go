@@ -33,6 +33,12 @@ type Screen struct {
 	// model's Title, which a page outside the shell draws as the mark, not as
 	// words (U-6.14).
 	Title func(model any) string
+	// Forms are the forms the page prints at its end, from the same view
+	// model (page.Document.Forms): the PostForms a button outside a form
+	// submits by their ID (Button.Form) — the one-button form of each card of
+	// the forgotten password (s-auth-6), the wipe's confirmation (s-auth-10).
+	// nil — the screen has none.
+	Forms func(model any) []widget.PostForm
 }
 
 // Root is what a screen draws: one of Typecase's roots — a shell, a page

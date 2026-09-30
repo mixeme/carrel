@@ -5,6 +5,7 @@
 package invite
 
 import (
+	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
 )
@@ -21,63 +22,27 @@ const formID = "invite"
 // (ReadOnly, C-6.8) —, Password, Repeat password; the cursor stands where
 // the model says (Focus), and a field with an error — a login taken — is
 // marked and says it under itself. The hidden rows (CSRF) ride with the
-// form; «Create account» submits it by name. A dead link is not this page:
-// it is DeadLinkPage's.
+// form; «Create account» submits it by name, drawn primary as the model says
+// (Primary). A dead link is not this page: it is DeadLinkPage's.
 func Screen(p *view.InvitePage) w.Page {
 	items := []w.DialogPart{
 		w.DialogTitle{Text: string(p.Title), Gap: w.DialogTitleGap4},
-		w.DialogSub{Parts: lede(p.Lede)},
+		w.DialogSub{Parts: bind.Inlines(p.Lede)},
 	}
 	for _, n := range p.Notices {
-		items = append(items, w.Msg{
-			Parts: []w.MsgPart{w.Text(n.Body)},
-			Tone:  tone(n.Role),
-			Space: w.MsgFlushBottom12,
-		})
+		items = append(items, bind.Msg(n, w.MsgFlushBottom12))
 	}
-	var hidden []w.Hidden
 	var fields []w.FormPart
-	for _, set := range p.Form.Sets {
-		for _, r := range set.Rows {
-			if r.Kind == view.InputHidden {
-				hidden = append(hidden, w.Hidden{Name: r.Name, Value: string(r.Value)})
-				continue
-			}
-			kind := w.InputText
-			if r.Kind == view.InputPassword {
-				kind = w.InputPassword
-			}
-			parts := []w.FieldPart{w.Input{
-				Kind:     kind,
-				Name:     r.Name,
-				Value:    string(r.Value),
-				Label:    string(r.Label),
-				Focus:    r.Focus,
-				Error:    r.Error != "",
-				Disabled: r.ReadOnly,
-				Required: r.Required,
-			}}
-			if r.Error != "" {
-				parts = append(parts, w.FieldHint{Parts: []w.Inline{w.Text(r.Error)}, Variant: w.HintDanger})
-			}
-			fields = append(fields, w.Field{Label: string(r.Label), Parts: parts, Width: w.FieldMD})
-		}
+	for _, r := range bind.Rows(p.Form) {
+		fields = append(fields, bind.Field(r, w.FieldMD))
 	}
 	var buttons []w.FormFootPart
 	for _, a := range p.Form.Actions {
-		buttons = append(buttons, w.Button{Label: string(a.Label), Kind: w.ButtonPrimary, Form: formID})
+		buttons = append(buttons, bind.Button(a, formID))
 	}
-	items = append(items,
-		w.Form{
-			Items:   fields,
-			Variant: w.FormFlushAll,
-			Action:  p.Form.Action,
-			Method:  p.Form.Method,
-			Fields:  hidden,
-			ID:      formID,
-		},
-		w.FormFoot{Items: buttons, Variant: w.FormFootFlush},
-	)
+	form := bind.Form(p.Form, formID)
+	form.Items, form.Variant = fields, w.FormFlushAll
+	items = append(items, form, w.FormFoot{Items: buttons, Variant: w.FormFootFlush})
 	return w.Page{
 		Items: []w.PagePart{
 			w.Auth{
@@ -88,33 +53,4 @@ func Screen(p *view.InvitePage) w.Page {
 			},
 		},
 	}
-}
-
-// tone is the look of a notice by its role: an alert — the password that
-// nobody can recover — is the frame's.
-func tone(r view.NoticeRole) w.MsgTone {
-	switch r {
-	case view.NoticeAlert:
-		return w.MsgAlert
-	case view.NoticeAccent:
-		return w.MsgAccent
-	}
-	return w.MsgPlain
-}
-
-// lede is the line under the title in the pieces the model sends it in, each
-// in its face: a login or an address monospaced, a name bold (C-6.2 Runs).
-func lede(r view.Runs) []w.Inline {
-	out := make([]w.Inline, 0, len(r))
-	for _, p := range r {
-		switch p.Mark {
-		case view.RunMono:
-			out = append(out, w.Mono{Text: string(p.Text)})
-		case view.RunStrong:
-			out = append(out, w.Strong(p.Text))
-		default:
-			out = append(out, w.Text(p.Text))
-		}
-	}
-	return out
 }

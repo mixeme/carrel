@@ -13,6 +13,7 @@ import (
 const (
 	module     = ".."
 	screensDir = "../screens"
+	bindDir    = "../bind"
 	clientSpec = "../../../docs/spec/carrel-client.md"
 )
 
@@ -82,6 +83,16 @@ func TestScreensImportOnlyWhatIsAllowed(t *testing.T) {
 	green(t, "imports", must(t)(guard.Imports(screensDir)))
 }
 
+// bind translates the contract's types into widgets with what a screen has,
+// and no word of its own (U-5.7).
+func TestBindImportsOnlyWhatAScreenMay(t *testing.T) {
+	green(t, "bind imports", must(t)(guard.BindImports(bindDir)))
+}
+
+func TestBindHasNoWordsOfItsOwn(t *testing.T) {
+	green(t, "bind words", must(t)(guard.Words(bindDir)))
+}
+
 func TestNoMarkupInStrings(t *testing.T) {
 	green(t, "strings", must(t)(guard.Strings(module, own...)))
 }
@@ -107,6 +118,22 @@ func TestImportsBite(t *testing.T) {
 		"screens.go:6: import",            // the registry: not a screen's package
 	})
 	green(t, "good imports", must(t)(guard.Imports("testdata/imports/good/screens")))
+}
+
+func TestBindBite(t *testing.T) {
+	bite(t, must(t)(guard.BindImports("testdata/bind/bad")), []string{
+		"bind.go:6: import",  // fmt
+		"bind.go:8: import",  // bind itself: the screens' exception is not bind's
+		"bind.go:9: import",  // a screen
+		"bind.go:10: import", // another package of the client
+	})
+	bite(t, must(t)(guard.Words("testdata/bind/bad")), []string{
+		"bind.go:20: word", // "Back to "
+		"bind.go:20: word", // "Sign in"
+		"bind.go:25: word", // 'x'
+	})
+	green(t, "good bind imports", must(t)(guard.BindImports("testdata/bind/good")))
+	green(t, "good bind words", must(t)(guard.Words("testdata/bind/good")))
 }
 
 func TestStringsBite(t *testing.T) {

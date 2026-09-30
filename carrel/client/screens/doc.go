@@ -19,8 +19,10 @@
 //     in their fields, and nothing else: no markup, no style, no script, no
 //     name of the library's space written by hand. The guards of
 //     carrel.dev/carrel/client/guard hold it: the packages here import only
-//     carrel.dev/carrel/server/view, carrel.dev/typecase/widget and the
-//     standard packages strconv and slices; no string or rune constant here
+//     carrel.dev/carrel/server/view, carrel.dev/typecase/widget,
+//     carrel.dev/carrel/client/bind — the one translation of the contract's
+//     types into widgets (U-5.7) — and the standard packages strconv and
+//     slices; no string or rune constant here
 //     holds markup, «tc-», «class=», «style=» or «data-tc»; the client module
 //     holds no stylesheet, page, script or picture file.
 //   - U-5.5. A frame that cannot be built from the widgets is a defect of the

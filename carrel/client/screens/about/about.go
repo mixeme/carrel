@@ -4,6 +4,7 @@
 package about
 
 import (
+	"carrel.dev/carrel/client/bind"
 	"carrel.dev/carrel/server/view"
 	w "carrel.dev/typecase/widget"
 )
@@ -15,6 +16,8 @@ import (
 // the way back (Back: to sign-in without a session, where one was from the
 // shell).
 func Screen(p *view.AboutPage) w.Page {
+	source, third := bind.Button(p.Source, ""), bind.Button(p.Third, "")
+	source.Small, third.Small = true, true
 	return w.Page{
 		Items: []w.PagePart{
 			w.Auth{
@@ -23,16 +26,16 @@ func Screen(p *view.AboutPage) w.Page {
 						w.DialogLogo{Logo: w.Logo{Label: "Carrel", ViewBox: "4.79 -31.36 291.08 116.63", Size: w.Logo42}, Wide: true},
 						w.DialogTitle{Text: string(p.Title)},
 						w.DialogSub{Parts: []w.Inline{w.Mono{Text: string(p.Version) + " · " + string(p.Commit)}}},
-						w.Tagline{Lead: lead(p.Lede), Text: string(p.Tagline)},
+						w.Tagline{Lead: bind.Words(p.Lede), Text: string(p.Tagline)},
 						w.Prose{
 							Parts:   []w.Inline{w.Text(p.Licence)},
 							Variant: w.ProseMuted,
 						},
 						w.FormFoot{
 							Items: []w.FormFootPart{
-								w.Button{Label: string(p.Source.Label), Small: true, Href: p.Source.Href},
-								w.Button{Label: string(p.Third.Label), Small: true, Href: p.Third.Href},
-								w.Push{Items: []w.PushPart{w.Button{Label: string(p.Back.Label), Href: p.Back.Href}}},
+								source,
+								third,
+								w.Push{Items: []w.PushPart{bind.Button(p.Back, "")}},
 							},
 							Variant: w.FormFootFlush,
 						},
@@ -42,14 +45,4 @@ func Screen(p *view.AboutPage) w.Page {
 			},
 		},
 	}
-}
-
-// lead is the first line of the tagline, the pieces of Lede one after
-// another: the tagline marks none of them (C-6.2 Runs).
-func lead(r view.Runs) string {
-	var s string
-	for _, p := range r {
-		s += string(p.Text)
-	}
-	return s
 }

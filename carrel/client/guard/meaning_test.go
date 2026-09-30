@@ -13,19 +13,34 @@ import (
 )
 
 // meaningFindings is the meaning guard (U-8, U-15.2) on each screen, drawn on
-// every fixture of its view model.
+// every fixture of its view model: its tree, whose buttons may name the
+// forms the page prints at its end (Screen.Forms), and each of those forms.
 func meaningFindings(l lib, all []screens.Screen) []string {
 	var out []string
 	for _, scr := range all {
 		at := label(scr)
 		for _, path := range l.fixtures(scr) {
-			root, err := draw(scr, path)
+			model, err := decode(scr, path)
 			if err != nil {
 				out = append(out, fmt.Sprintf("%s: %v", at, err))
 				continue
 			}
 			fx := filepath.Base(filepath.Dir(path)) + "/" + filepath.Base(path)
-			for _, f := range guard.Meaning(root) {
+			var forms []w.PostForm
+			if scr.Forms != nil {
+				forms = scr.Forms(model)
+			}
+			var ids []string
+			for _, pf := range forms {
+				if slices.Contains(ids, pf.ID) {
+					out = append(out, fmt.Sprintf("%s on %s: two forms of the page are %q", at, fx, pf.ID))
+				}
+				ids = append(ids, pf.ID)
+				for _, f := range guard.Meaning(pf) {
+					out = append(out, fmt.Sprintf("%s on %s: the page's form %s", at, fx, f))
+				}
+			}
+			for _, f := range guard.Meaning(scr.Draw(model), ids...) {
 				out = append(out, fmt.Sprintf("%s on %s: %s", at, fx, f))
 			}
 		}
@@ -46,6 +61,21 @@ func TestMeaningBite(t *testing.T) {
 		"(AuthStack).Items[1](Button): a button with nothing to follow or send",
 		"(AuthStack).Links[0](Link): no Href",
 		"(Field).Parts[0](Input): a field outside a form that sends",
+	} {
+		if !slices.ContainsFunc(found, func(f string) bool { return strings.Contains(f, want) }) {
+			t.Errorf("the meaning guard did not name %q; it found:\n%s", want, strings.Join(found, "\n"))
+		}
+	}
+	// The page's forms (Screen.Forms): a form that goes nowhere and two of
+	// one name are named; a button that names one of them is not.
+	posting := signIn(nil)
+	posting.Forms = func(any) []w.PostForm {
+		return []w.PostForm{{ID: "wipe"}, {ID: "wipe", Action: "/forgot"}}
+	}
+	found = meaningFindings(load(t), []screens.Screen{posting})
+	for _, want := range []string{
+		`the page's form PostForm: no Action`,
+		`two forms of the page are "wipe"`,
 	} {
 		if !slices.ContainsFunc(found, func(f string) bool { return strings.Contains(f, want) }) {
 			t.Errorf("the meaning guard did not name %q; it found:\n%s", want, strings.Join(found, "\n"))

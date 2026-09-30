@@ -254,9 +254,9 @@ func (l lib) fixtures(scr screens.Screen) []string {
 	return out
 }
 
-// draw decodes a fixture into the screen's view model — no field the model
-// lacks — and draws the screen.
-func draw(scr screens.Screen, path string) (screens.Root, error) {
+// decode decodes a fixture into the screen's view model — no field the
+// model lacks.
+func decode(scr screens.Screen, path string) (any, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -266,6 +266,15 @@ func draw(scr screens.Screen, path string) (screens.Root, error) {
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(model); err != nil {
 		return nil, fmt.Errorf("decode into %T: %v", model, err)
+	}
+	return model, nil
+}
+
+// draw decodes a fixture into the screen's view model and draws the screen.
+func draw(scr screens.Screen, path string) (screens.Root, error) {
+	model, err := decode(scr, path)
+	if err != nil {
+		return nil, err
 	}
 	return scr.Draw(model), nil
 }
